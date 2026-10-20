@@ -11,9 +11,6 @@ partial class main_package {
 
 internal static readonly @string token = "argv0-token-7f3a"u8;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object osExecutableˢ = (@string)"os.Executable:"u8;
-
 internal static void Main() {
     var (depth, _) = strconv.Atoi(Δos.Getenv("ARGV0_DEPTH"));
     if (depth > 3) {
@@ -29,7 +26,7 @@ internal static void Main() {
     }
     var (exe, err) = Δos.Executable();
     if (err != default!) {
-        fmt.Println(osExecutableˢ, err);
+        fmt.Println("os.Executable:", err);
         Δos.Exit(1);
     }
     var cmd = exec.Command(exe);
@@ -37,7 +34,7 @@ internal static void Main() {
     cmd.Value.Args = new @string[]{token, "-marker", "x"}.slice();
     cmd.Value.Env = append(Δos.Environ(), "ARGV0_DEPTH="u8 + strconv.Itoa(depth + 1));
     (var @out, err) = cmd.CombinedOutput();
-    fmt.Print(((@string)@out));
+    fmt.Print((@string)@out);
     if (depth == 0) {
         fmt.Printf("parent: child exit error = %v\n"u8, err);
     }

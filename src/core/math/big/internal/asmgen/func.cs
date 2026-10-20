@@ -125,7 +125,7 @@ public static ΔReg ArgHint(this ref ΔFunc f, @string name, Hint hint) {
 
 // ArgPtr is like Arg but returns a RegPtr.
 public static RegPtr ArgPtr(this ref ΔFunc f, @string name) {
-    return ((RegPtr)f.Arg(name));
+    return (RegPtr)f.Arg(name);
 }
 
 // StoreArg stores src into the named argument (or result).

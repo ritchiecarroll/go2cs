@@ -7,7 +7,7 @@ partial class uleb128_package {
 
 public static slice<byte> AppendUleb128(slice<byte> b, nuint v) {
     while (ᐧ) {
-        var c = (uint8)((nuint)(v & 0x7f));
+        var c = (uint8)(v & 0x7f);
         v >>= (int)(7);
         if (v != 0) {
             c |= (uint8)(0x80);

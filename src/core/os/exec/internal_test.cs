@@ -57,7 +57,7 @@ public static void TestPrefixSuffixSaver(ж<testing.T> Ꮡt) {
             }
         }
         {
-            @string got = ((@string)w.Bytes()); if (got != tt.want) {
+            @string got = (@string)w.Bytes(); if (got != tt.want) {
                 Ꮡt.Errorf("%d. Bytes = %q; want %q"u8, i, got, tt.want);
             }
         }

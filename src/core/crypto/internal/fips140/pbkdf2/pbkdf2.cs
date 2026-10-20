@@ -52,9 +52,9 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
         // U_1 = PRF(password, salt || uint(i))
         prf.Reset();
         prf.Write(salt);
-        buf[0] = (byte)((block >> (int)(24)));
-        buf[1] = (byte)((block >> (int)(16)));
-        buf[2] = (byte)((block >> (int)(8)));
+        buf[0] = (byte)(block >> 24);
+        buf[1] = (byte)(block >> 16);
+        buf[2] = (byte)(block >> 8);
         buf[3] = (byte)block;
         prf.Write(buf[..4]);
         dk = prf.Sum(dk);

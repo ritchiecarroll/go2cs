@@ -9,35 +9,24 @@ using path;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string abstractaddrˢ = "abstractaddr"u8;
-private static readonly object fatalMkdtempˢ = (@string)"FATAL mkdtemp:"u8;
-private static readonly @string unixˢ = "unix"u8;
-private static readonly object fatalResolveˢ = (@string)"FATAL resolve:"u8;
-private static readonly object fatalListenˢ = (@string)"FATAL listen:"u8;
-private static readonly object fatalDialˢ = (@string)"FATAL dial:"u8;
-private static readonly object netˢ = (@string)"net       ="u8;
-private static readonly object nameLenˢ = (@string)"name len  ="u8;
-private static readonly object nameIsˢ = (@string)"name is @ ="u8;
-
 internal static partial void Main() {
     GoFrame ᒐ = default;
     try {
-        var (dir, err) = os.MkdirTemp(""u8, abstractaddrˢ);
+        var (dir, err) = os.MkdirTemp("", "abstractaddr");
         if (err != default!) {
-            fmt.Println(fatalMkdtempˢ, err);
+            fmt.Println("FATAL mkdtemp:", err);
             return;
         }
         defer(os.RemoveAll, dir, ref ᒐ);
 
-        (var ta, err) = Δnet.ResolveUnixAddr(unixˢ, filepath.Join(dir, "s"));
+        (var ta, err) = Δnet.ResolveUnixAddr("unix", filepath.Join(dir, "s"));
         if (err != default!) {
-            fmt.Println(fatalResolveˢ, err);
+            fmt.Println("FATAL resolve:", err);
             return;
         }
-        (var ln, err) = Δnet.ListenUnix(unixˢ, ta);
+        (var ln, err) = Δnet.ListenUnix("unix", ta);
         if (err != default!) {
-            fmt.Println(fatalListenˢ, err);
+            fmt.Println("FATAL listen:", err);
             return;
         }
         var lnʗ1 = ln;
@@ -51,18 +40,18 @@ internal static partial void Main() {
             }
         });
 
-        (var c, err) = Δnet.DialUnix(unixˢ, nil, ta);
+        (var c, err) = Δnet.DialUnix("unix", nil, ta);
         if (err != default!) {
-            fmt.Println(fatalDialˢ, err);
+            fmt.Println("FATAL dial:", err);
             return;
         }
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
 
         var la = c.LocalAddr()._<ж<Δnet.UnixAddr>>();
-        fmt.Println(netˢ, (~la).Net);
-        fmt.Println(nameLenˢ, len((~la).Name));
-        fmt.Println(nameIsˢ, (~la).Name == "@"u8);
+        fmt.Println("net       =", (~la).Net);
+        fmt.Println("name len  =", len((~la).Name));
+        fmt.Println("name is @ =", (~la).Name == "@"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

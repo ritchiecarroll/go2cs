@@ -77,10 +77,10 @@ func main() {
 	mainCs := readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "namedbasic", "main.cs"))
 
 	for _, want := range []string{
-		"((B)(@string)a)",           // sibling named strings
-		"((pkgString)(@string)o)",   // a same-package type defined over a named string
-		"((otherString)(@string)p)", // and back
-		"((U)(bool)t)",              // sibling named bools
+		"(B)(@string)a",           // sibling named strings
+		"(pkgString)(@string)o",   // a same-package type defined over a named string
+		"(otherString)(@string)p", // and back
+		"(U)(bool)t",              // sibling named bools
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("missing %q in:\n%s", want, mainCs)

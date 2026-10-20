@@ -528,16 +528,14 @@ internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, contex
             var d = syscall.DnsRecordPayload<syscall.DNSTXTData>(p);
             @string s = ""u8;
 
-            // Go walks the union's variable-length `pStringArray[1]` by aliasing a huge window from
-            // &StringArray[0] and re-slicing to StringCount. That idiom cannot survive the managed
-            // payload and must NOT be restored: `Ꮡ(expr)` on a dereferenced value boxes a COPY, so
-            // `array<T>.AliasPointer` finds no element storage (`TryGetElementStorage` fails), takes
-            // its documented raw-address fork, and yields a window of capacity ZERO -- which panics
-            // as `slice bounds out of range [::1] with capacity 0` the moment StringCount is 1. The
-            // transcription already allocated exactly StringCount elements, so the count IS the
-            // length here and a direct index is both simpler and the only correct form.
-            for (nint i = 0; i < d.StringCount; i++) {
-                s += windows.UTF16PtrToString(d.of(syscall.DNSTXTData.ᏑStringArray).ElementRef(i));
+            // Go's own spelling: a huge window aliased from &StringArray[0], re-sliced to StringCount.
+            // `d.at(field, 0)` is the element's pointer through the field view, never `Ꮡ` of a dereferenced
+            // copy, so the window aliases the payload's own elements: over the managed transcription,
+            // AliasPointer's managed window (clamped to the StringCount elements it holds); over a record
+            // read NATIVE, golib's foreign pointer array, which reads exactly the StringCount words the
+            // slice spans (G's ruling, 2026-10-19; GolibTests WindowsDnsTxtPayloadTests pins both).
+            foreach (var (_, v) in array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1024).slice(0, d.StringCount, d.StringCount)) {
+                s += windows.UTF16PtrToString(v);
             }
             txts = append(txts, s);
         }

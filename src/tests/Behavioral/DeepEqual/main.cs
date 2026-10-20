@@ -181,22 +181,22 @@ internal static void Main() {
     fmt.Println(reflect.DeepEqual(g3.OrTypedNil(), g2.OrTypedNil()));
 
     var data = slice<byte>("same data"u8);
-    var c1 = ((charData)data);
-    var c2 = ((charData)appendꓸꓸꓸ(slice<byte>(default!), data));
+    var c1 = (charData)data;
+    var c2 = (charData)appendꓸꓸꓸ(slice<byte>(default!), data);
     fmt.Println(reflect.DeepEqual(c1, c2));
     data[1] = (rune)'o';
     fmt.Println(reflect.DeepEqual(c1, c2));
     fmt.Println(reflect.DeepEqual(c1, c1));
-    fmt.Println(reflect.DeepEqual(((charData)slice<byte>((@string)"ab"u8)), ((charData)slice<byte>((@string)"ab"u8))));
-    fmt.Println(reflect.DeepEqual(((charData)slice<byte>((@string)"ab"u8)), ((charData)slice<byte>((@string)"ac"u8))));
-    fmt.Println(reflect.DeepEqual(((charData)slice<byte>((@string)"ab"u8)), ((charData)slice<byte>((@string)"abc"u8))));
+    fmt.Println(reflect.DeepEqual((charData)slice<byte>((@string)"ab"u8), (charData)slice<byte>((@string)"ab"u8)));
+    fmt.Println(reflect.DeepEqual((charData)slice<byte>((@string)"ab"u8), (charData)slice<byte>((@string)"ac"u8)));
+    fmt.Println(reflect.DeepEqual((charData)slice<byte>((@string)"ab"u8), (charData)slice<byte>((@string)"abc"u8)));
 
     any tok1 = ((charData)data);
     any tok2 = ((charData)appendꓸꓸꓸ(slice<byte>(default!), data));
     fmt.Println(reflect.DeepEqual(tok1, tok2));
-    tok2 = ((any)((charData)data));
+    tok2 = (any)((charData)data);
     fmt.Println(reflect.DeepEqual(tok1, tok2));
-    fmt.Println(reflect.DeepEqual(new charData[]{((charData)slice<byte>((@string)"ab"u8))}.slice(), new charData[]{((charData)slice<byte>((@string)"ac"u8))}.slice()));
+    fmt.Println(reflect.DeepEqual(new charData[]{(charData)slice<byte>((@string)"ab"u8)}.slice(), new charData[]{(charData)slice<byte>((@string)"ac"u8)}.slice()));
     fmt.Println(reflect.DeepEqual(new map<@string, charData>{["k"] = ((charData)slice<byte>((@string)"ab"u8))}, new map<@string, charData>{["k"] = ((charData)slice<byte>((@string)"ac"u8))}));
 
     charData nilCD = default!;

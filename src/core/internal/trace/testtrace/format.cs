@@ -54,7 +54,7 @@ public static (io.Reader, version.Version, ж<Expectation>, error) ParseFile(@st
     }
     (var exp, err) = ParseExpectation((~ar).Files[0].Data);
     if (err != default!) {
-        return (default!, 0, default!, fmt.Errorf("internal error during %s: failed to parse expectation %q: %v"u8, testPath, ((@string)(~ar).Files[0].Data), err));
+        return (default!, 0, default!, fmt.Errorf("internal error during %s: failed to parse expectation %q: %v"u8, testPath, (@string)(~ar).Files[0].Data, err));
     }
     return (new bytes_BufferжReader(Ꮡbuf), tr.Version(), exp, default!);
 }

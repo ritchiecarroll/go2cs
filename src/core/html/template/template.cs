@@ -417,7 +417,7 @@ public static @string Name(this ref Template t) {
 public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    t.text.Funcs(((template.FuncMap)funcMap));
+    t.text.Funcs((template.FuncMap)funcMap);
     return Ꮡt;
 }
 
@@ -510,7 +510,7 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         if (err != default!) {
             return (default!, err);
         }
-        @string s = ((@string)b);
+        @string s = (@string)b;
         // First template becomes return value if not already defined,
         // and we use that one for subsequent New calls to associate
         // all the templates together. Also, if this file has the same name

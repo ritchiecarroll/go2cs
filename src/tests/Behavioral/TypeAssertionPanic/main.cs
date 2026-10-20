@@ -64,12 +64,8 @@ internal static void @catch(@string what, Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object commaOkˢ = (@string)"comma-ok:"u8;
-private static readonly object stillRunningˢ = (@string)"still running"u8;
-
 internal static void Main() {
-    any boxed = (nint)(7);
+    any boxed = (nint)7;
 
     var boxedʗ1 = boxed;
     @catch("int-to-string", () => {
@@ -138,10 +134,10 @@ internal static void Main() {
     var boxedʗ6 = boxed;
     @catch("comma-ok", () => {
         var (_, ok) = boxedʗ6._<@string>(ᐧ);
-        fmt.Println(commaOkˢ, ok);
+        fmt.Println("comma-ok:", ok);
     });
 
-    fmt.Println(stillRunningˢ);
+    fmt.Println("still running");
 }
 
 } // end main_package

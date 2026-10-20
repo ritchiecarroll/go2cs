@@ -81,7 +81,7 @@ internal static void Main() {
     l = line();
     report("S1 method, variadic, one literal:", got, l - 1);
 
-    plain((@string)"x"u8);
+    plain("x");
     l = line();
     report("S2 func, one converted literal:", got, l - 1);
 
@@ -92,7 +92,7 @@ internal static void Main() {
     nint r = e.Value((@string)"y"u8);
     report("S4 method, result used:", r, line() - 1);
 
-    e.Info((@string)"a"u8, (nint)(1), 2.5D);
+    e.Info((@string)"a"u8, (nint)1, 2.5D);
     l = line();
     report("S5 method, variadic, three args:", got, l - 1);
 
@@ -104,7 +104,7 @@ internal static void Main() {
     l = line();
     report("S7 func, struct literal arg:", got, l - 1);
 
-    plainV(litˢ);
+    plainV("lit");
     l = line();
     report("S8 func, variadic, one literal:", got, l - 1);
 

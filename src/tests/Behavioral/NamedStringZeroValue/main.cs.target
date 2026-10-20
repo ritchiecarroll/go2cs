@@ -42,33 +42,24 @@ internal static Alias viaAlias(bool ok) {
     return aliasedˢ;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object zeroTupleˢ = (@string)"zero tuple:"u8;
-private static readonly object setTupleˢ = (@string)"set tuple:"u8;
-private static readonly object singleZeroˢ = (@string)"single zero:"u8;
-private static readonly object singleSetˢ = (@string)"single set:"u8;
-private static readonly object aliasZeroˢ = (@string)"alias zero:"u8;
-private static readonly object aliasSetˢ = (@string)"alias set:"u8;
-private static readonly object accumulatedˢ = (@string)"accumulated:"u8;
-
 internal static void Main() {
     var (p0, net0) = lookup(false);
     var (p1, net1) = lookup(true);
 
-    fmt.Println(zeroTupleˢ, p0 == nil, ((@string)net0) == ""u8, len(net0));
-    fmt.Println(setTupleˢ, p1.Value, ((@string)net1), len(net1));
+    fmt.Println("zero tuple:", p0 == nil, ((@string)net0) == ""u8, len(net0));
+    fmt.Println("set tuple:", p1.Value, (@string)net1, len(net1));
 
-    fmt.Println(singleZeroˢ, ((@string)single(false)) == ""u8, len(single(false)));
-    fmt.Println(singleSetˢ, ((@string)single(true)));
+    fmt.Println("single zero:", ((@string)single(false)) == ""u8, len(single(false)));
+    fmt.Println("single set:", (@string)single(true));
 
-    fmt.Println(aliasZeroˢ, ((@string)viaAlias(false)) == ""u8);
-    fmt.Println(aliasSetˢ, ((@string)viaAlias(true)));
+    fmt.Println("alias zero:", ((@string)viaAlias(false)) == ""u8);
+    fmt.Println("alias set:", (@string)viaAlias(true));
 
     Network acc = default!;
     acc = acc + "a"u8;
     acc += "b"u8;
 
-    fmt.Println(accumulatedˢ, ((@string)acc), acc == "ab"u8, len(acc));
+    fmt.Println("accumulated:", (@string)acc, acc == "ab"u8, len(acc));
 }
 
 } // end main_package

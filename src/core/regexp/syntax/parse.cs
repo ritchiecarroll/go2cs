@@ -47,7 +47,7 @@ public static readonly ErrorCode ErrNestingDepth = "expression nests too deeply"
 public static readonly ErrorCode ErrLarge = "expression too large"u8;
 
 public static @string String(this ErrorCode e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // Flags control the behavior of the parser and record information about regexp context.
@@ -1802,8 +1802,8 @@ internal static slice<rune> appendGroup(this ж<parser> Ꮡp, slice<rune> r, cha
 }
 
 internal static ж<unicode.RangeTable> anyTable = Ꮡ(new unicode.RangeTable(
-    R16: new unicode.Range16[]{new(Lo: 0, Hi: (uint16)((1 << (int)(16)) - 1), Stride: 1)}.slice(),
-    R32: new unicode.Range32[]{new(Lo: ((uint32)1 << (int)(16)), Hi: unicode.MaxRune, Stride: 1)}.slice()
+    R16: new unicode.Range16[]{new(Lo: 0, Hi: (uint16)((1 << 16) - 1), Stride: 1)}.slice(),
+    R32: new unicode.Range32[]{new(Lo: ((uint32)1 << 16), Hi: unicode.MaxRune, Stride: 1)}.slice()
 ));
 
 internal static ж<unicode.RangeTable> asciiTable = Ꮡ(new unicode.RangeTable(
@@ -1879,7 +1879,7 @@ internal static @string canonicalName(@string name) {
     if (b == default!) {
         return name;
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // unicodeTable returns the unicode.RangeTable identified by name
@@ -2032,7 +2032,7 @@ internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @stri
         // If character class does not match \n, add it here,
         // so that negation later will do the right thing.
         if ((Flags)(p.flags & ClassNL) == 0) {
-            re.Value.Rune = builtin.append((~re).Rune, (rune)((rune)'\n'), (rune)((rune)'\n'));
+            re.Value.Rune = builtin.append((~re).Rune, (rune)'\n', (rune)'\n');
         }
     }
 

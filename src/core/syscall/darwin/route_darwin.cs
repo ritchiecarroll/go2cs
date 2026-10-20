@@ -44,7 +44,7 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAdd
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {
-        if ((int32)(m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
+        if ((m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();

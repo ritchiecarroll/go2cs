@@ -100,7 +100,7 @@ internal static nint base128BigIntLength(ж<bigꓸInt> Ꮡn) {
 
 internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<bigꓸInt> Ꮡn) {
     if (Ꮡn.Cmp(big.NewInt(0)) == 0) {
-        return append(dst, (byte)(0));
+        return append(dst, (byte)0);
     }
 
     for (nint i = base128BigIntLength(Ꮡn) - 1; i >= 0; i--) {
@@ -126,7 +126,7 @@ public static (slice<byte>, error) MarshalText(this ΔOID o) {
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
 public static error UnmarshalText(this ref ΔOID o, slice<byte> text) {
-    return o.unmarshalOIDText(((@string)text));
+    return o.unmarshalOIDText((@string)text);
 }
 
 internal static error unmarshalOIDText(this ref ΔOID o, @string oid) {
@@ -382,7 +382,7 @@ internal static (asn1.ObjectIdentifier, bool) toASN1OID(this ΔOID oid) {
                     @out = append(@out, val / 40);
                     @out = append(@out, val % 40);
                 } else {
-                    @out = append(@out, (nint)(2));
+                    @out = append(@out, (nint)2);
                     @out = append(@out, val - 80);
                 }
                 val = 0;

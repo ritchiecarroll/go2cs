@@ -43,7 +43,7 @@ internal static error Close(this ref writer w) {
 }
 
 internal static @string String(this ref writer w) {
-    return ((@string)w.@out);
+    return (@string)w.@out;
 }
 
 partial struct duplex {
@@ -81,15 +81,6 @@ partial interface readStringWriter {
     (nint, error) WriteString(@string s);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object readˢ = (@string)"read:"u8;
-private static readonly object writeˢ = (@string)"write:"u8;
-private static readonly object aliasedˢ = (@string)"aliased:"u8;
-private static readonly object closeˢ = (@string)"close:"u8;
-private static readonly object valueFormˢ = (@string)"value form:"u8;
-private static readonly object foreignˢ = (@string)"foreign:"u8;
-private static readonly object foreignValueFormˢ = (@string)"foreign value form:"u8;
-
 internal static void Main() {
     var r = Ꮡ(new reader(src: "hello world"));
     var w = Ꮡ(new writer(nil));
@@ -99,18 +90,18 @@ internal static void Main() {
 
     var buf = new slice<byte>(5);
     var (n, err) = rwc.Read(buf);
-    fmt.Println(readˢ, n, ((@string)(buf.slice(0, n))), err == default!);
+    fmt.Println("read:", n, (@string)(buf.slice(0, n)), err == default!);
 
     (n, err) = rwc.Write(buf.slice(0, n));
-    fmt.Println(writeˢ, n, err == default!);
+    fmt.Println("write:", n, err == default!);
 
-    fmt.Println(aliasedˢ, (~r).pos, w.String());
+    fmt.Println("aliased:", (~r).pos, w.String());
 
-    fmt.Println(closeˢ, rwc.Close() == default!, (~r).pos, (~w).flush);
+    fmt.Println("close:", rwc.Close() == default!, (~r).pos, (~w).flush);
 
     readWriter rw = d.Value;
     (n, _) = rw.Write(slice<byte>("!"u8));
-    fmt.Println(valueFormˢ, n, w.String());
+    fmt.Println("value form:", n, w.String());
 
     var f = Ꮡ(new foreign(strings.NewReader("abc"), Ꮡ(new strings.Builder(nil))));
     readStringWriter rsw = new foreignжreadStringWriter(f);
@@ -118,11 +109,11 @@ internal static void Main() {
     var fbuf = new slice<byte>(3);
     (n, _) = rsw.Read(fbuf);
     var (n2, _) = rsw.WriteString(((sstring)(fbuf.slice(0, n))) + "def"u8);
-    fmt.Println(foreignˢ, n, n2, (~f).Builder.String());
+    fmt.Println("foreign:", n, n2, (~f).Builder.String());
 
     readStringWriter frsw = f.Value;
     var (n3, _) = frsw.WriteString("gh");
-    fmt.Println(foreignValueFormˢ, n3, (~f).Builder.String());
+    fmt.Println("foreign value form:", n3, (~f).Builder.String());
 }
 
 } // end main_package

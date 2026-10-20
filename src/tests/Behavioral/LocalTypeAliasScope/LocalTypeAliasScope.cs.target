@@ -16,13 +16,8 @@ partial struct Header {
 }
 
 public static @string String(this Header h) {
-    return fmt.Sprint(h.Name, (@string)"/"u8, h.Size);
+    return fmt.Sprint(h.Name, "/", h.Size);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object writeˢ = (@string)"write:"u8;
-private static readonly object closeˢ = (@string)"close:"u8;
-private static readonly object writeOpsOpsˢ = (@string)"writeOps ops:"u8;
 
 internal partial struct writeOps_opWrite /*dyn*/ {
     internal @string str;
@@ -38,22 +33,17 @@ internal static void writeOps() {
     foreach (var (_, op) in ops) {
         switch (op.type()) {
         case writeOps_opWrite v: {
-            fmt.Println(writeˢ, v.str);
+            fmt.Println("write:", v.str);
             break;
         }
         case writeOps_opClose v: {
-            fmt.Println(closeˢ, v.err);
+            fmt.Println("close:", v.err);
             break;
         }}
     }
 
-    fmt.Println(writeOpsOpsˢ, len(ops));
+    fmt.Println("writeOps ops:", len(ops));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fileOpsMakersˢ = (@string)"fileOps makers:"u8;
-private static readonly object testsˢ = (@string)"tests:"u8;
-private static readonly object totalˢ = (@string)"total:"u8;
 
 internal partial struct fileOps_makeReg /*dyn*/ {
     internal int64 size;
@@ -82,25 +72,19 @@ internal static void fileOps() {
         }}
     }
 
-    fmt.Println(fileOpsMakersˢ, len(makers), testsˢ, len(tests), totalˢ, total);
+    fmt.Println("fileOps makers:", len(makers), "tests:", len(tests), "total:", total);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object localAliasesˢ = (@string)"localAliases:"u8;
 
 internal static void localAliases() {
     var h = new localAliases_hdr(Name: "small.txt", Size: 5);
     Header plain = h;
 
-    fmt.Println(localAliasesˢ, h, plain, plain.String(), new Header(Name: "raw", Size: 1));
+    fmt.Println("localAliases:", h, plain, plain.String(), new Header(Name: "raw", Size: 1));
 }
 
 partial interface namer {
     @string String();
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object aliasedIfaceConvˢ = (@string)"aliasedIfaceConv:"u8;
 
 internal static void aliasedIfaceConv() {
     aliasedIfaceConv_S s = new Header(Name: "alias.txt", Size: 2);
@@ -109,7 +93,7 @@ internal static void aliasedIfaceConv() {
     fmt.Stringer direct = new Header(Name: "direct.txt", Size: 4);
     namer d = new fmt_Stringerᴠnamer(direct);
 
-    fmt.Println(aliasedIfaceConvˢ, n.String(), d.String());
+    fmt.Println("aliasedIfaceConv:", n.String(), d.String());
 }
 
 internal static void Main() {

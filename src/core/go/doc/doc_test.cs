@@ -186,7 +186,7 @@ public static void TestFuncs(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, ((global::go.go.doc_package.Mode)0));
+    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, (global::go.go.doc_package.Mode)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }

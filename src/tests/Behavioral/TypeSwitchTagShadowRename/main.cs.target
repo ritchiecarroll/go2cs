@@ -70,23 +70,20 @@ internal static (@string, @string) classifyVia(any v) {
     return (pick(v), pick(other.OrTypedNil()));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object directˢ = (@string)"direct"u8;
-
 internal static void Main() {
     @string hi = "hi";
     var sn = Ꮡ(new node(nil));
     sn.Value.inner = hi;
 
-    fmt.Println(inspect(Ꮡ(new node(inner: (nint)(5)))));
+    fmt.Println(inspect(Ꮡ(new node(inner: (nint)5))));
     fmt.Println(inspect(sn.OrTypedNil()));
     fmt.Println(inspect(Ꮡ(new node(inner: 1.5D))));
-    fmt.Println(inspect((nint)(42)));
+    fmt.Println(inspect((nint)42));
 
-    var (a, b) = classifyVia(Ꮡ(new node(inner: (nint)(7))));
+    var (a, b) = classifyVia(Ꮡ(new node(inner: (nint)7)));
     fmt.Println(a, b);
 
-    var (c, d) = classifyVia(directˢ);
+    var (c, d) = classifyVia("direct");
     fmt.Println(c, d);
 }
 

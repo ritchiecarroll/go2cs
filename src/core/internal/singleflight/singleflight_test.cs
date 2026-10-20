@@ -145,7 +145,7 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
             // Notify that we started
             secondChʗ2.ᐸꟷ(new EmptyStruct());
             ᐸꟷ(secondChʗ2);
-            return ((nint)(2), default!);
+            return ((nint)2, default!);
         });
     });
 
@@ -169,7 +169,7 @@ public static partial void TestForgetUnshared(ж<testing.T> Ꮡt) {
     secondCh.ᐸꟷ(new EmptyStruct());
 
     {
-        var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)(2))) {
+        var result = ᐸꟷ(resultCh); if (!AreEqual(result.Val, (nint)2)) {
             Ꮡt.Errorf("We should receive result produced by second call, expected: 2, got %d"u8, result.Val);
         }
     }

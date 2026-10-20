@@ -69,16 +69,16 @@ internal static void _ᴛ1() {
 internal static (uint32 _a, uint32 _b, uint32 _c, uint32 _d) qr(uint32 a, uint32 b, uint32 c, uint32 d) {
     a += b;
     d ^= (uint32)(a);
-    d = (uint32)((d << (int)(16)) | (d >> (int)(16)));
+    d = d << 16 | d >> 16;
     c += d;
     b ^= (uint32)(c);
-    b = (uint32)((b << (int)(12)) | (b >> (int)(20)));
+    b = b << 12 | b >> 20;
     a += b;
     d ^= (uint32)(a);
-    d = (uint32)((d << (int)(8)) | (d >> (int)(24)));
+    d = d << 8 | d >> 24;
     c += d;
     b ^= (uint32)(c);
-    b = (uint32)((b << (int)(7)) | (b >> (int)(25)));
+    b = b << 7 | b >> 25;
     return (a, b, c, d);
 }
 

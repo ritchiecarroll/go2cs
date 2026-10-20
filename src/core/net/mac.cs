@@ -19,10 +19,10 @@ public static @string String(this HardwareAddr a) {
         if (i > 0) {
             buf = append(buf, (byte)((rune)':'));
         }
-        buf = append(buf, hexDigit[(b >> (int)(4))]);
+        buf = append(buf, hexDigit[(b >> 4)]);
         buf = append(buf, hexDigit[(byte)(b & 0xF)]);
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // ParseMAC parses s as an IEEE 802 MAC-48, EUI-48, EUI-64, or a 20-octet

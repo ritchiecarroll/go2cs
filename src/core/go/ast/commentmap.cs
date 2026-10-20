@@ -309,7 +309,7 @@ break_loop:;
         }}
     }
 
-    return ((@string)bytesΔ1);
+    return (@string)bytesΔ1;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

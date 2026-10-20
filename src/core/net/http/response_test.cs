@@ -673,7 +673,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
             fatalf("ReadFull only read %d bytes"u8, n);
         }
         if (test.compressed == false && !bytes.Equal(bytes.Repeat(new byte[]{(rune)'x'}.slice(), 2500), rbuf)) {
-            fatalf("ReadFull didn't read 2500 'x'; got %q"u8, ((@string)rbuf));
+            fatalf("ReadFull didn't read 2500 'x'; got %q"u8, (@string)rbuf);
         }
         (~resp).Body.Close();
 
@@ -681,7 +681,7 @@ public static void TestReadResponseCloseInMiddle(ж<testing.T> Ꮡt) {
         checkErr(err, readAllOnRemainderˢ);
         {
             @string e = nextRequestHereˢ;
-            @string g = ((@string)rest); if (e != g) {
+            @string g = (@string)rest; if (e != g) {
                 g = regexp.MustCompile(@"(xx+)"u8).ReplaceAllStringFunc(g, (@string match) => fmt.Sprintf("x(repeated x%d)"u8, builtin.len(match)));
                 fatalf("remainder = %q, expected %q"u8, g, e);
             }

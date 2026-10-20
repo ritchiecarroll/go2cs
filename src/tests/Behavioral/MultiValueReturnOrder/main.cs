@@ -115,63 +115,48 @@ internal static @string describe(any v) {
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object parseOIDˢ = (@string)"parseOID:"u8;
-private static readonly object readThenBumpˢ = (@string)"readThenBump:"u8;
-private static readonly object orderedCallsˢ = (@string)"orderedCalls:"u8;
-private static readonly object addressArgumentˢ = (@string)"addressArgument:"u8;
-private static readonly object throughPointerˢ = (@string)"throughPointer:"u8;
-private static readonly object pointerIdentityˢ = (@string)"pointerIdentity:"u8;
-private static readonly object unrelatedOperandˢ = (@string)"unrelatedOperand:"u8;
-private static readonly object valueReceiverCallˢ = (@string)"valueReceiverCall:"u8;
-private static readonly object pointerFieldUnrelatedˢ = (@string)"pointerFieldUnrelated:"u8;
-private static readonly object pointerFieldSameˢ = (@string)"pointerFieldSame:"u8;
-private static readonly object forwardPointerˢ = (@string)"forwardPointer:"u8;
-private static readonly object assertThingˢ = (@string)"assert *thing:"u8;
-private static readonly object assertThingˢ2 = (@string)"assert thing:"u8;
-
 internal static void Main() {
     var (o, err) = parseOID("abc");
-    fmt.Println(parseOIDˢ, ((@string)o.der), err);
+    fmt.Println("parseOID:", (@string)o.der, err);
 
     var (a, b) = readThenBump();
-    fmt.Println(readThenBumpˢ, a, b);
+    fmt.Println("readThenBump:", a, b);
 
     ref var log = ref heap<slice<@string>>(out var Ꮡlog);
     var (x, mid, y) = orderedCalls(ref log);
-    fmt.Println(orderedCallsˢ, x, mid, y, log);
+    fmt.Println("orderedCalls:", x, mid, y, log);
 
     var (p, q) = addressArgument();
-    fmt.Println(addressArgumentˢ, p, q);
+    fmt.Println("addressArgument:", p, q);
 
     var (r, s) = throughPointer();
-    fmt.Println(throughPointerˢ, r, s);
+    fmt.Println("throughPointer:", r, s);
 
     var (pc, pb) = pointerIdentity();
-    fmt.Println(pointerIdentityˢ, (~pc).n, pb);
+    fmt.Println("pointerIdentity:", (~pc).n, pb);
 
     var (ua, ub) = unrelatedOperand();
-    fmt.Println(unrelatedOperandˢ, ua, ub);
+    fmt.Println("unrelatedOperand:", ua, ub);
 
     var (va, vb) = valueReceiverCall();
-    fmt.Println(valueReceiverCallˢ, va, vb);
+    fmt.Println("valueReceiverCall:", va, vb);
 
     var nd = Ꮡ(new node(pat: Ꮡ(new counter(nil))));
     var (fa, fb) = pointerFieldUnrelated(ref (nd).DerefOrNull());
-    fmt.Println(pointerFieldUnrelatedˢ, fa, fb);
+    fmt.Println("pointerFieldUnrelated:", fa, fb);
 
     var nd2 = Ꮡ(new node(pat: Ꮡ(new counter(nil))));
     var (ga, gb) = pointerFieldSame(ref (nd2).DerefOrNull());
-    fmt.Println(pointerFieldSameˢ, ga, gb);
+    fmt.Println("pointerFieldSame:", ga, gb);
 
     var (v, ferr) = forwardPointer("one");
-    fmt.Println(forwardPointerˢ, describe(v), ferr);
+    fmt.Println("forwardPointer:", describe(v), ferr);
 
     var (tp, ok) = v._<ж<thing>>(ᐧ);
-    fmt.Println(assertThingˢ, ok, (~tp).name);
+    fmt.Println("assert *thing:", ok, (~tp).name);
 
     var (_, notValue) = v._<thing>(ᐧ);
-    fmt.Println(assertThingˢ2, notValue);
+    fmt.Println("assert thing:", notValue);
 }
 
 partial struct node {

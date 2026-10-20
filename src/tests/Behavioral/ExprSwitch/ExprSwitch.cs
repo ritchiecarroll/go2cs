@@ -32,77 +32,34 @@ public static nint Foo(nint n) {
     return n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object helloˢ = (@string)"hello, "u8;
-private static readonly object worldˢ = (@string)"world"u8;
-private static readonly object writeˢ = (@string)"Write "u8;
-private static readonly object oneˢ = (@string)"one"u8;
-private static readonly object twoˢ = (@string)"two"u8;
-private static readonly object threeˢ = (@string)"three"u8;
-private static readonly object fourFiveOrSizˢ = (@string)"four, five or siz"u8;
-private static readonly object unknownˢ = (@string)"unknown"u8;
-private static readonly object itSTheWeekendˢ = (@string)"It's the weekend"u8;
-private static readonly object ughItSMondayˢ = (@string)"Ugh, it's Monday"u8;
-private static readonly object itSAWeekdayˢ = (@string)"It's a weekday"u8;
-private static readonly object itSBeforeNoonˢ = (@string)"It's before noon"u8;
-private static readonly object itSAfterNoonˢ = (@string)"It's after noon"u8;
-private static readonly object goodMorningˢ = (@string)"Good morning!"u8;
-private static readonly object goodMorningOpt2ˢ = (@string)"Good morning (opt 2)!"u8;
-private static readonly object goodAfternoonˢ = (@string)"Good afternoon!"u8;
-private static readonly object midnightˢ = (@string)"Midnight!"u8;
-private static readonly object midnightOpt2ˢ = (@string)"Midnight (opt 2)!"u8;
-private static readonly object goodEveningˢ = (@string)"Good evening!"u8;
-private static readonly object whitespaceˢ = (@string)"whitespace"u8;
-private static readonly object negativeˢ = (@string)"negative"u8;
-private static readonly object zeroˢ = (@string)"zero"u8;
-private static readonly object oneOrTwoˢ = (@string)"one or two"u8;
-private static readonly object plusAlwaysADefaultHereˢ = (@string)"plus, always a default here because of fallthrough"u8;
-private static readonly object sub0OneOrTwoˢ = (@string)"sub0 one or two"u8;
-private static readonly object sub0Threeˢ = (@string)"sub0 three"u8;
-private static readonly object sub0Defaultˢ = (@string)"sub0 default"u8;
-private static readonly object sub1OneOrTwoˢ = (@string)"sub1 one or two"u8;
-private static readonly object sub1Threeˢ = (@string)"sub1 three"u8;
-private static readonly object sub1Defaultˢ = (@string)"sub1 default"u8;
-private static readonly object sub2OneOrTwoˢ = (@string)"sub2 one or two"u8;
-private static readonly object sub2Threeˢ = (@string)"sub2 three"u8;
-private static readonly object sub2Defaultˢ = (@string)"sub2 default"u8;
-private static readonly object firstCaseˢ = (@string)"First case"u8;
-private static readonly object secondCaseˢ = (@string)"Second case"u8;
-private static readonly object defaultCaseˢ = (@string)"Default case"u8;
-private static readonly object strictChecksDisabledˢ = (@string)"strict checks disabled"u8;
-private static readonly object unreachableButCompiledˢ = (@string)"unreachable but compiled"u8;
-private static readonly object fastˢ = (@string)"fast"u8;
-private static readonly object steadyˢ = (@string)"steady"u8;
-private static readonly object slowˢ = (@string)"slow"u8;
-
 internal static void Main() {
     fmt.Println(getStr("test"));
-    fmt.Println(getStr2(helloˢ, "world"));
-    fmt.Println(getStr3("hello, %s", worldˢ));
+    fmt.Println(getStr2("hello, ", "world"));
+    fmt.Println(getStr3("hello, %s", "world"));
 
     nint i = 2;
-    fmt.Print(writeˢ, i, (@string)" as "u8);
+    fmt.Print("Write ", i, " as ");
     switch (i) {
     case 1: {
-        fmt.Println(oneˢ);
+        fmt.Println("one");
         break;
     }
     case 2: {
-        fmt.Println(twoˢ);
+        fmt.Println("two");
         break;
     }
     case 3: {
         {
-            fmt.Println(threeˢ);
+            fmt.Println("three");
         }
         break;
     }
     case 4 or 5 or 6: {
-        fmt.Println(fourFiveOrSizˢ);
+        fmt.Println("four, five or siz");
         break;
     }
     default: {
-        fmt.Println(unknownˢ);
+        fmt.Println("unknown");
         break;
     }}
 
@@ -118,23 +75,23 @@ internal static void Main() {
 
     var exprᴛ1 = time.Now().Weekday();
     if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {
-        fmt.Println(itSTheWeekendˢ);
+        fmt.Println("It's the weekend");
     }
     else if (exprᴛ1 == time.Monday) {
-        fmt.Println(ughItSMondayˢ);
+        fmt.Println("Ugh, it's Monday");
     }
     else { /* default: */
-        fmt.Println(itSAWeekdayˢ);
+        fmt.Println("It's a weekday");
     }
 
     var t = time.Now();
     switch (ᐧ) {
     case {} when t.Hour() is < 12: {
-        fmt.Println(itSBeforeNoonˢ);
+        fmt.Println("It's before noon");
         break;
     }
     default: {
-        fmt.Println(itSAfterNoonˢ);
+        fmt.Println("It's after noon");
         break;
     }}
 
@@ -145,27 +102,27 @@ internal static void Main() {
         nint hourΔ1 = time.Now().Hour();
         switch (ᐧ) {
         case {} when hourΔ1 is 1 or < 12 or 2: {
-            fmt.Println(goodMorningˢ);
+            fmt.Println("Good morning!");
             break;
         }
         case {} when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4): {
-            fmt.Println(goodMorningOpt2ˢ);
+            fmt.Println("Good morning (opt 2)!");
             break;
         }
         case {} when hourΔ1 is < 17: {
-            fmt.Println(goodAfternoonˢ);
+            fmt.Println("Good afternoon!");
             break;
         }
         case {} when hourΔ1 is 0: {
-            fmt.Println(midnightˢ);
+            fmt.Println("Midnight!");
             break;
         }
         case {} when hourΔ1 == 0 && hour1 == 1: {
-            fmt.Println(midnightOpt2ˢ);
+            fmt.Println("Midnight (opt 2)!");
             break;
         }
         default: {
-            fmt.Println(goodEveningˢ);
+            fmt.Println("Good evening!");
             break;
         }}
     }
@@ -176,7 +133,7 @@ internal static void Main() {
 
     switch (c) {
     case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r': {
-        fmt.Println(whitespaceˢ);
+        fmt.Println("whitespace");
         break;
     }}
 
@@ -187,13 +144,13 @@ internal static void Main() {
         var exprᴛ2 = getNext();
         var matchᴛ1 = false;
         if (exprᴛ2 == -1) { matchᴛ1 = true;
-            fmt.Println(negativeˢ);
+            fmt.Println("negative");
         }
         else if (exprᴛ2 is 0) { matchᴛ1 = true;
-            fmt.Println(zeroˢ);
+            fmt.Println("zero");
         }
         else if (exprᴛ2 is 1 or 2) { matchᴛ1 = true;
-            fmt.Println(oneOrTwoˢ);
+            fmt.Println("one or two");
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ2 is 3) { matchᴛ1 = true;
@@ -202,7 +159,7 @@ internal static void Main() {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1) { /* default: */
-            fmt.Println(plusAlwaysADefaultHereˢ);
+            fmt.Println("plus, always a default here because of fallthrough");
         }
     }
 
@@ -212,55 +169,55 @@ internal static void Main() {
         var next = getNext();
         var matchᴛ2 = false;
         if (next <= -1) { matchᴛ2 = true;
-            fmt.Println(negativeˢ);
+            fmt.Println("negative");
 
             var exprᴛ4 = getNext();
             var matchᴛ3 = false;
             if (exprᴛ4 is 1 or 2) { matchᴛ3 = true;
-                fmt.Println(sub0OneOrTwoˢ);
+                fmt.Println("sub0 one or two");
             }
             else if (exprᴛ4 is 3) { matchᴛ3 = true;
-                fmt.Println(sub0Threeˢ);
+                fmt.Println("sub0 three");
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ3) { /* default: */
-                fmt.Println(sub0Defaultˢ);
+                fmt.Println("sub0 default");
             }
 
         }
         else if (next is 0) { matchᴛ2 = true;
-            fmt.Println(zeroˢ);
+            fmt.Println("zero");
 
             {
                 var nextΔ2 = getNext();
                 var matchᴛ4 = false;
                 if (nextΔ2 is 1 or <= 2) { matchᴛ4 = true;
-                    fmt.Println(sub1OneOrTwoˢ);
+                    fmt.Println("sub1 one or two");
                 }
                 else if (nextΔ2 is 3) { matchᴛ4 = true;
-                    fmt.Println(sub1Threeˢ);
+                    fmt.Println("sub1 three");
                     fallthrough = true;
                 }
                 if (fallthrough || !matchᴛ4) { /* default: */
-                    fmt.Println(sub1Defaultˢ);
+                    fmt.Println("sub1 default");
                 }
             }
 
         }
         else if (next is 1 or 2) { matchᴛ2 = true;
-            fmt.Println(oneOrTwoˢ);
+            fmt.Println("one or two");
 
             switch (next) {
             case 1 or 2: {
-                fmt.Println(sub2OneOrTwoˢ);
+                fmt.Println("sub2 one or two");
                 break;
             }
             case 3: {
-                fmt.Println(sub2Threeˢ);
+                fmt.Println("sub2 three");
                 break;
             }
             default: {
-                fmt.Println(sub2Defaultˢ);
+                fmt.Println("sub2 default");
                 break;
             }}
 
@@ -271,46 +228,46 @@ internal static void Main() {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ2) { /* default: */
-            fmt.Println(plusAlwaysADefaultHereˢ);
+            fmt.Println("plus, always a default here because of fallthrough");
         }
     }
 
     var exprᴛ6 = Foo(2);
     var matchᴛ5 = false;
     if (exprᴛ6 == Foo(1) || exprᴛ6 == Foo(2) || exprᴛ6 == Foo(3)) { matchᴛ5 = true;
-        fmt.Println(firstCaseˢ);
+        fmt.Println("First case");
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ5 && exprᴛ6 == Foo(4)) {
-        fmt.Println(secondCaseˢ);
+        fmt.Println("Second case");
     }
     else if (!matchᴛ5) { /* default: */
-        fmt.Println(defaultCaseˢ);
+        fmt.Println("Default case");
     }
 
     nint v = 3;
     switch (ᐧ) {
     case {} when ᐧᐧ: {
-        fmt.Println(strictChecksDisabledˢ);
+        fmt.Println("strict checks disabled");
         break;
     }
     case {} when v is > 2: {
-        fmt.Println(unreachableButCompiledˢ);
+        fmt.Println("unreachable but compiled");
         break;
     }}
 
     pace dur = 5;
     switch (ᐧ) {
     case {} when dur >= 6: {
-        fmt.Println(fastˢ);
+        fmt.Println("fast");
         break;
     }
     case {} when dur == 5: {
-        fmt.Println(steadyˢ);
+        fmt.Println("steady");
         break;
     }
     default: {
-        fmt.Println(slowˢ);
+        fmt.Println("slow");
         break;
     }}
 

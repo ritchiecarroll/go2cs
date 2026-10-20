@@ -82,7 +82,7 @@ public static void TestTBHelperParallel(ж<testing.T> Ꮡt) {
 
     Ꮡt.Logf("output:\n%s"u8, @out);
 
-    var lines = strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8);
+    var lines = strings.Split(strings.TrimSpace((@string)@out), "\n"u8);
 
     // We expect to see one "--- FAIL" line at the start
     // of the log, five lines of "parallel" logging,
@@ -112,7 +112,7 @@ public static void BenchmarkTBHelper(ж<testing.B> Ꮡb) {
     b.ResetTimer();
     b.ReportAllocs();
     for (nint i = 0; i < b.N; i++) {
-        if ((nint)(i & 1) == 0){
+        if ((i & 1) == 0){
             f1();
         } else {
             f2();

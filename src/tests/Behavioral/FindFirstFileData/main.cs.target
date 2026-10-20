@@ -42,11 +42,6 @@ internal static slice<filesᴛ1> files = new filesᴛ1[]{
     new("ÜnicödeDir\\Inner.dat", 65, time.Date(2024, time.May, 6, 7, 8, 9, 0, time.ΔUTC))
 }.slice();
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object singleLookupˢ = (@string)"-- single lookup --"u8;
-private static readonly object missingˢ = (@string)"-- missing --"u8;
-private static readonly object canonicalCaseˢ = (@string)"-- canonical case --"u8;
-
 internal static void Main() {
     @string root = filepath.Join(os.TempDir(), fmt.Sprintf("go2cs_findfirstfile_%d"u8, os.Getpid()));
     os.RemoveAll(root);
@@ -60,15 +55,15 @@ internal static void Main() {
         }
     }
 
-    fmt.Println(singleLookupˢ);
+    fmt.Println("-- single lookup --");
     var one = lookup(filepath.Join(root, "ReadMe.txt"));
     fmt.Printf("%s alt=%s dir=%v size=%d mtime=%d\n"u8, ascii(one.name), ascii(one.alt), one.isDir, one.size, one.mtime);
 
-    fmt.Println(missingˢ);
+    fmt.Println("-- missing --");
     var (_, err) = find(filepath.Join(root, "NoSuchFile.txt"));
     fmt.Println(AreEqual(err, syscall.ERROR_FILE_NOT_FOUND));
 
-    fmt.Println(canonicalCaseˢ);
+    fmt.Println("-- canonical case --");
     (var rootEval, err) = filepath.EvalSymlinks(root);
     if (err != default!) {
         fatal("EvalSymlinks(root)", err);
@@ -202,7 +197,7 @@ internal static (entry, bool) toEntry(ж<syscall.Win32finddata> Ꮡdata) {
     return (new entry(
         name: name,
         alt: altName(ref (Ꮡdata).DerefOrNull()),
-        isDir: (uint32)(data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0,
+        isDir: (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0,
         size: data.FileSizeLow,
         mtime: data.LastWriteTime.Nanoseconds()
     ), true);
@@ -233,17 +228,14 @@ internal static @string ascii(@string s) {
         }
         @out = append(@out, (byte)((rune)'\\'), (byte)((rune)'u'));
         for (nint shift = 12; shift >= 0; shift -= 4) {
-            @out = append(@out, hexDigits[(rune)((r.Rsh((nuint)shift)) & 0xf)]);
+            @out = append(@out, hexDigits[((r.Rsh((nuint)shift)) & 0xf)]);
         }
     }
-    return ((@string)@out);
+    return (@string)@out;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fatalˢ = (@string)"FATAL"u8;
-
 internal static void fatal(@string what, error err) {
-    fmt.Println(fatalˢ, what, err);
+    fmt.Println("FATAL", what, err);
     os.Exit(1);
 }
 

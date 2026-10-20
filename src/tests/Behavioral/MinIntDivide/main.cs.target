@@ -127,30 +127,27 @@ internal static void arm(@string @class, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object callsˢ = (@string)" calls "u8;
-
 internal static void Main() {
-    arm("int", () => fmt.Sprint(quo(i, m1) == Δmath.MinInt, (@string)" "u8, rem(i, m1)));
-    arm("int32", () => fmt.Sprint(quo(i32, (int32)m1), (@string)" "u8, rem(i32, (int32)m1)));
-    arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), (@string)" "u8, rem(i64, (int64)m1)));
-    arm("rune", () => fmt.Sprint(quo(r, (rune)m1), (@string)" "u8, rem(r, (rune)m1)));
-    arm("named int64", () => fmt.Sprint(w / ((word)(int64)m1), (@string)" "u8, w % ((word)(int64)m1)));
-    arm("named int32", () => fmt.Sprint(s / ((small)(int32)m1), (@string)" "u8, s % ((small)(int32)m1)));
-    arm("narrow", () => fmt.Sprint((int8)(i8 / (int8)m1), (@string)" "u8, (int8)(i8 % (int8)m1), (@string)" "u8, (int16)(i16 / (int16)m1), (@string)" "u8, (int16)(i16 % (int16)m1)));
+    arm("int", () => fmt.Sprint(quo(i, m1) == Δmath.MinInt, " ", rem(i, m1)));
+    arm("int32", () => fmt.Sprint(quo(i32, (int32)m1), " ", rem(i32, (int32)m1)));
+    arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
+    arm("rune", () => fmt.Sprint(quo(r, (rune)m1), " ", rem(r, (rune)m1)));
+    arm("named int64", () => fmt.Sprint(w / ((word)(int64)m1), " ", w % ((word)(int64)m1)));
+    arm("named int32", () => fmt.Sprint(s / ((small)(int32)m1), " ", s % ((small)(int32)m1)));
+    arm("narrow", () => fmt.Sprint((int8)(i8 / (int8)m1), " ", (int8)(i8 % (int8)m1), " ", (int16)(i16 / (int16)m1), " ", (int16)(i16 % (int16)m1)));
     arm("compound", () => {
         var (q, m) = (i64, i64);
         q = quo(q, (int64)m1);
         m = rem(m, (int64)m1);
-        return fmt.Sprint(q, (@string)" "u8, m);
+        return fmt.Sprint(q, " ", m);
     });
     arm("constant -1", () => {
         var (q, m) = (i32, i32);
         q *= -1;
         m = 0;
-        return fmt.Sprint(unchecked(-i) == Δmath.MinInt, (@string)" "u8, (nint)0, (@string)" "u8, unchecked(-i64), (@string)" "u8, (int64)0, (@string)" "u8, q, (@string)" "u8, m);
+        return fmt.Sprint(unchecked(-i) == Δmath.MinInt, " ", (nint)0, " ", unchecked(-i64), " ", (int64)0, " ", q, " ", m);
     });
-    arm("ordinary", () => fmt.Sprint(i64 / (int64)7, (@string)" "u8, i64 % (int64)7, (@string)" "u8, -7 / m1, (@string)" "u8, 7 % (m1 - 2)));
+    arm("ordinary", () => fmt.Sprint(i64 / (int64)7, " ", i64 % (int64)7, " ", -7 / m1, " ", 7 % (m1 - 2)));
     arm("compound pointer", () => {
         var p = Ꮡi64;
         ref var v = ref heap<int64>(out var Ꮡv);
@@ -164,20 +161,20 @@ internal static void Main() {
         nint j = 0;
         sl[j + 1].QuoAssign((int32)m1);
         sl[len(sl) - 1].RemAssign((int32)m1);
-        return fmt.Sprint(sl[1], (@string)" "u8, sl[2]);
+        return fmt.Sprint(sl[1], " ", sl[2]);
     });
     arm("compound call index", () => {
         calls = 0;
         var sl = new nint[]{0, Δmath.MinInt}.slice();
         sl[counted(1)].QuoAssign(m1);
-        return fmt.Sprint(sl[1], callsˢ, calls);
+        return fmt.Sprint(sl[1], " calls ", calls);
     });
     arm("compound map key", () => {
         calls = 0;
         var m = new map<@string, int64>{["k"] = Δmath.MinInt64};
         m.QuoAssign(key(), (int64)m1);
         m.RemAssign(key(), (int64)m1);
-        return fmt.Sprint(m["k"], callsˢ, calls);
+        return fmt.Sprint(m["k"], " calls ", calls);
     });
     arm("compound call selector", () => {
         calls = 0;
@@ -186,15 +183,15 @@ internal static void Main() {
         var p = Ꮡc;
         (p.ValueSlot).Value.x.RemAssign((int64)m1);
         fresh().Value.x.QuoAssign((int64)m1);
-        return fmt.Sprint((~c).x, callsˢ, calls);
+        return fmt.Sprint((~c).x, " calls ", calls);
     });
     arm("compound promoted", () => {
         var h = new holder(Ꮡ(new cell(x: Δmath.MinInt64)));
         h.x = quo(h.x, (int64)m1);
         return fmt.Sprint(h);
     });
-    arm("generic", () => fmt.Sprint(div(i64, (int64)m1), (@string)" "u8, div(w, ((word)(int64)m1)), (@string)" "u8, mod(i32, (int32)m1), (@string)" "u8, mod(i8, (int8)m1),
-            (@string)" "u8, quoAny(i, m1), (@string)" "u8, quoAny((uint8)200, (uint8)3)));
+    arm("generic", () => fmt.Sprint(div(i64, (int64)m1), " ", div(w, (word)(int64)m1), " ", mod(i32, (int32)m1), " ", mod(i8, (int8)m1),
+            " ", quoAny(i, m1), " ", quoAny((uint8)200, (uint8)3)));
     arm("constant -1 remainder of a nil selector", () => {
         ж<cell> c = default!;
         var rΔ1 = (~c).x * 0;
@@ -209,7 +206,7 @@ internal static void Main() {
         var sl = new nint[]{Δmath.MinInt}.slice();
         nint rΔ2 = ints()[counted(0)] * 0;
         nint q = unchecked(-ints()[counted(0)]);
-        return fmt.Sprint(rΔ2, (@string)" "u8, q == Δmath.MinInt, (@string)" "u8, sl[0] * 0, callsˢ, calls);
+        return fmt.Sprint(rΔ2, " ", q == Δmath.MinInt, " ", sl[0] * 0, " calls ", calls);
     });
     arm("constant -1 remainder out of range", () => {
         var sl = new nint[]{1}.slice();
@@ -221,17 +218,17 @@ internal static void Main() {
         nint j = 0;
         sl[j + 0] *= -1;
         sl[j + 1] = 0;
-        return fmt.Sprint(sl[0], (@string)" "u8, sl[1]);
+        return fmt.Sprint(sl[0], " ", sl[1]);
     });
     arm("constant dividend", () => {
         const int64 big = /* math.MaxInt64 */ 9223372036854775807;
         int64 d64 = Δmath.MinInt64;
         var b = slice<byte>("abc"u8);
-        return fmt.Sprint(5000 / (int64)m1, (@string)" "u8, len(b) % m1, (@string)" "u8, cap(b) / m1, (@string)" "u8, big / (int64)m1, (@string)" "u8, quo((int64)Δmath.MinInt64, (int64)m1), (@string)" "u8,
+        return fmt.Sprint(5000 / (int64)m1, " ", len(b) % m1, " ", cap(b) / m1, " ", big / (int64)m1, " ", quo((int64)Δmath.MinInt64, (int64)m1), " ",
             quo(d64, (int64)m1));
     });
     arm("local named rem", localRem);
-    arm("local constant or type switch named quo", () => fmt.Sprint(localConst(i64, (int64)m1), (@string)" "u8, laterConst(i32, (int32)m1), (@string)" "u8, typeSwitch(i, m1)));
+    arm("local constant or type switch named quo", () => fmt.Sprint(localConst(i64, (int64)m1), " ", laterConst(i32, (int32)m1), " ", typeSwitch(i, m1)));
     arm("divide by zero", () => fmt.Sprint(quo(i64, (int64)zero)));
     arm("remainder by zero", () => fmt.Sprint(rem(i, zero)));
 }

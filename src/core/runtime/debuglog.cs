@@ -450,7 +450,7 @@ internal static void ensure(this ref debugLogWriter l, uint64 n) {
 //go:nosplit
 internal static bool writeFrameAt(this ref debugLogWriter l, uint64 pos, uint64 size) {
     l.data.b[pos % (uint64)len(l.data.b)] = (uint8)size;
-    l.data.b[(pos + 1) % (uint64)len(l.data.b)] = (uint8)((size >> (int)(8)));
+    l.data.b[(pos + 1) % (uint64)len(l.data.b)] = (uint8)(size >> 8);
     return size <= 0xFFFF;
 }
 
@@ -496,9 +496,9 @@ internal static void bytes(this ref debugLogWriter l, slice<byte> x) {
 internal static void varint(this ref debugLogWriter l, int64 x) {
     uint64 u = default!;
     if (x < 0){
-        u = (uint64)(((~(uint64)x << (int)(1))) | 1); // complement i, bit 0 is 1
+        u = (~(uint64)x << 1) | 1; // complement i, bit 0 is 1
     } else {
-        u = (((uint64)x << (int)(1))); // do not complement i, bit 0 is 0
+        u = ((uint64)x << 1); // do not complement i, bit 0 is 0
     }
     l.uvarint(u);
 }
@@ -547,7 +547,7 @@ internal static uint64 skip(this ref debugLogReader r) {
 
 //go:nosplit
 internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
-    return (uint16)((uint16)(~r.data).b[pos % (uint64)len((~r.data).b)] | (uint16)((uint16)(~r.data).b[(pos + 1) % (uint64)len((~r.data).b)] << (int)(8)));
+    return (uint16)((uint16)(~r.data).b[pos % (uint64)len((~r.data).b)] | (uint16)((uint16)(~r.data).b[(pos + 1) % (uint64)len((~r.data).b)] << 8));
 }
 
 //go:nosplit
@@ -636,10 +636,10 @@ internal static uint64 uvarint(this ref debugLogReader r) {
 internal static int64 varint(this ref debugLogReader r) {
     var u = r.uvarint();
     int64 v = default!;
-    if ((uint64)(u & 1) == 0){
-        v = (int64)((u >> (int)(1)));
+    if ((u & 1) == 0){
+        v = (int64)(u >> 1);
     } else {
-        v = ~(int64)((u >> (int)(1)));
+        v = ~(int64)(u >> 1);
     }
     return v;
 }

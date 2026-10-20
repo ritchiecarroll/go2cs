@@ -46,7 +46,7 @@ public static (float64 sin, float64 cos) Sincos(float64 x) {
         j = (uint64)(x * /* (4 / Pi) */ 1.2732395447351628D); // integer part of x/(Pi/4), as integer for tests on the phase angle
         y = (float64)j; // integer part of x/(Pi/4), as float
 
-        if ((uint64)(j & 1) == 1) { // map zeros to origin
+        if ((j & 1) == 1) { // map zeros to origin
             j++;
             y++;
         }

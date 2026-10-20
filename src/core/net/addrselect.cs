@@ -316,7 +316,7 @@ internal static scope classifyScope(netipꓸAddr ip) {
     var ipv6 = ip.Is6() && !ip.Is4In6();
     var ipv6AsBytes = ip.As16();
     if (ipv6 && ip.IsMulticast()) {
-        return ((scope)((byte)(ipv6AsBytes[1] & 0xf)));
+        return (scope)((byte)(ipv6AsBytes[1] & 0xf));
     }
     // Site-local addresses are defined in RFC 3513 section 2.5.6
     // (and deprecated in RFC 3879).

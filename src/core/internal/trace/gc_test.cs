@@ -165,7 +165,7 @@ internal static float64 /*mmu*/ mmuSlow(slice<Δtrace.MutatorUtil> util, time.Du
     float64 mmu = default!;
 
     {
-        var max = ((time.Duration)(util[len(util) - 1].Time - util[0].Time)); if (window > max) {
+        var max = (time.Duration)(util[len(util) - 1].Time - util[0].Time); if (window > max) {
             window = max;
         }
     }

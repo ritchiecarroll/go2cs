@@ -27,7 +27,7 @@ public static @string Version() {
 
 // ScratchBuffer is a large buffer that will be written to using atomics, to
 // generate noise from memory access timings. Its contents do not matter.
-/* [(1 << (int)(25))]byte */
+/* [(1 << 25)]byte */
 partial struct ScratchBuffer /*[33554432]byte*/;
 
 // Seed returns a 384-bit seed with full entropy.
@@ -144,7 +144,7 @@ internal static uint8 Sample(this ref source s) {
     foreach (var _ᴛ1 in range(64)) {
         lcgState = 1664525 * lcgState + 1013904223;
         // Discard the lower bits, which tend to fall into short cycles.
-        var idx = (uint32)(((lcgState >> (int)(6))) & ((1 << (int)(25)) - 1));
+        var idx = (uint32)((lcgState >> 6) & ((1 << 25) - 1));
         touchMemory(memory, idx);
     }
     s.lcgState = lcgState;

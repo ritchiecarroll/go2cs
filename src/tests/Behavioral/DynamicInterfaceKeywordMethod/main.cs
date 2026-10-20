@@ -25,11 +25,6 @@ internal static (nint, bool) Deadline(this harness h) {
     return (h.deadline, true);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nameˢ = (@string)"Name:"u8;
-private static readonly object deadlineˢ = (@string)"deadline:"u8;
-private static readonly object noDeadlineˢ = (@string)"no deadline"u8;
-
 internal partial interface commandContext_type /*dyn*/ :
     TB
 {
@@ -40,9 +35,9 @@ internal static void commandContext(TB t) {
     {
         var (td, ok) = t._<commandContext_type>(ᐧ); if (ok){
             var (d, _) = td.Deadline();
-            fmt.Println(nameˢ, td.Name(), deadlineˢ, d);
+            fmt.Println("Name:", td.Name(), "deadline:", d);
         } else {
-            fmt.Println(noDeadlineˢ);
+            fmt.Println("no deadline");
         }
     }
 }
@@ -51,20 +46,13 @@ partial struct gate {
     internal @string name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sealedˢ = (@string)"sealed:"u8;
-
 internal static void @private(this gate g) {
-    fmt.Println(sealedˢ, g.name);
+    fmt.Println("sealed:", g.name);
 }
 
 internal static @string Kind(this gate g) {
     return "gate:"u8 + g.name;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object directˢ = (@string)"direct:"u8;
-private static readonly object noDirectˢ = (@string)"no direct"u8;
 
 internal partial interface direct_type /*dyn*/ {
     void @private();
@@ -75,9 +63,9 @@ internal static void direct(any v) {
     {
         var (d, ok) = v._<direct_type>(ᐧ); if (ok){
             d.@private();
-            fmt.Println(directˢ, d.Kind());
+            fmt.Println("direct:", d.Kind());
         } else {
-            fmt.Println(noDirectˢ);
+            fmt.Println("no direct");
         }
     }
 }

@@ -55,7 +55,7 @@ internal static void Main() {
     fmt.Printf("Completion status: %t\n"u8, container.Mappings["completed"].Value);
 
     Δpool<nint> pl = default!;
-    pl.items = append(pl.items, (nint)(7), (nint)(8));
+    pl.items = append(pl.items, (nint)7, (nint)8);
     var (v, ok) = pl.take();
     fmt.Println(v, ok, new keeper(nil).pool());
 

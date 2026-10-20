@@ -23,12 +23,6 @@ internal static channel<nint> chanFor(channel<nint> ch) {
     return ch;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sentAloneˢ = (@string)"sent alone"u8;
-private static readonly object impossibleˢ = (@string)"impossible"u8;
-private static readonly object sentBesideAReceiveˢ = (@string)"sent beside a receive"u8;
-private static readonly object orderˢ = (@string)"order:"u8;
-
 internal static void Main() {
     var ch = new channel<nint>(4);
 
@@ -37,7 +31,7 @@ internal static void Main() {
     var selᴛ2 = selᴛ1.ᐸꟷ(must(ᴛ1, ᴛ2), ꓸꓸꓸ);
     switch (select(selᴛ2)) {
     case 0: {
-        fmt.Println(sentAloneˢ);
+        fmt.Println("sent alone");
         break;
     }}
 
@@ -48,11 +42,11 @@ internal static void Main() {
     var selᴛ5 = selᴛ4.ᐸꟷ(must(ᴛ3, ᴛ4), ꓸꓸꓸ);
     switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ5)) {
     case 0 when selᴛ3.ꟷᐳ(out var v): {
-        fmt.Println(impossibleˢ, v);
+        fmt.Println("impossible", v);
         break;
     }
     case 1: {
-        fmt.Println(sentBesideAReceiveˢ);
+        fmt.Println("sent beside a receive");
         break;
     }}
 
@@ -62,7 +56,7 @@ internal static void Main() {
     var selᴛ7 = selᴛ6.ᐸꟷ(must(ᴛ5, ᴛ6), ꓸꓸꓸ);
     switch (select(selᴛ7)) {
     case 0: {
-        fmt.Println(orderˢ, log);
+        fmt.Println("order:", log);
         break;
     }}
 

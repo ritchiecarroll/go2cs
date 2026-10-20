@@ -51,7 +51,7 @@ internal static @string describe(@string format, params ꓸꓸꓸany argsʗp) {
 internal static slice<nint> into(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.slice();
 
-    return append(xs, (nint)(4));
+    return append(xs, (nint)4);
 }
 
 internal static nint copyInto(params ꓸꓸꓸnint xsʗp) {
@@ -87,43 +87,30 @@ internal static void deferred(ж<nint> Ꮡout, params ꓸꓸꓸnint xsʗp) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object forwardWroteThroughˢ = (@string)"forward wrote through:"u8;
-private static readonly object sumˢ = (@string)"sum:"u8;
-private static readonly object gatherˢ = (@string)"gather:"u8;
-private static readonly object fillˢ = (@string)"fill:"u8;
-private static readonly object describeˢ = (@string)"describe:"u8;
-private static readonly object twoˢ = (@string)"two"u8;
-private static readonly object intoˢ = (@string)"into:"u8;
-private static readonly object copyIntoˢ = (@string)"copyInto:"u8;
-private static readonly object keepˢ = (@string)"keep:"u8;
-private static readonly object captureˢ = (@string)"capture:"u8;
-private static readonly object deferredˢ = (@string)"deferred:"u8;
-
 internal static void Main() {
     var a = new nint[]{1, 2, 3}.slice();
     forward(a.ꓸꓸꓸ);
-    fmt.Println(forwardWroteThroughˢ, a);
+    fmt.Println("forward wrote through:", a);
 
-    fmt.Println(sumˢ, sum(a.ꓸꓸꓸ), sum(), sum(5));
-    fmt.Println(gatherˢ, gather(new nint[]{0}.slice(), 1, 2), gather(default!, a.ꓸꓸꓸ));
+    fmt.Println("sum:", sum(a.ꓸꓸꓸ), sum(), sum(5));
+    fmt.Println("gather:", gather(new nint[]{0}.slice(), 1, 2), gather(default!, a.ꓸꓸꓸ));
 
     var d = new slice<nint>(2);
     nint n = fill(d, 8, 9, 10);
-    fmt.Println(fillˢ, n, d);
+    fmt.Println("fill:", n, d);
 
-    fmt.Println(describeˢ, describe("%d-%s-%v", (nint)(1), twoˢ, 3.5D));
+    fmt.Println("describe:", describe("%d-%s-%v", (nint)1, "two", 3.5D));
 
-    fmt.Println(intoˢ, into(1, 2));
-    fmt.Println(copyIntoˢ, copyInto(1, 2, 3));
+    fmt.Println("into:", into(1, 2));
+    fmt.Println("copyInto:", copyInto(1, 2, 3));
     var k = keep(5, 6);
     k[0] = 100;
-    fmt.Println(keepˢ, k);
+    fmt.Println("keep:", k);
     var f = capture(1, 2);
-    fmt.Println(captureˢ, f());
+    fmt.Println("capture:", f());
     ref var total = ref heap(new nint(), out var Ꮡtotal);
     deferred(Ꮡtotal, 1, 2);
-    fmt.Println(deferredˢ, total);
+    fmt.Println("deferred:", total);
 }
 
 } // end main_package

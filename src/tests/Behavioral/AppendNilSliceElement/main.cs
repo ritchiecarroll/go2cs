@@ -8,7 +8,7 @@ internal static void Main() {
     slice<slice<nint>> lines = default!;
     lines = append(lines, (slice<nint>)(default!));
     lines = append(lines, (slice<nint>)(default!));
-    lines[0] = append(lines[0], (nint)(7));
+    lines[0] = append(lines[0], (nint)7);
     fmt.Println(len(lines), lines[0], lines[1] == default!);
 
     slice<map<@string, nint>> maps = default!;

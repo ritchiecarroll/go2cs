@@ -976,7 +976,7 @@ internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, cont
         if (len(txts) == 0) {
             txts = new slice<@string>(0, 1);
         }
-        txts = append(txts, ((@string)txtJoin));
+        txts = append(txts, (@string)txtJoin);
     }
     return (txts, default!);
 }

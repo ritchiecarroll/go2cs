@@ -83,29 +83,22 @@ internal static (nint total, @string log) deferMethodValue(Tally tʗp, nint n) {
     return (total, log);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closureReadˢ = (@string)"closureRead:"u8;
-private static readonly object closureWriteˢ = (@string)"closureWrite:"u8;
-private static readonly object deferClosureˢ = (@string)"deferClosure:"u8;
-private static readonly object deferMethodValueˢ = (@string)"deferMethodValue:"u8;
-private static readonly object callerCopyUntouchedˢ = (@string)"caller copy untouched:"u8;
-
 internal static void Main() {
     var t = new Tally(total: 5, log: "start");
 
     var (before, after, log) = closureRead(t, 3);
-    fmt.Println(closureReadˢ, before, after, log);
+    fmt.Println("closureRead:", before, after, log);
 
     (var total, log) = closureWrite(t, 3);
-    fmt.Println(closureWriteˢ, total, log);
+    fmt.Println("closureWrite:", total, log);
 
     (total, log) = deferClosure(t, 3);
-    fmt.Println(deferClosureˢ, total, log);
+    fmt.Println("deferClosure:", total, log);
 
     (total, log) = deferMethodValue(t, 3);
-    fmt.Println(deferMethodValueˢ, total, log);
+    fmt.Println("deferMethodValue:", total, log);
 
-    fmt.Println(callerCopyUntouchedˢ, t.total, t.log);
+    fmt.Println("caller copy untouched:", t.total, t.log);
 }
 
 } // end main_package

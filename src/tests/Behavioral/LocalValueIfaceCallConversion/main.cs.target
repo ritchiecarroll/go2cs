@@ -40,7 +40,7 @@ partial struct localImpl {
 }
 
 internal static @string G(this localImpl l) {
-    return fmt.Sprint((@string)"g"u8, l.N);
+    return fmt.Sprint("g", l.N);
 }
 
 internal delegate nint meter();
@@ -59,66 +59,50 @@ partial interface valued {
     nint Value();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object foreignSliceˢ = (@string)"foreign-slice:"u8;
-private static readonly object foreignStructˢ = (@string)"foreign-struct:"u8;
-private static readonly object foreignStructAssertˢ = (@string)"foreign-struct-assert:"u8;
-private static readonly object unexportedIfaceˢ = (@string)"unexported-iface:"u8;
-private static readonly object unexportedIfaceAssertˢ = (@string)"unexported-iface-assert:"u8;
-private static readonly object localIfaceˢ = (@string)"local-iface:"u8;
-private static readonly object localIfaceEqˢ = (@string)"local-iface-eq:"u8;
-private static readonly object funcSourceˢ = (@string)"func-source:"u8;
-private static readonly object numericSourceˢ = (@string)"numeric-source:"u8;
-private static readonly object switchˢ = (@string)"switch:"u8;
-private static readonly object meterˢ = (@string)"meter"u8;
-private static readonly object gaugeˢ = (@string)"gauge"u8;
-private static readonly object defaultˢ = (@string)"default"u8;
-private static readonly object mapˢ = (@string)"map:"u8;
-
 internal static void Main() {
-    var k = ((LocalKey)slice<byte>((@string)"abc"u8));
+    var k = (LocalKey)slice<byte>((@string)"abc"u8);
     var s = ((fmt.Stringer)k);
-    fmt.Println(foreignSliceˢ, s.String());
+    fmt.Println("foreign-slice:", s.String());
 
     fmt.Printf("foreign-slice-type: %T\n"u8, s);
 
     var ls = ((fmt.Stringer)new Label(Text: "x"));
-    fmt.Println(foreignStructˢ, ls.String());
+    fmt.Println("foreign-struct:", ls.String());
     fmt.Printf("foreign-struct-type: %T %v\n"u8, ls, ls);
     var (lv, lok) = ls._<Label>(ᐧ);
-    fmt.Println(foreignStructAssertˢ, lok, lv.Text, AreEqual(ls, ((fmt.Stringer)new Label(Text: "x"))));
+    fmt.Println("foreign-struct-assert:", lok, lv.Text, AreEqual(ls, ((fmt.Stringer)new Label(Text: "x"))));
 
-    fmt.Println(unexportedIfaceˢ, pinUnexpMethI.f());
+    fmt.Println("unexported-iface:", pinUnexpMethI.f());
     var (_, uok) = pinUnexpMethI._<embedWithUnexpMeth>(ᐧ);
-    fmt.Println(unexportedIfaceAssertˢ, uok);
+    fmt.Println("unexported-iface-assert:", uok);
 
     var li = ((LocalIface)new localImpl(N: 2));
-    fmt.Println(localIfaceˢ, li.G());
-    fmt.Println(localIfaceEqˢ, AreEqual(li, ((LocalIface)new localImpl(N: 2))), AreEqual(li, ((LocalIface)new localImpl(N: 3))));
+    fmt.Println("local-iface:", li.G());
+    fmt.Println("local-iface-eq:", AreEqual(li, ((LocalIface)new localImpl(N: 2))), AreEqual(li, ((LocalIface)new localImpl(N: 3))));
 
     var mv = ((valued)new meterᴠvalued(new meter(() => 11)));
     var gv = ((valued)((gauge)4));
-    fmt.Println(funcSourceˢ, mv.Value(), numericSourceˢ, gv.Value());
+    fmt.Println("func-source:", mv.Value(), "numeric-source:", gv.Value());
 
     switch (gv.type()) {
     case meter t: {
-        fmt.Println(switchˢ, meterˢ, t());
+        fmt.Println("switch:", "meter", t());
         break;
     }
     case gauge t: {
-        fmt.Println(switchˢ, gaugeˢ, (nint)t);
+        fmt.Println("switch:", "gauge", (nint)t);
         break;
     }
     default: {
         var t = gv;
-        fmt.Println(switchˢ, defaultˢ);
+        fmt.Println("switch:", "default");
         break;
     }}
 
     var seen = new map<valued, @string>{};
     seen[gv] = "call-syntax";
     valued byAssign = ((gauge)4);
-    fmt.Println(mapˢ, seen[byAssign], len(seen));
+    fmt.Println("map:", seen[byAssign], len(seen));
 }
 
 } // end main_package

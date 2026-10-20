@@ -55,7 +55,7 @@ internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> Ꮡdecl, @
         }
 
         if (sig.results.Len() > 0 && !check.isTerminating(new ast.BlockStmtжStmt(Ꮡbody), ""u8)) {
-            Ꮡcheck.error(((atPos)body.Rbrace), MissingReturn, missingReturnˢ);
+            Ꮡcheck.error((atPos)body.Rbrace, MissingReturn, missingReturnˢ);
         }
 
         // spec: "Implementation restriction: A compiler may make it illegal to
@@ -307,7 +307,7 @@ L:
                     if (Identical(v.typ, vt.typ)) {
                         var err = Ꮡcheck.newError(DuplicateCase);
                         err.addf(new operandжpositioner(Ꮡv), "duplicate case %s in expression switch"u8, Ꮡv);
-                        err.addf(((atPos)vt.pos), "previous case"u8);
+                        err.addf((atPos)vt.pos, "previous case"u8);
                         err.report();
                         goto continue_L;
                     }
@@ -632,7 +632,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
                 }
                 token.Token op = assignOp((~sΔ1).Tok);
                 if (op == token.ILLEGAL) {
-                    Ꮡcheck.errorf(((atPos)(~sΔ1).TokPos), InvalidSyntaxTree, "unknown assignment operation %s"u8, (~sΔ1).Tok);
+                    Ꮡcheck.errorf((atPos)(~sΔ1).TokPos, InvalidSyntaxTree, "unknown assignment operation %s"u8, (~sΔ1).Tok);
                     return;
                 }
                 ref var x = ref heap(new operand(), out var Ꮡx);

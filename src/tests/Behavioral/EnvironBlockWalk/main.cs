@@ -25,26 +25,19 @@ internal static readonly @string prefix = "GO2CS_ENVPROBE_"u8;
 
 internal static readonly @string hiddenName = "=GO2CSENVPROBEHIDDEN"u8;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fatalEmptyEnvironmentˢ = (@string)"FATAL empty environment"u8;
-private static readonly object fatalSetenvˢ = (@string)"FATAL Setenv"u8;
-private static readonly object sentinelsViaSyscallˢ = (@string)"-- sentinels via syscall.Environ --"u8;
-private static readonly object sentinelsViaOsEnvironˢ = (@string)"-- sentinels via os.Environ --"u8;
-private static readonly object fatalUnsetenvˢ = (@string)"FATAL Unsetenv"u8;
-
 internal static void Main() {
     var hiddenSet = os.Setenv(hiddenName, "hid") == default!;
 
     var before = syscall.Environ();
     if (len(before) == 0) {
-        fmt.Println(fatalEmptyEnvironmentˢ);
+        fmt.Println("FATAL empty environment");
         os.Exit(1);
     }
 
     foreach (var (_, s) in sentinels) {
         {
             var err = os.Setenv(s.name, s.value); if (err != default!) {
-                fmt.Println(fatalSetenvˢ, s.name, err);
+                fmt.Println("FATAL Setenv", s.name, err);
                 os.Exit(1);
             }
         }
@@ -54,12 +47,12 @@ internal static void Main() {
 
     fmt.Printf("delta %d\n"u8, len(after) - len(before));
 
-    fmt.Println(sentinelsViaSyscallˢ);
+    fmt.Println("-- sentinels via syscall.Environ --");
     foreach (var (_, e) in collect(after)) {
         fmt.Println(ascii(e));
     }
 
-    fmt.Println(sentinelsViaOsEnvironˢ);
+    fmt.Println("-- sentinels via os.Environ --");
     foreach (var (_, e) in collect(os.Environ())) {
         fmt.Println(ascii(e));
     }
@@ -82,7 +75,7 @@ internal static void Main() {
 
     {
         var err = os.Unsetenv(sentinels[0].name); if (err != default!) {
-            fmt.Println(fatalUnsetenvˢ, err);
+            fmt.Println("FATAL Unsetenv", err);
             os.Exit(1);
         }
     }
@@ -164,10 +157,10 @@ internal static @string ascii(@string s) {
         }
         @out = append(@out, (byte)((rune)'\\'), (byte)((rune)'u'));
         for (nint shift = 20; shift >= 0; shift -= 4) {
-            @out = append(@out, hexDigits[(rune)((r.Rsh((nuint)shift)) & 0xf)]);
+            @out = append(@out, hexDigits[((r.Rsh((nuint)shift)) & 0xf)]);
         }
     }
-    return ((@string)@out);
+    return (@string)@out;
 }
 
 } // end main_package

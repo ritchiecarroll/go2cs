@@ -34,7 +34,7 @@ internal static void Main() {
     fmt.Println(describe(new A(1)));
     fmt.Println(describe(new B(2)));
     fmt.Println(describe(new C(3)));
-    fmt.Println(describe((nint)(99)));
+    fmt.Println(describe((nint)99));
 }
 
 } // end main_package

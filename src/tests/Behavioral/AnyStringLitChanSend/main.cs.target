@@ -24,28 +24,23 @@ internal static @string speak(this ref cat c) {
     return "meow:"u8 + c.name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object stringˢ = (@string)"string:"u8;
-private static readonly object intˢ = (@string)"int:"u8;
-private static readonly object otherˢ = (@string)"other:"u8;
-
 internal static void describe(@string prefix, any v) {
     switch (v.type()) {
     case @string s: {
-        fmt.Println(prefix, stringˢ, s);
+        fmt.Println(prefix, "string:", s);
         break;
     }
     case nint s: {
-        fmt.Println(prefix, intˢ, s);
+        fmt.Println(prefix, "int:", s);
         break;
     }
     case int32 s: {
-        fmt.Println(prefix, intˢ, s);
+        fmt.Println(prefix, "int:", s);
         break;
     }
     default: {
         var s = v;
-        fmt.Println(prefix, otherˢ, s);
+        fmt.Println(prefix, "other:", s);
         break;
     }}
 }
@@ -53,15 +48,12 @@ internal static void describe(@string prefix, any v) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object textˢ = (@string)"text"u8;
 private static readonly object selˢ = (@string)"sel"u8;
-private static readonly object stringChanˢ = (@string)"string chan:"u8;
 private static readonly object assertˢ = (@string)"assert"u8;
-private static readonly object assertStringˢ = (@string)"assert string:"u8;
-private static readonly object assertMissedˢ = (@string)"assert missed"u8;
 
 internal static void Main() {
     var ch = new channel<any>(2);
     ch.ᐸꟷ(textˢ);
-    ch.ᐸꟷ((nint)(42));
+    ch.ᐸꟷ((nint)42);
     describe("send", ᐸꟷ(ch));
     describe("send", ᐸꟷ(ch));
 
@@ -75,7 +67,7 @@ internal static void Main() {
 
     var sc = new channel<@string>(1);
     sc.ᐸꟷ("plain");
-    fmt.Println(stringChanˢ, ᐸꟷ(sc));
+    fmt.Println("string chan:", ᐸꟷ(sc));
 
     var vs = new channel<speaker>(1);
     vs.ᐸꟷ(new dog(name: "rex"));
@@ -91,9 +83,9 @@ internal static void Main() {
     var got = ᐸꟷ(rt);
     {
         var (s, ok) = got._<@string>(ᐧ); if (ok){
-            fmt.Println(assertStringˢ, s);
+            fmt.Println("assert string:", s);
         } else {
-            fmt.Println(assertMissedˢ);
+            fmt.Println("assert missed");
         }
     }
 }

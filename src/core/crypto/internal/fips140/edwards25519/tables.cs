@@ -99,7 +99,7 @@ internal static void FromP3(this ref nafLookupTable8 v, ж<Point> Ꮡq) {
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
 internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡdest, int8 x) {
     // Compute xabs = |x|
-    var xmask = (int8)((x >> (int)(7)));
+    var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
 
     Ꮡdest.Zero();
@@ -115,7 +115,7 @@ internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡde
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
 internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> Ꮡdest, int8 x) {
     // Compute xabs = |x|
-    var xmask = (int8)((x >> (int)(7)));
+    var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
 
     Ꮡdest.Zero();

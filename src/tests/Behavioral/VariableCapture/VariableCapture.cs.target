@@ -8,11 +8,8 @@ partial struct data {
     internal @string name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nameˢ = (@string)"Name ="u8;
-
 internal static void printName(this data d) {
-    fmt.Println(nameˢ, d.name);
+    fmt.Println("Name =", d.name);
 }
 
 internal static void Main() {

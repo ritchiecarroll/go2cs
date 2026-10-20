@@ -27406,4 +27406,107 @@ in the third, only the added type argument; all three compile and print the same
 
 — P1 (measured 2026-10-17)
 
+## 2026-10-19 — P2: a pointer array over memory the Go runtime did not allocate reads its words as foreign addresses; stores refuse by name — SEATED (owner P2)
+
+Go reads a Windows DNS TXT record's strings as
+`(*[1 << 10]*uint16)(unsafe.Pointer(&d.StringArray[0]))[:d.StringCount:d.StringCount]`. A pointer element carries a
+managed reference, so golib could not alias the block and built a zeroed managed SHADOW instead: the record read as
+`StringCount` nils. The shadow is right for the runtime's own OS memory, whose pointer words are Go pointers the
+runtime stored, and wrong for memory a system call filled. This row seats G's ruling (COORD 2026-10-19 02:39Z).
+
+**Ownership is registered at the OS mapping primitives** (golib `GoOsMemory`, a set of disjoint ranges). Linux
+registers in `sysMmap` and releases in `sysMunmap` (every linux `sys*OS` path funnels through them, no converter
+change); windows registers in `sysAllocOS`/`sysReserveOS` and releases in `sysFreeOS`, and its decommit
+(`sysUnusedOS`) does not unregister; darwin registers in a new hand-owned `mmap`/`munmap` pair
+(`sys_darwin_mmap_impl.cs`, `manualConversionFuncs` darwin only). A release splits the range it lands in and drops
+the shadows inside it. The repoguard census `TestOsMemoryRegistrationCensus` classifies every OS mapping primitive
+call in the runtime hand-owns per GOOS (REGISTERED, INSIDE, RELEASES, DECOMMIT) and fails on an unclassified one.
+
+**Routes.** `builtin.NativeArrayPointer` sends a `*[N]*E` over unowned memory to `NativePointerArrayBox<E>`:
+- the element door (`p.at(i)`, `ElementRef(i)`) reads word i, nil for zero, and the element's pointer answers the
+  word's own address, so Go's re-cast of `&p[0]` builds the same kind again;
+- the pointer-form slice reads words [low, max) into a managed slice (a 2- or 1-index form reads [low, high));
+- `Value` refuses by name, so an arena route that missed its registration fails loudly instead of reading Go
+  pointers as foreign words.
+
+A foreign array of any other reference-bearing element (not a pointer) refuses by name in `ShadowArrayBox`. Its
+reach: the one converter emission of `NativeArrayPointer` is mpagealloc.cs, over runtime-owned memory.
+
+**Stores refuse by name.** A C# `ref` cannot observe a store, so every value minted into an element slot or a
+slice is kept (golib `GoForeignWords`) and compared at every later access through a foreign array over the same
+word and when the producer releases the memory (`GoForeignMemory.Release`, called by the windows DNS and
+addrinfo seams before their native free). The premise is that producer memory is immutable until release.
+
+**Footprint (two-seeded `-stdlib`, 3 targets, linux host, go1.26.9).** Predicted before the run: windows 0, linux 0,
+darwin `sys_darwin.cs` about −33/+2 and `package_info.cs` −3/+1, markers 0. Measured: exactly that (the converted
+`mmap`/`munmap` and their arg structs become placeholders). HELD.
+
+**Red first.** On the arms-only commit (the new golib API, nothing routed or registered), 7 of the 8
+NativePointerArrayTests arms fail; the eighth pins the registry that commit adds.
+
+**Gates (linux).** go test ./... rc 0 (the census included); the seat's 24 golib arms green on the final tree; full GolibTests 1894 pass, 15 skipped, 1 fail of 1910: `FixtureLinkStagingTests` needs
+`GOROOT/src/go.mod`, which this host's toolchain does not have (not this seat's files). runtime compiles for linux,
+windows and darwin with 0 errors; net and syscall compile for windows. The windows arms and the full behavioral
+suite are the i9's.
+
+— P2 (measured 2026-10-19)
+
+## 2026-10-19 — P2 finding: a POINTER field of a struct in native memory cannot be read; it refuses by name — OPEN (found by P2, sized, unowned)
+
+Found while probing the native reader (`docs/phase4/probes/p2-native-ptr-aot`). Go's `cc.Chains`, with `cc` a
+`*T` the OS returned, reads one pointer-sized word at the field's Go offset. golib's native field route
+(`NativeBox<T>.FieldRef`) reaches the field at its Go offset, then refuses any field type that holds a managed
+reference, and a converted pointer field is `ж<E>`, a class: "cannot read native memory as main.chainContext: its
+CLR layout is not its Go layout (field Chains is a managed reference where Go stores the value inline)". The
+refusal is honest (no wrong value is read), but Go reads the word. The shape a fix needs exists already: the
+foreign pointer array's element door reads a word and answers nil or a native box over it
+(`NativePointerArrayBox`), so a pointer field is that door with one element.
+
+**Size (read at e87a52f44b, converted std, three targets).** One converted consumer found: **net's darwin libc
+resolver** (`net/darwin/cgo_unix.cs`, the two `getaddrinfo` result loops, `r = _C_ai_next(r).ValueSlot` and
+`_C_ai_addr(r).ValueSlot`), which walks a list libc allocated. Whether darwin reaches it depends on the libc
+call itself being live there; no darwin host measured it. Every windows consumer of an OS-filled struct with
+pointer fields reads through a hand-owned seam that transcribes the struct into managed memory first, so it never
+meets this: crypto/x509's chain walk (`zsyscall_windows_certchain_impl.cs`), net's adapter and DNS-server walks
+(`adapterAddresses` in `interface_windows_impl.cs`), net's lookups (hand-owned `lookup_windows.cs`) and os/user
+(`lookup_windows_impl.cs`). No linux consumer was found (the linux std reads OS data out of byte buffers). Third-party code that walks an OS list without a seam
+meets it at the first `.Next`.
+
+— P2 (found 2026-10-19)
+
+## 2026-10-19 — P2 finding: an ARRAY field of a struct in native memory cannot be read by value (`range s.F`, `x := s.F`); it refuses by name — OPEN (found by P2, sized, unowned)
+
+Found with the row above. Go's `range nr.Name`, with `nr` a `*T` over native memory, copies the `[N]E` field. The
+converted field is `array<E>`, a class, so the same `NativeBox<T>.FieldRef` refusal fires ("field Name is a
+managed reference ..."). Indexing and addressing work: `&nr.Name[i]` and a slice of the field take the field
+VIEW (`ж.of`), which over a native root is a native array box with element doors, and `p.slice()` reads its window
+(slice.cs, `tryNativeArrayView`). Only the by-value read (range over the field, assignment, passing it as an
+argument) refuses. A fix reads the N elements through those doors into a new `array<E>`, the copy Go makes, which
+is what `NativeArrayBox`'s reflect read now does (claude/p2-native-array-followups).
+
+**Size (read at e87a52f44b, converted std, three targets).** No converted std site found. The one std walk over
+OS-allocated sockaddrs, net's darwin resolver, takes the view (`sa.of(syscall.RawSockaddrInet4.ᏑAddr).slice()`),
+not the value, and the windows consumers read through the transcribing seams named in the row above. Third-party
+code that ranges over a field of an OS-filled struct meets it.
+
+— P2 (found 2026-10-19)
+
+## 2026-10-19 — P2 finding: go2cs.TypeGenerator is about 92% of runtime's compile, and with ImplementGenerator about 85% of net/http's — OPEN (found by P2, a post-hop build-time candidate, not a gate; unowned)
+
+Found while measuring NativeArrayOpenerGenerator's cost (COORD's follow-up (c)). Reading: `ReportAnalyzer=true`, a
+Release `Rebuild` of the one project with `BuildProjectReferences=false` after a full dependency build, linux,
+two runs each, at claude/p2-native-array-followups 821741f7b0 (base e87a52f44b).
+
+| project | CoreCompile | all generators | TypeGenerator | ImplementGenerator | EscapeRegistryGenerator | NativeArrayOpenerGenerator |
+|---|---|---|---|---|---|---|
+| runtime | 344.3 / 334.2 s | 320.2 / 309.9 s | 296.4 / 286.7 s (92%) | 2.9 / 2.8 s | 14.9 / 14.7 s (4%) | 0.29 / 0.25 s |
+| net/http | 95.9 / 98.8 s | 83.8 / 85.9 s | 37.2 / 37.7 s (44%) | 34.9 / 35.8 s (41%) | 7.0 / 7.7 s (8%) | 0.05 / 0.05 s |
+
+Analyzers (not generators) took 2.2 / 2.1 s on runtime and 1.5 / 1.8 s on net/http. Every other go2cs generator is under 5%
+of either compile. The rows say where the time is, not why: no generator was profiled, and the generators are
+`ISourceGenerator`s, so every one re-runs in full on every compile, including in the IDE. The owner's rule
+stands: size and build time never gate parity, so this row is sized for after the hop.
+
+— P2 (measured 2026-10-19)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

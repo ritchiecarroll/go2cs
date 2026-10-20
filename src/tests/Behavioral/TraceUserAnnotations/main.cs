@@ -8,11 +8,6 @@ using runtime;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object insideWithRegionˢ = (@string)"inside WithRegion"u8;
-private static readonly object insideNestedRegionˢ = (@string)"inside nested region"u8;
-private static readonly object annotatedEnabledˢ = (@string)"annotated, enabled ="u8;
-
 internal static void annotate(@string label) {
     GoFrame ᒐ = default;
     try {
@@ -21,44 +16,40 @@ internal static void annotate(@string label) {
         defer(taskʗ1.End, ref ᒐ);
 
         trace.WithRegion(ctx, "prepare", () => {
-            fmt.Println(label, insideWithRegionˢ);
+            fmt.Println(label, "inside WithRegion");
         });
 
         var region = trace.StartRegion(ctx, "work");
         trace.Log(ctx, "step", "logged");
-        trace.Logf(ctx, "step", "count=%d"u8, (nint)(3));
+        trace.Logf(ctx, "step", "count=%d"u8, (nint)3);
         region.End();
 
         var (subctx, subtask) = trace.NewTask(ctx, "inner");
         trace.WithRegion(subctx, "nested", () => {
-            fmt.Println(label, insideNestedRegionˢ);
+            fmt.Println(label, "inside nested region");
         });
         subtask.End();
         subtask.End();
 
-        fmt.Println(label, annotatedEnabledˢ, trace.IsEnabled());
+        fmt.Println(label, "annotated, enabled =", trace.IsEnabled());
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object traceStartFailedˢ = (@string)"trace.Start failed:"u8;
-private static readonly object doneEnabledˢ = (@string)"done, enabled ="u8;
 
 internal static void Main() {
     annotate("off:");
 
     {
         var err = trace.Start(Δio.Discard); if (err != default!) {
-            fmt.Println(traceStartFailedˢ, err);
+            fmt.Println("trace.Start failed:", err);
             return;
         }
     }
     annotate("on:");
     trace.Stop();
 
-    fmt.Println(doneEnabledˢ, trace.IsEnabled());
+    fmt.Println("done, enabled =", trace.IsEnabled());
 }
 
 } // end main_package

@@ -219,7 +219,7 @@ public static void TestOnceFuncPanicTraceback(ж<Δtesting.T> Ꮡt) {
             var stack = debug.Stack();
             @string want = syncTestOnceFuncPanicˢ;
             if (!bytes.Contains(stack, slice<byte>(want))) {
-                Ꮡt.Fatalf("want stack containing %v, got:\n%s"u8, want, ((@string)stack));
+                Ꮡt.Fatalf("want stack containing %v, got:\n%s"u8, want, (@string)stack);
             }
         }, ref ᒐ);
         f();

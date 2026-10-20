@@ -20,33 +20,6 @@ public static @string Error(this ref BErr e) {
     return "b";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object xNilˢ = (@string)"x==nil"u8;
-private static readonly object pTypednilˢ = (@string)"p==typednil"u8;
-private static readonly object e1Nilˢ = (@string)"e1==nil"u8;
-private static readonly object e2Nilˢ = (@string)"e2==nil"u8;
-private static readonly object e1E2ˢ = (@string)"e1==e2"u8;
-private static readonly object eaE1ˢ = (@string)"ea==e1"u8;
-private static readonly object spNilˢ = (@string)"sp==nil"u8;
-private static readonly object spSp2ˢ = (@string)"sp==sp2"u8;
-private static readonly object spMpˢ = (@string)"sp==mp"u8;
-private static readonly object stpNilˢ = (@string)"stp==nil"u8;
-private static readonly object switchAErrˢ = (@string)"switch-AErr"u8;
-private static readonly object switchOtherˢ = (@string)"switch-other"u8;
-private static readonly object printfVˢ = (@string)"printf-v"u8;
-private static readonly object dpiNilˢ = (@string)"dpi==nil"u8;
-private static readonly object dpiXˢ = (@string)"dpi==x"u8;
-private static readonly object assignedNilˢ = (@string)"assigned==nil"u8;
-private static readonly object returnedNilˢ = (@string)"returned==nil"u8;
-private static readonly object elemNilˢ = (@string)"elem==nil"u8;
-private static readonly object fieldNilˢ = (@string)"field==nil"u8;
-private static readonly object mapvalNilˢ = (@string)"mapval==nil"u8;
-private static readonly object mapkeyˢ = (@string)"mapkey"u8;
-private static readonly object chanNilˢ = (@string)"chan==nil"u8;
-private static readonly object assertOkˢ = (@string)"assert-ok"u8;
-private static readonly object assertFailedˢ = (@string)"assert-failed"u8;
-private static readonly object deleteˢ = (@string)"delete"u8;
-
 internal partial struct main_type /*dyn*/ {
     internal nint r;
 }
@@ -67,40 +40,40 @@ internal partial struct main_rows /*dyn*/ {
 internal static void Main() {
     any x = ((ж<nint>)nil);
     fmt.Printf("%T\n"u8, x);
-    fmt.Println(xNilˢ, x == default!);
+    fmt.Println("x==nil", x == default!);
 
     any y = ((ж<nint>)nil);
-    fmt.Println((@string)"x==y"u8, AreEqual(x, y));
+    fmt.Println("x==y", AreEqual(x, y));
 
     ж<nint> p = default!;
-    fmt.Println(pTypednilˢ, p == ((ж<nint>)nil));
+    fmt.Println("p==typednil", p == ((ж<nint>)nil));
 
     error e1 = new AErrжerror(((ж<AErr>)nil));
     error e2 = new BErrжerror(((ж<BErr>)nil));
-    fmt.Println(e1Nilˢ, e1 == default!);
-    fmt.Println(e2Nilˢ, e2 == default!);
-    fmt.Println(e1E2ˢ, AreEqual(e1, e2));
+    fmt.Println("e1==nil", e1 == default!);
+    fmt.Println("e2==nil", e2 == default!);
+    fmt.Println("e1==e2", AreEqual(e1, e2));
 
     any ea = ((ж<AErr>)nil);
-    fmt.Println(eaE1ˢ, AreEqual(ea, e1));
+    fmt.Println("ea==e1", AreEqual(ea, e1));
 
     any sp = ((ж<slice<byte>>)nil);
     any sp2 = ((ж<slice<byte>>)nil);
     any mp = ((ж<map<@string, nint>>)nil);
     any stp = ((ж<main_type>)nil);
-    fmt.Println(spNilˢ, sp == default!);
-    fmt.Println(spSp2ˢ, AreEqual(sp, sp2));
-    fmt.Println(spMpˢ, AreEqual(sp, mp));
-    fmt.Println(stpNilˢ, stp == default!);
+    fmt.Println("sp==nil", sp == default!);
+    fmt.Println("sp==sp2", AreEqual(sp, sp2));
+    fmt.Println("sp==mp", AreEqual(sp, mp));
+    fmt.Println("stp==nil", stp == default!);
 
     switch (e1.type()) {
     case ж<AErr> v: {
-        fmt.Println(switchAErrˢ, v == nil);
+        fmt.Println("switch-AErr", v == nil);
         break;
     }
     default: {
         var v = e1;
-        fmt.Println(switchOtherˢ);
+        fmt.Println("switch-other");
         break;
     }}
 
@@ -110,31 +83,31 @@ internal static void Main() {
     var mm = new map<@string, ж<AErr>>{};
 
     fmt.Printf("%T %T %T %T\n"u8, dp.OrTypedNil(), st.P.OrTypedNil(), sl[0].OrTypedNil(), mm["missing"].OrTypedNil());
-    fmt.Println(printfVˢ, fmt.Sprintf("%v|%v"u8, dp.OrTypedNil(), st.P.OrTypedNil()));
+    fmt.Println("printf-v", fmt.Sprintf("%v|%v"u8, dp.OrTypedNil(), st.P.OrTypedNil()));
 
     any dpi = dp.OrTypedNil();
-    fmt.Println(dpiNilˢ, dpi == default!, dpiXˢ, AreEqual(dpi, x));
+    fmt.Println("dpi==nil", dpi == default!, "dpi==x", AreEqual(dpi, x));
     dpi = st.P.OrTypedNil();
-    fmt.Println(assignedNilˢ, dpi == default!);
+    fmt.Println("assigned==nil", dpi == default!);
 
-    fmt.Println(returnedNilˢ, boxed(sl[0]) == default!);
+    fmt.Println("returned==nil", boxed(sl[0]) == default!);
 
     var anys = new any[]{dp.OrTypedNil(), st.P.OrTypedNil()}.slice();
     var holder = new main_holder(V: dp.OrTypedNil());
     var byName = new map<@string, any>{["p"] = dp.OrTypedNil()};
     var byKey = new map<any, nint>{[dp.OrTypedNil()] = 7};
-    fmt.Println(elemNilˢ, anys[0] == default!, fieldNilˢ, holder.V == default!);
-    fmt.Println(mapvalNilˢ, byName["p"] == default!, mapkeyˢ, byKey[dp.OrTypedNil()], byKey[((ж<nint>)nil)]);
+    fmt.Println("elem==nil", anys[0] == default!, "field==nil", holder.V == default!);
+    fmt.Println("mapval==nil", byName["p"] == default!, "mapkey", byKey[dp.OrTypedNil()], byKey[((ж<nint>)nil)]);
 
     var ch = new channel<any>(1);
     ch.ᐸꟷ(dp.OrTypedNil());
-    fmt.Println(chanNilˢ, (ᐸꟷ(ch)) == default!);
+    fmt.Println("chan==nil", (ᐸꟷ(ch)) == default!);
 
     {
         var (q, ok) = dpi._<ж<AErr>>(ᐧ); if (ok){
-            fmt.Println(assertOkˢ, q == nil);
+            fmt.Println("assert-ok", q == nil);
         } else {
-            fmt.Println(assertFailedˢ);
+            fmt.Println("assert-failed");
         }
     }
 
@@ -146,7 +119,7 @@ internal static void Main() {
     var rows = new main_rows[]{
         new(dp.OrTypedNil(), true),
         new(st.P.OrTypedNil(), true),
-        new((nint)(7), false)
+        new((nint)7, false)
     }.slice();
     foreach (var (_, r) in rows) {
         fmt.Printf("row %T %v %v\n"u8, r.value, r.value == default!, r.want);
@@ -154,7 +127,7 @@ internal static void Main() {
 
     var dm = new map<any, nint>{[dp.OrTypedNil()] = 1, [st.P.OrTypedNil()] = 2};
     delete(dm, dp.OrTypedNil());
-    fmt.Println(deleteˢ, len(dm), dm[st.P.OrTypedNil()], dm[dp.OrTypedNil()]);
+    fmt.Println("delete", len(dm), dm[st.P.OrTypedNil()], dm[dp.OrTypedNil()]);
 }
 
 internal static any boxed(ж<BErr> Ꮡp) {

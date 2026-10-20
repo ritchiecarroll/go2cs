@@ -48,7 +48,7 @@ internal static void xor(slice<byte> a, slice<byte> b) {
 public static void TestCTR(ж<testing.T> Ꮡt) {
     for (nint size = 64; size <= 1024; size *= 2) {
         var iv = new slice<byte>(size);
-        var ctr = cipher.NewCTR(((noopBlock)size), iv);
+        var ctr = cipher.NewCTR((noopBlock)size, iv);
         var src = new slice<byte>(1024);
         foreach (var (i, _) in src) {
             src[i] = 0xff;

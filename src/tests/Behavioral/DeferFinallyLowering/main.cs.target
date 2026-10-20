@@ -8,27 +8,18 @@ partial struct tracer {
     internal @string id;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object touchˢ = (@string)"touch"u8;
-
 internal static void touch(this ref tracer t) {
-    fmt.Println(touchˢ, t.id);
+    fmt.Println("touch", t.id);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void done(this ref tracer t) {
-    fmt.Println(doneˢ, t.id);
+    fmt.Println("done", t.id);
 }
 
 partial struct box {
     internal tracer a;
     internal tracer b;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyTwoˢ = (@string)"body two"u8;
 
 internal static void two(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -41,7 +32,7 @@ internal static void two(this ж<box> Ꮡx) {
         x.b.touch();
         ᒐd1 = true;
         ᒐd2 = true;
-        fmt.Println(bodyTwoˢ);
+        fmt.Println("body two");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }
@@ -61,10 +52,6 @@ internal static void boom(this ж<box> Ꮡx) {
     finally { if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object earlyOutˢ = (@string)"early out"u8;
-private static readonly object bodyEarlyˢ = (@string)"body early"u8;
-
 internal static void early(this ж<box> Ꮡx, bool skip) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
@@ -74,19 +61,16 @@ internal static void early(this ж<box> Ꮡx, bool skip) {
         x.a.touch();
 
         if (skip) {
-            fmt.Println(earlyOutˢ);
+            fmt.Println("early out");
             return;
         }
 
         ᒐd1 = true;
-        fmt.Println(bodyEarlyˢ);
+        fmt.Println("body early");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyMixedˢ = (@string)"body mixed"u8;
 
 internal static void mixed(this ж<box> Ꮡx, bool f) {
     GoFrame ᒐ = default;
@@ -103,14 +87,11 @@ internal static void mixed(this ж<box> Ꮡx, bool f) {
             ᒐd2 = true;
         }
 
-        fmt.Println(bodyMixedˢ);
+        fmt.Println("body mixed");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyUnguardedˢ = (@string)"body unguarded"u8;
 
 internal static void unguarded(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -119,15 +100,11 @@ internal static void unguarded(this ж<box> Ꮡx) {
 
         x.a.touch();
         defer(Ꮡx.of(box.Ꮡb).done, ref ᒐ);
-        fmt.Println(bodyUnguardedˢ);
+        fmt.Println("body unguarded");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object innerRecoveredˢ = (@string)"inner recovered"u8;
-private static readonly object bodyWithLitˢ = (@string)"body withLit"u8;
 
 internal static void withLit(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -143,7 +120,7 @@ internal static void withLit(this ж<box> Ꮡx) {
             try {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(innerRecoveredˢ, r);
+                        fmt.Println("inner recovered", r);
                     }
                 }
             }
@@ -152,14 +129,11 @@ internal static void withLit(this ж<box> Ꮡx) {
         }
 
         f();
-        fmt.Println(bodyWithLitˢ);
+        fmt.Println("body withLit");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡx.DerefOrNull().a.done(); ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyCondPrefixˢ = (@string)"body condPrefix"u8;
 
 internal static void condPrefix(this ж<box> Ꮡx, bool f) {
     GoFrame ᒐ = default;
@@ -173,21 +147,15 @@ internal static void condPrefix(this ж<box> Ꮡx, bool f) {
         }
 
         defer(Ꮡx.of(box.Ꮡb).done, ref ᒐ);
-        fmt.Println(bodyCondPrefixˢ);
+        fmt.Println("body condPrefix");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object finishˢ = (@string)"finish"u8;
-
 internal static void finish(this ref box x) {
-    fmt.Println(finishˢ, x.a.id);
+    fmt.Println("finish", x.a.id);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyMethodShapeˢ = (@string)"body methodShape"u8;
 
 internal static void methodShape(this ж<box> Ꮡx) {
     GoFrame ᒐ = default;
@@ -197,14 +165,11 @@ internal static void methodShape(this ж<box> Ꮡx) {
 
         x.a.touch();
         ᒐd1 = true;
-        fmt.Println(bodyMethodShapeˢ);
+        fmt.Println("body methodShape");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡx.DerefOrNull().finish(); ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyWriteShapeˢ = (@string)"body writeShape"u8;
 
 internal static void writeShape(this ж<box> Ꮡx, bool isFile) {
     GoFrame ᒐ = default;
@@ -226,14 +191,11 @@ internal static void writeShape(this ж<box> Ꮡx, bool isFile) {
             ᒐd2 = true;
         }
 
-        fmt.Println(bodyWriteShapeˢ, isFile);
+        fmt.Println("body writeShape", isFile);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd2) Ꮡx.DerefOrNull().b.done(); if (ᒐd1) Ꮡx.DerefOrNull().finish(); ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bodyReboundˢ = (@string)"body rebound"u8;
 
 internal static void rebound(this ж<box> Ꮡx, ж<box> Ꮡother) {
     GoFrame ᒐ = default;
@@ -243,14 +205,11 @@ internal static void rebound(this ж<box> Ꮡx, ж<box> Ꮡother) {
         x.a.touch();
         defer(Ꮡx.of(box.Ꮡa).done, ref ᒐ);
         Ꮡx = Ꮡother; x = ref Ꮡx.DerefOrNull();
-        fmt.Println(bodyReboundˢ, x.a.id);
+        fmt.Println("body rebound", x.a.id);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered"u8;
 
 internal static void Main() {
     var x = Ꮡ(new box(a: new tracer(id: "a"), b: new tracer(id: "b")));
@@ -264,7 +223,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(recoveredˢ, r);
+                        fmt.Println("recovered", r);
                     }
                 }
             }, ref ᒐ);

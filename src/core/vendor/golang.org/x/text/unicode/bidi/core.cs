@@ -1001,8 +1001,8 @@ internal static slice<nint> computeReordering(slice<level> levels) {
     // locate highest level found on line.
     // Note the rules say text, but no reordering across line bounds is
     // performed, so this is sufficient.
-    var highestLevel = ((level)0);
-    var lowestOddLevel = ((level)(maxDepth + 2));
+    var highestLevel = (level)0;
+    var lowestOddLevel = (level)(maxDepth + 2);
     foreach (var (_, level) in levels) {
         if (level > highestLevel) {
             highestLevel = level;

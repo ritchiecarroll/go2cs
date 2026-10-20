@@ -37,13 +37,10 @@ public static @string BoxName(this ж<File> Ꮡf) {
     return f.name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sideEffectRanBoxShapeˢ = (@string)"  side effect ran (box shape)"u8;
-
 public static @string BoxAnnounce(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
-    fmt.Println(sideEffectRanBoxShapeˢ);
+    fmt.Println("  side effect ran (box shape)");
     _ = Ꮡf.checkValid("boxannounce");
     return f.name;
 }
@@ -56,11 +53,8 @@ public static nint ValFd(this ref File f) {
     return f.fd + 1;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sideEffectRanRefShapeˢ = (@string)"  side effect ran (ref shape)"u8;
-
 public static @string ValAnnounce(this ref File f) {
-    fmt.Println(sideEffectRanRefShapeˢ);
+    fmt.Println("  side effect ran (ref shape)");
     return f.name;
 }
 
@@ -82,17 +76,10 @@ internal static void @try(@string label, Action fn) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nilReceiverDelegatedˢ = (@string)"== 1. nil receiver, DELEGATED guard: must not panic =="u8;
-private static readonly object nilReceiverUnconditionalˢ = (@string)"== 2. nil receiver, UNCONDITIONAL deref: must panic =="u8;
-private static readonly object nilReceiverSideEffectˢ = (@string)"== 3. nil receiver, side effect BEFORE the deref: effect then panic =="u8;
-private static readonly object nonNilReceiverBothShapesˢ = (@string)"== 4. non-nil receiver, both shapes: values identical =="u8;
-private static readonly object theReceiverSurvivesAˢ = (@string)"== 5. the receiver survives a write through the pointer =="u8;
-
 internal static void Main() {
     ж<File> nilFile = default!;
 
-    fmt.Println(nilReceiverDelegatedˢ);
+    fmt.Println("== 1. nil receiver, DELEGATED guard: must not panic ==");
     var nilFileʗ1 = nilFile;
     @try("nilFile.checkValid", () => {
         fmt.Printf("  checkValid -> %v (is errInvalid: %v)\n"u8, nilFileʗ1.checkValid("x"), AreEqual(nilFileʗ1.checkValid("x"), errInvalid));
@@ -104,7 +91,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(nilReceiverUnconditionalˢ);
+    fmt.Println("== 2. nil receiver, UNCONDITIONAL deref: must panic ==");
     var nilFileʗ3 = nilFile;
     @try("nilFile.BoxName", () => {
         _ = nilFileʗ3.BoxName();
@@ -115,7 +102,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(nilReceiverSideEffectˢ);
+    fmt.Println("== 3. nil receiver, side effect BEFORE the deref: effect then panic ==");
     var nilFileʗ5 = nilFile;
     @try("nilFile.BoxAnnounce", () => {
         _ = nilFileʗ5.BoxAnnounce();
@@ -126,7 +113,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(nonNilReceiverBothShapesˢ);
+    fmt.Println("== 4. non-nil receiver, both shapes: values identical ==");
     var real = Ꮡ(new File(name: "real.txt", fd: 41));
     var realʗ1 = real;
     @try("real.checkValid", () => {
@@ -155,7 +142,7 @@ internal static void Main() {
     fmt.Printf("  box/ref shapes agree on the name: %v\n"u8, real.BoxName() == real.ValName());
 
     fmt.Println();
-    fmt.Println(theReceiverSurvivesAˢ);
+    fmt.Println("== 5. the receiver survives a write through the pointer ==");
     real.Value.name = "renamed.txt";
     fmt.Printf("  BoxName -> %s, ValName -> %s\n"u8, real.BoxName(), real.ValName());
 }

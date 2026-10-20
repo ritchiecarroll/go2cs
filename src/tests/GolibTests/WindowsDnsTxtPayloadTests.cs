@@ -124,4 +124,43 @@ public unsafe class WindowsDnsTxtPayloadTests
             NativeMemory.Free((void*)block);
         }
     }
+
+    /// <summary>
+    /// The same two-string record read NATIVE, through Go's own spelling (G's ruling on the native pointer-array
+    /// reader, 2026-10-19): <c>d := (*syscall.DNSTXTData)(unsafe.Pointer(&amp;r.Data[0]))</c> over the record dnsapi
+    /// filled, then <c>(*[1 &lt;&lt; 10]*uint16)(unsafe.Pointer(&amp;d.StringArray[0]))[:d.StringCount:d.StringCount]</c>.
+    /// The pointer words are foreign addresses (memory the Go runtime did not allocate), read from the record.
+    /// </summary>
+    [TestMethod]
+    public void ANativeTxtPayloadReadsBothStringsThroughGosSpelling()
+    {
+        if (!OnWindows)
+        {
+            Assert.Inconclusive("NOT MEASURED: the syscall package's windows flavour runs only on a Windows host.");
+            return;
+        }
+
+        nint block = txtRecordImage("txt.example", "first", "second");
+
+        try
+        {
+            ж<syscall.DNSTXTData> d = (ж<syscall.DNSTXTData>)(uintptr)(nuint)(block + RecordDataOffset);
+            uint16 count = d.of(syscall.DNSTXTData.ᏑStringCount).Value;
+            Assert.AreEqual((uint16)2, count);
+
+            string[] read = new string[count];
+            nint i = 0;
+
+            foreach ((nint _, ж<uint16> v) in array<ж<uint16>>.AliasPointer(d.at(syscall.DNSTXTData.ᏑStringArray, 0), 1 << 10).slice(0, count, count))
+                read[i++] = windows.UTF16PtrToString(v);
+
+            CollectionAssert.AreEqual(new[] { "first", "second" }, read);
+        }
+        finally
+        {
+            // dnsapi's release, as the seam makes it: nothing was stored, so nothing is refused.
+            GoForeignMemory.Release((nuint)block, BlockSize);
+            NativeMemory.Free((void*)block);
+        }
+    }
 }

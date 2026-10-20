@@ -83,6 +83,9 @@ public sealed class TestRunner
     // -test.list was given: M.Run lists instead of running.
     internal bool Listing => m_options.ListPattern.Length > 0;
 
+    // -test.testlogfile, or null: M.Run opens it before the tests and closes it after (TestLogBridge).
+    internal string? TestLogFile => m_options.TestLogFile is { Length: > 0 } path ? path : null;
+
     // -test.v (or --json, which implies it, as `go test -json` passes -test.v): Go's chatty output.
     internal bool Verbose => m_options.Verbose;
 

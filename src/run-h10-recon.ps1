@@ -115,6 +115,10 @@ param(
     # The converted host's per-test deadline (-test-deadline), resolved per row against the sweep's
     # $testDeadlineFloors exactly as -TestTimeout is against $longTimeouts. '0' turns it off.
     [string] $TestDeadline = '15m',
+    # The converter's -test-build-maxcpu N for every row (each row's test-host publish runs with -m:N), by the sweep's
+    # own Get-TestBuildMaxCpuArgs. 0, the default, passes no flag: every row's argv is what it was before.
+    [ValidateRange(0, [int]::MaxValue)]
+    [int] $TestBuildMaxCpu = 0,
     [string] $Platform     = '',
 
     # Run ONE row, print the matched summary line beside the emitted TSV row, write nothing. The
@@ -671,7 +675,7 @@ if ($InstrumentSweep) {
     else { $InstrumentProblems += "'$InstrumentSweep' defines no ConvertTo-GoDuration -- the deadline rule cannot be derived" }
     # The per-test deadline's two rules come from the sweep the same way, so a row here gets the
     # -test-deadline the sweep would give it, by the sweep's own reading.
-    foreach ($ruleName in @('Resolve-RowTestDeadline', 'Get-RowTestDeadlineArgs')) {
+    foreach ($ruleName in @('Resolve-RowTestDeadline', 'Get-RowTestDeadlineArgs', 'Get-TestBuildMaxCpuArgs')) {
         $ruleAst = $sweepAst.Find({
             param($node)
             $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $ruleName
@@ -688,7 +692,7 @@ if ($InstrumentRoster) {
 } else {
     $InstrumentProblems += "no src/_roster.ps1 under -Tree '$Tree' -- the execution pins are derived from it"
 }
-foreach ($needed in @('ConvertTo-GoDuration', 'Resolve-RowTestDeadline', 'Get-RowTestDeadlineArgs', 'Get-RosterExecutionArgs', 'Get-ValidatedRosterRows')) {
+foreach ($needed in @('ConvertTo-GoDuration', 'Resolve-RowTestDeadline', 'Get-RowTestDeadlineArgs', 'Get-TestBuildMaxCpuArgs', 'Get-RosterExecutionArgs', 'Get-ValidatedRosterRows')) {
     if (-not (Get-Command -Name $needed -CommandType Function -ErrorAction SilentlyContinue)) {
         $InstrumentProblems += "the derived function '$needed' is not defined"
     }
@@ -876,6 +880,21 @@ function Test-RowInvocationContract {
     Write-Host ("    argv {0}" -f $(if ($pass) { 'ok' } else { 'FAILED' }))
     Write-Host "      got : $argv"
     if (-not $pass) { Write-Host "      want: $wantArgv" }
+
+    # -TestBuildMaxCpu: the same row's argv with the flag asked (4) carries -test-build-maxcpu 4, and with the
+    # default (0) is byte-identical to the argv above. The composition is the row loop's own.
+    $cpuCases = @(
+        @(4, '-tests -test-action all -test-config Release -test-tiered -test-deadline 120m -test-build-maxcpu 4 -test-timeout 60m -go2cspath T/src G/src/fx/tiered T/src/core/fx/tiered'),
+        @(0, $wantArgv)
+    )
+    foreach ($c in $cpuCases) {
+        $got = (@(Get-RowConverterArgs (Resolve-RowDeadline '60m' '30m') (@(Get-RowExecutionArgs 'fx/tiered' $byName 'Release') + @(Get-RowTestDeadlineArgs (Resolve-RowTestDeadline '15m' '120m')) + @(Get-TestBuildMaxCpuArgs $c[0])) `
+                                       'T/src' @() 'G/src/fx/tiered' 'T/src/core/fx/tiered')) -join ' '
+        $pass = [string]::Equals($got, $c[1], [System.StringComparison]::Ordinal)
+        if (-not $pass) { $ok = $false }
+        Write-Host ("    argv -TestBuildMaxCpu {0} {1}" -f $c[0], $(if ($pass) { 'ok' } else { 'FAILED' }))
+        if (-not $pass) { Write-Host "      got : $got"; Write-Host "      want: $($c[1])" }
+    }
     return $ok
 }
 
@@ -1146,7 +1165,7 @@ foreach ($row in $rows) {
     }
     $rowTestDeadline = Resolve-RowTestDeadline $TestDeadline $TestDeadlineFloors[$row]
     if ($TestDeadlineFloors.ContainsKey($row)) { Write-Host "     per-test deadline: $rowTestDeadline  (floor $($TestDeadlineFloors[$row]) derived, asked $TestDeadline -- the longer)" }
-    $convArgs = @(Get-RowConverterArgs $rowTimeout ($rowExec + @(Get-RowTestDeadlineArgs $rowTestDeadline)) (Join-Path $Tree 'src') $extra $goDir $outDir)
+    $convArgs = @(Get-RowConverterArgs $rowTimeout ($rowExec + @(Get-RowTestDeadlineArgs $rowTestDeadline) + @(Get-TestBuildMaxCpuArgs $TestBuildMaxCpu)) (Join-Path $Tree 'src') $extra $goDir $outDir)
 
     # ⚠⚠ THE CONVERTER'S STDERR IS A TERMINATING ERROR UNDER Stop, AND FAILING IS THE MEASUREMENT.
     # `GitTry` above carries this exact diagnosis for git: in 5.1 a native command's stderr becomes a

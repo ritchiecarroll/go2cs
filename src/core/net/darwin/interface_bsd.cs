@@ -53,22 +53,22 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
 
 internal static Flags linkFlags(nint rawFlags) {
     Flags f = default!;
-    if ((nint)(rawFlags & (nint)syscall.IFF_UP) != 0) {
+    if ((rawFlags & (nint)syscall.IFF_UP) != 0) {
         f |= (Flags)(FlagUp);
     }
-    if ((nint)(rawFlags & (nint)syscall.IFF_RUNNING) != 0) {
+    if ((rawFlags & (nint)syscall.IFF_RUNNING) != 0) {
         f |= (Flags)(FlagRunning);
     }
-    if ((nint)(rawFlags & (nint)syscall.IFF_BROADCAST) != 0) {
+    if ((rawFlags & (nint)syscall.IFF_BROADCAST) != 0) {
         f |= (Flags)(FlagBroadcast);
     }
-    if ((nint)(rawFlags & (nint)syscall.IFF_LOOPBACK) != 0) {
+    if ((rawFlags & (nint)syscall.IFF_LOOPBACK) != 0) {
         f |= (Flags)(FlagLoopback);
     }
-    if ((nint)(rawFlags & (nint)syscall.IFF_POINTOPOINT) != 0) {
+    if ((rawFlags & (nint)syscall.IFF_POINTOPOINT) != 0) {
         f |= (Flags)(FlagPointToPoint);
     }
-    if ((nint)(rawFlags & (nint)syscall.IFF_MULTICAST) != 0) {
+    if ((rawFlags & (nint)syscall.IFF_MULTICAST) != 0) {
         f |= (Flags)(FlagMulticast);
     }
     return f;

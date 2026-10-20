@@ -56,9 +56,6 @@ internal static @string describe(any v) {
     return fmt.Sprintf("%v"u8, v);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-
 internal static void Main() {
     fmt.Println(fortyTwo(), fortyTwo());
 
@@ -73,7 +70,7 @@ internal static void Main() {
         GoFrame ᒐ = default;
         try {
             defer(() => {
-                fmt.Println(recoveredˢ, describe(recover()));
+                fmt.Println("recovered:", describe(recover()));
             }, ref ᒐ);
             panicOnceʗ1();
         }

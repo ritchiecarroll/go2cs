@@ -36,7 +36,7 @@ public static void TestInlining(ж<testing.T> Ꮡt) {
     var got = new map<@string, bool>{};
     var gotʗ1 = got;
     regexp.MustCompile(canInlineSˢ).ReplaceAllFunc(@out, (slice<byte> match) => {
-        gotʗ1[strings.TrimPrefix(((@string)match), canInlineˢ)] = true;
+        gotʗ1[strings.TrimPrefix((@string)match, canInlineˢ)] = true;
         return default!;
     });
     var wantInlinable = new @string[]{

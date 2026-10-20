@@ -231,19 +231,19 @@ internal static float64 expm1(float64 x) {
     }
     case {} when k <= -2 || k > 56: { // suffice to return exp(x)-1
         var yΔ2 = 1D - (e - x);
-        yΔ2 = Float64frombits(Float64bits(yΔ2) + ((uint64)k << (int)(52))); // add k to y's exponent
+        yΔ2 = Float64frombits(Float64bits(yΔ2) + ((uint64)k << 52)); // add k to y's exponent
         return yΔ2 - 1D;
     }}
     if (k < 20) {
         var tΔ2 = Float64frombits(0x3ff0000000000000UL - (((uint64)0x20000000000000UL).Rsh((nuint)k))); // t=1-2**-k
         var yΔ3 = tΔ2 - (e - x);
-        yΔ3 = Float64frombits(Float64bits(yΔ3) + ((uint64)k << (int)(52))); // add k to y's exponent
+        yΔ3 = Float64frombits(Float64bits(yΔ3) + ((uint64)k << 52)); // add k to y's exponent
         return yΔ3;
     }
-    t = Float64frombits(((uint64)(0x3ff - k) << (int)(52))); // 2**-k
+    t = Float64frombits((uint64)(0x3ff - k) << 52); // 2**-k
     var y = x - (e + t);
     y++;
-    y = Float64frombits(Float64bits(y) + ((uint64)k << (int)(52))); // add k to y's exponent
+    y = Float64frombits(Float64bits(y) + ((uint64)k << 52)); // add k to y's exponent
     return y;
 }
 

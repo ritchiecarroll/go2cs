@@ -87,35 +87,13 @@ internal static void checkPanicOnly(@string name, Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object uncomparableDynamicTypesˢ = (@string)"== uncomparable dynamic types: Go panics =="u8;
-private static readonly object arrayLengthIsPartOfTheˢ = (@string)"== array length is part of the reported type =="u8;
-private static readonly object interfaceFieldPanicsˢ = (@string)"== interface FIELD panics naming the inner type, recoverably =="u8;
-private static readonly object structWAnyIntˢ = (@string)"struct w/ any=int:"u8;
-private static readonly object nonEmptyInterfaceˢ = (@string)"== non-empty interface =="u8;
-private static readonly object nilComparesNeverPanicˢ = (@string)"== nil compares never panic =="u8;
-private static readonly object differingDynamicTypesˢ = (@string)"== differing dynamic types never panic =="u8;
-private static readonly object comparableValuesStillˢ = (@string)"== comparable values still compare =="u8;
-private static readonly object intˢ = (@string)"int:      "u8;
-private static readonly object stringˢ = (@string)"string:   "u8;
-private static readonly object boolˢ = (@string)"bool:     "u8;
-private static readonly object floatˢ = (@string)"float:    "u8;
-private static readonly object structˢ = (@string)"struct:   "u8;
-private static readonly object arrayˢ = (@string)"array:    "u8;
-private static readonly object pointerˢ = (@string)"pointer:  "u8;
-private static readonly object ptrToMapˢ = (@string)"ptr-to-map:"u8;
-private static readonly object chanˢ = (@string)"chan:     "u8;
-private static readonly object ifaceˢ = (@string)"iface:    "u8;
-private static readonly object nestedˢ = (@string)"nested:   "u8;
-private static readonly object theVerdictIsStableAcrossˢ = (@string)"== the verdict is stable across repeated comparisons =="u8;
-
 internal partial struct main_nestedComparable /*dyn*/ {
     public point P;
     public array<nint> A = new(2);
 }
 
 internal static void Main() {
-    fmt.Println(uncomparableDynamicTypesˢ);
+    fmt.Println("== uncomparable dynamic types: Go panics ==");
 
     any m = new map<@string, nint>{["a"] = 1};
     var mʗ1 = m;
@@ -180,7 +158,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(arrayLengthIsPartOfTheˢ);
+    fmt.Println("== array length is part of the reported type ==");
 
     any aos = new slice<nint>[]{new nint[]{1}.slice()}.array();
     var aosʗ1 = aos;
@@ -207,7 +185,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(interfaceFieldPanicsˢ);
+    fmt.Println("== interface FIELD panics naming the inner type, recoverably ==");
 
     any wa = new withAny(1, new map<@string, nint>{});
     var waʗ1 = wa;
@@ -221,13 +199,13 @@ internal static void Main() {
         _ = AreEqual(wa2ʗ1, wa2ʗ1);
     });
 
-    any wc1 = new withAny(1, (nint)(5));
-    any wc2 = new withAny(1, (nint)(5));
-    any wc3 = new withAny(1, (nint)(6));
-    fmt.Println(structWAnyIntˢ, AreEqual(wc1, wc2), AreEqual(wc1, wc3));
+    any wc1 = new withAny(1, (nint)5);
+    any wc2 = new withAny(1, (nint)5);
+    any wc3 = new withAny(1, (nint)6);
+    fmt.Println("struct w/ any=int:", AreEqual(wc1, wc2), AreEqual(wc1, wc3));
 
     fmt.Println();
-    fmt.Println(nonEmptyInterfaceˢ);
+    fmt.Println("== non-empty interface ==");
 
     error e = new sliceErr(new nint[]{1}.slice());
     var eʗ1 = e;
@@ -236,7 +214,7 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(nilComparesNeverPanicˢ);
+    fmt.Println("== nil compares never panic ==");
 
     var mʗ2 = m;
     check("map == nil", () => {
@@ -271,9 +249,9 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(differingDynamicTypesˢ);
+    fmt.Println("== differing dynamic types never panic ==");
 
-    any i = (nint)(5);
+    any i = (nint)5;
     var iʗ1 = i;
     var mʗ4 = m;
     check("map == int", () => {
@@ -291,35 +269,35 @@ internal static void Main() {
     });
 
     fmt.Println();
-    fmt.Println(comparableValuesStillˢ);
+    fmt.Println("== comparable values still compare ==");
 
-    any i1 = (nint)(5);
-    any i2 = (nint)(5);
-    any i3 = (nint)(6);
-    fmt.Println(intˢ, AreEqual(i1, i2), AreEqual(i1, i3));
+    any i1 = (nint)5;
+    any i2 = (nint)5;
+    any i3 = (nint)6;
+    fmt.Println("int:      ", AreEqual(i1, i2), AreEqual(i1, i3));
 
     any s1 = (@string)"hi"u8;
     any s2 = (@string)"hi"u8;
     any s3 = (@string)"ho"u8;
-    fmt.Println(stringˢ, AreEqual(s1, s2), AreEqual(s1, s3));
+    fmt.Println("string:   ", AreEqual(s1, s2), AreEqual(s1, s3));
 
     any b1 = true;
     any b2 = false;
-    fmt.Println(boolˢ, AreEqual(b1, b1), AreEqual(b1, b2));
+    fmt.Println("bool:     ", AreEqual(b1, b1), AreEqual(b1, b2));
 
     any f1 = 1.5D;
     any f2 = 2.5D;
-    fmt.Println(floatˢ, AreEqual(f1, f1), AreEqual(f1, f2));
+    fmt.Println("float:    ", AreEqual(f1, f1), AreEqual(f1, f2));
 
     any p1 = new point(1, 2);
     any p2 = new point(1, 2);
     any p3 = new point(1, 3);
-    fmt.Println(structˢ, AreEqual(p1, p2), AreEqual(p1, p3));
+    fmt.Println("struct:   ", AreEqual(p1, p2), AreEqual(p1, p3));
 
     any arr1 = new nint[]{1, 2}.array();
     any arr2 = new nint[]{1, 2}.array();
     any arr3 = new nint[]{1, 3}.array();
-    fmt.Println(arrayˢ, AreEqual(arr1, arr2), AreEqual(arr1, arr3));
+    fmt.Println("array:    ", AreEqual(arr1, arr2), AreEqual(arr1, arr3));
 
     ref var x = ref heap<nint>(out var Ꮡx);
     x = 1;
@@ -328,29 +306,29 @@ internal static void Main() {
     any ptr1 = Ꮡx;
     any ptr2 = Ꮡx;
     any ptr3 = Ꮡy;
-    fmt.Println(pointerˢ, AreEqual(ptr1, ptr2), AreEqual(ptr1, ptr3));
+    fmt.Println("pointer:  ", AreEqual(ptr1, ptr2), AreEqual(ptr1, ptr3));
 
     ref var pm = ref heap<map<@string, nint>>(out var Ꮡpm);
     pm = new map<@string, nint>{};
     any pmap1 = Ꮡpm;
     any pmap2 = Ꮡpm;
-    fmt.Println(ptrToMapˢ, AreEqual(pmap1, pmap2));
+    fmt.Println("ptr-to-map:", AreEqual(pmap1, pmap2));
 
     var (ch1, ch2) = (new channel<nint>(0), new channel<nint>(0));
     any c1 = ch1;
     any c2 = ch1;
     any c3 = ch2;
-    fmt.Println(chanˢ, AreEqual(c1, c2), AreEqual(c1, c3));
+    fmt.Println("chan:     ", AreEqual(c1, c2), AreEqual(c1, c3));
 
-    any e1 = ((any)(nint)(7));
-    any e2 = ((any)(nint)(7));
-    fmt.Println(ifaceˢ, AreEqual(e1, e2));
+    any e1 = ((any)(nint)7);
+    any e2 = ((any)(nint)7);
+    fmt.Println("iface:    ", AreEqual(e1, e2));
     any nc1 = new main_nestedComparable(new point(1, 2), new nint[]{3, 4}.array());
     any nc2 = new main_nestedComparable(new point(1, 2), new nint[]{3, 4}.array());
-    fmt.Println(nestedˢ, AreEqual(nc1, nc2));
+    fmt.Println("nested:   ", AreEqual(nc1, nc2));
 
     fmt.Println();
-    fmt.Println(theVerdictIsStableAcrossˢ);
+    fmt.Println("== the verdict is stable across repeated comparisons ==");
 
     for (nint iΔ1 = 0; iΔ1 < 2; iΔ1++) {
         var mʗ6 = m;

@@ -41,11 +41,8 @@ partial struct ledger {
     internal ж<CrossPkgLibꓸStatus> cur;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notedˢ = (@string)"noted"u8;
-
 internal static void note(nint n) {
-    fmt.Println(notedˢ, n);
+    fmt.Println("noted", n);
 }
 
 partial struct badge {
@@ -174,19 +171,6 @@ internal static (slice<byte>, error) readWith(@string @base, @string @file) {
     return (slice<byte>(@base + @file), default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object promotedLabelˢ = (@string)"promoted label:"u8;
-private static readonly object coarseˢ = (@string)"coarse"u8;
-private static readonly object fineˢ = (@string)"fine"u8;
-private static readonly object unknownˢ = (@string)"unknown"u8;
-private static readonly object tokenˢ = (@string)"token:"u8;
-private static readonly object leafˢ = (@string)"leaf:"u8;
-private static readonly object branchˢ = (@string)"branch:"u8;
-private static readonly object describedLeafˢ = (@string)"described leaf:"u8;
-private static readonly object describedBranchˢ = (@string)"described branch:"u8;
-private static readonly object verdictScoreˢ = (@string)"verdict score:"u8;
-private static readonly object talliesScoreˢ = (@string)"tallies score:"u8;
-
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
@@ -224,7 +208,7 @@ internal static void Main() {
         fmt.Println((float64)g.Temp, g.Sensor.Hot());
 
         Labeled lb2 = g;
-        fmt.Println(promotedLabelˢ, lb2.Label());
+        fmt.Println("promoted label:", lb2.Label());
 
         var c = new counter(Meter: CrossPkgLib.NewMeter());
         fmt.Println(c.Meter.Value.Bump());
@@ -233,8 +217,8 @@ internal static void Main() {
         fmt.Println(c.Meter.Value.Bump());
         fmt.Println(g.Meter());
 
-        var rd = ((reading)CrossPkgLib.Boiling());
-        var cback = ((CrossPkgLib.Celsius)rd);
+        var rd = (reading)CrossPkgLib.Boiling();
+        var cback = (CrossPkgLib.Celsius)rd;
         fmt.Println((float64)cback, cback == CrossPkgLib.Boiling());
         var (st1, err1) = stampOrErr(false);
         var (st2, err2) = stampOrErr(true);
@@ -250,13 +234,13 @@ internal static void Main() {
 
         var exprᴛ1 = CrossPkgLib.Precision;
         if (exprᴛ1 == 1) {
-            fmt.Println(coarseˢ);
+            fmt.Println("coarse");
         }
         else if (exprᴛ1 == 2) {
-            fmt.Println(fineˢ);
+            fmt.Println("fine");
         }
         else { /* default: */
-            fmt.Println(unknownˢ);
+            fmt.Println("unknown");
         }
 
         fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
@@ -272,12 +256,12 @@ internal static void Main() {
         var led = new ledger(cur: statusPtr(sptr));
         fmt.Println((~led.cur).Code);
 
-        CrossPkgLibꓸGrade gv = ((CrossPkgLibꓸGrade)7);
+        CrossPkgLibꓸGrade gv = (CrossPkgLibꓸGrade)7;
         CrossPkgLibꓸStatus stv = default!;
         stv.Code = (nint)gv;
         fmt.Println(stv.Code);
 
-        var ccel = ((CrossPkgLib.Celsius)(float64)((localCelsius)2.5D));
+        var ccel = (CrossPkgLib.Celsius)(float64)((localCelsius)2.5D);
         fmt.Println((float64)ccel);
         CrossPkgLib.Labeled l1 = new badge(name: "a");
         Tagged l2 = new badge(name: "b");
@@ -288,7 +272,7 @@ internal static void Main() {
         fmt.Println(rep.Report());
         error boom = new CrossPkgLib.Alarmжerror(Ꮡ(new CrossPkgLib.Alarm(Msg: "boom")));
         fmt.Println(boom.Error());
-        var tk = ((tick)(uintptr)((nint)(3 | (nint)gv)));
+        var tk = (tick)(uintptr)((3 | (nint)gv));
         fmt.Println((uint64)(uintptr)tk);
 
         namedLabel nl = new emblem(name: "gold", rank: 1);
@@ -329,7 +313,7 @@ internal static void Main() {
         fmt.Println(mk.ΔΔMarker);
 
         CrossPkgLibꓸToken tok = CrossPkgLib.AsToken(42);
-        fmt.Println(tokenˢ, tok);
+        fmt.Println("token:", tok);
 
         var wrapped = CrossPkgLib.Wrap<nint>(5);
         fmt.Println(len(wrapped), wrapped[0]);
@@ -347,27 +331,27 @@ internal static void Main() {
         sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed", Temp: 40D));
         fmt.Println((~sbx.Holder.item).Name, sbx.tag);
 
-        fmt.Println(leafˢ, leafEmitter.Emit());
+        fmt.Println("leaf:", leafEmitter.Emit());
 
-        fmt.Println(branchˢ, branchEmitter.Emit());
+        fmt.Println("branch:", branchEmitter.Emit());
 
-        fmt.Println(describedLeafˢ, CrossPkgLib.DescribeEmitter(leafEmitter));
-        fmt.Println(describedBranchˢ, CrossPkgLib.DescribeEmitter(branchEmitter));
+        fmt.Println("described leaf:", CrossPkgLib.DescribeEmitter(leafEmitter));
+        fmt.Println("described branch:", CrossPkgLib.DescribeEmitter(branchEmitter));
 
         var scan = makeScanner("p:");
         var (scanName, scanData, scanErr) = scan("hello");
-        fmt.Println(scanName, ((@string)scanData), scanErr == default!);
+        fmt.Println(scanName, (@string)scanData, scanErr == default!);
 
         var bbuf = slice<byte>("key"u8);
         bbuf = append(bbuf, (byte)(CrossPkgLib.Sep));
         var rbuf = new rune[]{(rune)'a'}.slice();
         rbuf = append(rbuf, (rune)(CrossPkgLib.Precision));
-        fmt.Println(((@string)bbuf), len(rbuf), rbuf[1]);
+        fmt.Println((@string)bbuf, len(rbuf), rbuf[1]);
 
         var sc = ((CrossPkgLib.Scored)((CrossPkgLib.Verdict)4));
-        fmt.Println(verdictScoreˢ, sc.Score());
+        fmt.Println("verdict score:", sc.Score());
         sc = new talliesжScored(Ꮡ(new tallies(pts: 7)));
-        fmt.Println(talliesScoreˢ, sc.Score());
+        fmt.Println("tallies score:", sc.Score());
 
         var cal = ((Action<ж<CrossPkgLib.Sensor>, CrossPkgLib.Celsius>)(CrossPkgLib.Calibrate));
         var mx = Ꮡ(new CrossPkgLib.Sensor(Name: "mx", Temp: 10D));

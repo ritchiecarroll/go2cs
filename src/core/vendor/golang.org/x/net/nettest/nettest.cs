@@ -71,8 +71,8 @@ internal static void probeStack() {
         // Technical Level < 2.
         var (@out, _) = exec.Command(oslevelˢ, "-s"u8).Output();
         if (len(@out) >= len("7200-XX-ZZ-YYMM")) { // AIX 7.2, Tech Level XX, Service Pack ZZ, date YYMM
-            sstring ver = ((sstring)(@out[..4]));
-            var (tl, _) = strconv.Atoi(((@string)(@out[5..7])));
+            sstring ver = (sstring)(@out[..4]);
+            var (tl, _) = strconv.Atoi((@string)(@out[5..7]));
             unStrmDgramEnabled = ver > "7200"u8 || (ver == "7200"u8 && tl >= 2);
         }
     }

@@ -49,7 +49,7 @@ internal static partial uint64 traceStack(nint skip, ж<g> Ꮡgp, ж<traceStackT
     if (debug.traceCheckStackOwnership != 0 && Ꮡgp != nil) {
         var status = readgstatus(Ꮡgp);
         // If the scan bit is set, assume we're the ones that acquired it.
-        if ((uint32)(status & (uint32)_Gscan) == 0) {
+        if ((status & (uint32)_Gscan) == 0) {
             // Use the trace status to check this. There are a number of cases
             // where a running goroutine might be in _Gwaiting, and these cases
             // are totally fine for taking a stack trace. They're captured

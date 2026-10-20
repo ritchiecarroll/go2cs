@@ -21,10 +21,6 @@ public static any GetValue(nint index) {
     return default!;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notAStringBoxˢ = (@string)"Not a string box"u8;
-private static readonly object unknownBoxTypeˢ = (@string)"Unknown box type"u8;
-
 internal static void Main() {
     var value = GetValue(0);
 
@@ -38,7 +34,7 @@ internal static void Main() {
         var (strBox, ok) = value._<Box<@string>>(ᐧ); if (ok){
             fmt.Printf("Found a string box with value: %s\n"u8, strBox.Value);
         } else {
-            fmt.Println(notAStringBoxˢ);
+            fmt.Println("Not a string box");
         }
     }
 
@@ -58,7 +54,7 @@ internal static void Main() {
     }
     default: {
         var v = switchᴛ1;
-        fmt.Println(unknownBoxTypeˢ);
+        fmt.Println("Unknown box type");
         break;
     }}
 }

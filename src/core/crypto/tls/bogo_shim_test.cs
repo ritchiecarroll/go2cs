@@ -219,7 +219,7 @@ internal static void bogoShim() {
             CipherSuites: ciphersuites,
             GetConfigForClient: (ж<global::go.crypto.tls_package.ClientHelloInfo> chi) => {
                 if (expectAdvertisedALPN.Value != ""u8) {
-                    var s = ((cryptobyte.String)slice<byte>(expectAdvertisedALPN.Value));
+                    var s = (cryptobyte.String)slice<byte>(expectAdvertisedALPN.Value);
 
                     slice<@string> expectedALPNs = default!;
 
@@ -228,7 +228,7 @@ internal static void bogoShim() {
                         if (!s.ReadUint8LengthPrefixed(Ꮡalpn)) {
                             return (default!, fmt.Errorf("unexpected error while parsing arguments for -expect-advertised-alpn"u8));
                         }
-                        expectedALPNs = append(expectedALPNs, ((@string)(slice<byte>)alpn));
+                        expectedALPNs = append(expectedALPNs, (@string)(slice<byte>)alpn);
                     }
 
                     if (!slices.Equal<slice<@string>, @string>((~chi).SupportedProtos, expectedALPNs)) {
@@ -295,7 +295,7 @@ internal static void bogoShim() {
                 log.Fatalf("load key-file err: %s"u8, err);
             }
             foreach (var (_, id) in signingPrefs.ValueSlot) {
-                pair.SupportedSignatureAlgorithms = append(pair.SupportedSignatureAlgorithms, ((global::go.crypto.tls_package.SignatureScheme)(uint16)id));
+                pair.SupportedSignatureAlgorithms = append(pair.SupportedSignatureAlgorithms, (global::go.crypto.tls_package.SignatureScheme)(uint16)id);
             }
             pair.OCSPStaple = ocspResponse.ValueSlot;
             // Use Get[Client]Certificate to force the use of the certificate, which
@@ -357,13 +357,13 @@ internal static void bogoShim() {
 
         if (curves.ValueSlot != default!) {
             foreach (var (_, id) in curves.ValueSlot) {
-                cfg.Value.CurvePreferences = append((~cfg).CurvePreferences, ((global::go.crypto.tls_package.CurveID)(uint16)id));
+                cfg.Value.CurvePreferences = append((~cfg).CurvePreferences, (global::go.crypto.tls_package.CurveID)(uint16)id);
             }
         }
 
         if (verifyPrefs.ValueSlot != default!) {
             foreach (var (_, id) in verifyPrefs.ValueSlot) {
-                testingOnlySupportedSignatureAlgorithms = append(testingOnlySupportedSignatureAlgorithms, ((global::go.crypto.tls_package.SignatureScheme)(uint16)id));
+                testingOnlySupportedSignatureAlgorithms = append(testingOnlySupportedSignatureAlgorithms, (global::go.crypto.tls_package.SignatureScheme)(uint16)id);
             }
         }
 
@@ -538,7 +538,7 @@ internal static void bogoShim() {
                     log.Fatalf("failed to parse -expect-peer-signature-algorithm: %s"u8, errΔ5);
                 }
                 if (cs.testingOnlyPeerSignatureAlgorithm != ((global::go.crypto.tls_package.SignatureScheme)(uint16)expectedSigAlgID)) {
-                    log.Fatalf("unexpected peer signature algorithm: want %s, got %s"u8, ((global::go.crypto.tls_package.SignatureScheme)(uint16)expectedSigAlgID), cs.testingOnlyPeerSignatureAlgorithm);
+                    log.Fatalf("unexpected peer signature algorithm: want %s, got %s"u8, (global::go.crypto.tls_package.SignatureScheme)(uint16)expectedSigAlgID, cs.testingOnlyPeerSignatureAlgorithm);
                 }
             }
         }

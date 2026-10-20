@@ -23,9 +23,6 @@ internal static void tryWrite(map<@string, nint> m) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deleteOkˢ = (@string)"delete ok"u8;
-
 internal static void Main() {
     map<@string, nint> m = default!;
 
@@ -43,7 +40,7 @@ internal static void Main() {
     fmt.Println(count);
 
     delete(m, "a"u8);
-    fmt.Println(deleteOkˢ);
+    fmt.Println("delete ok");
 
     fmt.Println(m == default!);
 

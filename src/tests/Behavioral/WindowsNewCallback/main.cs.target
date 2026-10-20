@@ -34,35 +34,28 @@ internal static uintptr onTimeFormatPanics(uintptr timeFormatString, uintptr lpa
     throw panic(callbackPanicText);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sameFuncSamePointerˢ = (@string)"same-func-same-pointer:"u8;
-private static readonly object differentFuncDifferentˢ = (@string)"different-func-different-pointer:"u8;
-private static readonly object callbackInvokedˢ = (@string)"callback-invoked:"u8;
-private static readonly object nonconformingRefusalˢ = (@string)"nonconforming-refusal:"u8;
-private static readonly object callbackPanicUnwindsˢ = (@string)"callback-panic-unwinds:"u8;
-
 internal static void Main() {
     var kernel32 = syscall.NewLazyDLL("kernel32.dll");
     var enumSystemLocalesW = kernel32.NewProc("EnumSystemLocalesW");
 
     var cb1 = syscall.NewCallback(onLocale);
     var cb2 = syscall.NewCallback(onLocale);
-    fmt.Println(sameFuncSamePointerˢ, cb1 == cb2);
+    fmt.Println("same-func-same-pointer:", cb1 == cb2);
 
     var cbOther = syscall.NewCallback(onLocaleOther);
-    fmt.Println(differentFuncDifferentˢ, cbOther != cb1);
+    fmt.Println("different-func-different-pointer:", cbOther != cb1);
 
     enumSystemLocalesW.Call(cb1, (uintptr)0x1);
-    fmt.Println(callbackInvokedˢ, invoked);
+    fmt.Println("callback-invoked:", invoked);
 
     var enumTimeFormatsEx = kernel32.NewProc("EnumTimeFormatsEx");
     uintptr localeNameUserDefault = 0;
     enumTimeFormatsEx.Call(syscall.NewCallback(onTimeFormat), localeNameUserDefault, 0, wantLParam);
     fmt.Printf("lparam-round-trip: %#x (want %#x)\n"u8, seenLParam, wantLParam);
 
-    fmt.Println(nonconformingRefusalˢ, refusalText());
+    fmt.Println("nonconforming-refusal:", refusalText());
 
-    fmt.Println(callbackPanicUnwindsˢ, panicUnwindText(enumTimeFormatsEx));
+    fmt.Println("callback-panic-unwinds:", panicUnwindText(enumTimeFormatsEx));
 }
 
 internal static @string /*out*/ panicUnwindText(ж<syscall.LazyProc> ᏑenumTimeFormatsEx) {

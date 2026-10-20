@@ -11,9 +11,6 @@ internal static (nint, error) pair(nint n) {
     return (n * 2, default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object hookˢ = (@string)"hook:"u8;
-
 internal static (int64 written, error err) send(nint n) {
     int64 written = default!;
     heap<error>(out var Ꮡerr);
@@ -22,7 +19,7 @@ internal static (int64 written, error err) send(nint n) {
         ref var err = ref Ꮡerr.ValueSlot;
 
         defer(() => {
-            fmt.Println(hookˢ, written, Ꮡerr.ValueSlot, written > 0);
+            fmt.Println("hook:", written, Ꮡerr.ValueSlot, written > 0);
         }, ref ᒐ);
         (var v, err) = pair(n);
         if (err != default!) {
@@ -47,9 +44,6 @@ internal static nint /*x*/ addrv() {
     return x;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object litHookˢ = (@string)"lit hook:"u8;
-
 internal static (int64, error) lit(nint n) {
     (int64 w, error e) f() {
         int64 w = default!;
@@ -58,7 +52,7 @@ internal static (int64, error) lit(nint n) {
         try {
             ref var e = ref Ꮡe.ValueSlot;
             defer(() => {
-                fmt.Println(litHookˢ, w, Ꮡe.ValueSlot);
+                fmt.Println("lit hook:", w, Ꮡe.ValueSlot);
             }, ref ᒐ);
             (var v, Ꮡe.ValueSlot) = pair(n);
             if (Ꮡe.ValueSlot != default!) {
@@ -74,9 +68,6 @@ internal static (int64, error) lit(nint n) {
     return f();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object clsPairˢ = (@string)"cls pair:"u8;
-
 internal static error /*err*/ cls(nint n) {
     ref var err = ref heap<error>(out var Ꮡerr);
 
@@ -84,28 +75,22 @@ internal static error /*err*/ cls(nint n) {
         Ꮡerr.ValueSlot = fmt.Errorf("cls %d"u8, n);
     }
     (var v, err) = pair(n);
-    fmt.Println(clsPairˢ, v, err);
+    fmt.Println("cls pair:", v, err);
     set();
     return err;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sendˢ = (@string)"send:"u8;
-private static readonly object addrvˢ = (@string)"addrv:"u8;
-private static readonly object litˢ = (@string)"lit:"u8;
-private static readonly object clsˢ = (@string)"cls:"u8;
-
 internal static void Main() {
     var (w, e) = send(3);
-    fmt.Println(sendˢ, w, e);
+    fmt.Println("send:", w, e);
     (w, e) = send(-1);
-    fmt.Println(sendˢ, w, e);
-    fmt.Println(addrvˢ, addrv());
+    fmt.Println("send:", w, e);
+    fmt.Println("addrv:", addrv());
     (w, e) = lit(4);
-    fmt.Println(litˢ, w, e);
+    fmt.Println("lit:", w, e);
     (w, e) = lit(-2);
-    fmt.Println(litˢ, w, e);
-    fmt.Println(clsˢ, cls(5));
+    fmt.Println("lit:", w, e);
+    fmt.Println("cls:", cls(5));
 }
 
 } // end main_package

@@ -89,9 +89,9 @@ public static (Time_t tt, error err) Time(ж<Time_t> Ꮡt) {
         return (0, errno);
     }
     if (Ꮡt != nil) {
-        t = ((Time_t)tv.Sec);
+        t = (Time_t)tv.Sec;
     }
-    return (((Time_t)tv.Sec), default!);
+    return ((Time_t)tv.Sec, default!);
 }
 
 //sys	Utime(path string, buf *Utimbuf) (err error)

@@ -16,19 +16,6 @@ internal static @string sign(float64 f) {
     return "+0";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object float64KeyAfter0Then0ˢ = (@string)"float64 key after +0 then -0:"u8;
-private static readonly object lenˢ = (@string)"len"u8;
-private static readonly object float64KeyAfter0Then0ˢ2 = (@string)"float64 key after -0 then +0:"u8;
-private static readonly object interfaceKeyAfter0Then0ˢ = (@string)"interface key after +0 then -0:"u8;
-private static readonly object valueˢ = (@string)"value"u8;
-private static readonly object complex128KeyAfterˢ = (@string)"complex128 key after overwrite:"u8;
-private static readonly object structFloat64KeyAfterˢ = (@string)"struct{float64} key after overwrite:"u8;
-private static readonly object intKeyOverwriteˢ = (@string)"int key overwrite:"u8;
-private static readonly object definedFloat64KeyAfterˢ = (@string)"defined float64 key after overwrite:"u8;
-private static readonly object definedFloat32KeyAfterˢ = (@string)"defined float32 key after overwrite:"u8;
-private static readonly object definedComplex128Keyˢ = (@string)"defined complex128 key after overwrite:"u8;
-
 internal partial struct keyUpdate_pt /*dyn*/ {
     internal float64 x, y;
 }
@@ -38,57 +25,57 @@ internal static void keyUpdate() {
     m[0D] = true;
     m[negZero] = true;
     foreach (var (k, _) in m) {
-        fmt.Println(float64KeyAfter0Then0ˢ, sign(k), lenˢ, len(m));
+        fmt.Println("float64 key after +0 then -0:", sign(k), "len", len(m));
     }
 
     var m2 = new map<float64, bool>{};
     m2[negZero] = true;
     m2[0D] = true;
     foreach (var (k, _) in m2) {
-        fmt.Println(float64KeyAfter0Then0ˢ2, sign(k), lenˢ, len(m2));
+        fmt.Println("float64 key after -0 then +0:", sign(k), "len", len(m2));
     }
 
     var mi = new map<any, nint>{};
     mi[0.0D] = 1;
     mi[negZero] = 2;
     foreach (var (k, v) in mi) {
-        fmt.Println(interfaceKeyAfter0Then0ˢ, sign(k._<float64>()), valueˢ, v, lenˢ, len(mi));
+        fmt.Println("interface key after +0 then -0:", sign(k._<float64>()), "value", v, "len", len(mi));
     }
 
     var mc = new map<complex128, nint>{};
     mc[complex(0D, 0D)] = 1;
     mc[complex(negZero, negZero)] = 2;
     foreach (var (k, v) in mc) {
-        fmt.Println(complex128KeyAfterˢ, sign(real(k)), sign(imag(k)), valueˢ, v);
+        fmt.Println("complex128 key after overwrite:", sign(real(k)), sign(imag(k)), "value", v);
     }
     var ms = new map<keyUpdate_pt, nint>{};
     ms[new keyUpdate_pt(0D, 1D)] = 1;
     ms[new keyUpdate_pt(negZero, 1D)] = 2;
     foreach (var (k, v) in ms) {
-        fmt.Println(structFloat64KeyAfterˢ, sign(k.x), valueˢ, v);
+        fmt.Println("struct{float64} key after overwrite:", sign(k.x), "value", v);
     }
 
     var mn = new map<nint, nint>{[7] = 1};
     mn[7] = 2;
-    fmt.Println(intKeyOverwriteˢ, mn[7], len(mn));
+    fmt.Println("int key overwrite:", mn[7], len(mn));
 
     var mf = new map<F64, bool>{};
     mf[0D] = true;
     mf[((F64)negZero)] = true;
     foreach (var (k, _) in mf) {
-        fmt.Println(definedFloat64KeyAfterˢ, sign((float64)k), lenˢ, len(mf));
+        fmt.Println("defined float64 key after overwrite:", sign((float64)k), "len", len(mf));
     }
     var mf32 = new map<F32, bool>{};
     mf32[0F] = true;
     mf32[((F32)(float32)negZero)] = true;
     foreach (var (k, _) in mf32) {
-        fmt.Println(definedFloat32KeyAfterˢ, sign((float64)(float32)k), lenˢ, len(mf32));
+        fmt.Println("defined float32 key after overwrite:", sign((float64)(float32)k), "len", len(mf32));
     }
     var mc2 = new map<C128, bool>{};
     mc2[((C128)complex(0D, 0D))] = true;
     mc2[((C128)complex(negZero, 0D))] = true;
     foreach (var (k, _) in mc2) {
-        fmt.Println(definedComplex128Keyˢ, sign(real(k)), lenˢ, len(mc2));
+        fmt.Println("defined complex128 key after overwrite:", sign(real(k)), "len", len(mc2));
     }
 }
 
@@ -98,11 +85,6 @@ partial struct F32 /*num:float32*/;
 
 partial struct C128 /*num:complex128*/;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object float64NaNTwiceThen0ˢ = (@string)"float64 NaN twice then ±0:"u8;
-private static readonly object interfaceNaNTwiceˢ = (@string)"interface NaN twice:"u8;
-private static readonly object definedFloat64NaNTwiceˢ = (@string)"defined float64 NaN twice:"u8;
-
 internal static void nanKeys() {
     var nan = Δmath.NaN();
     var m = new map<float64, nint>{};
@@ -110,24 +92,21 @@ internal static void nanKeys() {
     m[nan] = 2;
     m[0D] = 3;
     m[negZero] = 4;
-    fmt.Println(float64NaNTwiceThen0ˢ, len(m));
+    fmt.Println("float64 NaN twice then ±0:", len(m));
 
     var mi = new map<any, nint>{};
     mi[nan] = 1;
     mi[nan] = 2;
-    fmt.Println(interfaceNaNTwiceˢ, len(mi));
+    fmt.Println("interface NaN twice:", len(mi));
 
     var mf = new map<F64, nint>{};
     mf[((F64)nan)] = 1;
     mf[((F64)nan)] = 2;
-    fmt.Println(definedFloat64NaNTwiceˢ, len(mf));
+    fmt.Println("defined float64 NaN twice:", len(mf));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object rangeUnderOverwriteˢ = (@string)"range under overwrite: inconsistent"u8;
-private static readonly object bothOrdersSeenˢ = (@string)"both orders seen"u8;
 private static readonly object oneˢ = (@string)"one"u8;
-private static readonly object interfaceRangeUnderˢ = (@string)"interface range under overwrite: inconsistent"u8;
 
 internal static void rangeUnderOverwrite() {
     nint bad = 0;
@@ -163,7 +142,7 @@ internal static void rangeUnderOverwrite() {
             }
         }
     }
-    fmt.Println(rangeUnderOverwriteˢ, bad, bothOrdersSeenˢ, after > 0 && before > 0);
+    fmt.Println("range under overwrite: inconsistent", bad, "both orders seen", after > 0 && before > 0);
 
     (bad, after, before) = (0, 0, 0);
     for (nint trial = 0; trial < 400; trial++) {
@@ -198,11 +177,8 @@ internal static void rangeUnderOverwrite() {
             }
         }
     }
-    fmt.Println(interfaceRangeUnderˢ, bad, bothOrdersSeenˢ, after > 0 && before > 0);
+    fmt.Println("interface range under overwrite: inconsistent", bad, "both orders seen", after > 0 && before > 0);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object runtimeErrorˢ = (@string)"runtime.Error:"u8;
 
 internal static void @try(@string label, Action f) {
     GoFrame ᒐ = default;
@@ -211,7 +187,7 @@ internal static void @try(@string label, Action f) {
             {
                 var r = recover(); if (r != default!) {
                     var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
-                    fmt.Println(label + ": panic:", r, runtimeErrorˢ, isRuntimeError);
+                    fmt.Println(label + ": panic:", r, "runtime.Error:", isRuntimeError);
                 }
             }
         }, ref ᒐ);
@@ -222,14 +198,10 @@ internal static void @try(@string label, Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fullMapLenAfterˢ = (@string)"full map len after:"u8;
-private static readonly object emptyMapLenAfterˢ = (@string)"empty map len after:"u8;
-
 internal static void hashPanic() {
     slice<nint> Δslice = default!;
     var empty = new map<any, bool>{};
-    var full = new map<any, bool>{[(nint)(1)] = true, [(@string)"a"u8] = true};
+    var full = new map<any, bool>{[(nint)1] = true, [(@string)"a"u8] = true};
     map<any, bool> nilMap = default!;
 
     var emptyʗ1 = empty;
@@ -274,11 +246,8 @@ internal static void hashPanic() {
     @try("hashable key on empty map", () => {
         _ = emptyʗ5[new nint[]{1, 2}.array()];
     });
-    fmt.Println(fullMapLenAfterˢ, len(full), emptyMapLenAfterˢ, len(empty));
+    fmt.Println("full map len after:", len(full), "empty map len after:", len(empty));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object reflectFloat64KeyAfter0ˢ = (@string)"reflect float64 key after +0 then -0:"u8;
 
 internal static void reflectSide() {
     ref var m = ref heap<reflectꓸValue>(out var Ꮡm);
@@ -312,7 +281,7 @@ internal static void reflectSide() {
     fm.SetMapIndex(reflect.ValueOf(negZero), reflect.ValueOf(true));
     var iter = fm.MapRange();
     while (iter.Next()) {
-        fmt.Println(reflectFloat64KeyAfter0ˢ, sign(iter.Key().Float()), lenˢ, fm.Len());
+        fmt.Println("reflect float64 key after +0 then -0:", sign(iter.Key().Float()), "len", fm.Len());
     }
 }
 

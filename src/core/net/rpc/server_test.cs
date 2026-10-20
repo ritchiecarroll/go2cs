@@ -654,7 +654,7 @@ public static void TestRegistrationError(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Error(expectedErrorRegisteringˢ3);
     }
-    err = Register(((ΔNeedsPtrType)0));
+    err = Register((ΔNeedsPtrType)0);
     if (err == default!){
         Ꮡt.Error(expectedErrorRegisteringˢ4);
     } else 
@@ -693,7 +693,7 @@ internal static readonly object deadlockˢ = (@string)"deadlock"u8;
 public static partial void TestSendDeadlock(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var client = NewClientWithCodec(((WriteFailCodec)0));
+        var client = NewClientWithCodec((WriteFailCodec)0);
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
 
@@ -834,7 +834,7 @@ public static void TestClientWriteError(ж<testing.T> Ꮡt) {
 
         ref var res = ref heap<bool>(out var Ꮡres);
         res = false;
-        var err = c.Call(fooˢ, (nint)(1), Ꮡres);
+        var err = c.Call(fooˢ, (nint)1, Ꮡres);
         if (err == default!) {
             Ꮡt.Fatal(expectedErrorˢ);
         }

@@ -32,9 +32,6 @@ internal static void @try(@string name, Action f) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string abcˢ = "abc"u8;
-private static readonly object lenˢ = (@string)"len"u8;
-private static readonly object capˢ = (@string)"cap"u8;
-private static readonly object doneˢ = (@string)"done"u8;
 
 internal partial struct main_cases /*dyn*/ {
     internal @string name;
@@ -45,10 +42,10 @@ internal static void Main() {
     var s = new slice<nint>(3, 10);
     ref var a = ref heap(new array<nint>(3), out var Ꮡa);
     var p = Ꮡa;
-    var n = ((named)s);
+    var n = (named)s;
     ref var na = ref heap(new namedArr(), out var Ꮡna);
     @string str = "abc";
-    namedStr ns = ((namedStr)(@string)abcˢ);
+    namedStr ns = (namedStr)(@string)abcˢ;
     nint neg = -1;
     nint big = unchecked((nint)(4294967301L));
     nint lo4 = 4;
@@ -212,32 +209,32 @@ internal static void Main() {
         new("slice3 [-1:2:5]", () => {
             var t = sʗ13.slice(neg, two, five);
             sink = t;
-            fmt.Println(lenˢ, len(t), capˢ, cap(t));
+            fmt.Println("len", len(t), "cap", cap(t));
         }),
         new("slice3 [0:-1:5]", () => {
             var t = sʗ14.slice(0, neg, five);
             sink = t;
-            fmt.Println(lenˢ, len(t), capˢ, cap(t));
+            fmt.Println("len", len(t), "cap", cap(t));
         }),
         new("slice3 [0:2:-1]", () => {
             var t = sʗ15.slice(0, two, neg);
             sink = t;
-            fmt.Println(lenˢ, len(t), capˢ, cap(t));
+            fmt.Println("len", len(t), "cap", cap(t));
         }),
         new("array3 [-1:2:5]", () => {
             var t = a6ʗ1.slice(neg, two, five);
             sink = t;
-            fmt.Println(lenˢ, len(t), capˢ, cap(t));
+            fmt.Println("len", len(t), "cap", cap(t));
         }),
         new("array3 [0:2:-1]", () => {
             var t = a6ʗ2.slice(0, two, neg);
             sink = t;
-            fmt.Println(lenˢ, len(t), capˢ, cap(t));
+            fmt.Println("len", len(t), "cap", cap(t));
         }),
         new("slice3 [:2:5] in range", () => {
             var t = sʗ16.slice(0, two, five);
             sink = t;
-            fmt.Println(lenˢ, len(t), capˢ, cap(t));
+            fmt.Println("len", len(t), "cap", cap(t));
         })
     }.slice();
 
@@ -245,7 +242,7 @@ internal static void Main() {
         @try(c.name, c.f);
     }
 
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
 
 } // end main_package

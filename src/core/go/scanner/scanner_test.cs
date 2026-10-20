@@ -243,7 +243,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
         // check position
         if (tok == token.EOF) {
             // correction for EOF
-            epos.Line = newlineCount(((@string)source));
+            epos.Line = newlineCount((@string)source);
             epos.Column = 2;
         }
         checkPos(Ꮡt, lit, pos, epos);
@@ -268,7 +268,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
         var exprᴛ1 = e.tok;
         if (exprᴛ1 == token.COMMENT) {
             // no CRs in comments
-            elit = ((@string)stripCR(slice<byte>(e.lit), e.lit[1] == (rune)'*'));
+            elit = (@string)stripCR(slice<byte>(e.lit), e.lit[1] == (rune)'*');
             //-style comment literal doesn't contain newline
             if (elit[1] == (rune)'/') {
                 elit = elit.slice(0, len(elit) - 1);
@@ -285,7 +285,7 @@ public static void TestScan(ж<testing.T> Ꮡt) {
                 // no CRs in raw string literals
                 elit = e.lit;
                 if (elit[0] == (rune)'`') {
-                    elit = ((@string)stripCR(slice<byte>(elit), false));
+                    elit = (@string)stripCR(slice<byte>(elit), false);
                 }
             } else 
             if (e.tok.IsKeyword()) {
@@ -327,7 +327,7 @@ public static void TestStripCR(ж<testing.T> Ꮡt) {
         new("/*\r/\r*\r/*/"u8, "/*/*\r/*/"u8),
         new("/*\r\r\r\r*/"u8, "/**/"u8)
     }.slice()) {
-        @string got = ((@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*'));
+        @string got = (@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*');
         if (got != test.want) {
             Ꮡt.Errorf("stripCR(%q) = %q; want %q"u8, test.have, got, test.want);
         }

@@ -654,7 +654,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
             continue;
         }
         {
-            var errΔ1 = tt.want(((@string)got)); if (errΔ1 != default!) {
+            var errΔ1 = tt.want((@string)got); if (errΔ1 != default!) {
                 Ꮡt.Errorf("test[%d]: %v"u8, i, errΔ1);
             }
         }

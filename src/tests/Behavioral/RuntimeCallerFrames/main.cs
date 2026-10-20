@@ -64,84 +64,54 @@ internal static partial nint depthPlus2() {
     return depthPlus1();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sameLineAgreementˢ = (@string)"same-line agreement:"u8;
-private static readonly object selfLineConstantˢ = (@string)"self line constant:"u8;
-private static readonly object selfLineDiffersFromCallˢ = (@string)"self line differs from call site:"u8;
-private static readonly object distinctCallSitesˢ = (@string)"distinct call sites:"u8;
-private static readonly object sameFileˢ = (@string)"same file:"u8;
-private static readonly object fileReportedˢ = (@string)"file reported:"u8;
-private static readonly object callerFileTailˢ = (@string)"caller file tail:"u8;
-private static readonly object callerFileRootedˢ = (@string)"caller file rooted:"u8;
-private static readonly object callerLineˢ = (@string)"caller line:"u8;
-private static readonly object callerLineTwoFramesUpˢ = (@string)"caller line two frames up:"u8;
-private static readonly object tracebackNamesAGoFileˢ = (@string)"traceback names a go file:"u8;
-private static readonly object okAt0ˢ = (@string)"ok at 0:"u8;
-private static readonly object okAt1ˢ = (@string)"ok at 1:"u8;
-private static readonly object okTwoLevelsUpˢ = (@string)"ok two levels up:"u8;
-private static readonly object okPastTheStackˢ = (@string)"ok past the stack:"u8;
-private static readonly object callersDepthDeltaˢ = (@string)"callers depth delta:"u8;
-private static readonly object callerFileUsesForwardˢ = (@string)"caller file uses forward slash:"u8;
-private static readonly object callerFileUsesHostˢ = (@string)"caller file uses host separator:"u8;
-private static readonly object framesFilesUseForwardˢ = (@string)"frames files use forward slash:"u8;
-private static readonly object framesFilesUseHostˢ = (@string)"frames files use host separator:"u8;
-private static readonly object tracebackUsesHostˢ = (@string)"traceback uses host separator:"u8;
-private static readonly object tracebackNamesPointerˢ = (@string)"traceback names pointer receiver:"u8;
-private static readonly object tracebackNamesValueˢ = (@string)"traceback names value receiver:"u8;
-private static readonly object tracebackDropsPointerˢ = (@string)"traceback drops pointer receiver:"u8;
-private static readonly object tracebackDropsValueˢ = (@string)"traceback drops value receiver:"u8;
-private static readonly object tracebackNamesGenericˢ = (@string)"traceback names generic receiver:"u8;
-private static readonly object tracebackNamesPlainFuncˢ = (@string)"traceback names plain func:"u8;
-private static readonly object tracebackParenthesizesˢ = (@string)"traceback parenthesizes plain func:"u8;
-
 internal static partial void Main() {
     var (x, y) = sameSite();
-    fmt.Println(sameLineAgreementˢ, x == y);
+    fmt.Println("same-line agreement:", x == y);
 
-    fmt.Println(selfLineConstantˢ, selfLine() == selfLine());
-    fmt.Println(selfLineDiffersFromCallˢ, selfLine() != callerLine());
+    fmt.Println("self line constant:", selfLine() == selfLine());
+    fmt.Println("self line differs from call site:", selfLine() != callerLine());
 
-    fmt.Println(distinctCallSitesˢ, siteA() != siteB());
+    fmt.Println("distinct call sites:", siteA() != siteB());
 
     var (_, here, _, _) = runtime.Caller(0);
-    fmt.Println(sameFileˢ, here == callerFile());
-    fmt.Println(fileReportedˢ, len(here) > 0);
+    fmt.Println("same file:", here == callerFile());
+    fmt.Println("file reported:", len(here) > 0);
 
-    fmt.Println(callerFileTailˢ, callerFileTail());
-    fmt.Println(callerFileRootedˢ, callerFileRooted());
-    fmt.Println(callerLineˢ, selfLine());
-    fmt.Println(callerLineTwoFramesUpˢ, wrapGrand());
-    fmt.Println(tracebackNamesAGoFileˢ, hasSub(stackText(), "/main.go:"));
+    fmt.Println("caller file tail:", callerFileTail());
+    fmt.Println("caller file rooted:", callerFileRooted());
+    fmt.Println("caller line:", selfLine());
+    fmt.Println("caller line two frames up:", wrapGrand());
+    fmt.Println("traceback names a go file:", hasSub(stackText(), "/main.go:"));
 
-    fmt.Println(okAt0ˢ, okAt(0));
-    fmt.Println(okAt1ˢ, okAt(1));
-    fmt.Println(okTwoLevelsUpˢ, deepOK());
-    fmt.Println(okPastTheStackˢ, okAt(1000));
+    fmt.Println("ok at 0:", okAt(0));
+    fmt.Println("ok at 1:", okAt(1));
+    fmt.Println("ok two levels up:", deepOK());
+    fmt.Println("ok past the stack:", okAt(1000));
 
-    fmt.Println(callersDepthDeltaˢ, depthPlus2() - depth());
+    fmt.Println("callers depth delta:", depthPlus2() - depth());
 
     var (callerFwd, callerBack) = callerSeparators();
-    fmt.Println(callerFileUsesForwardˢ, callerFwd);
-    fmt.Println(callerFileUsesHostˢ, callerBack);
+    fmt.Println("caller file uses forward slash:", callerFwd);
+    fmt.Println("caller file uses host separator:", callerBack);
 
     var (framesFwd, framesBack) = framesSeparators();
-    fmt.Println(framesFilesUseForwardˢ, framesFwd);
-    fmt.Println(framesFilesUseHostˢ, framesBack);
+    fmt.Println("frames files use forward slash:", framesFwd);
+    fmt.Println("frames files use host separator:", framesBack);
 
-    fmt.Println(tracebackUsesHostˢ, stackHasBackslash());
+    fmt.Println("traceback uses host separator:", stackHasBackslash());
 
     @string methodTrace = ((recvT)0).valueFrame();
-    fmt.Println(tracebackNamesPointerˢ, hasSub(methodTrace, "main.(*recvT).ptrFrame"));
-    fmt.Println(tracebackNamesValueˢ, hasSub(methodTrace, "main.recvT.valueFrame"));
-    fmt.Println(tracebackDropsPointerˢ, hasSub(methodTrace, "main.ptrFrame"));
-    fmt.Println(tracebackDropsValueˢ, hasSub(methodTrace, "main.valueFrame"));
+    fmt.Println("traceback names pointer receiver:", hasSub(methodTrace, "main.(*recvT).ptrFrame"));
+    fmt.Println("traceback names value receiver:", hasSub(methodTrace, "main.recvT.valueFrame"));
+    fmt.Println("traceback drops pointer receiver:", hasSub(methodTrace, "main.ptrFrame"));
+    fmt.Println("traceback drops value receiver:", hasSub(methodTrace, "main.valueFrame"));
 
     @string genTrace = new genRecv<nint>(nil).genFrame();
-    fmt.Println(tracebackNamesGenericˢ, hasSub(genTrace, "main.genRecv[...].genFrame"));
+    fmt.Println("traceback names generic receiver:", hasSub(genTrace, "main.genRecv[...].genFrame"));
 
     @string plainTrace = plainFrame();
-    fmt.Println(tracebackNamesPlainFuncˢ, hasSub(plainTrace, "main.plainFrame"));
-    fmt.Println(tracebackParenthesizesˢ, hasSub(plainTrace, "(*"));
+    fmt.Println("traceback names plain func:", hasSub(plainTrace, "main.plainFrame"));
+    fmt.Println("traceback parenthesizes plain func:", hasSub(plainTrace, "(*"));
 }
 
 internal static bool hasByte(@string s, byte b) {
@@ -205,7 +175,7 @@ internal static partial bool callerFileRooted() {
 internal static partial bool stackHasBackslash() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return hasByte(((@string)(buf.slice(0, n))), (rune)'\\');
+    return hasByte((@string)(buf.slice(0, n)), (rune)'\\');
 }
 
 internal static bool hasSub(@string s, @string sub) {
@@ -227,7 +197,7 @@ internal static bool hasSub(@string s, @string sub) {
 internal static partial @string stackText() {
     var buf = new slice<byte>(8192);
     nint n = runtime.Stack(buf, false);
-    return ((@string)(buf.slice(0, n)));
+    return (@string)(buf.slice(0, n));
 }
 
 partial struct recvT /*num:nint*/;

@@ -28,7 +28,7 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 
 // Class returns the Bidi class for p.
 public static ΔClass Class(this Properties p) {
-    ΔClass c = ((ΔClass)(nuint)((uint8)(p.entry & 0x0F)));
+    ΔClass c = (ΔClass)(nuint)((uint8)(p.entry & 0x0F));
     if (c == Control) {
         c = controlByteToClass[(uint8)(p.last & 0xF)];
     }
@@ -48,7 +48,7 @@ public static bool IsOpeningBracket(this Properties p) {
 
 // TODO: find a better API and expose.
 internal static rune reverseBracket(this Properties p, rune r) {
-    return (int32)(xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r);
+    return xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r;
 }
 
 internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
@@ -117,7 +117,7 @@ public static (Properties p, nint sz) Lookup(slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -134,13 +134,13 @@ public static (Properties p, nint sz) Lookup(slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (new Properties(nil), 1);
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -184,7 +184,7 @@ public static (Properties p, nint sz) LookupString(@string s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -201,13 +201,13 @@ public static (Properties p, nint sz) LookupString(@string s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (new Properties(nil), 1);
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = bidiIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (new Properties(nil), 1);
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = bidiIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {

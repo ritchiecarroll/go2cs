@@ -2150,7 +2150,7 @@ type record struct {
 	n := copy(rec.Path[2:], []uint16{0x0c0d})
 	rec.B = 0x1112
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:7-8, 29-38 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:7-8, 23-32 -->
 ```csharp
 [GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4))]
 partial class main_package {

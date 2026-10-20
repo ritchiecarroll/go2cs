@@ -55,13 +55,13 @@ internal static void encodeVarint(ref buffer b, uint64 x) {
 }
 
 internal static void encodeLength(ref buffer b, nint tag, nint len) {
-    encodeVarint(ref b, (uint64)(((uint64)tag << (int)(3)) | 2));
+    encodeVarint(ref b, (uint64)tag << 3 | 2);
     encodeVarint(ref b, (uint64)len);
 }
 
 internal static void encodeUint64(ref buffer b, nint tag, uint64 x) {
     // append varint to b.data
-    encodeVarint(ref b, (uint64)(((uint64)tag << (int)(3)) | 0));
+    encodeVarint(ref b, (uint64)tag << 3 | 0);
     encodeVarint(ref b, x);
 }
 
@@ -170,11 +170,11 @@ internal static error /*err*/ unmarshal(slice<byte> data, message m) {
 }
 
 internal static uint64 le64(slice<byte> p) {
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)p[0] | ((uint64)p[1] << (int)(8))) | ((uint64)p[2] << (int)(16))) | ((uint64)p[3] << (int)(24))) | ((uint64)p[4] << (int)(32))) | ((uint64)p[5] << (int)(40))) | ((uint64)p[6] << (int)(48))) | ((uint64)p[7] << (int)(56)));
+    return (uint64)p[0] | (uint64)p[1] << 8 | (uint64)p[2] << 16 | (uint64)p[3] << 24 | (uint64)p[4] << 32 | (uint64)p[5] << 40 | (uint64)p[6] << 48 | (uint64)p[7] << 56;
 }
 
 internal static uint32 le32(slice<byte> p) {
-    return (uint32)((uint32)((uint32)((uint32)p[0] | ((uint32)p[1] << (int)(8))) | ((uint32)p[2] << (int)(16))) | ((uint32)p[3] << (int)(24)));
+    return (uint32)p[0] | (uint32)p[1] << 8 | (uint32)p[2] << 16 | (uint32)p[3] << 24;
 }
 
 internal static nint /*numVarints*/ peekNumVarints(slice<byte> data) {
@@ -217,8 +217,8 @@ internal static (slice<byte>, error) decodeField(ref buffer b, slice<byte> data)
     if (err != default!) {
         return (default!, err);
     }
-    b.field = (nint)((x >> (int)(3)));
-    b.typ = (nint)((uint64)(x & 7));
+    b.field = (nint)(x >> 3);
+    b.typ = (nint)(x & 7);
     b.data = default!;
     b.u64 = 0;
     switch (b.typ) {
@@ -398,7 +398,7 @@ internal static error decodeString(ref buffer b, ref @string x) {
             return err;
         }
     }
-    x = ((@string)b.data);
+    x = (@string)b.data;
     return default!;
 }
 

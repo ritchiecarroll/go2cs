@@ -76,7 +76,7 @@ A slot where a bare C# string would bind the wrong C# type keeps the form it had
 
 | Slot | Kept form | Why |
 |:--|:--|:--|
-| an `any` / interface slot | hoisted, or `(@string)"text"u8` | the boxed value would be a `System.String`, the wrong dynamic type |
+| an `any` slot go2cs-gen cannot intercept (below), or a non-empty interface slot | hoisted pre-boxed, or `(@string)"text"u8` | the boxed value would be a `System.String`, the wrong dynamic type |
 | a named string type | `((Token)(@string)"x"u8)` | C# applies only one user-defined conversion (CS0029) |
 | an argument whose callee parameter mentions a type parameter | `"text"u8` | C# would infer the type argument as `string` |
 | a `go` or `defer` argument | `(@string)"text"` | the capture list passes each argument through the launcher's type parameters, which would infer `string` |
@@ -91,6 +91,40 @@ Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` sp
 **A wrong binding is a build error.** The analyzer `StringLiteralBindingAnalyzer` (`go2cs-gen`) reports [`GO2CS0004`](../DiagnosticCodes.md), an error, on a C# string literal in converted code that binds where Go's string would not: an `object` or interface parameter, a method type parameter inferred as `string`, or a `System.String` parameter beside an `@string` overload. A parameter marked `[GoTakesCSharpString]` (golib) accepts a C# string by design and is exempt; golib marks `panic`'s state and `len(string)`. Hand-owned assemblies, attribute arguments, `nameof` and parameter defaults are not checked.
 
 The decisions are made in the literal pre-pass (`hoistedLiteralOperations.go`, `packagePlainLits`), and `convExpr`'s `*ast.BasicLit` arm renders a registered node bare. The unit tests in `plainStringLiterals_test.go` cover every row above, and `StringLiteralBindingAnalyzerTests` covers the analyzer.
+
+## A literal in an `any` slot is a plain C# literal too, and go2cs-gen boxes it as a Go string
+
+Outside the standard library, a literal passed to an `any` parameter or a `...any` element renders bare as well, so `fmt.Println` reads as it does in Go:
+
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.go:81 -->
+```go
+	fmt.Println("pre boxed any target")
+```
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:69 -->
+```csharp
+    fmt.Println("pre boxed any target");
+```
+
+A bare C# string reaches an `object` slot by a reference conversion, so the callee would see `System.String`, which no Go type switch, assertion or comparison matches. go2cs-gen's `LiteralInterceptorGenerator` prevents that. For every such call it generates a C# [interceptor](https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md): a method that replaces the call at that one location, writes a cached, pre-boxed `@string` into the slot and calls the original method. The box is allocated once per literal per file, so the call allocates nothing, as the pre-boxed field it replaces did. The generated file sits beside the source file, in namespace `go2cs.Interceptors`; the interceptor carries `[GeneratedCode("go2cs-gen")]` and `[StackTraceHidden]`, so `runtime.Caller` and .NET stack traces skip its frame.
+
+The converter emits the bare literal only where the generator can intercept the call (`interceptableAnyArg`): an ordinary call of a non-generic function, or of a method the generator can resolve. Every other `any` slot keeps the pre-boxed field:
+
+| Call | Why it keeps the field |
+|:--|:--|
+| a `go` or `defer` argument | the capture list passes it through the launcher's type parameters |
+| a func value | its C# call is a delegate invocation, which no interceptor can replace |
+| a generic function, or a method of a generic type | its interceptor would itself be generic; deferred, and no behavioral fixture has one |
+| a method of a type this package declares, a promoted method, or a method whose receiver is not a plain identifier | the call binds a member go2cs-gen generates in the same compilation (a `ж<T>` receiver forwarder, a promoted forwarder, a field's ref property), and a generator cannot see another generator's output |
+
+A literal outside a call (a `[]any` element, an `any` return, assignment, send or map key) keeps its form too. A function call whose other arguments use generated members is still intercepted: the generator resolves it from its method group, which has one member.
+
+**Every gap is a build error.** The generator reports [`GO2CS0005`](../DiagnosticCodes.md) for a call with a bare literal in an `object` slot that it cannot intercept, with the reason, and [`GO2CS0006`](../DiagnosticCodes.md) when another member of the method group (usually one taking `@string`, which C# prefers to `object`) has captured a literal meant for an `any` slot. `GO2CS0004` stays the net: it accepts a boxed literal only when its call is intercepted, so a build in which the generator does not run fails instead of passing `System.String`.
+
+**The build must admit the interceptors.** `InterceptorsNamespaces` must list `go2cs.Interceptors`, or every intercepted call is `CS9137`. `src/Directory.Build.props` sets it for the repository's projects, golib's `go.lib.targets` for a NuGet consumer, and the converter's csproj template for a converted project outside the tree. The same three also make a go2cs-gen that cannot load an error (`CS8032`, `CS8034`, `CS8784`, `CS8785`, `CS9057`), and `go.lib.targets` refuses a compiler older than Roslyn 4.14 ([`GO2CS3001`](../DiagnosticCodes.md)). A .NET 10 SDK build runs its own Roslyn 5.0.
+
+**The cost is design time, and it grows with the sites.** To find each call's callee, the generator binds every call that passes a bare literal to an `any` slot. A generator that binds re-runs on every change to the compilation. So in an IDE, each edit re-binds the `any`-slot literal calls of every file that has one, not only the edited file. That is also what lets `GO2CS0006` see an overload added in another file. A file with no such call pays nothing, because the generator decides that from syntax alone. A build pays the same binding once, and the compiler reuses most of it. For a large project that is IDE-heavy or performance-critical, `-hoist-literals` is the opt-out: with every literal hoisted, the converter emits no bare literal and the generator binds nothing.
+
+`-hoist-literals` and the standard library's opt-out cover the `any` slot too: with every literal hoisted, the converter emits no bare literal for the generator to intercept. `plainStringLiterals_test.go` (`TestPlainLiteralsAtInterceptableAnySlots`, `TestAnySlotsGoInterceptorsCannotReachKeepTheHoist`) covers the converter's side, and GenTests' `LiteralInterceptorGeneratorTests` covers the generator, building and running each shape.
 
 ## String literals render as `u8` spans
 
@@ -181,7 +215,7 @@ A `var` initializer renders as an expression, so each literal piece of a concate
 
 ## A value-materializing string literal is HOISTED to a `static readonly` field beside its first use
 
-This is the standard library's form, and `-hoist-literals` gives it to any other package; elsewhere a literal in a `string` slot is [plain](#a-literal-in-a-string-slot-is-a-plain-c-literal), and only a literal used solely in `any` slots is hoisted (pre-boxed, below).
+This is the standard library's form, and `-hoist-literals` gives it to any other package; elsewhere a literal in a `string` slot is [plain](#a-literal-in-a-string-slot-is-a-plain-c-literal), a literal in an interceptable `any` slot is [plain too](#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string), and only a literal used solely in other `any` slots is hoisted (pre-boxed, below).
 
 Go keeps literals in read-only memory, so `return "true"` allocates nothing. In C# each conversion of a `u8` literal to `@string` copies it. So a literal that becomes a value is hoisted: a package-wide pre-pass (`hoistedLiteralOperations.go`) gives each such literal one field, declared above the function that first uses it, and every use names the field:
 

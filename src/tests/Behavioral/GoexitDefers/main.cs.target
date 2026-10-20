@@ -22,9 +22,6 @@ internal static void exitFromHelper(channel/*<-*/<@string> log) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object mainContinuesPastTheˢ = (@string)"main continues past the exited goroutine"u8;
-
 internal static partial void Main() {
     var log = new channel<@string>(16);
     var done = new channel<EmptyStruct>(0);
@@ -72,7 +69,7 @@ internal static partial void Main() {
     });
     fmt.Println(ᐸꟷ(after));
 
-    fmt.Println(mainContinuesPastTheˢ);
+    fmt.Println("main continues past the exited goroutine");
 }
 
 } // end main_package

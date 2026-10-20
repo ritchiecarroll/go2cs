@@ -168,7 +168,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
 
         nint leftLen = len(leftRunes);
         nint rightLen = len(rightRunes);
-        if ((nint)(leftLen & 0x1) != 0 || (nint)(rightLen & 0x1) != 0) {
+        if ((leftLen & 0x1) != 0 || (rightLen & 0x1) != 0) {
             throw panic("mergeRuneSets odd length []rune");
         }
         ref var lx = ref heap(new nint(), out var Ꮡlx);

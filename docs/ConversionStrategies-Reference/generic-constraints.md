@@ -209,9 +209,9 @@ would infer a different `T`:
 x := max(u8, 1)
 x += 100
 ```
-<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:92-93 -->
+<!-- source: src/tests/Behavioral/MinMaxBuiltin/main.cs.target:104-105 -->
 ```csharp
-var x = max(u8, (uint8)(1));
+var x = max(u8, (uint8)1);
 x += 100;
 ```
 
@@ -963,7 +963,7 @@ fmt.Println(show(2.5D));
 fmt.Println(show((rune)'a'));
 fmt.Println(show(1D + 2D.i()));
 fmt.Println(show<nint>(named));
-fmt.Println(show<nint>((1 << (int)(10))));
+fmt.Println(show<nint>(1 << 10));
 fmt.Println(show((@string)"s"));
 fmt.Println(show(true));
 fmt.Println(many<nint>(1, 2, 3));

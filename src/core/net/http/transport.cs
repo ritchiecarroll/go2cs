@@ -296,21 +296,21 @@ internal static nint writeBufferSize(this ref Transport t) {
     if (t.WriteBufferSize > 0) {
         return t.WriteBufferSize;
     }
-    return (4 << (int)(10));
+    return 4 << 10;
 }
 
 internal static nint readBufferSize(this ref Transport t) {
     if (t.ReadBufferSize > 0) {
         return t.ReadBufferSize;
     }
-    return (4 << (int)(10));
+    return 4 << 10;
 }
 
 internal static int64 maxHeaderResponseSize(this ref Transport t) {
     if (t.MaxResponseHeaderBytes > 0) {
         return t.MaxResponseHeaderBytes;
     }
-    return ((int64)10 << (int)(20)); // conservative default; same as http2
+    return (int64)10 << 20; // conservative default; same as http2
 }
 
 // Clone returns a deep copy of t's exported fields.
@@ -2910,7 +2910,7 @@ internal static (ж<Response> resp, error err) readResponse(this ref persistConn
         if (is1xxNonTerminal) {
             if (Ꮡtrace != nil && trace.Got1xxResponse != default!) {
                 {
-                    var errΔ2 = trace.Got1xxResponse(resCode, ((textproto.MIMEHeader)(map<@string, slice<@string>>)(~resp).Header)); if (errΔ2 != default!) {
+                    var errΔ2 = trace.Got1xxResponse(resCode, (textproto.MIMEHeader)(map<@string, slice<@string>>)(~resp).Header); if (errΔ2 != default!) {
                         return (default!, errΔ2);
                     }
                 }

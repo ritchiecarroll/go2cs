@@ -74,25 +74,6 @@ internal static @string /*msg*/ recovered(Action fn) {
     return msg;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object chanRecvˢ = (@string)"chan->recv:"u8;
-private static readonly object recvChanˢ = (@string)"recv->chan:"u8;
-private static readonly object chanSendˢ = (@string)"chan->send:"u8;
-private static readonly object sendRecvˢ = (@string)"send->recv:"u8;
-private static readonly object identicalˢ = (@string)"identical:"u8;
-private static readonly object distinctˢ = (@string)"distinct:"u8;
-private static readonly object rangeCount5ˢ = (@string)"range count(5):"u8;
-private static readonly object rangeSendOnlyˢ = (@string)"range send-only:"u8;
-private static readonly object rangeSendOnlyHungTheˢ = (@string)"range send-only: HUNG -- the direction guard did not fire before Recv"u8;
-private static readonly object sendRecvˢ2 = (@string)"send/recv:"u8;
-private static readonly object lenˢ = (@string)"len:"u8;
-private static readonly object capˢ = (@string)"cap:"u8;
-private static readonly object tryrecvˢ = (@string)"tryrecv:"u8;
-private static readonly object emptyValidˢ = (@string)"| empty valid:"u8;
-private static readonly object trysendˢ = (@string)"trysend:"u8;
-private static readonly object recvOnSendOnlyˢ = (@string)"recv on send-only:"u8;
-private static readonly object sendOnRecvOnlyˢ = (@string)"send on recv-only:"u8;
-
 internal static partial void Main() {
     var send = new channel/*<-*/<nint>(0, GoChanDir.Send);
     var recv = new /*<-*/channel<nint>(2, GoChanDir.Recv);
@@ -123,13 +104,13 @@ internal static partial void Main() {
     var ci = reflect.TypeOf(@new<channel<nint>>()).Elem();
     var ri = reflect.TypeOf(Ꮡ(/*<-*/channel<nint>.RecvOnly)).Elem();
     var si = reflect.TypeOf(Ꮡ(channel/*<-*/<nint>.SendOnly)).Elem();
-    fmt.Println(chanRecvˢ, ci.AssignableTo(ri), recvChanˢ, ri.AssignableTo(ci), chanSendˢ, ci.AssignableTo(si), sendRecvˢ, si.AssignableTo(ri));
-    fmt.Println(identicalˢ, AreEqual(ci, reflect.TypeOf(both)), distinctˢ, !AreEqual(ci, ri), !AreEqual(ri, si));
+    fmt.Println("chan->recv:", ci.AssignableTo(ri), "recv->chan:", ri.AssignableTo(ci), "chan->send:", ci.AssignableTo(si), "send->recv:", si.AssignableTo(ri));
+    fmt.Println("identical:", AreEqual(ci, reflect.TypeOf(both)), "distinct:", !AreEqual(ci, ri), !AreEqual(ri, si));
 
     sink sk = new sink(0);
     describe("defined chan", reflect.TypeOf(sk));
 
-    fmt.Println(rangeCount5ˢ, walkRangeShape(reflect.ValueOf(count(5))));
+    fmt.Println("range count(5):", walkRangeShape(reflect.ValueOf(count(5))));
 
     var done = new channel<@string>(1);
     var doneʗ1 = done;
@@ -140,25 +121,25 @@ internal static partial void Main() {
     var selᴛ2 = time.After((time.Duration)(5000000000L));
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
     case 0 when selᴛ1.ꟷᐳ(out var got): {
-        fmt.Println(rangeSendOnlyˢ, got);
+        fmt.Println("range send-only:", got);
         break;
     }
     case 1 when selᴛ2.ꟷᐳ(out _): {
-        fmt.Println(rangeSendOnlyHungTheˢ);
+        fmt.Println("range send-only: HUNG -- the direction guard did not fire before Recv");
         break;
     }}
 
     var buffered = new channel<nint>(2);
     var bv = reflect.ValueOf(buffered);
-    bv.Send(reflect.ValueOf((nint)(41)));
-    bv.Send(reflect.ValueOf((nint)(42)));
+    bv.Send(reflect.ValueOf((nint)41));
+    bv.Send(reflect.ValueOf((nint)42));
     var (first, ok1) = bv.Recv();
-    fmt.Println(sendRecvˢ2, first.Int(), ok1, lenˢ, bv.Len(), capˢ, bv.Cap());
+    fmt.Println("send/recv:", first.Int(), ok1, "len:", bv.Len(), "cap:", bv.Cap());
 
     var (drained, ok2) = bv.TryRecv();
     var (empty, ok3) = bv.TryRecv();
-    fmt.Println(tryrecvˢ, drained.Int(), ok2, emptyValidˢ, empty.IsValid(), ok3);
-    fmt.Println(trysendˢ, bv.TrySend(reflect.ValueOf((nint)(7))));
+    fmt.Println("tryrecv:", drained.Int(), ok2, "| empty valid:", empty.IsValid(), ok3);
+    fmt.Println("trysend:", bv.TrySend(reflect.ValueOf((nint)7)));
 
     var closing = new channel<@string>(1);
     closing.ᐸꟷ("last");
@@ -169,12 +150,12 @@ internal static partial void Main() {
     fmt.Printf("closed: %q %v then %q %v\n"u8, drainedVal.String(), okDrain, zeroVal.String(), okZero);
 
     var sendʗ1 = send;
-    fmt.Println(recvOnSendOnlyˢ, recovered(() => {
+    fmt.Println("recv on send-only:", recovered(() => {
         reflect.ValueOf(sendʗ1).Recv();
     }));
     var recvʗ1 = recv;
-    fmt.Println(sendOnRecvOnlyˢ, recovered(() => {
-        reflect.ValueOf(recvʗ1).Send(reflect.ValueOf((nint)(1)));
+    fmt.Println("send on recv-only:", recovered(() => {
+        reflect.ValueOf(recvʗ1).Send(reflect.ValueOf((nint)1));
     }));
 }
 

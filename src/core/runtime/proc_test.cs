@@ -494,7 +494,7 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("want %q, got %q"u8, want, output);
     }
 
-    var buf = new slice<byte>((1 << (int)(20)));
+    var buf = new slice<byte>((1 << 20));
 
     // Try up to 10 times for a match before giving up.
     // This is a fundamentally racy check but it's important
@@ -511,7 +511,7 @@ public static partial void TestNumGoroutine(ж<testing.T> Ꮡt) {
 
         // To avoid double-counting "goroutine" in "goroutine $m [running]:"
         // and "created by $func in goroutine $n", remove the latter
-        @string outputΔ1 = strings.ReplaceAll(((@string)buf), inGoroutineˢ, ""u8);
+        @string outputΔ1 = strings.ReplaceAll((@string)buf, inGoroutineˢ, ""u8);
         nint nstk = strings.Count(outputΔ1, goroutineˢ2);
         if (n == nstk) {
             break;
@@ -571,13 +571,13 @@ public static partial void TestPingPongHog(ж<testing.T> Ꮡt) {
         // Start two co-scheduled hog goroutines.
         for (nint i = 0; i < 2; i++) {
             var runʗ1 = run;
-            goǃ(runʗ1, (nint)(1000000), ᏑhogCount, hogChan);
+            goǃ(runʗ1, (nint)1000000, ᏑhogCount, hogChan);
         }
 
         // Start two co-scheduled light goroutines.
         for (nint i = 0; i < 2; i++) {
             var runʗ2 = run;
-            goǃ(runʗ2, (nint)(1000), ᏑlightCount, lightChan);
+            goǃ(runʗ2, (nint)1000, ᏑlightCount, lightChan);
         }
 
         // Start goroutine pairs and wait for a few preemption rounds.
@@ -1510,7 +1510,7 @@ internal static error /*err*/ runTestTracesSTW(ж<testing.T> Ꮡt, nint run, @st
         var bufʗ1 = buf;
         defer(() => {
             if (Ꮡerr.ValueSlot != default! || Ꮡt.Failed()) {
-                testtrace.Dump(Ꮡt, fmt.Sprintf("Test%s-run%d"u8, name, run), ((slice<byte>)bufʗ1), false);
+                testtrace.Dump(Ꮡt, fmt.Sprintf("Test%s-run%d"u8, name, run), (slice<byte>)bufʗ1, false);
             }
         }, ref ᒐ);
 

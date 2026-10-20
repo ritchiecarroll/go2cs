@@ -91,8 +91,8 @@ internal static void checkGdbVersion(ж<testing.T> Ꮡt) {
     if (len(matches) < 3) {
         Ꮡt.Skipf("skipping: can't determine gdb version from\n%s\n"u8, @out);
     }
-    var (major, err1) = strconv.Atoi(((@string)matches[1]));
-    var (minor, err2) = strconv.Atoi(((@string)matches[2]));
+    var (major, err1) = strconv.Atoi((@string)matches[1]);
+    var (minor, err2) = strconv.Atoi((@string)matches[2]);
     if (err1 != default! || err2 != default!) {
         Ꮡt.Skipf("skipping: can't determine gdb version: %v, %v"u8, err1, err2);
     }
@@ -122,7 +122,7 @@ internal static void checkGdbPython(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Skipf("skipping due to issue running gdb: %v"u8, err);
     }
-    if (strings.TrimSpace(((@string)@out)) != "go gdb python support"u8) {
+    if (strings.TrimSpace((@string)@out) != "go gdb python support"u8) {
         Ꮡt.Skipf("skipping due to lack of python gdb support: %s"u8, @out);
     }
 }
@@ -174,7 +174,7 @@ internal static void checkPtraceScope(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to read file: %v"u8, err);
     }
-    (var value, err) = strconv.Atoi(strings.TrimSpace(((@string)data)));
+    (var value, err) = strconv.Atoi(strings.TrimSpace((@string)data));
     if (err != default!) {
         Ꮡt.Fatalf("failed converting value to int: %v"u8, err);
     }
@@ -422,7 +422,7 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
     var partRe = Δregexp.MustCompile(msBeginNNNENDˢ);
     var blocks = new map<@string, @string>{};
     foreach (var (_, subs) in partRe.FindAllSubmatch(got, -1)) {
-        blocks[((@string)subs[1])] = ((@string)subs[2]);
+        blocks[((@string)subs[1])] = (@string)subs[2];
     }
 
     var infoGoroutinesRe = Δregexp.MustCompile(sDSRunningSˢ);
@@ -744,7 +744,7 @@ public static void TestGdbAutotmpTypes(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
     }
 
-    @string sgot = ((@string)got);
+    @string sgot = (@string)got;
 
     // Check that the backtrace matches the source code.
     var types = new @string[]{
@@ -817,7 +817,7 @@ public static void TestGdbConst(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("gdb exited with error: %v"u8, err);
     }
 
-    @string sgot = strings.ReplaceAll(((@string)got), "\r\n"u8, "\n"u8);
+    @string sgot = strings.ReplaceAll((@string)got, "\r\n"u8, "\n"u8);
 
     if (!strings.Contains(sgot, "\n$1 = 42\n$2 = 18446744073709551615\n$3 = -1\n$4 = 1 '\\001'\n$5 = 8192"u8)) {
         Ꮡt.Fatalf("output mismatch"u8);

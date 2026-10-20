@@ -72,7 +72,7 @@ public static void TestTestdata(ж<testing.T> Ꮡt) {
             if (len((~a).Files) < 1 || (~a).Files[0].Name != "input"u8) {
                 tΔ1.Fatalf("first file is not %q"u8, inputˢ);
             }
-            var d = Ꮡp.Parse(((@string)stripDollarsʗ1((~a).Files[0].Data)));
+            var d = Ꮡp.Parse((@string)stripDollarsʗ1((~a).Files[0].Data));
             foreach (var (_, f) in (~a).Files[1..]) {
                 var want = stripDollarsʗ1(f.Data);
                 while (len(want) >= 2 && want[len(want) - 1] == (rune)'\n' && want[len(want) - 2] == (rune)'\n') {
@@ -188,20 +188,20 @@ internal static void dumpTo(ж<bytes.Buffer> Ꮡout, nint indent, any x) {
         break;
     }
     case Plain xΔ1: {
-        if (!strings.Contains(((@string)xΔ1), "\n"u8)){
-            fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(Ꮡout), "Plain %q"u8, ((@string)xΔ1));
+        if (!strings.Contains((@string)xΔ1, "\n"u8)){
+            fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(Ꮡout), "Plain %q"u8, (@string)xΔ1);
         } else {
             fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(Ꮡout), "Plain"u8);
-            dumpTo(Ꮡout, indent + 1, ((@string)xΔ1));
+            dumpTo(Ꮡout, indent + 1, (@string)xΔ1);
         }
         break;
     }
     case Italic xΔ1: {
-        if (!strings.Contains(((@string)xΔ1), "\n"u8)){
-            fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(Ꮡout), "Italic %q"u8, ((@string)xΔ1));
+        if (!strings.Contains((@string)xΔ1, "\n"u8)){
+            fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(Ꮡout), "Italic %q"u8, (@string)xΔ1);
         } else {
             fmt.Fprintf(new comment_internal_test_package.bytes_BufferжWriter(Ꮡout), "Italic"u8);
-            dumpTo(Ꮡout, indent + 1, ((@string)xΔ1));
+            dumpTo(Ꮡout, indent + 1, (@string)xΔ1);
         }
         break;
     }

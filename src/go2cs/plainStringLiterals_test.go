@@ -21,9 +21,16 @@ import (
 // hoistedLiteralOperations.go). Every literal is distinct, so each arm's assertion names exactly one
 // site.
 const plainLiteralFixture = "package plit\n\n" +
+	"import \"sync\"\n\n" +
+	"type holder struct{ m sync.Map }\n\n" +
 	"type Token string\n\n" +
 	"type Box[T any] struct{ v T }\n\n" +
 	"func (b *Box[T]) Set(v T) { b.v = v }\n\n" +
+	"func (b *Box[T]) Note(v any) {}\n\n" +
+	"func Tag[T any](t T, label any) {}\n\n" +
+	"type Sink interface{ Put(v any) }\n\n" +
+	"type logger struct{}\n\n" +
+	"func (l *logger) Log(args ...any) {}\n\n" +
 	"func Echo[T any](v T) T { return v }\n\n" +
 	"func Pair[K comparable, V any](k K, v V) map[K]V { return map[K]V{k: v} }\n\n" +
 	"func take(s string) int { return len(s) }\n\n" +
@@ -44,11 +51,29 @@ const plainLiteralFixture = "package plit\n\n" +
 	"\tdefined = \"assigned local value\"\n" +
 	"\tshow(\"passed to an any slot\")\n" +
 	"\tshow(\"mixed any and value use\")\n" +
+	"\tvar l logger\n" +
+	"\tl.Log(\"method variadic any\", 1)\n" +
+	"\tvar mp sync.Map\n" +
+	"\tmp.Store(\"cross package method\", 1)\n" +
+	"\tvar h holder\n" +
+	"\th.m.Store(\"field receiver method\", 2)\n" +
+	"\tvar sink Sink\n" +
+	"\tif sink != nil {\n" +
+	"\t\tsink.Put(\"interface method any\")\n" +
+	"\t}\n" +
+	"\tshow(\"\")\n" +
+	"\tdefer show(\"deferred any value\")\n" +
+	"\tgo show(\"goroutine any value\")\n" +
+	"\tf := show\n" +
+	"\tf(\"func value any\")\n" +
+	"\tTag(1, \"generic function any slot\")\n" +
+	"\t_ = []any{\"composite any element\"}\n" +
 	"\ttake(\"mixed any and value use\")\n" +
 	"\tEcho(\"echo through a generic\")\n" +
 	"\t_ = Pair(\"generic map key\", 1)\n" +
 	"\tvar b Box[string]\n" +
 	"\tb.Set(\"generic method value\")\n" +
+	"\tb.Note(\"generic type any slot\")\n" +
 	"\ttoken(\"named string slot\")\n" +
 	"\tdefer note(\"deferred argument value\")\n" +
 	"\tgo note(\"goroutine argument value\")\n" +
@@ -137,8 +162,7 @@ func TestPlainLiteralsAtStringSlots(t *testing.T) {
 }
 
 // TestPlainLiteralsKeepTheHoistWhereABareStringBindsWrong: every slot where a bare C# string would bind
-// the wrong C# type keeps today's form. An `any` slot keeps its pre-boxed field (a mixed literal's field
-// becomes the pre-boxed object). An inferred generic call keeps its field, since C# would infer
+// the wrong C# type keeps today's form. An inferred generic call keeps its field, since C# would infer
 // T = System.String: `Pair("generic map key", 1)` would make a map<string, nint>, which compiles and
 // diverges (G's review, 2026-10-18). So do a generic method on a generic type, a named string slot
 // (CS0029), go and defer arguments (the capture list infers its own type arguments) and a multi-line
@@ -147,10 +171,6 @@ func TestPlainLiteralsKeepTheHoistWhereABareStringBindsWrong(t *testing.T) {
 	emitted := convertPlainLiteralFixture(t, false)
 
 	for _, want := range []string{
-		`private static readonly object passedToAnAnySlotˢ = (@string)"passed to an any slot"u8;`,
-		`show(passedToAnAnySlotˢ);`,
-		`private static readonly object mixedAnyAndValueUseˢ = (@string)"mixed any and value use"u8;`,
-		`show(mixedAnyAndValueUseˢ);`,
 		`Echo(echoThroughAGenericˢ);`,
 		`Pair(genericMapKeyˢ, `,
 		`b.Set(genericMethodValueˢ);`,
@@ -171,10 +191,73 @@ func TestPlainLiteralsKeepTheHoistWhereABareStringBindsWrong(t *testing.T) {
 		`token("named string slot")`,
 		`defer(note, "deferred argument value"`,
 		`goǃ(note, "goroutine argument value"`,
-		`show("passed to an any slot")`,
 	} {
 		if strings.Contains(emitted, unwanted) {
 			t.Errorf("a bare C# string reached a slot that binds it wrong (%q):\n%s", unwanted, emitted)
+		}
+	}
+}
+
+// TestPlainLiteralsAtInterceptableAnySlots: an argument in an `any` slot of an ordinary call of a non-generic
+// function or method renders as the bare C# literal and claims no field; go2cs-gen's LiteralInterceptorGenerator
+// boxes it as a Go string (owner ruling 2026-10-17, part 2). That covers a function, a pointer-receiver method's
+// `...any` element, an interface method and the empty literal; a literal used in both an any slot and a string
+// slot is plain in both.
+func TestPlainLiteralsAtInterceptableAnySlots(t *testing.T) {
+	emitted := convertPlainLiteralFixture(t, false)
+
+	for _, want := range []string{
+		`show("passed to an any slot");`,
+		`show("mixed any and value use");`,
+		`mp.Store("cross package method", (nint)1);`,
+		`sink.Put("interface method any");`,
+		`show("");`,
+	} {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("want the bare literal in an interceptable any slot %q:\n%s", want, emitted)
+		}
+	}
+
+	for _, unwanted := range []string{"passedToAnAnySlotˢ", "mixedAnyAndValueUseˢ", "crossPackageMethodˢ", "interfaceMethodAnyˢ"} {
+		if strings.Contains(emitted, unwanted) {
+			t.Errorf("an intercepted literal claimed a field (%q):\n%s", unwanted, emitted)
+		}
+	}
+}
+
+// TestAnySlotsGoInterceptorsCannotReachKeepTheHoist: an any slot the generator cannot intercept keeps the
+// pre-boxed field: a go or defer argument (the capture list), a func value (a delegate Invoke), a generic
+// function and a method of a generic type (their interceptor would itself be generic, deferred). A composite
+// element is not a call and keeps its inline Go string.
+func TestAnySlotsGoInterceptorsCannotReachKeepTheHoist(t *testing.T) {
+	emitted := convertPlainLiteralFixture(t, false)
+
+	for _, want := range []string{
+		`private static readonly object deferredAnyValueˢ = (@string)"deferred any value"u8;`,
+		`private static readonly object goroutineAnyValueˢ = (@string)"goroutine any value"u8;`,
+		`f(funcValueAnyˢ);`,
+		`Tag<nint>(1, genericFunctionAnySlotˢ);`,
+		`b.Note(genericTypeAnySlotˢ);`,
+		`l.Log(methodVariadicAnyˢ, (nint)1);`,
+		`.Store(fieldReceiverMethodˢ, (nint)2);`,
+		`(@string)"composite any element"u8`,
+	} {
+		if !strings.Contains(emitted, want) {
+			t.Errorf("want the pre-boxed form %q:\n%s", want, emitted)
+		}
+	}
+
+	for _, unwanted := range []string{
+		`"deferred any value", ref`,
+		`goǃ(show, "goroutine any value"`,
+		`f("func value any")`,
+		`Tag<nint>(1, "generic function any slot")`,
+		`b.Note("generic type any slot")`,
+		`l.Log("method variadic any"`,
+		`Store("field receiver method"`,
+	} {
+		if strings.Contains(emitted, unwanted) {
+			t.Errorf("a bare literal reached an any slot no interceptor can reach (%q):\n%s", unwanted, emitted)
 		}
 	}
 }

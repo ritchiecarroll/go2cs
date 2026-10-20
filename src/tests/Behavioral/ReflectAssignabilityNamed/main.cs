@@ -27,16 +27,10 @@ internal static void @try(@string label, Action set) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object sStringˢ = (@string)"S->string:"u8;
-private static readonly object stringSˢ = (@string)"| string->S:"u8;
-private static readonly object byteBˢ = (@string)"[]byte->B:"u8;
-private static readonly object bByteˢ = (@string)"| B->[]byte:"u8;
-
 internal static void Main() {
     ref var dstString = ref heap(new @string(), out var ᏑdstString);
     @try("S->string (must PANIC)", () => {
-        reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf(((S)(@string)"x"u8)));
+        reflect.ValueOf(ᏑdstString).Elem().Set(reflect.ValueOf((S)(@string)"x"u8));
     });
 
     ref var dstB = ref heap<B>(out var ᏑdstB);
@@ -46,20 +40,20 @@ internal static void Main() {
 
     ref var dstBytes = ref heap<slice<byte>>(out var ᏑdstBytes);
     @try("B->[]byte (must be ok)", () => {
-        reflect.ValueOf(ᏑdstBytes).Elem().Set(reflect.ValueOf(((B)slice<byte>((@string)"z"u8))));
+        reflect.ValueOf(ᏑdstBytes).Elem().Set(reflect.ValueOf((B)slice<byte>((@string)"z"u8)));
     });
 
     ref var dstS = ref heap(new S(), out var ᏑdstS);
     @try("string->S (must PANIC)", () => {
-        reflect.ValueOf(ᏑdstS).Elem().Set(reflect.ValueOf((@string)"w"u8));
+        reflect.ValueOf(ᏑdstS).Elem().Set(reflect.ValueOf("w"));
     });
 
-    var st = reflect.TypeOf((@string)""u8);
-    var St = reflect.TypeOf(((S)(@string)""u8));
+    var st = reflect.TypeOf("");
+    var St = reflect.TypeOf((S)(@string)""u8);
     var bt = reflect.TypeOf(slice<byte>(default!));
-    var Bt = reflect.TypeOf(((B)default!));
-    fmt.Println(sStringˢ, St.AssignableTo(st), stringSˢ, st.AssignableTo(St));
-    fmt.Println(byteBˢ, bt.AssignableTo(Bt), bByteˢ, Bt.AssignableTo(bt));
+    var Bt = reflect.TypeOf((B)default!);
+    fmt.Println("S->string:", St.AssignableTo(st), "| string->S:", st.AssignableTo(St));
+    fmt.Println("[]byte->B:", bt.AssignableTo(Bt), "| B->[]byte:", Bt.AssignableTo(bt));
 }
 
 } // end main_package

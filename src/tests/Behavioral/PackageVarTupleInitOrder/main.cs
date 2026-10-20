@@ -14,7 +14,7 @@ internal static (Sum, error) build(/*[4]*/ array<byte> src) {
         return (new Sum(new byte[4].array()), errors.New("B was read before it was initialized"));
     }
 
-    return (((Sum)src), default!);
+    return ((Sum)src, default!);
 }
 
 internal static Sum must(Sum s, error err) {
@@ -40,13 +40,10 @@ internal static void initᴛAddressed() {
     Addressed = must(ᴛ3, ᴛ4);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object addressedˢ = (@string)"Addressed:"u8;
-
 internal static void Main() {
     var p = ᏑAddressed;
-    fmt.Println((@string)"A:"u8, A);
-    fmt.Println(addressedˢ, p.Value);
+    fmt.Println("A:", A);
+    fmt.Println("Addressed:", p.Value);
 }
 
 } // end main_package

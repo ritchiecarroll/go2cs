@@ -204,7 +204,7 @@ public static void Test16BitsPerColorChannel(ж<testing.T> Ꮡt) {
         var c = cm.Convert(new color.RGBA64(0x1234, 0x1234, 0x1234, 0x1234)); // Premultiplied alpha.
         var (r, _, _, _) = c.RGBA();
         if (r != 0x1234) {
-            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, c, (nint)(0x1234), r);
+            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, c, (nint)0x1234, r);
             continue;
         }
     }
@@ -214,7 +214,7 @@ public static void Test16BitsPerColorChannel(ж<testing.T> Ꮡt) {
         m.Set(1, 2, new color.NRGBA64(0xffff, 0xffff, 0xffff, 0x1357)); // Non-premultiplied alpha.
         var (r, _, _, _) = m.At(1, 2).RGBA();
         if (r != 0x1357) {
-            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, m, (nint)(0x1357), r);
+            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, m, (nint)0x1357, r);
             continue;
         }
     }

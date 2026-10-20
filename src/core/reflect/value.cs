@@ -82,7 +82,7 @@ internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
 internal static ΔKind kind(this flag f) {
-    return ((ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask))));
+    return (ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask)));
 }
 
 internal static flag ro(this flag f) {
@@ -267,7 +267,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
     ж<abi.Type> rcvrtype = default!;
     if ((flag)(v.flag & flagMethod) != 0){
         rcvr = v;
-        (rcvrtype, t, fn) = methodReceiver(op, v, ((nint)(uintptr)v.flag >> (int)(flagMethodShift)));
+        (rcvrtype, t, fn) = methodReceiver(op, v, (nint)(uintptr)v.flag >> (int)(flagMethodShift));
     } else 
     if ((flag)(v.flag & flagIndir) != 0){
         fn = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
@@ -528,7 +528,7 @@ break_stepsLoop:;
                     print((@string)"kind="u8, steps[0].kind, (@string)", type="u8, stringFor(tv), (@string)"\n"u8);
                     throw panic("mismatch between ABI description and types");
                 }
-                ret[i] = new ΔValue(tv, regArgs.Ptrs[steps[0].ireg], ((flag)(uintptr)(uint8)tv.Kind()));
+                ret[i] = new ΔValue(tv, regArgs.Ptrs[steps[0].ireg], (flag)(uintptr)(uint8)tv.Kind());
                 continue;
             }
 
@@ -620,7 +620,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
             @in = builtin.append(@in, Zero(new rtypeжΔType(toRType(typ))));
             continue;
         }
-        var v = new ΔValue(typ, nil, ((flag)(uintptr)(uint8)typ.Kind()));
+        var v = new ΔValue(typ, nil, (flag)(uintptr)(uint8)typ.Kind());
         var steps = abid.call.stepsForValue(i);
         {
             var st = steps[0]; if (st.kind == abiStepStack){
@@ -1617,7 +1617,7 @@ internal static ж<abi.Type> abiTypeSlow(this ΔValue v) {
 
     // Method value.
     // v.typ describes the receiver, not the method type.
-    nint i = ((nint)(uintptr)v.flag >> (int)(flagMethodShift));
+    nint i = (nint)(uintptr)v.flag >> (int)(flagMethodShift);
     if (v.typ().Kind() == abi.Interface) {
         // Method on interface.
         var tt = typ.Reinterpret<abi.Type, interfaceType>();
@@ -1903,7 +1903,7 @@ internal static ΔValue assignTo(this ΔValue v, @string context, ж<abi.Type> �
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new ΔValue(Ꮡdst, nil, ((flag)(uintptr)(nuint)ΔInterface));
+            return new ΔValue(Ꮡdst, nil, (flag)(uintptr)(nuint)ΔInterface);
         }
         var x = valueInterface(v, false);
         if (target == nil) {
@@ -2318,7 +2318,7 @@ internal static ΔValue cvtIntString(ΔValue v, ΔType t) {
     @string s = "\uFFFD"u8;
     {
         var x = v.Int(); if ((int64)(rune)x == x) {
-            s = ((@string)(rune)x);
+            s = (@string)(rune)x;
         }
     }
     return makeString(v.flag.ro(), s, t);
@@ -2329,7 +2329,7 @@ internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
     @string s = "\uFFFD"u8;
     {
         var x = v.Uint(); if ((uint64)(rune)x == x) {
-            s = ((@string)(rune)x);
+            s = (@string)(rune)x;
         }
     }
     return makeString(v.flag.ro(), s, t);
@@ -2337,7 +2337,7 @@ internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
 
 // convertOp: []byte -> string
 internal static ΔValue cvtBytesString(ΔValue v, ΔType t) {
-    return makeString(v.flag.ro(), ((@string)v.Bytes()), t);
+    return makeString(v.flag.ro(), (@string)v.Bytes(), t);
 }
 
 // convertOp: string -> []byte
@@ -2347,7 +2347,7 @@ internal static ΔValue cvtStringBytes(ΔValue v, ΔType t) {
 
 // convertOp: []rune -> string
 internal static ΔValue cvtRunesString(ΔValue v, ΔType t) {
-    return makeString(v.flag.ro(), ((@string)v.runes()), t);
+    return makeString(v.flag.ro(), (@string)v.runes(), t);
 }
 
 // convertOp: string -> []rune

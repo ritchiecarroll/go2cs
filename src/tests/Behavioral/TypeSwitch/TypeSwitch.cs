@@ -5,27 +5,17 @@ using fmt = fmt_package;
 partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object iMNilˢ = (@string)"I'm nil"u8;
-private static readonly object iMABoolˢ = (@string)"I'm a bool"u8;
 private static readonly object heyˢ = (@string)"hey"u8;
-private static readonly object intˢ = (@string)"int"u8;
-private static readonly object int32ˢ = (@string)"int32"u8;
-private static readonly object uintˢ = (@string)"uint"u8;
-private static readonly object uint32ˢ = (@string)"uint32"u8;
-private static readonly object otherˢ = (@string)"other"u8;
-private static readonly object uintWordˢ = (@string)"uint word"u8;
-private static readonly object uintptrWordˢ = (@string)"uintptr word"u8;
-private static readonly object textˢ = (@string)"text"u8;
 
 internal static void Main() {
     void whatAmI(any i) {
         switch (i.type()) {
         case null: {
-            fmt.Println(iMNilˢ);
+            fmt.Println("I'm nil");
             break;
         }
         case bool t: {
-            fmt.Println(iMABoolˢ);
+            fmt.Println("I'm a bool");
             break;
         }
         case nint _:
@@ -43,7 +33,7 @@ internal static void Main() {
         }}
     }
     whatAmI(true);
-    whatAmI((nint)(1));
+    whatAmI((nint)1);
     whatAmI((int64)2);
     whatAmI((uint64)2);
     whatAmI(heyˢ);
@@ -52,23 +42,23 @@ internal static void Main() {
     void classify(any i) {
         switch (i.type()) {
         case nint: {
-            fmt.Println(intˢ);
+            fmt.Println("int");
             break;
         }
         case int32: {
-            fmt.Println(int32ˢ);
+            fmt.Println("int32");
             break;
         }
         case nuint: {
-            fmt.Println(uintˢ);
+            fmt.Println("uint");
             break;
         }
         case uint32: {
-            fmt.Println(uint32ˢ);
+            fmt.Println("uint32");
             break;
         }
         default: {
-            fmt.Println(otherˢ);
+            fmt.Println("other");
             break;
         }}
 
@@ -85,23 +75,23 @@ internal static void Main() {
     void kind(any i) {
         switch (i.type()) {
         case nuint: {
-            fmt.Println(uintWordˢ);
+            fmt.Println("uint word");
             break;
         }
         case uint32: {
-            fmt.Println(uintWordˢ);
+            fmt.Println("uint word");
             break;
         }
         case uintptr: {
-            fmt.Println(uintptrWordˢ);
+            fmt.Println("uintptr word");
             break;
         }
         case @string: {
-            fmt.Println(textˢ);
+            fmt.Println("text");
             break;
         }
         default: {
-            fmt.Println(otherˢ);
+            fmt.Println("other");
             break;
         }}
 
@@ -120,7 +110,7 @@ internal static void Main() {
     scanInto(Ꮡnum);
     fmt.Println(flag, num);
 
-    fmt.Println(probe(true), probe((nint)(7)), probe((@string)"ab"u8));
+    fmt.Println(probe(true), probe((nint)7), probe("ab"));
 
     marker mk = default!;
     fmt.Println(mk.tag(new byte[]{7, 8}.slice()));

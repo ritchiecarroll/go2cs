@@ -27,12 +27,6 @@ internal static void show(@string name, reflectꓸType a, reflectꓸType b) {
     fmt.Printf("%-28s == %v  deep %v  (%v / %v)\n"u8, name, AreEqual(a, b), reflect.DeepEqual(a, b), a, b);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object errorDeepEqualTypeOfˢ = (@string)"error DeepEqual TypeOf/TypeFor"u8;
-private static readonly object mapKeyTypeForTypeOfˢ = (@string)"map key TypeFor->TypeOf"u8;
-private static readonly object syncMapTypeOfTypeForˢ = (@string)"sync.Map TypeOf->TypeFor"u8;
-private static readonly object typeForTypeOfˢ = (@string)"TypeFor->TypeOf"u8;
-
 internal static void Main() {
     ref var s = ref heap(new T(), out var Ꮡs);
     ref var p = ref heap<ж<T>>(out var Ꮡp);
@@ -57,19 +51,19 @@ internal static void Main() {
     show("method value Type/TypeOf", mt, reflect.TypeOf((nint p1) => mmʗ1.Do(p1)));
     show("method value Type/TypeFor", mt, reflect.TypeFor<Func<nint, @string>>());
 
-    fmt.Println(errorDeepEqualTypeOfˢ, reflect.DeepEqual(Ꮡ(new typeError(reflect.TypeOf(s))), Ꮡ(new typeError(reflect.TypeFor<T>()))));
+    fmt.Println("error DeepEqual TypeOf/TypeFor", reflect.DeepEqual(Ꮡ(new typeError(reflect.TypeOf(s))), Ꮡ(new typeError(reflect.TypeFor<T>()))));
 
     var m = new map<reflectꓸType, nint>{[reflect.TypeFor<T>()] = 1, [reflect.TypeFor<ж<T>>()] = 2};
     var (_, ok1) = m[reflect.TypeOf(s), ꟷ];
     var (_, ok2) = m[reflect.TypeOf(p.OrTypedNil()), ꟷ];
-    fmt.Println(mapKeyTypeForTypeOfˢ, ok1, ok2);
+    fmt.Println("map key TypeFor->TypeOf", ok1, ok2);
 
     ref var sm = ref heap(new Δsync.Map(), out var Ꮡsm);
-    Ꮡsm.Store(reflect.TypeOf(s), (nint)(1));
+    Ꮡsm.Store(reflect.TypeOf(s), (nint)1);
     var (_, ok3) = Ꮡsm.Load(reflect.TypeFor<T>());
-    Ꮡsm.Store(reflect.TypeFor<Arr>(), (nint)(2));
+    Ꮡsm.Store(reflect.TypeFor<Arr>(), (nint)2);
     var (_, ok4) = Ꮡsm.Load(reflect.TypeOf(a));
-    fmt.Println(syncMapTypeOfTypeForˢ, ok3, typeForTypeOfˢ, ok4);
+    fmt.Println("sync.Map TypeOf->TypeFor", ok3, "TypeFor->TypeOf", ok4);
 }
 
 } // end main_package

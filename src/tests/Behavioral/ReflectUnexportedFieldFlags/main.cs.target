@@ -18,27 +18,20 @@ partial struct allExported {
     public nint B;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bynameSecretˢ = (@string)"byname secret:"u8;
-private static readonly object bynameExportedˢ = (@string)"byname Exported:"u8;
-private static readonly object bynameAbsentˢ = (@string)"byname absent:"u8;
-private static readonly object decodeMixedˢ = (@string)"decode mixed:      "u8;
-private static readonly object decodeAllExportedˢ = (@string)"decode allExported:"u8;
-
 internal static void Main() {
     var t = reflect.TypeOf(new mixed(nil));
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
-        fmt.Printf("%d %-10s exported=%-5v pkgpath=%q tag=%q\n"u8, i, fΔ1.Name, fΔ1.IsExported(), fΔ1.PkgPath, ((@string)fΔ1.Tag));
+        fmt.Printf("%d %-10s exported=%-5v pkgpath=%q tag=%q\n"u8, i, fΔ1.Name, fΔ1.IsExported(), fΔ1.PkgPath, (@string)fΔ1.Tag);
     }
 
     var (f, ok) = t.FieldByName("secret");
-    fmt.Println(bynameSecretˢ, ok, f.IsExported(), f.PkgPath);
+    fmt.Println("byname secret:", ok, f.IsExported(), f.PkgPath);
     (f, ok) = t.FieldByName("Exported");
-    fmt.Println(bynameExportedˢ, ok, f.IsExported(), f.PkgPath);
+    fmt.Println("byname Exported:", ok, f.IsExported(), f.PkgPath);
     (_, ok) = t.FieldByName("absent");
-    fmt.Println(bynameAbsentˢ, ok);
+    fmt.Println("byname absent:", ok);
 
     ref var m = ref heap(new mixed(), out var Ꮡm);
     var v = reflect.ValueOf(Ꮡm).Elem();
@@ -48,9 +41,9 @@ internal static void Main() {
             v.Field(i).CanSet() == t.Field(i).IsExported());
     }
 
-    fmt.Println(decodeMixedˢ, decode(Ꮡm));
+    fmt.Println("decode mixed:      ", decode(Ꮡm));
     ref var a = ref heap(new allExported(), out var Ꮡa);
-    fmt.Println(decodeAllExportedˢ, decode(Ꮡa), a);
+    fmt.Println("decode allExported:", decode(Ꮡa), a);
 }
 
 internal static @string decode(any p) {

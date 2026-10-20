@@ -2803,7 +2803,7 @@ internal static (uint16 v, nint sz) lookup(this ref nfcTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -2820,13 +2820,13 @@ internal static (uint16 v, nint sz) lookup(this ref nfcTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = nfcIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -2849,11 +2849,11 @@ internal static uint16 lookupUnsafe(this ref nfcTrie t, slice<byte> s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = nfcIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = nfcIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = nfcIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = nfcIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -2892,7 +2892,7 @@ internal static (uint16 v, nint sz) lookupString(this ref nfcTrie t, @string s) 
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -2909,13 +2909,13 @@ internal static (uint16 v, nint sz) lookupString(this ref nfcTrie t, @string s) 
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = nfcIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -2938,11 +2938,11 @@ internal static uint16 lookupStringUnsafe(this ref nfcTrie t, @string s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = nfcIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = nfcIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = nfcIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = nfcIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -2961,7 +2961,7 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
 internal static uint16 lookupValue(this ref nfcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 46: {
-        return (uint16)nfcValues[(n << (int)(6)) + (uint32)b];
+        return (uint16)nfcValues[(n << 6) + (uint32)b];
     }
     default: {
         n -= 46;
@@ -4528,7 +4528,7 @@ internal static (uint16 v, nint sz) lookup(this ref nfkcTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfkcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -4545,13 +4545,13 @@ internal static (uint16 v, nint sz) lookup(this ref nfkcTrie t, slice<byte> s) {
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfkcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = nfkcIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -4574,11 +4574,11 @@ internal static uint16 lookupUnsafe(this ref nfkcTrie t, slice<byte> s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = nfkcIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = nfkcIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = nfkcIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = nfkcIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -4617,7 +4617,7 @@ internal static (uint16 v, nint sz) lookupString(this ref nfkcTrie t, @string s)
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfkcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
@@ -4634,13 +4634,13 @@ internal static (uint16 v, nint sz) lookupString(this ref nfkcTrie t, @string s)
         if (c1 < 0x80 || 0xC0 <= c1) {
             return (0, 1); // Illegal UTF-8: not a continuation byte.
         }
-        var o = ((uint32)i << (int)(6)) + (uint32)c1;
+        var o = ((uint32)i << 6) + (uint32)c1;
         i = nfkcIndex[o];
         var c2 = s[2];
         if (c2 < 0x80 || 0xC0 <= c2) {
             return (0, 2); // Illegal UTF-8: not a continuation byte.
         }
-        o = ((uint32)i << (int)(6)) + (uint32)c2;
+        o = ((uint32)i << 6) + (uint32)c2;
         i = nfkcIndex[o];
         var c3 = s[3];
         if (c3 < 0x80 || 0xC0 <= c3) {
@@ -4663,11 +4663,11 @@ internal static uint16 lookupStringUnsafe(this ref nfkcTrie t, @string s) {
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue((uint32)i, s[1]);
     }
-    i = nfkcIndex[((uint32)i << (int)(6)) + (uint32)s[1]];
+    i = nfkcIndex[((uint32)i << 6) + (uint32)s[1]];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue((uint32)i, s[2]);
     }
-    i = nfkcIndex[((uint32)i << (int)(6)) + (uint32)s[2]];
+    i = nfkcIndex[((uint32)i << 6) + (uint32)s[2]];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue((uint32)i, s[3]);
     }
@@ -4686,7 +4686,7 @@ internal static ж<nfkcTrie> newNfkcTrie(nint i) {
 internal static uint16 lookupValue(this ref nfkcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 95: {
-        return (uint16)nfkcValues[(n << (int)(6)) + (uint32)b];
+        return (uint16)nfkcValues[(n << 6) + (uint32)b];
     }
     default: {
         n -= 95;

@@ -12,9 +12,6 @@ partial struct registry {
     internal map<@string, Action<ж<inner.Record>, @string>> notify;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notifyˢ = (@string)"notify:"u8;
-
 internal static void Main() {
     var r = new registry(
         cache: new map<@string, ж<inner.Record>>{},
@@ -30,7 +27,7 @@ internal static void Main() {
         notify: new map<@string, Action<ж<inner.Record>, @string>>{
             ["hit"] = (ж<inner.Record> recΔ2, @string tag) => {
                 recΔ2.Value.Hits++;
-                fmt.Println(notifyˢ, tag, (~recΔ2).Name, (~recΔ2).Hits);
+                fmt.Println("notify:", tag, (~recΔ2).Name, (~recΔ2).Hits);
             }
         }
     );

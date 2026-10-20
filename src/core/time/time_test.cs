@@ -350,7 +350,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Helper();
 
         var t0 = Unix(ti, tns).UTC();
-        var d = ((Δtime.Duration)di);
+        var d = (Δtime.Duration)di;
         if (d < 0) {
             d = -d;
         }
@@ -433,9 +433,9 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
     // divisors of Second
     var testOneʗ1 = testOne;
     var f1 = (int64 ti, int32 tns, int32 logdi) => {
-        var d = ((Δtime.Duration)1);
+        var d = (Δtime.Duration)1;
         nuint a = (nuint)(logdi % 9);
-        var b = ((logdi >> (int)(16))) % 9;
+        var b = (logdi >> 16) % 9;
         d <<= (int)(a);
         for (nint i = 0; i < (nint)b; i++) {
             d *= 5;
@@ -535,7 +535,7 @@ internal static slice<ISOWeekTest> isoWeekTests = new ISOWeekTest[]{
 public static void TestISOWeek(ж<Δtesting.T> Ꮡt) {
     // Selected dates and corner cases
     foreach (var (_, wt) in isoWeekTests) {
-        var dt = Date(wt.year, ((timeꓸMonth)wt.month), wt.day, 0, 0, 0, 0, ΔUTC);
+        var dt = Date(wt.year, (timeꓸMonth)wt.month, wt.day, 0, 0, 0, 0, ΔUTC);
         var (y, w) = dt.ISOWeek();
         if (w != wt.wex || y != wt.yex) {
             Ꮡt.Errorf("got %d/%d; expected %d/%d for %d-%02d-%02d"u8,
@@ -640,7 +640,7 @@ internal static slice<ж<timeꓸLocation>> yearDayLocations = new ж<timeꓸLoca
 public static void TestYearDay(ж<Δtesting.T> Ꮡt) {
     foreach (var (i, loc) in yearDayLocations) {
         foreach (var (_, ydt) in yearDayTests) {
-            var dt = Date(ydt.year, ((timeꓸMonth)ydt.month), ydt.day, 0, 0, 0, 0, loc);
+            var dt = Date(ydt.year, (timeꓸMonth)ydt.month, ydt.day, 0, 0, 0, 0, loc);
             nint yday = dt.YearDay();
             if (yday != ydt.yday) {
                 Ꮡt.Errorf("Date(%d-%02d-%02d in %v).YearDay() = %d, want %d"u8,
@@ -733,7 +733,7 @@ internal static slice<dateTestsᴛ1> dateTests = new dateTestsᴛ1[]{
 
 public static void TestDate(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, tt) in dateTests) {
-        var time = Date(tt.year, ((timeꓸMonth)tt.month), tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
+        var time = Date(tt.year, (timeꓸMonth)tt.month, tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
         var want = Unix(tt.unix, 0);
         if (!time.Equal(want)) {
             Ꮡt.Errorf("Date(%d, %d, %d, %d, %d, %d, %d, %s) = %v, want %v"u8,
@@ -793,7 +793,7 @@ public static void TestDaysIn(ж<Δtesting.T> Ꮡt) {
     // Test the daysIn function via the `var DaysIn = daysIn`
     // statement in the internal_test.go file.
     foreach (var (_, tt) in daysInTests) {
-        nint di = time_internal_test_package.DaysIn(((timeꓸMonth)tt.month), tt.year);
+        nint di = time_internal_test_package.DaysIn((timeꓸMonth)tt.month, tt.year);
         if (di != tt.di) {
             Ꮡt.Errorf("got %d; expected %d for %d-%02d"u8,
                 di, tt.di, tt.year, tt.month);
@@ -920,7 +920,7 @@ public static void TestTimeJSON(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf("%v json.Marshal error = %v, want nil"u8, tt.time, err);
             } else 
             if (((sstring)jsonBytes) != tt.json){
-                Ꮡt.Errorf("%v JSON = %#q, want %#q"u8, tt.time, ((@string)jsonBytes), tt.json);
+                Ꮡt.Errorf("%v JSON = %#q, want %#q"u8, tt.time, (@string)jsonBytes, tt.json);
             } else 
             {
                 err = json.Unmarshal(jsonBytes, ᏑjsonTime); if (err != default!){
@@ -1139,13 +1139,13 @@ public static void TestParseDurationErrors(ж<Δtesting.T> Ꮡt) {
 
 public static void TestParseDurationRoundTrip(ж<Δtesting.T> Ꮡt) {
     // https://golang.org/issue/48629
-    var max0 = ((Δtime.Duration)Δmath.MaxInt64);
+    var max0 = (Δtime.Duration)Δmath.MaxInt64;
     var (max1, err) = ParseDuration(max0.String());
     if (err != default! || max0 != max1) {
         Ꮡt.Errorf("round-trip failed: %d => %q => %d, %v"u8, max0, max0.String(), max1, err);
     }
 
-    var min0 = ((Δtime.Duration)Δmath.MinInt64);
+    var min0 = (Δtime.Duration)Δmath.MinInt64;
     (var min1, err) = ParseDuration(min0.String());
     if (err != default! || min0 != min1) {
         Ꮡt.Errorf("round-trip failed: %d => %q => %d, %v"u8, min0, min0.String(), min1, err);
@@ -1258,8 +1258,8 @@ partial struct subTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
 }
 internal static slice<subTestsᴛ1> subTests = new subTestsᴛ1[]{
-    new(new Time(nil), new Time(nil), ((Δtime.Duration)0)),
-    new(Date(2009, 11, 23, 0, 0, 0, 1, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), ((Δtime.Duration)1)),
+    new(new Time(nil), new Time(nil), (Δtime.Duration)0),
+    new(Date(2009, 11, 23, 0, 0, 0, 1, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)1),
     new(Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), Date(2009, 11, 24, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(-86400000000000L)),
     new(Date(2009, 11, 24, 0, 0, 0, 0, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(86400000000000L)),
     new(Date(-2009, 11, 24, 0, 0, 0, 0, ΔUTC), Date(-2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(86400000000000L)),
@@ -1292,10 +1292,10 @@ partial struct nsDurationTestsᴛ1 /*dyn*/ {
     internal int64 want;
 }
 internal static slice<nsDurationTestsᴛ1> nsDurationTests = new nsDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-1000)), -1000),
-    new(((Δtime.Duration)(-1)), -1),
-    new(((Δtime.Duration)1), 1),
-    new(((Δtime.Duration)1000), 1000)
+    new((Δtime.Duration)(-1000), -1000),
+    new((Δtime.Duration)(-1), -1),
+    new((Δtime.Duration)1, 1),
+    new((Δtime.Duration)1000, 1000)
 }.slice();
 
 public static void TestDurationNanoseconds(ж<Δtesting.T> Ꮡt) {
@@ -1309,8 +1309,8 @@ public static void TestDurationNanoseconds(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<nsDurationTestsᴛ1> usDurationTests = new nsDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-1000)), -1),
-    new(((Δtime.Duration)1000), 1)
+    new((Δtime.Duration)(-1000), -1),
+    new((Δtime.Duration)1000, 1)
 }.slice();
 
 public static void TestDurationMicroseconds(ж<Δtesting.T> Ꮡt) {
@@ -1324,8 +1324,8 @@ public static void TestDurationMicroseconds(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<nsDurationTestsᴛ1> msDurationTests = new nsDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-1000000)), -1),
-    new(((Δtime.Duration)1000000), 1)
+    new((Δtime.Duration)(-1000000), -1),
+    new((Δtime.Duration)1000000, 1)
 }.slice();
 
 public static void TestDurationMilliseconds(ж<Δtesting.T> Ꮡt) {
@@ -1343,7 +1343,7 @@ partial struct secDurationTestsᴛ1 /*dyn*/ {
     internal float64 want;
 }
 internal static slice<secDurationTestsᴛ1> secDurationTests = new secDurationTestsᴛ1[]{
-    new(((Δtime.Duration)300000000), 0.3D)
+    new((Δtime.Duration)300000000, 0.3D)
 }.slice();
 
 public static void TestDurationSeconds(ж<Δtesting.T> Ꮡt) {
@@ -1357,11 +1357,11 @@ public static void TestDurationSeconds(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<secDurationTestsᴛ1> minDurationTests = new secDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-60000000000L)), -1D),
-    new(((Δtime.Duration)(-1)), -1D / 60e9D),
-    new(((Δtime.Duration)1), 1D / 60e9D),
-    new(((Δtime.Duration)60000000000L), 1D),
-    new(((Δtime.Duration)3000), 5e-8D)
+    new((Δtime.Duration)(-60000000000L), -1D),
+    new((Δtime.Duration)(-1), -1D / 60e9D),
+    new((Δtime.Duration)1, 1D / 60e9D),
+    new((Δtime.Duration)60000000000L, 1D),
+    new((Δtime.Duration)3000, 5e-8D)
 }.slice();
 
 public static void TestDurationMinutes(ж<Δtesting.T> Ꮡt) {
@@ -1375,11 +1375,11 @@ public static void TestDurationMinutes(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<secDurationTestsᴛ1> hourDurationTests = new secDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-3600000000000L)), -1D),
-    new(((Δtime.Duration)(-1)), -1D / 3600e9D),
-    new(((Δtime.Duration)1), 1D / 3600e9D),
-    new(((Δtime.Duration)3600000000000L), 1D),
-    new(((Δtime.Duration)36), 1e-11D)
+    new((Δtime.Duration)(-3600000000000L), -1D),
+    new((Δtime.Duration)(-1), -1D / 3600e9D),
+    new((Δtime.Duration)1, 1D / 3600e9D),
+    new((Δtime.Duration)3600000000000L, 1D),
+    new((Δtime.Duration)36, 1e-11D)
 }.slice();
 
 public static void TestDurationHours(ж<Δtesting.T> Ꮡt) {
@@ -1710,7 +1710,7 @@ public static void BenchmarkParseRFC3339UTCBytes(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        Parse(RFC3339, ((@string)testdataRFC3339UTCBytes));
+        Parse(RFC3339, (@string)testdataRFC3339UTCBytes);
     }
 }
 
@@ -1730,7 +1730,7 @@ public static void BenchmarkParseRFC3339TZBytes(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        Parse(RFC3339, ((@string)testdataRFC3339TZBytes));
+        Parse(RFC3339, (@string)testdataRFC3339TZBytes);
     }
 }
 
@@ -2080,7 +2080,7 @@ public static void TestTimeAddSecOverflow(ж<Δtesting.T> Ꮡt) {
     var notMonoTime = Unix(timeExt, 0);
     for (var i = (int64)0; i < 100; i++) {
         var sec = notMonoTime.Unix();
-        notMonoTime = notMonoTime.Add(((Δtime.Duration)(i * 1000000000)));
+        notMonoTime = notMonoTime.Add((Δtime.Duration)(i * 1000000000));
         {
             var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
                 Ꮡt.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d"u8, newSec, maxInt64);
@@ -2093,7 +2093,7 @@ public static void TestTimeAddSecOverflow(ж<Δtesting.T> Ꮡt) {
     notMonoTime = time_internal_test_package.NotMonoNegativeTime;
     for (var i = (int64)0; i > -100; i--) {
         var sec = notMonoTime.Unix();
-        notMonoTime = notMonoTime.Add(((Δtime.Duration)(i * 1000000000)));
+        notMonoTime = notMonoTime.Add((Δtime.Duration)(i * 1000000000));
         {
             var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
                 Ꮡt.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d"u8, newSec, maxInt64);

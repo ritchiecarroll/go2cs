@@ -53,7 +53,7 @@ public static (nint fd, uintptr errno) Open(ж<byte> Ꮡpath, nint mode, uint32 
     // Use SYS_OPENAT to match the syscall package.
     nint dfd = AT_FDCWD;
     var ᴋ2 = Ꮡpath;
-        var (r1, _, e) = Syscall6(SYS_OPENAT, (uintptr)dfd, (uintptr)ᴋ2, (uintptr)((nint)(mode | (nint)O_LARGEFILE)), (uintptr)perm, 0, 0);
+        var (r1, _, e) = Syscall6(SYS_OPENAT, (uintptr)dfd, (uintptr)ᴋ2, (uintptr)(mode | (nint)O_LARGEFILE), (uintptr)perm, 0, 0);
     System.GC.KeepAlive(ᴋ2);
     return ((nint)r1, e);
 }
@@ -88,17 +88,17 @@ public static (nint n, uintptr errno) Pread(nint fd, slice<byte> p, int64 offset
     var exprᴛ1 = goarch.GOARCH;
     if (exprᴛ1 == "386"u8) {
         var ᴋ4 = p0;
-                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ4, (uintptr)len(p), (uintptr)offset, (uintptr)((offset >> (int)(32))), 0);
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ4, (uintptr)len(p), (uintptr)offset, (uintptr)(offset >> 32), 0);
         System.GC.KeepAlive(ᴋ4);
     }
     else if (exprᴛ1 == "arm"u8 || exprᴛ1 == "mipsle"u8) {
         var ᴋ5 = p0;
-                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ5, (uintptr)len(p), 0, (uintptr)offset, (uintptr)((offset >> (int)(32))));
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ5, (uintptr)len(p), 0, (uintptr)offset, (uintptr)(offset >> 32));
         System.GC.KeepAlive(ᴋ5);
     }
     else if (exprᴛ1 == "mips"u8) {
         var ᴋ6 = p0;
-                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ6, (uintptr)len(p), 0, (uintptr)((offset >> (int)(32))), (uintptr)offset);
+                (r1, _, e) = Syscall6(SYS_PREAD64, (uintptr)fd, (uintptr)ᴋ6, (uintptr)len(p), 0, (uintptr)(offset >> 32), (uintptr)offset);
         System.GC.KeepAlive(ᴋ6);
     }
     else { /* default: */

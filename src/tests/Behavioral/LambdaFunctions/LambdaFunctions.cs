@@ -28,9 +28,6 @@ internal static (nint, error) half(nint n) {
     return (n / 2, default!);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object halvedˢ = (@string)"halved"u8;
-
 internal static void Main() {
     error probe(nint n, error errΔ1) {
         if (errΔ1 != default!) {
@@ -41,7 +38,7 @@ internal static void Main() {
             return errΔ1;
         }
         (var k, errΔ1) = half(m);
-        fmt.Println(halvedˢ, m, k);
+        fmt.Println("halved", m, k);
         return errΔ1;
     }
     fmt.Println(probe(8, default!), probe(3, default!));

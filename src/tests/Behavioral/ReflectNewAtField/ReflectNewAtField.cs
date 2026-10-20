@@ -59,7 +59,7 @@ internal static void Main() {
     field(u, 1).SetInt(50);
     fmt.Println(q.b);
 
-    var p = reflect.NewAt(reflect.TypeOf((nint)(0)), @unsafe.Pointer.FromPinnedBox(Ꮡn));
+    var p = reflect.NewAt(reflect.TypeOf((nint)0), @unsafe.Pointer.FromPinnedBox(Ꮡn));
     p.Elem().SetInt(9);
     fmt.Println(n);
 }
