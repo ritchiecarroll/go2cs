@@ -27561,4 +27561,10 @@ private to syscall and internal/syscall/windows register with golib's `GoAsyncIO
 replaces internal/poll's public hook event), the timer callback and readiness sink are named so they can be
 prepared, and the windows part touches the rest on spare values. Windows reading owed again.
 
+**Amended 2026-10-20 (the i9's windows reading of 4f9377add3).** After a first completion A1 now meets the bar (0.4-0.7,
+Go 0.6-1.2); cold it still misses (4.2-4.8, Go 0.2-0.8), with only 4 small compiles left in the window. Since one real
+completion first removes the lag, the windows pre-pay now also makes one (a one-byte write and read on a private
+named pipe pair, closed before it returns), to be kept only if the windows reading brings cold A1 within about 1 ms;
+otherwise the residue is recorded here as the runtime's first-completion cost.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

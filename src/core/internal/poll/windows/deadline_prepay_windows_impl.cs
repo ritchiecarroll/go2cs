@@ -31,11 +31,22 @@
 //   - syscall.LoadCancelIoEx, Go's own loader for CancelIoEx's kernel32 entry point; it resolves the
 //     address CancelIoEx calls through and opens nothing;
 //   - internal/syscall/windows' module initialization, which registers that package's part (as syscall
-//     registers its own) with GoAsyncIO.AddDeadlinePathPrepay before the poller runs every part.
-// Nothing here cancels, waits on or completes a real operation.
+//     registers its own) with GoAsyncIO.AddDeadlinePathPrepay before the poller runs every part;
+//   - one real completion (COORD's ruling of 2026-10-20 16:47Z, after the i9 read the cut before this
+//     step): a one-byte write and read on a private named pipe pair this step creates, uses and closes.
+//     A cold first deadline stayed 4.2-4.8 ms late with every listed method compiled, while one real
+//     completion through the poller first (the probe's io mode) brought it to Go's, so the remaining cost
+//     looks like the process's first completion on a CLR IO thread, which no method list shows; the
+//     step stays only if the windows reading confirms that. The pair's FDs
+//     are set up as FD.Init would set them, except that their poll descriptors come straight from
+//     runtime_pollOpen: FD.Init would re-enter the serverInit.Do this runs inside. Their completion modes
+//     are left as created, so the read's completion is delivered through the port even though the byte
+//     is already there. Nothing of the pair survives this step.
+// Apart from that pair, nothing here cancels, waits on or completes a real operation.
 
 using System;
 using System.Runtime.CompilerServices;
+using MonotonicClock = go.golib.MonotonicClock;
 
 [module: go.GoManualConversion]
 
@@ -54,8 +65,10 @@ partial class poll_package
             windows.GetOverlappedResult, windows.WSAGetOverlappedResult);
 
         ж<operation> o = Ꮡ(new operation());
+        o.DerefOrNull();
         ж<Δsyscall.Overlapped> overlapped = o.of(operation.Ꮡo);
         overlapped.Equals(o.of(operation.Ꮡo));
+        overlapped.Equals((object)o.of(operation.Ꮡo));
         Δsyscall.CancelIoEx(Δsyscall.InvalidHandle, overlapped);
 
         ж<FD> spare = Ꮡ(new FD());
@@ -76,6 +89,82 @@ partial class poll_package
 
         Δsyscall.LoadCancelIoEx();
         RuntimeHelpers.RunModuleConstructor(typeof(windows).Module.ModuleHandle);
+
+        prepayFirstCompletion();
+    }
+
+    // CreateNamedPipe flags the converted windows package does not name: refuse to open an instance of a
+    // pipe someone else already created under this name, and refuse clients from other machines.
+    private const uint32 fileFlagFirstPipeInstance = 0x00080000;
+    private const uint32 pipeRejectRemoteClients = 0x00000008;
+
+    private static void prepayFirstCompletion()
+    {
+        @string name = $@"\\.\pipe\go2cs-deadline-prepay-{Δsyscall.Getpid()}-{MonotonicClock.Nanoseconds()}";
+        var (wname, err) = Δsyscall.UTF16PtrFromString(name);
+        if (err != default!)
+            return;
+
+        var (server, errΔ1) = windows.CreateNamedPipe(wname,
+            (uint32)(windows.PIPE_ACCESS_DUPLEX | windows.O_FILE_FLAG_OVERLAPPED) | fileFlagFirstPipeInstance,
+            (uint32)(windows.PIPE_TYPE_BYTE | windows.PIPE_READMODE_BYTE) | pipeRejectRemoteClients, 1, 4096, 4096, 0, nil);
+        if (errΔ1 != default!)
+            return;
+
+        ж<FD> reader = privatePipeFD(server);
+        if (reader == nil)
+        {
+            Δsyscall.CloseHandle(server);
+            return;
+        }
+
+        try
+        {
+            var (client, errΔ2) = Δsyscall.CreateFile(wname, (uint32)(Δsyscall.GENERIC_READ | Δsyscall.GENERIC_WRITE), 0, nil,
+                (uint32)Δsyscall.OPEN_EXISTING, (uint32)Δsyscall.FILE_FLAG_OVERLAPPED, 0);
+            if (errΔ2 != default!)
+                return;
+
+            ж<FD> writer = privatePipeFD(client);
+            if (writer == nil)
+            {
+                Δsyscall.CloseHandle(client);
+                return;
+            }
+
+            try
+            {
+                slice<byte> one = new(1);
+                var (n, errΔ3) = writer.Write(one);
+                if (n == 1 && errΔ3 == default!)
+                    reader.Read(one);
+            }
+            finally
+            {
+                writer.Close();
+            }
+        }
+        finally
+        {
+            reader.Close();
+        }
+    }
+
+    // An FD over a private pipe handle, as FD.Init("pipe", true) leaves one, with its poll descriptor
+    // taken from runtime_pollOpen directly (see the file header). Nil when the poller refuses it.
+    private static ж<FD> privatePipeFD(Δsyscall.ΔHandle handle)
+    {
+        var (ctx, errno) = runtime_pollOpen((uintptr)handle);
+        if (errno != 0)
+            return nil;
+
+        ж<FD> fd = Ꮡ(new FD(Sysfd: handle, IsStream: true, ZeroReadIsEOF: true));
+        ref FD f = ref fd.DerefOrNull();
+        f.kind = kindPipe;
+        f.isFile = true;
+        f.isBlocking = false;
+        f.pd.runtimeCtx = ctx;
+        return fd;
     }
 
     private delegate void pollDescModeAction(ref pollDesc pd, nint mode);
