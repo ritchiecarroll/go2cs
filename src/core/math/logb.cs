@@ -53,7 +53,7 @@ public static nint Ilogb(float64 x) {
 // non-zero.
 internal static nint ilogb(float64 x) {
     (x, var exp) = normalize(x);
-    return (nint)((uint64)(((Float64bits(x) >> (int)(shift))) & (uint64)mask)) - (nint)bias + exp;
+    return (nint)((Float64bits(x) >> (int)(shift)) & (uint64)mask) - (nint)bias + exp;
 }
 
 } // end math_package

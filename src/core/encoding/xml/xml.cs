@@ -83,7 +83,7 @@ partial struct CharData /*[]byte*/;
 
 // Copy creates a new copy of CharData.
 public static CharData Copy(this CharData c) {
-    return ((CharData)bytes.Clone(c));
+    return (CharData)bytes.Clone(c);
 }
 
 // A Comment represents an XML comment of the form <!--comment-->.
@@ -92,7 +92,7 @@ partial struct Comment /*[]byte*/;
 
 // Copy creates a new copy of Comment.
 public static Comment Copy(this Comment c) {
-    return ((Comment)bytes.Clone(c));
+    return (Comment)bytes.Clone(c);
 }
 
 // A ProcInst represents an XML processing instruction of the form <?target inst?>
@@ -113,7 +113,7 @@ partial struct Directive /*[]byte*/;
 
 // Copy creates a new copy of Directive.
 public static Directive Copy(this Directive d) {
-    return ((Directive)bytes.Clone(d));
+    return (Directive)bytes.Clone(d);
 }
 
 // CopyToken returns a copy of a Token.
@@ -625,7 +625,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         if (data == default!) {
             return (default!, d.err);
         }
-        return (((CharData)data), default!);
+        return ((CharData)data, default!);
     }
 
     {
@@ -687,7 +687,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
         data = data.slice(0, len(data) - 2); // chop ?>
 
         if (targetΔ1 == "xml"u8) {
-            @string content = ((@string)data);
+            @string content = (@string)data;
             @string ver = procInst(versionˢ, content);
             if (ver != ""u8 && ver != "1.0"u8) {
                 d.err = fmt.Errorf("xml: unsupported version %q; only version 1.0 is supported"u8, ver);
@@ -754,7 +754,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             }
             var data = d.buf.Bytes();
             data = data.slice(0, len(data) - 3); // chop -->
-            return (((Comment)data), default!);
+            return ((Comment)data, default!);
         }
         case (rune)'[': { // <![
             // Probably <![CDATA[.
@@ -774,7 +774,7 @@ internal static (ΔToken, error) rawToken(this ref Decoder d) {
             if (data == default!) {
                 return (default!, d.err);
             }
-            return (((CharData)data), default!);
+            return ((CharData)data, default!);
         }}
 
         // Probably a directive: <!DOCTYPE ...>, <!ENTITY ...>, etc.
@@ -856,7 +856,7 @@ HandleB:
                 break;
             }}
         }
-        return (((Directive)d.buf.Bytes()), default!);
+        return ((Directive)d.buf.Bytes(), default!);
     }}
 
     // Must be an open element like <a href="foo">
@@ -928,7 +928,7 @@ HandleB:
             if (data == default!) {
                 return (default!, d.err);
             }
-            a.Value = ((@string)data);
+            a.Value = (@string)data;
         }
         attr = append(attr, a);
     }
@@ -1179,11 +1179,11 @@ Input:
                 if (b != (rune)';'){
                     d.ungetc(b);
                 } else {
-                    @string s = ((@string)(d.buf.Bytes().slice(start)));
+                    @string s = (@string)(d.buf.Bytes().slice(start));
                     d.buf.WriteByte((rune)';');
                     var (n, err) = strconv.ParseUint(s, @base, 64);
                     if (err == default! && n <= unicode.MaxRune) {
-                        text = ((@string)(rune)n);
+                        text = (@string)(rune)n;
                         haveText = true;
                     }
                 }
@@ -1205,10 +1205,10 @@ Input:
                     var name = d.buf.Bytes().slice(before + 1);
                     d.buf.WriteByte((rune)';');
                     if (isName(name)) {
-                        @string s = ((@string)name);
+                        @string s = (@string)name;
                         {
                             var (r, okΔ2) = entity[s, ꟷ]; if (okΔ2){
-                                text = ((@string)r);
+                                text = (@string)r;
                                 haveText = true;
                             } else 
                             if (d.Entity != default!) {
@@ -1229,7 +1229,7 @@ Input:
                 (b0, b1) = (0, 0);
                 goto continue_Input;
             }
-            @string ent = ((@string)(d.buf.Bytes().slice(before)));
+            @string ent = (@string)(d.buf.Bytes().slice(before));
             if (ent[len(ent) - 1] != (rune)';') {
                 ent += " (no semicolon)"u8;
             }
@@ -1318,7 +1318,7 @@ internal static (@string s, bool ok) name(this ref Decoder d) {
         d.err = d.syntaxError("invalid XML name: "u8 + ((sstring)b));
         return ("", false);
     }
-    return (((@string)b), true);
+    return ((@string)b, true);
 }
 
 // Read a name and append its bytes to d.buf.

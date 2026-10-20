@@ -108,7 +108,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
         // TODO(rsc): The new proof mentioned above should also
         // prove that we can't have lo1 == 0 and lo0 != 0.
         // After proving that, drop computation and use of lo0 here.
-        dt = bool2uint((uint64)(lo1 | lo0) != 0);
+        dt = bool2uint((lo1 | lo0) != 0);
         break;
     }
     case {} when -22 <= p && p < 0 && divisiblePow5(mant, -p): {
@@ -124,7 +124,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
     // the "rounding bit" (the first fractional bit) is dm&1,
     // and the "truncated bit" (have any bits been discarded?) is dt.
     nint shift = -de - 1;
-    dt |= (nuint)(bool2uint((uint64)(dm & (((uint64)1).Lsh((int64)(shift)) - 1)) != 0));
+    dt |= (nuint)(bool2uint((dm & (((uint64)1).Lsh((int64)(shift)) - 1)) != 0));
     dm.RshAssign((int64)(shift));
 
     // Set decimal point in eventual formatted digits,
@@ -133,7 +133,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
 
     // Trim excess digit if any, updating truncation and decimal point.
     // The << 1 is leaving room for the rounding bit.
-    var max = (uint64pow10[digits] << (int)(1));
+    var max = uint64pow10[digits] << 1;
     if (dm >= max) {
         nuint r = default!;
         (dm, r) = (dm / 10, (nuint)(dm % 10));
@@ -160,7 +160,7 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
             d.dp++;
         }
 
-        max = (uint64pow10[digits] << (int)(1));
+        max = uint64pow10[digits] << 1;
     }
 
     // Round and shift away rounding bit.
@@ -169,9 +169,9 @@ internal static void fixedFtoa(ref decimalSlice d, uint64 mant, nint exp, nint d
     // (b) or the fractional part is ≥ 0.5 and the integer part is odd
     //     (dm&1 != 0 and dm&2 != 0).
     // The bitwise expression encodes that logic.
-    dm += (uint64)((nuint)((nuint)((nuint)dm & ((nuint)(dt | ((nuint)dm >> (int)(1))))) & 1));
+    dm += (uint64)((nuint)dm & (dt | (nuint)dm >> 1) & 1);
     dm >>= (int)(1);
-    if (dm == (max >> (int)(1))) {
+    if (dm == max >> 1) {
         // 999... rolled over to 1000...
         dm = uint64pow10[digits - 1];
         d.dp++;

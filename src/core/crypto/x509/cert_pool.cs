@@ -198,7 +198,7 @@ public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) {
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), ((@string)cert.RawSubject), () => (Ꮡcert, default!), default!);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), default!);
 }
 
 // addCertFunc adds metadata about a certificate to a pool, along with
@@ -258,7 +258,7 @@ public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pe
             continue;
         }
         ref var lazyCert = ref heap(new AppendCertsFromPEM_lazyCert(), out var ᏑlazyCert);
-        s.addCertFunc(sha256.Sum224((~cert).Raw), ((@string)(~cert).RawSubject), () => {
+        s.addCertFunc(sha256.Sum224((~cert).Raw), (@string)(~cert).RawSubject, () => {
             ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
                 // This can't fail, as the same bytes already parsed above.
                 (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
@@ -319,7 +319,7 @@ public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> �
     if (Ꮡcert == nil) {
         throw panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), ((@string)cert.RawSubject), () => (Ꮡcert, default!), constraint);
+    s.addCertFunc(sha256.Sum224(cert.Raw), (@string)cert.RawSubject, () => (Ꮡcert, default!), constraint);
 }
 
 } // end x509_package

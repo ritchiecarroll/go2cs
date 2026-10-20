@@ -304,9 +304,9 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
 private static readonly object failedToLookUpSpecialAndˢ = (@string)"failed to look up special and made duplicate weak handle; see issue #70739"u8;
 
 public static void TestIssue70739(ж<testing.T> Ꮡt) {
-    var x = new slice<ж<nint>>((4 << (int)(16)));
-    var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << (int)(16))));
-    var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << (int)(16))));
+    var x = new slice<ж<nint>>((4 << 16));
+    var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
+    var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
     if (wx1 != wx2) {
         Ꮡt.Fatal(failedToLookUpSpecialAndˢ);
     }

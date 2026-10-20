@@ -81,7 +81,7 @@ internal static slice<ж<reverseBitsTest>> reverseBitsTests = new ж<reverseBits
 internal static slice<byte> largeDataChunk() {
     var result = new slice<byte>(100000);
     foreach (var (i, _) in result) {
-        result[i] = (byte)((nint)(i * i & 0xFF));
+        result[i] = (byte)(i * i & 0xFF);
     }
     return result;
 }
@@ -194,7 +194,7 @@ internal static (nint n, error err) Read(this ref sparseReader r, slice<byte> b)
         cur = r.l;
     }
     foreach (var (i, _) in b.slice(0, n)) {
-        if (r.cur + (int64)i >= r.l - ((int64)1 << (int)(16))){
+        if (r.cur + (int64)i >= r.l - ((int64)1 << 16)){
             b[i] = 1;
         } else {
             b[i] = 0;
@@ -511,7 +511,7 @@ public static void TestReaderDict(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (((sstring)data) != "hello again world"u8) {
-        Ꮡt.Fatalf("read returned %q want %q"u8, ((@string)data), text);
+        Ꮡt.Fatalf("read returned %q want %q"u8, (@string)data, text);
     }
 }
 
@@ -1160,13 +1160,13 @@ public static partial void TestMaxStackSize(ж<testing.T> Ꮡt) {
     try {
         // This test must not run in parallel with other tests as debug.SetMaxStack
         // affects all goroutines.
-        nint n = debug.SetMaxStack((1 << (int)(16)));
+        nint n = debug.SetMaxStack(1 << 16);
         defer(debug.SetMaxStack, n, ref ᒐ);
 
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
 
-        var b = new slice<byte>((1 << (int)(20)));
+        var b = new slice<byte>((1 << 20));
         for (nint level = HuffmanOnly; level <= BestCompression; level++) {
             // Run in separate goroutine to increase probability of stack regrowth.
             Ꮡwg.Add(1);

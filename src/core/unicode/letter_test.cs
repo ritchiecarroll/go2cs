@@ -123,7 +123,7 @@ internal static slice<caseT> caseTest = new caseT[]{
     // errors
     new(-1, (rune)'\n', 0xFFFD),
     new(UpperCase, -1, -1),
-    new(UpperCase, (rune)(1 << (int)(30)), (rune)(1 << (int)(30))),
+    new(UpperCase, (rune)(1 << 30), (rune)(1 << 30)),
 
     // ASCII (special-cased so test carefully)
     new(UpperCase, (rune)'\n', (rune)'\n'),
@@ -531,7 +531,7 @@ internal static bool binary(slice<Δunicode.Range16> ranges, uint16 r) {
     nint lo = 0;
     nint hi = len(ranges);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = Ꮡ(ranges, m);
         if ((~range_).Lo <= r && r <= (~range_).Hi) {
             return (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
@@ -574,7 +574,7 @@ public static void TestSpecialCaseNoMapping(ж<testing.T> Ꮡt) {
     // Issue 25636
     // no change for rune 'A', zero delta, under upper/lower/title case change.
     Δunicode.CaseRange noChangeForCapitalA = new CaseRange((rune)'A', (rune)'A', new rune[]{0, 0, 0}.array());
-    @string got = strings.ToLowerSpecial(((Δunicode.SpecialCase)new Δunicode.CaseRange[]{noChangeForCapitalA.ΔClone()}.slice()), abcˢ);
+    @string got = strings.ToLowerSpecial((Δunicode.SpecialCase)new Δunicode.CaseRange[]{noChangeForCapitalA.ΔClone()}.slice(), abcˢ);
     @string want = abcˢ2;
     if (got != want) {
         Ꮡt.Errorf("got %q; want %q"u8, got, want);
@@ -614,7 +614,7 @@ public static void TestNegativeRune(ж<testing.T> Ꮡt) {
 
         // Note r is negative, but uint8(r) == uint8(base) and
         // uint16(r) == uint16(base).
-        var r = (rune)(@base - ((uint32)1 << (int)(31)));
+        var r = (rune)(@base - ((uint32)1 << 31));
         if (Is(Letter, r)) {
             Ꮡt.Errorf("Is(Letter, 0x%x - 1<<31) = true, want false"u8, @base);
         }

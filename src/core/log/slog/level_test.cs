@@ -70,7 +70,7 @@ public static void TestLevelMarshalJSON(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (!bytes.Equal(data, wantData)) {
-        Ꮡt.Errorf("got %s, want %s"u8, ((@string)data), ((@string)wantData));
+        Ꮡt.Errorf("got %s, want %s"u8, (@string)data, (@string)wantData);
     }
     ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
     {
@@ -91,7 +91,7 @@ public static void TestLevelMarshalText(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (!bytes.Equal(data, wantData)) {
-        Ꮡt.Errorf("got %s, want %s"u8, ((@string)data), ((@string)wantData));
+        Ꮡt.Errorf("got %s, want %s"u8, (@string)data, (@string)wantData);
     }
     ref var got = ref heap(new global::go.log.slog_package.ΔLevel(), out var Ꮡgot);
     {
@@ -113,7 +113,7 @@ public static void TestLevelAppendText(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     if (!bytes.Equal(data, wantData)) {
-        Ꮡt.Errorf("got %s, want %s"u8, ((@string)data), ((@string)wantData));
+        Ꮡt.Errorf("got %s, want %s"u8, (@string)data, (@string)wantData);
     }
 }
 

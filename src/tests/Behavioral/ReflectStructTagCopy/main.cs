@@ -50,7 +50,7 @@ internal static void Main() {
 
     for (nint i = 0; i < t.NumField(); i++) {
         var fΔ1 = t.Field(i);
-        fmt.Printf("%s raw=%q json=%q asn1=%q\n"u8, fΔ1.Name, ((@string)fΔ1.Tag), fΔ1.Tag.Get("json"), fΔ1.Tag.Get("asn1"));
+        fmt.Printf("%s raw=%q json=%q asn1=%q\n"u8, fΔ1.Name, (@string)fΔ1.Tag, fΔ1.Tag.Get("json"), fΔ1.Tag.Get("asn1"));
     }
 
     var f = t.Field(1);
@@ -84,12 +84,12 @@ internal static void Main() {
     n = reflect.Copy(reflect.ValueOf(nilDst), reflect.ValueOf(new byte[]{1, 2}.slice()));
     fmt.Println("copy nil dst:", n);
 
-    foreach (var (_, vΔ1) in new any[]{new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), ((counter)0), new record(nil)}.slice()) {
+    foreach (var (_, vΔ1) in new any[]{new intSET(new nint[]{10}.slice()), new byteArray(new byte[4].array()), new stringMap(new map<@string, nint>{}), new intChan(0), new intPtr(Ꮡarr.at<nint>(0)), (counter)0, new record(nil)}.slice()) {
         var rt = reflect.TypeOf(vΔ1);
         fmt.Printf("named %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }
 
-    foreach (var (_, vΔ2) in new any[]{new nint[]{}.slice(), new byte[]{}.array(4), new map<@string, nint>{}, new channel<nint>(0), Ꮡarr, (nint)(0)}.slice()) {
+    foreach (var (_, vΔ2) in new any[]{new nint[]{}.slice(), new byte[]{}.array(4), new map<@string, nint>{}, new channel<nint>(0), Ꮡarr, (nint)0}.slice()) {
         var rt = reflect.TypeOf(vΔ2);
         fmt.Printf("plain %-12s name=%q pkg=%q\n"u8, rt.Kind(), rt.Name(), rt.PkgPath());
     }

@@ -48,7 +48,7 @@ internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr)
         if (br.bits > 0){
             // Get next bit - fast path.
             br.bits--;
-            bit = (uint16)((uint16)((br.n >> (int)(((nuint)(br.bits & 63))))) & 1);
+            bit = (uint16)((uint16)(br.n >> (int)((br.bits & 63))) & 1);
         } else {
             // Get next bit - slow path.
             // Use ReadBits to retrieve a single bit
@@ -172,7 +172,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     // We have to search the list of codes to find the divide between the left and right sides.
     nint firstRightIndex = len(codes);
     foreach (var (i, code) in codes) {
-        if ((uint32)(code.code & test) != 0) {
+        if ((code.code & test) != 0) {
             firstRightIndex = i;
             break;
         }

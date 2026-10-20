@@ -20,7 +20,7 @@ internal static slice<@string> splitList(@string path) {
     if (path == ""u8) {
         return new @string[]{}.slice();
     }
-    return strings.Split(path, ((@string)(rune)ListSeparator));
+    return strings.Split(path, (@string)(rune)ListSeparator);
 }
 
 internal static (@string, error) abs(@string path) {
@@ -31,7 +31,7 @@ internal static @string join(slice<@string> elem) {
     // If there's a bug here, fix the logic in ./path_plan9.go too.
     foreach (var (i, e) in elem) {
         if (e != ""u8) {
-            return Clean(strings.Join(elem.slice(i), ((@string)(rune)Separator)));
+            return Clean(strings.Join(elem.slice(i), (@string)(rune)Separator));
         }
     }
     return ""u8;

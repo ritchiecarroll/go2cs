@@ -10,7 +10,7 @@ internal partial struct main_i /*dyn*/ {
 }
 
 internal static void Main() {
-    var intT = reflect.TypeOf((nint)(0));
+    var intT = reflect.TypeOf((nint)0);
 
     var both = reflect.ChanOf(reflect.BothDir, intT);
     var recv = reflect.ChanOf(reflect.RecvDir, intT);

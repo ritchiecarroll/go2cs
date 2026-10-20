@@ -128,7 +128,7 @@ public static ж<Type> TypeFor<T>() {
             return t;
         }
     }
-    return TypeOf(((ж<T>)nil)).Elem();
+    return TypeOf((ж<T>)nil).Elem();
 }
 
 public static ΔKind Kind(this ref Type t) {

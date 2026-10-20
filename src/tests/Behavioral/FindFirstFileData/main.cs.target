@@ -197,7 +197,7 @@ internal static (entry, bool) toEntry(ж<syscall.Win32finddata> Ꮡdata) {
     return (new entry(
         name: name,
         alt: altName(ref (Ꮡdata).DerefOrNull()),
-        isDir: (uint32)(data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0,
+        isDir: (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0,
         size: data.FileSizeLow,
         mtime: data.LastWriteTime.Nanoseconds()
     ), true);
@@ -228,10 +228,10 @@ internal static @string ascii(@string s) {
         }
         @out = append(@out, (byte)((rune)'\\'), (byte)((rune)'u'));
         for (nint shift = 12; shift >= 0; shift -= 4) {
-            @out = append(@out, hexDigits[(rune)((r.Rsh((nuint)shift)) & 0xf)]);
+            @out = append(@out, hexDigits[((r.Rsh((nuint)shift)) & 0xf)]);
         }
     }
-    return ((@string)@out);
+    return (@string)@out;
 }
 
 internal static void fatal(@string what, error err) {

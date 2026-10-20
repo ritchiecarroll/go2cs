@@ -36,18 +36,18 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     uint32 access = default!;
     uint32 options = default!;
     // Map Win32 file flags to NT create options.
-    var fileFlags = (uint32)((uint32)flag & (uint32)FileFlagsMask);
-    if ((uint32)(fileFlags & ~(uint32)ValidFileFlagsMask) != 0) {
+    var fileFlags = (uint32)flag & (uint32)FileFlagsMask;
+    if ((fileFlags & ~(uint32)ValidFileFlagsMask) != 0) {
         return (syscall.InvalidHandle, oserror.ErrInvalid);
     }
-    if ((uint32)(fileFlags & (uint32)O_FILE_FLAG_OVERLAPPED) == 0) {
+    if ((fileFlags & (uint32)O_FILE_FLAG_OVERLAPPED) == 0) {
         options |= (uint32)(FILE_SYNCHRONOUS_IO_NONALERT);
     }
-    if ((uint32)(fileFlags & (uint32)O_FILE_FLAG_DELETE_ON_CLOSE) != 0) {
+    if ((fileFlags & (uint32)O_FILE_FLAG_DELETE_ON_CLOSE) != 0) {
         access |= (uint32)(DELETE);
     }
     void setOptionFlag(uint32 ntFlag, uint32 win32Flag) {
-        if ((uint32)(fileFlags & win32Flag) != 0) {
+        if ((fileFlags & win32Flag) != 0) {
             options |= (uint32)(ntFlag);
         }
     }
@@ -79,42 +79,42 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
         // but we still need to request SYNCHRONIZE.
         access |= (uint32)(SYNCHRONIZE);
     }
-    if ((uint64)(flag & (uint64)syscall.O_CREAT) != 0) {
+    if ((flag & (uint64)syscall.O_CREAT) != 0) {
         access |= (uint32)(FILE_GENERIC_WRITE);
     }
-    if ((uint32)(fileFlags & (uint32)O_FILE_FLAG_NO_BUFFERING) != 0) {
+    if ((fileFlags & (uint32)O_FILE_FLAG_NO_BUFFERING) != 0) {
         // Disable buffering implies no implicit append access.
         access &= unchecked((uint32)~(uint32)(FILE_APPEND_DATA));
     }
-    if ((uint64)(flag & (uint64)syscall.O_APPEND) != 0) {
+    if ((flag & (uint64)syscall.O_APPEND) != 0) {
         access |= (uint32)(FILE_APPEND_DATA);
         // Remove FILE_WRITE_DATA access unless O_TRUNC is set,
         // in which case we need it to truncate the file.
-        if ((uint64)(flag & (uint64)syscall.O_TRUNC) == 0) {
+        if ((flag & (uint64)syscall.O_TRUNC) == 0) {
             access &= unchecked((uint32)~(uint32)(FILE_WRITE_DATA));
         }
     }
-    if ((uint64)(flag & (uint64)O_DIRECTORY) != 0) {
+    if ((flag & (uint64)O_DIRECTORY) != 0) {
         options |= (uint32)(FILE_DIRECTORY_FILE);
         access |= (uint32)(FILE_LIST_DIRECTORY);
     }
-    if ((uint64)(flag & (uint64)syscall.O_SYNC) != 0) {
+    if ((flag & (uint64)syscall.O_SYNC) != 0) {
         options |= (uint32)(FILE_WRITE_THROUGH);
     }
-    if ((uint64)(flag & (uint64)O_WRITE_ATTRS) != 0) {
+    if ((flag & (uint64)O_WRITE_ATTRS) != 0) {
         access |= (uint32)(FILE_WRITE_ATTRIBUTES);
     }
     // Allow File.Stat.
     access |= (uint32)((uint32)((UntypedInt)(STANDARD_RIGHTS_READ | FILE_READ_ATTRIBUTES) | (uint32)FILE_READ_EA));
 
     var objAttrs = Ꮡ(new OBJECT_ATTRIBUTES(nil));
-    if ((uint64)(flag & (uint64)O_NOFOLLOW_ANY) != 0) {
+    if ((flag & (uint64)O_NOFOLLOW_ANY) != 0) {
         objAttrs.Value.Attributes |= (uint32)(OBJ_DONT_REPARSE);
     }
-    if ((uint64)(flag & (uint64)syscall.O_CLOEXEC) == 0) {
+    if ((flag & (uint64)syscall.O_CLOEXEC) == 0) {
         objAttrs.Value.Attributes |= (uint32)(OBJ_INHERIT);
     }
-    if ((uint32)(fileFlags & (uint32)O_FILE_FLAG_POSIX_SEMANTICS) == 0) {
+    if ((fileFlags & (uint32)O_FILE_FLAG_POSIX_SEMANTICS) == 0) {
         objAttrs.Value.Attributes |= (uint32)(OBJ_CASE_INSENSITIVE);
     }
     {
@@ -135,7 +135,7 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
         options |= (uint32)(FILE_OPEN_REPARSE_POINT); // don't follow symlinks
         break;
     }
-    case {} when (uint64)(flag & (uint64)syscall.O_CREAT) == syscall.O_CREAT: {
+    case {} when (flag & (uint64)syscall.O_CREAT) == syscall.O_CREAT: {
         disposition = FILE_OPEN_IF;
         break;
     }
@@ -145,36 +145,36 @@ public static (syscallꓸHandle, error e1) Openat(syscallꓸHandle dirfd, @strin
     }}
 
     var fileAttrs = (uint32)FILE_ATTRIBUTE_NORMAL;
-    if ((uint32)(perm & (uint32)syscall.S_IWRITE) == 0) {
+    if ((perm & (uint32)syscall.S_IWRITE) == 0) {
         fileAttrs = FILE_ATTRIBUTE_READONLY;
     }
 
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     error err = default!;
-    if (TestOpenatFallback && (uint64)(flag & (uint64)O_NOFOLLOW_ANY) != 0){
+    if (TestOpenatFallback && (flag & (uint64)O_NOFOLLOW_ANY) != 0){
         err = STATUS_INVALID_PARAMETER;
     } else {
         err = NtCreateFile(
             Ꮡh,
-            (uint32)((uint32)SYNCHRONIZE | access),
+            (uint32)SYNCHRONIZE | access,
             objAttrs,
             Ꮡ(new IO_STATUS_BLOCK(nil)),
             nil,
             fileAttrs,
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
             disposition,
-            (uint32)((uint32)FILE_OPEN_FOR_BACKUP_INTENT | options),
+            (uint32)FILE_OPEN_FOR_BACKUP_INTENT | options,
             nil,
             0);
     }
-    if (AreEqual(err, STATUS_INVALID_PARAMETER) && (uint64)(flag & (uint64)O_NOFOLLOW_ANY) != 0) {
-        (h, err) = openatFallback(name, (uint32)((uint32)SYNCHRONIZE | access), objAttrs.Value, fileAttrs, disposition, (uint32)((uint32)FILE_OPEN_FOR_BACKUP_INTENT | options));
+    if (AreEqual(err, STATUS_INVALID_PARAMETER) && (flag & (uint64)O_NOFOLLOW_ANY) != 0) {
+        (h, err) = openatFallback(name, (uint32)SYNCHRONIZE | access, objAttrs.Value, fileAttrs, disposition, (uint32)FILE_OPEN_FOR_BACKUP_INTENT | options);
     }
     if (err != default!) {
         return (h, ntCreateFileError(err, flag));
     }
 
-    if ((uint64)(flag & (uint64)syscall.O_TRUNC) != 0) {
+    if ((flag & (uint64)syscall.O_TRUNC) != 0) {
         err = syscall.Ftruncate(h, 0);
         if (AreEqual(err, ERROR_INVALID_PARAMETER)) {
             // ERROR_INVALID_PARAMETER means truncation is not supported on this file handle.
@@ -223,17 +223,17 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
         var err = NtCreateFile(
             Ꮡh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK(nil)), nil, fileAttrs,
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE), disposition,
-            (uint32)(((uint32)(options | (uint32)FILE_OPEN_REPARSE_POINT)) & ~(uint32)FILE_DELETE_ON_CLOSE), nil, 0);
+            (options | (uint32)FILE_OPEN_REPARSE_POINT) & ~(uint32)FILE_DELETE_ON_CLOSE, nil, 0);
         if (err != default!) {
             return (syscall.InvalidHandle, err);
         }
         // Inspect the handle, not the path, before truncation or delete-on-close.
         // Skip this check if opening the reparse point itself was requested,
         // or if O_CREAT|O_EXCL requires creating a new file without following links.
-        if ((uint32)(options & (uint32)FILE_OPEN_REPARSE_POINT) == 0) {
+        if ((options & (uint32)FILE_OPEN_REPARSE_POINT) == 0) {
             ref var info = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡinfo);
             err = syscall.GetFileInformationByHandle(h, Ꮡinfo);
-            if (err == default! && (uint32)(info.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+            if (err == default! && (info.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
                 err = STATUS_REPARSE_POINT_ENCOUNTERED;
             }
             if (err != default!) {
@@ -241,7 +241,7 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
                 return (syscall.InvalidHandle, err);
             }
         }
-        if ((uint32)(options & (uint32)FILE_DELETE_ON_CLOSE) == 0) {
+        if ((options & (uint32)FILE_DELETE_ON_CLOSE) == 0) {
             return (h, default!);
         }
         defer(syscall.CloseHandle, h, ref ᒐ);
@@ -256,7 +256,7 @@ internal static (syscallꓸHandle, error) openatFallback(@string name, uint32 ac
         err = NtOpenFile(
             Ꮡdh, access, Ꮡattrs, Ꮡ(new IO_STATUS_BLOCK(nil)),
             (uint32)((UntypedInt)(FILE_SHARE_READ | FILE_SHARE_WRITE) | (uint32)FILE_SHARE_DELETE),
-            (uint32)(options | (uint32)FILE_OPEN_REPARSE_POINT));
+            options | (uint32)FILE_OPEN_REPARSE_POINT);
         if (err != default!) {
             return (syscall.InvalidHandle, err);
         }
@@ -286,7 +286,7 @@ internal static error ntCreateFileError(error err, uint64 flag) {
         // (This might be Windows version dependent.)
         //
         // Only map STATUS_NOT_A_DIRECTORY to ENOTDIR when O_DIRECTORY is specified.
-        if ((uint64)(flag & (uint64)O_DIRECTORY) != 0) {
+        if ((flag & (uint64)O_DIRECTORY) != 0) {
             return syscall.ENOTDIR;
         }
     }
@@ -347,7 +347,7 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
             objAttrs,
             Ꮡ(new IO_STATUS_BLOCK(nil)),
             (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
-            (uint32)((uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options));
+            (uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options);
         if (err != default!) {
             {
                 var (ntStatus, ok) = err._<NTStatus>(ᐧ); if (!ok || ntStatus != STATUS_ACCESS_DENIED) {
@@ -364,7 +364,7 @@ public static error Deleteat(syscallꓸHandle dirfd, @string name, uint32 option
                 objAttrs,
                 Ꮡ(new IO_STATUS_BLOCK(nil)),
                 (uint32)((UntypedInt)(FILE_SHARE_DELETE | FILE_SHARE_READ) | (uint32)FILE_SHARE_WRITE),
-                (uint32)((uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options));
+                (uint32)((uint32)FILE_OPEN_REPARSE_POINT | (uint32)FILE_OPEN_FOR_BACKUP_INTENT) | options);
             if (err != default!) {
                 return ntCreateFileError(err, 0);
             }
@@ -426,7 +426,7 @@ public static bool TestDeleteatFallback;
 internal static error deleteatFallback(syscallꓸHandle h) {
     ref var data = ref heap(new syscall.ByHandleFileInformation(), out var Ꮡdata);
     {
-        var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == default! && (uint32)(data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
+        var err = syscall.GetFileInformationByHandle(h, Ꮡdata); if (err == default! && (data.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
             // Remove read-only attribute. Reopen the file, as it was previously open without FILE_WRITE_ATTRIBUTES access
             // in order to maximize compatibility in the happy path.
             var (wh, errΔ1) = ReOpenFile(h,
@@ -440,7 +440,7 @@ internal static error deleteatFallback(syscallꓸHandle h) {
                 wh,
                 FileBasicInfo,
                 @unsafe.Pointer.FromPinnedBox(Ꮡ(new FILE_BASIC_INFO(
-                    FileAttributes: (uint32)(data.FileAttributes & ~(uint32)FILE_ATTRIBUTE_READONLY)
+                    FileAttributes: (data.FileAttributes & ~(uint32)FILE_ATTRIBUTE_READONLY)
                 ))),
                 (uint32)/* unsafe.Sizeof(FILE_BASIC_INFO{}) */ (uintptr)40);
             syscall.CloseHandle(wh);
@@ -661,7 +661,7 @@ internal static error symlinkat(@string oldname, syscallꓸHandle newdirfd, @str
             syscall.FILE_ATTRIBUTE_NORMAL,
             0,
             FILE_CREATE,
-            (uint32)((uint32)((UntypedInt)(FILE_OPEN_REPARSE_POINT | FILE_OPEN_FOR_BACKUP_INTENT) | (uint32)FILE_SYNCHRONOUS_IO_NONALERT) | options),
+            (uint32)((UntypedInt)(FILE_OPEN_REPARSE_POINT | FILE_OPEN_FOR_BACKUP_INTENT) | (uint32)FILE_SYNCHRONOUS_IO_NONALERT) | options,
             nil,
             0);
         if (err != default!) {
@@ -742,7 +742,7 @@ internal static error withPrivilege(@string privilege, Func<error> f) {
         if (err != default!) {
             return f();
         }
-        defer(syscall.CloseHandle, ((syscallꓸHandle)(uintptr)token), ref ᒐ);
+        defer(syscall.CloseHandle, (syscallꓸHandle)(uintptr)token, ref ᒐ);
 
         (var privStr, err) = syscall.UTF16PtrFromString(privilege);
         if (err != default!) {

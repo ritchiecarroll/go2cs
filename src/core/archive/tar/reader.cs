@@ -358,7 +358,7 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
     if (err != default!) {
         return (default!, err);
     }
-    @string sbuf = ((@string)buf);
+    @string sbuf = (@string)buf;
 
     // For GNU PAX sparse format 0.0 support.
     // This function transforms the sparse format 0.0 headers into format 0.1

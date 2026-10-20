@@ -223,7 +223,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
                 tΔ1.Fatal(err);
             }
             @string jswant = @""""u8 + wants + @""""u8;
-            @string jsback = ((@string)jsb);
+            @string jsback = (@string)jsb;
             if (jsback != jswant) {
                 tΔ1.Errorf("Marshal(Unmarshal(%q)) = %s, want %s"u8, testʗ1.@in, jsback, jswant);
             }
@@ -718,7 +718,7 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Marshal(%v) got error %v"u8, ip, err);
     }
-    @string back = ((@string)jsb);
+    @string back = (@string)jsb;
     if (back != orig) {
         Ꮡt.Errorf("Marshal(Unmarshal(%q)) got %q, want %q"u8, orig, back, orig);
     }
@@ -1580,7 +1580,7 @@ public static void TestPrefixMarshalUnmarshal(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("failed to marshal: %v"u8, err);
             }
 
-            @string back = ((@string)pb);
+            @string back = (@string)pb;
             if (orig != back) {
                 tΔ1.Errorf("Marshal = %q; want %q"u8, back, orig);
             }

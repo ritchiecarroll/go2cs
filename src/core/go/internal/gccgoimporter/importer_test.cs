@@ -161,11 +161,11 @@ public static void TestObjImporter(ж<testing.T> Ꮡt) {
     if (len(vers) == 0) {
         Ꮡt.Fatalf("could not find version number in %s"u8, verout);
     }
-    (var major, err) = strconv.Atoi(((@string)vers[1]));
+    (var major, err) = strconv.Atoi((@string)vers[1]);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    (var minor, err) = strconv.Atoi(((@string)vers[2]));
+    (var minor, err) = strconv.Atoi((@string)vers[2]);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }

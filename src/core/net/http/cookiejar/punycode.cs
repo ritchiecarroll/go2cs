@@ -94,7 +94,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 internal static byte encodeDigit(int32 digit) {

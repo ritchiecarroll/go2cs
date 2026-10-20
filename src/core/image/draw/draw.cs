@@ -460,10 +460,10 @@ internal static void drawFillOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ui
             var db = Ꮡ(dst.Pix, i + 2);
             var da = Ꮡ(dst.Pix, i + 3);
 
-            dr.Value = (uint8)((((uint32)(dr.Value) * a / (uint32)m + sr) >> (int)(8)));
-            dg.Value = (uint8)((((uint32)(dg.Value) * a / (uint32)m + sg) >> (int)(8)));
-            db.Value = (uint8)((((uint32)(db.Value) * a / (uint32)m + sb) >> (int)(8)));
-            da.Value = (uint8)((((uint32)(da.Value) * a / (uint32)m + sa) >> (int)(8)));
+            dr.Value = (uint8)(((uint32)(dr.Value) * a / (uint32)m + sr) >> 8);
+            dg.Value = (uint8)(((uint32)(dg.Value) * a / (uint32)m + sg) >> 8);
+            db.Value = (uint8)(((uint32)(db.Value) * a / (uint32)m + sb) >> 8);
+            da.Value = (uint8)(((uint32)(da.Value) * a / (uint32)m + sa) >> 8);
         }
         i0 += dst.Stride;
         i1 += dst.Stride;
@@ -473,10 +473,10 @@ internal static void drawFillOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ui
 internal static void drawFillSrc(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, uint32 sr, uint32 sg, uint32 sb, uint32 sa) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
-    var sr8 = (uint8)((sr >> (int)(8)));
-    var sg8 = (uint8)((sg >> (int)(8)));
-    var sb8 = (uint8)((sb >> (int)(8)));
-    var sa8 = (uint8)((sa >> (int)(8)));
+    var sr8 = (uint8)(sr >> 8);
+    var sg8 = (uint8)(sg >> 8);
+    var sb8 = (uint8)(sb >> 8);
+    var sa8 = (uint8)(sa >> 8);
     // The built-in copy function is faster than a straightforward for loop to fill the destination with
     // the color, but copy requires a slice source. We therefore use a for loop to fill the first row, and
     // then use the first row as the slice source for the remaining rows.
@@ -536,10 +536,10 @@ internal static void drawCopyOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, ж
             var a = ((uint32)m - sa) * 0x101;
 
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-            d[0] = (uint8)((((uint32)d[0] * a / (uint32)m + sr) >> (int)(8)));
-            d[1] = (uint8)((((uint32)d[1] * a / (uint32)m + sg) >> (int)(8)));
-            d[2] = (uint8)((((uint32)d[2] * a / (uint32)m + sb) >> (int)(8)));
-            d[3] = (uint8)((((uint32)d[3] * a / (uint32)m + sa) >> (int)(8)));
+            d[0] = (uint8)(((uint32)d[0] * a / (uint32)m + sr) >> 8);
+            d[1] = (uint8)(((uint32)d[1] * a / (uint32)m + sg) >> 8);
+            d[2] = (uint8)(((uint32)d[2] * a / (uint32)m + sb) >> 8);
+            d[3] = (uint8)(((uint32)d[3] * a / (uint32)m + sa) >> 8);
         }
         d0 += ddelta;
         s0 += sdelta;
@@ -602,10 +602,10 @@ internal static void drawNRGBAOver(ref imageꓸRGBA dst, image.Rectangle r, ref 
             // The 0x101 is here for the same reason as in drawRGBA.
             var a = ((uint32)m - sa) * 0x101;
 
-            d[0] = (uint8)(((dr * a / (uint32)m + sr) >> (int)(8)));
-            d[1] = (uint8)(((dg * a / (uint32)m + sg) >> (int)(8)));
-            d[2] = (uint8)(((db * a / (uint32)m + sb) >> (int)(8)));
-            d[3] = (uint8)(((da * a / (uint32)m + sa) >> (int)(8)));
+            d[0] = (uint8)((dr * a / (uint32)m + sr) >> 8);
+            d[1] = (uint8)((dg * a / (uint32)m + sg) >> 8);
+            d[2] = (uint8)((db * a / (uint32)m + sb) >> 8);
+            d[3] = (uint8)((da * a / (uint32)m + sa) >> 8);
         }
     }
 }
@@ -631,10 +631,10 @@ internal static void drawNRGBASrc(ref imageꓸRGBA dst, image.Rectangle r, ref i
             var sb = (uint32)s[2] * sa / 0xff;
 
             var d = dpix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-            d[0] = (uint8)((sr >> (int)(8)));
-            d[1] = (uint8)((sg >> (int)(8)));
-            d[2] = (uint8)((sb >> (int)(8)));
-            d[3] = (uint8)((sa >> (int)(8)));
+            d[0] = (uint8)(sr >> 8);
+            d[1] = (uint8)(sg >> 8);
+            d[2] = (uint8)(sb >> 8);
+            d[3] = (uint8)(sa >> 8);
         }
     }
 }
@@ -698,16 +698,16 @@ internal static void drawGlyphOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, �
             if (ma == 0) {
                 continue;
             }
-            ma |= (uint32)((ma << (int)(8)));
+            ma |= (uint32)((ma << 8));
 
             // The 0x101 is here for the same reason as in drawRGBA.
             var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
 
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
-            d[0] = (uint8)((((uint32)d[0] * a + sr * ma) / (uint32)m >> (int)(8)));
-            d[1] = (uint8)((((uint32)d[1] * a + sg * ma) / (uint32)m >> (int)(8)));
-            d[2] = (uint8)((((uint32)d[2] * a + sb * ma) / (uint32)m >> (int)(8)));
-            d[3] = (uint8)((((uint32)d[3] * a + sa * ma) / (uint32)m >> (int)(8)));
+            d[0] = (uint8)(((uint32)d[0] * a + sr * ma) / (uint32)m >> 8);
+            d[1] = (uint8)(((uint32)d[1] * a + sg * ma) / (uint32)m >> 8);
+            d[2] = (uint8)(((uint32)d[2] * a + sb * ma) / (uint32)m >> 8);
+            d[3] = (uint8)(((uint32)d[3] * a + sa * ma) / (uint32)m >> 8);
         }
         i0 += dst.Stride;
         i1 += dst.Stride;
@@ -744,10 +744,10 @@ internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
         for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
             nint mi = mask.PixOffset(mx, my);
             var ma = (uint32)mask.Pix[mi];
-            ma |= (uint32)((ma << (int)(8)));
+            ma |= (uint32)((ma << 8));
             nint si = src.PixOffset(sx, sy);
             var syΔ1 = (uint32)src.Pix[si];
-            syΔ1 |= (uint32)((syΔ1 << (int)(8)));
+            syΔ1 |= (uint32)((syΔ1 << 8));
             var sa = (uint32)0xffff;
 
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
@@ -764,10 +764,10 @@ internal static void drawGrayMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             // This yields the same result, but is fewer arithmetic operations.
             var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
 
-            d[0] = (uint8)(((dr * a + syΔ1 * ma) / (uint32)m >> (int)(8)));
-            d[1] = (uint8)(((dg * a + syΔ1 * ma) / (uint32)m >> (int)(8)));
-            d[2] = (uint8)(((db * a + syΔ1 * ma) / (uint32)m >> (int)(8)));
-            d[3] = (uint8)(((da * a + sa * ma) / (uint32)m >> (int)(8)));
+            d[0] = (uint8)((dr * a + syΔ1 * ma) / (uint32)m >> 8);
+            d[1] = (uint8)((dg * a + syΔ1 * ma) / (uint32)m >> 8);
+            d[2] = (uint8)((db * a + syΔ1 * ma) / (uint32)m >> 8);
+            d[3] = (uint8)((da * a + sa * ma) / (uint32)m >> 8);
         }
         i0 += dy * dst.Stride;
     }
@@ -802,16 +802,16 @@ internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
         for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
             nint mi = mask.PixOffset(mx, my);
             var ma = (uint32)mask.Pix[mi];
-            ma |= (uint32)((ma << (int)(8)));
+            ma |= (uint32)((ma << 8));
             nint si = src.PixOffset(sx, sy);
             var sr = (uint32)src.Pix[si + 0];
             var sg = (uint32)src.Pix[si + 1];
             var sb = (uint32)src.Pix[si + 2];
             var sa = (uint32)src.Pix[si + 3];
-            sr |= (uint32)((sr << (int)(8)));
-            sg |= (uint32)((sg << (int)(8)));
-            sb |= (uint32)((sb << (int)(8)));
-            sa |= (uint32)((sa << (int)(8)));
+            sr |= (uint32)((sr << 8));
+            sg |= (uint32)((sg << 8));
+            sb |= (uint32)((sb << 8));
+            sa |= (uint32)((sa << 8));
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var dr = (uint32)d[0];
             var dg = (uint32)d[1];
@@ -826,10 +826,10 @@ internal static void drawRGBAMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r
             // This yields the same result, but is fewer arithmetic operations.
             var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
 
-            d[0] = (uint8)(((dr * a + sr * ma) / (uint32)m >> (int)(8)));
-            d[1] = (uint8)(((dg * a + sg * ma) / (uint32)m >> (int)(8)));
-            d[2] = (uint8)(((db * a + sb * ma) / (uint32)m >> (int)(8)));
-            d[3] = (uint8)(((da * a + sa * ma) / (uint32)m >> (int)(8)));
+            d[0] = (uint8)((dr * a + sr * ma) / (uint32)m >> 8);
+            d[1] = (uint8)((dg * a + sg * ma) / (uint32)m >> 8);
+            d[2] = (uint8)((db * a + sb * ma) / (uint32)m >> 8);
+            d[3] = (uint8)((da * a + sa * ma) / (uint32)m >> 8);
         }
         i0 += dy * dst.Stride;
     }
@@ -863,7 +863,7 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
         for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
             nint mi = mask.PixOffset(mx, my);
             var ma = (uint32)mask.Pix[mi];
-            ma |= (uint32)((ma << (int)(8)));
+            ma |= (uint32)((ma << 8));
             var srgba = src.RGBA64At(sx, sy);
             var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
             var dr = (uint32)d[0];
@@ -879,10 +879,10 @@ internal static void drawRGBA64ImageMaskOver(ж<imageꓸRGBA> Ꮡdst, image.Rect
             // This yields the same result, but is fewer arithmetic operations.
             var a = ((uint32)m - ((uint32)srgba.A * ma / (uint32)m)) * 0x101;
 
-            d[0] = (uint8)(((dr * a + (uint32)srgba.R * ma) / (uint32)m >> (int)(8)));
-            d[1] = (uint8)(((dg * a + (uint32)srgba.G * ma) / (uint32)m >> (int)(8)));
-            d[2] = (uint8)(((db * a + (uint32)srgba.B * ma) / (uint32)m >> (int)(8)));
-            d[3] = (uint8)(((da * a + (uint32)srgba.A * ma) / (uint32)m >> (int)(8)));
+            d[0] = (uint8)((dr * a + (uint32)srgba.R * ma) / (uint32)m >> 8);
+            d[1] = (uint8)((dg * a + (uint32)srgba.G * ma) / (uint32)m >> 8);
+            d[2] = (uint8)((db * a + (uint32)srgba.B * ma) / (uint32)m >> 8);
+            d[3] = (uint8)((da * a + (uint32)srgba.A * ma) / (uint32)m >> 8);
         }
         i0 += dy * dst.Stride;
     }
@@ -931,10 +931,10 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                             var db = (uint32)d[2];
                             var da = (uint32)d[3];
                             var a = ((uint32)m - (uint32)srgba.A) * 0x101;
-                            d[0] = (uint8)(((dr * a / (uint32)m + (uint32)srgba.R) >> (int)(8)));
-                            d[1] = (uint8)(((dg * a / (uint32)m + (uint32)srgba.G) >> (int)(8)));
-                            d[2] = (uint8)(((db * a / (uint32)m + (uint32)srgba.B) >> (int)(8)));
-                            d[3] = (uint8)(((da * a / (uint32)m + (uint32)srgba.A) >> (int)(8)));
+                            d[0] = (uint8)((dr * a / (uint32)m + (uint32)srgba.R) >> 8);
+                            d[1] = (uint8)((dg * a / (uint32)m + (uint32)srgba.G) >> 8);
+                            d[2] = (uint8)((db * a / (uint32)m + (uint32)srgba.B) >> 8);
+                            d[3] = (uint8)((da * a / (uint32)m + (uint32)srgba.A) >> 8);
                         }
                         i0 += dy * dst.Stride;
                     }
@@ -943,10 +943,10 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                         for ((nint i, nint sx, nint mx) = (i0, sx0, mx0); sx != sx1; (i, sx, mx) = (i + di, sx + dx, mx + dx)) {
                             var srgba = src0.RGBA64At(sx, sy);
                             var d = dst.Pix.slice(i, i + 4, i + 4);
-                            d[0] = (uint8)((srgba.R >> (int)(8)));
-                            d[1] = (uint8)((srgba.G >> (int)(8)));
-                            d[2] = (uint8)((srgba.B >> (int)(8)));
-                            d[3] = (uint8)((srgba.A >> (int)(8)));
+                            d[0] = (uint8)(srgba.R >> 8);
+                            d[1] = (uint8)(srgba.G >> 8);
+                            d[2] = (uint8)(srgba.B >> 8);
+                            d[3] = (uint8)(srgba.A >> 8);
                         }
                         i0 += dy * dst.Stride;
                     }
@@ -966,10 +966,10 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                                 var db = (uint32)d[2];
                                 var da = (uint32)d[3];
                                 var a = ((uint32)m - ((uint32)srgba.A * ma / (uint32)m)) * 0x101;
-                                d[0] = (uint8)(((dr * a + (uint32)srgba.R * ma) / (uint32)m >> (int)(8)));
-                                d[1] = (uint8)(((dg * a + (uint32)srgba.G * ma) / (uint32)m >> (int)(8)));
-                                d[2] = (uint8)(((db * a + (uint32)srgba.B * ma) / (uint32)m >> (int)(8)));
-                                d[3] = (uint8)(((da * a + (uint32)srgba.A * ma) / (uint32)m >> (int)(8)));
+                                d[0] = (uint8)((dr * a + (uint32)srgba.R * ma) / (uint32)m >> 8);
+                                d[1] = (uint8)((dg * a + (uint32)srgba.G * ma) / (uint32)m >> 8);
+                                d[2] = (uint8)((db * a + (uint32)srgba.B * ma) / (uint32)m >> 8);
+                                d[3] = (uint8)((da * a + (uint32)srgba.A * ma) / (uint32)m >> 8);
                             }
                             i0 += dy * dst.Stride;
                         }
@@ -979,10 +979,10 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                                 var ma = (uint32)mask0.RGBA64At(mx, my).A;
                                 var srgba = src0.RGBA64At(sx, sy);
                                 var d = dst.Pix.slice(i, i + 4, i + 4);
-                                d[0] = (uint8)(((uint32)srgba.R * ma / (uint32)m >> (int)(8)));
-                                d[1] = (uint8)(((uint32)srgba.G * ma / (uint32)m >> (int)(8)));
-                                d[2] = (uint8)(((uint32)srgba.B * ma / (uint32)m >> (int)(8)));
-                                d[3] = (uint8)(((uint32)srgba.A * ma / (uint32)m >> (int)(8)));
+                                d[0] = (uint8)((uint32)srgba.R * ma / (uint32)m >> 8);
+                                d[1] = (uint8)((uint32)srgba.G * ma / (uint32)m >> 8);
+                                d[2] = (uint8)((uint32)srgba.B * ma / (uint32)m >> 8);
+                                d[3] = (uint8)((uint32)srgba.A * ma / (uint32)m >> 8);
                             }
                             i0 += dy * dst.Stride;
                         }
@@ -1020,15 +1020,15 @@ internal static void drawRGBA(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, image.
                 // This yields the same result, but is fewer arithmetic operations.
                 var a = ((uint32)m - (sa * ma / (uint32)m)) * 0x101;
 
-                d[0] = (uint8)(((dr * a + sr * ma) / (uint32)m >> (int)(8)));
-                d[1] = (uint8)(((dg * a + sg * ma) / (uint32)m >> (int)(8)));
-                d[2] = (uint8)(((db * a + sb * ma) / (uint32)m >> (int)(8)));
-                d[3] = (uint8)(((da * a + sa * ma) / (uint32)m >> (int)(8)));
+                d[0] = (uint8)((dr * a + sr * ma) / (uint32)m >> 8);
+                d[1] = (uint8)((dg * a + sg * ma) / (uint32)m >> 8);
+                d[2] = (uint8)((db * a + sb * ma) / (uint32)m >> 8);
+                d[3] = (uint8)((da * a + sa * ma) / (uint32)m >> 8);
             } else {
-                d[0] = (uint8)((sr * ma / (uint32)m >> (int)(8)));
-                d[1] = (uint8)((sg * ma / (uint32)m >> (int)(8)));
-                d[2] = (uint8)((sb * ma / (uint32)m >> (int)(8)));
-                d[3] = (uint8)((sa * ma / (uint32)m >> (int)(8)));
+                d[0] = (uint8)(sr * ma / (uint32)m >> 8);
+                d[1] = (uint8)(sg * ma / (uint32)m >> 8);
+                d[2] = (uint8)(sb * ma / (uint32)m >> 8);
+                d[3] = (uint8)(sa * ma / (uint32)m >> 8);
             }
         }
         i0 += dy * dst.Stride;
@@ -1055,7 +1055,7 @@ internal static uint32 sqDiff(int32 x, int32 y) {
     // properties of unsigned integers operations guaranteed by the language
     // spec. See sqDiff from the image/color package for more details.
     var d = (uint32)(x - y);
-    return ((d * d) >> (int)(2));
+    return (d * d) >> 2;
 }
 
 internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src, image.Point sp, bool floydSteinberg) {

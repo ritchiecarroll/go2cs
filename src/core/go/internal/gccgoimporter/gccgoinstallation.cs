@@ -74,7 +74,7 @@ public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @str
     if (err != default!) {
         return err;
     }
-    inst.GccVersion = strings.TrimSpace(((@string)stdout));
+    inst.GccVersion = strings.TrimSpace((@string)stdout);
 
     return err;
 }

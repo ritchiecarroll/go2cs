@@ -818,7 +818,7 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
             }
             default: {
                 w.Write(jsLowUni);
-                var (t, bΔ2) = ((byte)((c >> (int)(4))), (byte)(c & 0x0f));
+                var (t, bΔ2) = ((byte)((c >> 4)), (byte)(c & 0x0f));
                 w.Write(hex.slice(t, (byte)(t + 1)));
                 w.Write(hex.slice(bΔ2, (byte)(bΔ2 + 1)));
                 break;

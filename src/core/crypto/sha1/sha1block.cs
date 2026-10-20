@@ -24,7 +24,7 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         // rounds below if needed for speed.
         for (nint iΔ1 = 0; iΔ1 < 16; iΔ1++) {
             nint j = iΔ1 * 4;
-            w[iΔ1] = (uint32)((uint32)((uint32)(((uint32)p[j] << (int)(24)) | ((uint32)p[j + 1] << (int)(16))) | ((uint32)p[j + 2] << (int)(8))) | (uint32)p[j + 3]);
+            w[iΔ1] = (uint32)p[j] << 24 | (uint32)p[j + 1] << 16 | (uint32)p[j + 2] << 8 | (uint32)p[j + 3];
         }
 
         var (a, b, c, d, e) = (h0, h1, h2, h3, h4);
@@ -34,37 +34,37 @@ internal static void blockGeneric(ref digest dig, slice<byte> p) {
         // the choice of K (_K0, _K1, etc).
         nint i = 0;
         for (; i < 16; i++) {
-            var f = (uint32)((uint32)(b & c) | (uint32)((~b) & d));
-            var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 0xf)] + (uint32)_K0;
+            var f = b & c | (~b) & d;
+            var t = bits.RotateLeft32(a, 5) + f + e + w[(i & 0xf)] + (uint32)_K0;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }
         for (; i < 20; i++) {
-            var tmp = (uint32)((uint32)((uint32)(w[(nint)((i - 3) & 0xf)] ^ w[(nint)((i - 8) & 0xf)]) ^ w[(nint)((i - 14) & 0xf)]) ^ w[(nint)((i) & 0xf)]);
-            w[(nint)(i & 0xf)] = bits.RotateLeft32(tmp, 1);
+            var tmp = w[((i - 3) & 0xf)] ^ w[((i - 8) & 0xf)] ^ w[((i - 14) & 0xf)] ^ w[((i) & 0xf)];
+            w[(i & 0xf)] = bits.RotateLeft32(tmp, 1);
 
-            var f = (uint32)((uint32)(b & c) | (uint32)((~b) & d));
-            var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 0xf)] + (uint32)_K0;
+            var f = b & c | (~b) & d;
+            var t = bits.RotateLeft32(a, 5) + f + e + w[(i & 0xf)] + (uint32)_K0;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }
         for (; i < 40; i++) {
-            var tmp = (uint32)((uint32)((uint32)(w[(nint)((i - 3) & 0xf)] ^ w[(nint)((i - 8) & 0xf)]) ^ w[(nint)((i - 14) & 0xf)]) ^ w[(nint)((i) & 0xf)]);
-            w[(nint)(i & 0xf)] = bits.RotateLeft32(tmp, 1);
-            var f = (uint32)((uint32)(b ^ c) ^ d);
-            var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 0xf)] + (uint32)_K1;
+            var tmp = w[((i - 3) & 0xf)] ^ w[((i - 8) & 0xf)] ^ w[((i - 14) & 0xf)] ^ w[((i) & 0xf)];
+            w[(i & 0xf)] = bits.RotateLeft32(tmp, 1);
+            var f = b ^ c ^ d;
+            var t = bits.RotateLeft32(a, 5) + f + e + w[(i & 0xf)] + (uint32)_K1;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }
         for (; i < 60; i++) {
-            var tmp = (uint32)((uint32)((uint32)(w[(nint)((i - 3) & 0xf)] ^ w[(nint)((i - 8) & 0xf)]) ^ w[(nint)((i - 14) & 0xf)]) ^ w[(nint)((i) & 0xf)]);
-            w[(nint)(i & 0xf)] = bits.RotateLeft32(tmp, 1);
-            var f = (uint32)(((uint32)(((uint32)(b | c)) & d)) | ((uint32)(b & c)));
-            var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 0xf)] + (uint32)_K2;
+            var tmp = w[((i - 3) & 0xf)] ^ w[((i - 8) & 0xf)] ^ w[((i - 14) & 0xf)] ^ w[((i) & 0xf)];
+            w[(i & 0xf)] = bits.RotateLeft32(tmp, 1);
+            var f = ((b | c) & d) | (b & c);
+            var t = bits.RotateLeft32(a, 5) + f + e + w[(i & 0xf)] + (uint32)_K2;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }
         for (; i < 80; i++) {
-            var tmp = (uint32)((uint32)((uint32)(w[(nint)((i - 3) & 0xf)] ^ w[(nint)((i - 8) & 0xf)]) ^ w[(nint)((i - 14) & 0xf)]) ^ w[(nint)((i) & 0xf)]);
-            w[(nint)(i & 0xf)] = bits.RotateLeft32(tmp, 1);
-            var f = (uint32)((uint32)(b ^ c) ^ d);
-            var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 0xf)] + (uint32)_K3;
+            var tmp = w[((i - 3) & 0xf)] ^ w[((i - 8) & 0xf)] ^ w[((i - 14) & 0xf)] ^ w[((i) & 0xf)];
+            w[(i & 0xf)] = bits.RotateLeft32(tmp, 1);
+            var f = b ^ c ^ d;
+            var t = bits.RotateLeft32(a, 5) + f + e + w[(i & 0xf)] + (uint32)_K3;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }
 

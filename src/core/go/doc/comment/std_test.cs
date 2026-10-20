@@ -28,7 +28,7 @@ public static void TestStd(ж<testing.T> Ꮡt) {
     }
 
     slice<@string> list = default!;
-    foreach (var (_, pkg) in strings.Fields(((@string)@out))) {
+    foreach (var (_, pkg) in strings.Fields((@string)@out)) {
         if (!strings.Contains(pkg, "/"u8)) {
             list = append(list, pkg);
         }

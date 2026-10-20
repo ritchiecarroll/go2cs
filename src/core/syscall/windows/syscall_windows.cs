@@ -51,7 +51,7 @@ public static (slice<uint16>, error) UTF16FromString(@string s) {
     // Also account for the terminating NUL character.
     var buf = new slice<uint16>(0, len(s) + 1);
     buf = encodeWTF16(s, buf);
-    return (append(buf, (uint16)(0)), default!);
+    return (append(buf, (uint16)0), default!);
 }
 
 // UTF16ToString returns the UTF-8 encoding of the UTF-16 sequence s,
@@ -135,7 +135,7 @@ public static (ж<uint16>, error) UTF16PtrFromString(@string s) {
 partial struct Errno /*num:uintptr*/;
 
 internal static uint32 langid(uint16 pri, uint16 sub) {
-    return (uint32)(((uint32)sub << (int)(10)) | (uint32)pri);
+    return (uint32)sub << 10 | (uint32)pri;
 }
 
 // FormatMessage is deprecated (msgsrc should be uintptr, not uint32, but can
@@ -367,7 +367,7 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     if (err != default!) {
         return (InvalidHandle, err);
     }
-    nint accessFlags = (nint)(flag & (nint)((nint)((nint)(UntypedInt)(O_RDONLY | O_WRONLY) | (nint)O_RDWR)));
+    nint accessFlags = flag & (nint)((nint)((nint)(UntypedInt)(O_RDONLY | O_WRONLY) | (nint)O_RDWR));
     uint32 access = default!;
     var exprᴛ1 = accessFlags;
     if (exprᴛ1 == O_RDONLY) {
@@ -379,14 +379,14 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     else if (exprᴛ1 == O_RDWR) {
         access = (uint32)((uint32)GENERIC_READ | (uint32)GENERIC_WRITE);
     }
-    if ((nint)(flag & (nint)O_CREAT) != 0) {
+    if ((flag & (nint)O_CREAT) != 0) {
         access |= (uint32)(GENERIC_WRITE);
     }
-    if ((nint)(flag & (nint)O_APPEND) != 0) {
+    if ((flag & (nint)O_APPEND) != 0) {
         // Remove GENERIC_WRITE unless O_TRUNC is set, in which case we need it to truncate the file.
         // We can't just remove FILE_WRITE_DATA because GENERIC_WRITE without FILE_WRITE_DATA
         // starts appending at the beginning of the file rather than at the end.
-        if ((nint)(flag & (nint)O_TRUNC) == 0) {
+        if ((flag & (nint)O_TRUNC) == 0) {
             access &= unchecked((uint32)~(uint32)(GENERIC_WRITE));
         }
         // Set all access rights granted by GENERIC_WRITE except for FILE_WRITE_DATA.
@@ -394,11 +394,11 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     }
     var sharemode = (uint32)((uint32)((uint32)FILE_SHARE_READ | (uint32)FILE_SHARE_WRITE));
     ж<SecurityAttributes> sa = default!;
-    if ((nint)(flag & (nint)O_CLOEXEC) == 0) {
+    if ((flag & (nint)O_CLOEXEC) == 0) {
         sa = makeInheritSa();
     }
     uint32 attrs = FILE_ATTRIBUTE_NORMAL;
-    if ((uint32)(perm & (uint32)S_IWRITE) == 0) {
+    if ((perm & (uint32)S_IWRITE) == 0) {
         attrs = FILE_ATTRIBUTE_READONLY;
     }
     // fileFlags contains the high 12 bits of flag.
@@ -406,7 +406,7 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     // passed to CreateFile. It is an error to use if the bits can't be
     // mapped to the supported FILE_FLAG_* constants.
     {
-        var fileFlags = (uint32)((uint32)flag & (uint32)fileFlagsMask); if ((uint32)(fileFlags & ~(uint32)validFileFlagsMask) == 0){
+        var fileFlags = (uint32)flag & (uint32)fileFlagsMask; if ((fileFlags & ~(uint32)validFileFlagsMask) == 0){
             attrs |= (uint32)(fileFlags);
         } else {
             return (InvalidHandle, oserror.ErrInvalid);
@@ -426,7 +426,7 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
         // to work with directories.
         attrs |= (uint32)(FILE_FLAG_BACKUP_SEMANTICS);
     }
-    if ((nint)(flag & (nint)O_SYNC) != 0) {
+    if ((flag & (nint)O_SYNC) != 0) {
         attrs |= (uint32)(_FILE_FLAG_WRITE_THROUGH);
     }
     // We don't use CREATE_ALWAYS, because when opening a file with
@@ -436,12 +436,12 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     // Instead, we ftruncate the file after opening when O_TRUNC is set.
     uint32 createmode = default!;
     switch (ᐧ) {
-    case {} when (nint)(flag & (nint)((nint)((nint)O_CREAT | (nint)O_EXCL))) == (nint)((nint)((nint)O_CREAT | (nint)O_EXCL)): {
+    case {} when (flag & (nint)((nint)((nint)O_CREAT | (nint)O_EXCL))) == (nint)((nint)((nint)O_CREAT | (nint)O_EXCL)): {
         createmode = CREATE_NEW;
         attrs |= (uint32)(FILE_FLAG_OPEN_REPARSE_POINT); // don't follow symlinks
         break;
     }
-    case {} when (nint)(flag & (nint)O_CREAT) == O_CREAT: {
+    case {} when (flag & (nint)O_CREAT) == O_CREAT: {
         createmode = OPEN_ALWAYS;
         break;
     }
@@ -451,16 +451,16 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
     }}
     (var h, err) = createFile(namep, access, sharemode, sa, createmode, attrs, 0);
     if (h == InvalidHandle) {
-        if (AreEqual(err, ERROR_ACCESS_DENIED) && ((uint32)(attrs & (uint32)FILE_FLAG_BACKUP_SEMANTICS) == 0)) {
+        if (AreEqual(err, ERROR_ACCESS_DENIED) && ((attrs & (uint32)FILE_FLAG_BACKUP_SEMANTICS) == 0)) {
             // We should return EISDIR when we are trying to open a directory with write access.
             var (fa, e1) = GetFileAttributes(namep);
-            if (e1 == default! && (uint32)(fa & (uint32)FILE_ATTRIBUTE_DIRECTORY) != 0) {
+            if (e1 == default! && (fa & (uint32)FILE_ATTRIBUTE_DIRECTORY) != 0) {
                 err = EISDIR;
             }
         }
         return (h, err);
     }
-    if ((nint)(flag & (nint)o_DIRECTORY) != 0) {
+    if ((flag & (nint)o_DIRECTORY) != 0) {
         // Check if the file is a directory, else return ENOTDIR.
         ref var fi = ref heap(new ByHandleFileInformation(), out var Ꮡfi);
         {
@@ -469,13 +469,13 @@ public static (ΔHandle fd, error err) Open(@string name, nint flag, uint32 perm
                 return (InvalidHandle, errΔ1);
             }
         }
-        if ((uint32)(fi.FileAttributes & (uint32)FILE_ATTRIBUTE_DIRECTORY) == 0) {
+        if ((fi.FileAttributes & (uint32)FILE_ATTRIBUTE_DIRECTORY) == 0) {
             CloseHandle(h);
             return (InvalidHandle, ENOTDIR);
         }
     }
     // Ignore O_TRUNC if the file has just been created.
-    if ((nint)(flag & (nint)O_TRUNC) == O_TRUNC && (createmode == OPEN_EXISTING || (createmode == OPEN_ALWAYS && AreEqual(err, ERROR_ALREADY_EXISTS)))) {
+    if ((flag & (nint)O_TRUNC) == O_TRUNC && (createmode == OPEN_EXISTING || (createmode == OPEN_ALWAYS && AreEqual(err, ERROR_ALREADY_EXISTS)))) {
         err = Ftruncate(h, 0);
         if (AreEqual(err, _ERROR_INVALID_PARAMETER)) {
             // ERROR_INVALID_PARAMETER means truncation is not supported on this file handle.
@@ -574,7 +574,7 @@ internal static error setFilePointerEx(ΔHandle handle, int64 distToMove, ж<int
     } else {
         // distToMove is a LARGE_INTEGER, which is 64 bits.
         var ᴋ1 = ᏑnewFilePointer;
-                (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 5, (uintptr)handle, (uintptr)distToMove, (uintptr)((distToMove >> (int)(32))), (uintptr)ᴋ1, (uintptr)whence, 0);
+                (_, _, e1) = Syscall6(procSetFilePointerEx.Addr(), 5, (uintptr)handle, (uintptr)distToMove, (uintptr)(distToMove >> 32), (uintptr)ᴋ1, (uintptr)whence, 0);
         System.GC.KeepAlive(ᴋ1);
     }
     if (e1 != 0) {
@@ -828,7 +828,7 @@ public static error /*err*/ Chmod(@string path, uint32 mode) {
     if (e != default!) {
         return e;
     }
-    if ((uint32)(mode & (uint32)S_IWRITE) != 0){
+    if ((mode & (uint32)S_IWRITE) != 0){
         attrs &= unchecked((uint32)~(uint32)(FILE_ATTRIBUTE_READONLY));
     } else {
         attrs |= (uint32)(FILE_ATTRIBUTE_READONLY);
@@ -1447,7 +1447,7 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) {
             var data = rdb.of(reparseDataBuffer.ᏑreparseBuffer).Reinterpret<byte, symbolicLinkReparseBuffer>();
             var p = array<uint16>.AliasPointer(data.at(symbolicLinkReparseBuffer.ᏑPathBuffer, 0), 65535);
             s = UTF16ToString(p.slice(data.SubstituteNameOffset / 2, (uint16)(data.SubstituteNameOffset + data.SubstituteNameLength) / 2));
-            if ((uint32)(data.Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
+            if ((data.Flags & (uint32)_SYMLINK_FLAG_RELATIVE) == 0) {
                 if (len(s) >= 4 && s[..4] == @"\??\"){
                     s = s[4..];
                     switch (ᐧ) {
@@ -1559,7 +1559,7 @@ internal static error update(this ref procThreadAttributeListContainer al, uintp
 // Delete frees ProcThreadAttributeList's resources.
 internal static void delete(this ref procThreadAttributeListContainer al) {
     deleteProcThreadAttributeList(al.data);
-    LocalFree(((ΔHandle)(uintptr)al.data));
+    LocalFree((ΔHandle)(uintptr)al.data);
     al.data = default!;
     al.pointers = default!;
 }

@@ -40,7 +40,7 @@ public static void TestWeakCertCache(ж<testing.T> Ꮡt) {
     }
 
     {
-        var (_, ok) = Ꮡwcc.of(global::go.crypto.tls_package.weakCertCache.ᏑMap).Load(((@string)(~p).Bytes)); if (!ok) {
+        var (_, ok) = Ꮡwcc.of(global::go.crypto.tls_package.weakCertCache.ᏑMap).Load((@string)(~p).Bytes); if (!ok) {
             Ꮡt.Fatal(cacheDoesNotContainˢ);
         }
     }
@@ -81,7 +81,7 @@ public static void TestWeakCertCache(ж<testing.T> Ꮡt) {
     certA = default!;
     runtime.GC();
 
-    timeoutRefCheck(Ꮡt, ((@string)(~p).Bytes), true);
+    timeoutRefCheck(Ꮡt, (@string)(~p).Bytes, true);
 
     // Keep certB alive until at least now, so that we can
     // purposefully nil it and force the finalizer to be
@@ -90,7 +90,7 @@ public static void TestWeakCertCache(ж<testing.T> Ꮡt) {
     certB = default!;
     runtime.GC();
 
-    timeoutRefCheck(Ꮡt, ((@string)(~p).Bytes), false);
+    timeoutRefCheck(Ꮡt, (@string)(~p).Bytes, false);
 }
 
 } // end tls_internal_test_package

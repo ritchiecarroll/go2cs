@@ -206,7 +206,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     gcPercentGoal += gcPercentGoal / (uint64)(/* 1.0 / (retainExtraPercent / 100.0) */ 10UL);
     // Align it to a physical page boundary to make the following calculations
     // a bit more exact.
-    gcPercentGoal = (uint64)((gcPercentGoal + (uint64)physPageSize - 1) & ~((uint64)physPageSize - 1));
+    gcPercentGoal = (gcPercentGoal + (uint64)physPageSize - 1) & ~((uint64)physPageSize - 1);
 
     // Represents where we are now in the heap's contribution to RSS in bytes.
     //
@@ -708,9 +708,9 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
 
     printlock();
     print((@string)"scav "u8,
-        (releasedBg >> (int)(10)), (@string)" KiB work (bg), "u8,
-        (releasedEager >> (int)(10)), (@string)" KiB work (eager), "u8,
-        (ᏑgcController.of(gcControllerState.ᏑheapReleased).load() >> (int)(10)), (@string)" KiB now, "u8,
+        releasedBg >> 10, (@string)" KiB work (bg), "u8,
+        releasedEager >> 10, (@string)" KiB work (eager), "u8,
+        ᏑgcController.of(gcControllerState.ᏑheapReleased).load() >> 10, (@string)" KiB now, "u8,
         (ᏑgcController.of(gcControllerState.ᏑheapInUse).load() * 100) / heapRetained(), (@string)"% util"u8);
     if (forced){
         print((@string)" (forced)"u8);
@@ -849,7 +849,7 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
         // byte was set. Finally, we determine if any of these high
         // bits are zero by ORing with ones everywhere except the
         // high bits and inverting the result."
-        return ~((uint64)(((uint64)((((uint64)(xΔ1 & c)) + c) | xΔ1)) | c));
+        return ~((((xΔ1 & c) + c) | xΔ1) | c);
     }
     // Transform x to contain a 1 bit at the top of each m-aligned
     // group of m zero bits.
@@ -894,7 +894,7 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     // set each group to have all the bits set except
     // the top bit, so just OR with the original
     // result to set all the bits.
-    return ~((uint64)((x - (x.Rsh((m - 1)))) | x));
+    return ~((x - (x.Rsh((m - 1)))) | x);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -945,7 +945,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     // Start by quickly skipping over blocks of non-free or scavenged pages.
     for (; i >= 0; i--) {
         // 1s are scavenged OR non-free => 0s are unscavenged AND free
-        var xΔ1 = fillAligned((uint64)(m.scavenged[i] | m.pallocBits[i]), (nuint)minimum);
+        var xΔ1 = fillAligned(m.scavenged[i] | m.pallocBits[i], (nuint)minimum);
         if (xΔ1 != ~(uint64)0) {
             break;
         }
@@ -958,7 +958,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
     // extend further. Loop until we find the extent of it.
 
     // 1s are scavenged OR non-free => 0s are unscavenged AND free
-    var x = fillAligned((uint64)(m.scavenged[i] | m.pallocBits[i]), (nuint)minimum);
+    var x = fillAligned(m.scavenged[i] | m.pallocBits[i], (nuint)minimum);
     nuint z1 = (nuint)sys.LeadingZeros64(~x);
     nuint run = (nuint)0;
     nuint end = (nuint)i * 64 + (64 - z1);
@@ -972,7 +972,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
         // word so it may extend into further words.
         run = 64 - z1;
         for (nint j = i - 1; j >= 0; j--) {
-            var xΔ2 = fillAligned((uint64)(m.scavenged[j] | m.pallocBits[j]), (nuint)minimum);
+            var xΔ2 = fillAligned(m.scavenged[j] | m.pallocBits[j], (nuint)minimum);
             run += (nuint)sys.LeadingZeros64(xΔ2);
             if (xΔ2 != 0) {
                 // The run stopped in this word.
@@ -1121,7 +1121,7 @@ internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) 
 
     // Starting from searchAddr's chunk, iterate until we find a chunk with pages to scavenge.
     var gen = s.gen;
-    chunkIdx min = ((chunkIdx)(nuint)Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Load());
+    chunkIdx min = (chunkIdx)(nuint)Ꮡs.of(scavengeIndex.ᏑminHeapIdx).Load();
     chunkIdx start = chunkIndex(searchAddr);
     // N.B. We'll never map the 0'th chunk, so minHeapIdx ensures this loop overflow.
     for (chunkIdx i = start; i >= min; i--) {
@@ -1272,15 +1272,15 @@ partial struct scavChunkData {
 internal static scavChunkData unpackScavChunkData(uint64 sc) {
     return new scavChunkData(
         inUse: (uint16)sc,
-        lastInUse: (uint16)((uint16)((sc >> (int)(16))) & (uint16)scavChunkInUseMask),
-        gen: (uint32)((sc >> (int)(32))),
-        scavChunkFlags: ((scavChunkFlags)((uint8)((uint8)((sc >> (int)((16 + logScavChunkInUseMax)))) & (uint8)scavChunkFlagsMask)))
+        lastInUse: (uint16)((uint16)(sc >> 16) & (uint16)scavChunkInUseMask),
+        gen: (uint32)(sc >> 32),
+        scavChunkFlags: ((scavChunkFlags)((uint8)((uint8)(sc >> (int)((16 + logScavChunkInUseMax))) & (uint8)scavChunkFlagsMask)))
     );
 }
 
 // pack returns sc packed into a uint64.
 internal static uint64 pack(this scavChunkData sc) {
-    return (uint64)((uint64)((uint64)((uint64)sc.inUse | (((uint64)sc.lastInUse << (int)(16)))) | (((uint64)(uint8)sc.scavChunkFlags << (int)((16 + logScavChunkInUseMax))))) | (((uint64)sc.gen << (int)(32))));
+    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)(uint8)sc.scavChunkFlags << (int)((16 + logScavChunkInUseMax))) | ((uint64)sc.gen << 32);
 }
 
 // scavChunkHasFree indicates whether the chunk has anything left to

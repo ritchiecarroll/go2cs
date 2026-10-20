@@ -194,7 +194,7 @@ partial struct rule {
 partial struct ΔsyntaxError /*@string*/;
 
 internal static @string Error(this ΔsyntaxError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

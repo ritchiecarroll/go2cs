@@ -375,7 +375,7 @@ internal static void traceAdvance(bool stopTrace) {
                 if ((~s.g).m != nil) {
                     Ꮡug.Value.mid = (int64)(~(~s.g).m).procid;
                 }
-                Ꮡug.Value.status = (uint32)(readgstatus(s.g) & ~(uint32)_Gscan);
+                Ꮡug.Value.status = readgstatus(s.g) & ~(uint32)_Gscan;
                 Ꮡug.Value.waitreason = s.g.Value.waitreason;
                 Ꮡug.Value.inMarkAssist = s.g.Value.inMarkAssist;
                 Ꮡug.Value.stackID = traceStack(0, gp, ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstackTab, (ulong)(gen % 2)));
@@ -718,13 +718,13 @@ internal static uintptr traceNextGen(uintptr gen) {
 // generation. Note: the provided generation must not have started yet.
 internal static void traceRegisterLabelsAndReasons(uintptr gen) {
     foreach (var (i, label) in gcMarkWorkerModeStrings[..]) {
-        Δtrace.markWorkerLabels[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label));
+        Δtrace.markWorkerLabels[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, label);
     }
     foreach (var (i, str) in traceBlockReasonStrings[..]) {
-        Δtrace.goBlockReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str));
+        Δtrace.goBlockReasons[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
     }
     foreach (var (i, str) in traceGoStopReasonStrings[..]) {
-        Δtrace.goStopReasons[gen % 2][i] = ((traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str));
+        Δtrace.goStopReasons[gen % 2][i] = (traceArg)ᏑΔtrace.at(runtime_package.Δtraceᴛ1.ᏑstringTab, (ulong)(gen % 2)).put(gen, str);
     }
 }
 

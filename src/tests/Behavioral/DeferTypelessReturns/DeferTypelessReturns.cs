@@ -59,7 +59,7 @@ internal static uint32 width() {
 internal static (uint32, error) mixedRet(bool ok) {
     GoFrame ᒐ = default;
     try {
-        defer(closeIt, (ж<nint>)(nil), (nint)(4), ref ᒐ);
+        defer(closeIt, (ж<nint>)(nil), (nint)4, ref ᒐ);
         if (!ok) {
             return (0, fmt.Errorf("nope"u8));
         }
@@ -72,7 +72,7 @@ internal static (uint32, error) mixedRet(bool ok) {
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
-        defer(closeIt, (ж<nint>)(nil), (nint)(3), ref ᒐ);
+        defer(closeIt, (ж<nint>)(nil), (nint)3, ref ᒐ);
         ref var h = ref heap<res>(out var Ꮡh);
         h = new res(id: 4);
         var hʗ1 = h;

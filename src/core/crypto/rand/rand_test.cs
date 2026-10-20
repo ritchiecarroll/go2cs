@@ -88,7 +88,7 @@ public static void TestLargeRead(ж<testing.T> Ꮡt) {
 
 internal static void testLargeRead(ж<testing.T> Ꮡt, Func<slice<byte>, (nint, error)> Read) {
     // 40MiB, more than the documented maximum of 32Mi-1 on Linux 32-bit.
-    var b = new slice<byte>((40 << (int)(20)));
+    var b = new slice<byte>((40 << 20));
     {
         var (n, err) = Read(b); if (err != default!){
             Ꮡt.Fatal(err);
@@ -246,7 +246,7 @@ public static void BenchmarkRead(ж<testing.B> Ꮡb) {
         benchmarkRead(bΔ2, 32);
     });
     Ꮡb.Run("4K"u8, (ж<testing.B> bΔ3) => {
-        benchmarkRead(bΔ3, (4 << (int)(10)));
+        benchmarkRead(bΔ3, 4 << 10);
     });
 }
 

@@ -63,7 +63,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 8 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 8 + span.@base());
             }
         }
     }
@@ -71,7 +71,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC1(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -226,7 +226,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -234,7 +234,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC2(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -389,7 +389,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 24 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 24 + span.@base());
             }
         }
     }
@@ -397,7 +397,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC3(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -552,7 +552,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 32 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 32 + span.@base());
             }
         }
     }
@@ -560,7 +560,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC4(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -715,7 +715,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 48 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 48 + span.@base());
             }
         }
     }
@@ -723,7 +723,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC5(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -878,7 +878,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 64 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 64 + span.@base());
             }
         }
     }
@@ -886,7 +886,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC6(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -1041,7 +1041,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 80 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 80 + span.@base());
             }
         }
     }
@@ -1049,7 +1049,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC7(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -1204,7 +1204,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 96 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 96 + span.@base());
             }
         }
     }
@@ -1212,7 +1212,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC8(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -1367,7 +1367,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 112 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 112 + span.@base());
             }
         }
     }
@@ -1375,7 +1375,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC9(uintptr size, ж<_t
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -1530,7 +1530,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 128 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 128 + span.@base());
             }
         }
     }
@@ -1538,7 +1538,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC10(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -1693,7 +1693,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 144 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 144 + span.@base());
             }
         }
     }
@@ -1701,7 +1701,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC11(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -1856,7 +1856,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 160 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 160 + span.@base());
             }
         }
     }
@@ -1864,7 +1864,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC12(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2019,7 +2019,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 176 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 176 + span.@base());
             }
         }
     }
@@ -2027,7 +2027,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC13(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2182,7 +2182,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 192 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 192 + span.@base());
             }
         }
     }
@@ -2190,7 +2190,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC14(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2345,7 +2345,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 208 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 208 + span.@base());
             }
         }
     }
@@ -2353,7 +2353,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC15(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2508,7 +2508,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 224 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 224 + span.@base());
             }
         }
     }
@@ -2516,7 +2516,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC16(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2671,7 +2671,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 240 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 240 + span.@base());
             }
         }
     }
@@ -2679,7 +2679,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC17(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2834,7 +2834,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 256 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 256 + span.@base());
             }
         }
     }
@@ -2842,7 +2842,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC18(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -2997,7 +2997,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 288 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 288 + span.@base());
             }
         }
     }
@@ -3005,7 +3005,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC19(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -3160,7 +3160,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 320 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 320 + span.@base());
             }
         }
     }
@@ -3168,7 +3168,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC20(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -3323,7 +3323,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 352 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 352 + span.@base());
             }
         }
     }
@@ -3331,7 +3331,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC21(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -3486,7 +3486,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 384 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 384 + span.@base());
             }
         }
     }
@@ -3494,7 +3494,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC22(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -3649,7 +3649,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 416 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 416 + span.@base());
             }
         }
     }
@@ -3657,7 +3657,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC23(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -3812,7 +3812,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 448 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 448 + span.@base());
             }
         }
     }
@@ -3820,7 +3820,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC24(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -3975,7 +3975,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 480 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 480 + span.@base());
             }
         }
     }
@@ -3983,7 +3983,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC25(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -4138,7 +4138,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 512 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 512 + span.@base());
             }
         }
     }
@@ -4146,7 +4146,7 @@ internal static @unsafe.Pointer mallocgcSmallScanNoHeaderSC26(uintptr size, ж<_
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if ((~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -4348,7 +4348,7 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -4356,7 +4356,7 @@ internal static @unsafe.Pointer mallocgcTinySize1(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -4504,7 +4504,7 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -4512,7 +4512,7 @@ internal static @unsafe.Pointer mallocgcTinySize2(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -4660,7 +4660,7 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -4668,7 +4668,7 @@ internal static @unsafe.Pointer mallocgcTinySize3(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -4816,7 +4816,7 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -4824,7 +4824,7 @@ internal static @unsafe.Pointer mallocgcTinySize4(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -4972,7 +4972,7 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -4980,7 +4980,7 @@ internal static @unsafe.Pointer mallocgcTinySize5(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -5128,7 +5128,7 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -5136,7 +5136,7 @@ internal static @unsafe.Pointer mallocgcTinySize6(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -5284,7 +5284,7 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -5292,7 +5292,7 @@ internal static @unsafe.Pointer mallocgcTinySize7(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -5440,7 +5440,7 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -5448,7 +5448,7 @@ internal static @unsafe.Pointer mallocgcTinySize8(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -5596,7 +5596,7 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -5604,7 +5604,7 @@ internal static @unsafe.Pointer mallocgcTinySize9(uintptr size, ж<_type> Ꮡtyp
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -5752,7 +5752,7 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -5760,7 +5760,7 @@ internal static @unsafe.Pointer mallocgcTinySize10(uintptr size, ж<_type> Ꮡty
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -5908,7 +5908,7 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -5916,7 +5916,7 @@ internal static @unsafe.Pointer mallocgcTinySize11(uintptr size, ж<_type> Ꮡty
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -6064,7 +6064,7 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -6072,7 +6072,7 @@ internal static @unsafe.Pointer mallocgcTinySize12(uintptr size, ж<_type> Ꮡty
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -6220,7 +6220,7 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -6228,7 +6228,7 @@ internal static @unsafe.Pointer mallocgcTinySize13(uintptr size, ж<_type> Ꮡty
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -6376,7 +6376,7 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -6384,7 +6384,7 @@ internal static @unsafe.Pointer mallocgcTinySize14(uintptr size, ж<_type> Ꮡty
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -6532,7 +6532,7 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -6540,7 +6540,7 @@ internal static @unsafe.Pointer mallocgcTinySize15(uintptr size, ж<_type> Ꮡty
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(tinySpanClass);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
     ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
 
@@ -6669,7 +6669,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 16 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 16 + span.@base());
             }
         }
     }
@@ -6677,7 +6677,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC2(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -6803,7 +6803,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 24 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 24 + span.@base());
             }
         }
     }
@@ -6811,7 +6811,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC3(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -6937,7 +6937,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 32 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 32 + span.@base());
             }
         }
     }
@@ -6945,7 +6945,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC4(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7071,7 +7071,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 48 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 48 + span.@base());
             }
         }
     }
@@ -7079,7 +7079,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC5(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7205,7 +7205,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 64 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 64 + span.@base());
             }
         }
     }
@@ -7213,7 +7213,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC6(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7339,7 +7339,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 80 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 80 + span.@base());
             }
         }
     }
@@ -7347,7 +7347,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC7(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7473,7 +7473,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 96 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 96 + span.@base());
             }
         }
     }
@@ -7481,7 +7481,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC8(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7607,7 +7607,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 112 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 112 + span.@base());
             }
         }
     }
@@ -7615,7 +7615,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC9(uintptr size, ж<_type> �
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7741,7 +7741,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 128 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 128 + span.@base());
             }
         }
     }
@@ -7749,7 +7749,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC10(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -7875,7 +7875,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 144 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 144 + span.@base());
             }
         }
     }
@@ -7883,7 +7883,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC11(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8009,7 +8009,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 160 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 160 + span.@base());
             }
         }
     }
@@ -8017,7 +8017,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC12(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8143,7 +8143,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 176 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 176 + span.@base());
             }
         }
     }
@@ -8151,7 +8151,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC13(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8277,7 +8277,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 192 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 192 + span.@base());
             }
         }
     }
@@ -8285,7 +8285,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC14(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8411,7 +8411,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 208 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 208 + span.@base());
             }
         }
     }
@@ -8419,7 +8419,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC15(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8545,7 +8545,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 224 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 224 + span.@base());
             }
         }
     }
@@ -8553,7 +8553,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC16(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8679,7 +8679,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 240 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 240 + span.@base());
             }
         }
     }
@@ -8687,7 +8687,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC17(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8813,7 +8813,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 256 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 256 + span.@base());
             }
         }
     }
@@ -8821,7 +8821,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC18(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -8947,7 +8947,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 288 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 288 + span.@base());
             }
         }
     }
@@ -8955,7 +8955,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC19(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9081,7 +9081,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 320 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 320 + span.@base());
             }
         }
     }
@@ -9089,7 +9089,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC20(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9215,7 +9215,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 352 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 352 + span.@base());
             }
         }
     }
@@ -9223,7 +9223,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC21(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9349,7 +9349,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 384 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 384 + span.@base());
             }
         }
     }
@@ -9357,7 +9357,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC22(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9483,7 +9483,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 416 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 416 + span.@base());
             }
         }
     }
@@ -9491,7 +9491,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC23(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9617,7 +9617,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 448 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 448 + span.@base());
             }
         }
     }
@@ -9625,7 +9625,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC24(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9751,7 +9751,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 480 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 480 + span.@base());
             }
         }
     }
@@ -9759,7 +9759,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC25(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }
@@ -9885,7 +9885,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
                 span.Value.allocCache.RshAssign((nuint)(theBit + 1));
                 span.Value.freeindex = freeidx;
                 span.Value.allocCount++;
-                nextFreeFastResult = ((gclinkptr)((uintptr)result * 512 + span.@base()));
+                nextFreeFastResult = (gclinkptr)((uintptr)result * 512 + span.@base());
             }
         }
     }
@@ -9893,7 +9893,7 @@ internal static @unsafe.Pointer mallocgcSmallNoScanSC26(uintptr size, ж<_type> 
     if (v == 0) {
         (v, span, checkGCTrigger) = c.nextFree(spc);
     }
-    @unsafe.Pointer x = ((@unsafe.Pointer)(uintptr)v);
+    @unsafe.Pointer x = (@unsafe.Pointer)(uintptr)v;
     if (needzero && (~span).needzero != 0) {
         memclrNoHeapPointers(x, elemsize);
     }

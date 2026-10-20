@@ -27,7 +27,7 @@ internal static url.Values cloneURLValues(url.Values v) {
     }
     // http.Header and url.Values have the same representation, so temporarily
     // treat it like http.Header, which does have a clone:
-    return ((url.Values)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)v).Clone());
+    return (url.Values)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)v).Clone();
 }
 
 // cloneURL should be an internal detail,
@@ -103,7 +103,7 @@ internal static ж<multipart.FileHeader> cloneMultipartFileHeader(ж<multipart.F
     }
     var fh2 = @new<multipart.FileHeader>();
     fh2.Value = fh;
-    fh2.Value.Header = ((textproto.MIMEHeader)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)fh.Header).Clone());
+    fh2.Value.Header = (textproto.MIMEHeader)(map<@string, slice<@string>>)((ΔHeader)(map<@string, slice<@string>>)fh.Header).Clone();
     return fh2;
 }
 

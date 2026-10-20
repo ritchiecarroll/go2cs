@@ -736,7 +736,7 @@ internal static @string quoteChar(byte c) {
     }
 
     // use quoted string with different quotation marks
-    @string s = strconv.Quote(((@string)c));
+    @string s = strconv.Quote((@string)c);
     return "'" + s.slice(1, len(s) - 1) + "'";
 }
 

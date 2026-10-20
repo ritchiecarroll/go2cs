@@ -47,7 +47,7 @@ public static void TestOpenAndNonOpenDefers(ж<testing.T> Ꮡt) {
                 if (!AreEqual(recover(), (@string)("testNonOpenDefer"))) {
                     Ꮡt.Fatal(expectedTestNonOpenPanicˢ);
                 }
-            }, (nint)(3), ref ᒐ);
+            }, (nint)3, ref ᒐ);
             if (glob > 2) {
                 break;
             }
@@ -70,7 +70,7 @@ internal static partial void testOpen(ж<testing.T> Ꮡt, nint arg) {
             if (!AreEqual(recover(), (@string)("testOpenDefer"))) {
                 Ꮡt.Fatal(expectedTestOpenPanicˢ);
             }
-        }, (nint)(4), ref ᒐ);
+        }, (nint)4, ref ᒐ);
         if (arg > 2) {
             throw panic("testOpenDefer");
         }
@@ -91,7 +91,7 @@ public static void TestNonOpenAndOpenDefers(ж<testing.T> Ꮡt) {
                 if (!AreEqual(recover(), (@string)("testNonOpenDefer"))) {
                     Ꮡt.Fatal(expectedTestNonOpenPanicˢ);
                 }
-            }, (nint)(3), ref ᒐ);
+            }, (nint)3, ref ᒐ);
             if (glob > 2) {
                 break;
             }
@@ -137,16 +137,16 @@ internal static void testConditionalDefers(nint n) {
         }
 
         var doappendʗ1 = doappend;
-        defer(doappendʗ1, (nint)(1), ref ᒐ);
+        defer(doappendʗ1, (nint)1, ref ᒐ);
         if (n > 5) {
             var doappendʗ2 = doappend;
-            defer(doappendʗ2, (nint)(2), ref ᒐ);
+            defer(doappendʗ2, (nint)2, ref ᒐ);
             if (n > 8){
                 var doappendʗ3 = doappend;
-                defer(doappendʗ3, (nint)(3), ref ᒐ);
+                defer(doappendʗ3, (nint)3, ref ᒐ);
             } else {
                 var doappendʗ4 = doappend;
-                defer(doappendʗ4, (nint)(4), ref ᒐ);
+                defer(doappendʗ4, (nint)4, ref ᒐ);
             }
         }
         throw panic("testConditional");
@@ -549,12 +549,12 @@ public static void TestIssue43921(ж<testing.T> Ꮡt) {
                         defer(() => {
                             expect(Ꮡt, 4, recover());
                         }, ref ᒐ);
-                        throw panic((nint)(4));
+                        throw panic((nint)4);
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 }, ref ᒐ);
-                throw panic((nint)(1));
+                throw panic((nint)1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -587,9 +587,9 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
                         defer(() => {
                             expect(Ꮡt, 5, recover());
                         }, ref ᒐ);
-                        defer(ᴛ1 => throw panic(ᴛ1), (nint)(5), ref ᒐ);
+                        defer(ᴛ1 => throw panic(ᴛ1), (nint)5, ref ᒐ);
                         ((Action)(() => {
-                            throw panic((nint)(4));
+                            throw panic((nint)4);
                         }))();
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -598,7 +598,7 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
                 defer(() => {
                     expect(Ꮡt, 3, recover());
                 }, ref ᒐ);
-                defer(ᴛ1 => throw panic(ᴛ1), (nint)(3), ref ᒐ);
+                defer(ᴛ1 => throw panic(ᴛ1), (nint)3, ref ᒐ);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -606,8 +606,8 @@ public static void TestIssue43920(ж<testing.T> Ꮡt) {
         ((Action)(() => {
             GoFrame ᒐ = default;
             try {
-                defer(step, Ꮡt, Ꮡsteps, (nint)(1), ref ᒐ);
-                throw panic((nint)(1));
+                defer(step, Ꮡt, Ꮡsteps, (nint)1, ref ᒐ);
+                throw panic((nint)1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -647,8 +647,8 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                                 defer(() => {
                                     expect(Ꮡt, 3, recover());
                                 }, ref ᒐ);
-                                defer(ᴛ1 => throw panic(ᴛ1), (nint)(3), ref ᒐ);
-                                throw panic((nint)(2));
+                                defer(ᴛ1 => throw panic(ᴛ1), (nint)3, ref ᒐ);
+                                throw panic((nint)2);
                             }
                             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                             finally { ᒐ.Run(); }
@@ -656,7 +656,7 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                         defer(() => {
                             expect(Ꮡt, 1, recover());
                         }, ref ᒐ);
-                        defer(ᴛ1 => throw panic(ᴛ1), (nint)(1), ref ᒐ);
+                        defer(ᴛ1 => throw panic(ᴛ1), (nint)1, ref ᒐ);
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
@@ -665,8 +665,8 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
                 }, ref ᒐ);
                 defer(() => {
                 }, ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)(10), ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)(9), ref ᒐ);
+                defer(step, Ꮡt, Ꮡsteps, (nint)10, ref ᒐ);
+                defer(step, Ꮡt, Ꮡsteps, (nint)9, ref ᒐ);
                 step(Ꮡt, Ꮡsteps, 8);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -675,13 +675,13 @@ public static void TestIssue43941(ж<testing.T> Ꮡt) {
         ((Action)(() => {
             GoFrame ᒐ = default;
             try {
-                defer(step, Ꮡt, Ꮡsteps, (nint)(13), ref ᒐ);
-                defer(step, Ꮡt, Ꮡsteps, (nint)(12), ref ᒐ);
+                defer(step, Ꮡt, Ꮡsteps, (nint)13, ref ᒐ);
+                defer(step, Ꮡt, Ꮡsteps, (nint)12, ref ᒐ);
                 ((Action)(() => {
                     GoFrame ᒐ = default;
                     try {
-                        defer(step, Ꮡt, Ꮡsteps, (nint)(11), ref ᒐ);
-                        throw panic((nint)(4));
+                        defer(step, Ꮡt, Ꮡsteps, (nint)11, ref ᒐ);
+                        throw panic((nint)4);
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }

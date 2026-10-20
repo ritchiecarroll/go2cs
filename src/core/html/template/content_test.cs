@@ -33,14 +33,14 @@ public static void TestTypedContent(ж<testing.T> Ꮡt) {
 
     var data = new any[]{
         (@string)@"<b> ""foo%"" O'Reilly &bar;"u8,
-        ((global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ),
-        ((global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ),
-        ((global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ),
-        ((global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ),
-        ((global::go.html.template_package.JSStr)(@string)helloWorldOReillyU0021ˢ),
-        ((global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ),
-        ((global::go.html.template_package.Srcset)(@string)greetingH69Addresseeˢ2),
-        ((global::go.html.template_package.URL)(@string)fooˢ)
+        (global::go.html.template_package.CSS)(@string)aHrefExampleComFooˢ,
+        (global::go.html.template_package.HTML)(@string)helloBWorldBAmpTcˢ,
+        (global::go.html.template_package.HTMLAttr)(@string)dirLtrˢ,
+        (global::go.html.template_package.JS)(@string)cAlertHelloWorldˢ,
+        (global::go.html.template_package.JSStr)(@string)helloWorldOReillyU0021ˢ,
+        (global::go.html.template_package.URL)(@string)greetingH69Addresseeˢ,
+        (global::go.html.template_package.Srcset)(@string)greetingH69Addresseeˢ2,
+        (global::go.html.template_package.URL)(@string)fooˢ
     }.slice();
 
     // For each content sensitive escaper, see how it does on
@@ -492,7 +492,7 @@ public static void TestEscapingNilNonemptyInterfaces(ж<testing.T> Ꮡt) {
     tmpl.Execute(new template_test_package.bytes_BufferжWriter(want), data);
 
     if (!bytes.Equal(want.Bytes(), got.Bytes())) {
-        Ꮡt.Errorf("expected %q got %q"u8, ((@string)want.Bytes()), ((@string)got.Bytes()));
+        Ꮡt.Errorf("expected %q got %q"u8, (@string)want.Bytes(), (@string)got.Bytes());
     }
 }
 

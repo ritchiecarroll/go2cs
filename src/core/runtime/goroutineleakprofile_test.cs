@@ -279,7 +279,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> Ꮡt) {
             expectedLeaks: new map<ж<Δregexp.Regexp>, bool>(len(leaks)),
             flakyLeaks: new map<ж<Δregexp.Regexp>, EmptyStruct>(len(leaks)),
             // Make sure the test is repeated at least once.
-            repetitions: (nint)(repetitions | 1)
+            repetitions: (repetitions | 1)
         );
 
         foreach (var (_, leak) in leaks) {

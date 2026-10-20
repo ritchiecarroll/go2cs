@@ -20,7 +20,7 @@ internal static void Main() {
     fmt.Printf("d: %d %d\n"u8, emptyBytes, text);
 
     fmt.Println("sprintf:", fmt.Sprintf("%q"u8, nilBytes), fmt.Sprintf("%q"u8, text));
-    fmt.Printf("named: %q %q\n"u8, ((main_named)default!), ((main_named)slice<byte>((@string)"hi"u8)));
+    fmt.Printf("named: %q %q\n"u8, (main_named)default!, (main_named)slice<byte>((@string)"hi"u8));
 }
 
 } // end main_package

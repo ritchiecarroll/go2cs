@@ -37,10 +37,10 @@ internal static void Main() {
     fmt.Println("defined-type methods compiled");
 
     uintptr seed = 42;
-    var h = ((handleT)seed);
+    var h = (handleT)seed;
     var k = openKey(h);
     fmt.Println(k == ((keyT)(uintptr)h), (uintptr)h);
-    var back = ((handleT)(uintptr)k);
+    var back = (handleT)(uintptr)k;
     fmt.Println(back == h);
 }
 
@@ -49,7 +49,7 @@ partial struct handleT /*num:uintptr*/;
 partial struct keyT /*num:uintptr*/;
 
 internal static keyT openKey(handleT h) {
-    return ((keyT)(uintptr)h);
+    return (keyT)(uintptr)h;
 }
 
 } // end main_package

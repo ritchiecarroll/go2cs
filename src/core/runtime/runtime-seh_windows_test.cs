@@ -207,12 +207,12 @@ public static void TestSehUnwindDoublePanic(ж<testing.T> Ꮡt) {
                 if (recover() == default!) {
                     Ꮡt.Fatal(didNotPanicˢ);
                 }
-                throw panic((nint)(2));
+                throw panic((nint)2);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }, ref ᒐ);
-        throw panic((nint)(1));
+        throw panic((nint)1);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

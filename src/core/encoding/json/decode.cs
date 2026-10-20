@@ -196,17 +196,17 @@ partial struct Number /*@string*/;
 
 // String returns the literal text of the number.
 public static @string String(this Number n) {
-    return ((@string)n);
+    return (@string)n;
 }
 
 // Float64 returns the number as a float64.
 public static (float64, error) Float64(this Number n) {
-    return strconv.ParseFloat(((@string)n), 64);
+    return strconv.ParseFloat((@string)n, 64);
 }
 
 // Int64 returns the number as an int64.
 public static (int64, error) Int64(this Number n) {
-    return strconv.ParseInt(((@string)n), 10, 64);
+    return strconv.ParseInt((@string)n, 10, 64);
 }
 
 // An errorContext provides context for type errors during decoding.
@@ -867,11 +867,11 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                 var exprᴛ3 = kt.Kind();
                 if (exprᴛ3 == reflect.ΔString) {
                     kv = reflect.New(kt).Elem();
-                    kv.SetString(((@string)key));
+                    kv.SetString((@string)key);
                 }
                 else if (exprᴛ3 == reflect.ΔInt || exprᴛ3 == reflect.Int8 || exprᴛ3 == reflect.Int16 || exprᴛ3 == reflect.Int32 || exprᴛ3 == reflect.Int64) {
                     do {
-                        @string s = ((@string)key);
+                        @string s = (@string)key;
                         var (n, err) = strconv.ParseInt(s, 10, 64);
                         if (err != default! || kt.OverflowInt(n)) {
                             d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + s, Type: kt, Offset: (int64)(start + 1)))));
@@ -883,7 +883,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
                 }
                 else if (exprᴛ3 == reflect.ΔUint || exprᴛ3 == reflect.Uint8 || exprᴛ3 == reflect.Uint16 || exprᴛ3 == reflect.Uint32 || exprᴛ3 == reflect.Uint64 || exprᴛ3 == reflect.Uintptr) {
                     do {
-                        @string s = ((@string)key);
+                        @string s = (@string)key;
                         var (n, err) = strconv.ParseUint(s, 10, 64);
                         if (err != default! || kt.OverflowUint(n)) {
                             d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + s, Type: kt, Offset: (int64)(start + 1)))));
@@ -927,7 +927,7 @@ internal static error @object(this ж<decodeState> Ꮡd, reflectꓸValue v) {
 // depending on the setting of d.useNumber.
 internal static (any, error) convertNumber(this ref decodeState d, @string s) {
     if (d.useNumber) {
-        return (((Number)s), default!);
+        return ((Number)s, default!);
     }
     var (f, err) = strconv.ParseFloat(s, 64);
     if (err != default!) {
@@ -1062,7 +1062,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
                 } while (false);
             }
             else if (exprᴛ3 == reflect.ΔString) {
-                @string t = ((@string)s);
+                @string t = (@string)s;
                 if (AreEqual(v.Type(), numberType) && !isValidNumber(t)) {
                     return fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number"u8, item);
                 }
@@ -1070,7 +1070,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             }
             else if (exprᴛ3 == reflect.ΔInterface) {
                 if (v.NumMethod() == 0){
-                    v.Set(reflect.ValueOf(((@string)s)));
+                    v.Set(reflect.ValueOf((@string)s));
                 } else {
                     d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string"u8, Type: v.Type(), Offset: (int64)d.readIndex()))));
                 }
@@ -1090,7 +1090,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             var exprᴛ4 = v.Kind();
             if (exprᴛ4 == reflect.ΔInterface) {
                 do {
-                    var (n, err) = d.convertNumber(((@string)item));
+                    var (n, err) = d.convertNumber((@string)item);
                     if (err != default!) {
                         d.saveError(err);
                         break;
@@ -1104,7 +1104,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             }
             else if (exprᴛ4 == reflect.ΔInt || exprᴛ4 == reflect.Int8 || exprᴛ4 == reflect.Int16 || exprᴛ4 == reflect.Int32 || exprᴛ4 == reflect.Int64) {
                 do {
-                    var (n, err) = strconv.ParseInt(((@string)item), 10, 64);
+                    var (n, err) = strconv.ParseInt((@string)item, 10, 64);
                     if (err != default! || v.OverflowInt(n)) {
                         d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                         break;
@@ -1114,7 +1114,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             }
             else if (exprᴛ4 == reflect.ΔUint || exprᴛ4 == reflect.Uint8 || exprᴛ4 == reflect.Uint16 || exprᴛ4 == reflect.Uint32 || exprᴛ4 == reflect.Uint64 || exprᴛ4 == reflect.Uintptr) {
                 do {
-                    var (n, err) = strconv.ParseUint(((@string)item), 10, 64);
+                    var (n, err) = strconv.ParseUint((@string)item, 10, 64);
                     if (err != default! || v.OverflowUint(n)) {
                         d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                         break;
@@ -1124,7 +1124,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
             }
             else if (exprᴛ4 == reflect.Float32 || exprᴛ4 == reflect.Float64) {
                 do {
-                    var (n, err) = strconv.ParseFloat(((@string)item), v.Type().Bits());
+                    var (n, err) = strconv.ParseFloat((@string)item, v.Type().Bits());
                     if (err != default! || v.OverflowFloat(n)) {
                         d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number "u8 + ((sstring)item), Type: v.Type(), Offset: (int64)d.readIndex()))));
                         break;
@@ -1137,7 +1137,7 @@ internal static error literalStore(this ref decodeState d, slice<byte> item, ref
                     if (v.Kind() == reflect.ΔString && AreEqual(v.Type(), numberType)) {
                         // s must be a valid number, because it's
                         // already been tokenized.
-                        v.SetString(((@string)item));
+                        v.SetString((@string)item);
                         break;
                     }
                     if (fromQuoted) {
@@ -1290,7 +1290,7 @@ internal static any literalInterface(this ж<decodeState> Ꮡd) {
             if (c != (rune)'-' && (c < (rune)'0' || c > (rune)'9')) {
                 throw panic(phasePanicMsg);
             }
-            var (n, err) = d.convertNumber(((@string)item));
+            var (n, err) = d.convertNumber((@string)item);
             if (err != default!) {
                 d.saveError(err);
             }
@@ -1337,7 +1337,7 @@ internal static (@string t, bool ok) unquote(slice<byte> s) {
     bool ok = default!;
 
     (s, ok) = unquoteBytes(s);
-    t = ((@string)s);
+    t = (@string)s;
     return (t, ok);
 }
 

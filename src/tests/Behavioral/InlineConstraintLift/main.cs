@@ -149,7 +149,7 @@ internal static void Main() {
     fmt.Println(new slot<tagged>(new tagged("s", 9)).get());
     fmt.Println(Both(new namer("n"), new tagged("m", 0), new tagged("k", 3)));
 
-    fmt.Println(Min(((age)5), ((age)3)));
+    fmt.Println(Min((age)5, (age)3));
     fmt.Println(new Ord<age>(v: 3).Below(5), new Ord<age>(v: 3).Below(2));
     fmt.Println(new Ord<nodeжOrd_T>(v: Ꮡ(new node(1))).Below(Ꮡ(new node(0))), new Ord<nodeжOrd_T>(v: Ꮡ(new node(1))).Below(Ꮡ(new node(4))));
     fmt.Println(new Ord<wrap<@string>>(v: new wrap<@string>(2)).Below(new wrap<@string>(5)), new Ord<wrap<nint>>(v: new wrap<nint>(7)).Below(new wrap<nint>(3)));

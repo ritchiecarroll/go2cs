@@ -20,7 +20,7 @@ partial class net_package {
 internal static partial uint64 runtime_rand();
 
 internal static nint randInt() {
-    return (nint)(((nuint)runtime_rand() >> (int)(1))); // clear sign bit
+    return (nint)((nuint)runtime_rand() >> 1); // clear sign bit
 }
 
 internal static nint randIntn(nint n) {
@@ -45,12 +45,12 @@ internal static (@string arpa, error err) reverseaddr(@string addr) {
         var v = ip[i];
         buf = append(buf, hexDigit[(byte)(v & 0xF)],
             (byte)((rune)'.'),
-            hexDigit[(v >> (int)(4))],
+            hexDigit[(v >> 4)],
             (byte)((rune)'.'));
     }
     // Append "ip6.arpa." and return (buf already has the final .)
     buf = append(buf, ((@string)"ip6.arpa."u8).ꓸꓸꓸ);
-    return (((@string)buf), default!);
+    return ((@string)buf, default!);
 }
 
 internal static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {

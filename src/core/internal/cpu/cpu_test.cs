@@ -38,7 +38,7 @@ internal static void runDebugOptionsTest(ж<testing.T> Ꮡt, @string test, @stri
     var (output, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("%s with %s: run failed: %v output:\n%s\n"u8,
-            test, env, err, ((@string)output));
+            test, env, err, (@string)output);
     }
 }
 

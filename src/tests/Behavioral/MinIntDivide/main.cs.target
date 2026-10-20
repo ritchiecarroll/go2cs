@@ -190,7 +190,7 @@ internal static void Main() {
         h.x = quo(h.x, (int64)m1);
         return fmt.Sprint(h);
     });
-    arm("generic", () => fmt.Sprint(div(i64, (int64)m1), " ", div(w, ((word)(int64)m1)), " ", mod(i32, (int32)m1), " ", mod(i8, (int8)m1),
+    arm("generic", () => fmt.Sprint(div(i64, (int64)m1), " ", div(w, (word)(int64)m1), " ", mod(i32, (int32)m1), " ", mod(i8, (int8)m1),
             " ", quoAny(i, m1), " ", quoAny((uint8)200, (uint8)3)));
     arm("constant -1 remainder of a nil selector", () => {
         ж<cell> c = default!;

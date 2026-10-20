@@ -80,9 +80,9 @@ internal static readonly @string ltFooˢ = "&lt;foo>"u8;
 public static void TestRedefineAfterNonExecution(ж<testing.T> Ꮡt) {
     var c = newTestCase(Ꮡt);
     c.mustParse((~c).root, ifTemplateXEndDefineXFooˢ);
-    c.mustExecute((~c).root, (nint)(0), ""u8);
+    c.mustExecute((~c).root, (nint)0, ""u8);
     c.mustNotParse((~c).root, defineXBarEndˢ);
-    c.mustExecute((~c).root, (nint)(1), ltFooˢ);
+    c.mustExecute((~c).root, (nint)1, ltFooˢ);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -138,9 +138,9 @@ internal static readonly @string defineXScriptEndˢ = @"{{define ""X""}}<script>
 public static void TestRedefineTopUse(ж<testing.T> Ꮡt) {
     var c = newTestCase(Ꮡt);
     c.mustParse((~c).root, templateXDefineXEndˢ);
-    c.mustExecute((~c).root, (nint)(42), @"42"u8);
+    c.mustExecute((~c).root, (nint)42, @"42"u8);
     c.mustNotParse((~c).root, defineXScriptEndˢ);
-    c.mustExecute((~c).root, (nint)(42), @"42"u8);
+    c.mustExecute((~c).root, (nint)42, @"42"u8);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -200,7 +200,7 @@ public static void TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped(ж
     // See #33671 and #37634 for more context on this.
     var tests = new TestStringsInScriptsWithJsonContentTypeAreCorrectlyEscaped_tests[]{
         new("empty"u8, ""u8),
-        new("invalid"u8, ((@string)(rune)(-1))),
+        new("invalid"u8, (@string)(rune)(-1)),
         new("null"u8, "\u0000"u8),
         new("unit separator"u8, "\u001F"u8),
         new("tab"u8, "\t"u8),

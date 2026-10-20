@@ -112,7 +112,7 @@ internal static any randValue(ж<rand.Rand> Ꮡr) {
     foreach (var (i, _) in b) {
         b[i] = (byte)((rune)'a' + (byte)rand.Intn(26));
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static reflectꓸValue Generate(this mapCall _, ж<rand.Rand> Ꮡr, nint size) {
@@ -233,7 +233,7 @@ public static partial void TestConcurrentRange(ж<Δtesting.T> Ꮡt) {
             }, g);
         }
 
-        nint iters = (1 << (int)(10));
+        nint iters = 1 << 10;
         if (Δtesting.Short()) {
             iters = 16;
         }
@@ -309,7 +309,7 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
             // a value from such a key, meaning there must be an internal bug regarding
             // nested range in the Map.
             {
-                var (_, loaded) = Ꮡm.LoadOrStore((nint)(42), dummyˢ); if (loaded) {
+                var (_, loaded) = Ꮡm.LoadOrStore((nint)42, dummyˢ); if (loaded) {
                     Ꮡt.Fatalf("Nested Range loads unexpected value, want store a new value"u8);
                 }
             }
@@ -319,9 +319,9 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
             // removed from the Map. Therefore any future range won't observe key 42
             // as we checked in above.
             @string val = syncMapˢ;
-            Ꮡm.Store((nint)(42), val);
+            Ꮡm.Store((nint)42, val);
             {
-                var (v, loaded) = Ꮡm.LoadAndDelete((nint)(42)); if (!loaded || !reflect.DeepEqual(v, val)) {
+                var (v, loaded) = Ꮡm.LoadAndDelete((nint)42); if (!loaded || !reflect.DeepEqual(v, val)) {
                     Ꮡt.Fatalf("Nested Range loads unexpected value, got %v, want %v"u8, v, val);
                 }
             }
@@ -342,13 +342,13 @@ public static void TestMapRangeNestedCall(ж<Δtesting.T> Ꮡt) {
     });
 
     if (length != 0) {
-        Ꮡt.Fatalf("Unexpected sync.Map size, got %v want %v"u8, length, (nint)(0));
+        Ꮡt.Fatalf("Unexpected sync.Map size, got %v want %v"u8, length, (nint)0);
     }
 }
 
 public static void TestCompareAndSwap_NonExistingKey(ж<Δtesting.T> Ꮡt) {
     var m = Ꮡ(new Δsync.Map(nil));
-    if (m.CompareAndSwap(m.OrTypedNil(), default!, (nint)(42))) {
+    if (m.CompareAndSwap(m.OrTypedNil(), default!, (nint)42)) {
         // See https://go.dev/issue/51972#issuecomment-1126408637.
         Ꮡt.Fatalf("CompareAndSwap on a non-existing key succeeded"u8);
     }

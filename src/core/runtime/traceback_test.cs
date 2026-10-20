@@ -119,7 +119,7 @@ partial struct ttiResult {
 internal static partial ж<ttiResult> ttiLeaf() {
     // Get a printed stack trace.
     ref var printed = ref heap<@string>(out var Ꮡprinted);
-    printed = ((@string)Δdebug.Stack());
+    printed = (@string)Δdebug.Stack();
     return Ꮡ(new ttiResult(printed));
 }
 
@@ -321,7 +321,7 @@ internal static partial @string tte2(nint n) {
         throw panic("bad n");
     }
     if (n == 2) {
-        return ((@string)Δdebug.Stack());
+        return (@string)Δdebug.Stack();
     }
     return tte1(n - 1);
 }
@@ -812,12 +812,12 @@ public static partial void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            var buf = new slice<byte>((1 << (int)(10)));
+            var buf = new slice<byte>((1 << 10));
             // We collect the stack only for this goroutine (by passing
             // false to runtime.Stack). We expect to see the current
             // goroutine ID, and the parent goroutine ID in a message like
             // "created by ... in goroutine N".
-            @string stack = ((@string)(buf.slice(0, Δruntime.Stack(buf, false))));
+            @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
             @string child = fmt.Sprintf("goroutine %d"u8, runtime_internal_test_package.Goid());
             if (!strings.Contains(stack, parent) || !strings.Contains(stack, child)) {
                 Ꮡt.Errorf("did not see parent (%s) and child (%s) IDs in stack, got %s"u8, parent, child, stack);
@@ -1069,10 +1069,10 @@ public static void TestTracebackGoroutineLabels(ж<testing.T> Ꮡt) {
             var tblʗ2 = tblʗ1;
             var verifyLabels = [MethodImpl(MethodImplOptions.NoInlining)] () => {
                 tΔ1.Helper();
-                var buf = new slice<byte>((1 << (int)(10)));
+                var buf = new slice<byte>((1 << 10));
                 // We collect the stack only for this goroutine (by passing
                 // false to runtime.Stack). We expect to see the parent's goroutine labels in the traceback.
-                @string stack = ((@string)(buf.slice(0, Δruntime.Stack(buf, false))));
+                @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
                 if (!strings.Contains(stack, "labels:"u8 + tblʗ2.expTB)) {
                     tΔ1.Errorf("failed to find goroutine labels with labels %s (as %s) got:\n%s\n---"u8, tblʗ2.l, tblʗ2.expTB, stack);
                 }
@@ -1101,10 +1101,10 @@ public static void TestTracebackGoroutineLabelsDisabledGODEBUG(ж<testing.T> Ꮡ
     var lblsʗ1 = lbls;
     var verifyLabels = [MethodImpl(MethodImplOptions.NoInlining)] () => {
         Ꮡt.Helper();
-        var buf = new slice<byte>((1 << (int)(10)));
+        var buf = new slice<byte>((1 << 10));
         // We collect the stack only for this goroutine (by passing
         // false to runtime.Stack).
-        @string stack = ((@string)(buf.slice(0, Δruntime.Stack(buf, false))));
+        @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
         if (strings.Contains(stack, labelsˢ)) {
             Ꮡt.Errorf("found goroutine labels with labels %s  got:\n%s\n---"u8, lblsʗ1, stack);
         }

@@ -160,7 +160,7 @@ internal static void sendTime(any c, uintptr seq, int64 delta) {
     // can delay a sendTime call until a goroutine tries to receive from
     // the channel. Subtract delta to go back to the old time that we
     // used to send.
-    var selᴛ1 = c._<channel<Time>>().ᐸꟷ(Now().Add(((Duration)(-delta))), ꓸꓸꓸ);
+    var selᴛ1 = c._<channel<Time>>().ᐸꟷ(Now().Add((Duration)(-delta)), ꓸꓸꓸ);
     switch (trySelect(selᴛ1)) {
     case 0: {
         break;

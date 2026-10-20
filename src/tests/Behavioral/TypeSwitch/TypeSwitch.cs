@@ -33,7 +33,7 @@ internal static void Main() {
         }}
     }
     whatAmI(true);
-    whatAmI((nint)(1));
+    whatAmI((nint)1);
     whatAmI((int64)2);
     whatAmI((uint64)2);
     whatAmI(heyˢ);
@@ -110,7 +110,7 @@ internal static void Main() {
     scanInto(Ꮡnum);
     fmt.Println(flag, num);
 
-    fmt.Println(probe(true), probe((nint)(7)), probe("ab"));
+    fmt.Println(probe(true), probe((nint)7), probe("ab"));
 
     marker mk = default!;
     fmt.Println(mk.tag(new byte[]{7, 8}.slice()));

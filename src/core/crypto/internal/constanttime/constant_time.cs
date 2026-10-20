@@ -17,7 +17,7 @@ public static nint Select(nint v, nint x, nint y) {
     // ConstantTimeSelect returns x if v != 0 and y if v == 0.
     // Do the same here to avoid non portable UB.
     v = (nint)boolToUint8(v != 0);
-    return (nint)((nint)(~(v - 1) & x) | (nint)((v - 1) & y));
+    return ~(v - 1) & x | (v - 1) & y;
 }
 
 // ByteEq returns 1 if x == y and 0 otherwise.

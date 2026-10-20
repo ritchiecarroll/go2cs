@@ -114,7 +114,7 @@ public static (slice<byte> data, error err) ReadUnified(ж<bufio.Reader> Ꮡr) {
         return (data, err);
     }
     {
-        @string s = ((@string)(suffix[..])); if (s != marker) {
+        @string s = (@string)(suffix[..]); if (s != marker) {
             err = fmt.Errorf("read %q instead of end-of-section marker (%q)"u8, s, marker);
             return (data, err);
         }
@@ -189,7 +189,7 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
             return (objapi, headers, err);
         }
     }
-    objapi = ((@string)line);
+    objapi = (@string)line;
 
     // objapi header begins with "go object ".
     if (!strings.HasPrefix(objapi, goObjectˢ)) {
@@ -213,7 +213,7 @@ public static (@string objapi, slice<@string> headers, error err) ReadObjectHead
         if (err != default!) {
             return (objapi, headers, err);
         }
-        headers = append(headers, ((@string)line));
+        headers = append(headers, (@string)line);
     }
 }
 
@@ -234,7 +234,7 @@ public static (nint n, error err) ReadExportDataHeader(ж<bufio.Reader> Ꮡr) {
         return (n, err);
     }
 
-    @string hdr = ((@string)line);
+    @string hdr = (@string)line;
     var exprᴛ1 = hdr;
     if (exprᴛ1 == "$$\n"u8) {
         err = fmt.Errorf("old textual export format no longer supported (recompile package)"u8);
@@ -388,13 +388,13 @@ internal static (@string, error) lookupGorootExport(@string pkgDir) {
                 if (Ꮡerr.ValueSlot != default!) {
                     {
                         var (ee, okΔ1) = Ꮡerr.ValueSlot._<ж<exec.ExitError>>(ᐧ); if (okΔ1 && len((~ee).Stderr) > 0) {
-                            Ꮡerr.ValueSlot = errors.New(((@string)(~ee).Stderr));
+                            Ꮡerr.ValueSlot = errors.New((@string)(~ee).Stderr);
                         }
                     }
                     return;
                 }
 
-                var exports = strings.Split(((@string)bytes.TrimSpace(output)), "\n"u8);
+                var exports = strings.Split((@string)bytes.TrimSpace(output), "\n"u8);
                 if (len(exports) != 1) {
                     Ꮡerr.ValueSlot = fmt.Errorf("go list reported %d exports; expected 1"u8, len(exports));
                     return;

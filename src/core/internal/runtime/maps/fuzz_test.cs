@@ -90,7 +90,7 @@ public static void TestEncodeDecode(ж<testing.T> Ꮡt) {
     }
 
     // Extra trailing bytes ignored.
-    b = append(b, (byte)(42));
+    b = append(b, (byte)42);
     got = decode(b);
     if (!reflect.DeepEqual(fc, got)) {
         Ꮡt.Errorf("encode-decode (extra byte) roundtrip got %+v want %+v"u8, got, fc);

@@ -130,7 +130,7 @@ internal static ж<hmacDRBG> newDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, sl
 public static ж<hmacDRBG> TestingOnlyNewDRBG<H>(Func<H> hashΔ1, slice<byte> entropy, slice<byte> nonce, slice<byte> s)
     where H : hash.Hash
 {
-    return newDRBG(hashΔ1, entropy, nonce, ((plainPersonalizationString)s));
+    return newDRBG(hashΔ1, entropy, nonce, (plainPersonalizationString)s);
 }
 
 internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {

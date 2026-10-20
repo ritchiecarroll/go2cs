@@ -129,7 +129,7 @@ internal static @string Label(this ref gnode n) {
 internal static void Main() {
     fmt.Println(Sum(new vec(1, 2), new vec(3, 4), new vec(5, 6)));
     fmt.Println(Sum<num>(1, 2, 3, 4));
-    fmt.Println(Min(((age)7), ((age)3)));
+    fmt.Println(Min((age)7, (age)3));
 
     MinSet<age> ms = default!;
     ms.Put(5);

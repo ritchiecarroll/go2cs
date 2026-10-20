@@ -111,7 +111,7 @@ public static (ж<SID>, error) StringToSid(@string s) {
         if (e != default!) {
             return (default!, e);
         }
-        defer(LocalFree, ((ΔHandle)(uintptr)sid), ref ᒐ);
+        defer(LocalFree, (ΔHandle)(uintptr)sid, ref ᒐ);
         return sid.Copy();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -170,7 +170,7 @@ public static (@string, error) String(this ж<SID> Ꮡsid) {
         if (e != default!) {
             return ("", e);
         }
-        defer(LocalFree, ((ΔHandle)(uintptr)s), ref ᒐ);
+        defer(LocalFree, (ΔHandle)(uintptr)s, ref ᒐ);
         return (utf16PtrToString(s), default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -319,7 +319,7 @@ public static (Token, error) OpenCurrentProcessToken() {
 
 // Close releases access to access token.
 public static error Close(this Token t) {
-    return CloseHandle(((ΔHandle)(uintptr)t));
+    return CloseHandle((ΔHandle)(uintptr)t);
 }
 
 // getInfo retrieves a specified type of information about an access token.

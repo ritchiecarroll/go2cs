@@ -50,7 +50,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     heapUpdate(heap, len(heap) - 1);
     checkHeap(Ꮡt, heap);
     if ((~heap[len(heap) - 1]).ev.time != 21) {
-        Ꮡt.Fatalf("heap update failed, expected %d as heap min: %s"u8, (nint)(21), heapDebugString(heap));
+        Ꮡt.Fatalf("heap update failed, expected %d as heap min: %s"u8, (nint)21, heapDebugString(heap));
     }
 
     // Update the last element to be smaller.
@@ -58,7 +58,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     heapUpdate(heap, len(heap) - 1);
     checkHeap(Ꮡt, heap);
     if ((~heap[len(heap) - 1]).ev.time == 21) {
-        Ꮡt.Fatalf("heap update failed, unexpected %d as heap min: %s"u8, (nint)(21), heapDebugString(heap));
+        Ꮡt.Fatalf("heap update failed, unexpected %d as heap min: %s"u8, (nint)21, heapDebugString(heap));
     }
 
     // Remove an element in the middle.
@@ -71,7 +71,7 @@ public static void TestHeap(ж<testing.T> Ꮡt) {
     checkHeap(Ꮡt, heap);
     foreach (var (i, _) in heap) {
         if ((~heap[i]).ev.time == 5) {
-            Ꮡt.Fatalf("failed to remove heap elem with time %d: %s"u8, (nint)(5), heapDebugString(heap));
+            Ꮡt.Fatalf("failed to remove heap elem with time %d: %s"u8, (nint)5, heapDebugString(heap));
         }
     }
 

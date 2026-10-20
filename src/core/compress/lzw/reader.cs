@@ -88,7 +88,7 @@ internal static (uint16, error) readLSB(this ref Reader r) {
         r.bits |= (uint32)(((uint32)x).Lsh(r.nBits));
         r.nBits += 8;
     }
-    var code = (uint16)((uint32)(r.bits & (((uint32)1).Lsh(r.width) - 1)));
+    var code = (uint16)(r.bits & (((uint32)1).Lsh(r.width) - 1));
     r.bits.RshAssign(r.width);
     r.nBits -= r.width;
     return (code, default!);

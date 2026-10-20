@@ -1104,7 +1104,7 @@ public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
 
     var captureErr = c.Stderr == default!;
     if (captureErr) {
-        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << (int)(10)))));
+        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << 10))));
     }
 
     var err = Ꮡc.Run();

@@ -9,7 +9,7 @@ partial class main_package {
 partial struct dirLike /*@string*/;
 
 internal static @string Name(this dirLike d) {
-    return ((@string)d);
+    return (@string)d;
 }
 
 internal static @string Kind(this dirLike d) {

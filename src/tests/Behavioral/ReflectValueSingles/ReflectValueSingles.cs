@@ -147,7 +147,7 @@ internal static void Main() {
     backing[0] = 99;
     fmt.Println("write through the re-capped window seen by the original:", xs[0] == 99);
     expectPanic("Bytes on int", "on int Value", () => {
-        reflect.ValueOf((nint)(0)).Bytes();
+        reflect.ValueOf((nint)0).Bytes();
     });
     expectPanic("Bytes []string", "of non-byte slice", () => {
         reflect.ValueOf(new @string[]{}.slice()).Bytes();
@@ -225,15 +225,15 @@ internal static void Main() {
     convRow("[]byte(nil) -> *[0]byte", slice<byte>(default!), ж<array<byte>>.NilBoxOfDims(0L));
     convRow("[]byte{} -> *[0]byte", new byte[]{}.slice(), Ꮡ(new array<byte>(0)));
     convRow("[]byte{7} -> *[1]byte", new byte[]{7}.slice(), Ꮡ(new byte[]{7}.array()));
-    convRow("MyBytes{9} -> *[1]byte", ((MyBytes)new byte[]{9}.slice()), Ꮡ(new byte[]{9}.array()));
+    convRow("MyBytes{9} -> *[1]byte", (MyBytes)new byte[]{9}.slice(), Ꮡ(new byte[]{9}.array()));
     convRow("[]byte{1,2,3,4} -> MyBytesArrayPtr", new byte[]{1, 2, 3, 4}.slice(), new MyBytesArrayPtr(Ꮡ(new byte[]{1, 2, 3, 4}.array())));
-    convRow("[]byte(nil) -> MyBytesArrayPtr0", slice<byte>(default!), ((MyBytesArrayPtr0)nil));
+    convRow("[]byte(nil) -> MyBytesArrayPtr0", slice<byte>(default!), (MyBytesArrayPtr0)nil);
     convRow("[]byte{1,2,3,4} -> *MyBytesArray", new byte[]{1, 2, 3, 4}.slice(), Ꮡ(new MyBytesArray(new byte[]{1, 2, 3, 4}.array())));
     convRow("[]byte(nil) -> *MyBytesArray0", slice<byte>(default!), ж<MyBytesArray0>.NilBoxOfDims(0L));
     convRow("new([0]byte) -> *MyBytesArray0", Ꮡ(new array<byte>(0)), @new<MyBytesArray0>());
     convRow("new(MyBytesArray0) -> *[0]byte", @new<MyBytesArray0>(), Ꮡ(new array<byte>(0)));
-    convRow("MyBytesArrayPtr0(nil) -> *[0]byte", ((MyBytesArrayPtr0)nil), ж<array<byte>>.NilBoxOfDims(0L));
-    convRow("(*[0]byte)(nil) -> MyBytesArrayPtr0", ж<array<byte>>.NilBoxOfDims(0L), ((MyBytesArrayPtr0)nil));
+    convRow("MyBytesArrayPtr0(nil) -> *[0]byte", (MyBytesArrayPtr0)nil, ж<array<byte>>.NilBoxOfDims(0L));
+    convRow("(*[0]byte)(nil) -> MyBytesArrayPtr0", ж<array<byte>>.NilBoxOfDims(0L), (MyBytesArrayPtr0)nil);
     convRow("new(int) -> *integer", @new<nint>(), @new<integer>());
     convRow("new(integer) -> *int", @new<integer>(), @new<nint>());
     convRow("*MyBuffer -> *bytes.Buffer", @new<main_MyBuffer>(), @new<bytes.Buffer>());
@@ -248,15 +248,15 @@ internal static void Main() {
         shʗ1.Convert(reflect.TypeOf(ж<array<byte>>.NilBoxOfDims(8L)));
     });
 
-    convRow("IntChan(nil) -> chan<- int", ((IntChan)default!), channel/*<-*/<nint>.SendOnly);
-    convRow("IntChan(nil) -> <-chan int", ((IntChan)default!), /*<-*/channel<nint>.RecvOnly);
-    convRow("chan int(nil) -> IntChanRecv", (channel<nint>)(default!), ((IntChanRecv)default!));
-    convRow("chan int(nil) -> IntChanSend", (channel<nint>)(default!), ((IntChanSend)default!));
-    convRow("IntChanRecv(nil) -> <-chan int", ((IntChanRecv)default!), /*<-*/channel<nint>.RecvOnly);
-    convRow("<-chan int(nil) -> IntChanRecv", /*<-*/channel<nint>.RecvOnly, ((IntChanRecv)default!));
-    convRow("IntChanSend(nil) -> chan<- int", ((IntChanSend)default!), channel/*<-*/<nint>.SendOnly);
-    convRow("chan<- int(nil) -> IntChanSend", channel/*<-*/<nint>.SendOnly, ((IntChanSend)default!));
-    convRow("IntChan(nil) -> chan int", ((IntChan)default!), (channel<nint>)(default!));
+    convRow("IntChan(nil) -> chan<- int", (IntChan)default!, channel/*<-*/<nint>.SendOnly);
+    convRow("IntChan(nil) -> <-chan int", (IntChan)default!, /*<-*/channel<nint>.RecvOnly);
+    convRow("chan int(nil) -> IntChanRecv", (channel<nint>)(default!), (IntChanRecv)default!);
+    convRow("chan int(nil) -> IntChanSend", (channel<nint>)(default!), (IntChanSend)default!);
+    convRow("IntChanRecv(nil) -> <-chan int", (IntChanRecv)default!, /*<-*/channel<nint>.RecvOnly);
+    convRow("<-chan int(nil) -> IntChanRecv", /*<-*/channel<nint>.RecvOnly, (IntChanRecv)default!);
+    convRow("IntChanSend(nil) -> chan<- int", (IntChanSend)default!, channel/*<-*/<nint>.SendOnly);
+    convRow("chan<- int(nil) -> IntChanSend", channel/*<-*/<nint>.SendOnly, (IntChanSend)default!);
+    convRow("IntChan(nil) -> chan int", (IntChan)default!, (channel<nint>)(default!));
     var live = new IntChan(1);
     var sendOnly = reflect.ValueOf(live).Convert(reflect.TypeOf(channel/*<-*/<nint>.SendOnly));
     sendOnly.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(7);
@@ -280,7 +280,7 @@ internal static void Main() {
         finally { ᒐ.Run(); }
     }
     var (sendT, recvT, bidiT) = (reflect.TypeOf(channel/*<-*/<nint>.SendOnly), reflect.TypeOf(/*<-*/channel<nint>.RecvOnly), reflect.TypeOf((channel<nint>)(default!)));
-    setRow("chan<- int <- IntChan(nil).Convert", sendT, reflect.ValueOf(((IntChan)default!)).Convert(sendT));
+    setRow("chan<- int <- IntChan(nil).Convert", sendT, reflect.ValueOf((IntChan)default!).Convert(sendT));
     setRow("<-chan int <- chan int(nil).Convert", recvT, reflect.ValueOf((channel<nint>)(default!)).Convert(recvT));
     setRow("chan int <- chan<- int(nil)", bidiT, reflect.ValueOf(channel/*<-*/<nint>.SendOnly));
     setRow("<-chan int <- chan<- int(nil)", recvT, reflect.ValueOf(channel/*<-*/<nint>.SendOnly));
@@ -291,31 +291,31 @@ internal static void Main() {
     slot.Interface()._<channel/*<-*/<nint>>().ᐸꟷ(8);
     fmt.Println("send-only slot value type:", reflect.TypeOf(slot.Interface()), " received on the original:", ᐸꟷ<nint>(live));
 
-    fmt.Println("IntChanRecv dir:", reflect.TypeOf(((IntChanRecv)default!)).ChanDir(), " IntChanSend dir:", reflect.TypeOf(((IntChanSend)default!)).ChanDir(), " IntChan dir:", reflect.TypeOf(((IntChan)default!)).ChanDir());
+    fmt.Println("IntChanRecv dir:", reflect.TypeOf((IntChanRecv)default!).ChanDir(), " IntChanSend dir:", reflect.TypeOf((IntChanSend)default!).ChanDir(), " IntChan dir:", reflect.TypeOf((IntChan)default!).ChanDir());
     void canRow(any xΔ2, any yΔ1) {
         fmt.Printf("%-14v -> %-14v convertible=%v assignable=%v\n"u8, reflect.TypeOf(xΔ2), reflect.TypeOf(yΔ1), reflect.TypeOf(xΔ2).ConvertibleTo(reflect.TypeOf(yΔ1)), reflect.TypeOf(xΔ2).AssignableTo(reflect.TypeOf(yΔ1)));
     }
-    canRow(/*<-*/channel<nint>.RecvOnly, ((IntChanRecv)default!));
-    canRow(channel/*<-*/<nint>.SendOnly, ((IntChanSend)default!));
-    canRow(((IntChan)default!), ((IntChanRecv)default!));
-    canRow(((IntChanRecv)default!), ((IntChan)default!));
-    canRow(((IntChanRecv)default!), channel/*<-*/<nint>.SendOnly);
-    canRow(((IntChanRecv)default!), (channel<nint>)(default!));
-    canRow(((IntChanSend)default!), /*<-*/channel<nint>.RecvOnly);
-    canRow(((IntChanRecv)default!), ((IntChanSend)default!));
+    canRow(/*<-*/channel<nint>.RecvOnly, (IntChanRecv)default!);
+    canRow(channel/*<-*/<nint>.SendOnly, (IntChanSend)default!);
+    canRow((IntChan)default!, (IntChanRecv)default!);
+    canRow((IntChanRecv)default!, (IntChan)default!);
+    canRow((IntChanRecv)default!, channel/*<-*/<nint>.SendOnly);
+    canRow((IntChanRecv)default!, (channel<nint>)(default!));
+    canRow((IntChanSend)default!, /*<-*/channel<nint>.RecvOnly);
+    canRow((IntChanRecv)default!, (IntChanSend)default!);
     var cst = reflect.TypeOf(new main_chanSlots(nil));
-    fmt.Println("IntChanRecv identity value/slot/elem:", AreEqual(reflect.TypeOf(((IntChanRecv)default!)), cst.Field(0).Type), AreEqual(reflect.TypeOf(((IntChanRecv)default!)), reflect.TypeOf(((ж<IntChanRecv>)nil)).Elem()), cst.Field(0).Type.ChanDir());
-    fmt.Println("IntChanSend identity value/slot/elem:", AreEqual(reflect.TypeOf(((IntChanSend)default!)), cst.Field(1).Type), AreEqual(reflect.TypeOf(((IntChanSend)default!)), reflect.TypeOf(((ж<IntChanSend>)nil)).Elem()), cst.Field(1).Type.ChanDir());
+    fmt.Println("IntChanRecv identity value/slot/elem:", AreEqual(reflect.TypeOf((IntChanRecv)default!), cst.Field(0).Type), AreEqual(reflect.TypeOf((IntChanRecv)default!), reflect.TypeOf((ж<IntChanRecv>)nil).Elem()), cst.Field(0).Type.ChanDir());
+    fmt.Println("IntChanSend identity value/slot/elem:", AreEqual(reflect.TypeOf((IntChanSend)default!), cst.Field(1).Type), AreEqual(reflect.TypeOf((IntChanSend)default!), reflect.TypeOf((ж<IntChanSend>)nil).Elem()), cst.Field(1).Type.ChanDir());
     fmt.Println("chan slot zero re-describes:", reflect.TypeOf(reflect.Zero(cst.Field(0).Type).Interface()), reflect.Zero(cst.Field(0).Type).Type().ChanDir());
 
-    fmt.Println("named ptr-to-array one descriptor:", AreEqual(reflect.TypeOf(((MyBytesArrayPtr0)nil)), reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0))))), AreEqual(reflect.TypeOf(((MyBytesArrayPtr)nil)), reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4))))), " elem:", reflect.TypeOf(((MyBytesArrayPtr)nil)).Elem(), reflect.TypeOf(((MyBytesArrayPtr0)nil)).Elem().Len());
-    canRow(((MyBytes)default!), ((MyBytesArrayPtr0)nil));
-    canRow(((MyBytesArrayPtr0)nil), ж<array<byte>>.NilBoxOfDims(0L));
-    canRow(((MyBytesArrayPtr)nil), ж<array<byte>>.NilBoxOfDims(4L));
-    canRow(((MyBytesArrayPtr)nil), ((MyBytesArrayPtr0)nil));
+    fmt.Println("named ptr-to-array one descriptor:", AreEqual(reflect.TypeOf((MyBytesArrayPtr0)nil), reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0))))), AreEqual(reflect.TypeOf((MyBytesArrayPtr)nil), reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4))))), " elem:", reflect.TypeOf((MyBytesArrayPtr)nil).Elem(), reflect.TypeOf((MyBytesArrayPtr0)nil).Elem().Len());
+    canRow((MyBytes)default!, (MyBytesArrayPtr0)nil);
+    canRow((MyBytesArrayPtr0)nil, ж<array<byte>>.NilBoxOfDims(0L));
+    canRow((MyBytesArrayPtr)nil, ж<array<byte>>.NilBoxOfDims(4L));
+    canRow((MyBytesArrayPtr)nil, (MyBytesArrayPtr0)nil);
     var pst = reflect.TypeOf(new main_ptrSlots(nil));
-    fmt.Println("MyBytesArrayPtr identity value/slot/elem:", AreEqual(reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4)))), pst.Field(0).Type), AreEqual(reflect.TypeOf(((MyBytesArrayPtr)nil)), reflect.TypeOf(((ж<MyBytesArrayPtr>)nil)).Elem()), pst.Field(0).Type.Elem().Len());
-    fmt.Println("MyBytesArrayPtr0 identity value/slot/elem:", AreEqual(reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0)))), pst.Field(1).Type), AreEqual(reflect.TypeOf(((MyBytesArrayPtr0)nil)), reflect.TypeOf(((ж<MyBytesArrayPtr0>)nil)).Elem()), pst.Field(1).Type.Elem().Len());
+    fmt.Println("MyBytesArrayPtr identity value/slot/elem:", AreEqual(reflect.TypeOf(new MyBytesArrayPtr(Ꮡ(new array<byte>(4)))), pst.Field(0).Type), AreEqual(reflect.TypeOf((MyBytesArrayPtr)nil), reflect.TypeOf((ж<MyBytesArrayPtr>)nil).Elem()), pst.Field(0).Type.Elem().Len());
+    fmt.Println("MyBytesArrayPtr0 identity value/slot/elem:", AreEqual(reflect.TypeOf(new MyBytesArrayPtr0(Ꮡ(new array<byte>(0)))), pst.Field(1).Type), AreEqual(reflect.TypeOf((MyBytesArrayPtr0)nil), reflect.TypeOf((ж<MyBytesArrayPtr0>)nil).Elem()), pst.Field(1).Type.Elem().Len());
     fmt.Println("ptr slot New re-describes:", reflect.TypeOf(reflect.New(pst.Field(1).Type).Elem().Interface()), reflect.New(pst.Field(0).Type).Elem().Type().Elem().Len());
 }
 

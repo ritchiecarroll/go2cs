@@ -71,7 +71,7 @@ internal static @string readBytes(ж<bufio.Reader> Ꮡbuf) {
             throw panic("Data: " + err.Error());
         }
     }
-    return ((@string)(b.slice(0, nb)));
+    return (@string)(b.slice(0, nb));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -139,7 +139,7 @@ internal static @string reads(ж<bufio.Reader> Ꮡbuf, nint m) {
             break;
         }
     }
-    return ((@string)(b.slice(0, nb)));
+    return (@string)(b.slice(0, nb));
 }
 
 partial struct bufReader {
@@ -525,7 +525,7 @@ public static void TestUnreadByteOthers(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatalf("#%d: unexpected error reading to %c: %v"u8, rno, delim, errΔ1);
             }
             {
-                @string got = ((@string)data); if (got != want) {
+                @string got = (@string)data; if (got != want) {
                     Ꮡt.Fatalf("#%d: got %q, want %q"u8, rno, got, want);
                 }
             }
@@ -1004,12 +1004,12 @@ public static void TestPeek(ж<Δtesting.T> Ꮡt) {
     var buf = NewReaderSize(new bufio_test_package.strings_ReaderжReader(strings.NewReader(abcdefghijklmnopˢ)), minReadBufferSize);
     {
         var (s, err) = buf.Peek(1); if (((sstring)s) != "a"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)"a"u8, ((@string)s), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)"a"u8, (@string)s, err);
         }
     }
     {
         var (s, err) = buf.Peek(4); if (((sstring)s) != "abcd"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, abcdˢ, ((@string)s), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, abcdˢ, (@string)s, err);
         }
     }
     {
@@ -1019,42 +1019,42 @@ public static void TestPeek(ж<Δtesting.T> Ꮡt) {
     }
     {
         var (s, err) = buf.Peek(32); if (((sstring)s) != "abcdefghijklmnop"u8 || !AreEqual(err, ErrBufferFull)) {
-            Ꮡt.Fatalf("want %q, ErrBufFull got %q, err=%v"u8, abcdefghijklmnopˢ, ((@string)s), err);
+            Ꮡt.Fatalf("want %q, ErrBufFull got %q, err=%v"u8, abcdefghijklmnopˢ, (@string)s, err);
         }
     }
     {
         var (_, err) = buf.Read(p[0..3]); if (((sstring)(p[0..3])) != "abc"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, abcˢ, ((@string)(p[0..3])), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, abcˢ, (@string)(p[0..3]), err);
         }
     }
     {
         var (s, err) = buf.Peek(1); if (((sstring)s) != "d"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)"d"u8, ((@string)s), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)"d"u8, (@string)s, err);
         }
     }
     {
         var (s, err) = buf.Peek(2); if (((sstring)s) != "de"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)"de"u8, ((@string)s), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)"de"u8, (@string)s, err);
         }
     }
     {
         var (_, err) = buf.Read(p[0..3]); if (((sstring)(p[0..3])) != "def"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, defˢ, ((@string)(p[0..3])), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, defˢ, (@string)(p[0..3]), err);
         }
     }
     {
         var (s, err) = buf.Peek(4); if (((sstring)s) != "ghij"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, ghijˢ, ((@string)s), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, ghijˢ, (@string)s, err);
         }
     }
     {
         var (_, err) = buf.Read(p[0..]); if (((sstring)(p[0..])) != "ghijklmnop"u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, ghijklmnopˢ, ((@string)(p[0..(int)(minReadBufferSize)])), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, ghijklmnopˢ, (@string)(p[0..(int)(minReadBufferSize)]), err);
         }
     }
     {
         var (s, err) = buf.Peek(0); if (((sstring)s) != ""u8 || err != default!) {
-            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)""u8, ((@string)s), err);
+            Ꮡt.Fatalf("want %q got %q, err=%v"u8, (@string)""u8, (@string)s, err);
         }
     }
     {
@@ -1064,15 +1064,15 @@ public static void TestPeek(ж<Δtesting.T> Ꮡt) {
     }
 
     // Test for issue 3022, not exposing a reader's error on a successful Peek.
-    buf = NewReaderSize(((dataAndEOFReader)(@string)abcdˢ), 32);
+    buf = NewReaderSize((dataAndEOFReader)(@string)abcdˢ, 32);
     {
         var (s, err) = buf.Peek(2); if (((sstring)s) != "ab"u8 || err != default!) {
-            Ꮡt.Errorf(@"Peek(2) on ""abcd"", EOF = %q, %v; want ""ab"", nil"u8, ((@string)s), err);
+            Ꮡt.Errorf(@"Peek(2) on ""abcd"", EOF = %q, %v; want ""ab"", nil"u8, (@string)s, err);
         }
     }
     {
         var (s, err) = buf.Peek(4); if (((sstring)s) != "abcd"u8 || err != default!) {
-            Ꮡt.Errorf(@"Peek(4) on ""abcd"", EOF = %q, %v; want ""abcd"", nil"u8, ((@string)s), err);
+            Ꮡt.Errorf(@"Peek(4) on ""abcd"", EOF = %q, %v; want ""abcd"", nil"u8, (@string)s, err);
         }
     }
     {
@@ -1213,7 +1213,7 @@ public static void TestReadAfterLines(ж<Δtesting.T> Ꮡt) {
     var l = NewReaderSize(new bufio_test_package.bytes_ReaderжReader(inbuf), maxLineLength);
     var (line, isPrefix, err) = l.ReadLine();
     if (isPrefix || err != default! || ((sstring)line) != line1) {
-        Ꮡt.Errorf("bad result for first line: isPrefix=%v err=%v line=%q"u8, isPrefix, err, ((@string)line));
+        Ꮡt.Errorf("bad result for first line: isPrefix=%v err=%v line=%q"u8, isPrefix, err, (@string)line);
     }
     (var n, err) = Δio.Copy(new bufio_test_package.strings_BuilderжWriter(outbuf), new bufio_test_package.bufio_ReaderжReader(l));
     if ((nint)n != len(restData) || err != default!) {
@@ -1409,7 +1409,7 @@ public static void TestWriterReadFrom(ж<Δtesting.T> Ꮡt) {
             }
             {
                 @string got = b.String();
-                @string want = ((@string)input); if (got != want) {
+                @string want = (@string)input; if (got != want) {
                     Ꮡt.Errorf("ws[%d], rs[%d]:\ngot  %q\nwant %q\n"u8, wi, ri, got, want);
                 }
             }
@@ -1742,9 +1742,9 @@ public static void TestReadZero(ж<Δtesting.T> Ꮡt) {
                 var p = new slice<byte>(50);
                 var (n, err) = brʗ1.Read(p);
                 if (!AreEqual(err, wantErr) || n != len(s) || ((sstring)(p.slice(0, n))) != s) {
-                    tΔ1.Fatalf("read(%d) = %q, %v, want %q, %v"u8, len(p), ((@string)(p.slice(0, n))), err, s, wantErr);
+                    tΔ1.Fatalf("read(%d) = %q, %v, want %q, %v"u8, len(p), (@string)(p.slice(0, n)), err, s, wantErr);
                 }
-                tΔ1.Logf("read(%d) = %q, %v"u8, len(p), ((@string)(p.slice(0, n))), err);
+                tΔ1.Logf("read(%d) = %q, %v"u8, len(p), (@string)(p.slice(0, n)), err);
             }
             want(abcˢ, default!);
             want(""u8, default!);
@@ -2037,7 +2037,7 @@ internal static Δio.Reader newScriptedReader(params Span<Func<slice<byte>, (nin
     var steps = stepsʗp.slice();
 
     ref var sr = ref heap<scriptedReader>(out var Ꮡsr);
-    sr = ((scriptedReader)steps);
+    sr = (scriptedReader)steps;
     return new bufio_test_package.scriptedReaderжReader(Ꮡsr);
 }
 
@@ -2234,7 +2234,7 @@ public static void BenchmarkReaderWriteToOptimal(ж<Δtesting.B> Ꮡb) {
     UntypedInt bufSize = /* 16 << 10 */ 16384;
     var buf = new slice<byte>(bufSize);
     var r = bytes.NewReader(buf);
-    var srcReader = NewReaderSize(new onlyReader(new bufio_test_package.bytes_ReaderжReader(r)), (1 << (int)(10)));
+    var srcReader = NewReaderSize(new onlyReader(new bufio_test_package.bytes_ReaderжReader(r)), 1 << 10);
     {
         var (_, ok) = Δio.Discard._<Δio.ReaderFrom>(ᐧ); if (!ok) {
             Ꮡb.Fatal(ioDiscardDoesnTSupportˢ);
@@ -2324,7 +2324,7 @@ public static void BenchmarkReaderEmpty(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    @string str = strings.Repeat("x"u8, (16 << (int)(10)));
+    @string str = strings.Repeat("x"u8, 16 << 10);
     for (nint i = 0; i < b.N; i++) {
         var br = NewReader(new bufio_test_package.strings_ReaderжReader(strings.NewReader(str)));
         var (n, err) = Δio.Copy(Δio.Discard, new bufio_test_package.bufio_ReaderжReader(br));
@@ -2341,7 +2341,7 @@ public static void BenchmarkWriterEmpty(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
-    @string str = strings.Repeat("x"u8, (1 << (int)(10)));
+    @string str = strings.Repeat("x"u8, 1 << 10);
     var bs = slice<byte>(str);
     for (nint i = 0; i < b.N; i++) {
         var bw = NewWriter(Δio.Discard);

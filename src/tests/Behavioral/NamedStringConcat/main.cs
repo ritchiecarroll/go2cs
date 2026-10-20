@@ -22,7 +22,7 @@ internal partial struct main_rec /*dyn*/ {
 }
 
 internal static void Main() {
-    version @base = ((version)(@string)go121ˢ);
+    version @base = (version)(@string)go121ˢ;
 
     version @short = @base + "-rc"u8;
     version @explicit = @base + "-beta"u8;

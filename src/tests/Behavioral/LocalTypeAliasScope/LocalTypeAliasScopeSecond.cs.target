@@ -14,7 +14,7 @@ internal partial struct secondWriteOps_readOp /*dyn*/ {
 
 internal static void secondWriteOps() {
     var tests = new secondWriteOps_testFnc[]{new secondWriteOps_readOp(1), new secondWriteOps_readOp(2)}.slice();
-    var maker = ((secondWriteOps_fileMaker)new secondWriteOps_readOp(9));
+    var maker = (secondWriteOps_fileMaker)new secondWriteOps_readOp(9);
 
     nint sum = 0;
 

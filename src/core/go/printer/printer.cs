@@ -613,7 +613,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
                 }
                 // Shorten the computed common prefix by the length of
                 // suffix, if it is found as suffix of the prefix.
-                prefix = strings.TrimSuffix(prefix, ((@string)suffix));
+                prefix = strings.TrimSuffix(prefix, (@string)suffix);
             }
         }
     }
@@ -1241,7 +1241,7 @@ internal static error printNode(this ж<printer> Ꮡp, any node) {
     // get comments ready for use
     p.nextComment();
 
-    Ꮡp.print(((pmode)0));
+    Ꮡp.print((pmode)0);
 
     // format node
     switch (node.type()) {
@@ -1454,7 +1454,7 @@ internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sy
             wsbuf: new slice<whiteSpace>(0, 16),
             // We start the printer with a 16K output buffer, which is currently
             // larger than about 80% of Go files in the standard library.
-            output: new slice<byte>(0, (16 << (int)(10)))
+            output: new slice<byte>(0, (16 << 10))
         ))
 ));
 internal static ref sync.Pool printerPool => ref ᏑprinterPool.Value;
@@ -1478,7 +1478,7 @@ internal static void free(this ж<printer> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Hard limit on buffer size; see https://golang.org/issue/23199.
-    if (cap(p.output) > (64 << (int)(10))) {
+    if (cap(p.output) > 64 << 10) {
         return;
     }
 

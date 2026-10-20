@@ -51,7 +51,7 @@ internal static slice<Func<@string>> stringClosures(@string s) {
         var (pi, pr) = (Ꮡi, Ꮡr);
         var piʗ1 = pi;
         var prʗ1 = pr;
-        fs = append(fs, () => fmt.Sprint(piʗ1.Value, ":", ((@string)(prʗ1.Value))));
+        fs = append(fs, () => fmt.Sprint(piʗ1.Value, ":", (@string)(prʗ1.Value)));
     }
     return fs;
 }

@@ -40,14 +40,14 @@ internal static void Main() {
     ref var sraw = ref heap<slice<byte>>(out var Ꮡsraw);
     sraw = new byte[]{1, 2, 3}.slice();
     var sp = Ꮡsraw.Reinterpret<slice<byte>, MyBytes>();
-    sp.ValueSlot = append(sp.ValueSlot, (byte)(4));
+    sp.ValueSlot = append(sp.ValueSlot, (byte)4);
     fmt.Println("C3 named-slice ptr aliases original:", sraw);
 
     ref var mb = ref heap<MyBytes>(out var Ꮡmb);
 
     mb = new MyBytes(new byte[]{9, 8}.slice());
     var bp = Ꮡmb.of(MyBytes.Ꮡm_value);
-    bp.ValueSlot = append(bp.ValueSlot, (byte)(7));
+    bp.ValueSlot = append(bp.ValueSlot, (byte)7);
     fmt.Println("C4 underlying-slice ptr aliases named:", mb);
 }
 

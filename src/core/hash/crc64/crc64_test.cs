@@ -218,22 +218,22 @@ internal static readonly @string random16KBˢ = "Random16KB"u8;
 
 public static void BenchmarkCrc64(ж<testing.B> Ꮡb) {
     Ꮡb.Run(iso64kbˢ, (ж<testing.B> bΔ1) => {
-        bench(bΔ1, ISO, ((int64)64 << (int)(10)));
+        bench(bΔ1, ISO, (int64)64 << 10);
     });
     Ꮡb.Run(iso4kbˢ, (ж<testing.B> bΔ2) => {
-        bench(bΔ2, ISO, ((int64)4 << (int)(10)));
+        bench(bΔ2, ISO, (int64)4 << 10);
     });
     Ꮡb.Run(iso1kbˢ, (ж<testing.B> bΔ3) => {
-        bench(bΔ3, ISO, ((int64)1 << (int)(10)));
+        bench(bΔ3, ISO, (int64)1 << 10);
     });
     Ꮡb.Run(ecma64kbˢ, (ж<testing.B> bΔ4) => {
-        bench(bΔ4, ECMA, ((int64)64 << (int)(10)));
+        bench(bΔ4, ECMA, (int64)64 << 10);
     });
     Ꮡb.Run(random64KBˢ, (ж<testing.B> bΔ5) => {
-        bench(bΔ5, 0x777, ((int64)64 << (int)(10)));
+        bench(bΔ5, 0x777, (int64)64 << 10);
     });
     Ꮡb.Run(random16KBˢ, (ж<testing.B> bΔ6) => {
-        bench(bΔ6, 0x777, ((int64)16 << (int)(10)));
+        bench(bΔ6, 0x777, (int64)16 << 10);
     });
 }
 

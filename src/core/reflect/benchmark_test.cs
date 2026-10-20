@@ -482,7 +482,7 @@ internal partial struct BenchmarkMap_tests /*dyn*/ {
 }
 
 public static void BenchmarkMap(ж<Δtesting.B> Ꮡb) {
-    var value = ValueOf(((BenchmarkMap_V)nil));
+    var value = ValueOf((BenchmarkMap_V)nil);
     var stringKeys = new @string[]{}.slice();
     var mapOfStrings = new map<@string, BenchmarkMap_V>{};
     var uint64Keys = new uint64[]{}.slice();
@@ -498,7 +498,7 @@ public static void BenchmarkMap(ж<Δtesting.B> Ꮡb) {
         uint64Keys = append(uint64Keys, uint64Key);
         mapOfUint64s[uint64Key] = default!;
 
-        BenchmarkMap_S userStringKey = ((BenchmarkMap_S)fmt.Sprintf("key%d"u8, i));
+        BenchmarkMap_S userStringKey = (BenchmarkMap_S)fmt.Sprintf("key%d"u8, i);
         userStringKeys = append(userStringKeys, userStringKey);
         mapOfUserStrings[userStringKey] = default!;
     }

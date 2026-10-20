@@ -100,7 +100,7 @@ internal static (ж<File>, error) rootOpenFileNolog(ж<Root> Ꮡroot, @string na
             if (errΔ1 != default!) {
                 // Never follow symlinks when O_CREATE|O_EXCL, no matter
                 // what error the OS returns.
-                var isCreateExcl = (nint)(flag & (nint)((nint)(O_CREATE | O_EXCL))) == ((nint)(O_CREATE | O_EXCL));
+                var isCreateExcl = (flag & (nint)((nint)(O_CREATE | O_EXCL))) == ((nint)(O_CREATE | O_EXCL));
                 if (!isCreateExcl && (isNoFollowErr(errΔ1) || AreEqual(errΔ1, syscall.ENOTDIR))) {
                     errΔ1 = checkSymlink(parent, nameΔ1, errΔ1);
                 }
@@ -299,7 +299,7 @@ internal static (@string, error) readlinkat(nint fd, @string name) {
         }
         n = max(n, 0);
         if (n < len) {
-            return (((@string)(b.slice(0, n))), default!);
+            return ((@string)(b.slice(0, n)), default!);
         }
     }
 }

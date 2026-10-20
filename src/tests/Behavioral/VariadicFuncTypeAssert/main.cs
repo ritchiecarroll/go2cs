@@ -23,7 +23,7 @@ internal static void Main() {
 
     {
         var (fnΔ1, ok) = logf._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
-            fnΔ1("value=%v flag=%v", (nint)(42), true);
+            fnΔ1("value=%v flag=%v", (nint)42, true);
         } else {
             fmt.Println("no match");
         }
@@ -51,7 +51,7 @@ internal static void Main() {
     }));
     {
         var (f, ok) = direct._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
-            fmt.Println("direct:", f((nint)(1), (nint)(2)));
+            fmt.Println("direct:", f((nint)1, (nint)2));
         } else {
             fmt.Println("direct: no match");
         }

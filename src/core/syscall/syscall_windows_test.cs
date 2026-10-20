@@ -132,8 +132,8 @@ public static void ExampleLoadLibrary() {
         }
         var (r, _, _) = syscall.Syscall((uintptr)proc, 0, 0, 0, 0);
         var major = (byte)r;
-        var minor = (uint8)((r >> (int)(8)));
-        var build = (uint16)((r >> (int)(16)));
+        var minor = (uint8)(r >> 8);
+        var build = (uint16)(r >> 16);
         print((@string)"windows version "u8, major, (@string)"."u8, minor, (@string)" (Build "u8, build, (@string)")\n"u8);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -221,7 +221,7 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
     }
     (@out, err) = exec.Command(exe).Output();
     if (err != default!) {
-        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, ((@string)@out));
+        Ꮡt.Fatalf("c program execution failed: %v: %v"u8, err, (@string)@out);
     }
 
     (var hostname, err) = Δos.Hostname();
@@ -229,7 +229,7 @@ public static void TestStdioAreInheritable(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
 
-    @string have = strings.ReplaceAll(((@string)@out), "\n"u8, ""u8);
+    @string have = strings.ReplaceAll((@string)@out, "\n"u8, ""u8);
     have = strings.ReplaceAll(have, "\r"u8, ""u8);
     @string want = fmt.Sprintf("%sHello World%s"u8, hostname, hostname);
     if (have != want) {

@@ -215,7 +215,7 @@ internal static @string replaceStringByte(@string s, byte old, byte @new) {
             n[i] = @new;
         }
     }
-    return ((@string)n);
+    return (@string)n;
 }
 
 // Split is filepath.Split.
@@ -259,7 +259,7 @@ public static @string Base(@string path) {
     }
     // If empty now, it had only slashes.
     if (path == ""u8) {
-        return ((@string)(rune)Separator);
+        return (@string)(rune)Separator;
     }
     return path;
 }

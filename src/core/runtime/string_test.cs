@@ -24,8 +24,8 @@ public static void BenchmarkCompareStringEqual(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var bytes = slice<byte>("Hello Gophers!"u8);
-    @string s1 = ((@string)bytes);
-    @string s2 = ((@string)bytes);
+    @string s1 = (@string)bytes;
+    @string s2 = (@string)bytes;
     for (nint i = 0; i < b.N; i++) {
         if (s1 != s2) {
             Ꮡb.Fatal(s1S2ˢ);
@@ -82,11 +82,11 @@ public static void BenchmarkCompareStringDifferentLength(ж<testing.B> Ꮡb) {
 public static void BenchmarkCompareStringBigUnaligned(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bytes = new slice<byte>(0, (1 << (int)(20)));
-    while (len(bytes) < (1 << (int)(20))) {
+    var bytes = new slice<byte>(0, (1 << 20));
+    while (len(bytes) < 1 << 20) {
         bytes = append(bytes, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
-    @string s1 = ((@string)bytes);
+    @string s1 = (@string)bytes;
     @string s2 = "hello"u8 + ((sstring)bytes);
     for (nint i = 0; i < b.N; i++) {
         if (s1 != s2[(int)(len("hello"))..]) {
@@ -99,12 +99,12 @@ public static void BenchmarkCompareStringBigUnaligned(ж<testing.B> Ꮡb) {
 public static void BenchmarkCompareStringBig(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bytes = new slice<byte>(0, (1 << (int)(20)));
-    while (len(bytes) < (1 << (int)(20))) {
+    var bytes = new slice<byte>(0, (1 << 20));
+    while (len(bytes) < 1 << 20) {
         bytes = append(bytes, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
-    @string s1 = ((@string)bytes);
-    @string s2 = ((@string)bytes);
+    @string s1 = (@string)bytes;
+    @string s2 = (@string)bytes;
     for (nint i = 0; i < b.N; i++) {
         if (s1 != s2) {
             Ꮡb.Fatal(s1S2ˢ);
@@ -131,7 +131,7 @@ public static void BenchmarkSliceByteToString(ж<testing.B> Ꮡb) {
     for (nint n = 0; n < 8; n++) {
         Ꮡb.Run(strconv.Itoa(len(buf)), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                escapeString = ((@string)Ꮡbuf.ValueSlot);
+                escapeString = (@string)Ꮡbuf.ValueSlot;
             }
         });
         buf = appendꓸꓸꓸ(buf, buf);
@@ -283,7 +283,7 @@ public static void TestStringW(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("bad test: stringW can't handle >16 bit runes"u8);
             }
         }
-        b = append(b, (uint16)(0));
+        b = append(b, (uint16)0);
         @string r = runtime_internal_test_package.GostringW(b);
         if (r != s) {
             Ꮡt.Errorf("gostringW(%v) = %s, want %s"u8, b, r, s);
@@ -296,7 +296,7 @@ internal static readonly @string stringconcatˢ = "stringconcat"u8;
 
 public static void TestLargeStringConcat(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, stringconcatˢ);
-    @string want = "panic: "u8 + strings.Repeat("0"u8, (1 << (int)(10))) + strings.Repeat("1"u8, (1 << (int)(10))) + strings.Repeat("2"u8, (1 << (int)(10))) + strings.Repeat("3"u8, (1 << (int)(10)));
+    @string want = "panic: "u8 + strings.Repeat("0"u8, 1 << 10) + strings.Repeat("1"u8, 1 << 10) + strings.Repeat("2"u8, 1 << 10) + strings.Repeat("3"u8, 1 << 10);
     if (!strings.HasPrefix(output, want)) {
         Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
     }
@@ -326,25 +326,25 @@ public static void TestCompareTempString(ж<testing.T> Ꮡt) {
     var bʗ1 = b;
     var n = testing.AllocsPerRun(1000, () => {
         if (((sstring)bʗ1) != s) {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) < s) {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) > s) {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) == s){
         } else {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) <= s){
         } else {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) >= s){
         } else {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
     });
     if (n != 0D) {
@@ -358,7 +358,7 @@ public static void TestStringIndexHaystack(ж<testing.T> Ꮡt) {
     @string needle = "ll"u8;
     var haystackʗ1 = haystack;
     var n = testing.AllocsPerRun(1000, () => {
-        if (strings.Index(((@string)haystackʗ1), needle) != 2) {
+        if (strings.Index((@string)haystackʗ1, needle) != 2) {
             Ꮡt.Fatalf("needle not found"u8);
         }
     });
@@ -373,7 +373,7 @@ public static void TestStringIndexNeedle(ж<testing.T> Ꮡt) {
     var needle = slice<byte>("ll"u8);
     var needleʗ1 = needle;
     var n = testing.AllocsPerRun(1000, () => {
-        if (strings.Index(haystack, ((@string)needleʗ1)) != 2) {
+        if (strings.Index(haystack, (@string)needleʗ1) != 2) {
             Ꮡt.Fatalf("needle not found"u8);
         }
     });
@@ -413,7 +413,7 @@ public static void TestIntString(ж<testing.T> Ꮡt) {
     // Escaping result of intstring.
     array<@string> a = new(4);
     for (var i = (rune)0; i < 4; i++) {
-        a[i] = ((@string)(i + (rune)'0'));
+        a[i] = (@string)(i + (rune)'0');
     }
     s = a[0] + a[1] + a[2] + a[3];
     {
@@ -426,8 +426,8 @@ public static void TestIntString(ж<testing.T> Ꮡt) {
 public static void TestIntStringAllocs(ж<testing.T> Ꮡt) {
     var unknown = (rune)'0';
     var n = testing.AllocsPerRun(1000, () => {
-        @string s1 = ((@string)unknown);
-        @string s2 = ((@string)(unknown + 1));
+        @string s1 = (@string)unknown;
+        @string s2 = (@string)(unknown + 1);
         if (s1 == s2) {
             Ꮡt.Fatalf("bad"u8);
         }
@@ -510,11 +510,11 @@ public static void TestParseByteCount(ж<testing.T> Ꮡt) {
         new("9223372036854775807B"u8, 9223372036854775807L, true),
 
         // Good binary suffix inputs.
-        new("1KiB"u8, ((int64)1 << (int)(10)), true),
-        new("05KiB"u8, ((int64)5 << (int)(10)), true),
-        new("1MiB"u8, ((int64)1 << (int)(20)), true),
-        new("10MiB"u8, ((int64)10 << (int)(20)), true),
-        new("1GiB"u8, ((int64)1 << (int)(30)), true),
+        new("1KiB"u8, (int64)1 << 10, true),
+        new("05KiB"u8, (int64)5 << 10, true),
+        new("1MiB"u8, (int64)1 << 20, true),
+        new("10MiB"u8, (int64)10 << 20, true),
+        new("1GiB"u8, (int64)1 << 30, true),
         new("100GiB"u8, 107374182400L, true),
         new("1TiB"u8, 1099511627776L, true),
         new("99TiB"u8, 108851651149824L, true),

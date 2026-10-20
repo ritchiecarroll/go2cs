@@ -60,7 +60,7 @@ partial interface valued {
 }
 
 internal static void Main() {
-    var k = ((LocalKey)slice<byte>((@string)"abc"u8));
+    var k = (LocalKey)slice<byte>((@string)"abc"u8);
     var s = ((fmt.Stringer)k);
     fmt.Println("foreign-slice:", s.String());
 

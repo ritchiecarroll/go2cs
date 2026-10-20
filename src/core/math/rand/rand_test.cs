@@ -428,7 +428,7 @@ internal static void testReadUniformity(ж<testing.T> Ꮡt, nint n, int64 seed) 
 
 public static void TestReadUniformity(ж<testing.T> Ꮡt) {
     var testBufferSizes = new nint[]{
-        2, 4, 7, 64, 1024, (1 << (int)(16)), (1 << (int)(20))
+        2, 4, 7, 64, 1024, 1 << 16, 1 << 20
     }.slice();
     foreach (var (_, seed) in testSeeds) {
         foreach (var (_, n) in testBufferSizes) {

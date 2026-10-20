@@ -163,7 +163,7 @@ internal static void probeI1() {
     ref var s = ref heap<slice<nint>>(out var Ꮡs);
     s = new nint[]{1}.slice();
     void app() {
-        Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (nint)(2));
+        Ꮡs.ValueSlot = append(Ꮡs.ValueSlot, (nint)2);
     }
     app();
     fmt.Println("I1:", len(s), s[0]);

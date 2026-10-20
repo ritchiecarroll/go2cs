@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static void Main() {
     var x = (uint64)0b1011010;
-    (x, var frac) = ((x >> (int)(3)), (uint64)(x & 7));
+    (x, var frac) = (x >> 3, x & 7);
     fmt.Println(x, frac);
 
     nint a = 10;

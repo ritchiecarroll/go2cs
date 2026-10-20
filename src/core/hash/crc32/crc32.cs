@@ -251,7 +251,7 @@ internal static uint32 Sum32(this ref digest d) {
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = d.Sum32();
-    return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
+    return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
 
 // Checksum returns the CRC-32 checksum of data

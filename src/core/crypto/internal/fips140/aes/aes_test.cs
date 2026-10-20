@@ -19,7 +19,7 @@ public static void TestPowx(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("powx[%d] = %#x, want %#x"u8, i, powx[i], p);
         }
         p <<= (int)(1);
-        if ((nint)(p & 0x100) != 0) {
+        if ((p & 0x100) != 0) {
             p ^= (nint)(poly);
         }
     }
@@ -32,7 +32,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
     var s = (uint32)0;
     for (var k = (uint32)1; k < 0x100 && j != 0; k <<= (int)(1)) {
         // Invariant: k == 1<<n, i == b * xⁿ
-        if ((uint32)(j & k) != 0) {
+        if ((j & k) != 0) {
             // s += i in GF(2); xor in binary
             s ^= (uint32)(i);
             j ^= (uint32)(k); // turn off bit to end loop early
@@ -40,7 +40,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
 
         // i *= x in GF(2) modulo the polynomial
         i <<= (int)(1);
-        if ((uint32)(i & 0x100) != 0) {
+        if ((i & 0x100) != 0) {
             i ^= (uint32)(poly);
         }
     }
@@ -55,7 +55,7 @@ public static void TestMul(ж<testing.T> Ꮡt) {
             var s = (uint8)0;
             for (nuint k = (nuint)0; k < 8; k++) {
                 for (nuint l = (nuint)0; l < 8; l++) {
-                    if ((uint32)(i & (((uint32)1).Lsh(k))) != 0 && (uint32)(j & (((uint32)1).Lsh(l))) != 0) {
+                    if ((i & (((uint32)1).Lsh(k))) != 0 && (j & (((uint32)1).Lsh(l))) != 0) {
                         s ^= (byte)(powx[k + l]);
                     }
                 }
@@ -95,7 +95,7 @@ public static void TestTe(ж<testing.T> Ꮡt) {
         var s = (uint32)sbox0[i];
         var s2 = mul(s, 2);
         var s3 = mul(s, 3);
-        var w = (uint32)((uint32)((uint32)((s2 << (int)(24)) | (s << (int)(16))) | (s << (int)(8))) | s3);
+        var w = s2 << 24 | s << 16 | s << 8 | s3;
         var te = GoReflect.WithElemDims(new array<uint32>[]{te0.Clone(), te1.Clone(), te2.Clone(), te3.Clone()}.slice(), 256);
         for (nint j = 0; j < 4; j++) {
             {
@@ -103,7 +103,7 @@ public static void TestTe(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("te[%d][%d] = %#x, want %#x"u8, j, i, x, w);
                 }
             }
-            w = (uint32)((w << (int)(24)) | (w >> (int)(8)));
+            w = w << 24 | w >> 8;
         }
     }
 }
@@ -117,7 +117,7 @@ public static void TestTd(ж<testing.T> Ꮡt) {
         var sb = mul(s, 0xb);
         var sd = mul(s, 0xd);
         var se = mul(s, 0xe);
-        var w = (uint32)((uint32)((uint32)((se << (int)(24)) | (s9 << (int)(16))) | (sd << (int)(8))) | sb);
+        var w = se << 24 | s9 << 16 | sd << 8 | sb;
         var td = GoReflect.WithElemDims(new array<uint32>[]{td0.Clone(), td1.Clone(), td2.Clone(), td3.Clone()}.slice(), 256);
         for (nint j = 0; j < 4; j++) {
             {
@@ -125,7 +125,7 @@ public static void TestTd(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("td[%d][%d] = %#x, want %#x"u8, j, i, x, w);
                 }
             }
-            w = (uint32)((w << (int)(24)) | (w >> (int)(8)));
+            w = w << 24 | w >> 8;
         }
     }
 }
