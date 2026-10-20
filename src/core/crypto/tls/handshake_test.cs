@@ -29,7 +29,6 @@ using encoding;
 using fs = go.io.fs_package;
 using go.crypto;
 using go.os;
-using hash = hash_package;
 using rsa = go.crypto.rsa_package;
 using static go.crypto.tls_package;
 

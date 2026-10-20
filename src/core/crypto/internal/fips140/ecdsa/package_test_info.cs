@@ -8,8 +8,6 @@ global using static global::go.crypto.@internal.fips140.ecdsa_package;
 
 // <ImportedTypeAliases>
 global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
-using testing = go.testing_package;
-using Δnistec = go.crypto.@internal.fips140.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -24,10 +22,6 @@ using static global::go.crypto.@internal.fips140.ecdsa_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P224PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P224PointжPoint>>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P256PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P256PointжPoint>>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P384PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P384PointжPoint>>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P521PointжPoint>, ж<global::go.crypto.@internal.fips140.ecdsa_package.Curve<P521PointжPoint>>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

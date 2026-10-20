@@ -62,7 +62,6 @@ global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
 global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
 global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -138,27 +137,6 @@ using static global::go.runtime_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<BigStruct, ж<BigStruct>>(Indirect = true)]
-[assembly: GoImplicitConv<BytesKey, ж<BytesKey>>(Indirect = true)]
-[assembly: GoImplicitConv<EfaceKey, ж<EfaceKey>>(Indirect = true)]
-[assembly: GoImplicitConv<HashSet, ж<HashSet>>(Indirect = true)]
-[assembly: GoImplicitConv<IfaceKey, ж<IfaceKey>>(Indirect = true)]
-[assembly: GoImplicitConv<Int32Key, ж<Int32Key>>(Indirect = true)]
-[assembly: GoImplicitConv<Int64Key, ж<Int64Key>>(Indirect = true)]
-[assembly: GoImplicitConv<Ptr, ж<Ptr>>(Indirect = true)]
-[assembly: GoImplicitConv<PtrScalar, ж<PtrScalar>>(Indirect = true)]
-[assembly: GoImplicitConv<ScalarPtr, ж<ScalarPtr>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.runtime_package.g, ж<global::go.runtime_package.g>>(Indirect = true)]
-[assembly: GoImplicitConv<listedVal, ж<listedVal>>(Indirect = true)]
-[assembly: GoImplicitConv<listedValManual, ж<listedValManual>>(Indirect = true)]
-[assembly: GoImplicitConv<listedValNIH, ж<listedValNIH>>(Indirect = true)]
-[assembly: GoImplicitConv<objWith<go.unsafe_package.Pointer>, ж<objWith<go.unsafe_package.Pointer>>>(Indirect = true)]
-[assembly: GoImplicitConv<objWith<ж<obj>>, ж<objWith<ж<obj>>>>(Indirect = true)]
-[assembly: GoImplicitConv<objWith<ж<objWith<ж<obj>>>>, ж<objWith<ж<objWith<ж<obj>>>>>>(Indirect = true)]
-[assembly: GoImplicitConv<smallPointer, ж<smallPointer>>(Indirect = true)]
-[assembly: GoImplicitConv<smallPointerMix, ж<smallPointerMix>>(Indirect = true)]
-[assembly: GoImplicitConv<smallScalar, ж<smallScalar>>(Indirect = true)]
-[assembly: GoImplicitConv<ttiResult, ж<ttiResult>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

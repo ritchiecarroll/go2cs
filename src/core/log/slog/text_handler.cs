@@ -12,7 +12,6 @@ using strconv = strconv_package;
 using sync = sync_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
-using buffer = go.log.slog.@internal.buffer_package;
 using go.log.slog.@internal;
 using go.unicode;
 using time = time_package;

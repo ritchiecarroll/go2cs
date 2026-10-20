@@ -16,7 +16,6 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using reflect = go.reflect_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,9 +56,6 @@ using static go.encoding.xml_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<StartElement, ж<StartElement>>(Indirect = true)]
-[assembly: GoImplicitConv<StartElement, ж<StartElement>>]
-[assembly: GoImplicitConv<fieldInfo, ж<fieldInfo>>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

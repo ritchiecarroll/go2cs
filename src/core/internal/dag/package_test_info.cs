@@ -7,7 +7,6 @@
 global using static global::go.@internal.dag_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -20,7 +19,6 @@ using static global::go.@internal.dag_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.@internal.dag_package.Graph, ж<global::go.@internal.dag_package.Graph>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

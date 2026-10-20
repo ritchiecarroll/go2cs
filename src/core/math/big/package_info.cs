@@ -53,8 +53,6 @@ using static go.math.big_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Float, ж<Float>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔInt, ж<ΔInt>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

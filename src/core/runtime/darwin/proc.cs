@@ -7205,7 +7205,7 @@ internal static void runqput(ж<Δp> Ꮡpp, ж<g> Ꮡgp, bool next) {
     if (next) {
 retryNext:
         var oldnext = pp.runnext;
-        if (!Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(oldnext, new Δguintptr(gp))) {
+        if (!Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(oldnext, new Δguintptr(Ꮡgp))) {
             goto retryNext;
         }
         if (oldnext == 0) {

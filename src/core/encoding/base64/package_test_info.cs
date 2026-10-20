@@ -16,8 +16,6 @@ global using reflectꓸValue = go.reflect_package.ΔValue;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using bytes = go.bytes_package;
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -35,10 +33,6 @@ using static global::go.encoding.base64_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bytes.Buffer, ж<bytes.Buffer>>(Indirect = true)]
-[assembly: GoImplicitConv<bytes.Reader, ж<bytes.Reader>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Builder, ж<strings.Builder>>(Indirect = true)]
-[assembly: GoImplicitConv<strings.Reader, ж<strings.Reader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

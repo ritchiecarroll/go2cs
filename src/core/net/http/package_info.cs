@@ -29,9 +29,6 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 global using urlꓸError = go.net.url_package.ΔError;
-using bufio = go.bufio_package;
-using httptrace = go.net.http.httptrace_package;
-using tls = go.crypto.tls_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -253,16 +250,6 @@ using static go.net.http_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<HTTP2Config, ж<HTTP2Config>>(Indirect = true)]
-[assembly: GoImplicitConv<Request, ж<Request>>(Indirect = true)]
-[assembly: GoImplicitConv<http2ClientConn, ж<http2ClientConn>>(Indirect = true)]
-[assembly: GoImplicitConv<http2MetaHeadersFrame, ж<http2MetaHeadersFrame>>(Indirect = true)]
-[assembly: GoImplicitConv<http2Server, ж<http2Server>>(Indirect = true)]
-[assembly: GoImplicitConv<http2responseWriter, ж<http2responseWriter>>(Indirect = true)]
-[assembly: GoImplicitConv<http2writeData, ж<http2writeData>>]
-[assembly: GoImplicitConv<http2writeResHeaders, ж<http2writeResHeaders>>(Indirect = true)]
-[assembly: GoImplicitConv<httptrace.ClientTrace, ж<httptrace.ClientTrace>>]
-[assembly: GoImplicitConv<tls.Conn, ж<tls.Conn>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

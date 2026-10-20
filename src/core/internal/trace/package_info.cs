@@ -14,7 +14,6 @@ global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tracev1ꓸSTWReason = go.@internal.trace.@internal.tracev1_package.ΔSTWReason;
-using bufio = go.bufio_package;
 using tracev1 = go.@internal.trace.@internal.tracev1_package;
 // </ImportedTypeAliases>
 
@@ -66,9 +65,6 @@ using static go.@internal.trace_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<dataTable<stringID, @string>, ж<dataTable<stringID, @string>>>(Indirect = true)]
-[assembly: GoImplicitConv<evTable, ж<evTable>>(Indirect = true)]
-[assembly: GoImplicitConv<spilledBatch, ж<spilledBatch>>(Indirect = true)]
 [assembly: GoImplicitConv<ΔTime, timestamp>(Inverted = true, ValueType = "int64")]
 [assembly: GoImplicitConv<ΔTime, tracev1.Timestamp>(Inverted = false, ValueType = "int64")]
 // </ImplicitConversions>

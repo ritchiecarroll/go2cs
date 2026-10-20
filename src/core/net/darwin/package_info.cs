@@ -37,7 +37,6 @@ global using syscallꓸSignal = go.syscall_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using syscall = go.syscall_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -123,7 +122,6 @@ using static go.net_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Interface, ж<Interface>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -68,7 +68,6 @@ using static go.reflect_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
 [assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
 [assembly: GoImplicitConv<flag, ΔKind>(Inverted = true, ValueType = "uintptr")]
 [assembly: GoImplicitConv<ΔKind, abiꓸKind>(Inverted = false, ValueType = "uint8")]

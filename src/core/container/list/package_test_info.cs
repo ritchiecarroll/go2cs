@@ -8,7 +8,6 @@ global using static global::go.container.list_package;
 global using static global::go.container.list_internal_test_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -21,7 +20,6 @@ using static global::go.container.list_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.container.list_package.List, ж<global::go.container.list_package.List>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -623,6 +623,7 @@
     <Project Path="tests/Behavioral/IncDecPointerField/IncDecPointerField.csproj" />
     <Project Path="tests/Behavioral/IndexedElementDirectBoxMethod/IndexedElementDirectBoxMethod.csproj" />
     <Project Path="tests/Behavioral/ImmediatelyInvokedFunc/ImmediatelyInvokedFunc.csproj" />
+    <Project Path="tests/Behavioral/ImplicitConvArgumentParameter/ImplicitConvArgumentParameter.csproj" />
     <Project Path="tests/Behavioral/ImportSegmentTypeShadow/ImportSegmentTypeShadow.csproj" />
     <Project Path="tests/Behavioral/IfaceFieldEmbedAdapter/IfaceFieldEmbedAdapter.csproj" />
     <Project Path="tests/Behavioral/IfaceFieldMethodValueBind/IfaceFieldMethodValueBind.csproj" />

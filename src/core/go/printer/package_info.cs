@@ -19,7 +19,6 @@ global using osꓸSignal = go.os_package.ΔSignal;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -52,7 +51,6 @@ using static go.go.printer_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<token.FileSet, ж<token.FileSet>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

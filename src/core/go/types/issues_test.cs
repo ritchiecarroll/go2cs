@@ -14,7 +14,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using static global::go.go.types_package;
-using constant = global::go.go.constant_package;
 using global::go.@internal;
 using global::go.go;
 using io = io_package;

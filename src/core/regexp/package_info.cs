@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using syntaxꓸError = go.regexp.syntax_package.ΔError;
-using syntax = go.regexp.syntax_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,8 +43,6 @@ using static go.regexp_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<syntax.Prog, ж<syntax.Prog>>(Indirect = true)]
-[assembly: GoImplicitConv<thread, ж<thread>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

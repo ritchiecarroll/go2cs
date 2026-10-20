@@ -26,7 +26,6 @@ global using typesꓸSignature = go.go.types_package.ΔSignature;
 global using typesꓸTerm = go.go.types_package.ΔTerm;
 global using typesꓸType = go.go.types_package.ΔType;
 global using xcoffꓸSection = go.@internal.xcoff_package.ΔSection;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,7 +41,6 @@ using static global::go.go.@internal.gccgoimporter_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<importerTest, ж<importerTest>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

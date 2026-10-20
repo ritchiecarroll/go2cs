@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using aes = go.crypto.@internal.fips140.aes_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,7 +39,6 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<aes.Block, ж<aes.Block>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

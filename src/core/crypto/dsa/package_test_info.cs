@@ -9,8 +9,6 @@ global using static global::go.crypto.dsa_package;
 // <ImportedTypeAliases>
 global using bigꓸInt = go.math.big_package.ΔInt;
 global using bigꓸRat = go.math.big_package.ΔRat;
-using big = go.math.big_package;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -23,8 +21,6 @@ using static global::go.crypto.dsa_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bigꓸInt, ж<bigꓸInt>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.dsa_package.PrivateKey, ж<global::go.crypto.dsa_package.PrivateKey>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

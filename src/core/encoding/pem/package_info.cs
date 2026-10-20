@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using base64 = go.encoding.base64_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,7 +41,6 @@ using static go.encoding.pem_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<lineBreaker, ж<lineBreaker>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

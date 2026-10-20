@@ -7,7 +7,6 @@
 global using static global::go.@internal.coverage.slicewriter_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -20,7 +19,6 @@ using static global::go.@internal.coverage.slicewriter_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.@internal.coverage.slicewriter_package.WriteSeeker, ж<global::go.@internal.coverage.slicewriter_package.WriteSeeker>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

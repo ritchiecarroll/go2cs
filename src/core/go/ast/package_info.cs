@@ -24,7 +24,6 @@ global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -164,10 +163,6 @@ using static go.go.ast_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<File, ж<File>>(Indirect = true)]
-[assembly: GoImplicitConv<GenDecl, ж<GenDecl>>(Indirect = true)]
-[assembly: GoImplicitConv<Ident, ж<Ident>>(Indirect = true)]
-[assembly: GoImplicitConv<go.go.ast_package.Object, ж<go.go.ast_package.Object>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

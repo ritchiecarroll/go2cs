@@ -43,8 +43,6 @@ using static go.@internal.trace.@internal.tracev1_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Event, ж<Event>>(Indirect = true)]
-[assembly: GoImplicitConv<Event, ж<Event>>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

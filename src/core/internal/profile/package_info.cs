@@ -54,14 +54,6 @@ using static go.@internal.profile_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Function, ж<Function>>(Indirect = true)]
-[assembly: GoImplicitConv<Label, ж<Label>>(Indirect = true)]
-[assembly: GoImplicitConv<Line, ж<Line>>(Indirect = true)]
-[assembly: GoImplicitConv<Location, ж<Location>>(Indirect = true)]
-[assembly: GoImplicitConv<Mapping, ж<Mapping>>(Indirect = true)]
-[assembly: GoImplicitConv<Options, ж<Options>>(Indirect = true)]
-[assembly: GoImplicitConv<Sample, ж<Sample>>(Indirect = true)]
-[assembly: GoImplicitConv<go.@internal.profile_package.ValueType, ж<go.@internal.profile_package.ValueType>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

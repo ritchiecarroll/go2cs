@@ -20,9 +20,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using ast = go.go.ast_package;
-using bytes = go.bytes_package;
-using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -141,45 +138,6 @@ using static go.go.types_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Basic, ж<Basic>>(Indirect = true)]
-[assembly: GoImplicitConv<Const, ж<Const>>(Indirect = true)]
-[assembly: GoImplicitConv<Context, ж<Context>>(Indirect = true)]
-[assembly: GoImplicitConv<Interface, ж<Interface>>(Indirect = true)]
-[assembly: GoImplicitConv<Label, ж<Label>>(Indirect = true)]
-[assembly: GoImplicitConv<Named, ж<Named>>(Indirect = true)]
-[assembly: GoImplicitConv<Package, ж<Package>>(Indirect = true)]
-[assembly: GoImplicitConv<PkgName, ж<PkgName>>(Indirect = true)]
-[assembly: GoImplicitConv<Pointer, ж<Pointer>>(Indirect = true)]
-[assembly: GoImplicitConv<Slice, ж<Slice>>(Indirect = true)]
-[assembly: GoImplicitConv<TypeName, ж<TypeName>>(Indirect = true)]
-[assembly: GoImplicitConv<TypeParam, ж<TypeParam>>(Indirect = true)]
-[assembly: GoImplicitConv<Union, ж<Union>>(Indirect = true)]
-[assembly: GoImplicitConv<Var, ж<Var>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.BasicLit, ж<ast.BasicLit>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.BinaryExpr, ж<ast.BinaryExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.BlockStmt, ж<ast.BlockStmt>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.CallExpr, ж<ast.CallExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.CompositeLit, ж<ast.CompositeLit>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.FieldList, ж<ast.FieldList>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.FuncLit, ж<ast.FuncLit>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.FuncType, ж<ast.FuncType>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.Ident, ж<ast.Ident>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.InterfaceType, ж<ast.InterfaceType>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.LabeledStmt, ж<ast.LabeledStmt>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.SelectorExpr, ж<ast.SelectorExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.SliceExpr, ж<ast.SliceExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.StructType, ж<ast.StructType>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.TypeSpec, ж<ast.TypeSpec>>(Indirect = true)]
-[assembly: GoImplicitConv<ast.UnaryExpr, ж<ast.UnaryExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<block, ж<block>>(Indirect = true)]
-[assembly: GoImplicitConv<declInfo, ж<declInfo>>(Indirect = true)]
-[assembly: GoImplicitConv<go.go.types_package.Func, ж<go.go.types_package.Func>>(Indirect = true)]
-[assembly: GoImplicitConv<go.go.types_package.Tuple, ж<go.go.types_package.Tuple>>(Indirect = true)]
-[assembly: GoImplicitConv<indexedExpr, ж<indexedExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<operand, ж<operand>>(Indirect = true)]
-[assembly: GoImplicitConv<token.FileSet, ж<token.FileSet>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔInfo, ж<ΔInfo>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔSignature, ж<ΔSignature>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -215,7 +173,7 @@ using static go.go.types_package;
 [assembly: global::go.GoPositionMap("go/types/gccgosizes.go", "gccgosizes.cs", "AAsa")]
 [assembly: global::go.GoPositionMap("go/types/gcsizes.go", "gcsizes.cs", "ABAe0oLKyKQABxDcgoKAgrYACAyCtoLmpJSCpoKUgpTmgoKCgpSCpoKCgoCClLamoqSCgoKAgraCxoKCpoKClIKYooKUpKSCgpSCgoKCuIKmyILEpKyygpQ=", "16-18:1")]
 [assembly: global::go.GoPositionMap("go/types/index.go", "index.cs", "ABMm4qaUgriUgoKUpoCU2oKCuIKClIKCgsqCyIKCgpS2gIKCgoLYgoK2goKClIKClIKCgqaClqKUgoKSlIKCxoKCgsaAgoLWtIKkgpSUgoK4gqaCpoKUpoKCgoKUgoKUgoKCuIKCyJSCgoKmgoKC3IKmgtaygoKCqKKUgoKCgriCgriCgriCgoKmlKaCgriCgqaCpoKCgoKUgoKUgoK4gtqCgoKCgpS2gIKCgtjIgoKCpqaCgoKokoKCyoKClICC6MakyoKCgoK4goIACBTSgoKUlJTe8oKUgoKCpoKmgqaCgoKCuKaigriCgriCgqaUgoK4goK4ABMogqaClAAIEAAHEA==", "112-161:1;222-249:1")]
-[assembly: global::go.GoPositionMap("go/types/infer.go", "infer.cs", "ABxGABQKgpK4goKSyoKmpoLKgoLcgoKCAB4+goLclLSCuIKCgoKmgoKmlMqCgpSmutqCgqaCypSCpoKCgqSAAAoW2oKC3IIAESSCgoKClKaCgoKCypSUggALGLiCxoLKABEigoIAARDigqSCyoK4goLcgqyygoKCgoKUgoKUgoKClJTKgoKCAAsYgoKCABo2mrKCgriCgsqCgoKCgAAMGoCCpIKCtu6CgoKCqAAFFAAkOIKmgoKCgqaCgqbatIKUpKSokoKClJSCgqyyyAAHEOSAgqSCgqbapqampgAHEAAJFKaCgoKmqqamgoLatrbmgoKCpq7igoKCgoKClIKCgpSUgoKClJSAyqQAAhTykoIACRTCgriAgoCU6pSClAAHELa2tu6ClILIgsiClILIgra2gsiAgujEpIKC", "41-43:1;48-50:2;119-154:3;305-305:4;567-569:1;615-617:2;659-670:1")]
+[assembly: global::go.GoPositionMap("go/types/infer.go", "infer.cs", "ABtGABQKgpK4goKSyoKmpoLKgoLcgoKCAB4+goLclLSCuIKCgoKmgoKmlMqCgpSmutqCgqaCypSCpoKCgqSAAAoW2oKC3IIAESSCgoKClKaCgoKCypSUggALGLiCxoLKABEigoIAARDigqSCyoK4goLcgqyygoKCgoKUgoKUgoKClJTKgoKCAAsYgoKCABo2mrKCgriCgsqCgoKCgAAMGoCCpIKCtu6CgoKCqAAFFAAkOIKmgoKCgqaCgqbatIKUpKSokoKClJSCgqyyyAAHEOSAgqSCgqbapqampgAHEAAJFKaCgoKmqqamgoLatrbmgoKCpq7igoKCgoKClIKCgpSUgoKClJSAyqQAAhTykoIACRTCgriAgoCU6pSClAAHELa2tu6ClILIgsiClILIgra2gsiAgujEpIKC", "41-43:1;48-50:2;119-154:3;305-305:4;567-569:1;615-617:2;659-670:1")]
 [assembly: global::go.GoPositionMap("go/types/initorder.go", "initorder.cs", "ABgo1riSlIKCgoKUgIKCgoKmyJSCgoKCppQACBKClJSCyoIACBKCAAgSgoK4goKC7oKUlIKClIKmgoKCgpS+soKUlpKClKiCgpSAgsiokqaCgqaClIKCgpQAGjiiyoKClKzEgpSAgv6UlICCgoLakoKAgpQADhyGppSmlIKCpqaCyoKCpgAJFICkgoKCpoKmgoKCyqaCpoKCgoKC", "151-153:1;273-275:1", "", "84=Name/1/1/1,order/1/1/1")]
 [assembly: global::go.GoPositionMap("go/types/instantiate.go", "instantiate.cs", "ABhsAB4CgoKUlIKCgoKUgJLIggACIgASDNKClIKUuIKC3LKClMqCgILIlMiCypSCpraUlIKUgpS4gpK4gtjIrLKClLS0poKCgqaokoKUyoKCgqYABhIACAKCgoKUgIK2goKmgoKCgoKUlJS4gtyCgsqCgpS4koKUuJKCuIK4lIKUgpSUgpTKgtyClIKUlKiSgriCkoKCppSUgoKUtLSklKaqopSCgtiCguiCtg==", "115-120:1;291-316:1;340-355:2")]
 [assembly: global::go.GoPositionMap("go/types/interface.go", "interface.cs", "ABs6sNae0oKClAACEuKCuIKCgILalIKClKiygoKUrsKokKigppCswKaQppCooKaQppCooKaQAAISAAkCgpSCpoCigKrCgoLm0oKCgpSmgoKCyoKCgqaCgoKClLiCgoCCpKiSgoCCtpSCgsqUlIK43II=", "160-166:1;231-233:2", "", "284=describef/1/1/2")]

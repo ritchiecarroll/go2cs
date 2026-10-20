@@ -22,8 +22,6 @@ global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-using parse = go.text.template.parse_package;
-using template = go.text.template_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,14 +55,6 @@ using static go.html.template_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<parse.ActionNode, ж<parse.ActionNode>>]
-[assembly: GoImplicitConv<parse.BranchNode, ж<parse.BranchNode>>]
-[assembly: GoImplicitConv<parse.ListNode, ж<parse.ListNode>>(Indirect = true)]
-[assembly: GoImplicitConv<parse.ListNode, ж<parse.ListNode>>]
-[assembly: GoImplicitConv<parse.TemplateNode, ж<parse.TemplateNode>>]
-[assembly: GoImplicitConv<parse.TextNode, ж<parse.TextNode>>]
-[assembly: GoImplicitConv<rangeContext, ж<rangeContext>>]
-[assembly: GoImplicitConv<template.Template, ж<template.Template>>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
