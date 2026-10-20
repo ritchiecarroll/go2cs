@@ -163,7 +163,7 @@ public static void TestHexdumpWords(ж<testing.T> Ꮡt) {
         pcStr = pcStr[..8] + " " + pcStr[8..]; // Add middle space
         var ascii = new slice<byte>(8);
         foreach (var (i, _) in ascii) {
-            var b = (byte)(pc.Rsh((int64)((8 * i))));
+            var b = (byte)(pc.Rsh((int64)(8 * i)));
             if (b >= (rune)' ' && b <= (rune)'~'){
                 ascii[i] = b;
             } else {

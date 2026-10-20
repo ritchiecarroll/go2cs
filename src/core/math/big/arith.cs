@@ -286,7 +286,7 @@ internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word
 internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
     nuint s = nlz(y);
     if (s != 0) {
-        x1 = (Word)(x1 << (int)(s) | x0 >> (int)(((nuint)_W - s)));
+        x1 = (Word)(x1 << (int)(s) | x0 >> (int)((nuint)_W - s));
         x0 <<= (int)(s);
         y <<= (int)(s);
     }

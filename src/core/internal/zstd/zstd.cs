@@ -214,7 +214,7 @@ retry:
 
     var singleSegment = (byte)(descriptor & ((byte)(1 << 5))) != 0;
 
-    nint fcsFieldSize = ((nint)1).Lsh((uint64)((descriptor >> 6)));
+    nint fcsFieldSize = ((nint)1).Lsh((uint64)(descriptor >> 6));
     if (fcsFieldSize == 1 && !singleSegment) {
         fcsFieldSize = 0;
     }

@@ -178,7 +178,7 @@ internal static int32 nsec(this ref Time t) {
 // sec returns the time's seconds since Jan 1 year 1.
 internal static int64 sec(this ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
-        return wallToInternal + (int64)((t.wall << 1) >> (int)((nsecShift + 1)));
+        return wallToInternal + (int64)((t.wall << 1) >> (int)(nsecShift + 1));
     }
     return t.ext;
 }
@@ -191,7 +191,7 @@ internal static int64 unixSec(this ref Time t) {
 // addSec adds d seconds to the time.
 internal static void addSec(this ref Time t, int64 d) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
-        var sec = (int64)((t.wall << 1) >> (int)((nsecShift + 1)));
+        var sec = (int64)((t.wall << 1) >> (int)(nsecShift + 1));
         var dsec = sec + d;
         if (0 <= dsec && dsec <= 8589934591L) {
             t.wall = t.wall & (uint64)nsecMask | (uint64)dsec << (int)(nsecShift) | (uint64)hasMonotonic;

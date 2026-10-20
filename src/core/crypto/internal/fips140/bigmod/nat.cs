@@ -480,7 +480,7 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
 
         xLimbs[i] = shiftedLimbs[i].Rsh((int64)(shift));
         if (i + 1 < len(shiftedLimbs)) {
-            xLimbs[i] |= (nuint)(shiftedLimbs[i + 1].Lsh((int64)(((nint)_W - shift))));
+            xLimbs[i] |= (nuint)(shiftedLimbs[i + 1].Lsh((int64)((nint)_W - shift)));
         }
     }
 
@@ -545,7 +545,7 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
 
     // We start by computing R = 2^(_W * n) mod m. We can get pretty close, to
     // 2^⌊log₂m⌋, by setting the highest bit we can without having to reduce.
-    rr.Value.limbs[n - 1] = (nuint)1 << (int)(((mLen - 1) % (nuint)_W));
+    rr.Value.limbs[n - 1] = (nuint)1 << (int)((mLen - 1) % (nuint)_W);
     // Then we double until we reach 2^(_W * n).
     for (nuint iΔ1 = mLen - 1; iΔ1 < logR; iΔ1++) {
         rr.Add(rr, Ꮡm);
@@ -1150,7 +1150,7 @@ public static ж<ΔNat> ExpShortVarTime(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, n
     for (nint i = (nint)bits.UintSize - bits.Len(e) + 1; i < bits.UintSize; i++) {
         Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
         {
-            nuint k = (e.Rsh((int64)(((nint)bits.UintSize - i - 1)))) & 1; if (k != 0) {
+            nuint k = (e.Rsh((int64)((nint)bits.UintSize - i - 1))) & 1; if (k != 0) {
                 Ꮡout.montgomeryMul(Ꮡout, xR, Ꮡm);
             }
         }
@@ -1315,9 +1315,9 @@ internal static void rshift1(ref ΔNat a, nuint carry) {
     foreach (var i in range(size)) {
         aLimbs[i] >>= (int)(1);
         if (i + 1 < size){
-            aLimbs[i] |= (nuint)((aLimbs[i + 1] << (int)((_W - 1))));
+            aLimbs[i] |= (nuint)((aLimbs[i + 1] << (int)(_W - 1)));
         } else {
-            aLimbs[i] |= (nuint)((carry << (int)((_W - 1))));
+            aLimbs[i] |= (nuint)((carry << (int)(_W - 1)));
         }
     }
 }
