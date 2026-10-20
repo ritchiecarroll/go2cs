@@ -58,7 +58,6 @@ using static go.go.@internal.gcimporter_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<readerDict, ж<readerDict>>]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

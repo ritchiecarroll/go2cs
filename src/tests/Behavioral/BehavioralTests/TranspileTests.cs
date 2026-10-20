@@ -922,6 +922,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]
+    public void CheckImplicitConvArgumentParameter() => CheckTarget("ImplicitConvArgumentParameter");
+
+    [TestMethod]
     public void CheckImportSegmentTypeShadow() => CheckTarget("ImportSegmentTypeShadow");
 
     [TestMethod]

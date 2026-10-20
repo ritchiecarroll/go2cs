@@ -41,8 +41,6 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<affineCached, ж<affineCached>>(Indirect = true)]
-[assembly: GoImplicitConv<projCached, ж<projCached>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

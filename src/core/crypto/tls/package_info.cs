@@ -32,8 +32,6 @@ global using tls13ꓸExporterMasterSecret = go.crypto.@internal.fips140.tls13_pa
 global using tls13ꓸHandshakeSecret = go.crypto.@internal.fips140.tls13_package.ΔHandshakeSecret;
 global using tls13ꓸMasterSecret = go.crypto.@internal.fips140.tls13_package.ΔMasterSecret;
 global using x509ꓸOID = go.crypto.x509_package.ΔOID;
-using net = go.net_package;
-using Δx509 = go.crypto.x509_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -112,17 +110,7 @@ using static go.crypto.tls_package;
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<AlertError, alert>(Inverted = true, ValueType = "uint8")]
-[assembly: GoImplicitConv<Certificate, ж<Certificate>>(Indirect = true)]
-[assembly: GoImplicitConv<Config, ж<Config>>(Indirect = true)]
-[assembly: GoImplicitConv<QUICConfig, ж<QUICConfig>>(Indirect = true)]
-[assembly: GoImplicitConv<SessionState, ж<SessionState>>]
 [assembly: GoImplicitConv<alert, AlertError>(Inverted = true, ValueType = "uint8")]
-[assembly: GoImplicitConv<clientHelloMsg, ж<clientHelloMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<clientKeyExchangeMsg, ж<clientKeyExchangeMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<echClientContext, ж<echClientContext>>(Indirect = true)]
-[assembly: GoImplicitConv<serverHelloMsg, ж<serverHelloMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<serverKeyExchangeMsg, ж<serverKeyExchangeMsg>>(Indirect = true)]
-[assembly: GoImplicitConv<Δx509.Certificate, ж<Δx509.Certificate>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -22,7 +22,6 @@ global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
 global using urlꓸError = go.net.url_package.ΔError;
-using parse = go.text.template.parse_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +53,6 @@ using static go.text.template_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<parse.Tree, ж<parse.Tree>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

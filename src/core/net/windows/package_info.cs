@@ -41,7 +41,6 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using windowsꓸContext = go.@internal.runtime.syscall.windows_package.Context;
 global using windowsꓸMemoryBasicInformation = go.@internal.runtime.syscall.windows_package.MemoryBasicInformation;
-using syscall = go.syscall_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -126,7 +125,6 @@ using static go.net_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Interface, ж<Interface>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

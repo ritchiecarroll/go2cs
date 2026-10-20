@@ -11,7 +11,6 @@
 
 // <ImportedTypeAliases>
 global using bigmodꓸNat = go.crypto.@internal.fips140.bigmod_package.ΔNat;
-using Δnistec = go.crypto.@internal.fips140.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,10 +48,6 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<PrivateKey, ж<PrivateKey>>(Indirect = true)]
-[assembly: GoImplicitConv<Signature, ж<Signature>>(Indirect = true)]
-[assembly: GoImplicitConv<hmacDRBG, ж<hmacDRBG>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔPublicKey, ж<ΔPublicKey>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

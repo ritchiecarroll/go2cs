@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -44,9 +43,6 @@ using static go.regexp.syntax_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Inst, ж<Inst>>(Indirect = true)]
-[assembly: GoImplicitConv<Prog, ж<Prog>>(Indirect = true)]
-[assembly: GoImplicitConv<Regexp, ж<Regexp>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

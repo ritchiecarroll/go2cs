@@ -11,7 +11,6 @@ using token = global::go.go.token_package;
 using slices = slices_package;
 using strings = strings_package;
 using System.Runtime.CompilerServices;
-using ast = global::go.go.ast_package;
 using global::go.go;
 
 partial class types_package {

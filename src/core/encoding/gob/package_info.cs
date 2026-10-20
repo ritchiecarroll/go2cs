@@ -65,10 +65,6 @@ using static go.encoding.gob_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<decInstr, ж<decInstr>>(Indirect = true)]
-[assembly: GoImplicitConv<decoderState, ж<decoderState>>(Indirect = true)]
-[assembly: GoImplicitConv<encEngine, ж<encEngine>>(Indirect = true)]
-[assembly: GoImplicitConv<userTypeInfo, ж<userTypeInfo>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

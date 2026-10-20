@@ -73,8 +73,6 @@ using static go.database.sql_package;
 
 // <ImplicitConversions>
 [assembly: GoImplicitConv<IsolationLevel, driver.IsolationLevel>(Inverted = true, ValueType = "nint")]
-[assembly: GoImplicitConv<driverConn, ж<driverConn>>(Indirect = true)]
-[assembly: GoImplicitConv<driverStmt, ж<driverStmt>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

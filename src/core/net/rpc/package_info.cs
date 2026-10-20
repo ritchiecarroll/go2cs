@@ -25,7 +25,6 @@ global using templateꓸFuncMap = go.text.template_package.FuncMap;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using sync = go.sync_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -68,10 +67,6 @@ using static go.net.rpc_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Request, ж<Request>>(Indirect = true)]
-[assembly: GoImplicitConv<methodType, ж<methodType>>(Indirect = true)]
-[assembly: GoImplicitConv<sync.Mutex, ж<sync.Mutex>>(Indirect = true)]
-[assembly: GoImplicitConv<sync.WaitGroup, ж<sync.WaitGroup>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

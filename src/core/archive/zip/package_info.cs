@@ -18,8 +18,6 @@ global using osꓸSignal = go.os_package.ΔSignal;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using bufio = go.bufio_package;
-using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -67,8 +65,6 @@ using static go.archive.zip_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bufio.Reader, ж<bufio.Reader>>(Indirect = true)]
-[assembly: GoImplicitConv<io.SectionReader, ж<io.SectionReader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

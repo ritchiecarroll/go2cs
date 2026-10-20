@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using Δnistec = go.crypto.@internal.fips140.nistec_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -45,8 +44,6 @@ using static go.crypto.@internal.fips140.ecdh_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<PrivateKey, ж<PrivateKey>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔPublicKey, ж<ΔPublicKey>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

@@ -83,7 +83,7 @@ using static go.log.slog_package;
 [assembly: go.GoPositionMap("log/slog/logger.go", "logger.cs", "ABxYABgCgoKmgqiQrvLugIKSggAMGIKCgpSChJKCuIKCggAMGoKSqJCq4oKUgoIAAhIACAKClIKCqJKClKiyqJKClKyyAAIaAAwCqLKosqiyqLKosqiyqLKosqiyrNKClIKUgoKUgpSCgqiygpSClIKClIKUgoKosqiyqLKosqiyqLKosqiyqLKosg==")]
 [assembly: go.GoPositionMap("log/slog/multi_handler.go", "multi_handler.cs", "AAsasoKCAAkUgoKCpqaigoKCgILIpoKCgpSmgoKClA==")]
 [assembly: go.GoPositionMap("log/slog/record.go", "record.cs", "AC900gAHFtKCqLKqwoKCpoKCAAgOwoKCgoKUgriCgpSCpoKCgoIABBDSgoKCgpSCgpSClMySgoKCgIK2AAQW4pSClKa2ABQowoKClIKUgpSosKrSgqaCgg==")]
-[assembly: go.GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABs40oKUAAkYoqqipoIAAkoAJAKmopSkpICCgoKmgqSAlIKkpJSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
+[assembly: go.GoPositionMap("log/slog/text_handler.go", "text_handler.cs", "ABo40oKUAAkYoqqipoIAAkoAJAKmopSkpICCgoKmgqSAlIKkpJSssoCCtoKClKaCgpSCgqaClIKUgoKUlA==")]
 [assembly: go.GoPositionMap("log/slog/value.go", "value.cs", "ADt8AA8agoKUAAYQkpSkxKSkpLS+sqiSqJKokqiSqJKCgpQACRyiypSCgpS4qJKq+ICCgoKCpqSokoKCgqYAAiQADwKUpKSkpKSkpKSkpKSkpKSkpKSkpLS+spSAgqSkpKSkpKSkpKSkvrKAgqSCpoKqooCSpKqigJKkqqKAkqSmgqqigJK2poKqooCStqaCqqKAkqSokpSClKS0zKKqooCCpKaCrLKCgoKUlKSkpKSkpLqSgsqqopSkpKSkpKSkpKQADSoACgKCgoCCyIKClJSCAAkGgoKCgpSCgoKCgoKClIKCgqY=", "502-506:1")]
 // </GoSourcePositionMaps>
 

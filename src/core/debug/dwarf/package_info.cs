@@ -68,9 +68,6 @@ using static go.debug.dwarf_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Entry, ж<Entry>>(Indirect = true)]
-[assembly: GoImplicitConv<typeUnit, ж<typeUnit>>(Indirect = true)]
-[assembly: GoImplicitConv<unit, ж<unit>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

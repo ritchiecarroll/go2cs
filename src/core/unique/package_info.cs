@@ -19,7 +19,6 @@ global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using abi = go.@internal.abi_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -49,7 +48,6 @@ using static go.unique_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<cloneSeq, ж<cloneSeq>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
