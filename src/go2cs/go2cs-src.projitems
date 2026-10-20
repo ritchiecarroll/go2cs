@@ -223,6 +223,7 @@
     <None Include="$(MSBuildThisFileDirectory)importAliasOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)importInit_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)implicitConvArgumentLoop_test.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitConvValueType_test.go" />
     <None Include="$(MSBuildThisFileDirectory)implicitRuntimeReference_test.go" />
     <None Include="$(MSBuildThisFileDirectory)importInitSection.go" />
