@@ -156,17 +156,13 @@ internal static void decodeRawAny(@string label, uint16 family, Action<Action<ni
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object wsaStartupFailedˢ = (@string)"WSAStartup failed"u8;
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);
         {
             var err = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (err != default!) {
-                fmt.Println(wsaStartupFailedˢ);
+                fmt.Println("WSAStartup failed");
                 return;
             }
         }
@@ -202,7 +198,7 @@ internal static void Main() {
         decodeRawAny("rawbad", 0xFEED, (Action<nint, byte> put) => {
         });
 
-        fmt.Println(doneˢ);
+        fmt.Println("done");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

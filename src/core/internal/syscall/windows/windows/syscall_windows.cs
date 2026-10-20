@@ -420,7 +420,9 @@ public static (@string, error) FinalPath(syscallꓸHandle h, uint32 flags) {
 // QueryPerformanceCounter retrieves the current value of performance counter.
 //
 //go:linkname QueryPerformanceCounter
-public static partial int64 QueryPerformanceCounter();
+/*linkname*/ public static partial int64 QueryPerformanceCounter() {
+    return go.runtime_package.windows_QueryPerformanceCounter();
+}
 
 // Implemented in runtime package.
 
@@ -428,7 +430,9 @@ public static partial int64 QueryPerformanceCounter();
 // The returned value is represented as counts per second.
 //
 //go:linkname QueryPerformanceFrequency
-public static partial int64 QueryPerformanceFrequency();
+/*linkname*/ public static partial int64 QueryPerformanceFrequency() {
+    return go.runtime_package.windows_QueryPerformanceFrequency();
+}
 
 // Implemented in runtime package.
 //sys   GetModuleHandle(modulename *uint16) (handle syscall.Handle, err error) = kernel32.GetModuleHandleW

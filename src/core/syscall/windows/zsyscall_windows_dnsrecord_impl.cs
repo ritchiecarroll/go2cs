@@ -180,11 +180,26 @@ partial class syscall_package
             // Freed here, always: nothing native escapes this function (see the file header).
             // DnsFreeRecordList == 1, the same value net's own `defer` passes.
             if (native != null) {
-                Syscall(procDnsRecordListFree.Addr(), 2, (uintptr)(void*)native, 1, 0);
+                try {
+                    releaseForeign(native);
+                }
+                finally {
+                    Syscall(procDnsRecordListFree.Addr(), 2, (uintptr)(void*)native, 1, 0);
+                }
             }
         }
 
         return default!;
+    }
+
+    // The producer's release (G's ruling, 2026-10-19): a store Go code made through a pointer array read from a
+    // record (a TXT record's pStringArray) is refused here by name, before dnsapi frees the record. Nothing reads these
+    // records through a foreign pointer array today -- the chain is transcribed above and freed right here -- so this
+    // keeps the seam's contract for the day one does.
+    private static unsafe void releaseForeign(NativeDnsRecord* native) {
+        for (NativeDnsRecord* record = native; record != null; record = record->Next) {
+            GoForeignMemory.Release((nuint)record, (nuint)(nativeDnsRecordDataOffset + record->Length));
+        }
     }
 
     // DnsRecordListFree releases nothing, because _DnsQuery above already did. The chain a caller

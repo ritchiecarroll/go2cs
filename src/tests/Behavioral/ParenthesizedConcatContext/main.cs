@@ -28,9 +28,6 @@ internal static (any, nint) pairConstParen() {
     return ((@string)(("t3" + "t4")), 2);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object litˢ = (@string)"lit"u8;
-
 internal static void Main() {
     @string a = "v";
 
@@ -53,7 +50,7 @@ internal static void Main() {
     fmt.Println(a + "-x");
     fmt.Println((a + "-y"));
 
-    fmt.Println(litˢ);
+    fmt.Println("lit");
     fmt.Println((@string)(("lit")));
 
     any c1 = (@string)("q1" + "q2");
@@ -72,14 +69,11 @@ internal static void Main() {
     fmt.Println(elems);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-
 internal static void @catch(Action f) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(recoveredˢ, recover());
+            fmt.Println("recovered:", recover());
         }, ref ᒐ);
         f();
     }

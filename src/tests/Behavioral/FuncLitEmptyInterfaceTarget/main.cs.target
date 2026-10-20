@@ -51,7 +51,7 @@ internal static @string call(any h) {
     case Func<nint, (any, error)> f: {
         var (@out, err) = f(5);
         var (_, negErr) = f(-1);
-        return fmt.Sprint(@out, (@string)" "u8, err, (@string)" "u8, negErr);
+        return fmt.Sprint(@out, " ", err, " ", negErr);
     }
     case Func<int64> f: {
         return fmt.Sprint(f());

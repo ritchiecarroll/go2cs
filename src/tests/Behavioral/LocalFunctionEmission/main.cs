@@ -31,14 +31,14 @@ internal static void p1() {
     nint a = parseUint("42", 0, 99);
     nint b = parseUint("7x", 1, 99);
     nint c = parseUint("98", 0, 50);
-    fmt.Println((@string)"P1:"u8, a, b, c, ok, calls);
+    fmt.Println("P1:", a, b, c, ok, calls);
 }
 
 internal static void p2() {
     nint @base = 10;
     nint add(nint a, nint b) => a + b + @base;
     @base = 20;
-    fmt.Println((@string)"P2:"u8, add(1, 2), add(3, 4));
+    fmt.Println("P2:", add(1, 2), add(3, 4));
 }
 
 internal static void p3() {
@@ -54,7 +54,7 @@ internal static void p3() {
     bump(2);
     bump(3);
     t.n++;
-    fmt.Println((@string)"P3:"u8, t.n, t.log, arr);
+    fmt.Println("P3:", t.n, t.log, arr);
 }
 
 internal static void p4() {
@@ -65,18 +65,14 @@ internal static void p4() {
     };
     next();
     var f = next;
-    fmt.Println((@string)"P4:"u8, f(), next(), c);
+    fmt.Println("P4:", f(), next(), c);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object p5aˢ = (@string)"P5a:"u8;
-private static readonly object p5bˢ = (@string)"P5b:"u8;
 
 internal static void p5() {
     var step = (nint n) => n + 1;
-    fmt.Println(p5aˢ, step(1));
+    fmt.Println("P5a:", step(1));
     step = (nint n) => n + 2;
-    fmt.Println(p5bˢ, step(1));
+    fmt.Println("P5b:", step(1));
 }
 
 internal static void p6() {
@@ -100,7 +96,7 @@ internal static void p6() {
         finally { ᒐ.Run(); }
         ᒐdone: return r;
     }
-    fmt.Println((@string)"P6:"u8, guard(3), guard(-1));
+    fmt.Println("P6:", guard(3), guard(-1));
 }
 
 internal static void p7() {
@@ -111,7 +107,7 @@ internal static void p7() {
         }
         return n * Ꮡfact.ValueSlot(n - 1);
     };
-    fmt.Println((@string)"P7:"u8, fact(5));
+    fmt.Println("P7:", fact(5));
 }
 
 internal static nint apply(Func<nint, nint> f, nint v) {
@@ -121,7 +117,7 @@ internal static nint apply(Func<nint, nint> f, nint v) {
 internal static void p8() {
     nint m = 3;
     var scale = (nint v) => v * m;
-    fmt.Println((@string)"P8:"u8, apply(scale, 5), scale(2));
+    fmt.Println("P8:", apply(scale, 5), scale(2));
 }
 
 internal static void p9() {
@@ -135,11 +131,8 @@ internal static void p9() {
     }
     nint a = outer(2);
     nint b = outer(3);
-    fmt.Println((@string)"P9:"u8, a, b, total);
+    fmt.Println("P9:", a, b, total);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object p10ˢ = (@string)"P10:"u8;
 
 internal static void p10() {
     nint pure(nint a, nint b) => a * b;
@@ -150,7 +143,7 @@ internal static void p10() {
     for (nint i = 1; i <= 3; i++) {
         acc(pure(i, i));
     }
-    fmt.Println(p10ˢ, sum);
+    fmt.Println("P10:", sum);
 }
 
 internal static void Main() {

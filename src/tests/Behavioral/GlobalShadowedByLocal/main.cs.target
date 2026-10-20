@@ -99,9 +99,6 @@ internal static partial nint constUnshadowedElsewhere() {
     return mlkemQ;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object mainFieldˢ = (@string)"main field:"u8;
-
 internal static void Main() {
     fmt.Println(constSelfInitShadow(), constNestedInitShadow(), constVarInitShadow(), constUnshadowedElsewhere());
     fmt.Println(collisionGlobalShadow());
@@ -111,7 +108,7 @@ internal static void Main() {
     fmt.Println(tupleInitShadow("a"), tupleInitShadow("z"));
 
     var bi = new buildRec(Main: "mod/a", Path: "p");
-    fmt.Println(mainFieldˢ, bi.Main, mainField(bi));
+    fmt.Println("main field:", bi.Main, mainField(bi));
 }
 
 partial struct buildRec {

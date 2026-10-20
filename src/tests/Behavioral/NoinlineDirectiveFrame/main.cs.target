@@ -32,9 +32,6 @@ internal static partial @string forward(slice<byte> b, nint i) {
     return keeper(b, i);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object bumpedˢ = (@string)"bumped"u8;
-
 internal static void Main() {
     var b = new byte[]{7, 9}.slice();
     var c = Ꮡ(new counter(nil));
@@ -51,7 +48,7 @@ internal static void Main() {
         }
     }
 
-    fmt.Println(bumpedˢ, (~c).n);
+    fmt.Println("bumped", (~c).n);
 }
 
 } // end main_package

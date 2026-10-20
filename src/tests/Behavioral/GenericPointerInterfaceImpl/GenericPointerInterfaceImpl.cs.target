@@ -120,7 +120,7 @@ internal static void Main() {
     fmt.Println(c2.Name(), c2.BaseLabel(), c2.Combined(), c2.Fresh());
 
     foreach (var (_, c) in new Curve[]{c1, c2}.slice()) {
-        fmt.Println(c.Name(), (@string)"->"u8, c.BaseLabel(), (@string)"->"u8, c.Combined(), (@string)"->"u8, c.Fresh());
+        fmt.Println(c.Name(), "->", c.BaseLabel(), "->", c.Combined(), "->", c.Fresh());
     }
 }
 

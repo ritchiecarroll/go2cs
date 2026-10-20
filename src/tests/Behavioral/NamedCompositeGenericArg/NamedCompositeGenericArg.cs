@@ -59,32 +59,24 @@ internal static nint count<T>(slice<T> items, Func<T, bool> p) {
     return n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object namedMapˢ = (@string)"named map:"u8;
-private static readonly object namedSliceˢ = (@string)"named slice:"u8;
-private static readonly object namedChanˢ = (@string)"named chan:"u8;
-private static readonly object namedFuncˢ = (@string)"named func:"u8;
-private static readonly object namedArrayˢ = (@string)"named array:"u8;
-private static readonly object controlsˢ = (@string)"controls:"u8;
-
 internal static void Main() {
     var names = new Names(new map<nint, @string>{[2] = "b", [1] = "a"});
-    fmt.Println(namedMapˢ, keys<@string>(names));
+    fmt.Println("named map:", keys<@string>(names));
 
     var scores = new Scores(new float64[]{1.5D, 2.5D}.slice());
-    fmt.Println(namedSliceˢ, total<float64>(scores));
+    fmt.Println("named slice:", total<float64>(scores));
 
     var feed = new Feed(2);
     feed.ᐸꟷ(7);
-    fmt.Println(namedChanˢ, drain<nint>(feed));
+    fmt.Println("named chan:", drain<nint>(feed));
 
     Func<nint, bool> even = (nint v) => v % 2 == 0;
-    fmt.Println(namedFuncˢ, count(new nint[]{1, 2, 4}.slice(), even));
+    fmt.Println("named func:", count(new nint[]{1, 2, 4}.slice(), even));
 
     var grid = new Grid(new nint[]{4, 5}.array());
-    fmt.Println(namedArrayˢ, first<nint>(grid));
+    fmt.Println("named array:", first<nint>(grid));
 
-    fmt.Println(controlsˢ, keys(new map<nint, @string>{[3] = "c"}), keys<@string>(names));
+    fmt.Println("controls:", keys(new map<nint, @string>{[3] = "c"}), keys<@string>(names));
 }
 
 } // end main_package

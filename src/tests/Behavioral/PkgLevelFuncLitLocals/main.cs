@@ -113,16 +113,12 @@ internal static slice<nint> inDecl() {
     return @out;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object singleˢ = (@string)"single"u8;
-private static readonly object controlˢ = (@string)"control"u8;
-
 internal static void Main() {
     foreach (var (_, e) in table) {
         fmt.Println(e.name, e.f());
     }
-    fmt.Println(singleˢ, single());
-    fmt.Println(controlˢ, inDecl());
+    fmt.Println("single", single());
+    fmt.Println("control", inDecl());
 }
 
 } // end main_package

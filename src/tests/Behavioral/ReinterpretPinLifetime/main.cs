@@ -24,29 +24,24 @@ internal static partial void churn() {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object readˢ = (@string)"read:"u8;
-private static readonly object writeˢ = (@string)"write:"u8;
-private static readonly object retainedˢ = (@string)"retained:"u8;
-
 internal static void Main() {
     var b = new slice<byte>(8);
     var h = asHdr(b);
 
     h.Value.A = 0x0201;
     churn();
-    fmt.Println(readˢ, (~h).A == 0x0201, b[0] == 1, b[1] == 2);
+    fmt.Println("read:", (~h).A == 0x0201, b[0] == 1, b[1] == 2);
 
     h.Value.B = 0x0403;
     h.Value.C = 0x0605;
     h.Value.D = 0x0807;
-    fmt.Println(writeˢ, b[2] == 3, b[3] == 4, b[4] == 5, b[5] == 6, b[6] == 7, b[7] == 8);
+    fmt.Println("write:", b[2] == 3, b[3] == 4, b[4] == 5, b[5] == 6, b[6] == 7, b[7] == 8);
 
     var r = asHdr(new slice<byte>(8));
     r.Value.A = 0x0a09;
     r.Value.D = 0x100f;
     churn();
-    fmt.Println(retainedˢ, (~r).A == 0x0a09, (~r).B == 0, (~r).C == 0, (~r).D == 0x100f);
+    fmt.Println("retained:", (~r).A == 0x0a09, (~r).B == 0, (~r).C == 0, (~r).D == 0x100f);
 }
 
 } // end main_package

@@ -763,7 +763,7 @@ func TestProvenanceNoteGuardFiresOnAPlantedStaleNote(t *testing.T) {
 	tree := provenanceNoteRealTree(t)
 	rel := "docs/ConversionStrategies.md"
 	text := livingMarkdownPages(t)[rel]
-	real := "UnsafeOperations.cs.target:91 (`var t2 = ~Ꮡt1.Reinterpret<T1, T2>();`)"
+	real := "UnsafeOperations.cs.target:87 (`var t2 = ~Ꮡt1.Reinterpret<T1, T2>();`)"
 
 	if strings.Count(text, real) != 1 {
 		t.Fatalf("the control's note is not on %s once; re-point the control at another quoted note", rel)
@@ -776,7 +776,7 @@ func TestProvenanceNoteGuardFiresOnAPlantedStaleNote(t *testing.T) {
 		t.Fatalf("the unplanted page has %d problem(s), want only its %d known-stale row(s): %v", len(p), stale, p)
 	}
 
-	planted := strings.Replace(text, real, strings.Replace(real, ":91 ", ":92 ", 1), 1)
+	planted := strings.Replace(text, real, strings.Replace(real, ":87 ", ":88 ", 1), 1)
 	_, p := provenanceNoteProblems(rel, planted, tree)
 	named := false
 
@@ -785,7 +785,7 @@ func TestProvenanceNoteGuardFiresOnAPlantedStaleNote(t *testing.T) {
 	}
 
 	if !named || len(p) != stale+1 {
-		t.Errorf("the note moved to line 92 was not named at %s:%d: %v", rel, line, p)
+		t.Errorf("the note moved to line 88 was not named at %s:%d: %v", rel, line, p)
 	}
 }
 

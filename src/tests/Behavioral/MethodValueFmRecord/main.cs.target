@@ -28,43 +28,34 @@ internal static @string nameOf(any fn) {
     return "<empty name>";
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object methodValueValueReceiverˢ = (@string)"method value, value receiver:        "u8;
-private static readonly object methodValueViaPointerˢ = (@string)"method value, via pointer, value rcv:"u8;
-private static readonly object literalCallingTheSameˢ = (@string)"literal calling the same method:     "u8;
-private static readonly object boundReceiverIsACopyˢ = (@string)"bound receiver is a copy:            "u8;
-
 internal static void Main() {
     ref var t = ref heap<T>(out var Ꮡt);
     t = new T(n: 1);
     var p = Ꮡt;
 
     var tʗ1 = t;
-    fmt.Println(methodValueValueReceiverˢ, nameOf(() => tʗ1.valueMethod()));
+    fmt.Println("method value, value receiver:        ", nameOf(() => tʗ1.valueMethod()));
     var recvʗ1 = ~p;
-    fmt.Println(methodValueViaPointerˢ, nameOf(() => recvʗ1.valueMethod()));
+    fmt.Println("method value, via pointer, value rcv:", nameOf(() => recvʗ1.valueMethod()));
 
     var literal = () => Ꮡt.Value.valueMethod();
-    fmt.Println(literalCallingTheSameˢ, nameOf((literal).OrTypedNilFunc()));
+    fmt.Println("literal calling the same method:     ", nameOf((literal).OrTypedNilFunc()));
 
     var tʗ2 = t;
     var bound = () => tʗ2.valueMethod();
     t.n = 2;
-    fmt.Println(boundReceiverIsACopyˢ, bound());
+    fmt.Println("bound receiver is a copy:            ", bound());
 
     var tʗ3 = t;
     call(() => tʗ3.walk());
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object frameˢ = (@string)"frame:                               "u8;
 
 internal static partial nint walk(this T t) {
     var pc = new slice<uintptr>(8);
     var frames = runtime.CallersFrames(pc.slice(0, runtime.Callers(1, pc)));
     while (ᐧ) {
         var (f, more) = frames.Next();
-        fmt.Println(frameˢ, f.Function);
+        fmt.Println("frame:                               ", f.Function);
         if (!more || f.Function == "main.main"u8) {
             return t.n;
         }

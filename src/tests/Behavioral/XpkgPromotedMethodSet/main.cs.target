@@ -170,19 +170,6 @@ internal static void probe(@string label, Func<@string> f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object fiveTokNˢ = (@string)"Five Tok N:"u8;
-private static readonly object s6TokNˢ = (@string)"S6 Tok N:"u8;
-private static readonly object stampValueIsJsonˢ = (@string)"Stamp value is json.Unmarshaler:"u8;
-private static readonly object stampIsJsonUnmarshalerˢ = (@string)"*Stamp is json.Unmarshaler:"u8;
-private static readonly object ptrStampValueIsJsonˢ = (@string)"PtrStamp value is json.Unmarshaler:"u8;
-private static readonly object directValueMethodByNameˢ = (@string)"Direct value MethodByName Set:"u8;
-private static readonly object ptrDirectValueˢ = (@string)"PtrDirect value MethodByName Set:"u8;
-private static readonly object brokenValueIsSyncLockerˢ = (@string)"Broken value is sync.Locker:"u8;
-private static readonly object nameVarˢ = (@string)"Name var:"u8;
-private static readonly object directAfterSetThroughˢ = (@string)"Direct after Set through *Direct:"u8;
-private static readonly object ptrDirectAfterSetThroughˢ = (@string)"PtrDirect after Set through the value:"u8;
-
 internal partial interface main_type /*dyn*/ {
     inner.Token Tok();
 }
@@ -235,7 +222,7 @@ internal static void Main() {
 
     {
         var (t, okΔ2) = f._<main_type>(ᐧ); if (okΔ2) {
-            fmt.Println(fiveTokNˢ, t.Tok().N);
+            fmt.Println("Five Tok N:", t.Tok().N);
         }
     }
 
@@ -243,25 +230,25 @@ internal static void Main() {
 
     {
         var (t, okΔ3) = s6._<main_type>(ᐧ); if (okΔ3) {
-            fmt.Println(s6TokNˢ, t.Tok().N);
+            fmt.Println("S6 Tok N:", t.Tok().N);
         }
     }
 
     var (_, ok) = ((any)new Stamp(nil))._<json.Unmarshaler>(ᐧ);
-    fmt.Println(stampValueIsJsonˢ, ok);
+    fmt.Println("Stamp value is json.Unmarshaler:", ok);
     (_, ok) = ((any)(Ꮡ(new Stamp(nil))))._<json.Unmarshaler>(ᐧ);
-    fmt.Println(stampIsJsonUnmarshalerˢ, ok);
+    fmt.Println("*Stamp is json.Unmarshaler:", ok);
     (_, ok) = ((any)new PtrStamp(nil))._<json.Unmarshaler>(ᐧ);
-    fmt.Println(ptrStampValueIsJsonˢ, ok);
+    fmt.Println("PtrStamp value is json.Unmarshaler:", ok);
     (_, ok) = reflect.TypeOf(new Direct(nil)).MethodByName("Set");
-    fmt.Println(directValueMethodByNameˢ, ok);
+    fmt.Println("Direct value MethodByName Set:", ok);
     (_, ok) = reflect.TypeOf(new PtrDirect(nil)).MethodByName("Set");
-    fmt.Println(ptrDirectValueˢ, ok);
+    fmt.Println("PtrDirect value MethodByName Set:", ok);
 
     any l = new Broken(nil);
     (_, ok) = l._<Δsync.Locker>(ᐧ);
-    fmt.Println(brokenValueIsSyncLockerˢ, ok);
-    fmt.Println(nameVarˢ, Name);
+    fmt.Println("Broken value is sync.Locker:", ok);
+    fmt.Println("Name var:", Name);
 
     probe("Where direct call", () => fmt.Sprint(new Direct(nil).Inner.Where()));
     probe("Where via assert Direct", () => fmt.Sprint(((any)new Direct(nil))._<main_typeᴛ2>().Where()));
@@ -269,11 +256,11 @@ internal static void Main() {
 
     var d = Ꮡ(new Direct(nil));
     ((any)d.OrTypedNil())._<main_typeᴛ3>().Set(4);
-    fmt.Println(directAfterSetThroughˢ, (~d).X);
+    fmt.Println("Direct after Set through *Direct:", (~d).X);
 
     var pd = new PtrDirect(Ꮡ(new inner.Inner(nil)));
     ((any)pd)._<main_typeᴛ3>().Set(6);
-    fmt.Println(ptrDirectAfterSetThroughˢ, pd.X);
+    fmt.Println("PtrDirect after Set through the value:", pd.X);
 
     probe("SameP value methods", () => methods(reflect.TypeOf(mid.NewSameP())));
     probe("SameP ptr methods", () => methods(reflect.TypeOf(Ꮡ(new mid.SameP(nil)))));

@@ -45,19 +45,6 @@ partial struct Ptr {
     public Node Node;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object uintAssertsToAnonBasicˢ = (@string)"uint asserts to anon Basic:"u8;
-private static readonly object uintAfterWriteThroughˢ = (@string)"uint after write through promoted pointer:"u8;
-private static readonly object intAfterWriteThroughˢ = (@string)"int after write through promoted pointer:"u8;
-private static readonly object typeSwitchMatchedAnonˢ = (@string)"type switch matched anon Basic, bit size:"u8;
-private static readonly object typeSwitchMatchedDefaultˢ = (@string)"type switch matched default"u8;
-private static readonly object uintValueAssertsToAnonˢ = (@string)"uint VALUE asserts to anon Basic:"u8;
-private static readonly object ptrCommonThroughEmbedˢ = (@string)"ptr Common through embed:"u8;
-private static readonly object ptrStringThroughEmbedˢ = (@string)"ptr String through embed:"u8;
-private static readonly object ptrCommonWithNilFieldˢ = (@string)"ptr Common with nil field:"u8;
-private static readonly object ptrAfterWriteThroughˢ = (@string)"ptr after write through Common:"u8;
-private static readonly object ptrFieldNodeˢ = (@string)"ptr field node:"u8;
-
 internal partial interface main_type /*dyn*/ {
     ж<Base> Basic();
 }
@@ -68,7 +55,7 @@ internal static void Main() {
     Node n = new UintжNode(u);
 
     var (basic, ok) = n._<main_type>(ᐧ);
-    fmt.Println(uintAssertsToAnonBasicˢ, ok);
+    fmt.Println("uint asserts to anon Basic:", ok);
 
     if (ok) {
         var b = basic.Basic();
@@ -76,7 +63,7 @@ internal static void Main() {
         b.Value.Label = "uint64";
     }
 
-    fmt.Println(uintAfterWriteThroughˢ, (~u).BitSize, (~u).Label, n.String());
+    fmt.Println("uint after write through promoted pointer:", (~u).BitSize, (~u).Label, n.String());
 
     var i = Ꮡ(new Int(nil));
     i.Value.Label = "int";
@@ -86,22 +73,22 @@ internal static void Main() {
             bi.Basic().Value.BitSize = 32;
         }
     }
-    fmt.Println(intAfterWriteThroughˢ, (~i).BitSize, (~i).Label);
+    fmt.Println("int after write through promoted pointer:", (~i).BitSize, (~i).Label);
 
     switch (n.type()) {
     case {} Δt when Δt._<main_type>(out var t): {
-        fmt.Println(typeSwitchMatchedAnonˢ, (~t.Basic()).BitSize);
+        fmt.Println("type switch matched anon Basic, bit size:", (~t.Basic()).BitSize);
         break;
     }
     default: {
         var t = n;
-        fmt.Println(typeSwitchMatchedDefaultˢ);
+        fmt.Println("type switch matched default");
         break;
     }}
 
     any anyValue = new Uint(nil);
     var (_, valueOK) = anyValue._<main_type>(ᐧ);
-    fmt.Println(uintValueAssertsToAnonˢ, valueOK);
+    fmt.Println("uint VALUE asserts to anon Basic:", valueOK);
 
     var inner = Ꮡ(new Uint(nil));
     inner.Value.Label = "inner";
@@ -112,19 +99,19 @@ internal static void Main() {
     p.Value.ByteSize = 4;
 
     Node np = new PtrжNode(p);
-    fmt.Println(ptrCommonThroughEmbedˢ, (~np.Common()).Label, (~np.Common()).ByteSize);
-    fmt.Println(ptrStringThroughEmbedˢ, np.String());
+    fmt.Println("ptr Common through embed:", (~np.Common()).Label, (~np.Common()).ByteSize);
+    fmt.Println("ptr String through embed:", np.String());
 
     var empty = Ꮡ(new Ptr(nil));
     empty.Value.Label = "empty";
     empty.Value.ByteSize = 2;
     Node ne = new PtrжNode(empty);
-    fmt.Println(ptrCommonWithNilFieldˢ, (~ne.Common()).Label, (~ne.Common()).ByteSize);
+    fmt.Println("ptr Common with nil field:", (~ne.Common()).Label, (~ne.Common()).ByteSize);
 
     ne.Common().Value.ByteSize = 16;
-    fmt.Println(ptrAfterWriteThroughˢ, (~empty).ByteSize);
+    fmt.Println("ptr after write through Common:", (~empty).ByteSize);
 
-    fmt.Println(ptrFieldNodeˢ, (~(~p).Node.Common()).Label, (~p).Node.String());
+    fmt.Println("ptr field node:", (~(~p).Node.Common()).Label, (~p).Node.String());
 }
 
 } // end main_package

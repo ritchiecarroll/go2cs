@@ -9,21 +9,15 @@ partial struct path {
     internal @string name;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closeˢ = (@string)"close"u8;
-
 internal static error Close(this path p) {
-    fmt.Println(closeˢ, p.name);
+    fmt.Println("close", p.name);
     return default!;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object logˢ = (@string)"log"u8;
 
 internal static void Log(this path p, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
-    fmt.Println(logˢ, p.name, args);
+    fmt.Println("log", p.name, args);
 }
 
 partial struct state {

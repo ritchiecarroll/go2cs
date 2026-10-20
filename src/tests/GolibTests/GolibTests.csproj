@@ -105,6 +105,9 @@
          syscall's windows/ folder. -->
     <Compile Remove="WindowsTokenGroupsTranscriptionTests.cs" />
     <Compile Remove="SyscallGetStartupInfoWindowsTests.cs" />
+    <!-- internal/syscall/windows.QueryPerformanceCounter/Frequency, the two pushes runtime makes into that
+         windows-EXCLUSIVE package: declared nowhere else. -->
+    <Compile Remove="WindowsQueryPerformanceCounterTests.cs" />
 
     <!-- The token door lives in syscall/windows/dll_windows.cs, so SyscallN exists only on this
          flavour. Its REFUSAL arms are host-independent (the door throws in managed code before the

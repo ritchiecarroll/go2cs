@@ -114,19 +114,6 @@ public static Animal Self(this ж<Cat> Ꮡc) {
     return new CatжAnimal(Ꮡc);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object viaPointerˢ = (@string)"via pointer:"u8;
-private static readonly object viaInterfaceˢ = (@string)"via interface:"u8;
-private static readonly object assertBackˢ = (@string)"assert-back:"u8;
-private static readonly object promotedViaPointerˢ = (@string)"promoted via pointer adapter:"u8;
-private static readonly object pickedˢ = (@string)"picked:"u8;
-private static readonly object replacedˢ = (@string)"replaced:"u8;
-private static readonly object deconstructedIntoIfaceˢ = (@string)"deconstructed into iface:"u8;
-private static readonly object madeˢ = (@string)"made:"u8;
-private static readonly object plumbedˢ = (@string)"plumbed:"u8;
-private static readonly object keywordMethodˢ = (@string)"keyword-method:"u8;
-private static readonly object anyStringˢ = (@string)"any-string:"u8;
-
 internal static void Main() {
     error err = default!;
 
@@ -143,21 +130,21 @@ internal static void Main() {
     Incrementer inc = new CounterжIncrementer(c);
     inc.Inc();
     inc.Inc();
-    fmt.Println(viaPointerˢ, c.Total());
+    fmt.Println("via pointer:", c.Total());
 
     c.Value.n = 10;
-    fmt.Println(viaInterfaceˢ, inc.Total());
+    fmt.Println("via interface:", inc.Total());
 
     var (back, ok) = inc._<ж<Counter>>(ᐧ);
     back.Inc();
-    fmt.Println(assertBackˢ, ok, c.Total(), back == c);
+    fmt.Println("assert-back:", ok, c.Total(), back == c);
 
     var r = Reversed(new Dog(nil));
-    fmt.Println(promotedViaPointerˢ, r.Speak());
+    fmt.Println("promoted via pointer adapter:", r.Speak());
 
     for (nint k = 0; k < 3; k++) {
         var (a, name) = pick(k);
-        fmt.Println(pickedˢ, name, a.Speak());
+        fmt.Println("picked:", name, a.Speak());
     }
 
     rdr rd = new strRdr(nil);
@@ -179,13 +166,13 @@ internal static void Main() {
 
     swapped = new Dog(nil);
     replaceAnimal(ref swapped);
-    fmt.Println(replacedˢ, swapped.Speak());
+    fmt.Println("replaced:", swapped.Speak());
 
     Incrementer inc2 = default!;
     var (ᴛ1, ᴛ2) = makeCounter();
     (inc2, err) = (new CounterжIncrementer(ᴛ1), ᴛ2);
     inc2.Inc();
-    fmt.Println(deconstructedIntoIfaceˢ, inc2.Total(), err == default!);
+    fmt.Println("deconstructed into iface:", inc2.Total(), err == default!);
 
     Animal makeAnimal(bool feline) {
         if (feline) {
@@ -193,19 +180,19 @@ internal static void Main() {
         }
         return new Dog(nil);
     }
-    fmt.Println(madeˢ, makeAnimal(true).Speak(), makeAnimal(false).Speak());
+    fmt.Println("made:", makeAnimal(true).Speak(), makeAnimal(false).Speak());
 
-    fmt.Println(plumbedˢ, runPlumbing());
+    fmt.Println("plumbed:", runPlumbing());
 
     speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
     fmt.Println(ss.Speak(), ss.Shut());
 
     labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id", num: 9)));
-    fmt.Println(keywordMethodˢ, lb.@string(), lb.@int());
+    fmt.Println("keyword-method:", lb.@string(), lb.@int());
 
     var av = describe(true);
     var (@as, aok) = av._<@string>(ᐧ);
-    fmt.Println(anyStringˢ, av, describe(false), @as, aok);
+    fmt.Println("any-string:", av, describe(false), @as, aok);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -26,9 +26,6 @@ public static void Log(this ж<Logger> Ꮡl, @string line) {
     finally { if (ᒐd1) Ꮡl.of(Logger.Ꮡmu).Unlock(); ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object lockRoundTripOkˢ = (@string)"lock round trip ok"u8;
-
 internal static void Main() {
     ref var l = ref heap(new Logger(), out var Ꮡl);
     Ꮡl.Log("first");
@@ -39,7 +36,7 @@ internal static void Main() {
     ref var w = ref heap(new aliaslibꓸMutexWrap(), out var Ꮡw);
     Ꮡw.Lock();
     Ꮡw.Unlock();
-    fmt.Println(lockRoundTripOkˢ);
+    fmt.Println("lock round trip ok");
 
     fmt.Println(aliaslib.Compare(1, 2), aliaslib.Compare(2, 2), aliaslib.Compare(3, 2));
 }

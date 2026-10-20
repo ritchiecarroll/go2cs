@@ -54,7 +54,7 @@ internal static void Main() {
 
     var (v, ok) = values[0]._<main_type>(ᐧ);
 
-    fmt.Println((@string)"ok"u8, ok);
+    fmt.Println("ok", ok);
 
     if (!ok) {
         return;

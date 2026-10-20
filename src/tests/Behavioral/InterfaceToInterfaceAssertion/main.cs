@@ -35,10 +35,6 @@ internal static Stringish newStringish(nint n) {
     return new widgetжStringish(Ꮡ(new widget(n)));
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object unexpectedOtherIsˢ = (@string)"unexpected: other is Marshaler"u8;
-private static readonly object otherIsNotMarshalerˢ = (@string)"other is not Marshaler"u8;
-
 internal static void Main() {
     var s = newStringish(7);
     fmt.Println(s.Str());
@@ -48,16 +44,16 @@ internal static void Main() {
 
     {
         var (m2, ok) = s._<Marshaler>(ᐧ); if (ok) {
-            fmt.Println((@string)"ok"u8, m2.Marshal());
+            fmt.Println("ok", m2.Marshal());
         }
     }
 
     Stringish s2 = new otherжStringish(Ꮡ(new other(nil)));
     {
         var (_, ok) = s2._<Marshaler>(ᐧ); if (ok){
-            fmt.Println(unexpectedOtherIsˢ);
+            fmt.Println("unexpected: other is Marshaler");
         } else {
-            fmt.Println(otherIsNotMarshalerˢ);
+            fmt.Println("other is not Marshaler");
         }
     }
 }

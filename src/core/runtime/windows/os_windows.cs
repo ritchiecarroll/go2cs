@@ -253,19 +253,9 @@ internal static uintptr windowsLoadSystemLib(slice<uint16> name) {
     return stdcall(_LoadLibraryExW, (uintptr)Ꮡ(name, 0), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
 }
 
-//go:linkname windows_QueryPerformanceCounter internal/syscall/windows.QueryPerformanceCounter
-internal static int64 windows_QueryPerformanceCounter() {
-    ref var counter = ref heap(new int64(), out var Ꮡcounter);
-    stdcall(_QueryPerformanceCounter, (uintptr)Ꮡcounter);
-    return counter;
-}
+// go2cs generated this placeholder — func windows_QueryPerformanceCounter is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-//go:linkname windows_QueryPerformanceFrequency internal/syscall/windows.QueryPerformanceFrequency
-internal static int64 windows_QueryPerformanceFrequency() {
-    ref var frequency = ref heap(new int64(), out var Ꮡfrequency);
-    stdcall(_QueryPerformanceFrequency, (uintptr)Ꮡfrequency);
-    return frequency;
-}
+// go2cs generated this placeholder — func windows_QueryPerformanceFrequency is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string bcryptprimitivesDllNotˢ = "bcryptprimitives.dll not found"u8;

@@ -44,15 +44,6 @@ internal static @string Name(this ref myFunc o) {
     return o.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object objMapˢ = (@string)"objMap:"u8;
-private static readonly object missˢ = (@string)"MISS:"u8;
-private static readonly object hitsˢ = (@string)"hits:"u8;
-private static readonly object sumˢ = (@string)"sum:"u8;
-private static readonly object missAfterReWideningˢ = (@string)"MISS after re-widening:"u8;
-private static readonly object identityLostˢ = (@string)"IDENTITY LOST:"u8;
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     var objMap = new map<Object, nint>();
     objMap[new myVarжObject(Ꮡ(new myVar("var-a")))] = 1;
@@ -69,26 +60,26 @@ internal static void Main() {
             }
         }
     }
-    fmt.Println(objMapˢ, len(objMap), (@string)"M:"u8, len(M));
+    fmt.Println("objMap:", len(objMap), "M:", len(M));
 
     nint hits = 0;
     nint sum = 0;
     foreach (var (d, _) in M) {
         var (v, ok) = objMap[d, ꟷ];
         if (!ok) {
-            fmt.Println(missˢ, d.Name());
+            fmt.Println("MISS:", d.Name());
             continue;
         }
         hits++;
         sum += v;
     }
-    fmt.Println(hitsˢ, hits, sumˢ, sum);
+    fmt.Println("hits:", hits, "sum:", sum);
 
     foreach (var (d, _) in M) {
         Object o = d;
         {
             var (_, ok) = objMap[o, ꟷ]; if (!ok) {
-                fmt.Println(missAfterReWideningˢ, d.Name());
+                fmt.Println("MISS after re-widening:", d.Name());
             }
         }
     }
@@ -99,10 +90,10 @@ internal static void Main() {
             continue;
         }
         if (!AreEqual(((Object)d), obj)) {
-            fmt.Println(identityLostˢ, obj.Name());
+            fmt.Println("IDENTITY LOST:", obj.Name());
         }
     }
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
 
 } // end main_package

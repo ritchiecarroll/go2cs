@@ -13,11 +13,8 @@ internal static nint compose(params ꓸꓸꓸHook hsʗp) {
     return len(hs);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object twoˢ = (@string)"two"u8;
-
 internal static void Main() {
-    fmt.Println(compose((nint)(1), twoˢ, 3.0D));
+    fmt.Println(compose((nint)(1), "two", 3.0D));
 }
 
 } // end main_package

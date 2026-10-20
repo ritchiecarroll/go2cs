@@ -19,16 +19,10 @@ using Δio = io_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object generateKeyErrorˢ = (@string)"generate key error:"u8;
-private static readonly object createErrorˢ = (@string)"create error:"u8;
-private static readonly object parseErrorˢ = (@string)"parse error:"u8;
-private static readonly object publicChainˢ = (@string)"public chain:"u8;
-
 internal static void Main() {
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != default!) {
-        fmt.Println(generateKeyErrorˢ, err);
+        fmt.Println("generate key error:", err);
         return;
     }
     var now = time.Now();
@@ -41,12 +35,12 @@ internal static void Main() {
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
     if (err != default!) {
-        fmt.Println(createErrorˢ, err);
+        fmt.Println("create error:", err);
         return;
     }
     (var self, err) = x509.ParseCertificate(der);
     if (err != default!) {
-        fmt.Println(parseErrorˢ, err);
+        fmt.Println("parse error:", err);
         return;
     }
     (_, err) = self.Verify(new x509.VerifyOptions(nil));
@@ -57,12 +51,12 @@ internal static void Main() {
     var (interBlock, _) = pem.Decode(slice<byte>(gtsIntermediate));
     (var leaf, err) = x509.ParseCertificate((~leafBlock).Bytes);
     if (err != default!) {
-        fmt.Println(parseErrorˢ, err);
+        fmt.Println("parse error:", err);
         return;
     }
     (var inter, err) = x509.ParseCertificate((~interBlock).Bytes);
     if (err != default!) {
-        fmt.Println(parseErrorˢ, err);
+        fmt.Println("parse error:", err);
         return;
     }
     var intermediates = x509.NewCertPool();
@@ -81,7 +75,7 @@ internal static void Main() {
         foreach (var (_, c) in chain) {
             names = append(names, (~c).Subject.CommonName);
         }
-        fmt.Println(publicChainˢ, strings.Join(names, " -> "));
+        fmt.Println("public chain:", strings.Join(names, " -> "));
     }
 }
 

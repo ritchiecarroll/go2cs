@@ -75,9 +75,6 @@ internal static void report(@string label, reflectꓸValue v) {
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object assertErrorOkFalseˢ = (@string)"  assert error ok=false"u8;
-
 internal partial struct main_si /*dyn*/ {
     public any I;
 }
@@ -151,7 +148,7 @@ internal static void Main() {
         var (e, ok) = si2._<error>(ᐧ); if (ok){
             fmt.Printf("  assert error ok=true Error()=%q\n"u8, e.Error());
         } else {
-            fmt.Println(assertErrorOkFalseˢ);
+            fmt.Println("  assert error ok=false");
         }
     }
 }

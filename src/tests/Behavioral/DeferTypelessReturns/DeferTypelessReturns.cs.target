@@ -38,11 +38,8 @@ internal static (ж<item>, error) find(slice<item> xs, nint want) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closeItˢ = (@string)"closeIt"u8;
-
 internal static error closeIt(ж<nint> Ꮡp, nint tag) {
-    fmt.Println(closeItˢ, Ꮡp == nil, tag);
+    fmt.Println("closeIt", Ꮡp == nil, tag);
     return default!;
 }
 
@@ -101,11 +98,8 @@ partial struct res {
     internal nint id;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closedˢ = (@string)"closed"u8;
-
 internal static error close(this res h) {
-    fmt.Println(closedˢ, h.id);
+    fmt.Println("closed", h.id);
     return default!;
 }
 

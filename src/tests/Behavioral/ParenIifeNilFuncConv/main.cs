@@ -14,13 +14,9 @@ internal static nint call(this handlerFunc h, @string s) {
     return h(s);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object parenIifeˢ = (@string)"paren iife"u8;
-private static readonly object bareIifeˢ = (@string)"bare iife"u8;
-
 internal static void Main() {
     ((Action)(() => {
-        fmt.Println(parenIifeˢ);
+        fmt.Println("paren iife");
     }))();
 
     nint sum = ((Func<nint, nint, nint>)((a, b) => {
@@ -29,7 +25,7 @@ internal static void Main() {
     fmt.Println(sum);
 
     ((Action)(() => {
-        fmt.Println(bareIifeˢ);
+        fmt.Println("bare iife");
     }))();
 
     nint product = ((Func<nint, nint, nint>)((a, b) => {

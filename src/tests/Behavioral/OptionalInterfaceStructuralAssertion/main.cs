@@ -32,9 +32,6 @@ internal static Describer newDescriber(@string name) {
     return new widget(name: name);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object notATaggerˢ = (@string)"not a Tagger"u8;
-
 internal static void Main() {
     var d = newDescriber("alpha");
     fmt.Println(d.Describe());
@@ -46,7 +43,7 @@ internal static void Main() {
             var (t, ok) = it._<Tagger>(ᐧ); if (ok){
                 fmt.Println(t.Describe(), t.Tag());
             } else {
-                fmt.Println(notATaggerˢ);
+                fmt.Println("not a Tagger");
             }
         }
     }

@@ -27406,4 +27406,49 @@ in the third, only the added type argument; all three compile and print the same
 
 — P1 (measured 2026-10-17)
 
+## 2026-10-19 — P2: a pointer array over memory the Go runtime did not allocate reads its words as foreign addresses; stores refuse by name — SEATED (owner P2)
+
+Go reads a Windows DNS TXT record's strings as
+`(*[1 << 10]*uint16)(unsafe.Pointer(&d.StringArray[0]))[:d.StringCount:d.StringCount]`. A pointer element carries a
+managed reference, so golib could not alias the block and built a zeroed managed SHADOW instead: the record read as
+`StringCount` nils. The shadow is right for the runtime's own OS memory, whose pointer words are Go pointers the
+runtime stored, and wrong for memory a system call filled. This row seats G's ruling (COORD 2026-10-19 02:39Z).
+
+**Ownership is registered at the OS mapping primitives** (golib `GoOsMemory`, a set of disjoint ranges). Linux
+registers in `sysMmap` and releases in `sysMunmap` (every linux `sys*OS` path funnels through them, no converter
+change); windows registers in `sysAllocOS`/`sysReserveOS` and releases in `sysFreeOS`, and its decommit
+(`sysUnusedOS`) does not unregister; darwin registers in a new hand-owned `mmap`/`munmap` pair
+(`sys_darwin_mmap_impl.cs`, `manualConversionFuncs` darwin only). A release splits the range it lands in and drops
+the shadows inside it. The repoguard census `TestOsMemoryRegistrationCensus` classifies every OS mapping primitive
+call in the runtime hand-owns per GOOS (REGISTERED, INSIDE, RELEASES, DECOMMIT) and fails on an unclassified one.
+
+**Routes.** `builtin.NativeArrayPointer` sends a `*[N]*E` over unowned memory to `NativePointerArrayBox<E>`:
+- the element door (`p.at(i)`, `ElementRef(i)`) reads word i, nil for zero, and the element's pointer answers the
+  word's own address, so Go's re-cast of `&p[0]` builds the same kind again;
+- the pointer-form slice reads words [low, max) into a managed slice (a 2- or 1-index form reads [low, high));
+- `Value` refuses by name, so an arena route that missed its registration fails loudly instead of reading Go
+  pointers as foreign words.
+
+A foreign array of any other reference-bearing element (not a pointer) refuses by name in `ShadowArrayBox`. Its
+reach: the one converter emission of `NativeArrayPointer` is mpagealloc.cs, over runtime-owned memory.
+
+**Stores refuse by name.** A C# `ref` cannot observe a store, so every value minted into an element slot or a
+slice is kept (golib `GoForeignWords`) and compared at every later access through a foreign array over the same
+word and when the producer releases the memory (`GoForeignMemory.Release`, called by the windows DNS and
+addrinfo seams before their native free). The premise is that producer memory is immutable until release.
+
+**Footprint (two-seeded `-stdlib`, 3 targets, linux host, go1.26.9).** Predicted before the run: windows 0, linux 0,
+darwin `sys_darwin.cs` about −33/+2 and `package_info.cs` −3/+1, markers 0. Measured: exactly that (the converted
+`mmap`/`munmap` and their arg structs become placeholders). HELD.
+
+**Red first.** On the arms-only commit (the new golib API, nothing routed or registered), 7 of the 8
+NativePointerArrayTests arms fail; the eighth pins the registry that commit adds.
+
+**Gates (linux).** go test ./... rc 0 (the census included); the seat's 24 golib arms green on the final tree; full GolibTests 1894 pass, 15 skipped, 1 fail of 1910: `FixtureLinkStagingTests` needs
+`GOROOT/src/go.mod`, which this host's toolchain does not have (not this seat's files). runtime compiles for linux,
+windows and darwin with 0 errors; net and syscall compile for windows. The windows arms and the full behavioral
+suite are the i9's.
+
+— P2 (measured 2026-10-19)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

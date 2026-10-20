@@ -8,9 +8,6 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object secondWriteOpsˢ = (@string)"secondWriteOps:"u8;
-
 internal partial struct secondWriteOps_readOp /*dyn*/ {
     internal nint cnt;
 }
@@ -35,16 +32,13 @@ internal static void secondWriteOps() {
         }
     }
 
-    fmt.Println(secondWriteOpsˢ, len(tests), sum);
+    fmt.Println("secondWriteOps:", len(tests), sum);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object secondAliasesˢ = (@string)"secondAliases:"u8;
 
 internal static void secondAliases() {
     var h = new secondAliases_hdr(Name: "link.txt", Size: 0);
 
-    fmt.Println(secondAliasesˢ, h, new Header(Name: "raw", Size: 7));
+    fmt.Println("secondAliases:", h, new Header(Name: "raw", Size: 7));
 }
 
 } // end main_package

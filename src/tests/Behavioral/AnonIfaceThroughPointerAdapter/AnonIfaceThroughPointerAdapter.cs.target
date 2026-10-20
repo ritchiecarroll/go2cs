@@ -20,14 +20,6 @@ partial interface speaker {
     @string Pong();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object pingOkˢ = (@string)"ping-ok"u8;
-private static readonly object pingMissedˢ = (@string)"ping-missed"u8;
-private static readonly object bothOkˢ = (@string)"both-ok"u8;
-private static readonly object bothMissedˢ = (@string)"both-missed"u8;
-private static readonly object quitMatchedWrongˢ = (@string)"quit-matched-wrong"u8;
-private static readonly object quitMissedOkˢ = (@string)"quit-missed-ok"u8;
-
 internal partial interface main_type /*dyn*/ {
     @string Ping();
 }
@@ -46,25 +38,25 @@ internal static void Main() {
 
     {
         var (p, ok) = s._<main_type>(ᐧ); if (ok){
-            fmt.Println(pingOkˢ, p.Ping());
+            fmt.Println("ping-ok", p.Ping());
         } else {
-            fmt.Println(pingMissedˢ);
+            fmt.Println("ping-missed");
         }
     }
 
     {
         var (b, ok) = s._<main_typeᴛ1>(ᐧ); if (ok){
-            fmt.Println(bothOkˢ, b.Ping(), b.Pong());
+            fmt.Println("both-ok", b.Ping(), b.Pong());
         } else {
-            fmt.Println(bothMissedˢ);
+            fmt.Println("both-missed");
         }
     }
 
     {
         var (_, ok) = s._<main_typeᴛ2>(ᐧ); if (ok){
-            fmt.Println(quitMatchedWrongˢ);
+            fmt.Println("quit-matched-wrong");
         } else {
-            fmt.Println(quitMissedOkˢ);
+            fmt.Println("quit-missed-ok");
         }
     }
 }
