@@ -333,14 +333,14 @@ public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) {
     foreach (var (_, b) in (~d).Content) {
         switch (b.type()) {
         case ж<Paragraph> bΔ1: {
-            bΔ1.Value.Text = d.parseLinkedText(((@string)((~bΔ1).Text[0]._<Plain>())));
+            bΔ1.Value.Text = d.parseLinkedText((@string)((~bΔ1).Text[0]._<Plain>()));
             break;
         }
         case ж<List> bΔ1: {
             foreach (var (_, i) in (~bΔ1).Items) {
                 foreach (var (_, c) in (~i).Content) {
                     var pΔ1 = c._<ж<Paragraph>>();
-                    pΔ1.Value.Text = d.parseLinkedText(((@string)((~pΔ1).Text[0]._<Plain>())));
+                    pΔ1.Value.Text = d.parseLinkedText((@string)((~pΔ1).Text[0]._<Plain>()));
                 }
             }
             break;
@@ -1172,7 +1172,7 @@ internal static bool isHost(byte c) {
 	1<<':' */
             maskᶜ;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL))) != 0;
 }
 
 // isPunct reports whether c is a punctuation byte that can appear
@@ -1190,7 +1190,7 @@ internal static bool isPunct(byte c) {
 	1<<'?' |
 	1<<'!' */ 10088151134830067712;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (/* mask >> 64 */ 0UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (10088151134830067712UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (/* mask >> 64 */ 0UL))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -1227,7 +1227,7 @@ internal static bool isPath(byte c) {
 	1<<'%' */
             maskᶜ1;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (2593985390075445248UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (8070450526610784255UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (2593985390075445248UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (8070450526610784255UL))) != 0;
 }
 
 // isName reports whether s is a capitalized Go identifier (like Name).
@@ -1284,7 +1284,7 @@ internal static bool isIdentASCII(byte c) {
 	1<<'_' */
             maskᶜ2;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (287948901175001088UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460745995190270UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (287948901175001088UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460745995190270UL))) != 0;
 }
 
 // validImportPath reports whether path is a valid import path.
@@ -1348,7 +1348,7 @@ internal static bool importPathOK(byte c) {
 	1<<'+' */
             maskᶜ3;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (288063250384289792UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (5188146764422578174UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (288063250384289792UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (5188146764422578174UL))) != 0;
 }
 
 } // end comment_package

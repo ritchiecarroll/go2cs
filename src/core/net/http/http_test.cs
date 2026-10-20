@@ -199,7 +199,7 @@ public static void TestNoUnicodeStrings(ж<testing.T> Ꮡt) {
             if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);
             }
-            foreach (var (lineNum, line) in strings.Split(((@string)contents), "\n"u8)) {
+            foreach (var (lineNum, line) in strings.Split((@string)contents, "\n"u8)) {
                 foreach (var (_, match) in reʗ1.FindAllStringSubmatch(line, -1)) {
                     if (!forbiddenStringsFunctions[match[2]]) {
                         continue;

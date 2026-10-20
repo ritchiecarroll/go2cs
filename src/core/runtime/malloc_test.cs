@@ -731,7 +731,7 @@ public static void TestScavengedBitsCleared(ж<testing.T> Ꮡt) {
 }
 
 partial struct acLink {
-    internal array<byte> x = new((1 << (int)(20)));
+    internal array<byte> x = new((1 << 20));
 }
 
 internal static slice<ж<acLink>> arenaCollisionSink;
@@ -756,13 +756,13 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
             // doesn't support this, so look for the
             // expected failure.
             {
-                @string want = tooManyAddressSpaceˢ; if (!strings.Contains(((@string)@out), want)) {
-                    Ꮡt.Fatalf("want %q, got:\n%s"u8, want, ((@string)@out));
+                @string want = tooManyAddressSpaceˢ; if (!strings.Contains((@string)@out, want)) {
+                    Ꮡt.Fatalf("want %q, got:\n%s"u8, want, (@string)@out);
                 }
             }
         } else 
-        if (!strings.Contains(((@string)@out), passˢ) || err != default!) {
-            Ꮡt.Fatalf("%s\n(exit status %v)"u8, ((@string)@out), err);
+        if (!strings.Contains((@string)@out, passˢ) || err != default!) {
+            Ꮡt.Fatalf("%s\n(exit status %v)"u8, (@string)@out, err);
         }
         return;
     }

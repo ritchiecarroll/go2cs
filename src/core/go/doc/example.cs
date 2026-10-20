@@ -585,7 +585,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     // Assume gofmt has been applied, so there is a blank line between adjacent imps
     // if and only if they are more than 2 positions apart (newline, tab).
     slice<ж<ast.ImportSpec>> groupStarts = default!;
-    tokenꓸPos prevEnd = ((tokenꓸPos)(-2));
+    tokenꓸPos prevEnd = (tokenꓸPos)(-2);
     foreach (var (_, imp) in imps) {
         if (imp.Pos() - prevEnd > 2) {
             groupStarts = append(groupStarts, imp);

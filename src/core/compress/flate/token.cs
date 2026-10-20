@@ -68,12 +68,12 @@ partial struct token /*num:uint32*/;
 
 // Convert a literal into a literal token.
 internal static token literalToken(uint32 literal) {
-    return ((token)((uint32)literalType + literal));
+    return (token)((uint32)literalType + literal);
 }
 
 // Convert a < xlength, xoffset > pair into a match token.
 internal static token matchToken(uint32 xlength, uint32 xoffset) {
-    return ((token)((uint32)matchType + (xlength << (int)(lengthShift)) + xoffset));
+    return (token)((uint32)matchType + (xlength << (int)(lengthShift)) + xoffset);
 }
 
 // Returns the literal of a literal token.
@@ -83,11 +83,11 @@ internal static uint32 literal(this token t) {
 
 // Returns the extra offset of a match token.
 internal static uint32 offset(this token t) {
-    return (uint32)((uint32)t & (uint32)offsetMask);
+    return (uint32)t & (uint32)offsetMask;
 }
 
 internal static uint32 length(this token t) {
-    return (uint32)(((t - (uint32)matchType) >> (int)(lengthShift)));
+    return (uint32)((t - (uint32)matchType) >> (int)(lengthShift));
 }
 
 internal static uint32 lengthCode(uint32 len) {
@@ -99,10 +99,10 @@ internal static uint32 offsetCode(uint32 off) {
     if (off < (uint32)len(offsetCodes)) {
         return offsetCodes[off];
     }
-    if ((off >> (int)(7)) < (uint32)len(offsetCodes)) {
-        return offsetCodes[(off >> (int)(7))] + 14;
+    if (off >> 7 < (uint32)len(offsetCodes)) {
+        return offsetCodes[(off >> 7)] + 14;
     }
-    return offsetCodes[(off >> (int)(14))] + 28;
+    return offsetCodes[(off >> 14)] + 28;
 }
 
 } // end flate_package

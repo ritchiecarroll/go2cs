@@ -16,9 +16,9 @@ internal static int32 lockUnlock(uint64 id) {
     try {
         while (!Ꮡlocked.CompareAndSwap(0, 1)) {
         }
-        defer(Ꮡlocked.Store, (int32)(0), ref ᒐ);
+        defer(Ꮡlocked.Store, (int32)0, ref ᒐ);
         ᏑrunGoid.Store(id);
-        defer(ᏑrunGoid.Store, (uint64)(0), ref ᒐ);
+        defer(ᏑrunGoid.Store, (uint64)0, ref ᒐ);
         return Ꮡlocked.Load();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -30,7 +30,7 @@ internal static int32 localAtomicDefer() {
     try {
         ref var n = ref heap(new atomic.Int32(), out var Ꮡn);
         Ꮡn.Store(41);
-        defer(Ꮡn.Store, (int32)(0), ref ᒐ);
+        defer(Ꮡn.Store, (int32)0, ref ᒐ);
         return Ꮡn.Load();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

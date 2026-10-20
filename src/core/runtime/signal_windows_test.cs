@@ -155,7 +155,7 @@ public static void TestVectoredHandlerDontCrashOnLibrary(ж<testing.T> Ꮡt) {
             expectedOutput = exceptionCount1ˢ2;
         }
         // cleaning output
-        @string cleanedOut = strings.ReplaceAll(((@string)@out), "\r\n"u8, "\n"u8);
+        @string cleanedOut = strings.ReplaceAll((@string)@out, "\r\n"u8, "\n"u8);
         if (cleanedOut != expectedOutput) {
             Ꮡt.Errorf("expected output %q, got %q"u8, expectedOutput, cleanedOut);
         }
@@ -372,7 +372,7 @@ public static void TestIssue59213(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("%v: %v\n%s"u8, cmdΔ1.OrTypedNil(), errΔ1, (~cmdΔ1).Stderr);
         }
-        @string outΔ1 = ((@string)bytes.TrimSpace(line));
+        @string outΔ1 = (@string)bytes.TrimSpace(line);
         Ꮡt.Logf("%v: %q"u8, cmdΔ1.OrTypedNil(), outΔ1);
         return outΔ1;
     }

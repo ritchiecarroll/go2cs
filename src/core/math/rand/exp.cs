@@ -26,7 +26,7 @@ internal static UntypedFloat re => 7.69711747013104972;
 public static float64 ExpFloat64(this ref Rand r) {
     while (ᐧ) {
         var j = r.Uint32();
-        var i = (uint32)(j & 0xFF);
+        var i = j & 0xFF;
         var x = (float64)j * (float64)we[i];
         if (j < ke[i]) {
             return x;

@@ -376,11 +376,11 @@ partial struct ipMaskTestsᴛ1 /*dyn*/ {
 internal static slice<ipMaskTestsᴛ1> ipMaskTests;
 internal static void initᴛipMaskTests() { ipMaskTests = new ipMaskTestsᴛ1[]{
     new(IPv4(192, 168, 1, 127), IPv4Mask(255, 255, 255, 128), IPv4(192, 168, 1, 0)),
-    new(IPv4(192, 168, 1, 127), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("255.255.255.192"u8))), IPv4(192, 168, 1, 64)),
-    new(IPv4(192, 168, 1, 127), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffe0"u8))), IPv4(192, 168, 1, 96)),
+    new(IPv4(192, 168, 1, 127), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("255.255.255.192"u8)), IPv4(192, 168, 1, 64)),
+    new(IPv4(192, 168, 1, 127), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffe0"u8)), IPv4(192, 168, 1, 96)),
     new(IPv4(192, 168, 1, 127), IPv4Mask(255, 0, 255, 0), IPv4(192, 0, 1, 0)),
-    new(ParseIP("2001:db8::1"u8), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8))), ParseIP("2001:d80::"u8)),
-    new(ParseIP("2001:db8::1"u8), ((global::go.net_package.IPMask)(slice<byte>)(ParseIP("f0f0:0f0f::"u8))), ParseIP("2000:d08::"u8))
+    new(ParseIP("2001:db8::1"u8), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8)), ParseIP("2001:d80::"u8)),
+    new(ParseIP("2001:db8::1"u8), (global::go.net_package.IPMask)(slice<byte>)(ParseIP("f0f0:0f0f::"u8)), ParseIP("2000:d08::"u8))
 }.slice(); }
 
 public static void TestIPMask(ж<testing.T> Ꮡt) {
@@ -400,8 +400,8 @@ partial struct ipMaskStringTestsᴛ1 /*dyn*/ {
 internal static slice<ipMaskStringTestsᴛ1> ipMaskStringTests = new ipMaskStringTestsᴛ1[]{
     new(IPv4Mask(255, 255, 255, 240), "fffffff0"u8),
     new(IPv4Mask(255, 0, 128, 0), "ff008000"u8),
-    new(((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8))), "ffffff80000000000000000000000000"u8),
-    new(((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ef00:ff80::cafe:0"u8))), "ef00ff800000000000000000cafe0000"u8),
+    new((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ffff:ff80::"u8)), "ffffff80000000000000000000000000"u8),
+    new((global::go.net_package.IPMask)(slice<byte>)(ParseIP("ef00:ff80::cafe:0"u8)), "ef00ff800000000000000000cafe0000"u8),
     new(default!, "<nil>"u8)
 }.slice();
 

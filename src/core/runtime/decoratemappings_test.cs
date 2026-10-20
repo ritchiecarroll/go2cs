@@ -61,11 +61,11 @@ public static void TestDecorateMappings(ж<testing.T> Ꮡt) {
         var (rawMaps, err) = Δos.ReadFile(procSelfMapsˢ); if (err != default!){
             Ꮡt.Fatalf("failed to read /proc/self/maps: %v"u8, err);
         } else {
-            Ꮡt.Logf("maps:%s\n"u8, ((@string)rawMaps));
+            Ꮡt.Logf("maps:%s\n"u8, (@string)rawMaps);
             var matches = Δregexp.MustCompile(anonGoˢ).FindAllSubmatch(rawMaps, -1);
             foreach (var (_, match_pair) in matches) {
                 // match_pair consists of the matching substring and the parenthesized group
-                labels = append(labels, ((@string)match_pair[1]));
+                labels = append(labels, (@string)match_pair[1]);
             }
         }
     }

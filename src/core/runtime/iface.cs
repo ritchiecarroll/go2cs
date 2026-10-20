@@ -33,7 +33,7 @@ partial struct itabTableType {
 
 internal static uintptr itabHashFunc(ref abiꓸInterfaceType inter, ref _type typ) {
     // compiler has provided some good hash codes for us.
-    return (uintptr)((uint32)(inter.Type.Hash ^ typ.Hash));
+    return (uintptr)(inter.Type.Hash ^ typ.Hash);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -542,14 +542,14 @@ internal static ж<itab> typeAssert(ж<abi.TypeAssert> Ꮡs, ж<_type> Ꮡt) {
 
     // Maybe update the cache, so the next time the generated code
     // doesn't need to call into the runtime.
-    if ((uint32)(cheaprand() & 1023) != 0) {
+    if ((cheaprand() & 1023) != 0) {
         // Only bother updating the cache ~1 in 1000 times.
         return tab;
     }
     // Load the current cache.
     var oldC = (ж<abi.TypeAssertCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.of(abi.TypeAssert.ᏑCache))));
 
-    if ((uint32)(cheaprand() & (uint32)oldC.Mask) != 0) {
+    if ((cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
         // so we can amortize the cost of building a new cache.
         return tab;
@@ -594,14 +594,14 @@ internal static ж<abi.TypeAssertCache> buildTypeAssertCache(ж<abi.TypeAssertCa
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
     void addEntry(ж<_type> typΔ1, ж<itab> tabΔ1) {
-        nint h = (nint)((nint)(~typΔ1).Hash & (newN - 1));
+        nint h = (nint)(~typΔ1).Hash & (newN - 1);
         while (ᐧ) {
             if (newEntriesʗ1[h].Typ == 0) {
                 newEntriesʗ1[h].Typ = (uintptr)typΔ1;
                 newEntriesʗ1[h].Itab = (uintptr)tabΔ1;
                 return;
             }
-            h = (nint)((h + 1) & (newN - 1));
+            h = (h + 1) & (newN - 1);
         }
     }
     foreach (var (_, e) in oldEntries) {
@@ -647,7 +647,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
 
     // Maybe update the cache, so the next time the generated code
     // doesn't need to call into the runtime.
-    if ((uint32)(cheaprand() & 1023) != 0) {
+    if ((cheaprand() & 1023) != 0) {
         // Only bother updating the cache ~1 in 1000 times.
         // This ensures we don't waste memory on switches, or
         // switch arguments, that only happen a few times.
@@ -656,7 +656,7 @@ internal static (nint, ж<itab>) interfaceSwitch(ж<abi.InterfaceSwitch> Ꮡs, �
     // Load the current cache.
     var oldC = (ж<abi.InterfaceSwitchCache>)(uintptr)(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.of(abi.InterfaceSwitch.ᏑCache))));
 
-    if ((uint32)(cheaprand() & (uint32)oldC.Mask) != 0) {
+    if ((cheaprand() & (uint32)oldC.Mask) != 0) {
         // As cache gets larger, choose to update it less often
         // so we can amortize the cost of building a new cache
         // (that cost is linear in oldc.Mask).
@@ -705,7 +705,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
     // Fill the new table.
     var newEntriesʗ1 = newEntries;
     void addEntry(ж<_type> typΔ1, nint case_Δ1, ж<itab> tabΔ1) {
-        nint h = (nint)((nint)(~typΔ1).Hash & (newN - 1));
+        nint h = (nint)(~typΔ1).Hash & (newN - 1);
         while (ᐧ) {
             if (newEntriesʗ1[h].Typ == 0) {
                 newEntriesʗ1[h].Typ = (uintptr)typΔ1;
@@ -713,7 +713,7 @@ internal static ж<abi.InterfaceSwitchCache> buildInterfaceSwitchCache(ж<abi.In
                 newEntriesʗ1[h].Itab = (uintptr)tabΔ1;
                 return;
             }
-            h = (nint)((h + 1) & (newN - 1));
+            h = (h + 1) & (newN - 1);
         }
     }
     foreach (var (_, e) in oldEntries) {

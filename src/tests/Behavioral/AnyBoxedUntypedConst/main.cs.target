@@ -32,7 +32,7 @@ internal static bool paramEq(any a, any b) {
 }
 
 internal static any retLit() {
-    return (nint)(0);
+    return (nint)0;
 }
 
 internal static any retNamed() {
@@ -82,8 +82,8 @@ internal static void Main() {
     rune r = (rune)'A';
     var f = 2.5D;
 
-    fmt.Println("var lit zero  :", variadicEq(n, (nint)(0)));
-    fmt.Println("var lit int   :", variadicEq(i, (nint)(7)));
+    fmt.Println("var lit zero  :", variadicEq(n, (nint)0));
+    fmt.Println("var lit int   :", variadicEq(i, (nint)7));
     fmt.Println("var named     :", variadicEq(i, (nint)(namedInt)));
     fmt.Println("var named+1   :", variadicEq(i + 1, (nint)(namedInt + 1)));
     fmt.Println("var lit expr  :", variadicEq(i + 1, (nint)(3 + 5)));
@@ -93,40 +93,40 @@ internal static void Main() {
     fmt.Println("var float lit :", variadicEq(f, 2.5D));
     fmt.Println("var float nmd :", variadicEq(f, (float64)(namedFloat)));
 
-    fmt.Println("par lit       :", paramEq(i, (nint)(7)));
+    fmt.Println("par lit       :", paramEq(i, (nint)7));
     fmt.Println("par named     :", paramEq(i, (nint)(namedInt)));
     fmt.Println("par rune lit  :", paramEq(r, (rune)'A'));
     fmt.Println("par float lit :", paramEq(f, 2.5D));
 
-    any av = (nint)(7);
+    any av = (nint)7;
     any ar = (rune)'A';
     any af = 2.5D;
     fmt.Println("asn lit       :", AreEqual(av, ((any)i)));
     fmt.Println("asn rune lit  :", AreEqual(ar, ((any)r)));
     fmt.Println("asn float lit :", AreEqual(af, ((any)f)));
 
-    var sl = new any[]{(nint)(7), (rune)'A', 2.5D, (nint)(namedInt)}.slice();
+    var sl = new any[]{(nint)7, (rune)'A', 2.5D, (nint)(namedInt)}.slice();
     fmt.Println("slc lit       :", AreEqual(sl[0], ((any)i)));
     fmt.Println("slc rune lit  :", AreEqual(sl[1], ((any)r)));
     fmt.Println("slc float lit :", AreEqual(sl[2], ((any)f)));
     fmt.Println("slc named     :", AreEqual(sl[3], ((any)i)));
 
-    var mk = new map<any, @string>{[(nint)(7)] = "seven", [(rune)'A'] = "letter", [2.5D] = "half"};
+    var mk = new map<any, @string>{[(nint)7] = "seven", [(rune)'A'] = "letter", [2.5D] = "half"};
     fmt.Println("mapkey lit    :", mk[((any)i)], mk[((any)r)], mk[((any)f)]);
-    fmt.Println("mapkey lookup :", mk[(nint)(7)], mk[(rune)'A'], mk[2.5D], mk[(nint)(namedInt)]);
+    fmt.Println("mapkey lookup :", mk[(nint)7], mk[(rune)'A'], mk[2.5D], mk[(nint)(namedInt)]);
     var (_, mkMiss) = mk[(int32)7, ꟷ];
     fmt.Println("mapkey miss   :", mkMiss);
 
-    var mv = new map<@string, any>{["i"] = (nint)(7), ["r"] = (rune)'A', ["f"] = 2.5D};
+    var mv = new map<@string, any>{["i"] = (nint)7, ["r"] = (rune)'A', ["f"] = 2.5D};
     fmt.Println("mapval lit    :", AreEqual(mv["i"], ((any)i)), AreEqual(mv["r"], ((any)r)), AreEqual(mv["f"], ((any)f)));
 
-    var hk = new holder(v: (nint)(7));
-    var hp = new holder((nint)(7));
+    var hk = new holder(v: (nint)7);
+    var hp = new holder((nint)7);
     fmt.Println("struct keyed  :", AreEqual(hk.v, ((any)i)));
     fmt.Println("struct posit  :", AreEqual(hp.v, ((any)i)));
 
     var ch = new channel<any>(1);
-    ch.ᐸꟷ((nint)(7));
+    ch.ᐸꟷ((nint)7);
     fmt.Println("chan send     :", AreEqual(ᐸꟷ(ch), ((any)i)));
 
     fmt.Println("ret lit       :", AreEqual(retLit(), ((any)n)));
@@ -139,11 +139,11 @@ internal static void Main() {
     fmt.Println("wide named    :", variadicEq(wide, (nint)(namedWide)));
     fmt.Println("wide kinds    :", kindOf(unchecked((nint)(1099511627776L))), kindOf((nint)(namedWide)));
 
-    fmt.Println("kinds lit     :", kindOf((nint)(0)), kindOf((rune)'A'), kindOf(2.5D));
+    fmt.Println("kinds lit     :", kindOf((nint)0), kindOf((rune)'A'), kindOf(2.5D));
     fmt.Println("kinds named   :", kindOf((nint)(namedInt)), kindOf((int32)(namedRune)), kindOf((float64)(namedFloat)));
     fmt.Println("kinds value   :", kindOf(i), kindOf(r), kindOf(f));
 
-    var (iv, iok) = ((any)(nint)(7))._<nint>(ᐧ);
+    var (iv, iok) = ((any)(nint)7)._<nint>(ᐧ);
     var (rv, rok) = ((any)(rune)'A')._<int32>(ᐧ);
     var (fv, fok) = ((any)2.5D)._<float64>(ᐧ);
     fmt.Println("assert lit    :", iv, iok, rv, rok, fv, fok);

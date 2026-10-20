@@ -371,7 +371,7 @@ public static CounterFlavor CtrRaw => /* iota + 1 */ 1;
 public static CounterFlavor CtrULeb128 => 2;
 
 public static nint Round4(nint x) {
-    return (nint)((x + 3) & ~(nint)3);
+    return (x + 3) & ~(nint)3;
 }
 
 //.....................................................................

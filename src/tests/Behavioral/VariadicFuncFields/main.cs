@@ -61,7 +61,7 @@ internal static void Main() {
     };
     fmt.Println(ctxt.JoinPath("p", "q"));
 
-    ctxt.Log("%s:%d", ctxt.Name, (nint)(3));
+    ctxt.Log("%s:%d", ctxt.Name, (nint)3);
     ctxt.Log("done");
 }
 

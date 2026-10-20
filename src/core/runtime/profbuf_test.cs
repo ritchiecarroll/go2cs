@@ -320,7 +320,7 @@ internal static partial void awaitBlockedGoroutine(@string state, @string fName)
     @string re = fmt.Sprintf(@"(?m)^goroutine \d+ \[%s.*\]:\n(?:.+\n\t.+\n)*runtime_test\.%s"u8, Δregexp.QuoteMeta(state), fName);
     var r = Δregexp.MustCompile(re);
 
-    var buf = new slice<byte>((64 << (int)(10)));
+    var buf = new slice<byte>((64 << 10));
     while (ᐧ) {
         Gosched();
         nint n = Stack(buf, true);

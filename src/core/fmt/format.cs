@@ -166,7 +166,7 @@ internal static void fmtUnicode(this ref fmt f, uint64 u) {
     // Format the Unicode code point u as a hexadecimal number.
     while (u >= 16) {
         i--;
-        buf[i] = udigits[(uint64)(u & 0xF)];
+        buf[i] = udigits[(u & 0xF)];
         prec--;
         u >>= (int)(4);
     }
@@ -251,7 +251,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     case 16: {
         while (u >= 16) {
             i--;
-            buf[i] = digits[(uint64)(u & 0xF)];
+            buf[i] = digits[(u & 0xF)];
             u >>= (int)(4);
         }
         break;
@@ -259,7 +259,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     case 8: {
         while (u >= 8) {
             i--;
-            buf[i] = (byte)((rune)'0' + (uint64)(u & 7));
+            buf[i] = (byte)((rune)'0' + (u & 7));
             u >>= (int)(3);
         }
         break;
@@ -267,7 +267,7 @@ internal static void fmtInteger(this ref fmt f, uint64 u, nint @base, bool isSig
     case 2: {
         while (u >= 2) {
             i--;
-            buf[i] = (byte)((rune)'0' + (uint64)(u & 1));
+            buf[i] = (byte)((rune)'0' + (u & 1));
             u >>= (int)(1);
         }
         break;
@@ -438,7 +438,7 @@ internal static void fmtSbx(this ref fmt f, sstring s, slice<byte> b, sstring di
             c = s[i]; // Take a byte from the input string.
         }
         // Encode each byte as two hexadecimal digits.
-        buf = append(buf, digits[(c >> (int)(4))], digits[(byte)(c & 0xF)]);
+        buf = append(buf, digits[(c >> 4)], digits[(byte)(c & 0xF)]);
     }
     f.buf.ValueSlot = buf;
     // Handle padding to the right.

@@ -165,8 +165,8 @@ public static void TestLink1(ж<testing.T> Ꮡt) {
 
 public static void TestLink2(ж<testing.T> Ꮡt) {
     ж<global::go.container.ring_package.Ring> r0 = default!;
-    var r1a = Ꮡ(new Ring(Value: (nint)(42)));
-    var r1b = Ꮡ(new Ring(Value: (nint)(77)));
+    var r1a = Ꮡ(new Ring(Value: (nint)42));
+    var r1b = Ꮡ(new Ring(Value: (nint)77));
     var r10 = makeN(10);
 
     r1a.Link(r0);

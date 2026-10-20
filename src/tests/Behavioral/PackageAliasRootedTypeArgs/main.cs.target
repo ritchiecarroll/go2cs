@@ -80,7 +80,7 @@ internal static void Main() {
     nested l = new nested{["z"] = new Header[]{new(Name: "q", Size: 2)}.slice()};
     hmap m = new hmap{["z"] = new(Name: "hm", Size: 3)};
     u8s n = new uint8[]{7, 8}.slice();
-    ifs o = new any[]{(nint)(1), (@string)"two"u8}.slice();
+    ifs o = new any[]{(nint)1, (@string)"two"u8}.slice();
     direct p = new direct(Name: "dir", Size: 4);
     aliasOfAlias q = new Header[]{new(Name: "aoa", Size: 5)}.slice();
     anon r = new anon(A: 9);

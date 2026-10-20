@@ -78,18 +78,18 @@ internal static @string fromChan(channel<any> ch) {
 }
 
 internal static void Main() {
-    fmt.Println(classify((nint)(7)));
+    fmt.Println(classify((nint)7));
     fmt.Println(classify("hi"));
     fmt.Println(classify(true));
     fmt.Println(classify(2.5D));
     fmt.Println("calls:", calls);
 
     fmt.Println(recovered("boom"));
-    fmt.Println(recovered((nint)(9)));
+    fmt.Println(recovered((nint)9));
     fmt.Println(recovered(1.25D));
 
     var ch = new channel<any>(1);
-    ch.ᐸꟷ((nint)(5));
+    ch.ᐸꟷ((nint)5);
     fmt.Println(fromChan(ch));
     @string msg = "text";
     ch.ᐸꟷ(msg);

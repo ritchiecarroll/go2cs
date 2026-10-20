@@ -69,26 +69,26 @@ internal static ж<Element> reduce(this ж<Element> Ꮡv) {
 
     // If v >= 2^255 - 19, then v + 19 >= 2^255, which would overflow 2^255 - 1,
     // generating a carry. That is, c will be 0 if v < 2^255 - 19, and 1 otherwise.
-    var c = ((v.l0 + 19) >> (int)(51));
-    c = ((v.l1 + c) >> (int)(51));
-    c = ((v.l2 + c) >> (int)(51));
-    c = ((v.l3 + c) >> (int)(51));
-    c = ((v.l4 + c) >> (int)(51));
+    var c = (v.l0 + 19) >> 51;
+    c = (v.l1 + c) >> 51;
+    c = (v.l2 + c) >> 51;
+    c = (v.l3 + c) >> 51;
+    c = (v.l4 + c) >> 51;
 
     // If v < 2^255 - 19 and c = 0, this will be a no-op. Otherwise, it's
     // effectively applying the reduction identity to the carry.
     v.l0 += 19 * c;
 
-    v.l1 += (v.l0 >> (int)(51));
-    v.l0 = (uint64)(v.l0 & maskLow51Bits);
-    v.l2 += (v.l1 >> (int)(51));
-    v.l1 = (uint64)(v.l1 & maskLow51Bits);
-    v.l3 += (v.l2 >> (int)(51));
-    v.l2 = (uint64)(v.l2 & maskLow51Bits);
-    v.l4 += (v.l3 >> (int)(51));
-    v.l3 = (uint64)(v.l3 & maskLow51Bits);
+    v.l1 += (v.l0 >> 51);
+    v.l0 = v.l0 & maskLow51Bits;
+    v.l2 += (v.l1 >> 51);
+    v.l1 = v.l1 & maskLow51Bits;
+    v.l3 += (v.l2 >> 51);
+    v.l2 = v.l2 & maskLow51Bits;
+    v.l4 += (v.l3 >> 51);
+    v.l3 = v.l3 & maskLow51Bits;
     // no additional carry
-    v.l4 = (uint64)(v.l4 & maskLow51Bits);
+    v.l4 = v.l4 & maskLow51Bits;
 
     return Ꮡv;
 }
@@ -234,17 +234,17 @@ public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x
     v.l0 = byteorder.LEUint64(x[0..8]);
     v.l0 &= (uint64)(maskLow51Bits);
     // Bits 51:102 (bytes 6:14, bits 48:112, shift 3, mask 51).
-    v.l1 = (byteorder.LEUint64(x[6..14]) >> (int)(3));
+    v.l1 = byteorder.LEUint64(x[6..14]) >> 3;
     v.l1 &= (uint64)(maskLow51Bits);
     // Bits 102:153 (bytes 12:20, bits 96:160, shift 6, mask 51).
-    v.l2 = (byteorder.LEUint64(x[12..20]) >> (int)(6));
+    v.l2 = byteorder.LEUint64(x[12..20]) >> 6;
     v.l2 &= (uint64)(maskLow51Bits);
     // Bits 153:204 (bytes 19:27, bits 152:216, shift 1, mask 51).
-    v.l3 = (byteorder.LEUint64(x[19..27]) >> (int)(1));
+    v.l3 = byteorder.LEUint64(x[19..27]) >> 1;
     v.l3 &= (uint64)(maskLow51Bits);
     // Bits 204:255 (bytes 24:32, bits 192:256, shift 12, mask 51).
     // Note: not bytes 25:33, shift 4, to avoid overread.
-    v.l4 = (byteorder.LEUint64(x[24..32]) >> (int)(12));
+    v.l4 = byteorder.LEUint64(x[24..32]) >> 12;
     v.l4 &= (uint64)(maskLow51Bits);
 
     return (Ꮡv, default!);
@@ -272,10 +272,10 @@ internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> �
     //   ├───u3───┼───u2───┼───u1───┼───u0───┤
     // 256      192      128       64        0
 
-    var u0 = (uint64)((t.l1 << (int)(51)) | t.l0);
-    var u1 = (uint64)((t.l2 << (int)((102 - 64))) | (t.l1 >> (int)((64 - 51))));
-    var u2 = (uint64)((t.l3 << (int)((153 - 128))) | (t.l2 >> (int)((128 - 102))));
-    var u3 = (uint64)((t.l4 << (int)((204 - 192))) | (t.l3 >> (int)((192 - 153))));
+    var u0 = t.l1 << 51 | t.l0;
+    var u1 = t.l2 << (int)((102 - 64)) | t.l1 >> (int)((64 - 51));
+    var u2 = t.l3 << (int)((153 - 128)) | t.l2 >> (int)((128 - 102));
+    var u3 = t.l4 << (int)((204 - 192)) | t.l3 >> (int)((192 - 153));
 
     byteorder.LEPutUint64(@out[(int)(0 * 8)..], u0);
     byteorder.LEPutUint64(@out[(int)(1 * 8)..], u1);
@@ -305,11 +305,11 @@ public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Ele
     ref var b = ref Ꮡb.DerefOrNull();
 
     var m = mask64Bits(cond);
-    v.l0 = (uint64)(((uint64)(m & a.l0)) | ((uint64)(~m & b.l0)));
-    v.l1 = (uint64)(((uint64)(m & a.l1)) | ((uint64)(~m & b.l1)));
-    v.l2 = (uint64)(((uint64)(m & a.l2)) | ((uint64)(~m & b.l2)));
-    v.l3 = (uint64)(((uint64)(m & a.l3)) | ((uint64)(~m & b.l3)));
-    v.l4 = (uint64)(((uint64)(m & a.l4)) | ((uint64)(~m & b.l4)));
+    v.l0 = (m & a.l0) | (~m & b.l0);
+    v.l1 = (m & a.l1) | (~m & b.l1);
+    v.l2 = (m & a.l2) | (~m & b.l2);
+    v.l3 = (m & a.l3) | (~m & b.l3);
+    v.l4 = (m & a.l4) | (~m & b.l4);
     return Ꮡv;
 }
 
@@ -318,19 +318,19 @@ public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var m = mask64Bits(cond);
-    var t = (uint64)(m & ((uint64)(v.l0 ^ u.l0)));
+    var t = m & (v.l0 ^ u.l0);
     v.l0 ^= (uint64)(t);
     u.l0 ^= (uint64)(t);
-    t = (uint64)(m & ((uint64)(v.l1 ^ u.l1)));
+    t = m & (v.l1 ^ u.l1);
     v.l1 ^= (uint64)(t);
     u.l1 ^= (uint64)(t);
-    t = (uint64)(m & ((uint64)(v.l2 ^ u.l2)));
+    t = m & (v.l2 ^ u.l2);
     v.l2 ^= (uint64)(t);
     u.l2 ^= (uint64)(t);
-    t = (uint64)(m & ((uint64)(v.l3 ^ u.l3)));
+    t = m & (v.l3 ^ u.l3);
     v.l3 ^= (uint64)(t);
     u.l3 ^= (uint64)(t);
-    t = (uint64)(m & ((uint64)(v.l4 ^ u.l4)));
+    t = m & (v.l4 ^ u.l4);
     v.l4 ^= (uint64)(t);
     u.l4 ^= (uint64)(t);
 }
@@ -385,8 +385,8 @@ internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
     uint64 hi = default!;
 
     var (mh, ml) = bits.Mul64(a, (uint64)b);
-    lo = (uint64)(ml & maskLow51Bits);
-    hi = (uint64)(((mh << (int)(13))) | ((ml >> (int)(51))));
+    lo = ml & maskLow51Bits;
+    hi = (mh << 13) | (ml >> 51);
     return (lo, hi);
 }
 
@@ -470,10 +470,10 @@ public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, �
 
     var rPrime = @new<Element>().Multiply(rr, sqrtM1); // r_prime = SQRT_M1 * r
     // r = CT_SELECT(r_prime IF flipped_sign_sqrt | flipped_sign_sqrt_i ELSE r)
-    rr.Select(rPrime, rr, (nint)(flippedSignSqrt | flippedSignSqrtI));
+    rr.Select(rPrime, rr, flippedSignSqrt | flippedSignSqrtI);
 
     Ꮡr.Absolute(rr); // Choose the nonnegative square root.
-    return (Ꮡr, (nint)(correctSignSqrt | flippedSignSqrt));
+    return (Ꮡr, correctSignSqrt | flippedSignSqrt);
 }
 
 } // end field_package

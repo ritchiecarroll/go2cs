@@ -61,9 +61,9 @@ public static void ExampleEncode() {
     for (nint y = 0; y < height; y++) {
         for (nint x = 0; x < width; x++) {
             img.Set(x, y, new color.NRGBA(
-                R: (uint8)((nint)((x + y) & 255)),
-                G: (uint8)((nint)(((x + y) << (int)(1)) & 255)),
-                B: (uint8)((nint)(((x + y) << (int)(2)) & 255)),
+                R: (uint8)((x + y) & 255),
+                G: (uint8)((x + y) << 1 & 255),
+                B: (uint8)((x + y) << 2 & 255),
                 A: 255
             ));
         }

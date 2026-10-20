@@ -129,7 +129,7 @@ internal static void x25519ScalarMult(slice<byte> dst, slice<byte> scalar, slice
 
     nint swap = 0;
     for (nint pos = 254; pos >= 0; pos--) {
-        var b = (byte)(e[pos / 8].Rsh((nuint)((nint)(pos & 7))));
+        var b = (byte)(e[pos / 8].Rsh((nuint)(pos & 7)));
         b &= (byte)(1);
         swap ^= (nint)((nint)b);
         x2.Swap(Ꮡx3, swap);

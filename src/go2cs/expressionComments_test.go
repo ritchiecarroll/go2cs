@@ -107,7 +107,7 @@ func TestOperandCommentsAtTheirGoPosition(t *testing.T) {
 	for _, c := range []struct{ trailing, next string }{
 		{"len(s) > 4 || // header", "len(s) > 2 ||"},
 		{"len(s) > 2 || // session", "len(s) > 1)"},
-		{"| // two", "(1 << (int)(3))"},
+		{"| // two", "(1 << 3)"},
 	} {
 		at := lineContaining(t, lines, c.trailing)
 

@@ -449,7 +449,7 @@ internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, i
         }
 
         if (expectNewPart) {
-            return (default!, fmt.Errorf("multipart: expecting a new Part; got line %q"u8, ((@string)line)));
+            return (default!, fmt.Errorf("multipart: expecting a new Part; got line %q"u8, (@string)line));
         }
 
         if (r.partsRead == 0) {

@@ -508,7 +508,7 @@ Found:
     r.Multistream(false);
     var (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
     if (((sstring)data) != hello || err != default!) {
-        Ꮡt.Fatalf("first stream = %q, %v, want %q, %v"u8, ((@string)data), err, hello, (any)(default!));
+        Ꮡt.Fatalf("first stream = %q, %v, want %q, %v"u8, (@string)data, err, hello, (any)(default!));
     }
 
     {
@@ -519,7 +519,7 @@ Found:
     r.Multistream(false);
     (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
     if (((sstring)data) != hello || err != default!) {
-        Ꮡt.Fatalf("second stream = %q, %v, want %q, %v"u8, ((@string)data), err, hello, (any)(default!));
+        Ꮡt.Fatalf("second stream = %q, %v, want %q, %v"u8, (@string)data, err, hello, (any)(default!));
     }
 
     {
@@ -566,7 +566,7 @@ public static void TestTruncatedStreams(ж<testing.T> Ꮡt) {
     // Intentionally iterate starting with at least one byte in the stream.
     foreach (var (_, tc) in cases) {
         for (nint i = 1; i < len(tc.data); i++) {
-            var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader(((@string)(tc.data.slice(0, i))))));
+            var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader((@string)(tc.data.slice(0, i)))));
             if (err != default!) {
                 if (!AreEqual(err, io.ErrUnexpectedEOF)) {
                     Ꮡt.Errorf("NewReader(%s-%d) on truncated stream: got %v, want %v"u8, tc.name, i, err, io.ErrUnexpectedEOF);

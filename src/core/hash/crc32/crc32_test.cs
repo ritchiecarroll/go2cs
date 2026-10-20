@@ -346,7 +346,7 @@ public static void BenchmarkCRC32(ж<testing.B> Ꮡb) {
 
 internal static Action<ж<testing.B>> benchmarkAll(hash.Hash32 h) {
     return (ж<testing.B> b) => {
-        foreach (var (_, size) in new nint[]{15, 40, 512, (1 << (int)(10)), (4 << (int)(10)), (32 << (int)(10))}.slice()) {
+        foreach (var (_, size) in new nint[]{15, 40, 512, 1 << 10, 4 << 10, 32 << 10}.slice()) {
             @string name = fmt.Sprint(size);
             if (size >= 1024) {
                 name = fmt.Sprintf("%dkB"u8, size / 1024);

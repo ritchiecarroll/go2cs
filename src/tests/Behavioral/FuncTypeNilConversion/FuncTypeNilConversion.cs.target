@@ -37,9 +37,9 @@ internal static void Main() {
     fmt.Println("B5 conversion of a real func:", h(1, 2, 3));
 
     fmt.Println("C1 one nil arg:", countArgs("x", (any)(default!)));
-    fmt.Println("C2 nil among others:", countArgs("x", (nint)(1), (any)(default!), "y"));
+    fmt.Println("C2 nil among others:", countArgs("x", (nint)1, (any)(default!), "y"));
     fmt.Println("C3 no variadic args:", countArgs("x"));
-    fmt.Println("C4 spread:", countArgs("x"u8, new any[]{(nint)(1), default!, (nint)(3)}.slice().ꓸꓸꓸ));
+    fmt.Println("C4 spread:", countArgs("x"u8, new any[]{(nint)1, default!, (nint)3}.slice().ꓸꓸꓸ));
     fmt.Println("C5 typed nil slice arg:", countPtrs((ж<Point>)(nil), (ж<Point>)(nil)));
     fmt.Println("C6 sum:", sum(4, 5, 6));
 }

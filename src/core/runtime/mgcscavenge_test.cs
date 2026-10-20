@@ -49,7 +49,7 @@ public static void TestFillAligned(ж<testing.T> Ꮡt) {
         var @out = (uint64)0;
         for (nuint i = (nuint)0; i < 64; i += m) {
             for (nuint j = (nuint)0; j < m; j++) {
-                if ((uint64)(x & (((uint64)1).Lsh((i + j)))) != 0) {
+                if ((x & (((uint64)1).Lsh((i + j)))) != 0) {
                     @out |= (uint64)(((((uint64)1).Lsh(m)) - 1).Lsh(i));
                     break;
                 }
@@ -105,7 +105,7 @@ public static void TestFillAligned(ж<testing.T> Ꮡt) {
                     // * Leave them as zero.
                     // * Set them randomly.
                     if (rand.Uint64() % 2 == 0) {
-                        val |= (uint64)(((uint64)(rand.Uint64() & ((((uint64)1).Lsh(m)) - 1))).Lsh(n));
+                        val |= (uint64)((rand.Uint64() & ((((uint64)1).Lsh(m)) - 1)).Lsh(n));
                     }
                 }
                 check(val, m);
@@ -513,7 +513,7 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
 
     // Set up a bunch of state that we're going to track and verify
     // throughout the test.
-    var totalWork = (uint64)(((uintptr)64 << (int)(20)) - 3 * runtime_internal_test_package.PhysPageSize);
+    var totalWork = (uint64)(((uintptr)64 << 20) - 3 * runtime_internal_test_package.PhysPageSize);
     ref var totalSlept = ref heap(new atomic.Int64(), out var ᏑtotalSlept);
     ref var totalWorked = ref heap(new atomic.Int64(), out var ᏑtotalWorked);
     ref var availableWork = ref heap(new atomic.Uint64(), out var ᏑavailableWork);
@@ -603,7 +603,7 @@ public static void TestScavenger(ж<testing.T> Ꮡt) {
     // which is OK. If this breaks often or gets annoying to maintain, modify
     // verifyScavengerState.
     ᏑavailableWork.Store(totalWork);
-    var stoppingPoint = (uint64)(((uintptr)1 << (int)(20)) - 3 * runtime_internal_test_package.PhysPageSize);
+    var stoppingPoint = (uint64)(((uintptr)1 << 20) - 3 * runtime_internal_test_package.PhysPageSize);
     ᏑstopAt.Store(stoppingPoint);
     Ꮡs.Wake();
     if (!Ꮡs.BlockUntilParked(2000000000 /* 2 seconds */)) {

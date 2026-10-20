@@ -11,7 +11,7 @@ partial struct point {
 }
 
 internal static void Main() {
-    any data = new Map(new map<@string, any>{["a"] = (nint)(1)});
+    any data = new Map(new map<@string, any>{["a"] = (nint)1});
 
     {
         var (mΔ1, okΔ1) = data._<Map>(ᐧ); if (okΔ1) {
@@ -22,7 +22,7 @@ internal static void Main() {
     var m = data._<Map>();
     fmt.Println("single:", m["a"]);
 
-    any other = (nint)(5);
+    any other = (nint)5;
     var (_, ok) = other._<Map>(ᐧ);
     fmt.Println("mismatch:", ok);
 

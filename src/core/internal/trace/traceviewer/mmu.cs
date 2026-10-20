@@ -163,7 +163,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         }
     }
     {
-        var maxMax = ((time.Duration)(maxEvent - minEvent)); if (xMax > maxMax) {
+        var maxMax = (time.Duration)(maxEvent - minEvent); if (xMax > maxMax) {
             xMax = maxMax;
         }
     }
@@ -172,7 +172,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     UntypedInt samples = 100;
     var plot = new slice<slice<float64>>(samples);
     for (nint i = 0; i < samples; i++) {
-        var window = ((time.Duration)(int64)math.Exp((float64)i / /* (samples - 1) */ 99D * (logMax - logMin) + logMin));
+        var window = (time.Duration)(int64)math.Exp((float64)i / /* (samples - 1) */ 99D * (logMax - logMin) + logMin);
         if (quantiles == default!){
             plot[i] = new slice<float64>(2);
             plot[i][1] = mmuCurve.MMU(window);
@@ -407,12 +407,12 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
         http.Error(w, fmt.Sprintf("failed to parse window parameter %q: %v"u8, windowStr, err), http.StatusBadRequest);
         return;
     }
-    var worst = mmuCurve.Examples(((time.Duration)(int64)window), 10);
+    var worst = mmuCurve.Examples((time.Duration)(int64)window, 10);
 
     // Construct a link for each window.
     slice<linkedUtilWindow> links = default!;
     foreach (var (_, ui) in worst) {
-        links = append(links, m.newLinkedUtilWindow(ui, ((time.Duration)(int64)window)));
+        links = append(links, m.newLinkedUtilWindow(ui, (time.Duration)(int64)window));
     }
 
     err = json.NewEncoder(new http_ResponseWriterᴠWriter(w)).Encode(links);

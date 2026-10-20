@@ -51,7 +51,7 @@ internal static @string describe(@string format, params ꓸꓸꓸany argsʗp) {
 internal static slice<nint> into(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.slice();
 
-    return append(xs, (nint)(4));
+    return append(xs, (nint)4);
 }
 
 internal static nint copyInto(params ꓸꓸꓸnint xsʗp) {
@@ -99,7 +99,7 @@ internal static void Main() {
     nint n = fill(d, 8, 9, 10);
     fmt.Println("fill:", n, d);
 
-    fmt.Println("describe:", describe("%d-%s-%v", (nint)(1), "two", 3.5D));
+    fmt.Println("describe:", describe("%d-%s-%v", (nint)1, "two", 3.5D));
 
     fmt.Println("into:", into(1, 2));
     fmt.Println("copyInto:", copyInto(1, 2, 3));

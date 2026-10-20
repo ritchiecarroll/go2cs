@@ -14,7 +14,7 @@ internal static nint compose(params ꓸꓸꓸHook hsʗp) {
 }
 
 internal static void Main() {
-    fmt.Println(compose((nint)(1), "two", 3.0D));
+    fmt.Println(compose((nint)1, "two", 3.0D));
 }
 
 } // end main_package

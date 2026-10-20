@@ -407,7 +407,7 @@ break_NextChar:;
         }
     }
 
-    mailbox.local = ((@string)localPartBytes);
+    mailbox.local = (@string)localPartBytes;
     mailbox.domain = @in;
     return (mailbox, true);
 }
@@ -976,7 +976,7 @@ internal static @string toLowerCaseASCII(@string @in) {
             @out[i] += (byte)((rune)'a' - (rune)'A');
         }
     }
-    return ((@string)@out);
+    return (@string)@out;
 }
 
 // VerifyHostname returns nil if c is a valid certificate for the named host.
@@ -1195,7 +1195,7 @@ internal static void deleteLeaf(this ref policyGraph pg, ΔOID policy) {
     foreach (var (c, _) in (~n).children) {
         delete((~c).parents, n);
     }
-    delete(pg.strata[pg.depth], ((@string)policy.der));
+    delete(pg.strata[pg.depth], (@string)policy.der);
 }
 
 internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) {
@@ -1225,7 +1225,7 @@ internal static void prune(this ref policyGraph pg) {
                 foreach (var (p, _) in (~n).parents) {
                     delete((~p).children, n);
                 }
-                delete(pg.strata[i], ((@string)(~n).validPolicy.der));
+                delete(pg.strata[i], (@string)(~n).validPolicy.der);
             }
         }
     }

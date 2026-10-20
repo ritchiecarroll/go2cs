@@ -25,7 +25,7 @@ internal static (int64 written, bool handled, error err) writeTo(this Ð¶<File> á
 
     var (pfd, network) = getPollFDAndNetwork(w);
     // TODO(panjf2000): same as File.spliceToFile.
-    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP(((@string)network))) {
+    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP((@string)network)) {
         return (written, handled, err);
     }
 

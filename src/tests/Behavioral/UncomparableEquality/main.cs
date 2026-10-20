@@ -199,9 +199,9 @@ internal static void Main() {
         _ = AreEqual(wa2ʗ1, wa2ʗ1);
     });
 
-    any wc1 = new withAny(1, (nint)(5));
-    any wc2 = new withAny(1, (nint)(5));
-    any wc3 = new withAny(1, (nint)(6));
+    any wc1 = new withAny(1, (nint)5);
+    any wc2 = new withAny(1, (nint)5);
+    any wc3 = new withAny(1, (nint)6);
     fmt.Println("struct w/ any=int:", AreEqual(wc1, wc2), AreEqual(wc1, wc3));
 
     fmt.Println();
@@ -251,7 +251,7 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("== differing dynamic types never panic ==");
 
-    any i = (nint)(5);
+    any i = (nint)5;
     var iʗ1 = i;
     var mʗ4 = m;
     check("map == int", () => {
@@ -271,9 +271,9 @@ internal static void Main() {
     fmt.Println();
     fmt.Println("== comparable values still compare ==");
 
-    any i1 = (nint)(5);
-    any i2 = (nint)(5);
-    any i3 = (nint)(6);
+    any i1 = (nint)5;
+    any i2 = (nint)5;
+    any i3 = (nint)6;
     fmt.Println("int:      ", AreEqual(i1, i2), AreEqual(i1, i3));
 
     any s1 = (@string)"hi"u8;
@@ -320,8 +320,8 @@ internal static void Main() {
     any c3 = ch2;
     fmt.Println("chan:     ", AreEqual(c1, c2), AreEqual(c1, c3));
 
-    any e1 = ((any)(nint)(7));
-    any e2 = ((any)(nint)(7));
+    any e1 = ((any)(nint)7);
+    any e2 = ((any)(nint)7);
     fmt.Println("iface:    ", AreEqual(e1, e2));
     any nc1 = new main_nestedComparable(new point(1, 2), new nint[]{3, 4}.array());
     any nc2 = new main_nestedComparable(new point(1, 2), new nint[]{3, 4}.array());

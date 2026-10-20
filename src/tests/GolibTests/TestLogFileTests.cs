@@ -64,8 +64,15 @@ public class TestLogFileTests
         string path = Path.Combine(Path.GetTempPath(), "go2cs-no-such-dir-" + Guid.NewGuid().ToString("N"), "testlog.txt");
         string? message = (string?)open.Invoke(null, BindingFlags.DoNotWrapExceptions, null, [path, true], null);
 
-        // Go on windows: fmt.Fprintf(os.Stderr, "testing: %s\n", err) with err os.Create's *PathError.
-        Assert.AreEqual($"testing: open {path}: The system cannot find the path specified.\n", message);
+        // Go: fmt.Fprintf(os.Stderr, "testing: %s\n", err) with err os.Create's *PathError, whose errno text is the
+        // OS's own. A missing parent directory is ERROR_PATH_NOT_FOUND on windows (its system message text, as Go's
+        // Errno.Error reads it) and ENOENT elsewhere ("no such file or directory" in go1.26.9's zerrors tables for
+        // linux and darwin).
+        string errnoText = OperatingSystem.IsWindows()
+            ? "The system cannot find the path specified."
+            : "no such file or directory";
+
+        Assert.AreEqual($"testing: open {path}: {errnoText}\n", message);
     }
 
     // Divergence (d), G's review of 4dea95c684: Go closes the log only after the FIRST m.Run (m.after runs

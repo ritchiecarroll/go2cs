@@ -606,8 +606,8 @@ internal static Word /*r*/ divWVW(slice<Word> z, Word xn, slice<Word> x, Word y)
     r = xn;
     if (len(x) == 1) {
         var (qq, rr) = bits.Div((nuint)r, (nuint)x[0], (nuint)y);
-        z[0] = ((Word)qq);
-        return ((Word)rr);
+        z[0] = (Word)qq;
+        return (Word)rr;
     }
     Word rec = reciprocalWord(y);
     for (nint i = len(z) - 1; i >= 0; i--) {
@@ -694,12 +694,12 @@ internal static void divBasic(this Δnat q, ж<stack> Ꮡstk, Δnat u, Δnat v) 
 
         // Invent a leading 0 for u, for the first iteration.
         // Invariant: ujn == u[j+n] in each iteration.
-        Word ujn = ((Word)0);
+        Word ujn = (Word)0;
 
         // Compute each digit of quotient.
         for (nint j = m; j >= 0; j--) {
             // Compute the 2-by-1 guess q̂.
-            Word qhat = ((Word)_M);
+            Word qhat = (Word)_M;
 
             // ujn ≤ vn1, or else q̂ would be more than one digit.
             // For ujn == vn1, we set q̂ to the max digit M above.

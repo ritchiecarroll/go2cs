@@ -59,7 +59,7 @@ internal static void Main() {
     b.tag = "struct field second";
     fmt.Println(b.name, b.tag);
 
-    fmt.Println(((@string)((label)(@string)namedStringConversionˢ)));
+    fmt.Println((@string)((label)(@string)namedStringConversionˢ));
 
     var counts = new map<@string, nint>{};
     counts["standalone map key"]++;
@@ -87,7 +87,7 @@ internal static void Main() {
     var table = new map<@string, @string>{["composite key"] = "composite value"};
     fmt.Println(parts[0], parts[1], boxed.name, boxed.tag, table["composite key"]);
 
-    var anys = new any[]{(@string)"any composite element"u8, (nint)(7)}.slice();
+    var anys = new any[]{(@string)"any composite element"u8, (nint)7}.slice();
     fmt.Println(anys[0], anys[1]);
 
     fmt.Println(pkgLevelLiteral);

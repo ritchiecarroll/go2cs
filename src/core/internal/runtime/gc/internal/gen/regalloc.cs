@@ -124,7 +124,7 @@ internal static void used(this ref regSet s, ж<op> Ꮡo, loc l) {
     if (traceRegAlloc) {
         log.Printf("  alloc %s @ v%02d"u8, reg.LocString(), o.id);
     }
-    if ((uint32)(s.inUse[reg.cls] & (((uint32)1).Lsh((int64)(reg.reg)))) != 0) {
+    if ((s.inUse[reg.cls] & (((uint32)1).Lsh((int64)(reg.reg)))) != 0) {
         fatalf("register %s already used"u8, reg.LocString());
     }
     s.inUse[reg.cls] |= (uint32)(((uint32)1).Lsh((int64)(reg.reg)));
@@ -141,7 +141,7 @@ internal static void free(this ref regSet s, loc l) {
     if (traceRegAlloc) {
         log.Printf("  free %s"u8, reg.LocString());
     }
-    if ((uint32)(s.inUse[reg.cls] & (((uint32)1).Lsh((int64)(reg.reg)))) == 0) {
+    if ((s.inUse[reg.cls] & (((uint32)1).Lsh((int64)(reg.reg)))) == 0) {
         fatalf("register %s is not in use"u8, reg.LocString());
     }
     s.inUse[reg.cls] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((int64)(reg.reg))));
@@ -210,10 +210,10 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     var regUsed = new slice<regSet>(len(fn.ops), () => new()); // In-use registers at each op
     foreach (var (i, _) in regUsed) {
         // X15/Y15/Z15 is reserved by the Go ABI
-        regUsed[i].inUse[regClassZ] |= (uint32)(((uint32)1 << (int)(15)));
+        regUsed[i].inUse[regClassZ] |= (uint32)(((uint32)1 << 15));
         // K0 is contextual (if used as an opmask, it means no mask). Too
         // complicated, so just ignore it.
-        regUsed[i].inUse[regClassK] |= (uint32)(((uint32)1 << (int)(0)));
+        regUsed[i].inUse[regClassK] |= (uint32)(((uint32)1 << 0));
     }
     var locs = new map<ж<op>, loc>();
     var canonʗ1 = canon;

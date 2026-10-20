@@ -180,7 +180,7 @@ internal static slice<onePassTestsᴛ1> onePassTests = new onePassTestsᴛ1[]{
     new(@"^.bc(d|e)*$"u8, true),
     new(@"^(?:(?:aa)|.)$"u8, false),
     new(@"^(?:(?:a{1,2}){1,2})$"u8, false),
-    new(@"^l"u8 + strings.Repeat("o"u8, (2 << (int)(8))) + @"ng$"u8, true)
+    new(@"^l"u8 + strings.Repeat("o"u8, 2 << 8) + @"ng$"u8, true)
 }.slice();
 
 public static void TestCompileOnePass(ж<testing.T> Ꮡt) {

@@ -178,7 +178,7 @@ internal static void benchmark(ж<testing.B> Ꮡb, Func<hash.Hash> h) {
     var password = new slice<byte>(h().Size());
     var salt = new slice<byte>(8);
     for (nint i = 0; i < b.N; i++) {
-        (password, err) = pbkdf2.Key(h, ((@string)password), salt, 4096, len(password));
+        (password, err) = pbkdf2.Key(h, (@string)password, salt, 4096, len(password));
         if (err != default!) {
             Ꮡb.Error(err);
         }

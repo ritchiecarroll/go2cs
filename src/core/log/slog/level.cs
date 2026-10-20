@@ -102,7 +102,7 @@ public static (slice<byte>, error) MarshalJSON(this ΔLevel l) {
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
 public static error UnmarshalJSON(this ж<ΔLevel> Ꮡl, slice<byte> data) {
-    var (s, err) = strconv.Unquote(((@string)data));
+    var (s, err) = strconv.Unquote((@string)data);
     if (err != default!) {
         return err;
     }
@@ -127,7 +127,7 @@ public static (slice<byte>, error) MarshalText(this ΔLevel l) {
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
 public static error UnmarshalText(this ж<ΔLevel> Ꮡl, slice<byte> data) {
-    return Ꮡl.parse(((@string)data));
+    return Ꮡl.parse((@string)data);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -197,7 +197,7 @@ partial struct LevelVar {
 
 // Level returns v's level.
 public static ΔLevel Level(this ж<LevelVar> Ꮡv) {
-    return ((ΔLevel)(nint)Ꮡv.of(LevelVar.Ꮡval).Load());
+    return (ΔLevel)(nint)Ꮡv.of(LevelVar.Ꮡval).Load();
 }
 
 // Set sets v's level to l.

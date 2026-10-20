@@ -23,7 +23,7 @@ partial class sysrand_internal_test_package {
 
 public static void TestRead(ж<testing.T> Ꮡt) {
     // 40MiB, more than the documented maximum of 32Mi-1 on Linux 32-bit.
-    var b = new slice<byte>((40 << (int)(20)));
+    var b = new slice<byte>((40 << 20));
     Read(b);
 
     if (testing.Short()) {

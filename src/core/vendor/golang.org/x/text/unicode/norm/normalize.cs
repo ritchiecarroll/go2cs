@@ -68,7 +68,7 @@ public static @string String(this Form f, @string s) {
     copy(@out, s.slice(0, n));
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
     rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s), @out: @out, flushF: appendFlush);
-    return ((@string)doAppendInner(Ꮡrb, n));
+    return (@string)doAppendInner(Ꮡrb, n);
 }
 
 // IsNormal returns true if b == f(b).
@@ -339,7 +339,7 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
     nint n = default!;
 
     uint8 lastCC = default!;
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     nint lastSegStart = i;
     for (n = end; i < n; ) {
         {
@@ -413,7 +413,7 @@ internal static nint firstBoundary(this Form f, input src, nint nsrc) {
         return -1;
     }
     var fd = formTable[f];
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     // We should call ss.first here, but we can't as the first rune is
     // skipped already. This means FirstBoundary can't really determine
     // CGJ insertion points correctly. Luckily it doesn't have to.
@@ -472,7 +472,7 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
         }
         return -1;
     }
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     ss.first(info);
 
     for (nint i = (nint)info.size; i < nsrc; i += (nint)info.size) {
@@ -525,7 +525,7 @@ internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
     if (info.BoundaryAfter()) {
         return i;
     }
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     ssState v = ss.backwards(info);
     for (i = p; i >= 0 && v != ssStarter; i = p) {
         (info, p) = lastRuneStart(ref fd, b.slice(0, i));
@@ -637,7 +637,7 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
     }
     array<ΔProperties> add = new(31); /* maxNonStarters + 1 */                                             // stores runeInfo in reverse order
     nint padd = 0;
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     nint p = len(rb.@out);
     while (ᐧ) {
         add[padd] = info;

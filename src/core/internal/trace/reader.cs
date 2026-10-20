@@ -106,7 +106,7 @@ public static (ΔEvent e, error err) ReadEvent(this ж<Reader> Ꮡr) {
                 var (evΔ1, okΔ1) = r.v1Events.of(traceV1Converter.Ꮡevents).Peek();
                 if (okΔ1) {
                     r.syncs++;
-                    (e, err) = (syncEvent((~r.v1Events).evt, ((ΔTime)(int64)((~evΔ1).Ts - 1)), r.syncs), default!); goto ᒐdone;
+                    (e, err) = (syncEvent((~r.v1Events).evt, (ΔTime)(int64)((~evΔ1).Ts - 1), r.syncs), default!); goto ᒐdone;
                 }
             }
             var (evΔ2, errΔ1) = r.v1Events.next();

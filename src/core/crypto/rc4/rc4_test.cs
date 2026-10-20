@@ -125,7 +125,7 @@ public static void TestGolden(ж<testing.T> Ꮡt) {
 public static void TestBlock(ж<testing.T> Ꮡt) {
     var (c1a, _) = NewCipher(golden[0].key);
     var (c1b, _) = NewCipher(golden[1].key);
-    var data1 = new slice<byte>((1 << (int)(20)));
+    var data1 = new slice<byte>((1 << 20));
     foreach (var (i, _) in data1) {
         c1a.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
         c1b.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
@@ -133,7 +133,7 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
 
     var (c2a, _) = NewCipher(golden[0].key);
     var (c2b, _) = NewCipher(golden[1].key);
-    var data2 = new slice<byte>((1 << (int)(20)));
+    var data2 = new slice<byte>((1 << 20));
     c2a.XORKeyStream(data2, data2);
     c2b.XORKeyStream(data2, data2);
 

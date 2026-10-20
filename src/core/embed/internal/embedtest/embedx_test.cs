@@ -72,18 +72,18 @@ internal static readonly @string bbigˢ = "bbig"u8;
 public static void TestXGlobal(ж<testing.T> Ꮡt) {
     testFiles(Ꮡt, global, testdataHelloTxtˢ, helloWorldˢ);
     testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass), glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
     testString(Ꮡt, concurrency2, concurrency2ˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass2), glass2ˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass2, glass2ˢ, iCanEatGlassAndItDoesnTˢ);
 
     var (big, err) = os.ReadFile(testdataAsciiTxtˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    testString(Ꮡt, sbig, sbigˢ, ((@string)big));
-    testString(Ꮡt, sbig2, sbig2ˢ, ((@string)big));
-    testString(Ꮡt, ((@string)bbig), bbigˢ, ((@string)big));
-    testString(Ꮡt, ((@string)bbig2), bbigˢ, ((@string)big));
+    testString(Ꮡt, sbig, sbigˢ, (@string)big);
+    testString(Ꮡt, sbig2, sbig2ˢ, (@string)big);
+    testString(Ꮡt, (@string)bbig, bbigˢ, (@string)big);
+    testString(Ꮡt, (@string)bbig2, bbigˢ, (@string)big);
 
     if (Ꮡt.Failed()) {
         return;

@@ -504,10 +504,10 @@ internal static error checkFIPS140OnlyPublicKey(ref PublicKey pub) {
     if (pub.N.BitLen() % 2 == 1) {
         return errors.New(cryptoRsaUseOfKeysWithˢ);
     }
-    if (pub.E <= (1 << (int)(16))) {
+    if (pub.E <= 1 << 16) {
         return errors.New(cryptoRsaUseOfPublicˢ);
     }
-    if ((nint)(pub.E & 1) == 0) {
+    if ((pub.E & 1) == 0) {
         return errors.New(cryptoRsaUseOfEvenPublicˢ);
     }
     return default!;

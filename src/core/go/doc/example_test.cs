@@ -50,7 +50,7 @@ public static void TestExamples(ж<testing.T> Ꮡt) {
             }
             var golden = new map<@string, @string>{};
             foreach (var (_, f) in (~archive).Files) {
-                golden[f.Name] = strings.TrimSpace(((@string)f.Data));
+                golden[f.Name] = strings.TrimSpace((@string)f.Data);
             }
 
             // Collect the results of doc.Examples in a map keyed by example name.

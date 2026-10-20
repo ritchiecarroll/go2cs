@@ -265,7 +265,7 @@ public static void TestUnpaddedSignature(ж<testing.T> Ꮡt) {
     // file.
     var expectedSig = decodeBase64("pX4DR8azytjdQ1rtUiC040FjkepuQut5q2ZFX1pTjBrOVKNjgsCDyiJDGZTCNoh9qpXYbhl7iEym30BWWwuiZg=="u8);
 
-    var (sig, err) = SignPKCS1v15(default!, test512Key, ((crypto.Hash)0), msg);
+    var (sig, err) = SignPKCS1v15(default!, test512Key, (crypto.Hash)0, msg);
     if (err != default!) {
         Ꮡt.Fatalf("SignPKCS1v15 failed: %s"u8, err);
     }
@@ -273,7 +273,7 @@ public static void TestUnpaddedSignature(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("signature is not expected value: got %x, want %x"u8, sig, expectedSig);
     }
     {
-        var errΔ1 = VerifyPKCS1v15(test512Key.of(rsa.PrivateKey.ᏑPublicKey), ((crypto.Hash)0), msg, sig); if (errΔ1 != default!) {
+        var errΔ1 = VerifyPKCS1v15(test512Key.of(rsa.PrivateKey.ᏑPublicKey), (crypto.Hash)0, msg, sig); if (errΔ1 != default!) {
             Ꮡt.Fatalf("signature failed to verify: %s"u8, errΔ1);
         }
     }

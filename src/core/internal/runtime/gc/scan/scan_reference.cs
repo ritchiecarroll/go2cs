@@ -28,7 +28,7 @@ public static int32 /*count*/ ScanSpanPackedReference(@unsafe.Pointer mem, ж<ui
     var expandBy = (uintptr)gc.SizeClassToSize[sizeClass] / (uintptr)goarch.PtrSize;
     foreach (var word in range(gc.PageWords)) {
         var objI = (uintptr)word / expandBy;
-        if ((uintptr)(objMarks[objI / (uintptr)goarch.PtrBits] & (((uintptr)1 << (int)((objI % (uintptr)goarch.PtrBits))))) == 0) {
+        if ((uintptr)(objMarks[objI / (uintptr)goarch.PtrBits] & ((uintptr)1 << (int)((objI % (uintptr)goarch.PtrBits)))) == 0) {
             continue;
         }
         if ((uintptr)(ptrMask[word / (nint)goarch.PtrBits] & (((uintptr)1).Lsh((int64)((word % (nint)goarch.PtrBits))))) == 0) {

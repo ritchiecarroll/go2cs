@@ -79,14 +79,14 @@ internal static void Main() {
         var s = new any[]{(int8)(a + a), (uint8)(u + u)}.slice();
         var m = new map<@string, any>{["k"] = (int16)(w + w)};
         var hΔ1 = new holder(v: (uint16)(z + z));
-        return fmt.Sprint(s, m, hΔ1.v, ((any)((int8)(a + a))));
+        return fmt.Sprint(s, m, hΔ1.v, (any)((int8)(a + a)));
     });
     arm("chan any", () => {
         var ch = new channel<any>(1);
         ch.ᐸꟷ((uint8)(u + u));
         return show(ᐸꟷ(ch));
     });
-    arm("type only", () => show((uint8)(u / 3)) + " "u8 + show((int8)(a % 7)) + " "u8 + show((uint8)((u >> (int)(1)))) + " "u8 + show((int8)(+a)) + " "u8 + show((int8)(~a)));
+    arm("type only", () => show((uint8)(u / 3)) + " "u8 + show((int8)(a % 7)) + " "u8 + show((uint8)((u >> 1))) + " "u8 + show((int8)(+a)) + " "u8 + show((int8)(~a)));
 
     arm("named any", () => {
         I i = (int8)(a + a);
@@ -119,7 +119,7 @@ internal static void Main() {
     });
 
     arm("divrem operand", () => fmt.Sprint((int8)((int8)(a + a) / 2), " ", (int8)((int8)(a + a) % 7), " ", (uint8)((uint8)(u + u) / 3)));
-    arm("shr operand", () => fmt.Sprint((int8)(((int8)(a + a) >> (int)(1))), " ", (uint8)(((uint8)(u + u) >> (int)(4)))));
+    arm("shr operand", () => fmt.Sprint((int8)(((int8)(a + a) >> 1)), " ", (uint8)(((uint8)(u + u) >> 4))));
     arm("minint8 / -1", () => fmt.Sprint((int8)(m8 / n1), " ", (int8)(m8 % n1)));
 
     arm("paren compare", () => fmt.Sprint((int8)(a + a) < 0, " ", (uint8)(u + u) == 144));
@@ -155,7 +155,7 @@ internal static void Main() {
         any y = (uint8)66;
         @string r = "nomatch";
         var exprᴛ2 = x;
-        if (AreEqual(exprᴛ2, (int8)((h >> (int)(1))))) {
+        if (AreEqual(exprᴛ2, (int8)((h >> 1)))) {
             r = "match";
         }
 
@@ -170,17 +170,17 @@ internal static void Main() {
     arm("guarded shr", () => {
         int8 x = (int8)(((int8)(a + a)).Rsh(n));
         any y = ((uint8)(u + u)).Rsh(n);
-        return fmt.Sprint(x, " ", y, " ", (int8)(((int8)(a + a)).Rsh(n)) == -28, " ", ((int8)(m8 / n1)).Rsh(n), " ", ((int8)(-(a + a))).Rsh(n), " ", ((int8)(a + a)).Rsh((uint64)(10)));
+        return fmt.Sprint(x, " ", y, " ", (int8)(((int8)(a + a)).Rsh(n)) == -28, " ", ((int8)(m8 / n1)).Rsh(n), " ", ((int8)(-(a + a))).Rsh(n), " ", ((int8)(a + a)).Rsh((uint64)10));
     });
     arm("guarded shl", () => {
         any y = ((int8)(a + a)).Lsh(n);
-        return fmt.Sprint((nint)(((int8)(a + a)).Lsh(n)), " ", y, " ", (int8)((((int8)(a + a)).Lsh(n)) / 3), " ", (nint)(((int8)((h >> (int)(1)))).Lsh((n + 1))), " ", ((uint8)(u + w8)).Lsh((uint64)(8)));
+        return fmt.Sprint((nint)(((int8)(a + a)).Lsh(n)), " ", y, " ", (int8)((((int8)(a + a)).Lsh(n)) / 3), " ", (nint)(((int8)((h >> 1))).Lsh((n + 1))), " ", ((uint8)(u + w8)).Lsh((uint64)8));
     });
 
     var tblʗ3 = tbl;
     arm("unary xor plus", () => {
         int8 q = (int8)((int8)(~(a + a)) / 2);
-        return fmt.Sprint((nint)((int8)(~(a + a))), " ", q, " ", (int8)(((int8)(~(a + a)) >> (int)(1))), " ", tblʗ3[(uint8)(+(u + u))], " ", (nint)((int8)(+(a * a))));
+        return fmt.Sprint((nint)((int8)(~(a + a))), " ", q, " ", (int8)(((int8)(~(a + a)) >> 1)), " ", tblʗ3[(uint8)(+(u + u))], " ", (nint)((int8)(+(a * a))));
     });
 
     var tblʗ4 = tbl;
@@ -194,14 +194,14 @@ internal static void Main() {
     arm("named func param", () => {
 
         Func<byte, @string> f = (byte b) => fmt.Sprint(b);
-        return f((byte)(u + w8)) + " "u8 + f((byte)((u >> (int)(1))));
+        return f((byte)(u + w8)) + " "u8 + f((byte)((u >> 1)));
     });
 
     arm("invariant", () => fmt.Sprint((int8)(u + u), " ", (int8)(a + a + a), " ", (uint8)(w + w)));
 
     arm("builtin arg", () => {
         var b = append(new byte[]{}.slice(), (byte)(u + u), (byte)(u * 2), (byte)(u - 1));
-        return fmt.Sprint(min((int8)(a + a), (int8)(0)), " ", max((uint8)(u + u), (uint8)(0)), " ", b);
+        return fmt.Sprint(min((int8)(a + a), (int8)0), " ", max((uint8)(u + u), (uint8)0), " ", b);
     });
 
     arm("paren define", () => {

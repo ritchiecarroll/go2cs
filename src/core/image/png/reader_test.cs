@@ -383,7 +383,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 nint b = default!;
                 nint c = default!;
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
-                    b = (nint)(b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y));
+                    b = b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y);
                     c++;
                     if (c == 8 / bitdepth) {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x"u8, b);
@@ -790,8 +790,8 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
             {
                 var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0){
                     got = append(got,
-                        hex[(uint32)(0x0f & ((r >> (int)(12))))],
-                        hex[(uint32)(0x0f & ((r >> (int)(8))))],
+                        hex[(0x0f & (r >> 12))],
+                        hex[(0x0f & (r >> 8))],
                         (byte)((rune)' '));
                 } else {
                     got = append(got,

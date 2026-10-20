@@ -22,20 +22,20 @@ partial class fmtsort_test_package {
 
 internal static slice<slice<reflectꓸValue>> compareTests;
 internal static void initᴛcompareTests() { compareTests = new slice<reflectꓸValue>[]{
-    ct(reflect.TypeOf((nint)0), (nint)(-1), (nint)(0), (nint)(1)),
-    ct(reflect.TypeOf((int8)0), (nint)(-1), (nint)(0), (nint)(1)),
-    ct(reflect.TypeOf((int16)0), (nint)(-1), (nint)(0), (nint)(1)),
-    ct(reflect.TypeOf((int32)0), (nint)(-1), (nint)(0), (nint)(1)),
-    ct(reflect.TypeOf((int64)0), (nint)(-1), (nint)(0), (nint)(1)),
-    ct(reflect.TypeOf((nuint)0), (nint)(0), (nint)(1), (nint)(5)),
-    ct(reflect.TypeOf((uint8)0), (nint)(0), (nint)(1), (nint)(5)),
-    ct(reflect.TypeOf((uint16)0), (nint)(0), (nint)(1), (nint)(5)),
-    ct(reflect.TypeOf((uint32)0), (nint)(0), (nint)(1), (nint)(5)),
-    ct(reflect.TypeOf((uint64)0), (nint)(0), (nint)(1), (nint)(5)),
-    ct(reflect.TypeOf((uintptr)0), (nint)(0), (nint)(1), (nint)(5)),
-    ct(reflect.TypeOf(((@string)""u8)), (@string)""u8, (@string)"a"u8, (@string)"ab"u8),
-    ct(reflect.TypeOf((float32)0F), math.NaN(), math.Inf(-1), -1e10D, (nint)(0), 1e10D, math.Inf(1)),
-    ct(reflect.TypeOf((float64)0D), math.NaN(), math.Inf(-1), -1e10D, (nint)(0), 1e10D, math.Inf(1)),
+    ct(reflect.TypeOf((nint)0), (nint)(-1), (nint)0, (nint)1),
+    ct(reflect.TypeOf((int8)0), (nint)(-1), (nint)0, (nint)1),
+    ct(reflect.TypeOf((int16)0), (nint)(-1), (nint)0, (nint)1),
+    ct(reflect.TypeOf((int32)0), (nint)(-1), (nint)0, (nint)1),
+    ct(reflect.TypeOf((int64)0), (nint)(-1), (nint)0, (nint)1),
+    ct(reflect.TypeOf((nuint)0), (nint)0, (nint)1, (nint)5),
+    ct(reflect.TypeOf((uint8)0), (nint)0, (nint)1, (nint)5),
+    ct(reflect.TypeOf((uint16)0), (nint)0, (nint)1, (nint)5),
+    ct(reflect.TypeOf((uint32)0), (nint)0, (nint)1, (nint)5),
+    ct(reflect.TypeOf((uint64)0), (nint)0, (nint)1, (nint)5),
+    ct(reflect.TypeOf((uintptr)0), (nint)0, (nint)1, (nint)5),
+    ct(reflect.TypeOf((@string)""u8), (@string)""u8, (@string)"a"u8, (@string)"ab"u8),
+    ct(reflect.TypeOf((float32)0F), math.NaN(), math.Inf(-1), -1e10D, (nint)0, 1e10D, math.Inf(1)),
+    ct(reflect.TypeOf((float64)0D), math.NaN(), math.Inf(-1), -1e10D, (nint)0, 1e10D, math.Inf(1)),
     ct(reflect.TypeOf((complex64)(1F.i())), -1D + -1D.i(), -1D + 0D.i(), -1D + 1D.i(), -1D.i(), 0D.i(), 1D.i(), 1D + -1D.i(), 1D + 0D.i(), 1D + 1D.i()),
     ct(reflect.TypeOf((complex128)(1D.i())), -1D + -1D.i(), -1D + 0D.i(), -1D + 1D.i(), -1D.i(), 0D.i(), 1D.i(), 1D + -1D.i(), 1D + 0D.i(), 1D + 1D.i()),
     ct(reflect.TypeOf(false), false, true),
@@ -44,7 +44,7 @@ internal static void initᴛcompareTests() { compareTests = new slice<reflectꓸ
     ct(reflect.TypeOf(chans[0]), chans[0], chans[1], chans[2]),
     ct(reflect.TypeOf(new toy(nil)), new toy(0, 1), new toy(0, 2), new toy(1, -1), new toy(1, 1)),
     ct(reflect.TypeOf(new nint[]{}.array(2)), new nint[]{1, 1}.array(), new nint[]{1, 2}.array(), new nint[]{2, 0}.array()),
-    ct(reflect.TypeOf(((any)(nint)(0))), iFace, (nint)(1), (nint)(2), (nint)(3))
+    ct(reflect.TypeOf((any)(nint)0), iFace, (nint)1, (nint)2, (nint)3)
 }.slice(); }
 
 internal static any iFace;
@@ -283,9 +283,9 @@ public static void TestInterface(ж<testing.T> Ꮡt) {
         [2.1D] = ""u8,
         [1.1D] = ""u8,
         [math.NaN()] = ""u8,
-        [(nint)(3)] = ""u8,
-        [(nint)(2)] = ""u8,
-        [(nint)(1)] = ""u8,
+        [(nint)3] = ""u8,
+        [(nint)2] = ""u8,
+        [(nint)1] = ""u8,
         [(@string)"c"u8] = ""u8,
         [(@string)"b"u8] = ""u8,
         [(@string)"a"u8] = ""u8,

@@ -497,7 +497,7 @@ internal static readonly @string netHttpCgiHandlerˢ = @"net/http/cgi\.\(\*Handl
 // [Handler.ServeHTTP].
 internal static partial bool handlerRunning() {
     var r = regexp.MustCompile(netHttpCgiHandlerˢ);
-    var buf = new slice<byte>((64 << (int)(10)));
+    var buf = new slice<byte>((64 << 10));
     while (ᐧ) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {

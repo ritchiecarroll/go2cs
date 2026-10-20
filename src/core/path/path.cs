@@ -51,7 +51,7 @@ internal static @string @string(this ref lazybuf b) {
     if (b.buf == default!) {
         return b.s.slice(0, b.w);
     }
-    return ((@string)(b.buf.slice(0, b.w)));
+    return (@string)(b.buf.slice(0, b.w));
 }
 
 // Clean returns the shortest path name equivalent to path
@@ -186,7 +186,7 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
             buf = builtin.append(buf, e.ꓸꓸꓸ);
         }
     }
-    return Clean(((@string)buf));
+    return Clean((@string)buf);
 }
 
 // Ext returns the file name extension used by path.

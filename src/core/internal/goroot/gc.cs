@@ -85,14 +85,14 @@ internal static void init(this ref gccgoDirs gd) {
     if (err != default!) {
         return;
     }
-    @string version = strings.TrimSpace(((@string)versionB));
+    @string version = strings.TrimSpace((@string)versionB);
     (var machineB, err) = exec.Command(bin, dumpmachineˢ).Output();
     if (err != default!) {
         return;
     }
-    @string machine = strings.TrimSpace(((@string)machineB));
+    @string machine = strings.TrimSpace((@string)machineB);
 
-    var dirsEntries = strings.Split(((@string)allDirs), "\n"u8);
+    var dirsEntries = strings.Split((@string)allDirs, "\n"u8);
     @string prefix = prefixᶜ;
     slice<@string> dirs = default!;
     foreach (var (_, dirEntry) in dirsEntries) {

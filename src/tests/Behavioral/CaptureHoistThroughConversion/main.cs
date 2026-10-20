@@ -41,14 +41,14 @@ internal static partial void Main() {
     var aʗ1 = a;
     goǃ(serve, new HandlerᴠIface(new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(aʗ1[0], i));
-    })), (nint)(10));
+    })), (nint)10);
     fmt.Println(ᐸꟷ(@out));
 
     var b = new @string[]{"b="}.slice();
     var bʗ1 = b;
     goǃ(run, new Handler((nint i) => {
         @out.ᐸꟷ(fmt.Sprint(bʗ1[0], i));
-    }), (nint)(20));
+    }), (nint)20);
     fmt.Println(ᐸꟷ(@out));
 
     var hc = new channel<Handler>(1);
@@ -96,7 +96,7 @@ internal static partial void Main() {
             var hʗ2 = hʗ1;
             defer(run, new Handler((nint i) => {
                 @out.ᐸꟷ(fmt.Sprint(hʗ2[0], i));
-            }), (nint)(80), ref ᒐ);
+            }), (nint)80, ref ᒐ);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
@@ -115,7 +115,7 @@ internal static partial void Main() {
     var jʗ1 = j;
     goǃ(runBare, (nint i) => {
         @out.ᐸꟷ(fmt.Sprint(jʗ1[0], i));
-    }, (nint)(100));
+    }, (nint)100);
     fmt.Println(ᐸꟷ(@out));
 }
 

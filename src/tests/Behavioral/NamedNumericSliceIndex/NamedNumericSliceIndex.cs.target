@@ -31,7 +31,7 @@ internal static void Main() {
     fmt.Println(bitset((uint64)3), bitset((uint64)10));
 
     var spans = new @string[]{"zero", "one", "two", "three"}.slice();
-    var (a, b) = pick(spans, ((PID)3));
+    var (a, b) = pick(spans, (PID)3);
     fmt.Println(a, b);
 
     var names = new @string[]{"lo", "mid", "hi"}.slice();

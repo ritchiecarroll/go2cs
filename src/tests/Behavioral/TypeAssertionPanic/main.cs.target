@@ -65,7 +65,7 @@ internal static void @catch(@string what, Action f) {
 }
 
 internal static void Main() {
-    any boxed = (nint)(7);
+    any boxed = (nint)7;
 
     var boxedʗ1 = boxed;
     @catch("int-to-string", () => {

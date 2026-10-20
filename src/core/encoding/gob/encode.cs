@@ -119,7 +119,7 @@ internal static void encodeUint(this ref encoderState state, uint64 x) {
     }
 
     binary.BigEndian.PutUint64(state.buf[1..], x);
-    nint bc = (bits.LeadingZeros64(x) >> (int)(3)); // 8 - bytelen(x)
+    nint bc = bits.LeadingZeros64(x) >> 3; // 8 - bytelen(x)
     state.buf[bc] = (uint8)(bc - (nint)uint64Size); // and then we subtract 8 to get -bytelen(x)
 
     state.b.Write(state.buf.slice(bc, uint64Size + 1));
@@ -131,9 +131,9 @@ internal static void encodeUint(this ref encoderState state, uint64 x) {
 internal static void encodeInt(this ref encoderState state, int64 i) {
     uint64 x = default!;
     if (i < 0){
-        x = (uint64)((uint64)((~i << (int)(1))) | 1);
+        x = (uint64)(~i << 1) | 1;
     } else {
-        x = (uint64)((i << (int)(1)));
+        x = (uint64)(i << 1);
     }
     state.encodeUint(x);
 }

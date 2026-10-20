@@ -261,7 +261,7 @@ internal static (ringElement, error) bitUnpackSlow(slice<byte> v, nint a, nint b
                 accBits += 8;
             }
         }
-        var w = (uint32)(acc & mask);
+        var w = acc & mask;
         if (w > maxValue) {
             return (new ringElement(new fieldElement[256].array()), errors.New(mldsaCoefficientOutOfˢ));
         }

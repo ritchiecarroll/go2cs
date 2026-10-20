@@ -103,7 +103,7 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
     }
     udpReq = tcpReq[2..];
     nint l = len(tcpReq) - 2;
-    tcpReq[0] = (byte)((l >> (int)(8)));
+    tcpReq[0] = (byte)(l >> 8);
     tcpReq[1] = (byte)l;
     return (id, udpReq, tcpReq, default!);
 }
@@ -170,7 +170,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
             return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ2);
         }
     }
-    nint l = (nint)(((nint)b[0] << (int)(8)) | (nint)b[1]);
+    nint l = (nint)b[0] << 8 | (nint)b[1];
     if (l > len(b)) {
         b = new slice<byte>(l);
     }

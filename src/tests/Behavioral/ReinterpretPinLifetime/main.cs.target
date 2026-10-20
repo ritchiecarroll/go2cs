@@ -20,7 +20,7 @@ internal static partial ж<hdr> asHdr(slice<byte> b) {
 internal static partial void churn() {
     var keep = new slice<slice<byte>>(64);
     for (nint i = 0; i < 400000; i++) {
-        keep[(nint)(i & 63)] = new slice<byte>(24);
+        keep[(i & 63)] = new slice<byte>(24);
     }
 }
 

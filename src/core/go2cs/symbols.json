@@ -355,6 +355,17 @@
       "note": "hand-owned unsafe.Pointer static method applied at every unsafe.Pointer-into-`any` boxing site; emitted by the converter only, so no Symbols.cs projection."
     },
     {
+      "name": "TypedNilTypeParamAccessor",
+      "value": "OrTypedNilOf()",
+      "comment": [
+        "TypedNilTypeParamAccessor is the golib extension method a value of TYPE-PARAMETER type takes on its way into an",
+        "EMPTY interface (`any`) when its type set can hold a pointer, a func or an unsafe.Pointer: the generic sibling of",
+        "TypedNilBoxAccessor and TypedNilFuncAccessor, decided per type argument at run time (golib TypedNilOf.cs), since",
+        "inside the generic body the converter cannot see which of them the argument is."
+      ],
+      "note": "golib extension method applied at every type-parameter-into-`any` boxing site whose type set can hold a nil pointer, func or unsafe.Pointer; emitted by the converter only, so no Symbols.cs projection."
+    },
+    {
       "name": "PackageTestInitHookMethod",
       "value": "init\u1D1B\u1D1Btests",
       "csharp": true,

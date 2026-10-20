@@ -26,9 +26,9 @@ partial struct testsᴛ1 /*dyn*/ {
     internal nint compare;
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{
-    new((nint)(1), (nint)(2), -1),
-    new((nint)(1), (nint)(1), 0),
-    new((nint)(2), (nint)(1), +1),
+    new((nint)1, (nint)2, -1),
+    new((nint)1, (nint)1, 0),
+    new((nint)2, (nint)1, +1),
     new((@string)"a"u8, (@string)"aa"u8, -1),
     new((@string)"a"u8, (@string)"a"u8, 0),
     new((@string)"aa"u8, (@string)"a"u8, +1),

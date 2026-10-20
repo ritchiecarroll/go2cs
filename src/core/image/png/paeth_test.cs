@@ -62,7 +62,7 @@ public static void BenchmarkPaeth(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        paeth((uint8)((i >> (int)(16))), (uint8)((i >> (int)(8))), (uint8)i);
+        paeth((uint8)(i >> 16), (uint8)(i >> 8), (uint8)i);
     }
 }
 

@@ -433,9 +433,9 @@ internal static void testDWARF(ж<testing.T> Ꮡt, nint linktype) {
         if (err != default!) {
             Ꮡt.Fatalf("running test executable failed: %s %s"u8, err, @out);
         }
-        Ꮡt.Logf("Testprog output:\n%s"u8, ((@string)@out));
+        Ꮡt.Logf("Testprog output:\n%s"u8, (@string)@out);
 
-        var matches = regexp.MustCompile(offsetˢ).FindStringSubmatch(((@string)@out));
+        var matches = regexp.MustCompile(offsetˢ).FindStringSubmatch((@string)@out);
         if (len(matches) < 2) {
             Ꮡt.Fatalf("unexpected program output: %s"u8, @out);
         }
@@ -547,7 +547,7 @@ public static void TestBSSHasZeros(ж<testing.T> Ꮡt) {
         var cmd = exec.Command(gccpath, "-c"u8, srcpath, "-o", objpath);
         (var @out, err) = cmd.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Fatalf("failed to build object file: %v - %v"u8, err, ((@string)@out));
+            Ꮡt.Fatalf("failed to build object file: %v - %v"u8, err, (@string)@out);
         }
 
         (var f, err) = Open(objpath);

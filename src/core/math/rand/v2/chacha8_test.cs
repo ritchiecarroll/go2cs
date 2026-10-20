@@ -84,7 +84,7 @@ public static void TestChaCha8Read(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("zero length read: %v"u8, err);
         } else 
         if (nΔ1 != 0) {
-            Ꮡt.Errorf("Read zero length: got %d, expected %d"u8, nΔ1, (nint)(0));
+            Ꮡt.Errorf("Read zero length: got %d, expected %d"u8, nΔ1, (nint)0);
         }
     }
 

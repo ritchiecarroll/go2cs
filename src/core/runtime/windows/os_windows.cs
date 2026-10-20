@@ -221,7 +221,7 @@ internal static stdFunction windowsFindfunc(uintptr lib, slice<byte> name) {
         @throw(usageˢ);
     }
     var f = stdcall(_GetProcAddress, lib, (uintptr)Ꮡ(name, 0));
-    return ((stdFunction)(@unsafe.Pointer)f);
+    return (stdFunction)(@unsafe.Pointer)f;
 }
 
 internal static UntypedInt _MAX_PATH => 260; // https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
@@ -632,7 +632,7 @@ internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, in
             w++;
         } else {
             r -= 0x10000;
-            utf16tmp[w] = (uint16)((uint16)surrogateMin + (uint16)((uint16)((r >> (int)(10))) & 0x3ff));
+            utf16tmp[w] = (uint16)((uint16)surrogateMin + (uint16)((uint16)(r >> 10) & 0x3ff));
             utf16tmp[w + 1] = (uint16)(surr2 + (uint16)((uint16)r & 0x3ff));
             w += 2;
         }
@@ -903,11 +903,11 @@ internal static void minit() {
     // calling C functions that don't have stack checks and for
     // lastcontinuehandler. We shouldn't be anywhere near this
     // bound anyway.
-    var @base = mbi.AllocationBase + ((uintptr)16 << (int)(10));
+    var @base = mbi.AllocationBase + ((uintptr)16 << 10);
     // Sanity check the stack bounds.
     var g0 = getg();
-    if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > ((uintptr)64 << (int)(20))) {
-        print((@string)"runtime: g0 stack ["u8, ((Δhex)(uint64)@base), (@string)","u8, ((Δhex)(uint64)(~g0).stack.hi), (@string)")\n"u8);
+    if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > (uintptr)64 << 20) {
+        print((@string)"runtime: g0 stack ["u8, (Δhex)(uint64)@base, (@string)","u8, (Δhex)(uint64)(~g0).stack.hi, (@string)")\n"u8);
         @throw(badG0Stackˢ);
     }
     g0.Value.stack.lo = @base;

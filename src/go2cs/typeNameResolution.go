@@ -1353,7 +1353,7 @@ func (v *Visitor) applyMethodGroupClashCast(expr ast.Expr, rendered string) stri
 	}
 
 	if delegateType := v.methodGroupClashDelegateType(expr); delegateType != "" {
-		return fmt.Sprintf("(%s)(%s)", delegateType, rendered)
+		return castOf(delegateType, rendered)
 	}
 
 	return rendered

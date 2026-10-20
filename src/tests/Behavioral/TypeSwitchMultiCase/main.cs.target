@@ -112,7 +112,7 @@ internal static void Main() {
     fmt.Println(describe(new circle(1)));
     fmt.Println(describe(new square(2)));
     fmt.Println(describe(new dot(nil)));
-    fmt.Println(classify((nint)(1)));
+    fmt.Println(classify((nint)1));
     fmt.Println(classify((int64)2));
     fmt.Println(classify("s"));
     fmt.Println(classify(false));
@@ -120,12 +120,12 @@ internal static void Main() {
     fmt.Println(ptrKind(Ꮡ(new circle(1))));
     fmt.Println(ptrKind(Ꮡ(new square(2))));
     fmt.Println(ptrKind(Ꮡ(new dot(nil))));
-    fmt.Println(ptrKind((nint)(7)));
+    fmt.Println(ptrKind((nint)7));
     fmt.Println(kind(default!));
     fmt.Println(kind(new dot(nil)));
     fmt.Println(kind(new circle(3)));
     fmt.Println(kind(new square(4)));
-    fmt.Println(tag((nint)(7)));
+    fmt.Println(tag((nint)7));
     fmt.Println(tag("x"));
     fmt.Println(tag(1.5D));
     fmt.Println(tag(true));

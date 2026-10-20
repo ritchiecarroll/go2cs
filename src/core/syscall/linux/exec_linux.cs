@@ -196,7 +196,7 @@ partial struct caps {
 
 // See CAP_TO_INDEX in linux/capability.h:
 internal static uintptr capToIndex(uintptr cap) {
-    return (cap >> (int)(5));
+    return cap >> 5;
 }
 
 // See CAP_TO_MASK in linux/capability.h:

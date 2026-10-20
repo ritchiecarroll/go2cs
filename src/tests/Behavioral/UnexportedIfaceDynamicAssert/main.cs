@@ -128,7 +128,7 @@ partial struct ValueSink {
 }
 
 internal static void report(@string label, ref sink s, int64 n, error err) {
-    fmt.Println(label, n, err, s.mode, ((@string)s.bytes));
+    fmt.Println(label, n, err, s.mode, (@string)s.bytes);
 }
 
 internal static void Main() {
@@ -161,7 +161,7 @@ internal static void Main() {
             ref var more = ref heap<Buffers>(out var Ꮡmore);
             more = new Buffers(new slice<byte>[]{slice<byte>("!"u8)}.slice());
             (n, _) = wv.writeBuffers(Ꮡmore);
-            fmt.Println("direct", n, ((@string)(~tcpSink).bytes));
+            fmt.Println("direct", n, (@string)(~tcpSink).bytes);
         } else {
             fmt.Println("direct", "miss");
         }

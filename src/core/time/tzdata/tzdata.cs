@@ -41,7 +41,7 @@ internal static nint get4s(@string s) {
     if (len(s) < 4) {
         return 0;
     }
-    return (nint)((nint)((nint)((nint)s[0] | ((nint)s[1] << (int)(8))) | ((nint)s[2] << (int)(16))) | ((nint)s[3] << (int)(24)));
+    return (nint)s[0] | (nint)s[1] << 8 | (nint)s[2] << 16 | (nint)s[3] << 24;
 }
 
 // get2s returns the little-endian 16-bit value at the start of s.
@@ -49,7 +49,7 @@ internal static nint get2s(@string s) {
     if (len(s) < 2) {
         return 0;
     }
-    return (nint)((nint)s[0] | ((nint)s[1] << (int)(8)));
+    return (nint)s[0] | (nint)s[1] << 8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

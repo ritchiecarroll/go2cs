@@ -324,7 +324,7 @@ partial struct byLiteral /*[]literalNode*/;
 internal static void sort(this ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s = ((byLiteral)a);
+    s = (byLiteral)a;
     sort_package.Sort(new byLiteralжInterface(Ꮡs));
 }
 
@@ -345,7 +345,7 @@ partial struct byFreq /*[]literalNode*/;
 internal static void sort(this ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    s = ((byFreq)a);
+    s = (byFreq)a;
     sort_package.Sort(new byFreqжInterface(Ꮡs));
 }
 

@@ -274,11 +274,11 @@ internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @s
     foreach (var (_, t) in x) {
         switch (t.type()) {
         case Plain tΔ1: {
-            p.indent(Ꮡout, indent, ((@string)tΔ1));
+            p.indent(Ꮡout, indent, (@string)tΔ1);
             break;
         }
         case Italic tΔ1: {
-            p.indent(Ꮡout, indent, ((@string)tΔ1));
+            p.indent(Ꮡout, indent, (@string)tΔ1);
             break;
         }
         case ж<Link> tΔ1: {

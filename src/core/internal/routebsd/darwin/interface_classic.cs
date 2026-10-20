@@ -32,7 +32,7 @@ internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, sl
     // We used to require that RTA_IFP always be set.
     // It turns out that on darwin messages about the
     // utun interface may not include a name. Issue #71064.
-    if ((nuint)(attrs & (nuint)syscall.RTA_IFP) != 0){
+    if ((attrs & (nuint)syscall.RTA_IFP) != 0){
         var (a, err) = parseLinkAddr(b.slice(w.bodyOff));
         if (err != default!) {
             return (default!, err);

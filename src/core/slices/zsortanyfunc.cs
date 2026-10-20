@@ -239,11 +239,11 @@ internal static bool partialInsertionSortCmpFunc<E>(slice<E> data, nint a, nint 
 internal static void breakPatternsCmpFunc<E>(slice<E> data, nint a, nint b, Func<E, E, nint> cmp) {
     nint length = b - a;
     if (length >= 8) {
-        var random = ((xorshift)(uint64)length);
+        var random = (xorshift)(uint64)length;
         nuint modulus = nextPowerOfTwo(length);
 
         for (nint idx = a + (length / 4) * 2 - 1; idx <= a + (length / 4) * 2 + 1; idx++) {
-            nint other = (nint)((nuint)((nuint)random.Next() & (modulus - 1)));
+            nint other = (nint)((nuint)random.Next() & (modulus - 1));
             if (other >= length) {
                 other -= length;
             }
@@ -386,7 +386,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         nint i = m;
         nint j = b;
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
+            nint h = (nint)((nuint)(i + j) >> 1);
             if (cmp(data[h], data[a]) < 0){
                 i = h + 1;
             } else {
@@ -410,7 +410,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         nint i = a;
         nint j = m;
         while (i < j) {
-            nint h = (nint)(((nuint)(i + j) >> (int)(1)));
+            nint h = (nint)((nuint)(i + j) >> 1);
             if (!(cmp(data[m], data[h]) < 0)){
                 i = h + 1;
             } else {
@@ -424,7 +424,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
         return;
     }
 
-    nint mid = (nint)(((nuint)(a + b) >> (int)(1)));
+    nint mid = (nint)((nuint)(a + b) >> 1);
     nint n = mid + m;
     nint start = default!;
     nint r = default!;
@@ -438,7 +438,7 @@ internal static void symMergeCmpFunc<E>(slice<E> data, nint a, nint m, nint b, F
     nint p = n - 1;
 
     while (start < r) {
-        nint c = (nint)(((nuint)(start + r) >> (int)(1)));
+        nint c = (nint)((nuint)(start + r) >> 1);
         if (!(cmp(data[p - c], data[c]) < 0)){
             start = c + 1;
         } else {

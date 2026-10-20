@@ -55,7 +55,7 @@ public static void TestUnsafePoint(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("can't objdump %v:\n%s"u8, err, @out);
     }
-    var lines = strings.Split(((@string)@out), "\n"u8)[1..];
+    var lines = strings.Split((@string)@out, "\n"u8)[1..];
 
     // Walk through assembly instructions, checking preemptible flags.
     uint64 entry = default!;

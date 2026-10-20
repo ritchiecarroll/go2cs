@@ -212,9 +212,9 @@ internal static void Seed(this ref rngSource rng, int64 seed) {
         x = seedrand(x);
         if (i >= 0) {
             int64 u = default!;
-            u = ((int64)x << (int)(40));
+            u = (int64)x << 40;
             x = seedrand(x);
-            u ^= (int64)(((int64)x << (int)(20)));
+            u ^= (int64)(((int64)x << 20));
             x = seedrand(x);
             u ^= (int64)((int64)x);
             u ^= (int64)(rngCooked[i]);
@@ -225,7 +225,7 @@ internal static void Seed(this ref rngSource rng, int64 seed) {
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
 internal static int64 Int63(this ref rngSource rng) {
-    return (int64)((uint64)(rng.Uint64() & (uint64)rngMask));
+    return (int64)(rng.Uint64() & (uint64)rngMask);
 }
 
 // Uint64 returns a non-negative pseudo-random 64-bit integer as a uint64.

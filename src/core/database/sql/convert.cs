@@ -291,7 +291,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.Value = ((@string)s);
+            d.Value = (@string)s;
             return default!;
         }
         case ж<any> d: {
@@ -553,7 +553,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             return default!;
         }
         case slice<byte> v: {
-            dv.SetString(((@string)v));
+            dv.SetString((@string)v);
             return default!;
         }}
     }
@@ -576,7 +576,7 @@ internal static @string asString(any src) {
         return v;
     }
     case slice<byte> v: {
-        return ((@string)v);
+        return (@string)v;
     }}
     var rv = reflect.ValueOf(src);
     var exprᴛ1 = rv.Kind();

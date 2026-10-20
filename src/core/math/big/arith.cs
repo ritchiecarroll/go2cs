@@ -39,7 +39,7 @@ internal static UntypedInt _M => /* _B - 1 */ 18446744073709551615; // digit mas
 // z1<<_W + z0 = x*y
 internal static (Word z1, Word z0) mulWW(Word x, Word y) {
     var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
-    return (((Word)hi), ((Word)lo));
+    return ((Word)hi, (Word)lo);
 }
 
 // z1<<_W + z0 = x*y + c
@@ -47,7 +47,7 @@ internal static (Word z1, Word z0) mulAddWWW_g(Word x, Word y, Word c) {
     var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
     nuint cc = default!;
     (lo, cc) = bits.Add(lo, (nuint)c, 0);
-    return (((Word)(hi + cc)), ((Word)lo));
+    return ((Word)(hi + cc), (Word)lo);
 }
 
 // nlz returns the number of leading zeros in x.
@@ -66,8 +66,8 @@ internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
 
     foreach (var (i, _) in z) {
         var (zi, cc) = bits.Add((nuint)x[i], (nuint)y[i], (nuint)c);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
+        z[i] = (Word)zi;
+        c = (Word)cc;
     }
     return c;
 }
@@ -82,8 +82,8 @@ internal static Word /*c*/ subVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
 
     foreach (var (i, _) in z) {
         var (zi, cc) = bits.Sub((nuint)x[i], (nuint)y[i], (nuint)c);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
+        z[i] = (Word)zi;
+        c = (Word)cc;
     }
     return c;
 }
@@ -110,7 +110,7 @@ internal static Word /*c*/ addVW(slice<Word> z, slice<Word> x, Word y) {
         return y;
     }
     var (zi, cc) = bits.Add((nuint)x[0], (nuint)y, 0);
-    z[0] = ((Word)zi);
+    z[0] = (Word)zi;
     if (cc == 0) {
         if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
             copy(z[1..], x[1..]);
@@ -138,8 +138,8 @@ internal static Word /*c*/ addVW_ref(slice<Word> z, slice<Word> x, Word y) {
     c = y;
     foreach (var (i, _) in z) {
         var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
+        z[i] = (Word)zi;
+        c = (Word)cc;
     }
     return c;
 }
@@ -166,7 +166,7 @@ internal static Word /*c*/ subVW(slice<Word> z, slice<Word> x, Word y) {
         return y;
     }
     var (zi, cc) = bits.Sub((nuint)x[0], (nuint)y, 0);
-    z[0] = ((Word)zi);
+    z[0] = (Word)zi;
     if (cc == 0) {
         if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
             copy(z[1..], x[1..]);
@@ -194,8 +194,8 @@ internal static Word /*c*/ subVW_ref(slice<Word> z, slice<Word> x, Word y) {
     c = y;
     foreach (var (i, _) in z) {
         var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
+        z[i] = (Word)zi;
+        c = (Word)cc;
     }
     return c;
 }
@@ -217,11 +217,11 @@ internal static Word /*c*/ lshVU_g(slice<Word> z, slice<Word> x, nuint s) {
     s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
     nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1); // ditto
-    c = (x[len(z) - 1] >> (int)(ŝ));
+    c = x[len(z) - 1] >> (int)(ŝ);
     for (nint i = len(z) - 1; i > 0; i--) {
-        z[i] = (Word)((x[i] << (int)(s)) | (x[i - 1] >> (int)(ŝ)));
+        z[i] = (Word)(x[i] << (int)(s) | x[i - 1] >> (int)(ŝ));
     }
-    z[0] = (x[0] << (int)(s));
+    z[0] = x[0] << (int)(s);
     return c;
 }
 
@@ -242,11 +242,11 @@ internal static Word /*c*/ rshVU_g(slice<Word> z, slice<Word> x, nuint s) {
     s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
     nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1); // ditto
-    c = (x[0] << (int)(ŝ));
+    c = x[0] << (int)(ŝ);
     for (nint i = 1; i < len(z); i++) {
-        z[i - 1] = (Word)((x[i - 1] >> (int)(s)) | (x[i] << (int)(ŝ)));
+        z[i - 1] = (Word)(x[i - 1] >> (int)(s) | x[i] << (int)(ŝ));
     }
-    z[len(z) - 1] = (x[len(z) - 1] >> (int)(s));
+    z[len(z) - 1] = x[len(z) - 1] >> (int)(s);
     return c;
 }
 
@@ -274,7 +274,7 @@ internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word
     foreach (var (i, _) in z) {
         var (z1, z0) = mulAddWWW_g(y[i], m, x[i]);
         var (lo, cc) = bits.Add((nuint)z0, (nuint)c, 0);
-        (c, z[i]) = (((Word)cc), ((Word)lo));
+        (c, z[i]) = ((Word)cc, (Word)lo);
         c += z1;
     }
     return c;
@@ -286,7 +286,7 @@ internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word
 internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
     nuint s = nlz(y);
     if (s != 0) {
-        x1 = (Word)((x1 << (int)(s)) | (x0 >> (int)(((nuint)_W - s))));
+        x1 = (Word)(x1 << (int)(s) | x0 >> (int)(((nuint)_W - s)));
         x0 <<= (int)(s);
         y <<= (int)(s);
     }
@@ -339,16 +339,16 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
         qq++;
         r0 -= d;
     }
-    return (((Word)qq), ((Word)(r0.Rsh(s))));
+    return ((Word)qq, (Word)(r0.Rsh(s)));
 }
 
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).
 internal static Word reciprocalWord(Word d1) {
-    nuint u = (nuint)((d1 << (int)(nlz(d1))));
+    nuint u = (nuint)(d1 << (int)(nlz(d1)));
     nuint x1 = ~u;
     nuint x0 = (nuint)_M;
     var (rec, _) = bits.Div(x1, x0, u); // (_B^2-1)/U-_B = (_B*(_M-C)+_M)/U
-    return ((Word)rec);
+    return (Word)rec;
 }
 
 } // end big_package

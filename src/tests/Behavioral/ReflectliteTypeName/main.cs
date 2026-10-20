@@ -14,7 +14,7 @@ partial struct namedKey {
 internal static void Main() {
     var bg = context.Background();
 
-    var c1 = context.WithValue(bg, ((ctxKey)1), "v1");
+    var c1 = context.WithValue(bg, (ctxKey)1, "v1");
     fmt.Println(c1);
 
     var c2 = context.WithValue(c1, new namedKey(2), "v2");

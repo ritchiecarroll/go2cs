@@ -10,7 +10,7 @@ internal static void Main() {
     nint size = os.Getpagesize();
     fmt.Println("page size:", size);
     fmt.Println("matches syscall.Getpagesize:", size == syscall.Getpagesize());
-    fmt.Println("positive power of two:", size > 0 && (nint)(size & (size - 1)) == 0);
+    fmt.Println("positive power of two:", size > 0 && (size & (size - 1)) == 0);
 }
 
 } // end main_package

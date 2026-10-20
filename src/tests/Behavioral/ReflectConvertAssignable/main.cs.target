@@ -73,9 +73,9 @@ internal partial struct main_i /*dyn*/ {
 
 internal static void Main() {
     var bytes = reflect.TypeOf(slice<byte>(default!));
-    var named = reflect.TypeOf(((myBytes)default!));
+    var named = reflect.TypeOf((myBytes)default!);
     var ints = reflect.TypeOf(slice<nint>(default!));
-    var namedInts = reflect.TypeOf(((myInts)default!));
+    var namedInts = reflect.TypeOf((myInts)default!);
 
     fmt.Println("slice", bytes.ConvertibleTo(named), named.ConvertibleTo(bytes));
     fmt.Println("slice", named.ConvertibleTo(named), bytes.ConvertibleTo(bytes));
@@ -84,16 +84,16 @@ internal static void Main() {
 
     map<@string, nint> unnamedMap = default!;
     var plain = reflect.TypeOf(unnamedMap);
-    var namedMap = reflect.TypeOf(((myMap)default!));
-    var wideMap = reflect.TypeOf(((myWideMap)default!));
-    var keyMap = reflect.TypeOf(((myKeyMap)default!));
+    var namedMap = reflect.TypeOf((myMap)default!);
+    var wideMap = reflect.TypeOf((myWideMap)default!);
+    var keyMap = reflect.TypeOf((myKeyMap)default!);
     fmt.Println("map", plain.ConvertibleTo(namedMap), namedMap.ConvertibleTo(plain));
     fmt.Println("map", plain.ConvertibleTo(wideMap), plain.ConvertibleTo(keyMap));
     fmt.Println("map", wideMap.ConvertibleTo(keyMap), namedMap.ConvertibleTo(namedMap));
 
-    var ptr = reflect.TypeOf(((ж<nint>)nil));
-    var namedPtr = reflect.TypeOf(((myPtr)nil));
-    var widePtr = reflect.TypeOf(((myWidePtr)nil));
+    var ptr = reflect.TypeOf((ж<nint>)nil);
+    var namedPtr = reflect.TypeOf((myPtr)nil);
+    var widePtr = reflect.TypeOf((myWidePtr)nil);
     fmt.Println("ptr", ptr.ConvertibleTo(namedPtr), namedPtr.ConvertibleTo(ptr));
     fmt.Println("ptr", ptr.ConvertibleTo(widePtr), widePtr.ConvertibleTo(namedPtr));
 
@@ -104,20 +104,20 @@ internal static void Main() {
     fmt.Println("array", arr.ConvertibleTo(wideArr), wideArr.ConvertibleTo(namedArr));
     fmt.Println("array", arr.Len(), namedArr.Len(), wideArr.Len());
 
-    var myChanType = reflect.TypeOf(((myChan)default!));
+    var myChanType = reflect.TypeOf((myChan)default!);
 
     fmt.Println("elem", named.Elem().Kind(), namedMap.Key().Kind(), namedMap.Elem().Kind());
     fmt.Println("elem", namedPtr.Elem().Kind(), myChanType.Elem().Kind(), namedArr.Elem().Kind());
 
-    var other = reflect.TypeOf(((myOtherBytes)default!));
+    var other = reflect.TypeOf((myOtherBytes)default!);
     fmt.Println("assign", bytes.AssignableTo(named), named.AssignableTo(bytes));
     fmt.Println("assign", named.AssignableTo(named), bytes.AssignableTo(bytes));
     fmt.Println("assign", named.AssignableTo(other), other.AssignableTo(named));
     fmt.Println("assign", named.AssignableTo(namedInts), bytes.AssignableTo(ints));
     fmt.Println("assign", named.AssignableTo(namedMap), plain.AssignableTo(named));
 
-    var stringerType = reflect.TypeOf(((ж<fmt.Stringer>)nil)).Elem();
-    var emptyType = reflect.TypeOf(((ж<any>)nil)).Elem();
+    var stringerType = reflect.TypeOf((ж<fmt.Stringer>)nil).Elem();
+    var emptyType = reflect.TypeOf((ж<any>)nil).Elem();
     fmt.Println("iface", reflect.TypeOf(new speaker(nil)).AssignableTo(stringerType));
     fmt.Println("iface", reflect.TypeOf(new mute(nil)).AssignableTo(stringerType));
     fmt.Println("iface", named.AssignableTo(emptyType), stringerType.AssignableTo(emptyType));

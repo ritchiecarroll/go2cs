@@ -215,8 +215,8 @@ internal static void fdctCols(ref block b) {
         // Subtracting 128*8 here is equivalent to subtracting 128
         // from every input before we started, but cheaper.
         // It also converts x0 from UQ11.18 to Q10.18.
-        b[0 * 8 + i] = ((x0 - 128 * 8) << (int)(18));
-        b[4 * 8 + i] = (x1 << (int)(18));
+        b[0 * 8 + i] = (x0 - 128 * 8) << 18;
+        b[4 * 8 + i] = x1 << 18;
         b[2 * 8 + i] = x2;
         b[6 * 8 + i] = x3;
 
@@ -226,8 +226,8 @@ internal static void fdctCols(ref block b) {
 
         // Stage 4: two √2 scalings and one butterfly.
 
-        x5 = ((x5 >> (int)(12))) * c(sqrt2, 12);
-        x6 = ((x6 >> (int)(12))) * c(sqrt2, 12);
+        x5 = (x5 >> 12) * c(sqrt2, 12);
+        x6 = (x6 >> 12) * c(sqrt2, 12);
         // x[56] still Q10.18 in [-925, 925] (= 654√2).
         (x7, x4) = (x7 + x4, x7 - x4);
         // x[47] still Q10.18 in [-925, 925] (not Q11.18!).
@@ -269,8 +269,8 @@ internal static void fdctRows(ж<block> Ꮡb) {
 
         // Stage 2: two boxes and two butterflies.
 
-        (x4, x7) = dctBox((x4 >> (int)(14)), (x7 >> (int)(14)), c(cos3, 14), c(sin3, 14));
-        (x5, x6) = dctBox((x5 >> (int)(14)), (x6 >> (int)(14)), c(cos1, 14), c(sin1, 14));
+        (x4, x7) = dctBox(x4 >> 14, x7 >> 14, c(cos3, 14), c(sin3, 14));
+        (x5, x6) = dctBox(x5 >> 14, x6 >> 14, c(cos1, 14), c(sin1, 14));
         // x[47] now Q12.18 in [-2830, 2830].
         // x[56] now Q12.18 in [-2400, 2400].
         (x0, x3) = (x0 + x3, x0 - x3);
@@ -279,7 +279,7 @@ internal static void fdctRows(ж<block> Ꮡb) {
 
         // Stage 3: one box and three butterflies.
 
-        (x2, x3) = dctBox((x2 >> (int)(14)), (x3 >> (int)(14)), c(sqrt2_cos6, 14), c(sqrt2_sin6, 14));
+        (x2, x3) = dctBox(x2 >> 14, x3 >> 14, c(sqrt2_cos6, 14), c(sqrt2_sin6, 14));
         // x[23] now Q13.18 in [-7539, 7539].
         (x0, x1) = (x0 + x1, x0 - x1);
         // x[01] now Q13.18 in [-8160, 8160].
@@ -289,22 +289,22 @@ internal static void fdctRows(ж<block> Ꮡb) {
 
         // Stage 4: two √2 scalings and one butterfly.
 
-        x5 = ((x5 >> (int)(14))) * c(sqrt2, 14);
-        x6 = ((x6 >> (int)(14))) * c(sqrt2, 14);
+        x5 = (x5 >> 14) * c(sqrt2, 14);
+        x6 = (x6 >> 14) * c(sqrt2, 14);
         // x[56] still Q13.18 in [-7397, 7397] (= 5230√2).
         (x7, x4) = (x7 + x4, x7 - x4);
         // x[47] still Q13.18 in [-7395, 7395] (= 2040*3.6246).
         // See “Note on 925” below.
 
         // Cut from Q13.18 to Q13.0.
-        x0 = ((x0 + (int32)(1 << (int)(17))) >> (int)(18));
-        x1 = ((x1 + (int32)(1 << (int)(17))) >> (int)(18));
-        x2 = ((x2 + (int32)(1 << (int)(17))) >> (int)(18));
-        x3 = ((x3 + (int32)(1 << (int)(17))) >> (int)(18));
-        x4 = ((x4 + (int32)(1 << (int)(17))) >> (int)(18));
-        x5 = ((x5 + (int32)(1 << (int)(17))) >> (int)(18));
-        x6 = ((x6 + (int32)(1 << (int)(17))) >> (int)(18));
-        x7 = ((x7 + (int32)(1 << (int)(17))) >> (int)(18));
+        x0 = (x0 + (int32)(1 << 17)) >> 18;
+        x1 = (x1 + (int32)(1 << 17)) >> 18;
+        x2 = (x2 + (int32)(1 << 17)) >> 18;
+        x3 = (x3 + (int32)(1 << 17)) >> 18;
+        x4 = (x4 + (int32)(1 << 17)) >> 18;
+        x5 = (x5 + (int32)(1 << 17)) >> 18;
+        x6 = (x6 + (int32)(1 << 17)) >> 18;
+        x7 = (x7 + (int32)(1 << 17)) >> 18;
 
         // Note: Unlike in fdctCols, saved all stores for the end
         // because they are adjacent memory locations and some systems
@@ -423,8 +423,8 @@ internal static void idctRows(ж<block> Ꮡb) {
         (x4, x6) = (x4 + x6, x4 - x6);
         // x[4567] now Q8.9 in [-218, 218].
 
-        (x4, x7) = dctBox((x4 >> (int)(2)), (x7 >> (int)(2)), c(cos3, 12), -c(sin3, 12));
-        (x5, x6) = dctBox((x5 >> (int)(2)), (x6 >> (int)(2)), c(cos1, 12), -c(sin1, 12));
+        (x4, x7) = dctBox(x4 >> 2, x7 >> 2, c(cos3, 12), -c(sin3, 12));
+        (x5, x6) = dctBox(x5 >> 2, x6 >> 2, c(cos1, 12), -c(sin1, 12));
         // x[4567] now Q9.19 in [-303, 303].
 
         // Stage 1.
@@ -469,14 +469,14 @@ internal static void idctCols(ref block b) {
         // Start by adding 0.5 to x0 (the incoming DC signal).
         // The butterflies will add it to all the other values,
         // and then the final shifts will round properly.
-        x0 += (int32)(1 << (int)(19));
+        x0 += (int32)(1 << 19);
 
         // Stages 4, 3, 2: x0, x1, x2, x3.
 
-        (x0, x1) = (((x0 + x1) >> (int)(2)), ((x0 - x1) >> (int)(2)));
+        (x0, x1) = ((x0 + x1) >> 2, (x0 - x1) >> 2);
         // x[01] now Q9.19.
         // Note: (1/sqrt 2)*((cos 6*pi/16)+(sin 6*pi/16)) < 1, so no new high bit.
-        (x2, x3) = dctBox((x2 >> (int)(13)), (x3 >> (int)(13)), c(sqrt2inv_cos6, 12), -c(sqrt2inv_sin6, 12));
+        (x2, x3) = dctBox(x2 >> 13, x3 >> 13, c(sqrt2inv_cos6, 12), -c(sqrt2inv_sin6, 12));
         // x[0123] now Q9.19.
 
         (x1, x2) = (x1 + x2, x1 - x2);
@@ -488,16 +488,16 @@ internal static void idctCols(ref block b) {
         (x7, x4) = (x7 + x4, x7 - x4);
         // x[47] now Q9.21.
 
-        x5 = ((x5 >> (int)(13))) * c(sqrt2inv, 14);
-        x6 = ((x6 >> (int)(13))) * c(sqrt2inv, 14);
+        x5 = (x5 >> 13) * c(sqrt2inv, 14);
+        x6 = (x6 >> 13) * c(sqrt2inv, 14);
         // x[56] now Q9.21.
 
         (x7, x5) = (x7 + x5, x7 - x5);
         (x4, x6) = (x4 + x6, x4 - x6);
         // x[4567] now Q9.22.
 
-        (x4, x7) = dctBox((x4 >> (int)(14)), (x7 >> (int)(14)), c(cos3, 12), -c(sin3, 12));
-        (x5, x6) = dctBox((x5 >> (int)(14)), (x6 >> (int)(14)), c(cos1, 12), -c(sin1, 12));
+        (x4, x7) = dctBox(x4 >> 14, x7 >> 14, c(cos3, 12), -c(sin3, 12));
+        (x5, x6) = dctBox(x5 >> 14, x6 >> 14, c(cos1, 12), -c(sin1, 12));
         // x[4567] now Q10.20.
 
         (x0, x7) = (x0 + x7, x0 - x7);

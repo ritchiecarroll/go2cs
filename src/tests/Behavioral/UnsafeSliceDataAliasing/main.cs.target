@@ -54,8 +54,8 @@ internal static void Main() {
     fmt.Println("ptr elem:", (~@unsafe.Slice(@unsafe.SliceData(ptrs), len(ptrs))[1]).key);
 
     var b = slice<byte>("hello"u8);
-    fmt.Println("bytes:", ((@string)@unsafe.Slice(@unsafe.SliceData(b), len(b))));
-    fmt.Println("bytes tail:", ((@string)@unsafe.Slice(@unsafe.SliceData(b[2..]), 3)));
+    fmt.Println("bytes:", (@string)@unsafe.Slice(@unsafe.SliceData(b), len(b)));
+    fmt.Println("bytes tail:", (@string)@unsafe.Slice(@unsafe.SliceData(b[2..]), 3));
 }
 
 } // end main_package

@@ -50,31 +50,31 @@ public static UntypedInt BoundsMaxConst => 31;
 public static nint BoundsEncode(BoundsErrorCode code, bool signed, bool xIsReg, bool yIsReg, nint xVal, nint yVal) {
     nint c = (nint)0;
     if (xIsReg){
-        c |= (nint)((1 << (int)(0)));
+        c |= (nint)((1 << 0));
         if (signed) {
-            c |= (nint)((1 << (int)(2)));
+            c |= (nint)((1 << 2));
         }
         if (xVal < 0 || xVal > BoundsMaxReg) {
             throw panic("bad xReg");
         }
-        c |= (nint)((xVal << (int)(3)));
+        c |= (nint)((xVal << 3));
     } else {
         if (xVal < 0 || xVal > BoundsMaxConst) {
             throw panic("bad xConst");
         }
-        c |= (nint)((xVal << (int)(2)));
+        c |= (nint)((xVal << 2));
     }
     if (yIsReg){
-        c |= (nint)((1 << (int)(1)));
+        c |= (nint)((1 << 1));
         if (yVal < 0 || yVal > BoundsMaxReg) {
             throw panic("bad yReg");
         }
-        c |= (nint)((yVal << (int)(7)));
+        c |= (nint)((yVal << 7));
     } else {
         if (yVal < 0 || yVal > BoundsMaxConst) {
             throw panic("bad yConst");
         }
-        c |= (nint)((yVal << (int)(7)));
+        c |= (nint)((yVal << 7));
     }
     return c * (nint)(uint8)numBoundsCodes + (nint)(uint8)code;
 }
@@ -87,26 +87,26 @@ public static (BoundsErrorCode code, bool signed, bool xIsReg, bool yIsReg, nint
     nint xVal = default!;
     nint yVal = default!;
 
-    code = ((BoundsErrorCode)(uint8)(v % (nint)(uint8)numBoundsCodes));
+    code = (BoundsErrorCode)(uint8)(v % (nint)(uint8)numBoundsCodes);
     nint c = v / (nint)(uint8)numBoundsCodes;
-    xIsReg = (nint)(c & 1) != 0;
+    xIsReg = (c & 1) != 0;
     c >>= (int)(1);
-    yIsReg = (nint)(c & 1) != 0;
+    yIsReg = (c & 1) != 0;
     c >>= (int)(1);
     if (xIsReg){
-        signed = (nint)(c & 1) != 0;
+        signed = (c & 1) != 0;
         c >>= (int)(1);
-        xVal = (nint)(c & 0xf);
+        xVal = c & 0xf;
         c >>= (int)(4);
     } else {
-        xVal = (nint)(c & 0x1f);
+        xVal = c & 0x1f;
         c >>= (int)(5);
     }
     if (yIsReg){
-        yVal = (nint)(c & 0xf);
+        yVal = c & 0xf;
         c >>= (int)(4);
     } else {
-        yVal = (nint)(c & 0x1f);
+        yVal = c & 0x1f;
         c >>= (int)(5);
     }
     if (c != 0) {

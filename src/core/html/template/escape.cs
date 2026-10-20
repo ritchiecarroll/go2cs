@@ -966,7 +966,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
         // Decode the value so non-HTML rules can easily handle
         //     <button onclick="alert(&quot;Hi!&quot;)">
         // without having to entity decode token boundaries.
-        for (var u = slice<byte>(html.UnescapeString(((@string)s))); len(u) != 0; ) {
+        for (var u = slice<byte>(html.UnescapeString((@string)s)); len(u) != 0; ) {
             var (c1, i1) = transitionFunc[c.state](c, u);
             (c, u) = (c1, u.slice(i1));
         }
@@ -976,7 +976,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
     var element = c.element;
 
     // If this is a non-JS "type" attribute inside "script" tag, do not treat the contents as JS.
-    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType(((@string)(s.slice(0, i))))) {
+    if (c.state == stateAttr && c.element == elementScript && c.attr == attrScriptType && !isJSType((@string)(s.slice(0, i)))) {
         element = elementNone;
     }
 

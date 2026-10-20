@@ -45,26 +45,26 @@ private static readonly @string valˢ = "val"u8;
 internal static void Main() {
     z("string non-empty", "val");
     z("string empty", "");
-    z("NS non-empty", ((NS)(@string)valˢ));
-    z("NS empty", ((NS)(@string)""u8));
-    z("NI non-zero", ((NI)3));
-    z("NI zero", ((NI)0));
+    z("NS non-empty", (NS)(@string)valˢ);
+    z("NS empty", (NS)(@string)""u8);
+    z("NI non-zero", (NI)3);
+    z("NI zero", (NI)0);
 
     z("[2]uint8{1,2}", new uint8[]{1, 2}.array());
     z("[2]uint8{}", new uint8[]{}.array(2));
     z("NA{1,2}", new NA(new uint8[]{1, 2}.array()));
     z("NA{}", new NA(new uint8[2].array()));
     z("[3]string{'','',''}", new @string[]{}.array(3));
-    z("[2]NS{'a',''}", new NS[]{((NS)(@string)"a"u8), ((NS)(@string)""u8)}.array());
+    z("[2]NS{'a',''}", new NS[]{(NS)(@string)"a"u8, (NS)(@string)""u8}.array());
 
-    z("NB(nil)", ((NB)default!));
+    z("NB(nil)", (NB)default!);
     z("NB{}", new NB(new byte[]{}.slice()));
     z("[]byte(nil)", slice<byte>(default!));
     z("[]byte{0}", new byte[]{0}.slice());
     map<@string, nint> nilMap = default!;
     z("map nil", nilMap);
     z("map empty", new map<@string, nint>{});
-    z("*int nil", ((ж<nint>)nil));
+    z("*int nil", (ж<nint>)nil);
 
     z("inner{}", new inner(nil));
     z("inner{S:val}", new inner(S: ((NS)(@string)valˢ)));
@@ -77,8 +77,8 @@ internal static void Main() {
     z("outer{P:&n}", new outer(P: Ꮡn));
     z("outer{Sl:[]}", new outer(Sl: new nint[]{}.slice()));
 
-    fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf(((any)((NS)(@string)""u8))).IsZero());
-    fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf(((any)((NS)(@string)"v"u8))).IsZero());
+    fmt.Println("any(NS(\"\")) IsZero:", reflect.ValueOf((any)((NS)(@string)""u8)).IsZero());
+    fmt.Println("any(NS(\"v\")) IsZero:", reflect.ValueOf((any)((NS)(@string)"v"u8)).IsZero());
 
     z("outer{E:nil}", new outer(nil));
     z("outer{E:err}", new outer(E: errors.New("x")));

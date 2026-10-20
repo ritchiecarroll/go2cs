@@ -44,7 +44,7 @@ public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) {
     var buf = new slice<byte>(sz);
 
     buf[0] = floatGobVersion;
-    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << (int)(5)) | (byte)((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << (int)(3))) | (byte)((byte)((form)(x.form & 3)) << (int)(1)));
+    var b = (byte)((byte)((byte)((byte)((RoundingMode)(x.mode & 7)) << 5) | (byte)((byte)(int8)((Accuracy)((x.acc + 1) & 3)) << 3)) | (byte)((byte)((form)(x.form & 3)) << 1));
     if (x.neg) {
         b |= (byte)(1);
     }
@@ -87,9 +87,9 @@ public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) {
     var oldMode = z.mode;
 
     var b = buf[1];
-    z.mode = ((RoundingMode)((byte)(((b >> (int)(5))) & 7)));
-    z.acc = (Accuracy)(((Accuracy)(int8)((byte)(((b >> (int)(3))) & 3))) - 1);
-    z.form = ((form)((byte)(((b >> (int)(1))) & 3)));
+    z.mode = (RoundingMode)((byte)((b >> 5) & 7));
+    z.acc = (Accuracy)(((Accuracy)(int8)((byte)((b >> 3) & 3))) - 1);
+    z.form = (form)((byte)((b >> 1) & 3));
     z.neg = (byte)(b & 1) != 0;
     z.prec = byteorder.BEUint32(buf[2..]);
 
@@ -138,7 +138,7 @@ public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) {
 // effect.
 public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
-    var (_, _, err) = Ꮡz.Parse(((@string)text), 0);
+    var (_, _, err) = Ꮡz.Parse((@string)text, 0);
     if (err != default!) {
         err = fmt.Errorf("math/big: cannot unmarshal %q into a *big.Float (%v)"u8, text, err);
     }

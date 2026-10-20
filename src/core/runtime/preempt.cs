@@ -165,7 +165,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
                     // Claim goroutine by setting scan bit.
                     // This may race with execution or readying of gp.
                     // The scan bit keeps it from transition state.
-                    if (!castogscanstatus(Ꮡgp, s, (uint32)(s | (uint32)_Gscan))) {
+                    if (!castogscanstatus(Ꮡgp, s, s | (uint32)_Gscan)) {
                         break;
                     }
 
@@ -239,7 +239,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
             }
             else if (!matchᴛ1) { /* default: */
                 do {
-                    if ((uint32)(s & (uint32)_Gscan) != 0) {
+                    if ((s & (uint32)_Gscan) != 0) {
                         // Someone else is suspending it. Wait
                         // for them to finish.
                         //
@@ -289,7 +289,7 @@ internal static void resumeG(suspendGState state) {
         var s = readgstatus(gp);
         var exprᴛ1 = s;
         if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
-            casfrom_Gscanstatus(gp, s, (uint32)(s & ~(uint32)_Gscan));
+            casfrom_Gscanstatus(gp, s, s & ~(uint32)_Gscan);
         }
         else { /* default: */
             dumpgstatus(gp);
@@ -309,7 +309,7 @@ internal static void resumeG(suspendGState state) {
 //
 //go:nosplit
 internal static bool canPreemptM(ref m mp) {
-    return mp.locks == 0 && mp.mallocing == 0 && mp.preemptoff == ""u8 && (~mp.p.ptr()).status == _Prunning && mp.curg != nil && (uint32)(readgstatus(mp.curg) & ~(uint32)_Gscan) != _Gsyscall;
+    return mp.locks == 0 && mp.mallocing == 0 && mp.preemptoff == ""u8 && (~mp.p.ptr()).status == _Prunning && mp.curg != nil && (readgstatus(mp.curg) & ~(uint32)_Gscan) != _Gsyscall;
 }
 
 //go:generate go run mkpreempt.go
@@ -392,7 +392,7 @@ internal static bool wantAsyncPreempt(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Check both the G and the P.
-    return (gp.preempt || (~gp.m).p != 0 && (~(~gp.m).p.ptr()).preempt) && (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Grunning;
+    return (gp.preempt || (~gp.m).p != 0 && (~(~gp.m).p.ptr()).preempt) && (readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Grunning;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

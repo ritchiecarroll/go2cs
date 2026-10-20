@@ -99,7 +99,7 @@ internal static void readHosts() {
                     @string name = absDomainName(f[i]);
                     var h = slice<byte>(f[i]);
                     lowerASCIIBytes(h);
-                    @string key = absDomainName(((@string)h));
+                    @string key = absDomainName((@string)h);
 
                     if (i == 1) {
                         canonical = key;
@@ -147,7 +147,7 @@ internal static (slice<@string>, @string) lookupStaticHost(@string host) {
             if (hasUpperCase(host)) {
                 var lowerHost = slice<byte>(host);
                 lowerASCIIBytes(lowerHost);
-                host = ((@string)lowerHost);
+                host = (@string)lowerHost;
             }
             {
                 var (byName, ok) = hosts.byName[absDomainName(host), ꟷ]; if (ok) {
