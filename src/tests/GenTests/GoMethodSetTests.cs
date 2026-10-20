@@ -31,7 +31,7 @@ public class GoMethodSetTests
     private const string Path = @"C:\go2cs\src\core\mtest\mtest.cs";
 
     // A plain struct with a value method, a pointer method emitted `this ref` (answered through RecvGenerator's ж twin),
-    // an unexported method, a variadic one and one with 16 parameters; a generic struct with a value and a pointer method
+    // an unexported method, a variadic one, one with 16 parameters and one with 17 (its method value takes golib's ladder); a generic struct with a value and a pointer method
     // over type parameters named apart from the type's; a struct named `file`, a contextual keyword the partial must
     // escape (CS9056); and Outer, which declares no method and promotes Inner's value method and pointer method.
     private const string Package =
@@ -62,6 +62,9 @@ public class GoMethodSetTests
             public static nint Wide(this Plain p, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8,
                 nint a9, nint a10, nint a11, nint a12, nint a13, nint a14, nint a15, nint a16) => p.n * 100 + a1 + a16;
 
+            public static nint Wider(this Plain p, nint a1, nint a2, nint a3, nint a4, nint a5, nint a6, nint a7, nint a8,
+                nint a9, nint a10, nint a11, nint a12, nint a13, nint a14, nint a15, nint a16, nint a17) => p.n * 100 + a1 + a17;
+
             public static nint Twice(this Inner x) => x.i * 2;
 
             public static void Bump(this ref Inner x) => x.i++;
@@ -76,6 +79,11 @@ public class GoMethodSetTests
                 p.v = v;
                 return old;
             }
+
+            // Boxes for the family pins, which read the arms through golib's reflect.
+            public static object PlainBox() => Ꮡ(new Plain { n = 3 });
+
+            public static object OuterBox() => Ꮡ(new Outer { Inner = new Inner { i = 4 } });
 
             // Executed by the test: each arm, as reflect asks for it.
             public static string Probe()
@@ -204,4 +212,65 @@ public class GoMethodSetTests
         // promoted Twice through T (10), Bump through *T then Twice through *T (5*2), Inner.i now 5, and no Bump through T.
         Assert.AreEqual("1 3 3 5 z=26 26 7 True True True 3 5 217 317 10 10 5 True", probe.Invoke(null, null));
     }
+
+    // golib takes a bound arm only when its delegate is of the type golib's binder builds (GoReflect.GoMethodValueType), so
+    // each family the generator spells for a method value is held to that type here: the BCL's Func through 16 parameters,
+    // golib's ladder from 17, the variadic family, and a promoted method. Each is asked through T and *T where Go's method
+    // set has it, and GoMethodValue must answer with the arm itself, not the binder.
+    [TestMethod]
+    public void EachFamilysBoundArmIsOfTheTypeTheBinderBuilds()
+    {
+        (_, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        Assembly assembly = Assembly.Load(image.ToArray());
+        Type plain = assembly.GetType("go.mtest_package+Plain", throwOnError: true)!;
+        Type outer = assembly.GetType("go.mtest_package+Outer", throwOnError: true)!;
+        Type package = assembly.GetType("go.mtest_package", throwOnError: true)!;
+        object plainBox = package.GetMethod("PlainBox")!.Invoke(null, null)!;
+        object outerBox = package.GetMethod("OuterBox")!.Invoke(null, null)!;
+
+        (string family, Type type, string method, object receiver)[] cases =
+        [
+            ("BCL Func, value receiver", plain, "Wide", Activator.CreateInstance(plain)!),
+            ("BCL Func, through *T", Box(plain), "Get", plainBox),
+            ("golib ladder, 17 parameters", plain, "Wider", Activator.CreateInstance(plain)!),
+            ("golib ladder, through *T", Box(plain), "Wider", plainBox),
+            ("variadic family", plain, "Sum", Activator.CreateInstance(plain)!),
+            ("variadic family, through *T", Box(plain), "Sum", plainBox),
+            ("promoted value method", outer, "Twice", Activator.CreateInstance(outer)!),
+            ("promoted pointer method, through *T", Box(outer), "Bump", outerBox)
+        ];
+
+        List<string> mismatches = [];
+
+        foreach ((string family, Type type, string method, object receiver) in cases)
+        {
+            bool pointer = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(golib::go.ж<>);
+            golib::go.IGoMethodSet set = (golib::go.IGoMethodSet)Activator.CreateInstance(pointer ? type.GetGenericArguments()[0] : type)!;
+            Delegate? arm = set.ᴛMethod(method, pointer, true, receiver);
+            int index = golib::go.GoReflect.GoMethodIndex(type, method);
+
+            if (arm is null || index < 0)
+            {
+                mismatches.Add($"{family}: no arm or no method ({method})");
+                continue;
+            }
+
+            Type binder = golib::go.GoReflect.GoMethodValueType(type, index);
+
+            if (arm.GetType() != binder)
+                mismatches.Add($"{family}: the arm is {arm.GetType()}, the binder builds {binder}");
+            else if (golib::go.GoReflect.GoMethodValue(type, index, receiver).Method != arm.Method)
+                mismatches.Add($"{family}: GoMethodValue did not answer with the arm");
+        }
+
+        Assert.AreEqual(0, mismatches.Count, string.Join("; ", mismatches));
+    }
+
+    private static Type Box(Type element) => typeof(golib::go.ж<>).MakeGenericType(element);
 }

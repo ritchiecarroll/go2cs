@@ -71,7 +71,7 @@ namespace go;
 //   a compile — the same memoization rule the bridge's ValueSlot accessors already follow.
 //
 // CACHES
-//   s_boundFactories / s_methodFuncs / s_methodFuncTypes are keyed by MethodInfo and are NOT on
+//   s_boundFactories / s_methodFuncs / s_methodFuncTypes / s_methodValueTypes are keyed by MethodInfo and are NOT on
 //   ClearTypeCaches' list, correctly so: a MethodInfo's signature is fixed when its type loads, and
 //   a late-loading assembly cannot change it. Only the TABLES (which methods belong to a set) are
 //   derived from the extension-method scan, and those are cleared in golib beside the scan itself.
@@ -80,6 +80,7 @@ public static partial class GoReflect
 {
     private static readonly ConcurrentDictionary<MethodInfo, Func<object?, Delegate>> s_boundFactories = [];
     private static readonly ConcurrentDictionary<MethodInfo, Type> s_methodFuncTypes = [];
+    private static readonly ConcurrentDictionary<MethodInfo, Type> s_methodValueTypes = [];
 
     // The pointer-lookup form of s_methodFuncTypes, and the reason it needs its OWN cache: the same
     // MethodInfo yields a DIFFERENT Go func type depending on whether it was reached through T or
@@ -404,6 +405,18 @@ public static partial class GoReflect
     }
 
     /// <summary>
+    /// Delegate type of the <paramref name="index"/>'th method's METHOD VALUE: its Go signature with the receiver
+    /// removed, the type <see cref="GoMethodValue"/> hands back whichever route binds it.
+    /// </summary>
+    /// <param name="t">Managed type standing for the Go type.</param>
+    /// <param name="index">Method index.</param>
+    /// <returns>Delegate type describing the method value's Go signature.</returns>
+    public static Type GoMethodValueType(Type? t, int index) => MethodValueType(MethodAt(t, index).Method);
+
+    private static Type MethodValueType(MethodInfo method) =>
+        s_methodValueTypes.GetOrAdd(method, static m => MakeDelegateType([.. m.GetParameters().Skip(1).Select(static p => p.ParameterType)], m.ReturnType));
+
+    /// <summary>
     /// Binds <paramref name="receiver"/> to the <paramref name="index"/>'th method of
     /// <paramref name="staticType"/>'s method set and returns the resulting METHOD VALUE — a
     /// delegate carrying the Go signature with the receiver removed, which is what
@@ -485,9 +498,13 @@ public static partial class GoReflect
         golib.TypeExtensions.IsCopyBoundReceiver(entry.Method, out Type receiverType);
 
         // The type's generated method set binds the receiver in compiled code (IGoMethodSet), as it is: a value method
-        // reached through *X copies the pointee there, at the bind.
-        if (GeneratedMethod(methodOwner, entry.Method, true, bindTarget) is { } generatedValue)
+        // reached through *X copies the pointee there, at the bind. Taken only when it is of the type the binder below
+        // builds, as the unbound func is, so a method value's type does not depend on which route answered.
+        if (GeneratedMethod(methodOwner, entry.Method, true, bindTarget) is { } generatedValue &&
+            generatedValue.GetType() == MethodValueType(entry.Method))
+        {
             return generatedValue;
+        }
 
         // A value-receiver method reached through *X receives a COPY of the pointee (Go's rule).
         // Fix W: the box test walks the base chain, so a per-kind subclass instance still takes
@@ -676,7 +693,7 @@ public static partial class GoReflect
 
         ParameterExpression receiver = Expression.Parameter(typeof(object), "receiver");
         ParameterExpression[] arguments = [.. parameters.Skip(1).Select(static (p, i) => Expression.Parameter(p.ParameterType, p.Name ?? $"arg{i}"))];
-        Type delegateType = MakeDelegateType([.. arguments.Select(static a => a.Type)], method.ReturnType);
+        Type delegateType = MethodValueType(method);
 
         Expression body = Expression.Call(method, [Expression.Convert(receiver, receiverType), .. arguments]);
         LambdaExpression bound = Expression.Lambda(delegateType, body, arguments);
