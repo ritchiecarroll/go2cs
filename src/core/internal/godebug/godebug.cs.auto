@@ -72,20 +72,20 @@ using go.sync;
 partial class godebug_package {
 
 // A Setting is a single setting in the $GODEBUG environment variable.
-[GoType] partial struct Setting {
+partial struct Setting {
     internal @string name;
     internal sync.Once once;
-    internal partial ref ж<setting> setting { get; }
+    /*embed*/ internal ж<setting> setting;
 }
 
-[GoType] partial struct setting {
+partial struct setting {
     internal atomic.Pointer<value> value;
     internal sync.Once nonDefaultOnce;
     internal atomic.Uint64 nonDefault;
     internal ж<godebugs.Info> info;
 }
 
-[GoType] partial struct value {
+partial struct value {
     internal @string text;
     internal ж<bisect.Matcher> bisect;
 }
@@ -109,7 +109,7 @@ public static ж<Setting> New(@string name) {
 }
 
 // Name returns the name of the setting.
-[GoRecv] public static @string Name(this ref Setting s) {
+public static @string Name(this ref Setting s) {
     if (s.name != ""u8 && s.name[0] == (rune)'#') {
         return s.name[1..];
     }
@@ -117,7 +117,7 @@ public static ж<Setting> New(@string name) {
 }
 
 // Undocumented reports whether this is an undocumented setting.
-[GoRecv] public static bool Undocumented(this ref Setting s) {
+public static bool Undocumented(this ref Setting s) {
     return s.name != ""u8 && s.name[0] == (rune)'#';
 }
 
@@ -204,6 +204,7 @@ internal static ж<setting> lookup(@string name) {
             return v._<ж<setting>>();
         }
     }
+
     return s;
 }
 
@@ -259,17 +260,28 @@ internal static void update(@string def, @string env) {
     try {
         ᏑupdateMu.Lock();
         defer(ᏑupdateMu.Unlock, ref ᒐ);
+
         // Update all the cached values, creating new ones as needed.
         // We parse the environment variable first, so that any settings it has
         // are already locked in place (did[name] = true) before we consider
-        // the defaults.
+        // the defaults. Existing immutable settings are always locked.
         var did = new map<@string, bool>();
-        parse(did, env);
-        parse(did, def);
-        // Clear any cached values that are no longer present.
         var didʗ1 = did;
         Ꮡcache.Range((any name, any s) => {
-            if (!didʗ1[name._<@string>()]) {
+            {
+                var info = s._<ж<setting>>().Value.info; if (info != nil && (~info).Immutable) {
+                    didʗ1[name._<@string>()] = true;
+                }
+            }
+            return true;
+        });
+        parse(did, env);
+        parse(did, def);
+
+        // Clear any cached values that are no longer present.
+        var didʗ2 = did;
+        Ꮡcache.Range((any name, any s) => {
+            if (!didʗ2[name._<@string>()]) {
                 s._<ж<setting>>().of(setting.Ꮡvalue).Store(Ꮡempty);
             }
             return true;
@@ -298,16 +310,16 @@ internal static void parse(map<@string, bool> did, @string s) {
     for (nint i = end - 1; i >= -1; i--) {
         if (i == -1 || s[i] == (rune)','){
             if (eq >= 0) {
-                @string name = s[(int)(i + 1)..(int)(eq)];
+                @string name = s.slice(i + 1, eq);
                 ref var arg = ref heap<@string>(out var Ꮡarg);
-                arg = s[(int)(eq + 1)..(int)(end)];
+                arg = s.slice(eq + 1, end);
                 if (!did[name]) {
                     did[name] = true;
                     var v = Ꮡ(new value(text: arg));
                     for (nint j = 0; j < len(arg); j++) {
                         if (arg[j] == (rune)'#') {
-                            v.Value.text = arg[..(int)(j)];
-                            (v.Value.bisect, _) = bisect.New(arg[(int)(j + 1)..]);
+                            v.Value.text = arg.slice(0, j);
+                            (v.Value.bisect, _) = bisect.New(arg.slice(j + 1));
                             break;
                         }
                     }
@@ -323,13 +335,13 @@ internal static void parse(map<@string, bool> did, @string s) {
     }
 }
 
-[GoType] partial struct runtimeStderr {
+partial struct runtimeStderr {
 }
 
 internal static ж<runtimeStderr> Ꮡstderr = new StandardBox<runtimeStderr>(default(runtimeStderr));
 internal static ref runtimeStderr stderr => ref Ꮡstderr.Value;
 
-[GoRecv] internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
+internal static (nint, error) Write(this ref runtimeStderr _, slice<byte> b) {
     if (len(b) > 0) {
         write(2, @unsafe.Pointer.FromPinnedBox(Ꮡ(b, 0)), (int32)len(b));
     }
