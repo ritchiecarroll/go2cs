@@ -117,9 +117,9 @@ public sealed class TestExecution
     private Goroutine? m_ownerGoroutine;
     private int m_tempDirSequence;
 
-    // Set under m_syncRoot on the FIRST TempDir call, where the PARENT directory's removal is registered
-    // once — see TempDir. Go keeps the same state as `c.tempDir != ""` (testing.go:1230).
-    private bool m_tempDirParentRegistered;
+    // Go's common.tempDir (makeTempDir, testing.go:1431): the test's PARENT temp directory, made on the
+    // first call and again whenever it no longer exists, its removal registered each time. Under m_syncRoot.
+    private string? m_tempDirParent;
 
     // Go 1.25's common.o (testing.go:1119-1121): the test's Output writer, made on first use here, and
     // its buffered partial line (outputWriter.partial). Both under m_syncRoot.
@@ -702,6 +702,7 @@ public sealed class TestExecution
 
     private const string ParallelInsideBubbleText = "testing: t.Parallel called inside synctest bubble";
     private const string RunInsideBubbleText = "testing: t.Run called inside synctest bubble";
+    private const string RunDuringCleanupText = "testing: t.Run called during t.Cleanup";
     internal const string DeadlineInsideBubbleText = "testing: t.Deadline called inside synctest bubble";
 
     /// <summary>
@@ -1000,13 +1001,20 @@ public sealed class TestExecution
             {
                 m_artifactDirMade = made = true;
 
-                try
+                if (!m_runner.Artifacts)
                 {
-                    m_artifactDir = m_runner.Artifacts ? m_runner.MakeArtifactDir() : TempDir().ToString();
+                    (m_artifactDir, m_artifactDirError) = MakeTempDir();
                 }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                else
                 {
-                    m_artifactDirError = ex.Message;
+                    try
+                    {
+                        m_artifactDir = m_runner.MakeArtifactDir();
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        m_artifactDirError = ex.Message;
+                    }
                 }
             }
         }
@@ -1327,6 +1335,13 @@ public sealed class TestExecution
         if (m_isSynctest)
             throw builtin.panic(RunInsideBubbleText);
 
+        // Go's `if t.cleanupStarted.Load()` (testing.go:2054), Issue 48515.
+        lock (m_syncRoot)
+        {
+            if (m_cleanupStarted)
+                throw builtin.panic(RunDuringCleanupText);
+        }
+
         // Go's t.creator (testing.go:2065): the stack that called t.Run, for the child's frameSkip.
         return m_runner.RunChild(this, name, action, Callers());
     }
@@ -1502,6 +1517,25 @@ public sealed class TestExecution
     /// </remarks>
     public @string TempDir()
     {
+        (string? dir, string? error) = MakeTempDir();
+        return dir ?? throw new IOException(error);
+    }
+
+    /// <summary>
+    /// Go 1.26's <c>makeTempDir</c> (testing.go:1431): a numbered child of the test's parent temp
+    /// directory, or the error Go's <c>TempDir</c> reports as <c>Fatalf("TempDir: %v", err)</c> and its
+    /// <c>ArtifactDir</c> as <c>Fatalf("ArtifactDir: %v", err)</c>.
+    /// </summary>
+    /// <remarks>
+    /// The parent sits under <c>GOTMPDIR</c> when it is set, read through the converted <c>os</c> where
+    /// <c>t.Setenv</c> writes it, as Go's <c>os.MkdirTemp(os.Getenv("GOTMPDIR"), pattern)</c> does;
+    /// otherwise under the run root, for the reason above. A creation failure is the TEST's, as in Go,
+    /// never an infrastructure error: before Go's 64-byte name limit was mirrored (see
+    /// <see cref="TempDirName"/>), testing's TestTempDir/aaaa... overflowed the path component and the
+    /// host raised it as one.
+    /// </remarks>
+    internal (string? dir, string? error) MakeTempDir()
+    {
         // ⚠ ONE cleanup, registered on the FIRST call, removing the test's PARENT directory — Go's own
         // shape (testing.go:1265-1269), where later calls only number a child inside it and register
         // nothing. A cleanup PER CALL is what this host did until 2026-09-15, and the difference is an
@@ -1512,8 +1546,7 @@ public sealed class TestExecution
         // with "The process cannot access the file ... because it is being used by another process" while
         // passing under `go test`. Diagnosed at both sources and ruled to Go's shape by COORD 5e2193a59d.
         // The on-disk LAYOUT does not move: the parent is the directory the numbered children already sat in.
-        string parent = Path.Combine(m_runner.RunRoot, ".tmp", TempDirName(Name));
-
+        //
         // ⚠ RE-REGISTERED WHEN THE PARENT IS GONE, which is Go's own `nonExistent` test
         // (testing.go:1224-1251 at 1.24.13): each call Stats c.tempDir and, if its removal has already
         // RUN, makes a fresh one and registers its removal again. testing's TestTempDirInCleanup is that
@@ -1522,19 +1555,39 @@ public sealed class TestExecution
         // it. With a once-only flag the host created `parent\N` there and registered nothing, leaving it
         // on disk ("Directory ... from user Cleanup still exists"). RunCleanups already drains cleanups
         // registered during the cleanup phase, so the re-registered removal runs.
-        lock (m_syncRoot)
+        try
         {
-            if (!m_tempDirParentRegistered || !Directory.Exists(parent))
-            {
-                m_tempDirParentRegistered = true;
-                Directory.CreateDirectory(parent);
-                Cleanup(() => RemoveAllWithWindowsRetry(parent));
-            }
-        }
+            string parent;
 
-        string path = Path.Combine(parent, Interlocked.Increment(ref m_tempDirSequence).ToString(CultureInfo.InvariantCulture));
-        Directory.CreateDirectory(path);
-        return path;
+            lock (m_syncRoot)
+            {
+                if (m_tempDirParent is null || !Directory.Exists(m_tempDirParent))
+                {
+                    string gotmpdir = os_package.Getenv("GOTMPDIR").ToString();
+                    string root = gotmpdir.Length > 0 ? gotmpdir : Path.Combine(m_runner.RunRoot, ".tmp");
+                    string made = Path.Combine(root, TempDirName(Name));
+
+                    // MkdirTemp makes only the last element: a GOTMPDIR that does not exist is an error, as in Go.
+                    if (gotmpdir.Length > 0 && !Directory.Exists(gotmpdir))
+                        throw new DirectoryNotFoundException($"Could not find a part of the path '{made}'.");
+
+                    Directory.CreateDirectory(made);
+                    m_tempDirParent = made;
+                    Cleanup(() => RemoveAllWithWindowsRetry(made));
+                }
+
+                parent = m_tempDirParent;
+            }
+
+            // Go's fmt.Sprintf("%s%c%03d", c.tempDir, os.PathSeparator, seq).
+            string path = Path.Combine(parent, Interlocked.Increment(ref m_tempDirSequence).ToString("D3", CultureInfo.InvariantCulture));
+            Directory.CreateDirectory(path);
+            return (path, null);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return (null, ex.Message);
+        }
     }
 
     /// <summary>
@@ -2182,10 +2235,24 @@ public sealed class TestExecution
 
     private void RunCleanups()
     {
-        // Go's c.cleanupStarted.Store(true) as runCleanup begins: synctest.Test refuses to start from here on.
+        // Go's c.cleanupStarted.Store(true) as runCleanup begins, and its deferred Store(false) as it ends:
+        // t.Run and synctest.Test refuse to start in between.
         lock (m_syncRoot)
             m_cleanupStarted = true;
 
+        try
+        {
+            RunCleanupsLoop();
+        }
+        finally
+        {
+            lock (m_syncRoot)
+                m_cleanupStarted = false;
+        }
+    }
+
+    private void RunCleanupsLoop()
+    {
         while (true)
         {
             Action cleanup;
@@ -2511,7 +2578,22 @@ public sealed class TestExecution
     /// </remarks>
     internal static string TempDirName(string value)
     {
-        return $"{GoTempDirPattern(value)}-{Fnv1a32(value):x8}";
+        return $"{GoTempDirPattern(GoTempDirNamePrefix(value))}-{Fnv1a32(value):x8}";
+    }
+
+    /// <summary>
+    /// Go 1.25's cut (makeTempDir): <i>"Limit length of file names on disk. Invalid runes from slicing are
+    /// dropped by strings.Map below."</i> — <c>pattern[:min(len(pattern), 64)]</c>, in BYTES, before mapping.
+    /// </summary>
+    /// <remarks>
+    /// A rune the cut splits decodes to U+FFFD, which <see cref="GoTempDirPattern"/> drops as Go's mapper
+    /// drops <c>utf8.RuneError</c>. The hash in <see cref="TempDirName"/> stays over the WHOLE name, so two
+    /// long names sharing 64 bytes still get two directories.
+    /// </remarks>
+    internal static string GoTempDirNamePrefix(string value)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(value);
+        return bytes.Length <= 64 ? value : Encoding.UTF8.GetString(bytes, 0, 64);
     }
 
     /// <summary>
