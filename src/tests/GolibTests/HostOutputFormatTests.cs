@@ -111,6 +111,20 @@ namespace GolibTests
                 $@"\A--- FAIL: TestLines \(\d+\.\d\ds\)\n    {Regex.Escape(ThisFile)}:{Line}: first\n        second\nFAIL\n\z"));
         }
 
+        // Go's TestTBHelper cases 9 and 10: a record a HELPER logs inside a cleanup is attributed to the line that called
+        // t.Cleanup (frameSkip walks on into the stack Cleanup kept, cleanupPc), not to the cleanup's own line.
+        [TestMethod]
+        public void AHelperInACleanupIsAttributedToTheCleanupCall()
+        {
+            TestRegistry registry = new("guard", []);
+            registry.Add("TestCleanupHelper", go.hostfmtguard.hostfmtguard_test_package.TestCleanupHelper, "a_test.go", 10);
+
+            (_, string output) = Run(registry, "-test.run=^TestCleanupHelper$");
+
+            StringAssert.Matches(output, new Regex(
+                $@"\A--- FAIL: TestCleanupHelper \(\d+\.\d\ds\)\n    {Regex.Escape(ThisFile)}:{Line}: in cleanup\nFAIL\n\z"));
+        }
+
         private static (int exit, string output) Run(TestRegistry registry, params string[] args)
         {
             TextWriter previousOut = Console.Out;
@@ -163,6 +177,19 @@ namespace go.hostfmtguard
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void TestLines(ж<testing_package.T> t) { At(); t.Error("first\nsecond"); }
+
+        // The cleanup's t.Error is on its OWN line, apart from the t.Cleanup call, so the arm tells the two apart.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void TestCleanupHelper(ж<testing_package.T> t)
+        {
+            Action cleanup = () =>
+            {
+                t.Helper();
+                t.Error("in cleanup");
+            };
+
+            At(); t.Cleanup(cleanup);
+        }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void helperLog(ж<testing_package.T> t, string message)
