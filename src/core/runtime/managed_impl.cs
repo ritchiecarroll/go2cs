@@ -412,6 +412,7 @@ partial class runtime_package
     // settings (panicnil, asynctimerchan, ...) count their non-default events through it
     // (godebugInc.IncNonDefault). Without the registration every such increment was dropped on the
     // floor — Go's documented behavior only for "calls before internal/godebug registers itself".
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static void godebugSetNewIncNonDefault(Func<@string, Action> newIncNonDefault) => godebug_setNewIncNonDefault(newIncNonDefault);
 
     // godebugSetUpdate is internal/godebug's //go:linkname setUpdate, the same crossing: Go's godebug
@@ -419,6 +420,7 @@ partial class runtime_package
     // $GODEBUG, and godebugNotify calls it again on every os.Setenv/Unsetenv of GODEBUG
     // (syscall_runtimeSetenv). That is how Value sees a GODEBUG os.Setenv writes, and the only
     // place an Immutable setting (fips140) is held at its first value.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public static void godebugSetUpdate(Action<@string, @string> update) => godebug_setUpdate(update);
 
     // syscallRuntimeSetenv / syscallRuntimeUnsetenv are syscall's runtimeSetenv/runtimeUnsetenv, the
