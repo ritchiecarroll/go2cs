@@ -48,9 +48,15 @@ namespace go.golib;
 /// <para>
 /// THE WAIT. Windows waits on a high-resolution waitable timer (<see cref="GoHighResolutionTimer"/>, the
 /// object Go's windows runtime uses), with no spin. Elsewhere the service thread waits on its wake event to
-/// within a millisecond of the head timer's due time, then spins out the final sub-millisecond with
-/// <see cref="SpinWait"/>, which yields. Only the head timer is ever spun for, so with one far-future timer
-/// armed the service thread is blocked, not running.
+/// within a millisecond of the head timer's due time, then sleeps out the final sub-millisecond in 250 µs
+/// libc <c>nanosleep</c> slices, spinning with <see cref="SpinWait"/> only where that call is missing. Only
+/// the head timer is ever waited for that closely, so with one far-future timer armed the service thread is
+/// blocked, not running.
+/// </para>
+/// <para>
+/// ONE HEAP, as in Go: package time's timers, tickers and <c>time.Sleep</c> are armed here too (each real-clock
+/// runtime timer owns one <see cref="GoTimer"/>), beside internal/poll's deadlines. golib's deadlock report
+/// reads <see cref="AnyPending"/>, Go's <c>checkdead</c> timer scan.
 /// </para>
 /// </remarks>
 public sealed partial class GoTimer
@@ -141,6 +147,10 @@ public sealed partial class GoTimer
     private static long s_slowCallbacks;
     private static string? s_lastSlowCallback;
 
+    // The callbacks of the batch the service thread is running that have not yet returned; set with the
+    // batch under s_lock, counted down as each returns.
+    private static int s_running;
+
     /// <summary>The number of armed timers in the heap (a test-visible observation point).</summary>
     internal static int Count
     {
@@ -148,6 +158,20 @@ public sealed partial class GoTimer
         {
             lock (s_lock)
                 return s_count;
+        }
+    }
+
+    /// <summary>
+    /// Whether any timer is armed or any callback is still running: Go's <c>checkdead</c> timer scan. A
+    /// running callback counts because what it does (start a goroutine, ready a waiter) has not happened
+    /// yet, as Go's checkdead sees the M running a timer as running.
+    /// </summary>
+    internal static bool AnyPending
+    {
+        get
+        {
+            lock (s_lock)
+                return s_count > 0 || Volatile.Read(ref s_running) > 0;
         }
     }
 
@@ -174,7 +198,11 @@ public sealed partial class GoTimer
             Name = "go2cs timer service"
         };
 
-        s_service.Start();
+        // Started WITHOUT the arming thread's ExecutionContext: the service thread lives for the process
+        // and must not carry whichever goroutine armed the first timer, its AsyncLocals (profile labels)
+        // or anything else it had flowing, into every callback after it.
+        using (ExecutionContext.SuppressFlow())
+            s_service.Start();
     }
 
     private static void service()
@@ -201,12 +229,21 @@ public sealed partial class GoTimer
                 }
 
                 next = s_count > 0 ? s_heap[0].m_when : long.MaxValue;
+                Volatile.Write(ref s_running, dueCount);
                 Volatile.Write(ref s_wakeRequested, 0);
             }
 
             for (int i = 0; i < dueCount; i++)
             {
-                run(due[i]);
+                try
+                {
+                    run(due[i]);
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref s_running);
+                }
+
                 due[i] = null!;
             }
 
