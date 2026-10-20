@@ -27527,4 +27527,12 @@ and only in a process that opens a pollable descriptor. Native AOT is unaffected
 
 — P2 (found and fixed 2026-10-20)
 
+**Amended 2026-10-20 (G's review of dd65b04763).** Windows read the first cut short of the bar (JIT, A1 late in ms):
+cold Go 0.0-0.6, no pre-pay 7.8-8.7, pre-pay 3.6-5.1; after a first completion Go 0.2-0.8, no pre-pay 4.6-5.4, pre-pay
+2.3-2.6. On windows the wake is followed by a cancel and an aborted completion that the first cut did not cover, so
+the windows seam now pre-pays them too (`windows/deadline_prepay_windows_impl.cs`). And because nothing guarded the
+pre-pay, a throwing hook made the first pollable FD.Init fail and skipped every later hook; this package's part, the
+windows part and each hook now run in their own try (red at dd65b04763 with a planted throwing hook, green after).
+The windows reading of the amended cut is owed by a windows host. Until it lands this row stays FIXED on linux only.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
