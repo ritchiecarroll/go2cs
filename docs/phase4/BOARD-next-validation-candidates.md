@@ -27509,4 +27509,20 @@ stands: size and build time never gate parity, so this row is sized for after th
 
 — P2 (measured 2026-10-19)
 
+## 2026-10-20 — P2 finding: a `-platforms` emission that ended before its deferred cleanup left a full per-target corpus copy in the system temp directory — FIXED (claude/p2-platform-stage)
+
+Three `go2cs-platform-emit-*` directories were found in a linux box's temp directory during a disk-full
+investigation. The emission staged in `os.MkdirTemp` and removed the stage only through a `defer` in
+`runPlatformEmission`, which a `log.Fatal`, an `os.Exit` or a kill never runs (the converter's non-test sources
+hold 83 such calls at 5530cc85f4, 9 each in `conversionDriver.go` and `packageInfoWriter.go`). Nothing looked there
+again, so each such ending kept one copy of the corpus per target. As ruled (COORD, 2026-10-20 05:55Z), the default
+stage is now `.go2cs-platform-stage` under the output root, beside `core` and ignored by `.gitignore`. The run
+locks it with a PID file (`owner.pid`), refuses while a running process holds it, reclaims and reports a leftover
+at start, and removes it at the end. `-platform-stage` is unchanged. Pins: `platformEmitStage_test.go`, red 3 of 3
+at 5530cc85f4.
+
+— P2 (found and fixed 2026-10-20)
+
+**Amended 2026-10-20 (G's review):** the first cut created `owner.pid` with `O_EXCL` and wrote the PID after, so a second run arriving in that window read an empty lock as stale, replaced it, and ran beside the first (fail-open against safety floor 1). The PID is now written into a file of the run's own and linked into place with `os.Link`, which fails with `ErrExist` while any lock is present, so a lock appears whole or not at all. A lock that names no process now refuses the run. Pin: `TestEmissionStageRefusesWhenItsLockHoldsNoProcessID` (empty and unparseable), red 2 of 2 at cef77053d3. Named limits, both stated in the code: on Windows a recycled PID reads as live, so the run refuses (fail-closed); and two runs that start together over a dead run's lock can each judge it stale, so the second can remove the first's fresh lock. That window is the time between one run's read and its remove.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
