@@ -2,12 +2,12 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/entropy@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/crypto/internal/entropy) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/crypto/internal/entropy)
+[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/crypto/internal/entropy@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/crypto/internal/entropy) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/crypto/internal/entropy)
 
 From C#, call this package through the static class go.crypto.@internal.entropy_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
-Package entropy provides the passive entropy source for the FIPS 140-3 module. It is only used in FIPS mode by [crypto/internal/fips140/drbg.Read](https://pkg.go.dev/crypto/internal/fips140/drbg@go1.26.9#Read) from the FIPS 140-3 Go Cryptographic Module v1.0.0.
+Package entropy provides the passive entropy source for the FIPS 140-3 module. It is only used in FIPS mode by [crypto/internal/fips140/drbg.Read](https://pkg.go.dev/crypto/internal/fips140/drbg@go1.26.10#Read) from the FIPS 140-3 Go Cryptographic Module v1.0.0.
 
 Later versions of the module use the CPU jitter-based entropy source in the crypto/internal/entropy/v1.0.0 sub-package.
 

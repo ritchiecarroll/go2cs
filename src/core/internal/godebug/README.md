@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-5_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/internal.godebug.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/internal/godebug@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/internal/godebug) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/internal/godebug)
+[![Tests](https://img.shields.io/badge/Tests-5_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/internal.godebug.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/internal/godebug@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/internal/godebug) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/internal/godebug)
 
 From C#, call this package through the static class go.@internal.godebug_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -21,7 +21,7 @@ In typical usage, code should declare a Setting as a global and then call Value 
 		...
 	}
 
-Each time a non-default setting causes a change in program behavior, code must call \[Setting.IncNonDefault] to increment a counter that can be reported by [runtime/metrics.Read](https://pkg.go.dev/runtime/metrics@go1.26.9#Read). The call must only happen when the program executes a non-default behavior, not just when the setting is set to a non-default value. This is occasionally (but very rarely) infeasible, in which case the internal/godebugs table entry must set Opaque: true, and the documentation in doc/godebug.md should mention that metrics are unavailable.
+Each time a non-default setting causes a change in program behavior, code must call \[Setting.IncNonDefault] to increment a counter that can be reported by [runtime/metrics.Read](https://pkg.go.dev/runtime/metrics@go1.26.10#Read). The call must only happen when the program executes a non-default behavior, not just when the setting is set to a non-default value. This is occasionally (but very rarely) infeasible, in which case the internal/godebugs table entry must set Opaque: true, and the documentation in doc/godebug.md should mention that metrics are unavailable.
 
 Conventionally, the global variable representing a godebug is named for the godebug itself, with no case changes:
 
