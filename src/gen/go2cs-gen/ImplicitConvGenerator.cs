@@ -86,12 +86,19 @@ public class ImplicitConvGenerator : ISourceGenerator
                 continue;
             }
 
-            // A type paired with its own box is a converter fault, never a conversion to generate: the
-            // operator would box a COPY, so the site would compile and a write through the box would be lost.
-            if (IsBoxOf(targetType, sourceType) || IsBoxOf(sourceType, targetType))
+            // Get the attribute's argument values, if defined
+            (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
+            bool inverted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Inverted")).value?.Trim() ?? "false");
+
+            // An operator that would return a box from a value is a converter fault, never a conversion to
+            // generate: Go has no implicit value-to-pointer conversion, and the operator would box a COPY (or a
+            // fresh value built from the source's fields), so the site would compile and a write through the
+            // box would be lost. Read by direction, after Inverted swaps the operator's sides.
+            (ITypeSymbol resultType, ITypeSymbol parameterType) = inverted ? (sourceType, targetType) : (targetType, sourceType);
+
+            if (IsBox(resultType) && !IsBox(parameterType))
             {
-                (ITypeSymbol element, ITypeSymbol box) = IsBoxOf(targetType, sourceType) ? (sourceType, targetType) : (targetType, sourceType);
-                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.SelfBoxConversion, attributeSyntax.GetLocation(), attributeSyntax.ToString(), element.GetFullTypeName(), box.GetFullTypeName()));
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.SelfBoxConversion, attributeSyntax.GetLocation(), attributeSyntax.ToString(), parameterType.GetFullTypeName(), resultType.GetFullTypeName()));
                 continue;
             }
 
@@ -109,9 +116,6 @@ public class ImplicitConvGenerator : ISourceGenerator
             string sourceTypeName = EscapeCsKeyword(sourceType.GetFullTypeName());
             string targetTypeName = EscapeCsKeyword(targetType.GetFullTypeName());
 
-            // Get the attribute's argument values, if defined
-            (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
-            bool inverted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Inverted")).value?.Trim() ?? "false");
             bool indirect = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Indirect")).value?.Trim() ?? "false");
             string? valueType = arguments.FirstOrDefault(arg => arg.name.Equals("ValueType")).value?.Trim();
 
@@ -423,10 +427,9 @@ public class ImplicitConvGenerator : ISourceGenerator
         _ => null
     };
 
-    // Whether `box` is golib's `ж<T>` with T exactly `element`.
-    private static bool IsBoxOf(ITypeSymbol box, ITypeSymbol element) =>
-        box is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 } named &&
-        SymbolEqualityComparer.Default.Equals(named.TypeArguments[0], element);
+    // Whether `type` is golib's box `ж<T>`.
+    private static bool IsBox(ITypeSymbol type) =>
+        type is INamedTypeSymbol { Name: PointerPrefix, TypeArguments.Length: 1 };
 
     private static StructDeclarationSyntax? GetStructDeclaration(GeneratorSyntaxContext context, string structName)
     {

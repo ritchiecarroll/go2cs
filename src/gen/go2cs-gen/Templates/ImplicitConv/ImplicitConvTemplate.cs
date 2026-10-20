@@ -49,28 +49,9 @@ internal class ImplicitConvTemplate : TemplateBase
 
     private string ConvExprValue => ConvExprOverride ?? ConvExpr;
 
-    private string ConvExpr
-    {
-        get
-        {
-            if (!PointerExpr.IsMatch(LHTypeName))
-                return $"new {LHTypeName}({ParamList})";
-            
-            int ltIndex = LHTypeName.IndexOf('<');
-            int gtIndex = LHTypeName.LastIndexOf('>');
-
-            if (gtIndex > ltIndex)
-            {
-                string innerType = LHTypeName[(ltIndex + 1)..gtIndex];
-
-                // A self-boxing record (`T -> ж<T>`) never reaches here: ImplicitConvGenerator refuses
-                // it (GO2CS0008), since its operator would box a copy of the value.
-                return $"{AddressPrefix}(new {innerType}({ParamList}))";
-            }
-
-            throw new FormatException($"Unexpected target type name \"{LHTypeName}\"");
-        }
-    }
+    // The operator never returns a box: ImplicitConvGenerator refuses a record whose operator would return
+    // one from a value (GO2CS0008), since it could only box a copy, and a box parameter has no struct source.
+    private string ConvExpr => $"new {LHTypeName}({ParamList})";
 
     private string ParamList => string.IsNullOrWhiteSpace(ValueType) ? 
         string.Join(", ", StructMembers.Select(GetParamExpr)) : 
