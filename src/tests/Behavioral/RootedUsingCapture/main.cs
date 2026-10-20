@@ -4,7 +4,6 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using lib = RootedUsingCapture.lib_package;
 using RootedUsingCapture;
-using Δsync = sync_package;
 
 partial class main_package {
 
