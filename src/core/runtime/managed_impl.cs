@@ -3671,9 +3671,14 @@ partial class runtime_package
     // method, can give the same site a second one.
     private readonly record struct CallSiteKey(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, bool SuspendedAtReportedCall, System.Reflection.MethodBase? Callee);
 
+    // A frame as a capture sees it: the site, and the raw callee directly inside it. Maps to the canonical
+    // site's token (internCallerFrame), so the capture's callee tests run once per observed pair.
+    private readonly record struct ObservedSite(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, System.Reflection.MethodBase? Callee);
+
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
     private static readonly Dictionary<CallSiteKey, nuint> s_callSiteTokens = new();
+    private static readonly Dictionary<ObservedSite, nuint> s_observedSiteTokens = new();
     private static readonly List<CallerFrameRecord> s_callerRecords = new();
 
     // EVERY CALL SITE OWNS A SPAN, AND ITS TOKEN SITS IN THE MIDDLE. Go's consumers do arithmetic on a
@@ -4225,23 +4230,43 @@ partial class runtime_package
     // by (calleeSettledCallSite) wherever a call of it follows that offset: the test here reads the IL
     // only, because the statement bounds the settling needs come from the symbol file, which a capture
     // never opens (LazyCallersTests).
+    //
+    // THE HOT PATH IS ONE LOOKUP. What the callee says about a site (suspendedAtReportedCall, callsCalleeAfter)
+    // is a function of the method, the offset and the callee, so it is computed the FIRST time that triple is
+    // seen and never again: the observed triple maps straight to its token. Computed on every capture, the
+    // callee tests made runtime.Callers 30% slower (measured 2026-10-20, windows, Release, a depth-8 stack:
+    // 4.4-4.6 -> 5.8-6.0 us). The token itself is the CANONICAL site's, which carries the callee only where
+    // it settles a call, so callees that settle nothing (a virtual call's implementations, an inlined
+    // callee's caller) still share one token, as Go's one PC.
     private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true, System.Reflection.MethodBase? callee = null)
     {
         int ilOffset = frame.GetILOffset();
-        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
-        System.Reflection.MethodBase? settlingCallee = returnAddress && callee is not null && !atReportedCall && callsCalleeAfter(method, ilOffset, callee) ? callee : null;
         bool nativeOffset = ilOffset < 0 && !System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported;
-        CallSiteKey key = new(method.MethodHandle, nativeOffset ? frame.GetNativeOffset() : ilOffset, nativeOffset, returnAddress, atReportedCall, settlingCallee);
+        int offset = nativeOffset ? frame.GetNativeOffset() : ilOffset;
+        ObservedSite observed = new(method.MethodHandle, offset, nativeOffset, returnAddress, returnAddress ? callee : null);
 
         lock (s_callerTableLock)
         {
-            if (s_callSiteTokens.TryGetValue(key, out nuint token))
-                return token;
+            if (s_observedSiteTokens.TryGetValue(observed, out nuint seen))
+                return seen;
+        }
 
-            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall, Callee = settlingCallee });
-            // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
-            token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
-            s_callSiteTokens[key] = token;
+        // First sight of this site with this callee: read what the callee settles (the IL only), outside the lock.
+        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
+        System.Reflection.MethodBase? settlingCallee = returnAddress && callee is not null && !atReportedCall && callsCalleeAfter(method, ilOffset, callee) ? callee : null;
+        CallSiteKey key = new(method.MethodHandle, offset, nativeOffset, returnAddress, atReportedCall, settlingCallee);
+
+        lock (s_callerTableLock)
+        {
+            if (!s_callSiteTokens.TryGetValue(key, out nuint token))
+            {
+                s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall, Callee = settlingCallee });
+                // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
+                token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
+                s_callSiteTokens[key] = token;
+            }
+
+            s_observedSiteTokens[observed] = token;
             return token;
         }
     }
