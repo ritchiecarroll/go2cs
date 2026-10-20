@@ -85,7 +85,7 @@ public static void TestMain(ж<testing.M> Ꮡm) {
 }
 
 partial struct testprogᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string dir;
     internal map<@string, ж<buildexe>> target;
 }
@@ -159,7 +159,7 @@ internal static (@string, error) runBuiltTestProgErr(ж<testing.T> Ꮡt, @string
             }
         }
     }
-    return (((@string)@out), err);
+    return ((@string)@out, err);
 }
 
 internal static channel<bool> serializeBuild = new channel<bool>(2);
@@ -866,7 +866,7 @@ public static void TestMemPprof(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("testprog failed: %s, output:\n%s"u8, err, got);
         }
-        @string fn = strings.TrimSpace(((@string)got));
+        @string fn = strings.TrimSpace((@string)got);
         defer(Δos.Remove, fn, ref ᒐ);
 
         for (nint @try = 0; @try < 2; @try++) {
@@ -1301,7 +1301,7 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
         Ꮡt.Logf("output:\n%s"u8, @out);
         // Don't check err since it's expected to crash.
         {
-            nint n = strings.Count(((@string)@out), morestackOnG0ˢ); if (n != 1) {
+            nint n = strings.Count((@string)@out, morestackOnG0ˢ); if (n != 1) {
                 Ꮡt.Fatalf("%s\n(exit status %v)"u8, @out, err);
             }
         }
@@ -1309,7 +1309,7 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
             // check for a stack trace
             @string want = runtimeStackOverflowˢ;
             {
-                nint n = strings.Count(((@string)@out), want); if (n < 5) {
+                nint n = strings.Count((@string)@out, want); if (n < 5) {
                     Ꮡt.Errorf("output does not contain %q at least 5 times:\n%s"u8, want, @out);
                 }
             }
@@ -1318,7 +1318,7 @@ public static void TestG0StackOverflow(ж<testing.T> Ꮡt) {
         // Check that it's a signal-style traceback.
         if (Δruntime.GOOS != "windows"u8) {
             {
-                @string want = "PC="u8; if (!strings.Contains(((@string)@out), want)) {
+                @string want = "PC="u8; if (!strings.Contains((@string)@out, want)) {
                     Ꮡt.Errorf("output does not contain %q:\n%s"u8, want, @out);
                 }
             }

@@ -34,7 +34,7 @@ partial struct streamSafe /*num:uint8*/;
 // first inserts the first rune of a segment. It is a faster version of next if
 // it is known p represents the first rune in a segment.
 internal static void first(this ref streamSafe ss, ΔProperties p) {
-    ss = ((streamSafe)p.nTrailingNonStarters());
+    ss = (streamSafe)p.nTrailingNonStarters();
 }
 
 // insert returns a ssState value to indicate whether a rune represented by p
@@ -58,7 +58,7 @@ internal static ssState next(this ref streamSafe ss, ΔProperties p) {
     // be a non-starter. Note that it always hold that if nLead > 0 then
     // nLead == nTrail.
     if (n == 0) {
-        ss = ((streamSafe)p.nTrailingNonStarters());
+        ss = (streamSafe)p.nTrailingNonStarters();
         return ssStarter;
     }
     return ssSuccess;

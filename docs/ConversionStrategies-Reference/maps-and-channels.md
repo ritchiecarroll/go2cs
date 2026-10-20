@@ -320,7 +320,7 @@ alias-free `.g.cs` — `canonicalizeQualifierRename` reverts a leading import-re
 nested-namespace consumer package importing both `IoLike` and `IoLike/FsLike`, with a named slice
 of the subpackage's type used across the assembly boundary.)
 
-A map indexed by a **non-empty interface key** converts a concrete key expression through the same interface-adapter path used by assignments and call arguments. For example, `seen[item] = "kept"` where `seen` is `map[Node]string` and `item` is `*Item` emits `seen[new ItemжNode(item)] = "kept"u8`; the comma-ok read emits the same adapter for the key, `seen[new ItemжNode(item), ꟷ]`. This records the pointer implementation (`GoImplement<Item, Node>(Pointer = true)`) and keeps dictionary lookup semantics aligned with Go's interface key identity. Empty-interface map keys keep their existing literal handling (`map[any]...` turns string literals into Go strings rather than UTF-8 spans), and pointer-typed map keys keep the direct pointer-box path. (Guarded by `InterfaceMapKeyPointer`.)
+A map indexed by a **non-empty interface key** converts a concrete key expression through the same interface-adapter path used by assignments and call arguments. For example, `seen[item] = "kept"` where `seen` is `map[Node]string` and `item` is `*Item` emits `seen[new ItemжNode(item)] = "kept"`; the comma-ok read emits the same adapter for the key, `seen[new ItemжNode(item), ꟷ]`. This records the pointer implementation (`GoImplement<Item, Node>(Pointer = true)`) and keeps dictionary lookup semantics aligned with Go's interface key identity. Empty-interface map keys keep their existing literal handling (`map[any]...` turns string literals into Go strings rather than UTF-8 spans), and pointer-typed map keys keep the direct pointer-box path. (Guarded by `InterfaceMapKeyPointer`.)
 
 A **pointer-keyed** map indexed by the method's **receiver** supplies the receiver's box as the key, exactly like the deref-aliased pointer-parameter case: `t.m[c]` inside `func (c *conn) …` emits `t.m[Ꮡc]` (plain read, write, and the comma-ok `t.m[Ꮡc, ꟷ]` alike) — net/http transport.go's idle-connection bookkeeping (`t.idleLRU.m[pc]`) passed the deref-aliased VALUE where `ж<persistConn>` was expected (CS1503 plus the `(v, ok)` deconstruction cascade). The box exists only on a **direct-ж** method, so the receiver-as-map-key body shape itself now *promotes* the method to direct-ж (`bodyUsesReceiverAsPointerValue` gained an `IndexExpr` case, gated on a pointer-KEYED map operand) — a method whose only pointer-use of its receiver is the map key still gets `this ж<conn> Ꮡc`. A pointer LOCAL is unchanged (it *is* the key — no `Ꮡ`), and `delete(t.m, c)` boxes through the ordinary pointer-argument rule once the method is direct-ж. (Guarded by `PtrKeyMapReceiverLookup` — pure-shape promotion, plain read/write, comma-ok, and delete through two distinct receiver identities, values vs Go.)
 
@@ -328,7 +328,7 @@ A value sent into a channel of **non-empty interface element type** converts thr
 interface-adapter path used by assignments and call arguments — the send emission previously tested
 the CHANNEL type itself for interface-ness (never true, its underlying is `*types.Chan`), so no
 conversion ever fired. A value implementation sends bare while recording the implement pair for the
-generator (`vs.ᐸꟷ(new dog(name: "rex"u8))` with `[assembly: GoImplement<dog, speaker>]`); a pointer
+generator (`vs.ᐸꟷ(new dog(name: "rex"))` with `[assembly: GoImplement<dog, speaker>]`); a pointer
 implementation wraps the box in its generated pointer adapter:
 
 ```go
@@ -339,7 +339,7 @@ ps <- c
 
 ```csharp
 var ps = new channel<speaker>(1);
-var c = Ꮡ(new cat(name: "tom"u8));
+var c = Ꮡ(new cat(name: "tom"));
 ps.ᐸꟷ(new catжspeaker(c));   // records GoImplement<cat, speaker>(Pointer = true)
 ```
 
@@ -408,7 +408,7 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
-<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11 and :46-48 -->
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11-51 -->
 ```csharp
 partial struct Set<T> /*map[T, @void]*/;
 

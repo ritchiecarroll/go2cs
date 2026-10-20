@@ -30,7 +30,7 @@ partial struct SectionHeader {
 }
 
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
@@ -79,7 +79,7 @@ partial struct FileHeader {
 
 // A File represents an open XCOFF file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Symbol>> Symbols;
     public slice<byte> StringTable;
@@ -144,7 +144,7 @@ internal static @string cstring(slice<byte> b) {
     nint i = default!;
     for (i = 0; i < len(b) && b[i] != 0; i++) {
     }
-    return ((@string)(b.slice(0, i)));
+    return (@string)(b.slice(0, i));
 }
 
 // getString extracts a string from an XCOFF string table.
@@ -423,7 +423,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             }
             sym.Value.AuxCSect.SymbolType = (nint)((uint8)((~aux).Xsmtyp & 0x7));
             sym.Value.AuxCSect.StorageMappingClass = (nint)(~aux).Xsmclas;
-            sym.Value.AuxCSect.Length = (int64)(((int64)(~aux).Xscnlenhi << (int)(32)) | (int64)(~aux).Xscnlenlo);
+            sym.Value.AuxCSect.Length = (int64)(~aux).Xscnlenhi << 32 | (int64)(~aux).Xscnlenlo;
         }
         f.Value.Symbols = append((~f).Symbols, sym);
 skip:
@@ -552,7 +552,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     array<uint32> subtypes = new uint32[]{SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR}.array();
     array<slice<byte>> dat = new(5); /* len(subtypes) */
     foreach (var (i, subtype) in subtypes.ΔRangeSnapshot()) {
-        var s = f.SectionByType((uint32)((uint32)STYP_DWARF | subtype));
+        var s = f.SectionByType((uint32)STYP_DWARF | subtype);
         if (s != nil) {
             var (b, err) = s.Data();
             if (err != default! && (uint64)len(b) < (~s).Size) {

@@ -80,7 +80,7 @@ internal static ж<matrix> newInverseHilbert(nint n) {
             x1.Mul(x1, x4);
             x1.Mul(x1, x4);
 
-            if ((nint)((i + j) & 1) != 0) {
+            if (((i + j) & 1) != 0) {
                 x1.Neg(x1);
             }
 

@@ -13,6 +13,7 @@ using @internal.runtime;
 using @internal.runtime.syscall;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
+[GoFieldAccess(typeof(windows.Context))]
 partial class runtime_package {
 
 // TODO(brainman): should not need those
@@ -220,7 +221,7 @@ internal static stdFunction windowsFindfunc(uintptr lib, slice<byte> name) {
         @throw(usageˢ);
     }
     var f = stdcall(_GetProcAddress, lib, (uintptr)Ꮡ(name, 0));
-    return ((stdFunction)(@unsafe.Pointer)f);
+    return (stdFunction)(@unsafe.Pointer)f;
 }
 
 internal static UntypedInt _MAX_PATH => 260; // https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
@@ -252,19 +253,9 @@ internal static uintptr windowsLoadSystemLib(slice<uint16> name) {
     return stdcall(_LoadLibraryExW, (uintptr)Ꮡ(name, 0), 0, _LOAD_LIBRARY_SEARCH_SYSTEM32);
 }
 
-//go:linkname windows_QueryPerformanceCounter internal/syscall/windows.QueryPerformanceCounter
-internal static int64 windows_QueryPerformanceCounter() {
-    ref var counter = ref heap(new int64(), out var Ꮡcounter);
-    stdcall(_QueryPerformanceCounter, (uintptr)Ꮡcounter);
-    return counter;
-}
+// go2cs generated this placeholder — func windows_QueryPerformanceCounter is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-//go:linkname windows_QueryPerformanceFrequency internal/syscall/windows.QueryPerformanceFrequency
-internal static int64 windows_QueryPerformanceFrequency() {
-    ref var frequency = ref heap(new int64(), out var Ꮡfrequency);
-    stdcall(_QueryPerformanceFrequency, (uintptr)Ꮡfrequency);
-    return frequency;
-}
+// go2cs generated this placeholder — func windows_QueryPerformanceFrequency is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string bcryptprimitivesDllNotˢ = "bcryptprimitives.dll not found"u8;
@@ -515,7 +506,7 @@ internal static void goenvs() {
     //     "envA=valA\x00envB=valB\x00\x00" (in UTF-16)
     // Two consecutive zero bytes end the list.
     @unsafe.Pointer strings = (@unsafe.Pointer)stdcall(_GetEnvironmentStringsW);
-    var Δp = (~(ж<array<uint16>>)(uintptr)(strings))[..];
+    var Δp = ((ж<array<uint16>>)(uintptr)(strings)).slice();
 
     nint n = 0;
     for ((nint from, nint i) = (0, 0); true; i++) {
@@ -641,7 +632,7 @@ internal static unsafe nint writeConsole(uintptr handle, @unsafe.Pointer buf, in
             w++;
         } else {
             r -= 0x10000;
-            utf16tmp[w] = (uint16)((uint16)surrogateMin + (uint16)((uint16)((r >> (int)(10))) & 0x3ff));
+            utf16tmp[w] = (uint16)((uint16)surrogateMin + (uint16)((uint16)(r >> 10) & 0x3ff));
             utf16tmp[w + 1] = (uint16)(surr2 + (uint16)((uint16)r & 0x3ff));
             w += 2;
         }
@@ -912,11 +903,11 @@ internal static void minit() {
     // calling C functions that don't have stack checks and for
     // lastcontinuehandler. We shouldn't be anywhere near this
     // bound anyway.
-    var @base = mbi.AllocationBase + ((uintptr)16 << (int)(10));
+    var @base = mbi.AllocationBase + ((uintptr)16 << 10);
     // Sanity check the stack bounds.
     var g0 = getg();
-    if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > ((uintptr)64 << (int)(20))) {
-        print((@string)"runtime: g0 stack ["u8, ((Δhex)(uint64)@base), (@string)","u8, ((Δhex)(uint64)(~g0).stack.hi), (@string)")\n"u8);
+    if (@base > (~g0).stack.hi || (~g0).stack.hi - @base > (uintptr)64 << 20) {
+        print((@string)"runtime: g0 stack ["u8, (Δhex)(uint64)@base, (@string)","u8, (Δhex)(uint64)(~g0).stack.hi, (@string)")\n"u8);
         @throw(badG0Stackˢ);
     }
     g0.Value.stack.lo = @base;
@@ -1086,7 +1077,7 @@ internal static void profilem(ж<m> Ꮡmp, uintptr thread) {
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
     c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
 
-    c.Value.ContextFlags = windows.CONTEXT_CONTROL;
+    c.ContextFlags = windows.CONTEXT_CONTROL;
     stdcall(_GetThreadContext, thread, (uintptr)c);
 
     var gp = gFromSP(ref (Ꮡmp).DerefOrNull(), c.SP());
@@ -1231,7 +1222,7 @@ internal static void preemptM(ж<m> Ꮡmp) {
     ж<windows.Context> c = default!;
     ref var cbuf = ref heap(new array<byte>(1247), out var Ꮡcbuf);
     c = (ж<windows.Context>)(uintptr)((@unsafe.Pointer)((uintptr)(((uintptr)Ꮡcbuf.at<byte>(15)) & ~(uintptr)15)));
-    c.Value.ContextFlags = windows.CONTEXT_CONTROL;
+    c.ContextFlags = windows.CONTEXT_CONTROL;
 
     // Serialize thread suspension. SuspendThread is asynchronous,
     // so it's otherwise possible for two threads to suspend each

@@ -41,13 +41,13 @@ internal partial struct TestTraceAnnotations_evDesc /*dyn*/ {
 public static void TestTraceAnnotations(ж<testing.T> Ꮡt) {
     testTraceProg(Ꮡt, annotationsGoˢ, (ж<testing.T> tΔ1, slice<byte> tb, slice<byte> _Δp2, @string _Δp3) => {
         var want = new TestTraceAnnotations_evDesc[]{
-            new(Δtrace.EventTaskBegin, ((Δtrace.TaskID)1), new @string[]{"task0"u8}.slice()),
-            new(Δtrace.EventRegionBegin, ((Δtrace.TaskID)1), new @string[]{"region0"u8}.slice()),
-            new(Δtrace.EventRegionBegin, ((Δtrace.TaskID)1), new @string[]{"region1"u8}.slice()),
-            new(Δtrace.EventLog, ((Δtrace.TaskID)1), new @string[]{"key0"u8, "0123456789abcdef"u8}.slice()),
-            new(Δtrace.EventRegionEnd, ((Δtrace.TaskID)1), new @string[]{"region1"u8}.slice()),
-            new(Δtrace.EventRegionEnd, ((Δtrace.TaskID)1), new @string[]{"region0"u8}.slice()),
-            new(Δtrace.EventTaskEnd, ((Δtrace.TaskID)1), new @string[]{"task0"u8}.slice()),
+            new(Δtrace.EventTaskBegin, (Δtrace.TaskID)1, new @string[]{"task0"u8}.slice()),
+            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, new @string[]{"region0"u8}.slice()),
+            new(Δtrace.EventRegionBegin, (Δtrace.TaskID)1, new @string[]{"region1"u8}.slice()),
+            new(Δtrace.EventLog, (Δtrace.TaskID)1, new @string[]{"key0"u8, "0123456789abcdef"u8}.slice()),
+            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, new @string[]{"region1"u8}.slice()),
+            new(Δtrace.EventRegionEnd, (Δtrace.TaskID)1, new @string[]{"region0"u8}.slice()),
+            new(Δtrace.EventTaskEnd, (Δtrace.TaskID)1, new @string[]{"task0"u8}.slice()),
             //  Currently, pre-existing region is not recorded to avoid allocations.
             new(Δtrace.EventRegionBegin, Δtrace.BackgroundTask, new @string[]{"post-existing region"u8}.slice())
         }.slice();
@@ -747,7 +747,7 @@ internal static void testTraceProg(ж<testing.T> Ꮡt, @string progName, Action<
         {
             var errΔ1 = cmd.Run(); if (errΔ1 != default!) {
                 if (errBuf.Len() != 0) {
-                    tΔ1.Logf("stderr: %s"u8, ((@string)errBuf.Bytes()));
+                    tΔ1.Logf("stderr: %s"u8, (@string)errBuf.Bytes());
                 }
                 tΔ1.Fatal(errΔ1);
             }

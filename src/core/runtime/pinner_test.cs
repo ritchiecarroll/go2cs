@@ -267,7 +267,7 @@ public static void TestPinnerInterface(ж<testing.T> Ꮡt) {
     Δruntime.Pinner pinner = new(nil);
     var o = @new<obj>();
     ref var ifc = ref heap<any>(out var Ꮡifc);
-    ifc = ((any)o.OrTypedNil());
+    ifc = (any)o.OrTypedNil();
     pinner.Pin(Ꮡifc);
     if (!runtime_internal_test_package.IsPinned(@unsafe.Pointer.FromPinnedBox(Ꮡifc))) {
         Ꮡt.Fatal(notMarkedAsPinnedˢ);

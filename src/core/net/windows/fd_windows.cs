@@ -310,7 +310,7 @@ internal static (ж<os.File>, error) dup(this ж<netFD> Ꮡfd) {
     syscallꓸHandle h = default!;
     ref var syserr = ref heap<error>(out var Ꮡsyserr);
     var err = Ꮡfd.of(netFD.Ꮡpfd).RawControl((uintptr fdΔ1) => {
-        (h, Ꮡsyserr.ValueSlot) = dupSocket(((syscallꓸHandle)fdΔ1));
+        (h, Ꮡsyserr.ValueSlot) = dupSocket((syscallꓸHandle)fdΔ1);
     });
     if (err == default!) {
         err = syserr;

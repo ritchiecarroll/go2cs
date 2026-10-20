@@ -13,7 +13,7 @@ partial class cgroup_package {
 partial struct stringError /*@string*/;
 
 internal static @string Error(this stringError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // All errors are explicit converted to type error in global initialization to

@@ -77,14 +77,14 @@ internal static Δnat setWord(this Δnat z, Word x) {
 internal static Δnat setUint64(this Δnat z, uint64 x) {
     // single-word value
     {
-        Word w = ((Word)(nuint)x); if ((uint64)(nuint)w == x) {
+        Word w = (Word)(nuint)x; if ((uint64)(nuint)w == x) {
             return z.setWord(w);
         }
     }
     // 2-word value
     z = z.make(2);
-    z[1] = ((Word)(nuint)((x >> (int)(32))));
-    z[0] = ((Word)(nuint)x);
+    z[1] = (Word)(nuint)((x >> 32));
+    z[0] = (Word)(nuint)x;
     return z;
 }
 
@@ -346,7 +346,7 @@ internal static void restore(this ref stack s, nint n) {
 
 // nat returns a nat of n words, allocated on the stack.
 internal static Δnat nat(this ref stack s, nint n) {
-    nint nr = (nint)((n + 3) & ~(nint)3); // round up to multiple of 4
+    nint nr = (n + 3) & ~(nint)3; // round up to multiple of 4
     nint off = len(s.w);
     s.w = slices.Grow<slice<Word>, Word>(s.w, nr);
     s.w = s.w.slice(0, off + nr);
@@ -369,12 +369,12 @@ internal static nint bitLen(this Δnat x) {
             // architectures. Neutralize any input-dependent behavior by setting all
             // bits after the first one bit.
             nuint top = (nuint)x[i];
-            top |= (nuint)((top >> (int)(1)));
-            top |= (nuint)((top >> (int)(2)));
-            top |= (nuint)((top >> (int)(4)));
-            top |= (nuint)((top >> (int)(8)));
-            top |= (nuint)((top >> (int)(16)));
-            top |= (nuint)(((top >> (int)(16)) >> (int)(16))); // ">> 32" doesn't compile on 32-bit architectures
+            top |= (nuint)((top >> 1));
+            top |= (nuint)((top >> 2));
+            top |= (nuint)((top >> 4));
+            top |= (nuint)((top >> 8));
+            top |= (nuint)((top >> 16));
+            top |= (nuint)(((top >> 16) >> 16)); // ">> 32" doesn't compile on 32-bit architectures
             return i * (nint)_W + bits.Len(top);
         }
     }
@@ -475,7 +475,7 @@ internal static Δnat rsh(this Δnat z, Δnat x, nuint s) {
 
 internal static Δnat setBit(this Δnat z, Δnat x, nuint i, nuint b) {
     nint j = (nint)(i / (nuint)_W);
-    Word m = (((Word)1) << (int)((i % (nuint)_W)));
+    Word m = ((Word)1) << (int)(i % (nuint)_W);
     nint n = len(x);
     switch (b) {
     case 0: {
@@ -510,7 +510,7 @@ internal static nuint bit(this Δnat x, nuint i) {
         return 0;
     }
     // 0 <= j < len(x)
-    return (nuint)((Word)((x[j] >> (int)((i % (nuint)_W))) & 1));
+    return (nuint)((Word)(x[j] >> (int)(i % (nuint)_W) & 1));
 }
 
 // sticky returns 1 if there's a 1 bit within the
@@ -529,7 +529,7 @@ internal static nuint sticky(this Δnat x, nuint i) {
             return 1;
         }
     }
-    if ((x[j] << (int)(((nuint)_W - i % (nuint)_W))) != 0) {
+    if (x[j] << (int)((nuint)_W - i % (nuint)_W) != 0) {
         return 1;
     }
     return 0;
@@ -560,7 +560,7 @@ internal static Δnat trunc(this Δnat z, Δnat x, nuint n) {
     z = z.make((nint)w);
     copy(z, x);
     if (n % (nuint)_W != 0) {
-        z[len(z) - 1] &= (Word)((Word)((nuint)1 << (int)((n % (nuint)_W))) - 1);
+        z[len(z) - 1] &= (Word)((Word)((nuint)1 << (int)(n % (nuint)_W)) - 1);
     }
     return z.norm();
 }
@@ -640,12 +640,12 @@ internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, n
         var exprᴛ1 = _W;
         if (exprᴛ1 == 32) {
             foreach (var (i, _) in z) {
-                z[i] = ((Word)(nuint)randΔ1.Uint32());
+                z[i] = (Word)(nuint)randΔ1.Uint32();
             }
         }
         else if (exprᴛ1 == 64) {
             foreach (var (i, _) in z) {
-                z[i] = (Word)(((Word)(nuint)randΔ1.Uint32()) | (((Word)(nuint)randΔ1.Uint32()) << (int)(32)));
+                z[i] = (Word)(((Word)(nuint)randΔ1.Uint32()) | ((Word)(nuint)randΔ1.Uint32()) << 32);
             }
         }
         else { /* default: */
@@ -876,7 +876,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         }
         powers[0] = powers[0].set(natOne);
         powers[1] = powers[1].trunc(x, logM);
-        for (nint iΔ2 = 2; iΔ2 < (nint)((1 << (int)(n))); iΔ2 += 2) {
+        for (nint iΔ2 = 2; iΔ2 < (nint)(1 << (int)(n)); iΔ2 += 2) {
             var (p2, p, p1) = (Ꮡpowers.at<Δnat>(iΔ2 / 2), Ꮡpowers.at<Δnat>(iΔ2), Ꮡpowers.at<Δnat>(iΔ2 + 1));
             p.ValueSlot = (~p).sqr(Ꮡstk, p2.ValueSlot);
             p.ValueSlot = (~p).trunc(p.ValueSlot, logM);
@@ -893,7 +893,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         nint mtop = (nint)((logM - 2) / (nuint)_W); // -2 because the top word of N bits is the (N-1)/W'th word.
         Word mmask = ~((Word)((Word)0));
         {
-            nuint mbits = (nuint)((logM - 1) & (nuint)(_W - 1)); if (mbits != 0) {
+            nuint mbits = (logM - 1) & (nuint)(_W - 1); if (mbits != 0) {
                 mmask = ((Word)((nuint)1 << (int)(mbits))) - 1;
             }
         }
@@ -930,7 +930,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
                     z = z.trunc(z, logM);
                 }
 
-                zz = zz.mul(Ꮡstk, z, powers[(yi >> (int)((_W - n)))]);
+                zz = zz.mul(Ꮡstk, z, powers[(yi >> (int)(_W - n))]);
                 (zz, z) = (z, zz);
                 z = z.trunc(z, logM);
 
@@ -991,7 +991,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
     array<Δnat> powers = new(16); /* (1 << (int)(n)) */
     powers[0] = powers[0].montgomery(one, RR, m, k0, numWords);
     powers[1] = powers[1].montgomery(x, RR, m, k0, numWords);
-    for (nint i = 2; i < (nint)((1 << (int)(n))); i++) {
+    for (nint i = 2; i < (nint)(1 << (int)(n)); i++) {
         powers[i] = powers[i].montgomery(powers[i - 1], powers[1], m, k0, numWords);
     }
 
@@ -1011,7 +1011,7 @@ internal static Δnat expNNMontgomery(this Δnat z, ж<stack> Ꮡstk, Δnat x, �
                 zz = zz.montgomery(z, z, m, k0, numWords);
                 z = z.montgomery(zz, zz, m, k0, numWords);
             }
-            zz = zz.montgomery(z, powers[(yi >> (int)((_W - n)))], m, k0, numWords);
+            zz = zz.montgomery(z, powers[(yi >> (int)(_W - n))], m, k0, numWords);
             (z, zz) = (zz, z);
             yi <<= (int)(n);
         }
@@ -1077,9 +1077,9 @@ internal static nint /*i*/ bytes(this Δnat z, slice<byte> buf) {
 // bigEndianWord returns the contents of buf interpreted as a big-endian encoded Word value.
 internal static Word bigEndianWord(slice<byte> buf) {
     if (_W == 64) {
-        return ((Word)(nuint)byteorder.BEUint64(buf));
+        return (Word)(nuint)byteorder.BEUint64(buf);
     }
-    return ((Word)(nuint)byteorder.BEUint32(buf));
+    return (Word)(nuint)byteorder.BEUint32(buf);
 }
 
 // setBytes interprets buf as the bytes of a big-endian unsigned
@@ -1140,7 +1140,7 @@ internal static Δnat sqrt(this Δnat z, ж<stack> Ꮡstk, Δnat x) {
             if (z2.cmp(z1) >= 0) {
                 // z1 is answer.
                 // Figure out whether z1 or z2 is currently aliased to z by looking at loop count.
-                if ((nint)(n & 1) == 0) {
+                if ((n & 1) == 0) {
                     return z1;
                 }
                 return z.set(z1);
@@ -1176,7 +1176,7 @@ internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
     // x - y < 0; x - y mod 2ⁿ = x - y + 2ⁿ = 2ⁿ - (y - x) = 1 + 2ⁿ-1 - (y - x) = 1 + ^(y - x).
     z = z.sub(y, x);
     while ((nuint)len(z) * (nuint)_W < n) {
-        z = append(z, (Word)(0));
+        z = append(z, (Word)0);
     }
     foreach (var (i, _) in z) {
         z[i] = ~z[i];

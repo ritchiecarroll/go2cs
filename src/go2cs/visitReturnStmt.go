@@ -406,7 +406,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 							// convertToInterfaceType finds no arm and falls through to its
 							// pointer-DEREF prefix — boxing a COPY of the pointee where Go's
 							// interface holds the pointer. See typedNilInterfaceBoxing.go.
-							result.WriteString(v.applyTypedNilPointerBoxToType(actual, tempNames[i]))
+							if typeParam, ok := actual.(*types.TypeParam); ok && isEmptyInterfaceTarget(declared) {
+								result.WriteString(applyTypedNilTypeParamBox(typeParam, tempNames[i]))
+							} else {
+								result.WriteString(v.applyTypedNilPointerBoxToType(actual, tempNames[i]))
+							}
 						} else {
 							result.WriteString(v.convertToInterfaceType(declared, actual, tempNames[i]))
 						}
@@ -638,7 +642,8 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 							elem.WriteString("ref ")
 						}
 
-						elem.WriteString(resultExpr)
+						// A returned value is a whole expression (parityOperatorEmission.go).
+						elem.WriteString(v.unparenthesizedWholeExpression(expr, resultExpr))
 					}
 				}
 

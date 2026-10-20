@@ -53,6 +53,12 @@ using static go.testing.fstest_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -62,7 +68,7 @@ using static go.testing.fstest_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("testing/fstest/mapfs.go", "mapfs.cs", "ACpWkpKWkoKUgoKmgpSuwoKCgoKCgqa4goKCgoKClO6CpoKUgpSYgpSCgpSUppSAgoKClMiCgoKCgpSClICCgoKUpJSokoKClIKUrLKCgpSmgoKUgoKUkpSCgqaCpoKCgtwADBaCpoKmgqaC7qSSAAgSgKKAooCigKKAooCigKKApIIACRSApICkgoKUgpSCgqaC2LSkgpSCpoKClIKClAAKFoCigKKCpoKCgpSClIKClII=", "106-108:1")]
-[assembly: go.GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABUCgIKkgoCCkoKCgqaCgpSAgqS2pqKSgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAgK9IKCgpSCgoKCqJKClJSCgpSCtIK0gqSCgoKUyKTKgoKCgriCgoKCuICC2qaAgqSSgoKClKaAgqSSgoKCgpSCgoKUgoKUgoKUgoKmpoCCgoKClJSCguyCgoKUlIKCuKKmkqiSqJKokoCCuJKCgoKCgoKClJS0tLS0tpTKgILIgoKCgoKUpoKmgpSUgoKCuIKCgpSCpoKCpoKClLSCtIK2qqKCgoKUgoKCgpSClIKmgoKClIKmgoKmgoLKgoKClIKCpoCCgoKClIKCyICCgoKClIKClIKCgt7CgoKCgpTKgoKmgoKCgoKClIKUlIKmgqaCgpSmAAgI0qaCgoKmgoKCgqaAgtqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgILEpIKCguqygoKClLqSuIKUgILugIIABxCCgII=", "474-482:1;510-515:2;568-568:1;600-606:1")]
+[assembly: go.GoPositionMap("testing/fstest/testfs.go", "testfs.cs", "ABlOABYCgIKkgoCCkoKCgqaCgpSAgqS2pqKSgoKCgpSClIKCgoKUlIKCpoKUAAoYsqaCgoKClIKCgoKUAAgK9IKCgpSCgoKCqJKClJSCgpSCtIK0gqSCgoKUyKTKgoKCgriCgoKCuICC2qaAgqSSgoKClKaAgqSSgoKCgpSCgoKUgoKUgoKUgoKmpoCCgoKClJSCguyCgoKUlIKCuKKmkqiSqJKo0oCCuJKCgoKCgoKClJS0tLS0tpTKgILIgoKCgoKUpoKmgpSUgoKCuIKCgpSCpoKCpoKClLSCtIK2qqKCgoKUgoKCgpSClIKmgoKClIKmgoKmgoLKgoKClIKCpoCCgoKClIKCyICCgoKClIKClIKCgt7SgoKCgpTKgoKmgoKCgoKClIKUlIKmgqaCgpSmAAgI0qaCgoKmgoKCgqaAgtqmgIKCgoKUuIKUgoKClJSigNiCgoKUpoKCgpSSgILEpIKCguqygoKClLqyuIKUgILugIIABxCCgII=", "474-482:1;510-515:2;568-568:1;600-606:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

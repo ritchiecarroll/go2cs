@@ -15,7 +15,7 @@ partial struct unit {
     internal Offset off; // byte offset of data within the aggregate info
     internal slice<byte> data;
     internal abbrevTable atable;
-    internal partial ref ж<unit5> unit5 { get; } // info specific to DWARF 5 units
+    /*embed*/ internal ж<unit5> unit5; // info specific to DWARF 5 units
     internal nint asize;
     internal nint vers;
     internal bool is64;  // True for 64-bit DWARF format

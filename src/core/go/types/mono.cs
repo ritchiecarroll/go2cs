@@ -116,6 +116,7 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
 
 internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var stackᴷ = new stackAppend<nint>();
 
     slice<nint> stack = default!;
     var seen = new slice<bool>(len(check.mono.vertices));
@@ -125,7 +126,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     // start by walking backwards along the path until we find a vertex
     // that appears twice.
     while (!seen[v]) {
-        stack = append(stack, v);
+        stack = append(stackᴷ, stack, v);
         seen[v] = true;
         v = check.mono.edges[check.mono.vertices[v].pre].src;
     }
@@ -154,11 +155,11 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
             break;
         }
         case ж<Named>: {
-            err.addf(((atPos)edge.pos), "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }
         case ж<TypeParam>: {
-            err.addf(((atPos)edge.pos), "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }}
     }

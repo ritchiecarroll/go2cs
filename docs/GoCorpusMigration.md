@@ -4749,9 +4749,12 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 61. **Before pass 1, run
     `src/run-h10-recon.ps1 -SelfTest -Tree <worktree> -NameList x -GoRoot x -Out x -ExpectTip x -Scratch x`
     under every shell a launcher uses. Its row-invocation contract must pass: the deadline is the longer of the derived
-    floor and the asked `-TestTimeout`, and every row carries its roster execution pin.** Re-key `$longTimeouts`
-    (run-validated-sweep.ps1:1203) to the release's relocations, and check it against the recon walls: raise a floor when
-    its wall passes 0.75 of it, never lower one. Why: the floor and pin defects were found only at pass 3, after rows read
+    floor and the asked `-TestTimeout`, and every row carries its roster execution pin.** The contract also holds the
+    per-test deadline: a row runs at the longer of `-TestDeadline` (default 15m) and its `$testDeadlineFloors` floor, `0`
+    turns it off, and a per-test floor on a row with no `$longTimeouts` floor is refused by name. Re-key `$longTimeouts`
+    (run-validated-sweep.ps1:1203) and `$testDeadlineFloors` together to the release's relocations, and check them against
+    the recon walls: raise a floor when its wall passes 0.75 of it, never lower one. Raise a per-test floor only for a
+    row whose read shows an abandoned verdict on a test Go passes. Why: the floor and pin defects were found only at pass 3, after rows read
     without their pin had been reported as converter defects. **Step text:** H10 step 5.
     <!-- Fixed at c8c77eadff (the wrapper takes max(asked, floor) and the roster pin, with the 1.24.13 floor re-check),
     branch tip d095fe8108. The self-test's contract cases are at run-h10-recon.ps1:616-810. Ledger 2026-09-22 14:52
@@ -4761,7 +4764,12 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     Mandatory (run-h10-recon.ps1:89-111), so that form fails at parameter binding before any self-test code runs. Under
     -SelfTest only -Tree is read (:238-242, :634-650: a per-run copy takes the sweep's and the roster's rules from the
     tree), so it names the worktree and the other five take any value. Read at e2008427b1 under pwsh 7: rc 0 and
-    "SELF-TEST PASSED". $longTimeouts is at run-validated-sweep.ps1:1203 at e2008427b1 (:1189 at 172d437e66). -->
+    "SELF-TEST PASSED". $longTimeouts is at run-validated-sweep.ps1:1203 at e2008427b1 (:1189 at 172d437e66).
+    Per-test deadline added 2026-10-17 with the watchdog seat (claude/c1-test-host-watchdog; COORD ruled option (A), the
+    15m default with a per-row floor column: crypto/dsa 120m, go/parser 90m, runtime at the default). The recon AST-loads
+    Resolve-RowTestDeadline and Get-RowTestDeadlineArgs from the sweep and derives the table through
+    Get-SweepTestDeadlineFloors. Made to fail: the floor replacing the ask failed the raise case, and the orphan check
+    removed failed the orphan case; both passed after a byte-identical restore. -->
 62. **At the END of pass 1, run three checks.** The first is a page census: every row's first proof link is at the new
     release. The second is the population identity, enumerated two ways: dispatched + unscheduled = population. The third
     re-dispatches every NOVERDICT or hand-stopped row at a raised budget. Why: two rows were in no shard plan and 14

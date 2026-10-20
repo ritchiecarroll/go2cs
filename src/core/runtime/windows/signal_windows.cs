@@ -380,9 +380,9 @@ internal static void winthrow(ж<windows.ExceptionRecord> Ꮡinfo, ж<windows.Co
     g0.Value.stackguard0 = (~g0).stack.lo + (uintptr)stackGuard;
     g0.Value.stackguard1 = g0.Value.stackguard0;
 
-    print((@string)"Exception "u8, ((Δhex)(uint64)info.ExceptionCode), (@string)" "u8, ((Δhex)(uint64)info.ExceptionInformation[0]), (@string)" "u8, ((Δhex)(uint64)info.ExceptionInformation[1]), (@string)" "u8, ((Δhex)(uint64)r.PC()), (@string)"\n"u8);
+    print((@string)"Exception "u8, (Δhex)(uint64)info.ExceptionCode, (@string)" "u8, (Δhex)(uint64)info.ExceptionInformation[0], (@string)" "u8, (Δhex)(uint64)info.ExceptionInformation[1], (@string)" "u8, (Δhex)(uint64)r.PC(), (@string)"\n"u8);
 
-    print((@string)"PC="u8, ((Δhex)(uint64)r.PC()), (@string)"\n"u8);
+    print((@string)"PC="u8, (Δhex)(uint64)r.PC(), (@string)"\n"u8);
     if ((~(~g0).m).incgo && Ꮡgp == (~(~g0).m).g0 && (~(~g0).m).curg != nil) {
         if (iscgo) {
             print((@string)"signal arrived during external code execution\n"u8);
@@ -430,9 +430,9 @@ internal static void sigpanic() {
             // We could check that the arena chunk is explicitly set to fault,
             // but the fact that we faulted on accessing it is enough to prove
             // that it is.
-            print((@string)"accessed data from freed user arena "u8, ((Δhex)(uint64)(~gp).sigcode1), (@string)"\n"u8);
+            print((@string)"accessed data from freed user arena "u8, (Δhex)(uint64)(~gp).sigcode1, (@string)"\n"u8);
         } else {
-            print((@string)"unexpected fault address "u8, ((Δhex)(uint64)(~gp).sigcode1), (@string)"\n"u8);
+            print((@string)"unexpected fault address "u8, (Δhex)(uint64)(~gp).sigcode1, (@string)"\n"u8);
         }
         @throw(faultˢ);
     }

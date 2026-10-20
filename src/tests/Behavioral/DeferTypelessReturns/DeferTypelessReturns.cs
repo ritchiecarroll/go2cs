@@ -38,11 +38,8 @@ internal static (ж<item>, error) find(slice<item> xs, nint want) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closeItˢ = (@string)"closeIt"u8;
-
 internal static error closeIt(ж<nint> Ꮡp, nint tag) {
-    fmt.Println(closeItˢ, Ꮡp == nil, tag);
+    fmt.Println("closeIt", Ꮡp == nil, tag);
     return default!;
 }
 
@@ -62,7 +59,7 @@ internal static uint32 width() {
 internal static (uint32, error) mixedRet(bool ok) {
     GoFrame ᒐ = default;
     try {
-        defer(closeIt, (ж<nint>)(nil), (nint)(4), ref ᒐ);
+        defer(closeIt, (ж<nint>)(nil), (nint)4, ref ᒐ);
         if (!ok) {
             return (0, fmt.Errorf("nope"u8));
         }
@@ -75,7 +72,7 @@ internal static (uint32, error) mixedRet(bool ok) {
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
-        defer(closeIt, (ж<nint>)(nil), (nint)(3), ref ᒐ);
+        defer(closeIt, (ж<nint>)(nil), (nint)3, ref ᒐ);
         ref var h = ref heap<res>(out var Ꮡh);
         h = new res(id: 4);
         var hʗ1 = h;
@@ -101,11 +98,8 @@ partial struct res {
     internal nint id;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object closedˢ = (@string)"closed"u8;
-
 internal static error close(this res h) {
-    fmt.Println(closedˢ, h.id);
+    fmt.Println("closed", h.id);
     return default!;
 }
 

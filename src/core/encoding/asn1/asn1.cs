@@ -192,7 +192,7 @@ public static nint At(this BitString b, nint i) {
     }
     nint x = i / 8;
     nuint y = 7 - (nuint)(i % 8);
-    return (nint)((nint)(b.Bytes[x].Rsh(y)) & 1);
+    return (nint)(b.Bytes[x].Rsh(y)) & 1;
 }
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
@@ -363,7 +363,7 @@ internal static (time.Time ret, error err) parseUTCTime(slice<byte> bytes) {
     time.Time ret = default!;
     error err = default!;
 
-    @string s = ((@string)bytes);
+    @string s = (@string)bytes;
 
     @string formatStr = "0601021504Z0700"u8;
     (ret, err) = time.Parse(formatStr, s);
@@ -400,7 +400,7 @@ internal static (time.Time ret, error err) parseGeneralizedTime(slice<byte> byte
     error err = default!;
 
     @string formatStr = formatStrᶜ;
-    @string s = ((@string)bytes);
+    @string s = (@string)bytes;
 
     {
         (ret, err) = time.Parse(formatStr, s); if (err != default!) {
@@ -427,7 +427,7 @@ internal static (@string ret, error err) parseNumericString(slice<byte> bytes) {
             return ("", new SyntaxError("NumericString contains invalid character"u8));
         }
     }
-    return (((@string)bytes), default!);
+    return ((@string)bytes, default!);
 }
 
 // isNumeric reports whether the given b is in the ASN.1 NumericString set.
@@ -449,7 +449,7 @@ internal static (@string ret, error err) parsePrintableString(slice<byte> bytes)
             return (ret, err);
         }
     }
-    ret = ((@string)bytes);
+    ret = (@string)bytes;
     return (ret, err);
 }
 
@@ -493,7 +493,7 @@ internal static (@string ret, error err) parseIA5String(slice<byte> bytes) {
             return (ret, err);
         }
     }
-    ret = ((@string)bytes);
+    ret = (@string)bytes;
     return (ret, err);
 }
 
@@ -516,7 +516,7 @@ internal static (@string ret, error err) parseT61String(slice<byte> bytes) {
         // All the 1-byte UTF-8 runes map 1-1 with Latin-1.
         buf = utf8.AppendRune(buf, (rune)v);
     }
-    return (((@string)buf), default!);
+    return ((@string)buf, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -530,7 +530,7 @@ internal static (@string ret, error err) parseUTF8String(slice<byte> bytes) {
     if (!utf8.Valid(bytes)) {
         return ("", errors.New(asn1InvalidUtf8Stringˢ));
     }
-    return (((@string)bytes), default!);
+    return ((@string)bytes, default!);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -541,6 +541,8 @@ internal static readonly @string invalidBMPStringˢ = "invalid BMPString"u8;
 // parseBMPString parses an ASN.1 BMPString (Basic Multilingual Plane of
 // ISO/IEC/ITU 10646-1) from the given byte slice and returns it.
 internal static (@string, error) parseBMPString(slice<byte> bmpString) {
+    var sᴷ = new stackAppend<uint16>();
+
     // BMPString uses the defunct UCS-2 16-bit character encoding, which
     // covers the Basic Multilingual Plane (BMP). UTF-16 was an extension of
     // UCS-2, containing all of the same code points, but also including
@@ -561,18 +563,18 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
 
     var s = new slice<uint16>(0, len(bmpString) / 2);
     while (len(bmpString) > 0) {
-        var point = (uint16)((uint16)((uint16)bmpString[0] << (int)(8)) + (uint16)bmpString[1]);
+        var point = (uint16)((uint16)((uint16)bmpString[0] << 8) + (uint16)bmpString[1]);
         // Reject UTF-16 code points that are permanently reserved
         // noncharacters (0xfffe, 0xffff, and 0xfdd0-0xfdef) and surrogates
         // (0xd800-0xdfff).
         if (point == 0xfffe || point == 0xffff || (point >= 0xfdd0 && point <= 0xfdef) || (point >= 0xd800 && point <= 0xdfff)) {
             return ("", errors.New(invalidBMPStringˢ));
         }
-        s = append(s, point);
+        s = append(sᴷ, s, point);
         bmpString = bmpString[2..];
     }
 
-    return (((@string)utf16.Decode(s)), default!);
+    return ((@string)utf16.Decode(s), default!);
 }
 
 // A RawValue represents an undecoded ASN.1 object.
@@ -611,7 +613,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
     }
     var b = bytes[offset];
     offset++;
-    ret.@class = (nint)((b >> (int)(6)));
+    ret.@class = (nint)(b >> 6);
     ret.isCompound = (byte)(b & 0x20) == 0x20;
     ret.tag = (nint)((byte)(b & 0x1f));
 
@@ -652,7 +654,7 @@ internal static (tagAndLength ret, nint offset, error err) parseTagAndLength(sli
             }
             b = bytes[offset];
             offset++;
-            if (ret.length >= (1 << (int)(23))) {
+            if (ret.length >= 1 << 23) {
                 // We can't shift ret.length up without
                 // overflowing.
                 err = new StructuralError("length too large"u8);
@@ -1001,7 +1003,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     case ж<Enumerated> vΔ1: {
         var (parsedInt, err1) = parseInt32(innerBytes);
         if (err1 == default!) {
-            vΔ1.Value = ((Enumerated)(nint)parsedInt);
+            vΔ1.Value = (Enumerated)(nint)parsedInt;
         }
         err = err1;
         return (offset, err);
@@ -1058,7 +1060,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
 
             if (structType.NumField() > 0 && AreEqual(structType.Field(0).Type, rawContentsType)) {
                 var bytesΔ2 = bytes.slice(initOffset, offset);
-                val.Field(0).Set(reflect.ValueOf(((RawContent)bytesΔ2)));
+                val.Field(0).Set(reflect.ValueOf((RawContent)bytesΔ2));
             }
 
             nint innerOffset = 0;

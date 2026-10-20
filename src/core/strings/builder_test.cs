@@ -458,7 +458,7 @@ public static void BenchmarkBuildString_Builder(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkBuildString_WriteString(ж<testing.B> Ꮡb) {
-    @string someString = ((@string)someBytes);
+    @string someString = (@string)someBytes;
     benchmarkBuilder(Ꮡb, (ж<testing.B> bΔ1, nint numWrite, bool grow) => {
         for (nint i = 0; i < (~bΔ1).N; i++) {
             ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);

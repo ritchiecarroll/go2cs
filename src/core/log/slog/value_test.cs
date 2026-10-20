@@ -170,7 +170,7 @@ internal partial struct TestAnyValue_type /*dyn*/ {
 
 public static void TestAnyValue(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestAnyValue_type[]{
-        new((nint)(1), IntValue(1)),
+        new((nint)1, IntValue(1)),
         new(1.5D, Float64Value(1.5D)),
         new((float32)2.5F, Float64Value(2.5D)),
         new((@string)"s"u8, StringValue("s"u8)),

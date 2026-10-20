@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using go2cs.Templates.InterfaceImpl;
@@ -261,7 +262,13 @@ public class ImplementGenerator : ISourceGenerator
             }
 
             string structName = structType.GetFullTypeName();
-            string interfaceName = GlobalQualify(interfaceType.GetFullTypeName(true));
+            // The fully qualified display string, never GetFullTypeName: its generic arm renders
+            // `Name<args>` without the containing class, which resolves only while the adapter's host
+            // class declares the interface. crypto/mlkem at Go 1.26 hosts *DecapsulationKey768's adapter
+            // in mlkem_package for mlkem_test's decapsulationKey[E] (CS0246 + CS0540 x3 per key).
+            // FullyQualifiedFormat roots every name in global:: and escapes keyword identifiers by its own
+            // options (`probe_package.@base`), rather than by the default format's.
+            string interfaceName = interfaceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
             // Get the attribute's Promoted / Pointer / ConstraintProxy argument values, if defined
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
@@ -269,6 +276,28 @@ public class ImplementGenerator : ISourceGenerator
             bool pointer = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Pointer")).value?.Trim() ?? "false");
             bool constraintProxy = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("ConstraintProxy")).value?.Trim() ?? "false");
             bool production = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Production")).value?.Trim() ?? "false");
+
+            // A VALUE record for a CONSTRUCTED generic target (`wrap<@string>` implementing
+            // `Lesser<wrap<@string>>`) extends the OPEN definition, since a partial declaration can only
+            // extend that (see emittedGenericValueImpls), and left the interface CLOSED:
+            // `partial struct wrap<E> : Lesser<wrap<@string>>` forwards `this.Less(_)` with a wrap<@string>
+            // where Less<E> takes wrap<E> (CS1929), for every generic value type implementing a generic
+            // interface at its own instantiation. Re-open the interface over the target's own parameters,
+            // `wrap<E> : Lesser<wrap<E>>`, which is what Go means: a method on wrap[E] is declared for every
+            // E and cannot specialize. Every closed record of the target then collapses into that one
+            // partial by the open key below. The record itself stays closed (an attribute's type arguments
+            // cannot be open). Validated member by member against the target's own Go methods, so a closed
+            // argument that only COINCIDES with a target argument (`namer[E]` whose Get returns string,
+            // implementing Getter[string]) keeps today's closed form.
+            if (!pointer && !constraintProxy &&
+                structType is INamedTypeSymbol { IsGenericType: true } constructedTarget &&
+                interfaceType is INamedTypeSymbol { IsGenericType: true } closedInterface &&
+                SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, context.Compilation.Assembly) &&
+                ReopenInterfaceOverTarget(constructedTarget, closedInterface, context.Compilation) is { } openInterface)
+            {
+                interfaceType = openInterface;
+                interfaceName = interfaceType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            }
 
             if (structType.TypeKind == TypeKind.Interface)
             {
@@ -336,9 +365,17 @@ public class ImplementGenerator : ISourceGenerator
             // nistPoint[Point] structurally so nistCurve[*P224Point] can instantiate): emit the
             // proxy class that wraps ж<element> and implements the interface over ITSELF, then move
             // on — none of the normal adapter method-binding below applies.
+            //
+            // A FOREIGN interface is never proxied here: a second importer would declare a second
+            // proxy, and the proxy is part of the instantiated type's identity. The record then binds
+            // the interface package's GENERIC proxy to the element's methods instead.
             if (constraintProxy)
             {
-                EmitConstraintProxy(context, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, packageClassName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+                if (SymbolEqualityComparer.Default.Equals(interfaceType.ContainingAssembly, context.Compilation.Assembly))
+                    EmitConstraintProxy(context, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, packageClassName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+                else
+                    EmitConstraintProxyBind(context, attributeSyntax, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+
                 continue;
             }
 
@@ -453,7 +490,7 @@ public class ImplementGenerator : ISourceGenerator
             // unbound member unconditionally: that member's promotion is what type-checked the
             // cast, so there is nothing to decide. SEVERAL embeds is the case that must be
             // decided per member — see multiEmbedHopPaths below.
-            List<(string Name, string TypeName)> embedHops = structDecl?.GetEmbeddedPointerHopNames() ?? [];
+            List<(string Name, string TypeName)> embedHops = structDecl?.GetEmbeddedPointerHopNames(compilation!) ?? [];
             string? embedHop = embedHops.Count == 1 ? embedHops[0].Name : null;
 
             // With SEVERAL embedded pointers no single hop can take every member, so both forms of the
@@ -512,7 +549,7 @@ public class ImplementGenerator : ISourceGenerator
 
                     embedHopValueMethods.UnionWith(hopDecl.GetExtensionMethods(hopCompilation).Select(method => GetSimpleName(method.Name)));
 
-                    foreach ((string fieldName, string fieldTypeName) in hopDecl.GetEmbeddedValueHopNames())
+                    foreach ((string fieldName, string fieldTypeName) in hopDecl.GetEmbeddedValueHopNames(hopCompilation!))
                     {
                         foreach (string deepMethod in StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(fieldTypeName, hopCompilation))
                         {
@@ -547,7 +584,7 @@ public class ImplementGenerator : ISourceGenerator
             HashSet<string>? embedHopMemberNames = null;
 
             if (embedHops.Count == 1 &&
-                ((structDecl?.GetEmbeddedValueHopNames().Count ?? 0) > 0 || GetEmbeddedInterfaceFieldMembers(structType).Count > 0))
+                ((structDecl?.GetEmbeddedValueHopNames(compilation!).Count ?? 0) > 0 || GetEmbeddedInterfaceFieldMembers(structType).Count > 0))
             {
                 embedHopMemberNames = new HashSet<string>(embedHopBoxMethods, StringComparer.Ordinal);
 
@@ -910,12 +947,14 @@ public class ImplementGenerator : ISourceGenerator
 
                         string receiver = "m_box";
                         StructDeclarationSyntax? currentDecl = structDecl;
+                        // The compilation that owns currentDecl's tree, followed down the hops with it.
+                        Compilation? currentCompilation = compilation;
                         string currentTypeName = structName;
                         INamedTypeSymbol? currentTypeSymbol = structType as INamedTypeSymbol;
 
                         for (int depth = 0; depth < maxDepth && currentDecl is not null; depth++)
                         {
-                            List<(string Name, string TypeName)> valueEmbedHops = currentDecl.GetEmbeddedValueHopNames();
+                            List<(string Name, string TypeName)> valueEmbedHops = currentDecl.GetEmbeddedValueHopNames(currentCompilation!);
 
                             if (valueEmbedHops.Count != 1)
                                 break;
@@ -942,6 +981,7 @@ public class ImplementGenerator : ISourceGenerator
                             // keyword-named type (`@fixed.Ꮡn`, not the parse-breaking `fixed.Ꮡn`).
                             receiver = $"{receiver}.of({EscapeCsKeyword(currentTypeName)}.{AddressPrefix}{GetUnsanitizedIdentifier(embedName)})";
                             (currentDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embedTypeName);
+                            currentCompilation = embedCompilation;
                             currentTypeName = embedTypeName;
                             currentTypeSymbol = embedTypeSymbol;
 
@@ -1436,7 +1476,7 @@ public class ImplementGenerator : ISourceGenerator
                 // it) - net's `addrPortUDPAddr struct { netip.AddrPort }`: the bare
                 // `this.String()` bound an unrelated same-package extension by NAME (CS1929);
                 // `this.AddrPort.String()` binds the embed's value-receiver method.
-                ValueEmbedHop = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var singleValueHop]) ? singleValueHop.Name : null,
+                ValueEmbedHop = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var singleValueHop]) ? singleValueHop.Name : null,
                 // A FOREIGN value embed's extensions live in another namespace segment
                 // (netip_package sits in go.net; the source file only ALIASES it, which does
                 // not import extensions) - call the package-class static directly:
@@ -1444,7 +1484,7 @@ public class ImplementGenerator : ISourceGenerator
                 // embed's SYMBOL: the spelled type name is already `global::go.…` in an internal test
                 // and `go.<module ns>.…` in an external one, and prefixing either again names nothing
                 // (`global::go.global::go.…` CS7000, `global::go.go.…` CS0234: golang-jwt's tests).
-                ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var svh]) && svh.TypeName.Contains('.')
+                ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames(compilation!) is [var svh]) && svh.TypeName.Contains('.')
                     ? ResolveValueEmbedPackageClass(structType, svh.Name) ?? "global::go." + svh.TypeName.Substring(0, svh.TypeName.LastIndexOf('.'))
                     : null,
                 UsingStatements = usingStatements
@@ -1707,6 +1747,7 @@ public class ImplementGenerator : ISourceGenerator
         string interfaceRef = $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyName}>";
 
         ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        ProxyForms forms = new(selfParameter, $"{PointerPrefix}<{elementName}>", proxyName);
         StringBuilder methods = new();
 
         // A Go constraint interface may EMBED other interfaces, and Go embedding emits as C#
@@ -1742,12 +1783,21 @@ public class ImplementGenerator : ISourceGenerator
                 string methodName = EscapeCsKeyword(method.Name);
                 string returnType = RenderWithProxy(method.ReturnType, selfParameter, proxyName);
                 string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyName)} {SafeParameterName(parameter.Name, index)}"));
-                string arguments = string.Join(", ", method.Parameters.Select((parameter, index) => RenderForwardedArgument(parameter.Type, SafeParameterName(parameter.Name, index), selfParameter, elementName)));
+                List<string> refused = UnforwardablePositions(method, forms);
 
                 if (methods.Length > 0)
                     methods.Append("\r\n\r\n        ");
 
-                methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => m_box.{methodName}({arguments});");
+                if (refused.Count > 0)
+                {
+                    methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {RefusedForwarderBody(proxyName, interfaceDef, method, refused)};");
+                    continue;
+                }
+
+                string arguments = string.Join(", ", method.Parameters.Select((parameter, index) => MarshalAcrossProxy(SafeParameterName(parameter.Name, index), parameter.Type, forms, false, true, 0)));
+                string call = $"m_box.{methodName}({arguments})";
+
+                methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {(method.ReturnsVoid ? call : MarshalAcrossProxy(call, method.ReturnType, forms, true, true, 0))};");
             }
         }
 
@@ -1779,6 +1829,247 @@ public class ImplementGenerator : ISourceGenerator
         .Generate();
 
         context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{proxyName}-proxy.g.cs")), proxySource);
+    }
+
+    // The generic constraint proxy's name: the interface's simple name behind the pointer marker, `жLesser<E>`. The
+    // converter names it so at every instantiation that reaches it, and the binder finds it so.
+    internal static string GenericConstraintProxyName(INamedTypeSymbol interfaceDef) => $"{PointerPrefix}{interfaceDef.Name}";
+
+    // The element parameter of a generic constraint proxy. The proxy's signatures render every other type fully
+    // qualified, so a package type of the same name cannot be confused with it.
+    private const string GenericProxyElement = "E";
+
+    // A generic-proxy SLOT's type is the element's own Go-method shape: the self parameter is the BOX, `ж<E>`, except where
+    // it is a type argument whose type parameter is constrained by an interface closed over that parameter. Go 1.26's
+    // `GraphNode[N GraphNode[N]] interface { Owner() *Graph[N] }` with `Graph[N GraphNode[N]]` is the shape: the converter
+    // names the constraint proxy there in the element's method as well (`*Graph[*GNode]` is `ж<Graph<…жGraphNode<GNode>>>`),
+    // and the box would not satisfy the constraint at all: `Graph<ж<E>>` was CS0311 in the interface's own assembly
+    // (behavioral SelfRefGenerics).
+    private static string RenderSlotType(ITypeSymbol type, ITypeParameterSymbol selfParameter, string boxRef, string proxyRef)
+    {
+        if (SymbolEqualityComparer.Default.Equals(type, selfParameter))
+            return boxRef;
+
+        if (!ContainsTypeParameter(type, selfParameter))
+            return GlobalQualify(type.ToDisplayString());
+
+        switch (type)
+        {
+            case IArrayTypeSymbol array:
+                return $"{RenderSlotType(array.ElementType, selfParameter, boxRef, proxyRef)}[]";
+            case INamedTypeSymbol { IsTupleType: true } tuple:
+                return $"({string.Join(", ", tuple.TupleElements.Select(element => RenderSlotType(element.Type, selfParameter, boxRef, proxyRef)))})";
+            case INamedTypeSymbol named:
+                ImmutableArray<ITypeParameterSymbol> parameters = named.ConstructedFrom.TypeParameters;
+
+                IEnumerable<string> arguments = named.TypeArguments.Select((argument, index) =>
+                    SymbolEqualityComparer.Default.Equals(argument, selfParameter) && index < parameters.Length && IsSelfConstrained(parameters[index])
+                        ? proxyRef
+                        : RenderSlotType(argument, selfParameter, boxRef, proxyRef));
+
+                return $"{StripGenericTypeArguments(GlobalQualify(named.ConstructedFrom.ToDisplayString()))}<{string.Join(", ", arguments)}>";
+            default:
+                return GlobalQualify(type.ToDisplayString());
+        }
+    }
+
+    // Reports whether a type parameter is constrained by a generic interface closed over the parameter itself
+    // (`where N : GraphNode<N>`), the constraint only a constraint proxy satisfies for a pointer argument.
+    private static bool IsSelfConstrained(ITypeParameterSymbol parameter) =>
+        parameter.ConstraintTypes.Any(constraint => constraint is INamedTypeSymbol { IsGenericType: true } named &&
+            named.TypeArguments.Any(argument => SymbolEqualityComparer.Default.Equals(argument, parameter)));
+
+    // The method set a constraint proxy forwards, each method paired with the interface that DECLARES it closed over
+    // the proxy: the constraint's own members first, in declaration order, then every embedded interface's, ordered
+    // by its rendered reference (see EmitConstraintProxy, whose order this repeats).
+    private static List<(string DeclaringRef, IMethodSymbol Method)> ConstraintMethodSet(INamedTypeSymbol interfaceDef, string interfaceRef, string proxyRef)
+    {
+        ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        List<(string DeclaringRef, INamedTypeSymbol Interface)> methodSets = [(interfaceRef, interfaceDef)];
+
+        methodSets.AddRange(interfaceDef.AllInterfaces
+            .Select(embedded => (DeclaringRef: RenderWithProxy(embedded, selfParameter, proxyRef), Interface: embedded))
+            .OrderBy(entry => entry.DeclaringRef, StringComparer.Ordinal));
+
+        return methodSets
+            .SelectMany(entry => entry.Interface.GetMembers().OfType<IMethodSymbol>()
+                .Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic)
+                .Select(method => (entry.DeclaringRef, method)))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Emits the GENERIC constraint proxy <c>жLesser&lt;E&gt; : Lesser&lt;жLesser&lt;E&gt;&gt;</c> for a
+    /// self-referential constraint interface this package declares (ConstraintProxyGenerator finds them).
+    /// </summary>
+    /// <remarks>
+    /// Each forwarder calls a static slot typed with the self parameter rendered as the BOX, <c>ж&lt;E&gt;</c>,
+    /// so a binder's lambda calls the element's Go method on exactly the types that method declares. Arguments
+    /// and results cross the proxy/box boundary through MarshalAcrossProxy, as in a concrete proxy; a method
+    /// whose values share the element's storage has no slot, and its forwarder throws the converter's refusal.
+    /// One delegate call per forwarded method is the cost of a proxy that does not know its element.
+    /// </remarks>
+    internal static void EmitGenericConstraintProxy(GeneratorExecutionContext context, INamedTypeSymbol interfaceDef, HashSet<string> emittedHintNames)
+    {
+        if (interfaceDef.TypeParameters.Length != 1 || interfaceDef.ContainingType is not { } packageClass || !packageClass.Name.EndsWith(PackageSuffix))
+            return;
+
+        string proxyName = GenericConstraintProxyName(interfaceDef);
+        string proxyRef = $"{proxyName}<{GenericProxyElement}>";
+        string boxRef = $"{PointerPrefix}<{GenericProxyElement}>";
+        string interfaceRef = $"{StripGenericTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyRef}>";
+        ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        ProxyForms forms = new(selfParameter, boxRef, proxyRef);
+
+        StringBuilder slots = new();
+        StringBuilder methods = new();
+        HashSet<string> slotNames = new(StringComparer.Ordinal);
+
+        foreach ((string declaringRef, IMethodSymbol method) in ConstraintMethodSet(interfaceDef, interfaceRef, proxyRef))
+        {
+            string methodName = EscapeCsKeyword(method.Name);
+            string slotName = $"{TempVarMarker}{method.Name}";
+
+            // The receiver, then the method's own parameters: a BCL delegate holds at most sixteen.
+            if (method.Parameters.Length + 1 > 16)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, method.Locations.FirstOrDefault(), $"the generic constraint proxy {proxyRef}", $"'{method.Name}' takes more parameters than a slot delegate can hold"));
+                return;
+            }
+
+            string returnType = method.ReturnsVoid ? "void" : RenderWithProxy(method.ReturnType, selfParameter, proxyRef);
+            string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyRef)} {SafeParameterName(parameter.Name, index)}"));
+            List<string> refused = UnforwardablePositions(method, forms);
+
+            if (methods.Length > 0)
+                methods.Append("\r\n\r\n        ");
+
+            // A method the proxy cannot forward has no slot to bind, and its forwarder throws the converter's refusal: the
+            // interface's own package compiles, and every value-element instantiation (which needs no proxy) works.
+            if (refused.Count > 0)
+            {
+                methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {RefusedForwarderBody(proxyRef, interfaceDef, method, refused)};");
+                continue;
+            }
+
+            // An interface embedding another that declares the same method (Go permits identical duplicates) forwards
+            // both declarations through one slot.
+            if (slotNames.Add(slotName))
+            {
+                IEnumerable<string> slotTypes = method.Parameters.Select(parameter => RenderSlotType(parameter.Type, selfParameter, boxRef, proxyRef)).Prepend(boxRef);
+
+                string slotType = method.ReturnsVoid
+                    ? $"global::System.Action<{string.Join(", ", slotTypes)}>"
+                    : $"global::System.Func<{string.Join(", ", slotTypes.Append(RenderSlotType(method.ReturnType, selfParameter, boxRef, proxyRef)))}>";
+
+                string discards = method.Parameters.Length == 0 ? "_" : $"({string.Join(", ", Enumerable.Repeat("_", method.Parameters.Length + 1))})";
+
+                if (slots.Length > 0)
+                    slots.Append("\r\n\r\n        ");
+
+                slots.Append($"public static {slotType} {slotName} = static {discards} => throw {TempVarMarker}Unbound(\"{method.Name}\");");
+            }
+
+            string arguments = string.Join("", method.Parameters.Select((parameter, index) => $", {MarshalAcrossProxy(SafeParameterName(parameter.Name, index), parameter.Type, forms, false, true, 0)}"));
+            string call = $"{slotName}(m_box{arguments})";
+
+            methods.Append($"{returnType} {declaringRef}.{methodName}({parameters}) => {(method.ReturnsVoid ? call : MarshalAcrossProxy(call, method.ReturnType, forms, true, true, 0))};");
+        }
+
+        string packageNamespace = packageClass.ContainingNamespace.ToDisplayString(s_namespaceUsingFormat);
+
+        string proxySource = new GenericConstraintProxyImplTemplate
+        {
+            PackageNamespace = packageNamespace,
+            PackageName = packageClass.Name[..^PackageSuffix.Length],
+            ProxyName = proxyName,
+            InterfaceRef = interfaceRef,
+            InterfaceName = interfaceDef.Name,
+            // Public with its interface: the proxy is a type argument of whatever exported signature closes the constraint.
+            AdapterScope = AdapterSidePublic(interfaceDef, interfaceDef.Name) ? "public" : "internal",
+            SlotDeclarations = slots.ToString(),
+            MethodsImplementation = methods.ToString()
+        }
+        .Generate();
+
+        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClass.Name}.{proxyName}-generic-proxy.g.cs")), proxySource);
+    }
+
+    /// <summary>
+    /// Binds a FOREIGN interface's generic constraint proxy to one element's Go methods: a module initializer
+    /// assigning each slot of <c>lib.жLesser&lt;elem.Node&gt;</c> a lambda that calls the like-named method on the box.
+    /// </summary>
+    /// <remarks>
+    /// The slots are read from the proxy the interface's package published, not re-derived from the interface, so
+    /// a binder can only bind what that proxy forwards. A package that published none is refused by name: the
+    /// converter names the proxy at the instantiation, which could not compile.
+    /// </remarks>
+    private static void EmitConstraintProxyBind(GeneratorExecutionContext context, AttributeSyntax attributeSyntax, ITypeSymbol elementType, INamedTypeSymbol interfaceType, string packageNamespace, string packageName, string[] usingStatements, HashSet<string> emittedHintNames, HashSet<string> emittedProxies)
+    {
+        INamedTypeSymbol interfaceDef = interfaceType.OriginalDefinition;
+
+        if (interfaceDef.TypeParameters.Length != 1)
+            return;
+
+        // One binding per (element, interface) pair, however many instantiation sites recorded it. Keyed by the CLOSED
+        // element: each instantiation of a generic element (`Box<int>`, `Box<string>`) closes its own proxy, whose
+        // slots are its own statics.
+        if (!emittedProxies.Add($"bind|{elementType.ToDisplayString()}|{interfaceDef.ToDisplayString()}"))
+            return;
+
+        string proxyName = GenericConstraintProxyName(interfaceDef);
+
+        if (interfaceDef.ContainingType?.GetTypeMembers(proxyName, 1).FirstOrDefault() is not { } proxy)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.UngeneratableRecord, attributeSyntax.GetLocation(), attributeSyntax.ToString(), $"'{interfaceDef.ToDisplayString()}' has no generic constraint proxy {proxyName}<E> in its package to bind '{elementType.ToDisplayString()}' to"));
+            return;
+        }
+
+        // Fully qualified by the symbol's own format: GetFullTypeName's generic arm drops the containing package class
+        // (`Box<int>`, CS0246 from the consumer's namespace).
+        string elementName = elementType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        string proxyRef = $"{StripGenericTypeArguments(GlobalQualify(proxy.ToDisplayString()))}<{elementName}>";
+        StringBuilder bindings = new();
+
+        foreach (IFieldSymbol slot in proxy.GetMembers().OfType<IFieldSymbol>().Where(field => field.IsStatic && field.Name.StartsWith(TempVarMarker, StringComparison.Ordinal)))
+        {
+            if (slot.Type is not INamedTypeSymbol { DelegateInvokeMethod: { } invoke })
+                continue;
+
+            string arguments = string.Join(", ", invoke.Parameters.Skip(1).Select((_, index) => $"{TempVarMarker}{index}"));
+            string parameters = string.Join(", ", new[] { "recv" }.Concat(invoke.Parameters.Skip(1).Select((_, index) => $"{TempVarMarker}{index}")));
+
+            if (bindings.Length > 0)
+                bindings.Append("\r\n        ");
+
+            bindings.Append($"{proxyRef}.{slot.Name} = static ({parameters}) => recv.{EscapeCsKeyword(slot.Name[TempVarMarker.Length..])}({arguments});");
+        }
+
+        // Each lambda calls the element's box extension methods, declared in the element's package class: bring that
+        // class's namespace into scope, as a concrete proxy does.
+        string[] bindUsings = usingStatements;
+
+        if (elementType.ContainingNamespace is { IsGlobalNamespace: false } elementNamespace)
+            bindUsings = [.. usingStatements, $"using {elementNamespace.ToDisplayString(s_namespaceUsingFormat)};"];
+
+        // Unique within the package class: two elements of one simple name, from two packages, bind separately.
+        string methodName = $"{TempVarMarker}Bind{elementType.Name}{PointerPrefix}{interfaceDef.Name}";
+
+        for (int suffix = 2; !emittedProxies.Add($"bindname|{packageNamespace}.{packageName}|{methodName}"); suffix++)
+            methodName = $"{TempVarMarker}Bind{elementType.Name}{PointerPrefix}{interfaceDef.Name}{suffix}";
+
+        string bindSource = new ConstraintProxyBindTemplate
+        {
+            PackageNamespace = packageNamespace,
+            PackageName = packageName,
+            MethodName = methodName,
+            ProxyRef = proxyRef,
+            Bindings = bindings.ToString(),
+            UsingStatements = bindUsings
+        }
+        .Generate();
+
+        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageName}{PackageSuffix}.{elementType.Name}{PointerPrefix}{interfaceDef.Name}-bind.g.cs")), bindSource);
     }
 
     /// <summary>
@@ -1882,47 +2173,121 @@ public class ImplementGenerator : ISourceGenerator
 
     private static string SafeParameterName(string name, int index) => string.IsNullOrEmpty(name) ? $"arg{index}" : EscapeCsKeyword(name);
 
-    // Renders ONE forwarded argument in a constraint-proxy forwarder body.
-    //
-    // A parameter whose type mentions the interface's self parameter is DECLARED on the proxy
-    // closed over the PROXY (`Action<TжTBRun>`), while the box extension the body forwards to is
-    // declared closed over the BOX (`Action<ж<testing.T>>`). At the TOP level the two implicit
-    // conversions the proxy emits marshal that boundary for free — a bare `T` argument converts
-    // proxy→box, a `T` result converts box→proxy. NESTED inside a delegate they cannot: C#
-    // delegate variance requires a REFERENCE conversion and does not lift a user-defined one
-    // through `Action<>`/`Func<>`. The forwarder then binds nothing (CS1929, reported against the
-    // ref-receiver overload because no ж-twin is applicable). net/http's own constraint is the
-    // shape — `type TBRun[T any] interface { testing.TB; Run(string, func(T)) bool }`.
-    //
-    // Re-wrap in a lambda whose parameters are typed with the self parameter substituted by the
-    // BOX, so every crossing takes an implicit conversion in whichever direction that position
-    // needs: box→proxy for an argument going IN, proxy→box for a self-typed RESULT coming OUT
-    // (the lambda's return type is inferred from the target delegate, where the conversion
-    // applies). The lambda parameters are named positionally with the temp marker, which no Go
-    // identifier can spell, so they cannot shadow the forwarder's own parameters.
-    //
-    // Anything that is NOT a delegate is returned untouched — the top-level implicit conversions
-    // already cover it — and so is a delegate with a by-ref parameter, which Go cannot express:
-    // a guess there would trade a clear diagnostic for a wrong marshalling.
-    private static string RenderForwardedArgument(ITypeSymbol parameterType, string parameterName, ITypeParameterSymbol selfParameter, string elementName)
+    // The two spellings of the self parameter across a constraint proxy's boundary: the element's Go methods (and a
+    // generic proxy's slots) take and return the BOX, the proxy's own signatures the PROXY.
+    private sealed record ProxyForms(ITypeParameterSymbol Self, string BoxRef, string ProxyRef)
     {
-        if (SymbolEqualityComparer.Default.Equals(parameterType, selfParameter) ||
-            !ContainsTypeParameter(parameterType, selfParameter) ||
-            parameterType is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } delegateType ||
-            delegateType.DelegateInvokeMethod is not { } invoke ||
-            invoke.Parameters.Any(parameter => parameter.RefKind != RefKind.None))
+        public string Render(ITypeSymbol type, bool asProxy) => asProxy ? RenderWithProxy(type, Self, ProxyRef) : RenderSlotType(type, Self, BoxRef, ProxyRef);
+
+        // A type both spellings name identically, or that C# converts implicitly: the self parameter itself (the
+        // proxy declares both conversions), or a tuple of such types (C# converts a tuple element-wise).
+        public bool ConvertsImplicitly(ITypeSymbol type) =>
+            !ContainsTypeParameter(type, Self) ||
+            SymbolEqualityComparer.Default.Equals(type, Self) ||
+            Render(type, true) == Render(type, false) ||
+            type is INamedTypeSymbol { IsTupleType: true } tuple && tuple.TupleElements.All(element => ConvertsImplicitly(element.Type));
+    }
+
+    // Marshals ONE value across a constraint proxy's boundary: `expression`, spelled with the self parameter as the
+    // box (toProxy) or as the proxy (!toProxy), becomes the other spelling. Returns null when the value cannot cross.
+    //
+    // - A type that converts implicitly (ProxyForms.ConvertsImplicitly) passes as written where C# has a target type
+    //   (an argument, a result, a lambda's return), and is cast elsewhere.
+    // - A DELEGATE is re-wrapped in a lambda over the target's own parameter types, marshalling each argument the
+    //   other way and the result this way, to any depth; a nil func stays nil. C# delegate variance needs a reference
+    //   conversion and never lifts the proxy's user-defined one through `Action<>`/`Func<>` (net/http's
+    //   `TBRun[T any] interface { testing.TB; Run(string, func(T)) bool }` is the shape).
+    // - A Go ARRAY (golib's array<T>) is copied element by element, which is exact: Go copies arrays.
+    // - A tuple marshals element by element.
+    // - Every other shape SHARES the element's storage in Go (a slice, map, channel or pointer of the self parameter,
+    //   or a generic type carrying it through a parameter that is not self-constrained): a proxy is a separate object
+    //   per box, so a copy would compile and break Go's aliasing. The converter refuses an instantiation that would
+    //   reach such a proxy (constraintProxyForwarding.go), and its forwarder throws the same refusal.
+    //
+    // Lambda parameters and pattern variables carry the temp marker and the nesting depth, which no Go identifier can
+    // spell, so they shadow neither the forwarder's parameters nor each other.
+    private static string? MarshalAcrossProxy(string expression, ITypeSymbol type, ProxyForms forms, bool toProxy, bool targetTyped, int depth)
+    {
+        if (forms.ConvertsImplicitly(type))
+            return targetTyped || !ContainsTypeParameter(type, forms.Self) || forms.Render(type, true) == forms.Render(type, false)
+                ? expression
+                : $"(({forms.Render(type, toProxy)})({expression}))";
+
+        switch (type)
         {
-            return parameterName;
+            case INamedTypeSymbol { TypeKind: TypeKind.Delegate, DelegateInvokeMethod: { } invoke } when invoke.Parameters.All(parameter => parameter.RefKind == RefKind.None):
+            {
+                string function = $"{TempVarMarker}f{depth}";
+                List<string> lambdaParameters = [];
+                List<string> arguments = [];
+
+                for (int index = 0; index < invoke.Parameters.Length; index++)
+                {
+                    IParameterSymbol parameter = invoke.Parameters[index];
+                    string name = $"{TempVarMarker}a{depth}_{index}";
+
+                    if (MarshalAcrossProxy(name, parameter.Type, forms, !toProxy, true, depth + 1) is not { } argument)
+                        return null;
+
+                    lambdaParameters.Add($"{forms.Render(parameter.Type, toProxy)} {name}");
+                    arguments.Add(argument);
+                }
+
+                string call = $"{function}({string.Join(", ", arguments)})";
+                string? body = invoke.ReturnsVoid ? call : MarshalAcrossProxy(call, invoke.ReturnType, forms, toProxy, true, depth + 1);
+
+                return body is null ? null : $"({expression} is {{ }} {function} ? new {forms.Render(type, toProxy)}(({string.Join(", ", lambdaParameters)}) => {body}) : null)";
+            }
+            case INamedTypeSymbol { Name: "array", Arity: 1, ContainingType: null } array when array.ContainingNamespace?.ToDisplayString() == "go":
+            {
+                ITypeSymbol elementType = array.TypeArguments[0];
+                string element = $"{TempVarMarker}e{depth}";
+
+                if (MarshalAcrossProxy(element, elementType, forms, toProxy, true, depth + 1) is not { } converted)
+                    return null;
+
+                return $"new {forms.Render(type, toProxy)}(global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select<{forms.Render(elementType, !toProxy)}, {forms.Render(elementType, toProxy)}>({expression}, {element} => {converted})))";
+            }
+            case INamedTypeSymbol { IsTupleType: true } tuple:
+            {
+                string value = $"{TempVarMarker}t{depth}";
+                List<string> elements = [];
+
+                for (int index = 0; index < tuple.TupleElements.Length; index++)
+                {
+                    if (MarshalAcrossProxy($"{value}.Item{index + 1}", tuple.TupleElements[index].Type, forms, toProxy, false, depth + 1) is not { } element)
+                        return null;
+
+                    elements.Add(element);
+                }
+
+                return $"({expression} switch {{ var {value} => ({string.Join(", ", elements)}) }})";
+            }
+            default:
+                return null;
+        }
+    }
+
+    // A forwarder body for a constraint method the proxy cannot forward: the refusal the converter gives every
+    // instantiation that would reach it, thrown as a Go panic. `phrases` names each position ("returns slice<N>"), parenthesized after the qualified method.
+    private static string RefusedForwarderBody(string proxyName, INamedTypeSymbol interfaceDef, IMethodSymbol method, IEnumerable<string> phrases) =>
+        $"throw global::go.builtin.panic(\"go2cs: constraint proxy {proxyName}: {interfaceDef.Name}.{method.Name} ({string.Join(", ", phrases)}), which in Go shares the element's own storage; a proxy is a separate object per pointer and cannot forward it, so go2cs refuses every instantiation of {interfaceDef.Name} over a pointer element\")";
+
+    // The positions of a constraint method that cannot cross the proxy boundary, as "returns T" / "takes T" phrases.
+    private static List<string> UnforwardablePositions(IMethodSymbol method, ProxyForms forms)
+    {
+        List<string> phrases = [];
+
+        foreach (IParameterSymbol parameter in method.Parameters)
+        {
+            if (MarshalAcrossProxy(parameter.Name, parameter.Type, forms, false, true, 0) is null)
+                phrases.Add($"takes {parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}");
         }
 
-        string boxRef = $"{PointerPrefix}<{elementName}>";
+        if (!method.ReturnsVoid && MarshalAcrossProxy("result", method.ReturnType, forms, true, true, 0) is null)
+            phrases.Add($"returns {method.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}");
 
-        string lambdaParameters = string.Join(", ", invoke.Parameters.Select((parameter, index) =>
-            $"{RenderWithProxy(parameter.Type, selfParameter, boxRef)} {TempVarMarker}{index}"));
-
-        string lambdaArguments = string.Join(", ", invoke.Parameters.Select((_, index) => $"{TempVarMarker}{index}"));
-
-        return $"({lambdaParameters}) => {parameterName}({lambdaArguments})";
+        return phrases;
     }
 
     // Reports whether a type mentions the interface's self-type parameter anywhere in its shape.
@@ -1970,5 +2335,99 @@ public class ImplementGenerator : ISourceGenerator
     private static string? GetFirstClassName(CompilationUnitSyntax compilationUnit)
     {
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
+    }
+
+    /// <summary>
+    /// Re-opens <paramref name="closedInterface"/> over the OPEN definition of
+    /// <paramref name="constructedTarget"/>: every occurrence of the target itself and of each of its type
+    /// arguments becomes the open target and its type parameters. Returns null when nothing re-opens, or
+    /// when any member of the candidate is not satisfied by a Go method the open target declares (a
+    /// package-class extension method over its receiver), in which case the closed form is kept.
+    /// </summary>
+    private static INamedTypeSymbol? ReopenInterfaceOverTarget(INamedTypeSymbol constructedTarget, INamedTypeSymbol closedInterface, Compilation compilation)
+    {
+        INamedTypeSymbol openTarget = constructedTarget.OriginalDefinition;
+
+        if (SymbolEqualityComparer.Default.Equals(constructedTarget, openTarget) || openTarget.ContainingType is not { } packageClass)
+            return null;
+
+        var closedArguments = constructedTarget.TypeArguments;
+        var openParameters = openTarget.TypeParameters;
+
+        ITypeSymbol Reopen(ITypeSymbol type)
+        {
+            if (SymbolEqualityComparer.Default.Equals(type, constructedTarget))
+                return openTarget;
+
+            for (int i = 0; i < closedArguments.Length; i++)
+            {
+                if (SymbolEqualityComparer.Default.Equals(type, closedArguments[i]))
+                    return openParameters[i];
+            }
+
+            return type is INamedTypeSymbol { IsGenericType: true } named
+                ? named.OriginalDefinition.Construct(named.TypeArguments.Select(Reopen).ToArray())
+                : type;
+        }
+
+        INamedTypeSymbol candidate = closedInterface.OriginalDefinition.Construct(closedInterface.TypeArguments.Select(Reopen).ToArray());
+
+        if (SymbolEqualityComparer.Default.Equals(candidate, closedInterface))
+            return null;
+
+        IEnumerable<IMethodSymbol> members = candidate.GetAllBaseInterfaces(compilation)
+            .Concat([candidate])
+            .SelectMany(iface => iface.GetMembers().OfType<IMethodSymbol>())
+            .Where(method => method.MethodKind == MethodKind.Ordinary && !method.IsStatic);
+
+        foreach (IMethodSymbol member in members)
+        {
+            if (!DeclaresGoMethod(packageClass, openTarget, member))
+                return null;
+        }
+
+        return candidate;
+    }
+
+    /// <summary>
+    /// Reports whether the open target declares a Go VALUE method satisfying <paramref name="member"/>: an
+    /// extension method of its package class named alike, over the target by value, generic over the
+    /// target's own parameters in order, whose remaining signature equals the member's once those
+    /// parameters are the target's.
+    /// </summary>
+    private static bool DeclaresGoMethod(INamedTypeSymbol packageClass, INamedTypeSymbol openTarget, IMethodSymbol member)
+    {
+        foreach (IMethodSymbol method in packageClass.GetMembers(member.Name).OfType<IMethodSymbol>())
+        {
+            if (!method.IsExtensionMethod || method.Parameters.Length != member.Parameters.Length + 1 ||
+                method.TypeParameters.Length != openTarget.TypeParameters.Length ||
+                method.Parameters[0].RefKind != RefKind.None ||
+                method.Parameters[0].Type is not INamedTypeSymbol receiver ||
+                !SymbolEqualityComparer.Default.Equals(receiver.OriginalDefinition, openTarget))
+            {
+                continue;
+            }
+
+            IMethodSymbol bound = method.Construct(openTarget.TypeParameters.Cast<ITypeSymbol>().ToArray());
+
+            if (!SymbolEqualityComparer.Default.Equals(bound.Parameters[0].Type, openTarget) ||
+                !SymbolEqualityComparer.Default.Equals(bound.ReturnType, member.ReturnType))
+            {
+                continue;
+            }
+
+            bool matches = true;
+
+            for (int i = 0; i < member.Parameters.Length && matches; i++)
+            {
+                matches = SymbolEqualityComparer.Default.Equals(bound.Parameters[i + 1].Type, member.Parameters[i].Type) &&
+                          bound.Parameters[i + 1].RefKind == member.Parameters[i].RefKind;
+            }
+
+            if (matches)
+                return true;
+        }
+
+        return false;
     }
 }

@@ -87,7 +87,7 @@ internal static replacer build(this ref Replacer b) {
             // We need to use string([]byte{o}) instead of string(o),
             // to avoid utf8 encoding of o.
             // E. g. byte(150) produces string of length 2.
-            r.toReplace = append(r.toReplace, ((@string)new byte[]{o}.slice()));
+            r.toReplace = append(r.toReplace, (@string)new byte[]{o}.slice());
         }
         r.replacements[o] = slice<byte>(n);
     }
@@ -346,7 +346,7 @@ internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) {
     ref var buf = ref heap<appendSliceWriter>(out var Ꮡbuf);
     buf = new appendSliceWriter(0, len(s));
     Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);
-    return ((@string)(slice<byte>)buf);
+    return (@string)(slice<byte>)buf;
 }
 
 internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
@@ -477,7 +477,7 @@ internal static @string Replace(this ref byteReplacer r, @string s) {
     if (buf == default!) {
         return s;
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) {
@@ -573,7 +573,7 @@ internal static @string Replace(this ref byteStringReplacer r, @string s) {
             j++;
         }
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) {

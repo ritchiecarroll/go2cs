@@ -957,12 +957,12 @@ internal static readonly @string remainingPointerBuffersˢ = "remaining pointer 
 internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    if ((uint32)(readgstatus(Ꮡgp) & (uint32)_Gscan) == 0) {
-        print((@string)"runtime:scanstack: gp="u8, Ꮡgp.OrTypedNil(), (@string)", goid="u8, gp.goid, (@string)", gp->atomicstatus="u8, ((Δhex)(uint64)readgstatus(Ꮡgp)), (@string)"\n"u8);
+    if ((readgstatus(Ꮡgp) & (uint32)_Gscan) == 0) {
+        print((@string)"runtime:scanstack: gp="u8, Ꮡgp.OrTypedNil(), (@string)", goid="u8, gp.goid, (@string)", gp->atomicstatus="u8, (Δhex)(uint64)readgstatus(Ꮡgp), (@string)"\n"u8);
         @throw(scanstackBadStatusˢ);
     }
 
-    var exprᴛ1 = (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan);
+    var exprᴛ1 = (readgstatus(Ꮡgp) & ~(uint32)_Gscan);
     if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
         return 0;
     }
@@ -1015,7 +1015,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
     }
 
     if (debugScanConservative && gp.asyncSafePoint) {
-        print((@string)"scanning async preempted goroutine "u8, gp.goid, (@string)" stack ["u8, ((Δhex)(uint64)gp.stack.lo), (@string)","u8, ((Δhex)(uint64)gp.stack.hi), (@string)")\n"u8);
+        print((@string)"scanning async preempted goroutine "u8, gp.goid, (@string)" stack ["u8, (Δhex)(uint64)gp.stack.lo, (@string)","u8, (Δhex)(uint64)gp.stack.hi, (@string)")\n"u8);
     }
 
     // Scan the saved context register. This is effectively a live
@@ -1084,7 +1084,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
         obj.setRecord(nil); // Don't scan it again.
         if (stackTraceDebug) {
             printlock();
-            print((@string)"  live stkobj at"u8, ((Δhex)(uint64)(state.stack.lo + (uintptr)(~obj).off)), (@string)"of size"u8, (~obj).size);
+            print((@string)"  live stkobj at"u8, (Δhex)(uint64)(state.stack.lo + (uintptr)(~obj).off), (@string)"of size"u8, (~obj).size);
             if (conservative) {
                 print((@string)" (conservative)"u8);
             }
@@ -1111,7 +1111,7 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
                 if ((~obj).r == nil) { // reachable
                     continue;
                 }
-                println((@string)"  dead stkobj at"u8, ((Δhex)(uint64)(gp.stack.lo + (uintptr)(~obj).off)), (@string)"of size"u8, (~(~obj).r).size);
+                println((@string)"  dead stkobj at"u8, (Δhex)(uint64)(gp.stack.lo + (uintptr)(~obj).off), (@string)"of size"u8, (~(~obj).r).size);
                 // Note: not necessarily really dead - only reachable-from-ptr dead.
             }
         }
@@ -1139,7 +1139,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
     var isDebugCall = frame.fn.valid() && frame.fn.funcID == abi.FuncID_debugCallV2;
     if (state.conservative || isAsyncPreempt || isDebugCall) {
         if (debugScanConservative) {
-            println((@string)"conservatively scanning function"u8, funcname(frame.fn), (@string)"at PC"u8, ((Δhex)(uint64)frame.continpc));
+            println((@string)"conservatively scanning function"u8, funcname(frame.fn), (@string)"at PC"u8, (Δhex)(uint64)frame.continpc);
         }
 
         // Conservatively scan the frame. Unlike the precise
@@ -1221,7 +1221,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
                 continue;
             }
             if (stackTraceDebug) {
-                println((@string)"stkobj at"u8, ((Δhex)(uint64)ptr), (@string)"of size"u8, (~obj).size);
+                println((@string)"stkobj at"u8, (Δhex)(uint64)ptr, (@string)"of size"u8, (~obj).size);
             }
             state.addObject(ptr, obj);
         }
@@ -1603,7 +1603,7 @@ internal static void scanblock(uintptr b0, uintptr n0, ж<uint8> Ꮡptrmask, ж<
             continue;
         }
         for (nint j = 0; j < 8 && i < n; j++) {
-            if ((uint32)(bits & 1) != 0) {
+            if ((bits & 1) != 0) {
                 // Same work as in scanObject; see comments there.
                 var Δp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(b + i));
                 if (Δp != 0) {
@@ -1642,12 +1642,12 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
 
     if (debugScanConservative) {
         printlock();
-        print((@string)"conservatively scanning ["u8, ((Δhex)(uint64)b), (@string)","u8, ((Δhex)(uint64)(b + n)), (@string)")\n"u8);
+        print((@string)"conservatively scanning ["u8, (Δhex)(uint64)b, (@string)","u8, (Δhex)(uint64)(b + n), (@string)")\n"u8);
         hexdumpWords(b, n, (uintptr Δp, hexdumpMarker m) => {
             if (Ꮡptrmask != nil) {
                 var word = (Δp - b) / (uintptr)goarch.PtrSize;
                 var bits = addb(Ꮡptrmask, word / 8).Value;
-                if ((byte)(((bits >> (int)((word % 8)))) & 1) == 0) {
+                if ((byte)((bits >> (int)(word % 8)) & 1) == 0) {
                     return;
                 }
             }
@@ -1690,7 +1690,7 @@ internal static void scanConservative(uintptr b, uintptr n, ж<uint8> Ꮡptrmask
                 i += goarch.PtrSize * 8 - goarch.PtrSize;
                 continue;
             }
-            if ((byte)(((bits >> (int)((word % 8)))) & 1) == 0) {
+            if ((byte)((bits >> (int)(word % 8)) & 1) == 0) {
                 continue;
             }
         }
@@ -1777,11 +1777,11 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
             return;
         }
         if (debug.checkfinalizers > 1) {
-            print((@string)"  mark "u8, ((Δhex)(uint64)obj), (@string)" found at *("u8, ((Δhex)(uint64)@base), (@string)"+"u8, ((Δhex)(uint64)off), (@string)")\n"u8);
+            print((@string)"  mark "u8, (Δhex)(uint64)obj, (@string)" found at *("u8, (Δhex)(uint64)@base, (@string)"+"u8, (Δhex)(uint64)off, (@string)")\n"u8);
         }
     } else {
         if (debug.gccheckmark > 0 && span.isFree(objIndex)) {
-            print((@string)"runtime: marking free object "u8, ((Δhex)(uint64)obj), (@string)" found at *("u8, ((Δhex)(uint64)@base), (@string)"+"u8, ((Δhex)(uint64)off), (@string)")\n"u8);
+            print((@string)"runtime: marking free object "u8, (Δhex)(uint64)obj, (@string)" found at *("u8, (Δhex)(uint64)@base, (@string)"+"u8, (Δhex)(uint64)off, (@string)")\n"u8);
             gcDumpObject(baseˢ, @base, off);
             gcDumpObject(objˢ, obj, ~(uintptr)0);
             getg().Value.m.Value.traceback = 2;
@@ -1823,12 +1823,12 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
 // field at byte offset off in obj.
 internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
     var s = spanOf(obj);
-    print(label, (@string)"="u8, ((Δhex)(uint64)obj));
+    print(label, (@string)"="u8, (Δhex)(uint64)obj);
     if (s == nil) {
         print((@string)" s=nil\n"u8);
         return;
     }
-    print((@string)" s.base()="u8, ((Δhex)(uint64)s.@base()), (@string)" s.limit="u8, ((Δhex)(uint64)(~s).limit), (@string)" s.spanclass="u8, (~s).spanclass, (@string)" s.elemsize="u8, (~s).elemsize, (@string)" s.state="u8);
+    print((@string)" s.base()="u8, (Δhex)(uint64)s.@base(), (@string)" s.limit="u8, (Δhex)(uint64)(~s).limit, (@string)" s.spanclass="u8, (~s).spanclass, (@string)" s.elemsize="u8, (~s).elemsize, (@string)" s.state="u8);
     {
         var state = s.of(mspan.Ꮡstate).get(); if (0 <= state && (nint)(uint8)state < len(mSpanStateNames)){
             print(mSpanStateNames[state], (@string)"\n"u8);
@@ -1857,7 +1857,7 @@ internal static void gcDumpObject(@string label, uintptr obj, uintptr off) {
             print((@string)" ...\n"u8);
             skipped = false;
         }
-        print((@string)" *("u8, label, (@string)"+"u8, i, (@string)") = "u8, ((Δhex)(uint64)(~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(obj + i)))));
+        print((@string)" *("u8, label, (@string)"+"u8, i, (@string)") = "u8, (Δhex)(uint64)(~(ж<uintptr>)(uintptr)((@unsafe.Pointer)(obj + i))));
         if (i == off) {
             print((@string)" <=="u8);
         }

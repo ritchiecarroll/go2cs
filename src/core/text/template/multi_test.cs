@@ -213,7 +213,7 @@ public static void TestParseFS(ж<testing.T> Ꮡt) {
 
 // In these tests, actual content (not just template definitions) comes from the parsed files.
 internal static slice<execTest> templateFileExecTests = new execTest[]{
-    new("test"u8, @"{{template ""tmpl1.tmpl""}}{{template ""tmpl2.tmpl""}}"u8, "template1\n\ny\ntemplate2\n\nx\n"u8, (nint)(0), true)
+    new("test"u8, @"{{template ""tmpl1.tmpl""}}{{template ""tmpl2.tmpl""}}"u8, "template1\n\ny\ntemplate2\n\nx\n"u8, (nint)0, true)
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -281,7 +281,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     }
     // Execute root.
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    err = root.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "a"u8, (nint)(0));
+    err = root.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "a"u8, (nint)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -290,7 +290,7 @@ public static void TestClone(ж<testing.T> Ꮡt) {
     }
     // Execute copy.
     b.Reset();
-    err = clone.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "a"u8, (nint)(0));
+    err = clone.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "a"u8, (nint)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -323,7 +323,7 @@ public static void TestAddParseTree(ж<testing.T> Ꮡt) {
     }
     // Execute.
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
-    err = added.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "a"u8, (nint)(0));
+    err = added.ExecuteTemplate(new template_test_package.strings_BuilderжWriter(Ꮡb), "a"u8, (nint)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -538,7 +538,7 @@ public static void TestIssue19294(ж<testing.T> Ꮡt) {
             }
         }
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-        res.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), (nint)(0));
+        res.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), (nint)0);
         if (buf.String() != "stylesheet"u8) {
             Ꮡt.Fatalf("iteration %d: got %q; expected %q"u8, i, buf.String(), stylesheetˢ);
         }

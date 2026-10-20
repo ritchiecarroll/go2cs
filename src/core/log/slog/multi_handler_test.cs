@@ -125,7 +125,7 @@ public static void TestMultiHandler(ж<testing.T> Ꮡt) {
         var multi = NewMultiHandler(new global::go.log.slog_package.TextHandlerжΔHandler(h1), new global::go.log.slog_package.JSONHandlerжΔHandler(h2)).WithGroup(reqˢ);
         var logger = New(multi);
 
-        logger.Info(userLoginˢ, userIdˢ, (nint)(42));
+        logger.Info(userLoginˢ, userIdˢ, (nint)42);
 
         checkLogOutput(tΔ5, Ꮡbuf1.String(), "time=" + textTimeRE + @" level=INFO msg=""user login"" req.user_id=42");
         checkLogOutput(tΔ5, Ꮡbuf2.String(), @"{""time"":""" + jsonTimeRE + @""",""level"":""INFO"",""msg"":""user login"",""req"":{""user_id"":42}}");

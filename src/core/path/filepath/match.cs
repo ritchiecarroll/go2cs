@@ -54,7 +54,7 @@ Pattern:
         (star, chunk, pattern) = scanChunk(pattern);
         if (star && chunk == ""u8) {
             // Trailing * matches rest of string unless it has a /.
-            return (!strings.Contains(name, ((@string)(rune)Separator)), default!);
+            return (!strings.Contains(name, (@string)(rune)Separator), default!);
         }
         // Look for match at current position.
         var (t, ok, errΔ1) = matchChunk(chunk, name);

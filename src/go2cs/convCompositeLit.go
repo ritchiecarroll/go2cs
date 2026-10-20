@@ -1471,6 +1471,11 @@ func (v *Visitor) markAnyFieldLits(structType *types.Struct, elts []ast.Expr, co
 			if isExactUnsafePointer(eltType) {
 				context.markAnyBoxedUnsafePointerArg(i)
 			}
+
+			// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
+			if typeParam, isTypeParam := eltType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
+				context.markAnyBoxedTypeParamArg(i)
+			}
 		}
 	}
 }
@@ -1531,6 +1536,12 @@ func (v *Visitor) markEmptyInterfaceElems(elts []ast.Expr, context *CallExprCont
 			// And the unsafe.Pointer sibling: `[]any{nilUnsafePointer}`.
 			if isExactUnsafePointer(eltType) {
 				context.markAnyBoxedUnsafePointerArg(i)
+				marked = true
+			}
+
+			// The type-parameter sibling: a value of type E that may be a nil pointer or func at run time.
+			if typeParam, isTypeParam := eltType.(*types.TypeParam); isTypeParam && typeParamCanHoldNilReference(typeParam) {
+				context.markAnyBoxedTypeParamArg(i)
 				marked = true
 			}
 		}

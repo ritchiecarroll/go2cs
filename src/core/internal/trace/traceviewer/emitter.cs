@@ -204,8 +204,8 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
 
                 // Reached max size, commit this range and
                 // start a new range.
-                var startTime = ((time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D));
-                var endTime = ((time.Duration)(int64)(ev.Time * 1000D));
+                var startTime = (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D);
+                var endTime = (time.Duration)(int64)(ev.Time * 1000D);
                 sʗ1.Value.Ranges = append((~sʗ1).Ranges, new Range(
                     Name: fmt.Sprintf("%v-%v"u8, startTime, endTime),
                     Start: start,
@@ -226,7 +226,7 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
             {
                 nint end = len(Ꮡsizes.ValueSlot) - 1; if (start < end) {
                     sʗ1.Value.Ranges = append((~sʗ1).Ranges, new Range(
-                        Name: fmt.Sprintf("%v-%v"u8, ((time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D)), ((time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D))),
+                        Name: fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)),
                         Start: start,
                         End: end,
                         StartTime: (int64)(Ꮡsizes.ValueSlot[start].Time * 1000D),
@@ -456,7 +456,7 @@ public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
 }
 
 partial struct AsyncSliceEvent {
-    public partial ref SliceEvent SliceEvent { get; }
+    /*embed*/ public SliceEvent SliceEvent;
     public @string Category;
     public @string Scope;
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.

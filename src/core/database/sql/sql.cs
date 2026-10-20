@@ -486,7 +486,7 @@ public static (driverꓸValue, error) Value<T>(this Null<T> n) {
     if (!n.Valid) {
         return (default!, default!);
     }
-    var v = ((any)n.V);
+    var v = (any)(n.V).OrTypedNilOf();
     // See issue 69728.
     {
         var (valuer, ok) = v._<driver.Valuer>(ᐧ); if (ok) {
@@ -610,7 +610,7 @@ internal static connReuseStrategy cachedOrNewConn => 1;
 partial struct driverConn {
     internal ж<DB> db;
     internal time.Time createdAt;
-    public partial ref sync_package.Mutex Mutex { get; }  // guards following
+    /*embed*/ public sync_package.Mutex Mutex;  // guards following
     internal driver.Conn ci;
     internal bool needReset; // The connection session should be reset before use if true.
     internal bool closed;
@@ -1051,6 +1051,7 @@ public static error Ping(this ж<DB> Ꮡdb) {
 // long-lived and shared between many goroutines.
 public static error Close(this ж<DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
+    var fnsᴷ = new stackAppend<Func<error>>();
 
     db.mu.Lock();
     if (db.closed) { // Make DB.Close idempotent
@@ -1063,7 +1064,7 @@ public static error Close(this ж<DB> Ꮡdb) {
     error err = default!;
     var fns = new slice<Func<error>>(0, len(db.freeConn));
     foreach (var (_, dc) in db.freeConn) {
-        fns = append(fns, dc.closeDBLocked());
+        fns = append(fnsᴷ, fns, dc.closeDBLocked());
     }
     db.freeConn = default!;
     db.closed = true;
@@ -2463,7 +2464,7 @@ public static error Close(this ж<ΔConn> Ꮡc) {
 }
 
 partial struct Tx_stmts /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<ж<ΔStmt>> v;
 }
 
@@ -3629,11 +3630,11 @@ internal static RawBytes setrawbuf(this ж<Rows> Ꮡrs, slice<byte> b) {
 
     if (Ꮡrs == nil) {
         // convertAssignRows can take a nil *Rows; for simplicity handle it here
-        return ((RawBytes)b);
+        return (RawBytes)b;
     }
     nint off = len(rs.raw);
     rs.raw = b;
-    return ((RawBytes)(rs.raw.slice(off)));
+    return (RawBytes)(rs.raw.slice(off));
 }
 
 internal static error errRowsClosed = errors.New("sql: Rows are closed"u8);
@@ -4097,8 +4098,8 @@ internal static (int64, error) RowsAffected(this driverResult dr) {
 }
 
 internal static partial @string stack() {
-    array<byte> buf = new(2048); /* (2 << (int)(10)) */
-    return ((@string)(buf.slice(0, runtime.Stack(buf[..], false))));
+    array<byte> buf = new(2048); /* (2 << 10) */
+    return (@string)(buf.slice(0, runtime.Stack(buf[..], false)));
 }
 
 // withLock runs while holding lk.

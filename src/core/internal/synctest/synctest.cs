@@ -36,7 +36,7 @@ public static Association OtherBubble => 2;     // associated with a different b
 public static Association Associate<T>(ж<T> Ꮡp) {
     // Ensure p escapes to permit us to attach a special to it.
     var escapedP = abi.Escape(Ꮡp);
-    return ((Association)associate(@unsafe.Pointer.FromPinnedBox(escapedP)));
+    return (Association)associate(@unsafe.Pointer.FromPinnedBox(escapedP));
 }
 
 //go:linkname associate

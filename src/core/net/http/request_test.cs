@@ -375,7 +375,7 @@ public static void TestMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> �
 internal static readonly @string myfileTxtˢ = "myfile.txt"u8;
 
 internal static void testMaxInt64ForMultipartFormMaxMemoryOverflow(ж<testing.T> Ꮡt, testMode mode) {
-    nint payloadSize = (1 << (int)(10));
+    nint payloadSize = 1 << 10;
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter rw, ж<Δhttp.Request> reqΔ1) => {
         // The combination of:
         //      MaxInt64 + payloadSize + (internal spare of 10MiB)
@@ -944,7 +944,7 @@ internal static error WriteByte(this logWrites l, byte c) {
 }
 
 internal static (nint n, error err) Write(this logWrites l, slice<byte> p) {
-    l.dst.ValueSlot = append(l.dst.ValueSlot, ((@string)p));
+    l.dst.ValueSlot = append(l.dst.ValueSlot, (@string)p);
     return (len(p), default!);
 }
 
@@ -1635,7 +1635,7 @@ public static void TestRequestCookiesByName(ж<testing.T> Ꮡt) {
             if (!reflect.DeepEqual(got, ttʗ1.want)) {
                 @string asStr(any v) {
                     var (blob, _) = json.MarshalIndent(v, ""u8, "  "u8);
-                    return ((@string)blob);
+                    return (@string)blob;
                 }
                 tΔ1.Fatalf("Result mismatch\n\tGot: %s\n\tWant: %s"u8, asStr(got), asStr(ttʗ1.want));
             }
@@ -1757,15 +1757,15 @@ public static void BenchmarkReadRequestWrk(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkFileAndServer_1KB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(10)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 10);
 }
 
 public static void BenchmarkFileAndServer_16MB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(24)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 24);
 }
 
 public static void BenchmarkFileAndServer_64MB(ж<testing.B> Ꮡb) {
-    benchmarkFileAndServer(Ꮡb, ((int64)1 << (int)(26)));
+    benchmarkFileAndServer(Ꮡb, (int64)1 << 26);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

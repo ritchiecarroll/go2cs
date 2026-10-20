@@ -85,7 +85,7 @@ internal static (slice<byte>, error) MarshalJSON(this jsonMarshaler j) {
 }
 
 internal partial struct jsonMarshalerError {
-    internal partial ref jsonMarshaler jsonMarshaler { get; }
+    /*embed*/ internal jsonMarshaler jsonMarshaler;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -169,7 +169,7 @@ internal static @string jsonValueString(global::go.log.slog_package.Value v) {
             s.appendError(err);
         }
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

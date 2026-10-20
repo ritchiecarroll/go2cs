@@ -250,11 +250,11 @@ internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     var (@out, _) = exec.Command(fsutilˢ, "8dot3name"u8, queryˢ, vol).CombinedOutput();
     // Check that system has "Volume level setting" set.
     @string expected = theRegistryStateOfˢ;
-    if (!strings.Contains(((@string)@out), expected)) {
+    if (!strings.Contains((@string)@out, expected)) {
         // Windows 10 version of fsutil has different output message.
         @string expectedWindow10 = theRegistryStateIs2Perˢ;
-        if (!strings.Contains(((@string)@out), expectedWindow10)) {
-            return fmt.Errorf("fsutil output should contain %q, but is %q"u8, expected, ((@string)@out));
+        if (!strings.Contains((@string)@out, expectedWindow10)) {
+            return fmt.Errorf("fsutil output should contain %q, but is %q"u8, expected, (@string)@out);
         }
     }
     // Now check the volume setting.
@@ -264,8 +264,8 @@ internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     } else {
         expected = fmt.Sprintf(expected, disabledˢ, vol);
     }
-    if (!strings.Contains(((@string)@out), expected)) {
-        return fmt.Errorf("unexpected fsutil output: %q"u8, ((@string)@out));
+    if (!strings.Contains((@string)@out, expected)) {
+        return fmt.Errorf("unexpected fsutil output: %q"u8, (@string)@out);
     }
     return default!;
 }
@@ -293,7 +293,7 @@ internal static error setVolume8dot3Setting(@string vol, bool enabled) {
             expectedWindow10 = fmt.Sprintf(expectedWindow10, disabledˢ, vol);
         }
         if (@outᴛ1 != expectedWindow10) {
-            return fmt.Errorf("%v command failed: %q"u8, cmd, ((@string)@out));
+            return fmt.Errorf("%v command failed: %q"u8, cmd, (@string)@out);
         }
     }
     return default!;
@@ -527,13 +527,13 @@ internal static readonly @string mklinkˢ = "mklink"u8;
 
 internal static void testWalkMklink(ж<testing.T> Ꮡt, @string linktype) {
     var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains(((@string)output), fmt.Sprintf(" /%s "u8, linktype))) {
+    if (!strings.Contains((@string)output, fmt.Sprintf(" /%s "u8, linktype))) {
         Ꮡt.Skipf(@"skipping test; mklink does not supports /%s parameter"u8, linktype);
     }
     testWalkSymlink(Ꮡt, error (@string target, @string link) => {
         var (outputΔ1, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/" + linktype, link, target).CombinedOutput();
         if (err != default!) {
-            return fmt.Errorf(@"""mklink /%s %v %v"" command failed: %v\n%v"u8, linktype, link, target, err, ((@string)outputΔ1));
+            return fmt.Errorf(@"""mklink /%s %v %v"" command failed: %v\n%v"u8, linktype, link, target, err, (@string)outputΔ1);
         }
         return default!;
     });
@@ -593,7 +593,7 @@ internal static slice<byte> createMountPartition(ж<testing.T> Ꮡt, @string vhd
     (var output, err) = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ, fileˢ2, script).CombinedOutput();
     if (err != default!) {
         // This can happen if Hyper-V is not installed or enabled.
-        Ꮡt.Skip(skippingTestBecauseˢ, err, ((@string)output));
+        Ꮡt.Skip(skippingTestBecauseˢ, err, (@string)output);
     }
     return output;
 }
@@ -618,14 +618,14 @@ public static void TestEvalSymlinksJunctionToVolumeID(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
 
     var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains(((@string)output), " /J "u8)) {
+    if (!strings.Contains((@string)output, " /J "u8)) {
         Ꮡt.Skip(skippingTestBecauseˢ3);
     }
 
     @string tmpdir = tempDirCanonical(Ꮡt);
     @string vhd = filepath.Join(tmpdir, testVhdxˢ);
     output = createMountPartition(Ꮡt, vhd, writeHostVolPathˢ);
-    @string vol = ((@string)output);
+    @string vol = (@string)output;
 
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
     (output, var err) = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), cmdˢ, "/c"u8, mklinkˢ, "/J", dirlink, vol).CombinedOutput();
@@ -674,7 +674,7 @@ internal static readonly @string filelinkˢ = "filelink"u8;
 
 public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
     var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains(((@string)output), " /J "u8)) {
+    if (!strings.Contains((@string)output, " /J "u8)) {
         Ꮡt.Skip(skippingTestBecauseˢ3);
     }
 
@@ -685,7 +685,7 @@ public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("failed to run mountvol %v /L: %v %q"u8, vol, err, output);
     }
-    @string target = strings.Trim(((@string)output), " \n\r"u8);
+    @string target = strings.Trim((@string)output, " \n\r"u8);
 
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
     (output, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/J", dirlink, target).CombinedOutput();

@@ -655,11 +655,11 @@ internal static bool checkIsBestApprox64(ж<testing.T> Ꮡt, float64 f, ж<globa
 }
 
 internal static bool isEven32(float32 f) {
-    return (uint32)(math.Float32bits(f) & 1) == 0;
+    return (math.Float32bits(f) & 1) == 0;
 }
 
 internal static bool isEven64(float64 f) {
-    return (uint64)(math.Float64bits(f) & 1) == 0;
+    return (math.Float64bits(f) & 1) == 0;
 }
 
 public static void TestIsFinite(ж<testing.T> Ꮡt) {

@@ -18,7 +18,7 @@ partial class gcimporter_package {
 // A pkgReader holds the shared state for reading a unified IR package
 // description.
 partial struct pkgReader {
-    public partial ref global::go.@internal.pkgbits_package.PkgDecoder PkgDecoder { get; }
+    /*embed*/ public global::go.@internal.pkgbits_package.PkgDecoder PkgDecoder;
     internal fakeFileSet fake;
     internal ж<types.Context> ctxt;
     internal map<@string, ж<types.Package>> imports; // previously imported packages, indexed by path
@@ -109,7 +109,7 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
 // A reader holds the state for reading a single unified IR element
 // within a package.
 partial struct reader {
-    public partial ref global::go.@internal.pkgbits_package.Decoder Decoder { get; }
+    /*embed*/ public global::go.@internal.pkgbits_package.Decoder Decoder;
     internal ж<pkgReader> p;
     internal ж<readerDict> dict;
 }
@@ -318,7 +318,7 @@ internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     {
-        pkgbits.CodeType tag = ((pkgbits.CodeType)Ꮡr.of(reader.ᏑDecoder).Code(pkgbits.SyncType));
+        pkgbits.CodeType tag = (pkgbits.CodeType)Ꮡr.of(reader.ᏑDecoder).Code(pkgbits.SyncType);
         var exprᴛ1 = tag;
         if (exprᴛ1 == pkgbits.TypeBasic) {
             return new types.BasicжΔType(types.Typ[Ꮡr.of(reader.ᏑDecoder).Len()]);
@@ -340,7 +340,7 @@ internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
             return new types.ArrayжΔType(types.NewArray(Ꮡr.typ(), lenΔ2));
         }
         if (exprᴛ1 == pkgbits.TypeChan) {
-            types.ChanDir dir = ((types.ChanDir)Ꮡr.of(reader.ᏑDecoder).Len());
+            types.ChanDir dir = (types.ChanDir)Ꮡr.of(reader.ᏑDecoder).Len();
             return new types.ChanжΔType(types.NewChan(dir, Ꮡr.typ()));
         }
         if (exprᴛ1 == pkgbits.TypeMap) {
@@ -501,7 +501,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
         (objPkg, objName) = rname.qualifiedIdent();
         assert(objName != ""u8);
 
-        tag = ((pkgbits.CodeObj)rname.of(reader.ᏑDecoder).Code(pkgbits.SyncCodeObj));
+        tag = (pkgbits.CodeObj)rname.of(reader.ᏑDecoder).Code(pkgbits.SyncCodeObj);
         pr.retireReader(rname);
     }
 

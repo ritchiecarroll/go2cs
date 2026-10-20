@@ -82,7 +82,7 @@ internal static bool isGoFile(fs.FileInfo fi) {
 }
 
 internal partial struct bundle {
-    public partial ref ж<global::go.go.doc_package.Package> Package { get; }
+    /*embed*/ public ж<global::go.go.doc_package.Package> Package;
     public ж<token.FileSet> FSet;
 }
 
@@ -186,7 +186,7 @@ public static void TestFuncs(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, ((global::go.go.doc_package.Mode)0));
+    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, (global::go.go.doc_package.Mode)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }

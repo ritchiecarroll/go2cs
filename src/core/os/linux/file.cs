@@ -225,8 +225,8 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
 partial struct fileWithoutReadFrom {
-    internal partial ref noReadFrom noReadFrom { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ internal noReadFrom noReadFrom;
+    /*embed*/ public ж<File> File;
 }
 
 internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
@@ -333,8 +333,8 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
 partial struct fileWithoutWriteTo {
-    internal partial ref noWriteTo noWriteTo { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ internal noWriteTo noWriteTo;
+    /*embed*/ public ж<File> File;
 }
 
 internal static (int64, error) genericWriteTo(ж<File> Ꮡf, Δio.Writer w) {
@@ -468,7 +468,7 @@ public static (ж<File>, error) OpenFile(@string name, nint flag, FileMode perm)
     if (err != default!) {
         return (default!, err);
     }
-    f.Value.appendMode = (nint)(flag & O_APPEND) != 0;
+    f.Value.appendMode = (flag & O_APPEND) != 0;
 
     return (f, default!);
 }

@@ -10,7 +10,7 @@ internal static void Main() {
         tt = vᴛ1;
 
         var p = Ꮡtt;
-        fmt.Println(((@string)(~p).a), ((@string)(~p).b), (~p).i);
+        fmt.Println((@string)(~p).a, (@string)(~p).b, (~p).i);
     }
 
     foreach (var (_, vᴛ2) in sizeTests) {

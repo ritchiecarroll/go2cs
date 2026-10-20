@@ -86,7 +86,7 @@ internal static partial void testChanSendBarrier(bool useSelect) {
                     var (_, err) = doRequest(useSelect);
                     var (_, ok) = err._<myError>(ᐧ);
                     if (!ok) {
-                        throw panic((nint)(1));
+                        throw panic((nint)1);
                     }
                     garbage = makeByte();
                 }
@@ -101,7 +101,7 @@ internal static partial void testChanSendBarrier(bool useSelect) {
 
 //go:noinline
 internal static partial slice<byte> makeByte() {
-    return new slice<byte>((1 << (int)(10)));
+    return new slice<byte>((1 << 10));
 }
 
 } // end runtime_test_package

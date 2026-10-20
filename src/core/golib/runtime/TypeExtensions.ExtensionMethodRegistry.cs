@@ -414,14 +414,12 @@ public static partial class TypeExtensions
                 return Expression.Lambda(delegateType, Expression.Call(methodInfo, arguments), arguments).Compile();
             }
 
-            if (!delegateType.IsGenericType || !methodInfo.IsGenericMethod)
-                return Delegate.CreateDelegate(delegateType, methodInfo);
-
-            Type extensionTarget = delegateType.GetGenericArguments()[0];
-
-            return Delegate.CreateDelegate(delegateType, extensionTarget.IsGenericType ?
-                methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]) :
-                methodInfo.MakeGenericMethod(extensionTarget));
+            // A generic type's method arrives CLOSED over the receiver's type arguments: the method-set candidate
+            // source closes it (CloseGoMethod), and the generated shells bind what AdapterBinder resolves from there.
+            // An open method has no delegate, which CreateDelegate reports as the ArgumentException caught below. (This
+            // once closed an open method over the receiver's FIRST type argument, right for one type parameter and
+            // wrong for two: `Pair[string, int]` never bound fmt.Stringer.)
+            return Delegate.CreateDelegate(delegateType, methodInfo);
         }
         catch (ArgumentException)
         {

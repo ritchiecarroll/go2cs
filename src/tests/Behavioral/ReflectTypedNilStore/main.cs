@@ -31,7 +31,7 @@ internal static void Main() {
         reflect.ValueOf(Ꮡdst).Elem().Set(f);
 
         var m = new map<@string, any>{};
-        reflect.ValueOf(m).SetMapIndex(reflect.ValueOf((@string)"k"u8), f);
+        reflect.ValueOf(m).SetMapIndex(reflect.ValueOf("k"), f);
 
         var s = reflect.Append(reflect.ValueOf(new any[]{}.slice()), f).Interface()._<slice<any>>();
 
@@ -41,7 +41,7 @@ internal static void Main() {
         reflect.ValueOf(ch).Send(f);
         var got = ᐸꟷ(ch);
 
-        fmt.Printf("%s: set=%T map=%T append=%T call=%v send=%T\n"u8, name, dst, m["k"u8], s[0], @out, got);
+        fmt.Printf("%s: set=%T map=%T append=%T call=%v send=%T\n"u8, name, dst, m["k"], s[0], @out, got);
     }
 }
 

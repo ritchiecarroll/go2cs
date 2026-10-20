@@ -447,6 +447,16 @@ var linknamePushTargets = map[string]linknamePush{
 	// semantics, so the forward reaches a body that genuinely terminates as Go's does. Same package edge as
 	// the two indicator rows above.
 	"crypto/internal/fips140.fatal": {source: "runtime.fips_fatal", selfSymbolPull: true},
+	// testing/synctest's bubble runner, pushed by testing/testing.go (`//go:linkname testingSynctestTest
+	// testing/synctest.testingSynctestTest`) in the same SELF-SYMBOL shape: synctest.go names its own package.
+	// The pushed body is hand-owned and PUBLIC in testing.cs (testingSynctestTest over
+	// TestExecution.RunSynctest), with the signature the consumer declares. No new project reference and no
+	// cycle: testing/synctest already references testing.
+	//
+	// What the stub was costing (Go 1.26): synctest.Test threw "testingSynctestTest: no implementation reached
+	// this compilation" by name, and ended any test host that calls it. encoding/json's two synctest tests did,
+	// and net/http calls synctest.Test 17 times.
+	"testing/synctest.testingSynctestTest": {source: "testing.testingSynctestTest", selfSymbolPull: true},
 	// crypto/internal/sysrand's fatal, pushed by runtime/panic.go (`//go:linkname sysrand_fatal
 	// crypto/internal/sysrand.fatal`). HANDLE consumer shape: rand.go carries its own one-arg
 	// `//go:linkname fatal` above a bodyless `func fatal(string)`, so bareDecl and selfSymbolPull stay false.
@@ -585,6 +595,21 @@ var linknamePushTargets = map[string]linknamePush{
 	// surfaced from net_package's type initializer — and every httptest consumer dies in net's cctor,
 	// whatever it was actually testing (net/http/cgi's TestCopyError is where it was found).
 	"internal/syscall/windows.GetSystemDirectory": {source: "runtime.windows_GetSystemDirectory"},
+	// The other two pushes runtime/os_windows.go makes into internal/syscall/windows, the same handle
+	// shape and the same wall: Go's bodies are `stdcall(_QueryPerformanceCounter, &counter)`, and both
+	// stdcall (asmstdcall, a throwing stub) and the function pointer (filled by the not-run osinit)
+	// are missing in the managed model. So the rows come with a displacement of runtime's two bodies
+	// (manualConversionFuncs, windows only) onto runtime/windows/os_windows_impl.cs, which reads the
+	// same counter through Stopwatch (QPC/QPF on Windows). A row alone would only have moved the throw
+	// one frame deeper.
+	//
+	// What the stubs were costing: crypto/internal/fips140deps/time's high-precision now returns
+	// windows.QueryPerformanceCounter(), and crypto/internal/entropy/v1.0.0 reads it, so the
+	// crypto/internal/fips140test host died in TestEntropyRace's goroutine, 27 of Go's 2278 tests in
+	// (the i9, Go 1.26 hop). The declared-not-implemented census had both as "latent": it judges reach
+	// by callers in the member's OWN package, and this caller is in another.
+	"internal/syscall/windows.QueryPerformanceCounter":   {source: "runtime.windows_QueryPerformanceCounter"},
+	"internal/syscall/windows.QueryPerformanceFrequency": {source: "runtime.windows_QueryPerformanceFrequency"},
 	// runtime/metrics's test-only name reader, pushed by runtime/metrics.go — the first row whose
 	// consumer is an EXTERNAL TEST package. The -tests conversion sets currentPackagePath to the
 	// variant's own PkgPath (`runtime/metrics_test`), so the consumer-side match needs no new

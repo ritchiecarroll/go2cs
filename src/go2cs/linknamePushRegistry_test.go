@@ -185,14 +185,58 @@ func TestLinknamePushRoutesOsSigpipe(t *testing.T) {
 		"runtime carries the real body (systemstack(sigpipe): sigsend, signal_ignored, dieFromSignal) and it runs")
 }
 
-// assertBarePushRouted is the shared body of the pinned-pair guards above. Both halves of the pair are
+// TestLinknamePushRoutesWindowsQueryPerformance pins the two pushes runtime/os_windows.go makes into
+// internal/syscall/windows: QueryPerformanceCounter and QueryPerformanceFrequency. Both consumers carry
+// a one-arg //go:linkname handle (the handle shape, not the bare one above). Without the rows both
+// emitted throwing stubs, and crypto/internal/fips140deps/time's high-precision now returns
+// windows.QueryPerformanceCounter(), so crypto/internal/entropy/v1.0.0 died in it (the i9's
+// crypto/internal/fips140test host, TestEntropyRace, 27 of 2278 tests in).
+//
+// A row alone would not be enough, and the second half below pins that: runtime's pushed bodies are
+// `stdcall(_QueryPerformanceCounter, &counter)`, and on windows stdcall bottoms out in asmstdcall, a
+// throwing stub, over a function pointer the not-run osinit never fills. So both runtime bodies are
+// displaced at windows alone onto runtime/windows/os_windows_impl.cs, which makes Go's two kernel32
+// calls directly (the enableWER, usleep and sysAllocOS precedent).
+func TestLinknamePushRoutesWindowsQueryPerformance(t *testing.T) {
+	for _, symbol := range []string{"QueryPerformanceCounter", "QueryPerformanceFrequency"} {
+		pusher := "windows_" + symbol
+
+		assertPushRouted(t, "internal/syscall/windows", symbol, "runtime", pusher, false,
+			"the call throws NotImplementedException (fips140deps/time -> crypto/internal/entropy/v1.0.0)",
+			"runtime's body runs once it is displaced onto kernel32 (below)")
+
+		scope, displaced := manualConversionFuncs["runtime"][pusher]
+
+		if !displaced {
+			t.Errorf("manualConversionFuncs[\"runtime\"] has no %q: the forwarder reaches runtime's converted body, "+
+				"which calls stdcall -> asmstdcall, a throwing stub, so the push arrives and still throws", pusher)
+			continue
+		}
+
+		for goos, want := range map[string]bool{"windows": true, "linux": false, "darwin": false} {
+			if scope.includes(goos) != want {
+				t.Errorf("runtime.%s is displaced on %s = %v, want %v: the push and its body exist only in Go's windows flavour",
+					pusher, goos, scope.includes(goos), want)
+			}
+		}
+	}
+}
+
+// assertBarePushRouted is assertPushRouted for the BARE shape, the shape both pinned pairs above use.
+func assertBarePushRouted(t *testing.T, consumerPkg, consumerFunc, pusherPkg, pusherFunc, consequence, body string) {
+	t.Helper()
+	assertPushRouted(t, consumerPkg, consumerFunc, pusherPkg, pusherFunc, true, consequence, body)
+}
+
+// assertPushRouted is the shared body of the pinned-pair guards above. Both halves of the pair are
 // re-derived from GOROOT, so Go's source is the input and the converter's routing is the thing under
 // test; and the last assertion exercises packageFuncAccess itself rather than the reverse index it
 // reads, because publicizing the pushing definition is what makes the forwarder compile across the
 // assembly boundary at all. Remove the row, break the reverse index, or narrow that access rule, and
-// the pinned pair goes red first. `consequence` says what the absence costs; `body` says why the row
-// is honorable.
-func assertBarePushRouted(t *testing.T, consumerPkg, consumerFunc, pusherPkg, pusherFunc, consequence, body string) {
+// the pinned pair goes red first. `bare` is the consumer's shape: no directive of its own (true), or a
+// one-arg //go:linkname handle (false). `consequence` says what the absence costs; `body` says why the
+// row is honorable.
+func assertPushRouted(t *testing.T, consumerPkg, consumerFunc, pusherPkg, pusherFunc string, bare bool, consequence, body string) {
 	t.Helper()
 
 	consumerKey := consumerPkg + "." + consumerFunc
@@ -206,8 +250,8 @@ func assertBarePushRouted(t *testing.T, consumerPkg, consumerFunc, pusherPkg, pu
 		t.Skip("GOROOT not resolvable; nothing to verify the pair against")
 	}
 
-	// Half one, from Go's source: the consumer declares the symbol bodyless, in the BARE shape (no
-	// directive of its own). Both properties are what the matcher requires before it will forward.
+	// Half one, from Go's source: the consumer declares the symbol bodyless, in the shape the row
+	// records. Both properties are what the matcher requires before it will forward.
 	decl := findGoFuncDecl(t, goRoot, consumerPkg, consumerFunc)
 
 	if decl == nil {
@@ -218,8 +262,12 @@ func assertBarePushRouted(t *testing.T, consumerPkg, consumerFunc, pusherPkg, pu
 		t.Fatalf("%s HAS a body in Go's source, so it is no longer a linkname push consumer", consumerKey)
 	}
 
-	if declHasLinknameDirective(decl) {
+	if bare && declHasLinknameDirective(decl) {
 		t.Errorf("%s now carries a //go:linkname directive of its own — the registry row records the BARE shape and the matcher fails closed, so the row would silently forward nothing", consumerKey)
+	}
+
+	if !bare && !declHasLinknameHandle(decl) {
+		t.Errorf("%s carries no one-arg //go:linkname handle — the registry row records the HANDLE shape and the matcher fails closed, so the row would silently forward nothing", consumerKey)
 	}
 
 	// Half two, from Go's source: the pusher performs the push.
@@ -239,8 +287,9 @@ func assertBarePushRouted(t *testing.T, consumerPkg, consumerFunc, pusherPkg, pu
 		t.Errorf("row %q pushes from %q, want %q", consumerKey, push.source, pusherPkg+"."+pusherFunc)
 	}
 
-	if !push.bareDecl {
-		t.Errorf("row %q records bareDecl=false, but the consumer's declaration carries no directive — the matcher would reject it", consumerKey)
+	if push.bareDecl != bare {
+		t.Errorf("row %q records bareDecl=%v, but the consumer's declaration is the %s shape — the matcher would reject it",
+			consumerKey, push.bareDecl, map[bool]string{true: "bare", false: "handle"}[bare])
 	}
 
 	if push.reason != "" {

@@ -40,6 +40,8 @@ internal static map<@string, @string> attributeTypeNames = new map<@string, @str
 // String returns a string representation of the sequence r,
 // roughly following the RFC 2253 Distinguished Names syntax.
 public static @string String(this RDNSequence r) {
+    var escapedᴷ = new stackAppend<rune>();
+
     @string s = ""u8;
     for (nint i = 0; i < len(r); i++) {
         var rdn = r[len(r) - 1 - i];
@@ -84,7 +86,7 @@ public static @string String(this RDNSequence r) {
                 }}
 
                 if (escape){
-                    escaped = append(escaped, (rune)((rune)'\\'), c);
+                    escaped = append(escapedᴷ, escaped, (rune)'\\', c);
                 } else {
                     escaped = append(escaped, c);
                 }
@@ -269,6 +271,8 @@ public static RDNSequence /*ret*/ ToRDNSequence(this Name n) {
 // String returns the string form of n, roughly following
 // the RFC 2253 Distinguished Names syntax.
 public static @string String(this Name n) {
+    var rdnsᴷ = new stackAppend<RelativeDistinguishedNameSET>();
+
     RDNSequence rdns = default!;
     // If there are no ExtraNames, surface the parsed value (all entries in
     // Names) instead.
@@ -285,7 +289,7 @@ public static @string String(this Name n) {
             }
             // Place non-standard parsed values at the beginning of the sequence
             // so they will be at the end of the string. See Issue 39924.
-            rdns = append(rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
+            rdns = append(rdnsᴷ, rdns, (RelativeDistinguishedNameSET)(new AttributeTypeAndValue[]{atv}.slice()));
         }
     }
     rdns = appendꓸꓸꓸ(rdns, n.ToRDNSequence());

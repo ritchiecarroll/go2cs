@@ -254,42 +254,11 @@ internal static void osinit_hack() {
 
 internal static partial void osinit_hack_trampoline();
 
-internal partial struct mmap_args /*dyn*/ {
-    internal @unsafe.Pointer addr;
-    internal uintptr n;
-    internal int32 prot, flags, fd;
-    internal uint32 off;
-    internal @unsafe.Pointer ret1;
-    internal nint ret2;
-}
-
-// mmap is used to do low-level memory allocation via mmap. Don't allow stack
-// splits, since this function (used by sysAlloc) is called in a lot of low-level
-// parts of the runtime and callers often assume it won't acquire any locks.
-//
-//go:nosplit
-internal static (@unsafe.Pointer, nint) mmap(@unsafe.Pointer addr, uintptr n, int32 prot, int32 flags, int32 fd, uint32 off) {
-    ref var args = ref heap<mmap_args>(out var Ꮡargs);
-    args = new mmap_args(addr.Value, n, prot, flags, fd, off, nil, 0);
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(mmap_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    return (args.ret1, args.ret2);
-}
+// go2cs generated this placeholder — func mmap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static partial void mmap_trampoline();
 
-internal partial struct munmap_args /*dyn*/ {
-    internal uintptr addr;
-    internal uintptr n;
-}
-
-//go:nosplit
-//go:cgo_unsafe_args
-internal static void munmap(@unsafe.Pointer addr, uintptr n) {
-    ref var args = ref heap(new munmap_args((uintptr)addr, n), out var Ꮡargs);
-
-    libcCall((@unsafe.Pointer)abi.FuncPCABI0(munmap_trampoline), @unsafe.Pointer.FromPinnedBox(Ꮡargs));
-    KeepAlive(@unsafe.Pointer.OrTypedNil(addr)); // Just for consistency. Hopefully addr is not a Go address.
-}
+// go2cs generated this placeholder — func munmap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static partial void munmap_trampoline();
 
@@ -452,7 +421,7 @@ internal static void sigaltstack(ж<stackt> Ꮡnew, ж<stackt> Ꮡold) {
     ref var @new = ref Ꮡnew.DerefOrNull();
     ref var args = ref heap(new sigaltstack_args((uintptr)Ꮡnew.OrTypedNil(), (uintptr)Ꮡold.OrTypedNil()), out var Ꮡargs);
 
-    if (Ꮡnew != nil && (int32)(@new.ss_flags & (int32)_SS_DISABLE) != 0 && @new.ss_size == 0) {
+    if (Ꮡnew != nil && (@new.ss_flags & (int32)_SS_DISABLE) != 0 && @new.ss_size == 0) {
         // Despite the fact that Darwin's sigaltstack man page says it ignores the size
         // when SS_DISABLE is set, it doesn't. sigaltstack returns ENOMEM
         // if we don't give it a reasonable size.
@@ -744,7 +713,7 @@ internal static void exitThread(ref atomic.Uint32 wait) {
 internal static void setNonblock(int32 fd) {
     var (flags, _) = fcntl(fd, _F_GETFL, 0);
     if (flags != -1) {
-        fcntl(fd, _F_SETFL, (int32)(flags | (int32)_O_NONBLOCK));
+        fcntl(fd, _F_SETFL, flags | (int32)_O_NONBLOCK);
     }
 }
 

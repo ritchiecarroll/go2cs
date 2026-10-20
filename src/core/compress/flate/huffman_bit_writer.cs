@@ -149,11 +149,11 @@ internal static void writeBits(this ref huffmanBitWriter w, int32 b, nuint nb) {
         nint n = w.nbytes;
         var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
-        bytes[1] = (byte)((bits >> (int)(8)));
-        bytes[2] = (byte)((bits >> (int)(16)));
-        bytes[3] = (byte)((bits >> (int)(24)));
-        bytes[4] = (byte)((bits >> (int)(32)));
-        bytes[5] = (byte)((bits >> (int)(40)));
+        bytes[1] = (byte)(bits >> 8);
+        bytes[2] = (byte)(bits >> 16);
+        bytes[3] = (byte)(bits >> 24);
+        bytes[4] = (byte)(bits >> 32);
+        bytes[5] = (byte)(bits >> 40);
         n += 6;
         if (n >= bufferFlushSize) {
             w.write(w.bytes.slice(0, n));
@@ -171,7 +171,7 @@ internal static void writeBytes(this ref huffmanBitWriter w, slice<byte> bytes) 
         return;
     }
     nint n = w.nbytes;
-    if ((nuint)(w.nbits & 7) != 0) {
+    if ((w.nbits & 7) != 0) {
         w.err = ((InternalError)(@string)writeBytesWithUnfinishedˢ);
         return;
     }
@@ -336,11 +336,11 @@ internal static void writeCode(this ref huffmanBitWriter w, hcode c) {
         nint n = w.nbytes;
         var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
-        bytes[1] = (byte)((bits >> (int)(8)));
-        bytes[2] = (byte)((bits >> (int)(16)));
-        bytes[3] = (byte)((bits >> (int)(24)));
-        bytes[4] = (byte)((bits >> (int)(32)));
-        bytes[5] = (byte)((bits >> (int)(40)));
+        bytes[1] = (byte)(bits >> 8);
+        bytes[2] = (byte)(bits >> 16);
+        bytes[3] = (byte)(bits >> 24);
+        bytes[4] = (byte)(bits >> 32);
+        bytes[5] = (byte)(bits >> 40);
         n += 6;
         if (n >= bufferFlushSize) {
             w.write(w.bytes.slice(0, n));
@@ -433,11 +433,13 @@ internal static void writeFixedHeader(this ref huffmanBitWriter w, bool isEof) {
 // stored block.
 // If the input is nil, the tokens will always be Huffman encoded.
 internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+    var tokensᴷ = new stackAppend<token>();
+
     if (w.err != default!) {
         return;
     }
 
-    tokens = append(tokens, (token)(endBlockMarker));
+    tokens = append(tokensᴷ, tokens, (token)(endBlockMarker));
     var (numLiterals, numOffsets) = w.indexTokens(tokens);
 
     nint extraBits = default!;
@@ -502,11 +504,13 @@ internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens
 // If input is supplied and the compression savings are below 1/16th of the
 // input size the block is stored.
 internal static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+    var tokensᴷ = new stackAppend<token>();
+
     if (w.err != default!) {
         return;
     }
 
-    tokens = append(tokens, (token)(endBlockMarker));
+    tokens = append(tokensᴷ, tokens, (token)(endBlockMarker));
     var (numLiterals, numOffsets) = w.indexTokens(tokens);
 
     // Generate codegen and codegenFrequencies, which indicates how to encode
@@ -517,7 +521,7 @@ internal static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token>
 
     // Store bytes, if we don't get a reasonable improvement.
     {
-        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> (int)(4)))) {
+        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
             w.writeStoredHeader(len(input), eof);
             w.writeBytes(input);
             return;
@@ -651,7 +655,7 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
 
     // Store bytes, if we don't get a reasonable improvement.
     {
-        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> (int)(4)))) {
+        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
             w.writeStoredHeader(len(input), eof);
             w.writeBytes(input);
             return;
@@ -676,11 +680,11 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
         w.nbits -= 48;
         var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
-        bytes[1] = (byte)((bits >> (int)(8)));
-        bytes[2] = (byte)((bits >> (int)(16)));
-        bytes[3] = (byte)((bits >> (int)(24)));
-        bytes[4] = (byte)((bits >> (int)(32)));
-        bytes[5] = (byte)((bits >> (int)(40)));
+        bytes[1] = (byte)(bits >> 8);
+        bytes[2] = (byte)(bits >> 16);
+        bytes[3] = (byte)(bits >> 24);
+        bytes[4] = (byte)(bits >> 32);
+        bytes[5] = (byte)(bits >> 40);
         n += 6;
         if (n < bufferFlushSize) {
             continue;

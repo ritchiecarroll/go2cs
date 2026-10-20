@@ -117,6 +117,7 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="crypto.aes.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />

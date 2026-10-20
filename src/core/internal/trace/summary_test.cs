@@ -474,7 +474,7 @@ public static void TestRelatedGoroutinesV2Trace(ж<testing.T> Ꮡt) {
     }
 
     // Test the function.
-    var targetg = ((Δtrace.GoID)86);
+    var targetg = (Δtrace.GoID)86;
     var got = Δtrace.RelatedGoroutinesV2(events, targetg);
     var want = new map<Δtrace.GoID, EmptyStruct>{
         [((Δtrace.GoID)86)] = new(), // N.B. Result includes target.

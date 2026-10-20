@@ -59,7 +59,7 @@ public static error WriteByte(this ref Buffer b, byte c) {
 }
 
 public static @string String(this ref Buffer b) {
-    return ((@string)(slice<byte>)b);
+    return (@string)(slice<byte>)b;
 }
 
 public static nint Len(this ref Buffer b) {

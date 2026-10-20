@@ -1430,14 +1430,14 @@ internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<ope
 // If an error occurred, x.mode is set to invalid.
 internal static void expr(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e) {
     Ꮡcheck.rawExpr(ᏑT, Ꮡx, e, default!, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
 // genericExpr is like expr but the result may also be generic.
 internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e) {
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, true);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
@@ -1452,7 +1452,7 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
 
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
 
     {
         var (t, ok) = x.typ._<ж<Tuple>>(ᐧ); if (ok && x.mode != invalid) {
@@ -1485,7 +1485,7 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checke
 internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ΔType hint) {
     assert(hint != default!);
     Ꮡcheck.rawExpr(nil, Ꮡx, e, hint, false);
-    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)((1 << (int)(byte)(novalue)) | (1 << (int)(byte)(Δbuiltinᴛ))) | (nuint)(1 << (int)(byte)(typexpr))));
+    Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(UntypedInt)(1 << (int)(byte)(novalue) | 1 << (int)(byte)(Δbuiltinᴛ)) | (nuint)(1 << (int)(byte)(typexpr))));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
@@ -1495,7 +1495,7 @@ internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, a
 // If an error occurred, x.mode is set to invalid.
 internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, bool allowGeneric) {
     Ꮡcheck.rawExpr(nil, Ꮡx, e, default!, allowGeneric);
-    Ꮡcheck.exclude(Ꮡx, ((nuint)1 << (int)(byte)(novalue)));
+    Ꮡcheck.exclude(Ꮡx, (nuint)1 << (int)(byte)(novalue));
     Ꮡcheck.singleValue(Ꮡx);
 }
 
@@ -1510,12 +1510,12 @@ internal static readonly @string sIsNotAnExpressionˢ = "%s is not an expression
 internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
     ref var x = ref Ꮡx.DerefOrNull();
 
-    if ((nuint)(modeset & (((nuint)1).Lsh((uint64)(byte)(x.mode)))) != 0) {
+    if ((modeset & (((nuint)1).Lsh((uint64)(byte)(x.mode)))) != 0) {
         @string msg = default!;
         errors.Code code = default!;
         var exprᴛ1 = x.mode;
         if (exprᴛ1 == novalue) {
-            if ((nuint)(modeset & (nuint)(((nuint)1 << (int)(byte)(typexpr)))) != 0){
+            if ((modeset & (nuint)((nuint)1 << (int)(byte)(typexpr))) != 0){
                 msg = sUsedAsValueˢ;
             } else {
                 msg = sUsedAsValueOrTypeˢ;

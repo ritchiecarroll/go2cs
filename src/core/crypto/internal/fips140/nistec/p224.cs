@@ -171,14 +171,14 @@ internal static slice<byte> bytes(this ref P224Point p, /*[57]*/ ж<array<byte>>
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return append(@out[..0], (byte)(0));
+        return append(@out[..0], (byte)0);
     }
 
     var zinv = @new<fiat.P224Element>().Invert(p.z);
     var x = @new<fiat.P224Element>().Mul(p.x, zinv);
     var y = @new<fiat.P224Element>().Mul(p.y, zinv);
 
-    var buf = append(@out[..0], (byte)(4));
+    var buf = append(@out[..0], (byte)4);
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     buf = appendꓸꓸꓸ(buf, y.Bytes());
     return buf;
@@ -223,7 +223,7 @@ internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<ar
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return append(@out[..0], (byte)(0));
+        return append(@out[..0], (byte)0);
     }
 
     var zinv = @new<fiat.P224Element>().Invert(p.z);
@@ -232,7 +232,7 @@ internal static slice<byte> bytesCompressed(this ref P224Point p, /*[29]*/ ж<ar
 
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
-    var buf = append(@out[..0], (byte)(2));
+    var buf = append(@out[..0], (byte)2);
     buf[0] |= (byte)((byte)(y.Bytes()[p224ElementLength - 1] & 1));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     return buf;
@@ -402,7 +402,7 @@ public static (ж<P224Point>, error) ScalarMult(this ж<P224Point> Ꮡp, ж<P224
             Ꮡp.Double(Ꮡp);
         }
 
-        var windowValue = (byte)((@byte >> (int)(4)));
+        var windowValue = (byte)((@byte >> 4));
         table.Select(t, windowValue);
         Ꮡp.Add(Ꮡp, t);
 
@@ -468,7 +468,7 @@ public static (ж<P224Point>, error) ScalarBaseMult(this ж<P224Point> Ꮡp, sli
     Ꮡp.Set(NewP224Point());
     nint tableIndex = 56 - 1;
     foreach (var (_, @byte) in scalar) {
-        var windowValue = (byte)((@byte >> (int)(4)));
+        var windowValue = (byte)((@byte >> 4));
         tables.Value[tableIndex].Select(t, windowValue);
         Ꮡp.Add(Ꮡp, t);
         tableIndex--;

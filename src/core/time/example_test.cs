@@ -129,7 +129,7 @@ public static void ExampleUntil() {
 public static void ExampleDuration_Abs() {
     var positiveDuration = (Δtime.Duration)(5000000000L);
     var negativeDuration = (Δtime.Duration)(-3000000000L);
-    var minInt64CaseDuration = ((Δtime.Duration)Δmath.MinInt64);
+    var minInt64CaseDuration = (Δtime.Duration)Δmath.MinInt64;
 
     var absPositive = positiveDuration.Abs();
     var absNegative = negativeDuration.Abs();
@@ -856,7 +856,7 @@ public static void ExampleTime_AppendFormat() {
     var text = slice<byte>("Time: "u8);
 
     text = t.AppendFormat(text, Δtime.Kitchen);
-    fmt.Println(((@string)text));
+    fmt.Println((@string)text);
 
     // Output:
     // Time: 11:00AM

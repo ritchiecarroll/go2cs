@@ -61,24 +61,24 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ5 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ5 & 0xff000000U) == 0){
+                if (((uint32)rΔ5 & 0xff000000U) == 0){
                     rΔ5 >>= (int)(16);
                 } else {
-                    rΔ5 = ~((rΔ5 >> (int)(31)));
+                    rΔ5 = ~(rΔ5 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
 
                 // use a temp slice to hint to the compiler that a single bounds check suffices
@@ -118,24 +118,24 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ6 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ6 & 0xff000000U) == 0){
+                if (((uint32)rΔ6 & 0xff000000U) == 0){
                     rΔ6 >>= (int)(16);
                 } else {
-                    rΔ6 = ~((rΔ6 >> (int)(31)));
+                    rΔ6 = ~(rΔ6 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
 
                 // use a temp slice to hint to the compiler that a single bounds check suffices
@@ -175,24 +175,24 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ7 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ7 & 0xff000000U) == 0){
+                if (((uint32)rΔ7 & 0xff000000U) == 0){
                     rΔ7 >>= (int)(16);
                 } else {
-                    rΔ7 = ~((rΔ7 >> (int)(31)));
+                    rΔ7 = ~(rΔ7 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
 
                 // use a temp slice to hint to the compiler that a single bounds check suffices
@@ -230,24 +230,24 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ8 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ8 & 0xff000000U) == 0){
+                if (((uint32)rΔ8 & 0xff000000U) == 0){
                     rΔ8 >>= (int)(16);
                 } else {
-                    rΔ8 = ~((rΔ8 >> (int)(31)));
+                    rΔ8 = ~(rΔ8 >> 31);
                 }
 
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
 
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
 
                 // use a temp slice to hint to the compiler that a single bounds check suffices

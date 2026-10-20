@@ -265,14 +265,14 @@ internal partial struct TestFreegc_tests /*dyn*/ {
 public static void TestFreegc(ж<testing.T> Ꮡt) {
     var tests = new TestFreegc_tests[]{
         // Types without pointers.
-        new("size=16"u8, testFreegc<array<byte>>, true), // smallest we support currently
-        new("size=17"u8, testFreegc<array<byte>>, true),
-        new("size=64"u8, testFreegc<array<byte>>, true),
-        new("size=500"u8, testFreegc<array<byte>>, true),
-        new("size=512"u8, testFreegc<array<byte>>, true),
-        new("size=4096"u8, testFreegc<array<byte>>, true),
-        new("size=20000"u8, testFreegc<array<byte>>, true), // not power of 2 or spc boundary
-        new("size=32KiB-8"u8, testFreegc<array<byte>>, true) // max noscan small object for 64-bit
+        new("size=16"u8, testFreegc<array<byte>, ᴀ16>, true), // smallest we support currently
+        new("size=17"u8, testFreegc<array<byte>, ᴀ17>, true),
+        new("size=64"u8, testFreegc<array<byte>, ᴀ64>, true),
+        new("size=500"u8, testFreegc<array<byte>, ᴀ500>, true),
+        new("size=512"u8, testFreegc<array<byte>, ᴀ512>, true),
+        new("size=4096"u8, testFreegc<array<byte>, ᴀ4096>, true),
+        new("size=20000"u8, testFreegc<array<byte>, ᴀ20000>, true), // not power of 2 or spc boundary
+        new("size=32KiB-8"u8, testFreegc<array<byte>, ᴀ32760>, true) // max noscan small object for 64-bit
     }.slice();
 
     // Run the tests twice if not in -short mode or not otherwise saving test time.
@@ -313,7 +313,9 @@ internal static readonly @string assistCreditˢ = "assist-credit"u8;
 internal static readonly object temporarilySkipAssistˢ = (@string)"temporarily skip assist credit tests for GOEXPERIMENT=sizespecializedmalloc for pointer types"u8;
 internal static readonly object skippingAssistCreditTestˢ = (@string)"skipping assist credit test with runtime.freegc disabled"u8;
 
-internal static Action<ж<testing.T>> testFreegc<T>(bool noscan) {
+internal static Action<ж<testing.T>> testFreegc<T, Tᴀ>(bool noscan)
+    where Tᴀ : IGoArrayDims
+{
     // We use stressMultiple to influence the duration of the tests.
     // When testing freegc changes, stressMultiple can be increased locally
     // to test longer or in some cases with more goroutines.
@@ -328,19 +330,19 @@ internal static Action<ж<testing.T>> testFreegc<T>(bool noscan) {
         ж<T> alloc() {
             // Force heap alloc, plus some light validation of zeroed memory.
             t.Helper();
-            var p = runtime_internal_test_package.Escape(@new<T>());
-            T zero = GoZero<T>();
+            var p = runtime_internal_test_package.Escape(GoArrayZero.New<T, Tᴀ>());
+            T zero = GoArrayZero.Of<T, Tᴀ>();
             if (!AreEqual(p.ValueSlot, zero)) {
-                t.Fatalf("allocator returned non-zero memory: %v"u8, p.ValueSlot);
+                t.Fatalf("allocator returned non-zero memory: %v"u8, (p.ValueSlot).OrTypedNilOf());
             }
             return p;
         }
 
         void free(ж<T> p) {
             t.Helper();
-            T zero = GoZero<T>();
+            T zero = GoArrayZero.Of<T, Tᴀ>();
             if (!AreEqual(p.ValueSlot, zero)) {
-                t.Fatalf("found non-zero memory before freegc (tests do not modify memory): %v"u8, p.ValueSlot);
+                t.Fatalf("found non-zero memory before freegc (tests do not modify memory): %v"u8, (p.ValueSlot).OrTypedNilOf());
             }
             runtime_internal_test_package.Freegc(@unsafe.Pointer.FromPinnedBox(p), @unsafe.Sizeof(p.ValueSlot), noscan);
         }
@@ -628,7 +630,7 @@ internal static Action<ж<testing.T>> testFreegc<T>(bool noscan) {
                 var counts = new nint[]{1, 2, 10, 100 * stressMultiple}.slice();
                 // Dropping down to GOMAXPROCS=1 might help reduce noise.
                 defer(GOMAXPROCS, GOMAXPROCS(1), ref ᒐ);
-                var size = (int64)@unsafe.Sizeof(@new<T>().ValueSlot);
+                var size = (int64)@unsafe.Sizeof(GoArrayZero.New<T, Tᴀ>().ValueSlot);
                 foreach (var (_, count) in counts) {
                     // Start by forcing a GC to reset this g's assist credit
                     // and perhaps help us get a cleaner measurement of GC cycle count.
@@ -678,6 +680,15 @@ internal static Action<ж<testing.T>> testFreegc<T>(bool noscan) {
     };
 }
 
+private sealed class ᴀ16 : IGoArrayDims { public static nint[] Dims { get; } = [16]; }
+private sealed class ᴀ17 : IGoArrayDims { public static nint[] Dims { get; } = [17]; }
+private sealed class ᴀ20000 : IGoArrayDims { public static nint[] Dims { get; } = [20000]; }
+private sealed class ᴀ32760 : IGoArrayDims { public static nint[] Dims { get; } = [32760]; }
+private sealed class ᴀ4096 : IGoArrayDims { public static nint[] Dims { get; } = [4096]; }
+private sealed class ᴀ500 : IGoArrayDims { public static nint[] Dims { get; } = [500]; }
+private sealed class ᴀ512 : IGoArrayDims { public static nint[] Dims { get; } = [512]; }
+private sealed class ᴀ64 : IGoArrayDims { public static nint[] Dims { get; } = [64]; }
+
 public static void TestPageCacheLeak(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
@@ -720,7 +731,7 @@ public static void TestScavengedBitsCleared(ж<testing.T> Ꮡt) {
 }
 
 partial struct acLink {
-    internal array<byte> x = new((1 << (int)(20)));
+    internal array<byte> x = new((1 << 20));
 }
 
 internal static slice<ж<acLink>> arenaCollisionSink;
@@ -745,13 +756,13 @@ public static void TestArenaCollision(ж<testing.T> Ꮡt) {
             // doesn't support this, so look for the
             // expected failure.
             {
-                @string want = tooManyAddressSpaceˢ; if (!strings.Contains(((@string)@out), want)) {
-                    Ꮡt.Fatalf("want %q, got:\n%s"u8, want, ((@string)@out));
+                @string want = tooManyAddressSpaceˢ; if (!strings.Contains((@string)@out, want)) {
+                    Ꮡt.Fatalf("want %q, got:\n%s"u8, want, (@string)@out);
                 }
             }
         } else 
-        if (!strings.Contains(((@string)@out), passˢ) || err != default!) {
-            Ꮡt.Fatalf("%s\n(exit status %v)"u8, ((@string)@out), err);
+        if (!strings.Contains((@string)@out, passˢ) || err != default!) {
+            Ꮡt.Fatalf("%s\n(exit status %v)"u8, (@string)@out, err);
         }
         return;
     }

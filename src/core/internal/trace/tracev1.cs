@@ -136,7 +136,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     // Convert from trace v1's Strings map to our dataTable.
     uint64 max = default!;
     foreach (var (id, s) in pr.Strings) {
-        evt.of(evTable.Ꮡstrings).insert(((stringID)id), s);
+        evt.of(evTable.Ꮡstrings).insert((stringID)id, s);
         if (id > max) {
             max = id;
         }
@@ -160,7 +160,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     foreach (var (id, s) in pr.InlineStrings) {
         var nid = max + 1 + (uint64)id;
         it.inlineToStringID = builtin.append(it.inlineToStringID, nid);
-        add(((stringID)nid), s);
+        add((stringID)nid, s);
     }
     max += (uint64)len(pr.InlineStrings);
     pr.InlineStrings = default!;
@@ -174,7 +174,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     void addBuiltin(nint c, @string s) {
         var nid = max + 1 + (uint64)c;
         Ꮡit.Value.builtinToStringID[c] = nid;
-        addʗ1(((stringID)nid), s);
+        addʗ1((stringID)nid, s);
     }
     addBuiltin(sForever, foreverˢ);
     addBuiltin(sPreempted, preemptedˢ);
@@ -215,7 +215,7 @@ internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
 
     // Convert stacks.
     foreach (var (id, stk) in pr.Stacks) {
-        evt.of(evTable.Ꮡstacks).insert(((stackID)(uint64)id), new stack(pcs: stk));
+        evt.of(evTable.Ꮡstacks).insert((stackID)(uint64)id, new stack(pcs: stk));
     }
 
     // OPT(dh): if we could share the frame type between this package and
@@ -326,7 +326,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         }
     }
     else if (exprᴛ1 == tracev1.EvProcStart) {
-        it.procMs[((ProcID)(int64)ev.P)] = ((ThreadID)(int64)ev.Args[0]);
+        it.procMs[((ProcID)(int64)ev.P)] = (ThreadID)(int64)ev.Args[0];
         {
             var (_, ok) = it.seenProcs[((ProcID)(int64)ev.P), ꟷ]; if (ok){
                 mappedType = tracev2.EvProcStart;
@@ -383,7 +383,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         if (it.preInit){
             mappedType = tracev2.EvGoStatus;
             mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)(uint8)tracev2.GoRunning}.array(4));
-            delete(it.createdPreInit, ((GoID)(int64)ev.Args[0]));
+            delete(it.createdPreInit, (GoID)(int64)ev.Args[0]);
         } else {
             mappedType = tracev2.EvGoStart;
         }
@@ -531,7 +531,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
     else if (exprᴛ1 == tracev1.EvGoWaiting) {
         mappedType = tracev2.EvGoStatus;
         mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)(uint8)tracev2.GoWaiting}.array(4));
-        delete(it.createdPreInit, ((GoID)(int64)ev.Args[0]));
+        delete(it.createdPreInit, (GoID)(int64)ev.Args[0]);
     }
     else if (exprᴛ1 == tracev1.EvGoInSyscall) {
         mappedType = tracev2.EvGoStatus;
@@ -539,7 +539,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         // syscall is on. In trace v1, EvGoInSyscall doesn't contain that
         // information and all we can do here is specify NoThread.
         mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], ~(uint64)0, (uint64)(uint8)tracev2.GoSyscall}.array(4));
-        delete(it.createdPreInit, ((GoID)(int64)ev.Args[0]));
+        delete(it.createdPreInit, (GoID)(int64)ev.Args[0]);
     }
     else if (exprᴛ1 == tracev1.EvHeapAlloc) {
         mappedType = tracev2.EvHeapAlloc;
@@ -560,7 +560,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
             parent = (uint64)NoTask;
         }
         mappedArgs = new timedEventArgs(new uint64[]{ev.Args[0], parent, ev.Args[2], (uint64)ev.StkID}.array());
-        var (name, _) = it.evt.of(evTable.Ꮡstrings).get(((stringID)ev.Args[2]));
+        var (name, _) = it.evt.of(evTable.Ꮡstrings).get((stringID)ev.Args[2]);
         it.tasks[((TaskID)ev.Args[0])] = new taskState(name: name, parentID: ((TaskID)ev.Args[1]));
     }
     else if (exprᴛ1 == tracev1.EvUserTaskEnd) {
@@ -569,7 +569,7 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         // and as extra strings.
         var (ts, ok) = it.tasks[((TaskID)ev.Args[0]), ꟷ];
         if (ok){
-            delete(it.tasks, ((TaskID)ev.Args[0]));
+            delete(it.tasks, (TaskID)ev.Args[0]);
             mappedArgs = new timedEventArgs(new uint64[]{
                 ev.Args[0],
                 ev.Args[1],
@@ -626,9 +626,9 @@ internal static (ΔEvent OUT, error ERR) convertEvent(this ж<traceV1Converter> 
         }
     }
     if (ev.Type == tracev1.EvProcStop) {
-        delete(it.procMs, ((ProcID)(int64)ev.P));
+        delete(it.procMs, (ProcID)(int64)ev.P);
     }
-    var g = ((GoID)(int64)ev.G);
+    var g = (GoID)(int64)ev.G;
     if (g == 0) {
         g = NoGoroutine;
     }

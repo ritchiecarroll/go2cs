@@ -16,6 +16,7 @@ using @internal;
 using System.Runtime.CompilerServices;
 using Δsync = sync_package;
 
+[GoFieldAccess(typeof(nonEmptyInterface), typeof(unsafeheader.Slice))]
 partial class reflect_package {
 
 // Value is the reflection interface to a Go value.
@@ -60,7 +61,7 @@ partial struct ΔValue {
     //
     // The remaining 22+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
-    internal partial ref flag flag { get; }
+    /*embed*/ internal flag flag;
 }
 
 partial struct flag /*num:uintptr*/;
@@ -81,7 +82,7 @@ internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
 internal static ΔKind kind(this flag f) {
-    return ((ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask))));
+    return (ΔKind)(nuint)((uintptr)((flag)(f & flagKindMask)));
 }
 
 internal static flag ro(this flag f) {
@@ -266,7 +267,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
     ж<abi.Type> rcvrtype = default!;
     if ((flag)(v.flag & flagMethod) != 0){
         rcvr = v;
-        (rcvrtype, t, fn) = methodReceiver(op, v, ((nint)(uintptr)v.flag >> (int)(flagMethodShift)));
+        (rcvrtype, t, fn) = methodReceiver(op, v, (nint)(uintptr)v.flag >> (int)(flagMethodShift));
     } else 
     if ((flag)(v.flag & flagIndir) != 0){
         fn = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
@@ -527,7 +528,7 @@ break_stepsLoop:;
                     print((@string)"kind="u8, steps[0].kind, (@string)", type="u8, stringFor(tv), (@string)"\n"u8);
                     throw panic("mismatch between ABI description and types");
                 }
-                ret[i] = new ΔValue(tv, regArgs.Ptrs[steps[0].ireg], ((flag)(uintptr)(uint8)tv.Kind()));
+                ret[i] = new ΔValue(tv, regArgs.Ptrs[steps[0].ireg], (flag)(uintptr)(uint8)tv.Kind());
                 continue;
             }
 
@@ -619,7 +620,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
             @in = builtin.append(@in, Zero(new rtypeжΔType(toRType(typ))));
             continue;
         }
-        var v = new ΔValue(typ, nil, ((flag)(uintptr)(uint8)typ.Kind()));
+        var v = new ΔValue(typ, nil, (flag)(uintptr)(uint8)typ.Kind());
         var steps = abid.call.stepsForValue(i);
         {
             var st = steps[0]; if (st.kind == abiStepStack){
@@ -802,11 +803,11 @@ internal static (ж<abi.Type> rcvrtype, ж<funcType> t, @unsafe.Pointer fn) meth
             throw panic("reflect: " + op + " of unexported method");
         }
         var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        if ((~iface).itab == nil) {
+        if (iface.itab == nil) {
             throw panic("reflect: " + op + " of method on nil interface value");
         }
-        rcvrtype = iface.Value.itab.Value.Type;
-        fn = @unsafe.Pointer.FromBox(Ꮡ(@unsafe.Slice((~iface).itab.at(abi.ITab.ᏑFun, 0), i + 1), i));
+        rcvrtype = iface.itab.Value.Type;
+        fn = @unsafe.Pointer.FromBox(Ꮡ(@unsafe.Slice(iface.itab.at(abi.ITab.ᏑFun, 0), i + 1), i));
         t = tt.typeOff((~m).Typ).FuncType();
     } else {
         rcvrtype = v.typ();
@@ -835,7 +836,7 @@ internal static void storeRcvr(ΔValue v, @unsafe.Pointer p) {
     if (t.Kind() == abi.Interface){
         // the interface data word becomes the receiver word
         var iface = (ж<nonEmptyInterface>)(uintptr)(v.ptr);
-        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.Value.word;
+        ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = iface.word;
     } else 
     if ((flag)(v.flag & flagIndir) != 0 && t.IsDirectIface()){
         ((ж<@unsafe.Pointer>)(uintptr)(p)).Value = ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).Value;
@@ -1259,88 +1260,7 @@ public static bool CanInterface(this ΔValue v) {
 
 // go2cs generated this placeholder — func valueInterface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string typeAssertˢ = "TypeAssert"u8;
-
-// TypeAssert is semantically equivalent to:
-//
-//	v2, ok := v.Interface().(T)
-public static (T, bool) TypeAssert<T>(ΔValue vʗp) {
-    ref var v = ref heap(vʗp, out var Ꮡv);
-
-    if (v.flag == 0) {
-        throw panic(Ꮡ(new ValueError("reflect.TypeAssert"u8, Invalid)));
-    }
-    if ((flag)(v.flag & flagRO) != 0) {
-        // Do not allow access to unexported values via TypeAssert,
-        // because they might be pointers that should not be
-        // writable or methods or function that should not be callable.
-        throw panic("reflect.TypeAssert: cannot return value obtained from unexported field or method");
-    }
-
-    if ((flag)(v.flag & flagMethod) != 0) {
-        v = makeMethodValue(typeAssertˢ, v);
-    }
-
-    var typ = abi.TypeFor<T>();
-
-    // If v is an interface, return the element inside the interface.
-    //
-    // T is a concrete type and v is an interface. For example:
-    //
-    //	var v any = int(1)
-    //	val := ValueOf(&v).Elem()
-    //	TypeAssert[int](val) == val.Interface().(int)
-    //
-    // T is a interface and v is a non-nil interface value. For example:
-    //
-    //	var v any = &someError{}
-    //	val := ValueOf(&v).Elem()
-    //	TypeAssert[error](val) == val.Interface().(error)
-    //
-    // T is a interface and v is a nil interface value. For example:
-    //
-    //	var v error = nil
-    //	val := ValueOf(&v).Elem()
-    //	TypeAssert[error](val) == val.Interface().(error)
-    if (v.kind() == ΔInterface) {
-        var (vΔ1, ok) = packIfaceValueIntoEmptyIface(v)._<T>(ᐧ);
-        return (vΔ1, ok);
-    }
-
-    // If T is an interface and v is a concrete type. For example:
-    //
-    //	TypeAssert[any](ValueOf(1)) == ValueOf(1).Interface().(any)
-    //	TypeAssert[error](ValueOf(&someError{})) == ValueOf(&someError{}).Interface().(error)
-    if (typ.Kind() == abi.Interface) {
-        // To avoid allocating memory, in case the type assertion fails,
-        // first do the type assertion with a nil Data pointer.
-        var iface = ~Ꮡ(new abi.EmptyInterface(Type: v.typ(), Data: default!)).Reinterpret<abi.EmptyInterface, any>();
-        {
-            ref var @out = ref heap<T>(out var Ꮡout);
-            (@out, var ok) = iface._<T>(ᐧ); if (ok) {
-                // Now populate the Data field properly, we update the Data ptr
-                // directly to avoid an additional type asertion. We can re-use the
-                // itab we already got from the runtime (through the previous type assertion).
-                (Ꮡout.Reinterpret<T, abi.CommonInterface>()).Value.Data = (uintptr)packEfaceData(v);
-                return (@out, true);
-            }
-        }
-        T zero = GoZero<T>();
-        return (zero, false);
-    }
-
-    // Both v and T must be concrete types.
-    // The only way for an type-assertion to match is if the types are equal.
-    if (typ != v.typ()) {
-        T zero = GoZero<T>();
-        return (zero, false);
-    }
-    if ((flag)(v.flag & flagIndir) == 0) {
-        return (~Ꮡv.of(reflect_package.ΔValue.Ꮡptr).Reinterpret<@unsafe.Pointer, T>(), true);
-    }
-    return (~(ж<T>)(uintptr)(v.ptr), true);
-}
+// go2cs generated this placeholder — func TypeAssert is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal partial interface packIfaceValueIntoEmptyIface_type /*dyn*/ {
     void M();
@@ -1431,7 +1351,7 @@ internal static nint lenNonSlice(this ΔValue v) {
         var exprᴛ1 = k;
         if (exprᴛ1 == Array) {
             var tt = v.typ().Reinterpret<abi.Type, arrayType>();
-            return (nint)(~tt).Len;
+            return (nint)tt.of(arrayType.ᏑLen).Value;
         }
         if (exprᴛ1 == Chan) {
             return chanlen((uintptr)v.pointer());
@@ -1552,7 +1472,7 @@ public static bool OverflowInt(this ΔValue v, int64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔInt || exprᴛ1 == Int8 || exprᴛ1 == Int16 || exprᴛ1 == Int32 || exprᴛ1 == Int64) {
         var bitSize = v.typ().Size() * 8;
-        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowInt"u8, v.kind())));
@@ -1565,7 +1485,7 @@ public static bool OverflowUint(this ΔValue v, uint64 x) {
     var exprᴛ1 = k;
     if (exprᴛ1 == ΔUint || exprᴛ1 == Uintptr || exprᴛ1 == Uint8 || exprᴛ1 == Uint16 || exprᴛ1 == Uint32 || exprᴛ1 == Uint64) {
         var bitSize = v.typ_.Size() * 8; // ok to use v.typ_ directly as Size doesn't escape
-        var trunc = (x.Lsh((uint64)((64 - bitSize)))).Rsh((uint64)((64 - bitSize)));
+        var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
     }
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowUint"u8, v.kind())));
@@ -1697,7 +1617,7 @@ internal static ж<abi.Type> abiTypeSlow(this ΔValue v) {
 
     // Method value.
     // v.typ describes the receiver, not the method type.
-    nint i = ((nint)(uintptr)v.flag >> (int)(flagMethodShift));
+    nint i = (nint)(uintptr)v.flag >> (int)(flagMethodShift);
     if (v.typ().Kind() == abi.Interface) {
         // Method on interface.
         var tt = typ.Reinterpret<abi.Type, interfaceType>();
@@ -1839,11 +1759,11 @@ internal static void grow(this ΔValue v, nint n) {
         throw panic("reflect.Value.Grow: negative len");
         break;
     }
-    case {} when (~p).Len + n is < 0: {
+    case {} when p.Len + n is < 0: {
         throw panic("reflect.Value.Grow: slice overflow");
         break;
     }
-    case {} when (~p).Len + n > (~p).Cap: {
+    case {} when p.Len + n > p.Cap: {
         var t = v.typ().Elem();
         p.Value = growslice(t, p.Value, n);
         break;
@@ -1983,7 +1903,7 @@ internal static ΔValue assignTo(this ΔValue v, @string context, ж<abi.Type> �
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new ΔValue(Ꮡdst, nil, ((flag)(uintptr)(nuint)ΔInterface));
+            return new ΔValue(Ꮡdst, nil, (flag)(uintptr)(nuint)ΔInterface);
         }
         var x = valueInterface(v, false);
         if (target == nil) {
@@ -2398,7 +2318,7 @@ internal static ΔValue cvtIntString(ΔValue v, ΔType t) {
     @string s = "\uFFFD"u8;
     {
         var x = v.Int(); if ((int64)(rune)x == x) {
-            s = ((@string)(rune)x);
+            s = (@string)(rune)x;
         }
     }
     return makeString(v.flag.ro(), s, t);
@@ -2409,7 +2329,7 @@ internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
     @string s = "\uFFFD"u8;
     {
         var x = v.Uint(); if ((uint64)(rune)x == x) {
-            s = ((@string)(rune)x);
+            s = (@string)(rune)x;
         }
     }
     return makeString(v.flag.ro(), s, t);
@@ -2417,7 +2337,7 @@ internal static ΔValue cvtUintString(ΔValue v, ΔType t) {
 
 // convertOp: []byte -> string
 internal static ΔValue cvtBytesString(ΔValue v, ΔType t) {
-    return makeString(v.flag.ro(), ((@string)v.Bytes()), t);
+    return makeString(v.flag.ro(), (@string)v.Bytes(), t);
 }
 
 // convertOp: string -> []byte
@@ -2427,7 +2347,7 @@ internal static ΔValue cvtStringBytes(ΔValue v, ΔType t) {
 
 // convertOp: []rune -> string
 internal static ΔValue cvtRunesString(ΔValue v, ΔType t) {
-    return makeString(v.flag.ro(), ((@string)v.runes()), t);
+    return makeString(v.flag.ro(), (@string)v.runes(), t);
 }
 
 // convertOp: string -> []rune
@@ -2442,7 +2362,7 @@ internal static ΔValue cvtSliceArrayPtr(ΔValue v, ΔType t) {
         throw panic("reflect: cannot convert slice with length " + strconv.Itoa(v.Len()) + " to pointer to array with length " + strconv.Itoa(n));
     }
     var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
-    return new ΔValue(t.common(), (~h).Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)(nuint)ΔPointer)));
+    return new ΔValue(t.common(), h.Data, (flag)((flag)(v.flag & ~((flag)((flag)(flagIndir | flagAddr) | flagKindMask))) | ((flag)(uintptr)(nuint)ΔPointer)));
 }
 
 // convertOp: []T -> [N]T
@@ -2453,7 +2373,7 @@ internal static ΔValue cvtSliceArray(ΔValue v, ΔType t) {
     }
     var h = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
     var typ = t.common();
-    @unsafe.Pointer ptr = h.Value.Data;
+    @unsafe.Pointer ptr = h.Data;
     @unsafe.Pointer c = (uintptr)unsafe_New(typ);
     typedmemmove(typ, c, ptr);
     ptr = c;

@@ -426,6 +426,8 @@ internal partial interface newEmailConstraints_R0 /*dyn*/ {
 }
 
 internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, bool permitted) {
+    var domainsᴷ = new stackAppend<@string>();
+
     if (builtin.len(l) == 0) {
         return default!;
     }
@@ -433,7 +435,7 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
     slice<@string> domains = default!;
     foreach (var (_, c) in l) {
         if (!strings.ContainsRune(c, (rune)'@')) {
-            domains = append(domains, c);
+            domains = append(domainsᴷ, domains, c);
             continue;
         }
         var (parsed, ok) = parseRFC2821Mailbox(c);
@@ -498,7 +500,7 @@ internal static error checkConstraints<T, V, P>(constraints<T, V> c, V s, P p)
     if (c.excluded != default!) {
         {
             var (constraint, found) = c.excluded.query(s); if (found) {
-                return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, constraint);
+                return fmt.Errorf("%s %q is excluded by constraint %q"u8, c.constraintType, p, (constraint).OrTypedNilOf());
             }
         }
     }

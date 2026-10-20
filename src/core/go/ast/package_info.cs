@@ -24,7 +24,6 @@ global using scannerꓸError = go.go.scanner_package.ΔError;
 global using tokenꓸFile = go.go.token_package.ΔFile;
 global using tokenꓸPos = go.go.token_package.ΔPos;
 global using tokenꓸPosition = go.go.token_package.ΔPosition;
-using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -164,11 +163,13 @@ using static go.go.ast_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<File, ж<File>>(Indirect = true)]
-[assembly: GoImplicitConv<GenDecl, ж<GenDecl>>(Indirect = true)]
-[assembly: GoImplicitConv<Ident, ж<Ident>>(Indirect = true)]
-[assembly: GoImplicitConv<go.go.ast_package.Object, ж<go.go.ast_package.Object>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -178,8 +179,8 @@ using static go.go.ast_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/ast/ast.go", "ast.cs", "AE2SAYCigAAIEICigKSApIKCgpQAAhIACAKClIKCpoLGpoKUlJSClJTYyKaC3IKCgoKmpoKm+uqCyoKClIKClIKCpgASJoKClIKUpoKClIKUgpQAChaCgriClKaCgriAgqSosoKCgoKClKYA0gG2A5CigKKAooCigKKCgpSkgKKAooCigKKAooCigKKAooCigKKAooCigKKCgpSkgKKAooCkgKKAooKClKSCuJSkgKKAooCigKKAooCigKKAooCigKKAooCigKKAooCigoKUpICigKKAqMKioqKioqKioqKioqKioqKkoqKioqKu0KaQppDUooKUAKgB2gKQooCigKKAooCigKKAooCigKKAooCigKKAooCigKKAooCigKKAooCigKSAooCigoKUpICigKKAooKkgKKAooCigoCCpKSCgpSkgoKUgIKkpIKClKSCgIKkpICigKKCgIKkpICigKKAqMKioqKioqKioqKioqKioqKioqKiACxekoKUpICigKSCgpSmgoCCpIKUpICowqIAKFiQooCigKSAooKClKSCgpSqwqIAJ1jArMKAgqQADRyAooAAAhgACgKCAAgGgoKCgpaSgoKAgoCCAAgOqJKCgoKU")]
-[assembly: global::go.GoPositionMap("go/ast/commentmap.go", "commentmap.cs", "ABAikgAHFIKCgpSUqJKClLSUggAOHgALGIKmgoKCgoIABxSigqzSgoKClIIAAiQADwKCpqaCgoKCpoKWAAYQgoKCmKKCuJSAgoKu0gAGEt7GppSkgoKUuIKm1MissoCCgqSssoKigIKklKqigoKUgqaCgqaCuIKClOqCgriCgpTI1oSSgpSCgoKUpoKCgoSSgIKUpJSC", "18-20:1;41-49:1;242-247:1;304-310:1")]
+[assembly: global::go.GoPositionMap("go/ast/ast.go", "ast.cs", "AE2SAYCigAAIEICigKSApIKCgpQAAhIACQKClIKCpoLGpoKUlJSClJTYyKaC3IKCgoKmpoKm+uqCyoKClIKClIKCpgASJoKClIKUpoKClIKUgpQAChaCgriClKaCgriAgqSosoKCgoKClKYA0gG2A5CigKKAooCigKKCgpSkgKKAooCigKKAooCigKKAooCigKKAooCigKKCgpSkgKKAooCkgKKAooKClKSCuJSkgKKAooCigKKAooCigKKAooCigKKAooCigKKAooCigoKUpICigKKAqMKioqKioqKioqKioqKioqKkoqKioqKu0KaQppDUooKUAKgB2gKQooCigKKAooCigKKAooCigKKAooCigKKAooCigKKAooCigKKAooCigKSAooCigoKUpICigKKAooKkgKKAooCigoCCpKSCgpSkgoKUgIKkpIKClKSCgIKkpICigKKCgIKkpICigKKAqMKioqKioqKioqKioqKioqKioqKiACxekoKUpICigKSCgpSmgoCCpIKUpICowqIAKFiQooCigKSAooKClKSCgpSqwqIAJ1jArMKAgqQADRyAooAAAhgACgKCAAgGgoKCgpaSgoKAgoCCAAgOqJKCgoKU")]
+[assembly: global::go.GoPositionMap("go/ast/commentmap.go", "commentmap.cs", "ABAikgAHFIKCgpSUqJKClLSUggAOHgALGIKmgoKCgoIABxSigqzSgoKClIIAAiQAEQKCpqaCgoKCpoKWAAYQgoKCmKKCuJSAgoKu0gAGEt7GppSkgoKUuIKm1MissoCCgqSssoKigIKklKqigoKUgqaCgqaCuIKClOqCgriCgpTI1qSSgpSCgoKUpoKCgoSSgIKUpJSC", "18-20:1;41-49:1;242-247:1;304-310:1")]
 [assembly: global::go.GoPositionMap("go/ast/directive.go", "directive.cs", "ACtwAA0GgqaC3IKClIKClIKmgqaCgoKUpoKmgKKAAAsi4pSCgoKUlLaCgqamgoKC2pQACRSCgqaCgoKmgoKClKaCgg==")]
 [assembly: global::go.GoPositionMap("go/ast/filter.go", "filter.cs", "AAsgwgACFPIAAhgACQIABBCigoKCgqasspSkgILWlKaygpSCgoKClIKUgoKClJSCgpSCpoKUgqaCgoKCuIKCgpS0gIKkgILGgpSmooKUgoKCpqaClKSkpIKUpIKCpIKUpIKCpJSmgpSCgoKClMaCgpSU3LamgoKCgoKmAAIS4qaClIKklAACGAAJAqaCgoKCgqaCAAIgAA0CpoKCgoKmABU2soCUlICCtoCC2MqeAAoIgoKCgpKCgoKCgpSCgoKUgqacwoKCgoKCgoKUgpSCgpS4uKiSgoKCgoKCgqIACRSAgoKAlKamlJTYggAIEoKCgoKCprqSgoKCgoKAAAcQguyCgrqSgoKCgoLK")]
 [assembly: global::go.GoPositionMap("go/ast/import.go", "import.cs", "AA0gwoKCpqaUuIKCgpSCpoKmgoKCgoKC3IKCgIKC7IKmgoKClKaCgoKUpoKCgpSokoKUAAwauIK4goK4goKCgoKCgpSUgoKCgqaUgpSCyoKCuIKCgoKUlIKSlIKUggAHEIKCgoKClIKCgoKUyoKCgpSmgILIpoKCgpSCgoKCgtzcmKzSgoKC", "186-200:1;242-244:2")]

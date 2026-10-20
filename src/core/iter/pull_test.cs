@@ -64,7 +64,7 @@ public static void TestPull(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)(0), false);
+                    tΔ1.Fatalf("next() = %d, %v, want %d, %v"u8, v, ok, (nint)0, false);
                 }
                 wantNG(0);
             }
@@ -109,7 +109,7 @@ public static void TestPull2(ж<testing.T> Ꮡt) {
             foreach (var _ᴛ1 in range(2)) {
                 var (k, v, ok) = next();
                 if (v != 0 || ok != false) {
-                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)(0), (nint)(0), false);
+                    tΔ1.Fatalf("next() = %d, %d, %v, want %d, %d, %v"u8, k, v, ok, (nint)0, (nint)0, false);
                 }
                 wantNG(0);
             }

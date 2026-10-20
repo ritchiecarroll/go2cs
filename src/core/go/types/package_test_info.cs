@@ -67,9 +67,6 @@ using static global::go.go.types_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.go.types_package.Basic, ж<global::go.go.types_package.Basic>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.types_package.Interface, ж<global::go.go.types_package.Interface>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.types_package.Tuple, ж<global::go.go.types_package.Tuple>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

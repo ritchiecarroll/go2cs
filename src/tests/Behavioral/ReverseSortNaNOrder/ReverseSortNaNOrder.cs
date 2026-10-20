@@ -82,7 +82,7 @@ internal static void Main() {
     insertionSort(floats);
     fmt.Println(floats);
 
-    fmt.Println(isNaN(nan), isNaN(1.5D), isNaN((float32)Δmath.NaN()), isNaN(7), isNaN((@string)"x"));
+    fmt.Println(isNaN(nan), isNaN(1.5D), isNaN((float32)Δmath.NaN()), isNaN<nint>(7), isNaN((@string)"x"));
     fmt.Println(less(nan, -784.0D), less(-784.0D, nan), less(nan, nan), less(1.0D, 2.0D));
 
     fmt.Println(eq(nan, nan), eq(1.5D, 1.5D));

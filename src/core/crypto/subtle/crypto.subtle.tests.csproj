@@ -127,6 +127,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/cpu/internal.cpu.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/sys/internal.runtime.sys.csproj" />
+    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/quick/testing.quick.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />

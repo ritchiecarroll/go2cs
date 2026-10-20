@@ -33,7 +33,7 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
 
         // Create a file mapping object. The object itself is not shared.
         (var mapObj, err) = Δsyscall.CreateFileMapping(
-            ((syscallꓸHandle)Ꮡf.Fd()), // fhandle
+            (syscallꓸHandle)Ꮡf.Fd(), // fhandle
             nil, // sa
             Δsyscall.PAGE_READWRITE, // prot
             0, // maxSizeHigh
@@ -74,11 +74,13 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
 internal static error Close(this ref sharedMem m) {
+    var errsᴷ = new stackAppend<error>();
+
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.
     slice<error> errs = default!;
-    errs = append(errs,
+    errs = append(errsᴷ, errs,
         Δsyscall.UnmapViewOfFile((uintptr)Ꮡ(m.region, 0)),
         Δsyscall.CloseHandle(m.sys.mapObj),
         m.f.Close());
@@ -99,11 +101,11 @@ internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     var mem = ᐸꟷ(comm.memMu);
     var memFD = (~mem).f.Fd();
     comm.memMu.ᐸꟷ(mem);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzIn.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzOut.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)memFD), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzIn.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzOut.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)memFD, Δsyscall.HANDLE_FLAG_INHERIT, 1);
     cmd.Env = append(cmd.Env, fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, comm.fuzzIn.Fd(), comm.fuzzOut.Fd(), memFD));
-    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)comm.fuzzIn.Fd()), ((syscallꓸHandle)comm.fuzzOut.Fd()), ((syscallꓸHandle)memFD)}.slice()));
+    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{(syscallꓸHandle)comm.fuzzIn.Fd(), (syscallꓸHandle)comm.fuzzOut.Fd(), (syscallꓸHandle)memFD}.slice()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -45,6 +45,12 @@ using static go.net.netip_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -53,7 +59,7 @@ using static go.net.netip_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/netip/netip.go", "netip.cs", "AEOKAYKaoKigppCmkKaQprIABRLSAAgYsoKUpMimqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKCpLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgpKCkoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4gpKClKaCgpSCgoLcgriCgpSCgpSSlJSsspSklKqiqqKqogACEPassK7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrLCqsqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAUQ0oKUgpSkgpSkgqaCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKkgpSCAAUeAAwClKSkgpS+spSkpIKUAAcSuIKUgpSouIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgILIgoKCgoKkgqamgoKUrLKUpoKCgoKmpqaClKqirLKCtoK0goKClIKkAAIQ0oKClIKCqJK2pIKClKaClKSkAAMQwtqigpSCpIKkgqSClAAIFqCmkKaQAAgOAAkCgoKmgoKUgpSCgpSCpq7CgoKClIKClIKCgpSCkoKUqqKCgpSqoKqygIKk1oKClKSCgqSCgoKClIKCgpSUgoKsspSkpIKClJSUgoKqoqyygraCpIKUrLKCgpSCgqyygoKUrLKqooKUgoKClIIADS4ACAKCgpTekKqwqrCkgKaQrgAICICCtoCCtgAHEIIAAhTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUrsKCAAIU8oKUgJKkAAgSygADEtKClIKUgpSCgJKUpIKcwoCCpICCpKyygpSCuIKUgoKUuIKCqqKssoK2gqSClKyygoKUgoKssoKClKzEqqKClIKCgpSC2JKClA==", "", "", "114=BEUint64/1/2/2,BEUint64/2/2/3;660=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;676=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1396=withoutZone/1/1/1")]
+[assembly: go.GoPositionMap("net/netip/netip.go", "netip.cs", "AEOKAYKaoKigppCmkKaQprIABRLSAAgYsoKUpMimqqKCgpQACBKCgoKUpoKSgoKCgoKUgoKCpLiCpoKUgoKClKaClIKosoKCgpSoktyCgoKClLiCpoKClILKgqaCgoKCgpKCkoKUlJSUlKaUuIKUlJSmgoKUgoKUgoK4goKmgoK4gpKClKaCgpSCgoLcgriCgpSCgpSSlJSsspSklKqiqqKqogACEPassK7SlKSUqJKClKyykoKUgpSCgpSClIKClIKUgpKClIKmrLCqsqyyqqKuwoKUrLKClIKClIKqooKUgqiSqJKCyoK4gpSokoLKgriClKiSgsqCuIKUqsaClKiSgsqCuIKUAAIYAAkClKaCyoKmAAIUwoK4pqqmpq7CAAUQ0oKUgpSkgpSkgqaCAAIQ8oKCrNKCgpSClKiSlKSCgqSCgoK8ooKClKaUpqqigoKkgpSCAAUeAAwClKSkgpS+spSkpIKUAAcSuIKUgpSouIKUgpSClKiSpoKCgoKmgoKCgoKCgoKmgoKCgqaCgoKCgpQAAhAABRDygoKmgoKCgoKUgILIgoKCgoKkgqamgoKUrNKUpoKCgoKmpqaClKqirLKCtoK0goKClIKkAAIQ0oKClIKCqJK2pIKClKaClKSkAAMQwtqigpSCpIKkgqSClAAIFqCmkKaQAAgOAAkCgoKmgoKUgpSCgpSCpq7CgoKClIKClIKCgpSCkoKUqqKCgpSqoKqygIKk1qKClKSCgqSCgoKClIKCgpSUgoKsspSkpIKClJSUgoKqoqyygraCpIKUrLKCgpSCgqyygoKUrLKqooKUgoKClIIADS4ACAKCgpTekKqwqrCkgKaQrgAICICCtoCCtgAHEIIAAhTygoKUgoKmgqamgqaCgpSCgpSClKqigoKUrsKCAAIU8oKUgJKkAAgSygADEtKClIKUgpSCgJKUpIKcwoCCpICCpKyygpSCuIKUgoKUuIKCqqKssoK2gqSClKyygoKUgoKssoKClKzEqqKClIKCgpSC2JKClA==", "", "", "114=BEUint64/1/2/2,BEUint64/2/2/3;660=IsLoopback/1/1/1,IsMulticast/1/1/2,IsLinkLocalUnicast/1/1/3;676=v4/2/5/1,v4/3/5/1,v4/4/5/2,v4/5/5/2;1400=withoutZone/1/1/1")]
 [assembly: go.GoPositionMap("net/netip/uint128.go", "uint128.cs", "ABMoogACENCmkqiSqJKokqiSgqiSgq7CqqKqog==")]
 // </GoSourcePositionMaps>
 

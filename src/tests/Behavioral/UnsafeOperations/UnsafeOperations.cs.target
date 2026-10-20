@@ -37,7 +37,7 @@ partial struct Padded {
 
 partial struct Embedded {
     internal byte lead;
-    public partial ref Padded Padded { get; }
+    /*embed*/ public Padded Padded;
     internal int16 trail;
 }
 
@@ -54,10 +54,6 @@ public static uint64 Float64bits(float64 f) {
 public static float64 Float64frombits(uint64 b) {
     return bitcast<uint64, float64>(b);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object valueOfTheNextElementˢ = (@string)"Value of the next element:"u8;
-private static readonly object valueOfT2Aˢ = (@string)"Value of t2.a:"u8;
 
 internal partial struct main_x /*dyn*/ {
     internal int64 a;
@@ -83,13 +79,13 @@ internal static void Main() {
     var arrptr = Ꮡarr.at<nint>(0);
 
     @unsafe.Pointer nextPtr = (@unsafe.Pointer)((uintptr)arrptr + /* unsafe.Sizeof(arr[0]) */ (uintptr)8);
-    fmt.Println(valueOfTheNextElementˢ, ~(ж<nint>)(uintptr)(nextPtr));
+    fmt.Println("Value of the next element:", ~(ж<nint>)(uintptr)(nextPtr));
 
     ref var t1 = ref heap(new T1(), out var Ꮡt1);
     t1.a = 42;
 
     var t2 = ~Ꮡt1.Reinterpret<T1, T2>();
-    fmt.Println(valueOfT2Aˢ, t2.a);
+    fmt.Println("Value of t2.a:", t2.a);
 
     int8 i = -1;
     int16 j = (int16)i;

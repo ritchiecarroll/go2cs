@@ -32,7 +32,7 @@ partial struct byName {
 
 // hosts contains known host entries.
 partial struct hostsᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     // Key for the list of literal IP addresses must be a host
     // name. It would be part of DNS labels, a FQDN or an absolute
     // FQDN.
@@ -99,7 +99,7 @@ internal static void readHosts() {
                     @string name = absDomainName(f[i]);
                     var h = slice<byte>(f[i]);
                     lowerASCIIBytes(h);
-                    @string key = absDomainName(((@string)h));
+                    @string key = absDomainName((@string)h);
 
                     if (i == 1) {
                         canonical = key;
@@ -147,7 +147,7 @@ internal static (slice<@string>, @string) lookupStaticHost(@string host) {
             if (hasUpperCase(host)) {
                 var lowerHost = slice<byte>(host);
                 lowerASCIIBytes(lowerHost);
-                host = ((@string)lowerHost);
+                host = (@string)lowerHost;
             }
             {
                 var (byName, ok) = hosts.byName[absDomainName(host), ꟷ]; if (ok) {

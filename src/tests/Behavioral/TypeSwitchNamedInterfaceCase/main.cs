@@ -17,11 +17,8 @@ partial struct circle {
     internal nint r;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string circleˢ = "circle"u8;
-
 internal static @string name(this ref circle c) {
-    return circleˢ;
+    return "circle";
 }
 
 internal static void grow(this ref circle c, nint n) {
@@ -36,11 +33,8 @@ partial struct dot {
     internal nint tag;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string dotˢ = "dot"u8;
-
 internal static @string name(this dot d) {
-    return dotˢ;
+    return "dot";
 }
 
 internal static void grow(this dot d, nint n) {
@@ -69,9 +63,6 @@ internal static @string describe(any x) {
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string noneˢ = "none"u8;
-
 internal static @string firstConcrete(any x) {
     switch (x.type()) {
     case ж<circle> t: {
@@ -82,7 +73,7 @@ internal static @string firstConcrete(any x) {
     }
     default: {
         var t = x;
-        return noneˢ;
+        return "none";
     }}
 }
 
@@ -96,32 +87,25 @@ internal static @string firstInterface(any x) {
     }
     default: {
         var t = x;
-        return noneˢ;
+        return "none";
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string multiShapeOrErrorˢ = "multi shape-or-error"u8;
-private static readonly @string nilˢ = "nil"u8;
 
 internal static @string multi(any x) {
     switch (x.type()) {
     case {} ᴛ0 when ᴛ0._<shape>(out var _):
     case {} ᴛ1 when ᴛ1._<error>(out var _): {
         var t = x;
-        return multiShapeOrErrorˢ;
+        return "multi shape-or-error";
     }
     case null: {
-        return nilˢ;
+        return "nil";
     }
     default: {
         var t = x;
         return fmt.Sprintf("single? %v"u8, t);
     }}
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string notASizerˢ = "not a sizer"u8;
 
 internal static @string viaInterfaceTag(shape v) {
     switch (v.type()) {
@@ -130,7 +114,7 @@ internal static @string viaInterfaceTag(shape v) {
     }
     default: {
         var t = v;
-        return notASizerˢ;
+        return "not a sizer";
     }}
 }
 
@@ -147,7 +131,7 @@ internal static void Main() {
     fmt.Println(describe(raw));
 
     fmt.Println(describe(new dot(tag: 3)));
-    fmt.Println(describe((nint)(42)));
+    fmt.Println(describe((nint)42));
 
     error e = new errMarkжerror(Ꮡ(new errMark(code: 5)));
     any anyErr = e;

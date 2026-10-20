@@ -44,7 +44,7 @@ public static void TestMultiReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d, expected %d bytes; got %d"u8,
                 nread, len(expected), n);
         }
-        @string got = ((@string)(Ꮡbuf.ValueSlot.slice(0, n)));
+        @string got = (@string)(Ꮡbuf.ValueSlot.slice(0, n));
         if (got != expected) {
             Ꮡt.Errorf("#%d, expected %q; got %q"u8,
                 nread, expected, got);
@@ -343,7 +343,7 @@ internal static readonly @string wantᶜ = "ab"u8;
 
 // This used to yield bytes forever; issue 16795.
 public static void TestMultiReaderSingleByteWithEOF(ж<testing.T> Ꮡt) {
-    var (got, err) = ReadAll(LimitReader(MultiReader(((byteAndEOFReader)(rune)'a'), ((byteAndEOFReader)(rune)'b')), 10));
+    var (got, err) = ReadAll(LimitReader(MultiReader((byteAndEOFReader)(rune)'a', (byteAndEOFReader)(rune)'b'), 10));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -357,7 +357,7 @@ public static void TestMultiReaderSingleByteWithEOF(ж<testing.T> Ꮡt) {
 // chain continues to return EOF on its final read, rather than
 // yielding a (0, EOF).
 public static void TestMultiReaderFinalEOF(ж<testing.T> Ꮡt) {
-    var r = MultiReader(new io_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), ((byteAndEOFReader)(rune)'a'));
+    var r = MultiReader(new io_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), (byteAndEOFReader)(rune)'a');
     var buf = new slice<byte>(2);
     var (n, err) = r.Read(buf);
     if (n != 1 || !AreEqual(err, EOF)) {
@@ -424,7 +424,7 @@ public static void TestInterleavedMultiReader(ж<testing.T> Ꮡt) {
     // Consume r1 (and clear it for GC to handle) and consume part of r2.
     var (n, err) = ReadFull(mr2, buf);
     {
-        @string got = ((@string)(buf.slice(0, n))); if (got != "1234"u8 || err != default!) {
+        @string got = (@string)(buf.slice(0, n)); if (got != "1234"u8 || err != default!) {
             Ꮡt.Errorf(@"ReadFull(mr2) = (%q, %v), want (""1234"", nil)"u8, got, err);
         }
     }
@@ -433,7 +433,7 @@ public static void TestInterleavedMultiReader(ж<testing.T> Ꮡt) {
     // This should not panic even though mr2 cleared r1.
     (n, err) = ReadFull(mr1, buf);
     {
-        @string got = ((@string)(buf.slice(0, n))); if (got != "5678"u8 || err != default!) {
+        @string got = (@string)(buf.slice(0, n)); if (got != "5678"u8 || err != default!) {
             Ꮡt.Errorf(@"ReadFull(mr1) = (%q, %v), want (""5678"", nil)"u8, got, err);
         }
     }

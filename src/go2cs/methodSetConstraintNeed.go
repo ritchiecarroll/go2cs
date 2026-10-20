@@ -31,11 +31,14 @@ import (
 //     assignment or declared variable, a return, a composite element, a channel send, or an
 //     interface comparison) -- an empty interface takes any C# value as object;
 //   - the parameter instantiating another generic whose own method-set constraint is needed
-//     (a same-file callee is asked recursively; any callee this file cannot see counts as needing it).
+//     (the callee is asked recursively, over its OWN syntax and types.Info: this file's, or, for a
+//     callee in another file or package, the declaring package's as the load carries it -- see
+//     genericFuncSource; errors_test's testAsType[E compError] calling errors.AsType[E] was CS0311 at
+//     every ж<fs.PathError> argument while that callee counted as unseen).
 //
-// Anything the analysis cannot see keeps the clause: a function with no body here, a method (its
-// type parameters belong to the receiver type), a callee in another file or package. That fails safe:
-// a kept clause is today's emission, while a dropped one the body needed would not compile.
+// Anything the analysis cannot see keeps the clause: a function with no body, a method (its type
+// parameters belong to the receiver type), a callee whose package the load holds no syntax for. That
+// fails safe: a kept clause is today's emission, while a dropped one the body needed would not compile.
 
 type methodSetNeedKey struct {
 	fn    *types.Func
@@ -54,6 +57,59 @@ func (v *Visitor) collectFileFuncDecls(file *ast.File) {
 			}
 		}
 	}
+}
+
+// The declaring packages' generic function declarations, by object, for callees outside the current
+// file: built once per owning package from the syntax the load carries, beside the types.Info that types
+// it. An owner with no loaded syntax maps to an empty set, which keeps every clause that reaches it.
+var importedGenericFuncDecls = map[*types.Package]map[*types.Func]*ast.FuncDecl{}
+var importedGenericFuncInfo = map[*types.Package]*types.Info{}
+
+// genericFuncSource is fn's declaration and the types.Info that types it: this file's own first, then the
+// declaring package's syntax as the load carries it (LoadAllSyntax holds the root's and every direct
+// dependency's, the handle importedGlobalIsBoxed reads). Nil when there is none -- no syntax for the
+// owner, a bodyless declaration, a package the root does not import -- and the caller keeps the clause.
+func (v *Visitor) genericFuncSource(fn *types.Func) (*ast.FuncDecl, *types.Info) {
+	if decl := v.fileFuncDecls[fn]; decl != nil {
+		return decl, v.info
+	}
+
+	owner := fn.Pkg()
+
+	if owner == nil || currentLoadedPackage == nil {
+		return nil, nil
+	}
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	decls, cached := importedGenericFuncDecls[owner]
+
+	if !cached {
+		decls = map[*types.Func]*ast.FuncDecl{}
+
+		if loaded := loadedPackageSource(currentLoadedPackage, owner); loaded != nil && loaded.TypesInfo != nil {
+			for _, file := range loaded.Syntax {
+				for _, decl := range file.Decls {
+					if funcDecl, ok := decl.(*ast.FuncDecl); ok && funcDecl.Recv == nil && funcDecl.Type.TypeParams != nil {
+						if object, ok := loaded.TypesInfo.Defs[funcDecl.Name].(*types.Func); ok {
+							decls[object] = funcDecl
+						}
+					}
+				}
+			}
+
+			importedGenericFuncInfo[owner] = loaded.TypesInfo
+		}
+
+		importedGenericFuncDecls[owner] = decls
+	}
+
+	if decl := decls[fn]; decl != nil {
+		return decl, importedGenericFuncInfo[owner]
+	}
+
+	return nil, nil
 }
 
 // currentGenericFunc is the function whose OWN type parameters signature declares, when that function
@@ -89,7 +145,7 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 
 	seen[key] = true
 
-	decl := v.fileFuncDecls[key.fn]
+	decl, info := v.genericFuncSource(key.fn)
 	signature, isSignature := key.fn.Type().(*types.Signature)
 
 	if decl == nil || decl.Body == nil || decl.Recv != nil || !isSignature || signature.TypeParams().Len() <= index {
@@ -122,7 +178,7 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 	// `Curve<P>` is named, so dropping the function's clause there is CS0314.
 	ast.Inspect(decl.Type, func(n ast.Node) bool {
 		if ident, ok := n.(*ast.Ident); ok && !needed {
-			if instance, ok := v.info.Instances[ident]; ok && v.instanceNeedsMethodSet(ident, instance, typeParam, seen) {
+			if instance, ok := info.Instances[ident]; ok && v.instanceNeedsMethodSet(info, ident, instance, typeParam, seen) {
 				needed = true
 			}
 		}
@@ -141,7 +197,7 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 
 		switch node := n.(type) {
 		case *ast.SelectorExpr:
-			if selection := v.info.Selections[node]; selection != nil && (selection.Kind() == types.MethodVal || selection.Kind() == types.MethodExpr) {
+			if selection := info.Selections[node]; selection != nil && (selection.Kind() == types.MethodVal || selection.Kind() == types.MethodExpr) {
 				receiver := selection.Recv()
 
 				if pointer, ok := receiver.(*types.Pointer); ok {
@@ -154,15 +210,15 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 				}
 			}
 		case *ast.Ident:
-			if instance, ok := v.info.Instances[node]; ok && v.instanceNeedsMethodSet(node, instance, typeParam, seen) {
+			if instance, ok := info.Instances[node]; ok && v.instanceNeedsMethodSet(info, node, instance, typeParam, seen) {
 				needed = true
 				return false
 			}
 		}
 
 		if expr, ok := n.(ast.Expr); ok {
-			if typeAndValue, ok := v.info.Types[expr]; ok && typeAndValue.IsValue() && types.Identical(typeAndValue.Type, typeParam) {
-				if target := v.methodSetTargetType(expr, parents, signature); target != nil && isNonEmptyMethodInterface(target) {
+			if typeAndValue, ok := info.Types[expr]; ok && typeAndValue.IsValue() && types.Identical(typeAndValue.Type, typeParam) {
+				if target := methodSetTargetType(info, expr, parents, signature); target != nil && isNonEmptyMethodInterface(target) {
 					needed = true
 					return false
 				}
@@ -177,13 +233,13 @@ func (v *Visitor) methodSetConstraintNeededSeen(fn *types.Func, index int, seen 
 
 // instanceNeedsMethodSet reports whether an instantiation that passes typeParam as a type argument
 // requires typeParam to satisfy a method-set constraint in C#.
-func (v *Visitor) instanceNeedsMethodSet(ident *ast.Ident, instance types.Instance, typeParam *types.TypeParam, seen map[methodSetNeedKey]bool) bool {
+func (v *Visitor) instanceNeedsMethodSet(info *types.Info, ident *ast.Ident, instance types.Instance, typeParam *types.TypeParam, seen map[methodSetNeedKey]bool) bool {
 	for j := 0; j < instance.TypeArgs.Len(); j++ {
 		if !types.Identical(instance.TypeArgs.At(j), typeParam) {
 			continue
 		}
 
-		switch object := v.info.Uses[ident].(type) {
+		switch object := info.Uses[ident].(type) {
 		case *types.Func:
 			signature, ok := object.Origin().Type().(*types.Signature)
 
@@ -215,7 +271,7 @@ func (v *Visitor) instanceNeedsMethodSet(ident *ast.Ident, instance types.Instan
 
 // methodSetTargetType is the type a value expression is converted TO by its context, or nil where the
 // context converts it to nothing (a define, a statement, an index, a builtin argument).
-func (v *Visitor) methodSetTargetType(expr ast.Expr, parents map[ast.Node]ast.Node, signature *types.Signature) types.Type {
+func methodSetTargetType(info *types.Info, expr ast.Expr, parents map[ast.Node]ast.Node, signature *types.Signature) types.Type {
 	var node ast.Node = expr
 	parent := parents[node]
 
@@ -231,7 +287,7 @@ func (v *Visitor) methodSetTargetType(expr ast.Expr, parents map[ast.Node]ast.No
 
 	switch p := parent.(type) {
 	case *ast.CallExpr:
-		funType, ok := v.info.Types[p.Fun]
+		funType, ok := info.Types[p.Fun]
 
 		if !ok {
 			return nil
@@ -279,15 +335,15 @@ func (v *Visitor) methodSetTargetType(expr ast.Expr, parents map[ast.Node]ast.No
 
 		for i, rhs := range p.Rhs {
 			if rhs == node {
-				return v.info.TypeOf(p.Lhs[i])
+				return info.TypeOf(p.Lhs[i])
 			}
 		}
 	case *ast.ValueSpec:
 		if p.Type != nil {
-			return v.info.TypeOf(p.Type)
+			return info.TypeOf(p.Type)
 		}
 	case *ast.ReturnStmt:
-		results := enclosingResults(p, parents, v.info, signature)
+		results := enclosingResults(p, parents, info, signature)
 
 		if results == nil || results.Len() != len(p.Results) {
 			return nil
@@ -299,14 +355,14 @@ func (v *Visitor) methodSetTargetType(expr ast.Expr, parents map[ast.Node]ast.No
 			}
 		}
 	case *ast.CompositeLit:
-		return compositeElementType(v.info.TypeOf(p), p, node, nil)
+		return compositeElementType(info.TypeOf(p), p, node, nil)
 	case *ast.KeyValueExpr:
 		if literal, ok := parents[p].(*ast.CompositeLit); ok {
-			return compositeElementType(v.info.TypeOf(literal), literal, node, p)
+			return compositeElementType(info.TypeOf(literal), literal, node, p)
 		}
 	case *ast.SendStmt:
 		if p.Value == node {
-			if channel, ok := v.info.TypeOf(p.Chan).Underlying().(*types.Chan); ok {
+			if channel, ok := info.TypeOf(p.Chan).Underlying().(*types.Chan); ok {
 				return channel.Elem()
 			}
 		}
@@ -318,7 +374,7 @@ func (v *Visitor) methodSetTargetType(expr ast.Expr, parents map[ast.Node]ast.No
 				other = p.Y
 			}
 
-			return v.info.TypeOf(other)
+			return info.TypeOf(other)
 		}
 	}
 

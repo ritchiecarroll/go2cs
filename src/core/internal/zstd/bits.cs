@@ -48,7 +48,7 @@ internal static error moreBits(this ref bitReader br) {
 
 // val is called to fetch a value of b bits.
 internal static uint32 val(this ref bitReader br, uint8 b) {
-    var r = (uint32)(br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1));
+    var r = br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1);
     br.bits.RshAssign((uint64)(b));
     br.cnt -= (uint32)b;
     return r;
@@ -108,7 +108,7 @@ internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) {
     }
 
     rbr.cnt -= (uint32)b;
-    var v = (uint32)((rbr.bits.Rsh((uint64)(rbr.cnt))) & ((((uint32)1).Lsh((uint64)(b))) - 1));
+    var v = (rbr.bits.Rsh((uint64)(rbr.cnt))) & ((((uint32)1).Lsh((uint64)(b))) - 1);
     return (v, default!);
 }
 

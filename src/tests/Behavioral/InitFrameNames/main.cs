@@ -22,23 +22,18 @@ internal static @string viaClosure2 = ((Func<@string>)([MethodImpl(MethodImplOpt
 }))();
 
 [GoInit] internal static void initΔ1() {
-    fmt.Println((@string)"main.go init 1:"u8, here());
+    fmt.Println("main.go init 1:", here());
 }
 
 [GoInit] internal static void initΔ2() {
     [MethodImpl(MethodImplOptions.NoInlining)] @string literal() => here();
-    fmt.Println((@string)"main.go init 2:"u8, here(), (@string)"literal:"u8, literal());
+    fmt.Println("main.go init 2:", here(), "literal:", literal());
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object directˢ = (@string)"direct:"u8;
-private static readonly object viaClosureˢ = (@string)"viaClosure:"u8;
-private static readonly object viaClosure2ˢ = (@string)"viaClosure2:"u8;
-
 internal static void Main() {
-    fmt.Println(directˢ, direct);
-    fmt.Println(viaClosureˢ, viaClosure);
-    fmt.Println(viaClosure2ˢ, viaClosure2);
+    fmt.Println("direct:", direct);
+    fmt.Println("viaClosure:", viaClosure);
+    fmt.Println("viaClosure2:", viaClosure2);
 }
 
 } // end main_package

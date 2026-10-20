@@ -18,76 +18,60 @@ public static colorlike.Color Alt(this ref Img p) {
     return new colorlike.Gray(Y: 7);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object ifaceEqˢ = (@string)"iface-eq:"u8;
-private static readonly object assertˢ = (@string)"assert:"u8;
-private static readonly object assertMissˢ = (@string)"assert-miss:"u8;
-private static readonly object assert1ˢ = (@string)"assert-1:"u8;
-private static readonly object switchˢ = (@string)"switch:"u8;
-private static readonly object grayˢ = (@string)"Gray"u8;
-private static readonly object nrgbaˢ = (@string)"NRGBA"u8;
-private static readonly object defaultˢ = (@string)"default"u8;
-private static readonly object altEqˢ = (@string)"alt-eq:"u8;
-private static readonly object altAssertˢ = (@string)"alt-assert:"u8;
-private static readonly object altSwitchˢ = (@string)"alt-switch:"u8;
-private static readonly object rgbaˢ = (@string)"rgba:"u8;
-private static readonly @string fromIfaceˢ = "from-iface"u8;
-private static readonly object mapˢ = (@string)"map:"u8;
-
 internal static void Main() {
     var p = Ꮡ(new Img(new colorlike.NRGBA(R: 0x99, G: 0x99, B: 0x99, A: 0xff)));
     var got = p.At();
     var want = new colorlike.NRGBA(R: 0x99, G: 0x99, B: 0x99, A: 0xff);
 
-    fmt.Println((@string)"eq:"u8, AreEqual(got, want), AreEqual(want, got));
-    fmt.Println((@string)"ne:"u8, AreEqual(got, new colorlike.NRGBA(R: 1, G: 2, B: 3, A: 4)));
+    fmt.Println("eq:", AreEqual(got, want), AreEqual(want, got));
+    fmt.Println("ne:", AreEqual(got, new colorlike.NRGBA(R: 1, G: 2, B: 3, A: 4)));
 
     colorlike.Color w2 = want;
-    fmt.Println(ifaceEqˢ, AreEqual(got, w2));
+    fmt.Println("iface-eq:", AreEqual(got, w2));
 
     var (v, ok) = got._<colorlike.NRGBA>(ᐧ);
-    fmt.Println(assertˢ, ok, v.R, v.A);
+    fmt.Println("assert:", ok, v.R, v.A);
     var (_, badOK) = got._<colorlike.Gray>(ᐧ);
-    fmt.Println(assertMissˢ, badOK);
-    fmt.Println(assert1ˢ, got._<colorlike.NRGBA>().G);
+    fmt.Println("assert-miss:", badOK);
+    fmt.Println("assert-1:", got._<colorlike.Color, colorlike.NRGBA>().G);
 
     switch (got.type()) {
     case colorlike.Gray t: {
-        fmt.Println(switchˢ, grayˢ, t.Y);
+        fmt.Println("switch:", "Gray", t.Y);
         break;
     }
     case colorlike.NRGBA t: {
-        fmt.Println(switchˢ, nrgbaˢ, t.B);
+        fmt.Println("switch:", "NRGBA", t.B);
         break;
     }
     default: {
         var t = got;
-        fmt.Println(switchˢ, defaultˢ);
+        fmt.Println("switch:", "default");
         break;
     }}
 
     var alt = p.Alt();
-    fmt.Println(altEqˢ, AreEqual(alt, new colorlike.Gray(Y: 7)), AreEqual(alt, got));
+    fmt.Println("alt-eq:", AreEqual(alt, new colorlike.Gray(Y: 7)), AreEqual(alt, got));
     var (g, gok) = alt._<colorlike.Gray>(ᐧ);
-    fmt.Println(altAssertˢ, gok, g.Y);
+    fmt.Println("alt-assert:", gok, g.Y);
     switch (alt.type()) {
     case colorlike.NRGBA t: {
-        fmt.Println(altSwitchˢ, nrgbaˢ, t.R);
+        fmt.Println("alt-switch:", "NRGBA", t.R);
         break;
     }
     case colorlike.Gray t: {
-        fmt.Println(altSwitchˢ, grayˢ, t.Y);
+        fmt.Println("alt-switch:", "Gray", t.Y);
         break;
     }}
 
     fmt.Printf("type: %T %T\n"u8, got, alt);
 
     var (r, gg, b, a) = got.RGBA();
-    fmt.Println(rgbaˢ, r, gg, b, a);
+    fmt.Println("rgba:", r, gg, b, a);
 
     var seen = new map<colorlike.Color, @string>{};
-    seen[got] = fromIfaceˢ;
-    fmt.Println(mapˢ, seen[want], len(seen));
+    seen[got] = "from-iface";
+    fmt.Println("map:", seen[want], len(seen));
 }
 
 } // end main_package

@@ -49,6 +49,12 @@ using static go.net.url_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,7 +64,7 @@ using static go.net.url_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/url/encoding_table.go", "encoding_table.cs", "ABg2")]
-[assembly: go.GoPositionMap("net/url/url.go", "url.cs", "AB48AAgSgKKA5IKG5oKGyoKoksqCyoKokgACENIAAhTyqrSCgoKUgoKCgpQABxCClAAHEIKCprSCtIKUyIKmgpSklIKCgriCtLS2qqKqoqaCkoKCgpTKgqaClIKClKaCgoKCpqaCgpSCtIKCgrSCtgA3fqIAAhYACAIADByygpSosoKUqsKClIKClNyygoLYgsaClMimAAIS9JKCgpSClICCpAACENKCgpQACA7CgpSCpoKUlIKCyoCCpJSCgpSmgpSClIIACBKAlMiCgoKAgqSCgqSm7oCCpNbCgoKUlIKUgpSCgpSCgIKklIKAgqSAgqSU6qKAgpKmgoKmgoKUgoKmgu6CgoKClIKClJSCgoLugoKUgpSSgIKCAAoWgoKCpqaCgtiCgIKkAAIqABICgoKUgoCUlKSoAAIWAAkCgoKCpoKUrLLcAA0QgsiokoKClIKAlJSkAAIWAAgCgoKCpqqigpSClIKCpgACMAAVApSCgpSCgoKUlIKClIKClIKUgqaClICCgqSAgsiCgpTugIK2lIKClIKClNrCgqaCgIKkAAgawoKClKqiqqKokqiSggACGgAKAoKCpsqCgoKUgoKUgoKU1qKClIKCgoKClIKUgoKCgpSUgoKClJSUqqKClKaCgoKClIKCgoKCgpSCgqaqooKCkoKClJSCpoKCgoKCgoKClIKkgIKUpKSClIK4griClKqirLKCgpQAAhIACAKSgpS4gpSCgoKClIKCgoKmgoKCgoKmgoKCrLKCqqKCgoKCpoKmgpSuwoKssoKs4pSCgqaCpqyipoKmgoKClIKu4oKmooKCpoKUuIKUkoIAAhgACQKCgpSClIKUlgAMFrSmqJKCgoKmrPKCgpSCgpQ=")]
+[assembly: go.GoPositionMap("net/url/url.go", "url.cs", "AB48AAgSgKKA5IKG5oKGyoKoksqCyoKokgACENIAAhTyqrSCgoKUgoKCgpQABxCClAAHEIKCprSCtIKUyIKmgpSklIKCgriCtLS2qqKqoqaCkoKCgpTKgqaClIKClKaCgoKCpqaCgpSCtIKCgrSCtgA3fqIAAhYACAIADByygpSosoKUqsKClIKClNyygoLYgsaClMimAAIS9JKCgpSClICCpAACENKCgpQACA7CgpSCpoKUlIKCyoCCpJSCgpSmgpSClIIACBKAlMiCgoKAgqSCgqSm7oCCpNbCgoKUlIKUgpSCgpSCgIKklIKAgqSAgqSU6qKAgpKmgoKmgoKUgoKmgu6CgoKClIKClJSCgoLugoKUgpSSgIKCAAoWgoKCpqaCgtiCgIKkAAIqABICgoKUgoCUlKSoAAIWAAkCgoKCpoKUrLLcAA0QgsiokoKClIKAlJSkAAIWAAgCgoKCpqqigpSClIKCpgACMAAVApSCgpSCgoKUlIKClIKClIKUgqaClICCgqSAgsiCgpTugIK2lIKClIKClNrCgqaCgIKkAAgawoKClKqiqqKokqiSggACGgAKAoKCpsqCgoKUgoKUgoKU1qKClIKCgoKClIKUgoKCgpSUgoKClJSUqqKClKaCgoKClIKCgoKCgpSCgqaqwoKCkoKClJSCpoKCgoKCgoKClIKkgIKUpKSClIK4griClKqirLKCgpQAAhIACAKSgpS4gpSCgoKClIKCgoKmgoKCgoKmgoKCrLKCqqKCgoKCpoKmgpSuwoKssoKs4pSCgqaCpqyipoKmgoKClIKu4oKmooKCpoKUuIKUkoIAAhgACQKCgpSClIKUlgAMFrSmqJKCgoKmrPKCgpSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.net;

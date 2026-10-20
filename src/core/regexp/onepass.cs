@@ -30,7 +30,7 @@ partial struct onePassProg {
 // A onePassInst is a single instruction in a one-pass regular expression program.
 // It is the same as syntax.Inst except for the new 'Next' field.
 public partial struct onePassInst {
-    public partial ref regexp.syntax_package.Inst Inst { get; }
+    /*embed*/ public regexp.syntax_package.Inst Inst;
     public slice<uint32> Next;
 }
 
@@ -168,7 +168,7 @@ internal static (slice<rune>, slice<uint32>) mergeRuneSets(ж<slice<rune>> Ꮡle
 
         nint leftLen = len(leftRunes);
         nint rightLen = len(rightRunes);
-        if ((nint)(leftLen & 0x1) != 0 || (nint)(rightLen & 0x1) != 0) {
+        if ((leftLen & 0x1) != 0 || (rightLen & 0x1) != 0) {
             throw panic("mergeRuneSets odd length []rune");
         }
         ref var lx = ref heap(new nint(), out var Ꮡlx);

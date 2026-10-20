@@ -353,7 +353,7 @@ internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.Re
     // some sort of abort request to the host, so the host
     // can properly cut off the client sending all the data.
     // For now just bound it a little and
-    io.CopyN(io.Discard, body, ((int64)100 << (int)(20)));
+    io.CopyN(io.Discard, body, (int64)100 << 20);
     body.Close();
 
     if (!req.keepConn) {

@@ -4,16 +4,9 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"recovered:"u8;
-private static readonly object afterRecoverˢ = (@string)"after recover"u8;
-private static readonly @string scopeˢ = "scope"u8;
-private static readonly object afterArgRecoverˢ = (@string)"after arg recover"u8;
-private static readonly object ignoredArgCallsˢ = (@string)"ignored arg; calls ="u8;
-
 internal static void Main() {
     ((Action)(() => {
-        fmt.Println((@string)"a"u8);
+        fmt.Println("a");
     }))();
 
     nint x = ((Func<nint>)(() => {
@@ -27,7 +20,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(recoveredˢ, r);
+                        fmt.Println("recovered:", r);
                     }
                 }
             }, ref ᒐ);
@@ -36,7 +29,7 @@ internal static void Main() {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
-    fmt.Println(afterRecoverˢ);
+    fmt.Println("after recover");
 
     nint total = 10 + ((Func<nint>)(() => {
         nint sum = 0;
@@ -55,7 +48,7 @@ internal static void Main() {
     fmt.Println(y);
 
     ((Action<nint>)(n => {
-        fmt.Println((@string)"n ="u8, n);
+        fmt.Println("n =", n);
     }))(7);
 
     nint tri = ((Func<nint, nint, nint, nint>)((a, b, c) => {
@@ -65,7 +58,7 @@ internal static void Main() {
 
     for (nint k = 0; k < 3; k++) {
         ((Action<nint>)(xΔ1 => {
-            fmt.Print(xΔ1, (@string)" "u8);
+            fmt.Print(xΔ1, " ");
         }))(k);
     }
     fmt.Println();
@@ -76,7 +69,7 @@ internal static void Main() {
             defer(() => {
                 {
                     var r = recover(); if (r != default!) {
-                        fmt.Println(label, recoveredˢ, r);
+                        fmt.Println(label, "recovered:", r);
                     }
                 }
             }, ref ᒐ);
@@ -84,8 +77,8 @@ internal static void Main() {
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
-    }))(scopeˢ);
-    fmt.Println(afterArgRecoverˢ);
+    }))("scope");
+    fmt.Println("after arg recover");
 
     nint calls = 0;
     nint bump() {
@@ -93,7 +86,7 @@ internal static void Main() {
         return 99;
     }
     ((Action<nint>)(_ => {
-        fmt.Println(ignoredArgCallsˢ, calls);
+        fmt.Println("ignored arg; calls =", calls);
     }))(bump());
 }
 

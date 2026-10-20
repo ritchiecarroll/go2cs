@@ -53,9 +53,13 @@ using static go.math.big_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<Float, ж<Float>>(Indirect = true)]
-[assembly: GoImplicitConv<ΔInt, ж<ΔInt>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -68,7 +72,7 @@ using static go.math.big_package;
 [assembly: go.GoPositionMap("math/big/accuracy_string.go", "accuracy_string.cs", "/oaigoLKlIKCgpQ=")]
 [assembly: go.GoPositionMap("math/big/arith.go", "arith.cs", "ABpWAA0CgqiSgoKCqqKosoKmgoKClKiygqaCgoKUAAIgAA0CgqaClIKCgoKUlIKCgoKClJSUqLKCgoKClAACIAANAoKmgpSCgoKClJSCgoKCgpSUlKiygoKCgpSmooKmgoKUgpSCgoKCgpSCpqKCpoKClIKUgoKCgoKUgqaigpSCgpSmooKmgoKCgoKUrLKCgoKClAAMGoKCppSCggARJIKCpoKClKiSgoKCgg==")]
 [assembly: go.GoPositionMap("math/big/arith_decl_pure.go", "arith_decl_pure.cs", "AAgSgqaCpoKmgqaCpoI=")]
-[assembly: go.GoPositionMap("math/big/decimal.go", "decimal.cs", "AB9CkoKUAAYkAA0EgoKC3IKCgoKUgriCgriCgqaClKaCgoKUuriCgoKCgpSUgpSCgpSmgoKCgoKCgoKCuIKCgoKClKaCgoKCpqaCgqaCpoKCgtiCgoLIgoK2qJKClKyylKas0oKmgpS4goLKgqaUgoKCuIK4ooKUgqqigoKUgoI=")]
+[assembly: go.GoPositionMap("math/big/decimal.go", "decimal.cs", "AB9CkoKUAAYkAA0EgoKC3IKCgoKUgriCgriCgqaClKaCgoKUuriCgoKCgpSUgpSCgpSmgoKCgoKCgoKCuIKCgoKClKaCgoKCpqaigqaCpoKCgtiCgoLIgoK2qJKClKyylKas0oKmgpS4goLKgqaUgoKCuIK4ooKUgqqigoKUgoI=")]
 [assembly: go.GoPositionMap("math/big/float.go", "float.cs", "AE+iAYKssoKUADiQAQAJAqaCgpSClLiClIKCgpSmgoKUrNKCgqqirLKClKiSrLKu4oKUgpSClAACJAATAoKUgpSCgoKmpqKUgoKmlIKCpoKCAAIoABMCgoKUlJSUqJKokqrCgqaCpoKmqJKUlICCAAgIooKUgoKUgoKUgpQAAhYACgKCpoKUyoKClAAQIoKmgpSmgoKCuIKmuIKU2KSkpKTclJSUlIKUlISS3JSCuKKClIKCgoKmgoKCgoKUrLKssoKCuKzSgpSClIKCgoKUgoKmgoKCgoKUrLKClIKCgoKmrAAJCIKClIKCgoKmgoKCrOKClJKCgoKUruKCgoIAAhIACQKClIKCgoKCgpSCkoKmqtKClIKCgoKCgoKCpqiSgoKUgpSUpJSokoKClIKUlIKClKSUAAIQ8oKmlIKmlKaUgoKUpqamgpSmAAIQ8oKmpoKUypSCgpSClJSUgpSmpqaClKYAAhDygqaoAAgW3IKUAAcQpIKClMqCgpTMkoKCypSClLqygsrKgqaCpqaCgpSmgpSmAAIQ8oKmqAAIFtyClAAHEKSCgpTKgoKUzJKCgsqUgpS6soLKyoKmgqamgoKUpoKUpgACEgAJAoKmgqamgpTcgoKCpoKUgpS0tKSmpqYAAhAACAKCpoKmppSClILGgsaCgoKkpqamqsKCgqrCgoKmgpSUgpSCvgAQFoLKgpS4lIKClILYtIKClIKUyKwACwyCpoKUlJSCgpSC2LSCgpSClMiCgoKCuKzyggAIEoKClJSsAAkCgtymgoCUggAIEKaCkoKCnMKCpqKq4oKmlKTKgoKCkoKClIKClJSkuAACOAAdAoKCpoKmAAYQlIKmuIKUgqaClKa4goKCppSCgoKmpsquAAgCgoKmgqaUgoKmuIKUgqaClKa4goKCppSCgoKmpsquAAgCgoKmgqaUlIKmgriCgqamgsqCrgAIAoKCpoKmlJSCpoK4goKmpoLKgq7ygoKmgoKUpMqUpKYAAhTygpSkpJSClA==")]
 [assembly: go.GoPositionMap("math/big/floatconv.go", "floatconv.cs", "AA8s0oCCpK4ACQKCgrimgoKokoKCqJKCgoK4goKCgoIADyCCpriCpLakpKTcpLakyoKCgoKUgqaUgsqCgpSmAAcQAB5CwoKCuIK4lIKClIKmAAJgADIEgoKUgoKmgoCCyICCkoK2qqKmntKCgg==")]
 [assembly: go.GoPositionMap("math/big/floatmarsh.go", "floatmarsh.cs", "ABAq0oK4goKU3IKmlJSCgoKUgpSCgqbu4pSClIKmgqaClIKCgoKClIKClIKmgoKmgIK2rLKClKyyrtSCgpQ=")]
@@ -82,7 +86,7 @@ using static go.math.big_package;
 [assembly: go.GoPositionMap("math/big/natmul.go", "natmul.cs", "AA4g4oKUlKSkyoKUpoKCpoKC3JSCgoKCgoK4AA4W4oKUpIKCgqaClJSCgqaCgqaCgqaC3gAIAoKCgqaCgoKCgpSUlIKippKCgriClKqigoKCAAQSAAgCgoK4goIAFi6CgoKCpoKCgpSCgpSCgoKCgpaSgoKClIKCgoKCgoKCgoKCgoKCgoKCgoKCyK4ACQKCgqaCggATKIKCgqaCgpSCgpSCgoKCgpaSgoKClIKCgoKCgoKCgoKCgoKCgoLGppKigpSCqJKClKiS")]
 [assembly: go.GoPositionMap("math/big/prime.go", "prime.cs", "AAo0AB0UgpSCqMiCgqaCpoKUkpSCpIKCpKaEpoKSAAUQ0pSClIKUopSCgoKUgpSCgpSCgoKClIKmxgACNgAZBIK4ggAJFIKCgoKCgqaUgoKClNyUuIKCggAQIoKCggAdPIKCgoKCpoKCgpSCgriCgoKUgoLKAAcQgoKClIKCgoKCgsqCgriCuIKClA==")]
 [assembly: go.GoPositionMap("math/big/rat.go", "rat.cs", "AB1CkqrCgoKCgpSkpIKmpoKCpoKCgoKUlK7yAA4igoKUgoIACBKCkoKCgIKSgryygoK4goKUgpSCuJSCgoKCpoKCgoKAlILIlIKClK7yAA4igoKUgoIACBKCkoKCgIKSgryygoK4goKUgpSCuJSCgoKCpoKCgoKAlILIlIKClK4ACgKCgpSCkoKClN4ACgKCgpSCkoKClNrigoKClIKUgoKqwoKUgoKClIKosoKCqLKCgqiygoKosoKClIKUqLKCgqiygoKq0oKUgoKuwqiSrsIAAhQACgS4lKbCpoK2toKSgoKCgIKCpJTcspSkpJSq0oKClIKuAAkCkoKSgoLY8oKkkoKCgoLY8oKkkoKCgoLY8oKklIKCgpSUpoKC2gAIAoKkgpSSgoKCgoI=")]
-[assembly: go.GoPositionMap("math/big/ratconv.go", "ratconv.cs", "AA4igtjoooKClIKUgIKkAAIqABYCgsqAgoCCpIKCgIK2gIKkgpTIpoKCqJKCgoKokoKCgriAgsiCAA4goriCpLakpKTcpLakuILIgoKCgqamgpSCgoKUpriClIKSgqaUAAUmABUEgoKClLiktIKChMSCqJKCgoKU3IKmgoKCgoKSgoKUlIKUpoKUgpSCpoKmqJKs0oKCgpSUqsKClKzylIKCgoKCpriCkpSCgqaCpoKCgoKCuIKUlIKCgoKUpgAFKAAVAoIAChSasoKe0oKCkoKAgqSCAAIU8oKAgoLagoCCpIKm")]
+[assembly: go.GoPositionMap("math/big/ratconv.go", "ratconv.cs", "AA4igtjoooKClIKUgIKkAAIqABYCgsqAgoCCpIKCgIK2gIKkgpTIpoKCqJKCgoKokoKCgriAgsiCAA4goriCpLakpKTcpLakuILIgoKCgqamgpSCgoKUpriClIKSgqaUAAUmABYEgoKClLiktIKChMSCqJKCgoKU3IKmgoKCgoKSgoKUlIKUpoKUgpSCpoKmqJKs0oKCgpSUqsKClKwACAKUgoKCgoKmuIKSlIKCpoKmgoKCgoK4gpSUgoKCgpSmAAUoABcCggAKFJqygp7SgoKSgoCCpIIAAhTygoCCgtqCgIKkgqY=")]
 [assembly: go.GoPositionMap("math/big/ratmarsh.go", "ratmarsh.cs", "ABQosoKUgoKCgpSUgoKCgpSC6JKUgpSClIKClIKCgpSCgpSCgoKosoKUqJKopICCpA==")]
 [assembly: go.GoPositionMap("math/big/roundingmode_string.go", "roundingmode_string.cs", "/oaigoKCgoLKlIKClA==")]
 [assembly: go.GoPositionMap("math/big/sqrt.go", "sqrt.cs", "ABEigoKUAAIYAAwCgqaCppS4goKCgtyCgtzIpNymAAIQAA0OgoKCsoKCgoKCgoKmgoKCgoLKqqKUgg==", "18-20:1;99-108:1")]

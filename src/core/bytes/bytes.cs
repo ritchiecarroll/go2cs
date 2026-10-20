@@ -188,7 +188,7 @@ public static nint IndexRune(slice<byte> s, rune r) {
 next:
             fails++;
             i++;
-            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> (int)(4)) && i < len(s))) {
+            if ((haveFastIndex && fails > bytealg.Cutover(i)) && i < len(s) || (!haveFastIndex && fails >= 4 + (i >> 4) && i < len(s))) {
                 goto fallback;
             }
         }
@@ -293,7 +293,7 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             }
             // Use bytealg.IndexString for performance if available.
             if (bytealg.MaxLen >= width) {
-                if (bytealg.IndexString(chars, ((@string)r)) >= 0) {
+                if (bytealg.IndexString(chars, (@string)r) >= 0) {
                     return i;
                 }
                 continue;
@@ -381,7 +381,7 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             }
             // Use bytealg.IndexString for performance if available.
             if (bytealg.MaxLen >= size) {
-                if (bytealg.IndexString(chars, ((@string)r)) >= 0) {
+                if (bytealg.IndexString(chars, (@string)r) >= 0) {
                     return i;
                 }
                 continue;
@@ -489,7 +489,7 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
         var r = s[iΔ1];
         setBits |= (byte)(r);
         nint isSpace = (nint)asciiSpace[r];
-        n += (nint)(wasSpace & ~isSpace);
+        n += (wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
 
@@ -545,6 +545,8 @@ internal partial struct FieldsFunc_span /*dyn*/ {
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
 public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
+    var spansᴷ = new stackAppend<FieldsFunc_span>();
+
     var spans = new slice<FieldsFunc_span>(0, 32);
 
     // Find the field start and end indices.
@@ -556,7 +558,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
         var (r, size) = utf8.DecodeRune(s.slice(i));
         if (f(r)){
             if (start >= 0) {
-                spans = append(spans, new FieldsFunc_span(start, i));
+                spans = append(spansᴷ, spans, new FieldsFunc_span(start, i));
                 start = -1;
             }
         } else {
@@ -989,14 +991,14 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
         if (c >= utf8.RuneSelf) {
             return (@as.Clone(), false);
         }
-        @as[c / 32] |= (uint32)(((uint32)1 << (int)((c % 32))));
+        @as[c / 32] |= (uint32)(((uint32)1 << (int)(c % 32)));
     }
     return (@as.Clone(), true);
 }
 
 // contains reports whether c is inside the set.
 internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as.Value[c / 32] & (((uint32)1 << (int)((c % 32)))))) != 0;
+    return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
 
 // containsRune is a simplified version of strings.ContainsRune
@@ -1400,7 +1402,7 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
         }
         i++;
         fails++;
-        if (fails >= 4 + (i >> (int)(4)) && i < t) {
+        if (fails >= 4 + (i >> 4) && i < t) {
             // Give up on IndexByte, it isn't skipping ahead
             // far enough to be better than Rabin-Karp.
             // Experiments (using IndexPeriodic) suggest

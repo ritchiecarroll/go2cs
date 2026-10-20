@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace go;
@@ -123,6 +124,30 @@ public interface IGoFieldBoxSource
     /// C# field name, since its Go name <c>_</c> repeats.
     /// </summary>
     object? FieldBox(string field, object parentBox);
+}
+
+/// <summary>
+/// A converted GENERIC type's Go methods, closed over its own type arguments: implemented by go2cs-gen on the generated
+/// part of every generic type with Go methods, so golib's method-set candidate source hands reflect and the interface
+/// shells a method compiled code instantiated, where it would otherwise need <c>MethodInfo.MakeGenericMethod</c>, which
+/// Native AOT answers only for an instantiation it happened to compile.
+/// </summary>
+/// <remarks>
+/// A Go method of <c>Pair[K, V]</c> is emitted as the generic extension method <c>String&lt;K, V&gt;(this Pair&lt;K, V&gt;)</c>.
+/// Each arm returns the <see cref="Delegate.Method"/> of a delegate the generated part creates over the type's own type
+/// parameters, so each instantiation the program constructs compiles its own closed methods. Reached like
+/// <see cref="IGoFieldBoxSource"/>, through the type's zero value; read by <c>TypeExtensions.GetGoMethodSetCandidates</c>.
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IGoMethodSource
+{
+    /// <summary>
+    /// The method named <paramref name="name"/> (its metadata name, as reflection reads it), closed over this type's type
+    /// arguments, or <c>null</c> when the type has no such method. <paramref name="pointerReceiver"/> asks for a
+    /// pointer-receiver method, in its bindable <c>ж&lt;T&gt;</c> form; otherwise the value-receiver method (or its
+    /// copy-bound <c>this ref T</c> form).
+    /// </summary>
+    MethodInfo? GoMethod(string name, bool pointerReceiver);
 }
 
 /// <summary>Finds the <see cref="IGoTypeOps"/> of a type known only at run time (trim stage 3c-2b).</summary>

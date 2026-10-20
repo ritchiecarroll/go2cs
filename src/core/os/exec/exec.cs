@@ -941,7 +941,7 @@ internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) 
 
 // An ExitError reports an unsuccessful exit by a command.
 partial struct ExitError {
-    public partial ref ж<os_package.ProcessState> ProcessState { get; }
+    /*embed*/ public ж<os_package.ProcessState> ProcessState;
     // Stderr holds a subset of the standard error output from the
     // Cmd.Output method if standard error was not otherwise being
     // collected.
@@ -1104,7 +1104,7 @@ public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) {
 
     var captureErr = c.Stderr == default!;
     if (captureErr) {
-        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << (int)(10)))));
+        c.Stderr = new prefixSuffixSaverжWriter(Ꮡ(new prefixSuffixSaver(N: (32 << 10))));
     }
 
     var err = Ꮡc.Run();

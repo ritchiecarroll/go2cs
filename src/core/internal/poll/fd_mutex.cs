@@ -53,11 +53,11 @@ internal static readonly @string overflowMsg = "too many concurrent operations o
 internal static bool incref(this ж<fdMutex> Ꮡmu) {
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
-        if ((uint64)(old & (uint64)mutexClosed) != 0) {
+        if ((old & (uint64)mutexClosed) != 0) {
             return false;
         }
         var @new = old + (uint64)mutexRef;
-        if ((uint64)(@new & (uint64)mutexRefMask) == 0) {
+        if ((@new & (uint64)mutexRefMask) == 0) {
             throw panic(overflowMsg);
         }
         if (atomic.CompareAndSwapUint64(Ꮡmu.of(fdMutex.Ꮡstate), old, @new)) {
@@ -73,7 +73,7 @@ internal static bool incref(this ж<fdMutex> Ꮡmu) {
 internal static bool decref(this ж<fdMutex> Ꮡmu) {
     while (ᐧ) {
         var old = atomic.LoadUint64(Ꮡmu.of(fdMutex.Ꮡstate));
-        if ((uint64)(old & (uint64)mutexRefMask) == 0) {
+        if ((old & (uint64)mutexRefMask) == 0) {
             throw panic("inconsistent poll.fdMutex");
         }
         var @new = old - (uint64)mutexRef;
@@ -182,7 +182,7 @@ internal static void readWriteUnlock(this ж<FD> Ꮡfd) {
 
 // closing returns true if fd is closing.
 internal static bool closing(this ж<FD> Ꮡfd) {
-    return (uint64)(atomic.LoadUint64(Ꮡfd.of(FD.Ꮡfdmu).of(fdMutex.Ꮡstate)) & (uint64)mutexClosed) != 0;
+    return (atomic.LoadUint64(Ꮡfd.of(FD.Ꮡfdmu).of(fdMutex.Ꮡstate)) & (uint64)mutexClosed) != 0;
 }
 
 } // end poll_package

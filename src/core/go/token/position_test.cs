@@ -215,7 +215,7 @@ public static void TestFileSetPastEnd(ж<testing.T> Ꮡt) {
         fset.AddFile(test.filename, fset.Base(), test.size);
     }
     {
-        var f = fset.File(((global::go.go.token_package.ΔPos)fset.Base())); if (f != nil) {
+        var f = fset.File((global::go.go.token_package.ΔPos)fset.Base()); if (f != nil) {
             Ꮡt.Errorf("got %v, want nil"u8, f.OrTypedNil());
         }
     }
@@ -229,7 +229,7 @@ public static void TestFileSetCacheUnlikely(ж<testing.T> Ꮡt) {
         fset.AddFile(test.filename, fset.Base(), test.size);
     }
     foreach (var (@file, pos) in offsets) {
-        var f = fset.File(((global::go.go.token_package.ΔPos)pos));
+        var f = fset.File((global::go.go.token_package.ΔPos)pos);
         if (f.Name() != @file) {
             Ꮡt.Errorf("got %q at position %d, want %q"u8, f.Name(), pos, @file);
         }
@@ -253,7 +253,7 @@ public static partial void TestFileSetRace(ж<testing.T> Ꮡt) {
         var rʗ1 = rΔ1;
         goǃ(() => {
             for (nint iΔ1 = 0; iΔ1 < 1000; iΔ1++) {
-                fsetʗ1.Position(((global::go.go.token_package.ΔPos)(nint)rʗ1.Int31n(max)));
+                fsetʗ1.Position((global::go.go.token_package.ΔPos)(nint)rʗ1.Int31n(max));
             }
             Ꮡstop.Done();
         });
@@ -562,16 +562,16 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
         // out-of-bounds positions must not lead to a panic when calling f.Offset
         {
             nint got = f.Offset(NoPos); if (got != 0) {
-                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)(0));
+                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)0);
             }
         }
         {
-            nint got = f.Offset(((global::go.go.token_package.ΔPos)(-1))); if (got != 0) {
-                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)(0));
+            nint got = f.Offset((global::go.go.token_package.ΔPos)(-1)); if (got != 0) {
+                Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)0);
             }
         }
         {
-            nint got = f.Offset(((global::go.go.token_package.ΔPos)(@base + (nint)fsize + 1))); if (got != fsize) {
+            nint got = f.Offset((global::go.go.token_package.ΔPos)(@base + (nint)fsize + 1)); if (got != fsize) {
                 Ꮡt.Errorf("offset = %d, want %d"u8, got, (nint)(fsize));
             }
         }
@@ -591,13 +591,13 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
         // out-of-bounds Pos values must not lead to a panic when calling f.Position
         @string want = fmt.Sprintf("%s:1:1"u8, f.Name());
         {
-            @string got = f.Position(((global::go.go.token_package.ΔPos)(-1))).String(); if (got != want) {
+            @string got = f.Position((global::go.go.token_package.ΔPos)(-1)).String(); if (got != want) {
                 Ꮡt.Errorf("position = %s, want %s"u8, got, want);
             }
         }
         want = fmt.Sprintf("%s:1:%d"u8, f.Name(), (nint)(fsize + 1));
         {
-            @string got = f.Position(((global::go.go.token_package.ΔPos)(fsize + 1))).String(); if (got != want) {
+            @string got = f.Position((global::go.go.token_package.ΔPos)(fsize + 1)).String(); if (got != want) {
                 Ꮡt.Errorf("position = %s, want %s"u8, got, want);
             }
         }
@@ -605,7 +605,7 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
         // check invariants
         UntypedInt xsize = /* fsize + 5 */ 10;
         for (nint offset = -xsize; offset < xsize; offset++) {
-            nint want1 = f.Offset(((global::go.go.token_package.ΔPos)((~f).@base + offset)));
+            nint want1 = f.Offset((global::go.go.token_package.ΔPos)((~f).@base + offset));
             {
                 nint got = f.Offset(f.Pos(offset)); if (got != want1) {
                     Ꮡt.Errorf("offset = %d, want %d"u8, got, want1);

@@ -33,7 +33,7 @@ internal static void Main() {
     fmt.Println(Δmath.Float64bits(Δmath.Float64frombits(0x400921FB54442D18UL)) == 0x400921FB54442D18UL);
 
     var x = 8.0D;
-    var t = Δmath.Float64frombits(Δmath.Float64bits(x) / 3 + ((uint64)715094163 << (int)(32)));
+    var t = Δmath.Float64frombits(Δmath.Float64bits(x) / 3 + ((uint64)715094163 << 32));
     fmt.Println(Δmath.Float64bits(t));
 
     var fz = (float32)0.0F;

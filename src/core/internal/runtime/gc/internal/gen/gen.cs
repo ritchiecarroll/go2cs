@@ -322,13 +322,13 @@ internal static bool deadcode(this ref Func fn) {
 // canMem is a map from operation to a bitmap of which arguments can use a
 // direct memory reference.
 internal static map<@string, uint64> canMem = new map<@string, uint64>{
-    ["VPERMB"u8] = ((uint64)1 << (int)(0)),
-    ["VPERMI2B"u8] = ((uint64)1 << (int)(0)),
-    ["VPERMT2B"u8] = ((uint64)1 << (int)(0)),
-    ["VGF2P8AFFINEQB"u8] = ((uint64)1 << (int)(0)),
-    ["VPORQ"u8] = ((uint64)1 << (int)(0)),
-    ["VPSUBQ"u8] = ((uint64)1 << (int)(0)),
-    ["VPSHUFBITQMB"u8] = ((uint64)1 << (int)(0))
+    ["VPERMB"u8] = ((uint64)1 << 0),
+    ["VPERMI2B"u8] = ((uint64)1 << 0),
+    ["VPERMT2B"u8] = ((uint64)1 << 0),
+    ["VGF2P8AFFINEQB"u8] = ((uint64)1 << 0),
+    ["VPORQ"u8] = ((uint64)1 << 0),
+    ["VPSUBQ"u8] = ((uint64)1 << 0),
+    ["VPSHUFBITQMB"u8] = ((uint64)1 << 0)
 };
 
 // addLoads inserts load ops for ops that can't take memory inputs directly.
@@ -351,7 +351,7 @@ internal static void addLoads(this ж<Func> Ꮡfn) {
             // that belongs in this pass or a different one.
             if ((~arg).Δop == "deref"u8 || (~arg).Δop == "const"u8) {
                 // These produce memory locations.
-                if ((uint64)(canMask & (((uint64)1).Lsh((int64)(i)))) == 0 || nRefs[arg] > 1) {
+                if ((canMask & (((uint64)1).Lsh((int64)(i)))) == 0 || nRefs[arg] > 1) {
                     // This argument needs to be loaded into a register.
                     var (load, ok) = loads[arg, ꟷ];
                     if (!ok) {
@@ -511,7 +511,7 @@ internal static void emit(this ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs
     // Emit constants first
     foreach (var (_, o) in fn.ops) {
         if ((~o).Δop == "const"u8) {
-            @string name = locs[o]._<locMem>().name;
+            @string name = locs[o]._<loc, locMem>().name;
             f.emitConst(name, (~o).c);
         }
     }
@@ -592,7 +592,7 @@ internal static void emitConst(this ref File f, @string name, any data) {
         uint64 word = default!;
         for (nint j = 0; j < 8 / sz; j++) { // Iterate over elements in this word
             var d = rv.Index(quo(wi * 8, sz) + j).Uint();
-            word |= (uint64)(d.Lsh((int64)((j * sz * 8))));
+            word |= (uint64)(d.Lsh((int64)(j * sz * 8)));
         }
         fmt.Fprintf(f.w, "DATA  %s+%#02x(SB)/8, $%#016x\n"u8, name, 8 * wi, word);
     }

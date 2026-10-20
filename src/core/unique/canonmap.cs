@@ -309,7 +309,7 @@ internal static UntypedInt nChildrenMask => /* nChildren - 1 */ 15;
 
 // indirect is an internal node in the hash-trie.
 partial struct Δindirect<T> {
-    internal partial ref node<T> node { get; }
+    /*embed*/ internal node<T> node;
     internal atomic.Bool dead;
     internal ж<Δindirect<T>> parent;
     internal Δsync.Mutex mu; // Protects mutation to children and any children that are entry nodes.
@@ -331,7 +331,7 @@ internal static bool empty<T>(this ref Δindirect<T> i) {
 
 // entry is a leaf node in the hash-trie.
 partial struct Δentry<T> {
-    internal partial ref node<T> node { get; }
+    /*embed*/ internal node<T> node;
     internal atomic.Pointer<Δentry<T>> overflow; // Overflow for hash collisions.
     internal weak.Pointer<T> key;
     internal uintptr hash;

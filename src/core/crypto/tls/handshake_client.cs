@@ -117,7 +117,7 @@ internal static (ж<clientHelloMsg>, ж<keySharePrivateKeys>, ж<echClientContex
     hello.Value.cipherSuites = config.cipherSuites(hasAESGCMHardwareSupport);
     // Don't advertise TLS 1.2-only cipher suites unless we're attempting TLS 1.2.
     if (maxVersion < VersionTLS12) {
-        hello.Value.cipherSuites = slices.DeleteFunc((~hello).cipherSuites, (uint16 id) => (nint)((~cipherSuiteByID(id)).flags & (nint)suiteTLS12) != 0);
+        hello.Value.cipherSuites = slices.DeleteFunc((~hello).cipherSuites, (uint16 id) => ((~cipherSuiteByID(id)).flags & (nint)suiteTLS12) != 0);
     }
 
     var (_, err) = io.ReadFull(config.rand(), (~hello).random);
@@ -292,7 +292,7 @@ internal static error /*err*/ clientHandshake(this ж<Conn> Ꮡc, context.Contex
 
             // Overwrite the server name in the outer hello with the public facing
             // name.
-            hello.Value.serverName = ((@string)(~(~ech).config).PublicName);
+            hello.Value.serverName = (@string)(~(~ech).config).PublicName;
             // Generate a new random for the outer hello.
             hello.Value.random = new slice<byte>(32);
             (_, err) = io.ReadFull(c.config.rand(), (~hello).random);

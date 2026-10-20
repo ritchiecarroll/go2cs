@@ -34,8 +34,6 @@ private static readonly @string endsWithANewlineˢ = """
 ends with a newline
 
 """u8.Raw();
-private static readonly @string cNoNewlineHereˢ = @"C:\no\newline\here"u8;
-private static readonly @string keepsItsCrˢ = "keeps\r\nits CR"u8;
 
 internal static void Main() {
     @string plain = lineOneLineTwoˢ;
@@ -47,10 +45,10 @@ head
 
 tail
 """.Raw();
-    @string oneLine = cNoNewlineHereˢ;
-    @string interpreted = keepsItsCrˢ;
+    @string oneLine = @"C:\no\newline\here";
+    @string interpreted = "keeps\r\nits CR";
 
-    foreach (var (_, s) in new @string[]{plain, trailing, pemBlock, describe("p"u8), chain, oneLine, interpreted}.slice()) {
+    foreach (var (_, s) in new @string[]{plain, trailing, pemBlock, describe("p"), chain, oneLine, interpreted}.slice()) {
         fmt.Println(len(s));
         fmt.Printf("%q\n"u8, s);
     }
@@ -60,7 +58,7 @@ tail
 
     var h = (uint32)2166136261U;
     for (nint i = 0; i < len(pemBlock); i++) {
-        h = ((uint32)(h ^ (uint32)pemBlock[i])) * 16777619;
+        h = (h ^ (uint32)pemBlock[i]) * 16777619;
     }
     fmt.Printf("%08x\n"u8, h);
 }

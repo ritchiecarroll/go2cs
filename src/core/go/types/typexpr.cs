@@ -536,7 +536,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
             // errors.
             Ꮡcheck.Value.recordInstance(Ꮡix.Value.orig, targsʗ1, instʗ1);
 
-            @string name = instʗ1._<instantiatedType_type>().Obj().Value.name;
+            @string name = instʗ1._<ΔgenericType, instantiatedType_type>().Obj().Value.name;
             var tparams = instʗ1.TypeParams().list();
             if (Ꮡcheck.validateTArgLen(Ꮡix.Value.Pos(), name, len(tparams), len(targsʗ1))) {
                 // check type constraints
@@ -547,7 +547,7 @@ internal static ΔType /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<in
                         if (i < len(Ꮡix.Value.indices)) {
                             pos = Ꮡix.Value.indices[i].Pos();
                         }
-                        Ꮡcheck.softErrorf(((atPos)pos), InvalidTypeArg, "%v"u8, err);
+                        Ꮡcheck.softErrorf((atPos)pos, InvalidTypeArg, "%v"u8, err);
                     } else {
                         Ꮡcheck.of(Checker.Ꮡmono).recordInstance(Ꮡcheck.Value.pkg, Ꮡix.Value.Pos(), tparams, targsʗ1, Ꮡix.Value.indices);
                     }

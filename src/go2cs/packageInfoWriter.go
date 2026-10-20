@@ -27,6 +27,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -395,6 +396,12 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			lines.Add(fmt.Sprintf("[assembly: GoDynamicTypeLift(\"%s\", \"%s\")]", hex.EncodeToString([]byte(signature)), typeName))
 		}
 
+		// Publish every inline constraint lift that captures its own parameter, by DECLARATION (see
+		// GoInlineConstraintLiftAttribute), so another package instantiating the declaration names it too.
+		for _, record := range publishedInlineConstraintLiftRecords() {
+			lines.Add(record)
+		}
+
 		// Sort lines
 		sortedLines := lines.Keys()
 		sort.Strings(sortedLines)
@@ -620,7 +627,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 		// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
 		// so the element doubles as the dummy — except where the interface constrains itself (see
 		// constraintProxyFor). See constraintProxyArg / EmitConstraintProxy.
-		for _, proxy := range constraintProxies {
+		for key, proxy := range constraintProxies {
 			elementRef := qualifyLocalTypeRef(proxy[0])
 			interfaceRef := qualifyLocalTypeRef(proxy[1])
 
@@ -634,8 +641,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			// name becomes ambiguous — CS0104 ×8 in crypto/ecdsa's test half, the same
 			// duplicate-type shadow the reference model exists to eliminate. The production proxy
 			// is the single identity; defer to it. A test-DECLARED constraint interface still
-			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before.
-			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") {
+			// renders bare (crypto/internal/nistec's own nistPoint) and is emitted here as before. A BIND record
+			// (foreignConstraintProxy) declares no class, only this assembly's binding, so it is always written.
+			if metadataAnchorLocalTypes && strings.Contains(interfaceRef, PackageSuffix+".") && !strings.HasPrefix(key, constraintProxyBindKey) {
 				continue
 			}
 
@@ -911,6 +919,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// not re-emit -- which is the only route production records have into a recompile-model test
 	// assembly, whose compile set excludes package_info.cs in favor of the seeded test-info file.
 	packageInfoLines = applyGoSourcePositionMaps(packageInfoLines, packageInfoFileName, mergeExisting)
+	packageInfoLines = applyHoistedLiteralsStamp(packageInfoLines, packageInfoFileName)
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
 
 	// Remove trailing empty lines
@@ -932,6 +941,72 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	if _, err := writeSourceIfChanged(packageInfoFileName, []byte(contents.String())); err != nil {
 		log.Fatalf("Failed to write package info file \"%s\": %s\n", packageInfoFileName, err)
 	}
+}
+
+// hoistedLiteralsStampProseLines returns the comment above the [GoHoistedLiterals] stamp. Like every
+// emitted-artifact comment it states what the stamp says and why the shape is so, and nothing about how
+// it came to be.
+func hoistedLiteralsStampProseLines() []string {
+	return []string{
+		"// This package's string literals are hoisted to `static readonly` fields (the standard",
+		"// library's form, or -hoist-literals), so no converted file passes a bare literal for",
+		"// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip",
+		"// the assembly.",
+	}
+}
+
+// isHoistedLiteralsStampLine reports whether a line is the [GoHoistedLiterals] stamp, in either
+// qualification globalQualifyRooted gives it.
+func isHoistedLiteralsStampLine(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	return trimmed == "[assembly: go.GoHoistedLiterals]" || trimmed == "[assembly: global::go.GoHoistedLiterals]"
+}
+
+// applyHoistedLiteralsStamp writes the [GoHoistedLiterals] stamp (golib) into the info file of a package
+// whose literals are hoisted (literalsHoistedFor), immediately above the <GoSourcePositionMaps> prose, and
+// removes it from any other. It is regenerated on every write, so a persisted file never keeps a stale stamp.
+//
+// Only package_info.cs (the production assembly) and package_test_info.cs (the test assembly) carry it. A
+// test assembly also compiles package_info_internal_test.cs, and the attribute is single-use, so a stamp
+// there as well would be CS0579.
+func applyHoistedLiteralsStamp(packageInfoLines []string, packageInfoFileName string) []string {
+	prose := hoistedLiteralsStampProseLines()
+	kept := make([]string, 0, len(packageInfoLines))
+
+	for i := 0; i < len(packageInfoLines); i++ {
+		if !isHoistedLiteralsStampLine(packageInfoLines[i]) {
+			kept = append(kept, packageInfoLines[i])
+			continue
+		}
+
+		// The stamp's own prose, written just above it, and the blank line after it go with it.
+		if len(kept) >= len(prose) && slices.Equal(kept[len(kept)-len(prose):], prose) {
+			kept = kept[:len(kept)-len(prose)]
+		}
+
+		if i+1 < len(packageInfoLines) && strings.TrimSpace(packageInfoLines[i+1]) == "" {
+			i++
+		}
+	}
+
+	if base := filepath.Base(packageInfoFileName); !packageHoistsLiterals || base != PackageInfoFileName && base != testPackageInfoFileName {
+		return kept
+	}
+
+	anchor := slices.Index(kept, goSourcePositionMapsProseLines()[0])
+
+	if anchor < 0 {
+		anchor = slices.IndexFunc(kept, func(line string) bool { return strings.Contains(line, "<GoSourcePositionMaps>") })
+	}
+
+	if anchor < 0 {
+		showWarning("Package info file \"%s\" has no <GoSourcePositionMaps> section; its [GoHoistedLiterals] stamp was not emitted", packageInfoFileName)
+		return kept
+	}
+
+	block := append(append([]string(nil), prose...), "[assembly: "+globalQualifyRooted("go.GoHoistedLiterals")+"]", "")
+
+	return slices.Concat(kept[:anchor], block, kept[anchor:])
 }
 
 // applyGoSourcePositionMaps rewrites the <GoSourcePositionMaps> section of a package info file with

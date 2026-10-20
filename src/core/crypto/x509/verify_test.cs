@@ -608,10 +608,10 @@ internal static @string generatePEMCertWithRepeatSAN(int64 currentTime, nint cou
     if (err != default!) {
         log.Fatal(err);
     }
-    return ((@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
+    return (@string)pem.EncodeToMemory(Ꮡ(new pem.Block(
         Type: "CERTIFICATE"u8,
         Bytes: certBytes
-    ))));
+    )));
 }
 
 internal static readonly @string gtsIntermediate = """
@@ -1875,7 +1875,7 @@ internal static (nint, error) macosMajorVersion(ж<testing.T> Ꮡt) {
         }
         return (0, fmt.Errorf("%v: %v"u8, cmd.OrTypedNil(), err));
     }
-    var (before, _, ok) = strings.Cut(((@string)@out), "."u8);
+    var (before, _, ok) = strings.Cut((@string)@out, "."u8);
     (var major, err) = strconv.Atoi(before);
     if (!ok || err != default!) {
         return (0, fmt.Errorf("%v: unexpected output: %q"u8, cmd.OrTypedNil(), @out));

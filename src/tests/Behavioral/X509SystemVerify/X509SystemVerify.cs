@@ -19,34 +19,30 @@ using Δio = io_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object generateKeyErrorˢ = (@string)"generate key error:"u8;
-private static readonly object createErrorˢ = (@string)"create error:"u8;
-private static readonly object parseErrorˢ = (@string)"parse error:"u8;
-private static readonly object publicChainˢ = (@string)"public chain:"u8;
-
 internal static void Main() {
+    var namesᴷ = new stackAppend<@string>();
+
     var (key, err) = ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
     if (err != default!) {
-        fmt.Println(generateKeyErrorˢ, err);
+        fmt.Println("generate key error:", err);
         return;
     }
     var now = time.Now();
     var template = Ꮡ(new x509.Certificate(
         SerialNumber: big.NewInt(20261011),
-        Subject: new pkix.Name(CommonName: "go2cs.example"u8),
+        Subject: new pkix.Name(CommonName: "go2cs.example"),
         NotBefore: now.Add(-time.ΔHour),
         NotAfter: now.Add(time.ΔHour),
-        DNSNames: new @string[]{"go2cs.example"u8}.slice()
+        DNSNames: new @string[]{"go2cs.example"}.slice()
     ));
     (var der, err) = x509.CreateCertificate(rand.Reader, template, template, key.of(ecdsa.PrivateKey.ᏑPublicKey), key.OrTypedNil());
     if (err != default!) {
-        fmt.Println(createErrorˢ, err);
+        fmt.Println("create error:", err);
         return;
     }
     (var self, err) = x509.ParseCertificate(der);
     if (err != default!) {
-        fmt.Println(parseErrorˢ, err);
+        fmt.Println("parse error:", err);
         return;
     }
     (_, err) = self.Verify(new x509.VerifyOptions(nil));
@@ -57,19 +53,19 @@ internal static void Main() {
     var (interBlock, _) = pem.Decode(slice<byte>(gtsIntermediate));
     (var leaf, err) = x509.ParseCertificate((~leafBlock).Bytes);
     if (err != default!) {
-        fmt.Println(parseErrorˢ, err);
+        fmt.Println("parse error:", err);
         return;
     }
     (var inter, err) = x509.ParseCertificate((~interBlock).Bytes);
     if (err != default!) {
-        fmt.Println(parseErrorˢ, err);
+        fmt.Println("parse error:", err);
         return;
     }
     var intermediates = x509.NewCertPool();
     intermediates.AddCert(inter);
     (var chains, err) = leaf.Verify(new x509.VerifyOptions(
         Intermediates: intermediates,
-        DNSName: "www.google.com"u8,
+        DNSName: "www.google.com",
         CurrentTime: time.Unix(1677615892, 0)
     ));
     if (err != default!) {
@@ -79,9 +75,9 @@ internal static void Main() {
     foreach (var (_, chain) in chains) {
         slice<@string> names = default!;
         foreach (var (_, c) in chain) {
-            names = append(names, (~c).Subject.CommonName);
+            names = append(namesᴷ, names, (~c).Subject.CommonName);
         }
-        fmt.Println(publicChainˢ, strings.Join(names, " -> "u8));
+        fmt.Println("public chain:", strings.Join(names, " -> "));
     }
 }
 

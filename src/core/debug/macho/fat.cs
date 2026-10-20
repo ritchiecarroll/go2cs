@@ -33,8 +33,8 @@ internal static UntypedInt fatArchHeaderSize => /* 5 * 4 */ 20;
 
 // A FatArch is a Mach-O File inside a FatFile.
 partial struct FatArch {
-    public partial ref FatArchHeader FatArchHeader { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ public FatArchHeader FatArchHeader;
+    /*embed*/ public ж<File> File;
 }
 
 // ErrNotFat is returned from [NewFatFile] or [OpenFat] when the file is not a
@@ -109,7 +109,7 @@ public static (ж<FatFile>, error) NewFatFile(io.ReaderAt r) {
         }
 
         // Make sure the architecture for this image is not duplicate.
-        var seenArch = (uint64)((((uint64)(uint32)fa.Cpu << (int)(32))) | (uint64)fa.SubCpu);
+        var seenArch = ((uint64)(uint32)fa.Cpu << 32) | (uint64)fa.SubCpu;
         {
             var (o, k) = seenArches[seenArch, ꟷ]; if (o || k) {
                 return (default!, new FormatErrorжerror(Ꮡ(new FormatError(offset, fmt.Sprintf("duplicate architecture cpu=%v, subcpu=%#x"u8, fa.Cpu, fa.SubCpu), default!))));

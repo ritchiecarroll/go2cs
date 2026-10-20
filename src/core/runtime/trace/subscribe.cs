@@ -20,7 +20,7 @@ internal static ж<traceMultiplexer> Ꮡtracing = new StandardBox<traceMultiplex
 internal static ref traceMultiplexer tracing => ref Ꮡtracing.Value;
 
 partial struct traceMultiplexer {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal atomic.Bool enabled;
     internal nint subscribers;
     internal sync.Mutex subscribersMu;

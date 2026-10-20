@@ -80,7 +80,7 @@ internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {
 
     byte msb = default!;
     for (nint i = 16 - 1; i >= 0; i--) {
-        (msb, x[i]) = ((byte)((x[i] >> (int)(7))), (byte)((byte)(x[i] << (int)(1)) | msb));
+        (msb, x[i]) = ((byte)((x[i] >> 7)), (byte)((byte)(x[i] << 1) | msb));
     }
     return msb;
 }

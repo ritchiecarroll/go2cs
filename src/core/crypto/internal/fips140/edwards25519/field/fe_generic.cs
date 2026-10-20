@@ -31,7 +31,7 @@ internal static uint128 addMul(uint128 v, uint64 a, uint64 b) {
 // mul19 returns v * 19.
 internal static uint64 mul19(uint64 v) {
     // Using this approach seems to yield better optimizations than *19.
-    return v + ((v + (v << (int)(3))) << (int)(1));
+    return v + ((v + (v << 3)) << 1);
 }
 
 // addMul19 returns v + 19 * a * b, where a and b are at most 52 bits.
@@ -52,7 +52,7 @@ internal static uint128 addMul38(uint128 v, uint64 a, uint64 b) {
 
 // shiftRightBy51 returns a >> 51. a is assumed to be at most 115 bits.
 internal static uint64 shiftRightBy51(uint128 a) {
-    return (uint64)(((a.hi << (int)((64 - 51)))) | ((a.lo >> (int)(51))));
+    return (a.hi << (int)(64 - 51)) | (a.lo >> 51);
 }
 
 internal static void feMulGeneric(ref Element v, ref Element a, ref Element b) {
@@ -168,21 +168,21 @@ internal static void feMulGeneric(ref Element v, ref Element a, ref Element b) {
     var c3 = shiftRightBy51(r3);
     var c4 = shiftRightBy51(r4);
 
-    var rr0 = (uint64)(r0.lo & maskLow51Bits) + mul19(c4);
-    var rr1 = (uint64)(r1.lo & maskLow51Bits) + c0;
-    var rr2 = (uint64)(r2.lo & maskLow51Bits) + c1;
-    var rr3 = (uint64)(r3.lo & maskLow51Bits) + c2;
-    var rr4 = (uint64)(r4.lo & maskLow51Bits) + c3;
+    var rr0 = (r0.lo & maskLow51Bits) + mul19(c4);
+    var rr1 = (r1.lo & maskLow51Bits) + c0;
+    var rr2 = (r2.lo & maskLow51Bits) + c1;
+    var rr3 = (r3.lo & maskLow51Bits) + c2;
+    var rr4 = (r4.lo & maskLow51Bits) + c3;
 
     // Now all coefficients fit into 64-bit registers but are still too large to
     // be passed around as an Element. We therefore do one last carry chain,
     // where the carries will be small enough to fit in the wiggle room above 2⁵¹.
 
-    v.l0 = (uint64)(rr0 & maskLow51Bits) + mul19((rr4 >> (int)(51)));
-    v.l1 = (uint64)(rr1 & maskLow51Bits) + (rr0 >> (int)(51));
-    v.l2 = (uint64)(rr2 & maskLow51Bits) + (rr1 >> (int)(51));
-    v.l3 = (uint64)(rr3 & maskLow51Bits) + (rr2 >> (int)(51));
-    v.l4 = (uint64)(rr4 & maskLow51Bits) + (rr3 >> (int)(51));
+    v.l0 = (rr0 & maskLow51Bits) + mul19(rr4 >> 51);
+    v.l1 = (rr1 & maskLow51Bits) + (rr0 >> 51);
+    v.l2 = (rr2 & maskLow51Bits) + (rr1 >> 51);
+    v.l3 = (rr3 & maskLow51Bits) + (rr2 >> 51);
+    v.l4 = (rr4 & maskLow51Bits) + (rr3 >> 51);
 }
 
 internal static void feSquareGeneric(ref Element v, ref Element a) {
@@ -245,17 +245,17 @@ internal static void feSquareGeneric(ref Element v, ref Element a) {
     var c3 = shiftRightBy51(r3);
     var c4 = shiftRightBy51(r4);
 
-    var rr0 = (uint64)(r0.lo & maskLow51Bits) + mul19(c4);
-    var rr1 = (uint64)(r1.lo & maskLow51Bits) + c0;
-    var rr2 = (uint64)(r2.lo & maskLow51Bits) + c1;
-    var rr3 = (uint64)(r3.lo & maskLow51Bits) + c2;
-    var rr4 = (uint64)(r4.lo & maskLow51Bits) + c3;
+    var rr0 = (r0.lo & maskLow51Bits) + mul19(c4);
+    var rr1 = (r1.lo & maskLow51Bits) + c0;
+    var rr2 = (r2.lo & maskLow51Bits) + c1;
+    var rr3 = (r3.lo & maskLow51Bits) + c2;
+    var rr4 = (r4.lo & maskLow51Bits) + c3;
 
-    v.l0 = (uint64)(rr0 & maskLow51Bits) + mul19((rr4 >> (int)(51)));
-    v.l1 = (uint64)(rr1 & maskLow51Bits) + (rr0 >> (int)(51));
-    v.l2 = (uint64)(rr2 & maskLow51Bits) + (rr1 >> (int)(51));
-    v.l3 = (uint64)(rr3 & maskLow51Bits) + (rr2 >> (int)(51));
-    v.l4 = (uint64)(rr4 & maskLow51Bits) + (rr3 >> (int)(51));
+    v.l0 = (rr0 & maskLow51Bits) + mul19(rr4 >> 51);
+    v.l1 = (rr1 & maskLow51Bits) + (rr0 >> 51);
+    v.l2 = (rr2 & maskLow51Bits) + (rr1 >> 51);
+    v.l3 = (rr3 & maskLow51Bits) + (rr2 >> 51);
+    v.l4 = (rr4 & maskLow51Bits) + (rr3 >> 51);
 }
 
 // carryPropagate brings the limbs below 52 bits by applying the reduction
@@ -266,11 +266,11 @@ internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) {
     // (l4>>51) is at most 64 - 51 = 13 bits, so (l4>>51)*19 is at most 18 bits, and
     // the final l0 will be at most 52 bits. Similarly for the rest.
     var l0 = v.l0;
-    v.l0 = (uint64)(v.l0 & maskLow51Bits) + mul19((v.l4 >> (int)(51)));
-    v.l4 = (uint64)(v.l4 & maskLow51Bits) + (v.l3 >> (int)(51));
-    v.l3 = (uint64)(v.l3 & maskLow51Bits) + (v.l2 >> (int)(51));
-    v.l2 = (uint64)(v.l2 & maskLow51Bits) + (v.l1 >> (int)(51));
-    v.l1 = (uint64)(v.l1 & maskLow51Bits) + (l0 >> (int)(51));
+    v.l0 = (v.l0 & maskLow51Bits) + mul19(v.l4 >> 51);
+    v.l4 = (v.l4 & maskLow51Bits) + (v.l3 >> 51);
+    v.l3 = (v.l3 & maskLow51Bits) + (v.l2 >> 51);
+    v.l2 = (v.l2 & maskLow51Bits) + (v.l1 >> 51);
+    v.l1 = (v.l1 & maskLow51Bits) + (l0 >> 51);
 
     return Ꮡv;
 }

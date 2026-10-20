@@ -223,7 +223,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
         return errors.New(sha3InvalidHashStateˢ);
     }
 
-    @string magic = ((@string)(b[..(int)(len(magicSHA3))]));
+    @string magic = (@string)(b[..(int)(len(magicSHA3))]);
     b = b[(int)(len(magicSHA3))..];
     switch (ᐧ) {
     case {} when magic == magicSHA3 && d.dsbyte == dsbyteSHA3: {
@@ -252,7 +252,7 @@ public static error UnmarshalBinary(this ref Digest d, slice<byte> b) {
     b = b[(int)(len(d.a))..];
 
     nint n = (nint)b[0];
-    spongeDirection state = ((spongeDirection)(nint)b[1]);
+    spongeDirection state = (spongeDirection)(nint)b[1];
     if (n > d.rate) {
         return errors.New(sha3InvalidHashStateˢ);
     }

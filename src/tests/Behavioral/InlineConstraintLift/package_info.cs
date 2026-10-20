@@ -1,0 +1,116 @@
+// go2cs code converter defines `global using` statements here for imported type
+// aliases as package references are encountered via `import' statements. Exported
+// type aliases that need a `global using` declaration will be loaded from the
+// referenced package by parsing its 'package_info.cs' source file and reading its
+// defined `GoTypeAlias` attributes.
+
+// Package name separator "dot" used in imported type aliases is extended Unicode
+// character '\uA4F8' which is a valid character in a C# identifier name. This is
+// used to simulate Go's package level type aliases since C# does not yet support
+// importing type aliases at a namespace level.
+
+// <ImportedTypeAliases>
+// </ImportedTypeAliases>
+
+using go;
+using static go.main_package;
+
+// For encountered type alias declarations, e.g., `type Table = map[string]int`,
+// go2cs code converter will generate a `global using` statement for the alias in
+// the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
+// Although scope of `global using` is available to all files in the project, all
+// converted Go code for the project targets the same package, so `global using`
+// statements will effectively have package level scope.
+
+// Additionally, `GoTypeAlias` attributes will be generated here for exported type
+// aliases. This allows the type alias to be imported and used from other packages
+// when referenced.
+
+// <ExportedTypeAliases>
+[assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e673b20546167282920696e747d", "Label_T")]
+[assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e677d", "Box_T")]
+[assembly: GoDynamicTypeLift("696e746572666163657b546167282920696e747d", "Both_C")]
+[assembly: GoInlineConstraintLift("Min", 0, "Min_T")]
+[assembly: GoInlineConstraintLift("Ord", 0, "Ord_T")]
+// </ExportedTypeAliases>
+
+// As types are cast to interfaces in Go source code, the go2cs code converter
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
+// code generation (see go2cs-gen). Resolving each duck-typed cast at compile time
+// this way is what keeps startup free of reflection.
+
+// <InterfaceImplementations>
+[assembly: GoImplement<age, Min_T<age>>]
+[assembly: GoImplement<age, Ord_T<age>>]
+[assembly: GoImplement<namer, Box_T>]
+[assembly: GoImplement<namer, Show_T>]
+[assembly: GoImplement<node, Ord_T<node>>(ConstraintProxy = true)]
+[assembly: GoImplement<tagged, Both_C>]
+[assembly: GoImplement<tagged, Box_T>]
+[assembly: GoImplement<tagged, Label_T>]
+[assembly: GoImplement<tagged, nameI>]
+[assembly: GoImplement<tagged, pair_T>]
+[assembly: GoImplement<wrap<@string>, Lesser<wrap<@string>>>]
+[assembly: GoImplement<wrap<@string>, Ord_T<wrap<@string>>>]
+[assembly: GoImplement<wrap<nint>, Ord_T<wrap<nint>>>]
+// </InterfaceImplementations>
+
+// <ImplicitConversions>
+// </ImplicitConversions>
+
+// Go source positions are recorded here, one `GoPositionMap` attribute per converted
+// source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
+// can name the GO file and line a frame was converted from rather than the emitted C# one.
+// Each record carries the Go file's identity and an encoded C#-line to Go-line table
+// TOGETHER: a frame either has a record and reports a position that exists in the Go tree,
+// or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
+
+// <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAoWgP6AooDmoKag9qgADAygpKKCgpQADAygAAwQoObC6qKClKaCgoKUgoKClIKCmIKCgpaC")]
+[assembly: go.GoPositionMap("ord.go", "ord.cs", "AA4SoAAIDIDooOiA")]
+// </GoSourcePositionMaps>
+
+namespace go;
+
+[GoPackage("main")]
+[GoTestMatchingConsoleOutput]
+public static partial class main_package
+{
+    // C# nested types declared with no access modifier are always private, and the
+    // Go type declarations in this package's converted sources are deliberately
+    // bare so they read more like the original Go code. The real accessibility for
+    // the types - public for a Go-exported name, internal otherwise - are defined
+    // via declarations below.
+
+    // <TypeAccessibility>
+    internal partial interface nameI {}
+    internal partial interface pair_T {}
+    internal partial struct age {}
+    internal partial struct namer {}
+    internal partial struct node {}
+    internal partial struct pair<T> {}
+    internal partial struct slot<T> {}
+    internal partial struct tagged {}
+    internal partial struct wrap<E> {}
+    public partial interface Both_C {}
+    public partial interface Box_T {}
+    public partial interface Label_T {}
+    public partial interface Lesser<T> {}
+    public partial interface Min_T<T> {}
+    public partial interface Ord_T<T> {}
+    public partial interface Show_T {}
+    public partial struct Box<T> {}
+    public partial struct Ord<T> {}
+    // </TypeAccessibility>
+
+    // Go initializes an imported package before the importing package, for every import
+    // form - not only the blank one. .NET would never load an assembly nothing has touched
+    // yet, so each import that initializes anything is forced below: once per assembly, and
+    // ahead of this package's own `init` functions, which this file being the first compile
+    // item of the project guarantees.
+
+    // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    // </ImportInitializers>
+}

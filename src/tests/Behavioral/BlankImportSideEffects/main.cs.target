@@ -14,26 +14,20 @@ internal static nint countAtInit;
     countAtInit = registry.Count();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object countAtInitˢ = (@string)"count at init:"u8;
-private static readonly object foundˢ = (@string)"found:"u8;
-private static readonly object missingˢ = (@string)"missing:"u8;
-private static readonly object countˢ = (@string)"count:"u8;
-
 internal static void Main() {
-    fmt.Println(countAtInitˢ, countAtInit);
+    fmt.Println("count at init:", countAtInit);
 
-    foreach (var (_, name) in new @string[]{"jpeglike"u8, "pnglike"u8, "giflike"u8}.slice()) {
+    foreach (var (_, name) in new @string[]{"jpeglike", "pnglike", "giflike"}.slice()) {
         {
             var (describe, ok) = registry.Lookup(name); if (ok){
-                fmt.Println(foundˢ, name, (@string)"=>"u8, describe);
+                fmt.Println("found:", name, "=>", describe);
             } else {
-                fmt.Println(missingˢ, name);
+                fmt.Println("missing:", name);
             }
         }
     }
 
-    fmt.Println(countˢ, registry.Count());
+    fmt.Println("count:", registry.Count());
 }
 
 } // end main_package

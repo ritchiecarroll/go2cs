@@ -10,7 +10,7 @@ partial struct flags {
 }
 
 partial struct formatter {
-    internal partial ref flags flags { get; }
+    /*embed*/ internal flags flags;
     internal array<byte> pad = new(3);
 }
 
@@ -21,7 +21,7 @@ partial struct printer {
 internal static void Main() {
     var p = @new<printer>();
     p.Value.f.width = 7;
-    p.Value.f.name = "hi"u8;
+    p.Value.f.name = "hi";
     p.Value.f.pad[0] = 65;
     fmt.Println((~p).f.width, (~p).f.name, (~p).f.pad[0]);
 

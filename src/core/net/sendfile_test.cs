@@ -761,7 +761,7 @@ public static void BenchmarkSendFile(ж<testing.B> Ꮡb) {
 
 internal static void benchmarkSendFile(ж<testing.B> Ꮡb, @string proto) {
     for (nint i = 0; i <= 10; i++) {
-        nint size = ((nint)1).Lsh((int64)((i + 10)));
+        nint size = ((nint)1).Lsh((int64)(i + 10));
         var bench = new sendFileBench(
             proto: proto,
             chunkSize: size

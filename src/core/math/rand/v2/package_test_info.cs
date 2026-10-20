@@ -23,7 +23,6 @@ global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,8 +39,13 @@ using static global::go.math.rand.rand_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<statsResults, ж<statsResults>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

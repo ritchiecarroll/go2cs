@@ -360,6 +360,12 @@ internal interface IGoReflectBox
     /// </summary>
     nuint TransientSlotAddress();
 
+    /// <summary>
+    /// The number this pointer crosses a syscall as: <c>uintptr(unsafe.Pointer(p))</c>, a native or pinned address,
+    /// or an order token for a reference-bearing pointee (what <c>NativeStructMarshal.CallDeep</c> copies).
+    /// </summary>
+    nuint NativeArgumentAddress();
+
     /// <summary>The pointee through the kind's own <c>ValueSlot</c>.</summary>
     object? ReadBoxSlot();
 

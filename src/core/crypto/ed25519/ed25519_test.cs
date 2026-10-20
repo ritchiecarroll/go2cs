@@ -136,7 +136,7 @@ public static void TestSignVerifyHashed(ж<testing.T> Ꮡt) {
     var (expectedSig, _) = hex.DecodeString("98a70222f0b8121aa9d30f813d683f809e462b469c7ff87639499bb94e6dae4131f85042463c2a355a2003d062adf5aaa10b8c61e636062aaad11c2a26083406"u8);
     var (message, _) = hex.DecodeString("616263"u8);
 
-    var @private = ((global::go.crypto.ed25519_package.PrivateKey)key);
+    var @private = (global::go.crypto.ed25519_package.PrivateKey)key;
     var @public = @private.Public()._<PublicKey>();
     var hash = sha512.Sum512(message);
     var (sig, err) = @private.Sign(default!, hash[..], crypto.SHA512);
@@ -214,7 +214,7 @@ public static void TestSignVerifyContext(ж<testing.T> Ꮡt) {
     ref var context = ref heap<@string>(out var Ꮡcontext);
     context = fooˢ;
 
-    var @private = ((global::go.crypto.ed25519_package.PrivateKey)key);
+    var @private = (global::go.crypto.ed25519_package.PrivateKey)key;
     var @public = @private.Public()._<PublicKey>();
     var (sig, err) = @private.Sign(default!, message, new ed25519_test_package.ed25519_OptionsжSignerOpts(Ꮡ(new Options(Context: context))));
     if (err != default!) {

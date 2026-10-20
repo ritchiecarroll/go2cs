@@ -91,6 +91,7 @@ using @internal;
 using @internal.runtime;
 using ꓸꓸꓸuintptr = Span<uintptr>;
 
+[GoFieldAccess(typeof(Δsliceᴛ), typeof(stringStruct), typeof(structtype))]
 partial class runtime_package {
 
 // Addresses collected in a cgo backtrace when crashing.
@@ -425,13 +426,13 @@ internal static void cgocallbackg1(@unsafe.Pointer fn, @unsafe.Pointer frame, ui
             // values in an order such that it always does.
             var Δp = gp.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δsliceᴛ>();
             atomicstorep(@unsafe.Pointer.FromBox(Δp.of(runtime_package.Δsliceᴛ.ᏑΔarray)), @unsafe.Pointer.FromBox(Ꮡ(s, 0)));
-            Δp.Value.cap = cap(s);
-            Δp.Value.len = len(s);
+            Δp.cap = cap(s);
+            Δp.len = len(s);
 
             defer((ж<g> gpΔ1) => {
                 // Decrease the length of the slice by one, safely.
                 var pΔ1 = gpΔ1.of(g.ᏑcgoCtxt).Reinterpret<slice<uintptr>, Δsliceᴛ>();
-                pΔ1.Value.len--;
+                pΔ1.len--;
             }, gp, ref ᒐ);
         }
 
@@ -611,15 +612,15 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     if (exprᴛ1 == abi.Array) {
         var at = Ꮡt.Reinterpret<_type, arraytype>();
         if (!indir) {
-            if ((~at).Len != 1) {
+            if (at.of(arraytype.ᏑLen).Value != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg((~at).Elem, Δp, !(~at).Elem.IsDirectIface(), top, msg);
+            cgoCheckArg(at.of(arraytype.ᏑElem).Value, Δp, !at.of(arraytype.ᏑElem).Value.IsDirectIface(), top, msg);
             return;
         }
-        for (var i = (uintptr)0; i < (~at).Len; i++) {
-            cgoCheckArg((~at).Elem, Δp, true, top, msg);
-            Δp = (uintptr)add(Δp, (~(~at).Elem).Size_);
+        for (var i = (uintptr)0; i < at.of(arraytype.ᏑLen).Value; i++) {
+            cgoCheckArg(at.of(arraytype.ᏑElem).Value, Δp, true, top, msg);
+            Δp = (uintptr)add(Δp, (~at.of(arraytype.ᏑElem).Value).Size_);
         }
     }
     else if (exprᴛ1 == abi.Chan || exprᴛ1 == abi.Map) {
@@ -660,40 +661,40 @@ internal static void cgoCheckArg(ж<_type> Ꮡt, @unsafe.Pointer Δp, bool indir
     else if (exprᴛ1 == abi.Slice) {
         var st = Ꮡt.Reinterpret<_type, slicetype>();
         var s = (ж<Δsliceᴛ>)(uintptr)(Δp);
-        Δp = s.Value.Δarray;
+        Δp = s.Δarray;
         if (Δp == nil || !cgoIsGoPointer(Δp)) {
             return;
         }
         if (!top && !isPinned(Δp)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
-        if (!(~st).Elem.Pointers()) {
+        if (!st.of(slicetype.ᏑElem).Value.Pointers()) {
             return;
         }
-        for (nint i = 0; i < (~s).cap; i++) {
-            cgoCheckArg((~st).Elem, Δp, true, false, msg);
-            Δp = (uintptr)add(Δp, (~(~st).Elem).Size_);
+        for (nint i = 0; i < s.cap; i++) {
+            cgoCheckArg(st.of(slicetype.ᏑElem).Value, Δp, true, false, msg);
+            Δp = (uintptr)add(Δp, (~st.of(slicetype.ᏑElem).Value).Size_);
         }
     }
     else if (exprᴛ1 == abi.ΔString) {
         var ss = (ж<stringStruct>)(uintptr)(Δp);
-        if (!cgoIsGoPointer((~ss).str)) {
+        if (!cgoIsGoPointer(ss.str)) {
             return;
         }
-        if (!top && !isPinned((~ss).str)) {
+        if (!top && !isPinned(ss.str)) {
             throw panic(cgoFormatErr(msg, t.Kind()));
         }
     }
     else if (exprᴛ1 == abi.Struct) {
         var st = Ꮡt.Reinterpret<_type, structtype>();
         if (!indir) {
-            if (len((~st).Fields) != 1) {
+            if (len(st.Fields) != 1) {
                 @throw(canTHappenˢ);
             }
-            cgoCheckArg((~st).Fields[0].Typ, Δp, !(~st).Fields[0].Typ.IsDirectIface(), top, msg);
+            cgoCheckArg(st.Fields[0].Typ, Δp, !st.Fields[0].Typ.IsDirectIface(), top, msg);
             return;
         }
-        foreach (var (_, f) in (~st).Fields) {
+        foreach (var (_, f) in st.Fields) {
             if (!f.Typ.Pointers()) {
                 continue;
             }
@@ -904,7 +905,7 @@ internal static errorString cgoFormatErr(cgoErrorMsg error, abiꓸKind kind) {
         msg += "argument of cgo function has Go pointer to unpinned Go "u8 + kindname;
     }
 
-    return ((errorString)msg);
+    return (errorString)msg;
 }
 
 } // end runtime_package

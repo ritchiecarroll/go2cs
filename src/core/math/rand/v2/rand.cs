@@ -44,12 +44,12 @@ public static ж<Rand> New(Source src) {
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64.
 public static int64 Int64(this ref Rand r) {
-    return (int64)((uint64)(r.src.Uint64() & ~(((uint64)1 << (int)(63)))));
+    return (int64)((uint64)(r.src.Uint64() & ~((uint64)1 << 63)));
 }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
 public static uint32 Uint32(this ref Rand r) {
-    return (uint32)((r.src.Uint64() >> (int)(32)));
+    return (uint32)(r.src.Uint64() >> 32);
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
@@ -59,12 +59,12 @@ public static uint64 Uint64(this ref Rand r) {
 
 // Int32 returns a non-negative pseudo-random 31-bit integer as an int32.
 public static int32 Int32(this ref Rand r) {
-    return (int32)((r.src.Uint64() >> (int)(33)));
+    return (int32)(r.src.Uint64() >> 33);
 }
 
 // Int returns a non-negative pseudo-random int.
 public static nint Int(this ref Rand r) {
-    return (nint)((((nuint)r.src.Uint64() << (int)(1)) >> (int)(1)));
+    return (nint)(((nuint)r.src.Uint64() << 1) >> 1);
 }
 
 // Uint returns a pseudo-random uint.
@@ -95,8 +95,8 @@ internal static uint64 uint64n(this ref Rand r, uint64 n) {
     if (is32bit && (uint64)(uint32)n == n) {
         return (uint64)r.uint32n((uint32)n);
     }
-    if ((uint64)(n & (n - 1)) == 0) { // n is power of two, can mask
-        return (uint64)(r.Uint64() & (n - 1));
+    if ((n & (n - 1)) == 0) { // n is power of two, can mask
+        return r.Uint64() & (n - 1);
     }
 
     // Suppose we have a uint64 x uniform in the range [0,2⁶⁴)
@@ -142,8 +142,8 @@ internal static uint64 uint64n(this ref Rand r, uint64 n) {
 // uint32n is an identical computation to uint64n
 // but optimized for 32-bit systems.
 internal static uint32 uint32n(this ref Rand r, uint32 n) {
-    if ((uint32)(n & (n - 1)) == 0) { // n is power of two, can mask
-        return (uint32)((uint32)r.Uint64() & (n - 1));
+    if ((n & (n - 1)) == 0) { // n is power of two, can mask
+        return (uint32)r.Uint64() & (n - 1);
     }
     // On 64-bit systems we still use the uint64 code below because
     // the probability of a random uint64 lo being < a uint32 n is near zero,
@@ -162,7 +162,7 @@ internal static uint32 uint32n(this ref Rand r, uint32 n) {
     // the computations involving these zeros.
     var x = r.Uint64();
     var (lo1a, lo0) = bits.Mul32((uint32)x, n);
-    var (hi, lo1b) = bits.Mul32((uint32)((x >> (int)(32))), n);
+    var (hi, lo1b) = bits.Mul32((uint32)(x >> 32), n);
     var (lo1, c) = bits.Add32(lo1a, lo1b, 0);
     hi += c;
     if (lo1 == 0 && lo0 < (uint32)n) {
@@ -171,7 +171,7 @@ internal static uint32 uint32n(this ref Rand r, uint32 n) {
         while (lo1 == 0 && lo0 < thresh) {
             var xΔ1 = r.Uint64();
             (lo1a, lo0) = bits.Mul32((uint32)xΔ1, n);
-            (hi, lo1b) = bits.Mul32((uint32)((xΔ1 >> (int)(32))), n);
+            (hi, lo1b) = bits.Mul32((uint32)(xΔ1 >> 32), n);
             (lo1, c) = bits.Add32(lo1a, lo1b, 0);
             hi += c;
         }
@@ -220,13 +220,13 @@ public static nuint UintN(this ref Rand r, nuint n) {
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
 public static float64 Float64(this ref Rand r) {
     // There are exactly 1<<53 float64s in [0,1). Use Intn(1<<53) / (1<<53).
-    return (float64)(((r.Uint64() << (int)(11)) >> (int)(11))) / (9007199254740992D);
+    return (float64)((r.Uint64() << 11) >> 11) / (9007199254740992D);
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).
 public static float32 Float32(this ref Rand r) {
     // There are exactly 1<<24 float32s in [0,1). Use Intn(1<<24) / (1<<24).
-    return (float32)(((r.Uint32() << (int)(8)) >> (int)(8))) / ((1 << (int)(24)));
+    return (float32)((r.Uint32() << 8) >> 8) / (1 << 24);
 }
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers

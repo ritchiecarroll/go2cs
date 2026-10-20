@@ -398,25 +398,25 @@ internal partial struct TestCanSetField_Embed /*dyn*/ {
 }
 
 internal partial struct TestCanSetField_S1 /*dyn*/ {
-    internal partial ref TestCanSetField_embed embed { get; }
+    /*embed*/ internal TestCanSetField_embed embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S2 /*dyn*/ {
-    internal partial ref ж<TestCanSetField_embed> embed { get; }
+    /*embed*/ internal ж<TestCanSetField_embed> embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S3 /*dyn*/ {
-    public partial ref TestCanSetField_Embed Embed { get; }
+    /*embed*/ public TestCanSetField_Embed Embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S4 /*dyn*/ {
-    public partial ref ж<TestCanSetField_Embed> Embed { get; }
+    /*embed*/ public ж<TestCanSetField_Embed> Embed;
     internal nint x;
     public nint X;
 }
@@ -499,7 +499,7 @@ internal static ж<nint> Ꮡ_i = new StandardBox<nint>(7);
 internal static ref nint _i => ref Ꮡ_i.Value;
 
 internal static slice<pair> valueToStringTests = new pair[]{
-    new((nint)(123), "123"u8),
+    new((nint)123, "123"u8),
     new(123.5D, "123.5"u8),
     new((byte)123, "123"u8),
     new((@string)"abc"u8, "abc"u8),
@@ -549,9 +549,9 @@ internal static readonly @string structCChanInt32DFloat32ˢ2 = "struct { c chan 
 
 public static void TestAll(ж<testing.T> Ꮡt) {
     testType(Ꮡt, 1, TypeOf((int8)0), int8ˢ);
-    testType(Ꮡt, 2, TypeOf(((ж<int8>)nil)).Elem(), int8ˢ);
+    testType(Ꮡt, 2, TypeOf((ж<int8>)nil).Elem(), int8ˢ);
 
-    var typ = TypeOf(((ж<typeᴛ18_x>)nil));
+    var typ = TypeOf((ж<typeᴛ18_x>)nil);
     testType(Ꮡt, 3, typ, structCChanInt32DFloat32ˢ);
     var etyp = typ.Elem();
     testType(Ꮡt, 4, etyp, structCChanInt32DFloat32ˢ2);
@@ -686,7 +686,7 @@ internal static ref Loopy loopy2 => ref Ꮡloopy2.ValueSlot;
 internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     // Equalities
     new(default!, default!, true),
-    new((nint)(1), (nint)(1), true),
+    new((nint)1, (nint)1, true),
     new((int32)1, (int32)1, true),
     new(0.5D, 0.5D, true),
     new((float32)0.5F, (float32)0.5F, true),
@@ -694,12 +694,12 @@ internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     new(new slice<nint>(10), new slice<nint>(10), true),
     new(Ꮡ(new nint[]{1, 2, 3}.array()), Ꮡ(new nint[]{1, 2, 3}.array()), true),
     new(new Basic(1, 0.5F), new Basic(1, 0.5F), true),
-    new(((error)default!), ((error)default!), true),
+    new((error)default!, (error)default!, true),
     new(new map<nint, @string>{[1] = "one"u8, [2] = "two"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, true),
     new((fn1).OrTypedNilFunc(), (fn2).OrTypedNilFunc(), true),
 
     // Inequalities
-    new((nint)(1), (nint)(2), false),
+    new((nint)1, (nint)2, false),
     new((int32)1, (int32)2, false),
     new(0.5D, 0.6D, false),
     new((float32)0.5F, (float32)0.6F, false),
@@ -712,8 +712,8 @@ internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     new(new map<nint, @string>{[1] = "one"u8, [2] = "txo"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new map<nint, @string>{[1] = "one"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, new map<nint, @string>{[1] = "one"u8}, false),
-    new(default!, (nint)(1), false),
-    new((nint)(1), default!, false),
+    new(default!, (nint)1, false),
+    new((nint)1, default!, false),
     new((fn1).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new((fn3).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new(new slice<nint>[]{new nint[]{1}.slice()}.slice(), new slice<nint>[]{new nint[]{2}.slice()}.slice(), false),
@@ -729,16 +729,16 @@ internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     new(new nint[]{}.slice(), slice<nint>(default!), false),
     new(new nint[]{}.slice(), new nint[]{}.slice(), true),
     new(slice<nint>(default!), slice<nint>(default!), true),
-    new(new map<nint, nint>{}, ((map<nint, nint>)default!), false),
+    new(new map<nint, nint>{}, (map<nint, nint>)default!, false),
     new(new map<nint, nint>{}, new map<nint, nint>{}, true),
-    new(((map<nint, nint>)default!), ((map<nint, nint>)default!), true),
+    new((map<nint, nint>)default!, (map<nint, nint>)default!, true),
 
     // Mismatched types
-    new((nint)(1), 1.0D, false),
+    new((nint)1, 1.0D, false),
     new((int32)1, (int64)1, false),
     new(0.5D, (@string)"hello"u8, false),
     new(new nint[]{1, 2, 3}.slice(), new nint[]{1, 2, 3}.array(), false),
-    new(Ꮡ(new any[]{(nint)(1), (nint)(2), (nint)(4)}.array()), Ꮡ(new any[]{(nint)(1), (nint)(2), (@string)"s"u8}.array()), false),
+    new(Ꮡ(new any[]{(nint)1, (nint)2, (nint)4}.array()), Ꮡ(new any[]{(nint)1, (nint)2, (@string)"s"u8}.array()), false),
     new(new Basic(1, 0.5F), new NotBasic(new Basic(1, 0.5F)), false),
     new(new map<nuint, @string>{[1] = "one"u8, [2] = "two"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
 
@@ -863,7 +863,7 @@ public static void TestIsNil(ж<testing.T> Ꮡt) {
 
     TestIsNil_doNilᴛ1 ii = default!;
     Nil(ii, Ꮡt);
-    ii.x = (nint)(2);
+    ii.x = (nint)2;
     NotNil(ii, Ꮡt);
 
     TestIsNil_fi fi = default!;
@@ -970,15 +970,15 @@ public static void TestImportPath(ж<testing.T> Ꮡt) {
         new(TypeOf((rune)0), ""u8),
         new(TypeOf(slice<byte>(default!)), ""u8),
         new(TypeOf(slice<rune>(default!)), ""u8),
-        new(TypeOf(((@string)""u8)), ""u8),
-        new(TypeOf(((ж<any>)nil)).Elem(), ""u8),
-        new(TypeOf(((ж<byte>)nil)), ""u8),
-        new(TypeOf(((ж<rune>)nil)), ""u8),
-        new(TypeOf(((ж<int64>)nil)), ""u8),
+        new(TypeOf((@string)""u8), ""u8),
+        new(TypeOf((ж<any>)nil).Elem(), ""u8),
+        new(TypeOf((ж<byte>)nil), ""u8),
+        new(TypeOf((ж<rune>)nil), ""u8),
+        new(TypeOf((ж<int64>)nil), ""u8),
         new(TypeOf(new map<@string, nint>{}), ""u8),
-        new(TypeOf(((ж<error>)nil)).Elem(), ""u8),
-        new(TypeOf(((ж<Point>)nil)), ""u8),
-        new(TypeOf(((ж<Point>)nil)).Elem(), "internal/reflectlite_test"u8)
+        new(TypeOf((ж<error>)nil).Elem(), ""u8),
+        new(TypeOf((ж<Point>)nil), ""u8),
+        new(TypeOf((ж<Point>)nil).Elem(), "internal/reflectlite_test"u8)
     }.slice();
     foreach (var (_, test) in tests) {
         {
@@ -1039,7 +1039,7 @@ internal partial struct TestSetPanic_t0 /*dyn*/ {
 
 internal partial struct TestSetPanic_t1 /*dyn*/ {
     public nint Y;
-    internal partial ref TestSetPanic_t0 t0 { get; }
+    /*embed*/ internal TestSetPanic_t0 t0;
 }
 
 internal partial struct TestSetPanic_T2 /*dyn*/ {
@@ -1049,8 +1049,8 @@ internal partial struct TestSetPanic_T2 /*dyn*/ {
 
 internal partial struct TestSetPanic_T /*dyn*/ {
     public nint X;
-    internal partial ref TestSetPanic_t1 t1 { get; }
-    public partial ref TestSetPanic_T2 T2 { get; }
+    /*embed*/ internal TestSetPanic_t1 t1;
+    /*embed*/ public TestSetPanic_T2 T2;
     public TestSetPanic_t1 NamedT1;
     public TestSetPanic_T2 NamedT2;
     internal TestSetPanic_t1 namedT1;
@@ -1338,18 +1338,18 @@ partial struct B<T> {
             void F();
         }
 internal static slice<nameTest> nameTests = new nameTest[]{
-    new(((ж<int32>)nil), "int32"u8),
-    new(((ж<D1>)nil), "D1"u8),
-    new(((ж<slice<D1>>)nil), ""u8),
-    new(((ж<channel<D1>>)nil), ""u8),
-    new(((ж<Func<D1>>)nil), ""u8),
-    new(((ж</*<-*/channel<D1>>)nil), ""u8),
-    new(((ж<channel/*<-*/<D1>>)nil), ""u8),
-    new(((ж<any>)nil), ""u8),
-    new(((ж<Δtypeᴛ30>)nil), ""u8),
-    new(((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil), "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"u8),
-    new(((ж<B<A>>)nil), "B[internal/reflectlite_test.A]"u8),
-    new(((ж<B<B<A>>>)nil), "B[internal/reflectlite_test.B[internal/reflectlite_test.A]]"u8)
+    new((ж<int32>)nil, "int32"u8),
+    new((ж<D1>)nil, "D1"u8),
+    new((ж<slice<D1>>)nil, ""u8),
+    new((ж<channel<D1>>)nil, ""u8),
+    new((ж<Func<D1>>)nil, ""u8),
+    new((ж</*<-*/channel<D1>>)nil, ""u8),
+    new((ж<channel/*<-*/<D1>>)nil, ""u8),
+    new((ж<any>)nil, ""u8),
+    new((ж<Δtypeᴛ30>)nil, ""u8),
+    new((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil, "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"u8),
+    new((ж<B<A>>)nil, "B[internal/reflectlite_test.A]"u8),
+    new((ж<B<B<A>>>)nil, "B[internal/reflectlite_test.B[internal/reflectlite_test.A]]"u8)
 }.slice();
 
 public static void TestNames(ж<testing.T> Ꮡt) {
@@ -1397,7 +1397,7 @@ partial struct Talias1 {
 }
 
 partial struct Talias2 {
-    public partial ref Tint Tint { get; }
+    /*embed*/ public Tint Tint;
     /*embed*/ public Tint2 Tint2;
 }
 

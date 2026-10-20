@@ -238,8 +238,8 @@ public static partial void RunSchedLocalQueueEmptyTest(nint iters) {
     var ready = @new<uint32>();
     for (nint i = 0; i < iters; i++) {
         ready.Value = 0;
-        var next0 = ((nint)(i & 1)) == 0;
-        var next1 = ((nint)(i & 2)) == 0;
+        var next0 = (i & 1) == 0;
+        var next1 = (i & 2) == 0;
         runqput(Δp, Ꮡ(gs, 0), next0);
         var doneʗ1 = done;
         var pʗ1 = Δp;
@@ -519,7 +519,7 @@ public static (global::go.runtime_package.MemStats @base, global::go.runtime_pac
         }
         foreach (var (_, Δp) in allp) {
             // Only count scav bits for pages in the cache
-            nint pg = sys.OnesCount64((uint64)((~Δp).pcache.cache & (~Δp).pcache.scav));
+            nint pg = sys.OnesCount64((~Δp).pcache.cache & (~Δp).pcache.scav);
             slow.HeapReleased += (uint64)pg * (uint64)pageSize;
         }
 
@@ -564,7 +564,7 @@ public static void Restore(this StackPoisonCopyRestore s) {
 public static StackPoisonCopyRestore StackPoisonCopy() {
     nint before = stackPoisonCopy;
     stackPoisonCopy = 1;
-    return ((StackPoisonCopyRestore)before);
+    return (StackPoisonCopyRestore)before;
 }
 
 // BlockOnSystemStack switches to the system stack, prints "x\n" to
@@ -762,7 +762,7 @@ public static uintptr PallocSumBytes => /* pallocSumBytes */ 8;
 public partial struct PallocSum /*num:uint64*/;
 
 public static PallocSum PackPallocSum(nuint start, nuint max, nuint end) {
-    return ((PallocSum)(uint64)packPallocSum(start, max, end));
+    return (PallocSum)(uint64)packPallocSum(start, max, end);
 }
 
 public static nuint Start(this PallocSum m) {
@@ -793,7 +793,7 @@ public static void Free(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) {
 }
 
 public static PallocSum Summarize(this ж<ΔPallocBits> Ꮡb) {
-    return ((PallocSum)(uint64)(Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).summarize());
+    return (PallocSum)(uint64)(Ꮡb.Reinterpret<ΔPallocBits, global::go.runtime_package.pallocBits>()).summarize();
 }
 
 public static nuint PopcntRange(this ж<ΔPallocBits> Ꮡb, nuint i, nuint n) {
@@ -908,7 +908,7 @@ public partial struct PageCache /*global::go.runtime_package.pageCache*/;
 public static uintptr PageCachePages => /* pageCachePages */ 64;
 
 public static PageCache NewPageCache(uintptr @base, uint64 cache, uint64 scav) {
-    return (new PageCache(new pageCache(@base: @base, cache: cache, scav: scav)));
+    return new PageCache(new pageCache(@base: @base, cache: cache, scav: scav));
 }
 
 public static bool Empty(this ж<PageCache> Ꮡc) {
@@ -978,7 +978,7 @@ public static PageCache AllocToCache(this ж<PageAlloc> Ꮡp) {
         // None of the tests need any higher-level locking, so we just
         // take the lock internally.
         @lock((~ppʗ1).mheapLock);
-        Ꮡc.Value = (new PageCache(ppʗ1.allocToCache()));
+        Ꮡc.Value = new PageCache(ppʗ1.allocToCache());
         unlock((~ppʗ1).mheapLock);
     });
     return c;
@@ -998,7 +998,7 @@ public static void Free(this ж<PageAlloc> Ꮡp, uintptr @base, uintptr npages) 
 }
 
 public static (ChunkIdx, ChunkIdx) Bounds(this ж<PageAlloc> Ꮡp) {
-    return (((ChunkIdx)(nuint)(Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).Value.start), ((ChunkIdx)(nuint)(Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).Value.end));
+    return ((ChunkIdx)(nuint)(Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).Value.start, (ChunkIdx)(nuint)(Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).Value.end);
 }
 
 public static uintptr /*r*/ Scavenge(this ж<PageAlloc> Ꮡp, uintptr nbytes) {
@@ -1022,13 +1022,13 @@ public static slice<AddrRange> InUse(this ref PageAlloc Δp) {
 
 // Returns nil if the PallocData's L2 is missing.
 public static ж<ΔPallocData> PallocData(this ж<PageAlloc> Ꮡp, ChunkIdx i) {
-    global::go.runtime_package.chunkIdx ci = ((global::go.runtime_package.chunkIdx)(nuint)i);
+    global::go.runtime_package.chunkIdx ci = (global::go.runtime_package.chunkIdx)(nuint)i;
     return (Ꮡp.Reinterpret<PageAlloc, global::go.runtime_package.pageAlloc>()).tryChunkOf(ci).Reinterpret<global::go.runtime_package.pallocData, ΔPallocData>();
 }
 
 // AddrRange is a wrapper around addrRange for testing.
 public partial struct AddrRange {
-    internal partial ref global::go.runtime_package.addrRange addrRange { get; }
+    /*embed*/ internal global::go.runtime_package.addrRange addrRange;
 }
 
 // MakeAddrRange creates a new address range.
@@ -1065,7 +1065,7 @@ internal static void initᴛtestSysStat() { testSysStat = Ꮡmemstats.of(global:
 
 // AddrRanges is a wrapper around addrRanges for testing.
 public partial struct AddrRanges {
-    internal partial ref global::go.runtime_package.addrRanges addrRanges { get; }
+    /*embed*/ internal global::go.runtime_package.addrRanges addrRanges;
     internal bool mutable;
 }
 
@@ -1174,7 +1174,7 @@ public static ж<PageAlloc> NewPageAlloc(map<ChunkIdx, slice<BitRange>> chunks, 
     Δp.init(@new<global::go.runtime_package.mutex>(), testSysStat, true);
     lockInit(ref ((~Δp).mheapLock).DerefOrNull(), lockRankMheap);
     foreach (var (i, init) in chunks) {
-        var addr = chunkBase(((global::go.runtime_package.chunkIdx)(nuint)i));
+        var addr = chunkBase((global::go.runtime_package.chunkIdx)(nuint)i);
 
         // Mark the chunk's existence in the pageAlloc.
         var pʗ1 = Δp;
@@ -1302,13 +1302,13 @@ public static ChunkIdx BaseChunkIdx = ((Func<ChunkIdx>)(() => {
     if (goos.IsAix != 0) {
         baseAddr += arenaBaseOffset;
     }
-    return ((ChunkIdx)(nuint)chunkIndex(baseAddr));
+    return (ChunkIdx)(nuint)chunkIndex(baseAddr);
 }))();
 
 // PageBase returns an address given a chunk index and a page index
 // relative to that chunk.
 public static uintptr PageBase(ChunkIdx c, nuint pageIdx) {
-    return chunkBase(((global::go.runtime_package.chunkIdx)(nuint)c)) + (uintptr)pageIdx * (uintptr)pageSize;
+    return chunkBase((global::go.runtime_package.chunkIdx)(nuint)c) + (uintptr)pageIdx * (uintptr)pageSize;
 }
 
 public partial struct BitsMismatch {
@@ -1343,7 +1343,7 @@ chunkLoop:
                 // If a used bit and scavenged bit are both set, that's
                 // an error, and could indicate a larger problem, or
                 // an accounting problem.
-                var want = (uint64)((~chunk).scavenged[j] & ~(~chunk).pallocBits[j]);
+                var want = (~chunk).scavenged[j] & ~(~chunk).pallocBits[j];
                 var got = (~chunk).scavenged[j];
                 if (want != got) {
                     ok = false;
@@ -1448,7 +1448,7 @@ public static UntypedInt SemTableSize => /* semTabSize */ 251;
 
 // SemTable is a wrapper around semTable exported for testing.
 public partial struct SemTable {
-    internal partial ref global::go.runtime_package.semTable semTable { get; }
+    /*embed*/ internal global::go.runtime_package.semTable semTable;
 }
 
 // Enqueue simulates enqueuing a waiter for a semaphore (or lock) at addr.
@@ -1546,7 +1546,7 @@ public static nint SetIntArgRegs(nint a) {
 }
 
 public static bool FinalizerGAsleep() {
-    return (uint32)(ᏑfingStatus.Load() & fingWait) != 0;
+    return (ᏑfingStatus.Load() & fingWait) != 0;
 }
 
 // For GCTestMoveStackOnNextCall, it's important not to introduce an
@@ -1581,7 +1581,7 @@ public static UntypedInt MemoryLimitHeapGoalHeadroomPercent => /* memoryLimitHea
 public static UntypedInt MemoryLimitMinHeapGoalHeadroom => /* memoryLimitMinHeapGoalHeadroom */ 1048576;
 
 public partial struct GCController {
-    internal partial ref global::go.runtime_package.gcControllerState gcControllerState { get; }
+    /*embed*/ internal global::go.runtime_package.gcControllerState gcControllerState;
 }
 
 public static ж<GCController> NewGCController(nint gcPercent, int64 memoryLimit) {
@@ -1675,7 +1675,7 @@ internal static any escapeSink;
 
 public static T Escape<T>(T x) {
     if (alwaysFalse) {
-        escapeSink = x;
+        escapeSink = (x).OrTypedNilOf();
     }
     return x;
 }
@@ -1699,7 +1699,7 @@ public static void GoschedIfBusy() {
 }
 
 public partial struct PIController {
-    internal partial ref global::go.runtime_package.piController piController { get; }
+    /*embed*/ internal global::go.runtime_package.piController piController;
 }
 
 public static partial ж<PIController> NewPIController(float64 kp, float64 ti, float64 tt, float64 min, float64 max) {
@@ -1916,7 +1916,7 @@ public static ж<ScavengeIndex> NewScavengeIndex(ChunkIdx min, ChunkIdx max) {
 
 public static (ChunkIdx, nuint) Find(this ж<ScavengeIndex> Ꮡs, bool force) {
     var (ci, off) = Ꮡs.of(ScavengeIndex.Ꮡi).find(force);
-    return (((ChunkIdx)(nuint)ci), off);
+    return ((ChunkIdx)(nuint)ci, off);
 }
 
 public static void AllocRange(this ref ScavengeIndex s, uintptr @base, uintptr limit) {
@@ -1975,7 +1975,7 @@ public static void NextGen(this ж<ScavengeIndex> Ꮡs) {
 }
 
 public static void SetEmpty(this ref ScavengeIndex s, ChunkIdx ci) {
-    s.i.setEmpty(((global::go.runtime_package.chunkIdx)(nuint)ci));
+    s.i.setEmpty((global::go.runtime_package.chunkIdx)(nuint)ci);
 }
 
 public static bool CheckPackScavChunkData(uint32 gen, uint16 inUse, uint16 lastInUse, uint8 flags) {
@@ -2028,7 +2028,7 @@ public static nint GlobalWaitingArenaChunks() {
 }
 
 public static T UserArenaClone<T>(T s) {
-    return arena_heapify(s)._<T>();
+    return arena_heapify((s).OrTypedNilOf())._<T>();
 }
 
 public static Func<uintptr, uintptr, uintptr> AlignUp = alignUp;
@@ -2106,7 +2106,7 @@ public static bool UnsafePoint(uintptr pc) {
 }
 
 public partial struct TraceMap {
-    internal partial ref global::go.runtime_package.traceMap traceMap { get; }
+    /*embed*/ internal global::go.runtime_package.traceMap traceMap;
 }
 
 public static (uint64, bool) PutString(this ж<TraceMap> Ꮡm, @string s) {
@@ -2253,7 +2253,7 @@ public static @string Hexdumper(uintptr @base, nint wordBytes, Action<uintptr, A
     if (n == cap(buf)) {
         throw panic("Hexdumper buf too small");
     }
-    return ((@string)(buf.slice(0, n)));
+    return (@string)(buf.slice(0, n));
 }
 
 public static @string HexdumpWords(uintptr Δp, uintptr bytes) {
@@ -2265,30 +2265,30 @@ public static @string HexdumpWords(uintptr Δp, uintptr bytes) {
     if (n == cap(buf)) {
         throw panic("HexdumpWords buf too small");
     }
-    return ((@string)(buf.slice(0, n)));
+    return (@string)(buf.slice(0, n));
 }
 
 // DumpPrintQuoted provides access to print(quoted()) for the tests in
 // runtime/print_quoted_test.go, allowing us to test that implementation.
 public static @string DumpPrintQuoted(@string s) {
     var gp = getg();
-    gp.Value.writebuf = new slice<byte>(0, (1 << (int)(20)));
-    print(((global::go.runtime_package.quoted)s));
+    gp.Value.writebuf = new slice<byte>(0, (1 << 20));
+    print((global::go.runtime_package.quoted)s);
     var buf = gp.Value.writebuf;
     gp.Value.writebuf = default!;
 
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 // DumpPrint returns the output of print(v).
 public static @string DumpPrint<T>(T v) {
     var gp = getg();
     gp.Value.writebuf = new slice<byte>(0, 2048);
-    print(v);
+    print((v).OrTypedNilOf());
     var buf = gp.Value.writebuf;
     gp.Value.writebuf = default!;
 
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 public static nint Float64Bytes = float64Bytes;

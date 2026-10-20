@@ -125,7 +125,7 @@ internal static void RuntimeError(this plainError e) {
 }
 
 internal static @string Error(this plainError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // A boundsError represents an indexing or slicing operation gone wrong.
@@ -181,6 +181,8 @@ internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
 }
 
 internal static @string Error(this boundsError e) {
+    var bᴷ = new stackAppend<byte>();
+
     @string fmt = boundsErrorFmts[e.code];
     if (e.signed && e.x < 0) {
         fmt = boundsNegErrorFmts[e.code];
@@ -192,7 +194,7 @@ internal static @string Error(this boundsError e) {
     for (nint i = 0; i < len(fmt); i++) {
         var c = fmt[i];
         if (c != (rune)'%') {
-            b = append(b, c);
+            b = append(bᴷ, b, c);
             continue;
         }
         i++;
@@ -206,7 +208,7 @@ internal static @string Error(this boundsError e) {
             break;
         }}
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 partial interface stringer {

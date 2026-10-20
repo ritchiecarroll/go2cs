@@ -264,7 +264,7 @@ partial struct Imethod {
 
 // ArrayType represents a fixed array type.
 partial struct ΔArrayType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // array element type
     public ж<Type> Slice; // slice type
     public uintptr Len;
@@ -285,55 +285,55 @@ public static ΔChanDir InvalidDir => 0;
 
 // ChanType represents a channel type
 partial struct ChanType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem;
     public ΔChanDir Dir;
 }
 
 partial struct structTypeUncommon {
-    public partial ref ΔStructType StructType { get; }
+    /*embed*/ public ΔStructType StructType;
     internal UncommonType u;
 }
 
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal partial struct Uncommon_u /*dyn*/ {
-    public partial ref PtrType PtrType { get; }
+    /*embed*/ public PtrType PtrType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ1 /*dyn*/ {
-    public partial ref ΔFuncType FuncType { get; }
+    /*embed*/ public ΔFuncType FuncType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ2 /*dyn*/ {
-    public partial ref SliceType SliceType { get; }
+    /*embed*/ public SliceType SliceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ3 /*dyn*/ {
-    public partial ref ΔArrayType ArrayType { get; }
+    /*embed*/ public ΔArrayType ArrayType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ4 /*dyn*/ {
-    public partial ref ChanType ChanType { get; }
+    /*embed*/ public ChanType ChanType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ5 /*dyn*/ {
-    public partial ref ΔMapType MapType { get; }
+    /*embed*/ public ΔMapType MapType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ6 /*dyn*/ {
-    public partial ref ΔInterfaceType InterfaceType { get; }
+    /*embed*/ public ΔInterfaceType InterfaceType;
     internal UncommonType u;
 }
 
 internal partial struct Uncommon_uᴛ7 /*dyn*/ {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     internal UncommonType u;
 }
 
@@ -386,10 +386,7 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 
 // go2cs generated this placeholder — func InterfaceType is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-// Size returns the size of data with type t.
-public static uintptr Size(this ref Type t) {
-    return t.Size_;
-}
+// go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
 public static nint Align(this ref Type t) {
@@ -401,7 +398,7 @@ public static nint FieldAlign(this ref Type t) {
 }
 
 partial struct ΔInterfaceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;      // import path
     public slice<Imethod> Methods; // sorted by hash
 }
@@ -432,7 +429,7 @@ public static nint NumMethod(this ref ΔInterfaceType t) {
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 partial struct SliceType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // slice element type
 }
 
@@ -448,7 +445,7 @@ partial struct SliceType {
 //		[2]*rtype    // [0] is in, [1] is out
 //	}
 partial struct ΔFuncType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public uint16 InCount;
     public uint16 OutCount; // top bit is set if last input parameter is ...
 }
@@ -462,7 +459,7 @@ public static nint NumIn(this ref ΔFuncType t) {
 }
 
 public static nint NumOut(this ref ΔFuncType t) {
-    return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
+    return (nint)((uint16)(t.OutCount & ((1 << 15) - 1)));
 }
 
 public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
@@ -474,11 +471,11 @@ public static ж<Type> Out(this ж<ΔFuncType> Ꮡt, nint i) {
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 public static bool IsVariadic(this ref ΔFuncType t) {
-    return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
+    return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
 
 partial struct PtrType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Elem; // pointer element (pointed at) type
 }
 
@@ -493,7 +490,7 @@ public static bool Embedded(this ref StructField f) {
 }
 
 partial struct ΔStructType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ΔName PkgPath;
     public slice<StructField> Fields;
 }
@@ -544,17 +541,17 @@ public static ж<byte> Data(this ΔName n, nint off) {
 
 // IsExported returns "is n exported?"
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 // HasTag returns true iff there is tag data following this name
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 // IsEmbedded returns true iff n is embedded (an anonymous field).
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -566,7 +563,7 @@ public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.DataChecked(off + i, readVarintˢ).Value;
-        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)((7 * i)));
+        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }
@@ -587,7 +584,7 @@ public static bool IsBlank(this ΔName n) {
 // Writes at most 10 bytes.
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = (byte)((nint)(n & 0x7f));
+        var b = (byte)(n & 0x7f);
         n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;
@@ -620,10 +617,10 @@ public static @string Tag(this ΔName n) {
 }
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
-    if (len(n) >= (1 << (int)(29))) {
+    if (len(n) >= 1 << 29) {
         throw panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
-    if (len(tag) >= (1 << (int)(29))) {
+    if (len(tag) >= 1 << 29) {
         throw panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = new(10);
@@ -634,14 +631,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= (byte)((byte)(1 << (int)(0)));
+        bits |= (byte)((byte)(1 << 0));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= (byte)((byte)(1 << (int)(1)));
+        bits |= (byte)((byte)(1 << 1));
     }
     if (embedded) {
-        bits |= (byte)((byte)(1 << (int)(3)));
+        bits |= (byte)((byte)(1 << 3));
     }
 
     var b = new slice<byte>(l);

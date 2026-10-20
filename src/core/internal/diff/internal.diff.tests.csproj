@@ -128,6 +128,7 @@
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/txtar/internal.txtar.csproj" />
+    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="internal.diff.csproj" />

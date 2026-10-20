@@ -86,7 +86,7 @@ internal static (slice<@string>, error) listGroupsFromReader(ref User u, io.Read
         if (len(parts) != 3 || len(parts[0]) == 0) {
             continue;
         }
-        @string gid = ((@string)parts[2]);
+        @string gid = (@string)parts[2];
         // Make sure it's numeric and not the same as primary GID.
         (var numGid, errΔ1) = strconv.Atoi(gid);
         if (errΔ1 != default! || numGid == primaryGid) {

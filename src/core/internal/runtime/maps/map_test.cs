@@ -623,12 +623,12 @@ public static void TestAlignUpPow2(ж<testing.T> Ꮡt) {
             want: 4
         ),
         new(
-            @in: ((uint64)1 << (int)(63)),
-            want: ((uint64)1 << (int)(63))
+            @in: ((uint64)1 << 63),
+            want: ((uint64)1 << 63)
         ),
         new(
             @in: 9223372036854775807UL,
-            want: ((uint64)1 << (int)(63))
+            want: ((uint64)1 << 63)
         ),
         new(
             @in: 9223372036854775809UL,
@@ -762,7 +762,7 @@ internal static any escapeSink;
 
 internal static T escape<T>(T x) {
     if (alwaysFalse) {
-        escapeSink = x;
+        escapeSink = (x).OrTypedNilOf();
     }
     return x;
 }
@@ -799,7 +799,7 @@ public static void TestTableGroupCount(ж<testing.T> Ꮡt) {
 
     slice<TestTableGroupCount_type> testCases = new TestTableGroupCount_type[]{
         new(
-            n: -((1 << (int)(30))),
+            n: -(1 << 30),
             escape: new TestTableGroupCount_mapCase(
                 initialLit: new TestTableGroupCount_mapCount(0, 0),
                 initialHint: new TestTableGroupCount_mapCount(0, 0),

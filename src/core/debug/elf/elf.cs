@@ -3592,15 +3592,15 @@ partial struct Rela32 {
 }
 
 public static uint32 R_SYM32(uint32 info) {
-    return (info >> (int)(8));
+    return info >> 8;
 }
 
 public static uint32 R_TYPE32(uint32 info) {
-    return (uint32)(info & 0xff);
+    return info & 0xff;
 }
 
 public static uint32 R_INFO32(uint32 sym, uint32 typ) {
-    return (uint32)((sym << (int)(8)) | typ);
+    return sym << 8 | typ;
 }
 
 // ELF32 Symbol.
@@ -3616,19 +3616,19 @@ partial struct Sym32 {
 public static UntypedInt Sym32Size => 16;
 
 public static SymBind ST_BIND(uint8 info) {
-    return ((SymBind)(nint)((info >> (int)(4))));
+    return (SymBind)(nint)((info >> 4));
 }
 
 public static SymType ST_TYPE(uint8 info) {
-    return ((SymType)(nint)((uint8)(info & 0xF)));
+    return (SymType)(nint)((uint8)(info & 0xF));
 }
 
 public static uint8 ST_INFO(SymBind bind, SymType typ) {
-    return (uint8)((uint8)((uint8)(nint)bind << (int)(4)) | (uint8)((uint8)(nint)typ & 0xf));
+    return (uint8)((uint8)((uint8)(nint)bind << 4) | (uint8)((uint8)(nint)typ & 0xf));
 }
 
 public static SymVis ST_VISIBILITY(uint8 other) {
-    return ((SymVis)(nint)((uint8)(other & 3)));
+    return (SymVis)(nint)((uint8)(other & 3));
 }
 
 /*
@@ -3711,7 +3711,7 @@ partial struct Rela64 {
 }
 
 public static uint32 R_SYM64(uint64 info) {
-    return (uint32)((info >> (int)(32)));
+    return (uint32)(info >> 32);
 }
 
 public static uint32 R_TYPE64(uint64 info) {
@@ -3719,7 +3719,7 @@ public static uint32 R_TYPE64(uint64 info) {
 }
 
 public static uint64 R_INFO(uint32 sym, uint32 typ) {
-    return (uint64)(((uint64)sym << (int)(32)) | (uint64)typ);
+    return (uint64)sym << 32 | (uint64)typ;
 }
 
 // ELF64 symbol table entries.
@@ -3775,7 +3775,7 @@ internal static @string stringName(uint32 i, slice<intName> names, bool goSyntax
 internal static @string flagName(uint32 i, slice<intName> names, bool goSyntax) {
     @string s = ""u8;
     foreach (var (_, n) in names) {
-        if ((uint32)(n.i & i) == n.i) {
+        if ((n.i & i) == n.i) {
             if (len(s) > 0) {
                 s += "+"u8;
             }

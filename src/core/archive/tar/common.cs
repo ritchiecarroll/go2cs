@@ -50,11 +50,13 @@ internal static readonly @string andˢ = "; and "u8;
 internal static readonly @string prefixᶜ = "archive/tar: cannot encode header"u8;
 
 internal static @string Error(this headerError he) {
+    var ssᴷ = new stackAppend<@string>();
+
     @string prefix = prefixᶜ;
     slice<@string> ss = default!;
     foreach (var (_, s) in he) {
         if (s != ""u8) {
-            ss = append(ss, s);
+            ss = append(ssᴷ, ss, s);
         }
     }
     if (len(ss) == 0) {
@@ -632,13 +634,13 @@ internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
     mode = ((fs.FileMode)(uint32)(~fi.h).Mode).Perm();
 
     // Set setuid, setgid and sticky bits.
-    if ((int64)((~fi.h).Mode & (int64)c_ISUID) != 0) {
+    if (((~fi.h).Mode & (int64)c_ISUID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetuid);
     }
-    if ((int64)((~fi.h).Mode & (int64)c_ISGID) != 0) {
+    if (((~fi.h).Mode & (int64)c_ISGID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetgid);
     }
-    if ((int64)((~fi.h).Mode & (int64)c_ISVTX) != 0) {
+    if (((~fi.h).Mode & (int64)c_ISVTX) != 0) {
         mode |= (fs.FileMode)(fs.ModeSticky);
     }
 

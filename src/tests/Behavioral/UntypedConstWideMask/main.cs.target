@@ -21,7 +21,7 @@ internal static bool isHost(byte c) {
 	1<<':' */
             maskᶜ;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL)))) != 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & (576284830442979328UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (576460746666278911UL))) != 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -34,7 +34,7 @@ internal static bool validHeaderValueByte(byte c) {
 	1<<0x09 */
             maskᶜ1;
 
-    return ((uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL)))) == 0;
+    return ((uint64)((((uint64)1).Lsh((uint64)(c))) & ~(18446744069414584832UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & ~(9223372036854775807UL))) == 0;
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -44,7 +44,7 @@ internal static uint64 smallHigh(byte c) {
     GoBigConst mask = /* 1<<70 | 1<<3 */
             maskᶜ2;
 
-    return (uint64)((uint64)((((uint64)1).Lsh((uint64)(c))) & (8UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (64UL)));
+    return (uint64)((((uint64)1).Lsh((uint64)(c))) & (8UL)) | (uint64)((((uint64)1).Lsh((uint64)((byte)(c - 64)))) & (64UL));
 }
 
 // Hoisted Go big-integer constant (single parse; Go folds constants at compile time)
@@ -56,12 +56,6 @@ internal static uintptr nativeWidth(byte c) {
 
     return (uintptr)((uintptr)((((uintptr)1).Lsh((uint64)(c))) & (uintptr)((nuint)(128UL))) | (uintptr)((((uintptr)1).Lsh((uint64)((byte)(c - 64)))) & (uintptr)(unchecked((nuint)(4611686018427387906UL)))));
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object isHostCountˢ = (@string)"isHost count:"u8;
-private static readonly object validHeaderValueByteˢ = (@string)"validHeaderValueByte count:"u8;
-private static readonly object isHostSamplesˢ = (@string)"isHost samples:"u8;
-private static readonly object valueSamplesˢ = (@string)"value samples:"u8;
 
 internal static void Main() {
     nint hosts = 0;
@@ -75,11 +69,11 @@ internal static void Main() {
             values++;
         }
     }
-    fmt.Println(isHostCountˢ, hosts);
-    fmt.Println(validHeaderValueByteˢ, values);
+    fmt.Println("isHost count:", hosts);
+    fmt.Println("validHeaderValueByte count:", values);
 
-    fmt.Println(isHostSamplesˢ, isHost((rune)'a'), isHost((rune)'Z'), isHost((rune)'9'), isHost((rune)':'), isHost((rune)' '), isHost(200));
-    fmt.Println(valueSamplesˢ, validHeaderValueByte((rune)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
+    fmt.Println("isHost samples:", isHost((rune)'a'), isHost((rune)'Z'), isHost((rune)'9'), isHost((rune)':'), isHost((rune)' '), isHost(200));
+    fmt.Println("value samples:", validHeaderValueByte((rune)'a'), validHeaderValueByte(0x09), validHeaderValueByte(0x00), validHeaderValueByte(0x80));
 
     foreach (var (_, c) in new byte[]{3, 6, 70, 8, 64}.slice()) {
         fmt.Printf("smallHigh(%d) = %d\n"u8, c, smallHigh(c));

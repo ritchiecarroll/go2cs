@@ -200,7 +200,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
     nint lo = 0;
     nint hi = len(tx);
     while (hi - lo > 1) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var lim = tx[m].when;
         if (sec < lim){
             end = lim;
@@ -614,12 +614,12 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
             d += 7;
         }
         for (nint i = 1; i < r.week; i++) {
-            if (d + 7 >= daysIn(((ΔMonth)r.mon), year)) {
+            if (d + 7 >= daysIn((ΔMonth)r.mon, year)) {
                 break;
             }
             d += 7;
         }
-        d += daysBefore(((ΔMonth)r.mon));
+        d += daysBefore((ΔMonth)r.mon);
         if (isLeap(year) && r.mon > 2) {
             d++;
         }

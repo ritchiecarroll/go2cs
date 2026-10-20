@@ -36,7 +36,7 @@ public static void TestPureGoTag(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Δlog.Fatalf("loading package list: %v\n%s"u8, err, @out);
     }
-    var pkgs = strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8);
+    var pkgs = strings.Split(strings.TrimSpace((@string)@out), "\n"u8);
 
     cmd = exec.Command(testenv.GoToolPath(new testing_TжTB(Ꮡt)), toolˢ, distˢ, listˢ);
     cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
@@ -45,7 +45,7 @@ public static void TestPureGoTag(ж<testing.T> Ꮡt) {
         Δlog.Fatalf("loading architecture list: %v\n%s"u8, err, @out);
     }
     var allGOARCH = new map<@string, bool>();
-    foreach (var (_, pair) in strings.Split(strings.TrimSpace(((@string)@out)), "\n"u8)) {
+    foreach (var (_, pair) in strings.Split(strings.TrimSpace((@string)@out), "\n"u8)) {
         @string GOARCH = strings.Split(pair, "/"u8)[1];
         allGOARCH[GOARCH] = true;
     }

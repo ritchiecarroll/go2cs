@@ -17,7 +17,6 @@ global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using urlꓸError = go.net.url_package.ΔError;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -33,7 +32,6 @@ using static global::go.net.http.cookiejar_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.net.http.cookiejar_package.Jar, ж<global::go.net.http.cookiejar_package.Jar>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

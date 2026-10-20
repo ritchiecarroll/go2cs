@@ -63,6 +63,11 @@ public static partial class testing_package
     {
         internal TestRunner? Runner;
 
+        // Go's m.numRun and m.afterOnce: a TestMain may call m.Run more than once (go.dev/issue/23129), and
+        // only the first run's m.after closes the test log.
+        internal int NumRun;
+        internal bool AfterDone;
+
         public M(NilType _) { }
     }
 
@@ -578,6 +583,9 @@ public static partial class testing_package
     {
         TestRunner runner = m.Runner ?? throw new InvalidOperationException("testing.M is not attached to a test registry");
 
+        // Go counts every m.Run first (`m.numRun++`), before the parse.
+        m.NumRun++;
+
         // Go's M.Run opens with exactly this, under exactly this reasoning -- its comment reads
         // "TestMain may have already called flag.Parse.":
         //
@@ -601,7 +609,27 @@ public static partial class testing_package
         if (runner.Listing)
             return runner.ListTests();
 
-        return runner.RunAll();
+        // m.before's testlog block, then the tests, then writeProfiles' (go1.26.9 testing.go:2339-2357,
+        // 2697-2706, run from m.after, which Go defers): an open or close failure prints Go's message and
+        // exits 2, as Go's does. m.after runs writeProfiles under m.afterOnce (:2683-2686), so only the FIRST
+        // run closes the log; a later run's log stays open and unflushed, as Go leaves it.
+        if (runner.TestLogFile is not { } testLog)
+            return runner.RunAll();
+
+        TestLogBridge.ExitIfFailed(TestLogBridge.Open(testLog, firstRun: m.NumRun == 1));
+
+        try
+        {
+            return runner.RunAll();
+        }
+        finally
+        {
+            if (!m.AfterDone)
+            {
+                m.AfterDone = true;
+                TestLogBridge.ExitIfFailed(TestLogBridge.Close(testLog));
+            }
+        }
     }
 
     // Compile-only B surface (see struct B above) — never executed, never throwing. The

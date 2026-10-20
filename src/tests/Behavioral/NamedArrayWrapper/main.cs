@@ -35,6 +35,8 @@ internal static void fill(this ж<pallocBits> Ꮡb) {
 }
 
 internal static void Main() {
+    var wᴷ = new stackAppend<uint32>();
+
     ref var e = ref heap(new pallocBits(), out var Ꮡe);
     Ꮡe.fill();
     fmt.Println((Ꮡe.Reinterpret<pallocBits, pageBits>()).get(0), (Ꮡe.Reinterpret<pallocBits, pageBits>()).get(3));
@@ -42,7 +44,7 @@ internal static void Main() {
     fmt.Println(e[1]);
 
     var arr = new uint32[]{10, 20, 30, 40, 50, 60}.array();
-    var p = ((pm)(arr[2..5]));
+    var p = (pm)(arr[2..5]);
     var d = new slice<uint32>(3);
     nint n = copy(d, p);
     fmt.Println(n, d[0], d[1], d[2]);
@@ -52,7 +54,7 @@ internal static void Main() {
     fmt.Println(n2, arr2[3], arr2[4], arr2[5], arr2[0]);
 
     var arr3 = new uint32[]{1, 2, 3, 4, 5, 6}.array();
-    var ov = ((pm)(arr3[0..4]));
+    var ov = (pm)(arr3[0..4]);
     nint n3 = copy(arr3[2..6], ov);
     fmt.Println(n3, arr3[2], arr3[3], arr3[4], arr3[5]);
 
@@ -72,7 +74,7 @@ internal static void Main() {
     fmt.Println(t[2]);
     var w = new pm(new uint32[]{}.slice());
     fmt.Println(len(w), cap(w));
-    w = append(w, (uint32)(42));
+    w = append(wᴷ, w, (uint32)42);
     fmt.Println(len(w), w[0]);
 
     zeroTB(ref t);
@@ -105,7 +107,7 @@ internal static void Main() {
     h.trace.Value[1] = h.trace.Value[0] + 2;
     fmt.Println(4, h.trace.Value[0], h.trace.Value[1], c[0]);
     var dst = new slice<uintptr>(2);
-    nint nc = copy(dst, (~h.trace).Value[..2]);
+    nint nc = copy(dst, h.trace.Value[..2]);
     fmt.Println(nc, dst[1]);
 
     ref var cs = ref heap(new counters(), out var Ꮡcs);

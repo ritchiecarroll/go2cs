@@ -96,7 +96,7 @@ public static void TestGlobal(ж<testing.T> Ꮡt) {
     }
 
     testString(Ꮡt, concurrency, concurrencyˢ, concurrencyIsNotˢ);
-    testString(Ꮡt, ((@string)glass), glassˢ, iCanEatGlassAndItDoesnTˢ);
+    testString(Ꮡt, (@string)glass, glassˢ, iCanEatGlassAndItDoesnTˢ);
 }
 
 //go:embed testdata

@@ -23,19 +23,19 @@ partial struct entry {
 }
 
 internal static slice<entry> table = new entry[]{
-    new("var-decl"u8, () => {
+    new("var-decl", () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         Ꮡc.inc(3);
         Ꮡc.inc(4);
         return c.get();
     }),
-    new("short-define"u8, () => {
+    new("short-define", () => {
         ref var c = ref heap<counter>(out var Ꮡc);
         c = new counter(n: 10);
         Ꮡc.inc(5);
         return c.get();
     }),
-    new("for-init"u8, () => {
+    new("for-init", () => {
         nint total = 0;
         for (var cᴛ1 = (new counter(n: 1)); cᴛ1.get() < 4; ) {
             ref var c = ref heap<counter>(out var Ꮡc);
@@ -46,7 +46,7 @@ internal static slice<entry> table = new entry[]{
         }
         return total;
     }),
-    new("if-init"u8, () => {
+    new("if-init", () => {
         {
             ref var c = ref heap<counter>(out var Ꮡc);
             c = (new counter(n: 7)); if (c.get() > 0) {
@@ -56,7 +56,7 @@ internal static slice<entry> table = new entry[]{
         }
         return -1;
     }),
-    new("switch-init"u8, () => {
+    new("switch-init", () => {
         {
             ref var c = ref heap<counter>(out var Ꮡc);
             c = (new counter(n: 20));
@@ -68,7 +68,7 @@ internal static slice<entry> table = new entry[]{
         }
 
     }),
-    new("range-value"u8, () => {
+    new("range-value", () => {
         nint total = 0;
         foreach (var (_, vᴛ1) in new counter[]{new(n: 1), new(n: 2)}.slice()) {
             ref var c = ref heap(new counter(), out var Ꮡc);
@@ -79,7 +79,7 @@ internal static slice<entry> table = new entry[]{
         }
         return total;
     }),
-    new("nested-literal"u8, () => {
+    new("nested-literal", () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         void inner() {
             Ꮡc.inc(6);
@@ -113,16 +113,12 @@ internal static slice<nint> inDecl() {
     return @out;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object singleˢ = (@string)"single"u8;
-private static readonly object controlˢ = (@string)"control"u8;
-
 internal static void Main() {
     foreach (var (_, e) in table) {
         fmt.Println(e.name, e.f());
     }
-    fmt.Println(singleˢ, single());
-    fmt.Println(controlˢ, inDecl());
+    fmt.Println("single", single());
+    fmt.Println("control", inDecl());
 }
 
 } // end main_package

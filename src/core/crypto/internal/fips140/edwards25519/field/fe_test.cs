@@ -74,7 +74,7 @@ internal static slice<uint64> weirdLimbs52 = new uint64[]{
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
-    ((uint64)1 << (int)(51)),
+    (uint64)1 << 51,
     (uint64)((2251799813685248L) + 1),
     (uint64)((4503599627370496L) - 19),
     (uint64)((4503599627370496L) - 1)
@@ -177,7 +177,7 @@ public static void TestSetBytesRoundTrip(ж<testing.T> Ꮡt) {
 
         // Mask the most significant bit as it's ignored by SetBytes. (Now
         // instead of earlier so we check the masking in SetBytes is working.)
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(7))) - 1);
+        @in[len(@in) - 1] &= (byte)((1 << 7) - 1);
 
         return bytes_package.Equal(@in[..], fe.Bytes()) && isInBounds(Ꮡfe);
     };
@@ -241,7 +241,7 @@ public static void TestBytesBigEquivalence(ж<testing.T> Ꮡt) {
         ref var fe1 = ref heap(fe1ʗp, out var Ꮡfe1);
         Ꮡfe.SetBytes(@in[..]);
 
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(7))) - 1); // mask the most significant bit
+        @in[len(@in) - 1] &= (byte)((1 << 7) - 1); // mask the most significant bit
         var b = @new<bigꓸInt>().SetBytes(swapEndianness(@in[..]));
         Ꮡfe1.fromBig(b);
 

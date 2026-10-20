@@ -57,6 +57,12 @@ using static go.@internal.reflectlite_package;
 [assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -66,7 +72,7 @@ using static go.@internal.reflectlite_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/reflectlite/type.go", "type.cs", "AIgBrAKCpoKmgqaC2qKCgoKCgvqCgpSCpoKClIKC5oKClIKCgoKUpoKCAAIaAAsO5IKmgqaCAAQWgKSCgoKUpoKCgpQABByCgpSCgoKClLSklKaCpoKCgpTOgoKClKaCgoKUpoKCgpSmgoKClKaCgoKUpoKCgpSmgoKClAACFPKqogAEGoKClIKCpoIABL4BAAkEgsqCuKaygqaCpgAE2AHSgpQ=")]
-[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE2kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
+[assembly: go.GoPositionMap("internal/reflectlite/value.go", "value.cs", "AE6kAYKmgoKUptyqooKUgpSokoKClJSCpoKCgoKU2MbsggAMNIKClAAEIKKClIK+soKmgpSCAAMS0gAIvAHSqqKsxgAEMpKClAAELJKCgqYAAhQACRwACAq4goKmgpS4lIKClJS4AAUU8qaayrKC")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

@@ -1106,6 +1106,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
     try {
         ref var p = ref Ꮡp.DerefOrNull();
         ref var name0 = ref Ꮡname0.DerefOrNull();
+        var listᴷ = new stackAppend<field>();
 
         if (p.trace) {
             defer(un, trace(Ꮡp, parameterListˢ), ref ᒐ);
@@ -1145,7 +1146,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             Ꮡname0 = default!; name0 = ref Ꮡname0.DerefOrNull(); // 1st name was consumed if present
             typ0 = default!; // 1st typ was consumed if present
             if (par.name != nil || par.typ != default!) {
-                list = append(list, par);
+                list = append(listᴷ, list, par);
                 if (par.name != nil && par.typ != default!) {
                     named++;
                 }

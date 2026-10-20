@@ -8,9 +8,6 @@ partial struct box {
     internal nint n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object programCompletedAfterˢ = (@string)"Program completed after panic recovery"u8;
-
 internal static void Main() {
     safeAssertions();
 
@@ -18,57 +15,44 @@ internal static void Main() {
 
     pointerAssertion();
 
-    fmt.Println(programCompletedAfterˢ);
+    fmt.Println("Program completed after panic recovery");
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object valueIsABoxˢ = (@string)"Value is a *box:"u8;
-private static readonly object pointerValueˢ = (@string)"Pointer value:"u8;
 
 internal static void pointerAssertion() {
     any i = Ꮡ(new box(n: 7));
 
     {
         var (bΔ1, ok) = i._<ж<box>>(ᐧ); if (ok) {
-            fmt.Println(valueIsABoxˢ, (~bΔ1).n);
+            fmt.Println("Value is a *box:", (~bΔ1).n);
         }
     }
 
     var b = i._<ж<box>>();
-    fmt.Println(pointerValueˢ, (~b).n);
+    fmt.Println("Pointer value:", (~b).n);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object helloˢ = (@string)"hello"u8;
-private static readonly object valueIsAStringˢ = (@string)"Value is a string:"u8;
-private static readonly object valueIsNotAStringˢ = (@string)"Value is not a string"u8;
-private static readonly object valueIsAnIntˢ = (@string)"Value is an int:"u8;
-private static readonly object valueIsNotAnIntˢ = (@string)"Value is not an int"u8;
 
 internal static void safeAssertions() {
     any i = helloˢ;
 
     {
         var (s, ok) = i._<@string>(ᐧ); if (ok){
-            fmt.Println(valueIsAStringˢ, s);
+            fmt.Println("Value is a string:", s);
         } else {
-            fmt.Println(valueIsNotAStringˢ);
+            fmt.Println("Value is not a string");
         }
     }
 
     {
         var (n, ok) = i._<nint>(ᐧ); if (ok){
-            fmt.Println(valueIsAnIntˢ, n);
+            fmt.Println("Value is an int:", n);
         } else {
-            fmt.Println(valueIsNotAnIntˢ);
+            fmt.Println("Value is not an int");
         }
     }
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredFromPanicˢ = (@string)"Recovered from panic:"u8;
-private static readonly object stringValueˢ = (@string)"String value:"u8;
-private static readonly object integerValueˢ = (@string)"Integer value:"u8;
 
 internal static void assertionsWithPanic() {
     GoFrame ᒐ = default;
@@ -76,7 +60,7 @@ internal static void assertionsWithPanic() {
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
-                    fmt.Println(recoveredFromPanicˢ, r);
+                    fmt.Println("Recovered from panic:", r);
                 }
             }
         }, ref ᒐ);
@@ -84,11 +68,11 @@ internal static void assertionsWithPanic() {
         any i = helloˢ;
 
         @string s = i._<@string>();
-        fmt.Println(stringValueˢ, s);
+        fmt.Println("String value:", s);
 
         nint n = i._<nint>();
 
-        fmt.Println(integerValueˢ, n);
+        fmt.Println("Integer value:", n);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

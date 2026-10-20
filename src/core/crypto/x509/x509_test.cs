@@ -2047,7 +2047,7 @@ public static void TestInsecureAlgorithmErrorString(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (i, tt) in tests) {
         {
-            @string got = fmt.Sprint(((global::go.crypto.x509_package.InsecureAlgorithmError)(nint)tt.sa)); if (got != tt.want) {
+            @string got = fmt.Sprint((global::go.crypto.x509_package.InsecureAlgorithmError)(nint)tt.sa); if (got != tt.want) {
                 Ꮡt.Errorf("%d. mismatch.\n got: %s\nwant: %s\n"u8, i, got, tt.want);
             }
         }
@@ -3330,7 +3330,7 @@ public static void TestUnknownExtKey(ж<testing.T> Ꮡt) {
     var template = Ꮡ(new Certificate(
         SerialNumber: big.NewInt(10),
         DNSNames: new @string[]{"foo"u8}.slice(),
-        ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{((global::go.crypto.x509_package.ExtKeyUsage)(-1))}.slice()
+        ExtKeyUsage: new global::go.crypto.x509_package.ExtKeyUsage[]{(global::go.crypto.x509_package.ExtKeyUsage)(-1)}.slice()
     ));
 
     var (_, err) = CreateCertificate(rand.Reader, template, template, testPrivateKey.Public(), testPrivateKey.OrTypedNil());

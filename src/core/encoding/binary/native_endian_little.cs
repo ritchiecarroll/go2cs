@@ -7,7 +7,7 @@ namespace go.encoding;
 partial class binary_package {
 
 public partial struct nativeEndian {
-    internal partial ref littleEndian littleEndian { get; }
+    /*embed*/ internal littleEndian littleEndian;
 }
 
 // NativeEndian is the native-endian implementation of [ByteOrder] and [AppendByteOrder].

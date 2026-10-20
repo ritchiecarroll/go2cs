@@ -30,7 +30,7 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     // basic types
     new(default!, "0  nil"u8),
     new(true, "0  true"u8),
-    new((nint)(42), "0  42"u8),
+    new((nint)42, "0  42"u8),
     new(3.14D, "0  3.14"u8),
     new(1D + 2.718D.i(), "0  (1+2.718i)"u8),
     new((@string)"foobar"u8, "0  \"foobar\""u8),

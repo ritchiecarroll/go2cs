@@ -71,7 +71,7 @@ partial struct Header {
 // returned by [Reader.Read] as tentative until they receive the [io.EOF]
 // marking the end of the data.
 partial struct Reader {
-    public partial ref Header Header { get; }       // valid after NewReader or Reader.Reset
+    /*embed*/ public Header Header;       // valid after NewReader or Reader.Reset
     internal flate.Reader r;
     internal io.ReadCloser decompressor;
     internal uint32 digest; // CRC-32, IEEE polynomial (section 8)
@@ -142,6 +142,8 @@ public static void Multistream(this ref Reader z, bool ok) {
 // will output a string encoded using UTF-8.
 // This method always updates z.digest with the data read.
 internal static (@string, error) readString(this ref Reader z) {
+    var sᴷ = new stackAppend<rune>();
+
     error err = default!;
     var needConv = false;
     for (nint i = 0; ᐧ ; i++) {
@@ -163,11 +165,11 @@ internal static (@string, error) readString(this ref Reader z) {
             if (needConv) {
                 var s = new slice<rune>(0, i);
                 foreach (var (_, v) in z.buf.slice(0, i)) {
-                    s = append(s, (rune)v);
+                    s = append(sᴷ, s, (rune)v);
                 }
-                return (((@string)s), default!);
+                return ((@string)s, default!);
             }
-            return (((@string)(z.buf.slice(0, i))), default!);
+            return ((@string)(z.buf.slice(0, i)), default!);
         }
     }
 }

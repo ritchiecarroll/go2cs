@@ -42,7 +42,7 @@ public static (uint32, uint32) HashStr<T>(T sep)
     uint32 pow = 1;
     uint32 sq = PrimeRK;
     for (nint i = len(sep); i > 0; i >>= (int)(1)) {
-        if ((nint)(i & 1) != 0) {
+        if ((i & 1) != 0) {
             pow *= sq;
         }
         sq *= sq;
@@ -62,7 +62,7 @@ public static (uint32, uint32) HashStrRev<T>(T sep)
     uint32 pow = 1;
     uint32 sq = PrimeRK;
     for (nint i = len(sep); i > 0; i >>= (int)(1)) {
-        if ((nint)(i & 1) != 0) {
+        if ((i & 1) != 0) {
             pow *= sq;
         }
         sq *= sq;

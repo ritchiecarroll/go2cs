@@ -103,19 +103,19 @@ internal static void blockGeneric(ref Digest dig, slice<byte> p) {
         foreach (var i in range(80)) {
             if (i < 16){
                 nint j = i * 8;
-                w[i] = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)p[j] << (int)(56)) | ((uint64)p[j + 1] << (int)(48))) | ((uint64)p[j + 2] << (int)(40))) | ((uint64)p[j + 3] << (int)(32))) | ((uint64)p[j + 4] << (int)(24))) | ((uint64)p[j + 5] << (int)(16))) | ((uint64)p[j + 6] << (int)(8))) | (uint64)p[j + 7]);
+                w[i] = (uint64)p[j] << 56 | (uint64)p[j + 1] << 48 | (uint64)p[j + 2] << 40 | (uint64)p[j + 3] << 32 | (uint64)p[j + 4] << 24 | (uint64)p[j + 5] << 16 | (uint64)p[j + 6] << 8 | (uint64)p[j + 7];
             } else {
                 var v1 = w[i - 2];
-                var t1Δ1 = (uint64)((uint64)(bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61)) ^ ((v1 >> (int)(6))));
+                var t1Δ1 = bits.RotateLeft64(v1, -19) ^ bits.RotateLeft64(v1, -61) ^ (v1 >> 6);
                 var v2 = w[i - 15];
-                var t2Δ1 = (uint64)((uint64)(bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8)) ^ ((v2 >> (int)(7))));
+                var t2Δ1 = bits.RotateLeft64(v2, -1) ^ bits.RotateLeft64(v2, -8) ^ (v2 >> 7);
 
                 w[i] = t1Δ1 + w[i - 7] + t2Δ1 + w[i - 16];
             }
 
-            var t1 = h + ((uint64)((uint64)(bits.RotateLeft64(e, -14) ^ bits.RotateLeft64(e, -18)) ^ bits.RotateLeft64(e, -41))) + ((uint64)(((uint64)(e & f)) ^ ((uint64)(~e & g)))) + _K[i] + w[i];
+            var t1 = h + (bits.RotateLeft64(e, -14) ^ bits.RotateLeft64(e, -18) ^ bits.RotateLeft64(e, -41)) + ((e & f) ^ (~e & g)) + _K[i] + w[i];
 
-            var t2 = ((uint64)((uint64)(bits.RotateLeft64(a, -28) ^ bits.RotateLeft64(a, -34)) ^ bits.RotateLeft64(a, -39))) + ((uint64)((uint64)(((uint64)(a & b)) ^ ((uint64)(a & c))) ^ ((uint64)(b & c))));
+            var t2 = (bits.RotateLeft64(a, -28) ^ bits.RotateLeft64(a, -34) ^ bits.RotateLeft64(a, -39)) + ((a & b) ^ (a & c) ^ (b & c));
 
             h = g;
             g = f;

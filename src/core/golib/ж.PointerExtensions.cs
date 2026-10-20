@@ -105,18 +105,50 @@ public static class PointerExtensions
     /// design -- so this indexes it in place, bounded by the length it was minted with. Every other box
     /// reads through <c>Value</c>, exactly as <c>p.Value[i]</c> does, with the same overloads and so the
     /// same bounds checks and panics. One type test per read; no element box (runtime's cheaprand is on
-    /// the emitted population).
+    /// the emitted population). A pointer array over FOREIGN memory reads its element's word in place
+    /// (<see cref="NativePointerArrayBox{E}"/>); that second test exists only for a reference-bearing
+    /// <typeparamref name="T"/>, a JIT-time constant, so an unmanaged element's read is unchanged.
     /// </remarks>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, int index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+            return ref words.ElementRef(index);
+
+        return ref pointer.Value[index];
+    }
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, nint index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+            return ref words.ElementRef(index);
+
+        return ref pointer.Value[index];
+    }
 
     /// <inheritdoc cref="ElementRef{T}(ж{array{T}}, int)"/>
-    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index) =>
-        ref pointer is NativeArrayBox<T> native ? ref native.ElementRef(index) : ref pointer.Value[index];
+    public static ref T ElementRef<T>(this ж<array<T>> pointer, ulong index)
+    {
+        if (pointer is NativeArrayBox<T> native)
+            return ref native.ElementRef(index);
+
+        if (RuntimeHelpers.IsReferenceOrContainsReferences<T>() && pointer is INativeWordArray<T> words)
+        {
+            // An UNSIGNED index is checked at its full value before any narrowing, as array<T>'s ulong indexer does.
+            if (index >= (ulong)words.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, words.Length);
+
+            return ref words.ElementRef((nint)index);
+        }
+
+        return ref pointer.Value[index];
+    }
 
     /// <summary>
     /// Reinterprets a pointer as a pointer to <typeparamref name="TDst"/> — Go's
@@ -180,6 +212,14 @@ public static class PointerExtensions
             TDst fn = FuncCookieReinterpret<T, TDst>.Resolve(word);
             return new StandardBox<TDst>(fn);
         }
+
+        // A reinterpret OF a reinterpret view re-views the view's ROOT, so `(*T)((*U)(p))` is p itself and a chain of
+        // conversions is one view over one box. A view over the view aliased the right storage but compared unequal to
+        // the box it came from wherever that box is not itself a field view -- a standard box or an element reference --
+        // so `(*Employee)((*Person)(e)) == e` read false. The root answers null when it cannot alias as TDst, and then
+        // the view-over-view below still aliases through the intermediate view.
+        if (box is FieldRefBox<T> { ReinterpretRoot: IReinterpretRoot root } && root.AliasAs<TDst>() is { } collapsed)
+            return collapsed;
 
         if (ReinterpretAliasesStorage<T, TDst>.Value)
         {
@@ -296,6 +336,28 @@ public static class PointerExtensions
     /// together are the boundary idiom this exists for, and they exclude the prefix-downcast
     /// idiom — see the call site.
     /// </remarks>
+    /// <summary>
+    /// Go's <c>(*TDst)(p)</c> for two struct types the converter knows cannot ALIAS in C#: identical ignoring tags,
+    /// but differing in the tags of a nested unnamed type held through a reference, which C# lifts to two classes.
+    /// </summary>
+    /// <remarks>
+    /// The conversion is valid Go and most of what follows it is exact here: a nil source gives the derived type's
+    /// nil, the result compares and hashes as a reinterpret view of <paramref name="box"/>, and converting it back
+    /// gives <paramref name="box"/> itself. Only a read or a write through it needs Go's aliased memory, and that
+    /// refuses by name (a plain "go2cs: pointer conversion" panic, never a runtime.Error) rather than copying, which is
+    /// what the converter emitted before. The converter prints a warning naming the site and the two classes.
+    /// </remarks>
+    public static ж<TDst> ReinterpretUnaliased<T, TDst>(this ж<T>? box)
+    {
+        if (box is null || box.IsNilPointer)
+            return ж<TDst>.NilBox;
+
+        if (box is FieldRefBox<T> { ReinterpretRoot: IReinterpretRoot root } && root is ж<TDst> same)
+            return same;
+
+        return new FieldRefBox<TDst>(box, ж<T>.UnaliasedRef<TDst>);
+    }
+
     internal static class FuncCookieReinterpret<T, TDst>
     {
         /// <summary>
@@ -683,4 +745,28 @@ public static class PointerExtensions
 public static class PrefixProjection<T, TDst>
 {
     public static Func<ж<T>, ж<TDst>?>? Project;
+}
+
+/// <summary>
+/// The box a reinterpret view stands over, asked to alias as another pointee type. See the round-trip collapse in
+/// <see cref="PointerExtensions.Reinterpret{T, TDst}"/>.
+/// </summary>
+internal interface IReinterpretRoot
+{
+    /// <summary>
+    /// This box itself when it already is a <c>ж&lt;TDst&gt;</c>; a reinterpret view over this box when the two pointee
+    /// types can alias; otherwise <c>null</c>.
+    /// </summary>
+    ж<TDst>? AliasAs<TDst>();
+}
+
+public abstract partial class ж<T> : IReinterpretRoot
+{
+    ж<TDst>? IReinterpretRoot.AliasAs<TDst>()
+    {
+        if (this is ж<TDst> same)
+            return same;
+
+        return PointerExtensions.ReinterpretAliasesStorage<T, TDst>.Value ? new FieldRefBox<TDst>(this, ReinterpretRef<TDst>) : null;
+    }
 }

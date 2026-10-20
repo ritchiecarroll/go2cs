@@ -22,6 +22,8 @@ partial class tls13_package {
 public static slice<byte> ExpandLabel<H>(Func<H> hashΔ1, slice<byte> secret, @string label, slice<byte> context, nint length)
     where H : hash.Hash
 {
+    var hkdfLabelᴷ = new stackAppend<byte>();
+
     if (len("tls13 ") + len(label) > 255 || len(context) > 255) {
         // It should be impossible for this to panic: labels are fixed strings,
         // and context is either a fixed-length computed hash, or parsed from a
@@ -35,12 +37,12 @@ public static slice<byte> ExpandLabel<H>(Func<H> hashΔ1, slice<byte> secret, @s
     }
     var hkdfLabel = new slice<byte>(0, 2 + 1 + len("tls13 ") + len(label) + 1 + len(context));
     hkdfLabel = byteorder.BEAppendUint16(hkdfLabel, (uint16)length);
-    hkdfLabel = append(hkdfLabel, (byte)(len("tls13 ") + len(label)));
+    hkdfLabel = append(hkdfLabelᴷ, hkdfLabel, (byte)(len("tls13 ") + len(label)));
     hkdfLabel = append(hkdfLabel, ((@string)"tls13 "u8).ꓸꓸꓸ);
     hkdfLabel = append(hkdfLabel, label.ꓸꓸꓸ);
     hkdfLabel = append(hkdfLabel, (byte)len(context));
     hkdfLabel = appendꓸꓸꓸ(hkdfLabel, context);
-    return hkdf.Expand(hashΔ1, secret, ((@string)hkdfLabel), length);
+    return hkdf.Expand(hashΔ1, secret, (@string)hkdfLabel, length);
 }
 
 internal static slice<byte> extract<H>(Func<H> hashΔ1, slice<byte> newSecret, slice<byte> currentSecret)

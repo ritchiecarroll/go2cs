@@ -133,7 +133,7 @@ public static (ж<File>, error) OpenFile(this ж<Root> Ꮡr, @string name, nint 
     if (err != default!) {
         return (default!, err);
     }
-    rf.Value.appendMode = (nint)(flag & O_APPEND) != 0;
+    rf.Value.appendMode = (flag & O_APPEND) != 0;
     return (rf, default!);
 }
 

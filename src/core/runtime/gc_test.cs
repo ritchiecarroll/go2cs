@@ -121,7 +121,7 @@ internal partial struct TestGcRescan_X /*dyn*/ {
 }
 
 internal partial struct TestGcRescan_Y /*dyn*/ {
-    public partial ref TestGcRescan_X X { get; }
+    /*embed*/ public TestGcRescan_X X;
     internal ж<TestGcRescan_Y> nexty;
     internal ж<nint> p;
 }
@@ -336,12 +336,12 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
     }
 
     var got = runtime_internal_test_package.GCTestIsReachable(all.ꓸꓸꓸ);
-    if ((uint64)(got & want) != want) {
+    if ((got & want) != want) {
         // This is a serious bug - an object is live (due to the KeepAlive
         // call below), but isn't reported as such.
         Ꮡt.Fatalf("live object not in reachable set; want %b, got %b"u8, want, got);
     }
-    if (global::go.math.bits_package.OnesCount64((uint64)(got & ~want)) > 1) {
+    if (global::go.math.bits_package.OnesCount64(got & ~want) > 1) {
         // Note: we can occasionally have a value that is retained even though
         // it isn't live, due to conservative scanning of stack frames.
         // See issue 67204. For now, we allow a "slop" of 1 unintentionally
@@ -507,7 +507,7 @@ public static void TestPageAccounting(ж<testing.T> Ꮡt) {
     // pages-in-use count below zero because of a rounding
     // mismatch (golang.org/issue/15022).
     UntypedInt blockSize = /* 64 << 10 */ 65536;
-    var blocks = new slice<ж<array<byte>>>(((64 << (int)(20))) / blockSize);
+    var blocks = new slice<ж<array<byte>>>((64 << 20) / blockSize);
     foreach (var (i, _) in blocks) {
         blocks[i] = Ꮡ(new array<byte>(65536));
     }
@@ -812,7 +812,7 @@ public static void BenchmarkWriteBarrier(ж<testing.B> Ꮡb) {
                 tos++;
             }
 
-            if (i % ((1 << (int)(12))) == 0) {
+            if (i % (1 << 12) == 0) {
                 // Avoid non-preemptible loops (see issue #10958).
                 Δruntime.Gosched();
             }

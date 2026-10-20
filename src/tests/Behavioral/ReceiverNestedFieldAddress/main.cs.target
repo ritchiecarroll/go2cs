@@ -62,36 +62,27 @@ internal static uint16 readA(this ж<outer> Ꮡo) {
     return p.Value;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object oneHopˢ = (@string)"one hop:"u8;
-private static readonly object selectedˢ = (@string)"selected:"u8;
-private static readonly object throughPointerHopˢ = (@string)"through pointer hop:"u8;
-private static readonly object valueFieldUntouchedˢ = (@string)"value field untouched:"u8;
-private static readonly object twoHopsˢ = (@string)"two hops:"u8;
-private static readonly object readBackˢ = (@string)"read back:"u8;
-private static readonly object nameIntactˢ = (@string)"name intact:"u8;
-
 internal static void Main() {
-    var o = Ꮡ(new outer(name: "x"u8, ptr: Ꮡ(new inner(nil))));
+    var o = Ꮡ(new outer(name: "x", ptr: Ꮡ(new inner(nil))));
 
     o.bumpA();
     o.bumpA();
-    fmt.Println(oneHopˢ, (~o).@in.a);
+    fmt.Println("one hop:", (~o).@in.a);
 
     o.bumpSelected(0);
     o.bumpSelected(1);
-    fmt.Println(selectedˢ, (~o).@in.a, (~o).@in.b);
+    fmt.Println("selected:", (~o).@in.a, (~o).@in.b);
 
     o.bumpViaPtr();
-    fmt.Println(throughPointerHopˢ, (~(~o).ptr).b, valueFieldUntouchedˢ, (~o).@in.b);
+    fmt.Println("through pointer hop:", (~(~o).ptr).b, "value field untouched:", (~o).@in.b);
 
     var d = Ꮡ(new deep(nil));
     d.bumpLeaf();
     d.bumpLeaf();
-    fmt.Println(twoHopsˢ, (~d).md.lf.n);
+    fmt.Println("two hops:", (~d).md.lf.n);
 
-    fmt.Println(readBackˢ, o.readA());
-    fmt.Println(nameIntactˢ, (~o).name);
+    fmt.Println("read back:", o.readA());
+    fmt.Println("name intact:", (~o).name);
 }
 
 } // end main_package

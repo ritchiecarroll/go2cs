@@ -29,13 +29,13 @@ partial struct GoroutineSummary {
     // List of regions in the goroutine, sorted based on the start time.
     public slice<ж<UserRegionSummary>> Regions;
     // Statistics of execution time during the goroutine execution.
-    public partial ref GoroutineExecStats GoroutineExecStats { get; }
+    /*embed*/ public GoroutineExecStats GoroutineExecStats;
     // goroutineSummary is state used just for computing this structure.
     // It's dropped before being returned to the caller.
     //
     // More specifically, if it's nil, it indicates that this summary has
     // already been finalized.
-    internal partial ref ж<goroutineSummary> goroutineSummary { get; }
+    /*embed*/ internal ж<goroutineSummary> goroutineSummary;
 }
 
 // UserTaskSummary represents a task in the trace.
@@ -88,7 +88,7 @@ partial struct UserRegionSummary {
     // but can be a state transition event to NotExist if the goroutine
     // terminated without explicitly ending the region.
     public ж<ΔEvent> End;
-    public partial ref GoroutineExecStats GoroutineExecStats { get; }
+    /*embed*/ public GoroutineExecStats GoroutineExecStats;
 }
 
 // GoroutineExecStats contains statistics about a goroutine's execution
@@ -681,6 +681,8 @@ internal partial struct RelatedGoroutinesV2_unblockEdge /*dyn*/ {
 // The association is based on whether they have synchronized with each other in the Go
 // scheduler (one has unblocked another).
 public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, GoID goid) {
+    var unblockEdgesᴷ = new stackAppend<RelatedGoroutinesV2_unblockEdge>();
+
     slice<RelatedGoroutinesV2_unblockEdge> unblockEdges = default!;
     foreach (var (_, vᴛ1) in events) {
         var ev = vᴛ1.ΔClone();
@@ -700,7 +702,7 @@ public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, 
         if (old == @new || old != GoWaiting) {
             continue;
         }
-        unblockEdges = builtin.append(unblockEdges, new RelatedGoroutinesV2_unblockEdge(
+        unblockEdges = builtin.append(unblockEdgesᴷ, unblockEdges, new RelatedGoroutinesV2_unblockEdge(
             @operator: ev.Goroutine(),
             operand: id
         ));

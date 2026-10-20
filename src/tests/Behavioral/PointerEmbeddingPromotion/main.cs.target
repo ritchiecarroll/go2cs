@@ -17,26 +17,26 @@ internal static nint get(this ref leaf l) {
 }
 
 partial struct holder {
-    internal partial ref ж<leaf> leaf { get; }
+    /*embed*/ internal ж<leaf> leaf;
     internal @string tag;
 }
 
 partial struct mid {
-    internal partial ref ж<leaf> leaf { get; }
+    /*embed*/ internal ж<leaf> leaf;
 }
 
 partial struct top {
-    internal partial ref mid mid { get; }
+    /*embed*/ internal mid mid;
     internal @string label;
 }
 
 internal static void Main() {
-    var h = new holder(leaf: Ꮡ(new leaf(n: 0)), tag: "h"u8);
+    var h = new holder(leaf: Ꮡ(new leaf(n: 0)), tag: "h");
     h.bump();
     h.bump();
     fmt.Println(h.get(), h.n, h.tag);
 
-    var t = new top(mid: new mid(leaf: Ꮡ(new leaf(n: 10))), label: "t"u8);
+    var t = new top(mid: new mid(leaf: Ꮡ(new leaf(n: 10))), label: "t");
     t.bump();
     fmt.Println(t.get(), t.n, t.label);
 }

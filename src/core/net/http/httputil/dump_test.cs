@@ -243,7 +243,7 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
                 continue;
             }
             if (((sstring)dump) != tt.WantDump) {
-                Ꮡt.Errorf("DumpRequest %d, expecting:\n%s\nGot:\n%s\n"u8, i, tt.WantDump, ((@string)dump));
+                Ꮡt.Errorf("DumpRequest %d, expecting:\n%s\nGot:\n%s\n"u8, i, tt.WantDump, (@string)dump);
                 continue;
             }
         }
@@ -265,7 +265,7 @@ public static partial void TestDumpRequest(ж<testing.T> Ꮡt) {
                 continue;
             }
             if (((sstring)dump) != tt.WantDumpOut) {
-                Ꮡt.Errorf("DumpRequestOut %d, expecting:\n%s\nGot:\n%s\n"u8, i, tt.WantDumpOut, ((@string)dump));
+                Ꮡt.Errorf("DumpRequestOut %d, expecting:\n%s\nGot:\n%s\n"u8, i, tt.WantDumpOut, (@string)dump);
                 continue;
             }
         }
@@ -438,7 +438,7 @@ public static void TestDumpResponse(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%d. DumpResponse = %v"u8, i, err);
             continue;
         }
-        @string got = ((@string)gotb);
+        @string got = (@string)gotb;
         got = strings.TrimSpace(got);
         got = strings.ReplaceAll(got, "\r"u8, ""u8);
 

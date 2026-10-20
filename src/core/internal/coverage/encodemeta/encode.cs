@@ -56,7 +56,7 @@ public static (ж<CoverageMetaDataBuilder>, error) NewCoverageMetaDataBuilder(@s
 
 internal static void h32(uint32 x, hash.Hash h, slice<byte> tmp) {
     tmp = tmp[..0];
-    tmp = append(tmp, (byte)(0), (byte)(0), (byte)(0), (byte)(0));
+    tmp = append(tmp, (byte)0, (byte)0, (byte)0, (byte)0);
     binary.LittleEndian.PutUint32(tmp, x);
     h.Write(tmp);
 }
@@ -122,7 +122,7 @@ internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error 
 
 internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) {
     b.tmp = b.tmp[..0];
-    b.tmp = append(b.tmp, (byte)(0), (byte)(0), (byte)(0), (byte)(0));
+    b.tmp = append(b.tmp, (byte)0, (byte)0, (byte)0, (byte)0);
     binary.LittleEndian.PutUint32(b.tmp, v);
     {
         var (nw, err) = w.Write(b.tmp); if (err != default!){

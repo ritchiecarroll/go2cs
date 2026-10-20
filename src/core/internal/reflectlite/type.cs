@@ -104,7 +104,7 @@ public static abiꓸKind ΔString => /* abi.String */ 24;
 public static abiꓸKind Struct => /* abi.Struct */ 25;
 
 partial struct rtype {
-    public partial ref ж<@internal.abi_package.Type> Type { get; }
+    /*embed*/ public ж<@internal.abi_package.Type> Type;
 }
 
 // name is an encoded type name with optional extra data.
@@ -139,15 +139,15 @@ internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
 }
 
 internal static bool isExported(this Δname n) {
-    return (byte)((n.bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
+    return (byte)((n.bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 internal static bool hasTag(this Δname n) {
-    return (byte)((n.bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
+    return (byte)((n.bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 internal static bool embedded(this Δname n) {
-    return (byte)((n.bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
+    return (byte)((n.bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -159,7 +159,7 @@ internal static (nint, nint) readVarint(this Δname n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.data(off + i, readVarintˢ).Value;
-        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)((7 * i)));
+        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }
@@ -191,7 +191,7 @@ internal static readonly @string nameFlagFieldˢ = "name flag field"u8;
 internal static readonly @string nameOffsetFieldˢ = "name offset field"u8;
 
 internal static @string pkgPath(abiꓸName n) {
-    if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << (int)(2)))) == 0) {
+    if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
@@ -203,7 +203,7 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)))[..], (~array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4))[..]);
+    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
     var pkgPathName = new Δname((ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.name();
 }

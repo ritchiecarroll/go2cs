@@ -27,7 +27,7 @@ internal static UntypedInt bitsetLSB => 0x0101010101010101;
 public const uint64 MapCtrlEmpty = /* bitsetLSB * uint64(ctrlEmpty) */ 9259542123273814144;
 
 partial struct ΔMapType {
-    public partial ref Type Type { get; }
+    /*embed*/ public Type Type;
     public ж<Type> Key;
     public ж<Type> Elem;
     public ж<Type> Group; // internal type representing a slot group
@@ -47,22 +47,22 @@ public static UntypedInt MapIndirectElem => 8;
 
 public static bool NeedKeyUpdate(this ref ΔMapType mt) {
     // true if we need to update key on an overwrite
-    return (uint32)(mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
+    return (mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
 }
 
 public static bool HashMightPanic(this ref ΔMapType mt) {
     // true if hash function might panic
-    return (uint32)(mt.Flags & (uint32)MapHashMightPanic) != 0;
+    return (mt.Flags & (uint32)MapHashMightPanic) != 0;
 }
 
 public static bool IndirectKey(this ref ΔMapType mt) {
     // store ptr to key instead of key itself
-    return (uint32)(mt.Flags & (uint32)MapIndirectKey) != 0;
+    return (mt.Flags & (uint32)MapIndirectKey) != 0;
 }
 
 public static bool IndirectElem(this ref ΔMapType mt) {
     // store ptr to elem instead of elem itself
-    return (uint32)(mt.Flags & (uint32)MapIndirectElem) != 0;
+    return (mt.Flags & (uint32)MapIndirectElem) != 0;
 }
 
 } // end abi_package

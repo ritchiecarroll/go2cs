@@ -775,6 +775,8 @@ internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w)
 // defined to read from src until EOF, it does not treat an EOF from Read
 // as an error to be reported.
 public static (slice<byte>, error) ReadAll(Reader r) {
+    var chunksᴷ = new stackAppend<slice<byte>>();
+
     // Build slices of exponentially growing size,
     // then copy into a perfectly-sized slice at the end.
     var b = new slice<byte>(0, 512);
@@ -809,7 +811,7 @@ public static (slice<byte>, error) ReadAll(Reader r) {
 
         if (cap(b) - len(b) < cap(b) / 16) {
             // Move to the next intermediate slice.
-            chunks = append(chunks, b);
+            chunks = append(chunksᴷ, chunks, b);
             finalSize += len(b);
             b = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(next))[..0];
             next += next / 2;

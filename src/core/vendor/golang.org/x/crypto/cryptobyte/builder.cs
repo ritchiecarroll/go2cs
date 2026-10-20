@@ -81,28 +81,28 @@ public static void AddUint8(this ref Builder b, uint8 v) {
 
 // AddUint16 appends a big-endian, 16-bit value to the byte string.
 public static void AddUint16(this ref Builder b, uint16 v) {
-    b.add((byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 8), (byte)v);
 }
 
 // AddUint24 appends a big-endian, 24-bit value to the byte string. The highest
 // byte of the 32-bit input value is silently truncated.
 public static void AddUint24(this ref Builder b, uint32 v) {
-    b.add((byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint32 appends a big-endian, 32-bit value to the byte string.
 public static void AddUint32(this ref Builder b, uint32 v) {
-    b.add((byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint48 appends a big-endian, 48-bit value to the byte string.
 public static void AddUint48(this ref Builder b, uint64 v) {
-    b.add((byte)((v >> (int)(40))), (byte)((v >> (int)(32))), (byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint64 appends a big-endian, 64-bit value to the byte string.
 public static void AddUint64(this ref Builder b, uint64 v) {
-    b.add((byte)((v >> (int)(56))), (byte)((v >> (int)(48))), (byte)((v >> (int)(40))), (byte)((v >> (int)(32))), (byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddBytes appends a sequence of bytes to the byte string.

@@ -155,7 +155,7 @@ public static (nint, bool) BinarySearch<S, E>(S x, E target)
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (cmp.Less(x[h], target)){
             i = h + 1; // preserves x[i-1] < target
@@ -183,7 +183,7 @@ public static (nint, bool) BinarySearchFunc<S, E, T>(S x, T target, Func<E, T, n
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (cmp(x[h], target) < 0){
             i = h + 1; // preserves cmp(x[i - 1], target) < 0
@@ -205,9 +205,9 @@ internal static sortedHint decreasingHint => 2;
 partial struct xorshift /*num:uint64*/;
 
 internal static uint64 Next(this ref xorshift r) {
-    r ^= (xorshift)((r << (int)(13)));
-    r ^= (xorshift)((r >> (int)(7)));
-    r ^= (xorshift)((r << (int)(17)));
+    r ^= (xorshift)((r << 13));
+    r ^= (xorshift)((r >> 7));
+    r ^= (xorshift)((r << 17));
     return (uint64)(r);
 }
 

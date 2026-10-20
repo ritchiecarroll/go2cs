@@ -81,12 +81,9 @@ internal static nint keywordLocals() {
     return @__arglist + record + @scoped + @required + nuint;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string boomˢ = "boom"u8;
-
 internal static (nint, @string) predeclLocals() {
     nint iota = 6;
-    @string error = boomˢ;
+    @string error = "boom";
     nint comparable = 8;
     nint uintptr = 11;
     nint complex64 = 12;
@@ -95,7 +92,7 @@ internal static (nint, @string) predeclLocals() {
 
 internal static nint viewLen(slice<byte> b) {
     nint Δsstring = 3;
-    sstring s = ((sstring)b);
+    sstring s = (sstring)b;
     if (s == "ok"u8) {
         return Δsstring;
     }
@@ -104,7 +101,7 @@ internal static nint viewLen(slice<byte> b) {
 
 internal static void Main() {
     var a = new Δany(x: 1);
-    var vals = new any[]{(nint)(1), (@string)"two"u8, 3.5D}.slice();
+    var vals = new any[]{(nint)1, (@string)"two"u8, 3.5D}.slice();
     var c = (rune)'x';
     c++;
     var r = new Δrune(r: 2);

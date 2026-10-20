@@ -88,8 +88,8 @@ internal static void codeInit() {
             for (nint i = 0; i < len(data) && i < len(codeJSON); i++) {
                 if (data[i] != codeJSON[i]) {
                     println((@string)"re-marshal: changed at byte"u8, i);
-                    println((@string)"orig: "u8, ((@string)(codeJSON.slice(i - 10, i + 10))));
-                    println((@string)"new: "u8, ((@string)(data.slice(i - 10, i + 10))));
+                    println((@string)"orig: "u8, (@string)(codeJSON.slice(i - 10, i + 10)));
+                    println((@string)"new: "u8, (@string)(data.slice(i - 10, i + 10)));
                     break;
                 }
             }

@@ -50,11 +50,11 @@ internal partial interface main_type /*dyn*/ {
 }
 
 internal static void Main() {
-    var values = new any[]{((calc)7)}.slice();
+    var values = new any[]{(calc)7}.slice();
 
     var (v, ok) = values[0]._<main_type>(ᐧ);
 
-    fmt.Println((@string)"ok"u8, ok);
+    fmt.Println("ok", ok);
 
     if (!ok) {
         return;
@@ -68,7 +68,7 @@ internal static void Main() {
         fmt.Println(i, v.Four(1, 2, 3, 4));
         fmt.Println(i, v.Five(1, 2, 3, 4, 5));
         fmt.Println(i, v.Sum(1, 2, 3, 4, 5));
-        fmt.Println(i, v.Mixed("go"u8, true, 9));
+        fmt.Println(i, v.Mixed("go", true, 9));
     }
 }
 

@@ -199,7 +199,7 @@ internal static (byte, byte, error) parseWord(@string s) {
     if (err != default!) {
         return (0, 0, err);
     }
-    return ((uint8)((ret >> (int)(8))), (uint8)ret, default!);
+    return ((uint8)(ret >> 8), (uint8)ret, default!);
 }
 
 } // end netip_test_package

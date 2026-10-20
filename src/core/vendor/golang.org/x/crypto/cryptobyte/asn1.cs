@@ -41,7 +41,7 @@ internal static void addASN1Signed(this ж<Builder> Ꮡb, asn1.Tag tag, int64 v)
         }
 
         for (; length > 0; length--) {
-            var i = (int64)(v.Rsh((nuint)((length - 1) * 8)) & 0xff);
+            var i = v.Rsh((nuint)((length - 1) * 8)) & 0xff;
             c.AddUint8((uint8)i);
         }
     });
@@ -56,7 +56,7 @@ public static void AddASN1Uint64(this ж<Builder> Ꮡb, uint64 v) {
         }
 
         for (; length > 0; length--) {
-            var i = (uint64)(v.Rsh((nuint)((length - 1) * 8)) & 0xff);
+            var i = v.Rsh((nuint)((length - 1) * 8)) & 0xff;
             c.AddUint8((uint8)i);
         }
     });
@@ -465,7 +465,7 @@ internal static bool readBase128Int(this ref String s, ж<nint> Ꮡout) {
         }
         // Avoid overflowing int on a 32-bit platform.
         // We don't want different behavior based on the architecture.
-        if (ret >= (1 << (int)((31 - 7)))) {
+        if (ret >= 1 << (int)(31 - 7)) {
             return false;
         }
         ret <<= (int)(7);
@@ -537,7 +537,7 @@ public static bool ReadASN1GeneralizedTime(this ref String s, ж<time.Time> Ꮡo
     if (!s.ReadASN1(Ꮡbytes, asn1.GeneralizedTime)) {
         return false;
     }
-    @string t = ((@string)(slice<byte>)bytes);
+    @string t = (@string)(slice<byte>)bytes;
     var (res, err) = time.Parse(generalizedTimeFormatStr, t);
     if (err != default!) {
         return false;
@@ -562,7 +562,7 @@ public static bool ReadASN1UTCTime(this ref String s, ж<time.Time> Ꮡout) {
     if (!s.ReadASN1(Ꮡbytes, asn1.UTCTime)) {
         return false;
     }
-    @string t = ((@string)(slice<byte>)bytes);
+    @string t = (@string)(slice<byte>)bytes;
 
     @string formatStr = defaultUTCTimeFormatStr;
     error err = default!;
@@ -844,7 +844,7 @@ internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag>
     }
 
     if (ᏑoutTag != nil) {
-        outTag = ((asn1.Tag)tag);
+        outTag = (asn1.Tag)tag;
     }
 
     // ITU-T X.690 section 8.1.3
@@ -867,7 +867,7 @@ internal static bool readASN1(this ref String s, ж<String> Ꮡout, ж<asn1.Tag>
             return false;
         }
 
-        var lenBytes = ((String)((s).slice(2, (byte)(2 + lenLen))));
+        var lenBytes = (String)((s).slice(2, (byte)(2 + lenLen)));
         if (!lenBytes.readUnsigned(Ꮡlen32, (nint)lenLen)) {
             return false;
         }

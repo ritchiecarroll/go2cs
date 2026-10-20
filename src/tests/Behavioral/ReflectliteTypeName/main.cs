@@ -14,15 +14,15 @@ partial struct namedKey {
 internal static void Main() {
     var bg = context.Background();
 
-    var c1 = context.WithValue(bg, ((ctxKey)1), (@string)"v1"u8);
+    var c1 = context.WithValue(bg, (ctxKey)1, "v1");
     fmt.Println(c1);
 
-    var c2 = context.WithValue(c1, new namedKey(2), (@string)"v2"u8);
+    var c2 = context.WithValue(c1, new namedKey(2), "v2");
     fmt.Println(c2);
 
     ref var n = ref heap<nint>(out var Ꮡn);
     n = 3;
-    var c3 = context.WithValue(c2, Ꮡn, (@string)"v3"u8);
+    var c3 = context.WithValue(c2, Ꮡn, "v3");
     fmt.Println(c3);
 }
 

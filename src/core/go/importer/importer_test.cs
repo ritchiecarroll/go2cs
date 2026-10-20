@@ -50,7 +50,7 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("go list %s: %v\n%s"u8, thePackage, err, @out);
     }
-    @string export = strings.TrimSpace(((@string)@out));
+    @string export = strings.TrimSpace((@string)@out);
     var (compiler, target, _) = strings.Cut(export, ":"u8);
 
     if (compiler == "gccgo"u8) {
@@ -79,7 +79,7 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             tΔ1.Fatalf("can't read file containing declaration of math/big.Int: %v"u8, errΔ1);
         }
-        var lines = strings.Split(((@string)data), "\n"u8);
+        var lines = strings.Split((@string)data, "\n"u8);
         if (posn.Line > len(lines) || !strings.HasPrefix(lines[posn.Line - 1], typeIntˢ)) {
             tΔ1.Fatalf("Object %v position %s does not contain its declaration"u8,
                 mathBigInt, posn);

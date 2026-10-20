@@ -66,10 +66,10 @@ public static void Example() {
             var (r, g, b, a) = m.At(x, y).RGBA();
             // A color's RGBA method returns values in the range [0, 65535].
             // Shifting by 12 reduces this to the range [0, 15].
-            histogram[(r >> (int)(12))][0]++;
-            histogram[(g >> (int)(12))][1]++;
-            histogram[(b >> (int)(12))][2]++;
-            histogram[(a >> (int)(12))][3]++;
+            histogram[(r >> 12)][0]++;
+            histogram[(g >> 12)][1]++;
+            histogram[(b >> 12)][2]++;
+            histogram[(a >> 12)][3]++;
         }
     }
 
@@ -78,7 +78,7 @@ public static void Example() {
     foreach (var (i, vᴛ1) in histogram.ΔRangeSnapshot()) {
         var x = vᴛ1.Clone();
 
-        fmt.Printf("0x%04x-0x%04x: %6d %6d %6d %6d\n"u8, (i << (int)(12)), ((i + 1) << (int)(12)) - 1, x[0], x[1], x[2], x[3]);
+        fmt.Printf("0x%04x-0x%04x: %6d %6d %6d %6d\n"u8, i << 12, ((i + 1) << 12) - 1, x[0], x[1], x[2], x[3]);
     }
     // Output:
     // bin               red  green   blue  alpha

@@ -83,6 +83,9 @@ public sealed class TestRunner
     // -test.list was given: M.Run lists instead of running.
     internal bool Listing => m_options.ListPattern.Length > 0;
 
+    // -test.testlogfile, or null: M.Run opens it before the tests and closes it after (TestLogBridge).
+    internal string? TestLogFile => m_options.TestLogFile is { Length: > 0 } path ? path : null;
+
     // -test.v (or --json, which implies it, as `go test -json` passes -test.v): Go's chatty output.
     internal bool Verbose => m_options.Verbose;
 
@@ -159,6 +162,13 @@ public sealed class TestRunner
 
         m_reporter.ReportPackage("run", output: m_options.ShuffleSeed is int reportedSeed ? $"shuffle seed: {reportedSeed}" : null);
 
+        // A test may lower the process's descriptor limit and leave it lowered, as Go's is free to (syscall's
+        // TestPrlimitFileLimit): the next test starts from the run's own limit, because the CLR cannot start a
+        // thread inside Go's 43 (HostDescriptorLimit.cs). Taken ONCE, before the first test, and restored at every
+        // serial boundary. A snapshot per test would capture whatever an ABANDONED test's still-running thread set
+        // since the last restore, and then restore to that (G's review of the watchdog).
+        HostDescriptorLimit.RLimit? runDescriptorLimit = HostDescriptorLimit.Snapshot();
+
         for (int count = 0; count < m_options.Count; count++)
         {
             // GO'S ORDER, not the names' (D4). cmd/go's loadTestFuncs (load/test.go) lists the package's
@@ -179,22 +189,18 @@ public sealed class TestRunner
 
             foreach (RegisteredTest test in tests)
             {
-                // A test may lower the process's descriptor limit and leave it lowered, as Go's is free
-                // to (syscall's TestPrlimitFileLimit): the next test starts from the run's own limit,
-                // because the CLR cannot start a thread inside Go's 43 (HostDescriptorLimit.cs).
-                HostDescriptorLimit.RLimit? descriptorLimit = HostDescriptorLimit.Snapshot();
-
                 TestExecution execution = Start(test.Name, test.Action, null, test.Source, test.Line);
-                WaitForSerialBoundary(execution, parallel.Add);
-
-                if (HostDescriptorLimit.Restore(descriptorLimit) is int errno)
-                    Console.Error.WriteLine($"go2cs test host: restoring RLIMIT_NOFILE after {test.Name} was refused (errno {errno}); later tests run under the lowered limit");
+                WaitBoundedAtSerialBoundary(execution, parallel.Add);
+                RestoreRunDescriptorLimit(runDescriptorLimit, test.Name);
             }
 
             foreach (TestExecution execution in parallel)
                 execution.ReleaseParallel();
-            foreach (TestExecution execution in parallel)
-                execution.Wait();
+
+            WaitBounded(parallel);
+
+            if (parallel.Count > 0)
+                RestoreRunDescriptorLimit(runDescriptorLimit, "this iteration's parallel tests");
         }
 
         packageTimer.Stop();
@@ -255,6 +261,11 @@ public sealed class TestRunner
 
     internal bool RunChild(TestExecution parent, string requestedName, Action<ж<testing_package.T>> action)
     {
+        // The watchdog already reported the parent: a subtest started by its still-running body would be a
+        // verdict under a test that has none left to give.
+        if (parent.Abandoned)
+            return false;
+
         string name = parent.NextSubtestName(requestedName);
         if (!m_options.ShouldRun(name))
             return true;
@@ -340,6 +351,22 @@ public sealed class TestRunner
     // one thread, so a plain Add is correct there. RunChild can be entered CONCURRENTLY on one
     // parent (Go permits t.Run from any goroutine -- go.dev/issue/64402), so its sink must be the
     // parent's lock-guarded writer.
+    // Puts the run's descriptor limit back at a serial boundary. A move found once the watchdog has abandoned a test is
+    // reported naming that test: its thread is still running and may be what moved the limit, which a reader of a
+    // later failure needs to know. A move with no abandon is a test's own, as Go allows, and is restored quietly.
+    private void RestoreRunDescriptorLimit(HostDescriptorLimit.RLimit? runLimit, string after)
+    {
+        if (m_reporter.FirstAbandoned is string abandoned && runLimit is HostDescriptorLimit.RLimit wanted &&
+            HostDescriptorLimit.Moved(runLimit) is HostDescriptorLimit.RLimit moved)
+        {
+            Console.Error.WriteLine($"go2cs test host: RLIMIT_NOFILE read {moved.Cur}/{moved.Max} after {after}, not the run's {wanted.Cur}/{wanted.Max}; " +
+                $"{abandoned} was abandoned at the per-test deadline and its thread may still be running, so it may be what moved it; restoring the run's limit");
+        }
+
+        if (HostDescriptorLimit.Restore(runLimit) is int errno)
+            Console.Error.WriteLine($"go2cs test host: restoring RLIMIT_NOFILE after {after} was refused (errno {errno}); later tests run under the lowered limit");
+    }
+
     private static void WaitForSerialBoundary(TestExecution execution, Action<TestExecution> onParallel)
     {
         Task completed = Task.WhenAny(execution.Completion, execution.ParallelReached).GetAwaiter().GetResult();
@@ -347,6 +374,144 @@ public sealed class TestRunner
             onParallel(execution);
         else
             execution.Wait();
+    }
+
+    // The shortest wait between two deadline checks of the parallel phase: a test that claimed its own verdict
+    // in the instant the deadline passed completes a moment later, and is not polled for in a hot loop.
+    private static readonly TimeSpan s_minimumDeadlineWait = TimeSpan.FromMilliseconds(50.0D);
+
+    /// <summary>
+    /// The per-test watchdog (DESIGN-object-lifetime-disclosure.md OQ-L3(b)) at a TOP-LEVEL test's serial
+    /// boundary: <see cref="WaitForSerialBoundary"/>, bounded by <see cref="TestOptions.TestDeadline"/>. A test
+    /// still running at the deadline is abandoned (<see cref="TestExecution.Abandon"/>) and the run goes on.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Only top-level tests are bounded. A subtest that hangs holds its parent, and the parent is the
+    /// top-level test this bounds; abandoning it abandons every subtest still in flight. A
+    /// <c>testing.RunTests</c> root runs inside a test, so the same bound covers it.
+    /// </para>
+    /// <para>
+    /// The deadline counts from when the test started RUNNING (<see cref="TestExecution.RunningSince"/>).
+    /// A test that reaches <c>t.Parallel()</c> leaves here at once, parked; its deadline restarts when it
+    /// resumes holding a slot, and <see cref="WaitBounded(List{TestExecution})"/> bounds it there.
+    /// </para>
+    /// </remarks>
+    private void WaitBoundedAtSerialBoundary(TestExecution execution, Action<TestExecution> onParallel)
+    {
+        if (m_options.TestDeadline <= TimeSpan.Zero)
+        {
+            WaitForSerialBoundary(execution, onParallel);
+            return;
+        }
+
+        Task<Task> boundary = Task.WhenAny(execution.Completion, execution.ParallelReached);
+
+        if (!WaitBounded(execution, boundary))
+            return;
+
+        if (boundary.Result == execution.ParallelReached && !execution.Completion.IsCompleted)
+            onParallel(execution);
+        else
+            WaitBounded(execution, execution.Completion);
+    }
+
+    /// <summary>
+    /// Waits for <paramref name="task"/> while <paramref name="execution"/> is within the per-test deadline.
+    /// Answers false when the watchdog abandoned it, and true when the task completed; a test that claimed its
+    /// own verdict as the deadline passed is waited for to the end, since it is finishing.
+    /// </summary>
+    internal bool WaitBounded(TestExecution execution, Task task)
+    {
+        TimeSpan deadline = m_options.TestDeadline;
+
+        while (true)
+        {
+            // Zero while the test has not started running: its thread has not reached the body yet. Waiting a whole
+            // deadline then re-reading can overshoot by up to the thread's start latency, which only ever errs late
+            // (G's review: harmless, noted here rather than measured away).
+            long since = execution.RunningSince;
+            TimeSpan remaining = since == 0 ? deadline : deadline - Stopwatch.GetElapsedTime(since);
+
+            if (remaining > TimeSpan.Zero)
+            {
+                if (task.Wait(remaining))
+                    return true;
+
+                continue;
+            }
+
+            if (execution.Abandon(deadline))
+                return false;
+
+            task.GetAwaiter().GetResult();
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Waits for an iteration's released PARALLEL top-level tests, abandoning each one still running at the
+    /// per-test deadline.
+    /// </summary>
+    /// <remarks>
+    /// All of them are watched together rather than one at a time, and that is what makes it safe: a parallel
+    /// test can be queued for a <c>-parallel</c> slot behind one that hangs, and waiting on the queued one first
+    /// would wait forever. Watched together, the hung one is abandoned, its slot comes back
+    /// (<see cref="TestExecution.Abandon"/>), and the queued one runs. A test queued for a slot is not running,
+    /// so its deadline has not started.
+    /// </remarks>
+    private void WaitBounded(List<TestExecution> executions)
+    {
+        TimeSpan deadline = m_options.TestDeadline;
+
+        if (deadline <= TimeSpan.Zero)
+        {
+            foreach (TestExecution execution in executions)
+                execution.Wait();
+
+            return;
+        }
+
+        List<TestExecution> pending = [.. executions];
+
+        while (pending.Count > 0)
+        {
+            TimeSpan nextCheck = deadline;
+
+            for (int i = pending.Count - 1; i >= 0; i--)
+            {
+                TestExecution execution = pending[i];
+
+                if (execution.Completion.IsCompleted)
+                {
+                    pending.RemoveAt(i);
+                    continue;
+                }
+
+                long since = execution.RunningSince;
+
+                if (since == 0)
+                    continue;
+
+                TimeSpan remaining = deadline - Stopwatch.GetElapsedTime(since);
+
+                if (remaining <= TimeSpan.Zero)
+                {
+                    // Abandon answers false when the test claimed its own verdict first; it stays pending
+                    // until its thread completes, a moment later.
+                    if (execution.Abandon(deadline))
+                        pending.RemoveAt(i);
+
+                    continue;
+                }
+
+                if (remaining < nextCheck)
+                    nextCheck = remaining;
+            }
+
+            if (pending.Count > 0)
+                Task.WaitAny([.. pending.Select(execution => execution.Completion)], nextCheck < s_minimumDeadlineWait ? s_minimumDeadlineWait : nextCheck);
+        }
     }
 
     // A failed test under a testing.RunTests root is the caller's ok == false, never the package's
@@ -469,6 +634,9 @@ public sealed class TestRunner
     internal void ReleaseParallelSlot(NestedRoot? root) => (root?.ParallelLimiter ?? m_parallelLimiter).Release();
 
     internal void Report(TestEvent testEvent) => m_reporter.Report(testEvent);
+
+    // TestExecution.Abandon's cascade tag (TestEvent.AfterAbandoned), set before its first verdict is reported.
+    internal void MarkAbandoned(string test) => m_reporter.MarkAbandoned(test);
 
     // Whether a registered test comes from the package's EXTERNAL (package x_test) files. Go's own definition is the
     // package clause: an external test file's clause is `<name>_test`. The converter stamps every test class with

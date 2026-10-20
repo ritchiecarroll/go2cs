@@ -117,7 +117,7 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
             }
         }
         var hhHashBytes = bytes.Fields(bytes.TrimSpace(hhsumHash.Bytes()))[0];
-        var (hhHash, err) = strconv.ParseUint(((@string)hhHashBytes), 16, 64);
+        var (hhHash, err) = strconv.ParseUint((@string)hhHashBytes, 16, 64);
         if (err != default!) {
             t.Fatalf("could not parse hash %q: %v"u8, hhHashBytes, err);
         }

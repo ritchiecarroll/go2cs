@@ -86,7 +86,7 @@ internal static void Swap(this methodArray m, nint i, nint j) {
 }
 
 partial struct debugHTTP {
-    public partial ref ж<Server> Server { get; }
+    /*embed*/ public ж<Server> Server;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -19,14 +19,9 @@ internal static nint must(nint v, bool ok) {
     return v;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object whileCondˢ = (@string)"while cond:"u8;
-private static readonly object condIˢ = (@string)"  cond i:"u8;
-private static readonly object forCondˢ = (@string)"for cond:"u8;
-private static readonly object postIˢ = (@string)"  post i:"u8;
-private static readonly object outerIˢ = (@string)"  outer i:"u8;
-
 internal static void Main() {
+    var funcsᴷ = new stackAppend<Func<nint>>();
+
     n = 0;
     nint count = 0;
     while (ᐧ) {
@@ -37,7 +32,7 @@ internal static void Main() {
             break;
         }
     }
-    fmt.Println(whileCondˢ, count, n);
+    fmt.Println("while cond:", count, n);
 
     n = 0;
     count = 0;
@@ -52,9 +47,9 @@ internal static void Main() {
         if (i % 2 == 0) {
             continue;
         }
-        fmt.Println(condIˢ, i);
+        fmt.Println("  cond i:", i);
     }
-    fmt.Println(forCondˢ, count, n);
+    fmt.Println("for cond:", count, n);
 
     n = 0;
     var (ᴛ5, ᴛ6) = next();
@@ -62,7 +57,7 @@ internal static void Main() {
         if (i % 2 == 0) {
             goto continueᴛ3;
         }
-        fmt.Println(postIˢ, i);
+        fmt.Println("  post i:", i);
 continueᴛ3:;
         var (ᴛ7, ᴛ8) = next();
         i = must(ᴛ7, ᴛ8);
@@ -83,7 +78,7 @@ outer:
                 goto continue_outer;
             }
         }
-        fmt.Println(outerIˢ, i);
+        fmt.Println("  outer i:", i);
 continue_outer:;
 continueᴛ4:;
         var (ᴛ11, ᴛ12) = next();
@@ -96,12 +91,12 @@ break_outer:;
     var (ᴛ13, ᴛ14) = next();
     for (nint iᴛ1 = must(ᴛ13, ᴛ14); iᴛ1 < 4; ) {
         var i = iᴛ1;
-        funcs = append(funcs, () => i);
+        funcs = append(funcsᴷ, funcs, () => i);
         var (ᴛ15, ᴛ16) = next();
         iᴛ1 = must(ᴛ15, ᴛ16);
     }
     foreach (var (_, f) in funcs) {
-        fmt.Print(f(), (@string)" "u8);
+        fmt.Print(f(), " ");
     }
     fmt.Println();
 }

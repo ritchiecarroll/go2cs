@@ -25,47 +25,31 @@ internal static bool prefixMatch<T>(T s, T sep)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string helloˢ = "hello"u8;
-private static readonly @string helˢ = "hel"u8;
-private static readonly object sumStringˢ = (@string)"sum(string):"u8;
-private static readonly object sumByteˢ = (@string)"sum([]byte):"u8;
-private static readonly object prefixStringˢ = (@string)"prefix string:"u8;
-private static readonly object prefixByteˢ = (@string)"prefix []byte:"u8;
-private static readonly object prefixMissˢ = (@string)"prefix miss:"u8;
 private static readonly @string xyzˢ = "xyz"u8;
-private static readonly object prefixTooLongˢ = (@string)"prefix too long:"u8;
 private static readonly @string helloWorldˢ = "hello world"u8;
-private static readonly object lastStringˢ = (@string)"last(string):"u8;
-private static readonly object lastByteˢ = (@string)"last([]byte):"u8;
-private static readonly object sumˢ = (@string)"sum:"u8;
-private static readonly object headˢ = (@string)"head:"u8;
 private static readonly @string x9876ˢ = "x98:76"u8;
-private static readonly object appendRunStringˢ = (@string)"appendRun(string):"u8;
 private static readonly @string abcdeˢ = "abcde"u8;
-private static readonly object appendRunByteˢ = (@string)"appendRun([]byte):"u8;
-private static readonly object wholeStringˢ = (@string)"whole(string):"u8;
-private static readonly object wholeByteˢ = (@string)"whole([]byte):"u8;
 
 internal static void Main() {
-    @string str = helloˢ;
+    @string str = "hello";
     var bs = slice<byte>(str);
-    @string hel = helˢ;
+    @string hel = "hel";
     var helBytes = slice<byte>(hel);
 
-    fmt.Println(sumStringˢ, byteSum(str));
-    fmt.Println(sumByteˢ, byteSum(bs));
+    fmt.Println("sum(string):", byteSum(str));
+    fmt.Println("sum([]byte):", byteSum(bs));
 
-    fmt.Println(prefixStringˢ, prefixMatch(str, hel));
-    fmt.Println(prefixByteˢ, prefixMatch(bs, helBytes));
-    fmt.Println(prefixMissˢ, prefixMatch(str, xyzˢ));
-    fmt.Println(prefixTooLongˢ, prefixMatch(str, helloWorldˢ));
-    fmt.Println(lastStringˢ, lastByte(str));
-    fmt.Println(lastByteˢ, lastByte(bs));
-    fmt.Println(sumˢ, digitSum((@string)"12:34"), digitSum(slice<byte>("56:78"u8)));
-    fmt.Println(headˢ, headSum(x9876ˢ), headSum(slice<byte>("y10:23"u8)));
-    fmt.Println(appendRunStringˢ, ((@string)appendRun(default!, abcdeˢ)));
-    fmt.Println(appendRunByteˢ, ((@string)appendRun(slice<byte>("<"u8), slice<byte>("abcde"u8))));
-    fmt.Println(wholeStringˢ, ((@string)wholeSpan(str)), wholeByteˢ, ((@string)wholeSpan(bs)));
+    fmt.Println("prefix string:", prefixMatch(str, hel));
+    fmt.Println("prefix []byte:", prefixMatch(bs, helBytes));
+    fmt.Println("prefix miss:", prefixMatch(str, xyzˢ));
+    fmt.Println("prefix too long:", prefixMatch(str, helloWorldˢ));
+    fmt.Println("last(string):", lastByte(str));
+    fmt.Println("last([]byte):", lastByte(bs));
+    fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>("56:78"u8)));
+    fmt.Println("head:", headSum(x9876ˢ), headSum(slice<byte>("y10:23"u8)));
+    fmt.Println("appendRun(string):", (@string)appendRun(default!, abcdeˢ));
+    fmt.Println("appendRun([]byte):", (@string)appendRun(slice<byte>("<"u8), slice<byte>("abcde"u8)));
+    fmt.Println("whole(string):", (@string)wholeSpan(str), "whole([]byte):", (@string)wholeSpan(bs));
 }
 
 internal static nint digitSum<T>(T s)

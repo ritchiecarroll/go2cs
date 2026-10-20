@@ -204,7 +204,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	// CS1503 ×4 against the generated ushort ctor parameter).
 	if structFieldType != nil {
 		if narrowCast := v.narrowArithmeticCastTypeFor(structFieldType, keyValueExpr.Value, valueExpr); len(narrowCast) > 0 {
-			valueExpr = fmt.Sprintf("(%s)(%s)", narrowCast, valueExpr)
+			valueExpr = castOf(narrowCast, valueExpr)
 		}
 	}
 

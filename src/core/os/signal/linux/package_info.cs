@@ -53,6 +53,12 @@ using static go.os.signal_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -61,7 +67,7 @@ using static go.os.signal_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLugqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
+[assembly: go.GoPositionMap("os/signal/signal.go", "signal.cs", "ACdKgqaCpoKs0oKUgpSCgoKCgsqmgoKmgsas4qiSggAKOAAUAoKmgpSCgoKUgqaSgpSCgoK4goK4uIKCpoLGqtKsspSCgoKUlIKCgoIADyCUlJSUgoKCuKrUooKCpoKUgpQACxCCggALDAACKAAVAoLKgoKCkrT6AAkWgoLuoqaCgoKCgoKCgqaUgsqCpoKClA==", "56-70:1;139-158:1;150-154:1.1;291-297:1")]
 [assembly: go.GoPositionMap("os/signal/signal_unix.go", "signal_unix.cs", "AAsewrKysrSCgriCzoKUgoKUtLiCpoKmgqaC")]
 // </GoSourcePositionMaps>
 

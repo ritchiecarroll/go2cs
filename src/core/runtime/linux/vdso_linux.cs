@@ -57,7 +57,7 @@ internal static uintptr vdsoBloomSizeScale => /* unsafe.Sizeof(uintptr(0)) / 4 *
 
 /* How to extract and insert information held in the st_info field.  */
 internal static byte _ELF_ST_BIND(byte val) {
-    return (byte)((val >> (int)(4)));
+    return (byte)((val >> 4));
 }
 
 internal static byte _ELF_ST_TYPE(byte val) {
@@ -174,15 +174,15 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         var nbucket = gnuhash.Value[0];
         info.symOff = gnuhash.Value[1];
         var bloomSize = gnuhash.Value[2];
-        info.bucket = (~gnuhash).slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale)).slice(0, (nint)(nbucket));
-        info.chain = (~gnuhash).slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale + nbucket));
+        info.bucket = gnuhash.slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale)).slice(0, (nint)(nbucket));
+        info.chain = gnuhash.slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale + nbucket));
         info.isGNUHash = true;
     } else {
         // Parse the hash table header.
         var nbucket = hash.Value[0];
         var nchain = hash.Value[1];
-        info.bucket = (~hash).slice(2, (nint)(2 + nbucket));
-        info.chain = (~hash).slice((nint)(2 + nbucket), (nint)(2 + nbucket + nchain));
+        info.bucket = hash.slice(2, (nint)(2 + nbucket));
+        info.chain = hash.slice((nint)(2 + nbucket), (nint)(2 + nbucket + nchain));
     }
 
     // That's all we need.
@@ -263,13 +263,13 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         }
         for (; ᐧ ; symIndex++) {
             var hash = info.chain[symIndex - info.symOff];
-            if ((uint32)(hash | 1) == (uint32)(k.gnuHash | 1)) {
+            if ((hash | 1) == (k.gnuHash | 1)) {
                 // Found a hash match.
                 if (apply(symIndex, k)) {
                     break;
                 }
             }
-            if ((uint32)(hash & 1) != 0) {
+            if ((hash & 1) != 0) {
                 // End of chain.
                 break;
             }

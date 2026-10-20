@@ -40,7 +40,7 @@ internal static (nint written, error err) Write(this ref buffer b, slice<byte> b
 }
 
 internal static @string String(this ref buffer b) {
-    return ((@string)b.a);
+    return (@string)b.a;
 }
 
 internal static void write(ж<testing.T> Ꮡt, @string testname, ж<tabwriter.Writer> Ꮡw, @string src) {

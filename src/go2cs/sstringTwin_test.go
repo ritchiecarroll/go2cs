@@ -159,7 +159,7 @@ func TestSStringTwinEmission(t *testing.T) {
 
 	// the consumer package: every package-qualified value site names the canonical delegate, and a
 	// call keeps the method (the priority binds the twin)
-	for _, want := range []string{"G = twin.Formatᶠ;", "f = twin.Formatᶠ;", "twin.Format(directDˢ, (nint)(1))", "twin.Plain(\"p\"u8)"} {
+	for _, want := range []string{"G = twin.Formatᶠ;", "f = twin.Formatᶠ;", "twin.Format(directDˢ, (nint)1)", "twin.Plain(\"p\")"} {
 		if !strings.Contains(consumer, want) {
 			t.Errorf("consumer: want %q in:\n%s", want, consumer)
 		}

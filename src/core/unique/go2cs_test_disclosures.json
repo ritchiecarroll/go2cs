@@ -30,6 +30,28 @@
       "class": "codegen-liveness",
       "signature": "still referenced by a handle (or tiny block?): internal pointer",
       "reason": "codegen-liveness: the test builds n1, n2 and n3 with nestHandle, each holding a Handle to the canonical copy of the value below it, checks the three Values, then drains the maps and asserts the bottom value n0 is gone. Go's liveness drops n1 to n3 at their last use, so the whole chain is collectable at the drain. The converted test keeps them as in-scope locals of its own frame, and n1's handle still points at n0's canonical copy, so the drain cannot reclaim it. MEASURED on linux (Release host), each arm with tiering off, as the -tests pipeline runs it, and again under tiering: (a) the test as converted FAILS at both settings; (b) the same body with ONLY n1 to n3 and the three checks moved into their own [NoInlining] method PASSES at both. Arm (b) runs the handle chain, the map's cleanup and the drain unchanged, so those work and the only thing holding n0's copy is the test's own frame, the same in-scope-slot retention TestMakeClonesStrings measured at every configuration."
+    },
+    {
+      "name": "TestMakeAllocs",
+      "records": 11,
+      "halves": [
+        {
+          "class": "deferred",
+          "signature": " allocs, want ",
+          "reason": "TestMakeAllocs runs testing.AllocsPerRun over Make legs and expects Go's exact count per run: 0 for a string, byte-slice or integer key, 1 where the key is first converted to any. Every leg that reaches the map lookup reads 8 to 10, an allocation COUNT per run in Go's own unit from go2cs's runtime counter, which counts only golib's own allocation sites and so is a lower bound. One mechanism accounts for 8 of them, read from a probe that recorded the stack of every charged allocation (Release, tiering off): Go's lookup line `hash := m.hash(abi.NoEscape(unsafe.Pointer(&key)), m.seed)` (canonmap.go:38) takes the address of a key Go keeps on the stack, while the converted Load boxes the key on the heap to take its address (2 objects, the box and its pinnable slot), and abi.NoEscape (2), unsafe.Pointer's FromPinnedBox (2), the box's element view (1) and the address-of helper (1) charge the rest. Go allocates none of these. The legs that read more add a charge of their own: stack string 2 and the three bytes legs 1 each, in the test's own closure (the string built from bytes), and large number 1 more on the lookup path. The two to-any legs read 8 against Go's 1, because the interface box Go counts is a C# box the counter does not see. The two create legs match. Deferred: the surplus is named and sits on the lookup path; the handles Make returns are correct.",
+          "want": "Go's exact count per leg: 0 for string, byte-slice and integer keys, 1 for the two to-any legs",
+          "reading": "at a22e71c7b6 on linux (Release, tiering off, .NET 10.0.12, go1.26.9), got/want per run: static string 8/0, heap string 8/0, stack string 10/0, bytes 9/0, bytes truncated short 9/0, bytes truncated long 9/0, string to any 8/1, large number 9/0, large number to any 8/1; create heap bytes and create heap string match. Charge sites from a stack-recording probe of AllocationCounter at b507fad765 (reverted after), 101 calls per leg: Load's key box 2, abi.NoEscape 2, Pointer.FromPinnedBox 2, the box's at view 1, the address-of helper 1.",
+          "plan": "stack-allocate the key whose address the hash takes: a scoped, non-boxing address for a key that does not escape the lookup (canonMap.Load and LoadOrStore), which removes the 8 charges per Make. The half retires when every leg that reaches the lookup reads Go's count with the counter still charging the path."
+        },
+        {
+          "class": "deferred",
+          "signature": "panic: runtime error: the size of [?]string is not known (the length of [?]string is not carried for an unnamed array type argument)",
+          "reason": "The pair leg calls Make over an UNNAMED array type argument, `Make[[2]string]`. C# spells every Go [N]T as one array type, so a descriptor built from the type alone carries no length, and the descriptor refuses Size by name rather than answer 0 (an answer of 0 sent Make down Go's zero-size arm, where two different pairs shared one handle). The refusal is a panic inside AllocsPerRun's warm-up call, so the test stops there and its two later legs, pair from stack and pair to any, do not run. Go reads 0 allocations for the pair legs and 1 for pair to any. A defined array type (`type N [2]string`) and a live value both carry their length, and every instantiation of this shape in the standard library is in a test file. Deferred: carrying the length for a type-only descriptor changes Make's public signature, and the refusal is the honest answer until that is designed.",
+          "want": "Make[[2]string] keys its own map by the [2]string type: 0 allocations per run for pair and pair from stack, 1 for pair to any",
+          "reading": "at a22e71c7b6 on linux (Release, tiering off, .NET 10.0.12, go1.26.9): the pair leg panics with the signature at abi Size (type_impl.cs) from Make (handle.cs:38), in AllocsPerRun's warm-up call; pair from stack and pair to any do not run. Before the refusal (b507fad765) the pair legs read 1/0 and 4/0 through Go's zero-size arm.",
+          "plan": "post-hop: the length rides a per-instantiation descriptor carrier into abi.TypeFor, which is Make's map key; tracked in the findings ledger (docs/phase4/BOARD-next-validation-candidates.md, 2026-10-16, a type-only descriptor for an unnamed array type argument carries no length). The half retires when Make[[2]string] reads its own descriptor with length 2."
+        }
+      ]
     }
   ]
 }

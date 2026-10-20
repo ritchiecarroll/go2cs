@@ -30,7 +30,7 @@ partial struct generation {
     internal slice<ThreadID> batchMs;
     internal slice<cpuSample> cpuSamples;
     internal timestamp minTs;
-    internal partial ref ж<evTable> evTable { get; }
+    /*embed*/ internal ж<evTable> evTable;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -123,7 +123,7 @@ internal static (ж<generation>, error) readGeneration(ж<bufio.Reader> Ꮡr, ve
 // Used only for trace versions < Go126.
 partial struct spilledBatch {
     internal uint64 gen;
-    internal partial ref ж<batch> batch { get; }
+    /*embed*/ internal ж<batch> batch;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -392,7 +392,7 @@ internal static error addStrings(ж<dataTable<stringID, @string>> ᏑstringTable
         @string s = sb.String();
         sb.Reset();
         {
-            var errΔ2 = stringTable.insert(((stringID)id), s); if (errΔ2 != default!) {
+            var errΔ2 = stringTable.insert((stringID)id, s); if (errΔ2 != default!) {
                 return errΔ2;
             }
         }
@@ -476,7 +476,7 @@ internal static error addStacks(ж<dataTable<stackID, stack>> ᏑstackTable, map
 
         // Add the stack to the map.
         {
-            var errΔ3 = stackTable.insert(((stackID)id), new stack(pcs: frames)); if (errΔ3 != default!) {
+            var errΔ3 = stackTable.insert((stackID)id, new stack(pcs: frames)); if (errΔ3 != default!) {
                 return errΔ3;
             }
         }
@@ -518,21 +518,21 @@ internal static (slice<cpuSample>, error) addCPUSamples(slice<cpuSample> samples
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        var mid = ((ThreadID)(int64)m);
+        var mid = (ThreadID)(int64)m;
 
         // Read the sample's P.
         (var p, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        var pid = ((ProcID)(int64)p);
+        var pid = (ProcID)(int64)p;
 
         // Read the sample's G.
         (var g, errΔ1) = binary.ReadUvarint(new bytes_ReaderжByteReader(r));
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        var goid = ((GoID)(int64)g);
+        var goid = (GoID)(int64)g;
         if (g == 0) {
             goid = NoGoroutine;
         }
@@ -585,7 +585,7 @@ internal static error setSyncBatch(ref sync s, batch b, version.Version ver) {
         if (err != default!) {
             return err;
         }
-        var et = ((tracev2.EventType)ev);
+        var et = (tracev2.EventType)ev;
         switch (ᐧ) {
         case {} when et == tracev2.EvFrequency: {
             if (s.freq != 0D) {
@@ -597,7 +597,7 @@ internal static error setSyncBatch(ref sync s, batch b, version.Version ver) {
                 return errΔ2;
             }
             // Convert to nanoseconds per timestamp unit.
-            s.freq = ((frequency)(1.0D / ((float64)f / 1e9D)));
+            s.freq = (frequency)(1.0D / ((float64)f / 1e9D));
             break;
         }
         case {} when et == tracev2.EvClockSnapshot && ver >= version.Go125: {
@@ -655,7 +655,7 @@ internal static void fixUpCPUSamples(slice<cpuSample> samples, frequency freq) {
     // Fix up the CPU sample timestamps.
     foreach (var (i, _) in samples) {
         var s = Ꮡ(samples, i);
-        s.Value.time = freq.mul(((timestamp)(uint64)(int64)(~s).time));
+        s.Value.time = freq.mul((timestamp)(uint64)(int64)(~s).time);
     }
     // Sort the CPU samples.
     slices.SortFunc(samples, (cpuSample a, cpuSample b) => cmp.Compare(a.time, b.time));

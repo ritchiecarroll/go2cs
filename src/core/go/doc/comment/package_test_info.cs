@@ -13,7 +13,6 @@ global using jsonꓸΔToken = object;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using bytes = go.bytes_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,9 +30,6 @@ using static global::go.go.doc.comment_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.go.doc.comment_package.Doc, ж<global::go.go.doc.comment_package.Doc>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.doc.comment_package.LinkDef, ж<global::go.go.doc.comment_package.LinkDef>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.doc.comment_package.ListItem, ж<global::go.go.doc.comment_package.ListItem>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

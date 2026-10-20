@@ -548,7 +548,7 @@ internal static slice<@string> gogoarchTags() {
         // ARM64 v9.x also includes support of v8.x+5 (i.e. v9.1 includes v8.(1+5) = v8.6).
         if (major == 9) {
             for (nint i = 0; i <= minor + 5 && i <= 9; i++) {
-                list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)(8), i));
+                list = append(list, fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)8, i));
             }
         }
         return list;

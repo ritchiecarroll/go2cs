@@ -16,7 +16,6 @@ global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
-using reflect = go.reflect_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -57,10 +56,13 @@ using static go.encoding.xml_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<StartElement, ж<StartElement>>(Indirect = true)]
-[assembly: GoImplicitConv<StartElement, ж<StartElement>>]
-[assembly: GoImplicitConv<fieldInfo, ж<fieldInfo>>]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -72,7 +74,7 @@ using static go.encoding.xml_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("encoding/xml/marshal.go", "marshal.cs", "ABakAQA4AoKCgIKkgIKkACVSsoKCgoCCpICCpAAHEpKCgqyyggACEgAIAoKClAACFAAKAoKClKiCggABHgAMBIKkgILWgILWtIKUgoKCyIKUgpSClIKCgoKUtIKUgoLElqqiqoKUgoCC+oLYtIKUxoKUtqqirLIAFyzCgIL+griCgsqCgIKkgtyClJSCgIKC2oKUgoKCgpSUqJKCpoKmgoKCgoKUvOKCpoKUgtyCgpSmgqaCgIK2goKCgILsgoCCtoKCgoCC7IKCgIK2poKCAAIS9IKCkoKCgpSCgILIgpSCgoCUpIKUuIKCgpSUgqaCpoKAgtqGlICCtoKUgoKSgpSmgqaAgraosoKAgoKClIKUyIKCgoCCgoKUgpTagoCCgoKUgsiCgoKAgoKClILslIKUuIKCgoCCtqaCgoKmgoKUgpSCqtKmgoKSgoKSgriUqLaClIKCuIKUgqjCgIKkgoKUgtjCgqaClIKClIKCgriCgoKUgoKClIKCgpSCpoKClIKUgIKClKSUgoKCgoKCpoKUpKSkpLSClpKClIKUxIKmpKacwoKClJSmsoKCgoKUgqamlIKClICCpIKAgoKClICCpLaCgoKAgoKClICCpNqCgpSAgsaAgsaAgsaAgsaAgsaAgoCC2KaAgqSCgoKUgpSCgoKClIKCgoK2goKCgraUgpSUlIKmgoKUgrSCyICCpIKCgILagIK2gtiygpSClKiygpSClKiSgpSClKyygpSCgIKkgpSokoKmgoKUgoKCgpSUgpSUgpSCgqaCggAIGLKCgoKmgoCCtoKokoKAgraCAAgSgqaClKyU")]
 [assembly: go.GoPositionMap("encoding/xml/read.go", "read.cs", "ABGKAgBzAqqi7sKCgqaClNyAACFEkoKClKoACASUgoKApIKCgqaCptyygoKCgoKUlILGtLaokoKClJSmgIK2goKCgILspoCCtoKCgoCC2qaCgqaAgoKkpoKCpqbOlsKCpoKCgoKUgJKC/oKCgriCgpSmpoCCyIKCgoCC2oKAgsiCgoKAgtoACxyAAAUQtoKUgsqCgqaAgoKktraCgoKmgoKCuIKCgpSCgoKUlJSCgILagoKCgoKUgoKAgqS4griCgoKAguyCgpSCuIK4griCgoKClAAH9QEABYgCgoKCgpSCgpSkgoKCgpSCgoCCyIKAguqCgoKmtoLIgvqCgIKAgqTIgoKCgIKAgqTagIK2gKSktoCkpILIpoKUgoKUuLyCgpSCgpSkgoKUgoKUpIKClIKClKSCgpSCgpSkpJSUAANfAAFkAAIQAAoCgoKCgoKUgoKmlJS4uILGlMqCgoKClKSCgpSCgILoAAQU0oKCgoKUlLSClA==", "212-212:1")]
-[assembly: go.GoPositionMap("encoding/xml/typeinfo.go", "typeinfo.cs", "AC5imKKAgraCgoKCgoK4goKClIKCgpSClKKCgIK2uIKCpoKCuICC2oKokqaCgILIgoKUgoKUpKSkpKSkyoKApKSCyKSClIKUgtyCuLiCpriAgpSkuIKClIKUgoKClNyCgoKCuKyygpSClIKCgpSCgriUAAIUAAkCgoSSgoKUgpSCgoKmgoKkgoKmguqCgsqCgsqCgoKCgtyCgoKUggAKFoIABRrSgoKCgoKClJSmlA==", "", "", "186=Get/1/1/1;193=Get/1/1/1")]
+[assembly: go.GoPositionMap("encoding/xml/typeinfo.go", "typeinfo.cs", "AC5imKKAgraCgoKCgoK4goKClIKCgpSClKKCgIK2uIKCpoKCuICC2oKokqaCgILIgoKUgoKUpKSkpKSkyoKApKSCyKSClIKUgtyCuLiCpriAgpSkuIKClIKUgoKClNyCgoKCuKyygpSClIKCgpSCgriUAAIUAAoCgoSSgoKUgpSCgoKmgoKkgoKmguqCgsqCgsqCgoKCgtyCgoKUggAKFoIABRrSgoKCgoKClJSmlA==", "", "", "186=Get/1/1/1;193=Get/1/1/1")]
 [assembly: go.GoPositionMap("encoding/xml/xml.go", "xml.cs", "ACM+ggAXOpKCgoKokgAMHJDukAAIEpKCAAYQkKaSlKSkpKSUAFfAAbLcgqikgIKk7gAFOgAaAoKCgpSCgpSAgoKUyJSCgIKCtuyCgoKClJSCgriCgoKUxoKUpAAGGNKUpKS0lICCkoLIyoCClAATKoKCgpSUgoKClIKmgoKCgpSCgpSs6IKCuIKUgoKUlIKCqqKClIKokoKqooKCgqiSAAISAAgCgoKUgqSCgoKClIKkgoKUhKa4goKClLiqooKUgpSCgpSmppqygpQAEAaCgpSClLiCpoKCppSCgoKUpoCCpJaSgIKClKSCgIKkgoKUqJKAgoKUpIKCgoKAgqSCgpSUgpSCgoKCgpSCgoKClIKCgpSClKa4gIKkpoCCpIKCpoKSgoCCpIKCgpSUlJSCgriCgIKkgoK4goKU3IKCgoKCgIKkgpSCgpT8tsiCgoCCpIKClILKlqKCgIKkgpTutriUqoCCgpS2goKCgIKkgoKAgqSCgpSUgpSUgoCCgpSkgoCCpIKCgpSClIKCgpSUlIKClNaCgoKmgqaCgqaCgoKCgqaElIKmqJKCgoKUxoIABBLigpSCgpSCgpSCpoKClIKssqyyqqKCgpSu8oCCgraokoKUgqYADRjCkoKCgoKCgoKClJTcgoKClIK4goKClIKUgpTcgoKCgoKAgqSCgoCCpIKCgoKAgraChoKAgraClIKCgoKCuIKCgqaAgqSClIKCgoKAgoKSguyCgoKClIKClIKClIK4gpKmprSCpoKCgoKClIKCgrissgACFNKCgpSCkoCClIKkrLKCgriCgoKUrNKCgIKkgoKUlIKAgqSCgpSUpoKsgoKUgoKUgpSCgoKClIKmpoKClIKClIKUgoKCgpSCpgAGEADCAYYDAHnyAZQAiwKWBJQAEyqCgoKCgoKCgpqirLKCgoKCgpS0tLS0tLSClLS0goKUpICCpICCpJSCqqKCgoKCgpS0tLS0tLS0tIKClKSCgpSssqiCgpqigpSAgraCgoKmgIKkgIKkpoCCtoKqxoKCgoKCgoKClIKAgoK2gpSCgpQ=")]
 // </GoSourcePositionMaps>
 

@@ -346,7 +346,7 @@ outer:
                         slotElem = emem;
                     }
 
-                    g.ctrls().set(i, ((ctrl)(uint8)h2Hash));
+                    g.ctrls().set(i, (ctrl)(uint8)h2Hash);
                     t.Value.growthLeft--;
                     t.Value.used++;
                     m.used++;

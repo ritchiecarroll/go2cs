@@ -30,8 +30,6 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using xmlꓸToken = object;
 global using xmlꓸΔToken = object;
-using testing = go.testing_package;
-using Δrand = go.math.rand_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -84,8 +82,6 @@ using static global::go.math.big_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.math.big_package.ΔInt, ж<global::go.math.big_package.ΔInt>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.math.big_package.ΔRat, ж<global::go.math.big_package.ΔRat>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted

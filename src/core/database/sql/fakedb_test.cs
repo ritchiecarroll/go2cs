@@ -1121,7 +1121,7 @@ rows:
                 {
                     var (bs, okΔ1) = tcol._<slice<byte>>(ᐧ); if (okΔ1) {
                         // lazy hack to avoid sprintf %v on a []byte
-                        tcol = ((@string)bs);
+                        tcol = (@string)bs;
                     }
                 }
                 any argValue = default!;

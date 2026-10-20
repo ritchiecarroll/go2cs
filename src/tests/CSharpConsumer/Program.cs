@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using go;                                   // golib, and the methods of every Go package whose import path has no slash
 using static go.builtin;                    // Go's built-ins: nil, len, append, delete, @new, goǃ, Ꮡ
@@ -88,8 +89,11 @@ static class Program
         var (num, aerr) = strconv.Atoi("42");   // (nint, error)
         Check("3 strconv.Atoi returns (nint, error)", aerr == nil && num == 42);
         slice<nint> nums = new nint[] { 1, 2, 3 };
-        nums = append(nums, (nint)4, (nint)5);  // literals are C# int: cast them to Go's int
+        nums = append(nums, 4, 5);              // C# int literals append to a slice<nint>
         Check("3 append to a slice<nint>", len(nums) == 5 && nums[4] == 5);
+        slice<long> big = new long[] { 5 };
+        big = append(big, 6, 7);                // and to any Go integer slice
+        Check("3 append takes C# int literals for a slice<long>", len(big) == 3 && big[2] == 7);
 
         // 4. Strings.
         @string hello = "héllo, 世界";      // System.String converts to @string (UTF-16 to UTF-8)
@@ -132,6 +136,17 @@ static class Program
         catch (FormatException ex)
         {
             Check("6 an error becomes an exception where C# wants one", ex.Message.Contains("invalid syntax"));
+        }
+        nint port = strconv.Atoi("8080").Must();    // the value, or a GoErrorException
+        Check("6 Must returns the value of a nil-error result", port == 8080);
+        try
+        {
+            strconv.Atoi("eighty").Must();
+            Check("6 Must throws on a non-nil error", false);
+        }
+        catch (GoErrorException ex) when (errors.Is(ex.Err, strconv.ErrSyntax))
+        {
+            Check("6 GoErrorException carries the original Go error", ex.Message.Contains("invalid syntax"));
         }
 
         // 7. Panics and exceptions.
@@ -254,6 +269,18 @@ static class Program
         for (var g = 0; g < 4; g++) done.Receive();
         Check("11 an unbuffered channel waits for every goroutine", seen == 4);
 
+        var replies = new channel<nint>(0);
+        Task<nint> reply = replies.ReceiveAsync();      // awaitable: no thread waits for the sender
+        goǃ(() => replies.Send(99));
+        Check("11 ReceiveAsync completes when a goroutine sends", reply.Wait(10000) && reply.Result == 99);
+        using (var cts = new CancellationTokenSource())
+        {
+            Task<nint> abandoned = replies.ReceiveAsync(cts.Token);
+            cts.Cancel();
+            ((Task)abandoned).ContinueWith(_ => { }).Wait(10000);
+            Check("11 a canceled ReceiveAsync leaves the channel and takes nothing", abandoned.IsCanceled && !replies.TrySend(1));
+        }
+
         // 12. A real third-party module: github.com/google/uuid.
         uuid.UUID id = uuid.New();
         @string text = id.String();
@@ -282,6 +309,10 @@ static class Program
         Check("13 ranging over the set visits every element", keySum == 10);
         slice<int> keys = set.Keys();
         Check("13 Keys returns a slice of every element", len(keys) == 4);
+        IReadOnlySet<int> members = set.AsReadOnlySet();    // a live, read-only view of the keys
+        Check("13 AsReadOnlySet passes the set where an IReadOnlySet goes", members.Contains(4) && members.IsSubsetOf(new[] { 1, 2, 3, 4, 5 }));
+        map<@string, EmptyStruct> visited = nil;
+        Check("13 a nil Go map is the empty set", visited.AsReadOnlySet().Count == 0 && !visited.AsReadOnlySet().Contains("go"));
     }
 
     // 2. A C# class implementing a Go interface: io.Writer.
