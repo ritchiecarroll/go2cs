@@ -174,6 +174,9 @@ internal static (slice<byte>, error) readWith(@string @base, @string @file) {
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
+        var bbufᴷ = new stackAppend<byte>();
+        var rbufᴷ = new stackAppend<rune>();
+
         defer(note, (nint)(CrossPkgLib.Precision), ref ᒐ);
 
         var b = CrossPkgLib.Boiling();
@@ -343,9 +346,9 @@ internal static void Main() {
         fmt.Println(scanName, ((@string)scanData), scanErr == default!);
 
         var bbuf = slice<byte>("key"u8);
-        bbuf = append(bbuf, (byte)(CrossPkgLib.Sep));
+        bbuf = append(bbufᴷ, bbuf, (byte)(CrossPkgLib.Sep));
         var rbuf = new rune[]{(rune)'a'}.slice();
-        rbuf = append(rbuf, (rune)(CrossPkgLib.Precision));
+        rbuf = append(rbufᴷ, rbuf, (rune)(CrossPkgLib.Precision));
         fmt.Println(((@string)bbuf), len(rbuf), rbuf[1]);
 
         var sc = ((CrossPkgLib.Scored)((CrossPkgLib.Verdict)4));

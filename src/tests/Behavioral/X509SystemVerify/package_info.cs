@@ -15,6 +15,7 @@ global using bigꓸRat = go.math.big_package.ΔRat;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("X509SystemVerify.go", "X509SystemVerify.cs", "ABU+goKCgpSC7oKCgpSCgoKUgoKUgoKCgoKUgoKClIKCyoKClIKCgpQ=", "", "", "29=NewInt/1/1/1,Add/1/2/3,Add/2/2/4;64=Unix/1/1/3")]
+[assembly: go.GoPositionMap("X509SystemVerify.go", "X509SystemVerify.cs", "ABU+ooKCgpSC7oKCgpSCgoKUgoKUgoKCgoKUgoKClIKCyoKClIKCgpQ=", "", "", "31=NewInt/1/1/1,Add/1/2/3,Add/2/2/4;66=Unix/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;

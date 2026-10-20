@@ -101,6 +101,8 @@ internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
 }
 
 internal static void Main() {
+    var namesᴷ = new stackAppend<@string>();
+
     fmt.Println("join3    :", callString(join, "go", (nint)(1), (nint)(2), (nint)(3)));
     fmt.Println("join0    :", callString(join, "go"));
 
@@ -149,7 +151,7 @@ internal static void Main() {
     };
     var names = new slice<@string>(0, len(funcs));
     foreach (var (name, _) in funcs) {
-        names = append(names, name);
+        names = append(namesᴷ, names, name);
     }
     sort.Strings(names);
     foreach (var (_, name) in names) {
