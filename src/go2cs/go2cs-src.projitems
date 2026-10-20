@@ -216,6 +216,7 @@
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hoistedLiteralOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)hoistedLiteralsStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)identifierNaming.go" />
     <None Include="$(MSBuildThisFileDirectory)iifeOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)implementRecordAliasCanonicalization_test.go" />
