@@ -46,13 +46,17 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
+	"strconv"
 	"strings"
+	"syscall"
 )
 
 // runPlatformEmission is the entry point for a `-platforms <two or more targets>` conversion: stage
@@ -97,19 +101,23 @@ func runPlatformEmission(options Options, stageDir string, packageFilter []strin
 			rootPath, filepath.Join("core", "golib", "golib.csproj"))
 	}
 
-	stageDir, removeStage, err := resolveEmissionStageDir(stageDir)
+	stageDir, releaseStage, reclaimed, err := resolveEmissionStageDir(stageDir, rootPath)
 
 	if err != nil {
 		return err
 	}
 
-	if removeStage {
-		defer os.RemoveAll(stageDir)
-	}
+	defer releaseStage()
 
 	fmt.Printf("\nMulti-platform emission (layout L3)\n")
 	fmt.Printf("  corpus root: %s\n", rootPath)
 	fmt.Printf("  staging dir: %s\n", stageDir)
+
+	if reclaimed.files > 0 {
+		fmt.Printf("  reclaimed:   %d files (%.1f MB) left in the staging dir by a run that ended before its cleanup\n",
+			reclaimed.files, float64(reclaimed.bytes)/(1024*1024))
+	}
+
 	fmt.Printf("  targets:     %s\n\n", strings.Join(targets, ", "))
 
 	seed, err := readCensusSeed(filepath.Join(rootPath, "core"))
@@ -154,31 +162,179 @@ func runPlatformEmission(options Options, stageDir string, packageFilter []strin
 	return mergePlatformEmissions(rootPath, emittedTargets, emissions)
 }
 
+// emissionStageDirName is the default staging directory of a multi-platform emission, made BESIDE the
+// corpus under the output root (`<root>/.go2cs-platform-stage`), never inside `core`, and ignored by
+// the repository's .gitignore. It used to be a fresh `go2cs-platform-emit-*` directory under the
+// system temporary directory, removed by a deferred call; a run that ended through log.Fatal, os.Exit
+// or a kill skipped that call and left a full per-target copy of the corpus behind where nothing
+// would ever find it again. A fixed path is found again: the next run reclaims it.
+const emissionStageDirName = ".go2cs-platform-stage"
+
+// emissionStageLockName is the file inside the default staging directory that holds the process ID of
+// the run using it, so a second run into the same output root refuses instead of emptying a stage a
+// live run is still writing (CLAUDE.md safety floor 1: never two conversions into one output root).
+const emissionStageLockName = "owner.pid"
+
+// stageReclaim is what a run removed from a leftover staging directory before it started.
+type stageReclaim struct {
+	files int
+	bytes int64
+}
+
 // resolveEmissionStageDir resolves the staging directory: the caller's -platform-stage when given
-// (kept afterwards, so a corpus-wide run can be inspected), otherwise a fresh temporary directory
-// this run owns and removes. Reports whether the caller owns cleanup.
-func resolveEmissionStageDir(stageDir string) (string, bool, error) {
+// (kept afterwards, so a corpus-wide run can be inspected), otherwise emissionStageDirName under
+// rootPath, which this run locks, empties of any leftover, and removes again through the returned
+// release function.
+func resolveEmissionStageDir(stageDir string, rootPath string) (string, func(), stageReclaim, error) {
+	keep := func() {}
+
 	if stageDir = strings.TrimSpace(stageDir); len(stageDir) > 0 {
 		resolved, err := filepath.Abs(stageDir)
 
 		if err != nil {
-			return "", false, fmt.Errorf("failed to resolve staging directory %q: %w", stageDir, err)
+			return "", keep, stageReclaim{}, fmt.Errorf("failed to resolve staging directory %q: %w", stageDir, err)
 		}
 
 		if err := os.MkdirAll(resolved, 0755); err != nil {
-			return "", false, fmt.Errorf("failed to create staging directory %q: %w", resolved, err)
+			return "", keep, stageReclaim{}, fmt.Errorf("failed to create staging directory %q: %w", resolved, err)
 		}
 
-		return resolved, false, nil
+		return resolved, keep, stageReclaim{}, nil
 	}
 
-	resolved, err := os.MkdirTemp("", "go2cs-platform-emit-")
+	resolved := filepath.Join(rootPath, emissionStageDirName)
+
+	if err := os.MkdirAll(resolved, 0755); err != nil {
+		return "", keep, stageReclaim{}, fmt.Errorf("failed to create staging directory %q: %w", resolved, err)
+	}
+
+	if err := lockEmissionStage(resolved); err != nil {
+		return "", keep, stageReclaim{}, err
+	}
+
+	// Locked: whatever else is here was left by a run that ended before its cleanup.
+	reclaimed, err := reclaimEmissionStage(resolved)
 
 	if err != nil {
-		return "", false, fmt.Errorf("failed to create a staging directory: %w", err)
+		os.Remove(filepath.Join(resolved, emissionStageLockName))
+		return "", keep, stageReclaim{}, err
 	}
 
-	return resolved, true, nil
+	return resolved, func() { os.RemoveAll(resolved) }, reclaimed, nil
+}
+
+// lockEmissionStage creates the stage's lock file holding this process's ID. A lock left by a process
+// that is no longer running is stale and is replaced; a lock held by a live process refuses the run.
+func lockEmissionStage(stageDir string) error {
+	lockPath := filepath.Join(stageDir, emissionStageLockName)
+
+	for attempt := 0; ; attempt++ {
+		lock, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0644)
+
+		if err == nil {
+			_, err = fmt.Fprintf(lock, "%d\n", os.Getpid())
+
+			if closeErr := lock.Close(); err == nil {
+				err = closeErr
+			}
+
+			if err != nil {
+				return fmt.Errorf("failed to write staging lock %q: %w", lockPath, err)
+			}
+
+			return nil
+		}
+
+		if !errors.Is(err, fs.ErrExist) || attempt > 0 {
+			return fmt.Errorf("failed to create staging lock %q: %w", lockPath, err)
+		}
+
+		if holder := readStageLockHolder(lockPath); holder > 0 && processIsRunning(holder) {
+			return fmt.Errorf("staging directory %q is held by running process %d (%s): two emissions into one output root "+
+				"are never run at once; wait for that run to finish, or, if that process is not a go2cs run, remove the directory",
+				stageDir, holder, emissionStageLockName)
+		}
+
+		if err := os.Remove(lockPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return fmt.Errorf("failed to remove stale staging lock %q: %w", lockPath, err)
+		}
+	}
+}
+
+// readStageLockHolder reads the process ID a staging lock holds, or 0 when it holds none.
+func readStageLockHolder(lockPath string) int {
+	content, err := os.ReadFile(lockPath)
+
+	if err != nil {
+		return 0
+	}
+
+	pid, err := strconv.Atoi(strings.TrimSpace(string(content)))
+
+	if err != nil {
+		return 0
+	}
+
+	return pid
+}
+
+// processIsRunning reports whether a process with the given ID is running. On Windows FindProcess
+// opens the process and fails when there is none; elsewhere it always succeeds, and signal 0 asks
+// without signalling (EPERM means the process exists under another user).
+func processIsRunning(pid int) bool {
+	process, err := os.FindProcess(pid)
+
+	if err != nil {
+		return false
+	}
+
+	defer process.Release()
+
+	if runtime.GOOS == "windows" {
+		return true
+	}
+
+	err = process.Signal(syscall.Signal(0))
+
+	return err == nil || errors.Is(err, syscall.EPERM)
+}
+
+// reclaimEmissionStage removes everything in a locked staging directory except its lock, and reports
+// how many files and bytes it removed.
+func reclaimEmissionStage(stageDir string) (stageReclaim, error) {
+	var reclaimed stageReclaim
+
+	entries, err := os.ReadDir(stageDir)
+
+	if err != nil {
+		return reclaimed, fmt.Errorf("failed to read staging directory %q: %w", stageDir, err)
+	}
+
+	for _, entry := range entries {
+		if entry.Name() == emissionStageLockName {
+			continue
+		}
+
+		leftover := filepath.Join(stageDir, entry.Name())
+
+		filepath.WalkDir(leftover, func(_ string, item fs.DirEntry, err error) error {
+			if err == nil && !item.IsDir() {
+				reclaimed.files++
+
+				if info, err := item.Info(); err == nil {
+					reclaimed.bytes += info.Size()
+				}
+			}
+
+			return nil
+		})
+
+		if err := os.RemoveAll(leftover); err != nil {
+			return reclaimed, fmt.Errorf("failed to reclaim leftover %q from staging directory: %w", leftover, err)
+		}
+	}
+
+	return reclaimed, nil
 }
 
 // mergedArtifact is one logical artifact's merge plan: where each emitting target's copy was staged.
