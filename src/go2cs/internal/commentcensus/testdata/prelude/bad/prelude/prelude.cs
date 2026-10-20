@@ -71,5 +71,15 @@ internal static nint /*n*/ opens(params ꓸꓸꓸnint xsʗp) {
     return n;
 }
 
+internal static nint /*n*/ regrow(params ꓸꓸꓸnint xsʗp) {
+    nint n = default!;
+    var xs = xsʗp.sslice();
+
+    n = len(xs);
+    var more = new slice<nint>(n);
+    n += len(more);
+    return n;
+}
+
 } // end prelude_package
 

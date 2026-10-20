@@ -675,7 +675,7 @@ func analyze(p pair, r *results, verbose bool) {
 				csLine := 0
 				if ci, ok := lineCS[L]; ok && cs.comments[ci].line > cOpen && cs.comments[ci].line < cEnd {
 					csLine = cs.comments[ci].line
-				} else if ids := goIdents(g.idents[L]); len(ids) > 0 {
+				} else if ids := goAnchorIdents(g.idents[L]); len(ids) > 0 {
 					for c := cur; c < cEnd; c++ {
 						if !cs.codeOnLine[c-1] {
 							continue
@@ -792,10 +792,7 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 		}
 		return 0
 	}
-	ids := goIdents(g.idents[lb+1])
-	for name := range respelledBuiltins {
-		delete(ids, name)
-	}
+	ids := goAnchorIdents(g.idents[lb+1])
 	for l := c + 1; l < cEnd && !isBlankCS(cs, l); l++ {
 		if !cs.codeOnLine[l-1] {
 			continue
@@ -819,10 +816,20 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 	return 0
 }
 
-// respelledBuiltins are the Go builtins the translation spells differently, so preludeSeparator does not require
-// them on the C# line: `x := make([]T, n)` becomes `var x = new slice<T>(n);` and `p := new(T)` becomes
+// respelledBuiltins are the Go builtins the translation spells differently, so an anchor never requires them on
+// the C# line: `x := make([]T, n)` becomes `var x = new slice<T>(n);` and `p := new(T)` becomes
 // `var p = @new<T>();`. (`new` is also a C# keyword, which goIdents already drops; it is listed for what it is.)
 var respelledBuiltins = map[string]bool{"make": true, "new": true}
+
+// goAnchorIdents returns the identifiers a C# line must hold to be the translation of a Go line: goIdents less
+// respelledBuiltins. preludeSeparator and the placement of a Go blank line both anchor through it.
+func goAnchorIdents(ids []string) map[string]bool {
+	m := goIdents(ids)
+	for name := range respelledBuiltins {
+		delete(m, name)
+	}
+	return m
+}
 
 var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!;)$`)
 

@@ -46,3 +46,11 @@ func opens(xs ...int) (n int) {
 	n = len(xs)
 	return
 }
+
+func regrow(xs ...int) (n int) {
+	n = len(xs)
+
+	more := make([]int, n)
+	n += len(more)
+	return
+}
