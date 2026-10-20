@@ -27665,4 +27665,10 @@ instances it relies on. A stricter anchor bounds the search by the C# line of th
 (the previous statement's own translation), rather than by the last blank placed. It is a census seat with
 its own two-reading measurement.
 
+**Amended 2026-10-20 (G's review of claude/c2-comment-blank-parity).** Two more named false reports, from narrowing
+the blank-placing walk to cross only a BARE heap box (a box with an initializer is a whole Go statement, and
+crossing it masked dropped blanks): crypto/x509/x509.go:1318 and runtime/runtime1.go:224 (windows). Both anchor on a
+line below another statement's initialized box, and the C# keeps the blank. Both read go-blank-cs-none at the
+narrowing commit.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
