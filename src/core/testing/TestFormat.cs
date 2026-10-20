@@ -73,6 +73,18 @@ internal static class TestFormat
     }
 
     /// <summary>
+    /// <c>fmt.Sprintln</c> exactly, its trailing newline kept: the string Go's <c>t.Log</c>, <c>t.Error</c>,
+    /// <c>t.Fatal</c> and <c>t.Skip</c> hand to <c>(*common).log</c>, which trims ONE trailing newline itself.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Sprint"/> has already removed Sprintln's newline, so passing its result to that trim
+    /// removed a second one: a record whose own text ended in a newline lost the empty continuation
+    /// line Go prints (G's PIN 2, <c>t.Log("two\nlines\n")</c>).
+    /// </remarks>
+    public static string Sprintln(ReadOnlySpan<object> args) =>
+        fmt_package.Sprintln(args.ToArray()).ToString();
+
+    /// <summary>
     /// Formats a Go format string as Go's <c>t.Logf</c> does — <c>fmt.Sprintf</c>, every verb and
     /// flag the converted fmt implements, including the <c>%#v</c> Go-syntax form and fmt's own
     /// disclosure styles for bad verbs and missing or extra arguments.

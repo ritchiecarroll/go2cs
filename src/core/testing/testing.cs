@@ -337,7 +337,7 @@ public static partial class testing_package
             return;
         }
 
-        execution.LogFromCaller(Sprint(args));
+        execution.LogFromCaller(Sprintln(args));
         execution.Fail();
     }
 
@@ -427,7 +427,7 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.LogFromCaller(Sprint(args));
+        execution.LogFromCaller(Sprintln(args));
         execution.FailNow();
     }
 
@@ -444,7 +444,7 @@ public static partial class testing_package
     }
 
     [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
-        t.Execution?.LogFromCaller(Sprint(args));
+        t.Execution?.LogFromCaller(Sprintln(args));
 
     [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
         t.Execution?.LogFromCaller(Sprintf(format, args));
@@ -479,7 +479,7 @@ public static partial class testing_package
             throw new GoexitException();
         }
 
-        execution.LogFromCaller(Sprint(args));
+        execution.LogFromCaller(Sprintln(args));
         execution.SkipNow();
     }
 
@@ -1140,6 +1140,9 @@ public static partial class testing_package
     // graph still acyclic on all three targets, and the closure and build-time cost that was
     // accepted for it) are recorded in TestFormat's remarks.
     private static string Sprint(ReadOnlySpan<any> args) => TestFormat.Sprint(args);
+
+    // fmt.Sprintln with its newline kept: what Go's Log/Error/Fatal/Skip pass to (*common).log, which trims one itself.
+    private static string Sprintln(ReadOnlySpan<any> args) => TestFormat.Sprintln(args);
 
     private static string Sprintf(@string format, ReadOnlySpan<any> args) => TestFormat.Sprintf(format, args);
 }
