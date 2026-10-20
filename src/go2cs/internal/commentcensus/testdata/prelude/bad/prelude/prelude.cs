@@ -81,5 +81,13 @@ internal static nint /*n*/ regrow(params ꓸꓸꓸnint xsʗp) {
     return n;
 }
 
+internal static nint boxed() {
+    nint p = 1;
+    ref var q = ref heap<nint>(out var Ꮡq);
+    q = p + 1;
+    sink = Ꮡq;
+    return q;
+}
+
 } // end prelude_package
 

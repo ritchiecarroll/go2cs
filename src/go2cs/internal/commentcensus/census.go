@@ -700,8 +700,10 @@ func analyze(p pair, r *results, verbose bool) {
 					continue
 				}
 				cur = csLine + 1
+				// The walk back crosses what the converter writes ahead of L's own translation: comments, attributes, and
+				// scaffolding (scaffoldRe), so an escaping local's heap box above its assignment is part of L.
 				st := csLine
-				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2])) {
+				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2]) || scaffoldRe.MatchString(strings.TrimSpace(cs.codeText[st-2]))) {
 					st--
 				}
 				matchedStarts[st] = true

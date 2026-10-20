@@ -171,9 +171,9 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 		t.Fatalf("%s: %v", rendering, err)
 	}
 
-	// Vacuity: the seven functions are read, or no class could move.
-	if n := r.r.body["functions"]; n != 7 {
-		t.Fatalf("%s: %d function bodies read, want 7", rendering, n)
+	// Vacuity: the eight functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 8 {
+		t.Fatalf("%s: %d function bodies read, want 8", rendering, n)
 	}
 
 	got := map[string]int{}
@@ -197,13 +197,15 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 // with a comment and then Go's blank line; `bad` drops that blank, as the converter does, and the census must
 // report it rather than credit the prelude's separator above the comment as Go's blank. `regrow` has a Go blank
 // line before `more := make(...)`: the line that places it must not require `make` either, or the blank reads
-// unmapped in `good` and is never reported missing in `bad`.
+// unmapped in `good` and is never reported missing in `bad`. `boxed` has a Go blank line before an escaping
+// local, whose translation is a heap box and then its assignment: the blank sits above the box, so the line that
+// places it walks back over the box as it does over a comment.
 func TestPreludeSeparatorIsNotADefect(t *testing.T) {
 	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 7 {
 		t.Errorf("good: %v and %d separators, want no body class and 7 separators", got, separators)
 	}
 
-	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1, "body:go-blank-cs-none": 2}
+	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1, "body:go-blank-cs-none": 3}
 
 	// `bad` keeps regrow's prelude separator: only the blank before its make line is dropped.
 	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 1 {

@@ -54,3 +54,13 @@ func regrow(xs ...int) (n int) {
 	n += len(more)
 	return
 }
+
+var sink *int
+
+func boxed() int {
+	p := 1
+
+	q := p + 1
+	sink = &q
+	return q
+}
