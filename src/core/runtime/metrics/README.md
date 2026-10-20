@@ -2,12 +2,12 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-2_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/runtime.metrics.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/runtime/metrics@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/runtime/metrics) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/runtime/metrics)
+[![Tests](https://img.shields.io/badge/Tests-2_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/runtime.metrics.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/runtime/metrics@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/runtime/metrics) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/runtime/metrics)
 
 From C#, call this package through the static class go.runtime.metrics_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
-Package metrics provides a stable interface to access implementation-defined metrics exported by the Go runtime. This package is similar to existing functions like [runtime.ReadMemStats](https://pkg.go.dev/runtime@go1.26.9#ReadMemStats) and [runtime/debug.ReadGCStats](https://pkg.go.dev/runtime/debug@go1.26.9#ReadGCStats), but significantly more general.
+Package metrics provides a stable interface to access implementation-defined metrics exported by the Go runtime. This package is similar to existing functions like [runtime.ReadMemStats](https://pkg.go.dev/runtime@go1.26.10#ReadMemStats) and [runtime/debug.ReadGCStats](https://pkg.go.dev/runtime/debug@go1.26.10#ReadGCStats), but significantly more general.
 
 The set of metrics defined by this package may evolve as the runtime itself evolves, and also enables variation across Go implementations, whose relevant metric sets may not intersect.
 

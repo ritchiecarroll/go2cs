@@ -5,6 +5,7 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using errors = errors_package;
+using slices = slices_package;
 using strings = strings_package;
 using syscall = syscall_package;
 using @unsafe = unsafe_package;
@@ -308,7 +309,12 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             }
         }
 
+        chains = slices.DeleteFunc<slice<slice<ж<Certificate>>>, slice<ж<Certificate>>>(chains, containsDistrustedSPKIHash);
+
         if (builtin.len(chains) == 0) {
+            if (topErr == default!) {
+                (chains, err) = (default!, new CertificateInvalidError(Ꮡc, NoValidChains, ""u8)); goto ᒐdone;
+            }
             // Return the error from the highest quality context.
             (chains, err) = (default!, topErr); goto ᒐdone;
         }
