@@ -5,26 +5,17 @@
 // Use of this source code is governed by a BSD-style license
 // that can be found in the LICENSE file.
 
-// [LibraryImport] requires /unsafe unconditionally (SYSLIB1062) — the generated stub is written in
-// terms of pointers even for a signature that has none. `time`'s converted emission needs nothing
-// unsafe, so this package is the one where the declaration is genuinely load-bearing rather than
-// merely honest: without it the file below does not compile, and the .csproj that would have said
-// otherwise is regenerated on every transpile. Placed above the file-scoped namespace because module
-// attributes must precede every other element (CS1730).
-[module: go.GoRequiresUnsafe]
-
 namespace go;
 
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Win32.SafeHandles;
-// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
+// Aliased rather than imported wholesale: this file needs exactly these golib types, and a blanket
 // `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
 // beside converted code.
 using Goroutine = go.golib.Goroutine;
+using GoTimer = go.golib.GoTimer;
 using WaitReason = go.golib.WaitReason;
 using SyncTestBubble = go.golib.SyncTestBubble;
 using @unsafe = unsafe_package;
@@ -152,38 +143,42 @@ partial class time_package
     // so much as calls time.Sleep once was unreachable. These bodies realize the runtime's timer
     // contract on .NET.
     //
-    // SERVICE MODEL. Go keeps timers in per-P heaps, run by whichever P first notices a deadline.
-    // The managed model is ONE global heap serviced by one dedicated background thread — the shape
-    // Go itself used before per-P timers (the old runtime `timerproc`). One thread suffices and is
-    // ordering-faithful because the only two callbacks package time ever installs are `sendTime` (a
-    // NON-BLOCKING channel send) and `goFunc` (which only starts a goroutine): neither can block the
-    // service thread and delay a later deadline. Callbacks run with the lock released, in deadline
-    // order.
+    // SERVICE MODEL. Go keeps every runtime timer in one kind of heap, whether time.Sleep, a Timer, a
+    // Ticker or an I/O deadline armed it. The managed model has ONE heap too: golib's GoTimer, served
+    // by one background thread, which internal/poll's deadlines already use. Each real-clock
+    // runtimeTimer owns one GoTimer (`engine`), armed exactly while `when > 0`, and a Sleep arms its
+    // thread's own. One thread suffices and is ordering-faithful because the only two callbacks
+    // package time ever installs are `sendTime` (a NON-BLOCKING channel send) and `goFunc` (which only
+    // starts a goroutine): neither can block the service thread and delay a later deadline, which is
+    // GoTimer's contract. Callbacks run with s_timerLock released, in deadline order. A synctest
+    // bubble's FAKE timers stay on the bubble's own heap, on the bubble's clock (below).
     //
     // WHY NOT System.Threading.Timer. Its resolution is the Windows timer tick — measured at ~15 ms
     // on this host, so a 1 ms Go timer would fire ~15x late and any two timers less than a tick
-    // apart could fire OUT OF ORDER. The service thread instead waits on a Windows high-resolution
-    // waitable timer, precisely the object the Go runtime uses for the same job
-    // (runtime/os_windows.go createHighResTimer/usleep), and it reads the same monotonic clock as
-    // runtimeNano(), so timer deadlines are coherent with Now()/Since/Sub.
+    // apart could fire OUT OF ORDER. GoTimer's service thread instead waits on a Windows
+    // high-resolution waitable timer (golib's GoHighResolutionTimer), precisely the object the Go
+    // runtime uses for the same job (runtime/os_windows.go createHighResTimer/usleep), and it reads
+    // the same monotonic clock as runtimeNano(), so timer deadlines are coherent with Now()/Since/Sub.
     //
-    // LOCKING DISCIPLINE. `s_timerLock` guards the heap AND every runtimeTimer field; nothing else
-    // does. Go's finer-grained scheme (a per-timer lock plus a per-P heap lock) exists to scale
-    // across Ps and to order timer-vs-heap acquisition; with a single heap there is exactly one
-    // lock and therefore no lock-ordering hazard at all. No user code and no timer callback ever
-    // runs under it — the service thread collects the due callbacks inside the lock and invokes
-    // them after releasing it — so a callback cannot deadlock against a concurrent Stop/Reset.
-    // A Stop or Reset that races the firing callback cannot double-fire or lose a re-arm: both the
-    // firing decision and the cancellation are `when`/`gen` transitions made under this one lock,
-    // and the loser of the race is detected by the generation check (see runtimeTimer.gen).
+    // LOCKING DISCIPLINE. `s_timerLock` guards every runtimeTimer field and the bubbles' fake heaps.
+    // Go's finer-grained scheme (a per-timer lock plus a per-P heap lock) exists to scale across Ps;
+    // here one lock serves every timer. GoTimer's own heap lock is taken INSIDE it (engine.Reset and
+    // engine.Stop) and never the reverse, because GoTimer runs a callback with its heap lock released
+    // and the callback (fireReal) takes s_timerLock. No user code and no timer callback ever runs
+    // under s_timerLock — the firing is decided inside it and delivered after releasing it — so a
+    // callback cannot deadlock against a concurrent Stop/Reset. A Stop or Reset that races the
+    // firing cannot double-fire or lose a re-arm: both the firing decision and the cancellation are
+    // `when` transitions made under this one lock, and the loser is detected there (fireReal for a
+    // real timer, the generation check for a fake one — see runtimeTimer.gen).
     //
     // ⚠ There IS a second lock now — a per-timer `sendLock`, for chan timers only (below) — and with
     // it one ordering rule, which holds today by construction and must keep holding:
     //
-    //     sendLock is OUTERMOST. sendLock -> s_timerLock, and sendLock -> the channel's own lock.
+    //     sendLock is OUTERMOST. sendLock -> s_timerLock -> GoTimer's heap lock, and sendLock -> the
+    //     channel's own lock.
     //
-    // stop/modify take sendLock first and then s_timerLock; the service thread takes sendLock only
-    // AFTER releasing s_timerLock; the send itself and the drain take the channel lock under
+    // stop/modify take sendLock first and then s_timerLock; a firing (fireReal, or a bubble's
+    // check) takes sendLock only AFTER releasing s_timerLock; the send itself and the drain take the channel lock under
     // sendLock; and nothing in golib's channel calls out while holding the channel lock. So no cycle
     // exists. The way to introduce one is to call Timer.Stop/Reset from inside something that
     // already holds a channel lock — a callback invoked under it — which nothing does and nothing
@@ -263,79 +258,60 @@ partial class time_package
     // asyncTimerChan(), which reads the setting LIVE at each decision point exactly as the runtime
     // reads debug.asynctimerchan.
     //
-    // ONE FIRING PER TIMER PER PASS — why the pass reads the clock exactly once (r39, 2026-08-03).
-    // The service pass samples `now` ONCE and threads that one value through the whole drain. That
-    // is not an optimization: it is the invariant. Go does the same and for the same reason — the
-    // scheduler samples the clock in timers.check and hands that value down through timers.run(now)
-    // to timer.unlockAndRun(now), never re-reading it inside a pass — and the consequence is a
-    // theorem rather than a heuristic:
+    // ONE FIRING PER TIMER PER PASS (r39, 2026-08-03; restated for the GoTimer heap, D3). Go's
+    // scheduler samples the clock once in timers.check and hands it down through timers.run(now) to
+    // timer.unlockAndRun(now), and the consequence is a theorem rather than a heuristic:
     //
     //     Within one service pass, every timer fires AT MOST ONCE.
     //
-    // Two facts carry it. First, AT MOST ONE HEAP ENTRY PER TIMER IS EVER LIVE: every Enqueue in
-    // this file is immediately preceded by a `gen++` on the same timer and queues the POST-increment
-    // value, and `gen` only ever increases — so each generation is consumed by at most one entry and
-    // every other entry for that timer fails the `entry.timer.gen != entry.gen` test and is dropped.
-    // (Keep that pairing intact: moving the `gen++` in the drain below into the periodic branch
-    // would silently break this.) A one-shot therefore cannot be re-peeked because it is dequeued
-    // and NOT re-enqueued, not because `when` is cleared — the drain reads the heap's priority, not
-    // `timer.when`.
+    // Two facts carry it here. First, THE BATCH IS FIXED BEFORE ANY CALLBACK RUNS: GoTimer's pass
+    // takes every due timer off its heap under its heap lock and only then runs the callbacks, and a
+    // GoTimer is in that heap at most once. A periodic re-arm (engine.Reset in takeDueLocked) puts the
+    // timer back on the HEAP, never into the batch being run, so it waits for the next pass.
     //
-    // Second, the arithmetic. A periodic timer is re-armed to next = when + period*(1 + delay/period)
-    // with delay = now - when >= 0; writing delay = q*period + r for 0 <= r < period gives
+    // Second, the arithmetic. A firing reads the clock ONCE (fireReal's `now`, a bubble check's
+    // bubble.Now) and a periodic timer is re-armed to next = when + period*(1 + delay/period) with
+    // delay = now - when >= 0; writing delay = q*period + r for 0 <= r < period gives
     // next = when + period*(1 + q) = (when + delay) + (period - r) = now + (period - r), and
-    // r < period makes that STRICTLY greater than `now`. The re-peek therefore always takes the
-    // `when > now` branch and the drain ends. It holds for every period, including the 1 ns one
-    // testTimerChan resets to. Overflow cannot defeat it: the arithmetic is unchecked, the true
-    // value is always in [1, 2^64-2), so a wrapped result is always NEGATIVE — never a small
-    // positive that could land at or below `now` — and the `next < 0` clamp catches exactly that.
+    // r < period makes that STRICTLY greater than `now`. It holds for every period, including the
+    // 1 ns one testTimerChan resets to. Overflow cannot defeat it: the arithmetic is unchecked, the
+    // true value is always in [1, 2^64-2), so a wrapped result is always NEGATIVE — never a small
+    // positive that could land at or below `now` — and the `next < 0` clamp catches exactly that. A
+    // bubble's fake heap keeps one entry per ARM, so there the first fact is the generation pairing:
+    // every Enqueue in this file is immediately preceded by a `gen++` on the same timer and queues
+    // the POST-increment value, so every older entry fails the `entry.timer.gen != entry.gen` test
+    // (keep that pairing intact: moving the `gen++` in takeDueLocked into the periodic branch would
+    // silently break this), and the strict inequality ends the bubble's drain.
     //
-    // Re-reading the clock per iteration broke that theorem and was the defect this replaced (r36
-    // recorded it): the advanced `when` lands one nanosecond ahead, a freshly read `now` has already
-    // passed it, and the same ticker fires again — for as long as consecutive reads of the ~100 ns
-    // monotonic source keep advancing. The burst is invisible while nobody is receiving (sendTime's
-    // non-blocking send onto the cap-1 channel drops all but one) but testTimerChan's drainAsync IS
-    // receiving, so the two stale values an async ticker is allowed became three or more and `noTick`
-    // reported "extra tick" — in ALL THREE asynctimerchan modes, which the divergence above (scoped
-    // to the sync mode) never explained.
+    // Re-reading the clock between firings of ONE drain broke that theorem and was the defect r39
+    // replaced (r36 recorded it): the advanced `when` lands one nanosecond ahead, a freshly read
+    // `now` has already passed it, and the same ticker fires again — for as long as consecutive reads
+    // of the ~100 ns monotonic source keep advancing. The burst is invisible while nobody is
+    // receiving (sendTime's non-blocking send onto the cap-1 channel drops all but one) but
+    // testTimerChan's drainAsync IS receiving, so the two stale values an async ticker is allowed
+    // became three or more and `noTick` reported "extra tick" — in ALL THREE asynctimerchan modes.
     //
-    // What the invariant does NOT do is rate-limit, and it cannot delay anything. `next` depends on
-    // `now` only through the floor delay/period, which is non-decreasing in `now`, so hoisting the
-    // read can only make `next` — and therefore the pass's `deadline` — SMALLER or equal. waitUntil
-    // recomputes `remaining` from a FRESH clock, and the OS wake is monotone in the deadline, so no
-    // timer can wake later than the per-iteration version would have woken it; usually the deadline
-    // is already past and waitUntil returns at once. (When delay < period, the common case, the floor
-    // is 0 and the deadline is bit-for-bit identical either way.) A high-rate ticker is thus served
-    // every pass, as in Go, where the scheduler simply calls check again with a fresh `now`. The
-    // bound is on re-firing WITHIN a pass, which is Go's "drop ticks to make up for slow receivers".
+    // What the invariant does NOT do is rate-limit, and it cannot delay anything: a high-rate ticker
+    // is served every pass, as in Go, where the scheduler simply calls check again with a fresh
+    // `now`. The bound is on re-firing WITHIN a pass, which is Go's "drop ticks to make up for slow
+    // receivers". A timer coming due DURING a pass waits for the next one, and that is not a delay
+    // either: GoTimer's next wait is for its heap head, already past, so the next pass starts at once.
     //
-    // A timer coming due DURING a pass waits for the next one, and that is not a delay either: the
-    // head of the heap is the minimum `when` among live entries, so `deadline` is <= that timer's
-    // `when` <= the clock at the end of the drain, hence `remaining <= 0` and the next pass starts
-    // immediately. Go behaves the same way.
-    //
-    // Where this model is NOT Go, so the fidelity claim above is not over-read: Go's `check` releases
-    // the timer-set lock around EACH callback and re-validates the head between them, so a Stop
-    // landing mid-pass cancels the callbacks after it; this drain commits the whole batch under one
-    // lock hold and then runs it. (In SYNC mode the seq check restores that cancellation for chan
-    // timers: a Stop or Reset landing after the batch was committed abandons every offer in it. In
-    // async mode it does not, which is the pre-1.23 behavior the mode selects.) Go also keeps one
-    // heap entry per TIMER (repositioned in place, zombies swept), where this keeps one per ARM and
-    // reclaims a dead entry only when it reaches the head. Both predate the single clock sample and
-    // are narrowed, not widened, by it — a frozen `now` commits a SMALLER batch. One consequence to
-    // know: `delay` is now measured from the pass's clock, so sendTime's `Now().Add(-delay)` lands
-    // slightly later than a per-iteration reading would place it — the same form Go uses, with a
-    // larger magnitude because callbacks here are deferred to the end of the batch.
+    // Each real firing is decided under s_timerLock in its OWN callback, as Go's check releases the
+    // timer-set lock around each callback and re-validates between them, so a Stop landing mid-pass
+    // cancels the firings after it (fireReal finds `when` cleared). A bubble's check still commits
+    // its whole batch under one hold of s_timerLock and then runs it; in SYNC mode the seq check
+    // restores the cancellation for its chan timers, and in async mode it does not, which is the
+    // pre-1.23 behavior the mode selects.
     //
     // Finally, a CONSTRAINT this establishes rather than merely satisfies. At the instant a ticker is
-    // stopped or reset, at most TWO of its ticks can exist: one in the cap-1 buffer and one committed
-    // to `due` but not yet sent. In SYNC mode both are now revoked outright (the drain takes the
-    // first, the seq check the second), so the guarantee no longer rests on the count. In ASYNC mode
-    // it still does, and there the two is exactly the allowance testTimerChan's drainAsync drains for
-    // a ticker — the margin is zero. Any later change that lets two ticks for ONE timer be committed
-    // before their callbacks run — batching two passes, a second service thread, moving the `due`
-    // flush inside the lock-held drain — re-breaks `noTick` under asynctimerchan=1 and =2 without
-    // touching a line of this file.
+    // stopped or reset, at most TWO of its ticks can exist: one in the cap-1 buffer and one decided
+    // but not yet sent. In SYNC mode both are revoked outright (the drain takes the first, the seq
+    // check the second), so the guarantee does not rest on the count. In ASYNC mode it does, and
+    // there the two is exactly the allowance testTimerChan's drainAsync drains for a ticker — the
+    // margin is zero. Any later change that lets two ticks for ONE timer be decided before either is
+    // sent — batching two passes, a second service thread, a callback handed to the thread pool —
+    // re-breaks `noTick` under asynctimerchan=1 and =2 without touching a line of this file.
 
     // Hidden runtime state for one Timer or Ticker. Go declares these fields on runtime.timeTimer,
     // AFTER the two fields package time can see (`C` and `initTimer`/`initTicker`); the comment in
@@ -359,12 +335,20 @@ partial class time_package
         // Callback argument — the channel<Time> for sendTime, the Action for goFunc.
         internal any? arg;
 
-        // Arm generation, bumped on EVERY change to `when` (arm, stop, reset, ticker re-arm). Heap
-        // entries carry the generation they were queued with, which is how a Stop or Reset cancels
-        // an already-queued firing without removing it from the heap: the service thread drops any
-        // entry whose generation no longer matches. This is the managed stand-in for Go's
-        // timerModified/timerZombie bits, which likewise leave the stale heap entry in place.
+        // Arm generation, bumped on EVERY change to `when` (arm, stop, reset, ticker re-arm). A
+        // bubble's fake-heap entries carry the generation they were queued with, which is how a Stop
+        // or Reset cancels an already-queued fake firing without removing it from the heap: the
+        // bubble's check drops any entry whose generation no longer matches. This is the managed
+        // stand-in for Go's timerModified/timerZombie bits, which likewise leave the stale heap entry
+        // in place. A real timer needs none of it: its `engine` is moved or removed in place.
         internal int64 gen;
+
+        // The real-clock timer on golib's one heap, created at this timer's first real arm (a fake
+        // timer never has one). Armed exactly while `when > 0`, and at `when`: every change to `when`
+        // under s_timerLock moves it to match (queueLocked, stopLocked, takeDueLocked). GoTimer can
+        // still run a callback it took off its heap just before a Stop or Reset, so fireReal re-reads
+        // `when` under s_timerLock and drops a firing whose arm is gone.
+        internal GoTimer? engine;
 
         // The timer's channel when this is a CHANNEL timer whose channel was handed to the runtime
         // — Go's t.isChan plus t.hchan(). The NIL channel otherwise: for AfterFunc's func timer,
@@ -406,9 +390,9 @@ partial class time_package
         //
         // Set under s_timerLock where the firing is committed, cleared under sendLock where it
         // resolves, and read-and-cleared by stop/modify, which hold BOTH — so every access is
-        // ordered against both writers. At most one offer per timer can be outstanding: the service
-        // thread is single and drains the whole batch before the next pass, and at most one heap
-        // entry per timer is ever live.
+        // ordered against both writers. At most one offer per timer can be outstanding: the timer
+        // service thread is single and delivers a firing before it decides the next, and a timer is
+        // on its heap at most once.
         internal bool offered;
 
         // Go's t.isChan. A channel timer is one whose channel package time handed to the runtime;
@@ -431,11 +415,12 @@ partial class time_package
     // COST, stated honestly: Go's counterpart is one atomic int load, and this is a $GODEBUG
     // environment read plus two lookups (godebug.Value re-reads the variable every call BY DESIGN —
     // the raw text is its cache-invalidation token, since there is no Setenv notification hook),
-    // measured at ~670 ns. Three orders of magnitude more expensive, so it is kept OFF the per-timer
-    // path: the service pass reads it once and threads the answer through the whole batch, and the
-    // remaining callers are Stop/Reset and len()/cap() of a timer channel — all per user operation.
-    // A func timer pays NOTHING, since syncSendLock tests IsChan first. Do not "optimize" this by
-    // caching the result across calls: the live-mode contract is the thing it exists to honor.
+    // measured at ~670 ns. Three orders of magnitude more expensive, so it is read at Go's own
+    // granularity and no finer: once per CHAN-timer firing (fireReal; a bubble's check reads it once
+    // per batch), and per Stop/Reset and len()/cap() of a timer channel — all per user operation or
+    // per tick. A func timer pays NOTHING, since fireReal and syncSendLock test IsChan first. Do not
+    // "optimize" this by caching the result across calls: the live-mode contract is the thing it
+    // exists to honor.
     private static bool asyncTimerChan()
     {
         return godebugInt(asynctimerchan.Value()) != 0;
@@ -496,8 +481,8 @@ partial class time_package
     // The timer's sendLock when the SYNCHRONOUS timer-channel protocol applies right now — a
     // channel timer, in a mode that wants the Go 1.23 semantics — and null when it does not, which
     // is every func timer and every timer under asynctimerchan=1 or =2. One helper so stop and
-    // modify cannot drift apart. (The service pass asks the same question, but resolves the mode
-    // ONCE per pass rather than per timer — see `sync` in serviceTimers.)
+    // modify cannot drift apart. (A firing asks the same question once, before it is decided, and
+    // carries the answer through its delivery — see `sync` in fireReal and checkBubbleTimers.)
     private static object? syncSendLock(runtimeTimer timer)
     {
         return timer.IsChan && !asyncTimerChan() ? timer.sendLock : null;
@@ -512,32 +497,10 @@ partial class time_package
     // dropped on the spot, only the channel kept — still fire.
     private static readonly ConditionalWeakTable<object, runtimeTimer> s_timerState = new();
 
-    // The single lock (see LOCKING DISCIPLINE above), the deadline-ordered heap, and the handle the
-    // service thread waits on alongside its high-resolution timer so a newly-armed earlier deadline
-    // interrupts an in-progress wait.
+    // The single lock (see LOCKING DISCIPLINE above). The heap is golib's GoTimer; golib's deadlock
+    // report reads it directly (Go's checkdead scans the same heaps), so package time registers
+    // nothing for it.
     private static readonly object s_timerLock = new();
-    private static readonly PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> s_timerHeap = new();
-
-    // golib's deadlock report asks whether a timer is still pending (Go: checkdead's timer scan), since
-    // an AfterFunc can still start a goroutine. Registered with the heap itself, so it exists whenever a
-    // timer can; a stale (stopped) entry still in the heap reads as pending, which only DELAYS a report.
-    private static readonly bool s_pendingTimerProbeRegistered = RegisterPendingTimerProbe();
-
-    private static bool RegisterPendingTimerProbe()
-    {
-        global::go.golib.Goroutine.RegisterPendingTimerProbe(static () =>
-        {
-            lock (s_timerLock)
-            {
-                return s_timerHeap.Count > 0;
-            }
-        });
-
-        return true;
-    }
-
-    private static readonly AutoResetEvent s_timerWake = new(false);
-    private static Thread? s_timerThread;
 
     // Sleep pauses the calling goroutine for at least the duration d. Mirrors runtime.timeSleep:
     // a non-positive duration returns immediately, and the deadline is computed on the monotonic
@@ -586,14 +549,42 @@ partial class time_package
             return;
         }
 
-        // Parked ONCE for the whole sleep, not once per waitUntil retry — Go's timeSleep parks once
-        // with waitReasonSleep and the retries are below the park, not around it. Deliberately here
-        // rather than inside waitUntil, whose OTHER caller is the timer service thread: that thread
-        // is not a goroutine (Park would be inert there anyway), and a sleep is a goroutine-level
-        // wait while the service loop's wait is the engine's own.
+        // Go's timeSleep: the sleeper's own timer (gp.timer, reused across sleeps; here one per thread)
+        // goes on the one heap and its callback wakes the sleeper, so a sleep is exactly as precise as
+        // every other timer. Parked ONCE for the whole sleep, as Go parks once with waitReasonSleep.
+        // The loop is for a wake that is not this sleep's: the firing of an earlier sleep on this
+        // thread that was interrupted while armed. It re-arms rather than trusting the wake, so the
+        // sleep still lasts at least d.
+        sleepTimer timer = t_sleepTimer ??= new sleepTimer();
+
         using (Goroutine.Park(WaitReason.Sleep))
-            waitUntil(deadline, null);
+        {
+            while (true)
+            {
+                timer.woken.Reset();
+                timer.engine.Reset(deadline);
+                timer.woken.Wait();
+
+                if (realNano() >= deadline)
+                    return;
+            }
+        }
     }
+
+    // A thread's sleep timer: a GoTimer whose callback sets the event the sleeper waits on.
+    private sealed class sleepTimer
+    {
+        internal readonly ManualResetEventSlim woken = new(false);
+        internal readonly GoTimer engine;
+
+        internal sleepTimer()
+        {
+            engine = new GoTimer(static state => ((ManualResetEventSlim)state!).Set(), woken);
+        }
+    }
+
+    [ThreadStatic]
+    private static sleepTimer? t_sleepTimer;
 
     // newTimer allocates a Timer (or, through the hand-owned tick.cs, a Ticker — same runtime
     // state) and arms it. Mirrors runtime.newTimer: build the state, modify(when, period, f, arg),
@@ -723,12 +714,13 @@ partial class time_package
             bool pending = timer.when > 0 || timer.offered;
             timer.offered = false;
             timer.when = 0;
-            // Cancels any firing already queued for this timer (see runtimeTimer.gen). Doing it
-            // under the same lock the service thread validates entries under is what makes the
-            // stop-vs-fire race safe in both directions: either the service thread has already
-            // taken the callback (and `when` is 0, so `offered` reports it instead), or this
-            // generation bump invalidates its queued entry and the callback never runs.
+            // Cancels any firing already queued for this timer: a real timer leaves the heap, a fake
+            // one's entry is invalidated (see runtimeTimer.gen). Doing it under the same lock a
+            // firing is decided under is what makes the stop-vs-fire race safe in both directions:
+            // either the firing was already decided (and `when` is 0, so `offered` reports it
+            // instead), or the firing finds `when` cleared, or its entry stale, and never runs.
             timer.gen++;
+            timer.engine?.Stop();
 
             if (bumpSeq)
             {
@@ -831,47 +823,59 @@ partial class time_package
         }
     }
 
-    // Queues the timer for `when` and wakes the service thread. Caller holds s_timerLock.
+    // Arms the timer for `when`. Caller holds s_timerLock.
     private static void armLocked(runtimeTimer timer, int64 when)
     {
         timer.when = when;
         timer.gen++;
+        queueLocked(timer, when);
+    }
 
-        // A fake timer goes on its bubble's own heap (Go: ts = &sg.timers) and wakes nothing: only the
-        // bubble's clock can make it due, and the clock moves only in the bubble's Run.
+    // Puts the timer on its heap for `when`, the post-increment `gen` already set. A fake timer goes
+    // on its bubble's own heap (Go: ts = &sg.timers) and wakes nothing: only the bubble's clock can
+    // make it due, and the clock moves only in the bubble's Run. A real timer's engine is moved to
+    // `when` in place, and a new head wakes the service thread. Caller holds s_timerLock.
+    private static void queueLocked(runtimeTimer timer, int64 when)
+    {
         if (timer.fake is { } bubble)
         {
             fakeHeapOf(bubble).Enqueue((timer, timer.gen), heapPrio(timer, when));
             return;
         }
 
-        s_timerHeap.Enqueue((timer, timer.gen), heapPrio(timer, when));
+        (timer.engine ??= new GoTimer(s_fireReal, timer)).Reset(when);
+    }
 
-        if (s_timerThread is null)
+    private static readonly Action<object?> s_fireReal = fireReal;
+
+    // A real timer's GoTimer callback, on the timer service thread: Go's unlockAndRun for one timer.
+    // The clock is read ONCE, under s_timerLock, and the firing is decided there and delivered after
+    // it is released (see ONE FIRING PER TIMER PER PASS). The asynctimerchan setting is read only for
+    // a chan timer, where Go reads it per firing; a func timer pays nothing (see asyncTimerChan).
+    private static void fireReal(object? state)
+    {
+        runtimeTimer timer = (runtimeTimer)state!;
+        bool sync = timer.IsChan && !asyncTimerChan();
+        List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due = s_realDue;
+
+        lock (s_timerLock)
         {
-            // Started on first use, not at package init: a program that never touches a timer never
-            // pays for the thread. Background, so it never keeps the process alive — Go's timer
-            // service does not either.
-            s_timerThread = new Thread(serviceTimers)
-            {
-                IsBackground = true,
-                Name = "go2cs.time.timers"
-            };
+            int64 now = realNano();
 
-            // Started WITHOUT the arming thread's ExecutionContext (COORD's addition 4): the engine
-            // thread lives for the process, and must not carry whichever goroutine happened to arm
-            // the first timer -- its AsyncLocals (profile labels) or anything else it had flowing.
-            // (Bubble membership cannot flow this way at all -- it is a goroutine field -- but the
-            // thread's context is the engine's, not a goroutine's.)
-            using (ExecutionContext.SuppressFlow())
-                s_timerThread.Start();
+            // GoTimer took this firing off its heap before a Stop or a Reset to a later time reached
+            // the timer: the arm it was for is gone (`when` 0) or queued again (`when` past `now`).
+            if (timer.when == 0 || timer.when > now)
+                return;
+
+            takeDueLocked(timer, timer.when, now, sync, due);
         }
 
-        // An AutoResetEvent latches, so this cannot be a lost wakeup even though the service thread
-        // computes its deadline and starts waiting outside the lock: a Set that lands in that window
-        // makes its next wait return at once and re-derive the head of the heap.
-        s_timerWake.Set();
+        fireDue(due, sync);
+        due.Clear();
     }
+
+    // fireReal's batch of one, reused: GoTimer runs every callback on its one service thread.
+    private static readonly List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> s_realDue = new(1);
 
     // ---- synctest bubbles: fake timers (S3; COORD's addition 5) ----
     //
@@ -889,7 +893,7 @@ partial class time_package
     // A heap entry's order: its deadline, then a tiebreak. Go re-randomizes a FAKE timer's rand at every
     // insert (maybeAdd, go1.26.9 runtime/time.go:739-743) and orders the heap on (when, rand), so bubbled
     // timers due at one fake instant fire in no fixed order, which internal/synctest's
-    // TestTimerNondeterminism checks across 1000 runs. A real timer's tiebreak stays 0, as before.
+    // TestTimerNondeterminism checks across 1000 runs. Only a fake timer reaches here: a real timer is on GoTimer's heap.
     private static (int64 when, uint rand) heapPrio(runtimeTimer timer, int64 when) =>
         (when, timer.fake is null ? 0u : (uint)System.Random.Shared.Next());
 
@@ -956,56 +960,11 @@ partial class time_package
         throw panic("time: timer used without initialization");
     }
 
-    // The service thread: run every due timer in deadline order, then wait for the next deadline
-    // (or for an arm to interrupt the wait). Mirrors the runtime's timers.run/timer.unlockAndRun.
-    private static void serviceTimers()
-    {
-        List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due = new();
-
-        while (true)
-        {
-            // 0 == nothing armed; wait for an arm instead of a deadline.
-            int64 deadline = 0;
-            due.Clear();
-
-            // Sampled ONCE for the whole pass, for the same reason `now` is: the commit below and
-            // the sends after it are two halves of ONE batched unlockAndRun, and they must agree
-            // about which model is in force or a firing could be marked as an offer and then
-            // delivered without the protocol that makes an offer revocable (or the reverse). Go
-            // reads the setting per unlockAndRun, i.e. per firing, which is the same granularity
-            // when a pass carries one timer and a strictly safer one when it carries several. It
-            // also keeps the read off the per-timer path — see the cost note on asyncTimerChan.
-            bool sync = !asyncTimerChan();
-
-            lock (s_timerLock)
-            {
-                // Sampled ONCE for the whole drain and never re-read inside it — the pass's clock,
-                // exactly as Go's timers.check samples `now` and passes it down through run and
-                // unlockAndRun. This is what bounds a periodic timer to one firing per pass; see
-                // ONE FIRING PER TIMER PER PASS above for the proof and for why re-reading it here
-                // let a 1 ns ticker burst.
-                int64 now = realNano();
-
-                deadline = collectDueLocked(s_timerHeap, now, sync, due);
-            }
-
-            fireDue(due, sync);
-
-            if (deadline == 0)
-            {
-                s_timerWake.WaitOne();
-            }
-            else
-            {
-                waitUntil(deadline, s_timerWake);
-            }
-        }
-    }
-
-    // The service loop's drain, shared with a synctest bubble's fake timers (CheckBubbleTimers): run
-    // under s_timerLock, it moves every timer due at `now` out of `heap` into `due` and returns the
-    // next deadline (0 when nothing is armed). Extracted verbatim from serviceTimers for S3, so the
-    // real clock and a bubble's fake one are ONE engine with two clocks.
+    // A synctest bubble's drain (checkBubbleTimers): run under s_timerLock, it moves every fake timer
+    // due at `now` out of `heap` into `due` and returns the next deadline (0 when nothing is armed).
+    // Extracted for S3 from the real-clock service pass, whose heap is GoTimer's since D3; the firing
+    // itself (takeDueLocked, fireDue) is shared, so the real clock and a bubble's fake one are ONE
+    // engine with two clocks.
     private static int64 collectDueLocked(PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> heap, int64 now, bool sync,
         List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due)
     {
@@ -1028,19 +987,19 @@ partial class time_package
             }
 
             heap.Dequeue();
-            takeDueLocked(entry.timer, prio.when, now, sync, due, heap);
+            takeDueLocked(entry.timer, prio.when, now, sync, due);
         }
 
         return deadline;
     }
 
-    // One due timer's half of the drain: queue its firing into `due` and advance or clear its `when`,
-    // re-arming a periodic timer on `heap`. Shared by the drain above and by a bubbled timer that is
-    // already due when it is armed (runFakeTimerNow). Caller holds s_timerLock and has taken the timer's
-    // entry off `heap` (or, for the run-now path, holds no live entry for it).
+    // One due timer's firing: queue it into `due` and advance or clear its `when`, re-arming a periodic
+    // timer on its heap. Shared by a real timer's callback (fireReal), a bubble's drain above, and a
+    // bubbled timer that is already due when it is armed (runFakeTimerNow). Caller holds s_timerLock and
+    // holds no live heap entry for the timer: GoTimer or the drain has taken it off its heap, or (the
+    // run-now path) there is none.
     private static void takeDueLocked(runtimeTimer timer, int64 when, int64 now, bool sync,
-        List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due,
-        PriorityQueue<(runtimeTimer timer, int64 gen), (int64 when, uint rand)> heap)
+        List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due)
     {
         // runtime.timer.unlockAndRun: capture the callback, advance or clear `when`, and
         // run the callback only after the lock is released. `delay` is how LATE the
@@ -1077,11 +1036,15 @@ partial class time_package
             }
 
             timer.when = next;
-            heap.Enqueue((timer, timer.gen), heapPrio(timer, next));
+            queueLocked(timer, next);
         }
         else
         {
             timer.when = 0;
+
+            // A Reset to a time already past can have put the engine back on its heap after GoTimer
+            // took this firing off it; this firing serves that arm, so the arm leaves the heap.
+            timer.engine?.Stop();
         }
     }
 
@@ -1101,13 +1064,13 @@ partial class time_package
         {
             // Still armed and still due: a racing Stop or Reset since the arm has moved `when`.
             if (timer.when > 0 && timer.when <= now)
-                takeDueLocked(timer, timer.when, now, sync, due, fakeHeapOf(bubble));
+                takeDueLocked(timer, timer.when, now, sync, due);
         }
 
         fireDue(due, sync);
     }
 
-    // The service loop's delivery of the drained firings, outside every lock -- shared the same way.
+    // The delivery of decided firings, outside s_timerLock -- shared the same way.
     private static void fireDue(List<(runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq)> due, bool sync)
     {
         foreach ((runtimeTimer timer, Action<any, uintptr, int64> f, any? arg, int64 delay, int64 seq) in due)
@@ -1142,175 +1105,5 @@ partial class time_package
                 }
             }
         }
-    }
-
-    // Blocks until the monotonic deadline, or until `interrupt` is signaled; returns true when
-    // interrupted. Never returns early on the deadline path: Go guarantees a sleep of AT LEAST the
-    // requested duration, so a short OS wake re-waits the remainder.
-    private static bool waitUntil(int64 deadline, WaitHandle? interrupt)
-    {
-        while (true)
-        {
-            int64 remaining = deadline - realNano();
-
-            if (remaining <= 0)
-            {
-                return false;
-            }
-
-            if (!t_highResTimerProbed)
-            {
-                // Cached PER THREAD, matching the Go runtime's per-M highResTimer. The handle is
-                // released by its SafeWaitHandle finalizer once the thread — and with it this
-                // thread-static — becomes unreachable.
-                t_highResTimerProbed = true;
-                t_highResTimer = highResTimer.TryCreate();
-            }
-
-            highResTimer? timer = t_highResTimer;
-
-            if (timer is not null && timer.Arm(remaining))
-            {
-                if (interrupt is null)
-                {
-                    timer.WaitOne();
-                }
-                else if (WaitHandle.WaitAny([timer, interrupt]) == 1)
-                {
-                    return true;
-                }
-
-                continue;
-            }
-
-            // Fallback where no high-resolution timer exists: wait coarsely to within a millisecond
-            // of the deadline, then spin out the remainder. Coarse waits are quantized to the OS
-            // timer tick, so this path can OVERSHOOT a short deadline — which is exactly why the
-            // high-resolution timer above is preferred.
-            int64 millis = remaining / 1_000_000;
-
-            if (millis > 1)
-            {
-                int coarse = (int)Math.Min(millis - 1, int.MaxValue);
-
-                if (interrupt is null)
-                {
-                    Thread.Sleep(coarse);
-                }
-                else if (interrupt.WaitOne(coarse))
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                Thread.SpinWait(1000);
-            }
-        }
-    }
-
-    [ThreadStatic]
-    private static highResTimer? t_highResTimer;
-
-    [ThreadStatic]
-    private static bool t_highResTimerProbed;
-
-    // A Windows high-resolution waitable timer, wrapped as a WaitHandle so the managed wait
-    // primitives block on it directly. This is the same OS object the Go runtime creates for its own
-    // sub-tick sleeps (runtime/os_windows.go: CreateWaitableTimerExW with
-    // CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, Windows 10 1803+) and it is what keeps a 1 ms Go timer
-    // from becoming a ~15 ms one.
-    private sealed partial class highResTimer : WaitHandle
-    {
-        private const uint CreateHighResolution = 0x2;
-        private const uint TimerAllAccess = 0x1F0003;
-
-        private highResTimer(nint handle)
-        {
-            SafeWaitHandle = new SafeWaitHandle(handle, ownsHandle: true);
-        }
-
-        internal static highResTimer? TryCreate()
-        {
-            if (!OperatingSystem.IsWindows())
-            {
-                return null;
-            }
-
-            nint handle;
-
-            try
-            {
-                handle = CreateWaitableTimerExW(0, null, CreateHighResolution, TimerAllAccess);
-            }
-            catch (Exception)
-            {
-                // No such export at all (a non-Windows host reached through some other runtime) —
-                // fall back to the coarse wait rather than failing the sleep.
-                return null;
-            }
-
-            // Pre-1803 Windows rejects the high-resolution flag (ERROR_INVALID_PARAMETER). A plain
-            // waitable timer would be no more precise than the coarse fallback, so there is nothing
-            // to gain by retrying without the flag.
-            return handle == 0 ? null : new highResTimer(handle);
-        }
-
-        // Arms the timer to signal `nanos` from now. A NEGATIVE due time is a relative interval in
-        // 100 ns units; the truncation can only wake the waiter early, by under 100 ns, which the
-        // caller's deadline loop absorbs.
-        internal bool Arm(int64 nanos)
-        {
-            long dueTime = -(nanos / 100);
-
-            if (dueTime == 0)
-            {
-                dueTime = -1;
-            }
-
-            // The reference count the SafeWaitHandle parameter used to take implicitly — see the
-            // declaration below for why it is explicit now. Without it a concurrent Dispose could
-            // close the handle between the read and the kernel's use of it, and the timer would be
-            // armed on whatever object Windows had since given the number to.
-            bool addedRef = false;
-
-            try
-            {
-                SafeWaitHandle.DangerousAddRef(ref addedRef);
-
-                return SetWaitableTimer(SafeWaitHandle.DangerousGetHandle(), ref dueTime, 0, 0, 0, resume: false);
-            }
-            finally
-            {
-                if (addedRef)
-                {
-                    SafeWaitHandle.DangerousRelease();
-                }
-            }
-        }
-
-        // CharSet.Unicode becomes StringMarshalling.Utf16. `timerName` is always null here (Go's
-        // runtime creates an unnamed timer), but the parameter stays a string because that is what
-        // the API takes and the marshalling for it is a pin, not a copy.
-        [LibraryImport("kernel32.dll", EntryPoint = "CreateWaitableTimerExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
-        private static partial nint CreateWaitableTimerExW(nint timerAttributes, string? timerName, uint flags, uint desiredAccess);
-
-        // TWO rejections, and they are the two the migration was worth doing for.
-        //
-        //  1. SafeWaitHandle. The source generator does not marshal SafeHandles at all, because the
-        //     reference counting that makes them safe is a RUNTIME marshalling service. [DllImport]
-        //     supplied it invisibly, which reads as "SafeHandle, therefore safe" — but nothing in
-        //     the source said where the ref count was taken, so nothing would have said it if the
-        //     parameter had ever been changed to a raw handle. The declaration now takes the `nint`
-        //     it always passed, and Arm above takes the ref count where a reader can see it.
-        //
-        //  2. `bool`, in both directions. Its native width is a marshalling decision, not a fact
-        //     about the type: Win32 BOOL is a 4-byte int, C++ `bool` is one byte, and the runtime
-        //     marshaller's silent default of 4 bytes happened to be right here. The generator
-        //     refuses to guess. Both are now stated — UnmanagedType.Bool IS the 4-byte Win32 BOOL,
-        //     so the ABI is unchanged and the choice is written down.
-        [LibraryImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static partial bool SetWaitableTimer(nint timer, ref long dueTime, int period, nint completionRoutine, nint completionArg, [MarshalAs(UnmanagedType.Bool)] bool resume);
     }
 }
