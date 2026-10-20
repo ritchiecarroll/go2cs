@@ -19,7 +19,7 @@ internal static void Main() {
     fmt.Println(MaxU + one == zero);
     fmt.Println(MaxU - one < MaxU);
 
-    uintptr big = ((uintptr)1 << (int)((4 * ptrSize)));
+    uintptr big = ((uintptr)1 << (int)(4 * ptrSize));
     fmt.Println(big);
     fmt.Println(big > 1);
 
@@ -27,7 +27,7 @@ internal static void Main() {
     fmt.Println(wide);
 
     var rows = new main_rows[]{
-        new((uintptr)1 << (int)((4 * ptrSize)), (uintptr)1 << (int)((4 * ptrSize))),
+        new((uintptr)1 << (int)(4 * ptrSize), (uintptr)1 << (int)(4 * ptrSize)),
         new((uintptr)(4294967296L - 1), (uintptr)(4294967296L - 1))
     }.slice();
     fmt.Println(rows[0].a, rows[0].b);

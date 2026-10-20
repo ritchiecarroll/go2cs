@@ -384,7 +384,7 @@ internal static Δstack @stackalloc(uint32 n) {
     // If we need a stack of a bigger size, we fall back on allocating
     // a dedicated span.
     @unsafe.Pointer v = default!;
-    if (n < (uint32)(((uint32)fixedStack << (int)(_NumStackOrders))) && n < _StackCacheSize){
+    if (n < (uint32)((uint32)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
@@ -518,7 +518,7 @@ internal static void stackfree(Δstack stk) {
     if (valgrindenabled) {
         valgrindFree(v);
     }
-    if (n < (uintptr)(((uintptr)fixedStack << (int)(_NumStackOrders))) && n < _StackCacheSize){
+    if (n < (uintptr)((uintptr)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
@@ -663,7 +663,7 @@ partial struct bitvector {
 // See adjustpointers for an example of a high-efficiency walk of a bitvector.
 internal static uint8 ptrbit(this ref bitvector bv, uintptr i) {
     var b = (addb(bv.bytedata, i / 8)).Value;
-    return (uint8)((byte)((b >> (int)((i % 8))) & 1));
+    return (uint8)((byte)((b >> (int)(i % 8)) & 1));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -825,7 +825,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
             }
             var (ptrBytes, gcData) = obj.gcdata();
             for (var iΔ1 = (uintptr)0; iΔ1 < ptrBytes; iΔ1 += goarch.PtrSize) {
-                if ((byte)(addb(gcData, iΔ1 / (uintptr)(8 * goarch.PtrSize)).Value >> (int)(((uintptr)(iΔ1 / (uintptr)goarch.PtrSize & 7))) & 1) != 0) {
+                if ((byte)(addb(gcData, iΔ1 / (uintptr)(8 * goarch.PtrSize)).Value >> (int)((uintptr)(iΔ1 / (uintptr)goarch.PtrSize & 7)) & 1) != 0) {
                     adjustpointer(ref adjinfo, (@unsafe.Pointer)(Δp + iΔ1));
                 }
             }

@@ -490,7 +490,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             }
         }
         else { /* default: */
-            f.Value.Loads = append((~f).Loads, (Load)(((LoadBytes)cmddat)));
+            f.Value.Loads = append((~f).Loads, (Load)((LoadBytes)cmddat));
         }
         if (s != nil) {
             if ((int64)(~s).Offset < 0) {

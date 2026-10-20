@@ -592,7 +592,7 @@ internal static void emitConst(this ref File f, @string name, any data) {
         uint64 word = default!;
         for (nint j = 0; j < 8 / sz; j++) { // Iterate over elements in this word
             var d = rv.Index(quo(wi * 8, sz) + j).Uint();
-            word |= (uint64)(d.Lsh((int64)((j * sz * 8))));
+            word |= (uint64)(d.Lsh((int64)(j * sz * 8)));
         }
         fmt.Fprintf(f.w, "DATA  %s+%#02x(SB)/8, $%#016x\n"u8, name, 8 * wi, word);
     }

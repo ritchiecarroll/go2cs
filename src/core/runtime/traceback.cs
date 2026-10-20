@@ -704,7 +704,7 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
             return true;
         }
         var bits = ~(ж<uint8>)(uintptr)(add(liveInfo, (uintptr)liveIdx + (uintptr)(slotIdxΔ1 / 8)));
-        return (uint8)(bits & ((uint8)(1 << (int)((slotIdxΔ1 % 8))))) != 0;
+        return (uint8)(bits & ((uint8)(1 << (int)(slotIdxΔ1 % 8)))) != 0;
     }
 
     var isLiveʗ1 = isLive;

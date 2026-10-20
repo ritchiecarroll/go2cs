@@ -52,7 +52,7 @@ internal static uint128 addMul38(uint128 v, uint64 a, uint64 b) {
 
 // shiftRightBy51 returns a >> 51. a is assumed to be at most 115 bits.
 internal static uint64 shiftRightBy51(uint128 a) {
-    return (a.hi << (int)((64 - 51))) | (a.lo >> 51);
+    return (a.hi << (int)(64 - 51)) | (a.lo >> 51);
 }
 
 internal static void feMulGeneric(ref Element v, ref Element a, ref Element b) {

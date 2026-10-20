@@ -186,13 +186,13 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         runtime.GC();
         runtime.ReadMemStats(Ꮡms);
         if (abs64((int64)baseline - (int64)ms.Alloc) > (int64)10 << 20) {
-            Ꮡt.Fatalf("failed to set up baseline live heap; got %d MB, want %d MB"u8, ms.Alloc >> 20, (nint)((baseline >> 20)));
+            Ꮡt.Fatalf("failed to set up baseline live heap; got %d MB, want %d MB"u8, ms.Alloc >> 20, (nint)(baseline >> 20));
         }
         // NextGC should be ~200 MB.
         UntypedInt thresh = /* 20 << 20 */ 20971520; // TODO: Figure out why this is so noisy on some builders
         {
             var want = (int64)(2 * baseline); if (abs64(want - (int64)ms.NextGC) > thresh) {
-                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)((thresh >> 20)));
+                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)(thresh >> 20));
             }
         }
         // Create some garbage, but not enough to trigger another GC.
@@ -205,7 +205,7 @@ public static void TestSetGCPercent(ж<testing.T> Ꮡt) {
         runtime.ReadMemStats(Ꮡms);
         {
             var want = (int64)(/* 1.5 * baseline */ 157286400L); if (abs64(want - (int64)ms.NextGC) > thresh) {
-                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)((thresh >> 20)));
+                Ꮡt.Errorf("NextGC = %d MB, want %d±%d MB"u8, ms.NextGC >> 20, want >> 20, (nint)(thresh >> 20));
             }
         }
 

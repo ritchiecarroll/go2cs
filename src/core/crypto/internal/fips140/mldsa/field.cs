@@ -401,7 +401,7 @@ internal static ringElement sampleInBall(slice<byte> rho, parameters p) {
         // c[j] = (−1) ^ h[i+τ−256], where h are the bits in s in little-endian.
         // That is, -1⁰ = 1 if the bit is 0, -1¹ = -1 if it is 1.
         nint bitIdx = i + p.τ - 256;
-        var bit = (byte)((s[bitIdx / 8].Rsh((int64)((bitIdx % 8)))) & 1);
+        var bit = (byte)((s[bitIdx / 8].Rsh((int64)(bitIdx % 8))) & 1);
         if (bit == 0){
             c[j[0]] = one;
         } else {

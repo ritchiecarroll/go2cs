@@ -1042,7 +1042,7 @@ internal static readonly @string badSpdeltaˢ = "bad spdelta"u8;
 
 internal static int32 funcspdelta(ΔfuncInfo f, uintptr targetpc) {
     var (x, _) = pcvalue(f, f.pcsp, targetpc, true);
-    if (debugPcln && (x & (int32)((goarch.PtrSize - 1))) != 0) {
+    if (debugPcln && (x & (int32)(goarch.PtrSize - 1)) != 0) {
         print((@string)"invalid spdelta "u8, funcname(f), (@string)" "u8, (Δhex)(uint64)f.entry(), (@string)" "u8, (Δhex)(uint64)targetpc, (@string)" "u8, (Δhex)(uint64)f.pcsp, (@string)" "u8, x, (@string)"\n"u8);
         @throw(badSpdeltaˢ);
     }
@@ -1147,7 +1147,7 @@ internal static (uint32 read, uint32 val) readvarint(slice<byte> Δp) {
     while (ᐧ) {
         var b = Δp[n];
         n++;
-        v |= (uint32)(((uint32)((byte)(b & 0x7F)) << (int)((shift & 31))));
+        v |= (uint32)(((uint32)((byte)(b & 0x7F)) << (int)(shift & 31)));
         if ((byte)(b & 0x80) == 0) {
             break;
         }

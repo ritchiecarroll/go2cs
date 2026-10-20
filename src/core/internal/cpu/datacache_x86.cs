@@ -34,7 +34,7 @@ internal static uint32 extractBits(uint32 arg, nint l, nint r) {
     if (l > r) {
         throw panic("bad bit range");
     }
-    return (arg.Rsh((int64)(l))) & ((((uint32)1).Lsh((int64)((r - l + 1)))) - 1);
+    return (arg.Rsh((int64)(l))) & ((((uint32)1).Lsh((int64)(r - l + 1))) - 1);
 }
 
 internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {

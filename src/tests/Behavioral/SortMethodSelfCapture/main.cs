@@ -41,7 +41,7 @@ internal static void Main() {
     fmt.Println("StringSlice.Sort:", strs);
 
     var names = new @string[]{"carol", "alice", "bob"}.slice();
-    sort.Sort((sort.Interface)(((sort.StringSlice)names)));
+    sort.Sort((sort.Interface)((sort.StringSlice)names));
     fmt.Println("sort.Sort(sort.StringSlice(v)):", names);
 
     var w = new words(new @string[]{"delta", "alpha", "charlie"}.slice());

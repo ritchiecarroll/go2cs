@@ -110,7 +110,7 @@ internal static void readTimeRandom(slice<byte> r) {
             size = len(r);
         }
         for (nint i = 0; i < size; i++) {
-            r[i] ^= (byte)((byte)(v.Rsh((int64)((8 * i)))));
+            r[i] ^= (byte)((byte)(v.Rsh((int64)(8 * i))));
         }
         r = r.slice(size);
         v = v >> 32 | v << 32;
