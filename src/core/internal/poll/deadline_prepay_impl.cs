@@ -29,7 +29,7 @@
 //   - every part another package registered with golib's GoAsyncIO.AddDeadlinePathPrepay: what this
 //     package cannot name, because it lives above it (os's return path) or is private to a package below
 //     it (syscall's completion callback on windows).
-// Nothing here arms a deadline, and apart from that windows pipe pair nothing waits on a descriptor.
+// Apart from that windows pipe pair, nothing here arms a deadline or waits on a descriptor.
 // Under Native AOT nothing is compiled at run
 // time, so none of it runs.
 //

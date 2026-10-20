@@ -27576,4 +27576,12 @@ about the same either way (the probe's first write and read, 31.7-32.1 ms agains
 to FD.Init rather than adding to it. The JIT list shows the step running end to end inside the pre-pay, through waitIO
 and the completion callback. The cost is documented beside the pre-pay. This row is now FIXED on linux and windows.
 
+**Amended 2026-10-20 (G's review of the completion step).** G found the step safe as written and asked for one fix:
+nothing bounded its write and read, so a completion that never arrived (an I/O-intercepting filter, say) would hang
+the first FD.Init of every process that does I/O. Both now carry a deadline one second out, which never fires on the
+normal path; where the I/O is held, the deadline cancels it as any deadline does and the step gives up. A port that
+never posts even the cancelled operation's completion still hangs it, as it hangs every deadline in the program. The
+pipe also takes an owner-only security descriptor (`D:P(A;;GA;;;OW)`) in place of the default, which lets Everyone
+read it (COORD's ruling, defense in depth). Neither is measured here: the i9's smoke run of the probe is owed.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

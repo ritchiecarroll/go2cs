@@ -47,11 +47,20 @@
 //     runtime_pollOpen: FD.Init would re-enter the serverInit.Do this runs inside. Their completion modes
 //     are left as created, so the read's completion is delivered through the port even though the byte
 //     is already there. Nothing of the pair survives this step.
+//     The write and the read each carry a deadline one second out (G's review). On the normal path
+//     the byte is there at once and neither fires. Where something holds the I/O (an I/O-intercepting
+//     filter, say), the deadline cancels it as any deadline does and the step gives up, instead of
+//     every process's first FD.Init waiting forever. A port that never posts even the cancelled
+//     operation's completion still hangs it, as it would hang every deadline in the program.
+//     The pipe takes an owner-only security descriptor (COORD's ruling, as defense in depth): only its
+//     owner may open it, where the default would also let Everyone read it. If the descriptor cannot
+//     be built its field stays 0, which asks for the default, and G found the default safe for this pipe.
 // Apart from that pair, nothing here cancels, waits on or completes a real operation.
 
 using System;
 using System.Runtime.CompilerServices;
 using MonotonicClock = go.golib.MonotonicClock;
+using time = go.time_package;
 
 [module: go.GoManualConversion]
 
@@ -103,6 +112,14 @@ partial class poll_package
     private const uint32 fileFlagFirstPipeInstance = 0x00080000;
     private const uint32 pipeRejectRemoteClients = 0x00000008;
 
+    // The pipe's security descriptor: a protected DACL whose one entry grants all access to the pipe's
+    // owner (OWNER RIGHTS), so no other account can open it.
+    private const string ownerOnlySDDL = "D:P(A;;GA;;;OW)";
+    private const uint32 sddlRevision1 = 1;
+
+    // How long the pipe's write and read may take before the step gives up.
+    private static readonly time.Duration pipeIOTimeout = time.ΔSecond;
+
     private static void prepayFirstCompletion()
     {
         @string name = $@"\\.\pipe\go2cs-deadline-prepay-{Δsyscall.Getpid()}-{MonotonicClock.Nanoseconds()}";
@@ -110,9 +127,15 @@ partial class poll_package
         if (err != default!)
             return;
 
+        ref var sa = ref heap(new Δsyscall.SecurityAttributes(), out var Ꮡsa);
+        sa.Length = (uint32)/* unsafe.Sizeof(sa) */ (uintptr)24;
+        sa.SecurityDescriptor = ownerOnlyDescriptor();
+
         var (server, errΔ1) = windows.CreateNamedPipe(wname,
             (uint32)(windows.PIPE_ACCESS_DUPLEX | windows.O_FILE_FLAG_OVERLAPPED) | fileFlagFirstPipeInstance,
-            (uint32)(windows.PIPE_TYPE_BYTE | windows.PIPE_READMODE_BYTE) | pipeRejectRemoteClients, 1, 4096, 4096, 0, nil);
+            (uint32)(windows.PIPE_TYPE_BYTE | windows.PIPE_READMODE_BYTE) | pipeRejectRemoteClients, 1, 4096, 4096, 0, Ꮡsa);
+        if (sa.SecurityDescriptor != 0)
+            Δsyscall.LocalFree((Δsyscall.ΔHandle)sa.SecurityDescriptor);
         if (errΔ1 != default!)
             return;
 
@@ -139,6 +162,10 @@ partial class poll_package
 
             try
             {
+                time.Time giveUp = time.Now().Add(pipeIOTimeout);
+                if (writer.SetWriteDeadline(giveUp) != default! || reader.SetReadDeadline(giveUp) != default!)
+                    return;
+
                 slice<byte> one = new(1);
                 var (n, errΔ3) = writer.Write(one);
                 if (n == 1 && errΔ3 == default!)
@@ -153,6 +180,26 @@ partial class poll_package
         {
             reader.Close();
         }
+    }
+
+    // The owner-only security descriptor, built from ownerOnlySDDL in memory the caller frees with
+    // LocalFree; 0 when it cannot be built.
+    private static uintptr ownerOnlyDescriptor()
+    {
+        var (sddl, err) = Δsyscall.UTF16PtrFromString(ownerOnlySDDL);
+        if (err != default!)
+            return 0;
+
+        ж<Δsyscall.LazyProc> convert = Δsyscall.NewLazyDLL("advapi32.dll")
+            .NewProc("ConvertStringSecurityDescriptorToSecurityDescriptorW");
+        if (convert.Find() != default!)
+            return 0;
+
+        ref var descriptor = ref heap(new uintptr(), out var Ꮡdescriptor);
+        var (r1, _, _) = Δsyscall.SyscallN(convert.Addr(), (uintptr)sddl, (uintptr)sddlRevision1, (uintptr)Ꮡdescriptor, 0);
+        System.GC.KeepAlive(sddl);
+        System.GC.KeepAlive(Ꮡdescriptor);
+        return r1 != 0 ? descriptor : (uintptr)0;
     }
 
     // An FD over a private pipe handle, as FD.Init("pipe", true) leaves one, with its poll descriptor
