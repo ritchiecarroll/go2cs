@@ -328,4 +328,49 @@ public class GoMethodSetTests
 
         Assert.AreEqual($"{panicwrap} | {panicwrap} | {panicwrap} | {fault} | {fault} | 10", probe.Invoke(null, null));
     }
+
+    // An unbound arm that only passes its arguments through IS the method, as golib's binder hands it out
+    // (Delegate.CreateDelegate over the method): reflect tokens a func value by its target method, and Go's
+    // Type.Method(i).Func is the same code pointer as the method expression (reflect's TestNestedMethods and
+    // TestEmbeddedMethods). A value method through T, a pointer method, and a promoted method of either kind, generic
+    // and variadic and past 16 parameters included; a copy-bound method and a value method through *T wrap a call, as
+    // Go's own wrapper does, and are not asked.
+    [TestMethod]
+    public void EachPassThroughUnboundArmIsTheMethodItself()
+    {
+        (_, Diagnostic[] errors, Compilation output) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+
+        using MemoryStream image = new();
+        Assert.IsTrue(output.Emit(image).Success, "the package emits an assembly");
+
+        Assembly assembly = Assembly.Load(image.ToArray());
+        Type package = assembly.GetType("go.mtest_package", throwOnError: true)!;
+
+        (string type, string method, bool pointer)[] cases =
+        [
+            ("Plain", "Get", false), ("Plain", "Sum", false), ("Plain", "Wide", false), ("file", "Size", true),
+            ("Outer", "Twice", false), ("Outer", "Bump", true)
+        ];
+
+        List<string> mismatches = [];
+
+        foreach ((string type, string method, bool pointer) in cases)
+        {
+            golib::go.IGoMethodSet set = (golib::go.IGoMethodSet)Activator.CreateInstance(package.GetNestedType(type)!)!;
+
+            if (set.ᴛMethod(method, pointer, false, null) is not { } arm)
+                mismatches.Add($"{type}.{method}: no arm");
+            else if (arm.Method.Name != method || arm.Method.DeclaringType != package)
+                mismatches.Add($"{type}.{method}: the arm calls through {arm.Method.DeclaringType?.Name}.{arm.Method.Name}");
+        }
+
+        golib::go.IGoMethodSet pair = (golib::go.IGoMethodSet)Activator.CreateInstance(package.GetNestedType("Pair`2")!.MakeGenericType(typeof(golib::go.@string), typeof(nint)))!;
+
+        if (pair.ᴛMethod("String", false, false, null) is not { Method: { Name: "String", IsGenericMethod: true } })
+            mismatches.Add("Pair.String: the arm is not the closed generic method");
+
+        Assert.AreEqual(0, mismatches.Count, string.Join("; ", mismatches));
+    }
 }

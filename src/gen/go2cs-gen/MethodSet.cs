@@ -363,10 +363,17 @@ internal static class MethodSet
                 ? $"{unboundDelegate}(({string.Join(", ", new[] { $"{receiverType} {TempVarMarker}recv" }.Concat(declarations))}) => {call})"
                 : null;
 
+        // An arm that only passes its receiver and arguments through is the method itself, a method group cast as the
+        // converter emits a method expression, so reflect's func identity (keyed on the delegate's method) agrees.
+        string? Method(string receiverType) =>
+            Delegate(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns) is { } unboundDelegate
+                ? $"{unboundDelegate}({shape.Target})"
+                : null;
+
         if (shape.Receiver == Receiver.Pointer)
         {
             yield return (shape.Name, true,
-                Unbound(box, $"{shape.Target}({TempVarMarker}recv{arguments})"),
+                Method(box),
                 Bound($"{box} {TempVarMarker}p = ({box})receiver!;", $"{shape.Target}({TempVarMarker}p{arguments})"));
 
             yield break;
@@ -386,7 +393,7 @@ internal static class MethodSet
             : $"global::go.GoReflect.ValueMethodRecv({pointer}, \"{shape.Name}\").Value";
 
         yield return (shape.Name, false,
-            Unbound(self, valueCall($"{TempVarMarker}recv")),
+            shape.Receiver == Receiver.Value ? Method(self) : Unbound(self, valueCall($"{TempVarMarker}recv")),
             Bound($"{self} {TempVarMarker}r = ({self})receiver!;", valueCall($"{TempVarMarker}r")));
 
         yield return (shape.Name, true,
