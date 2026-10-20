@@ -338,6 +338,8 @@
     <None Include="$(MSBuildThisFileDirectory)manualConversionMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualConversionScope_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)manualTypeReceiverRefusal.go" />
+    <None Include="$(MSBuildThisFileDirectory)manualTypeReceiverRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)manualTypeUnwrapBox_test.go" />
     <None Include="$(MSBuildThisFileDirectory)managedSliceViewRefusal_test.go" />
     <None Include="$(MSBuildThisFileDirectory)markerComments_test.go" />
