@@ -27509,4 +27509,35 @@ stands: size and build time never gate parity, so this row is sized for after th
 
 — P2 (measured 2026-10-19)
 
+## 2026-10-20 — P2 finding: crypto/x509's TestBetterTLS is a slow path on linux, not a hang (nameconstraints 390 s against Go's 2.3 s), and on a host that can make namespaces the row reads red because C# skips TestSetFallbackRoots — OPEN (found by P2, sized, unowned)
+
+Asked by COORD: is the long crypto/x509 run on linux a hang, a slow path, or a deadline? Reading: linux, uid 0,
+Microsoft .NET 10.0.12 / SDK 10.0.112, go1.26.10, tree 913d33224b (the go1.26.10 hop tip), the `-tests` row on a
+byte copy of the tree, Release, `-test-timeout 120m`, two runs (the second with the container's `SSL_CERT_FILE`
+unset).
+
+**A slow path.** Every case passes on both sides; nothing waits on a deadline or a lock.
+
+| part | Go | C# run 1 | C# run 2 | C# per case | Go per case |
+|---|---|---|---|---|---|
+| `TestBetterTLS/nameconstraints` (9,491 cases) | 2.31 s | 387.8 s | 389.8 s | about 41 ms | about 0.24 ms |
+| `TestBetterTLS/pathbuilding` (81 cases) | 0.08 s | 4.78 s | 4.67 s | about 58 ms | about 1 ms |
+| `TestBetterTLS` (with the suite fetch) | 17.04 s | 403.5 s | 405.4 s | | |
+| whole package | | 470 s | 478 s | | |
+
+The C# side is about 170 times Go on nameconstraints, and that one test is 85% of the package's wall. The runner
+read `tiered: false`. Nothing was profiled: the rows say where the time is, not why. A host about 1.5 times slower
+than this one passes Go's default 10-minute test timeout on `TestBetterTLS` alone.
+
+**The row reads red here for another reason.** `TestSetFallbackRoots` runs its nine subtests in a child process
+started with `CLONE_NEWNS | CLONE_NEWUSER`. Go runs them on this host; C# skips all nine ("posix_spawn seam:
+SysProcAttr.Cloneflags is not supported"), so the comparison fails 9 of 532. Go's own verdict depends on the
+environment: with the container's `SSL_CERT_FILE` set, Go fails the parent and the four `no_system_CAs` and
+`system_CA_read_error` subtests (the variable hands it a real bundle); with it unset, Go passes all nine. The
+roster's linux 500 was banked on a host where Go skips them too (inferred from the count, not re-read). Making
+them run needs `Cloneflags` in the posix_spawn seam, which posix_spawn cannot express: the child needs `clone` or
+`unshare` before exec.
+
+— P2 (measured 2026-10-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
