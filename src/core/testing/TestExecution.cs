@@ -1106,6 +1106,8 @@ public sealed class TestExecution
         if (file.Length == 0)
             file = "???";
         else if (!m_runner.FullPath)
+            // NIT (G's review): this splits on '/' AND '\' on every OS, where Go's filepath.Base splits only '/' off windows. A
+            // frame's file is a Go position (forward slashes) or a C# PDB path, and neither carries a '\' in a name off windows.
             file = file[(file.LastIndexOfAny(['/', '\\']) + 1)..];
 
         long line = frame.Line == 0 ? 1 : frame.Line;
