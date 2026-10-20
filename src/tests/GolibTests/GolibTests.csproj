@@ -335,6 +335,10 @@
     <!-- GoZeroResidualTests: unique.uniqueMap[T] is the converted std's one GENERIC struct that go2cs-gen
          calls needy, so it is the real subject of the "no registration for a generic struct" arm. -->
     <ProjectReference Include="..\..\core\unique\unique.csproj" />
+    <!-- GodebugUpdateHookTests: the hand-owned internal/godebug's cache is kept by the runtime's update
+         hook, so the guard drives the REAL package through the REAL os.Setenv -> syscall -> runtime
+         path, and runs a child for the arms that need a process with no fips140 entry cached. -->
+    <ProjectReference Include="..\..\core\internal\godebug\internal.godebug.csproj" />
   </ItemGroup>
 
 </Project>
