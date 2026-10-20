@@ -105,9 +105,14 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
             }
             chain[0] = append(chain[0], cert);
         }
+
         if (builtin.len(chain[0]) == 0) {
             // This should _never_ happen, but to be safe
             (chains, err) = (default!, errors.New(x509MacosCertificateˢ)); goto ᒐdone;
+        }
+
+        if (containsDistrustedSPKIHash(chain[0])) {
+            (chains, err) = (default!, new CertificateInvalidError(Ꮡc, NoValidChains, ""u8)); goto ᒐdone;
         }
 
         if (opts.DNSName != ""u8) {
