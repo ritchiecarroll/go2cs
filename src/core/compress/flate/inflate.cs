@@ -782,10 +782,10 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
                 return (0, noEOF(err));
             }
             f.roffset++;
-            b |= (uint32)(((uint32)c << (int)((nb & 31))));
+            b |= (uint32)(((uint32)c << (int)(nb & 31)));
             nb += 8;
         }
-        var chunk = h.chunks[(b & (uint32)((huffmanNumChunks - 1)))];
+        var chunk = h.chunks[(b & (uint32)(huffmanNumChunks - 1))];
         n = (nuint)(chunk & (uint32)huffmanCountMask);
         if (n > huffmanChunkBits) {
             chunk = h.links[(chunk >> (int)(huffmanValueShift))][((b >> (int)(huffmanChunkBits)) & h.linkMask)];
@@ -798,7 +798,7 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
                 f.err = ((CorruptInputError)f.roffset);
                 return (0, f.err);
             }
-            f.b = b >> (int)((n & 31));
+            f.b = b >> (int)(n & 31);
             f.nb = nb - n;
             return ((nint)(chunk >> (int)(huffmanValueShift)), default!);
         }

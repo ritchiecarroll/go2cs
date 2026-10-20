@@ -44,6 +44,10 @@ func pointerSized(a, b word) word { return a | b }
 
 func cleared(a uint64) uint64 { return a &^ 0xFF }
 
+func maskedCount(u uint64, k uint) uint64 { return u >> (k & 63) }
+
+func reducedCount(u uint64, k uint) uint64 { return u >> (k % 64) }
+
 func main() {
 	x := uint32(7)
 	fmt.Println(uint64(x)|1, le32([]byte{1, 2, 3, 4}), masked(3, 4), shifted(1, 2), mixed(1, 2, 3))
@@ -68,6 +72,9 @@ func TestParityOperatorEmissionReadsAsGo(t *testing.T) {
 		"return a & ~(uint64)0xFF;",
 		// A conversion as an argument, with no parentheses of its own.
 		"fmt.Println((uint64)x | 1,",
+		// A non-literal shift count takes C#'s `int` cast over Go's own parentheses, not a second pair of its own.
+		"return u >> (int)(k & 63);",
+		"return u >> (int)(k % 64);",
 	} {
 		lineContaining(t, lines, want)
 	}
@@ -83,7 +90,8 @@ func TestParityOperatorEmissionReadsAsGo(t *testing.T) {
 	}
 
 	for i, line := range lines {
-		if strings.Contains(line, "(int)(") || strings.Contains(line, "Println(((uint64)x") {
+		// A literal shift count cast to int, a cast over a doubled parenthesis, or a conversion argument re-wrapped.
+		if strings.Contains(line, "<< (int)(") || strings.Contains(line, ")((") || strings.Contains(line, "Println(((uint64)x") {
 			t.Errorf("line %d keeps a cast or parenthesis Go does not have: %q", i+1, line)
 		}
 	}
@@ -133,6 +141,23 @@ func TestWrappedWholeSeesOnlyOneParenthesizedExpression(t *testing.T) {
 	} {
 		if got := wrappedWhole(c.expr); got != c.want {
 			t.Errorf("wrappedWhole(%q) = %v, want %v", c.expr, got, c.want)
+		}
+	}
+}
+
+// An operand already rendered as ONE parenthesized expression takes the cast directly: `(int)(c[3] & 63)`, not
+// `(int)((c[3] & 63))`. A tuple and two groups side by side are not one expression and keep the cast's own pair.
+func TestCastOfAWrappedOperandTakesNoSecondPair(t *testing.T) {
+	for _, c := range []struct{ rendered, want string }{
+		{"(c[3] & 63)", "(int)(c[3] & 63)"},
+		{"(k % 64)", "(int)(k % 64)"},
+		{"((uint64)x)", "(int)((uint64)x)"},
+		{"(a, b)", "(int)((a, b))"},
+		{"(a) + (b)", "(int)((a) + (b))"},
+		{"(a)(b)", "(int)((a)(b))"},
+	} {
+		if got := castOf("int", c.rendered); got != c.want {
+			t.Errorf("castOf(int, %q) = %q, want %q", c.rendered, got, c.want)
 		}
 	}
 }

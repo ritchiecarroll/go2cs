@@ -10,7 +10,7 @@ internal static UntypedInt intSize => /* 32 << (^uint(0) >> 63) */ 64;
 
 internal static nint abs(nint x) {
     // m := -1 if x < 0. m := 0 otherwise.
-    nint m = x >> (int)((intSize - 1));
+    nint m = x >> (int)(intSize - 1);
 
     // In two's complement representation, the negative number
     // of any number (except the smallest one) can be computed

@@ -1274,13 +1274,13 @@ internal static scavChunkData unpackScavChunkData(uint64 sc) {
         inUse: (uint16)sc,
         lastInUse: (uint16)((uint16)(sc >> 16) & (uint16)scavChunkInUseMask),
         gen: (uint32)(sc >> 32),
-        scavChunkFlags: ((scavChunkFlags)((uint8)((uint8)(sc >> (int)((16 + logScavChunkInUseMax))) & (uint8)scavChunkFlagsMask)))
+        scavChunkFlags: ((scavChunkFlags)((uint8)((uint8)(sc >> (int)(16 + logScavChunkInUseMax)) & (uint8)scavChunkFlagsMask)))
     );
 }
 
 // pack returns sc packed into a uint64.
 internal static uint64 pack(this scavChunkData sc) {
-    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)(uint8)sc.scavChunkFlags << (int)((16 + logScavChunkInUseMax))) | ((uint64)sc.gen << 32);
+    return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)(uint8)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
 }
 
 // scavChunkHasFree indicates whether the chunk has anything left to

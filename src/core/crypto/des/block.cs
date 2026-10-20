@@ -231,7 +231,7 @@ internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes)
 // By doing so, we can have the input blocks (four bits each), and the key blocks (six bits each) well-aligned without
 // extra shifts/rotations for alignments.
 internal static uint64 unpack(uint64 x) {
-    return ((x >> (int)((6 * 1))) & 0xff) << (int)((8 * 0)) | ((x >> (int)((6 * 3))) & 0xff) << (int)((8 * 1)) | ((x >> (int)((6 * 5))) & 0xff) << (int)((8 * 2)) | ((x >> (int)((6 * 7))) & 0xff) << (int)((8 * 3)) | ((x >> (int)((6 * 0))) & 0xff) << (int)((8 * 4)) | ((x >> (int)((6 * 2))) & 0xff) << (int)((8 * 5)) | ((x >> (int)((6 * 4))) & 0xff) << (int)((8 * 6)) | ((x >> (int)((6 * 6))) & 0xff) << (int)((8 * 7));
+    return ((x >> (int)(6 * 1)) & 0xff) << (int)(8 * 0) | ((x >> (int)(6 * 3)) & 0xff) << (int)(8 * 1) | ((x >> (int)(6 * 5)) & 0xff) << (int)(8 * 2) | ((x >> (int)(6 * 7)) & 0xff) << (int)(8 * 3) | ((x >> (int)(6 * 0)) & 0xff) << (int)(8 * 4) | ((x >> (int)(6 * 2)) & 0xff) << (int)(8 * 5) | ((x >> (int)(6 * 4)) & 0xff) << (int)(8 * 6) | ((x >> (int)(6 * 6)) & 0xff) << (int)(8 * 7);
 }
 
 } // end des_package

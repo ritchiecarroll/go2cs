@@ -465,7 +465,7 @@ internal static bool readBase128Int(this ref String s, ж<nint> Ꮡout) {
         }
         // Avoid overflowing int on a 32-bit platform.
         // We don't want different behavior based on the architecture.
-        if (ret >= 1 << (int)((31 - 7))) {
+        if (ret >= 1 << (int)(31 - 7)) {
             return false;
         }
         ret <<= (int)(7);

@@ -490,7 +490,7 @@ public static ΔSignal StopSignal(this WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
-    return (ΔSignal)(((ΔSignal)(nint)((uint32)((w >> (int)(shift))))) & 0xFF);
+    return (ΔSignal)(((ΔSignal)(nint)((uint32)(w >> (int)(shift)))) & 0xFF);
 }
 
 public static nint TrapCause(this WaitStatus w) {

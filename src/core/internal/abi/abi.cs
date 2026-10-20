@@ -87,7 +87,7 @@ partial struct IntArgRegBitmap /*[2]uint8*/;
 
 // Set sets the i'th bit of the bitmap to 1.
 public static void Set(this ref IntArgRegBitmap b, nint i) {
-    b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)((i % 8))));
+    b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)(i % 8)));
 }
 
 // Get returns whether the i'th bit of the bitmap is set.
@@ -101,7 +101,7 @@ public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) {
 
     // Compute p=&b[i/8], but without a bounds check. We don't have the stack for it.
     var p = (ж<byte>)(uintptr)((@unsafe.Pointer)((uintptr)(uintptr)@unsafe.Pointer.FromRef(ref b) + (uintptr)(i / 8)));
-    return (byte)(p.Value & (((uint8)1).Lsh((int64)((i % 8))))) != 0;
+    return (byte)(p.Value & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
 } // end abi_package
