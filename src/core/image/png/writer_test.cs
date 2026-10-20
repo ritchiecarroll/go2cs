@@ -99,6 +99,7 @@ internal partial struct TestWriterPaletted_testCases /*dyn*/ {
 public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
     UntypedInt width = 32;
     UntypedInt height = 16;
+
     var testCases = new TestWriterPaletted_testCases[]{
         new(
             plen: 256,
@@ -126,6 +127,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             datalen: (1 + width / 8) * height
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestWriterPaletted_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -143,6 +145,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
                 );
             }
             var m0 = image.NewPaletted(image.Rect(0, 0, width, height), palette);
+
             nint i = 0;
             for (nint y = 0; y < height; y++) {
                 for (nint x = 0; x < width; x++) {
@@ -150,6 +153,7 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
                     i++;
                 }
             }
+
             // Encode the image
             ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
             {
@@ -161,9 +165,11 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             const nint chunkFieldsLength = 12; // 4 bytes for length, name and crc
             var data = b.Bytes();
             i = len(pngHeader);
+
             while (i < len(data) - chunkFieldsLength) {
                 var length = binary.BigEndian.Uint32(data.slice(i, i + 4));
-                @string name = ((@string)(data.slice(i + 4, i + 8)));
+                @string name = (@string)(data.slice(i + 4, i + 8));
+
                 var exprᴛ1 = name;
                 if (exprᴛ1 == "IHDR"u8) {
                     var bitdepth = data[i + 8 + 8];
@@ -172,9 +178,9 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
                     }
                 }
                 else if (exprᴛ1 == "IDAT"u8) {
+                    // Uncompress the image data
                     var (r, err) = zlib.NewReader(new png_test_package.bytes_ReaderжReader(bytes.NewReader(data.slice(i + 8, i + 8 + (nint)length))));
                     if (err != default!) {
-                        // Uncompress the image data
                         tΔ1.Error(err);
                         return;
                     }
@@ -200,6 +206,7 @@ internal static readonly object cannotDecodeˢ2 = (@string)"cannot decode NoComp
 
 public static void TestWriterLevels(ж<testing.T> Ꮡt) {
     var m = image.NewNRGBA(image.Rect(0, 0, 100, 100));
+
     ref var b1 = ref heap(new bytes.Buffer(), out var Ꮡb1);
     ref var b2 = ref heap(new bytes.Buffer(), out var Ꮡb2);
     {
@@ -213,6 +220,7 @@ public static void TestWriterLevels(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     if (b2.Len() <= b1.Len()) {
         Ꮡt.Error(defaultCompressionˢ);
     }
@@ -271,12 +279,14 @@ public static void TestWriteRGBA(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var testCases = new TestWriteRGBA_testCases[]{
         new("Transparent RGBA"u8, new image.ΔRGBAжImage(transparentImg)),
         new("Opaque RGBA"u8, new image.ΔRGBAжImage(opaqueImg)),
         new("50/50 Transparent/Opaque RGBA"u8, new image.ΔRGBAжImage(mixedImg)),
         new("RGBA with variable alpha"u8, new image.ΔRGBAжImage(translucentImg))
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestWriteRGBA_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -426,22 +436,18 @@ public static void BenchmarkEncodeRGBA(ж<testing.B> Ꮡb) {
         for (nint x = 0; x < width; x++) {
             nint percent = (x + y) % 100;
             switch (ᐧ) {
-            case {} when percent is < 10: {
-                img.Set(x, // 10% of pixels are translucent (have alpha >0 and <255)
- y, new color.NRGBA((uint8)x, (uint8)y, (uint8)(x * y), (uint8)percent));
+            case {} when percent is < 10: { // 10% of pixels are translucent (have alpha >0 and <255)
+                img.Set(x, y, new color.NRGBA((uint8)x, (uint8)y, (uint8)(x * y), (uint8)percent));
                 break;
             }
-            case {} when percent is < 40: {
-                img.Set(x, // 30% of pixels are transparent (have alpha == 0)
- y, new color.NRGBA((uint8)x, (uint8)y, (uint8)(x * y), 0));
+            case {} when percent is < 40: { // 30% of pixels are transparent (have alpha == 0)
+                img.Set(x, y, new color.NRGBA((uint8)x, (uint8)y, (uint8)(x * y), 0));
                 break;
             }
-            default: {
-                img.Set(x, // 60% of pixels are opaque (have alpha == 255)
- y, new color.NRGBA((uint8)x, (uint8)y, (uint8)(x * y), 255));
+            default: { // 60% of pixels are opaque (have alpha == 255)
+                img.Set(x, y, new color.NRGBA((uint8)x, (uint8)y, (uint8)(x * y), 255));
                 break;
             }}
-
         }
     }
     if (img.Opaque()) {

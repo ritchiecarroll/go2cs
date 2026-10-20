@@ -81,28 +81,28 @@ public static void AddUint8(this ref Builder b, uint8 v) {
 
 // AddUint16 appends a big-endian, 16-bit value to the byte string.
 public static void AddUint16(this ref Builder b, uint16 v) {
-    b.add((byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 8), (byte)v);
 }
 
 // AddUint24 appends a big-endian, 24-bit value to the byte string. The highest
 // byte of the 32-bit input value is silently truncated.
 public static void AddUint24(this ref Builder b, uint32 v) {
-    b.add((byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint32 appends a big-endian, 32-bit value to the byte string.
 public static void AddUint32(this ref Builder b, uint32 v) {
-    b.add((byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint48 appends a big-endian, 48-bit value to the byte string.
 public static void AddUint48(this ref Builder b, uint64 v) {
-    b.add((byte)((v >> (int)(40))), (byte)((v >> (int)(32))), (byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint64 appends a big-endian, 64-bit value to the byte string.
 public static void AddUint64(this ref Builder b, uint64 v) {
-    b.add((byte)((v >> (int)(56))), (byte)((v >> (int)(48))), (byte)((v >> (int)(40))), (byte)((v >> (int)(32))), (byte)((v >> (int)(24))), (byte)((v >> (int)(16))), (byte)((v >> (int)(8))), (byte)v);
+    b.add((byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddBytes appends a sequence of bytes to the byte string.
@@ -110,6 +110,28 @@ public static void AddBytes(this ref Builder b, slice<byte> v) {
     b.add(v.ꓸꓸꓸ);
 }
 
+// BuilderContinuation is a continuation-passing interface for building
+// length-prefixed byte sequences. Builder methods for length-prefixed
+// sequences (AddUint8LengthPrefixed etc) will invoke the BuilderContinuation
+// supplied to them. The child builder passed to the continuation can be used
+// to build the content of the length-prefixed sequence. For example:
+//
+//	parent := cryptobyte.NewBuilder()
+//	parent.AddUint8LengthPrefixed(func (child *Builder) {
+//	  child.AddUint8(42)
+//	  child.AddUint8LengthPrefixed(func (grandchild *Builder) {
+//	    grandchild.AddUint8(5)
+//	  })
+//	})
+//
+// It is an error to write more bytes to the child than allowed by the reserved
+// length prefix. After the continuation returns, the child must be considered
+// invalid, i.e. users must not store any copies or references of the child
+// that outlive the continuation.
+//
+// If the continuation panics with a value of type BuildError then the inner
+// error will be returned as the error from Bytes. If the child panics
+// otherwise then Bytes will repanic with the same value.
 // type BuilderContinuation is a methodless func type — rendered inline as its base delegate
 
 // BuildError wraps an error. If a BuilderContinuation panics with this value,
@@ -146,12 +168,15 @@ internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>>
 
         if (!b.inContinuation.Value) {
             b.inContinuation.Value = true;
+
             defer(() => {
                 Ꮡb.Value.inContinuation.Value = false;
+
                 var r = recover();
                 if (r == default!) {
                     return;
                 }
+
                 {
                     ref var buildError = ref heap<BuildError>(out var ᏑbuildError);
                     (buildError, var ok) = r._<BuildError>(ᐧ); if (ok){
@@ -162,6 +187,7 @@ internal static void callContinuation(this ж<Builder> Ꮡb, Action<ж<Builder>>
                 }
             }, ref ᒐ);
         }
+
         f(Ꮡarg);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -175,12 +201,15 @@ internal static void addLengthPrefixed(this ж<Builder> Ꮡb, nint lenLen, bool 
     if (b.err != default!) {
         return;
     }
+
     ref var offset = ref heap<nint>(out var Ꮡoffset);
     offset = len(b.result);
     b.add(new slice<byte>(lenLen).ꓸꓸꓸ);
+
     if (b.inContinuation == nil) {
         b.inContinuation = @new<bool>();
     }
+
     b.child = Ꮡ(new Builder(
         result: b.result,
         fixedSize: b.fixedSize,
@@ -189,6 +218,7 @@ internal static void addLengthPrefixed(this ж<Builder> Ꮡb, nint lenLen, bool 
         pendingIsASN1: isASN1,
         inContinuation: b.inContinuation
     ));
+
     Ꮡb.callContinuation(f, b.child);
     b.flushChild();
     if (b.child != nil) {
@@ -206,14 +236,18 @@ internal static void flushChild(this ref Builder b) {
     b.child.flushChild();
     var child = b.child;
     b.child = default!;
+
     if ((~child).err != default!) {
         b.err = child.Value.err;
         return;
     }
+
     nint length = len((~child).result) - (~child).pendingLenLen - (~child).offset;
+
     if (length < 0) {
         throw panic("cryptobyte: internal error"); // result unexpectedly shrunk
     }
+
     if ((~child).pendingIsASN1) {
         // For ASN.1, we reserved a single byte for the length. If that turned out
         // to be incorrect, we have to move the contents along in order to make
@@ -247,6 +281,7 @@ internal static void flushChild(this ref Builder b) {
             lenByte = (uint8)length;
             length = 0;
         }
+
         // Insert the initial length byte, make space for successive length bytes,
         // and adjust the offset.
         child.Value.result[(~child).offset] = lenByte;
@@ -259,6 +294,7 @@ internal static void flushChild(this ref Builder b) {
         child.Value.offset++;
         child.Value.pendingLenLen = extraBytes;
     }
+
     nint l = length;
     for (nint i = (~child).pendingLenLen - 1; i >= 0; i--) {
         child.Value.result[(~child).offset + i] = (uint8)l;
@@ -268,9 +304,11 @@ internal static void flushChild(this ref Builder b) {
         b.err = fmt.Errorf("cryptobyte: pending child length %d exceeds %d-byte length prefix"u8, length, (~child).pendingLenLen);
         return;
     }
+
     if (b.fixedSize && Ꮡ(b.result, 0) != Ꮡ((~child).result, 0)) {
         throw panic("cryptobyte: BuilderContinuation reallocated a fixed-size buffer");
     }
+
     b.result = child.Value.result;
 }
 

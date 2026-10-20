@@ -32,6 +32,7 @@ internal static (int64 written, error err, bool handled) spliceFrom(ж<netFD> �
             return (0, default!, true);
         }
     }
+
     ж<netFD> s = default!;
     switch (r.type()) {
     case ж<TCPConn> v: {
@@ -53,6 +54,7 @@ internal static (int64 written, error err, bool handled) spliceFrom(ж<netFD> �
         var v = r;
         return (0, default!, false);
     }}
+
     (written, handled, err) = pollSplice(Ꮡc.of(netFD.Ꮡpfd), s.of(netFD.Ꮡpfd), remain);
     if (lr != nil) {
         lr.Value.N -= written;
@@ -74,6 +76,7 @@ internal static (int64 written, error err, bool handled) spliceTo(Δio.Writer w,
     if (!ok || (~(~uc).fd).net != "unix"u8) {
         return (written, err, handled);
     }
+
     (written, handled, err) = pollSplice((~uc).fd.of(netFD.Ꮡpfd), Ꮡc.of(netFD.Ꮡpfd), 9223372036854775807L);
     return (written, wrapSyscallError(spliceˢ, err), handled);
 }

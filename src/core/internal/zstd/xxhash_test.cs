@@ -13,7 +13,6 @@ using static go.@internal.zstd_package;
 
 partial class zstd_internal_test_package {
 
-
 partial struct xxHashTestsᴛ1 /*dyn*/ {
     internal @string data;
     internal uint64 hash;
@@ -50,10 +49,12 @@ public static void TestLargeXXHash(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingExpensiveTestInˢ);
     }
+
     var (data, err) = os.ReadFile(testdataIsaacNewtonˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     global::go.@internal.zstd_package.xxhash64 xh = new();
     xh.reset();
     nint i = 0;
@@ -66,6 +67,7 @@ public static void TestLargeXXHash(ж<testing.T> Ꮡt) {
         xh.update(data.slice(i, i + c));
         i += c;
     }
+
     var got = xh.digest();
     var want = (uint64)0xf0dd39fd7e063f82UL;
     if (got != want) {
@@ -92,6 +94,7 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     @string xxhsum = findXxhsum(new zstd_internal_test_package.testing_FжTB(Ꮡf));
+
     foreach (var (_, test) in xxHashTests) {
         f.Add(slice<byte>(test.data));
     }
@@ -102,6 +105,7 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
     }
     f.Add(bytes.Repeat(buf.Bytes(), 64));
     f.Add(bigData(new zstd_internal_test_package.testing_FжTB(Ꮡf)));
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         var cmd = exec.Command(xxhsum, h64ˢ);
         cmd.Value.Stdin = new zstd_internal_test_package.bytes_ReaderжReader(bytes.NewReader(b));
@@ -113,14 +117,16 @@ public static void FuzzXXHash(ж<testing.F> Ꮡf) {
             }
         }
         var hhHashBytes = bytes.Fields(bytes.TrimSpace(hhsumHash.Bytes()))[0];
-        var (hhHash, err) = strconv.ParseUint(((@string)hhHashBytes), 16, 64);
+        var (hhHash, err) = strconv.ParseUint((@string)hhHashBytes, 16, 64);
         if (err != default!) {
             t.Fatalf("could not parse hash %q: %v"u8, hhHashBytes, err);
         }
+
         global::go.@internal.zstd_package.xxhash64 xh = new();
         xh.reset();
         xh.update(b);
         var goHash = xh.digest();
+
         if (goHash != hhHash) {
             t.Errorf("Go hash %#x != xxhsum hash %#x"u8, goHash, hhHash);
         }

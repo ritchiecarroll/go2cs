@@ -74,6 +74,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
     map<@string, @string> paxHdrs = default!;
     @string gnuLongName = default!;
     @string gnuLongLink = default!;
+
     // Externally, Next iterates through the tar archive as if it is a series of
     // files. Internally, the tar format often uses fake "files" to add meta
     // data that describes the next file. These meta data "files" should not
@@ -93,6 +94,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
             }
         }
         tr.pad = 0;
+
         var (hdr, rawHdr, err) = Ꮡtr.readHeader();
         if (err != default!) {
             return (default!, err);
@@ -103,6 +105,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
             }
         }
         format.mayOnlyBe((~hdr).Format);
+
         // Check for PAX/GNU special headers and files.
         var exprᴛ1 = (~hdr).Typeflag;
         if (exprᴛ1 == TypeXHeader || exprᴛ1 == TypeXGlobalHeader) {
@@ -129,6 +132,7 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
             if (errΔ6 != default!) {
                 return (default!, errΔ6);
             }
+
             parser p = default!;
             var exprᴛ2 = (~hdr).Typeflag;
             if (exprᴛ2 == TypeGNULongName) {
@@ -137,14 +141,13 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
             else if (exprᴛ2 == TypeGNULongLink) {
                 gnuLongLink = p.parseString(realname);
             }
-
             continue; // This is a meta header affecting the next header
         }
         else { /* default: */
+            // The old GNU sparse format is handled here since it is technically
+            // just a regular file with additional attributes.
             {
-                var errΔ7 = mergePAX(ref (hdr).DerefOrNull(), // The old GNU sparse format is handled here since it is technically
- // just a regular file with additional attributes.
- paxHdrs); if (errΔ7 != default!) {
+                var errΔ7 = mergePAX(ref (hdr).DerefOrNull(), paxHdrs); if (errΔ7 != default!) {
                     return (default!, errΔ7);
                 }
             }
@@ -161,28 +164,30 @@ internal static (ж<Header>, error) next(this ж<Reader> Ꮡtr) {
                     hdr.Value.Typeflag = TypeReg;
                 }
             }
+
+            // The extended headers may have updated the size.
+            // Thus, setup the regFileReader again after merging PAX headers.
             {
                 var errΔ8 = tr.handleRegularFile(hdr); if (errΔ8 != default!) {
-                    // The extended headers may have updated the size.
-                    // Thus, setup the regFileReader again after merging PAX headers.
                     return (default!, errΔ8);
                 }
             }
+
+            // Sparse formats rely on being able to read from the logical data
+            // section; there must be a preceding call to handleRegularFile.
             {
-                var errΔ9 = tr.handleSparseFile(hdr, // Sparse formats rely on being able to read from the logical data
- // section; there must be a preceding call to handleRegularFile.
- rawHdr); if (errΔ9 != default!) {
+                var errΔ9 = tr.handleSparseFile(hdr, rawHdr); if (errΔ9 != default!) {
                     return (default!, errΔ9);
                 }
             }
+
+            // Set the final guess at the format.
             if (format.has(FormatUSTAR) && format.has(FormatPAX)) {
-                // Set the final guess at the format.
                 format.mayOnlyBe(FormatUSTAR);
             }
             hdr.Value.Format = format;
             return (hdr, default!); // This is a file, so stop
         }
-
     }
 }
 
@@ -200,6 +205,7 @@ internal static error handleRegularFile(this ref Reader tr, ж<Header> Ꮡhdr) {
     if (nb < 0) {
         return ErrHeader;
     }
+
     tr.pad = blockPadding(nb);
     tr.curr = new regFileReaderжfileReader(Ꮡ(new regFileReader(r: tr.r, nb: nb)));
     return default!;
@@ -217,6 +223,7 @@ internal static error handleSparseFile(this ref Reader tr, ж<Header> Ꮡhdr, ж
     } else {
         (spd, err) = tr.readGNUSparsePAXHeaders(Ꮡhdr);
     }
+
     // If sp is non-nil, then this is a sparse file.
     // Note that it is possible for len(sp) == 0.
     if (err == default! && spd != default!) {
@@ -259,8 +266,8 @@ internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr,
     default: {
         return (default!, default!); // Not a PAX format GNU sparse file.
     }}
-
     hdr.Format.mayOnlyBe(FormatPAX);
+
     // Update hdr from GNU sparse PAX headers.
     {
         @string name = hdr.PAXRecords[paxGNUSparseName]; if (name != ""u8) {
@@ -278,6 +285,7 @@ internal static (sparseDatas, error) readGNUSparsePAXHeaders(this ref Reader tr,
         }
         hdr.Size = n;
     }
+
     // Read the sparse map according to the appropriate format.
     if (is1x0) {
         return readGNUSparseMap1x0(tr.curr);
@@ -335,7 +343,6 @@ internal static error /*err*/ mergePAX(ref Header hdr, map<@string, @string> pax
                 hdr.Xattrs[k[(int)(len(paxSchilyXattr))..]] = v;
             }
         }
-
         if (err != default!) {
             return ErrHeader;
         }
@@ -347,15 +354,19 @@ internal static error /*err*/ mergePAX(ref Header hdr, map<@string, @string> pax
 // parsePAX parses PAX headers.
 // If an extended header (type 'x') is invalid, ErrHeader is returned.
 internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
+    var sparseMapᴷ = new stackAppend<@string>();
+
     var (buf, err) = readSpecialFile(r);
     if (err != default!) {
         return (default!, err);
     }
-    @string sbuf = ((@string)buf);
+    @string sbuf = (@string)buf;
+
     // For GNU PAX sparse format 0.0 support.
     // This function transforms the sparse format 0.0 headers into format 0.1
     // headers since 0.0 headers were not PAX compliant.
     slice<@string> sparseMap = default!;
+
     var paxHdrs = new map<@string, @string>();
     while (len(sbuf) > 0) {
         var (key, value, residual, errΔ1) = parsePAXRecord(sbuf);
@@ -363,18 +374,18 @@ internal static (map<@string, @string>, error) parsePAX(io.Reader r) {
             return (default!, ErrHeader);
         }
         sbuf = residual;
+
         var exprᴛ1 = key;
         if (exprᴛ1 == paxGNUSparseOffset || exprᴛ1 == paxGNUSparseNumBytes) {
-            if ((len(sparseMap) % 2 == 0 && key != paxGNUSparseOffset) || (len(sparseMap) % 2 == 1 && key != paxGNUSparseNumBytes) || strings.Contains(value, // Validate sparse header order and value.
- ","u8)) {
+            // Validate sparse header order and value.
+            if ((len(sparseMap) % 2 == 0 && key != paxGNUSparseOffset) || (len(sparseMap) % 2 == 1 && key != paxGNUSparseNumBytes) || strings.Contains(value, ","u8)) {
                 return (default!, ErrHeader);
             }
-            sparseMap = append(sparseMap, value);
+            sparseMap = append(sparseMapᴷ, sparseMap, value);
         }
         else { /* default: */
             paxHdrs[key] = value;
         }
-
     }
     if (len(sparseMap) > 0) {
         paxHdrs[paxGNUSparseMap] = strings.Join(sparseMap, ","u8);
@@ -410,13 +421,16 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
         }
         return (default!, ж<block>.NilBoxOfDims(512L), ErrHeader); // Zero block and then non-zero block
     }
+
     // Verify the header matches a known format.
     Format format = Ꮡtr.of(Reader.Ꮡblk).getFormat();
     if (format == FormatUnknown) {
         return (default!, ж<block>.NilBoxOfDims(512L), ErrHeader);
     }
+
     parser p = default!;
     var hdr = @new<Header>();
+
     // Unpack the V7 header.
     var v7 = Ꮡtr.of(Reader.Ꮡblk).toV7();
     hdr.Value.Typeflag = v7.typeFlag()[0];
@@ -427,6 +441,7 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
     hdr.Value.Uid = (nint)p.parseNumeric(v7.uid());
     hdr.Value.Gid = (nint)p.parseNumeric(v7.gid());
     hdr.Value.ModTime = time.Unix(p.parseNumeric(v7.modTime()), 0);
+
     // Unpack format specific fields.
     if (format > formatV7) {
         var ustar = Ꮡtr.of(Reader.Ꮡblk).toUSTAR();
@@ -434,17 +449,17 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
         hdr.Value.Gname = p.parseString(ustar.groupName());
         hdr.Value.Devmajor = p.parseNumeric(ustar.devMajor());
         hdr.Value.Devminor = p.parseNumeric(ustar.devMinor());
+
         @string prefix = default!;
         switch (ᐧ) {
         case {} when format.has((Format)(FormatUSTAR | FormatPAX)): {
             hdr.Value.Format = format;
             var ustarΔ3 = Ꮡtr.of(Reader.Ꮡblk).toUSTAR();
             prefix = p.parseString(ustarΔ3.prefix());
-            var notASCII = (rune r) => {
-                // For Format detection, check if block is properly formatted since
-                // the parser is more liberal than what USTAR actually permits.
-                return r >= 0x80;
-            };
+
+            // For Format detection, check if block is properly formatted since
+            // the parser is more liberal than what USTAR actually permits.
+            var notASCII = (rune r) => r >= 0x80;
             if (bytes.IndexFunc(tr.blk[..], notASCII) >= 0) {
                 hdr.Value.Format = FormatUnknown; // Non-ASCII characters in block.
             }
@@ -475,28 +490,29 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
                     hdr.Value.ChangeTime = time.Unix(p2.parseNumeric(b), 0);
                 }
             }
+
+            // Prior to Go1.8, the Writer had a bug where it would output
+            // an invalid tar file in certain rare situations because the logic
+            // incorrectly believed that the old GNU format had a prefix field.
+            // This is wrong and leads to an output file that mangles the
+            // atime and ctime fields, which are often left unused.
+            //
+            // In order to continue reading tar files created by former, buggy
+            // versions of Go, we skeptically parse the atime and ctime fields.
+            // If we are unable to parse them and the prefix field looks like
+            // an ASCII string, then we fallback on the pre-Go1.8 behavior
+            // of treating these fields as the USTAR prefix field.
+            //
+            // Note that this will not use the fallback logic for all possible
+            // files generated by a pre-Go1.8 toolchain. If the generated file
+            // happened to have a prefix field that parses as valid
+            // atime and ctime fields (e.g., when they are valid octal strings),
+            // then it is impossible to distinguish between a valid GNU file
+            // and an invalid pre-Go1.8 file.
+            //
+            // See https://golang.org/issues/12594
+            // See https://golang.org/issues/21005
             if (p2.err != default!) {
-                // Prior to Go1.8, the Writer had a bug where it would output
-                // an invalid tar file in certain rare situations because the logic
-                // incorrectly believed that the old GNU format had a prefix field.
-                // This is wrong and leads to an output file that mangles the
-                // atime and ctime fields, which are often left unused.
-                //
-                // In order to continue reading tar files created by former, buggy
-                // versions of Go, we skeptically parse the atime and ctime fields.
-                // If we are unable to parse them and the prefix field looks like
-                // an ASCII string, then we fallback on the pre-Go1.8 behavior
-                // of treating these fields as the USTAR prefix field.
-                //
-                // Note that this will not use the fallback logic for all possible
-                // files generated by a pre-Go1.8 toolchain. If the generated file
-                // happened to have a prefix field that parses as valid
-                // atime and ctime fields (e.g., when they are valid octal strings),
-                // then it is impossible to distinguish between a valid GNU file
-                // and an invalid pre-Go1.8 file.
-                //
-                // See https://golang.org/issues/12594
-                // See https://golang.org/issues/21005
                 (hdr.Value.AccessTime, hdr.Value.ChangeTime) = (new time.Time(nil), new time.Time(nil));
                 var ustarΔ4 = Ꮡtr.of(Reader.Ꮡblk).toUSTAR();
                 {
@@ -508,7 +524,6 @@ internal static (ж<Header>, ж<block>, error) readHeader(this ж<Reader> Ꮡtr)
             }
             break;
         }}
-
         if (len(prefix) > 0) {
             hdr.Value.Name = prefix + "/"u8 + (~hdr).Name;
         }
@@ -535,6 +550,7 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
         return (default!, ErrHeader);
     }
     hdr.Format.mayOnlyBe(FormatGNU);
+
     parser p = default!;
     hdr.Size = p.parseNumeric(Ꮡblk.toGNU().realSize());
     if (p.err != default!) {
@@ -542,7 +558,8 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
     }
     var s = Ꮡblk.toGNU().sparse();
     var spd = new sparseDatas(0, s.maxEntries());
-    while (ᐧ) {
+    nint totalSize = len(s);
+    while (totalSize < maxSpecialFileSize) {
         for (nint i = 0; i < s.maxEntries(); i++) {
             // This termination condition is identical to GNU and BSD tar.
             if (s.entry(i).offset()[0] == 0x00) {
@@ -553,8 +570,13 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
             if (p.err != default!) {
                 return (default!, p.err);
             }
-            spd = append(spd, new sparseEntry(Offset: offset, Length: length));
+            error err = default!;
+            (spd, err) = appendSparseEntry(spd, new sparseEntry(Offset: offset, Length: length));
+            if (err != default!) {
+                return (default!, err);
+            }
         }
+
         if (s.isExtended()[0] > 0) {
             // There are more entries. Read an extension header and parse its entries.
             {
@@ -563,10 +585,12 @@ internal static (sparseDatas, error) readOldGNUSparseMap(this ref Reader tr, ж<
                 }
             }
             s = blk.toSparse();
+            totalSize += len(s);
             continue;
         }
         return (spd, default!); // Done
     }
+    return (default!, errSparseTooLong);
 }
 
 // readGNUSparseMap1x0 reads the sparse map as stored in GNU's PAX sparse format
@@ -584,6 +608,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
     bytes.Buffer buf = default!;
     ref var blk = ref heap(new block(), out var Ꮡblk);
     nint totalSize = default!;
+
     // feedTokens copies data in blocks from r into buf until there are
     // at least cnt newlines in buf. It will not read more blocks than needed.
     var blkʗ1 = blk;
@@ -607,6 +632,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
         }
         return default!;
     }
+
     // nextToken gets the next token delimited by a newline. This assumes that
     // at least one newline exists in the buffer.
     @string nextToken() {
@@ -614,6 +640,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
         var (tok, _) = buf.ReadString((rune)'\n');
         return strings.TrimRight(tok, "\n"u8);
     }
+
     // Parse for the number of entries.
     // Use integer overflow resistant math to check this.
     {
@@ -625,6 +652,7 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
     if (err != default! || numEntries < 0 || (nint)(2 * numEntries) < (nint)numEntries) {
         return (default!, ErrHeader);
     }
+
     // Parse for all member entries.
     // numEntries is trusted after this since feedTokens limits the number of
     // tokens based on maxSpecialFileSize.
@@ -640,7 +668,10 @@ internal static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
         if (err1 != default! || err2 != default!) {
             return (default!, ErrHeader);
         }
-        spd = append(spd, new sparseEntry(Offset: offset, Length: length));
+        (spd, err) = appendSparseEntry(spd, new sparseEntry(Offset: offset, Length: length));
+        if (err != default!) {
+            return (default!, err);
+        }
     }
     return (spd, default!);
 }
@@ -655,6 +686,7 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
     if (err != default! || numEntries < 0 || (nint)(2 * numEntries) < (nint)numEntries) {
         return (default!, ErrHeader);
     }
+
     // There should be two numbers in sparseMap for each entry.
     var sparseMap = strings.Split(paxHdrs[paxGNUSparseMap], ","u8);
     if (len(sparseMap) == 1 && sparseMap[0] == "") {
@@ -663,6 +695,7 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
     if ((int64)len(sparseMap) != 2 * numEntries) {
         return (default!, ErrHeader);
     }
+
     // Loop through the entries in the sparse map.
     // numEntries is trusted now.
     var spd = new sparseDatas(0, (nint)(numEntries));
@@ -672,10 +705,20 @@ internal static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> p
         if (err1 != default! || err2 != default!) {
             return (default!, ErrHeader);
         }
-        spd = append(spd, new sparseEntry(Offset: offset, Length: length));
+        (spd, err) = appendSparseEntry(spd, new sparseEntry(Offset: offset, Length: length));
+        if (err != default!) {
+            return (default!, err);
+        }
         sparseMap = sparseMap[2..];
     }
     return (spd, default!);
+}
+
+internal static (sparseDatas, error) appendSparseEntry(sparseDatas spd, sparseEntry ent) {
+    if (len(spd) >= maxSparseFileEntries) {
+        return (default!, errSparseTooLong);
+    }
+    return (append(spd, ent), default!);
 }
 
 // Read reads from the current file in the tar archive.
@@ -747,7 +790,6 @@ internal static (nint n, error err) Read(this ref regFileReader fr, slice<byte> 
     default: {
         return (n, err);
     }}
-
 }
 
 internal partial struct WriteTo_src /*dyn*/ {
@@ -783,17 +825,16 @@ internal static (nint n, error err) Read(this ref sparseFileReader sr, slice<byt
     if (finished) {
         b = b.slice(0, (nint)(sr.logicalRemaining()));
     }
+
     var b0 = b;
     var endPos = sr.pos + (int64)len(b);
     while (endPos > sr.pos && err == default!) {
         nint nf = default!;      // Bytes read in fragment
         var (holeStart, holeEnd) = (sr.sp[0].Offset, sr.sp[0].endOffset());
-        if (sr.pos < holeStart){
-            // In a data fragment
+        if (sr.pos < holeStart){ // In a data fragment
             var bf = b.slice(0, (nint)(min((int64)len(b), holeStart - sr.pos)));
             (nf, err) = tryReadFull(sr.fr, bf);
-        } else {
-            // In a hole fragment
+        } else { // In a hole fragment
             var bf = b.slice(0, (nint)(min((int64)len(b), holeEnd - sr.pos)));
             (nf, err) = tryReadFull(new zeroReader(nil), bf);
         }
@@ -803,6 +844,7 @@ internal static (nint n, error err) Read(this ref sparseFileReader sr, slice<byt
             sr.sp = sr.sp[1..]; // Ensure last fragment always remains
         }
     }
+
     n = len(b0) - len(b);
     switch (ᐧ) {
     case {} when AreEqual(err, io.EOF): {
@@ -820,14 +862,13 @@ internal static (nint n, error err) Read(this ref sparseFileReader sr, slice<byt
     default: {
         return (n, default!);
     }}
-
 }
 
 internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io.Writer w) {
     int64 n = default!;
     error err = default!;
-
     ref var sr = ref Ꮡsr.DerefOrNull();
+
     var (ws, ok) = w._<io.WriteSeeker>(ᐧ);
     if (ok) {
         {
@@ -839,17 +880,16 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
     if (!ok) {
         return io.Copy(w, new WriteTo_src(new sparseFileReaderжReader(Ꮡsr)));
     }
+
     bool writeLastByte = default!;
     var pos0 = sr.pos;
     while (sr.logicalRemaining() > 0 && !writeLastByte && err == default!) {
         int64 nf = default!;          // Size of fragment
         var (holeStart, holeEnd) = (sr.sp[0].Offset, sr.sp[0].endOffset());
-        if (sr.pos < holeStart){
-            // In a data fragment
+        if (sr.pos < holeStart){ // In a data fragment
             nf = holeStart - sr.pos;
             (nf, err) = io.CopyN(ws, sr.fr, nf);
-        } else {
-            // In a hole fragment
+        } else { // In a hole fragment
             nf = holeEnd - sr.pos;
             if (sr.physicalRemaining() == 0) {
                 writeLastByte = true;
@@ -862,12 +902,14 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
             sr.sp = sr.sp[1..]; // Ensure last fragment always remains
         }
     }
+
     // If the last fragment is a hole, then seek to 1-byte before EOF, and
     // write a single byte to ensure the file is the right size.
     if (writeLastByte && err == default!) {
         (_, err) = ws.Write(new byte[]{0}.slice());
         sr.pos++;
     }
+
     n = sr.pos - pos0;
     switch (ᐧ) {
     case {} when AreEqual(err, io.EOF): {
@@ -882,7 +924,6 @@ internal static (int64 n, error err) WriteTo(this ж<sparseFileReader> Ꮡsr, io
     default: {
         return (n, default!);
     }}
-
 }
 
 internal static int64 logicalRemaining(this sparseFileReader sr) {
@@ -962,6 +1003,7 @@ internal static error discard(io.Reader r, int64 n) {
             }
         }
     }
+
     var (copySkipped, err) = io.CopyN(io.Discard, r, n - seekSkipped);
     if (AreEqual(err, io.EOF) && seekSkipped + copySkipped < n) {
         err = io.ErrUnexpectedEOF;

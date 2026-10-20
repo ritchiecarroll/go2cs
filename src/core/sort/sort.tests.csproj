@@ -141,6 +141,7 @@
     <ProjectReference Include="$(go2csPath)core/internal/reflectlite/internal.reflectlite.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
+    <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/rand/v2/math.rand.v2.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />

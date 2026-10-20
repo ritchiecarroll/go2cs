@@ -16,6 +16,10 @@ using io = io_package;
 
 partial class syslog_package {
 
+// The Priority is a combination of the syslog facility and
+// severity. For example, [LOG_ALERT] | [LOG_FTP] sends an alert severity
+// message from the FTP facility. The default severity is [LOG_EMERG];
+// the default facility is [LOG_KERN].
 partial struct Priority /*num:nint*/;
 
 internal static UntypedInt severityMask => 0x07;
@@ -23,6 +27,9 @@ internal static UntypedInt severityMask => 0x07;
 internal static UntypedInt facilityMask => 0xf8;
 
 // Severity.
+
+// From /usr/include/sys/syslog.h.
+// These are the same on Linux, BSD, and OS X.
 public static Priority LOG_EMERG => /* iota */ 0;
 public static Priority LOG_ALERT => 1;
 public static Priority LOG_CRIT => 2;
@@ -33,6 +40,9 @@ public static Priority LOG_INFO => 6;
 public static Priority LOG_DEBUG => 7;
 
 // Facility.
+
+// From /usr/include/sys/syslog.h.
+// These are the same up to LOG_FTP on Linux, BSD, and OS X.
 public static Priority LOG_KERN => /* iota << 3 */ 0;
 public static Priority LOG_USER => 8;
 public static Priority LOG_MAIL => 16;
@@ -109,11 +119,13 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
         if (priority < 0 || priority > (Priority)(LOG_LOCAL7 | LOG_DEBUG)) {
             return (default!, errors.New(logSyslogInvalidPriorityˢ));
         }
+
         if (tag == ""u8) {
             tag = os.Args[0];
         }
         ref var hostname = ref heap<@string>(out var Ꮡhostname);
         (hostname, _) = os.Hostname();
+
         var w = Ꮡ(new Writer(
             priority: priority,
             tag: tag,
@@ -121,14 +133,16 @@ public static (ж<Writer>, error) Dial(@string network, @string raddr, Priority 
             network: network,
             raddr: raddr
         ));
+
         w.of(Writer.Ꮡmu).Lock();
         var wʗ1 = w;
         defer(wʗ1.of(Writer.Ꮡmu).Unlock, ref ᒐ);
+
         var err = w.connect();
         if (err != default!) {
             return (default!, err);
         }
-        return (w, err);
+        return (w, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -147,6 +161,7 @@ internal static error /*err*/ connect(this ref Writer w) {
         w.conn.close();
         w.conn = default!;
     }
+
     if (w.network == ""u8){
         (w.conn, err) = unixSyslog();
         if (w.hostname == ""u8) {
@@ -172,7 +187,7 @@ internal static error /*err*/ connect(this ref Writer w) {
 public static (nint, error) Write(this ж<Writer> Ꮡw, slice<byte> b) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    return Ꮡw.writeAndRetry(w.priority, ((@string)b));
+    return Ꮡw.writeAndRetry(w.priority, (@string)b);
 }
 
 // Close closes a connection to the syslog daemon.
@@ -184,6 +199,7 @@ public static error Close(this ж<Writer> Ꮡw) {
 
         w.mu.Lock();
         ᒐd1 = true;
+
         if (w.conn != default!) {
             var err = w.conn.close();
             w.conn = default!;
@@ -258,8 +274,10 @@ internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @s
         ref var w = ref Ꮡw.DerefOrNull();
 
         Priority pr = (Priority)(((Priority)(w.priority & (nint)facilityMask)) | ((Priority)(p & (nint)severityMask)));
+
         w.mu.Lock();
         ᒐd1 = true;
+
         if (w.conn != default!) {
             {
                 var (n, err) = w.write(pr, s); if (err == default!) {
@@ -286,6 +304,7 @@ internal static (nint, error) write(this ref Writer w, Priority p, @string msg) 
     if (!strings.HasSuffix(msg, "\n"u8)) {
         nl = "\n"u8;
     }
+
     var err = w.conn.writeString(p, w.hostname, w.tag, msg, nl);
     if (err != default!) {
         return (0, err);

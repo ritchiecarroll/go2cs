@@ -55,7 +55,19 @@ partial struct wbBuf {
     internal array<uintptr> buf = new(wbBufEntries);
 }
 
+// wbBufEntries is the maximum number of pointers that can be
+// stored in the write barrier buffer.
+//
+// This trades latency for throughput amortization. Higher
+// values amortize flushing overhead more, but increase the
+// latency of flushing. Higher values also increase the cache
+// footprint of the buffer.
+//
+// TODO: What is the latency cost of this? Tune this value.
 internal static UntypedInt wbBufEntries => 512;
+
+// Maximum number of entries that we need to ask from the
+// buffer in a single call.
 internal static UntypedInt wbMaxEntriesPerCall => 8;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -73,6 +85,7 @@ internal static void reset(this ref wbBuf b) {
     } else {
         b.end = start + (uintptr)len(b.buf) * /* unsafe.Sizeof(b.buf[0]) */ (uintptr)8;
     }
+
     if ((b.end - b.next) % /* unsafe.Sizeof(b.buf[0]) */ (uintptr)8 != 0) {
         @throw(badWriteBarrierBufferˢ);
     }
@@ -159,6 +172,7 @@ internal static void wbBufFlush() {
         (~(~getg()).m).p.ptr().of(runtime_package.Δp.ᏑwbBuf).discard();
         return;
     }
+
     // Switch to the system stack so we don't have to worry about
     // safe points.
     systemstack(() => {
@@ -183,9 +197,11 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡpp.of(runtime_package.Δp.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0));
     var n = (pp.wbBuf.next - start) / /* unsafe.Sizeof(pp.wbBuf.buf[0]) */ (uintptr)8;
     var ptrs = pp.wbBuf.buf.slice(0, (nint)(n));
+
     // Poison the buffer to make extra sure nothing is enqueued
     // while we're processing the buffer.
     pp.wbBuf.next = 0;
+
     if (useCheckmark) {
         // Slow path for checkmark mode.
         foreach (var (_, ptr) in ptrs) {
@@ -194,11 +210,12 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
         pp.wbBuf.reset();
         return;
     }
+
     // Mark all of the pointers in the buffer and record only the
     // pointers we greyed. We use the buffer itself to temporarily
     // record greyed pointers.
     //
-    // TODO: Should scanobject/scanblock just stuff pointers into
+    // TODO: Should scanObject/scanblock just stuff pointers into
     // the wbBuf? Then this would become the sole greying path.
     //
     // TODO: We could avoid shading any of the "new" pointers in
@@ -220,6 +237,9 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
             // path to reduce the rate of flushes?
             continue;
         }
+        if (tryDeferToSpanScan(ptr, gcw)) {
+            continue;
+        }
         var (obj, span, objIndex) = findObject(ptr, 0, 0);
         if (obj == 0) {
             continue;
@@ -231,11 +251,13 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
             continue;
         }
         mbits.setMarked();
+
         // Mark span.
         var (arena, pageIdx, pageMask) = pageIndexOf(span.@base());
         if ((uint8)((~arena).pageMarks[pageIdx] & pageMask) == 0) {
             atomic.Or8(arena.at(heapArena.ᏑpageMarks, (ulong)(pageIdx)), pageMask);
         }
+
         if ((~span).spanclass.noscan()) {
             gcw.Value.bytesMarked += (uint64)(~span).elemsize;
             continue;
@@ -243,8 +265,10 @@ internal static void wbBufFlush1(ж<Δp> Ꮡpp) {
         ptrs[pos] = obj;
         pos++;
     }
+
     // Enqueue the greyed objects.
-    gcw.putBatch(ptrs.slice(0, pos));
+    gcw.putObjBatch(ptrs.slice(0, pos));
+
     pp.wbBuf.reset();
 }
 

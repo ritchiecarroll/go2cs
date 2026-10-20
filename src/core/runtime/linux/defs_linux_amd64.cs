@@ -9,24 +9,31 @@ partial class runtime_package {
 internal static UntypedInt _EINTR => 0x4;
 internal static UntypedInt _EAGAIN => 0xb;
 internal static UntypedInt _ENOMEM => 0xc;
+internal static UntypedInt _ENOSYS => 0x26;
+
 internal static UntypedInt _PROT_NONE => 0x0;
 internal static UntypedInt _PROT_READ => 0x1;
 internal static UntypedInt _PROT_WRITE => 0x2;
 internal static UntypedInt _PROT_EXEC => 0x4;
+
 internal static UntypedInt _MAP_ANON => 0x20;
 internal static UntypedInt _MAP_PRIVATE => 0x2;
 internal static UntypedInt _MAP_FIXED => 0x10;
+
 internal static UntypedInt _MADV_DONTNEED => 0x4;
 internal static UntypedInt _MADV_FREE => 0x8;
 internal static UntypedInt _MADV_HUGEPAGE => 0xe;
 internal static UntypedInt _MADV_NOHUGEPAGE => 0xf;
 internal static UntypedInt _MADV_COLLAPSE => 0x19;
+
 internal static UntypedInt _SA_RESTART => 0x10000000;
 internal static UntypedInt _SA_ONSTACK => 0x8000000;
 internal static UntypedInt _SA_RESTORER => 0x4000000;
 internal static UntypedInt _SA_SIGINFO => 0x4;
+
 internal static UntypedInt _SI_KERNEL => 0x80;
 internal static UntypedInt _SI_TIMER => /* -0x2 */ -2;
+
 internal static UntypedInt _SIGHUP => 0x1;
 internal static UntypedInt _SIGINT => 0x2;
 internal static UntypedInt _SIGQUIT => 0x3;
@@ -57,7 +64,9 @@ internal static UntypedInt _SIGWINCH => 0x1c;
 internal static UntypedInt _SIGIO => 0x1d;
 internal static UntypedInt _SIGPWR => 0x1e;
 internal static UntypedInt _SIGSYS => 0x1f;
+
 internal static UntypedInt _SIGRTMIN => 0x20;
+
 internal static UntypedInt _FPE_INTDIV => 0x1;
 internal static UntypedInt _FPE_INTOVF => 0x2;
 internal static UntypedInt _FPE_FLTDIV => 0x3;
@@ -66,16 +75,22 @@ internal static UntypedInt _FPE_FLTUND => 0x5;
 internal static UntypedInt _FPE_FLTRES => 0x6;
 internal static UntypedInt _FPE_FLTINV => 0x7;
 internal static UntypedInt _FPE_FLTSUB => 0x8;
+
 internal static UntypedInt _BUS_ADRALN => 0x1;
 internal static UntypedInt _BUS_ADRERR => 0x2;
 internal static UntypedInt _BUS_OBJERR => 0x3;
+
 internal static UntypedInt _SEGV_MAPERR => 0x1;
 internal static UntypedInt _SEGV_ACCERR => 0x2;
+
 internal static UntypedInt _ITIMER_REAL => 0x0;
 internal static UntypedInt _ITIMER_VIRTUAL => 0x1;
 internal static UntypedInt _ITIMER_PROF => 0x2;
+
 internal static UntypedInt _CLOCK_THREAD_CPUTIME_ID => 0x3;
+
 internal static UntypedInt _SIGEV_THREAD_ID => 0x4;
+
 internal static UntypedInt _AF_UNIX => 0x1;
 internal static UntypedInt _SOCK_DGRAM => 0x2;
 
@@ -115,7 +130,7 @@ partial struct siginfoFields {
 }
 
 partial struct siginfo {
-    internal partial ref siginfoFields siginfoFields { get; }
+    /*embed*/ internal siginfoFields siginfoFields;
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_si_max_size - /* unsafe.Sizeof(siginfoFields{}) */ (uintptr)24);
 }
@@ -139,7 +154,7 @@ partial struct sigeventFields {
 }
 
 partial struct sigevent {
-    internal partial ref sigeventFields sigeventFields { get; }
+    /*embed*/ internal sigeventFields sigeventFields;
     // Pad struct to the max size in the kernel.
     internal array<byte> _ = new((uintptr)_sigev_max_size - /* unsafe.Sizeof(sigeventFields{}) */ (uintptr)24);
 }

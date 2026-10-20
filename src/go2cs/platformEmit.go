@@ -46,13 +46,17 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
+	"strconv"
 	"strings"
+	"syscall"
 )
 
 // runPlatformEmission is the entry point for a `-platforms <two or more targets>` conversion: stage
@@ -97,19 +101,23 @@ func runPlatformEmission(options Options, stageDir string, packageFilter []strin
 			rootPath, filepath.Join("core", "golib", "golib.csproj"))
 	}
 
-	stageDir, removeStage, err := resolveEmissionStageDir(stageDir)
+	stageDir, releaseStage, reclaimed, err := resolveEmissionStageDir(stageDir, rootPath)
 
 	if err != nil {
 		return err
 	}
 
-	if removeStage {
-		defer os.RemoveAll(stageDir)
-	}
+	defer releaseStage()
 
 	fmt.Printf("\nMulti-platform emission (layout L3)\n")
 	fmt.Printf("  corpus root: %s\n", rootPath)
 	fmt.Printf("  staging dir: %s\n", stageDir)
+
+	if reclaimed.files > 0 {
+		fmt.Printf("  reclaimed:   %d files (%.1f MB) left in the staging dir by a run that ended before its cleanup\n",
+			reclaimed.files, float64(reclaimed.bytes)/(1024*1024))
+	}
+
 	fmt.Printf("  targets:     %s\n\n", strings.Join(targets, ", "))
 
 	seed, err := readCensusSeed(filepath.Join(rootPath, "core"))
@@ -121,56 +129,239 @@ func runPlatformEmission(options Options, stageDir string, packageFilter []strin
 	fmt.Printf("  seed holds %d files, %d of them hand-owned ([module: GoManualConversion])\n\n",
 		len(seed.hashes), len(seed.markedFiles))
 
-	emissions := make([]*platformEmission, 0, len(targets))
-
 	// STRICTLY SEQUENTIAL, one fresh root each — the r41 never-convert-twice-into-one-root rule.
-	for i, target := range targets {
-		fmt.Printf("=== [%d/%d] emission target %s\n", i+1, len(targets), target)
-
+	emissions, err := runTargetsSkippingUnmatched(targets, packageFilter, "emission", func(target string) (*platformEmission, error) {
 		emission, err := runCensusTarget(options, rootPath, stageDir, target, packageFilter, seed)
 
 		if err != nil {
-			return fmt.Errorf("emission target %s failed: %w", target, err)
+			return nil, fmt.Errorf("emission target %s failed: %w", target, err)
 		}
 
 		// A staging root whose seeding did not take measures a corpus that does not exist, and here
 		// it would be MERGED into the real one. Fatal, not a footnote.
 		if len(emission.markerGateViolations) > 0 {
-			return fmt.Errorf("target %s emitted %d hand-owned file(s) as plain .cs — the staging root was not seeded correctly; "+
+			return nil, fmt.Errorf("target %s emitted %d hand-owned file(s) as plain .cs — the staging root was not seeded correctly; "+
 				"first offender: %s", target, len(emission.markerGateViolations), emission.markerGateViolations[0])
 		}
 
-		emissions = append(emissions, emission)
+		return emission, nil
+	})
+
+	if err != nil {
+		return err
 	}
 
-	return mergePlatformEmissions(rootPath, targets, emissions)
+	// The merge classifies over the targets that EMITTED; a target skipped for an empty filter match has
+	// no emission to merge and must not stand in the target list.
+	emittedTargets := make([]string, 0, len(emissions))
+
+	for _, emission := range emissions {
+		emittedTargets = append(emittedTargets, emission.target)
+	}
+
+	return mergePlatformEmissions(rootPath, emittedTargets, emissions)
+}
+
+// emissionStageDirName is the default staging directory of a multi-platform emission, made BESIDE the
+// corpus under the output root (`<root>/.go2cs-platform-stage`), never inside `core`, and ignored by
+// the repository's .gitignore. It used to be a fresh `go2cs-platform-emit-*` directory under the
+// system temporary directory, removed by a deferred call; a run that ended through log.Fatal, os.Exit
+// or a kill skipped that call and left a full per-target copy of the corpus behind where nothing
+// would ever find it again. A fixed path is found again: the next run reclaims it.
+const emissionStageDirName = ".go2cs-platform-stage"
+
+// emissionStageLockName is the file inside the default staging directory that holds the process ID of
+// the run using it, so a second run into the same output root refuses instead of emptying a stage a
+// live run is still writing (CLAUDE.md safety floor 1: never two conversions into one output root).
+const emissionStageLockName = "owner.pid"
+
+// stageReclaim is what a run removed from a leftover staging directory before it started.
+type stageReclaim struct {
+	files int
+	bytes int64
 }
 
 // resolveEmissionStageDir resolves the staging directory: the caller's -platform-stage when given
-// (kept afterwards, so a corpus-wide run can be inspected), otherwise a fresh temporary directory
-// this run owns and removes. Reports whether the caller owns cleanup.
-func resolveEmissionStageDir(stageDir string) (string, bool, error) {
+// (kept afterwards, so a corpus-wide run can be inspected), otherwise emissionStageDirName under
+// rootPath, which this run locks, empties of any leftover, and removes again through the returned
+// release function.
+func resolveEmissionStageDir(stageDir string, rootPath string) (string, func(), stageReclaim, error) {
+	keep := func() {}
+
 	if stageDir = strings.TrimSpace(stageDir); len(stageDir) > 0 {
 		resolved, err := filepath.Abs(stageDir)
 
 		if err != nil {
-			return "", false, fmt.Errorf("failed to resolve staging directory %q: %w", stageDir, err)
+			return "", keep, stageReclaim{}, fmt.Errorf("failed to resolve staging directory %q: %w", stageDir, err)
 		}
 
 		if err := os.MkdirAll(resolved, 0755); err != nil {
-			return "", false, fmt.Errorf("failed to create staging directory %q: %w", resolved, err)
+			return "", keep, stageReclaim{}, fmt.Errorf("failed to create staging directory %q: %w", resolved, err)
 		}
 
-		return resolved, false, nil
+		return resolved, keep, stageReclaim{}, nil
 	}
 
-	resolved, err := os.MkdirTemp("", "go2cs-platform-emit-")
+	resolved := filepath.Join(rootPath, emissionStageDirName)
+
+	if err := os.MkdirAll(resolved, 0755); err != nil {
+		return "", keep, stageReclaim{}, fmt.Errorf("failed to create staging directory %q: %w", resolved, err)
+	}
+
+	if err := lockEmissionStage(resolved); err != nil {
+		return "", keep, stageReclaim{}, err
+	}
+
+	// Locked: whatever else is here was left by a run that ended before its cleanup.
+	reclaimed, err := reclaimEmissionStage(resolved)
 
 	if err != nil {
-		return "", false, fmt.Errorf("failed to create a staging directory: %w", err)
+		os.Remove(filepath.Join(resolved, emissionStageLockName))
+		return "", keep, stageReclaim{}, err
 	}
 
-	return resolved, true, nil
+	return resolved, func() { os.RemoveAll(resolved) }, reclaimed, nil
+}
+
+// lockEmissionStage takes the stage's lock: a file holding this process's ID. The ID is written into a
+// file of this run's own first and that file is then linked into place, so the lock appears whole or
+// not at all, and a link refuses to replace a lock another run already holds. A lock naming a process
+// that is no longer running is stale and is replaced. A lock naming a live process refuses the run,
+// and so does one that names no process at all: no run ever presents an empty lock, so that is not
+// evidence of a stale one. A known limit: two runs that start together over a dead run's lock can both
+// judge it stale, and the later one's remove can take the lock the earlier one has just linked.
+func lockEmissionStage(stageDir string) error {
+	lockPath := filepath.Join(stageDir, emissionStageLockName)
+	pending, err := os.CreateTemp(stageDir, emissionStageLockName+".*")
+
+	if err != nil {
+		return fmt.Errorf("failed to create staging lock in %q: %w", stageDir, err)
+	}
+
+	defer os.Remove(pending.Name())
+
+	_, err = fmt.Fprintf(pending, "%d\n", os.Getpid())
+
+	if closeErr := pending.Close(); err == nil {
+		err = closeErr
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to write staging lock %q: %w", pending.Name(), err)
+	}
+
+	for attempt := 0; ; attempt++ {
+		err := os.Link(pending.Name(), lockPath)
+
+		if err == nil {
+			return nil
+		}
+
+		if !errors.Is(err, fs.ErrExist) || attempt > 0 {
+			return fmt.Errorf("failed to create staging lock %q: %w", lockPath, err)
+		}
+
+		holder := readStageLockHolder(lockPath)
+
+		if holder == 0 {
+			if _, err := os.Lstat(lockPath); errors.Is(err, fs.ErrNotExist) {
+				continue // its holder released it between the link and the read
+			}
+
+			return fmt.Errorf("staging directory %q has a lock (%s) that names no process, so it may belong to a live run: "+
+				"two emissions into one output root are never run at once; if no go2cs run is using it, remove the directory",
+				stageDir, emissionStageLockName)
+		}
+
+		if processIsRunning(holder) {
+			return fmt.Errorf("staging directory %q is held by running process %d (%s): two emissions into one output root "+
+				"are never run at once; wait for that run to finish, or, if that process is not a go2cs run, remove the directory",
+				stageDir, holder, emissionStageLockName)
+		}
+
+		if err := os.Remove(lockPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return fmt.Errorf("failed to remove stale staging lock %q: %w", lockPath, err)
+		}
+	}
+}
+
+// readStageLockHolder reads the process ID a staging lock holds, or 0 when it holds none: the lock is
+// missing, empty, or not a process ID.
+func readStageLockHolder(lockPath string) int {
+	content, err := os.ReadFile(lockPath)
+
+	if err != nil {
+		return 0
+	}
+
+	pid, err := strconv.Atoi(strings.TrimSpace(string(content)))
+
+	if err != nil || pid <= 0 {
+		return 0
+	}
+
+	return pid
+}
+
+// processIsRunning reports whether a process with the given ID is running. On Windows FindProcess
+// opens the process and fails when there is none; elsewhere it always succeeds, and signal 0 asks
+// without signalling (EPERM means the process exists under another user). A known limit, which fails
+// closed: Windows reuses process IDs, so a stale lock whose ID now belongs to an unrelated process
+// reads as live and the run refuses rather than proceeding; removing the directory clears it.
+func processIsRunning(pid int) bool {
+	process, err := os.FindProcess(pid)
+
+	if err != nil {
+		return false
+	}
+
+	defer process.Release()
+
+	if runtime.GOOS == "windows" {
+		return true
+	}
+
+	err = process.Signal(syscall.Signal(0))
+
+	return err == nil || errors.Is(err, syscall.EPERM)
+}
+
+// reclaimEmissionStage removes everything in a locked staging directory except its lock, and reports
+// how many files and bytes it removed.
+func reclaimEmissionStage(stageDir string) (stageReclaim, error) {
+	var reclaimed stageReclaim
+
+	entries, err := os.ReadDir(stageDir)
+
+	if err != nil {
+		return reclaimed, fmt.Errorf("failed to read staging directory %q: %w", stageDir, err)
+	}
+
+	for _, entry := range entries {
+		if entry.Name() == emissionStageLockName {
+			continue
+		}
+
+		leftover := filepath.Join(stageDir, entry.Name())
+
+		filepath.WalkDir(leftover, func(_ string, item fs.DirEntry, err error) error {
+			if err == nil && !item.IsDir() {
+				reclaimed.files++
+
+				if info, err := item.Info(); err == nil {
+					reclaimed.bytes += info.Size()
+				}
+			}
+
+			return nil
+		})
+
+		if err := os.RemoveAll(leftover); err != nil {
+			return reclaimed, fmt.Errorf("failed to reclaim leftover %q from staging directory: %w", leftover, err)
+		}
+	}
+
+	return reclaimed, nil
 }
 
 // mergedArtifact is one logical artifact's merge plan: where each emitting target's copy was staged.
@@ -611,6 +802,11 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 
 	conditioned := map[string]bool{}
 	residual := map[string]string{}
+	converted := make([]map[string]bool, len(emissions))
+
+	for i, emission := range emissions {
+		converted[i] = convertedPackages(emission)
+	}
 
 	for _, rawPath := range sortedKeys(names) {
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))
@@ -655,10 +851,35 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 		// ($(GoTargetOS)'s default). So this is deterministic AND it keeps the Windows lane's
 		// shipped bytes exactly as they are, while a platform-exclusive package — absent from the
 		// earlier targets entirely — still lands from the only target that has it.
+		//
+		// A review sibling in a per-GOOS folder is the exception: only that GOOS's target can emit
+		// it, and every other stage merely holds the seed copy it was staged with, so "first target
+		// that has it" would hand the root back its own seed bytes (see perGOOSReviewSiblingOwner).
+		//
+		// "Has it" is also too weak for the targets themselves. Every stage is a whole-tree copy of
+		// the seed, so a target that never CONVERTED the package still holds the seed's copy of its
+		// companions — and, first in order, handed the root back those seed bytes. Measured (H5,
+		// 2026-10-15): crypto/x509/internal/macos is darwin-only, and its README kept the seeded
+		// `macOS_package` from the Windows stage while the darwin stage emitted `macos_package`. So
+		// the first pass takes the first target that converted the package (convertedPackages), and
+		// only when none did does the second fall back to the first that has it. "Converted", not
+		// "emitted this companion": emission is read from modification time, a byte-identical
+		// rewrite does not move it, and os/exec/internal/fdtest's README — which Windows emits in its
+		// own flavor — would then go to whichever later target happened to differ.
 		source := ""
+		owner := perGOOSReviewSiblingOwner(rawPath, emissions)
+		pkg := companionPackage(rawPath, emissions)
 
-		for _, emission := range emissions {
-			if _, ok := emission.artifacts[rawPath]; ok {
+		for pass := 0; pass < 2 && len(source) == 0; pass++ {
+			for i, emission := range emissions {
+				if _, ok := emission.artifacts[rawPath]; !ok || (len(owner) != 0 && emission.goos != owner) {
+					continue
+				}
+
+				if pass == 0 && !converted[i][pkg] {
+					continue
+				}
+
 				source = filepath.Join(emission.root, "core", filepath.FromSlash(rawPath))
 				break
 			}
@@ -680,6 +901,63 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	}
 
 	return sortedKeys(conditioned), residual, written, nil
+}
+
+// convertedPackages returns the packages (logical `<pkg>` paths) a target CONVERTED this run: those
+// with at least one `.cs` it emitted. A census stage writes every source whether or not its bytes
+// changed (alwaysWriteSources), so for `.cs` emission is exact, unlike for a companion, which the
+// converter may leave untouched when it would rewrite the same bytes. A package the target does not
+// build — or a hand-owned one, which the conversion never writes as a plain `.cs` — is absent.
+func convertedPackages(emission *platformEmission) map[string]bool {
+	packages := map[string]bool{}
+
+	for rawPath, state := range emission.artifacts {
+		if state.emitted && filepath.Ext(rawPath) == ".cs" {
+			packages[path.Dir(state.logicalPath(rawPath))] = true
+		}
+	}
+
+	return packages
+}
+
+// companionPackage returns the logical package a companion belongs to, read through the first
+// emission that holds it so a per-GOOS folder is folded exactly as convertedPackages folds it.
+func companionPackage(rawPath string, emissions []*platformEmission) string {
+	for _, emission := range emissions {
+		if state, ok := emission.artifacts[rawPath]; ok {
+			return path.Dir(state.logicalPath(rawPath))
+		}
+	}
+
+	return path.Dir(rawPath)
+}
+
+// perGOOSReviewSiblingOwner returns the GOOS whose folder a `.cs.auto` review sibling sits in, or ""
+// for anything else: a flat sibling, or any other companion. Every staging root is a whole-tree copy
+// of the L3 seed (snapshotConvertedRoot), so a sibling under `<pkg>/linux/` is PRESENT in the
+// Windows stage too, but only as its seed copy. Only the Linux stage can rewrite it. The folder is
+// read through the snapshot's own fold, so a package whose name is a GOOS (`internal/syscall/windows`)
+// is never mistaken for a per-GOOS folder.
+//
+// Measured (H0, 2026-10-14): siginfo_linux.cs.auto and exec_unix.cs.auto were rewritten in the Linux
+// stage and kept their seed bytes in the root, because the Windows stage, first in -platforms order,
+// "had" them.
+func perGOOSReviewSiblingOwner(rawPath string, emissions []*platformEmission) string {
+	if !strings.HasSuffix(rawPath, ".cs.auto") {
+		return ""
+	}
+
+	for _, emission := range emissions {
+		if state, ok := emission.artifacts[rawPath]; ok {
+			if state.logicalPath(rawPath) == rawPath {
+				return ""
+			}
+
+			return path.Base(path.Dir(rawPath))
+		}
+	}
+
+	return ""
 }
 
 // mergePlatformProjectFile composes ONE project file out of the several a package's targets emitted,

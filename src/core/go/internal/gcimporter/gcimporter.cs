@@ -36,6 +36,7 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
                 (pkg, err) = (types.Unsafe, default!); goto ᒐdone;
             }
             id = path;
+
             // No need to re-import if the package was imported completely before.
             {
                 pkg = packages[id]; if (pkg != nil && pkg.Complete()) {
@@ -56,12 +57,14 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
                 }
                 (pkg, err) = (default!, err); goto ᒐdone;
             }
+
             // no need to re-import if the package was imported completely before
             {
                 pkg = packages[id]; if (pkg != nil && pkg.Complete()) {
                     goto ᒐdone;
                 }
             }
+
             // open file
             ref var errΔ2 = ref heap<error>(out var ᏑerrΔ2);
             (var f, errΔ2) = os.Open(filename);
@@ -78,13 +81,15 @@ public static (ж<types.Package> pkg, error err) Import(ж<token.FileSet> Ꮡfse
         }
         var rcʗ1 = rc;
         defer(() => rcʗ1.Close(), ref ᒐ);
+
         var buf = bufio.NewReader(rc);
         (var data, err) = exportdata.ReadUnified(buf);
         if (err != default!) {
             err = fmt.Errorf("import %q: %v"u8, path, err);
             goto ᒐdone;
         }
-        @string s = ((@string)data);
+        @string s = (@string)data;
+
         var input = pkgbits.NewPkgDecoder(id, s);
         pkg = readUnifiedPackage(Ꮡfset, nil, packages, input);
     }

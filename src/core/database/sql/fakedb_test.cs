@@ -222,7 +222,6 @@ public static void TestDrivers(ж<testing.T> Ꮡt) {
 }
 
 // hook to simulate connection failures
-
 partial struct hookOpenErrᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal Func<error> fn;
@@ -268,11 +267,14 @@ internal static (driver.Conn, error) Open(this ж<fakeDriver> Ꮡd, @string dsn)
         return (default!, errors.New(fakedbNoDatabaseNameˢ));
     }
     @string name = parts[0];
+
     var db = Ꮡd.getDB(name);
+
     d.mu.Lock();
     d.openCount++;
     d.mu.Unlock();
     var conn = Ꮡ(new fakeConn(db: db));
+
     if (len(parts) >= 2 && parts[1] == "badConn") {
         conn.Value.bad = true;
     }
@@ -430,7 +432,6 @@ internal static (driver.Tx, error) Begin(this ж<fakeConn> Ꮡc) {
     return (new sql_internal_test_package.fakeTxжTx(c.currTx), default!);
 }
 
-
 partial struct hookPostCloseConnᴛ1 /*dyn*/ {
     public partial ref sync_package.Mutex Mutex { get; }
     internal Action<ж<fakeConn>, error> fn;
@@ -537,7 +538,6 @@ internal static error checkSubsetTypes(bool allowAny, slice<driver.NamedValue> a
             }
             break;
         }}
-
     }
     return default!;
 }
@@ -593,6 +593,7 @@ internal static (ж<fakeStmt>, error) prepareSelect(this ref fakeConn c, ж<fake
         return (default!, errf("invalid SELECT syntax with %d parts; want 3"u8, len(parts)));
     }
     stmt.table = parts[0];
+
     stmt.colName = strings.Split(parts[1], ","u8);
     foreach (var (n, colspec) in strings.Split(parts[2], ","u8)) {
         if (colspec == ""u8) {
@@ -666,6 +667,7 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
             return (default!, errf("INSERT table %q references non-existent column %q"u8, stmt.table, column));
         }
         stmt.colName = append(stmt.colName, column);
+
         if (!strings.HasPrefix(value, "?"u8)){
             any subsetVal = default!;
             // Convert to driver subset type
@@ -684,10 +686,10 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
                 }
                 subsetVal = (int64)i; // int64 is a subset type, but not int32
             }
-            else if (exprᴛ1 == "table"u8) {
+            else if (exprᴛ1 == "table"u8) { // For testing cursor reads.
                 c.skipDirtySession = true;
-                var vparts = strings.Split(value, // For testing cursor reads.
- "!"u8);
+                var vparts = strings.Split(value, "!"u8);
+
                 var (substmt, err) = Ꮡc.PrepareContext(ctx, fmt.Sprintf("SELECT|%s|%s|"u8, vparts[0], strings.Join(vparts[1..], ","u8)));
                 if (err != default!) {
                     return (default!, err);
@@ -703,7 +705,6 @@ internal static (ж<fakeStmt>, error) prepareInsert(this ж<fakeConn> Ꮡc, cont
                 stmt.Close();
                 return (default!, errf("unsupported conversion for pre-bound parameter %q to type %q"u8, value, ctype));
             }
-
             stmt.colValue = append(stmt.colValue, subsetVal);
         } else {
             stmt.placeholders++;
@@ -729,9 +730,11 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
     if (c.db == nil) {
         throw panic("nil c.db; conn = " + fmt.Sprintf("%#v"u8, Ꮡc.OrTypedNil()));
     }
+
     if (c.stickyBad || (hookPrepareBadConn != default! && hookPrepareBadConn())) {
         return (default!, new fakeError(Message: "Prepare: Sticky Bad"u8, Wrapped: driver.ErrBadConn));
     }
+
     c.touchMem();
     ж<fakeStmt> firstStmt = default!;
     ж<fakeStmt> prev = default!;
@@ -761,11 +764,11 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
                 parts = parts[2..];
                 stmt.Value.wait = wait;
             }
-
         }
         @string cmd = parts[0];
         stmt.Value.cmd = cmd;
         parts = parts[1..];
+
         if (c.waiter != default!) {
             c.waiter(ctx);
             {
@@ -774,6 +777,7 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
                 }
             }
         }
+
         if ((~stmt).wait > 0) {
             var wait = time.NewTimer((~stmt).wait);
             var selᴛ1 = (~wait).C;
@@ -787,14 +791,15 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
                 return (default!, ctx.Err());
             }}
         }
+
         Ꮡc.incrStat(Ꮡc.of(fakeConn.ᏑstmtsMade));
         error err = default!;
         var exprᴛ2 = cmd;
         if (exprᴛ2 == "WIPE"u8) {
+            // Nothing
         }
         else if (exprᴛ2 == "SELECT"u8) {
-            (stmt, err) = c.prepareSelect(stmt, // Nothing
- parts);
+            (stmt, err) = c.prepareSelect(stmt, parts);
         }
         else if (exprᴛ2 == "CREATE"u8) {
             (stmt, err) = c.prepareCreate(stmt, parts);
@@ -803,15 +808,14 @@ internal static (driver.Stmt, error) PrepareContext(this ж<fakeConn> Ꮡc, cont
             (stmt, err) = Ꮡc.prepareInsert(ctx, stmt, parts);
         }
         else if (exprᴛ2 == "NOSERT"u8) {
-            (stmt, err) = Ꮡc.prepareInsert(ctx, // Do all the prep-work like for an INSERT but don't actually insert the row.
- // Used for some of the concurrent tests.
- stmt, parts);
+            // Do all the prep-work like for an INSERT but don't actually insert the row.
+            // Used for some of the concurrent tests.
+            (stmt, err) = Ꮡc.prepareInsert(ctx, stmt, parts);
         }
         else { /* default: */
             stmt.Close();
             return (default!, errf("unsupported command type %q"u8, cmd));
         }
-
         if (err != default!) {
             return (default!, err);
         }
@@ -875,20 +879,24 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
     if (s.closed) {
         return (default!, errClosed);
     }
+
     if ((~s.c).stickyBad || (hookExecBadConn != default! && hookExecBadConn())) {
         return (default!, new fakeError(Message: "Exec: Sticky Bad"u8, Wrapped: driver.ErrBadConn));
     }
     if (s.c.isDirtyAndMark()) {
         return (default!, errFakeConnSessionDirty);
     }
+
     var err = checkSubsetTypes((~(~s.c).db).allowAny, args);
     if (err != default!) {
         return (default!, err);
     }
     s.memToucher.touchMem();
+
     if (s.wait > 0) {
         time.Sleep(s.wait);
     }
+
     var selᴛ3 = ctx.Done();
     switch (trySelect(ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
     case 0 when selᴛ3.ꟷᐳ(out _): {
@@ -897,6 +905,7 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
     default: {
         break;
     }}
+
     var db = s.c.Value.db;
     var exprᴛ1 = s.cmd;
     if (exprᴛ1 == "WIPE"u8) {
@@ -915,11 +924,10 @@ internal static (driver.Result, error) ExecContext(this ж<fakeStmt> Ꮡs, conte
         return Ꮡs.execInsert(args, true);
     }
     if (exprᴛ1 == "NOSERT"u8) {
-        return Ꮡs.execInsert(args, // Do all the prep-work like for an INSERT but don't actually insert the row.
- // Used for some of the concurrent tests.
- false);
+        // Do all the prep-work like for an INSERT but don't actually insert the row.
+        // Used for some of the concurrent tests.
+        return Ꮡs.execInsert(args, false);
     }
-
     return (default!, fmt.Errorf("fakedb: unimplemented statement Exec command type of %q"u8, s.cmd));
 }
 
@@ -950,9 +958,11 @@ internal static (driver.Result, error) execInsert(this ж<fakeStmt> Ꮡs, slice<
         if (!ok) {
             return (default!, fmt.Errorf("fakedb: table %q doesn't exist"u8, s.table));
         }
+
         t.of(sql_internal_test_package.Δtable.Ꮡmu).Lock();
         var tʗ1 = t;
         defer(tʗ1.of(sql_internal_test_package.Δtable.Ꮡmu).Unlock, ref ᒐ);
+
         slice<any> cols = default!;
         if (doInsert) {
             cols = new slice<any>(len((~t).colname));
@@ -985,6 +995,7 @@ internal static (driver.Result, error) execInsert(this ж<fakeStmt> Ꮡs, slice<
                 cols[colidx] = val;
             }
         }
+
         if (doInsert) {
             t.Value.rows = append((~t).rows, Ꮡ(new row(cols: cols)));
         }
@@ -1015,24 +1026,29 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
     if (s.closed) {
         return (default!, errClosed);
     }
+
     if ((~s.c).stickyBad || (hookQueryBadConn != default! && hookQueryBadConn())) {
         return (default!, new fakeError(Message: "Query: Sticky Bad"u8, Wrapped: driver.ErrBadConn));
     }
     if (s.c.isDirtyAndMark()) {
         return (default!, errFakeConnSessionDirty);
     }
+
     var err = checkSubsetTypes((~(~s.c).db).allowAny, args);
     if (err != default!) {
         return (default!, err);
     }
+
     s.memToucher.touchMem();
     var db = s.c.Value.db;
     if (len(args) != s.placeholders) {
         throw panic("error in pkg db; should only get here if size is correct");
     }
+
     var setMRows = new slice<slice<ж<row>>>(0, 1);
     var setColumns = new slice<slice<@string>>(0, 1);
     var setColType = new slice<slice<@string>>(0, 1);
+
     while (ᐧ) {
         db.of(fakeDB.Ꮡmu).Lock();
         var (t, ok) = db.table(s.table);
@@ -1040,6 +1056,7 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
         if (!ok) {
             return (default!, fmt.Errorf("fakedb: table %q doesn't exist"u8, s.table));
         }
+
         if (s.table == "magicquery"u8) {
             if (len(s.whereCol) == 2 && s.whereCol[0].Column == "op"u8 && s.whereCol[1].Column == "millis"u8) {
                 if (AreEqual(args[0].Value, (@string)("sleep"))) {
@@ -1075,7 +1092,9 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
             ));
             return (new sql_internal_test_package.rowsCursorжRows(cursorΔ1), default!);
         }
+
         t.of(sql_internal_test_package.Δtable.Ꮡmu).Lock();
+
         var colIdx = new map<@string, nint>(); // select column name -> column index in table
         foreach (var (_, name) in s.colName) {
             nint idx = t.columnIndex(name);
@@ -1085,6 +1104,7 @@ internal static (driver.Rows, error) QueryContext(this ж<fakeStmt> Ꮡs, contex
             }
             colIdx[name] = idx;
         }
+
         var mrows = new ж<row>[]{}.slice();
 rows:
         foreach (var (_, trow) in (~t).rows) {
@@ -1101,7 +1121,7 @@ rows:
                 {
                     var (bs, okΔ1) = tcol._<slice<byte>>(ᐧ); if (okΔ1) {
                         // lazy hack to avoid sprintf %v on a []byte
-                        tcol = ((@string)bs);
+                        tcol = (@string)bs;
                     }
                 }
                 any argValue = default!;
@@ -1126,19 +1146,24 @@ rows:
 continue_rows:;
         }
 break_rows:;
+
         slice<@string> colType = default!;
         foreach (var (_, column) in s.colName) {
             colType = append(colType, (~t).coltype[t.columnIndex(column)]);
         }
+
         t.of(sql_internal_test_package.Δtable.Ꮡmu).Unlock();
+
         setMRows = append(setMRows, mrows);
         setColumns = append(setColumns, s.colName);
         setColType = append(setColType, colType);
+
         if (s.next == nil) {
             break;
         }
         Ꮡs = s.next; s = ref Ꮡs.DerefOrNull();
     }
+
     var cursor = Ꮡ(new rowsCursor(
         db: (~s.c).db,
         parentMem: new sql_internal_test_package.fakeConnжmemToucher(s.c),
@@ -1247,6 +1272,7 @@ internal static error Next(this ref rowsCursor rc, slice<driverꓸValue> dest) {
     if (rowsCursorNextHook != default!) {
         return rowsCursorNextHook(dest);
     }
+
     if (rc.closed) {
         return errors.New(fakedbCursorIsClosedˢ);
     }
@@ -1353,20 +1379,20 @@ internal static driver.ValueConverter converterForType(@string typ) {
         return new driver.Null(Converter: new fakeDriverString(nil));
     }
     if (exprᴛ1 == "int64"u8) {
-        return new driver.NotNull( // TODO(coopernurse): add type-specific converter
-Converter: driver.DefaultParameterConverter);
+        // TODO(coopernurse): add type-specific converter
+        return new driver.NotNull(Converter: driver.DefaultParameterConverter);
     }
     if (exprᴛ1 == "nullint64"u8) {
-        return new driver.Null( // TODO(coopernurse): add type-specific converter
-Converter: driver.DefaultParameterConverter);
+        // TODO(coopernurse): add type-specific converter
+        return new driver.Null(Converter: driver.DefaultParameterConverter);
     }
     if (exprᴛ1 == "float64"u8) {
-        return new driver.NotNull( // TODO(coopernurse): add type-specific converter
-Converter: driver.DefaultParameterConverter);
+        // TODO(coopernurse): add type-specific converter
+        return new driver.NotNull(Converter: driver.DefaultParameterConverter);
     }
     if (exprᴛ1 == "nullfloat64"u8) {
-        return new driver.Null( // TODO(coopernurse): add type-specific converter
-Converter: driver.DefaultParameterConverter);
+        // TODO(coopernurse): add type-specific converter
+        return new driver.Null(Converter: driver.DefaultParameterConverter);
     }
     if (exprᴛ1 == "datetime"u8) {
         return new driver.NotNull(Converter: driver.DefaultParameterConverter);
@@ -1377,7 +1403,6 @@ Converter: driver.DefaultParameterConverter);
     if (exprᴛ1 == "any"u8) {
         return new anyTypeConverter(nil);
     }
-
     throw panic("invalid fakedb column type of " + typ);
 }
 
@@ -1425,7 +1450,6 @@ internal static reflectꓸType colTypeToReflectType(@string typ) {
     if (exprᴛ1 == "any"u8) {
         return reflect.TypeFor<any>();
     }
-
     throw panic("invalid fakedb column type of " + typ);
 }
 

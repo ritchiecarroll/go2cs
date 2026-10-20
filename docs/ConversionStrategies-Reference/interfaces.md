@@ -19,7 +19,7 @@ func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
 	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
 	fmt.Println(n.String())
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 46-47 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-20, 49-50 -->
 ```csharp
 partial interface Stringer {
     @string String();
@@ -83,7 +83,7 @@ Cast sites emit the adapter around the box (`Incrementer inc = new CounterжIncr
 **Non-empty interface-to-interface conversions use a forwarding adapter.** A Go interface value may be assigned or passed to another non-empty interface when the source interface method set satisfies the target (`var local localLabel = foreign`, where `foreign` is `CrossPkgLib.Labeled`). C# has no structural conversion between unrelated interfaces, so the converter records the interface pair as `[assembly: GoImplement<CrossPkgLib_package.Labeled, localLabel>]` and emits the cast site as a generated adapter:
 
 ```csharp
-CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter"u8, Temp: 21);
+CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter", Temp: 21);
 localLabel local = new CrossPkgLib_LabeledᴠlocalLabel(foreign);
 fmt.Println(labelOf(new CrossPkgLib_LabeledᴠlocalLabel(foreign)));
 ```
@@ -165,6 +165,16 @@ The resolution is a LOOKUP, not a re-derivation: `ImplementGenerator` already bu
 
 **`TryCreate` is FAIL-SOFT.** The structural probe is deliberately NAME-ONLY for an open-generic receiver method — a Go `gbox[int]` whose `Get() T` returns an `int` matches `interface{ Get() string }` under that weaker rule (measured). Go answers `ok=false` there, so a shell that cannot be built answers `false` rather than escaping as an exception; a false-positive match must reproduce today's harmless miss, never a crash.
 
+**A generic type's method reaches every consumer CLOSED, and its signature is compared in full (2026-10-19).** The name-only rule above is retired. A Go method of a generic type emits as a generic extension method (`String<K, V>(this Pair<K, V> p)`), so the method-set scan finds its OPEN definition, and before this change each consumer handled that differently: `StructurallyImplements` matched by name only, `AdapterBinder` and `error<T>` could not bind it, and `CreateStaticDelegate` closed it over the receiver's FIRST type argument, which is right for one type parameter and wrong for two. `GetGoMethodSetCandidates` now closes every open candidate before any consumer sees it, so the probe, the binder, `error<T>` and reflect all read one closed method:
+
+1. **The type's generated method source.** `go2cs-gen` (`MethodSource.cs`) implements golib's `IGoMethodSource` on every generic value type with Go methods. Each arm returns the `Method` of a delegate created over the type's own parameters, so the C# compiler instantiates the closed method and Native AOT has code for exactly the instantiations the program uses. A pointer method emitted `this ref T` is named through RecvGenerator's `ж<T>` twin.
+2. **Receiver unification, with dynamic code only.** A generic type without a source (a hand-written one, or a test fixture) closes by matching the receiver's type arguments position by position and calling `MakeGenericMethod`.
+3. **Otherwise a Go panic naming the method and the type.** An open method is never handed to a consumer, and a CLR exception never escapes in its place. Reflect's `Method(i).Func` follows the same rule: a method whose func cannot be built panics naming the type and the method, prefixed `go2cs:` because Go never raises that panic. `NumMethod`, `Method(i)` and `MethodByName` never build one, as in Go: `Method(i).Func` carries the method unbound (`GoReflect.LazyMethodFunc`) and binds at its first use, which is where that panic belongs. Under Native AOT no method func of ANY type can be bound yet (the `Func`/`Expression` instantiation over the receiver has no native code); that gap predates this change, and closing it means go2cs-gen emitting, per type, both the closed unbound delegate and the binder that binds a receiver into a method value.
+
+A generic extension method with a type parameter its receiver does not carry (golib's type-assertion forms `_<T>(this X)`) is not a Go method, since a Go method declares no type parameters of its own, and the candidate source skips it.
+
+Generic named FUNC types are the residual: they emit as delegates and so have no generated part to carry a source. They close by route 2 under JIT and refuse by route 3 under Native AOT. No Go 1.26 standard library package and no behavioral test declares a method on one. (Guarded by the `GenericMethodReflect` behavioral test, GolibTests' `GenericMethodSourceTests` and GenTests' `GoMethodSourceTests`.)
+
 **Tier order in `builtin.TryTypeAssert` is unchanged, and the shells fire only where it previously answered MISS**: nominal `case T` → `IжAdapter` unwrap → `AdapterRegistry` (compile-time adapters) → **shell memo** → `Implements<T>` gate → **shell construction**. That is the regression floor — no assertion that already resolved can take a different path. Construction costs on the order of a microsecond and `fmt` probes three interfaces per formatted value, so the memo ships in the same change: `AdapterRegistry` caches the (dynamic type, interface) decision, **including the negative**. It is deliberately **not** cleared on `AssemblyLoad` — Go fixes a type's method set at compile time, and the extension methods carrying it live in that type's own assembly, which is loaded by definition when we are holding an instance of it. (Extension-method *discovery* caches are still invalidated on load; only this decision cache is not.)
 
 **The two memoized tiers were folded into ONE per-interface itab cache (2026-07-26).** The ladder above consulted the nominal `AdapterRegistry` (a `(Type, Type)` tuple hash) and then a separate per-interface shell memo, in sequence, on *every* assert — and for a shell-resolved pair the first of those could never hit, by construction: a hit would have returned before the shell tier was ever reached. Together with a `target.GetType()` whose result was dead for an interface target (its only consumers sat behind a `typeof(T).IsValueType &&` that short-circuits false), a memoized assert cost **three `GetType()` calls, two dictionary lookups and two `RuntimeType` property calls** before it did any work. `builtin.Itab<TInterface>` replaces both reads with one: a single entry per (dynamic type, interface), holding the resolver **whichever tier produced it** — a registered nominal adapter factory, a runtime shell factory, or `null` for a decided MISS — exactly as Go keeps one `*itab` per pair. `AdapterRegistry` is unchanged as the authoritative durable record; the itab is a projection formed by reading it back, never by forming a second decision. `IsInterface`/`IsValueType` are hoisted to per-closed-generic statics, and a **monomorphic slot** sits in front of the dictionary (an assert site is overwhelmingly single-typed, the locality assumption Go's per-site checks rely on), so the steady-state read is a static field load, an int compare and a reference compare. Tier precedence is unchanged — nominal still wins, shells still fire only where it answers MISS.
@@ -195,6 +205,19 @@ Nothing about the *emitted* dyn interface changes except the disappearance of `�
 A pointer-sourced cast to an interface implemented by a FOREIGN type references the foreign assembly's PUBLIC adapter class - os's `err = &PathError{...}` emits `new fs.PathErrorжerror(Ꮡ(new PathError(...)))`, io/fs having generated the adapter from its own `GoImplement<PathError, error>(Pointer = true)` record. The record's existence is read from the imported package's package_info (`parseExportedPointerImplements`, the same imported-records pattern as GoTypeAlias). The existence key is the **shared canonical spelling** both sides compose through `implementRecordKey` — `<declaring package>|<C# simple type>|<pkg>_package.<Iface>` — exactly as the value-implement records do; keeping the package CLASS on the interface side is what stops image's `Paletted→image.Image` record from satisfying a `Paletted→draw.Image` cast and referencing the adapter that implements the WRONG interface (CS1503). The reference goes through the file-local package ALIAS (`fs.PathErrorжerror`, user-ruled style) via getAliasQualifiedTypeName, which also registers the using — except when that yields a whole-TYPE alias for a collision-renamed foreign type (`imageꓸRGBA`), which is an identifier and not a path, so the base is rebuilt as the package qualifier plus the type's EMITTED simple name (`image.ΔRGBAжImage`). Guarded by `CrossPkgUser` (`rep = mtr` -> `new CrossPkgLib.MeterжReporter(mtr)`; `&CrossPkgLib.Alarm{}` -> error; and the same-simple-name LOCAL `Labeled` — `var localLb Labeled = sp2` takes the LOCAL `CrossPkgLib_SensorжLabeled`, never the lib's exported `SensorжLabeled`).
 
 An **EXPLICIT pointer-to-interface conversion** — Go's `image.Image(dst)` with `dst *image.RGBA` (image/draw) — is the same interface cast in conversion clothing and routes through the same machinery: `isTypeConversion` probes the ORIGINAL pointer type against an interface target (the value type alone does not implement it — the elem-only probe misread the conversion as a constructor call, `new image.Image(dst)`, CS0144), and the emission re-renders the argument in its BOX form and CASTS the adapter to the interface — `((image.Image)new image_ΔRGBAжImage(Ꮡdst))` — because the adapter implements its members explicitly, and a chained member access on the conversion result (`CrossPkgLib.Labeled(sp).Label()`) cannot bind on the adapter class itself (CS1929). (Guarded by `CrossPkgUser`'s `CrossPkgLib.Labeled(sp2).Label()` / `LabeledOf(sp2)` pair, output-compared vs Go.)
+
+## A pointer adapter names a GENERIC interface through the interface's own class
+`ImplementGenerator` takes the name of the interface an adapter implements from the interface symbol's display string. For a closed generic interface that is the fully qualified name, outer type and type arguments both. Until 2026-10-16 the name came from `GetFullTypeName`, whose generic arm writes `Name<args>` without the containing class. That bare name resolves only when the adapter's host class (the first class of the record's file) also declares the interface. Two arrangements host it elsewhere:
+- a record in one package for a generic interface declared in another;
+- an external test's record on a production pointer type, which anchors to the production class under the recompile model. crypto/mlkem at Go 1.26 is the measured instance: production `*DecapsulationKey768` against mlkem_test's `decapsulationKey[E encapsulationKey]`.
+
+Both built with CS0246 on the base list and one CS0540 per member. The adapter's class NAME does not change: it is composed from the simple interface name with the type arguments stripped. Only the generated file's hint name grows. For a non-generic interface the two spellings were already identical.
+
+<!-- generated: ImplementGenerator output for src/tests/Behavioral/GenericInterfaceCrossPackage, line 26; Generated/ is untracked, read 2026-10-16 -->
+```csharp
+internal sealed class decKeyжDecapKey : global::go.GenericInterfaceCrossPackage.keylike_package.DecapKey<global::go.GenericInterfaceCrossPackage.keylike_package.EncapKey>, IжAdapter
+```
+Guarded by the `GenericInterfaceCrossPackage` behavioral test (the interface and generic helper in sub-package `keylike`, the pointer implementers in `main`, output-compared against Go) and by GenTests `CrossClassGenericInterfaceAdapterTests`, which keeps two controls: a generic interface declared in the host class, and a non-generic interface from the other class.
 
 ## `%T` (and type-name rendering generally) unwraps generated adapters and pointer boxes
 
@@ -412,7 +435,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
 At a cast site the converter composes the adapter's name, with no marker:
 
-<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99, 103 -->
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:98-104 -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);
 …
@@ -1143,7 +1166,7 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
-<!-- source: src/core/io/fs/fs.cs:86-90 -->
+<!-- source: src/core/io/fs/fs.cs:98-102 -->
 ```csharp
 partial interface File :
     io.ReadCloser
@@ -1418,7 +1441,7 @@ it is present — the marker resolves as one unit to the already-simple lifted n
 well-defined even when several files lift the same shape. Emitted form:
 The declaring file, `batch.cs`:
 
-<!-- source: src/core/internal/trace/batch.cs:45-49 -->
+<!-- source: src/core/internal/trace/batch.cs:49-53 -->
 ```csharp
 internal partial interface readBatch_r /*dyn*/ :
     io.Reader,
@@ -1429,7 +1452,7 @@ internal partial interface readBatch_r /*dyn*/ :
 
 The cast site in another file, `generation.cs`:
 
-<!-- source: src/core/internal/trace/generation.cs:74 -->
+<!-- source: src/core/internal/trace/generation.cs:168 -->
 ```csharp
 (b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
 ```
@@ -1445,6 +1468,51 @@ not satisfying a lifted operator constraint — is a distinct, deeper root). Gua
 `AnonInterfaceCrossFile` (a two-file package: file A declares `describe(thing interface{ Sizer;
 Namer })`, file B casts a concrete `*box` to it — the lifted name must flow into the attribute,
 the adapter, and the signature).
+
+## An anonymous interface lifted out of a GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it
+
+Go 1.26's crypto/x509 declares `type constraints[T, V any] struct { permitted, excluded interface{
+query(V) (T, bool) } }` and fills it from functions returning `interface{ query(string) (string, bool)
+}`. The field's anonymous interface mentions `T` and `V`, so its lift is a GENERIC declaration of its
+own, `constraints_permitted<T, V>`, and the struct names it constructed. Lifted non-generic, both names
+were unbound (CS0246), and crypto/x509 blocked every remaining project of the hop. As with a lift out of
+a generic function, only the parameters the shape uses are bound and no constraint clause is emitted:
+the enclosing declaration's clauses govern every use. Within that one declaration the same shape is
+one type, so `excluded` reuses `permitted`'s lift; across declarations a lift that closes over type
+parameters is never shared or registered by signature, since `T` means something else elsewhere.
+
+In Go, `interface{ query(string) (string, bool) }` is ONE type whether it is a function's result or
+`constraints[string, string].permitted`; in C# the function's result is a lifted dyn interface of its
+own. So each concrete instantiation of the generic struct writes one partial part making that shape's
+lift DERIVE the closed generic, an implicit reference conversion, and the derived lift's member is
+declared `new` because it redeclares the inherited one (CS0108 otherwise). Both are deferred markers
+resolved after the file-visit barrier, so the lift named may live in any file of the package; a shape
+no lift claimed resolves to an empty line, and the marker on every other dyn member resolves to nothing.
+Emitted form:
+
+<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :39-41 -->
+```csharp
+partial interface constraints_permitted<T, V> /*dyn*/ {
+    (T, bool) query(V _);
+}
+partial interface newCounter_R0 : constraints_permitted<ж<counter>, nint> {}
+partial interface newDNS_R0 : constraints_permitted<@string, @string> {}
+
+    internal constraints_permitted<T, V> permitted;
+    internal constraints_permitted<T, V> excluded;
+
+internal partial interface newDNS_R0 /*dyn*/ {
+    new (@string, bool) query(@string _);
+}
+```
+
+One direction is NOT covered: assigning the generic field back to the concrete lift (`var q
+interface{ query(string) (string, bool) } = c.permitted`) is a base-to-derived conversion C# does not
+make implicitly. crypto/x509 never does it. It closes when a Go type identity becomes ONE C# type (the
+generic lift as the dyn name for every structurally identical shape), which retires these partial parts.
+(Guarded by `GenericLiftedInterfaceField`: two instantiations, value and pointer receivers, a value
+called through both its concrete interface and the generic field, and Go's structural assertion on the
+field, output-compared to Go; and by `TestLiftedInterfaceFieldOfAGenericStructCarriesItsTypeParameters`.)
 
 ## An INITIALIZED var lifts its explicit anonymous declared type too — and a blank name lifts from the GO identifier
 
@@ -1807,6 +1875,15 @@ and `ast.FuncType` → `ж<ast.FuncType>`, and those must not start recording. (
 `TestWhiteboxProductionPointerBoxConvStillRecorded`, whose both-foreign arm is the boundary, and
 `TestPointerBoxConversionRecordShape` for the shared predicate; the numeric phantom keeps its own guard,
 `TestWhiteboxProductionNumericConvNotRecorded`.)
+
+**Superseded 2026-10-20.** Those pointer-boxing records came from a call-argument loop that compared
+every argument with the FIRST parameter. Checked against its own parameter, an argument in a `*T` slot
+never owes `T` → `ж<T>`, because Go has no implicit conversion from a value to a pointer, so the records
+no longer arise and a `-tests` regen drops them. They were not inert either: in a production build the
+generator strips the box, finds `T`, and generated an operator that boxed a COPY (runtime's `runqput`
+stored a copy of the caller's `g`). It now refuses such a record by name, `GO2CS0008`. The guard above is
+now `TestWhiteboxArgumentOfItsParameterTypeRecordsNoBox`: `check(t, New())` records nothing, and the
+both-foreign arm stays.
 
 ---
 

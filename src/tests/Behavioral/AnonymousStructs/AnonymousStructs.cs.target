@@ -35,21 +35,16 @@ internal static void cycleMemo() {
     var seen = new map<any, EmptyStruct>{};
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 10;
+
     var memo = new cycleMemo_memo(Ꮡa, 2);
+
     var (_, before) = seen[memo, ꟷ];
     seen[memo] = new EmptyStruct();
     var (_, after) = seen[memo, ꟷ];
+
     var got = memo.ptr._<ж<nint>>();
     fmt.Printf("cycleMemo: val=%d len=%d before=%t after=%t\n"u8, got.Value, memo.len, before, after);
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object anonymousStructTypeˢ = (@string)"Anonymous struct type assertion:"u8;
-private static readonly object namedStructWithIdenticalˢ = (@string)"Named struct with identical fields:"u8;
-private static readonly object functionParameterTestsˢ = (@string)"\n=== Function Parameter Tests ==="u8;
-private static readonly object packageGlobalAnonymousˢ = (@string)"\n=== Package-Global Anonymous Struct ==="u8;
-private static readonly object inFunctionVarSliceOfˢ = (@string)"\n=== In-Function var Slice of Anonymous Struct ==="u8;
-private static readonly object anonymousStructWithEmptyˢ = (@string)"\n=== Anonymous Struct With Empty Interface Field ==="u8;
 
 internal partial struct main_type /*dyn*/ {
     internal @string name;
@@ -57,35 +52,53 @@ internal partial struct main_type /*dyn*/ {
 }
 
 internal static void Main() {
-    var namedPerson = new Person(Name: "Alice"u8, Age: 30);
-    var anonPerson = new processAnonymousStruct_data(Name: "Bob"u8, Age: 25);
+    var namedPerson = new Person(Name: "Alice", Age: 30);
+    var anonPerson = new processAnonymousStruct_data(Name: "Bob", Age: 25);
+
     any someInterface = anonPerson;
+
     var (_, ok) = someInterface._<processAnonymousStruct_data>(ᐧ);
-    fmt.Println(anonymousStructTypeˢ, ok);
+
+    fmt.Println("Anonymous struct type assertion:", ok);
+
     someInterface = namedPerson;
+
     (_, ok) = someInterface._<processAnonymousStruct_data>(ᐧ);
-    fmt.Println(namedStructWithIdenticalˢ, ok);
-    fmt.Println(functionParameterTestsˢ);
-    processAnonymousStruct(new processAnonymousStruct_data(Name: "Charlie"u8, Age: 40));
+
+    fmt.Println("Named struct with identical fields:", ok);
+
+    fmt.Println("\n=== Function Parameter Tests ===");
+
+    processAnonymousStruct(new processAnonymousStruct_data(Name: "Charlie", Age: 40));
+
     processAnonymousStruct(anonPerson);
+
     processAnonymousStruct(new processAnonymousStruct_data(namedPerson.Name, namedPerson.Age));
-    fmt.Println(packageGlobalAnonymousˢ);
+
+    fmt.Println("\n=== Package-Global Anonymous Struct ===");
     fmt.Printf("settings: Verbose=%t Retries=%d\n"u8, settings.Verbose, settings.Retries);
+
     var pRetries = Ꮡsettings.of(settingsᴛ1.ᏑRetries);
     pRetries.Value = 5;
     fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n"u8, pRetries.Value, settings.Retries);
-    fmt.Println(inFunctionVarSliceOfˢ);
+
+    fmt.Println("\n=== In-Function var Slice of Anonymous Struct ===");
+
     slice<main_type> sects = new main_type[]{
-        new("text"u8, 100),
-        new("data"u8, 200),
-        new("syms"u8, 300)
+        new("text", 100),
+        new("data", 200),
+        new("syms", 300)
     }.slice();
+
     var total = (uint32)0;
+
     foreach (var (_, sect) in sects) {
         total += sect.size;
     }
+
     fmt.Printf("sections=%d total=%d first=%s\n"u8, len(sects), total, sects[0].name);
-    fmt.Println(anonymousStructWithEmptyˢ);
+
+    fmt.Println("\n=== Anonymous Struct With Empty Interface Field ===");
     cycleMemo();
 }
 

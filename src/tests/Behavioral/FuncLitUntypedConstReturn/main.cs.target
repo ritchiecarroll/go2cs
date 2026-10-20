@@ -37,6 +37,7 @@ internal static float64 applyFloat64(Func<float64> f) {
 internal static void Main() {
     var maxFn = rune (rune _) => maxRune;
     fmt.Println(apply(maxFn, (rune)'a'));
+
     var encode = rune (rune r) => {
         if (r == runeSelf) {
             return maxRune;
@@ -49,6 +50,7 @@ internal static void Main() {
     fmt.Println(apply(encode, runeSelf));
     fmt.Println(apply(encode, maxRune));
     fmt.Println(apply(encode, (rune)'x'));
+
     int64 pick(bool neg) {
         if (neg) {
             return -1;
@@ -56,10 +58,13 @@ internal static void Main() {
         return bigConst;
     }
     fmt.Println(pick(false), pick(true));
+
     var invalid = rune (rune r) => maxRune + 1;
     fmt.Println(apply(invalid, (rune)'c'));
+
     var shrink = (rune r) => (rune)'a';
     fmt.Println(apply(shrink, maxRune));
+
     var isBetter = nint (uint16 a, uint16 b) => {
         if (a < b){
             return -1;
@@ -70,6 +75,7 @@ internal static void Main() {
         return 0;
     };
     fmt.Println(compareWith(3, 9, isBetter), compareWith(9, 3, isBetter), compareWith(4, 4, isBetter));
+
     var scale = int64 (bool on) => {
         if (on) {
             return 9;
@@ -77,10 +83,13 @@ internal static void Main() {
         return 0;
     };
     fmt.Println(applyInt64(scale, true), applyInt64(scale, false));
+
     var half = () => 0.5F;
     fmt.Println(applyFloat32(half));
+
     var whole = () => 3D;
     fmt.Println(applyFloat64(whole));
+
     var rank = (bool hi) => {
         if (hi) {
             return 100;
@@ -88,6 +97,7 @@ internal static void Main() {
         return -100;
     };
     fmt.Println(applyInt32(rank, true), applyInt32(rank, false));
+
     fmt.Println(apply((rune _) => maxRune, (rune)'b'));
 }
 

@@ -167,10 +167,10 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
+    <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
-    <ProjectReference Include="$(go2csPath)core/maps/maps.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/netip/net.netip.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/path.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />

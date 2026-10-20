@@ -80,12 +80,14 @@ public static void Exit(nint code) {
         // unexpected call to os.Exit(0).
         throw panic("unexpected call to os.Exit(0) during test");
     }
+
     // Inform the runtime that os.Exit is being called. If -race is
     // enabled, this will give race detector a chance to fail the
     // program (racy programs do not have the right to finish
     // successfully). If coverage is enabled, then this call will
     // enable us to write out a coverage data file.
     runtime_beforeExit(code);
+
     syscall.Exit(code);
 }
 

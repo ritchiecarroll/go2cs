@@ -25,7 +25,6 @@ global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using xmlꓸToken = object;
 global using xmlꓸΔToken = object;
 global using ΔToken = object;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -58,7 +57,6 @@ using static global::go.encoding.xml_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.encoding.xml_package.Decoder, ж<global::go.encoding.xml_package.Decoder>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -69,8 +67,8 @@ using static global::go.encoding.xml_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSYpKeu9oKCmKSnrAAVBoIAABaGgIKmgoKW")]
-[assembly: go.GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgpikp6z2goKYpKesABUGggAAFoaAgqaCgpY=")]
+[assembly: go.GoPositionMap("encoding/xml/example_marshaling_test.go", "example_marshaling_test.cs", "ABQsooKAgqSYpKeu9oKCmKSnnAAVBoIAABaGgIK2goKm")]
+[assembly: go.GoPositionMap("encoding/xml/example_text_marshaling_test.go", "example_text_marshaling_test.cs", "ABQsgpikp5z2goKYpKecABUGggAAFoaAgraCgqY=")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

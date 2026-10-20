@@ -117,9 +117,11 @@ internal static void encodeUint(this ref encoderState state, uint64 x) {
         state.b.writeByte((uint8)x);
         return;
     }
+
     binary.BigEndian.PutUint64(state.buf[1..], x);
-    nint bc = (bits.LeadingZeros64(x) >> (int)(3)); // 8 - bytelen(x)
+    nint bc = bits.LeadingZeros64(x) >> 3; // 8 - bytelen(x)
     state.buf[bc] = (uint8)(bc - (nint)uint64Size); // and then we subtract 8 to get -bytelen(x)
+
     state.b.Write(state.buf.slice(bc, uint64Size + 1));
 }
 
@@ -129,13 +131,14 @@ internal static void encodeUint(this ref encoderState state, uint64 x) {
 internal static void encodeInt(this ref encoderState state, int64 i) {
     uint64 x = default!;
     if (i < 0){
-        x = (uint64)((uint64)((~i << (int)(1))) | 1);
+        x = (uint64)(~i << 1) | 1;
     } else {
-        x = (uint64)((i << (int)(1)));
+        x = (uint64)(i << 1);
     }
     state.encodeUint(x);
 }
 
+// encOp is the signature of an encoding operator for a given type.
 // type encOp is a methodless func type — rendered inline as its base delegate
 
 // The 'instructions' of the encoding machine
@@ -307,7 +310,6 @@ internal static bool valid(reflectꓸValue v) {
     if (exprᴛ1 == reflect.ΔPointer) {
         return !v.IsNil();
     }
-
     return true;
 }
 
@@ -446,12 +448,14 @@ internal static void encodeInterface(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb
         state.encodeUint(0);
         return;
     }
+
     var ut = userType(iv.Elem().Type());
     var (namei, ok) = ᏑconcreteTypeToName.Load((~ut).@base);
     if (!ok) {
         errorf("type not registered for interface: %s"u8, (~ut).@base);
     }
     @string name = namei._<@string>();
+
     // Send the name.
     state.encodeUint((uint64)len(name));
     (~state).b.WriteString(name);
@@ -491,15 +495,17 @@ internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡ
     // We know it's one of these.
     var exprᴛ1 = ut.externalEnc;
     if (exprᴛ1 == xGob) {
-        (data, err) = v.Interface()._<GobEncoder>().GobEncode();
+        var (gobEncoder, _) = reflect.TypeAssert<GobEncoder>(v);
+        (data, err) = gobEncoder.GobEncode();
     }
     else if (exprᴛ1 == xBinary) {
-        (data, err) = v.Interface()._<encoding.BinaryMarshaler>().MarshalBinary();
+        var (binaryMarshaler, _) = reflect.TypeAssert<encoding.BinaryMarshaler>(v);
+        (data, err) = binaryMarshaler.MarshalBinary();
     }
     else if (exprᴛ1 == xText) {
-        (data, err) = v.Interface()._<encoding.TextMarshaler>().MarshalText();
+        var (textMarshaler, _) = reflect.TypeAssert<encoding.TextMarshaler>(v);
+        (data, err) = textMarshaler.MarshalText();
     }
-
     if (err != default!) {
         error_(err);
     }
@@ -564,8 +570,8 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, ni
                         op = encUint8Array;
                         break;
                     }
-                    var (elemOp, elemIndir) = encOpFor(t.Elem(), // Slices have a header; we decode it to find the underlying array.
- inProgress, building);
+                    // Slices have a header; we decode it to find the underlying array.
+                    var (elemOp, elemIndir) = encOpFor(t.Elem(), inProgress, building);
                     var helper = encSliceHelper[t.Elem().Kind()];
                     var elemOpʗ1 = elemOp;
                     var helperʗ1 = helper;
@@ -579,8 +585,8 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, ni
                 } while (false);
             }
             else if (exprᴛ1 == reflect.Array) {
-                var (elemOp, elemIndir) = encOpFor(t.Elem(), // True arrays have size in the type.
- inProgress, building);
+                // True arrays have size in the type.
+                var (elemOp, elemIndir) = encOpFor(t.Elem(), inProgress, building);
                 var helper = encArrayHelper[t.Elem().Kind()];
                 var elemOpʗ2 = elemOp;
                 var helperʗ2 = helper;
@@ -605,8 +611,8 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, ni
                 };
             }
             else if (exprᴛ1 == reflect.Struct) {
-                getEncEngine(ref (userType(typ)).DerefOrNull(), // Generate a closure that calls out to the engine for the nested type.
- building);
+                // Generate a closure that calls out to the engine for the nested type.
+                getEncEngine(ref (userType(typ)).DerefOrNull(), building);
                 var info = mustGetTypeInfo(typ);
                 var infoʗ1 = info;
                 op = (ж<encInstr> i, ж<encoderState> state, reflectꓸValue sv) => {
@@ -626,7 +632,6 @@ internal static (ж<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>, ni
                 };
             }
         }
-
     }
     if (op == default!) {
         errorf("can't happen: encode type %s"u8, rt);
@@ -750,7 +755,7 @@ internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect
         for (nint i = 0; i < indir; i++) {
             value = reflect.Indirect(value);
         }
-        if (ut.externalEnc == 0 && value.Type().Kind() == reflect.Struct){
+        if (ut.externalEnc == 0 && value.Kind() == reflect.Struct){
             Ꮡenc.encodeStruct(Ꮡb, engine, value);
         } else {
             Ꮡenc.encodeSingle(Ꮡb, engine, value);

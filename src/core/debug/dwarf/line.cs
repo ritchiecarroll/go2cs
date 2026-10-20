@@ -134,6 +134,7 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
         // No line tables available.
         return (default!, default!);
     }
+
     // Get line table information from cu.
     var (off, ok) = cu.Val(AttrStmtList)._<int64>(ᐧ);
     if (!ok) {
@@ -146,9 +147,10 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
     // AttrCompDir is optional if all file names are absolute. Use
     // the empty string if it's not present.
     var (compDir, _) = cu.Val(AttrCompDir)._<@string>(ᐧ);
+
     // Create the LineReader.
     var u = Ꮡ(d.unit, Ꮡd.offsetToUnit(cu.Offset));
-    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, ((Offset)(uint32)off), d.line.slice((nint)(off)));
+    var buf = makeBuf(Ꮡd, new unitжdataFormat(u), lineˢ, (Offset)(uint32)off, d.line.slice((nint)(off)));
     // The compilation directory is implicitly directories[0].
     ref var r = ref heap<ΔLineReader>(out var Ꮡr);
     r = new ΔLineReader(
@@ -157,14 +159,17 @@ public static (ж<ΔLineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry>
         str: d.str,
         lineStr: d.lineStr
     );
+
     // Read the header.
     {
         var err = Ꮡr.readHeader(compDir); if (err != default!) {
             return (default!, err);
         }
     }
+
     // Initialize line reader state.
     r.Reset();
+
     return (Ꮡr, default!);
 }
 
@@ -174,6 +179,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var buf = Ꮡr.of(dwarf_package.ΔLineReader.Ꮡbuf);
+
     // Read basic header fields [DWARF2 6.2.4].
     var hdrOffset = buf.Value.off;
     var (unitLength, dwarf64) = buf.unitLength();
@@ -199,9 +205,9 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     }
     Offset headerLength = default!;
     if (dwarf64){
-        headerLength = ((Offset)(uint32)buf.uint64());
+        headerLength = (Offset)(uint32)buf.uint64();
     } else {
-        headerLength = ((Offset)buf.uint32());
+        headerLength = (Offset)buf.uint32();
     }
     var programOffset = (~buf).off + headerLength;
     if (programOffset > r.endOffset) {
@@ -218,6 +224,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     r.defaultIsStmt = buf.uint8() != 0;
     r.lineBase = (nint)(int8)buf.uint8();
     r.lineRange = (nint)buf.uint8();
+
     // Validate header.
     if ((~buf).err != default!) {
         return (~buf).err;
@@ -228,12 +235,14 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
     if (r.lineRange == 0) {
         return new DecodeError("line"u8, hdrOffset, "invalid line range: 0"u8);
     }
+
     // Read standard opcode length table. This table starts with opcode 1.
     r.opcodeBase = (nint)buf.uint8();
     r.opcodeLengths = new slice<nint>(r.opcodeBase);
     for (nint i = 1; i < r.opcodeBase; i++) {
         r.opcodeLengths[i] = (nint)buf.uint8();
     }
+
     // Validate opcode lengths.
     if ((~buf).err != default!) {
         return (~buf).err;
@@ -245,6 +254,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
             }
         }
     }
+
     if (r.version < 5){
         // Read include directories table.
         r.directories = new @string[]{compDir}.slice();
@@ -263,6 +273,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
             }
             r.directories = append(r.directories, directory);
         }
+
         // Read file name list. File numbering starts with 1,
         // so leave the first entry nil.
         r.fileEntries = new slice<ж<LineFile>>(1);
@@ -300,7 +311,9 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
             r.fileEntries[i] = Ꮡ(new LineFile(name, mtime, (nint)size));
         }
     }
+
     r.initialFileEntries = len(r.fileEntries);
+
     return (~buf).err;
 }
 
@@ -318,7 +331,7 @@ internal static slice<lnctForm> readLNCTFormat(this ref ΔLineReader r) {
     var ret = new slice<lnctForm>(c);
     foreach (var (i, _) in ret) {
         ret[i].lnct = (nint)r.buf.@uint();
-        ret[i].form = ((format)(uint32)r.buf.@uint());
+        ret[i].form = (format)(uint32)r.buf.@uint();
     }
     return ret;
 }
@@ -360,14 +373,15 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(th
             }
         }
         else if (exprᴛ1 == formStrpSup) {
+            // Supplemental sections not yet supported.
             if (dwarf64){
-                // Supplemental sections not yet supported.
                 r.buf.uint64();
             } else {
                 r.buf.uint32();
             }
         }
         else if (exprᴛ1 == formStrx) {
+            // .debug_line.dwo sections not yet supported.
             r.buf.@uint();
         }
         else if (exprᴛ1 == formStrx1) {
@@ -404,7 +418,6 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(th
             val = r.buf.@uint();
         }
 
-        // .debug_line.dwo sections not yet supported.
         var exprᴛ2 = lf.lnct;
         if (exprᴛ2 == lnctPath) {
             path = str;
@@ -422,13 +435,14 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(th
             size = val;
         }
         else if (exprᴛ2 == lnctMD5) {
+            // Ignored.
         }
-
     }
-    // Ignored.
+
     if (dir != ""u8 && path != ""u8) {
         path = pathJoin(dir, path);
     }
+
     return (path, mtime, size, default!);
 }
 
@@ -456,6 +470,7 @@ internal static (bool, error) readFileEntry(this ref ΔLineReader r) {
     mtime = r.buf.@uint();
     ref var length = ref heap<nint>(out var Ꮡlength);
     length = (nint)r.buf.@uint();
+
     // If this is a dynamically added path and the cursor was
     // backed up, we may have already added this entry. Avoid
     // updating existing line table entries in this case. This
@@ -490,11 +505,10 @@ internal static void updateFile(this ref ΔLineReader r) {
 // Rows are always in order of increasing entry.Address, but
 // entry.Line may go forward or backward.
 public static error Next(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
-    ref var entry = ref Ꮡentry.DerefOrNull();
-
     if (r.buf.err != default!) {
         return r.buf.err;
     }
+
     // Execute opcodes until we reach an opcode that emits a line
     // table entry.
     while (ᐧ) {
@@ -511,9 +525,6 @@ public static error Next(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
     }
 }
 
-// lnsFixedAdvancePC takes a uint8 rather than a varint; it's
-// unclear what length the header is supposed to claim, so
-// ignore it.
 // knownOpcodeLengths gives the opcode lengths (in varint arguments)
 // of known standard opcodes.
 internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
@@ -527,6 +538,9 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
     [lnsSetPrologueEnd] = 0,
     [lnsSetEpilogueBegin] = 0,
     [lnsSetISA] = 1
+    // lnsFixedAdvancePC takes a uint8 rather than a varint; it's
+    // unclear what length the header is supposed to claim, so
+    // ignore it.
 };
 
 // step processes the next opcode and updates r.state. If the opcode
@@ -536,6 +550,7 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
     ref var entry = ref Ꮡentry.DerefOrNull();
 
     nint opcode = (nint)r.buf.uint8();
+
     if (opcode >= r.opcodeBase) {
         // Special opcode [DWARF2 6.2.5.1, DWARF4 6.2.5.1]
         nint adjustedOpcode = opcode - r.opcodeBase;
@@ -544,11 +559,14 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
         r.state.Line += lineDelta;
         goto emit;
     }
+
     var exprᴛ1 = opcode;
     if (exprᴛ1 is 0) {
-        var length = ((Offset)(uint32)r.buf.@uint());
+        // Extended opcode [DWARF2 6.2.5.3]
+        var length = (Offset)(uint32)r.buf.@uint();
         var startOff = r.buf.off;
         var opcodeΔ2 = r.buf.uint8();
+
         var exprᴛ2 = opcodeΔ2;
         if (exprᴛ2 == lneEndSequence) {
             r.state.EndSequence = true;
@@ -577,12 +595,10 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
                 r.buf.error(unknownAddressSizeˢ);
                 break;
             }}
-
         }
         else if (exprᴛ2 == lneDefineFile) {
             {
                 var (done, err) = r.readFileEntry(); if (err != default!){
-                    // Extended opcode [DWARF2 6.2.5.3]
                     r.buf.err = err;
                     return false;
                 } else 
@@ -594,15 +610,17 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
             r.updateFile();
         }
         else if (exprᴛ2 == lneSetDiscriminator) {
+            // [DWARF4 6.2.5.3]
             r.state.Discriminator = (nint)r.buf.@uint();
         }
 
         r.buf.skip((nint)(uint32)(startOff + length - r.buf.off));
+
         if (opcodeΔ2 == lneEndSequence) {
-            // [DWARF4 6.2.5.3]
             return true;
         }
     }
+    // Standard opcodes [DWARF2 6.2.5.2]
     else if (exprᴛ1 == lnsCopy) {
         goto emit;
     }
@@ -631,6 +649,7 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
     else if (exprᴛ1 == lnsFixedAdvancePC) {
         r.state.Address += (uint64)r.buf.uint16();
     }
+    // DWARF3 standard opcodes [DWARF3 6.2.5.2]
     else if (exprᴛ1 == lnsSetPrologueEnd) {
         r.state.PrologueEnd = true;
     }
@@ -641,16 +660,14 @@ internal static bool step(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
         r.state.ISA = (nint)r.buf.@uint();
     }
     else { /* default: */
+        // Unhandled standard opcode. Skip the number of
+        // arguments that the prologue says this opcode has.
         for (nint i = 0; i < r.opcodeLengths[opcode]; i++) {
-            // Standard opcodes [DWARF2 6.2.5.2]
-            // DWARF3 standard opcodes [DWARF3 6.2.5.2]
-            // Unhandled standard opcode. Skip the number of
-            // arguments that the prologue says this opcode has.
             r.buf.@uint();
         }
     }
-
     return false;
+
 emit:
     entry = r.state;
     r.state.BasicBlock = false;
@@ -703,8 +720,10 @@ public static void Reset(this ref ΔLineReader r) {
     // Reset buffer to the line number program offset.
     r.buf.off = r.programOffset;
     r.buf.data = r.section.slice((nint)(uint32)(r.buf.off), (nint)(uint32)(r.endOffset));
+
     // Reset file entries list.
     r.fileEntries = r.fileEntries.slice(0, r.initialFileEntries);
+
     // Reset line number program state.
     r.resetState();
 }
@@ -784,6 +803,7 @@ public static error SeekPC(this ref ΔLineReader r, uint64 pc, ж<LineEntry> Ꮡ
             return ErrUnknownPC;
         }
     }
+
     // Scan until we pass pc, then back up one.
     while (ᐧ) {
         ref var next = ref heap(new LineEntry(), out var Ꮡnext);
@@ -843,8 +863,8 @@ internal static @string pathJoin(@string dirname, @string filename) {
             // do here, so just ignore the directory.
             return drive2 + filename;
         }
+        // Drives are the same. Ignore drive on filename.
     }
-    // Drives are the same. Ignore drive on filename.
     if (!(strings.HasSuffix(dirname, "/"u8) || strings.HasSuffix(dirname, @"\"u8)) && dirname != ""u8) {
         @string sep = @"\"u8;
         if (strings.HasPrefix(dirname, "/"u8)) {
@@ -867,7 +887,7 @@ internal static (@string drive, @string rest) splitDrive(@string path) {
     }
     if (len(path) > 3 && (path[0] == (rune)'\\' || path[0] == (rune)'/') && (path[1] == (rune)'\\' || path[1] == (rune)'/')) {
         // Normalize the path so we can search for just \ below.
-        @string npath = strings.Replace(path, "/"u8, @"\"u8, -1);
+        @string npath = strings.ReplaceAll(path, "/"u8, @"\"u8);
         // Get the host part, which must be non-empty.
         nint slash1 = strings.IndexByte(npath[2..], (rune)'\\') + 2;
         if (slash1 > 2) {

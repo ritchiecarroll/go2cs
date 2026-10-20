@@ -15,7 +15,7 @@ internal const bool staticLockRanking = false;
 partial struct lockRankStruct {
 }
 
-internal static void lockInit(ж<mutex> Ꮡl, lockRank rank) {
+internal static void lockInit(ref mutex l, lockRank rank) {
 }
 
 internal static lockRank getLockRank(ж<mutex> Ꮡl) {

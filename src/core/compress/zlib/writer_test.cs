@@ -58,6 +58,7 @@ internal static partial void testLevelDict(ж<testing.T> Ꮡt, @string fn, slice
         if (d != ""u8) {
             dict = slice<byte>(d);
         }
+
         // Push data through a pipe that compresses at the write end, and decompresses at the read end.
         var (piper, pipew) = io.Pipe();
         var piperʗ1 = piper;
@@ -93,6 +94,7 @@ internal static partial void testLevelDict(ж<testing.T> Ꮡt, @string fn, slice
         }
         var zlibrʗ1 = zlibr;
         defer(() => zlibrʗ1.Close(), ref ᒐ);
+
         // Compare the decompressed data.
         var (b1, err1) = io.ReadAll(zlibr);
         if (err1 != default!) {
@@ -124,6 +126,7 @@ internal static void testFileLevelDictReset(ж<testing.T> Ꮡt, @string fn, nint
             return;
         }
     }
+
     // Compress once.
     var buf = @new<bytes.Buffer>();
     ж<global::go.compress.zlib_package.Writer> zlibw = default!;
@@ -143,6 +146,7 @@ internal static void testFileLevelDictReset(ж<testing.T> Ꮡt, @string fn, nint
         return;
     }
     @string @out = buf.String();
+
     // Reset and compress again.
     var buf2 = @new<bytes.Buffer>();
     zlibw.Reset(new zlib_test_package.bytes_BufferжWriter(buf2));
@@ -155,6 +159,7 @@ internal static void testFileLevelDictReset(ж<testing.T> Ꮡt, @string fn, nint
         return;
     }
     @string out2 = buf2.String();
+
     if (out2 != @out) {
         Ꮡt.Errorf("%s (level=%d): different output after reset (got %d bytes, expected %d"u8,
             fn, level, len(out2), len(@out));

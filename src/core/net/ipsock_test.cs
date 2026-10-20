@@ -11,7 +11,6 @@ partial class net_internal_test_package {
 
 internal static Func<global::go.net_package.IPAddr, global::go.net_package.ΔAddr> testInetaddr = (global::go.net_package.IPAddr ip) => new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ip.IP, Port: 5682, Zone: ip.Zone)));
 
-
 partial struct addrListTestsᴛ1 /*dyn*/ {
     internal Func<global::go.net_package.IPAddr, bool> filter;
     internal slice<global::go.net_package.IPAddr> ips;
@@ -199,6 +198,7 @@ public static void TestAddrList(ж<testing.T> Ꮡt) {
     if (!supportsIPv4() || !supportsIPv6()) {
         Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
     }
+
     foreach (var (i, tt) in addrListTests) {
         var (addrs, err) = filterAddrList(tt.filter, tt.ips, tt.inetaddr, addrˢ);
         if (!reflect.DeepEqual(err, tt.err)) {

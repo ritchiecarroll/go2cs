@@ -168,6 +168,7 @@ func refVerdictRecordDiff(published [][2]string, expected [][2]string) (missing 
 }
 
 func TestPublishedRefVerdictsMatchEmitted(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: converts a fixture package in-process")
 	}

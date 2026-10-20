@@ -16,7 +16,28 @@ namespace GolibTests;
 [TestClass]
 public class MemProfileFreeTests
 {
-    // One read: (allocs, frees, alloc bytes, free bytes) of the records whose first frame is `function`.
+    // A record's allocating function: since Go 1.26 every heap record starts at runtime.mallocgc, then the
+    // entry the compiler called (newobject, newarray, makeslice, growslice), then the allocating function
+    // (mProf_Malloc's callers(3, ...)). A record of any other shape names nothing, so a regression to the
+    // bare-function stack fails here as a missing record rather than reading as a match.
+    private static string? AllocatingFunction(slice<uintptr> stack)
+    {
+        var frames = CallersFrames(stack);
+        var (mallocgc, more) = frames.Next();
+
+        if (!more || (string)mallocgc.Function != "runtime.mallocgc")
+            return null;
+
+        var (entry, more2) = frames.Next();
+
+        if (!more2 || (string)entry.Function is not ("runtime.newobject" or "runtime.newarray" or "runtime.makeslice" or "runtime.growslice"))
+            return null;
+
+        var (allocating, _) = frames.Next();
+        return (string)allocating.Function;
+    }
+
+    // One read: (allocs, frees, alloc bytes, free bytes) of the records `function` allocated.
     private static (int64 Allocs, int64 Frees, int64 AllocBytes, int64 FreeBytes) RecordOf(string function)
     {
         var (n, _) = MemProfile(default, true);
@@ -28,11 +49,9 @@ public class MemProfileFreeTests
 
         for (int i = 0; i < (int)m; i++)
         {
-            var (first, _) = CallersFrames(records[i].Stack()).Next();
+            string? name = AllocatingFunction(records[i].Stack());
 
-            string name = first.Function;
-
-            if (name.EndsWith("." + function, StringComparison.Ordinal))
+            if (name is not null && name.EndsWith("." + function, StringComparison.Ordinal))
             {
                 allocs += records[i].AllocObjects;
                 frees += records[i].FreeObjects;

@@ -33,7 +33,7 @@ internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
     nint i = 0;
     for (i = 0; i < len(data); i++) {
         if (data[i] == (rune)'\n') {
-            s = ((@string)(data.slice(0, i)));
+            s = (@string)(data.slice(0, i));
             ok = true;
             // move data
             i++;
@@ -45,7 +45,7 @@ internal static (@string s, bool ok) getLineFromData(this ref Δfile f) {
     }
     if (f.atEOF && len(f.data) > 0) {
         // EOF, return all we have
-        s = ((@string)data);
+        s = (@string)data;
         f.data = f.data[0..0];
         ok = true;
     }

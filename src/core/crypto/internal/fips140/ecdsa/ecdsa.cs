@@ -9,6 +9,7 @@ using bigmod = go.crypto.@internal.fips140.bigmod_package;
 using drbg = go.crypto.@internal.fips140.drbg_package;
 using Δnistec = go.crypto.@internal.fips140.nistec_package;
 using errors = errors_package;
+using hash = hash_package;
 using io = io_package;
 using sync = sync_package;
 using go.crypto.@internal;
@@ -170,6 +171,13 @@ internal static slice<byte> p521Order = new byte[]{0x01, 0xff,
     0x3b, 0xb5, 0xc9, 0xb8, 0x89, 0x9c, 0x47, 0xae,
     0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09}.slice();
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string ecdsaInvalidPrivateKeyˢ = "ecdsa: invalid private key length"u8;
+internal static readonly @string ecdsaPrivateKeyIsZeroˢ = "ecdsa: private key is zero"u8;
+
+// NewPrivateKey creates a new ECDSA private key from the given D and Q byte
+// slices. D must be the fixed-length big-endian encoding of the private scalar,
+// and Q must be the compressed or uncompressed encoding of the public point.
 public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<byte> D, slice<byte> Q)
     where P : Point<P>
 {
@@ -180,14 +188,25 @@ public static (ж<PrivateKey>, error) NewPrivateKey<P>(ж<Curve<P>> Ꮡc, slice<
     if (err != default!) {
         return (default!, err);
     }
+    if (len(D) != c.N.Size()) {
+        return (default!, errors.New(ecdsaInvalidPrivateKeyˢ));
+    }
     (var d, err) = bigmod.NewNat().SetBytes(D, c.N);
     if (err != default!) {
         return (default!, err);
+    }
+    if (d.IsZero() == 1) {
+        return (default!, errors.New(ecdsaPrivateKeyIsZeroˢ));
     }
     var priv = Ꮡ(new PrivateKey(pub: pub.Value, d: d.Bytes(c.N)));
     return (priv, default!);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string ecdsaInvalidPublicKeyˢ = "ecdsa: invalid public key encoding"u8;
+
+// NewPublicKey creates a new ECDSA public key from the given Q byte slice.
+// Q must be the compressed or uncompressed encoding of the public point.
 public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<byte> Q)
     where P : Point<P>
 {
@@ -196,6 +215,9 @@ public static (ж<ΔPublicKey>, error) NewPublicKey<P>(ж<Curve<P>> Ꮡc, slice<
     // SetBytes checks that Q is a valid point on the curve, and that its
     // coordinates are reduced modulo p, fulfilling the requirements of SP
     // 800-89, Section 5.3.2.
+    if (len(Q) < 1 || Q[0] == 0) {
+        return (default!, errors.New(ecdsaInvalidPublicKeyˢ));
+    }
     var (_, err) = c.newPoint().SetBytes(Q);
     if (err != default!) {
         return (default!, err);
@@ -210,10 +232,12 @@ public static (ж<PrivateKey>, error) GenerateKey<P>(ж<Curve<P>> Ꮡc, io.Reade
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();
+
     var (k, Q, err) = randomPoint(ref (Ꮡc).DerefOrNull(), (slice<byte> b) => drbg.ReadWithReader(rand, b));
     if (err != default!) {
         return (default!, err);
     }
+
     var priv = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
             curve: c.curve,
@@ -241,6 +265,7 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
                 return (default!, default!, errΔ1);
             }
         }
+
         // Take only the leftmost bits of the generated random value. This is
         // both necessary to increase the chance of the random value being in
         // the correct range and to match the specification. It's unfortunate
@@ -260,6 +285,7 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
                 b = rightShift(b, excess);
             }
         }
+
         // FIPS 186-5, Appendix A.4.2 makes us check x <= N - 2 and then return
         // x + 1. Note that it follows that 0 < x + 1 < N. Instead, SetBytes
         // checks that k < N, and we explicitly check 0 != k. Since k can't be
@@ -271,6 +297,7 @@ internal static (ж<bigmodꓸNat> k, P p, error err) randomPoint<P>(ref Curve<P>
                 return (kΔ1, pΔ1, errΔ3);
             }
         }
+
         if (testingOnlyRejectionSamplingLooped != default!) {
             testingOnlyRejectionSamplingLooped();
         }
@@ -294,9 +321,9 @@ internal static readonly @string ecdsaPrivateKeyDoesNotˢ = "ecdsa: private key 
 // the hash function H) using the private key, priv. If the hash is longer than
 // the bit-length of the private key's curve order, the hash will be truncated
 // to that length.
-public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> hash)
+public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> hashΔ1)
     where P : Point<P>
-    where H : fips140.Hash
+    where H : hash.Hash
 {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var priv = ref Ꮡpriv.DerefOrNull();
@@ -306,24 +333,28 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
     }
     fips140.RecordApproved();
     fipsSelfTest();
+
     // Random ECDSA is dangerous, because a failure of the RNG would immediately
     // leak the private key. Instead, we use a "hedged" approach, as specified
     // in draft-irtf-cfrg-det-sigs-with-noise-04, Section 4. This has also the
     // advantage of closely resembling Deterministic ECDSA.
+
     var Z = new slice<byte>(len(priv.d));
     {
         var err = drbg.ReadWithReader(rand, Z); if (err != default!) {
             return (default!, err);
         }
     }
+
     // See https://github.com/cfrg/draft-irtf-cfrg-det-sigs-with-noise/issues/6
     // for the FIPS compliance of this method. In short Z is entropy from the
     // main DRBG, of length 3/2 of security_strength, so the nonce is optional
     // per SP 800-90Ar1, Section 8.6.7, and the rest is a personalization
     // string, which per SP 800-90Ar1, Section 8.7.1 may contain secret
     // information.
-    var drbgΔ1 = newDRBG(h, Z, default!, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hash)}.slice()));
-    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbgΔ1, hash);
+    var drbgΔ1 = newDRBG(h, Z, default!, new blockAlignedPersonalizationString(new slice<byte>[]{priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1)}.slice()));
+
+    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbgΔ1, hashΔ1);
 }
 
 // SignDeterministic signs a hash (which shall be the result of hashing a
@@ -331,9 +362,9 @@ public static (ж<Signature>, error) Sign<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж
 // hash is longer than the bit-length of the private key's curve order, the hash
 // will be truncated to that length. This applies Deterministic ECDSA as
 // specified in FIPS 186-5 and RFC 6979.
-public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, slice<byte> hash)
+public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, Func<H> h, ж<PrivateKey> Ꮡpriv, slice<byte> hashΔ1)
     where P : Point<P>
-    where H : fips140.Hash
+    where H : hash.Hash
 {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var priv = ref Ꮡpriv.DerefOrNull();
@@ -343,8 +374,8 @@ public static (ж<Signature>, error) SignDeterministic<P, H>(ж<Curve<P>> Ꮡc, 
     }
     fips140.RecordApproved();
     fipsSelfTestDeterministic();
-    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hash), default!); // RFC 6979, Section 3.3
-    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbg, hash);
+    var drbg = newDRBG(h, priv.d, bits2octets(ref (Ꮡc).DerefOrNull(), hashΔ1), default!); // RFC 6979, Section 3.3
+    return sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡpriv).DerefOrNull(), drbg, hashΔ1);
 }
 
 // bits2octets as specified in FIPS 186-5, Appendix B.2.4 or RFC 6979,
@@ -372,9 +403,11 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
     if (err != default!) {
         return (default!, err);
     }
+
     // kInv = k⁻¹
     var kInv = bigmod.NewNat();
     inverse(ref c, kInv, k);
+
     (var Rx, err) = R.BytesX();
     if (err != default!) {
         return (default!, err);
@@ -383,14 +416,17 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
     if (err != default!) {
         return (default!, err);
     }
+
     // The spec wants us to retry here, but the chance of hitting this condition
     // on a large prime-order group like the NIST curves we support is
     // cryptographically negligible. If we hit it, something is awfully wrong.
     if (r.IsZero() == 1) {
         return (default!, errors.New(ecdsaInternalErrorRIsˢ));
     }
+
     var e = bigmod.NewNat();
     hashToNat(ref c, e, hash);
+
     (var s, err) = bigmod.NewNat().SetBytes(priv.d, c.N);
     if (err != default!) {
         return (default!, err);
@@ -398,10 +434,12 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
     s.Mul(r, c.N);
     s.Add(e, c.N);
     s.Mul(kInv, c.N);
+
     // Again, the chance of this happening is cryptographically negligible.
     if (s.IsZero() == 1) {
         return (default!, errors.New(ecdsaInternalErrorSIsˢ));
     }
+
     return (Ꮡ(new Signature(r.Bytes(c.N), s.Bytes(c.N))), default!);
 }
 
@@ -422,6 +460,7 @@ internal static void inverse<P>(ref Curve<P> c, ж<bigmodꓸNat> ᏑkInv, ж<big
             return;
         }
     }
+
     // Calculate the inverse of s in GF(N) using Fermat's method
     // (exponentiation modulo P - 2, per Euler's theorem)
     ᏑkInv.Exp(Ꮡk, c.nMinus2, c.N);
@@ -465,7 +504,7 @@ internal static slice<byte> rightShift(slice<byte> b, nint shift) {
     for (nint i = len(b) - 1; i >= 0; i--) {
         b[i].RshAssign((int64)(shift));
         if (i > 0) {
-            b[i] |= (byte)(b[i - 1].Lsh((int64)((8 - shift))));
+            b[i] |= (byte)(b[i - 1].Lsh((int64)(8 - shift)));
         }
     }
     return b;
@@ -508,6 +547,7 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
     if (err != default!) {
         return err;
     }
+
     (var r, err) = bigmod.NewNat().SetBytes(sig.R, c.N);
     if (err != default!) {
         return err;
@@ -522,11 +562,14 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
     if (s.IsZero() == 1) {
         return errors.New(ecdsaInvalidSignatureSIsˢ);
     }
+
     var e = bigmod.NewNat();
     hashToNat(ref c, e, hash);
+
     // w = s⁻¹
     var w = bigmod.NewNat();
     inverse(ref c, w, s);
+
     // p₁ = [e * s⁻¹]G
     (var p1, err) = c.newPoint().ScalarBaseMult(e.Mul(w, c.N).Bytes(c.N));
     if (err != default!) {
@@ -542,10 +585,12 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
     if (err != default!) {
         return err;
     }
+
     (var v, err) = bigmod.NewNat().SetOverflowingBytes(Rx, c.N);
     if (err != default!) {
         return err;
     }
+
     if (v.Equal(r) != 1) {
         return errors.New(ecdsaSignatureDidNotˢ);
     }

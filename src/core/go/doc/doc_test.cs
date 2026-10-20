@@ -77,12 +77,12 @@ internal static @string indentFmt(@string indent, @string s) {
 
 internal static bool isGoFile(fs.FileInfo fi) {
     @string name = fi.Name();
-    return !fi.IsDir() && len(name) > 0 && name[0] != (rune)'.' && filepath.Ext(name) == ".go"u8;
+    return !fi.IsDir() && len(name) > 0 && name[0] != (rune)'.' && // ignore .files
+        filepath.Ext(name) == ".go"u8;
 }
 
-// ignore .files
 internal partial struct bundle {
-    public partial ref ж<global::go.go.doc_package.Package> Package { get; }
+    /*embed*/ public ж<global::go.go.doc_package.Package> Package;
     public ж<token.FileSet> FSet;
 }
 
@@ -97,12 +97,14 @@ internal static void test(ж<testing.T> Ꮡt, global::go.go.doc_package.Mode mod
         var rxʗ1 = rx;
         filter = (fs.FileInfo fi) => isGoFile(fi) && rxʗ1.MatchString(fi.Name());
     }
+
     // get packages
     var fset = token.NewFileSet();
     var (pkgs, err) = parser.ParseDir(fset, dataDir, filter, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // test packages
     foreach (var (_, pkg) in pkgs) {
         var fsetʗ1 = fset;
@@ -117,10 +119,12 @@ internal static void test(ж<testing.T> Ꮡt, global::go.go.doc_package.Mode mod
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
             }
+
             // golden files always use / in filenames - canonicalize them
             foreach (var (i, filename) in (~doc).Filenames) {
                 doc.Value.Filenames[i] = filepath.ToSlash(filename);
             }
+
             // print documentation
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             {
@@ -129,6 +133,7 @@ internal static void test(ж<testing.T> Ꮡt, global::go.go.doc_package.Mode mod
                 }
             }
             var got = buf.Bytes();
+
             // update golden file if necessary
             @string golden = filepath.Join(dataDir, fmt.Sprintf("%s.%d.golden"u8, (~pkgʗ1).Name, mode));
             if (update.Value) {
@@ -137,11 +142,13 @@ internal static void test(ж<testing.T> Ꮡt, global::go.go.doc_package.Mode mod
                     tΔ1.Fatal(errΔ4);
                 }
             }
+
             // get golden file
             (var want, errΔ2) = os.ReadFile(golden);
             if (errΔ2 != default!) {
                 tΔ1.Fatal(errΔ2);
             }
+
             // compare
             if (!bytes.Equal(got, want)) {
                 tΔ1.Errorf("package %s\n\tgot:\n%s\n\twant:\n%s"u8, (~pkgʗ1).Name, got, want);
@@ -179,10 +186,11 @@ public static void TestFuncs(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, ((global::go.go.doc_package.Mode)0));
+    (var doc, err) = NewFromFiles(fset, new ж<ast.File>[]{@file}.slice(), importPathˢ, (global::go.go.doc_package.Mode)0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, f) in (~doc).Funcs) {
         f.Value.Decl = default!;
     }
@@ -194,6 +202,7 @@ public static void TestFuncs(ж<testing.T> Ꮡt) {
             m.Value.Decl = default!;
         }
     }
+
     var compareFuncs = (ж<testing.T> tΔ1, @string msg, ж<global::go.go.doc_package.Func> got, ж<global::go.go.doc_package.Func> want) => {
         // ignore Decl and Examples
         got.Value.Decl = default!;
@@ -202,6 +211,7 @@ public static void TestFuncs(ж<testing.T> Ꮡt) {
             tΔ1.Errorf("%s:\ngot  %+v\nwant %+v"u8, msg, got.OrTypedNil(), want.OrTypedNil());
         }
     };
+
     compareSlices(Ꮡt, funcsˢ, (~doc).Funcs, (~funcsPackage).Funcs, compareFuncs);
     var compareFuncsʗ1 = compareFuncs;
     compareSlices(Ꮡt, typesˢ, (~doc).Types, (~funcsPackage).Types, (ж<testing.T> tΔ2, @string msg, ж<global::go.go.doc_package.Type> got, ж<global::go.go.doc_package.Type> want) => {
@@ -266,9 +276,8 @@ func (*G2[A, B]) MG4() {}
 
 
 
-"""u8;
+"""u8.Raw();
 
-// TODO: synthesize a param for G1?
 internal static ж<global::go.go.doc_package.Package> funcsPackage = Ꮡ(new Package(
     Funcs: new ж<global::go.go.doc_package.Func>[]{Ꮡ(new global::go.go.doc_package.Func(Name: "F"u8))}.slice(),
     Types: new ж<global::go.go.doc_package.Type>[]{
@@ -276,7 +285,7 @@ internal static ж<global::go.go.doc_package.Package> funcsPackage = Ꮡ(new Pac
             Name: "G1"u8,
             Funcs: new ж<global::go.go.doc_package.Func>[]{Ꮡ(new global::go.go.doc_package.Func(Name: "NewG1"u8))}.slice(),
             Methods: new ж<global::go.go.doc_package.Func>[]{
-                Ꮡ(new global::go.go.doc_package.Func(Name: "M4"u8, Recv: "G1"u8,
+                Ꮡ(new global::go.go.doc_package.Func(Name: "M4"u8, Recv: "G1"u8, // TODO: synthesize a param for G1?
                     Orig: "s3"u8, Level: 1)),
                 Ꮡ(new global::go.go.doc_package.Func(Name: "MG1"u8, Recv: "G1[T]"u8, Orig: "G1[T]"u8, Level: 0)),
                 Ꮡ(new global::go.go.doc_package.Func(Name: "MG2"u8, Recv: "*G1[U]"u8, Orig: "*G1[U]"u8, Level: 0))

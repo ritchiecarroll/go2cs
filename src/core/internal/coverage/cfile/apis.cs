@@ -59,6 +59,7 @@ public static error WriteCounters(io.Writer w) {
     if (!finalHashComputed) {
         return fmt.Errorf("meta-data not written yet, unable to write counter data"u8);
     }
+
     var pm = rtcov.Meta.PkgMap;
     var s = Ꮡ(new emitState(
         counterlist: cl,
@@ -76,6 +77,7 @@ public static error ClearCounters() {
     if (cmode != coverage.CtrModeAtomic) {
         return fmt.Errorf("ClearCounters invoked for program built with -covermode=%s (please use -covermode=atomic)"u8, cmode.String());
     }
+
     // Implementation note: this function would be faster and simpler
     // if we could just zero out the entire counter array, but for the
     // moment we go through and zero out just the slots in the array
@@ -132,6 +134,7 @@ public static error ClearCounters() {
     // another thread". Thus we can be sure that there will be no
     // inconsistency when reading the counter array from the thread
     // running ClearCounters.
+
     foreach (var (_, c) in cl) {
         var sd = @unsafe.Slice(c.Counters.Reinterpret<uint32, atomic.Uint32>(), (nint)c.Len);
         for (nint i = 0; i < len(sd); i++) {

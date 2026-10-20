@@ -30,11 +30,14 @@ internal static void Main() {
             return (name + "!", true);
         }
     );
+
     var (v1, err1) = m.apply(20, @double);
     fmt.Println(v1, err1);
+
     var (v2, err2) = m.named(3, @double);
     fmt.Println(v2, err2);
-    var (s, ok) = m.lookup("go"u8);
+
+    var (s, ok) = m.lookup("go");
     fmt.Println(s, ok);
 }
 

@@ -44,106 +44,105 @@ internal partial struct TestParseAddr_type /*dyn*/ {
 }
 
 public static void TestParseAddr(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-// Basic zero IPv4 address.
-// Basic non-zero IPv4 address.
-// IPv4 address in windows-style "print all the digits" form.
-// IPv4 address with a silly amount of leading zeros.
-// 4-in-6 with octet with leading zero
-// 4-in-6 with octet with unexpected character
-// Basic zero IPv6 address.
-// Localhost IPv6.
-// Fully expanded IPv6 address.
-// IPv6 with elided fields in the middle.
-// IPv6 with elided fields at the end.
-// IPv6 with single elided field at the end.
-// IPv6 with single elided field in the middle.
-// IPv6 with the trailing 32 bits written as IPv4 dotted decimal. (4in6)
-// IPv6 with a zone specifier.
-// IPv6 with dotted decimal and zone specifier.
-// 4-in-6 with zone
-// IPv6 with capital letters.
     slice<TestParseAddr_type> validIPs = new TestParseAddr_type[]{
+        // Basic zero IPv4 address.
         new(
             @in: "0.0.0.0"u8,
             ip: MkAddr(Mk128(0, 0xffff00000000UL), Z4)
         ),
+        // Basic non-zero IPv4 address.
         new(
             @in: "192.168.140.255"u8,
             ip: MkAddr(Mk128(0, 0xffffc0a88cffUL), Z4)
         ),
+        // IPv4 address in windows-style "print all the digits" form.
         new(
             @in: "010.000.015.001"u8,
             wantErr: @"ParseAddr(""010.000.015.001""): IPv4 field has octet with leading zero"u8
         ),
+        // IPv4 address with a silly amount of leading zeros.
         new(
             @in: "000001.00000002.00000003.000000004"u8,
             wantErr: @"ParseAddr(""000001.00000002.00000003.000000004""): IPv4 field has octet with leading zero"u8
         ),
+        // 4-in-6 with octet with leading zero
         new(
             @in: "::ffff:1.2.03.4"u8,
             wantErr: @"ParseAddr(""::ffff:1.2.03.4""): IPv4 field has octet with leading zero"u8
         ),
+        // 4-in-6 with octet with unexpected character
         new(
             @in: "::ffff:1.2.3.z"u8,
             wantErr: @"ParseAddr(""::ffff:1.2.3.z""): unexpected character (at ""z"")"u8
         ),
+        // Basic zero IPv6 address.
         new(
             @in: "::"u8,
             ip: MkAddr(Mk128(0, 0), Z6noz)
         ),
+        // Localhost IPv6.
         new(
             @in: "::1"u8,
             ip: MkAddr(Mk128(0, 1), Z6noz)
         ),
+        // Fully expanded IPv6 address.
         new(
             @in: "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b"u8,
             ip: MkAddr(Mk128(0xfd7a115ca1e0ab12UL, 0x4843cd96626b430bUL), Z6noz)
         ),
+        // IPv6 with elided fields in the middle.
         new(
             @in: "fd7a:115c::626b:430b"u8,
             ip: MkAddr(Mk128(0xfd7a115c00000000UL, 0x00000000626b430b), Z6noz)
         ),
+        // IPv6 with elided fields at the end.
         new(
             @in: "fd7a:115c:a1e0:ab12:4843:cd96::"u8,
             ip: MkAddr(Mk128(0xfd7a115ca1e0ab12UL, 0x4843cd9600000000UL), Z6noz)
         ),
+        // IPv6 with single elided field at the end.
         new(
             @in: "fd7a:115c:a1e0:ab12:4843:cd96:626b::"u8,
             ip: MkAddr(Mk128(0xfd7a115ca1e0ab12UL, 0x4843cd96626b0000UL), Z6noz),
             str: "fd7a:115c:a1e0:ab12:4843:cd96:626b:0"u8
         ),
+        // IPv6 with single elided field in the middle.
         new(
             @in: "fd7a:115c:a1e0::4843:cd96:626b:430b"u8,
             ip: MkAddr(Mk128(0xfd7a115ca1e00000UL, 0x4843cd96626b430bUL), Z6noz),
             str: "fd7a:115c:a1e0:0:4843:cd96:626b:430b"u8
         ),
+        // IPv6 with the trailing 32 bits written as IPv4 dotted decimal. (4in6)
         new(
             @in: "::ffff:192.168.140.255"u8,
             ip: MkAddr(Mk128(0, 0x0000ffffc0a88cffUL), Z6noz),
             str: "::ffff:192.168.140.255"u8
         ),
+        // IPv6 with a zone specifier.
         new(
             @in: "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b%eth0"u8,
             ip: MkAddr(Mk128(0xfd7a115ca1e0ab12UL, 0x4843cd96626b430bUL), unique.Make<AddrDetail>(MakeAddrDetail(true, eth0ˢ)))
         ),
+        // IPv6 with dotted decimal and zone specifier.
         new(
             @in: "1:2::ffff:192.168.140.255%eth1"u8,
             ip: MkAddr(Mk128(0x0001000200000000UL, 0x0000ffffc0a88cffUL), unique.Make<AddrDetail>(MakeAddrDetail(true, eth1ˢ))),
             str: "1:2::ffff:c0a8:8cff%eth1"u8
         ),
+        // 4-in-6 with zone
         new(
             @in: "::ffff:192.168.140.255%eth1"u8,
             ip: MkAddr(Mk128(0, 0x0000ffffc0a88cffUL), unique.Make<AddrDetail>(MakeAddrDetail(true, eth1ˢ))),
             str: "::ffff:192.168.140.255%eth1"u8
         ),
+        // IPv6 with capital letters.
         new(
             @in: "FD9E:1A04:F01D::1"u8,
             ip: MkAddr(Mk128(0xfd9e1a04f01d0000UL, 0x1), Z6noz),
             str: "fd9e:1a04:f01d::1"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in validIPs) {
         ref var test = ref heap(new TestParseAddr_type(), out var Ꮡtest);
         test = vᴛ1;
@@ -163,6 +162,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
             if (got != testʗ1.ip) {
                 tΔ1.Errorf("got %#v, want %#v"u8, got, testʗ1.ip);
             }
+
             // Check that ParseAddr is a pure function.
             (var got2, err) = ParseAddr(testʗ1.@in);
             if (err != default!) {
@@ -171,6 +171,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
             if (got != got2) {
                 tΔ1.Errorf("ParseAddr(%q) got 2 different results: %#v, %#v"u8, testʗ1.@in, got, got2);
             }
+
             // Check that ParseAddr(ip.String()) is the identity function.
             @string s = got.String();
             (var got3, err) = ParseAddr(s);
@@ -180,6 +181,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
             if (got != got3) {
                 tΔ1.Errorf("ParseAddr(%q) != ParseAddr(ParseIP(%q).String()). Got %#v, want %#v"u8, testʗ1.@in, testʗ1.@in, got3, got);
             }
+
             // Check that the slow-but-readable parser produces the same result.
             (var slow, err) = parseIPSlow(testʗ1.@in);
             if (err != default!) {
@@ -188,6 +190,7 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
             if (got != slow) {
                 tΔ1.Errorf("ParseAddr(%q) = %#v, parseIPSlow(%q) = %#v"u8, testʗ1.@in, got, testʗ1.@in, slow);
             }
+
             // Check that the parsed IP formats as expected.
             s = got.String();
             @string wants = testʗ1.str;
@@ -197,8 +200,10 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
             if (s != wants) {
                 tΔ1.Errorf("ParseAddr(%q).String() got %q, want %q"u8, testʗ1.@in, s, wants);
             }
+
             // Check that AppendTo matches MarshalText.
             TestAppendToMarshal(tΔ1, got);
+
             // Check that MarshalText/UnmarshalText work similarly to
             // ParseAddr/String (see TestIPMarshalUnmarshal for
             // marshal-specific behavior that's not common with
@@ -218,89 +223,94 @@ public static void TestParseAddr(ж<testing.T> Ꮡt) {
                 tΔ1.Fatal(err);
             }
             @string jswant = @""""u8 + wants + @""""u8;
-            @string jsback = ((@string)jsb);
+            @string jsback = (@string)jsb;
             if (jsback != jswant) {
                 tΔ1.Errorf("Marshal(Unmarshal(%q)) = %s, want %s"u8, testʗ1.@in, jsback, jswant);
             }
         });
     }
-// Empty string
-// Garbage non-IP
-// Single number. Some parsers accept this as an IPv4 address in
-// big-endian uint32 form, but we don't.
-// IPv4 with a zone specifier
-// IPv4 field must have at least one digit
-// IPv4 address too long
-// IPv4 in dotted octal form
-// IPv4 in dotted hex form
-// IPv4 in class B form
-// IPv4 in class B form, with a small enough number to be
-// parseable as a regular dotted decimal field.
-// IPv4 in class A form
-// IPv4 in class A form, with a small enough number to be
-// parseable as a regular dotted decimal field.
-// IPv4 field has value >255
-// IPv4 with too many fields
-// IPv6 with not enough fields
-// IPv6 with too many fields
-// IPv6 with 8 fields and a :: expander
-// IPv6 with a field bigger than 2b
-// IPv6 with non-hex values in field
-// IPv6 with a zone delimiter but no zone.
-// IPv6 (without ellipsis) with too many fields for trailing embedded IPv4.
-// IPv6 (with ellipsis) with too many fields for trailing embedded IPv4.
-// IPv6 with invalid embedded IPv4.
-// IPv6 with multiple ellipsis ::.
-// IPv6 with invalid non hex/colon character.
-// IPv6 with truncated bytes after single colon.
-// IPv6 with 5 zeros in last group
-// IPv6 with 5 zeros in one group and embedded IPv4
+
     slice<@string> invalidIPs = new @string[]{
+        // Empty string
         ""u8,
+        // Garbage non-IP
         "bad"u8,
+        // Single number. Some parsers accept this as an IPv4 address in
+        // big-endian uint32 form, but we don't.
         "1234"u8,
+        // IPv4 with a zone specifier
         "1.2.3.4%eth0"u8,
+        // IPv4 field must have at least one digit
         ".1.2.3"u8,
         "1.2.3."u8,
         "1..2.3"u8,
+        // IPv4 address too long
         "1.2.3.4.5"u8,
+        // IPv4 in dotted octal form
         "0300.0250.0214.0377"u8,
+        // IPv4 in dotted hex form
         "0xc0.0xa8.0x8c.0xff"u8,
+        // IPv4 in class B form
         "192.168.12345"u8,
+        // IPv4 in class B form, with a small enough number to be
+        // parseable as a regular dotted decimal field.
         "127.0.1"u8,
+        // IPv4 in class A form
         "192.1234567"u8,
+        // IPv4 in class A form, with a small enough number to be
+        // parseable as a regular dotted decimal field.
         "127.1"u8,
+        // IPv4 field has value >255
         "192.168.300.1"u8,
+        // IPv4 with too many fields
         "192.168.0.1.5.6"u8,
+        // IPv6 with not enough fields
         "1:2:3:4:5:6:7"u8,
+        // IPv6 with too many fields
         "1:2:3:4:5:6:7:8:9"u8,
+        // IPv6 with 8 fields and a :: expander
         "1:2:3:4::5:6:7:8"u8,
+        // IPv6 with a field bigger than 2b
         "fe801::1"u8,
+        // IPv6 with non-hex values in field
         "fe80:tail:scal:e::"u8,
+        // IPv6 with a zone delimiter but no zone.
         "fe80::1%"u8,
+        // IPv6 (without ellipsis) with too many fields for trailing embedded IPv4.
         "ffff:ffff:ffff:ffff:ffff:ffff:ffff:192.168.140.255"u8,
+        // IPv6 (with ellipsis) with too many fields for trailing embedded IPv4.
         "ffff::ffff:ffff:ffff:ffff:ffff:ffff:192.168.140.255"u8,
+        // IPv6 with invalid embedded IPv4.
         "::ffff:192.168.140.bad"u8,
+        // IPv6 with multiple ellipsis ::.
         "fe80::1::1"u8,
+        // IPv6 with invalid non hex/colon character.
         "fe80:1?:1"u8,
+        // IPv6 with truncated bytes after single colon.
         "fe80:"u8,
+        // IPv6 with 5 zeros in last group
         "0:0:0:0:0:ffff:0:00000"u8,
+        // IPv6 with 5 zeros in one group and embedded IPv4
         "0:0:0:0:00000:ffff:127.1.2.3"u8
     }.slice();
+
     foreach (var (_, s) in invalidIPs) {
         Ꮡt.Run(s, (ж<testing.T> tΔ2) => {
             var (got, err) = ParseAddr(s);
             if (err == default!) {
                 tΔ2.Errorf("ParseAddr(%q) = %#v, want error"u8, s, got);
             }
+
             (var slow, err) = parseIPSlow(s);
             if (err == default!) {
                 tΔ2.Errorf("parseIPSlow(%q) = %#v, want error"u8, s, slow);
             }
+
             var std = net.ParseIP(s);
             if (std != default!) {
                 tΔ2.Errorf("net.ParseIP(%q) = %#v, want error"u8, s, std);
             }
+
             if (s == ""u8) {
                 // Don't test unmarshaling of "" here, do it in
                 // IPMarshalUnmarshal.
@@ -378,7 +388,6 @@ internal partial struct TestAddrAppendText_tests /*dyn*/ {
 public static void TestAddrAppendText(ж<testing.T> Ꮡt) {
     var tests = new TestAddrAppendText_tests[]{
         new(new netipꓸAddr(nil), ""u8), // zero IP
-
         new(mustIP("1.2.3.4"u8), "1.2.3.4"u8),
         new(mustIP(fd7a115cA1e0Ab124843Cd96ˢ), "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b"u8),
         new(mustIP(ffff192168140255ˢ), "::ffff:192.168.140.255"u8),
@@ -386,6 +395,7 @@ public static void TestAddrAppendText(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (i, tc) in tests) {
         var ip = tc.ip;
+
         var mtAppend = new slice<byte>(4, 32);
         (mtAppend, var err) = ip.AppendText(mtAppend);
         mtAppend = mtAppend[4..];
@@ -406,7 +416,6 @@ internal partial struct TestAddrMarshalUnmarshalBinary_tests /*dyn*/ {
 public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
     var tests = new TestAddrMarshalUnmarshalBinary_tests[]{
         new(""u8, 0), // zero IP
-
         new("1.2.3.4"u8, 4),
         new("fd7a:115c:a1e0:ab12:4843:cd96:626b:430b"u8, 16),
         new("::ffff:c000:0280"u8, 16),
@@ -433,6 +442,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
         if (ip != ip2) {
             Ꮡt.Fatalf("got %v; want %v"u8, ip2, ip);
         }
+
         var bAppend = new slice<byte>(4, 32);
         (bAppend, err) = ip.AppendBinary(bAppend);
         bAppend = bAppend[4..];
@@ -452,6 +462,7 @@ public static void TestAddrMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("got %v; want %v"u8, ip3, ip);
         }
     }
+
     // Cannot unmarshal from unexpected IP length.
     foreach (var (_, n) in new nint[]{3, 5}.slice()) {
         netipꓸAddr ip2 = default!;
@@ -497,6 +508,7 @@ public static void TestAddrPortMarshalTextString(ж<testing.T> Ꮡt) {
         if (((sstring)mt) != tt.want) {
             Ꮡt.Errorf("%d. for (%v, %v) MarshalText = %q; want %q"u8, i, tt.@in.Addr(), tt.@in.Port(), mt, tt.want);
         }
+
         var mtAppend = new slice<byte>(4, 32);
         (mtAppend, err) = tt.@in.AppendText(mtAppend);
         mtAppend = mtAppend[4..];
@@ -543,6 +555,7 @@ public static void TestAddrPortMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
         if (ipport != ipport2) {
             Ꮡt.Fatalf("got %v; want %v"u8, ipport2, ipport);
         }
+
         var bAppend = new slice<byte>(4, 32);
         (bAppend, err) = ipport.AppendBinary(bAppend);
         bAppend = bAppend[4..];
@@ -562,6 +575,7 @@ public static void TestAddrPortMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("got %v; want %v"u8, ipport3, ipport);
         }
     }
+
     // Cannot unmarshal from unexpected lengths.
     foreach (var (_, n) in new nint[]{3, 7}.slice()) {
         netip.AddrPort ipport2 = default!;
@@ -590,9 +604,8 @@ public static void TestPrefixMarshalTextString(ж<testing.T> Ꮡt) {
         new(mustPrefix(fd7a115cA1e0Ab124843Cd96ˢ2), "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b/118"u8),
         new(mustPrefix(ffffC000028096ˢ), "::ffff:192.0.2.128/96"u8),
         new(mustPrefix(ffff1921681402558ˢ), "::ffff:192.168.140.255/8"u8),
-        new(PrefixFrom(mustIP(ffffC0000280ˢ).WithZone(eth0ˢ), 37), "::ffff:192.0.2.128/37"u8)
+        new(PrefixFrom(mustIP(ffffC0000280ˢ).WithZone(eth0ˢ), 37), "::ffff:192.0.2.128/37"u8) // Zone should be stripped
     }.slice();
-    // Zone should be stripped
     foreach (var (i, tt) in tests) {
         {
             @string got = tt.@in.String(); if (got != tt.want) {
@@ -607,6 +620,7 @@ public static void TestPrefixMarshalTextString(ж<testing.T> Ꮡt) {
         if (((sstring)mt) != tt.want) {
             Ꮡt.Errorf("%d. for %v MarshalText = %q; want %q"u8, i, tt.@in, mt, tt.want);
         }
+
         var mtAppend = new slice<byte>(4, 64);
         (mtAppend, err) = tt.@in.AppendText(mtAppend);
         mtAppend = mtAppend[4..];
@@ -630,9 +644,8 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
         new(mustPrefix("1.2.3.4/24"u8), 4 + 1),
         new(mustPrefix(fd7a115cA1e0Ab124843Cd96ˢ2), 16 + 1),
         new(mustPrefix(ffffC000028096ˢ), 16 + 1),
-        new(PrefixFrom(mustIP(ffffC0000280ˢ).WithZone(eth0ˢ), 37), 16 + 1)
+        new(PrefixFrom(mustIP(ffffC0000280ˢ).WithZone(eth0ˢ), 37), 16 + 1) // Zone should be stripped
     }.slice();
-    // Zone should be stripped
     tests = append(tests,
         new TestPrefixMarshalUnmarshalBinary_testCase(PrefixFrom(tests[0].prefix.Addr(), 33), tests[0].wantSize),
         new TestPrefixMarshalUnmarshalBinary_testCase(PrefixFrom(tests[1].prefix.Addr(), 129), tests[1].wantSize));
@@ -654,6 +667,7 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
         if (prefix != prefix2) {
             Ꮡt.Fatalf("got %v; want %v"u8, prefix2, prefix);
         }
+
         var bAppend = new slice<byte>(4, 32);
         (bAppend, err) = prefix.AppendBinary(bAppend);
         bAppend = bAppend[4..];
@@ -673,6 +687,7 @@ public static void TestPrefixMarshalUnmarshalBinary(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("got %v; want %v"u8, prefix3, prefix);
         }
     }
+
     // Cannot unmarshal from unexpected lengths.
     foreach (var (_, n) in new nint[]{3, 6}.slice()) {
         netipꓸPrefix prefix2 = default!;
@@ -698,11 +713,12 @@ public static void TestAddrMarshalUnmarshal(ж<testing.T> Ꮡt) {
     if (ip != (new netipꓸAddr(nil))) {
         Ꮡt.Errorf("Unmarshal(%q) is not the zero Addr"u8, orig);
     }
+
     var (jsb, err) = json.Marshal(ip);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal(%v) got error %v"u8, ip, err);
     }
-    @string back = ((@string)jsb);
+    @string back = (@string)jsb;
     if (back != orig) {
         Ꮡt.Errorf("Marshal(Unmarshal(%q)) got %q, want %q"u8, orig, back, orig);
     }
@@ -771,20 +787,26 @@ internal partial struct TestIPProperties_tests /*dyn*/ {
 
 public static void TestIPProperties(ж<testing.T> Ꮡt) {
     netipꓸAddr nilIP = default!;
+
     netipꓸAddr unicast4 = mustIP("192.0.2.1"u8);
     netipꓸAddr unicast6 = mustIP(db81ˢ);
     netipꓸAddr unicastZone6 = mustIP(db81Eth0ˢ);
     netipꓸAddr unicast6Unassigned = mustIP("4000::1"u8);             // not in 2000::/3.
+
     netipꓸAddr multicast4 = mustIP("224.0.0.1"u8);
     netipꓸAddr multicast6 = mustIP(ff021ˢ);
     netipꓸAddr multicastZone6 = mustIP(ff021Eth0ˢ);
+
     netipꓸAddr llu4 = mustIP("169.254.0.1"u8);
     netipꓸAddr llu6 = mustIP(fe801ˢ);
     netipꓸAddr llu6Last = mustIP(febfFfffFfffFfffFfffFfffˢ);
     netipꓸAddr lluZone6 = mustIP(fe801Eth0ˢ);
+
     netipꓸAddr loopback4 = mustIP("127.0.0.1"u8);
+
     netipꓸAddr ilm6 = mustIP(ff011ˢ);
     netipꓸAddr ilmZone6 = mustIP(ff011Eth0ˢ);
+
     netipꓸAddr private4a = mustIP("10.0.0.1"u8);
     netipꓸAddr private4b = mustIP("172.16.0.1"u8);
     netipꓸAddr private4c = mustIP("192.168.1.1"u8);
@@ -792,6 +814,7 @@ public static void TestIPProperties(ж<testing.T> Ꮡt) {
     netipꓸAddr private6mapped4a = mustIP(ffff10001ˢ);
     netipꓸAddr private6mapped4b = mustIP(ffff1721601ˢ);
     netipꓸAddr private6mapped4c = mustIP(ffff19216811ˢ);
+
     var tests = new TestIPProperties_tests[]{
         new(
             name: "nil"u8,
@@ -951,6 +974,7 @@ public static void TestIPProperties(ж<testing.T> Ꮡt) {
             unspecified: true
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestIPProperties_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -961,30 +985,37 @@ public static void TestIPProperties(ж<testing.T> Ꮡt) {
             if (gu != ttʗ1.globalUnicast) {
                 tΔ1.Errorf("IsGlobalUnicast(%v) = %v; want %v"u8, ttʗ1.ip, gu, ttʗ1.globalUnicast);
             }
+
             var ilm = ttʗ1.ip.IsInterfaceLocalMulticast();
             if (ilm != ttʗ1.interfaceLocalMulticast) {
                 tΔ1.Errorf("IsInterfaceLocalMulticast(%v) = %v; want %v"u8, ttʗ1.ip, ilm, ttʗ1.interfaceLocalMulticast);
             }
+
             var llu = ttʗ1.ip.IsLinkLocalUnicast();
             if (llu != ttʗ1.linkLocalUnicast) {
                 tΔ1.Errorf("IsLinkLocalUnicast(%v) = %v; want %v"u8, ttʗ1.ip, llu, ttʗ1.linkLocalUnicast);
             }
+
             var llm = ttʗ1.ip.IsLinkLocalMulticast();
             if (llm != ttʗ1.linkLocalMulticast) {
                 tΔ1.Errorf("IsLinkLocalMulticast(%v) = %v; want %v"u8, ttʗ1.ip, llm, ttʗ1.linkLocalMulticast);
             }
+
             var lo = ttʗ1.ip.IsLoopback();
             if (lo != ttʗ1.loopback) {
                 tΔ1.Errorf("IsLoopback(%v) = %v; want %v"u8, ttʗ1.ip, lo, ttʗ1.loopback);
             }
+
             var multicast = ttʗ1.ip.IsMulticast();
             if (multicast != ttʗ1.multicast) {
                 tΔ1.Errorf("IsMulticast(%v) = %v; want %v"u8, ttʗ1.ip, multicast, ttʗ1.multicast);
             }
+
             var @private = ttʗ1.ip.IsPrivate();
             if (@private != ttʗ1.@private) {
                 tΔ1.Errorf("IsPrivate(%v) = %v; want %v"u8, ttʗ1.ip, @private, ttʗ1.@private);
             }
+
             var unspecified = ttʗ1.ip.IsUnspecified();
             if (unspecified != ttʗ1.unspecified) {
                 tΔ1.Errorf("IsUnspecified(%v) = %v; want %v"u8, ttʗ1.ip, unspecified, ttʗ1.unspecified);
@@ -1027,6 +1058,7 @@ public static void TestAddrWellKnown(ж<testing.T> Ꮡt) {
             std: net.IPv6unspecified
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestAddrWellKnown_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1035,6 +1067,7 @@ public static void TestAddrWellKnown(ж<testing.T> Ꮡt) {
         Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             @string want = ttʗ1.std.String();
             @string got = ttʗ1.ip.String();
+
             if (got != want) {
                 tΔ1.Fatalf("got %s, want %s"u8, got, want);
             }
@@ -1070,14 +1103,15 @@ public static void TestAddrLessCompare(ж<testing.T> Ꮡt) {
         new(mustIP("0.0.0.0"u8), mustIP("::"u8), true),
         new(mustIP("::1%a"u8), mustIP("::1%b"u8), true),
         new(mustIP("::1%a"u8), mustIP("::1%a"u8), false),
-        new(mustIP("::1%b"u8), mustIP("::1%a"u8), false), // For Issue 68113, verify that an IPv4 address and a
- // v4-mapped-IPv6 address differing only in their zone
- // pointer are unequal via all three of
- // ==/Compare/reflect.DeepEqual. In Go 1.22 and
- // earlier, these were accidentally equal via
- // DeepEqual due to their zone pointers (z) differing
- // but pointing to identical structures.
+        new(mustIP("::1%b"u8), mustIP("::1%a"u8), false),
 
+        // For Issue 68113, verify that an IPv4 address and a
+        // v4-mapped-IPv6 address differing only in their zone
+        // pointer are unequal via all three of
+        // ==/Compare/reflect.DeepEqual. In Go 1.22 and
+        // earlier, these were accidentally equal via
+        // DeepEqual due to their zone pointers (z) differing
+        // but pointing to identical structures.
         new(mustIP(ffff111112ˢ), mustIP("11.1.1.12"u8), false)
     }.slice();
     foreach (var (_, tt) in tests) {
@@ -1098,6 +1132,7 @@ public static void TestAddrLessCompare(ж<testing.T> Ꮡt) {
         if (cmp == 1 && !tt.b.Less(tt.a)) {
             Ꮡt.Errorf("Compare(%q, %q) = 1; but b.Less(a) isn't true"u8, tt.a, tt.b);
         }
+
         // Also check inverse.
         if (gotΔ1 == tt.want && gotΔ1) {
             var got2 = tt.b.Less(tt.a);
@@ -1105,12 +1140,14 @@ public static void TestAddrLessCompare(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Less(%q, %q) was correctly %v, but so was Less(%q, %q)"u8, tt.a, tt.b, gotΔ1, tt.b, tt.a);
             }
         }
+
         // Also check reflect.DeepEqual. See issue 68113.
         var deepEq = reflect.DeepEqual(tt.a, tt.b);
         if ((cmp == 0) != deepEq) {
             Ꮡt.Errorf("%q and %q differ in == (%v) vs reflect.DeepEqual (%v)"u8, tt.a, tt.b, cmp == 0, deepEq);
         }
     }
+
     // And just sort.
     var values = new netipꓸAddr[]{
         mustIP("::1"u8),
@@ -1154,6 +1191,7 @@ public static void TestAddrPortCompare(ж<testing.T> Ꮡt) {
         if (gotΔ1 != tt.want) {
             Ꮡt.Errorf("Compare(%q, %q) = %v; want %v"u8, tt.a, tt.b, gotΔ1, tt.want);
         }
+
         // Also check inverse.
         if (gotΔ1 == tt.want) {
             nint got2 = tt.b.Compare(tt.a);
@@ -1164,6 +1202,7 @@ public static void TestAddrPortCompare(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // And just sort.
     var values = new netip.AddrPort[]{
         mustIPPort("[::1]:80"u8),
@@ -1186,7 +1225,18 @@ internal static readonly @string fe8064ˢ = "fe80::/64"u8;
 internal static readonly @string fe9064ˢ = "fe90::/64"u8;
 internal static readonly @string fe8048ˢ = "fe80::/48"u8;
 internal static readonly @string fe808ˢ = "fe80::/8"u8;
-internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 fe80::/48 fe80::/64 fe90::/64]"u8;
+internal static readonly @string invalidPrefix1200161200ˢ = @"[invalid Prefix 1.2.0.0/16 1.2.0.0/24 1.2.3.0/24 1.2.3.4/24 1.2.3.0/28 fe80::/48 fe80::/64 fe90::/64]"u8;
+internal static readonly @string fec010ˢ = "fec0::/10"u8;
+internal static readonly @string fe009ˢ = "fe00::/9"u8;
+internal static readonly @string f8006ˢ = "f800::/6"u8;
+internal static readonly @string e0004ˢ = "e000::/4"u8;
+internal static readonly @string ff008ˢ = "ff00::/8"u8;
+internal static readonly @string a0003ˢ = "a000::/3"u8;
+internal static readonly @string fc007ˢ = "fc00::/7"u8;
+internal static readonly @string c0003ˢ = "c000::/3"u8;
+internal static readonly @string fe8010ˢ = "fe80::/10"u8;
+internal static readonly @string f0005ˢ = "f000::/5"u8;
+internal static readonly @string a0003C0003E0004F0005F800ˢ = @"[0.0.0.0/8 0.0.0.0/32 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12 192.0.0.0/24 192.0.0.0/29 192.0.0.8/32 192.0.0.9/32 192.0.0.10/32 192.0.0.170/32 192.0.2.0/24 192.31.196.0/24 192.52.193.0/24 192.88.99.0/24 192.168.0.0/16 192.175.48.0/24 198.18.0.0/15 198.51.100.0/24 203.0.113.0/24 240.0.0.0/4 255.255.255.255/32 ::/8 100::/8 200::/7 400::/6 800::/5 1000::/4 2000::/3 4000::/3 6000::/3 8000::/3 a000::/3 c000::/3 e000::/4 f000::/5 f800::/6 fc00::/7 fe00::/9 fe80::/10 fec0::/10 ff00::/8]"u8;
 
 internal partial struct TestPrefixCompare_tests /*dyn*/ {
     internal netipꓸPrefix a, b;
@@ -1203,13 +1253,16 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
         new(mustPrefix(fe8064ˢ), mustPrefix(fe9064ˢ), -1),
         new(mustPrefix("1.2.0.0/16"u8), mustPrefix("1.2.0.0/24"u8), -1),
         new(mustPrefix(fe8048ˢ), mustPrefix(fe8064ˢ), -1),
-        new(mustPrefix("1.2.3.0/24"u8), mustPrefix(fe808ˢ), -1)
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix(fe808ˢ), -1),
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.4/24"u8), -1),
+        new(mustPrefix("1.2.3.0/24"u8), mustPrefix("1.2.3.0/28"u8), -1)
     }.slice();
     foreach (var (_, tt) in tests) {
         nint gotΔ1 = tt.a.Compare(tt.b);
         if (gotΔ1 != tt.want) {
             Ꮡt.Errorf("Compare(%q, %q) = %v; want %v"u8, tt.a, tt.b, gotΔ1, tt.want);
         }
+
         // Also check inverse.
         if (gotΔ1 == tt.want) {
             nint got2 = tt.b.Compare(tt.a);
@@ -1220,6 +1273,7 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // And just sort.
     var values = new netipꓸPrefix[]{
         mustPrefix("1.2.3.0/24"u8),
@@ -1228,11 +1282,71 @@ public static void TestPrefixCompare(ж<testing.T> Ꮡt) {
         mustPrefix("1.2.0.0/16"u8),
         new netipꓸPrefix(nil),
         mustPrefix(fe8048ˢ),
-        mustPrefix("1.2.0.0/24"u8)
+        mustPrefix("1.2.0.0/24"u8),
+        mustPrefix("1.2.3.4/24"u8),
+        mustPrefix("1.2.3.0/28"u8)
     }.slice();
     slices.SortFunc<slice<netipꓸPrefix>, netipꓸPrefix>(values, ((Func<netipꓸPrefix, netipꓸPrefix, nint>)(netip.Compare)));
     @string got = fmt.Sprintf("%s"u8, values);
     @string want = invalidPrefix1200161200ˢ;
+    if (got != want) {
+        Ꮡt.Errorf("unexpected sort\n got: %s\nwant: %s\n"u8, got, want);
+    }
+
+    // Lists from
+    // https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml and
+    // https://www.iana.org/assignments/ipv6-address-space/ipv6-address-space.xhtml,
+    // to verify that the sort order matches IANA's conventional
+    // ordering.
+    values = new netipꓸPrefix[]{
+        mustPrefix("0.0.0.0/8"u8),
+        mustPrefix("127.0.0.0/8"u8),
+        mustPrefix("10.0.0.0/8"u8),
+        mustPrefix("203.0.113.0/24"u8),
+        mustPrefix("169.254.0.0/16"u8),
+        mustPrefix("192.0.0.0/24"u8),
+        mustPrefix("240.0.0.0/4"u8),
+        mustPrefix("192.0.2.0/24"u8),
+        mustPrefix("192.0.0.170/32"u8),
+        mustPrefix("198.18.0.0/15"u8),
+        mustPrefix("192.0.0.8/32"u8),
+        mustPrefix("0.0.0.0/32"u8),
+        mustPrefix("192.0.0.9/32"u8),
+        mustPrefix("198.51.100.0/24"u8),
+        mustPrefix("192.168.0.0/16"u8),
+        mustPrefix("192.0.0.10/32"u8),
+        mustPrefix("192.175.48.0/24"u8),
+        mustPrefix("192.52.193.0/24"u8),
+        mustPrefix("100.64.0.0/10"u8),
+        mustPrefix("255.255.255.255/32"u8),
+        mustPrefix("192.31.196.0/24"u8),
+        mustPrefix("172.16.0.0/12"u8),
+        mustPrefix("192.0.0.0/29"u8),
+        mustPrefix("192.88.99.0/24"u8),
+        mustPrefix(fec010ˢ),
+        mustPrefix("6000::/3"u8),
+        mustPrefix(fe009ˢ),
+        mustPrefix("8000::/3"u8),
+        mustPrefix("0000::/8"u8),
+        mustPrefix("0400::/6"u8),
+        mustPrefix(f8006ˢ),
+        mustPrefix(e0004ˢ),
+        mustPrefix(ff008ˢ),
+        mustPrefix(a0003ˢ),
+        mustPrefix(fc007ˢ),
+        mustPrefix("1000::/4"u8),
+        mustPrefix("0800::/5"u8),
+        mustPrefix("4000::/3"u8),
+        mustPrefix("0100::/8"u8),
+        mustPrefix(c0003ˢ),
+        mustPrefix(fe8010ˢ),
+        mustPrefix("0200::/7"u8),
+        mustPrefix(f0005ˢ),
+        mustPrefix("2000::/3"u8)
+    }.slice();
+    slices.SortFunc(values, (netipꓸPrefix a, netipꓸPrefix b) => a.Compare(b));
+    got = fmt.Sprintf("%s"u8, values);
+    want = a0003C0003E0004F0005F800ˢ;
     if (got != want) {
         Ꮡt.Errorf("unexpected sort\n got: %s\nwant: %s\n"u8, got, want);
     }
@@ -1269,6 +1383,7 @@ public static void TestIPStringExpanded(ж<testing.T> Ꮡt) {
             s: "2001:0db8:0000:0000:0000:0000:0000:0001%eth0"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestIPStringExpanded_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1277,6 +1392,7 @@ public static void TestIPStringExpanded(ж<testing.T> Ꮡt) {
         Ꮡt.Run(tt.ip.String(), (ж<testing.T> tΔ1) => {
             @string want = ttʗ1.s;
             @string got = ttʗ1.ip.StringExpanded();
+
             if (got != want) {
                 tΔ1.Fatalf("got %s, want %s"u8, got, want);
             }
@@ -1308,6 +1424,7 @@ public static void TestPrefixMasking(ж<testing.T> Ꮡt) {
         if (zone != ""u8) {
             zone = "%"u8 + zone;
         }
+
         return new TestPrefixMasking_subtest[]{
             new(
                 ip: mustIP(fmt.Sprintf("2001:db8::1%s"u8, zone)),
@@ -1339,6 +1456,7 @@ public static void TestPrefixMasking(ж<testing.T> Ꮡt) {
             )
         }.slice();
     }
+
     var tests = new TestPrefixMasking_tests[]{
         new(
             family: "nil"u8,
@@ -1373,9 +1491,9 @@ public static void TestPrefixMasking(ж<testing.T> Ꮡt) {
                     ok: true
                 ),
                 new(
-                    ip: mustIP("100.98.156.66"u8), // Partially masking one byte that contains both
- // 1s and 0s on either side of the mask limit.
-
+                    // Partially masking one byte that contains both
+                    // 1s and 0s on either side of the mask limit.
+                    ip: mustIP("100.98.156.66"u8),
                     bits: 10,
                     p: mustPrefix("100.64.0.0/10"u8),
                     ok: true
@@ -1391,6 +1509,7 @@ public static void TestPrefixMasking(ж<testing.T> Ꮡt) {
             subtests: makeIPv6(eth0ˢ)
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestPrefixMasking_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1405,6 +1524,7 @@ public static void TestPrefixMasking(ж<testing.T> Ꮡt) {
                 tΔ1.Run(st.p.String(), (ж<testing.T> tΔ2) => {
                     // Ensure st.ip is not mutated.
                     @string orig = stʗ1.ip.String();
+
                     var (p, err) = stʗ1.ip.Prefix((nint)stʗ1.bits);
                     if (stʗ1.ok && err != default!) {
                         tΔ2.Fatalf("failed to produce prefix: %v"u8, err);
@@ -1416,9 +1536,11 @@ public static void TestPrefixMasking(ж<testing.T> Ꮡt) {
                         tΔ2.Logf("err: %v"u8, err);
                         return;
                     }
+
                     if (!reflect.DeepEqual(p, stʗ1.p)) {
                         tΔ2.Errorf("prefix = %q, want %q"u8, p, stʗ1.p);
                     }
+
                     {
                         @string got = stʗ1.ip.String(); if (got != orig) {
                             tΔ2.Errorf("IP was mutated: %q, want %q"u8, got, orig);
@@ -1439,22 +1561,26 @@ public static void TestPrefixMarshalUnmarshal(ж<testing.T> Ꮡt) {
         "::1/128"u8,
         "2001:db8::/32"u8
     }.slice();
+
     foreach (var (_, s) in tests) {
         Ꮡt.Run(s, (ж<testing.T> tΔ1) => {
             // Ensure that JSON  (and by extension, text) marshaling is
             // sane by entering quoted input.
             @string orig = @""""u8 + s + @""""u8;
+
             ref var p = ref heap(new netipꓸPrefix(), out var Ꮡp);
             {
                 var errΔ1 = json.Unmarshal(slice<byte>(orig), Ꮡp); if (errΔ1 != default!) {
                     tΔ1.Fatalf("failed to unmarshal: %v"u8, errΔ1);
                 }
             }
+
             var (pb, err) = json.Marshal(p);
             if (err != default!) {
                 tΔ1.Fatalf("failed to marshal: %v"u8, err);
             }
-            @string back = ((@string)pb);
+
+            @string back = (@string)pb;
             if (orig != back) {
                 tΔ1.Errorf("Marshal = %q; want %q"u8, back, orig);
             }
@@ -1500,6 +1626,7 @@ public static void TestIs4AndIs6(ж<testing.T> Ꮡt) {
         if (got4 != tt.is4) {
             Ꮡt.Errorf("Is4(%q) = %v; want %v"u8, tt.ip, got4, tt.is4);
         }
+
         var got6 = tt.ip.Is6();
         if (got6 != tt.is6) {
             Ꮡt.Errorf("Is6(%q) = %v; want %v"u8, tt.ip, got6, tt.is6);
@@ -1617,7 +1744,6 @@ public static void TestPrefix(ж<testing.T> Ꮡt) {
         ),
         new(
             prefix: "100.64.0.0/10"u8, // CGNAT range; prefix not multiple of 8
-
             ip: mustIP("100.64.0.0"u8),
             bits: 10,
             contains: mustIPs("100.64.0.0"u8, "100.64.0.1", "100.81.251.94", "100.100.100.100", "100.127.255.254", "100.127.255.255"),
@@ -1687,6 +1813,7 @@ public static void TestPrefix(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("prefix.String()=%q, want %q"u8, got, want);
                 }
             }
+
             TestAppendToMarshal(tΔ1, prefix);
         });
     }
@@ -1791,8 +1918,8 @@ public static void TestParsePrefixError(ж<testing.T> Ꮡt) {
         new(
             prefix: "2001::/129"u8,
             errstr: "out of range"u8
-        ), // Zones are not allowed: https://go.dev/issue/51899
-
+        ),
+        // Zones are not allowed: https://go.dev/issue/51899
         new(
             prefix: "1.1.1.0%a/24"u8,
             errstr: "unexpected character"u8
@@ -2016,7 +2143,6 @@ public static void BenchmarkIPv6Contains(ж<testing.B> Ꮡb) {
     }
 }
 
-
 partial struct parseBenchInputsᴛ1 /*dyn*/ {
     internal @string name;
     internal @string ip;
@@ -2186,6 +2312,7 @@ public static void BenchmarkPrefixMasking(ж<testing.B> Ꮡb) {
             bits: 0
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new BenchmarkPrefixMasking_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -2193,6 +2320,7 @@ public static void BenchmarkPrefixMasking(ж<testing.B> Ꮡb) {
         var ttʗ1 = tt;
         Ꮡb.Run(tt.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
+
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 (sinkPrefix, _) = ttʗ1.ip.Prefix(ttʗ1.bits);
             }
@@ -2220,6 +2348,7 @@ public static void BenchmarkParseAddrPort(ж<testing.B> Ꮡb) {
         }
         Ꮡb.Run(test.name, (ж<testing.B> bΔ1) => {
             bΔ1.ReportAllocs();
+
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 (sinkAddrPort, _) = ParseAddrPort(ipp);
             }
@@ -2241,7 +2370,6 @@ public static void TestAs4(ж<testing.T> Ꮡt) {
         ),
         new(
             ip: AddrFrom16(mustIP("1.2.3.4"u8).As16()), // IPv4-in-IPv6
-
             want: new byte[]{1, 2, 3, 4}.array()
         ),
         new(
@@ -2298,31 +2426,31 @@ public static void TestPrefixOverlaps(ж<testing.T> Ꮡt) {
     var pfx = mustPrefix;
     var tests = new TestPrefixOverlaps_tests[]{
         new(new netipꓸPrefix(nil), pfx("1.2.0.0/16"u8), false), // first zero
-
         new(pfx("1.2.0.0/16"u8), new netipꓸPrefix(nil), false), // second zero
-
         new(pfx("::0/3"u8), pfx("0.0.0.0/3"u8), false), // different families
-
         new(pfx("1.2.0.0/16"u8), pfx("1.2.0.0/16"u8), true), // equal
-
         new(pfx("1.2.0.0/16"u8), pfx("1.2.3.0/24"u8), true),
         new(pfx("1.2.3.0/24"u8), pfx("1.2.0.0/16"u8), true),
         new(pfx("1.2.0.0/16"u8), pfx("1.2.3.0/32"u8), true),
-        new(pfx("1.2.3.0/32"u8), pfx("1.2.0.0/16"u8), true), // Match /0 either order
+        new(pfx("1.2.3.0/32"u8), pfx("1.2.0.0/16"u8), true),
 
+        // Match /0 either order
         new(pfx("1.2.3.0/32"u8), pfx("0.0.0.0/0"u8), true),
         new(pfx("0.0.0.0/0"u8), pfx("1.2.3.0/32"u8), true),
         new(pfx("1.2.3.0/32"u8), pfx("5.5.5.5/0"u8), true), // normalization not required; /0 means true
- // IPv6 overlapping
 
+        // IPv6 overlapping
         new(pfx("5::1/128"u8), pfx("5::0/8"u8), true),
-        new(pfx("5::0/8"u8), pfx("5::1/128"u8), true), // IPv6 not overlapping
+        new(pfx("5::0/8"u8), pfx("5::1/128"u8), true),
 
+        // IPv6 not overlapping
         new(pfx("1::1/128"u8), pfx("2::2/128"u8), false),
-        new(pfx("0100::0/8"u8), pfx("::1/128"u8), false), // IPv4-mapped IPv6 addresses should not overlap with IPv4.
+        new(pfx("0100::0/8"u8), pfx("::1/128"u8), false),
 
-        new(PrefixFrom(AddrFrom16(mustIP("1.2.0.0"u8).As16()), 16), pfx("1.2.3.0/24"u8), false), // Invalid prefixes
+        // IPv4-mapped IPv6 addresses should not overlap with IPv4.
+        new(PrefixFrom(AddrFrom16(mustIP("1.2.0.0"u8).As16()), 16), pfx("1.2.3.0/24"u8), false),
 
+        // Invalid prefixes
         new(PrefixFrom(mustIP("1.2.3.4"u8), 33), pfx("1.2.3.0/24"u8), false),
         new(PrefixFrom(mustIP("2000::"u8), 129), pfx("2000::/64"u8), false)
     }.slice();
@@ -2348,27 +2476,16 @@ public static void TestPrefixOverlaps(ж<testing.T> Ꮡt) {
 // called. By writing results to a global variable, we hide that fact
 // from the compiler and force it to keep the code under test.
 internal static netipꓸAddr sinkIP;
-
 internal static net.IP sinkStdIP;
-
 internal static netip.AddrPort sinkAddrPort;
-
 internal static netipꓸPrefix sinkPrefix;
-
 internal static slice<netipꓸPrefix> sinkPrefixSlice;
-
 internal static unique.Handle<AddrDetail> sinkInternValue;
-
 internal static array<byte> sinkIP16 = new(16);
-
 internal static array<byte> sinkIP4 = new(4);
-
 internal static bool sinkBool;
-
 internal static @string sinkString;
-
 internal static slice<byte> sinkBytes;
-
 internal static ж<net.UDPAddr> sinkUDPAddr = Ꮡ(new net.UDPAddr(IP: new net.IP(0, 16)));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -2429,6 +2546,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
     if (asan.Enabled) {
         Ꮡt.Skip(testAllocatesMoreWithˢ);
     }
+
     // Wrappers that panic on error, to prove that our alloc-free
     // methods are returning successfully.
     netipꓸAddr panicIP(netipꓸAddr ip, error err) {
@@ -2457,6 +2575,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
             }
         });
     }
+
     // Addr constructors
     test(iPv4ˢ, () => {
         sinkIP = IPv4(1, 2, 3, 4);
@@ -2492,6 +2611,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
     test(iPv6Unspecifiedˢ, () => {
         sinkIP = IPv6Unspecified();
     });
+
     // Addr methods
     test(addrIsZeroˢ, () => {
         sinkBool = MustParseAddr("1.2.3.4"u8).IsZero();
@@ -2579,6 +2699,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
     test(addrPrevˢ, () => {
         sinkIP = MustParseAddr("1.2.3.4"u8).Prev();
     });
+
     // AddrPort constructors
     test(addrPortFromˢ, () => {
         sinkAddrPort = AddrPortFrom(IPv4(1, 2, 3, 4), 22);
@@ -2591,6 +2712,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
     test(mustParseAddrPortˢ, () => {
         sinkAddrPort = MustParseAddrPort("[::1]:1234"u8);
     });
+
     // Prefix constructors
     test(prefixFromˢ, () => {
         sinkPrefix = PrefixFrom(IPv4(1, 2, 3, 4), 32);
@@ -2608,6 +2730,7 @@ public static void TestNoAllocs(ж<testing.T> Ꮡt) {
     test(mustParsePrefixˢ, () => {
         sinkPrefix = MustParsePrefix("1.2.3.4/20"u8);
     });
+
     // Prefix methods
     test(prefixContainsˢ, () => {
         sinkBool = MustParsePrefix("1.2.3.0/24"u8).Contains(MustParseAddr("1.2.3.4"u8));
@@ -2679,6 +2802,7 @@ public static void TestPrefixString(ж<testing.T> Ꮡt) {
         new(PrefixFrom(new netipꓸAddr(nil), 8), "invalid Prefix"u8),
         new(PrefixFrom(MustParseAddr("1.2.3.4"u8), 88), "invalid Prefix"u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         {
             @string got = tt.ipp.String(); if (got != tt.want) {
@@ -2704,6 +2828,7 @@ public static void TestAddrPortString(ж<testing.T> Ꮡt) {
         new(new AddrPort(nil), "invalid AddrPort"u8),
         new(AddrPortFrom(new netipꓸAddr(nil), 80), "invalid AddrPort"u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         {
             @string got = tt.ipp.String(); if (got != tt.want) {
@@ -2727,6 +2852,7 @@ public static void TestAsSlice(ж<testing.T> Ꮡt) {
         new(@in: mustIP("1.2.3.4"u8), want: new byte[]{1, 2, 3, 4}.slice()),
         new(@in: mustIP(ffff1ˢ), want: new slice<byte>(16){[0] = 0xff, [1] = 0xff, [15] = 1})
     }.slice();
+
     foreach (var (_, test) in tests) {
         var got = test.@in.AsSlice();
         if (!bytes.Equal(got, test.want)) {

@@ -30,14 +30,11 @@ internal static partial nint fork(this ref runner r, nint c, Action<nint> dispat
     return c;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object deferSeesTheReassignedˢ = (@string)"defer sees the reassigned channel:"u8;
-
 internal static void later(channel<bool> done) {
     GoFrame ᒐ = default;
     try {
         defer(() => {
-            fmt.Println(deferSeesTheReassignedˢ, done == default!);
+            fmt.Println("defer sees the reassigned channel:", done == default!);
         }, ref ᒐ);
         done = default!;
     }
@@ -45,13 +42,10 @@ internal static void later(channel<bool> done) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object dispatchˢ = (@string)"dispatch"u8;
-
 internal static void Main() {
     var r = Ꮡ(new runner(nil));
     fmt.Println(r.fork(5, (nint v) => {
-        fmt.Println(dispatchˢ, v);
+        fmt.Println("dispatch", v);
     }));
     later(sink);
 }

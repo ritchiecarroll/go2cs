@@ -3,8 +3,11 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using @unsafe = unsafe_package;
+
 partial class syscall_package {
 
+// Windows errors.
 public static Errno ERROR_FILE_NOT_FOUND => 2;
 public static Errno ERROR_PATH_NOT_FOUND => 3;
 public static Errno ERROR_ACCESS_DENIED => 5;
@@ -30,6 +33,9 @@ public static Errno WSAENOPROTOOPT => 10042;
 public static Errno WSAECONNABORTED => 10053;
 public static Errno WSAECONNRESET => 10054;
 
+internal static Errno _ERROR_INVALID_PARAMETER => 87;
+
+// Invented values to support what package os expects.
 public static UntypedInt O_RDONLY => 0x00000;
 public static UntypedInt O_WRONLY => 0x00001;
 public static UntypedInt O_RDWR => 0x00002;
@@ -41,11 +47,12 @@ public static UntypedInt O_NONBLOCK => 0x00800;
 public static UntypedInt O_APPEND => 0x00400;
 public static UntypedInt O_SYNC => 0x01000;
 public static UntypedInt O_ASYNC => 0x02000;
+internal static UntypedInt o_DIRECTORY => 0x04000;
 public static UntypedInt O_CLOEXEC => 0x80000;
-internal static UntypedInt o_DIRECTORY => 0x100000; // used by internal/syscall/windows
-internal static UntypedInt o_NOFOLLOW_ANY => 0x20000000; // used by internal/syscall/windows
-internal static UntypedInt o_OPEN_REPARSE => 0x40000000; // used by internal/syscall/windows
+internal static UntypedInt o_NOFOLLOW_ANY => 0x200000000; // used by internal/syscall/windows
+internal static UntypedInt o_WRITE_ATTRS => 0x800000000; // used by internal/syscall/windows
 
+// More invented values for signals
 public static ΔSignal SIGHUP => /* Signal(0x1) */ 1;
 public static ΔSignal SIGINT => /* Signal(0x2) */ 2;
 public static ΔSignal SIGQUIT => /* Signal(0x3) */ 3;
@@ -78,14 +85,30 @@ internal static array<@string> signals = new array<@string>(16){
     [15] = "terminated"u8
 };
 
+internal static UntypedInt fileFlagsMask => 0xFFF00000;
+
+internal static UntypedInt validFileFlagsMask => /* FILE_FLAG_OPEN_REPARSE_POINT |
+	FILE_FLAG_BACKUP_SEMANTICS |
+	FILE_FLAG_OVERLAPPED |
+	_FILE_FLAG_OPEN_NO_RECALL |
+	_FILE_FLAG_SESSION_AWARE |
+	_FILE_FLAG_POSIX_SEMANTICS |
+	_FILE_FLAG_DELETE_ON_CLOSE |
+	_FILE_FLAG_SEQUENTIAL_SCAN |
+	_FILE_FLAG_NO_BUFFERING |
+	_FILE_FLAG_RANDOM_ACCESS |
+	_FILE_FLAG_WRITE_THROUGH */ 4289724416;
+
 public static UntypedInt GENERIC_READ => 0x80000000;
 public static UntypedInt GENERIC_WRITE => 0x40000000;
 public static UntypedInt GENERIC_EXECUTE => 0x20000000;
 public static UntypedInt GENERIC_ALL => 0x10000000;
+
 public static UntypedInt FILE_LIST_DIRECTORY => 0x00000001;
 public static UntypedInt FILE_APPEND_DATA => 0x00000004;
 internal static UntypedInt _FILE_WRITE_EA => 0x00000010;
 public static UntypedInt FILE_WRITE_ATTRIBUTES => 0x00000100;
+
 public static UntypedInt FILE_SHARE_READ => 0x00000001;
 public static UntypedInt FILE_SHARE_WRITE => 0x00000002;
 public static UntypedInt FILE_SHARE_DELETE => 0x00000004;
@@ -96,28 +119,46 @@ public static UntypedInt FILE_ATTRIBUTE_DIRECTORY => 0x00000010;
 public static UntypedInt FILE_ATTRIBUTE_ARCHIVE => 0x00000020;
 public static UntypedInt FILE_ATTRIBUTE_NORMAL => 0x00000080;
 public static UntypedInt FILE_ATTRIBUTE_REPARSE_POINT => 0x00000400;
+
 public static UntypedInt INVALID_FILE_ATTRIBUTES => 0xffffffff;
+
 public static UntypedInt CREATE_NEW => 1;
 public static UntypedInt CREATE_ALWAYS => 2;
 public static UntypedInt OPEN_EXISTING => 3;
 public static UntypedInt OPEN_ALWAYS => 4;
 public static UntypedInt TRUNCATE_EXISTING => 5;
+
+// The following flags are supported by [Open]
+// and exported in [golang.org/x/sys/windows].
+internal static UntypedInt _FILE_FLAG_OPEN_NO_RECALL => 0x00100000;
 public static UntypedInt FILE_FLAG_OPEN_REPARSE_POINT => 0x00200000;
+internal static UntypedInt _FILE_FLAG_SESSION_AWARE => 0x00800000;
+internal static UntypedInt _FILE_FLAG_POSIX_SEMANTICS => 0x01000000;
 public static UntypedInt FILE_FLAG_BACKUP_SEMANTICS => 0x02000000;
+internal static UntypedInt _FILE_FLAG_DELETE_ON_CLOSE => 0x04000000;
+internal static UntypedInt _FILE_FLAG_SEQUENTIAL_SCAN => 0x08000000;
+internal static UntypedInt _FILE_FLAG_RANDOM_ACCESS => 0x10000000;
+internal static UntypedInt _FILE_FLAG_NO_BUFFERING => 0x20000000;
 public static UntypedInt FILE_FLAG_OVERLAPPED => 0x40000000;
+internal static UntypedInt _FILE_FLAG_WRITE_THROUGH => 0x80000000;
+
 public static UntypedInt HANDLE_FLAG_INHERIT => 0x00000001;
 public static UntypedInt STARTF_USESTDHANDLES => 0x00000100;
 public static UntypedInt STARTF_USESHOWWINDOW => 0x00000001;
 public static UntypedInt DUPLICATE_CLOSE_SOURCE => 0x00000001;
 public static UntypedInt DUPLICATE_SAME_ACCESS => 0x00000002;
+
 public static UntypedInt STD_INPUT_HANDLE => -10;
 public static UntypedInt STD_OUTPUT_HANDLE => -11;
 public static UntypedInt STD_ERROR_HANDLE => -12;
+
 public static UntypedInt FILE_BEGIN => 0;
 public static UntypedInt FILE_CURRENT => 1;
 public static UntypedInt FILE_END => 2;
+
 public static UntypedInt LANG_ENGLISH => 0x09;
 public static UntypedInt SUBLANG_ENGLISH_US => 0x01;
+
 public static UntypedInt FORMAT_MESSAGE_ALLOCATE_BUFFER => 256;
 public static UntypedInt FORMAT_MESSAGE_IGNORE_INSERTS => 512;
 public static UntypedInt FORMAT_MESSAGE_FROM_STRING => 1024;
@@ -125,39 +166,50 @@ public static UntypedInt FORMAT_MESSAGE_FROM_HMODULE => 2048;
 public static UntypedInt FORMAT_MESSAGE_FROM_SYSTEM => 4096;
 public static UntypedInt FORMAT_MESSAGE_ARGUMENT_ARRAY => 8192;
 public static UntypedInt FORMAT_MESSAGE_MAX_WIDTH_MASK => 255;
+
 public static UntypedInt MAX_PATH => 260;
 public static UntypedInt MAX_LONG_PATH => 32768;
+
 public static UntypedInt MAX_COMPUTERNAME_LENGTH => 15;
+
 public static UntypedInt TIME_ZONE_ID_UNKNOWN => 0;
 public static UntypedInt TIME_ZONE_ID_STANDARD => 1;
+
 public static UntypedInt TIME_ZONE_ID_DAYLIGHT => 2;
 public static UntypedInt IGNORE => 0;
 public static UntypedInt INFINITE => 0xffffffff;
+
 public static UntypedInt WAIT_TIMEOUT => 258;
 public static UntypedInt WAIT_ABANDONED => 0x00000080;
 public static UntypedInt WAIT_OBJECT_0 => 0x00000000;
 public static UntypedInt WAIT_FAILED => 0xFFFFFFFF;
+
 public static UntypedInt CREATE_NEW_PROCESS_GROUP => 0x00000200;
 public static UntypedInt CREATE_UNICODE_ENVIRONMENT => 0x00000400;
+
 public static UntypedInt PROCESS_TERMINATE => 1;
 public static UntypedInt PROCESS_QUERY_INFORMATION => 0x00000400;
 public static UntypedInt SYNCHRONIZE => 0x00100000;
+
 public static UntypedInt PAGE_READONLY => 0x02;
 public static UntypedInt PAGE_READWRITE => 0x04;
 public static UntypedInt PAGE_WRITECOPY => 0x08;
 public static UntypedInt PAGE_EXECUTE_READ => 0x20;
 public static UntypedInt PAGE_EXECUTE_READWRITE => 0x40;
 public static UntypedInt PAGE_EXECUTE_WRITECOPY => 0x80;
+
 public static UntypedInt FILE_MAP_COPY => 0x01;
 public static UntypedInt FILE_MAP_WRITE => 0x02;
 public static UntypedInt FILE_MAP_READ => 0x04;
 public static UntypedInt FILE_MAP_EXECUTE => 0x20;
+
 public static UntypedInt CTRL_C_EVENT => 0;
 public static UntypedInt CTRL_BREAK_EVENT => 1;
 public static UntypedInt CTRL_CLOSE_EVENT => 2;
 public static UntypedInt CTRL_LOGOFF_EVENT => 5;
 public static UntypedInt CTRL_SHUTDOWN_EVENT => 6;
 
+// flags for CreateToolhelp32Snapshot
 public static UntypedInt TH32CS_SNAPHEAPLIST => 0x01;
 public static UntypedInt TH32CS_SNAPPROCESS => 0x02;
 public static UntypedInt TH32CS_SNAPTHREAD => 0x04;
@@ -166,6 +218,7 @@ public static UntypedInt TH32CS_SNAPMODULE32 => 0x10;
 public static UntypedInt TH32CS_SNAPALL => /* TH32CS_SNAPHEAPLIST | TH32CS_SNAPMODULE | TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD */ 15;
 public static UntypedInt TH32CS_INHERIT => 0x80000000;
 
+// do not reorder
 public static UntypedInt FILE_NOTIFY_CHANGE_FILE_NAME => /* 1 << iota */ 1;
 public static UntypedInt FILE_NOTIFY_CHANGE_DIR_NAME => 2;
 public static UntypedInt FILE_NOTIFY_CHANGE_ATTRIBUTES => 4;
@@ -174,12 +227,14 @@ public static UntypedInt FILE_NOTIFY_CHANGE_LAST_WRITE => 16;
 public static UntypedInt FILE_NOTIFY_CHANGE_LAST_ACCESS => 32;
 public static UntypedInt FILE_NOTIFY_CHANGE_CREATION => 64;
 
+// do not reorder
 public static UntypedInt FILE_ACTION_ADDED => /* iota + 1 */ 1;
 public static UntypedInt FILE_ACTION_REMOVED => 2;
 public static UntypedInt FILE_ACTION_MODIFIED => 3;
 public static UntypedInt FILE_ACTION_RENAMED_OLD_NAME => 4;
 public static UntypedInt FILE_ACTION_RENAMED_NEW_NAME => 5;
 
+// wincrypt.h
 public static UntypedInt PROV_RSA_FULL => 1;
 public static UntypedInt PROV_RSA_SIG => 2;
 public static UntypedInt PROV_DSS => 3;
@@ -204,13 +259,19 @@ public static UntypedInt CRYPT_DELETEKEYSET => 0x00000010;
 public static UntypedInt CRYPT_MACHINE_KEYSET => 0x00000020;
 public static UntypedInt CRYPT_SILENT => 0x00000040;
 public static UntypedInt CRYPT_DEFAULT_CONTAINER_OPTIONAL => 0x00000080;
+
 public static UntypedInt USAGE_MATCH_TYPE_AND => 0;
 public static UntypedInt USAGE_MATCH_TYPE_OR => 1;
+
 public static UntypedInt X509_ASN_ENCODING => 0x00000001;
 public static UntypedInt PKCS_7_ASN_ENCODING => 0x00010000;
+
 public static UntypedInt CERT_STORE_PROV_MEMORY => 2;
+
 public static UntypedInt CERT_STORE_ADD_ALWAYS => 4;
+
 public static UntypedInt CERT_STORE_DEFER_CLOSE_UNTIL_LAST_FREE_FLAG => 0x00000004;
+
 public static UntypedInt CERT_TRUST_NO_ERROR => 0x00000000;
 public static UntypedInt CERT_TRUST_IS_NOT_TIME_VALID => 0x00000001;
 public static UntypedInt CERT_TRUST_IS_REVOKED => 0x00000004;
@@ -231,6 +292,7 @@ public static UntypedInt CERT_TRUST_IS_OFFLINE_REVOCATION => 0x01000000;
 public static UntypedInt CERT_TRUST_NO_ISSUANCE_CHAIN_POLICY => 0x02000000;
 public static UntypedInt CERT_TRUST_IS_EXPLICIT_DISTRUST => 0x04000000;
 public static UntypedInt CERT_TRUST_HAS_NOT_SUPPORTED_CRITICAL_EXT => 0x08000000;
+
 public static UntypedInt CERT_CHAIN_POLICY_BASE => 1;
 public static UntypedInt CERT_CHAIN_POLICY_AUTHENTICODE => 2;
 public static UntypedInt CERT_CHAIN_POLICY_AUTHENTICODE_TS => 3;
@@ -239,11 +301,13 @@ public static UntypedInt CERT_CHAIN_POLICY_BASIC_CONSTRAINTS => 5;
 public static UntypedInt CERT_CHAIN_POLICY_NT_AUTH => 6;
 public static UntypedInt CERT_CHAIN_POLICY_MICROSOFT_ROOT => 7;
 public static UntypedInt CERT_CHAIN_POLICY_EV => 8;
+
 public static UntypedInt CERT_E_EXPIRED => 0x800B0101;
 public static UntypedInt CERT_E_ROLE => 0x800B0103;
 public static UntypedInt CERT_E_PURPOSE => 0x800B0106;
 public static UntypedInt CERT_E_UNTRUSTEDROOT => 0x800B0109;
 public static UntypedInt CERT_E_CN_NO_MATCH => 0x800B010F;
+
 public static UntypedInt AUTHTYPE_CLIENT => 1;
 public static UntypedInt AUTHTYPE_SERVER => 2;
 
@@ -251,6 +315,12 @@ public static slice<byte> OID_PKIX_KP_SERVER_AUTH = slice<byte>("1.3.6.1.5.5.7.3
 public static slice<byte> OID_SERVER_GATED_CRYPTO = slice<byte>("1.3.6.1.4.1.311.10.3.3\x00"u8);
 public static slice<byte> OID_SGC_NETSCAPE = slice<byte>("2.16.840.1.113730.4.1\x00"u8);
 
+// Pointer represents a pointer to an arbitrary Windows type.
+//
+// Pointer-typed fields may point to one of many different types. It's
+// up to the caller to provide a pointer to the appropriate type, cast
+// to Pointer. The caller must obey the unsafe.Pointer rules while
+// doing so.
 partial class Pointer /*ж<EmptyStruct>*/;
 
 // Invented values to support what package os expects.
@@ -301,7 +371,7 @@ partial struct Filetime {
 // since Epoch (00:00:00 UTC, January 1, 1970).
 public static int64 Nanoseconds(this ref Filetime ft) {
     // 100-nanosecond intervals since January 1, 1601
-    var nsec = ((int64)ft.HighDateTime << (int)(32)) + (int64)ft.LowDateTime;
+    var nsec = ((int64)ft.HighDateTime << 32) + (int64)ft.LowDateTime;
     // change starting time to the Epoch (00:00:00 UTC, January 1, 1970)
     nsec -= 116444736000000000L;
     // convert into nanoseconds
@@ -317,8 +387,8 @@ public static Filetime /*ft*/ NsecToFiletime(int64 nsec) {
     // change starting time to January 1, 1601
     nsec += 116444736000000000L;
     // split into high / low
-    ft.LowDateTime = (uint32)((int64)(nsec & 0xffffffffL));
-    ft.HighDateTime = (uint32)((int64)((nsec >> (int)(32)) & 0xffffffffL));
+    ft.LowDateTime = (uint32)(nsec & 0xffffffffL);
+    ft.HighDateTime = (uint32)(nsec >> 32 & 0xffffffffL);
     return ft;
 }
 
@@ -366,6 +436,7 @@ internal static void copyFindData(ref Win32finddata dst, ref win32finddata1 src)
     dst.FileSizeLow = src.FileSizeLow;
     dst.Reserved0 = src.Reserved0;
     dst.Reserved1 = src.Reserved1;
+
     // The src is 1 element bigger than dst, but it must be NUL.
     copy(dst.FileName[..], src.FileName[..]);
     copy(dst.AlternateFileName[..], src.AlternateFileName[..]);
@@ -397,32 +468,20 @@ partial struct Win32FileAttributeData {
 }
 
 // ShowWindow constants
+// winuser.h
 public static UntypedInt SW_HIDE => 0;
-
 public static UntypedInt SW_NORMAL => 1;
-
 public static UntypedInt SW_SHOWNORMAL => 1;
-
 public static UntypedInt SW_SHOWMINIMIZED => 2;
-
 public static UntypedInt SW_SHOWMAXIMIZED => 3;
-
 public static UntypedInt SW_MAXIMIZE => 3;
-
 public static UntypedInt SW_SHOWNOACTIVATE => 4;
-
 public static UntypedInt SW_SHOW => 5;
-
 public static UntypedInt SW_MINIMIZE => 6;
-
 public static UntypedInt SW_SHOWMINNOACTIVE => 7;
-
 public static UntypedInt SW_SHOWNA => 8;
-
 public static UntypedInt SW_RESTORE => 9;
-
 public static UntypedInt SW_SHOWDEFAULT => 10;
-
 public static UntypedInt SW_FORCEMINIMIZE => 11;
 
 partial struct StartupInfo {
@@ -446,15 +505,23 @@ partial struct StartupInfo {
     public ΔHandle StdErr;
 }
 
+// _PROC_THREAD_ATTRIBUTE_LIST is a placeholder type to represent a the opaque PROC_THREAD_ATTRIBUTE_LIST.
+//
+// Manipulate this type only through [procThreadAttributeListContainer] to ensure proper handling of the
+// underlying memory. See https://g.dev/issue/73170.
 public partial struct _PROC_THREAD_ATTRIBUTE_LIST {
-    internal array<byte> _ = new(1);
+}
+
+partial struct procThreadAttributeListContainer {
+    internal ж<_PROC_THREAD_ATTRIBUTE_LIST> data;
+    internal slice<@unsafe.Pointer> pointers;
 }
 
 internal static UntypedInt _PROC_THREAD_ATTRIBUTE_PARENT_PROCESS => 0x00020000;
 internal static UntypedInt _PROC_THREAD_ATTRIBUTE_HANDLE_LIST => 0x00020002;
 
 partial struct _STARTUPINFOEXW {
-    public partial ref StartupInfo StartupInfo { get; }
+    /*embed*/ public StartupInfo StartupInfo;
     public ж<_PROC_THREAD_ATTRIBUTE_LIST> ProcThreadAttributeList;
 }
 
@@ -507,14 +574,17 @@ public static UntypedInt AF_UNIX => 1;
 public static UntypedInt AF_INET => 2;
 public static UntypedInt AF_INET6 => 23;
 public static UntypedInt AF_NETBIOS => 17;
+
 public static UntypedInt SOCK_STREAM => 1;
 public static UntypedInt SOCK_DGRAM => 2;
 public static UntypedInt SOCK_RAW => 3;
 public static UntypedInt SOCK_SEQPACKET => 5;
+
 public static UntypedInt IPPROTO_IP => 0;
 public static UntypedInt IPPROTO_IPV6 => 0x29;
 public static UntypedInt IPPROTO_TCP => 6;
 public static UntypedInt IPPROTO_UDP => 17;
+
 public static UntypedInt SOL_SOCKET => 0xffff;
 public static UntypedInt SO_REUSEADDR => 4;
 public static UntypedInt SO_KEEPALIVE => 8;
@@ -525,6 +595,7 @@ public static UntypedInt SO_RCVBUF => 0x1002;
 public static UntypedInt SO_SNDBUF => 0x1001;
 public static UntypedInt SO_UPDATE_ACCEPT_CONTEXT => 0x700b;
 public static UntypedInt SO_UPDATE_CONNECT_CONTEXT => 0x7010;
+
 public static UntypedInt IOC_OUT => 0x40000000;
 public static UntypedInt IOC_IN => 0x80000000;
 public static UntypedInt IOC_VENDOR => 0x18000000;
@@ -533,6 +604,7 @@ public static UntypedInt IOC_WS2 => 0x08000000;
 public static UntypedInt SIO_GET_EXTENSION_FUNCTION_POINTER => /* IOC_INOUT | IOC_WS2 | 6 */ 3355443206;
 public static UntypedInt SIO_KEEPALIVE_VALS => /* IOC_IN | IOC_VENDOR | 4 */ 2550136836;
 public static UntypedInt SIO_UDP_CONNRESET => /* IOC_IN | IOC_VENDOR | 12 */ 2550136844;
+
 // cf. https://learn.microsoft.com/en-US/troubleshoot/windows/win32/header-library-requirement-socket-ipproto-ip
 public static UntypedInt IP_TOS => 0x3;
 public static UntypedInt IP_TTL => 0x4;
@@ -541,6 +613,7 @@ public static UntypedInt IP_MULTICAST_TTL => 0xa;
 public static UntypedInt IP_MULTICAST_LOOP => 0xb;
 public static UntypedInt IP_ADD_MEMBERSHIP => 0xc;
 public static UntypedInt IP_DROP_MEMBERSHIP => 0xd;
+
 public static UntypedInt IPV6_V6ONLY => 0x1b;
 public static UntypedInt IPV6_UNICAST_HOPS => 0x4;
 public static UntypedInt IPV6_MULTICAST_IF => 0x9;
@@ -548,11 +621,15 @@ public static UntypedInt IPV6_MULTICAST_HOPS => 0xa;
 public static UntypedInt IPV6_MULTICAST_LOOP => 0xb;
 public static UntypedInt IPV6_JOIN_GROUP => 0xc;
 public static UntypedInt IPV6_LEAVE_GROUP => 0xd;
+
 public static UntypedInt SOMAXCONN => 0x7fffffff;
+
 public static UntypedInt TCP_NODELAY => 1;
+
 public static UntypedInt SHUT_RD => 0;
 public static UntypedInt SHUT_WR => 1;
 public static UntypedInt SHUT_RDWR => 2;
+
 public static UntypedInt WSADESCRIPTION_LEN => 256;
 public static UntypedInt WSASYS_STATUS_LEN => 128;
 
@@ -563,33 +640,19 @@ partial struct WSABuf {
 
 // Invented values to support what package os expects.
 public static UntypedInt S_IFMT => 0x1f000;
-
 public static UntypedInt S_IFIFO => 0x1000;
-
 public static UntypedInt S_IFCHR => 0x2000;
-
 public static UntypedInt S_IFDIR => 0x4000;
-
 public static UntypedInt S_IFBLK => 0x6000;
-
 public static UntypedInt S_IFREG => 0x8000;
-
 public static UntypedInt S_IFLNK => 0xa000;
-
 public static UntypedInt S_IFSOCK => 0xc000;
-
 public static UntypedInt S_ISUID => 0x800;
-
 public static UntypedInt S_ISGID => 0x400;
-
 public static UntypedInt S_ISVTX => 0x200;
-
 public static UntypedInt S_IRUSR => 0x100;
-
 public static UntypedInt S_IWRITE => 0x80;
-
 public static UntypedInt S_IWUSR => 0x80;
-
 public static UntypedInt S_IXUSR => 0x40;
 
 public static UntypedInt FILE_TYPE_CHAR => 0x0002;
@@ -677,6 +740,7 @@ public static UntypedInt DNS_TYPE_NBSTAT => 0xff01;
 
 public static UntypedInt DNS_INFO_NO_RECORDS => 0x251D;
 
+// flags inside DNSRecord.Dw
 public static UntypedInt DnsSectionQuestion => 0x0000;
 public static UntypedInt DnsSectionAnswer => 0x0001;
 public static UntypedInt DnsSectionAuthority => 0x0002;
@@ -929,6 +993,7 @@ partial struct CertChainPolicyStatus {
     public Pointer ExtraPolicyStatus;
 }
 
+// do not reorder
 public static UntypedInt HKEY_CLASSES_ROOT => /* 0x80000000 + iota */ 2147483648;
 public static UntypedInt HKEY_CURRENT_USER => 2147483649;
 public static UntypedInt HKEY_LOCAL_MACHINE => 2147483650;
@@ -936,6 +1001,7 @@ public static UntypedInt HKEY_USERS => 2147483651;
 public static UntypedInt HKEY_PERFORMANCE_DATA => 2147483652;
 public static UntypedInt HKEY_CURRENT_CONFIG => 2147483653;
 public static UntypedInt HKEY_DYN_DATA => 2147483654;
+
 public static UntypedInt KEY_QUERY_VALUE => 1;
 public static UntypedInt KEY_SET_VALUE => 2;
 public static UntypedInt KEY_CREATE_SUB_KEY => 4;
@@ -949,6 +1015,7 @@ public static UntypedInt KEY_WOW64_64KEY => 0x0100;
 public static UntypedInt KEY_WOW64_32KEY => 0x0200;
 public static UntypedInt KEY_ALL_ACCESS => 0xf003f;
 
+// do not reorder
 public static UntypedInt REG_NONE => iota;
 public static UntypedInt REG_SZ => 1;
 public static UntypedInt REG_EXPAND_SZ => 2;
@@ -1001,6 +1068,7 @@ public static UntypedInt WSAPROTOCOL_LEN => 255;
 public static UntypedInt MAX_PROTOCOL_CHAIN => 7;
 public static UntypedInt BASE_PROTOCOL => 1;
 public static UntypedInt LAYERED_PROTOCOL => 0;
+
 public static UntypedInt XP1_CONNECTIONLESS => 0x00000001;
 public static UntypedInt XP1_GUARANTEED_DELIVERY => 0x00000002;
 public static UntypedInt XP1_GUARANTEED_ORDER => 0x00000004;
@@ -1020,6 +1088,7 @@ public static UntypedInt XP1_UNI_RECV => 0x00010000;
 public static UntypedInt XP1_IFS_HANDLES => 0x00020000;
 public static UntypedInt XP1_PARTIAL_MESSAGE => 0x00040000;
 public static UntypedInt XP1_SAN_SUPPORT_SDP => 0x00080000;
+
 public static UntypedInt PFL_MULTIPLE_PROTO_ENTRIES => 0x00000001;
 public static UntypedInt PFL_RECOMMENDED_PROTO_ENTRY => 0x00000002;
 public static UntypedInt PFL_HIDDEN => 0x00000004;

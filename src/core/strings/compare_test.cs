@@ -14,8 +14,6 @@ using static go.strings_internal_test_package;
 
 partial class strings_test_package {
 
-// test runtime·memeq's chunked implementation
-
 partial struct compareTestsᴛ1 /*dyn*/ {
     internal @string a, b;
     internal nint i;
@@ -31,6 +29,7 @@ internal static slice<compareTestsᴛ1> compareTests = new compareTestsᴛ1[]{
     new("ab"u8, "x"u8, -1),
     new("x"u8, "a"u8, 1),
     new("b"u8, "x"u8, -1),
+    // test runtime·memeq's chunked implementation
     new("abcdefgh"u8, "abcdefgh"u8, 0),
     new("abcdefghi"u8, "abcdefghi"u8, 0),
     new("abcdefghi"u8, "abcdefghj"u8, -1)
@@ -63,14 +62,17 @@ public static void TestCompareStrings(ж<testing.T> Ꮡt) {
     // unsafeString converts a []byte to a string with no allocation.
     // The caller must not modify b while the result string is in use.
     @string unsafeString(slice<byte> bΔ1) => @unsafe.String(@unsafe.SliceData(bΔ1), len(bΔ1));
+
     var lengths = new slice<nint>(0); // lengths to test in ascending order
     for (nint i = 0; i <= 128; i++) {
         lengths = append(lengths, i);
     }
-    lengths = append(lengths, (nint)(256), (nint)(512), (nint)(1024), (nint)(1333), (nint)(4095), (nint)(4096), (nint)(4097));
+    lengths = append(lengths, (nint)256, (nint)512, (nint)1024, (nint)1333, (nint)4095, (nint)4096, (nint)4097);
+
     if (!testing.Short() || testenv.Builder() != ""u8) {
-        lengths = append(lengths, (nint)(65535), (nint)(65536), (nint)(65537), (nint)(99999));
+        lengths = append(lengths, (nint)65535, (nint)65536, (nint)65537, (nint)99999);
     }
+
     nint n = lengths[len(lengths) - 1];
     var a = new slice<byte>(n + 1);
     var b = new slice<byte>(n + 1);
@@ -86,6 +88,7 @@ public static void TestCompareStrings(ж<testing.T> Ꮡt) {
             a[i] = 8;
             b[i] = 9;
         }
+
         @string sa = unsafeString(a);
         @string sb = unsafeString(b);
         nint cmp = Compare(sa.slice(0, lenΔ1), sb.slice(0, lenΔ1));

@@ -4,7 +4,6 @@
 namespace go;
 
 using bytes = bytes_package;
-using fmt = fmt_package;
 using abi = @internal.abi_package;
 using goexperiment = @internal.goexperiment_package;
 using profile = @internal.profile_package;
@@ -54,29 +53,32 @@ internal static readonly @string gcHeapFreesObjectsˢ = "/gc/heap/frees:objects"
 public static void TestReadMetrics(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Run a GC cycle to get some of the stats to be non-zero.
         Δruntime.GC();
+
         // Set an arbitrary memory limit to check the metric for it
         var limit = (int64)(512 * 1024 * 1024);
         var oldLimit = Δdebug.SetMemoryLimit(limit);
         defer(Δdebug.SetMemoryLimit, oldLimit, ref ᒐ);
+
         // Set a GC percent to check the metric for it
         nint gcPercent = 99;
         nint oldGCPercent = Δdebug.SetGCPercent(gcPercent);
         defer(Δdebug.SetGCPercent, oldGCPercent, ref ᒐ);
+
         // Tests whether readMetrics produces values aligning
         // with ReadMemStats while the world is stopped.
         ref var mstats = ref heap(new Δruntime.MemStats(), out var Ꮡmstats);
         var (_, samples) = prepareAllMetricsSamples();
         runtime_internal_test_package.ReadMetricsSlow(Ꮡmstats, @unsafe.Pointer.FromPinnedBox(Ꮡ(samples, 0)), len(samples), cap(samples));
+
         void checkUint64(ж<testing.T> tΔ1, @string m, uint64 got, uint64 want) {
             tΔ1.Helper();
             if (got != want) {
                 tΔ1.Errorf("metric %q: got %d, want %d"u8, m, got, want);
             }
         }
+
         // Check to make sure the values we read line up with other values we read.
         ж<metricsꓸFloat64Histogram> allocsBySize = default!;
         ж<metricsꓸFloat64Histogram> gcPauses = default!;
@@ -135,9 +137,9 @@ public static void TestReadMetrics(ж<testing.T> Ꮡt) {
                 }
                 else if (exprᴛ1 == "/gc/heap/allocs-by-size:bytes"u8) {
                     var hist = samples[i].Value.Float64Histogram();
+                    // Skip size class 0 in BySize, because it's always empty and not represented
+                    // in the histogram.
                     foreach (var (iΔ3, sc) in mstats.BySize[1..]) {
-                        // Skip size class 0 in BySize, because it's always empty and not represented
-                        // in the histogram.
                         {
                             var (b, s) = ((~hist).Buckets[iΔ3 + 1], (float64)(sc.Size + 1)); if (b != s) {
                                 Ꮡt.Errorf("bucket does not match size class: got %f, want %f"u8, b, s);
@@ -158,9 +160,9 @@ public static void TestReadMetrics(ж<testing.T> Ꮡt) {
                 }
                 else if (exprᴛ1 == "/gc/heap/frees-by-size:bytes"u8) {
                     var hist = samples[i].Value.Float64Histogram();
+                    // Skip size class 0 in BySize, because it's always empty and not represented
+                    // in the histogram.
                     foreach (var (iΔ4, sc) in mstats.BySize[1..]) {
-                        // Skip size class 0 in BySize, because it's always empty and not represented
-                        // in the histogram.
                         {
                             var (b, s) = ((~hist).Buckets[iΔ4 + 1], (float64)(sc.Size + 1)); if (b != s) {
                                 Ꮡt.Errorf("bucket does not match size class: got %f, want %f"u8, b, s);
@@ -179,7 +181,19 @@ public static void TestReadMetrics(ж<testing.T> Ꮡt) {
                     checkUint64(Ꮡt, name, samples[i].Value.Uint64(), mstats.TotalAlloc - mstats.HeapAlloc);
                 }
                 else if (exprᴛ1 == "/gc/heap/tiny/allocs:objects"u8) {
+                    // Currently, MemStats adds tiny alloc count to both Mallocs AND Frees.
+                    // The reason for this is because MemStats couldn't be extended at the time
+                    // but there was a desire to have Mallocs at least be a little more representative,
+                    // while having Mallocs - Frees still represent a live object count.
+                    // Unfortunately, MemStats doesn't actually export a large allocation count,
+                    // so it's impossible to pull this number out directly.
+                    //
+                    // Check tiny allocation count outside of this loop, by using the allocs-by-size
+                    // histogram in order to figure out how many large objects there are.
                     tinyAllocs = samples[i].Value.Uint64();
+                    // Because the next two metrics tests are checking against Mallocs and Frees,
+                    // we can't check them directly for the same reason: we need to account for tiny
+                    // allocations included in Mallocs and Frees.
                 }
                 else if (exprᴛ1 == "/gc/heap/allocs:objects"u8) {
                     mallocs = samples[i].Value.Uint64();
@@ -188,28 +202,16 @@ public static void TestReadMetrics(ж<testing.T> Ꮡt) {
                     frees = samples[i].Value.Uint64();
                 }
                 else if (exprᴛ1 == "/gc/heap/live:bytes"u8) {
+                    // Check for "obviously wrong" values. We can't check a stronger invariant,
+                    // such as live <= HeapAlloc, because live is not 100% accurate. It's computed
+                    // under racy conditions, and some objects may be double-counted (this is
+                    // intentional and necessary for GC performance).
+                    //
+                    // Instead, check against a much more reasonable upper-bound: the amount of
+                    // mapped heap memory. We can't possibly overcount to the point of exceeding
+                    // total mapped heap memory, except if there's an accounting bug.
                     {
                         var live = samples[i].Value.Uint64(); if (live > mstats.HeapSys){
-                            // Currently, MemStats adds tiny alloc count to both Mallocs AND Frees.
-                            // The reason for this is because MemStats couldn't be extended at the time
-                            // but there was a desire to have Mallocs at least be a little more representative,
-                            // while having Mallocs - Frees still represent a live object count.
-                            // Unfortunately, MemStats doesn't actually export a large allocation count,
-                            // so it's impossible to pull this number out directly.
-                            //
-                            // Check tiny allocation count outside of this loop, by using the allocs-by-size
-                            // histogram in order to figure out how many large objects there are.
-                            // Because the next two metrics tests are checking against Mallocs and Frees,
-                            // we can't check them directly for the same reason: we need to account for tiny
-                            // allocations included in Mallocs and Frees.
-                            // Check for "obviously wrong" values. We can't check a stronger invariant,
-                            // such as live <= HeapAlloc, because live is not 100% accurate. It's computed
-                            // under racy conditions, and some objects may be double-counted (this is
-                            // intentional and necessary for GC performance).
-                            //
-                            // Instead, check against a much more reasonable upper-bound: the amount of
-                            // mapped heap memory. We can't possibly overcount to the point of exceeding
-                            // total mapped heap memory, except if there's an accounting bug.
                             Ꮡt.Errorf("live bytes: %d > heap sys: %d"u8, live, mstats.HeapSys);
                         } else 
                         if (live == 0) {
@@ -246,17 +248,19 @@ public static void TestReadMetrics(ж<testing.T> Ꮡt) {
                     schedPausesTotalGC = samples[i].Value.Float64Histogram();
                 }
             }
-
         }
+
         // Check tinyAllocs.
         var nonTinyAllocs = (uint64)0;
         foreach (var (_, c) in (~allocsBySize).Counts) {
             nonTinyAllocs += c;
         }
         checkUint64(Ꮡt, gcHeapTinyAllocsObjectsˢ, tinyAllocs, mstats.Mallocs - nonTinyAllocs);
+
         // Check allocation and free counts.
         checkUint64(Ꮡt, gcHeapAllocsObjectsˢ, mallocs, mstats.Mallocs - tinyAllocs);
         checkUint64(Ꮡt, gcHeapFreesObjectsˢ, frees, mstats.Frees - tinyAllocs);
+
         // Verify that /gc/pauses:seconds is a copy of /sched/pauses/total/gc:seconds
         if (!slices.Equal<slice<float64>, float64>((~gcPauses).Buckets, (~schedPausesTotalGC).Buckets)) {
             Ꮡt.Errorf("/gc/pauses:seconds buckets %v do not match /sched/pauses/total/gc:seconds buckets %v"u8, (~gcPauses).Buckets, (~schedPausesTotalGC).Counts);
@@ -316,14 +320,17 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
     Δruntime.GC();
     Δruntime.GC();
     Δruntime.GC();
+
     // Set GOMAXPROCS high then sleep briefly to ensure we generate
     // some idle time.
     nint oldmaxprocs = Δruntime.GOMAXPROCS(10);
     time.Sleep(time.Millisecond);
     Δruntime.GOMAXPROCS(oldmaxprocs);
+
     // Read all the supported metrics through the metrics package.
     var (descs, samples) = prepareAllMetricsSamples();
     metrics.Read(samples);
+
     // Check to make sure the values we read make sense.
     TestReadMetricsConsistency_totalVirtual totalVirtual = default!;
     TestReadMetricsConsistency_objects objects = default!;
@@ -341,6 +348,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
         if (samples[i].Name != "/memory/classes/total:bytes"u8 && strings.HasPrefix(samples[i].Name, memoryClassesˢ)) {
             var v = samples[i].Value.Uint64();
             totalVirtual.want += v;
+
             // None of these stats should ever get this big.
             // If they do, there's probably overflow involved,
             // usually due to bad accounting.
@@ -443,7 +451,6 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
                 Ꮡt.Error(numberOfGoroutinesIsLessˢ);
             }
         }
-
     }
     // Only check this on Linux where we can be reasonably sure we have a high-resolution timer.
     if (Δruntime.GOOS == "linux"u8) {
@@ -558,9 +565,11 @@ public static void BenchmarkReadMetricsLatency(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var stop = applyGCLoad(Ꮡb);
+
     // Spend this much time measuring latencies.
     var latencies = new slice<time.Duration>(0, 1024);
     var (_, samples) = prepareAllMetricsSamples();
+
     // Hit metrics.Read continuously and measure.
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -573,12 +582,14 @@ public static void BenchmarkReadMetricsLatency(ж<testing.B> Ꮡb) {
     // confusing the benchmarking framework for small b.N.
     b.StopTimer();
     stop();
+
     // Disable the default */op metrics.
     // ns/op doesn't mean anything because it's an average, but we
     // have a sleep in our b.N loop above which skews this significantly.
     b.ReportMetric(0D, nsOpˢ);
     b.ReportMetric(0D, bOpˢ);
     b.ReportMetric(0D, allocsOpˢ);
+
     // Sort latencies then report percentiles.
     var latenciesʗ1 = latencies;
     sort.Slice(latencies, (nint i, nint j) => latenciesʗ1[i] < latenciesʗ1[j]);
@@ -606,6 +617,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
     samples[0] = samples[0].slice(0, total);
     samples[1] = samples[1].slice(0, total);
     copy(samples[1], samples[0]);
+
     // Start some noise in the background.
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(1);
@@ -617,11 +629,17 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
             defer(Ꮡwg.Done, ref ᒐ);
             while (ᐧ) {
                 // Add more things here that could influence metrics.
+                for (nint i = 0; i < 10; i++) {
+                    Δruntime.AddCleanup(@new<ж<nint>>(), (EmptyStruct _) => {
+                    }, new EmptyStruct());
+                    Δruntime.SetFinalizer(@new<ж<nint>>(), (ж<ж<nint>> _) => {
+                    });
+                }
                 for (nint i = 0; i < len(readMetricsSink); i++) {
                     readMetricsSink[i] = new slice<byte>(1024);
-                    var selᴛ72 = doneʗ1;
-                    switch (trySelect(ᐸꟷ(selᴛ72, ꓸꓸꓸ))) {
-                    case 0 when selᴛ72.ꟷᐳ(out _): {
+                    var selᴛ73 = doneʗ1;
+                    switch (trySelect(ᐸꟷ(selᴛ73, ꓸꓸꓸ))) {
+                    case 0 when selᴛ73.ꟷᐳ(out _): {
                         return;
                     }
                     default: {
@@ -634,6 +652,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     uint64 sum(slice<uint64> us) {
         var totalΔ1 = (uint64)0;
         foreach (var (_, u) in us) {
@@ -641,40 +660,43 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
         }
         return totalΔ1;
     }
+
     // Populate the first generation.
     metrics.Read(samples[0]);
+
     // Check to make sure that these metrics only grow monotonically.
     for (nint gen = 1; gen < 10; gen++) {
         metrics.Read(samples[gen % 2]);
         foreach (var (i, _) in samples[gen % 2]) {
             @string name = samples[gen % 2][i].Name;
             var (vNew, vOld) = (samples[gen % 2][i].Value, samples[1 - (gen % 2)][i].Value);
+
             var exprᴛ1 = vNew.Kind();
             if (exprᴛ1 == metrics.KindUint64) {
-                var @new = vNew.Uint64();
+                var newΔ2 = vNew.Uint64();
                 var old = vOld.Uint64();
-                if (@new < old) {
-                    Ꮡt.Errorf("%s decreased: %d < %d"u8, name, @new, old);
+                if (newΔ2 < old) {
+                    Ꮡt.Errorf("%s decreased: %d < %d"u8, name, newΔ2, old);
                 }
             }
             else if (exprᴛ1 == metrics.KindFloat64) {
-                var @new = vNew.Float64();
+                var newΔ3 = vNew.Float64();
                 var old = vOld.Float64();
-                if (@new < old) {
-                    Ꮡt.Errorf("%s decreased: %f < %f"u8, name, @new, old);
+                if (newΔ3 < old) {
+                    Ꮡt.Errorf("%s decreased: %f < %f"u8, name, newΔ3, old);
                 }
             }
             else if (exprᴛ1 == metrics.KindFloat64Histogram) {
-                var @new = sum((~vNew.Float64Histogram()).Counts);
+                var newΔ4 = sum((~vNew.Float64Histogram()).Counts);
                 var old = sum((~vOld.Float64Histogram()).Counts);
-                if (@new < old) {
-                    Ꮡt.Errorf("%s counts decreased: %d < %d"u8, name, @new, old);
+                if (newΔ4 < old) {
+                    Ꮡt.Errorf("%s counts decreased: %d < %d"u8, name, newΔ4, old);
                 }
             }
-
         }
     }
     close(done);
+
     Ꮡwg.Wait();
 }
 
@@ -688,6 +710,7 @@ internal static readonly @string syncMutexWaitTotalˢ = "/sync/mutex/wait/total:
 public static void TestMutexWaitTimeMetric(ж<testing.T> Ꮡt) {
     ref var sample = ref heap(new array<metrics.Sample>(1), out var Ꮡsample);
     sample[0].Name = syncMutexWaitTotalˢ;
+
     var locks = new locker2[]{new runtime_test_package.mutexжlocker2(@new<mutex>()), new runtime_test_package.rwmutexWriteжlocker2(@new<rwmutexWrite>()), new runtime_test_package.rwmutexReadWriteжlocker2(@new<rwmutexReadWrite>()), new runtime_test_package.rwmutexWriteReadжlocker2(@new<rwmutexWriteRead>())
     }.slice();
     foreach (var (_, @lock) in locks) {
@@ -695,10 +718,13 @@ public static void TestMutexWaitTimeMetric(ж<testing.T> Ꮡt) {
         var sampleʗ1 = sample;
         Ꮡt.Run(reflect.TypeOf(@lock).Elem().Name(), (ж<testing.T> tΔ1) => {
             metrics.Read(sampleʗ1[..]);
-            var before = ((time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D));
+            var before = (time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D);
+
             var minMutexWaitTime = generateMutexWaitTime(lockʗ1);
+
             metrics.Read(sampleʗ1[..]);
-            var after = ((time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D));
+            var after = (time.Duration)(int64)(sampleʗ1[0].Value.Float64() * 1e9D);
+
             {
                 var wt = after - before; if (wt < minMutexWaitTime) {
                     tΔ1.Errorf("too little mutex wait time: got %s, want %s"u8, wt, minMutexWaitTime);
@@ -814,7 +840,9 @@ internal static void Unlock2(this ж<rwmutexWriteRead> Ꮡm) {
 internal static partial time.Duration generateMutexWaitTime(locker2 mu) {
     // Set up the runtime to always track casgstatus transitions for metrics.
     runtime_internal_test_package.CasGStatusAlwaysTrack.Value = true;
+
     mu.Lock1();
+
     // Start up a goroutine to wait on the lock.
     var gc = new channel<ж<G>>(0);
     var done = new channel<bool>(0);
@@ -822,6 +850,7 @@ internal static partial time.Duration generateMutexWaitTime(locker2 mu) {
     var gcʗ1 = gc;
     goǃ(() => {
         gcʗ1.ᐸꟷ(runtime_internal_test_package.Getg());
+
         while (ᐧ) {
             mu.Lock2();
             mu.Unlock2();
@@ -831,9 +860,11 @@ internal static partial time.Duration generateMutexWaitTime(locker2 mu) {
         }
     });
     var gp = ᐸꟷ(gc);
+
     // Set the block time high enough so that it will always show up, even
     // on systems with coarse timer granularity.
     time.Duration blockTime = /* 100 * time.Millisecond */ 100000000;
+
     // Make sure the goroutine spawned above actually blocks on the lock.
     while (ᐧ) {
         if (runtime_internal_test_package.GIsWaitingOnMutex(gp)) {
@@ -841,11 +872,14 @@ internal static partial time.Duration generateMutexWaitTime(locker2 mu) {
         }
         Δruntime.Gosched();
     }
+
     // Let some amount of time pass.
     time.Sleep(blockTime);
+
     // Let the other goroutine acquire the lock.
     mu.Unlock1();
     done.ᐸꟷ(true);
+
     // Reset flag.
     runtime_internal_test_package.CasGStatusAlwaysTrack.Value = false;
     return blockTime;
@@ -864,6 +898,7 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
         // test is basically meaningless on this platform.
         Ꮡt.Skip(wasip1CurrentlyBusyWaitsˢ);
     }
+
     var names = new @string[]{
         "/cpu/classes/idle:cpu-seconds"u8,
         "/cpu/classes/gc/mark/assist:cpu-seconds"u8,
@@ -886,9 +921,15 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
         return mm;
     }
     var (m1, m2) = (prep(), prep());
+
+    // Expected time spent idle.
     time.Duration dur = /* 100 * time.Millisecond */ 100000000;
+
+    // maxFailures is the number of consecutive failures requires to cause the test to fail.
     const nint maxFailures = 10;
+
     var failureIdleTimes = new slice<float64>(0, maxFailures);
+
     // If the bug we expect is happening, then the Sleep CPU time will be accounted for
     // as user time rather than idle time. In an ideal world we'd expect the whole application
     // to go instantly idle the moment this goroutine goes to sleep, and stay asleep for that
@@ -905,28 +946,34 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
     // we yield and go idle. That has a rare enough chance that retries should resolve it.
     // If the issue we expect is happening, it should be persistent.
     var minIdleCPUSeconds = dur.Seconds() * ((float64)Δruntime.GOMAXPROCS(-1) - 0.5D);
+
     // Let's make sure there's no background scavenge work to do.
     //
     // The runtime.GC calls below ensure the background sweeper
     // will not run during the idle period.
     Δdebug.FreeOSMemory();
+
     for (nint retries = 0; retries < maxFailures; retries++) {
         // Read 1.
         Δruntime.GC(); // Update /cpu/classes metrics.
         metrics.Read(m1);
+
         // Sleep.
         time.Sleep(dur);
+
         // Read 2.
         Δruntime.GC(); // Update /cpu/classes metrics.
         metrics.Read(m2);
+
         var dt = m2[0].Value.Float64() - m1[0].Value.Float64();
         if (dt >= minIdleCPUSeconds) {
             // All is well. Test passed.
             return;
         }
         failureIdleTimes = append(failureIdleTimes, dt);
+        // Try again.
     }
-    // Try again.
+
     // We couldn't observe the expected idle time even once.
     foreach (var (i, dt) in failureIdleTimes) {
         Ꮡt.Logf("try %2d: idle time = %.5fs\n"u8, i + 1, dt);
@@ -950,26 +997,34 @@ internal static void testSchedPauseMetrics(ж<testing.T> Ꮡt, Action<ж<testing
         new(Name: "/sched/pauses/total/gc:seconds"u8),
         new(Name: "/sched/pauses/total/other:seconds"u8)
     }.slice();
+
     var stoppingGC = Ꮡ(m, 0);
     var stoppingOther = Ꮡ(m, 1);
     var totalGC = Ꮡ(m, 2);
     var totalOther = Ꮡ(m, 3);
+
     uint64 sampleCount(ж<metrics.Sample> s) {
         var h = (~s).Value.Float64Histogram();
+
         uint64 n = default!;
         foreach (var (_, c) in (~h).Counts) {
             n += c;
         }
         return n;
     }
+
     // Read baseline.
     metrics.Read(m);
+
     var baselineStartGC = sampleCount(stoppingGC);
     var baselineStartOther = sampleCount(stoppingOther);
     var baselineTotalGC = sampleCount(totalGC);
     var baselineTotalOther = sampleCount(totalOther);
+
     fn(Ꮡt);
+
     metrics.Read(m);
+
     if (isGC){
         {
             var got = sampleCount(stoppingGC); if (got <= baselineStartGC) {
@@ -981,6 +1036,7 @@ internal static void testSchedPauseMetrics(ж<testing.T> Ꮡt, Action<ж<testing
                 Ꮡt.Errorf("/sched/pauses/total/gc:seconds sample count %d did not increase from baseline of %d"u8, got, baselineTotalGC);
             }
         }
+
         {
             var got = sampleCount(stoppingOther); if (got != baselineStartOther) {
                 Ꮡt.Errorf("/sched/pauses/stopping/other:seconds sample count %d changed from baseline of %d"u8, got, baselineStartOther);
@@ -1002,6 +1058,7 @@ internal static void testSchedPauseMetrics(ж<testing.T> Ꮡt, Action<ж<testing
                 Ꮡt.Errorf("/sched/pauses/total/gc:seconds sample count %d changed from baseline of %d"u8, got, baselineTotalGC);
             }
         }
+
         {
             var got = sampleCount(stoppingOther); if (got <= baselineStartOther) {
                 Ꮡt.Errorf("/sched/pauses/stopping/other:seconds sample count %d did not increase from baseline of %d"u8, got, baselineStartOther);
@@ -1030,8 +1087,6 @@ internal partial struct TestSchedPauseMetrics_tests /*dyn*/ {
 public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var tests = new TestSchedPauseMetrics_tests[]{
             new(
                 name: "runtime.GC"u8,
@@ -1048,8 +1103,10 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
                         if (Δruntime.GOARCH == "wasm"u8) {
                             tΔ2.Skip(gomaxprocs1NotSupportedˢ);
                         }
+
                         nint n = Δruntime.GOMAXPROCS(0);
                         defer(Δruntime.GOMAXPROCS, n, ref ᒐ);
+
                         Δruntime.GOMAXPROCS(n + 1);
                     }
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1085,6 +1142,7 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
                         if (Δruntime.GOOS == "js"u8) {
                             tΔ6.Skip(writeHeapDumpNotˢ);
                         }
+
                         var (f, err) = Δos.CreateTemp(tΔ6.TempDir(), heapdumptestˢ);
                         if (err != default!) {
                             tΔ6.Fatalf("os.CreateTemp failed: %v"u8, err);
@@ -1104,6 +1162,7 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
                     if (trace.IsEnabled()) {
                         tΔ7.Skip(tracingAlreadyEnabledˢ);
                     }
+
                     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
                     {
                         var err = trace.Start(new runtime_test_package.bytes_BufferжWriter(Ꮡbuf)); if (err != default!) {
@@ -1114,6 +1173,7 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
                 }
             )
         }.slice();
+
         // These tests count STW pauses, classified based on whether they're related
         // to the GC or not. Disable automatic GC cycles during the test so we don't
         // have an incidental GC pause when we're trying to observe only
@@ -1122,6 +1182,7 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
         // until any active GC mark phase completes.
         defer(Δdebug.SetGCPercent, Δdebug.SetGCPercent(-1), ref ᒐ);
         Δruntime.GC();
+
         foreach (var (_, vᴛ1) in tests) {
             ref var tc = ref heap(new TestSchedPauseMetrics_tests(), out var Ꮡtc);
             tc = vᴛ1;
@@ -1137,38 +1198,32 @@ public static void TestSchedPauseMetrics(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string godebugˢ = "GODEBUG"u8;
-internal static readonly @string runtimecontentionstacksˢ = "runtimecontentionstacks="u8;
 internal static readonly @string mutexˢ = "mutex"u8;
 internal static readonly @string runtimeLockˢ = "runtime.lock"u8;
+internal static readonly @string runtimeTestˢ = "runtime_test.fastMarkerFrame"u8;
+internal static readonly @string runtimeTestˢ2 = "runtime_test.slowMarkerFrame"u8;
 internal static readonly @string sample1ˢ = "sample-1"u8;
 internal static readonly @string metricˢ = "metric"u8;
 internal static readonly @string compareTimersˢ = "compare timers"u8;
 internal static readonly @string sample2ˢ = "sample-2"u8;
 internal static readonly @string runtimeSemreleaseˢ = "runtime.semrelease"u8;
 
+internal partial struct TestRuntimeLockMetricsAndProfile_type /*dyn*/ {
+    internal @string name;
+    internal int64 profTime;
+    internal int64 minTime;
+    internal int64 maxTime;
+}
+
 public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         nint old = Δruntime.SetMutexProfileFraction(0); // enabled during sub-tests
         defer(Δruntime.SetMutexProfileFraction, old, ref ᒐ);
         if (old != 0) {
             Ꮡt.Fatalf("need MutexProfileRate 0, got %d"u8, old);
         }
-        {
-            @string before = Δos.Getenv(godebugˢ);
-            foreach (var (_, s) in strings.Split(before, ","u8)) {
-                if (strings.HasPrefix(s, runtimecontentionstacksˢ)) {
-                    Ꮡt.Logf("GODEBUG includes explicit setting %q"u8, s);
-                }
-            }
-            defer(() => {
-                Δos.Setenv(godebugˢ, before);
-            }, ref ᒐ);
-            Δos.Setenv(godebugˢ, fmt.Sprintf("%s,runtimecontentionstacks=1"u8, before));
-        }
+
         Ꮡt.Logf("NumCPU %d"u8, Δruntime.NumCPU());
         Ꮡt.Logf("GOMAXPROCS %d"u8, Δruntime.GOMAXPROCS(0));
         {
@@ -1176,6 +1231,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 Ꮡt.Skipf("creating and observing contention on runtime-internal locks requires NumCPU >= %d"u8, minCPU);
             }
         }
+
         ж<profile.Profile> loadProfile(ж<testing.T> tΔ1) {
             ref var w = ref heap(new bytes.Buffer(), out var Ꮡw);
             pprof.Lookup(mutexˢ).WriteTo(new runtime_test_package.bytes_BufferжWriter(Ꮡw), 0);
@@ -1190,6 +1246,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
             }
             return p;
         }
+
         var loadProfileʗ1 = loadProfile;
         (float64 metricGrowth, float64 profileGrowth, ж<profile.Profile> p) measureDelta(ж<testing.T> tΔ2, Action fn) {
             float64 metricGrowth = default!;
@@ -1198,10 +1255,13 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
             var beforeProfile = loadProfileʗ1(tΔ2);
             var beforeMetrics = new metrics.Sample[]{new(Name: "/sync/mutex/wait/total:seconds"u8)}.slice();
             metrics.Read(beforeMetrics);
+
             fn();
+
             var afterProfile = loadProfileʗ1(tΔ2);
             var afterMetrics = new metrics.Sample[]{new(Name: "/sync/mutex/wait/total:seconds"u8)}.slice();
             metrics.Read(afterMetrics);
+
             int64 sumSamples(ж<profile.Profile> pΔ1, nint i) {
                 int64 sum = default!;
                 foreach (var (_, s) in (~pΔ1).Sample) {
@@ -1209,8 +1269,10 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 }
                 return sum;
             }
+
             metricGrowth = afterMetrics[0].Value.Float64() - beforeMetrics[0].Value.Float64();
             profileGrowth = (float64)(sumSamples(afterProfile, 1) - sumSamples(beforeProfile, 1)) * time.ΔNanosecond.Seconds();
+
             // The internal/profile package does not support compaction; this delta
             // profile will include separate positive and negative entries.
             p = afterProfile.Copy();
@@ -1220,17 +1282,19 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     tΔ2.Fatalf("Merge profiles: %v"u8, err);
                 }
             }
+
             return (metricGrowth, profileGrowth, p);
         }
+
         var measureDeltaʗ1 = measureDelta;
-        Func<ж<testing.T>, (float64, float64, int64, int64)> testcase(bool strictTiming, slice<slice<@string>> acceptStacks, nint workers, Func<bool> fn) {
+        Func<ж<testing.T>, (float64, slice<int64>, int64, int64, Action)> testcase(bool strictTiming, slice<slice<@string>> acceptStacks, nint workers, Func<bool> fn) {
             var measureDeltaʗ2 = measureDeltaʗ1;
             return (ж<testing.T> tΔ3) => {
                 float64 metricGrowth = default!;
-                float64 profileGrowth = default!;
+                slice<int64> profileGrowth = default!;
                 int64 n = default!;
                 int64 value = default!;
-                (metricGrowth, profileGrowth, var p) = measureDeltaʗ2(tΔ3, [MethodImpl(MethodImplOptions.NoInlining)] () => {
+                (metricGrowth, var totalProfileGrowth, var p) = measureDeltaʗ2(tΔ3, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                     ref var started = ref heap(new Δsync.WaitGroup(), out var Ꮡstarted);
                     ref var stopped = ref heap(new Δsync.WaitGroup(), out var Ꮡstopped);
                     Ꮡstarted.Add(workers);
@@ -1252,7 +1316,8 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     }
                     Ꮡstopped.Wait();
                 });
-                if (profileGrowth == 0D) {
+
+                if (totalProfileGrowth == 0D) {
                     tΔ3.Errorf("no increase in mutex profile"u8);
                 }
                 if (metricGrowth == 0D && strictTiming) {
@@ -1272,8 +1337,9 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 // together. It doesn't work as well for user-space contention, where the
                 // involved goroutines are not _Grunnable the whole time and so need to pass
                 // through the scheduler.
-                tΔ3.Logf("lock contention growth in runtime/pprof's view  (%fs)"u8, profileGrowth);
+                tΔ3.Logf("lock contention growth in runtime/pprof's view  (%fs)"u8, totalProfileGrowth);
                 tΔ3.Logf("lock contention growth in runtime/metrics' view (%fs)"u8, metricGrowth);
+
                 acceptStacks = appendꓸꓸꓸ(slice<slice<@string>>(default!), acceptStacks);
                 foreach (var (i, vᴛ1) in acceptStacks) {
                     var stk = vᴛ1;
@@ -1289,8 +1355,9 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     }
                     acceptStacks[i] = stk;
                 }
+
                 slice<slice<@string>> stks = default!;
-                var values = GoReflect.WithElemDims(new slice<array<int64>>(len(acceptStacks), () => new(2)), 2);
+                var values = GoReflect.WithElemDims(new slice<array<int64>>(len(acceptStacks) + 1, () => new(2)), 2);
                 foreach (var (_, s) in (~p).Sample) {
                     slice<@string> have = default!;
                     foreach (var (_, loc) in (~s).Location) {
@@ -1299,16 +1366,26 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                         }
                     }
                     stks = append(stks, have);
+                    var found = false;
                     foreach (var (i, stk) in acceptStacks) {
                         if (slices.Equal<slice<@string>, @string>(have, stk)) {
                             values[i][0] += (~s).Value[0];
                             values[i][1] += (~s).Value[1];
+                            found = true;
+                            break;
                         }
                     }
+                    if (!found) {
+                        values[len(values) - 1][0] += (~s).Value[0];
+                        values[len(values) - 1][1] += (~s).Value[1];
+                    }
                 }
+                profileGrowth = new slice<int64>(len(acceptStacks) + 1);
+                profileGrowth[len(profileGrowth) - 1] = values[len(values) - 1][1];
                 foreach (var (i, stk) in acceptStacks) {
                     n += values[i][0];
                     value += values[i][1];
+                    profileGrowth[i] = values[i][1];
                     tΔ3.Logf("stack %v has samples totaling n=%d value=%d"u8, stk, values[i][0], values[i][1]);
                 }
                 if (n == 0 && value == 0) {
@@ -1320,18 +1397,20 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                         tΔ3.Errorf("want stack %v"u8, stk);
                     }
                 }
-                return (metricGrowth, profileGrowth, n, value);
+
+                var pʗ1 = p;
+                return (metricGrowth, profileGrowth, n, value, () => {
+                    tΔ3.Logf("profile:\n%s"u8, pʗ1.OrTypedNil());
+                });
             };
         }
+
         @string name = Ꮡt.Name();
+
         var testcaseʗ1 = testcase;
         Ꮡt.Run(runtimeLockˢ, (ж<testing.T> tΔ4) => {
             GoFrame ᒐ = default;
             try {
-                var mus = new slice<Mutex>(200, () => new(nil));
-                ref var needContention = ref heap(new atomic.Int64(), out var ᏑneedContention);
-                var delay = 100 * time.Microsecond; // large relative to system noise, for comparison between clocks
-                var delayMicros = delay.Microseconds();
                 // The goroutine that acquires the lock will only proceed when it
                 // detects that its partner is contended for the lock. That will lead to
                 // live-lock if anything (such as a STW) prevents the partner goroutine
@@ -1340,10 +1419,30 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 // counting the correct number of contention events, since some locks
                 // will end up contended twice. Instead, disable the GC.
                 defer(Δdebug.SetGCPercent, Δdebug.SetGCPercent(-1), ref ᒐ);
-                const nint workers = 2;
-                if (Δruntime.GOMAXPROCS(0) < workers) {
-                    tΔ4.Skipf("contention on runtime-internal locks requires GOMAXPROCS >= %d"u8, (nint)(workers));
+
+                var mus = new slice<Mutex>(200, () => new(nil));
+                ref var needContention = ref heap(new atomic.Int64(), out var ᏑneedContention);
+
+                var baseDelay = 100 * time.Microsecond; // large relative to system noise, for comparison between clocks
+                var fastDelayMicros = baseDelay.Microseconds();
+                var slowDelayMicros = baseDelay.Microseconds() * 4;
+
+                const nint fastRole = iota;
+                const nint slowRole = 1;
+                const nint workerCount = 2;
+                if (Δruntime.GOMAXPROCS(0) < workerCount) {
+                    tΔ4.Skipf("contention on runtime-internal locks requires GOMAXPROCS >= %d"u8, (nint)(workerCount));
                 }
+
+                var minTicks = new slice<slice<int64>>(workerCount); // lower bound, known-contended time, measured by cputicks
+                var maxTicks = new slice<slice<int64>>(workerCount); // upper bound, total lock() duration, measured by cputicks
+                foreach (var (i, _) in minTicks) {
+                    minTicks[i] = new slice<int64>(len(mus));
+                    maxTicks[i] = new slice<int64>(len(mus));
+                }
+                ref var id = ref heap(new atomic.Int32(), out var Ꮡid);
+                var maxTicksʗ1 = maxTicks;
+                var minTicksʗ1 = minTicks;
                 var musʗ1 = mus;
                 var fn = () => {
                     nint n = (nint)ᏑneedContention.Load();
@@ -1351,26 +1450,79 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                         return false;
                     }
                     var mu = Ꮡ(musʗ1, n);
-                    runtime_internal_test_package.ΔLock(mu);
-                    while ((nint)ᏑneedContention.Load() == n) {
-                        if (runtime_internal_test_package.MutexContended(mu)) {
-                            // make them wait a little while
-                            for (var start = runtime_internal_test_package.Nanotime(); (runtime_internal_test_package.Nanotime() - start) / 1000 < delayMicros; ) {
-                                runtime_internal_test_package.Usleep((uint32)delayMicros);
-                            }
-                            break;
-                        }
+
+                    // Each worker has a role: to have a fast or slow critical section.
+                    // Rotate the role assignments as we step through the mutex slice so
+                    // we don't end up with one M always claiming the same kind of work.
+                    nint idΔ1 = (nint)Ꮡid.Add(1);
+                    nint role = (idΔ1 + n) % workerCount;
+
+                    var marker = fastMarkerFrame;
+                    var delayMicros = fastDelayMicros;
+                    if (role == slowRole) {
+                        (marker, delayMicros) = (slowMarkerFrame, slowDelayMicros);
                     }
-                    runtime_internal_test_package.ΔUnlock(mu);
-                    ᏑneedContention.Store((int64)(n - 1));
+
+                    // Each lock is used by two different critical sections, one fast
+                    // and one slow, identified in profiles by their different "marker"
+                    // functions. We expect the profile to blame each for the amount of
+                    // delay it inflicts on other users of the lock. We run one worker
+                    // of each kind, so any contention in one would be due to the other.
+                    //
+                    // We measure how long our runtime.lock call takes, which sets an
+                    // upper bound on how much blame to expect for the other worker type
+                    // in the profile. And if we acquire the lock first, we wait for the
+                    // other worker to announce its contention. We measure the
+                    // known-contended time, to use as a lower bound on how much blame
+                    // we expect of ourselves in the profile. Then we stall for a little
+                    // while (different amounts for "fast" versus "slow") before
+                    // unlocking the mutex.
+
+                    var maxTicksʗ2 = maxTicksʗ1;
+                    var minTicksʗ2 = minTicksʗ1;
+                    var muʗ1 = mu;
+                    marker(() => {
+                        var t0 = runtime_internal_test_package.Cputicks();
+                        runtime_internal_test_package.ΔLock(muʗ1);
+                        maxTicksʗ2[role][n] = runtime_internal_test_package.Cputicks() - t0;
+                        minTicksʗ2[role][n] = 0;
+                        while ((nint)ᏑneedContention.Load() == n) {
+                            if (runtime_internal_test_package.MutexContended(muʗ1)) {
+                                var t1 = runtime_internal_test_package.Cputicks();
+                                // make them wait a little while
+                                for (var start = runtime_internal_test_package.Nanotime(); (runtime_internal_test_package.Nanotime() - start) / 1000 < delayMicros; ) {
+                                    runtime_internal_test_package.Usleep((uint32)(1 + delayMicros / 8));
+                                }
+                                minTicksʗ2[role][n] = runtime_internal_test_package.Cputicks() - t1;
+                                break;
+                            }
+                        }
+                        runtime_internal_test_package.ΔUnlock(muʗ1);
+                        ᏑneedContention.Store((int64)(n - 1));
+                    });
+
                     return true;
                 };
-                var stks = new slice<@string>[]{new @string[]{
-                    "runtime.unlock"u8,
-                    "runtime_test."u8 + name + ".func5.1"u8,
-                    "runtime_test.(*contentionWorker).run"u8}.slice()
-                }.slice();
+
+                var stks = new slice<slice<@string>>(2);
+                foreach (var (i, _) in stks) {
+                    @string marker = runtimeTestˢ;
+                    if (i == slowRole) {
+                        marker = runtimeTestˢ2;
+                    }
+
+                    stks[i] = new @string[]{
+                        "runtime.unlock"u8,
+                        "runtime_test."u8 + name + ".func4.1.1"u8,
+                        marker,
+                        "runtime_test."u8 + name + ".func4.1"u8,
+                        "runtime_test.(*contentionWorker).run"u8
+                    }.slice();
+                }
+
                 var fnʗ1 = fn;
+                var maxTicksʗ3 = maxTicks;
+                var minTicksʗ3 = minTicks;
                 var musʗ2 = mus;
                 var stksʗ1 = stks;
                 var testcaseʗ2 = testcaseʗ1;
@@ -1379,15 +1531,24 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     try {
                         nint oldΔ1 = Δruntime.SetMutexProfileFraction(1);
                         defer(Δruntime.SetMutexProfileFraction, oldΔ1, ref ᒐ);
+
                         ᏑneedContention.Store((int64)(len(musʗ2) - 1));
-                        var (metricGrowth, profileGrowth, n, _) = testcaseʗ2(true, stksʗ1, workers, fnʗ1)(tΔ5);
+                        var (metricGrowth, profileGrowth, n, _, explain) = testcaseʗ2(true, stksʗ1, workerCount, fnʗ1)(tΔ5);
+                        var explainʗ1 = explain;
+                        defer(() => {
+                            if (tΔ5.Failed()) {
+                                explainʗ1();
+                            }
+                        }, ref ᒐ);
+
                         var musʗ3 = musʗ2;
                         tΔ5.Run(metricˢ, (ж<testing.T> tΔ6) => {
                             // The runtime/metrics view may be sampled at 1 per
                             // gTrackingPeriod, so we don't have a hard lower bound here.
                             testenv.SkipFlaky(new runtime_test_package.testing_TжTB(tΔ6), 64253);
+
                             {
-                                var (have, want) = (metricGrowth, delay.Seconds() * (float64)len(musʗ3)); if (have < want) {
+                                var (have, want) = (metricGrowth, baseDelay.Seconds() * (float64)len(musʗ3)); if (have < want) {
                                     // The test imposes a delay with usleep, verified with calls to
                                     // nanotime. Compare against the runtime/metrics package's view
                                     // (based on nanotime) rather than runtime/pprof's view (based
@@ -1401,10 +1562,66 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                                 tΔ5.Errorf("mutex profile reported contention count different from the known true count (%d != %d)"u8, have, want);
                             }
                         }
+
+                        int64 slowMinTicks = default!;
+                        int64 fastMinTicks = default!;
+                        foreach (var (role, ticks) in minTicksʗ3) {
+                            foreach (var (_, delta) in ticks) {
+                                if (role == slowRole){
+                                    slowMinTicks += delta;
+                                } else {
+                                    fastMinTicks += delta;
+                                }
+                            }
+                        }
+                        int64 slowMaxTicks = default!;
+                        int64 fastMaxTicks = default!;
+                        foreach (var (role, ticks) in maxTicksʗ3) {
+                            foreach (var (_, delta) in ticks) {
+                                if (role == slowRole){
+                                    slowMaxTicks += delta;
+                                } else {
+                                    fastMaxTicks += delta;
+                                }
+                            }
+                        }
+
+                        var cpuGHz = (float64)runtime_internal_test_package.CyclesPerSecond() / 1e9D;
+                        foreach (var (_, set) in new TestRuntimeLockMetricsAndProfile_type[]{
+                            new(
+                                name: "slow"u8,
+                                profTime: profileGrowth[slowRole],
+                                minTime: (int64)((float64)slowMinTicks / cpuGHz),
+                                maxTime: (int64)((float64)fastMaxTicks / cpuGHz)
+                            ),
+                            new(
+                                name: "fast"u8,
+                                profTime: profileGrowth[fastRole],
+                                minTime: (int64)((float64)fastMinTicks / cpuGHz),
+                                maxTime: (int64)((float64)slowMaxTicks / cpuGHz)
+                            )
+                        }.slice()) {
+                            tΔ5.Logf("profile's view of delays due to %q critical section:                 %dns"u8, set.name, set.profTime);
+                            tΔ5.Logf("test's view of known-contended time within %q critical section:      %dns"u8, set.name, set.minTime);
+                            tΔ5.Logf("test's view of lock duration before critical sections other than %q: %dns"u8, set.name, set.maxTime);
+
+                            if (set.profTime < set.minTime) {
+                                tΔ5.Errorf("profile undercounted %q critical section"u8, set.name);
+                            }
+                            if (set.profTime > set.maxTime) {
+                                tΔ5.Errorf("profile overcounted %q critical section"u8, set.name);
+                            }
+                        }
+
+                        float64 totalProfileGrowth = default!;
+                        foreach (var (_, growth) in profileGrowth) {
+                            totalProfileGrowth += (float64)growth * time.ΔNanosecond.Seconds();
+                        }
+
                         const float64 slop = 1.5; // account for nanotime vs cputicks
                         tΔ5.Run(compareTimersˢ, (ж<testing.T> tΔ7) => {
                             testenv.SkipFlaky(new runtime_test_package.testing_TжTB(tΔ7), 64253);
-                            if (profileGrowth > slop * metricGrowth || metricGrowth > slop * profileGrowth) {
+                            if (totalProfileGrowth > slop * metricGrowth || metricGrowth > slop * totalProfileGrowth) {
                                 tΔ7.Errorf("views differ by more than %fx"u8, (float64)(slop));
                             }
                         });
@@ -1412,6 +1629,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                     finally { ᒐ.Run(); }
                 });
+
                 var fnʗ2 = fn;
                 var musʗ4 = mus;
                 var stksʗ2 = stks;
@@ -1420,17 +1638,27 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     GoFrame ᒐ = default;
                     try {
                         testenv.SkipFlaky(new runtime_test_package.testing_TжTB(tΔ8), 64253);
+
                         nint oldΔ2 = Δruntime.SetMutexProfileFraction(2);
                         defer(Δruntime.SetMutexProfileFraction, oldΔ2, ref ᒐ);
+
                         ᏑneedContention.Store((int64)(len(musʗ4) - 1));
-                        var (metricGrowth, profileGrowth, n, _) = testcaseʗ3(true, stksʗ2, workers, fnʗ2)(tΔ8);
+                        var (metricGrowth, profileGrowth, n, _, explain) = testcaseʗ3(true, stksʗ2, workerCount, fnʗ2)(tΔ8);
+                        var explainʗ2 = explain;
+                        defer(() => {
+                            if (tΔ8.Failed()) {
+                                explainʗ2();
+                            }
+                        }, ref ᒐ);
+
                         // With 100 trials and profile fraction of 2, we expect to capture
                         // 50 samples. Allow the test to pass if we get at least 20 samples;
                         // the CDF of the binomial distribution says there's less than a
                         // 1e-9 chance of that, which is an acceptably low flakiness rate.
                         UntypedFloat samplingSlop = 2.5;
+
                         {
-                            var (have, want) = (metricGrowth, delay.Seconds() * (float64)len(musʗ4)); if ((float64)samplingSlop * have < want) {
+                            var (have, want) = (metricGrowth, baseDelay.Seconds() * (float64)len(musʗ4)); if ((float64)samplingSlop * have < want) {
                                 // The test imposes a delay with usleep, verified with calls to
                                 // nanotime. Compare against the runtime/metrics package's view
                                 // (based on nanotime) rather than runtime/pprof's view (based
@@ -1443,8 +1671,14 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                                 tΔ8.Errorf("mutex profile reported contention count too different from the expected count (%d far from %d)"u8, have, want);
                             }
                         }
+
+                        float64 totalProfileGrowth = default!;
+                        foreach (var (_, growth) in profileGrowth) {
+                            totalProfileGrowth += (float64)growth * time.ΔNanosecond.Seconds();
+                        }
+
                         const float64 timerSlop = /* 1.5 * samplingSlop */ 3.75; // account for nanotime vs cputicks, plus the two views' independent sampling
-                        if (profileGrowth > timerSlop * metricGrowth || metricGrowth > timerSlop * profileGrowth) {
+                        if (totalProfileGrowth > timerSlop * metricGrowth || metricGrowth > timerSlop * totalProfileGrowth) {
                             tΔ8.Errorf("views differ by more than %fx"u8, (float64)(timerSlop));
                         }
                     }
@@ -1455,17 +1689,21 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         var testcaseʗ4 = testcase;
         Ꮡt.Run(runtimeSemreleaseˢ, (ж<testing.T> tΔ9) => {
             GoFrame ᒐ = default;
             try {
                 testenv.SkipFlaky(new runtime_test_package.testing_TжTB(tΔ9), 64253);
+
                 nint oldΔ3 = Δruntime.SetMutexProfileFraction(1);
                 defer(Δruntime.SetMutexProfileFraction, oldΔ3, ref ᒐ);
+
                 const nint workers = 3;
                 if (Δruntime.GOMAXPROCS(0) < workers) {
                     tΔ9.Skipf("creating and observing contention on runtime-internal semaphores requires GOMAXPROCS >= %d"u8, (nint)(workers));
                 }
+
                 ref var sem = ref heap(new uint32(), out var Ꮡsem);
                 sem = 1;
                 ref var tries = ref heap(new atomic.Int32(), out var Ꮡtries);
@@ -1479,6 +1717,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     if (Ꮡtries.Add(-1) < 0) {
                         return false;
                     }
+
                     runtime_internal_test_package.Semacquire(Ꮡsem);
                     runtime_internal_test_package.Semrelease1(Ꮡsem, false, 0);
                     if (runtime_internal_test_package.MutexContended(runtime_internal_test_package.SemRootLock(Ꮡsem))) {
@@ -1486,24 +1725,28 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                     }
                     return true;
                 };
+
                 var stks = new slice<@string>[]{
                     new @string[]{
                         "runtime.unlock"u8,
                         "runtime.semrelease1"u8,
-                        "runtime_test.TestRuntimeLockMetricsAndProfile.func6.1"u8,
+                        "runtime_test.TestRuntimeLockMetricsAndProfile.func5.1"u8,
                         "runtime_test.(*contentionWorker).run"u8}.slice(),
                     new @string[]{
                         "runtime.unlock"u8,
                         "runtime.semacquire1"u8,
                         "runtime.semacquire"u8,
-                        "runtime_test.TestRuntimeLockMetricsAndProfile.func6.1"u8,
+                        "runtime_test.TestRuntimeLockMetricsAndProfile.func5.1"u8,
                         "runtime_test.(*contentionWorker).run"u8}.slice()
                 }.slice();
+
                 // Verify that we get call stack we expect, with anything more than zero
                 // cycles / zero samples. The duration of each contention event is too
                 // small relative to the expected overhead for us to verify its value
                 // more directly. Leave that to the explicit lock/unlock test.
+
                 testcaseʗ4(false, stks, workers, fn)(tΔ9);
+
                 {
                     var remaining = Ꮡtries.Load(); if (remaining >= 0) {
                         tΔ9.Logf("finished test early (%d tries remaining)"u8, remaining);
@@ -1516,6 +1759,14 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+internal static partial void slowMarkerFrame(Action fn) {
+    fn();
+}
+
+internal static partial void fastMarkerFrame(Action fn) {
+    fn();
 }
 
 // contentionWorker provides cleaner call stacks for lock contention profile tests
@@ -1532,6 +1783,7 @@ internal static void run(this ж<contentionWorker> Ꮡw) {
 
         defer(Ꮡw.Value.after, ref ᒐ);
         w.before();
+
         while (w.fn()) {
         }
     }
@@ -1549,11 +1801,13 @@ public static void TestCPUStats(ж<testing.T> Ꮡt) {
     Δruntime.GC();
     Δruntime.GC();
     Δruntime.GC();
+
     // Set GOMAXPROCS high then sleep briefly to ensure we generate
     // some idle time.
     nint oldmaxprocs = Δruntime.GOMAXPROCS(10);
     time.Sleep(time.Millisecond);
     Δruntime.GOMAXPROCS(oldmaxprocs);
+
     var stats = runtime_internal_test_package.ReadCPUStats();
     var gcTotal = stats.GCAssistTime + stats.GCDedicatedTime + stats.GCIdleTime + stats.GCPauseTime;
     if (gcTotal != stats.GCTotalTime) {
@@ -1579,8 +1833,6 @@ public static void TestCPUStats(ж<testing.T> Ꮡt) {
 }
 
 public static partial void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // This test makes sure /memory/classes/heap/unused:bytes
     // doesn't overflow when allocating and deallocating large
     // objects. It is a regression test for #67019.
@@ -1594,12 +1846,12 @@ public static partial void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T>
             defer(Ꮡwg.Done, ref ᒐ);
             while (ᐧ) {
                 foreach (var _ᴛ1 in range(10)) {
-                    abi.Escape(new slice<byte>((1 << (int)(20))));
+                    abi.Escape(new slice<byte>((1 << 20)));
                 }
                 Δruntime.GC();
-                var selᴛ73 = doneʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ73, ꓸꓸꓸ))) {
-                case 0 when selᴛ73.ꟷᐳ(out _): {
+                var selᴛ74 = doneʗ1;
+                switch (trySelect(ᐸꟷ(selᴛ74, ꓸꓸꓸ))) {
+                case 0 when selᴛ74.ꟷᐳ(out _): {
                     return;
                 }
                 default: {
@@ -1615,13 +1867,102 @@ public static partial void TestMetricHeapUnusedLargeObjectOverflow(ж<testing.T>
     }.slice();
     foreach (var _ᴛ2 in range(1000)) {
         metrics.Read(s);
-        if (s[0].Value.Uint64() > ((uint64)1 << (int)(40))) {
+        if (s[0].Value.Uint64() > (uint64)1 << 40) {
             Ꮡt.Errorf("overflow"u8);
             break;
         }
     }
     done.ᐸꟷ(new EmptyStruct());
     Ꮡwg.Wait();
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string gcCleanupsQueuedCleanupsˢ = "/gc/cleanups/queued:cleanups"u8;
+internal static readonly @string gcCleanupsExecutedˢ = "/gc/cleanups/executed:cleanups"u8;
+
+public static void TestReadMetricsCleanups(ж<testing.T> Ꮡt) {
+    Δruntime.GC(); // End any in-progress GC.
+    runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)(1 * time.ΔSecond)); // Flush any queued cleanups.
+
+    array<metrics.Sample> before = new(2);
+    before[0].Name = gcCleanupsQueuedCleanupsˢ;
+    before[1].Name = gcCleanupsExecutedˢ;
+    var after = before.Clone();
+
+    metrics.Read(before[..]);
+
+    UntypedInt N = 10;
+    for (nint i = 0; i < N; i++) {
+        Δruntime.AddCleanup(@new<ж<nint>>(), (EmptyStruct _) => {
+        }, new EmptyStruct());
+    }
+
+    Δruntime.GC();
+    runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)(1 * time.ΔSecond));
+
+    metrics.Read(after[..]);
+
+    {
+        var (v0, v1) = (before[0].Value.Uint64(), after[0].Value.Uint64()); if (v0 + (uint64)N != v1) {
+            Ꮡt.Errorf("expected %s difference to be exactly %d, got %d -> %d"u8, before[0].Name, (nint)(N), v0, v1);
+        }
+    }
+    {
+        var (v0, v1) = (before[1].Value.Uint64(), after[1].Value.Uint64()); if (v0 + (uint64)N != v1) {
+            Ꮡt.Errorf("expected %s difference to be exactly %d, got %d -> %d"u8, before[1].Name, (nint)(N), v0, v1);
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string gcFinalizersQueuedˢ = "/gc/finalizers/queued:finalizers"u8;
+internal static readonly @string gcFinalizersExecutedˢ = "/gc/finalizers/executed:finalizers"u8;
+
+public static void TestReadMetricsFinalizers(ж<testing.T> Ꮡt) {
+    Δruntime.GC(); // End any in-progress GC.
+    runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(1 * time.ΔSecond)); // Flush any queued finalizers.
+
+    array<metrics.Sample> before = new(2);
+    before[0].Name = gcFinalizersQueuedˢ;
+    before[1].Name = gcFinalizersExecutedˢ;
+    var after = before.Clone();
+
+    metrics.Read(before[..]);
+
+    UntypedInt N = 10;
+    for (nint i = 0; i < N; i++) {
+        Δruntime.SetFinalizer(@new<ж<nint>>(), (ж<ж<nint>> _) => {
+        });
+    }
+
+    Δruntime.GC();
+    Δruntime.GC();
+    runtime_internal_test_package.BlockUntilEmptyFinalizerQueue((int64)(1 * time.ΔSecond));
+
+    metrics.Read(after[..]);
+
+    {
+        var (v0, v1) = (before[0].Value.Uint64(), after[0].Value.Uint64()); if (v0 + (uint64)N != v1) {
+            Ꮡt.Errorf("expected %s difference to be exactly %d, got %d -> %d"u8, before[0].Name, (nint)(N), v0, v1);
+        }
+    }
+    {
+        var (v0, v1) = (before[1].Value.Uint64(), after[1].Value.Uint64()); if (v0 + (uint64)N != v1) {
+            Ꮡt.Errorf("expected %s difference to be exactly %d, got %d -> %d"u8, before[1].Name, (nint)(N), v0, v1);
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string schedMetricsˢ = "SchedMetrics"u8;
+
+public static void TestReadMetricsSched(ж<testing.T> Ꮡt) {
+    // This test is run in a subprocess to prevent other tests from polluting the metrics.
+    @string output = runTestProg(Ꮡt, testprogˢ, schedMetricsˢ);
+    @string want = "OK\n"u8;
+    if (output != want) {
+        Ꮡt.Fatalf("output:\n%s\n\nwanted:\n%s"u8, output, want);
+    }
 }
 
 } // end runtime_test_package

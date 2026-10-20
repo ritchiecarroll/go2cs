@@ -100,7 +100,7 @@ public static (slice<ж<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     n = 0;
     foreach (var (i, s) in ss) {
         bb[i] = Ꮡ(b, n);
-        copy(b[(int)(n)..], s);
+        copy(b.slice(n), s);
         n += len(s) + 1;
     }
     return (bb, default!);
@@ -117,7 +117,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
     if (err != default!) {
         return err;
     }
-    if (((nint)(flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
+    if (((flag & (nint)O_NONBLOCK) != 0) == nonblocking) {
         return default!;
     }
     if (nonblocking){
@@ -131,7 +131,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
 
 // Credential holds user and group identities to be assumed
 // by a child process started by [StartProcess].
-[GoType] partial struct Credential {
+partial struct Credential {
     public uint32 Uid;   // User ID.
     public uint32 Gid;   // Group ID.
     public slice<uint32> Groups; // Supplementary group IDs.
@@ -140,7 +140,7 @@ public static error /*err*/ SetNonblock(nint fd, bool nonblocking) {
 
 // ProcAttr holds attributes that will be applied to a new process started
 // by [StartProcess].
-[GoType] partial struct ProcAttr {
+partial struct ProcAttr {
     public @string Dir;   // Current working directory.
     public slice<@string> Env; // Environment.
     public slice<uintptr> Files; // File descriptors.
@@ -156,12 +156,13 @@ internal static ref SysProcAttr zeroSysProcAttr => ref ᏑzeroSysProcAttr.Value;
 internal static (nint pid, error err) forkExec(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {
     nint pid = default!;
     error err = default!;
-
     ref var attr = ref Ꮡattr.DerefOrNull();
+
     array<nint> p = new(2);
     nint n = default!;
     ref var err1 = ref heap(new Errno(), out var Ꮡerr1);
     ref var wstatus = ref heap(new WaitStatus(), out var Ꮡwstatus);
+
     if (Ꮡattr == nil) {
         Ꮡattr = ᏑzeroProcAttr; attr = ref Ꮡattr.DerefOrNull();
     }
@@ -169,6 +170,7 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
     if (sys == nil) {
         sys = ᏑzeroSysProcAttr;
     }
+
     // Convert args to C form.
     (var argv0p, err) = BytePtrFromString(argv0);
     if (err != default!) {
@@ -182,9 +184,11 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
     if (err != default!) {
         return (0, err);
     }
+
     if ((runtime.GOOS == "freebsd"u8 || runtime.GOOS == "dragonfly"u8) && len(argv) > 0 && len(argv[0]) > len(argv0)) {
         argvp[0] = argv0p;
     }
+
     ж<byte> chroot = default!;
     if ((~sys).Chroot != ""u8) {
         (chroot, err) = BytePtrFromString((~sys).Chroot);
@@ -199,6 +203,7 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
             return (0, err);
         }
     }
+
     // Both Setctty and Foreground use the Ctty field,
     // but they give it slightly different meanings.
     if ((~sys).Setctty && (~sys).Foreground) {
@@ -207,7 +212,9 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
     if ((~sys).Setctty && (~sys).Ctty >= len(attr.Files)) {
         return (0, errorspkg.New("Setctty set but Ctty not valid in child"u8));
     }
+
     acquireForkLock();
+
     // Allocate child status pipe close on exec.
     {
         err = forkExecPipe(p[..]); if (err != default!) {
@@ -215,6 +222,7 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
             return (0, err);
         }
     }
+
     // Kick off child.
     (pid, err1) = forkAndExecInChild(argv0p, argvp, envvp, chroot, dir, ref (Ꮡattr).DerefOrNull(), ref (sys).DerefOrNull(), p[1]);
     if (err1 != 0) {
@@ -224,6 +232,7 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
         return (0, err1);
     }
     releaseForkLock();
+
     // Read child error status from pipe.
     Close(p[1]);
     while (ᐧ) {
@@ -240,16 +249,20 @@ internal static (nint pid, error err) forkExec(@string argv0, slice<@string> arg
         if (err == default!) {
             err = EPIPE;
         }
+
         // Child failed; wait for it to exit, to make sure
         // the zombies don't accumulate.
         var (_, err1Δ1) = Wait4(pid, Ꮡwstatus, 0, nil);
         while (AreEqual(err1Δ1, EINTR)) {
             (_, err1Δ1) = Wait4(pid, Ꮡwstatus, 0, nil);
         }
+
         // OS-specific cleanup on failure.
         forkAndExecFailureCleanup(ref (Ꮡattr).DerefOrNull(), ref (sys).DerefOrNull());
+
         return (0, err);
     }
+
     // Read got EOF, so pipe closed on exec, so exec succeeded.
     return (pid, default!);
 }
@@ -298,10 +311,12 @@ public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@stri
         return err;
     }
     runtime_BeforeExec();
+
     var rlim = ᏑorigRlimitNofile.Load();
     if (rlim != nil) {
         Setrlimit(RLIMIT_NOFILE, rlim);
     }
+
     error err1 = default!;
     if (runtime.GOOS == "solaris"u8 || runtime.GOOS == "illumos"u8 || runtime.GOOS == "aix"u8){
         // RawSyscall should never be used on Solaris, illumos, or AIX.

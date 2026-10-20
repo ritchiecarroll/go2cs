@@ -8,9 +8,10 @@ using fmt = fmt_package;
 using trace = go.@internal.trace_package;
 using format = go.@internal.trace.traceviewer.format_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using time = time_package;
 using encoding;
+using go;
 using go.@internal;
 using go.@internal.trace.traceviewer;
 
@@ -37,6 +38,7 @@ public static TraceConsumer ViewerDataTraceConsumer(io.Writer w, int64 startIdx,
     var enc = json.NewEncoder(w);
     nint written = 0;
     var index = (int64)(-1);
+
     io.WriteString(w, "{"u8);
         var encʗ1 = enc;
 
@@ -101,13 +103,18 @@ internal partial struct SplittingTraceConsumer_eventSz /*dyn*/ {
 }
 
 public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
+    // data.Frames contains only the frames for required events.
     ref var data = ref heap(new format.Data(), out var Ꮡdata);
 
     data = new format.Data(Frames: new map<@string, format.Frame>());
+
     map<@string, format.Frame> allFrames = new map<@string, format.Frame>();
+
     ref var sizes = ref heap<slice<SplittingTraceConsumer_eventSz>>(out var Ꮡsizes);
     ref var cw = ref heap(new countingWriter(), out var Ꮡcw);
+
     var s = @new<splitter>();
+
         var allFramesʗ1 = allFrames;
 
         var allFramesʗ4 = allFrames;
@@ -162,16 +169,21 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
             var enc = json.NewEncoder(new countingWriterжWriter(Ꮡcw));
             enc.Encode(Ꮡdata.Value);
             nint requiredSize = Ꮡcw.Value.size;
+
             // Then calculate size of each individual event and
             // their stack frames, grouping them into ranges. We
             // only include stack frames relevant to the events in
             // the range to reduce overhead.
+
             nint start = 0;
+
             nint eventsSize = 0;
+
             map<@string, format.Frame> frames = new map<@string, format.Frame>();
             nint framesSize = 0;
             foreach (var (i, ev) in Ꮡsizes.ValueSlot) {
                 eventsSize += ev.Sz;
+
                 // Add required stack frames. Note that they
                 // may already be in the map.
                 foreach (var (_, id) in ev.Frames) {
@@ -184,14 +196,16 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
                     frames[sΔ3] = f;
                     framesSize += stackFrameEncodedSize((nuint)id, f);
                 }
+
                 nint total = requiredSize + framesSize + eventsSize;
                 if (total < max) {
                     continue;
                 }
+
                 // Reached max size, commit this range and
                 // start a new range.
-                var startTime = ((time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D));
-                var endTime = ((time.Duration)(int64)(ev.Time * 1000D));
+                var startTime = (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D);
+                var endTime = (time.Duration)(int64)(ev.Time * 1000D);
                 sʗ1.Value.Ranges = append((~sʗ1).Ranges, new Range(
                     Name: fmt.Sprintf("%v-%v"u8, startTime, endTime),
                     Start: start,
@@ -208,10 +222,11 @@ public static (ж<splitter>, TraceConsumer) SplittingTraceConsumer(nint max) {
                 sʗ1.Value.Ranges = default!;
                 return;
             }
+
             {
                 nint end = len(Ꮡsizes.ValueSlot) - 1; if (start < end) {
                     sʗ1.Value.Ranges = append((~sʗ1).Ranges, new Range(
-                        Name: fmt.Sprintf("%v-%v"u8, ((time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D)), ((time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D))),
+                        Name: fmt.Sprintf("%v-%v"u8, (time.Duration)(int64)(Ꮡsizes.ValueSlot[start].Time * 1000D), (time.Duration)(int64)(Ꮡsizes.ValueSlot[end].Time * 1000D)),
                         Start: start,
                         End: end,
                         StartTime: (int64)(Ꮡsizes.ValueSlot[start].Time * 1000D),
@@ -252,15 +267,21 @@ internal static nint stackFrameEncodedSize(nuint id, format.Frame f) {
     // The parent is omitted if 0. The trailing comma is omitted from the
     // last entry, but we don't need that much precision.
     const nint baseSize = /* len(`"`) + len(`":{"name":"`) + len(`"},`) */ 15;
-    
+
+    // Don't count the trailing quote on the name, as that is
+    // counted in baseSize.
     const nint parentBaseSize = /* len(`,"parent":`) */ 10;
+
     nint size = baseSize;
+
     size += len(f.Name);
+
     // Bytes for id (always positive).
     while (id > 0) {
         size += 1;
         id /= 10;
     }
+
     if (f.Parent > 0) {
         size += parentBaseSize;
         // Bytes for parent (always positive).
@@ -269,6 +290,7 @@ internal static nint stackFrameEncodedSize(nuint id, format.Frame f) {
             f.Parent /= 10;
         }
     }
+
     return size;
 }
 
@@ -294,6 +316,7 @@ public static Mode ModeThreadOriented => 4; // Mutually exclusive with ModeGorou
 // rangeEnd args are used for splitting large traces.
 public static ж<Emitter> NewEmitter(TraceConsumer c, time.Duration rangeStart, time.Duration rangeEnd) {
     c.ConsumeTimeUnit("ns"u8);
+
     return Ꮡ(new Emitter(
         c: c,
         rangeStart: rangeStart,
@@ -433,7 +456,7 @@ public static void AsyncSlice(this ref Emitter e, AsyncSliceEvent s) {
 }
 
 partial struct AsyncSliceEvent {
-    public partial ref SliceEvent SliceEvent { get; }
+    /*embed*/ public SliceEvent SliceEvent;
     public @string Category;
     public @string Scope;
     public uint64 TaskColorIndex; // Take on the same color as the task with this ID.
@@ -564,10 +587,10 @@ public static void IncThreadStateCount(this ref Emitter e, time.Duration ts, Thr
             Arg: Ꮡ(new format.ThreadCountersArg(
                 Running: (int64)e.threadStats[ThreadStateRunning],
                 InSyscall: (int64)e.threadStats[ThreadStateInSyscall]
+                // TODO(mknyszek): Why is InSyscallRuntime not included here?
             ))
         )));
     }
-    // TODO(mknyszek): Why is InSyscallRuntime not included here?
     e.prevThreadStats = e.threadStats.Clone();
 }
 
@@ -636,17 +659,21 @@ private static readonly @string syscallsˢ = "Syscalls"u8;
 
 public static void Flush(this ref Emitter e) {
     e.processMeta(format.StatsSection, statsˢ, 0);
+
     if (len(e.tasks) != 0) {
         e.processMeta(format.TasksSection, tasksˢ, 1);
     }
     foreach (var (id, task) in e.tasks) {
         e.threadMeta(format.TasksSection, id, task.name, task.sortIndex);
     }
+
     e.processMeta(format.ProcsSection, e.resourceType, 2);
-    e.threadMeta(format.ProcsSection, trace.GCP, "GC"u8, -6);
-    e.threadMeta(format.ProcsSection, trace.NetpollP, networkˢ, -5);
-    e.threadMeta(format.ProcsSection, trace.TimerP, timersˢ, -4);
-    e.threadMeta(format.ProcsSection, trace.SyscallP, syscallsˢ, -3);
+
+    e.threadMeta(format.ProcsSection, GCP, "GC"u8, -6);
+    e.threadMeta(format.ProcsSection, NetpollP, networkˢ, -5);
+    e.threadMeta(format.ProcsSection, TimerP, timersˢ, -4);
+    e.threadMeta(format.ProcsSection, SyscallP, syscallsˢ, -3);
+
     foreach (var (id, name) in e.resources) {
         nint priority = (nint)id;
         if (e.focusResource != 0 && id == e.focusResource) {
@@ -655,6 +682,7 @@ public static void Flush(this ref Emitter e) {
         }
         e.threadMeta(format.ProcsSection, id, name, priority);
     }
+
     e.c.Flush();
 }
 
@@ -692,25 +720,26 @@ internal static void processMeta(this ref Emitter e, uint64 sectionID, @string n
 
 // Stack emits the given frames and returns a unique id for the stack. No
 // pointers to the given data are being retained beyond the call to Stack.
-public static nint Stack(this ref Emitter e, slice<ж<trace.Frame>> stk) {
+public static nint Stack(this ref Emitter e, slice<trace.StackFrame> stk) {
     return e.buildBranch(e.frameTree, stk);
 }
 
 // buildBranch builds one branch in the prefix tree rooted at ctx.frameTree.
-internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<ж<trace.Frame>> stk) {
+internal static nint buildBranch(this ref Emitter e, frameNode parent, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return parent.id;
     }
     nint last = len(stk) - 1;
     var frame = stk[last];
     stk = stk.slice(0, last);
-    var (node, ok) = parent.children[(~frame).PC, ꟷ];
+
+    var (node, ok) = parent.children[frame.PC, ꟷ];
     if (!ok) {
         e.frameSeq++;
         node.id = e.frameSeq;
         node.children = new map<uint64, frameNode>();
-        parent.children[(~frame).PC] = node;
-        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, (~frame).Fn, (~frame).Line), Parent: parent.id));
+        parent.children[frame.PC] = node;
+        e.c.ConsumeViewerFrame(strconv.Itoa(node.id), new format.Frame(Name: fmt.Sprintf("%v:%v"u8, frame.Func, frame.Line), Parent: parent.id));
     }
     return e.buildBranch(node, stk);
 }
@@ -731,6 +760,7 @@ public static GState GRunnable => 1;
 public static GState GRunning => 2;
 public static GState GWaiting => 3;
 public static GState GWaitingGC => 4;
+
 internal static GState gStateCount => 5;
 
 partial struct ThreadState /*num:nint*/;
@@ -738,6 +768,7 @@ partial struct ThreadState /*num:nint*/;
 public static ThreadState ThreadStateInSyscall => /* iota */ 0;
 public static ThreadState ThreadStateInSyscallRuntime => 1;
 public static ThreadState ThreadStateRunning => 2;
+
 internal static ThreadState threadStateCount => 3;
 
 partial struct frameNode {
@@ -749,67 +780,36 @@ partial struct frameNode {
 // https://github.com/catapult-project/catapult/blob/master/tracing/tracing/base/color_scheme.html#L50
 // The chrome trace viewer allows only those as cname values.
 internal static readonly @string colorLightMauve = "thread_state_uninterruptible"u8; // 182, 125, 143
-
 internal static readonly @string colorOrange = "thread_state_iowait"u8; // 255, 140, 0
-
 internal static readonly @string colorSeafoamGreen = "thread_state_running"u8; // 126, 200, 148
-
 internal static readonly @string colorVistaBlue = "thread_state_runnable"u8; // 133, 160, 210
-
 internal static readonly @string colorTan = "thread_state_unknown"u8; // 199, 155, 125
-
 internal static readonly @string colorIrisBlue = "background_memory_dump"u8; // 0, 180, 180
-
 internal static readonly @string colorMidnightBlue = "light_memory_dump"u8; // 0, 0, 180
-
 internal static readonly @string colorDeepMagenta = "detailed_memory_dump"u8; // 180, 0, 180
-
 internal static readonly @string colorBlue = "vsync_highlight_color"u8; // 0, 0, 255
-
 internal static readonly @string colorGrey = "generic_work"u8;     // 125, 125, 125
-
 internal static readonly @string colorGreen = "good"u8;             // 0, 125, 0
-
 internal static readonly @string colorDarkGoldenrod = "bad"u8;              // 180, 125, 0
-
 internal static readonly @string colorPeach = "terrible"u8;         // 180, 0, 0
-
 internal static readonly @string colorBlack = "black"u8;            // 0, 0, 0
-
 internal static readonly @string colorLightGrey = "grey"u8;             // 221, 221, 221
-
 internal static readonly @string colorWhite = "white"u8;            // 255, 255, 255
-
 internal static readonly @string colorYellow = "yellow"u8;           // 255, 255, 0
-
 internal static readonly @string colorOlive = "olive"u8;            // 100, 100, 0
-
 internal static readonly @string colorCornflowerBlue = "rail_response"u8;    // 67, 135, 253
-
 internal static readonly @string colorSunsetOrange = "rail_animation"u8;   // 244, 74, 63
-
 internal static readonly @string colorTangerine = "rail_idle"u8;        // 238, 142, 0
-
 internal static readonly @string colorShamrockGreen = "rail_load"u8;        // 13, 168, 97
-
 internal static readonly @string colorGreenishYellow = "startup"u8;          // 230, 230, 0
-
 internal static readonly @string colorDarkGrey = "heap_dump_stack_frame"u8; // 128, 128, 128
-
 internal static readonly @string colorTawny = "heap_dump_child_node_arrow"u8; // 204, 102, 0
-
 internal static readonly @string colorLemon = "cq_build_running"u8; // 255, 255, 119
-
 internal static readonly @string colorLime = "cq_build_passed"u8;  // 153, 238, 102
-
 internal static readonly @string colorPink = "cq_build_failed"u8;  // 238, 136, 136
-
 internal static readonly @string colorSilver = "cq_build_abandoned"u8; // 187, 187, 187
-
 internal static readonly @string colorManzGreen = "cq_build_attempt_runnig"u8; // 222, 222, 75
-
 internal static readonly @string colorKellyGreen = "cq_build_attempt_passed"u8; // 108, 218, 35
-
 internal static readonly @string colorAnotherGrey = "cq_build_attempt_failed"u8; // 187, 187, 187
 
 internal static slice<@string> colorForTask = new @string[]{

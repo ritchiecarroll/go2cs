@@ -725,6 +725,13 @@ public sealed class Goroutine
     public static object? GetProfileLabels() => s_profileLabels.Value;
 
     /// <summary>
+    /// THIS goroutine's profile labels as another thread sees them, Go's <c>gp.labels</c> read by a
+    /// traceback of <c>gp</c> (runtime.Stack's goroutine header). The calling goroutine reads its own
+    /// through <see cref="GetProfileLabels"/>, which is authoritative for it; see m_profileLabels.
+    /// </summary>
+    internal object? ProfileLabels => Volatile.Read(ref m_profileLabels);
+
+    /// <summary>
     /// Accounts for a SYSTEM goroutine doing user work for the lifetime of the returned scope, so a
     /// profile of user goroutines includes it.
     /// </summary>
@@ -847,17 +854,10 @@ public sealed class Goroutine
     // detector built on it would kill a live program (a ticker worker parked on its channel beside a
     // `select {}` main). What IS provable is the FOREVER wait: nothing can ever wake a nil-channel op or
     // a `select {}`. The report is therefore Go's rule restricted to that shape: every user goroutine,
-    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and package
-    // time holds no pending timer (an AfterFunc can still start one -- checkdead waits for timers too).
+    // MAIN included, sits in a forever wait, no new goroutine appeared during the check, and no timer is
+    // pending (an AfterFunc can still start one -- checkdead waits for timers too).
     // A deadlock that involves an ordinary channel or sync wait is not reported; it blocks, as it did
     // before this rule existed for every shape but the nil-channel one.
-
-    private static Func<bool>? s_pendingTimerProbe;
-
-    /// <summary>
-    /// Registers package time's answer to "is any timer still pending?" (Go: checkdead's timer scan).
-    /// </summary>
-    public static void RegisterPendingTimerProbe(Func<bool> anyPending) => Volatile.Write(ref s_pendingTimerProbe, anyPending);
 
     // Waits nothing can ever end: a nil-channel receive or send, and a select with no live case.
     internal static bool IsForeverWait(WaitReason reason) =>
@@ -869,9 +869,11 @@ public sealed class Goroutine
     /// </summary>
     internal static bool AllGoroutinesForeverBlocked()
     {
-        // The timer probe FIRST: a timer that fires after this read starts its goroutine through Register,
-        // which the exclusive section below either sees whole or excludes whole.
-        if (Volatile.Read(ref s_pendingTimerProbe) is { } anyPending && anyPending())
+        // The timer heap FIRST (Go's checkdead timer scan; every runtime timer, package time's among them,
+        // is a GoTimer): a timer that fires after this read starts its goroutine through Register, which the
+        // exclusive section below either sees whole or excludes whole, and one that fired before it counts
+        // until its callback has returned.
+        if (GoTimer.AnyPending)
             return false;
 
         Goroutine[] live;
@@ -957,12 +959,19 @@ public sealed class Goroutine
     /// it did through <c>QueueUserWorkItem</c> — <c>Thread.Start</c> captures it the same way — which
     /// is what keeps a failure inside a goroutine attributable to the test that spawned it.
     /// </remarks>
-    public static void Start(Action body)
+    public static void Start(Action body) => Start(body, "", 0);
+
+    /// <summary>
+    /// Starts <paramref name="body"/> as a goroutine launched from the <c>go</c> site at
+    /// <paramref name="callerFile"/>:<paramref name="callerLine"/>, whose creator is resolved once per site (see
+    /// <see cref="CreatorOfSite"/>); <c>builtin.goǃ</c> passes its own caller's site.
+    /// </summary>
+    public static void Start(Action body, string callerFile, int callerLine)
     {
         // Captured HERE, on the thread executing the `go` statement -- the new thread's first frame
         // is Run, which knows nothing about who asked for it. `body` IS the goroutine's start
         // function on this overload: nothing wrapped it, so its Method names the Go function.
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, body.Method);
         StartWithCreator(body, creator, ilOffset, body.Method);
     }
 
@@ -977,10 +986,50 @@ public sealed class Goroutine
     /// profile groups by. Two delegates over one method answer one function, so a method group and a
     /// closure are interchangeable here.
     /// </remarks>
-    public static void Start(Action body, Delegate entry)
+    public static void Start(Action body, Delegate entry) => Start(body, entry, "", 0);
+
+    /// <summary>
+    /// Starts <paramref name="body"/> as a goroutine whose START FUNCTION is <paramref name="entry"/>, launched from the
+    /// <c>go</c> site at <paramref name="callerFile"/>:<paramref name="callerLine"/> (see <see cref="Start(Action, string, int)"/>).
+    /// </summary>
+    public static void Start(Action body, Delegate entry, string callerFile, int callerLine)
     {
-        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorFrame();
+        (System.Reflection.MethodBase? creator, int ilOffset) = CreatorOfSite(callerFile, callerLine, entry.Method);
         StartWithCreator(body, creator, ilOffset, entry.Method);
+    }
+
+    // The creator of a `go` statement, ONCE per site. CreatorFrame resolves a frame for every frame on the stack, so
+    // calling it at every `go` made a goroutine's creation cost grow with the creator's stack depth: go-cmp's cyclic
+    // Transformer test, which recurses 65,536 levels and launches a goroutine from that depth, spent 95% of its time
+    // there (386 s; 20 s with the capture stubbed; Go 0.3 s -- measured 2026-10-11). A `go` site's creator never
+    // changes, so it is resolved by the walk the first time the site runs and read from this cache after. The site is
+    // the launcher's caller (CallerFilePath/CallerLineNumber, which the C# compiler fills in at the `goǃ` call, so
+    // converted code needs no change) plus the entry delegate's method, which keeps two `go` statements on one C#
+    // line apart. A caller with no site (an empty file or a line of 0) walks every time, as before.
+    private static readonly ConcurrentDictionary<(string file, int line, System.Reflection.MethodBase? entry), (System.Reflection.MethodBase? method, int ilOffset)> s_creatorBySite = new();
+
+    // Counts the walks CreatorOfSite performs (GolibTests reads it: one per site, never one per `go`).
+    internal static long CreatorWalks;
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static (System.Reflection.MethodBase? method, int ilOffset) CreatorOfSite(string callerFile, int callerLine, System.Reflection.MethodBase? entry)
+    {
+        if (callerLine <= 0 || string.IsNullOrEmpty(callerFile))
+        {
+            Interlocked.Increment(ref CreatorWalks);
+            return CreatorFrame();
+        }
+
+        (string, int, System.Reflection.MethodBase?) site = (callerFile, callerLine, entry);
+
+        if (s_creatorBySite.TryGetValue(site, out (System.Reflection.MethodBase? method, int ilOffset) cached))
+            return cached;
+
+        Interlocked.Increment(ref CreatorWalks);
+        (System.Reflection.MethodBase? method, int ilOffset) found = CreatorFrame();
+        s_creatorBySite.TryAdd(site, found);
+
+        return found;
     }
 
     /// <summary>
@@ -1445,7 +1494,7 @@ public sealed class Goroutine
                 if (m_goroutine.m_bubble is { } bubble)
                 {
                     m_goroutine.m_bubble = null;
-                    bubble.Exited();
+                    bubble.Exited(m_goroutine);
                 }
 
                 // Go's goexit traces the destroy on the goroutine's own thread (ExecutionTracer, Q28).

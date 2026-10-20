@@ -55,16 +55,18 @@ public static ΔSockets Sockets(this ж<Switch> Ꮡsw) {
     return tab;
 }
 
+// A Cookie represents a 3-tuple of a socket; address family, socket
+// type and protocol number.
 partial struct Cookie /*num:uint64*/;
 
 // Family returns an address family.
 public static nint Family(this Cookie c) {
-    return (nint)(uint64)((c >> (int)(48)));
+    return (nint)(uint64)((c >> 48));
 }
 
 // Type returns a socket type.
 public static nint Type(this Cookie c) {
-    return (nint)(uint64)(((c << (int)(16)) >> (int)(32)));
+    return (nint)(uint64)(((c << 16) >> 32));
 }
 
 // Protocol returns a protocol number.
@@ -73,7 +75,7 @@ public static nint Protocol(this Cookie c) {
 }
 
 internal static Cookie cookie(nint family, nint sotype, nint proto) {
-    return (Cookie)((Cookie)((((Cookie)(uint64)family) << (int)(48)) | ((Cookie)(((Cookie)(uint64)sotype) & 0xffffffffU) << (int)(16))) | (Cookie)(((Cookie)(uint64)proto) & 0xff));
+    return (Cookie)((Cookie)(((Cookie)(uint64)family) << 48 | (Cookie)(((Cookie)(uint64)sotype) & 0xffffffffU) << 16) | (Cookie)(((Cookie)(uint64)proto) & 0xff));
 }
 
 // A Status represents the status of a socket.
@@ -119,6 +121,7 @@ internal static ж<Stat> getLocked(this stats st, Cookie c) {
     return s;
 }
 
+// A FilterType represents a filter type.
 partial struct FilterType /*num:nint*/;
 
 public static FilterType FilterSocket => /* iota */ 0;         // for Socket
@@ -128,6 +131,15 @@ public static FilterType FilterAccept => 3;         // for Accept, Accept4 or Ac
 public static FilterType FilterGetsockoptInt => 4;  // for GetsockoptInt
 public static FilterType FilterClose => 5;          // for Close or Closesocket
 
+// A Filter represents a socket system call filter.
+//
+// It will only be executed before a system call for a socket that has
+// an entry in internal table.
+// If the filter returns a non-nil error, the execution of system call
+// will be canceled and the system call function returns the non-nil
+// error.
+// It can return a non-nil [AfterFilter] for filtering after the
+// execution of the system call.
 public delegate (AfterFilter, error) Filter(ж<Status> _);
 
 internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
@@ -137,6 +149,13 @@ internal static (AfterFilter, error) apply(this Filter f, ж<Status> Ꮡst) {
     return f(Ꮡst);
 }
 
+// An AfterFilter represents a socket system call filter after an
+// execution of a system call.
+//
+// It will only be executed after a system call for a socket that has
+// an entry in internal table.
+// If the filter returns a non-nil error, the system call function
+// returns the non-nil error.
 public delegate error AfterFilter(ж<Status> _);
 
 internal static error apply(this AfterFilter f, ж<Status> Ꮡst) {

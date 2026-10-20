@@ -13,7 +13,7 @@ using context = context_package;
 using errors = errors_package;
 using bytealg = @internal.bytealg_package;
 using godebug = @internal.godebug_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using Δio = io_package;
 using os = os_package;
@@ -31,8 +31,12 @@ using vendor.golang.org.x.net.dns;
 
 partial class net_package {
 
+// to be used as a useTCP parameter to exchange
 internal const bool useTCPOnly = true;
 internal const bool useUDPOrTCP = false;
+
+// Maximum DNS packet size.
+// Value taken from https://dnsflagday.net/2020/.
 internal static UntypedInt maxDNSPacketSize => 1232;
 
 internal static error errLameReferral = errors.New("lame referral"u8);
@@ -41,6 +45,10 @@ internal static error errCannotMarshalDNSMessage = errors.New("cannot marshal DN
 internal static error errServerMisbehaving = errors.New("server misbehaving"u8);
 internal static error errInvalidDNSResponse = errors.New("invalid DNS response"u8);
 internal static error errNoAnswerFromDNSServer = errors.New("no answer from DNS server"u8);
+
+// errServerTemporarilyMisbehaving is like errServerMisbehaving, except
+// that when it gets translated to a DNSError, the IsTemporary field
+// gets set to true.
 internal static ж<temporaryError> errServerTemporarilyMisbehaving = Ꮡ(new temporaryError("server misbehaving"u8));
 
 // netedns0 controls whether we send an EDNS0 additional header.
@@ -51,8 +59,8 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
     slice<byte> udpReq = default!;
     slice<byte> tcpReq = default!;
     error err = default!;
-
     q = q.ΔClone();
+
     id = (uint16)randInt();
     ref var b = ref heap<dnsmessage.Builder>(out var Ꮡb);
     b = dnsmessage.NewBuilder(new slice<byte>(2, 514), new dnsmessage.Header(ID: id, RecursionDesired: true, AuthenticData: ad));
@@ -66,6 +74,7 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
             return (0, default!, default!, errΔ2);
         }
     }
+
     if (netedns0.Value() == "0"u8){
         netedns0.IncNonDefault();
     } else {
@@ -87,13 +96,14 @@ internal static (uint16 id, slice<byte> udpReq, slice<byte> tcpReq, error err) n
             }
         }
     }
+
     (tcpReq, err) = b.Finish();
     if (err != default!) {
         return (0, default!, default!, err);
     }
     udpReq = tcpReq[2..];
     nint l = len(tcpReq) - 2;
-    tcpReq[0] = (byte)((l >> (int)(8)));
+    tcpReq[0] = (byte)(l >> 8);
     tcpReq[1] = (byte)l;
     return (id, udpReq, tcpReq, default!);
 }
@@ -122,6 +132,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip
             return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), err);
         }
     }
+
     b = new slice<byte>(maxDNSPacketSize);
     while (ᐧ) {
         var (n, err) = c.Read(b);
@@ -152,13 +163,14 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
             return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ1);
         }
     }
+
     b = new slice<byte>(1280); // 1280 is a reasonable initial size for IP over Ethernet, see RFC 4035
     {
         var (_, errΔ2) = Δio.ReadFull(new ConnᴠReader(c), b[..2]); if (errΔ2 != default!) {
             return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ2);
         }
     }
-    nint l = (nint)(((nint)b[0] << (int)(8)) | (nint)b[1]);
+    nint l = (nint)b[0] << 8 | (nint)b[1];
     if (l > len(b)) {
         b = new slice<byte>(l);
     }
@@ -202,6 +214,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ж<R
             var (ctxΔ1, cancel) = context.WithDeadline(ctx, time.Now().Add(timeout));
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
+
             var (c, errΔ1) = Ꮡr.dial(ctxΔ1, network, server);
             if (errΔ1 != default!) {
                 return (new dnsmessage.Parser(nil), new dnsmessage.Header(nil), errΔ1);
@@ -252,18 +265,22 @@ internal static error checkHeader(ж<dnsmessage.Parser> Ꮡp, dnsmessage.Header 
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (rcode, hasAdd) = extractExtendedRCode(p, h);
+
     if (rcode == dnsmessage.RCodeNameError) {
         return new notFoundErrorжerror(errNoSuchHost);
     }
+
     var (_, err) = p.AnswerHeader();
     if (err != default! && !AreEqual(err, dnsmessage.ErrSectionDone)) {
         return errCannotUnmarshalDNSMessage;
     }
+
     // libresolv continues to the next server when it receives
     // an invalid referral response. See golang.org/issue/15434.
     if (rcode == dnsmessage.RCodeSuccess && !h.Authoritative && !h.RecursionAvailable && AreEqual(err, dnsmessage.ErrSectionDone) && !hasAdd) {
         return errLameReferral;
     }
+
     if (rcode != dnsmessage.RCodeSuccess && rcode != dnsmessage.RCodeNameError) {
         // None of the error codes make sense
         // for the query we sent. If we didn't get
@@ -275,6 +292,7 @@ internal static error checkHeader(ж<dnsmessage.Parser> Ꮡp, dnsmessage.Header 
         }
         return errServerMisbehaving;
     }
+
     return default!;
 }
 
@@ -332,6 +350,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
     error lastErr = default!;
     var serverOffset = Ꮡcfg.serverOffset();
     var sLen = (uint32)len(cfg.servers);
+
     var (n, err) = dnsmessage.NewName(name);
     if (err != default!) {
         return (new dnsmessage.Parser(nil), "", new DNSErrorжerror(Ꮡ(new DNSError(Err: errCannotMarshalDNSMessage.Error(), Name: name))));
@@ -341,9 +360,11 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
         Type: qtype,
         Class: dnsmessage.ClassINET
     );
+
     for (nint i = 0; i < cfg.attempts; i++) {
         for (var j = (uint32)0; j < sLen; j++) {
             @string server = cfg.servers[(serverOffset + j) % sLen];
+
             ref var p = ref heap<dnsmessage.Parser>(out var Ꮡp);
             (p, var h, var errΔ1) = Ꮡr.exchange(ctx, server, q, cfg.timeout, cfg.useTCP, cfg.trustAD);
             if (errΔ1 != default!) {
@@ -358,6 +379,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
                 lastErr = new DNSErrorжerror(dnsErr);
                 continue;
             }
+
             {
                 var errΔ2 = checkHeader(Ꮡp, h); if (errΔ2 != default!) {
                     if (AreEqual(errΔ2, errNoSuchHost)) {
@@ -369,6 +391,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
                     continue;
                 }
             }
+
             {
                 var errΔ3 = skipToAnswer(Ꮡp, qtype); if (errΔ3 != default!) {
                     if (AreEqual(errΔ3, errNoSuchHost)) {
@@ -380,6 +403,7 @@ internal static (dnsmessage.Parser, @string, error) tryOneName(this ж<Resolver>
                     continue;
                 }
             }
+
             return (p, server, default!);
         }
     }
@@ -415,6 +439,7 @@ internal static void init(this ж<resolverConfig> Ꮡconf) {
     // resolv.conf twice the first time.
     Ꮡconf.of(resolverConfig.ᏑdnsConfig).Store(dnsReadConfig(etcResolvConfˢ));
     conf.lastChecked = time.Now();
+
     // Prepare ch so that only one update of resolverConfig may
     // run at once.
     conf.ch = new channel<EmptyStruct>(1);
@@ -430,28 +455,32 @@ internal static void tryUpdate(this ж<resolverConfig> Ꮡconf, @string name) {
         ref var conf = ref Ꮡconf.DerefOrNull();
 
         Ꮡconf.of(resolverConfig.ᏑinitOnce).Do(Ꮡconf.init);
+
         if ((~Ꮡconf.of(resolverConfig.ᏑdnsConfig).Load()).noReload) {
             return;
         }
+
         // Ensure only one update at a time checks resolv.conf.
         if (!conf.tryAcquireSema()) {
             return;
         }
         ᒐd1 = true;
+
         var now = time.Now();
         if (conf.lastChecked.After(now.Add((time.Duration)(-5000000000L)))) {
             return;
         }
         conf.lastChecked = now;
+
         var exprᴛ1 = runtime.GOOS;
         if (exprᴛ1 == "windows"u8) {
+            // There's no file on disk, so don't bother checking
+            // and failing.
+            //
+            // The Windows implementation of dnsReadConfig (called
+            // below) ignores the name.
         }
         else { /* default: */
-// There's no file on disk, so don't bother checking
-// and failing.
-//
-// The Windows implementation of dnsReadConfig (called
-// below) ignores the name.
             time.Time mtime = default!;
             {
                 var (fi, err) = os.Stat(name); if (err == default!) {
@@ -496,9 +525,11 @@ internal static (dnsmessage.Parser, @string, error) lookup(this ж<Resolver> Ꮡ
         // For consistency with libc resolvers, report no such host.
         return (new dnsmessage.Parser(nil), "", new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
     }
+
     if (Ꮡconf == nil) {
         Ꮡconf = getSystemDNSConfig(); conf = ref Ꮡconf.DerefOrNull();
     }
+
     dnsmessage.Parser p = default!;
     @string server = default!;
     error err = default!;
@@ -552,6 +583,7 @@ internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
     if (l > 254 || l == 254 && !rooted) {
         return default!;
     }
+
     // If name is rooted (trailing dot), try only that name.
     if (rooted) {
         if (avoidDNS(name)) {
@@ -559,9 +591,11 @@ internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
         }
         return new @string[]{name}.slice();
     }
+
     var hasNdots = bytealg.CountString(name, (rune)'.') >= conf.ndots;
     name += "."u8;
     l++;
+
     // Build list of search choices.
     var names = new slice<@string>(0, 1 + len(conf.search));
     // If name has enough dots, try unsuffixed first.
@@ -582,8 +616,12 @@ internal static slice<@string> nameList(this ref dnsConfig conf, @string name) {
     return names;
 }
 
+// hostLookupOrder specifies the order of LookupHost lookup strategies.
+// It is basically a simplified representation of nsswitch.conf.
+// "files" means /etc/hosts.
 partial struct ΔhostLookupOrder /*num:nint*/;
 
+// hostLookupCgo means defer to cgo.
 internal static ΔhostLookupOrder hostLookupCgo => /* iota */ 0;
 internal static ΔhostLookupOrder hostLookupFilesDNS => 1; // files first
 internal static ΔhostLookupOrder hostLookupDNSFiles => 2; // dns first
@@ -604,7 +642,7 @@ internal static @string String(this ΔhostLookupOrder o) {
             return s;
         }
     }
-    return "hostLookupOrder="u8 + itoa.Itoa((nint)o) + "??"u8;
+    return "hostLookupOrder="u8 + strconv.Itoa((nint)o) + "??"u8;
 }
 
 internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
@@ -617,6 +655,7 @@ internal static (slice<@string> addrs, error err) goLookupHostOrder(this ж<Reso
         if (len(addrs) > 0) {
             return (addrs, err);
         }
+
         if (order == hostLookupFiles) {
             return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
         }
@@ -673,11 +712,13 @@ internal partial struct goLookupIPCNAMEOrder_result /*dyn*/ {
 internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookupIPCNAMEOrder(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
     slice<IPAddr> addrs = default!;
     dnsmessage.Name cname = new();
-
     ref var conf = ref Ꮡconf.DerefOrNull();
+    var qtypesᴷ = new stackAppend<dnsmessage.Type>();
+
     if (order == hostLookupFilesDNS || order == hostLookupFiles) {
         @string canonical = default!;
         (addrs, canonical) = goLookupIPFiles(name);
+
         if (len(addrs) > 0) {
             error errΔ1 = default!;
             (cname, errΔ1) = dnsmessage.NewName(canonical);
@@ -686,21 +727,25 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
             }
             return (addrs, cname.ΔClone(), default!);
         }
+
         if (order == hostLookupFiles) {
             return (default!, new dnsmessage.Name(nil), new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
         }
     }
+
     if (!isDomainName(name)) {
         // See comment in func lookup above about use of errNoSuchHost.
         return (default!, new dnsmessage.Name(nil), new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), name, ""u8)));
     }
+
     if (Ꮡconf == nil) {
         Ꮡconf = getSystemDNSConfig(); conf = ref Ꮡconf.DerefOrNull();
     }
+
     var lane = new channel<goLookupIPCNAMEOrder_result>(1);
     var qtypes = new dnsmessage.Type[]{dnsmessage.TypeA, dnsmessage.TypeAAAA}.slice();
     if (network == "CNAME"u8) {
-        qtypes = append(qtypes, dnsmessage.TypeCNAME);
+        qtypes = append(qtypesᴷ, qtypes, dnsmessage.TypeCNAME);
     }
     switch (ipVersion(network)) {
     case (rune)'4': {
@@ -711,7 +756,6 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
         qtypes = new dnsmessage.Type[]{dnsmessage.TypeAAAA}.slice();
         break;
     }}
-
     Action<@string, dnsmessage.Type> queryFn = default!;
     Func<@string, dnsmessage.Type, goLookupIPCNAMEOrder_result> responseFn = default!;
     if (conf.singleRequest){
@@ -765,6 +809,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
                 }
                 continue;
             }
+
             // Presotto says it's okay to assume that servers listed in
             // /etc/resolv.conf are recursive resolvers.
             //
@@ -779,6 +824,7 @@ internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookup
             // Therefore, we should be able to assume that we can ignore
             // CNAMEs and that the A and AAAA records we requested are
             // for the canonical name.
+
 loop:
             while (ᐧ) {
                 var (h, errΔ4) = result.p.AnswerHeader();
@@ -850,7 +896,6 @@ loop:
                     }
                     continue;
                 }
-
 continue_loop:;
             }
 break_loop:;
@@ -911,10 +956,12 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
         if (len(names) > 0) {
             return (names, default!);
         }
+
         if (order == hostLookupFiles) {
             return (default!, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), addr, ""u8)));
         }
     }
+
     var (arpa, err) = reverseaddr(addr);
     if (err != default!) {
         return (default!, err);
@@ -922,12 +969,13 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, err) = Ꮡr.lookup(ctx, arpa, dnsmessage.TypePTR, Ꮡconf);
     if (err != default!) {
-        ref var dnsErr = ref heap<ж<DNSError>>(out var ᏑdnsErr);
-        if (errors.As(err, ᏑdnsErr) && (~dnsErr).IsNotFound) {
-            if (order == hostLookupDNSFiles) {
-                var names = lookupStaticAddr(addr);
-                if (len(names) > 0) {
-                    return (names, default!);
+        {
+            var (dnsErr, ok) = errors.AsType<ж<DNSError>>(err); if (ok && (~dnsErr).IsNotFound) {
+                if (order == hostLookupDNSFiles) {
+                    var names = lookupStaticAddr(addr);
+                    if (len(names) > 0) {
+                        return (names, default!);
+                    }
                 }
             }
         }
@@ -967,6 +1015,7 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
         }
         ptrs = append(ptrs, ptr.PTR.String());
     }
+
     return (ptrs, default!);
 }
 

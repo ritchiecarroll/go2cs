@@ -17,7 +17,7 @@ partial struct MyError {
 partial struct MyCustomError {
     public @string Message;
     /*embed*/ public Abser Abser;
-    public partial ref ж<MyError> MyError { get; }
+    /*embed*/ public ж<MyError> MyError;
 }
 
 public static float64 Time(this ref MyCustomError myErr) {
@@ -32,16 +32,13 @@ partial struct core {
     internal nint pings;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pongˢ = "pong"u8;
-
 internal static @string Ping(this ref core c) {
     c.pings++;
-    return pongˢ;
+    return "pong";
 }
 
 partial struct Station {
-    internal partial ref core core { get; }
+    /*embed*/ internal core core;
     internal @string id;
 }
 
@@ -49,8 +46,8 @@ partial struct noop {
 }
 
 partial struct link {
-    internal partial ref noop noop { get; }
-    public partial ref ж<Station> Station { get; }
+    /*embed*/ internal noop noop;
+    /*embed*/ public ж<Station> Station;
 }
 
 partial interface Pinger {
@@ -85,11 +82,11 @@ internal static nint Hits(this ref meta m) {
 }
 
 partial struct kindBase {
-    internal partial ref meta meta { get; }
+    /*embed*/ internal meta meta;
 }
 
 partial struct counterKind {
-    internal partial ref kindBase kindBase { get; }
+    /*embed*/ internal kindBase kindBase;
 }
 
 partial interface stamper {
@@ -113,7 +110,7 @@ internal static nint probeRig(rig rʗp) {
 }
 
 partial struct deviceHandle {
-    public partial ref ж<Device> Device { get; }
+    /*embed*/ public ж<Device> Device;
 }
 
 partial struct leftSide {
@@ -121,7 +118,7 @@ partial struct leftSide {
 }
 
 internal static @string Ping(this leftSide l) {
-    return "L"u8;
+    return "L";
 }
 
 partial struct rightSide {
@@ -129,12 +126,12 @@ partial struct rightSide {
 }
 
 internal static @string Ping(this rightSide r) {
-    return "R"u8;
+    return "R";
 }
 
 partial struct pair {
-    internal partial ref leftSide leftSide { get; }
-    internal partial ref rightSide rightSide { get; }
+    /*embed*/ internal leftSide leftSide;
+    /*embed*/ internal rightSide rightSide;
 }
 
 partial struct Inner {
@@ -142,50 +139,53 @@ partial struct Inner {
 }
 
 partial struct Middle {
-    public partial ref ж<Inner> Inner { get; }
+    /*embed*/ public ж<Inner> Inner;
 }
 
 partial struct Outer {
     internal ж<ж<Inner>> ptr;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string newˢ = "New"u8;
-private static readonly @string worldˢ = "World"u8;
-private static readonly object myErrorWhatˢ = (@string)"MyError What ="u8;
-private static readonly object myCustomErrorWhatˢ = (@string)"MyCustomError What ="u8;
-private static readonly object myCustomErrorMethodˢ = (@string)"MyCustomError method ="u8;
-
 internal static void Main() {
     ref var e = ref heap<MyError>(out var Ꮡe);
-    e = new MyError(time.Now(), "Hello"u8);
-    var a = new MyCustomError("New One"u8, default!, Ꮡe);
-    a.Message = newˢ;
-    a.What = worldˢ;
-    fmt.Println(myErrorWhatˢ, e.What);
-    fmt.Println(myCustomErrorWhatˢ, a.What);
-    fmt.Println(myCustomErrorMethodˢ, a.Time());
+    e = new MyError(time.Now(), "Hello");
+    var a = new MyCustomError("New One", default!, Ꮡe);
+
+    a.Message = "New";
+    a.What = "World";
+
+    fmt.Println("MyError What =", e.What);
+    fmt.Println("MyCustomError What =", a.What);
+    fmt.Println("MyCustomError method =", a.Time());
+
     ref var inner = ref heap<ж<Inner>>(out var Ꮡinner);
-    inner = Ꮡ(new Inner(Value: "hello"u8));
+    inner = Ꮡ(new Inner(Value: "hello"));
     var innerPtr = Ꮡinner;
+
     var middle = new Middle(Inner: inner);
     fmt.Println(middle.Value);
+
     var outer = new Outer(ptr: innerPtr);
     fmt.Println((~(outer.ptr.ValueSlot)).Value);
-    var dev = Ꮡ(new Device(name: "sensor"u8, hits: 3));
+
+    var dev = Ꮡ(new Device(name: "sensor", hits: 3));
     Describer dsc = new deviceHandle(Device: dev);
     fmt.Println(dsc.Describe());
     var p = dsc.Tag();
     p.Value = 7;
     fmt.Println((~dev).hits);
-    var pw = new pair(new leftSide(tag: "a"u8), new rightSide(tag: "b"u8));
+
+    var pw = new pair(new leftSide(tag: "a"), new rightSide(tag: "b"));
     fmt.Println(pw.leftSide.tag, pw.rightSide.Ping());
-    fmt.Println(probeRig(new rig(dev: new Device(name: "r"u8, hits: 42))));
+
+    fmt.Println(probeRig(new rig(dev: new Device(name: "r", hits: 42))));
+
     var ck = Ꮡ(new counterKind(nil));
-    ck.Value.label = "k9"u8;
+    ck.Value.label = "k9";
     stamper st = new counterKindжstamper(ck);
     fmt.Println(st.Stamp(), st.Stamp(), st.Hits());
-    var stn = Ꮡ(new Station(id: "s1"u8));
+
+    var stn = Ꮡ(new Station(id: "s1"));
     Pinger pg = new link(Station: stn);
     fmt.Println(pg.Ping(), pg.Ping(), (~stn).pings);
 }

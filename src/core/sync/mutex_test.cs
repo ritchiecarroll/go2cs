@@ -61,6 +61,7 @@ public static partial void BenchmarkContendedSemaphore(ж<Δtesting.B> Ꮡb) {
         var c = new channel<bool>(0);
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(2), ref ᒐ);
         b.StartTimer();
+
         goǃ(HammerSemaphore, s, Ꮡb.Value.N / 2, c);
         goǃ(HammerSemaphore, s, Ꮡb.Value.N / 2, c);
         ᐸꟷ(c);
@@ -93,7 +94,9 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
             }
         }
         defer(Δruntime.SetMutexProfileFraction, (nint)(0), ref ᒐ);
+
         var m = @new<Δsync.Mutex>();
+
         m.Lock();
         if (m.TryLock()) {
             Ꮡt.Fatalf("TryLock succeeded with mutex locked"u8);
@@ -103,6 +106,7 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("TryLock failed with mutex unlocked"u8);
         }
         m.Unlock();
+
         var c = new channel<bool>(0);
         for (nint i = 0; i < 10; i++) {
             goǃ(HammerMutex, m, (nint)(1000), c);
@@ -114,7 +118,6 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct misuseTestsᴛ1 /*dyn*/ {
     internal @string name;

@@ -272,6 +272,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeSize = arraySize,
                             TypeClass = "Array",
                             ElementZeroFactory = ArrayElementZeroFactory(context, targetSyntax, semanticModel, typeName, needsConstructionCache),
+                            GoMethodNames = GoMethodNames(semanticModel, targetSyntax),
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -512,6 +513,7 @@ public class TypeGenerator : ISourceGenerator
                             // one gets no shell rather than one that fails to implement it (CS0535).
                             EmitShells = shellEligible && interfaceMethods.Length > 0 &&
                                 interfaceMethods.All(method => method.IsSignatureRenderable),
+                            EmitAssertOverload = shellEligible,
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -550,6 +552,9 @@ public class TypeGenerator : ISourceGenerator
                         continue;
                 }
 
+                // Trim: the type's Go methods stay visible to golib's method-set scan while it can be boxed (MethodSetKeep).
+                generatedSource = MethodSetKeep.OnToString(generatedSource, semanticModel.GetDeclaredSymbol(targetSyntax) as INamedTypeSymbol);
+
                 // Add the source code to the compilation
                 context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs")), generatedSource);
 
@@ -559,6 +564,10 @@ public class TypeGenerator : ISourceGenerator
                         registrations[(packageNamespace, packageName)] = entries = [];
 
                     entries.Add((OpenGenericName(identifier), RegistryMembersFor(targetSyntax, typeDefinition)));
+
+                    // A generic value type's Go methods, closed over its own type parameters for golib (MethodSource).
+                    if (MethodSource.Source(packageNamespace, generatedType as INamedTypeSymbol) is { } methodSource)
+                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
                 }
             }
         }

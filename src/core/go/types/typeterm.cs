@@ -34,7 +34,6 @@ public static @string String(this ж<Δterm> Ꮡx) {
     default: {
         return x.typ.String();
     }}
-
 }
 
 // equal reports whether x and y represent the same type set.
@@ -50,8 +49,8 @@ internal static bool equal(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
     case {} when x.typ == default! || y.typ == default!: {
         return AreEqual(x.typ, y.typ);
     }}
-
     // ∅ ⊂ x, y ⊂ 𝓤
+
     return x.tilde == y.tilde && Identical(x.typ, y.typ);
 }
 
@@ -77,12 +76,13 @@ internal static (ж<Δterm>, ж<Δterm>) union(this ж<Δterm> Ꮡx, ж<Δterm> 
     case {} when y.typ == default!: {
         return (Ꮡy, default!); // x ∪ 𝓤 == 𝓤
     }}
-
     // ∅ ⊂ x, y ⊂ 𝓤
+
     if (x.disjoint(Ꮡy)) {
         return (Ꮡx, Ꮡy); // x ∪ y == (x, y) if x ∩ y == ∅
     }
     // x.typ == y.typ
+
     // ~t ∪ ~t == ~t
     // ~t ∪  T == ~t
     //  T ∪ ~t == ~t
@@ -109,12 +109,13 @@ internal static ж<Δterm> intersect(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
     case {} when y.typ == default!: {
         return Ꮡx; // x ∩ 𝓤 == x
     }}
-
     // ∅ ⊂ x, y ⊂ 𝓤
+
     if (x.disjoint(Ꮡy)) {
         return default!; // x ∩ y == ∅ if x ∩ y == ∅
     }
     // x.typ == y.typ
+
     // ~t ∩ ~t == ~t
     // ~t ∩  T ==  T
     //  T ∩ ~t ==  T
@@ -137,11 +138,11 @@ internal static bool includes(this ж<Δterm> Ꮡx, ΔType t) {
     case {} when x.typ == default!: {
         return true; // t ∈ 𝓤 == true
     }}
-
     // ∅ ⊂ x ⊂ 𝓤
+
     var u = t;
     if (x.tilde) {
-        u = under(u);
+        u = u.Underlying();
     }
     return Identical(x.typ, u);
 }
@@ -165,12 +166,13 @@ internal static bool subsetOf(this ж<Δterm> Ꮡx, ж<Δterm> Ꮡy) {
     case {} when x.typ == default!: {
         return false; // 𝓤 ⊆ y == false since y != 𝓤
     }}
-
     // ∅ ⊂ x, y ⊂ 𝓤
+
     if (x.disjoint(Ꮡy)) {
         return false; // x ⊆ y == false if x ∩ y == ∅
     }
     // x.typ == y.typ
+
     // ~t ⊆ ~t == true
     // ~t ⊆ T == false
     //  T ⊆ ~t == true
@@ -188,11 +190,11 @@ internal static bool disjoint(this ref Δterm x, ж<Δterm> Ꮡy) {
     }
     var ux = x.typ;
     if (y.tilde) {
-        ux = under(ux);
+        ux = ux.Underlying();
     }
     var uy = y.typ;
     if (x.tilde) {
-        uy = under(uy);
+        uy = uy.Underlying();
     }
     return !Identical(ux, uy);
 }

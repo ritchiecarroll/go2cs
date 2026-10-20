@@ -16,9 +16,6 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-// Tests header sorting when over the insertion sort threshold side:
-// Tests invalid characters in headers.
-
 partial struct headerWriteTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader h;
     internal map<@string, bool> exclude;
@@ -78,6 +75,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = new headerWriteTe
         default!,
         "Blank: \r\nDouble-Blank: \r\nDouble-Blank: \r\n"u8
     ),
+    // Tests header sorting when over the insertion sort threshold side:
     new(
         new ΔHeader(new map<@string, slice<@string>>{
             ["k1"u8] = new @string[]{"1a"u8, "1b"u8}.slice(),
@@ -93,6 +91,7 @@ internal static slice<headerWriteTestsᴛ1> headerWriteTests = new headerWriteTe
         new map<@string, bool>{["k5"u8] = true},
         "k1: 1a\r\nk1: 1b\r\nk2: 2a\r\nk2: 2b\r\nk3: 3a\r\nk3: 3b\r\n"u8 + "k4: 4a\r\nk4: 4b\r\nk6: 6a\r\nk6: 6b\r\n"u8 + "k7: 7a\r\nk7: 7b\r\nk8: 8a\r\nk8: 8b\r\nk9: 9a\r\nk9: 9b\r\n"u8
     ),
+    // Tests invalid characters in headers.
     new(
         new ΔHeader(new map<@string, slice<@string>>{
             ["Content-Type"u8] = new @string[]{"text/html; charset=UTF-8"u8}.slice(),
@@ -116,7 +115,6 @@ public static void TestHeaderWrite(ж<testing.T> Ꮡt) {
         buf.Reset();
     }
 }
-
 
 partial struct parseTimeTestsᴛ1 /*dyn*/ {
     internal global::go.net.http_package.ΔHeader h;
@@ -195,7 +193,7 @@ public static void TestHasToken(ж<testing.T> Ꮡt) {
 }
 
 public static void TestNilHeaderClone(ж<testing.T> Ꮡt) {
-    var t1 = ((global::go.net.http_package.ΔHeader)default!);
+    var t1 = (global::go.net.http_package.ΔHeader)default!;
     var t2 = t1.Clone();
     if (t2 != default!) {
         Ꮡt.Errorf("cloned header does not match original: got: %+v; want: %+v"u8, t2, (any)(default!));
@@ -272,6 +270,7 @@ public static void TestCloneOrMakeHeader(ж<testing.T> Ꮡt) {
             want: new ΔHeader(new map<@string, slice<@string>>{["foo"u8] = default!})
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestCloneOrMakeHeader_tests(), out var Ꮡtt);
         tt = vᴛ1;

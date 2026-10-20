@@ -8,10 +8,12 @@ partial class dag_package {
 // Transpose reverses all edges in g.
 public static void Transpose(this ref Graph g) {
     var old = g.edges;
+
     g.edges = new map<@string, map<@string, bool>>();
     foreach (var (_, n) in g.Nodes) {
         g.edges[n] = new map<@string, bool>();
     }
+
     foreach (var (from, tos) in old) {
         foreach (var (to, _) in tos) {
             g.edges[to].Set(from, true);
@@ -26,6 +28,7 @@ public static slice<@string> Topo(this ж<Graph> Ꮡg) {
     ref var topo = ref heap<slice<@string>>(out var Ꮡtopo);
     topo = new slice<@string>(0, len(g.Nodes));
     var marks = new map<@string, bool>();
+
     ref var visit = ref heap<Action<@string>>(out var Ꮡvisit);
     var marksʗ1 = marks;
     visit = (@string n) => {

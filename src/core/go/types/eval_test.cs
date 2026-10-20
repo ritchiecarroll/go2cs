@@ -30,6 +30,7 @@ internal static void testEval(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset, ж<
         Ꮡt.Errorf("Eval(%q) got nil type but no error"u8, expr);
         return;
     }
+
     // compare types
     if (typ != default!){
         // we have a type, check identity
@@ -45,6 +46,7 @@ internal static void testEval(ж<testing.T> Ꮡt, ж<token.FileSet> Ꮡfset, ж<
             return;
         }
     }
+
     // compare values
     @string gotStr = ""u8;
     if (gotTv.Value != default!) {
@@ -94,6 +96,7 @@ internal static readonly @string interfaceRReadˢ = "interface{R}.Read"u8;
 
 public static void TestEvalPos(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     // The contents of /*-style comments are of the form
     //	expr => value, type
     // where value may be the empty string.
@@ -128,7 +131,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 			/* m.Pi < m.E => false, untyped bool */
 		}
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -153,13 +156,13 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 			type FT /* FT => , p.FT */ interface{}
 		}
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
 		/* T => , p.T */
 		
-"""u8,
+"""u8.Raw(),
         """
 
 		package p
@@ -174,8 +177,9 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 			type R interface {} // must not shadow R in first line of this function body
 		}
 		
-"""u8
+"""u8.Raw()
     }.slice();
+
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default!;
     foreach (var (i, src) in sources) {
@@ -183,6 +187,7 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("could not parse file %d: %s"u8, i, errΔ1);
         }
+
         // Materialized aliases give a different (better)
         // result for the final test, so skip it for now.
         // TODO(adonovan): reenable when gotypesalias=1 is the default.
@@ -195,12 +200,14 @@ public static void TestEvalPos(ж<testing.T> Ꮡt) {
 
         files = append(files, @file);
     }
+
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(Importer: defaultImporter(fset));
     var (pkg, err) = Ꮡconf.Check("p"u8, fset, files, nil);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, @file) in files) {
         foreach (var (_, group) in (~@file).Comments) {
             foreach (var (_, comment) in (~group).List) {
@@ -255,26 +262,30 @@ func f(a int, s string) S {
 
 	return S{}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestCheckExpr(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     // Each comment has the form /* expr => object */:
     // expr is an identifier or selector expression that is passed
     // to CheckExpr at the position of the comment, and object is
     // the string form of the object it denotes.
     @string src = srcᶜ15;
+
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, "p"u8, src, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(Importer: defaultImporter(fset));
     (var pkg, err) = Ꮡconf.Check("p"u8, fset, new ж<ast.File>[]{f}.slice(), nil);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var fsetʗ1 = fset;
     var pkgʗ1 = pkg;
     (types.Object, error) checkExpr(tokenꓸPos pos, @string str) {
@@ -282,6 +293,7 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
+
         var info = Ꮡ(new typesꓸInfo(
             Uses: new map<ж<ast.Ident>, types.Object>(),
             Selections: new map<ж<ast.SelectorExpr>, ж<types.Selection>>()
@@ -315,6 +327,7 @@ public static void TestCheckExpr(ж<testing.T> Ꮡt) {
         }}
         return (default!, fmt.Errorf("no object for %s"u8, str));
     }
+
     foreach (var (_, group) in (~f).Comments) {
         foreach (var (_, comment) in (~group).List) {
             @string s = comment.Value.Text;
@@ -344,17 +357,20 @@ internal static readonly @string srcᶜ16 = """
 package p
 func _[A any](A) {}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue65898(ж<testing.T> Ꮡt) {
     @string src = srcᶜ16;
+
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
+
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var (pkg, err) = Ꮡconf.Check(pkgName(src), fset, new ж<ast.File>[]{f}.slice(), nil);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, d) in (~f).Decls) {
         {
             var (fun, _) = d._<ж<ast.FuncDecl>>(ᐧ); if (fun != nil) {

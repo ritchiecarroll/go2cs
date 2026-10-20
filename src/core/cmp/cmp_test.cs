@@ -21,15 +21,14 @@ internal static uintptr nonnilptr = (uintptr)Ꮡnegzero;
 
 internal static uintptr nilptr = (uintptr)(@unsafe.Pointer)default!;
 
-
 partial struct testsᴛ1 /*dyn*/ {
     internal any x, y;
     internal nint compare;
 }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{
-    new((nint)(1), (nint)(2), -1),
-    new((nint)(1), (nint)(1), 0),
-    new((nint)(2), (nint)(1), +1),
+    new((nint)1, (nint)2, -1),
+    new((nint)1, (nint)1, 0),
+    new((nint)2, (nint)1, +1),
     new((@string)"a"u8, (@string)"aa"u8, -1),
     new((@string)"a"u8, (@string)"a"u8, 0),
     new((@string)"aa"u8, (@string)"a"u8, +1),
@@ -84,7 +83,6 @@ public static void TestLess(ж<testing.T> Ꮡt) {
             b = cmp.Less(test.x._<uintptr>(), test.y._<uintptr>());
             break;
         }}
-
         if (b != (test.compare < 0)) {
             Ꮡt.Errorf("Less(%v, %v) == %t, want %t"u8, test.x, test.y, b, test.compare < 0);
         }
@@ -115,7 +113,6 @@ public static void TestCompare(ж<testing.T> Ꮡt) {
             c = cmp.Compare(test.x._<uintptr>(), test.y._<uintptr>());
             break;
         }}
-
         if (c != test.compare) {
             Ꮡt.Errorf("Compare(%v, %v) == %d, want %d"u8, test.x, test.y, c, test.compare);
         }
@@ -170,9 +167,14 @@ public static void ExampleOr() {
     // that may or may not be an empty string
     @string userInput1 = ""u8;
     @string userInput2 = someTextˢ;
+
     fmt.Println(cmp.Or(userInput1, defaultˢ));
     fmt.Println(cmp.Or(userInput2, defaultˢ));
     fmt.Println(cmp.Or(userInput1, userInput2, defaultˢ));
+    // Output:
+    // default
+    // some text
+    // some text
 }
 
 internal partial struct ExampleOr_sort_Order /*dyn*/ {
@@ -181,10 +183,6 @@ internal partial struct ExampleOr_sort_Order /*dyn*/ {
     public float64 Price;
 }
 
-// Output:
-// default
-// some text
-// some text
 public static void ExampleOr_sort() {
     var orders = new ExampleOr_sort_Order[]{
         new("foo"u8, "alice"u8, 1.00D),
@@ -202,14 +200,14 @@ public static void ExampleOr_sort() {
     foreach (var (_, order) in orders) {
         fmt.Printf("%s %s %.2f\n"u8, order.Product, order.Customer, order.Price);
     }
-}
 
-// Output:
-// foo alice 2.00
-// foo alice 1.00
-// bar bob 3.00
-// foo bob 4.00
-// bar carol 1.00
-// baz carol 4.00
+    // Output:
+    // foo alice 2.00
+    // foo alice 1.00
+    // bar bob 3.00
+    // foo bob 4.00
+    // bar carol 1.00
+    // baz carol 4.00
+}
 
 } // end cmp_test_package

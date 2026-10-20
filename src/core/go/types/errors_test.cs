@@ -22,15 +22,17 @@ public static void TestError(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("empty error: got %q, want %q"u8, got, want);
         }
     }
+
     want = foo42ˢ;
-    err.addf(noposn, "foo %d"u8, (nint)(42));
+    err.addf(noposn, "foo %d"u8, (nint)42);
     {
         @string got = err.msg(); if (got != want) {
             Ꮡt.Errorf("simple error: got %q, want %q"u8, got, want);
         }
     }
+
     want = foo42Bar43ˢ;
-    err.addf(noposn, "bar %d"u8, (nint)(43));
+    err.addf(noposn, "bar %d"u8, (nint)43);
     {
         @string got = err.msg(); if (got != want) {
             Ꮡt.Errorf("simple error: got %q, want %q"u8, got, want);

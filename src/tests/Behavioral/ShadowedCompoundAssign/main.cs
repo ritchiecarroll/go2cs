@@ -13,6 +13,7 @@ internal static void Main() {
         fmt.Println(xΔ1);
     }
     fmt.Println(x);
+
     nint sum = 1000;
     nint i = 50;
     _ = sum;
@@ -26,12 +27,13 @@ internal static void Main() {
     }))();
     fmt.Println(total);
     fmt.Println(sum);
+
     nint acc = 7;
     for (nint n = 0; n < 3; n++) {
         nint accΔ1 = 0;
         accΔ1 += n;
         accΔ1 -= 1;
-        fmt.Print(accΔ1, (@string)" "u8);
+        fmt.Print(accΔ1, " ");
     }
     fmt.Println();
     fmt.Println(acc);

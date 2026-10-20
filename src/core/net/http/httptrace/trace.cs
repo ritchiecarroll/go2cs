@@ -43,6 +43,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
     }
     var old = ContextClientTrace(ctx);
     Ꮡtrace.compose(old);
+
     ctx = context.WithValue(ctx, new clientEventContextKey(nil), Ꮡtrace.OrTypedNil());
     if (Ꮡtrace.hasNetHooks()) {
         var nt = Ꮡ(new nettrace.Trace(
@@ -81,7 +82,7 @@ public static context.Context WithClientTrace(context.Context ctx, ж<ClientTrac
 // during a single round trip and has no hooks that span a series
 // of redirected requests.
 //
-// See https://blog.golang.org/http-tracing for more.
+// See https://go.dev/blog/http-tracing for more.
 partial struct ClientTrace {
     // GetConn is called before a connection is created or
     // retrieved from an idle pool. The hostPort is the
@@ -184,10 +185,12 @@ internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> Ꮡold) 
             tf.Set(of);
             continue;
         }
+
         // Make a copy of tf for tf to call. (Otherwise it
         // creates a recursive call cycle and stack overflows)
         ref var tfCopy = ref heap<reflectꓸValue>(out var ᏑtfCopy);
         tfCopy = reflect.ValueOf(tf.Interface());
+
         // We need to call both tf and of in some order.
         var ofʗ1 = of;
         var tfCopyʗ1 = tfCopy;

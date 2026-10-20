@@ -18,6 +18,10 @@ using math;
 
 partial class nettest_package {
 
+// MakePipe creates a connection between two endpoints and returns the pair
+// as c1 and c2, such that anything written to c1 is read by c2 and vice-versa.
+// The stop function closes all resources, including c1, c2, and the underlying
+// net.Listener (if there is one), and should not be nil.
 // type MakePipe is a methodless func type — rendered inline as its base delegate
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -113,8 +117,9 @@ private static readonly object transmittedDataDiffersˢ = (@string)"transmitted 
 
 // testBasicIO tests that the data sent on c1 is properly received on c2.
 internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
-    var want = new slice<byte>((1 << (int)(20)));
+    var want = new slice<byte>((1 << 20));
     rand.New(rand.NewSource(0)).Read(want);
+
     var dataCh = new channel<slice<byte>>(0);
     var wantʗ1 = want;
     goǃ(() => {
@@ -130,6 +135,7 @@ internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Co
             }
         }
     });
+
     var dataChʗ1 = dataCh;
     goǃ(() => {
         var wr = @new<bytes.Buffer>();
@@ -145,6 +151,7 @@ internal static partial void testBasicIO(ж<testing.T> Ꮡt, net.Conn c1, net.Co
         }
         dataChʗ1.ᐸꟷ(wr.Bytes());
     });
+
     {
         var got = ᐸꟷ(dataCh); if (!bytes.Equal(got, want)) {
             Ꮡt.Error(transmittedDataDiffersˢ);
@@ -159,6 +166,7 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
     try {
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
+
         void pingPonger(net.Conn c) {
             GoFrame ᒐ = default;
             try {
@@ -174,6 +182,7 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
                             Ꮡt.Errorf("unexpected Read error: %v"u8, err);
                         }
                     }
+
                     var v = binary.LittleEndian.Uint64(buf);
                     binary.LittleEndian.PutUint64(buf, v + 1);
                     if (prev != 0 && prev + 2 != v) {
@@ -183,6 +192,7 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
                     if (v == 1000) {
                         break;
                     }
+
                     {
                         var (_, err) = c.Write(buf); if (err != default!) {
                             Ꮡt.Errorf("unexpected Write error: %v"u8, err);
@@ -199,11 +209,13 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         Ꮡwg.Add(2);
         var pingPongerʗ1 = pingPonger;
         goǃ(pingPongerʗ1, c1);
         var pingPongerʗ2 = pingPonger;
         goǃ(pingPongerʗ2, c2);
+
         // Start off the chain reaction.
         {
             var (_, err) = c1.Write(new slice<byte>(8)); if (err != default!) {
@@ -216,13 +228,15 @@ internal static partial void testPingPong(ж<testing.T> Ꮡt, net.Conn c1, net.C
 }
 
 // testRacyRead tests that it is safe to mutate the input Read buffer
-// immediately after cancelation has occurred.
+// immediately after cancellation has occurred.
 internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new rand_RandжReader(rand.New(rand.NewSource(0))));
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
+
         c1.SetReadDeadline(time.Now().Add(time.Millisecond));
         for (nint i = 0; i < 10; i++) {
             Ꮡwg.Add(1);
@@ -230,6 +244,7 @@ internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.C
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
+
                     var b1 = new slice<byte>(1024);
                     var b2 = new slice<byte>(1024);
                     for (nint j = 0; j < 100; j++) {
@@ -251,13 +266,15 @@ internal static partial void testRacyRead(ж<testing.T> Ꮡt, net.Conn c1, net.C
 }
 
 // testRacyWrite tests that it is safe to mutate the input Write buffer
-// immediately after cancelation has occurred.
+// immediately after cancellation has occurred.
 internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), io.Discard, new net_ConnᴠReader(c2));
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
+
         c1.SetWriteDeadline(time.Now().Add(time.Millisecond));
         for (nint i = 0; i < 10; i++) {
             Ꮡwg.Add(1);
@@ -265,6 +282,7 @@ internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.
                 GoFrame ᒐ = default;
                 try {
                     defer(Ꮡwg.Done, ref ᒐ);
+
                     var b1 = new slice<byte>(1024);
                     var b2 = new slice<byte>(1024);
                     for (nint j = 0; j < 100; j++) {
@@ -288,6 +306,7 @@ internal static partial void testRacyWrite(ж<testing.T> Ꮡt, net.Conn c1, net.
 // testReadTimeout tests that Read timeouts do not affect Write.
 internal static partial void testReadTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), io.Discard, new net_ConnᴠReader(c2));
+
     c1.SetReadDeadline(aLongTimeAgo);
     var (_, err) = c1.Read(new slice<byte>(1024));
     checkForTimeoutError(Ꮡt, err);
@@ -301,6 +320,7 @@ internal static partial void testReadTimeout(ж<testing.T> Ꮡt, net.Conn c1, ne
 // testWriteTimeout tests that Write timeouts do not affect Read.
 internal static partial void testWriteTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new rand_RandжReader(rand.New(rand.NewSource(0))));
+
     c1.SetWriteDeadline(aLongTimeAgo);
     var (_, err) = c1.Write(new slice<byte>(1024));
     checkForTimeoutError(Ꮡt, err);
@@ -315,7 +335,9 @@ internal static partial void testWriteTimeout(ж<testing.T> Ꮡt, net.Conn c1, n
 // Read and Write requests.
 internal static partial void testPastTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
+
     testRoundtrip(Ꮡt, c1);
+
     c1.SetDeadline(aLongTimeAgo);
     var (n, err) = c1.Write(new slice<byte>(1024));
     if (n != 0) {
@@ -327,6 +349,7 @@ internal static partial void testPastTimeout(ж<testing.T> Ꮡt, net.Conn c1, ne
         Ꮡt.Errorf("unexpected Read count: got %d, want 0"u8, n);
     }
     checkForTimeoutError(Ꮡt, err);
+
     testRoundtrip(Ꮡt, c1);
 }
 
@@ -342,6 +365,7 @@ internal static partial void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1,
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
         Ꮡwg.Add(3);
+
         var deadlineSet = new channel<bool>(1);
         var deadlineSetʗ1 = deadlineSet;
         goǃ(() => {
@@ -400,6 +424,7 @@ internal static partial void testPresentTimeout(ж<testing.T> Ꮡt, net.Conn c1,
 internal static partial void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, net.Conn c2) {
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
     Ꮡwg.Add(2);
+
     c1.SetDeadline(time.Now().Add(100 * time.Millisecond));
     goǃ(() => {
         GoFrame ᒐ = default;
@@ -425,6 +450,7 @@ internal static partial void testFutureTimeout(ж<testing.T> Ꮡt, net.Conn c1, 
         finally { ᒐ.Run(); }
     });
     Ꮡwg.Wait();
+
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
     resyncConn(Ꮡt, c1);
     testRoundtrip(Ꮡt, c1);
@@ -436,10 +462,12 @@ internal static partial void testCloseTimeout(ж<testing.T> Ꮡt, net.Conn c1, n
     GoFrame ᒐ = default;
     try {
         goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
+
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         defer(Ꮡwg.Wait, ref ᒐ);
         Ꮡwg.Add(3);
-        // Test for cancelation upon connection closure.
+
+        // Test for cancellation upon connection closure.
         c1.SetDeadline(neverTimeout);
         goǃ(() => {
             GoFrame ᒐ = default;
@@ -492,6 +520,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> Ꮡt, net.Conn 
         Ꮡt.Skip(skippingOnPlan9SeeHttpsˢ);
     }
     goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), new net_ConnᴠWriter(c2), new net_ConnᴠReader(c2));
+
     // The results of the calls may be nonsensical, but this should
     // not trigger a race detector warning.
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -562,6 +591,7 @@ internal static partial void testConcurrentMethods(ж<testing.T> Ꮡt, net.Conn 
         });
     }
     Ꮡwg.Wait(); // At worst, the deadline is set 10ms into the future
+
     resyncConn(Ꮡt, c1);
     testRoundtrip(Ꮡt, c1);
 }
@@ -597,6 +627,7 @@ internal static void testRoundtrip(ж<testing.T> Ꮡt, net.Conn c) {
             Ꮡt.Errorf("roundtrip SetDeadline error: %v"u8, err);
         }
     }
+
     @string s = sᶜ;
     var buf = slice<byte>(s);
     {

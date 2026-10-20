@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using strconvꓸError = go.@internal.strconv_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -40,8 +41,13 @@ using static go.strconv_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<floatInfo, ж<floatInfo>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -51,19 +57,10 @@ using static go.strconv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("strconv/atob.go", "atob.cs", "AAoUspSkpOiSgpSqooKU")]
-[assembly: go.GoPositionMap("strconv/atoc.go", "atoc.cs", "AAwaooCCgoKCtgACLgAUAoKClpaClpaCgoKCppaCqKii3KKUpLiCgoKCpoKClA==")]
-[assembly: go.GoPositionMap("strconv/atof.go", "atof.cs", "ABAosoKClIKCgpSCpgAGENKClIKCpIKUgoKkhqKUgraCtqaigoKWgpSUtILIgoKClrSSlIKCtoKSgpSCgpKClLSUgpSCAAYQgoKClIKCkoKClIKUgoKUlIKmloKWgq4ADAKWgpSUtILIgoKCgoKCgoKUgoKCgoKCgoCkgraClIKCtoKSgpSCgoKCkoKUtoKCgoKClJTEtIKUgpaCggAGEIKCgpSCgpKCgpSClIKCgoKUgqaSlJaCloKWgriUwoKWgoKCzIKUlIKCqIKCgoKUlIKUgoKClJSCqLqCgoKWgqiCloKCgoK6gpSEhJKChISSgoKUuNoAARYADAKClIKClJas4oKUlJSktKrSgpSCgpSUrNKClJSUpLQAAhDygoIABhCCgpSClIKCzIKCqIKCgoKCgoKCqJKUgpKCgpaCgoKUgpTKwoCCpoKCloKClqaCgIK2goKCyoKCvJKClIKCgpSmwoCCpoKCloKClqaCgIK2goKCyoKCvJKClIKCgpQAAjwAGwKCgpSmgoKClA==")]
-[assembly: go.GoPositionMap("strconv/atoi.go", "atoi.cs", "AAsgwrimAAgSgqaAAAIU8qaCpoKmggAMGrKEgpaEgsyCopSCtIK0grSC+qaCkoKaopS0tLaEgoKCgpSCtLS0poKWlJSEgpSUloKWAAU4ABsChIKogoKCkoKCmJKCgoKCloKWgoKUgpSCgpTYkoSCloKCgoKogqKCgpSUgpSogoCCpKwACAyCloKogoKCgqiUgoKmgoKUgqaCppQ=")]
 [assembly: go.GoPositionMap("strconv/bytealg.go", "bytealg.cs", "AAsYkg==")]
-[assembly: go.GoPositionMap("strconv/ctoa.go", "ctoa.cs", "AAcc8oKUloKClg==")]
-[assembly: go.GoPositionMap("strconv/decimal.go", "decimal.cs", "ABUsgoKClIKWgoKUqIKCgoKCyJKCgriStKaCgpSssoKUgrqyloKCgoKCgqiCgoKUggAIEpKChpKCgpSClIKClJSClISWgoKCgoKCqIKCgoKCkoKUloIAWSQAP5wBkoKClIKmqJKCgpaChpKCgoKCgoKSgpSogoKCgoKSgpSWgoKUgqiyyJKClLSCgpTakoKUpIKUpq7igpSClLqygpSCqJKCqIKCkoKCzIKCqsKClIKCgpSClIKU")]
-[assembly: go.GoPositionMap("strconv/eisel_lemire.go", "eisel_lemire.cs", "ABcy2oKClJSCqIKCgpaWgoKCgpSClKiCgpaCqIKCgoLugpSCgpSmAAsWgoKUlIKogoKClpaCgoKClIKUqIKCloKogoKCgu6ClIKClADLBSo=")]
-[assembly: go.GoPositionMap("strconv/ftoa.go", "ftoa.cs", "ABUsogACNAAYAqqi9oKCgpSCtIK0toKChJaSlLS0tKioxJaClIKWgpaClIKEkoKClJS0tMSUgpS0gpS2xIKCgoKSgoKCpoKUqJKCgoKCgoKClJS0tNiUtLSClLSUpoKUpKaCkpqylIKCgpSUgpS4qtSCggAOIoKUzIKCAAAQ4oKCgpSClIKCugAAGgANCLiCgpSCgoKUgoKUgoLMhJq6ugAOCKiUgqSCpIIAChakgqiCgpSWgoKCgoKClIK6goKSlIKClJSWlLS0tqikgqiCgoKCpqiCgoKCgIKkqKikgqiWloKClISokoKogoKCqIKCgoKClIKUgqiCgqiClJaCgoKCgqSCgoKCuoKClIKCgpSUlpS0tLY=")]
-[assembly: go.GoPositionMap("strconv/ftoaryu.go", "ftoaryu.cs", "AAooAAkCgpSCpoKCpoKAgoIACBC6hIKC3IKCpoKEgoKmvJSCppSokoKmgoKmgoCCggALFrqEgoLcgoKmgoSCgqa8lIKmlKYABBCygoKCgoKCgpKCyJSCpoKUlIKmgoKCgpKClJSCgoKUgoKUgoKUgoKUqJKCgriCgoKUgoKCpojCooKigoKClIKClIKmlJSmgpSClILKgpSCgsqCgpSCuIKmusqCgqaUggACEOQAAhDkrAAIApSCgqaCgriEgoKClJKUgpSCgoKUlIKCgoKClIKUuIKmgoKCupSCgpSmgtyCgoKmAAoWgoKClJSCgqaCmIKmgoKCgoKCgoKUgpSCAAIaAAoClJSUlIKUlIKCAAIaAAoClJSUlIKUlJaCgoKCpoKClIKClJSqooKmgoI=")]
-[assembly: go.GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCBAoIEAHPoAQ==")]
-[assembly: go.GoPositionMap("strconv/itoa.go", "itoa.cs", "AAwcsoKUgqyygpSCqJKqooKUgqqigpSCqJKClAAKMgAIAoKogoSCzKiUuIKCgoKCgoK6goTMgoKCgoKCqIKCgoKCppSCgoKCgoKmgqaCgriCgqaCqIKCloKClIKmgg==")]
-[assembly: go.GoPositionMap("strconv/quote.go", "quote.cs", "AA4mkqaCpoKmpoKCgpSCgoKCgpSCgoKClJSCpoKCgpSCgqaCkoKClIKCgqSClJS0tLS0tLS0lIKCpIKkgoK2goLorsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpKQAAiIAFASCgpSApIKkgqTIgoKUgoSUtLS0tLS0tIKUtLS0goKClIKCgoKUlIKUgpSCgpSCtIKCgpSSgoKClJSCgoKUtLSCgpS0gqSCqqKCAAIS4oKClK70gpSCgoKUhJSUtLiCgoKmvqbigpS0grSCgoKUqpKCgoKUpoKClJaCgpS6gqqSlISClKTM0oKSgoKClKYAAhgACgSClJSUlAAGEoKCgoKUgpaCgoKUgpSCgqyygpSsxIKUgg==")]
+[assembly: go.GoPositionMap("strconv/isprint.go", "isprint.cs", "AAkWANYBrgMAhwGQAgCAAoIEAHPoAQ==")]
+[assembly: go.GoPositionMap("strconv/number.go", "number.cs", "ABImsoKClKiSqqIABS4AFAKCgpQABTwAGwKCgpTcsoKClAAFOAAbAoKClNiSgoKUAAIU8gACNgAYAqqirLKssqiSqqKqoqiSlKSkpJS4pgAIEoKmgAACFPKmgqaCpoI=")]
+[assembly: go.GoPositionMap("strconv/quote.go", "quote.cs", "AA4mkqaCpoKmpoKCgpSCgoKCgoKClJSCpoKCgpSCgqaCgoKClIKCgqSClJS0tLS0tLS0lIKCpIKkgoK2goLIrsKqoqyyqqKuwqqiAAIQ0qqiAAIS4qqiAAIS4qqirLKCgoKCgpSUgpSCpqaygpSkpJQAAiIAFASCgpSApIKkgqTIgoKUgpSUtLS0tLS0tIKUtLSkgoKClIKCgoKUlIKUgpSCgpSCtIKCgpSCgoKClJSCgoKUtLSCgpS0gpSCqqKCAAIS4oKClK4ACQSClIKCgpSUlJS02IKCgqb+toKClLSCpIKCgpS6koKCgpSmgoKUpoKClMqCyoKUlIKUpLzSgpKCgoKUpgACGAAKBIKUlJSUAAgSgoKCgpSCpoKCgpSClIKCrLKClKzEgpSC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -78,10 +75,6 @@ public static partial class strconv_package
     // via declarations below.
 
     // <TypeAccessibility>
-    internal partial struct decimalSlice {}
-    internal partial struct floatInfo {}
-    internal partial struct leftCheat {}
-    [GoValueClone("d")] public partial struct @decimal {}
     public partial struct NumError {}
     // </TypeAccessibility>
 
@@ -94,9 +87,8 @@ public static partial class strconv_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸbytealg() => builtin.initPackage(typeof(@internal.bytealg_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸstrconv() => builtin.initPackage(typeof(@internal.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸstringslite() => builtin.initPackage(typeof(@internal.stringslite_package));
-    [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
-    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(go.math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸunicodeꓸutf8() => builtin.initPackage(typeof(unicode.utf8_package));
     // </ImportInitializers>
 }

@@ -5,8 +5,10 @@
 namespace go;
 
 using goarch = @internal.goarch_package;
+using tracev2 = @internal.trace.tracev2_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
+using @internal.trace;
 
 partial class runtime_package {
 
@@ -39,6 +41,7 @@ partial class runtime_package {
 // and ppc64le.
 internal static UntypedInt traceTimeDiv => /* (1-osHasLowResClockInt)*64 + osHasLowResClockInt*(256-224*(goarch.IsPpc64|goarch.IsPpc64le)) */ 256;
 
+// traceTime represents a timestamp for the trace.
 partial struct traceTime /*num:uint64*/;
 
 // traceClockNow returns a monotonic timestamp. The clock this function gets
@@ -48,19 +51,21 @@ partial struct traceTime /*num:uint64*/;
 // nosplit because it's called from exitsyscall and various trace writing functions,
 // which are nosplit.
 //
-// traceClockNow is called by golang.org/x/exp/trace using linkname.
+// traceClockNow is called by runtime/trace and golang.org/x/exp/trace using linkname.
 //
 //go:linkname traceClockNow
 //go:nosplit
 internal static traceTime traceClockNow() {
     if (osHasLowResClock) {
-        return ((traceTime)(uint64)(cputicks() / (int64)traceTimeDiv));
+        return (traceTime)(uint64)(cputicks() / (int64)traceTimeDiv);
     }
-    return ((traceTime)(uint64)(nanotime() / (int64)traceTimeDiv));
+    return (traceTime)(uint64)(nanotime() / (int64)traceTimeDiv);
 }
 
 // traceClockUnitsPerSecond estimates the number of trace clock units per
 // second that elapse.
+//
+//go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond
 internal static uint64 traceClockUnitsPerSecond() {
     if (osHasLowResClock) {
         // We're using cputicks as our clock, so we need a real estimate.
@@ -71,17 +76,33 @@ internal static uint64 traceClockUnitsPerSecond() {
     return (uint64)(/* 1.0 / float64(traceTimeDiv) */ 0.00390625D * 1e9D);
 }
 
-// traceFrequency writes a batch with a single EvFrequency event.
-//
-// freq is the number of trace clock units per second.
-internal static void traceFrequency(uintptr gen) {
+internal static void traceSyncBatch(uintptr gen, uint64 frequency) {
     var w = unsafeTraceWriter(gen, nil);
+
     // Ensure we have a place to write to.
-    (w, _) = w.ensure(1 + traceBytesPerNumber);
-    /* traceEvFrequency + frequency */
-    // Write out the string.
-    w.@byte((byte)traceEvFrequency);
-    w.varint(traceClockUnitsPerSecond());
+    (w, _) = w.ensure(3 /* EvSync + EvFrequency + EvClockSnapshot */ + 5 * traceBytesPerNumber /* frequency, timestamp, mono, sec, nsec */);
+
+    // Write out the sync batch event.
+    w.@byte((byte)tracev2.EvSync);
+
+    // Write out the frequency event.
+    w.@byte((byte)tracev2.EvFrequency);
+    w.varint(frequency);
+
+    // Write out the clock snapshot event.
+    var (sec, nsec, mono) = time_now();
+    var ts = traceClockNow();
+    if (ts <= (~w.traceBuf).lastTime) {
+        ts = (~w.traceBuf).lastTime + 1;
+    }
+    var tsDiff = (uint64)(ts - (~w.traceBuf).lastTime);
+    w.traceBuf.Value.lastTime = ts;
+    w.@byte((byte)tracev2.EvClockSnapshot);
+    w.varint(tsDiff);
+    w.varint((uint64)mono);
+    w.varint((uint64)sec);
+    w.varint((uint64)nsec);
+
     // Immediately flush the buffer.
     var wʗ1 = w;
     systemstack(() => {

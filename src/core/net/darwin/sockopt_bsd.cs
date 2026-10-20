@@ -26,7 +26,6 @@ internal static error setDefaultSockopts(nint s, nint family, nint sotype, bool 
         else if (exprᴛ1 == syscall.AF_INET6) {
             syscall.SetsockoptInt(s, syscall.IPPROTO_IPV6, syscall.IPV6_PORTRANGE, syscall.IPV6_PORTRANGE_HIGH);
         }
-
     }
     if (family == syscall.AF_INET6 && sotype != syscall.SOCK_RAW && supportsIPv4map()) {
         // Allow both IP versions even if the OS default

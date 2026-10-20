@@ -40,13 +40,14 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         if (cmode == coverage.CtrModeInvalid) {
             return fmt.Errorf("invalid counter mode %q"u8, cm);
         }
+
         // Emit meta-data and counter data.
         var ml = rtcov.Meta.List;
         if (len(ml) == 0){
-        } else {
             // This corresponds to the case where we have a package that
             // contains test code but no functions (which is fine). In this
             // case there is no need to emit anything.
+        } else {
             {
                 var errΔ1 = emitMetaDataToDirectory(dir, ml); if (errΔ1 != default!) {
                     return errΔ1;
@@ -58,6 +59,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 }
             }
         }
+
         // Collect pods from test run. For the majority of cases we would
         // expect to see a single pod here, but allow for multiple pods in
         // case the test harness is doing extra work to collect data files
@@ -66,6 +68,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
         if (err != default!) {
             return fmt.Errorf("reading from %s: %v"u8, dir, err);
         }
+
         // Open text output file if appropriate.
         ж<os.File> tf = default!;
         bool tfClosed = default!;
@@ -83,6 +86,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 }
             }, ref ᒐ);
         }
+
         // Read/process the pods.
         var ts = Ꮡ(new tstate(
             cm: Ꮡ(new cmerge.Merger(nil)),
@@ -105,6 +109,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 }
             }
         }
+
         @string metafilespath = filepath.Join(dir, coverage.MetaFilesFileName);
         {
             var (_, errΔ5) = os.Stat(metafilespath); if (errΔ5 == default!) {
@@ -115,12 +120,14 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 }
             }
         }
+
         // Emit percent.
         {
             var errΔ7 = (~ts).cf.EmitPercent(w, selpkgs, cpkg, true, true); if (errΔ7 != default!) {
                 return errΔ7;
             }
         }
+
         // Emit text output.
         if (tf != nil) {
             {
@@ -135,6 +142,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
                 }
             }
         }
+
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -142,7 +150,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 }
 
 partial struct tstate {
-    public partial ref go.@internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc { get; }
+    /*embed*/ public go.@internal.coverage.calloc_package.BatchCounterAlloc BatchCounterAlloc;
     internal ж<cmerge.Merger> cm;
     internal ж<cformat.Formatter> cf;
     internal coverage.CounterMode cmode;
@@ -178,8 +186,10 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
                 return errΔ1;
             }
         }
+
         // A map to store counter data, indexed by pkgid/fnid tuple.
         var pmm = new map<pkfunc, slice<uint32>>();
+
         // Helper to read a single counter data file.
         var pmmʗ1 = pmm;
         error readcdf(@string cdf) {
@@ -205,6 +215,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
                     if (!ok) {
                         break;
                     }
+
                     // NB: sanity check on pkg and func IDs?
                     var key = new pkfunc(pk: data.PkgIdx, fcn: data.FuncIdx);
                     {
@@ -226,6 +237,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
             finally { ᒐ.Run(); }
         }
+
         // Read counter data files.
         foreach (var (_, cdf) in p.CounterDataFiles) {
             {
@@ -234,6 +246,7 @@ internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string,
                 }
             }
         }
+
         // Visit meta-data file.
         var np = (uint32)mfr.NumPackages();
         var payload = new byte[]{}.slice();
@@ -294,6 +307,7 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
             return fmt.Errorf("error reading auxmetafiles file %q: %v"u8, metafiles, errΔ1);
         }
     }
+
     // Walk through each available aux meta-file. If we've already
     // seen the package path in question during the walk of the
     // "regular" meta-data file, then we can skip the package,
@@ -329,6 +343,7 @@ public static float64 Snapshot() {
         // no work to do here.
         return 0.0D;
     }
+
     var tot = (uint64)0;
     var totExec = (uint64)0;
     foreach (var (_, c) in cl) {
@@ -342,6 +357,7 @@ public static float64 Snapshot() {
             // We found a function that was executed.
             var nCtrs = Ꮡ(sd, i + (nint)coverage.NumCtrsOffset).Load();
             nint cst = i + (nint)coverage.FirstCtrOffset;
+
             if (cst + (nint)nCtrs > len(sd)) {
                 break;
             }

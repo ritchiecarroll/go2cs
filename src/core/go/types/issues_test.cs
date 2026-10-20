@@ -14,7 +14,6 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using static global::go.go.types_package;
-using constant = global::go.go.constant_package;
 using global::go.@internal;
 using global::go.go;
 using io = io_package;
@@ -50,12 +49,13 @@ var (
 	_ = (interface{})("foo")
 	_ = (interface{})(nil)
 )
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue5849(ж<testing.T> Ꮡt) {
     @string src = packagePVarSUintUint88ˢ;
     var types = new map<ast.Expr, types.TypeAndValue>();
     mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
+
     foreach (var (x, tv) in types) {
         typesꓸType want = default!;
         switch (x.type()) {
@@ -76,7 +76,6 @@ public static void TestIssue5849(ж<testing.T> Ꮡt) {
             else if (exprᴛ1 == @"""foo"""u8) {
                 want = new types.BasicжΔType(Typ[ΔString]);
             }
-
             break;
         }
         case ж<ast.Ident> xΔ1: {
@@ -101,12 +100,13 @@ func f() int {
 	return 0
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue6413(ж<testing.T> Ꮡt) {
     @string src = packagePFuncFIntDeferFGoˢ;
     var types = new map<ast.Expr, types.TypeAndValue>();
     mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
+
     var want = Typ[Int];
     nint n = 0;
     foreach (var (x, tv) in types) {
@@ -119,6 +119,7 @@ public static void TestIssue6413(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (n != 2) {
         Ꮡt.Errorf("got %d CallExprs; want 2"u8, n);
     }
@@ -131,20 +132,23 @@ package p
 func (T) m() (res bool) { return }
 type T struct{} // receiver type after method declaration
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue7245(ж<testing.T> Ꮡt) {
     @string src = packagePFuncTMResBoolˢ;
     var f = mustParse(fset, src);
+
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var defs = new map<ж<ast.Ident>, types.Object>();
     var (_, err) = Ꮡconf.Check((~(~f).Name).Name, fset, new ж<ast.File>[]{f}.slice(), Ꮡ(new typesꓸInfo(Defs: defs)));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var m = (~f).Decls[0]._<ж<ast.FuncDecl>>();
     var res1 = defs[(~m).Name]._<ж<types.Func>>().Signature().Results().At(0);
     var res2 = defs[(~(~(~(~m).Type).Results).List[0]).Names[0]]._<ж<types.Var>>();
+
     if (res1 != res2) {
         Ꮡt.Errorf("got %s (%p) != %s (%p)"u8, res1.OrTypedNil(), res2.OrTypedNil(), res1.OrTypedNil(), res2.OrTypedNil());
     }
@@ -164,7 +168,7 @@ func _() {
         _, _, _ = x, y, z  // uses x, y, z
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ2 = """
@@ -178,20 +182,20 @@ L6 uses var x int
 L7 uses var x int
 L7 uses var y int
 L7 uses var z int
-"""u8;
+"""u8.Raw();
 
 // This tests that uses of existing vars on the LHS of an assignment
 // are Uses, not Defs; and also that the (illegal) use of a non-var on
 // the LHS of an assignment is a Use nonetheless.
 public static void TestIssue7827(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string src = srcᶜ19;
     // We need a specific fileset in this test below for positions.
     // Cannot use typecheck helper.
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
+
     @string want = wantᶜ2;
+
     // don't abort at the first error
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(Error: (error errΔ1) => {
@@ -205,6 +209,7 @@ public static void TestIssue7827(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Check: unexpected error: %s"u8, s);
         }
     }
+
     slice<@string> facts = default!;
     foreach (var (id, obj) in defs) {
         if (obj != default!) {
@@ -217,6 +222,7 @@ public static void TestIssue7827(ж<testing.T> Ꮡt) {
         facts = append(facts, fact);
     }
     slices.Sort<slice<@string>, @string>(facts);
+
     @string got = strings.Join(facts, "\n"u8);
     if (got != want) {
         Ꮡt.Errorf("Unexpected defs/uses\ngot:\n%s\nwant:\n%s"u8, got, want);
@@ -242,7 +248,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string src1ᶜ1 = """
@@ -261,7 +267,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string src2ᶜ1 = """
@@ -280,7 +286,7 @@ func main() {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 // This tests that the package associated with the types.Object.Pkg method
 // is the type's package independent of the order in which the imports are
@@ -290,6 +296,7 @@ func main() {
 // level.
 public static void TestIssue13898(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     @string src0 = src0ᶜ;
     // like src0, but also imports go/importer
     @string src1 = src1ᶜ1;
@@ -299,6 +306,7 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
     void f(@string test, @string src) {
         var info = Ꮡ(new typesꓸInfo(Uses: new map<ж<ast.Ident>, types.Object>()));
         mustTypecheck(src, nil, info);
+
         ж<types.Package> pkg = default!;
         nint count = 0;
         foreach (var (id, obj) in (~info).Uses) {
@@ -314,6 +322,7 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("%s: got %v; want package types"u8, test, pkg.OrTypedNil());
         }
     }
+
     f(src0ˢ, src0);
     f(src1ˢ, src1);
     f(src2ˢ, src2);
@@ -324,6 +333,7 @@ internal static readonly @string srcᶜ20 = @"package p; func f() { var a, b, c,
 
 public static void TestIssue22525(ж<testing.T> Ꮡt) {
     @string src = srcᶜ20;
+
     @string got = "\n"u8;
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(Error: (error err) => {
@@ -353,6 +363,7 @@ public static void TestIssue25627(ж<testing.T> Ꮡt) {
         @"struct { a int; b Missing; *Missing }"u8
     }.slice()) {
         var f = mustParse(fset, prefix + src);
+
         ref var cfg = ref heap<types.Config>(out var Ꮡcfg);
         cfg = new Config(Importer: defaultImporter(fset), Error: (error errΔ1) => {
         });
@@ -365,6 +376,7 @@ public static void TestIssue25627(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         var infoʗ1 = info;
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
             {
@@ -397,11 +409,13 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
         "package p; type B interface{ B() }"u8,
         "package p; type X interface{ A; B }"u8
     }.array();
+
     // compute original file ASTs
     array<ж<ast.File>> orig = new(3); /* len(sources) */
     foreach (var (i, src) in sources.ΔRangeSnapshot()) {
         orig[i] = mustParse(fset, src);
     }
+
     // run the test for all order permutations of the incoming files
     foreach (var (_, vᴛ1) in GoReflect.WithElemDims(new array<nint>[]{
         new nint[]{0, 1, 2}.array(),
@@ -418,6 +432,7 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
         foreach (var (i, _) in perm) {
             files[i] = orig[perm[i]];
         }
+
         // type-check package with given file order permutation
         ref var conf = ref heap(new types.Config(), out var Ꮡconf);
         var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
@@ -425,6 +440,7 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // look for interface object X
         types.Object obj = default!;
         foreach (var (name, def) in (~info).Defs) {
@@ -437,6 +453,7 @@ public static void TestIssue28005(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(objectXNotFoundˢ);
         }
         var iface = obj.Type().Underlying()._<ж<types.Interface>>(); // object X must be an interface
+
         // Each iface method m is embedded; and m's receiver base type name
         // must match the method's name per the choice in the source file.
         for (nint i = 0; i < iface.NumMethods(); i++) {
@@ -482,6 +499,7 @@ internal static readonly @string packagePVarBInterfaceAˢ = @"package p; var B i
 public static void TestIssue29029(ж<testing.T> Ꮡt) {
     var f1 = mustParse(fset, packagePTypeAInterfaceMˢ);
     var f2 = mustParse(fset, packagePVarBInterfaceAˢ);
+
     // printInfo prints the *Func definitions recorded in info, one *Func per line.
     @string printInfo(ж<typesꓸInfo> infoΔ1) {
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -494,9 +512,11 @@ public static void TestIssue29029(ж<testing.T> Ꮡt) {
         }
         return buf.String();
     }
+
     // The *Func (method) definitions for package p must be the same
     // independent on whether f1 and f2 are type-checked together, or
     // incrementally.
+
     // type-check together
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     var info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
@@ -507,6 +527,7 @@ public static void TestIssue29029(ж<testing.T> Ꮡt) {
         }
     }
     @string want = printInfo(info);
+
     // type-check incrementally
     info = Ꮡ(new typesꓸInfo(Defs: new map<ж<ast.Ident>, types.Object>()));
     check = NewChecker(Ꮡconf, fset, NewPackage(""u8, "p"u8), info);
@@ -521,6 +542,7 @@ public static void TestIssue29029(ж<testing.T> Ꮡt) {
         }
     }
     @string got = printInfo(info);
+
     if (got != want) {
         Ꮡt.Errorf("\ngot : %swant: %s"u8, got, want);
     }
@@ -535,7 +557,9 @@ internal static readonly @string bsrcᶜ = @"package b; import ""a""; type T str
 public static void TestIssue34151(ж<testing.T> Ꮡt) {
     @string asrc = asrcᶜ;
     @string bsrc = bsrcᶜ;
+
     var a = mustTypecheck(asrc, nil, nil);
+
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(Importer: new importHelper(pkg: a));
     mustTypecheck(bsrc, Ꮡconf, nil);
@@ -572,10 +596,12 @@ public static void TestIssue34921(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         slice<@string> sources = new @string[]{
             @"package a; type T int"u8,
             @"package b; import ""a""; type T a.T"u8
         }.slice();
+
         ж<types.Package> pkg = default!;
         foreach (var (_, src) in sources) {
             ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -606,6 +632,7 @@ public static void TestIssue43088(ж<testing.T> Ꮡt) {
     var s2 = NewStruct(new ж<types.Var>[]{NewField(nopos, nil, "_"u8, new types.NamedжΔType(T2), false)}.slice(), default!);
     var s3 = NewStruct(new ж<types.Var>[]{NewField(nopos, nil, "_"u8, new types.StructжΔType(s2), false)}.slice(), default!);
     T2.SetUnderlying(new types.StructжΔType(s3));
+
     // These calls must terminate (no endless recursion).
     Comparable(new types.NamedжΔType(T1));
     Comparable(new types.NamedжΔType(T2));
@@ -619,11 +646,13 @@ internal static readonly @string fooPointerˢ = "foo.Pointer"u8;
 
 public static void TestIssue44515(ж<testing.T> Ꮡt) {
     var typ = Unsafe.Scope().Lookup(pointerˢ).Type();
+
     @string got = TypeString(typ, default!);
     @string want = unsafePointerˢ;
     if (got != want) {
         Ꮡt.Errorf("got %q; want %q"u8, got, want);
     }
+
     var qf = @string (ж<types.Package> pkg) => {
         if (pkg == Unsafe) {
             return fooˢ;
@@ -656,7 +685,7 @@ func _() {
 	a.F(template /* ERRORx "cannot use.*html/template.* as .*text/template" */ .Template{})
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string csrcᶜ = """
@@ -677,7 +706,7 @@ var _ fmt.Stringer = 1 // ERRORx "cannot use 1.*as fmt\\.Stringer"
 // text/template.
 func _() { a.G(template /* ERRORx "cannot use .*html/template.*Template" */ .Template{}) }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string tsrcᶜ = """
@@ -691,34 +720,36 @@ type T int
 // Verify that the current package name also causes disambiguation.
 var _ T = template /* ERRORx "cannot use.*text/template.* as T value" */.Template{}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue43124(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // TODO(rFindley) move this to testdata by enhancing support for importing.
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The go command is needed for the importer to determine the locations of stdlib .a files.
+
     // All involved packages have the same name (template). Error messages should
     // disambiguate between text/template and html/template by printing the full
     // path.
     @string asrc = asrcᶜ1;
-    
     @string bsrc = bsrcᶜ1;
-    
     @string csrc = csrcᶜ;
-    
+
     @string tsrc = tsrcᶜ;
+
     var a = mustTypecheck(asrc, nil, nil);
     ref var imp = ref heap<importHelper>(out var Ꮡimp);
     imp = new importHelper(
-        pkg: a, // TODO(adonovan): use same FileSet as mustTypecheck.
-
+        pkg: a,
+        // TODO(adonovan): use same FileSet as mustTypecheck.
         fallback: defaultImporter(token.NewFileSet())
     );
+
     var impʗ1 = imp;
     var withImporter = (ж<types.Config> cfg) => {
         cfg.Value.Importer = impʗ1;
     };
+
     testFiles(Ꮡt, new @string[]{"b.go"u8}.slice(), new slice<byte>[]{slice<byte>(bsrc)}.slice(), false, withImporter);
     testFiles(Ꮡt, new @string[]{"c.go"u8}.slice(), new slice<byte>[]{slice<byte>(csrc)}.slice(), false, withImporter);
     testFiles(Ꮡt, new @string[]{"t.go"u8}.slice(), new slice<byte>[]{slice<byte>(tsrc)}.slice(), false, withImporter);
@@ -736,18 +767,21 @@ internal static readonly object comparableNotAssignableˢ = (@string)"comparable
 public static void TestIssue50646(ж<testing.T> Ꮡt) {
     var anyType = Universe.Lookup(anyˢ).Type().Underlying();
     var comparableType = Universe.Lookup(comparableˢ).Type();
+
     if (!Comparable(anyType)) {
         Ꮡt.Error(anyIsNotAComparableTypeˢ);
     }
     if (!Comparable(comparableType)) {
         Ꮡt.Error(comparableIsNotAˢ);
     }
+
     if (Implements(anyType, comparableType.Underlying()._<ж<types.Interface>>())) {
         Ꮡt.Error(anyImplementsComparableˢ);
     }
     if (!Implements(comparableType, anyType._<ж<types.Interface>>())) {
         Ꮡt.Error(comparableDoesNotˢ);
     }
+
     if (AssignableTo(anyType, comparableType)) {
         Ꮡt.Error(anyAssignableToˢ);
     }
@@ -763,21 +797,26 @@ public static void TestIssue55030(ж<testing.T> Ꮡt) {
         var @params = NewTuple(par);
         NewSignatureType(nil, default!, default!, @params, nil, true);
     }
+
     // makeSig must not panic for the following (example) types:
     // []int
     makeSig(new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int]))));
+
     // string
     makeSig(new types.BasicжΔType(Typ[ΔString]));
+
     // P where P's core type is string
     {
         var P = NewTypeName(nopos, nil, "P"u8, default!); // [P string]
         makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.BasicжΔType(Typ[ΔString])}.slice())))));
     }
+
     // P where P's core type is an (unnamed) slice
     {
         var P = NewTypeName(nopos, nil, "P"u8, default!); // [P []int]
         makeSig(new types.TypeParamжΔType(NewTypeParam(P, new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.SliceжΔType(NewSlice(new types.BasicжΔType(Typ[Int])))}.slice())))));
     }
+
     // P where P's core type is bytestring (i.e., string or []byte)
     {
         var t1 = NewTerm(true, new types.BasicжΔType(Typ[ΔString])); // ~string
@@ -794,7 +833,6 @@ internal partial struct TestIssue51093_type /*dyn*/ {
 }
 
 public static void TestIssue51093(ж<testing.T> Ꮡt) {
-// some more complex constraints
     // Each test stands for a conversion of the form P(val)
     // where P is a type parameter with typ as constraint.
     // The test ensures that P(val) has the correct type P
@@ -807,14 +845,18 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
         new("float64"u8, "3.5"u8),
         new("complex64"u8, "1.25"u8),
         new("string"u8, "\"foo\""u8),
+
+        // some more complex constraints
         new("~byte"u8, "1"u8),
         new("~int | ~float64 | complex128"u8, "1"u8),
         new("~uint64 | ~rune"u8, "'X'"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         @string src = fmt.Sprintf("package p; func _[P %s]() { _ = P(%s) }"u8, test.typ, test.val);
         var types = new map<ast.Expr, types.TypeAndValue>();
         mustTypecheck(src, nil, Ꮡ(new typesꓸInfo(Types: types)));
+
         nint n = default!;
         foreach (var (x, tv) in types) {
             {
@@ -837,8 +879,9 @@ public static void TestIssue51093(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         if (n != 1) {
-            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)(1));
+            Ꮡt.Fatalf("%s: got %d CallExpr nodes; want 1"u8, src, (nint)1);
         }
     }
 }
@@ -854,7 +897,7 @@ public static void TestIssue54258(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tests = new TestIssue54258_tests[]{
-        new(
+        new( //---------------------------------------------------------------
             """
 package main
 import "b"
@@ -863,20 +906,19 @@ type I0 interface {
 }
 var _ I0 = b.S{}
 
-"""u8, //---------------------------------------------------------------
-
+"""u8.Raw(),
             """
 package b
 type S struct{}
 func (S) M0(struct{ f string }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I0 value in variable declaration: b[.]S does not implement I0 [(]wrong type for method M0[)]
 .*have M0[(]struct{f string /[*] package b [*]/ }[)]
 .*want M0[(]struct{f string /[*] package main [*]/ }[)]
-"""u8),
-        new(
+"""u8.Raw()),
+        new( //---------------------------------------------------------------
             """
 package main
 import "b"
@@ -885,20 +927,19 @@ type I1 interface {
 }
 var _ I1 = b.S{}
 
-"""u8, //---------------------------------------------------------------
-
+"""u8.Raw(),
             """
 package b
 type S struct{}
 func (S) M1(struct{ string }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I1 value in variable declaration: b[.]S does not implement I1 [(]wrong type for method M1[)]
 .*have M1[(]struct{string /[*] package b [*]/ }[)]
 .*want M1[(]struct{string /[*] package main [*]/ }[)]
-"""u8),
-        new(
+"""u8.Raw()),
+        new( //---------------------------------------------------------------
             """
 package main
 import "b"
@@ -907,20 +948,19 @@ type I2 interface {
 }
 var _ I2 = b.S{}
 
-"""u8, //---------------------------------------------------------------
-
+"""u8.Raw(),
             """
 package b
 type S struct{}
 func (S) M2(struct{ f struct{ f string } }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I2 value in variable declaration: b[.]S does not implement I2 [(]wrong type for method M2[)]
 .*have M2[(]struct{f struct{f string} /[*] package b [*]/ }[)]
 .*want M2[(]struct{f struct{f string} /[*] package main [*]/ }[)]
-"""u8),
-        new(
+"""u8.Raw()),
+        new( //---------------------------------------------------------------
             """
 package main
 import "b"
@@ -929,20 +969,19 @@ type I3 interface {
 }
 var _ I3 = b.S{}
 
-"""u8, //---------------------------------------------------------------
-
+"""u8.Raw(),
             """
 package b
 type S struct{}
 func (S) M3(struct{ F struct{ f string } }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I3 value in variable declaration: b[.]S does not implement I3 [(]wrong type for method M3[)]
 .*have M3[(]struct{F struct{f string /[*] package b [*]/ }}[)]
 .*want M3[(]struct{F struct{f string /[*] package main [*]/ }}[)]
-"""u8),
-        new(
+"""u8.Raw()),
+        new( //---------------------------------------------------------------
             """
 package main
 import "b"
@@ -951,20 +990,19 @@ type I4 interface {
 }
 var _ I4 = b.S{}
 
-"""u8, //---------------------------------------------------------------
-
+"""u8.Raw(),
             """
 package b
 type S struct{}
 func (S) M4(struct { *string }) {}
 
-"""u8,
+"""u8.Raw(),
             """
 6:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I4 value in variable declaration: b[.]S does not implement I4 [(]wrong type for method M4[)]
 .*have M4[(]struct{[*]string /[*] package b [*]/ }[)]
 .*want M4[(]struct{[*]string /[*] package main [*]/ }[)]
-"""u8),
-        new(
+"""u8.Raw()),
+        new( //---------------------------------------------------------------
             """
 package main
 import "b"
@@ -974,21 +1012,21 @@ type I5 interface {
 }
 var _ I5 = b.S{}
 
-"""u8, //---------------------------------------------------------------
-
+"""u8.Raw(),
             """
 package b
 type S struct{}
 type t struct{ A int }
 func (S) M5(struct {S;t}) {}
 
-"""u8,
+"""u8.Raw(),
             """
 7:12: cannot use b[.]S{} [(]value of struct type b[.]S[)] as I5 value in variable declaration: b[.]S does not implement I5 [(]wrong type for method M5[)]
 .*have M5[(]struct{b[.]S; b[.]t}[)]
 .*want M5[(]struct{b[.]S; t}[)]
-"""u8)
+"""u8.Raw())
     }.slice();
+
     var fset = token.NewFileSet();
     var fsetʗ1 = fset;
     void test(@string main, @string b, @string want) {
@@ -1033,7 +1071,7 @@ type Layout = C.struct_layout
 
 func (*Layout /* ERROR "cannot define new methods on non-local type Layout" */) Binding() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string cgoTypesᶜ = """
@@ -1077,12 +1115,14 @@ func _cgoCheckPointer(interface{}, interface{})
 //go:noescape
 func _cgoCheckResult(interface{})
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue59944(ж<testing.T> Ꮡt) {
     testenv.MustHaveCGO(new types_test_package.testing_TжTB(Ꮡt));
+
     // Methods declared on aliases of cgo types are not permitted.
     @string src = srcᶜ21;
+
     // code generated by cmd/cgo for the above source.
     @string cgoTypes = cgoTypesᶜ;
     testFiles(Ꮡt, new @string[]{"p.go"u8, "_cgo_gotypes.go"u8}.slice(), new slice<byte>[]{slice<byte>(src), slice<byte>(cgoTypes)}.slice(), false, (ж<types.Config> cfg) => {
@@ -1105,7 +1145,7 @@ func _() {
 	A(B, nil // syntax error: missing ',' before newline in argument list
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue61931(ж<testing.T> Ꮡt) {
     @string src = srcᶜ22;
@@ -1114,6 +1154,7 @@ public static void TestIssue61931(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatal(expectedSyntaxErrorˢ);
     }
+
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     Ꮡconf.Check((~(~f).Name).Name, fset, new ж<ast.File>[]{f}.slice(), nil); // must not panic
 }
@@ -1126,13 +1167,14 @@ package p
 func f[T any]() {}
 func _()        { f() }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue61938(ж<testing.T> Ꮡt) {
     @string src = srcᶜ23;
     // no error handler provided (this issue)
     ref var conf = ref heap(new types.Config(), out var Ꮡconf);
     typecheck(src, Ꮡconf, nil); // must not panic
+
     // with error handler (sanity check)
     conf.Error = (error _) => {
     };
@@ -1157,20 +1199,23 @@ func f[I *T, T any]() {
         var v T
         _ = v
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue63260(ж<testing.T> Ꮡt) {
     @string src = srcᶜ24;
+
     ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
     info = new typesꓸInfo(
         Defs: new map<ж<ast.Ident>, types.Object>()
     );
     var pkg = mustTypecheck(src, nil, Ꮡinfo);
+
     // get type parameter T in signature of f
     var T = pkg.Scope().Lookup("f"u8).Type()._<ж<typesꓸSignature>>().TypeParams().At(1);
     if (T.Obj().Name() != "T"u8) {
         Ꮡt.Fatalf("got type parameter %s, want T"u8, T.OrTypedNil());
     }
+
     // get type of variable v in body of f
     types.Object v = default!;
     foreach (var (name, obj) in info.Defs) {
@@ -1182,6 +1227,7 @@ public static void TestIssue63260(ж<testing.T> Ꮡt) {
     if (v == default!) {
         Ꮡt.Fatal(variableVNotFoundˢ);
     }
+
     // type of v and T must be pointer-identical
     if (!AreEqual(v.Type(), T)) {
         Ꮡt.Fatalf("types of v and T are not pointer-identical: %p != %p"u8, v.Type()._<ж<types.TypeParam>>().OrTypedNil(), T.OrTypedNil());
@@ -1199,19 +1245,22 @@ package p
 type A = []int
 type S struct{ A }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ3 = "type p.S struct{p.A}"u8;
 
 public static void TestIssue44410(ж<testing.T> Ꮡt) {
     @string src = srcᶜ25;
+
     Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
     var pkg = mustTypecheck(src, nil, nil);
+
     var S = pkg.Scope().Lookup("S"u8);
     if (S == default!) {
         Ꮡt.Fatal(objectSNotFoundˢ);
     }
+
     @string got = S.String();
     @string want = wantᶜ3;
     if (got != want) {
@@ -1237,38 +1286,38 @@ public static void TestIssue59831(ж<testing.T> Ꮡt) {
     // the tests check the error messages when m is not found.
     @string asrc = asrcᶜ2;
     var apkg = mustTypecheck(asrc, nil, nil);
+
     // Package b exports a type S with an exported method m;
     // the tests check the error messages when M is not found.
     @string bsrc = bsrcᶜ2;
     var bpkg = mustTypecheck(bsrc, nil, nil);
-    var tests = new TestIssue59831_tests[]{ // tests importing a (or nothing)
 
+    var tests = new TestIssue59831_tests[]{
+        // tests importing a (or nothing)
         new(apkg, @"package a1; import ""a""; var _ interface { M() } = a.S{}"u8,
             "a.S does not implement interface{M()} (missing method M) have m() want M()"u8),
         new(apkg, @"package a2; import ""a""; var _ interface { m() } = a.S{}"u8,
             "a.S does not implement interface{m()} (unexported method m)"u8), // test for issue
-
         new(nil, @"package a3; type S struct{}; func (S) m(); var _ interface { M() } = S{}"u8,
             "S does not implement interface{M()} (missing method M) have m() want M()"u8),
         new(nil, @"package a4; type S struct{}; func (S) m(); var _ interface { m() } = S{}"u8,
             ""u8), // no error expected
-
         new(nil, @"package a5; type S struct{}; func (S) m(); var _ interface { n() } = S{}"u8,
-            "S does not implement interface{n()} (missing method n)"u8), // tests importing b (or nothing)
+            "S does not implement interface{n()} (missing method n)"u8),
 
+        // tests importing b (or nothing)
         new(bpkg, @"package b1; import ""b""; var _ interface { m() } = b.S{}"u8,
             "b.S does not implement interface{m()} (missing method m) have M() want m()"u8),
         new(bpkg, @"package b2; import ""b""; var _ interface { M() } = b.S{}"u8,
             ""u8), // no error expected
-
         new(nil, @"package b3; type S struct{}; func (S) M(); var _ interface { M() } = S{}"u8,
             ""u8), // no error expected
-
         new(nil, @"package b4; type S struct{}; func (S) M(); var _ interface { m() } = S{}"u8,
             "S does not implement interface{m()} (missing method m) have M() want m()"u8),
         new(nil, @"package b5; type S struct{}; func (S) M(); var _ interface { n() } = S{}"u8,
             "S does not implement interface{n()} (missing method n)"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         // typecheck test source
         ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -1283,9 +1332,11 @@ public static void TestIssue59831(ж<testing.T> Ꮡt) {
         if (test.err == ""u8) {
             Ꮡt.Errorf("package %s: got %q, want not error"u8, pkg.Name(), err.Error());
         }
+
         // flatten reported error message
         @string errmsg = strings.ReplaceAll(err.Error(), "\n"u8, " "u8);
         errmsg = strings.ReplaceAll(errmsg, "\t"u8, ""u8);
+
         // verify error message
         if (!strings.Contains(errmsg, test.err)) {
             Ꮡt.Errorf("package %s: got %q, want %q"u8, pkg.Name(), errmsg, test.err);
@@ -1305,7 +1356,7 @@ func _() {
 	f([]string{})
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue64759(ж<testing.T> Ꮡt) {
     @string src = srcᶜ26;
@@ -1331,20 +1382,21 @@ func f(x int) {
 	}
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue68334(ж<testing.T> Ꮡt) {
     @string src = srcᶜ27;
+
     @string got = ""u8;
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(
         GoVersion: "go1.21"u8, // #68334 requires GoVersion <= 1.21
-
         Error: (error err) => {
-            got += err.Error() + "\n"u8; // #68334 requires Error != nil
-        }
+            got += err.Error() + "\n"u8;
+        } // #68334 requires Error != nil
     );
     typecheck(src, Ꮡconf, nil); // do not crash
+
     @string want = "p:5:20: cannot range over x (variable of type int): requires go1.22 or later\n"u8 + "p:9:19: cannot range over x (variable of type int): requires go1.22 or later\n"u8;
     if (got != want) {
         Ꮡt.Errorf("got: %s want: %s"u8, got, want);
@@ -1361,13 +1413,14 @@ type (
 	A = S
 	T A
 )
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ4 = "type p.T struct{}"u8;
 
 public static void TestIssue68877(ж<testing.T> Ꮡt) {
     @string src = srcᶜ28;
+
     Ꮡt.Setenv(godebugˢ, gotypesalias1ˢ);
     var pkg = mustTypecheck(src, nil, nil);
     var T = pkg.Scope().Lookup("T"u8)._<ж<types.TypeName>>();
@@ -1388,10 +1441,11 @@ package p
 
 var _ = T{{x}}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestIssue69092(ж<testing.T> Ꮡt) {
     @string src = srcᶜ29;
+
     var fset = token.NewFileSet();
     var @file = mustParse(fset, src);
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -1400,9 +1454,11 @@ public static void TestIssue69092(ж<testing.T> Ꮡt) {
     ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
     info = new typesꓸInfo(Types: new map<ast.Expr, types.TypeAndValue>());
     Ꮡconf.Check("p"u8, fset, new ж<ast.File>[]{@file}.slice(), Ꮡinfo);
+
     // look for {x} expression
     var outer = (~(~(~@file).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>()).Values[0]._<ж<ast.CompositeLit>>(); // T{{x}}
     var inner = (~outer).Elts[0]; // {x}
+
     // type of {x} must have been recorded
     var (tv, ok) = info.Types[inner, ꟷ];
     if (!ok) {

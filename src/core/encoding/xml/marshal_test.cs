@@ -324,7 +324,7 @@ internal static global::go.encoding.xml_package.Marshaler _ᴛ1ʗ = new xml_inte
 
 public static error MarshalXML(this ref MyMarshalerTest m, ж<global::go.encoding.xml_package.Encoder> Ꮡe, global::go.encoding.xml_package.StartElement start) {
     Ꮡe.EncodeToken(start);
-    Ꮡe.EncodeToken(((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8)));
+    Ꮡe.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>("hello world"u8));
     Ꮡe.EncodeToken(new EndElement(start.Name));
     return default!;
 }
@@ -547,53 +547,10 @@ internal static ref @string contentsAttr => ref ᏑcontentsAttr.Value;
 internal static ж<@string> Ꮡempty = new StandardBox<@string>(""u8);
 internal static ref @string empty => ref Ꮡempty.Value;
 
-// Test nil marshals to nothing
-// Test value types
-// Test time.
-// A pointer to struct{} may be used to test for an element's presence.
-// A []byte field is only nil if the element was not found.
-// Check that []byte works, including named []byte types.
-// Test innerxml
-// Test structs
-// Test a>b
-// Uses interface{}
-// Test struct embedding
-// Shadowed by A.A
-// Shadowed by A.A
-// Shadowed by A.B.B
-// Anonymous struct pointer field which is nil
-// Other kinds of nil anonymous fields
-// Test that name casing matters
-// Test the order in which the XML element name is chosen
-// xml.Name works in a plain field as well.
-// Marshaling zero xml.Name uses the tag or field name.
-// Test attributes
-// pointer fields
-// empty chardata pointer field
-// omitempty on fields
-// Test ",any"
-// Test recursive types.
-// Test ignoring fields via "-" tag
-// Test escaping.
-// Test outputting CDATA-wrapped text.
-// Test omitempty with parent chain; see golang.org/issue/4168.
-// Custom marshalers.
-// Test pointer indirection in various kinds of fields.
-// https://golang.org/issue/19063
-// marshals without CDATA
-// unmarshal leaves Chardata=stringptr("")
-// marshals without CDATA
-// marshals without CDATA
-// marshals with CDATA
-// unmarshal leaves CDATA=stringptr("")
-// marshals with CDATA
-// marshals with CDATA
-// Note: Changed in Go 1.8 to include <OmitEmpty> element (because x.OmitEmpty != nil).
 // Unless explicitly stated as such (or *Plain), all of the
 // tests below are two-way tests. When introducing new tests,
 // please try to make them two-way as well to ensure that
 // marshaling and unmarshaling are as symmetrical as feasible.
-
 partial struct marshalTestsᴛ1 /*dyn*/ {
     public any Value;
     public @string ExpectXML;
@@ -602,7 +559,6 @@ partial struct marshalTestsᴛ1 /*dyn*/ {
     public bool UnmarshalOnly;
     public @string UnmarshalError;
 }
-
         partial struct Δtype /*dyn*/ {
             public EmptyStruct XMLName; /*`xml:"space top"`*/
             public @string A; /*`xml:"x>a"`*/
@@ -611,7 +567,6 @@ partial struct marshalTestsᴛ1 /*dyn*/ {
             public @string C1; /*`xml:"space1 x>c"`*/
             public @string D1; /*`xml:"space1 x>d"`*/
         }
-
         partial struct Δtypeᴛ1 /*dyn*/ {
             public global::go.encoding.xml_package.Name XMLName;
             public @string A; /*`xml:"x>a"`*/
@@ -620,7 +575,6 @@ partial struct marshalTestsᴛ1 /*dyn*/ {
             public @string C1; /*`xml:"space1 x>c"`*/
             public @string D1; /*`xml:"space1 x>d"`*/
         }
-
         partial struct Δtypeᴛ2 /*dyn*/ {
             public EmptyStruct XMLName; /*`xml:"top"`*/
             public @string B; /*`xml:"space x>b"`*/
@@ -628,8 +582,11 @@ partial struct marshalTestsᴛ1 /*dyn*/ {
         }
 internal static slice<marshalTestsᴛ1> marshalTests;
 internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1[]{
+    // Test nil marshals to nothing
     new(Value: default!, ExpectXML: @""u8, MarshalOnly: true),
     new(Value: nilStruct.OrTypedNil(), ExpectXML: @""u8, MarshalOnly: true),
+
+    // Test value types
     new(Value: Ꮡ(new Plain(true)), ExpectXML: @"<Plain><V>true</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(false)), ExpectXML: @"<Plain><V>false</V></Plain>"u8),
     new(Value: Ꮡ(new Plain((nint)42)), ExpectXML: @"<Plain><V>42</V></Plain>"u8),
@@ -648,14 +605,18 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(Value: Ꮡ(new Plain((@string)"</>"u8)), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(slice<byte>("</>"u8))), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(new byte[]{(rune)'<', (rune)'/', (rune)'>'}.array())), ExpectXML: @"<Plain><V>&lt;/&gt;</V></Plain>"u8),
-    new(Value: Ꮡ(new Plain(((NamedType)(@string)"potato"u8))), ExpectXML: @"<Plain><V>potato</V></Plain>"u8),
+    new(Value: Ꮡ(new Plain((NamedType)(@string)"potato"u8)), ExpectXML: @"<Plain><V>potato</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.slice())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"u8),
     new(Value: Ꮡ(new Plain(new nint[]{1, 2, 3}.array())), ExpectXML: @"<Plain><V>1</V><V>2</V><V>3</V></Plain>"u8),
     new(Value: ifaceptr(true), MarshalOnly: true, ExpectXML: @"<bool>true</bool>"u8),
+
+    // Test time.
     new(
         Value: Ꮡ(new Plain(time.Unix(1000000000, 123456789).UTC())),
         ExpectXML: @"<Plain><V>2001-09-09T01:46:40.123456789Z</V></Plain>"u8
     ),
+
+    // A pointer to struct{} may be used to test for an element's presence.
     new(
         Value: Ꮡ(new PresenceTest(@new<EmptyStruct>())),
         ExpectXML: @"<PresenceTest><Exists></Exists></PresenceTest>"u8
@@ -664,6 +625,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         Value: Ꮡ(new PresenceTest(nil)),
         ExpectXML: @"<PresenceTest></PresenceTest>"u8
     ),
+
+    // A []byte field is only nil if the element was not found.
     new(
         Value: Ꮡ(new Data(nil)),
         ExpectXML: @"<Data></Data>"u8,
@@ -674,10 +637,14 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         ExpectXML: @"<Data Attr=""""><Bytes></Bytes><Custom></Custom></Data>"u8,
         UnmarshalOnly: true
     ),
+
+    // Check that []byte works, including named []byte types.
     new(
         Value: Ꮡ(new Data(Bytes: slice<byte>("ab"u8), Custom: ((MyBytes)slice<byte>((@string)"cd"u8)), Attr: new byte[]{(rune)'v'}.slice())),
         ExpectXML: @"<Data Attr=""v""><Bytes>ab</Bytes><Custom>cd</Custom></Data>"u8
     ),
+
+    // Test innerxml
     new(
         Value: Ꮡ(new SecretAgent(
             Handle: "007"u8,
@@ -696,6 +663,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         ExpectXML: @"<agent handle=""007""><Identity>James Bond</Identity><redacted/></agent>"u8,
         UnmarshalOnly: true
     ),
+
+    // Test structs
     new(Value: Ꮡ(new Port(Type: "ssl"u8, Number: "443"u8)), ExpectXML: @"<port type=""ssl"">443</port>"u8),
     new(Value: Ꮡ(new Port(Number: "443"u8)), ExpectXML: @"<port>443</port>"u8),
     new(Value: Ꮡ(new Port(Type: "<unix>"u8)), ExpectXML: @"<port type=""&lt;unix&gt;""></port>"u8),
@@ -735,6 +704,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         )),
         ExpectXML: @"<spaceship name=""Heart of Gold"" pilot=""Computer"">"u8 + @"<drive>"u8 + strconv.Itoa((nint)ImprobabilityDrive) + @"</drive>"u8 + @"<age>1</age>"u8 + @"<passenger>"u8 + @"<name>Zaphod</name>"u8 + @"<name>Beeblebrox</name>"u8 + @"<weight>7.25</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Trisha</name>"u8 + @"<name>McMillen</name>"u8 + @"<weight>5.5</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Ford</name>"u8 + @"<name>Prefect</name>"u8 + @"<weight>7</weight>"u8 + @"</passenger>"u8 + @"<passenger>"u8 + @"<name>Arthur</name>"u8 + @"<name>Dent</name>"u8 + @"<weight>6.75</weight>"u8 + @"</passenger>"u8 + @"</spaceship>"u8
     ),
+
+    // Test a>b
     new(
         Value: Ꮡ(new NestedItems(Items: default!, Item1: default!)),
         ExpectXML: @"<result>"u8 + @"<Items>"u8 + @"</Items>"u8 + @"</result>"u8
@@ -763,7 +734,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         Value: Ꮡ(new NilTest(A: (@string)"A"u8, B: default!, C: (@string)"C"u8)),
         ExpectXML: @"<NilTest>"u8 + @"<parent1>"u8 + @"<parent2><a>A</a></parent2>"u8 + @"<parent2><c>C</c></parent2>"u8 + @"</parent1>"u8 + @"</NilTest>"u8,
-        MarshalOnly: true
+        MarshalOnly: true // Uses interface{}
+
     ),
     new(
         Value: Ꮡ(new MixedNested(A: "A"u8, B: "B"u8, C: "C"u8, D: "D"u8)),
@@ -818,11 +790,13 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         )),
         ExpectXML: @"<top>"u8 + @"<x><b xmlns=""space"">b</b>"u8 + @"<b xmlns=""space1"">b1</b></x>"u8 + @"</top>"u8
     ),
+
+    // Test struct embedding
     new(
         Value: Ꮡ(new EmbedA(
             EmbedC: new EmbedC(
-                FieldA1: ""u8,
-                FieldA2: ""u8,
+                FieldA1: ""u8, // Shadowed by A.A
+                FieldA2: ""u8, // Shadowed by A.A
                 FieldB: "A.C.B"u8,
                 FieldC: "A.C.C"u8
             ),
@@ -831,7 +805,7 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
                 EmbedC: Ꮡ(new EmbedC(
                     FieldA1: "A.B.C.A1"u8,
                     FieldA2: "A.B.C.A2"u8,
-                    FieldB: ""u8,
+                    FieldB: ""u8, // Shadowed by A.B.B
                     FieldC: "A.B.C.C"u8
                 ))
             ),
@@ -842,18 +816,26 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         )),
         ExpectXML: @"<EmbedA>"u8 + @"<FieldB>A.C.B</FieldB>"u8 + @"<FieldC>A.C.C</FieldC>"u8 + @"<EmbedB>"u8 + @"<FieldB>A.B.B</FieldB>"u8 + @"<FieldA>"u8 + @"<A1>A.B.C.A1</A1>"u8 + @"<A2>A.B.C.A2</A2>"u8 + @"</FieldA>"u8 + @"<FieldC>A.B.C.C</FieldC>"u8 + @"</EmbedB>"u8 + @"<FieldA>A.A</FieldA>"u8 + @"<FieldE>A.D.E</FieldE>"u8 + @"</EmbedA>"u8
     ),
+
+    // Anonymous struct pointer field which is nil
     new(
         Value: Ꮡ(new EmbedB(nil)),
         ExpectXML: @"<EmbedB><FieldB></FieldB></EmbedB>"u8
     ),
+
+    // Other kinds of nil anonymous fields
     new(
         Value: Ꮡ(new PointerAnonFields(nil)),
         ExpectXML: @"<PointerAnonFields></PointerAnonFields>"u8
     ),
+
+    // Test that name casing matters
     new(
         Value: Ꮡ(new NameCasing(Xy: "mixed"u8, XY: "upper"u8, XyA: "mixedA"u8, XYA: "upperA"u8)),
         ExpectXML: @"<casing Xy=""mixedA"" XY=""upperA""><Xy>mixed</Xy><XY>upper</XY></casing>"u8
     ),
+
+    // Test the order in which the XML element name is chosen
     new(
         Value: Ꮡ(new NamePrecedence(
             FromTag: new XMLNameWithoutTag(Value: "A"u8),
@@ -875,6 +857,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         ExpectXML: @"<Parent>"u8 + @"<InTag>A</InTag>"u8 + @"<FromNameVal>B</FromNameVal>"u8 + @"<InXMLNameTag>C</InXMLNameTag>"u8 + @"<InFieldName>D</InFieldName>"u8 + @"</Parent>"u8,
         UnmarshalOnly: true
     ),
+
+    // xml.Name works in a plain field as well.
     new(
         Value: Ꮡ(new NameInField(new Name(Space: "ns"u8, Local: "foo"u8))),
         ExpectXML: @"<NameInField><foo xmlns=""ns""></foo></NameInField>"u8
@@ -884,11 +868,15 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         ExpectXML: @"<NameInField><foo xmlns=""ns""><ignore></ignore></foo></NameInField>"u8,
         UnmarshalOnly: true
     ),
+
+    // Marshaling zero xml.Name uses the tag or field name.
     new(
         Value: Ꮡ(new NameInField(nil)),
         ExpectXML: @"<NameInField><foo xmlns=""ns""></foo></NameInField>"u8,
         MarshalOnly: true
     ),
+
+    // Test attributes
     new(
         Value: Ꮡ(new AttrTest(
             Int: 8,
@@ -969,16 +957,22 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         Value: Ꮡ(new OmitAttrTest(nil)),
         ExpectXML: @"<OmitAttrTest></OmitAttrTest>"u8
     ),
+
+    // pointer fields
     new(
         Value: Ꮡ(new PointerFieldsTest(Name: ᏑnameAttr, Age: ᏑageAttr, Contents: ᏑcontentsAttr)),
         ExpectXML: @"<dummy name=""Sarah"" age=""12"">lorem ipsum</dummy>"u8,
         MarshalOnly: true
     ),
+
+    // empty chardata pointer field
     new(
         Value: Ꮡ(new ChardataEmptyTest(nil)),
         ExpectXML: @"<test></test>"u8,
         MarshalOnly: true
     ),
+
+    // omitempty on fields
     new(
         Value: Ꮡ(new OmitFieldTest(
             Int: 8,
@@ -997,6 +991,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         Value: Ꮡ(new OmitFieldTest(nil)),
         ExpectXML: @"<OmitFieldTest></OmitFieldTest>"u8
     ),
+
+    // Test ",any"
     new(
         ExpectXML: @"<a><nested><value>known</value></nested><other><sub>unknown</sub></other></a>"u8,
         Value: Ꮡ(new AnyTest(
@@ -1044,6 +1040,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
             Nested: "b"u8
         ))
     ),
+
+    // Test recursive types.
     new(
         Value: Ꮡ(new RecurseA(
             A: "a1"u8,
@@ -1054,6 +1052,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         )),
         ExpectXML: @"<RecurseA><A>a1</A><B><A><A>a2</A></A><B>b1</B></B></RecurseA>"u8
     ),
+
+    // Test ignoring fields via "-" tag
     new(
         ExpectXML: @"<IgnoreTest></IgnoreTest>"u8,
         Value: Ꮡ(new IgnoreTest(nil))
@@ -1068,6 +1068,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         Value: Ꮡ(new IgnoreTest(nil)),
         UnmarshalOnly: true
     ),
+
+    // Test escaping.
     new(
         ExpectXML: @"<a><nested><value>dquote: &#34;; squote: &#39;; ampersand: &amp;; less: &lt;; greater: &gt;;</value></nested><empty></empty></a>"u8,
         Value: Ꮡ(new AnyTest(
@@ -1095,6 +1097,7 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
             MyInt: 42
         ))
     ),
+    // Test outputting CDATA-wrapped text.
     new(
         ExpectXML: @"<CDataTest></CDataTest>"u8,
         Value: Ꮡ(new CDataTest(nil))
@@ -1129,10 +1132,13 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
             Chardata: "<![CDATA[<![CDATA[Nested]]>]]>"u8
         ))
     ),
+
+    // Test omitempty with parent chain; see golang.org/issue/4168.
     new(
         ExpectXML: @"<Strings><A></A></Strings>"u8,
         Value: Ꮡ(new Strings(nil))
     ),
+    // Custom marshalers.
     new(
         ExpectXML: @"<MyMarshalerTest>hello world</MyMarshalerTest>"u8,
         Value: Ꮡ(new MyMarshalerTest(nil))
@@ -1169,6 +1175,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         ExpectXML: @"<NestedAndCData><A><B></B><B></B></A><![CDATA[test]]></NestedAndCData>"u8,
         Value: Ꮡ(new NestedAndCData(AB: new slice<@string>(2), CDATA: "test"u8))
     ),
+    // Test pointer indirection in various kinds of fields.
+    // https://golang.org/issue/19063
     new(
         ExpectXML: @"<IndirComment><T1></T1><!--hi--><T2></T2></IndirComment>"u8,
         Value: Ꮡ(new IndirComment(Comment: stringptr("hi"u8))),
@@ -1224,7 +1232,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<IndirChardata><T1></T1><![CDATA[hi]]><T2></T2></IndirChardata>"u8,
         Value: Ꮡ(new IndirChardata(Chardata: stringptr("hi"u8))),
-        UnmarshalOnly: true
+        UnmarshalOnly: true // marshals without CDATA
+
     ),
     new(
         ExpectXML: @"<IndirChardata><T1></T1><T2></T2></IndirChardata>"u8,
@@ -1233,7 +1242,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<IndirChardata><T1></T1><T2></T2></IndirChardata>"u8,
         Value: Ꮡ(new IndirChardata(Chardata: nil)),
-        MarshalOnly: true
+        MarshalOnly: true // unmarshal leaves Chardata=stringptr("")
+
     ),
     new(
         ExpectXML: @"<IfaceChardata><T1></T1>hi<T2></T2></IfaceChardata>"u8,
@@ -1243,7 +1253,7 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<IfaceChardata><T1></T1><![CDATA[hi]]><T2></T2></IfaceChardata>"u8,
         Value: Ꮡ(new IfaceChardata(Chardata: ((@string)"hi"u8))),
-        UnmarshalOnly: true,
+        UnmarshalOnly: true, // marshals without CDATA
         UnmarshalError: "cannot unmarshal into interface {}"u8
     ),
     new(
@@ -1263,7 +1273,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<DirectChardata><T1></T1><![CDATA[hi]]><T2></T2></DirectChardata>"u8,
         Value: Ꮡ(new DirectChardata(Chardata: ((@string)"hi"u8))),
-        UnmarshalOnly: true
+        UnmarshalOnly: true // marshals without CDATA
+
     ),
     new(
         ExpectXML: @"<DirectChardata><T1></T1><T2></T2></DirectChardata>"u8,
@@ -1276,7 +1287,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<IndirCDATA><T1></T1>hi<T2></T2></IndirCDATA>"u8,
         Value: Ꮡ(new IndirCDATA(CDATA: stringptr("hi"u8))),
-        UnmarshalOnly: true
+        UnmarshalOnly: true // marshals with CDATA
+
     ),
     new(
         ExpectXML: @"<IndirCDATA><T1></T1><T2></T2></IndirCDATA>"u8,
@@ -1285,7 +1297,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<IndirCDATA><T1></T1><T2></T2></IndirCDATA>"u8,
         Value: Ꮡ(new IndirCDATA(CDATA: nil)),
-        MarshalOnly: true
+        MarshalOnly: true // unmarshal leaves CDATA=stringptr("")
+
     ),
     new(
         ExpectXML: @"<IfaceCDATA><T1></T1><![CDATA[hi]]><T2></T2></IfaceCDATA>"u8,
@@ -1295,7 +1308,7 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<IfaceCDATA><T1></T1>hi<T2></T2></IfaceCDATA>"u8,
         Value: Ꮡ(new IfaceCDATA(CDATA: ((@string)"hi"u8))),
-        UnmarshalOnly: true,
+        UnmarshalOnly: true, // marshals with CDATA
         UnmarshalError: "cannot unmarshal into interface {}"u8
     ),
     new(
@@ -1315,7 +1328,8 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
     new(
         ExpectXML: @"<DirectCDATA><T1></T1>hi<T2></T2></DirectCDATA>"u8,
         Value: Ꮡ(new DirectCDATA(CDATA: ((@string)"hi"u8))),
-        UnmarshalOnly: true
+        UnmarshalOnly: true // marshals with CDATA
+
     ),
     new(
         ExpectXML: @"<DirectCDATA><T1></T1><T2></T2></DirectCDATA>"u8,
@@ -1423,6 +1437,7 @@ internal static void initᴛmarshalTests() { marshalTests = new marshalTestsᴛ1
         Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr("hi"u8)))
     ),
     new(
+        // Note: Changed in Go 1.8 to include <OmitEmpty> element (because x.OmitEmpty != nil).
         ExpectXML: @"<IndirOmitEmpty><T1></T1><OmitEmpty></OmitEmpty><T2></T2></IndirOmitEmpty>"u8,
         Value: Ꮡ(new IndirOmitEmpty(OmitEmpty: stringptr(""u8))),
         MarshalOnly: true
@@ -1552,6 +1567,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
         if (test.UnmarshalOnly) {
             continue;
         }
+
         var testʗ1 = test;
         Ꮡt.Run(fmt.Sprintf("%d"u8, idx), (ж<testing.T> tΔ1) => {
             var (data, err) = Marshal(testʗ1.Value);
@@ -1570,7 +1586,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
                 return;
             }
             {
-                @string got = ((@string)data);
+                @string got = (@string)data;
                 @string want = testʗ1.ExpectXML; if (got != want) {
                     if (strings.Contains(want, "\n"u8)){
                         tΔ1.Errorf("marshal(%#v):\nHAVE:\n%s\nWANT:\n%s"u8, testʗ1.Value, got, want);
@@ -1590,8 +1606,6 @@ public partial struct AttrParent {
 public partial struct BadAttr {
     public map<@string, @string> Name; /*`xml:"name,attr"`*/
 }
-
-// Reject parent chain with attr, never worked; see golang.org/issue/5033.
 
 partial struct marshalErrorTestsᴛ1 /*dyn*/ {
     public any Value;
@@ -1621,6 +1635,7 @@ internal static slice<marshalErrorTestsᴛ1> marshalErrorTests = new marshalErro
         Value: Ꮡ(new Domain(Comment: slice<byte>("f--bar"u8))),
         Err: @"xml: comments must not contain ""--"""u8
     ),
+    // Reject parent chain with attr, never worked; see golang.org/issue/5033.
     new(
         Value: Ꮡ(new AttrParent(nil)),
         Err: @"xml: X>Y chain not valid with attr flag"u8
@@ -1630,7 +1645,6 @@ internal static slice<marshalErrorTestsᴛ1> marshalErrorTests = new marshalErro
         Err: @"xml: unsupported type: map[string]string"u8
     )
 }.slice();
-
 
 partial struct marshalIndentTestsᴛ1 /*dyn*/ {
     public any Value;
@@ -1690,9 +1704,11 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
             // https://go-review.googlesource.com/#/c/5910/
             continue;
         }
+
         var vt = reflect.TypeOf(test.Value);
         var dest = reflect.New(vt.Elem()).Interface();
         var err = Unmarshal(slice<byte>(test.ExpectXML), dest);
+
         var destʗ1 = dest;
         var errʗ1 = err;
         var testʗ1 = test;
@@ -1705,6 +1721,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
                 }
                 break;
             }}
+
             if (errʗ1 != default!) {
                 if (testʗ1.UnmarshalError == ""u8) {
                     tΔ1.Errorf("unmarshal(%#v): %s"u8, testʗ1.ExpectXML, errʗ1);
@@ -1732,7 +1749,7 @@ public static void TestMarshalIndent(ж<testing.T> Ꮡt) {
             continue;
         }
         {
-            @string got = ((@string)data);
+            @string got = (@string)data;
             @string want = test.ExpectXML; if (got != want) {
                 Ꮡt.Errorf("#%d: MarshalIndent:\nGot:%s\nWant:\n%s"u8, i, got, want);
             }
@@ -1803,6 +1820,7 @@ internal static readonly @string unwritableˢ = "unwritable"u8;
 
 public static void TestMarshalWriteIOErrors(ж<testing.T> Ꮡt) {
     var enc = NewEncoder(new errWriter(nil));
+
     @string expectErr = unwritableˢ;
     var err = enc.Encode(Ꮡ(new Passenger(nil)));
     if (err == default! || err.Error() != expectErr) {
@@ -1817,7 +1835,7 @@ public static void TestMarshalFlush(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡbuf));
     {
-        var err = enc.EncodeToken(((global::go.encoding.xml_package.CharData)slice<byte>((@string)"hello world"u8))); if (err != default!) {
+        var err = enc.EncodeToken((global::go.encoding.xml_package.CharData)slice<byte>((@string)"hello world"u8)); if (err != default!) {
             Ꮡt.Fatalf("enc.EncodeToken: %v"u8, err);
         }
     }
@@ -1875,12 +1893,13 @@ public static void TestStructPointerMarshal(ж<testing.T> Ꮡt) {
         XMLName: new Name(Local: "c"u8),
         Value: "x"u8
     ))));
+
     var (b, err) = Marshal(a.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     {
-        @string x = ((@string)b); if (x != "<a><c><value>x</value></c></a>"u8) {
+        @string x = (@string)b; if (x != "<a><c><value>x</value></c></a>"u8) {
             Ꮡt.Fatal(x);
         }
     }
@@ -1890,7 +1909,6 @@ public static void TestStructPointerMarshal(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
 }
-
 
 partial struct encodeTokenTestsᴛ1 /*dyn*/ {
     internal @string desc;
@@ -1920,25 +1938,25 @@ internal static void initᴛencodeTokenTests() { encodeTokenTests = new encodeTo
 ), new(
     desc: "char data"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"foo"u8
 ), new(
     desc: "char data with escaped chars"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)" \t\n"u8))
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)" \t\n"u8)
     }.slice(),
     want: " &#x9;\n"u8
 ), new(
     desc: "comment"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"<!--foo-->"u8
 ), new(
     desc: "comment with invalid content"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo-->"u8))
+        (global::go.encoding.xml_package.Comment)slice<byte>((@string)"foo-->"u8)
     }.slice(),
     err: "xml: EncodeToken of Comment containing --> marker"u8
 ), new(
@@ -1962,19 +1980,19 @@ internal static void initᴛencodeTokenTests() { encodeTokenTests = new encodeTo
 ), new(
     desc: "directive"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"<!foo>"u8
 ), new(
     desc: "more complex directive"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]"u8)
     }.slice(),
     want: @"<!DOCTYPE doc [ <!ELEMENT doc '>'> <!-- com>ment --> ]>"u8
 ), new(
     desc: "directive instruction with bad name"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo>"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo>"u8)
     }.slice(),
     err: "xml: EncodeToken of Directive containing wrong < or > markers"u8
 ), new(
@@ -2320,7 +2338,6 @@ loop:
             continue;
             break;
         }}
-
         {
             var errΔ1 = enc.Flush(); if (errΔ1 != default!) {
                 errorf(" %v"u8, errΔ1);
@@ -2341,16 +2358,19 @@ break_loop:;
 public static void TestProcInstEncodeToken(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new xml_test_package.bytes_BufferжWriter(Ꮡbuf));
+
     {
         var err = enc.EncodeToken(new ProcInst("xml"u8, slice<byte>("Instruction"u8))); if (err != default!) {
             Ꮡt.Fatalf("enc.EncodeToken: expected to be able to encode xml target ProcInst as first token, %s"u8, err);
         }
     }
+
     {
         var err = enc.EncodeToken(new ProcInst("Target"u8, slice<byte>("Instruction"u8))); if (err != default!) {
             Ꮡt.Fatalf("enc.EncodeToken: expected to be able to add non-xml target ProcInst"u8);
         }
     }
+
     {
         var err = enc.EncodeToken(new ProcInst("xml"u8, slice<byte>("Instruction"u8))); if (err == default!) {
             Ꮡt.Fatalf("enc.EncodeToken: expected to not be allowed to encode xml target ProcInst when not first token"u8);
@@ -2365,7 +2385,7 @@ internal static readonly @string xmlVersion10EncodingUtf8ˢ = """
 <root>
 </root>
 
-"""u8;
+"""u8.Raw();
 
 public static void TestDecodeEncode(ж<testing.T> Ꮡt) {
     ref var @in = ref heap(new bytes.Buffer(), out var Ꮡin);
@@ -2422,12 +2442,12 @@ public static void TestIsValidDirective(ж<testing.T> Ꮡt) {
         "<!DOCTYPE doc <!--comment>"u8
     }.slice();
     foreach (var (_, s) in testOK) {
-        if (!isValidDirective(((global::go.encoding.xml_package.Directive)slice<byte>(s)))) {
+        if (!isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
             Ꮡt.Errorf("Directive %q is expected to be valid"u8, s);
         }
     }
     foreach (var (_, s) in testKO) {
-        if (isValidDirective(((global::go.encoding.xml_package.Directive)slice<byte>(s)))) {
+        if (isValidDirective((global::go.encoding.xml_package.Directive)slice<byte>(s))) {
             Ꮡt.Errorf("Directive %q is expected to be invalid"u8, s);
         }
     }
@@ -2550,6 +2570,7 @@ public static void TestMarshalZeroValue(ж<testing.T> Ꮡt) {
     if (got != want) {
         Ꮡt.Fatalf("unexpected unmarshal result, want %f but got %f"u8, want, got);
     }
+
     // Marshal again (or Encode again)
     // In issue 50164, here `Marshal(l1)` will panic because of the zero value of xml attribute ValueTwo `value_two`.
     (var anotherXML, err) = Marshal(l1);
@@ -2578,7 +2599,7 @@ internal static slice<encodeTokenTestsᴛ1> closeTests = new encodeTokenTestsᴛ
 ), new(
     desc: "directive"u8,
     toks: new ΔToken[]{
-        ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8))
+        (global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)
     }.slice(),
     want: @"<!foo>"u8
 )
@@ -2616,7 +2637,6 @@ public static void TestClose(ж<testing.T> Ꮡt) {
                 tΔ1.Errorf(" error mismatch; got %v, want %v"u8, err, ttʗ1.err);
                 break;
             }}
-
             {
                 @string got = @out.String(); if (got != ttʗ1.want) {
                     tΔ1.Errorf("\ngot  %v\nwant %v"u8, got, ttʗ1.want);
@@ -2624,7 +2644,7 @@ public static void TestClose(ж<testing.T> Ꮡt) {
             }
             tΔ1.Log((~enc).p.closed);
             {
-                var errΔ1 = enc.EncodeToken(((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8))); if (errΔ1 == default!) {
+                var errΔ1 = enc.EncodeToken((global::go.encoding.xml_package.Directive)slice<byte>((@string)"foo"u8)); if (errΔ1 == default!) {
                     tΔ1.Errorf("unexpected success when encoding after Close"u8);
                 }
             }

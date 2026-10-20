@@ -4,7 +4,7 @@
 namespace go.crypto;
 
 using fips140only = go.crypto.@internal.fips140only_package;
-using randutil = go.crypto.@internal.randutil_package;
+using rand = go.crypto.@internal.rand_package;
 using errors = errors_package;
 using io = io_package;
 using big = math.big_package;
@@ -19,26 +19,35 @@ internal static readonly @string cryptoRandPrimeSizeMustˢ = "crypto/rand: prime
 
 // Prime returns a number of the given bit length that is prime with high probability.
 // Prime will return error for any error returned by rand.Read or if bits < 2.
-public static (ж<bigꓸInt>, error) Prime(io.Reader rand, nint bits) {
-    if (fips140only.Enabled) {
+//
+// Since Go 1.26, a secure source of random bytes is always used, and the Reader is
+// ignored unless GODEBUG=cryptocustomrand=1 is set. This setting will be removed
+// in a future Go release. Instead, use [testing/cryptotest.SetGlobalRandom].
+public static (ж<bigꓸInt>, error) Prime(io.Reader r, nint bits) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoRandUseOfPrimeIsˢ));
     }
     if (bits < 2) {
         return (default!, errors.New(cryptoRandPrimeSizeMustˢ));
     }
-    randutil.MaybeReadByte(rand);
+
+    r = rand.CustomReader(r);
+
     nuint b = (nuint)(bits % 8);
     if (b == 0) {
         b = 8;
     }
+
     var bytes = new slice<byte>((bits + 7) / 8);
     var p = @new<bigꓸInt>();
+
     while (ᐧ) {
         {
-            var (_, err) = io.ReadFull(rand, bytes); if (err != default!) {
+            var (_, err) = io.ReadFull(r, bytes); if (err != default!) {
                 return (default!, err);
             }
         }
+
         // Clear bits in the first byte to make sure the candidate has a size <= bits.
         bytes[0] &= (uint8)((uint8)((nint)(((nint)1).Lsh(b)) - 1));
         // Don't let the value be too small, i.e, set the most significant two bits.
@@ -56,6 +65,7 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader rand, nint bits) {
         }
         // Make the value odd since an even number this large certainly isn't prime.
         bytes[len(bytes) - 1] |= (byte)(1);
+
         p.SetBytes(bytes);
         if (p.ProbablyPrime(20)) {
             return (p, default!);
@@ -68,8 +78,8 @@ public static (ж<bigꓸInt>, error) Prime(io.Reader rand, nint bits) {
 public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡmax) {
     ж<bigꓸInt> n = default!;
     error err = default!;
-
     ref var max = ref Ꮡmax.DerefOrNull();
+
     if (max.Sign() <= 0) {
         throw panic("crypto/rand: argument to Int is <= 0");
     }
@@ -88,15 +98,19 @@ public static (ж<bigꓸInt> n, error err) Int(io.Reader rand, ж<bigꓸInt> Ꮡ
     if (b == 0) {
         b = 8;
     }
+
     var bytes = new slice<byte>(k);
+
     while (ᐧ) {
         (_, err) = io.ReadFull(rand, bytes);
         if (err != default!) {
             return (default!, err);
         }
+
         // Clear bits in the first byte to increase the probability
         // that the candidate is < max.
         bytes[0] &= (uint8)((uint8)((nint)(((nint)1).Lsh(b)) - 1));
+
         n.SetBytes(bytes);
         if (n.Cmp(Ꮡmax) < 0) {
             return (n, err);

@@ -81,7 +81,7 @@ internal static readonly @string usrShareDocˢ = "/usr/share/doc"u8;
 
 public static void ExampleFileServer() {
     // Simple static webserver:
-    log.Fatal(Δhttp.ListenAndServe(":8080"u8, Δhttp.FileServer(((Δhttp.Dir)(@string)usrShareDocˢ))));
+    log.Fatal(Δhttp.ListenAndServe(":8080"u8, Δhttp.FileServer((Δhttp.Dir)(@string)usrShareDocˢ)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -92,14 +92,14 @@ public static void ExampleFileServer_stripPrefix() {
     // To serve a directory on disk (/tmp) under an alternate URL
     // path (/tmpfiles/), use StripPrefix to modify the request
     // URL's path before the FileServer sees it:
-    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer(((Δhttp.Dir)(@string)tmpˢ))));
+    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer((Δhttp.Dir)(@string)tmpˢ)));
 }
 
 public static void ExampleStripPrefix() {
     // To serve a directory on disk (/tmp) under an alternate URL
     // path (/tmpfiles/), use StripPrefix to modify the request
     // URL's path before the FileServer sees it:
-    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer(((Δhttp.Dir)(@string)tmpˢ))));
+    Δhttp.Handle(tmpfilesˢ, Δhttp.StripPrefix(tmpfilesˢ, Δhttp.FileServer((Δhttp.Dir)(@string)tmpˢ)));
 }
 
 partial struct apiHandler {
@@ -148,8 +148,10 @@ public static void ExampleResponseWriter_trailers() {
         // the trailer.
         w.Header().Set(trailerˢ, atEnd1AtEnd2ˢ);
         w.Header().Add(trailerˢ, atEnd3ˢ);
+
         w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ); // normal header
         w.WriteHeader(Δhttp.StatusOK);
+
         w.Header().Set(atEnd1ˢ, value1ˢ);
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), thisHttpResponseHasBothˢ);
         w.Header().Set(atEnd2ˢ, value2ˢ);
@@ -159,12 +161,14 @@ public static void ExampleResponseWriter_trailers() {
 
 public static partial void ExampleServer_Shutdown() {
     ref var srv = ref heap(new Δhttp.Server(), out var Ꮡsrv);
+
     var idleConnsClosed = new channel<EmptyStruct>(0);
     var idleConnsClosedʗ1 = idleConnsClosed;
     goǃ(() => {
         var sigint = new channel<osꓸSignal>(1);
         signal.Notify(sigint.WithDirection(GoChanDir.Send), os.Interrupt);
         ᐸꟷ(sigint);
+
         // We received an interrupt signal, shut down.
         {
             var err = Ꮡsrv.Shutdown(context_package.Background()); if (err != default!) {
@@ -174,12 +178,14 @@ public static partial void ExampleServer_Shutdown() {
         }
         builtin.close(idleConnsClosedʗ1);
     });
+
     {
         var err = Ꮡsrv.ListenAndServe(); if (!AreEqual(err, Δhttp.ErrServerClosed)) {
             // Error starting or closing listener:
             log.Fatalf("HTTP server ListenAndServe: %v"u8, err);
         }
     }
+
     ᐸꟷ(idleConnsClosed);
 }
 
@@ -192,6 +198,7 @@ public static void ExampleListenAndServeTLS() {
     Δhttp.HandleFunc("/"u8, (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloTlsˢ);
     });
+
     // One can use generate_cert.go in crypto/tls to generate cert.pem and key.pem.
     log.Printf("About to listen on 8443. Go to https://127.0.0.1:8443/"u8);
     var err = Δhttp.ListenAndServeTLS(":8443"u8, certPemˢ, keyPemˢ, default!);
@@ -207,6 +214,7 @@ public static void ExampleListenAndServe() {
     var helloHandler = (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloWorldˢ);
     };
+
     Δhttp.HandleFunc(helloˢ4, helloHandler);
     log.Fatal(Δhttp.ListenAndServe(":8080"u8, default!));
 }
@@ -223,8 +231,10 @@ public static void ExampleHandleFunc() {
     var h2 = (Δhttp.ResponseWriter w, ж<Δhttp.Request> _) => {
         io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloFromAHandleFunc2ˢ);
     };
+
     Δhttp.HandleFunc("/"u8, h1);
     Δhttp.HandleFunc(endpointˢ, h2);
+
     log.Fatal(Δhttp.ListenAndServe(":8080"u8, default!));
 }
 
@@ -243,10 +253,13 @@ internal static readonly @string resourcesPeopleˢ = "/resources/people/"u8;
 
 public static void ExampleNotFoundHandler() {
     var mux = Δhttp.NewServeMux();
+
     // Create sample handler to returns 404
     mux.Handle(resourcesˢ, Δhttp.NotFoundHandler());
+
     // Create sample handler that returns 200
     mux.Handle(resourcesPeopleˢ, newPeopleHandler());
+
     log.Fatal(Δhttp.ListenAndServe(":8080"u8, new Δhttp.ServeMuxжΔHandler(mux)));
 }
 
@@ -255,18 +268,22 @@ public static void ExampleProtocols_http1() {
     srv = new Δhttp.Server(
         Addr: ":8443"u8
     );
+
     // Serve only HTTP/1.
     srv.Protocols = @new<Δhttp.Protocols>();
     srv.Protocols.SetHTTP1(true);
+
     log.Fatal(Ꮡsrv.ListenAndServeTLS(certPemˢ, keyPemˢ));
 }
 
 public static void ExampleProtocols_http1or2() {
     var t = Δhttp.DefaultTransport._<ж<Δhttp.Transport>>().Clone();
+
     // Use either HTTP/1 and HTTP/2.
     t.Value.Protocols = @new<Δhttp.Protocols>();
     (~t).Protocols.SetHTTP1(true);
     (~t).Protocols.SetHTTP2(true);
+
     var cli = Ꮡ(new Δhttp.Client(Transport: new Δhttp.TransportжRoundTripper(t)));
     var (res, err) = cli.Get(httpWwwGoogleComRobotsˢ);
     if (err != default!) {

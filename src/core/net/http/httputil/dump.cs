@@ -112,7 +112,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         if (!body){
             var contentLength = outgoingLength(ref (Ꮡreq).DerefOrNull());
             if (contentLength != 0) {
-                req.Body = io.NopCloser(io.LimitReader(((neverEnding)(rune)'x'), contentLength));
+                req.Body = io.NopCloser(io.LimitReader((neverEnding)(rune)'x', contentLength));
                 dummyBody = true;
             }
         } else {
@@ -122,6 +122,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
                 return (default!, errΔ1);
             }
         }
+
         // Since we're using the actual Transport code to write the request,
         // switch to http so the Transport doesn't try to do an SSL
         // negotiation with our dumpConn and its bytes.Buffer & pipe.
@@ -134,6 +135,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
             (~reqSend).URL.Value = req.URL.Value;
             reqSend.Value.URL.Value.Scheme = httpˢ;
         }
+
         // Use the actual Transport code to record what we would send
         // on the wire, but not using TCP.  Use a Transport with a
         // custom dialer that returns a fake net.Conn that waits
@@ -146,6 +148,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         var pwʗ1 = pw;
         defer(() => pwʗ1.Close(), ref ᒐ);
         var dr = Ꮡ(new delegateReader(c: new channel<io.Reader>(0)));
+
             var drʗ1 = dr;
             var pwʗ2 = pw;
         var t = Ꮡ(new http.Transport(
@@ -153,6 +156,7 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
         ));
         var tʗ1 = t;
         defer(tʗ1.CloseIdleConnections, ref ᒐ);
+
         // We need this channel to ensure that the reader
         // goroutine exits if t.RoundTrip returns an error.
         // See golang.org/issue/32571.
@@ -176,20 +180,22 @@ public static partial (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡre
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out _): {
+                // Ensure delegateReader.Read doesn't block forever if we get an error.
                 close((~drʗ2).c);
                 break;
             }}
         });
-        // Ensure delegateReader.Read doesn't block forever if we get an error.
+
         var (_, err) = t.RoundTrip(reqSend);
+
         req.Body = save;
         if (err != default!) {
-            pw.Close();
             dr.Value.err = err;
             close(quitReadCh);
             return (default!, err);
         }
         var dump = buf.Bytes();
+
         // If we used a dummy body above, remove it now.
         // TODO: if the req.ContentLength is large, we allocate memory
         // unnecessarily just to slice it off here. But this is just
@@ -236,9 +242,8 @@ internal static @string valueOrDefault(@string value, @string def) {
     return def;
 }
 
-// not in Header map anyway
 internal static map<@string, bool> reqWriteExcludeHeaderDump = new map<@string, bool>{
-    ["Host"u8] = true,
+    ["Host"u8] = true, // not in Header map anyway
     ["Transfer-Encoding"u8] = true,
     ["Trailer"u8] = true
 };
@@ -277,7 +282,9 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
             return (default!, err);
         }
     }
+
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
+
     // By default, print out the unmodified req.RequestURI, which
     // is always set for incoming server requests. But because we
     // previously used req.URL.RequestURI and the docs weren't
@@ -288,8 +295,10 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
     if (reqURI == ""u8) {
         reqURI = req.URL.RequestURI();
     }
+
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "%s %s HTTP/%d.%d\r\n"u8, valueOrDefault(req.Method, getˢ),
         reqURI, req.ProtoMajor, req.ProtoMinor);
+
     var absRequestURI = strings.HasPrefix(req.RequestURI, httpˢ2) || strings.HasPrefix(req.RequestURI, httpsˢ);
     if (!absRequestURI) {
         @string host = req.Host;
@@ -300,15 +309,19 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
             fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "Host: %s\r\n"u8, host);
         }
     }
+
     var chunked = len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked";
     if (len(req.TransferEncoding) > 0) {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "Transfer-Encoding: %s\r\n"u8, strings.Join(req.TransferEncoding, ","u8));
     }
+
     err = req.Header.WriteSubset(new bytes_BufferжWriter(Ꮡb), reqWriteExcludeHeaderDump);
     if (err != default!) {
         return (default!, err);
     }
+
     io.WriteString(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
+
     if (req.Body != default!) {
         io.Writer dest = new bytes_BufferжWriter(Ꮡb);
         if (chunked) {
@@ -320,6 +333,7 @@ public static (slice<byte>, error) DumpRequest(ж<http.Request> Ꮡreq, bool bod
             io.WriteString(new bytes_BufferжWriter(Ꮡb), "\r\n"u8);
         }
     }
+
     req.Body = save;
     if (err != default!) {
         return (default!, err);
@@ -357,6 +371,7 @@ public static (slice<byte>, error) DumpResponse(ж<http.Response> Ꮡresp, bool 
     error err = default!;
     var save = resp.Body;
     var savecl = resp.ContentLength;
+
     if (!body){
         // For content length of zero. Make sure the body is an empty
         // reader, instead of returning error through failureToReadBody{}.

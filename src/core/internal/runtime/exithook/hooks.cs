@@ -8,7 +8,7 @@
 // from a safe context (e.g. not an error/panic path or signal
 // handler, preemption enabled, allocation allowed, write barriers
 // allowed, etc), and that the exit function F will be invoked under
-// similar circumstances. That is the say, we are expecting that F
+// similar circumstances. That is to say, we are expecting that F
 // uses normal / high-level Go code as opposed to one of the more
 // restricted dialects used for the trickier parts of the runtime.
 namespace go.@internal.runtime;
@@ -34,6 +34,8 @@ internal static ж<atomic.Uint64> ᏑrunGoid = new StandardBox<atomic.Uint64>(de
 internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
 internal static slice<Hook> hooks;
 internal static bool running;
+
+// runtime sets these for us
 public static Action Gosched;
 public static Func<uint64> Goid;
 public static Action<@string> Throw;
@@ -65,9 +67,10 @@ public static void Run(nint code) {
             }
             Gosched();
         }
-        defer(Ꮡlocked.Store, (int32)(0), ref ᒐ);
+        defer(Ꮡlocked.Store, (int32)0, ref ᒐ);
         ᏑrunGoid.Store(Goid());
-        defer(ᏑrunGoid.Store, (uint64)(0), ref ᒐ);
+        defer(ᏑrunGoid.Store, (uint64)0, ref ᒐ);
+
         defer(() => {
             {
                 var e = recover(); if (e != default!) {
@@ -75,6 +78,7 @@ public static void Run(nint code) {
                 }
             }
         }, ref ᒐ);
+
         while (len(hooks) > 0) {
             var h = hooks[len(hooks) - 1];
             hooks = hooks.slice(0, len(hooks) - 1);
@@ -91,7 +95,7 @@ public static void Run(nint code) {
 partial struct exitError /*@string*/;
 
 internal static @string Error(this exitError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 } // end exithook_package

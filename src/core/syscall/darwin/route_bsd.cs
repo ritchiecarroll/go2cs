@@ -7,6 +7,7 @@ namespace go;
 using runtime = runtime_package;
 using @unsafe = unsafe_package;
 
+[GoFieldAccess(typeof(RawSockaddrDatalink), typeof(RawSockaddr))]
 partial class syscall_package {
 
 internal static @string freebsdConfArch; // "machine $arch" line in kern.conftxt on freebsd
@@ -37,7 +38,7 @@ internal static nint rsaAlignOf(nint salen) {
     if (salen == 0) {
         return salign;
     }
-    return (nint)((salen + salign - 1) & ~(salign - 1));
+    return (salen + salign - 1) & ~(salign - 1);
 }
 
 // parseSockaddrLink parses b as a datalink socket address.
@@ -50,9 +51,9 @@ internal static (ж<SockaddrDatalink>, error) parseSockaddrLink(slice<byte> b) {
         return (default!, err);
     }
     var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddrDatalink>();
-    sa.Value.Len = rsa.Value.Len;
-    sa.Value.Family = rsa.Value.Family;
-    sa.Value.Index = rsa.Value.Index;
+    sa.Value.Len = rsa.Len;
+    sa.Value.Family = rsa.Family;
+    sa.Value.Index = rsa.Index;
     return (sa, default!);
 }
 
@@ -111,7 +112,6 @@ internal static (Sockaddr, error) parseSockaddrInet(slice<byte> b, byte family) 
     { /* default: */
         return (default!, EINVAL);
     }
-
 }
 
 internal const nint offsetofInet4 = /* int(unsafe.Offsetof(RawSockaddrInet4{}.Addr)) */ 4;
@@ -165,17 +165,15 @@ internal static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte fami
         copy((~sa).Addr[..], b[(int)(offsetofInet4)..]);
         return (new SockaddrInet4жSockaddr(sa), default!);
     }
-    default: {
+    default: { // an old fashion, AF_UNSPEC or unknown means AF_INET
         var sa = Ꮡ(new SockaddrInet4(nil));
         if (l - 1 < offsetofInet4){
-            // an old fashion, AF_UNSPEC or unknown means AF_INET
             copy((~sa).Addr[..], b.slice(1, l));
         } else {
             copy((~sa).Addr[..], b.slice(l - offsetofInet4, l));
         }
         return (new SockaddrInet4жSockaddr(sa), default!);
     }}
-
 }
 
 // RouteRIB returns routing information base, as known as RIB,
@@ -184,7 +182,7 @@ internal static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte fami
 //
 // Deprecated: Use golang.org/x/net/route instead.
 public static (slice<byte>, error) RouteRIB(nint facility, nint param) {
-    var mib = new _C_int[]{CTL_NET, AF_ROUTE, 0, 0, ((_C_int)(int32)facility), ((_C_int)(int32)param)}.slice();
+    var mib = new _C_int[]{CTL_NET, AF_ROUTE, 0, 0, (_C_int)(int32)facility, (_C_int)(int32)param}.slice();
     // Find size.
     ref var n = ref heap<uintptr>(out var Ꮡn);
     n = (uintptr)0;
@@ -234,27 +232,27 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {
-        if ((int32)(m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
+        if ((m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();
-        var exprᴛ1 = (~rsa).Family;
+        var exprᴛ1 = rsa.Family;
         if (exprᴛ1 == AF_LINK) {
             var (sa, err) = parseSockaddrLink(b);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
-            var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
+            var (sa, err) = parseSockaddrInet(b, rsa.Family);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
-            family = rsa.Value.Family;
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
+            family = rsa.Family;
         }
         else { /* default: */
             var (sa, err) = parseNetworkLayerAddr(b, family);
@@ -264,7 +262,6 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) {
             sas[i] = sa;
             b = b.slice(rsaAlignOf((nint)b[0]));
         }
-
     }
     return (sas[..], default!);
 }
@@ -280,7 +277,7 @@ partial struct InterfaceMessage {
 
 internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
-    if ((int32)(m.Header.Addrs & (int32)RTA_IFP) == 0) {
+    if ((m.Header.Addrs & (int32)RTA_IFP) == 0) {
         return (default!, default!);
     }
     var (sa, err) = parseSockaddrLink(m.Data[..]);
@@ -305,27 +302,27 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {
-        if ((int32)(m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
+        if ((m.Header.Addrs & (((int32)1).Lsh(i))) == 0) {
             continue;
         }
         var rsa = Ꮡ(b, 0).Reinterpret<byte, RawSockaddr>();
-        var exprᴛ1 = (~rsa).Family;
+        var exprᴛ1 = rsa.Family;
         if (exprᴛ1 == AF_LINK) {
             var (sa, err) = parseSockaddrLink(b);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = new SockaddrDatalinkжSockaddr(sa);
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
         }
         else if (exprᴛ1 == AF_INET || exprᴛ1 == AF_INET6) {
-            var (sa, err) = parseSockaddrInet(b, (~rsa).Family);
+            var (sa, err) = parseSockaddrInet(b, rsa.Family);
             if (err != default!) {
                 return (default!, err);
             }
             sas[i] = sa;
-            b = b.slice(rsaAlignOf((nint)(~rsa).Len));
-            family = rsa.Value.Family;
+            b = b.slice(rsaAlignOf((nint)rsa.Len));
+            family = rsa.Family;
         }
         else { /* default: */
             var (sa, err) = parseNetworkLayerAddr(b, family);
@@ -335,7 +332,6 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
             sas[i] = sa;
             b = b.slice(rsaAlignOf((nint)b[0]));
         }
-
     }
     return (sas[..], default!);
 }

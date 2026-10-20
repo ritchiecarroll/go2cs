@@ -53,8 +53,6 @@ internal static void checkOnCurve(ж<testing.T> Ꮡt, params Span<ж<global::go.
 }
 
 public static void TestGenerator(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // These are the coordinates of B from RFC 8032, Section 5.1, converted to
     // little endian hex.
     @string x = "1ad5258f602d56c9b2a7259560c72c695cdcd6fd31e2a4c0fe536ecdd3366921"u8;
@@ -84,6 +82,7 @@ internal static readonly object bB0ˢ2 = (@string)"B + (-B) != 0"u8;
 
 public static void TestAddSubNegOnBasePoint(ж<testing.T> Ꮡt) {
     var (checkLhs, checkRhs) = (Ꮡ(new Point(nil)), Ꮡ(new Point(nil)));
+
     checkLhs.Add(B, B);
     var tmpP2 = @new<global::go.crypto.@internal.fips140.edwards25519_package.projP2>().FromP3(B);
     var tmpP1xP1 = @new<global::go.crypto.@internal.fips140.edwards25519_package.projP1xP1>().Double(tmpP2);
@@ -92,6 +91,7 @@ public static void TestAddSubNegOnBasePoint(ж<testing.T> Ꮡt) {
         Ꮡt.Error(bB2Bˢ);
     }
     checkOnCurve(Ꮡt, checkLhs, checkRhs);
+
     checkLhs.Subtract(B, B);
     var Bneg = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().Negate(B);
     checkRhs.Add(B, Bneg);
@@ -145,9 +145,9 @@ internal partial struct TestNonCanonicalPoints_test /*dyn*/ {
 }
 
 public static void TestNonCanonicalPoints(ж<testing.T> Ꮡt) {
-    var tests = new TestNonCanonicalPoints_test[]{ // Points with x = 0 and the sign bit set. With x = 0 the curve equation
- // gives y² = 1, so y = ±1. 1 has two valid encodings.
-
+    var tests = new TestNonCanonicalPoints_test[]{
+        // Points with x = 0 and the sign bit set. With x = 0 the curve equation
+        // gives y² = 1, so y = ±1. 1 has two valid encodings.
         new(
             "y=1,sign-"u8,
             "0100000000000000000000000000000000000000000000000000000000000080"u8,
@@ -162,8 +162,9 @@ public static void TestNonCanonicalPoints(ж<testing.T> Ꮡt) {
             "y=p-1,sign-"u8,
             "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8,
             "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8
-        ), // Non-canonical y encodings with values 2²⁵⁵-19 (p) to 2²⁵⁵-1 (p+18).
+        ),
 
+        // Non-canonical y encodings with values 2²⁵⁵-19 (p) to 2²⁵⁵-1 (p+18).
         new(
             "y=p,sign+"u8,
             "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8,
@@ -178,9 +179,9 @@ public static void TestNonCanonicalPoints(ж<testing.T> Ꮡt) {
             "y=p+1,sign+"u8,
             "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8,
             "0100000000000000000000000000000000000000000000000000000000000000"u8
-        ), // "y=p+1,sign-" is already tested above.
- // p+2 is not a valid y-coordinate.
-
+        ),
+        // "y=p+1,sign-" is already tested above.
+        // p+2 is not a valid y-coordinate.
         new(
             "y=p+3,sign+"u8,
             "f0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8,
@@ -220,9 +221,9 @@ public static void TestNonCanonicalPoints(ж<testing.T> Ꮡt) {
             "y=p+6,sign-"u8,
             "f3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8,
             "0600000000000000000000000000000000000000000000000000000000000080"u8
-        ), // p+7 is not a valid y-coordinate.
- // p+8 is not a valid y-coordinate.
-
+        ),
+        // p+7 is not a valid y-coordinate.
+        // p+8 is not a valid y-coordinate.
         new(
             "y=p+9,sign+"u8,
             "f6ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8,
@@ -242,10 +243,10 @@ public static void TestNonCanonicalPoints(ж<testing.T> Ꮡt) {
             "y=p+10,sign-"u8,
             "f7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8,
             "0a00000000000000000000000000000000000000000000000000000000000080"u8
-        ), // p+11 is not a valid y-coordinate.
- // p+12 is not a valid y-coordinate.
- // p+13 is not a valid y-coordinate.
-
+        ),
+        // p+11 is not a valid y-coordinate.
+        // p+12 is not a valid y-coordinate.
+        // p+13 is not a valid y-coordinate.
         new(
             "y=p+14,sign+"u8,
             "fbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8,
@@ -275,8 +276,8 @@ public static void TestNonCanonicalPoints(ж<testing.T> Ꮡt) {
             "y=p+16,sign-"u8,
             "fdffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8,
             "1000000000000000000000000000000000000000000000000000000000000080"u8
-        ), // p+17 is not a valid y-coordinate.
-
+        ),
+        // p+17 is not a valid y-coordinate.
         new(
             "y=p+18,sign+"u8,
             "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"u8,

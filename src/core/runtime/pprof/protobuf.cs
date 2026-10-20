@@ -21,13 +21,13 @@ internal static void varint(this ref protobuf b, uint64 x) {
 }
 
 internal static void length(this ref protobuf b, nint tag, nint len) {
-    b.varint((uint64)(((uint64)tag << (int)(3)) | 2));
+    b.varint((uint64)tag << 3 | 2);
     b.varint((uint64)len);
 }
 
 internal static void uint64(this ref protobuf b, nint tag, uint64 x) {
     // append varint to b.data
-    b.varint((uint64)(((uint64)tag << (int)(3)) | 0));
+    b.varint((uint64)tag << 3 | 0);
     b.varint(x);
 }
 
@@ -127,7 +127,7 @@ partial struct msgOffset /*num:nint*/;
 
 internal static msgOffset startMessage(this ref protobuf b) {
     b.nest++;
-    return ((msgOffset)len(b.data));
+    return (msgOffset)len(b.data);
 }
 
 internal static void endMessage(this ref protobuf b, nint tag, msgOffset start) {

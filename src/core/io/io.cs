@@ -19,9 +19,7 @@ partial class io_package {
 
 // Seek whence values.
 public static UntypedInt SeekStart => 0; // seek relative to the origin of the file
-
 public static UntypedInt SeekCurrent => 1; // seek relative to the current offset
-
 public static UntypedInt SeekEnd => 2; // seek relative to the end
 
 // ErrShortWrite means that a write accepted fewer bytes than requested
@@ -574,7 +572,6 @@ public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint w
     else { /* default: */
         return (0, errWhence);
     }
-
     if (offset < s.@base) {
         return (0, errOffset);
     }
@@ -642,6 +639,7 @@ public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p
     if (off < 0) {
         return (0, errOffset);
     }
+
     off += o.@base;
     return o.w.WriteAt(p, off);
 }
@@ -657,7 +655,6 @@ public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint wh
     else { /* default: */
         return (0, errWhence);
     }
-
     if (offset < o.@base) {
         return (0, errOffset);
     }
@@ -778,7 +775,19 @@ internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w)
 // defined to read from src until EOF, it does not treat an EOF from Read
 // as an error to be reported.
 public static (slice<byte>, error) ReadAll(Reader r) {
+    var chunksᴷ = new stackAppend<slice<byte>>();
+
+    // Build slices of exponentially growing size,
+    // then copy into a perfectly-sized slice at the end.
     var b = new slice<byte>(0, 512);
+    // Starting with next equal to 256 (instead of say 512 or 1024)
+    // allows less memory usage for small inputs that finish in the
+    // early growth stages, but we grow the read sizes quickly such that
+    // it does not materially impact medium or large inputs.
+    nint next = 256;
+    var chunks = new slice<slice<byte>>(0, 4);
+    // Invariant: finalSize = sum(len(c) for c in chunks)
+    nint finalSize = default!;
     while (ᐧ) {
         var (n, err) = r.Read(b.slice(len(b), cap(b)));
         b = b.slice(0, len(b) + n);
@@ -786,11 +795,26 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             if (AreEqual(err, EOF)) {
                 err = default!;
             }
-            return (b, err);
+            if (len(chunks) == 0) {
+                return (b, err);
+            }
+
+            // Build our final right-sized slice.
+            finalSize += len(b);
+            var final = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(finalSize))[..0];
+            foreach (var (_, chunk) in chunks) {
+                final = appendꓸꓸꓸ(final, chunk);
+            }
+            final = appendꓸꓸꓸ(final, b);
+            return (final, err);
         }
-        if (len(b) == cap(b)) {
-            // Add more capacity (let append pick how much).
-            b = append(b, (byte)(0)).slice(0, len(b));
+
+        if (cap(b) - len(b) < cap(b) / 16) {
+            // Move to the next intermediate slice.
+            chunks = append(chunksᴷ, chunks, b);
+            finalSize += len(b);
+            b = appendꓸꓸꓸ(slice<byte>(default!), makeꓸꓸꓸ<byte>(next))[..0];
+            next += next / 2;
         }
     }
 }

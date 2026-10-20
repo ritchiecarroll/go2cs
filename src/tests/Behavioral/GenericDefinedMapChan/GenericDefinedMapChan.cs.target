@@ -22,9 +22,11 @@ public static Set<T> NewSet<T>(params Span<T> itemsʗp) {
     var items = itemsʗp.sslice();
 
     var s = new Set<T>(len(items));
+
     foreach (var (_, item) in items) {
         s.Add(item);
     }
+
     return s;
 }
 
@@ -34,6 +36,7 @@ public static bool Add<T>(this Set<T> s, T item) {
             return false;
         }
     }
+
     s[item] = new @void(nil);
     return true;
 }
@@ -64,6 +67,7 @@ public static void Put<K, V>(this ref Index<K, V> ix, K key, V value) {
     if (ix == default!) {
         ix = new Index<K, V>(0);
     }
+
     (ix)[key] = value;
 }
 
@@ -73,10 +77,13 @@ public static void Send<T>(this Pipe<T> p, T value) {
 
 public static slice<T> Drain<T>(this ref Pipe<T> p) {
     close<T>(p);
+
     slice<T> @out = default!;
+
     foreach (var value in p) {
         @out = append(@out, value);
     }
+
     return @out;
 }
 
@@ -90,25 +97,31 @@ public static T Peek<T>(this Stack<T> s) {
 
 public static slice<T> Keys<T>(this Set<T> s) {
     var keys = new slice<T>(0, len(s));
+
     foreach (var (key, _) in s) {
         keys = append(keys, key);
     }
+
     return keys;
 }
 
 public static slice<T> Keys<T>(this Bag<T> b) {
     var keys = new slice<T>(0, len(b));
+
     foreach (var (key, _) in b) {
         keys = append(keys, key);
     }
+
     return keys;
 }
 
 public static slice<K> Keys<K, V>(this Index<K, V> ix) {
     var keys = new slice<K>(0, len(ix));
+
     foreach (var (key, _) in ix) {
         keys = append(keys, key);
     }
+
     return keys;
 }
 
@@ -123,58 +136,56 @@ internal static slice<@string> sortedStrings(slice<@string> values) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object setIntˢ = (@string)"Set[int]:"u8;
-private static readonly object setIntAfterResetˢ = (@string)"Set[int] after Reset:"u8;
-private static readonly object setStringˢ = (@string)"Set[string]:"u8;
-private static readonly object bagIntˢ = (@string)"Bag[int]:"u8;
-private static readonly object bagStringˢ = (@string)"Bag[string]:"u8;
-private static readonly object indexStringIntˢ = (@string)"Index[string, int]:"u8;
 private static readonly @string twoˢ = "two"u8;
-private static readonly object indexIntStringˢ = (@string)"Index[int, string]:"u8;
-private static readonly object pipeIntˢ = (@string)"Pipe[int]:"u8;
-private static readonly object pipeStringˢ = (@string)"Pipe[string]:"u8;
-private static readonly object stackIntˢ = (@string)"Stack[int]:"u8;
-private static readonly object stackStringˢ = (@string)"Stack[string]:"u8;
 
 internal static void Main() {
     var ints = NewSet<nint>(3, 1, 2, 3);
-    fmt.Println(setIntˢ, len(ints), ints.Has(2), ints.Has(9), ints.Add(4), ints.Add(4), sortedInts(ints.Keys()));
+    fmt.Println("Set[int]:", len(ints), ints.Has(2), ints.Has(9), ints.Add(4), ints.Add(4), sortedInts(ints.Keys()));
     ints.Reset();
-    fmt.Println(setIntAfterResetˢ, len(ints), ints == default!);
+    fmt.Println("Set[int] after Reset:", len(ints), ints == default!);
+
     var words = NewSet<@string>((@string)"go", (@string)"cs");
-    fmt.Println(setStringˢ, len(words), words.Has("go"u8), sortedStrings(words.Keys()));
+    fmt.Println("Set[string]:", len(words), words.Has("go"u8), sortedStrings(words.Keys()));
+
     var bag = new Bag<nint>(2);
     bag.Put(7);
     bag.Put(8);
     bag.Drop(7);
-    fmt.Println(bagIntˢ, len(bag), sortedInts(bag.Keys()));
-    Bag<@string> names = new Bag<@string>(new map<@string, EmptyStruct>{["a"u8] = new()});
+    fmt.Println("Bag[int]:", len(bag), sortedInts(bag.Keys()));
+
+    Bag<@string> names = new Bag<@string>(new map<@string, EmptyStruct>{["a"] = new()});
     names.Put("b"u8);
-    fmt.Println(bagStringˢ, sortedStrings(names.Keys()));
+    fmt.Println("Bag[string]:", sortedStrings(names.Keys()));
+
     Index<@string, nint> ages = default!;
     ages.Put("x"u8, 1);
     ages.Put("y"u8, 2);
     var (age, ok) = ages.Get("y"u8);
     var (_, missing) = ages.Get("z"u8);
-    fmt.Println(indexStringIntˢ, age, ok, missing, sortedStrings(ages.Keys()));
-    var labels = new Index<nint, @string>(new map<nint, @string>{[1] = "one"u8});
+    fmt.Println("Index[string, int]:", age, ok, missing, sortedStrings(ages.Keys()));
+
+    var labels = new Index<nint, @string>(new map<nint, @string>{[1] = "one"});
     labels.Put(2, twoˢ);
     var (label, _) = labels.Get(2);
-    fmt.Println(indexIntStringˢ, label, sortedInts(labels.Keys()));
+    fmt.Println("Index[int, string]:", label, sortedInts(labels.Keys()));
+
     var pipe = new Pipe<nint>(3);
     pipe.Send(1);
     pipe.Send(2);
-    fmt.Println(pipeIntˢ, cap(pipe), len(pipe), pipe.Drain());
+    fmt.Println("Pipe[int]:", cap(pipe), len(pipe), pipe.Drain());
+
     var texts = new Pipe<@string>(1);
     texts.Send("hi"u8);
-    fmt.Println(pipeStringˢ, texts.Drain());
+    fmt.Println("Pipe[string]:", texts.Drain());
+
     var stack = new Stack<nint>(0, 4);
     stack.Push(5);
     stack.Push(6);
-    fmt.Println(stackIntˢ, len(stack), cap(stack), stack.Peek());
+    fmt.Println("Stack[int]:", len(stack), cap(stack), stack.Peek());
+
     Stack<@string> tags = default!;
     tags.Push("t"u8);
-    fmt.Println(stackStringˢ, tags.Peek(), len(tags));
+    fmt.Println("Stack[string]:", tags.Peek(), len(tags));
 }
 
 } // end main_package

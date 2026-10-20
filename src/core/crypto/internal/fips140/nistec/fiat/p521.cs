@@ -86,18 +86,15 @@ public static (ж<P521Element>, error) SetBytes(this ж<P521Element> Ꮡe, slice
     if (len(v) != p521ElementLen) {
         return (default!, errors.New(invalidP521Elementˢ));
     }
+
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
     // the encoding of -1 mod p, so p - 1, the highest canonical encoding.
     slice<byte> minusOneEncoding = @new<P521Element>().Sub(
         @new<P521Element>(), @new<P521Element>().One()).Bytes();
-    foreach (var (i, _) in v) {
-        if (v[i] < minusOneEncoding[i]) {
-            break;
-        }
-        if (v[i] > minusOneEncoding[i]) {
-            return (default!, errors.New(invalidP521Elementˢ));
-        }
+    if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
+        return (default!, errors.New(invalidP521Elementˢ));
     }
+
     ref var @in = ref heap(new array<byte>(66), out var Ꮡin);
     copy(@in[..], v);
     p521InvertEndianness(@in[..]);
@@ -158,7 +155,7 @@ public static ж<P521Element> Select(this ж<P521Element> Ꮡv, ж<P521Element> 
     var ᴛ4 = nonnil(ref b).x.Value;
 
     var ᴛ5 = nonnil(ref a).x.Value;
-    p521Selectznz(ref ᴛ3, ((p521Uint1)(uint64)cond),
+    p521Selectznz(ref ᴛ3, (p521Uint1)(uint64)cond,
         ref ᴛ4, ref ᴛ5);
     return Ꮡv;
 }

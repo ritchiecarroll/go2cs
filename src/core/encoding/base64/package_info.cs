@@ -45,6 +45,12 @@ using static go.encoding.base64_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -53,7 +59,7 @@ using static go.encoding.base64_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/base64/base64.go", "base64.cs", "ACWAAfKCloKCgoS4lLS0lAACFAAJApS0tIIAAhIACAKCuLjKygABGAAKAoLKhJKClISCgoKEgpaCgqaCgpaChJSCgsaCgu6igoKCqJKCggALGLKCqIKCgoKUgoKClIKAgqSogoKCgpSCgIKkgqiCgoKqtIKCgpQAAhDSqqKClAAEErIAAhD0kpaEgoKUpKSClIKEgoKCloKCloKolqiylJSUlJbIgpSUlIKogoKkgoKkgoKUgqSCgriu1IKClISCgqyygoIADRy0goKCloK8goKClIKUgpaChJKCgoKCgoKUgqaCgpSogoKCgoKClJSCggACEgAJAoLMhIKCgoAACBSCgpSCgoKCyoKCgMyCgpSCgoKCyoKCgoKCpqzWgpQAAhTWgpQABh6CgoKCgoKClKaCppSokqqipoKUpg==")]
+[assembly: go.GoPositionMap("encoding/base64/base64.go", "base64.cs", "ACWAAfKCpoKCgpS4lLSklAACFAAJApS0pIIAAhIACAKCuLjKygABGAAKAoLKlJKClJSCgoKUgqaCgqaCgqaClJSCgsaCgt6igoKCqJKCggALGLKCuIKCgoKUgoKClIKAgqS4goKCgpSCgIKkgriCgoKqtIKCgpQAAhDSqqKClAAEErIAAhD0kqaUgoKUpJSClIKUgoKCpoKCpoK4psiClJSUlKbIgpSUlIK4goKkgoKkgoKUgqSCgriu1IKClJSCgqyygoIADRy0goKCpoLcgoKClIKUgqaChJKCgoKCgoKUgqaCgpS4goKCgoKClJSCggACEgAJAoLclIKCgoAACBSCgpSCgoKC2oKCgMyCgpSCgoKC2oKCgoKCpqzWgpQAAhTWgpQABh6CgoKCgoKClKaCppSokqqipoKUpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -82,7 +88,6 @@ public static partial class base64_package
     // item of the project guarantees.
 
     // <ImportInitializers>
-    [GoInit] internal static void initᴛᴛimportꓸencodingꓸbinary() => builtin.initPackage(typeof(go.encoding.binary_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));

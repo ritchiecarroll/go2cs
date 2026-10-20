@@ -28,6 +28,8 @@ partial class slog_package {
 //
 // Users of the slog package should not invoke Handler methods directly.
 // They should use the methods of [Logger] instead.
+//
+// Before implementing your own handler, consult https://go.dev/s/slog-handler-guide.
 partial interface ΔHandler {
     // Enabled reports whether the handler handles records at the given level.
     // The handler ignores records whose level is lower.
@@ -56,6 +58,9 @@ partial interface ΔHandler {
     //   - If a group's key is empty, inline the group's Attrs.
     //   - If a group has no Attrs (even if it has a non-empty key),
     //     ignore it.
+    //
+    // [Logger] discards any errors from Handle. Wrap the Handle method to
+    // process any errors from Handlers.
     error Handle(context.Context _Δp0, Record _Δp1);
     // WithAttrs returns a new Handler whose attributes consist of
     // both the receiver's attributes and the arguments.
@@ -107,8 +112,8 @@ internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, 
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
-
         ref var h = ref Ꮡh.DerefOrNull();
+
         var buf = buffer.New();
         buf.WriteString(r.Level.String());
         buf.WriteByte((rune)' ');
@@ -172,12 +177,17 @@ partial struct HandlerOptions {
 }
 
 // Keys for "built-in" attributes.
+// TimeKey is the key used by the built-in handlers for the time
+// when the log method is called. The associated Value is a [time.Time].
 public static readonly @string TimeKey = "time"u8;
-
+// LevelKey is the key used by the built-in handlers for the level
+// of the log call. The associated value is a [Level].
 public static readonly @string LevelKey = "level"u8;
-
+// MessageKey is the key used by the built-in handlers for the
+// message of the log call. The associated value is a string.
 public static readonly @string MessageKey = "msg"u8;
-
+// SourceKey is the key used by the built-in handlers for the source file
+// and line of the log call. The associated value is a *[Source].
 public static readonly @string SourceKey = "source"u8;
 
 partial struct commonHandler {
@@ -205,11 +215,9 @@ internal static ж<commonHandler> clone(this ref commonHandler h) {
         groups: slices.Clip<slice<@string>, @string>(h.groups),
         nOpenGroups: h.nOpenGroups,
         w: h.w,
-        mu: h.mu
+        mu: h.mu // mutex shared among all clones of this handler
     ));
 }
-
-// mutex shared among all clones of this handler
 
 // enabled reports whether l is greater than or equal to the
 // minimum level.
@@ -275,8 +283,8 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
-
         ref var h = ref Ꮡh.DerefOrNull();
+
         ref var state = ref heap<handleState>(out var Ꮡstate);
         state = Ꮡh.newHandleState(buffer.New(), true, ""u8);
         defer(Ꮡstate.free, ref ᒐ);
@@ -309,7 +317,11 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         }
         // source
         if (h.opts.AddSource) {
-            Ꮡstate.appendAttr(Any(SourceKey, r.source().OrTypedNil()));
+            var src = r.Source();
+            if (src == nil) {
+                src = Ꮡ(new ΔSource(nil));
+            }
+            Ꮡstate.appendAttr(Any(SourceKey, src.OrTypedNil()));
         }
         key = MessageKey;
         @string msg = r.Message;
@@ -322,6 +334,7 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
         state.groups = stateGroups; // Restore groups passed to ReplaceAttrs.
         Ꮡstate.appendNonBuiltIns(r);
         state.buf.WriteByte((rune)'\n');
+
         h.mu.Lock();
         defer(Ꮡh.Value.mu.Unlock, ref ᒐ);
         var (_, err) = h.w.Write(state.buf.ValueSlot);
@@ -333,8 +346,8 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
 
 internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     r = r.ΔClone();
-
     ref var s = ref Ꮡs.DerefOrNull();
+
     // preformatted Attrs
     {
         var pfa = s.h.Value.preformattedAttrs; if (len(pfa) > 0) {
@@ -470,8 +483,8 @@ internal static void closeGroup(this ref handleState s, @string name) {
         s.buf.WriteByte((rune)'}');
     } else {
         (s.prefix.ValueSlot) = (s.prefix.ValueSlot).slice(0, len(s.prefix.ValueSlot) - len(name) - 1);
+        /* for keyComponentSep */
     }
-    /* for keyComponentSep */
     s.sep = s.h.attrSep();
     if (s.groups != nil) {
         s.groups.ValueSlot = (s.groups.ValueSlot).slice(0, len(s.groups.ValueSlot) - 1);
@@ -517,7 +530,10 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     {
         var v = a.Value; if (v.Kind() == KindAny) {
             {
-                var (src, ok) = v.Any()._<ж<Source>>(ᐧ); if (ok) {
+                var (src, ok) = v.Any()._<ж<ΔSource>>(ᐧ); if (ok) {
+                    if (src.isEmpty()) {
+                        return false;
+                    }
                     if ((~s.h).json){
                         a.Value = src.group();
                     } else {
@@ -562,8 +578,7 @@ internal static void appendError(this ref handleState s, error err) {
 internal static void appendKey(this ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
     if (s.prefix != nil && len(s.prefix.ValueSlot) > 0){
-        // TODO: optimize by avoiding allocation.
-        s.appendString(((@string)(slice<byte>)s.prefix.ValueSlot) + key);
+        s.appendTwoStrings((@string)(slice<byte>)s.prefix.ValueSlot, key);
     } else {
         s.appendString(key);
     }
@@ -573,6 +588,29 @@ internal static void appendKey(this ref handleState s, @string key) {
         s.buf.WriteByte((rune)'=');
     }
     s.sep = s.h.attrSep();
+}
+
+// appendTwoStrings implements appendString(prefix + key), but faster.
+internal static void appendTwoStrings(this ref handleState s, @string x, @string y) {
+    var buf = s.buf.ValueSlot;
+    switch (ᐧ) {
+    case {} when (~s.h).json: {
+        buf.WriteByte((rune)'"');
+        buf = appendEscapedJSONString(buf, x);
+        buf = appendEscapedJSONString(buf, y);
+        buf.WriteByte((rune)'"');
+        break;
+    }
+    case {} when !needsQuoting(x) && !needsQuoting(y): {
+        buf.WriteString(x);
+        buf.WriteString(y);
+        break;
+    }
+    default: {
+        buf = strconv.AppendQuote(buf, x + y);
+        break;
+    }}
+    s.buf.ValueSlot = buf;
 }
 
 internal static void appendString(this ref handleState s, @string str) {
@@ -614,11 +652,13 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
                             return;
                         }
                     }
+
                     // Otherwise just print the original panic message.
                     Ꮡs.Value.appendString(fmt.Sprintf("!PANIC: %v"u8, r));
                 }
             }
         }, ref ᒐ);
+
         error err = default!;
         if ((~s.h).json){
             err = appendJSONValue(Ꮡs, v);

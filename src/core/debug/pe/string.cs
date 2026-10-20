@@ -20,9 +20,10 @@ internal static @string cstring(slice<byte> b) {
     if (i == -1) {
         i = len(b);
     }
-    return ((@string)(b.slice(0, i)));
+    return (@string)(b.slice(0, i));
 }
 
+// StringTable is a COFF string table.
 partial struct StringTable /*[]byte*/;
 
 internal static (StringTable, error) readStringTable(ref FileHeader fh, io.ReadSeeker r) {
@@ -45,11 +46,12 @@ internal static (StringTable, error) readStringTable(ref FileHeader fh, io.ReadS
         return (default!, default!);
     }
     l -= 4;
+
     (var buf, err) = saferio.ReadData(r, (uint64)l);
     if (err != default!) {
         return (default!, fmt.Errorf("fail to read string table: %v"u8, err));
     }
-    return (((StringTable)buf), default!);
+    return ((StringTable)buf, default!);
 }
 
 // TODO(brainman): decide if start parameter should be int instead of uint32

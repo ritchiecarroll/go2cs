@@ -44,17 +44,21 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     testenv.MustHaveGoBuild(new importer_internal_test_package.testing_TжTB(Ꮡt));
+
     @string thePackage = thePackageᶜ;
     var (@out, err) = testenv.Command(new importer_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new importer_internal_test_package.testing_TжTB(Ꮡt)), listˢ, exportˢ, fContextCompilerExportˢ, thePackage).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("go list %s: %v\n%s"u8, thePackage, err, @out);
     }
-    @string export = strings.TrimSpace(((@string)@out));
+    @string export = strings.TrimSpace((@string)@out);
     var (compiler, target, _) = strings.Cut(export, ":"u8);
+
     if (compiler == "gccgo"u8) {
         Ꮡt.Skip(golangOrgIssue22500ˢ);
     }
+
     var fset = token.NewFileSet();
+
     var fsetʗ1 = fset;
     Ꮡt.Run(lookupDefaultˢ, (ж<testing.T> tΔ1) => {
         var imp = ForCompiler(fsetʗ1, compiler, default!);
@@ -65,6 +69,7 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
         if (pkg.Path() != thePackage) {
             tΔ1.Fatalf("Path() = %q, want %q"u8, pkg.Path(), thePackage);
         }
+
         // Check that the fileset positions are accurate.
         // https://github.com/golang/go#28995
         var mathBigInt = pkg.Scope().Lookup(intˢ);
@@ -74,12 +79,13 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
         if (errΔ1 != default!) {
             tΔ1.Fatalf("can't read file containing declaration of math/big.Int: %v"u8, errΔ1);
         }
-        var lines = strings.Split(((@string)data), "\n"u8);
+        var lines = strings.Split((@string)data, "\n"u8);
         if (posn.Line > len(lines) || !strings.HasPrefix(lines[posn.Line - 1], typeIntˢ)) {
             tΔ1.Fatalf("Object %v position %s does not contain its declaration"u8,
                 mathBigInt, posn);
         }
     });
+
     var fsetʗ2 = fset;
     Ꮡt.Run(lookupCustomˢ, (ж<testing.T> tΔ2) => {
         // TODO(mdempsky): Decide whether to remove this test, or to fix
@@ -90,6 +96,7 @@ public static void TestForCompiler(ж<testing.T> Ꮡt) {
             /* was buildcfg.Experiment.Unified */
             tΔ2.Skip(notSupportedByˢ);
         }
+
         var lookup = (io.ReadCloser, error) (@string path) => {
             if (path != "math/bigger"u8) {
                 tΔ2.Fatalf("lookup called with unexpected path %q"u8, path);

@@ -9,29 +9,28 @@
 namespace go.math;
 
 using bits = go.math.bits_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
 using go.math;
 
 partial class big_package {
 
+// A Word represents a single digit of a multi-precision unsigned integer.
 partial struct Word /*num:nuint*/;
 
 internal static UntypedInt _S => /* _W / 8 */ 8; // word size in bytes
+
 internal static UntypedInt _W => /* bits.UintSize */ 64; // word size in bits
 internal static readonly GoBigConst _B = /* 1 << _W */    // digit base
     GoBigConst.Parse("18446744073709551616");
 internal static UntypedInt _M => /* _B - 1 */ 18446744073709551615; // digit mask
 
-// Many of the loops in this file are of the form
-//   for i := 0; i < len(z) && i < len(x) && i < len(y); i++
-// i < len(z) is the real condition.
-// However, checking i < len(x) && i < len(y) as well is faster than
-// having the compiler do a bounds check in the body of the loop;
-// remarkably it is even faster than hoisting the bounds check
-// out of the loop, by doing something like
-//   _, _ = x[len(z)-1], y[len(z)-1]
-// There are other ways to hoist the bounds check out of the loop,
-// but the compiler's BCE isn't powerful enough for them (yet?).
-// See the discussion in CL 164966.
+// In these routines, it is the caller's responsibility to arrange for
+// x, y, and z to all have the same length. We check this and panic.
+// The assembly versions of these routines do not include that check.
+//
+// The check+panic also has the effect of teaching the compiler that
+// “i in range for z” implies “i in range for x and y”, eliminating all
+// bounds checks in loops from 0 to len(z) and vice versa.
 // ----------------------------------------------------------------------------
 // Elementary operations on words
 //
@@ -40,7 +39,7 @@ internal static UntypedInt _M => /* _B - 1 */ 18446744073709551615; // digit mas
 // z1<<_W + z0 = x*y
 internal static (Word z1, Word z0) mulWW(Word x, Word y) {
     var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
-    return (((Word)hi), ((Word)lo));
+    return ((Word)hi, (Word)lo);
 }
 
 // z1<<_W + z0 = x*y + c
@@ -48,7 +47,7 @@ internal static (Word z1, Word z0) mulAddWWW_g(Word x, Word y, Word c) {
     var (hi, lo) = bits.Mul((nuint)x, (nuint)y);
     nuint cc = default!;
     (lo, cc) = bits.Add(lo, (nuint)c, 0);
-    return (((Word)(hi + cc)), ((Word)lo));
+    return ((Word)(hi + cc), (Word)lo);
 }
 
 // nlz returns the number of leading zeros in x.
@@ -61,11 +60,14 @@ internal static nuint nlz(Word x) {
 internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) {
     Word c = default!;
 
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x) && i < len(y); i++) {
+    if (len(x) != len(z) || len(y) != len(z)) {
+        throw panic("addVV len");
+    }
+
+    foreach (var (i, _) in z) {
         var (zi, cc) = bits.Add((nuint)x[i], (nuint)y[i], (nuint)c);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
+        z[i] = (Word)zi;
+        c = (Word)cc;
     }
     return c;
 }
@@ -74,149 +76,205 @@ internal static Word /*c*/ addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) 
 internal static Word /*c*/ subVV_g(slice<Word> z, slice<Word> x, slice<Word> y) {
     Word c = default!;
 
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x) && i < len(y); i++) {
+    if (len(x) != len(z) || len(y) != len(z)) {
+        throw panic("subVV len");
+    }
+
+    foreach (var (i, _) in z) {
         var (zi, cc) = bits.Sub((nuint)x[i], (nuint)y[i], (nuint)c);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
+        z[i] = (Word)zi;
+        c = (Word)cc;
     }
     return c;
 }
 
-// The resulting carry c is either 0 or 1.
-internal static Word /*c*/ addVW_g(slice<Word> z, slice<Word> x, Word y) {
-    Word c = default!;
-
-    c = y;
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x); i++) {
-        var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
-    }
-    return c;
-}
-
-// addVWlarge is addVW, but intended for large z.
-// The only difference is that we check on every iteration
-// whether we are done with carries,
-// and if so, switch to a much faster copy instead.
-// This is only a good idea for large z,
-// because the overhead of the check and the function call
-// outweigh the benefits when z is small.
-internal static Word /*c*/ addVWlarge(slice<Word> z, slice<Word> x, Word y) {
-    Word c = default!;
-
-    c = y;
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x); i++) {
-        if (c == 0) {
-            copy(z.slice(i), x.slice(i));
-            return c;
-        }
-        var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
-    }
-    return c;
-}
-
-internal static Word /*c*/ subVW_g(slice<Word> z, slice<Word> x, Word y) {
-    Word c = default!;
-
-    c = y;
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x); i++) {
-        var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
-    }
-    return c;
-}
-
-// subVWlarge is to subVW as addVWlarge is to addVW.
-internal static Word /*c*/ subVWlarge(slice<Word> z, slice<Word> x, Word y) {
-    Word c = default!;
-
-    c = y;
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x); i++) {
-        if (c == 0) {
-            copy(z.slice(i), x.slice(i));
-            return c;
-        }
-        var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
-        z[i] = ((Word)zi);
-        c = ((Word)cc);
-    }
-    return c;
-}
-
-internal static Word /*c*/ shlVU_g(slice<Word> z, slice<Word> x, nuint s) {
-    Word c = default!;
-
-    if (s == 0) {
-        copy(z, x);
-        return c;
-    }
-    if (len(z) == 0) {
-        return c;
-    }
-    s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
-    nuint ŝ = (nuint)_W - s;
-    ŝ &= (nuint)(_W - 1); // ditto
-    c = (x[len(z) - 1] >> (int)(ŝ));
-    for (nint i = len(z) - 1; i > 0; i--) {
-        z[i] = (Word)((x[i] << (int)(s)) | (x[i - 1] >> (int)(ŝ)));
-    }
-    z[0] = (x[0] << (int)(s));
-    return c;
-}
-
-internal static Word /*c*/ shrVU_g(slice<Word> z, slice<Word> x, nuint s) {
-    Word c = default!;
-
-    if (s == 0) {
-        copy(z, x);
-        return c;
-    }
-    if (len(z) == 0) {
-        return c;
-    }
+// addVW sets z = x + y, returning the final carry c.
+// The behavior is undefined if len(x) != len(z).
+// If len(z) == 0, c = y; otherwise, c is 0 or 1.
+//
+// addVW should be an internal detail,
+// but widely used packages access it using linkname.
+// Notable members of the hall of shame include:
+//   - github.com/remyoudompheng/bigfft
+//
+// Do not remove or change the type signature.
+// See go.dev/issue/67401.
+//
+//go:linkname addVW
+internal static Word /*c*/ addVW(slice<Word> z, slice<Word> x, Word y) {
     if (len(x) != len(z)) {
-        // This is an invariant guaranteed by the caller.
-        throw panic("len(x) != len(z)");
+        throw panic("addVW len");
+    }
+
+    if (len(z) == 0) {
+        return y;
+    }
+    var (zi, cc) = bits.Add((nuint)x[0], (nuint)y, 0);
+    z[0] = (Word)zi;
+    if (cc == 0) {
+        if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+            copy(z[1..], x[1..]);
+        }
+        return 0;
+    }
+    for (nint i = 1; i < len(z); i++) {
+        Word xi = x[i];
+        if (xi != ~((Word)((Word)0))) {
+            z[i] = xi + 1;
+            if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+                copy(z.slice(i + 1), x.slice(i + 1));
+            }
+            return 0;
+        }
+        z[i] = 0;
+    }
+    return 1;
+}
+
+// addVW_ref is the reference implementation for addVW, used only for testing.
+internal static Word /*c*/ addVW_ref(slice<Word> z, slice<Word> x, Word y) {
+    Word c = default!;
+
+    c = y;
+    foreach (var (i, _) in z) {
+        var (zi, cc) = bits.Add((nuint)x[i], (nuint)c, 0);
+        z[i] = (Word)zi;
+        c = (Word)cc;
+    }
+    return c;
+}
+
+// subVW sets z = x - y, returning the final carry c.
+// The behavior is undefined if len(x) != len(z).
+// If len(z) == 0, c = y; otherwise, c is 0 or 1.
+//
+// subVW should be an internal detail,
+// but widely used packages access it using linkname.
+// Notable members of the hall of shame include:
+//   - github.com/remyoudompheng/bigfft
+//
+// Do not remove or change the type signature.
+// See go.dev/issue/67401.
+//
+//go:linkname subVW
+internal static Word /*c*/ subVW(slice<Word> z, slice<Word> x, Word y) {
+    if (len(x) != len(z)) {
+        throw panic("subVW len");
+    }
+
+    if (len(z) == 0) {
+        return y;
+    }
+    var (zi, cc) = bits.Sub((nuint)x[0], (nuint)y, 0);
+    z[0] = (Word)zi;
+    if (cc == 0) {
+        if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+            copy(z[1..], x[1..]);
+        }
+        return 0;
+    }
+    for (nint i = 1; i < len(z); i++) {
+        Word xi = x[i];
+        if (xi != 0) {
+            z[i] = xi - 1;
+            if (Ꮡ(z, 0) != Ꮡ(x, 0)) {
+                copy(z.slice(i + 1), x.slice(i + 1));
+            }
+            return 0;
+        }
+        z[i] = ~((Word)((Word)0));
+    }
+    return 1;
+}
+
+// subVW_ref is the reference implementation for subVW, used only for testing.
+internal static Word /*c*/ subVW_ref(slice<Word> z, slice<Word> x, Word y) {
+    Word c = default!;
+
+    c = y;
+    foreach (var (i, _) in z) {
+        var (zi, cc) = bits.Sub((nuint)x[i], (nuint)c, 0);
+        z[i] = (Word)zi;
+        c = (Word)cc;
+    }
+    return c;
+}
+
+internal static Word /*c*/ lshVU_g(slice<Word> z, slice<Word> x, nuint s) {
+    Word c = default!;
+
+    if (len(x) != len(z)) {
+        throw panic("lshVU len");
+    }
+
+    if (s == 0) {
+        copy(z, x);
+        return c;
+    }
+    if (len(z) == 0) {
+        return c;
     }
     s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
     nuint ŝ = (nuint)_W - s;
     ŝ &= (nuint)(_W - 1); // ditto
-    c = (x[0] << (int)(ŝ));
-    for (nint i = 1; i < len(z); i++) {
-        z[i - 1] = (Word)((x[i - 1] >> (int)(s)) | (x[i] << (int)(ŝ)));
+    c = x[len(z) - 1] >> (int)(ŝ);
+    for (nint i = len(z) - 1; i > 0; i--) {
+        z[i] = (Word)(x[i] << (int)(s) | x[i - 1] >> (int)(ŝ));
     }
-    z[len(z) - 1] = (x[len(z) - 1] >> (int)(s));
+    z[0] = x[0] << (int)(s);
+    return c;
+}
+
+internal static Word /*c*/ rshVU_g(slice<Word> z, slice<Word> x, nuint s) {
+    Word c = default!;
+
+    if (len(x) != len(z)) {
+        throw panic("rshVU len");
+    }
+
+    if (s == 0) {
+        copy(z, x);
+        return c;
+    }
+    if (len(z) == 0) {
+        return c;
+    }
+    s &= (nuint)(_W - 1); // hint to the compiler that shifts by s don't need guard code
+    nuint ŝ = (nuint)_W - s;
+    ŝ &= (nuint)(_W - 1); // ditto
+    c = x[0] << (int)(ŝ);
+    for (nint i = 1; i < len(z); i++) {
+        z[i - 1] = (Word)(x[i - 1] >> (int)(s) | x[i] << (int)(ŝ));
+    }
+    z[len(z) - 1] = x[len(z) - 1] >> (int)(s);
     return c;
 }
 
 internal static Word /*c*/ mulAddVWW_g(slice<Word> z, slice<Word> x, Word y, Word r) {
     Word c = default!;
 
+    if (len(x) != len(z)) {
+        throw panic("mulAddVWW len");
+    }
     c = r;
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x); i++) {
+    foreach (var (i, _) in z) {
         (c, z[i]) = mulAddWWW_g(x[i], y, c);
     }
     return c;
 }
 
-internal static Word /*c*/ addMulVVW_g(slice<Word> z, slice<Word> x, Word y) {
+internal static Word /*c*/ addMulVVWW_g(slice<Word> z, slice<Word> x, slice<Word> y, Word m, Word a) {
     Word c = default!;
 
-    // The comment near the top of this file discusses this for loop condition.
-    for (nint i = 0; i < len(z) && i < len(x); i++) {
-        var (z1, z0) = mulAddWWW_g(x[i], y, z[i]);
+    if (len(x) != len(z) || len(y) != len(z)) {
+        throw panic("rshVU len");
+    }
+
+    c = a;
+    foreach (var (i, _) in z) {
+        var (z1, z0) = mulAddWWW_g(y[i], m, x[i]);
         var (lo, cc) = bits.Add((nuint)z0, (nuint)c, 0);
-        (c, z[i]) = (((Word)cc), ((Word)lo));
+        (c, z[i]) = ((Word)cc, (Word)lo);
         c += z1;
     }
     return c;
@@ -228,7 +286,7 @@ internal static Word /*c*/ addMulVVW_g(slice<Word> z, slice<Word> x, Word y) {
 internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
     nuint s = nlz(y);
     if (s != 0) {
-        x1 = (Word)((x1 << (int)(s)) | (x0 >> (int)(((nuint)_W - s))));
+        x1 = (Word)(x1 << (int)(s) | x0 >> (int)((nuint)_W - s));
         x0 <<= (int)(s);
         y <<= (int)(s);
     }
@@ -281,16 +339,16 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
         qq++;
         r0 -= d;
     }
-    return (((Word)qq), ((Word)(r0.Rsh(s))));
+    return ((Word)qq, (Word)(r0.Rsh(s)));
 }
 
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).
 internal static Word reciprocalWord(Word d1) {
-    nuint u = (nuint)((d1 << (int)(nlz(d1))));
+    nuint u = (nuint)(d1 << (int)(nlz(d1)));
     nuint x1 = ~u;
     nuint x0 = (nuint)_M;
     var (rec, _) = bits.Div(x1, x0, u); // (_B^2-1)/U-_B = (_B*(_M-C)+_M)/U
-    return ((Word)rec);
+    return (Word)rec;
 }
 
 } // end big_package

@@ -54,9 +54,8 @@ internal static @string makePATH(@string root, slice<@string> dirs) {
             paths = append(paths, filepath.Join(root, d));
             break;
         }}
-
     }
-    return strings.Join(paths, ((@string)(rune)os.PathListSeparator));
+    return strings.Join(paths, (@string)(rune)os.PathListSeparator);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -67,12 +66,14 @@ internal static readonly @string batˢ = ".bat"u8;
 internal static void installProgs(ж<testing.T> Ꮡt, @string root, slice<@string> files) {
     foreach (var (_, f) in files) {
         @string dstPath = filepath.Join(root, f);
+
         @string dir = filepath.Dir(dstPath);
         {
             var err = os.MkdirAll(dir, 493); if (err != default!) {
                 Ꮡt.Fatal(err);
             }
         }
+
         if (os.IsPathSeparator(f[len(f) - 1])) {
             continue; // directory and PATH entry only.
         }
@@ -98,6 +99,7 @@ internal static void installExe(ж<testing.T> Ꮡt, @string dstPath) {
         }
         var srcʗ1 = src;
         defer(() => srcʗ1.Close(), ref ᒐ);
+
         (var dst, err) = os.OpenFile(dstPath, (nint)((nint)(nint)(os.O_CREATE | os.O_EXCL) | os.O_WRONLY), 511);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -110,6 +112,7 @@ internal static void installExe(ж<testing.T> Ꮡt, @string dstPath) {
                 }
             }
         }, ref ᒐ);
+
         (_, err) = io.Copy(new os.FileжWriter(dst), new exec_test_package.os_FileжReader(src));
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -136,6 +139,7 @@ internal static void installBat(ж<testing.T> Ꮡt, @string dstPath) {
                 }
             }
         }, ref ᒐ);
+
         {
             var (_, errΔ2) = fmt.Fprintf(new os.FileжWriter(dst), "@echo %s\r\n"u8, dstPath); if (errΔ2 != default!) {
                 Ꮡt.Fatal(errΔ2);
@@ -157,8 +161,6 @@ partial struct lookPathTest {
     internal bool skipCmdExeCheck; // if true, do not check want against the behavior of cmd.exe
 }
 
-// If cmd.exe is too old it might not respect NoDefaultCurrentDirectoryInExePath,
-// so skip that check.
 internal static slice<lookPathTest> lookPathTests = new lookPathTest[]{
     new(
         name: "first match"u8,
@@ -278,6 +280,8 @@ internal static slice<lookPathTest> lookPathTests = new lookPathTest[]{
         PATH: new @string[]{@"p"u8}.slice(),
         searchFor: @"a"u8,
         want: @"p\a.bat"u8,
+        // If cmd.exe is too old it might not respect NoDefaultCurrentDirectoryInExePath,
+        // so skip that check.
         skipCmdExeCheck: true
     ),
     new(
@@ -302,13 +306,12 @@ internal static readonly @string printpathˢ = "printpath"u8;
 internal static readonly @string pathextˢ = "PATHEXT"u8;
 
 public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Not parallel: uses Chdir and Setenv.
     // We are using the "printpath" command mode to test exec.Command here,
     // so we won't be calling helperCommand to resolve it.
     // That may cause it to appear to be unused.
     maySkipHelperCommand(printpathˢ);
+
     // Before we begin, find the absolute path to cmd.exe.
     // In non-short mode, we will use it to check the ground truth
     // of the test's "want" field.
@@ -316,6 +319,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, vᴛ1) in lookPathTests) {
         ref var tt = ref heap(new lookPathTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -325,12 +329,15 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
             if (ttʗ1.want == ""u8 && ttʗ1.wantErr == default!) {
                 tΔ1.Fatalf("test must specify either want or wantErr"u8);
             }
+
             @string root = tΔ1.TempDir();
             installProgs(tΔ1, root, ttʗ1.files);
+
             if (ttʗ1.PATHEXT != ""u8) {
                 tΔ1.Setenv(pathextˢ, ttʗ1.PATHEXT);
                 tΔ1.Logf("set PATHEXT=%s"u8, ttʗ1.PATHEXT);
             }
+
             @string pathVar = default!;
             if (ttʗ1.PATH == default!){
                 var paths = new slice<@string>(0, len(ttʗ1.files));
@@ -340,20 +347,22 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
                         paths = append(paths, dir);
                     }
                 }
-                pathVar = strings.Join(paths, ((@string)(rune)os.PathListSeparator));
+                pathVar = strings.Join(paths, (@string)(rune)os.PathListSeparator);
             } else {
                 pathVar = makePATH(root, ttʗ1.PATH);
             }
             tΔ1.Setenv(pathˢ, pathVar);
             tΔ1.Logf("set PATH=%s"u8, pathVar);
+
             tΔ1.Chdir(root);
+
             if (!testing.Short() && !(ttʗ1.skipCmdExeCheck || errors.Is(ttʗ1.wantErr, Δexec.ErrDot))) {
                 // Check that cmd.exe, which is our source of ground truth,
                 // agrees that our test case is correct.
                 var cmd = testenv.Command(new exec_test_package.testing_TжTB(tΔ1), cmdExe, "/c"u8, ttʗ1.searchFor, printpathˢ);
                 var (@out, errΔ1) = cmd.Output();
                 if (errΔ1 == default!){
-                    @string gotAbs = strings.TrimSpace(((@string)@out));
+                    @string gotAbs = strings.TrimSpace((@string)@out);
                     @string wantAbs = ""u8;
                     if (ttʗ1.want != ""u8) {
                         wantAbs = filepath.Join(root, ttʗ1.want);
@@ -372,6 +381,7 @@ public static void TestLookPathWindows(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("%v: %v"u8, cmd.OrTypedNil(), errΔ1);
                 }
             }
+
             var (got, errΔ2) = Δexec.LookPath(ttʗ1.searchFor);
             if (filepath.IsAbs(got)) {
                 (got, errΔ2) = filepath.Rel(root, got);
@@ -401,26 +411,8 @@ partial struct commandTest {
     internal error wantRunErr;
 }
 
-// testing commands with no slash, like `a.exe`
-// testing commands with slash, like `.\a.exe`
-// tests commands, like `a.exe`, with c.Dir set
-// should not find a.exe in p, because LookPath(`a.exe`) will fail when
-// called by Command (before Dir is set), and that error is sticky.
-// LookPath(`a.exe`) will resolve to `.\a.exe`, but prefixing that with
-// dir `p\a.exe` will refer to a non-existent file
-// like above, but making test succeed by installing file
-// in referred destination (so LookPath(`a.exe`) will still
-// find `.\a.exe`, but we successfully execute `p\a.exe`)
-// like above, but add PATH in attempt to break the test
-// like above, but use "a" instead of "a.exe" for command
-// finds `a.exe` in the PATH regardless of Dir because Command resolves the
-// full path (using LookPath) before Dir is set.
-// tests commands, like `.\a.exe`, with c.Dir set
-// should use dir when command is path, like ".\a.exe"
-// like above, but with PATH added in attempt to break it
-// LookPath(".\a") will fail before Dir is set, and that error is sticky.
-// LookPath(".\a") will fail before Dir is set, and that error is sticky.
 internal static slice<commandTest> commandTests = new commandTest[]{
+    // testing commands with no slash, like `a.exe`
     new(
         name: "current directory"u8,
         files: new @string[]{@"a.exe"u8}.slice(),
@@ -445,6 +437,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         want: @"a.exe"u8,
         wantErrDot: true
     ),
+    // testing commands with slash, like `.\a.exe`
     new(
         name: "with dir"u8,
         files: new @string[]{@"p\a.exe"u8}.slice(),
@@ -473,7 +466,10 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         arg0: @"p\a"u8,
         want: @"p\a.exe"u8
     ),
+    // tests commands, like `a.exe`, with c.Dir set
     new(
+        // should not find a.exe in p, because LookPath(`a.exe`) will fail when
+        // called by Command (before Dir is set), and that error is sticky.
         name: "not found before Dir"u8,
         files: new @string[]{@"p\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8}.slice(),
@@ -483,6 +479,8 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         wantRunErr: Δexec.ErrNotFound
     ),
     new(
+        // LookPath(`a.exe`) will resolve to `.\a.exe`, but prefixing that with
+        // dir `p\a.exe` will refer to a non-existent file
         name: "resolved before Dir"u8,
         files: new @string[]{@"a.exe"u8, @"p\not_important_file"u8}.slice(),
         PATH: new @string[]{"."u8}.slice(),
@@ -493,6 +491,9 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         wantRunErr: fs.ErrNotExist
     ),
     new(
+        // like above, but making test succeed by installing file
+        // in referred destination (so LookPath(`a.exe`) will still
+        // find `.\a.exe`, but we successfully execute `p\a.exe`)
         name: "relative to Dir"u8,
         files: new @string[]{@"a.exe"u8, @"p\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8}.slice(),
@@ -502,6 +503,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         wantErrDot: true
     ),
     new(
+        // like above, but add PATH in attempt to break the test
         name: "relative to Dir with extra PATH"u8,
         files: new @string[]{@"a.exe"u8, @"p\a.exe"u8, @"p2\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8, "p2"u8, "p"u8}.slice(),
@@ -511,6 +513,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         wantErrDot: true
     ),
     new(
+        // like above, but use "a" instead of "a.exe" for command
         name: "relative to Dir with extra PATH and no extension"u8,
         files: new @string[]{@"a.exe"u8, @"p\a.exe"u8, @"p2\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8, "p2"u8, "p"u8}.slice(),
@@ -520,6 +523,8 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         wantErrDot: true
     ),
     new(
+        // finds `a.exe` in the PATH regardless of Dir because Command resolves the
+        // full path (using LookPath) before Dir is set.
         name: "from PATH with no match in Dir"u8,
         files: new @string[]{@"p\a.exe"u8, @"p2\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8, "p2"u8, "p"u8}.slice(),
@@ -527,7 +532,9 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         arg0: @"a.exe"u8,
         want: @"p2\a.exe"u8
     ),
+    // tests commands, like `.\a.exe`, with c.Dir set
     new(
+        // should use dir when command is path, like ".\a.exe"
         name: "relative to Dir with explicit dot"u8,
         files: new @string[]{@"p\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8}.slice(),
@@ -536,6 +543,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         want: @"p\a.exe"u8
     ),
     new(
+        // like above, but with PATH added in attempt to break it
         name: "relative to Dir with dot and extra PATH"u8,
         files: new @string[]{@"p\a.exe"u8, @"p2\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8, "p2"u8}.slice(),
@@ -544,6 +552,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         want: @"p\a.exe"u8
     ),
     new(
+        // LookPath(".\a") will fail before Dir is set, and that error is sticky.
         name: "relative to Dir with dot and extra PATH and no extension"u8,
         files: new @string[]{@"p\a.exe"u8, @"p2\a.exe"u8}.slice(),
         PATH: new @string[]{"."u8, "p2"u8}.slice(),
@@ -552,6 +561,7 @@ internal static slice<commandTest> commandTests = new commandTest[]{
         want: @"p\a.exe"u8
     ),
     new(
+        // LookPath(".\a") will fail before Dir is set, and that error is sticky.
         name: "relative to Dir with different extension"u8,
         files: new @string[]{@"a.exe"u8, @"p\a.bat"u8}.slice(),
         PATH: new @string[]{"."u8}.slice(),
@@ -562,13 +572,12 @@ internal static slice<commandTest> commandTests = new commandTest[]{
 }.slice();
 
 public static void TestCommand(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Not parallel: uses Chdir and Setenv.
     // We are using the "printpath" command mode to test exec.Command here,
     // so we won't be calling helperCommand to resolve it.
     // That may cause it to appear to be unused.
     maySkipHelperCommand(printpathˢ);
+
     foreach (var (_, vᴛ1) in commandTests) {
         ref var tt = ref heap(new commandTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -578,12 +587,16 @@ public static void TestCommand(ж<testing.T> Ꮡt) {
             if (ttʗ1.PATH == default!) {
                 tΔ1.Fatalf("test must specify PATH"u8);
             }
+
             @string root = tΔ1.TempDir();
             installProgs(tΔ1, root, ttʗ1.files);
+
             @string pathVar = makePATH(root, ttʗ1.PATH);
             tΔ1.Setenv(pathˢ, pathVar);
             tΔ1.Logf("set PATH=%s"u8, pathVar);
+
             tΔ1.Chdir(root);
+
             var cmd = Δexec.Command(ttʗ1.arg0, printpathˢ);
             cmd.Value.Dir = filepath.Join(root, ttʗ1.dir);
             if (ttʗ1.wantErrDot) {
@@ -593,6 +606,7 @@ public static void TestCommand(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("cmd.Err = %v; want ErrDot"u8, (~cmd).Err);
                 }
             }
+
             var (@out, err) = cmd.Output();
             if (err != default!) {
                 {
@@ -607,7 +621,8 @@ public static void TestCommand(ж<testing.T> Ꮡt) {
                 }
                 return;
             }
-            @string got = strings.TrimSpace(((@string)@out));
+
+            @string got = strings.TrimSpace((@string)@out);
             if (filepath.IsAbs(got)) {
                 (got, err) = filepath.Rel(root, got);
                 if (err != default!) {
@@ -617,6 +632,7 @@ public static void TestCommand(ж<testing.T> Ꮡt) {
             if (got != ttʗ1.want) {
                 tΔ1.Errorf("\nran  %#q\nwant %#q"u8, got, ttʗ1.want);
             }
+
             @string gotPath = cmd.Value.Path;
             @string wantPath = ttʗ1.wantPath;
             if (wantPath == ""u8) {
@@ -641,6 +657,7 @@ internal static readonly @string exampleComˢ = "example.com"u8;
 
 public static void TestAbsCommandWithDoubledExtension(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     // We expect that ".com" is always included in PATHEXT, but it may also be
     // found in the import path of a Go package. If it is at the root of the
     // import path, the resulting executable may be named like "example.com.exe".
@@ -648,15 +665,18 @@ public static void TestAbsCommandWithDoubledExtension(ж<testing.T> Ꮡt) {
     // Since "example.com" looks like a proper executable name, it is probably ok
     // for exec.Command to try to run it directly without re-resolving it.
     // However, exec.LookPath should try a little harder to figure it out.
+
     @string comPath = filepath.Join(Ꮡt.TempDir(), exampleComˢ);
     @string batPath = comPath + ".bat"u8;
     installBat(Ꮡt, batPath);
+
     var cmd = Δexec.Command(comPath);
     var (@out, err) = cmd.CombinedOutput();
     Ꮡt.Logf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
     if (!errors.Is(err, fs.ErrNotExist)) {
         Ꮡt.Errorf("Command(%#q).Run: %v\nwant fs.ErrNotExist"u8, comPath, err);
     }
+
     (var resolved, err) = Δexec.LookPath(comPath);
     if (err != default! || resolved != batPath) {
         Ꮡt.Fatalf("LookPath(%#q) = %v, %v; want %#q, <nil>"u8, comPath, resolved, err, batPath);

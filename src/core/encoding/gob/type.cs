@@ -34,9 +34,7 @@ partial struct userTypeInfo {
 
 // externalEncoding bits
 internal static UntypedInt xGob => /* 1 + iota */ 1; // GobEncoder or GobDecoder
-
 internal static UntypedInt xBinary => 2; // encoding.BinaryMarshaler or encoding.BinaryUnmarshaler
-
 internal static UntypedInt xText => 3; // encoding.TextMarshaler or encoding.TextUnmarshaler
 
 internal static ж<sync.Map> ᏑuserTypeCache = new StandardBox<sync.Map>(default(sync.Map));
@@ -51,9 +49,11 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
             return (uiΔ1._<ж<userTypeInfo>>(), default!);
         }
     }
+
     // Construct a new userTypeInfo and atomically add it to the userTypeCache.
     // If we lose the race, we'll waste a little CPU and create a little garbage
     // but return the existing value anyway.
+
     var ut = @new<userTypeInfo>();
     ut.Value.@base = rt;
     ut.Value.user = rt;
@@ -69,8 +69,7 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
             break;
         }
         ut.Value.@base = pt.Elem();
-        if (AreEqual((~ut).@base, slowpoke)) {
-            // ut.base lapped slowpoke
+        if (AreEqual((~ut).@base, slowpoke)) { // ut.base lapped slowpoke
             // recursive pointer type.
             return (default!, errors.New("can't represent recursive pointer type "u8 + (~ut).@base.String()));
         }
@@ -79,6 +78,7 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
         }
         ut.Value.indir++;
     }
+
     {
         var (ok, indir) = implementsInterface((~ut).user, gobEncoderInterfaceType); if (ok){
             (ut.Value.externalEnc, ut.Value.encIndir) = (xGob, indir);
@@ -89,11 +89,13 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
             }
         }
     }
+
     // NOTE(rsc): Would like to allow MarshalText here, but results in incompatibility
     // with older encodings for net.IP. See golang.org/issue/6760.
     // } else if ok, indir := implementsInterface(ut.user, textMarshalerInterfaceType); ok {
     // 	ut.externalEnc, ut.encIndir = xText, indir
     // }
+
     {
         var (ok, indir) = implementsInterface((~ut).user, gobDecoderInterfaceType); if (ok){
             (ut.Value.externalDec, ut.Value.decIndir) = (xGob, indir);
@@ -104,10 +106,12 @@ internal static (ж<userTypeInfo>, error) validUserType(reflectꓸType rt) {
             }
         }
     }
+
     // See note above.
     // } else if ok, indir := implementsInterface(ut.user, textUnmarshalerInterfaceType); ok {
     // 	ut.externalDec, ut.decIndir = xText, indir
     // }
+
     var (ui, _) = ᏑuserTypeCache.LoadOrStore(rt, ut.OrTypedNil());
     return (ui._<ж<userTypeInfo>>(), default!);
 }
@@ -118,6 +122,7 @@ internal static reflectꓸType binaryMarshalerInterfaceType = reflect.TypeFor<en
 internal static reflectꓸType binaryUnmarshalerInterfaceType = reflect.TypeFor<encoding.BinaryUnmarshaler>();
 internal static reflectꓸType textMarshalerInterfaceType = reflect.TypeFor<encoding.TextMarshaler>();
 internal static reflectꓸType textUnmarshalerInterfaceType = reflect.TypeFor<encoding.TextUnmarshaler>();
+
 internal static reflectꓸType wireTypeType = reflect.TypeFor<wireType>();
 
 // implementsInterface reports whether the type implements the
@@ -141,8 +146,7 @@ internal static (bool success, int8 indir) implementsInterface(reflectꓸType ty
         {
             var p = rt; if (p.Kind() == reflect.ΔPointer) {
                 indir++;
-                if (indir > 100) {
-                    // insane number of indirections
+                if (indir > 100) { // insane number of indirections
                     return (false, 0);
                 }
                 rt = p.Elem();
@@ -171,6 +175,8 @@ internal static ж<userTypeInfo> userType(reflectꓸType rt) {
     return ut;
 }
 
+// A typeId represents a gob Type as an integer that can be passed on the wire.
+// Internally, typeIds are used as keys to a map to recover the underlying type info.
 public partial struct typeId /*num:int32*/;
 
 internal static ж<sync.Mutex> ᏑtypeLock = new StandardBox<sync.Mutex>(default(sync.Mutex));
@@ -209,7 +215,7 @@ internal static void setTypeId(ΔgobType typ) {
     if (typ.id() != 0) {
         return;
     }
-    var nextId = ((typeId)(int32)len(idToTypeSlice));
+    var nextId = (typeId)(int32)len(idToTypeSlice);
     typ.setId(nextId);
     idToTypeSlice = append(idToTypeSlice, typ);
 }
@@ -271,49 +277,47 @@ internal static @string name(this ref CommonType t) {
 
 // Create and check predefined types
 // The string for tBytes is "bytes" not "[]byte" to signify its specialness.
-internal static typeId tBool = bootstrapType("bool"u8, ((ж<bool>)nil));
-internal static typeId tInt = bootstrapType("int"u8, ((ж<nint>)nil));
-internal static typeId tUint = bootstrapType("uint"u8, ((ж<nuint>)nil));
-internal static typeId tFloat = bootstrapType("float"u8, ((ж<float64>)nil));
-internal static typeId tBytes = bootstrapType("bytes"u8, ((ж<slice<byte>>)nil));
-internal static typeId tString = bootstrapType("string"u8, ((ж<@string>)nil));
-internal static typeId tComplex = bootstrapType("complex"u8, ((ж<complex128>)nil));
-internal static typeId tInterface = bootstrapType("interface"u8, ((ж<any>)nil));
 
+// Primordial types, needed during initialization.
+// Always passed as pointers so the interface{} type
+// goes through without losing its interfaceness.
+internal static typeId tBool = bootstrapType("bool"u8, (ж<bool>)nil);
+internal static typeId tInt = bootstrapType("int"u8, (ж<nint>)nil);
+internal static typeId tUint = bootstrapType("uint"u8, (ж<nuint>)nil);
+internal static typeId tFloat = bootstrapType("float"u8, (ж<float64>)nil);
+internal static typeId tBytes = bootstrapType("bytes"u8, (ж<slice<byte>>)nil);
+internal static typeId tString = bootstrapType("string"u8, (ж<@string>)nil);
+internal static typeId tComplex = bootstrapType("complex"u8, (ж<complex128>)nil);
+internal static typeId tInterface = bootstrapType("interface"u8, (ж<any>)nil);
+// Reserve some Ids for compatible expansion
     partial struct eᴛ1 /*dyn*/ {
         internal nint r7;
     }
-internal static typeId tReserved7 = bootstrapType("_reserved1"u8, ((ж<eᴛ1>)nil));
-
+internal static typeId tReserved7 = bootstrapType("_reserved1"u8, (ж<eᴛ1>)nil);
     partial struct eᴛ2 /*dyn*/ {
         internal nint r6;
     }
-internal static typeId tReserved6 = bootstrapType("_reserved1"u8, ((ж<eᴛ2>)nil));
-
+internal static typeId tReserved6 = bootstrapType("_reserved1"u8, (ж<eᴛ2>)nil);
     partial struct eᴛ3 /*dyn*/ {
         internal nint r5;
     }
-internal static typeId tReserved5 = bootstrapType("_reserved1"u8, ((ж<eᴛ3>)nil));
-
+internal static typeId tReserved5 = bootstrapType("_reserved1"u8, (ж<eᴛ3>)nil);
     partial struct eᴛ4 /*dyn*/ {
         internal nint r4;
     }
-internal static typeId tReserved4 = bootstrapType("_reserved1"u8, ((ж<eᴛ4>)nil));
-
+internal static typeId tReserved4 = bootstrapType("_reserved1"u8, (ж<eᴛ4>)nil);
     partial struct eᴛ5 /*dyn*/ {
         internal nint r3;
     }
-internal static typeId tReserved3 = bootstrapType("_reserved1"u8, ((ж<eᴛ5>)nil));
-
+internal static typeId tReserved3 = bootstrapType("_reserved1"u8, (ж<eᴛ5>)nil);
     partial struct eᴛ6 /*dyn*/ {
         internal nint r2;
     }
-internal static typeId tReserved2 = bootstrapType("_reserved1"u8, ((ж<eᴛ6>)nil));
-
+internal static typeId tReserved2 = bootstrapType("_reserved1"u8, (ж<eᴛ6>)nil);
     partial struct eᴛ7 /*dyn*/ {
         internal nint r1;
     }
-internal static typeId tReserved1 = bootstrapType("_reserved1"u8, ((ж<eᴛ7>)nil));
+internal static typeId tReserved1 = bootstrapType("_reserved1"u8, (ж<eᴛ7>)nil);
 
 // Predefined because it's needed by the Decoder
 internal static typeId tWireType;
@@ -330,7 +334,9 @@ internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
     checkId(20, (~mustGetTypeInfo(reflect.TypeFor<structType>())).id);
     checkId(21, (~mustGetTypeInfo(reflect.TypeFor<fieldType>())).id);
     checkId(23, (~mustGetTypeInfo(reflect.TypeFor<mapType>())).id);
+
     copy(builtinIdToTypeSlice[..], idToTypeSlice);
+
     // Move the id space upwards to allow for growth in the predefined world
     // without breaking existing files.
     {
@@ -345,7 +351,7 @@ internal static ж<userTypeInfo> wireTypeUserInfo; // userTypeInfo of wireType
 
 // Array type
 public partial struct arrayType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public typeId Elem;
     public nint Len;
 }
@@ -378,7 +384,7 @@ internal static @string @string(this ref arrayType a) {
 
 // GobEncoder type (something that implements the GobEncoder interface)
 public partial struct gobEncoderType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
 }
 
 internal static ж<gobEncoderType> newGobEncoderType(@string name) {
@@ -397,7 +403,7 @@ internal static @string @string(this ref gobEncoderType g) {
 
 // Map type
 public partial struct mapType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public typeId Key;
     public typeId Elem;
 }
@@ -432,7 +438,7 @@ internal static @string @string(this ref mapType m) {
 
 // Slice type
 public partial struct sliceType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public typeId Elem;
 }
 
@@ -473,7 +479,7 @@ public partial struct fieldType {
 }
 
 public partial struct structType {
-    public partial ref CommonType CommonType { get; }
+    /*embed*/ public CommonType CommonType;
     public slice<fieldType> Field;
 }
 
@@ -534,6 +540,7 @@ internal static (ΔgobType, error) newTypeObject(@string name, ref userTypeInfo 
         {
             var t = rt;
             var exprᴛ1 = t.Kind();
+            // All basic types are easy: they are predefined.
             if (exprᴛ1 == reflect.ΔBool) {
                 return (tBool.gobType(), default!);
             }
@@ -558,20 +565,19 @@ internal static (ΔgobType, error) newTypeObject(@string name, ref userTypeInfo 
             if (exprᴛ1 == reflect.Array) {
                 var at = newArrayType(name);
                 types[rt] = new arrayTypeжΔgobType(at);
-                (type0, err) = getBaseType(""u8, // All basic types are easy: they are predefined.
- t.Elem());
+                (type0, err) = getBaseType(""u8, t.Elem());
                 if (err != default!) {
                     return (default!, err);
                 }
-                at.init(type0, // Historical aside:
- // For arrays, maps, and slices, we set the type id after the elements
- // are constructed. This is to retain the order of type id allocation after
- // a fix made to handle recursive types, which changed the order in
- // which types are built. Delaying the setting in this way preserves
- // type ids while allowing recursive types to be described. Structs,
- // done below, were already handling recursion correctly so they
- // assign the top-level id before those of the field.
- t.Len());
+                // Historical aside:
+                // For arrays, maps, and slices, we set the type id after the elements
+                // are constructed. This is to retain the order of type id allocation after
+                // a fix made to handle recursive types, which changed the order in
+                // which types are built. Delaying the setting in this way preserves
+                // type ids while allowing recursive types to be described. Structs,
+                // done below, were already handling recursion correctly so they
+                // assign the top-level id before those of the field.
+                at.init(type0, t.Len());
                 return (new arrayTypeжΔgobType(at), default!);
             }
             if (exprᴛ1 == reflect.Map) {
@@ -589,8 +595,8 @@ internal static (ΔgobType, error) newTypeObject(@string name, ref userTypeInfo 
                 return (new mapTypeжΔgobType(mt), default!);
             }
             if (exprᴛ1 == reflect.ΔSlice) {
+                // []byte == []uint8 is a special case
                 if (t.Elem().Kind() == reflect.Uint8) {
-                    // []byte == []uint8 is a special case
                     return (tBytes.gobType(), default!);
                 }
                 var st = newSliceType(name);
@@ -636,7 +642,6 @@ internal static (ΔgobType, error) newTypeObject(@string name, ref userTypeInfo 
                 return (default!, errors.New("gob NewTypeObject can't handle type: "u8 + rt.String()));
             }
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -664,6 +669,7 @@ internal static bool isSent(ref reflect.StructField field) {
     if (typ.Kind() == reflect.Chan || typ.Kind() == reflect.Func) {
         return false;
     }
+
     return true;
 }
 
@@ -765,7 +771,6 @@ internal static @string @string(this ж<wireType> Ꮡw) {
     case {} when w.TextMarshalerT != nil: {
         return (~w.TextMarshalerT).Name;
     }}
-
     return unknown;
 }
 
@@ -822,22 +827,25 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
     try {
         ᏑtypeLock.Lock();
         defer(ᏑtypeLock.Unlock, ref ᒐ);
+
         {
             var infoΔ1 = lookupTypeInfo(rt); if (infoΔ1 != nil) {
                 return (infoΔ1, default!);
             }
         }
+
         var (gt, err) = getBaseType(rt.Name(), rt);
         if (err != default!) {
             return (default!, err);
         }
         var info = Ꮡ(new typeInfo(id: gt.id()));
+
         if (ut.externalEnc != 0){
             var (userType, errΔ1) = getType(rt.Name(), ref ut, rt);
             if (errΔ1 != default!) {
                 return (default!, errΔ1);
             }
-            var gtΔ1 = userType.id().gobType()._<ж<gobEncoderType>>();
+            var gtΔ1 = userType.id().gobType()._<ΔgobType, ж<gobEncoderType>>();
             var exprᴛ1 = ut.externalEnc;
             if (exprᴛ1 == xGob) {
                 info.Value.wire.GobEncoderT = gtΔ1;
@@ -848,7 +856,6 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
             else if (exprᴛ1 == xText) {
                 info.Value.wire.TextMarshalerT = gtΔ1;
             }
-
             rt = ut.user;
         } else {
             var t = (~info).id.gobType();
@@ -856,29 +863,30 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ref userTypeInfo ut, reflect
                 var typ = rt;
                 var exprᴛ2 = typ.Kind();
                 if (exprᴛ2 == reflect.Array) {
-                    info.Value.wire.ArrayT = t._<ж<arrayType>>();
+                    info.Value.wire.ArrayT = t._<ΔgobType, ж<arrayType>>();
                 }
                 else if (exprᴛ2 == reflect.Map) {
-                    info.Value.wire.MapT = t._<ж<mapType>>();
+                    info.Value.wire.MapT = t._<ΔgobType, ж<mapType>>();
                 }
                 else if (exprᴛ2 == reflect.ΔSlice) {
+                    // []byte == []uint8 is a special case handled separately
                     if (typ.Elem().Kind() != reflect.Uint8) {
-                        // []byte == []uint8 is a special case handled separately
-                        info.Value.wire.SliceT = t._<ж<sliceType>>();
+                        info.Value.wire.SliceT = t._<ΔgobType, ж<sliceType>>();
                     }
                 }
                 else if (exprᴛ2 == reflect.Struct) {
-                    info.Value.wire.StructT = t._<ж<structType>>();
+                    info.Value.wire.StructT = t._<ΔgobType, ж<structType>>();
                 }
             }
-
         }
+
         {
             var mΔ1 = typeInfoMapInit; if (mΔ1 != default!) {
                 mΔ1[rt] = info;
                 return (info, default!);
             }
         }
+
         // Create new map with old contents plus new entry.
         var (m, _) = ᏑtypeInfoMap.Load()._<map<reflectꓸType, ж<typeInfo>>>(ᐧ);
         var newm = maps.Clone<map<reflectꓸType, ж<typeInfo>>, reflectꓸType, ж<typeInfo>>(m);
@@ -938,15 +946,19 @@ public static void RegisterName(@string name, any value) {
         // reserved for nil
         throw panic("attempt to register empty name");
     }
+
     var ut = userType(reflect.TypeOf(value));
+
     // Check for incompatible duplicates. The name must refer to the
     // same user type, and vice versa.
+
     // Store the name and type provided by the user....
     {
         var (t, dup) = ᏑnameToConcreteType.LoadOrStore(name, reflect.TypeOf(value)); if (dup && !AreEqual(t, (~ut).user)) {
             throw panic(fmt.Sprintf("gob: registering duplicate types for %q: %s != %s"u8, name, t, (~ut).user));
         }
     }
+
     // but the flattened type in the type table, since that's what decode needs.
     {
         var (n, dup) = ᏑconcreteTypeToName.LoadOrStore((~ut).@base, name); if (dup && !AreEqual(n, name)) {
@@ -966,6 +978,7 @@ public static void Register(any value) {
     // Default to printed representation for unnamed types
     var rt = reflect.TypeOf(value);
     @string name = rt.String();
+
     // But for named types (or pointers to them), qualify with import path (but see inner comment).
     // Dereference one pointer looking for a named type.
     @string star = ""u8;
@@ -1000,6 +1013,7 @@ public static void Register(any value) {
             name = star + rt.PkgPath() + "."u8 + rt.Name();
         }
     }
+
     RegisterName(name, value);
 }
 

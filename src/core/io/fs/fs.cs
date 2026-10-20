@@ -6,6 +6,19 @@
 // A file system can be provided by the host operating system
 // but also by other packages.
 //
+// # Path Names
+//
+// The interfaces in this package all operate on the same
+// path name syntax, regardless of the host operating system.
+//
+// Path names are UTF-8-encoded,
+// unrooted, slash-separated sequences of path elements, like “x/y/z”.
+// Path names must not contain an element that is “.” or “..” or the empty string,
+// except for the special case that the name "." may be used for the root directory.
+// Paths must not start or end with a slash: “/x” and “x/” are invalid.
+//
+// # Testing
+//
 // See the [testing/fstest] package for support with testing
 // implementations of file systems.
 namespace go.io;
@@ -44,24 +57,23 @@ partial interface FS {
 // ValidPath reports whether the given path name
 // is valid for use in a call to Open.
 //
-// Path names passed to open are UTF-8-encoded,
-// unrooted, slash-separated sequences of path elements, like “x/y/z”.
-// Path names must not contain an element that is “.” or “..” or the empty string,
-// except for the special case that the name "." may be used for the root directory.
-// Paths must not start or end with a slash: “/x” and “x/” are invalid.
-//
 // Note that paths are slash-separated on all systems, even Windows.
 // Paths containing other characters such as backslash and colon
 // are accepted as valid, but those characters must never be
 // interpreted by an [FS] implementation as path element separators.
+// See the [Path Names] section for more details.
+//
+// [Path Names]: https://pkg.go.dev/io/fs#hdr-Path_Names
 public static bool ValidPath(@string name) {
     if (!utf8.ValidString(name)) {
         return false;
     }
+
     if (name == "."u8) {
         // special case
         return true;
     }
+
     // Iterate over elements in name, checking each.
     while (ᐧ) {
         nint i = 0;
@@ -127,7 +139,7 @@ partial interface ReadDirFile :
     // At the end of a directory, the error is io.EOF.
     // (ReadDir must return io.EOF itself, not an error wrapping io.EOF.)
     //
-    // If n <= 0, ReadDir returns all the DirEntry values from the directory
+    // If n <= 0, ReadDir returns all remaining DirEntry values from the directory
     // in a single slice. In this case, if ReadDir succeeds (reads all the way
     // to the end of the directory), it returns the slice and a nil error.
     // If it encounters an error before the end of the directory,
@@ -139,13 +151,9 @@ partial interface ReadDirFile :
 // Errors returned by file systems can be tested against these errors
 // using [errors.Is].
 public static error ErrInvalid = errInvalid(); // "invalid argument"
-
 public static error ErrPermission = errPermission(); // "permission denied"
-
 public static error ErrExist = errExist(); // "file already exists"
-
 public static error ErrNotExist = errNotExist(); // "file does not exist"
-
 public static error ErrClosed = errClosed(); // "file already closed"
 
 internal static error errInvalid() {
@@ -178,6 +186,11 @@ partial interface FileInfo {
     any Sys();           // underlying data source (can return nil)
 }
 
+// A FileMode represents a file's mode and permission bits.
+// The bits have the same definition on all systems, so that
+// information about files can be moved from one system
+// to another portably. Not all bits apply to all systems.
+// The only required bit is [ModeDir] for directories.
 partial struct FileMode /*num:uint32*/;
 
 // The defined file mode bits are the most significant bits of the [FileMode].
@@ -185,32 +198,23 @@ partial struct FileMode /*num:uint32*/;
 // The values of these bits should be considered part of the public API and
 // may be used in wire protocols or disk representations: they must not be
 // changed, although new bits might be added.
+// The single letters are the abbreviations
+// used by the String method's formatting.
 public static FileMode ModeDir => /* 1 << (32 - 1 - iota) */ 2147483648;                         // d: is a directory
-
 public static FileMode ModeAppend => 1073741824;                      // a: append-only
-
 public static FileMode ModeExclusive => 536870912;                   // l: exclusive use
-
 public static FileMode ModeTemporary => 268435456;                   // T: temporary file; Plan 9 only
-
 public static FileMode ModeSymlink => 134217728;                     // L: symbolic link
-
 public static FileMode ModeDevice => 67108864;                      // D: device file
-
 public static FileMode ModeNamedPipe => 33554432;                   // p: named pipe (FIFO)
-
 public static FileMode ModeSocket => 16777216;                      // S: Unix domain socket
-
 public static FileMode ModeSetuid => 8388608;                      // u: setuid
-
 public static FileMode ModeSetgid => 4194304;                      // g: setgid
-
 public static FileMode ModeCharDevice => 2097152;                  // c: Unix character device, when ModeDevice is set
-
 public static FileMode ModeSticky => 1048576;                      // t: sticky
-
 public static FileMode ModeIrregular => 524288;                   // ?: non-regular file; nothing else is known about this file
 
+// Mask for the type bits. For regular files, none will be set.
 public static FileMode ModeType => /* ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice | ModeCharDevice | ModeIrregular */ 2401763328;
 
 public static FileMode ModePerm => /* 0777 */ 511;  // Unix permission bits
@@ -244,7 +248,7 @@ public static @string String(this FileMode m) {
         }
         w++;
     }
-    return ((@string)(buf.slice(0, w)));
+    return (@string)(buf.slice(0, w));
 }
 
 // IsDir reports whether m describes a directory.

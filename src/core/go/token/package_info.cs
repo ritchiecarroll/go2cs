@@ -44,6 +44,12 @@ using static go.go.token_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -52,9 +58,10 @@ using static go.go.token_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/token/position.go", "position.cs", "ACBEkAACFAAIAoKCgpSCgqaClAAKRJIAESiSqJKokqiygoKCrNKCgIKkrgAJAoKUgoKC7oKiqMKCgoIAAhYACwSCgoK6goKCqsKCgoKClIKCuoKCrAAIAoKUgoKClAAPHqIAAhYACgKCgIKkqJKUgsaCxriCyAACGAAJAgACGAAJAqqipoKGppSsAAgCgoKAgqSUgIKCgoCUgoLKkqYACA6CprKCgoIAAhDygpSssgAiSJLO4oKCggACJAAVBISCgoKUgpSCgqaCgqaCgoIABRIADAKEgoSAgoKCxKjCgoKCgpSCgsqChqaUpuSAgqaCloCClKaCttzSgpSu4oKAgraqoqwACxSSgpSClKY=", "326-328:1;528-530:1")]
-[assembly: global::go.GoPositionMap("go/token/serialize.go", "serialize.cs", "ABcssoKAgqaCgoKCggAHEIKChKiyhIKCgoKC7pSChA==")]
-[assembly: global::go.GoPositionMap("go/token/token.go", "token.cs", "AMYBjAIAVNYB0oKClIKUAA0ispSkpKSkpMqCgoK6koCCpK7AqKKqoKaSgqikgqyygpSCgqY=")]
+[assembly: global::go.GoPositionMap("go/token/position.go", "position.cs", "ACJEkAACFAAIAoKCgpSCgqaClAAgRJIAFC6SqJKokqiSqLKCgoKs0oKAgqSuAAkCgpSCgoLugqKowoKCggACFgALBIKCgsqCgoKqwoKCgoKUgoLKgoKsAAgCgpSCgoKUAA8eogACFgAKAoKAgqSokpSCxoLGuIK4AAIYAAkCAAIYAAkCqqKmgoamlKwACAKCgoCCpJSAgoKCgJSCgsqSpgAIDoKmsoKCggACEPKClKyyACJIks7CgoKCAAIkABUElIKCgpSClIKCpoKCpoKCgt4AGyaClIKCtAACEAAMAoKUlIKCtKjCgsqigoLkpMSAgraClIKApoKk3NKClK7igoCCtqqirAALFJKClIKUpg==", "334-336:1;559-563:1")]
+[assembly: global::go.GoPositionMap("go/token/serialize.go", "serialize.cs", "ABkwsoKAgraCgoIABxCClKiylIKCgoKC7pSClA==", "", "", "65=Clone/1/2/4,Clone/2/2/5")]
+[assembly: global::go.GoPositionMap("go/token/token.go", "token.cs", "AIQBjAIAVNYB0oKClIKUAAsispSkpKSklMqCgoK6koCCpK7AqKKqoKaSgqikgqyygpSCgqY=")]
+[assembly: global::go.GoPositionMap("go/token/tree.go", "tree.cs", "ADRqggACGAAJApSklKrSgoKClIKUgoK4goKCgpSClIKCAAMQAAgCkoKCgpKClKauwoKClIKCgqaClKYABhDClKSkpLiigoKUlIKClKaigoK4soKCuLKCgriigpSmgoKCpqKUgpS0tLQABBQACAKCgoKUgpSmgpSUuJS81IKClIKUgoKUgoKq1IKClIKUgoKUgoKq0oKCgpSAggAGENKAuIKUgqSCgqiylILKgpSmgIKktoKCtraCgoKCgqrCgpSCgoKUgoKCgpSs4oKUgoKClA==", "132-151:1", "", "362=Name/1/2/1,Base/1/2/1,End/1/2/1,Name/2/2/2,Base/2/2/2,End/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -69,7 +76,10 @@ public static partial class token_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct node {}
     internal partial struct serializedFileSet {}
+    internal partial struct tree {}
+    internal partial struct Δkey {}
     public partial struct FileSet {}
     public partial struct Token {}
     public partial struct lineInfo {}
@@ -87,6 +97,7 @@ public static partial class token_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸiter() => builtin.initPackage(typeof(iter_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));

@@ -32,8 +32,10 @@ internal static void Main() {
     pool[1].inner.n = 5;
     setInt(ref pool[1].inner.mu);
     setInt(ref pool[2].inner.mu);
+
     grid[0].cell.n = 9;
     setInt(ref grid[0].cell.mu);
+
     fmt.Println(pool[1].inner.mu, pool[1].inner.n, pool[2].inner.mu);
     fmt.Println(grid[0].cell.mu, grid[0].cell.n);
 }

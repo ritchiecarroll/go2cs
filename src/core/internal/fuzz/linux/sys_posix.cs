@@ -1,7 +1,7 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build darwin || freebsd || linux
+//go:build darwin || freebsd || linux || openbsd
 namespace go.@internal;
 
 using fmt = fmt_package;
@@ -24,17 +24,20 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> Ꮡf, nint s
     if (err != default!) {
         return (default!, err);
     }
+
     return (Ꮡ(new sharedMem(f: Ꮡf, region: region, removeOnClose: removeOnClose)), default!);
 }
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
 internal static error Close(this ref sharedMem m) {
+    var errsᴷ = new stackAppend<error>();
+
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.
     slice<error> errs = default!;
-    errs = append(errs,
+    errs = append(errsᴷ, errs,
         Δsyscall.Munmap(m.region),
         m.f.Close());
     if (m.removeOnClose) {
@@ -123,21 +126,18 @@ internal static (osꓸSignal, bool) terminationSignal(error err) {
 // with status 2 if not recovered, which we handle as a crash.
 internal static bool isCrashSignal(osꓸSignal signal) {
     var exprᴛ1 = signal;
-    if (AreEqual(exprᴛ1, Δsyscall.SIGILL) || AreEqual(exprᴛ1, Δsyscall.SIGTRAP) || AreEqual(exprᴛ1, Δsyscall.SIGABRT) || AreEqual(exprᴛ1, Δsyscall.SIGBUS) || AreEqual(exprᴛ1, Δsyscall.SIGFPE) || AreEqual(exprᴛ1, Δsyscall.SIGSEGV) || AreEqual(exprᴛ1, Δsyscall.SIGPIPE)) {
+    if (AreEqual(exprᴛ1, Δsyscall.SIGILL) || AreEqual(exprᴛ1, Δsyscall.SIGTRAP) || AreEqual(exprᴛ1, Δsyscall.SIGABRT) || AreEqual(exprᴛ1, Δsyscall.SIGBUS) || AreEqual(exprᴛ1, Δsyscall.SIGFPE) || AreEqual(exprᴛ1, Δsyscall.SIGSEGV) || AreEqual(exprᴛ1, Δsyscall.SIGPIPE)) { // sent data to closed pipe or socket
+        // illegal instruction
+        // breakpoint
+        // abort() called
+        // invalid memory access (e.g., misaligned address)
+        // math error, e.g., integer divide by zero
+        // invalid memory access (e.g., write to read-only)
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
-
-// illegal instruction
-// breakpoint
-// abort() called
-// invalid memory access (e.g., misaligned address)
-// math error, e.g., integer divide by zero
-// invalid memory access (e.g., write to read-only)
-// sent data to closed pipe or socket
 
 } // end fuzz_package

@@ -188,6 +188,7 @@
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'" />
 
   <ItemGroup Condition="'$(GoTargetOS)'=='windows'">
+    <ProjectReference Include="$(go2csPath)core/internal/syscall/windows/internal.syscall.windows.csproj" />
     <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
   </ItemGroup>
 

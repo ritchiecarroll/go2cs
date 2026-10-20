@@ -139,6 +139,8 @@ type Visitor struct {
 	outputBuilder      *strings.Builder
 	standAloneComments map[token.Pos]string
 	sortedCommentPos   []token.Pos
+	commentGroups      []*ast.CommentGroup // the file's, with or without -comments (goBlankLineBetween)
+	callParens         [][3]token.Pos      // the `(`, `)` and first argument of each call being converted, innermost last (convExprList)
 	processedComments  hashset.HashSet[token.Pos]
 	newline            string
 	indentLevel        int
@@ -167,6 +169,12 @@ type Visitor struct {
 
 	liftedTypeNames hashset.HashSet[string]
 	liftedTypeMap   map[types.Type]string
+
+	// capturedLiftNames dedups lifts that close over type parameters (liftedTypeParams.go) WITHIN the
+	// declaration owning those parameters, where one signature is one Go type; liftBaseMarked records the
+	// lifts whose instantiation base parts are written (dynamicInterfaceBase.go).
+	capturedLiftNames map[string]string
+	liftBaseMarked    map[string]bool
 	subStructTypes  map[types.Type][]types.Type
 
 	// inUsingAliasTarget is set only while a type alias's `global using` RHS is being rendered.
@@ -269,6 +277,11 @@ type Visitor struct {
 	// renders — no churn elsewhere. types.Type carries no source alias, so this map supplies it.
 	importPathAliases map[string]string
 
+	// dotImportTargets maps a Go import PATH this file DOT-imports to the class its `using static`
+	// names. A dot-imported package's type renders through its package NAME, which is correct only
+	// while no other import of the file binds that name. dotImportCollisionQualifier consults it.
+	dotImportTargets map[string]string
+
 	// FuncDecl variables
 	inFunction      bool
 	currentFuncDecl *ast.FuncDecl
@@ -353,6 +366,16 @@ type Visitor struct {
 	// literals inside the declaration inherit it, which is what lets a `reflect.TypeFor[T]` written
 	// inside a closure render the companion the enclosing declaration declared.
 	currentFuncCompanionNames map[*types.TypeParam]string
+	// currentFuncArrayDimsNames holds the current FUNCTION declaration's ARRAY-DIMS COMPANION type
+	// parameters (see arrayDimsCompanion.go), keyed like currentFuncCompanionNames and inherited by
+	// func literals the same way, so a `var x T` inside a closure reads the enclosing declaration's
+	// companion.
+	currentFuncArrayDimsNames map[*types.TypeParam]string
+	// closedConstraintsRecorded holds the (type argument, closed constraint) pairs
+	// recordClosedConstraintImplementation has recorded, so each records once. It is also what
+	// ends the recursion of a SELF-referential constraint, whose recording renders the closed
+	// constraint and so reaches the same pair again. Lazily initialized.
+	closedConstraintsRecorded map[string]bool
 	// identAddressTakenCache memoizes per-object `&ident` scans of the current function
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.
@@ -360,6 +383,12 @@ type Visitor struct {
 	// nativeFieldViewLocalCache memoizes isNativeFieldArrayViewLocal per local (nativeFieldArrayView.go);
 	// lazily initialized and never cleared, on the same per-object reasoning as the cache above.
 	nativeFieldViewLocalCache map[types.Object]bool
+	// fieldAccessLocalCache memoizes fieldAccessLocal per local (fieldAccess.go), on the same per-object
+	// reasoning: the pointee struct type of a local the provenance rule admits, or nil.
+	fieldAccessLocalCache map[types.Object]types.Type
+	// fieldAccessTypes lists, in first-use order, the rendered struct types whose fields this FILE reaches
+	// through a provenance-scoped local, for its `[GoFieldAccess(…)]` record (fieldAccess.go).
+	fieldAccessTypes []string
 	// captureAnalysisDecl is the declaration whose body performVariableAnalysis is currently
 	// walking — the real FuncDecl, or visitValueSpec's SYNTHETIC wrapper for a package-level
 	// func-literal initializer. The shared-capture routing's write scan (varShareFacts) reads
@@ -404,6 +433,25 @@ type Visitor struct {
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
 	// consumed (read and cleared) by the type-kind emitter (visitArrayType/visitStructType/…).
 	pendingTypeAccess string
+
+	// pendingTypeDoc carries the doc comment of the type spec being declared to the forward-declaration
+	// type-kind emitters (named ident, array/slice, map, chan, func, pointer and cross-package types),
+	// which write it after their leading line break; see writePendingTypeDoc. The struct and interface
+	// emitters take the doc as an argument instead.
+	pendingTypeDoc    *ast.CommentGroup
+	pendingTypeDocPos token.Pos
+	// clauseSpans maps the colon of each case and select clause to the source span its leading comments
+	// are taken from; noteClauseSpans fills it per switch and select, writeLeadingBodyComments reads it.
+	clauseSpans map[token.Pos]clauseSpan
+	// heldComments holds, by colon, the pending comments of a clause the lowering emits after clauses
+	// that follow it in the source; holdClauseComments fills it, releaseClauseComments empties it.
+	heldComments map[token.Pos][]token.Pos
+	// inValueSpec is set while visitValueSpec converts a spec, so a struct it lifts ahead of the var does
+	// not open a second line after the spec's own (visitStructType, class L).
+	inValueSpec bool
+	// funcLitRbrace is the closing brace of the func literal whose body is being visited; a comment past it
+	// on a statement's line labels the literal, not the statement (writeTrailingComment).
+	funcLitRbrace token.Pos
 	// manualConversion mirrors the file entry's flag: this file's destination `.cs` is a hand-owned
 	// manual conversion, so the visit still feeds package-wide state but the emitted text lands in
 	// the non-compiled `.cs.auto` review sibling. Consulted by recordTypeAccessibility, which must
@@ -522,6 +570,10 @@ type Visitor struct {
 	// emptyInterfaceFuncLits marks the func literals whose Go destination is an empty interface, at
 	// any position (see markEmptyInterfaceFuncLits). convFuncLit then states the declared result type.
 	emptyInterfaceFuncLits map[*ast.FuncLit]bool
+
+	// fileFuncDecls is the current file's function declarations by object (collectFileFuncDecls), for
+	// the recursive callee question methodSetConstraintNeeded asks.
+	fileFuncDecls map[*types.Func]*ast.FuncDecl
 
 	// untypedConstContexts maps an UNTYPED constant subexpression to the resolved type of its
 	// enclosing typed constant expression — the context go/types drops when it leaves constant

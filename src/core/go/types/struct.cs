@@ -5,9 +5,9 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using strconv = strconv_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -90,11 +90,14 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
         styp.markComplete();
         return;
     }
+
     // struct fields and tags
     ref var fields = ref heap<slice<ж<Var>>>(out var Ꮡfields);
     ref var tags = ref heap<slice<@string>>(out var Ꮡtags);
+
     // for double-declaration checks
     ref var fset = ref heap<objset>(out var Ꮡfset);
+
     // current field typ and tag
     ref var typ = ref heap<ΔType>(out var Ꮡtyp);
     @string tag = default!;
@@ -105,6 +108,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
         if (Ꮡtags.ValueSlot != default!) {
             Ꮡtags.ValueSlot = append(Ꮡtags.ValueSlot, tag);
         }
+
         tokenꓸPos pos = ident.Pos();
         @string name = ident.Value.Name;
         var fld = NewField(pos, Ꮡcheck.Value.pkg, name, Ꮡtyp.ValueSlot, embedded);
@@ -114,6 +118,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
             Ꮡcheck.Value.recordDef(ident, new VarжObject(fld));
         }
     }
+
     // addInvalid adds an embedded field of invalid type to the struct for
     // fields with errors; this keeps the number of struct fields in sync
     // with the source as long as the fields are _ or have different names
@@ -124,6 +129,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
         tag = ""u8;
         addʗ1(ident, true);
     }
+
     foreach (var (_, f) in (~list).List) {
         typ = Ꮡcheck.varType((~f).Type);
         tag = Ꮡcheck.tag((~f).Tag);
@@ -147,25 +153,28 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
                 continue;
             }
             add(name, true); // struct{p.T} field has position of T
+
             // Because we have a name, typ must be of the form T or *T, where T is the name
             // of a (named or alias) type, and t (= deref(typ)) must be the type of T.
             // We must delay this check to the end because we don't want to instantiate
-            // (via under(t)) a possibly incomplete type.
+            // (via t.Underlying()) a possibly incomplete type.
+
             // for use in the closure below
             var embeddedTyp = typ;
             var embeddedPos = f.Value.Type;
+
             var embeddedPosʗ1 = embeddedPos;
             var embeddedTypʗ1 = embeddedTyp;
             check.later(() => {
                 var (t, isPtr) = deref(embeddedTypʗ1);
-                switch (under(t).type()) {
+                switch (t.Underlying().type()) {
                 case ж<Basic> u: {
                     if (!isValid(t)) {
                         // error was reported before
                         return;
                     }
+                    // unsafe.Pointer is treated like a regular pointer
                     if ((~u).kind == UnsafePointer) {
-                        // unsafe.Pointer is treated like a regular pointer
                         Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ);
                     }
                     break;
@@ -190,6 +199,7 @@ internal static void structType(this ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, �
             }).describef(new ast_Exprᴠpositioner(embeddedPos), "check embedded type %s"u8, embeddedTyp);
         }
     }
+
     styp.fields = fields;
     styp.tags = tags;
     styp.markComplete();
@@ -201,9 +211,9 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
         return eΔ1;
     }
     case ж<ast.StarExpr> eΔ1: {
+        // *T is valid, but **T is not
         {
             var (_, ok) = (~eΔ1).X._<ж<ast.StarExpr>>(ᐧ); if (!ok) {
-                // *T is valid, but **T is not
                 return embeddedFieldIdent((~eΔ1).X);
             }
         }
@@ -227,7 +237,7 @@ internal static bool declareInSet(this ж<Checker> Ꮡcheck, ж<objset> Ꮡoset,
     {
         var alt = oset.insert(obj); if (alt != default!) {
             var err = Ꮡcheck.newError(DuplicateDecl);
-            err.addf(((atPos)pos), "%s redeclared"u8, obj.Name());
+            err.addf((atPos)pos, "%s redeclared"u8, obj.Name());
             err.addAltDecl(alt);
             err.report();
             return false;

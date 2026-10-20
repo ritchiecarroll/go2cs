@@ -24,7 +24,6 @@ public partial interface testingT {
     void Skipf(@string format, params ꓸꓸꓸany argsʗp);
 }
 
-
 partial struct InternalTestsᴛ1 /*dyn*/ {
     public @string Name;
     public Action<testingT> Test;
@@ -42,7 +41,7 @@ internal static void testAbsDaysSplit(testingT t) {
     bool isLeap(uint64 year) => year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
     nint bad = 0;
     var wantYear = (uint64)0;
-    global::go.time_package.absYday wantYday = ((global::go.time_package.absYday)0);
+    global::go.time_package.absYday wantYday = (global::go.time_package.absYday)0;
     foreach (var days in range<global::go.time_package.absDays>(((global::go.time_package.absDays)1000000))) {
         var (century, cyear, yday) = days.split();
         if (century != ((global::go.time_package.absCentury)(wantYear / 100)) || cyear != ((global::go.time_package.absCyear)(nint)(wantYear % 100)) || yday != wantYday) {
@@ -55,7 +54,7 @@ internal static void testAbsDaysSplit(testingT t) {
                 }
             }
         }
-        global::go.time_package.absYday end = ((global::go.time_package.absYday)365);
+        global::go.time_package.absYday end = (global::go.time_package.absYday)365;
         if (isLeap(wantYear + 1)) {
             end = 366;
         }
@@ -71,7 +70,7 @@ internal static void testAbsDaysSplit(testingT t) {
 internal static void testAbsYdaySplit(testingT t) {
     var ends = new nint[]{31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 31, 29}.slice();
     nint bad = 0;
-    global::go.time_package.absMonth wantMonth = ((global::go.time_package.absMonth)3);
+    global::go.time_package.absMonth wantMonth = (global::go.time_package.absMonth)3;
     nint wantDay = 1;
     foreach (var yday in range(((global::go.time_package.absYday)366))) {
         var (month, day) = yday.split();
@@ -117,6 +116,7 @@ internal static void testAbsDate(testingT t) {
                 }
             }
         }
+
         (year, var yday) = days.yearYday();
         year += (nint)absoluteYears;
         if (year != wantYear || yday != wantYday) {
@@ -129,6 +129,7 @@ internal static void testAbsDate(testingT t) {
                 }
             }
         }
+
         {
             wantMday++; if (wantMday == ends[wantMonth - 1] + 1 || wantMonth == February && wantMday == 29 && !isLeap(year)) {
                 wantMonth++;
@@ -147,7 +148,7 @@ internal static void testAbsDate(testingT t) {
 
 internal static void testDateToAbsDays(testingT t) {
     bool isLeap(int64 year) => year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
-    var wantDays = ((global::go.time_package.absDays)marchThruDecember);
+    var wantDays = (global::go.time_package.absDays)marchThruDecember;
     nint bad = 0;
     for (var year = (int64)1; year < 10000; year++) {
         var days = dateToAbsDays(year - (int64)absoluteYears, January, 1);
@@ -191,7 +192,7 @@ internal static void testDaysIn(testingT t) {
 
 internal static void testDaysBefore(testingT t) {
     foreach (var (m, want) in new nint[]{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365}.slice()) {
-        nint d = daysBefore(((global::go.time_package.ΔMonth)(m + 1)));
+        nint d = daysBefore((global::go.time_package.ΔMonth)(m + 1));
         if (d != want) {
             t.Errorf("daysBefore(%d) = %d, want %d"u8, m, d, want);
         }

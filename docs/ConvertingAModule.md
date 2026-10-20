@@ -193,19 +193,41 @@ difference is small: testify's assertion messages, for example, do not print the
 When a module is validated, Go's own `go test` run uses the same tag, so both sides are compared on the same
 code. To convert the files a plain `go build` selects instead, pass `-module-safe-tag=false`.
 
+## Validate a converted module's tests
+
+The walkthrough above shows that a converted program runs. To check that a module behaves as it does in Go,
+convert its own `_test.go` suites as well, run them in C#, and compare every verdict with `go test`:
+
+```shell
+go2cs -tests -recurse -test-action all path/to/module out_root
+```
+
+- **Plain `-recurse` only.** `-tests` refuses `-recurse=nuget` and `-recurse=module`.
+- **The output root sits outside the module's own source tree.**
+- **The Go release must match.** A module that needs a newer Go than the converted standard library is refused,
+  as it is for a conversion.
+- **The result is a verdict per test**, matched or not, and proof pages written beside the conversion. A test whose
+  failure is a known, disclosed difference is read from a disclosure manifest
+  ([`-module-disclosures`](CommandLine.md#options)).
+
+The modules that pass are listed, with their proof pages, in [Validated Modules](ValidatedModules.md). To check one
+package of the converted standard library from a clone instead, see
+[Validate a converted test suite](BuildingGo2cs.md#validate-a-converted-test-suite).
+
 ## Optional: convert the module only, and deal with its dependencies later
 
 A dependency closure is not always convertible today — a large third-party SDK can hit a converter defect,
-or pull in a package go2cs cannot yet handle — and under plain `-recurse` that blocks the packages you
-actually came for. `-recurse=module` narrows the **scope** to the input module's own packages:
+or pull in a package go2cs cannot yet handle — and under `-recurse=nuget` that blocks the packages you
+actually came for. Adding `module` narrows the **scope** to the input module's own packages, and `nuget`
+keeps the NuGet references the walkthrough uses:
 
 ```shell
 cd path/to/colordemo
-go2cs -recurse=module . csharp
+go2cs -recurse=module,nuget . csharp
 ```
 
-Every package under the module's own `go.mod` converts, in dependency order, exactly as it would under the
-full `-recurse`; every third-party package is *referenced* — into `csharp/pkg/<import-path>`, the same place
+Every package under the module's own `go.mod` converts, in dependency order, exactly as it would under
+`-recurse=nuget`; every third-party package is *referenced* — into `csharp/pkg/<import-path>`, the same place
 the full run would have converted it — but never converted, so nothing about it can fail the run. The
 converter prints the referenced-but-unconverted list when it finishes:
 
@@ -220,8 +242,8 @@ Third-party packages referenced but NOT converted (-recurse=module): 4
 ```
 
 Those references are unresolved until something is written at those paths, so the generated solution does
-**not** build yet — the mode's deliberate trade. Re-running the same conversion **without** `=module` (once
-the dependencies convert) writes them at exactly those paths and resolves the references; the app's own
+**not** build yet — the mode's deliberate trade. Re-running the conversion **without** `module`, as
+`-recurse=nuget` (once the dependencies convert), writes them at exactly those paths and resolves the references; the app's own
 converted `.cs` and `.csproj` come out byte-identical either way, so nothing you have done to them is lost.
 
 ## Optional: build against a local standard library
@@ -276,3 +298,20 @@ the pin offline, warns if a source now disagrees, and refuses a package whose by
 - `-nuget-map off` turns mapping off and makes no request.
 - `-nuget-map-only`, `-nuget-map-exclude`, `-nuget-map-refresh`, `-nuget-map-canonical-only` and `-nuget-map-feed` are listed under
   [Command-line options](CommandLine.md#options). Every `-nuget-map*` flag needs `-recurse=nuget`.
+
+## Publishing your conversion: the package page
+
+When you convert a module and publish it as a NuGet package, its nuget.org page is the file
+`nuget/README.md` in the converted module's directory (the conversion repository's root when the module sits
+there). The first pack writes it, and from then on it is yours: change the title, rewrite the description under it, add usage sections. Commit it with the
+conversion.
+
+The pack still owns one block in it, between the lines `[//]: # (nugetgo:generated:begin)` and
+`[//]: # (nugetgo:generated:end)`. That block states the facts: where the C# came from and a link back to the Go
+source, the security caveat, the test badge, the versions, and the license. Every pack rewrites the block from what it
+measured, says so, and leaves everything outside it alone. Keep both marker lines, each on its own line with a blank
+line before and after, and put no link above the block. The pack refuses the file, by name, otherwise.
+
+`nuget/icon.png` beside it replaces the go2cs icon (PNG, at most 1 MB). The publishing runbook,
+[`NugetgoPublish.md`](NugetgoPublish.md#customizing-the-package-page), has the same rules in its
+"Customizing the package page" section.

@@ -178,7 +178,7 @@ function Get-NugetgoDescription {
     $refuse = { param($why) [pscustomobject]@{ Description = $null; Author = $false; Refused = $true; Reason = $why } }
     $moduleOrg = Get-NugetgoHostOrg $ModulePath
     $repositoryOrg = if ($RepositoryUrl -match '^https://(?<rest>.+)$') { Get-NugetgoHostOrg $Matches['rest'] } else { $null }
-    $security = "Security: that standard library carries no Go security fixes issued after Go $GoRelease; review before any production use."
+    $security = "Security: the Go standard library this package is built on includes no Go security fixes released after Go $GoRelease; review before any production use."
 
     if ($UpstreamPublishes) {
         if (-not $moduleOrg) {

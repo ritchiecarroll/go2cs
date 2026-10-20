@@ -23,7 +23,7 @@ public static @string String(this OSArch p) {
 public static bool RaceDetectorSupported(@string goos, @string goarch) {
     var exprᴛ1 = goos;
     if (exprᴛ1 == "linux"u8) {
-        return goarch == "amd64"u8 || goarch == "ppc64le"u8 || goarch == "arm64"u8 || goarch == "s390x"u8;
+        return goarch == "amd64"u8 || goarch == "arm64"u8 || goarch == "loong64"u8 || goarch == "ppc64le"u8 || goarch == "riscv64"u8 || goarch == "s390x"u8;
     }
     if (exprᴛ1 == "darwin"u8) {
         return goarch == "amd64"u8 || goarch == "arm64"u8;
@@ -34,7 +34,6 @@ public static bool RaceDetectorSupported(@string goos, @string goarch) {
     { /* default: */
         return false;
     }
-
 }
 
 // MSanSupported reports whether goos/goarch supports the memory
@@ -50,7 +49,6 @@ public static bool MSanSupported(@string goos, @string goarch) {
     { /* default: */
         return false;
     }
-
 }
 
 // ASanSupported reports whether goos/goarch supports the address
@@ -63,34 +61,31 @@ public static bool ASanSupported(@string goos, @string goarch) {
     { /* default: */
         return false;
     }
-
 }
 
 // FuzzSupported reports whether goos/goarch supports fuzzing
 // ('go test -fuzz=.').
 public static bool FuzzSupported(@string goos, @string goarch) {
     var exprᴛ1 = goos;
-    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "windows"u8) {
+    if (exprᴛ1 == "darwin"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "windows"u8) {
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
 
 // FuzzInstrumented reports whether fuzzing on goos/goarch uses coverage
 // instrumentation. (FuzzInstrumented implies FuzzSupported.)
 public static bool FuzzInstrumented(@string goos, @string goarch) {
     var exprᴛ1 = goarch;
-    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8) {
-        return FuzzSupported(goos, // TODO(#14565): support more architectures.
- goarch);
+    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8) {
+        // TODO(#14565): support more architectures.
+        return FuzzSupported(goos, goarch);
     }
     { /* default: */
         return false;
     }
-
 }
 
 // MustLinkExternal reports whether goos/goarch requires external linking
@@ -98,21 +93,15 @@ public static bool FuzzInstrumented(@string goos, @string goarch) {
 public static bool MustLinkExternal(@string goos, @string goarch, bool withCgo) {
     if (withCgo) {
         var exprᴛ1 = goarch;
-        if (exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
+        if (exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8) {
+            // Internally linking cgo is incomplete on some architectures.
+            // https://go.dev/issue/14449
             return true;
         }
-        if (exprᴛ1 == "arm64"u8) {
-            if (goos == "windows"u8) {
-                // Internally linking cgo is incomplete on some architectures.
-                // https://go.dev/issue/14449
-                // windows/arm64 internal linking is not implemented.
-                return true;
-            }
-        }
-        else if (exprᴛ1 == "ppc64"u8) {
+        if (exprᴛ1 == "ppc64"u8) {
+            // Big Endian PPC64 cgo internal linking is not implemented for aix or linux.
+            // https://go.dev/issue/8912
             if (goos == "aix"u8 || goos == "linux"u8) {
-                // Big Endian PPC64 cgo internal linking is not implemented for aix or linux.
-                // https://go.dev/issue/8912
                 return true;
             }
         }
@@ -122,13 +111,13 @@ public static bool MustLinkExternal(@string goos, @string goarch, bool withCgo) 
             return true;
         }
         if (exprᴛ2 == "dragonfly"u8) {
+            // It seems that on Dragonfly thread local storage is
+            // set up by the dynamic linker, so internal cgo linking
+            // doesn't work. Test case is "go test runtime/cgo".
             return true;
         }
-
     }
-    // It seems that on Dragonfly thread local storage is
-    // set up by the dynamic linker, so internal cgo linking
-    // doesn't work. Test case is "go test runtime/cgo".
+
     var exprᴛ3 = goos;
     if (exprᴛ3 == "android"u8) {
         if (goarch != "arm64"u8) {
@@ -140,7 +129,6 @@ public static bool MustLinkExternal(@string goos, @string goarch, bool withCgo) 
             return true;
         }
     }
-
     return false;
 }
 
@@ -151,11 +139,13 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
     if (compiler == "gccgo"u8) {
         return true;
     }
+
     {
         var (_, ok) = distInfo[new OSArch(goos, goarch), ꟷ]; if (!ok) {
             return false; // platform unrecognized
         }
     }
+
     @string platform = goos + "/"u8 + goarch;
     var exprᴛ1 = buildmode;
     if (exprᴛ1 == "archive"u8) {
@@ -169,17 +159,23 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
         if (exprᴛ2 == "linux"u8) {
             var exprᴛ3 = goarch;
             if (exprᴛ3 == "386"u8 || exprᴛ3 == "amd64"u8 || exprᴛ3 == "arm"u8 || exprᴛ3 == "armbe"u8 || exprᴛ3 == "arm64"u8 || exprᴛ3 == "arm64be"u8 || exprᴛ3 == "loong64"u8 || exprᴛ3 == "ppc64le"u8 || exprᴛ3 == "riscv64"u8 || exprᴛ3 == "s390x"u8) {
+                // linux/ppc64 not supported because it does
+                // not support external linking mode yet.
                 return true;
             }
             { /* default: */
+                // Other targets do not support -shared,
+                // per ParseFlags in
+                // cmd/compile/internal/base/flag.go.
+                // For c-archive the Go tool passes -shared,
+                // so that the result is suitable for inclusion
+                // in a PIE or shared library.
                 return false;
             }
-
         }
         else if (exprᴛ2 == "freebsd"u8) {
             return goarch == "amd64"u8;
         }
-
         return false;
     }
     if (exprᴛ1 == "c-shared"u8) {
@@ -187,7 +183,6 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
         if (exprᴛ4 == "linux/amd64"u8 || exprᴛ4 == "linux/arm"u8 || exprᴛ4 == "linux/arm64"u8 || exprᴛ4 == "linux/loong64"u8 || exprᴛ4 == "linux/386"u8 || exprᴛ4 == "linux/ppc64le"u8 || exprᴛ4 == "linux/riscv64"u8 || exprᴛ4 == "linux/s390x"u8 || exprᴛ4 == "android/amd64"u8 || exprᴛ4 == "android/arm"u8 || exprᴛ4 == "android/arm64"u8 || exprᴛ4 == "android/386"u8 || exprᴛ4 == "freebsd/amd64"u8 || exprᴛ4 == "darwin/amd64"u8 || exprᴛ4 == "darwin/arm64"u8 || exprᴛ4 == "windows/amd64"u8 || exprᴛ4 == "windows/386"u8 || exprᴛ4 == "windows/arm64"u8 || exprᴛ4 == "wasip1/wasm"u8) {
             return true;
         }
-
         return false;
     }
     if (exprᴛ1 == "default"u8) {
@@ -198,10 +193,9 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
     }
     if (exprᴛ1 == "pie"u8) {
         var exprᴛ5 = platform;
-        if (exprᴛ5 == "linux/386"u8 || exprᴛ5 == "linux/amd64"u8 || exprᴛ5 == "linux/arm"u8 || exprᴛ5 == "linux/arm64"u8 || exprᴛ5 == "linux/loong64"u8 || exprᴛ5 == "linux/ppc64le"u8 || exprᴛ5 == "linux/riscv64"u8 || exprᴛ5 == "linux/s390x"u8 || exprᴛ5 == "android/amd64"u8 || exprᴛ5 == "android/arm"u8 || exprᴛ5 == "android/arm64"u8 || exprᴛ5 == "android/386"u8 || exprᴛ5 == "freebsd/amd64"u8 || exprᴛ5 == "darwin/amd64"u8 || exprᴛ5 == "darwin/arm64"u8 || exprᴛ5 == "ios/amd64"u8 || exprᴛ5 == "ios/arm64"u8 || exprᴛ5 == "aix/ppc64"u8 || exprᴛ5 == "openbsd/arm64"u8 || exprᴛ5 == "windows/386"u8 || exprᴛ5 == "windows/amd64"u8 || exprᴛ5 == "windows/arm"u8 || exprᴛ5 == "windows/arm64"u8) {
+        if (exprᴛ5 == "linux/386"u8 || exprᴛ5 == "linux/amd64"u8 || exprᴛ5 == "linux/arm"u8 || exprᴛ5 == "linux/arm64"u8 || exprᴛ5 == "linux/loong64"u8 || exprᴛ5 == "linux/ppc64le"u8 || exprᴛ5 == "linux/riscv64"u8 || exprᴛ5 == "linux/s390x"u8 || exprᴛ5 == "android/amd64"u8 || exprᴛ5 == "android/arm"u8 || exprᴛ5 == "android/arm64"u8 || exprᴛ5 == "android/386"u8 || exprᴛ5 == "freebsd/amd64"u8 || exprᴛ5 == "darwin/amd64"u8 || exprᴛ5 == "darwin/arm64"u8 || exprᴛ5 == "ios/amd64"u8 || exprᴛ5 == "ios/arm64"u8 || exprᴛ5 == "aix/ppc64"u8 || exprᴛ5 == "openbsd/arm64"u8 || exprᴛ5 == "windows/386"u8 || exprᴛ5 == "windows/amd64"u8 || exprᴛ5 == "windows/arm64"u8) {
             return true;
         }
-
         return false;
     }
     if (exprᴛ1 == "shared"u8) {
@@ -209,37 +203,25 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
         if (exprᴛ6 == "linux/386"u8 || exprᴛ6 == "linux/amd64"u8 || exprᴛ6 == "linux/arm"u8 || exprᴛ6 == "linux/arm64"u8 || exprᴛ6 == "linux/ppc64le"u8 || exprᴛ6 == "linux/s390x"u8) {
             return true;
         }
-
         return false;
     }
     if (exprᴛ1 == "plugin"u8) {
         var exprᴛ7 = platform;
-        if (exprᴛ7 == "linux/amd64"u8 || exprᴛ7 == "linux/arm"u8 || exprᴛ7 == "linux/arm64"u8 || exprᴛ7 == "linux/386"u8 || exprᴛ7 == "linux/loong64"u8 || exprᴛ7 == "linux/s390x"u8 || exprᴛ7 == "linux/ppc64le"u8 || exprᴛ7 == "android/amd64"u8 || exprᴛ7 == "android/386"u8 || exprᴛ7 == "darwin/amd64"u8 || exprᴛ7 == "darwin/arm64"u8 || exprᴛ7 == "freebsd/amd64"u8) {
+        if (exprᴛ7 == "linux/amd64"u8 || exprᴛ7 == "linux/arm"u8 || exprᴛ7 == "linux/arm64"u8 || exprᴛ7 == "linux/386"u8 || exprᴛ7 == "linux/loong64"u8 || exprᴛ7 == "linux/riscv64"u8 || exprᴛ7 == "linux/s390x"u8 || exprᴛ7 == "linux/ppc64le"u8 || exprᴛ7 == "android/amd64"u8 || exprᴛ7 == "android/386"u8 || exprᴛ7 == "darwin/amd64"u8 || exprᴛ7 == "darwin/arm64"u8 || exprᴛ7 == "freebsd/amd64"u8) {
             return true;
         }
-
         return false;
     }
     { /* default: */
         return false;
     }
-
 }
 
-// linux/ppc64 not supported because it does
-// not support external linking mode yet.
-// Other targets do not support -shared,
-// per ParseFlags in
-// cmd/compile/internal/base/flag.go.
-// For c-archive the Go tool passes -shared,
-// so that the result is suitable for inclusion
-// in a PIE or shared library.
 public static bool InternalLinkPIESupported(@string goos, @string goarch) {
     var exprᴛ1 = goos + "/"u8 + goarch;
-    if (exprᴛ1 == "android/arm64"u8 || exprᴛ1 == "darwin/amd64"u8 || exprᴛ1 == "darwin/arm64"u8 || exprᴛ1 == "linux/amd64"u8 || exprᴛ1 == "linux/arm64"u8 || exprᴛ1 == "linux/ppc64le"u8 || exprᴛ1 == "windows/386"u8 || exprᴛ1 == "windows/amd64"u8 || exprᴛ1 == "windows/arm"u8 || exprᴛ1 == "windows/arm64"u8) {
+    if (exprᴛ1 == "android/arm64"u8 || exprᴛ1 == "darwin/amd64"u8 || exprᴛ1 == "darwin/arm64"u8 || exprᴛ1 == "linux/amd64"u8 || exprᴛ1 == "linux/arm64"u8 || exprᴛ1 == "linux/loong64"u8 || exprᴛ1 == "linux/ppc64le"u8 || exprᴛ1 == "windows/386"u8 || exprᴛ1 == "windows/amd64"u8 || exprᴛ1 == "windows/arm64"u8) {
         return true;
     }
-
     return false;
 }
 
@@ -262,7 +244,6 @@ public static bool DefaultPIE(@string goos, @string goarch, bool isRace) {
     if (exprᴛ1 == "darwin"u8) {
         return true;
     }
-
     return false;
 }
 
@@ -273,7 +254,6 @@ public static bool ExecutableHasDWARF(@string goos, @string goarch) {
     if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "ios"u8) {
         return false;
     }
-
     return true;
 }
 

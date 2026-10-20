@@ -13,7 +13,6 @@ using fs = go.io.fs_package;
 
 partial class fs_test_package {
 
-
 partial struct globTestsᴛ1 /*dyn*/ {
     internal fs.FS fs;
     internal @string pattern, result;
@@ -88,9 +87,11 @@ public static void TestGlobMethod(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Glob(%s) = %v, %v, want %v, nil"u8, desc, namesΔ1, errΔ1, new @string[]{"hello.txt"u8}.slice());
         }
     }
+
     // Test that ReadDir uses the method when present.
     var (names, err) = Glob(new globOnly(new fstest_MapFSᴠGlobFS(testFsys)), txtˢ);
     check(readDirOnlyˢ, names, err);
+
     // Test that ReadDir uses Open when the method is not present.
     (names, err) = Glob(new openOnly(testFsys), txtˢ);
     check(openOnlyˢ, names, err);

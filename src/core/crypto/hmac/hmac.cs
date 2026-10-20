@@ -27,7 +27,6 @@ using fips140hash = go.crypto.@internal.fips140hash_package;
 using fips140only = go.crypto.@internal.fips140only_package;
 using subtle = go.crypto.subtle_package;
 using hash = hash_package;
-using fips140 = go.crypto.@internal.fips140_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
@@ -46,10 +45,10 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) {
         if (hm != default!) {
             return hm;
         }
+        // BoringCrypto did not recognize h, so fall through to standard Go code.
     }
-    // BoringCrypto did not recognize h, so fall through to standard Go code.
     h = fips140hash.UnwrapNew(h);
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         if (len(key) < 112 / 8) {
             throw panic("crypto/hmac: use of keys shorter than 112 bits is not allowed in FIPS 140-only mode");
         }
@@ -57,7 +56,7 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) {
             throw panic("crypto/hmac: use of hash functions other than SHA-2 or SHA-3 is not allowed in FIPS 140-only mode");
         }
     }
-    return new hmac_HMACжHash(hmac.New(widen<hash.Hash, fips140.Hash>(h, elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), key));
+    return new hmac_HMACжHash(hmac.New(h, key));
 }
 
 // Equal compares two MACs for equality without leaking timing information.

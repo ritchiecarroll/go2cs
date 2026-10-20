@@ -219,6 +219,7 @@ public static void TestUnixUTCAndBack(ж<Δtesting.T> Ꮡt) {
     var fʗ1 = f;
     var f32 = (int32 sec) => fʗ1((int64)sec);
     var cfg = Ꮡ(new quick.Config(MaxCount: 10000));
+
     // Try a reasonable date first, then the huge ones.
     {
         var err = quick.Check((f32).OrTypedNilFunc(), cfg); if (err != default!) {
@@ -241,6 +242,7 @@ public static void TestUnixNanoUTCAndBack(ж<Δtesting.T> Ꮡt) {
     var fʗ1 = f;
     var f32 = (int32 nsec) => fʗ1((int64)nsec);
     var cfg = Ꮡ(new quick.Config(MaxCount: 10000));
+
     // Try a small date first, then the large ones. (The span is only a few hundred years
     // for nanoseconds in an int64.)
     {
@@ -312,8 +314,6 @@ internal static @string absString(Δtime.Time t) {
     return fmt.Sprintf("%d%09d"u8, sec, nsec);
 }
 
-// 5.8*d rounds to 6*d, but .8*d+.8*d < 0 < d
-
 partial struct truncateRoundTestsᴛ1 /*dyn*/ {
     internal Δtime.Time t;
     internal Δtime.Duration d;
@@ -323,7 +323,7 @@ internal static slice<truncateRoundTestsᴛ1> truncateRoundTests = new truncateR
     new(Date(-1, January, 1, 12, 15, 31, 500000000, ΔUTC), 3),
     new(Date(2012, January, 1, 12, 15, 30, 500000000, ΔUTC), ΔSecond),
     new(Date(2012, January, 1, 12, 15, 31, 500000000, ΔUTC), ΔSecond),
-    new(Unix(-19012425939L, 649146258), 7435029458905025217L)
+    new(Unix(-19012425939L, 649146258), 7435029458905025217L) // 5.8*d rounds to 6*d, but .8*d+.8*d < 0 < d
 }.slice();
 
 public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
@@ -336,7 +336,9 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
     ж<bigꓸInt> br = @new<bigꓸInt>();
     ж<bigꓸInt> bq = @new<bigꓸInt>();
     ж<bigꓸInt> b1e9 = @new<bigꓸInt>();
+
     b1e9.SetInt64(1000000000);
+
     var b1e9ʗ1 = b1e9;
     var bdʗ1 = bd;
     var bnsecʗ1 = bnsec;
@@ -346,27 +348,32 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
     var btʗ1 = bt;
     bool testOne(int64 ti, int64 tns, int64 di) {
         Ꮡt.Helper();
+
         var t0 = Unix(ti, tns).UTC();
-        var d = ((Δtime.Duration)di);
+        var d = (Δtime.Duration)di;
         if (d < 0) {
             d = -d;
         }
         if (d <= 0) {
             d = 1;
         }
+
         // Compute bt = absolute nanoseconds.
         var (sec, nsec) = abs(t0);
         bsecʗ1.SetInt64(sec);
         bnsecʗ1.SetInt64(nsec);
         btʗ1.Mul(bsecʗ1, b1e9ʗ1);
         btʗ1.Add(btʗ1, bnsecʗ1);
+
         // Compute quotient and remainder mod d.
         bdʗ1.SetInt64((int64)d);
         bqʗ1.DivMod(btʗ1, bdʗ1, brʗ1);
+
         // To truncate, subtract remainder.
         // br is < d, so it fits in an int64.
         var r = brʗ1.Int64();
         var t1 = t0.Add(-((Δtime.Duration)r));
+
         // Check that time.Truncate works.
         {
             var trunc = t0.Truncate(d); if (trunc != t1) {
@@ -376,6 +383,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
                 return false;
             }
         }
+
         // To round, add d back if remainder r > d/2 or r == exactly d/2.
         // The commented out code would round half to even instead of up,
         // but that makes it time-zone dependent, which is a bit strange.
@@ -383,6 +391,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
             /*&& bq.Bit(0) == 1*/
             t1 = t1.Add(d);
         }
+
         // Check that time.Round works.
         {
             var rnd = t0.Round(d); if (rnd != t1) {
@@ -394,10 +403,12 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         }
         return true;
     }
+
     // manual test cases
     foreach (var (_, tt) in truncateRoundTests) {
         testOne(tt.t.Unix(), (int64)tt.t.Nanosecond(), (int64)tt.d);
     }
+
     // exhaustive near 0
     for (nint i = 0; i < 100; i++) {
         for (nint j = 1; j < 100; j++) {
@@ -408,32 +419,38 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
             }
         }
     }
+
     if (Ꮡt.Failed()) {
         return;
     }
+
     // randomly generated test cases
     var cfg = Ꮡ(new quick.Config(MaxCount: 100000));
     if (Δtesting.Short()) {
         cfg.Value.MaxCount = 1000;
     }
+
     // divisors of Second
     var testOneʗ1 = testOne;
     var f1 = (int64 ti, int32 tns, int32 logdi) => {
-        var d = ((Δtime.Duration)1);
+        var d = (Δtime.Duration)1;
         nuint a = (nuint)(logdi % 9);
-        var b = ((logdi >> (int)(16))) % 9;
+        var b = (logdi >> 16) % 9;
         d <<= (int)(a);
         for (nint i = 0; i < (nint)b; i++) {
             d *= 5;
         }
+
         // Make room for unix ↔ internal conversion.
         // We don't care about behavior too close to ± 2^63 Unix seconds.
         // It is full of wraparounds but will never happen in a reasonable program.
         // (Or maybe not? See go.dev/issue/20678. In any event, they're not handled today.)
         ti >>= (int)(1);
+
         return testOneʗ1(ti, (int64)tns, (int64)d);
     };
     quick.Check((f1).OrTypedNilFunc(), cfg);
+
     // multiples of Second
     var testOneʗ2 = testOne;
     var f2 = (int64 ti, int32 tns, int32 di) => {
@@ -445,6 +462,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         return testOneʗ2(ti, (int64)tns, (int64)d);
     };
     quick.Check((f2).OrTypedNilFunc(), cfg);
+
     // halfway cases
     var testOneʗ3 = testOne;
     var f3 = (int64 tns, int64 di) => {
@@ -461,6 +479,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
         return testOneʗ3(0, tns, di);
     };
     quick.Check((f3).OrTypedNilFunc(), cfg);
+
     // full generality
     var testOneʗ4 = testOne;
     var f4 = (int64 ti, int32 tns, int64 di) => {
@@ -516,13 +535,14 @@ internal static slice<ISOWeekTest> isoWeekTests = new ISOWeekTest[]{
 public static void TestISOWeek(ж<Δtesting.T> Ꮡt) {
     // Selected dates and corner cases
     foreach (var (_, wt) in isoWeekTests) {
-        var dt = Date(wt.year, ((timeꓸMonth)wt.month), wt.day, 0, 0, 0, 0, ΔUTC);
+        var dt = Date(wt.year, (timeꓸMonth)wt.month, wt.day, 0, 0, 0, 0, ΔUTC);
         var (y, w) = dt.ISOWeek();
         if (w != wt.wex || y != wt.yex) {
             Ꮡt.Errorf("got %d/%d; expected %d/%d for %d-%02d-%02d"u8,
                 y, w, wt.yex, wt.wex, wt.year, wt.month, wt.day);
         }
     }
+
     // The only real invariant: Jan 04 is in week 1
     for (nint year = 1950; year < 2100; year++) {
         {
@@ -538,17 +558,10 @@ partial struct YearDayTest {
     internal nint yday;
 }
 
-// Non-leap-year tests
-// Leap-year tests
-// Looks like leap-year (but isn't) tests
-// Year one tests (non-leap)
-// Year minus one tests (non-leap)
-// 400 BC tests (leap-year)
-// Special Cases
-// Gregorian calendar change (no effect)
 // Test YearDay in several different scenarios
 // and corner cases
 internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
+    // Non-leap-year tests
     new(2007, 1, 1, 1),
     new(2007, 1, 15, 15),
     new(2007, 2, 1, 32),
@@ -557,6 +570,8 @@ internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
     new(2007, 3, 15, 74),
     new(2007, 4, 1, 91),
     new(2007, 12, 31, 365),
+
+    // Leap-year tests
     new(2008, 1, 1, 1),
     new(2008, 1, 15, 15),
     new(2008, 2, 1, 32),
@@ -565,6 +580,8 @@ internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
     new(2008, 3, 15, 75),
     new(2008, 4, 1, 92),
     new(2008, 12, 31, 366),
+
+    // Looks like leap-year (but isn't) tests
     new(1900, 1, 1, 1),
     new(1900, 1, 15, 15),
     new(1900, 2, 1, 32),
@@ -573,6 +590,8 @@ internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
     new(1900, 3, 15, 74),
     new(1900, 4, 1, 91),
     new(1900, 12, 31, 365),
+
+    // Year one tests (non-leap)
     new(1, 1, 1, 1),
     new(1, 1, 15, 15),
     new(1, 2, 1, 32),
@@ -581,6 +600,8 @@ internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
     new(1, 3, 15, 74),
     new(1, 4, 1, 91),
     new(1, 12, 31, 365),
+
+    // Year minus one tests (non-leap)
     new(-1, 1, 1, 1),
     new(-1, 1, 15, 15),
     new(-1, 2, 1, 32),
@@ -589,6 +610,8 @@ internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
     new(-1, 3, 15, 74),
     new(-1, 4, 1, 91),
     new(-1, 12, 31, 365),
+
+    // 400 BC tests (leap-year)
     new(-400, 1, 1, 1),
     new(-400, 1, 15, 15),
     new(-400, 2, 1, 32),
@@ -597,6 +620,10 @@ internal static slice<YearDayTest> yearDayTests = new YearDayTest[]{
     new(-400, 3, 15, 75),
     new(-400, 4, 1, 92),
     new(-400, 12, 31, 366),
+
+    // Special Cases
+
+    // Gregorian calendar change (no effect)
     new(1582, 10, 4, 277),
     new(1582, 10, 15, 288)
 }.slice();
@@ -613,13 +640,14 @@ internal static slice<ж<timeꓸLocation>> yearDayLocations = new ж<timeꓸLoca
 public static void TestYearDay(ж<Δtesting.T> Ꮡt) {
     foreach (var (i, loc) in yearDayLocations) {
         foreach (var (_, ydt) in yearDayTests) {
-            var dt = Date(ydt.year, ((timeꓸMonth)ydt.month), ydt.day, 0, 0, 0, 0, loc);
+            var dt = Date(ydt.year, (timeꓸMonth)ydt.month, ydt.day, 0, 0, 0, 0, loc);
             nint yday = dt.YearDay();
             if (yday != ydt.yday) {
                 Ꮡt.Errorf("Date(%d-%02d-%02d in %v).YearDay() = %d, want %d"u8,
                     ydt.year, ydt.month, ydt.day, loc.OrTypedNil(), yday, ydt.yday);
                 continue;
             }
+
             if (ydt.year < 0 || ydt.year > 9999) {
                 continue;
             }
@@ -636,7 +664,6 @@ public static void TestYearDay(ж<Δtesting.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct durationTestsᴛ1 /*dyn*/ {
     internal @string str;
@@ -673,61 +700,40 @@ public static void TestDurationString(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// 1:00:00 PDT
-// 1:59:59 PDT
-// 2:00:00 PST
-// 1:00:00 PST
-// 1:59:59 PST
-// 3:00:00 PDT
-// 2:30:00 PDT ≡ 1:30 PST
-// Leap year
-// Many names for Fri Nov 18 7:56:35 PST 2011
-// Nov 18 7:56:35
-// Nov 19 -17:56:35
-// Nov 17 31:56:35
-// Nov 18 6:116:35
-// Oct 49 7:56:35
-// Nov 18 7:55:95
-// Nov 18 7:56:34 + 10⁹ns
-// Dec -21 7:56:35
-// Jan -52 7:56:35 2012
-// (Jan-2) 18 7:56:35 2012
-// (Dec+11) 18 7:56:35 2010
-// large number of days
-// negative Unix time
-
 partial struct dateTestsᴛ1 /*dyn*/ {
     internal nint year, month, day, hour, min, sec, nsec;
     internal ж<timeꓸLocation> z;
     internal int64 unix;
 }
 internal static slice<dateTestsᴛ1> dateTests = new dateTestsᴛ1[]{
-    new(2011, 11, 6, 1, 0, 0, 0, ΔLocal, 1320566400),
-    new(2011, 11, 6, 1, 59, 59, 0, ΔLocal, 1320569999),
-    new(2011, 11, 6, 2, 0, 0, 0, ΔLocal, 1320573600),
-    new(2011, 3, 13, 1, 0, 0, 0, ΔLocal, 1300006800),
-    new(2011, 3, 13, 1, 59, 59, 0, ΔLocal, 1300010399),
-    new(2011, 3, 13, 3, 0, 0, 0, ΔLocal, 1300010400),
-    new(2011, 3, 13, 2, 30, 0, 0, ΔLocal, 1300008600),
-    new(2012, 12, 24, 0, 0, 0, 0, ΔLocal, 1356336000),
-    new(2011, 11, 18, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(2011, 11, 19, -17, 56, 35, 0, ΔLocal, 1321631795),
-    new(2011, 11, 17, 31, 56, 35, 0, ΔLocal, 1321631795),
-    new(2011, 11, 18, 6, 116, 35, 0, ΔLocal, 1321631795),
-    new(2011, 10, 49, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(2011, 11, 18, 7, 55, 95, 0, ΔLocal, 1321631795),
-    new(2011, 11, 18, 7, 56, 34, 1000000000, ΔLocal, 1321631795),
-    new(2011, 12, -12, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(2012, 1, -43, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(2012, (nint)(January - 2), 18, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(2010, (nint)(December + 11), 18, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(1970, 1, 15297, 7, 56, 35, 0, ΔLocal, 1321631795),
-    new(1970, 1, -25508, 0, 0, 0, 0, ΔLocal, -2203948800L)
+    new(2011, 11, 6, 1, 0, 0, 0, ΔLocal, 1320566400), // 1:00:00 PDT
+    new(2011, 11, 6, 1, 59, 59, 0, ΔLocal, 1320569999), // 1:59:59 PDT
+    new(2011, 11, 6, 2, 0, 0, 0, ΔLocal, 1320573600), // 2:00:00 PST
+    new(2011, 3, 13, 1, 0, 0, 0, ΔLocal, 1300006800), // 1:00:00 PST
+    new(2011, 3, 13, 1, 59, 59, 0, ΔLocal, 1300010399), // 1:59:59 PST
+    new(2011, 3, 13, 3, 0, 0, 0, ΔLocal, 1300010400), // 3:00:00 PDT
+    new(2011, 3, 13, 2, 30, 0, 0, ΔLocal, 1300008600), // 2:30:00 PDT ≡ 1:30 PST
+    new(2012, 12, 24, 0, 0, 0, 0, ΔLocal, 1356336000), // Leap year
+
+    // Many names for Fri Nov 18 7:56:35 PST 2011
+    new(2011, 11, 18, 7, 56, 35, 0, ΔLocal, 1321631795), // Nov 18 7:56:35
+    new(2011, 11, 19, -17, 56, 35, 0, ΔLocal, 1321631795), // Nov 19 -17:56:35
+    new(2011, 11, 17, 31, 56, 35, 0, ΔLocal, 1321631795), // Nov 17 31:56:35
+    new(2011, 11, 18, 6, 116, 35, 0, ΔLocal, 1321631795), // Nov 18 6:116:35
+    new(2011, 10, 49, 7, 56, 35, 0, ΔLocal, 1321631795), // Oct 49 7:56:35
+    new(2011, 11, 18, 7, 55, 95, 0, ΔLocal, 1321631795), // Nov 18 7:55:95
+    new(2011, 11, 18, 7, 56, 34, 1000000000, ΔLocal, 1321631795), // Nov 18 7:56:34 + 10⁹ns
+    new(2011, 12, -12, 7, 56, 35, 0, ΔLocal, 1321631795), // Dec -21 7:56:35
+    new(2012, 1, -43, 7, 56, 35, 0, ΔLocal, 1321631795), // Jan -52 7:56:35 2012
+    new(2012, (nint)(January - 2), 18, 7, 56, 35, 0, ΔLocal, 1321631795), // (Jan-2) 18 7:56:35 2012
+    new(2010, (nint)(December + 11), 18, 7, 56, 35, 0, ΔLocal, 1321631795), // (Dec+11) 18 7:56:35 2010
+    new(1970, 1, 15297, 7, 56, 35, 0, ΔLocal, 1321631795), // large number of days
+    new(1970, 1, -25508, 0, 0, 0, 0, ΔLocal, -2203948800L) // negative Unix time
 }.slice();
 
 public static void TestDate(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, tt) in dateTests) {
-        var time = Date(tt.year, ((timeꓸMonth)tt.month), tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
+        var time = Date(tt.year, (timeꓸMonth)tt.month, tt.day, tt.hour, tt.min, tt.sec, tt.nsec, tt.z);
         var want = Unix(tt.unix, 0);
         if (!time.Equal(want)) {
             Ꮡt.Errorf("Date(%d, %d, %d, %d, %d, %d, %d, %s) = %v, want %v"u8,
@@ -741,7 +747,6 @@ public static void TestDate(ж<Δtesting.T> Ꮡt) {
 // Fri Nov 18 7:56:35 PST 2011
 // to
 // Thu Mar 19 7:56:35 PST 2016
-
 partial struct addDateTestsᴛ1 /*dyn*/ {
     internal nint years, months, days;
 }
@@ -763,6 +768,7 @@ public static void TestAddDate(ж<Δtesting.T> Ꮡt) {
                 time, t1);
         }
     }
+
     var t2 = Date(1899, 12, 31, 0, 0, 0, 0, ΔUTC);
     var days = t2.Unix() / (24 * 60 * 60);
     var t3 = Unix(0, 0).AddDate(0, 0, (nint)days);
@@ -771,21 +777,15 @@ public static void TestAddDate(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// January, first month, 31 days
-// February, non-leap year, 28 days
-// February, leap year, 29 days
-// June, 30 days
-// December, last month, 31 days
-
 partial struct daysInTestsᴛ1 /*dyn*/ {
     internal nint year, month, di;
 }
 internal static slice<daysInTestsᴛ1> daysInTests = new daysInTestsᴛ1[]{
-    new(2011, 1, 31),
-    new(2011, 2, 28),
-    new(2012, 2, 29),
-    new(2011, 6, 30),
-    new(2011, 12, 31)
+    new(2011, 1, 31), // January, first month, 31 days
+    new(2011, 2, 28), // February, non-leap year, 28 days
+    new(2012, 2, 29), // February, leap year, 29 days
+    new(2011, 6, 30), // June, 30 days
+    new(2011, 12, 31) // December, last month, 31 days
 }.slice();
 
 public static void TestDaysIn(ж<Δtesting.T> Ꮡt) {
@@ -793,7 +793,7 @@ public static void TestDaysIn(ж<Δtesting.T> Ꮡt) {
     // Test the daysIn function via the `var DaysIn = daysIn`
     // statement in the internal_test.go file.
     foreach (var (_, tt) in daysInTests) {
-        nint di = time_internal_test_package.DaysIn(((timeꓸMonth)tt.month), tt.year);
+        nint di = time_internal_test_package.DaysIn((timeꓸMonth)tt.month, tt.year);
         if (di != tt.di) {
             Ꮡt.Errorf("got %d; expected %d for %d-%02d"u8,
                 di, tt.di, tt.year, tt.month);
@@ -818,13 +818,11 @@ internal static bool equalTimeAndZone(Δtime.Time a, Δtime.Time b) {
     return a.Equal(b) && aoffset == boffset && aname == bname;
 }
 
-// Time.sec: 0x0123456789ABCDEF
-// nil location
 internal static slice<Δtime.Time> gobTests = new Δtime.Time[]{
     Date(0, 1, 2, 3, 4, 5, 6, ΔUTC),
     Date(7, 8, 9, 10, 11, 12, 13, FixedZone(""u8, 0)),
-    Unix(81985467080890095L, 0x76543210),
-    new(),
+    Unix(81985467080890095L, 0x76543210), // Time.sec: 0x0123456789ABCDEF
+    new(), // nil location
     Date(1, 2, 3, 4, 5, 6, 7, FixedZone(""u8, 32767 * 60)),
     Date(1, 2, 3, 4, 5, 6, 7, FixedZone(""u8, -32768 * 60))
 }.slice();
@@ -855,7 +853,6 @@ public static void TestTimeGob(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct invalidEncodingTestsᴛ1 /*dyn*/ {
     internal slice<byte> bytes;
     internal @string want;
@@ -880,7 +877,6 @@ public static void TestInvalidTimeGob(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct notEncodableTimesᴛ1 /*dyn*/ {
     internal Δtime.Time time;
     internal @string want;
@@ -904,7 +900,6 @@ public static void TestNotGobEncodableTime(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct jsonTestsᴛ1 /*dyn*/ {
     internal Δtime.Time time;
     internal @string json;
@@ -919,12 +914,13 @@ internal static slice<jsonTestsᴛ1> jsonTests = new jsonTestsᴛ1[]{
 public static void TestTimeJSON(ж<Δtesting.T> Ꮡt) {
     foreach (var (_, tt) in jsonTests) {
         ref var jsonTime = ref heap(new Δtime.Time(), out var ᏑjsonTime);
+
         {
             var (jsonBytes, err) = json.Marshal(tt.time); if (err != default!){
                 Ꮡt.Errorf("%v json.Marshal error = %v, want nil"u8, tt.time, err);
             } else 
             if (((sstring)jsonBytes) != tt.json){
-                Ꮡt.Errorf("%v JSON = %#q, want %#q"u8, tt.time, ((@string)jsonBytes), tt.json);
+                Ꮡt.Errorf("%v JSON = %#q, want %#q"u8, tt.time, (@string)jsonBytes, tt.json);
             } else 
             {
                 err = json.Unmarshal(jsonBytes, ᏑjsonTime); if (err != default!){
@@ -953,13 +949,16 @@ public static void TestUnmarshalInvalidTimes(ж<Δtesting.T> Ꮡt) {
         new(@"""2000-01-01T00:00:00+00:60"""u8, @"<nil>"u8),
         new(@"""2000-01-01T00:00:00+123:45"""u8, @"parsing time ""2000-01-01T00:00:00+123:45"" as ""2006-01-02T15:04:05Z07:00"": cannot parse ""+123:45"" as ""Z07:00"""u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         ref var ts = ref heap(new Δtime.Time(), out var Ꮡts);
+
         @string want = tt.want;
         var err = json.Unmarshal(slice<byte>(tt.@in), Ꮡts);
         if (fmt.Sprint(err) != want) {
             Ꮡt.Errorf("Time.UnmarshalJSON(%s) = %v, want %v"u8, tt.@in, err, want);
         }
+
         if (strings.HasPrefix(tt.@in, @""""u8) && strings.HasSuffix(tt.@in, @""""u8)) {
             err = ts.UnmarshalText(slice<byte>(strings.Trim(tt.@in, @""""u8)));
             if (fmt.Sprint(err) != want) {
@@ -983,6 +982,7 @@ public static void TestMarshalInvalidTimes(ж<Δtesting.T> Ꮡt) {
         new(Date(2020, 1, 1, 0, 0, 0, 0, FixedZone(""u8, 24 * 60 * 60)), "Time.MarshalJSON: timezone hour outside of range [0,23]"u8),
         new(Date(2020, 1, 1, 0, 0, 0, 0, FixedZone(""u8, 123 * 60 * 60)), "Time.MarshalJSON: timezone hour outside of range [0,23]"u8)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         @string want = tt.want;
         var (b, err) = tt.time.MarshalJSON();
@@ -1020,39 +1020,25 @@ public static void TestMarshalInvalidTimes(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Errorf("(%v).AppendText() error = %v, want %v"u8, tt.time, err, want);
             break;
         }}
-
     }
 }
-
-// simple
-// sign
-// decimal
-// different units
-// U+00B5
-// U+03BC
-// composite durations
-// large value
-// more than 9 digits after decimal point, see https://golang.org/issue/6617
-// 9007199254740993 = 1<<53+1 cannot be stored precisely in a float64
-// largest duration that can be represented by int64 in nanoseconds
-// largest negative value
-// largest negative round trip value, see https://golang.org/issue/48629
-// huge string; issue 15011.
-// This value tests the first overflow check in leadingFraction.
 
 partial struct parseDurationTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal Δtime.Duration want;
 }
 internal static slice<parseDurationTestsᴛ1> parseDurationTests = new parseDurationTestsᴛ1[]{
+    // simple
     new("0"u8, 0),
     new("5s"u8, (Δtime.Duration)(5000000000L)),
     new("30s"u8, (Δtime.Duration)(30000000000L)),
     new("1478s"u8, (Δtime.Duration)(1478000000000L)),
+    // sign
     new("-5s"u8, (Δtime.Duration)(-5000000000L)),
     new("+5s"u8, (Δtime.Duration)(5000000000L)),
     new("-0"u8, 0),
     new("+0"u8, 0),
+    // decimal
     new("5.0s"u8, (Δtime.Duration)(5000000000L)),
     new("5.6s"u8, (Δtime.Duration)(5600000000L)),
     new("5.s"u8, (Δtime.Duration)(5000000000L)),
@@ -1062,31 +1048,41 @@ internal static slice<parseDurationTestsᴛ1> parseDurationTests = new parseDura
     new("1.004s"u8, 1 * ΔSecond + 4 * Millisecond),
     new("1.0040s"u8, 1 * ΔSecond + 4 * Millisecond),
     new("100.00100s"u8, (Δtime.Duration)(100001000000L)),
+    // different units
     new("10ns"u8, 10 * ΔNanosecond),
     new("11us"u8, 11 * Microsecond),
-    new("12µs"u8, 12 * Microsecond),
-    new("12μs"u8, 12 * Microsecond),
+    new("12µs"u8, 12 * Microsecond), // U+00B5
+    new("12μs"u8, 12 * Microsecond), // U+03BC
     new("13ms"u8, 13 * Millisecond),
     new("14s"u8, (Δtime.Duration)(14000000000L)),
     new("15m"u8, (Δtime.Duration)(900000000000L)),
     new("16h"u8, (Δtime.Duration)(57600000000000L)),
+    // composite durations
     new("3h30m"u8, (Δtime.Duration)(12600000000000L)),
     new("10.5s4m"u8, (Δtime.Duration)(250500000000L)),
     new("-2m3.4s"u8, -((Δtime.Duration)(123400000000L))),
     new("1h2m3s4ms5us6ns"u8, (Δtime.Duration)(3723004005006L)),
     new("39h9m14.425s"u8, (Δtime.Duration)(140954425000000L)),
+    // large value
     new("52763797000ns"u8, (Δtime.Duration)(52763797000L)),
+    // more than 9 digits after decimal point, see https://golang.org/issue/6617
     new("0.3333333333333333333h"u8, (Δtime.Duration)(1200000000000L)),
+    // 9007199254740993 = 1<<53+1 cannot be stored precisely in a float64
     new("9007199254740993ns"u8, (Δtime.Duration)(9007199254740993L)),
+    // largest duration that can be represented by int64 in nanoseconds
     new("9223372036854775807ns"u8, (Δtime.Duration)(9223372036854775807L)),
     new("9223372036854775.807us"u8, (Δtime.Duration)(9223372036854775807L)),
     new("9223372036s854ms775us807ns"u8, (Δtime.Duration)(9223372036854775807L)),
     new("-9223372036854775808ns"u8, (Δtime.Duration)(-9223372036854775808L)),
     new("-9223372036854775.808us"u8, (Δtime.Duration)(-9223372036854775808L)),
     new("-9223372036s854ms775us808ns"u8, (Δtime.Duration)(-9223372036854775808L)),
+    // largest negative value
     new("-9223372036854775808ns"u8, (Δtime.Duration)(-9223372036854775808L)),
+    // largest negative round trip value, see https://golang.org/issue/48629
     new("-2562047h47m16.854775808s"u8, (Δtime.Duration)(-9223372036854775808L)),
+    // huge string; issue 15011.
     new("0.100000000000000000000h"u8, (Δtime.Duration)(360000000000L)),
+    // This value tests the first overflow check in leadingFraction.
     new("0.830103483285477580700h"u8, (Δtime.Duration)(2988372539827L))
 }.slice();
 
@@ -1099,16 +1095,12 @@ public static void TestParseDuration(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// invalid
-// utf8.RuneError
-// utf8.RuneError
-// overflow
-
 partial struct parseDurationErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string expect;
 }
 internal static slice<parseDurationErrorTestsᴛ1> parseDurationErrorTests = new parseDurationErrorTestsᴛ1[]{
+    // invalid
     new(""u8, @""""""u8),
     new("3"u8, @"""3"""u8),
     new("-"u8, @"""-"""u8),
@@ -1121,8 +1113,9 @@ internal static slice<parseDurationErrorTestsᴛ1> parseDurationErrorTests = new
     new(((@string)(new byte[]{0x85, 0x85})), @"""\x85\x85"""u8),
     new(((@string)(new byte[]{0xff, 0x66, 0x66})), @"""\xffff"""u8),
     new(((@string)(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0xff, 0x66, 0x66, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64})), @"""hello \xffff world"""u8),
-    new("\uFFFD"u8, @"""\xef\xbf\xbd"""u8),
-    new("\uFFFD hello \uFFFD world"u8, @"""\xef\xbf\xbd hello \xef\xbf\xbd world"""u8),
+    new("\uFFFD"u8, @"""\xef\xbf\xbd"""u8), // utf8.RuneError
+    new("\uFFFD hello \uFFFD world"u8, @"""\xef\xbf\xbd hello \xef\xbf\xbd world"""u8), // utf8.RuneError
+    // overflow
     new("9223372036854775810ns"u8, @"""9223372036854775810ns"""u8),
     new("9223372036854775808ns"u8, @"""9223372036854775808ns"""u8),
     new("-9223372036854775809ns"u8, @"""-9223372036854775809ns"""u8),
@@ -1146,16 +1139,18 @@ public static void TestParseDurationErrors(ж<Δtesting.T> Ꮡt) {
 
 public static void TestParseDurationRoundTrip(ж<Δtesting.T> Ꮡt) {
     // https://golang.org/issue/48629
-    var max0 = ((Δtime.Duration)Δmath.MaxInt64);
+    var max0 = (Δtime.Duration)Δmath.MaxInt64;
     var (max1, err) = ParseDuration(max0.String());
     if (err != default! || max0 != max1) {
         Ꮡt.Errorf("round-trip failed: %d => %q => %d, %v"u8, max0, max0.String(), max1, err);
     }
-    var min0 = ((Δtime.Duration)Δmath.MinInt64);
+
+    var min0 = (Δtime.Duration)Δmath.MinInt64;
     (var min1, err) = ParseDuration(min0.String());
     if (err != default! || min0 != min1) {
         Ꮡt.Errorf("round-trip failed: %d => %q => %d, %v"u8, min0, min0.String(), min1, err);
     }
+
     for (nint i = 0; i < 100; i++) {
         // Resolutions finer than milliseconds will result in
         // imprecise round-trips.
@@ -1171,6 +1166,7 @@ public static void TestParseDurationRoundTrip(ж<Δtesting.T> Ꮡt) {
 // golang.org/issue/4622
 public static partial void TestLocationRace(ж<Δtesting.T> Ꮡt) {
     time_internal_test_package.ResetLocalOnceForTest(); // reset the Once to trigger the race
+
     var c = new channel<@string>(1);
     var cʗ1 = c;
     goǃ(() => {
@@ -1179,13 +1175,13 @@ public static partial void TestLocationRace(ж<Δtesting.T> Ꮡt) {
     _ = Now().String();
     ᐸꟷ(c);
     Sleep(100 * Millisecond);
+
     // Back to Los Angeles for subsequent tests:
     time_internal_test_package.ForceUSPacificForTesting();
 }
 
 internal static Δtime.Time t;
 internal static int64 u;
-
 
 partial struct mallocTestᴛ1 /*dyn*/ {
     internal nint count;
@@ -1235,6 +1231,7 @@ public static void TestLoadFixed(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // The tzdata name Etc/GMT+1 uses "east is negative",
     // but Go and most other systems use "east is positive".
     // So GMT+1 corresponds to -3600 in the Go zone, not +3600.
@@ -1255,15 +1252,14 @@ public static void TestLoadFixed(ж<Δtesting.T> Ꮡt) {
 internal static Δtime.Duration minDuration => /* -1 << 63 */ -9223372036854775808;
 internal static Δtime.Duration maxDuration => /* 1<<63 - 1 */ 9223372036854775807;
 
-
 partial struct subTestsᴛ1 /*dyn*/ {
     internal Δtime.Time t;
     internal Δtime.Time u;
     internal Δtime.Duration d;
 }
 internal static slice<subTestsᴛ1> subTests = new subTestsᴛ1[]{
-    new(new Time(nil), new Time(nil), ((Δtime.Duration)0)),
-    new(Date(2009, 11, 23, 0, 0, 0, 1, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), ((Δtime.Duration)1)),
+    new(new Time(nil), new Time(nil), (Δtime.Duration)0),
+    new(Date(2009, 11, 23, 0, 0, 0, 1, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)1),
     new(Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), Date(2009, 11, 24, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(-86400000000000L)),
     new(Date(2009, 11, 24, 0, 0, 0, 0, ΔUTC), Date(2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(86400000000000L)),
     new(Date(-2009, 11, 24, 0, 0, 0, 0, ΔUTC), Date(-2009, 11, 23, 0, 0, 0, 0, ΔUTC), (Δtime.Duration)(86400000000000L)),
@@ -1291,16 +1287,15 @@ public static void TestSub(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct nsDurationTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal int64 want;
 }
 internal static slice<nsDurationTestsᴛ1> nsDurationTests = new nsDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-1000)), -1000),
-    new(((Δtime.Duration)(-1)), -1),
-    new(((Δtime.Duration)1), 1),
-    new(((Δtime.Duration)1000), 1000)
+    new((Δtime.Duration)(-1000), -1000),
+    new((Δtime.Duration)(-1), -1),
+    new((Δtime.Duration)1, 1),
+    new((Δtime.Duration)1000, 1000)
 }.slice();
 
 public static void TestDurationNanoseconds(ж<Δtesting.T> Ꮡt) {
@@ -1314,8 +1309,8 @@ public static void TestDurationNanoseconds(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<nsDurationTestsᴛ1> usDurationTests = new nsDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-1000)), -1),
-    new(((Δtime.Duration)1000), 1)
+    new((Δtime.Duration)(-1000), -1),
+    new((Δtime.Duration)1000, 1)
 }.slice();
 
 public static void TestDurationMicroseconds(ж<Δtesting.T> Ꮡt) {
@@ -1329,8 +1324,8 @@ public static void TestDurationMicroseconds(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<nsDurationTestsᴛ1> msDurationTests = new nsDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-1000000)), -1),
-    new(((Δtime.Duration)1000000), 1)
+    new((Δtime.Duration)(-1000000), -1),
+    new((Δtime.Duration)1000000, 1)
 }.slice();
 
 public static void TestDurationMilliseconds(ж<Δtesting.T> Ꮡt) {
@@ -1343,13 +1338,12 @@ public static void TestDurationMilliseconds(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct secDurationTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal float64 want;
 }
 internal static slice<secDurationTestsᴛ1> secDurationTests = new secDurationTestsᴛ1[]{
-    new(((Δtime.Duration)300000000), 0.3D)
+    new((Δtime.Duration)300000000, 0.3D)
 }.slice();
 
 public static void TestDurationSeconds(ж<Δtesting.T> Ꮡt) {
@@ -1363,11 +1357,11 @@ public static void TestDurationSeconds(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<secDurationTestsᴛ1> minDurationTests = new secDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-60000000000L)), -1D),
-    new(((Δtime.Duration)(-1)), -1D / 60e9D),
-    new(((Δtime.Duration)1), 1D / 60e9D),
-    new(((Δtime.Duration)60000000000L), 1D),
-    new(((Δtime.Duration)3000), 5e-8D)
+    new((Δtime.Duration)(-60000000000L), -1D),
+    new((Δtime.Duration)(-1), -1D / 60e9D),
+    new((Δtime.Duration)1, 1D / 60e9D),
+    new((Δtime.Duration)60000000000L, 1D),
+    new((Δtime.Duration)3000, 5e-8D)
 }.slice();
 
 public static void TestDurationMinutes(ж<Δtesting.T> Ꮡt) {
@@ -1381,11 +1375,11 @@ public static void TestDurationMinutes(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static slice<secDurationTestsᴛ1> hourDurationTests = new secDurationTestsᴛ1[]{
-    new(((Δtime.Duration)(-3600000000000L)), -1D),
-    new(((Δtime.Duration)(-1)), -1D / 3600e9D),
-    new(((Δtime.Duration)1), 1D / 3600e9D),
-    new(((Δtime.Duration)3600000000000L), 1D),
-    new(((Δtime.Duration)36), 1e-11D)
+    new((Δtime.Duration)(-3600000000000L), -1D),
+    new((Δtime.Duration)(-1), -1D / 3600e9D),
+    new((Δtime.Duration)1, 1D / 3600e9D),
+    new((Δtime.Duration)3600000000000L, 1D),
+    new((Δtime.Duration)36, 1e-11D)
 }.slice();
 
 public static void TestDurationHours(ж<Δtesting.T> Ꮡt) {
@@ -1397,7 +1391,6 @@ public static void TestDurationHours(ж<Δtesting.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct durationTruncateTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
@@ -1460,7 +1453,6 @@ public static void TestDurationRound(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct durationAbsTestsᴛ1 /*dyn*/ {
     internal Δtime.Duration d;
     internal Δtime.Duration want;
@@ -1487,9 +1479,6 @@ public static void TestDurationAbs(ж<Δtesting.T> Ꮡt) {
         }
     }
 }
-
-// Using Equal since Add don't modify loc using "==" will cause a fail
-// Original cause for this test case bug 15852
 
 partial struct defaultLocTestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -1525,8 +1514,12 @@ internal static slice<defaultLocTestsᴛ1> defaultLocTests = new defaultLocTests
     new("Second"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Second() == t2.Second()),
     new("Nanosecond"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Hour() == t2.Hour()),
     new("YearDay"u8, (Δtime.Time t1, Δtime.Time t2) => t1.YearDay() == t2.YearDay()),
+
+    // Using Equal since Add don't modify loc using "==" will cause a fail
     new("Add"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Add(ΔHour).Equal(t2.Add(ΔHour))),
     new("Sub"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Sub(t2) == t2.Sub(t1)),
+
+    // Original cause for this test case bug 15852
     new("AddDate"u8, (Δtime.Time t1, Δtime.Time t2) => t1.AddDate(1991, 9, 3) == t2.AddDate(1991, 9, 3)),
     new("UTC"u8, (Δtime.Time t1, Δtime.Time t2) => t1.UTC() == t2.UTC()),
     new("Local"u8, (Δtime.Time t1, Δtime.Time t2) => t1.Local() == t2.Local()),
@@ -1717,7 +1710,7 @@ public static void BenchmarkParseRFC3339UTCBytes(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        Parse(RFC3339, ((@string)testdataRFC3339UTCBytes));
+        Parse(RFC3339, (@string)testdataRFC3339UTCBytes);
     }
 }
 
@@ -1737,7 +1730,7 @@ public static void BenchmarkParseRFC3339TZBytes(ж<Δtesting.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (nint i = 0; i < b.N; i++) {
-        Parse(RFC3339, ((@string)testdataRFC3339TZBytes));
+        Parse(RFC3339, (@string)testdataRFC3339TZBytes);
     }
 }
 
@@ -1885,11 +1878,13 @@ public static void TestMarshalBinaryVersion2(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Errorf("Failed to Marshal, error = %v"u8, err);
     }
+
     var t2 = new Time(nil);
     err = t2.UnmarshalBinary(b);
     if (err != default!) {
         Ꮡt.Errorf("Failed to Unmarshal, error = %v"u8, err);
     }
+
     if (!(t0.Equal(t1) && t1.Equal(t2))) {
         if (!t0.Equal(t1)) {
             Ꮡt.Errorf("The result t1: %+v after Marshal is not matched original t0: %+v"u8, t1, t0);
@@ -2045,6 +2040,7 @@ public static void TestTimeIsDST(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         var (tzWithDST, err) = LoadLocation(australiaSydneyˢ);
         if (err != default!) {
             Ꮡt.Fatalf("could not load tz 'Australia/Sydney': %v"u8, err);
@@ -2054,6 +2050,7 @@ public static void TestTimeIsDST(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("could not load tz 'Australia/Brisbane': %v"u8, err);
         }
         var tzFixed = FixedZone(fixedTimeˢ, 12345);
+
         var tests = new array<TestTimeIsDST_tests>(8){
             [0] = new(Date(2009, 1, 1, 12, 0, 0, 0, ΔUTC), false),
             [1] = new(Date(2009, 6, 1, 12, 0, 0, 0, ΔUTC), false),
@@ -2064,6 +2061,7 @@ public static void TestTimeIsDST(ж<Δtesting.T> Ꮡt) {
             [6] = new(Date(2009, 1, 1, 12, 0, 0, 0, tzFixed), false),
             [7] = new(Date(2009, 6, 1, 12, 0, 0, 0, tzFixed), false)
         };
+
         foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
             var got = tt.time.IsDST();
             if (got != tt.want) {
@@ -2082,19 +2080,20 @@ public static void TestTimeAddSecOverflow(ж<Δtesting.T> Ꮡt) {
     var notMonoTime = Unix(timeExt, 0);
     for (var i = (int64)0; i < 100; i++) {
         var sec = notMonoTime.Unix();
-        notMonoTime = notMonoTime.Add(((Δtime.Duration)(i * 1000000000)));
+        notMonoTime = notMonoTime.Add((Δtime.Duration)(i * 1000000000));
         {
             var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
                 Ꮡt.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d"u8, newSec, maxInt64);
             }
         }
     }
+
     // Test it with negative delta.
     maxInt64 = -maxInt64;
     notMonoTime = time_internal_test_package.NotMonoNegativeTime;
     for (var i = (int64)0; i > -100; i--) {
         var sec = notMonoTime.Unix();
-        notMonoTime = notMonoTime.Add(((Δtime.Duration)(i * 1000000000)));
+        notMonoTime = notMonoTime.Add((Δtime.Duration)(i * 1000000000));
         {
             var newSec = notMonoTime.Unix(); if (newSec != sec + i && newSec + time_internal_test_package.UnixToInternal != maxInt64) {
                 Ꮡt.Fatalf("time ext: %d overflows with positive delta, overflow threshold: %d"u8, newSec, maxInt64);
@@ -2115,30 +2114,34 @@ public static void TestTimeWithZoneTransition(ж<Δtesting.T> Ꮡt) {
         var undo = time_internal_test_package.DisablePlatformSources();
         var undoʗ1 = undo;
         defer(undoʗ1, ref ᒐ);
+
         var (loc, err) = LoadLocation(asiaShanghaiˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        var tests = new array<TestTimeWithZoneTransition_tests>(8){ // 14 Apr 1991 - Daylight Saving Time Started
- // When time of "Asia/Shanghai" was about to reach
- // Sunday, 14 April 1991, 02:00:00 clocks were turned forward 1 hour to
- // Sunday, 14 April 1991, 03:00:00 local daylight time instead.
- // The UTC time was 13 April 1991, 18:00:00
 
+        var tests = new array<TestTimeWithZoneTransition_tests>(8){
+            // 14 Apr 1991 - Daylight Saving Time Started
+            // When time of "Asia/Shanghai" was about to reach
+            // Sunday, 14 April 1991, 02:00:00 clocks were turned forward 1 hour to
+            // Sunday, 14 April 1991, 03:00:00 local daylight time instead.
+            // The UTC time was 13 April 1991, 18:00:00
             [0] = new(Date(1991, April, 13, 17, 50, 0, 0, loc), Date(1991, April, 13, 9, 50, 0, 0, ΔUTC)),
             [1] = new(Date(1991, April, 13, 18, 0, 0, 0, loc), Date(1991, April, 13, 10, 0, 0, 0, ΔUTC)),
             [2] = new(Date(1991, April, 14, 1, 50, 0, 0, loc), Date(1991, April, 13, 17, 50, 0, 0, ΔUTC)),
-            [3] = new(Date(1991, April, 14, 3, 0, 0, 0, loc), Date(1991, April, 13, 18, 0, 0, 0, ΔUTC)), // 15 Sep 1991 - Daylight Saving Time Ended
- // When local daylight time of "Asia/Shanghai" was about to reach
- // Sunday, 15 September 1991, 02:00:00 clocks were turned backward 1 hour to
- // Sunday, 15 September 1991, 01:00:00 local standard time instead.
- // The UTC time was 14 September 1991, 17:00:00
+            [3] = new(Date(1991, April, 14, 3, 0, 0, 0, loc), Date(1991, April, 13, 18, 0, 0, 0, ΔUTC)),
 
+            // 15 Sep 1991 - Daylight Saving Time Ended
+            // When local daylight time of "Asia/Shanghai" was about to reach
+            // Sunday, 15 September 1991, 02:00:00 clocks were turned backward 1 hour to
+            // Sunday, 15 September 1991, 01:00:00 local standard time instead.
+            // The UTC time was 14 September 1991, 17:00:00
             [4] = new(Date(1991, September, 14, 16, 50, 0, 0, loc), Date(1991, September, 14, 7, 50, 0, 0, ΔUTC)),
             [5] = new(Date(1991, September, 14, 17, 0, 0, 0, loc), Date(1991, September, 14, 8, 0, 0, 0, ΔUTC)),
             [6] = new(Date(1991, September, 15, 0, 50, 0, 0, loc), Date(1991, September, 14, 15, 50, 0, 0, ΔUTC)),
             [7] = new(Date(1991, September, 15, 2, 0, 0, 0, loc), Date(1991, September, 14, 18, 0, 0, 0, ΔUTC))
         };
+
         foreach (var (i, tt) in tests.ΔRangeSnapshot()) {
             if (!tt.give.Equal(tt.want)) {
                 Ꮡt.Errorf("#%d:: %#v is not equal to %#v"u8, i, tt.give.Format(RFC3339), tt.want.Format(RFC3339));
@@ -2165,6 +2168,7 @@ public static void TestZoneBounds(ж<Δtesting.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         // The ZoneBounds of a UTC location would just return two zero Time.
         foreach (var (_, vᴛ1) in utctests) {
             ref var test = ref heap(new TimeTest(), out var Ꮡtest);
@@ -2178,6 +2182,7 @@ public static void TestZoneBounds(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf("ZoneBounds of %+v expects two zero Time, got:\n  start=%v\n  end=%v"u8, golden.Value, startΔ1, endΔ1);
             }
         }
+
         // If the zone begins at the beginning of time, start will be returned as a zero Time.
         // Use math.MinInt32 to avoid overflow of int arguments on 32-bit systems.
         var beginTime = Date(Δmath.MinInt32, January, 1, 0, 0, 0, 0, loc);
@@ -2185,6 +2190,7 @@ public static void TestZoneBounds(ж<Δtesting.T> Ꮡt) {
         if (!start.IsZero() || end.IsZero()) {
             Ꮡt.Errorf("ZoneBounds of %v expects start is zero Time, got:\n  start=%v\n  end=%v"u8, beginTime, start, end);
         }
+
         // If the zone goes on forever, end will be returned as a zero Time.
         // Use math.MaxInt32 to avoid overflow of int arguments on 32-bit systems.
         var foreverTime = Date(Δmath.MaxInt32, January, 1, 0, 0, 0, 0, loc);
@@ -2192,21 +2198,23 @@ public static void TestZoneBounds(ж<Δtesting.T> Ꮡt) {
         if (start.IsZero() || !end.IsZero()) {
             Ꮡt.Errorf("ZoneBounds of %v expects end is zero Time, got:\n  start=%v\n  end=%v"u8, foreverTime, start, end);
         }
+
         // Check some real-world cases to make sure we're getting the right bounds.
         var boundOne = Date(1990, September, 16, 1, 0, 0, 0, loc);
         var boundTwo = Date(1991, April, 14, 3, 0, 0, 0, loc);
         var boundThree = Date(1991, September, 15, 1, 0, 0, 0, loc);
         Δtime.Time makeLocalTime(int64 sec) => Unix(sec, 0);
-        var realTests = new array<TestZoneBounds_realTests>(23){ // The ZoneBounds of "Asia/Shanghai" Daylight Saving Time
-
+        var realTests = new array<TestZoneBounds_realTests>(23){
+            // The ZoneBounds of "Asia/Shanghai" Daylight Saving Time
             [0] = new(Date(1991, April, 13, 17, 50, 0, 0, loc), boundOne, boundTwo),
             [1] = new(Date(1991, April, 13, 18, 0, 0, 0, loc), boundOne, boundTwo),
             [2] = new(Date(1991, April, 14, 1, 50, 0, 0, loc), boundOne, boundTwo),
             [3] = new(boundTwo, boundTwo, boundThree),
             [4] = new(Date(1991, September, 14, 16, 50, 0, 0, loc), boundTwo, boundThree),
             [5] = new(Date(1991, September, 14, 17, 0, 0, 0, loc), boundTwo, boundThree),
-            [6] = new(Date(1991, September, 15, 0, 50, 0, 0, loc), boundTwo, boundThree), // The ZoneBounds of a "Asia/Shanghai" after the last transition (Standard Time)
+            [6] = new(Date(1991, September, 15, 0, 50, 0, 0, loc), boundTwo, boundThree),
 
+            // The ZoneBounds of a "Asia/Shanghai" after the last transition (Standard Time)
             [7] = new(boundThree, boundThree, new Time(nil)),
             [8] = new(Date(1991, December, 15, 1, 50, 0, 0, loc), boundThree, new Time(nil)),
             [9] = new(Date(1992, April, 13, 17, 50, 0, 0, loc), boundThree, new Time(nil)),
@@ -2214,9 +2222,10 @@ public static void TestZoneBounds(ж<Δtesting.T> Ꮡt) {
             [11] = new(Date(1992, April, 14, 1, 50, 0, 0, loc), boundThree, new Time(nil)),
             [12] = new(Date(1992, September, 14, 16, 50, 0, 0, loc), boundThree, new Time(nil)),
             [13] = new(Date(1992, September, 14, 17, 0, 0, 0, loc), boundThree, new Time(nil)),
-            [14] = new(Date(1992, September, 15, 0, 50, 0, 0, loc), boundThree, new Time(nil)), // The ZoneBounds of a local time would return two local Time.
- // Note: We preloaded "America/Los_Angeles" as time.Local for testing
+            [14] = new(Date(1992, September, 15, 0, 50, 0, 0, loc), boundThree, new Time(nil)),
 
+            // The ZoneBounds of a local time would return two local Time.
+            // Note: We preloaded "America/Los_Angeles" as time.Local for testing
             [15] = new(makeLocalTime(0), makeLocalTime(-5756400), makeLocalTime(9972000)),
             [16] = new(makeLocalTime(1221681866), makeLocalTime(1205056800), makeLocalTime(1225616400)),
             [17] = new(makeLocalTime(2152173599L), makeLocalTime(2145916800), makeLocalTime(2152173600L)),

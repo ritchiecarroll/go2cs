@@ -194,7 +194,7 @@ internal static (Attr, slice<any>) argsToAttr(slice<any> args) {
 }
 
 // Source describes the location of a line of source code.
-partial struct Source {
+partial struct ΔSource {
     // Function is the package path-qualified function name containing the
     // source line. If non-empty, this string uniquely identifies a single
     // function in the program. This may be the empty string if not known.
@@ -214,7 +214,7 @@ internal static readonly @string lineˢ = "line"u8;
 // It is similar to a LogValue method, but we don't want Source
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
-internal static Value group(this ref Source s) {
+internal static Value group(this ref ΔSource s) {
     slice<Attr> @as = default!;
     if (s.Function != ""u8) {
         @as = builtin.append(@as, String(functionˢ, s.Function));
@@ -228,16 +228,26 @@ internal static Value group(this ref Source s) {
     return GroupValue(@as.ꓸꓸꓸ);
 }
 
-// source returns a Source for the log event.
-// If the Record was created without the necessary information,
-// or if the location is unavailable, it returns a non-nil *Source
-// with zero fields.
-internal static ж<Source> source(this Record r) {
+// isEmpty returns whether the Source struct is nil or only contains zero fields.
+internal static bool isEmpty(this ж<ΔSource> Ꮡs) {
+    ref var s = ref Ꮡs.DerefOrNull();
+
+    return Ꮡs == nil || s == new ΔSource(nil);
+}
+
+// Source returns a new Source for the log event using r's PC.
+// If the PC field is zero, meaning the Record was created without the necessary information
+// or the location is unavailable, then nil is returned.
+public static ж<ΔSource> Source(this Record r) {
     r = r.ΔClone();
+
+    if (r.PC == 0) {
+        return default!;
+    }
 
     var fs = runtime.CallersFrames(new uintptr[]{r.PC}.slice());
     var (f, _) = fs.Next();
-    return Ꮡ(new Source(
+    return Ꮡ(new ΔSource(
         Function: f.Function,
         File: f.File,
         Line: f.Line

@@ -49,7 +49,7 @@ internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) {
     ᏑserverInit.Do(runtime_pollServerInit);
     var (ctx, errno) = runtime_pollOpen((uintptr)fd.Sysfd);
     if (errno != 0) {
-        return errnoErr(((Δsyscall.Errno)(uintptr)errno));
+        return errnoErr((Δsyscall.Errno)(uintptr)errno);
     }
     pd.runtimeCtx = ctx;
     return default!;
@@ -120,11 +120,8 @@ internal static bool pollable(this ref pollDesc pd) {
 // Error values returned by runtime_pollReset and runtime_pollWait.
 // These must match the values in runtime/netpoll.go.
 internal static UntypedInt pollNoError => 0;
-
 internal static UntypedInt pollErrClosing => 1;
-
 internal static UntypedInt pollErrTimeout => 2;
-
 internal static UntypedInt pollErrNotPollable => 3;
 
 internal static error convertErr(nint res, bool isFile) {
@@ -141,7 +138,6 @@ internal static error convertErr(nint res, bool isFile) {
     if (exprᴛ1 == pollErrNotPollable) {
         return ErrNotPollable;
     }
-
     println((@string)"unreachable: "u8, res);
     throw panic("unreachable");
 }
@@ -179,6 +175,7 @@ internal static error setDeadlineImpl(ж<FD> Ꮡfd, time.Time t, nint mode) {
             }
         }
         defer(() => Ꮡfd.decref(), ref ᒐ);
+
         if (fd.pd.runtimeCtx == 0) {
             return ErrNoDeadline;
         }

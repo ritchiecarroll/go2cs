@@ -32,7 +32,6 @@ global using sqlꓸStmt = go.database.sql_package.ΔStmt;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -54,9 +53,13 @@ using static global::go.database.sql_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.database.sql_package.DB, ж<global::go.database.sql_package.DB>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.database.sql_package.Rows, ж<global::go.database.sql_package.Rows>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -66,8 +69,8 @@ using static global::go.database.sql_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("database/sql/example_cli_test.go", "example_cli_test.cs", "ACAmooKChIKUgpSWgqaUhIKChIKUgoSigpaEoqjCgpSAgsT4woKUgoKClKI=", "51-54:1")]
-[assembly: go.GoPositionMap("database/sql/example_test.go", "example_test.cs", "ABYqooKCgpSShIKCgKakyoKCqICCpKLUgoKCgoKUtLQACAiCgoKClIKClIIAHAiiggAAKoKClJSCmICCpJSClMqCmICCpJSAgsTUAAoUgpSCgIKkogALBKIABRSCgpSUgoCC1vSiAAUUgoKUlIKClJSCgIK2gILE5IKCgpSCgoKClICC+MaCgpSSgoKClIKClIK01IKCgpSCgoKAgqSUgIIACQiCgoKUgoKCgIKklIKCgIKklICC+LSCgpSmgoKClLS01KS0goKUpoKCgpS0tNSkooKCgpSUgoKCgIKkpoCCpKI=")]
+[assembly: go.GoPositionMap("database/sql/example_cli_test.go", "example_cli_test.cs", "ACAmooKClIKUgpSmgqaUlIKClIKkgpSigqaUoqjCgqSAgsT4woKkgoKClKI=", "51-54:1")]
+[assembly: go.GoPositionMap("database/sql/example_test.go", "example_test.cs", "ABYqooKCgpSSlIKCgKakyoKCuICCpKLUgoKCgoKUtLT4goKCgpSCgpSCABwIooIAACqCgpSkgpiAgqSUgpTKgpiAgqSUgILE1AAKFIKkgoCCpKIACwSiAAYUgoKUpIKAgtb0ogAGFIKClKSCgpSkgoCCtoCCxOSCgoKUgoKCgpSAgvjGgoKUkoKCgpSCgpSCtNSCgoKUgoKCgIKklICCAAkIgoKClIKCgoCCpJSCgoCCpJSAgvi0goKUtoKCgpS0tMSktIKClLaCgoKUtLTEpKKCgoKUpIKCgoCCpKaAgqSi")]
 // </GoSourcePositionMaps>
 
 namespace go.database;

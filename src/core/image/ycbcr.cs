@@ -8,6 +8,7 @@ using image;
 
 partial class image_package {
 
+// YCbCrSubsampleRatio is the chroma subsample ratio used in a YCbCr image.
 partial struct YCbCrSubsampleRatio /*num:nint*/;
 
 public static YCbCrSubsampleRatio YCbCrSubsampleRatio444 => /* iota */ 0;
@@ -45,7 +46,6 @@ public static @string String(this YCbCrSubsampleRatio s) {
     if (exprᴛ1 == YCbCrSubsampleRatio410) {
         return yCbCrSubsampleRatio410ˢ;
     }
-
     return "YCbCrSubsampleRatioUnknown"u8;
 }
 
@@ -126,7 +126,6 @@ public static nint COffset(this ref YCbCr p, nint x, nint y) {
     if (exprᴛ1 == YCbCrSubsampleRatio410) {
         return (y / 2 - p.Rect.Min.Y / 2) * p.CStride + (x / 4 - p.Rect.Min.X / 4);
     }
-
     // Default to 4:4:4 subsampling.
     return (y - p.Rect.Min.Y) * p.CStride + (x - p.Rect.Min.X);
 }
@@ -189,11 +188,10 @@ internal static (nint w, nint h, nint cw, nint ch) yCbCrSize(Rectangle r, YCbCrS
         ch = (r.Max.Y + 1) / 2 - r.Min.Y / 2;
     }
     else { /* default: */
+        // Default to 4:4:4 subsampling.
         cw = w;
         ch = h;
     }
-
-    // Default to 4:4:4 subsampling.
     return (w, h, cw, ch);
 }
 
@@ -203,6 +201,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     ref var w = ref heap<nint>(out var Ꮡw);
     ref var cw = ref heap<nint>(out var Ꮡcw);
     (w, var h, cw, var ch) = yCbCrSize(r, subsampleRatio);
+
     // totalLength should be the same as i2, below, for a valid Rectangle r.
     nint totalLength = add2NonNeg(
         mul3NonNeg(1, w, h),
@@ -210,6 +209,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
     if (totalLength < 0) {
         throw panic("image: NewYCbCr Rectangle has huge or negative dimensions");
     }
+
     nint i0 = w * h + 0 * cw * ch;
     nint i1 = w * h + 1 * cw * ch;
     nint i2 = w * h + 2 * cw * ch;
@@ -229,7 +229,7 @@ public static ж<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRatio
 // colors. A and AStride are analogous to the Y and YStride fields of the
 // embedded YCbCr.
 partial struct NYCbCrA {
-    public partial ref YCbCr YCbCr { get; }
+    /*embed*/ public YCbCr YCbCr;
     public slice<uint8> A;
     public nint AStride;
 }
@@ -326,6 +326,7 @@ public static bool Opaque(this ref NYCbCrA p) {
 public static ж<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsampleRatio) {
     ref var w = ref heap<nint>(out var Ꮡw);
     (w, var h, var cw, var ch) = yCbCrSize(r, subsampleRatio);
+
     // totalLength should be the same as i3, below, for a valid Rectangle r.
     nint totalLength = add2NonNeg(
         mul3NonNeg(2, w, h),
@@ -333,6 +334,7 @@ public static ж<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsampleR
     if (totalLength < 0) {
         throw panic("image: NewNYCbCrA Rectangle has huge or negative dimension");
     }
+
     nint i0 = 1 * w * h + 0 * cw * ch;
     nint i1 = 1 * w * h + 1 * cw * ch;
     nint i2 = 1 * w * h + 2 * cw * ch;

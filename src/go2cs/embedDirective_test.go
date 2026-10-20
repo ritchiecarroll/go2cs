@@ -473,6 +473,7 @@ func embedNamesEqual(left, right []string) bool {
 // `go.embed_package` needs no import and cannot be shadowed. Both import forms are armed below, so
 // the rule is ONE rule and a later reader cannot re-introduce the alias for the named-import case.
 func TestTheInitializerIsQualifiedUnderEitherImportForm(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	for _, form := range []struct {
 		name    string
 		imports string
@@ -518,6 +519,56 @@ func TestTheInitializerIsQualifiedUnderEitherImportForm(t *testing.T) {
 			// exists, which a blank import never provides.
 			if strings.Contains(emitted, " embed.ΔEmbed") || strings.Contains(emitted, "=embed.ΔEmbed") || strings.Contains(emitted, "= embed.ΔEmbed") {
 				t.Errorf("the initializer used the BARE alias, which a blank import does not mint; emitted:\n%s", emitted)
+			}
+		})
+	}
+}
+
+// ARM 13, THE GROUPED SPEC — a regression comment-parity seats B and C introduced: visitGenDecl began
+// passing each spec the doc it WRITES (its own doc in a `var ( … )` group, or the group doc merged
+// with it) where the directive reads expected the GenDecl's doc. They also read valueSpec.Doc, so a
+// grouped variable's `//go:embed` was read twice, two patterns for a []byte variable, and refused.
+// The directive reads take the declaration's doc; the writer takes the spec's (visitValueSpec).
+func TestAGroupedSpecReadsItsEmbedDirectiveOnce(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	for _, form := range []struct {
+		name string
+		decl string
+	}{
+		{"first spec of a group", "var (\n\t//go:embed data.txt\n\tpayload []byte\n)"},
+		{"later spec of a group", "var (\n\tother int\n\n\t//go:embed data.txt\n\tpayload []byte\n)"},
+	} {
+		t.Run(form.name, func(t *testing.T) {
+			dir := t.TempDir()
+
+			writeModuleFiles(t, dir, map[string]string{
+				"go.mod":        "module example/groupembed\n\ngo 1.23\n",
+				"groupembed.go": "package groupembed\n\nfunc Use() {}\n",
+				"data.txt":      "payload bytes\n",
+				"groupembed_test.go": "package groupembed\n\nimport (\n\t_ \"embed\"\n\t\"testing\"\n)\n\n" +
+					form.decl + "\n\nfunc TestPayload(t *testing.T) { _ = payload }\n",
+			})
+
+			internal, _ := loadTestVariantsForDir(t, dir)
+
+			if internal == nil {
+				t.Fatal("the internal test variant did not load")
+			}
+
+			outputPath := t.TempDir()
+			options := testVariantOptions(Options{indentSpaces: 4, preferVarDecl: true, useChannelOperators: true}, testProjectRecompile, false, "bridge")
+
+			testMethodRenames = make(map[types.Object]bool)
+			defer func() { testMethodRenames = nil }()
+
+			if _, _, err := convertTestVariant(internal, testFileEntries(internal), outputPath, "go", productionSeed{}, options); err != nil {
+				t.Fatalf("convertTestVariant: %v", err)
+			}
+
+			emitted := readConvertedAssembly(t, outputPath)
+
+			if !strings.Contains(emitted, RootNamespace+"."+getSanitizedImport("embed"+PackageSuffix)+".ΔEmbed") {
+				t.Errorf("the grouped variable must take its embed initializer; emitted:\n%s", emitted)
 			}
 		})
 	}

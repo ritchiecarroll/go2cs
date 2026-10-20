@@ -48,7 +48,7 @@ public static @string Text(this ж<Float> Ꮡx, byte format, nint prec) {
     if (prec > 0) {
         cap += prec;
     }
-    return ((@string)Ꮡx.Append(new slice<byte>(0, cap), format, prec));
+    return (@string)Ꮡx.Append(new slice<byte>(0, cap), format, prec);
 }
 
 // String formats x like x.Text('g', 10).
@@ -66,6 +66,7 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
     if (x.neg) {
         buf = append(buf, (byte)((rune)'-'));
     }
+
     // Inf
     if (x.form == inf) {
         if (!x.neg) {
@@ -73,6 +74,7 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
         }
         return append(buf, ((@string)"Inf"u8).ꓸꓸꓸ);
     }
+
     // pick off easy formats
     switch (fmt) {
     case (rune)'b': {
@@ -89,12 +91,14 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
     //   1) convert Float to multiprecision decimal
     //   2) round to desired precision
     //   3) read digits out and format
+
     // 1) convert Float to multiprecision decimal
     ref var d = ref heap(new @decimal(), out var Ꮡd);                // == 0.0
     if (x.form == finite) {
         // x != 0
         Ꮡd.init(x.mant, (nint)x.exp - x.mant.bitLen());
     }
+
     // 2) round to desired precision
     var shortest = false;
     if (prec < 0){
@@ -114,29 +118,28 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
             prec = len(d.mant);
             break;
         }}
-
     } else {
         // round appropriately
         switch (fmt) {
         case (rune)'e' or (rune)'E': {
+            // one digit before and number of digits after decimal point
             Ꮡd.round(1 + prec);
             break;
         }
         case (rune)'f': {
+            // number of digits before and after decimal point
             Ꮡd.round(d.exp + prec);
             break;
         }
         case (rune)'g' or (rune)'G': {
             if (prec == 0) {
-                // one digit before and number of digits after decimal point
-                // number of digits before and after decimal point
                 prec = 1;
             }
             Ꮡd.round(prec);
             break;
         }}
-
     }
+
     // 3) read digits out and format
     switch (fmt) {
     case (rune)'e' or (rune)'E': {
@@ -146,16 +149,16 @@ public static slice<byte> Append(this ж<Float> Ꮡx, slice<byte> buf, byte fmt,
         return fmtF(buf, prec, d);
     }
     case (rune)'g' or (rune)'G': {
+        // trim trailing fractional zeros in %e format
         nint eprec = prec;
         if (eprec > len(d.mant) && len(d.mant) >= d.exp) {
-            // trim trailing fractional zeros in %e format
             eprec = len(d.mant);
         }
+        // %e is used if the exponent from the conversion
+        // is less than -4 or greater than or equal to the precision.
+        // If precision was the shortest possible, use eprec = 6 for
+        // this decision.
         if (shortest) {
-            // %e is used if the exponent from the conversion
-            // is less than -4 or greater than or equal to the precision.
-            // If precision was the shortest possible, use eprec = 6 for
-            // this decision.
             eprec = 6;
         }
         nint exp = d.exp - 1;
@@ -185,53 +188,62 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
     if (len(d.mant) == 0) {
         return;
     }
+
     // Approach: All numbers in the interval [x - 1/2ulp, x + 1/2ulp]
     // (possibly exclusive) round to x for the given precision of x.
     // Compute the lower and upper bound in decimal form and find the
     // shortest decimal number d such that lower <= d <= upper.
+
     // TODO(gri) strconv/ftoa.do describes a shortcut in some cases.
     // See if we can use it (in adjusted form) here as well.
+
     // 1) Compute normalized mantissa mant and exponent exp for x such
     // that the lsb of mant corresponds to 1/2 ulp for the precision of
     // x (i.e., for mant we want x.prec + 1 bits).
-    var mant = ((nat)default!).set(x.mant);
+    var mant = ((Δnat)default!).set(x.mant);
     nint exp = (nint)x.exp - mant.bitLen();
     nint s = mant.bitLen() - (nint)(x.prec + 1);
     switch (ᐧ) {
     case {} when s is < 0: {
-        mant = mant.shl(mant, (nuint)(-s));
+        mant = mant.lsh(mant, (nuint)(-s));
         break;
     }
     case {} when s is > 0: {
-        mant = mant.shr(mant, (nuint)(+s));
+        mant = mant.rsh(mant, (nuint)(+s));
         break;
     }}
-
     exp += s;
     // x = mant * 2**exp with lsb(mant) == 1/2 ulp of x.prec
+
     // 2) Compute lower bound by subtracting 1/2 ulp.
     ref var lower = ref heap(new @decimal(), out var Ꮡlower);
-    nat tmp = default!;
+    Δnat tmp = default!;
     Ꮡlower.init(tmp.sub(mant, natOne), exp);
+
     // 3) Compute upper bound by adding 1/2 ulp.
     ref var upper = ref heap(new @decimal(), out var Ꮡupper);
     Ꮡupper.init(tmp.add(mant, natOne), exp);
+
     // The upper and lower bounds are possible outputs only if
     // the original mantissa is even, so that ToNearestEven rounding
     // would round to the original mantissa and not the neighbors.
     var inclusive = (Word)(mant[0] & 2) == 0; // test bit 1 since original mantissa was shifted by 1
+
     // Now we can figure out the minimum number of digits required.
     // Walk along until d has distinguished itself from upper and lower.
     foreach (var (i, m) in d.mant) {
         var l = lower.at(i);
         var u = upper.at(i);
+
         // Okay to round down (truncate) if lower has a different digit
         // or if lower is inclusive and is exactly the result of rounding
         // down (i.e., and we have reached the final digit of lower).
         var okdown = l != m || inclusive && i + 1 == len(lower.mant);
+
         // Okay to round up if upper has a different digit and either upper
         // is inclusive or upper is bigger than the result of rounding up.
         var okup = m != u && (inclusive || (byte)(m + 1) < u || i + 1 < len(upper.mant));
+
         // If it's okay to do either, then round to the nearest one.
         // If it's okay to do only one, do it.
         switch (ᐧ) {
@@ -247,7 +259,6 @@ internal static void roundShortest(ж<@decimal> Ꮡd, ref Float x) {
             d.roundUp(i + 1);
             return;
         }}
-
     }
 }
 
@@ -259,6 +270,7 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
         ch = d.mant[0];
     }
     buf = append(buf, ch);
+
     // .moredigits
     if (prec > 0) {
         buf = append(buf, (byte)((rune)'.'));
@@ -272,6 +284,7 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
             buf = append(buf, (byte)((rune)'0'));
         }
     }
+
     // e±
     buf = append(buf, fmt);
     int64 exp = default!;
@@ -285,6 +298,7 @@ internal static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, @decimal 
         ch = (rune)'+';
     }
     buf = append(buf, ch);
+
     // dd...d
     if (exp < 10) {
         buf = append(buf, (byte)((rune)'0')); // at least 2 exponent digits
@@ -304,6 +318,7 @@ internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
     } else {
         buf = append(buf, (byte)((rune)'0'));
     }
+
     // fraction
     if (prec > 0) {
         buf = append(buf, (byte)((rune)'.'));
@@ -311,6 +326,7 @@ internal static slice<byte> fmtF(slice<byte> buf, nint prec, @decimal d) {
             buf = append(buf, d.at(d.exp + i));
         }
     }
+
     return buf;
 }
 
@@ -325,21 +341,23 @@ internal static slice<byte> fmtB(this ref Float x, slice<byte> buf) {
     if (x.form == zero) {
         return append(buf, (byte)((rune)'0'));
     }
+
     if (debugFloat && x.form != finite) {
         throw panic("non-finite float");
     }
     // x != 0
+
     // adjust mantissa to use exactly x.prec bits
     var m = x.mant;
     {
         var w = (uint32)len(x.mant) * (uint32)_W;
         switch (ᐧ) {
         case {} when w < x.prec: {
-            m = ((nat)default!).shl(m, (nuint)(x.prec - w));
+            m = ((Δnat)default!).lsh(m, (nuint)(x.prec - w));
             break;
         }
         case {} when w > x.prec: {
-            m = ((nat)default!).shr(m, (nuint)(w - x.prec));
+            m = ((Δnat)default!).rsh(m, (nuint)(w - x.prec));
             break;
         }}
     }
@@ -373,9 +391,11 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
         buf = append(buf, ((@string)"p+00"u8).ꓸꓸꓸ);
         return buf;
     }
+
     if (debugFloat && x.form != finite) {
         throw panic("non-finite float");
     }
+
     // round mantissa to n bits
     nuint n = default!;
     if (prec < 0){
@@ -385,22 +405,23 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
     }
     // n%4 == 1
     Ꮡx = @new<Float>().SetPrec(n).SetMode(x.mode).Set(Ꮡx); x = ref Ꮡx.DerefOrNull();
+
     // adjust mantissa to use exactly n bits
     var m = x.mant;
     {
         nuint w = (nuint)len(x.mant) * (nuint)_W;
         switch (ᐧ) {
         case {} when w < n: {
-            m = ((nat)default!).shl(m, n - w);
+            m = ((Δnat)default!).lsh(m, n - w);
             break;
         }
         case {} when w > n: {
-            m = ((nat)default!).shr(m, w - n);
+            m = ((Δnat)default!).rsh(m, w - n);
             break;
         }}
     }
-
     var exp64 = (int64)x.exp - 1; // avoid wrap-around
+
     var hm = m.utoa(16);
     if (debugFloat && hm[0] != (rune)'1') {
         throw panic("incorrect mantissa: " + ((sstring)hm));
@@ -410,6 +431,7 @@ internal static slice<byte> fmtX(this ж<Float> Ꮡx, slice<byte> buf, nint prec
         buf = append(buf, (byte)((rune)'.'));
         buf = appendꓸꓸꓸ(buf, hm[1..]);
     }
+
     buf = append(buf, (byte)((rune)'p'));
     if (exp64 >= 0){
         buf = append(buf, (byte)((rune)'+'));
@@ -434,10 +456,12 @@ internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
     if (x.form == zero) {
         return append(buf, (byte)((rune)'0'));
     }
+
     if (debugFloat && x.form != finite) {
         throw panic("non-finite float");
     }
     // x != 0
+
     // remove trailing 0 words early
     // (no need to convert to hex 0's and trim later)
     var m = x.mant;
@@ -446,6 +470,7 @@ internal static slice<byte> fmtP(this ref Float x, slice<byte> buf) {
         i++;
     }
     m = m.slice(i);
+
     buf = append(buf, ((@string)"0x."u8).ꓸꓸꓸ);
     buf = appendꓸꓸꓸ(buf, bytes_package.TrimRight(m.utoa(16), "0"u8));
     buf = append(buf, (byte)((rune)'p'));
@@ -473,22 +498,23 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
     if (!hasPrec) {
         prec = 6; // default precision for 'e', 'f'
     }
+
     var exprᴛ1 = format;
     var matchᴛ1 = false;
     if (exprᴛ1 is (rune)'e' or (rune)'E' or (rune)'f' or (rune)'b' or (rune)'p' or (rune)'x') { matchᴛ1 = true;
+        // nothing to do
     }
     else if (exprᴛ1 is (rune)'F') { matchᴛ1 = true;
+        // (*Float).Text doesn't support 'F'; handle like 'f'
         format = (rune)'f';
     }
     else if (exprᴛ1 is (rune)'v') { matchᴛ1 = true;
+        // handle like 'g'
         format = (rune)'g';
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && (exprᴛ1 is (rune)'g' or (rune)'G')) {
         if (!hasPrec) {
-            // nothing to do
-            // (*Float).Text doesn't support 'F'; handle like 'f'
-            // handle like 'g'
             prec = -1; // default precision for 'g', 'G'
         }
     }
@@ -496,13 +522,13 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
         fmt.Fprintf(new fmt_StateᴠWriter(s), "%%!%c(*big.Float=%s)"u8, format, Ꮡx.String());
         return;
     }
-
     slice<byte> buf = default!;
     buf = Ꮡx.Append(buf, (byte)format, prec);
     if (len(buf) == 0) {
         buf = slice<byte>("?"u8); // should never happen, but don't crash
     }
     // len(buf) > 0
+
     @string sign = default!;
     switch (ᐧ) {
     case {} when buf[0] is (rune)'-': {
@@ -511,9 +537,9 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
         break;
     }
     case {} when buf[0] is (rune)'+': {
+        // +Inf
         sign = "+"u8;
         if (s.Flag((rune)' ')) {
-            // +Inf
             sign = " "u8;
         }
         buf = buf[1..];
@@ -534,29 +560,29 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
             padding = width - len(sign) - len(buf);
         }
     }
+
     switch (ᐧ) {
     case {} when s.Flag((rune)'0') && !x.IsInf(): {
-        writeMultiple(s, // 0-padding on left
- sign, 1);
+        // 0-padding on left
+        writeMultiple(s, sign, 1);
         writeMultiple(s, "0"u8, padding);
         s.Write(buf);
         break;
     }
     case {} when s.Flag((rune)'-'): {
-        writeMultiple(s, // padding on right
- sign, 1);
+        // padding on right
+        writeMultiple(s, sign, 1);
         s.Write(buf);
         writeMultiple(s, " "u8, padding);
         break;
     }
     default: {
-        writeMultiple(s, // padding on left
- " "u8, padding);
+        // padding on left
+        writeMultiple(s, " "u8, padding);
         writeMultiple(s, sign, 1);
         s.Write(buf);
         break;
     }}
-
 }
 
 } // end big_package

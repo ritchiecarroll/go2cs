@@ -10,6 +10,7 @@ using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
+[GoFieldAccess(typeof(mlink))]
 partial class runtime_package {
 
 // fixalloc is a simple free-list allocator for fixed size objects.
@@ -62,6 +63,7 @@ internal static void init(this ref fixalloc f, uintptr size, Action<@unsafe.Poin
         @throw(runtimeFixallocSizeTooˢ);
     }
     size = builtin.max(size, /* unsafe.Sizeof(mlink{}) */ (uintptr)8);
+
     f.size = size;
     f.first = first;
     f.arg = arg;
@@ -82,6 +84,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
         print((@string)"runtime: use of FixAlloc_Alloc before FixAlloc_Init\n"u8);
         @throw(runtimeInternalErrorˢ);
     }
+
     if (f.list != nil) {
         @unsafe.Pointer vΔ1 = @unsafe.Pointer.FromPinnedBox(f.list);
         f.list = f.list.Value.next;
@@ -95,6 +98,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
         f.chunk = (uintptr)(uintptr)persistentalloc((uintptr)f.nalloc, 0, f.stat);
         f.nchunk = f.nalloc;
     }
+
     @unsafe.Pointer v = (@unsafe.Pointer)f.chunk;
     if (f.first != default!) {
         f.first(f.arg, v);
@@ -108,7 +112,7 @@ internal static @unsafe.Pointer alloc(this ref fixalloc f) {
 internal static void free(this ref fixalloc f, @unsafe.Pointer Δp) {
     f.inuse -= f.size;
     var v = (ж<mlink>)(uintptr)(Δp);
-    v.Value.next = f.list;
+    v.next = f.list;
     f.list = v;
 }
 

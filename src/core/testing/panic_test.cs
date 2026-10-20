@@ -36,6 +36,7 @@ internal partial struct TestPanic_testCases /*dyn*/ {
 
 public static void TestPanic(ж<testing.T> Ꮡt) {
     testenv.MustHaveExec(new testing_TжTB(Ꮡt));
+
     var testCases = new TestPanic_testCases[]{new(
         desc: "root test panics"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper"u8}.slice(),
@@ -44,7 +45,7 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8}.slice(),
@@ -55,7 +56,7 @@ public static void TestPanic(ж<testing.T> Ꮡt) {
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with cleanup"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8}.slice(),
@@ -69,7 +70,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with outer cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=outer"u8}.slice(),
@@ -81,7 +82,7 @@ ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with middle cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=middle"u8}.slice(),
@@ -95,7 +96,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "subtest panics with inner cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=inner"u8}.slice(),
@@ -109,7 +110,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with cleanup"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_parallel"u8}.slice(),
@@ -123,7 +124,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with outer cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=outer"u8, "-test_panic_parallel"u8}.slice(),
@@ -135,7 +136,7 @@ ran outer cleanup
 --- FAIL: TestPanicHelper (N.NNs)
     panic_test.go:NNN: TestPanicHelper
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with middle cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=middle"u8, "-test_panic_parallel"u8}.slice(),
@@ -149,7 +150,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     ), new(
         desc: "parallel subtest panics with inner cleanup panic"u8,
         flags: new @string[]{"-test_panic_test=TestPanicHelper/1"u8, "-test_panic_cleanup"u8, "-test_panic_cleanup_panic=inner"u8, "-test_panic_parallel"u8}.slice(),
@@ -163,7 +164,7 @@ ran outer cleanup
     --- FAIL: TestPanicHelper/1 (N.NNs)
         panic_test.go:NNN: TestPanicHelper/1
 
-"""u8
+"""u8.Raw()
     )
     }.slice();
     foreach (var (_, vᴛ1) in testCases) {
@@ -176,7 +177,7 @@ ran outer cleanup
             cmd.Value.Args = appendꓸꓸꓸ((~cmd).Args, tcʗ1.flags);
             cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
             var (b, _) = cmd.CombinedOutput();
-            @string got = ((@string)b);
+            @string got = (@string)b;
             @string want = strings.TrimSpace(tcʗ1.want);
             @string re = makeRegexp(want);
             {
@@ -217,7 +218,6 @@ public static void TestPanicHelper(ж<testing.T> Ꮡt) {
     else { /* default: */
         Ꮡt.Fatalf("bad -test_panic_cleanup_panic: %s"u8, testPanicCleanupPanic.Value);
     }
-
     Ꮡt.Cleanup(() => {
         fmt.Println(ranOuterCleanupˢ);
         if (testPanicCleanupPanic.Value == "outer"u8) {
@@ -265,6 +265,7 @@ public static void TestMorePanic(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     testenv.MustHaveExec(new testing_TжTB(Ꮡt));
+
     var testCases = new TestMorePanic_testCases[]{
         new(
             desc: "Issue 48502: call runtime.Goexit in t.Cleanup after panic"u8,
@@ -272,7 +273,7 @@ public static void TestMorePanic(ж<testing.T> Ꮡt) {
             want: """
 panic: die
 	panic: test executed panic(nil) or runtime.Goexit
-"""u8
+"""u8.Raw()
         ),
         new(
             desc: "Issue 48515: call t.Run in t.Cleanup should trigger panic"u8,
@@ -280,11 +281,12 @@ panic: die
             want: @"panic: testing: t.Run called during t.Cleanup"u8
         )
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         var cmd = exec.Command(Δos.Args[0], tc.flags.ꓸꓸꓸ);
         cmd.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=1"u8);
         var (b, _) = cmd.CombinedOutput();
-        @string got = ((@string)b);
+        @string got = (@string)b;
         @string want = tc.want;
         @string re = makeRegexp(want);
         {
@@ -303,6 +305,7 @@ public static void TestCallRunInCleanupHelper(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) != "1"u8) {
         return;
     }
+
     Ꮡt.Cleanup(() => {
         Ꮡt.Run(inCleanupˢ, (ж<testing.T> tΔ1) => {
             tΔ1.Log(mustNotBeExecutedˢ);
@@ -314,6 +317,7 @@ public static void TestGoexitInCleanupAfterPanicHelper(ж<testing.T> Ꮡt) {
     if (Δos.Getenv(goWantHelperProcessˢ) != "1"u8) {
         return;
     }
+
     Ꮡt.Cleanup(() => {
         Δruntime.Goexit();
     });

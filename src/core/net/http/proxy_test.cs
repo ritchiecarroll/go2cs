@@ -13,7 +13,6 @@ partial class http_internal_test_package {
 
 // TODO(mattn):
 //	test ProxyAuth
-
 partial struct cacheKeysTestsᴛ1 /*dyn*/ {
     internal @string proxy;
     internal @string scheme;

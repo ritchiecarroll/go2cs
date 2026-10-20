@@ -12,22 +12,7 @@ internal static @string escaper(params ꓸꓸꓸany argsʗp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string valueVFlagVˢ = "value=%v flag=%v"u8;
-private static readonly object noMatchˢ = (@string)"no match"u8;
 private static readonly object plainˢ = (@string)"plain"u8;
-private static readonly object unexpectedMatchˢ = (@string)"unexpected match"u8;
-private static readonly object noMatchForStringˢ = (@string)"no match for string"u8;
-private static readonly object directˢ = (@string)"direct:"u8;
-private static readonly object directNoMatchˢ = (@string)"direct: no match"u8;
-private static readonly @string escˢ = "esc"u8;
-private static readonly object mappedˢ = (@string)"mapped:"u8;
-private static readonly object mappedNoMatchˢ = (@string)"mapped: no match"u8;
-private static readonly object assignedˢ = (@string)"assigned:"u8;
-private static readonly object assignedNoMatchˢ = (@string)"assigned: no match"u8;
-private static readonly object elementˢ = (@string)"element:"u8;
-private static readonly object elementNoMatchˢ = (@string)"element: no match"u8;
-private static readonly object directPlainˢ = (@string)"direct plain:"u8;
-private static readonly object directPlainNoMatchˢ = (@string)"direct plain: no match"u8;
 
 internal static void Main() {
     Actionꓸꓸꓸ<@string, any> fn = (@string format, params ꓸꓸꓸany argsʗp) => {
@@ -35,68 +20,76 @@ internal static void Main() {
         fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
     };
     any logf = (((Actionꓸꓸꓸ<@string, any>)(fn))).OrTypedNilFunc();
+
     {
         var (fnΔ1, ok) = logf._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
-            fnΔ1(valueVFlagVˢ, (nint)(42), true);
+            fnΔ1("value=%v flag=%v", (nint)42, true);
         } else {
-            fmt.Println(noMatchˢ);
+            fmt.Println("no match");
         }
     }
+
     any notFn = plainˢ;
     {
         var (_, ok) = notFn._<Actionꓸꓸꓸ<@string, any>>(ᐧ); if (ok){
-            fmt.Println(unexpectedMatchˢ);
+            fmt.Println("unexpected match");
         } else {
-            fmt.Println(noMatchForStringˢ);
+            fmt.Println("no match for string");
         }
     }
+
     any plain = @string (@string s) => s + "!"u8;
     {
         var (fnΔ2, ok) = plain._<Func<@string, @string>>(ᐧ); if (ok) {
-            fmt.Println(fnΔ2("ok"u8));
+            fmt.Println(fnΔ2("ok"));
         }
     }
+
     any direct = ((Funcꓸꓸꓸ<any, @string>)(@string (params ꓸꓸꓸany argsʗp) => {
         var args = argsʗp.sslice();
         return fmt.Sprint(args.ꓸꓸꓸ);
     }));
     {
         var (f, ok) = direct._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
-            fmt.Println(directˢ, f((nint)(1), (nint)(2)));
+            fmt.Println("direct:", f((nint)1, (nint)2));
         } else {
-            fmt.Println(directNoMatchˢ);
+            fmt.Println("direct: no match");
         }
     }
-    var funcMap = new map<@string, any>{["esc"u8] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
+
+    var funcMap = new map<@string, any>{["esc"] = ((Funcꓸꓸꓸ<any, @string>)(escaper))};
     {
-        var (f, ok) = funcMap[escˢ]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
-            fmt.Println(mappedˢ, f((@string)"a"u8, (@string)"b"u8));
+        var (f, ok) = funcMap["esc"]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
+            fmt.Println("mapped:", f((@string)"a"u8, (@string)"b"u8));
         } else {
-            fmt.Println(mappedNoMatchˢ);
+            fmt.Println("mapped: no match");
         }
     }
+
     any assigned = ((Funcꓸꓸꓸ<any, @string>)(escaper));
     {
         var (f, ok) = assigned._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
-            fmt.Println(assignedˢ, f((@string)"x"u8));
+            fmt.Println("assigned:", f((@string)"x"u8));
         } else {
-            fmt.Println(assignedNoMatchˢ);
+            fmt.Println("assigned: no match");
         }
     }
+
     var slots = new any[]{(Funcꓸꓸꓸ<any, @string>)(escaper)}.slice();
     {
         var (f, ok) = slots[0]._<Funcꓸꓸꓸ<any, @string>>(ᐧ); if (ok){
-            fmt.Println(elementˢ, f((@string)"y"u8));
+            fmt.Println("element:", f((@string)"y"u8));
         } else {
-            fmt.Println(elementNoMatchˢ);
+            fmt.Println("element: no match");
         }
     }
+
     any directPlain = @string (@string s) => s + "?"u8;
     {
         var (f, ok) = directPlain._<Func<@string, @string>>(ᐧ); if (ok){
-            fmt.Println(directPlainˢ, f("z"u8));
+            fmt.Println("direct plain:", f("z"));
         } else {
-            fmt.Println(directPlainNoMatchˢ);
+            fmt.Println("direct plain: no match");
         }
     }
 }

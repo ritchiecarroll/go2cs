@@ -21,22 +21,22 @@ partial struct bigEndian {
 
 internal static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint32)((uint32)((uint32)((uint32)b[0] | ((uint32)b[1] << (int)(8))) | ((uint32)b[2] << (int)(16))) | ((uint32)b[3] << (int)(24)));
+    return (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16 | (uint32)b[3] << 24;
 }
 
 internal static uint64 Uint64(this littleEndian _Δp0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[0] | ((uint64)b[1] << (int)(8))) | ((uint64)b[2] << (int)(16))) | ((uint64)b[3] << (int)(24))) | ((uint64)b[4] << (int)(32))) | ((uint64)b[5] << (int)(40))) | ((uint64)b[6] << (int)(48))) | ((uint64)b[7] << (int)(56)));
+    return (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32 | (uint64)b[5] << 40 | (uint64)b[6] << 48 | (uint64)b[7] << 56;
 }
 
 internal static uint32 Uint32(this bigEndian _Δp0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint32)((uint32)((uint32)((uint32)b[3] | ((uint32)b[2] << (int)(8))) | ((uint32)b[1] << (int)(16))) | ((uint32)b[0] << (int)(24)));
+    return (uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24;
 }
 
 internal static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)b[7] | ((uint64)b[6] << (int)(8))) | ((uint64)b[5] << (int)(16))) | ((uint64)b[4] << (int)(24))) | ((uint64)b[3] << (int)(32))) | ((uint64)b[2] << (int)(40))) | ((uint64)b[1] << (int)(48))) | ((uint64)b[0] << (int)(56)));
+    return (uint64)b[7] | (uint64)b[6] << 8 | (uint64)b[5] << 16 | (uint64)b[4] << 24 | (uint64)b[3] << 32 | (uint64)b[2] << 40 | (uint64)b[1] << 48 | (uint64)b[0] << 56;
 }
 
 // hostByteOrder returns littleEndian on little-endian machines and
@@ -49,7 +49,6 @@ internal static byteOrder hostByteOrder() {
     if (exprᴛ1 == "armbe"u8 || exprᴛ1 == "arm64be"u8 || exprᴛ1 == "m68k"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64p32"u8 || exprᴛ1 == "ppc"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "s390"u8 || exprᴛ1 == "s390x"u8 || exprᴛ1 == "shbe"u8 || exprᴛ1 == "sparc"u8 || exprᴛ1 == "sparc64"u8) {
         return new bigEndian(nil);
     }
-
     throw panic("unknown architecture");
 }
 

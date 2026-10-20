@@ -39,20 +39,21 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     if (len(s) == 0) {
         return preceding;
     }
+
     // All cases below are in the single-byte UTF-8 group.
     {
         var c = s[len(s) - 1];
         nint n = len(s);
         switch (c) {
         case (rune)'+' or (rune)'-': {
+            // ++ and -- are not regexp preceders, but + and - are whether
+            // they are used as infix or prefix operators.
             nint start = n - 1;
+            // Count the number of adjacent dashes or pluses.
             while (start > 0 && s[start - 1] == c) {
-                // ++ and -- are not regexp preceders, but + and - are whether
-                // they are used as infix or prefix operators.
-                // Count the number of adjacent dashes or pluses.
                 start--;
             }
-            if ((nint)((n - start) & 1) == 1) {
+            if (((n - start) & 1) == 1) {
                 // Reached for trailing minus signs since "---" is the
                 // same as "-- -".
                 return jsCtxRegexp;
@@ -60,68 +61,70 @@ internal static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
             return jsCtxDivOp;
         }
         case (rune)'.': {
+            // Handle "42."
             if (n != 1 && (rune)'0' <= s[n - 2] && s[n - 2] <= (rune)'9') {
-                // Handle "42."
                 return jsCtxDivOp;
             }
             return jsCtxRegexp;
         }
+        // Suffixes for all punctuators from section 7.7 of the language spec
+        // that only end binary operators not handled above.
         case (rune)',' or (rune)'<' or (rune)'>' or (rune)'=' or (rune)'*' or (rune)'%' or (rune)'&' or (rune)'|' or (rune)'^' or (rune)'?': {
             return jsCtxRegexp;
         }
+        // Suffixes for all punctuators from section 7.7 of the language spec
+        // that are prefix operators not handled above.
         case (rune)'!' or (rune)'~': {
             return jsCtxRegexp;
         }
+        // Matches all the punctuators from section 7.7 of the language spec
+        // that are open brackets not handled above.
         case (rune)'(' or (rune)'[': {
             return jsCtxRegexp;
         }
+        // Matches all the punctuators from section 7.7 of the language spec
+        // that precede expression starts.
         case (rune)':' or (rune)';' or (rune)'{': {
             return jsCtxRegexp;
         }
+        // CAVEAT: the close punctuators ('}', ']', ')') precede div ops and
+        // are handled in the default except for '}' which can precede a
+        // division op as in
+        //    ({ valueOf: function () { return 42 } } / 2
+        // which is valid, but, in practice, developers don't divide object
+        // literals, so our heuristic works well for code like
+        //    function () { ... }  /foo/.test(x) && sideEffect();
+        // The ')' punctuator can precede a regular expression as in
+        //     if (b) /foo/.test(x) && ...
+        // but this is much less likely than
+        //     (a + b) / c
         case (rune)'}': {
             return jsCtxRegexp;
         }
         default: {
+            // Look for an IdentifierName and see if it is a keyword that
+            // can precede a regular expression.
             nint j = n;
             while (j > 0 && isJSIdentPart((rune)s[j - 1])) {
-                // Suffixes for all punctuators from section 7.7 of the language spec
-                // that only end binary operators not handled above.
-                // Suffixes for all punctuators from section 7.7 of the language spec
-                // that are prefix operators not handled above.
-                // Matches all the punctuators from section 7.7 of the language spec
-                // that are open brackets not handled above.
-                // Matches all the punctuators from section 7.7 of the language spec
-                // that precede expression starts.
-                // CAVEAT: the close punctuators ('}', ']', ')') precede div ops and
-                // are handled in the default except for '}' which can precede a
-                // division op as in
-                //    ({ valueOf: function () { return 42 } } / 2
-                // which is valid, but, in practice, developers don't divide object
-                // literals, so our heuristic works well for code like
-                //    function () { ... }  /foo/.test(x) && sideEffect();
-                // The ')' punctuator can precede a regular expression as in
-                //     if (b) /foo/.test(x) && ...
-                // but this is much less likely than
-                //     (a + b) / c
-                // Look for an IdentifierName and see if it is a keyword that
-                // can precede a regular expression.
                 j--;
             }
-            if (regexpPrecederKeywords[tmpstring(s.slice(j))]) {
+            // An IdentifierName after a property-access dot is a property name,
+            // which precedes a div op.
+            if (regexpPrecederKeywords[tmpstring(s.slice(j))] && !bytes.HasSuffix(bytes.TrimRight(s.slice(0, j), jsWhitespace), slice<byte>("."u8))) {
                 return jsCtxRegexp;
             }
             break;
         }}
     }
-
     // Otherwise is a punctuator not listed above, or
     // a string which precedes a div op, or an identifier
     // which precedes a div op.
     return jsCtxDivOp;
 }
 
-// regexpPrecederKeywords is a set of reserved JS keywords that can precede a
-// regular expression in JS source.
+// regexpPrecederKeywords is a set of JS keywords that can precede a regular
+// expression in JS source. It deliberately treats the context-sensitive
+// keyword yield as a keyword.
 internal static map<@string, bool> regexpPrecederKeywords = new map<@string, bool>{
     ["break"u8] = true,
     ["case"u8] = true,
@@ -136,7 +139,8 @@ internal static map<@string, bool> regexpPrecederKeywords = new map<@string, boo
     ["throw"u8] = true,
     ["try"u8] = true,
     ["typeof"u8] = true,
-    ["void"u8] = true
+    ["void"u8] = true,
+    ["yield"u8] = true
 };
 
 internal static reflectꓸType jsonMarshalType = reflect.TypeFor<json.Marshaler>();
@@ -151,6 +155,7 @@ internal static any indirectToJSONMarshaler(any a) {
     if (a == default!) {
         return default!;
     }
+
     var v = reflect.ValueOf(a);
     while (!v.Type().Implements(jsonMarshalType) && v.Kind() == reflect.ΔPointer && !v.IsNil()) {
         v = v.Elem();
@@ -176,12 +181,14 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         a = indirectToJSONMarshaler(args[0]);
         switch (a.type()) {
         case JS t: {
-            return ((@string)t);
+            return (@string)t;
         }
         case JSStr t: {
+            // TODO: normalize quotes.
             return @""""u8 + ((@string)t) + @""""u8;
         }
         case {} Δt when Δt._<json.Marshaler>(out var t): {
+            // Do not treat as a Stringer.
             break;
         }
         case {} Δt when Δt._<fmt.Stringer>(out var t): {
@@ -189,8 +196,6 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
             break;
         }}
     } else {
-        // TODO: normalize quotes.
-        // Do not treat as a Stringer.
         foreach (var (i, arg) in args) {
             args[i] = indirectToJSONMarshaler(arg);
         }
@@ -221,11 +226,12 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         //     x//* error marshaling y:
         //          second line of error message */null
         @string errStr = err.Error();
-        errStr = ((@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8)));
+        errStr = (@string)scriptTagRe.ReplaceAll(slice<byte>(errStr), slice<byte>(@"\x3C${1}script"u8));
         errStr = strings.ReplaceAll(errStr, "*/"u8, "* /"u8);
         errStr = strings.ReplaceAll(errStr, "<!--"u8, x3Cˢ);
         return fmt.Sprintf(" /* %s */null "u8, errStr);
     }
+
     // TODO: maybe post-process output to prevent it from containing
     // "<!--", "-->", "<![CDATA[", "]]>", or "</script"
     // in case custom marshalers produce output containing those.
@@ -271,7 +277,7 @@ internal static @string jsValEscaper(params ꓸꓸꓸany argsʗp) {
         }
         return buf.String();
     }
-    return ((@string)b);
+    return (@string)b;
 }
 
 // jsStrEscaper produces a string that can be included between quotes in
@@ -345,7 +351,6 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
             continue;
             break;
         }}
-
         if (written == 0) {
             Ꮡb.Grow(len(s));
         }
@@ -360,14 +365,13 @@ internal static @string replace(@string s, slice<@string> replacementTable) {
     return b.String();
 }
 
-// "\v" == "v" on IE 6.
 internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(32){
     [0] = @"\u0000"u8, [1] = @"\u0001"u8, [2] = @"\u0002"u8, [3] = @"\u0003"u8, [4] = @"\u0004"u8, [5] = @"\u0005"u8, [6] = @"\u0006"u8,
     [(rune)'\a'] = @"\u0007"u8,
     [(rune)'\b'] = @"\u0008"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
     [(rune)'\f'] = @"\f"u8,
     [(rune)'\r'] = @"\r"u8,
     [0xe] = @"\u000e"u8, [0xf] = @"\u000f"u8, [0x10] = @"\u0010"u8, [0x11] = @"\u0011"u8, [0x12] = @"\u0012"u8, [0x13] = @"\u0013"u8,
@@ -375,16 +379,15 @@ internal static slice<@string> lowUnicodeReplacementTable = new slice<@string>(3
     [0x1a] = @"\u001a"u8, [0x1b] = @"\u001b"u8, [0x1c] = @"\u001c"u8, [0x1d] = @"\u001d"u8, [0x1e] = @"\u001e"u8, [0x1f] = @"\u001f"u8
 };
 
-// "\v" == "v" on IE 6.
-// Encode HTML specials as hex so the output can be embedded
-// in HTML attributes without further encoding.
 internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
     [(rune)'\f'] = @"\f"u8,
     [(rune)'\r'] = @"\r"u8,
+    // Encode HTML specials as hex so the output can be embedded
+    // in HTML attributes without further encoding.
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'`'] = @"\u0060"u8,
     [(rune)'&'] = @"\u0026"u8,
@@ -396,18 +399,17 @@ internal static slice<@string> jsStrReplacementTable = new slice<@string>(97){
     [(rune)'\\'] = @"\\"u8
 };
 
-// "\v" == "v" on IE 6.
-// Encode HTML specials as hex so the output can be embedded
-// in HTML attributes without further encoding.
 // jsBqStrReplacementTable is like jsStrReplacementTable except it also contains
 // the special characters for JS template literals: $, {, and }.
 internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
     [(rune)'\f'] = @"\f"u8,
     [(rune)'\r'] = @"\r"u8,
+    // Encode HTML specials as hex so the output can be embedded
+    // in HTML attributes without further encoding.
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'`'] = @"\u0060"u8,
     [(rune)'&'] = @"\u0026"u8,
@@ -422,18 +424,17 @@ internal static slice<@string> jsBqStrReplacementTable = new slice<@string>(126)
     [(rune)'}'] = @"\u007d"u8
 };
 
-// "\v" == "v" on IE 6.
-// Encode HTML specials as hex so the output can be embedded
-// in HTML attributes without further encoding.
 // jsStrNormReplacementTable is like jsStrReplacementTable but does not
 // overencode existing escapes since this table has no entry for `\`.
 internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
     [(rune)'\f'] = @"\f"u8,
     [(rune)'\r'] = @"\r"u8,
+    // Encode HTML specials as hex so the output can be embedded
+    // in HTML attributes without further encoding.
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'&'] = @"\u0026"u8,
     [(rune)'\''] = @"\u0027"u8,
@@ -444,16 +445,15 @@ internal static slice<@string> jsStrNormReplacementTable = new slice<@string>(97
     [(rune)'>'] = @"\u003e"u8
 };
 
-// "\v" == "v" on IE 6.
-// Encode HTML specials as hex so the output can be embedded
-// in HTML attributes without further encoding.
 internal static slice<@string> jsRegexpReplacementTable = new slice<@string>(126){
     [0] = @"\u0000"u8,
     [(rune)'\t'] = @"\t"u8,
     [(rune)'\n'] = @"\n"u8,
-    [(rune)'\v'] = @"\u000b"u8,
+    [(rune)'\v'] = @"\u000b"u8, // "\v" == "v" on IE 6.
     [(rune)'\f'] = @"\f"u8,
     [(rune)'\r'] = @"\r"u8,
+    // Encode HTML specials as hex so the output can be embedded
+    // in HTML attributes without further encoding.
     [(rune)'"'] = @"\u0022"u8,
     [(rune)'$'] = @"\$"u8,
     [(rune)'&'] = @"\u0026"u8,
@@ -498,7 +498,6 @@ internal static bool isJSIdentPart(rune r) {
     case {} when (rune)'a' <= r && r <= (rune)'z': {
         return true;
     }}
-
     return false;
 }
 
@@ -516,13 +515,12 @@ internal static bool isJSType(@string mimeType) {
     mimeType = strings.ToLower(mimeType);
     mimeType = strings.TrimSpace(mimeType);
     var exprᴛ1 = mimeType;
-    if (exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
+    if (exprᴛ1 == ""u8 || exprᴛ1 == "application/ecmascript"u8 || exprᴛ1 == "application/javascript"u8 || exprᴛ1 == "application/json"u8 || exprᴛ1 == "application/ld+json"u8 || exprᴛ1 == "application/x-ecmascript"u8 || exprᴛ1 == "application/x-javascript"u8 || exprᴛ1 == "module"u8 || exprᴛ1 == "text/ecmascript"u8 || exprᴛ1 == "text/javascript"u8 || exprᴛ1 == "text/javascript1.0"u8 || exprᴛ1 == "text/javascript1.1"u8 || exprᴛ1 == "text/javascript1.2"u8 || exprᴛ1 == "text/javascript1.3"u8 || exprᴛ1 == "text/javascript1.4"u8 || exprᴛ1 == "text/javascript1.5"u8 || exprᴛ1 == "text/jscript"u8 || exprᴛ1 == "text/livescript"u8 || exprᴛ1 == "text/x-ecmascript"u8 || exprᴛ1 == "text/x-javascript"u8) {
         return true;
     }
     { /* default: */
         return false;
     }
-
 }
 
 } // end template_package

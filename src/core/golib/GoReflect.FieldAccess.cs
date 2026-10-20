@@ -554,14 +554,42 @@ public static partial class GoReflect
     /// <c>m_val</c>-hardcoded IL would not. The cached accessor doubles as the ж equality-identity
     /// token, preserving Go's <c>&amp;s.f == &amp;s.f</c>.
     /// </summary>
+    /// <remarks>
+    /// The struct's GENERATED field-box table answers first (<see cref="IGoFieldBoxSource"/>, trim stage 3d family E): it
+    /// builds the very view converted code builds for <c>&amp;s.f</c> (<c>box.of(S.Ꮡf)</c>), compiled, so Native AOT needs
+    /// neither the accessor's IL nor a generic method closed at run time. The DynamicMethod below remains for a struct with
+    /// no table, where only the JIT can run it.
+    /// </remarks>
     public static object FieldAliasBox(object parentBox, GoFieldInfo field)
     {
+        if (fieldBoxFromTable(parentBox, field) is { } tabled)
+            return tabled;
+
         Type boxType = parentBox.GetType();
         Delegate accessor = s_fieldAccessors.GetOrAdd((boxType, fieldPathKey(field)), _ => buildFieldAccessor(boxType, field));
 
         return s_fieldBoxMakers.GetOrAdd(field.Type, static ft =>
             typeof(GoReflect).GetMethod(nameof(makeFieldBox), BindingFlags.NonPublic | BindingFlags.Static)!
                 .MakeGenericMethod(ft).CreateDelegate<Func<object, Delegate, object>>())(parentBox, accessor);
+    }
+
+    // A struct's generated field-box table, per pointee type: its zero value is the source (the same route GoTypeOps takes to
+    // a value type's operations), or null when the struct carries none.
+    private static readonly ConcurrentDictionary<Type, IGoFieldBoxSource?> s_fieldBoxSources = new();
+
+    // The field's box from its struct's table, keyed by the GO field name: every Go field of a converted struct (its own,
+    // an embed, a defined type's forwarded field) has a generated Ꮡ<name> accessor on the struct itself, so a multi-step C#
+    // path (a defined type's m_value descent) is one lookup. A blank field, whose Go name `_` repeats, is keyed by its C#
+    // field name. Null sends the caller to the DynamicMethod.
+    private static object? fieldBoxFromTable(object parentBox, GoFieldInfo field)
+    {
+        if (field.Path is not { Length: > 0 } || !TryBoxPointee(parentBox.GetType(), out Type? element))
+            return null;
+
+        IGoFieldBoxSource? source = s_fieldBoxSources.GetOrAdd(element, static type =>
+            type.IsValueType && !type.ContainsGenericParameters ? GoTypeOps.Uninitialized(type) as IGoFieldBoxSource : null);
+
+        return source?.FieldBox(field.Name == "_" ? field.Path[^1].Name : field.Name, parentBox);
     }
 
     private static object makeFieldBox<F>(object parentBox, Delegate accessor)

@@ -15,8 +15,6 @@ partial class rand_test_package {
 // to try to make sure that it runs early. It has the best chance of
 // detecting deterministic seeding if it's the first test that runs.
 public static void TestAuto(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Pull out 10 int64s from the global source
     // and then check that they don't appear in that
     // order in the deterministic seeded result.
@@ -24,6 +22,7 @@ public static void TestAuto(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 10; i++) {
         @out = append(@out, Int64());
     }
+
     // Look for out in seeded output.
     // Strictly speaking, we should look for them in order,
     // but this is good enough and not significantly more

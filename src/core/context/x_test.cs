@@ -59,6 +59,7 @@ internal static time.Duration quiescent(ж<testing.T> Ꮡt) {
     if (!ok) {
         return (time.Duration)(5000000000L);
     }
+
     time.Duration arbitraryCleanupMargin = /* 1 * time.Second */ 1000000000;
     return time.Until(deadline) - arbitraryCleanupMargin;
 }
@@ -120,15 +121,18 @@ public static void TestWithCancel(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (c1, cancel) = WithCancel(Background());
+
     {
         @string got = fmt.Sprint(c1);
         @string want = contextBackgroundˢ2; if (got != want) {
             Ꮡt.Errorf("c1.String() = %q want %q"u8, got, want);
         }
     }
+
     var o = new otherContext(c1);
     var (c2, _) = WithCancel(o);
     var contexts = new context.Context[]{c1, o, c2}.slice();
+
     foreach (var (i, c) in contexts) {
         {
             var d = c.Done(); if (d == default!) {
@@ -140,6 +144,7 @@ public static void TestWithCancel(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("c[%d].Err() == %v want nil"u8, i, e);
             }
         }
+
         var selᴛ11 = c.Done();
         switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
         case 0 when selᴛ11.ꟷᐳ(out var x): {
@@ -150,6 +155,7 @@ public static void TestWithCancel(ж<testing.T> Ꮡt) {
             break;
         }}
     }
+
     cancel(); // Should propagate synchronously.
     foreach (var (i, c) in contexts) {
         var selᴛ12 = c.Done();
@@ -207,6 +213,7 @@ internal static readonly @string withDeadlineNowˢ = "WithDeadline+now"u8;
 
 public static void TestDeadline(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (c, _) = WithDeadline(Background(), time.Now().Add(shortDuration));
     {
         @string got = fmt.Sprint(c);
@@ -215,15 +222,19 @@ public static void TestDeadline(ж<testing.T> Ꮡt) {
         }
     }
     testDeadline(c, withDeadlineˢ, Ꮡt);
+
     (c, _) = WithDeadline(Background(), time.Now().Add(shortDuration));
     var o = new otherContext(c);
     testDeadline(o, withDeadlineOtherContextˢ, Ꮡt);
+
     (c, _) = WithDeadline(Background(), time.Now().Add(shortDuration));
     o = new otherContext(c);
     (c, _) = WithDeadline(o, time.Now().Add(veryLongDuration));
     testDeadline(c, withDeadlineOtherContextˢ2, Ꮡt);
+
     (c, _) = WithDeadline(Background(), time.Now().Add(-shortDuration));
     testDeadline(c, withDeadlineInthepastˢ, Ꮡt);
+
     (c, _) = WithDeadline(Background(), time.Now());
     testDeadline(c, withDeadlineNowˢ, Ꮡt);
 }
@@ -235,6 +246,7 @@ internal static readonly @string withTimeoutOtherContextˢ2 = "WithTimeout+other
 
 public static void TestTimeout(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (c, _) = WithTimeout(Background(), shortDuration);
     {
         @string got = fmt.Sprint(c);
@@ -243,9 +255,11 @@ public static void TestTimeout(ж<testing.T> Ꮡt) {
         }
     }
     testDeadline(c, withTimeoutˢ, Ꮡt);
+
     (c, _) = WithTimeout(Background(), shortDuration);
     var o = new otherContext(c);
     testDeadline(o, withTimeoutOtherContextˢ, Ꮡt);
+
     (c, _) = WithTimeout(Background(), shortDuration);
     o = new otherContext(c);
     (c, _) = WithTimeout(o, veryLongDuration);
@@ -318,42 +332,55 @@ public static void TestValues(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var c0 = Background();
     check(c0, "c0"u8, ""u8, ""u8, ""u8);
+
     var c1 = WithValue(Background(), k1, c1k1ˢ);
     check(c1, "c1"u8, c1k1ˢ, ""u8, ""u8);
+
     {
         @string got = fmt.Sprint(c1);
         @string want = contextBackgroundˢ4; if (got != want) {
             Ꮡt.Errorf("c.String() = %q want %q"u8, got, want);
         }
     }
+
     var c2 = WithValue(c1, k2, c2k2ˢ);
     check(c2, "c2"u8, c1k1ˢ, c2k2ˢ, ""u8);
+
     {
         @string got = fmt.Sprint(c2);
         @string want = contextBackgroundˢ5; if (got != want) {
             Ꮡt.Errorf("c.String() = %q want %q"u8, got, want);
         }
     }
+
     var c3 = WithValue(c2, k3, c3k3ˢ);
     check(c3, "c2"u8, c1k1ˢ, c2k2ˢ, c3k3ˢ);
+
     var c4 = WithValue(c3, k1, default!);
     check(c4, "c4"u8, ""u8, c2k2ˢ, c3k3ˢ);
+
     {
         @string got = fmt.Sprint(c4);
         @string want = contextBackgroundˢ6; if (got != want) {
             Ꮡt.Errorf("c.String() = %q want %q"u8, got, want);
         }
     }
+
     var o0 = new otherContext(Background());
     check(o0, "o0"u8, ""u8, ""u8, ""u8);
+
     var o1 = new otherContext(WithValue(Background(), k1, c1k1ˢ));
     check(o1, "o1"u8, c1k1ˢ, ""u8, ""u8);
+
     var o2 = WithValue(o1, k2, o2k2ˢ);
     check(o2, "o2"u8, c1k1ˢ, o2k2ˢ, ""u8);
+
     var o3 = new otherContext(c4);
     check(o3, "o3"u8, ""u8, c2k2ˢ, c3k3ˢ);
+
     var o4 = WithValue(o3, k3, default!);
     check(o4, "o4"u8, ""u8, c2k2ˢ, ""u8);
 }
@@ -465,6 +492,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
                 Ꮡwg.Done();
             }, cancelΔ2);
         }
+
         var d = quiescent(Ꮡt);
         var stuck = new channel<EmptyStruct>(0);
         var stuckʗ1 = stuck;
@@ -473,6 +501,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
         });
         var timerʗ1 = timer;
         defer(() => timerʗ1.Stop(), ref ᒐ);
+
         // Wait on all the contexts in a random order.
         foreach (var (ctx, _) in m) {
             var selᴛ16 = ctx.Done();
@@ -482,7 +511,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
                 break;
             }
             case 1 when selᴛ17.ꟷᐳ(out _): {
-                var buf = new slice<byte>((10 << (int)(10)));
+                var buf = new slice<byte>((10 << 10));
                 nint n = Δruntime.Stack(buf, true);
                 Ꮡt.Fatalf("timed out after %v waiting for <-ctx.Done(); stacks:\n%s"u8, d, buf.slice(0, n));
                 break;
@@ -502,7 +531,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ19.ꟷᐳ(out _): {
-            var buf = new slice<byte>((10 << (int)(10)));
+            var buf = new slice<byte>((10 << 10));
             nint n = Δruntime.Stack(buf, true);
             Ꮡt.Fatalf("timed out after %v waiting for cancel functions; stacks:\n%s"u8, d, buf.slice(0, n));
             break;
@@ -535,7 +564,7 @@ public static partial void TestInterlockedCancels(ж<testing.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ21.ꟷᐳ(out _): {
-            var buf = new slice<byte>((10 << (int)(10)));
+            var buf = new slice<byte>((10 << 10));
             nint n = Δruntime.Stack(buf, true);
             Ꮡt.Fatalf("timed out after %v waiting for child.Done(); stacks:\n%s"u8, d, buf.slice(0, n));
             break;
@@ -565,6 +594,7 @@ internal static void testLayers(ж<testing.T> Ꮡt, int64 seed, bool testTimeout
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var r = rand.New(rand.NewSource(seed));
         @string prefix = fmt.Sprintf("seed=%d"u8, seed);
         void errorf(@string format, params ꓸꓸꓸany aʗp) {
@@ -601,7 +631,6 @@ internal static void testLayers(ж<testing.T> Ꮡt, int64 seed, bool testTimeout
                 numTimers++;
                 break;
             }}
-
         }
         var ctxʗ1 = ctx;
         var errorfʗ1 = errorf;
@@ -673,6 +702,7 @@ public static void TestWithCancelCanceledParent(ж<testing.T> Ꮡt) {
     var (parent, pcancel) = WithCancelCause(Background());
     var cause = fmt.Errorf("Because!"u8);
     pcancel(cause);
+
     var (c, _) = WithCancel(parent);
     var selᴛ26 = c.Done();
     switch (trySelect(ᐸꟷ(selᴛ26, ꓸꓸꓸ))) {
@@ -702,6 +732,7 @@ public static partial void TestWithCancelSimultaneouslyCanceledParent(ж<testing
         var cause = fmt.Errorf("Because!"u8);
         var pcancelʗ1 = pcancel;
         goǃ(pcancelʗ1, cause);
+
         var (c, _) = WithCancel(parent);
         ᐸꟷ(c.Done());
         {
@@ -1155,8 +1186,10 @@ public static void TestCustomContextPropagation(ж<testing.T> Ꮡt) {
         var (ctx3, cancel3) = WithCancel(new context_test_package.customDoneContextжContext(ctx2));
         var cancel3ʗ1 = cancel3;
         defer(() => cancel3ʗ1(), ref ᒐ);
+
         cancel1(cause);
         close(donec);
+
         ᐸꟷ(ctx3.Done());
         {
             var (got, want) = (ctx3.Err(), Canceled); if (!AreEqual(got, want)) {
@@ -1228,6 +1261,7 @@ internal static void cancel(this ж<customCauseContext> Ꮡccc) {
     close(ccc.done);
     var cancelChild = ccc.cancelChild;
     ccc.mu.Unlock();
+
     if (cancelChild != default!) {
         cancelChild();
     }
@@ -1256,6 +1290,7 @@ public static void TestCustomContextCause(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Cause(ccc) = %v, want %v"u8, got, Canceled);
         }
     }
+
     // Test that if we pass a custom context to WithCancelCause,
     // and then cancel that child context with a cause,
     // that the cause of the child canceled context is correct
@@ -1286,6 +1321,7 @@ public static void TestCustomContextCause(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("after CancelCauseFunc Cause(ccc) = %v, want %v"u8, got, (any)(default!));
         }
     }
+
     // Test that if we now cancel the parent custom context,
     // the cause of the child canceled context is still correct,
     // and the parent custom context is canceled without a cause.
@@ -1310,6 +1346,7 @@ public static void TestCustomContextCause(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("after CancelCauseFunc Cause(ccc) = %v, want %v"u8, got, Canceled);
         }
     }
+
     // Test that if we associate a custom context with a child,
     // then canceling the custom context cancels the child.
     ccc = Ꮡ(new customCauseContext(

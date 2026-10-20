@@ -29,24 +29,21 @@ internal static float64 ldexp(float64 frac, nint exp) {
     case {} when IsInf(frac, 0) || IsNaN(frac): {
         return frac;
     }}
-
     (frac, var e) = normalize(frac);
     exp += e;
     var x = Float64bits(frac);
-    exp += (nint)((nint)((x >> (int)(shift))) & (nint)mask) - (nint)bias;
+    exp += ((nint)(x >> (int)(shift)) & (nint)mask) - (nint)bias;
     if (exp < -1075) {
         return Copysign(0D, frac); // underflow
     }
-    if (exp > 1023) {
-        // overflow
+    if (exp > 1023) { // overflow
         if (frac < 0D) {
             return Inf(-1);
         }
         return Inf(1);
     }
     float64 m = 1D;
-    if (exp < -1022) {
-        // denormal
+    if (exp < -1022) { // denormal
         exp += 53;
         m = 1.0D / (9007199254740992D); // 2**-53
     }

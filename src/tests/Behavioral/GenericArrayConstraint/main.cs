@@ -46,10 +46,12 @@ internal static void Main() {
     var r2 = new ringElement(new fieldElement[]{10, 20, 30, 40}.array());
     var rs = addPoly(r1, r2);
     fmt.Println(rs[0], rs[1], rs[2], rs[3], sum(rs));
+
     var n1 = new nttElement(new fieldElement[]{5, 6, 7, 8}.array());
     var n2 = new nttElement(new fieldElement[]{50, 60, 70, 80}.array());
     var ns = addPoly(n1, n2);
     fmt.Println(ns[0], ns[1], ns[2], ns[3], sum(ns));
+
     var scaled = scalePoly(r1, 3);
     fmt.Println(scaled[0], scaled[1], scaled[2], scaled[3]);
 }

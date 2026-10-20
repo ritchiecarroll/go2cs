@@ -26,48 +26,16 @@ partial class bytealg_package
         // runtime/slice.go's bytealg_MakeNoZero -- and strings.Builder's growth reads that capacity:
         // Grow(18) holds 24 bytes, so a 19th byte fits without a regrow. And the buffer is the ONE
         // allocation Go counts for a Builder (TestBuilderAllocs, bufio's TestReadStringAllocs), so it
-        // goes through AllocationCounter like every other backing golib mints. The table stays here
-        // rather than being read from the converted runtime's sizeclasses: internal/bytealg sits BELOW
-        // runtime in the import graph, so a reference the other way is a cycle.
-        nint capacity = RoundUpSizeNoScan(n);
+        // goes through AllocationCounter like every other backing golib mints. The size classes are
+        // golib's (GoSizeClasses, guarded against the pinned GOROOT), the table append's growth reads:
+        // internal/bytealg sits BELOW runtime in the import graph, so the converted runtime's own table
+        // is out of reach.
+        nint capacity = (nint)GoSizeClasses.RoundUpSize((nuint)n, noscan: true);
 
         if (capacity > Array.MaxLength)
             capacity = n;
 
         return new slice<byte>(AllocationCounter.NewArray<byte>(capacity), 0, n);
-    }
-
-    // Go 1.24's small-object size classes (runtime/sizeclasses.go, class_to_size), the same on every
-    // 64-bit target.
-    private static readonly ushort[] s_classToSize =
-    [
-        0, 8, 16, 24, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 256, 288, 320, 352,
-        384, 416, 448, 480, 512, 576, 640, 704, 768, 896, 1024, 1152, 1280, 1408, 1536, 1792, 2048, 2304,
-        2688, 3072, 3200, 3456, 4096, 4864, 5376, 6144, 6528, 6784, 6912, 8192, 9472, 9728, 10240, 10880,
-        12288, 13568, 14336, 16384, 18432, 19072, 20480, 21760, 24576, 27264, 28672, 32768,
-    ];
-
-    private const nint MaxSmallSize = 32768;
-
-    private const nint PageSize = 8192;
-
-    // roundupsize(size, noscan: true) as the runtime computes it, MEASURED rather than transcribed:
-    // for a []byte, cap(append([]byte(nil), make([]byte, n)...)) and a fresh strings.Builder's
-    // Grow(n) both return exactly this for every n from 1 to 70,000 at go1.24.13. A noscan object
-    // carries no malloc header, so every size up to 32 KiB is SMALL (32,761..32,768 take the 32,768
-    // class) and only a larger one rounds up to the page.
-    internal static nint RoundUpSizeNoScan(nint size)
-    {
-        if (size <= MaxSmallSize)
-        {
-            int index = Array.BinarySearch(s_classToSize, (ushort)size);
-
-            return s_classToSize[index >= 0 ? index : ~index];
-        }
-
-        nint rounded = size + (PageSize - 1);
-
-        return rounded < size ? size : rounded & ~(PageSize - 1);
     }
 
     // internal/bytealg's Index/Compare/Count family are assembly-optimized on amd64, so the

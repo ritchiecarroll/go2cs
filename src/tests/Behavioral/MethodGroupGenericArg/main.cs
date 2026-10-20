@@ -29,11 +29,13 @@ internal static bool pairEqual<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> 
     if (len(s1) != len(s2)) {
         return false;
     }
+
     foreach (var (i, _) in s1) {
         if (!eq(s1[i], s2[i])) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -46,6 +48,7 @@ internal static S insertAt<S, E>(S s, nint i, params Span<E> vʗp)
     @out = appendꓸꓸꓸ<S, E>(@out, subslice<S, E>(s, 0, i));
     @out = appendꓸꓸꓸ<S, E>(@out, v);
     @out = appendꓸꓸꓸ<S, E>(@out, subslice<S, E>(s, i));
+
     return @out;
 }
 
@@ -69,11 +72,13 @@ internal static bool sliceEq<S, E>(S a, S b)
     if (len(a) != len(b)) {
         return false;
     }
+
     foreach (var (i, _) in a) {
         if (!AreEqual(a[i], b[i])) {
             return false;
         }
     }
+
     return true;
 }
 
@@ -87,16 +92,21 @@ internal static void Main() {
     var nums = new nint[]{1, 2, 3, 4}.slice();
     nint sum = foldSlice<slice<nint>, nint>(nums, addInt);
     fmt.Println(sum);
+
     fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, new nint[]{1, 2, 3, 4}.slice(), equalPair<nint>));
     fmt.Println(pairEqual<slice<nint>, slice<nint>, nint, nint>(nums, new nint[]{1, 2, 9, 4}.slice(), equalPair<nint>));
+
     fmt.Println(insertAt<slice<nint>, nint>(nums, 1));
-    fmt.Println(insertAt(nums, 1, (nint)(7), (nint)(8)));
+    fmt.Println(insertAt(nums, 1, (nint)7, (nint)8));
+
     var plain = new nint[]{1, 2, 3}.slice();
     applyTo<slice<nint>>(plain, reverse<slice<nint>, nint>);
     fmt.Println(plain);
+
     var named = new namedInts(new nint[]{4, 5, 6}.slice());
     applyTo<namedInts>(named, reverse<namedInts, nint>);
     fmt.Println(named);
+
     fmt.Println(rowsEqual(new row[]{new nint[]{1, 2}.slice(), new nint[]{3}.slice()}.slice(), new row[]{new nint[]{1, 2}.slice(), new nint[]{3}.slice()}.slice()));
     fmt.Println(rowsEqual(new row[]{new nint[]{1, 2}.slice(), new nint[]{3}.slice()}.slice(), new row[]{new nint[]{1, 2}.slice(), new nint[]{4}.slice()}.slice()));
 }

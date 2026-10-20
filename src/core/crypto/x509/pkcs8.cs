@@ -123,7 +123,6 @@ public static (any key, error err) ParsePKCS8PrivateKey(slice<byte> der) {
     default: {
         return (default!, fmt.Errorf("x509: PKCS#8 wrapping contained private key with unknown algorithm: %v"u8, privKey.Algo.Algorithm));
     }}
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -140,6 +139,7 @@ internal static readonly @string x509UnknownCurveWhileˢ = "x509: unknown curve 
 // MarshalPKCS8PrivateKey runs [rsa.PrivateKey.Precompute] on RSA keys.
 public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
     pkcs8 privKey = default!;
+
     switch (key.type()) {
     case ж<rsa.PrivateKey> k: {
         privKey.Algo = new pkix.AlgorithmIdentifier(
@@ -171,7 +171,7 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
             )
         );
         {
-            (privKey.PrivateKey, err) = marshalECPrivateKeyWithOID(ref (k).DerefOrNull(), default!); if (err != default!) {
+            (privKey.PrivateKey, err) = marshalECPrivateKeyWithOID(k, default!); if (err != default!) {
                 return (default!, errors.New("x509: failed to marshal EC private key while building PKCS#8: "u8 + err.Error()));
             }
         }
@@ -226,6 +226,7 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(any key) {
         var k = key;
         return (default!, fmt.Errorf("x509: unknown key type while marshaling PKCS#8: %T"u8, key));
     }}
+
     return asn1.Marshal(privKey);
 }
 

@@ -39,30 +39,34 @@ public static void TestMain(ж<testing.M> Ꮡm) {
     if (Δos.Getenv(goWantRaceBeforeTestsˢ) == "1"u8) {
         doRace();
     }
+
     Ꮡm.Run();
+
+    // Note: m.Run currently prints the final "PASS" line, so if any race is
+    // reported here (after m.Run but before the process exits), it will print
+    // "PASS", then print the stack traces for the race, then exit with nonzero
+    // status.
+    //
+    // This is a somewhat fundamental race: because the race detector hooks into
+    // the runtime at a very low level, no matter where we put the printing it
+    // would be possible to report a race that occurs afterward. However, we could
+    // theoretically move the printing after TestMain, which would at least do a
+    // better job of diagnosing races in cleanup functions within TestMain itself.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string testˢ = "test"u8;
 
-// Note: m.Run currently prints the final "PASS" line, so if any race is
-// reported here (after m.Run but before the process exits), it will print
-// "PASS", then print the stack traces for the race, then exit with nonzero
-// status.
-//
-// This is a somewhat fundamental race: because the race detector hooks into
-// the runtime at a very low level, no matter where we put the printing it
-// would be possible to report a race that occurs afterward. However, we could
-// theoretically move the printing after TestMain, which would at least do a
-// better job of diagnosing races in cleanup functions within TestMain itself.
 public static void TestTempDirInCleanup(ж<testing.T> Ꮡt) {
     @string dir = default!;
+
     Ꮡt.Run(testˢ, (ж<testing.T> tΔ1) => {
         tΔ1.Cleanup(() => {
             dir = tΔ1.TempDir();
         });
         _ = tΔ1.TempDir();
     });
+
     var (fi, err) = Δos.Stat(dir);
     if (fi != default!) {
         Ꮡt.Fatalf("Directory %q from user Cleanup still exists"u8, dir);
@@ -76,8 +80,6 @@ public static void TestTempDirInCleanup(ж<testing.T> Ꮡt) {
 private static readonly object subTestFailureInAˢ = (@string)"Sub test failure in a benchmark"u8;
 
 public static void TestTempDirInBenchmark(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testing.Benchmark((ж<testing.B> b) => {
         if (!b.Run(testˢ, (ж<testing.B> bΔ1) => {
             // Add a loop so that the test won't fail. See issue 38677.
@@ -145,6 +147,7 @@ internal static void testTempDir(ж<testing.T> Ꮡt) {
             break;
         }}
     });
+
     @string dir = Ꮡt.TempDir();
     if (dir == ""u8) {
         Ꮡt.Fatal(expectedDirˢ);
@@ -171,6 +174,7 @@ internal static void testTempDir(ж<testing.T> Ꮡt) {
     if (len(files) > 0) {
         Ꮡt.Errorf("unexpected %d files in TempDir: %v"u8, len(files), files);
     }
+
     @string glob = filepath.Join(dir, txtˢ);
     {
         var (_, errΔ2) = filepath.Glob(glob); if (errΔ2 != default!) {
@@ -213,6 +217,7 @@ public static void TestSetenv(ж<testing.T> Ꮡt) {
             newValue: "222"u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestSetenv_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -226,6 +231,7 @@ public static void TestSetenv(ж<testing.T> Ꮡt) {
         } else {
             Δos.Unsetenv(test.key);
         }
+
         var testʗ1 = test;
         Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
             tΔ1.Setenv(testʗ1.key, testʗ1.newValue);
@@ -233,6 +239,7 @@ public static void TestSetenv(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("unexpected value after t.Setenv: got %s, want %s"u8, Δos.Getenv(testʗ1.key), testʗ1.newValue);
             }
         });
+
         var (got, exists) = Δos.LookupEnv(test.key);
         if (got != test.initialValue) {
             Ꮡt.Fatalf("unexpected value after t.Setenv cleanup: got %s, want %s"u8, got, test.initialValue);
@@ -261,6 +268,7 @@ internal static void testWithParallelAfter(ж<testing.T> Ꮡt, Action<ж<testing
     GoFrame ᒐ = default;
     try {
         defer(expectParallelConflict, Ꮡt, ref ᒐ);
+
         fn(Ꮡt);
         Ꮡt.Parallel();
     }
@@ -272,6 +280,7 @@ internal static void testWithParallelBefore(ж<testing.T> Ꮡt, Action<ж<testin
     GoFrame ᒐ = default;
     try {
         defer(expectParallelConflict, Ꮡt, ref ᒐ);
+
         Ꮡt.Parallel();
         fn(Ꮡt);
     }
@@ -284,10 +293,12 @@ private static readonly @string childˢ = "child"u8;
 
 internal static void testWithParallelParentBefore(ж<testing.T> Ꮡt, Action<ж<testing.T>> fn) {
     Ꮡt.Parallel();
+
     Ꮡt.Run(childˢ, (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
             defer(expectParallelConflict, tΔ1, ref ᒐ);
+
             fn(tΔ1);
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -300,11 +311,13 @@ private static readonly @string grandChildˢ = "grand-child"u8;
 
 internal static void testWithParallelGrandParentBefore(ж<testing.T> Ꮡt, Action<ж<testing.T>> fn) {
     Ꮡt.Parallel();
+
     Ꮡt.Run(childˢ, (ж<testing.T> tΔ1) => {
         tΔ1.Run(grandChildˢ, (ж<testing.T> tΔ2) => {
             GoFrame ᒐ = default;
             try {
                 defer(expectParallelConflict, tΔ2, ref ᒐ);
+
                 fn(tΔ2);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -374,6 +387,7 @@ public static void TestChdir(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(Δos.Chdir, oldDir, ref ᒐ);
+
         // The "relative" test case relies on tmp not being a symlink.
         (var tmp, err) = filepath.EvalSymlinks(Ꮡt.TempDir());
         if (err != default!) {
@@ -385,6 +399,7 @@ public static void TestChdir(ж<testing.T> Ꮡt) {
             // is no relative path between them, so skip that test case.
             rel = skipˢ;
         }
+
         foreach (var (_, vᴛ1) in new TestChdir_type[]{
             new(
                 name: "absolute"u8,
@@ -419,7 +434,9 @@ public static void TestChdir(ж<testing.T> Ꮡt) {
                 if (!filepath.IsAbs(tcʗ1.pwd)) {
                     tΔ1.Fatalf("Bad tc.pwd: %q (must be absolute)"u8, tcʗ1.pwd);
                 }
+
                 tΔ1.Chdir(tcʗ1.dir);
+
                 var (newDirΔ1, errΔ1) = Δos.Getwd();
                 if (errΔ1 != default!) {
                     tΔ1.Fatal(errΔ1);
@@ -427,13 +444,14 @@ public static void TestChdir(ж<testing.T> Ꮡt) {
                 if (newDirΔ1 != tcʗ1.pwd) {
                     tΔ1.Fatalf("failed to chdir to %q: getwd: got %q, want %q"u8, tcʗ1.dir, newDirΔ1, tcʗ1.pwd);
                 }
+
                 var exprᴛ1 = Δruntime.GOOS;
                 if (exprᴛ1 == "windows"u8 || exprᴛ1 == "plan9"u8) {
+                    // Windows and Plan 9 do not use the PWD variable.
                 }
                 else { /* default: */
                     {
                         @string pwd = Δos.Getenv(pwdˢ); if (pwd != tcʗ1.pwd) {
-                            // Windows and Plan 9 do not use the PWD variable.
                             tΔ1.Fatalf("PWD: got %q, want %q"u8, pwd, tcʗ1.pwd);
                         }
                     }
@@ -443,6 +461,7 @@ public static void TestChdir(ж<testing.T> Ꮡt) {
                     Δos.Chdir(".."u8);
                 }
             });
+
             var (newDir, errΔ2) = Δos.Getwd();
             if (errΔ2 != default!) {
                 Ꮡt.Fatal(errΔ2);
@@ -482,7 +501,7 @@ func main() {
 	fmt.Println(testing.Testing())
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object skippingBuildingABinaryˢ = (@string)"skipping building a binary in short mode"u8;
@@ -502,21 +521,25 @@ public static void TestTesting(ж<testing.T> Ꮡt) {
     if (!testingTrueInPackageVarInit) {
         Ꮡt.Errorf("testing.Testing() variable initialized as %t, want %t"u8, testingTrueInPackageVarInit, true);
     }
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingBuildingABinaryˢ);
     }
     testenv.MustHaveGoRun(new testing_TжTB(Ꮡt));
+
     @string fn = filepath.Join(Ꮡt.TempDir(), xGoˢ);
     {
         var errΔ1 = Δos.WriteFile(fn, slice<byte>(testingProg), 420); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), runˢ, fn);
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("%v failed: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
     }
+
     @string s = ((@string)bytes.TrimSpace(@out));
     if (s != "false"u8) {
         Ꮡt.Errorf("in non-test testing.Test() returned %q, want %q"u8, s, falseˢ);
@@ -532,12 +555,15 @@ private static readonly @string testBenchtime2xˢ = "-test.benchtime=2x"u8;
 // runTest both logs and returns the test output.
 internal static slice<byte> runTest(ж<testing.T> Ꮡt, @string test) {
     Ꮡt.Helper();
+
     testenv.MustHaveExec(new testing_TжTB(Ꮡt));
+
     var cmd = testenv.Command(new testing_TжTB(Ꮡt), testenv.Executable(new testing_TжTB(Ꮡt)), "-test.run=^"u8 + test + "$"u8, "-test.bench=" + test, testVˢ2, testParallel2ˢ, testBenchtime2xˢ);
     cmd = testenv.CleanCmdEnv(cmd);
     cmd.Value.Env = append((~cmd).Env, "GO_WANT_HELPER_PROCESS=1"u8);
     var (@out, err) = cmd.CombinedOutput();
     Ꮡt.Logf("%v: %v\n%s"u8, cmd.OrTypedNil(), err, @out);
+
     return @out;
 }
 
@@ -567,7 +593,9 @@ public static void TestRaceReports(ж<testing.T> Ꮡt) {
         });
         return;
     }
+
     var @out = runTest(Ꮡt, testRaceReportsˢ);
+
     // We should see at most one race detector report.
     nint c = bytes.Count(@out, slice<byte>("race detected"u8));
     nint want = 0;
@@ -589,7 +617,9 @@ public static void TestRaceName(ж<testing.T> Ꮡt) {
         doRace();
         return;
     }
+
     var @out = runTest(Ꮡt, testRaceNameˢ);
+
     if (Δregexp.MustCompile(nameSˢ).Match(@out)) {
         Ꮡt.Errorf("incorrectly reported test with no name"u8);
     }
@@ -622,7 +652,9 @@ public static void TestRaceSubReports(ж<testing.T> Ꮡt) {
         doRace();
         return;
     }
+
     var @out = runTest(Ꮡt, testRaceSubReportsˢ);
+
     // There should be three race reports: one for each subtest, and one for the
     // race after the subtests complete. Note that because the subtests run in
     // parallel, the race stacks may both be printed in with one or the other
@@ -635,6 +667,7 @@ public static void TestRaceSubReports(ж<testing.T> Ꮡt) {
     if (cReport != wantReport) {
         Ꮡt.Errorf("got %d race reports, want %d"u8, cReport, wantReport);
     }
+
     // Regardless of when the stacks are printed, we expect each subtest to be
     // marked as failed, and that failure should propagate up to the parents.
     nint cFail = bytes.Count(@out, slice<byte>("--- FAIL:"u8));
@@ -656,11 +689,13 @@ public static void TestRaceInCleanup(ж<testing.T> Ꮡt) {
         Ꮡt.Parallel();
         Ꮡt.Run(subˢ, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
+            // No race should be reported for sub.
         });
-        // No race should be reported for sub.
         return;
     }
+
     var @out = runTest(Ꮡt, testRaceInCleanupˢ);
+
     // There should be one race report, for the parent test only.
     nint cReport = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
     nint wantReport = 0;
@@ -670,6 +705,7 @@ public static void TestRaceInCleanup(ж<testing.T> Ꮡt) {
     if (cReport != wantReport) {
         Ꮡt.Errorf("got %d race reports, want %d"u8, cReport, wantReport);
     }
+
     // Only the parent test should be marked as failed.
     // (The subtest does not race, and should pass.)
     nint cFail = bytes.Count(@out, slice<byte>("--- FAIL:"u8));
@@ -699,7 +735,9 @@ public static void TestDeepSubtestRace(ж<testing.T> Ꮡt) {
         });
         return;
     }
+
     var @out = runTest(Ꮡt, testDeepSubtestRaceˢ);
+
     nint c = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
     nint want = 0;
     // There should be two race reports.
@@ -722,6 +760,7 @@ public static partial void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> 
             doRace(); // This race happens while both subtests are running.
             close(doneʗ1);
         });
+
         var doneʗ2 = done;
         Ꮡt.Run(subˢ, (ж<testing.T> tΔ1) => {
             var doneʗ3 = doneʗ2;
@@ -737,9 +776,12 @@ public static partial void TestRaceDuringParallelFailsAllSubtests(ж<testing.T> 
                 ᐸꟷ(doneʗ4);
             });
         });
+
         return;
     }
+
     var @out = runTest(Ꮡt, "TestRaceDuringParallelFailsAllSubtests"u8);
+
     nint c = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
     nint want = 0;
     // Each subtest should report the race independently.
@@ -762,7 +804,9 @@ public static void TestRaceBeforeParallel(ж<testing.T> Ꮡt) {
         });
         return;
     }
+
     var @out = runTest(Ꮡt, testRaceBeforeParallelˢ);
+
     nint c = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
     nint want = 0;
     // We should see one race detector report.
@@ -783,7 +827,9 @@ public static void TestRaceBeforeTests(ж<testing.T> Ꮡt) {
     cmd.Value.Env = append((~cmd).Env, "GO_WANT_RACE_BEFORE_TESTS=1"u8);
     var (@out, _) = cmd.CombinedOutput();
     Ꮡt.Logf("%s"u8, @out);
+
     nint c = bytes.Count(@out, slice<byte>("race detected outside of test execution"u8));
+
     nint want = 0;
     if (race.Enabled) {
         want = 1;
@@ -799,6 +845,7 @@ private static readonly @string benchmarkRacyˢ = "BenchmarkRacy"u8;
 public static void TestBenchmarkRace(ж<testing.T> Ꮡt) {
     var @out = runTest(Ꮡt, benchmarkRacyˢ);
     nint c = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
+
     nint want = 0;
     // We should see one race detector report.
     if (race.Enabled) {
@@ -815,6 +862,7 @@ private static readonly @string benchmarkBLoopRacyˢ = "BenchmarkBLoopRacy"u8;
 public static void TestBenchmarkRaceBLoop(ж<testing.T> Ꮡt) {
     var @out = runTest(Ꮡt, benchmarkBLoopRacyˢ);
     nint c = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
+
     nint want = 0;
     // We should see one race detector report.
     if (race.Enabled) {
@@ -851,6 +899,7 @@ private static readonly @string benchmarkSubRacyˢ = "BenchmarkSubRacy"u8;
 public static void TestBenchmarkSubRace(ж<testing.T> Ꮡt) {
     var @out = runTest(Ꮡt, benchmarkSubRacyˢ);
     nint c = bytes.Count(@out, slice<byte>("race detected during execution of test"u8));
+
     nint want = 0;
     // We should see 3 race detector reports:
     // one in the sub-bencmark, one in the parent afterward,
@@ -872,6 +921,7 @@ public static void BenchmarkSubRacy(ж<testing.B> Ꮡb) {
     if (Δos.Getenv(goWantHelperProcessˢ) != "1"u8) {
         Ꮡb.Skipf("skipping intentionally-racy benchmark"u8);
     }
+
     Ꮡb.Run(nonRacyˢ, (ж<testing.B> bΔ1) => {
         nint tot = 0;
         for (nint i = 0; i < (~bΔ1).N; i++) {
@@ -879,16 +929,19 @@ public static void BenchmarkSubRacy(ж<testing.B> Ꮡb) {
         }
         _ = tot;
     });
+
     Ꮡb.Run(racyˢ, (ж<testing.B> bΔ2) => {
         for (nint i = 0; i < (~bΔ2).N; i++) {
             doRace();
         }
     });
+
     Ꮡb.Run(racyBLoopˢ, (ж<testing.B> bΔ3) => {
         while (bΔ3.Loop()) {
             doRace();
         }
     });
+
     doRace(); // should be reported separately
 }
 
@@ -897,9 +950,11 @@ private static readonly @string testParallel4ˢ = "-test.parallel=4"u8;
 
 public static void TestRunningTests(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     // Regression test for https://go.dev/issue/64404:
     // on timeout, the "running tests" message should not include
     // tests that are waiting on parked subtests.
+
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
         for (nint i = 0; i < 2; i++) {
             Ꮡt.Run(fmt.Sprintf("outer%d"u8, i), (ж<testing.T> tΔ1) => {
@@ -915,6 +970,7 @@ public static void TestRunningTests(ж<testing.T> Ꮡt) {
             });
         }
     }
+
     var timeout = 10 * time.Millisecond;
     while (ᐧ) {
         var cmd = testenv.Command(new testing_TжTB(Ꮡt), Δos.Args[0], "-test.run=^"u8 + Ꮡt.Name() + "$"u8, "-test.timeout=" + timeout.String(), testParallel4ˢ);
@@ -926,6 +982,7 @@ public static void TestRunningTests(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
+
         // Because the outer subtests (and TestRunningTests itself) are marked as
         // parallel, their test functions return (and are no longer “running”)
         // before the inner subtests are released to run and hang.
@@ -936,6 +993,7 @@ public static void TestRunningTests(ж<testing.T> Ꮡt) {
             "TestRunningTests/outer1/inner0"u8,
             "TestRunningTests/outer1/inner1"u8
         }.slice();
+
         var (got, ok) = parseRunningTests(@out);
         if (slices.Equal<slice<@string>, @string>(got, want)) {
             break;
@@ -951,9 +1009,8 @@ public static void TestRunningTests(ж<testing.T> Ꮡt) {
 }
 
 public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     if (Δos.Getenv(goWantHelperProcessˢ) == "1"u8) {
         for (nint i = 0; i < 2; i++) {
             Ꮡt.Run(fmt.Sprintf("outer%d"u8, i), (ж<testing.T> tΔ1) => {
@@ -964,6 +1021,7 @@ public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
                         time.Sleep(1 * time.Millisecond);
                     }
                 });
+
                 for (nint j = 0; j < 2; j++) {
                     tΔ1.Run(fmt.Sprintf("inner%d"u8, j), (ж<testing.T> tΔ2) => {
                         tΔ2.Parallel();
@@ -972,6 +1030,7 @@ public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
             });
         }
     }
+
     var timeout = 10 * time.Millisecond;
     while (ᐧ) {
         var cmd = testenv.Command(new testing_TжTB(Ꮡt), Δos.Args[0], "-test.run=^"u8 + Ꮡt.Name() + "$"u8, "-test.timeout=" + timeout.String());
@@ -983,6 +1042,7 @@ public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
+
         // TestRunningTestsInCleanup is blocked in the call to t.Run,
         // but its test function has not yet returned so it should still
         // be considered to be running.
@@ -992,6 +1052,7 @@ public static void TestRunningTestsInCleanup(ж<testing.T> Ꮡt) {
             "TestRunningTestsInCleanup"u8,
             "TestRunningTestsInCleanup/outer0"u8
         }.slice();
+
         var (got, ok) = parseRunningTests(@out);
         if (slices.Equal<slice<@string>, @string>(got, want)) {
             break;
@@ -1023,13 +1084,16 @@ internal static (slice<@string> runningTests, bool ok) parseRunningTests(slice<b
                     }
                 }
             }
+
             // This line is not the name of a running test.
             return (runningTests, true);
         }
+
         if (strings.TrimSpace(line) == "running tests:"u8) {
             inRunningTests = true;
         }
     }
+
     return (default!, false);
 }
 
@@ -1061,14 +1125,11 @@ private static readonly @string notInnerˢ = "not_inner"u8;
 private static readonly object helloInnerˢ = (@string)"Hello inner!"u8;
 
 public static void TestParentRun(ж<testing.T> Ꮡt1) {
-    ref var t1 = ref Ꮡt1.DerefOrNull();
-
     // Regression test for https://go.dev/issue/64402:
     // this deadlocked after https://go.dev/cl/506755.
     Ꮡt1.Run(outerˢ, (ж<testing.T> t2) => {
         t2.Log(helloOuterˢ);
-        Ꮡt1.Run(notInnerˢ, (ж<testing.T> t3) => {
-            // Note: this is t1.Run, not t2.Run.
+        Ꮡt1.Run(notInnerˢ, (ж<testing.T> t3) => { // Note: this is t1.Run, not t2.Run.
             t3.Log(helloInnerˢ);
         });
     });
@@ -1087,6 +1148,7 @@ public static void TestContext(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("expected non-canceled context, got %v"u8, err);
         }
     }
+
     ref var innerCtx = ref heap<context.Context>(out var ᏑinnerCtx);
     Ꮡt.Run(innerˢ, (ж<testing.T> tΔ1) => {
         ᏑinnerCtx.ValueSlot = tΔ1.Context();
@@ -1101,6 +1163,7 @@ public static void TestContext(ж<testing.T> Ꮡt) {
             tΔ2.Fatal(expectedContextOfSiblingˢ);
         }
     });
+
     var ctxʗ1 = ctx;
     Ꮡt.Cleanup(() => {
         if (!errors.Is(ctxʗ1.Err(), context.Canceled)) {
@@ -1117,16 +1180,19 @@ private static readonly object missingBenchmarkOutputˢ = (@string)"missing benc
 public static void TestBenchmarkBLoopIterationCorrect(ж<testing.T> Ꮡt) {
     var @out = runTest(Ꮡt, benchmarkBLoopPrintˢ);
     nint c = bytes.Count(@out, slice<byte>("Printing from BenchmarkBLoopPrint"u8));
+
     nint want = 2;
     if (c != want) {
         Ꮡt.Errorf("got %d loop iterations; want %d"u8, c, want);
     }
+
     // b.Loop() will only rampup once.
     c = bytes.Count(@out, slice<byte>("Ramping up from BenchmarkBLoopPrint"u8));
     want = 1;
     if (c != want) {
         Ꮡt.Errorf("got %d loop rampup; want %d"u8, c, want);
     }
+
     var re = Δregexp.MustCompile(benchmarkBLoopPrint09S2Sˢ);
     if (!re.Match(@out)) {
         Ꮡt.Error(missingBenchmarkOutputˢ);
@@ -1139,12 +1205,14 @@ private static readonly @string benchmarkBNPrintˢ = "BenchmarkBNPrint"u8;
 public static void TestBenchmarkBNIterationCorrect(ж<testing.T> Ꮡt) {
     var @out = runTest(Ꮡt, benchmarkBNPrintˢ);
     nint c = bytes.Count(@out, slice<byte>("Printing from BenchmarkBNPrint"u8));
+
     // runTest sets benchtime=2x, with semantics specified in #32051 it should
     // run 3 times.
     nint want = 3;
     if (c != want) {
         Ꮡt.Errorf("got %d loop iterations; want %d"u8, c, want);
     }
+
     // b.N style fixed iteration loop will rampup twice:
     // One in run1(), the other in launch
     c = bytes.Count(@out, slice<byte>("Ramping up from BenchmarkBNPrint"u8));

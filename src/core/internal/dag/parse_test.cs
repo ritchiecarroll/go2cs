@@ -14,7 +14,7 @@ internal static readonly @string diamond = """
 
 NONE < a < b, c < d;
 
-"""u8;
+"""u8.Raw();
 
 internal static ж<global::go.@internal.dag_package.Graph> mustParse(ж<testing.T> Ꮡt, @string dag) {
     Ꮡt.Helper();
@@ -29,11 +29,13 @@ internal static void wantEdges(ж<testing.T> Ꮡt, ж<global::go.@internal.dag_p
     ref var g = ref Ꮡg.DerefOrNull();
 
     Ꮡt.Helper();
+
     var wantEdges = strings.Fields(edges);
     var wantEdgeMap = new map<@string, bool>();
     foreach (var (_, e) in wantEdges) {
         wantEdgeMap[e] = true;
     }
+
     foreach (var (_, n1) in g.Nodes) {
         foreach (var (_, n2) in g.Nodes) {
             var got = g.HasEdge(n1, n2);
@@ -58,10 +60,12 @@ internal static readonly @string bACADADBDCˢ = "b->a c->a d->a d->b d->c"u8;
 public static void TestParse(ж<testing.T> Ꮡt) {
     // Basic smoke test for graph parsing.
     var g = mustParse(Ꮡt, diamond);
+
     var wantNodes = strings.Fields(aBCDˢ);
     if (!slices.Equal<slice<@string>, @string>(wantNodes, (~g).Nodes)) {
         Ꮡt.Fatalf("want nodes %v, got %v"u8, wantNodes, (~g).Nodes);
     }
+
     // Parse returns the transitive closure, so it adds d->a.
     wantEdges(Ꮡt, g, bACADADBDCˢ);
 }

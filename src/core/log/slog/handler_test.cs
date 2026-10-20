@@ -7,7 +7,9 @@ namespace go.log;
 using bytes = bytes_package;
 using context = context_package;
 using json = go.encoding.json_package;
+using fmt = fmt_package;
 using io = io_package;
+using buffer = go.log.slog.@internal.buffer_package;
 using os = os_package;
 using filepath = path.filepath_package;
 using slices = slices_package;
@@ -19,6 +21,7 @@ using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
+using go.log.slog.@internal;
 using path;
 using static go.log.slog_package;
 using ꓸꓸꓸstring = Span<@string>;
@@ -102,7 +105,7 @@ public static void TestDefaultHandle(ж<testing.T> Ꮡt) {
             @string got = default!;
 
             global::go.log.slog_package.ΔHandler h = new global::go.log.slog_package.defaultHandlerжΔHandler(newDefaultHandler((uintptr _, slice<byte> b) => {
-                got = ((@string)b);
+                got = (@string)b;
                 return default!;
             }));
             if (testʗ1.with != default!) {
@@ -146,7 +149,6 @@ public static void TestConcurrentWrites(ж<testing.T> Ꮡt) {
             else { /* default: */
                 tΔ1.Fatalf("unexpected handlerType %q"u8, handlerType);
             }
-
             var sub1 = h.WithAttrs(new global::go.log.slog_package.Attr[]{go.log.slog_package.Bool(sub1ˢ, true)}.slice());
             var sub2 = h.WithAttrs(new global::go.log.slog_package.Attr[]{go.log.slog_package.Bool(sub2ˢ, true)}.slice());
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
@@ -198,6 +200,11 @@ internal static readonly @string bCX2Eˢ = " b.c=\"\\x2E\t"u8;
 internal static readonly @string nameˢ = "name"u8;
 internal static readonly object minsˢ = (@string)"mins"u8;
 internal static readonly object secsˢ = (@string)"secs"u8;
+internal static readonly @string prefixˢ = "prefix"u8;
+internal static readonly @string needsQuotingˢ = " needs quoting "u8;
+internal static readonly @string notNeedsQuotingˢ = "NotNeedsQuoting"u8;
+internal static readonly @string prefixNeedsQuotingˢ = "prefix needs quoting"u8;
+internal static readonly object sourceIsNilˢ = (@string)"source is nil"u8;
 internal static readonly @string lineˢ2 = "$LINE"u8;
 
 internal partial struct TestJSONAndTextHandlers_type /*dyn*/ {
@@ -223,8 +230,10 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
 
     // remove all Attrs
     var removeAll = (slice<@string> _, global::go.log.slog_package.Attr a) => new Attr(nil);
+
     var attrs = new global::go.log.slog_package.Attr[]{go.log.slog_package.String("a"u8, oneˢ), Int("b"u8, 2), go.log.slog_package.Any(""u8, default!)}.slice();
     var preAttrs = new global::go.log.slog_package.Attr[]{Int(preˢ, 3), go.log.slog_package.String("x"u8, "y"u8)}.slice();
+
             var preAttrsʗ1 = preAttrs;
 
             var preAttrsʗ2 = preAttrs;
@@ -328,7 +337,6 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
         new(
             name: "groups"u8,
             replace: removeKeys(TimeKey, LevelKey), // to simplify the result
-
             attrs: new global::go.log.slog_package.Attr[]{
                 Int("a"u8, 1),
                 Group("g"u8,
@@ -376,9 +384,8 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
                 go.log.slog_package.String("a b"u8, "x\t\n\u0000y"u8),
                 Group(bCX2Eˢ,
                     go.log.slog_package.String("d=e"u8, "f.g\""u8),
-                    Int("m.d"u8, 1))
-            }.slice(), // dot is not escaped
-
+                    Int("m.d"u8, 1)) // dot is not escaped
+            }.slice(),
             wantText: @"msg=message ""a b""=""x\t\n\x00y"" "" b.c=\""\\x2E\t.d=e""=""f.g\"""" "" b.c=\""\\x2E\t.m.d""=1"u8,
             wantJSON: @"{""msg"":""message"",""a b"":""x\t\n\u0000y"","" b.c=\""\\x2E\t"":{""d=e"":""f.g\"""",""m.d"":1}}"u8
         ),
@@ -394,11 +401,10 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
             wantJSON: @"{""msg"":""message"",""a"":1,""name"":{""first"":""Ren"",""last"":""Hoek""},""b"":2}"u8
         ),
         new(
-            name: "resolve"u8, // Test resolution when there is no ReplaceAttr function.
-
+            // Test resolution when there is no ReplaceAttr function.
+            name: "resolve"u8,
             attrs: new global::go.log.slog_package.Attr[]{
                 go.log.slog_package.Any(""u8, Ꮡ(new replace(new Value(nil)))), // should be elided
-
                 go.log.slog_package.Any(nameˢ, new logValueName("Ren"u8, "Hoek"u8))
             }.slice(),
             wantText: "time=2000-01-02T03:04:05.000Z level=INFO msg=message name.first=Ren name.last=Hoek"u8,
@@ -467,7 +473,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
         new(
             name: "json.RawMessage"u8,
             replace: removeKeys(TimeKey, LevelKey),
-            attrs: new global::go.log.slog_package.Attr[]{go.log.slog_package.Any("bs"u8, ((json.RawMessage)slice<byte>("1234"u8)))}.slice(),
+            attrs: new global::go.log.slog_package.Attr[]{go.log.slog_package.Any("bs"u8, (json.RawMessage)slice<byte>("1234"u8))}.slice(),
             wantText: @"msg=message bs=""1234"""u8,
             wantJSON: @"{""msg"":""message"",""bs"":1234}"u8
         ),
@@ -486,7 +492,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
             name: "Source"u8,
             replace: (slice<@string> gs, global::go.log.slog_package.Attr a) => {
                 if (a.Key == SourceKey) {
-                    var s = a.Value.Any()._<ж<global::go.log.slog_package.Source>>();
+                    var s = a.Value.Any()._<ж<global::go.log.slog_package.ΔSource>>();
                     s.Value.File = filepath.Base((~s).File);
                     return go.log.slog_package.Any(a.Key, s.OrTypedNil());
                 }
@@ -500,7 +506,7 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
             name: "replace built-in with group"u8,
             replace: (slice<@string> _, global::go.log.slog_package.Attr a) => {
                 if (a.Key == TimeKey) {
-                    return Group(TimeKey, minsˢ, (nint)(3), secsˢ, (nint)(2));
+                    return Group(TimeKey, minsˢ, (nint)3, secsˢ, (nint)2);
                 }
                 if (a.Key == LevelKey) {
                     return new Attr(nil);
@@ -584,6 +590,18 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
             attrs: new global::go.log.slog_package.Attr[]{go.log.slog_package.Any(nameˢ, new logValueName("Perry"u8, "Platypus"u8))}.slice(),
             wantText: "name.first=Perry name.last=Platypus"u8,
             wantJSON: @"{""name"":{""first"":""Perry"",""last"":""Platypus""}}"u8
+        ),
+        new(
+            name: "group and key (or both) needs quoting"u8,
+            replace: removeKeys(TimeKey, LevelKey),
+            attrs: new global::go.log.slog_package.Attr[]{
+                Group(prefixˢ,
+                    go.log.slog_package.String(needsQuotingˢ, "v"u8), go.log.slog_package.String(notNeedsQuotingˢ, "v"u8)),
+                Group(prefixNeedsQuotingˢ,
+                    go.log.slog_package.String(needsQuotingˢ, "v"u8), go.log.slog_package.String(notNeedsQuotingˢ, "v"u8))
+            }.slice(),
+            wantText: @"msg=message ""prefix. needs quoting ""=v prefix.NotNeedsQuoting=v ""prefix needs quoting. needs quoting ""=v ""prefix needs quoting.NotNeedsQuoting""=v"u8,
+            wantJSON: @"{""msg"":""message"",""prefix"":{"" needs quoting "":""v"",""NotNeedsQuoting"":""v""},""prefix needs quoting"":{"" needs quoting "":""v"",""NotNeedsQuoting"":""v""}}"u8
         )
     }.slice()) {
         ref var test = ref heap(new TestJSONAndTextHandlers_type(), out var Ꮡtest);
@@ -591,7 +609,11 @@ public static void TestJSONAndTextHandlers(ж<testing.T> Ꮡt) {
 
         ref var r = ref heap<global::go.log.slog_package.Record>(out var Ꮡr);
         r = NewRecord(testTime, LevelInfo, messageˢ, callerPC(2));
-        @string line = strconv.Itoa((~r.source()).Line);
+        var source = r.Source();
+        if (source == nil) {
+            Ꮡt.Fatal(sourceIsNilˢ);
+        }
+        @string line = strconv.Itoa((~source).Line);
         r.AddAttrs(test.attrs.ꓸꓸꓸ);
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         ref var opts = ref heap<global::go.log.slog_package.HandlerOptions>(out var Ꮡopts);
@@ -677,11 +699,11 @@ public static void TestHandlerEnabled(ж<testing.T> Ꮡt) {
         Ꮡal.Set(l);
         return Ꮡal;
     }
+
     foreach (var (_, test) in new TestHandlerEnabled_type[]{
         new(default!, true),
         new(LevelWarn, false),
         new(new global::go.log.slog_package.LevelVarжLeveler(Ꮡ(new LevelVar(nil))), true), // defaults to Info
-
         new(new global::go.log.slog_package.LevelVarжLeveler(levelVar(LevelWarn)), false),
         new(LevelDebug, true),
         new(new global::go.log.slog_package.LevelVarжLeveler(levelVar(LevelDebug)), true)
@@ -691,6 +713,46 @@ public static void TestHandlerEnabled(ж<testing.T> Ꮡt) {
         if (got != test.want) {
             Ꮡt.Errorf("%v: got %t, want %t"u8, test.leveler, got, test.want);
         }
+    }
+}
+
+internal partial struct TestJSONAndTextHandlersWithUnavailableSource_type /*dyn*/ {
+    internal @string name;
+    internal global::go.log.slog_package.ΔHandler h;
+    internal @string want;
+}
+
+public static void TestJSONAndTextHandlersWithUnavailableSource(ж<testing.T> Ꮡt) {
+    // Verify that a nil source does not cause a panic.
+    // and that the source is empty.
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+    var opts = Ꮡ(new HandlerOptions(
+        ReplaceAttr: removeKeys(LevelKey),
+        AddSource: true
+    ));
+
+    foreach (var (_, vᴛ1) in new TestJSONAndTextHandlersWithUnavailableSource_type[]{
+        new("text"u8, new global::go.log.slog_package.TextHandlerжΔHandler(NewTextHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), opts)), "msg=message"u8),
+        new("json"u8, new global::go.log.slog_package.JSONHandlerжΔHandler(NewJSONHandler(new slog_test_package.bytes_BufferжWriter(Ꮡbuf), opts)), @"{""msg"":""message""}"u8)
+    }.slice()) {
+        ref var test = ref heap(new TestJSONAndTextHandlersWithUnavailableSource_type(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+            Ꮡbuf.Value.Reset();
+            var r = NewRecord(new time_package.Time(nil), LevelInfo, messageˢ, 0);
+            var err = testʗ1.h.Handle(tΔ1.Context(), r);
+            if (err != default!) {
+                tΔ1.Fatal(err);
+            }
+
+            @string want = strings.TrimSpace(testʗ1.want);
+            @string got = strings.TrimSpace(Ꮡbuf.String());
+            if (got != want) {
+                tΔ1.Errorf("\ngot  %s\nwant %s"u8, got, want);
+            }
+        });
     }
 }
 
@@ -736,6 +798,7 @@ internal partial struct TestReplaceAttrGroups_ga /*dyn*/ {
 
 public static void TestReplaceAttrGroups(ж<testing.T> Ꮡt) {
     ref var got = ref heap<slice<TestReplaceAttrGroups_ga>>(out var Ꮡgot);
+
     var h = NewTextHandler(io.Discard, Ꮡ(new HandlerOptions(ReplaceAttr: (slice<@string> gs, global::go.log.slog_package.Attr a) => {
         @string v = a.Value.String();
         if (a.Key == TimeKey) {
@@ -752,6 +815,7 @@ public static void TestReplaceAttrGroups(ж<testing.T> Ꮡt) {
         Int("f"u8, 6),
         Group("g4"u8, Int("h"u8, 7)),
         Int("i"u8, 8));
+
     var want = new TestReplaceAttrGroups_ga[]{
         new(""u8, "a"u8, "1"u8),
         new("g1"u8, "b"u8, "2"u8),
@@ -778,7 +842,7 @@ public static void TestWriteTimeRFC3339(ж<testing.T> Ꮡt) {
         time_package.Date(2000, 1, 2, 3, 4, 5, 400, time_package.ΔLocal),
         time_package.Date(2000, 11, 12, 3, 4, 500, 50000000, time_package.ΔUTC)
     }.slice()) {
-        @string got = ((@string)appendRFC3339Millis(default!, tm));
+        @string got = (@string)appendRFC3339Millis(default!, tm);
         @string want = tm.Format(rfc3339Millis);
         if (got != want) {
             Ꮡt.Errorf("got %s, want %s"u8, got, want);
@@ -813,16 +877,45 @@ public static void TestDiscardHandler(ж<testing.T> Ꮡt) {
     Ꮡt.Cleanup(() => {
         (os.Stdout, os.Stderr) = (stdoutʗ1, stderrʗ1);
     });
+
     // Just ensure nothing panics during normal usage
     var l = New(DiscardHandler);
-    l.Info(msgˢ, (@string)"a"u8, (nint)(1), (@string)"b"u8, (nint)(2));
-    l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)(2));
+    l.Info(msgˢ, (@string)"a"u8, (nint)1, (@string)"b"u8, (nint)2);
+    l.Debug("bg"u8, Int("a"u8, 1), (@string)"b"u8, (nint)2);
     l.Warn("w"u8, go.log.slog_package.Duration(durˢ, (time.Duration)(3000000000L)));
-    l.Error(badˢ, (@string)"a"u8, (nint)(1));
+    l.Error(badˢ, (@string)"a"u8, (nint)1);
     l.Log(ctx, LevelWarn + 1, "w"u8, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
     l.LogAttrs(ctx, LevelInfo + 1, aBCˢ, Int("a"u8, 1), go.log.slog_package.String("b"u8, twoˢ));
     l.Info(infoˢ2, (@string)"a"u8, new global::go.log.slog_package.Attr[]{Int("i"u8, 1)}.slice());
     l.Info(infoˢ2, (@string)"a"u8, GroupValue(Int("i"u8, 1)));
+}
+
+public static void BenchmarkAppendKey(ж<testing.B> Ꮡb) {
+    foreach (var (_, size) in new nint[]{5, 10, 30, 50, 100}.slice()) {
+        foreach (var (_, quoting) in new @string[]{"no_quoting"u8, "pre_quoting"u8, "key_quoting"u8, "both_quoting"u8}.slice()) {
+            Ꮡb.Run(fmt.Sprintf("%s_prefix_size_%d"u8, quoting, size), (ж<testing.B> bΔ1) => {
+                global::go.log.slog_package.handleState hs = NewJSONHandler(io.Discard, nil).newHandleState(buffer.New(), false, ""u8);
+                ref var prefix = ref heap<slice<byte>>(out var Ꮡprefix);
+
+                prefix = bytes.Repeat(slice<byte>("x"u8), size);
+                @string key = keyˢ;
+
+                if (quoting == "pre_quoting"u8 || quoting == "both_quoting"u8) {
+                    prefix[0] = (rune)'"';
+                }
+                if (quoting == "key_quoting"u8 || quoting == "both_quoting"u8) {
+                    key = "ke\""u8;
+                }
+
+                hs.prefix = Ꮡprefix.Reinterpret<slice<byte>, buffer.Buffer>();
+
+                while (bΔ1.Loop()) {
+                    hs.appendKey(key);
+                    hs.buf.Reset();
+                }
+            });
+        }
+    }
 }
 
 } // end slog_internal_test_package

@@ -1,18 +1,21 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// Package fips140 provides information about the FIPS 140-3 Go Cryptographic
+// Module and FIPS 140-3 mode.
+//
+// For more details, see the [FIPS 140-3 documentation].
+//
+// [FIPS 140-3 documentation]: https://go.dev/doc/security/fips140
 namespace go.crypto;
 
 using fips140 = go.crypto.@internal.fips140_package;
 using check = go.crypto.@internal.fips140.check_package;
-using godebug = go.@internal.godebug_package;
-using go.@internal;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
 partial class fips140_package {
-
-internal static ж<godebug.Setting> fips140GODEBUG = godebug.New("fips140"u8);
 
 // Enabled reports whether the cryptography libraries are operating in FIPS
 // 140-3 mode.
@@ -23,15 +26,25 @@ internal static ж<godebug.Setting> fips140GODEBUG = godebug.New("fips140"u8);
 //
 // This can't be changed after the program has started.
 public static bool Enabled() {
-    @string godebug = fips140GODEBUG.Value();
-    var currentlyEnabled = godebug == "on"u8 || godebug == "only"u8 || godebug == "debug"u8;
-    if (currentlyEnabled != fips140.Enabled) {
-        throw panic("crypto/fips140: GODEBUG setting changed after program start");
-    }
     if (fips140.Enabled && !check.Verified) {
         throw panic("crypto/fips140: FIPS 140-3 mode enabled, but integrity check didn't pass");
     }
     return fips140.Enabled;
+}
+
+// Version returns the FIPS 140-3 Go Cryptographic Module version (such as
+// "v1.0.0"), as referenced in the Security Policy for the module, if building
+// against a frozen module with GOFIPS140. Otherwise, it returns "latest". If an
+// alias is in use (such as "inprogress") the actual resolved version is
+// returned.
+//
+// The returned version may not uniquely identify the frozen module which was
+// used to build the program, if there are multiple copies of the frozen module
+// at the same version. The uniquely identifying version suffix can be found by
+// checking the value of the GOFIPS140 setting in
+// runtime/debug.BuildInfo.Settings.
+public static @string Version() {
+    return fips140.Version();
 }
 
 } // end fips140_package

@@ -82,6 +82,7 @@ internal static partial bool testSemaHandoff() {
     ref var sema = ref heap(new uint32(), out var Ꮡsema);
     ref var res = ref heap(new uint32(), out var Ꮡres);
     var done = new channel<EmptyStruct>(0);
+
     // We're testing that the current goroutine is able to yield its time slice
     // to another goroutine. Stop the current goroutine from migrating to
     // another CPU where it can win the race (and appear to have not yielded) by
@@ -95,9 +96,9 @@ internal static partial bool testSemaHandoff() {
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
                 while (ᐧ) {
-                    var selᴛ95 = doneʗ1;
-                    switch (trySelect(ᐸꟷ(selᴛ95, ꓸꓸꓸ))) {
-                    case 0 when selᴛ95.ꟷᐳ(out _): {
+                    var selᴛ96 = doneʗ1;
+                    switch (trySelect(ᐸꟷ(selᴛ96, ꓸꓸꓸ))) {
+                    case 0 when selᴛ96.ꟷᐳ(out _): {
                         return;
                     }
                     default: {
@@ -110,6 +111,7 @@ internal static partial bool testSemaHandoff() {
             finally { ᒐ.Run(); }
         });
     }
+
     Ꮡwg.Add(1);
     var doneʗ2 = done;
     goǃ(() => {
@@ -118,6 +120,7 @@ internal static partial bool testSemaHandoff() {
             defer(Ꮡwg.Done, ref ᒐ);
             runtime_internal_test_package.Semacquire(Ꮡsema);
             atomic.CompareAndSwapUint32(Ꮡres, 0, 1);
+
             runtime_internal_test_package.Semrelease1(Ꮡsema, true, 0);
             close(doneʗ2);
         }
@@ -127,12 +130,15 @@ internal static partial bool testSemaHandoff() {
     while (runtime_internal_test_package.SemNwait(Ꮡsema) == 0) {
         Gosched(); // wait for goroutine to block in Semacquire
     }
+
     // The crux of the test: we release the semaphore with handoff
     // and immediately perform a CAS both here and in the waiter; we
     // want the CAS in the waiter to execute first.
     runtime_internal_test_package.Semrelease1(Ꮡsema, true, 0);
     atomic.CompareAndSwapUint32(Ꮡres, 0, 2);
+
     Ꮡwg.Wait(); // wait for goroutines to finish to avoid data races
+
     return res == 1; // did the waiter run first?
 }
 
@@ -144,7 +150,9 @@ public static void BenchmarkSemTable(ж<testing.B> Ꮡb) {
         Ꮡb.Run(fmt.Sprintf("OneAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ1) => {
             var tab = runtime_internal_test_package.Escape(@new<global::go.runtime_internal_test_package.SemTable>());
             var u = new slice<uint32>(runtime_internal_test_package.SemTableSize + 1);
+
             bΔ1.ResetTimer();
+
             for (nint j = 0; j < (~bΔ1).N; j++) {
                 // Simulate two locks colliding on the same semaRoot.
                 //
@@ -181,7 +189,9 @@ public static void BenchmarkSemTable(ж<testing.B> Ꮡb) {
         Ꮡb.Run(fmt.Sprintf("ManyAddrCollision/n=%d"u8, n), (ж<testing.B> bΔ2) => {
             var tab = runtime_internal_test_package.Escape(@new<global::go.runtime_internal_test_package.SemTable>());
             var u = new slice<uint32>(n * (nint)runtime_internal_test_package.SemTableSize);
+
             bΔ2.ResetTimer();
+
             for (nint j = 0; j < (~bΔ2).N; j++) {
                 // Simulate n locks colliding on the same semaRoot.
                 //

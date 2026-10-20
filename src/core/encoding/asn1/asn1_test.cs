@@ -112,7 +112,6 @@ public static void TestParseInt32(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct bigIntTestsᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal bool ok;
@@ -266,6 +265,7 @@ public static void TestObjectIdentifier(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     {
         @string s = ((global::go.encoding.asn1_package.ObjectIdentifier)new nint[]{1, 2, 3, 4}.slice()).String(); if (s != "1.2.3.4"u8) {
             Ꮡt.Errorf("bad ObjectIdentifier.String(). Got %s, want 1.2.3.4"u8, s);
@@ -279,8 +279,6 @@ internal partial struct timeTest {
     internal time.Time @out;
 }
 
-/* These are invalid times. However, the time package normalises times
-	 * and they were accepted in some versions. See #11134. */
 internal static slice<timeTest> utcTestData = new timeTest[]{
     new("910506164540-0700"u8, true, time.Date(1991, 5, 6, 16, 45, 40, 0, time.FixedZone(""u8, -7 * 60 * 60))),
     new("910506164540+0730"u8, true, time.Date(1991, 5, 6, 16, 45, 40, 0, time.FixedZone(""u8, 7 * 60 * 60 + 30 * 60))),
@@ -295,6 +293,8 @@ internal static slice<timeTest> utcTestData = new timeTest[]{
     new("91050633444aZ"u8, false, new time.Time(nil)),
     new("910506334461Z"u8, false, new time.Time(nil)),
     new("910506334400Za"u8, false, new time.Time(nil)),
+    /* These are invalid times. However, the time package normalises times
+	 * and they were accepted in some versions. See #11134. */
     new("000100000000Z"u8, false, new time.Time(nil)),
     new("101302030405Z"u8, false, new time.Time(nil)),
     new("100002030405Z"u8, false, new time.Time(nil)),
@@ -338,8 +338,6 @@ public static void TestUTCTime(ж<testing.T> Ꮡt) {
     }
 }
 
-/* These are invalid times. However, the time package normalises times
-	 * and they were accepted in some versions. See #11134. */
 internal static slice<timeTest> generalizedTimeTestData = new timeTest[]{
     new("20100102030405Z"u8, true, time.Date(2010, 1, 2, 3, 4, 5, 0, time.ΔUTC)),
     new("20100102030405"u8, false, new time.Time(nil)),
@@ -349,6 +347,8 @@ internal static slice<timeTest> generalizedTimeTestData = new timeTest[]{
     new("20100102030405."u8, false, new time.Time(nil)),
     new("20100102030405+0607"u8, true, time.Date(2010, 1, 2, 3, 4, 5, 0, time.FixedZone(""u8, 6 * 60 * 60 + 7 * 60))),
     new("20100102030405-0607"u8, true, time.Date(2010, 1, 2, 3, 4, 5, 0, time.FixedZone(""u8, -6 * 60 * 60 - 7 * 60))),
+    /* These are invalid times. However, the time package normalises times
+	 * and they were accepted in some versions. See #11134. */
     new("00000100000000Z"u8, false, new time.Time(nil)),
     new("20101302030405Z"u8, false, new time.Time(nil)),
     new("20100002030405Z"u8, false, new time.Time(nil)),
@@ -387,13 +387,6 @@ internal partial struct tagAndLengthTest {
     internal global::go.encoding.asn1_package.tagAndLength @out;
 }
 
-// Superfluous zeros in the length should be an error.
-// Lengths up to the maximum size of an int should work.
-// Lengths that would overflow an int should be rejected.
-// Long length form may not be used for lengths that fit in short form.
-// Tag numbers which would overflow int32 are rejected. (The value below is 2^31.)
-// Tag numbers that fit in an int32 are valid. (The value below is 2^31 - 1.)
-// Long tag number form may not be used for tags that fit in short form.
 internal static slice<tagAndLengthTest> tagAndLengthData = new tagAndLengthTest[]{
     new(new byte[]{0x80, 0x01}.slice(), true, new tagAndLength(2, 0, 1, false)),
     new(new byte[]{0xa0, 0x01}.slice(), true, new tagAndLength(2, 0, 1, true)),
@@ -407,12 +400,19 @@ internal static slice<tagAndLengthTest> tagAndLengthData = new tagAndLengthTest[
     new(new byte[]{0x00, 0x83, 0x01, 0x00}.slice(), false, new tagAndLength(nil)),
     new(new byte[]{0x1f, 0x85}.slice(), false, new tagAndLength(nil)),
     new(new byte[]{0x30, 0x80}.slice(), false, new tagAndLength(nil)),
+    // Superfluous zeros in the length should be an error.
     new(new byte[]{0xa0, 0x82, 0x00, 0xff}.slice(), false, new tagAndLength(nil)),
+    // Lengths up to the maximum size of an int should work.
     new(new byte[]{0xa0, 0x84, 0x7f, 0xff, 0xff, 0xff}.slice(), true, new tagAndLength(2, 0, 0x7fffffff, true)),
+    // Lengths that would overflow an int should be rejected.
     new(new byte[]{0xa0, 0x84, 0x80, 0x00, 0x00, 0x00}.slice(), false, new tagAndLength(nil)),
+    // Long length form may not be used for lengths that fit in short form.
     new(new byte[]{0xa0, 0x81, 0x7f}.slice(), false, new tagAndLength(nil)),
+    // Tag numbers which would overflow int32 are rejected. (The value below is 2^31.)
     new(new byte[]{0x1f, 0x88, 0x80, 0x80, 0x80, 0x00, 0x00}.slice(), false, new tagAndLength(nil)),
+    // Tag numbers that fit in an int32 are valid. (The value below is 2^31 - 1.)
     new(new byte[]{0x1f, 0x87, 0xFF, 0xFF, 0xFF, 0x7F, 0x00}.slice(), true, new tagAndLength(tag: math.MaxInt32)),
+    // Long tag number form may not be used for tags that fit in short form.
     new(new byte[]{0x1f, 0x1e, 0x00}.slice(), false, new tagAndLength(nil))
 }.slice();
 
@@ -515,8 +515,6 @@ public partial struct TestSet {
     public slice<nint> Ints; /*`asn1:"set"`*/
 }
 
-// Ampersand is allowed in PrintableString due to mistakes by major CAs.
-
 partial struct unmarshalTestDataᴛ1 /*dyn*/ {
     internal slice<byte> @in;
     internal any @out;
@@ -530,6 +528,7 @@ internal static slice<unmarshalTestDataᴛ1> unmarshalTestData = new unmarshalTe
     new(new byte[]{0x02, 0x01, 0x10}.slice(), newInt(16).OrTypedNil()),
     new(new byte[]{0x13, 0x04, (rune)'t', (rune)'e', (rune)'s', (rune)'t'}.slice(), newString("test"u8).OrTypedNil()),
     new(new byte[]{0x16, 0x04, (rune)'t', (rune)'e', (rune)'s', (rune)'t'}.slice(), newString("test"u8).OrTypedNil()),
+    // Ampersand is allowed in PrintableString due to mistakes by major CAs.
     new(new byte[]{0x13, 0x05, (rune)'t', (rune)'e', (rune)'s', (rune)'t', (rune)'&'}.slice(), newString("test&"u8).OrTypedNil()),
     new(new byte[]{0x16, 0x04, (rune)'t', (rune)'e', (rune)'s', (rune)'t'}.slice(), Ꮡ(new RawValue(0, 22, false, slice<byte>("test"u8), slice<byte>("\x16\x04test"u8)))),
     new(new byte[]{0x04, 0x04, 1, 2, 3, 4}.slice(), Ꮡ(new RawValue(0, 4, false, new byte[]{1, 2, 3, 4}.slice(), new byte[]{4, 4, 1, 2, 3, 4}.slice()))),
@@ -570,6 +569,7 @@ public static void TestUnmarshalWithNilOrNonPointer(ж<testing.T> Ꮡt) {
         new(b: new byte[]{0x05, 0x00}.slice(), v: new RawValue(nil), want: "asn1: Unmarshal recipient value is non-pointer asn1.RawValue"u8),
         new(b: new byte[]{0x05, 0x00}.slice(), v: ((ж<global::go.encoding.asn1_package.RawValue>)nil), want: "asn1: Unmarshal recipient value is nil *asn1.RawValue"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         var (_, err) = Unmarshal(test.b, test.v);
         if (err == default!) {
@@ -640,8 +640,6 @@ public static void TestCertificate(ж<testing.T> Ꮡt) {
 internal static readonly object unmarshalSucceededShouldˢ = (@string)"Unmarshal succeeded, should not have"u8;
 
 public static void TestCertificateWithNUL(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // This is the paypal NUL-hack certificate. It should fail to parse because
     // NUL isn't a permitted character in a PrintableString.
     ref var cert = ref heap(new Certificate(), out var Ꮡcert);
@@ -660,6 +658,7 @@ internal partial struct rawStructTest {
 public static void TestRawStructs(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new rawStructTest(), out var Ꮡs);
     var input = new byte[]{0x30, 0x03, 0x02, 0x01, 0x50}.slice();
+
     var (rest, err) = Unmarshal(input, Ꮡs);
     if (len(rest) != 0) {
         Ꮡt.Errorf("incomplete parse: %x"u8, rest);
@@ -670,9 +669,9 @@ public static void TestRawStructs(ж<testing.T> Ꮡt) {
         return;
     }
     if (s.A != 0x50) {
-        Ꮡt.Errorf("bad value for A: got %d want %d"u8, s.A, (nint)(0x50));
+        Ꮡt.Errorf("bad value for A: got %d want %d"u8, s.A, (nint)0x50);
     }
-    if (!bytes.Equal(((slice<byte>)s.Raw), input)) {
+    if (!bytes.Equal((slice<byte>)s.Raw, input)) {
         Ꮡt.Errorf("bad value for Raw: got %x want %x"u8, s.Raw, input);
     }
 }
@@ -955,11 +954,13 @@ public static void TestStringSlice(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Error(err);
         }
+
         ref var res = ref heap<slice<@string>>(out var Ꮡres);
         (_, err) = Unmarshal(bs, Ꮡres);
         if (err != default!) {
             Ꮡt.Error(err);
         }
+
         if (fmt.Sprintf("%v"u8, res) != fmt.Sprintf("%v"u8, test)) {
             Ꮡt.Errorf("incorrect marshal/unmarshal; %v != %v"u8, res, test);
         }
@@ -969,7 +970,6 @@ public static void TestStringSlice(ж<testing.T> Ꮡt) {
 internal partial struct explicitTaggedTimeTest {
     public time.Time Time; /*`asn1:"explicit,tag:0"`*/
 }
-
 
 partial struct explicitTaggedTimeTestDataᴛ1 /*dyn*/ {
     internal slice<byte> @in;
@@ -1031,14 +1031,11 @@ public static void TestTruncatedExplicitTag(ж<testing.T> Ꮡt) {
     // This crashed Unmarshal in the past. See #11154.
     var der = new byte[]{
         0x30, // SEQUENCE
-
         0x02, // two bytes long
-
         0xa0, // context-specific, tag 0
-
-        0x30
+        0x30 // 48 bytes long
     }.slice();
-    // 48 bytes long
+
     ref var result = ref heap(new truncatedExplicitTagTest(), out var Ꮡresult);
     {
         var (_, err) = Unmarshal(der, Ꮡresult); if (err == default!) {
@@ -1061,6 +1058,7 @@ public static void TestUnmarshalInvalidUTF8(ж<testing.T> Ꮡt) {
     var data = slice<byte>(((@string)(new byte[]{0x30, 0x05, 0x0c, 0x03, 0x61, 0xc9, 0x63})));
     ref var result = ref heap(new invalidUTF8Test(), out var Ꮡresult);
     var (_, err) = Unmarshal(data, Ꮡresult);
+
     @string expectedSubstring = expectedSubstringᶜ;
     if (err == default!){
         Ꮡt.Fatal(successfullyUnmarshaledˢ);
@@ -1100,10 +1098,12 @@ internal partial struct exported {
 
 public static void TestUnexportedStructField(ж<testing.T> Ꮡt) {
     var want = new StructuralError("struct contains unexported fields"u8);
+
     var (_, err) = Marshal(new unexported(X: 5, y: 1));
     if (!AreEqual(err, want)) {
         Ꮡt.Errorf("got %v, want %v"u8, err, want);
     }
+
     (var bs, err) = Marshal(new exported(X: 5, Y: 1));
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1123,6 +1123,7 @@ public static void TestNull(ж<testing.T> Ꮡt) {
     if (!bytes.Equal(NullBytes, marshaled)) {
         Ꮡt.Errorf("Expected Marshal of NullRawValue to yield %x, got %x"u8, NullBytes, marshaled);
     }
+
     ref var unmarshaled = ref heap<global::go.encoding.asn1_package.RawValue>(out var Ꮡunmarshaled);
     unmarshaled = new RawValue(nil);
     {
@@ -1130,11 +1131,13 @@ public static void TestNull(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     unmarshaled.FullBytes = NullRawValue.FullBytes;
     if (len(unmarshaled.Bytes) == 0) {
         // DeepEqual considers a nil slice and an empty slice to be different.
         unmarshaled.Bytes = NullRawValue.Bytes;
     }
+
     if (!reflect.DeepEqual(NullRawValue, unmarshaled)) {
         Ꮡt.Errorf("Expected Unmarshal of NullBytes to yield %v, got %v"u8, NullRawValue, unmarshaled);
     }
@@ -1151,12 +1154,14 @@ public static void TestExplicitTagRawValueStruct(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var after = ref heap(new TestExplicitTagRawValueStruct_foo(), out var Ꮡafter);
     {
         var (rest, errΔ1) = Unmarshal(derBytes, Ꮡafter); if (errΔ1 != default! || len(rest) != 0) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     @string got = fmt.Sprintf("%#v"u8, after);
     @string want = fmt.Sprintf("%#v"u8, before);
     if (got != want) {
@@ -1180,13 +1185,15 @@ internal partial struct TestTaggedRawValue_tests /*dyn*/ {
 public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
     UntypedInt isCompound = 0x20;
     UntypedInt tag = 5;
+
     var tests = new TestTaggedRawValue_tests[]{
         new(false, new byte[]{0x30, 3, TagInteger, 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)((byte)((ClassContextSpecific << (int)(6))) | (byte)tag), 1, 1}.slice()),
-        new(true, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassContextSpecific << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
-        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassApplication << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice()),
-        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)(((ClassPrivate << (int)(6))) | tag) | (byte)isCompound), 1, 1}.slice())
+        new(true, new byte[]{0x30, 3, (byte)((byte)(ClassContextSpecific << 6) | (byte)tag), 1, 1}.slice()),
+        new(true, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassContextSpecific << 6) | tag) | (byte)isCompound), 1, 1}.slice()),
+        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassApplication << 6) | tag) | (byte)isCompound), 1, 1}.slice()),
+        new(false, new byte[]{0x30, 3, (byte)((UntypedInt)((ClassPrivate << 6) | tag) | (byte)isCompound), 1, 1}.slice())
     }.slice();
+
     foreach (var (i, test) in tests) {
         ref var tagged = ref heap(new TestTaggedRawValue_taggedRawValue(), out var Ꮡtagged);
         {
@@ -1194,6 +1201,7 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("#%d: unexpected result parsing %x: %s"u8, i, test.derBytes, err);
             }
         }
+
         // An untagged RawValue should accept anything.
         ref var untagged = ref heap(new TestTaggedRawValue_untaggedRawValue(), out var Ꮡuntagged);
         {
@@ -1204,16 +1212,15 @@ public static void TestTaggedRawValue(ж<testing.T> Ꮡt) {
     }
 }
 
-// Example from https://tools.ietf.org/html/rfc7292#appendix-B.
-// Some characters from the "Letterlike Symbols Unicode block".
-
 partial struct bmpStringTestsᴛ1 /*dyn*/ {
     internal @string decoded;
     internal @string encodedHex;
 }
 internal static slice<bmpStringTestsᴛ1> bmpStringTests = new bmpStringTestsᴛ1[]{
     new(""u8, "0000"u8),
+    // Example from https://tools.ietf.org/html/rfc7292#appendix-B.
     new("Beavis"u8, "0042006500610076006900730000"u8),
+    // Some characters from the "Letterlike Symbols Unicode block".
     new("\u2115 - Double-struck N"u8, "21150020002d00200044006f00750062006c0065002d00730074007200750063006b0020004e0000"u8)
 }.slice();
 
@@ -1223,11 +1230,14 @@ public static void TestBMPString(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("#%d: failed to decode from hex string"u8, i);
         }
+
         (var decoded, err) = parseBMPString(encoded);
+
         if (err != default!) {
             Ꮡt.Errorf("#%d: decoding output gave an error: %s"u8, i, err);
             continue;
         }
+
         if (decoded != test.decoded) {
             Ꮡt.Errorf("#%d: decoding output resulted in %q, but it should have been %q"u8, i, decoded, test.decoded);
             continue;
@@ -1272,20 +1282,24 @@ public static void TestParsingMemoryConsumption(ж<testing.T> Ꮡt) {
         derBomb[i] = 0x30;
     }
     derBomb = appendꓸꓸꓸ(new byte[]{0x30, 0x83, 0x98, 0x96, 0x80}.slice(), derBomb);
+
     ref var m = ref heap(new runtime.MemStats(), out var Ꮡm);
     runtime.GC();
     runtime.ReadMemStats(Ꮡm);
     var memBefore = m.TotalAlloc;
+
     ref var @out = ref heap<slice<TestParsingMemoryConsumption_out>>(out var Ꮡout);
     var (_, err) = Unmarshal(derBomb, Ꮡout);
     if (!errors.As(err, Ꮡ(new SyntaxError(nil)))) {
         Ꮡt.Fatalf("Incorrect error result: want (%v), but got (%v) instead"u8, Ꮡ(new SyntaxError(nil)), err);
     }
+
     runtime.ReadMemStats(Ꮡm);
     var memDiff = m.TotalAlloc - memBefore;
+
     // Ensure that the memory allocated does not exceed 10<<21 (~20 MB) when
     // the parsing fails.
-    if (memDiff > ((uint64)10 << (int)(21))) {
+    if (memDiff > (uint64)10 << 21) {
         Ꮡt.Errorf("Too much memory allocated while parsing DER: %v MiB"u8, memDiff / 1024 / 1024);
     }
 }

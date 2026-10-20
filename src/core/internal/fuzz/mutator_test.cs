@@ -21,6 +21,7 @@ public static void BenchmarkMutatorBytes(ж<testing.B> Ꮡb) {
         }, ref ᒐ);
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
+
         foreach (var (_, size) in new nint[]{
             1,
             10,
@@ -33,6 +34,7 @@ public static void BenchmarkMutatorBytes(ж<testing.B> Ꮡb) {
             Ꮡb.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
                 var buf = new slice<byte>(size);
                 bΔ1.ResetTimer();
+
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
@@ -55,6 +57,7 @@ public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
         }, ref ᒐ);
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
+
         foreach (var (_, size) in new nint[]{
             1,
             10,
@@ -67,11 +70,12 @@ public static void BenchmarkMutatorString(ж<testing.B> Ꮡb) {
             Ꮡb.Run(strconv.Itoa(size), (ж<testing.B> bΔ1) => {
                 var buf = new slice<byte>(size);
                 bΔ1.ResetTimer();
+
                 for (nint i = 0; i < (~bΔ1).N; i++) {
                     // resize buffer to the correct shape and reset the PCG
                     buf = buf.slice(0, size);
                     mʗ1.Value.r = new global::go.@internal.fuzz_package.pcgRandжmutatorRand(newPcgRand());
-                    mʗ1.mutate(new any[]{((@string)buf)}.slice(), workerSharedMemSize);
+                    mʗ1.mutate(new any[]{(@string)buf}.slice(), workerSharedMemSize);
                 }
             });
         }
@@ -89,9 +93,10 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
         }, ref ᒐ);
         os.Setenv(godebugˢ, fmt.Sprintf("%s,fuzzseed=123"u8, origEnv));
         var m = newMutator();
+
         var types = new any[]{
             slice<byte>(""u8),
-            ((@string)""u8),
+            (@string)""u8,
             false,
             (float32)0F,
             (float64)0D,
@@ -105,6 +110,7 @@ public static void BenchmarkMutatorAllBasicTypes(ж<testing.B> Ꮡb) {
             (uint32)0,
             (uint64)0
         }.slice();
+
         foreach (var (_, t) in types) {
             var mʗ1 = m;
             var tʗ1 = t;

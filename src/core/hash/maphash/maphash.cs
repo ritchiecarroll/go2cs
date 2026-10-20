@@ -12,8 +12,8 @@
 // (See crypto/sha256 and crypto/sha512 for cryptographic use.)
 namespace go.hash;
 
-using byteorder = @internal.byteorder_package;
-using math = math_package;
+using hash = hash_package;
+using abi = @internal.abi_package;
 using @internal;
 
 partial class maphash_package {
@@ -46,6 +46,7 @@ public static uint64 Bytes(ΔSeed seed, slice<byte> b) {
     if (state == 0) {
         throw panic("maphash: use of uninitialized Seed");
     }
+
     if (len(b) > bufSize) {
         b = b.slice(0, len(b), len(b)); // merge len and cap calculations when reslicing
         while (len(b) > bufSize) {
@@ -80,7 +81,7 @@ public static uint64 String(ΔSeed seed, @string s) {
 //
 // The zero Hash is a valid Hash ready to use.
 // A zero Hash chooses a random seed for itself during
-// the first call to a Reset, Write, Seed, or Sum64 method.
+// the first call to a Reset, Write, Seed, Clone, or Sum64 method.
 // For control over the seed, use SetSeed.
 //
 // The computed hash values depend only on the initial seed and
@@ -153,8 +154,8 @@ public static (nint, error) Write(this ref Hash h, slice<byte> b) {
         }
         b = b.slice(k);
         h.flush();
+        // No need to set h.n = 0 here; it happens just before exit.
     }
-    // No need to set h.n = 0 here; it happens just before exit.
     // Process as many full buffers as possible, without copying, and calling initSeed only once.
     if (len(b) > bufSize) {
         h.initSeed();
@@ -265,14 +266,14 @@ public static ΔSeed MakeSeed() {
 public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
     var x = h.Sum64();
     return append(b,
-        (byte)((x >> (int)(0))),
-        (byte)((x >> (int)(8))),
-        (byte)((x >> (int)(16))),
-        (byte)((x >> (int)(24))),
-        (byte)((x >> (int)(32))),
-        (byte)((x >> (int)(40))),
-        (byte)((x >> (int)(48))),
-        (byte)((x >> (int)(56))));
+        (byte)(x >> 0),
+        (byte)(x >> 8),
+        (byte)(x >> 16),
+        (byte)(x >> 24),
+        (byte)(x >> 32),
+        (byte)(x >> 40),
+        (byte)(x >> 48),
+        (byte)(x >> 56));
 }
 
 // Size returns h's hash value size, 8 bytes.
@@ -285,34 +286,27 @@ public static nint BlockSize(this ref Hash h) {
     return len(h.buf);
 }
 
+// Clone implements [hash.Cloner].
+public static (hash.Cloner, error) Clone(this ref Hash h) {
+    h.initSeed();
+    ref var r = ref heap<Hash>(out var Ꮡr);
+    r = h.ΔClone();
+    return (new HashжCloner(Ꮡr), default!);
+}
+
 // Comparable returns the hash of comparable value v with the given seed
 // such that Comparable(s, v1) == Comparable(s, v2) if v1 == v2.
 // If v != v, then the resulting hash is randomly distributed.
 public static uint64 Comparable<T>(ΔSeed seed, T v) {
-    escapeForHash(v);
+    abi.EscapeNonString(v);
     return comparableHash(v, seed);
-}
-
-// escapeForHash forces v to be on the heap, if v contains a
-// non-string pointer. We cannot hash pointers to local variables,
-// as the address of the local variable might change on stack growth.
-// Strings are okay as the hash depends on only the content, not
-// the pointer.
-//
-// This is essentially
-//
-//	if hasNonStringPointers(T) { abi.Escape(v) }
-//
-// Implemented as a compiler intrinsic.
-internal static void escapeForHash<T>(T v) {
-    // Go COMPILER INTRINSIC: the gc compiler replaces every call, so the written `panic("intrinsic")` body is unreachable by construction and has no CLR counterpart.
 }
 
 // WriteComparable adds x to the data hashed by h.
 public static void WriteComparable<T>(ж<Hash> Ꮡh, T x) {
     ref var h = ref Ꮡh.DerefOrNull();
 
-    escapeForHash(x);
+    abi.EscapeNonString(x);
     // writeComparable (not in purego mode) directly operates on h.state
     // without using h.buf. Mix in the buffer length so it won't
     // commute with a buffered write, which either changes h.n or changes
@@ -321,28 +315,6 @@ public static void WriteComparable<T>(ж<Hash> Ꮡh, T x) {
         writeComparable(Ꮡh, h.n);
     }
     writeComparable(Ꮡh, x);
-}
-
-internal static void float64(this ref Hash h, float64 f) {
-    if (f == 0D) {
-        h.WriteByte(0);
-        return;
-    }
-    array<byte> buf = new(8);
-    if (f != f) {
-        byteorder.LEPutUint64(buf[..], randUint64());
-        h.Write(buf[..]);
-        return;
-    }
-    byteorder.LEPutUint64(buf[..], math.Float64bits(f));
-    h.Write(buf[..]);
-}
-
-internal static byte btoi(bool b) {
-    if (b) {
-        return 1;
-    }
-    return 0;
 }
 
 } // end maphash_package

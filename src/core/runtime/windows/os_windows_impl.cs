@@ -12,7 +12,8 @@
 //
 // (1) THE SYSTEM DIRECTORY - initSysDirectory, below.
 // (2) LONG-PATH AWARENESS  - initLongPathSupport, after it.
-// (3) THE PHYSICAL PAGE SIZE - physPageSize, at the end of this file.
+// (3) THE PHYSICAL PAGE SIZE - physPageSize, after them.
+// (4) THE PERFORMANCE COUNTER - windows_QueryPerformanceCounter/Frequency, at the end of this file.
 //
 // Go fills `runtime.sysDirectory` in initSysDirectory(), which osinit() calls before any user code:
 // `stdcall2(_GetSystemDirectoryA, &sysDirectory[0], len(sysDirectory)-1)`, then it appends a
@@ -144,5 +145,44 @@ partial class runtime_package
     internal static void ᴛInitPhysPageSize()
     {
         physPageSize = (uintptr)(nuint)Environment.SystemPageSize;
+    }
+
+    // (4) THE PERFORMANCE COUNTER. runtime/os_windows.go pushes two bodies into internal/syscall/windows
+    // (`//go:linkname windows_QueryPerformanceCounter internal/syscall/windows.QueryPerformanceCounter`, and
+    // Frequency beside it); the converter forwards both declarations here (linknamePushTargets). Go's bodies are
+    // `stdcall(_QueryPerformanceCounter, uintptr(unsafe.Pointer(&counter)))` and the same over
+    // _QueryPerformanceFrequency (runtime/os_windows.go), and neither half survives conversion: stdcall bottoms out in
+    // asmstdcall, a throwing stub, and the function pointer is filled by osinit, which go2cs emits not-run. So the
+    // two bodies are displaced here (manualConversionFuncs, windows only) and read the counter through
+    // System.Diagnostics.Stopwatch, which on Windows IS QueryPerformanceCounter and QueryPerformanceFrequency
+    // (Stopwatch.IsHighResolution): the same counter and the same frequency Go reads, not an approximation of
+    // them. It is the source the runtime's own clock already uses (nanotime_impl.cs, golib's MonotonicClock).
+    // That equality holds only while Stopwatch.IsHighResolution: without it Stopwatch counts DateTime ticks, which
+    // are not Go's values, so each body refuses by name rather than answer them. It never fires on a Windows that
+    // Go supports, so "these are Go's values" stays a checked fact rather than an assumption.
+    //
+    // What the stubs were costing: crypto/internal/fips140deps/time's high-precision now returns
+    // windows.QueryPerformanceCounter(), crypto/internal/entropy/v1.0.0 reads it, and the throw killed the
+    // crypto/internal/fips140test host in TestEntropyRace's goroutine.
+    public static int64 windows_QueryPerformanceCounter()
+    {
+        requirePerformanceCounter("QueryPerformanceCounter");
+
+        return System.Diagnostics.Stopwatch.GetTimestamp();
+    }
+
+    public static int64 windows_QueryPerformanceFrequency()
+    {
+        requirePerformanceCounter("QueryPerformanceFrequency");
+
+        return System.Diagnostics.Stopwatch.Frequency;
+    }
+
+    private static void requirePerformanceCounter(string call)
+    {
+        if (!System.Diagnostics.Stopwatch.IsHighResolution)
+        {
+            throw new PanicException((@string)$"go2cs: {call}: Stopwatch is not high-resolution here, so it does not read the kernel's performance counter, and its value would not be Go's");
+        }
     }
 }

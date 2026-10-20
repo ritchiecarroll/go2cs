@@ -157,7 +157,6 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
         else { /* default: */
             bitdepth = 16;
         }
-
         var (cpm, _) = cm._<color.Palette>(ᐧ);
         ж<image.Paletted> paletted = default!;
         if (cpm != default!) {
@@ -178,9 +177,9 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 bitdepth = 8;
                 break;
             }}
-
             paletted = png._<ж<image.Paletted>>();
         }
+
         // Write the filename and IHDR.
         io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "#SNG: from "u8 + filename + ".png\nIHDR {\n"u8);
         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    width: %d; height: %d; bitdepth: %d;\n"u8, bounds.Dx(), bounds.Dy(), bitdepth);
@@ -209,10 +208,10 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), unknownPngDecoderColorˢ);
                     break;
                 }}
-
             }
         }
         io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
+
         // We fake a gAMA chunk. The test files have a gAMA chunk but the go PNG
         // parser ignores it (the PNG spec section 11.3 says "Ancillary chunks may
         // be ignored by a decoder").
@@ -223,6 +222,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), gAMA10000ˢ);
             }
         }
+
         // Write the PLTE and tRNS (if applicable).
         var useTransparent = false;
         if (cpm != default!){
@@ -283,14 +283,13 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
                     var exprᴛ2 = filename;
                     if (exprᴛ2 == "ftbbn0g01"u8 || exprᴛ2 == "ftbbn0g02"u8 || exprᴛ2 == "ftbbn0g04"u8) {
-                        fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), // The standard image package doesn't have a "gray with
- // alpha" type. Instead, we use an image.NRGBA.
- "    gray: %d;\n"u8, c.R);
+                        // The standard image package doesn't have a "gray with
+                        // alpha" type. Instead, we use an image.NRGBA.
+                        fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    gray: %d;\n"u8, c.R);
                     }
                     else { /* default: */
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    red: %d; green: %d; blue: %d;\n"u8, c.R, c.G, c.B);
                     }
-
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
                 }
                 break;
@@ -301,19 +300,19 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), tRNSˢ2);
                     var exprᴛ3 = filename;
                     if (exprᴛ3 == "ftbwn0g16"u8) {
-                        fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), // The standard image package doesn't have a "gray16 with
- // alpha" type. Instead, we use an image.NRGBA64.
- "    gray: %d;\n"u8, c.R);
+                        // The standard image package doesn't have a "gray16 with
+                        // alpha" type. Instead, we use an image.NRGBA64.
+                        fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    gray: %d;\n"u8, c.R);
                     }
                     else { /* default: */
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "    red: %d; green: %d; blue: %d;\n"u8, c.R, c.G, c.B);
                     }
-
                     io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
                 }
                 break;
             }}
         }
+
         // Write the IMAGE.
         io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), imagePixelsHexˢ);
         for (nint y = bounds.Min.Y; y < bounds.Max.Y; y++) {
@@ -360,7 +359,6 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                             fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x%02x%02x%02x "u8, nrgba.R, nrgba.G, nrgba.B, nrgba.A);
                         }
                     }
-
                 }
                 break;
             }
@@ -378,7 +376,6 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                             fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%04x%04x%04x%04x "u8, nrgba64.R, nrgba64.G, nrgba64.B, nrgba64.A);
                         }
                     }
-
                 }
                 break;
             }
@@ -386,7 +383,7 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 nint b = default!;
                 nint c = default!;
                 for (nint x = bounds.Min.X; x < bounds.Max.X; x++) {
-                    b = (nint)(b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y));
+                    b = b.Lsh((nuint)bitdepth) | (nint)paletted.ColorIndexAt(x, y);
                     c++;
                     if (c == 8 / bitdepth) {
                         fmt.Fprintf(new png_test_package.io_WriteCloserᴠWriter(w), "%02x"u8, b);
@@ -403,7 +400,6 @@ internal static void sng(io.WriteCloser w, @string filename, image.Image png) {
                 }
                 break;
             }}
-
             io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "\n"u8);
         }
         io.WriteString(new png_test_package.io_WriteCloserᴠWriter(w), "}\n"u8);
@@ -429,6 +425,7 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
                 Ꮡt.Error(fn, err);
                 continue;
             }
+
             if (fn == "basn4a16"u8) {
                 // basn4a16.sng is gray + alpha but sng() will produce true color + alpha
                 // so we just check a single random pixel.
@@ -438,11 +435,13 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
                 }
                 continue;
             }
+
             var (piper, pipew) = io.Pipe();
             var pb = bufio.NewScanner(new io.PipeReaderжReader(piper));
             goǃ(sng, new io.PipeWriterжWriteCloser(pipew), fn, img);
             var piperʗ1 = piper;
             defer(() => piperʗ1.Close(), ref ᒐ);
+
             // Read the .sng file.
             (var sf, err) = os.Open("testdata/pngsuite/"u8 + fn + ".sng"u8);
             if (err != default!) {
@@ -452,6 +451,7 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
             var sfʗ1 = sf;
             defer(() => sfʗ1.Close(), ref ᒐ);
             var sb = bufio.NewScanner(new png_test_package.os_FileжReader(sf));
+
             // Compare the two, in SNG format, line by line.
             while (ᐧ) {
                 var pdone = !pb.Scan();
@@ -465,6 +465,7 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
                 }
                 @string ps = pb.Text();
                 @string ss = sb.Text();
+
                 // Newer versions of the sng command line tool append an optional
                 // color name to the RGB tuple. For example:
                 //	# rgb = (0xff,0xff,0xff) grey100
@@ -480,6 +481,7 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
                         }
                     }
                 }
+
                 if (ps != ss) {
                     Ꮡt.Errorf("%s: Mismatch\n%s\nversus\n%s\n"u8, fn, ps, ss);
                     break;
@@ -496,7 +498,6 @@ public static partial void TestReader(ж<testing.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct readerErrorsᴛ1 /*dyn*/ {
     internal @string @file;
@@ -591,9 +592,7 @@ public static void TestIncompleteIDATOnRowBoundary(ж<testing.T> Ꮡt) {
     // but the zlib-compressed IDAT payload contains two bytes "\x02\x00",
     // which is only one row of data (the leading "\x02" is a row filter).
     @string ihdr = ihdrᶜ;
-    
     @string idat = idatᶜ;
-    
     @string iend = iendᶜ;
     var (_, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idat + iend)));
     if (err == default!) {
@@ -623,19 +622,18 @@ public static void TestTrailingIDATChunks(ж<testing.T> Ꮡt) {
     // The following is a valid 1x1 PNG image containing color.Gray{255} and
     // a trailing zero-length IDAT chunk (see PNG specification section 12.9):
     @string ihdr = ihdrᶜ1;
-    
     @string idatWhite = idatWhiteᶜ;
-    
     @string idatZero = idatZeroᶜ;
-    
     @string iend = iendᶜ1;
     var (_, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idatWhite + idatZero + iend)));
     if (err != default!) {
         Ꮡt.Fatalf("decoding valid image: %v"u8, err);
     }
+
     // Non-zero-length trailing IDAT chunks should be ignored (recoverable error).
     // The following chunk contains a single pixel with color.Gray{0}.
     @string idatBlack = idatBlackᶜ;
+
     (var img, err) = Decode(new png_test_package.strings_ReaderжReader(strings.NewReader(pngHeader + ihdr + idatWhite + idatBlack + iend)));
     if (err != default!) {
         Ꮡt.Fatalf("trailing IDAT not ignored: %v"u8, err);
@@ -674,13 +672,9 @@ public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
 		Dropping the tRNS chunk makes that color's alpha 0xff instead of 0x7f.
 	*/
     @string ihdr = ihdrᶜ2;
-    
     @string plte = plteᶜ;
-    
     @string trns = trnsᶜ;
-    
     @string idat = idatᶜ1;
-    
     @string iend = iendᶜ2;
     for (nint i = 0; i < 4; i++) {
         slice<byte> b = default!;
@@ -692,6 +686,7 @@ public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
         }
         b = append(b, idat.ꓸꓸꓸ);
         b = append(b, iend.ꓸꓸꓸ);
+
         color.Color want = default!;
         var (m, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(b)));
         switch (i) {
@@ -718,7 +713,6 @@ public static void TestMultipletRNSChunks(ж<testing.T> Ꮡt) {
             continue;
             break;
         }}
-
         {
             var got = m.At(0, 0); if (!AreEqual(got, want)) {
                 Ꮡt.Errorf("%d tRNS chunks: got %T %v, want %T %v"u8, i, got, got, want, want);
@@ -751,6 +745,7 @@ public static void TestPaletted8OutOfRangePixel(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("decoding invalid-palette.png: unexpected error %v"u8, err);
         return;
     }
+
     // Expect that the palette is extended with opaque black.
     var want = new colorꓸRGBA(0x00, 0x00, 0x00, 0xff);
     {
@@ -786,6 +781,7 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Decode: %v"u8, err);
     }
+
     @string hex = hexᶜ;
     slice<byte> got = default!;
     var bounds = m.Bounds();
@@ -794,8 +790,8 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
             {
                 var (r, _, _, a) = m.At(x, y).RGBA(); if (a != 0){
                     got = append(got,
-                        hex[(uint32)(0x0f & ((r >> (int)(12))))],
-                        hex[(uint32)(0x0f & ((r >> (int)(8))))],
+                        hex[(0x0f & (r >> 12))],
+                        hex[(0x0f & (r >> 8))],
                         (byte)((rune)' '));
                 } else {
                     got = append(got,
@@ -807,7 +803,9 @@ public static void TestGray8Transparent(ж<testing.T> Ꮡt) {
         }
         got = append(got, (byte)((rune)'\n'));
     }
+
     @string want = wantᶜ;
+
     if (((sstring)got) != want) {
         Ꮡt.Errorf("got:\n%swant:\n%s"u8, got, want);
     }
@@ -824,16 +822,15 @@ internal partial struct TestDimensionOverflow_testCases /*dyn*/ {
 }
 
 public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     nint maxInt32AsInt = (nint)((2147483648L) - 1);
     var have32BitInts = 0 > (1 + maxInt32AsInt);
-    var testCases = new TestDimensionOverflow_testCases[]{ // These bytes come from https://golang.org/issues/22304
- //
- // It encodes a 2147483646 × 2147483646 (i.e. 0x7ffffffe × 0x7ffffffe)
- // NRGBA image. The (width × height) per se doesn't overflow an int64, but
- // (width × height × bytesPerPixel) will.
 
+    var testCases = new TestDimensionOverflow_testCases[]{
+        // These bytes come from https://golang.org/issues/22304
+        //
+        // It encodes a 2147483646 × 2147483646 (i.e. 0x7ffffffe × 0x7ffffffe)
+        // NRGBA image. The (width × height) per se doesn't overflow an int64, but
+        // (width × height × bytesPerPixel) will.
         new(
             src: new byte[]{
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -841,16 +838,17 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
                 0xfd, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            }.slice(), // It's debatable whether DecodeConfig (which does not allocate a
- // pixel buffer, unlike Decode) should fail in this case. The Go
- // standard library has made its choice, and the standard library
- // has compatibility constraints.
-
+            }.slice(),
+            // It's debatable whether DecodeConfig (which does not allocate a
+            // pixel buffer, unlike Decode) should fail in this case. The Go
+            // standard library has made its choice, and the standard library
+            // has compatibility constraints.
             unsupportedConfig: true,
             width: 0x7ffffffe,
             height: 0x7ffffffe
-        ), // The next three cases come from https://golang.org/issues/38435
+        ),
 
+        // The next three cases come from https://golang.org/issues/38435
         new(
             src: new byte[]{
                 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -858,9 +856,9 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
                 0xb8, 0x00, 0x00, 0x00, 0x15, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x62, 0x62, 0x20, 0x12, 0x8c,
                 0x2a, 0xa4, 0xb3, 0x42, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x13, 0x38, 0x00, 0x15, 0x2d, 0xef,
                 0x5f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
-            }.slice(), // Here, width * height = 0x7ffea810, just under MaxInt32, but at 4
- // bytes per pixel, the number of pixels overflows an int32.
-
+            }.slice(),
+            // Here, width * height = 0x7ffea810, just under MaxInt32, but at 4
+            // bytes per pixel, the number of pixels overflows an int32.
             unsupportedConfig: have32BitInts,
             width: 0x0000b504,
             height: 0x0000b504
@@ -890,6 +888,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
             height: 0x00000001
         )
     }.slice();
+
     foreach (var (i, tc) in testCases) {
         var (cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src)));
         if (tc.unsupportedConfig){
@@ -915,6 +914,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("i=%d: height: got %d, want %d"u8, i, cfg.Height, tc.height);
             continue;
         }
+
         {
             var nPixels = (int64)cfg.Width * (int64)cfg.Height; if (nPixels > 0x7f000000){
                 // In theory, calling Decode would succeed, given several gigabytes
@@ -934,6 +934,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         // Even if we don't panic, these aren't valid PNG images.
         {
             var (_, errΔ1) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(tc.src))); if (errΔ1 == default!) {
@@ -941,6 +942,7 @@ public static void TestDimensionOverflow(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingTestsWhichˢ);
     }
@@ -983,6 +985,7 @@ public static void TestDecodePalettedWithTransparency(ж<testing.T> Ꮡt) {
         0xea, 0x70, 0x40, 0x12, 0x00, 0x79, 0x54, 0x09, 0x22, 0x00, 0x00, 0x30, 0xf3, 0x52, 0x87, 0xc6,
         0xe4, 0xbd, 0x70, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
     }.slice();
+
     var (cfg, err) = DecodeConfig(new png_test_package.bytes_ReaderжReader(bytes.NewReader(src)));
     if (err != default!){
         Ꮡt.Fatalf("DecodeConfig: %v"u8, err);
@@ -992,6 +995,7 @@ public static void TestDecodePalettedWithTransparency(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("DecodeConfig: got %d, want 0"u8, alpha);
         }
     }
+
     (var img, err) = Decode(new png_test_package.bytes_ReaderжReader(bytes.NewReader(src)));
     if (err != default!){
         Ꮡt.Fatalf("Decode: %v"u8, err);

@@ -9,16 +9,21 @@ global using static global::go.@internal.trace_internal_test_package;
 
 // <ImportedTypeAliases>
 global using flagꓸErrorHandling = go.flag_package.ΔErrorHandling;
-global using oldtraceꓸSTWReason = go.@internal.trace.@internal.oldtrace_package.ΔSTWReason;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
+global using reflectꓸKind = go.reflect_package.ΔKind;
+global using reflectꓸMethod = go.reflect_package.ΔMethod;
+global using reflectꓸType = go.reflect_package.ΔType;
+global using reflectꓸValue = go.reflect_package.ΔValue;
 global using runtimeꓸError = go.runtime_package.ΔError;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
+global using tracev1ꓸSTWReason = go.@internal.trace.@internal.tracev1_package.ΔSTWReason;
 global using traceꓸEvent = go.@internal.trace_package.ΔEvent;
 global using traceꓸLabel = go.@internal.trace_package.ΔLabel;
 global using traceꓸLog = go.@internal.trace_package.ΔLog;
@@ -27,6 +32,7 @@ global using traceꓸRange = go.@internal.trace_package.ΔRange;
 global using traceꓸRegion = go.@internal.trace_package.ΔRegion;
 global using traceꓸStack = go.@internal.trace_package.ΔStack;
 global using traceꓸStateTransition = go.@internal.trace_package.ΔStateTransition;
+global using traceꓸSync = go.@internal.trace_package.ΔSync;
 global using traceꓸTask = go.@internal.trace_package.ΔTask;
 global using traceꓸTime = go.@internal.trace_package.ΔTime;
 // </ImportedTypeAliases>
@@ -43,6 +49,7 @@ using static global::go.@internal.trace_test_package;
 [assembly: GoTypeAlias("Region", "ΔRegion")]
 [assembly: GoTypeAlias("Stack", "ΔStack")]
 [assembly: GoTypeAlias("StateTransition", "ΔStateTransition")]
+[assembly: GoTypeAlias("Sync", "ΔSync")]
 [assembly: GoTypeAlias("Task", "ΔTask")]
 [assembly: GoTypeAlias("Time", "ΔTime")]
 // </ExportedTypeAliases>
@@ -58,6 +65,12 @@ using static global::go.@internal.trace_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -66,11 +79,11 @@ using static global::go.@internal.trace_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/gc_test.go", "gc_test.cs", "ABEkooKUgoIACAaC3gAHEIQACRyAgqTKgpSCgoIACg7GlJSiqIKCgoIABhCAkoKCgoKCgoKCgtiSkoKCgpSCgoKUgoKClIKUpriigIKmqIKCgoKCgpSClJSSgoKUuqaCgpSCgoKUlJSC", "87-118:1;104-104:1.1;119-142:2;154-166:1;167-174:2")]
-[assembly: go.GoPositionMap("internal/trace/oldtrace_test.go", "oldtrace_test.cs", "ABcgooKClIKCgoKClKKCgpSUgoKWgoKCgoKClJSAgqaCggAKFpSAgsaCtoKC+qSC", "28-84:1")]
-[assembly: go.GoPositionMap("internal/trace/reader_test.go", "reader_test.cs", "ABgwgtaCgoKUgoKCgpSCgoKUyoi0goKClIKCgpaCppSkpKSkgqSkpAAMEqKCgoCCpJSCgoKClIKAgqSUgpSAgraAgsiChIKClIKCgpSCgoKUgpSAgrbmooSCgpSCgoKUkoCCpA==", "39-45:1;55-93:1")]
-[assembly: go.GoPositionMap("internal/trace/summary_test.go", "summary_test.cs", "ABgcgoKsgoSCgoKAgqSAgraClIKUggALCIKCAAwggoKCgoKUgqaCAA4IgoIAABCCgpQAR5ABgoKClIKogoKSgqSCqIKClIKAgpS2goK6gpSCgsyClIKCgoKUgsyUgriCgoKm1qKCgpSElIKUgoK4goKCppaCgqaCkoKUgpSU5qKUgraClIKClIKCpoKClIKUgILYppSCtoKUgoKUgoKmgoKUgpSAgtgACwiigpSClIKUgpSClIKCpoKCyoKCgoKogoKYkoKCgpSClKiCguyCgIKUtoKC", "89-93:1", "", "114=Invoke/1/3/29,Invoke/2/3/47,Invoke/3/3/65")]
-[assembly: go.GoPositionMap("internal/trace/trace_test.go", "trace_test.cs", "ACYwgoIACiCCgpSCgoKUgpSCgpSClIKkgqSCpIKCgriCggAIDILWgoSUpOaipoKCgoKCgoKClIKUgIKkgt6CgoKCgpSCgoKSgpSClIKUgoKCgoKCgqaCpoKmgpKCAAYQgoKCgqiCgoKClIK4goKCqIKCgpQACAqijgAMDIKCgoKUgoKClILKgoKUggAJFIKUgoKUgoKClIKUgpS2gpS2gpS2gpS2lIL6gtaCABAGooIAARYAT54B7siUggASJoKCgpSAgraUgoKUgoKClIKUgoKUgpSCgpSCpKSCpIKkgoKCgriCggAIDIKUpNaClKTWgtaClIKk1oKmgpKEgoKUgoKClIKUlpaChICSpKKCgJKCABMKgpaChIKClIKClIKUgpSUlJSM0oKUgIKClKSWloKouIKC7pSklKaSlJKClJSSgpQ=", "25-82:1;100-209:1;213-302:1;314-496:1;438-448:1.1;533-552:1;578-644:1;645-647:2;648-653:3;654-659:4")]
+[assembly: go.GoPositionMap("internal/trace/gc_test.go", "gc_test.cs", "ABIkooKUgoIACAaC7gAHEJQACRyAgqTKgpSCgoIACg6mlJSiuIKCgoIABxCAkoKCgoKCgoKCgtiSkoKCgpSCgoKUgoKClIKUpriigIK2uIKCgoKCgpSClJSSgoKUyqaCgpSCgoKUlJSC", "87-118:1;104-104:1.1;119-142:2;154-166:1;167-174:2")]
+[assembly: go.GoPositionMap("internal/trace/reader_test.go", "reader_test.cs", "ABYqgoLWgoKClIKCgpSCgoKUgoLKiMSCgoKUgoKCpoKmlKSkpKSCpKSkAAsSsoKCgIKklIKCgpSCgpSCgIKklIKUgIK2gIIADQiCipKCgoKUgoKUgoKCgpSClIK4gJK2goKCgpSClIKUgpSC3AAIEg==", "36-44:1;54-92:1;135-184:1;136-183:1.1", "", "230=Date/1/3/1,Date/2/3/2,Date/3/3/3")]
+[assembly: go.GoPositionMap("internal/trace/summary_test.go", "summary_test.cs", "ABscgoLOgpSCgoKAgqSAgqSUgpSClIKUggALCIKCAAsggoKCgoKUgqaCAA4IgoIAABCCgpQAR5ABgoKClIK4goKSgqSCuIKClIKAgpS2goLKgpSCgtyClIKCgoKUgtyUgriCgoKm1qKCgpSElIKUgoK4goKCpqaCgqaCkoKUgpSU5qKUgraClIKClIKCpoKClIKUgILYppSCtoKUgoKUgoKmgoKUgpSAgtgACgiigpSClIKUgpSClIKCpoKCyoKCgoK4goKokoKCgpSClLiCgtyCgIKUtoKC", "94-98:1", "", "123=Invoke/1/3/29,Invoke/2/3/47,Invoke/3/3/65")]
+[assembly: go.GoPositionMap("internal/trace/trace_test.go", "trace_test.cs", "ACgygoIACiCCgpSCgoKUgpSCgpSClIKkgqSClIKCgriCggAIDILWgpSUlOaipoKCgoKCgoKClIKUgIKkgu6CgoKCgpSCgoKSgpSClIKUgoKCgoKCgqaCpoKmgpKCAAcQgoKCgriCgoKClIK4goKCuIKCgpQACAqCjgAJDIKCgoKUgoKClILKgoKUggAJFIKUgoKUgoKClIKUgpS2gpS2gpS2gpSmlIL6gtaCABIGgoIAARYAT6ABgrjIlILuyJSCABEkgqaCgoKUgIK2lIKClIKCgpSClIKClIKUgoKUgpSkgqSClIKCgoK4goIACAyClJTWgpSU1oLWgpSClNaCpoKSlIKClIKCgpSClKamgpSAkqSigoCSggAZCoKmgpSEpoKClIKClIKCgpSCgpSCgoK4poKUlJSUgoCUvtKClICCgpSkpoKCypSmgriCgoKUlKaSlJKClJSSgpSUkoKUgpQ=", "26-83:1;101-210:1;214-303:1;315-513:1;455-465:1.1;550-569:1;600-683:1;608-610:1.1;675-680:1.2;684-686:2;687-692:3;693-698:4;699-707:5")]
+[assembly: go.GoPositionMap("internal/trace/tracev1_test.go", "tracev1_test.cs", "ABgiooKClIKCgoKUooKClKSCgqaCgoKCgoKUlICCtoKCAAoWlICCxoK2goLqpII=", "28-84:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -89,6 +102,7 @@ public static partial class trace_test_package
     [GoLocalName("region")] internal partial struct TestSummarizeGoroutinesRegionsTrace_region {}
     [GoLocalName("task")] internal partial struct TestSummarizeTasksTrace_task {}
     [GoLocalName("evDesc")] internal partial struct TestTraceAnnotations_evDesc {}
+    [GoLocalName("sync")] internal partial struct TestTraceGenSync_sync {}
     [GoLocalName("evDesc")] internal partial struct TestTraceStacks_evDesc {}
     [GoLocalName("frame")] internal partial struct TestTraceStacks_frame {}
     // </TypeAccessibility>
@@ -104,10 +118,10 @@ public static partial class trace_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸflag() => builtin.initPackage(typeof(flag_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(go.@internal.diff_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(go.@internal.race_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtrace() => builtin.initPackage(typeof(go.@internal.trace_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸraw() => builtin.initPackage(typeof(go.@internal.trace.raw_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtesttrace() => builtin.initPackage(typeof(go.@internal.trace.testtrace_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸversion() => builtin.initPackage(typeof(go.@internal.trace.version_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
@@ -115,6 +129,7 @@ public static partial class trace_test_package
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(go.math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

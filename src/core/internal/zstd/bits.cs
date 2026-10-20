@@ -8,6 +8,9 @@ using math;
 
 partial class zstd_package {
 
+// block is the data for a single compressed block.
+// The data starts immediately after the 3 byte block header,
+// and is Block_Size bytes long.
 partial struct block /*[]byte*/;
 
 // bitReader reads a bit stream going forward.
@@ -45,7 +48,7 @@ internal static error moreBits(this ref bitReader br) {
 
 // val is called to fetch a value of b bits.
 internal static uint32 val(this ref bitReader br, uint8 b) {
-    var r = (uint32)(br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1));
+    var r = br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1);
     br.bits.RshAssign((uint64)(b));
     br.cnt -= (uint32)b;
     return r;
@@ -103,8 +106,9 @@ internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) {
     if (!rbr.fetch(b)) {
         return (0, rbr.r.makeEOFError((nint)rbr.off));
     }
+
     rbr.cnt -= (uint32)b;
-    var v = (uint32)((rbr.bits.Rsh((uint64)(rbr.cnt))) & ((((uint32)1).Lsh((uint64)(b))) - 1));
+    var v = (rbr.bits.Rsh((uint64)(rbr.cnt))) & ((((uint32)1).Lsh((uint64)(b))) - 1);
     return (v, default!);
 }
 

@@ -5,6 +5,7 @@
 namespace go;
 
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
 
@@ -35,6 +36,7 @@ partial struct mstats {
     internal float64 gc_cpu_fraction; // fraction of CPU time used by GC
     internal uint64 last_gc_nanotime; // last gc (monotonic time)
     internal uint64 lastHeapInUse; // heapInUse at mark termination of the previous GC
+    internal array<sizeClassScanStats> lastScanStats = new(gc.NumSizeClasses);
     internal bool enablegc;
 }
 
@@ -303,7 +305,7 @@ partial struct MemStats {
     // Ensure the size of heapStatsDelta causes adjacent fields/slots (e.g.
     // [3]heapStatsDelta) to be 8-byte aligned.
     {
-        var size = /* unsafe.Sizeof(heapStatsDelta{}) */ (uintptr)1176; if (size % 8 != 0) {
+        var size = /* unsafe.Sizeof(heapStatsDelta{}) */ (uintptr)1168; if (size % 8 != 0) {
             println(size);
             @throw("heapStatsDelta not a multiple of 8 bytes in size"u8);
         }
@@ -331,11 +333,13 @@ internal static readonly @string mappedReadyAndOtherˢ = "mappedReady and other 
 // The world must be stopped.
 internal static void readmemstats_m(ref MemStats stats) {
     assertWorldStopped();
+
     // Flush mcaches to mcentral before doing anything else.
     //
     // Flushing to the mcentral may in general cause stats to
     // change as mcentral data structures are manipulated.
     systemstack(flushallmcaches);
+
     // Calculate memory allocator stats.
     // During program execution we only count number of frees and amount of freed memory.
     // Current number of alive objects in the heap and amount of alive heap memory
@@ -343,29 +347,35 @@ internal static void readmemstats_m(ref MemStats stats) {
     // Total number of mallocs is calculated as number of frees plus number of alive objects.
     // Similarly, total amount of allocated memory is calculated as amount of freed memory
     // plus amount of alive heap memory.
+
     // Collect consistent stats, which are the source-of-truth in some cases.
     ref var consStats = ref heap(new heapStatsDelta(), out var ᏑconsStats);
     Ꮡmemstats.of(mstats.ᏑheapStats).unsafeRead(ᏑconsStats);
+
     // Collect large allocation stats.
     var totalAlloc = consStats.largeAlloc;
     var nMalloc = consStats.largeAllocCount;
     var totalFree = consStats.largeFree;
     var nFree = consStats.largeFreeCount;
+
     // Collect per-sizeclass stats.
-    array<MemStats_BySize> bySize = new(68); /* _NumSizeClasses */
+    array<MemStats_BySize> bySize = new(68); /* gc.NumSizeClasses */
     foreach (var (i, _) in bySize) {
-        bySize[i].Size = (uint32)class_to_size[i];
+        bySize[i].Size = (uint32)gc.SizeClassToSize[i];
+
         // Malloc stats.
         var a = consStats.smallAllocCount[i];
-        totalAlloc += a * (uint64)class_to_size[i];
+        totalAlloc += a * (uint64)gc.SizeClassToSize[i];
         nMalloc += a;
         bySize[i].Mallocs = a;
+
         // Free stats.
         var f = consStats.smallFreeCount[i];
-        totalFree += f * (uint64)class_to_size[i];
+        totalFree += f * (uint64)gc.SizeClassToSize[i];
         nFree += f;
         bySize[i].Frees = f;
     }
+
     // Account for tiny allocations.
     // For historical reasons, MemStats includes tiny allocations
     // in both the total free and total alloc count. This double-counts
@@ -374,12 +384,16 @@ internal static void readmemstats_m(ref MemStats stats) {
     // currently not done because it would be too expensive.
     nFree += consStats.tinyAllocCount;
     nMalloc += consStats.tinyAllocCount;
+
     // Calculate derived stats.
+
     var stackInUse = (uint64)consStats.inStacks;
     var gcWorkBufInUse = (uint64)consStats.inWorkBufs;
-    var gcProgPtrScalarBitsInUse = (uint64)consStats.inPtrScalarBits;
-    var totalMapped = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load() + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load() + Ꮡmemstats.of(mstats.Ꮡmspan_sys).load() + Ꮡmemstats.of(mstats.Ꮡmcache_sys).load() + Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load() + Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + Ꮡmemstats.of(mstats.Ꮡother_sys).load() + stackInUse + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
+
+    var totalMapped = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load() + Ꮡmemstats.of(mstats.Ꮡstacks_sys).load() + Ꮡmemstats.of(mstats.Ꮡmspan_sys).load() + Ꮡmemstats.of(mstats.Ꮡmcache_sys).load() + Ꮡmemstats.of(mstats.Ꮡbuckhash_sys).load() + Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + Ꮡmemstats.of(mstats.Ꮡother_sys).load() + stackInUse + gcWorkBufInUse;
+
     var heapGoal = ᏑgcController.heapGoal();
+
     if (doubleCheckReadMemStats) {
         // Only check this if we're debugging. It would be bad to crash an application
         // just because the debugging stats are wrong. We mostly rely on tests to catch
@@ -390,7 +404,7 @@ internal static void readmemstats_m(ref MemStats stats) {
         //
         // * memstats.heapInUse == inHeap
         // * memstats.heapReleased == released
-        // * memstats.heapInUse + memstats.heapFree == committed - inStacks - inWorkBufs - inPtrScalarBits
+        // * memstats.heapInUse + memstats.heapFree == committed - inStacks - inWorkBufs
         // * memstats.totalAlloc == totalAlloc
         // * memstats.totalFree == totalFree
         //
@@ -411,7 +425,7 @@ internal static void readmemstats_m(ref MemStats stats) {
             @throw(heapReleasedAndˢ);
         }
         var heapRetained = ᏑgcController.of(gcControllerState.ᏑheapInUse).load() + ᏑgcController.of(gcControllerState.ᏑheapFree).load();
-        var consRetained = (uint64)(consStats.committed - consStats.inStacks - consStats.inWorkBufs - consStats.inPtrScalarBits);
+        var consRetained = (uint64)(consStats.committed - consStats.inStacks - consStats.inWorkBufs);
         if (heapRetained != consRetained) {
             print((@string)"runtime: global value="u8, heapRetained, (@string)"\n"u8);
             print((@string)"runtime: consistent value="u8, consRetained, (@string)"\n"u8);
@@ -440,7 +454,9 @@ internal static void readmemstats_m(ref MemStats stats) {
         unlock(ᏑΔtrace.of(Δtraceᴛ1.Ꮡlock));
         unlock(Ꮡsched.of(schedt.Ꮡsysmonlock));
     }
+
     // We've calculated all the values we need. Now, populate stats.
+
     stats.Alloc = totalAlloc - totalFree;
     stats.TotalAlloc = totalAlloc;
     stats.Sys = totalMapped;
@@ -460,8 +476,8 @@ internal static void readmemstats_m(ref MemStats stats) {
     //
     // or
     //
-    // HeapSys = sys - stacks_inuse - gcWorkBufInUse - gcProgPtrScalarBitsInUse
-    // HeapIdle = sys - stacks_inuse - gcWorkBufInUse - gcProgPtrScalarBitsInUse - heapInUse
+    // HeapSys = sys - stacks_inuse - gcWorkBufInUse
+    // HeapIdle = sys - stacks_inuse - gcWorkBufInUse - heapInUse
     //
     // => HeapIdle = HeapSys - heapInUse = heapFree + heapReleased
     stats.HeapIdle = ᏑgcController.of(gcControllerState.ᏑheapFree).load() + ᏑgcController.of(gcControllerState.ᏑheapReleased).load();
@@ -480,7 +496,7 @@ internal static void readmemstats_m(ref MemStats stats) {
     // MemStats defines GCSys as an aggregate of all memory related
     // to the memory management system, but we track this memory
     // at a more granular level in the runtime.
-    stats.GCSys = Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + gcWorkBufInUse + gcProgPtrScalarBitsInUse;
+    stats.GCSys = Ꮡmemstats.of(mstats.ᏑgcMiscSys).load() + gcWorkBufInUse;
     stats.OtherSys = Ꮡmemstats.of(mstats.Ꮡother_sys).load();
     stats.NextGC = heapGoal;
     stats.LastGC = memstats.last_gc_unix;
@@ -491,6 +507,7 @@ internal static void readmemstats_m(ref MemStats stats) {
     stats.NumForcedGC = memstats.numforcedgc;
     stats.GCCPUFraction = memstats.gc_cpu_fraction;
     stats.EnableGC = true;
+
     // stats.BySize and bySize might not match in length.
     // That's OK, stats.BySize cannot change due to backwards
     // compatibility issues. copy will copy the minimum amount
@@ -518,12 +535,15 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
     if (cap(Δp) < len(memstats.pause_ns) + 3) {
         @throw(shortSlicePassedToˢ);
     }
+
     // Pass back: pauses, pause ends, last gc (absolute time), number of gc, total pause ns.
     @lock(Ꮡmheap_.of(mheap.Ꮡlock));
+
     var n = memstats.numgc;
     if (n > (uint32)len(memstats.pause_ns)) {
         n = (uint32)len(memstats.pause_ns);
     }
+
     // The pause buffer is circular. The most recent pause is at
     // pause_ns[(numgc-1)%len(pause_ns)], and then backward
     // from there to go back farther in time. We deliver the times
@@ -534,6 +554,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
         Δp[i] = memstats.pause_ns[j];
         Δp[n + i] = memstats.pause_end[j];
     }
+
     Δp[n + n] = memstats.last_gc_unix;
     Δp[n + n + 1] = (uint64)memstats.numgc;
     Δp[n + n + 2] = memstats.pause_total_ns;
@@ -548,6 +569,7 @@ internal static void readGCStats_m(ref slice<uint64> pauses) {
 //go:nowritebarrier
 internal static void flushmcache(nint i) {
     assertWorldStopped();
+
     var Δp = allp[i];
     var c = Δp.Value.mcache;
     if (c == nil) {
@@ -559,6 +581,9 @@ internal static void flushmcache(nint i) {
 
 // go2cs generated this placeholder — func flushallmcaches is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// sysMemStat represents a global system statistic that is managed atomically.
+//
+// This type must structurally be a uint64 so that mstats aligns with MemStats.
 partial struct sysMemStat /*num:uint64*/;
 
 // load atomically reads the value of the stat.
@@ -596,18 +621,17 @@ partial struct heapStatsDelta {
     internal int64 inHeap; // byte delta of memory placed in the heap
     internal int64 inStacks; // byte delta of memory reserved for stacks
     internal int64 inWorkBufs; // byte delta of memory reserved for work bufs
-    internal int64 inPtrScalarBits; // byte delta of memory reserved for unrolled GC prog bits
     // Allocator stats.
     //
     // These are all uint64 because they're cumulative, and could quickly wrap
     // around otherwise.
-    internal uint64 tinyAllocCount;                  // number of tiny allocations
-    internal uint64 largeAlloc;                  // bytes allocated for large objects
-    internal uint64 largeAllocCount;                  // number of large object allocations
-    internal array<uint64> smallAllocCount = new(_NumSizeClasses); // number of allocs for small objects
-    internal uint64 largeFree;                  // bytes freed for large objects (>maxSmallSize)
-    internal uint64 largeFreeCount;                  // number of frees for large objects (>maxSmallSize)
-    internal array<uint64> smallFreeCount = new(_NumSizeClasses); // number of frees for small objects (<=maxSmallSize)
+    internal uint64 tinyAllocCount;                    // number of tiny allocations
+    internal uint64 largeAlloc;                    // bytes allocated for large objects
+    internal uint64 largeAllocCount;                    // number of large object allocations
+    internal array<uint64> smallAllocCount = new(gc.NumSizeClasses); // number of allocs for small objects
+    internal uint64 largeFree;                    // bytes freed for large objects (>maxSmallSize)
+    internal uint64 largeFreeCount;                    // number of frees for large objects (>maxSmallSize)
+    internal array<uint64> smallFreeCount = new(gc.NumSizeClasses); // number of frees for small objects (<=maxSmallSize)
 }
 
 // NOTE: This struct must be a multiple of 8 bytes in size because it
@@ -623,7 +647,7 @@ internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     a.inHeap += b.inHeap;
     a.inStacks += b.inStacks;
     a.inWorkBufs += b.inWorkBufs;
-    a.inPtrScalarBits += b.inPtrScalarBits;
+
     a.tinyAllocCount += b.tinyAllocCount;
     a.largeAlloc += b.largeAlloc;
     a.largeAllocCount += b.largeAllocCount;
@@ -756,6 +780,7 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
     ref var @out = ref Ꮡout.DerefOrNull();
 
     assertWorldStopped();
+
     foreach (var (i, _) in m.stats) {
         @out.merge(Ꮡ(m.stats, i));
     }
@@ -767,9 +792,8 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
 // be donated elsewhere before clearing.
 internal static void unsafeClear(this ref consistentHeapStats m) {
     assertWorldStopped();
-    foreach (var (i, _) in m.stats) {
-        m.stats[i] = new heapStatsDelta(nil);
-    }
+
+    builtin.clear(m.stats[..]);
 }
 
 // go2cs generated this placeholder — func read is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -788,7 +812,7 @@ partial struct cpuStats {
     public int64 ScavengeBgTime; // scavenge assists
     public int64 ScavengeTotalTime;
     public int64 IdleTime; // Time Ps spent in _Pidle.
-    public int64 UserTime; // Time Ps spent in _Prunning or _Psyscall that's not any of the above.
+    public int64 UserTime; // Time Ps spent in _Prunning that's not any of the above.
     public int64 TotalTime; // GOMAXPROCS * (monotonic wall clock time elapsed)
 }
 
@@ -811,11 +835,8 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
     int64 markAssistCpu = default!;
-    
     int64 markDedicatedCpu = default!;
-    
     int64 markFractionalCpu = default!;
-    
     int64 markIdleCpu = default!;
     if (gcMarkPhase) {
         // N.B. These stats may have stale values if the GC is not
@@ -825,26 +846,32 @@ internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase
         markFractionalCpu = ᏑgcController.of(gcControllerState.ᏑfractionalMarkTime).Load();
         markIdleCpu = ᏑgcController.of(gcControllerState.ᏑidleMarkTime).Load();
     }
+
     // The rest of the stats below are either derived from the above or
     // are reset on each mark termination.
+
     var scavAssistCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑassistTime).Load();
     var scavBgCpu = ᏑΔscavenge.of(runtime_package.Δscavengeᴛ1.ᏑbackgroundTime).Load();
+
     // Update cumulative GC CPU stats.
     s.GCAssistTime += markAssistCpu;
     s.GCDedicatedTime += markDedicatedCpu + markFractionalCpu;
     s.GCIdleTime += markIdleCpu;
     s.GCTotalTime += markAssistCpu + markDedicatedCpu + markFractionalCpu + markIdleCpu;
+
     // Update cumulative scavenge CPU stats.
     s.ScavengeAssistTime += scavAssistCpu;
     s.ScavengeBgTime += scavBgCpu;
     s.ScavengeTotalTime += scavAssistCpu + scavBgCpu;
+
     // Update total CPU.
     s.TotalTime = sched.totaltime + (now - sched.procresizetime) * (int64)gomaxprocs;
     s.IdleTime += Ꮡsched.of(schedt.ᏑidleTime).Load();
+
     // Compute userTime. We compute this indirectly as everything that's not the above.
     //
     // Since time spent in _Pgcstop is covered by gcPauseTime, and time spent in _Pidle
-    // is covered by idleTime, what we're left with is time spent in _Prunning and _Psyscall,
+    // is covered by idleTime, what we're left with is time spent in _Prunning,
     // the latter of which is fine because the P will either go idle or get used for something
     // else via sysmon. Meanwhile if we subtract GC time from whatever's left, we get non-GC
     // _Prunning time. Note that this still leaves time spent in sweeping and in the scheduler,

@@ -51,6 +51,7 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
             coverage.CtrRaw,
             coverage.CtrULeb128
         }.slice();
+
         bool isDead(decodecounter.FuncPayload fp) {
             foreach (var (_, v) in fp.Counters) {
                 if (v != 0) {
@@ -59,14 +60,17 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
             }
             return true;
         }
+
         var funcs = new decodecounter.FuncPayload[]{
             mkfunc(0, 0, new uint32[]{13, 14, 15}.slice()),
             mkfunc(0, 1, new uint32[]{16, 17}.slice()),
             mkfunc(1, 0, new uint32[]{18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 976543, 7}.slice())
         }.slice();
         var writeVisitor = Ꮡ(new ctrVis(funcs: funcs));
+
         foreach (var (kf, flav) in flavors) {
             Ꮡt.Logf("testing flavor %d\n"u8, flav);
+
             // Open a counter data file in preparation for emitting data.
             @string d = Ꮡt.TempDir();
             @string cfpath = filepath.Join(d, fmt.Sprintf("covcounters.hash.0.%d"u8, kf));
@@ -74,6 +78,7 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 Ꮡt.Fatalf("opening covcounters: %v"u8, err);
             }
+
             // Perform the encode and write.
             var cdfw = encodecounter.NewCoverageDataWriter(new os.FileжWriter(of), flav);
             if (cdfw == nil) {
@@ -92,6 +97,7 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
                 }
             }
             cdfw = default!;
+
             // Decode the same file.
             ж<decodecounter.CounterDataReader> cdr = default!;
             (var inf, err) = os.Open(cfpath);
@@ -103,6 +109,7 @@ public static void TestCounterDataWriterReader(ж<testing.T> Ꮡt) {
                     }
                 }
             }, ref ᒐ);
+
             if (err != default!) {
                 Ꮡt.Fatalf("reopening covcounters file: %v"u8, err);
             }
@@ -163,7 +170,9 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("opening covcounters: %v"u8, err);
         }
+
         UntypedInt numSegments = 2;
+
         // Write a counter with with multiple segments.
         var args = new map<@string, @string>{["argc"u8] = "1"u8, ["argv0"u8] = "prog.exe"u8};
         var allfuncs = new slice<decodecounter.FuncPayload>[]{}.slice();
@@ -181,7 +190,9 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
                 funcs = append(funcs, mkfunc((uint32)idx, (uint32)k, c));
             }
             allfuncs = append(allfuncs, funcs);
+
             var writeVisitor = Ꮡ(new ctrVis(funcs: funcs));
+
             if (idx == 0){
                 // Perform the encode and write.
                 cdfw = encodecounter.NewCoverageDataWriter(new os.FileжWriter(of), coverage.CtrRaw);
@@ -207,6 +218,7 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("closing covcounters: %v"u8, errΔ3);
             }
         }
+
         // Read the result file.
         ж<decodecounter.CounterDataReader> cdr = default!;
         (var inf, err) = os.Open(cfpath);
@@ -218,6 +230,7 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         if (err != default!) {
             Ꮡt.Fatalf("reopening covcounters file: %v"u8, err);
         }
@@ -233,6 +246,7 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
         if (len(allfuncs) != numSegments) {
             Ꮡt.Fatalf("expected %d got %d"u8, (nint)(numSegments), len(allfuncs));
         }
+
         for (nint sidx = 0; sidx < (nint)ns; sidx++) {
             {
                 var (off, errΔ5) = inf.Seek(0, io.SeekCurrent); if (errΔ5 != default!){
@@ -241,6 +255,7 @@ public static void TestCounterDataAppendSegment(ж<testing.T> Ꮡt) {
                     Ꮡt.Logf("sidx=%d off=%d\n"u8, sidx, off);
                 }
             }
+
             if (sidx != 0) {
                 {
                     var (ok, errΔ6) = cdr.BeginNextSegment(); if (errΔ6 != default!){

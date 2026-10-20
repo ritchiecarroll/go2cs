@@ -275,6 +275,7 @@ internal static ж<@file> lookup(this FS f, @string name) {
     if (f.files == nil) {
         return default!;
     }
+
     // Binary search to find where name would be in the list,
     // and then check if name is at that position.
     var (dir, elem, _) = split(name);
@@ -393,6 +394,7 @@ internal static (nint, error) Read(this ref openFile f, slice<byte> b) {
 internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
+        // offset += 0
         break;
     }
     case 1: {
@@ -403,8 +405,6 @@ internal static (int64, error) Seek(this ref openFile f, int64 offset, nint when
         offset += (int64)len((~f.f).data);
         break;
     }}
-
-    // offset += 0
     if (offset < 0 || offset > (int64)len((~f.f).data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "seek"u8, Path: (~f.f).name, Err: fs.ErrInvalid))));
     }
@@ -468,7 +468,7 @@ internal static nint sortSearch(nint n, Func<nint, bool> f) {
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = (nint)(((nuint)(i + j) >> (int)(1))); // avoid overflow when computing h
+        nint h = (nint)((nuint)(i + j) >> 1); // avoid overflow when computing h
         // i ≤ h < j
         if (!f(h)){
             i = h + 1; // preserves f(i-1) == false

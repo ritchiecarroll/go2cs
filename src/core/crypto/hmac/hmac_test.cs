@@ -27,14 +27,9 @@ internal partial struct hmacTest {
     internal nint blocksize;
 }
 
-// Tests from US FIPS 198
-// https://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
-// Test from Plan 9.
-// Tests from RFC 4231
-// Tests from https://csrc.nist.gov/groups/ST/toolkit/examples.html
-// (truncated tag tests are left out)
-// HMAC without key is dumb but should probably not fail.
 internal static slice<hmacTest> hmacTests = new hmacTest[]{
+    // Tests from US FIPS 198
+    // https://csrc.nist.gov/publications/fips/fips198/fips-198a.pdf
     new(
         sha1.New,
         new byte[]{
@@ -86,6 +81,8 @@ internal static slice<hmacTest> hmacTests = new hmacTest[]{
         sha1.ΔSize,
         sha1.ΔBlockSize
     ),
+
+    // Test from Plan 9.
     new(
         md5.New,
         slice<byte>("Jefe"u8),
@@ -94,6 +91,8 @@ internal static slice<hmacTest> hmacTests = new hmacTest[]{
         md5.ΔSize,
         md5.ΔBlockSize
     ),
+
+    // Tests from RFC 4231
     new(
         sha256.New,
         new byte[]{
@@ -207,6 +206,9 @@ internal static slice<hmacTest> hmacTests = new hmacTest[]{
         sha256.Size,
         sha256.BlockSize
     ),
+
+    // Tests from https://csrc.nist.gov/groups/ST/toolkit/examples.html
+    // (truncated tag tests are left out)
     new(
         sha1.New,
         new byte[]{
@@ -512,6 +514,7 @@ internal static slice<hmacTest> hmacTests = new hmacTest[]{
         sha512.Size,
         sha512.BlockSize
     ),
+    // HMAC without key is dumb but should probably not fail.
     new(
         sha1.New,
         new byte[]{}.slice(),
@@ -560,6 +563,7 @@ public static void TestHMAC(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("test %d.%d: Write(%d) = %d, %v"u8, i, j, len(tt.@in), n, err);
                 continue;
             }
+
             // Repetitive Sum() calls should return the same value
             for (nint k = 0; k < 2; k++) {
                 @string sum = fmt.Sprintf("%x"u8, h.Sum(default!));
@@ -567,8 +571,10 @@ public static void TestHMAC(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("test %d.%d.%d: have %s want %s\n"u8, i, j, k, sum, tt.@out);
                 }
             }
+
             // Second iteration: make sure reset works.
             h.Reset();
+
             // Third and fourth iteration: make sure hmac works on
             // hashes without MarshalBinary/UnmarshalBinary
             if (j == 1) {
@@ -618,6 +624,7 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     var a = slice<byte>("test"u8);
     var b = slice<byte>("test1"u8);
     var c = slice<byte>("test2"u8);
+
     if (!Equal(b, b)) {
         Ꮡt.Error(equalFailedWithEqualˢ);
     }
@@ -636,6 +643,7 @@ public static void TestHMACHash(ж<testing.T> Ꮡt) {
     foreach (var (i, test) in hmacTests) {
         var baseHash = test.hash;
         var key = test.key;
+
         var baseHashʗ1 = baseHash;
         var keyʗ1 = key;
         Ꮡt.Run(fmt.Sprintf("test-%d"u8, i), (ж<testing.T> tΔ1) => {

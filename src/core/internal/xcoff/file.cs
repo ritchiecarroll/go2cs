@@ -30,7 +30,7 @@ partial struct SectionHeader {
 }
 
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     public slice<Reloc> Relocs;
     /*embed*/ public io_package.ReaderAt ReaderAt;
     internal ж<io.SectionReader> sr;
@@ -79,7 +79,7 @@ partial struct FileHeader {
 
 // A File represents an open XCOFF file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     public slice<ж<Symbol>> Symbols;
     public slice<byte> StringTable;
@@ -144,7 +144,7 @@ internal static @string cstring(slice<byte> b) {
     nint i = default!;
     for (i = 0; i < len(b) && b[i] != 0; i++) {
     }
-    return ((@string)(b.slice(0, i)));
+    return (@string)(b.slice(0, i));
 }
 
 // getString extracts a string from an XCOFF string table.
@@ -168,8 +168,10 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (magic != U802TOCMAGIC && magic != U64_TOCMAGIC) {
         return (default!, fmt.Errorf("unrecognised XCOFF magic: 0x%x"u8, magic));
     }
+
     var f = @new<File>();
     f.Value.TargetMachine = magic;
+
     // Read XCOFF file header
     {
         var (_, err) = sr.Seek(0, io.SeekStart); if (err != default!) {
@@ -212,6 +214,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (symptr == 0 || nsyms <= 0) {
         return (default!, fmt.Errorf("no symbol table"u8));
     }
+
     // Read string table (located right after symbol table).
     var offset = symptr + (uint64)nsyms * (uint64)SYMESZ;
     {
@@ -233,6 +236,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         }
         f.Value.StringTable = st;
     }
+
     // Read section headers
     {
         var (_, err) = sr.Seek((int64)hdrsz + (int64)opthdr, io.SeekStart); if (err != default!) {
@@ -278,18 +282,18 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             s.Value.Relptr = shdr.Value.Srelptr;
             s.Value.Nreloc = shdr.Value.Snreloc;
         }
-
         var r2 = r;
-        if (scnptr == 0) {
-            // .bss must have all 0s
+        if (scnptr == 0) { // .bss must have all 0s
             r2 = new nobitsSectionReaderжReaderAt(Ꮡ(new nobitsSectionReader(nil)));
         }
         s.Value.sr = io.NewSectionReader(r2, (int64)scnptr, (int64)(~s).Size);
         s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
         f.Value.Sections = append((~f).Sections, s);
     }
+
     // Symbol map needed by relocation
     map<nint, ж<Symbol>> idxToSym = new map<nint, ж<Symbol>>();
+
     // Read symbol table
     {
         var (_, err) = sr.Seek((int64)symptr, io.SeekStart); if (err != default!) {
@@ -343,7 +347,6 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 goto skip;
             }
         }
-
         if ((~sym).StorageClass != C_EXT && (~sym).StorageClass != C_WEAKEXT && (~sym).StorageClass != C_HIDEXT) {
             goto skip;
         }
@@ -351,6 +354,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         if (numaux < 1 || i + numaux >= (nint)nsyms) {
             goto skip;
         }
+
         if ((~sym).SectionNumber > (nint)nscns) {
             goto skip;
         }
@@ -359,7 +363,9 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         } else {
             sym.Value.Value -= (~f).Sections[(~sym).SectionNumber - 1].Value.VirtualAddress;
         }
+
         idxToSym[i] = sym;
+
         // If this symbol is a function, it must retrieve its size from
         // its AUX_FCN entry.
         // It can happen that a function symbol doesn't have any AUX_FCN.
@@ -384,8 +390,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
                 }
                 sym.Value.AuxFcn.Size = (int64)(~aux).Xfsize;
             }
-
         }
+
         // Read csect auxiliary entry (by convention, it is the last).
         if (!needAuxFcn) {
             {
@@ -417,9 +423,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             }
             sym.Value.AuxCSect.SymbolType = (nint)((uint8)((~aux).Xsmtyp & 0x7));
             sym.Value.AuxCSect.StorageMappingClass = (nint)(~aux).Xsmclas;
-            sym.Value.AuxCSect.Length = (int64)(((int64)(~aux).Xscnlenhi << (int)(32)) | (int64)(~aux).Xscnlenlo);
+            sym.Value.AuxCSect.Length = (int64)(~aux).Xscnlenhi << 32 | (int64)(~aux).Xscnlenlo;
         }
-
         f.Value.Symbols = append((~f).Symbols, sym);
 skip:
         i += numaux; // Skip auxiliary entries
@@ -429,6 +434,7 @@ skip:
             }
         }
     }
+
     // Read relocations
     // Only for .data or .text section
     foreach (var (sectNum, sect) in (~f).Sections) {
@@ -462,6 +468,7 @@ skip:
                 reloc.Symbol = idxToSym[(nint)(~rel).Rsymndx];
                 reloc.Type = rel.Value.Rtype;
                 reloc.Length = (uint8)((uint8)((~rel).Rsize & 0x3F) + 1);
+
                 if ((uint8)((~rel).Rsize & 0x80) != 0) {
                     reloc.Signed = true;
                 }
@@ -491,6 +498,7 @@ skip:
             sect.Value.Relocs = append((~sect).Relocs, reloc);
         }
     }
+
     return (f, default!);
 }
 
@@ -544,7 +552,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
     array<uint32> subtypes = new uint32[]{SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR}.array();
     array<slice<byte>> dat = new(5); /* len(subtypes) */
     foreach (var (i, subtype) in subtypes.ΔRangeSnapshot()) {
-        var s = f.SectionByType((uint32)((uint32)STYP_DWARF | subtype));
+        var s = f.SectionByType((uint32)STYP_DWARF | subtype);
         if (s != nil) {
             var (b, err) = s.Data();
             if (err != default! && (uint64)len(b) < (~s).Size) {
@@ -553,6 +561,7 @@ public static (ж<dwarf.Data>, error) DWARF(this ref File f) {
             dat[i] = b;
         }
     }
+
     var (abbrev, info, line, ranges, str) = (dat[0], dat[1], dat[2], dat[3], dat[4]);
     return dwarf.New(abbrev, default!, default!, info, line, default!, ranges, str);
 }
@@ -607,6 +616,7 @@ internal static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSect
             return (default!, err);
         }
     }
+
     nint offset = 0;
     // First import file ID is the default LIBPATH value
     @string libpath = cstring(table.slice(offset));
@@ -628,6 +638,7 @@ internal static (slice<@string>, error) readImportIDs(this ref File f, ж<ΔSect
         }
         all = append(all, path);
     }
+
     return (all, default!);
 }
 
@@ -688,11 +699,13 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
             return (default!, errΔ7);
         }
     }
+
     // Read imported libraries
     var (libs, err) = f.readImportIDs(s);
     if (err != default!) {
         return (default!, err);
     }
+
     // Read loader symbol table
     {
         var (_, errΔ8) = (~s).sr.Seek((int64)symoff, io.SeekStart); if (errΔ8 != default!) {
@@ -743,7 +756,6 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
             }
             ifile = ldsym.Value.Lifile;
         }
-
         ImportedSymbol sym = default!;
         sym.Name = name;
         if (ifile >= 1 && (nint)ifile <= len(libs)) {
@@ -751,6 +763,7 @@ public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) {
         }
         all = append(all, sym);
     }
+
     return (all, default!);
 }
 

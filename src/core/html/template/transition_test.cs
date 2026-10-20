@@ -58,9 +58,11 @@ public static void BenchmarkTemplateSpecialTags(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var r = new BenchmarkTemplateSpecialTags_r("Aunt Mildred"u8, "bone china tea set"u8);
+
     @string h1 = textareaHelloHelloHelloˢ;
     @string h2 = textareaPDearNameWithˢ;
     @string html = strings.Repeat(h1, 100) + h2 + strings.Repeat(h1, 100) + h2;
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     for (nint i = 0; i < b.N; i++) {
         var (ᴛ1, ᴛ2) = New(fooˢ2).Parse(html);

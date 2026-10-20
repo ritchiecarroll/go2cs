@@ -6,12 +6,16 @@ namespace go;
 using abi = @internal.abi_package;
 using cpu = @internal.cpu_package;
 using goarch = @internal.goarch_package;
+using goexperiment = @internal.goexperiment_package;
 using goos = @internal.goos_package;
 using atomic = @internal.runtime.atomic_package;
+using gc = @internal.runtime.gc_package;
 using sys = @internal.runtime.sys_package;
+using bits = go.math.bits_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
+using go.math;
 
 partial class runtime_package {
 
@@ -64,8 +68,18 @@ StackGuard - StackSmall bytes at the bottom.
 The linkers explore all possible call traces involving non-splitting
 functions to make sure that this limit cannot be violated.
 */
+
+// stackSystem is a number of additional bytes to add
+// to each stack below the usual guard area for OS-specific
+// purposes like signal handling. Used on Windows, Plan 9,
+// and iOS because they do not use a separate stack.
 internal static UntypedInt stackSystem => /* goos.IsWindows*4096 + goos.IsPlan9*512 + goos.IsIos*goarch.IsArm64*1024 */ 4096;
+
+// The minimum size of stack used by Go code
 internal static UntypedInt stackMin => 2048;
+
+// The minimum stack size to allocate.
+// The hackery here rounds fixedStack0 up to a power of 2.
 internal static UntypedInt fixedStack0 => /* stackMin + stackSystem */ 6144;
 internal static UntypedInt fixedStack1 => /* fixedStack0 - 1 */ 6143;
 internal static UntypedInt fixedStack2 => /* fixedStack1 | (fixedStack1 >> 1) */ 8191;
@@ -74,24 +88,54 @@ internal static UntypedInt fixedStack4 => /* fixedStack3 | (fixedStack3 >> 4) */
 internal static UntypedInt fixedStack5 => /* fixedStack4 | (fixedStack4 >> 8) */ 8191;
 internal static UntypedInt fixedStack6 => /* fixedStack5 | (fixedStack5 >> 16) */ 8191;
 internal static UntypedInt fixedStack => /* fixedStack6 + 1 */ 8192;
+
+// stackNosplit is the maximum number of bytes that a chain of NOSPLIT
+// functions can use.
+// This arithmetic must match that in cmd/internal/objabi/stack.go:StackNosplit.
 internal static UntypedInt stackNosplit => /* abi.StackNosplitBase * sys.StackGuardMultiplier */ 800;
+
+// The stack guard is a pointer this many bytes above the
+// bottom of the stack.
+//
+// The guard leaves enough room for a stackNosplit chain of NOSPLIT calls
+// plus one stackSmall frame plus stackSystem bytes for the OS.
+// This arithmetic must match that in cmd/internal/objabi/stack.go:StackLimit.
 internal static UntypedInt stackGuard => /* stackNosplit + stackSystem + abi.StackSmall */ 5024;
 
+// stackDebug == 0: no logging
+//            == 1: logging of per-stack operations
+//            == 2: logging of per-frame operations
+//            == 3: logging of per-word updates
+//            == 4: logging of per-word reads
 internal static UntypedInt stackDebug => 0;
 internal static UntypedInt stackFromSystem => 0; // allocate stacks from system memory instead of the heap
 internal static UntypedInt stackFaultOnFree => 0; // old stacks are mapped noaccess to detect use after free
 internal static UntypedInt stackNoCache => 0; // disable per-P small stack caches
+
+// check the BP links during traceback.
 internal const bool debugCheckBP = false;
 
 internal static nint stackPoisonCopy = 0; // fill stack that should not be accessed with garbage, to detect bad dereferences during copy
 
 internal static UntypedInt uintptrMask => /* 1<<(8*goarch.PtrSize) - 1 */ 18446744073709551615;
+
 // The values below can be stored to g.stackguard0 to force
 // the next stack check to fail.
 // These are all larger than any real SP.
+
+// Goroutine preemption request.
+// 0xfffffade in hex.
 internal static UntypedInt stackPreempt => /* uintptrMask & -1314 */ 18446744073709550302;
+
+// Thread is forking. Causes a split stack check failure.
+// 0xfffffb2e in hex.
 internal static UntypedInt stackFork => /* uintptrMask & -1234 */ 18446744073709550382;
+
+// Force a stack movement. Used for debugging.
+// 0xfffffeed in hex.
 internal static UntypedInt stackForceMove => /* uintptrMask & -275 */ 18446744073709551341;
+
+// stackPoisonMin is the lowest allowed stack poison value.
 internal static UntypedInt stackPoisonMin => /* uintptrMask & -4096 */ 18446744073709547520;
 
 // Global pool of spans that have free stacks.
@@ -100,7 +144,6 @@ internal static UntypedInt stackPoisonMin => /* uintptrMask & -4096 */ 184467440
 //	order = log_2(size/FixedStack)
 //
 // There is a free list for each order.
-
 partial struct stackpoolᴛ1 /*dyn*/ {
     internal stackpoolItem item;
     internal array<byte> _ = new(40);
@@ -115,7 +158,6 @@ partial struct stackpoolItem {
 }
 
 // Global pool of large stack spans.
-
 partial struct stackLargeᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal array<mSpanList> free = new(35); // free lists by log_2(s.npages)
@@ -127,27 +169,25 @@ internal static ref stackLargeᴛ1 stackLarge => ref ᏑstackLarge.Value;
 internal static readonly @string cacheSizeMustBeAMultipleˢ = "cache size must be a multiple of page size"u8;
 
 internal static void stackinit() {
-    if ((UntypedInt)(_StackCacheSize & _PageMask) != 0) {
+    if ((UntypedInt)(_StackCacheSize & pageMask) != 0) {
         @throw(cacheSizeMustBeAMultipleˢ);
     }
     foreach (var (i, _) in stackpool) {
         stackpool[i].item.span.init();
-        lockInit(Ꮡstackpool.at<stackpoolᴛ1>(i).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu), lockRankStackpool);
+        lockInit(ref stackpool[i].item.mu, lockRankStackpool);
     }
     foreach (var (i, _) in stackLarge.free) {
         stackLarge.free[i].init();
-        lockInit(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock), lockRankStackLarge);
+        lockInit(ref stackLarge.@lock, lockRankStackLarge);
     }
 }
 
 // stacklog2 returns ⌊log_2(n)⌋.
 internal static nint stacklog2(uintptr n) {
-    nint log2 = 0;
-    while (n > 1) {
-        n >>= (int)(1);
-        log2++;
+    if (n == 0) {
+        return 0;
     }
-    return log2;
+    return bits.Len64((uint64)n);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -163,7 +203,7 @@ internal static gclinkptr stackpoolalloc(uint8 order) {
     lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
     if (s == nil) {
         // no free stacks. Allocate another span worth.
-        s = Ꮡmheap_.allocManual(((uintptr)_StackCacheSize >> (int)(_PageShift)), spanAllocStack);
+        s = Ꮡmheap_.allocManual((uintptr)_StackCacheSize >> (int)(gc.PageShift), spanAllocStack);
         if (s == nil) {
             @throw(outOfMemoryˢ);
         }
@@ -176,7 +216,14 @@ internal static gclinkptr stackpoolalloc(uint8 order) {
         osStackAlloc(ref (s).DerefOrNull());
         s.Value.elemsize = ((uintptr)fixedStack).Lsh((uint64)(order));
         for (var i = (uintptr)0; i < _StackCacheSize; i += s.Value.elemsize) {
-            var xΔ1 = ((gclinkptr)(s.@base() + i));
+            var xΔ1 = (gclinkptr)(s.@base() + i);
+            if (valgrindenabled) {
+                // The address of x.ptr() becomes the base of stacks. We need to
+                // mark it allocated here and in stackfree and stackpoolfree, and free'd in
+                // stackalloc in order to avoid overlapping allocations and
+                // uninitialized memory errors in valgrind.
+                valgrindMalloc(@unsafe.Pointer.FromPinnedBox(xΔ1.ptr()), /* unsafe.Sizeof(x.ptr()) */ (uintptr)8);
+            }
             xΔ1.ptr().Value.next = s.Value.manualFreeList;
             s.Value.manualFreeList = xΔ1;
         }
@@ -242,6 +289,7 @@ internal static void stackcacherefill(ref mcache c, uint8 order) {
     if (stackDebug >= 1) {
         print((@string)"stackcacherefill order="u8, order, (@string)"\n"u8);
     }
+
     // Grab some stacks from the global cache.
     // Grab half of the allowed capacity (to prevent thrashing).
     gclinkptr list = default!;
@@ -299,6 +347,7 @@ internal static void stackcache_clear(ref mcache c) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string stackallocNotOnSchedulerˢ = "stackalloc not on scheduler stack"u8;
 internal static readonly @string stackSizeNotAPowerOf2ˢ = "stack size not a power of 2"u8;
+internal static readonly @string goroutineStackSystemˢ = "goroutine stack (system)"u8;
 internal static readonly @string outOfMemoryStackallocˢ = "out of memory (stackalloc)"u8;
 
 // stackalloc allocates an n byte stack.
@@ -315,25 +364,27 @@ internal static Δstack @stackalloc(uint32 n) {
     if (thisg != (~(~thisg).m).g0) {
         @throw(stackallocNotOnSchedulerˢ);
     }
-    if ((uint32)(n & (n - 1)) != 0) {
+    if ((n & (n - 1)) != 0) {
         @throw(stackSizeNotAPowerOf2ˢ);
     }
     if (stackDebug >= 1) {
         print((@string)"stackalloc "u8, n, (@string)"\n"u8);
     }
+
     if (debug.efence != 0 || stackFromSystem != 0) {
         n = (uint32)alignUp((uintptr)n, physPageSize);
-        @unsafe.Pointer vΔ1 = (uintptr)sysAlloc((uintptr)n, Ꮡmemstats.of(mstats.Ꮡstacks_sys));
+        @unsafe.Pointer vΔ1 = (uintptr)sysAlloc((uintptr)n, Ꮡmemstats.of(mstats.Ꮡstacks_sys), goroutineStackSystemˢ);
         if (vΔ1 == nil) {
             @throw(outOfMemoryStackallocˢ);
         }
         return new Δstack((uintptr)vΔ1, (uintptr)vΔ1 + (uintptr)n);
     }
+
     // Small stacks are allocated with a fixed-size free-list allocator.
     // If we need a stack of a bigger size, we fall back on allocating
     // a dedicated span.
     @unsafe.Pointer v = default!;
-    if (n < (uint32)(((uint32)fixedStack << (int)(_NumStackOrders))) && n < _StackCacheSize){
+    if (n < (uint32)((uint32)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
@@ -359,11 +410,18 @@ internal static Δstack @stackalloc(uint32 n) {
             (~c).stackcache[order].list = x.ptr().Value.next;
             (~c).stackcache[order].size -= (uintptr)n;
         }
-        v = ((@unsafe.Pointer)(uintptr)x);
+        if (valgrindenabled) {
+            // We're about to allocate the stack region starting at x.ptr().
+            // To prevent valgrind from complaining about overlapping allocations,
+            // we need to mark the (previously allocated) memory as free'd.
+            valgrindFree(@unsafe.Pointer.FromPinnedBox(x.ptr()));
+        }
+        v = (@unsafe.Pointer)(uintptr)x;
     } else {
         ж<mspan> s = default!;
-        var npage = ((uintptr)n >> (int)(_PageShift));
+        var npage = (uintptr)n >> (int)(gc.PageShift);
         nint log2npage = stacklog2(npage);
+
         // Try to get a stack from the large stack cache.
         @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
         if (!stackLarge.free[log2npage].isEmpty()) {
@@ -371,7 +429,9 @@ internal static Δstack @stackalloc(uint32 n) {
             ᏑstackLarge.at(stackLargeᴛ1.Ꮡfree, log2npage).remove(s);
         }
         unlock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
+
         lockWithRankMayAcquire(Ꮡmheap_.of(mheap.Ꮡlock), lockRankMheap);
+
         if (s == nil) {
             // Allocate a new stack from the heap.
             s = Ꮡmheap_.allocManual(npage, spanAllocStack);
@@ -383,6 +443,7 @@ internal static Δstack @stackalloc(uint32 n) {
         }
         v = (@unsafe.Pointer)s.@base();
     }
+
     if (traceAllocFreeEnabled()) {
         var Δtrace = traceAcquire();
         if (Δtrace.ok()) {
@@ -398,6 +459,9 @@ internal static Δstack @stackalloc(uint32 n) {
     }
     if (asanenabled) {
         asanunpoison(v, (uintptr)n);
+    }
+    if (valgrindenabled) {
+        valgrindMalloc(v, (uintptr)n);
     }
     if (stackDebug >= 1) {
         print((@string)"  allocated "u8, @unsafe.Pointer.OrTypedNil(v), (@string)"\n"u8);
@@ -451,22 +515,36 @@ internal static void stackfree(Δstack stk) {
     if (asanenabled) {
         asanpoison(v, n);
     }
-    if (n < (uintptr)(((uintptr)fixedStack << (int)(_NumStackOrders))) && n < _StackCacheSize){
+    if (valgrindenabled) {
+        valgrindFree(v);
+    }
+    if (n < (uintptr)((uintptr)fixedStack << (int)(_NumStackOrders)) && n < _StackCacheSize){
         var order = (uint8)0;
         var n2 = n;
         while (n2 > fixedStack) {
             order++;
             n2 >>= (int)(1);
         }
-        var x = ((gclinkptr)(uintptr)v);
+        var x = (gclinkptr)(uintptr)v;
         if (stackNoCache != 0 || (~(~gp).m).p == 0 || (~(~gp).m).preemptoff != ""u8){
             @lock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
+            if (valgrindenabled) {
+                // x.ptr() is the head of the list of free stacks, and will be used
+                // when allocating a new stack, so it has to be marked allocated.
+                valgrindMalloc(@unsafe.Pointer.FromPinnedBox(x.ptr()), /* unsafe.Sizeof(x.ptr()) */ (uintptr)8);
+            }
             stackpoolfree(x, order);
             unlock(Ꮡstackpool.at<stackpoolᴛ1>((nint)(order)).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
         } else {
             var c = (~(~gp).m).p.ptr().Value.mcache;
             if ((~c).stackcache[order].size >= _StackCacheSize) {
                 stackcacherelease(ref (c).DerefOrNull(), order);
+            }
+            if (valgrindenabled) {
+                // x.ptr() is the head of the list of free stacks, and will
+                // be used when allocating a new stack, so it has to be
+                // marked allocated.
+                valgrindMalloc(@unsafe.Pointer.FromPinnedBox(x.ptr()), /* unsafe.Sizeof(x.ptr()) */ (uintptr)8);
             }
             x.ptr().Value.next = (~c).stackcache[order].list;
             (~c).stackcache[order].list = x;
@@ -475,7 +553,7 @@ internal static void stackfree(Δstack stk) {
     } else {
         var s = spanOfUnchecked((uintptr)v);
         if (s.of(mspan.Ꮡstate).get() != mSpanManual) {
-            println(((Δhex)(uint64)s.@base()), @unsafe.Pointer.OrTypedNil(v));
+            println((Δhex)(uint64)s.@base(), @unsafe.Pointer.OrTypedNil(v));
             @throw(badSpanStateˢ);
         }
         if (gcphase == _GCoff){
@@ -497,7 +575,7 @@ internal static void stackfree(Δstack stk) {
     }
 }
 
-internal static uintptr maxstacksize = ((uintptr)1 << (int)(20)); // enough until runtime.main sets it for real
+internal static uintptr maxstacksize = ((uintptr)1 << 20); // enough until runtime.main sets it for real
 
 internal static uintptr maxstackceiling = maxstacksize;
 
@@ -549,14 +627,25 @@ partial struct adjustinfo {
 // If so, it rewrites *vpp to point into the new stack.
 internal static void adjustpointer(ref adjustinfo adjinfo, @unsafe.Pointer vpp) {
     var pp = (ж<uintptr>)(uintptr)(vpp);
-    var Δp = pp.Value;
+    ref var Δp = ref heap<uintptr>(out var Ꮡp);
+    Δp = pp.Value;
     if (stackDebug >= 4) {
-        print((@string)"        "u8, pp.OrTypedNil(), (@string)":"u8, ((Δhex)(uint64)Δp), (@string)"\n"u8);
+        print((@string)"        "u8, pp.OrTypedNil(), (@string)":"u8, (Δhex)(uint64)Δp, (@string)"\n"u8);
+    }
+    if (valgrindenabled) {
+        // p is a pointer on a stack, it is inherently initialized, as
+        // everything on the stack is, but valgrind for _some unknown reason_
+        // sometimes thinks it's uninitialized, and flags operations on p below
+        // as uninitialized. We just initialize it if valgrind thinks its
+        // uninitialized.
+        //
+        // See go.dev/issues/73801.
+        valgrindMakeMemDefined(@unsafe.Pointer.FromBox(Ꮡp), /* unsafe.Sizeof(&p) */ (uintptr)8);
     }
     if (adjinfo.old.lo <= Δp && Δp < adjinfo.old.hi) {
         pp.Value = Δp + adjinfo.delta;
         if (stackDebug >= 3) {
-            print((@string)"        adjust ptr "u8, pp.OrTypedNil(), (@string)":"u8, ((Δhex)(uint64)Δp), (@string)" -> "u8, ((Δhex)(uint64)(pp.Value)), (@string)"\n"u8);
+            print((@string)"        adjust ptr "u8, pp.OrTypedNil(), (@string)":"u8, (Δhex)(uint64)Δp, (@string)" -> "u8, (Δhex)(uint64)(pp.Value), (@string)"\n"u8);
         }
     }
 }
@@ -574,7 +663,7 @@ partial struct bitvector {
 // See adjustpointers for an example of a high-efficiency walk of a bitvector.
 internal static uint8 ptrbit(this ref bitvector bv, uintptr i) {
     var b = (addb(bv.bytedata, i / 8)).Value;
-    return (uint8)((byte)(((b >> (int)((i % 8)))) & 1));
+    return (uint8)((byte)((b >> (int)(i % 8)) & 1));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -598,7 +687,7 @@ internal static void adjustpointers(@unsafe.Pointer scanp, ж<bitvector> Ꮡbv, 
     for (var i = (uintptr)0; i < num; i += 8) {
         if (stackDebug >= 4) {
             for (var j = (uintptr)0; j < 8; j++) {
-                print((@string)"        "u8, @unsafe.Pointer.OrTypedNil((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":"u8, ptrnames[bv.ptrbit(i + j)], (@string)":"u8, ((Δhex)(uint64)(~(ж<uintptr>)(uintptr)((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize)))), (@string)" # "u8, i, (@string)" "u8, addb(bv.bytedata, i / 8).Value, (@string)"\n"u8);
+                print((@string)"        "u8, @unsafe.Pointer.OrTypedNil((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize)), (@string)":"u8, ptrnames[bv.ptrbit(i + j)], (@string)":"u8, (Δhex)(uint64)(~(ж<uintptr>)(uintptr)((uintptr)add(scanp, (i + j) * (uintptr)goarch.PtrSize))), (@string)" # "u8, i, (@string)" "u8, addb(bv.bytedata, i / 8).Value, (@string)"\n"u8);
             }
         }
         var b = (addb(bv.bytedata, i / 8)).Value;
@@ -612,12 +701,12 @@ retry:
                 // Looks like a junk value in a pointer slot.
                 // Live analysis wrong?
                 getg().Value.m.Value.traceback = 2;
-                print((@string)"runtime: bad pointer in frame "u8, funcname(f), (@string)" at "u8, pp.OrTypedNil(), (@string)": "u8, ((Δhex)(uint64)Δp), (@string)"\n"u8);
+                print((@string)"runtime: bad pointer in frame "u8, funcname(f), (@string)" at "u8, pp.OrTypedNil(), (@string)": "u8, (Δhex)(uint64)Δp, (@string)"\n"u8);
                 @throw(invalidPointerFoundOnˢ);
             }
             if (minp <= Δp && Δp < maxp) {
                 if (stackDebug >= 3) {
-                    print((@string)"adjust ptr "u8, ((Δhex)(uint64)Δp), (@string)" "u8, funcname(f), (@string)"\n"u8);
+                    print((@string)"adjust ptr "u8, (Δhex)(uint64)Δp, (@string)" "u8, funcname(f), (@string)"\n"u8);
                 }
                 if (useCAS){
                     var ppu = Ꮡ(new @unsafe.Pointer(~pp));
@@ -639,14 +728,6 @@ internal static readonly @string badFramePointerˢ = "bad frame pointer"u8;
 internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) {
     ref var frame = ref Ꮡframe.DerefOrNull();
 
-    if (frame.continpc == 0) {
-        // Frame is dead.
-        return;
-    }
-    var f = frame.fn;
-    if (stackDebug >= 2) {
-        print((@string)"    adjusting "u8, funcname(f), (@string)" frame=["u8, ((Δhex)(uint64)frame.sp), (@string)","u8, ((Δhex)(uint64)frame.fp), (@string)"] pc="u8, ((Δhex)(uint64)frame.pc), (@string)" continpc="u8, ((Δhex)(uint64)frame.continpc), (@string)"\n"u8);
-    }
     // Adjust saved frame pointer if there is one.
     if ((goarch.ArchFamily == goarch.AMD64 || goarch.ArchFamily == goarch.ARM64) && frame.argp - frame.varp == (uintptr)(2 * goarch.PtrSize)) {
         if (stackDebug >= 3) {
@@ -658,7 +739,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
             var bp = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)frame.varp);
             if (bp != 0 && (bp < adjinfo.old.lo || bp >= adjinfo.old.hi)) {
                 println((@string)"runtime: found invalid frame pointer"u8);
-                print((@string)"bp="u8, ((Δhex)(uint64)bp), (@string)" min="u8, ((Δhex)(uint64)adjinfo.old.lo), (@string)" max="u8, ((Δhex)(uint64)adjinfo.old.hi), (@string)"\n"u8);
+                print((@string)"bp="u8, (Δhex)(uint64)bp, (@string)" min="u8, (Δhex)(uint64)adjinfo.old.lo, (@string)" max="u8, (Δhex)(uint64)adjinfo.old.hi, (@string)"\n"u8);
                 @throw(badFramePointerˢ);
             }
         }
@@ -668,14 +749,55 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         // by the caller in its frame (one word below its SP).
         adjustpointer(ref adjinfo, (@unsafe.Pointer)frame.varp);
     }
+    if (goarch.ArchFamily == goarch.ARM64 && isInjectedCall(frame.fn.funcID)) {
+        // If this is an injected call on arm64, then we need to adjust
+        // the frame pointer saved by the original function into which
+        // the call was injected. Normally this would be handled when
+        // adjusting the callee's frame or in adjustctxt. But when a
+        // call is injected, the frame is placed 16 bytes below the
+        // original stack pointer to make room to save the link
+        // register, and the frame pointer saved by the original
+        // function isn't inside any call frame. We can adjust that
+        // saved frame pointer here by looking just above frame.fp.
+        //
+        // ^  original call    ^
+        // |  frame above...   |
+        // +-------------------+ <- stack pointer at the time of injection
+        // :  FP saved by      :
+        // :  original func    :
+        // :···················: <- frame pointer register from original function
+        // :  LR saved during  :
+        // :  injection        :
+        // +-------------------+ <- frame.fp (injection decrements SP by 16 bytes)
+        // |  FP saved         |
+        // |  during injection |
+        // +-------------------+
+        // |  injected call    |
+        // V  frame below...   V
+        adjustpointer(ref adjinfo, (@unsafe.Pointer)(frame.fp + (uintptr)goarch.PtrSize));
+    }
+
+    if (frame.continpc == 0) {
+        // Frame is dead. The program might still see the frame pointer
+        // saved in the frame, adjusted above, but we don't need to
+        // adjust the rest of the frame.
+        return;
+    }
+    var f = frame.fn;
+    if (stackDebug >= 2) {
+        print((@string)"    adjusting "u8, funcname(f), (@string)" frame=["u8, (Δhex)(uint64)frame.sp, (@string)","u8, (Δhex)(uint64)frame.fp, (@string)"] pc="u8, (Δhex)(uint64)frame.pc, (@string)" continpc="u8, (Δhex)(uint64)frame.continpc, (@string)"\n"u8);
+    }
+
     ref var locals = ref heap<bitvector>(out var Ꮡlocals);
     ref var args = ref heap<bitvector>(out var Ꮡargs);
     (locals, args, var objs) = frame.getStackMap(true);
+
     // Adjust local variables if stack frame has been allocated.
     if (locals.n > 0) {
         var size = (uintptr)locals.n * (uintptr)goarch.PtrSize;
         adjustpointers((@unsafe.Pointer)(frame.varp - size), Ꮡlocals, ref adjinfo, f);
     }
+
     // Adjust arguments.
     if (args.n > 0) {
         if (stackDebug >= 3) {
@@ -683,6 +805,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
         }
         adjustpointers((@unsafe.Pointer)frame.argp, Ꮡargs, ref adjinfo, new ΔfuncInfo(nil));
     }
+
     // Adjust pointers in all stack objects (whether they are live or not).
     // See comments in mgcmark.go:scanframeworker.
     if (frame.varp != 0) {
@@ -702,7 +825,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
             }
             var (ptrBytes, gcData) = obj.gcdata();
             for (var iΔ1 = (uintptr)0; iΔ1 < ptrBytes; iΔ1 += goarch.PtrSize) {
-                if ((byte)((addb(gcData, iΔ1 / (uintptr)(8 * goarch.PtrSize)).Value >> (int)(((uintptr)(iΔ1 / (uintptr)goarch.PtrSize & 7)))) & 1) != 0) {
+                if ((byte)(addb(gcData, iΔ1 / (uintptr)(8 * goarch.PtrSize)).Value >> (int)((uintptr)(iΔ1 / (uintptr)goarch.PtrSize & 7)) & 1) != 0) {
                     adjustpointer(ref adjinfo, (@unsafe.Pointer)(Δp + iΔ1));
                 }
             }
@@ -724,7 +847,7 @@ internal static void adjustctxt(ж<g> Ꮡgp, ref adjustinfo adjinfo) {
         var bp = gp.sched.bp;
         if (bp != 0 && (bp < adjinfo.old.lo || bp >= adjinfo.old.hi)) {
             println((@string)"runtime: found invalid top frame pointer"u8);
-            print((@string)"bp="u8, ((Δhex)(uint64)bp), (@string)" min="u8, ((Δhex)(uint64)adjinfo.old.lo), (@string)" max="u8, ((Δhex)(uint64)adjinfo.old.hi), (@string)"\n"u8);
+            print((@string)"bp="u8, (Δhex)(uint64)bp, (@string)" min="u8, (Δhex)(uint64)adjinfo.old.lo, (@string)" max="u8, (Δhex)(uint64)adjinfo.old.hi, (@string)"\n"u8);
             @throw(badTopFramePointerˢ);
         }
     }
@@ -765,7 +888,8 @@ internal static void adjustsudogs(ref g gp, ref adjustinfo adjinfo) {
     // the data elements pointed to by a SudoG structure
     // might be in the stack.
     for (var s = gp.waiting; s != nil; s = s.Value.waitlink) {
-        adjustpointer(ref adjinfo, @unsafe.Pointer.FromBox(s.of(sudog.Ꮡelem)));
+        adjustpointer(ref adjinfo, @unsafe.Pointer.FromBox(s.of(sudog.Ꮡelem).of(maybeTraceablePtr.Ꮡvu)));
+        adjustpointer(ref adjinfo, @unsafe.Pointer.FromBox(s.of(sudog.Ꮡelem).of(maybeTraceablePtr.Ꮡvp)));
     }
 }
 
@@ -778,7 +902,7 @@ internal static void fillstack(Δstack stk, byte b) {
 internal static uintptr findsghi(ref g gp, Δstack stk) {
     uintptr sghi = default!;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
-        var Δp = (uintptr)(~sg).elem + (uintptr)(~(~sg).c).elemsize;
+        var Δp = sg.of(sudog.Ꮡelem).uintptr() + (uintptr)(~sg.of(sudog.Ꮡc).get()).elemsize;
         if (stk.lo <= Δp && Δp < stk.hi && Δp > sghi) {
             sghi = Δp;
         }
@@ -793,10 +917,11 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
     if (gp.waiting == nil) {
         return 0;
     }
+
     // Lock channels to prevent concurrent send/receive.
     ж<Δhchan> lastc = default!;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
-        if ((~sg).c != lastc) {
+        if (sg.of(sudog.Ꮡc).get() != lastc) {
             // There is a ranking cycle here between gscan bit and
             // hchan locks. Normally, we only allow acquiring hchan
             // locks and then getting a gscan bit. In this case, we
@@ -806,12 +931,14 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
             // suspended. So, we get a special hchan lock rank here
             // that is lower than gscan, but doesn't allow acquiring
             // any other locks other than hchan.
-            lockWithRank((~sg).c.of(runtime_package.Δhchan.Ꮡlock), lockRankHchanLeaf);
+            lockWithRank(sg.of(sudog.Ꮡc).get().of(runtime_package.Δhchan.Ꮡlock), lockRankHchanLeaf);
         }
-        lastc = sg.Value.c;
+        lastc = sg.of(sudog.Ꮡc).get();
     }
+
     // Adjust sudogs.
     adjustsudogs(ref gp, ref adjinfo);
+
     // Copy the part of the stack the sudogs point in to
     // while holding the lock to prevent races on
     // send/receive slots.
@@ -822,14 +949,16 @@ internal static uintptr syncadjustsudogs(ref g gp, uintptr used, ref adjustinfo 
         sgsize = adjinfo.sghi - oldBot;
         memmove((@unsafe.Pointer)newBot, (@unsafe.Pointer)oldBot, sgsize);
     }
+
     // Unlock channels.
     lastc = default!;
     for (var sg = gp.waiting; sg != nil; sg = sg.Value.waitlink) {
-        if ((~sg).c != lastc) {
-            unlock((~sg).c.of(runtime_package.Δhchan.Ꮡlock));
+        if (sg.of(sudog.Ꮡc).get() != lastc) {
+            unlock(sg.of(sudog.Ꮡc).get().of(runtime_package.Δhchan.Ꮡlock));
         }
-        lastc = sg.Value.c;
+        lastc = sg.of(sudog.Ꮡc).get();
     }
+
     return sgsize;
 }
 
@@ -856,18 +985,21 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     // It's also fine if we have no P, addScannableStack can deal with
     // that case.
     ᏑgcController.addScannableStack((~(~getg()).m).p.ptr(), (int64)newsize - (int64)(old.hi - old.lo));
+
     // allocate new stack
     var @new = @stackalloc((uint32)newsize);
     if (stackPoisonCopy != 0) {
         fillstack(@new, 0xfd);
     }
     if (stackDebug >= 1) {
-        print((@string)"copystack gp="u8, Ꮡgp.OrTypedNil(), (@string)" ["u8, ((Δhex)(uint64)old.lo), (@string)" "u8, ((Δhex)(uint64)(old.hi - used)), (@string)" "u8, ((Δhex)(uint64)old.hi), (@string)"]"u8, (@string)" -> ["u8, ((Δhex)(uint64)@new.lo), (@string)" "u8, ((Δhex)(uint64)(@new.hi - used)), (@string)" "u8, ((Δhex)(uint64)@new.hi), (@string)"]/"u8, newsize, (@string)"\n"u8);
+        print((@string)"copystack gp="u8, Ꮡgp.OrTypedNil(), (@string)" ["u8, (Δhex)(uint64)old.lo, (@string)" "u8, (Δhex)(uint64)(old.hi - used), (@string)" "u8, (Δhex)(uint64)old.hi, (@string)"]"u8, (@string)" -> ["u8, (Δhex)(uint64)@new.lo, (@string)" "u8, (Δhex)(uint64)(@new.hi - used), (@string)" "u8, (Δhex)(uint64)@new.hi, (@string)"]/"u8, newsize, (@string)"\n"u8);
     }
+
     // Compute adjustment.
     adjustinfo adjinfo = default!;
     adjinfo.old = old;
     adjinfo.delta = @new.hi - old.hi;
+
     // Adjust sudogs, synchronizing with channel ops if necessary.
     var ncopy = used;
     if (!gp.activeStackChans){
@@ -888,12 +1020,15 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
         // of the stack, so there's little cost in handling
         // everything below it carefully.)
         adjinfo.sghi = findsghi(ref (Ꮡgp).DerefOrNull(), old);
+
         // Synchronize with channel ops and copy the part of
         // the stack they may interact with.
         ncopy -= syncadjustsudogs(ref (Ꮡgp).DerefOrNull(), used, ref adjinfo);
     }
+
     // Copy the stack (or the rest of it) to the new location
     memmove((@unsafe.Pointer)(@new.hi - ncopy), (@unsafe.Pointer)(old.hi - ncopy), ncopy);
+
     // Adjust remaining structures that have pointers into stacks.
     // We have to do most of these before we traceback the new
     // stack because gentraceback uses them.
@@ -903,17 +1038,38 @@ internal static void copystack(ж<g> Ꮡgp, uintptr newsize) {
     if (adjinfo.sghi != 0) {
         adjinfo.sghi += adjinfo.delta;
     }
+
     // Swap out old stack for new one
     gp.stack = @new;
     gp.stackguard0 = @new.lo + (uintptr)stackGuard; // NOTE: might clobber a preempt request
     gp.sched.sp = @new.hi - used;
     gp.stktopsp += adjinfo.delta;
+
     // Adjust pointers in the new stack.
     ref var u = ref heap(new unwinder(), out var Ꮡu);
     for (Ꮡu.init(Ꮡgp, 0); u.valid(); Ꮡu.next()) {
         adjustframe(Ꮡu.of(unwinder.Ꮡframe), ref adjinfo);
     }
+
+    if (valgrindenabled) {
+        if (gp.valgrindStackID == 0){
+            gp.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)@new.lo, (@unsafe.Pointer)@new.hi);
+        } else {
+            valgrindChangeStack(gp.valgrindStackID, (@unsafe.Pointer)@new.lo, (@unsafe.Pointer)@new.hi);
+        }
+    }
+
     // free old stack
+    if (goexperiment.RuntimeSecret && gp.secret > 0) {
+        // Some portion of the old stack has secret stuff on it.
+        // We don't really know where we entered secret mode,
+        // so just clear the whole thing.
+        // TODO(dmo): traceback until we hit secret.Do? clearing
+        // is fast and optimized, might not be worth it.
+        memclrNoHeapPointers((@unsafe.Pointer)old.lo, old.hi - old.lo);
+        // The memmove call above might put secrets from the stack into registers.
+        secretEraseRegisters();
+    }
     if (stackPoisonCopy != 0) {
         fillstack(old, 0xfc);
     }
@@ -959,12 +1115,22 @@ internal static void newstack() {
         @throw(stackGrowthAfterForkˢ);
     }
     if ((~(~thisg).m).morebuf.g.ptr() != (~(~thisg).m).curg) {
-        print((@string)"runtime: newstack called from g="u8, ((Δhex)(uint64)(uintptr)(~(~thisg).m).morebuf.g), (@string)("\n" + "\tm="), (~thisg).m.OrTypedNil(), (@string)" m->curg="u8, (~(~thisg).m).curg.OrTypedNil(), (@string)" m->g0="u8, (~(~thisg).m).g0.OrTypedNil(), (@string)" m->gsignal="u8, (~(~thisg).m).gsignal.OrTypedNil(), (@string)"\n"u8);
+        print((@string)"runtime: newstack called from g="u8, (Δhex)(uint64)(uintptr)(~(~thisg).m).morebuf.g, (@string)("\n" + "\tm="), (~thisg).m.OrTypedNil(), (@string)" m->curg="u8, (~(~thisg).m).curg.OrTypedNil(), (@string)" m->g0="u8, (~(~thisg).m).g0.OrTypedNil(), (@string)" m->gsignal="u8, (~(~thisg).m).gsignal.OrTypedNil(), (@string)"\n"u8);
         var morebufΔ1 = thisg.Value.m.Value.morebuf;
         traceback(morebufΔ1.pc, morebufΔ1.sp, morebufΔ1.lr, morebufΔ1.g.ptr());
         @throw(runtimeWrongGoroutineInˢ);
     }
+
     var gp = thisg.Value.m.Value.curg;
+    if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
+        // If we're entering here from a secret context, clear
+        // all the registers. This is important because we
+        // might context switch to a different goroutine which
+        // is not in secret mode, and it will not be careful
+        // about clearing its registers.
+        secretEraseRegisters();
+    }
+
     if ((~(~(~thisg).m).curg).throwsplit) {
         // Update syscallsp, syscallpc in case traceback uses them.
         var morebufΔ2 = thisg.Value.m.Value.morebuf;
@@ -977,23 +1143,27 @@ internal static void newstack() {
             pcname = funcname(f);
             pcoff = (~gp).sched.pc - f.entry();
         }
-        print((@string)"runtime: newstack at "u8, pcname, (@string)"+"u8, ((Δhex)(uint64)pcoff),
-            (@string)" sp="u8, ((Δhex)(uint64)(~gp).sched.sp), (@string)" stack=["u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)", "u8, ((Δhex)(uint64)(~gp).stack.hi), (@string)"]\n"u8,
-            (@string)"\tmorebuf={pc:"u8, ((Δhex)(uint64)morebufΔ2.pc), (@string)" sp:"u8, ((Δhex)(uint64)morebufΔ2.sp), (@string)" lr:"u8, ((Δhex)(uint64)morebufΔ2.lr), (@string)"}\n"u8,
-            (@string)"\tsched={pc:"u8, ((Δhex)(uint64)(~gp).sched.pc), (@string)" sp:"u8, ((Δhex)(uint64)(~gp).sched.sp), (@string)" lr:"u8, ((Δhex)(uint64)(~gp).sched.lr), (@string)" ctxt:"u8, @unsafe.Pointer.OrTypedNil((~gp).sched.ctxt), (@string)"}\n"u8);
+        print((@string)"runtime: newstack at "u8, pcname, (@string)"+"u8, (Δhex)(uint64)pcoff,
+            (@string)" sp="u8, (Δhex)(uint64)(~gp).sched.sp, (@string)" stack=["u8, (Δhex)(uint64)(~gp).stack.lo, (@string)", "u8, (Δhex)(uint64)(~gp).stack.hi, (@string)"]\n"u8,
+            (@string)"\tmorebuf={pc:"u8, (Δhex)(uint64)morebufΔ2.pc, (@string)" sp:"u8, (Δhex)(uint64)morebufΔ2.sp, (@string)" lr:"u8, (Δhex)(uint64)morebufΔ2.lr, (@string)"}\n"u8,
+            (@string)"\tsched={pc:"u8, (Δhex)(uint64)(~gp).sched.pc, (@string)" sp:"u8, (Δhex)(uint64)(~gp).sched.sp, (@string)" lr:"u8, (Δhex)(uint64)(~gp).sched.lr, (@string)" ctxt:"u8, @unsafe.Pointer.OrTypedNil((~gp).sched.ctxt), (@string)"}\n"u8);
+
         thisg.Value.m.Value.traceback = 2; // Include runtime frames
         traceback(morebufΔ2.pc, morebufΔ2.sp, morebufΔ2.lr, gp);
         @throw(runtimeStackSplitAtBadˢ);
     }
+
     var morebuf = thisg.Value.m.Value.morebuf;
     thisg.Value.m.Value.morebuf.pc = 0;
     thisg.Value.m.Value.morebuf.lr = 0;
     thisg.Value.m.Value.morebuf.sp = 0;
     thisg.Value.m.Value.morebuf.g = 0;
+
     // NOTE: stackguard0 may change underfoot, if another thread
     // is about to try to preempt gp. Read it just once and use that same
     // value now and below.
     var stackguard0 = atomic.Loaduintptr(gp.of(g.Ꮡstackguard0));
+
     // Be conservative about where we preempt.
     // We are interested in preempting user Go code, not runtime code.
     // If we're holding locks, mallocing, or preemption is disabled, don't
@@ -1015,6 +1185,7 @@ internal static void newstack() {
             gogo(gp.of(g.Ꮡsched)); // never return
         }
     }
+
     if ((~gp).stack.lo == 0) {
         @throw(missingStackInNewstackˢ);
     }
@@ -1024,15 +1195,16 @@ internal static void newstack() {
         sp -= goarch.PtrSize;
     }
     if (stackDebug >= 1 || sp < (~gp).stack.lo) {
-        print((@string)"runtime: newstack sp="u8, ((Δhex)(uint64)sp), (@string)" stack=["u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)", "u8, ((Δhex)(uint64)(~gp).stack.hi), (@string)"]\n"u8,
-            (@string)"\tmorebuf={pc:"u8, ((Δhex)(uint64)morebuf.pc), (@string)" sp:"u8, ((Δhex)(uint64)morebuf.sp), (@string)" lr:"u8, ((Δhex)(uint64)morebuf.lr), (@string)"}\n"u8,
-            (@string)"\tsched={pc:"u8, ((Δhex)(uint64)(~gp).sched.pc), (@string)" sp:"u8, ((Δhex)(uint64)(~gp).sched.sp), (@string)" lr:"u8, ((Δhex)(uint64)(~gp).sched.lr), (@string)" ctxt:"u8, @unsafe.Pointer.OrTypedNil((~gp).sched.ctxt), (@string)"}\n"u8);
+        print((@string)"runtime: newstack sp="u8, (Δhex)(uint64)sp, (@string)" stack=["u8, (Δhex)(uint64)(~gp).stack.lo, (@string)", "u8, (Δhex)(uint64)(~gp).stack.hi, (@string)"]\n"u8,
+            (@string)"\tmorebuf={pc:"u8, (Δhex)(uint64)morebuf.pc, (@string)" sp:"u8, (Δhex)(uint64)morebuf.sp, (@string)" lr:"u8, (Δhex)(uint64)morebuf.lr, (@string)"}\n"u8,
+            (@string)"\tsched={pc:"u8, (Δhex)(uint64)(~gp).sched.pc, (@string)" sp:"u8, (Δhex)(uint64)(~gp).sched.sp, (@string)" lr:"u8, (Δhex)(uint64)(~gp).sched.lr, (@string)" ctxt:"u8, @unsafe.Pointer.OrTypedNil((~gp).sched.ctxt), (@string)"}\n"u8);
     }
     if (sp < (~gp).stack.lo) {
-        print((@string)"runtime: gp="u8, gp.OrTypedNil(), (@string)", goid="u8, (~gp).goid, (@string)", gp->status="u8, ((Δhex)(uint64)readgstatus(gp)), (@string)"\n "u8);
-        print((@string)"runtime: split stack overflow: "u8, ((Δhex)(uint64)sp), (@string)" < "u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)"\n"u8);
+        print((@string)"runtime: gp="u8, gp.OrTypedNil(), (@string)", goid="u8, (~gp).goid, (@string)", gp->status="u8, (Δhex)(uint64)readgstatus(gp), (@string)"\n "u8);
+        print((@string)"runtime: split stack overflow: "u8, (Δhex)(uint64)sp, (@string)" < "u8, (Δhex)(uint64)(~gp).stack.lo, (@string)"\n"u8);
         @throw(runtimeSplitStackˢ);
     }
+
     if (preempt) {
         if (gp == (~(~thisg).m).g0) {
             @throw(runtimePreemptG0ˢ);
@@ -1040,21 +1212,29 @@ internal static void newstack() {
         if ((~(~thisg).m).p == 0 && (~(~thisg).m).locks == 0) {
             @throw(runtimeGIsRunningButPIsˢ);
         }
+
         if ((~gp).preemptShrink) {
             // We're at a synchronous safe point now, so
             // do the pending stack shrink.
             gp.Value.preemptShrink = false;
             shrinkstack(gp);
         }
+
+        // Set a flag indicated that we've been synchronously preempted.
+        gp.Value.syncSafePoint = true;
+
         if ((~gp).preemptStop) {
             preemptPark(gp); // never returns
         }
+
         // Act like goroutine called runtime.Gosched.
         gopreempt_m(gp); // never return
     }
+
     // Allocate a bigger segment and move the stack.
     var oldsize = (~gp).stack.hi - (~gp).stack.lo;
     var newsize = oldsize * 2;
+
     // Make sure we grow at least as much as needed to fit the new frame.
     // (This is just an optimization - the caller of morestack will
     // recheck the bounds on return.)
@@ -1068,24 +1248,28 @@ internal static void newstack() {
             }
         }
     }
+
     if (stackguard0 == stackForceMove) {
         // Forced stack movement used for debugging.
         // Don't double the stack (or we may quickly run out
         // if this is done repeatedly).
         newsize = oldsize;
     }
+
     if (newsize > maxstacksize || newsize > maxstackceiling) {
         if (maxstacksize < maxstackceiling){
             print((@string)"runtime: goroutine stack exceeds "u8, maxstacksize, (@string)"-byte limit\n"u8);
         } else {
             print((@string)"runtime: goroutine stack exceeds "u8, maxstackceiling, (@string)"-byte limit\n"u8);
         }
-        print((@string)"runtime: sp="u8, ((Δhex)(uint64)sp), (@string)" stack=["u8, ((Δhex)(uint64)(~gp).stack.lo), (@string)", "u8, ((Δhex)(uint64)(~gp).stack.hi), (@string)"]\n"u8);
+        print((@string)"runtime: sp="u8, (Δhex)(uint64)sp, (@string)" stack=["u8, (Δhex)(uint64)(~gp).stack.lo, (@string)", "u8, (Δhex)(uint64)(~gp).stack.hi, (@string)"]\n"u8);
         @throw(stackOverflowˢ);
     }
+
     // The goroutine must be executing in order to call newstack,
     // so it must be Grunning (or Gscanrunning).
     casgstatus(gp, _Grunning, _Gcopystack);
+
     // The concurrent GC will not scan the stack while we are doing the copy since
     // the gp is in a Gcopystack status.
     copystack(gp, newsize);
@@ -1141,15 +1325,18 @@ internal static bool isShrinkStackSafe(ж<g> Ꮡgp) {
     if (Ꮡgp.of(g.ᏑparkingOnChan).Load()) {
         return false;
     }
-    // We also can't copy the stack while tracing is enabled, and
-    // gp is in _Gwaiting solely to make itself available to suspendG.
+    // We also can't copy the stack while a gp is in _Gwaiting solely
+    // to make itself available to suspendG.
+    //
     // In these cases, the G is actually executing on the system
-    // stack, and the execution tracer may want to take a stack trace
-    // of the G's stack. Note: it's safe to access gp.waitreason here.
-    // We're only checking if this is true if we took ownership of the
+    // stack, and the execution tracer, mutex profiler, etc. may want
+    // to take a stack trace of the G's stack.
+    //
+    // Note: it's safe to access gp.waitreason here.
+    // We're only calling isShrinkStackSafe if we took ownership of the
     // G with the _Gscan bit. This prevents the goroutine from transitioning,
     // which prevents gp.waitreason from changing.
-    if (traceEnabled() && (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Gwaiting && gp.waitreason.isWaitingForSuspendG()) {
+    if ((readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Gwaiting && gp.waitreason.isWaitingForSuspendG()) {
         return false;
     }
     return true;
@@ -1175,6 +1362,7 @@ internal static void freeStackSpans() {
         }
         unlock(Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
     }
+
     // Free large stack spans.
     @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
     foreach (var (i, _) in stackLarge.free) {
@@ -1210,7 +1398,13 @@ internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
     var ptr = (uintptr)(uintptr)@unsafe.Pointer.FromRef(ref r);
     ж<moduledata> mod = default!;
     for (var datap = Ꮡfirstmoduledata; datap != nil; datap = datap.Value.next) {
-        if ((~datap).gofunc <= ptr && ptr < (~datap).end) {
+        // The normal case: stackObjectRecord is in funcdata.
+        if ((~datap).gofunc <= ptr && ptr < (~datap).epclntab) {
+            mod = datap;
+            break;
+        }
+        // A special case: methodValueCallFrameObjs.
+        if ((~datap).noptrbss <= ptr && ptr < (~datap).enoptrbss) {
             mod = datap;
             break;
         }

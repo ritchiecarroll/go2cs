@@ -62,6 +62,7 @@ internal static readonly @string typeˢ2 = "type."u8;
 // or the empty string if there is none.
 public static @string PackageName(this ref Sym s) {
     @string name = s.nameWithoutInst();
+
     // Since go1.20, a prefix of "type:" and "go:" is a compiler-generated symbol,
     // they do not belong to any package.
     //
@@ -69,14 +70,17 @@ public static @string PackageName(this ref Sym s) {
     if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:"u8) || strings.HasPrefix(name, typeˢ))) {
         return ""u8;
     }
+
     // For go1.18 and below, the prefix are "type." and "go." instead.
     if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go."u8) || strings.HasPrefix(name, typeˢ2))) {
         return ""u8;
     }
+
     nint pathend = strings.LastIndex(name, "/"u8);
     if (pathend < 0) {
         pathend = 0;
     }
+
     {
         nint i = strings.Index(name.slice(pathend), "."u8); if (i != -1) {
             return name.slice(0, pathend + i);
@@ -136,7 +140,7 @@ public static @string BaseName(this ref Sym s) {
 // A Func collects information about a single function.
 partial struct Func {
     public uint64 Entry;
-    public partial ref ж<Sym> Sym { get; }
+    /*embed*/ public ж<Sym> Sym;
     public uint64 End;
     public slice<ж<Sym>> Params; // nil for Go 1.3 and later binaries
     public slice<ж<Sym>> Locals; // nil for Go 1.3 and later binaries
@@ -193,22 +197,21 @@ internal static slice<byte> bigEndianSymtab = new byte[]{0xFF, 0xFF, 0xFF, 0xFD,
 internal static slice<byte> oldLittleEndianSymtab = new byte[]{0xFE, 0xFF, 0xFF, 0xFF, 0x00, 0x00}.slice();
 
 internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
-    if (len(data) == 0) {
-        // missing symtab is okay
+    if (len(data) == 0) { // missing symtab is okay
         return default!;
     }
     binary.ByteOrder order = binary.BigEndian;
     var newTable = false;
     switch (ᐧ) {
     case {} when bytes.HasPrefix(data, oldLittleEndianSymtab): {
+        // Same as Go 1.0, but little endian.
+        // Format was used during interim development between Go 1.0 and Go 1.1.
+        // Should not be widespread, but easy to support.
         data = data[6..];
         order = binary.LittleEndian;
         break;
     }
-    case {} when bytes.HasPrefix(data, // Same as Go 1.0, but little endian.
- // Format was used during interim development between Go 1.0 and Go 1.1.
- // Should not be widespread, but easy to support.
- bigEndianSymtab): {
+    case {} when bytes.HasPrefix(data, bigEndianSymtab): {
         newTable = true;
         break;
     }
@@ -217,7 +220,6 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
         order = binary.LittleEndian;
         break;
     }}
-
     ref var ptrsz = ref heap(new nint(), out var Ꮡptrsz);
     if (newTable) {
         if (len(data) < 8) {
@@ -299,6 +301,7 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
             s.typ = typ;
             p = p[5..];
         }
+
         // Name.
         nint i = default!;
         nint nnul = default!;
@@ -319,13 +322,13 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
             }
             break;
         }}
-
         if (len(p) < i + nnul) {
             return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
         }
         s.name = p.slice(0, i);
         i += nnul;
         p = p.slice(i);
+
         if (!newTable) {
             if (len(p) < 4) {
                 return new DecodingErrorжerror(Ꮡ(new DecodingError(len(data), "unexpected EOF"u8, default!)));
@@ -341,7 +344,8 @@ internal static error walksymtab(slice<byte> data, Func<sym, error> fn) {
 
 // NewTable decodes the Go symbol table (the ".gosymtab" section in ELF),
 // returning an in-memory representation.
-// Starting with Go 1.3, the Go symbol table no longer includes symbol data.
+// Starting with Go 1.3, the Go symbol table no longer includes symbol data;
+// callers should pass nil for the symtab parameter.
 public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡpcln) {
     ref var pcln = ref Ꮡpcln.DerefOrNull();
 
@@ -353,6 +357,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
     if (err != default!) {
         return (default!, err);
     }
+
     ref var t = ref heap(new Table(), out var Ꮡt);
     if (Ꮡpcln.isGo12()) {
         t.go12line = Ꮡpcln;
@@ -373,10 +378,10 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
         ts.Value.goVersion = Ꮡpcln.Value.version;
         switch (s.typ) {
         default: {
+            // rewrite name to use . instead of · (c2 b7)
             nint w = 0;
             var b = s.name;
             for (nint i = 0; i < len(b); i++) {
-                // rewrite name to use . instead of · (c2 b7)
                 if (b[i] == 0xc2 && i + 1 < len(b) && b[i + 1] == 0xb7) {
                     i++;
                     b[i] = (rune)'.';
@@ -384,7 +389,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
                 b[w] = b[i];
                 w++;
             }
-            ts.Value.Name = ((@string)(s.name.slice(0, w)));
+            ts.Value.Name = (@string)(s.name.slice(0, w));
             break;
         }
         case (rune)'z' or (rune)'Z': {
@@ -407,7 +412,6 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             }
             break;
         }}
-
         switch (s.typ) {
         case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l': {
             nf++;
@@ -417,15 +421,16 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             fnameʗ1[(uint16)s.value] = ts.Value.Name;
             break;
         }}
-
         lasttyp = s.typ;
         return default!;
     });
     if (err != default!) {
         return (default!, err);
     }
+
     t.Funcs = new slice<Func>(0, () => new(nil), nf);
     t.Files = new map<@string, ж<Obj>>();
+
     ж<Obj> obj = default!;
     if (t.go12line != nil){
         // Put all functions into one Obj.
@@ -435,27 +440,28 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
     } else {
         t.Objs = new slice<Obj>(0, nz);
     }
+
     // Count text symbols and attach frame sizes, parameters, and
     // locals to them. Also, find object file boundaries.
     nint lastf = 0;
     for (nint i = 0; i < len(t.Syms); i++) {
         var sym = Ꮡ(t.Syms, i);
         switch ((~sym).Type) {
-        case (rune)'Z' or (rune)'z': {
+        case (rune)'Z' or (rune)'z': { // path symbol
             if (t.go12line != nil) {
-                // path symbol
                 // Go 1.2 binaries have the file information elsewhere. Ignore.
                 break;
             }
+            // Finish the current object
             if (obj != nil) {
-                // Finish the current object
                 obj.Value.Funcs = t.Funcs.slice(lastf);
             }
             lastf = len(t.Funcs);
+
+            // Start new object
             nint nΔ9 = len(t.Objs);
             t.Objs = t.Objs.slice(0, nΔ9 + 1);
             obj = Ꮡ(t.Objs, nΔ9);
-// Start new object
 
             // Count & copy path symbols
             nint endΔ1 = default!;
@@ -468,9 +474,10 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             }
             obj.Value.Paths = t.Syms.slice(i, endΔ1);
             i = endΔ1 - 1; // loop will i++
+
+            // Record file names
             nint depth = 0;
             foreach (var (j, _) in (~obj).Paths) {
-                // Record file names
                 var s = Ꮡ((~obj).Paths, j);
                 if ((~s).Name == ""u8){
                     depth--;
@@ -483,16 +490,16 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
             }
             break;
         }
-        case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l': {
+        case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l': { // text symbol
             {
                 nint nΔ10 = len(t.Funcs); if (nΔ10 > 0) {
-                    // text symbol
                     t.Funcs[nΔ10 - 1].End = sym.Value.Value;
                 }
             }
             if ((~sym).Name == "runtime.etext"u8 || (~sym).Name == "etext"u8) {
                 continue;
             }
+
             // Count parameter and local (auto) syms
             nint np = default!;
             nint na = default!;
@@ -512,10 +519,11 @@ countloop:
                     na++;
                     break;
                 }}
-
 continue_countloop:;
             }
 break_countloop:;
+
+            // Fill in the function symbol
             nint nΔ11 = len(t.Funcs);
             t.Funcs = t.Funcs.slice(0, nΔ11 + 1);
             var fn = Ꮡ(t.Funcs, nΔ11);
@@ -554,13 +562,12 @@ break_countloop:;
                     fn.Value.Locals[nΔ14] = s;
                     break;
                 }}
-
             }
             i = end - 1; // loop will i++
             break;
         }}
-
     }
+
     if (t.go12line != nil && nf == 0) {
         t.Funcs = t.go12line.go12Funcs();
     }
@@ -589,7 +596,6 @@ public static ж<Func> PCToFunc(this ref Table t, uint64 pc) {
             funcs = funcs.slice(m + 1);
             break;
         }}
-
     }
     return default!;
 }
@@ -627,6 +633,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
     if (!ok) {
         return (0, default!, ((UnknownFileError)@file));
     }
+
     if (t.go12line != nil) {
         var pcΔ1 = t.go12line.go12LineToPC(@file, line);
         if (pcΔ1 == 0) {
@@ -634,6 +641,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
         }
         return (pcΔ1, t.PCToFunc(pcΔ1), default!);
     }
+
     (var abs, err) = obj.alineFromLine(@file, line);
     if (err != default!) {
         return (pc, fn, err);
@@ -661,7 +669,6 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
             }
             break;
         }}
-
     }
     return default!;
 }
@@ -689,7 +696,6 @@ public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
             }
             break;
         }}
-
     }
     return default!;
 }
@@ -716,6 +722,7 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
 internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) {
     var noPath = Ꮡ(new lineFromAline_stackEnt(""u8, 0, 0, nil));
     var tos = noPath;
+
 pathloop:
     foreach (var (_, s) in o.Paths) {
         ref var val = ref heap<nint>(out var Ꮡval);
@@ -726,13 +733,13 @@ pathloop:
             break;
         }
         case {} when val is 1: {
-            tos = Ꮡ(new lineFromAline_stackEnt( // Start a new stack
-s.Name, val, 0, noPath));
+            // Start a new stack
+            tos = Ꮡ(new lineFromAline_stackEnt(s.Name, val, 0, noPath));
             break;
         }
         case {} when s.Name == ""u8: {
+            // Pop
             if (tos == noPath) {
-                // Pop
                 return (malformedSymbolTableˢ, 0);
             }
             tos.Value.prev.Value.offset += val - (~tos).start;
@@ -740,14 +747,14 @@ s.Name, val, 0, noPath));
             break;
         }
         default: {
-            tos = Ꮡ(new lineFromAline_stackEnt( // Push
-s.Name, val, 0, tos));
+            // Push
+            tos = Ꮡ(new lineFromAline_stackEnt(s.Name, val, 0, tos));
             break;
         }}
-
 continue_pathloop:;
     }
 break_pathloop:;
+
     if (tos == noPath) {
         return ("", 0);
     }
@@ -758,11 +765,13 @@ internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint l
     if (line < 1) {
         return (0, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(path, line))));
     }
+
     foreach (var (i, s) in o.Paths) {
         // Find this path
         if (s.Name != path) {
             continue;
         }
+
         // Find this line at this stack level
         nint depth = 0;
         nint incstart = default!;
@@ -791,7 +800,6 @@ pathloop:
                 depth++;
                 break;
             }}
-
 continue_pathloop:;
         }
 break_pathloop:;
@@ -800,11 +808,14 @@ break_pathloop:;
     return (0, ((UnknownFileError)path));
 }
 
-partial struct UnknownFileError /*@string*/;
-
 /*
  * Errors
  */
+
+// UnknownFileError represents a failure to find the specific file in
+// the symbol table.
+partial struct UnknownFileError /*@string*/;
+
 public static @string Error(this UnknownFileError e) {
     return "unknown file: "u8 + ((@string)e);
 }

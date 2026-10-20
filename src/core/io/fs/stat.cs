@@ -26,6 +26,7 @@ public static (FileInfo, error) Stat(FS fsys, @string name) {
                 return fsysΔ1.Stat(name);
             }
         }
+
         var (@file, err) = fsys.Open(name);
         if (err != default!) {
             return (default!, err);

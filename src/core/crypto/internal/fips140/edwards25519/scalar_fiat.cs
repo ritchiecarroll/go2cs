@@ -46,8 +46,14 @@ partial struct fiatScalarUint1 /*num:uint64*/;
 
 partial struct fiatScalarInt1 /*num:int64*/;
 
+// The type fiatScalarMontgomeryDomainFieldElement is a field element in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct fiatScalarMontgomeryDomainFieldElement /*[4]uint64*/;
 
+// The type fiatScalarNonMontgomeryDomainFieldElement is a field element NOT in the Montgomery domain.
+//
+// Bounds: [[0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff], [0x0 ~> 0xffffffffffffffff]]
 partial struct fiatScalarNonMontgomeryDomainFieldElement /*[4]uint64*/;
 
 // fiatScalarCmovznzU64 is a single-word conditional move.
@@ -67,7 +73,7 @@ partial struct fiatScalarNonMontgomeryDomainFieldElement /*[4]uint64*/;
 //	out1: [0x0 ~> 0xffffffffffffffff]
 internal static void fiatScalarCmovznzU64(ref uint64 out1, fiatScalarUint1 arg1, uint64 arg2, uint64 arg3) {
     var x1 = ((uint64)arg1 * 0xffffffffffffffffUL);
-    var x2 = ((uint64)(((uint64)(x1 & arg3)) | ((uint64)((~x1) & arg2))));
+    var x2 = ((x1 & arg3) | ((~x1) & arg2));
     out1 = x2;
 }
 
@@ -354,13 +360,13 @@ internal static void fiatScalarMul(ref fiatScalarMontgomeryDomainFieldElement ou
     uint64 x191 = default!;
     (_, x191) = bits.Sub64(x181, (uint64)0x0, (uint64)((fiatScalarUint1)x189));
     uint64 x192 = default!;
-    fiatScalarCmovznzU64(ref x192, ((fiatScalarUint1)x191), x182, x173);
+    fiatScalarCmovznzU64(ref x192, (fiatScalarUint1)x191, x182, x173);
     uint64 x193 = default!;
-    fiatScalarCmovznzU64(ref x193, ((fiatScalarUint1)x191), x184, x175);
+    fiatScalarCmovznzU64(ref x193, (fiatScalarUint1)x191, x184, x175);
     uint64 x194 = default!;
-    fiatScalarCmovznzU64(ref x194, ((fiatScalarUint1)x191), x186, x177);
+    fiatScalarCmovznzU64(ref x194, (fiatScalarUint1)x191, x186, x177);
     uint64 x195 = default!;
-    fiatScalarCmovznzU64(ref x195, ((fiatScalarUint1)x191), x188, x179);
+    fiatScalarCmovznzU64(ref x195, (fiatScalarUint1)x191, x188, x179);
     out1[0] = x192;
     out1[1] = x193;
     out1[2] = x194;
@@ -406,13 +412,13 @@ internal static void fiatScalarAdd(ref fiatScalarMontgomeryDomainFieldElement ou
     uint64 x18 = default!;
     (_, x18) = bits.Sub64((uint64)((fiatScalarUint1)x8), (uint64)0x0, (uint64)((fiatScalarUint1)x16));
     uint64 x19 = default!;
-    fiatScalarCmovznzU64(ref x19, ((fiatScalarUint1)x18), x9, x1);
+    fiatScalarCmovznzU64(ref x19, (fiatScalarUint1)x18, x9, x1);
     uint64 x20 = default!;
-    fiatScalarCmovznzU64(ref x20, ((fiatScalarUint1)x18), x11, x3);
+    fiatScalarCmovznzU64(ref x20, (fiatScalarUint1)x18, x11, x3);
     uint64 x21 = default!;
-    fiatScalarCmovznzU64(ref x21, ((fiatScalarUint1)x18), x13, x5);
+    fiatScalarCmovznzU64(ref x21, (fiatScalarUint1)x18, x13, x5);
     uint64 x22 = default!;
-    fiatScalarCmovznzU64(ref x22, ((fiatScalarUint1)x18), x15, x7);
+    fiatScalarCmovznzU64(ref x22, (fiatScalarUint1)x18, x15, x7);
     out1[0] = x19;
     out1[1] = x20;
     out1[2] = x21;
@@ -444,18 +450,18 @@ internal static void fiatScalarSub(ref fiatScalarMontgomeryDomainFieldElement ou
     uint64 x8 = default!;
     (x7, x8) = bits.Sub64(arg1[3], arg2[3], (uint64)((fiatScalarUint1)x6));
     uint64 x9 = default!;
-    fiatScalarCmovznzU64(ref x9, ((fiatScalarUint1)x8), (uint64)0x0, 0xffffffffffffffffUL);
+    fiatScalarCmovznzU64(ref x9, (fiatScalarUint1)x8, (uint64)0x0, 0xffffffffffffffffUL);
     uint64 x10 = default!;
     uint64 x11 = default!;
-    (x10, x11) = bits.Add64(x1, ((uint64)(x9 & 0x5812631a5cf5d3edUL)), (uint64)0x0);
+    (x10, x11) = bits.Add64(x1, (x9 & 0x5812631a5cf5d3edUL), (uint64)0x0);
     uint64 x12 = default!;
     uint64 x13 = default!;
-    (x12, x13) = bits.Add64(x3, ((uint64)(x9 & 0x14def9dea2f79cd6UL)), (uint64)((fiatScalarUint1)x11));
+    (x12, x13) = bits.Add64(x3, (x9 & 0x14def9dea2f79cd6UL), (uint64)((fiatScalarUint1)x11));
     uint64 x14 = default!;
     uint64 x15 = default!;
     (x14, x15) = bits.Add64(x5, (uint64)0x0, (uint64)((fiatScalarUint1)x13));
     uint64 x16 = default!;
-    (x16, _) = bits.Add64(x7, ((uint64)(x9 & 0x1000000000000000UL)), (uint64)((fiatScalarUint1)x15));
+    (x16, _) = bits.Add64(x7, (x9 & 0x1000000000000000UL), (uint64)((fiatScalarUint1)x15));
     out1[0] = x10;
     out1[1] = x12;
     out1[2] = x14;
@@ -486,18 +492,18 @@ internal static void fiatScalarOpp(ref fiatScalarMontgomeryDomainFieldElement ou
     uint64 x8 = default!;
     (x7, x8) = bits.Sub64((uint64)0x0, arg1[3], (uint64)((fiatScalarUint1)x6));
     uint64 x9 = default!;
-    fiatScalarCmovznzU64(ref x9, ((fiatScalarUint1)x8), (uint64)0x0, 0xffffffffffffffffUL);
+    fiatScalarCmovznzU64(ref x9, (fiatScalarUint1)x8, (uint64)0x0, 0xffffffffffffffffUL);
     uint64 x10 = default!;
     uint64 x11 = default!;
-    (x10, x11) = bits.Add64(x1, ((uint64)(x9 & 0x5812631a5cf5d3edUL)), (uint64)0x0);
+    (x10, x11) = bits.Add64(x1, (x9 & 0x5812631a5cf5d3edUL), (uint64)0x0);
     uint64 x12 = default!;
     uint64 x13 = default!;
-    (x12, x13) = bits.Add64(x3, ((uint64)(x9 & 0x14def9dea2f79cd6UL)), (uint64)((fiatScalarUint1)x11));
+    (x12, x13) = bits.Add64(x3, (x9 & 0x14def9dea2f79cd6UL), (uint64)((fiatScalarUint1)x11));
     uint64 x14 = default!;
     uint64 x15 = default!;
     (x14, x15) = bits.Add64(x5, (uint64)0x0, (uint64)((fiatScalarUint1)x13));
     uint64 x16 = default!;
-    (x16, _) = bits.Add64(x7, ((uint64)(x9 & 0x1000000000000000UL)), (uint64)((fiatScalarUint1)x15));
+    (x16, _) = bits.Add64(x7, (x9 & 0x1000000000000000UL), (uint64)((fiatScalarUint1)x15));
     out1[0] = x10;
     out1[1] = x12;
     out1[2] = x14;
@@ -522,7 +528,7 @@ internal static void fiatScalarOpp(ref fiatScalarMontgomeryDomainFieldElement ou
 //
 //	out1: [0x0 ~> 0xffffffffffffffff]
 internal static void fiatScalarNonzero(ref uint64 out1, ref array<uint64> arg1) {
-    var x1 = ((uint64)(arg1[0] | ((uint64)(arg1[1] | ((uint64)(arg1[2] | arg1[3]))))));
+    var x1 = (arg1[0] | (arg1[1] | (arg1[2] | arg1[3])));
     out1 = x1;
 }
 
@@ -669,13 +675,13 @@ internal static void fiatScalarFromMontgomery(ref fiatScalarNonMontgomeryDomainF
     uint64 x94 = default!;
     (_, x94) = bits.Sub64((uint64)0x0, (uint64)0x0, (uint64)((fiatScalarUint1)x92));
     uint64 x95 = default!;
-    fiatScalarCmovznzU64(ref x95, ((fiatScalarUint1)x94), x85, x78);
+    fiatScalarCmovznzU64(ref x95, (fiatScalarUint1)x94, x85, x78);
     uint64 x96 = default!;
-    fiatScalarCmovznzU64(ref x96, ((fiatScalarUint1)x94), x87, x80);
+    fiatScalarCmovznzU64(ref x96, (fiatScalarUint1)x94, x87, x80);
     uint64 x97 = default!;
-    fiatScalarCmovznzU64(ref x97, ((fiatScalarUint1)x94), x89, x82);
+    fiatScalarCmovznzU64(ref x97, (fiatScalarUint1)x94, x89, x82);
     uint64 x98 = default!;
-    fiatScalarCmovznzU64(ref x98, ((fiatScalarUint1)x94), x91, x84);
+    fiatScalarCmovznzU64(ref x98, (fiatScalarUint1)x94, x91, x84);
     out1[0] = x95;
     out1[1] = x96;
     out1[2] = x97;
@@ -933,13 +939,13 @@ internal static void fiatScalarToMontgomery(ref fiatScalarMontgomeryDomainFieldE
     uint64 x167 = default!;
     (_, x167) = bits.Sub64((uint64)0x0, (uint64)0x0, (uint64)((fiatScalarUint1)x165));
     uint64 x168 = default!;
-    fiatScalarCmovznzU64(ref x168, ((fiatScalarUint1)x167), x158, x151);
+    fiatScalarCmovznzU64(ref x168, (fiatScalarUint1)x167, x158, x151);
     uint64 x169 = default!;
-    fiatScalarCmovznzU64(ref x169, ((fiatScalarUint1)x167), x160, x153);
+    fiatScalarCmovznzU64(ref x169, (fiatScalarUint1)x167, x160, x153);
     uint64 x170 = default!;
-    fiatScalarCmovznzU64(ref x170, ((fiatScalarUint1)x167), x162, x155);
+    fiatScalarCmovznzU64(ref x170, (fiatScalarUint1)x167, x162, x155);
     uint64 x171 = default!;
-    fiatScalarCmovznzU64(ref x171, ((fiatScalarUint1)x167), x164, x157);
+    fiatScalarCmovznzU64(ref x171, (fiatScalarUint1)x167, x164, x157);
     out1[0] = x168;
     out1[1] = x169;
     out1[2] = x170;
@@ -969,61 +975,61 @@ internal static void fiatScalarToBytes(ref array<uint8> out1, ref array<uint64> 
     var x3 = arg1[1];
     var x4 = arg1[0];
     var x5 = ((uint8)((uint8)x4 & 0xff));
-    var x6 = ((x4 >> (int)(8)));
+    var x6 = (x4 >> 8);
     var x7 = ((uint8)((uint8)x6 & 0xff));
-    var x8 = ((x6 >> (int)(8)));
+    var x8 = (x6 >> 8);
     var x9 = ((uint8)((uint8)x8 & 0xff));
-    var x10 = ((x8 >> (int)(8)));
+    var x10 = (x8 >> 8);
     var x11 = ((uint8)((uint8)x10 & 0xff));
-    var x12 = ((x10 >> (int)(8)));
+    var x12 = (x10 >> 8);
     var x13 = ((uint8)((uint8)x12 & 0xff));
-    var x14 = ((x12 >> (int)(8)));
+    var x14 = (x12 >> 8);
     var x15 = ((uint8)((uint8)x14 & 0xff));
-    var x16 = ((x14 >> (int)(8)));
+    var x16 = (x14 >> 8);
     var x17 = ((uint8)((uint8)x16 & 0xff));
-    var x18 = (uint8)((x16 >> (int)(8)));
+    var x18 = (uint8)(x16 >> 8);
     var x19 = ((uint8)((uint8)x3 & 0xff));
-    var x20 = ((x3 >> (int)(8)));
+    var x20 = (x3 >> 8);
     var x21 = ((uint8)((uint8)x20 & 0xff));
-    var x22 = ((x20 >> (int)(8)));
+    var x22 = (x20 >> 8);
     var x23 = ((uint8)((uint8)x22 & 0xff));
-    var x24 = ((x22 >> (int)(8)));
+    var x24 = (x22 >> 8);
     var x25 = ((uint8)((uint8)x24 & 0xff));
-    var x26 = ((x24 >> (int)(8)));
+    var x26 = (x24 >> 8);
     var x27 = ((uint8)((uint8)x26 & 0xff));
-    var x28 = ((x26 >> (int)(8)));
+    var x28 = (x26 >> 8);
     var x29 = ((uint8)((uint8)x28 & 0xff));
-    var x30 = ((x28 >> (int)(8)));
+    var x30 = (x28 >> 8);
     var x31 = ((uint8)((uint8)x30 & 0xff));
-    var x32 = (uint8)((x30 >> (int)(8)));
+    var x32 = (uint8)(x30 >> 8);
     var x33 = ((uint8)((uint8)x2 & 0xff));
-    var x34 = ((x2 >> (int)(8)));
+    var x34 = (x2 >> 8);
     var x35 = ((uint8)((uint8)x34 & 0xff));
-    var x36 = ((x34 >> (int)(8)));
+    var x36 = (x34 >> 8);
     var x37 = ((uint8)((uint8)x36 & 0xff));
-    var x38 = ((x36 >> (int)(8)));
+    var x38 = (x36 >> 8);
     var x39 = ((uint8)((uint8)x38 & 0xff));
-    var x40 = ((x38 >> (int)(8)));
+    var x40 = (x38 >> 8);
     var x41 = ((uint8)((uint8)x40 & 0xff));
-    var x42 = ((x40 >> (int)(8)));
+    var x42 = (x40 >> 8);
     var x43 = ((uint8)((uint8)x42 & 0xff));
-    var x44 = ((x42 >> (int)(8)));
+    var x44 = (x42 >> 8);
     var x45 = ((uint8)((uint8)x44 & 0xff));
-    var x46 = (uint8)((x44 >> (int)(8)));
+    var x46 = (uint8)(x44 >> 8);
     var x47 = ((uint8)((uint8)x1 & 0xff));
-    var x48 = ((x1 >> (int)(8)));
+    var x48 = (x1 >> 8);
     var x49 = ((uint8)((uint8)x48 & 0xff));
-    var x50 = ((x48 >> (int)(8)));
+    var x50 = (x48 >> 8);
     var x51 = ((uint8)((uint8)x50 & 0xff));
-    var x52 = ((x50 >> (int)(8)));
+    var x52 = (x50 >> 8);
     var x53 = ((uint8)((uint8)x52 & 0xff));
-    var x54 = ((x52 >> (int)(8)));
+    var x54 = (x52 >> 8);
     var x55 = ((uint8)((uint8)x54 & 0xff));
-    var x56 = ((x54 >> (int)(8)));
+    var x56 = (x54 >> 8);
     var x57 = ((uint8)((uint8)x56 & 0xff));
-    var x58 = ((x56 >> (int)(8)));
+    var x58 = (x56 >> 8);
     var x59 = ((uint8)((uint8)x58 & 0xff));
-    var x60 = (uint8)((x58 >> (int)(8)));
+    var x60 = (uint8)(x58 >> 8);
     out1[0] = x5;
     out1[1] = x7;
     out1[2] = x9;
@@ -1079,37 +1085,37 @@ internal static void fiatScalarToBytes(ref array<uint8> out1, ref array<uint64> 
 internal static void fiatScalarFromBytes(ref array<uint64> out1, /*[32]*/ ж<array<uint8>> Ꮡarg1) {
     ref var arg1 = ref Ꮡarg1.DerefOrNull();
 
-    var x1 = (((uint64)arg1[31] << (int)(56)));
-    var x2 = (((uint64)arg1[30] << (int)(48)));
-    var x3 = (((uint64)arg1[29] << (int)(40)));
-    var x4 = (((uint64)arg1[28] << (int)(32)));
-    var x5 = (((uint64)arg1[27] << (int)(24)));
-    var x6 = (((uint64)arg1[26] << (int)(16)));
-    var x7 = (((uint64)arg1[25] << (int)(8)));
+    var x1 = ((uint64)arg1[31] << 56);
+    var x2 = ((uint64)arg1[30] << 48);
+    var x3 = ((uint64)arg1[29] << 40);
+    var x4 = ((uint64)arg1[28] << 32);
+    var x5 = ((uint64)arg1[27] << 24);
+    var x6 = ((uint64)arg1[26] << 16);
+    var x7 = ((uint64)arg1[25] << 8);
     var x8 = arg1[24];
-    var x9 = (((uint64)arg1[23] << (int)(56)));
-    var x10 = (((uint64)arg1[22] << (int)(48)));
-    var x11 = (((uint64)arg1[21] << (int)(40)));
-    var x12 = (((uint64)arg1[20] << (int)(32)));
-    var x13 = (((uint64)arg1[19] << (int)(24)));
-    var x14 = (((uint64)arg1[18] << (int)(16)));
-    var x15 = (((uint64)arg1[17] << (int)(8)));
+    var x9 = ((uint64)arg1[23] << 56);
+    var x10 = ((uint64)arg1[22] << 48);
+    var x11 = ((uint64)arg1[21] << 40);
+    var x12 = ((uint64)arg1[20] << 32);
+    var x13 = ((uint64)arg1[19] << 24);
+    var x14 = ((uint64)arg1[18] << 16);
+    var x15 = ((uint64)arg1[17] << 8);
     var x16 = arg1[16];
-    var x17 = (((uint64)arg1[15] << (int)(56)));
-    var x18 = (((uint64)arg1[14] << (int)(48)));
-    var x19 = (((uint64)arg1[13] << (int)(40)));
-    var x20 = (((uint64)arg1[12] << (int)(32)));
-    var x21 = (((uint64)arg1[11] << (int)(24)));
-    var x22 = (((uint64)arg1[10] << (int)(16)));
-    var x23 = (((uint64)arg1[9] << (int)(8)));
+    var x17 = ((uint64)arg1[15] << 56);
+    var x18 = ((uint64)arg1[14] << 48);
+    var x19 = ((uint64)arg1[13] << 40);
+    var x20 = ((uint64)arg1[12] << 32);
+    var x21 = ((uint64)arg1[11] << 24);
+    var x22 = ((uint64)arg1[10] << 16);
+    var x23 = ((uint64)arg1[9] << 8);
     var x24 = arg1[8];
-    var x25 = (((uint64)arg1[7] << (int)(56)));
-    var x26 = (((uint64)arg1[6] << (int)(48)));
-    var x27 = (((uint64)arg1[5] << (int)(40)));
-    var x28 = (((uint64)arg1[4] << (int)(32)));
-    var x29 = (((uint64)arg1[3] << (int)(24)));
-    var x30 = (((uint64)arg1[2] << (int)(16)));
-    var x31 = (((uint64)arg1[1] << (int)(8)));
+    var x25 = ((uint64)arg1[7] << 56);
+    var x26 = ((uint64)arg1[6] << 48);
+    var x27 = ((uint64)arg1[5] << 40);
+    var x28 = ((uint64)arg1[4] << 32);
+    var x29 = ((uint64)arg1[3] << 24);
+    var x30 = ((uint64)arg1[2] << 16);
+    var x31 = ((uint64)arg1[1] << 8);
     var x32 = arg1[0];
     var x33 = (x31 + (uint64)x32);
     var x34 = (x30 + x33);

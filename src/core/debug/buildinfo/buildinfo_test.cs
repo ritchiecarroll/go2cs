@@ -91,12 +91,15 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
     if (!haveRuntimePlatform) {
         platforms = append(platforms, runtimePlatform);
     }
+
     var buildModes = new @string[]{"pie"u8, "exe"u8}.slice();
     if (testenv.HasCGO()) {
         buildModes = append(buildModes, "c-shared"u8);
     }
+
     // Keep in sync with src/cmd/go/internal/work/init.go:buildModeInit.
     @string badmode(@string goos, @string goarch, @string buildmode) => fmt.Sprintf("-buildmode=%s not supported on %s/%s"u8, buildmode, goos, goarch);
+
     var badmodeʗ1 = badmode;
     var buildWithModules = @string (ж<testing.T> tΔ1, @string goos, @string goarch, @string buildmode) => {
         @string dir = tΔ1.TempDir();
@@ -132,6 +135,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         }
         return outPath;
     };
+
     var badmodeʗ2 = badmode;
     var buildWithGOPATH = @string (ж<testing.T> tΔ2, @string goos, @string goarch, @string buildmode) => {
         @string gopathDir = tΔ2.TempDir();
@@ -166,6 +170,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         }
         return outPath;
     };
+
     void damageBuildInfo(ж<testing.T> tΔ3, @string name) {
         var (data, err) = os.ReadFile(name);
         if (err != default!) {
@@ -182,6 +187,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     void damageStringLen(ж<testing.T> tΔ4, @string name) {
         var (data, err) = os.ReadFile(name);
         if (err != default!) {
@@ -192,13 +198,14 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
             tΔ4.Fatal(goBuildinfNotFoundˢ);
         }
         var verLen = data.slice(i + 32);
-        binary.PutUvarint(verLen, ((uint64)16 << (int)(40))); // 16TB ought to be enough for anyone.
+        binary.PutUvarint(verLen, (uint64)16 << 40); // 16TB ought to be enough for anyone.
         {
             var errΔ1 = os.WriteFile(name, data, 438); if (errΔ1 != default!) {
                 tΔ4.Fatal(errΔ1);
             }
         }
     }
+
     var goVersionRe = regexp.MustCompile(mGoˢ);
     var buildRe = regexp.MustCompile(mBuildˢ);
     var buildReʗ1 = buildRe;
@@ -217,6 +224,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         });
         return got;
     }
+
 
 
             var buildWithModulesʗ1 = buildWithModules;
@@ -285,6 +293,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
             wantErr: "not a Go executable"u8
         )
     }.slice();
+
     foreach (var (_, p) in platforms) {
         ref var pΔ1 = ref heap<TestReadFile_platform>(out var ᏑpΔ1);
         pΔ1 = p;
@@ -351,10 +360,12 @@ public static void Test117(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("ReadFile got err %v, want nil"u8, err);
     }
+
     (var info, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)));
     if (err != default!) {
         Ꮡt.Fatalf("Read got err %v, want nil"u8, err);
     }
+
     if ((~info).GoVersion != "go1.17"u8) {
         Ꮡt.Errorf("GoVersion got %s want go1.17"u8, (~info).GoVersion);
     }
@@ -372,16 +383,16 @@ internal static readonly @string notAGoExecutableˢ = "not a Go executable"u8;
 
 // TestNotGo verifies that parsing of a non-Go binary returns the proper error.
 public static void TestNotGo(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (b, err) = obscuretestdata.ReadFile(testdataNotgoNotgoBase64ˢ);
     if (err != default!) {
         Ꮡt.Fatalf("ReadFile got err %v, want nil"u8, err);
     }
+
     (_, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)));
     if (err == default!) {
         Ꮡt.Fatalf("Read got nil err, want non-nil"u8);
     }
+
     // The precise error text here isn't critical, but we want something
     // like errNotGoExe rather than e.g., a file read error.
     if (!strings.Contains(err.Error(), notAGoExecutableˢ)) {
@@ -411,32 +422,42 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.Parallel();
+
     const nint paddingSize = 200;
     const nint buildInfoAlign = 16;
     var buildInfoMagic = slice<byte>(((@string)(new byte[]{0xff, 0x20, 0x47, 0x6f, 0x20, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x69, 0x6e, 0x66, 0x3a})));
+
     // Construct a valid PE header.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     buf.Write(new byte[]{(rune)'M', (rune)'Z'}.slice());
     buf.Write(bytes.Repeat(new byte[]{0}.slice(), 0x3c - 2));
     // At location 0x3c, the stub has the file offset to the PE signature.
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (int32)(0x3c + 4));
+
     buf.Write(new byte[]{(rune)'P', (rune)'E', 0, 0}.slice());
+
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, new pe.FileHeader(NumberOfSections: 1));
+
     var sh = new pe.SectionHeader32(
         Name: new uint8[]{(rune)'t', 0}.array(8),
         SizeOfRawData: (uint32)(paddingSize + len(buildInfoMagic)),
         PointerToRawData: (uint32)buf.Len()
     );
     sh.PointerToRawData = (uint32)(buf.Len() + binary.Size(sh));
+
     binary.Write(new buildinfo_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, sh);
+
     nint start = buf.Len();
     buf.Write(bytes.Repeat(new byte[]{0}.slice(), paddingSize + len(buildInfoMagic)));
     var data = buf.Bytes();
+
     {
         var (_, err) = pe.NewFile(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data))); if (err != default!) {
             Ꮡt.Fatalf("need a valid PE header for the misaligned buildInfoMagic test: %s"u8, err);
         }
     }
+
     // Place buildInfoMagic after the header.
     for (nint iᴛ1 = 1; iᴛ1 < paddingSize - len(buildInfoMagic); iᴛ1++) {
         var i = iᴛ1;
@@ -444,6 +465,7 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
         if (i % buildInfoAlign == 0) {
             continue;
         }
+
         var buildInfoMagicʗ1 = buildInfoMagic;
         var dataʗ1 = data;
         Ꮡt.Run(fmt.Sprintf("start_at_%d"u8, i), (ж<testing.T> tΔ1) => {
@@ -452,7 +474,9 @@ public static void TestIssue54968(ж<testing.T> Ꮡt) {
             d = appendꓸꓸꓸ(d, bytes.Repeat(new byte[]{0}.slice(), i));
             d = appendꓸꓸꓸ(d, buildInfoMagicʗ1);
             d = appendꓸꓸꓸ(d, bytes.Repeat(new byte[]{0}.slice(), paddingSize - i));
+
             var (_, err) = buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(d)));
+
             @string wantErr = notAGoExecutableˢ;
             if (err == default!){
                 tΔ1.Errorf("got error nil; want error containing %q"u8, wantErr);
@@ -474,11 +498,13 @@ public static void FuzzRead(ж<testing.F> Ꮡf) {
         Ꮡf.Errorf("Error reading go117: %v"u8, err);
     }
     f.Add(go117);
+
     (var notgo, err) = obscuretestdata.ReadFile(testdataNotgoNotgoBase64ˢ);
     if (err != default!) {
         Ꮡf.Errorf("Error reading notgo: %v"u8, err);
     }
     f.Add(notgo);
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in) => {
         buildinfo.Read(new buildinfo_test_package.bytes_ReaderжReaderAt(bytes.NewReader(@in)));
     });

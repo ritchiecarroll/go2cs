@@ -51,29 +51,25 @@ internal static nint total(params ꓸꓸꓸnint valsʗp) {
     return sum;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tagˢ = "tag"u8;
-private static readonly @string litUnnamedˢ = "lit-unnamed"u8;
-private static readonly @string litBlankˢ = "lit-blank"u8;
-
 internal static void Main() {
     ref var n = ref heap(new note(), out var Ꮡn);
     setup(Ꮡn);
     discard(5);
-    unnamedVariadic("a"u8, "b");
+    unnamedVariadic("a", "b");
     blankVariadic(1, 2);
-    bothUnnamed(3, "c"u8);
+    bothUnnamed(3, "c");
     fmt.Println(count);
-    fmt.Println(label(tagˢ, 7, 8));
+    fmt.Println(label("tag", 7, 8));
     fmt.Println(new note(9).tally(1, 2));
     fmt.Println(total(1, 2, 3, 4));
-    @string litUnnamed(params ꓸꓸꓸnint _ʗp) => litUnnamedˢ;
-    @string litBlank(params ꓸꓸꓸstring _ʗp) => litBlankˢ;
+
+    @string litUnnamed(params ꓸꓸꓸnint _ʗp) => "lit-unnamed";
+    @string litBlank(params ꓸꓸꓸstring _ʗp) => "lit-blank";
     nint litNamed(params ꓸꓸꓸstring partsʗp) {
         var parts = partsʗp.sslice();
         return len(parts);
     }
-    fmt.Println(litUnnamed(1, 2), litBlank("x"u8), litNamed("p"u8, "q", "r"));
+    fmt.Println(litUnnamed(1, 2), litBlank("x"), litNamed("p", "q", "r"));
 }
 
 } // end main_package

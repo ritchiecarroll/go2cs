@@ -47,6 +47,12 @@ using static go.text.scanner_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -55,7 +61,7 @@ using static go.text.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACRIkNSCgoKUgpQANVgAChiSgIKkAD2WAdKogoKWgoKCgqiWloKCgoKE7uKUlKaCgriC3IKCgoKCgoKUgpSUgty4gpSClIKCgoLMgoKWlrSCgsYAAhIACAKCgoKClKzSlIKCpqaigoKCgpSCgpSmoqaCgpSmtIKClKaAooCigAACEAAKAoKCgoKCgpKClIKmgoKClIKm9qKCgoKWkoKCgoKClIK0grSCtILGgoKCgrqCgoKUgpaCqICClLS0goKClIKCgqSCpoKWgoKAgrgACAaClKSkpMqSgoKWgoKCgrqCgoKUgsa0gpTGgpamgpSkpNaCgoKUgpSmgoKWpLSkpKSk1qKCgoKClIKUlJSmgoKCgoKU6IKC6JSUgoKUqIKCgoKUgoKCgqYAAhDyloKEhJLIgqiClILKgqiClIKClMaClMaktIKClKSCgpSkgoK2goKCgoKUgraCgpSk6oSCruKCgpaCtoK2guSqwpSWlKiUuoKC")]
+[assembly: go.GoPositionMap("text/scanner/scanner.go", "scanner.cs", "ACRIkNSCgoKUgpQAJ1gAChiSgIKkAD2WAdK4goKmgoKCgrimpoKCgoKU7uKklKaCgriC3IKCgoKCgoKUgpSUgty4gpSClIKCgoLcgoKmprSCgrYAAhIACAKCgoKClKzSlIKCpqaigoKCgpSCgpSmoqaCgpSmtIKClKaAooCigAACEAAKAoKCgoKCgpKClIKmgoKClIKm9qKCgoKmkoKCgoKClIK0grSCtIK2goKCgsqCgoKUgqaCuICClLSkgoKClIKCgqSCtoKmgoKAgsgACAaClKSkpLqSgoKmgoKCgsqCgoKUgsa0gpS2gqamgpSklNaCgoKUgpSmgoKmpKSkpKSU1qKCgoKClIKUlJSmgoKCgoKU6IKC6JSUgoKUuIKCgoKUgoKCgqYAAhDypoKUhJLYgriClILKgriClIKClMaClMaktIKClKSCgpSkgoK2goKCgoKUgraCgpSk2pSCruKCgqaCxoLGgqSqwpSmlLiUyoKC")]
 // </GoSourcePositionMaps>
 
 namespace go.text;

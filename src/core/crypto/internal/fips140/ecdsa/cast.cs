@@ -11,6 +11,7 @@ using errors = errors_package;
 using sync = sync_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using hash = hash_package;
 using Δnistec = go.crypto.@internal.fips140.nistec_package;
 
 partial class ecdsa_package {
@@ -61,7 +62,7 @@ internal static void fipsPCT<P>(ж<Curve<P>> Ꮡc, ж<PrivateKey> Ꮡk)
 {
     fips140.PCT(ecdsaPctˢ, () => {
         var hash = testHash();
-        var drbg = newDRBG<fips140.Hash>(widen<ж<sha512.Digest>, fips140.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), Ꮡk.Value.d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default!);
+        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), Ꮡk.Value.d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default!);
         var (sig, err) = sign(ref (Ꮡc).DerefOrNull(), ref (Ꮡk).DerefOrNull(), drbg, hash);
         if (err != default!) {
             return err;
@@ -96,7 +97,7 @@ internal static void initᴛfipsSelfTest() { fipsSelfTest = sync.OnceFunc(() => 
             0x8a, 0x60, 0xae, 0x52, 0x31, 0xe4, 0x2e, 0x4e
         }.slice()
         ));
-        var drbg = newDRBG<fips140.Hash>(widen<ж<sha512.Digest>, fips140.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), Z, default!, ((plainPersonalizationString)persStr));
+        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), Z, default!, (plainPersonalizationString)persStr);
         var (got, err) = sign<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != default!) {
             return err;
@@ -131,7 +132,7 @@ internal static void initᴛfipsSelfTestDeterministic() { fipsSelfTestDeterminis
             0xb9, 0xfa, 0x0f, 0xbd, 0x3b, 0x9b, 0xc2, 0xfe
         }.slice()
         ));
-        var drbg = newDRBG<fips140.Hash>(widen<ж<sha512.Digest>, fips140.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), (~k).d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default!);
+        var drbg = newDRBG<hash.Hash>(widen<ж<sha512.Digest>, hash.Hash>(sha512.New, elemᴛ0 => new sha512_DigestжHash(elemᴛ0)), (~k).d, bits2octets<P256PointжPoint>(ref (P256()).DerefOrNull(), hash), default!);
         var (got, err) = sign<P256PointжPoint>(ref (P256()).DerefOrNull(), ref (k).DerefOrNull(), drbg, hash);
         if (err != default!) {
             return err;

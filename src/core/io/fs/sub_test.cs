@@ -36,8 +36,9 @@ public static void TestSub(ж<testing.T> Ꮡt) {
         }
         (var data, errΔ1) = ReadFile(subΔ1, goodbyeTxtˢ);
         if (((sstring)data) != "goodbye, world"u8 || errΔ1 != default!) {
-            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, ((@string)data), errΔ1, goodbyeWorldˢ);
+            Ꮡt.Errorf(@"ReadFile(%s, ""goodbye.txt"" = %q, %v, want %q, nil"u8, desc, (@string)data, errΔ1, goodbyeWorldˢ);
         }
+
         (var dirs, errΔ1) = ReadDir(subΔ1, "."u8);
         if (errΔ1 != default! || len(dirs) != 1 || dirs[0].Name() != "goodbye.txt"u8) {
             slice<@string> names = default!;
@@ -47,12 +48,15 @@ public static void TestSub(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf(@"ReadDir(%s, ""."") = %v, %v, want %v, nil"u8, desc, names, errΔ1, new @string[]{"goodbye.txt"u8}.slice());
         }
     }
+
     // Test that Sub uses the method when present.
     var (sub, err) = Sub(new subOnly(new fstest_MapFSᴠSubFS(testFsys)), subˢ2);
     check(subOnlyˢ, sub, err);
+
     // Test that Sub uses Open when the method is not present.
     (sub, err) = Sub(new openOnly(testFsys), subˢ2);
     check(openOnlyˢ, sub, err);
+
     (_, err) = sub.Open(nonexistˢ);
     if (err == default!) {
         Ꮡt.Fatal(openNonexistSucceededˢ);
@@ -64,6 +68,7 @@ public static void TestSub(ж<testing.T> Ꮡt) {
     if ((~pe).Path != "nonexist"u8) {
         Ꮡt.Fatalf("Open(nonexist): err.Path = %q, want %q"u8, (~pe).Path, nonexistˢ);
     }
+
     (_, err) = sub.Open("./"u8);
     if (!errors.Is(err, ErrInvalid)) {
         Ꮡt.Fatalf("Open(./): error is %v, want %v"u8, err, ErrInvalid);

@@ -103,6 +103,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 	if !v.inFunction {
 		target.WriteString(v.newline)
 	}
+	v.writePendingTypeDoc(target)
 
 	// A lifted function-local type's Go name rides its accessibility record where one is written.
 	localName, localNameRecord := v.recordedLocalName(identType, getSanitizedIdentifier(name))
@@ -351,6 +352,12 @@ func (v *Visitor) zeroValueInitializer(t types.Type) string {
 func (v *Visitor) typeParamZero(t types.Type) string {
 	if _, isTypeParam := types.Unalias(t).(*types.TypeParam); !isTypeParam {
 		return ""
+	}
+
+	// A type parameter that carries an array-dims companion builds its zero from the dims the call
+	// site supplied, since an array type argument's length is not in its C# type (arrayDimsCompanion.go).
+	if companion := v.arrayDimsCompanionFor(t); companion != "" {
+		return fmt.Sprintf("GoArrayZero.Of<%s, %s>()", v.getCSharpTypeName(t), companion)
 	}
 
 	return fmt.Sprintf("GoZero<%s>()", v.getCSharpTypeName(t))

@@ -10,22 +10,27 @@ internal static UntypedInt _EINTR => 0x4;
 internal static UntypedInt _EFAULT => 0xe;
 internal static UntypedInt _EAGAIN => 0x23;
 internal static UntypedInt _ETIMEDOUT => 0x3c;
+
 internal static UntypedInt _PROT_NONE => 0x0;
 internal static UntypedInt _PROT_READ => 0x1;
 internal static UntypedInt _PROT_WRITE => 0x2;
 internal static UntypedInt _PROT_EXEC => 0x4;
+
 internal static UntypedInt _MAP_ANON => 0x1000;
 internal static UntypedInt _MAP_PRIVATE => 0x2;
 internal static UntypedInt _MAP_FIXED => 0x10;
+
 internal static UntypedInt _MADV_DONTNEED => 0x4;
 internal static UntypedInt _MADV_FREE => 0x5;
 internal static UntypedInt _MADV_FREE_REUSABLE => 0x7;
 internal static UntypedInt _MADV_FREE_REUSE => 0x8;
+
 internal static UntypedInt _SA_SIGINFO => 0x40;
 internal static UntypedInt _SA_RESTART => 0x2;
 internal static UntypedInt _SA_ONSTACK => 0x1;
 internal static UntypedInt _SA_USERTRAMP => 0x100;
 internal static UntypedInt _SA_64REGSET => 0x200;
+
 internal static UntypedInt _SIGHUP => 0x1;
 internal static UntypedInt _SIGINT => 0x2;
 internal static UntypedInt _SIGQUIT => 0x3;
@@ -57,6 +62,7 @@ internal static UntypedInt _SIGWINCH => 0x1c;
 internal static UntypedInt _SIGINFO => 0x1d;
 internal static UntypedInt _SIGUSR1 => 0x1e;
 internal static UntypedInt _SIGUSR2 => 0x1f;
+
 internal static UntypedInt _FPE_INTDIV => 0x7;
 internal static UntypedInt _FPE_INTOVF => 0x8;
 internal static UntypedInt _FPE_FLTDIV => 0x1;
@@ -65,14 +71,18 @@ internal static UntypedInt _FPE_FLTUND => 0x3;
 internal static UntypedInt _FPE_FLTRES => 0x4;
 internal static UntypedInt _FPE_FLTINV => 0x5;
 internal static UntypedInt _FPE_FLTSUB => 0x6;
+
 internal static UntypedInt _BUS_ADRALN => 0x1;
 internal static UntypedInt _BUS_ADRERR => 0x2;
 internal static UntypedInt _BUS_OBJERR => 0x3;
+
 internal static UntypedInt _SEGV_MAPERR => 0x1;
 internal static UntypedInt _SEGV_ACCERR => 0x2;
+
 internal static UntypedInt _ITIMER_REAL => 0x0;
 internal static UntypedInt _ITIMER_VIRTUAL => 0x1;
 internal static UntypedInt _ITIMER_PROF => 0x2;
+
 internal static UntypedInt _EV_ADD => 0x1;
 internal static UntypedInt _EV_DELETE => 0x2;
 internal static UntypedInt _EV_ENABLE => 0x4;
@@ -84,14 +94,19 @@ internal static UntypedInt _EV_EOF => 0x8000;
 internal static UntypedInt _EVFILT_READ => /* -0x1 */ -1;
 internal static UntypedInt _EVFILT_WRITE => /* -0x2 */ -2;
 internal static UntypedInt _EVFILT_USER => /* -0xa */ -10;
+
 internal static UntypedInt _NOTE_TRIGGER => 0x1000000;
+
 internal static UntypedInt _PTHREAD_CREATE_DETACHED => 0x2;
+
 internal static UntypedInt _F_GETFL => 0x3;
 internal static UntypedInt _F_SETFL => 0x4;
+
 internal static UntypedInt _O_WRONLY => 0x1;
 internal static UntypedInt _O_NONBLOCK => 0x4;
 internal static UntypedInt _O_CREAT => 0x200;
 internal static UntypedInt _O_TRUNC => 0x400;
+
 internal static UntypedInt _VM_REGION_BASIC_INFO_COUNT_64 => 0x9;
 internal static UntypedInt _VM_REGION_BASIC_INFO_64 => 0x9;
 

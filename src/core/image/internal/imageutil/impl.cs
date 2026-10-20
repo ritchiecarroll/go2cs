@@ -39,12 +39,14 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
+
             nint ci = (sy - src.Rect.Min.Y) * src.CStride + (sp.X - src.Rect.Min.X);
             for (nint x = x0; x != x1; (x, yi, ci) = (x + 4, yi + 1, ci + 1)) {
                 // This is an inline version of image/color/ycbcr.go's func YCbCrToRGB.
                 var yy1 = (int32)src.Y[yi] * 0x10101;
                 var cb1 = (int32)src.Cb[ci] - 128;
                 var cr1 = (int32)src.Cr[ci] - 128;
+
                 // The bit twiddling below is equivalent to
                 //
                 // r := (yy1 + 91881*cr1) >> 16
@@ -59,23 +61,26 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ5 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ5 & 0xff000000U) == 0){
+                if (((uint32)rΔ5 & 0xff000000U) == 0){
                     rΔ5 >>= (int)(16);
                 } else {
-                    rΔ5 = ~((rΔ5 >> (int)(31)));
+                    rΔ5 = ~(rΔ5 >> 31);
                 }
+
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
+
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
+
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
                 rgba[0] = (uint8)rΔ5;
@@ -89,13 +94,16 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
+
             nint ciBase = (sy - src.Rect.Min.Y) * src.CStride - src.Rect.Min.X / 2;
             for ((nint x, nint sx) = (x0, sp.X); x != x1; (x, sx, yi) = (x + 4, sx + 1, yi + 1)) {
                 nint ci = ciBase + sx / 2;
+
                 // This is an inline version of image/color/ycbcr.go's func YCbCrToRGB.
                 var yy1 = (int32)src.Y[yi] * 0x10101;
                 var cb1 = (int32)src.Cb[ci] - 128;
                 var cr1 = (int32)src.Cr[ci] - 128;
+
                 // The bit twiddling below is equivalent to
                 //
                 // r := (yy1 + 91881*cr1) >> 16
@@ -110,23 +118,26 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ6 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ6 & 0xff000000U) == 0){
+                if (((uint32)rΔ6 & 0xff000000U) == 0){
                     rΔ6 >>= (int)(16);
                 } else {
-                    rΔ6 = ~((rΔ6 >> (int)(31)));
+                    rΔ6 = ~(rΔ6 >> 31);
                 }
+
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
+
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
+
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
                 rgba[0] = (uint8)rΔ6;
@@ -140,13 +151,16 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
+
             nint ciBase = (sy / 2 - src.Rect.Min.Y / 2) * src.CStride - src.Rect.Min.X / 2;
             for ((nint x, nint sx) = (x0, sp.X); x != x1; (x, sx, yi) = (x + 4, sx + 1, yi + 1)) {
                 nint ci = ciBase + sx / 2;
+
                 // This is an inline version of image/color/ycbcr.go's func YCbCrToRGB.
                 var yy1 = (int32)src.Y[yi] * 0x10101;
                 var cb1 = (int32)src.Cb[ci] - 128;
                 var cr1 = (int32)src.Cr[ci] - 128;
+
                 // The bit twiddling below is equivalent to
                 //
                 // r := (yy1 + 91881*cr1) >> 16
@@ -161,23 +175,26 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ7 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ7 & 0xff000000U) == 0){
+                if (((uint32)rΔ7 & 0xff000000U) == 0){
                     rΔ7 >>= (int)(16);
                 } else {
-                    rΔ7 = ~((rΔ7 >> (int)(31)));
+                    rΔ7 = ~(rΔ7 >> 31);
                 }
+
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
+
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
+
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
                 rgba[0] = (uint8)rΔ7;
@@ -191,12 +208,14 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
         for ((nint y, nint sy) = (y0, sp.Y); y != y1; (y, sy) = (y + 1, sy + 1)) {
             var dpix = dst.Pix.slice(y * dst.Stride);
             nint yi = (sy - src.Rect.Min.Y) * src.YStride + (sp.X - src.Rect.Min.X);
+
             nint ci = (sy / 2 - src.Rect.Min.Y / 2) * src.CStride + (sp.X - src.Rect.Min.X);
             for (nint x = x0; x != x1; (x, yi, ci) = (x + 4, yi + 1, ci + 1)) {
                 // This is an inline version of image/color/ycbcr.go's func YCbCrToRGB.
                 var yy1 = (int32)src.Y[yi] * 0x10101;
                 var cb1 = (int32)src.Cb[ci] - 128;
                 var cr1 = (int32)src.Cr[ci] - 128;
+
                 // The bit twiddling below is equivalent to
                 //
                 // r := (yy1 + 91881*cr1) >> 16
@@ -211,23 +230,26 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 // statement will convert ^int32(0) to 0xff.
                 // The code below to compute g and b uses a similar pattern.
                 var rΔ8 = yy1 + 91881 * cr1;
-                if ((uint32)((uint32)rΔ8 & 0xff000000U) == 0){
+                if (((uint32)rΔ8 & 0xff000000U) == 0){
                     rΔ8 >>= (int)(16);
                 } else {
-                    rΔ8 = ~((rΔ8 >> (int)(31)));
+                    rΔ8 = ~(rΔ8 >> 31);
                 }
+
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
-                if ((uint32)((uint32)g & 0xff000000U) == 0){
+                if (((uint32)g & 0xff000000U) == 0){
                     g >>= (int)(16);
                 } else {
-                    g = ~((g >> (int)(31)));
+                    g = ~(g >> 31);
                 }
+
                 var b = yy1 + 116130 * cb1;
-                if ((uint32)((uint32)b & 0xff000000U) == 0){
+                if (((uint32)b & 0xff000000U) == 0){
                     b >>= (int)(16);
                 } else {
-                    b = ~((b >> (int)(31)));
+                    b = ~(b >> 31);
                 }
+
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
                 rgba[0] = (uint8)rΔ8;
@@ -240,7 +262,6 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     else { /* default: */
         return false;
     }
-
     return true;
 }
 

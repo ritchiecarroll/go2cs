@@ -26,6 +26,7 @@ internal static void readServices() {
         }
         var fileʗ1 = Δfile;
         defer(fileʗ1.close, ref ᒐ);
+
         for (var (line, ok) = Δfile.readLine(); ok; (line, ok) = Δfile.readLine()) {
             // "http 80/tcp www www-http # World Wide Web HTTP"
             {
@@ -49,8 +50,7 @@ internal static void readServices() {
                 services[netw] = m;
             }
             for (nint i = 0; i < len(f); i++) {
-                if (i != 1) {
-                    // f[1] was port/net
+                if (i != 1) { // f[1] was port/net
                     m[f[i]] = port;
                 }
             }

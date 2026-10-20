@@ -29,11 +29,17 @@ partial struct dirInfo {
     internal @string path; // absolute directory path, empty if the file system supports FILE_ID_BOTH_DIR_INFO
 }
 
+// dirBufSize is the size of the dirInfo buffer.
+// The buffer must be big enough to hold at least a single entry.
+// The filename alone can be 512 bytes (MAX_PATH*2), and the fixed part of
+// the FILE_ID_BOTH_DIR_INFO structure is 105 bytes, so dirBufSize
+// should not be set below 1024 bytes (512+105+safety buffer).
+// Windows 8.1 and earlier only works with buffer sizes up to 64 kB.
 internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 
-// The buffer must be at least a block long.
 internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
+        // The buffer must be at least a block long.
         var buf = new slice<byte>(dirBufSize);
         return Ꮡ(buf);
     }
@@ -61,6 +67,7 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
     d.@class = windows.FileFullDirectoryRestartInfo;
     // The previous settings are enough to read the directory entries.
     // The following code is only needed to support os.SameFile.
+
     // It is safe to query d.vol once and reuse the value.
     // Hard links are not allowed to reference files in other volumes.
     // Junctions and symbolic links can reference files and directories in other volumes,
@@ -73,11 +80,11 @@ internal static void init(this ж<dirInfo> Ꮡd, syscallꓸHandle h) {
         // but we can still read the directory entries.
         return;
     }
-    if ((uint32)(flags & (uint32)windows.FILE_SUPPORTS_OBJECT_IDS) == 0) {
+    if ((flags & (uint32)windows.FILE_SUPPORTS_OBJECT_IDS) == 0) {
         // The file system does not support object IDs, no need to continue.
         return;
     }
-    if (allowReadDirFileID && (uint32)(flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
+    if (allowReadDirFileID && (flags & (uint32)windows.FILE_SUPPORTS_OPEN_BY_FILE_ID) != 0){
         // Use FileIdBothDirectoryRestartInfo if available as it returns the file ID
         // without the need to open the file.
         d.@class = windows.FileIdBothDirectoryRestartInfo;

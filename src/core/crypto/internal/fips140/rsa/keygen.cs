@@ -31,6 +31,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
     if (bits < 2048 || bits % 2 == 1) {
         fips140.RecordNonApproved();
     }
+
     while (ᐧ) {
         var (p, err) = randomPrime(rand, (bits + 1) / 2);
         if (err != default!) {
@@ -40,6 +41,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         if (err != default!) {
             return (default!, err);
         }
+
         (var P, err) = bigmod.NewModulus(p);
         if (err != default!) {
             return (default!, err);
@@ -48,9 +50,11 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         if (err != default!) {
             return (default!, err);
         }
+
         if (Q.Nat().ExpandFor(P).Equal(P.Nat()) == 1) {
             return (default!, errors.New(rsaGeneratedPQRandomˢ));
         }
+
         (var N, err) = bigmod.NewModulusProduct(p, q);
         if (err != default!) {
             return (default!, err);
@@ -58,6 +62,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         if (N.BitLen() != bits) {
             return (default!, errors.New(rsaInternalErrorModulusˢ));
         }
+
         // d can be safely computed as e⁻¹ mod φ(N) where φ(N) = (p-1)(q-1), and
         // indeed that's what both the original RSA paper and the pre-FIPS
         // crypto/rsa implementation did.
@@ -78,6 +83,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         if (err != default!) {
             return (default!, err);
         }
+
         var e = bigmod.NewNat().SetUint(65537);
         var (d, ok) = bigmod.NewNat().InverseVarTime(e, λ);
         if (!ok) {
@@ -90,9 +96,11 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
             // of this check failing is only 1/65537, so it doesn't matter.
             continue;
         }
+
         if (e.ExpandFor(λ).Mul(d, λ).IsOne() == 0) {
             return (default!, errors.New(rsaInternalErrorED1ModNˢ));
         }
+
         // FIPS 186-5, A.1.1(3) requires checking that d > 2^(nlen / 2).
         //
         // The probability of this check failing when d is derived from
@@ -105,10 +113,12 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
         // We still need to check to comply with FIPS 186-5, but knowing it has
         // negligible chance of failure we can defer the check to the end of key
         // generation and return an error if it fails. See [checkPrivateKey].
+
         (var k, err) = newPrivateKey(N, 65537, d, P, Q);
         if (err != default!) {
             return (default!, err);
         }
+
         if ((~k).fipsApproved) {
             var kʗ1 = k;
             fips140.PCT(rsaSignAndVerifyPctˢ, () => {
@@ -125,6 +135,7 @@ public static (ж<PrivateKey>, error) GenerateKey(io.Reader rand, nint bits) {
                 return verifyPKCS1v15(kʗ1.PublicKey(), sha256ˢ, hash, sig);
             });
         }
+
         return (k, default!);
     }
 }
@@ -143,7 +154,9 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
     ref var q = ref Ꮡq.DerefOrNull();
 
     var (a, b) = (p.Nat().SubOne(Ꮡp), q.Nat().SubOne(Ꮡq));
+
     // lcm(a, b) = a×b / gcd(a, b) = a × (b / gcd(a, b))
+
     // Our GCD requires at least one of the numbers to be odd. For LCM we only
     // need to preserve the larger prime power of each prime factor, so we can
     // right-shift the number with the fewest trailing zeros until it's odd.
@@ -155,6 +168,7 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
     } else {
         b = b.ShiftRightVarTime(bz);
     }
+
     var (gcd, err) = bigmod.NewNat().GCDVarTime(a, b);
     if (err != default!) {
         return (default!, err);
@@ -162,6 +176,7 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
     if (gcd.IsOdd() == 0) {
         return (default!, errors.New(rsaInternalErrorGcdABIsˢ));
     }
+
     // To avoid implementing multiple-precision division, we just try again if
     // the divisor doesn't fit in a single word. This would have a chance of
     // 2⁻⁶⁴ on 64-bit platforms, and 2⁻³² on 32-bit platforms, but testing 2⁻⁶⁴
@@ -178,6 +193,7 @@ internal static (ж<bigmod.Modulus>, error) totient(ж<bigmod.Modulus> Ꮡp, ж<
             return (default!, errors.New(rsaInternalErrorBIsNotˢ));
         }
     }
+
     return bigmod.NewModulusProduct(a.Bytes(Ꮡp), b.Bytes(Ꮡq));
 }
 
@@ -190,6 +206,7 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
     if (bits < 16) {
         return (default!, errors.New(rsaPrimeSizeMustBeAtˢ));
     }
+
     var b = new slice<byte>((bits + 7) / 8);
     while (ᐧ) {
         {
@@ -197,30 +214,32 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
                 return (default!, err);
             }
         }
-        {
-            nint excess = len(b) * 8 - bits; if (excess != 0) {
-                b[0].RshAssign((int64)(excess));
-            }
-        }
+        // Clear the most significant bits to reach the desired size. We use a
+        // mask rather than right-shifting b[0] to make it easier to inject test
+        // candidates, which can be represented as simple big-endian integers.
+        nint excess = len(b) * 8 - bits;
+        b[0] &= (byte)(((byte)0b1111_1111).Rsh((int64)(excess)));
+
         // Don't let the value be too small: set the most significant two bits.
         // Setting the top two bits, rather than just the top bit, means that
         // when two of these values are multiplied together, the result isn't
         // ever one bit short.
-        {
-            nint excess = len(b) * 8 - bits; if (excess < 7){
-                b[0] |= (byte)(((byte)0b1100_0000).Rsh((int64)(excess)));
-            } else {
-                b[0] |= (byte)(0b0000_0001);
-                b[1] |= (byte)(0b1000_0000);
-            }
+        if (excess < 7){
+            b[0] |= (byte)(((byte)0b1100_0000).Rsh((int64)(excess)));
+        } else {
+            b[0] |= (byte)(0b0000_0001);
+            b[1] |= (byte)(0b1000_0000);
         }
+
         // Make the value odd since an even number certainly isn't prime.
         b[len(b) - 1] |= (byte)(1);
+
         // We don't need to check for p >= √2 × 2^(bits-1) (steps 4.4 and 5.4)
         // because we set the top two bits above, so
         //
         //   p > 2^(bits-1) + 2^(bits-2) = 3⁄2 × 2^(bits-1) > √2 × 2^(bits-1)
         //
+
         // Step 5.5 requires checking that |p - q| > 2^(nlen/2 - 100).
         //
         // The probability of |p - q| ≤ k where p and q are uniformly random in
@@ -230,6 +249,7 @@ internal static (slice<byte>, error) randomPrime(io.Reader rand, nint bits) {
         // We still need to check to comply with FIPS 186-5, but knowing it has
         // negligible chance of failure we can defer the check to the end of key
         // generation and return an error if it fails. See [checkPrivateKey].
+
         if (isPrime(b)) {
             return (b, default!);
         }
@@ -249,17 +269,18 @@ internal static bool isPrime(slice<byte> w) {
         // w is zero, one, or even.
         return false;
     }
-    (var primes, err) = bigmod.NewNat().SetBytes(productOfPrimes, (~mr).w);
-    // If w is too small for productOfPrimes, key generation is
-    // going to be fast enough anyway.
-    if (err == default!) {
-        var (_, hasInverse) = primes.InverseVarTime(primes, (~mr).w);
-        if (!hasInverse) {
-            // productOfPrimes doesn't have an inverse mod w,
-            // so w is divisible by at least one of the primes.
+
+    // Before Miller-Rabin, rule out most composites with trial divisions.
+    for (nint i = 0; i < len(primes); i += 3) {
+        nuint p1 = primes[i];
+        nuint p2 = primes[i + 1];
+        nuint p3 = primes[i + 2];
+        nuint r = (~mr).w.Nat().DivShortVarTime(p1 * p2 * p3);
+        if (r % p1 == 0 || r % p2 == 0 || r % p3 == 0) {
             return false;
         }
     }
+
     // iterations is the number of Miller-Rabin rounds, each with a
     // randomly-selected base.
     //
@@ -312,11 +333,8 @@ internal static bool isPrime(slice<byte> w) {
     var b = new slice<byte>((bits + 7) / 8);
     while (ᐧ) {
         drbg.Read(b);
-        {
-            nint excess = len(b) * 8 - bits; if (excess != 0) {
-                b[0].RshAssign((int64)(excess));
-            }
-        }
+        nint excess = len(b) * 8 - bits;
+        b[0] &= (byte)(((byte)0b1111_1111).Rsh((int64)(excess)));
         var (result, errΔ1) = millerRabinIteration(ref (mr).DerefOrNull(), b);
         if (errΔ1 != default!) {
             // b was rejected.
@@ -332,18 +350,34 @@ internal static bool isPrime(slice<byte> w) {
     }
 }
 
-// productOfPrimes is the product of the first 74 primes higher than 2.
+// primes are the first prime numbers (except 2), such that the product of any
+// three primes fits in a uint32.
 //
-// The number of primes was selected to be the highest such that the product fit
-// in 512 bits, so to be usable for 1024 bit RSA keys.
-//
-// Higher values cause fewer Miller-Rabin tests of composites (nothing can help
-// with the final test on the actual prime) but make InverseVarTime take longer.
-internal static slice<byte> productOfPrimes = new byte[]{
-    0x10, 0x6a, 0xa9, 0xfb, 0x76, 0x46, 0xfa, 0x6e, 0xb0, 0x81, 0x3c, 0x28, 0xc5, 0xd5, 0xf0, 0x9f,
-    0x07, 0x7e, 0xc3, 0xba, 0x23, 0x8b, 0xfb, 0x99, 0xc1, 0xb6, 0x31, 0xa2, 0x03, 0xe8, 0x11, 0x87,
-    0x23, 0x3d, 0xb1, 0x17, 0xcb, 0xc3, 0x84, 0x05, 0x6e, 0xf0, 0x46, 0x59, 0xa4, 0xa1, 0x1d, 0xe4,
-    0x9f, 0x7e, 0xcb, 0x29, 0xba, 0xda, 0x8f, 0x98, 0x0d, 0xec, 0xec, 0xe9, 0x2e, 0x30, 0xc4, 0x8f
+// More primes cause fewer Miller-Rabin tests of composites (nothing can help
+// with the final test on the actual prime) but have diminishing returns: these
+// 255 primes catch 84.9% of composites, the next 255 would catch 1.5% more.
+// Adding primes can still be marginally useful since they only compete with the
+// (much more expensive) first Miller-Rabin round for candidates that were not
+// rejected by the previous primes.
+internal static slice<nuint> primes = new nuint[]{
+    3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
+    59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127,
+    131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
+    211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283,
+    293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383,
+    389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467,
+    479, 487, 491, 499, 503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577,
+    587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661,
+    673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769,
+    773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877,
+    881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983,
+    991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069,
+    1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181,
+    1187, 1193, 1201, 1213, 1217, 1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283,
+    1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381, 1399,
+    1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487,
+    1489, 1493, 1499, 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583,
+    1597, 1601, 1607, 1609, 1613, 1619
 }.slice();
 
 partial struct millerRabin {
@@ -360,6 +394,7 @@ internal static readonly @string candidateIsOneˢ = "candidate is one"u8;
 // the Miller-Rabin test.
 internal static (ж<millerRabin>, error) millerRabinSetup(slice<byte> w) {
     var mr = Ꮡ(new millerRabin(nil));
+
     // Check that w is odd, and precompute Montgomery parameters.
     var (wm, err) = bigmod.NewModulus(w);
     if (err != default!) {
@@ -369,12 +404,14 @@ internal static (ж<millerRabin>, error) millerRabinSetup(slice<byte> w) {
         return (default!, errors.New(candidateIsEvenˢ));
     }
     mr.Value.w = wm;
+
     // Compute m = (w-1)/2^a, where m is odd.
     var wMinus1 = (~mr).w.Nat().SubOne((~mr).w);
     if (wMinus1.IsZero() == 1) {
         return (default!, errors.New(candidateIsOneˢ));
     }
     mr.Value.a = wMinus1.TrailingZeroBitsVarTime();
+
     // Store mr.m as a big-endian byte slice with leading zero bytes removed,
     // for use with [bigmod.Nat.Exp].
     var m = wMinus1.ShiftRightVarTime((~mr).a);
@@ -382,6 +419,7 @@ internal static (ж<millerRabin>, error) millerRabinSetup(slice<byte> w) {
     while ((~mr).m[0] == 0) {
         mr.Value.m = (~mr).m[1..];
     }
+
     return (mr, default!);
 }
 
@@ -407,15 +445,18 @@ internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byt
     if (b.IsZero() == 1 || b.IsOne() == 1 || b.IsMinusOne(mr.w) == 1) {
         return (false, errors.New(outOfRangeCandidateˢ));
     }
+
     // Compute b^(m*2^i) mod w for successive i.
     // If b^m mod w = 1, b is a possible prime.
     // If b^(m*2^i) mod w = -1 for some 0 <= i < a, b is a possible prime.
     // Otherwise b is composite.
+
     // Start by computing and checking b^m mod w (also the i = 0 case).
     var z = bigmod.NewNat().Exp(b, mr.m, mr.w);
     if (z.IsOne() == 1 || z.IsMinusOne(mr.w) == 1) {
         return (millerRabinPOSSIBLYPRIME, default!);
     }
+
     // Check b^(m*2^i) mod w = -1 for 0 < i < a.
     foreach (var _ᴛ1 in range<nuint>(mr.a - 1)) {
         z.Mul(z, mr.w);
@@ -427,6 +468,7 @@ internal static (bool, error) millerRabinIteration(ref millerRabin mr, slice<byt
             break;
         }
     }
+
     return (millerRabinCOMPOSITE, default!);
 }
 

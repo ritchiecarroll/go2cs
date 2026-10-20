@@ -9,23 +9,32 @@ using go.unicode;
 partial class norm_package {
 
 internal static UntypedInt maxNonStarters => 30;
+// The maximum number of characters needed for a buffer is
+// maxNonStarters + 1 for the starter + 1 for the GCJ
 internal static UntypedInt maxBufferSize => /* maxNonStarters + 2 */ 32;
 internal static UntypedInt maxNFCExpansion => 3; // NFC(0x1D160)
 internal static UntypedInt maxNFKCExpansion => 18; // NFKC(0xFDFA)
+
 internal static UntypedInt maxByteBufferSize => /* utf8.UTFMax * maxBufferSize */ 128; // 128
 
+// ssState is used for reporting the segment state after inserting a rune.
+// It is returned by streamSafe.next.
 partial struct ssState /*num:nint*/;
 
+// Indicates a rune was successfully added to the segment.
 internal static ssState ssSuccess => /* iota */ 0;
+// Indicates a rune starts a new segment and should not be added.
 internal static ssState ssStarter => 1;
+// Indicates a rune caused a segment overflow and a CGJ should be inserted.
 internal static ssState ssOverflow => 2;
 
+// streamSafe implements the policy of when a CGJ should be inserted.
 partial struct streamSafe /*num:uint8*/;
 
 // first inserts the first rune of a segment. It is a faster version of next if
 // it is known p represents the first rune in a segment.
 internal static void first(this ref streamSafe ss, ΔProperties p) {
-    ss = ((streamSafe)p.nTrailingNonStarters());
+    ss = (streamSafe)p.nTrailingNonStarters();
 }
 
 // insert returns a ssState value to indicate whether a rune represented by p
@@ -49,7 +58,7 @@ internal static ssState next(this ref streamSafe ss, ΔProperties p) {
     // be a non-starter. Note that it always hold that if nLead > 0 then
     // nLead == nTrail.
     if (n == 0) {
-        ss = ((streamSafe)p.nTrailingNonStarters());
+        ss = (streamSafe)p.nTrailingNonStarters();
         return ssStarter;
     }
     return ssSuccess;
@@ -194,6 +203,8 @@ internal static void insertOrdered(this ref reorderBuffer rb, ΔProperties info)
     b[n] = info;
 }
 
+// insertErr is an error code returned by insert. Using this type instead
+// of error improves performance up to 20% for many of the benchmarks.
 partial struct insertErr /*num:nint*/;
 
 internal static insertErr iSuccess => /* -iota */ 0;
@@ -305,43 +316,27 @@ internal static slice<byte> bytesAt(this ref reorderBuffer rb, nint n) {
 
 // For Hangul we combine algorithmically, instead of using tables.
 internal static UntypedInt hangulBase => 0xAC00; // UTF-8(hangulBase) -> EA B0 80
-
 internal static UntypedInt hangulBase0 => 0xEA;
-
 internal static UntypedInt hangulBase1 => 0xB0;
-
 internal static UntypedInt hangulBase2 => 0x80;
 
 internal static UntypedInt hangulEnd => /* hangulBase + jamoLVTCount */ 55204; // UTF-8(0xD7A4) -> ED 9E A4
-
 internal static UntypedInt hangulEnd0 => 0xED;
-
 internal static UntypedInt hangulEnd1 => 0x9E;
-
 internal static UntypedInt hangulEnd2 => 0xA4;
 
 internal static UntypedInt jamoLBase => 0x1100; // UTF-8(jamoLBase) -> E1 84 00
-
 internal static UntypedInt jamoLBase0 => 0xE1;
-
 internal static UntypedInt jamoLBase1 => 0x84;
-
 internal static UntypedInt jamoLEnd => 0x1113;
-
 internal static UntypedInt jamoVBase => 0x1161;
-
 internal static UntypedInt jamoVEnd => 0x1176;
-
 internal static UntypedInt jamoTBase => 0x11A7;
-
 internal static UntypedInt jamoTEnd => 0x11C3;
 
 internal static UntypedInt jamoTCount => 28;
-
 internal static UntypedInt jamoVCount => 21;
-
 internal static UntypedInt jamoVTCount => /* 21 * 28 */ 588;
-
 internal static UntypedInt jamoLVTCount => /* 19 * 21 * 28 */ 11172;
 
 internal static UntypedInt hangulUTF8Size => 3;
@@ -368,7 +363,6 @@ internal static bool isHangul(slice<byte> b) {
     case {} when b1 < hangulEnd1: {
         return true;
     }}
-
     return b1 == hangulEnd1 && b[2] < hangulEnd2;
 }
 
@@ -394,7 +388,6 @@ internal static bool isHangulString(@string b) {
     case {} when b1 < hangulEnd1: {
         return true;
     }}
-
     return b1 == hangulEnd1 && b[2] < hangulEnd2;
 }
 
@@ -460,13 +453,13 @@ internal static void combineHangul(this ref reorderBuffer rb, nint s, nint i, ni
             var v = rb.runeAt(i); // also used to compare to jamoT
             switch (ᐧ) {
             case {} when jamoLBase <= l && l < jamoLEnd && jamoVBase <= v && v < jamoVEnd: {
-                rb.assignRune(s, // 11xx plus 116x to LV
- (rune)hangulBase + (l - (rune)jamoLBase) * (rune)jamoVTCount + (v - (rune)jamoVBase) * (rune)jamoTCount);
+                // 11xx plus 116x to LV
+                rb.assignRune(s, (rune)hangulBase + (l - (rune)jamoLBase) * (rune)jamoVTCount + (v - (rune)jamoVBase) * (rune)jamoTCount);
                 break;
             }
             case {} when hangulBase <= l && l < hangulEnd && jamoTBase < v && v < jamoTEnd && ((l - (rune)hangulBase) % (rune)jamoTCount) == 0: {
-                rb.assignRune(s, // ACxx plus 11Ax to LVT
- l + v - (rune)jamoTBase);
+                // ACxx plus 11Ax to LVT
+                rb.assignRune(s, l + v - (rune)jamoTBase);
                 break;
             }
             default: {
@@ -474,7 +467,6 @@ internal static void combineHangul(this ref reorderBuffer rb, nint s, nint i, ni
                 k++;
                 break;
             }}
-
         }
     }
     rb.nrune = k;
@@ -487,6 +479,7 @@ internal static void compose(this ref reorderBuffer rb) {
     // Lazily load the map used by the combine func below, but do
     // it outside of the loop.
     ᏑrecompMapOnce.Do(buildRecompMap);
+
     // UAX #15, section X5 , including Corrigendum #5
     // "In any character sequence beginning with starter S, a character C is
     //  blocked from S if and only if there is some character B between S

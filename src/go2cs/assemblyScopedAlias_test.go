@@ -62,6 +62,7 @@ import (
 // member. Both halves must be seeded together: the TYPE so every renderer spells the alias, and the
 // alias TARGET so the name resolves where it lands.
 func TestSeedProductionInterfaceAliasesFollowsPublishedChain(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads a module fixture through go/packages")
 	}
@@ -197,6 +198,7 @@ func TestSeedProductionInterfaceAliasesFollowsPublishedChain(t *testing.T) {
 // `var f DecodeHookFunc = WeaklyTypedHook`). A method-bearing inline interface stays the control: it
 // IS a class member.
 func TestSeedProductionInterfaceAliasesIncludesInlineEmptyInterface(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads a module fixture through go/packages")
 	}
@@ -271,6 +273,7 @@ func TestSeedProductionInterfaceAliasesIncludesInlineEmptyInterface(t *testing.T
 // package-level registry is the authority for closing it: package-scoped, and keyed by the full
 // types.String() including field TAGS, which is what Go's struct identity compares.
 func TestFunctionLocalAnonStructAdoptsPackageLift(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -411,6 +414,7 @@ func TestPublishedAliasChainTerminates(t *testing.T) {
 // of the two with a C# spelling) and EMITTED unchanged (C# infers P from the argument and checks the
 // constraint nominally, so an adapter wrap there is CS1503).
 func TestComparableConstraintInterfaceEmitsMethodSetForm(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

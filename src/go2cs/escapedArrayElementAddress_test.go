@@ -35,6 +35,7 @@ import (
 // THROUGH the box instead, which is also what keeps writes through the returned pointer landing in
 // the escaped storage rather than in a copy.
 func TestEscapedArrayElementAddress(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -124,6 +125,7 @@ func main() {
 // and is a compile error. The suppression is by AST-node identity, so a call nested inside the same
 // statement, whose value IS consumed, must keep its conversion.
 func TestDiscardedUnsafePointerResultStatement(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

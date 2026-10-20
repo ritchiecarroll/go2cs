@@ -112,12 +112,10 @@ internal static time.Time farFuture() {
     return t;
 }
 
-// This is 127 times 'x'
-// This is 128 times 'x'
 internal static slice<marshalTest> marshalTests = new marshalTest[]{
-    new((nint)(10), "02010a"u8),
-    new((nint)(127), "02017f"u8),
-    new((nint)(128), "02020080"u8),
+    new((nint)10, "02010a"u8),
+    new((nint)127, "02017f"u8),
+    new((nint)128, "02020080"u8),
     new((nint)(-128), "020180"u8),
     new((nint)(-129), "0202ff7f"u8),
     new(new intStruct(64), "3003020140"u8),
@@ -141,11 +139,11 @@ internal static slice<marshalTest> marshalTests = new marshalTest[]{
     new(((global::go.encoding.asn1_package.ObjectIdentifier)new nint[]{2, 100, 3}.slice()), "0603813403"u8),
     new((@string)"test"u8, "130474657374"u8),
     new(
-        (@string)(""u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8),
+        (@string)(""u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8), // This is 127 times 'x'
         "137f"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8 + "78787878787878787878787878787878787878787878787878787878787878"u8
     ),
     new(
-        (@string)(""u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8),
+        (@string)(""u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8 + "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"u8), // This is 128 times 'x'
         "138180"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8 + "7878787878787878787878787878787878787878787878787878787878787878"u8
     ),
     new(new ia5StringTest("test"u8), "3006160474657374"u8),
@@ -158,7 +156,7 @@ internal static slice<marshalTest> marshalTests = new marshalTest[]{
     new(new rawContentsStruct(default!, 64), "3003020140"u8),
     new(new rawContentsStruct(new byte[]{0x30, 3, 1, 2, 3}.slice(), 64), "3003010203"u8),
     new(new RawValue(Tag: 1, Class: 2, IsCompound: false, Bytes: new byte[]{1, 2, 3}.slice()), "8103010203"u8),
-    new(((testSET)new nint[]{10}.slice()), "310302010a"u8),
+    new((testSET)new nint[]{10}.slice(), "310302010a"u8),
     new(new omitEmptyTest(new @string[]{}.slice()), "3000"u8),
     new(new omitEmptyTest(new @string[]{"1"u8}.slice()), "30053003130131"u8),
     new((@string)"Σ"u8, "0c02cea3"u8),
@@ -231,6 +229,7 @@ public static void TestMarshalError(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d should fail, but success"u8, i);
             continue;
         }
+
         if (!strings.Contains(err.Error(), test.err)) {
             Ꮡt.Errorf("#%d got: %v want %v"u8, i, err, test.err);
         }
@@ -247,16 +246,12 @@ public static void TestInvalidUTF8(ж<testing.T> Ꮡt) {
 public static void TestMarshalOID(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-// bytes format returns a byte sequence \x04
-// {ObjectIdentifier([]int{0}), "060100"}, // returns an error as OID 0.0 has the same encoding
-// same as above "\x06\x010" = "\x06\x01" + "0"
-// Example of ITU-T X.690
-// zero OID
     slice<marshalTest> marshalTestsOID = new marshalTest[]{
-        new(slice<byte>("\x06\x01\x30"u8), "0403060130"u8),
-        new(slice<byte>(((@string)(new byte[]{0x06, 0x01, 0x30}))), "0403060130"u8),
-        new(((global::go.encoding.asn1_package.ObjectIdentifier)new nint[]{2, 999, 3}.slice()), "0603883703"u8),
-        new(((global::go.encoding.asn1_package.ObjectIdentifier)new nint[]{0, 0}.slice()), "060100"u8)
+        new(slice<byte>("\x06\x01\x30"u8), "0403060130"u8), // bytes format returns a byte sequence \x04
+        // {ObjectIdentifier([]int{0}), "060100"}, // returns an error as OID 0.0 has the same encoding
+        new(slice<byte>(((@string)(new byte[]{0x06, 0x01, 0x30}))), "0403060130"u8), // same as above "\x06\x010" = "\x06\x01" + "0"
+        new(((global::go.encoding.asn1_package.ObjectIdentifier)new nint[]{2, 999, 3}.slice()), "0603883703"u8), // Example of ITU-T X.690
+        new(((global::go.encoding.asn1_package.ObjectIdentifier)new nint[]{0, 0}.slice()), "060100"u8) // zero OID
     }.slice();
     foreach (var (i, test) in marshalTestsOID) {
         var (data, err) = Marshal(test.@in);
@@ -283,15 +278,18 @@ public static void TestIssue11130(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("marshal OID returned an invalid type"u8);
         return;
     }
+
     (var data1, err) = Marshal(v);
     if (err != default!) {
         Ꮡt.Errorf("%v"u8, err);
         return;
     }
+
     if (!bytes.Equal(data, data1)) {
         Ꮡt.Errorf("got: %q, want: %q \n"u8, data1, data);
         return;
     }
+
     ref var v1 = ref heap<any>(out var Ꮡv1);
     (_, err) = Unmarshal(data1, Ꮡv1);
     if (err != default!) {
@@ -310,6 +308,7 @@ public static void TestIssue68241(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("cannot Marshal: %v"u8, err);
             return;
         }
+
         ref var got = ref heap<any>(out var Ꮡgot);
         (_, err) = Unmarshal(data, Ꮡgot);
         if (err != default!) {
@@ -326,6 +325,7 @@ public static void BenchmarkMarshal(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
+
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, test) in marshalTests) {
             Marshal(test.@in);
@@ -344,12 +344,15 @@ public static void TestSetEncoder(ж<testing.T> Ꮡt) {
     var testStruct = new TestSetEncoder_testStruct(
         Strings: new @string[]{"a"u8, "aa"u8, "b"u8, "bb"u8, "c"u8, "cc"u8}.slice()
     );
+
     // Expected ordering of the SET should be:
     // a, b, c, aa, bb, cc
+
     var (output, err) = Marshal(testStruct);
     if (err != default!) {
         Ꮡt.Errorf("%v"u8, err);
     }
+
     var expectedOrder = new @string[]{"a"u8, "b"u8, "c"u8, "aa"u8, "bb"u8, "cc"u8}.slice();
     ref var resultStruct = ref heap(new TestSetEncoder_testStruct(), out var ᏑresultStruct);
     (var rest, err) = Unmarshal(output, ᏑresultStruct);
@@ -368,12 +371,15 @@ internal partial struct TestSetEncoderSETSliceSuffix_testSetSET /*[]@string*/;
 
 public static void TestSetEncoderSETSliceSuffix(ж<testing.T> Ꮡt) {
     var testSet = new TestSetEncoderSETSliceSuffix_testSetSET(new @string[]{"a"u8, "aa"u8, "b"u8, "bb"u8, "c"u8, "cc"u8}.slice());
+
     // Expected ordering of the SET should be:
     // a, b, c, aa, bb, cc
+
     var (output, err) = Marshal(testSet);
     if (err != default!) {
         Ꮡt.Errorf("%v"u8, err);
     }
+
     var expectedOrder = new TestSetEncoderSETSliceSuffix_testSetSET(new @string[]{"a"u8, "b"u8, "c"u8, "aa"u8, "bb"u8, "cc"u8}.slice());
     ref var resultSet = ref heap<TestSetEncoderSETSliceSuffix_testSetSET>(out var ᏑresultSet);
     (var rest, err) = Unmarshal(output, ᏑresultSet);
@@ -403,11 +409,13 @@ public static void BenchmarkUnmarshal(ж<testing.B> Ꮡb) {
         var inCopy = new slice<byte>(len(test.@in));
         copy(inCopy, test.@in);
         var outCopy = pv.Interface();
+
         testData = append(testData, new BenchmarkUnmarshal_testCase(
             @in: inCopy,
             @out: outCopy
         ));
     }
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         foreach (var (_, testCase) in testData) {

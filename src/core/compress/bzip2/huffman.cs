@@ -37,30 +37,35 @@ internal static UntypedInt invalidNodeValue => 0xffff;
 // symbol is found.
 internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) {
     uint16 v = default!;
-
     ref var br = ref Ꮡbr.DerefOrNull();
+
     var nodeIndex = (uint16)0; // node 0 is the root of the tree.
+
     while (ᐧ) {
         var node = Ꮡ(t.nodes, nodeIndex);
+
         uint16 bit = default!;
         if (br.bits > 0){
             // Get next bit - fast path.
             br.bits--;
-            bit = (uint16)((uint16)((br.n >> (int)(((nuint)(br.bits & 63))))) & 1);
+            bit = (uint16)((uint16)(br.n >> (int)(br.bits & 63)) & 1);
         } else {
             // Get next bit - slow path.
             // Use ReadBits to retrieve a single bit
             // from the underling io.ByteReader.
             bit = (uint16)br.ReadBits(1);
         }
+
         // Trick a compiler into generating conditional move instead of branch,
         // by making both loads unconditional.
         var (l, r) = (node.Value.left, node.Value.right);
+
         if (bit == 1){
             nodeIndex = l;
         } else {
             nodeIndex = r;
         }
+
         if (nodeIndex == invalidNodeValue) {
             // We found a leaf. Use the value of bit to decide
             // whether is a left or a right value.
@@ -88,7 +93,9 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     if (len(lengths) < 2) {
         throw panic("newHuffmanTree: too few symbols");
     }
+
     ref var t = ref heap(new huffmanTree(), out var Ꮡt);
+
     // First we sort the code length assignments by ascending code length,
     // using the symbol value to break ties.
     var pairs = new slice<huffmanSymbolLengthPair>(len(lengths));
@@ -96,6 +103,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
         pairs[i].value = (uint16)i;
         pairs[i].length = lengthΔ1;
     }
+
     slices.SortFunc(pairs, (huffmanSymbolLengthPair a, huffmanSymbolLengthPair b) => {
         {
             nint c = cmp.Compare(a.length, b.length); if (c != 0) {
@@ -104,12 +112,14 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
         }
         return cmp.Compare(a.value, b.value);
     });
+
     // Now we assign codes to the symbols, starting with the longest code.
     // We keep the codes packed into a uint32, at the most-significant end.
     // So branches are taken from the MSB downwards. This makes it easy to
     // sort them later.
     var code = (uint32)0;
     var length = (uint8)32;
+
     var codes = new slice<huffmanCode>(len(lengths));
     for (nint i = len(pairs) - 1; i >= 0; i--) {
         if (length > pairs[i].length) {
@@ -122,9 +132,11 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
         // like a |length| bit number.
         code += ((uint32)1).Lsh((uint64)((uint8)(32 - length)));
     }
+
     // Now we can sort by the code so that the left half of each branch are
     // grouped together, recursively.
     slices.SortFunc(codes, (huffmanCode a, huffmanCode b) => cmp.Compare(a.code, b.code));
+
     t.nodes = new slice<huffmanNode>(len(codes));
     var (_, err) = buildHuffmanNode(Ꮡt, codes, 0);
     return (t, err);
@@ -153,19 +165,22 @@ internal static readonly @string equalSymbolsInHuffmanˢ = "equal symbols in Huf
 internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> Ꮡt, slice<huffmanCode> codes, uint32 level) {
     uint16 nodeIndex = default!;
     error err = default!;
-
     ref var t = ref Ꮡt.DerefOrNull();
-    var test = ((uint32)1).Lsh((uint64)((31 - level)));
+
+    var test = ((uint32)1).Lsh((uint64)(31 - level));
+
     // We have to search the list of codes to find the divide between the left and right sides.
     nint firstRightIndex = len(codes);
     foreach (var (i, code) in codes) {
-        if ((uint32)(code.code & test) != 0) {
+        if ((code.code & test) != 0) {
             firstRightIndex = i;
             break;
         }
     }
+
     var left = codes.slice(0, firstRightIndex);
     var right = codes.slice(firstRightIndex);
+
     if (len(left) == 0 || len(right) == 0) {
         // There is a superfluous level in the Huffman tree indicating
         // a bug in the encoder. However, this bug has been observed in
@@ -181,6 +196,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
         if (len(codes) < 2) {
             return (0, ((StructuralError)(@string)emptyHuffmanTreeˢ));
         }
+
         // In this case the recursion doesn't always reduce the length
         // of codes so we need to ensure termination via another
         // mechanism.
@@ -191,14 +207,17 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
             // infinite recursion.
             return (0, ((StructuralError)(@string)equalSymbolsInHuffmanˢ));
         }
+
         if (len(left) == 0) {
             return buildHuffmanNode(Ꮡt, right, level + 1);
         }
         return buildHuffmanNode(Ꮡt, left, level + 1);
     }
+
     nodeIndex = (uint16)t.nextNode;
     var node = Ꮡ(t.nodes, t.nextNode);
     t.nextNode++;
+
     if (len(left) == 1){
         // leaf node
         node.Value.left = invalidNodeValue;
@@ -206,9 +225,11 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     } else {
         (node.Value.left, err) = buildHuffmanNode(Ꮡt, left, level + 1);
     }
+
     if (err != default!) {
         return (nodeIndex, err);
     }
+
     if (len(right) == 1){
         // leaf node
         node.Value.right = invalidNodeValue;
@@ -216,6 +237,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
     } else {
         (node.Value.right, err) = buildHuffmanNode(Ꮡt, right, level + 1);
     }
+
     return (nodeIndex, err);
 }
 

@@ -21,7 +21,7 @@ internal static void run() {
     GoFrame ᒐ = default;
     try {
         ref var st = ref heap<state>(out var Ꮡst);
-        st = new state(n: 0, label: "run"u8);
+        st = new state(n: 0, label: "run");
         defer(Ꮡst.free, ref ᒐ);
         st.add(5);
         st.add(10);
@@ -35,7 +35,7 @@ internal static void twice() {
     GoFrame ᒐ = default;
     try {
         ref var st = ref heap<state>(out var Ꮡst);
-        st = new state(n: 100, label: "twice"u8);
+        st = new state(n: 100, label: "twice");
         defer(Ꮡst.free, ref ᒐ);
         st.add(1);
         fmt.Printf("during twice: n=%d\n"u8, st.n);

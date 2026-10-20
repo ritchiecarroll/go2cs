@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 
 // Package flate implements the DEFLATE compressed data format, described in
-// RFC 1951.  The gzip and zlib packages implement access to DEFLATE-based file
-// formats.
+// RFC 1951.  The [compress/gzip] and [compress/zlib] packages implement access
+// to DEFLATE-based file formats.
 namespace go.compress;
 
 using bufio = bufio_package;
@@ -17,6 +17,9 @@ using go.math;
 partial class flate_package {
 
 internal static UntypedInt maxCodeLen => 16; // max length of Huffman code
+// The next three numbers come from the RFC section 3.2.7, with the
+// additional proviso in section 3.2.5 which implies that distance codes
+// 30 and 31 should never occur in compressed data.
 internal static UntypedInt maxNumLit => 286;
 internal static UntypedInt maxNumDist => 30;
 internal static UntypedInt numCodes => 19; // number of codes in Huffman meta-code
@@ -28,12 +31,14 @@ internal static ref sync.Once fixedOnce => ref ᏑfixedOnce.Value;
 internal static ж<huffmanDecoder> ᏑfixedHuffmanDecoder = new StandardBox<huffmanDecoder>(new huffmanDecoder());
 internal static ref huffmanDecoder fixedHuffmanDecoder => ref ᏑfixedHuffmanDecoder.Value;
 
+// A CorruptInputError reports the presence of corrupt input at a given offset.
 partial struct CorruptInputError /*num:int64*/;
 
 public static @string Error(this CorruptInputError e) {
     return "flate: corrupt input before offset "u8 + strconv.FormatInt((int64)e, 10);
 }
 
+// An InternalError reports an error in the flate code itself.
 partial struct InternalError /*@string*/;
 
 public static @string Error(this InternalError e) {
@@ -113,9 +118,11 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     // table construction. It's intended to be used during
     // development to supplement the currently ad-hoc unit tests.
     const bool sanity = false;
+
     if (h.min != 0) {
         h = new huffmanDecoder(nil);
     }
+
     // Count number of codes of each length,
     // compute min and max length.
     array<nint> count = new(16); /* maxCodeLen */
@@ -133,6 +140,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         }
         count[n]++;
     }
+
     // Empty tree. The decompressor.huffSym function will fail later if the tree
     // is used. Technically, an empty tree is only valid for the HDIST tree and
     // not the HCLEN and HLIT tree. However, a stream with an empty HCLEN tree
@@ -143,6 +151,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     if (max == 0) {
         return true;
     }
+
     nint code = 0;
     array<nint> nextcode = new(16); /* maxCodeLen */
     for (nint i = min; i <= max; i++) {
@@ -150,6 +159,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
         nextcode[i] = code;
         code += count[i];
     }
+
     // Check that the coding is complete (i.e., that we've
     // assigned all 2-to-the-max possible bit sequences).
     // Exception: To be compatible with zlib, we also need to
@@ -158,12 +168,14 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
     if (code != ((nint)1).Lsh((nuint)max) && !(code == 1 && max == 1)) {
         return false;
     }
+
     h.min = min;
     if (max > huffmanChunkBits) {
         nint numLinks = ((nint)1).Lsh(((nuint)max - (nuint)huffmanChunkBits));
         h.linkMask = (uint32)(numLinks - 1);
+
         // create link tables
-        nint link = (nextcode[huffmanChunkBits + 1] >> (int)(1));
+        nint link = nextcode[huffmanChunkBits + 1] >> 1;
         h.links = new slice<slice<uint32>>((nint)huffmanNumChunks - link);
         for (nuint j = (nuint)link; j < huffmanNumChunks; j++) {
             nint reverse = (nint)bits.Reverse16((uint16)j);
@@ -172,17 +184,18 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
             if (sanity && h.chunks[reverse] != 0) {
                 throw panic("impossible: overwriting existing chunk");
             }
-            h.chunks[reverse] = (uint32)((nuint)((off << (int)(huffmanValueShift)) | (nuint)(huffmanChunkBits + 1)));
+            h.chunks[reverse] = (uint32)(off << (int)(huffmanValueShift) | (nuint)(huffmanChunkBits + 1));
             h.links[off] = new slice<uint32>(numLinks);
         }
     }
+
     foreach (var (i, n) in lengths) {
         if (n == 0) {
             continue;
         }
         nint codeΔ1 = nextcode[n];
         nextcode[n]++;
-        var chunk = (uint32)((nint)((i << (int)(huffmanValueShift)) | n));
+        var chunk = (uint32)(i << (int)(huffmanValueShift) | n);
         nint reverse = (nint)bits.Reverse16((uint16)codeΔ1);
         reverse.RshAssign((nuint)(16 - n));
         if (n <= huffmanChunkBits){
@@ -198,13 +211,13 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
                 h.chunks[off] = chunk;
             }
         } else {
-            nint j = (nint)(reverse & (nint)(huffmanNumChunks - 1));
-            if (sanity && (uint32)(h.chunks[j] & (uint32)huffmanCountMask) != (uint32)(huffmanChunkBits + 1)) {
+            nint j = reverse & (nint)(huffmanNumChunks - 1);
+            if (sanity && (h.chunks[j] & (uint32)huffmanCountMask) != (uint32)(huffmanChunkBits + 1)) {
                 // Longer codes should have been
                 // associated with a link table above.
                 throw panic("impossible: not an indirect chunk");
             }
-            var value = (h.chunks[j] >> (int)(huffmanValueShift));
+            var value = h.chunks[j] >> (int)(huffmanValueShift);
             var linktab = h.links[value];
             reverse >>= (int)(huffmanChunkBits);
             for (nint off = reverse; off < len(linktab); off += ((nint)1).Lsh((nuint)(n - (nint)huffmanChunkBits))) {
@@ -215,6 +228,7 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
             }
         }
     }
+
     if (sanity) {
         // Above we've sanity checked that we never overwrote
         // an existing entry. Here we additionally check that
@@ -238,11 +252,12 @@ internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) {
             }
         }
     }
+
     return true;
 }
 
 // The actual read interface needed by [NewReader].
-// If the passed in io.Reader does not also have ReadByte,
+// If the passed in [io.Reader] does not also have ReadByte,
 // the [NewReader] will introduce its own buffering.
 partial interface Reader :
     io.Reader,
@@ -290,9 +305,9 @@ internal static void nextBlock(this ж<decompressor> Ꮡf) {
             }
         }
     }
-    f.final = (uint32)(f.b & 1) == 1;
+    f.final = (f.b & 1) == 1;
     f.b >>= (int)(1);
-    var typ = (uint32)(f.b & 3);
+    var typ = f.b & 3;
     f.b >>= (int)(2);
     f.nb -= 1 + 2;
     switch (typ) {
@@ -301,16 +316,16 @@ internal static void nextBlock(this ж<decompressor> Ꮡf) {
         break;
     }
     case 1: {
+        // compressed, fixed Huffman tables
         f.hl = ᏑfixedHuffmanDecoder;
         f.hd = default!;
         f.huffmanBlock();
         break;
     }
     case 2: {
+        // compressed, dynamic Huffman tables
         {
             f.err = Ꮡf.readHuffman(); if (f.err != default!) {
-                // compressed, fixed Huffman tables
-                // compressed, dynamic Huffman tables
                 break;
             }
         }
@@ -320,13 +335,12 @@ internal static void nextBlock(this ж<decompressor> Ꮡf) {
         break;
     }
     default: {
+        // 3 is reserved.
         f.err = ((CorruptInputError)f.roffset);
         break;
     }}
-
 }
 
-// 3 is reserved.
 internal static (nint, error) Read(this ж<decompressor> Ꮡf, slice<byte> b) {
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -374,20 +388,21 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             }
         }
     }
-    nint nlit = (nint)((uint32)(f.b & 0x1F)) + 257;
+    nint nlit = (nint)(f.b & 0x1F) + 257;
     if (nlit > maxNumLit) {
         return ((CorruptInputError)f.roffset);
     }
     f.b >>= (int)(5);
-    nint ndist = (nint)((uint32)(f.b & 0x1F)) + 1;
+    nint ndist = (nint)(f.b & 0x1F) + 1;
     if (ndist > maxNumDist) {
         return ((CorruptInputError)f.roffset);
     }
     f.b >>= (int)(5);
-    nint nclen = (nint)((uint32)(f.b & 0xF)) + 4;
+    nint nclen = (nint)(f.b & 0xF) + 4;
     // numCodes is 19, so nclen is always valid.
     f.b >>= (int)(4);
     f.nb -= 5 + 5 + 4;
+
     // (HCLEN+4)*3 bits: code lengths in the magic codeOrder order.
     for (nint i = 0; i < nclen; i++) {
         while (f.nb < 3) {
@@ -397,16 +412,17 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
                 }
             }
         }
-        f.codebits.Value[codeOrder[i]] = (nint)((uint32)(f.b & 0x7));
+        f.codebits.Value[codeOrder[i]] = (nint)(f.b & 0x7);
         f.b >>= (int)(3);
         f.nb -= 3;
     }
     for (nint i = nclen; i < len(codeOrder); i++) {
         f.codebits.Value[codeOrder[i]] = 0;
     }
-    if (!f.h1.init((~f.codebits)[0..])) {
+    if (!f.h1.init(f.codebits.slice(0))) {
         return ((CorruptInputError)f.roffset);
     }
+
     // HLIT + 257 code lengths, HDIST + 1 code lengths,
     // using the code length Huffman code.
     for ((nint i, nint n) = (0, nlit + ndist); i < n; ) {
@@ -449,7 +465,6 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             b = 0;
             break;
         }}
-
         while (f.nb < nb) {
             {
                 var errΔ1 = f.moreBits(); if (errΔ1 != default!) {
@@ -457,7 +472,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
                 }
             }
         }
-        rep += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
+        rep += (nint)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1));
         f.b.RshAssign(nb);
         f.nb -= nb;
         if (i + rep > n) {
@@ -468,9 +483,11 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
             i++;
         }
     }
-    if (!f.h1.init((~f.bits).slice(0, nlit)) || !f.h2.init((~f.bits).slice(nlit, nlit + ndist))) {
+
+    if (!f.h1.init(f.bits.slice(0, nlit)) || !f.h2.init(f.bits.slice(nlit, nlit + ndist))) {
         return ((CorruptInputError)f.roffset);
     }
+
     // As an optimization, we can initialize the min bits to read at a time
     // for the HLIT tree to the length of the EOB marker since we know that
     // every block must terminate with one. This preserves the property that
@@ -478,6 +495,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
     if (f.h1.min < f.bits.Value[endBlockMarker]) {
         f.h1.min = f.bits.Value[endBlockMarker];
     }
+
     return default!;
 }
 
@@ -488,6 +506,7 @@ internal static error readHuffman(this ж<decompressor> Ꮡf) {
 internal static void huffmanBlock(this ref decompressor f) {
     const nint stateInit = iota; // Zero value must be stateInit
     const nint stateDict = 1;
+
     var exprᴛ1 = f.stepState;
     if (exprᴛ1 == stateInit) {
         goto readLiteral;
@@ -522,6 +541,7 @@ readLiteral:
             f.finishBlock();
             return;
         }
+        // otherwise, reference to older data
         case {} when v is < 265: {
             length = v - (257 - 3);
             n = 0;
@@ -561,8 +581,6 @@ readLiteral:
             f.err = ((CorruptInputError)f.roffset);
             return;
         }}
-
-        // otherwise, reference to older data
         if (n > 0) {
             while (f.nb < n) {
                 {
@@ -572,10 +590,11 @@ readLiteral:
                     }
                 }
             }
-            length += (nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(n) - 1)));
+            length += (nint)(f.b & (uint32)(((uint32)1).Lsh(n) - 1));
             f.b.RshAssign(n);
             f.nb -= n;
         }
+
         nint dist = default!;
         if (f.hd == nil){
             while (f.nb < 5) {
@@ -586,7 +605,7 @@ readLiteral:
                     }
                 }
             }
-            dist = (nint)bits.Reverse8((uint8)(((uint32)(f.b & 0x1F) << (int)(3))));
+            dist = (nint)bits.Reverse8((uint8)((f.b & 0x1F) << 3));
             f.b >>= (int)(5);
             f.nb -= 5;
         } else {
@@ -597,16 +616,17 @@ readLiteral:
                 }
             }
         }
+
         switch (ᐧ) {
         case {} when dist is < 4: {
             dist++;
             break;
         }
         case {} when dist < maxNumDist: {
-            nuint nb = ((nuint)(dist - 2) >> (int)(1));
-            nint extra = ((nint)(dist & 1)).Lsh(nb);
+            nuint nb = (nuint)(dist - 2) >> 1;
+            // have 1 bit in bottom of dist, need nb more.
+            nint extra = (dist & 1).Lsh(nb);
             while (f.nb < nb) {
-                // have 1 bit in bottom of dist, need nb more.
                 {
                     err = f.moreBits(); if (err != default!) {
                         f.err = err;
@@ -614,7 +634,7 @@ readLiteral:
                     }
                 }
             }
-            extra |= (nint)((nint)((uint32)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1))));
+            extra |= (nint)((nint)(f.b & (uint32)(((uint32)1).Lsh(nb) - 1)));
             f.b.RshAssign(nb);
             f.nb -= nb;
             dist = ((nint)1).Lsh((nb + 1)) + 1 + extra;
@@ -630,9 +650,11 @@ readLiteral:
             f.err = ((CorruptInputError)f.roffset);
             return;
         }
+
         (f.copyLen, f.copyDist) = (length, dist);
         goto copyHistory;
     }
+
 copyHistory:
     {
         // Perform a backwards copy according to RFC section 3.2.3.
@@ -641,6 +663,7 @@ copyHistory:
             cnt = f.dict.writeCopy(f.copyDist, f.copyLen);
         }
         f.copyLen -= cnt;
+
         if (f.dict.availWrite() == 0 || f.copyLen > 0) {
             f.toRead = f.dict.readFlush();
             f.step = ((Action<ж<decompressor>>)(huffmanBlock)); // We need to continue this work
@@ -657,6 +680,7 @@ internal static void dataBlock(this ref decompressor f) {
     // Discard current half-byte.
     f.nb = 0;
     f.b = 0;
+
     // Length then ones-complement of length.
     var (nr, err) = io.ReadFull(f.r, f.buf[0..4]);
     f.roffset += (int64)nr;
@@ -664,17 +688,19 @@ internal static void dataBlock(this ref decompressor f) {
         f.err = noEOF(err);
         return;
     }
-    nint n = (nint)((nint)f.buf[0] | ((nint)f.buf[1] << (int)(8)));
-    nint nn = (nint)((nint)f.buf[2] | ((nint)f.buf[3] << (int)(8)));
+    nint n = (nint)f.buf[0] | (nint)f.buf[1] << 8;
+    nint nn = (nint)f.buf[2] | (nint)f.buf[3] << 8;
     if ((uint16)nn != (uint16)(~n)) {
         f.err = ((CorruptInputError)f.roffset);
         return;
     }
+
     if (n == 0) {
         f.toRead = f.dict.readFlush();
         f.finishBlock();
         return;
     }
+
     f.copyLen = n;
     f.copyData();
 }
@@ -686,6 +712,7 @@ internal static void copyData(this ref decompressor f) {
     if (len(buf) > f.copyLen) {
         buf = buf.slice(0, f.copyLen);
     }
+
     var (cnt, err) = io.ReadFull(f.r, buf);
     f.roffset += (int64)cnt;
     f.copyLen -= cnt;
@@ -694,6 +721,7 @@ internal static void copyData(this ref decompressor f) {
         f.err = noEOF(err);
         return;
     }
+
     if (f.dict.availWrite() == 0 || f.copyLen > 0) {
         f.toRead = f.dict.readFlush();
         f.step = ((Action<ж<decompressor>>)(copyData));
@@ -754,14 +782,14 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
                 return (0, noEOF(err));
             }
             f.roffset++;
-            b |= (uint32)(((uint32)c << (int)(((nuint)(nb & 31)))));
+            b |= (uint32)(((uint32)c << (int)(nb & 31)));
             nb += 8;
         }
-        var chunk = h.chunks[(uint32)(b & (uint32)((huffmanNumChunks - 1)))];
-        n = (nuint)((uint32)(chunk & (uint32)huffmanCountMask));
+        var chunk = h.chunks[(b & (uint32)(huffmanNumChunks - 1))];
+        n = (nuint)(chunk & (uint32)huffmanCountMask);
         if (n > huffmanChunkBits) {
-            chunk = h.links[(chunk >> (int)(huffmanValueShift))][(uint32)(((b >> (int)(huffmanChunkBits))) & h.linkMask)];
-            n = (nuint)((uint32)(chunk & (uint32)huffmanCountMask));
+            chunk = h.links[(chunk >> (int)(huffmanValueShift))][((b >> (int)(huffmanChunkBits)) & h.linkMask)];
+            n = (nuint)(chunk & (uint32)huffmanCountMask);
         }
         if (n <= nb) {
             if (n == 0) {
@@ -770,9 +798,9 @@ internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder
                 f.err = ((CorruptInputError)f.roffset);
                 return (0, f.err);
             }
-            f.b = (b >> (int)(((nuint)(n & 31))));
+            f.b = b >> (int)(n & 31);
             f.nb = nb - n;
-            return ((nint)((chunk >> (int)(huffmanValueShift))), default!);
+            return ((nint)(chunk >> (int)(huffmanValueShift)), default!);
         }
     }
 }
@@ -838,6 +866,7 @@ internal static error Reset(this ref decompressor f, io.Reader r, slice<byte> di
 // The [io.ReadCloser] returned by NewReader also implements [Resetter].
 public static io.ReadCloser NewReader(io.Reader r) {
     fixedHuffmanDecoderInit();
+
     ref var f = ref heap(new decompressor(), out var Ꮡf);
     f.makeReader(r);
     f.bits = Ꮡ(new array<nint>(316));
@@ -848,14 +877,15 @@ public static io.ReadCloser NewReader(io.Reader r) {
 }
 
 // NewReaderDict is like [NewReader] but initializes the reader
-// with a preset dictionary. The returned [Reader] behaves as if
+// with a preset dictionary. The returned reader behaves as if
 // the uncompressed data stream started with the given dictionary,
 // which has already been read. NewReaderDict is typically used
-// to read data compressed by NewWriterDict.
+// to read data compressed by [NewWriterDict].
 //
 // The ReadCloser returned by NewReaderDict also implements [Resetter].
 public static io.ReadCloser NewReaderDict(io.Reader r, slice<byte> dict) {
     fixedHuffmanDecoderInit();
+
     ref var f = ref heap(new decompressor(), out var Ꮡf);
     f.makeReader(r);
     f.bits = Ꮡ(new array<nint>(316));

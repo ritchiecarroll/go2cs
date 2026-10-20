@@ -144,6 +144,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
         if (runtime.GOOS != "linux"u8) {
             Ꮡt.Skip(issue35057IsOnlyˢ);
         }
+
         // Linux [5.9,5.16) has a kernel bug that can break CPU timers on newly
         // created threads, breaking our CPU accounting.
         var (major, minor) = unix.KernelVersion();
@@ -153,6 +154,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                 Ꮡt.Logf("Failure of this test may indicate that your system suffers from a known Linux kernel bug fixed on newer kernels. See https://golang.org/issue/49065."u8);
             }
         }, ref ᒐ);
+
         // Disable on affected builders to avoid flakiness, but otherwise keep
         // it enabled to potentially warn users that they are on a broken
         // kernel.
@@ -163,6 +165,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                 testenv.SkipFlaky(new pprof_internal_test_package.testing_TжTB(Ꮡt), 49065);
             }
         }
+
         // Run a workload in a single goroutine, then run copies of the same
         // workload in several goroutines. For both the serial and parallel cases,
         // the CPU time the process measures with its own profiler should match the
@@ -172,24 +175,30 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
         // linear increase in the CPU usage reported by both the OS and the
         // profiler, but without a guarantee of exclusive access to CPU resources
         // that is likely to be a flaky test.
+
         // Require the smaller value to be within 10%, or 40% in short mode.
         var maxDiff = 0.10D;
         if (testing.Short()) {
             maxDiff = 0.40D;
         }
+
         error compare(time.Duration a, time.Duration b, float64 maxDiffΔ1) {
             if (a <= 0 || b <= 0) {
                 return fmt.Errorf("Expected both time reports to be positive"u8);
             }
+
             if (a < b) {
                 (a, b) = (b, a);
             }
+
             var diff = (float64)(int64)(a - b) / (float64)(int64)a;
             if (diff > maxDiffΔ1) {
                 return fmt.Errorf("CPU usage reports are too different (limit -%.1f%%, got -%.1f%%)"u8, maxDiffΔ1 * 100D, diff * 100D);
             }
+
             return default!;
         }
+
         foreach (var (_, vᴛ1) in new TestCPUProfileMultithreadMagnitude_type[]{
             new(
                 name: "serial"u8,
@@ -208,6 +217,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
             var tcʗ1 = tc;
             Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
                 tΔ1.Logf("Running with %d workers"u8, tcʗ1.workers);
+
                 time.Duration userTime = default!;
                 time.Duration systemTime = default!;
                 var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContains), new @string[]{"runtime/pprof.cpuHog1"u8}.slice(), avoidFunctions());
@@ -217,6 +227,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                     if (!matchesʗ1(tΔ2, p)) {
                         return false;
                     }
+
                     var ok = true;
                     foreach (var (i, unit) in new @string[]{"count"u8, "nanoseconds"u8}.slice()) {
                         {
@@ -227,6 +238,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                             }
                         }
                     }
+
                     // cpuHog1 called below is the primary source of CPU
                     // load, but there may be some background work by the
                     // runtime. Since the OS rusage measurement will
@@ -236,6 +248,7 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                     foreach (var (_, sample) in (~p).Sample) {
                         value += ((time.Duration)(~sample).Value[1]) * time.ΔNanosecond;
                     }
+
                     var totalTime = userTime + systemTime;
                     tΔ2.Logf("compare %s user + %s system = %s vs %s"u8, userTime, systemTime, totalTime, value);
                     {
@@ -244,8 +257,10 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
                             ok = false;
                         }
                     }
+
                     return ok;
                 };
+
                 var tcʗ2 = tcʗ1;
                 testCPUProfile(tΔ1, new Func<ж<testing.T>, ж<profile.Profile>, bool>(acceptProfile), (time.Duration dur) => {
                     var tcʗ3 = tcʗ2;
@@ -293,6 +308,7 @@ internal static (uint64 pc, bool found) findInlinedCall(any f, nint maxBytes) {
     if (fFunc == nil || fFunc.Entry() == 0) {
         throw panic("failed to locate function entry");
     }
+
     for (nint offset = 0; offset < maxBytes; offset++) {
         var innerPC = fFunc.Entry() + (uintptr)offset;
         var inner = runtime.FuncForPC(innerPC);
@@ -311,6 +327,7 @@ internal static (uint64 pc, bool found) findInlinedCall(any f, nint maxBytes) {
             return ((uint64)innerPC, true);
         }
     }
+
     return (0, false);
 }
 
@@ -318,13 +335,15 @@ internal static (uint64 pc, bool found) findInlinedCall(any f, nint maxBytes) {
 internal static readonly object canTDetermineWhetherˢ = (@string)"Can't determine whether inlinedCallee was inlined into inlinedCaller."u8;
 
 public static void TestCPUProfileInlining(ж<testing.T> Ꮡt) {
-    if (!containsInlinedCall(inlinedCaller, (4 << (int)(10)))) {
+    if (!containsInlinedCall(inlinedCaller, 4 << 10)) {
         Ꮡt.Skip(canTDetermineWhetherˢ);
     }
+
     var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContains), new @string[]{"runtime/pprof.inlinedCallee"u8, "runtime/pprof.inlinedCaller"u8}.slice(), avoidFunctions());
     var p = testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
         cpuHogger(inlinedCaller, Ꮡsalt1, dur);
     });
+
     // Check if inlined function locations are encoded correctly. The inlinedCalee and inlinedCaller should be in one location.
     foreach (var (_, loc) in (~p).Location) {
         var (hasInlinedCallerAfterInlinedCallee, hasInlinedCallee) = (false, false);
@@ -356,6 +375,7 @@ internal static partial void dumpCallers(slice<uintptr> pcs) {
     if (pcs == default!) {
         return;
     }
+
     nint skip = 2; // Callers and dumpCallers
     runtime.Callers(skip, pcs);
 }
@@ -391,6 +411,7 @@ public static void TestCPUProfileRecursion(ж<testing.T> Ꮡt) {
     var p = testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
         cpuHogger(recursionCaller, Ꮡsalt1, dur);
     });
+
     // check the Location encoding was not confused by recursive calls.
     foreach (var (i, loc) in (~p).Location) {
         nint recursionFunc = 0;
@@ -435,6 +456,7 @@ internal static void recursionChainBottom(nint x, slice<uintptr> pcs) {
     // This will be called each time, we only care about the last. We
     // can't make this conditional or this function won't be inlined.
     dumpCallers(pcs);
+
     recursionChainTop(x - 1, pcs);
 }
 
@@ -468,7 +490,7 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        @string vers = ((@string)@out);
+        @string vers = (@string)@out;
         Ꮡt.Logf("uname -a: %v"u8, vers);
     }
     else if (exprᴛ1 == "plan9"u8) {
@@ -479,6 +501,7 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
     }
 
     var broken = testenv.CPUProfilingBroken();
+
     var (deadline, ok) = t.Deadline();
     if (broken || !ok) {
         if (broken && testing.Short()){
@@ -488,12 +511,14 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
             deadline = time.Now().Add((time.Duration)(10000000000L));
         }
     }
+
     // If we're running a long test, start with a long duration
     // for tests that try to make sure something *doesn't* happen.
     var duration = (time.Duration)(5000000000L);
     if (testing.Short()) {
         duration = 100 * time.Millisecond;
     }
+
     // Profiling tests are inherently flaky, especially on a
     // loaded system, such as when this test is running with
     // several others under go test std. If a test fails in a way
@@ -508,20 +533,24 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
         }
         f(duration);
         StopCPUProfile();
+
         {
             var (p, okΔ1) = profileOk(Ꮡt, matches, prof, duration); if (okΔ1) {
                 return p;
             }
         }
+
         duration *= 2;
         if (time.Until(deadline) < duration) {
             break;
         }
         Ꮡt.Logf("retrying with %s duration"u8, duration);
     }
+
     if (broken) {
         Ꮡt.Skipf("ignoring failure on %s/%s; see golang.org/issue/13841"u8, runtime.GOOS, runtime.GOARCH);
     }
+
     // Ignore the failure if the tests are running in a QEMU-based emulator,
     // QEMU is not perfect at emulating everything.
     // IN_QEMU environmental variable is set by some of the Go builders.
@@ -566,6 +595,7 @@ internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> Ꮡt, Fun
     bool ok = default!;
 
     ok = true;
+
     uintptr samples = default!;
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var p = parseProfile(Ꮡt, prof.Bytes(), (uintptr count, slice<ж<profile.Location>> stk, map<@string, slice<@string>> labels) => {
@@ -576,6 +606,7 @@ internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> Ꮡt, Fun
         fmt.Fprintf(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡbuf), "\n"u8);
     });
     Ꮡt.Logf("total %d CPU profile samples collected:\n%s"u8, samples, buf.String());
+
     if (samples < 10 && runtime.GOOS == "windows"u8) {
         // On some windows machines we end up with
         // not enough samples due to coarse timer
@@ -583,6 +614,7 @@ internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> Ꮡt, Fun
         Ꮡt.Log(tooFewSamplesOnWindowsˢ);
         return (p, false);
     }
+
     // Check that we got a reasonable number of samples.
     // We used to always require at least ideal/4 samples,
     // but that is too hard to guarantee on a loaded system.
@@ -594,9 +626,11 @@ internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> Ꮡt, Fun
             ok = false;
         }
     }
+
     if (matches != default! && !matches(Ꮡt, p)) {
         ok = false;
     }
+
     return (p, ok);
 }
 
@@ -608,10 +642,12 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
     return (ж<testing.T> t, ж<profile.Profile> p) => {
         bool ok = default!;
         ok = true;
+
         // Check that profile is well formed, contains 'need', and does not contain
         // anything from 'avoid'.
         var have = new slice<uintptr>(len(needʗ1));
         var avoidSamples = new slice<uintptr>(len(avoidʗ1));
+
         foreach (var (_, sample) in (~p).Sample) {
             var count = (uintptr)(~sample).Value[0];
             foreach (var (i, spec) in needʗ1) {
@@ -629,6 +665,7 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
                 }
             }
         }
+
         foreach (var (i, name) in avoidʗ1) {
             var bad = avoidSamples[i];
             if (bad != 0) {
@@ -636,9 +673,11 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
                 ok = false;
             }
         }
+
         if (len(needʗ1) == 0) {
             return ok;
         }
+
         uintptr total = default!;
         foreach (var (i, name) in needʗ1) {
             total += have[i];
@@ -648,6 +687,7 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
             t.Logf("no samples in expected functions"u8);
             ok = false;
         }
+
         // We'd like to check a reasonable minimum, like
         // total / len(have) / smallconstant, but this test is
         // pretty flaky (see bug 7095).  So we'll just test to
@@ -668,24 +708,24 @@ internal static Func<ж<testing.T>, ж<profile.Profile>, bool> matchAndAvoidStac
 public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveExec(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+
         var (exe, err) = os.Executable();
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
-        nint heap = (1 << (int)(30));
+
+        nint heap = 1 << 30;
         if (runtime.GOOS == "android"u8) {
             // Use smaller size for Android to avoid crash.
-            heap = (100 << (int)(20));
+            heap = 100 << 20;
         }
         if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm"u8) {
             // Use smaller heap for Windows/ARM to avoid crash.
             heap = (100 << (int)(20));
         }
         if (testing.Short()) {
-            heap = (100 << (int)(20));
+            heap = 100 << 20;
         }
         // This makes fork slower.
         var garbage = new slice<byte>(heap);
@@ -700,6 +740,7 @@ public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
             doneʗ1.ᐸꟷ(true);
         });
         ᐸꟷ(done);
+
         ref var prof = ref builtin.heap(new bytes.Buffer(), out var Ꮡprof);
         {
             var errΔ1 = StartCPUProfile(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡprof)); if (errΔ1 != default!) {
@@ -707,6 +748,7 @@ public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
             }
         }
         defer(StopCPUProfile, ref ᒐ);
+
         for (nint i = 0; i < 10; i++) {
             testenv.Command(new pprof_internal_test_package.testing_TжTB(Ꮡt), exe, "-h"u8).CombinedOutput();
         }
@@ -744,6 +786,7 @@ public static void TestGoroutineSwitch(ж<testing.T> Ꮡt) {
             runtime.Gosched();
         }
         StopCPUProfile();
+
         // Read profile to look for entries for gogo with an attempt at a traceback.
         // "runtime.gogo" is OK, because that's the part of the context switch
         // before the actual switch begins. But we should not see "gogo",
@@ -757,11 +800,13 @@ public static void TestGoroutineSwitch(ж<testing.T> Ꮡt) {
                     return;
                 }
             }
+
             // An entry with just one frame is OK too:
             // it knew to stop at gogo.
             if (len(stk) == 1) {
                 return;
             }
+
             // Otherwise, should not see gogo.
             // The place we'd see it would be the inner most frame.
             @string name = (~stk[0]).Line[0].Function.Value.Name;
@@ -855,7 +900,7 @@ internal static partial void growstack1() {
 
 //go:noinline
 internal static partial void growstack(nint n) {
-    array<byte> buf = new(2097152); /* (8 << (int)(18)) */
+    array<byte> buf = new(2097152); /* (8 << 18) */
     use(buf);
     if (n > 0) {
         growstack(n - 1);
@@ -901,7 +946,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockChanRecv\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "chan send"u8,
                 f: blockChanSend,
@@ -917,7 +962,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockChanSend\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "chan close"u8,
                 f: blockChanClose,
@@ -933,7 +978,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockChanClose\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "select recv async"u8,
                 f: blockSelectRecvAsync,
@@ -949,7 +994,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockSelectRecvAsync\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "select send sync"u8,
                 f: blockSelectSendSync,
@@ -965,7 +1010,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockSelectSendSync\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "mutex"u8,
                 f: blockMutex,
@@ -981,7 +1026,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockMutex\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8),
+"""u8.Raw()),
             new(
                 name: "cond"u8,
                 f: blockCond,
@@ -997,31 +1042,37 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 #	0x[0-9a-f]+	runtime/pprof\.blockCond\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 #	0x[0-9a-f]+	runtime/pprof\.TestBlockProfile\+0x[0-9a-f]+	.*runtime/pprof/pprof_test.go:[0-9]+
 
-"""u8)
+"""u8.Raw())
         }.array();
+
         // Generate block profile
         runtime.SetBlockProfileRate(1);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
         foreach (var (_, test) in tests.ΔRangeSnapshot()) {
             test.f(Ꮡt);
         }
+
         var testsʗ1 = tests;
         Ꮡt.Run(debug1ˢ, (ж<testing.T> tΔ1) => {
             ref var w = ref heap(new strings.Builder(), out var Ꮡw);
             Lookup(blockˢ).WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
             @string prof = w.String();
+
             if (!strings_package.HasPrefix(prof, contentionCyclesSecondˢ)) {
                 tΔ1.Fatalf("Bad profile header:\n%v"u8, prof);
             }
+
             if (strings_package.HasSuffix(prof, "#\t0x0\n\n"u8)) {
                 tΔ1.Errorf("Useless 0 suffix:\n%v"u8, prof);
             }
+
             foreach (var (_, test) in testsʗ1.ΔRangeSnapshot()) {
                 if (!regexp.MustCompile(strings_package.ReplaceAll(test.re, "\t"u8, "\t+"u8)).MatchString(prof)) {
                     tΔ1.Errorf("Bad %v entry, expect:\n%v\ngot:\n%v"u8, test.name, test.re, prof);
                 }
             }
         });
+
         var testsʗ2 = tests;
         Ꮡt.Run(protoˢ, (ж<testing.T> tΔ2) => {
             // proto format
@@ -1037,6 +1088,7 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
                     tΔ2.Fatalf("invalid profile: %v"u8, errΔ1);
                 }
             }
+
             var stks = profileStacks(p);
             foreach (var (_, test) in testsʗ2.ΔRangeSnapshot()) {
                 if (!containsStack(stks, test.stk)) {
@@ -1051,8 +1103,8 @@ public static void TestBlockProfile(ж<testing.T> Ꮡt) {
 
 internal static slice<slice<@string>> /*res*/ profileStacks(ж<profile.Profile> Ꮡp) {
     slice<slice<@string>> res = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     foreach (var (_, s) in p.Sample) {
         slice<@string> stk = default!;
         foreach (var (_, l) in (~s).Location) {
@@ -1115,6 +1167,7 @@ internal static partial void awaitBlockedGoroutine(ж<testing.T> Ꮡt, @string s
 
         @string re = fmt.Sprintf(@"(?m)^goroutine \d+ \[%s\]:\n(?:.+\n\t.+\n)*runtime/pprof\.%s"u8, regexp.QuoteMeta(state), fName);
         var r = regexp.MustCompile(re);
+
         {
             var (deadline, ok) = t.Deadline(); if (ok) {
                 {
@@ -1129,7 +1182,8 @@ internal static partial void awaitBlockedGoroutine(ж<testing.T> Ꮡt, @string s
                 }
             }
         }
-        var buf = new slice<byte>((64 << (int)(10)));
+
+        var buf = new slice<byte>((64 << 10));
         while (ᐧ) {
             runtime.Gosched();
             nint n = runtime.Stack(buf, true);
@@ -1315,10 +1369,12 @@ public static void TestBlockProfileBias(ж<testing.T> Ꮡt) {
     try {
         nint rate = (nint)1000; // arbitrary value
         runtime.SetBlockProfileRate(rate);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
+
         // simulate blocking events
         blockFrequentShort(rate);
         blockInfrequentLong(rate);
+
         ref var w = ref heap(new bytes.Buffer(), out var Ꮡw);
         Lookup(blockˢ).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡw), 0);
         var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡw));
@@ -1326,6 +1382,7 @@ public static void TestBlockProfileBias(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("failed to parse profile: %v"u8, err);
         }
         Ꮡt.Logf("parsed proto: %s"u8, p.OrTypedNil());
+
         var il = (float64)(-1D); // blockInfrequentLong duration
         var fs = (float64)(-1D); // blockFrequentShort duration
         foreach (var (_, s) in (~p).Sample) {
@@ -1334,6 +1391,7 @@ public static void TestBlockProfileBias(ж<testing.T> Ꮡt) {
                     if (len((~s).Value) < 2) {
                         Ꮡt.Fatal(blockProfileHasLessThan2ˢ);
                     }
+
                     if ((~line.Function).Name == "runtime/pprof.blockInfrequentLong"u8){
                         il = (float64)(~s).Value[1];
                     } else 
@@ -1346,6 +1404,7 @@ public static void TestBlockProfileBias(ж<testing.T> Ꮡt) {
         if (il == -1D || fs == -1D) {
             Ꮡt.Fatal(blockProfileIsMissingˢ);
         }
+
         // stddev of bias from 100 runs on local machine multiplied by 10x
         const float64 threshold = 0.2;
         {
@@ -1400,16 +1459,19 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
         if (old != 0) {
             Ꮡt.Fatalf("need MutexProfileRate 0, got %d"u8, old);
         }
+
         UntypedInt N = 100;
         time.Duration D = /* 100 * time.Millisecond */ 100000000;
         var start = time.Now();
         blockMutexN(Ꮡt, N, D);
         var blockMutexNTime = time.Since(start);
+
         Ꮡt.Run(debug1ˢ, (ж<testing.T> tΔ1) => {
             ref var w = ref heap(new strings.Builder(), out var Ꮡw);
             Lookup(mutexˢ).WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
             @string prof = w.String();
             tΔ1.Logf("received profile: %v"u8, prof);
+
             if (!strings_package.HasPrefix(prof, mutexCyclesSecondˢ)) {
                 tΔ1.Errorf("Bad profile header:\n%v"u8, prof);
             }
@@ -1447,6 +1509,7 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
                     tΔ2.Fatalf("invalid profile: %v"u8, errΔ1);
                 }
             }
+
             var stks = profileStacks(p);
             foreach (var (_, want) in new slice<@string>[]{
                 new @string[]{"sync.(*Mutex).Unlock"u8, "runtime/pprof.blockMutexN.func1"u8}.slice()
@@ -1455,6 +1518,7 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
                     tΔ2.Errorf("No matching stack entry for %+v"u8, want);
                 }
             }
+
             nint i = 0;
             for (; i < len((~p).SampleType); i++) {
                 if ((~(~p).SampleType[i]).Unit == "nanoseconds"u8) {
@@ -1476,16 +1540,17 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
             // time keeps ticking during these delays. By making the upper
             // bound proportional to the wall time in blockMutexN, in theory
             // we're accounting for all these possible delays.
-            var d = ((time.Duration)total);
+            var d = (time.Duration)total;
             var lo = (time.Duration)(9000000000L);
             var hi = ((time.Duration)N) * blockMutexNTime * 11 / 10;
             if (d < lo || d > hi) {
                 foreach (var (_, s) in (~p).Sample) {
-                    tΔ2.Logf("sample: %s"u8, ((time.Duration)(~s).Value[i]));
+                    tΔ2.Logf("sample: %s"u8, (time.Duration)(~s).Value[i]);
                 }
                 tΔ2.Fatalf("profile samples total %v, want within range [%v, %v] (target: %v)"u8, d, lo, hi, (time.Duration)(10000000000L));
             }
         });
+
         Ꮡt.Run(recordsˢ, (ж<testing.T> tΔ3) => {
             // Record a mutex profile using the structured record API.
             slice<runtime.BlockProfileRecord> records = default!;
@@ -1497,6 +1562,7 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
                 }
                 records = new slice<runtime.BlockProfileRecord>(n * 2, () => new(nil));
             }
+
             // Check that we see the same stack trace as the proto profile. For
             // historical reason we expect a runtime.goexit root frame here that is
             // omitted in the proto profile.
@@ -1522,6 +1588,7 @@ public static void TestMutexProfileRateAdjust(ж<testing.T> Ꮡt) {
         if (old != 0) {
             Ꮡt.Fatalf("need MutexProfileRate 0, got %d"u8, old);
         }
+
         (int64 contentions, int64 delay) readProfile() {
             int64 contentionsΔ1 = default!;
             int64 delayΔ1 = default!;
@@ -1537,6 +1604,7 @@ public static void TestMutexProfileRateAdjust(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("invalid profile: %v"u8, errΔ1);
                 }
             }
+
             foreach (var (_, s) in (~p).Sample) {
                 bool match = default!;
                 bool runtimeInternal = default!;
@@ -1557,10 +1625,10 @@ public static void TestMutexProfileRateAdjust(ж<testing.T> Ꮡt) {
             }
             return (contentionsΔ1, delayΔ1);
         }
+
         blockMutex(Ꮡt);
         var (contentions, delay) = readProfile();
-        if (contentions == 0) {
-            // low-resolution timers can have delay of 0 in mutex profile
+        if (contentions == 0) { // low-resolution timers can have delay of 0 in mutex profile
             Ꮡt.Fatal(didNotSeeExpectedˢ);
         }
         runtime.SetMutexProfileFraction(0);
@@ -1602,6 +1670,7 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
         // Setting GOMAXPROCS to 1 ensures we can force all goroutines to the
         // desired blocking point.
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(1), ref ᒐ);
+
         var c = new channel<nint>(0);
         for (nint i = 0; i < 100; i++) {
             switch (ᐧ) {
@@ -1617,13 +1686,13 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
                 goǃ(func3, c);
                 break;
             }}
-
             // Let goroutines block on channel
             for (nint j = 0; j < 5; j++) {
                 runtime.Gosched();
             }
         }
         var ctx = context.Background();
+
         // ... and again, with labels this time (just with fewer iterations to keep
         // sorting deterministic).
         var cʗ1 = c;
@@ -1642,15 +1711,16 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
                     goǃ(func3, cʗ1);
                     break;
                 }}
-
                 // Let goroutines block on channel
                 for (nint j = 0; j < 5; j++) {
                     runtime.Gosched();
                 }
             }
         });
+
         SetGoroutineLabels(WithLabels(context.Background(), Labels(selfLabelˢ, selfValueˢ)));
         defer(SetGoroutineLabels, context.Background(), ref ᒐ);
+
         var garbage = @new<ж<nint>>();
         var fingReady = new channel<EmptyStruct>(0);
         var cʗ2 = c;
@@ -1668,11 +1738,14 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
             runtime.GC();
         }
         ᐸꟷ(fingReady);
+
         ref var w = ref heap(new bytes.Buffer(), out var Ꮡw);
         var goroutineProf = Lookup(goroutineˢ);
+
         // Check debug profile
         goroutineProf.WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡw), 1);
         @string prof = Ꮡw.String();
+
         ref var labels = ref heap<global::go.runtime.pprof_package.labelMap>(out var Ꮡlabels);
         labels = new labelMap(Labels(labelˢ, valueˢ));
         @string labelStr = "\n# labels: "u8 + Ꮡlabels.String();
@@ -1696,6 +1769,7 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
         if (!containsInOrder(prof, append(orderedPrefix, fingLabelStr).ꓸꓸꓸ)) {
             Ꮡt.Errorf("expected sorted goroutine counts with Labels:\n%s"u8, prof);
         }
+
         // Check proto profile
         w.Reset();
         goroutineProf.WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡw), 0);
@@ -1721,7 +1795,9 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("expected count profile to contain goroutines with counts and labels %v, got %v"u8,
                 expectedLabels, p.OrTypedNil());
         }
+
         close(c);
+
         time.Sleep(10 * time.Millisecond); // let goroutines exit
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1799,15 +1875,20 @@ internal static readonly @string finalizerNotPresentˢ = "finalizer not present"
 internal static readonly @string finalizerPresentˢ = "finalizer present"u8;
 internal static readonly @string goroutineLaunchesˢ = "goroutine launches"u8;
 
+// T is a pointer type so it won't be allocated by the tiny
+// allocator, which can lead to its finalizer not being called
+// during this test
 internal partial class TestGoroutineProfileConcurrency_T /*ж<byte>*/;
 
 public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+
     var goroutineProf = Lookup(goroutineˢ);
+
     nint profilerCalls(@string s) => strings_package.Count(s, runtimePprofRuntimeˢ);
+
     bool includesFinalizer(@string s) => strings_package.Contains(s, runtimeRunfinqˢ);
+
     // Concurrent calls to the goroutine profiler should not trigger data races
     // or corruption.
     var goroutineProfʗ1 = goroutineProf;
@@ -1820,6 +1901,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, (time.Duration)(10000000000L));
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
+
             ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
             for (nint i = 0; i < 2; i++) {
                 Ꮡwg.Add(1);
@@ -1855,6 +1937,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // The finalizer goroutine should not show up in most profiles, since it's
     // marked as a system goroutine when idle.
     var goroutineProfʗ4 = goroutineProf;
@@ -1867,6 +1950,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             tΔ2.Errorf("profile includes finalizer (but finalizer should be marked as system):\n%s"u8, prof);
         }
     });
+
     // The finalizer goroutine should show up when it's running user code.
     var goroutineProfʗ5 = goroutineProf;
     var includesFinalizerʗ2 = includesFinalizer;
@@ -1907,6 +1991,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // Check that new goroutines only show up in order.
     var goroutineProfʗ6 = goroutineProf;
     var testLaunches = [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ4) => {
@@ -1914,14 +1999,18 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
         try {
             ref var done = ref heap(new sync.WaitGroup(), out var Ꮡdone);
             defer(Ꮡdone.Wait, ref ᒐ);
+
             ref var ctx = ref heap<context.Context>(out var Ꮡctx);
             Ꮡctx.ValueSlot = context.Background();
             (Ꮡctx.ValueSlot, var cancel) = context.WithCancel(Ꮡctx.ValueSlot);
             var cancelʗ4 = cancel;
             defer(() => cancelʗ4(), ref ᒐ);
+
             var ch = new channel<nint>(0);
             defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
+
             ref var ready = ref heap(new sync.WaitGroup(), out var Ꮡready);
+
             // These goroutines all survive until the end of the subtest, so we can
             // check that a (numbered) goroutine appearing in the profile implies
             // that all older goroutines also appear in the profile.
@@ -1959,6 +2048,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             });
+
             // Short-lived goroutines exercise different code paths (goroutines with
             // status _Gdead, for instance). This churn doesn't have behavior that
             // we can test directly, but does help to shake out data races.
@@ -1981,7 +2071,9 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             goǃ(() => {
                 Ꮡchurn.ValueSlot(0);
             });
+
             Ꮡready.Wait();
+
             ref var w = ref heap(new array<bytes.Buffer>(3), out var Ꮡw);
             foreach (var (i, _) in w) {
                 goroutineProfʗ6.WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡw.at<bytes.Buffer>(i)), 0);
@@ -1991,6 +2083,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
                 if (err != default!) {
                     tΔ4.Errorf("error parsing protobuf profile: %v"u8, err);
                 }
+
                 // High-numbered loop-i goroutines imply that every lower-numbered
                 // loop-i goroutine should be present in the profile too.
                 var counts = new map<@string, nint>();
@@ -2015,6 +2108,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     };
+
     nint runs = 100;
     if (testing.Short()) {
         runs = 5;
@@ -2027,10 +2121,10 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
 
 // Regression test for #69998.
 public static partial void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+
     var goroutineProf = Lookup(goroutineˢ);
+
     // Set up a goroutine to just create and run coroutine goroutines all day.
     void iterFunc() {
         GoFrame ᒐ = default;
@@ -2079,11 +2173,15 @@ public static partial void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     // Take a goroutine profile. If the bug in #69998 is present, this will crash
     // with high probability. We don't care about the output for this bug.
     goroutineProf.WriteTo(io.Discard, 1);
 }
 
+// T is a pointer type so it won't be allocated by the tiny
+// allocator, which can lead to its finalizer not being called
+// during this test.
 internal partial class TestGoroutineProfileIssue74090_T /*ж<byte>*/;
 
 // This test tries to provoke a situation wherein the finalizer goroutine is
@@ -2091,6 +2189,7 @@ internal partial class TestGoroutineProfileIssue74090_T /*ж<byte>*/;
 // cause a crash. See go.dev/issue/74090.
 public static void TestGoroutineProfileIssue74090(ж<testing.T> Ꮡt) {
     testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+
     var goroutineProf = Lookup(goroutineˢ);
     foreach (var _ᴛ1 in range(10)) {
         // We use finalizers for this test because finalizers transition between
@@ -2109,8 +2208,10 @@ public static void TestGoroutineProfileIssue74090(ж<testing.T> Ꮡt) {
             objs = append(objs, obj);
         }
         objs = default!;
+
         // Queue up all the finalizers.
         runtime.GC();
+
         // Try to run a goroutine profile concurrently with finalizer execution
         // to trigger the bug.
         ref var w = ref heap(new strings.Builder(), out var Ꮡw);
@@ -2134,6 +2235,7 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
                     close(cʗ1);
                     Ꮡdone.Wait();
                 }, ref ᒐ);
+
                 for (nint i = 0; i < n; i++) {
                     Ꮡready.Add(1);
                     Ꮡdone.Add(1);
@@ -2149,11 +2251,13 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
                 for (nint i = 0; i < 5; i++) {
                     runtime.Gosched();
                 }
+
                 fn(bΔ1);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         };
+
     Action<ж<testing.B>> withChurn(Action<ж<testing.B>> fn) => [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.B> bΔ2) => {
             GoFrame ᒐ = default;
             try {
@@ -2162,6 +2266,7 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
                 (Ꮡctx.ValueSlot, var cancel) = context.WithCancel(Ꮡctx.ValueSlot);
                 var cancelʗ1 = cancel;
                 defer(() => cancelʗ1(), ref ᒐ);
+
                 ref var ready = ref heap(new sync.WaitGroup(), out var Ꮡready);
                 Ꮡready.Add(1);
                 ref var count = ref heap(new int64(), out var Ꮡcount);
@@ -2180,12 +2285,14 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
                     Ꮡchurn.ValueSlot(0);
                 });
                 Ꮡready.Wait();
+
                 fn(bΔ2);
                 bΔ2.ReportMetric((float64)atomic.LoadInt64(Ꮡcount) / (float64)(~bΔ2).N, concurrentLaunchesOpˢ);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         };
+
     var benchWriteTo = (ж<testing.B> bΔ3) => {
         var goroutineProf = Lookup(goroutineˢ);
         bΔ3.ResetTimer();
@@ -2194,6 +2301,7 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
         }
         bΔ3.StopTimer();
     };
+
     var benchGoroutineProfile = (ж<testing.B> bΔ4) => {
         var p = new slice<runtime.StackRecord>(10000, () => new());
         bΔ4.ResetTimer();
@@ -2202,6 +2310,7 @@ public static void BenchmarkGoroutine(ж<testing.B> Ꮡb) {
         }
         bΔ4.StopTimer();
     };
+
     // Note that some costs of collecting a goroutine profile depend on the
     // length of the runtime.allgs slice, which never shrinks. Stay within race
     // detector's 8k-goroutine limit
@@ -2223,9 +2332,11 @@ public static void TestEmptyCallStack(ж<testing.T> Ꮡt) {
 
     @string name = fmt.Sprintf("test18836_%d"u8, emptyCallStackTestRun);
     emptyCallStackTestRun++;
+
     Ꮡt.Parallel();
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var p = NewProfile(name);
+
     p.Add(fooˢ, 47674);
     p.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡbuf), 1);
     p.Remove(fooˢ);
@@ -2301,6 +2412,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
     // Test the race detector annotations for synchronization
     // between setting labels and consuming them from the
     // goroutine profile. See issue #50292.
+
     Ꮡt.Run(resetˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
@@ -2309,6 +2421,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
             (Ꮡctx.ValueSlot, var cancel) = context.WithCancel(Ꮡctx.ValueSlot);
             var cancelʗ1 = cancel;
             defer(() => cancelʗ1(), ref ᒐ);
+
             var cancelʗ2 = cancel;
             goǃ(() => {
                 var goroutineProf = Lookup(goroutineˢ);
@@ -2321,6 +2434,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
                     }
                 }
             });
+
             for (nint i = 0; Ꮡctx.ValueSlot.Err() == default!; i++) {
                 Do(Ꮡctx.ValueSlot, Labels(loopIˢ, fmt.Sprint(i)), (context.Context ctxΔ1) => {
                 });
@@ -2329,6 +2443,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     Ꮡt.Run(churnˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
@@ -2337,6 +2452,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
             (Ꮡctx.ValueSlot, var cancel) = context.WithCancel(Ꮡctx.ValueSlot);
             var cancelʗ3 = cancel;
             defer(() => cancelʗ3(), ref ᒐ);
+
             ref var ready = ref heap(new sync.WaitGroup(), out var Ꮡready);
             Ꮡready.Add(1);
             ref var churn = ref heap<Action<nint>>(out var Ꮡchurn);
@@ -2353,6 +2469,7 @@ public static void TestGoroutineProfileLabelRace(ж<testing.T> Ꮡt) {
                 Ꮡchurn.ValueSlot(0);
             });
             Ꮡready.Wait();
+
             var goroutineProf = Lookup(goroutineˢ);
             for (nint i = 0; i < 10; i++) {
                 goroutineProf.WriteTo(io.Discard, 1);
@@ -2371,18 +2488,18 @@ internal static readonly @string sampleMustNotBeLabeledˢ = "sample must not be 
 // TestLabelSystemstack makes sure CPU profiler samples of goroutines running
 // on systemstack include the correct pprof labels. See issue #48577
 public static void TestLabelSystemstack(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Grab and re-set the initial value before continuing to ensure
     // GOGC doesn't actually change following the test.
     nint gogc = debug.SetGCPercent(100);
     debug.SetGCPercent(gogc);
+
     var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContainsLabeled), new @string[]{"runtime.systemstack;key=value"u8}.slice(), avoidFunctions());
     var p = testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
         Do(context.Background(), Labels(keyˢ, valueˢ), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context ctx) => {
             parallelLabelHog(ctx, dur, gogc);
         });
     });
+
     // Two conditions to check:
     // * labelHog should always be labeled.
     // * The label should _only_ appear on labelHog and the Do call above.
@@ -2398,29 +2515,29 @@ public static void TestLabelSystemstack(ж<testing.T> Ꮡt) {
                     mustBeLabeled = l.Function.Value.Name;
                 }
                 else if (exprᴛ1 == "runtime/pprof.Do"u8) {
+                    // Do sets the labels, so samples may
+                    // or may not be labeled depending on
+                    // which part of the function they are
+                    // at.
                     mayBeLabeled = true;
                 }
                 else if (exprᴛ1 == "runtime.bgsweep"u8 || exprᴛ1 == "runtime.bgscavenge"u8 || exprᴛ1 == "runtime.forcegchelper"u8 || exprᴛ1 == "runtime.gcBgMarkWorker"u8 || exprᴛ1 == "runtime.runfinq"u8 || exprᴛ1 == "runtime.sysmon"u8) {
+                    // Runtime system goroutines or threads
+                    // (such as those identified by
+                    // runtime.isSystemGoroutine). These
+                    // should never be labeled.
                     mustNotBeLabeled = l.Function.Value.Name;
                 }
                 else if (exprᴛ1 == "gogo"u8 || exprᴛ1 == "gosave_systemstack_switch"u8 || exprᴛ1 == "racecall"u8) {
+                    // These are context switch/race
+                    // critical that we can't do a full
+                    // traceback from. Typically this would
+                    // be covered by the runtime check
+                    // below, but these symbols don't have
+                    // the package name.
                     mayBeLabeled = true;
                 }
 
-                // Do sets the labels, so samples may
-                // or may not be labeled depending on
-                // which part of the function they are
-                // at.
-                // Runtime system goroutines or threads
-                // (such as those identified by
-                // runtime.isSystemGoroutine). These
-                // should never be labeled.
-                // These are context switch/race
-                // critical that we can't do a full
-                // traceback from. Typically this would
-                // be covered by the runtime check
-                // below, but these symbols don't have
-                // the package name.
                 if (strings_package.HasPrefix((~l.Function).Name, runtimeˢ)) {
                     // There are many places in the runtime
                     // where we can't do a full traceback.
@@ -2466,6 +2583,7 @@ internal static void labelHog(channel<EmptyStruct> stop, nint gogc) {
     // Regression test for issue 50032. We must give GC an opportunity to
     // be initially triggered by a labelled goroutine.
     runtime.GC();
+
     for (nint i = 0; ᐧ ; i++) {
         var selᴛ10 = stop;
         switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
@@ -2496,6 +2614,7 @@ internal static partial void parallelLabelHog(context.Context ctx, time.Duration
             finally { ᒐ.Run(); }
         });
     }
+
     time.Sleep(dur);
     close(stop);
     Ꮡwg.Wait();
@@ -2516,14 +2635,17 @@ public static partial void TestAtomicLoadStore64(ж<testing.T> Ꮡt) {
         defer(os.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         {
             var errΔ1 = StartCPUProfile(new os.FileжWriter(f)); if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
         defer(StopCPUProfile, ref ᒐ);
+
         ref var flag = ref heap(new uint64(), out var Ꮡflag);
         var done = new channel<bool>(1);
+
         var doneʗ1 = done;
         goǃ(() => {
             while (atomic.LoadUint64(Ꮡflag) == 0) {
@@ -2554,14 +2676,17 @@ public static partial void TestTracebackAll(ж<testing.T> Ꮡt) {
         defer(os.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         {
             var errΔ1 = StartCPUProfile(new os.FileжWriter(f)); if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
         defer(StopCPUProfile, ref ᒐ);
+
         var ch = new channel<nint>(0);
         defer(ᴛ1 => close(ᴛ1), ch, ref ᒐ);
+
         nint count = 10;
         for (nint i = 0; i < count; i++) {
             var chʗ1 = ch;
@@ -2569,6 +2694,7 @@ public static partial void TestTracebackAll(ж<testing.T> Ꮡt) {
                 ᐸꟷ(chʗ1); // block
             });
         }
+
         nint N = 10000;
         if (testing.Short()) {
             N = 500;
@@ -2602,10 +2728,11 @@ internal partial struct TestTryAdd_testCases /*dyn*/ {
 // utilizing translateCPUProfile defined in proto_test.go
 public static void TestTryAdd(ж<testing.T> Ꮡt) {
     {
-        var (_, found) = findInlinedCall(inlinedCallerDump, (4 << (int)(10))); if (!found) {
+        var (_, found) = findInlinedCall(inlinedCallerDump, 4 << 10); if (!found) {
             Ꮡt.Skip(canTDetermineWhetherˢ2);
         }
     }
+
     // inlinedCallerDump
     //   inlinedCalleeDump
     var pcs = new slice<uintptr>(2);
@@ -2616,11 +2743,13 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
     }
     var wrapperPCs = new slice<uintptr>(1);
     inlinedWrapperCallerDump(wrapperPCs);
+
     {
-        var (_, found) = findInlinedCall(recursionChainBottom, (4 << (int)(10))); if (!found) {
+        var (_, found) = findInlinedCall(recursionChainBottom, 4 << 10); if (!found) {
             Ꮡt.Skip(canTDetermineWhetherˢ3);
         }
     }
+
     // recursionChainTop
     //   recursionChainMiddle
     //     recursionChainBottom
@@ -2633,13 +2762,14 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in pcs) {
         recursionStack[i] = (uint64)pcs[i];
     }
-    var period = (int64)(2000 * 1000); // 1/500*1e9 nanosec.
-    var testCases = new TestTryAdd_testCases[]{new(
-        name: "full_stack_trace"u8, // Sanity test for a normal, complete stack trace.
 
+    var period = (int64)(2000 * 1000); // 1/500*1e9 nanosec.
+
+    var testCases = new TestTryAdd_testCases[]{new(
+        // Sanity test for a normal, complete stack trace.
+        name: "full_stack_trace"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             5, 0, 50, inlinedCallerStack[0], inlinedCallerStack[1]
         }.slice(),
         count: 2,
@@ -2653,10 +2783,9 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         name: "bug35538"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
- // Fake frame: tryAdd will have inlinedCallerDump
- // (stack[1]) on the deck when it encounters the next
- // inline function. It should accept this.
-
+            // Fake frame: tryAdd will have inlinedCallerDump
+            // (stack[1]) on the deck when it encounters the next
+            // inline function. It should accept this.
             7, 0, 10, inlinedCallerStack[0], inlinedCallerStack[1], inlinedCallerStack[0], inlinedCallerStack[1],
             5, 0, 20, inlinedCallerStack[0], inlinedCallerStack[1]
         }.slice(),
@@ -2670,9 +2799,8 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         name: "bug38096"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
- // count (data[2]) == 0 && len(stk) == 1 is an overflow
- // entry. The "stk" entry is actually the count.
-
+            // count (data[2]) == 0 && len(stk) == 1 is an overflow
+            // entry. The "stk" entry is actually the count.
             4, 0, 0, 4242
         }.slice(),
         count: 2,
@@ -2681,23 +2809,22 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
             Ꮡ(new profile.Sample(Value: new int64[]{4242, 4242 * period}.slice(), Location: new ж<profile.Location>[]{Ꮡ(new profile.Location(ID: 1))}.slice()))
         }.slice()
     ), new(
-        name: "directly_recursive_func_is_not_inlined"u8, // If a function is directly called recursively then it must
- // not be inlined in the caller.
- //
- // N.B. We're generating an impossible profile here, with a
- // recursive inlineCalleeDump call. This is simulating a non-Go
- // function that looks like an inlined Go function other than
- // its recursive property. See pcDeck.tryAdd.
-
+        // If a function is directly called recursively then it must
+        // not be inlined in the caller.
+        //
+        // N.B. We're generating an impossible profile here, with a
+        // recursive inlineCalleeDump call. This is simulating a non-Go
+        // function that looks like an inlined Go function other than
+        // its recursive property. See pcDeck.tryAdd.
+        name: "directly_recursive_func_is_not_inlined"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             5, 0, 30, inlinedCallerStack[0], inlinedCallerStack[0],
             4, 0, 40, inlinedCallerStack[0]
         }.slice(),
-        count: 3, // inlinedCallerDump shows up here because
- // runtime_expandFinalInlineFrame adds it to the stack frame.
-
+        count: 3,
+        // inlinedCallerDump shows up here because
+        // runtime_expandFinalInlineFrame adds it to the stack frame.
         wantLocs: new slice<@string>[]{new @string[]{"runtime/pprof.inlinedCalleeDump"u8}.slice(), new @string[]{"runtime/pprof.inlinedCallerDump"u8}.slice()}.slice(),
         wantSamples: new ж<profile.Sample>[]{
             Ꮡ(new profile.Sample(Value: new int64[]{30, 30 * period}.slice(), Location: new ж<profile.Location>[]{Ꮡ(new profile.Location(ID: 1)), Ꮡ(new profile.Location(ID: 1)), Ꮡ(new profile.Location(ID: 2))}.slice())),
@@ -2707,7 +2834,6 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         name: "recursion_chain_inline"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             9, 0, 10, recursionStack[0], recursionStack[1], recursionStack[2], recursionStack[3], recursionStack[4], recursionStack[5]
         }.slice(),
         count: 2,
@@ -2721,8 +2847,8 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
                 "runtime/pprof.recursionChainMiddle"u8,
                 "runtime/pprof.recursionChainTop"u8,
                 "runtime/pprof.TestTryAdd"u8}.slice()
-        }.slice(), // inlined into the test.
-
+            // inlined into the test.
+        }.slice(),
         wantSamples: new ж<profile.Sample>[]{
             Ꮡ(new profile.Sample(Value: new int64[]{10, 10 * period}.slice(), Location: new ж<profile.Location>[]{Ꮡ(new profile.Location(ID: 1)), Ꮡ(new profile.Location(ID: 2)), Ꮡ(new profile.Location(ID: 3))}.slice()))
         }.slice()
@@ -2730,7 +2856,6 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         name: "truncated_stack_trace_later"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             5, 0, 50, inlinedCallerStack[0], inlinedCallerStack[1],
             4, 0, 60, inlinedCallerStack[0]
         }.slice(),
@@ -2744,7 +2869,6 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         name: "truncated_stack_trace_first"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             4, 0, 70, inlinedCallerStack[0],
             5, 0, 80, inlinedCallerStack[0], inlinedCallerStack[1]
         }.slice(),
@@ -2755,11 +2879,10 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
             Ꮡ(new profile.Sample(Value: new int64[]{80, 80 * period}.slice(), Location: new ж<profile.Location>[]{Ꮡ(new profile.Location(ID: 1))}.slice()))
         }.slice()
     ), new(
-        name: "truncated_stack_trace_only"u8, // We can recover the inlined caller from a truncated stack.
-
+        // We can recover the inlined caller from a truncated stack.
+        name: "truncated_stack_trace_only"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             4, 0, 70, inlinedCallerStack[0]
         }.slice(),
         count: 2,
@@ -2768,15 +2891,14 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
             Ꮡ(new profile.Sample(Value: new int64[]{70, 70 * period}.slice(), Location: new ж<profile.Location>[]{Ꮡ(new profile.Location(ID: 1))}.slice()))
         }.slice()
     ), new(
-        name: "truncated_stack_trace_twice"u8, // The same location is used for duplicated stacks.
-
+        // The same location is used for duplicated stacks.
+        name: "truncated_stack_trace_twice"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
-            4, 0, 70, inlinedCallerStack[0], // Fake frame: add a fake call to
- // inlinedCallerDump to prevent this sample
- // from getting merged into above.
-
+            4, 0, 70, inlinedCallerStack[0],
+            // Fake frame: add a fake call to
+            // inlinedCallerDump to prevent this sample
+            // from getting merged into above.
             5, 0, 80, inlinedCallerStack[1], inlinedCallerStack[0]
         }.slice(),
         count: 3,
@@ -2792,7 +2914,6 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         name: "expand_wrapper_function"u8,
         input: new uint64[]{
             3, 0, 500, // hz = 500. Must match the period.
-
             4, 0, 50, (uint64)wrapperPCs[0]
         }.slice(),
         count: 2,
@@ -2802,6 +2923,7 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
         }.slice()
     )
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         ref var tc = ref heap(new TestTryAdd_testCases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -2813,6 +2935,7 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("translating profile: %v"u8, err);
             }
             tΔ1.Logf("Profile: %v\n"u8, p.OrTypedNil());
+
             // One location entry with all inlined functions.
             slice<slice<@string>> gotLoc = default!;
             foreach (var (_, loc) in (~p).Location) {
@@ -2848,14 +2971,13 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
 }
 
 public static void TestTimeVDSO(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test that time functions have the right stack trace. In particular,
     // it shouldn't be recursive.
     if (runtime.GOOS == "android"u8) {
         // Flaky on Android, issue 48655. VDSO may not be enabled.
         testenv.SkipFlaky(new pprof_internal_test_package.testing_TжTB(Ꮡt), 48655);
     }
+
     var matches = matchAndAvoidStacks(new Func<@string, uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>, bool>(stackContains), new @string[]{"time.now"u8}.slice(), avoidFunctions());
     var p = testCPUProfile(Ꮡt, matches, (time.Duration dur) => {
         var t0 = time.Now();
@@ -2866,6 +2988,7 @@ public static void TestTimeVDSO(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     // Check for recursive time.now sample.
     foreach (var (_, sample) in (~p).Sample) {
         bool seenNow = default!;
@@ -2893,15 +3016,18 @@ internal partial struct TestProfilerStackDepth_tests /*dyn*/ {
 
 public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
     Ꮡt.Cleanup(disableSampling());
+
     UntypedInt depth = 128;
     goǃ(produceProfileEvents, Ꮡt, (nint)(depth));
     awaitBlockedGoroutine(Ꮡt, chanReceiveˢ, goroutineDeepˢ, 1);
+
     var tests = new TestProfilerStackDepth_tests[]{
         new("heap"u8, new @string[]{"runtime/pprof.allocDeep"u8}.slice()),
         new("block"u8, new @string[]{"runtime.chanrecv1"u8, "runtime/pprof.blockChanDeep"u8}.slice()),
         new("mutex"u8, new @string[]{"sync.(*Mutex).Unlock"u8, "runtime/pprof.blockMutexDeep"u8}.slice()),
         new("goroutine"u8, new @string[]{"runtime.gopark"u8, "runtime.chanrecv"u8, "runtime.chanrecv1"u8, "runtime/pprof.goroutineDeep"u8}.slice())
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestProfilerStackDepth_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -2919,6 +3045,7 @@ public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("failed to parse heap profile: %v"u8, err);
             }
             tΔ1.Logf("Profile = %v"u8, p.OrTypedNil());
+
             var stks = profileStacks(p);
             slice<slice<@string>> matchedStacks = default!;
             foreach (var (_, stk) in stks) {
@@ -2947,6 +3074,7 @@ public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
                 if (len(stk) != depth) {
                     tΔ1.Errorf("want stack depth = %d, got %d"u8, (nint)(depth), len(stk));
                 }
+
                 {
                     @string rootFn = stk[depth - 1];
                     @string wantFn = runtimePprofˢ; if (rootFn != wantFn) {
@@ -2981,7 +3109,7 @@ internal static void allocDeep(nint n) {
         allocDeep(n - 1);
         return;
     }
-    memSink = new slice<byte>((1 << (int)(20)));
+    memSink = new slice<byte>((1 << 20));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -3098,14 +3226,18 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
         // https://github.com/grafana/pyroscope-go/issues/103,
         // authored by Tolya Korniltsev
         ref var m = ref heap(new sync.Mutex(), out var Ꮡm);
+
         nint prev = runtime.SetMutexProfileFraction(-1);
         defer(runtime.SetMutexProfileFraction, prev, ref ᒐ);
+
         const nint fraction = 1;
         const nint iters = 100;
         const nint workers = 2;
+
         runtime.SetMutexProfileFraction(fraction);
         runtime.SetBlockProfileRate(1);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
+
         ref var wg = ref heap<sync.WaitGroup>(out var Ꮡwg);
         wg = new sync.WaitGroup(nil);
         Ꮡwg.Add(workers);
@@ -3122,6 +3254,7 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
             });
         }
         Ꮡwg.Wait();
+
         void assertNoDuplicates(@string name, Func<slice<runtime.BlockProfileRecord>, (nint, bool)> collect) {
             var stacks = getProfileStacks(collect, true);
             var seen = new map<@string, EmptyStruct>();
@@ -3201,9 +3334,10 @@ public static partial void TestBlockMutexProfileInlineExpansion(ж<testing.T> �
     GoFrame ᒐ = default;
     try {
         runtime.SetBlockProfileRate(1);
-        defer(runtime.SetBlockProfileRate, (nint)(0), ref ᒐ);
+        defer(runtime.SetBlockProfileRate, (nint)0, ref ᒐ);
         nint prev = runtime.SetMutexProfileFraction(1);
         defer(runtime.SetMutexProfileFraction, prev, ref ᒐ);
+
         ref var mu = ref heap(new sync.Mutex(), out var Ꮡmu);
         ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(2);
@@ -3213,6 +3347,7 @@ public static partial void TestBlockMutexProfileInlineExpansion(ж<testing.T> �
         // inlineD will unblock inlineA
         goǃ(inlineD, Ꮡmu, Ꮡwg);
         Ꮡwg.Wait();
+
         var tcs = new TestBlockMutexProfileInlineExpansion_tcs[]{
             new(
                 Name: "mutex"u8,
@@ -3222,7 +3357,7 @@ sync.(*Mutex).Unlock
 runtime/pprof.inlineF
 runtime/pprof.inlineE
 runtime/pprof.inlineD
-"""u8
+"""u8.Raw()
             ),
             new(
                 Name: "block"u8,
@@ -3232,9 +3367,10 @@ sync.(*Mutex).Lock
 runtime/pprof.inlineC
 runtime/pprof.inlineB
 runtime/pprof.inlineA
-"""u8
+"""u8.Raw()
             )
         }.slice();
+
         foreach (var (_, vᴛ1) in tcs) {
             ref var tc = ref heap(new TestBlockMutexProfileInlineExpansion_tcs(), out var Ꮡtc);
             tc = vᴛ1;
@@ -3271,18 +3407,19 @@ public static void TestProfileRecordNullPadding(ж<testing.T> Ꮡt) {
     ᐸꟷ(time.After(time.Millisecond)); // BlockProfile
     blockMutex(Ꮡt); // MutexProfile
     runtime.GC();
+
     // Test that all profile records are null padded.
     testProfileRecordNullPadding<runtime.BlockProfileRecord>(Ꮡt, mutexProfileˢ, runtime.MutexProfile);
     testProfileRecordNullPadding<runtime.StackRecord>(Ꮡt, goroutineProfileˢ, runtime.GoroutineProfile);
     testProfileRecordNullPadding<runtime.BlockProfileRecord>(Ꮡt, blockProfileˢ, runtime.BlockProfile);
     testProfileRecordNullPadding(Ꮡt, memProfileInUseZeroTrueˢ, (slice<runtime.MemProfileRecord> p) => runtime.MemProfile(p, true));
     testProfileRecordNullPadding(Ꮡt, memProfileInUseZeroFalseˢ, (slice<runtime.MemProfileRecord> p) => runtime.MemProfile(p, false));
+    // Not testing ThreadCreateProfile because it is broken, see issue 6104.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object noRecordsFoundˢ = (@string)"no records found"u8;
 
-// Not testing ThreadCreateProfile because it is broken, see issue 6104.
 internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string name, Func<slice<T>, (nint, bool)> fn)
     where T : /* runtime.StackRecord | runtime.MemProfileRecord | runtime.BlockProfileRecord */ new()
 {
@@ -3304,6 +3441,7 @@ internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string
             break;
         }}
     }
+
     var stack0ʗ1 = stack0;
     Ꮡt.Run(name, (ж<testing.T> tΔ2) => {
         slice<T> p = default!;
@@ -3322,9 +3460,11 @@ internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string
                 }
             }
         }
+
         if (len(p) == 0) {
             tΔ2.Fatal(noRecordsFoundˢ);
         }
+
         foreach (var (_, vᴛ1) in p) {
             ref var sr = ref heap<T>(out var Ꮡsr);
             sr = vᴛ1;

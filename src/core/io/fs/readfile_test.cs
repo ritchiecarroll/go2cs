@@ -52,11 +52,13 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
     if (((sstring)data) != "hello, world"u8 || err != default!) {
         Ꮡt.Fatalf(@"ReadFile(readFileOnly, ""hello.txt"") = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
     }
+
     // Test that ReadFile uses Open when the method is not present.
     (data, err) = ReadFile(new openOnly(testFsys), helloTxtˢ);
     if (((sstring)data) != "hello, world"u8 || err != default!) {
         Ꮡt.Fatalf(@"ReadFile(openOnly, ""hello.txt"") = %q, %v, want %q, nil"u8, data, err, helloWorldˢ);
     }
+
     // Test that ReadFile on Sub of . works (sub_test checks non-trivial subs).
     (var sub, err) = Sub(testFsys, "."u8);
     if (err != default!) {

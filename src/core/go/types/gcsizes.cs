@@ -23,17 +23,18 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             assert(result >= 1);
         }, ref ᒐ);
+
         // For arrays and structs, alignment is defined in terms
         // of alignment of the elements and fields, respectively.
-        var switchᴛ7 = under(T);
+        var switchᴛ7 = T.Underlying();
         switch (switchᴛ7.type()) {
         case ж<Array> t: {
+            // spec: "For a variable x of array type: unsafe.Alignof(x)
+            // is the same as unsafe.Alignof(x[0]), but at least 1."
             result = Ꮡs.Alignof((~t).elem); goto ᒐdone;
         }
         case ж<Struct> t: {
             if (len((~t).fields) == 0 && _IsSyncAtomicAlign64(T)) {
-                // spec: "For a variable x of array type: unsafe.Alignof(x)
-                // is the same as unsafe.Alignof(x[0]), but at least 1."
                 // Special case: sync/atomic.align64 is an
                 // empty struct we recognize as a signal that
                 // the struct it contains must be
@@ -43,11 +44,12 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
                 // cmd/compile/internal/types/size.go:calcStructOffset
                 result = 8; goto ᒐdone;
             }
+
+            // spec: "For a variable x of struct type: unsafe.Alignof(x)
+            // is the largest of the values unsafe.Alignof(x.f) for each
+            // field f of x, but at least 1."
             var max = (int64)1;
             foreach (var (_, f) in (~t).fields) {
-                // spec: "For a variable x of struct type: unsafe.Alignof(x)
-                // is the largest of the values unsafe.Alignof(x.f) for each
-                // field f of x, but at least 1."
                 {
                     var aΔ1 = Ꮡs.Alignof((~f).typ); if (aΔ1 > max) {
                         max = aΔ1;
@@ -59,16 +61,16 @@ internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, ΔType T) {
         case ж<Slice> _:
         case ж<Interface> _: {
             var t = switchᴛ7;
+            // Multiword data structures are effectively structs
+            // in which each element has size WordSize.
+            // Type parameters lead to variable sizes/alignments;
+            // StdSizes.Alignof won't be called for them.
             assert(!isTypeParam(T));
             result = s.WordSize; goto ᒐdone;
         }
         case ж<Basic> t: {
+            // Strings are like slices and interfaces.
             if ((BasicInfo)(t.Info() & IsString) != 0) {
-                // Multiword data structures are effectively structs
-                // in which each element has size WordSize.
-                // Type parameters lead to variable sizes/alignments;
-                // StdSizes.Alignof won't be called for them.
-                // Strings are like slices and interfaces.
                 result = s.WordSize; goto ᒐdone;
             }
             break;
@@ -125,7 +127,7 @@ internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fie
 internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    var switchᴛ8 = under(T);
+    var switchᴛ8 = T.Underlying();
     switch (switchᴛ8.type()) {
     case ж<Basic> t: {
         assert(isTyped(T));
@@ -147,9 +149,9 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
         if (n <= 0) {
             return 0;
         }
+        // n > 0
         var esize = Ꮡs.Sizeof((~t).elem);
         if (esize < 0) {
-            // n > 0
             return -1; // element too large
         }
         if (esize == 0) {
@@ -177,15 +179,17 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
         if (offs < 0 || size < 0) {
             return -1; // type too large
         }
+        // gc: The last field of a non-zero-sized struct is not allowed to
+        // have size 0.
         if (offs > 0 && size == 0) {
-            // gc: The last field of a non-zero-sized struct is not allowed to
-            // have size 0.
             size = 1;
         }
-        return align(offs + size, // gc: Size includes alignment padding.
- Ꮡs.Alignof(new StructжΔType(t))); // may overflow to < 0 which is ok
+        // gc: Size includes alignment padding.
+        return align(offs + size, Ꮡs.Alignof(new StructжΔType(t))); // may overflow to < 0 which is ok
     }
     case ж<Interface> t: {
+        // Type parameters lead to variable sizes/alignments;
+        // StdSizes.Sizeof won't be called for them.
         assert(!isTypeParam(T));
         return s.WordSize * 2;
     }
@@ -195,8 +199,6 @@ internal static int64 Sizeof(this ж<gcSizes> Ꮡs, ΔType T) {
         throw panic("unreachable");
         break;
     }}
-    // Type parameters lead to variable sizes/alignments;
-    // StdSizes.Sizeof won't be called for them.
     return s.WordSize; // catch-all
 }
 

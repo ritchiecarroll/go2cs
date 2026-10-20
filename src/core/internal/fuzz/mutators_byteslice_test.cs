@@ -212,6 +212,7 @@ public static void BenchmarkByteSliceMutators(ж<testing.B> Ꮡb) {
         new("ShuffleBytes"u8, byteSliceShuffleBytes),
         new("SwapBytes"u8, byteSliceSwapBytes)
     }.array();
+
     foreach (var (_, vᴛ1) in tests.ΔRangeSnapshot()) {
         ref var tc = ref heap(new BenchmarkByteSliceMutators_tests(), out var Ꮡtc);
         tc = vᴛ1;

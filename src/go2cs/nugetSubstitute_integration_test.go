@@ -144,6 +144,7 @@ func generatedText(t *testing.T, dir string) string {
 // Domain -> ΔDomain alias a local conversion would never produce, and the app's emission follows it. The control
 // run (-nuget-map off) converts the module locally and never says ΔDomain.
 func TestRecurseNuGetSubstitutesAMappedModule(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: go mod download + go/packages over a file-proxy module cache")
 	}

@@ -9,17 +9,9 @@ its error codes mean, and where things live in the repository.
 You need the Go release and the .NET SDK named in the README's [Requirements](README.md#requirements),
 with your Go environment set up (`GOROOT`/`GOPATH`). Converted projects target the framework named by
 [`src/Directory.Build.props`](https://github.com/ritchiecarroll/go2cs/blob/master/src/Directory.Build.props).
-The converter's module path is plain `go2cs`, so it cannot be installed by URL: clone the repository,
-then install from the clone.
-
-```shell
-git clone https://github.com/ritchiecarroll/go2cs.git
-cd go2cs/src/go2cs
-go install .
-```
-
-`go install` compiles the converter and puts the binary in `GOBIN` (or `GOPATH/bin`), which a standard
-Go setup already has on its `PATH`. Go produces a self-contained native binary; to target another
+The converter's module path is plain `go2cs`, so it cannot be installed by URL: clone the repository and
+install from the clone, as the README's [Installing the converter](README.md#installing-the-converter)
+shows. Go produces a self-contained native binary; to target another
 platform, use Go's standard cross-compilation (`GOOS`/`GOARCH`). Rebuild after every pull, with the
 same Go release you convert with.
 
@@ -52,15 +44,16 @@ Three focused checks run by hand when you change what they guard:
 Every validated package ships its **converted C# test sources** next to the production code under
 [`src/core`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core) (for example,
 [`unicode/utf8/utf8_test.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/unicode/utf8/utf8_test.cs)),
-so you can read the exact C# that runs — and re-run the validation yourself. You need
-**[Go 1.24.13](https://go.dev/dl/)** (for the reference `go test` run), the
-**[.NET 10 SDK](https://dotnet.microsoft.com/download)**, and `go2cs` on your `PATH` (see
-[Build the converter](#build-the-converter)).
+so you can read the exact C# that runs — and re-run the validation yourself. You need the Go
+release and the .NET SDK in the README's [Requirements](README.md#requirements) (Go for the
+reference `go test` run), and `go2cs` on your `PATH` (see [Build the converter](#build-the-converter)).
 
 Run it from the root of your clone. The first argument is the package's Go source, and the second is
 the package's home in the converted tree; the converter locates the runtime and the package's
-standard-library dependencies from there, so no other flags or environment setup are needed. The first
-run builds the converted runtime and its dependencies, so it allows ten minutes.
+standard-library dependencies from there, so no other flags or environment setup are needed. The ten
+minutes are the deadline for running the tests and comparing them with `go test`; building the test host
+has its own, longer allowance, because the first build compiles the converted runtime and the package's
+standard-library dependencies.
 
 PowerShell, on Windows:
 
@@ -107,25 +100,10 @@ that the differential oracle matches by *exact failure signature* — any other 
 mismatch — and reports as **disclosed-divergent** in the summary. Packages without a manifest compare
 strictly.
 
-## Diagnostics
+<a id="diagnostics"></a>
 
-A failure in the Go input itself is printed on stderr in MSBuild's canonical error format, one line per error, so CI logs
-and editor problem matchers (for example VS Code's `$msCompile`) pick it up:
-
-```
-/src/app/main.go(3,16): error GO2CS1003: cannot use 1 (untyped int constant) as string value in variable declaration
-```
-
-| Code | Meaning |
-|:--|:--|
-| `GO2CS1000` | The package did not load cleanly (an error `go/packages` does not classify). The package still converts best-effort. |
-| `GO2CS1001` | The package did not load cleanly: a `go list` error, such as a missing module or no Go files for this build. |
-| `GO2CS1002` | The package did not load cleanly: a Go parse error. The package still converts best-effort. |
-| `GO2CS1003` | The package did not fully type-check. It still converts best-effort, but code that depends on the failing expression is emitted untyped and will not compile. |
-| `GO2CS2001` | Refused: a cgo source (`import "C"`) is selected for this build, and cgo has no C# conversion yet. The run exits non-zero. Convert with `CGO_ENABLED=0` or exclude the file. |
-
-A diagnostic with no source position names `go2cs` as its origin. The `WARNING:` / `Refusing to convert:` summary line
-printed before these lines is unchanged.
+The `GO2CS` error codes a conversion reports are listed in
+[Command-line options, Diagnostics](CommandLine.md#diagnostics).
 
 ## Project layout
 

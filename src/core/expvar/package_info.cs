@@ -59,6 +59,12 @@ using static go.expvar_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -67,7 +73,7 @@ using static go.expvar_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("expvar/expvar.go", "expvar.cs", "AD50gqaCpoKmgqaCAAcQgqaCpoKokoKCgoKCgsySAA8ggqaCpoKCgoKCloKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuICCgIKCyKiSgoKCgoK6gILKkoKCgoKCuoCCyuKCgoKCgrSqAAgCgoKCgoK0/oKCqqKmgqaCzoKmgoIACRLSgIKkgoKCoqiiqpKCgqaCgoKmgoKCpoKCgqyy5oKCrLKmgqaCgoKmgoKUlILYkoKCgpSUtLS0tOa0xoI=", "136-136:1;139-139:2;145-160:3")]
+[assembly: go.GoPositionMap("expvar/expvar.go", "expvar.cs", "AD50gqaCpoKmgqaCAAcQgqaCpoKokoKCgoKCgsySAA8ggqaCpoKCgoKCpoKCgoKClIKCgpS0xLaCgoKo4oKCgoLY4oKUgoKUoqSCgoKmuICCgIKC2KiSgoKCgoLKgILKkoKCgoKCyoCCyuKCgoKCgrSqAAgCgoKCgoK0/oKCqqKmgqaC7oKmgoIACRLSgIKkgoKCoqiiqpKCgqaCgoKmgoKCpoKCgqyy5oKCrLKmgqaCgoKmgoKUlILYkoKCgpSUtLS0tNa0toI=", "136-136:1;139-139:2;145-160:3")]
 // </GoSourcePositionMaps>
 
 namespace go;

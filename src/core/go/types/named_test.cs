@@ -40,7 +40,7 @@ func (G[P]) N() (p P) { return }
 
 type Inst = G[int]
 	
-"""u8;
+"""u8.Raw();
 
 internal partial struct BenchmarkNamed_tests /*dyn*/ {
     internal @string name;
@@ -50,16 +50,19 @@ internal partial struct BenchmarkNamed_tests /*dyn*/ {
 public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
     @string src = srcᶜ32;
     var pkg = mustTypecheck(src, nil, nil);
+
     typesꓸType T = pkg.Scope().Lookup("T"u8).Type();
     typesꓸType G = pkg.Scope().Lookup("G"u8).Type();
     typesꓸType SrcInst = pkg.Scope().Lookup(instˢ).Type();
     typesꓸType UserInst = mustInstantiate(new types_test_package.testing_BжTB(Ꮡb), G, new types.BasicжΔType(Typ[Int]));
+
     var tests = new BenchmarkNamed_tests[]{
         new("nongeneric"u8, T),
         new("generic"u8, G),
         new("src instance"u8, SrcInst),
         new("user instance"u8, UserInst)
     }.slice();
+
     var testsʗ1 = tests;
     Ꮡb.Run(underlyingˢ, (ж<testing.B> bΔ1) => {
         foreach (var (_, vᴛ1) in testsʗ1) {
@@ -77,6 +80,7 @@ public static void BenchmarkNamed(ж<testing.B> Ꮡb) {
             });
         }
     });
+
     var testsʗ2 = tests;
     Ꮡb.Run(newMethodSetˢ, (ж<testing.B> bΔ3) => {
         foreach (var (_, vᴛ2) in testsʗ2) {
@@ -125,11 +129,12 @@ func (Node[Q]) M(Q) {}
 
 type Inst = *Tree[int]
 
-"""u8;
+"""u8.Raw();
 
 // Test that types do not expand infinitely, as in go.dev/issue/52715.
 public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
     @string src = srcᶜ33;
+
     var fset = token.NewFileSet();
     var f = mustParse(fset, src);
     var pkg = NewPackage("p"u8, (~(~f).Name).Name);
@@ -138,7 +143,9 @@ public static void TestFiniteTypeExpansion(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     ж<types.Named> firstFieldType(ж<types.Named> n) => n.Underlying()._<ж<types.Struct>>().Field(0).Type()._<ж<types.Pointer>>().Elem()._<ж<types.Named>>();
+
     var Inst = Unalias(pkg.Scope().Lookup(instˢ).Type())._<ж<types.Pointer>>().Elem()._<ж<types.Named>>();
     var Node = firstFieldType(Inst);
     var Tree = firstFieldType(Node);
@@ -161,14 +168,12 @@ func (T) a() {}
 func (T) c() {}
 func (T) b() {}
 
-"""u8;
+"""u8.Raw();
 
 // TestMethodOrdering is a simple test verifying that the indices of methods of
 // a named type remain the same as long as the same source and AddMethod calls
 // are presented to the type checker in the same order (go.dev/issue/61298).
 public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string src = srcᶜ34;
     // should get the same method order each time
     slice<@string> methods = default!;
@@ -176,12 +181,13 @@ public static void TestMethodOrdering(ж<testing.T> Ꮡt) {
         // collect T methods as provided in src
         var pkg = mustTypecheck(src, nil, nil);
         var T = pkg.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
+
         // add a few more methods manually
         foreach (var (_, name) in new @string[]{"foo"u8, "bar"u8, "bal"u8}.slice()) {
-            var m = NewFunc(nopos, pkg, name, nil);
-            /* don't care about signature */
+            var m = NewFunc(nopos, pkg, name, nil /* don't care about signature */);
             T.AddMethod(m);
         }
+
         // check method order
         if (i == 0){
             // first round: collect methods in given order

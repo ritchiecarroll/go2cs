@@ -96,6 +96,9 @@ type conversionArtifact struct {
 	project   string
 	runtime   runtimeConfiguration
 	createdAt time.Time
+	// prebuild is the background build a conversion made for the page starts; nil for one saved by
+	// another path, such as the warmup's. Guarded by pipelineRunner.mu.
+	prebuild *prebuild
 }
 
 type pipelineRunner struct {
@@ -111,6 +114,10 @@ type pipelineRunner struct {
 	nugetSource    string
 	nugetVersion   string
 	toolTimeout    time.Duration
+	warm           *warmup
+	// life ends when the runner closes, and every background build ends with it.
+	life    context.Context
+	endLife context.CancelFunc
 }
 
 func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRunner {
@@ -119,6 +126,7 @@ func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRu
 		options = supplied[0]
 	}
 	options = resolvePipelineOptions(repoRoot, options)
+	life, endLife := context.WithCancel(context.Background())
 	return &pipelineRunner{
 		repoRoot:       repoRoot,
 		cacheDir:       filepath.Join(repoRoot, "src", "tour", ".cache"),
@@ -129,6 +137,9 @@ func newPipelineRunner(repoRoot string, supplied ...pipelineOptions) *pipelineRu
 		nugetSource:    options.nugetSource,
 		nugetVersion:   options.nugetVersion,
 		toolTimeout:    options.toolTimeout,
+		warm:           newWarmup(!options.noWarmup),
+		life:           life,
+		endLife:        endLife,
 	}
 }
 
@@ -276,6 +287,40 @@ func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult
 	if strings.TrimSpace(request.ConversionID) == "" {
 		return runResult{}, validationError("conversionId is required")
 	}
+	if err := p.waitForWarmup(ctx); err != nil {
+		return runResult{}, err
+	}
+
+	// Through build, not runConversion: a conversion made for the page is already building in the
+	// background, and a second build in the same project directory would race it.
+	build, err := p.build(ctx, request)
+	if err != nil {
+		return runResult{}, err
+	}
+	result := runResult{Stages: []stageResult{build}}
+	if build.Status != "passed" {
+		result.Stages = append(result.Stages, skippedStage("run", ".NET Run"))
+		return result, nil
+	}
+
+	run, err := p.execute(ctx, request)
+	if err != nil {
+		return runResult{}, err
+	}
+	result.Stages = append(result.Stages, run)
+	result.Successful = run.Status == "passed"
+	return result, nil
+}
+
+// waitForWarmup holds a .NET build until a running warmup ends. The warmup is restoring the same
+// go.* packages into the same NuGet cache and starting the same build servers, so a build that
+// waits for it gets a warm toolchain instead of racing it for one. It waits before taking a pipeline
+// slot: the warmup needs a slot of its own to finish.
+func (p *pipelineRunner) waitForWarmup(ctx context.Context) error {
+	return p.warm.wait(ctx)
+}
+
+func (p *pipelineRunner) runConversion(ctx context.Context, request runRequest) (runResult, error) {
 	if err := p.acquire(ctx); err != nil {
 		return runResult{}, err
 	}
@@ -289,9 +334,7 @@ func (p *pipelineRunner) run(ctx context.Context, request runRequest) (runResult
 		return runResult{}, conversionNotFoundError("that conversion has expired; convert the current Go source again")
 	}
 
-	buildArgs := []string{"build", artifact.project, "--nologo", "--verbosity:minimal"}
-	buildArgs = append(buildArgs, runtimeMSBuildArgs(artifact.runtime)...)
-	build := p.runStage(ctx, "build", "Build", artifact.outputDir, buildTimeout, "dotnet", buildArgs...)
+	build := p.buildStage(ctx, artifact)
 	result := runResult{Stages: []stageResult{build}}
 	if build.Status != "passed" {
 		result.Stages = append(result.Stages, skippedStage("run", ".NET Run"))
@@ -684,12 +727,12 @@ func (p *pipelineRunner) runStage(parent context.Context, id, label, dir string,
 
 func (p *pipelineRunner) cleanupExpired() {
 	now := time.Now()
-	var remove []*conversionArtifact
+	var remove []retiredWorkspace
 
 	p.mu.Lock()
 	for id, artifact := range p.saved {
 		if now.Sub(artifact.createdAt) > conversionMaxAge {
-			remove = append(remove, artifact)
+			remove = append(remove, retire(artifact))
 			delete(p.saved, id)
 		}
 	}
@@ -704,28 +747,38 @@ func (p *pipelineRunner) cleanupExpired() {
 		for len(p.saved) > maxSavedArtifacts {
 			artifact := artifacts[0]
 			artifacts = artifacts[1:]
-			remove = append(remove, artifact)
+			remove = append(remove, retire(artifact))
 			delete(p.saved, artifact.id)
 		}
 	}
 	p.mu.Unlock()
 
-	for _, artifact := range remove {
-		_ = os.RemoveAll(artifact.workDir)
-	}
+	removeWorkspaces(remove, false)
 }
 
-func (p *pipelineRunner) close() {
+// discard forgets one saved conversion and removes its workspace.
+func (p *pipelineRunner) discard(id string) {
 	p.mu.Lock()
-	artifacts := make([]*conversionArtifact, 0, len(p.saved))
+	var remove []retiredWorkspace
+	if artifact := p.saved[id]; artifact != nil {
+		remove = append(remove, retire(artifact))
+	}
+	delete(p.saved, id)
+	p.mu.Unlock()
+	removeWorkspaces(remove, false)
+}
+
+// close ends every background build and removes every saved workspace.
+func (p *pipelineRunner) close() {
+	p.endLife()
+	p.mu.Lock()
+	remove := make([]retiredWorkspace, 0, len(p.saved))
 	for _, artifact := range p.saved {
-		artifacts = append(artifacts, artifact)
+		remove = append(remove, retire(artifact))
 	}
 	p.saved = make(map[string]*conversionArtifact)
 	p.mu.Unlock()
-	for _, artifact := range artifacts {
-		_ = os.RemoveAll(artifact.workDir)
-	}
+	removeWorkspaces(remove, true)
 }
 
 func newConversionID() (string, error) {

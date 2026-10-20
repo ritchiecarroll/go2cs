@@ -5,6 +5,7 @@
 namespace go;
 
 using cpu = @internal.cpu_package;
+using goexperiment = @internal.goexperiment_package;
 using @unsafe = unsafe_package;
 using @internal;
 
@@ -12,7 +13,6 @@ partial class runtime_package {
 
 //go:noescape
 internal static partial nint vgetrandom1(ж<byte> buf, uintptr length, uint32 flags, uintptr state, uintptr stateSize);
-
 
 partial struct vgetrandomAllocᴛ1 /*dyn*/ {
     internal slice<uintptr> states;
@@ -35,6 +35,7 @@ internal static void vgetrandomInit() {
     if (vdsoGetrandomSym == 0) {
         return;
     }
+
     ref var @params = ref heap(new vgetrandomInit_params(), out var Ꮡparams);
     if (vgetrandom1(nil, 0, 0, (uintptr)Ꮡparams, ~(uintptr)0) != 0) {
         return;
@@ -42,13 +43,17 @@ internal static void vgetrandomInit() {
     vgetrandomAlloc.stateSize = (uintptr)@params.SizeOfOpaqueState;
     vgetrandomAlloc.mmapProt = (int32)@params.MmapProt;
     vgetrandomAlloc.mmapFlags = (int32)@params.MmapFlags;
-    lockInit(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock), lockRankLeafRank);
+
+    lockInit(ref vgetrandomAlloc.statesLock, lockRankVgetrandom);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string getrandomStatesˢ = "getrandom states"u8;
 
 internal static uintptr vgetrandomGetState() {
     @lock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
     if (len(vgetrandomAlloc.states) == 0) {
-        var num = (uintptr)ncpu; // Just a reasonable size hint to start.
+        var num = (uintptr)numCPUStartup; // Just a reasonable size hint to start.
         var stateSizeCacheAligned = (uintptr)((vgetrandomAlloc.stateSize + cpu.CacheLineSize - 1) & ~(cpu.CacheLineSize - 1));
         var allocSize = (uintptr)((num * stateSizeCacheAligned + physPageSize - 1) & ~(physPageSize - 1));
         num = (physPageSize / stateSizeCacheAligned) * (allocSize / physPageSize);
@@ -57,6 +62,7 @@ internal static uintptr vgetrandomGetState() {
             unlock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
             return 0;
         }
+        setVMAName(Δp, allocSize, getrandomStatesˢ);
         var newBlock = (uintptr)Δp;
         if (vgetrandomAlloc.states == default!) {
             vgetrandomAlloc.states = new slice<uintptr>(0, (nint)(num));
@@ -82,6 +88,7 @@ internal static void vgetrandomDestroy(ref m mp) {
     if (mp.vgetrandomState == 0) {
         return;
     }
+
     @lock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
     vgetrandomAlloc.states = append(vgetrandomAlloc.states, mp.vgetrandomState);
     unlock(ᏑvgetrandomAlloc.of(vgetrandomAllocᴛ1.ᏑstatesLock));
@@ -94,6 +101,14 @@ public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flag
     if (vgetrandomAlloc.stateSize == 0) {
         return (-1, false);
     }
+
+    // vDSO code may spill registers to the stack
+    // Make sure they're zeroed if we're running in secret mode
+    var gp = getg();
+    if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
+        secretEraseRegisters();
+    }
+
     // We use getg().m instead of acquirem() here, because always taking
     // the lock is slightly more expensive than not always taking the lock.
     // However, we *do* require that m doesn't migrate elsewhere during the
@@ -105,6 +120,7 @@ public static (nint ret, bool supported) vgetrandom(slice<byte> Δp, uint32 flag
     // is very much the slow path, in the sense that it only ever happens
     // once over the entire lifetime of an m. So, a simple getg().m suffices.
     var mp = getg().Value.m;
+
     if ((~mp).vgetrandomState == 0) {
         mp.Value.locks++;
         var state = vgetrandomGetState();

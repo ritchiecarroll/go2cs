@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
@@ -40,6 +41,9 @@ public static void TestCoroCgoCallback(ж<testing.T> Ꮡt) {
     if (Δruntime.GOOS == "windows"u8) {
         Ꮡt.Skip(coroCgoCallbackTestsNotˢ);
     }
+    if (Δruntime.GOOS == "freebsd"u8 && race.Enabled) {
+        Ꮡt.Skipf("race + cgo freebsd not supported. See https://go.dev/issue/73788."u8);
+    }
     foreach (var (_, test) in new @string[]{
         "CoroCgoIterCallback"u8,
         "CoroCgoIterCallbackYield"u8,
@@ -62,6 +66,7 @@ internal static readonly @string expectˢ = "expect: "u8;
 
 internal static void checkCoroTestProgOutput(ж<testing.T> Ꮡt, @string output) {
     Ꮡt.Helper();
+
     var c = strings.SplitN(output, "\n"u8, 2);
     if (len(c) == 1) {
         Ꮡt.Fatalf("expected at least one complete line in the output, got:\n%s"u8, output);

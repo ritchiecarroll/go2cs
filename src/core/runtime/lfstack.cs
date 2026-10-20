@@ -10,22 +10,21 @@ using @internal.runtime;
 
 partial class runtime_package {
 
+// lfstack is the head of a lock-free stack.
+//
+// The zero value of lfstack is an empty list.
+//
+// This stack is intrusive. Nodes must embed lfnode as the first field.
+//
+// The stack does not keep GC-visible pointers to nodes, so the caller
+// must ensure the nodes are allocated outside the Go heap.
 partial struct lfstack /*num:uint64*/;
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string lfstackPushˢ = "lfstack.push"u8;
 
 internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
     ref var node = ref Ꮡnode.DerefOrNull();
 
     node.pushcnt++;
     var @new = lfstackPack(Ꮡnode, node.pushcnt);
-    {
-        var node1 = lfstackUnpack(@new); if (node1 != Ꮡnode) {
-            print((@string)"runtime: lfstack.push invalid packing: node="u8, Ꮡnode.OrTypedNil(), (@string)" cnt="u8, ((Δhex)(uint64)node.pushcnt), (@string)" packed="u8, ((Δhex)@new), (@string)" -> node="u8, node1.OrTypedNil(), (@string)"\n"u8);
-            @throw(lfstackPushˢ);
-        }
-    }
     while (ᐧ) {
         var old = atomic.Load64(Ꮡhead.Reinterpret<lfstack, uint64>());
         node.next = old;
@@ -36,6 +35,11 @@ internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
 }
 
 internal static @unsafe.Pointer pop(this ж<lfstack> Ꮡhead) {
+    uint32 backoff = default!;
+    // TODO: tweak backoff parameters on other architectures.
+    if (GOARCH == "arm64"u8) {
+        backoff = 128;
+    }
     while (ᐧ) {
         var old = atomic.Load64(Ꮡhead.Reinterpret<lfstack, uint64>());
         if (old == 0) {
@@ -46,6 +50,15 @@ internal static @unsafe.Pointer pop(this ж<lfstack> Ꮡhead) {
         if (atomic.Cas64(Ꮡhead.Reinterpret<lfstack, uint64>(), old, next)) {
             return @unsafe.Pointer.FromPinnedBox(node);
         }
+
+        // Use a backoff approach to reduce demand to the shared memory location
+        // decreases memory contention and allows for other threads to make quicker
+        // progress.
+        // Read more in this Arm blog post:
+        // https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/multi-threaded-applications-arm
+        procyield(backoff);
+        // Increase backoff time.
+        backoff += backoff / 2;
     }
 }
 
@@ -55,7 +68,6 @@ internal static bool empty(this ж<lfstack> Ꮡhead) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string lfstackNodeAllocatedFromˢ = "lfstack node allocated from the heap"u8;
-internal static readonly @string badLfnodeAddressˢ = "bad lfnode address"u8;
 
 // lfnodeValidate panics if node is not a valid address for use with
 // lfstack.push. This only needs to be called when node is allocated.
@@ -65,15 +77,11 @@ internal static void lfnodeValidate(ж<lfnode> Ꮡnode) {
             @throw(lfstackNodeAllocatedFromˢ);
         }
     }
-    if (lfstackUnpack(lfstackPack(Ꮡnode, ~(uintptr)0)) != Ꮡnode) {
-        printlock();
-        println((@string)"runtime: bad lfnode address"u8, ((Δhex)(uint64)(uintptr)Ꮡnode));
-        @throw(badLfnodeAddressˢ);
-    }
+    lfstackPack(Ꮡnode, ~(uintptr)0);
 }
 
 internal static uint64 lfstackPack(ж<lfnode> Ꮡnode, uintptr cnt) {
-    return (uint64)taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡnode), cnt);
+    return (uint64)taggedPointerPack(@unsafe.Pointer.FromPinnedBox(Ꮡnode), (uintptr)(cnt & (uintptr)((1 << (int)(tagBits)) - 1)));
 }
 
 internal static ж<lfnode> lfstackUnpack(uint64 val) {

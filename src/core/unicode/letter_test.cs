@@ -119,35 +119,13 @@ partial struct caseT {
     internal rune @in, @out;
 }
 
-// errors
-// ASCII (special-cased so test carefully)
-// Latin-1: easy to read the tests!
-// 0131;LATIN SMALL LETTER DOTLESS I;Ll;0;L;;;;;N;;;0049;;0049
-// 0133;LATIN SMALL LIGATURE IJ;Ll;0;L;<compat> 0069 006A;;;;N;LATIN SMALL LETTER I J;;0132;;0132
-// 212A;KELVIN SIGN;Lu;0;L;004B;;;;N;DEGREES KELVIN;;;006B;
-// From an UpperLower sequence
-// A640;CYRILLIC CAPITAL LETTER ZEMLYA;Lu;0;L;;;;;N;;;;A641;
-// A641;CYRILLIC SMALL LETTER ZEMLYA;Ll;0;L;;;;;N;;;A640;;A640
-// A64E;CYRILLIC CAPITAL LETTER NEUTRAL YER;Lu;0;L;;;;;N;;;;A64F;
-// A65F;CYRILLIC SMALL LETTER YN;Ll;0;L;;;;;N;;;A65E;;A65E
-// From another UpperLower sequence
-// 0139;LATIN CAPITAL LETTER L WITH ACUTE;Lu;0;L;004C 0301;;;;N;LATIN CAPITAL LETTER L ACUTE;;;013A;
-// 013F;LATIN CAPITAL LETTER L WITH MIDDLE DOT;Lu;0;L;<compat> 004C 00B7;;;;N;;;;0140;
-// 0148;LATIN SMALL LETTER N WITH CARON;Ll;0;L;006E 030C;;;;N;LATIN SMALL LETTER N HACEK;;0147;;0147
-// Lowercase lower than uppercase.
-// AB78;CHEROKEE SMALL LETTER GE;Ll;0;L;;;;;N;;;13A8;;13A8
-// Last block in the 5.1.0 table
-// 10400;DESERET CAPITAL LETTER LONG I;Lu;0;L;;;;;N;;;;10428;
-// 10427;DESERET CAPITAL LETTER EW;Lu;0;L;;;;;N;;;;1044F;
-// 10428;DESERET SMALL LETTER LONG I;Ll;0;L;;;;;N;;;10400;;10400
-// 1044F;DESERET SMALL LETTER EW;Ll;0;L;;;;;N;;;10427;;10427
-// First one not in the 5.1.0 table
-// 10450;SHAVIAN LETTER PEEP;Lo;0;L;;;;;N;;;;;
-// Non-letters with case.
 internal static slice<caseT> caseTest = new caseT[]{
+    // errors
     new(-1, (rune)'\n', 0xFFFD),
     new(UpperCase, -1, -1),
-    new(UpperCase, (rune)(1 << (int)(30)), (rune)(1 << (int)(30))),
+    new(UpperCase, (rune)(1 << 30), (rune)(1 << 30)),
+
+    // ASCII (special-cased so test carefully)
     new(UpperCase, (rune)'\n', (rune)'\n'),
     new(UpperCase, (rune)'a', (rune)'A'),
     new(UpperCase, (rune)'A', (rune)'A'),
@@ -160,6 +138,8 @@ internal static slice<caseT> caseTest = new caseT[]{
     new(TitleCase, (rune)'a', (rune)'A'),
     new(TitleCase, (rune)'A', (rune)'A'),
     new(TitleCase, (rune)'7', (rune)'7'),
+
+    // Latin-1: easy to read the tests!
     new(UpperCase, 0x80, 0x80),
     new(UpperCase, (rune)'Å', (rune)'Å'),
     new(UpperCase, (rune)'å', (rune)'Å'),
@@ -169,57 +149,88 @@ internal static slice<caseT> caseTest = new caseT[]{
     new(TitleCase, 0x80, 0x80),
     new(TitleCase, (rune)'Å', (rune)'Å'),
     new(TitleCase, (rune)'å', (rune)'Å'),
+
+    // 0131;LATIN SMALL LETTER DOTLESS I;Ll;0;L;;;;;N;;;0049;;0049
     new(UpperCase, 0x0131, (rune)'I'),
     new(LowerCase, 0x0131, 0x0131),
     new(TitleCase, 0x0131, (rune)'I'),
+
+    // 0133;LATIN SMALL LIGATURE IJ;Ll;0;L;<compat> 0069 006A;;;;N;LATIN SMALL LETTER I J;;0132;;0132
     new(UpperCase, 0x0133, 0x0132),
     new(LowerCase, 0x0133, 0x0133),
     new(TitleCase, 0x0133, 0x0132),
+
+    // 212A;KELVIN SIGN;Lu;0;L;004B;;;;N;DEGREES KELVIN;;;006B;
     new(UpperCase, 0x212A, 0x212A),
     new(LowerCase, 0x212A, (rune)'k'),
     new(TitleCase, 0x212A, 0x212A),
+
+    // From an UpperLower sequence
+    // A640;CYRILLIC CAPITAL LETTER ZEMLYA;Lu;0;L;;;;;N;;;;A641;
     new(UpperCase, 0xA640, 0xA640),
     new(LowerCase, 0xA640, 0xA641),
     new(TitleCase, 0xA640, 0xA640),
+    // A641;CYRILLIC SMALL LETTER ZEMLYA;Ll;0;L;;;;;N;;;A640;;A640
     new(UpperCase, 0xA641, 0xA640),
     new(LowerCase, 0xA641, 0xA641),
     new(TitleCase, 0xA641, 0xA640),
+    // A64E;CYRILLIC CAPITAL LETTER NEUTRAL YER;Lu;0;L;;;;;N;;;;A64F;
     new(UpperCase, 0xA64E, 0xA64E),
     new(LowerCase, 0xA64E, 0xA64F),
     new(TitleCase, 0xA64E, 0xA64E),
+    // A65F;CYRILLIC SMALL LETTER YN;Ll;0;L;;;;;N;;;A65E;;A65E
     new(UpperCase, 0xA65F, 0xA65E),
     new(LowerCase, 0xA65F, 0xA65F),
     new(TitleCase, 0xA65F, 0xA65E),
+
+    // From another UpperLower sequence
+    // 0139;LATIN CAPITAL LETTER L WITH ACUTE;Lu;0;L;004C 0301;;;;N;LATIN CAPITAL LETTER L ACUTE;;;013A;
     new(UpperCase, 0x0139, 0x0139),
     new(LowerCase, 0x0139, 0x013A),
     new(TitleCase, 0x0139, 0x0139),
+    // 013F;LATIN CAPITAL LETTER L WITH MIDDLE DOT;Lu;0;L;<compat> 004C 00B7;;;;N;;;;0140;
     new(UpperCase, 0x013f, 0x013f),
     new(LowerCase, 0x013f, 0x0140),
     new(TitleCase, 0x013f, 0x013f),
+    // 0148;LATIN SMALL LETTER N WITH CARON;Ll;0;L;006E 030C;;;;N;LATIN SMALL LETTER N HACEK;;0147;;0147
     new(UpperCase, 0x0148, 0x0147),
     new(LowerCase, 0x0148, 0x0148),
     new(TitleCase, 0x0148, 0x0147),
+
+    // Lowercase lower than uppercase.
+    // AB78;CHEROKEE SMALL LETTER GE;Ll;0;L;;;;;N;;;13A8;;13A8
     new(UpperCase, 0xab78, 0x13a8),
     new(LowerCase, 0xab78, 0xab78),
     new(TitleCase, 0xab78, 0x13a8),
     new(UpperCase, 0x13a8, 0x13a8),
     new(LowerCase, 0x13a8, 0xab78),
     new(TitleCase, 0x13a8, 0x13a8),
+
+    // Last block in the 5.1.0 table
+    // 10400;DESERET CAPITAL LETTER LONG I;Lu;0;L;;;;;N;;;;10428;
     new(UpperCase, 0x10400, 0x10400),
     new(LowerCase, 0x10400, 0x10428),
     new(TitleCase, 0x10400, 0x10400),
+    // 10427;DESERET CAPITAL LETTER EW;Lu;0;L;;;;;N;;;;1044F;
     new(UpperCase, 0x10427, 0x10427),
     new(LowerCase, 0x10427, 0x1044F),
     new(TitleCase, 0x10427, 0x10427),
+    // 10428;DESERET SMALL LETTER LONG I;Ll;0;L;;;;;N;;;10400;;10400
     new(UpperCase, 0x10428, 0x10400),
     new(LowerCase, 0x10428, 0x10428),
     new(TitleCase, 0x10428, 0x10400),
+    // 1044F;DESERET SMALL LETTER EW;Ll;0;L;;;;;N;;;10427;;10427
     new(UpperCase, 0x1044F, 0x10427),
     new(LowerCase, 0x1044F, 0x1044F),
     new(TitleCase, 0x1044F, 0x10427),
+
+    // First one not in the 5.1.0 table
+    // 10450;SHAVIAN LETTER PEEP;Lo;0;L;;;;;N;;;;;
     new(UpperCase, 0x10450, 0x10450),
     new(LowerCase, 0x10450, 0x10450),
     new(TitleCase, 0x10450, 0x10450),
+
+    // Non-letters with case.
     new(LowerCase, 0x2161, 0x2171),
     new(UpperCase, 0x0345, 0x0399)
 }.slice();
@@ -277,7 +288,6 @@ internal static @string caseString(nint c) {
     if (exprᴛ1 == TitleCase) {
         return titleCaseˢ;
     }
-
     return errorCaseˢ;
 }
 
@@ -396,22 +406,27 @@ public static void TestTurkishCase(ж<testing.T> Ꮡt) {
     }
 }
 
-// SimpleFold(x) returns the next equivalent rune > x or wraps
-// around to smaller values.
-// Easy cases.
-// ASCII special cases.
-// Non-ASCII special cases.
-// Extra special cases: has lower/upper but no case fold.
-// Upper comes before lower (Cherokee).
 internal static slice<@string> simpleFoldTests = new @string[]{
+    // SimpleFold(x) returns the next equivalent rune > x or wraps
+    // around to smaller values.
+
+    // Easy cases.
     "Aa"u8,
     "δΔ"u8,
+
+    // ASCII special cases.
     "KkK"u8,
     "Ssſ"u8,
+
+    // Non-ASCII special cases.
     "ρϱΡ"u8,
     "ͅΙιι"u8,
+
+    // Extra special cases: has lower/upper but no case fold.
     "İ"u8,
     "ı"u8,
+
+    // Upper comes before lower (Cherokee).
     "\u13b0\uab80"u8
 }.slice();
 
@@ -428,6 +443,7 @@ public static void TestSimpleFold(ж<testing.T> Ꮡt) {
             r = @out;
         }
     }
+
     {
         var r = SimpleFold(-42); if (r != -42) {
             Ꮡt.Errorf("SimpleFold(-42) = %v, want -42"u8, r);
@@ -450,9 +466,11 @@ public static void TestCalibrate(ж<testing.T> Ꮡt) {
     if (!calibrate.Value) {
         return;
     }
+
     if (Δruntime.GOARCH == "amd64"u8) {
         fmt.Printf("warning: running calibration on %s\n"u8, Δruntime.GOARCH);
     }
+
     // Find the point where binary search wins by more than 10%.
     // The 10% bias gives linear search an edge when they're close,
     // because on predominantly ASCII inputs linear search is even
@@ -513,7 +531,7 @@ internal static bool binary(slice<Δunicode.Range16> ranges, uint16 r) {
     nint lo = 0;
     nint hi = len(ranges);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = Ꮡ(ranges, m);
         if ((~range_).Lo <= r && r <= (~range_).Hi) {
             return (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
@@ -556,7 +574,7 @@ public static void TestSpecialCaseNoMapping(ж<testing.T> Ꮡt) {
     // Issue 25636
     // no change for rune 'A', zero delta, under upper/lower/title case change.
     Δunicode.CaseRange noChangeForCapitalA = new CaseRange((rune)'A', (rune)'A', new rune[]{0, 0, 0}.array());
-    @string got = strings.ToLowerSpecial(((Δunicode.SpecialCase)new Δunicode.CaseRange[]{noChangeForCapitalA.ΔClone()}.slice()), abcˢ);
+    @string got = strings.ToLowerSpecial((Δunicode.SpecialCase)new Δunicode.CaseRange[]{noChangeForCapitalA.ΔClone()}.slice(), abcˢ);
     @string want = abcˢ2;
     if (got != want) {
         Ꮡt.Errorf("got %q; want %q"u8, got, want);
@@ -570,22 +588,22 @@ public static void TestNegativeRune(ж<testing.T> Ꮡt) {
     // This package has Latin-1-specific optimizations, so we test all of
     // Latin-1 and representative non-Latin-1 values in the character
     // categories covered by IsGraphic, etc.
-    var nonLatin1 = new uint32[]{ // Lu: LATIN CAPITAL LETTER A WITH MACRON
-
-        0x0100, // Ll: LATIN SMALL LETTER A WITH MACRON
-
-        0x0101, // Lt: LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
-
-        0x01C5, // M: COMBINING GRAVE ACCENT
-
-        0x0300, // Nd: ARABIC-INDIC DIGIT ZERO
-
-        0x0660, // P: GREEK QUESTION MARK
-
-        0x037E, // S: MODIFIER LETTER LEFT ARROWHEAD
-
-        0x02C2, // Z: OGHAM SPACE MARK
-
+    var nonLatin1 = new uint32[]{
+        // Lu: LATIN CAPITAL LETTER A WITH MACRON
+        0x0100,
+        // Ll: LATIN SMALL LETTER A WITH MACRON
+        0x0101,
+        // Lt: LATIN CAPITAL LETTER D WITH SMALL LETTER Z WITH CARON
+        0x01C5,
+        // M: COMBINING GRAVE ACCENT
+        0x0300,
+        // Nd: ARABIC-INDIC DIGIT ZERO
+        0x0660,
+        // P: GREEK QUESTION MARK
+        0x037E,
+        // S: MODIFIER LETTER LEFT ARROWHEAD
+        0x02C2,
+        // Z: OGHAM SPACE MARK
         0x1680
     }.slice();
     for (nint i = 0; i < (nint)MaxLatin1 + len(nonLatin1); i++) {
@@ -593,9 +611,10 @@ public static void TestNegativeRune(ж<testing.T> Ꮡt) {
         if (i >= MaxLatin1) {
             @base = nonLatin1[i - (nint)MaxLatin1];
         }
+
         // Note r is negative, but uint8(r) == uint8(base) and
         // uint16(r) == uint16(base).
-        var r = (rune)(@base - ((uint32)1 << (int)(31)));
+        var r = (rune)(@base - ((uint32)1 << 31));
         if (Is(Letter, r)) {
             Ꮡt.Errorf("Is(Letter, 0x%x - 1<<31) = true, want false"u8, @base);
         }

@@ -28,6 +28,9 @@ using syscall = syscall_package;
 
 partial class registry_package {
 
+// Registry key security and access rights.
+// See https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-key-security-and-access-rights
+// for details.
 public static UntypedInt ALL_ACCESS => 0xf003f;
 public static UntypedInt CREATE_LINK => 0x00020;
 public static UntypedInt CREATE_SUB_KEY => 0x00004;
@@ -41,8 +44,16 @@ public static UntypedInt WOW64_32KEY => 0x00200;
 public static UntypedInt WOW64_64KEY => 0x00100;
 public static UntypedInt WRITE => 0x20006;
 
+// Key is a handle to an open Windows registry key.
+// Keys can be obtained by calling OpenKey; there are
+// also some predefined root keys such as CURRENT_USER.
+// Keys can be used directly in the Windows API.
 partial struct Key /*global::go.syscall_package.ΔHandle*/;
 
+// Windows defines some predefined root keys that are always open.
+// An application can use these keys as entry points to the registry.
+// Normally these keys are used in OpenKey to open new keys,
+// but they can also be used anywhere a Key is required.
 public static Key CLASSES_ROOT => /* Key(syscall.HKEY_CLASSES_ROOT) */ unchecked((Key)(syscallꓸHandle)2147483648);
 public static Key CURRENT_USER => /* Key(syscall.HKEY_CURRENT_USER) */ unchecked((Key)(syscallꓸHandle)2147483649);
 public static Key LOCAL_MACHINE => /* Key(syscall.HKEY_LOCAL_MACHINE) */ unchecked((Key)(syscallꓸHandle)2147483650);
@@ -51,7 +62,7 @@ public static Key CURRENT_CONFIG => /* Key(syscall.HKEY_CURRENT_CONFIG) */ unche
 
 // Close closes open key k.
 public static error Close(this Key k) {
-    return syscall.RegCloseKey(((syscallꓸHandle)k));
+    return syscall.RegCloseKey((syscallꓸHandle)k);
 }
 
 // OpenKey opens a new key with path name relative to key k.
@@ -65,11 +76,11 @@ public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
         return ((Key)(syscallꓸHandle)(0), err);
     }
     ref var subkey = ref heap(new syscallꓸHandle(), out var Ꮡsubkey);
-    err = syscall.RegOpenKeyEx(((syscallꓸHandle)k), p, 0, access, Ꮡsubkey);
+    err = syscall.RegOpenKeyEx((syscallꓸHandle)k, p, 0, access, Ꮡsubkey);
     if (err != default!) {
         return ((Key)(syscallꓸHandle)(0), err);
     }
-    return (((Key)subkey), default!);
+    return ((Key)subkey, default!);
 }
 
 // ReadSubKeyNames returns the names of subkeys of key k.
@@ -81,6 +92,7 @@ public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
         // its current thread. See #49320.
         runtime.LockOSThread();
         defer(runtime.UnlockOSThread, ref ᒐ);
+
         var names = new slice<@string>(0);
         // Registry key size limit is 255 bytes and described there:
         // https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-element-size-limits
@@ -90,7 +102,7 @@ loopItems:
             ref var l = ref heap<uint32>(out var Ꮡl);
             l = (uint32)len(buf);
             while (ᐧ) {
-                var err = syscall.RegEnumKeyEx(((syscallꓸHandle)k), i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
+                var err = syscall.RegEnumKeyEx((syscallꓸHandle)k, i, Ꮡ(buf, 0), Ꮡl, nil, nil, nil, nil);
                 if (err == default!) {
                     break;
                 }
@@ -125,17 +137,25 @@ public static (Key newk, bool openedExisting, error err) CreateKey(Key k, @strin
 
     ref var h = ref heap(new syscallꓸHandle(), out var Ꮡh);
     ref var d = ref heap(new uint32(), out var Ꮡd);
-    err = regCreateKeyEx(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(path),
+    (var pathp, err) = syscall.UTF16PtrFromString(path);
+    if (err != default!) {
+        return ((Key)(syscallꓸHandle)(0), false, err);
+    }
+    err = regCreateKeyEx((syscallꓸHandle)k, pathp,
         0, nil, _REG_OPTION_NON_VOLATILE, access, nil, Ꮡh, Ꮡd);
     if (err != default!) {
         return ((Key)(syscallꓸHandle)(0), false, err);
     }
-    return (((Key)h), d == _REG_OPENED_EXISTING_KEY, default!);
+    return ((Key)h, d == _REG_OPENED_EXISTING_KEY, default!);
 }
 
 // DeleteKey deletes the subkey path of key k and its values.
 public static error DeleteKey(Key k, @string path) {
-    return regDeleteKey(((syscallꓸHandle)k), syscall.StringToUTF16Ptr(path));
+    var (pathp, err) = syscall.UTF16PtrFromString(path);
+    if (err != default!) {
+        return err;
+    }
+    return regDeleteKey((syscallꓸHandle)k, pathp);
 }
 
 // A KeyInfo describes the statistics of a key. It is returned by Stat.
@@ -151,7 +171,7 @@ partial struct KeyInfo {
 // Stat retrieves information about the open key k.
 public static (ж<KeyInfo>, error) Stat(this Key k) {
     ref var ki = ref heap(new KeyInfo(), out var Ꮡki);
-    var err = syscall.RegQueryInfoKey(((syscallꓸHandle)k), nil, nil, nil,
+    var err = syscall.RegQueryInfoKey((syscallꓸHandle)k, nil, nil, nil,
         Ꮡki.of(KeyInfo.ᏑSubKeyCount), Ꮡki.of(KeyInfo.ᏑMaxSubKeyLen), nil, Ꮡki.of(KeyInfo.ᏑValueCount),
         Ꮡki.of(KeyInfo.ᏑMaxValueNameLen), Ꮡki.of(KeyInfo.ᏑMaxValueLen), nil, Ꮡki.of(KeyInfo.ᏑlastWriteTime));
     if (err != default!) {

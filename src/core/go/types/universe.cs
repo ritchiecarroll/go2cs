@@ -81,6 +81,7 @@ internal static void defPredeclaredTypes() {
     foreach (var (_, t) in basicAliases.ΔRangeSnapshot()) {
         def(new TypeNameжObject(NewTypeName(nopos, nil, (~t).name, new BasicжΔType(t))));
     }
+
     // type any = interface{}
     //
     // Implement two representations of any: one for the legacy gotypesalias=0,
@@ -99,46 +100,51 @@ internal static void defPredeclaredTypes() {
     // interface.
     {
         universeAnyNoAlias = NewTypeName(nopos, nil, anyˢ, new InterfaceжΔType(Ꮡ(new Interface(complete: true, tset: ᏑtopTypeSet))));
-        universeAnyNoAlias.of(TypeName.Ꮡobject).setColor(black);
         // ensure that the any TypeName reports a consistent Parent, after
         // hijacking Universe.Lookup with gotypesalias=0.
         universeAnyNoAlias.of(TypeName.Ꮡobject).setParent(Universe);
+
         // It shouldn't matter which representation of any is actually inserted
         // into the Universe, but we lean toward the future and insert the Alias
         // representation.
         universeAnyAlias = NewTypeName(nopos, nil, anyˢ, default!);
-        universeAnyAlias.of(TypeName.Ꮡobject).setColor(black);
         _ = NewAlias(universeAnyAlias, universeAnyNoAlias.of(TypeName.Ꮡobject).Type().Underlying()); // Link TypeName and Alias
         def(new TypeNameжObject(universeAnyAlias));
     }
+
     // type error interface{ Error() string }
     {
         var obj = NewTypeName(nopos, nil, errorˢ, default!);
-        obj.of(TypeName.Ꮡobject).setColor(black);
-        var typ = NewNamed(obj, default!, default!);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
+
         // error.Error() string
-        var recv = NewVar(nopos, nil, ""u8, new NamedжΔType(typ));
-        var res = NewVar(nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
+        var recv = newVar(RecvVar, nopos, nil, ""u8, new NamedжΔType(typ));
+        var res = newVar(ResultVar, nopos, nil, ""u8, new BasicжΔType(Typ[ΔString]));
         var sig = NewSignatureType(recv, default!, default!, nil, NewTuple(res), false);
         var err = NewFunc(nopos, nil, errorˢ2, sig);
+
         // interface{ Error() string }
         var ityp = Ꮡ(new Interface(methods: new ж<Func>[]{err}.slice(), complete: true));
         computeInterfaceTypeSet(nil, nopos, ityp); // prevent races due to lazy computation of tset
-        typ.SetUnderlying(new InterfaceжΔType(ityp));
+
+        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.Underlying();
         def(new TypeNameжObject(obj));
     }
+
     // type comparable interface{} // marked as comparable
     {
         var obj = NewTypeName(nopos, nil, comparableˢ, default!);
-        obj.of(TypeName.Ꮡobject).setColor(black);
-        var typ = NewNamed(obj, default!, default!);
+        var typ = (((ж<Checker>)nil)).newNamed(obj, default!, default!);
+
         // interface{} // marked as comparable
         var ityp = Ꮡ(new Interface(complete: true, tset: Ꮡ(new _TypeSet(default!, allTermlist, true))));
-        typ.SetUnderlying(new InterfaceжΔType(ityp));
+
+        typ.Value.fromRHS = new InterfaceжΔType(ityp);
+        typ.Underlying();
         def(new TypeNameжObject(obj));
     }
 }
-
 
 partial struct predeclaredConstsᴛ1 /*dyn*/ {
     internal @string name;
@@ -158,11 +164,13 @@ internal static void defPredeclaredConsts() {
 }
 
 internal static void defPredeclaredNil() {
-    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]), color_: black)))));
+    def(new NilжObject(Ꮡ(new Nil(new @object(name: "nil"u8, typ: new BasicжΔType(Typ[UntypedNil]))))));
 }
 
+// A builtinId is the id of a builtin function.
 partial struct builtinId /*num:nint*/;
 
+// universe scope
 internal static builtinId _Append => /* iota */ 0;
 internal static builtinId _Cap => 1;
 internal static builtinId _Clear => 2;
@@ -181,6 +189,8 @@ internal static builtinId _Print => 14;
 internal static builtinId _Println => 15;
 internal static builtinId _Real => 16;
 internal static builtinId _Recover => 17;
+
+// package unsafe
 internal static builtinId _Add => 18;
 internal static builtinId _Alignof => 19;
 internal static builtinId _Offsetof => 20;
@@ -189,10 +199,10 @@ internal static builtinId _Slice => 22;
 internal static builtinId _SliceData => 23;
 internal static builtinId _String => 24;
 internal static builtinId _StringData => 25;
+
+// testing support
 internal static builtinId _Assert => 26;
 internal static builtinId _Trace => 27;
-
-// To disable max/min, remove the next two lines.
 
 partial struct predeclaredFuncsᴛ1 /*dyn*/ {
     internal @string name;
@@ -211,6 +221,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
     [(int)_Imag] = new("imag"u8, 1, false, expression),
     [(int)_Len] = new("len"u8, 1, false, expression),
     [(int)_Make] = new("make"u8, 1, true, expression),
+    // To disable max/min, remove the next two lines.
     [(int)_Max] = new("max"u8, 1, true, expression),
     [(int)_Min] = new("min"u8, 1, true, expression),
     [(int)_New] = new("new"u8, 1, false, expression),
@@ -233,7 +244,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
 
 internal static void defPredeclaredFuncs() {
     foreach (var (i, _) in predeclaredFuncs) {
-        builtinId id = ((builtinId)i);
+        builtinId id = (builtinId)i;
         if (id == _Assert || id == _Trace) {
             continue; // only define these in testing environment
         }
@@ -259,10 +270,12 @@ public static void DefPredeclaredTestFuncs() {
     Universe = NewScope(nil, nopos, nopos, "universe"u8);
     Unsafe = NewPackage("unsafe"u8, "unsafe"u8);
     Unsafe.Value.complete = true;
+
     defPredeclaredTypes();
     defPredeclaredConsts();
     defPredeclaredNil();
     defPredeclaredFuncs();
+
     universeIota = Universe.Lookup("iota"u8);
     universeBool = Universe.Lookup("bool"u8).Type();
     universeByte = Universe.Lookup("byte"u8).Type();
@@ -275,7 +288,7 @@ public static void DefPredeclaredTestFuncs() {
 // a scope. Objects with exported names are inserted in the unsafe package
 // scope; other objects are inserted in the universe scope.
 internal static void def(Object obj) {
-    assert(obj.color() == black);
+    assert(obj.Type() != default!);
     @string name = obj.Name();
     if (strings.Contains(name, " "u8)) {
         return; // nothing to do

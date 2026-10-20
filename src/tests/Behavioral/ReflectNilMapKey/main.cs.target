@@ -23,49 +23,34 @@ internal static void show(@string label, map<any, any> m) {
     fmt.Println(label, len(m), keys);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object nilKeyˢ = (@string)"nil-key"u8;
-private static readonly @string afterNilKeyˢ = "after nil key:"u8;
-private static readonly object mapIndexNilˢ = (@string)"MapIndex(nil):"u8;
-private static readonly object mNilˢ = (@string)"m[nil]:"u8;
-private static readonly object typedNilKeyˢ = (@string)"typed-nil-key"u8;
-private static readonly @string afterTypedNilKeyˢ = "after typed-nil key:"u8;
-private static readonly object mTNilˢ = (@string)"m[(*T)(nil)]:"u8;
-private static readonly object mNilStillˢ = (@string)"m[nil] still:"u8;
-private static readonly object mapIndexTNilˢ = (@string)"MapIndex((*T)(nil)):"u8;
-private static readonly object mapIndexNilStillˢ = (@string)"MapIndex(nil) still:"u8;
-private static readonly object againˢ = (@string)"again"u8;
-private static readonly object mNilAfterOverwriteˢ = (@string)"m[nil] after overwrite:"u8;
-private static readonly @string afterDeleteNilKeyˢ = "after delete nil key:"u8;
-private static readonly object mapKeysˢ = (@string)"MapKeys:"u8;
-private static readonly object keyKindˢ = (@string)" key kind:"u8;
-private static readonly object elemˢ = (@string)"elem:"u8;
-private static readonly object elemNilˢ = (@string)"elem nil:"u8;
-
 internal static void Main() {
     var m = new map<any, any>{};
     var v = reflect.ValueOf(m);
     var keyType = v.Type().Key();
-    v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf(nilKeyˢ));
-    show(afterNilKeyˢ, m);
-    fmt.Println(mapIndexNilˢ, v.MapIndex(reflect.Zero(keyType)));
-    fmt.Println(mNilˢ, m[default!]);
+
+    v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("nil-key"));
+    show("after nil key:", m);
+    fmt.Println("MapIndex(nil):", v.MapIndex(reflect.Zero(keyType)));
+    fmt.Println("m[nil]:", m[default!]);
+
     var h = new holder(nil);
     var pk = reflect.ValueOf(h).Field(0);
-    v.SetMapIndex(pk, reflect.ValueOf(typedNilKeyˢ));
-    show(afterTypedNilKeyˢ, m);
-    fmt.Println(mTNilˢ, m[((ж<T>)nil)]);
-    fmt.Println(mNilStillˢ, m[default!]);
-    fmt.Println(mapIndexTNilˢ, v.MapIndex(pk));
-    fmt.Println(mapIndexNilStillˢ, v.MapIndex(reflect.Zero(keyType)));
-    v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf(againˢ));
-    fmt.Println(mNilAfterOverwriteˢ, m[default!]);
+    v.SetMapIndex(pk, reflect.ValueOf("typed-nil-key"));
+    show("after typed-nil key:", m);
+    fmt.Println("m[(*T)(nil)]:", m[((ж<T>)nil)]);
+    fmt.Println("m[nil] still:", m[default!]);
+    fmt.Println("MapIndex((*T)(nil)):", v.MapIndex(pk));
+    fmt.Println("MapIndex(nil) still:", v.MapIndex(reflect.Zero(keyType)));
+
+    v.SetMapIndex(reflect.Zero(keyType), reflect.ValueOf("again"));
+    fmt.Println("m[nil] after overwrite:", m[default!]);
     v.SetMapIndex(reflect.Zero(keyType), new reflectꓸValue(nil));
-    show(afterDeleteNilKeyˢ, m);
+    show("after delete nil key:", m);
+
     var keys = v.MapKeys();
-    fmt.Println(mapKeysˢ, len(keys));
+    fmt.Println("MapKeys:", len(keys));
     foreach (var (_, k) in keys) {
-        fmt.Println(keyKindˢ, k.Kind(), elemˢ, k.Elem().Type(), elemNilˢ, k.Elem().IsNil());
+        fmt.Println(" key kind:", k.Kind(), "elem:", k.Elem().Type(), "elem nil:", k.Elem().IsNil());
     }
 }
 

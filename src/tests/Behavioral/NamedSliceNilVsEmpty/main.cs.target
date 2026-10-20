@@ -14,39 +14,36 @@ internal static void probe(@string name, bool isNil) {
     fmt.Println(name, isNil);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string sliceZeroˢ = "sliceZero"u8;
-private static readonly @string sliceEmptyLiteralˢ = "sliceEmptyLiteral"u8;
-private static readonly @string sliceMakeZeroˢ = "sliceMakeZero"u8;
-private static readonly @string sliceFilledˢ = "sliceFilled"u8;
-private static readonly @string sliceResliceTailCapZeroˢ = "sliceResliceTailCapZero"u8;
-private static readonly @string sliceNilResliceˢ = "sliceNilReslice"u8;
-private static readonly @string mapZeroˢ = "mapZero"u8;
-private static readonly @string mapEmptyLiteralˢ = "mapEmptyLiteral"u8;
-private static readonly @string chanZeroˢ = "chanZero"u8;
-private static readonly @string chanMadeˢ = "chanMade"u8;
-
 internal static void Main() {
     IntSlice zeroSlice = default!;
-    probe(sliceZeroˢ, zeroSlice == default!);
+    probe("sliceZero", zeroSlice == default!);
+
     var emptySlice = new IntSlice(new nint[]{}.slice());
-    probe(sliceEmptyLiteralˢ, emptySlice == default!);
+    probe("sliceEmptyLiteral", emptySlice == default!);
+
     var madeSlice = new IntSlice(0);
-    probe(sliceMakeZeroˢ, madeSlice == default!);
+    probe("sliceMakeZero", madeSlice == default!);
+
     var filledSlice = new IntSlice(new nint[]{1, 2}.slice());
-    probe(sliceFilledˢ, filledSlice == default!);
+    probe("sliceFilled", filledSlice == default!);
+
     var tail = filledSlice[2..2];
-    probe(sliceResliceTailCapZeroˢ, tail == default!);
+    probe("sliceResliceTailCapZero", tail == default!);
+
     var nilReslice = zeroSlice[0..0];
-    probe(sliceNilResliceˢ, nilReslice == default!);
+    probe("sliceNilReslice", nilReslice == default!);
+
     StrIntMap zeroMap = default!;
-    probe(mapZeroˢ, zeroMap == default!);
+    probe("mapZero", zeroMap == default!);
+
     var emptyMap = new StrIntMap(new map<@string, nint>{});
-    probe(mapEmptyLiteralˢ, emptyMap == default!);
+    probe("mapEmptyLiteral", emptyMap == default!);
+
     IntChan zeroChan = default!;
-    probe(chanZeroˢ, zeroChan == default!);
+    probe("chanZero", zeroChan == default!);
+
     var madeChan = new IntChan(0);
-    probe(chanMadeˢ, madeChan == default!);
+    probe("chanMade", madeChan == default!);
 }
 
 } // end main_package

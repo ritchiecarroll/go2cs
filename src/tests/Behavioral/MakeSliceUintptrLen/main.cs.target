@@ -19,11 +19,13 @@ internal static partial void run() {
     var g = new slice<byte>(2);
     nint k = 7;
     var h = new slice<nint>(k);
+
     var mp = new map<nint, nint>((nint)(n));
     mp[1] = 100;
     var ch = new channel<nint>((nint)(n));
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);
+
     foreach (var (i, _) in a) {
         a[i] = (byte)i;
     }

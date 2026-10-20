@@ -3,15 +3,18 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using fmt = fmt_package;
+using Δregexp = regexp_package;
+using Δruntime = runtime_package;
 using static runtime_package;
 using slices = slices_package;
+using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
-using Δruntime = runtime_package;
 
 partial class runtime_test_package {
 
@@ -30,6 +33,7 @@ internal static readonly @string bothWraparoundˢ = "BothWraparound"u8;
 
 public static void TestProfBuf(ж<testing.T> Ꮡt) {
     UntypedInt hdrSize = 2;
+
     void write(ж<testing.T> tΔ1, ж<global::go.runtime_internal_test_package.ProfBuf> b, @unsafe.Pointer tagʗp, int64 now, slice<uint64> hdr, slice<uintptr> stk) {
         ref var tag = ref heap(tagʗp, out var Ꮡtag);
         b.Write(Ꮡtag, now, hdr, stk);
@@ -73,8 +77,10 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             tΔ4.Errorf("unexpected profile read (non-blocking): %#x, %#x, eof=%v; want nil, nil, eof=true"u8, rdata, rtags, eof);
         }
     }
+
     var myTags = new slice<byte>(100);
     Ꮡt.Logf("myTags is %p"u8, Ꮡ(myTags, 0));
+
     var myTagsʗ1 = myTags;
     var readʗ1 = read;
     var writeʗ1 = write;
@@ -86,6 +92,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ1(tΔ5, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2)), 99, new uint64[]{101, 102}.slice(), new uintptr[]{201, 202, 203, 204}.slice());
         readʗ1(tΔ5, b, new uint64[]{8, 99, 101, 102, 201, 202, 203, 204}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ1, 2))}.slice());
     });
+
     var myTagsʗ2 = myTags;
     var readʗ2 = read;
     var writeʗ2 = write;
@@ -96,6 +103,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ2(tΔ6, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1)), 500, new uint64[]{502, 504}.slice(), new uintptr[]{506}.slice());
         readʗ2(tΔ6, b, new uint64[]{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204, 5, 500, 502, 504, 506}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 2)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ2, 1))}.slice());
     });
+
     var myTagsʗ3 = myTags;
     var readʗ3 = read;
     var writeʗ3 = write;
@@ -105,6 +113,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ3(tΔ7, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2)), 99, new uint64[]{101, 102}.slice(), new uintptr[]{201, 202, 203, 204}.slice());
         readʗ3(tΔ7, b, new uint64[]{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ3, 2))}.slice());
     });
+
     var myTagsʗ4 = myTags;
     var readʗ4 = read;
     var writeʗ4 = write;
@@ -114,6 +123,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ4(tΔ8, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2)), 99, new uint64[]{101, 102}.slice(), new uintptr[]{201, 202, 203, 204}.slice());
         readʗ4(tΔ8, b, new uint64[]{10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 99, 101, 102, 201, 202, 203, 204}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 0)), @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ4, 2))}.slice());
     });
+
     var myTagsʗ5 = myTags;
     var readʗ5 = read;
     var writeʗ5 = write;
@@ -132,6 +142,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ5(tΔ9, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1)), 500, new uint64[]{502, 504}.slice(), new uintptr[]{506}.slice()); // room for overflow+this record
         readʗ5(tΔ9, b, new uint64[]{5, 99, 0, 0, 300, 5, 500, 502, 504, 506}.slice(), new @unsafe.Pointer[]{default!, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ5, 1))}.slice());
     });
+
     var myTagsʗ6 = myTags;
     var readʗ6 = read;
     var writeʗ6 = write;
@@ -149,6 +160,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ6(tΔ10, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1)), 500, new uint64[]{502, 505}.slice(), new uintptr[]{506}.slice()); // written
         readʗ6(tΔ10, b, new uint64[]{5, 500, 502, 505, 506}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ6, 1))}.slice());
     });
+
     var myTagsʗ7 = myTags;
     var readʗ7 = read;
     var writeʗ7 = write;
@@ -164,6 +176,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         writeʗ7(tΔ11, b, @unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1)), 500, new uint64[]{502, 504}.slice(), new uintptr[]{506}.slice());
         readʗ7(tΔ11, b, new uint64[]{5, 500, 502, 504, 506}.slice(), new @unsafe.Pointer[]{@unsafe.Pointer.FromPinnedBox(Ꮡ(myTagsʗ7, 1))}.slice());
     });
+
     var myTagsʗ8 = myTags;
     var readBlockʗ1 = readBlock;
     var readEOFʗ1 = readEOF;
@@ -184,6 +197,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
         wait();
         readEOFʗ1(tΔ12, b);
     });
+
     var myTagsʗ9 = myTags;
     var readʗ8 = read;
     var writeʗ9 = write;
@@ -195,6 +209,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             readʗ8(tΔ13, b, default!, default!); // release data returned by previous read
         }
     });
+
     var myTagsʗ10 = myTags;
     var readʗ9 = read;
     var writeʗ10 = write;
@@ -206,6 +221,7 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             readʗ9(tΔ14, b, default!, default!); // release data returned by previous read
         }
     });
+
     var myTagsʗ11 = myTags;
     var readʗ10 = read;
     var writeʗ11 = write;
@@ -217,6 +233,108 @@ public static void TestProfBuf(ж<testing.T> Ꮡt) {
             readʗ10(tΔ15, b, default!, default!); // release data returned by previous read
         }
     });
+}
+
+public static partial void TestProfBufDoubleWakeup(ж<testing.T> Ꮡt) {
+    var b = runtime_internal_test_package.NewProfBuf(2, 16, 2);
+    var bʗ1 = b;
+    goǃ(() => {
+        foreach (var _ᴛ1 in range(1000)) {
+            bʗ1.Write(nil, 1, new uint64[]{5, 6}.slice(), new uintptr[]{7, 8}.slice());
+        }
+        bʗ1.Close();
+    });
+    while (ᐧ) {
+        var (_, _, eof) = b.Read(runtime_internal_test_package.ProfBufBlocking);
+        if (eof) {
+            return;
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string waitingˢ = "waiting"u8;
+internal static readonly @string runnableˢ = "runnable"u8;
+internal static readonly @string syscallˢ = "syscall"u8;
+internal static readonly @string testProfBufWakeupFunc1ˢ = "TestProfBufWakeup.func1"u8;
+
+public static void TestProfBufWakeup(ж<testing.T> Ꮡt) {
+    var b = runtime_internal_test_package.NewProfBuf(2, 16, 2);
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    var bʗ1 = b;
+    Ꮡwg.Go(() => {
+        nint read = 0;
+        while (ᐧ) {
+            var (rdata, _, eof) = bʗ1.Read(runtime_internal_test_package.ProfBufBlocking);
+            if (read == 0 && len(rdata) < 8) {
+                Ꮡt.Errorf("first wake up at less than half full, got %x"u8, rdata);
+            }
+            read += len(rdata);
+            if (eof) {
+                return;
+            }
+        }
+    });
+
+    // Under the hood profBuf uses notetsleepg when the reader blocks.
+    // Different platforms have different implementations, leading to
+    // different statuses we need to look for to determine whether the
+    // reader is blocked.
+    @string waitStatus = default!;
+    var exprᴛ1 = Δruntime.GOOS;
+    if (exprᴛ1 == "js"u8) {
+        waitStatus = waitingˢ;
+    }
+    else if (exprᴛ1 == "wasip1"u8) {
+        waitStatus = runnableˢ;
+    }
+    else { /* default: */
+        waitStatus = syscallˢ;
+    }
+
+    // Ensure that the reader is blocked
+    awaitBlockedGoroutine(waitStatus, testProfBufWakeupFunc1ˢ);
+    // NB: this writes 6 words not 4. Fine for the test.
+    // The reader shouldn't wake up for this
+    b.Write(nil, 1, new uint64[]{1, 2}.slice(), new uintptr[]{3, 4}.slice());
+
+    // The reader should still be blocked. The awaitBlockedGoroutine here
+    // checks that and also gives a buggy implementation a chance to
+    // actually wake up (it calls Gosched) before the next write. There is a
+    // small chance that a buggy implementation would have woken up but
+    // doesn't get scheduled by the time we do the next write. In that case
+    // the reader will see a more-than-half-full buffer and the test will
+    // pass. But if the implementation is broken, this test should fail
+    // regularly, even if not 100% of the time.
+    awaitBlockedGoroutine(waitStatus, testProfBufWakeupFunc1ˢ);
+    b.Write(nil, 1, new uint64[]{5, 6}.slice(), new uintptr[]{7, 8}.slice());
+    b.Close();
+
+    // Wait here so we can be sure the reader got the data
+    Ꮡwg.Wait();
+}
+
+// see also runtime/pprof tests
+internal static partial void awaitBlockedGoroutine(@string state, @string fName) {
+    // NB: this matches [state] as well as [state, n minutes]
+    @string re = fmt.Sprintf(@"(?m)^goroutine \d+ \[%s.*\]:\n(?:.+\n\t.+\n)*runtime_test\.%s"u8, Δregexp.QuoteMeta(state), fName);
+    var r = Δregexp.MustCompile(re);
+
+    var buf = new slice<byte>((64 << 10));
+    while (ᐧ) {
+        Gosched();
+        nint n = Stack(buf, true);
+        if (n == len(buf)) {
+            // Buffer wasn't large enough for a full goroutine dump.
+            // Resize it and try again.
+            buf = new slice<byte>(2 * len(buf));
+            continue;
+        }
+        const nint count = 1;
+        if (len(r.FindAll(buf.slice(0, n), -1)) >= count) {
+            return;
+        }
+    }
 }
 
 } // end runtime_test_package

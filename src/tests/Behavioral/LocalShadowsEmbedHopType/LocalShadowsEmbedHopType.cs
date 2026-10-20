@@ -18,26 +18,26 @@ internal static void Store(this ref inner g, /*[4]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     @out[0] = (byte)g.total;
-    @out[1] = (byte)((g.total >> (int)(8)));
-    @out[2] = (byte)((g.total >> (int)(16)));
-    @out[3] = (byte)((g.total >> (int)(24)));
+    @out[1] = (byte)(g.total >> 8);
+    @out[2] = (byte)(g.total >> 16);
+    @out[3] = (byte)(g.total >> 24);
 }
 
 partial struct acc {
-    internal partial ref inner inner { get; }
+    /*embed*/ internal inner inner;
 }
 
 partial struct deep {
-    internal partial ref acc acc { get; }
+    /*embed*/ internal acc acc;
 }
 
 partial struct Hash {
-    internal partial ref acc acc { get; }
+    /*embed*/ internal acc acc;
     internal bool finalized;
 }
 
 partial struct DeepHash {
-    internal partial ref deep deep { get; }
+    /*embed*/ internal deep deep;
 }
 
 public static void Write(this ref Hash h, slice<byte> p) {
@@ -76,6 +76,7 @@ internal static void Main() {
     h.Write(slice<byte>("go2cs"u8));
     fmt.Println(h.Sum(default!));
     fmt.Println((~h).finalized);
+
     var d = Ꮡ(new DeepHash(nil));
     d.of(DeepHash.Ꮡdeep).of(deep.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go2cs"u8));
     ref var @out = ref heap(new array<byte>(4), out var Ꮡout);

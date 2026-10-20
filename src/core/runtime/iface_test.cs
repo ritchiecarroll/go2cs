@@ -89,11 +89,13 @@ public static void TestCmpIfaceConcreteAlloc(ж<testing.T> Ꮡt) {
     if (Δruntime.Compiler != "gc") {
         Ꮡt.Skip(skippingOnNonGcCompilerˢ);
     }
-    var n = testing.AllocsPerRun(1, () => {
+
+    var n = testing.AllocsPerRun(100, () => {
         _ = AreEqual(e, ts);
         _ = AreEqual(i1, ts);
-        _ = AreEqual(e, (nint)(1));
+        _ = AreEqual(e, (nint)1);
     });
+
     if (n > 0D) {
         Ꮡt.Fatalf("iface cmp allocs=%v; want 0"u8, n);
     }
@@ -333,16 +335,17 @@ public static void BenchmarkAssertE2E2Blank(ж<testing.B> Ꮡb) {
 
 public static void TestNonEscapingConvT2E(ж<testing.T> Ꮡt) {
     var m = new map<any, bool>();
-    m[(nint)(42)] = true;
-    if (!m[(nint)(42)]) {
+    m[(nint)42] = true;
+    if (!m[(nint)42]) {
         Ꮡt.Fatalf("42 is not present in the map"u8);
     }
-    if (m[(nint)(0)]) {
+    if (m[(nint)0]) {
         Ꮡt.Fatalf("0 is present in the map"u8);
     }
+
     var mʗ1 = m;
     var n = testing.AllocsPerRun(1000, () => {
-        if (mʗ1[(nint)(0)]) {
+        if (mʗ1[(nint)0]) {
             Ꮡt.Fatalf("0 is present in the map"u8);
         }
     });
@@ -360,6 +363,7 @@ public static void TestNonEscapingConvT2I(ж<testing.T> Ꮡt) {
     if (m[((TM)0)]) {
         Ꮡt.Fatalf("0 is present in the map"u8);
     }
+
     var mʗ1 = m;
     var n = testing.AllocsPerRun(1000, () => {
         if (mʗ1[((TM)0)]) {
@@ -382,11 +386,11 @@ internal partial struct TestZeroConvT2x_tests /*dyn*/ {
 public static void TestZeroConvT2x(ж<testing.T> Ꮡt) {
     var tests = new TestZeroConvT2x_tests[]{
         new(name: "E8"u8, fn: () => {
-            e = eight8; // any byte-sized value does not allocate
-        }),
+            e = eight8;
+        }), // any byte-sized value does not allocate
         new(name: "E16"u8, fn: () => {
-            e = zero16; // zero values do not allocate
-        }),
+            e = zero16;
+        }), // zero values do not allocate
         new(name: "E32"u8, fn: () => {
             e = zero32;
         }),
@@ -400,8 +404,8 @@ public static void TestZeroConvT2x(ж<testing.T> Ꮡt) {
             e = zeroslice;
         }),
         new(name: "Econstflt"u8, fn: () => {
-            e = 99.0D; // constants do not allocate
-        }),
+            e = 99.0D;
+        }), // constants do not allocate
         new(name: "Econststr"u8, fn: () => {
             e = changeˢ;
         }),
@@ -424,6 +428,7 @@ public static void TestZeroConvT2x(ж<testing.T> Ꮡt) {
             i1 = zerosliceI;
         })
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestZeroConvT2x_tests(), out var Ꮡtest);
         test = vᴛ1;
@@ -441,24 +446,30 @@ public static void TestZeroConvT2x(ж<testing.T> Ꮡt) {
 internal static uint8 eight8 = 8;
 internal static T8 eight8I = 8;
 internal static bool yes = true;
+
 internal static uint16 zero16 = 0;
 internal static T16 zero16I = 0;
 internal static uint16 one16 = 1;
 internal static uint16 thousand16 = 1000;
+
 internal static uint32 zero32 = 0;
 internal static T32 zero32I = 0;
 internal static uint32 one32 = 1;
 internal static uint32 thousand32 = 1000;
+
 internal static uint64 zero64 = 0;
 internal static T64 zero64I = 0;
 internal static uint64 one64 = 1;
 internal static uint64 thousand64 = 1000;
+
 internal static @string zerostr = ""u8;
 internal static Tstr zerostrI = ""u8;
 internal static @string nzstr = "abc"u8;
+
 internal static slice<byte> zeroslice = default!;
 internal static Tslice zerosliceI = default!;
 internal static slice<byte> nzslice = slice<byte>("abc"u8);
+
 internal static array<byte> zerobig = new(512);
 internal static array<byte> nzbig = new array<byte>(512){[511] = 1};
 

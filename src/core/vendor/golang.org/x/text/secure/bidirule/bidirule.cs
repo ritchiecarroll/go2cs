@@ -61,49 +61,53 @@ partial struct ruleTransition {
     internal uint16 mask;
 }
 
-// [2.1] The first character must be a character with Bidi property L, R, or
-// AL. If it has the R or AL property, it is an RTL label; if it has the L
-// property, it is an LTR label.
-// [2.3] In an RTL label, the end of the label must be a character with
-// Bidi property R, AL, EN, or AN, followed by zero or more characters
-// with Bidi property NSM.
-// [2.2] In an RTL label, only characters with the Bidi properties R,
-// AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
-// We exclude the entries from [2.3]
-// [2.3] In an RTL label, the end of the label must be a character with
-// Bidi property R, AL, EN, or AN, followed by zero or more characters
-// with Bidi property NSM.
-// [2.2] In an RTL label, only characters with the Bidi properties R,
-// AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
-// We exclude the entries from [2.3] and NSM.
-// [2.6] In an LTR label, the end of the label must be a character with
-// Bidi property L or EN, followed by zero or more characters with Bidi
-// property NSM.
-// [2.5] In an LTR label, only characters with the Bidi properties L,
-// EN, ES, CS, ET, ON, BN, or NSM are allowed.
-// We exclude the entries from [2.6].
-// [2.6] In an LTR label, the end of the label must be a character with
-// Bidi property L or EN, followed by zero or more characters with Bidi
-// property NSM.
-// [2.5] In an LTR label, only characters with the Bidi properties L,
-// EN, ES, CS, ET, ON, BN, or NSM are allowed.
-// We exclude the entries from [2.6].
 internal static array<array<ruleTransition>> transitions = new golib.SparseArray<array<ruleTransition>>{
+    // [2.1] The first character must be a character with Bidi property L, R, or
+    // AL. If it has the R or AL property, it is an RTL label; if it has the L
+    // property, it is an LTR label.
     [ruleInitial] = new ruleTransition[]{
         new(ruleLTRFinal, (uint16)(1 << (int)(nuint)(bidi.L))),
-        new(ruleRTLFinal, (uint16)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))))}.array(),
+        new(ruleRTLFinal, (uint16)(1 << (int)(nuint)(bidi.R) | 1 << (int)(nuint)(bidi.AL)))}.array(),
     [ruleRTL] = new ruleTransition[]{
-        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.AN)))),
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))) | (1 << (int)(nuint)(bidi.NSM))))}.array(),
+        // [2.3] In an RTL label, the end of the label must be a character with
+        // Bidi property R, AL, EN, or AN, followed by zero or more characters
+        // with Bidi property NSM.
+        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.R) | 1 << (int)(nuint)(bidi.AL)) | 1 << (int)(nuint)(bidi.EN)) | 1 << (int)(nuint)(bidi.AN))),
+
+        // [2.2] In an RTL label, only characters with the Bidi properties R,
+        // AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
+        // We exclude the entries from [2.3]
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)) | 1 << (int)(nuint)(bidi.NSM)))}.array(),
     [ruleRTLFinal] = new ruleTransition[]{
-        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.R)) | (1 << (int)(nuint)(bidi.AL))) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.AN))) | (1 << (int)(nuint)(bidi.NSM)))),
-        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))))}.array(),
+        // [2.3] In an RTL label, the end of the label must be a character with
+        // Bidi property R, AL, EN, or AN, followed by zero or more characters
+        // with Bidi property NSM.
+        new(ruleRTLFinal, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.R) | 1 << (int)(nuint)(bidi.AL)) | 1 << (int)(nuint)(bidi.EN)) | 1 << (int)(nuint)(bidi.AN)) | 1 << (int)(nuint)(bidi.NSM))),
+
+        // [2.2] In an RTL label, only characters with the Bidi properties R,
+        // AL, AN, EN, ES, CS, ET, ON, BN, or NSM are allowed.
+        // We exclude the entries from [2.3] and NSM.
+        new(ruleRTL, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)))}.array(),
     [ruleLTR] = new ruleTransition[]{
-        new(ruleLTRFinal, (uint16)((1 << (int)(nuint)(bidi.L)) | (1 << (int)(nuint)(bidi.EN)))),
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))) | (1 << (int)(nuint)(bidi.NSM))))}.array(),
+        // [2.6] In an LTR label, the end of the label must be a character with
+        // Bidi property L or EN, followed by zero or more characters with Bidi
+        // property NSM.
+        new(ruleLTRFinal, (uint16)(1 << (int)(nuint)(bidi.L) | 1 << (int)(nuint)(bidi.EN))),
+
+        // [2.5] In an LTR label, only characters with the Bidi properties L,
+        // EN, ES, CS, ET, ON, BN, or NSM are allowed.
+        // We exclude the entries from [2.6].
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)) | 1 << (int)(nuint)(bidi.NSM)))}.array(),
     [ruleLTRFinal] = new ruleTransition[]{
-        new(ruleLTRFinal, (uint16)((UntypedInt)((1 << (int)(nuint)(bidi.L)) | (1 << (int)(nuint)(bidi.EN))) | (1 << (int)(nuint)(bidi.NSM)))),
-        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)((1 << (int)(nuint)(bidi.ES)) | (1 << (int)(nuint)(bidi.CS))) | (1 << (int)(nuint)(bidi.ET))) | (1 << (int)(nuint)(bidi.ON))) | (1 << (int)(nuint)(bidi.BN))))}.array(),
+        // [2.6] In an LTR label, the end of the label must be a character with
+        // Bidi property L or EN, followed by zero or more characters with Bidi
+        // property NSM.
+        new(ruleLTRFinal, (uint16)((UntypedInt)(1 << (int)(nuint)(bidi.L) | 1 << (int)(nuint)(bidi.EN)) | 1 << (int)(nuint)(bidi.NSM))),
+
+        // [2.5] In an LTR label, only characters with the Bidi properties L,
+        // EN, ES, CS, ET, ON, BN, or NSM are allowed.
+        // We exclude the entries from [2.6].
+        new(ruleLTR, (uint16)((UntypedInt)((UntypedInt)((UntypedInt)(1 << (int)(nuint)(bidi.ES) | 1 << (int)(nuint)(bidi.CS)) | 1 << (int)(nuint)(bidi.ET)) | 1 << (int)(nuint)(bidi.ON)) | 1 << (int)(nuint)(bidi.BN)))}.array(),
     [ruleInvalid] = new ruleTransition[]{
         new(ruleInvalid, 0),
         new(ruleInvalid, 0)}.array()
@@ -246,7 +250,6 @@ public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, 
         err = ErrInvalid;
         break;
     }}
-
     return (n, err);
 }
 
@@ -308,7 +311,6 @@ internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s)
                 break;
             }}
         }
-
         n += sz;
     }
     return (n, true);
@@ -358,7 +360,6 @@ internal static (nint n, bool ok) advanceString(this ref Transformer t, @string 
                 break;
             }}
         }
-
         n += sz;
     }
     return (n, true);

@@ -19,7 +19,6 @@ internal static Func<nint, bool> f(slice<nint> a, nint x) {
 
 internal static slice<nint> data = new slice<nint>(14){[0] = -10, [1] = -5, [2] = 0, [3] = 1, [4] = 2, [5] = 3, [6] = 5, [7] = 7, [8] = 11, [9] = 100, [10] = 100, [11] = 100, [12] = 1000, [13] = 10000};
 
-
 partial struct testsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
@@ -72,10 +71,13 @@ public static void TestFind(ж<testing.T> Ꮡt) {
     var str2 = new @string[]{"ab"u8, "ca"u8}.slice();
     var str3 = new @string[]{"mo"u8, "qo"u8, "vo"u8}.slice();
     var str4 = new @string[]{"ab"u8, "ad"u8, "ca"u8, "xy"u8}.slice();
+
     // slice with repeating elements
     var strRepeats = new @string[]{"ba"u8, "ca"u8, "da"u8, "da"u8, "da"u8, "ka"u8, "ma"u8, "ma"u8, "ta"u8}.slice();
+
     // slice with all element equal
     var strSame = new @string[]{"xx"u8, "xx"u8, "xx"u8}.slice();
+
     var tests = new TestFind_tests[]{
         new(new @string[]{}.slice(), "foo"u8, 0, false),
         new(new @string[]{}.slice(), ""u8, 0, false),
@@ -112,6 +114,7 @@ public static void TestFind(ж<testing.T> Ꮡt) {
         new(strSame, "ab"u8, 0, false),
         new(strSame, "zz"u8, 3, false)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestFind_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -120,6 +123,7 @@ public static void TestFind(ж<testing.T> Ꮡt) {
         Ꮡt.Run(tt.target, (ж<testing.T> tΔ1) => {
             var ttʗ2 = ttʗ1;
             var cmp = (nint i) => stringspkg.Compare(ttʗ2.target, ttʗ2.data[i]);
+
             var (pos, found) = Find(len(ttʗ1.data), cmp);
             if (pos != ttʗ1.wantPos || found != ttʗ1.wantFound) {
                 tΔ1.Errorf("Find got (%v, %v), want (%v, %v)"u8, pos, found, ttʗ1.wantPos, ttʗ1.wantFound);
@@ -170,7 +174,6 @@ public static void TestSearchEfficiency(ж<testing.T> Ꮡt) {
 internal static slice<float64> fdata = new slice<float64>(5){[0] = -3.14D, [1] = 0D, [2] = 1D, [3] = 2D, [4] = 1000.7D};
 
 internal static slice<@string> sdata = new slice<@string>(4){[0] = "f"u8, [1] = "foo"u8, [2] = "foobar"u8, [3] = "x"u8};
-
 
 partial struct wrappertestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -254,11 +257,13 @@ public static void TestFindExhaustive(ж<testing.T> Ꮡt) {
             var x = xᴛ1;
             bool wantFound = default!;
             nint wantPos = default!;
+
             var cmp = (nint i) => {
                 // Encodes the unmaterialized sequence with elem[i] == (i+1)*2
                 return x - (i + 1) * 2;
             };
             var (pos, found) = Find(size, cmp);
+
             if (x % 2 == 0){
                 wantPos = x / 2 - 1;
                 wantFound = true;

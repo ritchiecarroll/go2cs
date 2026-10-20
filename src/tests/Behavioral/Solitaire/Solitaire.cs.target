@@ -22,7 +22,7 @@ internal static slice<rune> board = slice<rune>(
 ...........
 ...........
 
-""");
+""".Raw());
 
 internal static nint center;
 
@@ -72,7 +72,7 @@ internal static bool solve() {
                 if (move(pos, dir)) {
                     if (solve()) {
                         unmove(pos, dir);
-                        println(((@string)board));
+                        println((@string)board);
                         return true;
                     }
                     unmove(pos, dir);
@@ -83,7 +83,7 @@ internal static bool solve() {
         }
     }
     if (n == 1 && (center < 0 || last == center)) {
-        println(((@string)board));
+        println((@string)board);
         return true;
     }
     return false;

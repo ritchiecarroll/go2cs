@@ -84,34 +84,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(table);
             var h2 = New(table);
+
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
+
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ1.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
+
             (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
             if (err != default!) {
                 tΔ1.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
             stateAppend = stateAppend[4..];
+
             if (((sstring)state) != g.halfStateISO) {
                 tΔ1.Errorf("ISO crc64(%q) state = %q, want %q"u8, g.@in, state, g.halfStateISO);
                 continue;
             }
+
             if (((sstring)stateAppend) != g.halfStateISO) {
                 tΔ1.Errorf("ISO crc64(%q) state = %q, want %q"u8, g.@in, stateAppend, g.halfStateISO);
                 continue;
             }
+
             {
                 var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                     tΔ1.Errorf("could not unmarshal: %v"u8, errΔ1);
                     continue;
                 }
             }
+
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
+
             if (h.Sum64() != h2.Sum64()) {
                 tΔ1.Errorf("ISO crc64(%s) = 0x%x != marshaled (0x%x)"u8, g.@in, h.Sum64(), h2.Sum64());
             }
@@ -122,34 +130,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
         foreach (var (_, g) in golden) {
             var h = New(table);
             var h2 = New(table);
+
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
+
             var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
             if (err != default!) {
                 tΔ2.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
+
             (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
             if (err != default!) {
                 tΔ2.Errorf("could not marshal: %v"u8, err);
                 continue;
             }
             stateAppend = stateAppend[4..];
+
             if (((sstring)state) != g.halfStateECMA) {
                 tΔ2.Errorf("ECMA crc64(%q) state = %q, want %q"u8, g.@in, state, g.halfStateECMA);
                 continue;
             }
+
             if (((sstring)stateAppend) != g.halfStateECMA) {
                 tΔ2.Errorf("ECMA crc64(%q) state = %q, want %q"u8, g.@in, stateAppend, g.halfStateECMA);
                 continue;
             }
+
             {
                 var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                     tΔ2.Errorf("could not unmarshal: %v"u8, errΔ1);
                     continue;
                 }
             }
+
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
             io.WriteString(new crc64_internal_test_package.hash_Hash64ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
+
             if (h.Sum64() != h2.Sum64()) {
                 tΔ2.Errorf("ECMA crc64(%s) = 0x%x != marshaled (0x%x)"u8, g.@in, h.Sum64(), h2.Sum64());
             }
@@ -160,10 +176,12 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
 public static void TestMarshalTableMismatch(ж<testing.T> Ꮡt) {
     var h1 = New(MakeTable(ISO));
     var h2 = New(MakeTable(ECMA));
+
     var (state1, err) = h1._<encoding.BinaryMarshaler>().MarshalBinary();
     if (err != default!) {
         Ꮡt.Errorf("could not marshal: %v"u8, err);
     }
+
     {
         var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state1); if (errΔ1 == default!) {
             Ꮡt.Errorf("no error when one was expected"u8);
@@ -181,6 +199,7 @@ internal static void bench(ж<testing.B> Ꮡb, uint64 poly, int64 size) {
     }
     var h = New(MakeTable(poly));
     var @in = new slice<byte>(0, h.Size());
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         h.Reset();
@@ -199,22 +218,22 @@ internal static readonly @string random16KBˢ = "Random16KB"u8;
 
 public static void BenchmarkCrc64(ж<testing.B> Ꮡb) {
     Ꮡb.Run(iso64kbˢ, (ж<testing.B> bΔ1) => {
-        bench(bΔ1, ISO, ((int64)64 << (int)(10)));
+        bench(bΔ1, ISO, (int64)64 << 10);
     });
     Ꮡb.Run(iso4kbˢ, (ж<testing.B> bΔ2) => {
-        bench(bΔ2, ISO, ((int64)4 << (int)(10)));
+        bench(bΔ2, ISO, (int64)4 << 10);
     });
     Ꮡb.Run(iso1kbˢ, (ж<testing.B> bΔ3) => {
-        bench(bΔ3, ISO, ((int64)1 << (int)(10)));
+        bench(bΔ3, ISO, (int64)1 << 10);
     });
     Ꮡb.Run(ecma64kbˢ, (ж<testing.B> bΔ4) => {
-        bench(bΔ4, ECMA, ((int64)64 << (int)(10)));
+        bench(bΔ4, ECMA, (int64)64 << 10);
     });
     Ꮡb.Run(random64KBˢ, (ж<testing.B> bΔ5) => {
-        bench(bΔ5, 0x777, ((int64)64 << (int)(10)));
+        bench(bΔ5, 0x777, (int64)64 << 10);
     });
     Ꮡb.Run(random16KBˢ, (ж<testing.B> bΔ6) => {
-        bench(bΔ6, 0x777, ((int64)16 << (int)(10)));
+        bench(bΔ6, 0x777, (int64)16 << 10);
     });
 }
 

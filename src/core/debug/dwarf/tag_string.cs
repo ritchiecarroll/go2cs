@@ -119,7 +119,6 @@ public static @string String(this Tag i) {
     default: {
         return "Tag("u8 + strconv.FormatInt((int64)(uint32)i, 10) + ")"u8;
     }}
-
 }
 
 } // end dwarf_package

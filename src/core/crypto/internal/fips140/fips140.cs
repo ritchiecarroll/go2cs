@@ -29,34 +29,44 @@ internal static bool debug;
     else { /* default: */
         throw panic("fips140: unknown GODEBUG setting fips140=" + v);
     }
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string fips1403ModeIsˢ = "FIPS 140-3 mode is incompatible with ASAN"u8;
-private static readonly @string fips1403ModeIsˢ2 = "FIPS 140-3 mode is incompatible with GOEXPERIMENT=boringcrypto"u8;
+private static readonly @string fips1403ModeIsˢ = "FIPS 140-3 mode is incompatible with the purego build tag"u8;
+private static readonly @string fips1403ModeIsˢ2 = "FIPS 140-3 mode is incompatible with ASAN"u8;
+private static readonly @string fips1403ModeIsˢ3 = "FIPS 140-3 mode is incompatible with GOEXPERIMENT=boringcrypto"u8;
 
 // Supported returns an error if FIPS 140-3 mode can't be enabled.
 public static error Supported() {
     // Keep this in sync with fipsSupported in cmd/dist/test.go.
+    // The purego tag changes too much of the implementation to claim the
+    // validation still applies.
+    if (puregoEnabled) {
+        return errors.New(fips1403ModeIsˢ);
+    }
+
     // ASAN disapproves of reading swaths of global memory in fips140/check.
     // One option would be to expose runtime.asanunpoison through
     // crypto/internal/fips140deps and then call it to unpoison the range
     // before reading it, but it is unclear whether that would then cause
     // false negatives. For now, FIPS+ASAN doesn't need to work.
     if (asanEnabled) {
-        return errors.New(fips1403ModeIsˢ);
+        return errors.New(fips1403ModeIsˢ2);
     }
+
     // See EnableFIPS in cmd/internal/obj/fips.go for commentary.
+    // Also, js/wasm and windows/386 don't have good enough timers
+    // for the CPU jitter entropy source.
     switch (ᐧ) {
-    case {} when (runtime.GOARCH == "wasm"u8) || (runtime.GOOS == "windows"u8 && runtime.GOARCH == "386"u8) || (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm"u8) || (runtime.GOOS == "openbsd"u8) || (runtime.GOOS == "aix"u8): {
+    case {} when (runtime.GOARCH == "wasm"u8) || (runtime.GOOS == "windows"u8 && runtime.GOARCH == "386"u8) || (runtime.GOOS == "openbsd"u8) || (runtime.GOOS == "aix"u8): {
+        // due to -fexecute-only, see #70880
         return errors.New("FIPS 140-3 mode is not supported on "u8 + runtime.GOOS + "-"u8 + runtime.GOARCH);
     }}
 
-    // due to -fexecute-only, see #70880
     if (boringEnabled) {
-        return errors.New(fips1403ModeIsˢ2);
+        return errors.New(fips1403ModeIsˢ3);
     }
+
     return default!;
 }
 

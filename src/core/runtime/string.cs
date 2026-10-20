@@ -6,7 +6,9 @@ namespace go;
 using abi = @internal.abi_package;
 using bytealg = @internal.bytealg_package;
 using goarch = @internal.goarch_package;
+using Δmath = @internal.runtime.math_package;
 using sys = @internal.runtime.sys_package;
+using strconv = @internal.strconv_package;
 using @unsafe = unsafe_package;
 using @internal;
 using @internal.runtime;
@@ -29,8 +31,6 @@ internal static readonly @string stringConcatenationTooˢ = "string concatenatio
 // escape the calling function, so the string data can be stored in buf
 // if small enough.
 internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
-    ref var buf = ref Ꮡbuf.DerefOrNull();
-
     nint idx = 0;
     nint l = 0;
     nint count = 0;
@@ -49,6 +49,7 @@ internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
     if (count == 0) {
         return ""u8;
     }
+
     // If there is just one string and either it is not on the stack
     // or our result does not escape the calling frame (buf != nil),
     // then we can return that string directly.
@@ -63,6 +64,9 @@ internal static @string concatstrings(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
     return s;
 }
 
+// concatstring2 helps make the callsite smaller (compared to concatstrings),
+// and we think this is currently more valuable than omitting one call in the
+// chain, the same goes for concatstring{3,4,5}.
 internal static @string concatstring2(ж<tmpBuf> Ꮡbuf, @string a0, @string a1) {
     return concatstrings(Ꮡbuf, new @string[]{a0, a1}.slice());
 }
@@ -82,7 +86,9 @@ internal static @string concatstring5(ж<tmpBuf> Ꮡbuf, @string a0, @string a1,
 // concatbytes implements a Go string concatenation x+y+z+... returning a slice
 // of bytes.
 // The operands are passed in the slice a.
-internal static slice<byte> concatbytes(slice<@string> a) {
+internal static slice<byte> concatbytes(ж<tmpBuf> Ꮡbuf, slice<@string> a) {
+    ref var buf = ref Ꮡbuf.DerefOrNull();
+
     nint l = 0;
     foreach (var (_, x) in a) {
         nint n = len(x);
@@ -95,29 +101,40 @@ internal static slice<byte> concatbytes(slice<@string> a) {
         // This is to match the return type of the non-optimized concatenation.
         return new byte[]{}.slice();
     }
-    var b = rawbyteslice(l);
+
+    slice<byte> b = default!;
+    if (Ꮡbuf != nil && l <= 32){
+        buf = new tmpBuf(new byte[32].array());
+        b = buf.Value.slice(0, l);
+    } else {
+        b = rawbyteslice(l);
+    }
     nint offset = 0;
     foreach (var (_, x) in a) {
         copy(b.slice(offset), x);
         offset += len(x);
     }
+
     return b;
 }
 
-internal static slice<byte> concatbyte2(@string a0, @string a1) {
-    return concatbytes(new @string[]{a0, a1}.slice());
+// concatbyte2 helps make the callsite smaller (compared to concatbytes),
+// and we think this is currently more valuable than omitting one call in
+// the chain, the same goes for concatbyte{3,4,5}.
+internal static slice<byte> concatbyte2(ж<tmpBuf> Ꮡbuf, @string a0, @string a1) {
+    return concatbytes(Ꮡbuf, new @string[]{a0, a1}.slice());
 }
 
-internal static slice<byte> concatbyte3(@string a0, @string a1, @string a2) {
-    return concatbytes(new @string[]{a0, a1, a2}.slice());
+internal static slice<byte> concatbyte3(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2) {
+    return concatbytes(Ꮡbuf, new @string[]{a0, a1, a2}.slice());
 }
 
-internal static slice<byte> concatbyte4(@string a0, @string a1, @string a2, @string a3) {
-    return concatbytes(new @string[]{a0, a1, a2, a3}.slice());
+internal static slice<byte> concatbyte4(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2, @string a3) {
+    return concatbytes(Ꮡbuf, new @string[]{a0, a1, a2, a3}.slice());
 }
 
-internal static slice<byte> concatbyte5(@string a0, @string a1, @string a2, @string a3, @string a4) {
-    return concatbytes(new @string[]{a0, a1, a2, a3, a4}.slice());
+internal static slice<byte> concatbyte5(ж<tmpBuf> Ꮡbuf, @string a0, @string a1, @string a2, @string a3, @string a4) {
+    return concatbytes(Ꮡbuf, new @string[]{a0, a1, a2, a3, a4}.slice());
 }
 
 // slicebytetostring converts a byte slice to a string.
@@ -154,6 +171,7 @@ internal static @string slicebytetostring(ж<tmpBuf> Ꮡbuf, ж<byte> Ꮡptr, ni
         }
         return @unsafe.String((ж<byte>)(uintptr)(pΔ1), 1);
     }
+
     @unsafe.Pointer Δp = default!;
     if (Ꮡbuf != nil && n <= 32){
         Δp = @unsafe.Pointer.FromPinnedBox(Ꮡbuf);
@@ -175,8 +193,8 @@ internal static bool stringDataOnStack(@string s) {
 internal static (@string s, slice<byte> b) rawstringtmp(ж<tmpBuf> Ꮡbuf, nint l) {
     @string s = default!;
     slice<byte> b = default!;
-
     ref var buf = ref Ꮡbuf.DerefOrNull();
+
     if (Ꮡbuf != nil && l <= 32){
         b = buf.Value.slice(0, l);
         s = slicebytetostringtmp(Ꮡ(b, 0), len(b));
@@ -239,6 +257,7 @@ internal static slice<rune> stringtoslicerune(/*[32]*/ ж<array<rune>> Ꮡbuf, @
     foreach ((_, _) in s) {
         n++;
     }
+
     slice<rune> a = default!;
     if (Ꮡbuf != nil && n <= 32){
         buf = new rune[]{}.array(32);
@@ -246,6 +265,7 @@ internal static slice<rune> stringtoslicerune(/*[32]*/ ж<array<rune>> Ꮡbuf, @
     } else {
         a = rawruneslice(n);
     }
+
     n = 0;
     foreach (var (_, r) in s) {
         a[n] = r;
@@ -301,8 +321,8 @@ internal static ж<stringStruct> stringStructOf(ж<@string> Ꮡsp) {
 
 internal static @string /*s*/ intstring(/*[4]*/ ж<array<byte>> Ꮡbuf, int64 v) {
     @string s = default!;
-
     ref var buf = ref Ꮡbuf.DerefOrNull();
+
     slice<byte> b = default!;
     if (Ꮡbuf != nil){
         b = buf[..];
@@ -328,6 +348,7 @@ internal static slice<byte> /*b*/ rawbyteslice(nint size) {
     if (cap != (uintptr)size) {
         memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size), cap - (uintptr)size);
     }
+
     (Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>()).Value = new Δsliceᴛ(Δp.Value, size, (nint)cap);
     return b;
 }
@@ -344,6 +365,7 @@ internal static slice<rune> /*b*/ rawruneslice(nint size) {
     if (mem != (uintptr)size * 4) {
         memclrNoHeapPointers((uintptr)add(Δp, (uintptr)size * 4), mem - (uintptr)size * 4);
     }
+
     (Ꮡb.Reinterpret<slice<rune>, Δsliceᴛ>()).Value = new Δsliceᴛ(Δp.Value, size, (nint)(mem / 4));
     return b;
 }
@@ -358,11 +380,14 @@ internal static slice<byte> /*b*/ gobytes(ж<byte> Ꮡp, nint n) {
     if (n == 0) {
         return new slice<byte>(0);
     }
+
     if (n < 0 || (uintptr)n > maxAlloc) {
         throw panic(((errorString)(@string)gobytesLengthOutOfRangeˢ));
     }
+
     @unsafe.Pointer bp = (uintptr)mallocgc((uintptr)n, nil, false);
     memmove(bp, @unsafe.Pointer.FromPinnedBox(Ꮡp), (uintptr)n);
+
     (Ꮡb.Reinterpret<slice<byte>, Δsliceᴛ>()).Value = new Δsliceᴛ(bp.Value, n, n);
     return b;
 }
@@ -396,74 +421,6 @@ internal static @string gostringn(ж<byte> Ꮡp, nint l) {
     return s;
 }
 
-internal const uint64 maxUint64 = /* ^uint64(0) */ 18446744073709551615;
-internal const int64 maxInt64 = /* int64(maxUint64 >> 1) */ 9223372036854775807;
-
-// atoi64 parses an int64 from a string s.
-// The bool result reports whether s is a number
-// representable by a value of type int64.
-internal static (int64, bool) atoi64(@string s) {
-    if (s == ""u8) {
-        return (0, false);
-    }
-    var neg = false;
-    if (s[0] == (rune)'-') {
-        neg = true;
-        s = s[1..];
-    }
-    var un = (uint64)0;
-    for (nint i = 0; i < len(s); i++) {
-        var c = s[i];
-        if (c < (rune)'0' || c > (rune)'9') {
-            return (0, false);
-        }
-        if (un > maxUint64 / 10) {
-            // overflow
-            return (0, false);
-        }
-        un *= 10;
-        var un1 = un + (uint64)c - (rune)'0';
-        if (un1 < un) {
-            // overflow
-            return (0, false);
-        }
-        un = un1;
-    }
-    if (!neg && un > (uint64)maxInt64) {
-        return (0, false);
-    }
-    if (neg && un > (uint64)maxInt64 + 1) {
-        return (0, false);
-    }
-    var n = (int64)un;
-    if (neg) {
-        n = -n;
-    }
-    return (n, true);
-}
-
-// atoi is like atoi64 but for integers
-// that fit into an int.
-internal static (nint, bool) atoi(@string s) {
-    {
-        var (n, ok) = atoi64(s); if (n == (int64)(nint)n) {
-            return ((nint)n, ok);
-        }
-    }
-    return (0, false);
-}
-
-// atoi32 is like atoi but for integers
-// that fit into an int32.
-internal static (int32, bool) atoi32(@string s) {
-    {
-        var (n, ok) = atoi64(s); if (n == (int64)(int32)n) {
-            return ((int32)n, ok);
-        }
-    }
-    return (0, false);
-}
-
 // parseByteCount parses a string that represents a count of bytes.
 //
 // s must match the following regular expression:
@@ -485,11 +442,11 @@ internal static (int64, bool) parseByteCount(@string s) {
     // Handle the easy non-suffix case.
     var last = s[len(s) - 1];
     if (last >= (rune)'0' && last <= (rune)'9') {
-        var (nΔ1, okΔ1) = atoi64(s);
-        if (!okΔ1 || nΔ1 < 0) {
+        var (nΔ1, errΔ1) = strconv.ParseInt(s, 10, 64);
+        if (errΔ1 != default! || nΔ1 < 0) {
             return (0, false);
         }
-        return (nΔ1, okΔ1);
+        return (nΔ1, true);
     }
     // Failing a trailing digit, this must always end in 'B'.
     // Also at this point there must be at least one digit before
@@ -501,11 +458,11 @@ internal static (int64, bool) parseByteCount(@string s) {
     {
         var c = s[len(s) - 2]; if (c >= (rune)'0' && c <= (rune)'9'){
             // Trivial 'B' suffix.
-            var (nΔ2, okΔ2) = atoi64(s.slice(0, len(s) - 1));
-            if (!okΔ2 || nΔ2 < 0) {
+            var (nΔ2, errΔ2) = strconv.ParseInt(s.slice(0, len(s) - 1), 10, 64);
+            if (errΔ2 != default! || nΔ2 < 0) {
                 return (0, false);
             }
-            return (nΔ2, okΔ2);
+            return (nΔ2, true);
         } else 
         if (c != (rune)'i') {
             return (0, false);
@@ -535,25 +492,24 @@ internal static (int64, bool) parseByteCount(@string s) {
         break;
     }
     default: {
+        // Invalid suffix.
         return (0, false);
     }}
-
-    // Invalid suffix.
     var m = (uint64)1;
     for (nint i = 0; i < power; i++) {
         m *= 1024;
     }
-    var (n, ok) = atoi64(s.slice(0, len(s) - 3));
-    if (!ok || n < 0) {
+    var (n, err) = strconv.ParseInt(s.slice(0, len(s) - 3), 10, 64);
+    if (err != default! || n < 0) {
         return (0, false);
     }
     var un = (uint64)n;
-    if (un > maxUint64 / m) {
+    if (un > Δmath.MaxUint64 / m) {
         // Overflow.
         return (0, false);
     }
     un *= m;
-    if (un > (uint64)maxInt64) {
+    if (un > (uint64)Δmath.MaxInt64) {
         // Overflow.
         return (0, false);
     }
@@ -562,11 +518,10 @@ internal static (int64, bool) parseByteCount(@string s) {
 
 //go:nosplit
 internal static nint findnull(ж<byte> Ꮡs) {
-    ref var s = ref Ꮡs.DerefOrNull();
-
     if (Ꮡs == nil) {
         return 0;
     }
+
     // Avoid IndexByteString on Plan 9 because it uses SSE instructions
     // on x86 machines, and those are classified as floating point instructions,
     // which are illegal in a note handler.
@@ -578,11 +533,13 @@ internal static nint findnull(ж<byte> Ꮡs) {
         }
         return l;
     }
+
     // pageSize is the unit we scan at a time looking for NULL.
     // It must be the minimum page size for any architecture Go
     // runs on. It's okay (just a minor performance loss) if the
     // actual system page size is larger than this value.
     UntypedInt pageSize = 4096;
+
     nint offset = 0;
     ref var ptr = ref heap<@unsafe.Pointer>(out var Ꮡptr);
     ptr = @unsafe.Pointer.FromPinnedBox(Ꮡs);
@@ -591,6 +548,7 @@ internal static nint findnull(ж<byte> Ꮡs) {
     // [ptr, endOfPage) interval.
     ref var safeLen = ref heap<nint>(out var ᏑsafeLen);
     safeLen = (nint)((uintptr)pageSize - (uintptr)ptr % (uintptr)pageSize);
+
     while (ᐧ) {
         @string t = ~Ꮡ(new stringStruct(ptr.Value, safeLen)).Reinterpret<stringStruct, @string>();
         // Check one page at a time.

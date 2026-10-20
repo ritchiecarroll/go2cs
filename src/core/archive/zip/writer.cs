@@ -37,7 +37,7 @@ partial struct Writer {
 }
 
 partial struct header {
-    public partial ref ж<FileHeader> FileHeader { get; }
+    /*embed*/ public ж<FileHeader> FileHeader;
     internal uint64 offset;
     internal bool raw;
 }
@@ -95,11 +95,12 @@ public static error Close(this ref Writer w) {
         return errors.New(zipWriterClosedTwiceˢ);
     }
     w.closed = true;
+
     // write central directory
     var start = w.cw.Value.count;
     foreach (var (_, h) in w.dir) {
         array<byte> bufΔ1 = new(46); /* directoryHeaderLen */
-        var bΔ1 = ((writeBuf)(bufΔ1[..]));
+        var bΔ1 = (writeBuf)(bufΔ1[..]);
         bΔ1.uint32((uint32)directoryHeaderSignature);
         bΔ1.uint16((~h).CreatorVersion);
         bΔ1.uint16((~h).ReaderVersion);
@@ -114,9 +115,10 @@ public static error Close(this ref Writer w) {
             // zip64 extra header should be used.
             bΔ1.uint32(uint32max); // compressed size
             bΔ1.uint32(uint32max); // uncompressed size
+
             // append a zip64 extra block to Extra
             array<byte> bufΔ2 = new(28);            // 2x uint16 + 3x uint64
-            var eb = ((writeBuf)(bufΔ2[..]));
+            var eb = (writeBuf)(bufΔ2[..]);
             eb.uint16(zip64ExtraID);
             eb.uint16(24); // size = 3x uint64
             eb.uint64((~h).UncompressedSize64);
@@ -127,6 +129,7 @@ public static error Close(this ref Writer w) {
             bΔ1.uint32((~h).CompressedSize);
             bΔ1.uint32((~h).UncompressedSize);
         }
+
         bΔ1.uint16((uint16)len((~h).Name));
         bΔ1.uint16((uint16)len((~h).Extra));
         bΔ1.uint16((uint16)len((~h).Comment));
@@ -159,17 +162,21 @@ public static error Close(this ref Writer w) {
         }
     }
     var end = w.cw.Value.count;
+
     var records = (uint64)len(w.dir);
     var size = (uint64)(end - start);
     var offset = (uint64)start;
+
     {
         var f = w.testHookCloseSizeOffset; if (f != default!) {
             f(size, offset);
         }
     }
+
     if (records >= uint16max || size >= uint32max || offset >= uint32max) {
         array<byte> bufΔ3 = new(76); /* directory64EndLen + directory64LocLen */
-        var bΔ2 = ((writeBuf)(bufΔ3[..]));
+        var bΔ2 = (writeBuf)(bufΔ3[..]);
+
         // zip64 end of central directory record
         bΔ2.uint32(directory64EndSignature);
         bΔ2.uint64(directory64EndLen - 12); // length minus signature (uint32) and length fields (uint64)
@@ -181,25 +188,29 @@ public static error Close(this ref Writer w) {
         bΔ2.uint64(records); // total number of entries in the central directory
         bΔ2.uint64(size); // size of the central directory
         bΔ2.uint64(offset); // offset of start of central directory with respect to the starting disk number
+
         // zip64 end of central directory locator
         bΔ2.uint32(directory64LocSignature);
         bΔ2.uint32(0); // number of the disk with the start of the zip64 end of central directory
         bΔ2.uint64((uint64)end); // relative offset of the zip64 end of central directory record
         bΔ2.uint32(1); // total number of disks
+
         {
             var (_, err) = w.cw.Write(bufΔ3[..]); if (err != default!) {
                 return err;
             }
         }
+
         // store max values in the regular end record to signal
         // that the zip64 values should be used instead
         records = uint16max;
         size = uint32max;
         offset = uint32max;
     }
+
     // write end record
     array<byte> buf = new(22); /* directoryEndLen */
-    var b = ((writeBuf)(buf[..]));
+    var b = (writeBuf)(buf[..]);
     b.uint32((uint32)directoryEndSignature);
     b = b[4..]; // skip over disk number and first disk number (2x uint16)
     b.uint16((uint16)records); // number of entries this disk
@@ -217,6 +228,7 @@ public static error Close(this ref Writer w) {
             return err;
         }
     }
+
     return (~w.cw).w._<ж<bufio.Writer>>().Flush();
 }
 
@@ -298,6 +310,7 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
             return (default!, err);
         }
     }
+
     // The ZIP format has a sad state of affairs regarding character encoding.
     // Officially, the name and comment fields are supposed to be encoded
     // in CP-437 (which is mostly compatible with ASCII), unless the UTF-8
@@ -328,6 +341,7 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
 
     fh.CreatorVersion = (uint16)((uint16)(fh.CreatorVersion & 0xff00) | (uint16)zipVersion20); // preserve compatibility byte
     fh.ReaderVersion = zipVersion20;
+
     // If Modified is set, this takes precedence over MS-DOS timestamp fields.
     if (!fh.Modified.IsZero()) {
         // Contrary to the FileHeader.SetModTime method, we intentionally
@@ -339,6 +353,7 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
         // The timezone is only non-UTC if a user directly sets the Modified
         // field directly themselves. All other approaches sets UTC.
         (fh.ModifiedDate, fh.ModifiedTime) = timeToMsDosTime(fh.Modified);
+
         // Use "extended timestamp" format since this is what Info-ZIP uses.
         // Nearly every major ZIP implementation uses a different format,
         // but at least most seem to be able to understand the other formats.
@@ -347,19 +362,21 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
         // if modification time is the only timestamp being encoded.
         array<byte> mbuf = new(9);            // 2*SizeOf(uint16) + SizeOf(uint8) + SizeOf(uint32)
         var mt = (uint32)fh.Modified.Unix();
-        var eb = ((writeBuf)(mbuf[..]));
+        var eb = (writeBuf)(mbuf[..]);
         eb.uint16(extTimeExtraID);
         eb.uint16(5); // Size: SizeOf(uint8) + SizeOf(uint32)
         eb.uint8(1); // Flags: ModTime
         eb.uint32(mt); // ModTime
         fh.Extra = appendꓸꓸꓸ(fh.Extra, mbuf[..]);
     }
+
     io.Writer ow = default!;
     ж<fileWriter> fw = default!;
     var h = Ꮡ(new header(
         FileHeader: Ꮡfh,
         offset: (uint64)(~w.cw).count
     ));
+
     if (strings.HasSuffix(fh.Name, "/"u8)){
         // Set the compression method to Store to ensure data length is truly zero,
         // which the writeHeader method always encodes for the size fields.
@@ -367,14 +384,17 @@ public static (io.Writer, error) CreateHeader(this ref Writer w, ж<FileHeader> 
         // even when compressing an empty string.
         fh.Method = Store;
         fh.Flags &= unchecked((uint16)~(uint16)(0x8)); // we will not write a data descriptor
+
         // Explicitly clear sizes as they have no meaning for directories.
         fh.CompressedSize = 0;
         fh.CompressedSize64 = 0;
         fh.UncompressedSize = 0;
         fh.UncompressedSize64 = 0;
+
         ow = new dirWriter(nil);
     } else {
         fh.Flags |= (uint16)(0x8); // we will write a data descriptor
+
         fw = Ꮡ(new fileWriter(
             zipw: new countWriterжWriter(w.cw),
             compCount: Ꮡ(new countWriter(w: new countWriterжWriter(w.cw))),
@@ -414,8 +434,9 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
     if (len(h.Extra) > maxUint16) {
         return errLongExtra;
     }
+
     array<byte> buf = new(30); /* fileHeaderLen */
-    var b = ((writeBuf)(buf[..]));
+    var b = (writeBuf)(buf[..]);
     b.uint32((uint32)fileHeaderSignature);
     b.uint16(h.ReaderVersion);
     b.uint16(h.Flags);
@@ -470,8 +491,10 @@ public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡ
             return (default!, err);
         }
     }
+
     fh.CompressedSize = (uint32)min(fh.CompressedSize64, (uint64)(uint32max));
     fh.UncompressedSize = (uint32)min(fh.UncompressedSize64, (uint64)(uint32max));
+
     var h = Ꮡ(new header(
         FileHeader: Ꮡfh,
         offset: (uint64)(~w.cw).count,
@@ -483,10 +506,12 @@ public static (io.Writer, error) CreateRaw(this ref Writer w, ж<FileHeader> Ꮡ
             return (default!, err);
         }
     }
+
     if (strings.HasSuffix(fh.Name, "/"u8)) {
         w.last = default!;
         return (new dirWriter(nil), default!);
     }
+
     var fw = Ꮡ(new fileWriter(
         header: h,
         zipw: new countWriterжWriter(w.cw)
@@ -601,7 +626,7 @@ internal static (nint, error) Write(this dirWriter _, slice<byte> b) {
 }
 
 partial struct fileWriter {
-    internal partial ref ж<header> header { get; }
+    /*embed*/ internal ж<header> header;
     internal io.Writer zipw;
     internal ж<countWriter> rawCount;
     internal io.WriteCloser comp;
@@ -640,11 +665,13 @@ internal static error close(this ref fileWriter w) {
             return err;
         }
     }
+
     // update FileHeader
     var fh = w.header.Value.FileHeader;
     fh.Value.CRC32 = w.crc32.Sum32();
     fh.Value.CompressedSize64 = (uint64)(~w.compCount).count;
     fh.Value.UncompressedSize64 = (uint64)(~w.rawCount).count;
+
     if (fh.isZip64()){
         fh.Value.CompressedSize = uint32max;
         fh.Value.UncompressedSize = uint32max;
@@ -653,6 +680,7 @@ internal static error close(this ref fileWriter w) {
         fh.Value.CompressedSize = (uint32)(~fh).CompressedSize64;
         fh.Value.UncompressedSize = (uint32)(~fh).UncompressedSize64;
     }
+
     return w.writeDataDescriptor();
 }
 
@@ -671,7 +699,7 @@ internal static error writeDataDescriptor(this ref fileWriter w) {
     } else {
         buf = new slice<byte>(dataDescriptorLen);
     }
-    var b = ((writeBuf)buf);
+    var b = (writeBuf)buf;
     b.uint32(dataDescriptorSignature); // de-facto standard, required by OS X
     b.uint32(w.CRC32);
     if (w.isZip64()){

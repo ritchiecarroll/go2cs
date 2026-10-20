@@ -18,9 +18,10 @@ partial struct mixed {
 }
 
 internal static void Main() {
-    var p = new point(x: 1, y: 2, a: "h"u8, b: "i"u8, wide: 3.5D, tall: 4.5D);
+    var p = new point(x: 1, y: 2, a: "h", b: "i", wide: 3.5D, tall: 4.5D);
     fmt.Println(p.x, p.y, p.a, p.b, p.wide, p.tall);
-    var m = new mixed(X: 10, y: 20, p: 30, q: 40, label: "tag"u8);
+
+    var m = new mixed(X: 10, y: 20, p: 30, q: 40, label: "tag");
     fmt.Println(m.X, m.y, m.p, m.q, m.label);
 }
 

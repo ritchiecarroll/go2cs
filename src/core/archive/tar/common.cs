@@ -50,11 +50,13 @@ internal static readonly @string andˢ = "; and "u8;
 internal static readonly @string prefixᶜ = "archive/tar: cannot encode header"u8;
 
 internal static @string Error(this headerError he) {
+    var ssᴷ = new stackAppend<@string>();
+
     @string prefix = prefixᶜ;
     slice<@string> ss = default!;
     foreach (var (_, s) in he) {
         if (s != ""u8) {
-            ss = append(ss, s);
+            ss = append(ssᴷ, ss, s);
         }
     }
     if (len(ss) == 0) {
@@ -64,81 +66,70 @@ internal static @string Error(this headerError he) {
 }
 
 // Type flags for Header.Typeflag.
+// Type '0' indicates a regular file.
 public static UntypedInt TypeReg => /* '0' */ 48;
 
+// Deprecated: Use TypeReg instead.
 public static UntypedInt TypeRegA => /* '\x00' */ 0;
 
+// Type '1' to '6' are header-only flags and may not have a data body.
 public static UntypedInt TypeLink => /* '1' */ 49; // Hard link
-
 public static UntypedInt TypeSymlink => /* '2' */ 50; // Symbolic link
-
 public static UntypedInt TypeChar => /* '3' */ 51; // Character device node
-
 public static UntypedInt TypeBlock => /* '4' */ 52; // Block device node
-
 public static UntypedInt TypeDir => /* '5' */ 53; // Directory
-
 public static UntypedInt TypeFifo => /* '6' */ 54; // FIFO node
 
+// Type '7' is reserved.
 public static UntypedInt TypeCont => /* '7' */ 55;
 
+// Type 'x' is used by the PAX format to store key-value records that
+// are only relevant to the next file.
+// This package transparently handles these types.
 public static UntypedInt TypeXHeader => /* 'x' */ 120;
 
+// Type 'g' is used by the PAX format to store key-value records that
+// are relevant to all subsequent files.
+// This package only supports parsing and composing such headers,
+// but does not currently support persisting the global state across files.
 public static UntypedInt TypeXGlobalHeader => /* 'g' */ 103;
 
+// Type 'S' indicates a sparse file in the GNU format.
 public static UntypedInt TypeGNUSparse => /* 'S' */ 83;
 
+// Types 'L' and 'K' are used by the GNU format for a meta file
+// used to store the path or link name for the next file.
+// This package transparently handles these types.
 public static UntypedInt TypeGNULongName => /* 'L' */ 76;
-
 public static UntypedInt TypeGNULongLink => /* 'K' */ 75;
 
 // Keywords for PAX extended header records.
 internal static readonly @string paxNone = ""u8; // Indicates that no PAX key is suitable
-
 internal static readonly @string paxPath = "path"u8;
-
 internal static readonly @string paxLinkpath = "linkpath"u8;
-
 internal static readonly @string paxSize = "size"u8;
-
 internal static readonly @string paxUid = "uid"u8;
-
 internal static readonly @string paxGid = "gid"u8;
-
 internal static readonly @string paxUname = "uname"u8;
-
 internal static readonly @string paxGname = "gname"u8;
-
 internal static readonly @string paxMtime = "mtime"u8;
-
 internal static readonly @string paxAtime = "atime"u8;
-
 internal static readonly @string paxCtime = "ctime"u8; // Removed from later revision of PAX spec, but was valid
-
 internal static readonly @string paxCharset = "charset"u8; // Currently unused
-
 internal static readonly @string paxComment = "comment"u8; // Currently unused
 
 internal static readonly @string paxSchilyXattr = "SCHILY.xattr."u8;
 
+// Keywords for GNU sparse files in a PAX extended header.
 internal static readonly @string paxGNUSparse = "GNU.sparse."u8;
-
 internal static readonly @string paxGNUSparseNumBlocks = "GNU.sparse.numblocks"u8;
-
 internal static readonly @string paxGNUSparseOffset = "GNU.sparse.offset"u8;
-
 internal static readonly @string paxGNUSparseNumBytes = "GNU.sparse.numbytes"u8;
-
 internal static readonly @string paxGNUSparseMap = "GNU.sparse.map"u8;
-
 internal static readonly @string paxGNUSparseName = "GNU.sparse.name"u8;
-
 internal static readonly @string paxGNUSparseMajor = "GNU.sparse.major"u8;
-
 internal static readonly @string paxGNUSparseMinor = "GNU.sparse.minor"u8;
-
 internal static readonly @string paxGNUSparseSize = "GNU.sparse.size"u8;
-
 internal static readonly @string paxGNUSparseRealSize = "GNU.sparse.realsize"u8;
 
 // basicKeys is a set of the PAX keys for which we have built-in support.
@@ -224,6 +215,38 @@ internal static int64 endOffset(this sparseEntry s) {
     return s.Offset + s.Length;
 }
 
+// A sparse file can be represented as either a sparseDatas or a sparseHoles.
+// As long as the total size is known, they are equivalent and one can be
+// converted to the other form and back. The various tar formats with sparse
+// file support represent sparse files in the sparseDatas form. That is, they
+// specify the fragments in the file that has data, and treat everything else as
+// having zero bytes. As such, the encoding and decoding logic in this package
+// deals with sparseDatas.
+//
+// However, the external API uses sparseHoles instead of sparseDatas because the
+// zero value of sparseHoles logically represents a normal file (i.e., there are
+// no holes in it). On the other hand, the zero value of sparseDatas implies
+// that the file has no data in it, which is rather odd.
+//
+// As an example, if the underlying raw file contains the 10-byte data:
+//
+//	var compactFile = "abcdefgh"
+//
+// And the sparse map has the following entries:
+//
+//	var spd sparseDatas = []sparseEntry{
+//		{Offset: 2,  Length: 5},  // Data fragment for 2..6
+//		{Offset: 18, Length: 3},  // Data fragment for 18..20
+//	}
+//	var sph sparseHoles = []sparseEntry{
+//		{Offset: 0,  Length: 2},  // Hole fragment for 0..1
+//		{Offset: 7,  Length: 11}, // Hole fragment for 7..17
+//		{Offset: 21, Length: 4},  // Hole fragment for 21..24
+//	}
+//
+// Then the content of the resulting sparse file with a Header.Size of 25 is:
+//
+//	var sparseFile = "\x00"*2 + "abcde" + "\x00"*11 + "fgh" + "\x00"*4
 partial struct sparseDatas /*[]sparseEntry*/;
 
 partial struct sparseHoles /*[]sparseEntry*/;
@@ -251,7 +274,6 @@ internal static bool validateSparseEntries(slice<sparseEntry> sp, int64 size) {
         case {} when pre.endOffset() > cur.Offset: {
             return false; // Regions cannot overlap and must be in order
         }}
-
         pre = cur;
     }
     return true;
@@ -346,6 +368,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
 
     format = (Format)((Format)(FormatUSTAR | FormatPAX) | FormatGNU);
     paxHdrs = new map<@string, @string>();
+
     @string whyNoUSTAR = default!;
     @string whyNoPAX = default!;
     @string whyNoGNU = default!;
@@ -438,6 +461,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
             }
         }
     }
+
     // Check basic fields.
     ref var blk = ref heap(new block(), out var Ꮡblk);
     var v7 = Ꮡblk.toV7();
@@ -456,13 +480,14 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     verifyTime(h.ModTime, len(v7.modTime()), modTimeˢ, paxMtime);
     verifyTime(h.AccessTime, len(gnu.accessTime()), accessTimeˢ, paxAtime);
     verifyTime(h.ChangeTime, len(gnu.changeTime()), changeTimeˢ, paxCtime);
+
     // Check for header-only types.
     @string whyOnlyPAX = default!;
     @string whyOnlyGNU = default!;
     var exprᴛ1 = h.Typeflag;
     if (exprᴛ1 == TypeReg || exprᴛ1 == TypeChar || exprᴛ1 == TypeBlock || exprᴛ1 == TypeFifo || exprᴛ1 == TypeGNUSparse) {
-        if (strings.HasSuffix(h.Name, // Exclude TypeLink and TypeSymlink, since they may reference directories.
- "/"u8)) {
+        // Exclude TypeLink and TypeSymlink, since they may reference directories.
+        if (strings.HasSuffix(h.Name, "/"u8)) {
             return (FormatUnknown, default!, new headerError(new @string[]{"filename may not have trailing slash"u8}.slice()));
         }
     }
@@ -477,10 +502,10 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
         whyOnlyPAX = onlyPaxSupportsˢ;
         format.mayOnlyBe(FormatPAX);
     }
-
     if (!isHeaderOnlyType(h.Typeflag) && h.Size < 0) {
         return (FormatUnknown, default!, new headerError(new @string[]{"negative size on header-only type"u8}.slice()));
     }
+
     // Check PAX records.
     if (len(h.Xattrs) > 0) {
         foreach (var (k, v) in h.Xattrs) {
@@ -507,7 +532,6 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                     break;
                 }}
             }
-
         }
         whyOnlyPAX = onlyPaxSupportsˢ2;
         format.mayOnlyBe(FormatPAX);
@@ -517,6 +541,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
             return (FormatUnknown, default!, new headerError(new @string[]{fmt.Sprintf("invalid PAX record: %q"u8, k + " = " + v)}.slice()));
         }
     }
+
     // TODO(dsnet): Re-enable this when adding sparse support.
     // See https://golang.org/issue/22735
     /*
@@ -539,6 +564,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
 			format.mustNotBe(FormatUSTAR)
 		}
 	*/
+
     // Check desired format.
     {
         Format wantFormat = h.Format; if (wantFormat != FormatUnknown) {
@@ -562,7 +588,6 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
         else { /* default: */
             err = new headerError(new @string[]{whyNoUSTAR, whyNoPAX, whyNoGNU, whyOnlyPAX, whyOnlyGNU}.slice());
         }
-
     }
     return (format, paxHdrs, err);
 }
@@ -607,16 +632,18 @@ internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
 
     // Set file permission bits.
     mode = ((fs.FileMode)(uint32)(~fi.h).Mode).Perm();
+
     // Set setuid, setgid and sticky bits.
-    if ((int64)((~fi.h).Mode & (int64)c_ISUID) != 0) {
+    if (((~fi.h).Mode & (int64)c_ISUID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetuid);
     }
-    if ((int64)((~fi.h).Mode & (int64)c_ISGID) != 0) {
+    if (((~fi.h).Mode & (int64)c_ISGID) != 0) {
         mode |= (fs.FileMode)(fs.ModeSetgid);
     }
-    if ((int64)((~fi.h).Mode & (int64)c_ISVTX) != 0) {
+    if (((~fi.h).Mode & (int64)c_ISVTX) != 0) {
         mode |= (fs.FileMode)(fs.ModeSticky);
     }
+
     // Set file mode bits; clear perm, setuid, setgid, and sticky bits.
     {
         var m = (fs.FileMode)(((fs.FileMode)(uint32)(~fi.h).Mode) & ~4095);
@@ -670,9 +697,14 @@ internal static @string String(this headerFileInfo fi) {
 // sysStat, if non-nil, populates h from system-dependent fields of fi.
 internal static Func<fs.FileInfo, ж<Header>, bool, error> sysStat;
 
+// Mode constants from the USTAR spec:
+// See http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
 internal static UntypedInt c_ISUID => /* 04000 */ 2048; // Set uid
 internal static UntypedInt c_ISGID => /* 02000 */ 1024; // Set gid
 internal static UntypedInt c_ISVTX => /* 01000 */ 512; // Save text (sticky bit)
+
+// Common Unix mode constants; these are not defined in any common tar standard.
+// Header.FileInfo understands these, but FileInfoHeader will never produce these.
 internal static UntypedInt c_ISDIR => /* 040000 */ 16384; // Directory
 internal static UntypedInt c_ISFIFO => /* 010000 */ 4096; // FIFO
 internal static UntypedInt c_ISREG => /* 0100000 */ 32768; // Regular file
@@ -703,9 +735,8 @@ public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
     var h = Ꮡ(new Header(
         Name: fi.Name(),
         ModTime: fi.ModTime(),
-        Mode: (int64)(uint32)fm.Perm()
+        Mode: (int64)(uint32)fm.Perm() // or'd with c_IS* constants later
     ));
-    // or'd with c_IS* constants later
     switch (ᐧ) {
     case {} when fm.IsRegular(): {
         h.Value.Typeflag = TypeReg;
@@ -740,7 +771,6 @@ public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
     default: {
         return (default!, fmt.Errorf("archive/tar: unknown file mode %v"u8, fm));
     }}
-
     if ((fs.FileMode)(fm & fs.ModeSetuid) != 0) {
         h.Value.Mode |= (int64)(c_ISUID);
     }
@@ -815,7 +845,6 @@ internal static bool isHeaderOnlyType(byte flag) {
     { /* default: */
         return false;
     }
-
 }
 
 } // end tar_package

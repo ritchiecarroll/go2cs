@@ -308,6 +308,8 @@ them learns something. One caveat rides along and is guarded rather than remembe
 | no duplicates | a duplicate changes nothing about the scope, which is exactly why it is evidence the list was edited without being read |
 | a scoped entry needs a run GOOS | see §8.3 |
 
+> **2026-10-13 (C1; COORD ruling the same day):** "the same test, a different cause per platform" is NOT two entries of one name. The loader refuses a duplicate name before any scope applies. It is ONE entry with two `halves`, each with its own class, signature and DISJOINT `platforms` (testDisclosure.Halves, ruled 2026-09-28; per-half platforms the same day). runtime/debug's TestFreeOSMemory is the first member: a codegen-liveness half scoped [windows, linux] and a runtime-capability half scoped [darwin]. `TestDarwinOnlyHalfIsNeverJudgedOnLinux` pins that each platform sees only its own half.
+
 ### 8.2 INERT is not STALE, and that is the whole point
 
 | | orphan | out of scope |

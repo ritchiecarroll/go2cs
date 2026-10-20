@@ -81,8 +81,6 @@ internal static readonly @string bz2ˢ = ".bz2"u8;
 internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var (f, err) = Δos.Open(@file);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -118,8 +116,8 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 break;
             }
             case {} when (rune)'A' <= line[0] && line[0] <= (rune)'Z': {
-                Ꮡt.Logf("%s\n"u8, // Test name.
- line);
+                // Test name.
+                Ꮡt.Logf("%s\n"u8, line);
                 continue;
                 break;
             }
@@ -142,8 +140,8 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                     str = append(str, q);
                     continue;
                 }
+                // Is a regexp.
                 if (len(input) != 0) {
-                    // Is a regexp.
                     Ꮡt.Fatalf("%s:%d: out of sync: have %d strings left before %#q"u8, @file, linenoΔ1, len(input), q);
                 }
                 (re, errΔ2) = tryCompile(q);
@@ -170,9 +168,9 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 break;
             }
             case {} when line[0] == (rune)'-' || (rune)'0' <= line[0] && line[0] <= (rune)'9': {
+                // A sequence of match results.
                 ncase++;
                 if (re == nil) {
-                    // A sequence of match results.
                     // Failed to compile: skip results.
                     continue;
                 }
@@ -222,7 +220,6 @@ internal static void testRE2(ж<testing.T> Ꮡt, @string @file) {
                 Ꮡt.Fatalf("%s:%d: out of sync: %s\n"u8, @file, linenoΔ1, line);
                 break;
             }}
-
         }
         {
             var errΔ3 = scanner.Err(); if (errΔ3 != default!) {
@@ -401,8 +398,6 @@ internal static void initᴛnotab() { notab = MustCompilePOSIX(@"[^\t]+"u8); }
 internal static void testFowler(ж<testing.T> Ꮡt, @string @file) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         var (f, err) = Δos.Open(@file);
         if (err != default!) {
             Ꮡt.Error(err);
@@ -423,6 +418,7 @@ Reading:
                 }
                 goto break_Reading;
             }
+
             // http://www2.research.att.com/~astopen/man/man1/testregex.html
             //
             // INPUT FORMAT
@@ -447,6 +443,7 @@ Reading:
             if (len(field) == 0) {
                 goto continue_Reading;
             }
+
             //   Field 1: the regex(3) flags to apply, one character per REG_feature
             //   flag. The test is skipped if REG_feature is not supported by the
             //   implementation. If the first character is not [BEASKLP] then the
@@ -510,10 +507,10 @@ Reading:
             @string flag = field[0];
             switch (flag[0]) {
             case (rune)'?' or (rune)'&' or (rune)'|' or (rune)';' or (rune)'{' or (rune)'}': {
+                // Ignore all the control operators.
+                // Just run everything.
                 flag = flag[1..];
                 if (flag == ""u8) {
-                    // Ignore all the control operators.
-                    // Just run everything.
                     goto continue_Reading;
                 }
                 break;
@@ -539,6 +536,7 @@ Reading:
                 Ꮡt.Errorf("%s:%d: too few fields: %s"u8, @file, lineno, line);
                 goto continue_Reading;
             }
+
             // Expand C escapes (a.k.a. Go escapes).
             if (strings.Contains(flag, "$"u8)) {
                 @string fΔ2 = @"""" + field[1] + @"""";
@@ -554,6 +552,7 @@ Reading:
                     }
                 }
             }
+
             //   Field 2: the regular expression pattern; SAME uses the pattern from
             //     the previous specification.
             //
@@ -561,15 +560,19 @@ Reading:
                 field[1] = lastRegexp;
             }
             lastRegexp = field[1];
+
             //   Field 3: the string to match.
             @string text = field[2];
+
             //   Field 4: the test outcome...
             var (ok, shouldCompile, shouldMatch, pos) = parseFowlerResult(field[3]);
             if (!ok) {
                 Ꮡt.Errorf("%s:%d: cannot parse result %#q"u8, @file, lineno, field[3]);
                 goto continue_Reading;
             }
+
             //   Field 5: optional comment appended to the report.
+
 Testing:
             foreach (var (_, c) in flag) {
                 // Run test once for each specified capital letter mode that we support.
@@ -581,23 +584,23 @@ Testing:
                     break;
                 }
                 case (rune)'E': {
+                    // extended regexp (what we support)
                     break;
                 }
                 case (rune)'L': {
+                    // literal
                     pattern = QuoteMeta(pattern);
                     break;
                 }}
 
-                // extended regexp (what we support)
-                // literal
                 foreach (var (_, cΔ1) in flag) {
                     switch (cΔ1) {
                     case (rune)'i': {
                         syn |= (syntax.Flags)(syntax.FoldCase);
                         break;
                     }}
-
                 }
+
                 var (re, errΔ2) = compile(pattern, syn, true);
                 if (errΔ2 != default!) {
                     if (shouldCompile) {
@@ -658,27 +661,27 @@ internal static (bool ok, bool compiled, bool matched, slice<nint> pos) parseFow
     //     returned.
     switch (ᐧ) {
     case {} when s == ""u8: {
+        // Match with no position information.
         ok = true;
         compiled = true;
         matched = true;
         return (ok, compiled, matched, pos);
     }
     case {} when s == "NOMATCH"u8: {
+        // Match failure.
         ok = true;
         compiled = true;
         matched = false;
         return (ok, compiled, matched, pos);
     }
     case {} when (rune)'A' <= s[0] && s[0] <= (rune)'Z': {
+        // All the other error codes are compile errors.
         ok = true;
         compiled = false;
         return (ok, compiled, matched, pos);
     }}
-
-    // Match with no position information.
-    // Match failure.
-    // All the other error codes are compile errors.
     compiled = true;
+
     slice<nint> x = default!;
     while (s != ""u8) {
         byte end = (rune)')';
@@ -749,13 +752,14 @@ internal static readonly object matchˢ = (@string)"match!"u8;
 
 public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
     var isRaceBuilder = strings.HasSuffix(testenv.Builder(), raceˢ);
+
     foreach (var (_, data) in benchData) {
         var r = MustCompile(data.re);
         foreach (var (_, vᴛ1) in benchSizes) {
             ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
             size = vᴛ1;
 
-            if ((isRaceBuilder || testing.Short()) && size.n > (1 << (int)(10))) {
+            if ((isRaceBuilder || testing.Short()) && size.n > 1 << 10) {
                 continue;
             }
             var t = makeText(size.n);
@@ -788,7 +792,7 @@ public static void BenchmarkMatch_onepass_regex(ж<testing.B> Ꮡb) {
         ref var size = ref heap(new benchSizesᴛ1(), out var Ꮡsize);
         size = vᴛ1;
 
-        if ((isRaceBuilder || testing.Short()) && size.n > (1 << (int)(10))) {
+        if ((isRaceBuilder || testing.Short()) && size.n > 1 << 10) {
             continue;
         }
         var t = makeText(size.n);
@@ -816,7 +820,6 @@ internal static slice<compileBenchDataᴛ1> benchData = new compileBenchDataᴛ1
     new("Hard1"u8, "ABCD|CDEF|EFGH|GHIJ|IJKL|KLMN|MNOP|OPQR|QRST|STUV|UVWX|WXYZ"u8)
 }.slice();
 
-
 partial struct benchSizesᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
@@ -824,10 +827,10 @@ partial struct benchSizesᴛ1 /*dyn*/ {
 internal static slice<benchSizesᴛ1> benchSizes = new benchSizesᴛ1[]{
     new("16"u8, 16),
     new("32"u8, 32),
-    new("1K"u8, (1 << (int)(10))),
-    new("32K"u8, (32 << (int)(10))),
-    new("1M"u8, (1 << (int)(20))),
-    new("32M"u8, (32 << (int)(20)))
+    new("1K"u8, 1 << 10),
+    new("32K"u8, 32 << 10),
+    new("1M"u8, 1 << 20),
+    new("32M"u8, 32 << 20)
 }.slice();
 
 public static void TestLongest(ж<testing.T> Ꮡt) {

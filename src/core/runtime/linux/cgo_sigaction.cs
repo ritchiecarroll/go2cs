@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 // Support for sanitizers. See runtime/cgo/sigaction.go.
-//go:build (linux && amd64) || (freebsd && amd64) || (linux && arm64) || (linux && ppc64le)
+// Also used on linux/386 to clear the SA_RESTORER flag
+// when using cgo; see issue #75253.
+//go:build (linux && (386 || amd64 || arm64 || loong64 || ppc64le)) || (freebsd && amd64)
 namespace go;
 
 using @unsafe = unsafe_package;
@@ -18,9 +20,8 @@ internal static @unsafe.Pointer _cgo_sigaction;
 //go:nosplit
 //go:nowritebarrierrec
 internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactiont> Ꮡold) {
-    ref var old = ref Ꮡold.DerefOrNull();
-
     ref var sig = ref heap(sigʗp, out var Ꮡsig);
+
     // racewalk.go avoids adding sanitizing instrumentation to package runtime,
     // but we might be calling into instrumented C functions here,
     // so we need the pointer parameters to be properly marked.
@@ -42,6 +43,9 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
         // the current thread in transition between goroutines, or with the g0
         // system stack already in use).
         int32 ret = default!;
+
+        fixSigactionForCgo(Ꮡnew);
+
         ж<g> g = default!;
         if (mainStarted) {
             g = getg();
@@ -49,27 +53,27 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
         var sp = (uintptr)Ꮡsig;
         switch (ᐧ) {
         case {} when g == nil: {
-            ret = callCgoSigaction((uintptr)sig, // No g: we're on a C stack or a signal stack.
- Ꮡnew, Ꮡold);
+            // No g: we're on a C stack or a signal stack.
+            ret = callCgoSigaction((uintptr)sig, Ꮡnew, Ꮡold);
             break;
         }
         case {} when sp < (~g).stack.lo || sp >= (~g).stack.hi: {
-            ret = callCgoSigaction((uintptr)sig, // We're no longer on g's stack, so we must be handling a signal.  It's
- // possible that we interrupted the thread during a transition between g
- // and g0, so we should stay on the current stack to avoid corrupting g0.
- Ꮡnew, Ꮡold);
+            // We're no longer on g's stack, so we must be handling a signal.  It's
+            // possible that we interrupted the thread during a transition between g
+            // and g0, so we should stay on the current stack to avoid corrupting g0.
+            ret = callCgoSigaction((uintptr)sig, Ꮡnew, Ꮡold);
             break;
         }
         default: {
+            // We're running on g's stack, so either we're not in a signal handler or
+            // the signal handler has set the correct g.  If we're on gsignal or g0,
+            // systemstack will make the call directly; otherwise, it will switch to
+            // g0 to ensure we have enough room to call a libc function.
+            //
+            // The function literal that we pass to systemstack is not nosplit, but
+            // that's ok: we'll be running on a fresh, clean system stack so the stack
+            // check will always succeed anyway.
             systemstack(() => {
-                // We're running on g's stack, so either we're not in a signal handler or
-                // the signal handler has set the correct g.  If we're on gsignal or g0,
-                // systemstack will make the call directly; otherwise, it will switch to
-                // g0 to ensure we have enough room to call a libc function.
-                //
-                // The function literal that we pass to systemstack is not nosplit, but
-                // that's ok: we'll be running on a fresh, clean system stack so the stack
-                // check will always succeed anyway.
                 ret = callCgoSigaction((uintptr)Ꮡsig.Value, Ꮡnew, Ꮡold);
             });
             break;
@@ -83,6 +87,7 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
             sysSigaction(sig, Ꮡnew, Ꮡold);
         }
     }
+
     if (msanenabled && Ꮡold != nil) {
         msanread(@unsafe.Pointer.FromPinnedBox(Ꮡold), /* unsafe.Sizeof(*old) */ (uintptr)32);
     }

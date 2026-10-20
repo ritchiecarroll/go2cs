@@ -45,7 +45,7 @@ public static void Add(this ref TimeHistogram h, time.Duration d) {
 
 // BucketMin returns the minimum duration value for a provided bucket.
 public static time.Duration BucketMin(this ref TimeHistogram h, nint bucket) {
-    return ((time.Duration)(int64)math.Exp((float64)bucket * logDiv));
+    return (time.Duration)(int64)math.Exp((float64)bucket * logDiv);
 }
 
 // ToHTML renders the histogram as HTML.
@@ -53,15 +53,18 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil || h.Count == 0) {
-        return ((template.HTML)(@string)""u8);
+        return (template.HTML)(@string)""u8;
     }
+
     const nint barWidth = 400;
+
     nint maxCount = 0;
     foreach (var (_, count) in h.Buckets) {
         if (count > maxCount) {
             maxCount = count;
         }
     }
+
     var w = @new<strings.Builder>();
     fmt.Fprintf(new strings_BuilderжWriter(w), @"<table>"u8);
     for (nint i = h.MinBucket; i <= h.MaxBucket; i++) {
@@ -81,7 +84,7 @@ public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Durati
     // Final tick label.
     fmt.Fprintf(new strings_BuilderжWriter(w), @"<tr><td align=""right"">%s</td></tr>"u8, h.BucketMin(h.MaxBucket + 1));
     fmt.Fprintf(new strings_BuilderжWriter(w), @"</table>"u8);
-    return ((template.HTML)w.String());
+    return (template.HTML)w.String();
 }
 
 } // end traceviewer_package

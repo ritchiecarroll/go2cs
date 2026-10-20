@@ -34,8 +34,6 @@ internal static readonly @string emptyPackageˢ = "empty/package"u8;
 internal static readonly @string packageˢ = "package"u8;
 
 public static void TestMetaDataEmptyPackage(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Make sure that encoding/decoding works properly with packages
     // that don't actually have any functions.
     @string p = emptyPackageˢ;
@@ -54,7 +52,7 @@ public static void TestMetaDataEmptyPackage(ж<testing.T> Ꮡt) {
     }
     var nf = dec.NumFuncs();
     if (nf != 0) {
-        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)(0));
+        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)0);
     }
     @string pp = dec.PackagePath();
     if (pp != p) {
@@ -94,8 +92,9 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     );
     nuint idx = b.AddFunc(f1);
     if (idx != 0) {
-        Ꮡt.Errorf("b.AddFunc(f1) got %d want %d"u8, idx, (nint)(0));
+        Ꮡt.Errorf("b.AddFunc(f1) got %d want %d"u8, idx, (nint)0);
     }
+
     var f2 = new coverage.FuncDesc(
         Funcname: "xfunc"u8,
         Srcfile: "bar.go"u8,
@@ -107,11 +106,13 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     );
     idx = b.AddFunc(f2);
     if (idx != 1) {
-        Ꮡt.Errorf("b.AddFunc(f2) got %d want %d"u8, idx, (nint)(0));
+        Ꮡt.Errorf("b.AddFunc(f2) got %d want %d"u8, idx, (nint)0);
     }
+
     // Emit into a writer.
     var drws = Ꮡ(new slicewriter.WriteSeeker(nil));
     b.Emit(new test_internal_test_package.slicewriter_WriteSeekerжWriteSeeker(drws));
+
     // Test decode path.
     drws.Seek(0, io.SeekStart);
     (var dec, err) = decodemeta.NewCoverageMetaDataDecoder(drws.BytesWritten(), false);
@@ -120,8 +121,9 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     }
     var nf = dec.NumFuncs();
     if (nf != 2) {
-        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)(2));
+        Ꮡt.Errorf("dec.NumFuncs(): got %d want %d"u8, nf, (nint)2);
     }
+
     @string gotpp = dec.PackagePath();
     if (gotpp != pp) {
         Ꮡt.Errorf("packagepath: got %s want %s"u8, gotpp, pp);
@@ -130,6 +132,7 @@ public static void TestMetaDataEncoderDecoder(ж<testing.T> Ꮡt) {
     if (gotpn != pn) {
         Ꮡt.Errorf("packagename: got %s want %s"u8, gotpn, pn);
     }
+
     var cases = new coverage.FuncDesc[]{f1, f2}.slice();
     for (var i = (uint32)0; i < (uint32)len(cases); i++) {
         ref var fn = ref heap(new coverage.FuncDesc(), out var Ꮡfn);
@@ -176,6 +179,7 @@ internal static slice<byte> createBlob(ж<testing.T> Ꮡt, nint i) {
     if (err != default!) {
         Ꮡt.Fatalf("making builder: %v"u8, err);
     }
+
     var funcs = createFuncs(i);
     foreach (var (_, f) in funcs) {
         b.AddFunc(f);
@@ -197,9 +201,8 @@ internal static slice<slice<byte>> createMetaDataBlobs(ж<testing.T> Ꮡt, nint 
 internal static readonly @string covmetaHash0ˢ = "covmeta.hash.0"u8;
 
 public static void TestMetaDataWriterReader(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string d = Ꮡt.TempDir();
+
     // Emit a meta-file...
     @string mfpath = filepath.Join(d, covmetaHash0ˢ);
     var (of, err) = os.OpenFile(mfpath, (nint)((nint)(nint)(os.O_WRONLY | os.O_CREATE) | os.O_TRUNC), 438);
@@ -220,14 +223,17 @@ public static void TestMetaDataWriterReader(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("closing meta-file: %v"u8, err);
         }
     }
+
     // ... then read it back in, first time without setting fileView,
     // second time setting it.
     for (nint k = 0; k < 2; k++) {
         slice<byte> fileView = default!;
+
         var (inf, errΔ1) = os.Open(mfpath);
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("open() on meta-file: %v"u8, errΔ1);
         }
+
         if (k != 0) {
             // Use fileview to exercise different paths in reader.
             var (fi, errΔ2) = os.Stat(mfpath);
@@ -246,6 +252,7 @@ public static void TestMetaDataWriterReader(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         (var mfr, errΔ1) = decodemeta.NewCoverageMetaFileReader(inf, fileView);
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("k=%d NewCoverageMetaFileReader failed with: %v"u8, k, errΔ1);
@@ -264,6 +271,7 @@ public static void TestMetaDataWriterReader(ж<testing.T> Ꮡt) {
         if (granΔ1 != wgran) {
             Ꮡt.Fatalf("k=%d wanted gran %d got %d"u8, k, wgran, granΔ1);
         }
+
         var payload = new byte[]{}.slice();
         for (nint pi = 0; pi < (nint)np; pi++) {
             ж<decodemeta.CoverageMetaDataDecoder> pd = default!;
@@ -323,9 +331,11 @@ public static void TestMetaDataDecodeLitFlagIssue57942(ж<testing.T> Ꮡt) {
         wantfds = append(wantfds, fd);
         b.AddFunc(fd);
     }
+
     // Emit into a writer.
     var drws = Ꮡ(new slicewriter.WriteSeeker(nil));
     b.Emit(new test_internal_test_package.slicewriter_WriteSeekerжWriteSeeker(drws));
+
     // Decode the result.
     drws.Seek(0, io.SeekStart);
     (var dec, err) = decodemeta.NewCoverageMetaDataDecoder(drws.BytesWritten(), false);

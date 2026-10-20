@@ -111,7 +111,6 @@ public static void TestConstantTimeCopy(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct lessOrEqTestsᴛ1 /*dyn*/ {
     internal nint x, y, result;
 }
@@ -140,9 +139,11 @@ public static void BenchmarkConstantTimeByteEq(ж<testing.B> Ꮡb) {
 
     uint8 x = default!;
     uint8 y = default!;
+
     for (nint i = 0; i < b.N; i++) {
         (x, y) = ((uint8)ConstantTimeByteEq(x, y), x);
     }
+
     benchmarkGlobal = x;
 }
 
@@ -151,9 +152,11 @@ public static void BenchmarkConstantTimeEq(ж<testing.B> Ꮡb) {
 
     nint x = default!;
     nint y = default!;
+
     for (nint i = 0; i < b.N; i++) {
         (x, y) = (ConstantTimeEq((int32)x, (int32)y), x);
     }
+
     benchmarkGlobal = (uint8)x;
 }
 
@@ -162,9 +165,11 @@ public static void BenchmarkConstantTimeLessOrEq(ж<testing.B> Ꮡb) {
 
     nint x = default!;
     nint y = default!;
+
     for (nint i = 0; i < b.N; i++) {
         (x, y) = (ConstantTimeLessOrEq(x, y), x);
     }
+
     benchmarkGlobal = (uint8)x;
 }
 

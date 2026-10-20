@@ -256,9 +256,11 @@ func main() {
 	convertTestsCmd := commandLine.Bool("tests", false, "Convert eligible Go package tests and emit a runnable test host project")
 	testActionCmd := commandLine.String("test-action", "convert", "Converted-test action: convert, build, run, compare, or all")
 	testTimeoutCmd := commandLine.Duration("test-timeout", 2*time.Minute, "Timeout for each converted-test child process (build/run/compare); the test host's dotnet publish gets at least 30m")
+	testDeadlineCmd := commandLine.Duration("test-deadline", defaultTestDeadline, "Per-test deadline for the CONVERTED host under -test-action run/compare/all: a top-level test still running this long after it started is reported failed and ABANDONED (labelled so in the comparison), and the run goes on to the next test. Without it a hung test held the host to -test-timeout and every later test went unmeasured. 0 disables it. The Go side is unbounded, as `go test` is. A row whose own legitimate test outlasts the default takes a per-row floor (run-validated-sweep.ps1 $testDeadlineFloors)")
 	testFilterCmd := commandLine.String("test-filter", "", "Regex handed VERBATIM to BOTH sides of a -test-action compare (go test -run and the converted host --run), so the two runs filter identically. Intended for the block-gated census: exclude a test that BLOCKS the suite by passing an anchored alternation of the parents to keep. A gated census is DIAGNOSTIC ONLY and must never bank a row -- the row banks from an ungated run, after the block is rooted or the divergence disclosed")
 	testConfigCmd := commandLine.String("test-config", "Release", "Publish/run configuration for the converted test host: Release (default since 2026-09-02 -- the validation configuration of RECORD, with an explicit -p:go2csPath replacing the Debug-conditional csproj-template default, and the CLR's tiered JIT disabled by default, see -test-tiered) or Debug (the pre-2026-09-02 default, still fully supported by flag). Recorded on every proof page and in the comparison record so a verdict carries the level it was measured at. The default moved on the deployment owner's ruling, gated on the Release census (docs/phase4/CENSUS-release-tc0-delta.md), not on this flag's own authority")
 	testTieredCmd := commandLine.Bool("test-tiered", false, "With -test-config Release, opt back IN to the CLR's default tiered JIT (Release's own default is DOTNET_TieredCompilation=0, since a verdict that depends on JIT promotion timing is not reproducible run to run). Meaningless with -test-config Debug. It changes what the C# host's JIT does, not what the converter emits")
+	testBuildMaxCPUCmd := commandLine.Int("test-build-maxcpu", 0, "Cap the MSBuild nodes of the converted test host's dotnet publish, the only dotnet command a -tests run starts, by passing it -m:N. 0 (the default) passes no -m, and MSBuild uses one node per logical processor. Only an explicit -m on the command line caps it: a Directory.Build.rsp or MSBUILDNODECOUNT in the tree did not (measured on the i9, 2026-10-18)")
 	testPublishBinlogCmd := commandLine.Bool("test-publish-binlog", false, "Have the converted test host's dotnet publish write an MSBuild binary log to <output>/bin/tests/publish.binlog, from the first attempt, KEPT only when the publish fails and deleted when it succeeds. For census and battery sweeps chasing a build failure that passes on a re-run; costs ~35% of a warm publish")
 	testModuleDisclosuresCmd := commandLine.String("module-disclosures", "", "With -tests on a third-party module: the committed tree of module rows' disclosure manifests (<root>/<module>@<version>/<package dir>/go2cs_test_disclosures.json, e.g. src/tests/ModuleDisclosures). Read only when the package's output directory holds no manifest, and only for the module version this run resolved")
 	testAllowHandOwnCmd := commandLine.Bool("test-allow-handown", false, "Convert a package the -stdlib queue deliberately skips (testing, unsafe, builtin, cmd/...) as a -tests target anyway. Refused by default: `testing` IS the hand-owned Phase-4 test host, and the pipeline's natural output path is the very directory the host lives in, so a mistyped command overwrites it (measured 2026-09-03 -- the run replaced src/core/testing/testing.cs with Go's converted testing.go). Pass this ONLY with a BARE scratch output root, for a deliberate measurement whose emission is thrown away; it is not a route to banking such a package, which would still hit the F15b 'ONE testing package, period' collision. Consulted AFTER the hand-own host path since 2026-09-20, so what this flag does depends on what is AT the output root: on a BARE root it keeps the full production census measured 2026-09-03 (no csproj there, so the host path cannot open), while at a hand-owned counterpart's own directory -- or at a root SEEDED from src/core, which carries that counterpart's csproj and markers and so is NOT bare -- the host path wins instead, the run converts TESTS ONLY, and no production file is emitted over a hand-own")
@@ -275,10 +277,11 @@ func main() {
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform(s) for conversion, format: os/arch; comma-separated for a list (windows/amd64,linux/amd64,darwin/amd64), which with -stdlib emits the multi-platform (layout L3) corpus — one GOOS per target")
 	platformCensusCmd := commandLine.String("platform-census", "", "With -stdlib and two or more -platforms targets: convert once per target into an isolated seeded staging root under this directory, classify the emissions (shared/variant/partial/exclusive) and write platform-manifest.json there. Emits NO corpus output")
 	refCensusCmd := commandLine.String("ref-census", "", "With -stdlib: run the ж-box A1 ref-lowering classification census (analysis only, never emits) over the standard library — once per -platforms target — and write the JSON report to this path. See docs/phase4/DESIGN-zh-box-reduction.md §9 stage A1")
-	platformStageCmd := commandLine.String("platform-stage", "", "Directory a multi-platform -stdlib EMISSION stages its per-target conversions in (kept afterwards for inspection); a temporary directory is created and removed when omitted")
+	platformStageCmd := commandLine.String("platform-stage", "", "Directory a multi-platform -stdlib EMISSION stages its per-target conversions in (kept afterwards for inspection); when omitted, the run stages in .go2cs-platform-stage under the output root, reclaims anything an earlier run left there, and removes it at the end")
 	buildTagsCmd := commandLine.String("tags", "", "Comma-separated build tags applied when loading packages, e.g. -tags purego to select the portable Go implementations over assembly ones (with -stdlib, purego is applied by default and any explicit -tags value replaces it)")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
+	hoistLiteralsCmd := commandLine.Bool("hoist-literals", false, "Hoist each string literal in a value slot to one `static readonly` field (`F(helloˢ)`), the standard library's form, instead of the default plain C# literal (`F(\"hello\")`, converted once and shared by golib). The standard library always hoists; this opts any other package in")
 	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	licenseCmd := commandLine.String("license", "", "Override NuGet license metadata with an SPDX expression (for example MIT or BSD-3-Clause); does not relicense input code")
 	provenanceCmd := commandLine.Bool("provenance", false, "Include a deterministic source-file provenance comment (no conversion timestamp)")
@@ -555,10 +558,12 @@ Examples:
 		convertTests:        *convertTestsCmd,
 		testAction:          strings.ToLower(strings.TrimSpace(*testActionCmd)),
 		testTimeout:         *testTimeoutCmd,
+		testDeadline:        *testDeadlineCmd,
 		testFilter:          strings.TrimSpace(*testFilterCmd),
 		testConfig:          canonicalTestConfig(*testConfigCmd),
 		testTiered:          *testTieredCmd,
 		testPublishBinlog:   *testPublishBinlogCmd,
+		testBuildMaxCPU:     *testBuildMaxCPUCmd,
 		testAllowHandOwn:    *testAllowHandOwnCmd,
 		recurse:             recurseVal.enabled,
 		moduleOnly:          recurseVal.moduleOnly,
@@ -572,6 +577,7 @@ Examples:
 		buildTags:           buildTags,
 		tagsExplicit:        tagsExplicit,
 		indentSpaces:        *indentSpacesCmd,
+		hoistLiterals:       *hoistLiteralsCmd,
 		preferVarDecl:       *preferVarDeclCmd,
 		useChannelOperators: *useChannelOperatorsCmd,
 		includeComments:     *includeCommentsCmd,
@@ -582,6 +588,10 @@ Examples:
 		debugMode:           *debugModeCmd,
 		dualRecv:            *dualRecvCmd,
 		dualRecvParams:      *dualRecvParamsCmd,
+	}
+
+	if options.testBuildMaxCPU < 0 {
+		log.Fatalf("-test-build-maxcpu is %d; it takes a node count of 1 or more, or 0 for MSBuild's own default\n", options.testBuildMaxCPU)
 	}
 
 	options.testModuleDisclosures = absPathOrEmpty(strings.TrimSpace(*testModuleDisclosuresCmd))
@@ -629,6 +639,10 @@ Examples:
 
 		if options.testTimeout <= 0 {
 			log.Fatalln("-test-timeout must be greater than zero")
+		}
+
+		if options.testDeadline < 0 {
+			log.Fatalln("-test-deadline must be zero (none) or greater than zero")
 		}
 
 		// Same fail-fast posture as -test-timeout above: a filter that cannot compile must die
@@ -913,7 +927,7 @@ Examples:
 				switch {
 				case options.testHandOwnHost:
 					// TESTS ONLY. processConversion is what emits the production .cs, the
-					// package_init.cs hook and the production csproj; for a hand-owned host all
+					// package_init.cs and the production csproj; for a hand-owned host all
 					// three would overwrite hand-written files, so the whole call is skipped and
 					// the test conversion — which processConversion would otherwise have ended by
 					// calling — is entered directly. This is the ONE structural difference between
@@ -939,5 +953,14 @@ Examples:
 				}
 			}
 		}
+	}
+
+	// The converter never exits 0 after emitting raw Go text. A dynamic type no lift resolved is written as its
+	// Go signature, which cannot compile; the record of those sites is process-global and never reset per
+	// package, so this one check, after whichever driver ran (single package, -tests, -stdlib, -recurse,
+	// -platforms), covers them all. The files stay written; the run names every site and fails. The -tests path
+	// keeps its own earlier return of the same error (conversionDriver.go), which fails before its build step.
+	if err := unresolvedDynamicTypeError(); err != nil {
+		log.Fatalf("%v\n", err)
 	}
 }

@@ -58,11 +58,13 @@ internal static void Main() {
     viaParam(b);
     viaParam(b);
     fmt.Println((~b).h.c.n);
+
     var w = Ꮡ(new wrapper(nil));
     w.bump();
     w.bump();
     w.bump();
     fmt.Println((~w).b.h.c.n);
+
     var d = Ꮡ(new deep(nil));
     d.bumpDeep();
     d.bumpDeep();

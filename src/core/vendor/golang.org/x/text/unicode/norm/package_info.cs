@@ -44,6 +44,12 @@ using static go.vendor.golang.org.x.text.unicode.norm_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -52,14 +58,14 @@ using static go.vendor.golang.org.x.text.unicode.norm_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/composition.go", "composition.cs", "ABhMoqqigpSCgIKCAAkSgoKUrsKClIKClIKClKaCABg2goKCgqaCgoKCpoKCqJKCpqKClIKCqLKCgoKUqJKCgoKUgqqigoKClIKssoKCgpSCgpSmgoKCggAIIuKAgoKkgpSCruKAgqSUlL7SuIKCgpSClKqigqiSqJKCgoKCqJKCgqiSgoKqooIALUCCgpSCgpSClKSkpKSmgoKUgoKUgpSkpKSkqKSmgoKCqqKCgoKCgoKCgpSssoKCgoKCgryigoKCgoKClJSClIKCmMzEgtis1t6CgpSCgoKmgpTKgoKCgoKUlIKCgoK4gpQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/forminfo.go", "forminfo.cs", "ADp6ABZEAAgCgsqqtAAEHICigKSAooCigKSCpoKmgqaCqrSClIKCgqiSqJKClKqiqqKmgoKCgoKCggADHgALAoKClKaCgqaCgqiSgqS4koKkvLKCkoLcgpSmgoKCgoKCgoKCgpSCgpSm")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/composition.go", "composition.cs", "ACFMoqqigpSCgIKCAAkSgoKUrsKClIKClIKClKaCABg2goKCgqaCgoKCpoKCqJKCpqKClIKCqLKCgoKUqJKCgoKUgqqigoKClIKssoKCgpSCgpSmgoKCggAKIuKAgoKkgpSCruKAgqSUlL7SuIKCgpSClKqigqiSqJKCgoKCqJKCgqiSgoKqooIAHUCCgpSCgpSClKSkpJSmgoKUgoKUgpSkpKSUqKSmgoKCqqKCgoKCgoKCgpSssoKCgoKCgryigoKCgoKClJSClIKCqMy0gsis1u6CgpSCgoKmgpTKgoKCgoKUlIKCgoK4gpQ=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/forminfo.go", "forminfo.cs", "ADt6ABZEAAgCgsqqtAANHICigKSAooCigKSCpoKmgqaCqrSClIKCgqiSqJKClKqiqqKmgoKCgoKCggADHgALAoKClKaCgqaCgqiSgqS4koKkvLKCkoLcgpSmgoKCgoKCgoKCgpSCgpSm")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/input.go", "input.cs", "AA8cgqaCpoKCpoKCpoKClKaCgqampoKCpqamgoKUgpSmgoKUpoKClKaCgpSmooKCgpSUgpSUgpQ=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/iter.go", "iter.cs", "AB1AkoKCgoKUgoKCgoKokoKCgoKUgoKCgoKssoKUtLS0pIKUgoKUgoKCgoKuwoKUqJKmgoKokgACEPKmooKCgoKUgoKClIKCpqKCgoKClIKCgpSCgqaigoKCkoKCgoKUgqaCqsKClJSCgoKClKaCqsKCgoKCgoKCgoKUgpSCgqiygpKCgIKCgoKCgpKCgpSSgMqCgqaCpKaCgoKmgoKUgoCCgpSkpIKkgoKUpIKCgoKUkoCCgoKCgoKSgoKmgoKUgsSCgpSCgoCCkoKCpIKmgpKClIKGooKmooKCgIKCpIKClICCgsimooKCgoKCqLKSgoKClIKCgpSCgpSCgoKCkoKCgpSCgIKSgoKkgqaChJKCgoKCgoKCgpSCgqa0goCCgqSCgIKSgoKklIKCpqKCgriCgg==")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/normalize.go", "normalize.cs", "ABpakoKCgoKUgoKSqJKCgoKClIKCkqiSgoKCgpSSgoKCgIKklKaigoKCgpSCgoKClKaokoKCgoKUkoKCgoKUgoKCgpSmlIKAgqSUrNKCgpSCgqaCgoKCgoKUgoKCgIKCkoKCgqSCpqKClIKCqsKmgoKUlIKCgoKUkpSSpqKCkoKAlIKCpIKCgoKCgoKUpoKUlIKmgqaigoKUqqKqooKq0oKCgpSmqtKCgoKUpq7igoKCgoCCgoKCgqSCgpSUuJSkpIK2goKmgqaClIKClJSqooKqoqaCgoKUgriCgoKUgIKkgoKClM6irLKssqaCgoKUlIKCgoKUlIKEgoKCgpS4gIK2gpSqoqaCgoKClJKSlIKCkqaSlIKUgoKCgoCCpIKSlKas5IKClICUgqSCgqSAgqSCgoKClJSCgoKUlICCkoKCpICCtoKClKqigpSClKrCgoKUlIKUgoKCgoKCgqaUgoKClIKCpoSSgoKCgoI=", "120-136:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/readwriter.go", "readwriter.cs", "AA8k9JSUgoKUgoKCgqiCgpSCgIKkgqaokoKCgqauwoKCAAwcsoKCgoKClJSClIKChIKCgoKUgpSCggAFEKKCgoKC")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/tables15.0.0.go", "tables15.0.0.cs", "AAsoAMMCLAD/EuYqsoKUpKSilIKCgpSkkpSCgoKUgoKCgpSkkpSCgoKUgoKCgpSCgoKClLaqooKSlIKSlIKSlIKSlKyygpSkpKKUgoKClKSSlIKCgpSCgoKClKSSlIKCgpSCgoKClIKCgoKUtqqigpKUgpKUgpKUgpKU7IKokpSkggA2DADsA44IAFTWAQClAQYA3AWGDrKClKSkopSCgoKUpJKUgoKClIKCgoKUpJKUgoKClIKCgoKUgoKCgpS2qqKCkpSCkpSCkpSCkpSssoKUpKSilIKCgpSkkpSCgoKUgoKCgpSkkpSCgoKUgoKCgpSCgoKClLaqooKSlIKSlIKSlIKSlOyCqJKUpIIAZwwA2QfKEABc5gEAsgEG")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/transform.go", "transform.cs", "AAwcvAAJBIKCgIKCgqSCgoKCloKUprSClIKmmPSSgpSCgoKUgpaCgoCCgoKkgoKCgoKClA==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/iter.go", "iter.cs", "AB1AkoKCgoKUgoKCgoKokoKCgoKUgoKCgoKssoKUtLS0lIKUgoKUgoKCgoKuwoKUqJKmgoKokgACEPKmooKCgoKUgoKClIKCpqKCgoKClIKCgpSCgqaigoKCkoKCgoKUgqaCqsKClJSCgoKClKaCqsKCgoKCgoKCgoKUgpSCgqiygpKCgIKCgoKCgpKCgpSSgMqCgqaCpKaCgoKmgoKUgoCCgpSkpIKkgoKUlIKCgoKUkoCCgoKCgoKSgoKmgoKUgsSCgpSCgoCCkoKCpIKmgpKClIKGooKmooKCgIKCpIKClICCgsimooKCgoKCqLKSgoKClIKCgpSCgpSCgoKCkoKCgpSCgIKSgoKkgqaChJKCgoKCgoKCgpSCgqa0goCCgqSCgIKSgoKklIKCpqKCgriCgg==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/normalize.go", "normalize.cs", "ACtakoKCgoKUgoKSqJKCgoKClIKCkqiSgoKCgpSSgoKCgIKklKaigoKCgpSCgoKClKaokoKCgoKUkoKCgoKUgoKCgpSmlIKAgqSUrNKCgpSCgqaCgoKCgoKUgoKCgIKCkoKCgqSCpqKClIKCqsKmgoKUlIKCgoKUkpSSpqKCkoKAlIKCpIKCgoKCgoKUpoKUlIKmgqaigoKUqqKqooKq0oKCgpSmqtKCgoKUpq7igoKCgoCCgoKCgqSCgpSUuJSkpIKmgoKmgqaClIKClJSqooKqoqaCgoKUgriCgoKUgIKkgoKClM6irLKssqaCgoKUlIKCgoKUlIKUgoKCgpS4gIK2gpSqoqaCgoKClIKClIKCgqaClIKUgoKCgoCCpIKClKas5IKClICUgqSCgqSAgqSCgoKClJSCgoKUlICCkoKCpICCtoKClKqigpSClKrCgoKUlIKUgoKCgoKCgqaUgoKClIKCpoSSgoKCgoI=", "120-136:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/readwriter.go", "readwriter.cs", "AA8k9KSUgoKUgoKCgriCgpSCgIKkgqaokoKCgqauwoKCAAwcsoKCgoKClJSClIKClIKCgoKUgpSCggAFEKKCgoKC")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/tables15.0.0.go", "tables15.0.0.cs", "ABEoABMsAK8V5iqygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpTsgqiSlKSC3ACGBI4IAGrWAaYA/waGDrKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClOyCqJKUpILcAKQIyhAAcuYBpg==")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/transform.go", "transform.cs", "AAwcvAAJBIKCgIKCgqSCgoKCpoKUprSClIKmmPSSgpSCgoKUgqaCgoCCgoKkgoKCgoKClA==")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/text/unicode/norm/trie.go", "trie.cs", "ABMi6syCnsKCgoKCgoKCgpSClKY=")]
 // </GoSourcePositionMaps>
 

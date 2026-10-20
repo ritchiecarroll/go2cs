@@ -107,6 +107,7 @@ public static partial void TestServerNoParams(ж<testing.T> Ꮡt) {
         defer(() => cliʗ1.Close(), ref ᒐ);
         goǃ(ServeConn, new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(srv));
         var dec = json.NewDecoder(new jsonrpc_internal_test_package.net_ConnᴠReader(cli));
+
         fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), @"{""method"": ""Arith.Add"", ""id"": ""123""}"u8);
         ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
         {
@@ -130,6 +131,7 @@ public static partial void TestServerEmptyMessage(ж<testing.T> Ꮡt) {
         defer(() => cliʗ1.Close(), ref ᒐ);
         goǃ(ServeConn, new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(srv));
         var dec = json.NewDecoder(new jsonrpc_internal_test_package.net_ConnᴠReader(cli));
+
         fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), "{}"u8);
         ref var resp = ref heap(new ArithAddResp(), out var Ꮡresp);
         {
@@ -153,6 +155,7 @@ public static partial void TestServer(ж<testing.T> Ꮡt) {
         defer(() => cliʗ1.Close(), ref ᒐ);
         goǃ(ServeConn, new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(srv));
         var dec = json.NewDecoder(new jsonrpc_internal_test_package.net_ConnᴠReader(cli));
+
         // Send hand-coded requests to server, parse responses.
         for (nint i = 0; i < 10; i++) {
             fmt.Fprintf(new jsonrpc_internal_test_package.net_ConnᴠWriter(cli), @"{""method"": ""Arith.Add"", ""id"": ""\u%04d"", ""params"": [{""A"": %d, ""B"": %d}]}"u8, i, i, i + 1);
@@ -165,7 +168,7 @@ public static partial void TestServer(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("resp.Error: %s"u8, resp.Error);
             }
             if (resp.Id._<@string>() != ((@string)(rune)i)) {
-                Ꮡt.Fatalf("resp: bad id %q want %q"u8, resp.Id._<@string>(), ((@string)(rune)i));
+                Ꮡt.Fatalf("resp: bad id %q want %q"u8, resp.Id._<@string>(), (@string)(rune)i);
             }
             if (resp.Result.C != 2 * i + 1) {
                 Ꮡt.Fatalf("resp: bad result: %d+%d=%d"u8, i, i + 1, resp.Result.C);
@@ -190,9 +193,11 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         // Test client against server.
         var (cli, srv) = net.Pipe();
         goǃ(ServeConn, new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(srv));
+
         var client = NewClient(new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(cli));
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Synchronous calls
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
@@ -203,6 +208,7 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         if ((~reply).C != (~args).A + (~args).B) {
             Ꮡt.Errorf("Add: got %d expected %d"u8, (~reply).C, (~args).A + (~args).B);
         }
+
         args = Ꮡ(new Args(7, 8));
         reply = @new<Reply>();
         err = client.Call(arithMulˢ, args.OrTypedNil(), reply.OrTypedNil());
@@ -212,12 +218,14 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         if ((~reply).C != (~args).A * (~args).B) {
             Ꮡt.Errorf("Mul: got %d expected %d"u8, (~reply).C, (~args).A * (~args).B);
         }
+
         // Out of order.
         args = Ꮡ(new Args(7, 8));
         var mulReply = @new<Reply>();
         var mulCall = client.Go(arithMulˢ, args.OrTypedNil(), mulReply.OrTypedNil(), default!);
         var addReply = @new<Reply>();
         var addCall = client.Go(arithAddˢ, args.OrTypedNil(), addReply.OrTypedNil(), default!);
+
         addCall = ᐸꟷ((~addCall).Done);
         if ((~addCall).Error != default!) {
             Ꮡt.Errorf("Add: expected no error but got string %q"u8, (~addCall).Error.Error());
@@ -225,6 +233,7 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         if ((~addReply).C != (~args).A + (~args).B) {
             Ꮡt.Errorf("Add: got %d expected %d"u8, (~addReply).C, (~args).A + (~args).B);
         }
+
         mulCall = ᐸꟷ((~mulCall).Done);
         if ((~mulCall).Error != default!) {
             Ꮡt.Errorf("Mul: expected no error but got string %q"u8, (~mulCall).Error.Error());
@@ -232,6 +241,7 @@ public static partial void TestClient(ж<testing.T> Ꮡt) {
         if ((~mulReply).C != (~args).A * (~args).B) {
             Ꮡt.Errorf("Mul: got %d expected %d"u8, (~mulReply).C, (~args).A * (~args).B);
         }
+
         // Error test
         args = Ꮡ(new Args(7, 0));
         reply = @new<Reply>();
@@ -258,9 +268,11 @@ public static partial void TestBuiltinTypes(ж<testing.T> Ꮡt) {
     try {
         var (cli, srv) = net.Pipe();
         goǃ(ServeConn, new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(srv));
+
         var client = NewClient(new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(cli));
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         // Map
         nint arg = 7;
         ref var replyMap = ref heap<map<nint, nint>>(out var ᏑreplyMap);
@@ -272,6 +284,7 @@ public static partial void TestBuiltinTypes(ж<testing.T> Ꮡt) {
         if (replyMap[arg] != arg) {
             Ꮡt.Errorf("Map: expected %d got %d"u8, arg, replyMap[arg]);
         }
+
         // Slice
         ref var replySlice = ref heap<slice<nint>>(out var ᏑreplySlice);
         replySlice = new nint[]{}.slice();
@@ -284,6 +297,7 @@ public static partial void TestBuiltinTypes(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Slice: expected %v got %v"u8, e, replySlice);
             }
         }
+
         // Array
         ref var replyArray = ref heap<array<nint>>(out var ᏑreplyArray);
         replyArray = new nint[]{}.array(1);
@@ -318,9 +332,11 @@ public static partial void TestMalformedOutput(ж<testing.T> Ꮡt) {
         var srvʗ1 = srv;
         goǃ(ᴛ1 => srvʗ1.Write(ᴛ1), slice<byte>(@"{""id"":0,""result"":null,""error"":null}"u8));
         goǃ(ᴛ1 => io.ReadAll(ᴛ1), new jsonrpc_internal_test_package.net_ConnᴠReader(srv));
+
         var client = NewClient(new jsonrpc_internal_test_package.net_ConnᴠReadWriteCloser(cli));
         var clientʗ1 = client;
         defer(() => clientʗ1.Close(), ref ᒐ);
+
         var args = Ꮡ(new Args(7, 8));
         var reply = @new<Reply>();
         var err = client.Call(arithAddˢ, args.OrTypedNil(), reply.OrTypedNil());
@@ -394,12 +410,13 @@ public static partial void TestUnexpectedError(ж<testing.T> Ꮡt) {
 internal static (ж<pipe>, ж<pipe>) myPipe() {
     var (r1, w1) = io.Pipe();
     var (r2, w2) = io.Pipe();
+
     return (Ꮡ(new pipe(r1, w2)), Ꮡ(new pipe(r2, w1)));
 }
 
 internal partial struct pipe {
-    public partial ref ж<io_package.PipeReader> PipeReader { get; }
-    public partial ref ж<io_package.PipeWriter> PipeWriter { get; }
+    /*embed*/ public ж<io_package.PipeReader> PipeReader;
+    /*embed*/ public ж<io_package.PipeWriter> PipeWriter;
 }
 
 internal partial struct pipeAddr /*num:nint*/;

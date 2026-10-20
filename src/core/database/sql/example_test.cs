@@ -31,6 +31,7 @@ public static void ExampleDB_QueryContext() {
         var rowsʗ1 = rows;
         defer(() => rowsʗ1.Close(), ref ᒐ);
         var names = new slice<@string>(0);
+
         while (rows.Next()) {
             ref var name = ref heap(new @string(), out var Ꮡname);
             {
@@ -49,6 +50,7 @@ public static void ExampleDB_QueryContext() {
         if (rerr != default!) {
             log.Fatal(rerr);
         }
+
         // Rows.Err will report the last error encountered by Rows.Scan.
         {
             var errΔ2 = rows.Err(); if (errΔ2 != default!) {
@@ -82,7 +84,6 @@ public static void ExampleDB_QueryRowContext() {
         log.Printf("username is %q, account created on %s\n"u8, username, created);
         break;
     }}
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -126,7 +127,7 @@ from
 	join uid on uid.id = ur.user
 ;
 	
-"""u8;
+"""u8.Raw();
 
 public static void ExampleDB_Query_multipleResultSets() {
     GoFrame ᒐ = default;
@@ -139,6 +140,7 @@ public static void ExampleDB_Query_multipleResultSets() {
         }
         var rowsʗ1 = rows;
         defer(() => rowsʗ1.Close(), ref ᒐ);
+
         while (rows.Next()) {
             ref var id = ref heap(new int64(), out var Ꮡid);
             ref var name = ref heap(new @string(), out var Ꮡname);
@@ -194,6 +196,7 @@ public static void ExampleDB_PingContext() {
         var (ctxΔ1, cancel) = context.WithTimeout(sql_test_package.ctx, 1 * time.ΔSecond);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         @string status = "up"u8;
         {
             var err = db.PingContext(ctxΔ1); if (err != default!) {
@@ -224,12 +227,14 @@ public static void ExampleDB_Prepare() {
             new("gopher"u8, 2009),
             new("moby dock"u8, 2013)
         }.slice();
+
         var (stmt, err) = db.Prepare(insertIntoProjectsIdˢ);
         if (err != default!) {
             log.Fatal(err);
         }
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ); // Prepared statements take up server resources and should be closed after use.
+
         foreach (var (id, project) in projects) {
             {
                 var (_, errΔ1) = stmt.Exec(id + 1, project.mascot, project.release, openSourceˢ); if (errΔ1 != default!) {
@@ -256,18 +261,21 @@ public static void ExampleTx_Prepare() {
             new("gopher"u8, 2009),
             new("moby dock"u8, 2013)
         }.slice();
+
         var (tx, err) = db.Begin();
         if (err != default!) {
             log.Fatal(err);
         }
         var txʗ1 = tx;
         defer(() => txʗ1.Rollback(), ref ᒐ); // The rollback will be ignored if the tx has been committed later in the function.
+
         (var stmt, err) = tx.Prepare(insertIntoProjectsIdˢ);
         if (err != default!) {
             log.Fatal(err);
         }
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ); // Prepared statements take up server resources and should be closed after use.
+
         foreach (var (id, project) in projects) {
             {
                 var (_, errΔ1) = stmt.Exec(id + 1, project.mascot, project.release, openSourceˢ); if (errΔ1 != default!) {
@@ -412,6 +420,7 @@ public static void ExampleStmt() {
         }
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ);
+
         // Then reuse it each time you need to issue the query.
         nint id = 43;
         ref var username = ref heap(new @string(), out var Ꮡusername);
@@ -429,7 +438,6 @@ public static void ExampleStmt() {
             log.Printf("username is %s\n"u8, username);
             break;
         }}
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -445,6 +453,7 @@ public static void ExampleStmt_QueryRowContext() {
         }
         var stmtʗ1 = stmt;
         defer(() => stmtʗ1.Close(), ref ᒐ);
+
         // Then reuse it each time you need to issue the query.
         nint id = 43;
         ref var username = ref heap(new @string(), out var Ꮡusername);
@@ -462,7 +471,6 @@ public static void ExampleStmt_QueryRowContext() {
             log.Printf("username is %s\n"u8, username);
             break;
         }}
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -478,6 +486,7 @@ public static void ExampleRows() {
         }
         var rowsʗ1 = rows;
         defer(() => rowsʗ1.Close(), ref ᒐ);
+
         var names = new slice<@string>(0);
         while (rows.Next()) {
             ref var name = ref heap(new @string(), out var Ꮡname);

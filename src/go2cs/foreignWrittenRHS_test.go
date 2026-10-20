@@ -24,6 +24,7 @@ import (
 // package's syntax alone), so a foreign target hopped through the number -- `((ΔLevel)(uint32)x)`,
 // whose second leg has no operator (CS0030). The answer must not depend on which package converts.
 func TestForeignTargetWrittenOverANamedNumberCastsDirectly(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 
@@ -91,7 +92,7 @@ func main() {
 	libCs := readGenerated(t, filepath.Join(outDir, "lib", "lib.cs"))
 
 	// The control: inside lib, both conversions cast directly.
-	for _, want := range []string{"return ((L)n);", "return ((S)n);"} {
+	for _, want := range []string{"return (L)n;", "return (S)n;"} {
 		if !strings.Contains(libCs, want) {
 			t.Errorf("control: missing %q in lib:\n%s", want, libCs)
 		}

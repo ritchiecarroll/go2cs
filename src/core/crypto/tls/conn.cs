@@ -18,7 +18,6 @@ using net = net_package;
 using sync = sync_package;
 using atomic = go.sync.atomic_package;
 using time = time_package;
-using System.Runtime.CompilerServices;
 using go.@internal;
 using go.crypto;
 using go.sync;
@@ -52,12 +51,10 @@ partial struct Conn {
     internal bool didHRR; // whether a HelloRetryRequest was sent/received
     internal uint16 cipherSuite;
     internal CurveID curveID;
+    internal SignatureScheme peerSigAlg;
     internal slice<byte> ocspResponse; // stapled OCSP response
     internal slice<slice<byte>> scts; // signed certificate timestamps from server
     internal slice<ж<Δx509.Certificate>> peerCertificates;
-    // activeCertHandles contains the cache handles to certificates in
-    // peerCertificates that are used to track active references.
-    internal slice<ж<activeCert>> activeCertHandles;
     // verifiedChains contains the certificate chains that we built, as
     // opposed to the ones presented by the server.
     internal slice<slice<ж<Δx509.Certificate>>> verifiedChains;
@@ -160,7 +157,7 @@ public static net.Conn NetConn(this ref Conn c) {
 // A halfConn represents one direction of the record layer
 // connection, either sending or receiving.
 partial struct halfConn {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal error err;  // first permanent error
     internal uint16 version; // protocol version
     internal any cipher;    // cipher algorithm
@@ -222,9 +219,7 @@ internal static error changeCipherSpec(this ref halfConn hc) {
     hc.mac = hc.nextMac;
     hc.nextCipher = default!;
     hc.nextMac = default!;
-    foreach (var (i, _) in hc.seq) {
-        hc.seq[i] = 0;
-    }
+    clear(hc.seq[..]);
     return default!;
 }
 
@@ -238,9 +233,7 @@ internal static void setTrafficSecret(this ref halfConn hc, ж<cipherSuiteTLS13>
     hc.level = level;
     var (key, iv) = Ꮡsuite.trafficKey(secret);
     hc.cipher = suite.aead(key, iv);
-    foreach (var (i, _) in hc.seq) {
-        hc.seq[i] = 0;
-    }
+    clear(hc.seq[..]);
 }
 
 // incSeq increments the sequence number.
@@ -251,6 +244,7 @@ internal static void incSeq(this ref halfConn hc) {
             return;
         }
     }
+
     // Not allowed to let sequence number wrap.
     // Instead, must renegotiate before it does.
     // Not likely enough to bother.
@@ -264,6 +258,7 @@ internal static nint explicitNonceLen(this ref halfConn hc) {
     if (hc.cipher == default!) {
         return 0;
     }
+
     switch (hc.cipher.type()) {
     case {} Δc when Δc._<cipher.Stream>(out var c): {
         return 0;
@@ -272,8 +267,8 @@ internal static nint explicitNonceLen(this ref halfConn hc) {
         return c.explicitNonceLen();
     }
     case {} Δc when Δc._<cbcMode>(out var c): {
+        // TLS 1.1 introduced a per-record explicit IV to fix the BEAST attack.
         if (hc.version >= VersionTLS11) {
-            // TLS 1.1 introduced a per-record explicit IV to fix the BEAST attack.
             return c.BlockSize();
         }
         return 0;
@@ -295,29 +290,34 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     if (len(payload) < 1) {
         return (0, 0);
     }
+
     var paddingLen = payload[len(payload) - 1];
     nuint t = (nuint)(len(payload) - 1) - (nuint)paddingLen;
     // if len(payload) >= (paddingLen - 1) then the MSB of t is zero
-    good = (byte)(((int32)(~t) >> (int)(31)));
+    good = (byte)((int32)(~t) >> 31);
+
     // The maximum possible padding length plus the actual length field
     nint toCheck = 256;
     // The length of the padded data is public, so we can use an if here
     if (toCheck > len(payload)) {
         toCheck = len(payload);
     }
+
     for (nint i = 0; i < toCheck; i++) {
         nuint tΔ1 = (nuint)paddingLen - (nuint)i;
         // if i <= paddingLen then the MSB of t is zero
-        var mask = (byte)(((int32)(~tΔ1) >> (int)(31)));
+        var mask = (byte)((int32)(~tΔ1) >> 31);
         var b = payload[len(payload) - 1 - i];
         good &= unchecked((byte)~(byte)((byte)((byte)(mask & paddingLen) ^ (byte)(mask & b))));
     }
+
     // We AND together the bits of good and replicate the result across
     // all the bits.
-    good &= (byte)((byte)(good << (int)(4)));
-    good &= (byte)((byte)(good << (int)(2)));
-    good &= (byte)((byte)(good << (int)(1)));
-    good = (uint8)(((int8)good >> (int)(7)));
+    good &= (byte)((byte)(good << 4));
+    good &= (byte)((byte)(good << 2));
+    good &= (byte)((byte)(good << 1));
+    good = (uint8)((int8)good >> 7);
+
     // Zero the padding length on error. This ensures any unchecked bytes
     // are included in the MAC. Otherwise, an attacker that could
     // distinguish MAC failures from padding failures could mount an attack
@@ -328,6 +328,7 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     //
     // See also macAndPaddingGood logic below.
     paddingLen &= (byte)(good);
+
     toRemove = (nint)paddingLen + 1;
     return (toRemove, good);
 }
@@ -347,16 +348,20 @@ partial interface cbcMode :
 // this stage. The returned plaintext might overlap with the input.
 internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, slice<byte> record) {
     slice<byte> plaintext = default!;
-    var typ = ((recordType)record[0]);
+    var typ = (recordType)record[0];
     var payload = record[(int)(recordHeaderLen)..];
+
     // In TLS 1.3, change_cipher_spec messages are to be ignored without being
     // decrypted. See RFC 8446, Appendix D.4.
     if (hc.version == VersionTLS13 && typ == recordTypeChangeCipherSpec) {
         return (payload, typ, default!);
     }
+
     var paddingGood = (byte)255;
     nint paddingLen = 0;
+
     nint explicitNonceLen = hc.explicitNonceLen();
+
     if (hc.cipher != default!){
         switch (hc.cipher.type()) {
         case {} Δc when Δc._<cipher.Stream>(out var c): {
@@ -372,6 +377,7 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
                 nonce = hc.seq[..];
             }
             payload = payload.slice(explicitNonceLen);
+
             slice<byte> additionalData = default!;
             if (hc.version == VersionTLS13){
                 additionalData = record[..(int)(recordHeaderLen)];
@@ -379,8 +385,9 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
                 additionalData = appendꓸꓸꓸ(hc.scratchBuf[..0], hc.seq[..]);
                 additionalData = appendꓸꓸꓸ(additionalData, record[..3]);
                 nint n = len(payload) - c.Overhead();
-                additionalData = append(additionalData, (byte)((n >> (int)(8))), (byte)n);
+                additionalData = append(additionalData, (byte)(n >> 8), (byte)n);
             }
+
             error err = default!;
             (plaintext, err) = c.Open(payload[..0], nonce, payload, additionalData);
             if (err != default!) {
@@ -394,11 +401,19 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
             if (len(payload) % blockSize != 0 || len(payload) < minPayload) {
                 return (default!, 0, alertBadRecordMAC);
             }
+
             if (explicitNonceLen > 0) {
                 c.SetIV(payload.slice(0, explicitNonceLen));
                 payload = payload.slice(explicitNonceLen);
             }
             c.CryptBlocks(payload, payload);
+
+            // In a limited attempt to protect against CBC padding oracles like
+            // Lucky13, the data past paddingLen (which is secret) is passed to
+            // the MAC function as extra data, to be fed into the HMAC after
+            // computing the digest. This makes the MAC roughly constant time as
+            // long as the digest computation is constant time and does not
+            // affect the subsequent write, modulo cache effects.
             (paddingLen, paddingGood) = extractPadding(payload);
             break;
         }
@@ -407,12 +422,7 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
             throw panic("unknown cipher type");
             break;
         }}
-        // In a limited attempt to protect against CBC padding oracles like
-        // Lucky13, the data past paddingLen (which is secret) is passed to
-        // the MAC function as extra data, to be fed into the HMAC after
-        // computing the digest. This makes the MAC roughly constant time as
-        // long as the digest computation is constant time and does not
-        // affect the subsequent write, modulo cache effects.
+
         if (hc.version == VersionTLS13) {
             if (typ != recordTypeApplicationData) {
                 return (default!, 0, alertUnexpectedMessage);
@@ -423,7 +433,7 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
             // Remove padding and find the ContentType scanning from the end.
             for (nint i = len(plaintext) - 1; i >= 0; i--) {
                 if (plaintext[i] != 0) {
-                    typ = ((recordType)plaintext[i]);
+                    typ = (recordType)plaintext[i];
                     plaintext = plaintext.slice(0, i);
                     break;
                 }
@@ -435,17 +445,20 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
     } else {
         plaintext = payload;
     }
+
     if (hc.mac != default!) {
         nint macSize = hc.mac.Size();
         if (len(payload) < macSize) {
             return (default!, 0, alertBadRecordMAC);
         }
+
         nint n = len(payload) - macSize - paddingLen;
-        n = subtle.ConstantTimeSelect((nint)(((uint32)n >> (int)(31))), 0, n); // if n < 0 { n = 0 }
-        record[3] = (byte)((n >> (int)(8)));
+        n = subtle.ConstantTimeSelect((nint)((uint32)n >> 31), 0, n); // if n < 0 { n = 0 }
+        record[3] = (byte)(n >> 8);
         record[4] = (byte)n;
         var remoteMAC = payload.slice(n, n + macSize);
         var localMAC = tls10MAC(hc.mac, hc.scratchBuf[..0], hc.seq[..], record[..(int)(recordHeaderLen)], payload.slice(0, n), payload.slice(n + macSize));
+
         // This is equivalent to checking the MACs and paddingGood
         // separately, but in constant-time to prevent distinguishing
         // padding failures from MAC failures. Depending on what value
@@ -453,12 +466,14 @@ internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, s
         // bad MAC from bad padding can lead to an attack.
         //
         // See also the logic at the end of extractPadding.
-        nint macAndPaddingGood = (nint)(subtle.ConstantTimeCompare(localMAC, remoteMAC) & (nint)paddingGood);
+        nint macAndPaddingGood = subtle.ConstantTimeCompare(localMAC, remoteMAC) & (nint)paddingGood;
         if (macAndPaddingGood != 1) {
             return (default!, 0, alertBadRecordMAC);
         }
+
         plaintext = payload.slice(0, n);
     }
+
     hc.incSeq();
     return (plaintext, typ, default!);
 }
@@ -488,6 +503,7 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
     if (hc.cipher == default!) {
         return (appendꓸꓸꓸ(record, payload), default!);
     }
+
     slice<byte> explicitNonce = default!;
     {
         nint explicitNonceLen = hc.explicitNonceLen(); if (explicitNonceLen > 0) {
@@ -514,6 +530,7 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
             }
         }
     }
+
     slice<byte> dst = default!;
     switch (hc.cipher.type()) {
     case {} Δc when Δc._<cipher.Stream>(out var c): {
@@ -528,14 +545,18 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
         if (len(nonce) == 0) {
             nonce = hc.seq[..];
         }
+
         if (hc.version == VersionTLS13){
             record = appendꓸꓸꓸ(record, payload);
+
             // Encrypt the actual ContentType and replace the plaintext one.
             record = append(record, record[0]);
             record[0] = (byte)recordTypeApplicationData;
+
             nint nΔ1 = len(payload) + 1 + c.Overhead();
-            record[3] = (byte)((nΔ1 >> (int)(8)));
+            record[3] = (byte)(nΔ1 >> 8);
             record[4] = (byte)nΔ1;
+
             record = c.Seal(record[..(int)(recordHeaderLen)],
                 nonce, record[(int)(recordHeaderLen)..], record[..(int)(recordHeaderLen)]);
         } else {
@@ -567,11 +588,13 @@ internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> r
         throw panic("unknown cipher type");
         break;
     }}
+
     // Update length to include nonce, MAC and any block padding needed.
     nint n = len(record) - (nint)recordHeaderLen;
-    record[3] = (byte)((n >> (int)(8)));
+    record[3] = (byte)(n >> 8);
     record[4] = (byte)n;
     hc.incSeq();
+
     return (record, default!);
 }
 
@@ -639,14 +662,17 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         return c.@in.err;
     }
     var handshakeComplete = Ꮡc.of(Conn.ᏑisHandshakeComplete).Load();
+
     // This function modifies c.rawInput, which owns the c.input memory.
     if (c.input.Len() != 0) {
         return c.@in.setErrorLocked(errors.New(tlsInternalErrorˢ));
     }
     c.input.Reset(default!);
+
     if (c.quic != nil) {
         return c.@in.setErrorLocked(errors.New(tlsInternalErrorˢ2));
     }
+
     // Read header, payload.
     {
         var errΔ1 = c.readFromUntil(new net_ConnᴠReader(c.conn), recordHeaderLen); if (errΔ1 != default!) {
@@ -665,7 +691,8 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         }
     }
     var hdr = c.rawInput.Bytes()[..(int)(recordHeaderLen)];
-    var typ = ((recordType)hdr[0]);
+    var typ = (recordType)hdr[0];
+
     // No valid TLS record has a type of 0x80, however SSLv2 handshakes
     // start with a uint16 length where the MSB is set and the first record
     // is always < 256 bytes long. Therefore typ == 0x80 strongly suggests
@@ -674,14 +701,15 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
         Ꮡc.sendAlert(alertProtocolVersion);
         return c.@in.setErrorLocked(c.newRecordHeaderError(default!, unsupportedSSLv2ˢ));
     }
-    var vers = (uint16)((uint16)((uint16)hdr[1] << (int)(8)) | (uint16)hdr[2]);
+
+    var vers = (uint16)((uint16)((uint16)hdr[1] << 8) | (uint16)hdr[2]);
     var expectedVers = c.vers;
     if (expectedVers == VersionTLS13) {
         // All TLS 1.3 records are expected to have 0x0303 (1.2) after
         // the initial hello (RFC 8446 Section 5.1).
         expectedVers = VersionTLS12;
     }
-    nint n = (nint)(((nint)hdr[3] << (int)(8)) | (nint)hdr[4]);
+    nint n = (nint)hdr[3] << 8 | (nint)hdr[4];
     if (c.haveVers && vers != expectedVers) {
         Ꮡc.sendAlert(alertProtocolVersion);
         @string msg = fmt.Sprintf("received record with version %x when expecting version %x"u8, vers, expectedVers);
@@ -711,6 +739,7 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
             return errΔ2;
         }
     }
+
     // Process message.
     var record = c.rawInput.Next((nint)recordHeaderLen + n);
     (var data, typ, var err) = c.@in.decrypt(record);
@@ -720,18 +749,22 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
     if (len(data) > maxPlaintext) {
         return c.@in.setErrorLocked(Ꮡc.sendAlert(alertRecordOverflow));
     }
+
     // Application Data messages are always protected.
     if (c.@in.cipher == default! && typ == recordTypeApplicationData) {
         return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
     }
-    if (typ != recordTypeAlert && typ != recordTypeChangeCipherSpec && len(data) > 0) {
+
+    if ((typ == recordTypeApplicationData || (typ == recordTypeHandshake && !handshakeComplete)) && len(data) > 0) {
         // This is a state-advancing message: reset the retry count.
         c.retryCount = 0;
     }
+
     // Handshake messages MUST NOT be interleaved with other record types in TLS 1.3.
     if (c.vers == VersionTLS13 && typ != recordTypeHandshake && c.hand.Len() > 0) {
         return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
     }
+
     var exprᴛ1 = typ;
     if (exprᴛ1 == recordTypeAlert) {
         if (c.quic != nil) {
@@ -744,35 +777,43 @@ internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCiphe
             return c.@in.setErrorLocked(io.EOF);
         }
         if (c.vers == VersionTLS13) {
+            // TLS 1.3 removed warning-level alerts except for alertUserCanceled
+            // (RFC 8446, § 6.1). Since at least one major implementation
+            // (https://bugs.openjdk.org/browse/JDK-8323517) misuses this alert,
+            // many TLS stacks now ignore it outright when seen in a TLS 1.3
+            // handshake (e.g. BoringSSL, NSS, Rustls).
+            if (((alert)data[1]) == alertUserCanceled) {
+                // Like TLS 1.2 alertLevelWarning alerts, we drop the record and retry.
+                return Ꮡc.retryReadRecord(expectChangeCipherSpec);
+            }
             return c.@in.setErrorLocked(new net.OpErrorжerror(Ꮡ(new net.OpError(Op: "remote error"u8, Err: ((alert)data[1])))));
         }
         var exprᴛ2 = data[0];
         if (exprᴛ2 == alertLevelWarning) {
+            // Drop the record on the floor and retry.
             return Ꮡc.retryReadRecord(expectChangeCipherSpec);
         }
         if (exprᴛ2 == alertLevelError) {
-            return c.@in.setErrorLocked(new net.OpErrorжerror(Ꮡ(new net.OpError( // Drop the record on the floor and retry.
-Op: "remote error"u8, Err: ((alert)data[1])))));
+            return c.@in.setErrorLocked(new net.OpErrorжerror(Ꮡ(new net.OpError(Op: "remote error"u8, Err: ((alert)data[1])))));
         }
         { /* default: */
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
         }
-
     }
     else if (exprᴛ1 == recordTypeChangeCipherSpec) {
         if (len(data) != 1 || data[0] != 1) {
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertDecodeError));
         }
+        // Handshake messages are not allowed to fragment across the CCS.
         if (c.hand.Len() > 0) {
-            // Handshake messages are not allowed to fragment across the CCS.
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
         }
+        // In TLS 1.3, change_cipher_spec records are ignored until the
+        // Finished. See RFC 8446, Appendix D.4. Note that according to Section
+        // 5, a server can send a ChangeCipherSpec before its ServerHello, when
+        // c.vers is still unset. That's not useful though and suspicious if the
+        // server then selects a lower protocol version, so don't allow that.
         if (c.vers == VersionTLS13) {
-            // In TLS 1.3, change_cipher_spec records are ignored until the
-            // Finished. See RFC 8446, Appendix D.4. Note that according to Section
-            // 5, a server can send a ChangeCipherSpec before its ServerHello, when
-            // c.vers is still unset. That's not useful though and suspicious if the
-            // server then selects a lower protocol version, so don't allow that.
             return Ꮡc.retryReadRecord(expectChangeCipherSpec);
         }
         if (!expectChangeCipherSpec) {
@@ -788,18 +829,18 @@ Op: "remote error"u8, Err: ((alert)data[1])))));
         if (!handshakeComplete || expectChangeCipherSpec) {
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
         }
+        // Some OpenSSL servers send empty records in order to randomize the
+        // CBC IV. Ignore a limited number of empty records.
         if (len(data) == 0) {
-            // Some OpenSSL servers send empty records in order to randomize the
-            // CBC IV. Ignore a limited number of empty records.
             return Ꮡc.retryReadRecord(expectChangeCipherSpec);
         }
+        // Note that data is owned by c.rawInput, following the Next call above,
+        // to avoid copying the plaintext. This is safe because c.rawInput is
+        // not read from or written to until c.input is drained.
         c.input.Reset(data);
     }
     else if (exprᴛ1 == recordTypeHandshake) {
         if (len(data) == 0 || expectChangeCipherSpec) {
-            // Note that data is owned by c.rawInput, following the Next call above,
-            // to avoid copying the plaintext. This is safe because c.rawInput is
-            // not read from or written to until c.input is drained.
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage));
         }
         c.hand.Write(data);
@@ -872,6 +913,7 @@ internal static error sendAlertLocked(this ж<Conn> Ꮡc, alert err) {
     if (c.quic != nil) {
         return c.@out.setErrorLocked(new net.OpErrorжerror(Ꮡ(new net.OpError(Op: "local error"u8, Err: err))));
     }
+
     var exprᴛ1 = err;
     if (exprᴛ1 == alertNoRenegotiation || exprᴛ1 == alertCloseNotify) {
         c.tmp[0] = alertLevelWarning;
@@ -879,13 +921,14 @@ internal static error sendAlertLocked(this ж<Conn> Ꮡc, alert err) {
     else { /* default: */
         c.tmp[0] = alertLevelError;
     }
-
     c.tmp[1] = (byte)err;
+
     var (_, writeErr) = Ꮡc.writeRecordLocked(recordTypeAlert, c.tmp[0..2]);
     if (err == alertCloseNotify) {
         // closeNotify is a special case in that it isn't an error.
         return writeErr;
     }
+
     return c.@out.setErrorLocked(new net.OpErrorжerror(Ꮡ(new net.OpError(Op: "local error"u8, Err: err))));
 }
 
@@ -902,7 +945,16 @@ internal static error sendAlert(this ж<Conn> Ꮡc, alert err) {
     finally { if (ᒐd1) Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
+// tcpMSSEstimate is a conservative estimate of the TCP maximum segment
+// size (MSS). A constant is used, rather than querying the kernel for
+// the actual MSS, to avoid complexity. The value here is the IPv6
+// minimum MTU (1280 bytes) minus the overhead of an IPv6 header (40
+// bytes) and a TCP header with timestamps (32 bytes).
 internal static UntypedInt tcpMSSEstimate => 1208;
+
+// recordSizeBoostThreshold is the number of bytes of application data
+// sent after which the TLS record size will be increased to the
+// maximum.
 internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
 
 // maxPayloadSizeForWrite returns the maximum TLS payload size to use for the
@@ -925,9 +977,11 @@ internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) {
     if ((~c.config).DynamicRecordSizingDisabled || typ != recordTypeApplicationData) {
         return maxPlaintext;
     }
+
     if (c.bytesSent >= recordSizeBoostThreshold) {
         return maxPlaintext;
     }
+
     // Subtract TLS overheads to get the maximum payload size.
     nint payloadBytes = (nint)(tcpMSSEstimate - recordHeaderLen) - c.@out.explicitNonceLen();
     if (c.@out.cipher != default!) {
@@ -942,7 +996,11 @@ internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) {
         }
         case {} Δciph when Δciph._<cbcMode>(out var ciph): {
             nint blockSize = ciph.BlockSize();
-            payloadBytes = ((nint)(payloadBytes & ~(blockSize - 1))) - 1;
+            // The payload must fit in a multiple of blockSize, with
+            // room for at least one padding byte.
+            payloadBytes = (payloadBytes & ~(blockSize - 1)) - 1;
+            // The MAC is appended before padding so affects the
+            // payload size directly.
             payloadBytes -= c.@out.mac.Size();
             break;
         }
@@ -952,19 +1010,17 @@ internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) {
             break;
         }}
     }
-    // The payload must fit in a multiple of blockSize, with
-    // room for at least one padding byte.
-    // The MAC is appended before padding so affects the
-    // payload size directly.
     if (c.vers == VersionTLS13) {
         payloadBytes--; // encrypted ContentType
     }
+
     // Allow packet growth in arithmetic progression up to max.
     var pkt = c.packetsSent;
     c.packetsSent++;
     if (pkt > 1000) {
         return maxPlaintext; // avoid overflow in multiply below
     }
+
     nint n = payloadBytes * (nint)(pkt + 1);
     if (n > maxPlaintext) {
         n = maxPlaintext;
@@ -977,6 +1033,7 @@ internal static (nint, error) write(this ref Conn c, slice<byte> data) {
         c.sendBuf = appendꓸꓸꓸ(c.sendBuf, data);
         return (len(data), default!);
     }
+
     var (n, err) = c.conn.Write(data);
     c.bytesSent += (int64)n;
     return (n, err);
@@ -986,6 +1043,7 @@ internal static (nint, error) flush(this ref Conn c) {
     if (len(c.sendBuf) == 0) {
         return (0, default!);
     }
+
     var (n, err) = c.conn.Write(c.sendBuf);
     c.bytesSent += (int64)n;
     c.sendBuf = default!;
@@ -1023,6 +1081,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
             }
             return (len(data), default!);
         }
+
         var outBufPtr = ᏑoutBufPool.Get()._<ж<slice<byte>>>();
         ref var outBuf = ref heap<slice<byte>>(out var ᏑoutBuf);
         outBuf = outBufPtr.ValueSlot;
@@ -1036,6 +1095,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
             outBufPtrʗ1.ValueSlot = ᏑoutBuf.ValueSlot;
             ᏑoutBufPool.Put(outBufPtrʗ1.OrTypedNil());
         }, ref ᒐ);
+
         nint n = default!;
         while (len(data) > 0) {
             nint m = len(data);
@@ -1044,6 +1104,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
                     m = maxPayload;
                 }
             }
+
             (_, outBuf) = sliceForAppend(outBuf[..0], recordHeaderLen);
             outBuf[0] = (byte)typ;
             var vers = c.vers;
@@ -1057,10 +1118,11 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
                 // See RFC 8446, Section 5.1.
                 vers = VersionTLS12;
             }
-            outBuf[1] = (byte)((vers >> (int)(8)));
+            outBuf[1] = (byte)(vers >> 8);
             outBuf[2] = (byte)vers;
-            outBuf[3] = (byte)((m >> (int)(8)));
+            outBuf[3] = (byte)(m >> 8);
             outBuf[4] = (byte)m;
+
             error err = default!;
             (outBuf, err) = c.@out.encrypt(outBuf, data.slice(0, m), c.config.rand());
             if (err != default!) {
@@ -1074,6 +1136,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
             n += m;
             data = data.slice(m);
         }
+
         if (typ == recordTypeChangeCipherSpec && c.vers != VersionTLS13) {
             {
                 var err = c.@out.changeCipherSpec(); if (err != default!) {
@@ -1081,6 +1144,7 @@ internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType t
                 }
             }
         }
+
         return (n, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1096,6 +1160,7 @@ internal static (nint, error) writeHandshakeRecord(this ж<Conn> Ꮡc, handshake
     try {
         Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
         ᒐd1 = true;
+
         var (data, err) = msg.marshal();
         if (err != default!) {
             return (0, err);
@@ -1103,6 +1168,7 @@ internal static (nint, error) writeHandshakeRecord(this ж<Conn> Ꮡc, handshake
         if (transcript != default!) {
             transcript.Write(data);
         }
+
         return Ꮡc.writeRecordLocked(recordTypeHandshake, data);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1153,6 +1219,7 @@ internal static (any, error) readHandshake(this ж<Conn> Ꮡc, transcriptHash tr
         }
     }
     var data = c.hand.Bytes();
+
     nint maxHandshakeSize = maxHandshake;
     // hasVers indicates we're past the first message, forcing someone trying to
     // make us just allocate a large buffer to at least do the initial part of
@@ -1163,7 +1230,8 @@ internal static (any, error) readHandshake(this ж<Conn> Ꮡc, transcriptHash tr
         // those messages.
         maxHandshakeSize = maxHandshakeCertificateMsg;
     }
-    nint n = (nint)((nint)(((nint)data[1] << (int)(16)) | ((nint)data[2] << (int)(8))) | (nint)data[3]);
+
+    nint n = (nint)data[1] << 16 | (nint)data[2] << 8 | (nint)data[3];
     if (n > maxHandshakeSize) {
         Ꮡc.sendAlertLocked(alertInternalError);
         return (default!, c.@in.setErrorLocked(fmt.Errorf("tls: handshake message of length %d bytes exceeds maximum of %d bytes"u8, n, maxHandshakeSize)));
@@ -1266,12 +1334,15 @@ internal static (handshakeMessage, error) unmarshalHandshakeMessage(this ж<Conn
     // expect to be able to keep references to data,
     // so pass in a fresh copy that won't be overwritten.
     data = appendꓸꓸꓸ(slice<byte>(default!), data);
+
     if (!m.unmarshal(data)) {
-        return (default!, c.@in.setErrorLocked(Ꮡc.sendAlert(alertUnexpectedMessage)));
+        return (default!, c.@in.setErrorLocked(Ꮡc.sendAlert(alertDecodeError)));
     }
+
     if (transcript != default!) {
         transcript.Write(data);
     }
+
     return (m, default!);
 }
 
@@ -1291,7 +1362,7 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
         // interlock with Close below
         while (ᐧ) {
             var x = Ꮡc.of(Conn.ᏑactiveCall).Load();
-            if ((int32)(x & 1) != 0) {
+            if ((x & 1) != 0) {
                 return (0, net.ErrClosed);
             }
             if (Ꮡc.of(Conn.ᏑactiveCall).CompareAndSwap(x, x + 2)) {
@@ -1299,24 +1370,30 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
             }
         }
         defer(Ꮡc.of(Conn.ᏑactiveCall).Add, (int32)(-2), ref ᒐ);
+
         {
             var errΔ1 = Ꮡc.Handshake(); if (errΔ1 != default!) {
                 return (0, errΔ1);
             }
         }
+
         Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
         defer(Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Unlock, ref ᒐ);
+
         {
             var errΔ2 = c.@out.err; if (errΔ2 != default!) {
                 return (0, errΔ2);
             }
         }
+
         if (!Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
             return (0, alertInternalError);
         }
+
         if (c.closeNotifySent) {
             return (0, errShutdown);
         }
+
         // TLS 1.0 is susceptible to a chosen-plaintext
         // attack when using block mode ciphers due to predictable IVs.
         // This can be prevented by splitting each Application Data
@@ -1325,6 +1402,7 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
         // https://www.openssl.org/~bodo/tls-cbc.txt
         // https://bugzilla.mozilla.org/show_bug.cgi?id=665814
         // https://www.imperialviolet.org/2012/01/15/beastfollowup.html
+
         nint m = default!;
         if (len(b) > 1 && c.vers == VersionTLS10) {
             {
@@ -1337,6 +1415,7 @@ public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) {
                 }
             }
         }
+
         var (n, err) = Ꮡc.writeRecordLocked(recordTypeApplicationData, b);
         return (n + m, c.@out.setErrorLocked(err));
     }
@@ -1358,18 +1437,22 @@ internal static error handleRenegotiation(this ж<Conn> Ꮡc) {
         if (c.vers == VersionTLS13) {
             return errors.New(tlsInternalErrorˢ3);
         }
+
         var (msg, err) = Ꮡc.readHandshake(default!);
         if (err != default!) {
             return err;
         }
+
         var (helloReq, ok) = msg._<ж<helloRequestMsg>>(ᐧ);
         if (!ok) {
             Ꮡc.sendAlert(alertUnexpectedMessage);
             return unexpectedMessageError(helloReq.OrTypedNil(), msg);
         }
+
         if (!c.isClient) {
             return Ꮡc.sendAlert(alertNoRenegotiation);
         }
+
         var exprᴛ1 = (~c.config).Renegotiation;
         if (exprᴛ1 == RenegotiateNever) {
             return Ꮡc.sendAlert(alertNoRenegotiation);
@@ -1380,15 +1463,16 @@ internal static error handleRenegotiation(this ж<Conn> Ꮡc) {
             }
         }
         else if (exprᴛ1 == RenegotiateFreelyAsClient) {
+            // Ok.
         }
         else { /* default: */
             Ꮡc.sendAlert(alertInternalError);
             return errors.New(tlsUnknownRenegotiationˢ);
         }
 
-        // Ok.
         c.handshakeMutex.Lock();
         ᒐd1 = true;
+
         Ꮡc.of(Conn.ᏑisHandshakeComplete).Store(false);
         {
             c.handshakeErr = Ꮡc.clientHandshake(context.Background()); if (c.handshakeErr == default!) {
@@ -1412,6 +1496,7 @@ internal static error handlePostHandshakeMessage(this ж<Conn> Ꮡc) {
     if (c.vers != VersionTLS13) {
         return Ꮡc.handleRenegotiation();
     }
+
     var (msg, err) = Ꮡc.readHandshake(default!);
     if (err != default!) {
         return err;
@@ -1421,6 +1506,7 @@ internal static error handlePostHandshakeMessage(this ж<Conn> Ꮡc) {
         Ꮡc.sendAlert(alertUnexpectedMessage);
         return c.@in.setErrorLocked(errors.New(tlsTooManyNonAdvancingˢ));
     }
+
     switch (msg.type()) {
     case ж<newSessionTicketMsgTLS13> msgΔ1: {
         return Ꮡc.handleNewSessionTicket(msgΔ1);
@@ -1450,13 +1536,16 @@ internal static error handleKeyUpdate(this ж<Conn> Ꮡc, ж<keyUpdateMsg> Ꮡke
             Ꮡc.sendAlert(alertUnexpectedMessage);
             return c.@in.setErrorLocked(errors.New(tlsReceivedUnexpectedKeyˢ));
         }
+
         var cipherSuite = cipherSuiteTLS13ByID(c.cipherSuite);
         if (cipherSuite == nil) {
             return c.@in.setErrorLocked(Ꮡc.sendAlert(alertInternalError));
         }
+
         if (keyUpdate.updateRequested) {
             Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
             ᒐd1 = true;
+
             var msg = Ꮡ(new keyUpdateMsg(nil));
             var (msgBytes, err) = msg.marshal();
             if (err != default!) {
@@ -1468,15 +1557,18 @@ internal static error handleKeyUpdate(this ж<Conn> Ꮡc, ж<keyUpdateMsg> Ꮡke
                 c.@out.setErrorLocked(err);
                 return default!;
             }
+
             var newSecretΔ1 = cipherSuite.nextTrafficSecret(c.@out.trafficSecret);
             c.setWriteTrafficSecret(cipherSuite, QUICEncryptionLevelInitial, newSecretΔ1);
         }
+
         var newSecret = cipherSuite.nextTrafficSecret(c.@in.trafficSecret);
         {
-            var err = Ꮡc.setReadTrafficSecret(cipherSuite, QUICEncryptionLevelInitial, newSecret); if (err != default!) {
+            var err = Ꮡc.setReadTrafficSecret(cipherSuite, QUICEncryptionLevelInitial, newSecret, keyUpdate.updateRequested); if (err != default!) {
                 return err;
             }
         }
+
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1505,8 +1597,10 @@ public static (nint, error) Read(this ж<Conn> Ꮡc, slice<byte> b) {
             // Read(nil) for the side effect of the Handshake.
             return (0, default!);
         }
+
         Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex).Lock();
         ᒐd1 = true;
+
         while (c.input.Len() == 0) {
             {
                 var err = Ꮡc.readRecord(); if (err != default!) {
@@ -1521,7 +1615,9 @@ public static (nint, error) Read(this ж<Conn> Ꮡc, slice<byte> b) {
                 }
             }
         }
+
         var (n, _) = c.input.Read(b);
+
         // If a close-notify alert is waiting, read it so that we can return (n,
         // EOF) instead of (n, nil), to signal to the HTTP response reading
         // goroutine that the connection is now closed. This eliminates a race
@@ -1536,6 +1632,7 @@ public static (nint, error) Read(this ж<Conn> Ꮡc, slice<byte> b) {
                 }
             }
         }
+
         return (n, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1550,10 +1647,10 @@ public static error Close(this ж<Conn> Ꮡc) {
     int32 x = default!;
     while (ᐧ) {
         x = Ꮡc.of(Conn.ᏑactiveCall).Load();
-        if ((int32)(x & 1) != 0) {
+        if ((x & 1) != 0) {
             return net.ErrClosed;
         }
-        if (Ꮡc.of(Conn.ᏑactiveCall).CompareAndSwap(x, (int32)(x | 1))) {
+        if (Ꮡc.of(Conn.ᏑactiveCall).CompareAndSwap(x, x | 1)) {
             break;
         }
     }
@@ -1566,6 +1663,7 @@ public static error Close(this ж<Conn> Ꮡc) {
         // waiting on handshakeMutex or the c.out mutex.
         return c.conn.Close();
     }
+
     error alertErr = default!;
     if (Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
         {
@@ -1574,6 +1672,7 @@ public static error Close(this ж<Conn> Ꮡc) {
             }
         }
     }
+
     {
         var err = c.conn.Close(); if (err != default!) {
             return err;
@@ -1591,6 +1690,7 @@ public static error CloseWrite(this ж<Conn> Ꮡc) {
     if (!Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
         return errEarlyCloseWrite;
     }
+
     return Ꮡc.closeNotify();
 }
 
@@ -1602,6 +1702,7 @@ internal static error closeNotify(this ж<Conn> Ꮡc) {
 
         Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
         ᒐd1 = true;
+
         if (!c.closeNotifySent) {
             // Set a Write Deadline to prevent possibly blocking forever.
             c.SetWriteDeadline(time_package.Now().Add((time.Duration)(5000000000L)));
@@ -1652,7 +1753,7 @@ public static error HandshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string tlsInternalErrorˢ4 = "tls: internal error: handshake should have had a result"u8;
 
-internal static partial error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
+internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Context ctx) {
     error ret = default!;
     GoFrame ᒐ = default;
     try {
@@ -1664,56 +1765,35 @@ internal static partial error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, conte
         if (Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
             ret = default!; goto ᒐdone;
         }
+
         var (handshakeCtx, cancel) = context.WithCancel(ctx);
-        // Note: defer this before starting the "interrupter" goroutine
+        // Note: defer this before calling context.AfterFunc
         // so that we can tell the difference between the input being canceled and
         // this cancellation. In the former case, we need to close the connection.
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         if (c.quic != nil){
-            c.quic.Value.cancelc = handshakeCtx.Done();
+            c.quic.Value.ctx = handshakeCtx;
             c.quic.Value.cancel = cancel;
         } else 
         if (ctx.Done() != default!) {
-            // Start the "interrupter" goroutine, if this context might be canceled.
-            // (The background context cannot).
-            //
-            // The interrupter goroutine waits for the input context to be done and
-            // closes the connection if this happens before the function returns.
-            var done = new channel<EmptyStruct>(0);
-            var interruptRes = new channel<error>(1);
-            var doneʗ1 = done;
-            var interruptResʗ1 = interruptRes;
+            // Close the connection if ctx is canceled before the function returns.
+            var stop = context.AfterFunc(ctx, () => {
+                _ = Ꮡc.Value.conn.Close();
+            });
+            var stopʗ1 = stop;
             defer(() => {
-                close(doneʗ1);
-                {
-                    var ctxErr = ᐸꟷ(interruptResʗ1); if (ctxErr != default!) {
-                        // Return context error to user.
-                        ret = ctxErr;
-                    }
+                if (!stopʗ1()) {
+                    // Return context error to user.
+                    ret = ctx.Err();
                 }
             }, ref ᒐ);
-            var doneʗ2 = done;
-            var handshakeCtxʗ1 = handshakeCtx;
-            var interruptResʗ2 = interruptRes;
-            goǃ(() => {
-                var selᴛ1 = handshakeCtxʗ1.Done();
-                var selᴛ2 = doneʗ2;
-                switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-                case 0 when selᴛ1.ꟷᐳ(out _): {
-                    _ = Ꮡc.Value.conn.Close();
-                    interruptResʗ2.ᐸꟷ(handshakeCtxʗ1.Err());
-                    break;
-                }
-                case 1 when selᴛ2.ꟷᐳ(out _): {
-                    interruptResʗ2.ᐸꟷ(default!);
-                    break;
-                }}
-            });
         }
-        // Close the connection, discarding the error
+
         c.handshakeMutex.Lock();
         defer(Ꮡc.of(Conn.ᏑhandshakeMutex).Unlock, ref ᒐ);
+
         {
             var err = c.handshakeErr; if (err != default!) {
                 ret = err; goto ᒐdone;
@@ -1722,8 +1802,10 @@ internal static partial error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, conte
         if (Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
             ret = default!; goto ᒐdone;
         }
+
         Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex).Lock();
         defer(Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex).Unlock, ref ᒐ);
+
         c.handshakeErr = c.handshakeFn(handshakeCtx);
         if (c.handshakeErr == default!){
             c.handshakes++;
@@ -1732,12 +1814,14 @@ internal static partial error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, conte
             // alert that might be left in the buffer.
             c.flush();
         }
+
         if (c.handshakeErr == default! && !Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
             c.handshakeErr = errors.New(tlsInternalErrorˢ4);
         }
         if (c.handshakeErr != default! && Ꮡc.of(Conn.ᏑisHandshakeComplete).Load()) {
             throw panic("tls: internal error: handshake returned an error but is marked successful");
         }
+
         if (c.quic != nil) {
             if (c.handshakeErr == default!){
                 c.quicHandshakeComplete();
@@ -1750,9 +1834,9 @@ internal static partial error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, conte
                     }
                 }
             } else {
-                ref var a = ref heap(new alert(), out var Ꮡa);
                 Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Lock();
-                if (!errors.As(c.@out.err, Ꮡa)) {
+                var (a, ok) = errors.AsType<alert>(c.@out.err);
+                if (!ok) {
                     a = alertInternalError;
                 }
                 Ꮡc.of(Conn.Ꮡout).of(halfConn.ᏑMutex).Unlock();
@@ -1760,11 +1844,12 @@ internal static partial error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, conte
                 // any alert error we may have sent, or alertInternalError
                 // if we didn't send an alert.
                 // Truncate the text of the alert to 0 characters.
-                c.handshakeErr = fmt.Errorf("%w%.0w"u8, c.handshakeErr, ((AlertError)(uint8)a));
+                c.handshakeErr = fmt.Errorf("%w%.0w"u8, c.handshakeErr, (AlertError)(uint8)a);
             }
             close((~c.quic).blockedc);
             close((~c.quic).signalc);
         }
+
         ret = c.handshakeErr;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1797,9 +1882,9 @@ internal static ΔConnectionState connectionStateLocked(this ж<Conn> Ꮡc) {
     state.Version = c.vers;
     state.NegotiatedProtocol = c.clientProtocol;
     state.DidResume = c.didResume;
-    state.testingOnlyDidHRR = c.didHRR;
-    // c.curveID is not set on TLS 1.0–1.2 resumptions. Fix that before exposing it.
-    state.testingOnlyCurveID = c.curveID;
+    state.HelloRetryRequest = c.didHRR;
+    state.testingOnlyPeerSignatureAlgorithm = c.peerSigAlg;
+    state.CurveID = c.curveID;
     state.NegotiatedProtocolIsMutual = true;
     state.ServerName = c.serverName;
     state.CipherSuite = c.cipherSuite;
@@ -1842,6 +1927,7 @@ public static slice<byte> OCSPResponse(this ж<Conn> Ꮡc) {
 
         c.handshakeMutex.Lock();
         ᒐd1 = true;
+
         return c.ocspResponse;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -1885,14 +1971,18 @@ internal static readonly @string tlsHandshakeBufferNotˢ = "tls: handshake buffe
 // setReadTrafficSecret sets the read traffic secret for the given encryption level. If
 // being called at the same time as setWriteTrafficSecret, the caller must ensure the call
 // to setWriteTrafficSecret happens first so any alerts are sent at the write level.
-internal static error setReadTrafficSecret(this ж<Conn> Ꮡc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
+internal static error setReadTrafficSecret(this ж<Conn> Ꮡc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret, bool locked) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Ensure that there are no buffered handshake messages before changing the
     // read keys, since that can cause messages to be parsed that were encrypted
     // using old keys which are no longer appropriate.
     if (c.hand.Len() != 0) {
-        Ꮡc.sendAlert(alertUnexpectedMessage);
+        if (locked){
+            Ꮡc.sendAlertLocked(alertUnexpectedMessage);
+        } else {
+            Ꮡc.sendAlert(alertUnexpectedMessage);
+        }
         return errors.New(tlsHandshakeBufferNotˢ);
     }
     c.@in.setTrafficSecret(Ꮡsuite, level, secret);

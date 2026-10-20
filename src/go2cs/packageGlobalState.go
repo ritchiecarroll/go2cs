@@ -240,10 +240,16 @@ var promotedInterfaceImplementations map[string]hashset.HashSet[string]
 // generic type instantiated with a pointer type whose type parameter carries a self-referential
 // generic method-set interface constraint (nistCurve's `Point nistPoint[Point]` at `*P224Point`).
 // The box ж<P224Point> can't nominally implement nistPoint<…>, so a proxy stands in as the type
-// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName}; each
-// becomes a `[assembly: GoImplement<element, iface<element>>(ConstraintProxy = true)]` record that
-// drives ImplementGenerator's EmitConstraintProxy. See constraintProxyArg.
-var constraintProxies map[string][2]string
+// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName,
+// placeholder}; each becomes a `[assembly: GoImplement<element, iface<placeholder>>(ConstraintProxy =
+// true)]` record that drives ImplementGenerator's EmitConstraintProxy. The placeholder is the element,
+// or the proxy itself for an interface that constrains itself (see constraintProxyFor). A record keyed with
+// constraintProxyBindKey binds a FOREIGN interface's generic proxy instead (see foreignConstraintProxy).
+var constraintProxies map[string][3]string
+
+// importedConstraintProxies caches, per imported package path, the CONCRETE constraint proxies that package publishes:
+// proxy class name → the element of each record naming it (see publishedConstraintProxyElements).
+var importedConstraintProxies map[string]map[string][]string
 
 // nominalProductionConstraints collects the (production type argument, test-declared constraint
 // interface) pairs a WHITE-BOX REFERENCE test conversion has emitted a nominal C# `where` clause
@@ -475,6 +481,10 @@ var packageLock = sync.Mutex{}
 // can't see that per-file map. This package-level registry, resolved after the
 // concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
+
+// packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
+// to its lift, for the methods whose receiver copy of the constraint no signature key may name.
+var packageConstraintLiftNames = map[string]string{}
 
 // packageLiftedTypeNames holds every lifted type name (an anonymous struct/interface, or a
 // function-local declaration hoisted out of its body) CLAIMED so far by this package's conversion.

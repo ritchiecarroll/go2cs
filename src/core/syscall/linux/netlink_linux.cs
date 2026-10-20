@@ -85,6 +85,7 @@ public static (slice<byte>, error) NetlinkRIB(nint proto, nint family) {
             return (default!, EINVAL);
         }
         slice<byte> tab = default!;
+
         var rbNew = pageBufPool.Get()._<ж<slice<byte>>>();
         defer(pageBufPool.Put, rbNew.OrTypedNil(), ref ᒐ);
 done:
@@ -180,7 +181,6 @@ public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ж<NetlinkM
     else { /* default: */
         return (default!, EINVAL);
     }
-
     slice<NetlinkRouteAttr> attrs = default!;
     while (len(b) >= SizeofRtAttr) {
         var (a, vbuf, alen, err) = netlinkRouteAttrAndValue(b);

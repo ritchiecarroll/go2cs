@@ -3,9 +3,13 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using atomic = @internal.runtime.atomic_package;
 using Δruntime = runtime_package;
+using Δsync = sync_package;
 using testing = testing_package;
+using time = time_package;
 using @unsafe = unsafe_package;
+using @internal.runtime;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
@@ -334,8 +338,8 @@ public static void TestCleanupPointerEqualsArg(ж<testing.T> Ꮡt) {
                     Ꮡt.Error(wantPanicTestDidNotPanicˢ);
                 } else 
                 if (AreEqual(r, want)){
-                } else {
                     // do nothing
+                } else {
                     Ꮡt.Errorf("wrong panic: want=%q, got=%q"u8, want, r);
                 }
             }
@@ -349,6 +353,139 @@ public static void TestCleanupPointerEqualsArg(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+internal partial struct TestCleanupLost_T /*dyn*/ {
+    internal nint v;
+    internal @unsafe.Pointer p;
+}
+
+// Checks to make sure cleanups aren't lost when there are a lot of them.
+public static partial void TestCleanupLost(ж<testing.T> Ꮡt) {
+    nint cleanups = 10_000;
+    if (testing.Short()) {
+        cleanups = 100;
+    }
+    nint n = Δruntime.GOMAXPROCS(-1);
+    nint want = n * cleanups;
+    ref var got = ref heap(new atomic.Uint64(), out var Ꮡgot);
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    foreach (var i in range(n)) {
+        Ꮡwg.Add(1);
+        goǃ((nint iΔ1) => {
+            GoFrame ᒐ = default;
+            try {
+                defer(Ꮡwg.Done, ref ᒐ);
+
+                foreach (var _ᴛ1 in range(cleanups)) {
+                    var v = @new<TestCleanupLost_T>().of(TestCleanupLost_T.Ꮡv);
+                    v.Value = 97531;
+                    Δruntime.AddCleanup(v, (nint _) => {
+                        Ꮡgot.Add(1);
+                    }, 97531);
+                }
+            }
+            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+            finally { ᒐ.Run(); }
+        }, i);
+    }
+    Ꮡwg.Wait();
+    Δruntime.GC();
+    var timeout = (time.Duration)(10000000000L);
+    var empty = runtime_internal_test_package.BlockUntilEmptyCleanupQueue((int64)timeout);
+    if (!empty) {
+        Ꮡt.Errorf("failed to drain cleanup queue within %s"u8, timeout);
+    }
+
+    {
+        nint gotΔ1 = (nint)Ꮡgot.Load(); if (gotΔ1 != want) {
+            Ꮡt.Errorf("%d cleanups executed, expected %d"u8, gotΔ1, want);
+        }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object addCleanupFailedToDetectˢ = (@string)"AddCleanup failed to detect self-pointer"u8;
+internal static readonly object cleanupRanUnexpectedlyˢ = (@string)"cleanup ran unexpectedly"u8;
+
+internal partial struct TestCleanupUnreachablePointer_T /*dyn*/ {
+    internal ж<byte> p; // use *byte to avoid tiny allocator
+    internal nint f;
+}
+
+public static void TestCleanupUnreachablePointer(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            if (recover() == default!) {
+                Ꮡt.Error(addCleanupFailedToDetectˢ);
+            }
+        }, ref ᒐ);
+        var v = Ꮡ(new TestCleanupUnreachablePointer_T(nil));
+        Δruntime.AddCleanup(v, (ж<nint> _) => {
+            Ꮡt.Error(cleanupRanUnexpectedlyˢ);
+        }, v.of(TestCleanupUnreachablePointer_T.Ꮡf));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object addCleanupFailedToDetectˢ2 = (@string)"AddCleanup failed to detect closure pointer"u8;
+
+internal partial struct TestCleanupUnreachableClosure_T /*dyn*/ {
+    internal ж<byte> p; // use *byte to avoid tiny allocator
+    internal nint f;
+}
+
+public static void TestCleanupUnreachableClosure(ж<testing.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        defer(() => {
+            if (recover() == default!) {
+                Ꮡt.Error(addCleanupFailedToDetectˢ2);
+            }
+        }, ref ᒐ);
+        var v = Ꮡ(new TestCleanupUnreachableClosure_T(nil));
+        var vʗ1 = v;
+        Δruntime.AddCleanup(v, (nint _) => {
+            Ꮡt.Log((~vʗ1).f);
+            Ꮡt.Error(cleanupRanUnexpectedlyˢ);
+        }, 0);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+internal partial struct BenchmarkAddCleanupAndStop_T /*dyn*/ {
+    internal nint v;
+    internal @unsafe.Pointer p;
+}
+
+// BenchmarkAddCleanupAndStop benchmarks adding and removing a cleanup
+// from the same allocation.
+//
+// At face value, this benchmark is unrealistic, since no program would
+// do this in practice. However, adding cleanups to new allocations in a
+// loop is also unrealistic. It adds additional unused allocations,
+// exercises uncommon performance pitfalls in AddCleanup (traversing the
+// specials list, which should just be its own benchmark), and executing
+// cleanups at a frequency that is unlikely to appear in real programs.
+//
+// This benchmark is still useful however, since we can get a low-noise
+// measurement of the cost of AddCleanup and Stop all in one without the
+// above pitfalls: we can measure the pure overhead. We can then separate
+// out the cost of each in CPU profiles if we so choose (they're not so
+// inexpensive as to make this infeasible).
+public static void BenchmarkAddCleanupAndStop(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    b.ReportAllocs();
+    var x = @new<BenchmarkAddCleanupAndStop_T>();
+    while (Ꮡb.Loop()) {
+        Δruntime.AddCleanup(x, (nint _) => {
+        }, 14).Stop();
+    }
 }
 
 } // end runtime_test_package

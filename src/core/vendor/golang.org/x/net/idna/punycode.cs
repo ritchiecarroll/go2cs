@@ -17,17 +17,11 @@ partial class idna_package {
 // All computation is done with int32s, so that overflow behavior is identical
 // regardless of whether int is 32-bit or 64-bit.
 internal const int32 @base = 36;
-
 internal const int32 damp = 700;
-
 internal const int32 initialBias = 72;
-
 internal const int32 initialN = 128;
-
 internal const int32 skew = 38;
-
 internal const int32 tmax = 26;
-
 internal const int32 tmin = 1;
 
 internal static error punyError(@string s) {
@@ -36,6 +30,8 @@ internal static error punyError(@string s) {
 
 // decode decodes a string as specified in section 6.2.
 internal static (@string, error) decode(@string encoded) {
+    var outputᴷ = new stackAppend<rune>();
+
     if (encoded == ""u8) {
         return ("", default!);
     }
@@ -49,7 +45,7 @@ internal static (@string, error) decode(@string encoded) {
     var output = new slice<rune>(0, len(encoded));
     if (pos != 0) {
         foreach (var (_, r) in encoded.slice(0, pos - 1)) {
-            output = append(output, r);
+            output = append(outputᴷ, output, r);
         }
     }
     var (i, n, bias) = ((int32)0, initialN, initialBias);
@@ -94,12 +90,12 @@ internal static (@string, error) decode(@string encoded) {
         if (n < 0 || n > utf8.MaxRune) {
             return ("", punyError(encoded));
         }
-        output = append(output, (rune)(0));
+        output = append(output, (rune)0);
         copy(output.slice(i + 1), output.slice(i));
         output[i] = n;
         i++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 // encode encodes a string as specified in section 6.3 and prepends prefix to
@@ -108,6 +104,8 @@ internal static (@string, error) decode(@string encoded) {
 // The "while h < length(input)" line in the specification becomes "for
 // remaining != 0" in the Go code, because len(s) in Go is in bytes, not runes.
 internal static (@string, error) encode(@string prefix, @string s) {
+    var outputᴷ = new stackAppend<byte>();
+
     var output = new slice<byte>(len(prefix), len(prefix) + 1 + 2 * len(s));
     copy(output, prefix);
     var (delta, n, bias) = ((int32)0, initialN, initialBias);
@@ -115,7 +113,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
     foreach (var (_, r) in s) {
         if (r < 0x80){
             b++;
-            output = append(output, (byte)r);
+            output = append(outputᴷ, output, (byte)r);
         } else {
             remaining++;
         }
@@ -172,7 +170,7 @@ internal static (@string, error) encode(@string prefix, @string s) {
         delta++;
         n++;
     }
-    return (((@string)output), default!);
+    return ((@string)output, default!);
 }
 
 // madd computes a + (b * c), detecting overflow.
@@ -195,7 +193,6 @@ internal static (int32 digit, bool ok) decodeDigit(byte x) {
     case {} when (rune)'a' <= x && x <= (rune)'z': {
         return ((int32)((byte)(x - (rune)'a')), true);
     }}
-
     return (0, false);
 }
 
@@ -207,7 +204,6 @@ internal static byte encodeDigit(int32 digit) {
     case {} when 26 <= digit && digit < 36: {
         return (byte)(digit + ((rune)'0' - 26));
     }}
-
     throw panic("idna: internal error in punycode encoding");
 }
 

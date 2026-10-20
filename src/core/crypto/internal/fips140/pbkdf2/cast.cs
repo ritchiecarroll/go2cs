@@ -10,6 +10,7 @@ using sha256 = go.crypto.@internal.fips140.sha256_package;
 using errors = errors_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
+using hash = hash_package;
 
 partial class pbkdf2_package {
 
@@ -30,13 +31,15 @@ partial class pbkdf2_package {
             0xC7, 0x58, 0x76, 0xC0, 0x71, 0x1C, 0x29, 0x75,
             0x2D, 0x3A, 0xA6, 0xDF, 0x29, 0x96
         }.slice();
-        var (mk, err) = Key<fips140.Hash>(widen<ж<sha256.Digest>, fips140.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), "password"u8, salt, 2, 14);
+
+        var (mk, err) = Key<hash.Hash>(widen<ж<sha256.Digest>, hash.Hash>(sha256.New, elemᴛ0 => new sha256_DigestжHash(elemᴛ0)), "password"u8, salt, 2, 14);
         if (err != default!) {
             return err;
         }
         if (!bytes.Equal(mk, want)) {
             return errors.New("unexpected result"u8);
         }
+
         return default!;
     });
 }

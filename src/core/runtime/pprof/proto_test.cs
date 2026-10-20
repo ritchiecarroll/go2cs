@@ -50,12 +50,13 @@ internal static (ж<profile.Profile>, error) translateCPUProfile(slice<uint64> d
 // data structures like profile.Profile.
 internal static @string fmtJSON(any x) {
     var (js, _) = json.MarshalIndent(x, ""u8, "\t"u8);
-    return ((@string)js);
+    return (@string)js;
 }
 
 public static void TestConvertCPUProfileNoSamples(ж<testing.T> Ꮡt) {
     // A test server with mock cpu profile data.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     var b = new uint64[]{3, 0, 500}.slice(); // empty profile at 500 Hz (2ms sample period)
     var (p, err) = translateCPUProfile(b, 1);
     if (err != default!) {
@@ -66,16 +67,19 @@ public static void TestConvertCPUProfileNoSamples(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("writing profile: %v"u8, errΔ1);
         }
     }
+
     (p, err) = profile.Parse(new pprof_internal_test_package.bytes_BufferжReader(Ꮡbuf));
     if (err != default!) {
         Ꮡt.Fatalf("profile.Parse: %v"u8, err);
     }
+
     // Expected PeriodType and SampleType.
     var periodType = Ꮡ(new profile.ValueType(Type: "cpu"u8, Unit: "nanoseconds"u8));
     var sampleType = new ж<profile.ValueType>[]{
         Ꮡ(new profile.ValueType(Type: "samples"u8, Unit: "count"u8)),
         Ꮡ(new profile.ValueType(Type: "cpu"u8, Unit: "nanoseconds"u8))
     }.slice();
+
     checkProfile(Ꮡt, p, 2000 * 1000, periodType, sampleType, default!, ""u8);
 }
 
@@ -102,9 +106,9 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
 
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "linux"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "netbsd"u8) {
+        // Figure out two addresses from /proc/self/maps.
         var (mmap, err) = os.ReadFile(procSelfMapsˢ);
         if (err != default!) {
-            // Figure out two addresses from /proc/self/maps.
             Ꮡt.Fatal(err);
         }
         ref var mappings = ref heap<slice<ж<profile.Mapping>>>(out var Ꮡmappings);
@@ -134,6 +138,7 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
     else if (exprᴛ1 == "windows"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8) {
         addr1 = (uint64)abi.FuncPCABIInternal(f1);
         addr2 = (uint64)abi.FuncPCABIInternal(f2);
+
         ref var start = ref heap<uint64>(out var Ꮡstart);
         ref var end = ref heap<uint64>(out var Ꮡend);
         ref var exe = ref heap<@string>(out var Ꮡexe);
@@ -142,6 +147,7 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         map1 = Ꮡ(new profile.Mapping(
             ID: 1,
             Start: start,
@@ -166,27 +172,23 @@ internal static (uint64 addr1, uint64 addr2, ж<profile.Mapping> map1, ж<profil
     else { /* default: */
         addr1 = (uint64)abi.FuncPCABIInternal(f1);
         addr2 = (uint64)abi.FuncPCABIInternal(f2);
-        var fake = Ꮡ(new profile.Mapping( // Fake mapping - HasFunctions will be true because two PCs from Go
- // will be fully symbolized.
-ID: 1, HasFunctions: true));
+        // Fake mapping - HasFunctions will be true because two PCs from Go
+        // will be fully symbolized.
+        var fake = Ꮡ(new profile.Mapping(ID: 1, HasFunctions: true));
         (map1, map2) = (fake, fake);
     }
-
     return (addr1, addr2, map1, map2);
 }
 
 public static void TestConvertCPUProfile(ж<testing.T> Ꮡt) {
     var (addr1, addr2, map1, map2) = testPCs(Ꮡt);
+
     var b = new uint64[]{
         3, 0, 500, // hz = 500
-
         5, 0, 10, (uint64)(addr1 + 1), (uint64)(addr1 + 2), // 10 samples in addr1
-
         5, 0, 40, (uint64)(addr2 + 1), (uint64)(addr2 + 2), // 40 samples in addr2
-
-        5, 0, 10, (uint64)(addr1 + 1), (uint64)(addr1 + 2)
+        5, 0, 10, (uint64)(addr1 + 1), (uint64)(addr1 + 2) // 10 samples in addr1
     }.slice();
-    // 10 samples in addr1
     var (p, err) = translateCPUProfile(b, 4);
     if (err != default!) {
         Ꮡt.Fatalf("translating profile: %v"u8, err);
@@ -214,6 +216,7 @@ internal static void checkProfile(ж<testing.T> Ꮡt, ж<profile.Profile> Ꮡp, 
     ref var p = ref Ꮡp.DerefOrNull();
 
     Ꮡt.Helper();
+
     if (p.Period != period) {
         Ꮡt.Errorf("p.Period = %d, want %d"u8, p.Period, period);
     }
@@ -233,8 +236,7 @@ internal static void checkProfile(ж<testing.T> Ꮡt, ж<profile.Profile> Ꮡp, 
             l.Value.Line = default!;
         }
     }
-    if (fmtJSON(p.Sample) != fmtJSON(samples)) {
-        // ignore unexported fields
+    if (fmtJSON(p.Sample) != fmtJSON(samples)) { // ignore unexported fields
         if (len(p.Sample) == len(samples)) {
             foreach (var (i, _) in p.Sample) {
                 if (!reflect.DeepEqual(p.Sample[i].OrTypedNil(), samples[i].OrTypedNil())) {
@@ -285,7 +287,7 @@ c000000000-c000036000 rw-p 00000000 00:00 0
 ->
 07000000 07093000 06c00000 /path/to/gobench_server_main
 
-"""u8;
+"""u8.Raw();
 
 internal static @string profSelfMapsTestsWithDeleted = """
 
@@ -341,7 +343,7 @@ ffffffffff600000-ffffffffff601000 r-xp 00000090 00:00 0                  [vsysca
 7ffc34343000 7ffc34345000 00000000 [vdso]
 ffffffffff600000 ffffffffff601000 00000090 [vsyscall]
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object malformedTestCaseˢ = (@string)"malformed test case"u8;
@@ -367,10 +369,12 @@ public static void TestProcSelfMaps(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var fʗ1 = f;
     Ꮡt.Run(normalˢ, (ж<testing.T> tΔ2) => {
         fʗ1(tΔ2, profSelfMapsTests);
     });
+
     var fʗ2 = f;
     Ꮡt.Run(withDeletedFileˢ, (ж<testing.T> tΔ3) => {
         fʗ2(tΔ3, profSelfMapsTestsWithDeleted);
@@ -392,7 +396,9 @@ internal static readonly object noLocationWithMissingˢ = (@string)"no location 
 public static void TestMapping(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoRun(new pprof_internal_test_package.testing_TжTB(Ꮡt));
     testenv.MustHaveCGO(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+
     @string prog = testdataMappingtestMainˢ;
+
     // GoOnly includes only Go symbols that runtime will symbolize.
     // Go+C includes C symbols that runtime will not symbolize.
     foreach (var (_, traceback) in new @string[]{"GoOnly"u8, "Go+C"u8}.slice()) {
@@ -402,15 +408,18 @@ public static void TestMapping(ж<testing.T> Ꮡt) {
                 cmd.Value.Env = append(os.Environ(), "SETCGOTRACEBACK=1"u8);
             }
             cmd.Value.Stderr = new pprof_internal_test_package.bytes_BufferжWriter(@new<bytes.Buffer>());
+
             var (@out, err) = cmd.Output();
             if (err != default!) {
                 tΔ1.Fatalf("failed to run the test program %q: %v\n%v"u8, prog, err, (~cmd).Stderr);
             }
+
             (var prof, err) = profile.Parse(new pprof_internal_test_package.bytes_ReaderжReader(bytes.NewReader(@out)));
             if (err != default!) {
                 tΔ1.Fatalf("failed to parse the generated profile data: %v"u8, err);
             }
             tΔ1.Logf("Profile: %s"u8, prof.OrTypedNil());
+
             var hit = new map<ж<profile.Mapping>, bool>();
             var miss = new map<ж<profile.Mapping>, bool>();
             foreach (var (_, loc) in (~prof).Location) {
@@ -423,6 +432,7 @@ public static void TestMapping(ж<testing.T> Ꮡt) {
             if (len(miss) == 0) {
                 tΔ1.Log(noLocationWithMissingˢ);
             }
+
             foreach (var (_, m) in (~prof).Mapping) {
                 if (miss[m] && (~m).HasFunctions) {
                     tΔ1.Errorf("mapping %+v has HasFunctions=true, but contains locations with failed symbolization"u8, m.OrTypedNil());
@@ -433,6 +443,7 @@ public static void TestMapping(ж<testing.T> Ꮡt) {
                     continue;
                 }
             }
+
             if (traceback == "Go+C"u8) {
                 // The test code was arranged to have PCs from C and
                 // they are not symbolized.
@@ -482,6 +493,7 @@ public static void TestFakeMapping(ж<testing.T> Ꮡt) {
     if (len((~prof).Mapping) == 0) {
         Ꮡt.Fatal(wantProfileWithAtLeastˢ);
     }
+
     var hit = new map<ж<profile.Mapping>, bool>();
     var miss = new map<ж<profile.Mapping>, bool>();
     foreach (var (_, loc) in (~prof).Location) {
@@ -508,10 +520,8 @@ public static void TestFakeMapping(ж<testing.T> Ꮡt) {
 public static void TestEmptyStack(ж<testing.T> Ꮡt) {
     var b = new uint64[]{
         3, 0, 500, // hz = 500
-
-        3, 0, 10
+        3, 0, 10 // 10 samples with an empty stack trace
     }.slice();
-    // 10 samples with an empty stack trace
     var (_, err) = translateCPUProfile(b, 2);
     if (err != default!) {
         Ꮡt.Fatalf("translating profile: %v"u8, err);

@@ -55,6 +55,7 @@ public static void TestFallback(ж<testing.T> Ꮡt) {
                 systemRoots = ᏑoriginalSystemRoots;
             }, ref ᒐ);
         }
+
         var tests = new TestFallback_tests[]{
             new(
                 name: "nil systemRoots"u8,
@@ -97,6 +98,7 @@ public static void TestFallback(ж<testing.T> Ꮡt) {
                 returnsFallback: true
             )
         }.slice();
+
         foreach (var (_, vᴛ1) in tests) {
             ref var tc = ref heap(new TestFallback_tests(), out var Ꮡtc);
             tc = vᴛ1;
@@ -116,9 +118,12 @@ public static void TestFallback(ж<testing.T> Ꮡt) {
                 } else {
                     tΔ1.Setenv(godebugˢ, x509usefallbackroots0ˢ);
                 }
+
                 var fallbackPool = NewCertPool();
                 SetFallbackRoots(fallbackPool);
+
                 var systemPoolIsFallback = systemRoots == fallbackPool;
+
                 if (tcʗ1.returnsFallback && !systemPoolIsFallback){
                     tΔ1.Error(systemRootsWasNotSetToˢ);
                 } else 

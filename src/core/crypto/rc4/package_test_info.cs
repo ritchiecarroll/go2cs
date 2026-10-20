@@ -7,7 +7,6 @@
 global using static global::go.crypto.rc4_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -21,8 +20,13 @@ using static global::go.crypto.rc4_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.rc4_package.Cipher, ж<global::go.crypto.rc4_package.Cipher>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -32,7 +36,7 @@ using static global::go.crypto.rc4_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rc4/rc4_test.go", "rc4_test.cs", "ABcmADd4ooKCgoLKgoKCgpaCgpaCgoKWgoKCgpSCgtyCgoKCgoKWgoKCgoSCuIKCgriigoKClISCuIKmgqaC", "142-145:1")]
+[assembly: go.GoPositionMap("crypto/rc4/rc4_test.go", "rc4_test.cs", "ABQmADt4ooKCgoLKgoKCgqaCgqaCgoKmgoKCgpSCgtyCgoKCgoKmgoKCgpSCuIKCgriigoKClJSCuIKmgqaC", "142-145:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

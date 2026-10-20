@@ -66,7 +66,6 @@ public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
         }
         break;
     }}
-
     return Ꮡr;
 }
 

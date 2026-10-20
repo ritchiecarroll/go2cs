@@ -7,9 +7,9 @@ using bytes = bytes_package;
 using json = encoding.json_package;
 using testenv = go.@internal.testenv_package;
 using os = os_package;
+using exec = go.os.exec_package;
 using testing = testing_package;
 using encoding;
-using exec = go.os.exec_package;
 using fs = go.io.fs_package;
 using go.@internal;
 using go.os;
@@ -32,19 +32,23 @@ internal partial struct FetchModule_j /*dyn*/ {
 // containing its source tree. It skips the test if fetching modules is not
 // possible in this environment.
 public static @string FetchModule(ж<testing.T> Ꮡt, @string module, @string version) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExternalNetwork(new testing_TжTB(Ꮡt));
-    @string goTool = testenv.GoToolPath(new testing_TжTB(Ꮡt));
+
     // If the default GOMODCACHE doesn't exist, use a temporary directory
     // instead. (For example, run.bash sets GOPATH=/nonexist-gopath.)
-    var (@out, err) = testenv.Command(new testing_TжTB(Ꮡt), goTool, envˢ, gomodcacheˢ).Output();
+    var (@out, err) = testenv.CleanCmdEnv(testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), envˢ, gomodcacheˢ)).Output();
     if (err != default!) {
-        Ꮡt.Fatalf("%s env GOMODCACHE: %v\n%s"u8, goTool, err, @out);
+        Ꮡt.Errorf("%s env GOMODCACHE: %v\n%s"u8, testenv.GoToolPath(new testing_TжTB(Ꮡt)), err, @out);
+        {
+            var (ee, ok) = err._<ж<exec.ExitError>>(ᐧ); if (ok) {
+                Ꮡt.Logf("%s"u8, (~ee).Stderr);
+            }
+        }
+        Ꮡt.FailNow();
     }
     var modcacheOk = false;
     {
-        @string gomodcache = ((@string)bytes.TrimSpace(@out)); if (gomodcache != ""u8) {
+        @string gomodcache = (@string)bytes.TrimSpace(@out); if (gomodcache != ""u8) {
             {
                 var (_, errΔ1) = os.Stat(gomodcache); if (errΔ1 == default!) {
                     modcacheOk = true;
@@ -57,8 +61,10 @@ public static @string FetchModule(ж<testing.T> Ꮡt, @string module, @string ve
         // Allow t.TempDir() to clean up subdirectories.
         Ꮡt.Setenv(goflagsˢ, os.Getenv(goflagsˢ) + " -modcacherw"u8);
     }
+
     Ꮡt.Logf("fetching %s@%s\n"u8, module, version);
-    (var output, err) = testenv.Command(new testing_TжTB(Ꮡt), goTool, modˢ, downloadˢ, jsonˢ, module + "@" + version).CombinedOutput();
+
+    (var output, err) = testenv.Command(new testing_TжTB(Ꮡt), testenv.GoToolPath(new testing_TжTB(Ꮡt)), modˢ, downloadˢ, jsonˢ, module + "@" + version).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("failed to download %s@%s: %s\n%s\n"u8, module, version, err, output);
     }
@@ -68,6 +74,7 @@ public static @string FetchModule(ж<testing.T> Ꮡt, @string module, @string ve
             Ꮡt.Fatalf("failed to parse 'go mod download': %s\n%s\n"u8, errΔ2, output);
         }
     }
+
     return j.Dir;
 }
 

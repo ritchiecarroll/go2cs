@@ -118,15 +118,13 @@ internal partial struct TestDecodeNilToken_type /*dyn*/ {
 }
 
 public static void TestDecodeNilToken(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, strict) in new bool[]{true, false}.slice()) {
         @string name = fmt.Sprintf("Strict=%v"u8, strict);
         Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
             var start = new StartElement(Name: new Name(Local: "test"u8));
             var bad = new StartElement(Name: new Name(Local: "bad"u8));
-            var d = NewTokenDecoder(new xml_internal_test_package.toksNilжTokenReader(Ꮡ(new toksNil( // Malformed
-
+            var d = NewTokenDecoder(new xml_internal_test_package.toksNilжTokenReader(Ꮡ(new toksNil(
+                // Malformed
                 t: new ΔToken[]{start, bad, start.End()}.slice()
             ))));
             d.Value.Strict = strict;
@@ -145,103 +143,100 @@ internal static readonly @string testInput = "\n<?xml version=\"1.0\" encoding=\
 internal static map<@string, @string> testEntity = new map<@string, @string>{["何"u8] = "What"u8, ["is-it"u8] = "is it?"u8};
 
 internal static slice<ΔToken> rawTokens = new ΔToken[]{
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new ProcInst("xml"u8, slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"""
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)"""
 DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-"""u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+"""u8.Raw()),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "body"u8), new global::go.encoding.xml_package.Attr[]{new(new Name("xmlns"u8, "foo"u8), "ns1"u8), new(new Name(""u8, "xmlns"u8), "ns2"u8), new(new Name("xmlns"u8, "tag"u8), "ns3"u8)}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name(""u8, "hello"u8), new global::go.encoding.xml_package.Attr[]{new(new Name(""u8, "lang"u8), "en"u8)}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"World <>'\" 白鵬翔"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"World <>'\" 白鵬翔"u8),
     new EndElement(new Name(""u8, "hello"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name(""u8, "query"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"What is it?"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"What is it?"u8),
     new EndElement(new Name(""u8, "query"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name(""u8, "goodbye"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
     new EndElement(new Name(""u8, "goodbye"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name(""u8, "outer"u8), new global::go.encoding.xml_package.Attr[]{new(new Name("foo"u8, "attr"u8), "value"u8), new(new Name("xmlns"u8, "tag"u8), "ns4"u8)}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8),
     new StartElement(new Name(""u8, "inner"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
     new EndElement(new Name(""u8, "inner"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new EndElement(new Name(""u8, "outer"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name("tag"u8, "name"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"Some text here."u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"Some text here."u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new EndElement(new Name("tag"u8, "name"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new EndElement(new Name(""u8, "body"u8)),
-    ((global::go.encoding.xml_package.Comment)slice<byte>((@string)" missing final newline "u8))
+    (global::go.encoding.xml_package.Comment)slice<byte>((@string)" missing final newline "u8)
 }.slice();
 
 internal static slice<ΔToken> cookedTokens = new ΔToken[]{
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new ProcInst("xml"u8, slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)"""
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)"""
 DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
-"""u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+"""u8.Raw()),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name("ns2"u8, "body"u8), new global::go.encoding.xml_package.Attr[]{new(new Name("xmlns"u8, "foo"u8), "ns1"u8), new(new Name(""u8, "xmlns"u8), "ns2"u8), new(new Name("xmlns"u8, "tag"u8), "ns3"u8)}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name("ns2"u8, "hello"u8), new global::go.encoding.xml_package.Attr[]{new(new Name(""u8, "lang"u8), "en"u8)}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"World <>'\" 白鵬翔"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"World <>'\" 白鵬翔"u8),
     new EndElement(new Name("ns2"u8, "hello"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name("ns2"u8, "query"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"What is it?"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"What is it?"u8),
     new EndElement(new Name("ns2"u8, "query"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name("ns2"u8, "goodbye"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
     new EndElement(new Name("ns2"u8, "goodbye"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name("ns2"u8, "outer"u8), new global::go.encoding.xml_package.Attr[]{new(new Name("ns1"u8, "attr"u8), "value"u8), new(new Name("xmlns"u8, "tag"u8), "ns4"u8)}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8),
     new StartElement(new Name("ns2"u8, "inner"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
     new EndElement(new Name("ns2"u8, "inner"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new EndElement(new Name("ns2"u8, "outer"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new StartElement(new Name("ns3"u8, "name"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"Some text here."u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n    "u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"Some text here."u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n  "u8),
     new EndElement(new Name("ns3"u8, "name"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new EndElement(new Name("ns2"u8, "body"u8)),
-    ((global::go.encoding.xml_package.Comment)slice<byte>((@string)" missing final newline "u8))
+    (global::go.encoding.xml_package.Comment)slice<byte>((@string)" missing final newline "u8)
 }.slice();
 
 internal static readonly @string testInputAltEncoding = """
 
 <?xml version="1.0" encoding="x-testing-uppercase"?>
 <TAG>VALUE</TAG>
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> rawTokensAltEncoding = new ΔToken[]{
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new ProcInst("xml"u8, slice<byte>(@"version=""1.0"" encoding=""x-testing-uppercase"""u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"value"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"value"u8),
     new EndElement(new Name(""u8, "tag"u8))
 }.slice();
 
-// unexpected EOF cases
-// other Syntax errors
-//	"<!0 >",	// let the Token() caller handle
-//	"<![CDATA[d]]>",	// let the Token() caller handle
 internal static slice<@string> xmlInput = new @string[]{
+    // unexpected EOF cases
     "<"u8,
     "<t"u8,
     "<t "u8,
@@ -265,10 +260,13 @@ internal static slice<@string> xmlInput = new @string[]{
     "<t/><![CDATA[d"u8,
     "<t/><![CDATA[d]"u8,
     "<t/><![CDATA[d]]"u8,
+
+    // other Syntax errors
     "<>"u8,
     "<t/a"u8,
     "<0 />"u8,
     "<?0 >"u8,
+    //	"<!0 >",	// let the Token() caller handle
     "</0>"u8,
     "<t 0=''>"u8,
     "<t a='&'>"u8,
@@ -277,6 +275,7 @@ internal static slice<@string> xmlInput = new @string[]{
     "<t a>"u8,
     "<t a=>"u8,
     "<t a=v>"u8,
+    //	"<![CDATA[d]]>",	// let the Token() caller handle
     "<t></e>"u8,
     "<t></>"u8,
     "<t></t!"u8,
@@ -300,42 +299,42 @@ internal static readonly @string nonStrictInput = """
 <tag>&;</tag>
 <tag>&0a;</tag>
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> nonStrictTokens = new ΔToken[]{
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"non&entity"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"non&entity"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&unknown;entity"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&unknown;entity"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&#123"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&#123"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&#zzz;"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&#zzz;"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&なまえ3;"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&なまえ3;"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&lt-gt;"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&lt-gt;"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&;"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&;"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
     new StartElement(new Name(""u8, "tag"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"&0a;"u8)),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"&0a;"u8),
     new EndElement(new Name(""u8, "tag"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8))
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)
 }.slice();
 
 public static void TestNonStrictRawToken(ж<testing.T> Ꮡt) {
@@ -432,6 +431,7 @@ internal static void testRawToken(ж<testing.T> Ꮡt, ж<global::go.encoding.xml
             }
             Ꮡt.Errorf("token %d = %s, want %s"u8, i, shave, swant);
         }
+
         // Check that InputOffset returned actual token.
         switch (ᐧ) {
         case {} when start < lastEnd: {
@@ -439,8 +439,8 @@ internal static void testRawToken(ж<testing.T> Ꮡt, ж<global::go.encoding.xml
             break;
         }
         case {} when start >= end: {
+            // Special case: EndElement can be synthesized.
             if (start == end && end == lastEnd) {
-                // Special case: EndElement can be synthesized.
                 break;
             }
             Ꮡt.Errorf("token %d: position [%d,%d) for %T is empty"u8, i, start, end, have);
@@ -457,7 +457,6 @@ internal static void testRawToken(ж<testing.T> Ꮡt, ж<global::go.encoding.xml
             }
             break;
         }}
-
         lastEnd = end;
     }
 }
@@ -475,28 +474,29 @@ internal static @string nestedDirectivesInput = """
 <!DOCTYPE [<!ENTITY xlt '">'>]>
 <!DOCTYPE [<!ENTITY xlt "'<">]>
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> nestedDirectivesTokens = new ΔToken[]{
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY rdf ""http://www.w3.org/1999/02/22-rdf-syntax-ns#"">]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt "">"">]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt ""<"">]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt '>'>]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt '<'>]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt '"">'>]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt ""'<"">]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8))
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY rdf ""http://www.w3.org/1999/02/22-rdf-syntax-ns#"">]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt "">"">]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt ""<"">]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt '>'>]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt '<'>]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt '"">'>]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY xlt ""'<"">]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)
 }.slice();
 
 public static void TestNestedDirectives(ж<testing.T> Ꮡt) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(nestedDirectivesInput)));
+
     foreach (var (i, want) in nestedDirectivesTokens) {
         var (have, err) = d.Token();
         if (err != default!) {
@@ -511,6 +511,7 @@ public static void TestNestedDirectives(ж<testing.T> Ꮡt) {
 public static void TestToken(ж<testing.T> Ꮡt) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(testInput)));
     d.Value.Entity = testEntity;
+
     foreach (var (i, want) in cookedTokens) {
         var (have, err) = d.Token();
         if (err != default!) {
@@ -549,7 +550,7 @@ att
 
 --></elt>
 </root>
-"""u8;
+"""u8.Raw();
 
 public static void TestInputLinePos(ж<testing.T> Ꮡt) {
     @string testInput = rootPiEltAttValCdataEltˢ;
@@ -574,6 +575,7 @@ public static void TestInputLinePos(ж<testing.T> Ꮡt) {
                 continue;
             }
         }
+
         var (gotLine, gotCol) = dec.InputPos();
         if (gotLine != want[0] || gotCol != want[1]) {
             Ꮡt.Errorf("dec.InputPos() = %d,%d, want %d,%d"u8, gotLine, gotCol, want[0], want[1]);
@@ -652,11 +654,12 @@ internal static readonly @string testScalarsInput = """
 	<String>15</String>
 	<PtrString>16</PtrString>
 </allscalars>
-"""u8;
+"""u8.Raw();
 
 public static void TestAllScalars(ж<testing.T> Ꮡt) {
     ref var a = ref heap(new allScalars(), out var Ꮡa);
     var err = Unmarshal(slice<byte>(testScalarsInput), Ꮡa);
+
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -714,6 +717,7 @@ public static void TestIssue569(ж<testing.T> Ꮡt) {
     @string data = itemFieldAAbcdFieldAItemˢ;
     ref var i = ref heap(new item(), out var Ꮡi);
     var err = Unmarshal(slice<byte>(data), Ꮡi);
+
     if (err != default! || i.FieldA != "abcd"u8) {
         Ꮡt.Fatal(expectingAbcdˢ);
     }
@@ -888,7 +892,6 @@ public static void TestEntityInsideCDATA(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct characterTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string err;
@@ -909,6 +912,7 @@ public static void TestDisallowedCharacters(ж<testing.T> Ꮡt) {
     foreach (var (i, tt) in characterTests) {
         var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(tt.@in)));
         error err = default!;
+
         while (err == default!) {
             (_, err) = d.Token();
         }
@@ -926,9 +930,7 @@ public static void TestIsInCharacterRange(ж<testing.T> Ꮡt) {
     var invalid = new rune[]{
         utf8.MaxRune + 1,
         0xD800, // surrogate min
-
         0xDFFF, // surrogate max
-
         -1
     }.slice();
     foreach (var (_, r) in invalid) {
@@ -937,8 +939,6 @@ public static void TestIsInCharacterRange(ж<testing.T> Ꮡt) {
         }
     }
 }
-
-// TODO: what's the right approach to handle these nested cases?
 
 partial struct procInstTestsᴛ1 /*dyn*/ {
     internal @string input;
@@ -954,6 +954,7 @@ internal static slice<procInstTestsᴛ1> procInstTests = new procInstTestsᴛ1[]
     new(@"version= encoding="u8, new @string[]{""u8, ""u8}.array()),
     new(@"encoding=""version=1.0"""u8, new @string[]{""u8, "version=1.0"u8}.array()),
     new(@""u8, new @string[]{""u8, ""u8}.array()),
+    // TODO: what's the right approach to handle these nested cases?
     new(@"encoding=""version='1.0'"""u8, new @string[]{"1.0"u8, "version='1.0'"u8}.array()),
     new(@"version=""encoding='utf-8'"""u8, new @string[]{"encoding='utf-8'"u8, "utf-8"u8}.array())
 }.slice();
@@ -983,20 +984,21 @@ internal static @string directivesWithCommentsInput = """
 <!DOCTYPE [<!ENTITY go "Golang"><!-- a comment-->]>
 <!DOCTYPE <!-> <!> <!----> <!-->--> <!--->--> [<!ENTITY go "Golang"><!-- a comment-->]>
 
-"""u8;
+"""u8.Raw();
 
 internal static slice<ΔToken> directivesWithCommentsTokens = new ΔToken[]{
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [ <!ENTITY rdf ""http://www.w3.org/1999/02/22-rdf-syntax-ns#"">]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY go ""Golang""> ]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-    ((global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE <!-> <!>       [<!ENTITY go ""Golang""> ]"u8)),
-    ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8))
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [ <!ENTITY rdf ""http://www.w3.org/1999/02/22-rdf-syntax-ns#"">]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE [<!ENTITY go ""Golang""> ]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+    (global::go.encoding.xml_package.Directive)slice<byte>((@string)@"DOCTYPE <!-> <!>       [<!ENTITY go ""Golang""> ]"u8),
+    (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)
 }.slice();
 
 public static void TestDirectivesWithComments(ж<testing.T> Ꮡt) {
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(directivesWithCommentsInput)));
+
     foreach (var (i, want) in directivesWithCommentsTokens) {
         var (have, err) = d.Token();
         if (err != default!) {
@@ -1019,6 +1021,7 @@ internal static (nint n, error err) Write(this errWriter _, slice<byte> p) {
 public static void TestEscapeTextIOErrors(ж<testing.T> Ꮡt) {
     @string expectErr = unwritableˢ;
     var err = EscapeText(new errWriter(nil), new byte[]{(rune)'A'}.slice());
+
     if (err == default! || err.Error() != expectErr) {
         Ꮡt.Errorf("have %v, want %v"u8, err, expectErr);
     }
@@ -1030,6 +1033,7 @@ internal static readonly @string aTerminatedStringˢ = "A \uFFFD terminated stri
 public static void TestEscapeTextInvalidChar(ж<testing.T> Ꮡt) {
     var input = slice<byte>("A \x00 terminated string."u8);
     @string expected = aTerminatedStringˢ;
+
     var buff = @new<strings.Builder>();
     {
         var err = EscapeText(new xml_test_package.strings_BuilderжWriter(buff), input); if (err != default!) {
@@ -1037,6 +1041,7 @@ public static void TestEscapeTextInvalidChar(ж<testing.T> Ꮡt) {
         }
     }
     @string text = buff.String();
+
     if (text != expected) {
         Ꮡt.Errorf("have %v, want %v"u8, text, expected);
     }
@@ -1062,7 +1067,7 @@ internal static readonly @string exampleTitleExampleTitleˢ = """
 			<link>http://example.com/home</link> <!-- not assigned -->
 			<ns:link xmlns:ns="http://www.w3.org/2005/Atom">http://example.com/ns</ns:link>
 		</example>
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestIssue8535_ExampleConflict /*dyn*/ {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"example"`*/
@@ -1072,6 +1077,7 @@ internal partial struct TestIssue8535_ExampleConflict /*dyn*/ {
 
 public static void TestIssue8535(ж<testing.T> Ꮡt) {
     @string testCase = exampleTitleExampleTitleˢ;
+
     ref var dest = ref heap(new TestIssue8535_ExampleConflict(), out var Ꮡdest);
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(testCase)));
     {
@@ -1094,11 +1100,12 @@ public static void TestEncodeXMLNS(ж<testing.T> Ꮡt) {
         new(encodeXMLNS3, @"<Test xmlns=""http://example.com/ns""><Body>hello world</Body></Test>"u8, true),
         new(encodeXMLNS4, @"<Test xmlns=""http://example.com/ns""><Body>hello world</Body></Test>"u8, false)
     }.slice();
+
     foreach (var (i, tc) in testCases) {
         {
             var (b, err) = tc.f(); if (err == default!){
                 {
-                    @string got = ((@string)b);
+                    @string got = (@string)b;
                     @string want = tc.want; if (got != want) {
                         Ꮡt.Errorf("%d: got %s, want %s \n"u8, i, got, want);
                     }
@@ -1232,12 +1239,14 @@ public static void TestIssue7113(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (a.XMLName.Space != structSpace) {
         Ꮡt.Errorf("overidding with empty namespace: unmarshaling, got %s, want %s\n"u8, a.XMLName.Space, structSpace);
     }
     if (len(a.C.XMLName.Space) != 0) {
         Ꮡt.Fatalf("overidding with empty namespace: unmarshaling, got %s, want empty\n"u8, a.C.XMLName.Space);
     }
+
     slice<byte> b = default!;
     (b, err) = Marshal(Ꮡa);
     if (err != default!) {
@@ -1273,19 +1282,20 @@ internal partial struct TestIssue20396_testCases /*dyn*/ {
 
 public static void TestIssue20396(ж<testing.T> Ꮡt) {
     global::go.encoding.xml_package.UnmarshalError attrError = ((global::go.encoding.xml_package.UnmarshalError)(@string)xmlSyntaxErrorOnLine1ˢ);
+
     var testCases = new TestIssue20396_testCases[]{
         new(@"<a:te:st xmlns:a=""abcd""/>"u8, // Issue 20396
-
-            ((global::go.encoding.xml_package.UnmarshalError)(@string)xmlSyntaxErrorOnLine1ˢ2)),
+            (global::go.encoding.xml_package.UnmarshalError)(@string)xmlSyntaxErrorOnLine1ˢ2),
         new(@"<a:te=st xmlns:a=""abcd""/>"u8, attrError),
         new(@"<a:te&st xmlns:a=""abcd""/>"u8, attrError),
         new(@"<a:test xmlns:a=""abcd""/>"u8, default!),
         new(@"<a:te:st xmlns:a=""abcd"">1</a:te:st>"u8,
-            ((global::go.encoding.xml_package.UnmarshalError)(@string)xmlSyntaxErrorOnLine1ˢ2)),
+            (global::go.encoding.xml_package.UnmarshalError)(@string)xmlSyntaxErrorOnLine1ˢ2),
         new(@"<a:te=st xmlns:a=""abcd"">1</a:te=st>"u8, attrError),
         new(@"<a:te&st xmlns:a=""abcd"">1</a:te&st>"u8, attrError),
         new(@"<a:test xmlns:a=""abcd"">1</a:test>"u8, default!)
     }.slice();
+
     ref var dest = ref heap(new @string(), out var Ꮡdest);
     foreach (var (_, tc) in testCases) {
         {
@@ -1402,14 +1412,18 @@ public static void TestWrapDecoder(ж<testing.T> Ꮡt) {
         }}
         return tΔ1;
     });
+
     d = NewTokenDecoder(m(new global::go.encoding.xml_package.DecoderжTokenReader(d)));
+
     ref var o = ref heap<TestWrapDecoder_o>(out var Ꮡo);
     o = new TestWrapDecoder_o();
+
     {
         var err = d.Decode(Ꮡo); if (err != default!) {
             Ꮡt.Fatal(gotUnexpectedErrorWhileˢ, err);
         }
     }
+
     if (o.Chardata != "[Re-enter Clown with a letter, and FABIAN]"u8) {
         Ꮡt.Fatalf("Got unexpected chardata: `%s`\n"u8, o.Chardata);
     }
@@ -1442,6 +1456,7 @@ public static void TestTokenUnmarshaler(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         var d = NewTokenDecoder(new tokReader(nil));
         d.Decode(Ꮡ(new Failure(nil)));
     }
@@ -1474,6 +1489,7 @@ internal static void testRoundTrip(ж<testing.T> Ꮡt, @string input) {
             Ꮡt.Fatal(err);
         }
     }
+
     d = NewDecoder(new xml_test_package.bytes_BufferжReader(Ꮡbuf));
     while (ᐧ) {
         var (tok, err) = d.Token();
@@ -1537,13 +1553,16 @@ public static void TestParseErrors(ж<testing.T> Ꮡt) {
         new(withDefaultHeader(notOkˢ4), @"invalid <![ sequence"u8),
         new(withDefaultHeader(zzzFooXmlnsZzzHttpˢ),
             @"element <foo> in space zzz closed by </foo> in space """""u8),
-        new(withDefaultHeader(((@string)(new byte[]{0xf1}))), @"invalid UTF-8"u8), // Header-related errors.
+        new(withDefaultHeader(((@string)(new byte[]{0xf1}))), @"invalid UTF-8"u8),
 
-        new(@"<?xml version=""1.1"" encoding=""UTF-8""?>"u8, @"unsupported version ""1.1""; only version 1.0 is supported"u8), // Cases below are for "no errors".
+        // Header-related errors.
+        new(@"<?xml version=""1.1"" encoding=""UTF-8""?>"u8, @"unsupported version ""1.1""; only version 1.0 is supported"u8),
 
+        // Cases below are for "no errors".
         new(withDefaultHeader(@"<?ok?>"u8), @""u8),
         new(withDefaultHeader(okVersionOkˢ), @""u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(test.src)));
         error err = default!;
@@ -1581,7 +1600,7 @@ internal static readonly @string testInputHTMLAutoClose = """
 <BR/><BR/>
 <Br></Br>
 <BR><span id="test">abc</span><br/><br/>
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkHTMLAutoClose(ж<testing.B> Ꮡb) {
     Ꮡb.RunParallel((ж<testing.PB> p) => {
@@ -1606,44 +1625,45 @@ public static void BenchmarkHTMLAutoClose(ж<testing.B> Ꮡb) {
 public static void TestHTMLAutoClose(ж<testing.T> Ꮡt) {
     var wantTokens = new ΔToken[]{
         new ProcInst("xml"u8, slice<byte>(@"version=""1.0"" encoding=""UTF-8"""u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "br"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
-        new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-        new EndElement(new Name(""u8, "br"u8)),
-        new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
-        new EndElement(new Name(""u8, "br"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "br"u8)),
         new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "br"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "br"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
+        new EndElement(new Name(""u8, "br"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
+        new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
+        new EndElement(new Name(""u8, "br"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "BR"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "BR"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "BR"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "BR"u8)),
         new StartElement(new Name(""u8, "BR"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "BR"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "Br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "Br"u8)),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"\n"u8),
         new StartElement(new Name(""u8, "BR"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "BR"u8)),
         new StartElement(new Name(""u8, "span"u8), new global::go.encoding.xml_package.Attr[]{new(Name: new Name(""u8, "id"u8), Value: "test"u8)}.slice()),
-        ((global::go.encoding.xml_package.CharData)slice<byte>((@string)"abc"u8)),
+        (global::go.encoding.xml_package.CharData)slice<byte>((@string)"abc"u8),
         new EndElement(new Name(""u8, "span"u8)),
         new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "br"u8)),
         new StartElement(new Name(""u8, "br"u8), new global::go.encoding.xml_package.Attr[]{}.slice()),
         new EndElement(new Name(""u8, "br"u8))
     }.slice();
+
     var d = NewDecoder(new xml_test_package.strings_ReaderжReader(strings.NewReader(testInputHTMLAutoClose)));
     d.Value.Strict = false;
     d.Value.AutoClose = HTMLAutoClose;

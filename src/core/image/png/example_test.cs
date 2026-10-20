@@ -32,7 +32,9 @@ public static void ExampleDecode() {
     if (err != default!) {
         log.Fatal(err);
     }
+
     var levels = new @string[]{" "u8, "░"u8, "▒"u8, "▓"u8, "█"u8}.slice();
+
     for (nint y = img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++) {
         for (nint x = img.Bounds().Min.X; x < img.Bounds().Max.X; x++) {
             var c = color.GrayModel.Convert(img.At(x, y))._<color.Gray>();
@@ -52,28 +54,33 @@ internal static readonly @string imagePngˢ = "image.png"u8;
 public static void ExampleEncode() {
     const nint width = 256;
     const nint height = 256;
+
     // Create a colored image of the given width and height.
     var img = image.NewNRGBA(image.Rect(0, 0, width, height));
+
     for (nint y = 0; y < height; y++) {
         for (nint x = 0; x < width; x++) {
             img.Set(x, y, new color.NRGBA(
-                R: (uint8)((nint)((x + y) & 255)),
-                G: (uint8)((nint)(((x + y) << (int)(1)) & 255)),
-                B: (uint8)((nint)(((x + y) << (int)(2)) & 255)),
+                R: (uint8)((x + y) & 255),
+                G: (uint8)((x + y) << 1 & 255),
+                B: (uint8)((x + y) << 2 & 255),
                 A: 255
             ));
         }
     }
+
     var (f, err) = os.Create(imagePngˢ);
     if (err != default!) {
         log.Fatal(err);
     }
+
     {
         var errΔ1 = png.Encode(new os.FileжWriter(f), new image.NRGBAжImage(img)); if (errΔ1 != default!) {
             f.Close();
             log.Fatal(errΔ1);
         }
     }
+
     {
         var errΔ2 = f.Close(); if (errΔ2 != default!) {
             log.Fatal(errΔ2);

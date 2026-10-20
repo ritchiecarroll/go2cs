@@ -33,6 +33,7 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 			v.outputBuilder.WriteString(v.newline)
 		}
 
+		v.writePendingTypeDoc(v.outputBuilder)
 		v.writeOutput("// type %s is a methodless func type — rendered inline as its base delegate", name)
 		v.outputBuilder.WriteString(v.newline)
 		return
@@ -54,5 +55,6 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	}
 
 	v.outputBuilder.WriteString(v.newline)
+	v.writePendingTypeDoc(v.outputBuilder)
 	v.writeOutputLn("%s delegate %s %s%s(%s)%s;", getAccess(name), resultsSignature, name, typeParams, parameterSignature, constraints)
 }

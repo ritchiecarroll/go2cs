@@ -215,8 +215,10 @@ public static void TestRegistrationNaming(ж<testing.T> Ꮡt) {
         new(Ꮡ(new N1(nil)), "*gob.N1"u8),
         new(new N2(nil), "encoding/gob.N2"u8)
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         Register(tc.t);
+
         var tct = reflect.TypeOf(tc.t);
         var (ct, _) = ᏑnameToConcreteType.Load(tc.name);
         if (!AreEqual(ct, tct)) {
@@ -296,7 +298,6 @@ public static partial void TestTypeRace(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("bad i %d"u8, iΔ1);
                     return;
                 }}
-
                 ref var m = ref heap<map<@string, @string>>(out var Ꮡm);
                 m = new map<@string, @string>();
                 ᐸꟷ(cʗ1);

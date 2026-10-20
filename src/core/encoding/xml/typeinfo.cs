@@ -34,8 +34,11 @@ internal static fieldFlags fCharData => 8;
 internal static fieldFlags fInnerXML => 16;
 internal static fieldFlags fComment => 32;
 internal static fieldFlags fAny => 64;
+
 internal static fieldFlags fOmitEmpty => 128;
+
 internal static fieldFlags fMode => /* fElement | fAttr | fCDATA | fCharData | fInnerXML | fComment | fAny */ 127;
+
 internal static readonly @string xmlName = "XMLName"u8;
 
 internal static ж<sync.Map> ᏑtinfoMap = new StandardBox<sync.Map>(default(sync.Map));
@@ -51,6 +54,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
             return (tiΔ1._<ж<typeInfo>>(), default!);
         }
     }
+
     var tinfo = Ꮡ(new typeInfo(nil));
     if (typ.Kind() == reflect.Struct && !AreEqual(typ, nameType)) {
         nint n = typ.NumField();
@@ -59,6 +63,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
             if ((!f.IsExported() && !f.Anonymous) || f.Tag.Get(xmlˢ) == "-"u8) {
                 continue; // Private field
             }
+
             // For embedded structs, embed its fields.
             if (f.Anonymous) {
                 var t = f.Type;
@@ -86,14 +91,17 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
                     continue;
                 }
             }
+
             var (finfo, err) = structFieldInfo(typ, ref f);
             if (err != default!) {
                 return (default!, err);
             }
+
             if (f.Name == xmlName) {
                 tinfo.Value.xmlname = finfo;
                 continue;
             }
+
             // Add the field if it doesn't conflict with other fields.
             {
                 var errΔ1 = addFieldInfo(typ, tinfo, ref (finfo).DerefOrNull()); if (errΔ1 != default!) {
@@ -102,6 +110,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
             }
         }
     }
+
     var (ti, _) = ᏑtinfoMap.LoadOrStore(typ, tinfo.OrTypedNil());
     return (ti._<ж<typeInfo>>(), default!);
 }
@@ -109,6 +118,7 @@ internal static (ж<typeInfo>, error) getTypeInfo(reflectꓸType typ) {
 // structFieldInfo builds and returns a fieldInfo for f.
 internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref reflect.StructField f) {
     var finfo = Ꮡ(new fieldInfo(idx: f.Index));
+
     // Split the tag from the xml namespace if necessary.
     @string tag = f.Tag.Get(xmlˢ);
     {
@@ -116,6 +126,7 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
             (finfo.Value.xmlns, tag) = (ns, t);
         }
     }
+
     // Parse flags.
     var tokens = strings.Split(tag, ","u8);
     if (len(tokens) == 1){
@@ -145,8 +156,8 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
             else if (exprᴛ1 == "omitempty"u8) {
                 finfo.Value.flags |= (fieldFlags)(fOmitEmpty);
             }
-
         }
+
         // Validate the flags used.
         var valid = true;
         {
@@ -161,11 +172,10 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
                 }
             }
             else { /* default: */
+                // This will also catch multiple modes in a single field.
                 valid = false;
             }
         }
-
-        // This will also catch multiple modes in a single field.
         if ((fieldFlags)((~finfo).flags & fMode) == fAny) {
             finfo.Value.flags |= (fieldFlags)(fElement);
         }
@@ -177,11 +187,13 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
                 f.Name, typ, f.Tag.Get(xmlˢ)));
         }
     }
+
     // Use of xmlns without a name is not allowed.
     if ((~finfo).xmlns != ""u8 && tag == ""u8) {
         return (default!, fmt.Errorf("xml: namespace without name in field %s of type %s: %q"u8,
             f.Name, typ, f.Tag.Get(xmlˢ)));
     }
+
     if (f.Name == xmlName) {
         // The XMLName field records the XML element name. Don't
         // process it as usual because its name should default to
@@ -189,6 +201,7 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         finfo.Value.name = tag;
         return (finfo, default!);
     }
+
     if (tag == ""u8) {
         // If the name part of the tag is completely empty, get
         // default from XMLName of underlying struct if feasible,
@@ -202,6 +215,7 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         }
         return (finfo, default!);
     }
+
     // Prepare field name and parents.
     var parents = strings.Split(tag, ">"u8);
     if (parents[0] == "") {
@@ -217,6 +231,7 @@ internal static (ж<fieldInfo>, error) structFieldInfo(reflectꓸType typ, ref r
         }
         finfo.Value.parents = parents.slice(0, len(parents) - 1);
     }
+
     // If the field type has an XMLName field, the names must match
     // so that the behavior of both marshaling and unmarshaling
     // is straightforward and unambiguous.
@@ -266,6 +281,7 @@ internal static ж<fieldInfo> /*xmlname*/ lookupXMLName(reflectꓸType typ) {
 // It is okay for field paths to share a common, shorter prefix.
 internal static error addFieldInfo(reflectꓸType typ, ж<typeInfo> Ꮡtinfo, ref fieldInfo newf) {
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
+    var conflictsᴷ = new stackAppend<nint>();
 
     slice<nint> conflicts = default!;
 Loop:
@@ -286,7 +302,7 @@ Loop:
         }
         if (len((~oldf).parents) > len(newf.parents)){
             if ((~oldf).parents[len(newf.parents)] == newf.name) {
-                conflicts = append(conflicts, i);
+                conflicts = append(conflictsᴷ, conflicts, i);
             }
         } else 
         if (len((~oldf).parents) < len(newf.parents)){
@@ -306,6 +322,7 @@ break_Loop:;
         tinfo.fields = append(tinfo.fields, newf);
         return default!;
     }
+
     // If any conflict is shallower, ignore the new field.
     // This matches the Go field resolution on embedding.
     foreach (var (_, i) in conflicts) {
@@ -313,6 +330,7 @@ break_Loop:;
             return default!;
         }
     }
+
     // Otherwise, if any of them is at the same depth level, it's an error.
     foreach (var (_, i) in conflicts) {
         var oldf = Ꮡ(tinfo.fields, i);
@@ -322,6 +340,7 @@ break_Loop:;
             return new TagPathErrorжerror(Ꮡ(new TagPathError(typ, f1.Name, f1.Tag.Get(xmlˢ), f2.Name, f2.Tag.Get(xmlˢ))));
         }
     }
+
     // Otherwise, the new field is shallower, and thus takes precedence,
     // so drop the conflicting fields from tinfo and append the new one.
     for (nint c = len(conflicts) - 1; c >= 0; c--) {

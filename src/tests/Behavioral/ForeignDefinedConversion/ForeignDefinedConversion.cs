@@ -18,12 +18,16 @@ partial struct Dur /*global::go.time_package.Duration*/;
 internal static fmt.Stringer _ᴛ1ʗ = ((Level)(levellib.Level)0);
 
 internal static void Main() {
-    fmt.Println(((Level)(levellib.Level)0), ((Level)(levellib.Level)3));
+    fmt.Println((Level)(levellib.Level)0, (Level)(levellib.Level)3);
+
     uint32 u = 5;
-    fmt.Println(((Level)(levellib.Level)(uint32)u));
+    fmt.Println((Level)(levellib.Level)(uint32)u);
+
     nint n = 7;
-    fmt.Println(((Level)(levellib.Level)(uint32)n), ((Level)(levellib.Level)(uint32)(n + 1)));
-    fmt.Println(((time.Duration)((Dur)(time.Duration)5)), ((time.Duration)((Dur)(time.Duration)2) * ((Dur)time.ΔSecond)));
+    fmt.Println((Level)(levellib.Level)(uint32)n, (Level)(levellib.Level)(uint32)(n + 1));
+
+    fmt.Println((time.Duration)((Dur)(time.Duration)5), (time.Duration)((Dur)(time.Duration)2) * ((Dur)time.ΔSecond));
+
     fmt.Println(((levellib.Level)((Level)(levellib.Level)4)).Double());
 }
 

@@ -15,6 +15,7 @@ import (
 	"go/token"
 	"go/types"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -811,6 +812,14 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 		if context.u8StringOK {
 			result.WriteString("u8")
 		}
+
+		// A Go raw string never holds a CR, but C# takes a multi-line raw literal's line breaks from
+		// the .cs file, and every checkout gives that file CRLF (.gitattributes pins *.cs eol=crlf).
+		// golib's Raw() (string.cs) removes them, so the value is Go's on any checkout. A one-line
+		// raw string is a verbatim literal with no line break, and an interpreted string is unchanged.
+		if isRawStr && strings.Contains(strVal, "\n") {
+			result.WriteString(".Raw()")
+		}
 	}
 
 	return result.String()
@@ -843,4 +852,146 @@ func (v *Visitor) nativeWidthUnsignedPrefix(basicLit *ast.BasicLit) string {
 	}
 
 	return "(nuint)"
+}
+
+// brokenByteArrayConst writes a string constant folded to a byte array (byteArrayStringLiteral) with Go's line
+// breaks, when its value is a `+` chain of string literals across lines that carries comments and `-comments` is
+// on: each operand's bytes on a line of their own, its trailing comment after them, an own-line comment above the
+// operand it precedes (class G, the owner's decision 3: the array initializer can break where Go's expression does).
+// The comments it writes are taken, so none is written above the declaration. It returns "" to keep the one-line
+// form, and whether it wrote the spec's own trailing comment (Go attaches the last operand's comment to the spec).
+func (v *Visitor) brokenByteArrayConst(spec *ast.ValueSpec, value ast.Expr, folded string) (string, bool) {
+	if !v.options.includeComments {
+		return "", false
+	}
+
+	var leaves []*ast.BasicLit
+
+	for expr := value; ; {
+		binary, isBinary := expr.(*ast.BinaryExpr)
+
+		if !isBinary {
+			lit, isLit := expr.(*ast.BasicLit)
+
+			if !isLit || lit.Kind != token.STRING {
+				return "", false
+			}
+
+			leaves = append(leaves, lit)
+			break
+		}
+
+		lit, isLit := binary.Y.(*ast.BasicLit)
+
+		if binary.Op != token.ADD || !isLit || lit.Kind != token.STRING {
+			return "", false
+		}
+
+		leaves = append(leaves, lit)
+		expr = binary.X
+	}
+
+	slices.Reverse(leaves)
+
+	if v.file == nil {
+		v.file = v.fset.File(value.Pos())
+	}
+
+	if v.file.Line(leaves[0].Pos()) == v.file.Line(leaves[len(leaves)-1].End()) {
+		return "", false
+	}
+
+	values := make([]string, len(leaves))
+	joined := &strings.Builder{}
+
+	for i, leaf := range leaves {
+		decoded, err := strconv.Unquote(leaf.Value)
+
+		if err != nil {
+			return "", false
+		}
+
+		values[i] = decoded
+		joined.WriteString(decoded)
+	}
+
+	if joined.String() != folded {
+		return "", false
+	}
+
+	// The comments between the operands, and the spec's trailing comment, which Go attaches to the spec.
+	var comments []*ast.Comment
+
+	for _, group := range v.commentGroups {
+		if group.Pos() > leaves[0].Pos() && group.End() < value.End() {
+			comments = append(comments, group.List...)
+		}
+	}
+
+	tookSpecComment := false
+
+	if spec.Comment != nil && v.file.Line(spec.Comment.Pos()) == v.file.Line(value.End()) {
+		comments = append(comments, spec.Comment.List...)
+		tookSpecComment = true
+	}
+
+	if len(comments) == 0 {
+		return "", false
+	}
+
+	indent := v.indent(v.indentLevel + 1)
+	builder := &strings.Builder{}
+	builder.WriteString("((@string)(new byte[]{")
+	next := 0
+	written := 0
+
+	for i, leaf := range leaves {
+		// own-line comments above this operand
+		for next < len(comments) && comments[next].Pos() < leaf.Pos() {
+			fmt.Fprintf(builder, "%s%s%s", v.newline, indent, comments[next].Text)
+			next++
+		}
+
+		if len(values[i]) > 0 {
+			builder.WriteString(v.newline)
+			builder.WriteString(indent)
+
+			for j := 0; j < len(values[i]); j++ {
+				if j > 0 {
+					builder.WriteString(", ")
+				}
+
+				fmt.Fprintf(builder, "0x%02x", values[i][j])
+			}
+
+			written += len(values[i])
+
+			if written < len(folded) {
+				builder.WriteString(",")
+			}
+		}
+
+		// this operand's trailing comments: after it, on its line
+		line := v.file.Line(leaf.End())
+
+		for next < len(comments) && v.file.Line(comments[next].Pos()) == line {
+			fmt.Fprintf(builder, " %s", comments[next].Text)
+			next++
+		}
+	}
+
+	for ; next < len(comments); next++ {
+		fmt.Fprintf(builder, "%s%s%s", v.newline, indent, comments[next].Text)
+	}
+
+	builder.WriteString(v.newline)
+	builder.WriteString(v.indent(v.indentLevel))
+	builder.WriteString("}))")
+
+	for _, comment := range comments {
+		delete(v.standAloneComments, comment.Slash)
+		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, comment.Slash)
+	}
+
+	return builder.String(), tookSpecComment
 }

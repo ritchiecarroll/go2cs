@@ -96,10 +96,11 @@ public static void TestStack(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var b = ((T)0).method();
-    var lines = strings.Split(((@string)b), "\n"u8);
+    var lines = strings.Split((@string)b, "\n"u8);
     if (len(lines) < 6) {
         Ꮡt.Fatal(tooFewLinesˢ);
     }
+
     // If built with -trimpath, file locations should start with package paths.
     // Otherwise, file locations should start with a GOROOT/src prefix
     // (for whatever value of GOROOT is baked into the binary, not the one
@@ -124,7 +125,7 @@ public static void TestStack(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
-            fileGoroot = ((@string)bytes.TrimSpace(@out));
+            fileGoroot = (@string)bytes.TrimSpace(@out);
         } else {
             // Since GOROOT is not set in the environment, its value (if any) must come
             // from the path embedded in the binary.
@@ -135,16 +136,20 @@ public static void TestStack(ж<testing.T> Ꮡt) {
     if (fileGoroot != ""u8) {
         filePrefix = filepath.ToSlash(fileGoroot) + "/src/"u8;
     }
+
     nint n = 0;
     var linesʗ1 = lines;
     void frame(@string @file, @string code) {
         Ꮡt.Helper();
+
         @string line = linesʗ1[n];
         if (!strings.Contains(line, code)) {
             Ꮡt.Errorf("expected %q in %q"u8, code, line);
         }
         n++;
+
         line = linesʗ1[n];
+
         @string wantPrefix = "\t"u8 + filePrefix + @file;
         if (!strings.HasPrefix(line, wantPrefix)) {
             Ꮡt.Errorf("in line %q, expected prefix %q"u8, line, wantPrefix);
@@ -152,6 +157,7 @@ public static void TestStack(ж<testing.T> Ꮡt) {
         n++;
     }
     n++;
+
     frame(runtimeDebugStackGoˢ, runtimeDebugStackˢ);
     frame(runtimeDebugStackTestGoˢ, runtimeDebugTestTˢ);
     frame(runtimeDebugStackTestGoˢ, runtimeDebugTestTMethodˢ);
@@ -169,7 +175,9 @@ public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     @string crashOutput = filepath.Join(Ꮡt.TempDir(), crashOutˢ);
+
     var cmd = exec.Command(exe);
     cmd.Value.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
     cmd.Value.Env = append(os.Environ(), "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=setcrashoutput"u8, "CRASHOUTPUT=" + crashOutput);
@@ -179,6 +187,7 @@ public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("child process succeeded unexpectedly (stderr: %s)"u8, stderr);
     }
     Ꮡt.Logf("child process finished with error %v and stderr <<%s>>"u8, err, stderr);
+
     // Read the file the child process should have written.
     // It should contain a crash report such as this:
     //
@@ -193,9 +202,10 @@ public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("child process failed to write crash report: %v"u8, err);
     }
-    @string crash = ((@string)data);
+    @string crash = (@string)data;
     Ꮡt.Logf("crash = <<%s>>"u8, crash);
     Ꮡt.Logf("stderr = <<%s>>"u8, stderr);
+
     // Check that the crash file and the stderr both contain the panic and stack trace.
     foreach (var (_, want) in new @string[]{
         "panic: oops"u8,
@@ -209,6 +219,7 @@ public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("stderr output does not contain %q"u8, want);
         }
     }
+
     // Check that stderr, but not crash, contains the output of println().
     @string printlnOnly = helloˢ;
     if (strings.Contains(crash, printlnOnly)) {

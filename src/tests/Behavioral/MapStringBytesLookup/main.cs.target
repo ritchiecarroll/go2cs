@@ -4,18 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string alphaˢ = "alpha"u8;
-
 internal static void Main() {
     var interned = new map<@string, @string>{
-        ["Content-Length"u8] = "len"u8,
-        ["Host"u8] = "host"u8
+        ["Content-Length"] = "len",
+        ["Host"] = "host"
     };
+
     var b = slice<byte>("Content-Length"u8);
+
     fmt.Println(interned[tmpstring(b)]);
+
     b[0] = (rune)'X';
     fmt.Println(interned[tmpstring(b)] == "");
+
     b[0] = (rune)'C';
     var (v, ok) = interned[tmpstring(b), ꟷ];
     fmt.Println(v, ok);
@@ -23,16 +24,19 @@ internal static void Main() {
     (v, ok) = interned[tmpstring(b), ꟷ];
     fmt.Println(v == ""u8, ok);
     b[0] = (rune)'C';
+
     fmt.Println(interned[tmpstring(b[..4])] == "");
     fmt.Println(interned[tmpstring(b[0..])]);
+
     var w = new map<@string, nint>{};
     var k = slice<byte>("alpha"u8);
     w[((@string)k)] = 42;
     k[0] = (rune)'Z';
-    fmt.Println(w[alphaˢ], len(w));
+    fmt.Println(w["alpha"], len(w));
     var (_, hit) = w[tmpstring(k), ꟷ];
     fmt.Println(hit);
-    delete(w, ((@string)slice<byte>("alpha"u8)));
+
+    delete(w, (@string)slice<byte>("alpha"u8));
     fmt.Println(len(w));
 }
 

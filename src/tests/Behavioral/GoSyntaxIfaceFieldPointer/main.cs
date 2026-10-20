@@ -33,20 +33,24 @@ internal partial struct main_named /*dyn*/ {
 }
 
 internal static void Main() {
-    var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8));
+    var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"));
+
     array<main_type> connAddrs = new main_type[]{
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(ta)),
-        new(new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8))), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8)))),
-        new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock"u8, Net: "unix"u8))))
+        new(new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix")))),
+        new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))))
     }.array();
+
     foreach (var (i, ca) in connAddrs.ΔRangeSnapshot()) {
         fmt.Printf("%d got  T=%T v=%#v\n"u8, i, ca.got, ca.got);
         fmt.Printf("%d want T=%T v=%#v\n"u8, i, ca.want, ca.want);
         fmt.Printf("%d deepequal=%v\n"u8, i, reflect.DeepEqual(ca.got, ca.want));
     }
+
     fmt.Printf("direct T=%T v=%#v\n"u8, ta.OrTypedNil(), ta.OrTypedNil());
     var n = new main_named(got: new UnixAddrжAddr(ta));
     fmt.Printf("named T=%T v=%#v\n"u8, n.got, n.got);
+
     Addr nilAddr = default!;
     fmt.Printf("nil T=%T v=%v\n"u8, nilAddr, nilAddr);
 }

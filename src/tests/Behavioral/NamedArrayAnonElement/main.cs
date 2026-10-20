@@ -19,11 +19,8 @@ internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
     return Ꮡ(t.Value, i).of(semTableᴛ1.Ꮡroot);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object namedArrayAnonElementˢ = (@string)"named-array anon element compiles"u8;
-
 internal static void Main() {
-    fmt.Println(namedArrayAnonElementˢ);
+    fmt.Println("named-array anon element compiles");
 }
 
 } // end main_package

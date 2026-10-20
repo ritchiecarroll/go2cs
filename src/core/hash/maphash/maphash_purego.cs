@@ -7,6 +7,7 @@ namespace go.hash;
 using rand = crypto.rand_package;
 using errors = errors_package;
 using byteorder = @internal.byteorder_package;
+using math = math_package;
 using bits = go.math.bits_package;
 using reflect = reflect_package;
 using @internal;
@@ -52,20 +53,21 @@ internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
     uint64 a = default!;
     uint64 b = default!;
     seed ^= (uint64)(hashkey[0]);
+
     if (i > 16) {
         if (i > 48) {
             var seed1 = seed;
             var seed2 = seed;
             for (; i > 48; i -= 48) {
-                seed = mix((uint64)(r8(p) ^ hashkey[1]), (uint64)(r8(p[8..]) ^ seed));
-                seed1 = mix((uint64)(r8(p[16..]) ^ hashkey[2]), (uint64)(r8(p[24..]) ^ seed1));
-                seed2 = mix((uint64)(r8(p[32..]) ^ hashkey[3]), (uint64)(r8(p[40..]) ^ seed2));
+                seed = mix(r8(p) ^ hashkey[1], r8(p[8..]) ^ seed);
+                seed1 = mix(r8(p[16..]) ^ hashkey[2], r8(p[24..]) ^ seed1);
+                seed2 = mix(r8(p[32..]) ^ hashkey[3], r8(p[40..]) ^ seed2);
                 p = p[48..];
             }
-            seed ^= (uint64)((uint64)(seed1 ^ seed2));
+            seed ^= (uint64)((seed1 ^ seed2));
         }
         for (; i > 16; i -= 16) {
-            seed = mix((uint64)(r8(p) ^ hashkey[1]), (uint64)(r8(p[8..]) ^ seed));
+            seed = mix(r8(p) ^ hashkey[1], r8(p[8..]) ^ seed);
             p = p[16..];
         }
     }
@@ -78,17 +80,16 @@ internal static uint64 wyhash(slice<byte> key, uint64 seed, uint64 len) {
         break;
     }
     default: {
-        var n = (((i >> (int)(3))) << (int)(2));
-        a = (uint64)((r4(p) << (int)(32)) | r4(p.slice((nint)(n))));
-        b = (uint64)((r4(p.slice((nint)(i - 4))) << (int)(32)) | r4(p.slice((nint)(i - 4 - n))));
+        var n = (i >> 3) << 2;
+        a = r4(p) << 32 | r4(p.slice((nint)(n)));
+        b = r4(p.slice((nint)(i - 4))) << 32 | r4(p.slice((nint)(i - 4 - n)));
         break;
     }}
-
-    return mix((uint64)((uint64)m5 ^ len), mix((uint64)(a ^ hashkey[1]), (uint64)(b ^ seed)));
+    return mix((uint64)m5 ^ len, mix(a ^ hashkey[1], b ^ seed));
 }
 
 internal static uint64 r3(slice<byte> p, uint64 k) {
-    return (uint64)((uint64)((((uint64)p[0] << (int)(16))) | (((uint64)p[(k >> (int)(1))] << (int)(8)))) | (uint64)p[k - 1]);
+    return ((uint64)p[0] << 16) | ((uint64)p[(k >> 1)] << 8) | (uint64)p[k - 1];
 }
 
 internal static uint64 r4(slice<byte> p) {
@@ -102,7 +103,7 @@ internal static uint64 r8(slice<byte> p) {
 internal static uint64 mix(uint64 a, uint64 b) {
     // Fully qualified to avoid alias shadowing by the same-package test declaration "bits".
     var (hi, lo) = go.math.bits_package.Mul64(a, b);
-    return (uint64)(hi ^ lo);
+    return hi ^ lo;
 }
 
 internal static uint64 comparableHash<T>(T v, ΔSeed seed) {
@@ -113,7 +114,7 @@ internal static uint64 comparableHash<T>(T v, ΔSeed seed) {
 }
 
 internal static void writeComparable<T>(ж<Hash> Ꮡh, T v) {
-    var vv = reflect.ValueOf(v);
+    var vv = reflect.ValueOf((v).OrTypedNilOf());
     appendT(Ꮡh, vv);
 }
 
@@ -179,10 +180,10 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
     }
     if (exprᴛ1 == reflect.ΔUnsafePointer || exprᴛ1 == reflect.ΔPointer || exprᴛ1 == reflect.Chan) {
         array<byte> buf = new(8);
-        byteorder.LEPutUint64(buf[..], // because pointing to the abi.Escape call in comparableReady,
- // So this is ok to hash pointer,
- // this way because we know their target won't be moved.
- (uint64)v.Pointer());
+        // because pointing to the abi.Escape call in comparableReady,
+        // So this is ok to hash pointer,
+        // this way because we know their target won't be moved.
+        byteorder.LEPutUint64(buf[..], (uint64)v.Pointer());
         h.Write(buf[..]);
         return;
     }
@@ -190,8 +191,29 @@ internal static void appendT(ж<Hash> Ꮡh, reflectꓸValue v) {
         appendT(Ꮡh, v.Elem());
         return;
     }
-
     throw panic(errors.New("maphash: hash of unhashable type "u8 + v.Type().String()));
+}
+
+internal static void float64(this ref Hash h, float64 f) {
+    if (f == 0D) {
+        h.WriteByte(0);
+        return;
+    }
+    array<byte> buf = new(8);
+    if (f != f) {
+        byteorder.LEPutUint64(buf[..], randUint64());
+        h.Write(buf[..]);
+        return;
+    }
+    byteorder.LEPutUint64(buf[..], math.Float64bits(f));
+    h.Write(buf[..]);
+}
+
+internal static byte btoi(bool b) {
+    if (b) {
+        return 1;
+    }
+    return 0;
 }
 
 } // end maphash_package

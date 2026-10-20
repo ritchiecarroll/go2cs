@@ -38,6 +38,7 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             Ꮡb.WriteString(strings.ToLower(sub));
         }
     }
+
     foreach (var (_, attribute) in slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(param))) {
         @string value = param[attribute];
         Ꮡb.WriteByte((rune)';');
@@ -46,34 +47,40 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             return ""u8;
         }
         Ꮡb.WriteString(strings.ToLower(attribute));
+
         var needEnc = needsEncoding(value);
         if (needEnc) {
             // RFC 2231 section 4
             Ꮡb.WriteByte((rune)'*');
         }
         Ꮡb.WriteByte((rune)'=');
+
         if (needEnc) {
             Ꮡb.WriteString(utf8ˢ3);
+
             nint offsetΔ1 = 0;
             for (nint index = 0; index < len(value); index++) {
                 var ch = value[index];
                 // {RFC 2231 section 7}
                 // attribute-char := <any (US-ASCII) CHAR except SPACE, CTLs, "*", "'", "%", or tspecials>
-                if (ch <= (rune)' ' || ch >= 0x7F || ch == (rune)'*' || ch == (rune)'\'' || ch == (rune)'%' || isTSpecial((rune)ch)) {
+                if (ch <= (rune)' ' || ch >= 0x7F || ch == (rune)'*' || ch == (rune)'\'' || ch == (rune)'%' || isTSpecial(ch)) {
                     Ꮡb.WriteString(value.slice(offsetΔ1, index));
                     offsetΔ1 = index + 1;
+
                     Ꮡb.WriteByte((rune)'%');
-                    Ꮡb.WriteByte(upperhex[(ch >> (int)(4))]);
+                    Ꮡb.WriteByte(upperhex[(ch >> 4)]);
                     Ꮡb.WriteByte(upperhex[(byte)(ch & 0x0F)]);
                 }
             }
             Ꮡb.WriteString(value.slice(offsetΔ1));
             continue;
         }
+
         if (isToken(value)) {
             Ꮡb.WriteString(value);
             continue;
         }
+
         Ꮡb.WriteByte((rune)'"');
         nint offset = 0;
         for (nint index = 0; index < len(value); index++) {
@@ -90,40 +97,39 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
     return b.String();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mimeNoMediaTypeˢ = "mime: no media type"u8;
-internal static readonly @string mimeExpectedSlashAfterˢ = "mime: expected slash after first token"u8;
-internal static readonly @string mimeExpectedTokenAfterˢ = "mime: expected token after slash"u8;
-internal static readonly @string mimeUnexpectedContentˢ = "mime: unexpected content after media subtype"u8;
-
 internal static error checkMediaTypeDisposition(@string s) {
     var (typ, rest) = consumeToken(s);
     if (typ == ""u8) {
-        return errors.New(mimeNoMediaTypeˢ);
+        return errNoMediaType;
     }
     if (rest == ""u8) {
         return default!;
     }
-    if (!strings.HasPrefix(rest, "/"u8)) {
-        return errors.New(mimeExpectedSlashAfterˢ);
+    bool ok = default!;
+    {
+        (rest, ok) = strings.CutPrefix(rest, "/"u8); if (!ok) {
+            return errNoSlashAfterFirstToken;
+        }
     }
-    (var subtype, rest) = consumeToken(rest[1..]);
+    (var subtype, rest) = consumeToken(rest);
     if (subtype == ""u8) {
-        return errors.New(mimeExpectedTokenAfterˢ);
+        return errNoTokenAfterSlash;
     }
     if (rest != ""u8) {
-        return errors.New(mimeUnexpectedContentˢ);
+        return errUnexpectedContentAfterMediaSubtype;
     }
     return default!;
 }
+
+internal static error errNoMediaType = errors.New("mime: no media type"u8);
+internal static error errNoSlashAfterFirstToken = errors.New("mime: expected slash after first token"u8);
+internal static error errNoTokenAfterSlash = errors.New("mime: expected token after slash"u8);
+internal static error errUnexpectedContentAfterMediaSubtype = errors.New("mime: unexpected content after media subtype"u8);
 
 // ErrInvalidMediaParameter is returned by [ParseMediaType] if
 // the media type value was found but there was an error parsing
 // the optional parameters
 public static error ErrInvalidMediaParameter = errors.New("mime: invalid media parameter"u8);
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string mimeDuplicateParameterˢ = "mime: duplicate parameter name"u8;
 
 // ParseMediaType parses a media type value and any optional
 // parameters, per RFC 1521.  Media types are the values in
@@ -142,15 +148,19 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
 
     var (@base, _, _) = strings.Cut(v, ";"u8);
     mediatype = strings.TrimSpace(strings.ToLower(@base));
+
     err = checkMediaTypeDisposition(mediatype);
     if (err != default!) {
         return ("", default!, err);
     }
+
     @params = new map<@string, @string>();
+
     // Map of base parameter name -> parameter name -> value
     // for parameters containing a '*' character.
     // Lazily initialized.
     map<@string, map<@string, @string>> continuation = default!;
+
     v = v.slice(len(@base));
     while (len(v) > 0) {
         v = strings.TrimLeftFunc(v, Δunicode.IsSpace);
@@ -167,15 +177,15 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
             // Parse error.
             return (mediatype, default!, ErrInvalidMediaParameter);
         }
+
         var pmap = @params;
         {
             var (baseName, _, ok) = strings.Cut(key, "*"u8); if (ok) {
                 if (continuation == default!) {
                     continuation = new map<@string, map<@string, @string>>();
                 }
-                bool okΔ1 = default!;
                 {
-                    (pmap, okΔ1) = continuation[baseName, ꟷ]; if (!okΔ1) {
+                    (pmap, ok) = continuation[baseName, ꟷ]; if (!ok) {
                         continuation[baseName] = new map<@string, @string>();
                         pmap = continuation[baseName];
                     }
@@ -185,12 +195,13 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
         {
             var (vΔ1, exists) = pmap[key, ꟷ]; if (exists && vΔ1 != value) {
                 // Duplicate parameter names are incorrect, but we allow them if they are equal.
-                return ("", default!, errors.New(mimeDuplicateParameterˢ));
+                return ("", default!, errDuplicateParamName);
             }
         }
         pmap[key] = value;
         v = rest;
     }
+
     // Stitch together any continuations or things with stars
     // (i.e. RFC 2231 things with stars: "foo*0" or "foo*")
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -199,19 +210,20 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
         {
             var (vΔ2, ok) = pieceMap[singlePartKey, ꟷ]; if (ok) {
                 {
-                    var (decv, okΔ2) = decode2231Enc(vΔ2); if (okΔ2) {
+                    var (decv, okΔ1) = decode2231Enc(vΔ2); if (okΔ1) {
                         @params[key] = decv;
                     }
                 }
                 continue;
             }
         }
+
         buf.Reset();
         var valid = false;
         for (nint n = 0; ᐧ ; n++) {
             @string simplePart = fmt.Sprintf("%s*%d"u8, key, n);
             {
-                var (vΔ3, okΔ3) = pieceMap[simplePart, ꟷ]; if (okΔ3) {
+                var (vΔ3, okΔ2) = pieceMap[simplePart, ꟷ]; if (okΔ2) {
                     valid = true;
                     Ꮡbuf.WriteString(vΔ3);
                     continue;
@@ -225,7 +237,7 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
             valid = true;
             if (n == 0){
                 {
-                    var (decv, okΔ4) = decode2231Enc(vΔ4); if (okΔ4) {
+                    var (decv, okΔ3) = decode2231Enc(vΔ4); if (okΔ3) {
                         Ꮡbuf.WriteString(decv);
                     }
                 }
@@ -238,34 +250,33 @@ public static (@string mediatype, map<@string, @string> @params, error err) Pars
             @params[key] = buf.String();
         }
     }
+
     return (mediatype, @params, err);
 }
 
+internal static error errDuplicateParamName = errors.New("mime: duplicate parameter name"u8);
+
 internal static (@string, bool) decode2231Enc(@string v) {
-    var sv = strings.SplitN(v, "'"u8, 3);
-    if (len(sv) != 3) {
+    (var charset, v, var ok) = strings.Cut(v, "'"u8);
+    if (!ok) {
         return ("", false);
     }
-    // TODO: ignoring lang in sv[1] for now. If anybody needs it we'll
+    // TODO: ignoring the language part for now. If anybody needs it, we'll
     // need to decide how to expose it in the API. But I'm not sure
     // anybody uses it in practice.
-    @string charset = strings.ToLower(sv[0]);
-    if (len(charset) == 0) {
+    (_, var extOtherVals, ok) = strings.Cut(v, "'"u8);
+    if (!ok) {
         return ("", false);
     }
-    if (charset != "us-ascii"u8 && charset != "utf-8"u8) {
-        // TODO: unsupported encoding
+    charset = strings.ToLower(charset);
+    var exprᴛ1 = charset;
+    if (exprᴛ1 == "us-ascii"u8 || exprᴛ1 == "utf-8"u8) {
+    }
+    else { /* default: */
+        // Empty or unsupported encoding.
         return ("", false);
     }
-    var (encv, err) = percentHexUnescape(sv[2]);
-    if (err != default!) {
-        return ("", false);
-    }
-    return (encv, true);
-}
-
-internal static bool isNotTokenChar(rune r) {
-    return !isTokenChar(r);
+    return percentHexUnescape(extOtherVals);
 }
 
 // consumeToken consumes a token from the beginning of provided
@@ -273,14 +284,12 @@ internal static bool isNotTokenChar(rune r) {
 // the token consumed and the rest of the string. Returns ("", v) on
 // failure to consume at least one character.
 internal static (@string token, @string rest) consumeToken(@string v) {
-    nint notPos = strings.IndexFunc(v, isNotTokenChar);
-    if (notPos == -1) {
-        return (v, "");
+    foreach (var i in range(len(v))) {
+        if (!isTokenChar(v[i])) {
+            return (v.slice(0, i), v.slice(i));
+        }
     }
-    if (notPos == 0) {
-        return ("", v);
-    }
-    return (v.slice(0, notPos), v.slice(notPos));
+    return (v, "");
 }
 
 // consumeValue consumes a "value" per RFC 2045, where a value is
@@ -298,6 +307,7 @@ internal static (@string value, @string rest) consumeValue(@string v) {
     if (v[0] != (rune)'"') {
         return consumeToken(v);
     }
+
     // parse a quoted-string
     var buffer = @new<strings.Builder>();
     for (nint i = 1; i < len(v); i++) {
@@ -315,7 +325,7 @@ internal static (@string value, @string rest) consumeValue(@string v) {
         // and intended as a literal backslash. This makes Go servers deal better
         // with MSIE without affecting the way they handle conforming MIME
         // generators.
-        if (r == (rune)'\\' && i + 1 < len(v) && isTSpecial((rune)v[i + 1])) {
+        if (r == (rune)'\\' && i + 1 < len(v) && isTSpecial(v[i + 1])) {
             buffer.WriteByte(v[i + 1]);
             i++;
             continue;
@@ -335,21 +345,26 @@ internal static (@string param, @string value, @string rest) consumeMediaParam(@
     @string rest = default!;
 
     rest = strings.TrimLeftFunc(v, Δunicode.IsSpace);
-    if (!strings.HasPrefix(rest, ";"u8)) {
-        return ("", "", v);
+    bool ok = default!;
+    {
+        (rest, ok) = strings.CutPrefix(rest, ";"u8); if (!ok) {
+            return ("", "", v);
+        }
     }
-    rest = rest[1..]; // consume semicolon
+
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
     (param, rest) = consumeToken(rest);
     param = strings.ToLower(param);
     if (param == ""u8) {
         return ("", "", v);
     }
+
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
-    if (!strings.HasPrefix(rest, "="u8)) {
-        return ("", "", v);
+    {
+        (rest, ok) = strings.CutPrefix(rest, "="u8); if (!ok) {
+            return ("", "", v);
+        }
     }
-    rest = rest[1..]; // consume equals sign
     rest = strings.TrimLeftFunc(rest, Δunicode.IsSpace);
     (value, var rest2) = consumeValue(rest);
     if (value == ""u8 && rest2 == rest) {
@@ -359,7 +374,7 @@ internal static (@string param, @string value, @string rest) consumeMediaParam(@
     return (param, value, rest);
 }
 
-internal static (@string, error) percentHexUnescape(@string s) {
+internal static (@string, bool) percentHexUnescape(@string s) {
     // Count %, check that they're well-formed.
     nint percents = 0;
     for (nint i = 0; i < len(s); ) {
@@ -369,23 +384,20 @@ internal static (@string, error) percentHexUnescape(@string s) {
         }
         percents++;
         if (i + 2 >= len(s) || !ishex(s[i + 1]) || !ishex(s[i + 2])) {
-            s = s.slice(i);
-            if (len(s) > 3) {
-                s = s[0..3];
-            }
-            return ("", fmt.Errorf("mime: bogus characters after %%: %q"u8, s));
+            return ("", false);
         }
         i += 3;
     }
     if (percents == 0) {
-        return (s, default!);
+        return (s, true);
     }
+
     var t = new slice<byte>(len(s) - 2 * percents);
     nint j = 0;
     for (nint i = 0; i < len(s); ) {
         switch (s[i]) {
         case (rune)'%': {
-            t[j] = (byte)((byte)(unhex(s[i + 1]) << (int)(4)) | unhex(s[i + 2]));
+            t[j] = (byte)((byte)(unhex(s[i + 1]) << 4) | unhex(s[i + 2]));
             j++;
             i += 3;
             break;
@@ -396,9 +408,8 @@ internal static (@string, error) percentHexUnescape(@string s) {
             i++;
             break;
         }}
-
     }
-    return (((@string)t), default!);
+    return ((@string)t, true);
 }
 
 internal static bool ishex(byte c) {
@@ -412,7 +423,6 @@ internal static bool ishex(byte c) {
     case {} when (rune)'A' <= c && c <= (rune)'F': {
         return true;
     }}
-
     return false;
 }
 
@@ -427,7 +437,6 @@ internal static byte unhex(byte c) {
     case {} when (rune)'A' <= c && c <= (rune)'F': {
         return (byte)(c - (rune)'A' + 10);
     }}
-
     return 0;
 }
 

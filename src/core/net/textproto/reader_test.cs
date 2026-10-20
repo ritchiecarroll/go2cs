@@ -115,6 +115,7 @@ public static void TestReadDotLines(ж<testing.T> Ꮡt) {
     if (!slices.Equal<slice<@string>, @string>(s, want) || err != default!) {
         Ꮡt.Fatalf("ReadDotLines: %v, %v"u8, s, err);
     }
+
     (s, err) = r.ReadDotLines();
     want = new @string[]{"another"u8}.slice();
     if (!slices.Equal<slice<@string>, @string>(s, want) || !AreEqual(err, io.ErrUnexpectedEOF)) {
@@ -132,6 +133,7 @@ public static void TestReadDotBytes(ж<testing.T> Ꮡt) {
     if (!slices.Equal<slice<byte>, byte>(b, want) || err != default!) {
         Ꮡt.Fatalf("ReadDotBytes: %q, %v"u8, b, err);
     }
+
     (b, err) = r.ReadDotBytes();
     want = slice<byte>("anot.her\n"u8);
     if (!slices.Equal<slice<byte>, byte>(b, want) || !AreEqual(err, io.ErrUnexpectedEOF)) {
@@ -225,7 +227,7 @@ public static void TestLargeReadMIMEHeader(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < len(data); i++) {
         data[i] = (rune)'x';
     }
-    @string sdata = ((@string)data);
+    @string sdata = (@string)data;
     var r = reader("Cookie: "u8 + sdata + "\r\n\n"u8);
     var (m, err) = r.ReadMIMEHeader();
     if (err != default!) {
@@ -307,6 +309,7 @@ public static void TestReadMIMEHeaderBytes(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when i is (rune)':': {
+            // Special case: "Foo:Bar: foo" is the header "Foo".
             wantErr = false;
             break;
         }
@@ -314,8 +317,6 @@ public static void TestReadMIMEHeaderBytes(ж<testing.T> Ꮡt) {
             wantErr = false;
             break;
         }}
-
-        // Special case: "Foo:Bar: foo" is the header "Foo".
         var (m, err) = r.ReadMIMEHeader();
         if (err != default! != wantErr) {
             Ꮡt.Errorf("ReadMIMEHeader(%q) = %v, %v; want error=%v"u8, s, m, err, wantErr);
@@ -342,7 +343,6 @@ public static void TestReadMIMEHeaderBytes(ж<testing.T> Ꮡt) {
             wantErr = false;
             break;
         }}
-
         var (m, err) = r.ReadMIMEHeader();
         if ((err != default!) != wantErr) {
             Ꮡt.Errorf("ReadMIMEHeader(%q) = %v, %v; want error=%v"u8, s, m, err, wantErr);
@@ -357,8 +357,8 @@ public static void TestReadMIMEHeaderTrimContinued(ж<testing.T> Ꮡt) {
     // In this header, \n and \r\n terminated lines are mixed on purpose.
     // We expect each line to be trimmed (prefix and suffix) before being concatenated.
     // Keep the spaces as they are.
-    var r = reader(""u8 + "a:\n"u8 + " 0 \r\n"u8 + "b:1 \t\r\n"u8 + "c: 2\r\n"u8 + " 3\t\n"u8 + "  \t 4  \r\n\n"u8);
-    // for code formatting purpose.
+    var r = reader(""u8 + // for code formatting purpose.
+        "a:\n"u8 + " 0 \r\n"u8 + "b:1 \t\r\n"u8 + "c: 2\r\n"u8 + " 3\t\n"u8 + "  \t 4  \r\n\n"u8);
     var (m, err) = r.ReadMIMEHeader();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -449,13 +449,15 @@ public static void TestRFC959Lines(ж<testing.T> Ꮡt) {
 // Test that multi-line errors are appropriately and fully read. Issue 10230.
 public static void TestReadMultiLineError(ж<testing.T> Ꮡt) {
     var r = reader("550-5.1.1 The email account that you tried to reach does not exist. Please try\n"u8 + "550-5.1.1 double-checking the recipient's email address for typos or\n"u8 + "550-5.1.1 unnecessary spaces. Learn more at\n"u8 + "Unexpected but legal text!\n"u8 + "550 5.1.1 https://support.google.com/mail/answer/6596 h20si25154304pfd.166 - gsmtp\n"u8);
+
     @string wantMsg = "5.1.1 The email account that you tried to reach does not exist. Please try\n"u8 + "5.1.1 double-checking the recipient's email address for typos or\n"u8 + "5.1.1 unnecessary spaces. Learn more at\n"u8 + "Unexpected but legal text!\n"u8 + "5.1.1 https://support.google.com/mail/answer/6596 h20si25154304pfd.166 - gsmtp"u8;
+
     var (code, msg, err) = r.ReadResponse(250);
     if (err == default!) {
         Ꮡt.Errorf("ReadResponse: no error, want error"u8);
     }
     if (code != 550) {
-        Ꮡt.Errorf("ReadResponse: code=%d, want %d"u8, code, (nint)(550));
+        Ꮡt.Errorf("ReadResponse: code=%d, want %d"u8, code, (nint)550);
     }
     if (msg != wantMsg) {
         Ꮡt.Errorf("ReadResponse: msg=%q, want %q"u8, msg, wantMsg);
@@ -500,7 +502,9 @@ public static partial void TestIssue46363(ж<testing.T> Ꮡt) {
     // Reset commonHeaderOnce, so that commonHeader will have to be initialized
     commonHeaderOnce = new sync.Once(nil);
     commonHeader = default!;
+
     // Test for data race by calling ReadMIMEHeader and CanonicalMIMEHeaderKey concurrently
+
     // Send MIME header over net.Conn
     var (r, w) = net.Pipe();
     var rʗ1 = r;
@@ -509,8 +513,10 @@ public static partial void TestIssue46363(ж<testing.T> Ꮡt) {
         NewConn(new textproto_internal_test_package.net_ConnᴠReadWriteCloser(rʗ1)).of(global::go.net.textproto_package.Conn.ᏑReader).ReadMIMEHeader();
     });
     w.Write(slice<byte>("A: 1\r\nB: 2\r\nC: 3\r\n\r\n"u8));
+
     // CanonicalMIMEHeaderKey calls commonHeaderOnce.Do(initCommonHeader) which initializes commonHeader
     CanonicalMIMEHeaderKey("a"u8);
+
     if (commonHeader == default!) {
         Ꮡt.Fatal(canonicalMIMEHeaderKeyˢ);
     }
@@ -529,7 +535,7 @@ COOKIE: __utma=000000000.0000000000.0000000000.0000000000.0000000000.00; __utmb=
 Non-Interned: test
 
 
-"""u8, "\n"u8, "\r\n"u8, -1);
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1);
 
 internal static @string serverHeaders = strings.Replace("""
 Content-Type: text/html; charset=utf-8
@@ -543,7 +549,7 @@ Connection: Close
 Non-Interned: test
 
 
-"""u8, "\n"u8, "\r\n"u8, -1);
+"""u8.Raw(), "\n"u8, "\r\n"u8, -1);
 
 internal partial struct BenchmarkReadMIMEHeader_type /*dyn*/ {
     internal @string name;
@@ -566,6 +572,7 @@ public static void BenchmarkReadMIMEHeader(ж<testing.B> Ꮡb) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             var br = bufio.NewReader(new textproto_internal_test_package.bytes_BufferжReader(Ꮡbuf));
             var r = NewReader(br);
+
             for (nint i = 0; i < (~bΔ1).N; i++) {
                 buf.WriteString(setʗ1.headers);
                 {

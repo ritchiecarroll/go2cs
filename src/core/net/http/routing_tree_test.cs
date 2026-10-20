@@ -97,10 +97,11 @@ internal static readonly @string aAAXBABABYABMultiABXGJGXˢ = """
                 "i":
                     "/g/h/i"
 
-"""u8;
+"""u8.Raw();
 
 public static void TestRoutingAddPattern(ж<testing.T> Ꮡt) {
     @string want = aAAXBABABYABMultiABXGJGXˢ;
+
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     getTestTree().print(new http_test_package.strings_BuilderжWriter(Ꮡb), 0);
     @string got = b.String();
@@ -147,6 +148,7 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     test(getTestTree(), new testCase[]{
         new("GET"u8, ""u8, "/a"u8, "/a"u8, default!),
         new("Get"u8, ""u8, "/b"u8, ""u8, default!),
@@ -158,6 +160,7 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
         new("Get"u8, ""u8, "/g/h/i"u8, "/g/h/i"u8, default!),
         new("Get"u8, ""u8, "/g/h/j"u8, "/g/{x}/j"u8, new @string[]{"h"u8}.slice())
     }.slice());
+
     var tree = buildTree(
         itemˢ,
         postItemUserˢ,
@@ -170,6 +173,7 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
         getHeadwinsˢ,
         headHeadwinsˢ,
         pathPˢ);
+
     test(tree, new testCase[]{
         new("GET"u8, ""u8, "/item/jba"u8,
             "GET /item/{user}"u8, new @string[]{"jba"u8}.slice()),
@@ -179,7 +183,6 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
             "GET /item/{user}"u8, new @string[]{"jba"u8}.slice()),
         new("get"u8, ""u8, "/item/jba"u8,
             "/item/{user}"u8, new @string[]{"jba"u8}.slice()), // method matches are case-sensitive
-
         new("POST"u8, ""u8, "/item/jba/17"u8,
             "/item/{user}/{id}"u8, new @string[]{"jba"u8, "17"u8}.slice()),
         new("GET"u8, ""u8, "/item/jba/new"u8,
@@ -194,17 +197,16 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
             "GET /item/{user}"u8, new @string[]{"jba"u8}.slice()),
         new("GET"u8, ""u8, "/item"u8,
             ""u8, default!), // does not match
-
         new("GET"u8, ""u8, "/headwins"u8,
             "GET /headwins"u8, default!),
         new("HEAD"u8, ""u8, "/headwins"u8, // HEAD is more specific than GET
-
             "HEAD /headwins"u8, default!),
         new("GET"u8, ""u8, "/path/to/file"u8,
             "/path/{p...}"u8, new @string[]{"to/file"u8}.slice()),
         new("GET"u8, ""u8, "/path/*"u8,
             "/path/{p...}"u8, new @string[]{"*"u8}.slice())
     }.slice());
+
     // A pattern ending in {$} should only match URLS with a trailing slash.
     @string pat1 = "/a/b/{$}"u8;
     test(buildTree(pat1), new testCase[]{
@@ -213,6 +215,7 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
         new("GET"u8, ""u8, "/a/b/c"u8, ""u8, default!),
         new("GET"u8, ""u8, "/a/b/c/d"u8, ""u8, default!)
     }.slice());
+
     // A pattern ending in a single wildcard should not match a trailing slash URL.
     @string pat2 = aBWˢ;
     test(buildTree(pat2), new testCase[]{
@@ -221,6 +224,7 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
         new("GET"u8, ""u8, "/a/b/c"u8, pat2, new @string[]{"c"u8}.slice()),
         new("GET"u8, ""u8, "/a/b/c/d"u8, ""u8, default!)
     }.slice());
+
     // A pattern ending in a multi wildcard should match both URLs.
     @string pat3 = aBWˢ2;
     test(buildTree(pat3), new testCase[]{
@@ -229,6 +233,7 @@ public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
         new("GET"u8, ""u8, "/a/b/c"u8, pat3, new @string[]{"c"u8}.slice()),
         new("GET"u8, ""u8, "/a/b/c/d"u8, pat3, new @string[]{"c/d"u8}.slice())
     }.slice());
+
     // All three of the above should work together.
     test(buildTree(pat1, pat2, pat3), new testCase[]{
         new("GET"u8, ""u8, "/a/b"u8, ""u8, default!),
@@ -253,8 +258,6 @@ internal partial struct TestMatchingMethods_type /*dyn*/ {
 }
 
 public static void TestMatchingMethods(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var hostTree = buildTree(getAComˢ, putBComˢ, postFooXˢ);
     foreach (var (_, vᴛ1) in new TestMatchingMethods_type[]{
         new(
@@ -288,9 +291,9 @@ public static void TestMatchingMethods(ж<testing.T> Ꮡt) {
             "PUT"u8
         ),
         new(
-            "empty"u8, // This case shouldn't come up because we only call matchingMethods
- // when there was no match, but we include it for completeness.
-
+            // This case shouldn't come up because we only call matchingMethods
+            // when there was no match, but we include it for completeness.
+            "empty"u8,
             buildTree("/"u8), ""u8, "/"u8,
             ""u8
         )
@@ -321,17 +324,20 @@ internal static void print(this ж<global::go.net.http_package.routingNode> Ꮡn
         fmt.Fprintf(w, "%s%q:\n"u8, indent, (@string)""u8);
         n.emptyChild.print(w, level + 1);
     }
+
     ref var keys = ref heap<slice<@string>>(out var Ꮡkeys);
     Ꮡn.of(global::go.net.http_package.routingNode.Ꮡchildren).eachPair((@string k, ж<global::go.net.http_package.routingNode> _Δp1) => {
         Ꮡkeys.ValueSlot = append(Ꮡkeys.ValueSlot, k);
         return true;
     });
     slices.Sort<slice<@string>, @string>(keys);
+
     foreach (var (_, k) in keys) {
         fmt.Fprintf(w, "%s%q:\n"u8, indent, k);
         var (nΔ1, _) = Ꮡn.of(global::go.net.http_package.routingNode.Ꮡchildren).find(k);
         nΔ1.print(w, level + 1);
     }
+
     if (n.multiChild != nil) {
         fmt.Fprintf(w, "%sMULTI:\n"u8, indent);
         n.multiChild.print(w, level + 1);

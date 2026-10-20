@@ -48,6 +48,12 @@ using static go.os.user_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,12 +62,12 @@ using static go.os.user_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("os/user/cgo_listgroups_unix.go", "cgo_listgroups_unix.cs", "AA4igoKClIKChJKSgqaAgraCgoKUquSClIKCgpQ=")]
+[assembly: go.GoPositionMap("os/user/cgo_listgroups_unix.go", "cgo_listgroups_unix.cs", "AA4igoKClIKClJKSgqaAgraCgoKUquSClIKCgpQ=")]
 [assembly: go.GoPositionMap("os/user/cgo_lookup_syscall.go", "cgo_lookup_syscall.cs", "ABUugKKAooCigKKAooCigKSAooCkgKSygoKmsoKCprKCgqaygoIABRCA")]
-[assembly: go.GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKChJKClJSClIKUpoKCgpSmgoKEgoKUlIKUgpSmggAKFoKmgoKEgoSSgpSUgpSClKaCgoKUpoKChIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKCkpailIKClNyCqJKSgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "68=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;131=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
+[assembly: go.GoPositionMap("os/user/cgo_lookup_unix.go", "cgo_lookup_unix.cs", "AA8kgqaCgoKClJKClJSClIKUpoKCgpSmgoKUgoKUlIKUgpSmggAKFoKmgoKUgpSSgpSUgpSClKaCgoKUpoKClIKClJSClIKUpoK4AAcUgoK4lJSUrLKCgoKCkraClIKClNyCqJKSgoI=", "28-33:1;55-60:1;93-98:1;120-125:1", "", "70=_C_pw_uid/1/1/1,FormatUint/1/2/1,_C_pw_gid/1/1/2,FormatUint/2/2/2,_C_pw_name/1/1/3,_C_GoString/1/3/3,_C_pw_gecos/1/1/4,_C_GoString/2/3/4,_C_pw_dir/1/1/5,_C_GoString/3/3/5;136=_C_gr_gid/1/1/1,Itoa/1/1/1,_C_gr_name/1/1/2,_C_GoString/1/1/2")]
 [assembly: go.GoPositionMap("os/user/getgrouplist_syscall.go", "getgrouplist_syscall.cs", "AAsagoKClA==")]
-[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgAMGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
-[assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEOKAYLOgs6CzoI=")]
+[assembly: go.GoPositionMap("os/user/lookup.go", "lookup.cs", "AAwcntKAkoKUkgALGKKAgqSqooCCpKqiqqKokg==", "22-22:1")]
+[assembly: go.GoPositionMap("os/user/user.go", "user.cs", "AEKKAYLugu6C7oI=")]
 // </GoSourcePositionMaps>
 
 namespace go.os;

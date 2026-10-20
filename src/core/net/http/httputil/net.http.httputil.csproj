@@ -172,6 +172,7 @@
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/log/log.csproj" />
     <ProjectReference Include="$(go2csPath)core/mime/mime.csproj" />
@@ -183,6 +184,7 @@
     <ProjectReference Include="$(go2csPath)core/net/textproto/net.textproto.csproj" />
     <ProjectReference Include="$(go2csPath)core/net/url/net.url.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
+    <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
     <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/net/http/httpguts/vendor.golang.org.x.net.http.httpguts.csproj" />

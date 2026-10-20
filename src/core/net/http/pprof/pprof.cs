@@ -67,7 +67,7 @@
 // in your browser.
 //
 // For a study of the facility in action, visit
-// https://blog.golang.org/2011/06/profiling-go-programs.html.
+// https://go.dev/blog/pprof.
 namespace go.net.http;
 
 using bufio = bufio_package;
@@ -76,6 +76,7 @@ using context = context_package;
 using fmt = fmt_package;
 using html = html_package;
 using godebug = go.@internal.godebug_package;
+using goexperiment = go.@internal.goexperiment_package;
 using profile = go.@internal.profile_package;
 using io = io_package;
 using log = log_package;
@@ -142,6 +143,7 @@ internal static void configureWriteDeadline(http.ResponseWriter w, ж<http.Reque
     var (srv, ok) = r.Context().Value(http.ServerContextKey.OrTypedNil())._<ж<http.Server>>(ᐧ);
     if (ok && (~srv).WriteTimeout > 0) {
         var timeout = (~srv).WriteTimeout + ((time.Duration)(int64)(seconds * (float64)(int64)time.ΔSecond));
+
         var rc = http.NewResponseController(w);
         rc.SetWriteDeadline(time.Now().Add(timeout));
     }
@@ -173,7 +175,9 @@ public static void Profile(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     if (sec <= 0 || err != default!) {
         sec = 30;
     }
+
     configureWriteDeadline(w, Ꮡr, (float64)sec);
+
     // Set Content Type assuming StartCPUProfile will work,
     // because if it does it starts writing.
     w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
@@ -202,7 +206,9 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
     if (sec <= 0D || err != default!) {
         sec = 1D;
     }
+
     configureWriteDeadline(w, Ꮡr, sec);
+
     // Set Content Type assuming trace.Start will work,
     // because if it does it starts writing.
     w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
@@ -215,7 +221,7 @@ public static void Trace(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             return;
         }
     }
-    sleep(Ꮡr, ((time.Duration)(int64)(sec * (float64)(int64)time.ΔSecond)));
+    sleep(Ꮡr, (time.Duration)(int64)(sec * (float64)(int64)time.ΔSecond));
     trace.Stop();
 }
 
@@ -227,31 +233,36 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
 
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     w.Header().Set(contentTypeˢ, textPlainCharsetUtf8ˢ);
+
     // We have to read the whole POST body before
     // writing any output. Buffer the output here.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     // We don't know how many symbols we have, but we
     // do have symbol information. Pprof only cares whether
     // this number is 0 (no symbols available) or > 0.
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "num_symbols: 1\n"u8);
+
     ж<bufio.Reader> b = default!;
     if (r.Method == "POST"u8){
         b = bufio.NewReader(new io_ReadCloserᴠReader(r.Body));
     } else {
         b = bufio.NewReader(new strings_ReaderжReader(strings.NewReader((~r.URL).RawQuery)));
     }
+
     while (ᐧ) {
         var (word, err) = b.ReadSlice((rune)'+');
         if (err == default!) {
             word = word.slice(0, len(word) - 1); // trim +
         }
-        var (pc, _) = strconv.ParseUint(((@string)word), 0, 64);
+        var (pc, _) = strconv.ParseUint((@string)word, 0, 64);
         if (pc != 0) {
             var f = runtime.FuncForPC((uintptr)pc);
             if (f != nil) {
                 fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), "%#x %s\n"u8, pc, f.Name());
             }
         }
+
         // Wait until here to check for err; the last
         // symbol will have an err because it doesn't end in +.
         if (err != default!) {
@@ -261,6 +272,7 @@ public static void Symbol(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             break;
         }
     }
+
     w.Write(buf.Bytes());
 }
 
@@ -278,7 +290,7 @@ internal static readonly @string debugˢ = "debug"u8;
 
 internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr) {
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
-    var p = pprof.Lookup(((@string)name));
+    var p = pprof.Lookup((@string)name);
     if (p == nil) {
         serveError(w, http.StatusNotFound, unknownProfileˢ);
         return;
@@ -325,7 +337,9 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
             serveError(w, http.StatusBadRequest, secondsParameterIsNotˢ);
             return;
         }
+
         configureWriteDeadline(w, Ꮡr, (float64)sec);
+
         var (debug, _) = strconv.Atoi(Ꮡr.FormValue(debugˢ));
         if (debug != 0) {
             serveError(w, http.StatusBadRequest, secondsAndDebugParamsAreˢ);
@@ -336,9 +350,11 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
             serveError(w, http.StatusInternalServerError, failedToCollectProfileˢ);
             return;
         }
+
         var t = time.NewTimer(((time.Duration)sec) * time.ΔSecond);
         var tʗ1 = t;
         defer(() => tʗ1.Stop(), ref ᒐ);
+
         var selᴛ3 = r.Context().Done();
         var selᴛ4 = (~t).C;
         switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
@@ -346,8 +362,7 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
             var errΔ1 = r.Context().Err();
             if (AreEqual(errΔ1, context.DeadlineExceeded)){
                 serveError(w, http.StatusRequestTimeout, errΔ1.Error());
-            } else {
-                // TODO: what's a good status code for canceled requests? 400?
+            } else { // TODO: what's a good status code for canceled requests? 400?
                 serveError(w, http.StatusInternalServerError, errΔ1.Error());
             }
             return;
@@ -355,6 +370,7 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
         case 1 when selᴛ4.ꟷᐳ(out _): {
             break;
         }}
+
         (var p1, err) = collectProfile(Ꮡp);
         if (err != default!) {
             serveError(w, http.StatusInternalServerError, failedToCollectProfileˢ);
@@ -362,14 +378,18 @@ internal static void serveDeltaProfile(this handler name, http.ResponseWriter w,
         }
         var ts = p1.Value.TimeNanos;
         var dur = (~p1).TimeNanos - (~p0).TimeNanos;
+
         p0.Scale(-1D);
+
         (p1, err) = profile.Merge(new ж<profile.Profile>[]{p0, p1}.slice());
         if (err != default!) {
             serveError(w, http.StatusInternalServerError, failedToComputeDeltaˢ);
             return;
         }
+
         p1.Value.TimeNanos = ts; // set since we don't know what profile.Merge set for TimeNanos.
         p1.Value.DurationNanos = dur;
+
         w.Header().Set(contentTypeˢ, applicationOctetStreamˢ);
         w.Header().Set(contentDispositionˢ, fmt.Sprintf(@"attachment; filename=""%s-delta"""u8, name));
         p1.Write(new http_ResponseWriterᴠWriter(w));
@@ -397,6 +417,7 @@ internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> �
 internal static map<handler, bool> profileSupportsDelta = new map<handler, bool>{
     ["allocs"u8] = true,
     ["block"u8] = true,
+    ["goroutineleak"u8] = true,
     ["goroutine"u8] = true,
     ["heap"u8] = true,
     ["mutex"u8] = true,
@@ -415,6 +436,12 @@ internal static map<@string, @string> profileDescriptions = new map<@string, @st
     ["threadcreate"u8] = "Stack traces that led to the creation of new OS threads"u8,
     ["trace"u8] = "A trace of execution of the current program. You can specify the duration in the seconds GET parameter. After you get the trace file, use the go tool trace command to investigate the trace."u8
 };
+
+[GoInit] internal static void initΔ1() {
+    if (goexperiment.GoroutineLeakProfile) {
+        profileDescriptions["goroutineleak"u8] = "Stack traces of all leaked goroutines. Use debug=2 as a query parameter to export in the same format as an unrecovered panic."u8;
+    }
+}
 
 partial struct profileEntry {
     public @string Name;
@@ -442,8 +469,10 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             }
         }
     }
+
     w.Header().Set(xContentTypeOptionsˢ, nosniffˢ);
     w.Header().Set(contentTypeˢ, textHtmlCharsetUtf8ˢ);
+
     slice<profileEntry> profiles = default!;
     foreach (var (_, p) in pprof.Profiles()) {
         profiles = append(profiles, new profileEntry(
@@ -453,6 +482,7 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             Count: p.Count()
         ));
     }
+
     // Adding other profiles exposed from within this package
     foreach (var (_, p) in new @string[]{"cmdline"u8, "profile"u8, "symbol"u8, "trace"u8}.slice()) {
         profiles = append(profiles, new profileEntry(
@@ -461,7 +491,9 @@ public static void Index(http.ResponseWriter w, ж<http.Request> Ꮡr) {
             Desc: profileDescriptions[p]
         ));
     }
+
     slices.SortFunc(profiles, (profileEntry a, profileEntry b) => strings.Compare(a.Name, b.Name));
+
     {
         var err = indexTmplExecute(new http_ResponseWriterᴠWriter(w), profiles); if (err != default!) {
             log.Print(err);
@@ -490,7 +522,7 @@ Types of profiles available:
 <table>
 <thead><td>Count</td><td>Profile</td></thead>
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string tableAHrefGoroutineDebugˢ = """
 </table>
 <a href="goroutine?debug=2">full goroutine stack dump</a>
@@ -499,26 +531,29 @@ internal static readonly @string tableAHrefGoroutineDebugˢ = """
 Profile Descriptions:
 <ul>
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string ulPBodyHtmlˢ = """
 </ul>
 </p>
 </body>
 </html>
-"""u8;
+"""u8.Raw();
 
 internal static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles) {
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     b.WriteString(htmlHeadTitleDebugPprofˢ);
+
     foreach (var (_, profile) in profiles) {
         var link = Ꮡ(new url.URL(Path: profile.Href, RawQuery: "debug=1"u8));
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<tr><td>%d</td><td><a href='%s'>%s</a></td></tr>\n"u8, profile.Count, link.OrTypedNil(), html.EscapeString(profile.Name));
     }
+
     b.WriteString(tableAHrefGoroutineDebugˢ);
     foreach (var (_, profile) in profiles) {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "<li><div class=profile-name>%s: </div> %s</li>\n"u8, html.EscapeString(profile.Name), html.EscapeString(profile.Desc));
     }
     b.WriteString(ulPBodyHtmlˢ);
+
     var (_, err) = w.Write(b.Bytes());
     return err;
 }

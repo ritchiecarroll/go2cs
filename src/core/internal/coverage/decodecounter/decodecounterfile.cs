@@ -10,9 +10,10 @@ using slicereader = go.@internal.coverage.slicereader_package;
 using stringtab = go.@internal.coverage.stringtab_package;
 using io = io_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using @unsafe = unsafe_package;
 using encoding;
+using go;
 using go.@internal;
 using go.@internal.coverage;
 
@@ -58,6 +59,7 @@ public static (ж<CounterDataReader>, error) NewCounterDataReader(@string fn, io
     if ((~cdr).hdr.Version > coverage.CounterFileVersion) {
         return (default!, fmt.Errorf("version data incompatibility: reader is %d data is %d"u8, (nint)(coverage.CounterFileVersion), (~cdr).hdr.Version));
     }
+
     // Read footer.
     {
         var err = cdr.readFooter(); if (err != default!) {
@@ -126,6 +128,7 @@ internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), " FcnEntries=0x%x StrTabLen=0x%x ArgsLen=0x%x\n"u8,
             cdr.shdr.FcnEntries, cdr.shdr.StrTabLen, cdr.shdr.ArgsLen);
     }
+
     // Read string table and args.
     {
         var err = cdr.readStringTable(); if (err != default!) {
@@ -165,8 +168,7 @@ internal static error readStringTable(this ref CounterDataReader cdr) {
     if (nr != (nint)cdr.shdr.StrTabLen) {
         return fmt.Errorf("error: short read on string table"u8);
     }
-    var slr = slicereader.NewReader(b, false);
-    /* not readonly */
+    var slr = slicereader.NewReader(b, false /* not readonly */);
     cdr.stab = stringtab.NewReader(slr);
     cdr.stab.Read();
     return default!;
@@ -188,8 +190,7 @@ internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) {
     if (nr != (nint)cdr.shdr.ArgsLen) {
         return fmt.Errorf("error: short read on args table"u8);
     }
-    var slr = slicereader.NewReader(b, false);
-    /* not readonly */
+    var slr = slicereader.NewReader(b, false /* not readonly */);
     var slrʗ1 = slr;
     (@string, error) sget() {
         var kidx = slrʗ1.ReadULEB128();
@@ -377,6 +378,7 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     } else {
         throw panic("internal error: unknown counter flavor");
     }
+
     // Alternative/experimental path: one way we could handling writing
     // out counter data would be to just memcpy the counter segment
     // out to a file, meaning that a region in the counter memory
@@ -403,6 +405,7 @@ public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncP
     if (err != default!) {
         return (false, err);
     }
+
     // Read package and func indices.
     (p.PkgIdx, err) = rdu32();
     if (err != default!) {

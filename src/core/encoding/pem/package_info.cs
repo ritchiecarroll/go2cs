@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-using base64 = go.encoding.base64_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -42,8 +41,13 @@ using static go.encoding.pem_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<lineBreaker, ж<lineBreaker>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -53,7 +57,7 @@ using static go.encoding.pem_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("encoding/pem/pem.go", "pem.cs", "ACNQ0oKCgoKUgoKmAAIQ0qaUgoSCgpSClqaSkpKcAAkGhIKmgpS6goKUgoKClIKChIKCgoKCgpSEuqaClISCgqiCgoKCgrqCuoKCgpaCgoSogIKmgoKCgoKClLqCAAsYlLKCgoKWgoKUgoSCgpaCgpamooKCgpSWpoKCAAgIxIKCzoCCpICCpoKCgoKCgoKUuIKAgsiCgoCCtoCCuIKEgoCCpIKEgIKkggACENKCgIKk", "", "", "167=HasSuffix/1/1/1")]
+[assembly: go.GoPositionMap("encoding/pem/pem.go", "pem.cs", "ACNQ0oKCgoKUgoKmAAIQ0qaUgpSCgpSCpqaSkpKcAAkGlIKmgpTKgoKUgoKClIKClIKCgoKCgpSUyqaClJSCgriCgoKCgsqCyoKCgqaCgoS4gIK2goKCgoKClMqCAAsYlLKCgoKmgoKUgpSCgqaCgqamooKCgpSmpoKCAAgI1IKC7oCCpICCtoKCgoKCgoKUuIKAgsiCgoCCtoCCyIKUgoCCpIKUgIKkggACENKCgIKk", "", "", "179=HasSuffix/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;

@@ -39,6 +39,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     if (cap(stats.Pause) < 2 * maxPause + 3) {
         stats.Pause = new slice<time.Duration>(2 * maxPause + 3);
     }
+
     // readGCStats fills in the pause and end times histories (up to
     // maxPause entries) and then three more: Unix ns time of last GC,
     // number of GC, and total pause time in nanoseconds. Here we
@@ -52,6 +53,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     stats.PauseTotal = stats.Pause[n + 2];
     n /= 2; // buffer holds pauses and end times
     stats.Pause = stats.Pause.slice(0, n);
+
     if (cap(stats.PauseEnd) < maxPause) {
         stats.PauseEnd = new slice<time.Time>(0, maxPause);
     }
@@ -59,6 +61,7 @@ public static void ReadGCStats(ж<GCStats> Ꮡstats) {
     foreach (var (_, ns) in stats.Pause.slice(n, n + n)) {
         stats.PauseEnd = append(stats.PauseEnd, time.Unix(0, (int64)ns));
     }
+
     if (len(stats.PauseQuantiles) > 0) {
         if (n == 0){
             clear(stats.PauseQuantiles);

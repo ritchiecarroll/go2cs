@@ -12,9 +12,6 @@ internal partial struct canonicalHeaderKeyTest {
     internal @string @in, @out;
 }
 
-// Other valid tchar bytes in tokens:
-// Non-ASCII or anything with spaces or non-token chars is unchanged:
-// This caused a panic due to mishandling of a space:
 internal static slice<canonicalHeaderKeyTest> canonicalHeaderKeyTests = new canonicalHeaderKeyTest[]{
     new("a-b-c"u8, "A-B-C"u8),
     new("a-1-c"u8, "A-1-C"u8),
@@ -22,12 +19,18 @@ internal static slice<canonicalHeaderKeyTest> canonicalHeaderKeyTests = new cano
     new("uSER-aGENT"u8, "User-Agent"u8),
     new("user-agent"u8, "User-Agent"u8),
     new("USER-AGENT"u8, "User-Agent"u8),
+
+    // Other valid tchar bytes in tokens:
     new("foo-bar_baz"u8, "Foo-Bar_baz"u8),
     new("foo-bar$baz"u8, "Foo-Bar$baz"u8),
     new("foo-bar~baz"u8, "Foo-Bar~baz"u8),
     new("foo-bar*baz"u8, "Foo-Bar*baz"u8),
+
+    // Non-ASCII or anything with spaces or non-token chars is unchanged:
     new("üser-agenT"u8, "üser-agenT"u8),
     new("a B"u8, "a B"u8),
+
+    // This caused a panic due to mishandling of a space:
     new("C Ontent-Transfer-Encoding"u8, "C Ontent-Transfer-Encoding"u8),
     new("foo bar"u8, "foo bar"u8)
 }.slice();

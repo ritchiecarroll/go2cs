@@ -25,10 +25,12 @@ internal static error wrapSyscallError(@string name, error err) {
 // otherwise it just returns the original io.Reader and the theoretical unlimited remaining amount of bytes.
 internal static (ж<Δio.LimitedReader>, Δio.Reader, int64) tryLimitedReader(Δio.Reader r) {
     int64 remain = 9223372036854775807L; // by default, copy until EOF
+
     var (lr, ok) = r._<ж<Δio.LimitedReader>>(ᐧ);
     if (!ok) {
         return (default!, r, remain);
     }
+
     remain = lr.Value.N;
     return (lr, (~lr).R, remain);
 }

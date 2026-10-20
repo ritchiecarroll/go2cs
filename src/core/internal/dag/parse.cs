@@ -100,10 +100,12 @@ public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) {
 public static (ж<Graph>, error) Parse(@string dag) {
     var g = newGraph();
     var disallowed = new rule[]{}.slice();
+
     var (rules, err) = parseRules(dag);
     if (err != default!) {
         return (default!, err);
     }
+
     // TODO: Add line numbers to errors.
     ref var errors = ref heap<slice<@string>>(out var Ꮡerrors);
     void errorf(@string format, params ꓸꓸꓸany aʗp) {
@@ -137,6 +139,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
             }
         }
     }
+
     // Check for missing definition.
     foreach (var (_, tos) in (~g).edges) {
         foreach (var (to, _) in tos) {
@@ -145,6 +148,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
             }
         }
     }
+
     // Complete transitive closure.
     foreach (var (_, k) in (~g).Nodes) {
         foreach (var (_, i) in (~g).Nodes) {
@@ -161,6 +165,7 @@ public static (ж<Graph>, error) Parse(@string dag) {
             }
         }
     }
+
     // Check negative assertions against completed allowed graph.
     foreach (var (_, bad) in disallowed) {
         foreach (var (_, less) in bad.less) {
@@ -171,9 +176,11 @@ public static (ж<Graph>, error) Parse(@string dag) {
             }
         }
     }
+
     if (len(errors) > 0) {
         return (default!, fmt.Errorf("%s"u8, strings.Join(errors, "\n"u8)));
     }
+
     return (g, default!);
 }
 
@@ -187,7 +194,7 @@ partial struct rule {
 partial struct ΔsyntaxError /*@string*/;
 
 internal static @string Error(this ΔsyntaxError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -217,6 +224,7 @@ internal static (slice<rule> @out, error err) parseRules(@string rules) {
             }}
         }, ref ᒐ);
         var p = Ꮡ(new rulesParser(lineno: 1, text: rules));
+
         slice<@string> prev = default!;
         @string op = default!;
         while (ᐧ) {
@@ -279,8 +287,8 @@ internal static (slice<@string> list, @string token) nextList(this ref rulesPars
         if (fallthrough || !matchᴛ1 && (exprᴛ1 == ","u8 || exprᴛ1 == "<"u8 || exprᴛ1 == "!<"u8 || exprᴛ1 == ";"u8)) { matchᴛ1 = true;
             p.syntaxError(badListSyntaxˢ);
         }
-
         list = append(list, tok);
+
         tok = p.nextToken();
         if (tok != ","u8) {
             return (list, tok);
@@ -338,7 +346,6 @@ internal static @string nextToken(this ref rulesParser p) {
             p.lastWord = t;
             return t;
         }
-
     }
 }
 

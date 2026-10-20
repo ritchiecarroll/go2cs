@@ -232,7 +232,7 @@ internal static (any, bool) popTail(this ж<poolDequeue> Ꮡd) {
 }
 
 [GoType] partial struct poolChainElt {
-    internal partial ref poolDequeue poolDequeue { get; }
+    /*embed*/ internal poolDequeue poolDequeue;
     // next and prev link to the adjacent poolChainElts in this
     // poolChain.
     //

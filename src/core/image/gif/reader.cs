@@ -31,37 +31,29 @@ partial interface reader :
 }
 
 // Masks etc.
+// Fields.
 internal static UntypedInt fColorTable => /* 1 << 7 */ 128;
-
 internal static UntypedInt fInterlace => /* 1 << 6 */ 64;
-
 internal static UntypedInt fColorTableBitsMask => 7;
 
+// Graphic control flags.
 internal static UntypedInt gcTransparentColorSet => /* 1 << 0 */ 1;
-
 internal static UntypedInt gcDisposalMethodMask => /* 7 << 2 */ 28;
 
 // Disposal Methods.
 public static UntypedInt DisposalNone => 0x01;
-
 public static UntypedInt DisposalBackground => 0x02;
-
 public static UntypedInt DisposalPrevious => 0x03;
 
 // Section indicators.
 internal static UntypedInt sExtension => 0x21;
-
 internal static UntypedInt sImageDescriptor => 0x2C;
-
 internal static UntypedInt sTrailer => 0x3B;
 
 // Extensions.
 internal static UntypedInt eText => 0x01; // Plain Text
-
 internal static UntypedInt eGraphicControl => 0xF9; // Graphic Control
-
 internal static UntypedInt eComment => 0xFE; // Comment
-
 internal static UntypedInt eApplication => 0xFF; // Application
 
 internal static error readFull(io.Reader r, slice<byte> b) {
@@ -130,6 +122,7 @@ internal static void fill(this ref blockReader b) {
     if (b.err != default!) {
         return;
     }
+
     b.i = 0;
     b.err = readFull((~b.d).r, (~b.d).tmp.slice(0, b.j));
     if (b.err != default!) {
@@ -144,6 +137,7 @@ internal static (byte, error) ReadByte(this ref blockReader b) {
             return (0, b.err);
         }
     }
+
     var c = (~b.d).tmp[b.i];
     b.i++;
     return (c, default!);
@@ -161,6 +155,7 @@ internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
             return (0, b.err);
         }
     }
+
     nint n = copy(p, (~b.d).tmp.slice(b.i, b.j));
     b.i += (uint8)n;
     return (n, default!);
@@ -183,6 +178,7 @@ internal static error close(this ref blockReader b) {
         // Some other error was encountered while reading.
         return b.err;
     }
+
     if (b.i == b.j) {
         // We reached the end of a sub block reading LZW data. We'll allow at
         // most one more sub block of data with a length of 1 byte.
@@ -197,6 +193,7 @@ internal static error close(this ref blockReader b) {
             return errTooMuch;
         }
     }
+
     // Part of a sub-block remains buffered. We expect that the next attempt to
     // buffer a sub-block will reach the block terminator.
     b.fill();
@@ -206,6 +203,7 @@ internal static error close(this ref blockReader b) {
     if (b.err != default!) {
         return b.err;
     }
+
     return errTooMuch;
 }
 
@@ -221,7 +219,9 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
             d.r = new bufio_Readerжreader(bufio.NewReader(r));
         }
     }
+
     d.loopCount = -1;
+
     var err = d.readHeaderAndScreenDescriptor();
     if (err != default!) {
         return err;
@@ -229,6 +229,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     if (configOnly) {
         return default!;
     }
+
     while (ᐧ) {
         var (c, errΔ1) = readByte(d.r);
         if (errΔ1 != default!) {
@@ -248,6 +249,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
                     return errΔ1;
                 }
             }
+
             if (!keepAllFrames && len(d.image) == 1) {
                 return default!;
             }
@@ -261,7 +263,6 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
         else { /* default: */
             return fmt.Errorf("gif: unknown block type: 0x%.2x"u8, c);
         }
-
     }
 }
 
@@ -270,12 +271,12 @@ internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
     if (err != default!) {
         return fmt.Errorf("gif: reading header: %v"u8, err);
     }
-    d.vers = ((@string)(d.tmp[..6]));
+    d.vers = (@string)(d.tmp[..6]);
     if (d.vers != "GIF87a"u8 && d.vers != "GIF89a"u8) {
         return fmt.Errorf("gif: can't recognize format %q"u8, d.vers);
     }
-    d.width = (nint)d.tmp[6] + ((nint)d.tmp[7] << (int)(8));
-    d.height = (nint)d.tmp[8] + ((nint)d.tmp[9] << (int)(8));
+    d.width = (nint)d.tmp[6] + ((nint)d.tmp[7] << 8);
+    d.height = (nint)d.tmp[8] + ((nint)d.tmp[9] << 8);
     {
         var fields = d.tmp[10]; if ((byte)(fields & (byte)fColorTable) != 0) {
             d.backgroundIndex = d.tmp[11];
@@ -320,20 +321,19 @@ internal static error readExtension(this ref decoder d) {
         return d.readGraphicControl();
     }
     else if (exprᴛ1 == eComment) {
+        // nothing to do but read the data.
     }
     else if (exprᴛ1 == eApplication) {
         var (b, errΔ2) = readByte(d.r);
         if (errΔ2 != default!) {
-            // nothing to do but read the data.
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ2);
         }
+        // The spec requires size be 11, but Adobe sometimes uses 10.
         size = (nint)b;
     }
     else { /* default: */
-        return fmt.Errorf("gif: unknown extension 0x%.2x"u8, // The spec requires size be 11, but Adobe sometimes uses 10.
- extension);
+        return fmt.Errorf("gif: unknown extension 0x%.2x"u8, extension);
     }
-
     if (size > 0) {
         {
             var errΔ3 = readFull(d.r, d.tmp.slice(0, size)); if (errΔ3 != default!) {
@@ -341,6 +341,7 @@ internal static error readExtension(this ref decoder d) {
             }
         }
     }
+
     // Application Extension with "NETSCAPE2.0" as string and 1 in data means
     // this extension defines a loop count.
     if (extension == eApplication && ((sstring)(d.tmp.slice(0, size))) == "NETSCAPE2.0"u8) {
@@ -352,7 +353,7 @@ internal static error readExtension(this ref decoder d) {
             return default!;
         }
         if (n == 3 && d.tmp[0] == 1) {
-            d.loopCount = (nint)((nint)d.tmp[1] | ((nint)d.tmp[2] << (int)(8)));
+            d.loopCount = (nint)d.tmp[1] | (nint)d.tmp[2] << 8;
         }
     }
     while (ᐧ) {
@@ -376,8 +377,8 @@ internal static error readGraphicControl(this ref decoder d) {
         return fmt.Errorf("gif: invalid graphic control extension block size: %d"u8, d.tmp[0]);
     }
     var flags = d.tmp[1];
-    d.disposalMethod = (byte)((((byte)(flags & (byte)gcDisposalMethodMask)) >> (int)(2)));
-    d.delayTime = (nint)((nint)d.tmp[2] | ((nint)d.tmp[3] << (int)(8)));
+    d.disposalMethod = (byte)((((byte)(flags & (byte)gcDisposalMethodMask)) >> 2));
+    d.delayTime = (nint)d.tmp[2] | (nint)d.tmp[3] << 8;
     if ((byte)(flags & (byte)gcTransparentColorSet) != 0) {
         d.transparentIndex = d.tmp[4];
         d.hasTransparentIndex = true;
@@ -415,7 +416,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
         if (d.hasTransparentIndex) {
             if (!useLocalColorTable) {
                 // Clone the global color table.
-                m.Value.Palette = appendꓸꓸꓸ(((Δcolor.Palette)default!), d.globalColorTable);
+                m.Value.Palette = appendꓸꓸꓸ((Δcolor.Palette)default!, d.globalColorTable);
             }
             {
                 nint ti = (nint)d.transparentIndex; if (ti < len((~m).Palette)){
@@ -473,6 +474,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
                 return errTooMuch;
             }
         }
+
         // In practice, some GIFs have an extra byte in the data sub-block
         // stream, which we ignore. See https://golang.org/issue/16146.
         {
@@ -483,6 +485,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
                 return fmt.Errorf("gif: reading image data: %v"u8, errΔ2);
             }
         }
+
         // Check that the color indexes are inside the palette.
         if (len((~m).Palette) < 256) {
             foreach (var (_, pixel) in (~m).Pix) {
@@ -491,10 +494,12 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
                 }
             }
         }
+
         // Undo the interlacing if necessary.
         if ((byte)(d.imageFields & (byte)fInterlace) != 0) {
             uninterlace(m);
         }
+
         if (keepAllFrames || len(d.image) == 0) {
             d.image = append(d.image, m);
             d.delay = append(d.delay, d.delayTime);
@@ -520,11 +525,12 @@ internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref deco
             return (default!, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
         }
     }
-    nint left = (nint)d.tmp[0] + ((nint)d.tmp[1] << (int)(8));
-    nint top = (nint)d.tmp[2] + ((nint)d.tmp[3] << (int)(8));
-    nint width = (nint)d.tmp[4] + ((nint)d.tmp[5] << (int)(8));
-    nint height = (nint)d.tmp[6] + ((nint)d.tmp[7] << (int)(8));
+    nint left = (nint)d.tmp[0] + ((nint)d.tmp[1] << 8);
+    nint top = (nint)d.tmp[2] + ((nint)d.tmp[3] << 8);
+    nint width = (nint)d.tmp[4] + ((nint)d.tmp[5] << 8);
+    nint height = (nint)d.tmp[6] + ((nint)d.tmp[7] << 8);
     d.imageFields = d.tmp[8];
+
     // The GIF89a spec, Section 20 (Image Descriptor) says: "Each image must
     // fit within the boundaries of the Logical Screen, as defined in the
     // Logical Screen Descriptor."
@@ -568,16 +574,12 @@ partial struct interlaceScan {
     internal nint skip, start;
 }
 
-// Group 1 : Every 8th. row, starting with row 0.
-// Group 2 : Every 8th. row, starting with row 4.
-// Group 3 : Every 4th. row, starting with row 2.
-// Group 4 : Every 2nd. row, starting with row 1.
 // interlacing represents the set of scans in an interlaced GIF image.
 internal static slice<interlaceScan> interlacing = new interlaceScan[]{
-    new(8, 0),
-    new(8, 4),
-    new(4, 2),
-    new(2, 1)
+    new(8, 0), // Group 1 : Every 8th. row, starting with row 0.
+    new(8, 4), // Group 2 : Every 8th. row, starting with row 4.
+    new(4, 2), // Group 3 : Every 4th. row, starting with row 2.
+    new(2, 1) // Group 4 : Every 2nd. row, starting with row 1.
 }.slice();
 
 // uninterlace rearranges the pixels in m to account for interlaced input.

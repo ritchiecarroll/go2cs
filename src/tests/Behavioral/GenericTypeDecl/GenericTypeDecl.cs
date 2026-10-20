@@ -11,9 +11,10 @@ partial struct Pair<T, U> {
 
 internal static void Main() {
     var p = new Pair<@string, nint>(
-        First: "answer"u8,
+        First: "answer",
         Second: 42
     );
+
     fmt.Printf("Pair: %v, %v\n"u8, p.First, p.Second);
 }
 

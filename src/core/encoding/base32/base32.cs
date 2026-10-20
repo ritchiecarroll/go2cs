@@ -42,10 +42,12 @@ public static ж<Encoding> NewEncoding(@string encoder) {
     if (len(encoder) != 32) {
         throw panic("encoding alphabet is not 32-bytes long");
     }
+
     var e = @new<Encoding>();
     e.Value.padChar = StdPadding;
     copy((~e).encode[..], encoder);
     copy((~e).decodeMap[..], decodeMapInitialize);
+
     for (nint i = 0; i < len(encoder); i++) {
         // Note: While we document that the alphabet cannot contain
         // the padding character, we do not enforce it since we do not know
@@ -59,7 +61,6 @@ public static ж<Encoding> NewEncoding(@string encoder) {
             throw panic("encoding alphabet includes duplicate symbols");
             break;
         }}
-
         e.Value.decodeMap[encoder[i]] = (uint8)i;
     }
     return e;
@@ -91,7 +92,6 @@ public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) {
         throw panic("padding contained in alphabet");
         break;
     }}
-
     enc.padChar = padding;
     return Ꮡenc;
 }
@@ -114,55 +114,60 @@ public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> sr
     // loop below means a nil check at every operation. Lift that nil check
     // outside of the loop to speed up the encoder.
     _ = enc.encode;
+
     nint di = 0;
     nint si = 0;
     nint n = (len(src) / 5) * 5;
     while (si < n) {
         // Combining two 32 bit loads allows the same code to be used
         // for 32 and 64 bit platforms.
-        var hi = (uint32)((uint32)((uint32)(((uint32)src[si + 0] << (int)(24)) | ((uint32)src[si + 1] << (int)(16))) | ((uint32)src[si + 2] << (int)(8))) | (uint32)src[si + 3]);
-        var lo = (uint32)((hi << (int)(8)) | (uint32)src[si + 4]);
-        dst[di + 0] = enc.encode[(uint32)(((hi >> (int)(27))) & 0x1F)];
-        dst[di + 1] = enc.encode[(uint32)(((hi >> (int)(22))) & 0x1F)];
-        dst[di + 2] = enc.encode[(uint32)(((hi >> (int)(17))) & 0x1F)];
-        dst[di + 3] = enc.encode[(uint32)(((hi >> (int)(12))) & 0x1F)];
-        dst[di + 4] = enc.encode[(uint32)(((hi >> (int)(7))) & 0x1F)];
-        dst[di + 5] = enc.encode[(uint32)(((hi >> (int)(2))) & 0x1F)];
-        dst[di + 6] = enc.encode[(uint32)(((lo >> (int)(5))) & 0x1F)];
-        dst[di + 7] = enc.encode[(uint32)((lo) & 0x1F)];
+        var hi = (uint32)src[si + 0] << 24 | (uint32)src[si + 1] << 16 | (uint32)src[si + 2] << 8 | (uint32)src[si + 3];
+        var lo = hi << 8 | (uint32)src[si + 4];
+
+        dst[di + 0] = enc.encode[((hi >> 27) & 0x1F)];
+        dst[di + 1] = enc.encode[((hi >> 22) & 0x1F)];
+        dst[di + 2] = enc.encode[((hi >> 17) & 0x1F)];
+        dst[di + 3] = enc.encode[((hi >> 12) & 0x1F)];
+        dst[di + 4] = enc.encode[((hi >> 7) & 0x1F)];
+        dst[di + 5] = enc.encode[((hi >> 2) & 0x1F)];
+        dst[di + 6] = enc.encode[((lo >> 5) & 0x1F)];
+        dst[di + 7] = enc.encode[((lo) & 0x1F)];
+
         si += 5;
         di += 8;
     }
+
     // Add the remaining small block
     nint remain = len(src) - si;
     if (remain == 0) {
         return;
     }
+
     // Encode the remaining bytes in reverse order.
     var val = (uint32)0;
     var exprᴛ1 = remain;
     var matchᴛ1 = false;
     if (exprᴛ1 is 4) { matchᴛ1 = true;
         val |= (uint32)((uint32)src[si + 3]);
-        dst[di + 6] = enc.encode[(uint32)((val << (int)(3)) & 0x1F)];
-        dst[di + 5] = enc.encode[(uint32)((val >> (int)(2)) & 0x1F)];
+        dst[di + 6] = enc.encode[(val << 3 & 0x1F)];
+        dst[di + 5] = enc.encode[(val >> 2 & 0x1F)];
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 2] << (int)(8)));
-        dst[di + 4] = enc.encode[(uint32)((val >> (int)(7)) & 0x1F)];
+        val |= (uint32)(((uint32)src[si + 2] << 8));
+        dst[di + 4] = enc.encode[(val >> 7 & 0x1F)];
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
-        val |= (uint32)(((uint32)src[si + 1] << (int)(16)));
-        dst[di + 3] = enc.encode[(uint32)((val >> (int)(12)) & 0x1F)];
-        dst[di + 2] = enc.encode[(uint32)((val >> (int)(17)) & 0x1F)];
+        val |= (uint32)(((uint32)src[si + 1] << 16));
+        dst[di + 3] = enc.encode[(val >> 12 & 0x1F)];
+        dst[di + 2] = enc.encode[(val >> 17 & 0x1F)];
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
-        val |= (uint32)(((uint32)src[si + 0] << (int)(24)));
-        dst[di + 1] = enc.encode[(uint32)((val >> (int)(22)) & 0x1F)];
-        dst[di + 0] = enc.encode[(uint32)((val >> (int)(27)) & 0x1F)];
+        val |= (uint32)(((uint32)src[si + 0] << 24));
+        dst[di + 1] = enc.encode[(val >> 22 & 0x1F)];
+        dst[di + 0] = enc.encode[(val >> 27 & 0x1F)];
     }
 
     // Pad the final quantum
@@ -187,7 +192,7 @@ public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, s
 public static @string EncodeToString(this ref Encoding enc, slice<byte> src) {
     var buf = new slice<byte>(enc.EncodedLen(len(src)));
     enc.Encode(buf, src);
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 partial struct encoder {
@@ -206,6 +211,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
     if (e.err != default!) {
         return (0, e.err);
     }
+
     // Leading fringe.
     if (e.nbuf > 0) {
         nint i = default!;
@@ -226,6 +232,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         }
         e.nbuf = 0;
     }
+
     // Large interior chunks.
     while (len(p) >= 5) {
         nint nn = len(e.@out) / 8 * 5;
@@ -242,6 +249,7 @@ internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) {
         n += nn;
         p = p.slice(nn);
     }
+
     // Trailing fringe.
     copy(e.buf[..], p);
     e.nbuf = len(p);
@@ -299,12 +307,15 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
 
     // Lift the nil check outside of the loop.
     _ = enc.decodeMap;
+
     nint dsti = 0;
     nint olen = len(src);
+
     while (len(src) > 0 && !end) {
         // Decode quantum using the base32 alphabet
         array<byte> dbuf = new(8);
         nint dlen = 8;
+
         for (nint j = 0; j < 8; ) {
             if (len(src) == 0) {
                 if (enc.padChar != NoPadding) {
@@ -346,35 +357,35 @@ internal static (nint n, bool end, error err) decode(this ref Encoding enc, slic
             }
             j++;
         }
+
         // Pack 8x 5-bit source blocks into 5 byte destination
         // quantum
         var exprᴛ1 = dlen;
         var matchᴛ1 = false;
         if (exprᴛ1 is 8) { matchᴛ1 = true;
-            dst[dsti + 4] = (byte)((byte)(dbuf[6] << (int)(5)) | dbuf[7]);
+            dst[dsti + 4] = (byte)((byte)(dbuf[6] << 5) | dbuf[7]);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 7) { matchᴛ1 = true;
-            dst[dsti + 3] = (byte)((byte)((byte)(dbuf[4] << (int)(7)) | (byte)(dbuf[5] << (int)(2))) | (dbuf[6] >> (int)(3)));
+            dst[dsti + 3] = (byte)((byte)((byte)(dbuf[4] << 7) | (byte)(dbuf[5] << 2)) | dbuf[6] >> 3);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
-            dst[dsti + 2] = (byte)((byte)(dbuf[3] << (int)(4)) | (dbuf[4] >> (int)(1)));
+            dst[dsti + 2] = (byte)((byte)(dbuf[3] << 4) | dbuf[4] >> 1);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
-            dst[dsti + 1] = (byte)((byte)((byte)(dbuf[1] << (int)(6)) | (byte)(dbuf[2] << (int)(1))) | (dbuf[3] >> (int)(4)));
+            dst[dsti + 1] = (byte)((byte)((byte)(dbuf[1] << 6) | (byte)(dbuf[2] << 1)) | dbuf[3] >> 4);
             n++;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
-            dst[dsti + 0] = (byte)((byte)(dbuf[0] << (int)(3)) | (dbuf[1] >> (int)(2)));
+            dst[dsti + 0] = (byte)((byte)(dbuf[0] << 3) | dbuf[1] >> 2);
             n++;
         }
-
         dsti += 5;
     }
     return (n, end, default!);
@@ -407,6 +418,7 @@ public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byt
         n--;
     }
     n = decodedLen(n, NoPadding);
+
     dst = slices.Grow<slice<byte>, byte>(dst, n);
     (n, var err) = enc.Decode(dst.slice(len(dst)).slice(0, n), src);
     return (dst.slice(0, len(dst) + n), err);
@@ -468,9 +480,11 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         }
         return (n, default!);
     }
+
     if (d.err != default!) {
         return (0, d.err);
     }
+
     // Read a chunk.
     nint nn = (len(p) + 4) / 5 * 8;
     if (nn < 8) {
@@ -479,6 +493,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     if (nn > len(d.buf)) {
         nn = len(d.buf);
     }
+
     // Minimum amount of bytes that needs to be read each cycle
     nint min = default!;
     bool expectsPadding = default!;
@@ -489,6 +504,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         min = 8 - d.nbuf;
         expectsPadding = true;
     }
+
     (nn, d.err) = readEncodedData(d.r, d.buf.slice(d.nbuf, nn), min, expectsPadding);
     d.nbuf += nn;
     if (d.nbuf < min) {
@@ -497,6 +513,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     if (nn > 0 && d.end) {
         return (0, ((CorruptInputError)0));
     }
+
     // Decode chunk into p, or d.out and then p if p is too small.
     nint nr = default!;
     if ((~d.enc).padChar == NoPadding){
@@ -505,6 +522,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         nr = d.nbuf / 8 * 8;
     }
     nint nw = d.enc.DecodedLen(d.nbuf);
+
     if (nw > len(p)){
         (nw, d.end, err) = d.enc.decode(d.outbuf[0..], d.buf.slice(0, nr));
         d.@out = d.outbuf.slice(0, nw);
@@ -517,9 +535,11 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
     for (nint i = 0; i < d.nbuf; i++) {
         d.buf[i] = d.buf[i + nr];
     }
+
     if (err != default! && (d.err == default! || AreEqual(d.err, io.EOF))) {
         d.err = err;
     }
+
     if (len(d.@out) > 0) {
         // We cannot return all the decoded bytes to the caller in this
         // invocation of Read, so we return a nil error to ensure that Read
@@ -527,6 +547,7 @@ internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) {
         // returned with the last set of decoded bytes.
         return (n, default!);
     }
+
     return (n, d.err);
 }
 

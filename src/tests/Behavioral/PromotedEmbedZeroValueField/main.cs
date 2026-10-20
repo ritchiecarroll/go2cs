@@ -13,7 +13,7 @@ internal static void inc(this ref counter c) {
 }
 
 partial struct holder {
-    internal partial ref counter counter { get; }
+    /*embed*/ internal counter counter;
     internal @string name;
 }
 
@@ -22,16 +22,12 @@ partial struct slotBox {
     internal holder slot;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object countˢ = (@string)"count:"u8;
-private static readonly object nameEmptyˢ = (@string)"name-empty:"u8;
-
 internal static void Main() {
     var b = new slotBox(id: 3);
     b.slot.counter.inc();
     b.slot.counter.inc();
     b.slot.counter.inc();
-    fmt.Println((@string)"id:"u8, b.id, countˢ, b.slot.n, nameEmptyˢ, b.slot.name == ""u8);
+    fmt.Println("id:", b.id, "count:", b.slot.n, "name-empty:", b.slot.name == ""u8);
 }
 
 } // end main_package

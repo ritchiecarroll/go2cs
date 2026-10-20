@@ -5,9 +5,9 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using constant = global::go.go.constant_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -45,6 +45,7 @@ public static @string String(this ж<Union> Ꮡu) {
     return TypeString(new UnionжΔType(Ꮡu), default!);
 }
 
+// A Term represents a term in a [Union].
 partial struct ΔTerm /*Δterm*/;
 
 // NewTerm returns a new union term.
@@ -80,7 +81,9 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
 
     var (blist, tlist) = flattenUnion(default!, uexpr);
     assert(len(blist) == len(tlist) - 1);
+
     slice<ж<ΔTerm>> terms = default!;
+
     ΔType u = default!;
     foreach (var (i, x) in tlist) {
         var Δterm = parseTilde(Ꮡcheck, x);
@@ -99,13 +102,16 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             terms = append(terms, Δterm);
             u = new UnionжΔType(Ꮡ(new Union(terms)));
         }
+
         if (i > 0) {
             check.recordTypeAndValue(blist[i - 1], typexpr, u, default!);
         }
     }
+
     if (!isValid(u)) {
         return u;
     }
+
     // Check validity of terms.
     // Do this check later because it requires types to be set up.
     // Note: This is a quadratic algorithm, but unions tend to be short.
@@ -116,18 +122,21 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             if (!isValid((~t).typ)) {
                 continue;
             }
-            var uΔ1 = under((~t).typ);
+
+            var uΔ1 = (~t).typ.Underlying();
             var (f, _) = uΔ1._<ж<Interface>>(ᐧ);
             if ((~t).tilde) {
                 if (f != nil) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "invalid use of ~ (%s is an interface)"u8, (~t).typ);
                     continue; // don't report another error for t
                 }
+
                 if (!Identical(uΔ1, (~t).typ)) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "invalid use of ~ (underlying type of %s is %s)"u8, (~t).typ, uΔ1);
                     continue;
                 }
             }
+
             // Stand-alone embedded interfaces are ok and are handled by the single-type case
             // in the beginning. Embedded interfaces with tilde are excluded above. If we reach
             // here, we must have at least two terms in the syntactic term list (but not necessarily
@@ -147,9 +156,9 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
                     Ꮡcheck.errorf(new ast_Exprᴠpositioner(tlistʗ1[i]), InvalidUnion, "cannot use %s in union (%s embeds comparable)"u8, t.OrTypedNil(), t.OrTypedNil());
                     break;
                 }}
-
                 continue; // terms with interface types are not subject to the no-overlap rule
             }
+
             // Report overlapping (non-disjoint) terms such as
             // a|a, a|~a, ~a|~a, and ~a|A (where under(A) == a).
             {
@@ -159,6 +168,7 @@ internal static ΔType parseUnion(ж<Checker> Ꮡcheck, ast.Expr uexpr) {
             }
         }
     }).describef(new ast_Exprᴠpositioner(uexpr), "check term validity %s"u8, uexpr);
+
     return u;
 }
 

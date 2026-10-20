@@ -16,12 +16,14 @@ public static void TestOneByteReader_nonEmptyReader(ж<testing.T> Ꮡt) {
     @string msg = helloWorldˢ;
     var buf = @new<bytes.Buffer>();
     buf.WriteString(msg);
+
     var obr = OneByteReader(new iotest_test_package.bytes_BufferжReader(buf));
     slice<byte> b = default!;
     var (n, err) = obr.Read(b);
     if (err != default! || n != 0) {
         Ꮡt.Errorf("Empty buffer read returned n=%d err=%v"u8, n, err);
     }
+
     b = new slice<byte>(3);
     // Read from obr until EOF.
     var got = @new<strings.Builder>();
@@ -53,6 +55,7 @@ public static void TestOneByteReader_nonEmptyReader(ж<testing.T> Ꮡt) {
 
 public static void TestOneByteReader_emptyReader(ж<testing.T> Ꮡt) {
     var r = @new<bytes.Buffer>();
+
     var obr = OneByteReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default!;
     {
@@ -60,6 +63,7 @@ public static void TestOneByteReader_emptyReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Empty buffer read returned n=%d err=%v"u8, nΔ1, errΔ1);
         }
     }
+
     b = new slice<byte>(5);
     var (n, err) = obr.Read(b);
     {
@@ -117,6 +121,7 @@ public static void TestHalfReader_nonEmptyReader(ж<testing.T> Ꮡt) {
 
 public static void TestHalfReader_emptyReader(ж<testing.T> Ꮡt) {
     var r = @new<bytes.Buffer>();
+
     var hr = HalfReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default!;
     {
@@ -124,6 +129,7 @@ public static void TestHalfReader_emptyReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Empty buffer read returned n=%d err=%v"u8, nΔ1, errΔ1);
         }
     }
+
     b = new slice<byte>(5);
     var (n, err) = hr.Read(b);
     {
@@ -236,7 +242,9 @@ public static void TestDataErrReader_nonEmptyReader(ж<testing.T> Ꮡt) {
     @string msg = helloWorldˢ;
     var buf = @new<bytes.Buffer>();
     buf.WriteString(msg);
+
     var der = DataErrReader(new iotest_test_package.bytes_BufferжReader(buf));
+
     var b = new slice<byte>(3);
     var got = @new<strings.Builder>();
     nint n = default!;
@@ -261,6 +269,7 @@ public static void TestDataErrReader_nonEmptyReader(ж<testing.T> Ꮡt) {
 
 public static void TestDataErrReader_emptyReader(ж<testing.T> Ꮡt) {
     var r = @new<bytes.Buffer>();
+
     var der = DataErrReader(new iotest_test_package.bytes_BufferжReader(r));
     slice<byte> b = default!;
     {
@@ -268,6 +277,7 @@ public static void TestDataErrReader_emptyReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Empty buffer read returned n=%d err=%v"u8, nΔ1, errΔ1);
         }
     }
+
     b = new slice<byte>(5);
     var (n, err) = der.Read(b);
     {
@@ -294,6 +304,7 @@ public static void TestErrReader(ж<testing.T> Ꮡt) {
         new("non-nil error"u8, errors.New(ioFailureˢ)),
         new("io.EOF"u8, io.EOF)
     }.slice();
+
     foreach (var (_, tt) in cases) {
         ref var ttΔ1 = ref heap<TestErrReader_cases>(out var ᏑttΔ1);
         ttΔ1 = tt;
@@ -315,6 +326,7 @@ internal static readonly @string msgᶜ = "Now is the time for all good gophers.
 
 public static void TestStringsReader(ж<testing.T> Ꮡt) {
     @string msg = msgᶜ;
+
     var r = strings.NewReader(msg);
     {
         var err = TestReader(new iotest_test_package.strings_ReaderжReader(r), slice<byte>(msg)); if (err != default!) {

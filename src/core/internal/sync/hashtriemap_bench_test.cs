@@ -58,6 +58,7 @@ internal static void benchmarkHashTrieMapLoadOrStore(ж<testing.B> Ꮡb, slice<@
 
     b.ReportAllocs();
     ref var m = ref heap(new isync.HashTrieMap<@string, nint>(), out var Ꮡm);
+
     var dataʗ1 = data;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         nint i = 0;

@@ -5,8 +5,9 @@ namespace go.@internal;
 
 using fmt = fmt_package;
 using sort = sort_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
+using go;
 
 partial class profile_package {
 
@@ -25,6 +26,7 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
     if (err != default!) {
         return (default!, err);
     }
+
     var pm = Ꮡ(new profileMerger(
         p: p,
         samples: new map<sampleKey, ж<Sample>>(len((~srcs[0]).Sample)),
@@ -32,11 +34,13 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
         functions: new map<functionKey, ж<Function>>(len((~srcs[0]).Function)),
         mappings: new map<mappingKey, ж<Mapping>>(len((~srcs[0]).Mapping))
     ));
+
     foreach (var (_, src) in srcs) {
         // Clear the profile-specific hash tables
         pm.Value.locationsByID = new map<uint64, ж<Location>>(len((~src).Location));
         pm.Value.functionsByID = new map<uint64, ж<Function>>(len((~src).Function));
         pm.Value.mappingsByID = new map<uint64, mapInfo>(len((~src).Mapping));
+
         if (len((~pm).mappings) == 0 && len((~src).Mapping) > 0) {
             // The Mapping list has the property that the first mapping
             // represents the main binary. Take the first Mapping we see,
@@ -44,12 +48,14 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
             // arbitrary order.
             pm.mapMapping((~src).Mapping[0]);
         }
+
         foreach (var (_, s) in (~src).Sample) {
             if (!isZeroSample(ref (s).DerefOrNull())) {
                 pm.mapSample(s);
             }
         }
     }
+
     foreach (var (_, s) in (~p).Sample) {
         if (isZeroSample(ref (s).DerefOrNull())) {
             // If there are any zero samples, re-merge the profile to GC
@@ -57,6 +63,7 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
             return Merge(new ж<Profile>[]{p}.slice());
         }
     }
+
     return (p, default!);
 }
 
@@ -71,18 +78,21 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
             return err;
         }
     }
+
     var baseVals = new slice<int64>(len(p.SampleType));
     foreach (var (_, s) in pb.Sample) {
         foreach (var (i, v) in (~s).Value) {
             baseVals[i] += v;
         }
     }
+
     var srcVals = new slice<int64>(len(p.SampleType));
     foreach (var (_, s) in p.Sample) {
         foreach (var (i, v) in (~s).Value) {
             srcVals[i] += v;
         }
     }
+
     var normScale = new slice<float64>(len(baseVals));
     foreach (var (i, _) in baseVals) {
         if (srcVals[i] == 0){
@@ -169,20 +179,26 @@ internal static ж<Sample> mapSample(this ref profileMerger pm, ж<Sample> Ꮡsr
 
 // key generates sampleKey to be used as a key for maps.
 internal static sampleKey key(this ref Sample sample) {
+    var labelsᴷ = new stackAppend<@string>();
+    var numlabelsᴷ = new stackAppend<@string>();
+
     var ids = new slice<@string>(len(sample.Location));
     foreach (var (i, l) in sample.Location) {
         ids[i] = strconv.FormatUint((~l).ID, 16);
     }
+
     var labels = new slice<@string>(0, len(sample.Label));
     foreach (var (k, v) in sample.Label) {
-        labels = append(labels, fmt.Sprintf("%q%q"u8, k, v));
+        labels = append(labelsᴷ, labels, fmt.Sprintf("%q%q"u8, k, v));
     }
     sort.Strings(labels);
+
     var numlabels = new slice<@string>(0, len(sample.NumLabel));
     foreach (var (k, v) in sample.NumLabel) {
-        numlabels = append(numlabels, fmt.Sprintf("%q%x%x"u8, k, v, sample.NumUnit[k]));
+        numlabels = append(numlabelsᴷ, numlabels, fmt.Sprintf("%q%x%x"u8, k, v, sample.NumUnit[k]));
     }
     sort.Strings(numlabels);
+
     return new sampleKey(
         strings.Join(ids, "|"u8),
         strings.Join(labels, ""u8),
@@ -202,12 +218,14 @@ internal static ж<Location> mapLocation(this ref profileMerger pm, ж<Location>
     if (Ꮡsrc == nil) {
         return default!;
     }
+
     {
         var (lΔ1, ok) = pm.locationsByID[src.ID, ꟷ]; if (ok) {
             pm.locationsByID[src.ID] = lΔ1;
             return lΔ1;
         }
     }
+
     var mi = pm.mapMapping(src.Mapping);
     var l = Ꮡ(new Location(
         ID: (uint64)(len((~pm.p).Location) + 1),
@@ -268,11 +286,13 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
     if (Ꮡsrc == nil) {
         return new mapInfo(nil);
     }
+
     {
         var (miΔ1, ok) = pm.mappingsByID[src.ID, ꟷ]; if (ok) {
             return miΔ1;
         }
     }
+
     // Check memoization tables.
     var mk = src.key();
     {
@@ -295,6 +315,7 @@ internal static mapInfo mapMapping(this ref profileMerger pm, ж<Mapping> Ꮡsrc
         HasInlineFrames: src.HasInlineFrames
     ));
     pm.p.Value.Mapping = append((~pm.p).Mapping, m);
+
     // Update memoization tables.
     pm.mappings[mk] = m;
     var mi = new mapInfo(m, 0);
@@ -308,6 +329,7 @@ internal static mappingKey key(this ref Mapping m) {
     // Normalize addresses to handle address space randomization.
     // Round up to next 4K boundary to avoid minor discrepancies.
     const uint64 mapsizeRounding = 0x1000;
+
     var size = m.Limit - m.Start;
     size = size + mapsizeRounding - 1;
     size = size - (size % mapsizeRounding);
@@ -315,6 +337,7 @@ internal static mappingKey key(this ref Mapping m) {
         size: size,
         offset: m.Offset
     );
+
     switch (ᐧ) {
     case {} when m.BuildID != ""u8: {
         key.buildIDOrFile = m.BuildID;
@@ -325,12 +348,11 @@ internal static mappingKey key(this ref Mapping m) {
         break;
     }
     default: {
+        // A mapping containing neither build ID nor file name is a fake mapping. A
+        // key with empty buildIDOrFile is used for fake mappings so that they are
+        // treated as the same mapping during merging.
         break;
     }}
-
-    // A mapping containing neither build ID nor file name is a fake mapping. A
-    // key with empty buildIDOrFile is used for fake mappings so that they are
-    // treated as the same mapping during merging.
     return key;
 }
 
@@ -403,6 +425,7 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
             }
         }
     }
+
     ref var timeNanos = ref heap(new int64(), out var ᏑtimeNanos);
     ref var durationNanos = ref heap(new int64(), out var ᏑdurationNanos);
     ref var period = ref heap(new int64(), out var Ꮡperiod);
@@ -429,6 +452,7 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
             defaultSampleType = s.Value.DefaultSampleType;
         }
     }
+
     var p = Ꮡ(new Profile(
         SampleType: new slice<ж<ValueType>>(len((~srcs[0]).SampleType)),
         DropFrames: (~srcs[0]).DropFrames,
@@ -453,9 +477,11 @@ internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
     if (!equalValueType(ref (p.PeriodType).DerefOrNull(), ref (pb.PeriodType).DerefOrNull())) {
         return fmt.Errorf("incompatible period types %v and %v"u8, p.PeriodType.OrTypedNil(), pb.PeriodType.OrTypedNil());
     }
+
     if (len(p.SampleType) != len(pb.SampleType)) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
+
     foreach (var (i, _) in p.SampleType) {
         if (!equalValueType(ref (p.SampleType[i]).DerefOrNull(), ref (pb.SampleType[i]).DerefOrNull())) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);

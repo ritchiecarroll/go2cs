@@ -64,6 +64,17 @@ internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
     return false;
 }
 
+// An Importer resolves import paths to package Objects.
+// The imports map records the packages already imported,
+// indexed by package id (canonical import path).
+// An Importer must determine the canonical import path and
+// check the map to see if it is already present in the imports map.
+// If so, the Importer can return the map entry. Otherwise, the
+// Importer should load the package data for the given path into
+// a new *[Object] (pkg), record pkg in the imports map, and then
+// return pkg.
+//
+// Deprecated: use the type checker [go/types] instead; see [Object].
 // type Importer is a methodless func type — rendered inline as its base delegate
 
 // NewPackage creates a new [Package] node from a set of [File] nodes. It resolves
@@ -78,10 +89,10 @@ internal static bool resolve(ж<Scope> Ꮡscope, ref Ident ident) {
 // Deprecated: use the type checker [go/types] instead; see [Object].
 public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@string, ж<File>> files, Func<map<@string, ж<Object>>, @string, (ж<Object>, error)> importer, ж<Scope> Ꮡuniverse) {
     ref var fset = ref Ꮡfset.DerefOrNull();
-    ref var universe = ref Ꮡuniverse.DerefOrNull();
 
     pkgBuilder p = default!;
     p.fset = Ꮡfset;
+
     // complete package scope
     ref var pkgName = ref heap<@string>(out var ᏑpkgName);
     pkgName = ""u8;
@@ -107,8 +118,10 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
             p.declare(pkgScope, nil, obj);
         }
     }
+
     // package global mapping of imported package ids to package objects
     var imports = new map<@string, ж<Object>>();
+
     // complete file scopes with imports and resolve identifiers
     foreach (var (_, @file) in files) {
         // ignore file if it belongs to a different package
@@ -116,6 +129,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
         if ((~(~@file).Name).Name != pkgName) {
             continue;
         }
+
         // build file scope by processing all imports
         var importErrors = false;
         var fileScope = NewScope(pkgScope);
@@ -134,11 +148,13 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
             // TODO(gri) If a local package name != "." is provided,
             // global identifier resolution could proceed even if the
             // import failed. Consider adjusting the logic here a bit.
+
             // local name overrides imported package name
             @string name = pkg.Value.Name;
             if ((~spec).Name != nil) {
                 name = spec.Value.Name.Value.Name;
             }
+
             // add import to file scope
             if (name == "."u8){
                 // merge imported scope with file scope
@@ -157,6 +173,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
                 p.declare(fileScope, pkgScope, obj);
             }
         }
+
         // resolve identifiers
         if (importErrors) {
             // don't use the universe scope without correct imports
@@ -176,6 +193,7 @@ public static (ж<Package>, error) NewPackage(ж<token.FileSet> Ꮡfset, map<@st
         @file.Value.Unresolved = (~@file).Unresolved.slice(0, i);
         pkgScope.Value.Outer = Ꮡuniverse; // reset universe scope
     }
+
     p.errors.Sort();
     return (Ꮡ(new Package(pkgName, pkgScope, imports, files)), p.errors.Err());
 }

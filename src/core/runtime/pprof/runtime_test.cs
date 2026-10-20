@@ -16,6 +16,7 @@ partial class pprof_internal_test_package {
 
 public static partial void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
     var sync = new channel<EmptyStruct>(0);
+
     ref var wantLabels = ref heap<map<@string, @string>>(out var ᏑwantLabels);
     wantLabels = new map<@string, @string>{};
     {
@@ -33,6 +34,7 @@ public static partial void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
         syncʗ1.ᐸꟷ(new EmptyStruct());
     });
     ᐸꟷ(sync);
+
     wantLabels = new map<@string, @string>{["key"u8] = "value"u8};
     var ctx = WithLabels(context.Background(), Labels(keyˢ, valueˢ));
     SetGoroutineLabels(ctx);
@@ -51,6 +53,7 @@ public static partial void TestSetGoroutineLabels(ж<testing.T> Ꮡt) {
         syncʗ2.ᐸꟷ(new EmptyStruct());
     });
     ᐸꟷ(sync);
+
     wantLabels = new map<@string, @string>{};
     ctx = context.Background();
     SetGoroutineLabels(ctx);
@@ -78,6 +81,7 @@ public static void TestDo(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Expected parent goroutine's profile labels to be empty before Do, got %v"u8, gotLabels);
         }
     }
+
     Do(context.Background(), Labels(key1ˢ, value1ˢ, key2ˢ, value2ˢ), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context ctx) => {
         var wantLabelsΔ1 = new map<@string, @string>{["key1"u8] = "value1"u8, ["key2"u8] = "value2"u8};
         {
@@ -85,6 +89,7 @@ public static void TestDo(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("parent goroutine's profile labels: got %v, want %v"u8, gotLabels, wantLabelsΔ1);
             }
         }
+
         var sync = new channel<EmptyStruct>(0);
         var syncʗ1 = sync;
         goǃ(() => {
@@ -98,6 +103,7 @@ public static void TestDo(ж<testing.T> Ꮡt) {
         });
         ᐸꟷ(sync);
     });
+
     wantLabels = new map<@string, @string>{};
     {
         var gotLabels = getProfLabel(); if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(gotLabels, wantLabels)) {

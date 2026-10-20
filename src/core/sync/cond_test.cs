@@ -231,11 +231,10 @@ public static partial void TestRace(ж<Δtesting.T> Ꮡt) {
 }
 
 public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     for (nint iters = 0; iters < 1000; iters++) {
         ref var m = ref heap(new Δsync.Mutex(), out var Ꮡm);
         var cond = NewCond(new Δsync.MutexжLocker(Ꮡm));
+
         // Start a waiter.
         var ch = new channel<EmptyStruct>(0);
         var chʗ1 = ch;
@@ -245,11 +244,14 @@ public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
             chʗ1.ᐸꟷ(new EmptyStruct());
             condʗ1.Wait();
             Ꮡm.Unlock();
+
             chʗ1.ᐸꟷ(new EmptyStruct());
         });
+
         ᐸꟷ(ch);
         Ꮡm.Lock();
         Ꮡm.Unlock();
+
         // We know that the waiter is in the cond.Wait() call because we
         // synchronized with it, then acquired/released the mutex it was
         // holding when we synchronized.
@@ -264,6 +266,7 @@ public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
         goǃ(() => {
             condʗ2.Broadcast();
         });
+
         var condʗ3 = cond;
         goǃ(() => {
             Ꮡm.Lock();
@@ -272,8 +275,10 @@ public static partial void TestCondSignalStealing(ж<Δtesting.T> Ꮡt) {
             }
             Ꮡm.Unlock();
         });
+
         // Check that the first waiter does get signaled.
         ᐸꟷ(ch);
+
         // Release the second waiter in case it didn't get the
         // broadcast.
         Ꮡm.Lock();
@@ -331,6 +336,7 @@ internal static partial void benchmarkCond(ж<Δtesting.B> Ꮡb, nint waiters) {
     var c = NewCond(new Δsync.MutexжLocker(Ꮡ(new Mutex(nil))));
     var done = new channel<bool>(0);
     nint id = 0;
+
     for (nint routine = 0; routine < waiters + 1; routine++) {
         var cʗ1 = c;
         var doneʗ1 = done;

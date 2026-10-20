@@ -109,7 +109,7 @@ public static void TestBuffers_WriteTo(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct testBuffer_writeTo_writeLog /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal slice<nint> log;
 }
 
@@ -131,6 +131,7 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
         for (nint i = 0; i < chunks; i++) {
             want.WriteByte((byte)i);
         }
+
 
         withTCPConnPair(Ꮡt, error (ж<global::go.net_package.TCPConn> c) => {
             ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
@@ -160,11 +161,13 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
             if (!bytes.Equal(all, Ꮡwant.Value.Bytes()) || err != default!) {
                 return fmt.Errorf("client read %q, %v; want %q, nil"u8, all, err, Ꮡwant.Value.Bytes());
             }
+
             ᏑwriteLog.of(testBuffer_writeTo_writeLog.ᏑMutex).Lock(); // no need to unlock
             nint gotSum = default!;
             foreach (var (_, v) in ᏑwriteLog.Value.log) {
                 gotSum += v;
             }
+
             nint wantSum = default!;
             var exprᴛ1 = Δruntime.GOOS;
             if (exprᴛ1 == "aix"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "linux"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8) {
@@ -189,7 +192,6 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
                     Ꮡt.Errorf("write calls = %v; want %v"u8, len(ᏑwriteLog.Value.log), wantCalls);
                 }
             }
-
             if (gotSum != wantSum) {
                 Ꮡt.Errorf("writev call sum  = %v; want %v"u8, gotSum, wantSum);
             }
@@ -207,12 +209,12 @@ internal static readonly object buffersWriteToClosedConnˢ = (@string)"Buffers.W
 public static partial void TestWritevError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (Δruntime.GOOS == "windows"u8) {
             Ꮡt.Skipf("skipping the test: windows does not have problem sending large chunks of data"u8);
         }
+
         var ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+
         var ch = new channel<global::go.net_package.Conn>(1);
         var chʗ1 = ch;
         var lnʗ1 = ln;
@@ -222,6 +224,7 @@ public static partial void TestWritevError(ж<testing.T> Ꮡt) {
                 c.Close();
             }
         }, ref ᒐ);
+
         var chʗ2 = ch;
         var lnʗ2 = ln;
         goǃ(() => {
@@ -249,12 +252,13 @@ public static partial void TestWritevError(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(noServerSideConnectionˢ);
         }
         c2.Close();
+
         // 1 GB of data should be enough to notice the connection is gone.
         // Just a few bytes is not enough.
         // Arrange to reuse the same 1 MB buffer so that we don't allocate much.
-        var buf = new slice<byte>((1 << (int)(20)));
+        var buf = new slice<byte>((1 << 20));
         ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
-        buffers = new global::go.net_package.Buffers((1 << (int)(10)));
+        buffers = new global::go.net_package.Buffers((1 << 10));
         foreach (var (i, _) in buffers) {
             buffers[i] = buf;
         }

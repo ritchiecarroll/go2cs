@@ -8,6 +8,12 @@ namespace go.vendor.golang.org.x.crypto.cryptobyte;
 
 partial class asn1_package {
 
+// Tag represents an ASN.1 identifier octet, consisting of a tag number
+// (indicating a type) and class (such as context-specific or constructed).
+//
+// Methods in the cryptobyte package only support the low-tag-number form, i.e.
+// a single identifier octet with bits 7-8 encoding the class and bits 1-6
+// encoding the tag number.
 partial struct Tag /*num:uint8*/;
 
 internal static UntypedInt classConstructed => 0x20;
@@ -25,35 +31,20 @@ public static Tag ContextSpecific(this Tag t) {
 
 // The following is a list of standard tag and class combinations.
 public static Tag BOOLEAN => /* Tag(1) */ 1;
-
 public static Tag INTEGER => /* Tag(2) */ 2;
-
 public static Tag BIT_STRING => /* Tag(3) */ 3;
-
 public static Tag OCTET_STRING => /* Tag(4) */ 4;
-
 public static Tag NULL => /* Tag(5) */ 5;
-
 public static Tag OBJECT_IDENTIFIER => /* Tag(6) */ 6;
-
 public static Tag ENUM => /* Tag(10) */ 10;
-
 public static Tag UTF8String => /* Tag(12) */ 12;
-
 public static Tag SEQUENCE => /* Tag(16 | classConstructed) */ 48;
-
 public static Tag SET => /* Tag(17 | classConstructed) */ 49;
-
 public static Tag PrintableString => /* Tag(19) */ 19;
-
 public static Tag T61String => /* Tag(20) */ 20;
-
 public static Tag IA5String => /* Tag(22) */ 22;
-
 public static Tag UTCTime => /* Tag(23) */ 23;
-
 public static Tag GeneralizedTime => /* Tag(24) */ 24;
-
 public static Tag GeneralString => /* Tag(27) */ 27;
 
 } // end asn1_package

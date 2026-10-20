@@ -29,8 +29,10 @@ internal static void benchmarkMake(ж<testing.B> Ꮡb, slice<@string> testData) 
     foreach (var (i, _) in testData) {
         handles = append(handles, Make<@string>(testData[i]));
     }
+
     b.ReportAllocs();
     b.ResetTimer();
+
     var testDataʗ1 = testData;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         nint i = 0;
@@ -42,7 +44,9 @@ internal static void benchmarkMake(ж<testing.B> Ꮡb, slice<@string> testData) 
             }
         }
     });
+
     b.StopTimer();
+
     Δruntime.GC();
     Δruntime.GC();
 }

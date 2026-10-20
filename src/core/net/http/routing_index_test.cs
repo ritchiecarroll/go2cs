@@ -59,6 +59,7 @@ internal static slice<@string> indexConflicts(ж<global::go.net.http_package.pat
 // sample of parts.
 internal static slice<ж<global::go.net.http_package.pattern>> generatePatterns() {
     ref var pats = ref heap<slice<ж<global::go.net.http_package.pattern>>>(out var Ꮡpats);
+
     var collect = (@string s) => {
         // Replace duplicate wildcards with unique ones.
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
@@ -80,10 +81,12 @@ internal static slice<ж<global::go.net.http_package.pattern>> generatePatterns(
         }
         Ꮡpats.ValueSlot = append(Ꮡpats.ValueSlot, pat);
     };
+
     slice<@string> methods = new @string[]{""u8, "GET "u8, "HEAD "u8, "POST "u8}.slice();
     slice<@string> hosts = new @string[]{""u8, "h1"u8, "h2"u8}.slice();
     slice<@string> segs = new @string[]{"/a"u8, "/b"u8, "/{x}"u8}.slice();
     slice<@string> finalSegs = new @string[]{"/a"u8, "/b"u8, "/{f}"u8, "/{m...}"u8, "/{$}"u8}.slice();
+
     var g = genConcat(
         genChoice(methods),
         genChoice(hosts),
@@ -93,6 +96,8 @@ internal static slice<ж<global::go.net.http_package.pattern>> generatePatterns(
     return pats;
 }
 
+// A generator is a function that calls its argument with the strings that it
+// generates.
 // type generator is a methodless func type — rendered inline as its base delegate
 
 // genConst generates a single constant string.

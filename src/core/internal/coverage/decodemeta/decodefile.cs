@@ -51,6 +51,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
         fileView: fileView,
         tmp: new slice<byte>(256)
     ));
+
     {
         var err = r.readFileHeader(); if (err != default!) {
             return (default!, err);
@@ -63,24 +64,29 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     error err = default!;
+
     r.fileRdr = bufio.NewReader(new os_FileжReader(r.f));
+
     // Read file header.
     {
         var errΔ1 = binary.Read(new bufio_ReaderжReader(r.fileRdr), binary.LittleEndian, Ꮡr.of(CoverageMetaFileReader.Ꮡhdr)); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
+
     // Verify magic string
     var m = r.hdr.Magic.Clone();
     var g = coverage.CovMetaMagic.Clone();
     if (m[0] != g[0] || m[1] != g[1] || m[2] != g[2] || m[3] != g[3]) {
         return fmt.Errorf("invalid meta-data file magic string"u8);
     }
+
     // Vet the version. If this is a meta-data file from the future,
     // we won't be able to read it.
     if (r.hdr.Version > coverage.MetaFileVersion) {
-        return fmt.Errorf("meta-data file withn unknown version %d (expected %d)"u8, r.hdr.Version, (nint)(coverage.MetaFileVersion));
+        return fmt.Errorf("meta-data file with an unknown version %d (expected %d)"u8, r.hdr.Version, (nint)(coverage.MetaFileVersion));
     }
+
     // Read package offsets for good measure
     r.pkgOffsets = new slice<uint64>((nint)(r.hdr.Entries));
     for (var i = (uint64)0; i < r.hdr.Entries; i++) {
@@ -106,6 +112,7 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
                 i, r.pkgLengths[i], r.hdr.TotalLength);
         }
     }
+
     // Read string table.
     var b = new slice<byte>((nint)(r.hdr.StrTabLength));
     (var nr, err) = r.fileRdr.Read(b);
@@ -115,13 +122,14 @@ internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) {
     if (nr != (nint)r.hdr.StrTabLength) {
         return fmt.Errorf("error: short read on string table"u8);
     }
-    var slr = slicereader.NewReader(b, false);
-    /* not readonly */
+    var slr = slicereader.NewReader(b, false /* not readonly */);
     r.strtab = stringtab.NewReader(slr);
     r.strtab.Read();
+
     if (r.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= read-in header is: %+v\n"u8, r);
     }
+
     return default!;
 }
 
@@ -205,12 +213,15 @@ public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileRe
     }
     var off = r.pkgOffsets[pkIdx];
     var len = r.pkgLengths[pkIdx];
+
     if (r.debug) {
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "=-= for pk %d, off=%d len=%d\n"u8, pkIdx, off, len);
     }
+
     if (r.fileView != default!) {
         return (r.fileView.slice((nint)(off), (nint)(off + len)), default!);
     }
+
     var payload = payloadbuf[..0];
     if (cap(payload) < (nint)len) {
         payload = new slice<byte>(0, (nint)(len));

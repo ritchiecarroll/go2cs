@@ -7,8 +7,8 @@ namespace go.go;
 
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -89,21 +89,25 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
     var again = true;
     while (again) {
         again = false;
+
         foreach (var (i, edge) in check.mono.edges) {
             var src = Ꮡ(check.mono.vertices, edge.src);
             var dst = Ꮡ(check.mono.vertices, edge.dst);
+
             // N.B., we're looking for the greatest weight paths, unlike
             // typical Bellman-Ford.
             nint w = (~src).weight + edge.weight;
             if (w <= (~dst).weight) {
                 continue;
             }
+
             dst.Value.pre = i;
             dst.Value.len = (~src).len + 1;
             if ((~dst).len == len(check.mono.vertices)) {
                 Ꮡcheck.reportInstanceLoop(edge.dst);
                 return;
             }
+
             dst.Value.weight = w;
             again = true;
         }
@@ -112,46 +116,52 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
 
 internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     ref var check = ref Ꮡcheck.DerefOrNull();
+    var stackᴷ = new stackAppend<nint>();
 
     slice<nint> stack = default!;
     var seen = new slice<bool>(len(check.mono.vertices));
+
     // We have a path that contains a cycle and ends at v, but v may
     // only be reachable from the cycle, not on the cycle itself. We
     // start by walking backwards along the path until we find a vertex
     // that appears twice.
     while (!seen[v]) {
-        stack = append(stack, v);
+        stack = append(stackᴷ, stack, v);
         seen[v] = true;
         v = check.mono.edges[check.mono.vertices[v].pre].src;
     }
+
     // Trim any vertices we visited before visiting v the first
     // time. Since v is the first vertex we found within the cycle, any
     // vertices we visited earlier cannot be part of the cycle.
     while (stack[0] != v) {
         stack = stack[1..];
     }
+
     // TODO(mdempsky): Pivot stack so we report the cycle from the top?
+
     var err = Ꮡcheck.newError(InvalidInstanceCycle);
     var obj0 = check.mono.vertices[v].obj;
     err.addf(new TypeNameжpositioner(obj0), "instantiation cycle:"u8);
+
     var qf = RelativeTo(check.pkg);
     foreach (var (_, vΔ1) in stack) {
         var edge = check.mono.edges[check.mono.vertices[vΔ1].pre];
         var obj = check.mono.vertices[edge.dst].obj;
+
         switch (obj.of(TypeName.Ꮡobject).Type().type()) {
         default: {
             throw panic("unexpected type");
             break;
         }
         case ж<Named>: {
-            err.addf(((atPos)edge.pos), "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s implicitly parameterized by %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }
         case ж<TypeParam>: {
-            err.addf(((atPos)edge.pos), "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
+            err.addf((atPos)edge.pos, "%s instantiated as %s"u8, obj.of(TypeName.Ꮡobject).Name(), TypeString(edge.typ, qf)); // secondary error, \t indented
             break;
         }}
-
     }
     err.report();
 }
@@ -192,23 +202,26 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
     if (tpar.Obj().of(TypeName.Ꮡobject).Pkg() != Ꮡpkg) {
         return;
     }
+
     // flow adds an edge from vertex src representing that typ flows to tpar.
     void flow(nint src, ΔType typ) {
         nint weight = 1;
         if (AreEqual(typ, targ)) {
             weight = 0;
         }
+
         Ꮡw.Value.addEdge(Ꮡw.Value.typeParamVertex(Ꮡtpar), src, weight, pos, targ);
     }
+
     // Recursively walk the type argument to find any defined types or
     // type parameters.
     ref var @do = ref heap<Action<ΔType>>(out var Ꮡdo);
     var flowʗ1 = flow;
     @do = (ΔType typ) => {
-        var switchᴛ10 = Unalias(typ);
-        switch (switchᴛ10.type()) {
+        var switchᴛ9 = Unalias(typ);
+        switch (switchᴛ9.type()) {
         default: {
-            var typΔ1 = switchᴛ10;
+            var typΔ1 = switchᴛ9;
             throw panic("unexpected type");
             break;
         }
@@ -223,6 +236,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
                     flowʗ1(src, new NamedжΔType(typΔ1));
                 }
             }
+
             var targs = typΔ1.TypeArgs();
             for (nint i = 0; i < targs.Len(); i++) {
                 Ꮡdo.ValueSlot(targs.At(i));
@@ -234,6 +248,7 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
             break;
         }
         case ж<Basic> typΔ1: {
+            // ok
             break;
         }
         case ж<Chan> typΔ1: {
@@ -255,7 +270,6 @@ internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> Ꮡpkg, token�
         }
         case ж<Interface> typΔ1: {
             for (nint i = 0; i < typΔ1.NumMethods(); i++) {
-                // ok
                 Ꮡdo.ValueSlot(typΔ1.Method(i).of(Func.Ꮡobject).Type());
             }
             break;
@@ -289,16 +303,20 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, 
     if (obj.of(TypeName.Ꮡobject).Pkg() != Ꮡpkg) {
         return -1; // imported type
     }
+
     var root = Ꮡpkg.Scope();
     if (obj.of(TypeName.Ꮡobject).Parent() == root) {
         return -1; // package scope, no ambient type parameters
     }
+
     {
         var (idxΔ1, ok) = w.nameIdx[obj, ꟷ]; if (ok) {
             return idxΔ1;
         }
     }
+
     nint idx = -1;
+
     // Walk the type definition's scope to find any ambient type
     // parameters that it's implicitly parameterized by.
     for (var scope = obj.of(TypeName.Ꮡobject).Parent(); scope != root; scope = scope.Parent()) {
@@ -311,6 +329,7 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, 
                                 idx = len(w.vertices);
                                 w.vertices = append(w.vertices, new monoVertex(obj: obj));
                             }
+
                             w.addEdge(idx, w.typeParamVertex(tpar), 1, obj.of(TypeName.Ꮡobject).Pos(), new TypeParamжΔType(tpar));
                         }
                     }
@@ -318,6 +337,7 @@ internal static nint localNamedVertex(this ref monoGraph w, ж<Package> Ꮡpkg, 
             }
         }
     }
+
     if (w.nameIdx == default!) {
         w.nameIdx = new map<ж<TypeName>, nint>();
     }
@@ -334,15 +354,19 @@ internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar
             Ꮡtpar = x; tpar = ref Ꮡtpar.DerefOrNull();
         }
     }
+
     var obj = tpar.Obj();
+
     {
         var (idxΔ1, ok) = w.nameIdx[obj, ꟷ]; if (ok) {
             return idxΔ1;
         }
     }
+
     if (w.nameIdx == default!) {
         w.nameIdx = new map<ж<TypeName>, nint>();
     }
+
     nint idx = len(w.vertices);
     w.vertices = append(w.vertices, new monoVertex(obj: obj));
     w.nameIdx[obj] = idx;

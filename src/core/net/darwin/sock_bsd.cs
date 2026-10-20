@@ -25,20 +25,19 @@ internal static nint maxListenerBacklog() {
         (n, err) = syscall.SysctlUint32(kernIpcSoacceptqueueˢ);
     }
     else if (exprᴛ1 == "netbsd"u8) {
+        // NOTE: NetBSD has no somaxconn-like kernel state so far
     }
     else if (exprᴛ1 == "openbsd"u8) {
         (n, err) = syscall.SysctlUint32(kernSomaxconnˢ);
     }
-
-    // NOTE: NetBSD has no somaxconn-like kernel state so far
     if (n == 0 || err != default!) {
         return syscall.SOMAXCONN;
     }
     // FreeBSD stores the backlog in a uint16, as does Linux.
     // Assume the other BSDs do too. Truncate number to avoid wrapping.
     // See issue 5030.
-    if (n > (1 << (int)(16)) - 1) {
-        n = (1 << (int)(16)) - 1;
+    if (n > (1 << 16) - 1) {
+        n = (1 << 16) - 1;
     }
     return (nint)n;
 }

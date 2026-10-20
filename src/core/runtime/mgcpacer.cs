@@ -6,22 +6,73 @@ namespace go;
 using cpu = @internal.cpu_package;
 using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for go:linkname
+using Δmath = @internal.runtime.math_package;
+using strconv = @internal.strconv_package;
+// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
 using @internal.runtime;
 using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
+// gcGoalUtilization is the goal CPU utilization for
+// marking as a fraction of GOMAXPROCS.
+//
+// Increasing the goal utilization will shorten GC cycles as the GC
+// has more resources behind it, lessening costs from the write barrier,
+// but comes at the cost of increasing mutator latency.
 internal static UntypedFloat gcGoalUtilization => /* gcBackgroundUtilization */ 0.25;
+
+// gcBackgroundUtilization is the fixed CPU utilization for background
+// marking. It must be <= gcGoalUtilization. The difference between
+// gcGoalUtilization and gcBackgroundUtilization will be made up by
+// mark assists. The scheduler will aim to use within 50% of this
+// goal.
+//
+// As a general rule, there's little reason to set gcBackgroundUtilization
+// < gcGoalUtilization. One reason might be in mostly idle applications,
+// where goroutines are unlikely to assist at all, so the actual
+// utilization will be lower than the goal. But this is moot point
+// because the idle mark workers already soak up idle CPU resources.
+// These two values are still kept separate however because they are
+// distinct conceptually, and in previous iterations of the pacer the
+// distinction was more important.
 internal static UntypedFloat gcBackgroundUtilization => 0.25;
+
+// gcCreditSlack is the amount of scan work credit that can
+// accumulate locally before updating gcController.heapScanWork and,
+// optionally, gcController.bgScanCredit. Lower values give a more
+// accurate assist ratio and make it more likely that assists will
+// successfully steal background credit. Higher values reduce memory
+// contention.
 internal static UntypedInt gcCreditSlack => 2000;
+
+// gcAssistTimeSlack is the nanoseconds of mutator assist time that
+// can accumulate on a P before updating gcController.assistTime.
 internal static UntypedInt gcAssistTimeSlack => 5000;
+
+// gcOverAssistWork determines how many extra units of scan work a GC
+// assist does when an assist happens. This amortizes the cost of an
+// assist by pre-paying for this many bytes of future allocations.
 internal static UntypedInt gcOverAssistWork => /* 64 << 10 */ 65536;
+
+// defaultHeapMinimum is the value of heapMinimum for GOGC==100.
 internal static UntypedInt defaultHeapMinimum => /* (goexperiment.HeapMinimum512KiBInt)*(512<<10) +
 	(1-goexperiment.HeapMinimum512KiBInt)*(4<<20) */ 4194304;
+
+// maxStackScanSlack is the bytes of stack space allocated or freed
+// that can accumulate on a P before updating gcController.stackSize.
 internal static UntypedInt maxStackScanSlack => /* 8 << 10 */ 8192;
+
+// memoryLimitMinHeapGoalHeadroom is the minimum amount of headroom the
+// pacer gives to the heap goal when operating in the memory-limited regime.
+// That is, it'll reduce the heap goal by this many extra bytes off of the
+// base calculation, at minimum.
 internal static UntypedInt memoryLimitMinHeapGoalHeadroom => /* 1 << 20 */ 1048576;
+
+// memoryLimitHeapGoalHeadroomPercent is how headroom the memory-limit-based
+// heap goal should have as a percent of the maximum possible heap goal allowed
+// to maintain the memory limit.
 internal static UntypedInt memoryLimitHeapGoalHeadroomPercent => 3;
 
 // gcController implements the GC pacing controller that determines
@@ -295,12 +346,11 @@ internal static void init(this ж<gcControllerState> Ꮡc, int32 gcPercent, int6
     Ꮡc.setGCPercent(gcPercent);
     Ꮡc.setMemoryLimit(memoryLimit);
     Ꮡc.commit(true); // No sweep phase in the first GC cycle.
+    // N.B. Don't bother calling traceHeapGoal. Tracing is never enabled at
+    // initialization time.
+    // N.B. No need to call revise; there's no GC enabled during
+    // initialization.
 }
-
-// N.B. Don't bother calling traceHeapGoal. Tracing is never enabled at
-// initialization time.
-// N.B. No need to call revise; there's no GC enabled during
-// initialization.
 
 // startCycle resets the GC controller's state and computes estimates
 // for a new GC cycle. The caller must hold worldsema and the world
@@ -318,6 +368,7 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
     Ꮡc.of(gcControllerState.ᏑidleMarkTime).Store(0);
     c.markStartTime = markStartTime;
     c.triggered = Ꮡc.of(gcControllerState.ᏑheapLive).Load();
+
     // Compute the background mark utilization goal. In general,
     // this may not come out exactly. We round the number of
     // dedicated workers so that the utilization is closest to
@@ -340,16 +391,19 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
     } else {
         c.fractionalUtilizationGoal = 0D;
     }
+
     // In STW mode, we just want dedicated workers.
     if (debug.gcstoptheworld > 0) {
         dedicatedMarkWorkersNeeded = (int64)procs;
         c.fractionalUtilizationGoal = 0D;
     }
+
     // Clear per-P state
     foreach (var (_, Δp) in allp) {
         Δp.Value.gcAssistTime = 0;
-        Δp.Value.gcFractionalMarkTime = 0;
+        Δp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Store(0);
     }
+
     if (trigger.kind == gcTriggerTime){
         // During a periodic GC cycle, reduce the number of idle mark workers
         // required. However, we need at least one dedicated mark worker or
@@ -369,17 +423,19 @@ internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStart
         // change during a GC cycle.
         Ꮡc.setMaxIdleMarkWorkers((int32)procs - (int32)dedicatedMarkWorkersNeeded);
     }
+
     // Compute initial values for controls that are updated
     // throughout the cycle.
     Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Store(dedicatedMarkWorkersNeeded);
     Ꮡc.revise();
+
     if (debug.gcpacertrace > 0) {
         var heapGoal = Ꮡc.heapGoal();
         var assistRatio = Ꮡc.of(gcControllerState.ᏑassistWorkPerByte).Load();
         print((@string)"pacer: assist ratio="u8, assistRatio,
-            (@string)" (scan "u8, (ᏑgcController.of(gcControllerState.ᏑheapScan).Load() >> (int)(20)), (@string)" MB in "u8,
-            (work.initialHeapLive >> (int)(20)), (@string)"->"u8,
-            (heapGoal >> (int)(20)), (@string)" MB)"u8,
+            (@string)" (scan "u8, ᏑgcController.of(gcControllerState.ᏑheapScan).Load() >> 20, (@string)" MB in "u8,
+            work.initialHeapLive >> 20, (@string)"->"u8,
+            heapGoal >> 20, (@string)" MB)"u8,
             (@string)" workers="u8, dedicatedMarkWorkersNeeded,
             (@string)"+"u8, c.fractionalUtilizationGoal, (@string)"\n"u8);
     }
@@ -419,12 +475,15 @@ internal static void revise(this ж<gcControllerState> Ꮡc) {
     var live = Ꮡc.of(gcControllerState.ᏑheapLive).Load();
     var scan = Ꮡc.of(gcControllerState.ᏑheapScan).Load();
     var work = Ꮡc.of(gcControllerState.ᏑheapScanWork).Load() + Ꮡc.of(gcControllerState.ᏑstackScanWork).Load() + Ꮡc.of(gcControllerState.ᏑglobalsScanWork).Load();
+
     // Assume we're under the soft goal. Pace GC to complete at
     // heapGoal assuming the heap is in steady-state.
     var heapGoal = (int64)Ꮡc.heapGoal();
+
     // The expected scan work is computed as the amount of bytes scanned last
     // GC cycle (both heap and stack), plus our estimate of globals work for this cycle.
     var scanWorkExpected = (int64)(c.lastHeapScan + Ꮡc.of(gcControllerState.ᏑlastStackScan).Load() + Ꮡc.of(gcControllerState.ᏑglobalsScan).Load());
+
     // maxScanWork is a worst-case estimate of the amount of scan work that
     // needs to be performed in this GC cycle. Specifically, it represents
     // the case where *all* scannable memory turns out to be live, and
@@ -444,6 +503,7 @@ internal static void revise(this ж<gcControllerState> Ꮡc) {
         // memory anyway.
         var extHeapGoal = (int64)((float64)(heapGoal - (int64)c.triggered) / (float64)scanWorkExpected * (float64)maxScanWork) + (int64)c.triggered;
         scanWorkExpected = maxScanWork;
+
         // hardGoal is a hard limit on the amount that we're willing to push back the
         // heap goal, and that's twice the heap goal (i.e. if GOGC=100 and the heap and/or
         // stacks and/or globals grow to twice their size, this limits the current GC cycle's
@@ -463,9 +523,11 @@ internal static void revise(this ж<gcControllerState> Ꮡc) {
         // finish by that point.
         const float64 maxOvershoot = 1.1;
         heapGoal = (int64)((float64)heapGoal * maxOvershoot);
+
         // Compute the upper bound on the scan work remaining.
         scanWorkExpected = maxScanWork;
     }
+
     // Compute the remaining scan work estimate.
     //
     // Note that we currently count allocations during GC as both
@@ -485,6 +547,7 @@ internal static void revise(this ж<gcControllerState> Ꮡc) {
         // negative, even in the hard goal regime.
         scanWorkRemaining = 1000;
     }
+
     // Compute the heap distance remaining.
     var heapRemaining = heapGoal - (int64)live;
     if (heapRemaining <= 0) {
@@ -492,6 +555,7 @@ internal static void revise(this ж<gcControllerState> Ꮡc) {
         // dividing by zero or setting the assist negative.
         heapRemaining = 1;
     }
+
     // Compute the mutator assist ratio so by the time the mutator
     // allocates the remaining heap bytes up to heapGoal, it will
     // have done (or stolen) the remaining amount of scan work.
@@ -515,14 +579,17 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     // Record last heap goal for the scavenger.
     // We'll be updating the heap goal soon.
     gcController.lastHeapGoal = Ꮡc.heapGoal();
+
     // Compute the duration of time for which assists were turned on.
     var assistDuration = now - c.markStartTime;
+
     // Assume background mark hit its utilization goal.
     float64 utilization = gcBackgroundUtilization;
     // Add assist utilization; avoid divide by zero.
     if (assistDuration > 0) {
         utilization += (float64)Ꮡc.of(gcControllerState.ᏑassistTime).Load() / (float64)(assistDuration * (int64)procs);
     }
+
     if (Ꮡc.of(gcControllerState.ᏑheapLive).Load() <= c.triggered) {
         // Shouldn't happen, but let's be very safe about this in case the
         // GC is somehow extremely short.
@@ -568,6 +635,7 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     // Note that because we only care about the ratio, assistDuration and procs cancel out.
     var scanWork = Ꮡc.of(gcControllerState.ᏑheapScanWork).Load() + Ꮡc.of(gcControllerState.ᏑstackScanWork).Load() + Ꮡc.of(gcControllerState.ᏑglobalsScanWork).Load();
     var currentConsMark = ((float64)(Ꮡc.of(gcControllerState.ᏑheapLive).Load() - c.triggered) * (utilization + idleUtilization)) / ((float64)scanWork * (1D - utilization));
+
     // Update our cons/mark estimate. This is the maximum of the value we just computed and the last
     // 4 cons/mark values we measured. The reason we take the maximum here is to bias a noisy
     // cons/mark measurement toward fewer assists at the expense of additional GC cycles (starting
@@ -581,6 +649,7 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     }
     copy(c.lastConsMark[..], c.lastConsMark[1..]);
     c.lastConsMark[len(c.lastConsMark) - 1] = currentConsMark;
+
     if (debug.gcpacertrace > 0) {
         printlock();
         var goal = gcGoalUtilization * 100D;
@@ -597,20 +666,42 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
 // another P if there are spare worker slots. It is used by putfull
 // when more work is made available.
 //
+// If goexperiment.GreenTeaGC, the caller must not hold a G's scan bit,
+// otherwise this could cause a deadlock. This is already enforced by
+// the static lock ranking.
+//
 //go:nowritebarrier
 internal static void enlistWorker(this ж<gcControllerState> Ꮡc) {
-    // If there are idle Ps, wake one so it will run an idle worker.
-    // NOTE: This is suspected of causing deadlocks. See golang.org/issue/19112.
+    var needDedicated = Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Load() > 0;
+
+    // Create new workers from idle Ps with goexperiment.GreenTeaGC.
     //
-    //	if sched.npidle.Load() != 0 && sched.nmspinning.Load() == 0 {
-    //		wakep()
-    //		return
-    //	}
-    // There are no idle Ps. If we need more dedicated workers,
-    // try to preempt a running P so it will switch to a worker.
-    if (Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Load() <= 0) {
+    // Note: with Green Tea, this places a requirement on enlistWorker
+    // that it must not be called while a G's scan bit is held.
+    if (goexperiment.GreenTeaGC) {
+        var needIdle = Ꮡc.needIdleMarkWorker();
+
+        // If we're all full on dedicated and idle workers, nothing
+        // to do.
+        if (!needDedicated && !needIdle) {
+            return;
+        }
+
+        // If there are idle Ps, wake one so it will run a worker
+        // (the scheduler will already prefer to spin up a new
+        // dedicated worker over an idle one).
+        if (Ꮡsched.of(schedt.Ꮡnpidle).Load() != 0 && Ꮡsched.of(schedt.Ꮡnmspinning).Load() == 0) {
+            wakep(); // Likely to consume our worker request.
+            return;
+        }
+    }
+
+    // If we still need more dedicated workers, try to preempt a running P
+    // so it will switch to a worker.
+    if (!needDedicated) {
         return;
     }
+
     // Pick a random other P to preempt.
     if (gomaxprocs <= 1) {
         return;
@@ -638,32 +729,38 @@ internal static void enlistWorker(this ж<gcControllerState> Ꮡc) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gcControllerStateˢ = "gcControllerState.findRunnable: blackening not enabled"u8;
 
-// findRunnableGCWorker returns a background mark worker for pp if it
-// should be run. This must only be called when gcBlackenEnabled != 0.
-internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
+// assignWaitingGCWorker assigns a background mark worker to pp if one should
+// be run.
+//
+// If a worker is selected, it is assigned to pp.nextMarkGCWorker and the P is
+// wired as a GC mark worker. The G is still in _Gwaiting. If no worker is
+// selected, ok returns false.
+//
+// If assignedWaitingGCWorker returns true, this P must either:
+// - Mark the G as runnable and run it, clearing pp.nextMarkGCWorker.
+// - Or, call c.releaseNextGCMarkWorker.
+//
+// This must only be called when gcBlackenEnabled != 0.
+internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (gcBlackenEnabled == 0) {
         @throw(gcControllerStateˢ);
     }
-    // Since we have the current time, check if the GC CPU limiter
-    // hasn't had an update in a while. This check is necessary in
-    // case the limiter is on but hasn't been checked in a while and
-    // so may have left sufficient headroom to turn off again.
+
     if (now == 0) {
         now = nanotime();
     }
-    if (ᏑgcCPULimiter.needUpdate(now)) {
-        ᏑgcCPULimiter.update(now);
-    }
-    if (!gcMarkWorkAvailable(Ꮡpp)) {
-        // No work to be done right now. This can happen at
+
+    if (!gcShouldScheduleWorker(Ꮡpp)) {
+        // No good reason to schedule a worker. This can happen at
         // the end of the mark phase when there are still
         // assists tapering off. Don't bother running a worker
         // now because it'll just return immediately.
-        return (default!, now);
+        return (false, now);
     }
+
     if (Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded).Load() <= 0 && c.fractionalUtilizationGoal == 0D) {
         // No current need for dedicated workers, and no need at all for
         // fractional workers. Check before trying to acquire a worker; when
@@ -672,8 +769,9 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         // When a dedicated worker stops running, the gcBgMarkWorker loop notes
         // the need for the worker before returning it to the pool. If we don't
         // see the need now, we wouldn't have found it in the pool anyway.
-        return (default!, now);
+        return (false, now);
     }
+
     // Grab a worker before we commit to running below.
     var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
     if (node == nil) {
@@ -688,19 +786,22 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         // it will always do so with queued global work. Thus, that P
         // will be immediately eligible to re-run the worker G it was
         // just using, ensuring work can complete.
-        return (default!, now);
+        return (false, now);
     }
+
     bool decIfPositive(ж<atomic.Int64> val) {
         while (ᐧ) {
             var v = val.Load();
             if (v <= 0) {
                 return false;
             }
+
             if (val.CompareAndSwap(v, v - 1)) {
                 return true;
             }
         }
     }
+
     if (decIfPositive(Ꮡc.of(gcControllerState.ᏑdedicatedMarkWorkersNeeded))){
         // This P is now dedicated to marking until the end of
         // the concurrent mark phase.
@@ -709,21 +810,63 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
     if (c.fractionalUtilizationGoal == 0D){
         // No need for fractional workers.
         ᏑgcBgMarkWorkerPool.push(node.of(gcBgMarkWorkerNode.Ꮡnode));
-        return (default!, now);
+        return (false, now);
     } else {
         // Is this P behind on the fractional utilization
         // goal?
         //
         // This should be kept in sync with pollFractionalWorkerExit.
         var delta = now - c.markStartTime;
-        if (delta > 0 && (float64)pp.gcFractionalMarkTime / (float64)delta > c.fractionalUtilizationGoal) {
+        if (delta > 0 && (float64)Ꮡpp.of(runtime_package.Δp.ᏑgcFractionalMarkTime).Load() / (float64)delta > c.fractionalUtilizationGoal) {
             // Nope. No need to run a fractional worker.
             ᏑgcBgMarkWorkerPool.push(node.of(gcBgMarkWorkerNode.Ꮡnode));
-            return (default!, now);
+            return (false, now);
         }
         // Run a fractional worker.
         pp.gcMarkWorkerMode = gcMarkWorkerFractionalMode;
     }
+
+    pp.nextGCMarkWorker = node;
+    return (true, now);
+}
+
+// findRunnableGCWorker returns a background mark worker for pp if it
+// should be run.
+//
+// If findRunnableGCWorker returns a G, this P is wired as a GC mark worker and
+// must run the G.
+//
+// This must only be called when gcBlackenEnabled != 0.
+//
+// This function is allowed to have write barriers because it is called from
+// the portion of findRunnable that always has a P.
+//
+//go:yeswritebarrierrec
+internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp, int64 now) {
+    ref var pp = ref Ꮡpp.DerefOrNull();
+
+    // Since we have the current time, check if the GC CPU limiter
+    // hasn't had an update in a while. This check is necessary in
+    // case the limiter is on but hasn't been checked in a while and
+    // so may have left sufficient headroom to turn off again.
+    if (now == 0) {
+        now = nanotime();
+    }
+    if (ᏑgcCPULimiter.needUpdate(now)) {
+        ᏑgcCPULimiter.update(now);
+    }
+
+    // If a worker wasn't already assigned by procresize, assign one now.
+    if (pp.nextGCMarkWorker == nil) {
+        var (ok, nowΔ1) = Ꮡc.assignWaitingGCWorker(Ꮡpp, now);
+        if (!ok) {
+            return (default!, nowΔ1);
+        }
+    }
+
+    var node = pp.nextGCMarkWorker;
+    pp.nextGCMarkWorker = default!;
+
     // Run the background mark worker.
     var gp = (~node).gp.ptr();
     var Δtrace = traceAcquire();
@@ -733,6 +876,25 @@ internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> �
         traceRelease(Δtrace);
     }
     return (gp, now);
+}
+
+// Release an unused pp.nextGCMarkWorker, if any.
+//
+// This function is allowed to have write barriers because it is called from
+// the portion of schedule.
+//
+//go:yeswritebarrierrec
+internal static void releaseNextGCMarkWorker(this ж<gcControllerState> Ꮡc, ж<Δp> Ꮡpp) {
+    ref var pp = ref Ꮡpp.DerefOrNull();
+
+    var node = pp.nextGCMarkWorker;
+    if (node == nil) {
+        return;
+    }
+
+    Ꮡc.markWorkerStop(pp.gcMarkWorkerMode, 0);
+    ᏑgcBgMarkWorkerPool.push(node.of(gcBgMarkWorkerNode.Ꮡnode));
+    pp.nextGCMarkWorker = default!;
 }
 
 // resetLive sets up the controller state for the next mark phase after the end
@@ -749,6 +911,7 @@ internal static void resetLive(this ж<gcControllerState> Ꮡc, uint64 bytesMark
     c.lastHeapScan = (uint64)Ꮡc.of(gcControllerState.ᏑheapScanWork).Load();
     Ꮡc.of(gcControllerState.ᏑlastStackScan).Store((uint64)Ꮡc.of(gcControllerState.ᏑstackScanWork).Load());
     c.triggered = ~(uint64)0; // Reset triggered.
+
     // heapLive was updated, so emit a trace event.
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
@@ -782,7 +945,6 @@ internal static void markWorkerStop(this ж<gcControllerState> Ꮡc, gcMarkWorke
     else { /* default: */
         @throw(markWorkerStopUnknownˢ);
     }
-
 }
 
 internal static void update(this ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
@@ -838,10 +1000,11 @@ internal static uint64 heapGoal(this ж<gcControllerState> Ꮡc) {
 internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcControllerState> Ꮡc) {
     uint64 goal = default!;
     uint64 minTrigger = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     // Start with the goal calculated for gcPercent.
     goal = Ꮡc.of(gcControllerState.ᏑgcPercentHeapGoal).Load();
+
     // Check if the memory-limit-based goal is smaller, and if so, pick that.
     {
         var newGoal = Ꮡc.memoryLimitHeapGoal(); if (newGoal < goal){
@@ -862,6 +1025,7 @@ internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcCont
             // the trigger, because it could cause a violation of the
             // invariant that the trigger < goal.
             minTrigger = sweepDistTrigger;
+
             // Ensure that the heap goal is at least a little larger than
             // the point at which we triggered. This may not be the case if GC
             // start is delayed or if the allocation that pushed gcController.heapLive
@@ -898,12 +1062,13 @@ internal static uint64 memoryLimitHeapGoal(this ж<gcControllerState> Ꮡc) {
         if (heapFree + heapAlloc <= mappedReady) {
             break;
         }
+        // It is impossible for total unreleased mapped memory to exceed heap memory, but
+        // because these stats are updated independently, we may observe a partial update
+        // including only some values. Thus, we appear to break the invariant. However,
+        // this condition is necessarily transient, so just try again. In the case of a
+        // persistent accounting error, we'll deadlock here.
     }
-    // It is impossible for total unreleased mapped memory to exceed heap memory, but
-    // because these stats are updated independently, we may observe a partial update
-    // including only some values. Thus, we appear to break the invariant. However,
-    // this condition is necessarily transient, so just try again. In the case of a
-    // persistent accounting error, we'll deadlock here.
+
     // Below we compute a goal from memoryLimit. There are a few things to be aware of.
     // Firstly, the memoryLimit does not easily compare to the heap goal: the former
     // is total mapped memory by the runtime that hasn't been released, while the latter is
@@ -957,14 +1122,18 @@ internal static uint64 memoryLimitHeapGoal(this ж<gcControllerState> Ꮡc) {
     // disproportionately affect small heaps: as heaps get smaller, the pacer's inputs get fuzzier.
     // Shorter GC cycles and less GC work means noisy external factors like the OS scheduler have a
     // greater impact.
+
     var memoryLimit = (uint64)Ꮡc.of(gcControllerState.ᏑmemoryLimit).Load();
+
     // Compute term 1.
     var nonHeapMemory = mappedReady - heapFree - heapAlloc;
+
     // Compute term 2.
     uint64 overage = default!;
     if (mappedReady > memoryLimit) {
         overage = mappedReady - memoryLimit;
     }
+
     if (nonHeapMemory + overage >= memoryLimit) {
         // We're at a point where non-heap memory exceeds the memory limit on its own.
         // There's honestly not much we can do here but just trigger GCs continuously
@@ -972,8 +1141,10 @@ internal static uint64 memoryLimitHeapGoal(this ж<gcControllerState> Ꮡc) {
         // Set it to heapMarked, the lowest possible goal.
         return c.heapMarked;
     }
+
     // Compute the goal.
     var goal = memoryLimit - (nonHeapMemory + overage);
+
     // Apply some headroom to the goal to account for pacing inaccuracies and to reduce
     // the impact of scavenging at allocation time in response to a high allocation rate
     // when GOGC=off. See issue #57069. Also, be careful about small limits.
@@ -995,8 +1166,23 @@ internal static uint64 memoryLimitHeapGoal(this ж<gcControllerState> Ꮡc) {
     return goal;
 }
 
+// These constants determine the bounds on the GC trigger as a fraction
+// of heap bytes allocated between the start of a GC (heapLive == heapMarked)
+// and the end of a GC (heapLive == heapGoal).
+//
+// The constants are obscured in this way for efficiency. The denominator
+// of the fraction is always a power-of-two for a quick division, so that
+// the numerator is a single constant integer multiplication.
 internal static UntypedInt triggerRatioDen => 64;
+
+// The minimum trigger constant was chosen empirically: given a sufficiently
+// fast/scalable allocator with 48 Ps that could drive the trigger ratio
+// to <0.05, this constant causes applications to retain the same peak
+// RSS compared to not having this allocator.
 internal static UntypedInt minTriggerRatioNum => 45; // ~0.7
+
+// The maximum trigger constant is chosen somewhat arbitrarily, but the
+// current constant has served us well over the years.
 internal static UntypedInt maxTriggerRatioNum => 61; // ~0.95
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1013,10 +1199,12 @@ internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (goal, minTrigger) = Ꮡc.heapGoalInternal();
+
     // Invariant: the trigger must always be less than the heap goal.
     //
     // Note that the memory limit sets a hard maximum on our heap goal,
     // but the live heap may grow beyond it.
+
     if (c.heapMarked >= goal) {
         // The goal should never be smaller than heapMarked, but let's be
         // defensive about it. The only reasonable trigger here is one that
@@ -1024,12 +1212,15 @@ internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) {
         // if it came out as smaller than that.
         return (goal, goal);
     }
+
     // Below this point, c.heapMarked < goal.
+
     // heapMarked is our absolute minimum, and it's possible the trigger
     // bound we get from heapGoalinternal is less than that.
     if (minTrigger < c.heapMarked) {
         minTrigger = c.heapMarked;
     }
+
     // If we let the trigger go too low, then if the application
     // is allocating very rapidly we might end up in a situation
     // where we're allocating black during a nearly always-on GC.
@@ -1041,6 +1232,7 @@ internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) {
     if (minTrigger < triggerLowerBound) {
         minTrigger = triggerLowerBound;
     }
+
     // For small heaps, set the max trigger point at maxTriggerRatio of the way
     // from the live heap to the heap goal. This ensures we always have *some*
     // headroom when the GC actually starts. For larger heaps, set the max trigger
@@ -1055,6 +1247,7 @@ internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) {
         maxTrigger = goal - (uint64)defaultHeapMinimum;
     }
     maxTrigger = builtin.max(maxTrigger, minTrigger);
+
     // Compute the trigger from our bounds and the runway stored by commit.
     uint64 trigger = default!;
     var runway = Ꮡc.of(gcControllerState.Ꮡrunway).Load();
@@ -1096,6 +1289,7 @@ internal static void commit(this ж<gcControllerState> Ꮡc, bool isSweepDone) {
     if (!c.test) {
         assertWorldStoppedOrLockHeld(ref mheap_.@lock);
     }
+
     if (isSweepDone){
         // The sweep is done, so there aren't any restrictions on the trigger
         // we need to think about.
@@ -1106,6 +1300,7 @@ internal static void commit(this ж<gcControllerState> Ꮡc, bool isSweepDone) {
         // give the sweeper some runway if it doesn't have enough.
         Ꮡc.of(gcControllerState.ᏑsweepDistMinTrigger).Store(Ꮡc.of(gcControllerState.ᏑheapLive).Load() + (uint64)sweepMinHeapDistance);
     }
+
     // Compute the next GC goal, which is when the allocated heap
     // has grown by GOGC/100 over where it started the last cycle,
     // plus additional runway for non-heap sources of GC work.
@@ -1121,6 +1316,7 @@ internal static void commit(this ж<gcControllerState> Ꮡc, bool isSweepDone) {
         gcPercentHeapGoal = c.heapMinimum;
     }
     Ꮡc.of(gcControllerState.ᏑgcPercentHeapGoal).Store(gcPercentHeapGoal);
+
     // Compute the amount of runway we want the GC to have by using our
     // estimate of the cons/mark ratio.
     //
@@ -1157,12 +1353,14 @@ internal static int32 setGCPercent(this ж<gcControllerState> Ꮡc, int32 @in) {
     if (!c.test) {
         assertWorldStoppedOrLockHeld(ref mheap_.@lock);
     }
+
     var @out = Ꮡc.of(gcControllerState.ᏑgcPercent).Load();
     if (@in < 0) {
         @in = -1;
     }
     c.heapMinimum = (uint64)defaultHeapMinimum * (uint64)@in / 100;
     Ꮡc.of(gcControllerState.ᏑgcPercent).Store(@in);
+
     return @out;
 }
 
@@ -1177,11 +1375,13 @@ internal static int32 /*out*/ setGCPercent(int32 @in) {
         gcControllerCommit();
         unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     });
+
     // If we just disabled GC, wait for any concurrent GC mark to
     // finish so we always return with no GC running.
     if (@in < 0) {
         gcWaitOnMark(Ꮡwork.of(workType.Ꮡcycles).Load());
     }
+
     return @out;
 }
 
@@ -1194,8 +1394,8 @@ internal static int32 readGOGC() {
         return -1;
     }
     {
-        var (n, ok) = atoi32(Δp); if (ok) {
-            return n;
+        var (n, err) = strconv.ParseInt(Δp, 10, 32); if (err == default!) {
+            return (int32)n;
         }
     }
     return 100;
@@ -1211,10 +1411,12 @@ internal static int64 setMemoryLimit(this ж<gcControllerState> Ꮡc, int64 @in)
     if (!c.test) {
         assertWorldStoppedOrLockHeld(ref mheap_.@lock);
     }
+
     var @out = Ꮡc.of(gcControllerState.ᏑmemoryLimit).Load();
     if (@in >= 0) {
         Ꮡc.of(gcControllerState.ᏑmemoryLimit).Store(@in);
     }
+
     return @out;
 }
 
@@ -1245,7 +1447,7 @@ internal static readonly @string malformedGomemlimitSeeGoˢ = "malformed GOMEMLI
 internal static int64 readGOMEMLIMIT() {
     @string Δp = gogetenv(gomemlimitˢ);
     if (Δp == ""u8 || Δp == "off"u8) {
-        return maxInt64;
+        return Δmath.MaxInt64;
     }
     var (n, ok) = parseByteCount(Δp);
     if (!ok) {
@@ -1271,7 +1473,7 @@ internal static readonly @string negativeIdleMarkWorkersˢ = "negative idle mark
 internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
+        var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n >= max) {
             // See the comment on idleMarkWorkers for why
             // n > max is tolerated.
@@ -1281,7 +1483,7 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)(n + 1) | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)(n + 1) | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return true;
         }
@@ -1298,7 +1500,7 @@ internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 //go:nosplit
 internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     var Δp = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-    var (n, max) = ((int32)((uint64)(Δp & (uint64)(~(uint32)0))), (int32)((Δp >> (int)(32))));
+    var (n, max) = ((int32)(Δp & (uint64)(~(uint32)0)), (int32)(Δp >> 32));
     return n < max;
 }
 
@@ -1306,12 +1508,12 @@ internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var (n, max) = ((int32)((uint64)(old & (uint64)(~(uint32)0))), (int32)((old >> (int)(32))));
+        var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n - 1 < 0) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)(n - 1) | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)(n - 1) | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return;
         }
@@ -1326,12 +1528,12 @@ internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) {
 internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int32 max) {
     while (ᐧ) {
         var old = Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).Load();
-        var n = (int32)((uint64)(old & (uint64)(~(uint32)0)));
+        var n = (int32)(old & (uint64)(~(uint32)0));
         if (n < 0) {
             print((@string)"n="u8, n, (@string)" max="u8, max, (@string)"\n"u8);
             @throw(negativeIdleMarkWorkersˢ);
         }
-        var @new = (uint64)((uint64)(uint32)n | (((uint64)max << (int)(32))));
+        var @new = (uint64)(uint32)n | ((uint64)max << 32);
         if (Ꮡc.of(gcControllerState.ᏑidleMarkWorkers).CompareAndSwap(old, @new)) {
             return;
         }
@@ -1349,11 +1551,14 @@ internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int3
 //go:systemstack
 internal static void gcControllerCommit() {
     assertWorldStoppedOrLockHeld(ref mheap_.@lock);
+
     ᏑgcController.commit(isSweepDone());
+
     // Update mark pacing.
     if (gcphase != _GCoff) {
         ᏑgcController.revise();
     }
+
     // TODO(mknyszek): This isn't really accurate any longer because the heap
     // goal is computed dynamically. Still useful to snapshot, but not as useful.
     var Δtrace = traceAcquire();
@@ -1361,6 +1566,7 @@ internal static void gcControllerCommit() {
         Δtrace.HeapGoal();
         traceRelease(Δtrace);
     }
+
     var (trigger, heapGoal) = ᏑgcController.trigger();
     gcPaceSweeper(trigger);
     gcPaceScavenger(ᏑgcController.of(gcControllerState.ᏑmemoryLimit).Load(), heapGoal, gcController.lastHeapGoal);

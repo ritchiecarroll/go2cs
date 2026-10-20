@@ -41,6 +41,12 @@ using static go.@internal.trace.version_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,7 +55,7 @@ using static go.@internal.trace.version_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABw2AAcekqaCggAFEKKCgoKUgpSokg==", "", "", "29=Specs/1/2/7,Specs/2/2/11")]
+[assembly: go.GoPositionMap("internal/trace/version/version.go", "version.cs", "ABg4AAsckuqigpSCgpSClKaCggAFEKKCgoKUgpSokg==", "", "", "25=Specs/1/4/7,Specs/2/4/8,Specs/3/4/9,Specs/4/4/10")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.trace;
@@ -75,8 +81,7 @@ public static partial class version_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸevent() => builtin.initPackage(typeof(go.@internal.trace.event_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸeventꓸgo122() => builtin.initPackage(typeof(go.@internal.trace.@event.go122_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtraceꓸtracev2() => builtin.initPackage(typeof(go.@internal.trace.tracev2_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     // </ImportInitializers>
 }

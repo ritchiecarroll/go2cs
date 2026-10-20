@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using boring = go.crypto.@internal.boring_package;
 using ecdh = go.crypto.@internal.fips140.ecdh_package;
 using fips140only = go.crypto.@internal.fips140only_package;
+using rand = go.crypto.@internal.rand_package;
 using errors = errors_package;
 using io = io_package;
 using go.crypto.@internal;
@@ -30,10 +31,10 @@ internal static @string String(this ref nistCurve c) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string cryptoEcdhOnlyCryptoRandˢ = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader rand) {
+internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
-    if (boring.Enabled && AreEqual(rand, boring.RandReader)) {
+    if (boring.Enabled && rand.IsDefaultReader(r)) {
         var (key, bytes, errΔ1) = boring.GenerateKeyECDH(c.name);
         if (errΔ1 != default!) {
             return (default!, errΔ1);
@@ -50,13 +51,18 @@ internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.
         ));
         return (kΔ1, default!);
     }
-    if (fips140only.Enabled && !fips140only.ApprovedRandomReader(rand)) {
+
+    r = rand.CustomReader(r);
+
+    if (fips140only.Enforced() && !fips140only.ApprovedRandomReader(r)) {
         return (default!, errors.New(cryptoEcdhOnlyCryptoRandˢ));
     }
-    var (privateKey, err) = c.generate(rand);
+
+    var (privateKey, err) = c.generate(r);
     if (err != default!) {
         return (default!, err);
     }
+
     var k = Ꮡ(new PrivateKey(
         curve: new nistCurveжΔCurve(Ꮡc),
         privateKey: privateKey.Bytes(),
@@ -105,6 +111,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, s
         ));
         return (kΔ1, default!);
     }
+
     var (fk, err) = c.newPrivateKey(key);
     if (err != default!) {
         return (default!, err);

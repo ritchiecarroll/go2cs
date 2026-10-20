@@ -12,9 +12,8 @@ using ꓸꓸꓸosꓸSignal = Span<osꓸSignal>;
 
 partial class signal_package {
 
-
 partial struct handlersᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     // Map a channel to the signals that should be sent to it.
     internal map<channel/*<-*/<osꓸSignal>, ж<handler>> m;
     // Map a signal to the number of channels receiving it.
@@ -39,15 +38,15 @@ partial struct handler {
 }
 
 internal static bool want(this ref handler h, nint sig) {
-    return (uint32)((h.mask[sig / 32].Rsh((nuint)((nint)(sig & 31)))) & 1) != 0;
+    return ((h.mask[sig / 32].Rsh((nuint)(sig & 31))) & 1) != 0;
 }
 
 internal static void set(this ref handler h, nint sig) {
-    h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31))));
+    h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)(sig & 31)));
 }
 
 internal static void clear(this ref handler h, nint sig) {
-    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)((nint)(sig & 31)))));
+    h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)(sig & 31))));
 }
 
 // Stop relaying the signals, sigs, to any channels previously registered to
@@ -58,8 +57,10 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
     try {
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         void remove(nint n) {
             handler zerohandler = new();
+
             foreach (var (c, h) in handlers.m) {
                 if (h.want(n)) {
                     handlers.@ref[n]--;
@@ -69,8 +70,10 @@ internal static void cancel(slice<osꓸSignal> sigs, Action<nint> action) {
                     }
                 }
             }
+
             action(n);
         }
+
         if (len(sigs) == 0){
             for (nint n = 0; n < numSig; n++) {
                 remove(n);
@@ -101,6 +104,10 @@ public static bool Ignored(osꓸSignal sig) {
     return sn >= 0 && signalIgnored(sn);
 }
 
+// watchSignalLoopOnce guards calling the conditionally
+// initialized watchSignalLoop. If watchSignalLoop is non-nil,
+// it will be run in a goroutine lazily once Notify is invoked.
+// See Issue 21576.
 internal static ж<sync.Once> ᏑwatchSignalLoopOnce = new StandardBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once watchSignalLoopOnce => ref ᏑwatchSignalLoopOnce.Value;
 internal static Action watchSignalLoop;
@@ -129,8 +136,10 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
         if (c == default!) {
             throw panic("os/signal: Notify using nil channel");
         }
+
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         var h = handlers.m[c];
         if (h == nil) {
             if (handlers.m == default!) {
@@ -139,6 +148,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
             h = @new<handler>();
             handlers.m[c] = h;
         }
+
         var hʗ1 = h;
         void add(nint n) {
             if (n < 0) {
@@ -148,6 +158,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                 hʗ1.set(n);
                 if (handlers.@ref[n] == 0) {
                     enableSignal(n);
+
                     // The runtime requires that we enable a
                     // signal before starting the watcher.
                     ᏑwatchSignalLoopOnce.Do([MethodImpl(MethodImplOptions.NoInlining)] () => {
@@ -159,6 +170,7 @@ public static void Notify(channel/*<-*/<osꓸSignal> c, params ꓸꓸꓸosꓸSig
                 handlers.@ref[n]++;
             }
         }
+
         if (len(sig) == 0){
             for (nint n = 0; n < numSig; n++) {
                 add(n);
@@ -187,12 +199,14 @@ public static void Reset(params ꓸꓸꓸosꓸSignal sigʗp) {
 // When Stop returns, it is guaranteed that c will receive no more signals.
 public static void Stop(channel/*<-*/<osꓸSignal> c) {
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+
     var h = handlers.m[c];
     if (h == nil) {
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
         return;
     }
     delete(handlers.m, c);
+
     for (nint n = 0; n < numSig; n++) {
         if (h.want(n)) {
             handlers.@ref[n]--;
@@ -201,6 +215,7 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
             }
         }
     }
+
     // Signals will no longer be delivered to the channel.
     // We want to avoid a race for a signal such as SIGINT:
     // it should be either delivered to the channel,
@@ -211,16 +226,22 @@ public static void Stop(channel/*<-*/<osꓸSignal> c) {
     // to send it on the channel, put the channel on a list of
     // channels being stopped and wait for signal delivery to
     // quiesce before fully removing it.
+
     handlers.stopping = append(handlers.stopping, new stopping(c, h));
+
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
+
     signalWaitUntilIdle();
+
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
+
     foreach (var (i, s) in handlers.stopping) {
         if (s.c == c) {
             handlers.stopping = slices.Delete<slice<stopping>, stopping>(handlers.stopping, i, i + 1);
             break;
         }
     }
+
     Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock();
 }
 
@@ -237,8 +258,10 @@ internal static void process(osꓸSignal sig) {
         if (n < 0) {
             return;
         }
+
         Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Lock();
         defer(Ꮡhandlers.of(handlersᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         foreach (var (c, h) in handlers.m) {
             if (h.want(n)) {
                 // send but do not block for it
@@ -252,6 +275,7 @@ internal static void process(osꓸSignal sig) {
                 }}
             }
         }
+
         // Avoid the race mentioned in Stop.
         foreach (var (_, d) in handlers.stopping) {
             if (d.h.want(n)) {
@@ -282,6 +306,9 @@ internal static void process(osꓸSignal sig) {
 // the returned context. Future interrupts received will not trigger the default
 // (exit) behavior until the returned stop function is called.
 //
+// If a signal causes the returned context to be canceled, calling
+// [context.Cause] on it will return an error describing the signal.
+//
 // The stop function releases resources associated with it, so code should
 // call stop as soon as the operations running in this Context complete and
 // signals no longer need to be diverted to the context.
@@ -289,7 +316,7 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
     context.Context ctx = default!;
     var signals = signalsʗp.slice();
 
-    (ctx, var cancel) = context.WithCancel(parent);
+    (ctx, var cancel) = context.WithCancelCause(parent);
     var c = Ꮡ(new signalCtx(
         Context: ctx,
         cancel: cancel,
@@ -303,8 +330,8 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
             var selᴛ3 = (~cʗ1).ch;
             var selᴛ4 = (~cʗ1).Context.Done();
             switch (select(ᐸꟷ(selᴛ3, ꓸꓸꓸ), ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
-            case 0 when selᴛ3.ꟷᐳ(out _): {
-                (~cʗ1).cancel();
+            case 0 when selᴛ3.ꟷᐳ(out var s): {
+                (~cʗ1).cancel((signalError)(s.String() + " signal received"u8));
                 break;
             }
             case 1 when selᴛ4.ꟷᐳ(out _): {
@@ -317,13 +344,13 @@ public static partial (context.Context ctx, Action stop) NotifyContext(context.C
 
 partial struct signalCtx {
     /*embed*/ public context_package.Context Context;
-    internal Action cancel;
+    internal Action<error> cancel;
     internal slice<osꓸSignal> signals;
     internal channel<osꓸSignal> ch;
 }
 
 internal static void stop(this ref signalCtx c) {
-    c.cancel();
+    c.cancel(default!);
     Stop(c.ch.WithDirection(GoChanDir.Send));
 }
 
@@ -332,6 +359,8 @@ partial interface stringer {
 }
 
 internal static @string String(this ref signalCtx c) {
+    var bufᴷ = new stackAppend<byte>();
+
     slice<byte> buf = default!;
     // We know that the type of c.Context is context.cancelCtx, and we know that the
     // String method of cancelCtx returns a string that ends with ".WithCancel".
@@ -343,13 +372,26 @@ internal static @string String(this ref signalCtx c) {
         foreach (var (i, s) in c.signals) {
             buf = append(buf, s.String().ꓸꓸꓸ);
             if (i != len(c.signals) - 1) {
-                buf = append(buf, (byte)((rune)' '));
+                buf = append(bufᴷ, buf, (byte)((rune)' '));
             }
         }
         buf = append(buf, (byte)((rune)']'));
     }
     buf = append(buf, (byte)((rune)')'));
-    return ((@string)buf);
+    return (@string)buf;
+}
+
+partial struct signalError /*@string*/;
+
+internal static @string Error(this signalError s) {
+    return (@string)s;
+}
+
+internal static bool Is(this signalError s, error target) {
+    if (AreEqual(target, context.Canceled)) {
+        return true;
+    }
+    return false;
 }
 
 } // end signal_package

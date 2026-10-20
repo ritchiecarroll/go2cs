@@ -17,6 +17,8 @@ import (
 )
 
 func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
+	v.noteClauseSpans(selectStmt.Body)
+
 	var comClauses []*ast.CommClause
 	var defaultClause *ast.CommClause
 	hasDefault := false
@@ -55,6 +57,8 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	// Ensure default clause is the last clause
 	if hasDefault {
 		comClauses = append(comClauses, defaultClause)
+		v.holdClauseComments(defaultClause.Colon)
+		defer v.releaseClauseComments(defaultClause.Colon)
 	}
 
 	// Go evaluates EVERY case's operands — a receive case's channel operand, and a send case's
@@ -279,6 +283,8 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			v.outputBuilder.WriteString(v.newline)
 		}
 
+		v.writeAboveLabelComments(comClause.Colon)
+
 		// visitStmt resets this per statement, but an EMPTY clause body (a bare `default:` — io
 		// pipe.go read's poll select) never calls visitStmt, so the flag would carry the PREVIOUS
 		// clause's terminal `return` and suppress the mandatory `break;` (C# requires every switch
@@ -394,9 +400,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			v.writeOutput("%s", boxDecl)
 		}
 
-		for _, stmt := range comClause.Body {
-			v.visitListStmt(stmt)
-		}
+		v.visitStatementList(comClause.Body, comClause.Colon)
 
 		v.outputBuilder.WriteString(v.newline)
 

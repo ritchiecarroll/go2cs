@@ -55,6 +55,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
         var fns = fnsʗp.slice();
         return fns;
     }
+
     Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error> hasStatus(nint wantCode) => (Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>)(error (ж<global::go.net.http.httptest_package.ResponseRecorder> rec) => {
             if ((~rec).Code != wantCode) {
                 return fmt.Errorf("Status = %d; want %d"u8, (~rec).Code, wantCode);
@@ -78,7 +79,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 return err;
             }
-            @string contents = ((@string)contentBytes);
+            @string contents = (@string)contentBytes;
             if (contents != want) {
                 return fmt.Errorf("Result().Body = %s; want %s"u8, contents, want);
             }
@@ -155,6 +156,7 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
             }
             return default!;
         });
+
 
 
 
@@ -283,9 +285,9 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
         ),
         new(
             "Header set without any write"u8, // Issue 15560
-
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w.Header().Set(xFooˢ, "1"u8);
+
                 // Simulate somebody using
                 // new(ResponseRecorder) instead of
                 // using the constructor which sets
@@ -301,7 +303,6 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
         ),
         new(
             "HeaderMap vs FinalHeaders"u8, // more for Issue 15560
-
             (http.ResponseWriter w, ж<http.Request> r) => {
                 var h = w.Header();
                 h.Set(xFooˢ, "1"u8);
@@ -327,7 +328,6 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
         ),
         new(
             "nil ResponseRecorder.Body"u8, // Issue 26642
-
             (http.ResponseWriter w, ж<http.Request> r) => {
                 w._<ж<global::go.net.http.httptest_package.ResponseRecorder>>().Value.Body = default!;
                 io.WriteString(new httptest_test_package.http_ResponseWriterᴠWriter(w), "hi"u8);
@@ -377,8 +377,8 @@ public static void TestParseContentLength(ж<testing.T> Ꮡt) {
             want: -1
         ),
         new(
-            cl: "9223372036854775807"u8, // max int64, for safe conversion before returning
-
+            // max int64, for safe conversion before returning
+            cl: "9223372036854775807"u8,
             want: 9223372036854775807L
         ),
         new(
@@ -386,6 +386,7 @@ public static void TestParseContentLength(ж<testing.T> Ꮡt) {
             want: -1
         )
     }.slice();
+
     foreach (var (_, tt) in tests) {
         {
             var got = parseContentLength(tt.cl); if (got != tt.want) {
@@ -417,6 +418,7 @@ public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> Ꮡt) {
                         }
                     }
                 }, ref ᒐ);
+
                 void handler(http.ResponseWriter rwΔ1, ж<http.Request> _Δp1) {
                     rwΔ1.WriteHeader(badCodeΔ1);
                 }

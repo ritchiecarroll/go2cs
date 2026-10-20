@@ -7,9 +7,11 @@ Go's `string` becomes golib [`@string`](https://github.com/ritchiecarroll/go2cs/
 | Go | C# | Where |
 |:--|:--|:--|
 | a `string` value | `@string` | everywhere by default |
-| `"text"` | `"text"u8` (a `ReadOnlySpan<byte>`) | converts to `@string` where a value is needed |
-| a literal used as a value | `static readonly @string textˢ` | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
-| `const name = "text"` inside a function | `static readonly @string nameᶜ` | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
+| a literal in a `string` slot | `"text"`, a C# string converted once and shared | [plain literals](#a-literal-in-a-string-slot-is-a-plain-c-literal) |
+| a literal any other slot reads | `"text"u8` (a `ReadOnlySpan<byte>`) | [`u8` spans](#string-literals-render-as-u8-spans) |
+| a literal used as a value, in the standard library or under `-hoist-literals` | `static readonly @string textˢ` | [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use) |
+| `const name = "text"` inside a function, in the standard library or under `-hoist-literals` | `static readonly @string nameᶜ` | [local string constants](#a-function-local-string-const-hoists-to-a-static-readonly-field-under-its-own-name) |
+| a raw string that spans lines | `"""…"""u8.Raw()` | [multi-line raw strings](#a-multi-line-raw-string-ends-in-raw) |
 | a literal with raw non-UTF-8 bytes | `((@string)(new byte[]{…}))` | [raw-byte literals](#a-string-literal-with-raw-byte-escapes-emits-a-byte-array-string) |
 | `type Token string` | `partial struct Token /*@string*/` | [named string types](#named-string-types) |
 | `string(b)` read and discarded | `(sstring)b` | [conversion views](#a-non-escaping-stringbyte-local-emits-the-stack-string-sstring) |
@@ -30,22 +32,118 @@ Sharing the array is safe because `@string` is immutable, and every conversion o
 
 The zero value is null-safe and reads as `""`, so `default!` stands for Go's zero string. As a generic type argument a string is `@string` too (`Pair<nint, @string>`), which satisfies the `new()` constraint every converted type parameter carries.
 
+## A literal in a `string` slot is a plain C# literal
+
+Outside the standard library, a literal whose slot is exactly Go `string` renders as a bare C# string literal, the way the Go source reads:
+
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.go:12-18 -->
+```go
+func kind(n int) string {
+	if n == 0 {
+		return "zero value return"
+	}
+
+	return "other value return"
+}
+```
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:8-14 -->
+```csharp
+internal static @string kind(nint n) {
+    if (n == 0) {
+        return "zero value return";
+    }
+
+    return "other value return";
+}
+```
+
+A package-level `var` takes it too:
+
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.go:20 -->
+```go
+var names = []string{"stdin", "stdout"}
+```
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22 -->
+```csharp
+internal static slice<@string> names = new @string[]{"stdin", "stdout"}.slice();
+```
+
+golib's `implicit operator @string(string)` makes the conversion. For a C# **literal** it goes through `StringLiteralCache` (golib [`StringLiteralCache.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/StringLiteralCache.cs)): the first evaluation transcodes the UTF-16 literal to UTF-8 and stores the result, and every later evaluation returns the stored `@string`. A literal is a frozen object that never moves or dies, so the cache keys on its address and holds it without a leak. A run-time C# string is converted as before and never stored. So a plain literal costs one conversion per program run, and the emitted code needs no field and no name. `""` is plain too, and it equals the zero `@string` in every Go operation (`==`, `len`, hashing, and `[]byte("")` is non-nil); the golib test `PlainEmptyLiteralTests` checks this.
+
+The plain form covers returns, assignments, `string` and `...string` arguments, struct fields (keyed or positional), typed slice, array and map elements and keys, package-level `var` initializers, and function-local string constants. A plain literal claims no field, so it adds no initialization-order dependency, and `func init()` bodies and init-reachable functions take it too.
+
+A slot where a bare C# string would bind the wrong C# type keeps the form it had before:
+
+| Slot | Kept form | Why |
+|:--|:--|:--|
+| an `any` slot go2cs-gen cannot intercept (below), or a non-empty interface slot | hoisted pre-boxed, or `(@string)"text"u8` | the boxed value would be a `System.String`, the wrong dynamic type |
+| a named string type | `((Token)(@string)"x"u8)` | C# applies only one user-defined conversion (CS0029) |
+| an argument whose callee parameter mentions a type parameter | `"text"u8` | C# would infer the type argument as `string` |
+| a `go` or `defer` argument | `(@string)"text"` | the capture list passes each argument through the launcher's type parameters, which would infer `string` |
+| an [sstring twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind)'s parameter | `"text"u8` | a C# string reaches the `sstring` member through a conversion that transcodes on every call; the `u8` form binds a zero-copy view |
+| a multi-line raw string | `"""…"""u8.Raw()` | `Raw()` must strip the checkout's CRs |
+| a literal with raw non-UTF-8 bytes | the byte-array form | a C# string cannot hold the bytes |
+
+Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` span, as they always have. A package `var` initialized by an inferred generic call follows the call's argument rule.
+
+**The standard library opts out.** A package whose source is under `GOROOT/src` keeps [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use), under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). `-hoist-literals` gives any other package the same form, and it is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation (about 0.5 ns, measured).
+
+**A wrong binding is a build error.** The analyzer `StringLiteralBindingAnalyzer` (`go2cs-gen`) reports [`GO2CS0004`](../DiagnosticCodes.md), an error, on a C# string literal in converted code that binds where Go's string would not: an `object` or interface parameter, a method type parameter inferred as `string`, or a `System.String` parameter beside an `@string` overload. A parameter marked `[GoTakesCSharpString]` (golib) accepts a C# string by design and is exempt; golib marks `panic`'s state and `len(string)`. Hand-owned assemblies, attribute arguments, `nameof` and parameter defaults are not checked.
+
+The decisions are made in the literal pre-pass (`hoistedLiteralOperations.go`, `packagePlainLits`), and `convExpr`'s `*ast.BasicLit` arm renders a registered node bare. The unit tests in `plainStringLiterals_test.go` cover every row above, and `StringLiteralBindingAnalyzerTests` covers the analyzer.
+
+## A literal in an `any` slot is a plain C# literal too, and go2cs-gen boxes it as a Go string
+
+Outside the standard library, a literal passed to an `any` parameter or a `...any` element renders bare as well, so `fmt.Println` reads as it does in Go:
+
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.go:81 -->
+```go
+	fmt.Println("pre boxed any target")
+```
+<!-- source: src/tests/Behavioral/StringLiteralHoisting/main.cs.target:69 -->
+```csharp
+    fmt.Println("pre boxed any target");
+```
+
+A bare C# string reaches an `object` slot by a reference conversion, so the callee would see `System.String`, which no Go type switch, assertion or comparison matches. go2cs-gen's `LiteralInterceptorGenerator` prevents that. For every such call it generates a C# [interceptor](https://github.com/dotnet/roslyn/blob/main/docs/features/interceptors.md): a method that replaces the call at that one location, writes a cached, pre-boxed `@string` into the slot and calls the original method. The box is allocated once per literal per file, so the call allocates nothing, as the pre-boxed field it replaces did. The generated file sits beside the source file, in namespace `go2cs.Interceptors`; the interceptor carries `[GeneratedCode("go2cs-gen")]` and `[StackTraceHidden]`, so `runtime.Caller` and .NET stack traces skip its frame.
+
+The converter emits the bare literal only where the generator can intercept the call (`interceptableAnyArg`): an ordinary call of a non-generic function, or of a method the generator can resolve. Every other `any` slot keeps the pre-boxed field:
+
+| Call | Why it keeps the field |
+|:--|:--|
+| a `go` or `defer` argument | the capture list passes it through the launcher's type parameters |
+| a func value | its C# call is a delegate invocation, which no interceptor can replace |
+| a generic function, or a method of a generic type | its interceptor would itself be generic; deferred, and no behavioral fixture has one |
+| a method of a type this package declares, a promoted method, or a method whose receiver is not a plain identifier | the call binds a member go2cs-gen generates in the same compilation (a `ж<T>` receiver forwarder, a promoted forwarder, a field's ref property), and a generator cannot see another generator's output |
+
+A literal outside a call (a `[]any` element, an `any` return, assignment, send or map key) keeps its form too. A function call whose other arguments use generated members is still intercepted: the generator resolves it from its method group, which has one member.
+
+**Every gap is a build error.** The generator reports [`GO2CS0005`](../DiagnosticCodes.md) for a call with a bare literal in an `object` slot that it cannot intercept, with the reason, and [`GO2CS0006`](../DiagnosticCodes.md) when another member of the method group (usually one taking `@string`, which C# prefers to `object`) has captured a literal meant for an `any` slot. `GO2CS0004` stays the net: it accepts a boxed literal only when its call is intercepted, so a build in which the generator does not run fails instead of passing `System.String`.
+
+**The build must admit the interceptors.** `InterceptorsNamespaces` must list `go2cs.Interceptors`, or every intercepted call is `CS9137`. `src/Directory.Build.props` sets it for the repository's projects, golib's `go.lib.targets` for a NuGet consumer, and the converter's csproj template for a converted project outside the tree. The same three also make a go2cs-gen that cannot load an error (`CS8032`, `CS8034`, `CS8784`, `CS8785`, `CS9057`), and `go.lib.targets` refuses a compiler older than Roslyn 4.14 ([`GO2CS3001`](../DiagnosticCodes.md)). A .NET 10 SDK build runs its own Roslyn 5.0.
+
+**The cost is design time, and it grows with the sites.** To find each call's callee, the generator binds every call that passes a bare literal to an `any` slot. A generator that binds re-runs on every change to the compilation. So in an IDE, each edit re-binds the `any`-slot literal calls of every file that has one, not only the edited file. That is also what lets `GO2CS0006` see an overload added in another file. A file with no such call pays nothing, because the generator decides that from syntax alone. A build pays the same binding once, and the compiler reuses most of it. For a large project that is IDE-heavy or performance-critical, `-hoist-literals` is the opt-out: with every literal hoisted, the converter emits no bare literal and the generator binds nothing.
+
+**A hoisting package says so, and the generator skips it.** The converter writes `[assembly: GoHoistedLiterals]` (golib) into the info file of every package whose literals it hoists: `package_info.cs`, and `package_test_info.cs` for its test assembly, never `package_info_internal_test.cs`, which the same test assembly also compiles. The stamp is regenerated on every write, so it never outlives the flag. The generator finds the stamp from syntax and drops the assembly's files before any semantic step, so the standard library and a `-hoist-literals` package run no transform at all, even for a file with a call such as `panic("…")`, whose literal argument goes to a parameter that takes a C# string on purpose. The stamp only skips work: a bare literal in an `any` slot of a stamped assembly would still be `GO2CS0004`, a build error. `hoistedLiteralsStamp_test.go` covers the converter's side, and GenTests' `AStampedAssemblyRunsNoTransform` covers the generator.
+
+`-hoist-literals` and the standard library's opt-out cover the `any` slot too: with every literal hoisted, the converter emits no bare literal for the generator to intercept. `plainStringLiterals_test.go` (`TestPlainLiteralsAtInterceptableAnySlots`, `TestAnySlotsGoInterceptorsCannotReachKeepTheHoist`) covers the converter's side, and GenTests' `LiteralInterceptorGeneratorTests` covers the generator, building and running each shape.
+
 ## String literals render as `u8` spans
 
-A literal renders as a C# UTF-8 literal and converts to `@string` only where a string value is needed:
+Every literal that is not [plain](#a-literal-in-a-string-slot-is-a-plain-c-literal) renders as a C# UTF-8 literal, and converts to `@string` only where a string value is needed:
 
 ```go
-var s string = "ready"
+ok := s == "ready"
 bs := []byte("hello")
 rs := []rune("héllo")
 ```
 ```csharp
-@string s = "ready"u8;
+var ok = s == "ready"u8;
 var bs = slice<byte>("hello"u8);
 var rs = slice<rune>((@string)"héllo");
 ```
 
-The span form is used in every slot that accepts it: assignments, `string` parameters, struct fields (positional or keyed), typed slice and array elements, and concatenations. C# folds `"a"u8 + "b"u8` into one literal. A concatenation with a string value binds golib's `operator +(@string, ReadOnlySpan<byte>)`, which copies the literal's bytes straight into the result.
+The span form is used in every slot that reads the bytes in place: comparisons, concatenations and `[]byte` sources. In the standard library it is also the form of every literal that is not hoisted, in every slot that accepts it: assignments, `string` parameters, struct fields (positional or keyed), and typed slice and array elements. C# folds `"a"u8 + "b"u8` into one literal. A concatenation with a string value binds golib's `operator +(@string, ReadOnlySpan<byte>)`, which copies the literal's bytes straight into the result.
 
 Some slots cannot take a span, and the literal changes form there:
 
@@ -59,6 +157,31 @@ Some slots cannot take a span, and the literal changes form there:
 | `[]rune("…")`, or `[]byte` of a constant concatenation | `slice<rune>((@string)"héllo")` | the rune conversion goes through `@string` |
 
 Parentheses are transparent: `(x)` renders exactly as `x` would in the same slot. The behavioral tests `StringLiteralSliceConversion`, `NamedStringConversion`, `NamedStringZeroValue`, `CompositeElementStringConcat`, `AnyStringLitComposite` and `ParenthesizedConcatContext` cover these forms.
+
+## A multi-line raw string ends in `.Raw()`
+
+A Go raw string that spans lines emits as a C# raw string literal, and the literal ends in `.Raw()`. Every line of the Go text stays as it was:
+
+```go
+return fmt.Sprintf(`%[1]s and %[2]s both match some paths, like %[3]q.
+But neither is more specific than the other.
+%[1]s matches %[4]q, but %[2]s doesn't.
+%[2]s matches %[5]q, but %[1]s doesn't.`,
+	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
+```
+```csharp
+return fmt.Sprintf("""
+%[1]s and %[2]s both match some paths, like %[3]q.
+But neither is more specific than the other.
+%[1]s matches %[4]q, but %[2]s doesn't.
+%[2]s matches %[5]q, but %[1]s doesn't.
+"""u8.Raw(),
+            Ꮡp1.OrTypedNil(), Ꮡp2.OrTypedNil(), commonPath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp1).DerefOrNull(), ref (Ꮡp2).DerefOrNull()), differencePath(ref (Ꮡp2).DerefOrNull(), ref (Ꮡp1).DerefOrNull()));
+```
+
+`Raw()` exists because of line endings. A Go raw string never holds a carriage return: the Go compiler drops every CR between the backquotes. C# instead takes a raw literal's line breaks from the source file, and `.gitattributes` pins every `*.cs` to `eol=crlf`, so every checkout gives the literal CRLF. Without `Raw()`, a build of the checked-out file holds `\r\n` where Go holds `\n`, and its length, bytes, comparisons and hashes all differ. A published package and a plain `dotnet build` both compile that checked-out form. `Raw()` (golib `string.cs`) removes every CR, which is exactly Go's rule, so the value is the same on any checkout.
+
+`Raw()` adds no allocation. The implicit span-to-`@string` conversion already copies the literal's bytes once, and `Raw()` makes that same copy while skipping CRs. A raw string inside a `+` chain of constant pieces emits as a C# `string`, and takes the `string` overload of `Raw()`. The strip applies to raw literals only. An interpreted `"\r\n"` holds a real CR and keeps it, and a one-line raw string emits as a verbatim `@"…"` literal with no line break. The behavioral test `RawStringLineEndings` guards this. Its golden is checked by compiling and running the committed CRLF `main.cs`, without a fresh transpile.
 
 ## A string literal with raw-byte escapes emits a byte-array `@string`
 
@@ -93,6 +216,8 @@ A `var` initializer renders as an expression, so each literal piece of a concate
 `string([]rune)` writes U+FFFD for each invalid rune (a surrogate, or a value outside `0..0x10FFFF`), as Go does. golib's `builtin.ToUTF8Bytes` is the single encoder. The behavioral tests `DefinedElemStringConversion`, `NamedByteSliceFromStringLit` and `InvalidRuneString` cover these.
 
 ## A value-materializing string literal is HOISTED to a `static readonly` field beside its first use
+
+This is the standard library's form, and `-hoist-literals` gives it to any other package; elsewhere a literal in a `string` slot is [plain](#a-literal-in-a-string-slot-is-a-plain-c-literal), a literal in an interceptable `any` slot is [plain too](#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string), and only a literal used solely in other `any` slots is hoisted (pre-boxed, below).
 
 Go keeps literals in read-only memory, so `return "true"` allocates nothing. In C# each conversion of a `u8` literal to `@string` copies it. So a literal that becomes a value is hoisted: a package-wide pre-pass (`hoistedLiteralOperations.go`) gives each such literal one field, declared above the function that first uses it, and every use names the field:
 
@@ -145,6 +270,8 @@ public static @string FormatBool(bool b) {
 Emission is one substitution in `convExpr`'s `*ast.BasicLit` arm; the decisions are made before any file emits. The behavioral test `StringLiteralHoisting` covers every row above.
 
 ## A function-LOCAL string const hoists to a `static readonly` field under its own name
+
+This is the standard library's form, and `-hoist-literals` gives it to any other package. Elsewhere the constant is a local initialized from a [plain literal](#a-literal-in-a-string-slot-is-a-plain-c-literal) (`@string fnAtoi = "Atoi";`), which allocates nothing per call.
 
 A string constant declared inside a function would otherwise be a local initialized from a `u8` literal, copied into a new `@string` on every call. It hoists to one field named after the constant, with the `ᶜ` marker (`HoistedConstMarker`, shared with [local big constants](named-numeric-types.md#a-function-local-gobigconst-hoists-its-parse-to-a-static-readonly-field)). The local copies the field, which allocates nothing, so every reference is unchanged:
 
@@ -250,7 +377,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 - **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
-  <!-- source: src/core/fmt/print.cs:268-276 -->
+  <!-- source: src/core/fmt/print.cs:256-264 -->
   ```csharp
   public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
       …

@@ -152,6 +152,7 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
     var resp = Ꮡ(new Response(
         Request: Ꮡreq
     ));
+
     // Parse the first line of the response.
     var (line, err) = tp.ReadLine();
     if (err != default!) {
@@ -166,6 +167,7 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
     }
     resp.Value.Proto = proto;
     resp.Value.Status = strings.TrimLeft(status, " "u8);
+
     var (statusCode, _, _) = strings.Cut((~resp).Status, " "u8);
     if (builtin.len(statusCode) != 3) {
         return (default!, badStringError(malformedHttpStatusCodeˢ, statusCode));
@@ -179,6 +181,7 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
             return (default!, badStringError(malformedHttpVersionˢ, (~resp).Proto));
         }
     }
+
     // Parse the response headers.
     (var mimeHeader, err) = tp.ReadMIMEHeader();
     if (err != default!) {
@@ -187,12 +190,15 @@ public static (ж<Response>, error) ReadResponse(ж<bufio.Reader> Ꮡr, ж<Reque
         }
         return (default!, err);
     }
-    resp.Value.Header = ((ΔHeader)(map<@string, slice<@string>>)mimeHeader);
+    resp.Value.Header = (ΔHeader)(map<@string, slice<@string>>)mimeHeader;
+
     fixPragmaCacheControl((~resp).Header);
+
     err = readTransfer(resp.OrTypedNil(), Ꮡr);
     if (err != default!) {
         return (default!, err);
     }
+
     return (resp, default!);
 }
 
@@ -262,11 +268,13 @@ public static error Write(this ref Response r, io.Writer w) {
         // Not important.
         text = strings.TrimPrefix(text, strconv.Itoa(r.StatusCode) + " "u8);
     }
+
     {
         var (_, errΔ1) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n"u8, r.ProtoMajor, r.ProtoMinor, r.StatusCode, text); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
+
     // Clone it, so we can modify r1 as needed.
     var r1 = @new<Response>();
     r1.Value = r;
@@ -296,6 +304,7 @@ public static error Write(this ref Response r, io.Writer w) {
     if ((~r1).ContentLength == -1 && !(~r1).Close && r1.ProtoAtLeast(1, 1) && !chunked((~r1).TransferEncoding) && !(~r1).Uncompressed) {
         r1.Value.Close = true;
     }
+
     // Process Body,ContentLength,Close,Trailer
     var (tw, err) = newTransferWriter(r1.OrTypedNil());
     if (err != default!) {
@@ -305,11 +314,13 @@ public static error Write(this ref Response r, io.Writer w) {
     if (err != default!) {
         return err;
     }
+
     // Rest of header
     err = r.Header.WriteSubset(w, respExcludeHeader);
     if (err != default!) {
         return err;
     }
+
     // contentLengthAlreadySent may have been already sent for
     // POST/PUT requests, even if zero length. See Issue 8180.
     var contentLengthAlreadySent = tw.shouldSendContentLength();
@@ -320,17 +331,20 @@ public static error Write(this ref Response r, io.Writer w) {
             }
         }
     }
+
     // End-of-header
     {
         var (_, errΔ4) = io.WriteString(w, "\r\n"u8); if (errΔ4 != default!) {
             return errΔ4;
         }
     }
+
     // Write body and trailer
     err = tw.writeBody(w);
     if (err != default!) {
         return err;
     }
+
     // Success
     return default!;
 }
@@ -368,7 +382,7 @@ internal static bool isProtocolSwitchResponse(nint code, ΔHeader h) {
 // isProtocolSwitchHeader reports whether the request or response header
 // is for a protocol switch.
 internal static bool isProtocolSwitchHeader(ΔHeader h) {
-    return h.Get(upgradeˢ) != ""u8 && httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ);
+    return h.Get(upgradeˢ2) != ""u8 && httpguts.HeaderValuesContainsToken(h[connectionˢ], upgradeˢ2);
 }
 
 } // end http_package

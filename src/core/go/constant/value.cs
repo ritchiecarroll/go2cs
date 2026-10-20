@@ -26,12 +26,19 @@ using unicode;
 
 partial class constant_package {
 
+//go:generate stringer -type Kind
+
+// Kind specifies the kind of value represented by a [Value].
 partial struct ΔKind /*num:nint*/;
 
-//go:generate stringer -type Kind
+// unknown values
 public static ΔKind Unknown => /* iota */ 0;
+
+// non-numeric values
 public static ΔKind Bool => 1;
 public static ΔKind ΔString => 2;
+
+// numeric values
 public static ΔKind Int => 3;
 public static ΔKind Float => 4;
 public static ΔKind Complex => 5;
@@ -177,6 +184,7 @@ internal static @string @string(this ж<stringVal> Ꮡx) {
     }
     @string s = x.s;
     x.mu.Unlock();
+
     return s;
 }
 
@@ -201,6 +209,7 @@ internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@str
         (~y).r.of(stringVal.Ꮡmu).Lock();
         list = (~y).r.appendReverse(list);
         (~y).r.of(stringVal.Ꮡmu).Unlock();
+
         var l = y.Value.l;
         if (y != Ꮡx) {
             y.of(stringVal.Ꮡmu).Unlock();
@@ -230,10 +239,12 @@ internal static @string String(this ratVal x) {
 // String returns a decimal approximation of the Float value.
 internal static @string String(this floatVal x) {
     var f = x.val;
+
     // Don't try to convert infinities (will not terminate).
     if (f.IsInf()) {
         return f.String();
     }
+
     // Use exact fmt formatting if in float64 range (common case):
     // proceed if f doesn't underflow to 0 or overflow to inf.
     {
@@ -247,24 +258,31 @@ internal static @string String(this floatVal x) {
             return s;
         }
     }
+
     // Out of float64 range. Do approximate manual to decimal
     // conversion to avoid precise but possibly slow Float
     // formatting.
     // f = mant * 2**exp
     ref var mant = ref heap(new big.Float(), out var Ꮡmant);
     nint exp = f.MantExp(Ꮡmant); // 0.5 <= |mant| < 1.0
+
     // approximate float64 mantissa m and decimal exponent d
     // f ~ m * 10**d
     var (m, _) = Ꮡmant.Float64(); // 0.5 <= |m| < 1.0
     var d = (float64)exp * /* (math.Ln2 / math.Ln10) */ 0.3010299956639812D; // log_10(2)
+
     // adjust m for truncated (integer) decimal exponent e
     var e = (int64)d;
     m *= math.Pow(10D, d - (float64)e);
+
     // ensure 1 <= |m| < 10
     {
         var am = math.Abs(m);
         switch (ᐧ) {
         case {} when am < 1D - 0.5e-6D: {
+            // The %.6g format below rounds m to 5 digits after the
+            // decimal point. Make sure that m*10 < 10 even after
+            // rounding up: m*10 + 0.5e-5 < 10 => m < 1 - 0.5e6.
             m *= 10D;
             e--;
             break;
@@ -276,9 +294,6 @@ internal static @string String(this floatVal x) {
         }}
     }
 
-    // The %.6g format below rounds m to 5 digits after the
-    // decimal point. Make sure that m*10 < 10 even after
-    // rounding up: m*10 + 0.5e-5 < 10 => m < 1 - 0.5e6.
     return fmt.Sprintf("%.6ge%+d"u8, m, e);
 }
 
@@ -383,7 +398,7 @@ internal static floatVal rtof(ratVal x) {
 }
 
 internal static complexVal vtoc(Value x) {
-    return new complexVal(x, ((int64Val)0));
+    return new complexVal(x, (int64Val)0);
 }
 
 internal static Value makeInt(ж<bigꓸInt> Ꮡx) {
@@ -521,7 +536,7 @@ public static Value MakeInt64(int64 x) {
 
 // MakeUint64 returns the [Int] value for x.
 public static Value MakeUint64(uint64 x) {
-    if (x < ((uint64)1 << (int)(63))) {
+    if (x < (uint64)1 << 63) {
         return ((int64Val)(int64)x);
     }
     return new intVal(newInt().SetUint64(x));
@@ -549,6 +564,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
     if (zero != 0) {
         throw panic("MakeFromLiteral called with non-zero last argument");
     }
+
     var exprᴛ1 = tok;
     if (exprᴛ1 == token.INT) {
         {
@@ -574,7 +590,7 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) {
             nint n = len(lit); if (n > 0 && lit[n - 1] == (rune)'i') {
                 {
                     var im = makeFloatFromLiteral(lit.slice(0, n - 1)); if (im != default!) {
-                        return makeComplex(((int64Val)0), im);
+                        return makeComplex((int64Val)0, im);
                     }
                 }
             }
@@ -860,7 +876,6 @@ public static nint Sign(Value x) {
         case {} when xΔ1 > 0: {
             return 1;
         }}
-
         return 0;
     }
     case intVal xΔ1: {
@@ -873,7 +888,7 @@ public static nint Sign(Value x) {
         return xΔ1.val.Sign();
     }
     case complexVal xΔ1: {
-        return (nint)(Sign(xΔ1.re) | Sign(xΔ1.im));
+        return Sign(xΔ1.re) | Sign(xΔ1.im);
     }
     case unknownVal xΔ1: {
         return 1; // avoid spurious division by zero errors
@@ -887,6 +902,8 @@ public static nint Sign(Value x) {
 
 // ----------------------------------------------------------------------------
 // Support for assembling/disassembling numeric values
+
+// Compute the size of a Word in bytes.
 internal static big.Word _m => /* ^big.Word(0) */ unchecked((big.Word)18446744073709551615);
 internal static big.Word _log => /* _m>>8&1 + _m>>16&1 + _m>>32&1 */ 3;
 internal static UntypedInt wordSize => /* 1 << _log */ 8;
@@ -909,8 +926,10 @@ public static slice<byte> Bytes(Value x) {
         throw panic(fmt.Sprintf("%v not an Int"u8, xΔ1));
         break;
     }}
+
     var words = t.val.Bits();
     var bytes = new slice<byte>(len(words) * (nint)wordSize);
+
     nint i = 0;
     foreach (var (_, vᴛ1) in words) {
         var w = vᴛ1;
@@ -925,6 +944,7 @@ public static slice<byte> Bytes(Value x) {
     while (i > 0 && bytes[i - 1] == 0) {
         i--;
     }
+
     return bytes.slice(0, i);
 }
 
@@ -932,6 +952,7 @@ public static slice<byte> Bytes(Value x) {
 // binary representation. An empty byte slice argument represents 0.
 public static Value MakeFromBytes(slice<byte> bytes) {
     var words = new slice<big.Word>((len(bytes) + (nint)(wordSize - 1)) / (nint)wordSize);
+
     nint i = 0;
     big.Word w = default!;
     nuint s = default!;
@@ -955,6 +976,7 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     while (i > 0 && words[i - 1] == 0) {
         i--;
     }
+
     return makeInt(newInt().SetBits(words.slice(0, i)));
 }
 
@@ -1035,13 +1057,12 @@ public static Value MakeImag(Value x) {
     case intVal _:
     case ratVal _:
     case floatVal _: {
-        return makeComplex(((int64Val)0), x);
+        return makeComplex((int64Val)0, x);
     }
     default: {
         throw panic(fmt.Sprintf("%v not Int or Float"u8, x));
         break;
     }}
-
 }
 
 // Real returns the real part of x, which must be a numeric or unknown value.
@@ -1109,22 +1130,25 @@ public static Value ToInt(Value x) {
         break;
     }
     case floatVal xΔ1: {
+        // avoid creation of huge integers
+        // (Existing tests require permitting exponents of at least 1024;
+        // allow any value that would also be permissible as a fraction.)
         if (smallFloat(xΔ1.val)) {
-            // avoid creation of huge integers
-            // (Existing tests require permitting exponents of at least 1024;
-            // allow any value that would also be permissible as a fraction.)
             var i = newInt();
             {
                 var (_, acc) = xΔ1.val.Int(i); if (acc == big.Exact) {
                     return makeInt(i);
                 }
             }
+
             // If we can get an integer by rounding up or down,
             // assume x is not an integer because of rounding
             // errors in prior computations.
+
             UntypedInt delta = 4; // a small number of bits > 0
             ref var t = ref heap(new big.Float(), out var Ꮡt);
             Ꮡt.SetPrec(prec - delta);
+
             // try rounding down a little
             Ꮡt.SetMode(big.ToZero);
             Ꮡt.Set(xΔ1.val);
@@ -1133,6 +1157,7 @@ public static Value ToInt(Value x) {
                     return makeInt(i);
                 }
             }
+
             // try rounding up a little
             Ꮡt.SetMode(big.AwayFromZero);
             Ꮡt.Set(xΔ1.val);
@@ -1152,6 +1177,7 @@ public static Value ToInt(Value x) {
         }
         break;
     }}
+
     return new unknownVal(nil);
 }
 
@@ -1205,13 +1231,13 @@ public static Value ToComplex(Value x) {
 // is32bit reports whether x can be represented using 32 bits.
 internal static bool is32bit(int64 x) {
     UntypedInt s = 32;
-    return (int64)(((int64)(-1) << (int)((s - 1)))) <= x && x <= (int64)(2147483648L - 1);
+    return (int64)((int64)(-1) << (int)(s - 1)) <= x && x <= (int64)(2147483648L - 1);
 }
 
 // is63bit reports whether x can be represented using 63 bits.
 internal static bool is63bit(int64 x) {
     UntypedInt s = 63;
-    return (int64)(-4611686018427387904L) <= x && x <= (int64)(4611686018427387903L);
+    return (int64)(-4611686018427387904L) <= x && x <= (int64)4611686018427387903L;
 }
 
 // UnaryOp returns the result of the unary expression op y.
@@ -1230,7 +1256,6 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
         case complexVal _: {
             return y;
         }}
-
     }
     else if (exprᴛ1 == token.SUB) {
         switch (y.type()) {
@@ -1279,10 +1304,10 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) {
             goto Error;
             break;
         }}
+        // For unsigned types, the result will be negative and
+        // thus "too large": We must limit the result precision
+        // to the type's precision.
         if (prec > 0) {
-            // For unsigned types, the result will be negative and
-            // thus "too large": We must limit the result precision
-            // to the type's precision.
             z.AndNot(z, newInt().Lsh(big.NewInt(-1), prec)); // z &^= (-1)<<prec
         }
         return makeInt(z);
@@ -1304,6 +1329,8 @@ Error:
 internal static nint ord(Value x) {
     switch (x.type()) {
     default: {
+        // force invalid value into "x position" in match
+        // (don't panic here so that callers can provide a better error message)
         return -1;
     }
     case unknownVal: {
@@ -1328,11 +1355,7 @@ internal static nint ord(Value x) {
     case complexVal: {
         return 6;
     }}
-
 }
-
-// force invalid value into "x position" in match
-// (don't panic here so that callers can provide a better error message)
 
 // match returns the matching representation (same type) with the
 // smallest complexity for two values x and y. If one of them is
@@ -1352,7 +1375,6 @@ internal static (Value, Value) match(Value x, Value y) {
             break;
         }}
     }
-
     return (x, y);
 }
 
@@ -1393,7 +1415,15 @@ internal static (Value, Value) match0(Value x, Value y) {
         break;
     }
     case complexVal: {
-        return (vtoc(x), y);
+        switch (x.type()) {
+        case int64Val _:
+        case intVal _:
+        case ratVal _:
+        case floatVal _: {
+            var x1 = x;
+            return (vtoc(x1), y);
+        }}
+        break;
     }}
 
     // force unknown and invalid values into "x position" in callers of match
@@ -1412,6 +1442,7 @@ internal static (Value, Value) match0(Value x, Value y) {
 // Division by zero leads to a run-time panic.
 public static Value BinaryOp(Value x_, token.Token op, Value y_) {
     var (x, y) = match(x_, y_);
+
     switch (x.type()) {
     case unknownVal xΔ1: {
         return xΔ1;
@@ -1425,7 +1456,6 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         if (exprᴛ1 == token.LOR) {
             return ((boolVal)((bool)xΔ1  ||  (bool)yΔ1));
         }
-
         break;
     }
     case int64Val xΔ1: {
@@ -1454,28 +1484,27 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else if (exprᴛ2 == token.QUO) {
             return makeRat(big.NewRat(a, b));
         }
-        else if (exprᴛ2 == token.QUO_ASSIGN) {
+        else if (exprᴛ2 == token.QUO_ASSIGN) { // force integer division
             c = builtin.quo(a, b);
         }
         else if (exprᴛ2 == token.REM) {
             c = rem(a, b);
         }
         else if (exprᴛ2 == token.AND) {
-            c = (int64)(a & b);
+            c = a & b;
         }
         else if (exprᴛ2 == token.OR) {
-            c = (int64)(a | b);
+            c = a | b;
         }
         else if (exprᴛ2 == token.XOR) {
-            c = (int64)(a ^ b);
+            c = a ^ b;
         }
         else if (exprᴛ2 == token.AND_NOT) {
-            c = (int64)(a & ~b);
+            c = a & ~b;
         }
         else { /* default: */
             goto Error;
         }
-
         return ((int64Val)c);
     }
     case intVal xΔ1: {
@@ -1484,8 +1513,7 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         var c = newInt();
         var exprᴛ3 = op;
         if (exprᴛ3 == token.ADD) {
-            c.Add(a, // force integer division
- b);
+            c.Add(a, b);
         }
         else if (exprᴛ3 == token.SUB) {
             c.Sub(a, b);
@@ -1496,9 +1524,8 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else if (exprᴛ3 == token.QUO) {
             return makeRat(newRat().SetFrac(a, b));
         }
-        else if (exprᴛ3 == token.QUO_ASSIGN) {
-            c.Quo(a, // force integer division
- b);
+        else if (exprᴛ3 == token.QUO_ASSIGN) { // force integer division
+            c.Quo(a, b);
         }
         else if (exprᴛ3 == token.REM) {
             c.Rem(a, b);
@@ -1518,7 +1545,6 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else { /* default: */
             goto Error;
         }
-
         return makeInt(c);
     }
     case ratVal xΔ1: {
@@ -1541,7 +1567,6 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else { /* default: */
             goto Error;
         }
-
         return makeRat(c);
     }
     case floatVal xΔ1: {
@@ -1564,7 +1589,6 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else { /* default: */
             goto Error;
         }
-
         return makeFloat(c);
     }
     case complexVal xΔ1: {
@@ -1575,18 +1599,18 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         Value im = default!;
         var exprᴛ6 = op;
         if (exprᴛ6 == token.ADD) {
-            re = add(a, // (a+c) + i(b+d)
- c);
+            // (a+c) + i(b+d)
+            re = add(a, c);
             im = add(b, d);
         }
         else if (exprᴛ6 == token.SUB) {
-            re = sub(a, // (a-c) + i(b-d)
- c);
+            // (a-c) + i(b-d)
+            re = sub(a, c);
             im = sub(b, d);
         }
         else if (exprᴛ6 == token.MUL) {
-            var ac = mul(a, // (ac-bd) + i(bc+ad)
- c);
+            // (ac-bd) + i(bc+ad)
+            var ac = mul(a, c);
             var bd = mul(b, d);
             var bc = mul(b, c);
             var ad = mul(a, d);
@@ -1594,8 +1618,8 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
             im = add(bc, ad);
         }
         else if (exprᴛ6 == token.QUO) {
-            var ac = mul(a, // (ac+bd)/s + i(bc-ad)/s, with s = cc + dd
- c);
+            // (ac+bd)/s + i(bc-ad)/s, with s = cc + dd
+            var ac = mul(a, c);
             var bd = mul(b, d);
             var bc = mul(b, c);
             var ad = mul(a, d);
@@ -1610,7 +1634,6 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         else { /* default: */
             goto Error;
         }
-
         return makeComplex(re, im);
     }
     case ж<stringVal> xΔ1: {
@@ -1619,6 +1642,7 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) {
         }
         break;
     }}
+
 Error:
     throw panic(fmt.Sprintf("invalid binary operation %v %s %v"u8, x_, op, y_));
 }
@@ -1659,7 +1683,6 @@ public static Value Shift(Value x, token.Token op, nuint s) {
         if (exprᴛ1 == token.SHR) {
             return (xΔ1 >> (int)(s));
         }
-
         break;
     }
     case intVal xΔ1: {
@@ -1674,9 +1697,9 @@ public static Value Shift(Value x, token.Token op, nuint s) {
         if (exprᴛ2 == token.SHR) {
             return makeInt(z.Rsh(xΔ1.val, s));
         }
-
         break;
     }}
+
     throw panic(fmt.Sprintf("invalid shift %v %s %d"u8, x, op, s));
 }
 
@@ -1700,7 +1723,6 @@ internal static bool cmpZero(nint x, token.Token op) {
     if (exprᴛ1 == token.GEQ) {
         return x >= 0;
     }
-
     throw panic(fmt.Sprintf("invalid comparison %v %s 0"u8, x, op));
 }
 
@@ -1710,6 +1732,7 @@ internal static bool cmpZero(nint x, token.Token op) {
 // false.
 public static bool Compare(Value x_, token.Token op, Value y_) {
     var (x, y) = match(x_, y_);
+
     switch (x.type()) {
     case unknownVal xΔ1: {
         return false;
@@ -1723,7 +1746,6 @@ public static bool Compare(Value x_, token.Token op, Value y_) {
         if (exprᴛ1 == token.NEQ) {
             return xΔ1 != yΔ1;
         }
-
         break;
     }
     case int64Val xΔ1: {
@@ -1747,7 +1769,6 @@ public static bool Compare(Value x_, token.Token op, Value y_) {
         if (exprᴛ2 == token.GEQ) {
             return xΔ1 >= yΔ2;
         }
-
         break;
     }
     case intVal xΔ1: {
@@ -1770,7 +1791,6 @@ public static bool Compare(Value x_, token.Token op, Value y_) {
         if (exprᴛ3 == token.NEQ) {
             return !re || !im;
         }
-
         break;
     }
     case ж<stringVal> xΔ1: {
@@ -1795,9 +1815,9 @@ public static bool Compare(Value x_, token.Token op, Value y_) {
         if (exprᴛ4 == token.GEQ) {
             return xs >= ys;
         }
-
         break;
     }}
+
     throw panic(fmt.Sprintf("invalid comparison %v %s %v"u8, x_, op, y_));
 }
 

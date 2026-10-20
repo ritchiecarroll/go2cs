@@ -27,4 +27,17 @@ partial struct EmptyInterface {
     public @unsafe.Pointer Data;
 }
 
+// NonEmptyInterface describes the layout of an interface that contains any methods.
+partial struct NonEmptyInterface {
+    public ж<ITab> ITab;
+    public @unsafe.Pointer Data;
+}
+
+// CommonInterface describes the layout of both [EmptyInterface] and [NonEmptyInterface].
+partial struct CommonInterface {
+    // Either an *ITab or a *Type, unexported to avoid accidental use.
+    internal @unsafe.Pointer _;
+    public @unsafe.Pointer Data;
+}
+
 } // end abi_package

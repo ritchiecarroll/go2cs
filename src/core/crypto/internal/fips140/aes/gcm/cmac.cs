@@ -36,6 +36,7 @@ internal static void deriveSubkeys(this ж<CMAC> Ꮡc) {
     aes.EncryptBlockInternal(Ꮡc.of(CMAC.Ꮡb), c.k1[..], c.k1[..]);
     var msb = shiftLeft(Ꮡc.of(CMAC.Ꮡk1));
     c.k1[len(c.k1) - 1] ^= (byte)(msb * 0b10000111);
+
     c.k2 = c.k1.Clone();
     msb = shiftLeft(Ꮡc.of(CMAC.Ꮡk2));
     c.k2[len(c.k2) - 1] ^= (byte)(msb * 0b10000111);
@@ -79,7 +80,7 @@ internal static byte shiftLeft(/*[16]*/ ж<array<byte>> Ꮡx) {
 
     byte msb = default!;
     for (nint i = 16 - 1; i >= 0; i--) {
-        (msb, x[i]) = ((byte)((x[i] >> (int)(7))), (byte)((byte)(x[i] << (int)(1)) | msb));
+        (msb, x[i]) = ((byte)((x[i] >> 7)), (byte)((byte)(x[i] << 1) | msb));
     }
     return msb;
 }

@@ -115,6 +115,7 @@ public static partial void TestPipe3(ж<testing.T> Ꮡt) {
         if (err != default! && !AreEqual(err, EOF)) {
             Ꮡt.Fatalf("read: %v"u8, err);
         }
+
         // only final two reads should be short - 1 byte, then 0
         nint expect = n;
         if (n == 128){
@@ -226,7 +227,7 @@ public static partial void TestPipeReadClose2(ж<testing.T> Ꮡt) {
     var (n, err) = r.Read(new slice<byte>(64));
     ᐸꟷ(c);
     if (n != 0 || !AreEqual(err, ErrClosedPipe)) {
-        Ꮡt.Errorf("read from closed pipe: %v, %v want %v, %v"u8, n, err, (nint)(0), ErrClosedPipe);
+        Ꮡt.Errorf("read from closed pipe: %v, %v want %v, %v"u8, n, err, (nint)0, ErrClosedPipe);
     }
 }
 
@@ -274,7 +275,7 @@ public static partial void TestPipeWriteClose2(ж<testing.T> Ꮡt) {
     var (n, err) = w.Write(new slice<byte>(64));
     ᐸꟷ(c);
     if (n != 0 || !AreEqual(err, ErrClosedPipe)) {
-        Ꮡt.Errorf("write to closed pipe: %v, %v want %v, %v"u8, n, err, (nint)(0), ErrClosedPipe);
+        Ꮡt.Errorf("write to closed pipe: %v, %v want %v, %v"u8, n, err, (nint)0, ErrClosedPipe);
     }
 }
 
@@ -321,14 +322,16 @@ public static partial void TestWriteAfterWriterClose(ж<testing.T> Ꮡt) {
             (_, ᏑwriteErr.ValueSlot) = wʗ1.Write(slice<byte>("world"u8));
             doneʗ1.ᐸꟷ(true);
         });
+
         var buf = new slice<byte>(100);
         @string result = default!;
         var (n, err) = ReadFull(new Δio.PipeReaderжReader(r), buf);
         if (err != default! && !AreEqual(err, ErrUnexpectedEOF)) {
             Ꮡt.Fatalf("got: %q; want: %q"u8, err, ErrUnexpectedEOF);
         }
-        result = ((@string)(buf.slice(0, n)));
+        result = (@string)(buf.slice(0, n));
         ᐸꟷ(done);
+
         if (result != "hello"u8) {
             Ꮡt.Errorf("got: %q; want: %q"u8, result, helloˢ);
         }
@@ -362,6 +365,7 @@ public static void TestPipeCloseError(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Write error: got %T, want testError1"u8, err);
         }
     }
+
     (r, w) = Pipe();
     w.CloseWithError(new TestPipeCloseError_testError1(nil));
     {
@@ -387,8 +391,10 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
     @string input = inputᶜ;
     UntypedInt count = 8;
     UntypedInt readSize = 2;
+
     Ꮡt.Run(writeˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         var (r, w) = Pipe();
+
         for (nint i = 0; i < count; i++) {
             var wʗ1 = w;
             goǃ(() => {
@@ -400,6 +406,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
                 }
             });
         }
+
         var buf = new slice<byte>((nint)count * len(input));
         for (nint i = 0; i < len(buf); i += readSize) {
             {
@@ -408,16 +415,19 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Since each Write is fully gated, if multiple Read calls were needed,
         // the contents of Write should still appear together in the output.
-        @string got = ((@string)buf);
+        @string got = (@string)buf;
         @string want = strings.Repeat(input, count);
         if (got != want) {
             tΔ1.Errorf("got: %q; want: %q"u8, got, want);
         }
     });
+
     Ꮡt.Run(readˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         var (r, w) = Pipe();
+
         var c = new channel<slice<byte>>((nint)((nint)count * len(input)) / readSize);
         for (nint i = 0; i < cap(c); i++) {
             var cʗ1 = c;
@@ -433,6 +443,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
                 cʗ1.ᐸꟷ(buf);
             });
         }
+
         for (nint i = 0; i < count; i++) {
             {
                 var (n, err) = w.Write(slice<byte>(input)); if (n != len(input) || err != default!) {
@@ -440,6 +451,7 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Since each read is independent, the only guarantee about the output
         // is that it is a permutation of the input in readSized groups.
         var got = new slice<byte>(0, (nint)count * len(input));
@@ -472,6 +484,7 @@ public static void TestPipeAllocations(ж<testing.T> Ꮡt) {
     var numAllocs = testing.AllocsPerRun(10, () => {
         (rSink, wSink) = Pipe();
     });
+
     // go.dev/cl/473535 claimed Pipe() should only do 2 allocations,
     // plus the 2 escaping to heap for simulating real world usages.
     nint expectedAllocs = 4;

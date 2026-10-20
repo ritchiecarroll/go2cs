@@ -25,11 +25,13 @@ internal static readonly @string goTypesˢ = "go/types"u8;
 
 public static void TestSelf(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt)); // The Go command is needed for the importer to determine the locations of stdlib .a files.
+
     var fset = token.NewFileSet();
     var (files, err) = pkgFiles(fset, "."u8);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
     conf = new Config(Importer: defaultImporter(fset));
     (_, err) = Ꮡconf.Check(goTypesˢ, fset, files, nil);
@@ -48,6 +50,7 @@ internal static readonly @string noinfoˢ = "noinfo"u8;
 
 public static void BenchmarkCheck(ж<testing.B> Ꮡb) {
     testenv.MustHaveGoBuild(new types_test_package.testing_BжTB(Ꮡb)); // The Go command is needed for the importer to determine the locations of stdlib .a files.
+
     foreach (var (_, p) in new @string[]{
         "net/http"u8,
         "go/parser"u8,
@@ -92,6 +95,7 @@ internal static void runbench(ж<testing.B> Ꮡb, @string path, bool ignoreFuncB
         lines += f.LineCount();
         return true;
     });
+
     b.ResetTimer();
     var start = time.Now();
     for (nint i = 0; i < b.N; i++) {
@@ -126,6 +130,7 @@ internal static (slice<ж<ast.File>>, error) pkgFiles(ж<token.FileSet> Ꮡfset,
     if (err != default!) {
         return (default!, err);
     }
+
     slice<ж<ast.File>> files = default!;
     foreach (var (_, filename) in filenames) {
         var (@file, errΔ1) = parser.ParseFile(Ꮡfset, filename, default!, 0);
@@ -134,6 +139,7 @@ internal static (slice<ж<ast.File>>, error) pkgFiles(ж<token.FileSet> Ꮡfset,
         }
         files = append(files, @file);
     }
+
     return (files, default!);
 }
 

@@ -4,7 +4,7 @@
 namespace go;
 
 using context = context_package;
-using itoa = @internal.itoa_package;
+using strconv = @internal.strconv_package;
 using netip = net.netip_package;
 using syscall = syscall_package;
 using @internal;
@@ -14,8 +14,6 @@ partial class net_package {
 
 // BUG(mikio): On Plan 9, the ReadMsgUDP and
 // WriteMsgUDP methods of UDPConn are not implemented.
-// BUG(mikio): On Windows, the File method of UDPConn is not
-// implemented.
 // BUG(mikio): On JS, methods and functions related to UDPConn are not
 // implemented.
 
@@ -55,9 +53,9 @@ public static @string String(this ж<UDPAddr> Ꮡa) {
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {
-        return JoinHostPort(ip + "%"u8 + a.Zone, itoa.Itoa(a.Port));
+        return JoinHostPort(ip + "%"u8 + a.Zone, strconv.Itoa(a.Port));
     }
-    return JoinHostPort(ip, itoa.Itoa(a.Port));
+    return JoinHostPort(ip, strconv.Itoa(a.Port));
 }
 
 internal static bool isWildcard(this ж<UDPAddr> Ꮡa) {
@@ -95,14 +93,12 @@ public static (ж<UDPAddr>, error) ResolveUDPAddr(@string network, @string addre
     var exprᴛ1 = network;
     if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
     }
-    else if (exprᴛ1 == ""u8) {
+    else if (exprᴛ1 == ""u8) { // a hint wildcard for Go 1.0 undocumented behavior
         network = udpˢ;
     }
     else { /* default: */
         return (default!, ((UnknownNetworkError)network));
     }
-
-    // a hint wildcard for Go 1.0 undocumented behavior
     var (addrs, err) = DefaultResolver.internetAddrList(context.Background(), network, address);
     if (err != default!) {
         return (default!, err);
@@ -123,7 +119,7 @@ public static ж<UDPAddr> UDPAddrFromAddrPort(netip.AddrPort addr) {
 
 // An addrPortUDPAddr is a netip.AddrPort-based UDP address that satisfies the Addr interface.
 partial struct addrPortUDPAddr {
-    public partial ref net.netip_package.AddrPort AddrPort { get; }
+    /*embed*/ public net.netip_package.AddrPort AddrPort;
 }
 
 internal static @string Network(this addrPortUDPAddr _) {
@@ -133,7 +129,7 @@ internal static @string Network(this addrPortUDPAddr _) {
 // UDPConn is the implementation of the [Conn] and [PacketConn] interfaces
 // for UDP network connections.
 partial struct UDPConn {
-    internal partial ref conn conn { get; }
+    /*embed*/ internal conn conn;
 }
 
 // SyscallConn returns a raw network connection.
@@ -190,8 +186,8 @@ public static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPort(this 
     nint n = default!;
     netip.AddrPort addr = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, new netip.AddrPort(nil), syscall.EINVAL);
     }
@@ -231,8 +227,8 @@ public static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) Re
     nint flags = default!;
     netip.AddrPort addr = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, 0, new netip.AddrPort(nil), syscall.EINVAL);
     }
@@ -301,8 +297,8 @@ public static (nint n, nint oobn, error err) WriteMsgUDP(this ж<UDPConn> Ꮡc, 
     nint n = default!;
     nint oobn = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -318,8 +314,8 @@ public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn
     nint n = default!;
     nint oobn = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
         return (0, 0, syscall.EINVAL);
     }
@@ -342,18 +338,26 @@ internal static ж<UDPConn> newUDPConn(ж<netFD> Ꮡfd) {
 // If the IP field of raddr is nil or an unspecified IP address, the
 // local system is assumed.
 public static (ж<UDPConn>, error) DialUDP(@string network, ж<UDPAddr> Ꮡladdr, ж<UDPAddr> Ꮡraddr) {
+    return dialUDP(context.Background(), nil, network, Ꮡladdr, Ꮡraddr);
+}
+
+internal static (ж<UDPConn>, error) dialUDP(context.Context ctx, ж<Dialer> Ꮡdialer, @string network, ж<UDPAddr> Ꮡladdr, ж<UDPAddr> Ꮡraddr) {
+    ref var dialer = ref Ꮡdialer.DerefOrNull();
+
     var exprᴛ1 = network;
     if (exprᴛ1 == "udp"u8 || exprᴛ1 == "udp4"u8 || exprᴛ1 == "udp6"u8) {
     }
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡraddr == nil) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: default!, Err: errMissingAddress))));
     }
     var sd = Ꮡ(new sysDialer(network: network, address: Ꮡraddr.String()));
-    var (c, err) = sd.dialUDP(context.Background(), Ꮡladdr, Ꮡraddr);
+    if (Ꮡdialer != nil) {
+        sd.Value.Dialer = dialer;
+    }
+    var (c, err) = sd.dialUDP(ctx, Ꮡladdr, Ꮡraddr);
     if (err != default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: Ꮡladdr.opAddr(), Addr: Ꮡraddr.opAddr(), Err: err))));
     }
@@ -378,7 +382,6 @@ public static (ж<UDPConn>, error) ListenUDP(@string network, ж<UDPAddr> Ꮡlad
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡladdr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡladdr == nil) {
         Ꮡladdr = Ꮡ(new UDPAddr(nil)); laddr = ref Ꮡladdr.DerefOrNull();
     }
@@ -419,7 +422,6 @@ public static (ж<UDPConn>, error) ListenMulticastUDP(@string network, ж<Interf
     else { /* default: */
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡgaddr.opAddr(), Err: ((UnknownNetworkError)network)))));
     }
-
     if (Ꮡgaddr == nil || gaddr.IP == default!) {
         return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "listen"u8, Net: network, Source: default!, Addr: Ꮡgaddr.opAddr(), Err: errMissingAddress))));
     }

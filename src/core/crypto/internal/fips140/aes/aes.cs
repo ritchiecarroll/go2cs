@@ -18,7 +18,7 @@ public static UntypedInt ΔBlockSize => 16;
 // A Block is an instance of AES using a particular key.
 // It is safe for concurrent use.
 partial struct Block {
-    internal partial ref block block { get; }
+    /*embed*/ internal block block;
 }
 
 // blockExpanded is the block type used for all architectures except s390x,
@@ -39,6 +39,7 @@ partial struct blockExpanded {
 internal static UntypedInt aes128KeySize => 16;
 internal static UntypedInt aes192KeySize => 24;
 internal static UntypedInt aes256KeySize => 32;
+
 internal static UntypedInt aes128Rounds => 10;
 internal static UntypedInt aes192Rounds => 12;
 internal static UntypedInt aes256Rounds => 14;
@@ -73,7 +74,6 @@ internal static partial (ж<Block>, error) newOutlined(ж<Block> Ꮡb, slice<byt
     else { /* default: */
         return (default!, ((KeySizeError)len(key)));
     }
-
     return (newBlock(Ꮡb, key), default!);
 }
 
@@ -90,7 +90,6 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
     else if (exprᴛ1 == aes256KeySize) {
         c.rounds = aes256Rounds;
     }
-
     expandKeyGeneric(Ꮡc, key);
 }
 

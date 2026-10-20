@@ -13,7 +13,6 @@ using static global::go.go.build.constraint_package;
 
 partial class constraint_internal_test_package {
 
-
 partial struct exprStringTestsᴛ1 /*dyn*/ {
     internal global::go.go.build.constraint_package.Expr x;
     internal @string @out;
@@ -55,7 +54,6 @@ public static void TestExprString(ж<testing.T> Ꮡt) {
         });
     }
 }
-
 
 partial struct lexTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -128,6 +126,7 @@ internal static (@string tok, error err) lexHelp(ж<global::go.go.build.constrai
                 }
             }
         }, ref ᒐ);
+
         p.lex();
         (tok, err) = (p.tok, default!);
     }
@@ -135,7 +134,6 @@ internal static (@string tok, error err) lexHelp(ж<global::go.go.build.constrai
     finally { ᒐ.Run(); }
     return (tok, err);
 }
-
 
 partial struct parseExprTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -171,7 +169,6 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct parseExprErrorTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal error err;
@@ -203,7 +200,6 @@ public static void TestParseError(ж<testing.T> Ꮡt) {
         });
     }
 }
-
 
 partial struct exprEvalTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -277,7 +273,6 @@ public static void TestParsePlusBuildExpr(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct constraintTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.go.build.constraint_package.Expr x;
@@ -326,7 +321,6 @@ public static void TestParse(ж<testing.T> Ꮡt) {
         });
     }
 }
-
 
 partial struct plusBuildLinesTestsᴛ1 /*dyn*/ {
     internal @string @in;

@@ -91,13 +91,12 @@ internal static int64 averageDeltaBound(image.Image m0, image.Image m1, image.Re
 // writer interface.  This ensures we're compatible.
 internal static global::go.image.gif_package.writer _ᴛ2ʗ = new gif_internal_test_package.gif_blockWriterᴠwriter(new blockWriter(nil));
 
-
 partial struct testCaseᴛ1 /*dyn*/ {
     internal @string filename;
     internal int64 tolerance;
 }
 internal static slice<testCaseᴛ1> testCase = new testCaseᴛ1[]{
-    new("../testdata/video-001.png"u8, ((int64)1 << (int)(12))),
+    new("../testdata/video-001.png"u8, (int64)1 << 12),
     new("../testdata/video-001.gif"u8, 0),
     new("../testdata/video-001.interlaced.gif"u8, 0)
 }.slice();
@@ -194,6 +193,7 @@ internal static readonly object decodeConfigˢ = (@string)"DecodeConfig:"u8;
 internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool useGlobalColorModel) {
     const nint width = 150;
     const nint height = 103;
+
     var g0 = Ꮡ(new GIF(
         Image: new slice<ж<image.Paletted>>(len(frames)),
         Delay: new slice<nint>(len(frames)),
@@ -232,6 +232,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
         );
         g0.Value.BackgroundIndex = backgroundIndex;
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var errΔ2 = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), g0); if (errΔ2 != default!) {
@@ -247,6 +248,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
     if (err != default!) {
         Ꮡt.Fatal(decodeAllˢ, err);
     }
+
     if (!reflect.DeepEqual(config, (~g1).Config)) {
         Ꮡt.Errorf("DecodeConfig inconsistent with DecodeAll"u8);
     }
@@ -259,6 +261,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
             Ꮡt.Errorf("got config width * height = %d * %d, want %d * %d"u8, w, h, (nint)(width), (nint)(height));
         }
     }
+
     if ((~g0).LoopCount != (~g1).LoopCount) {
         Ꮡt.Errorf("loop counts differ: %d and %d"u8, (~g0).LoopCount, (~g1).LoopCount);
     }
@@ -274,6 +277,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
     if (len((~g1).Image) != len((~g1).Disposal)) {
         Ꮡt.Fatalf("image and disposal lengths differ: %d and %d"u8, len((~g1).Image), len((~g1).Disposal));
     }
+
     foreach (var (i, _) in (~g0).Image) {
         var (m0, m1) = ((~g0).Image[i], (~g1).Image[i]);
         if (m0.Bounds() != m1.Bounds()) {
@@ -315,6 +319,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
     foreach (var (i, _) in images) {
         images[i] = image.NewPaletted(image.Rect(0, 0, 5, 5), palette.Plan9);
     }
+
     var g0 = Ꮡ(new GIF(
         Image: images,
         Delay: new slice<nint>(1)
@@ -324,6 +329,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
             Ꮡt.Error(expectedErrorFromˢ);
         }
     }
+
     var g1 = Ꮡ(new GIF(
         Image: images,
         Delay: new slice<nint>(len(images)),
@@ -380,8 +386,6 @@ public static void TestEncodeAllFramesOutOfBounds(ж<testing.T> Ꮡt) {
 }
 
 public static void TestEncodeNonZeroMinPoint(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var points = new image.Point[]{
         new(-8, -9),
         new(-4, -4),
@@ -412,6 +416,7 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Also test having a source image (gray on the diagonal) that has a
     // non-zero Bounds().Min, but isn't an image.Paletted.
     {
@@ -426,6 +431,7 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> Ꮡt) {
         src.SetRGBA(5, 5, new colorꓸRGBA(0x55, 0x55, 0x55, 0xFF));
         src.SetRGBA(6, 6, new colorꓸRGBA(0x66, 0x66, 0x66, 0xFF));
         src.SetRGBA(7, 7, new colorꓸRGBA(0x77, 0x77, 0x77, 0xFF));
+
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         {
             var errΔ1 = Encode(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), new image.ΔRGBAжImage(src), nil); if (errΔ1 != default!) {
@@ -444,12 +450,14 @@ public static void TestEncodeNonZeroMinPoint(ж<testing.T> Ꮡt) {
                 return;
             }
         }
+
         var mʗ1 = m;
         uint32 rednessAt(nint x, nint y) {
             var (r, _, _, _) = mʗ1.At(x, y).RGBA();
             // Shift by 8 to convert from 16 bit color to 8 bit color.
-            return (r >> (int)(8));
+            return r >> 8;
         }
+
         // Round-tripping a still (non-animated) image.Image through
         // Encode+Decode should shift the origin to (0, 0).
         {
@@ -530,6 +538,7 @@ public static void TestEncodePalettes(ж<testing.T> Ꮡt) {
             Height: h
         )
     ));
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var errΔ1 = EncodeAll(new gif_internal_test_package.bytes_BufferжWriter(Ꮡbuf), g0); if (errΔ1 != default!) {
@@ -565,6 +574,7 @@ public static void TestEncodeBadPalettes(ж<testing.T> Ꮡt) {
                     pal[i] = Δcolor.Black;
                 }
             }
+
             var err = EncodeAll(io.Discard, Ꮡ(new GIF(
                 Image: new ж<image.Paletted>[]{
                     image.NewPaletted(image.Rect(0, 0, w, h), pal)
@@ -577,6 +587,7 @@ public static void TestEncodeBadPalettes(ж<testing.T> Ꮡt) {
                     Height: h
                 )
             )));
+
             var got = err != default!;
             var want = n > 256 || nilColors;
             if (got != want) {
@@ -592,16 +603,18 @@ internal static readonly object colorTablesMatchFalseˢ = (@string)"colorTablesM
 
 public static void TestColorTablesMatch(ж<testing.T> Ꮡt) {
     const nint trIdx = 100;
-    var global = ((Δcolor.Palette)palette.Plan9);
+    var global = (Δcolor.Palette)palette.Plan9;
     {
         var rgb = global[trIdx]._<colorꓸRGBA>(); if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) {
             Ꮡt.Fatalf("trIdx (%d) is already black"u8, (nint)(trIdx));
         }
     }
+
     // Make a copy of the palette, substituting trIdx's slot with transparent,
     // just like decoder.decode.
-    var local = appendꓸꓸꓸ(((Δcolor.Palette)default!), global);
+    var local = appendꓸꓸꓸ((Δcolor.Palette)default!, global);
     local[trIdx] = new colorꓸRGBA(nil);
+
     const nint testLen = /* 3 * 256 */ 768;
     const nint padded = 7;
     var e = @new<global::go.image.gif_package.encoder>();
@@ -669,6 +682,7 @@ public static void TestEncodeWrappedImage(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("readImg: %v"u8, err);
     }
+
     // Case 1: Encode a wrapped image.Image
     var buf = @new<bytes.Buffer>();
     var w0 = new offsetImage(m0, m0.Bounds());
@@ -684,6 +698,7 @@ public static void TestEncodeWrappedImage(ж<testing.T> Ꮡt) {
     if (avgDelta > 0) {
         Ꮡt.Fatalf("Wrapped: average delta is too high. expected: 0, got %d"u8, avgDelta);
     }
+
     // Case 2: Encode a wrapped image.Image with offset
     var b0 = new image.Rectangle(
         Min: new image.Point(
@@ -705,6 +720,7 @@ public static void TestEncodeWrappedImage(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Dencode: %v"u8, err);
     }
+
     var b1 = new image.Rectangle(
         Min: new image.Point(
             X: 0,
@@ -729,6 +745,7 @@ public static void BenchmarkEncodeRandomPaletted(ж<testing.B> Ꮡb) {
     foreach (var (i, _) in (~paletted).Pix) {
         paletted.Value.Pix[i] = (uint8)rnd.Intn(256);
     }
+
     b.SetBytes(640 * 480 * 1);
     b.ReportAllocs();
     b.ResetTimer();
@@ -753,6 +770,7 @@ public static void BenchmarkEncodeRandomRGBA(ж<testing.B> Ꮡb) {
             ));
         }
     }
+
     b.SetBytes(640 * 480 * 4);
     b.ReportAllocs();
     b.ResetTimer();
@@ -774,6 +792,7 @@ public static void BenchmarkEncodeRealisticPaletted(ж<testing.B> Ꮡb) {
     var bo = img.Bounds();
     var paletted = image.NewPaletted(bo, palette.Plan9);
     draw.Draw(new gif_internal_test_package.image_PalettedжImage(paletted), bo, img, bo.Min, draw.Src);
+
     b.SetBytes((int64)(bo.Dx() * bo.Dy() * 1));
     b.ReportAllocs();
     b.ResetTimer();
@@ -796,6 +815,7 @@ public static void BenchmarkEncodeRealisticRGBA(ж<testing.B> Ꮡb) {
     // benchmarking encoding an RGBA image.
     var rgba = image.NewRGBA(bo);
     draw.Draw(new gif_internal_test_package.image_ΔRGBAжImage(rgba), bo, img, bo.Min, draw.Src);
+
     b.SetBytes((int64)(bo.Dx() * bo.Dy() * 4));
     b.ReportAllocs();
     b.ResetTimer();

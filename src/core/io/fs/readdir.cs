@@ -37,16 +37,19 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) {
                 return fsysΔ1.ReadDir(name);
             }
         }
+
         var (@file, err) = fsys.Open(name);
         if (err != default!) {
             return (default!, err);
         }
         var fileʗ1 = @file;
         defer(() => fileʗ1.Close(), ref ᒐ);
+
         var (dir, ok) = @file._<ReadDirFile>(ᐧ);
         if (!ok) {
             return (default!, new PathErrorжerror(Ꮡ(new PathError(Op: "readdir"u8, Path: name, Err: errors.New(notImplementedˢ)))));
         }
+
         (var list, err) = dir.ReadDir(-1);
         slices.SortFunc(list, (DirEntry a, DirEntry b) => bytealg.CompareString(a.Name(), b.Name()));
         return (list, err);

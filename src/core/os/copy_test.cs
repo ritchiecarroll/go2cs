@@ -34,6 +34,7 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
     try {
         UntypedInt size = /* 10 * 1024 * 1024 */ 10485760;
         @string dir = Ꮡt.TempDir();
+
         var (src, err) = Δos.Create(dir + "/src"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -50,12 +51,14 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         (var dst, err) = Δos.Create(dir + "/dst"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var dstʗ1 = dst;
         defer(() => dstʗ1.Close(), ref ᒐ);
+
         var (client, server) = createSocketPair(Ꮡt, tcpˢ);
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(2);
@@ -92,6 +95,7 @@ public static partial void TestLargeCopyViaNetwork(ж<Δtesting.T> Ꮡt) {
             finally { ᒐ.Run(); }
         });
         Ꮡwg.Wait();
+
         {
             var (_, errΔ5) = dst.Seek(0, 0); if (errΔ5 != default!) {
                 Ꮡt.Fatal(errΔ5);
@@ -115,6 +119,7 @@ public static void TestCopyFileToFile(ж<Δtesting.T> Ꮡt) {
     try {
         UntypedInt size = /* 1 * 1024 * 1024 */ 1048576;
         @string dir = Ꮡt.TempDir();
+
         var (src, err) = Δos.Create(dir + "/src"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -131,6 +136,7 @@ public static void TestCopyFileToFile(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         int64 mustSeek(ж<Δos.File> f, int64 offset, nint whence) {
             var (ret, errΔ3) = f.Seek(offset, whence);
             if (errΔ3 != default!) {
@@ -138,6 +144,7 @@ public static void TestCopyFileToFile(ж<Δtesting.T> Ꮡt) {
             }
             return ret;
         }
+
         foreach (var (_, srcStart) in new int64[]{0, 100, size}.slice()) {
             var remaining = (int64)size - srcStart;
             foreach (var (_, dstStart) in new int64[]{0, 200}.slice()) {
@@ -158,12 +165,14 @@ public static void TestCopyFileToFile(ж<Δtesting.T> Ꮡt) {
                             var dstʗ1 = dst;
                             defer(() => dstʗ1.Close(), ref ᒐ);
                             defer(Δos.Remove, dst.Name(), ref ᒐ);
+
                             mustSeekʗ1(srcʗ2, srcStart, Δio.SeekStart);
                             {
                                 var (_, errΔ5) = Δio.CopyN(new Δos.FileжWriter(dst), new zeroReader(nil), dstStart); if (errΔ5 != default!) {
                                     tΔ1.Fatal(errΔ5);
                                 }
                             }
+
                             int64 copied = default!;
                             if (limit == 0){
                                 (copied, errΔ4) = Δio.Copy(new Δos.FileжWriter(dst), new os_test_package.os_FileжReader(srcʗ2));
@@ -179,6 +188,7 @@ public static void TestCopyFileToFile(ж<Δtesting.T> Ꮡt) {
                                     tΔ1.Errorf("Copy: %v; want nil"u8, errΔ4);
                                 }
                             }
+
                             var wantCopied = remaining;
                             if (limit != 0) {
                                 wantCopied = min(limit, wantCopied);
@@ -186,16 +196,19 @@ public static void TestCopyFileToFile(ж<Δtesting.T> Ꮡt) {
                             if (copied != wantCopied) {
                                 tΔ1.Errorf("copied %v bytes, want %v"u8, copied, wantCopied);
                             }
+
                             var srcPos = mustSeekʗ1(srcʗ2, 0, Δio.SeekCurrent);
                             var wantSrcPos = srcStart + wantCopied;
                             if (srcPos != wantSrcPos) {
                                 tΔ1.Errorf("source position = %v, want %v"u8, srcPos, wantSrcPos);
                             }
+
                             var dstPos = mustSeekʗ1(dst, 0, Δio.SeekCurrent);
                             var wantDstPos = dstStart + wantCopied;
                             if (dstPos != wantDstPos) {
                                 tΔ1.Errorf("destination position = %v, want %v"u8, dstPos, wantDstPos);
                             }
+
                             mustSeekʗ1(dst, 0, Δio.SeekStart);
                             var rr = newRandReader();
                             Δio.CopyN(Δio.Discard, new os_test_package.randReaderжReader(rr), srcStart);
@@ -264,7 +277,7 @@ internal static ж<randReader> newRandReader() {
 
 internal static (nint, error) Read(this ref randReader r, slice<byte> p) {
     foreach (var (i, _) in p) {
-        p[i] = (byte)((uint32)(r.rand.Uint32() & 0xff));
+        p[i] = (byte)(r.rand.Uint32() & 0xff);
     }
     return (len(p), default!);
 }
@@ -277,6 +290,7 @@ internal static partial (Δnet.Conn client, Δnet.Conn server) createSocketPair(
     if (!nettest.TestableNetwork(proto)) {
         Ꮡt.Skipf("%s does not support %q"u8, Δruntime.GOOS, proto);
     }
+
     var (ln, err) = nettest.NewLocalListener(proto);
     if (err != default!) {
         Ꮡt.Fatalf("NewLocalListener error: %v"u8, err);

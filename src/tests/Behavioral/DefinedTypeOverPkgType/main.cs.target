@@ -27,21 +27,20 @@ internal static uint32 Add(this ж<counter> Ꮡc, uint32 d) {
     return (Ꮡc.Reinterpret<counter, atomic.Uint32>()).Add(d);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object definedTypeMethodsˢ = (@string)"defined-type methods compiled"u8;
-
 internal static void Main() {
     handler = other;
     fmt.Println(handler == other);
+
     ref var c = ref heap(new counter(), out var Ꮡc);
     Ꮡc.Store(10);
     _ = Ꮡc.Add(5);
-    fmt.Println(definedTypeMethodsˢ);
+    fmt.Println("defined-type methods compiled");
+
     uintptr seed = 42;
-    var h = ((handleT)seed);
+    var h = (handleT)seed;
     var k = openKey(h);
     fmt.Println(k == ((keyT)(uintptr)h), (uintptr)h);
-    var back = ((handleT)(uintptr)k);
+    var back = (handleT)(uintptr)k;
     fmt.Println(back == h);
 }
 
@@ -50,7 +49,7 @@ partial struct handleT /*num:uintptr*/;
 partial struct keyT /*num:uintptr*/;
 
 internal static keyT openKey(handleT h) {
-    return ((keyT)(uintptr)h);
+    return (keyT)(uintptr)h;
 }
 
 } // end main_package

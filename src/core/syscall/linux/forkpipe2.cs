@@ -14,8 +14,12 @@ internal static error forkExecPipe(slice<nint> p) {
     return Pipe2(p, O_CLOEXEC);
 }
 
+// Guard the forking variable.
 internal static ж<Δsync.Mutex> ᏑforkingLock = new StandardBox<Δsync.Mutex>(default(Δsync.Mutex));
 internal static ref Δsync.Mutex forkingLock => ref ᏑforkingLock.Value;
+// Number of goroutines currently forking, and thus the
+// number of goroutines holding a conceptual write lock
+// on ForkLock.
 internal static nint forking;
 
 // hasWaitingReaders reports whether any goroutine is waiting
@@ -38,13 +42,16 @@ internal static void acquireForkLock() {
     try {
         ᏑforkingLock.Lock();
         defer(ᏑforkingLock.Unlock, ref ᒐ);
+
         if (forking == 0) {
             // There is no current write lock on ForkLock.
             ᏑForkLock.Lock();
             forking++;
             return;
         }
+
         // ForkLock is currently locked for writing.
+
         if (hasWaitingReaders(ᏑForkLock)) {
             // ForkLock is locked for writing, and at least one
             // goroutine is waiting to read from it.
@@ -58,14 +65,19 @@ internal static void acquireForkLock() {
             // the standard library should never take a read
             // lock on ForkLock.
             ᏑforkingLock.Unlock();
+
             ᏑForkLock.RLock();
             ᏑForkLock.RUnlock();
+
             ᏑforkingLock.Lock();
+
             // Readers got a chance, so now take the write lock.
+
             if (forking == 0) {
                 ᏑForkLock.Lock();
             }
         }
+
         forking++;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -79,10 +91,13 @@ internal static void releaseForkLock() {
     try {
         ᏑforkingLock.Lock();
         defer(ᏑforkingLock.Unlock, ref ᒐ);
+
         if (forking <= 0) {
             throw panic("syscall.releaseForkLock: negative count");
         }
+
         forking--;
+
         if (forking == 0) {
             // No more conceptual write locks.
             ᏑForkLock.Unlock();

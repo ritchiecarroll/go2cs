@@ -43,11 +43,12 @@ internal static readonly @string urlToParseˢ = "URL to parse"u8;
 public static void ExampleValue() {
     var fs = flag.NewFlagSet(exampleValueˢ, flag.ExitOnError);
     fs.Var(new flag_test_package.URLValueжValue(Ꮡ(new URLValue(u))), urlˢ, urlToParseˢ);
+
     fs.Parse(new @string[]{"-url"u8, "https://golang.org/pkg/flag/"u8}.slice());
     fmt.Printf(@"{scheme: %q, host: %q, path: %q}"u8, (~u).Scheme, (~u).Host, (~u).Path);
-}
 
-// Output:
-// {scheme: "https", host: "golang.org", path: "/pkg/flag/"}
+    // Output:
+    // {scheme: "https", host: "golang.org", path: "/pkg/flag/"}
+}
 
 } // end flag_test_package

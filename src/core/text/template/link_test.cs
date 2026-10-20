@@ -45,7 +45,7 @@ func main() {
 	t.Used()
 }
 
-"""u8;
+"""u8.Raw();
 
 // Issue 36021: verify that text/template doesn't prevent the linker from removing
 // unused methods.
@@ -56,6 +56,7 @@ public static void TestLinkerGC(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new template_test_package.testing_TжTB(Ꮡt));
     @string prog = progᶜ;
     @string td = Ꮡt.TempDir();
+
     {
         var errΔ1 = os.WriteFile(filepath.Join(td, xGoˢ), slice<byte>(prog), 420); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);

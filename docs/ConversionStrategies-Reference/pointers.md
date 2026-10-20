@@ -46,7 +46,7 @@ The address of a **slice** element uses the call form `Ꮡ(slice, index)` (golib
 
 The `Ꮡ(slice, index)` form applies to **any slice-typed base expression**, not just a named slice variable — a method-**call** result (`&b.stk()[0]`, runtime `mprof.go`; `&StringByteSlice(s)[0]`, `syscall`), a builtin/`make` result, an `unsafe.Slice(…)` result (`reflect`), or a **slice-expression** base (`&x[0:cap(x)][cap(x)-1]`, `math/big`). Such bases have no bare identifier, so they previously fell out of the (identifier-gated) slice arm into the *array* branch — a slice's type name also starts with `[` — whose naive fallback textually prefixed `Ꮡ` onto the postfix chain: `Ꮡb.stk().at<uintptr>(0)` binds as `(Ꮡb).stk()…`, referencing a box that does not exist (CS0103), or copy-boxed the slice header (a lost-write latent). The element address of the returned slice **view** reaches the shared backing array per Go aliasing, so a write through the pointer is visible via the original storage. (Guarded by the `NestedFieldElementAddr` extension — `&st.stk()[0]` through a pointer local, write-through vs Go.)
 
-The bounds of a **3-index (full) slice** `s[low:high:max]` lower to the golib `.slice(nint low, nint high, nint max)` method, and a `uintptr`/`uint`/`uint32`/`uint64`/`int64` bound takes `(nint)` (the `castWideIntegerToNint` helper): `stk[:b.nstk:b.nstk]` (b.nstk a `uintptr`) → `stk.slice(-1, (nint)(b.nstk), (nint)(b.nstk))`. A plain `int`/small-int bound is left uncast. `(nint)` rather than `(int)`: an `(int)` cast truncated `s[0:w:w]` at w = 1<<32+5 to `len 5 cap 5`. The three bounds can mix kinds, so they take one nint overload rather than unsigned ones, and an unsigned bound at or above 2^63 panics with a signed bound in its text, a stated residual. (The 2-index range forms `s[lo:hi]` narrow through `getRangeIndexer` for the C# `[..]` range operator; only the 3-index `.slice()` form needed this.) (Guarded by the `Slice3IndexWideBound` behavioral test — `uintptr`/`uint`/`uint64` full-slice bounds on an array and a slice + an int control, values verified vs Go; runtime hits this in `mprof`'s `stk[:b.nstk:b.nstk]`.)
+The bounds of a **3-index (full) slice** `s[low:high:max]` lower to the golib `.slice(nint low, nint high, nint max)` method, and a `uintptr`/`uint`/`uint32`/`uint64`/`int64` bound takes `(nint)` (the `castWideIntegerToNint` helper): `arr[:n:n]` (n a `uintptr`) → `arr.slice(0, (nint)(n), (nint)(n))`, the omitted low written as the `0` it means. A plain `int`/small-int bound is left uncast. `(nint)` rather than `(int)`: an `(int)` cast truncated `s[0:w:w]` at w = 1<<32+5 to `len 5 cap 5`. The three bounds can mix kinds, so they take one nint overload rather than unsigned ones, and an unsigned bound at or above 2^63 panics with a signed bound in its text, a stated residual. (A 2-index `s[lo:hi]` keeps the C# `[..]` range only when each bound is a constant that fits in an `int`; any other bound takes the same `nint` method, `.slice(lo, hi)`, through `sliceMethodCall`.) (Guarded by the `Slice3IndexWideBound` behavioral test — `uintptr`/`uint`/`uint64` full-slice bounds on an array and a slice + an int control, values verified vs Go.)
 
 **Address of an element of an array *field* reached through a pointer or boxed struct.** When the array being indexed is a field of a heap-boxed value — `&mp.future[i]` where `mp` is a `*memRecord`, or `&g.future[i]` where `g` is an address-taken global — the *array field's* address goes through the box-field accessor first, then the element index: `Ꮡmp.of(memRecord.Ꮡfuture).at<cycle>(i)` (pointer parameter), `mp.of(...)` (pointer local), `Ꮡg.of(rec.Ꮡfuture).at<cycle>(i)` (boxed global). A naive `Ꮡ` prefix on the field read (`Ꮡ(~mp).future`) instead binds `.future` to the box value `Ꮡ(~mp)` (a `ж<memRecord>`, which has no `future` member) → CS1061. This requires a matching golib detail: `ж<T>.at<TElem>(index)` resolves the array through the `Value` property, **not** the raw `m_val` field — for a field-reference pointer produced by `of(...)`, `m_val` is an empty default and the real array lives behind `Value` (the same resolution `of(...)` itself uses). Reading `m_val` would miss the array → null-deref at runtime even though the C# compiled. (`array<T>` is a readonly struct over a shared backing `T[]`, so the value `Value` yields still aliases the real elements; writes through the returned element pointer land.) (Guarded by the `PointerFieldArrayElementAddress` behavioral test — pointer parameter and pointer local both taking `&p.future[i]` and mutating through it.)
 
@@ -2116,6 +2116,117 @@ out of whatever bytes sit at that offset when the field is read. Pinning makes t
 buffer's rather than recycled memory, but a fabricated reference is a CLR type-safety break either
 way. That is the raw-metal-on-non-native-types fork (`os.readReparseLink`'s remedy is a hand-owned
 decode; `os_windows_test.go`'s `createMountPoint` is test code that cannot be hand-owned).
+
+The scalar fields of such a struct now read and write at their Go offset through the field property, and
+an element or slice of its array field through the field view, so `createMountPoint`'s stores land where Go
+puts them: [A field reached through a pointer REINTERPRETED from `unsafe.Pointer`](#a-field-reached-through-a-pointer-reinterpreted-from-unsafepointer-reads-at-its-go-offset--the-field-property).
+
+## A field reached through a pointer REINTERPRETED from `unsafe.Pointer` reads at its Go offset — the field property
+
+A local whose every assignment in its function is `(*T)(unsafe.Pointer(e))`, where `T` is a struct that holds a
+managed reference (an array, string, slice, map, interface or pointer field), reads and writes its fields as Go
+spells them: `rec.Kind = x`, `rec.Off += 1`, `rec.In.X`. Such a pointer may alias native or pinned memory, where
+the struct's CLR layout is not Go's (the CLR places the reference first), so neither the whole-value read
+`rec.Value` nor the field's CLR slot can serve the site.
+
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.go:27-45 -->
+```go
+type record struct {
+	Kind   uint32
+	Length uint16
+	Off    uint16
+	Path   [4]uint16
+	tail
+}
+…
+	blob := make([]byte, 24)
+	rec := (*record)(unsafe.Pointer(&blob[0]))
+
+	rec.Kind = 0x01020304
+	rec.Length = 0x0506
+	rec.Off = 7
+	rec.Off += 1
+	rec.Path[1] = 0x0a0b
+	n := copy(rec.Path[2:], []uint16{0x0c0d})
+	rec.B = 0x1112
+```
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:7-8, 23-32 -->
+```csharp
+[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4))]
+partial class main_package {
+…
+    var blob = new slice<byte>(24);
+    var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
+
+    rec.Kind = 0x01020304;
+    rec.Length = 0x0506;
+    rec.Off = 7;
+    rec.Off += 1;
+    rec.of(record.ᏑPath).ElementRef(1) = 0x0a0b;
+    nint n = copy(rec.of(record.ᏑPath).slice(2), new uint16[]{0x0c0d}.slice());
+    rec.tail.B = 0x1112;
+```
+
+`rec.Kind` is a C# 14 extension PROPERTY on `ж<record>` that go2cs-gen emits, a `ref` over golib's
+`ж<T>.field`:
+
+```csharp
+extension(global::go.ж<global::go.main_package.@record> ʗp)
+{
+    public ref uint Kind => ref ʗp.field(global::go.main_package.@record.ᏑKind);
+    …
+}
+```
+
+`field` answers the field at its Go offset when the box aliases native memory (the offset resolved once per
+accessor from the struct's Go layout) and `ref` the struct's own slot otherwise. Being a `ref`, one property
+serves a read, a write, a compound assignment, a nested field and a `ref` argument; it allocates nothing.
+
+- **The record.** Each file with a site names its struct types in a `[GoFieldAccess(…)]` record on its package
+  class, and go2cs-gen emits one extension block per type into an `internal static class GoFieldAccess` of the
+  USING compilation. The record is per FILE because a test assembly recompiles the production files beside its
+  own; `internal` keeps two packages that extend one foreign type from meeting.
+- **A foreign type** gets a property for each field whose `Ꮡ` accessor it can see; a type of the same package
+  gets one for every declared field, since the type generator emits the accessors in the same run. A generic
+  struct gets `extension<T>(ж<G<T>> p)` with its constraints.
+- **A field named like a member of `ж<T>`** (`Value`, `of`, `at`, `IsNull`, …) gets no property, because an
+  instance member binds first and the property would silently lose to it; the site emits
+  `p.of(T.ᏑValue).Value`. The list is `src/go2cs/fieldAccessCollisions.txt`, read by the converter, go2cs-gen
+  and the guard that fails when `ж<T>` gains a member the list lacks.
+- **A field that shadows a method an embedded type promotes** (`abi.ArrayType`'s field `Len` against the
+  `Len()` its embedded `abi.Type` promotes) takes the same explicit form: Go selects the shallower field, but
+  the box carries the promoted method as an extension method, and C# binds `a.Len` to that method group.
+- **A field of a struct a hand-owned file declares** (runtime's `iface`, `eface` and `funcinl`, in the
+  hand-owned `runtime2.cs`) takes the same explicit form. A hand-owned file's structs have no `package_info`
+  record to make them `internal`, so each is a private type nested in the package class, which the generated
+  extension class cannot name. A field promoted into such a struct keeps the dereference.
+- **An element of an array field**, `p.arr[i]`, emits `p.of(T.Ꮡarr).ElementRef(i)`, and a slice of one,
+  `p.arr[lo:hi]`, emits `p.of(T.Ꮡarr).slice(lo, hi)`: the field view is a native window over native memory
+  ([An element pointer reinterpreted as an array pointer](#an-element-pointer-reinterpreted-as-an-array-pointer-aliases-the-elements-storage)).
+- **A field promoted through value embeds** walks them by name, `rec.tail.B` (Go's own explicit spelling of
+  `rec.B`); the embed's property is its `ref` accessor's. A field promoted through a POINTER embed lives in
+  another allocation and keeps the dereference.
+- **`&p.f`** keeps `p.of(T.Ꮡf)`, which already answers a view at the Go offset.
+
+**Limits.** A field whose own CLR form is a managed reference (an array, a string) still cannot be read WHOLE
+over native memory: `field` refuses it by name, `runtime error: cannot read native memory as main.record: its
+CLR layout is not its Go layout (field Path is a managed reference where Go stores the value inline)`, as the
+whole-value read did. Over managed memory every field reads as before. A local assigned anything else (a
+`new(T)`, a parameter, a field), a range variable, a multi-value assignment or a local whose address is taken
+keeps the `p.Value.f` / `(~p).f` emission.
+
+Guarded by: `tests/Behavioral/FieldAccessReinterpret` (byte-level, against Go; with the route off it exits
+with the refusal above), the converter's `TestFieldAccessReadsThroughTheFieldProperty`, GenTests'
+`FieldAccessGeneratorTests` (the collision guard among them), and GolibTests' `FieldAccessTests` (Go offsets,
+the refusal, zero bytes allocated per call).
+<!-- Ruled 2026-10-16: the provenance rule (a reinterpret-only local, a reference-bearing T), uniform scope
+     with no exclusions, and the ref-property shape over a box member. Census at 967214ff01 (emitted sites):
+     windows 200 field, 11 element, 16 address sites over 58 struct types; linux 182/7/17 over 53; darwin
+     203/9/18 over 63; zero collision-name hits on all three; 14 promoted per target, all value embeds.
+     Two-seeded -stdlib footprint (three targets, 2026-10-17, cut base 967214ff01, golib excluded): 66 files
+     +526/-484, 402 changed site lines, 42 records, 2 ElementRef sites; 46 lines take the explicit form, 60
+     occurrences: 53 shadowed promoted methods (Elem 39, Len 12, Key 2) and 7 hand-owned runtime2.cs fields.
+     The first round ran without those two arms and failed to compile internal/runtime/maps and runtime. -->
 
 ## `unsafe.Slice` over MANAGED element storage ALIASES it
 

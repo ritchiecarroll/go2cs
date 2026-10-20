@@ -59,7 +59,6 @@ public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint w
         sws.off = newoff;
         return (sws.off, default!);
     }
-
     // other modes not supported
     return (0, fmt.Errorf("unsupported seek mode %d"u8, whence));
 }

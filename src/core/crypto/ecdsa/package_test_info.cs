@@ -21,7 +21,6 @@ global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
-using big = go.math.big_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -37,7 +36,6 @@ using static global::go.crypto.ecdsa_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<bigꓸInt, ж<bigꓸInt>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -48,7 +46,7 @@ using static global::go.crypto.ecdsa_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdsa/equal_test.go", "equal_test.cs", "ABIgooKEgpSClIKWgoKUgoKUgpSCloKClIK6goKClJSCAAkIgoCSgpSAkoCSgA==", "68-68:1;72-72:2;73-73:3;74-74:4")]
+[assembly: go.GoPositionMap("crypto/ecdsa/equal_test.go", "equal_test.cs", "ABIggoKUgpSClIKmgoKUgoKUgpSCpoKClILKgoKClJSCAAkIgoCSgpSAkoCSgA==", "68-68:1;72-72:2;73-73:3;74-74:4")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

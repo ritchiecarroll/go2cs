@@ -8,10 +8,10 @@ namespace go.go;
 
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using math = math_package;
 using ast = global::go.go.ast_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -26,21 +26,24 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(x.mode == constant_);
+
     if (x.val.Kind() == constant.Unknown) {
         // TODO(gri) We should report exactly what went wrong. At the
         //           moment we don't have the (go/constant) API for that.
         //           See also TODO in go/constant/value.go.
-        Ꮡcheck.error(((atPos)opPos), InvalidConstVal, constantResultIsNotˢ);
+        Ꮡcheck.error((atPos)opPos, InvalidConstVal, constantResultIsNotˢ);
         return;
     }
+
     // Typed constants must be representable in
     // their type after each constant operation.
     // x.typ cannot be a type parameter (type
     // parameters cannot be constant types).
     if (isTyped(x.typ)) {
-        Ꮡcheck.representable(Ꮡx, under(x.typ)._<ж<Basic>>());
+        Ꮡcheck.representable(Ꮡx, x.typ.Underlying()._<ж<Basic>>());
         return;
     }
+
     // Untyped integer values must not grow arbitrarily.
     const nint prec = 512; // 512 is the constant precision
     if (x.val.Kind() == constant.Int && constant.BitLen(x.val) > prec) {
@@ -48,7 +51,7 @@ internal static void overflow(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token
         if (op != ""u8) {
             op += " "u8;
         }
-        Ꮡcheck.errorf(((atPos)opPos), InvalidConstVal, "constant %soverflow"u8, op);
+        Ꮡcheck.errorf((atPos)opPos, InvalidConstVal, "constant %soverflow"u8, op);
         x.val = constant.MakeUnknown();
     }
 }
@@ -73,15 +76,18 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
     if (x.Kind() == constant.Unknown) {
         return true; // avoid follow-up errors
     }
+
     ж<Config> conf = default!;
     if (Ꮡcheck != nil) {
         conf = check.conf;
     }
+
     var confʗ1 = conf;
     int64 @sizeof(ΔType T) {
         var s = confʗ1.@sizeof(T);
         return s;
     }
+
     switch (ᐧ) {
     case {} when isInteger(new BasicжΔType(Ꮡtyp)): {
         var xΔ3 = constant.ToInt(x);
@@ -100,15 +106,15 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 }
                 if (exprᴛ1 == Int8) {
                     UntypedInt s = 8;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)((1 << (int)((s - 1))) - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
                 if (exprᴛ1 == Int16) {
                     UntypedInt s = 16;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)((1 << (int)((s - 1))) - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)((1 << (int)(s - 1)) - 1);
                 }
                 if (exprᴛ1 == Int32) {
                     UntypedInt s = 32;
-                    return (int64)(((int64)(-1) << (int)((s - 1)))) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
+                    return (int64)((int64)(-1) << (int)(s - 1)) <= xΔ4 && xΔ4 <= (int64)(2147483648L - 1);
                 }
                 if (exprᴛ1 == Int64 || exprᴛ1 == ΔUntypedInt) {
                     return true;
@@ -131,7 +137,7 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 }
                 if (exprᴛ1 == Uint32) {
                     UntypedInt s = 32;
-                    return 0 <= xΔ4 && xΔ4 <= (int64)(4294967295L);
+                    return 0 <= xΔ4 && xΔ4 <= (int64)4294967295L;
                 }
                 if (exprᴛ1 == Uint64) {
                     return 0 <= xΔ4;
@@ -139,14 +145,13 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 { /* default: */
                     throw panic("unreachable");
                 }
-
             }
         }
+        // x does not fit into int64
         {
             nint n = constant.BitLen(xΔ3);
             var exprᴛ2 = typ.kind;
             if (exprᴛ2 == Uint || exprᴛ2 == Uintptr) {
-// x does not fit into int64
                 nuint s = (nuint)@sizeof(new BasicжΔType(Ꮡtyp)) * 8;
                 return constant.Sign(xΔ3) >= 0 && n <= (nint)s;
             }
@@ -157,7 +162,6 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
                 return true;
             }
         }
-
         break;
     }
     case {} when isFloat(new BasicжΔType(Ꮡtyp)): {
@@ -192,7 +196,6 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         else { /* default: */
             throw panic("unreachable");
         }
-
         break;
     }
     case {} when isComplex(new BasicжΔType(Ꮡtyp)): {
@@ -229,7 +232,6 @@ internal static bool representableConst(constant.Value x, ж<Checker> Ꮡcheck, 
         else { /* default: */
             throw panic("unreachable");
         }
-
         break;
     }
     case {} when isString(new BasicжΔType(Ꮡtyp)): {
@@ -330,7 +332,6 @@ internal static void invalidConversion(this ж<Checker> Ꮡcheck, errors.Code co
     else if (exprᴛ1 == NumericOverflow) {
         msg = sOverflowsSˢ;
     }
-
     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, msg, Ꮡx.OrTypedNil(), target);
 }
 

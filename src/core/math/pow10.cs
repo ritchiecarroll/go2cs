@@ -33,13 +33,16 @@ public static float64 Pow10(nint n) {
     if (0 <= n && n <= 308) {
         return pow10postab32[(nuint)n / 32] * pow10tab[(nuint)n % 32];
     }
+
     if (-323 <= n && n <= 0) {
         return pow10negtab32[(nuint)(-n) / 32] / pow10tab[(nuint)(-n) % 32];
     }
+
     // n < -323 || 308 < n
     if (n > 0) {
         return Inf(1);
     }
+
     // n < -323
     return 0D;
 }

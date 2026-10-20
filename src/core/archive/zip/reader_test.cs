@@ -60,30 +60,6 @@ public partial struct ZipTestFile {
     public uint64 Size;
 }
 
-// created in windows XP file manager.
-// created by Zip 3.0 under Linux
-// created by Go, before we wrote the "optional" data
-// descriptor signatures (which are required by macOS).
-// Use obscured file to avoid Apple’s notarization service
-// rejecting the toolchain due to an inability to unzip this archive.
-// See golang.org/issue/34986
-// created by Go, after we wrote the "optional" data
-// descriptor signatures (which are required by macOS)
-// Tests that we verify (and accept valid) crc32s on files
-// with crc32s in their file header (not in data descriptors)
-// Tests that we verify (and reject invalid) crc32s on files
-// with crc32s in their file header (not in data descriptors)
-// Another zip64 file with different Extras fields. (golang.org/issue/7069)
-// Largest possible non-zip64 file, with no zip64 header.
-// Name is valid UTF-8, but format does not have UTF-8 flag set.
-// We don't do UTF-8 detection for multi-byte runes due to
-// false-positives with other encodings (e.g., Shift-JIS).
-// Format says encoding is not UTF-8, so we trust it.
-// Name is valid UTF-8, but format does not have UTF-8 set.
-// Issue 66869: Don't skip over an EOCDR with a truncated comment.
-// The test file sneakily hides a second EOCDR before the first one;
-// previously we would extract one file ("file") from this archive,
-// while most other tools would reject the file or extract a different one ("FILE").
 internal static slice<ZipTest> tests;
 internal static void initᴛtests() { tests = new ZipTest[]{
     new(
@@ -218,6 +194,7 @@ internal static void initᴛtests() { tests = new ZipTest[]{
         }.slice()
     ),
     new(
+        // created in windows XP file manager.
         Name: "winxp.zip"u8,
         File: new ZipTestFile[]{
             new(
@@ -247,6 +224,7 @@ internal static void initᴛtests() { tests = new ZipTest[]{
         }.slice()
     ),
     new(
+        // created by Zip 3.0 under Linux
         Name: "unix.zip"u8,
         File: new ZipTestFile[]{
             new(
@@ -276,6 +254,11 @@ internal static void initᴛtests() { tests = new ZipTest[]{
         }.slice()
     ),
     new(
+        // created by Go, before we wrote the "optional" data
+        // descriptor signatures (which are required by macOS).
+        // Use obscured file to avoid Apple’s notarization service
+        // rejecting the toolchain due to an inability to unzip this archive.
+        // See golang.org/issue/34986
         Name: "go-no-datadesc-sig.zip.base64"u8,
         Obscured: true,
         File: new ZipTestFile[]{
@@ -294,6 +277,8 @@ internal static void initᴛtests() { tests = new ZipTest[]{
         }.slice()
     ),
     new(
+        // created by Go, after we wrote the "optional" data
+        // descriptor signatures (which are required by macOS)
         Name: "go-with-datadesc-sig.zip"u8,
         File: new ZipTestFile[]{
             new(
@@ -329,6 +314,8 @@ internal static void initᴛtests() { tests = new ZipTest[]{
             )
         }.slice()
     ),
+    // Tests that we verify (and accept valid) crc32s on files
+    // with crc32s in their file header (not in data descriptors)
     new(
         Name: "crc32-not-streamed.zip"u8,
         File: new ZipTestFile[]{
@@ -346,6 +333,8 @@ internal static void initᴛtests() { tests = new ZipTest[]{
             )
         }.slice()
     ),
+    // Tests that we verify (and reject invalid) crc32s on files
+    // with crc32s in their file header (not in data descriptors)
     new(
         Name: "crc32-not-streamed.zip"u8,
         Source: returnCorruptNotStreamedZip,
@@ -376,6 +365,7 @@ internal static void initᴛtests() { tests = new ZipTest[]{
             )
         }.slice()
     ),
+    // Another zip64 file with different Extras fields. (golang.org/issue/7069)
     new(
         Name: "zip64-2.zip"u8,
         File: new ZipTestFile[]{
@@ -387,6 +377,7 @@ internal static void initᴛtests() { tests = new ZipTest[]{
             )
         }.slice()
     ),
+    // Largest possible non-zip64 file, with no zip64 header.
     new(
         Name: "big.zip"u8,
         Source: returnBigZipBytes,
@@ -418,6 +409,10 @@ internal static void initᴛtests() { tests = new ZipTest[]{
                 Name: "世界"u8,
                 Content: new byte[]{}.slice(),
                 Mode: 420,
+                // Name is valid UTF-8, but format does not have UTF-8 flag set.
+                // We don't do UTF-8 detection for multi-byte runes due to
+                // false-positives with other encodings (e.g., Shift-JIS).
+                // Format says encoding is not UTF-8, so we trust it.
                 NonUTF8: true,
                 Modified: time.Date(2017, 11, 6, 13, 9, 27, 0, timeZone((time.Duration)(-28800000000000L)))
             )
@@ -430,6 +425,7 @@ internal static void initᴛtests() { tests = new ZipTest[]{
                 Name: "世界"u8,
                 Content: new byte[]{}.slice(),
                 Mode: 420,
+                // Name is valid UTF-8, but format does not have UTF-8 set.
                 NonUTF8: true,
                 Modified: time.Date(2017, 11, 6, 13, 9, 27, 0, timeZone((time.Duration)(-28800000000000L)))
             )
@@ -582,6 +578,10 @@ internal static void initᴛtests() { tests = new ZipTest[]{
             )
         }.slice()
     ),
+    // Issue 66869: Don't skip over an EOCDR with a truncated comment.
+    // The test file sneakily hides a second EOCDR before the first one;
+    // previously we would extract one file ("file") from this archive,
+    // while most other tools would reject the file or extract a different one ("FILE").
     new(
         Name: "comment-truncated.zip"u8,
         Error: ErrFormat
@@ -603,8 +603,6 @@ public static void TestReader(ж<testing.T> Ꮡt) {
 internal static partial void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         ж<global::go.archive.zip_package.Reader> z = default!;
         error err = default!;
         slice<byte> raw = default!;
@@ -647,21 +645,25 @@ internal static partial void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
             Ꮡt.Errorf("error=%v, want %v"u8, err, zt.Error);
             return;
         }
+
         // bail if file is not zip
         if (AreEqual(err, ErrFormat)) {
             return;
         }
+
         // bail here if no Files expected to be tested
         // (there may actually be files in the zip, but we don't care)
         if (zt.File == default!) {
             return;
         }
+
         if ((~z).Comment != zt.Comment) {
             Ꮡt.Errorf("comment=%q, want %q"u8, (~z).Comment, zt.Comment);
         }
         if (len((~z).File) != len(zt.File)) {
             Ꮡt.Fatalf("file count=%d, want %d"u8, len((~z).File), len(zt.File));
         }
+
         // test read of each file
         foreach (var (i, ft) in zt.File) {
             readTestFile(Ꮡt, zt, ft, (~z).File[i], raw);
@@ -669,6 +671,7 @@ internal static partial void readTestZip(ж<testing.T> Ꮡt, ZipTest zt) {
         if (Ꮡt.Failed()) {
             return;
         }
+
         // test simultaneous reads
         nint n = 0;
         var done = new channel<bool>(0);
@@ -703,7 +706,6 @@ internal static bool equalTimeAndZone(time.Time t1, time.Time t2) {
 }
 
 internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft, ж<global::go.archive.zip_package.File> Ꮡf, slice<byte> raw) {
-    ref var t = ref Ꮡt.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.Name != ft.Name) {
@@ -715,7 +717,9 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
     if (!ft.ModTime.IsZero() && !equalTimeAndZone(Ꮡf.of(global::go.archive.zip_package.File.ᏑFileHeader).ModTime(), ft.ModTime)) {
         Ꮡt.Errorf("%s: ModTime=%s, want %s"u8, f.Name, Ꮡf.of(global::go.archive.zip_package.File.ᏑFileHeader).ModTime(), ft.ModTime);
     }
+
     testFileMode(Ꮡt, Ꮡf, ft.Mode);
+
     var size = (uint64)f.UncompressedSize;
     if (size == uint32max){
         size = f.UncompressedSize64;
@@ -723,6 +727,7 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
     if (size != f.UncompressedSize64) {
         Ꮡt.Errorf("%v: UncompressedSize=%#x does not match UncompressedSize64=%#x"u8, f.Name, size, f.UncompressedSize64);
     }
+
     // Check that OpenRaw returns the correct byte segment
     var (rw, err) = f.OpenRaw();
     if (err != default!) {
@@ -747,11 +752,13 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
         Ꮡt.Errorf("%v: OpenRaw returned unexpected bytes"u8, f.Name);
         return;
     }
+
     (var r, err) = Ꮡf.Open();
     if (err != default!) {
         Ꮡt.Errorf("%v"u8, err);
         return;
     }
+
     // For very large files, just check that the size is correct.
     // The content is expected to be all zeros.
     // Don't bother uncompressing: too big.
@@ -762,6 +769,7 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
         r.Close();
         return;
     }
+
     ref var b = ref heap(new bytes.Buffer(), out var Ꮡb);
     (_, err) = io.Copy(new zip_test_package.bytes_BufferжWriter(Ꮡb), r);
     if (!AreEqual(err, ft.ContentErr)) {
@@ -771,11 +779,13 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
         return;
     }
     r.Close();
+
     {
         var g = (uint64)b.Len(); if (g != size) {
             Ꮡt.Errorf("%v: read %v bytes but f.UncompressedSize == %v"u8, f.Name, g, size);
         }
     }
+
     slice<byte> c = default!;
     if (ft.Content != default!){
         c = ft.Content;
@@ -786,10 +796,12 @@ internal static void readTestFile(ж<testing.T> Ꮡt, ZipTest zt, ZipTestFile ft
             return;
         }
     }
+
     if (b.Len() != len(c)) {
         Ꮡt.Errorf("%s: len=%d, want %d"u8, f.Name, b.Len(), len(c));
         return;
     }
+
     foreach (var (i, bΔ1) in b.Bytes()) {
         if (bΔ1 != c[i]) {
             Ꮡt.Errorf("%s: content[%d]=%q want %q"u8, f.Name, i, bΔ1, c[i]);
@@ -813,11 +825,13 @@ internal static void testFileMode(ж<testing.T> Ꮡt, ж<global::go.archive.zip_
 public static void TestInvalidFiles(ж<testing.T> Ꮡt) {
     UntypedInt size = /* 1024 * 70 */ 71680; // 70kb
     var b = new slice<byte>(size);
+
     // zeroes
     var (_, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)), size);
     if (!AreEqual(err, ErrFormat)) {
         Ꮡt.Errorf("zeroes: error=%v, want %v"u8, err, ErrFormat);
     }
+
     // repeated directoryEndSignatures
     var sig = new slice<byte>(4);
     binary.LittleEndian.PutUint32(sig, directoryEndSignature);
@@ -828,6 +842,7 @@ public static void TestInvalidFiles(ж<testing.T> Ꮡt) {
     if (!AreEqual(err, ErrFormat)) {
         Ꮡt.Errorf("sigs: error=%v, want %v"u8, err, ErrFormat);
     }
+
     // negative size
     (_, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(slice<byte>("foobar"u8))), -1);
     if (err == default!) {
@@ -857,15 +872,15 @@ internal static (io.ReaderAt r, int64 size) returnCorruptNotStreamedZip() {
         // the file header and TOC. (0x7e -> 0x7f)
         b[0x11]++;
         b[0x9d]++;
+
+        // TODO(bradfitz): add a new test that only corrupts
+        // one of these values, and verify that that's also an
+        // error. Currently, the reader code doesn't verify the
+        // fileheader and TOC's crc32 match if they're both
+        // non-zero and only the second line above, the TOC,
+        // is what matters.
     });
 }
-
-// TODO(bradfitz): add a new test that only corrupts
-// one of these values, and verify that that's also an
-// error. Currently, the reader code doesn't verify the
-// fileheader and TOC's crc32 match if they're both
-// non-zero and only the second line above, the TOC,
-// is what matters.
 
 // rZipBytes returns the bytes of a recursive zip file, without
 // putting it on disk and triggering certain virus scanners.
@@ -900,7 +915,7 @@ internal static slice<byte> rZipBytes() {
 0000190 00 00 00 00 00 00 00 00 00 00 00 72 2f 72 2e 7a
 00001a0 69 70 50 4b 05 06 00 00 00 00 01 00 01 00 35 00
 00001b0 00 00 6d 01 00 00 00 00
-"""u8;
+"""u8.Raw();
     s = regexp.MustCompile(@"[0-9a-f]{7}"u8).ReplaceAllString(s, ""u8);
     s = regexp.MustCompile(@"\s+"u8).ReplaceAllString(s, ""u8);
     var (b, err) = hex.DecodeString(s);
@@ -1061,7 +1076,7 @@ internal static slice<byte> biggestZipBytes() {
 00004c0 00 00 00 00 62 69 67 67 65 72 2e 7a 69 70 50 4b
 00004d0 05 06 00 00 00 00 01 00 01 00 38 00 00 00 96 04
 00004e0 00 00 00 00
-"""u8;
+"""u8.Raw();
     s = regexp.MustCompile(@"[0-9a-f]{7}"u8).ReplaceAllString(s, ""u8);
     s = regexp.MustCompile(@"\s+"u8).ReplaceAllString(s, ""u8);
     var (b, err) = hex.DecodeString(s);
@@ -1327,6 +1342,7 @@ public static void TestFSModTime(ж<testing.T> Ꮡt) {
         }
         var zʗ1 = z;
         defer(() => zʗ1.Close(), ref ᒐ);
+
         foreach (var (_, test) in new TestFSModTime_type[]{
             new(
                 "a"u8,
@@ -1436,6 +1452,7 @@ public static void TestOpenReaderInsecurePath(ж<testing.T> Ꮡt) {
             0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x39, 0x00,
             0x00, 0x00, 0x59, 0x00, 0x00, 0x00, 0x00, 0x00
         }.slice();
+
         // Read in the archive with the OpenReader interface
         @string name = filepath.Join(Ꮡt.TempDir(), testZipˢ);
         var err = os.WriteFile(name, data, 420);
@@ -1447,6 +1464,7 @@ public static void TestOpenReaderInsecurePath(ж<testing.T> Ꮡt) {
             var rʗ1 = r;
             defer(() => rʗ1.Close(), ref ᒐ);
         }
+
         if (!AreEqual(err, ErrInsecurePath)) {
             Ꮡt.Fatalf("Error reading the archive, we expected ErrInsecurePath but got: %v"u8, err);
         }
@@ -1471,8 +1489,6 @@ public static void TestOpenReaderInsecurePath(ж<testing.T> Ꮡt) {
 }
 
 public static void TestCVE202133196(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Archive that indicates it has 1 << 128 -1 files,
     // this would previously cause a panic due to attempting
     // to allocate a slice with 1 << 128 -1 elements.
@@ -1508,6 +1524,7 @@ public static void TestCVE202133196(ж<testing.T> Ꮡt) {
     if (!AreEqual(err, ErrFormat)) {
         Ꮡt.Fatalf("unexpected error, got: %v, want: %v"u8, err, ErrFormat);
     }
+
     // Also check that an archive containing a handful of empty
     // files doesn't cause an issue
     var b = bytes.NewBuffer(default!);
@@ -1691,9 +1708,11 @@ public static void TestUnderSize(ж<testing.T> Ꮡt) {
         }
         var zʗ1 = z;
         defer(() => zʗ1.Close(), ref ᒐ);
+
         foreach (var (_, f) in (~z).File) {
             f.Value.UncompressedSize64 = 1;
         }
+
         foreach (var (_, f) in (~z).File) {
             var fʗ1 = f;
             Ꮡt.Run((~f).Name, (ж<testing.T> tΔ1) => {
@@ -1705,6 +1724,7 @@ public static void TestUnderSize(ж<testing.T> Ꮡt) {
                     }
                     var rdʗ1 = rd;
                     defer(() => rdʗ1.Close(), ref ᒐ);
+
                     (_, errΔ1) = io.Copy(io.Discard, rd);
                     if (!AreEqual(errΔ1, ErrFormat)) {
                         tΔ1.Fatalf("Error mismatch\n\tGot:  %v\n\tWant: %v"u8, errΔ1, ErrFormat);
@@ -1729,20 +1749,24 @@ public static void TestIssue54801(ж<testing.T> Ꮡt) {
             }
             var zʗ1 = z;
             defer(() => zʗ1.Close(), ref ᒐ);
+
             foreach (var (_, f) in (~z).File) {
                 // Make file a directory
                 f.Value.Name += "/"u8;
+
                 var fʗ1 = f;
                 Ꮡt.Run((~f).Name, (ж<testing.T> tΔ1) => {
                     GoFrame ᒐ = default;
                     try {
                         tΔ1.Logf("CompressedSize64: %d, Flags: %#x"u8, (~fʗ1).CompressedSize64, (~fʗ1).Flags);
+
                         var (rd, errΔ1) = fʗ1.Open();
                         if (errΔ1 != default!) {
                             tΔ1.Fatal(errΔ1);
                         }
                         var rdʗ1 = rd;
                         defer(() => rdʗ1.Close(), ref ᒐ);
+
                         var (n, got) = io.Copy(io.Discard, rd);
                         if (n != 0 || !AreEqual(got, ErrFormat)) {
                             tΔ1.Fatalf("Error mismatch, got: %d, %v, want: %v"u8, n, got, ErrFormat);
@@ -1774,6 +1798,7 @@ public static void TestInsecurePaths(ж<testing.T> Ꮡt) {
             continue;
         }
         zw.Close();
+
         (var zr, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
         if (!AreEqual(err, ErrInsecurePath)) {
             Ꮡt.Errorf("NewReader for archive with file %q: got err %v, want ErrInsecurePath"u8, path, err);
@@ -1946,6 +1971,7 @@ internal static readonly @string doesNotExistˢ = "does-not-exist"u8;
 public static void BenchmarkReaderOneDeepDir(ж<testing.B> Ꮡb) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var zw = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
+
     foreach (var i in range(4000)) {
         ref var name = ref heap<@string>(out var Ꮡname);
         name = strings.Repeat("a/"u8, i) + "data"u8;
@@ -1954,12 +1980,14 @@ public static void BenchmarkReaderOneDeepDir(ж<testing.B> Ꮡb) {
             Method: Store
         )));
     }
+
     {
         var err = zw.Close(); if (err != default!) {
             Ꮡb.Fatal(err);
         }
     }
     var data = buf.Bytes();
+
     while (Ꮡb.Loop()) {
         var (zr, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)), (int64)len(data));
         if (err != default!) {
@@ -1972,21 +2000,25 @@ public static void BenchmarkReaderOneDeepDir(ж<testing.B> Ꮡb) {
 public static void BenchmarkReaderManyDeepDirs(ж<testing.B> Ꮡb) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var zw = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
+
     foreach (var i in range(2850)) {
         ref var name = ref heap<@string>(out var Ꮡname);
         name = fmt.Sprintf("%x"u8, i);
         name = strings.Repeat("/"u8 + name, i + 1)[1..];
+
         zw.CreateHeader(Ꮡ(new FileHeader(
             Name: name,
             Method: Store
         )));
     }
+
     {
         var err = zw.Close(); if (err != default!) {
             Ꮡb.Fatal(err);
         }
     }
     var data = buf.Bytes();
+
     while (Ꮡb.Loop()) {
         var (zr, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)), (int64)len(data));
         if (err != default!) {
@@ -1999,6 +2031,7 @@ public static void BenchmarkReaderManyDeepDirs(ж<testing.B> Ꮡb) {
 public static void BenchmarkReaderManyShallowFiles(ж<testing.B> Ꮡb) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var zw = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
+
     foreach (var i in range(310000)) {
         ref var name = ref heap<@string>(out var Ꮡname);
         name = fmt.Sprintf("%v"u8, i);
@@ -2007,12 +2040,14 @@ public static void BenchmarkReaderManyShallowFiles(ж<testing.B> Ꮡb) {
             Method: Store
         )));
     }
+
     {
         var err = zw.Close(); if (err != default!) {
             Ꮡb.Fatal(err);
         }
     }
     var data = buf.Bytes();
+
     while (Ꮡb.Loop()) {
         var (zr, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)), (int64)len(data));
         if (err != default!) {

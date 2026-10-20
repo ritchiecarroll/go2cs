@@ -419,6 +419,19 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// nugetgo-pack.ps1 is the one place a module's NuGet ID is minted (see PackageIdMarker).
 	newContents = []byte(strings.ReplaceAll(string(newContents), PackageIdMarker, packageIdLine(projectFileName, outputType, options)))
 
+	// Go links runtime into EVERY program. A C# app carries only what its references reach, so an app whose
+	// import closure never reaches runtime would ship without it: an app importing only math/bits, whose
+	// overflow and divide errors are runtime's own values, reached late-bound by name since go1.26.9
+	// (golib LinknameVar). Such an app gets runtime as an implicit reference. An app that already reaches
+	// it transitively gains nothing, so the corpus's emission is unchanged. importedPackages is the
+	// package's full transitive import closure. It goes in before the references are derived, so the
+	// -recurse=nuget arm turns it into go.runtime like any other stdlib import.
+	if outputType == "Exe" && !options.convertStdLib && currentPackagePath != "runtime" {
+		if _, reachesRuntime := importedPackages["runtime"]; !reachesRuntime {
+			projectImports.Add("runtime")
+		}
+	}
+
 	// Extract project references from imports
 	packageInfoMap := getImportPackageInfo(projectImports.Keys(), options)
 	projectReferences := &strings.Builder{}

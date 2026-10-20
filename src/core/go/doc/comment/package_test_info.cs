@@ -13,7 +13,6 @@ global using jsonꓸΔToken = object;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
-using bytes = go.bytes_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,9 +30,6 @@ using static global::go.go.doc.comment_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.go.doc.comment_package.Doc, ж<global::go.go.doc.comment_package.Doc>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.doc.comment_package.LinkDef, ж<global::go.go.doc.comment_package.LinkDef>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.go.doc.comment_package.ListItem, ж<global::go.go.doc.comment_package.ListItem>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -44,11 +40,11 @@ using static global::go.go.doc.comment_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/doc/comment/old_test.go", "old_test.cs", "ABAWABMugoKCAAoKABw+goKCgg==")]
+[assembly: global::go.GoPositionMap("go/doc/comment/old_test.go", "old_test.cs", "AA8WABMugoKC+gAcPoKCgoI=")]
 [assembly: global::go.GoPositionMap("go/doc/comment/parse_test.go", "parse_test.cs", "AAoUkg==")]
-[assembly: global::go.GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABcegoKCloKCgqaEgoKC")]
-[assembly: global::go.GoPositionMap("go/doc/comment/testdata_test.go", "testdata_test.cs", "ABskgoKClIK4goKUlIKGlJbKlIKSgoKClIKCgqaClIKCgoKUgpikpKSkAAITAAIYgu6CgoKmgqS2goKCgoKUtoKCyLaCgsiCtoK2goLIgraCtoK2goLIgpSCyIKUgsiCgoLagraCyKKCgg==", "28-33:1;34-41:2;43-49:3;51-91:4")]
-[assembly: global::go.GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg1IKClIKWgoKCgoKClIKUlpKSgoKSkpaCgoKUgpSCgpSClIKClJSSkoKUlIKogoIABxgACgqCgoKClIKUgoKCgoKClIKClIKCgsyCgpSCgoKU", "41-88:1;45-86:1.1")]
+[assembly: global::go.GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABcegoKCpoKCgqaUgoKC")]
+[assembly: global::go.GoPositionMap("go/doc/comment/testdata_test.go", "testdata_test.cs", "ABskgoKClIK4goKUlIKGlKbKlIKSgoKClIKCgqaClIKCgoKUgpikpKSkAAITAAEYgu6CgoKmgqS2goKCgoKUtoKCyLaCgsiCtoK2goLIgraCtoK2goLIgpSCyIKUgsiCgoLagraCyKKCgg==", "28-33:1;34-41:2;43-49:3;51-91:4")]
+[assembly: global::go.GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg1IKClIKmgoKCgoKClIKUppKSgoKSkqaCgoKUgpSCgpSClIKClKSCkoKUlIK4goIABxgACgqCgoKClIKUgoKCgoKClIKClIKCgtyCgpSCgoKU", "41-88:1;45-86:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.go.doc;

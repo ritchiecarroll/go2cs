@@ -24,22 +24,23 @@ public static void TestBodyReadBadTrailer(ж<testing.T> Ꮡt) {
     var b = Ꮡ(new body(
         src: new http_test_package.strings_ReaderжReader(strings.NewReader(foobarˢ)),
         hdr: true, // force reading the trailer
-
         r: bufio.NewReader(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8)))
     ));
     var buf = new slice<byte>(7);
     var (n, err) = b.Read(buf[..3]);
-    @string got = ((@string)(buf.slice(0, n)));
+    @string got = (@string)(buf.slice(0, n));
     if (got != "foo"u8 || err != default!) {
         Ꮡt.Fatalf(@"first Read = %d (%q), %v; want 3 (""foo"")"u8, n, got, err);
     }
+
     (n, err) = b.Read(buf[..]);
-    got = ((@string)(buf.slice(0, n)));
+    got = (@string)(buf.slice(0, n));
     if (got != "bar"u8 || err != default!) {
         Ꮡt.Fatalf(@"second Read = %d (%q), %v; want 3 (""bar"")"u8, n, got, err);
     }
+
     (n, err) = b.Read(buf[..]);
-    got = ((@string)(buf.slice(0, n)));
+    got = (@string)(buf.slice(0, n));
     if (err == default!) {
         Ꮡt.Errorf("final Read was successful (%q), expected error from trailer read"u8, got);
     }
@@ -127,7 +128,8 @@ internal partial struct TestTransferWriterWriteBodyReaderTypes_cases /*dyn*/ {
 public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
     var fileType = reflect.TypeFor<ж<os.File>>();
     var bufferType = reflect.TypeFor<ж<bytes.Buffer>>();
-    var nBytes = (int64)(((int64)1 << (int)(10)));
+
+    var nBytes = (int64)((int64)1 << 10);
     var newFileFunc = (io.Reader r, Action done, error err) () => {
         Action done = default!;
         error err = default!;
@@ -135,6 +137,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
         if (err != default!) {
             return (default!, default!, err);
         }
+
         // Write some bytes to the file to enable reading.
         {
             var (_, errΔ1) = io.CopyN(new os.FileжWriter(f), rand.Reader, nBytes); if (errΔ1 != default!) {
@@ -146,15 +149,19 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                 return (default!, default!, fmt.Errorf("failed to seek to front: %v"u8, errΔ2));
             }
         }
+
         var fʗ1 = f;
         done = () => {
             fʗ1.Close();
             os.Remove(fʗ1.Name());
         };
+
         return (new http_test_package.os_FileжReader(f), done, default!);
     };
+
     var newBufferFunc = (io.Reader, Action, error) () => (new http_test_package.bytes_BufferжReader(bytes.NewBuffer(new slice<byte>((nint)(nBytes)))), () => {
         }, default!);
+
             var newFileFuncʗ1 = newFileFunc;
 
             var newBufferFuncʗ1 = newBufferFunc;
@@ -240,6 +247,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
             expectedWrite: true
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in cases) {
         ref var tc = ref heap(new TestTransferWriterWriteBodyReaderTypes_cases(), out var Ꮡtc);
         tc = vᴛ1;
@@ -254,21 +262,25 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                 }
                 var cleanupʗ1 = cleanup;
                 defer(cleanupʗ1, ref ᒐ);
+
                 var mw = Ꮡ(new mockTransferWriter(nil));
                 var tw = Ꮡ(new transferWriter(
                     Body: body,
                     ContentLength: tcʗ1.contentLength,
                     TransferEncoding: tcʗ1.transferEncoding
                 ));
+
                 {
                     var errΔ1 = tw.writeBody(new http_internal_test_package.mockTransferWriterжWriter(mw)); if (errΔ1 != default!) {
                         tΔ1.Fatal(errΔ1);
                     }
                 }
+
                 if (tcʗ1.expectedReader != default!) {
                     if ((~mw).CalledReader == default!) {
                         tΔ1.Fatal(didNotCallReadFromˢ);
                     }
+
                     reflectꓸType actualReader = default!;
                     var (lr, ok) = (~mw).CalledReader._<ж<io.LimitedReader>>(ᐧ);
                     if (ok && tcʗ1.limitedReader){
@@ -282,10 +294,12 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                             actualReader = actualReader.Field(1).Type;
                         }
                     }
+
                     if (!AreEqual(tcʗ1.expectedReader, actualReader)) {
                         tΔ1.Fatalf("got reader %s want %s"u8, actualReader, tcʗ1.expectedReader);
                     }
                 }
+
                 if (tcʗ1.expectedWrite && !(~mw).WriteCalled) {
                     tΔ1.Fatal(didNotInvokeWriteˢ);
                 }
@@ -332,6 +346,7 @@ public static void TestParseTransferEncoding(ж<testing.T> Ꮡt) {
             wantErr: default!
         )
     }.slice();
+
     foreach (var (i, tt) in tests) {
         var tr = Ꮡ(new transferReader(
             Header: tt.hdr,
@@ -370,8 +385,8 @@ public static void TestParseContentLength(ж<testing.T> Ꮡt) {
             wantErr: badStringError(badContentLengthˢ, "-3"u8)
         ),
         new(
-            cl: "9223372036854775807"u8, // max int64, for safe conversion before returning
-
+            // max int64, for safe conversion before returning
+            cl: "9223372036854775807"u8,
             wantErr: default!
         ),
         new(
@@ -379,6 +394,7 @@ public static void TestParseContentLength(ж<testing.T> Ꮡt) {
             wantErr: badStringError(badContentLengthˢ, "9223372036854775808"u8)
         )
     }.slice();
+
     foreach (var (_, tt) in tests) {
         {
             var (_, gotErr) = parseContentLength(new @string[]{tt.cl}.slice()); if (!reflect.DeepEqual(gotErr, tt.wantErr)) {

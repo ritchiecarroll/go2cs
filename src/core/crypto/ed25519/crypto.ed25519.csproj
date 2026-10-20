@@ -169,10 +169,13 @@
 
     <ProjectReference Include="$(go2csPath)core/crypto/crypto.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/ed25519/crypto.internal.fips140.ed25519.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140cache/crypto.internal.fips140cache.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140only/crypto.internal.fips140only.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/rand/crypto.internal.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/subtle/crypto.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
   </ItemGroup>

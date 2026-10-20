@@ -22,14 +22,8 @@ public static void ResetCoverage() {
 // multiple values for each counter by OR'ing them together.
 public static void SnapshotCoverage() {
     var cov = coverage();
-    foreach (var (i, vᴛ1) in cov) {
-        var b = vᴛ1;
-
-        b |= (byte)((b >> (int)(1)));
-        b |= (byte)((b >> (int)(2)));
-        b |= (byte)((b >> (int)(4)));
-        b -= (byte)((b >> (int)(1)));
-        coverageSnapshot[i] = b;
+    foreach (var (i, b) in cov) {
+        coverageSnapshot[i] = pow2Table[b];
     }
 }
 
@@ -100,9 +94,27 @@ internal static bool coverageEnabled;
 internal static void initᴛcoverageEnabled() { coverageEnabled = len(coverage()) > 0; }
 internal static slice<byte> coverageSnapshot;
 internal static void initᴛcoverageSnapshot() { coverageSnapshot = new slice<byte>(len(coverage())); }
+
+// _counters and _ecounters mark the start and end, respectively, of where
+// the 8-bit coverage counters reside in memory. They're known to cmd/link,
+// which specially assigns their addresses for this purpose.
 internal static ж<array<byte>> Ꮡ_counters = new StandardBox<array<byte>>(new array<byte>(0));
 internal static ref array<byte> _counters => ref Ꮡ_counters.Value;
 internal static ж<array<byte>> Ꮡ_ecounters = new StandardBox<array<byte>>(new array<byte>(0));
 internal static ref array<byte> _ecounters => ref Ꮡ_ecounters.Value;
+
+// lookup table for faster power of two rounding
+internal static array<byte> pow2Table = new(256);
+
+[GoInit] internal static void init() {
+    foreach (var (i, _) in pow2Table) {
+        var b = (byte)i;
+        b |= (byte)((b >> 1));
+        b |= (byte)((b >> 2));
+        b |= (byte)((b >> 4));
+        b -= (byte)((b >> 1));
+        pow2Table[i] = b;
+    }
+}
 
 } // end fuzz_package

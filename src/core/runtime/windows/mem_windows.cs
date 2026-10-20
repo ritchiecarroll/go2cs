@@ -11,8 +11,10 @@ internal static UntypedInt _MEM_COMMIT => 0x1000;
 internal static UntypedInt _MEM_RESERVE => 0x2000;
 internal static UntypedInt _MEM_DECOMMIT => 0x4000;
 internal static UntypedInt _MEM_RELEASE => 0x8000;
+
 internal static UntypedInt _PAGE_READWRITE => 0x0004;
 internal static UntypedInt _PAGE_NOACCESS => 0x0001;
+
 internal static UntypedInt _ERROR_NOT_ENOUGH_MEMORY => 8;
 internal static UntypedInt _ERROR_COMMITMENT_LIMIT => 1455;
 
@@ -40,7 +42,11 @@ internal static void sysFaultOS(@unsafe.Pointer v, uintptr n) {
 
 // go2cs generated this placeholder — func sysReserveOS is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void sysMapOS(@unsafe.Pointer v, uintptr n) {
+internal static void sysMapOS(@unsafe.Pointer v, uintptr n, @string _) {
+}
+
+internal static bool needZeroAfterSysUnusedOS() {
+    return true;
 }
 
 } // end runtime_package

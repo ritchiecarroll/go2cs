@@ -28,6 +28,7 @@ public static void TestWindow(ж<testing.T> Ꮡt) {
                 var b = makeSequence((rune)'a' + i, j);
                 for (nint k = 0; k <= 2 * size; k++) {
                     var c = makeSequence((rune)'a' + i + j, k);
+
                     var aʗ1 = a;
                     var bʗ1 = b;
                     var cʗ1 = c;
@@ -45,25 +46,31 @@ public static void TestWindow(ж<testing.T> Ꮡt) {
 internal static void testWindow(ж<testing.T> Ꮡt, nint size, slice<byte> a, slice<byte> b, slice<byte> c) {
     global::go.@internal.zstd_package.window w = default!;
     w.reset(size);
+
     w.save(a);
     w.save(b);
     w.save(c);
+
     slice<byte> tail = default!;
     tail = appendꓸꓸꓸ(tail, a);
     tail = appendꓸꓸꓸ(tail, b);
     tail = appendꓸꓸꓸ(tail, c);
+
     if (builtin.len(tail) > size) {
         tail = tail.slice(builtin.len(tail) - size);
     }
+
     if (w.len() != (uint32)builtin.len(tail)) {
         Ꮡt.Errorf("wrong data length: got: %d, want: %d"u8, w.len(), builtin.len(tail));
     }
+
     uint32 from = default!;
     uint32 to = default!;
     for (from = 0; from <= (uint32)builtin.len(tail); from++) {
         for (to = from; to <= (uint32)builtin.len(tail); to++) {
             var got = w.appendTo(default!, from, to);
             var want = tail.slice((nint)(from), (nint)(to));
+
             if (!bytes.Equal(got, want)) {
                 Ꮡt.Errorf("wrong data at [%d:%d]: got %q, want %q"u8, from, to, got, want);
             }

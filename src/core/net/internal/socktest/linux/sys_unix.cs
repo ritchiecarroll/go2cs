@@ -17,10 +17,12 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
         ref var sw = ref Ꮡsw.DerefOrNull();
 
         Ꮡsw.of(Switch.Ꮡonce).Do(Ꮡsw.init);
+
         var so = Ꮡ(new Status(Cookie: cookie(family, sotype, proto)));
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var f = sw.fltab[FilterSocket];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             (s, err) = (-1, err); goto ᒐdone;
@@ -34,6 +36,7 @@ public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nin
                 (s, err) = (-1, err); goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -63,6 +66,7 @@ public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var f = sw.fltab[FilterClose];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -73,6 +77,7 @@ public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) {
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -102,6 +107,7 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Socka
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var f = sw.fltab[FilterConnect];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -112,6 +118,7 @@ public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Socka
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -140,6 +147,7 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) 
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var f = sw.fltab[FilterListen];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             goto ᒐdone;
@@ -150,6 +158,7 @@ public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) 
                 goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -180,6 +189,7 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
         Ꮡsw.of(Switch.Ꮡfmu).RLock();
         var f = sw.fltab[FilterAccept];
         Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
         (var af, err) = f.apply(so);
         if (err != default!) {
             (ns, sa, err) = (-1, default!, err); goto ᒐdone;
@@ -193,6 +203,7 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
                 (ns, sa, err) = (-1, default!, err); goto ᒐdone;
             }
         }
+
         Ꮡsw.of(Switch.Ꮡsmu).Lock();
         defer(Ꮡsw.of(Switch.Ꮡsmu).Unlock, ref ᒐ);
         if ((~so).Err != default!) {
@@ -212,8 +223,8 @@ public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> �
 public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
     nint soerr = default!;
     error err = default!;
-
     ref var sw = ref Ꮡsw.DerefOrNull();
+
     var so = Ꮡsw.sockso(s);
     if (so == nil) {
         return syscall.GetsockoptInt(s, level, opt);
@@ -221,6 +232,7 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
     Ꮡsw.of(Switch.Ꮡfmu).RLock();
     var f = sw.fltab[FilterGetsockoptInt];
     Ꮡsw.of(Switch.Ꮡfmu).RUnlock();
+
     (var af, err) = f.apply(so);
     if (err != default!) {
         return (-1, err);
@@ -232,6 +244,7 @@ public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint 
             return (-1, err);
         }
     }
+
     if ((~so).Err != default!) {
         return (-1, (~so).Err);
     }

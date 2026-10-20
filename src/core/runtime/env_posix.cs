@@ -26,8 +26,7 @@ internal static @string gogetenv(@string key) {
 // envKeyEqual reports whether a == b, with ASCII-only case insensitivity
 // on Windows. The two strings must have the same length.
 internal static bool envKeyEqual(@string a, @string b) {
-    if (GOOS == "windows"u8) {
-        // case insensitive
+    if (GOOS == "windows"u8) { // case insensitive
         for (nint i = 0; i < len(a); i++) {
             var (ca, cb) = (a[i], b[i]);
             if (ca == cb || lowerASCII(ca) == lowerASCII(cb)) {

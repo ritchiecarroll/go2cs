@@ -37,12 +37,14 @@ internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go
         }
         var goldenʗ1 = golden;
         defer(() => goldenʗ1.Close(), ref ᒐ);
+
         // Read the file again, and push it through a pipe that compresses at the write end, and decompresses at the read end.
         (var raw, err) = os.Open(fn);
         if (err != default!) {
             Ꮡt.Errorf("%s (order=%d litWidth=%d): %v"u8, fn, order, litWidth, err);
             return;
         }
+
         var (piper, pipew) = io.Pipe();
         var piperʗ1 = piper;
         defer(() => piperʗ1.Close(), ref ᒐ);
@@ -81,6 +83,7 @@ internal static partial void testFile(ж<testing.T> Ꮡt, @string fn, global::go
         var lzwr = NewReader(new io.PipeReaderжReader(piper), order, litWidth);
         var lzwrʗ1 = lzwr;
         defer(() => lzwrʗ1.Close(), ref ᒐ);
+
         // Compare the two.
         var (b0, err0) = io.ReadAll(new lzw_internal_test_package.os_FileжReader(golden));
         var (b1, err1) = io.ReadAll(lzwr);
@@ -140,28 +143,34 @@ public static void TestWriterReset(ж<testing.T> Ꮡt) {
                     var w = NewWriter(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), order, litWidth);
                     {
                         var (_, err) = w.Write(data); if (err != default!) {
-                            tΔ2.Errorf("write: %v: %v"u8, ((@string)data), err);
+                            tΔ2.Errorf("write: %v: %v"u8, (@string)data, err);
                         }
                     }
+
                     {
                         var err = w.Close(); if (err != default!) {
                             tΔ2.Errorf("close: %v"u8, err);
                         }
                     }
+
                     var b1 = buf.Bytes();
                     buf.Reset();
+
                     w._<ж<global::go.compress.lzw_package.Writer>>().Reset(new lzw_internal_test_package.bytes_BufferжWriter(Ꮡbuf), order, litWidth);
+
                     {
                         var (_, err) = w.Write(data); if (err != default!) {
-                            tΔ2.Errorf("write: %v: %v"u8, ((@string)data), err);
+                            tΔ2.Errorf("write: %v: %v"u8, (@string)data, err);
                         }
                     }
+
                     {
                         var err = w.Close(); if (err != default!) {
                             tΔ2.Errorf("close: %v"u8, err);
                         }
                     }
                     var b2 = buf.Bytes();
+
                     if (!bytes.Equal(b1, b2)) {
                         tΔ2.Errorf("bytes written were not same"u8);
                     }
@@ -214,10 +223,12 @@ public static void TestStartsWithClearCode(ж<testing.T> Ꮡt) {
         }
         w.Close();
         @string got = Ꮡbuf.String();
+
         @string want = ((@string)(new byte[]{0x80, 0x81}));
         if (!empty) {
             want = ((@string)(new byte[]{0x80, 0x48, 0x69, 0x81}));
         }
+
         if (got != want) {
             Ꮡt.Errorf("empty=%t: got %q, want %q"u8, empty, got, want);
         }
@@ -232,6 +243,7 @@ public static void BenchmarkEncoder(ж<testing.B> Ꮡb) {
     if (len(buf) == 0) {
         Ꮡb.Fatalf("test file has no data"u8);
     }
+
     for (nint e = 4; e <= 6; e++) {
         nint n = (nint)math.Pow10(e);
         var buf0 = buf;

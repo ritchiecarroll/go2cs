@@ -63,6 +63,11 @@ public static partial class testing_package
     {
         internal TestRunner? Runner;
 
+        // Go's m.numRun and m.afterOnce: a TestMain may call m.Run more than once (go.dev/issue/23129), and
+        // only the first run's m.after closes the test log.
+        internal int NumRun;
+        internal bool AfterDone;
+
         public M(NilType _) { }
     }
 
@@ -144,6 +149,10 @@ public static partial class testing_package
     /// </remarks>
     public interface TB
     {
+        // Go 1.26 adds ArtifactDir and Go 1.25 Attr, at the head of TB in Go's own order
+        // (testing.go's `type TB interface`); Output, from 1.25, closes it, after Context.
+        @string ArtifactDir();
+        void Attr(@string key, @string value);
         void Cleanup(Action cleanup);
         void Error(params ꓸꓸꓸany args);
         void Errorf(@string format, params ꓸꓸꓸany args);
@@ -169,6 +178,7 @@ public static partial class testing_package
         bool Skipped();
         @string TempDir();
         context_package.Context Context();
+        io_package.Writer Output();
     }
 
     /// <summary>
@@ -361,8 +371,10 @@ public static partial class testing_package
     /// </remarks>
     [GoRecv] public static (time_package.Time deadline, bool ok) Deadline(this ref T t)
     {
-        // Touch the execution so an unattached T fails the same way every other member does.
-        _ = t.RequiredExecution;
+        // Touch the execution so an unattached T fails the same way every other member does. Inside a
+        // synctest bubble Go panics instead of answering a real-clock deadline (testing.go:2164).
+        if (t.RequiredExecution.IsSynctest)
+            throw builtin.panic(TestExecution.DeadlineInsideBubbleText);
 
         if (TestHost.PackageDeadlineUtc is not { } deadline)
             return (default!, false);
@@ -499,6 +511,53 @@ public static partial class testing_package
     [GoRecv] public static context_package.Context Context(this ref T t) =>
         t.RequiredExecution.Context();
 
+    /// <summary>
+    /// Go 1.25's <c>Attr</c> (testing.go:1604): Errorf on a key holding Unicode whitespace or a value
+    /// holding a carriage return or newline, each in Go's text; otherwise an <c>attr</c> event under
+    /// chatty output.
+    /// </summary>
+    [GoRecv] public static void Attr(this ref T t, @string key, @string value)
+    {
+        string k = key.ToString();
+        string v = value.ToString();
+
+        // unicode.IsSpace over the key's runes (strings.ContainsFunc); an invalid byte decodes to
+        // U+FFFD, which is not a space, as Go's range over a string reads it.
+        foreach (System.Text.Rune rune in k.EnumerateRunes())
+        {
+            if (System.Text.Rune.IsWhiteSpace(rune))
+            {
+                t.Errorf("disallowed whitespace in attribute key %q", key);
+                return;
+            }
+        }
+
+        if (v.AsSpan().IndexOfAny('\r', '\n') >= 0)
+        {
+            t.Errorf("disallowed newline in attribute value %q", value);
+            return;
+        }
+
+        t.RequiredExecution.ReportAttr(k, v);
+    }
+
+    /// <summary>Go 1.25's <c>Output</c> (testing.go:1114): a writer onto the test's log.</summary>
+    [GoRecv] public static io_package.Writer Output(this ref T t) => t.RequiredExecution.Output();
+
+    /// <summary>
+    /// Go 1.26's <c>ArtifactDir</c> (testing.go:1333): one directory per test, and
+    /// <c>Fatalf("ArtifactDir: %v", err)</c> when it cannot be made.
+    /// </summary>
+    [GoRecv] public static @string ArtifactDir(this ref T t)
+    {
+        (string? dir, string? error) = t.RequiredExecution.ArtifactDir();
+
+        if (error is not null)
+            t.Fatalf("ArtifactDir: %v", (@string)error);
+
+        return dir!;
+    }
+
     [GoRecv] public static void Parallel(this ref T t) => t.RequiredExecution.Parallel();
 
     // RecvGenerator intentionally handles ordinary receiver signatures. C# params
@@ -524,6 +583,9 @@ public static partial class testing_package
     {
         TestRunner runner = m.Runner ?? throw new InvalidOperationException("testing.M is not attached to a test registry");
 
+        // Go counts every m.Run first (`m.numRun++`), before the parse.
+        m.NumRun++;
+
         // Go's M.Run opens with exactly this, under exactly this reasoning -- its comment reads
         // "TestMain may have already called flag.Parse.":
         //
@@ -547,7 +609,27 @@ public static partial class testing_package
         if (runner.Listing)
             return runner.ListTests();
 
-        return runner.RunAll();
+        // m.before's testlog block, then the tests, then writeProfiles' (go1.26.9 testing.go:2339-2357,
+        // 2697-2706, run from m.after, which Go defers): an open or close failure prints Go's message and
+        // exits 2, as Go's does. m.after runs writeProfiles under m.afterOnce (:2683-2686), so only the FIRST
+        // run closes the log; a later run's log stays open and unflushed, as Go leaves it.
+        if (runner.TestLogFile is not { } testLog)
+            return runner.RunAll();
+
+        TestLogBridge.ExitIfFailed(TestLogBridge.Open(testLog, firstRun: m.NumRun == 1));
+
+        try
+        {
+            return runner.RunAll();
+        }
+        finally
+        {
+            if (!m.AfterDone)
+            {
+                m.AfterDone = true;
+                TestLogBridge.ExitIfFailed(TestLogBridge.Close(testLog));
+            }
+        }
     }
 
     // Compile-only B surface (see struct B above) — never executed, never throwing. The
@@ -643,6 +725,14 @@ public static partial class testing_package
     // to anything expecting a usable context gets one that is merely never canceled, instead of a
     // nil dereference. The "nothing went wrong" value for a context is a live one.
     [GoRecv] public static context_package.Context Context(this ref B b) => context_package.Background();
+
+    // Go 1.25/1.26's Attr, Output and ArtifactDir on B, compile-only like the rest of this surface:
+    // never executed, so a discarding writer and an empty directory name are enough.
+    [GoRecv] public static void Attr(this ref B b, @string key, @string value) { }
+
+    [GoRecv] public static io_package.Writer Output(this ref B b) => io_package.Discard;
+
+    [GoRecv] public static @string ArtifactDir(this ref B b) => (@string)"";
 
     /// <summary>
     /// Go 1.24's <c>B.Loop</c> — <c>for b.Loop() { … }</c>, the replacement for <c>for i := 0; i &lt; b.N; i++</c>.
@@ -783,6 +873,13 @@ public static partial class testing_package
 
     [GoRecv] public static context_package.Context Context(this ref F f) => context_package.Background();
 
+    // Go 1.25/1.26's Attr, Output and ArtifactDir on F, compile-only as for B above.
+    [GoRecv] public static void Attr(this ref F f, @string key, @string value) { }
+
+    [GoRecv] public static io_package.Writer Output(this ref F f) => io_package.Discard;
+
+    [GoRecv] public static @string ArtifactDir(this ref F f) => (@string)"";
+
     // Params-taking F members need the same explicit ж<F> overloads as T's and B's above (params
     // collections are ref-like Spans the RecvGenerator does not synthesize overloads for).
     [GoRecv] public static void Add(this ref F f, params ꓸꓸꓸany args) { }
@@ -836,6 +933,18 @@ public static partial class testing_package
     public static void Skip(this ж<F> f, params ꓸꓸꓸany args) => Skip(ref f.Value, args);
 
     public static void Skipf(this ж<F> f, @string format, params ꓸꓸꓸany args) => Skipf(ref f.Value, format, args);
+
+    /// <summary>
+    /// Go 1.25's <c>testingSynctestTest</c> (testing.go:2125): runs <paramref name="f"/> with a new T
+    /// inside the caller's synctest bubble and reports whether it passed.
+    /// </summary>
+    /// <remarks>
+    /// Go reaches it through a push linkname, <c>//go:linkname testingSynctestTest
+    /// testing/synctest.testingSynctestTest</c>, so testing/synctest declares it without a body. That
+    /// package's companion forwards here; it is public because the companion is in another assembly.
+    /// synctest.Test calls it from inside a bubble it has just made.
+    /// </remarks>
+    public static bool testingSynctestTest(ж<T> t, Action<ж<T>> f) => t.Value.RequiredExecution.RunSynctest(f);
 
     /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, which
@@ -931,6 +1040,10 @@ public static partial class testing_package
     /// </remarks>
     public static double AllocsPerRun(nint runs, Action f)
     {
+        // Go 1.25: the first thing AllocsPerRun does (allocs.go:21-23), before its warmup run.
+        if (TestExecution.ParallelTestsRunning)
+            throw builtin.panic("testing: AllocsPerRun called during parallel test");
+
         // Warmup run outside the measurement window (Go does the same): first-call lazy
         // initialization — and JIT compilation here — must not count against f.
         f();

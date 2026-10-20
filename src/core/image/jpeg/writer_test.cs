@@ -44,11 +44,10 @@ public static void TestZigUnzig(ж<testing.T> Ꮡt) {
     }
 }
 
-// Luminance.
-// Chrominance.
 // unscaledQuantInNaturalOrder are the unscaled quantization tables in
 // natural (not zig-zag) order, as specified in section K.1.
 internal static array<array<byte>> unscaledQuantInNaturalOrder = new array<byte>[]{
+    // Luminance.
     new byte[]{
         16, 11, 10, 16, 24, 40, 51, 61,
         12, 12, 14, 19, 26, 58, 60, 55,
@@ -58,6 +57,7 @@ internal static array<array<byte>> unscaledQuantInNaturalOrder = new array<byte>
         24, 35, 55, 64, 81, 104, 113, 92,
         49, 64, 78, 87, 103, 121, 120, 101,
         72, 92, 95, 98, 112, 100, 103, 99}.array(),
+    // Chrominance.
     new byte[]{
         17, 18, 24, 47, 99, 99, 99, 99,
         18, 21, 26, 66, 99, 99, 99, 99,
@@ -71,7 +71,7 @@ internal static array<array<byte>> unscaledQuantInNaturalOrder = new array<byte>
 
 public static void TestUnscaledQuant(ж<testing.T> Ꮡt) {
     var bad = false;
-    for (global::go.image.jpeg_package.quantIndex i = ((global::go.image.jpeg_package.quantIndex)0); i < nQuantIndex; i++) {
+    for (global::go.image.jpeg_package.quantIndex i = (global::go.image.jpeg_package.quantIndex)0; i < nQuantIndex; i++) {
         for (nint zig = 0; zig < blockSize; zig++) {
             var got = unscaledQuant[i][zig];
             var want = unscaledQuantInNaturalOrder[i][unzig[zig]];
@@ -98,19 +98,18 @@ public static void TestUnscaledQuant(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct testCaseᴛ1 /*dyn*/ {
     internal @string filename;
     internal nint quality;
     internal int64 tolerance;
 }
 internal static slice<testCaseᴛ1> testCase = new testCaseᴛ1[]{
-    new("../testdata/video-001.png"u8, 1, ((int64)24 << (int)(8))),
-    new("../testdata/video-001.png"u8, 20, ((int64)12 << (int)(8))),
-    new("../testdata/video-001.png"u8, 60, ((int64)8 << (int)(8))),
-    new("../testdata/video-001.png"u8, 80, ((int64)6 << (int)(8))),
-    new("../testdata/video-001.png"u8, 90, ((int64)4 << (int)(8))),
-    new("../testdata/video-001.png"u8, 100, ((int64)2 << (int)(8)))
+    new("../testdata/video-001.png"u8, 1, (int64)24 << 8),
+    new("../testdata/video-001.png"u8, 20, (int64)12 << 8),
+    new("../testdata/video-001.png"u8, 60, (int64)8 << 8),
+    new("../testdata/video-001.png"u8, 80, (int64)6 << 8),
+    new("../testdata/video-001.png"u8, 90, (int64)4 << 8),
+    new("../testdata/video-001.png"u8, 100, (int64)2 << 8)
 }.slice();
 
 internal static int64 delta(uint32 u0, uint32 u1) {
@@ -195,7 +194,7 @@ public static void TestWriteGrayscale(ж<testing.T> Ꮡt) {
         }
     }
     // Compare the average delta to the tolerance level.
-    var want = (int64)(((int64)2 << (int)(8)));
+    var want = (int64)((int64)2 << 8);
     {
         var got = averageDelta(new image.GrayжImage(m0), m1); if (got > want) {
             Ꮡt.Errorf("average delta too high; got %d, want <= %d"u8, got, want);
@@ -248,6 +247,7 @@ public static void TestEncodeYCbCr(ж<testing.T> Ꮡt) {
             imgYCbCr.Value.Cr[co] = ccb;
         }
     }
+
     // Now check that both images are identical after an encode.
     ref var bufRGBA = ref heap(new bytes.Buffer(), out var ᏑbufRGBA);
     ref var bufYCbCr = ref heap(new bytes.Buffer(), out var ᏑbufYCbCr);

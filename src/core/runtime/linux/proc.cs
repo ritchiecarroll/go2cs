@@ -6,10 +6,12 @@ namespace go;
 using abi = @internal.abi_package;
 using cpu = @internal.cpu_package;
 using goarch = @internal.goarch_package;
+using goexperiment = @internal.goexperiment_package;
 using goos = @internal.goos_package;
 using atomic = @internal.runtime.atomic_package;
 using exithook = @internal.runtime.exithook_package;
 using sys = @internal.runtime.sys_package;
+using strconv = @internal.strconv_package;
 using stringslite = @internal.stringslite_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -157,9 +159,11 @@ internal static void Main() {
     GoFrame ᒐ = default;
     try {
         var mp = getg().Value.m;
+
         // Racectx of m0->g0 is used only as the parent of the main goroutine.
         // It must not be used for anything else.
         mp.Value.g0.Value.racectx = 0;
+
         // Max stack size is 1 GB on 64-bit, 250 MB on 32-bit.
         // Using decimal instead of binary GB and MB because
         // they look nicer in the stack overflow failure message.
@@ -168,17 +172,21 @@ internal static void Main() {
         } else {
             maxstacksize = 250000000;
         }
+
         // An upper limit for max stack size. Used to avoid random crashes
         // after calling SetMaxStack and trying to allocate a stack that is too big,
         // since stackalloc works with 32-bit sizes.
         maxstackceiling = 2 * maxstacksize;
+
         // Allow newproc to start new Ms.
         mainStarted = true;
+
         if (haveSysmon) {
             systemstack(() => {
                 newm(sysmon, nil, -1);
             });
         }
+
         // Lock the main goroutine onto this, the main OS thread,
         // during initialization. Most programs won't care, but a few
         // do require certain calls to be made by the main thread.
@@ -186,20 +194,25 @@ internal static void Main() {
         // by calling runtime.LockOSThread during initialization
         // to preserve the lock.
         lockOSThread();
+
         if (mp != Ꮡm0) {
             @throw(runtimeMainNotOnM0ˢ);
         }
+
         // Record when the world started.
         // Must be before doInit for tracing init.
         runtimeInitTime = nanotime();
         if (runtimeInitTime == 0) {
             @throw(nanotimeReturningZeroˢ);
         }
+
         if (debug.inittrace != 0) {
             inittrace.id = getg().Value.goid;
             inittrace.active = true;
         }
+
         doInit(runtime_inittasks); // Must be before defer.
+
         // Defer unlock so that runtime.Goexit during init does the unlock too.
         var needUnlock = true;
         defer(() => {
@@ -207,12 +220,16 @@ internal static void Main() {
                 unlockOSThread();
             }
         }, ref ᒐ);
+
         gcenable();
+        defaultGOMAXPROCSUpdateEnable(); // don't STW before runtime initialized.
+
         main_init_done = new channel<bool>(0);
         if (iscgo) {
             if (_cgo_pthread_key_created == nil) {
                 @throw(cgoPthreadKeyCreatedˢ);
             }
+
             if (_cgo_thread_start == nil) {
                 @throw(cgoThreadStartMissingˢ);
             }
@@ -227,16 +244,19 @@ internal static void Main() {
             if (_cgo_notify_runtime_init_done == nil) {
                 @throw(cgoNotifyRuntimeInitDoneˢ);
             }
+
             // Set the x_crosscall2_ptr C function pointer variable point to crosscall2.
             if (set_crosscall2 == default!) {
                 @throw(setCrosscall2Missingˢ);
             }
             set_crosscall2();
+
             // Start the template thread in case we enter Go from
             // a C-created thread and need to create a new thread.
             startTemplateThread();
             cgocall(_cgo_notify_runtime_init_done, nil);
         }
+
         // Run the initializing tasks. Depending on build mode this
         // list can arrive a few different ways, but it will always
         // contain the init tasks computed by the linker for all the
@@ -244,15 +264,23 @@ internal static void Main() {
         // by package plugin). Run through the modules in dependency
         // order (the order they are initialized by the dynamic
         // loader, i.e. they are added to the moduledata linked list).
-        for (var m = Ꮡfirstmoduledata; m != nil; m = m.Value.next) {
+        var last = lastmoduledatap; // grab before loop starts. Any added modules after this point will do their own doInit calls.
+        for (var m = Ꮡfirstmoduledata; true; m = m.Value.next) {
             doInit((~m).inittasks);
+            if (m == last) {
+                break;
+            }
         }
+
         // Disable init tracing after main init done to avoid overhead
         // of collecting statistics in malloc and newproc
         inittrace.active = false;
+
         builtin.close(main_init_done);
+
         needUnlock = false;
         unlockOSThread();
+
         if (isarchive || islibrary) {
             // A program compiled with -buildmode=c-archive or c-shared
             // has a main, but it is not executed.
@@ -271,10 +299,21 @@ internal static void Main() {
         }
         var fn = main_main; // make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
         fn();
-        if (raceenabled) {
-            runExitHooks(0); // run hooks now, since racefini does not return
-            racefini();
+
+        // Check for C memory leaks if using ASAN and we've made cgo calls,
+        // or if we are running as a library in a C program.
+        // We always make one cgo call, above, to notify_runtime_init_done,
+        // so we ignore that one.
+        // No point in leak checking if no cgo calls, since leak checking
+        // just looks for objects allocated using malloc and friends.
+        // Just checking iscgo doesn't help because asan implies iscgo.
+        var exitHooksRun = false;
+        if (asanenabled && (isarchive || islibrary || NumCgoCall() > 1)) {
+            runExitHooks(0); // lsandoleakcheck may not return
+            exitHooksRun = true;
+            lsandoleakcheck();
         }
+
         // Make racy client program work: if panicking on
         // another goroutine at the same time as main returns,
         // let the other goroutine finish printing the panic trace.
@@ -291,7 +330,13 @@ internal static void Main() {
         if (Ꮡpanicking.Load() != 0) {
             gopark(default!, nil, waitReasonPanicWait, traceBlockForever, 1);
         }
-        runExitHooks(0);
+        if (!exitHooksRun) {
+            runExitHooks(0);
+        }
+        if (raceenabled) {
+            racefini(); // does not return
+        }
+
         exit(0);
         while (ᐧ) {
             ж<int32> x = default!;
@@ -309,6 +354,11 @@ internal static void os_beforeExit(nint exitCode) {
     runExitHooks(exitCode);
     if (exitCode == 0 && raceenabled) {
         racefini();
+    }
+
+    // See comment in main, above.
+    if (exitCode == 0 && asanenabled && (isarchive || islibrary || NumCgoCall() > 1)) {
+        lsandoleakcheck();
     }
 }
 
@@ -332,7 +382,7 @@ internal static readonly @string forcegcPhaseErrorˢ = "forcegc: phase error"u8;
 
 internal static void forcegchelper() {
     forcegc.g = getg();
-    lockInit(Ꮡforcegc.of(forcegcstate.Ꮡlock), lockRankForcegc);
+    lockInit(ref forcegc.@lock, lockRankForcegc);
     while (ᐧ) {
         @lock(Ꮡforcegc.of(forcegcstate.Ꮡlock));
         if (Ꮡforcegc.of(forcegcstate.Ꮡidle).Load()) {
@@ -432,7 +482,7 @@ internal static ж<sudog> acquireSudog() {
     var s = (~pp).sudogcache[n - 1];
     pp.Value.sudogcache[n - 1] = default!;
     pp.Value.sudogcache = (~pp).sudogcache.slice(0, n - 1);
-    if ((~s).elem != nil) {
+    if ((uintptr)s.of(sudog.Ꮡelem).get() != nil) {
         @throw(acquireSudogFoundSElemˢ);
     }
     releasem(ref (mp).DerefOrNull());
@@ -452,7 +502,7 @@ internal static readonly @string runtimeReleaseSudogWithˢ = "runtime: releaseSu
 internal static void releaseSudog(ж<sudog> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
-    if (s.elem != nil) {
+    if ((uintptr)s.elem.get() != nil) {
         @throw(runtimeSudogWithNonNilˢ);
     }
     if (s.isSelect) {
@@ -467,7 +517,7 @@ internal static void releaseSudog(ж<sudog> Ꮡs) {
     if (s.waitlink != nil) {
         @throw(runtimeSudogWithNonNilˢ4);
     }
-    if (s.c != nil) {
+    if (s.c.get() != nil) {
         @throw(runtimeSudogWithNonNilCˢ);
     }
     var gp = getg();
@@ -534,13 +584,15 @@ internal static void badmorestackg0() {
         writeErrStr(fatalMorestackOnG0ˢ);
         return;
     }
+
     var g = getg();
     var gʗ1 = g;
     switchToCrashStack(() => {
-        print((@string)"runtime: morestack on g0, stack ["u8, ((Δhex)(uint64)(~gʗ1).stack.lo), (@string)" "u8, ((Δhex)(uint64)(~gʗ1).stack.hi), (@string)"], sp="u8, ((Δhex)(uint64)(~gʗ1).sched.sp), (@string)", called from\n"u8);
+        print((@string)"runtime: morestack on g0, stack ["u8, (Δhex)(uint64)(~gʗ1).stack.lo, (@string)" "u8, (Δhex)(uint64)(~gʗ1).stack.hi, (@string)"], sp="u8, (Δhex)(uint64)(~gʗ1).sched.sp, (@string)", called from\n"u8);
         gʗ1.Value.m.Value.traceback = 2; // include pc and sp in stack trace
         traceback1((~gʗ1).sched.pc, (~gʗ1).sched.sp, (~gʗ1).sched.lr, gʗ1, 0);
         print((@string)"\n"u8);
+
         @throw(morestackOnG0ˢ);
     });
 }
@@ -612,10 +664,29 @@ internal static bool lockedOSThread() {
     return (~gp).lockedm != 0 && (~(~gp).m).lockedg != 0;
 }
 
+// allgs contains all Gs ever created (including dead Gs), and thus
+// never shrinks.
+//
+// Access via the slice is protected by allglock or stop-the-world.
+// Readers that cannot take the lock may (carefully!) use the atomic
+// variables below.
 internal static ж<mutex> Ꮡallglock = new StandardBox<mutex>(new mutex(nil));
 internal static ref mutex allglock => ref Ꮡallglock.Value;
 internal static ж<slice<ж<g>>> Ꮡallgs = new StandardBox<slice<ж<g>>>(default(slice<ж<g>>));
 internal static ref slice<ж<g>> allgs => ref Ꮡallgs.ValueSlot;
+
+// allglen and allgptr are atomic variables that contain len(allgs) and
+// &allgs[0] respectively. Proper ordering depends on totally-ordered
+// loads and stores. Writes are protected by allglock.
+//
+// allgptr is updated before allglen. Readers should read allglen
+// before allgptr to ensure that allglen is always <= len(allgptr). New
+// Gs appended during the race can be missed. For a consistent view of
+// all Gs, allglock must be held.
+//
+// allgptr copies should always be stored as a concrete type or
+// unsafe.Pointer, not uintptr, to ensure that GC can still reach it
+// even if it points to a stale array.
 internal static ж<uintptr> Ꮡallglen = new StandardBox<uintptr>(default(uintptr));
 internal static ref uintptr allglen => ref Ꮡallglen.Value;
 internal static ж<ж<ж<g>>> Ꮡallgptr = new StandardBox<ж<ж<g>>>(default(ж<ж<g>>));
@@ -628,6 +699,7 @@ internal static void allgadd(ж<g> Ꮡgp) {
     if (readgstatus(Ꮡgp) == _Gidle) {
         @throw(allgaddBadStatusGidleˢ);
     }
+
     @lock(Ꮡallglock);
     allgs = append(allgs, Ꮡgp);
     if (Ꮡ(allgs, 0) != allgptr) {
@@ -642,6 +714,7 @@ internal static void allgadd(ж<g> Ꮡgp) {
 // The world must be stopped or allglock must be held.
 internal static slice<ж<g>> allGsSnapshot() {
     assertWorldStoppedOrLockHeld(ref allglock);
+
     // Because the world is stopped or allglock is held, allgadd
     // cannot happen concurrently with this. allgs grows
     // monotonically and existing entries never change, so we can
@@ -686,37 +759,38 @@ internal static void forEachGRace(Action<ж<g>> fn) {
     return;
 }
 
+// Number of goroutine ids to grab from sched.goidgen to local per-P cache at once.
+// 16 seems to provide enough amortization, but other than that it's mostly arbitrary number.
 internal static UntypedInt _GoidCacheBatch => 16;
 
 // cpuinit sets up CPU feature flags and calls internal/cpu.Initialize. env should be the complete
 // value of the GODEBUG environment variable.
 internal static void cpuinit(@string env) {
-    var exprᴛ1 = GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "linux"u8) {
-        cpu.DebugOptions = true;
-    }
-
     cpu.Initialize(env);
+
     // Support cpu feature variables are used in code generated by the compiler
     // to guard execution of instructions that can not be assumed to be always supported.
-    var exprᴛ2 = GOARCH;
-    if (exprᴛ2 == "386"u8 || exprᴛ2 == "amd64"u8) {
+    var exprᴛ1 = GOARCH;
+    if (exprᴛ1 == "386"u8 || exprᴛ1 == "amd64"u8) {
+        x86HasAVX = cpu.X86.HasAVX;
+        x86HasFMA = cpu.X86.HasFMA;
         x86HasPOPCNT = cpu.X86.HasPOPCNT;
         x86HasSSE41 = cpu.X86.HasSSE41;
-        x86HasFMA = cpu.X86.HasFMA;
     }
-    else if (exprᴛ2 == "arm"u8) {
+    else if (exprᴛ1 == "arm"u8) {
         armHasVFPv4 = cpu.ARM.HasVFPv4;
     }
-    else if (exprᴛ2 == "arm64"u8) {
+    else if (exprᴛ1 == "arm64"u8) {
         arm64HasATOMICS = cpu.ARM64.HasATOMICS;
     }
-    else if (exprᴛ2 == "loong64"u8) {
+    else if (exprᴛ1 == "loong64"u8) {
         loong64HasLAMCAS = cpu.Loong64.HasLAMCAS;
         loong64HasLAM_BH = cpu.Loong64.HasLAM_BH;
         loong64HasLSX = cpu.Loong64.HasLSX;
     }
-
+    else if (exprᴛ1 == "riscv64"u8) {
+        riscv64HasZbb = cpu.RISCV64.HasZbb;
+    }
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -725,35 +799,44 @@ internal static readonly @string prefixᶜ = "GODEBUG="u8;
 // getGodebugEarly extracts the environment variable GODEBUG from the environment on
 // Unix-like operating systems and returns it. This function exists to extract GODEBUG
 // early before much of the runtime is initialized.
-internal static @string getGodebugEarly() {
+//
+// Returns nil, false if OS doesn't provide env vars early in the init sequence.
+internal static (@string, bool) getGodebugEarly() {
     @string prefix = prefixᶜ;
     @string env = default!;
     var exprᴛ1 = GOOS;
     if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "linux"u8) {
-        var n = (int32)0;
-        while (argv_index(argv, // Similar to goenv_unix but extracts the environment value for
- // GODEBUG directly.
- // TODO(moehrmann): remove when general goenvs() can be called before cpuinit()
- argc + 1 + n) != nil) {
-            n++;
-        }
-        for (var i = (int32)0; i < n; i++) {
-            var Δp = argv_index(argv, argc + 1 + i);
-            @string s = @unsafe.String(Δp, findnull(Δp));
-            if (stringslite.HasPrefix(s, prefix)) {
-                env = gostring(Δp)[(int)(len(prefix))..];
-                break;
+        do {
+            // Similar to goenv_unix but extracts the environment value for
+            // GODEBUG directly.
+            // TODO(moehrmann): remove when general goenvs() can be called before cpuinit()
+            var n = (int32)0;
+            while (argv_index(argv, argc + 1 + n) != nil) {
+                n++;
             }
-        }
-    }
 
-    return env;
+            for (var i = (int32)0; i < n; i++) {
+                var Δp = argv_index(argv, argc + 1 + i);
+                @string s = @unsafe.String(Δp, findnull(Δp));
+
+                if (stringslite.HasPrefix(s, prefix)) {
+                    env = gostringnocopy(Δp)[(int)(len(prefix))..];
+                    break;
+                }
+            }
+            break;
+        } while (false);
+    }
+    else { /* default: */
+        return ("", false);
+    }
+    return (env, true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string godebugˢ = "GODEBUG"u8;
 internal static readonly @string gomaxprocsˢ = "GOMAXPROCS"u8;
 internal static readonly @string unknownRunnableGoroutineˢ = "unknown runnable goroutine during bootstrap"u8;
-internal static readonly @string unknownˢ2 = "unknown"u8;
 
 // The bootstrap sequence is:
 //
@@ -764,61 +847,81 @@ internal static readonly @string unknownˢ2 = "unknown"u8;
 //
 // The new G calls runtime·main.
 internal static void schedinit() {
-    lockInit(Ꮡsched.of(schedt.Ꮡlock), lockRankSched);
-    lockInit(Ꮡsched.of(schedt.Ꮡsysmonlock), lockRankSysmon);
-    lockInit(Ꮡsched.of(schedt.Ꮡdeferlock), lockRankDefer);
-    lockInit(Ꮡsched.of(schedt.Ꮡsudoglock), lockRankSudog);
-    lockInit(Ꮡdeadlock, lockRankDeadlock);
-    lockInit(Ꮡpaniclk, lockRankPanic);
-    lockInit(Ꮡallglock, lockRankAllg);
-    lockInit(ᏑallpLock, lockRankAllp);
-    lockInit(ᏑreflectOffs.of(reflectOffsᴛ1.Ꮡlock), lockRankReflectOffs);
-    lockInit(Ꮡfinlock, lockRankFin);
-    lockInit(Ꮡcpuprof.of(cpuProfile.Ꮡlock), lockRankCpuprof);
+    lockInit(ref sched.@lock, lockRankSched);
+    lockInit(ref sched.sysmonlock, lockRankSysmon);
+    lockInit(ref sched.deferlock, lockRankDefer);
+    lockInit(ref sched.sudoglock, lockRankSudog);
+    lockInit(ref deadlock, lockRankDeadlock);
+    lockInit(ref paniclk, lockRankPanic);
+    lockInit(ref allglock, lockRankAllg);
+    lockInit(ref allpLock, lockRankAllp);
+    lockInit(ref reflectOffs.@lock, lockRankReflectOffs);
+    lockInit(ref finlock, lockRankFin);
+    lockInit(ref cpuprof.@lock, lockRankCpuprof);
+    lockInit(ref computeMaxProcsLock, lockRankComputeMaxProcs);
     ᏑallocmLock.init(lockRankAllocmR, lockRankAllocmRInternal, lockRankAllocmW);
     ᏑexecLock.init(lockRankExecR, lockRankExecRInternal, lockRankExecW);
     traceLockInit();
     // Enforce that this lock is always a leaf lock.
     // All of this lock's critical sections should be
     // extremely short.
-    lockInit(Ꮡmemstats.of(mstats.ᏑheapStats).of(consistentHeapStats.ᏑnoPLock), lockRankLeafRank);
+    lockInit(ref memstats.heapStats.noPLock, lockRankLeafRank);
+
     lockVerifyMSize();
+
+    Ꮡsched.of(schedt.Ꮡmidle).init(/* unsafe.Offsetof(m{}.idleNode) */ (uintptr)368);
+
     // raceinit must be the first call to race detector.
     // In particular, it must be done before mallocinit below calls racemapshadow.
     var gp = getg();
     if (raceenabled) {
         (gp.Value.racectx, raceprocctx0) = raceinit();
     }
+
     sched.maxmcount = 10000;
     ᏑcrashFD.Store(~(uintptr)0);
+
     // The world starts stopped.
     worldStopped();
+
+    var (godebug, parsedGodebug) = getGodebugEarly();
+    if (parsedGodebug) {
+        parseRuntimeDebugVars(godebug);
+    }
     ticks.init(); // run as early as possible
     moduledataverify();
     stackinit();
+    randinit(); // must run before mallocinit, alginit, mcommoninit
     mallocinit();
-    @string godebug = getGodebugEarly();
     cpuinit(godebug); // must run before alginit
-    randinit(); // must run before alginit, mcommoninit
     alginit(); // maps, hash, rand must not be used before this call
     mcommoninit((~gp).m, -1);
     modulesinit(); // provides activeModules
     typelinksinit(); // uses maps, activeModules
     itabsinit(); // uses activeModules
     stkobjinit(); // must run before GC starts
+
     sigsave((~gp).m.of(m.Ꮡsigmask));
     initSigmask = gp.Value.m.Value.sigmask.Clone();
+
     goargs();
     goenvs();
     secure();
     checkfds();
-    parsedebugvars();
+    if (!parsedGodebug) {
+        // Some platforms, e.g., Windows, didn't make env vars available "early",
+        // so try again now.
+        parseRuntimeDebugVars(gogetenv(godebugˢ));
+    }
+    finishDebugVarsSetup();
     gcinit();
+
     // Allocate stack space that can be used when crashing due to bad stack
     // conditions, e.g. morestack on g0.
     gcrash.stack = @stackalloc(16384);
     gcrash.stackguard0 = gcrash.stack.lo + 1000;
     gcrash.stackguard1 = gcrash.stack.lo + 1000;
+
     // if disableMemoryProfiling is set, update MemProfileRate to 0 to turn off memprofile.
     // Note: parsedebugvars may update MemProfileRate, but when disableMemoryProfiling is
     // set to true by the linker, it means that nothing is consuming the profile, it is
@@ -826,26 +929,42 @@ internal static void schedinit() {
     if (disableMemoryProfiling) {
         MemProfileRate = 0;
     }
+
     // mcommoninit runs before parsedebugvars, so init profstacks again.
     mProfStackInit(ref ((~gp).m).DerefOrNull());
+    defaultGOMAXPROCSInit();
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     Ꮡsched.of(schedt.Ꮡlastpoll).Store(nanotime());
-    var procs = ncpu;
+    int32 procs = default!;
     {
-        var (n, ok) = atoi32(gogetenv(gomaxprocsˢ)); if (ok && n > 0) {
-            procs = n;
+        var (n, err) = strconv.ParseInt(gogetenv(gomaxprocsˢ), 10, 32); if (err == default! && n > 0){
+            procs = (int32)n;
+            sched.customGOMAXPROCS = true;
+        } else {
+            // Use numCPUStartup for initial GOMAXPROCS for two reasons:
+            //
+            // 1. We just computed it in osinit, recomputing is (minorly) wasteful.
+            //
+            // 2. More importantly, if debug.containermaxprocs == 0 &&
+            //    debug.updatemaxprocs == 0, we want to guarantee that
+            //    runtime.GOMAXPROCS(0) always equals runtime.NumCPU (which is
+            //    just numCPUStartup).
+            procs = defaultGOMAXPROCS(numCPUStartup);
         }
     }
     if (procresize(procs) != nil) {
         @throw(unknownRunnableGoroutineˢ);
     }
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     // World is effectively started now, as P's can run.
     worldStarted();
+
     if (buildVersion == ""u8) {
         // Condition should never trigger. This code just serves
         // to ensure runtime·buildVersion is kept in the resulting binary.
-        buildVersion = unknownˢ2;
+        buildVersion = unknownˢ;
     }
     if (len(modinfo) == 1) {
         // Condition should never trigger. This code just serves
@@ -868,6 +987,7 @@ internal static readonly @string threadExhaustionˢ = "thread exhaustion"u8;
 // sched.lock must be held.
 internal static void checkmcount() {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     // Exclude extra M's, which are used for cgocallback from threads
     // created in C.
     //
@@ -892,6 +1012,7 @@ internal static readonly @string runtimeThreadIdOverflowˢ = "runtime: thread ID
 // sched.lock must be held.
 internal static int64 mReserveID() {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     if (sched.mnext + 1 < sched.mnext) {
         @throw(runtimeThreadIdOverflowˢ);
     }
@@ -906,28 +1027,38 @@ internal static partial void mcommoninit(ж<m> Ꮡmp, int64 id) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     var gp = getg();
+
     // g0 stack won't make sense for user (and is not necessary unwindable).
     if (gp != (~(~gp).m).g0) {
         callers(1, mp.createstack[..]);
     }
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
+
     if (id >= 0){
         mp.id = id;
     } else {
         mp.id = mReserveID();
     }
+
+    mp.self = newMWeakPointer(Ꮡmp);
+
     mrandinit(Ꮡmp);
+
     mpreinit(Ꮡmp);
     if (mp.gsignal != nil) {
         mp.gsignal.Value.stackguard1 = (~mp.gsignal).stack.lo + (uintptr)stackGuard;
     }
+
     // Add to allm so garbage collector doesn't free g->m
     // when it is just in a register or thread-local storage.
     mp.alllink = allm;
-    // NumCgoCall() and others iterate over allm w/o schedlock,
+
+    // NumCgoCall and others iterate over allm w/o schedlock,
     // so we need to publish it safely.
     atomicstorep(@unsafe.Pointer.FromBox(Ꮡallm), @unsafe.Pointer.FromPinnedBox(Ꮡmp));
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     // Allocate memory to hold a cgo traceback if the cgo call crashes.
     if (iscgo || GOOS == "solaris"u8 || GOOS == "illumos"u8 || GOOS == "windows"u8) {
         mp.cgoCallers = @new<ΔcgoCallers>();
@@ -1005,8 +1136,16 @@ internal static bool hasCgoOnStack(this ref m mp) {
     return mp.ncgo > 0 || mp.isextra;
 }
 
+// osHasLowResTimer indicates that the platform's internal timer system has a low resolution,
+// typically on the order of 1 ms or more.
 internal const bool osHasLowResTimer = /* GOOS == "windows" || GOOS == "openbsd" || GOOS == "netbsd" */ false;
+
+// osHasLowResClockInt is osHasLowResClock but in integer form, so it can be used to create
+// constants conditionally.
 internal static UntypedInt osHasLowResClockInt => /* goos.IsWindows */ 0;
+
+// osHasLowResClock indicates that timestamps produced by nanotime on the platform have a
+// low resolution, typically on the order of 1 ms or more.
 internal const bool osHasLowResClock = /* osHasLowResClockInt > 0 */ false;
 
 // go2cs generated this placeholder — func ready is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1053,6 +1192,7 @@ internal static void freezetheworld() {
         usleep(1000);
         return;
     }
+
     // stopwait and preemption requests can be lost
     // due to races with concurrently executing threads,
     // so try several times
@@ -1092,21 +1232,21 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var success = false;
+
     // Check that transition is valid.
     var exprᴛ1 = oldval;
-    if (exprᴛ1 == _Gscanrunnable || exprᴛ1 == _Gscanwaiting || exprᴛ1 == _Gscanrunning || exprᴛ1 == _Gscansyscall || exprᴛ1 == _Gscanpreempted) {
-        if (newval == (uint32)(oldval & ~(uint32)_Gscan)) {
+    if (exprᴛ1 == _Gscanrunnable || exprᴛ1 == _Gscanwaiting || exprᴛ1 == _Gscanrunning || exprᴛ1 == _Gscansyscall || exprᴛ1 == _Gscanleaked || exprᴛ1 == _Gscanpreempted || exprᴛ1 == _Gscandeadextra) {
+        if (newval == (oldval & ~(uint32)_Gscan)) {
             success = Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval);
         }
     }
     else { /* default: */
-        print((@string)"runtime: casfrom_Gscanstatus bad oldval gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, ((Δhex)(uint64)oldval), (@string)", newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+        print((@string)"runtime: casfrom_Gscanstatus bad oldval gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, (Δhex)(uint64)oldval, (@string)", newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
         dumpgstatus(Ꮡgp);
         @throw(casfromGscanstatusTopGpˢ);
     }
-
     if (!success) {
-        print((@string)"runtime: casfrom_Gscanstatus failed gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, ((Δhex)(uint64)oldval), (@string)", newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+        print((@string)"runtime: casfrom_Gscanstatus failed gp="u8, Ꮡgp.OrTypedNil(), (@string)", oldval="u8, (Δhex)(uint64)oldval, (@string)", newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
         dumpgstatus(Ꮡgp);
         @throw(casfromGscanstatusGpˢ);
     }
@@ -1114,14 +1254,14 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string castogscanstatusˢ = "castogscanstatus"u8;
+internal static readonly @string badOldvalPassedToˢ = "bad oldval passed to castogscanstatus"u8;
 
 // This will return false if the gp is not in the expected status and the cas fails.
 // This acts like a lock acquire while the casfromgstatus acts like a lock release.
 internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     var exprᴛ1 = oldval;
-    if (exprᴛ1 == _Grunnable || exprᴛ1 == _Grunning || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gsyscall) {
-        if (newval == (uint32)(oldval | (uint32)_Gscan)) {
+    if (exprᴛ1 == _Grunnable || exprᴛ1 == _Grunning || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gleaked || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gdeadextra) {
+        if (newval == (oldval | (uint32)_Gscan)) {
             var r = Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval);
             if (r) {
                 acquireLockRankAndM(lockRankGscan);
@@ -1129,10 +1269,9 @@ internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval)
             return r;
         }
     }
-
-    print((@string)"runtime: castogscanstatus oldval="u8, ((Δhex)(uint64)oldval), (@string)" newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
-    @throw(castogscanstatusˢ);
-    throw panic("not reached");
+    print((@string)"runtime: castogscanstatus oldval="u8, (Δhex)(uint64)oldval, (@string)" newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
+    @throw(badOldvalPassedToˢ);
+    return false;
 }
 
 // casgstatusAlwaysTrack is a debug flag that causes casgstatus to always track
@@ -1153,18 +1292,21 @@ internal static readonly @string casgstatusWaitingForˢ = "casgstatus: waiting f
 internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    if (((uint32)(oldval & (uint32)_Gscan) != 0) || ((uint32)(newval & (uint32)_Gscan) != 0) || oldval == newval) {
+    if (((oldval & (uint32)_Gscan) != 0) || ((newval & (uint32)_Gscan) != 0) || oldval == newval) {
         systemstack(() => {
             // Call on the systemstack to prevent print and throw from counting
             // against the nosplit stack reservation.
-            print((@string)"runtime: casgstatus: oldval="u8, ((Δhex)(uint64)oldval), (@string)" newval="u8, ((Δhex)(uint64)newval), (@string)"\n"u8);
+            print((@string)"runtime: casgstatus: oldval="u8, (Δhex)(uint64)oldval, (@string)" newval="u8, (Δhex)(uint64)newval, (@string)"\n"u8);
             @throw(casgstatusBadIncomingˢ);
         });
     }
+
     lockWithRankMayAcquire(nil, lockRankGscan);
+
     // See https://golang.org/cl/21503 for justification of the yield delay.
     UntypedInt yieldDelay = /* 5 * 1000 */ 5000;
     int64 nextYield = default!;
+
     // loop if gp->atomicstatus is in a scan state giving
     // GC time to finish and change the state to oldval.
     for (nint i = 0; !Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(oldval, newval); i++) {
@@ -1187,13 +1329,16 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
             nextYield = nanotime() + (int64)(yieldDelay / 2);
         }
     }
-    if (gp.syncGroup != nil) {
+
+    if (gp.bubble != nil) {
         systemstack(() => {
-            Ꮡgp.Value.syncGroup.changegstatus(Ꮡgp, oldval, newval);
+            Ꮡgp.Value.bubble.changegstatus(Ꮡgp, oldval, newval);
         });
     }
-    if (oldval == _Grunning) {
-        // Track every gTrackingPeriod time a goroutine transitions out of running.
+
+    if ((oldval == _Grunning || oldval == _Gsyscall) && (newval != _Grunning && newval != _Gsyscall)) {
+        // Track every gTrackingPeriod time a goroutine transitions out of _Grunning or _Gsyscall.
+        // Do not track _Grunning <-> _Gsyscall transitions, since they're two very similar states.
         if (casgstatusAlwaysTrack || (uint8)(gp.trackingSeq % (uint8)gTrackingPeriod) == 0) {
             gp.tracking = true;
         }
@@ -1202,6 +1347,7 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     if (!gp.tracking) {
         return;
     }
+
     // Handle various kinds of tracking.
     //
     // Currently:
@@ -1209,6 +1355,9 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     // - Time spent blocked on a sync.Mutex or sync.RWMutex.
     var exprᴛ1 = oldval;
     if (exprᴛ1 == _Grunnable) {
+        // We transitioned out of runnable, so measure how much
+        // time we spent in this state and add it to
+        // runnableTime.
         var now = nanotime();
         gp.runnableTime += now - gp.trackingStamp;
         gp.trackingStamp = 0;
@@ -1216,23 +1365,19 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     else if (exprᴛ1 == _Gwaiting) {
         do {
             if (!gp.waitreason.isMutexWait()) {
-                // We transitioned out of runnable, so measure how much
-                // time we spent in this state and add it to
-                // runnableTime.
                 // Not blocking on a lock.
                 break;
             }
+            // Blocking on a lock, measure it. Note that because we're
+            // sampling, we have to multiply by our sampling period to get
+            // a more representative estimate of the absolute value.
+            // gTrackingPeriod also represents an accurate sampling period
+            // because we can only enter this state from _Grunning.
             var now = nanotime();
             Ꮡsched.of(schedt.ᏑtotalMutexWaitTime).Add((now - gp.trackingStamp) * (int64)gTrackingPeriod);
             gp.trackingStamp = 0;
         } while (false);
     }
-
-    // Blocking on a lock, measure it. Note that because we're
-    // sampling, we have to multiply by our sampling period to get
-    // a more representative estimate of the absolute value.
-    // gTrackingPeriod also represents an accurate sampling period
-    // because we can only enter this state from _Grunning.
     var exprᴛ2 = newval;
     if (exprᴛ2 == _Gwaiting) {
         do {
@@ -1240,28 +1385,26 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
                 // Not blocking on a lock.
                 break;
             }
+            // Blocking on a lock. Write down the timestamp.
             var now = nanotime();
             gp.trackingStamp = now;
         } while (false);
     }
     else if (exprᴛ2 == _Grunnable) {
+        // We just transitioned into runnable, so record what
+        // time that happened.
         var now = nanotime();
         gp.trackingStamp = now;
     }
     else if (exprᴛ2 == _Grunning) {
+        // We're transitioning into running, so turn off
+        // tracking and record how much time we spent in
+        // runnable.
         gp.tracking = false;
         Ꮡsched.of(schedt.ᏑtimeToRun).record(gp.runnableTime);
         gp.runnableTime = 0;
     }
-
 }
-
-// Blocking on a lock. Write down the timestamp.
-// We just transitioned into runnable, so record what
-// time that happened.
-// We're transitioning into running, so turn off
-// tracking and record how much time we spent in
-// runnable.
 
 // casGToWaiting transitions gp from old to _Gwaiting, and sets the wait reason.
 //
@@ -1279,6 +1422,9 @@ internal static readonly @string casGToWaitingForSuspendGˢ = "casGToWaitingForS
 
 // casGToWaitingForSuspendG transitions gp from old to _Gwaiting, and sets the wait reason.
 // The wait reason must be a valid isWaitingForSuspendG wait reason.
+//
+// While a goroutine is in this state, it's stack is effectively pinned.
+// The garbage collector must not shrink or otherwise mutate the goroutine's stack.
 //
 // Use this over casgstatus when possible to ensure that a waitreason is set.
 internal static void casGToWaitingForSuspendG(ж<g> Ꮡgp, uint32 old, waitReason reason) {
@@ -1302,14 +1448,13 @@ internal static void casGToPreemptScan(ж<g> Ꮡgp, uint32 old, uint32 @new) {
     acquireLockRankAndM(lockRankGscan);
     while (!Ꮡgp.of(g.Ꮡatomicstatus).CompareAndSwap(_Grunning, (uint32)((uint32)_Gscan | (uint32)_Gpreempted))) {
     }
+    // We never notify gp.bubble that the goroutine state has moved
+    // from _Grunning to _Gpreempted. We call bubble.changegstatus
+    // after status changes happen, but doing so here would violate the
+    // ordering between the gscan and synctest locks. The bubble doesn't
+    // distinguish between _Grunning and _Gpreempted anyway, so not
+    // notifying it is fine.
 }
-
-// We never notify gp.syncGroup that the goroutine state has moved
-// from _Grunning to _Gpreempted. We call syncGroup.changegstatus
-// after status changes happen, but doing so here would violate the
-// ordering between the gscan and synctest locks. syncGroup doesn't
-// distinguish between _Grunning and _Gpreempted anyway, so not
-// notifying it is fine.
 
 // casGFromPreempted attempts to transition gp from _Gpreempted to
 // _Gwaiting. If successful, the caller is responsible for
@@ -1325,50 +1470,35 @@ internal static bool casGFromPreempted(ж<g> Ꮡgp, uint32 old, uint32 @new) {
         return false;
     }
     {
-        var sg = gp.syncGroup; if (sg != nil) {
-            sg.changegstatus(Ꮡgp, _Gpreempted, _Gwaiting);
+        var bubble = gp.bubble; if (bubble != nil) {
+            bubble.changegstatus(Ꮡgp, _Gpreempted, _Gwaiting);
         }
     }
     return true;
 }
 
+// stwReason is an enumeration of reasons the world is stopping.
 partial struct stwReason /*num:uint8*/;
 
 // Reasons to stop-the-world.
 //
 // Avoid reusing reasons and add new ones instead.
 internal static stwReason stwUnknown => /* iota */ 0;                    // "unknown"
-
 internal static stwReason stwGCMarkTerm => 1;                 // "GC mark termination"
-
 internal static stwReason stwGCSweepTerm => 2;                // "GC sweep termination"
-
 internal static stwReason stwWriteHeapDump => 3;              // "write heap dump"
-
 internal static stwReason stwGoroutineProfile => 4;           // "goroutine profile"
-
 internal static stwReason stwGoroutineProfileCleanup => 5;    // "goroutine profile cleanup"
-
 internal static stwReason stwAllGoroutinesStack => 6;         // "all goroutines stack trace"
-
 internal static stwReason stwReadMemStats => 7;               // "read mem stats"
-
 internal static stwReason stwAllThreadsSyscall => 8;          // "AllThreadsSyscall"
-
 internal static stwReason stwGOMAXPROCS => 9;                 // "GOMAXPROCS"
-
 internal static stwReason stwStartTrace => 10;                 // "start trace"
-
 internal static stwReason stwStopTrace => 11;                  // "stop trace"
-
 internal static stwReason stwForTestCountPagesInUse => 12;     // "CountPagesInUse (test)"
-
 internal static stwReason stwForTestReadMetricsSlow => 13;     // "ReadMetricsSlow (test)"
-
 internal static stwReason stwForTestReadMemStatsSlow => 14;    // "ReadMemStatsSlow (test)"
-
 internal static stwReason stwForTestPageCachePagesLeaked => 15; // "PageCachePagesLeaked (test)"
-
 internal static stwReason stwForTestResetDebugLog => 16;       // "ResetDebugLog (test)"
 
 internal static @string String(this stwReason r) {
@@ -1495,56 +1625,48 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     // stack while we try to stop the world since otherwise we could get
     // in a mutual preemption deadlock.
     //
-    // We must not modify anything on the G stack because a stack shrink
-    // may occur, now that we switched to _Gwaiting, specifically if we're
-    // doing this during the mark phase (mark termination excepted, since
-    // we know that stack scanning is done by that point). A stack shrink
-    // is otherwise OK though because in order to return from this function
-    // (and to leave the system stack) we must have preempted all
-    // goroutines, including any attempting to scan our stack, in which
-    // case, any stack shrinking will have already completed by the time we
-    // exit.
+    // casGToWaitingForSuspendG marks the goroutine as ineligible for a
+    // stack shrink, effectively pinning the stack in memory for the duration.
     //
     // N.B. The execution tracer is not aware of this status transition and
-    // andles it specially based on the wait reason.
+    // handles it specially based on the wait reason.
     casGToWaitingForSuspendG((~(~getg()).m).curg, _Grunning, waitReasonStoppingTheWorld);
+
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
         Δtrace.STWStart(reason);
         traceRelease(Δtrace);
     }
     var gp = getg();
+
     // If we hold a lock, then we won't be able to stop another M
     // that is blocked trying to acquire the lock.
     if ((~(~gp).m).locks > 0) {
         @throw(stopTheWorldHoldingLocksˢ);
     }
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     var start = nanotime(); // exclude time waiting for sched.lock from start and total time metrics.
     sched.stopwait = gomaxprocs;
     Ꮡsched.of(schedt.Ꮡgcwaiting).Store(true);
     preemptall();
-    // stop current P
+
+    // Stop current P.
     (~(~gp).m).p.ptr().Value.status = _Pgcstop; // Pgcstop is only diagnostic.
     (~(~gp).m).p.ptr().Value.gcStopTime = start;
     sched.stopwait--;
-    // try to retake all P's in Psyscall status
-    Δtrace = traceAcquire();
+
+    // Try to retake all P's in syscalls.
     foreach (var (_, pp) in allp) {
-        var s = pp.Value.status;
-        if (s == _Psyscall && atomic.Cas(pp.of(runtime_package.Δp.Ꮡstatus), s, _Pgcstop)) {
-            if (Δtrace.ok()) {
-                Δtrace.ProcSteal(pp, false);
+        {
+            var (thread, ok) = setBlockOnExitSyscall(pp); if (ok) {
+                thread.gcstopP();
+                thread.resume();
             }
-            pp.Value.syscalltick++;
-            pp.Value.gcStopTime = nanotime();
-            sched.stopwait--;
         }
     }
-    if (Δtrace.ok()) {
-        traceRelease(Δtrace);
-    }
-    // stop idle P's
+
+    // Stop idle Ps.
     var now = nanotime();
     while (ᐧ) {
         var (pp, _) = pidleget(now);
@@ -1557,7 +1679,8 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     }
     var wait = sched.stopwait > 0;
     unlock(Ꮡsched.of(schedt.Ꮡlock));
-    // wait for remaining P's to stop voluntarily
+
+    // Wait for remaining Ps to stop voluntarily.
     if (wait) {
         while (ᐧ) {
             // wait for 100us, then try to re-preempt in case of any races
@@ -1568,6 +1691,7 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
             preemptall();
         }
     }
+
     var finish = nanotime();
     var startTime = finish - start;
     if (reason.isGC()){
@@ -1575,6 +1699,7 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     } else {
         Ꮡsched.of(schedt.ᏑstwStoppingTimeOther).record(startTime);
     }
+
     // Double-check we actually stopped everything, and all the invariants hold.
     // Also accumulate all the time spent by each P in _Pgcstop up to the point
     // where everything was stopped. This will be accumulated into the total pause
@@ -1606,9 +1731,12 @@ internal static worldStop stopTheWorldWithSema(stwReason reason) {
     if (bad != ""u8) {
         @throw(bad);
     }
+
     worldStopped();
+
     // Switch back to _Grunning, now that the world is stopped.
     casgstatus((~(~getg()).m).curg, _Gwaiting, _Grunning);
+
     return new worldStop(
         reason: reason,
         startedStopping: start,
@@ -1628,6 +1756,7 @@ internal static readonly @string startTheWorldˢ = "startTheWorld: inconsistent 
 // stattTheWorldWithSema returns now.
 internal static int64 startTheWorldWithSema(int64 now, worldStop w) {
     assertWorldStopped();
+
     var mp = acquirem(); // disable preemption because it can be holding p in a local var
     if (netpollinited()) {
         ref var list = ref heap<gList>(out var Ꮡlist);
@@ -1636,6 +1765,7 @@ internal static int64 startTheWorldWithSema(int64 now, worldStop w) {
         netpollAdjustWaiters(delta);
     }
     @lock(Ꮡsched.of(schedt.Ꮡlock));
+
     var procs = gomaxprocs;
     if (newprocs != 0) {
         procs = newprocs;
@@ -1648,7 +1778,9 @@ internal static int64 startTheWorldWithSema(int64 now, worldStop w) {
         notewakeup(Ꮡsched.of(schedt.Ꮡsysmonnote));
     }
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     worldStarted();
+
     while (p1 != nil) {
         var Δp = p1;
         p1 = (~p1).link.ptr();
@@ -1665,6 +1797,7 @@ internal static int64 startTheWorldWithSema(int64 now, worldStop w) {
             newm(default!, Δp, -1);
         }
     }
+
     // Capture start-the-world time before doing clean-up tasks.
     if (now == 0) {
         now = nanotime();
@@ -1680,11 +1813,14 @@ internal static int64 startTheWorldWithSema(int64 now, worldStop w) {
         Δtrace.STWDone();
         traceRelease(Δtrace);
     }
+
     // Wakeup an additional proc in case we have excessive runnable goroutines
     // in local queues or in the global queue. If we don't, the proc will park itself.
     // If we have lots of excessive work, resetspinning will unpark additional procs as necessary.
     wakep();
+
     releasem(ref (mp).DerefOrNull());
+
     return now;
 }
 
@@ -1692,13 +1828,9 @@ internal static int64 startTheWorldWithSema(int64 now, worldStop w) {
 // via libcall.
 internal static bool usesLibcall() {
     var exprᴛ1 = GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "windows"u8) {
+    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "windows"u8) {
         return true;
     }
-    if (exprᴛ1 == "openbsd"u8) {
-        return GOARCH != "mips64"u8;
-    }
-
     return false;
 }
 
@@ -1706,13 +1838,9 @@ internal static bool usesLibcall() {
 // system-allocated stack.
 internal static bool mStackIsSystemAllocated() {
     var exprᴛ1 = GOOS;
-    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "windows"u8) {
+    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "windows"u8) {
         return true;
     }
-    if (exprᴛ1 == "openbsd"u8) {
-        return GOARCH != "mips64"u8;
-    }
-
     return false;
 }
 
@@ -1731,6 +1859,7 @@ internal static partial void mstart();
 //go:nowritebarrierrec
 internal static void mstart0() {
     var gp = getg();
+
     var osStack = (~gp).stack.lo == 0;
     if (osStack) {
         // Initialize stack bounds from system stack.
@@ -1756,6 +1885,7 @@ internal static void mstart0() {
     // functions, which check stackguard1.
     gp.Value.stackguard1 = gp.Value.stackguard0;
     mstart1();
+
     // Exit this thread.
     if (mStackIsSystemAllocated()) {
         // Windows, Solaris, illumos, Darwin, AIX and Plan 9 always system-allocate
@@ -1775,9 +1905,11 @@ internal static readonly @string badRuntimeMstartˢ = "bad runtime·mstart"u8;
 //go:noinline
 internal static partial void mstart1() {
     var gp = getg();
+
     if (gp != (~(~gp).m).g0) {
         @throw(badRuntimeMstartˢ);
     }
+
     // Set up m.g0.sched as a label returning to just
     // after the mstart1 call in mstart0 above, for use by goexit0 and mcall.
     // We're never coming back to mstart1 after we call schedule,
@@ -1787,21 +1919,26 @@ internal static partial void mstart1() {
     gp.Value.sched.g = new Δguintptr(gp);
     gp.Value.sched.pc = sys.GetCallerPC();
     gp.Value.sched.sp = sys.GetCallerSP();
+
     asminit();
     minit();
+
     // Install signal handlers; after minit so that minit can
     // prepare the thread to be able to handle the signals.
     if ((~gp).m == Ꮡm0) {
         mstartm0();
     }
+
     if (debug.dataindependenttiming == 1) {
         sys.EnableDIT();
     }
+
     {
         var fn = gp.Value.m.Value.mstartfn; if (fn != default!) {
             fn();
         }
     }
+
     if ((~gp).m != Ꮡm0) {
         acquirep((~(~gp).m).nextp.ptr());
         gp.Value.m.Value.nextp = 0;
@@ -1851,6 +1988,7 @@ internal static readonly @string mNotFoundInAllmˢ = "m not found in allm"u8;
 //go:yeswritebarrierrec
 internal static void mexit(bool osStack) {
     var mp = getg().Value.m;
+
     if (mp == Ꮡm0) {
         // This is the main thread. Just wedge it.
         //
@@ -1871,19 +2009,31 @@ internal static void mexit(bool osStack) {
         mPark();
         @throw(lockedM0WokeUpˢ);
     }
+
     sigblock(true);
     unminit();
+
     // Free the gsignal stack.
     if ((~mp).gsignal != nil) {
         stackfree((~(~mp).gsignal).stack);
+        if (valgrindenabled) {
+            valgrindDeregisterStack((~(~mp).gsignal).valgrindStackID);
+            mp.Value.gsignal.Value.valgrindStackID = 0;
+        }
         // On some platforms, when calling into VDSO (e.g. nanotime)
         // we store our g on the gsignal stack, if there is one.
         // Now the stack is freed, unlink it from the m, so we
         // won't write to it when calling VDSO code.
         mp.Value.gsignal = default!;
     }
+
     // Free vgetrandom state.
     vgetrandomDestroy(ref (mp).DerefOrNull());
+
+    // Clear the self pointer so Ps don't access this M after it is freed,
+    // or keep it alive.
+    (~mp).self.clear();
+
     // Remove m from allm.
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     for (var pprev = Ꮡallm; pprev.ValueSlot != nil; pprev = (pprev.ValueSlot).of(m.Ꮡalllink)) {
@@ -1911,11 +2061,14 @@ found:
     mp.Value.freelink = sched.freem;
     sched.freem = mp;
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     atomic.Xadd64(Ꮡncgocall, (int64)(~mp).ncgocall);
     Ꮡsched.of(schedt.ᏑtotalRuntimeLockWaitTime).Add(mp.of(m.ᏑmLockProfile).of(mLockProfile.ᏑwaitTime).Load());
+
     // Release the P.
     handoffp(releasep());
     // After this point we must not have write barriers.
+
     // Invoke the deadlock detector. This must happen after
     // handoffp because it may have started a new M to take our
     // P's work.
@@ -1923,6 +2076,7 @@ found:
     sched.nmfreed++;
     checkdead();
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
         // Make sure pendingPreemptSignals is correct when an M exits.
         // For #41702.
@@ -1930,16 +2084,20 @@ found:
             ᏑpendingPreemptSignals.Add(-1);
         }
     }
+
     // Destroy all allocated resources. After this is called, we may no
     // longer take any locks.
     mdestroy(ref (mp).DerefOrNull());
+
     if (osStack) {
         // No more uses of mp, so it is safe to drop the reference.
         mp.of(m.ᏑfreeWait).Store(freeMRef);
+
         // Return from mstart and let the system thread
         // library free the g0 stack and terminate the thread.
         return;
     }
+
     // mstart is the thread's entry point, so there's nothing to
     // return to. Exit the thread directly. exitThread will clear
     // m.freeWait when it's done with the stack and the m can be
@@ -1966,16 +2124,11 @@ internal static void forEachP(waitReason reason, Action<ж<Δp>> fn) {
         // deadlock as we attempt to preempt a goroutine that's trying
         // to preempt us (e.g. for a stack scan).
         //
-        // We must not modify anything on the G stack because a stack shrink
-        // may occur. A stack shrink is otherwise OK though because in order
-        // to return from this function (and to leave the system stack) we
-        // must have preempted all goroutines, including any attempting
-        // to scan our stack, in which case, any stack shrinking will
-        // have already completed by the time we exit.
+        // casGToWaitingForSuspendG marks the goroutine as ineligible for a
+        // stack shrink, effectively pinning the stack in memory for the duration.
         //
-        // N.B. The execution tracer is not aware of this status
-        // transition and handles it specially based on the
-        // wait reason.
+        // N.B. The execution tracer is not aware of this status transition and
+        // handles it specially based on the wait reason.
         casGToWaitingForSuspendG(gp, _Grunning, reason);
         forEachPInternal(fn);
         casgstatus(gp, _Gwaiting, _Grunning);
@@ -1999,12 +2152,14 @@ internal static readonly @string forEachPPDidNotRunFnˢ = "forEachP: P did not r
 internal static void forEachPInternal(Action<ж<Δp>> fn) {
     var mp = acquirem();
     var pp = (~(~getg()).m).p.ptr();
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     if (sched.safePointWait != 0) {
         @throw(forEachPSchedˢ);
     }
     sched.safePointWait = gomaxprocs - 1;
     sched.safePointFn = fn;
+
     // Ask all Ps to run the safe point function.
     foreach (var (_, p2) in allp) {
         if (p2 != pp) {
@@ -2012,9 +2167,11 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
         }
     }
     preemptall();
-    // Any P entering _Pidle or _Psyscall from now on will observe
+
+    // Any P entering _Pidle or a system call from now on will observe
     // p.runSafePointFn == 1 and will call runSafePointFn when
-    // changing its status to _Pidle/_Psyscall.
+    // changing its status to _Pidle.
+
     // Run safe point function for all idle Ps. sched.pidle will
     // not change because we hold sched.lock.
     for (var Δp = sched.pidle.ptr(); Δp != nil; Δp = (~Δp).link.ptr()) {
@@ -2023,30 +2180,29 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
             sched.safePointWait--;
         }
     }
+
     var wait = sched.safePointWait > 0;
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     // Run fn for the current P.
     fn(pp);
-    // Force Ps currently in _Psyscall into _Pidle and hand them
+
+    // Force Ps currently in a system call into _Pidle and hand them
     // off to induce safe point function execution.
     foreach (var (_, p2) in allp) {
-        var s = p2.Value.status;
-        // We need to be fine-grained about tracing here, since handoffp
-        // might call into the tracer, and the tracer is non-reentrant.
-        var Δtrace = traceAcquire();
-        if (s == _Psyscall && (~p2).runSafePointFn == 1 && atomic.Cas(p2.of(runtime_package.Δp.Ꮡstatus), s, _Pidle)){
-            if (Δtrace.ok()) {
-                // It's important that we traceRelease before we call handoffp, which may also traceAcquire.
-                Δtrace.ProcSteal(p2, false);
-                traceRelease(Δtrace);
+        if (atomic.Load(p2.of(runtime_package.Δp.ᏑrunSafePointFn)) != 1) {
+            // Already ran it.
+            continue;
+        }
+        {
+            var (thread, ok) = setBlockOnExitSyscall(p2); if (ok) {
+                thread.takeP();
+                thread.resume();
+                handoffp(p2);
             }
-            p2.Value.syscalltick++;
-            handoffp(p2);
-        } else 
-        if (Δtrace.ok()) {
-            traceRelease(Δtrace);
         }
     }
+
     // Wait for remaining Ps to run fn.
     if (wait) {
         while (ᐧ) {
@@ -2069,6 +2225,7 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
             @throw(forEachPPDidNotRunFnˢ);
         }
     }
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     sched.safePointFn = default!;
     unlock(Ꮡsched.of(schedt.Ꮡlock));
@@ -2083,9 +2240,9 @@ internal static void forEachPInternal(Action<ж<Δp>> fn) {
 //	}
 //
 // runSafePointFn must be checked on any transition in to _Pidle or
-// _Psyscall to avoid a race where forEachP sees that the P is running
-// just before the P goes into _Pidle/_Psyscall and neither forEachP
-// nor the P run the safe-point function.
+// when entering a system call to avoid a race where forEachP sees
+// that the P is running just before the P goes into _Pidle/system call
+// and neither forEachP nor the P run the safe-point function.
 internal static void runSafePointFn() {
     var Δp = (~(~getg()).m).p.ptr();
     // Resolve the race between forEachP running the safe-point
@@ -2124,17 +2281,18 @@ partial struct cgothreadstart {
 //
 //go:yeswritebarrierrec
 internal static ж<m> allocm(ж<Δp> Ꮡpp, Action fn, int64 id) {
-    ref var pp = ref Ꮡpp.DerefOrNull();
-
     ᏑallocmLock.rlock();
+
     // The caller owns pp, but we may borrow (i.e., acquirep) it. We must
     // disable preemption to ensure it is not stolen, which would make the
     // caller lose ownership.
     acquirem();
+
     var gp = getg();
     if ((~(~gp).m).p == 0) {
         acquirep(Ꮡpp); // temporarily borrow p for mallocs in this function
     }
+
     // Release the free M list. We need to do this somewhere and
     // this may free up a stack we can use.
     if (sched.freem != nil) {
@@ -2168,6 +2326,10 @@ internal static ж<m> allocm(ж<Δp> Ꮡpp, Action fn, int64 id) {
                 var freemʗ1 = freem;
                 systemstack(() => {
                     stackfree((~(~freemʗ1).g0).stack);
+                    if (valgrindenabled) {
+                        valgrindDeregisterStack((~(~freemʗ1).g0).valgrindStackID);
+                        freemʗ1.Value.g0.Value.valgrindStackID = 0;
+                    }
                 });
             }
             freem = freem.Value.freelink;
@@ -2176,9 +2338,11 @@ internal static ж<m> allocm(ж<Δp> Ꮡpp, Action fn, int64 id) {
         sched.freem = newList;
         unlock(Ꮡsched.of(schedt.Ꮡlock));
     }
-    var mp = @new<m>();
+
+    var mp = @new<mPadded>().of(mPadded.Ꮡm);
     mp.Value.mstartfn = fn;
     mcommoninit(mp, id);
+
     // In case of cgo or Solaris or illumos or Darwin, pthread_create will make us a stack.
     // Windows and Plan 9 will layout sched stack on OS stack.
     if (iscgo || mStackIsSystemAllocated()){
@@ -2187,9 +2351,11 @@ internal static ж<m> allocm(ж<Δp> Ꮡpp, Action fn, int64 id) {
         mp.Value.g0 = malg(16384 * sys.StackGuardMultiplier);
     }
     mp.Value.g0.Value.m = mp;
+
     if (Ꮡpp == (~(~gp).m).p.ptr()) {
         releasep();
     }
+
     releasem(ref ((~gp).m).DerefOrNull());
     ᏑallocmLock.runlock();
     return mp;
@@ -2248,6 +2414,7 @@ internal static void needm(bool signal) {
         writeErrStr(fatalErrorCgoCallbackˢ);
         exit(1);
     }
+
     // Save and block signals before getting an M.
     // The signal handler may call needm itself,
     // and we must avoid a deadlock. Also, once g is installed,
@@ -2259,10 +2426,12 @@ internal static void needm(bool signal) {
     ref var sigmask = ref heap(new sigset(), out var Ꮡsigmask);
     sigsave(Ꮡsigmask);
     sigblock(false);
+
     // getExtraM is safe here because of the invariant above,
     // that the extra list always contains or will soon contain
     // at least one m.
     var (mp, last) = getExtraM();
+
     // Set needextram when we've just emptied the list,
     // so that the eventual call into cgocallbackg will
     // allocate a new m for the extra list. We delay the
@@ -2271,23 +2440,29 @@ internal static void needm(bool signal) {
     // running at all (that is, there's no garbage collection
     // running right now).
     mp.Value.needextram = last;
+
     // Store the original signal mask for use by minit.
     mp.Value.sigmask = sigmask.Clone();
+
     // Install TLS on some platforms (previously setg
     // would do this if necessary).
     osSetupTLS(ref (mp).DerefOrNull());
+
     // Install g (= m->g0) and set the stack bounds
     // to match the current stack.
     setg((~mp).g0);
     var sp = sys.GetCallerSP();
     callbackUpdateSystemStack(ref (mp).DerefOrNull(), sp, signal);
-    // Should mark we are already in Go now.
+
+    // We must mark that we are already in Go now.
     // Otherwise, we may call needm again when we get a signal, before cgocallbackg1,
     // which means the extram list may be empty, that will cause a deadlock.
     mp.Value.isExtraInC = false;
+
     // Initialize this thread to use the m.
     asminit();
     minit();
+
     // Emit a trace event for this dead -> syscall transition,
     // but only if we're not in a signal handler.
     //
@@ -2297,9 +2472,21 @@ internal static void needm(bool signal) {
     if (!signal) {
         Δtrace = traceAcquire();
     }
+
     // mp.curg is now a real goroutine.
-    casgstatus((~mp).curg, _Gdead, _Gsyscall);
+    casgstatus((~mp).curg, _Gdeadextra, _Gsyscall);
     Ꮡsched.of(schedt.Ꮡngsys).Add(-1);
+
+    // This is technically inaccurate, but we set isExtraInC to false above,
+    // and so we need to update addGSyscallNoP to keep the two pieces of state
+    // consistent (it's only updated when isExtraInC is false). More specifically,
+    // When we get to cgocallbackg and exitsyscall, we'll be looking for a P, and
+    // since isExtraInC is false, we will decrement this metric.
+    //
+    // The inaccuracy is thankfully transient: only until this thread can get a P.
+    // We're going into Go anyway, so it's okay to pretend we're a real goroutine now.
+    addGSyscallNoP(ref (mp).DerefOrNull());
+
     if (!signal) {
         if (Δtrace.ok()) {
             Δtrace.GoCreateSyscall((~mp).curg);
@@ -2314,6 +2501,7 @@ internal static void needm(bool signal) {
 //go:nosplit
 internal static void needAndBindM() {
     needm(false);
+
     if (_cgo_pthread_key_created != nil && ~(ж<uintptr>)(uintptr)(_cgo_pthread_key_created) != 0) {
         cgoBindM();
     }
@@ -2352,11 +2540,10 @@ internal static void oneNewExtraM() {
     gp.Value.syscallpc = gp.Value.sched.pc;
     gp.Value.syscallsp = gp.Value.sched.sp;
     gp.Value.stktopsp = gp.Value.sched.sp;
-    // malg returns status as _Gidle. Change to _Gdead before
-    // adding to allg where GC can see it. We use _Gdead to hide
-    // this from tracebacks and stack scans since it isn't a
-    // "real" goroutine until needm grabs it.
-    casgstatus(gp, _Gidle, _Gdead);
+    // malg returns status as _Gidle. Change to _Gdeadextra before
+    // adding to allg where GC can see it. _Gdeadextra hides this
+    // from traceback and stack scans.
+    casgstatus(gp, _Gidle, _Gdeadextra);
     gp.Value.m = mp;
     mp.Value.curg = gp;
     mp.Value.isextra = true;
@@ -2371,11 +2558,13 @@ internal static void oneNewExtraM() {
     }
     // put on allg for garbage collector
     allgadd(gp);
+
     // gp is now on the allg list, but we don't want it to be
     // counted by gcount. It would be more "proper" to increment
     // sched.ngfree, but that requires locking. Incrementing ngsys
     // has the same effect.
     Ꮡsched.of(schedt.Ꮡngsys).Add(1);
+
     // Add m to the extra list.
     addExtraM(mp);
 }
@@ -2405,7 +2594,7 @@ internal static void oneNewExtraM() {
 // So that the destructor would invoke dropm while the non-Go thread is exiting.
 // This is much faster since it avoids expensive signal-related syscalls.
 //
-// This always runs without a P, so //go:nowritebarrierrec is required.
+// This may run without a P, so //go:nowritebarrierrec is required.
 //
 // This may run with a different stack than was recorded in g0 (there is no
 // call to callbackUpdateSystemStack prior to dropm), so this must be
@@ -2418,6 +2607,7 @@ internal static void dropm() {
     // After the call to setg we can only call nosplit functions
     // with no pointer manipulation.
     var mp = getg().Value.m;
+
     // Emit a trace event for this syscall -> dead transition.
     //
     // N.B. the tracer can run on a bare M just fine, we just have
@@ -2426,16 +2616,20 @@ internal static void dropm() {
     if (!(~mp).isExtraInSig) {
         Δtrace = traceAcquire();
     }
-    // Return mp.curg to dead state.
-    casgstatus((~mp).curg, _Gsyscall, _Gdead);
+
+    // Return mp.curg to _Gdeadextra state.
+    casgstatus((~mp).curg, _Gsyscall, _Gdeadextra);
     mp.Value.curg.Value.preemptStop = false;
     Ꮡsched.of(schedt.Ꮡngsys).Add(1);
+    decGSyscallNoP(ref (mp).DerefOrNull());
+
     if (!(~mp).isExtraInSig) {
         if (Δtrace.ok()) {
             Δtrace.GoDestroySyscall();
             traceRelease(Δtrace);
         }
     }
+
     // Trash syscalltick so that it doesn't line up with mp.old.syscalltick anymore.
     //
     // In the new tracer, we model needm and dropm and a goroutine being created and
@@ -2450,9 +2644,11 @@ internal static void dropm() {
     // the syscall exit code expects as possible. Setting to zero is risky because
     // syscalltick could already be zero (and in fact, is initialized to zero).
     mp.Value.syscalltick--;
+
     // Reset trace state unconditionally. This goroutine is being 'destroyed'
     // from the perspective of the tracer.
     (~mp).curg.of(g.Ꮡtrace).reset();
+
     // Flush all the M's buffers. This is necessary because the M might
     // be used on a different thread with a different procid, so we have
     // to make sure we don't write into the same buffer.
@@ -2469,6 +2665,7 @@ internal static void dropm() {
         unlock(Ꮡsched.of(schedt.Ꮡlock));
     }
     mp.Value.isExtraInSig = false;
+
     // Block signals before unminit.
     // Unminit unregisters the signal handling stack (but needs g on some systems).
     // Setg(nil) clears g, which is the signal handler's cue not to run Go handlers.
@@ -2476,7 +2673,9 @@ internal static void dropm() {
     var sigmask = mp.Value.sigmask.Clone();
     sigblock(false);
     unminit();
+
     setg(nil);
+
     // Clear g0 stack bounds to ensure that needm always refreshes the
     // bounds when reusing this M.
     var g0 = mp.Value.g0;
@@ -2485,7 +2684,9 @@ internal static void dropm() {
     g0.Value.stackguard0 = 0;
     g0.Value.stackguard1 = 0;
     mp.Value.g0StackAccurate = false;
+
     putExtraM(mp);
+
     msigrestore(sigmask);
 }
 
@@ -2541,12 +2742,22 @@ internal static uintptr getm() {
     return (uintptr)(~getg()).m;
 }
 
+// Locking linked list of extra M's, via mp.schedlink. Must be accessed
+// only via lockextra/unlockextra.
+//
+// Can't be atomic.Pointer[m] because we use an invalid pointer as a
+// "locked" sentinel value. M's on this list remain visible to the GC
+// because their mp.curg is on allgs.
 internal static ж<atomic.Uintptr> ᏑextraM = new StandardBox<atomic.Uintptr>(default(atomic.Uintptr));
 internal static ref atomic.Uintptr extraM => ref ᏑextraM.Value;
+// Number of M's in the extraM list.
 internal static ж<atomic.Uint32> ᏑextraMLength = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 extraMLength => ref ᏑextraMLength.Value;
+// Number of waiters in lockextra.
 internal static ж<atomic.Uint32> ᏑextraMWaiters = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
 internal static ref atomic.Uint32 extraMWaiters => ref ᏑextraMWaiters.Value;
+
+// Number of extra M's in use by threads.
 public static ж<atomic.Uint32> ᏑextraMInUse = new StandardBox<atomic.Uint32>(default(atomic.Uint32));
 public static ref atomic.Uint32 extraMInUse => ref ᏑextraMInUse.Value;
 
@@ -2559,6 +2770,7 @@ public static ref atomic.Uint32 extraMInUse => ref ᏑextraMInUse.Value;
 //go:nosplit
 internal static ж<m> lockextra(bool nilokay) {
     uintptr locked = 1;
+
     var incr = false;
     while (ᐧ) {
         var old = ᏑextraM.Load();
@@ -2627,21 +2839,26 @@ internal static void addExtraM(ж<m> Ꮡmp) {
     unlockextra(Ꮡmp, 1);
 }
 
+// allocmLock is locked for read when creating new Ms in allocm and their
+// addition to allm. Thus acquiring this lock for write blocks the
+// creation of new Ms.
 internal static ж<rwmutex> ᏑallocmLock = new StandardBox<rwmutex>(new rwmutex());
 internal static ref rwmutex allocmLock => ref ᏑallocmLock.Value;
+
+// execLock serializes exec and clone to avoid bugs or unspecified
+// behaviour around exec'ing while creating/destroying threads. See
+// issue #19546.
 internal static ж<rwmutex> ᏑexecLock = new StandardBox<rwmutex>(new rwmutex());
 internal static ref rwmutex execLock => ref ᏑexecLock.Value;
 
 // These errors are reported (via writeErrStr) by some OS-specific
 // versions of newosproc and newosproc0.
 internal static readonly @string failthreadcreate = "runtime: failed to create new OS thread\n"u8;
-
 internal static readonly @string failallocatestack = "runtime: failed to allocate stack for the new OS thread\n"u8;
 
 // newmHandoff contains a list of m structures that need new OS threads.
 // This is used by newm in situations where newm itself can't safely
 // start an OS thread.
-
 partial struct newmHandoffᴛ1 /*dyn*/ {
     internal mutex @lock;
     // newm points to a list of M structures that need new OS
@@ -2681,6 +2898,7 @@ internal static void newm(Action fn, ж<Δp> Ꮡpp, int64 id) {
     // ensuring that anything added to allm is guaranteed to eventually
     // start.
     acquirem();
+
     var mp = allocm(Ꮡpp, fn, id);
     mp.of(m.Ꮡnextp).set(Ꮡpp);
     mp.Value.sigmask = initSigmask.Clone();
@@ -2751,10 +2969,10 @@ internal static void newm1(ж<m> Ꮡmp) {
 //
 // The calling thread must itself be in a known-good state.
 internal static void startTemplateThread() {
-    if (GOARCH == "wasm"u8) {
-        // no threads on wasm yet
+    if (GOARCH == "wasm"u8) { // no threads on wasm yet
         return;
     }
+
     // Disable preemption to guarantee that the template thread will be
     // created before a park once haveTemplateThread is set.
     var mp = acquirem();
@@ -2783,6 +3001,7 @@ internal static void templateThread() {
     sched.nmsys++;
     checkdead();
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     while (ᐧ) {
         @lock(ᏑnewmHandoff.of(newmHandoffᴛ1.Ꮡlock));
         while (newmHandoff.newm != 0) {
@@ -2813,6 +3032,7 @@ internal static readonly @string stopmSpinningˢ = "stopm spinning"u8;
 // Returns with acquired P.
 internal static void stopm() {
     var gp = getg();
+
     if ((~(~gp).m).locks != 0) {
         @throw(stopmHoldingLocksˢ);
     }
@@ -2822,6 +3042,7 @@ internal static void stopm() {
     if ((~(~gp).m).spinning) {
         @throw(stopmSpinningˢ);
     }
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     mput((~gp).m);
     unlock(Ꮡsched.of(schedt.Ꮡlock));
@@ -2915,12 +3136,14 @@ internal static void startm(ж<Δp> Ꮡpp, bool spinning, bool lockheld) {
         // queued G's.
         var id = mReserveID();
         unlock(Ꮡsched.of(schedt.Ꮡlock));
+
         Action fn = default!;
         if (spinning) {
             // The caller incremented nmspinning, so set m.spinning in the new M.
             fn = mspinning;
         }
         newm(fn, Ꮡpp, id);
+
         if (lockheld) {
             @lock(Ꮡsched.of(schedt.Ꮡlock));
         }
@@ -2958,9 +3181,9 @@ internal static void handoffp(ж<Δp> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // handoffp must start an M in any situation where
-    // findrunnable would return a G to run on pp.
+    // findRunnable would return a G to run on pp.
     // if it has local work, start it straight away
-    if (!runqempty(Ꮡpp) || sched.runqsize != 0) {
+    if (!runqempty(Ꮡpp) || !Ꮡsched.of(schedt.Ꮡrunq).empty()) {
         startm(Ꮡpp, false, false);
         return;
     }
@@ -2970,14 +3193,13 @@ internal static void handoffp(ж<Δp> Ꮡpp) {
         return;
     }
     // if it has GC work, start it straight away
-    if (gcBlackenEnabled != 0 && gcMarkWorkAvailable(Ꮡpp)) {
+    if (gcBlackenEnabled != 0 && gcShouldScheduleWorker(Ꮡpp)) {
         startm(Ꮡpp, false, false);
         return;
     }
     // no local work, check that there are no spinning/idle M's,
     // otherwise our help is not required
-    if (Ꮡsched.of(schedt.Ꮡnmspinning).Load() + Ꮡsched.of(schedt.Ꮡnpidle).Load() == 0 && Ꮡsched.of(schedt.Ꮡnmspinning).CompareAndSwap(0, 1)) {
-        // TODO: fast atomic
+    if (Ꮡsched.of(schedt.Ꮡnmspinning).Load() + Ꮡsched.of(schedt.Ꮡnpidle).Load() == 0 && Ꮡsched.of(schedt.Ꮡnmspinning).CompareAndSwap(0, 1)) { // TODO: fast atomic
         Ꮡsched.of(schedt.Ꮡneedspinning).Store(0);
         startm(Ꮡpp, true, false);
         return;
@@ -3000,7 +3222,7 @@ internal static void handoffp(ж<Δp> Ꮡpp) {
             notewakeup(Ꮡsched.of(schedt.ᏑsafePointNote));
         }
     }
-    if (sched.runqsize != 0) {
+    if (!Ꮡsched.of(schedt.Ꮡrunq).empty()) {
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         startm(Ꮡpp, false, false);
         return;
@@ -3012,11 +3234,13 @@ internal static void handoffp(ж<Δp> Ꮡpp) {
         startm(Ꮡpp, false, false);
         return;
     }
+
     // The scheduler lock cannot be held when calling wakeNetPoller below
     // because wakeNetPoller may call wakep which may call startm.
     var when = Ꮡpp.of(runtime_package.Δp.Ꮡtimers).wakeTime();
     pidleput(Ꮡpp, 0);
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     if (when != 0) {
         wakeNetPoller(when);
     }
@@ -3044,12 +3268,14 @@ internal static void wakep() {
     if (Ꮡsched.of(schedt.Ꮡnmspinning).Load() != 0 || !Ꮡsched.of(schedt.Ꮡnmspinning).CompareAndSwap(0, 1)) {
         return;
     }
+
     // Disable preemption until ownership of pp transfers to the next M in
     // startm. Otherwise preemption here would leave pp stuck waiting to
     // enter _Pgcstop.
     //
     // See preemption comment on acquirem in startm for more details.
     var mp = acquirem();
+
     ж<Δp> pp = default!;
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     (pp, _) = pidlegetSpinning(0);
@@ -3066,7 +3292,9 @@ internal static void wakep() {
     // unlock here and lock in startm. A checkdead in between will always
     // see at least one running M (ours).
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     startm(pp, true, false);
+
     releasem(ref (mp).DerefOrNull());
 }
 
@@ -3078,6 +3306,7 @@ internal static readonly @string stoplockedmNotRunnableˢ = "stoplockedm: not ru
 // Returns with acquired P.
 internal static void stoplockedm() {
     var gp = getg();
+
     if ((~(~gp).m).lockedg == 0 || (~(~(~gp).m).lockedg.ptr()).lockedm.ptr() != (~gp).m) {
         @throw(stoplockedmInconsistentˢ);
     }
@@ -3090,7 +3319,7 @@ internal static void stoplockedm() {
     // Wait until another thread schedules lockedg again.
     mPark();
     var status = readgstatus((~(~gp).m).lockedg.ptr());
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunnable) {
+    if ((status & ~(uint32)_Gscan) != _Grunnable) {
         print((@string)"runtime:stoplockedm: lockedg (atomicstatus="u8, status, (@string)") is not Grunnable or Gscanrunnable\n"u8);
         dumpgstatus((~(~gp).m).lockedg.ptr());
         @throw(stoplockedmNotRunnableˢ);
@@ -3131,6 +3360,7 @@ internal static readonly @string gcstopmNegativeˢ = "gcstopm: negative nmspinni
 // Returns when the world is restarted.
 internal static void gcstopm() {
     var gp = getg();
+
     if (!Ꮡsched.of(schedt.Ꮡgcwaiting).Load()) {
         @throw(gcstopmNotWaitingForGcˢ);
     }
@@ -3167,16 +3397,18 @@ internal static void execute(ж<g> Ꮡgp, bool inheritTime) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var mp = getg().Value.m;
+
     if (goroutineProfile.active) {
         // Make sure that gp has had its stack written out to the goroutine
         // profile, exactly as it was when the goroutine profiler first stopped
         // the world.
         tryRecordGoroutineProfile(Ꮡgp, default!, osyield);
     }
-    // Assign gp.m before entering _Grunning so running Gs have an
-    // M.
+
+    // Assign gp.m before entering _Grunning so running Gs have an M.
     mp.Value.curg = Ꮡgp;
     gp.m = mp;
+    gp.syncSafePoint = false; // Clear the flag, which may have been set by morestack.
     casgstatus(Ꮡgp, _Grunnable, _Grunning);
     gp.waitsince = 0;
     gp.preempt = false;
@@ -3184,25 +3416,47 @@ internal static void execute(ж<g> Ꮡgp, bool inheritTime) {
     if (!inheritTime) {
         (~mp).p.ptr().Value.schedtick++;
     }
+
+    if (sys.DITSupported && debug.dataindependenttiming != 1) {
+        if (gp.ditWanted && !(~mp).ditEnabled){
+            // The current M doesn't have DIT enabled, but the goroutine we're
+            // executing does need it, so turn it on.
+            sys.EnableDIT();
+            mp.Value.ditEnabled = true;
+        } else 
+        if (!gp.ditWanted && (~mp).ditEnabled) {
+            // The current M has DIT enabled, but the goroutine we're executing does
+            // not need it, so turn it off.
+            // NOTE: turning off DIT here means that the scheduler will have DIT enabled
+            // when it runs after this goroutine yields or is preempted. This may have
+            // a minor performance impact on the scheduler.
+            sys.DisableDIT();
+            mp.Value.ditEnabled = false;
+        }
+    }
+
     // Check whether the profiler needs to be turned on or off.
     var hz = sched.profilehz;
     if ((~mp).profilehz != hz) {
         setThreadCPUProfiler(hz);
     }
+
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
         Δtrace.GoStart();
         traceRelease(Δtrace);
     }
+
     gogo(Ꮡgp.of(g.Ꮡsched));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string findrunnableWrongPˢ = "findrunnable: wrong p"u8;
-internal static readonly @string findrunnableNegativeˢ = "findrunnable: negative nmspinning"u8;
+internal static readonly @string couldnTPutGsIntoEmptyˢ = "Couldn't put Gs into empty local runq"u8;
 internal static readonly @string globalRunqEmptyWithNonˢ = "global runq empty with non-zero runqsize"u8;
-internal static readonly @string findrunnableNetpollWithPˢ = "findrunnable: netpoll with p"u8;
-internal static readonly @string findrunnableNetpollWithˢ = "findrunnable: netpoll with spinning"u8;
+internal static readonly @string findRunnableWrongPˢ = "findRunnable: wrong p"u8;
+internal static readonly @string findRunnableNegativeˢ = "findRunnable: negative nmspinning"u8;
+internal static readonly @string findRunnableNetpollWithPˢ = "findRunnable: netpoll with p"u8;
+internal static readonly @string findRunnableNetpollWithˢ = "findRunnable: netpoll with spinning"u8;
 
 // Finds a runnable goroutine to execute.
 // Tries to steal from other P's, get g from local or global queue, poll network.
@@ -3212,14 +3466,17 @@ internal static (ж<g> gp, bool inheritTime, bool tryWakeP) findRunnable() {
     ж<g> gp = default!;
 
     var mp = getg().Value.m;
+
     // The conditions here and in handoffp must agree: if
-    // findrunnable would return a G to run, handoffp must start
+    // findRunnable would return a G to run, handoffp must start
     // an M.
+
 top:
     mp.clearAllpSnapshot();
     // We may have collected an allp snapshot below. The snapshot is only
     // required in each loop iteration. Clear it to all GC to collect the
     // slice.
+
     var pp = (~mp).p.ptr();
     if (Ꮡsched.of(schedt.Ꮡgcwaiting).Load()) {
         gcstopm();
@@ -3228,11 +3485,13 @@ top:
     if ((~pp).runSafePointFn != 0) {
         runSafePointFn();
     }
+
     // now and pollUntil are saved for work stealing later,
     // which may steal timers. It's important that between now
     // and then, nothing blocks, so these numbers remain mostly
     // relevant.
-    var (now, pollUntil, _) = pp.of(runtime_package.Δp.Ꮡtimers).check(0);
+    var (now, pollUntil, _) = pp.of(runtime_package.Δp.Ꮡtimers).check(0, nil);
+
     // Try to schedule the trace reader.
     if (traceEnabled() || traceShuttingDown()) {
         var gpΔ1 = traceReader();
@@ -3246,6 +3505,7 @@ top:
             return (gpΔ1, false, true);
         }
     }
+
     // Try to schedule a GC worker.
     if (gcBlackenEnabled != 0) {
         var (gpΔ2, tnow) = ᏑgcController.findRunnableGCWorker(pp, now);
@@ -3254,17 +3514,19 @@ top:
         }
         now = tnow;
     }
+
     // Check the global runnable queue once in a while to ensure fairness.
     // Otherwise two goroutines can completely occupy the local runqueue
     // by constantly respawning each other.
-    if ((~pp).schedtick % 61 == 0 && sched.runqsize > 0) {
+    if ((~pp).schedtick % 61 == 0 && !Ꮡsched.of(schedt.Ꮡrunq).empty()) {
         @lock(Ꮡsched.of(schedt.Ꮡlock));
-        var gpΔ3 = globrunqget(pp, 1);
+        var gpΔ3 = globrunqget();
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         if (gpΔ3 != nil) {
             return (gpΔ3, false, false);
         }
     }
+
     // Wake up the finalizer G.
     if ((uint32)(ᏑfingStatus.Load() & ((uint32)(fingWait | fingWake))) == (uint32)(fingWait | fingWake)) {
         {
@@ -3273,24 +3535,39 @@ top:
             }
         }
     }
+
+    // Wake up one or more cleanup Gs.
+    if (ᏑgcCleanups.needsWake()) {
+        ᏑgcCleanups.wake();
+    }
+
     if (cgo_yield.Value != nil) {
         asmcgocall(cgo_yield.Value, nil);
     }
+
     // local runq
     {
         var (gpΔ5, inheritTimeΔ1) = runqget(pp); if (gpΔ5 != nil) {
             return (gpΔ5, inheritTimeΔ1, false);
         }
     }
+
     // global runq
-    if (sched.runqsize != 0) {
+    if (!Ꮡsched.of(schedt.Ꮡrunq).empty()) {
         @lock(Ꮡsched.of(schedt.Ꮡlock));
-        var gpΔ6 = globrunqget(pp, 0);
+        ref var q = ref heap<gQueue>(out var Ꮡq);
+        (var gpΔ6, q) = globrunqgetbatch((int32)len((~pp).runq) / 2);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         if (gpΔ6 != nil) {
+            {
+                runqputbatch(pp, Ꮡq); if (!q.empty()) {
+                    @throw(couldnTPutGsIntoEmptyˢ);
+                }
+            }
             return (gpΔ6, false, false);
         }
     }
+
     // Poll network.
     // This netpoll is only an optimization before we resort to stealing.
     // We can safely skip it if there are no waiters or a thread is blocked
@@ -3298,24 +3575,26 @@ top:
     // blocked thread (e.g. it has already returned from netpoll, but does
     // not set lastpoll yet), this thread will do blocking netpoll below
     // anyway.
-    if (netpollinited() && netpollAnyWaiters() && Ꮡsched.of(schedt.Ꮡlastpoll).Load() != 0) {
-        {
-            ref var list = ref heap<gList>(out var Ꮡlist);
-            (list, var delta) = netpoll(0); if (!list.empty()) {
-                // non-blocking
-                var gpΔ7 = list.pop();
-                injectglist(Ꮡlist);
-                netpollAdjustWaiters(delta);
-                var Δtrace = traceAcquire();
-                casgstatus(gpΔ7, _Gwaiting, _Grunnable);
-                if (Δtrace.ok()) {
-                    Δtrace.GoUnpark(gpΔ7, 0);
-                    traceRelease(Δtrace);
-                }
-                return (gpΔ7, false, false);
+    // We only poll from one thread at a time to avoid kernel contention
+    // on machines with many cores.
+    if (netpollinited() && netpollAnyWaiters() && Ꮡsched.of(schedt.Ꮡlastpoll).Load() != 0 && Ꮡsched.of(schedt.ᏑpollingNet).Swap(1) == 0) {
+        ref var list = ref heap<gList>(out var Ꮡlist);
+        (list, var delta) = netpoll(0);
+        Ꮡsched.of(schedt.ᏑpollingNet).Store(0);
+        if (!list.empty()) { // non-blocking
+            var gpΔ7 = list.pop();
+            injectglist(Ꮡlist);
+            netpollAdjustWaiters(delta);
+            var Δtrace = traceAcquire();
+            casgstatus(gpΔ7, _Gwaiting, _Grunnable);
+            if (Δtrace.ok()) {
+                Δtrace.GoUnpark(gpΔ7, 0);
+                traceRelease(Δtrace);
             }
+            return (gpΔ7, false, false);
         }
     }
+
     // Spinning Ms: steal work from other Ps.
     //
     // Limit the number of spinning Ms to half the number of busy Ps.
@@ -3325,6 +3604,7 @@ top:
         if (!(~mp).spinning) {
             mp.becomeSpinning();
         }
+
         var (gpΔ8, inheritTimeΔ2, tnow, w, newWork) = stealWork(now);
         if (gpΔ8 != nil) {
             // Successfully stole.
@@ -3335,21 +3615,24 @@ top:
             // discover.
             goto top;
         }
+
         now = tnow;
         if (w != 0 && (pollUntil == 0 || w < pollUntil)) {
             // Earlier timer to wait for.
             pollUntil = w;
         }
     }
+
     // We have nothing to do.
     //
     // If we're in the GC mark phase, can safely scan and blacken objects,
     // and have work to do, run idle-time marking rather than give up the P.
-    if (gcBlackenEnabled != 0 && gcMarkWorkAvailable(pp) && ᏑgcController.addIdleMarkWorker()) {
+    if (gcBlackenEnabled != 0 && gcShouldScheduleWorker(pp) && ᏑgcController.addIdleMarkWorker()) {
         var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
         if (node != nil) {
             pp.Value.gcMarkWorkerMode = gcMarkWorkerIdleMode;
             var gpΔ9 = (~node).gp.ptr();
+
             var Δtrace = traceAcquire();
             casgstatus(gpΔ9, _Gwaiting, _Grunnable);
             if (Δtrace.ok()) {
@@ -3360,6 +3643,7 @@ top:
         }
         ᏑgcController.removeIdleMarkWorker();
     }
+
     // wasm only:
     // If a callback returned and no other goroutine is awake,
     // then wake event handler goroutine which pauses execution
@@ -3377,6 +3661,7 @@ top:
     if (otherReady) {
         goto top;
     }
+
     // Before we drop our P, make a snapshot of the allp slice,
     // which can change underfoot once we no longer block
     // safe-points. We don't need to snapshot the contents because
@@ -3390,15 +3675,25 @@ top:
     // len to change out from under us.
     var idlepMaskSnapshot = idlepMask;
     var timerpMaskSnapshot = timerpMask;
+
     // return P and block
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     if (Ꮡsched.of(schedt.Ꮡgcwaiting).Load() || (~pp).runSafePointFn != 0) {
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         goto top;
     }
-    if (sched.runqsize != 0) {
-        var gpΔ10 = globrunqget(pp, 0);
+    if (!Ꮡsched.of(schedt.Ꮡrunq).empty()) {
+        ref var q = ref heap<gQueue>(out var Ꮡq);
+        (var gpΔ10, q) = globrunqgetbatch((int32)len((~pp).runq) / 2);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
+        if (gpΔ10 == nil) {
+            @throw(globalRunqEmptyWithNonˢ);
+        }
+        {
+            runqputbatch(pp, Ꮡq); if (!q.empty()) {
+                @throw(couldnTPutGsIntoEmptyˢ);
+            }
+        }
         return (gpΔ10, false, false);
     }
     if (!(~mp).spinning && Ꮡsched.of(schedt.Ꮡneedspinning).Load() == 1) {
@@ -3408,10 +3703,11 @@ top:
         goto top;
     }
     if (releasep() != pp) {
-        @throw(findrunnableWrongPˢ);
+        @throw(findRunnableWrongPˢ);
     }
     now = pidleput(pp, now);
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     // Delicate dance: thread transitions from spinning to non-spinning
     // state, potentially concurrently with submission of new work. We must
     // drop nmspinning first and then check all sources again (with
@@ -3452,8 +3748,9 @@ top:
     if ((~mp).spinning) {
         mp.Value.spinning = false;
         if (Ꮡsched.of(schedt.Ꮡnmspinning).Add(-1) < 0) {
-            @throw(findrunnableNegativeˢ);
+            @throw(findRunnableNegativeˢ);
         }
+
         // Note the for correctness, only the last M transitioning from
         // spinning to non-spinning must perform these rechecks to
         // ensure no missed work. However, the runtime has some cases
@@ -3462,33 +3759,44 @@ top:
         // and perform the check on all spinning Ms.
         //
         // See https://go.dev/issue/43997.
+
         // Check global and P runqueues again.
+
         @lock(Ꮡsched.of(schedt.Ꮡlock));
-        if (sched.runqsize != 0) {
+        if (!Ꮡsched.of(schedt.Ꮡrunq).empty()) {
             var (ppΔ1, _) = pidlegetSpinning(0);
             if (ppΔ1 != nil) {
-                var gpΔ11 = globrunqget(ppΔ1, 0);
+                ref var q = ref heap<gQueue>(out var Ꮡq);
+                (var gpΔ11, q) = globrunqgetbatch((int32)len((~ppΔ1).runq) / 2);
+                unlock(Ꮡsched.of(schedt.Ꮡlock));
                 if (gpΔ11 == nil) {
                     @throw(globalRunqEmptyWithNonˢ);
                 }
-                unlock(Ꮡsched.of(schedt.Ꮡlock));
+                {
+                    runqputbatch(pp, Ꮡq); if (!q.empty()) {
+                        @throw(couldnTPutGsIntoEmptyˢ);
+                    }
+                }
                 acquirep(ppΔ1);
                 mp.becomeSpinning();
                 return (gpΔ11, false, false);
             }
         }
         unlock(Ꮡsched.of(schedt.Ꮡlock));
+
         var ppΔ2 = checkRunqsNoP(allpSnapshot, idlepMaskSnapshot);
         if (ppΔ2 != nil) {
             acquirep(ppΔ2);
             mp.becomeSpinning();
             goto top;
         }
+
         // Check for idle-priority GC work again.
         (ppΔ2, var gpΔ12) = checkIdleGCNoP();
         if (ppΔ2 != nil) {
             acquirep(ppΔ2);
             mp.becomeSpinning();
+
             // Run the idle worker.
             ppΔ2.Value.gcMarkWorkerMode = gcMarkWorkerIdleMode;
             var Δtrace = traceAcquire();
@@ -3499,6 +3807,7 @@ top:
             }
             return (gpΔ12, false, false);
         }
+
         // Finally, check for timer creation or expiry concurrently with
         // transitioning from spinning to non-spinning.
         //
@@ -3507,16 +3816,18 @@ top:
         // allowed when we don't have an active P.
         pollUntil = checkTimersNoP(allpSnapshot, timerpMaskSnapshot, pollUntil);
     }
+
     // We don't need allp anymore at this pointer, but can't clear the
     // snapshot without a P for the write barrier..
+
     // Poll network until next timer.
     if (netpollinited() && (netpollAnyWaiters() || pollUntil != 0) && Ꮡsched.of(schedt.Ꮡlastpoll).Swap(0) != 0){
         Ꮡsched.of(schedt.ᏑpollUntil).Store(pollUntil);
         if ((~mp).p != 0) {
-            @throw(findrunnableNetpollWithPˢ);
+            @throw(findRunnableNetpollWithPˢ);
         }
         if ((~mp).spinning) {
-            @throw(findrunnableNetpollWithˢ);
+            @throw(findRunnableNetpollWithˢ);
         }
         var delay = (int64)(-1);
         if (pollUntil != 0) {
@@ -3585,7 +3896,7 @@ top:
 // background work loops, like idle GC. It checks a subset of the
 // conditions checked by the actual scheduler.
 internal static bool pollWork() {
-    if (sched.runqsize != 0) {
+    if (!Ꮡsched.of(schedt.Ꮡrunq).empty()) {
         return true;
     }
     var Δp = (~(~getg()).m).p.ptr();
@@ -3615,10 +3926,13 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
     int64 pollUntil = default!;
 
     var pp = (~(~getg()).m).p.ptr();
+
     var ranTimer = false;
+
     UntypedInt stealTries = 4;
     for (nint i = 0; i < stealTries; i++) {
         var stealTimersOrRunNextG = i == (nint)(stealTries - 1);
+
         for (var @enum = stealOrder.start(cheaprand()); !@enum.done(); @enum.next()) {
             if (Ꮡsched.of(schedt.Ꮡgcwaiting).Load()) {
                 // GC work may be available.
@@ -3628,6 +3942,7 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
             if (pp == p2) {
                 continue;
             }
+
             // Steal timers from p2. This call to checkTimers is the only place
             // where we might hold a lock on a different P's timers. We do this
             // once on the last pass before checking runnext because stealing
@@ -3642,7 +3957,7 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
             // timerpMask tells us whether the P may have timers at all. If it
             // can't, no need to check at all.
             if (stealTimersOrRunNextG && timerpMask.read(@enum.position())) {
-                var (tnow, w, ran) = p2.of(runtime_package.Δp.Ꮡtimers).check(now);
+                var (tnow, w, ran) = p2.of(runtime_package.Δp.Ꮡtimers).check(now, nil);
                 now = tnow;
                 if (w != 0 && (pollUntil == 0 || w < pollUntil)) {
                     pollUntil = w;
@@ -3664,6 +3979,7 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
                     ranTimer = true;
                 }
             }
+
             // Don't bother to attempt to steal if p2 is idle.
             if (!idlepMask.read(@enum.position())) {
                 {
@@ -3674,6 +3990,7 @@ internal static (ж<g> gp, bool inheritTime, int64 rnow, int64 pollUntil, bool n
             }
         }
     }
+
     // No goroutines found to steal. Regardless, running a timer may have
     // made some goroutine ready that we missed. Indicate the next timer to
     // wait for.
@@ -3699,6 +4016,7 @@ internal static ж<Δp> checkRunqsNoP(slice<ж<Δp>> allpSnapshot, pMask idlepMa
             return pp;
         }
     }
+
     // No work available.
     return default!;
 }
@@ -3715,6 +4033,7 @@ internal static int64 checkTimersNoP(slice<ж<Δp>> allpSnapshot, pMask timerpMa
             }
         }
     }
+
     return pollUntil;
 }
 
@@ -3732,9 +4051,10 @@ internal static (ж<Δp>, ж<g>) checkIdleGCNoP() {
     if (atomic.Load(ᏑgcBlackenEnabled) == 0 || !ᏑgcController.needIdleMarkWorker()) {
         return (default!, default!);
     }
-    if (!gcMarkWorkAvailable(nil)) {
+    if (!gcShouldScheduleWorker(nil)) {
         return (default!, default!);
     }
+
     // Work is available; we can start an idle GC worker only if there is
     // an available P and available worker G.
     //
@@ -3758,12 +4078,14 @@ internal static (ж<Δp>, ж<g>) checkIdleGCNoP() {
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         return (default!, default!);
     }
+
     // Now that we own a P, gcBlackenEnabled can't change (as it requires STW).
     if (gcBlackenEnabled == 0 || !ᏑgcController.addIdleMarkWorker()) {
         pidleput(pp, now);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         return (default!, default!);
     }
+
     var node = (ж<gcBgMarkWorkerNode>)(uintptr)(ᏑgcBgMarkWorkerPool.pop());
     if (node == nil) {
         pidleput(pp, now);
@@ -3771,7 +4093,9 @@ internal static (ж<Δp>, ж<g>) checkIdleGCNoP() {
         ᏑgcController.removeIdleMarkWorker();
         return (default!, default!);
     }
+
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     return (pp, (~node).gp.ptr());
 }
 
@@ -3780,7 +4104,7 @@ internal static (ж<Δp>, ж<g>) checkIdleGCNoP() {
 // timers and the network poller if there isn't one already.
 internal static void wakeNetPoller(int64 when) {
     if (Ꮡsched.of(schedt.Ꮡlastpoll).Load() == 0){
-        // In findrunnable we ensure that when polling the pollUntil
+        // In findRunnable we ensure that when polling the pollUntil
         // field is either zero or the time to which the current
         // poll is expected to run. This can have a spurious wakeup
         // but should never miss a wakeup.
@@ -3791,8 +4115,7 @@ internal static void wakeNetPoller(int64 when) {
     } else {
         // There are no threads in the network poller, try to get
         // one there so it can handle new timers.
-        if (GOOS != "plan9"u8) {
-            // Temporary workaround - see issue #42303.
+        if (GOOS != "plan9"u8) { // Temporary workaround - see issue #42303.
             wakep();
         }
     }
@@ -3809,7 +4132,7 @@ internal static void resetspinning() {
     gp.Value.m.Value.spinning = false;
     var nmspinning = Ꮡsched.of(schedt.Ꮡnmspinning).Add(-1);
     if (nmspinning < 0) {
-        @throw(findrunnableNegativeˢ);
+        @throw(findRunnableNegativeˢ);
     }
     // M wakeup policy is deliberately somewhat conservative, so check if we
     // need to wakeup another P here. See "Worker thread parking/unparking"
@@ -3828,32 +4151,52 @@ internal static readonly @string scheduleSpinningWithˢ = "schedule: spinning wi
 // Never returns.
 internal static void schedule() {
     var mp = getg().Value.m;
+
     if ((~mp).locks != 0) {
         @throw(scheduleHoldingLocksˢ);
     }
+
     if ((~mp).lockedg != 0) {
         stoplockedm();
         execute((~mp).lockedg.ptr(), false); // Never returns.
     }
+
     // We should not schedule away from a g that is executing a cgo call,
     // since the cgo call is using the m's g0 stack.
     if ((~mp).incgo) {
         @throw(scheduleInCgoˢ);
     }
+
 top:
     var pp = (~mp).p.ptr();
     pp.Value.preempt = false;
+
     // Safety check: if we are spinning, the run queue should be empty.
     // Check this before calling checkTimers, as that might call
     // goready to put a ready goroutine on the local run queue.
     if ((~mp).spinning && ((~pp).runnext != 0 || (~pp).runqhead != (~pp).runqtail)) {
         @throw(scheduleSpinningWithˢ);
     }
+
     var (gp, inheritTime, tryWakeP) = findRunnable(); // blocks until work is available
+
+    // May be on a new P.
+    pp = (~mp).p.ptr();
+
     // findRunnable may have collected an allp snapshot. The snapshot is
     // only required within findRunnable. Clear it to all GC to collect the
     // slice.
     mp.clearAllpSnapshot();
+
+    // If the P was assigned a next GC mark worker but findRunnable
+    // selected anything else, release the worker so another P may run it.
+    //
+    // N.B. If this occurs because a higher-priority goroutine was selected
+    // (trace reader), then tryWakeP is set, which will wake another P to
+    // run the worker. If this occurs because the GC is no longer active,
+    // there is no need to wakep.
+    ᏑgcController.releaseNextGCMarkWorker(pp);
+
     if (debug.dontfreezetheworld > 0 && Ꮡfreezing.Load()) {
         // See comment in freezetheworld. We don't want to perturb
         // scheduler state, so we didn't gcstopm in findRunnable, but
@@ -3865,28 +4208,30 @@ top:
         @lock(Ꮡdeadlock);
         @lock(Ꮡdeadlock);
     }
+
     // This thread is going to run a goroutine and is not spinning anymore,
     // so if it was marked as spinning we need to reset it now and potentially
     // start a new spinning M.
     if ((~mp).spinning) {
         resetspinning();
     }
-    if (sched.disable.user && !schedEnabled(ref (gp).DerefOrNull())) {
+
+    if (sched.disable.user && !schedEnabled(gp)) {
         // Scheduling of this goroutine is disabled. Put it on
         // the list of pending runnable goroutines for when we
         // re-enable user scheduling and look again.
         @lock(Ꮡsched.of(schedt.Ꮡlock));
-        if (schedEnabled(ref (gp).DerefOrNull())){
+        if (schedEnabled(gp)){
             // Something re-enabled scheduling while we
             // were acquiring the lock.
             unlock(Ꮡsched.of(schedt.Ꮡlock));
         } else {
             Ꮡsched.of(schedt.Ꮡdisable).of(schedt_disable.Ꮡrunnable).pushBack(gp);
-            sched.disable.n++;
             unlock(Ꮡsched.of(schedt.Ꮡlock));
             goto top;
         }
     }
+
     // If about to schedule a not-normal goroutine (a GCworker or tracereader),
     // wake a P if there is one.
     if (tryWakeP) {
@@ -3898,6 +4243,7 @@ top:
         startlockedm(ref (gp).DerefOrNull());
         goto top;
     }
+
     execute(gp, inheritTime);
 }
 
@@ -3910,6 +4256,7 @@ top:
 // call schedule to restart the scheduling of goroutines on this m.
 internal static void dropg() {
     var gp = getg();
+
     setMNoWB((~(~gp).m).curg.of(g.Ꮡm), nil);
     setGNoWB((~gp).m.of(m.Ꮡcurg), nil);
 }
@@ -3924,15 +4271,18 @@ internal static void park_m(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var mp = getg().Value.m;
+
     var Δtrace = traceAcquire();
+
     // If g is in a synctest group, we don't want to let the group
     // become idle until after the waitunlockf (if any) has confirmed
     // that the park is happening.
-    // We need to record gp.syncGroup here, since waitunlockf can change it.
-    var sg = gp.syncGroup;
-    if (sg != nil) {
-        sg.incActive();
+    // We need to record gp.bubble here, since waitunlockf can change it.
+    var bubble = gp.bubble;
+    if (bubble != nil) {
+        bubble.incActive();
     }
+
     if (Δtrace.ok()) {
         // Trace the event before the transition. It may take a
         // stack trace, but we won't own the stack after the
@@ -3945,7 +4295,9 @@ internal static void park_m(ж<g> Ꮡgp) {
     if (Δtrace.ok()) {
         traceRelease(Δtrace);
     }
+
     dropg();
+
     {
         var fn = mp.Value.waitunlockf; if (fn != default!) {
             var ok = fn(Ꮡgp, (~mp).waitlock);
@@ -3954,8 +4306,8 @@ internal static void park_m(ж<g> Ꮡgp) {
             if (!ok) {
                 var traceΔ1 = traceAcquire();
                 casgstatus(Ꮡgp, _Gwaiting, _Grunnable);
-                if (sg != nil) {
-                    sg.decActive();
+                if (bubble != nil) {
+                    bubble.decActive();
                 }
                 if (traceΔ1.ok()) {
                     traceΔ1.GoUnpark(Ꮡgp, 2);
@@ -3965,9 +4317,11 @@ internal static void park_m(ж<g> Ꮡgp) {
             }
         }
     }
-    if (sg != nil) {
-        sg.decActive();
+
+    if (bubble != nil) {
+        bubble.decActive();
     }
+
     schedule();
 }
 
@@ -3975,9 +4329,12 @@ internal static void park_m(ж<g> Ꮡgp) {
 internal static readonly @string badGStatusˢ = "bad g status"u8;
 
 internal static void goschedImpl(ж<g> Ꮡgp, bool preempted) {
+    ref var gp = ref Ꮡgp.DerefOrNull();
+
+    var pp = (~gp.m).p.ptr();
     var Δtrace = traceAcquire();
     var status = readgstatus(Ꮡgp);
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunning) {
+    if ((status & ~(uint32)_Gscan) != _Grunning) {
         dumpgstatus(Ꮡgp);
         @throw(badGStatusˢ);
     }
@@ -3995,13 +4352,22 @@ internal static void goschedImpl(ж<g> Ꮡgp, bool preempted) {
     if (Δtrace.ok()) {
         traceRelease(Δtrace);
     }
+
     dropg();
-    @lock(Ꮡsched.of(schedt.Ꮡlock));
-    globrunqput(Ꮡgp);
-    unlock(Ꮡsched.of(schedt.Ꮡlock));
+    if (preempted && Ꮡsched.of(schedt.Ꮡgcwaiting).Load()){
+        // If preempted for STW, keep the G on the local P in runnext
+        // so it can keep running immediately after the STW.
+        runqput(pp, Ꮡgp, true);
+    } else {
+        @lock(Ꮡsched.of(schedt.Ꮡlock));
+        globrunqput(Ꮡgp);
+        unlock(Ꮡsched.of(schedt.Ꮡlock));
+    }
+
     if (mainStarted) {
         wakep();
     }
+
     schedule();
 }
 
@@ -4035,10 +4401,11 @@ internal static void preemptPark(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var status = readgstatus(Ꮡgp);
-    if ((uint32)(status & ~(uint32)_Gscan) != _Grunning) {
+    if ((status & ~(uint32)_Gscan) != _Grunning) {
         dumpgstatus(Ꮡgp);
         @throw(badGStatusˢ);
     }
+
     if (gp.asyncSafePoint) {
         // Double-check that async preemption does not
         // happen in SPWRITE assembly functions.
@@ -4052,6 +4419,7 @@ internal static void preemptPark(ж<g> Ꮡgp) {
             @throw(preemptSpwriteˢ);
         }
     }
+
     // Transition from _Grunning to _Gscan|_Gpreempted. We can't
     // be in _Grunning when we dropg because then we'd be running
     // without an M, but the moment we're in _Gpreempted,
@@ -4059,30 +4427,44 @@ internal static void preemptPark(ж<g> Ꮡgp) {
     // up. Hence, we set the scan bit to lock down further
     // transitions until we can dropg.
     casGToPreemptScan(Ꮡgp, _Grunning, (uint32)((uint32)_Gscan | (uint32)_Gpreempted));
-    dropg();
-    // Be careful about how we trace this next event. The ordering
-    // is subtle.
+
+    // Be careful about ownership as we trace this next event.
     //
-    // The moment we CAS into _Gpreempted, suspendG could CAS to
-    // _Gwaiting, do its work, and ready the goroutine. All of
+    // According to the tracer invariants (trace.go) it's unsafe
+    // for us to emit an event for a goroutine we do not own.
+    // The moment we CAS into _Gpreempted, suspendG could CAS the
+    // goroutine to _Gwaiting, effectively taking ownership. All of
     // this could happen before we even get the chance to emit
     // an event. The end result is that the events could appear
     // out of order, and the tracer generally assumes the scheduler
     // takes care of the ordering between GoPark and GoUnpark.
     //
     // The answer here is simple: emit the event while we still hold
-    // the _Gscan bit on the goroutine. We still need to traceAcquire
-    // and traceRelease across the CAS because the tracer could be
-    // what's calling suspendG in the first place, and we want the
-    // CAS and event emission to appear atomic to the tracer.
+    // the _Gscan bit on the goroutine, since the _Gscan bit means
+    // ownership over transitions.
+    //
+    // We still need to traceAcquire and traceRelease across the CAS
+    // because the tracer could be what's calling suspendG in the first
+    // place. This also upholds the tracer invariant that we must hold
+    // traceAcquire/traceRelease across the transition. However, we
+    // specifically *only* emit the event while we still have ownership.
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
         Δtrace.GoPark(traceBlockPreempted, 0);
     }
+
+    // Drop the goroutine from the M. Only do this after the tracer has
+    // emitted an event, because it needs the association for GoPark to
+    // work correctly.
+    dropg();
+
+    // Drop the scan bit and release the trace locker if necessary.
     casfrom_Gscanstatus(Ꮡgp, (uint32)((uint32)_Gscan | (uint32)_Gpreempted), _Gpreempted);
     if (Δtrace.ok()) {
         traceRelease(Δtrace);
     }
+
+    // All done.
     schedule();
 }
 
@@ -4129,8 +4511,8 @@ internal static void goyield_m(ж<g> Ꮡgp) {
 internal static void goexit1() {
     if (raceenabled) {
         {
-            var gp = getg(); if ((~gp).syncGroup != nil) {
-                racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)(~gp).syncGroup.raceaddr());
+            var gp = getg(); if ((~gp).bubble != nil) {
+                racereleasemergeg(ref (gp).DerefOrNull(), (uintptr)(~gp).bubble.raceaddr());
             }
         }
         racegoend();
@@ -4145,6 +4527,15 @@ internal static void goexit1() {
 
 // goexit continuation on g0.
 internal static void goexit0(ж<g> Ꮡgp) {
+    ref var gp = ref Ꮡgp.DerefOrNull();
+
+    if (goexperiment.RuntimeSecret && gp.secret > 0) {
+        // Erase the whole stack. This path only occurs when
+        // runtime.Goexit is called from within a runtime/secret.Do call.
+        memclrNoHeapPointers((@unsafe.Pointer)gp.stack.lo, gp.stack.hi - gp.stack.lo);
+        // Since this is running on g0, our registers are already zeroed from going through
+        // mcall in secret mode.
+    }
     gdestroy(Ꮡgp);
     schedule();
 }
@@ -4158,9 +4549,10 @@ internal static void gdestroy(ж<g> Ꮡgp) {
 
     var mp = getg().Value.m;
     var pp = (~mp).p.ptr();
+
     casgstatus(Ꮡgp, _Grunning, _Gdead);
     ᏑgcController.addScannableStack(pp, -(int64)(gp.stack.hi - gp.stack.lo));
-    if (isSystemGoroutine(ref (Ꮡgp).DerefOrNull(), false)) {
+    if (isSystemGoroutine(Ꮡgp, false)) {
         Ꮡsched.of(schedt.Ꮡngsys).Add(-1);
     }
     gp.m = default!;
@@ -4176,7 +4568,10 @@ internal static void gdestroy(ж<g> Ꮡgp) {
     gp.param = default!;
     gp.labels = default!;
     gp.timer = default!;
-    gp.syncGroup = default!;
+    gp.bubble = default!;
+    gp.fipsOnlyBypass = false;
+    gp.secret = 0;
+
     if (gcBlackenEnabled != 0 && gp.gcAssistBytes > 0) {
         // Flush assist credit to the global pool. This gives
         // better information to pacing if the application is
@@ -4186,12 +4581,14 @@ internal static void gdestroy(ж<g> Ꮡgp) {
         ᏑgcController.of(gcControllerState.ᏑbgScanCredit).Add(scanCredit);
         gp.gcAssistBytes = 0;
     }
+
     dropg();
-    if (GOARCH == "wasm"u8) {
-        // no threads yet on wasm
+
+    if (GOARCH == "wasm"u8) { // no threads yet on wasm
         gfput(pp, Ꮡgp);
         return;
     }
+
     if (locked && (~mp).lockedInt != 0) {
         print((@string)"runtime: mp.lockedInt = "u8, (~mp).lockedInt, (@string)"\n"u8);
         if ((~mp).isextra) {
@@ -4206,8 +4603,7 @@ internal static void gdestroy(ж<g> Ꮡgp) {
         // rather than returning it to the thread pool.
         // Return to mstart, which will release the P and exit
         // the thread.
-        if (GOOS != "plan9"u8){
-            // See golang.org/issue/22227.
+        if (GOOS != "plan9"u8){ // See golang.org/issue/22227.
             gogo((~mp).g0.of(g.Ꮡsched));
         } else {
             // Clear lockedExt on plan9 since we may end up re-using
@@ -4230,6 +4626,7 @@ internal static readonly @string saveOnSystemGNotAllowedˢ = "save on system g n
 //go:nowritebarrierrec
 internal static void save(uintptr pc, uintptr sp, uintptr bp) {
     var gp = getg();
+
     if (gp == (~(~gp).m).g0 || gp == (~(~gp).m).gsignal) {
         // m.g0.sched is special and must describe the context
         // for exiting the thread. mstart1 writes to it directly.
@@ -4238,10 +4635,10 @@ internal static void save(uintptr pc, uintptr sp, uintptr bp) {
         // run in contexts where they'd write to system g's.
         @throw(saveOnSystemGNotAllowedˢ);
     }
+
     gp.Value.sched.pc = pc;
     gp.Value.sched.sp = sp;
     gp.Value.sched.lr = 0;
-    gp.Value.sched.ret = 0;
     gp.Value.sched.bp = bp;
     // We need to ensure ctxt is zero, but can't have a write
     // barrier here. However, it should always already be zero.
@@ -4253,9 +4650,14 @@ internal static void save(uintptr pc, uintptr sp, uintptr bp) {
 
 // go2cs generated this placeholder — func reentersyscall is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// debugExtendGrunningNoP is a debug mode that extends the windows in which
+// we're _Grunning without a P in order to try to shake out bugs with code
+// assuming this state is impossible.
+internal const bool debugExtendGrunningNoP = false;
+
 // go2cs generated this placeholder — func entersyscall is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void entersyscall_sysmon() {
+internal static void entersyscallWakeSysmon() {
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     if (Ꮡsched.of(schedt.Ꮡsysmonwait).Load()) {
         Ꮡsched.of(schedt.Ꮡsysmonwait).Store(false);
@@ -4264,25 +4666,21 @@ internal static void entersyscall_sysmon() {
     unlock(Ꮡsched.of(schedt.Ꮡlock));
 }
 
-internal static void entersyscall_gcwait() {
+internal static void entersyscallHandleGCWait(traceLocker Δtrace) {
     var gp = getg();
-    var pp = (~(~gp).m).oldp.ptr();
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
-    var Δtrace = traceAcquire();
-    if (sched.stopwait > 0 && atomic.Cas(pp.of(runtime_package.Δp.Ꮡstatus), _Psyscall, _Pgcstop)){
+    if (sched.stopwait > 0) {
+        // Set our P to _Pgcstop so the STW can take it.
+        var pp = (~(~gp).m).p.ptr();
+        pp.Value.m = 0;
+        gp.Value.m.Value.p = 0;
+        atomic.Store(pp.of(runtime_package.Δp.Ꮡstatus), _Pgcstop);
+
         if (Δtrace.ok()) {
-            // This is a steal in the new tracer. While it's very likely
-            // that we were the ones to put this P into _Psyscall, between
-            // then and now it's totally possible it had been stolen and
-            // then put back into _Psyscall for us to acquire here. In such
-            // case ProcStop would be incorrect.
-            //
-            // TODO(mknyszek): Consider emitting a ProcStop instead when
-            // gp.m.syscalltick == pp.syscalltick, since then we know we never
-            // lost the P.
-            Δtrace.ProcSteal(pp, true);
-            traceRelease(Δtrace);
+            Δtrace.ProcStop(pp);
         }
+        addGSyscallNoP(ref ((~gp).m).DerefOrNull()); // We gave up our P voluntarily.
         pp.Value.gcStopTime = nanotime();
         pp.Value.syscalltick++;
         {
@@ -4290,9 +4688,6 @@ internal static void entersyscall_gcwait() {
                 notewakeup(Ꮡsched.of(schedt.Ꮡstopnote));
             }
         }
-    } else 
-    if (Δtrace.ok()) {
-        traceRelease(Δtrace);
     }
     unlock(Ꮡsched.of(schedt.Ꮡlock));
 }
@@ -4300,90 +4695,42 @@ internal static void entersyscall_gcwait() {
 // The same as entersyscall(), but with a hint that the syscall is blocking.
 // go2cs generated this placeholder — func entersyscallblock is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void entersyscallblock_handoff() {
-    var Δtrace = traceAcquire();
-    if (Δtrace.ok()) {
-        Δtrace.GoSysCall();
-        traceRelease(Δtrace);
-    }
-    handoffp(releasep());
-}
-
 // go2cs generated this placeholder — func exitsyscall is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-//go:nosplit
-internal static bool exitsyscallfast(ж<Δp> Ꮡoldp) {
-    ref var oldp = ref Ꮡoldp.DerefOrNull();
-
-    // Freezetheworld sets stopwait but does not retake P's.
-    if (sched.stopwait == freezeStopWait) {
-        return false;
-    }
-    // Try to re-acquire the last P.
-    var Δtrace = traceAcquire();
-    if (Ꮡoldp != nil && oldp.status == _Psyscall && atomic.Cas(Ꮡoldp.of(runtime_package.Δp.Ꮡstatus), _Psyscall, _Pidle)) {
-        // There's a cpu for us, so we can run.
-        wirep(Ꮡoldp);
-        exitsyscallfast_reacquired(Δtrace);
-        if (Δtrace.ok()) {
-            traceRelease(Δtrace);
-        }
-        return true;
-    }
-    if (Δtrace.ok()) {
-        traceRelease(Δtrace);
-    }
-    // Try to get any other idle P.
-    if (sched.pidle != 0) {
-        bool ok = default!;
-        systemstack(() => {
-            ok = exitsyscallfast_pidle();
-        });
-        if (ok) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// exitsyscallfast_reacquired is the exitsyscall path on which this G
-// has successfully reacquired the P it was running on before the
-// syscall.
+// exitsyscall's attempt to try to get any P, if it's missing one.
+// Returns true on success.
 //
-//go:nosplit
-internal static void exitsyscallfast_reacquired(traceLocker Δtrace) {
-    var gp = getg();
-    if ((~(~gp).m).syscalltick != (~(~(~gp).m).p.ptr()).syscalltick) {
-        if (Δtrace.ok()) {
-            // The p was retaken and then enter into syscall again (since gp.m.syscalltick has changed).
-            // traceGoSysBlock for this syscall was already emitted,
-            // but here we effectively retake the p from the new syscall running on the same p.
-            var gpʗ1 = gp;
-            var traceʗ1 = Δtrace;
-            systemstack(() => {
-                // We're stealing the P. It's treated
-                // as if it temporarily stopped running. Then, start running.
-                traceʗ1.ProcSteal((~(~gpʗ1).m).p.ptr(), true);
-                traceʗ1.ProcStart();
-            });
+// Must execute on the systemstack because exitsyscall is nosplit.
+//
+//go:systemstack
+internal static ж<Δp> exitsyscallTryGetP(ж<Δp> Ꮡoldp) {
+    // Try to steal our old P back.
+    if (Ꮡoldp != nil) {
+        {
+            var (thread, ok) = setBlockOnExitSyscall(Ꮡoldp); if (ok) {
+                thread.takeP();
+                decGSyscallNoP(ref ((~getg()).m).DerefOrNull()); // We got a P for ourselves.
+                thread.resume();
+                return Ꮡoldp;
+            }
         }
-        (~(~gp).m).p.ptr().Value.syscalltick++;
     }
-}
 
-internal static bool exitsyscallfast_pidle() {
-    @lock(Ꮡsched.of(schedt.Ꮡlock));
-    var (pp, _) = pidleget(0);
-    if (pp != nil && Ꮡsched.of(schedt.Ꮡsysmonwait).Load()) {
-        Ꮡsched.of(schedt.Ꮡsysmonwait).Store(false);
-        notewakeup(Ꮡsched.of(schedt.Ꮡsysmonnote));
+    // Try to get an idle P.
+    if (sched.pidle != 0) {
+        @lock(Ꮡsched.of(schedt.Ꮡlock));
+        var (pp, _) = pidleget(0);
+        if (pp != nil && Ꮡsched.of(schedt.Ꮡsysmonwait).Load()) {
+            Ꮡsched.of(schedt.Ꮡsysmonwait).Store(false);
+            notewakeup(Ꮡsched.of(schedt.Ꮡsysmonnote));
+        }
+        unlock(Ꮡsched.of(schedt.Ꮡlock));
+        if (pp != nil) {
+            decGSyscallNoP(ref ((~getg()).m).DerefOrNull()); // We got a P for ourselves.
+            return pp;
+        }
     }
-    unlock(Ꮡsched.of(schedt.Ꮡlock));
-    if (pp != nil) {
-        acquirep(pp);
-        return true;
-    }
-    return false;
+    return default!;
 }
 
 // exitsyscall slow path on g0.
@@ -4392,13 +4739,12 @@ internal static bool exitsyscallfast_pidle() {
 // Called via mcall, so gp is the calling g from this M.
 //
 //go:nowritebarrierrec
-internal static void exitsyscall0(ж<g> Ꮡgp) {
+internal static void exitsyscallNoP(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
-    traceLocker Δtrace = default!;
     traceExitingSyscall();
-    Δtrace = traceAcquire();
-    casgstatus(Ꮡgp, _Gsyscall, _Grunnable);
+    var Δtrace = traceAcquire();
+    casgstatus(Ꮡgp, _Grunning, _Grunnable);
     traceExitedSyscall();
     if (Δtrace.ok()) {
         // Write out syscall exit eagerly.
@@ -4408,15 +4754,17 @@ internal static void exitsyscall0(ж<g> Ꮡgp) {
         Δtrace.GoSysExit(true);
         traceRelease(Δtrace);
     }
+    decGSyscallNoP(ref ((~getg()).m).DerefOrNull());
     dropg();
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     ж<Δp> pp = default!;
-    if (schedEnabled(ref (Ꮡgp).DerefOrNull())) {
+    if (schedEnabled(Ꮡgp)) {
         (pp, _) = pidleget(0);
     }
     bool locked = default!;
     if (pp == nil){
         globrunqput(Ꮡgp);
+
         // Below, we stoplockedm if gp is locked. globrunqput releases
         // ownership of gp, so we must check if gp is locked prior to
         // committing the release by unlocking sched.lock, otherwise we
@@ -4445,6 +4793,41 @@ internal static void exitsyscall0(ж<g> Ꮡgp) {
     schedule(); // Never returns.
 }
 
+// addGSyscallNoP must be called when a goroutine in a syscall loses its P.
+// This function updates all relevant accounting.
+//
+// nosplit because it's called on the syscall paths.
+//
+//go:nosplit
+internal static void addGSyscallNoP(ref m mp) {
+    // It's safe to read isExtraInC here because it's only mutated
+    // outside of _Gsyscall, and we know this thread is attached
+    // to a goroutine in _Gsyscall and blocked from exiting.
+    if (!mp.isExtraInC) {
+        // Increment nGsyscallNoP since we're taking away a P
+        // from a _Gsyscall goroutine, but only if isExtraInC
+        // is not set on the M. If it is, then this thread is
+        // back to being a full C thread, and will just inflate
+        // the count of not-in-go goroutines. See go.dev/issue/76435.
+        Ꮡsched.of(schedt.ᏑnGsyscallNoP).Add(1);
+    }
+}
+
+// decGSsyscallNoP must be called whenever a goroutine in a syscall without
+// a P exits the system call. This function updates all relevant accounting.
+//
+// nosplit because it's called from dropm.
+//
+//go:nosplit
+internal static void decGSyscallNoP(ref m mp) {
+    // Update nGsyscallNoP, but only if this is not a thread coming
+    // out of C. See the comment in addGSyscallNoP. This logic must match,
+    // to avoid unmatched increments and decrements.
+    if (!mp.isExtraInC) {
+        Ꮡsched.of(schedt.ᏑnGsyscallNoP).Add(-1);
+    }
+}
+
 // Called from syscall package before fork.
 //
 // syscall_runtime_BeforeFork is for package syscall,
@@ -4459,12 +4842,14 @@ internal static void exitsyscall0(ж<g> Ꮡgp) {
 //go:nosplit
 internal static void syscall_runtime_BeforeFork() {
     var gp = getg().Value.m.Value.curg;
+
     // Block signals during a fork, so that the child does not run
     // a signal handler before exec if a signal is sent to the process
     // group. See issue #18600.
     gp.Value.m.Value.locks++;
     sigsave((~gp).m.of(m.Ꮡsigmask));
     sigblock(false);
+
     // This function is called before fork in syscall package.
     // Code between fork and exec must not allocate memory nor even try to grow stack.
     // Here we spoil g.stackguard0 to reliably detect any attempts to grow stack.
@@ -4486,9 +4871,12 @@ internal static void syscall_runtime_BeforeFork() {
 //go:nosplit
 internal static void syscall_runtime_AfterFork() {
     var gp = getg().Value.m.Value.curg;
+
     // See the comments in beforefork.
     gp.Value.stackguard0 = (~gp).stack.lo + (uintptr)stackGuard;
+
     msigrestore((~(~gp).m).sigmask);
+
     gp.Value.m.Value.locks--;
 }
 
@@ -4521,10 +4909,13 @@ internal static void syscall_runtime_AfterForkInChild() {
     // because if we are sharing address space with the parent process,
     // then the parent process can not be running concurrently.
     inForkedChild = true;
+
     clearSignalHandlers();
+
     // When we are the child we are the only thread running,
     // so we know that nothing else has changed gp.m.sigmask.
     msigrestore((~(~getg()).m).sigmask);
+
     inForkedChild = false;
 }
 
@@ -4540,6 +4931,7 @@ internal static ref atomic.Int32 pendingPreemptSignals => ref ᏑpendingPreemptS
 internal static void syscall_runtime_BeforeExec() {
     // Prevent thread creation during exec.
     ᏑexecLock.@lock();
+
     // On Darwin, wait for all pending preemption signals to
     // be received. See issue #41702.
     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
@@ -4564,6 +4956,9 @@ internal static ж<g> malg(int32 stacksize) {
         var newgʗ1 = newg;
         systemstack(() => {
             newgʗ1.Value.stack = @stackalloc((uint32)stacksize);
+            if (valgrindenabled) {
+                newgʗ1.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~newgʗ1).stack.lo, (@unsafe.Pointer)(~newgʗ1).stack.hi);
+            }
         });
         newg.Value.stackguard0 = (~newg).stack.lo + (uintptr)stackGuard;
         newg.Value.stackguard1 = ~(uintptr)0;
@@ -4583,8 +4978,10 @@ internal static void newproc(ж<funcval> Ꮡfn) {
     var gpʗ1 = gp;
     systemstack(() => {
         var newg = newproc1(Ꮡfn, gpʗ1, pc, false, waitReasonZero);
+
         var pp = (~(~getg()).m).p.ptr();
         runqput(pp, newg, true);
+
         if (mainStarted) {
             wakep();
         }
@@ -4606,6 +5003,7 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
     if (Ꮡfn == nil) {
         fatal(goOfNilFuncValueˢ);
     }
+
     var mp = acquirem(); // disable preemption because we hold M and P in local vars.
     var pp = (~mp).p.ptr();
     var newg = gfget(pp);
@@ -4617,9 +5015,11 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
     if ((~newg).stack.hi == 0) {
         @throw(newproc1NewgMissingStackˢ);
     }
+
     if (readgstatus(newg) != _Gdead) {
         @throw(newproc1NewGIsNotGdeadˢ);
     }
+
     var totalSize = (uintptr)(4 * goarch.PtrSize + sys.MinFrameSize); // extra space in case of reads slightly beyond frame
     totalSize = alignUp(totalSize, sys.StackAlign);
     var sp = (~newg).stack.hi - totalSize;
@@ -4632,7 +5032,8 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
         // caller's FP
         ((ж<uintptr>)(uintptr)((@unsafe.Pointer)(sp - (uintptr)goarch.PtrSize))).Value = 0;
     }
-    memclrNoHeapPointers(@unsafe.Pointer.FromPinnedBox(newg.of(g.Ꮡsched)), /* unsafe.Sizeof(newg.sched) */ (uintptr)56);
+
+    memclrNoHeapPointers(@unsafe.Pointer.FromPinnedBox(newg.of(g.Ꮡsched)), /* unsafe.Sizeof(newg.sched) */ (uintptr)48);
     newg.Value.sched.sp = sp;
     newg.Value.stktopsp = sp;
     newg.Value.sched.pc = abi.FuncPCABI0(goexit) + (uintptr)sys.PCQuantum; // +PCQuantum so that previous instruction is in same function
@@ -4642,11 +5043,12 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
     newg.Value.gopc = callerpc;
     newg.Value.ancestors = saveAncestors(Ꮡcallergp);
     newg.Value.startpc = fn.fn;
-    if (isSystemGoroutine(ref (newg).DerefOrNull(), false)){
+    newg.of(g.ᏑrunningCleanups).Store(false);
+    if (isSystemGoroutine(newg, false)){
         Ꮡsched.of(schedt.Ꮡngsys).Add(1);
     } else {
         // Only user goroutines inherit synctest groups and pprof labels.
-        newg.Value.syncGroup = callergp.syncGroup;
+        newg.Value.bubble = callergp.bubble;
         if ((~mp).curg != nil) {
             newg.Value.labels = mp.Value.curg.Value.labels;
         }
@@ -4665,7 +5067,9 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
         newg.Value.tracking = true;
     }
     ᏑgcController.addScannableStack(pp, (int64)((~newg).stack.hi - (~newg).stack.lo));
-    // Get a goid and switch to runnable. Make all this atomic to the tracer.
+
+    // Get a goid and switch to runnable. This needs to happen under traceAcquire
+    // since it's a goroutine transition. See tracer invariants in trace.go.
     var Δtrace = traceAcquire();
     uint32 status = _Grunnable;
     if (parked) {
@@ -4688,6 +5092,13 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
         Δtrace.GoCreate(newg, (~newg).startpc, parked);
         traceRelease(Δtrace);
     }
+
+    // fips140 bubble
+    newg.Value.fipsOnlyBypass = callergp.fipsOnlyBypass;
+
+    // dit bubble
+    newg.Value.ditWanted = callergp.ditWanted;
+
     // Set up race context.
     if (raceenabled) {
         newg.Value.racectx = racegostart(callerpc);
@@ -4698,7 +5109,9 @@ internal static ж<g> newproc1(ж<funcval> Ꮡfn, ж<g> Ꮡcallergp, uintptr cal
             racereleasemergeg(ref (newg).DerefOrNull(), @unsafe.Pointer.FromBox(ᏑlabelSync));
         }
     }
+    pp.Value.goroutinesCreated++;
     releasem(ref (mp).DerefOrNull());
+
     return newg;
 }
 
@@ -4722,6 +5135,7 @@ internal static partial ж<slice<ancestorInfo>> saveAncestors(ж<g> Ꮡcallergp)
     }
     var ancestors = new slice<ancestorInfo>(n);
     copy(ancestors[1..], callerAncestors);
+
     array<uintptr> pcs = new(50); /* tracebackInnerFrames */
     nint npcs = gcallers(Ꮡcallergp, 0, pcs[..]);
     var ipcs = new slice<uintptr>(npcs);
@@ -4731,6 +5145,7 @@ internal static partial ж<slice<ancestorInfo>> saveAncestors(ж<g> Ꮡcallergp)
         goid: callergp.goid,
         gopc: callergp.gopc
     );
+
     var ancestorsp = @new<slice<ancestorInfo>>();
     ancestorsp.ValueSlot = ancestors;
     return ancestorsp;
@@ -4748,34 +5163,36 @@ internal static void gfput(ж<Δp> Ꮡpp, ж<g> Ꮡgp) {
     if (readgstatus(Ꮡgp) != _Gdead) {
         @throw(gfputBadStatusNotGdeadˢ);
     }
+
     var stksize = gp.stack.hi - gp.stack.lo;
+
     if (stksize != (uintptr)startingStackSize) {
         // non-standard stack size - free it.
         stackfree(gp.stack);
         gp.stack.lo = 0;
         gp.stack.hi = 0;
         gp.stackguard0 = 0;
+        if (valgrindenabled) {
+            valgrindDeregisterStack(gp.valgrindStackID);
+            gp.valgrindStackID = 0;
+        }
     }
-    Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).push(Ꮡgp);
-    pp.gFree.n++;
-    if (pp.gFree.n >= 64) {
-        int32 inc = default!;
+
+    pp.gFree.push(Ꮡgp);
+    if (pp.gFree.size >= 64) {
         gQueue stackQ = default!;
         gQueue noStackQ = default!;
-        while (pp.gFree.n >= 32) {
-            var gpΔ1 = Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).pop();
-            pp.gFree.n--;
+        while (pp.gFree.size >= 32) {
+            var gpΔ1 = pp.gFree.pop();
             if ((~gpΔ1).stack.lo == 0){
                 noStackQ.push(gpΔ1);
             } else {
                 stackQ.push(gpΔ1);
             }
-            inc++;
         }
         @lock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
         Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.ᏑnoStack).pushAll(noStackQ);
         Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡstack).pushAll(stackQ);
-        sched.gFree.n += inc;
         unlock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
     }
 }
@@ -4786,10 +5203,10 @@ internal static ж<g> gfget(ж<Δp> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
 retry:
-    if (Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).empty() && (!Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡstack).empty() || !Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.ᏑnoStack).empty())) {
+    if (pp.gFree.empty() && (!Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡstack).empty() || !Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.ᏑnoStack).empty())) {
         @lock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
         // Move a batch of free Gs to the P.
-        while (pp.gFree.n < 32) {
+        while (pp.gFree.size < 32) {
             // Prefer Gs with stacks.
             var gpΔ1 = Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡstack).pop();
             if (gpΔ1 == nil) {
@@ -4798,18 +5215,15 @@ retry:
                     break;
                 }
             }
-            sched.gFree.n--;
-            Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).push(gpΔ1);
-            pp.gFree.n++;
+            pp.gFree.push(gpΔ1);
         }
         unlock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
         goto retry;
     }
-    var gp = Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).pop();
+    var gp = pp.gFree.pop();
     if (gp == nil) {
         return default!;
     }
-    pp.gFree.n--;
     if ((~gp).stack.lo != 0 && (~gp).stack.hi - (~gp).stack.lo != (uintptr)startingStackSize) {
         // Deallocate old stack. We kept it in gfput because it was the
         // right size when the goroutine was put on the free list, but
@@ -4820,6 +5234,10 @@ retry:
             gpʗ1.Value.stack.lo = 0;
             gpʗ1.Value.stack.hi = 0;
             gpʗ1.Value.stackguard0 = 0;
+            if (valgrindenabled) {
+                valgrindDeregisterStack((~gpʗ1).valgrindStackID);
+                gpʗ1.Value.valgrindStackID = 0;
+            }
         });
     }
     if ((~gp).stack.lo == 0){
@@ -4827,6 +5245,9 @@ retry:
         var gpʗ2 = gp;
         systemstack(() => {
             gpʗ2.Value.stack = @stackalloc(startingStackSize);
+            if (valgrindenabled) {
+                gpʗ2.Value.valgrindStackID = valgrindRegisterStack((@unsafe.Pointer)(~gpʗ2).stack.lo, (@unsafe.Pointer)(~gpʗ2).stack.hi);
+            }
         });
         gp.Value.stackguard0 = (~gp).stack.lo + (uintptr)stackGuard;
     } else {
@@ -4847,23 +5268,19 @@ retry:
 internal static void gfpurge(ж<Δp> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
-    int32 inc = default!;
     gQueue stackQ = default!;
     gQueue noStackQ = default!;
-    while (!Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).empty()) {
-        var gp = Ꮡpp.of(runtime_package.Δp.ᏑgFree).of(p_gFree.ᏑgList).pop();
-        pp.gFree.n--;
+    while (!pp.gFree.empty()) {
+        var gp = pp.gFree.pop();
         if ((~gp).stack.lo == 0){
             noStackQ.push(gp);
         } else {
             stackQ.push(gp);
         }
-        inc++;
     }
     @lock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
     Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.ᏑnoStack).pushAll(noStackQ);
     Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡstack).pushAll(stackQ);
-    sched.gFree.n += inc;
     unlock(Ꮡsched.of(schedt.ᏑgFree).of(schedt_gFree.Ꮡlock));
 }
 
@@ -4920,10 +5337,17 @@ internal static void badunlockosthread() {
 
 // go2cs generated this placeholder — func gcount is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
+// goroutineleakcount returns the number of leaked goroutines last reported by
+// the runtime.
+//
+//go:linkname goroutineleakcount runtime/pprof.runtime_goroutineleakcount
+internal static nint goroutineleakcount() {
+    return work.goroutineLeak.count;
+}
+
 internal static int32 mcount() {
     return (int32)(sched.mnext - sched.nmfreed);
 }
-
 
 partial struct profᴛ1 /*dyn*/ {
     internal atomic.Uint32 signalLock;
@@ -4976,12 +5400,14 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
     if (Ꮡprof.of(profᴛ1.Ꮡhz).Load() == 0) {
         return;
     }
+
     // If mp.profilehz is 0, then profiling is not enabled for this thread.
     // We must check this to avoid a deadlock between setcpuprofilerate
     // and the call to cpuprof.add, below.
     if (Ꮡmp != nil && mp.profilehz == 0) {
         return;
     }
+
     // On mips{,le}/arm, 64bit atomics are emulated with spinlocks, in
     // internal/runtime/atomic. If SIGPROF arrives while the program is inside
     // the critical section, it creates a deadlock (when writing the sample).
@@ -5005,6 +5431,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             return;
         }
     }
+
     // Profiling runs concurrently with GC, so it must not allocate.
     // Set a trap in case the code does allocate.
     // Note that on windows, one thread takes profiles of all the
@@ -5012,6 +5439,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
     // In fact mp may not even be stopped.
     // See golang.org/issue/17165.
     getg().Value.m.Value.mallocing++;
+
     ref var u = ref heap(new unwinder(), out var Ꮡu);
     array<uintptr> stk = new(64); /* maxCPUProfStack */
     nint n = 0;
@@ -5026,9 +5454,10 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             while (cgoOff < 32 && mp.cgoCallers.Value[cgoOff] != 0) {
                 cgoOff++;
             }
-            n += copy(stk[..], (~mp.cgoCallers).Value.slice(0, cgoOff));
+            n += copy(stk[..], mp.cgoCallers.Value.slice(0, cgoOff));
             mp.cgoCallers.Value[0] = 0;
         }
+
         // Collect Go stack that leads to the cgo call.
         Ꮡu.initAt((~mp.curg).syscallpc, (~mp.curg).syscallsp, 0, mp.curg, unwindSilentErrors);
     } else 
@@ -5045,6 +5474,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
         Ꮡu.initAt(pc, sp, lr, Ꮡgp, (unwindFlags)((unwindFlags)(unwindSilentErrors | unwindTrap) | unwindJumpStack));
     }
     n += tracebackPCs(Ꮡu, 0, stk.slice(n));
+
     if (n <= 0) {
         // Normal traceback is impossible or has failed.
         // Account it against abstract "System" or "GC".
@@ -5063,6 +5493,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             stk[1] = abi.FuncPCABIInternal(_System) + (uintptr)sys.PCQuantum;
         }
     }
+
     if (Ꮡprof.of(profᴛ1.Ꮡhz).Load() != 0) {
         // Note: it can happen on Windows that we interrupted a system thread
         // with no g, so gp could nil. The other nil checks are done out of
@@ -5072,6 +5503,7 @@ internal static void sigprof(uintptr pc, uintptr sp, uintptr lr, ж<g> Ꮡgp, ж
             tagPtr = (~gp.m).curg.of(g.Ꮡlabels);
         }
         cpuprof.add(tagPtr, stk.slice(0, n));
+
         var gprof = Ꮡgp;
         ж<m> mpΔ1 = default!;
         ж<Δp> pp = default!;
@@ -5094,14 +5526,17 @@ internal static void setcpuprofilerate(int32 hz) {
     if (hz < 0) {
         hz = 0;
     }
+
     // Disable preemption, otherwise we can be rescheduled to another thread
     // that has profiling enabled.
     var gp = getg();
     gp.Value.m.Value.locks++;
+
     // Stop profiler on this thread so that it is safe to lock prof.
     // if a profiling signal came in while we had prof locked,
     // it would deadlock.
     setThreadCPUProfiler(0);
+
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         osyield();
     }
@@ -5110,12 +5545,15 @@ internal static void setcpuprofilerate(int32 hz) {
         Ꮡprof.of(profᴛ1.Ꮡhz).Store(hz);
     }
     Ꮡprof.of(profᴛ1.ᏑsignalLock).Store(0);
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     sched.profilehz = hz;
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
     if (hz != 0) {
         setThreadCPUProfiler(hz);
     }
+
     gp.Value.m.Value.locks--;
 }
 
@@ -5128,6 +5566,7 @@ internal static void init(this ж<Δp> Ꮡpp, int32 id) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     pp.id = id;
+    pp.gcw.id = id;
     pp.status = _Pgcstop;
     pp.sudogcache = pp.sudogbuf[..0];
     pp.deferpool = pp.deferpoolbuf[..0];
@@ -5152,7 +5591,8 @@ internal static void init(this ж<Δp> Ꮡpp, int32 id) {
             pp.raceprocctx = raceproccreate();
         }
     }
-    lockInit(Ꮡpp.of(runtime_package.Δp.Ꮡtimers).of(timers.Ꮡmu), lockRankTimers);
+    lockInit(ref nonnil(ref pp).timers.mu, lockRankTimers);
+
     // This P may get timers when it starts running. Set the mask here
     // since the P may not go through pidleget (notably P 0 on startup).
     timerpMask.set(id);
@@ -5160,6 +5600,9 @@ internal static void init(this ж<Δp> Ꮡpp, int32 id) {
     // running if it is P 0 on startup.
     idlepMask.clear(id);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string pDestroyedWhileGcIsˢ = "P destroyed while GC is running"u8;
 
 // destroy releases all of the resources associated with pp and
 // transitions it to status _Pdead.
@@ -5170,6 +5613,7 @@ internal static void destroy(this ж<Δp> Ꮡpp) {
 
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
     assertWorldStopped();
+
     // Move all runnable goroutines to the global queue
     while (pp.runqhead != pp.runqtail) {
         // Pop from tail of local queue
@@ -5182,21 +5626,25 @@ internal static void destroy(this ж<Δp> Ꮡpp) {
         globrunqputhead(pp.runnext.ptr());
         pp.runnext = 0;
     }
+
     // Move all timers to the local P.
     (~(~getg()).m).p.ptr().of(runtime_package.Δp.Ꮡtimers).take(Ꮡpp.of(runtime_package.Δp.Ꮡtimers));
-    // Flush p's write barrier buffer.
-    if (gcphase != _GCoff) {
-        wbBufFlush1(Ꮡpp);
-        pp.gcw.dispose();
+
+    // No need to flush p's write barrier buffer or span queue, as Ps
+    // cannot be destroyed during the mark phase.
+    {
+        var phase = gcphase; if (phase != _GCoff) {
+            println((@string)"runtime: p id"u8, pp.id, (@string)"destroyed during GC phase"u8, phase);
+            @throw(pDestroyedWhileGcIsˢ);
+        }
     }
-    foreach (var (i, _) in pp.sudogbuf) {
-        pp.sudogbuf[i] = default!;
-    }
+    // We should free the queues though.
+    Ꮡpp.of(runtime_package.Δp.Ꮡgcw).of(gcWork.Ꮡspanq).destroy();
+
+    builtin.clear(pp.sudogbuf[..]);
     pp.sudogcache = pp.sudogbuf[..0];
     pp.pinnerCache = default!;
-    foreach (var (j, _) in pp.deferpoolbuf) {
-        pp.deferpoolbuf[j] = default!;
-    }
+    builtin.clear(pp.deferpoolbuf[..]);
     pp.deferpool = pp.deferpoolbuf[..0];
     systemstack(() => {
         for (nint i = 0; i < Ꮡpp.Value.mspancache.len; i++) {
@@ -5221,14 +5669,21 @@ internal static void destroy(this ж<Δp> Ꮡpp) {
             var mp = getg().Value.m;
             var phold = (~mp).p.ptr();
             mp.of(m.Ꮡp).set(Ꮡpp);
+
             racectxend(pp.timers.raceCtx);
             pp.timers.raceCtx = 0;
+
             mp.of(m.Ꮡp).set(phold);
         }
         raceprocdestroy(pp.raceprocctx);
         pp.raceprocctx = 0;
     }
     pp.gcAssistTime = 0;
+    gcCleanups.queued += pp.cleanupsQueued;
+    pp.cleanupsQueued = 0;
+    Ꮡsched.of(schedt.ᏑgoroutinesCreated).Add((int64)pp.goroutinesCreated);
+    pp.goroutinesCreated = 0;
+    pp.xRegs.free();
     pp.status = _Pdead;
 }
 
@@ -5246,6 +5701,7 @@ internal static readonly @string procresizeInvalidArgˢ = "procresize: invalid a
 internal static ж<Δp> procresize(int32 nprocs) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
     assertWorldStopped();
+
     var old = gomaxprocs;
     if (old < 0 || nprocs <= 0) {
         @throw(procresizeInvalidArgˢ);
@@ -5255,13 +5711,14 @@ internal static ж<Δp> procresize(int32 nprocs) {
         Δtrace.Gomaxprocs(nprocs);
         traceRelease(Δtrace);
     }
+
     // update statistics
     var now = nanotime();
     if (sched.procresizetime != 0) {
         sched.totaltime += (int64)old * (now - sched.procresizetime);
     }
     sched.procresizetime = now;
-    var maskWords = (nprocs + 31) / 32;
+
     // Grow allp if necessary.
     if (nprocs > (int32)len(allp)) {
         // Synchronize with retake, which could be running
@@ -5276,20 +5733,13 @@ internal static ж<Δp> procresize(int32 nprocs) {
             copy(nallp, allp.slice(0, cap(allp)));
             allp = nallp;
         }
-        if (maskWords <= (int32)cap(idlepMask)){
-            idlepMask = idlepMask.slice(0, maskWords);
-            timerpMask = timerpMask.slice(0, maskWords);
-        } else {
-            var nidlepMask = new slice<uint32>(maskWords);
-            // No need to copy beyond len, old Ps are irrelevant.
-            copy(nidlepMask, idlepMask);
-            idlepMask = nidlepMask;
-            var ntimerpMask = new slice<uint32>(maskWords);
-            copy(ntimerpMask, timerpMask);
-            timerpMask = ntimerpMask;
-        }
+
+        idlepMask = idlepMask.resize(nprocs);
+        timerpMask = timerpMask.resize(nprocs);
+        work.spanqMask = work.spanqMask.resize(nprocs);
         unlock(ᏑallpLock);
     }
+
     // initialize new P's
     for (var i = old; i < nprocs; i++) {
         var pp = allp[i];
@@ -5299,6 +5749,7 @@ internal static ж<Δp> procresize(int32 nprocs) {
         pp.init(i);
         atomicstorep(@unsafe.Pointer.FromBox(Ꮡ(allp, i)), @unsafe.Pointer.FromPinnedBox(pp));
     }
+
     var gp = getg();
     if ((~(~gp).m).p != 0 && (~(~(~gp).m).p.ptr()).id < nprocs){
         // continue to use the current P
@@ -5333,37 +5784,135 @@ internal static ж<Δp> procresize(int32 nprocs) {
             traceRelease(traceΔ2);
         }
     }
+
     // g.m.p is now set, so we no longer need mcache0 for bootstrapping.
     mcache0 = default!;
+
     // release resources from unused P's
     for (var i = nprocs; i < old; i++) {
         var pp = allp[i];
         pp.destroy();
+        // can't free P itself because it can be referenced by an M in syscall
     }
-    // can't free P itself because it can be referenced by an M in syscall
+
     // Trim allp.
     if ((int32)len(allp) != nprocs) {
         @lock(ᏑallpLock);
         allp = allp.slice(0, nprocs);
-        idlepMask = idlepMask.slice(0, maskWords);
-        timerpMask = timerpMask.slice(0, maskWords);
+        idlepMask = idlepMask.resize(nprocs);
+        timerpMask = timerpMask.resize(nprocs);
+        work.spanqMask = work.spanqMask.resize(nprocs);
         unlock(ᏑallpLock);
     }
+
+    // Assign Ms to Ps with runnable goroutines.
     ж<Δp> runnablePs = default!;
+    ж<Δp> runnablePsNeedM = default!;
+    ж<Δp> idlePs = default!;
     for (var i = nprocs - 1; i >= 0; i--) {
         var pp = allp[i];
         if ((~(~gp).m).p.ptr() == pp) {
             continue;
         }
         pp.Value.status = _Pidle;
-        if (runqempty(pp)){
-            pidleput(pp, now);
-        } else {
-            pp.of(runtime_package.Δp.Ꮡm).set(mget());
+        if (runqempty(pp)) {
+            pp.of(runtime_package.Δp.Ꮡlink).set(idlePs);
+            idlePs = pp;
+            continue;
+        }
+
+        // Prefer to run on the most recent M if it is
+        // available.
+        //
+        // Ps with no oldm (or for which oldm is already taken
+        // by an earlier P), we delay until all oldm Ps are
+        // handled. Otherwise, mget may return an M that a
+        // later P has in oldm.
+        ж<m> mp = default!;
+        {
+            var oldm = (~pp).oldm.get(); if (oldm != nil) {
+                // Returns nil if oldm is not idle.
+                mp = mgetSpecific(oldm);
+            }
+        }
+        if (mp == nil) {
+            // Call mget later.
+            pp.of(runtime_package.Δp.Ꮡlink).set(runnablePsNeedM);
+            runnablePsNeedM = pp;
+            continue;
+        }
+        pp.of(runtime_package.Δp.Ꮡm).set(mp);
+        pp.of(runtime_package.Δp.Ꮡlink).set(runnablePs);
+        runnablePs = pp;
+    }
+    // Assign Ms to remaining runnable Ps without usable oldm. See comment
+    // above.
+    while (runnablePsNeedM != nil) {
+        var pp = runnablePsNeedM;
+        runnablePsNeedM = (~pp).link.ptr();
+
+        var mp = mget();
+        pp.of(runtime_package.Δp.Ꮡm).set(mp);
+        pp.of(runtime_package.Δp.Ꮡlink).set(runnablePs);
+        runnablePs = pp;
+    }
+
+    // Now that we've assigned Ms to Ps with runnable goroutines, assign GC
+    // mark workers to remaining idle Ps, if needed.
+    //
+    // By assigning GC workers to Ps here, we slightly speed up starting
+    // the world, as we will start enough Ps to run all of the user
+    // goroutines and GC mark workers all at once, rather than using a
+    // sequence of wakep calls as each P's findRunnable realizes it needs
+    // to run a mark worker instead of a user goroutine.
+    //
+    // By assigning GC workers to Ps only _after_ previously-running Ps are
+    // assigned Ms, we ensure that goroutines previously running on a P
+    // continue to run on the same P, with GC mark workers preferring
+    // previously-idle Ps. This helps prevent goroutines from shuffling
+    // around too much across STW.
+    //
+    // N.B., if there aren't enough Ps left in idlePs for all of the GC
+    // mark workers, then findRunnable will still choose to run mark
+    // workers on Ps assigned above.
+    //
+    // N.B., we do this during any STW in the mark phase, not just the
+    // sweep termination STW that starts the mark phase. gcBgMarkWorker
+    // always preempts by removing itself from the P, so even unrelated
+    // STWs during the mark require that Ps reselect mark workers upon
+    // restart.
+    if (gcBlackenEnabled != 0) {
+        while (idlePs != nil) {
+            var pp = idlePs;
+
+            var (ok, _) = ᏑgcController.assignWaitingGCWorker(pp, now);
+            if (!ok) {
+                // No more mark workers needed.
+                break;
+            }
+
+            // Got a worker, P is now runnable.
+            //
+            // mget may return nil if there aren't enough Ms, in
+            // which case startTheWorldWithSema will start one.
+            //
+            // N.B. findRunnableGCWorker will make the worker G
+            // itself runnable.
+            idlePs = (~pp).link.ptr();
+            var mp = mget();
+            pp.of(runtime_package.Δp.Ꮡm).set(mp);
             pp.of(runtime_package.Δp.Ꮡlink).set(runnablePs);
             runnablePs = pp;
         }
     }
+
+    // Finally, any remaining Ps are truly idle.
+    while (idlePs != nil) {
+        var pp = idlePs;
+        idlePs = (~pp).link.ptr();
+        pidleput(pp, now);
+    }
+
     stealOrder.reset((uint32)nprocs);
     ж<int32> int32p = Ꮡgomaxprocs;          // make compiler check that gomaxprocs is an int32
     atomic.Store(int32p.Reinterpret<int32, uint32>(), (uint32)nprocs);
@@ -5381,19 +5930,36 @@ internal static ж<Δp> procresize(int32 nprocs) {
 //
 //go:yeswritebarrierrec
 internal static void acquirep(ж<Δp> Ꮡpp) {
-    ref var pp = ref Ꮡpp.DerefOrNull();
+    // Do the work.
+    acquirepNoTrace(Ꮡpp);
 
-    // Do the part that isn't allowed to have write barriers.
-    wirep(Ꮡpp);
-    // Have p; write barriers now allowed.
-    // Perform deferred mcache flush before this P can allocate
-    // from a potentially stale mcache.
-    pp.mcache.prepareForSweep();
+    // Emit the event.
     var Δtrace = traceAcquire();
     if (Δtrace.ok()) {
         Δtrace.ProcStart();
         traceRelease(Δtrace);
     }
+}
+
+// Internals of acquirep, just skipping the trace events.
+//
+//go:yeswritebarrierrec
+internal static void acquirepNoTrace(ж<Δp> Ꮡpp) {
+    ref var pp = ref Ꮡpp.DerefOrNull();
+
+    // Do the part that isn't allowed to have write barriers.
+    wirep(Ꮡpp);
+
+    // Have p; write barriers now allowed.
+
+    // The M we're associating with will be the old M after the next
+    // releasep. We must set this here because write barriers are not
+    // allowed in releasep.
+    pp.oldm = pp.m.ptr().Value.self;
+
+    // Perform deferred mcache flush before this P can allocate
+    // from a potentially stale mcache.
+    pp.mcache.prepareForSweep();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -5410,6 +5976,7 @@ internal static void wirep(ж<Δp> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     var gp = getg();
+
     if ((~(~gp).m).p != 0) {
         // Call on the systemstack to avoid a nosplit overflow build failure
         // on some platforms when built with -N -l. See #64113.
@@ -5451,14 +6018,19 @@ internal static readonly @string releasepInvalidPStateˢ = "releasep: invalid p 
 // Disassociate p and the current m without tracing an event.
 internal static ж<Δp> releasepNoTrace() {
     var gp = getg();
+
     if ((~(~gp).m).p == 0) {
         @throw(releasepInvalidArgˢ);
     }
     var pp = (~(~gp).m).p.ptr();
     if ((~pp).m.ptr() != (~gp).m || (~pp).status != _Prunning) {
-        print((@string)"releasep: m="u8, (~gp).m.OrTypedNil(), (@string)" m->p="u8, (~(~gp).m).p.ptr().OrTypedNil(), (@string)" p->m="u8, ((Δhex)(uint64)(uintptr)(~pp).m), (@string)" p->status="u8, (~pp).status, (@string)"\n"u8);
+        print((@string)"releasep: m="u8, (~gp).m.OrTypedNil(), (@string)" m->p="u8, (~(~gp).m).p.ptr().OrTypedNil(), (@string)" p->m="u8, (Δhex)(uint64)(uintptr)(~pp).m, (@string)" p->status="u8, (~pp).status, (@string)"\n"u8);
         @throw(releasepInvalidPStateˢ);
     }
+
+    // P must clear if nextGCMarkWorker if it stops.
+    ᏑgcController.releaseNextGCMarkWorker(pp);
+
     gp.Value.m.Value.p = 0;
     pp.Value.m = 0;
     pp.Value.status = _Pidle;
@@ -5487,6 +6059,7 @@ internal static readonly @string allGoroutinesAreAsleepˢ = "all goroutines are 
 // sched.lock must be held.
 internal static void checkdead() {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     // For -buildmode=c-shared or -buildmode=c-archive it's OK if
     // there are no running goroutines. The calling program is
     // assumed to be running.
@@ -5495,6 +6068,7 @@ internal static void checkdead() {
     if ((islibrary || isarchive) && GOARCH != "wasm"u8) {
         return;
     }
+
     // If we are dying because of a signal caught on an already idle thread,
     // freezetheworld will cause all running threads to block.
     // And runtime will essentially enter into deadlock state,
@@ -5502,6 +6076,7 @@ internal static void checkdead() {
     if (Ꮡpanicking.Load() > 0) {
         return;
     }
+
     // If we are not running under cgo, but we have an extra M then account
     // for it. (It is possible to have an extra M on Windows without cgo to
     // accommodate callbacks created by syscall.NewCallback. See issue #6751
@@ -5510,6 +6085,7 @@ internal static void checkdead() {
     if (!iscgo && cgoHasExtraM && ᏑextraMLength.Load() > 0) {
         run0 = 1;
     }
+
     var run = mcount() - sched.nmidle - sched.nmidlelocked - sched.nmsys;
     if (run > run0) {
         return;
@@ -5519,13 +6095,14 @@ internal static void checkdead() {
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         @throw(checkdeadInconsistentˢ);
     }
+
     nint grunning = 0;
     forEachG((ж<g> gp) => {
-        if (isSystemGoroutine(ref (gp).DerefOrNull(), false)) {
+        if (isSystemGoroutine(gp, false)) {
             return;
         }
         var s = readgstatus(gp);
-        var exprᴛ1 = (uint32)(s & ~(uint32)_Gscan);
+        var exprᴛ1 = (s & ~(uint32)_Gscan);
         if (exprᴛ1 == _Gwaiting || exprᴛ1 == _Gpreempted) {
             grunning++;
         }
@@ -5534,18 +6111,18 @@ internal static void checkdead() {
             unlock(Ꮡsched.of(schedt.Ꮡlock));
             @throw(checkdeadRunnableGˢ);
         }
-
     });
-    if (grunning == 0) {
-        // possible if main goroutine calls runtime·Goexit()
+    if (grunning == 0) { // possible if main goroutine calls runtime·Goexit()
         unlock(Ꮡsched.of(schedt.Ꮡlock)); // unlock so that GODEBUG=scheddetail=1 doesn't hang
         fatal(noGoroutinesMainCalledˢ);
     }
+
     // Maybe jump time forward for playground.
     if (faketime != 0) {
         {
             var when = timeSleepUntil(); if (when < maxWhen) {
                 faketime = when;
+
                 // Start an M to steal the timer.
                 var (pp, _) = pidleget(faketime);
                 if (pp == nil) {
@@ -5572,12 +6149,14 @@ internal static void checkdead() {
             }
         }
     }
+
     // There are no goroutines running, so we can look at the P's.
     foreach (var (_, pp) in allp) {
         if (len((~pp).timers.heap) > 0) {
             return;
         }
     }
+
     unlock(Ꮡsched.of(schedt.Ꮡlock)); // unlock so that GODEBUG=scheddetail=1 doesn't hang
     fatal(allGoroutinesAreAsleepˢ);
 }
@@ -5589,10 +6168,6 @@ internal static void checkdead() {
 // This is a variable for testing purposes. It normally doesn't change.
 internal static ж<int64> Ꮡforcegcperiod = new StandardBox<int64>(120000000000L);
 internal static ref int64 forcegcperiod => ref Ꮡforcegcperiod.Value;
-
-// needSysmonWorkaround is true if the workaround for
-// golang.org/issue/42515 is needed on NetBSD.
-internal static bool needSysmonWorkaround = false;
 
 // haveSysmon indicates whether there is sysmon thread support.
 //
@@ -5607,23 +6182,24 @@ internal static void sysmon() {
     sched.nmsys++;
     checkdead();
     unlock(Ꮡsched.of(schedt.Ꮡlock));
+
+    var lastgomaxprocs = (int64)0;
     var lasttrace = (int64)0;
     nint idle = 0; // how many cycles in succession we had not wokeup somebody
     var delay = (uint32)0;
+
     while (ᐧ) {
-        if (idle == 0){
-            // start with 20us sleep...
+        if (idle == 0){ // start with 20us sleep...
             delay = 20;
         } else 
-        if (idle > 50) {
-            // start doubling the sleep after 1ms...
+        if (idle > 50) { // start doubling the sleep after 1ms...
             delay *= 2;
         }
-        if (delay > 10 * 1000) {
-            // up to 10ms
+        if (delay > 10 * 1000) { // up to 10ms
             delay = 10 * 1000;
         }
         usleep(delay);
+
         // sysmon should not enter deep sleep if schedtrace is enabled so that
         // it can print that information at the right time.
         //
@@ -5673,10 +6249,12 @@ internal static void sysmon() {
             }
             unlock(Ꮡsched.of(schedt.Ꮡlock));
         }
+
         @lock(Ꮡsched.of(schedt.Ꮡsysmonlock));
         // Update now in case we blocked on sysmonnote or spent a long time
         // blocked on schedlock or sysmonlock above.
         now = nanotime();
+
         // trigger libc interceptors if needed
         if (cgo_yield.Value != nil) {
             asmcgocall(cgo_yield.Value, nil);
@@ -5701,27 +6279,10 @@ internal static void sysmon() {
                 netpollAdjustWaiters(delta);
             }
         }
-        if (GOOS == "netbsd"u8 && needSysmonWorkaround) {
-            // netpoll is responsible for waiting for timer
-            // expiration, so we typically don't have to worry
-            // about starting an M to service timers. (Note that
-            // sleep for timeSleepUntil above simply ensures sysmon
-            // starts running again when that timer expiration may
-            // cause Go code to run again).
-            //
-            // However, netbsd has a kernel bug that sometimes
-            // misses netpollBreak wake-ups, which can lead to
-            // unbounded delays servicing timers. If we detect this
-            // overrun, then startm to get something to handle the
-            // timer.
-            //
-            // See issue 42515 and
-            // https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=50094.
-            {
-                var next = timeSleepUntil(); if (next < now) {
-                    startm(nil, false, false);
-                }
-            }
+        // Check if we need to update GOMAXPROCS at most once per second.
+        if (debug.updatemaxprocs != 0 && lastgomaxprocs + 1000000000 <= now) {
+            sysmonUpdateGOMAXPROCS();
+            lastgomaxprocs = now;
         }
         if (Ꮡscavenger.of(scavengerState.ᏑsysmonWake).Load() != 0) {
             // Kick the scavenger awake if someone requested it.
@@ -5773,72 +6334,211 @@ internal static uint32 retake(int64 now) {
     // temporarily drop the allpLock. Hence, we need to re-fetch
     // allp each time around the loop.
     for (nint i = 0; i < len(allp); i++) {
+        // Quickly filter out non-running Ps. Running Ps are either
+        // in a syscall or are actually executing. Idle Ps don't
+        // need to be retaken.
+        //
+        // This is best-effort, so it's OK that it's racy. Our target
+        // is to retake Ps that have been running or in a syscall for
+        // a long time (milliseconds), so the state has plenty of time
+        // to stabilize.
         var pp = allp[i];
-        if (pp == nil) {
-            // This can happen if procresize has grown
+        if (pp == nil || atomic.Load(pp.of(runtime_package.Δp.Ꮡstatus)) != _Prunning) {
+            // pp can be nil if procresize has grown
             // allp but not yet created new Ps.
             continue;
         }
         var pd = pp.of(runtime_package.Δp.Ꮡsysmontick);
-        var s = pp.Value.status;
         var sysretake = false;
-        if (s == _Prunning || s == _Psyscall) {
-            // Preempt G if it's running on the same schedtick for
-            // too long. This could be from a single long-running
-            // goroutine or a sequence of goroutines run via
-            // runnext, which share a single schedtick time slice.
-            var t = (int64)(~pp).schedtick;
-            if ((int64)(~pd).schedtick != t){
-                pd.Value.schedtick = (uint32)t;
-                pd.Value.schedwhen = now;
-            } else 
-            if ((~pd).schedwhen + (int64)forcePreemptNS <= now) {
-                preemptone(ref (pp).DerefOrNull());
-                // In case of syscall, preemptone() doesn't
-                // work, because there is no M wired to P.
-                sysretake = true;
-            }
+
+        // Preempt G if it's running on the same schedtick for
+        // too long. This could be from a single long-running
+        // goroutine or a sequence of goroutines run via
+        // runnext, which share a single schedtick time slice.
+        var schedt = (int64)(~pp).schedtick;
+        if ((int64)(~pd).schedtick != schedt){
+            pd.Value.schedtick = (uint32)schedt;
+            pd.Value.schedwhen = now;
+        } else 
+        if ((~pd).schedwhen + (int64)forcePreemptNS <= now) {
+            preemptone(ref (pp).DerefOrNull());
+            // If pp is in a syscall, preemptone doesn't work.
+            // The goroutine nor the thread can respond to a
+            // preemption request because they're not in Go code,
+            // so we need to take the P ourselves.
+            sysretake = true;
         }
-        if (s == _Psyscall) {
-            // Retake P from syscall if it's there for more than 1 sysmon tick (at least 20us).
-            var t = (int64)(~pp).syscalltick;
-            if (!sysretake && (int64)(~pd).syscalltick != t) {
-                pd.Value.syscalltick = (uint32)t;
+
+        // Drop allpLock so we can take sched.lock.
+        unlock(ᏑallpLock);
+
+        // Need to decrement number of idle locked M's (pretending that
+        // one more is running) before we take the P and resume.
+        // Otherwise the M from which we retake can exit the syscall,
+        // increment nmidle and report deadlock.
+        //
+        // Can't call incidlelocked once we setBlockOnExitSyscall, due
+        // to a lock ordering violation between sched.lock and _Gscan.
+        incidlelocked(-1);
+
+        // Try to prevent the P from continuing in the syscall, if it's in one at all.
+        var (thread, ok) = setBlockOnExitSyscall(pp);
+        if (!ok) {
+            // Not in a syscall, or something changed out from under us.
+            goto done;
+        }
+
+        // Retake the P if it's there for more than 1 sysmon tick (at least 20us).
+        {
+            var syst = (int64)(~pp).syscalltick; if (!sysretake && (int64)(~pd).syscalltick != syst) {
+                pd.Value.syscalltick = (uint32)syst;
                 pd.Value.syscallwhen = now;
-                continue;
+                thread.resume();
+                goto done;
             }
-            // On the one hand we don't want to retake Ps if there is no other work to do,
-            // but on the other hand we want to retake them eventually
-            // because they can prevent the sysmon thread from deep sleep.
-            if (runqempty(pp) && Ꮡsched.of(schedt.Ꮡnmspinning).Load() + Ꮡsched.of(schedt.Ꮡnpidle).Load() > 0 && (~pd).syscallwhen + 10 * 1000 * 1000 > now) {
-                continue;
-            }
-            // Drop allpLock so we can take sched.lock.
-            unlock(ᏑallpLock);
-            // Need to decrement number of idle locked M's
-            // (pretending that one more is running) before the CAS.
-            // Otherwise the M from which we retake can exit the syscall,
-            // increment nmidle and report deadlock.
-            incidlelocked(-1);
-            var Δtrace = traceAcquire();
-            if (atomic.Cas(pp.of(runtime_package.Δp.Ꮡstatus), s, _Pidle)){
-                if (Δtrace.ok()) {
-                    Δtrace.ProcSteal(pp, false);
-                    traceRelease(Δtrace);
-                }
-                n++;
-                pp.Value.syscalltick++;
-                handoffp(pp);
-            } else 
-            if (Δtrace.ok()) {
-                traceRelease(Δtrace);
-            }
-            incidlelocked(1);
-            @lock(ᏑallpLock);
         }
+
+        // On the one hand we don't want to retake Ps if there is no other work to do,
+        // but on the other hand we want to retake them eventually
+        // because they can prevent the sysmon thread from deep sleep.
+        if (runqempty(pp) && Ꮡsched.of(runtime_package.schedt.Ꮡnmspinning).Load() + Ꮡsched.of(runtime_package.schedt.Ꮡnpidle).Load() > 0 && (~pd).syscallwhen + 10 * 1000 * 1000 > now) {
+            thread.resume();
+            goto done;
+        }
+
+        // Take the P. Note: because we have the scan bit, the goroutine
+        // is at worst stuck spinning in exitsyscall.
+        thread.takeP();
+        thread.resume();
+        n++;
+
+        // Handoff the P for some other thread to run it.
+        handoffp(pp);
+
+        // The P has been handed off to another thread, so risk of a false
+        // deadlock report while we hold onto it is gone.
+done:
+        incidlelocked(1);
+        @lock(ᏑallpLock);
     }
     unlock(ᏑallpLock);
     return (uint32)n;
+}
+
+// syscallingThread represents a thread in a system call that temporarily
+// cannot advance out of the system call.
+partial struct syscallingThread {
+    internal ж<g> gp;
+    internal ж<m> mp;
+    internal ж<Δp> pp;
+    internal uint32 status;
+}
+
+// setBlockOnExitSyscall prevents pp's thread from advancing out of
+// exitsyscall. On success, returns the g/m/p state of the thread
+// and true. At that point, the caller owns the g/m/p links referenced,
+// the goroutine is in _Gsyscall, and prevented from transitioning out
+// of it. On failure, it returns false, and none of these guarantees are
+// made.
+//
+// Callers must call resume on the resulting thread state once
+// they're done with thread, otherwise it will remain blocked forever.
+//
+// This function races with state changes on pp, and thus may fail
+// if pp is not in a system call, or exits a system call concurrently
+// with this function. However, this function is safe to call without
+// any additional synchronization.
+internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<Δp> Ꮡpp) {
+    ref var pp = ref Ꮡpp.DerefOrNull();
+
+    if (pp.status != _Prunning) {
+        return (new syscallingThread(nil), false);
+    }
+    // Be very careful here, these reads are intentionally racy.
+    // Once we notice the G is in _Gsyscall, acquire its scan bit,
+    // and validate that it's still connected to the *same* M and P,
+    // we can actually get to work. Holding the scan bit will prevent
+    // the G from exiting the syscall.
+    //
+    // Our goal here is to interrupt long syscalls. If it turns out
+    // that we're wrong and the G switched to another syscall while
+    // we were trying to do this, that's completely fine. It's
+    // probably making more frequent syscalls and the typical
+    // preemption paths should be effective.
+    var mp = pp.m.ptr();
+    if (mp == nil) {
+        // Nothing to do.
+        return (new syscallingThread(nil), false);
+    }
+    var gp = mp.Value.curg;
+    if (gp == nil) {
+        // Nothing to do.
+        return (new syscallingThread(nil), false);
+    }
+    var status = readgstatus(gp) & ~(uint32)_Gscan;
+
+    // A goroutine is considered in a syscall, and may have a corresponding
+    // P, if it's in _Gsyscall *or* _Gdeadextra. In the latter case, it's an
+    // extra M goroutine.
+    if (status != _Gsyscall && status != _Gdeadextra) {
+        // Not in a syscall, nothing to do.
+        return (new syscallingThread(nil), false);
+    }
+    if (!castogscanstatus(gp, status, status | (uint32)_Gscan)) {
+        // Not in _Gsyscall or _Gdeadextra anymore. Nothing to do.
+        return (new syscallingThread(nil), false);
+    }
+    if ((~gp).m != mp || (~(~gp).m).p.ptr() != Ꮡpp) {
+        // This is not what we originally observed. Nothing to do.
+        casfrom_Gscanstatus(gp, status | (uint32)_Gscan, status);
+        return (new syscallingThread(nil), false);
+    }
+    return (new syscallingThread(gp, mp, Ꮡpp, status), true);
+}
+
+// gcstopP unwires the P attached to the syscalling thread
+// and moves it into the _Pgcstop state.
+//
+// The caller must be stopping the world.
+internal static void gcstopP(this syscallingThread s) {
+    assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
+    s.releaseP(_Pgcstop);
+    s.pp.Value.gcStopTime = nanotime();
+    sched.stopwait--;
+}
+
+// takeP unwires the P attached to the syscalling thread
+// and moves it into the _Pidle state.
+internal static void takeP(this syscallingThread s) {
+    s.releaseP(_Pidle);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string attemptedToReleasePIntoAˢ = "attempted to release P into a bad state"u8;
+
+// releaseP unwires the P from the syscalling thread, moving
+// it to the provided state. Callers should prefer to use
+// takeP and gcstopP.
+internal static void releaseP(this syscallingThread s, uint32 state) {
+    if (state != _Pidle && state != _Pgcstop) {
+        @throw(attemptedToReleasePIntoAˢ);
+    }
+    var Δtrace = traceAcquire();
+    s.pp.Value.m = 0;
+    s.mp.Value.p = 0;
+    atomic.Store(s.pp.of(runtime_package.Δp.Ꮡstatus), state);
+    if (Δtrace.ok()) {
+        Δtrace.ProcSteal(s.pp);
+        traceRelease(Δtrace);
+    }
+    addGSyscallNoP(ref (s.mp).DerefOrNull());
+    s.pp.Value.syscalltick++;
+}
+
+// resume allows a syscalling thread to advance beyond exitsyscall.
+internal static void resume(this syscallingThread s) {
+    casfrom_Gscanstatus(s.gp, s.status | (uint32)_Gscan, s.status);
 }
 
 // Tell all goroutines that they have been preempted and they should stop.
@@ -5878,17 +6578,25 @@ internal static bool preemptone(ref Δp pp) {
     if (gp == nil || gp == (~mp).g0) {
         return false;
     }
+    if ((readgstatus(gp) & ~(uint32)_Gscan) == _Gsyscall) {
+        // Don't bother trying to preempt a goroutine in a syscall.
+        return false;
+    }
+
     gp.Value.preempt = true;
+
     // Every call in a goroutine checks for stack overflow by
     // comparing the current stack pointer to gp->stackguard0.
     // Setting gp->stackguard0 to StackPreempt folds
     // preemption into the normal stack overflow check.
     gp.Value.stackguard0 = stackPreempt;
+
     // Request an async preemption of this P.
     if (preemptMSupported && debug.asyncpreemptoff == 0) {
         pp.preempt = true;
         preemptM(mp);
     }
+
     return true;
 }
 
@@ -5899,8 +6607,9 @@ internal static void schedtrace(bool detailed) {
     if (starttime == 0) {
         starttime = now;
     }
+
     @lock(Ꮡsched.of(schedt.Ꮡlock));
-    print((@string)"SCHED "u8, (now - starttime) / 1000000, (@string)"ms: gomaxprocs="u8, gomaxprocs, (@string)" idleprocs="u8, Ꮡsched.of(schedt.Ꮡnpidle).Load(), (@string)" threads="u8, mcount(), (@string)" spinningthreads="u8, Ꮡsched.of(schedt.Ꮡnmspinning).Load(), (@string)" needspinning="u8, Ꮡsched.of(schedt.Ꮡneedspinning).Load(), (@string)" idlethreads="u8, sched.nmidle, (@string)" runqueue="u8, sched.runqsize);
+    print((@string)"SCHED "u8, (now - starttime) / 1000000, (@string)"ms: gomaxprocs="u8, gomaxprocs, (@string)" idleprocs="u8, Ꮡsched.of(schedt.Ꮡnpidle).Load(), (@string)" threads="u8, mcount(), (@string)" spinningthreads="u8, Ꮡsched.of(schedt.Ꮡnmspinning).Load(), (@string)" needspinning="u8, Ꮡsched.of(schedt.Ꮡneedspinning).Load(), (@string)" idlethreads="u8, sched.nmidle, (@string)" runqueue="u8, sched.runq.size);
     if (detailed) {
         print((@string)" gcwaiting="u8, Ꮡsched.of(schedt.Ꮡgcwaiting).Load(), (@string)" nmidlelocked="u8, sched.nmidlelocked, (@string)" stopwait="u8, sched.stopwait, (@string)" sysmonwait="u8, Ꮡsched.of(schedt.Ꮡsysmonwait).Load(), (@string)"\n"u8);
     }
@@ -5908,34 +6617,46 @@ internal static void schedtrace(bool detailed) {
     // Even if we hold schedlock, most data can be changed concurrently.
     // E.g. (p->m ? p->m->id : -1) can crash if p->m changes from non-nil to nil.
     foreach (var (i, pp) in allp) {
-        var mp = (~pp).m.ptr();
         var h = atomic.Load(pp.of(runtime_package.Δp.Ꮡrunqhead));
         var t = atomic.Load(pp.of(runtime_package.Δp.Ꮡrunqtail));
         if (detailed){
             print((@string)"  P"u8, i, (@string)": status="u8, (~pp).status, (@string)" schedtick="u8, (~pp).schedtick, (@string)" syscalltick="u8, (~pp).syscalltick, (@string)" m="u8);
+            var mp = (~pp).m.ptr();
             if (mp != nil){
                 print((~mp).id);
             } else {
                 print((@string)"nil"u8);
             }
-            print((@string)" runqsize="u8, t - h, (@string)" gfreecnt="u8, (~pp).gFree.n, (@string)" timerslen="u8, len((~pp).timers.heap), (@string)"\n"u8);
+            print((@string)" runqsize="u8, t - h, (@string)" gfreecnt="u8, (~pp).gFree.size, (@string)" timerslen="u8, len((~pp).timers.heap), (@string)"\n"u8);
         } else {
             // In non-detailed mode format lengths of per-P run queues as:
-            // [len1 len2 len3 len4]
+            // [ len1 len2 len3 len4 ]
             print((@string)" "u8);
             if (i == 0) {
-                print((@string)"["u8);
+                print((@string)"[ "u8);
             }
             print(t - h);
             if (i == len(allp) - 1) {
-                print((@string)"]\n"u8);
+                print((@string)" ]"u8);
             }
         }
     }
+
+    if (!detailed) {
+        // Format per-P schedticks as: schedticks=[ tick1 tick2 tick3 tick4 ].
+        print((@string)" schedticks=[ "u8);
+        foreach (var (_, pp) in allp) {
+            print((~pp).schedtick);
+            print((@string)" "u8);
+        }
+        print((@string)"]\n"u8);
+    }
+
     if (!detailed) {
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         return;
     }
+
     for (var mp = allm; mp != nil; mp = mp.Value.alllink) {
         var pp = (~mp).p.ptr();
         print((@string)"  M"u8, (~mp).id, (@string)": p="u8);
@@ -5960,6 +6681,7 @@ internal static void schedtrace(bool detailed) {
         }
         print((@string)"\n"u8);
     }
+
     forEachG((ж<g> gp) => {
         print((@string)"  G"u8, (~gp).goid, (@string)": status="u8, readgstatus(gp), (@string)"("u8, (~gp).waitreason.String(), (@string)") m="u8);
         if ((~gp).m != nil){
@@ -5980,6 +6702,171 @@ internal static void schedtrace(bool detailed) {
     unlock(Ꮡsched.of(schedt.Ꮡlock));
 }
 
+partial struct updateMaxProcsGState {
+    internal mutex @lock;
+    internal ж<g> g;
+    internal atomic.Bool idle;
+    // Readable when idle == false, writable when idle == true.
+    internal int32 procs; // new GOMAXPROCS value
+}
+
+// GOMAXPROCS update godebug metric. Incremented if automatic
+// GOMAXPROCS updates actually change the value of GOMAXPROCS.
+internal static ж<godebugInc> updatemaxprocs = Ꮡ(new godebugInc(name: "updatemaxprocs"u8));
+
+// Synchronization and state between updateMaxProcsGoroutine and
+// sysmon.
+internal static ж<updateMaxProcsGState> ᏑupdateMaxProcsG = new StandardBox<updateMaxProcsGState>(new updateMaxProcsGState());
+internal static ref updateMaxProcsGState updateMaxProcsG => ref ᏑupdateMaxProcsG.Value;
+
+// Synchronization between GOMAXPROCS and sysmon.
+//
+// Setting GOMAXPROCS via a call to GOMAXPROCS disables automatic
+// GOMAXPROCS updates.
+//
+// We want to make two guarantees to callers of GOMAXPROCS. After
+// GOMAXPROCS returns:
+//
+// 1. The runtime will not make any automatic changes to GOMAXPROCS.
+//
+// 2. The runtime will not perform any of the system calls used to
+//    determine the appropriate value of GOMAXPROCS (i.e., it won't
+//    call defaultGOMAXPROCS).
+//
+// (1) is the baseline guarantee that everyone needs. The GOMAXPROCS
+// API isn't useful to anyone if automatic updates may occur after it
+// returns. This is easily achieved by double-checking the state under
+// STW before committing an automatic GOMAXPROCS update.
+//
+// (2) doesn't matter to most users, as it is isn't observable as long
+// as (1) holds. However, it can be important to users sandboxing Go.
+// They want disable these system calls and need some way to know when
+// they are guaranteed the calls will stop.
+//
+// This would be simple to achieve if we simply called
+// defaultGOMAXPROCS under STW in updateMaxProcsGoroutine below.
+// However, we would like to avoid scheduling this goroutine every
+// second when it will almost never do anything. Instead, sysmon calls
+// defaultGOMAXPROCS to decide whether to schedule
+// updateMaxProcsGoroutine. Thus we need to synchronize between sysmon
+// and GOMAXPROCS calls.
+//
+// GOMAXPROCS can't hold a runtime mutex across STW. It could hold a
+// semaphore, but sysmon cannot take semaphores. Instead, we have a
+// more complex scheme:
+//
+// * sysmon holds computeMaxProcsLock while calling defaultGOMAXPROCS.
+// * sysmon skips the current update if sched.customGOMAXPROCS is
+//   set.
+// * GOMAXPROCS sets sched.customGOMAXPROCS once it is committed to
+//   changing GOMAXPROCS.
+// * GOMAXPROCS takes computeMaxProcsLock to wait for outstanding
+//   defaultGOMAXPROCS calls to complete.
+//
+// N.B. computeMaxProcsLock could simply be sched.lock, but we want to
+// avoid holding that lock during the potentially slow
+// defaultGOMAXPROCS.
+internal static ж<mutex> ᏑcomputeMaxProcsLock = new StandardBox<mutex>(new mutex(nil));
+internal static ref mutex computeMaxProcsLock => ref ᏑcomputeMaxProcsLock.Value;
+
+// Start GOMAXPROCS update helper goroutine.
+//
+// This is based on forcegchelper.
+internal static partial void defaultGOMAXPROCSUpdateEnable() {
+    if (debug.updatemaxprocs == 0) {
+        // Unconditionally increment the metric when updates are disabled.
+        //
+        // It would be more descriptive if we did a dry run of the
+        // complete update, determining the appropriate value of
+        // GOMAXPROCS and the bailing out and just incrementing the
+        // metric if a change would occur.
+        //
+        // Not only is that a lot of ongoing work for a disabled
+        // feature, but some users need to be able to completely
+        // disable the update system calls (such as sandboxes).
+        // Currently, updatemaxprocs=0 serves that purpose.
+        updatemaxprocs.IncNonDefault();
+        return;
+    }
+
+    goǃ(updateMaxProcsGoroutine);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string updateMaxProcsGoroutineˢ = "updateMaxProcsGoroutine: phase error"u8;
+
+internal static void updateMaxProcsGoroutine() {
+    updateMaxProcsG.g = getg();
+    lockInit(ref updateMaxProcsG.@lock, lockRankUpdateMaxProcsG);
+    while (ᐧ) {
+        @lock(ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡlock));
+        if (ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡidle).Load()) {
+            @throw(updateMaxProcsGoroutineˢ);
+        }
+        ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡidle).Store(true);
+        goparkunlock(ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡlock), waitReasonUpdateGOMAXPROCSIdle, traceBlockSystemGoroutine, 1);
+        // This goroutine is explicitly resumed by sysmon.
+
+        var stw = stopTheWorldGC(stwGOMAXPROCS);
+
+        // Still OK to update?
+        @lock(Ꮡsched.of(schedt.Ꮡlock));
+        var custom = sched.customGOMAXPROCS;
+        unlock(Ꮡsched.of(schedt.Ꮡlock));
+        if (custom) {
+            startTheWorldGC(stw);
+            return;
+        }
+
+        // newprocs will be processed by startTheWorld
+        //
+        // TODO(prattmic): this could use a nicer API. Perhaps add it to the
+        // stw parameter?
+        newprocs = updateMaxProcsG.procs;
+        @lock(Ꮡsched.of(schedt.Ꮡlock));
+        sched.customGOMAXPROCS = false;
+        unlock(Ꮡsched.of(schedt.Ꮡlock));
+
+        startTheWorldGC(stw);
+    }
+}
+
+internal static void sysmonUpdateGOMAXPROCS() {
+    // Synchronize with GOMAXPROCS. See comment on computeMaxProcsLock.
+    @lock(ᏑcomputeMaxProcsLock);
+
+    // No update if GOMAXPROCS was set manually.
+    @lock(Ꮡsched.of(schedt.Ꮡlock));
+    var custom = sched.customGOMAXPROCS;
+    var curr = gomaxprocs;
+    unlock(Ꮡsched.of(schedt.Ꮡlock));
+    if (custom) {
+        unlock(ᏑcomputeMaxProcsLock);
+        return;
+    }
+
+    // Don't hold sched.lock while we read the filesystem.
+    var procs = defaultGOMAXPROCS(0);
+    unlock(ᏑcomputeMaxProcsLock);
+    if (procs == curr) {
+        // Nothing to do.
+        return;
+    }
+
+    // Sysmon can't directly stop the world. Run the helper to do so on our
+    // behalf. If updateGOMAXPROCS.idle is false, then a previous update is
+    // still pending.
+    if (ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡidle).Load()) {
+        @lock(ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡlock));
+        updateMaxProcsG.procs = procs;
+        ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡidle).Store(false);
+        ref var list = ref heap(new gList(), out var Ꮡlist);
+        list.push(updateMaxProcsG.g);
+        injectglist(Ꮡlist);
+        unlock(ᏑupdateMaxProcsG.of(updateMaxProcsGState.Ꮡlock));
+    }
+}
+
 // schedEnableUser enables or disables the scheduling of user
 // goroutines.
 //
@@ -5993,9 +6880,8 @@ internal static void schedEnableUser(bool enable) {
     }
     sched.disable.user = !enable;
     if (enable){
-        var n = sched.disable.n;
-        sched.disable.n = 0;
-        globrunqputbatch(ref sched.disable.runnable, n);
+        var n = sched.disable.runnable.size;
+        globrunqputbatch(ref sched.disable.runnable);
         unlock(Ꮡsched.of(schedt.Ꮡlock));
         for (; n != 0 && Ꮡsched.of(schedt.Ꮡnpidle).Load() != 0; n--) {
             startm(nil, false, false);
@@ -6009,10 +6895,11 @@ internal static void schedEnableUser(bool enable) {
 // false is scheduling of gp is disabled.
 //
 // sched.lock must be held.
-internal static bool schedEnabled(ref g gp) {
+internal static bool schedEnabled(ж<g> Ꮡgp) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     if (sched.disable.user) {
-        return isSystemGoroutine(ref gp, true);
+        return isSystemGoroutine(Ꮡgp, true);
     }
     return true;
 }
@@ -6023,11 +6910,9 @@ internal static bool schedEnabled(ref g gp) {
 //
 //go:nowritebarrierrec
 internal static void mput(ж<m> Ꮡmp) {
-    ref var mp = ref Ꮡmp.DerefOrNull();
-
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
-    mp.schedlink = sched.midle;
-    Ꮡsched.of(schedt.Ꮡmidle).set(Ꮡmp);
+
+    Ꮡsched.of(schedt.Ꮡmidle).push(@unsafe.Pointer.FromPinnedBox(Ꮡmp));
     sched.nmidle++;
     checkdead();
 }
@@ -6039,12 +6924,35 @@ internal static void mput(ж<m> Ꮡmp) {
 //go:nowritebarrierrec
 internal static ж<m> mget() {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
-    var mp = sched.midle.ptr();
+
+    var mp = (ж<m>)(uintptr)(Ꮡsched.of(schedt.Ꮡmidle).pop());
     if (mp != nil) {
-        sched.midle = mp.Value.schedlink;
         sched.nmidle--;
     }
     return mp;
+}
+
+// Try to get a specific m from midle list. Returns nil if it isn't on the
+// midle list.
+//
+// sched.lock must be held.
+// May run during STW, so write barriers are not allowed.
+//
+//go:nowritebarrierrec
+internal static ж<m> mgetSpecific(ж<m> Ꮡmp) {
+    ref var mp = ref Ꮡmp.DerefOrNull();
+
+    assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
+    if (mp.idleNode.prev == 0 && mp.idleNode.next == 0) {
+        // Not on the list.
+        return default!;
+    }
+
+    Ꮡsched.of(schedt.Ꮡmidle).remove(@unsafe.Pointer.FromPinnedBox(Ꮡmp));
+    sched.nmidle--;
+
+    return Ꮡmp;
 }
 
 // Put gp on the global runnable queue.
@@ -6054,8 +6962,8 @@ internal static ж<m> mget() {
 //go:nowritebarrierrec
 internal static void globrunqput(ж<g> Ꮡgp) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     Ꮡsched.of(schedt.Ꮡrunq).pushBack(Ꮡgp);
-    sched.runqsize++;
 }
 
 // Put gp at the head of the global runnable queue.
@@ -6065,8 +6973,8 @@ internal static void globrunqput(ж<g> Ꮡgp) {
 //go:nowritebarrierrec
 internal static void globrunqputhead(ж<g> Ꮡgp) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     Ꮡsched.of(schedt.Ꮡrunq).push(Ꮡgp);
-    sched.runqsize++;
 }
 
 // Put a batch of runnable goroutines on the global runnable queue.
@@ -6075,63 +6983,97 @@ internal static void globrunqputhead(ж<g> Ꮡgp) {
 // May run during STW, so write barriers are not allowed.
 //
 //go:nowritebarrierrec
-internal static void globrunqputbatch(ref gQueue batch, int32 n) {
+internal static void globrunqputbatch(ref gQueue batch) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     Ꮡsched.of(schedt.Ꮡrunq).pushBackAll(batch);
-    sched.runqsize += n;
     batch = new gQueue(nil);
+}
+
+// Try get a single G from the global runnable queue.
+// sched.lock must be held.
+internal static ж<g> globrunqget() {
+    assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
+    if (sched.runq.size == 0) {
+        return default!;
+    }
+
+    return Ꮡsched.of(schedt.Ꮡrunq).pop();
 }
 
 // Try get a batch of G's from the global runnable queue.
 // sched.lock must be held.
-internal static ж<g> globrunqget(ж<Δp> Ꮡpp, int32 max) {
-    ref var pp = ref Ꮡpp.DerefOrNull();
+internal static (ж<g> gp, gQueue q) globrunqgetbatch(int32 n) {
+    ж<g> gp = default!;
+    gQueue q = default!;
 
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
-    if (sched.runqsize == 0) {
-        return default!;
+
+    if (sched.runq.size == 0) {
+        return (gp, q);
     }
-    var n = quo(sched.runqsize, gomaxprocs) + 1;
-    if (n > sched.runqsize) {
-        n = sched.runqsize;
-    }
-    if (max > 0 && n > max) {
-        n = max;
-    }
-    if (n > (int32)len(pp.runq) / 2) {
-        n = (int32)len(pp.runq) / 2;
-    }
-    sched.runqsize -= n;
-    var gp = Ꮡsched.of(schedt.Ꮡrunq).pop();
+
+    n = min(n, sched.runq.size, quo(sched.runq.size, gomaxprocs) + 1);
+
+    gp = Ꮡsched.of(schedt.Ꮡrunq).pop();
     n--;
+
     for (; n > 0; n--) {
         var gp1 = Ꮡsched.of(schedt.Ꮡrunq).pop();
-        runqput(Ꮡpp, gp1, false);
+        q.pushBack(gp1);
     }
-    return gp;
+    return (gp, q);
 }
 
+// pMask is an atomic bitstring with one bit per P.
 partial struct pMask /*[]uint32*/;
 
 // read returns true if P id's bit is set.
 internal static bool read(this pMask Δp, uint32 id) {
     var word = id / 32;
-    var mask = ((uint32)1 << (int)((id % 32)));
-    return ((uint32)(atomic.Load(Ꮡ(Δp, word)) & mask)) != 0;
+    var mask = (uint32)1 << (int)(id % 32);
+    return (atomic.Load(Ꮡ(Δp, word)) & mask) != 0;
 }
 
 // set sets P id's bit.
 internal static void set(this pMask Δp, int32 id) {
     var word = id / 32;
-    var mask = ((uint32)1).Lsh((int64)((id % 32)));
+    var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.Or(Ꮡ(Δp, word), mask);
 }
 
 // clear clears P id's bit.
 internal static void clear(this pMask Δp, int32 id) {
     var word = id / 32;
-    var mask = ((uint32)1).Lsh((int64)((id % 32)));
+    var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.And(Ꮡ(Δp, word), ~mask);
+}
+
+// any returns true if any bit in p is set.
+internal static bool any(this pMask Δp) {
+    foreach (var (i, _) in Δp) {
+        if (atomic.Load(Ꮡ(Δp, i)) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// resize resizes the pMask and returns a new one.
+//
+// The result may alias p, so callers are encouraged to
+// discard p. Not safe for concurrent use.
+internal static pMask resize(this pMask Δp, int32 nprocs) {
+    var maskWords = (nprocs + 31) / 32;
+
+    if (maskWords <= (int32)cap(Δp)) {
+        return Δp.slice(0, maskWords);
+    }
+    var newMask = new slice<uint32>(maskWords);
+    // No need to copy beyond len, old Ps are irrelevant.
+    copy(newMask, Δp);
+    return newMask;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -6153,6 +7095,7 @@ internal static int64 pidleput(ж<Δp> Ꮡpp, int64 now) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     if (!runqempty(Ꮡpp)) {
         @throw(pidleputPHasNonEmptyRunˢ);
     }
@@ -6181,6 +7124,7 @@ internal static int64 pidleput(ж<Δp> Ꮡpp, int64 now) {
 //go:nowritebarrierrec
 internal static (ж<Δp>, int64) pidleget(int64 now) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     var pp = sched.pidle.ptr();
     if (pp != nil) {
         // Timer may get added at any time now.
@@ -6208,14 +7152,16 @@ internal static (ж<Δp>, int64) pidleget(int64 now) {
 //go:nowritebarrierrec
 internal static (ж<Δp>, int64) pidlegetSpinning(int64 now) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
+
     (var pp, now) = pidleget(now);
     if (pp == nil) {
-        // See "Delicate dance" comment in findrunnable. We found work
+        // See "Delicate dance" comment in findRunnable. We found work
         // that we cannot take, we must synchronize with non-spinning
         // Ms that may be preparing to drop their P.
         Ꮡsched.of(schedt.Ꮡneedspinning).Store(1);
         return (default!, now);
     }
+
     return (pp, now);
 }
 
@@ -6255,10 +7201,11 @@ internal static void runqput(ж<Δp> Ꮡpp, ж<g> Ꮡgp, bool next) {
     if (randomizeScheduler && next && randn(2) == 0) {
         next = false;
     }
+
     if (next) {
 retryNext:
         var oldnext = pp.runnext;
-        if (!Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(oldnext, new Δguintptr(gp))) {
+        if (!Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(oldnext, new Δguintptr(Ꮡgp))) {
             goto retryNext;
         }
         if (oldnext == 0) {
@@ -6267,6 +7214,7 @@ retryNext:
         // Kick the old runnext out to the regular run queue.
         Ꮡgp = oldnext.ptr(); gp = ref Ꮡgp.DerefOrNull();
     }
+
 retry:
     var h = atomic.LoadAcq(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead)); // load-acquire, synchronize with consumers
     var t = pp.runqtail;
@@ -6291,6 +7239,7 @@ internal static bool runqputslow(ж<Δp> Ꮡpp, ж<g> Ꮡgp, uint32 h, uint32 t)
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     array<ж<g>> batch = new(129); /* len(pp.runq) / 2 + 1 */
+
     // First, grab a batch from local queue.
     var n = t - h;
     n = n / 2;
@@ -6300,39 +7249,42 @@ internal static bool runqputslow(ж<Δp> Ꮡpp, ж<g> Ꮡgp, uint32 h, uint32 t)
     for (var i = (uint32)0; i < n; i++) {
         batch[i] = pp.runq[(h + i) % (uint32)len(pp.runq)].ptr();
     }
-    if (!atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + n)) {
-        // cas-release, commits consume
+    if (!atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + n)) { // cas-release, commits consume
         return false;
     }
     batch[n] = Ꮡgp;
+
     if (randomizeScheduler) {
         for (var i = (uint32)1; i <= n; i++) {
             var j = cheaprandn(i + 1);
             (batch[i], batch[j]) = (batch[j], batch[i]);
         }
     }
+
     // Link the goroutines.
     for (var i = (uint32)0; i < n; i++) {
         batch[i].of(g.Ꮡschedlink).set(batch[i + 1]);
     }
-    gQueue q = default!;
-    q.head.set(batch[0]);
-    q.tail.set(batch[n]);
+
+    var q = new gQueue(batch[0].guintptr(), batch[n].guintptr(), (int32)(n + 1));
+
     // Now put the batch on global queue.
     @lock(Ꮡsched.of(schedt.Ꮡlock));
-    globrunqputbatch(ref q, (int32)(n + 1));
+    globrunqputbatch(ref q);
     unlock(Ꮡsched.of(schedt.Ꮡlock));
     return true;
 }
 
 // runqputbatch tries to put all the G's on q on the local runnable queue.
-// If the queue is full, they are put on the global queue; in that case
-// this will temporarily acquire the scheduler lock.
+// If the local runq is full the input queue still contains unqueued Gs.
 // Executed only by the owner P.
-internal static void runqputbatch(ж<Δp> Ꮡpp, ж<gQueue> Ꮡq, nint qsize) {
+internal static void runqputbatch(ж<Δp> Ꮡpp, ж<gQueue> Ꮡq) {
     ref var pp = ref Ꮡpp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
+    if (q.empty()) {
+        return;
+    }
     var h = atomic.LoadAcq(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead));
     var t = pp.runqtail;
     var n = (uint32)0;
@@ -6342,7 +7294,7 @@ internal static void runqputbatch(ж<Δp> Ꮡpp, ж<gQueue> Ꮡq, nint qsize) {
         t++;
         n++;
     }
-    qsize -= (nint)n;
+
     if (randomizeScheduler) {
         uint32 off(uint32 o) => (Ꮡpp.Value.runqtail + o) % (uint32)len(Ꮡpp.Value.runq);
         for (var i = (uint32)1; i < n; i++) {
@@ -6350,12 +7302,10 @@ internal static void runqputbatch(ж<Δp> Ꮡpp, ж<gQueue> Ꮡq, nint qsize) {
             (pp.runq[off(i)], pp.runq[off(j)]) = (pp.runq[off(j)], pp.runq[off(i)]);
         }
     }
+
     atomic.StoreRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqtail), t);
-    if (!q.empty()) {
-        @lock(Ꮡsched.of(schedt.Ꮡlock));
-        globrunqputbatch(ref (Ꮡq).DerefOrNull(), (int32)qsize);
-        unlock(Ꮡsched.of(schedt.Ꮡlock));
-    }
+
+    return;
 }
 
 // Get g from local runnable queue.
@@ -6373,6 +7323,7 @@ internal static (ж<g> gp, bool inheritTime) runqget(ж<Δp> Ꮡpp) {
     if (next != 0 && Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(next, 0)) {
         return (next.ptr(), true);
     }
+
     while (ᐧ) {
         var h = atomic.LoadAcq(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead)); // load-acquire, synchronize with other consumers
         var t = pp.runqtail;
@@ -6380,8 +7331,7 @@ internal static (ж<g> gp, bool inheritTime) runqget(ж<Δp> Ꮡpp) {
             return (default!, false);
         }
         var gpΔ1 = pp.runq[h % (uint32)len(pp.runq)].ptr();
-        if (atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + 1)) {
-            // cas-release, commits consume
+        if (atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + 1)) { // cas-release, commits consume
             return (gpΔ1, false);
         }
     }
@@ -6389,31 +7339,30 @@ internal static (ж<g> gp, bool inheritTime) runqget(ж<Δp> Ꮡpp) {
 
 // runqdrain drains the local runnable queue of pp and returns all goroutines in it.
 // Executed only by the owner P.
-internal static (gQueue drainQ, uint32 n) runqdrain(ж<Δp> Ꮡpp) {
+internal static gQueue /*drainQ*/ runqdrain(ж<Δp> Ꮡpp) {
     gQueue drainQ = default!;
-    uint32 n = default!;
-
     ref var pp = ref Ꮡpp.DerefOrNull();
+
     var oldNext = pp.runnext;
     if (oldNext != 0 && Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(oldNext, 0)) {
         drainQ.pushBack(oldNext.ptr());
-        n++;
     }
+
 retry:
     var h = atomic.LoadAcq(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead)); // load-acquire, synchronize with other consumers
     var t = pp.runqtail;
     var qn = t - h;
     if (qn == 0) {
-        return (drainQ, n);
+        return drainQ;
     }
-    if (qn > (uint32)len(pp.runq)) {
-        // read inconsistent h and t
+    if (qn > (uint32)len(pp.runq)) { // read inconsistent h and t
         goto retry;
     }
-    if (!atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + qn)) {
-        // cas-release, commits consume
+
+    if (!atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + qn)) { // cas-release, commits consume
         goto retry;
     }
+
     // We've inverted the order in which it gets G's from the local P's runnable queue
     // and then advances the head pointer because we don't want to mess up the statuses of G's
     // while runqdrain() and runqsteal() are running in parallel.
@@ -6424,9 +7373,8 @@ retry:
     for (var i = (uint32)0; i < qn; i++) {
         var gp = pp.runq[(h + i) % (uint32)len(pp.runq)].ptr();
         drainQ.pushBack(gp);
-        n++;
     }
-    return (drainQ, n);
+    return drainQ;
 }
 
 // Grabs a batch of goroutines from pp's runnable queue into batch.
@@ -6448,23 +7396,40 @@ internal static uint32 runqgrab(ж<Δp> Ꮡpp, /*[256]*/ ж<array<Δguintptr>> �
                 {
                     var next = pp.runnext; if (next != 0) {
                         if (pp.status == _Prunning) {
-                            // Sleep to ensure that pp isn't about to run the g
-                            // we are about to steal.
-                            // The important use case here is when the g running
-                            // on pp ready()s another g and then almost
-                            // immediately blocks. Instead of stealing runnext
-                            // in this window, back off to give pp a chance to
-                            // schedule runnext. This will avoid thrashing gs
-                            // between different Ps.
-                            // A sync chan send/recv takes ~50ns as of time of
-                            // writing, so 3us gives ~50x overshoot.
-                            if (!osHasLowResTimer){
-                                usleep(3);
-                            } else {
-                                // On some platforms system timer granularity is
-                                // 1-15ms, which is way too much for this
-                                // optimization. So just yield.
-                                osyield();
+                            {
+                                var mp = pp.m.ptr(); if (mp != nil) {
+                                    {
+                                        var gp = mp.Value.curg; if (gp == nil || (readgstatus(gp) & ~(uint32)_Gscan) != _Gsyscall) {
+                                            // Sleep to ensure that pp isn't about to run the g
+                                            // we are about to steal.
+                                            // The important use case here is when the g running
+                                            // on pp ready()s another g and then almost
+                                            // immediately blocks. Instead of stealing runnext
+                                            // in this window, back off to give pp a chance to
+                                            // schedule runnext. This will avoid thrashing gs
+                                            // between different Ps.
+                                            // A sync chan send/recv takes ~50ns as of time of
+                                            // writing, so 3us gives ~50x overshoot.
+                                            // If curg is nil, we assume that the P is likely
+                                            // to be in the scheduler. If curg isn't nil and isn't
+                                            // in a syscall, then it's either running, waiting, or
+                                            // runnable. In this case we want to sleep because the
+                                            // P might either call into the scheduler soon (running),
+                                            // or already is (since we found a waiting or runnable
+                                            // goroutine hanging off of a running P, suggesting it
+                                            // either recently transitioned out of running, or will
+                                            // transition to running shortly).
+                                            if (!osHasLowResTimer){
+                                                usleep(3);
+                                            } else {
+                                                // On some platforms system timer granularity is
+                                                // 1-15ms, which is way too much for this
+                                                // optimization. So just yield.
+                                                osyield();
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         if (!Ꮡpp.of(runtime_package.Δp.Ꮡrunnext).cas(next, 0)) {
@@ -6477,16 +7442,14 @@ internal static uint32 runqgrab(ж<Δp> Ꮡpp, /*[256]*/ ж<array<Δguintptr>> �
             }
             return 0;
         }
-        if (n > (uint32)(len(pp.runq) / 2)) {
-            // read inconsistent h and t
+        if (n > (uint32)(len(pp.runq) / 2)) { // read inconsistent h and t
             continue;
         }
         for (var i = (uint32)0; i < n; i++) {
             var g = pp.runq[(h + i) % (uint32)len(pp.runq)];
             batch[(batchHead + i) % (uint32)256] = g;
         }
-        if (atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + n)) {
-            // cas-release, commits consume
+        if (atomic.CasRel(Ꮡpp.of(runtime_package.Δp.Ꮡrunqhead), h, h + n)) { // cas-release, commits consume
             return n;
         }
     }
@@ -6524,6 +7487,7 @@ internal static ж<g> runqsteal(ж<Δp> Ꮡpp, ж<Δp> Ꮡp2, bool stealRunNextG
 partial struct gQueue {
     internal Δguintptr head;
     internal Δguintptr tail;
+    internal int32 size;
 }
 
 // empty reports whether q is empty.
@@ -6540,6 +7504,7 @@ internal static void push(this ref gQueue q, ж<g> Ꮡgp) {
     if (q.tail == 0) {
         q.tail.set(Ꮡgp);
     }
+    q.size++;
 }
 
 // pushBack adds gp to the tail of q.
@@ -6553,6 +7518,7 @@ internal static void pushBack(this ref gQueue q, ж<g> Ꮡgp) {
         q.head.set(Ꮡgp);
     }
     q.tail.set(Ꮡgp);
+    q.size++;
 }
 
 // pushBackAll adds all Gs in q2 to the tail of q. After this q2 must
@@ -6568,6 +7534,7 @@ internal static void pushBackAll(this ref gQueue q, gQueue q2) {
         q.head = q2.head;
     }
     q.tail = q2.tail;
+    q.size += q2.size;
 }
 
 // pop removes and returns the head of queue q. It returns nil if
@@ -6579,13 +7546,14 @@ internal static ж<g> pop(this ref gQueue q) {
         if (q.head == 0) {
             q.tail = 0;
         }
+        q.size--;
     }
     return gp;
 }
 
 // popList takes all Gs in q and returns them as a gList.
 internal static gList popList(this ref gQueue q) {
-    var Δstack = new gList(q.head);
+    var Δstack = new gList(q.head, q.size);
     q = new gQueue(nil);
     return Δstack;
 }
@@ -6594,6 +7562,7 @@ internal static gList popList(this ref gQueue q) {
 // on one gQueue or gList at a time.
 partial struct gList {
     internal Δguintptr head;
+    internal int32 size;
 }
 
 // empty reports whether l is empty.
@@ -6607,13 +7576,15 @@ internal static void push(this ref gList l, ж<g> Ꮡgp) {
 
     gp.schedlink = l.head;
     l.head.set(Ꮡgp);
+    l.size++;
 }
 
-// pushAll prepends all Gs in q to l.
+// pushAll prepends all Gs in q to l. After this q must not be used.
 internal static void pushAll(this ref gList l, gQueue q) {
     if (!q.empty()) {
         q.tail.ptr().Value.schedlink = l.head;
         l.head = q.head;
+        l.size += q.size;
     }
 }
 
@@ -6622,6 +7593,7 @@ internal static ж<g> pop(this ref gList l) {
     var gp = l.head.ptr();
     if (gp != nil) {
         l.head = gp.Value.schedlink;
+        l.size--;
     }
     return gp;
 }
@@ -6632,8 +7604,7 @@ internal static nint /*out*/ setMaxThreads(nint @in) {
 
     @lock(Ꮡsched.of(schedt.Ꮡlock));
     @out = (nint)sched.maxmcount;
-    if (@in > 0x7fffffff){
-        // MaxInt32
+    if (@in > 0x7fffffff){ // MaxInt32
         sched.maxmcount = 0x7fffffff;
     } else {
         sched.maxmcount = (int32)@in;
@@ -6658,6 +7629,7 @@ internal static nint /*out*/ setMaxThreads(nint @in) {
 internal static nint procPin() {
     var gp = getg();
     var mp = gp.Value.m;
+
     mp.Value.locks++;
     return (nint)(~(~mp).p.ptr()).id;
 }
@@ -6713,7 +7685,7 @@ internal static bool internal_sync_runtime_canSpin(nint i) {
     // GOMAXPROCS>1 and there is at least one other running P and local runq is empty.
     // As opposed to runtime mutex we don't do passive spinning here,
     // because there can be work on global runq or on other Ps.
-    if (i >= active_spin || ncpu <= 1 || gomaxprocs <= Ꮡsched.of(schedt.Ꮡnpidle).Load() + Ꮡsched.of(schedt.Ꮡnmspinning).Load() + 1) {
+    if (i >= active_spin || numCPUStartup <= 1 || gomaxprocs <= Ꮡsched.of(schedt.Ꮡnpidle).Load() + Ꮡsched.of(schedt.Ꮡnmspinning).Load() + 1) {
         return false;
     }
     {
@@ -6855,29 +7827,30 @@ internal static void doInit1(ж<initTask> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.state) {
-    case 2: {
+    case 2: { // fully initialized
         return;
     }
-    case 1: {
+    case 1: { // initialization in progress
         @throw(recursiveCallDuringˢ);
         break;
     }
-    default: {
+    default: { // not initialized yet
         t.state = 1; // initialization in progress
-// fully initialized
-// initialization in progress
-// not initialized yet
+
         int64 start = default!;
         tracestat before = default!;
+
         if (inittrace.active) {
             start = nanotime();
             // Load stats non-atomically since tracinit is updated only by this init goroutine.
             before = inittrace;
         }
+
         if (t.nfns == 0) {
             // We should have pruned all of these in the linker.
             @throw(inittaskWithNoFunctionsˢ);
         }
+
         ref var firstFunc = ref heap<@unsafe.Pointer>(out var ᏑfirstFunc);
         firstFunc = (uintptr)add(@unsafe.Pointer.FromPinnedBox(Ꮡt), 8);
         for (var i = (uint32)0; i < t.nfns; i++) {
@@ -6886,24 +7859,27 @@ internal static void doInit1(ж<initTask> Ꮡt) {
             var f = (Ꮡp.Reinterpret<@unsafe.Pointer, Action>()).ValueSlot;
             f();
         }
+
         if (inittrace.active) {
             var end = nanotime();
             // Load stats non-atomically since tracinit is updated only by this init goroutine.
             var after = inittrace;
+
             var f = (ᏑfirstFunc.Reinterpret<@unsafe.Pointer, Action>()).ValueSlot;
             @string pkg = funcpkgpath(findfunc(abi.FuncPCABIInternal((f).OrTypedNilFunc())));
+
             array<byte> sbuf = new(24);
             print((@string)"init "u8, pkg, (@string)" @"u8);
-            print(((@string)fmtNSAsMS(sbuf[..], (uint64)(start - runtimeInitTime))), (@string)" ms, "u8);
-            print(((@string)fmtNSAsMS(sbuf[..], (uint64)(end - start))), (@string)" ms clock, "u8);
-            print(((@string)itoa(sbuf[..], after.bytes - before.bytes)), (@string)" bytes, "u8);
-            print(((@string)itoa(sbuf[..], after.allocs - before.allocs)), (@string)" allocs"u8);
+            print((@string)fmtNSAsMS(sbuf[..], (uint64)(start - runtimeInitTime)), (@string)" ms, "u8);
+            print((@string)fmtNSAsMS(sbuf[..], (uint64)(end - start)), (@string)" ms clock, "u8);
+            print((@string)itoa(sbuf[..], after.bytes - before.bytes), (@string)" bytes, "u8);
+            print((@string)itoa(sbuf[..], after.allocs - before.allocs), (@string)" allocs"u8);
             print((@string)"\n"u8);
         }
+
         t.state = 2; // initialization done
         break;
     }}
-
 }
 
 } // end runtime_package

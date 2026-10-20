@@ -16,11 +16,13 @@ partial class gzip_internal_test_package {
 // TestEmpty tests that an empty payload still forms a valid GZIP stream.
 public static void TestEmpty(ж<testing.T> Ꮡt) {
     var buf = @new<bytes.Buffer>();
+
     {
         var errΔ1 = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf)).Close(); if (errΔ1 != default!) {
             Ꮡt.Fatalf("Writer.Close: %v"u8, errΔ1);
         }
     }
+
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
     if (err != default!) {
         Ꮡt.Fatalf("NewReader: %v"u8, err);
@@ -54,6 +56,7 @@ internal static readonly object extraˢ = (@string)"extra"u8;
 // function.
 public static void TestRoundTrip(ж<testing.T> Ꮡt) {
     var buf = @new<bytes.Buffer>();
+
     var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
     w.Value.Comment = commentˢ;
     w.Value.Extra = slice<byte>("extra"u8);
@@ -69,6 +72,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Writer.Close: %v"u8, errΔ2);
         }
     }
+
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
     if (err != default!) {
         Ꮡt.Fatalf("NewReader: %v"u8, err);
@@ -78,7 +82,7 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ReadAll: %v"u8, err);
     }
     if (((sstring)b) != "payload"u8) {
-        Ꮡt.Fatalf("payload is %q, want %q"u8, ((@string)b), payloadˢ);
+        Ꮡt.Fatalf("payload is %q, want %q"u8, (@string)b, payloadˢ);
     }
     if ((~r).Comment != "comment"u8) {
         Ꮡt.Fatalf("comment is %q, want %q"u8, (~r).Comment, commentˢ);
@@ -114,6 +118,7 @@ public static void TestLatin1(ж<testing.T> Ꮡt) {
     if (s != utf8) {
         Ꮡt.Fatalf("read latin-1: got %q, want %q"u8, s, utf8);
     }
+
     var buf = bytes.NewBuffer(new slice<byte>(0, len(latin1)));
     var c = new Writer(w: new gzip_test_package.bytes_BufferжWriter(buf));
     {
@@ -123,7 +128,7 @@ public static void TestLatin1(ж<testing.T> Ꮡt) {
     }
     s = buf.String();
     if (s != ((sstring)latin1)) {
-        Ꮡt.Fatalf("write utf-8: got %q, want %q"u8, s, ((@string)latin1));
+        Ꮡt.Fatalf("write utf-8: got %q, want %q"u8, s, (@string)latin1);
     }
 }
 
@@ -149,6 +154,7 @@ public static void TestLatin1RoundTrip(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (_, tc) in testCases) {
         var buf = @new<bytes.Buffer>();
+
         var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
         w.Value.Name = tc.name;
         var err = w.Close();
@@ -159,6 +165,7 @@ public static void TestLatin1RoundTrip(ж<testing.T> Ꮡt) {
         if (!tc.ok) {
             continue;
         }
+
         (var r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(buf));
         if (err != default!) {
             Ꮡt.Errorf("NewReader: %v"u8, err);
@@ -188,38 +195,47 @@ internal static readonly object flushDidnTFlushAnyDataˢ = (@string)"Flush didn'
 
 public static void TestWriterFlush(ж<testing.T> Ꮡt) {
     var buf = @new<bytes.Buffer>();
+
     var w = NewWriter(new gzip_test_package.bytes_BufferжWriter(buf));
     w.Value.Comment = commentˢ;
     w.Value.Extra = slice<byte>("extra"u8);
     w.Value.ModTime = time.Unix(100000000, 0);
     w.Value.Name = nameˢ;
+
     nint n0 = buf.Len();
     if (n0 != 0) {
         Ꮡt.Fatalf("buffer size = %d before writes; want 0"u8, n0);
     }
+
     {
         var err = w.Flush(); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     nint n1 = buf.Len();
     if (n1 == 0) {
         Ꮡt.Fatal(noDataAfterFirstFlushˢ);
     }
+
     w.Write(slice<byte>("x"u8));
+
     nint n2 = buf.Len();
     if (n1 != n2) {
         Ꮡt.Fatalf("after writing a single byte, size changed from %d to %d; want no change"u8, n1, n2);
     }
+
     {
         var err = w.Flush(); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     nint n3 = buf.Len();
     if (n2 == n3) {
         Ꮡt.Fatal(flushDidnTFlushAnyDataˢ);
     }
+
     {
         var err = w.Close(); if (err != default!) {
             Ꮡt.Fatal(err);
@@ -239,6 +255,7 @@ public static void TestConcat(ж<testing.T> Ꮡt) {
     w = NewWriter(new gzip_test_package.bytes_BufferжWriter(Ꮡbuf));
     w.Write(slice<byte>("world\n"u8));
     w.Close();
+
     var (r, err) = NewReader(new gzip_test_package.bytes_BufferжReader(Ꮡbuf));
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -282,6 +299,7 @@ internal static (nint n, error err) Write(this ref limitedWriter l, slice<byte> 
 // Write should never return more bytes than the input slice.
 public static void TestLimitedWrite(ж<testing.T> Ꮡt) {
     var msg = slice<byte>("a"u8);
+
     for (nint limᴛ1 = 2; limᴛ1 < 20; limᴛ1++) {
         ref var lim = ref heap<nint>(out var Ꮡlim);
         lim = limᴛ1;
@@ -291,6 +309,7 @@ public static void TestLimitedWrite(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Write() = %d, want %d or less"u8, n, len(msg));
             }
         }
+
         z.Reset(new gzip_internal_test_package.limitedWriterжWriter(Ꮡ(new limitedWriter(lim))));
         z.Value.Header = new Header(
             Comment: "comment"u8,

@@ -40,6 +40,7 @@ internal static int32 netpollopen(uintptr fd, ж<pollDesc> Ꮡpd) {
     ev[0].flags = (uint16)((uint16)_EV_ADD | (uint16)_EV_CLEAR);
     ev[0].fflags = 0;
     ev[0].data = 0;
+
     if (goarch.PtrSize == 4){
         // We only have a pointer-sized field to store into,
         // so on a 32-bit system we get no sequence protection.
@@ -78,6 +79,7 @@ internal static void netpollBreak() {
     if (!ᏑnetpollWakeSig.CompareAndSwap(0, 1)) {
         return;
     }
+
     wakeNetpoll(kq);
 }
 
@@ -133,6 +135,7 @@ retry:
     var delta = (int32)0;
     for (nint i = 0; i < (nint)n; i++) {
         var ev = Ꮡevents.at<keventt>(i);
+
         if (isWakeup(ref (ev).DerefOrNull())) {
             var isBlocking = delay != 0;
             processWakeupEvent(kq, isBlocking);
@@ -143,27 +146,28 @@ retry:
             }
             continue;
         }
+
         int32 mode = default!;
         var exprᴛ1 = (~ev).filter;
         if (exprᴛ1 == _EVFILT_READ) {
             mode += (rune)'r';
+
+            // On some systems when the read end of a pipe
+            // is closed the write end will not get a
+            // _EVFILT_WRITE event, but will get a
+            // _EVFILT_READ event with EV_EOF set.
+            // Note that setting 'w' here just means that we
+            // will wake up a goroutine waiting to write;
+            // that goroutine will try the write again,
+            // and the appropriate thing will happen based
+            // on what that write returns (success, EPIPE, EAGAIN).
             if ((uint16)((~ev).flags & (uint16)_EV_EOF) != 0) {
-                // On some systems when the read end of a pipe
-                // is closed the write end will not get a
-                // _EVFILT_WRITE event, but will get a
-                // _EVFILT_READ event with EV_EOF set.
-                // Note that setting 'w' here just means that we
-                // will wake up a goroutine waiting to write;
-                // that goroutine will try the write again,
-                // and the appropriate thing will happen based
-                // on what that write returns (success, EPIPE, EAGAIN).
                 mode += (rune)'w';
             }
         }
         else if (exprᴛ1 == _EVFILT_WRITE) {
             mode += (rune)'w';
         }
-
         if (mode != 0) {
             ж<pollDesc> pd = default!;
             uintptr tag = default!;
@@ -173,7 +177,7 @@ retry:
                 pd = (~ev).udata.Reinterpret<byte, pollDesc>();
                 tag = 0;
             } else {
-                var tpΔ1 = ((taggedPointer)(uint64)(uintptr)(~ev).udata);
+                var tpΔ1 = (taggedPointer)(uint64)(uintptr)(~ev).udata;
                 pd = (ж<pollDesc>)(uintptr)(tpΔ1.pointer());
                 tag = tpΔ1.tag();
                 if (pd.of(pollDesc.Ꮡfdseq).Load() != tag) {

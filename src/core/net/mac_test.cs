@@ -10,22 +10,23 @@ using static go.net_package;
 
 partial class net_internal_test_package {
 
-// See RFC 7042, Section 2.1.1.
-// See RFC 7042, Section 2.2.2.
-// See RFC 4391, Section 9.1.1.
-
 partial struct parseMACTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal global::go.net_package.HardwareAddr @out;
     internal @string err;
 }
 internal static slice<parseMACTestsᴛ1> parseMACTests = new parseMACTestsᴛ1[]{
+    // See RFC 7042, Section 2.1.1.
     new("00:00:5e:00:53:01"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
     new("00-00-5e-00-53-01"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
     new("0000.5e00.5301"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
+
+    // See RFC 7042, Section 2.2.2.
     new("02:00:5e:10:00:00:00:01"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
     new("02-00-5e-10-00-00-00-01"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
     new("0200.5e10.0000.0001"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
+
+    // See RFC 4391, Section 9.1.1.
     new(
         "00:00:00:00:fe:80:00:00:00:00:00:00:02:00:5e:10:00:00:00:01"u8,
         new HardwareAddr(new byte[]{
@@ -85,6 +86,7 @@ public static void TestParseMAC(ж<testing.T> Ꮡt) {
         }
         return err != default! && strings.Contains(err.Error(), s);
     }
+
     foreach (var (i, tt) in parseMACTests) {
         var (@out, err) = ParseMAC(tt.@in);
         if (!reflect.DeepEqual(@out, tt.@out) || !match(err, tt.err)) {

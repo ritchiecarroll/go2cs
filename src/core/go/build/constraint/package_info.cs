@@ -46,6 +46,12 @@ using static go.go.build.constraint_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -54,7 +60,7 @@ using static go.go.build.constraint_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACtapIKmgqaA/qSCpoKCpLSmgP6klIKCpoKmgoKAgqSmggAHEKSUgoKmgqaCgoCCpKaCAAgSgqaYooCCpICCpKqigtq0gpSCloKWgsyCgpYADCDSgoCCgIKCpLiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU3AAIBIKSgoCCgIKktoKClIKWgoKUlIKCAAUS4oKClIKCgpSUgoKCpoKUgoKCpoKCgoKmgoKWgoKCqqKC2rSClIKWgpSUhIKUzIKCltiYsoSCgoKigoKClIKClIKUlIKmgpSAgqSmgpSAgqSmgpSssoKUgoKmpsjYhpKCgoKCgqS0tpTMgoKCpoKCgpSYkoKCgoKCgpSUlJassqakgJKkpIKUpIKCgpSClKSCgoKUgpS8ooCCgoKkqqKAgoKCpA==", "214-222:1;280-287:1")]
+[assembly: global::go.GoPositionMap("go/build/constraint/expr.go", "expr.cs", "ACxapIKmgqaA/qSCpoKCpKSmgP6klIKCpoKmgoKAgqSmggAHEKSUgoKmgqaCgoCCpKaCAAgSgqaYooCCpICCpKqigtq0gpSCpoKmgtyCgqYADCDSgoCCgIKCpMiCgoKU7NKCgpSs0oKClKzSgoKUgoKCgpSU3AAIBIKSgoCCgIKktoKClIKmgoKUlIKCAAUS4oKClIKCgpSUgoKCpoKUgoKCpoKCgoKmgoKmgoKCqqKC2rSClIKmgpSUlIKU3IKCptiYspSCgoKSgoKClIKClIKUlIKmgpSAgqSmgpSAgqSmgpSssoKUgoKmpsj4lpKCgoKCgqS0ppTcgoKCpoKCgpSokoKCgoKCgoKUpqassrakgIKkpIKUpIKCgpSClKSCgoKUgpS8ooCCgoKkqqKAgoKCpA==", "214-222:1;280-287:1")]
 [assembly: global::go.GoPositionMap("go/build/constraint/vers.go", "vers.cs", "AA08ABICgoKUgpTaoqSkgoKUpIKClKSklJSClIKClJS+soKUrLKClA==")]
 // </GoSourcePositionMaps>
 

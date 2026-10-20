@@ -44,20 +44,25 @@ internal static void Main() {
     var a = new nint[]{1, 2, 3, 4, 5}.slice();
     reverseSeq<slice<nint>, nint>(a);
     fmt.Println(a);
+
     var b = new numbers(new nint[]{10, 20, 30}.slice());
     reverseSeq<numbers, nint>(b);
     fmt.Println(b);
-    var s = new @string[]{"go"u8, "2"u8, "cs"u8}.slice();
+
+    var s = new @string[]{"go", "2", "cs"}.slice();
     reverseSeq<slice<@string>, @string>(s);
     fmt.Println(s);
+
     var c = new nint[]{6, 7, 8, 9}.slice();
     explicitReverseSeq<slice<nint>, nint>(c);
     fmt.Println(c);
+
     var d = new numbers(new nint[]{100, 200}.slice());
     explicitReverseSeq<numbers, nint>(d);
     fmt.Println(d);
+
     var m = new sortedMap(0, 4);
-    m = append(m, (nint)(3), (nint)(1), (nint)(4), (nint)(1));
+    m = append(m, (nint)3, (nint)1, (nint)4, (nint)1);
     sortSeq(m, (nint x, nint y) => x < y);
     fmt.Println(m);
 }

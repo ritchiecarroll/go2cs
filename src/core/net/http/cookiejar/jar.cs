@@ -11,6 +11,7 @@ using fmt = fmt_package;
 using net = net_package;
 using http = go.net.http_package;
 using ascii = go.net.http.@internal.ascii_package;
+using netip = go.net.netip_package;
 using url = go.net.url_package;
 using slices = slices_package;
 using strings = strings_package;
@@ -117,7 +118,7 @@ internal static @string id(this ref entry e) {
 // request to host/path. It is the caller's responsibility to check if the
 // cookie is expired.
 internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) {
-    return e.domainMatch(host) && e.pathMatch(path) && (https || !e.Secure);
+    return e.domainMatch(host) && e.pathMatch(path) && e.secureMatch(https);
 }
 
 // domainMatch checks whether e's Domain allows sending e back to host.
@@ -144,6 +145,43 @@ internal static bool pathMatch(this ref entry e, @string requestPath) {
         }
     }
     return false;
+}
+
+// secureMatch checks whether a cookie should be sent based on the protocol
+// and the Secure flag. Localhost is considered a secure origin regardless
+// of protocol, matching browser behavior.
+internal static bool secureMatch(this ref entry e, bool https) {
+    if (!e.Secure) {
+        // Cookies not marked secure are always sent.
+        return true;
+    }
+    // Everything below is about cookies marked secure.
+    if (https) {
+        // HTTPS request matches secure cookies.
+        return true;
+    }
+    // Consider localhost to be secure like browsers.
+    if (isLocalhost(e.Domain)) {
+        return true;
+    }
+    var (ip, err) = netip.ParseAddr(e.Domain);
+    if (err == default! && ip.IsLoopback()) {
+        return true;
+    }
+    return false;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string localhostˢ = "localhost"u8;
+
+internal static bool isLocalhost(@string host) {
+    host = strings.TrimSuffix(host, "."u8);
+    {
+        nint idx = strings.LastIndex(host, "."u8); if (idx >= 0) {
+            host = host.slice(idx + 1);
+        }
+    }
+    return ascii.EqualFold(host, localhostˢ);
 }
 
 // hasDotSuffix reports whether s ends in "."+suffix.
@@ -174,17 +212,21 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
             goto ᒐdone;
         }
         @string key = jarKey(host, j.psList);
+
         j.mu.Lock();
         defer(Ꮡj.of(Jar.Ꮡmu).Unlock, ref ᒐ);
+
         var submap = j.entries[key];
         if (submap == default!) {
             goto ᒐdone;
         }
+
         var https = u.Scheme == "https"u8;
         @string path = u.Path;
         if (path == ""u8) {
             path = "/"u8;
         }
+
         var modified = false;
         slice<entry> selected = default!;
         foreach (var (id, vᴛ1) in submap) {
@@ -210,6 +252,7 @@ internal static slice<ж<httpꓸCookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, 
                 j.entries[key] = submap;
             }
         }
+
         // sort according to RFC 6265 section 5.4 point 2: by longest
         // path and then by earliest creation time.
         slices.SortFunc(selected, (entry a, entry b) => {
@@ -261,9 +304,12 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
         }
         @string key = jarKey(host, j.psList);
         @string defPath = defaultPath(u.Path);
+
         j.mu.Lock();
         ᒐd1 = true;
+
         var submap = j.entries[key];
+
         var modified = false;
         foreach (var (_, cookie) in cookies) {
             var (e, remove, errΔ1) = j.newEntry(cookie, now, defPath, host);
@@ -285,6 +331,7 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
             if (submap == default!) {
                 submap = new map<@string, entry>();
             }
+
             {
                 var (old, ok) = submap[id, ꟷ]; if (ok){
                     e.Creation = old.Creation;
@@ -299,6 +346,7 @@ internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<ht
             submap[id] = e;
             modified = true;
         }
+
         if (modified) {
             if (len(submap) == 0){
                 delete(j.entries, key);
@@ -350,6 +398,7 @@ internal static @string jarKey(@string host, PublicSuffixList psl) {
     if (isIP(host)) {
         return host;
     }
+
     nint i = default!;
     if (psl == default!){
         i = strings.LastIndex(host, "."u8);
@@ -367,10 +416,10 @@ internal static @string jarKey(@string host, PublicSuffixList psl) {
             // Storing cookies under host is a safe stopgap.
             return host;
         }
+        // Only len(suffix) is used to determine the jar key from
+        // here on, so it is okay if psl.PublicSuffix("www.buggy.psl")
+        // returns "com" as the jar key is generated from host.
     }
-    // Only len(suffix) is used to determine the jar key from
-    // here on, so it is okay if psl.PublicSuffix("www.buggy.psl")
-    // returns "com" as the jar key is generated from host.
     nint prevDot = strings.LastIndex(host.slice(0, i - 1), "."u8);
     return host.slice(prevDot + 1);
 }
@@ -393,6 +442,7 @@ internal static @string defaultPath(@string path) {
     if (len(path) == 0 || path[0] != (rune)'/') {
         return "/"u8; // Path is empty or malformed.
     }
+
     nint i = strings.LastIndex(path, "/"u8); // Path starts with "/", so i != -1.
     if (i == 0) {
         return "/"u8; // Path has the form "/abc".
@@ -417,18 +467,21 @@ internal static readonly @string sameSiteLaxˢ = "SameSite=Lax"u8;
 internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<httpꓸCookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     e.Name = c.Name;
+
     if (c.Path == ""u8 || c.Path[0] != (rune)'/'){
         e.Path = defPath;
     } else {
         e.Path = c.Path;
     }
+
     (e.Domain, e.HostOnly, err) = j.domainAndType(host, c.Domain);
     if (err != default!) {
         return (e, false, err);
     }
+
     // MaxAge takes precedence over Expires.
     if (c.MaxAge < 0){
         return (e, true, default!);
@@ -448,10 +501,12 @@ internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<ht
             e.Persistent = true;
         }
     }
+
     e.Value = c.Value;
     e.Quoted = c.Quoted;
     e.Secure = c.Secure;
     e.HttpOnly = c.HttpOnly;
+
     var exprᴛ1 = c.SameSite;
     if (exprᴛ1 == http.SameSiteDefaultMode) {
         e.SameSite = sameSiteˢ;
@@ -481,6 +536,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         // host cookie.
         return (host, true, default!);
     }
+
     if (isIP(host)) {
         // RFC 6265 is not super clear here, a sensible interpretation
         // is that cookies with an IP address in the domain-attribute
@@ -500,6 +556,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         if (host != domain) {
             return ("", false, errIllegalDomain);
         }
+
         // According to RFC 6265 such cookies should be treated as
         // domain cookies.
         // As there are no subdomains of an IP address the treatment
@@ -511,20 +568,24 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         // domain cookies requires a domain name to be well defined.
         return (host, true, default!);
     }
+
     // From here on: If the cookie is valid, it is a domain cookie (with
     // the one exception of a public suffix below).
     // See RFC 6265 section 5.2.3.
     domain = strings.TrimPrefix(domain, "."u8);
+
     if (len(domain) == 0 || domain[0] == (rune)'.') {
         // Received either "Domain=." or "Domain=..some.thing",
         // both are illegal.
         return ("", false, errMalformedDomain);
     }
+
     (domain, var isASCII) = ascii.ToLower(domain);
     if (!isASCII) {
         // Received non-ASCII domain, e.g. "perché.com" instead of "xn--perch-fsa.com"
         return ("", false, errMalformedDomain);
     }
+
     if (domain[len(domain) - 1] == (rune)'.') {
         // We received stuff like "Domain=www.example.com.".
         // Browsers do handle such stuff (actually differently) but
@@ -534,6 +595,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         // (5.1.2) are.
         return ("", false, errMalformedDomain);
     }
+
     // See RFC 6265 section 5.3 #5.
     if (j.psList != default!) {
         {
@@ -547,11 +609,13 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
             }
         }
     }
+
     // The domain must domain-match host: www.mycompany.com cannot
     // set cookies for .ourcompetitors.com.
     if (host != domain && !hasDotSuffix(host, domain)) {
         return ("", false, errIllegalDomain);
     }
+
     return (domain, false, default!);
 }
 

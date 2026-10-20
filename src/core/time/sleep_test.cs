@@ -65,7 +65,6 @@ internal static Δtime.Duration adjustDelay(ж<Δtesting.T> Ꮡt, Δtime.Duratio
         Ꮡt.Fatal("adjustDelay unimplemented on " + Δruntime.GOOS);
         return 0;
     }
-
 }
 
 public static partial void TestSleep(ж<Δtesting.T> Ꮡt) {
@@ -100,6 +99,7 @@ public static void TestAfterFunc(ж<Δtesting.T> Ꮡt) {
             cʗ1.ᐸꟷ(true);
         }
     };
+
     AfterFunc(0, f);
     ᐸꟷ(c);
 }
@@ -172,9 +172,11 @@ public static partial void TestAfterFuncStarvation(ж<Δtesting.T> Ꮡt) {
         // However, in https://go.dev/issue/65178 this was observed to live-lock
         // on wasip1/wasm and js/wasm after <10000 runs.
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(1), ref ᒐ);
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         ref var stop = ref heap(new atomic.Bool(), out var Ꮡstop);
         channel<bool> c = new channel<bool>(1);
+
         Ꮡwg.Add(2);
         var cʗ1 = c;
         goǃ(() => {
@@ -190,6 +192,7 @@ public static partial void TestAfterFuncStarvation(ж<Δtesting.T> Ꮡt) {
             }
             Ꮡwg.Done();
         });
+
         AfterFunc(1 * Microsecond, () => {
             Ꮡstop.Store(true);
         });
@@ -224,9 +227,11 @@ internal static partial void benchmark(ж<Δtesting.B> Ꮡb, Action<ж<Δtesting
         }, i);
     }
     Ꮡwg.Wait();
+
     b.ResetTimer();
     Ꮡb.RunParallel(bench);
     b.StopTimer();
+
     foreach (var (_, garbage) in garbageAll) {
         foreach (var (_, t) in garbage) {
             t.Stop();
@@ -306,6 +311,7 @@ public static void BenchmarkStartStop1000(ж<Δtesting.B> Ꮡb) {
             foreach (var (i, _) in timers) {
                 timers[i] = AfterFunc(ΔHour, default!);
             }
+
             foreach (var (i, _) in timers) {
                 timers[i].Stop();
             }
@@ -400,8 +406,6 @@ public static void TestAfterStop(ж<Δtesting.T> Ꮡt) {
 }
 
 internal static void testAfterStop(ж<Δtesting.T> Ꮡt, Func<Δtime.Duration, ж<Δtime.Timer>> newTimer) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // We want to test that we stop a timer before it runs.
     // We also want to test that it didn't run after a longer timer.
     // Since we don't want the test to run for too long, we don't
@@ -413,6 +417,7 @@ internal static void testAfterStop(ж<Δtesting.T> Ꮡt, Func<Δtime.Duration, �
             Ꮡt.Log(e);
         }
     }
+
     for (nint i = 0; i < 5; i++) {
         AfterFunc(100 * Millisecond, () => {
         });
@@ -452,13 +457,16 @@ internal static void testAfterStop(ж<Δtesting.T> Ꮡt, Func<Δtime.Duration, �
             errs = append(errs, "Stop returned true twice"u8);
             continue;
         }
+
         // Test passed, so all done.
         if (len(errs) > 0) {
             Ꮡt.Logf("saw %d errors, ignoring to avoid flakiness"u8, len(errs));
             logErrs();
         }
+
         return;
     }
+
     Ꮡt.Errorf("saw %d errors"u8, len(errs));
     logErrs();
 }
@@ -509,6 +517,7 @@ internal static partial error testAfterQueuing1(Δtime.Duration delta, Func<Δti
     // to depend on channel queuing semantics that might
     // possibly change in the future.
     var result = new channel<afterResult>(len(slots));
+
     var t0 = Now();
     foreach (var (_, slot) in slots) {
         goǃ(await, slot, result.WithDirection(GoChanDir.Send), After(((Δtime.Duration)(int64)slot) * delta));
@@ -610,6 +619,7 @@ internal static error testReset(Δtime.Duration d) {
     default: {
         return errors.New(resetTimerDidNotFireˢ);
     }}
+
     if (t0.Reset(50 * Millisecond)) {
         return errors.New(resettingExpiredTimerˢ);
     }
@@ -617,8 +627,6 @@ internal static error testReset(Δtime.Duration d) {
 }
 
 public static void TestReset(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // We try to run this test with increasingly larger multiples
     // until one works so slow, loaded hardware isn't as flaky,
     // but without slowing down fast machines unnecessarily.
@@ -648,12 +656,14 @@ public static partial void TestOverflowSleep(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Δtime.Duration big = /* Duration(int64(1<<63 - 1)) */ 9223372036854775807;
+
     goǃ(() => {
         Sleep(big);
         // On failure, this may return after the test has completed, so
         // we need to panic instead.
         throw panic("big sleep returned");
     });
+
     var selᴛ9 = After(big);
     var selᴛ10 = After(25 * Millisecond);
     switch (select(ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
@@ -662,15 +672,17 @@ public static partial void TestOverflowSleep(ж<Δtesting.T> Ꮡt) {
         break;
     }
     case 1 when selᴛ10.ꟷᐳ(out _): {
+        // OK
         break;
     }}
-    // OK
+
     Δtime.Duration neg = /* Duration(-1 << 63) */ -9223372036854775808;
     Sleep(neg); // Returns immediately.
     var selᴛ11 = After(neg);
     var selᴛ12 = After(1 * ΔSecond);
     switch (select(ᐸꟷ(selᴛ11, ꓸꓸꓸ), ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
     case 0 when selᴛ11.ꟷᐳ(out _): {
+        // OK
         break;
     }
     case 1 when selᴛ12.ꟷᐳ(out _): {
@@ -683,8 +695,6 @@ public static partial void TestOverflowSleep(ж<Δtesting.T> Ꮡt) {
 internal static readonly object expectedPanicButNoneˢ = (@string)"Expected panic, but none happened."u8;
 internal static readonly object shouldBeUnreachableˢ = (@string)"Should be unreachable."u8;
 
-// OK
-
 // Test that a panic while deleting a timer does not leave
 // the timers mutex held, deadlocking a ticker.Stop in a defer.
 public static void TestIssue5745(ж<Δtesting.T> Ꮡt) {
@@ -696,12 +706,14 @@ public static void TestIssue5745(ж<Δtesting.T> Ꮡt) {
             // would deadlock here before the fix due to
             // lock taken before the segfault.
             tickerʗ1.Stop();
+
             {
                 var r = recover(); if (r == default!) {
                     Ꮡt.Error(expectedPanicButNoneˢ);
                 }
             }
         }, ref ᒐ);
+
         // cause a panic due to a segfault
         ж<Δtime.Timer> timer = default!;
         timer.Stop();
@@ -785,6 +797,7 @@ internal static void testZeroTimer(ж<Δtesting.T> Ꮡt, Func<Δtime.Duration, �
     if (Δtesting.Short()) {
         Ꮡt.Skip(shortˢ);
     }
+
     for (nint i = 0; i < 1000000; i++) {
         var s = Now();
         var ti = newTimer(0);
@@ -808,6 +821,7 @@ public static void TestTimerModifiedEarlier(ж<Δtesting.T> Ꮡt) {
         if (Δruntime.GOOS == "plan9"u8 && Δruntime.GOARCH == "arm"u8) {
             testenv.SkipFlaky(new time_test_package.testing_TжTB(Ꮡt), 50470);
         }
+
         var past = Until(Unix(0, 0));
         nint count = 1000;
         nint fail = 0;
@@ -819,6 +833,7 @@ public static void TestTimerModifiedEarlier(ж<Δtesting.T> Ꮡt) {
                 }
                 timer.Reset(past);
             }
+
             var deadline = NewTimer((Δtime.Duration)(10000000000L));
             var deadlineʗ1 = deadline;
             defer(() => deadlineʗ1.Stop(), ref ᒐ);
@@ -840,6 +855,7 @@ public static void TestTimerModifiedEarlier(ж<Δtesting.T> Ꮡt) {
                 break;
             }}
         }
+
         if (fail > 0) {
             Ꮡt.Errorf("%d failures"u8, fail);
         }
@@ -858,15 +874,19 @@ public static void TestAdjustTimers(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     ж<rand.Rand> rnd = rand.New(rand.NewSource(Now().UnixNano()));
+
     var timers = new slice<ж<Δtime.Timer>>(100);
     var states = new slice<nint>(len(timers));
     var indices = rnd.Perm(len(timers));
+
     while (len(indices) != 0) {
         nint ii = rnd.Intn(len(indices));
         nint i = indices[ii];
+
         ж<Δtime.Timer> timer = timers[i];
         nint state = states[i];
         states[i]++;
+
         switch (state) {
         case 0: {
             timers[i] = newTimerFunc(0);
@@ -876,9 +896,9 @@ public static void TestAdjustTimers(ж<Δtesting.T> Ꮡt) {
             ᐸꟷ((~timer).C); // Timer is now idle.
             break;
         }
+        // Reset to various long durations, which we'll cancel.
         case 2: {
             if (timer.Reset((Δtime.Duration)(60000000000L))) {
-                // Reset to various long durations, which we'll cancel.
                 throw panic("shouldn't be active (1)");
             }
             break;
@@ -895,17 +915,17 @@ public static void TestAdjustTimers(ж<Δtesting.T> Ꮡt) {
             }
             break;
         }
+        // Stop and drain a long-duration timer.
         case 3 or 5 or 7: {
             if (!timer.Stop()) {
-                // Stop and drain a long-duration timer.
                 Ꮡt.Logf("timer %d state %d Stop returned false"u8, i, state);
                 ᐸꟷ((~timer).C);
             }
             break;
         }
+        // Start a short-duration timer we expect to select without blocking.
         case 8: {
             if (timer.Reset(0)) {
-                // Start a short-duration timer we expect to select without blocking.
                 Ꮡt.Fatal(timerResetReturnedTrueˢ);
             }
             break;
@@ -919,16 +939,15 @@ public static void TestAdjustTimers(ж<Δtesting.T> Ꮡt) {
             }
             break;
         }
+        // Timer is done. Swap with tail and remove.
         case 10: {
             indices[ii] = indices[len(indices) - 1];
             indices = indices.slice(0, len(indices) - 1);
             break;
         }}
-
     }
 }
 
-// Timer is done. Swap with tail and remove.
 public static void TestStopResult(ж<Δtesting.T> Ꮡt) {
     testStopResetResult(Ꮡt, true);
 }
@@ -953,6 +972,7 @@ internal static readonly @string godebugˢ = "GODEBUG"u8;
 
 internal static partial void testStopResetResultGODEBUG(ж<Δtesting.T> Ꮡt, bool testStop, @string godebug) {
     Ꮡt.Setenv(godebugˢ, "asynctimerchan="u8 + godebug);
+
     bool stopOrReset(ж<Δtime.Timer> timer) {
         if (testStop){
             return timer.Stop();
@@ -960,6 +980,7 @@ internal static partial void testStopResetResultGODEBUG(ж<Δtesting.T> Ꮡt, bo
             return timer.Reset((Δtime.Duration)(3600000000000L));
         }
     }
+
     var start = new channel<EmptyStruct>(0);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     const nint N = 1000;
@@ -1010,6 +1031,7 @@ public static partial void TestMultiWakeupTicker(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         Ꮡt.Skip(shortˢ);
     }
+
     nint goroutines = Δruntime.GOMAXPROCS(0);
     var timer = NewTicker(Microsecond);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -1045,6 +1067,7 @@ public static partial void TestMultiWakeupTimer(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         Ꮡt.Skip(shortˢ);
     }
+
     nint goroutines = Δruntime.GOMAXPROCS(0);
     var timer = NewTimer(ΔNanosecond);
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
@@ -1097,19 +1120,25 @@ public static void BenchmarkParallelTimerLatency(ж<Δtesting.B> Ꮡb) {
     if (gmp < 2 || Δruntime.NumCPU() < gmp) {
         Ꮡb.Skip(skippingWithGomaxprocs2ˢ);
     }
+
     // allocate memory now to avoid GC interference later.
     nint timerCount = gmp - 1;
     var stats = new slice<BenchmarkParallelTimerLatency_type>(timerCount);
+
     // Ensure the time to start new threads to service timers will not pollute
     // the results.
     warmupScheduler(gmp);
+
     // Note that other than the AfterFunc calls this benchmark is measuring it
     // avoids using any other timers. In particular, the main goroutine uses
     // doWork to spin for some durations because up through Go 1.15 if all
     // threads are idle sysmon could leave deep sleep when we wake.
+
     // Ensure sysmon is in deep sleep.
     doWork(30 * Millisecond);
+
     b.ResetTimer();
+
     Δtime.Duration delay = /* Millisecond */ 1000000;
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     ref var count = ref heap(new int32(), out var Ꮡcount);
@@ -1134,15 +1163,17 @@ public static void BenchmarkParallelTimerLatency(ж<Δtesting.B> Ꮡb) {
                 }
                 atomic.AddInt32(Ꮡcount, 1);
                 while (atomic.LoadInt32(Ꮡcount) < (int32)timerCount) {
+                    // spin until all timers fired
                 }
-                // spin until all timers fired
                 Ꮡwg.Done();
             });
         }
+
         while (atomic.LoadInt32(Ꮡcount) < (int32)timerCount) {
+            // spin until all timers fired
         }
-        // spin until all timers fired
         Ꮡwg.Wait();
+
         // Spin for a bit to let the other scheduler threads go idle before the
         // next round.
         doWork(Millisecond);
@@ -1169,7 +1200,9 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> Ꮡb) {
     if (gmp < 2 || Δruntime.NumCPU() < gmp) {
         Ꮡb.Skip(skippingWithGomaxprocs2ˢ);
     }
+
     Δtime.Duration delay = /* 3 * Millisecond */ 3000000;
+
     foreach (var (_, dur) in new Δtime.Duration[]{300 * Microsecond, 2 * Millisecond}.slice()) {
         Ꮡb.Run(fmt.Sprintf("work-dur=%s"u8, dur), (ж<Δtesting.B> bΔ1) => {
             for (nint tickersPerP = 1; tickersPerP < (nint)(int64)(delay / dur) + 1; tickersPerP++) {
@@ -1177,10 +1210,13 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> Ꮡb) {
                 bΔ1.Run(fmt.Sprintf("tickers-per-P=%d"u8, tickersPerP), [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.B> bΔ2) => {
                     // allocate memory now to avoid GC interference later.
                     var stats = new slice<BenchmarkParallelTimerLatency_type>(tickerCount);
+
                     // Ensure the time to start new threads to service timers
                     // will not pollute the results.
                     warmupScheduler(gmp);
+
                     bΔ2.ResetTimer();
+
                     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
                     Ꮡwg.Add(tickerCount);
                     for (nint j = 0; j < tickerCount; j++) {
@@ -1194,6 +1230,7 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> Ꮡb) {
                             GoFrame ᒐ = default;
                             try {
                                 defer(tickerΔ1.Stop, ref ᒐ);
+
                                 for (; c > 0; c--) {
                                     ᐸꟷ((~tickerΔ1).C);
                                     var late = Since(ᏑexpectedWakeup.Value);
@@ -1215,6 +1252,7 @@ public static void BenchmarkStaggeredTickerLatency(ж<Δtesting.B> Ꮡb) {
                         }, (~bΔ2).N, ticker, ᏑexpectedWakeup.Value);
                     }
                     Ꮡwg.Wait();
+
                     float64 total = default!;
                     float64 samples = default!;
                     var max = ((Δtime.Duration)0);
@@ -1244,8 +1282,9 @@ internal static partial void warmupScheduler(nint targetThreadCount) {
         goǃ(() => {
             atomic.AddInt32(Ꮡcount, 1);
             while (atomic.LoadInt32(Ꮡcount) < (int32)targetThreadCount) {
+                // spin until all threads started
             }
-            // spin until all threads started
+
             // spin a bit more to ensure they are all running on separate CPUs.
             doWork(Millisecond);
             Ꮡwg.Done();

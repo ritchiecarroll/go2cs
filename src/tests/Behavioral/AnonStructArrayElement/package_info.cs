@@ -33,6 +33,7 @@ using static go.main_package;
 [assembly: GoDynamicTypeLift("7374727563747b53697a652075696e7433323b20436f756e742075696e7436347d", "Stats_BySize")]
 [assembly: GoDynamicTypeLift("7374727563747b53697a652075696e7433327d", "Composed_Ptrs")]
 [assembly: GoDynamicTypeLift("7374727563747b6974656d20696e743b20706164205b345d627974657d", "poolᴛ1")]
+[assembly: GoDynamicTypeLift("7374727563747b723720696e747d", "reservedIsNil_type")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -55,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ADhyggAGFICogIDugsyCgqaCgoSChoKChIKCgoSCgg==")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ADVyggAGFICogIDugsyCgqaCgpSCloKClIKCgpSCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;

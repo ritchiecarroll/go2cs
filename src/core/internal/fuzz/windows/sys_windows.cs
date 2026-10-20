@@ -30,40 +30,34 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
                 Ꮡerr.ValueSlot = fmt.Errorf("mapping temporary file %s: %w"u8, Ꮡf.Value.Name(), Ꮡerr.ValueSlot);
             }
         }, ref ᒐ);
+
         // Create a file mapping object. The object itself is not shared.
         (var mapObj, err) = Δsyscall.CreateFileMapping(
-            ((syscallꓸHandle)Ꮡf.Fd()), // fhandle
-
+            (syscallꓸHandle)Ꮡf.Fd(), // fhandle
             nil, // sa
-
             Δsyscall.PAGE_READWRITE, // prot
-
             0, // maxSizeHigh
-
             0, // maxSizeLow
-
-            nil);
-        // name
+            nil // name
+        );
         if (err != default!) {
             (mem, err) = (default!, err); goto ᒐdone;
         }
+
         // Create a view from the file mapping object.
         var access = (uint32)((uint32)((uint32)Δsyscall.FILE_MAP_READ | (uint32)Δsyscall.FILE_MAP_WRITE));
         (var addr, err) = Δsyscall.MapViewOfFile(
             mapObj, // handle
-
             access, // access
-
             0, // offsetHigh
-
             0, // offsetLow
-
-            (uintptr)size);
-        // length
+            (uintptr)size // length
+        );
         if (err != default!) {
             Δsyscall.CloseHandle(mapObj);
             (mem, err) = (default!, err); goto ᒐdone;
         }
+
         var region = @unsafe.Slice((ж<byte>)(uintptr)((@unsafe.Pointer)addr), size);
         (mem, err) = (Ꮡ(new sharedMem(
             f: Ꮡf,
@@ -80,11 +74,13 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> Ꮡf
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
 internal static error Close(this ref sharedMem m) {
+    var errsᴷ = new stackAppend<error>();
+
     // Attempt all operations, even if we get an error for an earlier operation.
     // os.File.Close may fail due to I/O errors, but we still want to delete
     // the temporary file.
     slice<error> errs = default!;
-    errs = append(errs,
+    errs = append(errsᴷ, errs,
         Δsyscall.UnmapViewOfFile((uintptr)Ꮡ(m.region, 0)),
         Δsyscall.CloseHandle(m.sys.mapObj),
         m.f.Close());
@@ -105,11 +101,11 @@ internal static void setWorkerComm(ref exec.Cmd cmd, workerComm comm) {
     var mem = ᐸꟷ(comm.memMu);
     var memFD = (~mem).f.Fd();
     comm.memMu.ᐸꟷ(mem);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzIn.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)comm.fuzzOut.Fd()), Δsyscall.HANDLE_FLAG_INHERIT, 1);
-    Δsyscall.SetHandleInformation(((syscallꓸHandle)memFD), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzIn.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)comm.fuzzOut.Fd(), Δsyscall.HANDLE_FLAG_INHERIT, 1);
+    Δsyscall.SetHandleInformation((syscallꓸHandle)memFD, Δsyscall.HANDLE_FLAG_INHERIT, 1);
     cmd.Env = append(cmd.Env, fmt.Sprintf("GO_TEST_FUZZ_WORKER_HANDLES=%x,%x,%x"u8, comm.fuzzIn.Fd(), comm.fuzzOut.Fd(), memFD));
-    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)comm.fuzzIn.Fd()), ((syscallꓸHandle)comm.fuzzOut.Fd()), ((syscallꓸHandle)memFD)}.slice()));
+    cmd.SysProcAttr = Ꮡ(new Δsyscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{(syscallꓸHandle)comm.fuzzIn.Fd(), (syscallꓸHandle)comm.fuzzOut.Fd(), (syscallꓸHandle)memFD}.slice()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -134,6 +130,7 @@ internal static (workerComm comm, error err) getWorkerComm() {
             return (new workerComm(nil), fmt.Errorf("parsing GO_TEST_FUZZ_WORKER_HANDLES=%s: %v"u8, v, errΔ1));
         }
     }
+
     var fuzzIn = os.NewFile(fuzzInFD, fuzzInˢ);
     var fuzzOut = os.NewFile(fuzzOutFD, fuzzOutˢ);
     var memFile = os.NewFile(memFileFD, fuzzMemˢ);
@@ -152,6 +149,7 @@ internal static (workerComm comm, error err) getWorkerComm() {
     }
     var memMu = new channel<ж<sharedMem>>(1);
     memMu.ᐸꟷ(mem);
+
     return (new workerComm(fuzzIn: fuzzIn, fuzzOut: fuzzOut, memMu: memMu), default!);
 }
 

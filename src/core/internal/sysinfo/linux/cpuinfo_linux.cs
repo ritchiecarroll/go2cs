@@ -23,10 +23,12 @@ internal static error readLinuxProcCPUInfo(slice<byte> buf) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (_, err) = io.ReadFull(new os_FileжReader(f), buf);
         if (err != default! && !AreEqual(err, io.ErrUnexpectedEOF)) {
             return err;
         }
+
         return default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -36,12 +38,14 @@ internal static error readLinuxProcCPUInfo(slice<byte> buf) {
 internal static @string osCPUInfoName() {
     @string modelName = ""u8;
     @string cpuMHz = ""u8;
+
     // The 512-byte buffer is enough to hold the contents of CPU0
     var buf = new slice<byte>(512);
     var err = readLinuxProcCPUInfo(buf);
     if (err != default!) {
         return ""u8;
     }
+
     var scanner = bufio.NewScanner(new bytes_ReaderжReader(bytes.NewReader(buf)));
     while (scanner.Scan()) {
         var (key, value, found) = strings.Cut(scanner.Text(), ": "u8);
@@ -55,14 +59,16 @@ internal static @string osCPUInfoName() {
         else if (exprᴛ1 == "CPU MHz"u8 || exprᴛ1 == "cpu MHz"u8) {
             cpuMHz = value;
         }
-
     }
+
     if (modelName == ""u8) {
         return ""u8;
     }
+
     if (cpuMHz == ""u8) {
         return modelName;
     }
+
     // The modelName field already contains the frequency information,
     // so the cpuMHz field information is not needed.
     // modelName filed example:
@@ -73,6 +79,7 @@ internal static @string osCPUInfoName() {
             return modelName;
         }
     }
+
     return modelName + " @ "u8 + cpuMHz + "MHz"u8;
 }
 

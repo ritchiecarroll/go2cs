@@ -29,6 +29,7 @@ import (
 // $(go2csPath) to the stdlib, and a folder-grouped recurse solution is emitted. Deterministic and
 // network-free.
 func TestRecurseSyntheticModule(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -211,6 +212,7 @@ func TestRecurseBuildFilesRelativePinWhenRootsCoincide(t *testing.T) {
 // the /core/ folder.
 // Deterministic and network-free (asserts the emitted .csproj/.props/.slnx text; no dotnet restore).
 func TestRecurseNuGetReferences(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -334,6 +336,7 @@ func TestRecurseNuGetReferences(t *testing.T) {
 // a module whose third-party closure cannot be converted still convert its own code.
 // Deterministic and network-free.
 func TestRecurseModuleOnly(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -448,6 +451,7 @@ func TestRecurseModuleOnly(t *testing.T) {
 // (test-pinned) cache root the go.work still aborts the load, under it the package converts.
 // Deterministic and network-free.
 func TestModuleCachePoisonedGoWorkLoad(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture package via go/packages")
 	}
@@ -528,6 +532,7 @@ func TestModuleCachePoisonedGoWorkLoad(t *testing.T) {
 // failure rather than the guard passing vacuously. Network-free: the "module cache" is a temp
 // directory that goModCache is pinned to, and the app reaches both modules through its own replaces.
 func TestModuleCacheVestigialReplaceLoad(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the fixture packages via go/packages")
 	}
@@ -644,6 +649,7 @@ func TestModuleCacheVestigialReplaceLoad(t *testing.T) {
 // whose go.mod quotes both its module path and its requires — resolved through a local replace so the
 // test stays deterministic and network-free.
 func TestRecurseQuotedModulePath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -752,6 +758,7 @@ func TestRecurseQuotedModulePath(t *testing.T) {
 // property over the converter's own `keywords` set rather than a list of literals, so a keyword this
 // test never names is covered too.
 func TestRecurseKeywordNamespaceSegment(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -853,6 +860,7 @@ func TestRecurseKeywordNamespaceSegment(t *testing.T) {
 // go-file-free container directories over same-named leaf packages, plus the same shape inside the app's
 // OWN tree (internal/web/api), imported so both sides of every emitted name are exercised.
 func TestRecurseGoFileFreeContainerDirsKeepDistinctProjectNames(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -1048,6 +1056,7 @@ func assertEmittedPathsInsideBudget(t *testing.T, root string) {
 // and a 314-character generated FILE NAME that no Windows can write at any output root — that build
 // died with CS0016 from a nine-character root, with every long-path setting turned on.
 func TestRecurseDeepImportPathStaysInsideMaxPath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}
@@ -1178,6 +1187,7 @@ func writeModuleFile(t *testing.T, path, content string) {
 // path has no slash to enter the rewrite, which is why the standard library's own `<-chan time.Time`
 // fields were always fine. Network-free, via a local replace, like its neighbors.
 func TestRecurseChannelOfHyphenatedModulePath(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the app's standard-library closure via go/packages")
 	}

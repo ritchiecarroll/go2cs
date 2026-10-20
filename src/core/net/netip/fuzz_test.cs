@@ -16,109 +16,109 @@ using netip = go.net.netip_package;
 
 partial class netip_test_package {
 
-// Basic zero IPv4 address.
-// Basic non-zero IPv4 address.
-// IPv4 address in windows-style "print all the digits" form.
-// IPv4 address with a silly amount of leading zeros.
-// 4-in-6 with octet with leading zero
-// Basic zero IPv6 address.
-// Localhost IPv6.
-// Fully expanded IPv6 address.
-// IPv6 with elided fields in the middle.
-// IPv6 with elided fields at the end.
-// IPv6 with single elided field at the end.
-// IPv6 with single elided field in the middle.
-// IPv6 with the trailing 32 bits written as IPv4 dotted decimal. (4in6)
-// IPv6 with a zone specifier.
-// IPv6 with dotted decimal and zone specifier.
-// IPv6 with capital letters.
-// Empty string.
-// Garbage non-IP.
-// Single number. Some parsers accept this as an IPv4 address in
-// big-endian uint32 form, but we don't.
-// IPv4 with a zone specifier.
-// IPv4 field must have at least one digit.
-// IPv4 address too long.
-// IPv4 in dotted octal form.
-// IPv4 in dotted hex form.
-// IPv4 in class B form.
-// IPv4 in class B form, with a small enough number to be
-// parseable as a regular dotted decimal field.
-// IPv4 in class A form.
-// IPv4 in class A form, with a small enough number to be
-// parseable as a regular dotted decimal field.
-// IPv4 field has value >255.
-// IPv4 with too many fields.
-// IPv6 with not enough fields.
-// IPv6 with too many fields.
-// IPv6 with 8 fields and a :: expander.
-// IPv6 with a field bigger than 2b.
-// IPv6 with non-hex values in field.
-// IPv6 with a zone delimiter but no zone.
-// IPv6 with a zone specifier of zero.
-// IPv6 (without ellipsis) with too many fields for trailing embedded IPv4.
-// IPv6 (with ellipsis) with too many fields for trailing embedded IPv4.
-// IPv6 with invalid embedded IPv4.
-// IPv6 with multiple ellipsis ::.
-// IPv6 with invalid non hex/colon character.
-// IPv6 with truncated bytes after single colon.
-// AddrPort strings.
-// Prefix strings.
 internal static slice<@string> corpus = new @string[]{
+    // Basic zero IPv4 address.
     "0.0.0.0"u8,
+    // Basic non-zero IPv4 address.
     "192.168.140.255"u8,
+    // IPv4 address in windows-style "print all the digits" form.
     "010.000.015.001"u8,
+    // IPv4 address with a silly amount of leading zeros.
     "000001.00000002.00000003.000000004"u8,
+    // 4-in-6 with octet with leading zero
     "::ffff:1.2.03.4"u8,
+    // Basic zero IPv6 address.
     "::"u8,
+    // Localhost IPv6.
     "::1"u8,
+    // Fully expanded IPv6 address.
     "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b"u8,
+    // IPv6 with elided fields in the middle.
     "fd7a:115c::626b:430b"u8,
+    // IPv6 with elided fields at the end.
     "fd7a:115c:a1e0:ab12:4843:cd96::"u8,
+    // IPv6 with single elided field at the end.
     "fd7a:115c:a1e0:ab12:4843:cd96:626b::"u8,
     "fd7a:115c:a1e0:ab12:4843:cd96:626b:0"u8,
+    // IPv6 with single elided field in the middle.
     "fd7a:115c:a1e0::4843:cd96:626b:430b"u8,
     "fd7a:115c:a1e0:0:4843:cd96:626b:430b"u8,
+    // IPv6 with the trailing 32 bits written as IPv4 dotted decimal. (4in6)
     "::ffff:192.168.140.255"u8,
     "::ffff:192.168.140.255"u8,
+    // IPv6 with a zone specifier.
     "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b%eth0"u8,
+    // IPv6 with dotted decimal and zone specifier.
     "1:2::ffff:192.168.140.255%eth1"u8,
     "1:2::ffff:c0a8:8cff%eth1"u8,
+    // IPv6 with capital letters.
     "FD9E:1A04:F01D::1"u8,
     "fd9e:1a04:f01d::1"u8,
+    // Empty string.
     ""u8,
+    // Garbage non-IP.
     "bad"u8,
+    // Single number. Some parsers accept this as an IPv4 address in
+    // big-endian uint32 form, but we don't.
     "1234"u8,
+    // IPv4 with a zone specifier.
     "1.2.3.4%eth0"u8,
+    // IPv4 field must have at least one digit.
     ".1.2.3"u8,
     "1.2.3."u8,
     "1..2.3"u8,
+    // IPv4 address too long.
     "1.2.3.4.5"u8,
+    // IPv4 in dotted octal form.
     "0300.0250.0214.0377"u8,
+    // IPv4 in dotted hex form.
     "0xc0.0xa8.0x8c.0xff"u8,
+    // IPv4 in class B form.
     "192.168.12345"u8,
+    // IPv4 in class B form, with a small enough number to be
+    // parseable as a regular dotted decimal field.
     "127.0.1"u8,
+    // IPv4 in class A form.
     "192.1234567"u8,
+    // IPv4 in class A form, with a small enough number to be
+    // parseable as a regular dotted decimal field.
     "127.1"u8,
+    // IPv4 field has value >255.
     "192.168.300.1"u8,
+    // IPv4 with too many fields.
     "192.168.0.1.5.6"u8,
+    // IPv6 with not enough fields.
     "1:2:3:4:5:6:7"u8,
+    // IPv6 with too many fields.
     "1:2:3:4:5:6:7:8:9"u8,
+    // IPv6 with 8 fields and a :: expander.
     "1:2:3:4::5:6:7:8"u8,
+    // IPv6 with a field bigger than 2b.
     "fe801::1"u8,
+    // IPv6 with non-hex values in field.
     "fe80:tail:scal:e::"u8,
+    // IPv6 with a zone delimiter but no zone.
     "fe80::1%"u8,
+    // IPv6 with a zone specifier of zero.
     "::ffff:0:0%0"u8,
+    // IPv6 (without ellipsis) with too many fields for trailing embedded IPv4.
     "ffff:ffff:ffff:ffff:ffff:ffff:ffff:192.168.140.255"u8,
+    // IPv6 (with ellipsis) with too many fields for trailing embedded IPv4.
     "ffff::ffff:ffff:ffff:ffff:ffff:ffff:192.168.140.255"u8,
+    // IPv6 with invalid embedded IPv4.
     "::ffff:192.168.140.bad"u8,
+    // IPv6 with multiple ellipsis ::.
     "fe80::1::1"u8,
+    // IPv6 with invalid non hex/colon character.
     "fe80:1?:1"u8,
+    // IPv6 with truncated bytes after single colon.
     "fe80:"u8,
+    // AddrPort strings.
     "1.2.3.4:51820"u8,
     "[fd7a:115c:a1e0:ab12:4843:cd96:626b:430b]:80"u8,
     "[::ffff:c000:0280]:65535"u8,
     "[::ffff:c000:0280%eth0]:1"u8,
+    // Prefix strings.
     "1.2.3.4/24"u8,
     "fd7a:115c:a1e0:ab12:4843:cd96:626b:430b/118"u8,
     "::ffff:c000:0280/96"u8,
@@ -131,16 +131,19 @@ public static void FuzzParse(ж<testing.F> Ꮡf) {
     foreach (var (_, seed) in corpus) {
         f.Add(seed);
     }
+
     Ꮡf.Fuzz((ж<testing.T> t, @string s) => {
         var (ip, _) = ParseAddr(s);
         checkStringParseRoundTrip<netipꓸAddr>(t, ip, ParseAddr);
         checkEncoding(t, ip);
+
         // Check that we match the net's IP parser, modulo zones.
         if (!strings.Contains(s, "%"u8)) {
             var stdip = net.ParseIP(s);
             if (!ip.IsValid() != (stdip == default!)) {
                 t.Errorf("ParseAddr zero != net.ParseIP nil: ip=%q stdip=%q"u8, ip, stdip);
             }
+
             if (ip.IsValid() && !ip.Is4In6()) {
                 var (buf, errΔ1) = ip.MarshalText();
                 if (errΔ1 != default!) {
@@ -182,6 +185,7 @@ public static void FuzzParse(ж<testing.F> Ꮡf) {
                 }
             }
         }
+
         // Check that .Next().Prev() and .Prev().Next() preserve the IP.
         if (ip.IsValid() && ip.Next().IsValid() && ip.Next().Prev() != ip) {
             t.Errorf(".Next.Prev did not round trip: ip=%q .next=%q .next.prev=%q"u8, ip, ip.Next(), ip.Next().Prev());
@@ -189,6 +193,7 @@ public static void FuzzParse(ж<testing.F> Ꮡf) {
         if (ip.IsValid() && ip.Prev().IsValid() && ip.Prev().Next() != ip) {
             t.Errorf(".Prev.Next did not round trip: ip=%q .prev=%q .prev.next=%q"u8, ip, ip.Prev(), ip.Prev().Next());
         }
+
         var (port, err) = ParseAddrPort(s);
         if (err == default!) {
             checkStringParseRoundTrip<netip.AddrPort>(t, port, ParseAddrPort);
@@ -197,6 +202,7 @@ public static void FuzzParse(ж<testing.F> Ꮡf) {
         port = AddrPortFrom(ip, 80);
         checkStringParseRoundTrip<netip.AddrPort>(t, port, ParseAddrPort);
         checkEncoding(t, port);
+
         (var ipp, err) = ParsePrefix(s);
         if (err == default!) {
             checkStringParseRoundTrip<netipꓸPrefix>(t, ipp, ParsePrefix);
@@ -295,6 +301,7 @@ internal static void checkTextMarshalMatchesAppendTo(ж<testing.T> Ꮡt, appendM
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var buf2 = new slice<byte>(0, len(buf));
     buf2 = x.AppendTo(buf2);
     if (!bytes.Equal(buf, buf2)) {
@@ -323,17 +330,18 @@ internal static void checkStringParseRoundTrip<P>(ж<testing.T> Ꮡt, P x, Func<
         // Ignore invalid values.
         return;
     }
+
     @string s = x.String();
     var (y, err) = parse(s);
     if (err != default!) {
         Ꮡt.Fatalf("s=%q err=%v"u8, s, err);
     }
     if (!AreEqual(x, y)) {
-        Ꮡt.Fatalf("%T round trip identity failure: s=%q x=%#v y=%#v"u8, x, s, x, y);
+        Ꮡt.Fatalf("%T round trip identity failure: s=%q x=%#v y=%#v"u8, (x).OrTypedNilOf(), s, (x).OrTypedNilOf(), (y).OrTypedNilOf());
     }
     @string s2 = y.String();
     if (s != s2) {
-        Ꮡt.Fatalf("%T String round trip identity failure: s=%#v s2=%#v"u8, x, s, s2);
+        Ꮡt.Fatalf("%T String round trip identity failure: s=%#v s2=%#v"u8, (x).OrTypedNilOf(), s, s2);
     }
 }
 
@@ -343,6 +351,7 @@ internal static void checkEncoding(ж<testing.T> Ꮡt, netipType x) {
         checkBinaryMarshaler(Ꮡt, x);
         checkTextMarshalMatchesString(Ꮡt, x);
     }
+
     {
         var (am, ok) = x._<appendMarshaler>(ᐧ); if (ok) {
             checkTextMarshalMatchesAppendTo(Ꮡt, am);

@@ -20,12 +20,18 @@ using @internal;
 
 partial class adler32_package {
 
+// mod is the largest prime that is less than 65536.
 internal static UntypedInt mod => 65521;
+// nmax is the largest n such that
+// 255 * n * (n+1) / 2 + (n+1) * (mod-1) <= 2^32-1.
+// It is mentioned in RFC 1950 (search for "5552").
 internal static UntypedInt nmax => 5552;
 
 // The size of an Adler-32 checksum in bytes.
 public static UntypedInt ΔSize => 4;
 
+// digest represents the partial evaluation of a checksum.
+// The low 16 bits are s1, the high 16 bits are s2.
 partial struct digest /*num:uint32*/;
 
 internal static void Reset(this ref digest d) {
@@ -75,13 +81,19 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     if (len(b) != marshaledSize) {
         return errors.New(hashAdler32InvalidHashˢ2);
     }
-    d = ((digest)byteorder.BEUint32(b[(int)(len(magic))..]));
+    d = (digest)byteorder.BEUint32(b[(int)(len(magic))..]);
     return default!;
+}
+
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d;
+    return (new digestжCloner(Ꮡr), default!);
 }
 
 // Add p to the running checksum d.
 internal static digest update(digest d, slice<byte> p) {
-    var (s1, s2) = ((uint32)((digest)(d & 0xffff)), (uint32)((d >> (int)(16))));
+    var (s1, s2) = ((uint32)((digest)(d & 0xffff)), (uint32)(d >> 16));
     while (len(p) > 0) {
         slice<byte> q = default!;
         if (len(p) > nmax) {
@@ -106,7 +118,7 @@ internal static digest update(digest d, slice<byte> p) {
         s2 %= mod;
         p = q;
     }
-    return ((digest)((uint32)((s2 << (int)(16)) | s1)));
+    return (digest)(s2 << 16 | s1);
 }
 
 internal static (nint nn, error err) Write(this ref digest d, slice<byte> p) {
@@ -120,7 +132,7 @@ internal static uint32 Sum32(this ref digest d) {
 
 internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
-    return append(@in, (byte)((s >> (int)(24))), (byte)((s >> (int)(16))), (byte)((s >> (int)(8))), (byte)s);
+    return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
 
 // Checksum returns the Adler-32 checksum of data.

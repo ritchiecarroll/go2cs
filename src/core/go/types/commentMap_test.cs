@@ -34,9 +34,11 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
 
     var fset = token.NewFileSet();
     var @file = fset.AddFile(""u8, -1, len(src));
+
     scanner.Scanner s = default!;
     s.Init(@file, src, default!, scanner.ScanComments);
     tokenꓸPos prev = default!;                // position of last non-comment, non-semicolon token
+
     while (ᐧ) {
         var (pos, tok, lit) = s.Scan();
         var exprᴛ1 = tok;
@@ -59,8 +61,8 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
             }
         }
         else if (exprᴛ1 == token.SEMICOLON) { matchᴛ1 = true;
+            // ignore automatically inserted semicolon
             if (lit == "\n"u8) {
-                // ignore automatically inserted semicolon
                 continue;
             }
             fallthrough = true;
@@ -68,7 +70,6 @@ internal static map<nint, slice<comment>> /*res*/ commentMap(slice<byte> src, ж
         if (fallthrough || !matchᴛ1) { /* default: */
             prev = pos;
         }
-
     }
 }
 
@@ -86,7 +87,7 @@ x /* ERROR "3:1" */                // ignore automatically inserted semicolon he
 	package /* ERROR "7:2" */  // indented with tab
         import  /* ERROR "8:9" */  // indented with blanks
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCommentMap(ж<testing.T> Ꮡt) {
     @string src = srcᶜ14;
@@ -99,6 +100,7 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
                 continue;
             }
             // err.line == line
+
             @string got = strings.TrimSpace(err.text[(int)(len(" ERROR "))..]);
             @string wantΔ1 = fmt.Sprintf(@"""%d:%d"""u8, line, err.col);
             if (got != wantΔ1) {
@@ -108,6 +110,7 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
             found++;
         }
     }
+
     nint want = strings.Count(src, errorˢ);
     if (found != want) {
         Ꮡt.Errorf("commentMap got %d errors; want %d"u8, found, want);

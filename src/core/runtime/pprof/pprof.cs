@@ -79,6 +79,7 @@ using bufio = bufio_package;
 using cmp = cmp_package;
 using fmt = fmt_package;
 using abi = @internal.abi_package;
+using goexperiment = @internal.goexperiment_package;
 using profilerecord = @internal.profilerecord_package;
 using io = io_package;
 using runtime = runtime_package;
@@ -108,12 +109,13 @@ partial class pprof_package {
 //
 // Each Profile has a unique name. A few profiles are predefined:
 //
-//	goroutine    - stack traces of all current goroutines
-//	heap         - a sampling of memory allocations of live objects
-//	allocs       - a sampling of all past memory allocations
-//	threadcreate - stack traces that led to the creation of new OS threads
-//	block        - stack traces that led to blocking on synchronization primitives
-//	mutex        - stack traces of holders of contended mutexes
+//	goroutine      - stack traces of all current goroutines
+//	goroutineleak  - stack traces of all leaked goroutines
+//	allocs         - a sampling of all past memory allocations
+//	heap           - a sampling of memory allocations of live objects
+//	threadcreate   - stack traces that led to the creation of new OS threads
+//	block          - stack traces that led to blocking on synchronization primitives
+//	mutex          - stack traces of holders of contended mutexes
 //
 // These predefined profiles maintain themselves and panic on an explicit
 // [Profile.Add] or [Profile.Remove] method call.
@@ -172,12 +174,6 @@ partial class pprof_package {
 // holds a lock for 1s while 5 other goroutines are waiting for the entire
 // second to acquire the lock, its unlock call stack will report 5s of
 // contention.
-//
-// Runtime-internal locks are always reported at the location
-// "runtime._LostContendedRuntimeLock". More detailed stack traces for
-// runtime-internal locks can be obtained by setting
-// `GODEBUG=runtimecontentionstacks=1` (see package [runtime] docs for
-// caveats).
 partial struct Profile {
     internal @string name;
     internal sync.Mutex mu;
@@ -187,7 +183,6 @@ partial struct Profile {
 }
 
 // profiles records all registered profiles.
-
 partial struct profilesᴛ1 /*dyn*/ {
     internal sync.Mutex mu;
     internal map<@string, ж<Profile>> m;
@@ -200,6 +195,13 @@ internal static void initᴛgoroutineProfile() { goroutineProfile = Ꮡ(new Prof
     name: "goroutine"u8,
     count: countGoroutine,
     write: writeGoroutine
+)); }
+
+internal static ж<Profile> goroutineLeakProfile;
+internal static void initᴛgoroutineLeakProfile() { goroutineLeakProfile = Ꮡ(new Profile(
+    name: "goroutineleak"u8,
+    count: runtime_goroutineleakcount,
+    write: writeGoroutineLeak
 )); }
 
 internal static ж<Profile> threadcreateProfile;
@@ -216,11 +218,10 @@ internal static void initᴛheapProfile() { heapProfile = Ꮡ(new Profile(
     write: writeHeap
 )); }
 
-// identical to heap profile
 internal static ж<Profile> allocsProfile;
 internal static void initᴛallocsProfile() { allocsProfile = Ꮡ(new Profile(
     name: "allocs"u8,
-    count: countHeap,
+    count: countHeap, // identical to heap profile
     write: writeAlloc
 )); }
 
@@ -238,6 +239,35 @@ internal static void initᴛmutexProfile() { mutexProfile = Ꮡ(new Profile(
     write: writeMutex
 )); }
 
+// goroutineLeakProfileLock ensures that the goroutine leak profile writer observes the
+// leaked goroutines discovered during the goroutine leak detection GC cycle
+// that was triggered by the profile request.
+// This prevents a race condition between the garbage collector and the profile writer
+// when multiple profile requests are issued concurrently: the status of leaked goroutines
+// is reset to _Gwaiting at the beginning of a leak detection cycle, which may lead the
+// profile writer of another concurrent request to produce an incomplete profile.
+//
+// Example trace:
+//
+//	G1                    | GC                          | G2
+//	----------------------+-----------------------------+---------------------
+//	Request profile       | .                           | .
+//	.                     | .                           | Request profile
+//	.                     | [G1] Resets leaked g status | .
+//	.                     | [G1] Leaks detected         | .
+//	.                     | <New cycle>                 | .
+//	.                     | [G2] Resets leaked g status | .
+//	Write profile         | .                           | .
+//	.                     | [G2] Leaks detected         | .
+//	.                     | .                           | Write profile
+//	----------------------+-----------------------------+---------------------
+//	Incomplete profile    |+++++++++++++++++++++++++++++| Complete profile
+internal static ж<sync.Mutex> ᏑgoroutineLeakProfileLock = new StandardBox<sync.Mutex>(default(sync.Mutex));
+internal static ref sync.Mutex goroutineLeakProfileLock => ref ᏑgoroutineLeakProfileLock.Value;
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string goroutineleakˢ = "goroutineleak"u8;
+
 internal static void lockProfiles() {
     Ꮡprofiles.of(profilesᴛ1.Ꮡmu).Lock();
     if (profiles.m == default!) {
@@ -250,6 +280,9 @@ internal static void lockProfiles() {
             ["block"u8] = blockProfile,
             ["mutex"u8] = mutexProfile
         };
+        if (goexperiment.GoroutineLeakProfile) {
+            profiles.m[goroutineleakˢ] = goroutineLeakProfile;
+        }
     }
 }
 
@@ -303,10 +336,12 @@ public static slice<ж<Profile>> Profiles() {
     try {
         lockProfiles();
         defer(unlockProfiles, ref ᒐ);
+
         var all = new slice<ж<Profile>>(0, len(profiles.m));
         foreach (var (_, p) in profiles.m) {
             all = append(all, p);
         }
+
         slices.SortFunc(all, (ж<Profile> a, ж<Profile> b) => strings_package.Compare((~a).name, (~b).name));
         return all;
     }
@@ -366,6 +401,7 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
         if (p.write != default!) {
             throw panic("pprof: Add called on built-in Profile " + p.name);
         }
+
         var stk = new slice<uintptr>(32);
         nint n = runtime.Callers(skip + 1, stk[..]);
         stk = stk.slice(0, n);
@@ -373,6 +409,7 @@ public static partial void Add(this ж<Profile> Ꮡp, any value, nint skip) {
             // The value for skip is too large, and there's no stack trace to record.
             stk = new uintptr[]{abi.FuncPCABIInternal(lostProfileEvent)}.slice();
         }
+
         p.mu.Lock();
         ᒐd1 = true;
         if (p.m[value] != default!) {
@@ -424,6 +461,7 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
     if (p.write != default!) {
         return p.write(w, debug);
     }
+
     // Obtain consistent snapshot under lock; then process without lock.
     p.mu.Lock();
     var all = new slice<slice<uintptr>>(0, len(p.m));
@@ -431,9 +469,11 @@ public static error WriteTo(this ж<Profile> Ꮡp, io.Writer w, nint debug) {
         all = append(all, stk);
     }
     p.mu.Unlock();
+
     // Map order is non-deterministic; make output deterministic.
     slices.SortFunc<slice<slice<uintptr>>, slice<uintptr>>(all, slices.Compare<slice<uintptr>, uintptr>);
-    return printCountProfile(w, debug, p.name, ((stackProfile)all));
+
+    return printCountProfile(w, debug, p.name, (stackProfile)all);
 }
 
 partial struct stackProfile /*[]slice<uintptr>*/;
@@ -494,7 +534,9 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
     b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, countName, countˢ);
     b.pbValueType(tagProfile_SampleType, cycleName, nanosecondsˢ);
+
     var cpuGHz = (float64)pprof_cyclesPerSecond() / 1e9D;
+
     var values = new int64[]{0, 0}.slice();
     slice<uint64> locs = default!;
     var expandedStack = pprof_makeProfStack();
@@ -507,8 +549,7 @@ internal static error printCountCycleProfile(io.Writer w, @string countName, @st
         locs = b.appendLocsForStack(locs[..0], expandedStack.slice(0, n));
         b.pbSample(values, locs, default!);
     }
-    b.build();
-    return default!;
+    return b.build();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -543,7 +584,9 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         }
         count[k]++;
     }
+
     sort.Sort(new keysByCountжInterface(Ꮡ(new keysByCount(keys, count))));
+
     if (debug > 0) {
         // Print debug profile in legacy format
         var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
@@ -554,11 +597,13 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         }
         return tw.Flush();
     }
+
     // Output profile in protobuf form.
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, name, countˢ);
     b.of(profileBuilder.Ꮡpb).int64Opt(tagProfile_Period, 1);
     b.pbValueType(tagProfile_SampleType, name, countˢ);
+
     var values = new int64[]{0}.slice();
     slice<uint64> locs = default!;
     foreach (var (_, k) in keys) {
@@ -571,15 +616,14 @@ internal static error printCountProfile(io.Writer w, nint debug, @string name, c
         if (p.Label(idx) != nil) {
             var bʗ1 = b;
             labels = () => {
-                foreach (var (_, lbl) in (~p.Label(idx)).list) {
-                    bʗ1.pbLabel(tagSample_Label, lbl.key, lbl.value, 0);
+                foreach (var (_, lbl) in (~p.Label(idx)).Set.List) {
+                    bʗ1.pbLabel(tagSample_Label, lbl.Key, lbl.Value, 0);
                 }
             };
         }
         b.pbSample(values, locs, labels);
     }
-    b.build();
-    return default!;
+    return b.build();
 }
 
 // keysByCount sorts keys with higher counts first, breaking ties by key string order.
@@ -678,6 +722,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         memStats = @new<runtime.MemStats>();
         runtime.ReadMemStats(memStats);
     }
+
     // Find out how many records there are (the call
     // pprof_memProfileInternal(nil, true) below),
     // allocate that many records, and get the data.
@@ -697,15 +742,19 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
             p = p.slice(0, n);
             break;
         }
+        // Profile grew; try again.
     }
-    // Profile grew; try again.
+
     if (debug == 0) {
         return writeHeapProto(w, p, (int64)runtime.MemProfileRate, defaultSampleType);
     }
+
     slices.SortFunc(p, (profilerecord.MemProfileRecord a, profilerecord.MemProfileRecord bΔ1) => cmp.Compare(a.InUseBytes(), bΔ1.InUseBytes()));
+
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(new bufio_WriterжWriter(b), 1, 8, 1, (rune)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
+
     runtime.MemProfileRecord total = new();
     foreach (var (i, _) in p) {
         var r = Ꮡ(p, i);
@@ -714,10 +763,12 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         total.FreeBytes += r.Value.FreeBytes;
         total.FreeObjects += r.Value.FreeObjects;
     }
+
     // Technically the rate is MemProfileRate not 2*MemProfileRate,
     // but early versions of the C++ heap profiler reported 2*MemProfileRate,
     // so that's what pprof has come to expect.
     nint rate = 2 * runtime.MemProfileRate;
+
     // pprof reads a profile with alloc == inuse as being a "2-column" profile
     // (objects and bytes, not distinguishing alloc from inuse),
     // but then such a profile can't be merged using pprof *.prof with
@@ -729,10 +780,12 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     if (inUseBytes == allocBytes) {
         allocBytes++;
     }
+
     fmt.Fprintf(w, "heap profile: %d: %d [%d: %d] @ heap/%d\n"u8,
         total.InUseObjects(), inUseBytes,
         total.AllocObjects, allocBytes,
         rate);
+
     foreach (var (i, _) in p) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%d: %d [%d: %d] @"u8,
@@ -744,6 +797,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         fmt.Fprintf(w, "\n"u8);
         printStackRecord(w, (~r).Stack, false);
     }
+
     // Print memstats information too.
     // Pprof will ignore, but useful for people
     var s = memStats;
@@ -754,18 +808,21 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     fmt.Fprintf(w, "# Lookups = %d\n"u8, (~s).Lookups);
     fmt.Fprintf(w, "# Mallocs = %d\n"u8, (~s).Mallocs);
     fmt.Fprintf(w, "# Frees = %d\n"u8, (~s).Frees);
+
     fmt.Fprintf(w, "# HeapAlloc = %d\n"u8, (~s).HeapAlloc);
     fmt.Fprintf(w, "# HeapSys = %d\n"u8, (~s).HeapSys);
     fmt.Fprintf(w, "# HeapIdle = %d\n"u8, (~s).HeapIdle);
     fmt.Fprintf(w, "# HeapInuse = %d\n"u8, (~s).HeapInuse);
     fmt.Fprintf(w, "# HeapReleased = %d\n"u8, (~s).HeapReleased);
     fmt.Fprintf(w, "# HeapObjects = %d\n"u8, (~s).HeapObjects);
+
     fmt.Fprintf(w, "# Stack = %d / %d\n"u8, (~s).StackInuse, (~s).StackSys);
     fmt.Fprintf(w, "# MSpan = %d / %d\n"u8, (~s).MSpanInuse, (~s).MSpanSys);
     fmt.Fprintf(w, "# MCache = %d / %d\n"u8, (~s).MCacheInuse, (~s).MCacheSys);
     fmt.Fprintf(w, "# BuckHashSys = %d\n"u8, (~s).BuckHashSys);
     fmt.Fprintf(w, "# GCSys = %d\n"u8, (~s).GCSys);
     fmt.Fprintf(w, "# OtherSys = %d\n"u8, (~s).OtherSys);
+
     fmt.Fprintf(w, "# NextGC = %d\n"u8, (~s).NextGC);
     fmt.Fprintf(w, "# LastGC = %d\n"u8, (~s).LastGC);
     fmt.Fprintf(w, "# PauseNs = %d\n"u8, (~s).PauseNs);
@@ -774,8 +831,10 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     fmt.Fprintf(w, "# NumForcedGC = %d\n"u8, (~s).NumForcedGC);
     fmt.Fprintf(w, "# GCCPUFraction = %v\n"u8, (~s).GCCPUFraction);
     fmt.Fprintf(w, "# DebugGC = %v\n"u8, (~s).DebugGC);
+
     // Also flush out MaxRSS on supported platforms.
     addMaxRSS(w);
+
     tw.Flush();
     return b.Flush();
 }
@@ -815,18 +874,49 @@ internal static error writeGoroutine(io.Writer w, nint debug) {
     return writeRuntimeProfile(w, debug, goroutineˢ, pprof_goroutineProfileWithLabels);
 }
 
+// writeGoroutineLeak first invokes a GC cycle that performs goroutine leak detection.
+// It then writes the goroutine profile, filtering for leaked goroutines.
+internal static error writeGoroutineLeak(io.Writer w, nint debug) {
+    GoFrame ᒐ = default;
+    try {
+        // Acquire the goroutine leak detection lock and release
+        // it after the goroutine leak profile is written.
+        //
+        // While the critical section is long, this is needed to prevent
+        // a race condition between the garbage collector and the goroutine
+        // leak profile writer when multiple profile requests are issued concurrently.
+        ᏑgoroutineLeakProfileLock.Lock();
+        defer(ᏑgoroutineLeakProfileLock.Unlock, ref ᒐ);
+
+        // Run the GC with leak detection first so that leaked goroutines
+        // may transition to the leaked state.
+        runtime_goroutineLeakGC();
+
+        // If the debug flag is set sufficiently high, just defer to writing goroutine stacks
+        // like in a regular goroutine profile. Include non-leaked goroutines, too.
+        if (debug >= 2) {
+            return writeGoroutineStacks(w);
+        }
+
+        // Otherwise, write the goroutine leak profile.
+        return writeRuntimeProfile(w, debug, goroutineleakˢ, pprof_goroutineLeakProfileWithLabels);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
 internal static partial error writeGoroutineStacks(io.Writer w) {
     // We don't know how big the buffer needs to be to collect
     // all the goroutines. Start with 1 MB and try a few times, doubling each time.
     // Give up and use a truncated trace if 64 MB is not enough.
-    var buf = new slice<byte>((1 << (int)(20)));
+    var buf = new slice<byte>((1 << 20));
     for (nint i = 0; ᐧ ; i++) {
         nint n = runtime.Stack(buf, true);
         if (n < len(buf)) {
             buf = buf.slice(0, n);
             break;
         }
-        if (len(buf) >= (64 << (int)(20))) {
+        if (len(buf) >= 64 << 20) {
             // Filled 64 MB - stop there.
             break;
         }
@@ -846,6 +936,7 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
     slice<profilerecord.StackRecord> p = default!;
     slice<@unsafe.Pointer> labels = default!;
     var (n, ok) = fetch(default!, default!);
+
     while (ᐧ) {
         // Allocate room for a slightly bigger profile,
         // in case a few more entries have been added
@@ -857,8 +948,9 @@ internal static error writeRuntimeProfile(io.Writer w, nint debug, @string name,
             p = p.slice(0, n);
             break;
         }
+        // Profile grew; try again.
     }
-    // Profile grew; try again.
+
     return printCountProfile(w, debug, name, new runtimeProfileжcountProfile(Ꮡ(new runtimeProfile(p, labels))));
 }
 
@@ -879,9 +971,8 @@ internal static ж<labelMap> Label(this ref runtimeProfile p, nint i) {
     return (ж<labelMap>)(uintptr)(p.labels[i]);
 }
 
-
 partial struct cpuᴛ1 /*dyn*/ {
-    public partial ref go.sync_package.Mutex Mutex { get; }
+    /*embed*/ public go.sync_package.Mutex Mutex;
     internal bool profiling;
     internal channel<bool> done;
 }
@@ -912,6 +1003,7 @@ public static partial error StartCPUProfile(io.Writer w) {
         // convert sample counts to seconds. Instead of requiring
         // each client to specify the frequency, we hard code it.
         const nint hz = 100;
+
         Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
         defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock, ref ᒐ);
         if (cpu.done == default!) {
@@ -944,7 +1036,10 @@ internal static void profileWriter(io.Writer w) {
     var b = newProfileBuilder(w);
     error err = default!;
     while (ᐧ) {
-        time.Sleep(100 * time.Millisecond);
+        if (runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8) {
+            // see runtime_pprof_readProfile
+            time.Sleep(100 * time.Millisecond);
+        }
         var (data, tags, eof) = readProfile();
         {
             var e = b.addCPUData(data, tags); if (e != default! && err == default!) {
@@ -972,6 +1067,7 @@ public static void StopCPUProfile() {
     try {
         Ꮡcpu.of(cpuᴛ1.ᏑMutex).Lock();
         defer(Ꮡcpu.of(cpuᴛ1.ᏑMutex).Unlock, ref ᒐ);
+
         if (!cpu.profiling) {
             return;
         }
@@ -1027,13 +1123,17 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
             break;
         }
     }
+
     slices.SortFunc(p, (profilerecord.BlockProfileRecord a, profilerecord.BlockProfileRecord bΔ1) => cmp.Compare(bΔ1.Cycles, a.Cycles));
+
     if (debug <= 0) {
         return printCountCycleProfile(w, contentionsˢ, delayˢ, p);
     }
+
     var b = bufio.NewWriter(w);
     var tw = tabwriter.NewWriter(w, 1, 8, 1, (rune)'\t', 0);
     w = new tabwriter_WriterжWriter(tw);
+
     fmt.Fprintf(w, "--- %v:\n"u8, name);
     fmt.Fprintf(w, "cycles/second=%v\n"u8, pprof_cyclesPerSecond());
     if (name == "mutex"u8) {
@@ -1053,6 +1153,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
             printStackRecord(w, stack, true);
         }
     }
+
     if (tw != nil) {
         tw.Flush();
     }
@@ -1064,6 +1165,9 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
     var (ᴛ1, ᴛ2) = runtime.pprof_goroutineProfileWithLabels(p, labels);
     return (ᴛ1, ᴛ2);
 }
+
+//go:linkname pprof_goroutineLeakProfileWithLabels runtime.pprof_goroutineLeakProfileWithLabels
+internal static partial (nint n, bool ok) pprof_goroutineLeakProfileWithLabels(slice<profilerecord.StackRecord> p, slice<@unsafe.Pointer> labels);
 
 //go:linkname pprof_cyclesPerSecond runtime/pprof.runtime_cyclesPerSecond
 /*linkname*/ internal static partial int64 pprof_cyclesPerSecond() {

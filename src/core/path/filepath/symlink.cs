@@ -19,7 +19,8 @@ internal static readonly @string evalSymlinksTooManyLinksˢ = "EvalSymlinks: too
 
 internal static (@string, error) walkSymlinks(@string path) {
     nint volLen = filepathlite.VolumeNameLen(path);
-    @string pathSeparator = ((@string)(rune)os.PathSeparator);
+    @string pathSeparator = (@string)(rune)os.PathSeparator;
+
     if (volLen < len(path) && os.IsPathSeparator(path[volLen])) {
         volLen++;
     }
@@ -34,10 +35,12 @@ internal static (@string, error) walkSymlinks(@string path) {
         while (end < len(path) && !os.IsPathSeparator(path[end])) {
             end++;
         }
+
         // On Windows, "." can be a symlink.
         // We look it up, and use the value if it is absolute.
         // If not, we just return ".".
         var isWindowsDot = runtime.GOOS == "windows"u8 && path.slice(filepathlite.VolumeNameLen(path)) == ".";
+
         // The next path component is in path[start:end].
         if (end == start){
             // No more path components.
@@ -73,37 +76,49 @@ internal static (@string, error) walkSymlinks(@string path) {
             }
             continue;
         }
+
         // Ordinary path component. Add it to result.
+
         if (len(dest) > filepathlite.VolumeNameLen(dest) && !os.IsPathSeparator(dest[len(dest) - 1])) {
             dest += pathSeparator;
         }
+
         dest += path.slice(start, end);
+
         // Resolve symlink.
+
         var (fi, err) = os.Lstat(dest);
         if (err != default!) {
             return ("", err);
         }
+
         if ((fs.FileMode)(fi.Mode() & fs.ModeSymlink) == 0) {
             if (!fi.Mode().IsDir() && end < len(path)) {
                 return ("", syscall.ENOTDIR);
             }
             continue;
         }
+
         // Found symlink.
+
         linksWalked++;
         if (linksWalked > 255) {
             return ("", errors.New(evalSymlinksTooManyLinksˢ));
         }
+
         (var link, err) = os.Readlink(dest);
         if (err != default!) {
             return ("", err);
         }
+
         if (isWindowsDot && !IsAbs(link)) {
             // On Windows, if "." is a relative symlink,
             // just return ".".
             break;
         }
+
         path = link + path.slice(end);
+
         nint v = filepathlite.VolumeNameLen(link);
         if (v > 0){
             // Symlink to drive name is an absolute path.

@@ -141,7 +141,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
     }
     // Could check that the high byte is zero but it's not worth it.
     foreach (var (_, bΔ1) in buf.slice(0, width)) {
-        x = (uint64)((x << (int)(8)) | (uint64)bΔ1);
+        x = x << 8 | (uint64)bΔ1;
     }
     width++; // +1 for length byte
     return (x, width, err);
@@ -170,7 +170,7 @@ internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
     // Don't need to check error; it's safe to loop regardless.
     // Could check that the high byte is zero but it's not worth it.
     foreach (var (_, bΔ1) in buf.slice(0, n)) {
-        x = (uint64)((x << (int)(8)) | (uint64)bΔ1);
+        x = x << 8 | (uint64)bΔ1;
     }
     state.b.Drop(n);
     return x;
@@ -180,10 +180,10 @@ internal static uint64 /*x*/ decodeUint(this ref decoderState state) {
 // Does not check for overflow.
 internal static int64 decodeInt(this ref decoderState state) {
     var x = state.decodeUint();
-    if ((uint64)(x & 1) != 0) {
-        return ~(int64)((x >> (int)(1)));
+    if ((x & 1) != 0) {
+        return ~(int64)(x >> 1);
     }
-    return (int64)((x >> (int)(1)));
+    return (int64)(x >> 1);
 }
 
 // getLength decodes the next uint and makes sure it is a possible
@@ -197,6 +197,7 @@ internal static (nint, bool) getLength(this ref decoderState state) {
     return (n, true);
 }
 
+// decOp is the signature of a decoding operator for a given type.
 // type decOp is a methodless func type — rendered inline as its base delegate
 
 // The 'instructions' of the decoding machine
@@ -473,7 +474,7 @@ internal static void decString(ж<decInstr> Ꮡi, ж<decoderState> Ꮡstate, ref
     if (len(data) < n) {
         errorf("invalid string length %d: exceeds input size %d"u8, n, len(data));
     }
-    @string s = ((@string)(data.slice(0, n)));
+    @string s = (@string)(data.slice(0, n));
     state.b.Drop(n);
     value.SetString(s);
 }
@@ -541,12 +542,10 @@ internal static void decodeStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
             if (delta < 0) {
                 errorf("decode: corrupted data: negative delta"u8);
             }
-            if (delta == 0) {
-                // struct terminator is zero delta fieldnum
+            if (delta == 0) { // struct terminator is zero delta fieldnum
                 break;
             }
-            if ((~state).fieldnum >= len(engine.instr) - delta) {
-                // subtract to compare without overflow
+            if ((~state).fieldnum >= len(engine.instr) - delta) { // subtract to compare without overflow
                 error_(errRange);
             }
             nint fieldnum = (~state).fieldnum + delta;
@@ -583,8 +582,7 @@ internal static void ignoreStruct(this ж<Decoder> Ꮡdec, ж<decEngine> Ꮡengi
             if (delta < 0) {
                 errorf("ignore decode: corrupted data: negative delta"u8);
             }
-            if (delta == 0) {
-                // struct terminator is zero delta fieldnum
+            if (delta == 0) { // struct terminator is zero delta fieldnum
                 break;
             }
             nint fieldnum = (~state).fieldnum + delta;
@@ -674,6 +672,7 @@ internal static reflectꓸValue decodeIntoValue(ж<decoderState> Ꮡstate, Actio
     if (isPtr) {
         v = decAlloc(value);
     }
+
     op(Ꮡinstr, Ꮡstate, v);
     return value;
 }
@@ -789,8 +788,7 @@ internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ity
 
     // Read the name of the concrete type.
     var nr = state.decodeUint();
-    if (nr > ((uint64)1 << (int)(31))) {
-        // zero is permissible for anonymous types
+    if (nr > (uint64)1 << 31) { // zero is permissible for anonymous types
         errorf("invalid type name length %d"u8, nr);
     }
     if (nr > (uint64)state.b.Len()) {
@@ -809,11 +807,12 @@ internal static void decodeInterface(this ж<Decoder> Ꮡdec, reflectꓸType ity
         errorf("name too long (%d bytes): %.20q..."u8, len(name), name);
     }
     // The concrete type must be registered.
-    var (typi, ok) = ᏑnameToConcreteType.Load(((@string)name));
+    var (typi, ok) = ᏑnameToConcreteType.Load((@string)name);
     if (!ok) {
         errorf("name not registered for interface: %q"u8, name);
     }
     var typ = typi._<reflectꓸType>();
+
     // Read the type id of the concrete value.
     var concreteId = Ꮡdec.decodeTypeSequence(true);
     if (concreteId < 0) {
@@ -885,15 +884,17 @@ internal static void decodeGobDecoder(this ref Decoder dec, ж<userTypeInfo> Ꮡ
     // We know it's one of these.
     var exprᴛ1 = ut.externalDec;
     if (exprᴛ1 == xGob) {
-        err = value.Interface()._<GobDecoder>().GobDecode(b);
+        var (gobDecoder, _) = reflect.TypeAssert<GobDecoder>(value);
+        err = gobDecoder.GobDecode(b);
     }
     else if (exprᴛ1 == xBinary) {
-        err = value.Interface()._<encoding.BinaryUnmarshaler>().UnmarshalBinary(b);
+        var (binaryUnmarshaler, _) = reflect.TypeAssert<encoding.BinaryUnmarshaler>(value);
+        err = binaryUnmarshaler.UnmarshalBinary(b);
     }
     else if (exprᴛ1 == xText) {
-        err = value.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(b);
+        var (textUnmarshaler, _) = reflect.TypeAssert<encoding.TextUnmarshaler>(value);
+        err = textUnmarshaler.UnmarshalText(b);
     }
-
     if (err != default!) {
         error_(err);
     }
@@ -955,6 +956,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
     if ((~ut).externalDec != 0) {
         return dec.gobDecodeOpFor(ut);
     }
+
     // If this type is already in progress, it's a recursive type (e.g. map[string]*T).
     // Return the pointer to the op we're already building.
     {
@@ -1012,7 +1014,7 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                     typeId elemId = default!;
                     {
                         var tt = builtinIdToType(wireId); if (tt != default!){
-                            elemId = tt._<ж<sliceType>>().Value.Elem;
+                            elemId = tt._<ΔgobType, ж<sliceType>>().Value.Elem;
                         } else {
                             elemId = dec.wireType[wireId].Value.SliceT.Value.Elem;
                         }
@@ -1029,9 +1031,9 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                 } while (false);
             }
             else if (exprᴛ1 == reflect.Struct) {
+                // Generate a closure that calls out to the engine for the nested type.
                 var utΔ2 = userType(typ);
-                var (enginePtr, err) = Ꮡdec.getDecEnginePtr(wireId, // Generate a closure that calls out to the engine for the nested type.
- utΔ2);
+                var (enginePtr, err) = Ꮡdec.getDecEnginePtr(wireId, utΔ2);
                 if (err != default!) {
                     error_(err);
                 }
@@ -1048,7 +1050,6 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decO
                 };
             }
         }
-
     }
     if (op == default!) {
         errorf("decode can't handle type %s"u8, rt);
@@ -1133,9 +1134,9 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
                 break;
             }
             case {} when (~wire).StructT != nil: {
+                // Generate a closure that calls out to the engine for the nested type.
                 var (enginePtr, err) = Ꮡdec.getIgnoreEnginePtr(wireId);
                 if (err != default!) {
-                    // Generate a closure that calls out to the engine for the nested type.
                     error_(err);
                 }
                 var enginePtrʗ1 = enginePtr;
@@ -1151,7 +1152,6 @@ internal static ж<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decI
                 };
                 break;
             }}
-
         }
         if (op == default!) {
             errorf("bad data: ignore can't handle type %s"u8, wireId.@string());
@@ -1210,8 +1210,7 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
     if (((~ut).externalDec == xGob) != (ok && (~wire).GobEncoderT != nil) || ((~ut).externalDec == xBinary) != (ok && (~wire).BinaryMarshalerT != nil) || ((~ut).externalDec == xText) != (ok && (~wire).TextMarshalerT != nil)) {
         return false;
     }
-    if ((~ut).externalDec != 0) {
-        // This test trumps all others.
+    if ((~ut).externalDec != 0) { // This test trumps all others.
         return true;
     }
     {
@@ -1240,7 +1239,6 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
         }
         if (exprᴛ1 == reflect.Array) {
             if (!ok || (~wire).ArrayT == nil) {
-                // chan, etc: cannot handle.
                 return false;
             }
             var Δarray = wire.Value.ArrayT;
@@ -1254,8 +1252,8 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
             return dec.compatibleType(t.Key(), (~MapType).Key, inProgress) && dec.compatibleType(t.Elem(), (~MapType).Elem, inProgress);
         }
         if (exprᴛ1 == reflect.ΔSlice) {
+            // Is it an array of bytes?
             if (t.Elem().Kind() == reflect.Uint8) {
-                // Is it an array of bytes?
                 return fw == tBytes;
             }
             // Extract and compare element types.
@@ -1275,10 +1273,10 @@ internal static bool compatibleType(this ref Decoder dec, reflectꓸType fr, typ
             return true;
         }
         { /* default: */
+            // chan, etc: cannot handle.
             return false;
         }
     }
-
 }
 
 // typeString returns a human-readable description of the type identified by remoteId.
@@ -1306,9 +1304,9 @@ internal static @string typeString(this ж<Decoder> Ꮡdec, typeId remoteId) {
 internal static (ж<decEngine> engine, error err) compileSingle(this ж<Decoder> Ꮡdec, typeId remoteId, ж<userTypeInfo> Ꮡut) {
     ж<decEngine> engine = default!;
     error err = default!;
-
     ref var dec = ref Ꮡdec.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
+
     var rt = ut.user;
     engine = @new<decEngine>();
     engine.Value.instr = new slice<decInstr>(1); // one item
@@ -1348,8 +1346,8 @@ internal static (ж<decEngine> engine, error err) compileDec(this ж<Decoder> �
     try {
         ref var dec = ref Ꮡdec.DerefOrNull();
         ref var ut = ref Ꮡut.DerefOrNull();
-
         ref var err = ref Ꮡerr.ValueSlot;
+
         defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
         var rt = ut.@base;
         var srt = rt;
@@ -1408,9 +1406,9 @@ internal static (ж<decEngine> engine, error err) compileDec(this ж<Decoder> �
 internal static (ж<ж<decEngine>> enginePtr, error err) getDecEnginePtr(this ж<Decoder> Ꮡdec, typeId remoteId, ж<userTypeInfo> Ꮡut) {
     ж<ж<decEngine>> enginePtr = default!;
     error err = default!;
-
     ref var dec = ref Ꮡdec.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
+
     var rt = ut.user;
     var (decoderMap, ok) = dec.decoderCache[rt, ꟷ];
     if (!ok) {
@@ -1441,8 +1439,8 @@ internal static reflectꓸType emptyStructType = reflect.TypeFor<emptyStruct>();
 internal static (ж<ж<decEngine>> enginePtr, error err) getIgnoreEnginePtr(this ж<Decoder> Ꮡdec, typeId wireId) {
     ж<ж<decEngine>> enginePtr = default!;
     error err = default!;
-
     ref var dec = ref Ꮡdec.DerefOrNull();
+
     bool ok = default!;
     {
         (enginePtr, ok) = dec.ignorerCache[wireId, ꟷ]; if (!ok) {
@@ -1537,9 +1535,9 @@ internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
     else { /* default: */
         throw panic("gob: unknown size of int/uint");
     }
-
     decOpTable[reflect.ΔInt] = iop;
     decOpTable[reflect.ΔUint] = uop;
+
     // Finally uintptr
     var exprᴛ2 = uintptrBits;
     if (exprᴛ2 == 32) {
@@ -1551,7 +1549,6 @@ internal static UntypedInt uintptrBits => /* 32 << (^uintptr(0) >> 63) */ 64;
     else { /* default: */
         throw panic("gob: unknown size of uintptr");
     }
-
     decOpTable[reflect.Uintptr] = uop;
 }
 

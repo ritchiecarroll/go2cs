@@ -14,6 +14,7 @@ using strings = strings_package;
 
 partial class user_package {
 
+// lineFunc returns a value, an error, or (nil, nil) to skip the row.
 // type lineFunc is a methodless func type — rendered inline as its base delegate
 
 // readColonFile parses r as an /etc/group or /etc/passwd style file, running
@@ -27,16 +28,19 @@ internal static (any v, error err) readColonFile(io.Reader r, Func<slice<byte>, 
     error err = default!;
 
     var rd = bufio.NewReader(r);
+
     // Read the file line-by-line.
     while (ᐧ) {
         bool isPrefix = default!;
         slice<byte> wholeLine = default!;
+
         // Read the next line. We do so in chunks (as much as reader's
         // buffer is able to keep), check if we read enough columns
         // already on each step and store final result in wholeLine.
         while (ᐧ) {
             slice<byte> line = default!;
             (line, isPrefix, err) = rd.ReadLine();
+
             if (err != default!) {
                 // We should return (nil, nil) if EOF is reached
                 // without a match.
@@ -45,19 +49,23 @@ internal static (any v, error err) readColonFile(io.Reader r, Func<slice<byte>, 
                 }
                 return (default!, err);
             }
+
             // Simple common case: line is short enough to fit in a
             // single reader's buffer.
             if (!isPrefix && len(wholeLine) == 0) {
                 wholeLine = line;
                 break;
             }
+
             wholeLine = appendꓸꓸꓸ(wholeLine, line);
+
             // Check if we read the whole line (or enough columns)
             // already.
             if (!isPrefix || bytes.Count(wholeLine, new byte[]{(rune)':'}.slice()) >= readCols) {
                 break;
             }
         }
+
         // There's no spec for /etc/passwd or /etc/group, but we try to follow
         // the same rules as the glibc parser, which allows comments and blank
         // space at the beginning of a line.
@@ -69,6 +77,7 @@ internal static (any v, error err) readColonFile(io.Reader r, Func<slice<byte>, 
         if (v != default! || err != default!) {
             return (v, err);
         }
+
         // If necessary, skip the rest of the line
         for (; isPrefix; (_, isPrefix, err) = rd.ReadLine()) {
             if (err != default!) {
@@ -96,12 +105,13 @@ internal static Func<slice<byte>, (any, error)> matchGroupIndexValue(@string val
             return (v, err);
         }
         // wheel:*:0:root
-        var parts = strings.SplitN(((@string)line), ":"u8, 4);
-        if (len(parts) < 4 || parts[0] == "" || parts[idx] != value || parts[0][0] == (rune)'+' || parts[0][0] == (rune)'-') {
+        var parts = strings.SplitN((@string)line, ":"u8, 4);
+        if (len(parts) < 4 || parts[0] == "" || parts[idx] != value ||
             // If the file contains +foo and you search for "foo", glibc
             // returns an "invalid argument" error. Similarly, if you search
             // for a gid for a row where the group name starts with "+" or "-",
             // glibc fails to find the record.
+            parts[0][0] == (rune)'+' || parts[0][0] == (rune)'-') {
             return (v, err);
         }
         {
@@ -153,7 +163,7 @@ internal static Func<slice<byte>, (any, error)> matchUserIndexValue(@string valu
             return (v, err);
         }
         // kevin:x:1005:1006::/home/kevin:/usr/bin/zsh
-        var parts = strings.SplitN(((@string)line), ":"u8, 7);
+        var parts = strings.SplitN((@string)line, ":"u8, 7);
         if (len(parts) < 6 || parts[idx] != value || parts[0] == "" || parts[0][0] == (rune)'+' || parts[0][0] == (rune)'-') {
             return (v, err);
         }

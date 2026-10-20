@@ -168,17 +168,17 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/entropy/crypto.internal.entropy.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/entropy/v1.0.0/crypto.internal.entropy.v1.0.0.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/aes/crypto.internal.fips140.aes.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/crypto.internal.fips140.check.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/subtle/crypto.internal.fips140.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/byteorder/crypto.internal.fips140deps.byteorder.csproj" />
-    <ProjectReference Include="$(go2csPath)core/crypto/internal/randutil/crypto.internal.randutil.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/sysrand/crypto.internal.sysrand.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/bits/math.bits.csproj" />
+    <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
   </ItemGroup>
 

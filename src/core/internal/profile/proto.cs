@@ -21,6 +21,7 @@ namespace go.@internal;
 
 using errors = errors_package;
 using fmt = fmt_package;
+using slices = slices_package;
 
 partial class profile_package {
 
@@ -54,13 +55,13 @@ internal static void encodeVarint(ref buffer b, uint64 x) {
 }
 
 internal static void encodeLength(ref buffer b, nint tag, nint len) {
-    encodeVarint(ref b, (uint64)(((uint64)tag << (int)(3)) | 2));
+    encodeVarint(ref b, (uint64)tag << 3 | 2);
     encodeVarint(ref b, (uint64)len);
 }
 
 internal static void encodeUint64(ref buffer b, nint tag, uint64 x) {
     // append varint to b.data
-    encodeVarint(ref b, (uint64)(((uint64)tag << (int)(3)) | 0));
+    encodeVarint(ref b, (uint64)tag << 3 | 0);
     encodeVarint(ref b, x);
 }
 
@@ -169,11 +170,25 @@ internal static error /*err*/ unmarshal(slice<byte> data, message m) {
 }
 
 internal static uint64 le64(slice<byte> p) {
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)p[0] | ((uint64)p[1] << (int)(8))) | ((uint64)p[2] << (int)(16))) | ((uint64)p[3] << (int)(24))) | ((uint64)p[4] << (int)(32))) | ((uint64)p[5] << (int)(40))) | ((uint64)p[6] << (int)(48))) | ((uint64)p[7] << (int)(56)));
+    return (uint64)p[0] | (uint64)p[1] << 8 | (uint64)p[2] << 16 | (uint64)p[3] << 24 | (uint64)p[4] << 32 | (uint64)p[5] << 40 | (uint64)p[6] << 48 | (uint64)p[7] << 56;
 }
 
 internal static uint32 le32(slice<byte> p) {
-    return (uint32)((uint32)((uint32)((uint32)p[0] | ((uint32)p[1] << (int)(8))) | ((uint32)p[2] << (int)(16))) | ((uint32)p[3] << (int)(24)));
+    return (uint32)p[0] | (uint32)p[1] << 8 | (uint32)p[2] << 16 | (uint32)p[3] << 24;
+}
+
+internal static nint /*numVarints*/ peekNumVarints(slice<byte> data) {
+    nint numVarints = default!;
+
+    for (; len(data) > 0; numVarints++) {
+        error err = default!;
+        {
+            (_, data, err) = decodeVarint(data); if (err != default!) {
+                break;
+            }
+        }
+    }
+    return numVarints;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -202,8 +217,8 @@ internal static (slice<byte>, error) decodeField(ref buffer b, slice<byte> data)
     if (err != default!) {
         return (default!, err);
     }
-    b.field = (nint)((x >> (int)(3)));
-    b.typ = (nint)((uint64)(x & 7));
+    b.field = (nint)(x >> 3);
+    b.typ = (nint)(x & 7);
     b.data = default!;
     b.u64 = 0;
     switch (b.typ) {
@@ -306,10 +321,14 @@ internal static error decodeInt64s(ref buffer b, ж<slice<int64>> Ꮡx) {
 
     if (b.typ == 2) {
         // Packed encoding
+        nint dataLen = peekNumVarints(b.data);
+        x = slices.Grow<slice<int64>, int64>(x, dataLen);
+
         var data = b.data;
         while (len(data) > 0) {
             uint64 u = default!;
             error err = default!;
+
             {
                 (u, data, err) = decodeVarint(data); if (err != default!) {
                     return err;
@@ -345,11 +364,15 @@ internal static error decodeUint64s(ref buffer b, ж<slice<uint64>> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (b.typ == 2) {
-        var data = b.data;
         // Packed encoding
+        nint dataLen = peekNumVarints(b.data);
+        x = slices.Grow<slice<uint64>, uint64>(x, dataLen);
+
+        var data = b.data;
         while (len(data) > 0) {
             uint64 uΔ1 = default!;
             error err = default!;
+
             {
                 (uΔ1, data, err) = decodeVarint(data); if (err != default!) {
                     return err;
@@ -375,7 +398,7 @@ internal static error decodeString(ref buffer b, ref @string x) {
             return err;
         }
     }
-    x = ((@string)b.data);
+    x = (@string)b.data;
     return default!;
 }
 

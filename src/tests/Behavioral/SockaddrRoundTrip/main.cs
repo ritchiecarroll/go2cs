@@ -38,63 +38,75 @@ internal static void roundTrip(@string label, nint family, syscallꓸSockaddr bi
             return;
         }
         defer(syscall.Closesocket, server, ref ᒐ);
+
         {
             var errΔ1 = syscall.Bind(server, bindTo); if (errΔ1 != default!) {
                 fmt.Printf("%s: bind failed\n"u8, label);
                 return;
             }
         }
+
         (var bound, err) = syscall.Getsockname(server);
         if (err != default!) {
             fmt.Printf("%s: getsockname failed\n"u8, label);
             return;
         }
+
         var (boundAddr, boundPort, ok) = describe(bound);
         if (!ok) {
             fmt.Printf("%s: getsockname returned an unexpected Sockaddr type\n"u8, label);
             return;
         }
         fmt.Printf("%s bound: addr=%s portAssigned=%v\n"u8, label, boundAddr, boundPort > 0);
+
         {
             var errΔ2 = syscall.Listen(server, 1); if (errΔ2 != default!) {
                 fmt.Printf("%s: listen failed\n"u8, label);
                 return;
             }
         }
+
         (var client, err) = syscall.Socket(family, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
         if (err != default!) {
             fmt.Printf("%s: client socket failed\n"u8, label);
             return;
         }
         defer(syscall.Closesocket, client, ref ᒐ);
+
         {
             var errΔ3 = syscall.Connect(client, bound); if (errΔ3 != default!) {
                 fmt.Printf("%s: connect failed\n"u8, label);
                 return;
             }
         }
+
         (var peer, err) = syscall.Getpeername(client);
         if (err != default!) {
             fmt.Printf("%s: getpeername failed\n"u8, label);
             return;
         }
+
         (var peerAddr, var peerPort, ok) = describe(peer);
         if (!ok) {
             fmt.Printf("%s: getpeername returned an unexpected Sockaddr type\n"u8, label);
             return;
         }
+
         fmt.Printf("%s peer matches bound: addr=%v port=%v\n"u8,
             label, sameAddr(peer, bound) && peerAddr == boundAddr, peerPort == boundPort);
+
         (var local, err) = syscall.Getsockname(client);
         if (err != default!) {
             fmt.Printf("%s: client getsockname failed\n"u8, label);
             return;
         }
+
         (var localAddr, var localPort, ok) = describe(local);
         if (!ok) {
             fmt.Printf("%s: client getsockname returned an unexpected Sockaddr type\n"u8, label);
             return;
         }
+
         fmt.Printf("%s client local: addr=%s portAssigned=%v distinctFromListener=%v\n"u8,
             label, localAddr, localPort > 0, localPort != boundPort);
     }
@@ -116,11 +128,13 @@ internal static void decodeRawAny(@string label, uint16 family, Action<Action<ni
     fill((nint off, byte v) => {
         putRaw(ref (Ꮡrsa).DerefOrNull(), off, v);
     });
+
     var (sa, err) = Ꮡrsa.Sockaddr();
     if (err != default!) {
         fmt.Printf("%s decode: err=%v\n"u8, label, err);
         return;
     }
+
     switch (sa.type()) {
     case ж<syscall.SockaddrInet4> s: {
         fmt.Printf("%s decode: inet4 addr=%d.%d.%d.%d port=%d\n"u8,
@@ -142,30 +156,22 @@ internal static void decodeRawAny(@string label, uint16 family, Action<Action<ni
     }}
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object wsaStartupFailedˢ = (@string)"WSAStartup failed"u8;
-private static readonly @string tcp4ˢ = "tcp4"u8;
-private static readonly @string tcp6ˢ = "tcp6"u8;
-private static readonly @string raw4ˢ = "raw4"u8;
-private static readonly @string raw6ˢ = "raw6"u8;
-private static readonly @string rawunixˢ = "rawunix"u8;
-private static readonly @string rawbadˢ = "rawbad"u8;
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
         ref var data = ref heap(new syscall.WSAData(), out var Ꮡdata);
         {
             var err = syscall.WSAStartup((uint32)0x202, Ꮡdata); if (err != default!) {
-                fmt.Println(wsaStartupFailedˢ);
+                fmt.Println("WSAStartup failed");
                 return;
             }
         }
         defer(() => syscall.WSACleanup(), ref ᒐ);
-        roundTrip(tcp4ˢ, syscall.AF_INET, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: new byte[]{127, 0, 0, 1}.array()))));
-        roundTrip(tcp6ˢ, syscall.AF_INET6, new syscall.SockaddrInet6жΔSockaddr(Ꮡ(new syscall.SockaddrInet6(Addr: new array<byte>(16){[15] = 1}))));
-        decodeRawAny(raw4ˢ, syscall.AF_INET, (Action<nint, byte> put) => {
+
+        roundTrip("tcp4", syscall.AF_INET, new syscall.SockaddrInet4жΔSockaddr(Ꮡ(new syscall.SockaddrInet4(Addr: new byte[]{127, 0, 0, 1}.array()))));
+        roundTrip("tcp6", syscall.AF_INET6, new syscall.SockaddrInet6жΔSockaddr(Ꮡ(new syscall.SockaddrInet6(Addr: new array<byte>(16){[15] = 1}))));
+
+        decodeRawAny("raw4", syscall.AF_INET, (Action<nint, byte> put) => {
             put(2, 0x1F);
             put(3, 0x90);
             put(4, 203);
@@ -173,7 +179,8 @@ internal static void Main() {
             put(6, 113);
             put(7, 42);
         });
-        decodeRawAny(raw6ˢ, syscall.AF_INET6, (Action<nint, byte> put) => {
+
+        decodeRawAny("raw6", syscall.AF_INET6, (Action<nint, byte> put) => {
             put(2, 0x01);
             put(3, 0xF4);
             for (nint i = 0; i < 16; i++) {
@@ -181,14 +188,17 @@ internal static void Main() {
             }
             put(24, 7);
         });
-        decodeRawAny(rawunixˢ, syscall.AF_UNIX, (Action<nint, byte> put) => {
+
+        decodeRawAny("rawunix", syscall.AF_UNIX, (Action<nint, byte> put) => {
             foreach (var (i, c) in slice<byte>("go2cs.sock"u8)) {
                 put(2 + i, c);
             }
         });
-        decodeRawAny(rawbadˢ, 0xFEED, (Action<nint, byte> put) => {
+
+        decodeRawAny("rawbad", 0xFEED, (Action<nint, byte> put) => {
         });
-        fmt.Println(doneˢ);
+
+        fmt.Println("done");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

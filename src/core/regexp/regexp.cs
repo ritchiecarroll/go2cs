@@ -174,6 +174,7 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
     ref var maxCap = ref heap<nint>(out var ᏑmaxCap);
     maxCap = re.MaxCap();
     var capNames = re.CapNames();
+
     re = re.Simplify();
     (var prog, err) = syntax.Compile(re);
     if (err != default!) {
@@ -207,12 +208,14 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
         regexp.Value.prefixBytes = slice<byte>((~regexp).prefix);
         (regexp.Value.prefixRune, _) = utf8.DecodeRuneInString((~regexp).prefix);
     }
+
     nint n = len((~prog).Inst);
     nint i = 0;
     while (matchSize[i] != 0 && matchSize[i] < n) {
         i++;
     }
     regexp.Value.mpool = i;
+
     return (regexp, default!);
 }
 
@@ -223,7 +226,6 @@ internal static (ж<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
 // so matchPool[0] has 16*2*128 = 4kB queues, etc.
 // The final matchPool is a catch-all for very large queues.
 internal static array<nint> matchSize = new nint[]{128, 512, 2048, 16384, 0}.array();
-
 internal static ж<array<Δsync.Pool>> ᏑmatchPool = new StandardBox<array<Δsync.Pool>>(new array<Δsync.Pool>(5));
 internal static ref array<Δsync.Pool> matchPool => ref ᏑmatchPool.Value;
 
@@ -245,11 +247,11 @@ internal static ж<machine> get(this ж<Regexp> Ꮡre) {
             t.Value.cap = new slice<nint>(re.matchcap);
         }
     }
+
     // Allocate queues if needed.
     // Or reallocate, for "large" match pool.
     nint n = matchSize[re.mpool];
-    if (n == 0) {
-        // large pool
+    if (n == 0) { // large pool
         n = len((~re.prog).Inst);
     }
     if (len((~m).q0.sparse) < n) {
@@ -313,7 +315,6 @@ internal static nint minInputLen(ref syntax.Regexp re) {
     { /* default: */
         return 0;
     }
-
 }
 
 // MustCompile is like [Compile] but panics if the expression cannot be parsed.
@@ -396,10 +397,6 @@ partial struct inputString {
 
 internal static (rune, nint) step(this ref inputString i, nint pos) {
     if (pos < len(i.str)) {
-        var c = i.str[pos];
-        if (c < utf8.RuneSelf) {
-            return ((rune)c, 1);
-        }
         return utf8.DecodeRuneInString(i.str.slice(pos));
     }
     return (endOfText, 0);
@@ -425,17 +422,11 @@ internal static lazyFlag context(this ref inputString i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
-        r1 = (rune)i.str[pos - 1];
-        if (r1 >= utf8.RuneSelf) {
-            (r1, _) = utf8.DecodeLastRuneInString(i.str.slice(0, pos));
-        }
+        (r1, _) = utf8.DecodeLastRuneInString(i.str.slice(0, pos));
     }
     // 0 <= pos && pos < len(i.str)
     if ((nuint)pos < (nuint)len(i.str)) {
-        r2 = (rune)i.str[pos];
-        if (r2 >= utf8.RuneSelf) {
-            (r2, _) = utf8.DecodeRuneInString(i.str.slice(pos));
-        }
+        (r2, _) = utf8.DecodeRuneInString(i.str.slice(pos));
     }
     return newLazyFlag(r1, r2);
 }
@@ -447,10 +438,6 @@ partial struct inputBytes {
 
 internal static (rune, nint) step(this ref inputBytes i, nint pos) {
     if (pos < len(i.str)) {
-        var c = i.str[pos];
-        if (c < utf8.RuneSelf) {
-            return ((rune)c, 1);
-        }
         return utf8.DecodeRune(i.str.slice(pos));
     }
     return (endOfText, 0);
@@ -476,17 +463,11 @@ internal static lazyFlag context(this ref inputBytes i, nint pos) {
     var (r1, r2) = (endOfText, endOfText);
     // 0 < pos && pos <= len(i.str)
     if ((nuint)(pos - 1) < (nuint)len(i.str)) {
-        r1 = (rune)i.str[pos - 1];
-        if (r1 >= utf8.RuneSelf) {
-            (r1, _) = utf8.DecodeLastRune(i.str.slice(0, pos));
-        }
+        (r1, _) = utf8.DecodeLastRune(i.str.slice(0, pos));
     }
     // 0 <= pos && pos < len(i.str)
     if ((nuint)pos < (nuint)len(i.str)) {
-        r2 = (rune)i.str[pos];
-        if (r2 >= utf8.RuneSelf) {
-            (r2, _) = utf8.DecodeRune(i.str.slice(pos));
-        }
+        (r2, _) = utf8.DecodeRune(i.str.slice(pos));
     }
     return newLazyFlag(r1, r2);
 }
@@ -602,14 +583,14 @@ public static @string ReplaceAllString(this ж<Regexp> Ꮡre, @string src, @stri
         n = 2 * (re.numSubexp + 1);
     }
     var b = Ꮡre.replaceAll(default!, src, n, (slice<byte> dst, slice<nint> match) => Ꮡre.Value.expand(dst, repl, default!, src, match));
-    return ((@string)b);
+    return (@string)b;
 }
 
 // ReplaceAllLiteralString returns a copy of src, replacing matches of the [Regexp]
 // with the replacement string repl. The replacement repl is substituted directly,
 // without using [Regexp.Expand].
 public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src, @string repl) {
-    return ((@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ)));
+    return (@string)Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl.ꓸꓸꓸ));
 }
 
 // ReplaceAllStringFunc returns a copy of src in which all matches of the
@@ -618,7 +599,7 @@ public static @string ReplaceAllLiteralString(this ж<Regexp> Ꮡre, @string src
 // directly, without using [Regexp.Expand].
 public static @string ReplaceAllStringFunc(this ж<Regexp> Ꮡre, @string src, Func<@string, @string> repl) {
     var b = Ꮡre.replaceAll(default!, src, 2, (slice<byte> dst, slice<nint> match) => append(dst, repl(src.slice(match[0], match[1])).ꓸꓸꓸ));
-    return ((@string)b);
+    return (@string)b;
 }
 
 internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, @string src, nint nmatch, Func<slice<byte>, slice<nint>, slice<byte>> repl) {
@@ -636,18 +617,21 @@ internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, 
     if (nmatch > (~re.prog).NumCap) {
         nmatch = re.prog.Value.NumCap;
     }
+
     array<nint> dstCap = new(2);
     while (searchPos <= endPos) {
         var a = Ꮡre.doExecute(default!, bsrc, src, searchPos, nmatch, dstCap[..0]);
         if (len(a) == 0) {
             break; // no more matches
         }
+
         // Copy the unmatched characters before this match.
         if (bsrc != default!){
             buf = appendꓸꓸꓸ(buf, bsrc.slice(lastMatchEnd, a[0]));
         } else {
             buf = append(buf, src.slice(lastMatchEnd, a[0]).ꓸꓸꓸ);
         }
+
         // Now insert a copy of the replacement string, but not for a
         // match of the empty string immediately after another match.
         // (Otherwise, we get double replacement for patterns that
@@ -656,6 +640,7 @@ internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, 
             buf = repl(buf, a);
         }
         lastMatchEnd = a[1];
+
         // Advance past this match; always advance at least one character.
         nint width = default!;
         if (bsrc != default!){
@@ -674,12 +659,14 @@ internal static slice<byte> replaceAll(this ж<Regexp> Ꮡre, slice<byte> bsrc, 
             searchPos = a[1];
         }
     }
+
     // Copy the unmatched characters after the last match.
     if (bsrc != default!){
         buf = appendꓸꓸꓸ(buf, bsrc.slice(lastMatchEnd));
     } else {
         buf = append(buf, src.slice(lastMatchEnd).ꓸꓸꓸ);
     }
+
     return buf;
 }
 
@@ -698,7 +685,7 @@ public static slice<byte> ReplaceAll(this ж<Regexp> Ꮡre, slice<byte> src, sli
     var srcʗ1 = src;
     var b = Ꮡre.replaceAll(src, ""u8, n, (slice<byte> dst, slice<nint> match) => {
         if (len(srepl) != len(replʗ1)) {
-            srepl = ((@string)replʗ1);
+            srepl = (@string)replʗ1;
         }
         return Ꮡre.Value.expand(dst, srepl, srcʗ1, ""u8, match);
     });
@@ -727,12 +714,12 @@ internal static array<byte> specialBytes = new(16);
 
 // special reports whether byte b needs to be escaped by QuoteMeta.
 internal static bool special(byte b) {
-    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & (((byte)1).Lsh((uint64)((b / 16))))) != 0;
+    return b < utf8.RuneSelf && (byte)(specialBytes[b % 16] & (((byte)1).Lsh((uint64)(b / 16)))) != 0;
 }
 
 [GoInit] internal static void init() {
     foreach (var (_, b) in slice<byte>(@"\.+*?()|[]{}^$"u8)) {
-        specialBytes[b % 16] |= (byte)(((byte)1).Lsh((uint64)((b / 16))));
+        specialBytes[b % 16] |= (byte)(((byte)1).Lsh((uint64)(b / 16)));
     }
 }
 
@@ -751,6 +738,7 @@ public static @string QuoteMeta(@string s) {
     if (i >= len(s)) {
         return s;
     }
+
     var b = new slice<byte>(2 * len(s) - i);
     copy(b, s.slice(0, i));
     nint j = i;
@@ -762,7 +750,7 @@ public static @string QuoteMeta(@string s) {
         b[j] = s[i];
         j++;
     }
-    return ((@string)(b.slice(0, j)));
+    return (@string)(b.slice(0, j));
 }
 
 // The number of capture values in the program may correspond
@@ -794,11 +782,13 @@ internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b,
     } else {
         end = len(b);
     }
+
     for ((nint pos, nint i, nint prevMatchEnd) = (0, 0, -1); i < n && pos <= end; ) {
         var matches = Ꮡre.doExecute(default!, b, s, pos, (~re.prog).NumCap, default!);
         if (len(matches) == 0) {
             break;
         }
+
         var accept = true;
         if (matches[1] == pos){
             // We've found an empty match.
@@ -824,6 +814,7 @@ internal static void allMatches(this ж<Regexp> Ꮡre, @string s, slice<byte> b,
             pos = matches[1];
         }
         prevMatchEnd = matches[1];
+
         if (accept) {
             deliver(re.pad(matches));
             i++;
@@ -933,7 +924,7 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
 //
 // To insert a literal $ in the output, use $$ in the template.
 public static slice<byte> Expand(this ref Regexp re, slice<byte> dst, slice<byte> template, slice<byte> src, slice<nint> match) {
-    return re.expand(dst, ((@string)template), src, ""u8, match);
+    return re.expand(dst, (@string)template, src, ""u8, match);
 }
 
 // ExpandString is like [Regexp.Expand] but the template and source are strings.
@@ -1026,6 +1017,7 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
         }
         i++;
     }
+
     // Parse number.
     num = 0;
     for (nint iΔ1 = 0; iΔ1 < len(name); iΔ1++) {
@@ -1039,6 +1031,7 @@ internal static (@string name, nint num, @string rest, bool ok) extract(@string 
     if (name[0] == (rune)'0' && len(name) > 1) {
         num = -1;
     }
+
     rest = str.slice(i);
     ok = true;
     return (name, num, rest, ok);
@@ -1282,26 +1275,32 @@ public static slice<@string> Split(this ж<Regexp> Ꮡre, @string s, nint n) {
     if (n == 0) {
         return default!;
     }
+
     if (len(re.expr) > 0 && len(s) == 0) {
         return new @string[]{""u8}.slice();
     }
+
     var matches = Ꮡre.FindAllStringIndex(s, n);
     var strings = new slice<@string>(0, len(matches));
+
     nint beg = 0;
     nint end = 0;
     foreach (var (_, match) in matches) {
         if (n > 0 && len(strings) >= n - 1) {
             break;
         }
+
         end = match[0];
         if (match[1] != 0) {
             strings = append(strings, s.slice(beg, end));
         }
         beg = match[1];
     }
+
     if (end != len(s)) {
         strings = append(strings, s.slice(beg));
     }
+
     return strings;
 }
 
@@ -1326,7 +1325,7 @@ public static (slice<byte>, error) MarshalText(this ref Regexp re) {
 // UnmarshalText implements [encoding.TextUnmarshaler] by calling
 // [Compile] on the encoded value.
 public static error UnmarshalText(this ref Regexp re, slice<byte> text) {
-    var (newRE, err) = Compile(((@string)text));
+    var (newRE, err) = Compile((@string)text);
     if (err != default!) {
         return err;
     }

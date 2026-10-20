@@ -81,6 +81,7 @@ internal static int64 ticksPerSecond() {
     if (r != 0) {
         return r;
     }
+
     // Compute the conversion rate.
     while (ᐧ) {
         @lock(Ꮡticks.of(ticksType.Ꮡlock));
@@ -89,9 +90,11 @@ internal static int64 ticksPerSecond() {
             unlock(Ꮡticks.of(ticksType.Ꮡlock));
             return r;
         }
+
         // Grab the current time in both clocks.
         var nowTime = nanotime();
         var nowTicks = cputicks();
+
         // See if we can use these times.
         if (nowTicks > ticks.startTicks && nowTime - ticks.startTime > minTimeForTicksPerSecond) {
             // Perform the calculation with floats. We don't want to risk overflow.
@@ -106,6 +109,7 @@ internal static int64 ticksPerSecond() {
             break;
         }
         unlock(Ꮡticks.of(ticksType.Ꮡlock));
+
         // Sleep in one millisecond increments until we have a reliable time.
         timeSleep(1_000_000);
     }
@@ -161,6 +165,7 @@ internal static void godebug_setNewIncNonDefault(Func<@string, Action> newIncNon
     var Δp = @new<Func<@string, Action>>();
     Δp.ValueSlot = newIncNonDefault;
     ᏑgodebugNewIncNonDefault.Store(Δp);
+    defaultGOMAXPROCSUpdateGODEBUG();
 }
 
 // A godebugInc provides access to internal/godebug's IncNonDefault function
@@ -260,7 +265,9 @@ internal static uintptr setCrashFD(uintptr fd) {
     if (Ꮡpanicking.Load() > 0) {
         return ~(uintptr)0;
     }
+
     var old = ᏑcrashFD.Swap(fd);
+
     // If we are panicking, don't return the old FD to runtime/debug for
     // closing. writeErrData may have already read the old FD from crashFD
     // before the swap and closing it would cause the write to be lost [1].
@@ -289,23 +296,15 @@ internal static uintptr setCrashFD(uintptr fd) {
 }
 
 // auxv is populated on relevant platforms but defined here for all platforms
-// so x/sys/cpu can assume the getAuxv symbol exists without keeping its list
-// of auxv-using GOOS build tags in sync.
+// so x/sys/cpu and x/sys/unix can assume the getAuxv symbol exists without
+// keeping its list of auxv-using GOOS build tags in sync.
 //
 // It contains an even number of elements, (tag, value) pairs.
 internal static slice<uintptr> auxv;
 
-// golang.org/x/sys/cpu uses getAuxv via linkname.
+// golang.org/x/sys/cpu and golang.org/x/sys/unix use getAuxv via linkname.
 // Do not remove or change the type signature.
-// (See go.dev/issue/57336.)
-//
-// getAuxv should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/cilium/ebpf
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
+// See go.dev/issue/57336 and go.dev/issue/67401.
 //
 //go:linkname getAuxv
 internal static slice<uintptr> getAuxv() {

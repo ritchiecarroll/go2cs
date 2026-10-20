@@ -37,6 +37,7 @@ public static void TestPointer(ж<testing.T> Ꮡt) {
     if (zeroNil.Value() != nil) {
         Ꮡt.Error(valueOfWeakMakeTNilIsNotˢ);
     }
+
     var bt = @new<T>();
     var wt = weak.Make<T>(bt);
     {
@@ -46,6 +47,7 @@ public static void TestPointer(ж<testing.T> Ꮡt) {
     }
     // bt is still referenced.
     Δruntime.GC();
+
     {
         var st = wt.Value(); if (st != bt) {
             Ꮡt.Fatalf("weak pointer is not the same as strong pointer after GC: %p vs. %p"u8, st.OrTypedNil(), bt.OrTypedNil());
@@ -53,6 +55,7 @@ public static void TestPointer(ж<testing.T> Ꮡt) {
     }
     // bt is no longer referenced.
     Δruntime.GC();
+
     {
         var st = wt.Value(); if (st != nil) {
             Ꮡt.Fatalf("expected weak pointer to be nil, got %p"u8, st.OrTypedNil());
@@ -69,6 +72,7 @@ public static void TestPointerEquality(ж<testing.T> Ꮡt) {
     if (zero != zeroNil) {
         Ꮡt.Error(weakMakeTNilZeroValueOfˢ);
     }
+
     var bt = new slice<ж<T>>(10);
     var wt = new slice<weak.Pointer<T>>(10);
     var wo = new slice<weak.Pointer<nint>>(10);
@@ -153,12 +157,14 @@ public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
         }
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
+
     // Make sure the weak pointer stays around while bt is live.
     Δruntime.GC();
     if (wt.Value() == nil) {
         Ꮡt.Errorf("weak pointer went nil too soon"u8);
     }
     Δruntime.KeepAlive(bt.OrTypedNil());
+
     // bt is no longer referenced.
     //
     // Run one cycle to queue the finalizer.
@@ -166,8 +172,10 @@ public static void TestPointerFinalizer(ж<testing.T> Ꮡt) {
     if (wt.Value() != nil) {
         Ꮡt.Errorf("weak pointer did not go nil when finalizer was enqueued"u8);
     }
+
     // Wait for the finalizer to run.
     ᐸꟷ(done);
+
     // The weak pointer should still be nil after the finalizer runs.
     Δruntime.GC();
     if (wt.Value() != nil) {
@@ -204,6 +212,7 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
         var (ctx, cancel) = context.WithTimeout(context.Background(), 1 * time.ΔSecond);
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
+
         // What we're trying to do is manufacture the conditions under which this
         // bug happens. Specifically, we want:
         //
@@ -225,6 +234,7 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
         // As of 2024-09-03, removing the line that shades pointers during
         // the weak-to-strong conversion causes this test to fail about 50%
         // of the time.
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
         var ctxʗ1 = ctx;
@@ -234,6 +244,7 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
                 defer(Ꮡwg.Done, ref ᒐ);
                 while (ᐧ) {
                     Δruntime.GC();
+
                     var selᴛ1 = ctxʗ1.Done();
                     switch (trySelect(ᐸꟷ(selᴛ1, ꓸꓸꓸ))) {
                     case 0 when selᴛ1.ꟷᐳ(out _): {
@@ -293,9 +304,9 @@ public static partial void TestIssue69210(ж<testing.T> Ꮡt) {
 private static readonly object failedToLookUpSpecialAndˢ = (@string)"failed to look up special and made duplicate weak handle; see issue #70739"u8;
 
 public static void TestIssue70739(ж<testing.T> Ꮡt) {
-    var x = new slice<ж<nint>>((4 << (int)(16)));
-    var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << (int)(16))));
-    var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << (int)(16))));
+    var x = new slice<ж<nint>>((4 << 16));
+    var wx1 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
+    var wx2 = weak.Make<ж<nint>>(Ꮡ(x, (1 << 16)));
     if (wx1 != wx2) {
         Ꮡt.Fatal(failedToLookUpSpecialAndˢ);
     }

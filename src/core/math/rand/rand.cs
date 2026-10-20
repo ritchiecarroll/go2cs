@@ -93,6 +93,7 @@ public static void Seed(this ж<Rand> Ꮡr, int64 seed) {
             return;
         }
     }
+
     r.src.Seed(seed);
     r.readPos = 0;
 }
@@ -104,7 +105,7 @@ public static int64 Int63(this ref Rand r) {
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
 public static uint32 Uint32(this ref Rand r) {
-    return (uint32)((r.Int63() >> (int)(31)));
+    return (uint32)(r.Int63() >> 31);
 }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
@@ -112,18 +113,18 @@ public static uint64 Uint64(this ref Rand r) {
     if (r.s64 != default!) {
         return r.s64.Uint64();
     }
-    return (uint64)(((uint64)r.Int63() >> (int)(31)) | ((uint64)r.Int63() << (int)(32)));
+    return (uint64)r.Int63() >> 31 | (uint64)r.Int63() << 32;
 }
 
 // Int31 returns a non-negative pseudo-random 31-bit integer as an int32.
 public static int32 Int31(this ref Rand r) {
-    return (int32)((r.Int63() >> (int)(32)));
+    return (int32)(r.Int63() >> 32);
 }
 
 // Int returns a non-negative pseudo-random int.
 public static nint Int(this ref Rand r) {
     nuint u = (nuint)r.Int63();
-    return (nint)(((u << (int)(1)) >> (int)(1))); // clear sign bit if int == int32
+    return (nint)((u << 1) >> 1); // clear sign bit if int == int32
 }
 
 // Int63n returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -132,11 +133,10 @@ public static int64 Int63n(this ref Rand r, int64 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int63n");
     }
-    if ((int64)(n & (n - 1)) == 0) {
-        // n is power of two, can mask
-        return (int64)(r.Int63() & (n - 1));
+    if ((n & (n - 1)) == 0) { // n is power of two, can mask
+        return r.Int63() & (n - 1);
     }
-    var max = (int64)(9223372036854775807UL - (((uint64)1 << (int)(63))) % (uint64)n);
+    var max = (int64)(9223372036854775807UL - ((uint64)1 << 63) % (uint64)n);
     var v = r.Int63();
     while (v > max) {
         v = r.Int63();
@@ -150,11 +150,10 @@ public static int32 Int31n(this ref Rand r, int32 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int31n");
     }
-    if ((int32)(n & (n - 1)) == 0) {
-        // n is power of two, can mask
-        return (int32)(r.Int31() & (n - 1));
+    if ((n & (n - 1)) == 0) { // n is power of two, can mask
+        return r.Int31() & (n - 1);
     }
-    var max = (int32)((uint32)((2147483648L) - 1) - (((uint32)1 << (int)(31))) % (uint32)n);
+    var max = (int32)((uint32)((2147483648L) - 1) - ((uint32)1 << 31) % (uint32)n);
     var v = r.Int31();
     while (v > max) {
         v = r.Int31();
@@ -183,7 +182,7 @@ internal static int32 int31n(this ref Rand r, int32 n) {
             low = (uint32)prod;
         }
     }
-    return (int32)((prod >> (int)(32)));
+    return (int32)(prod >> 32);
 }
 
 // Intn returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -261,6 +260,7 @@ public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) {
     if (n < 0) {
         throw panic("invalid argument to Shuffle");
     }
+
     // Fisher-Yates shuffle: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
     // Shuffle really ought not be called with n that doesn't fit in 32 bits.
     // Not only will it take a very long time, but with 2³¹! possible permutations,
@@ -343,6 +343,7 @@ internal static ж<Rand> globalRand() {
             return rΔ1;
         }
     }
+
     // This is the first call. Initialize based on GODEBUG.
     ж<Rand> r = default!;
     if (randautoseed.Value() == "0"u8){
@@ -355,6 +356,7 @@ internal static ж<Rand> globalRand() {
             s64: new runtimeSourceжSource64(Ꮡ(new runtimeSource(nil)))
         ));
     }
+
     if (!ᏑglobalRandGenerator.CompareAndSwap(nil, r)) {
         // Two different goroutines called some top-level
         // function at the same time. While the results in
@@ -364,6 +366,7 @@ internal static ж<Rand> globalRand() {
         // Just use the first one to get in.
         return ᏑglobalRandGenerator.Load();
     }
+
     return r;
 }
 
@@ -378,7 +381,7 @@ partial struct runtimeSource {
 }
 
 internal static int64 Int63(this ref runtimeSource _) {
-    return (int64)((uint64)(runtime_rand() & (uint64)rngMask));
+    return (int64)(runtime_rand() & (uint64)rngMask);
 }
 
 internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) {
@@ -392,8 +395,8 @@ internal static uint64 Uint64(this ref runtimeSource _) {
 internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
     nint n = default!;
     error err = default!;
-
     ref var fs = ref Ꮡfs.DerefOrNull();
+
     fs.mu.Lock();
     (n, err) = read(p, new runtimeSourceжSource(Ꮡfs), ref (ᏑreadVal).DerefOrNull(), ref (ᏑreadPos).DerefOrNull());
     fs.mu.Unlock();
@@ -424,7 +427,9 @@ public static void Seed(int64 seed) {
         return;
     }
     randseednop.IncNonDefault();
+
     var orig = ᏑglobalRandGenerator.Load();
+
     // If we are already using a lockedSource, we can just re-seed it.
     if (orig != nil) {
         {
@@ -434,14 +439,17 @@ public static void Seed(int64 seed) {
             }
         }
     }
+
     // Otherwise either
     // 1) orig == nil, which is the normal case when Seed is the first
     // top-level function to be called, or
     // 2) orig is already a runtimeSource, in which case we need to change
     // to a lockedSource.
     // Either way we do the same thing.
+
     var r = New(new lockedSourceжSource(@new<lockedSource>()));
     r.Seed(seed);
+
     if (!ᏑglobalRandGenerator.CompareAndSwap(orig, r)) {
         // Something changed underfoot. Retry to be safe.
         Seed(seed);
@@ -563,8 +571,8 @@ partial struct lockedSource {
 
 internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) {
     int64 n = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     r.lk.Lock();
     n = r.s.Int63();
     r.lk.Unlock();
@@ -573,8 +581,8 @@ internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) {
 
 internal static uint64 /*n*/ Uint64(this ж<lockedSource> Ꮡr) {
     uint64 n = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     r.lk.Lock();
     n = r.s.Uint64();
     r.lk.Unlock();
@@ -614,8 +622,8 @@ internal static void seed(this ref lockedSource r, int64 seed) {
 internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte> p, ж<int64> ᏑreadVal, ж<int8> ᏑreadPos) {
     nint n = default!;
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     r.lk.Lock();
     (n, err) = read(p, new rngSourceжSource(r.s), ref (ᏑreadVal).DerefOrNull(), ref (ᏑreadPos).DerefOrNull());
     r.lk.Unlock();

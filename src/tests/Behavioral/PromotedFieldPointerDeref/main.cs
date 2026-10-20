@@ -10,7 +10,7 @@ partial struct header {
 }
 
 partial struct node {
-    internal partial ref header header { get; }
+    /*embed*/ internal header header;
     internal nint val;
 }
 
@@ -24,13 +24,16 @@ internal static void Main() {
     var b = Ꮡ(new node(val: 2));
     b.Value.tag = 9;
     a.Value.next = b;
+
     list l = default!;
     l.head = a;
+
     var x = l.head;
     while (x != nil) {
         fmt.Println((~x).val, (~x).tag);
         x = x.Value.next;
     }
+
     var y = l.head;
     y.Value.tag = 99;
     fmt.Println((~a).tag);

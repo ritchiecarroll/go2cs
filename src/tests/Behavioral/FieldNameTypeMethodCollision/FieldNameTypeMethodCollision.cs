@@ -23,11 +23,12 @@ internal static @string describe(this ΔLabel l) {
 }
 
 internal static void Main() {
-    var e = new @event(kind: 7, label: "cpu"u8);
+    var e = new @event(kind: 7, label: "cpu");
     var l = e.Label();
     fmt.Println(l.ΔΔLabel, l.Resource);
     fmt.Println(l.describe());
-    var m = new ΔLabel(ΔΔLabel: "mem"u8, Resource: 3);
+
+    var m = new ΔLabel(ΔΔLabel: "mem", Resource: 3);
     m.ΔΔLabel = m.ΔΔLabel + "!"u8;
     fmt.Println(m.ΔΔLabel, m.Resource);
 }

@@ -48,8 +48,7 @@ partial class cmplx_package {
 //	Pow(0, ±0) returns 1+0i
 //	Pow(0, c) for real(c)<0 returns Inf+0i if imag(c) is zero, otherwise Inf+Inf i.
 public static complex128 Pow(complex128 x, complex128 y) {
-    if (x == 0D) {
-        // Guaranteed also true for x == -0.
+    if (x == 0D) { // Guaranteed also true for x == -0.
         if (IsNaN(y)) {
             return NaN();
         }
@@ -67,7 +66,6 @@ public static complex128 Pow(complex128 x, complex128 y) {
         case {} when rΔ1 is > 0D: {
             return 0D;
         }}
-
         throw panic("not reached");
     }
     var modulus = Abs(x);

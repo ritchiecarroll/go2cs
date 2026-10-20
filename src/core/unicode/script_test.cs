@@ -14,7 +14,6 @@ partial struct T {
     internal @string script;
 }
 
-// Unifieds.
 internal static slice<T> inCategoryTest = new T[]{
     new(0x0081, "Cc"u8),
     new(0x200B, "Cf"u8),
@@ -45,6 +44,7 @@ internal static slice<T> inCategoryTest = new T[]{
     new(0x2028, "Zl"u8),
     new(0x2029, "Zp"u8),
     new(0x202f, "Zs"u8),
+    // Unifieds.
     new(0x04aa, "L"u8),
     new(0x0009, "C"u8),
     new(0x1712, "M"u8),
@@ -54,7 +54,6 @@ internal static slice<T> inCategoryTest = new T[]{
     new(0x00a0, "Z"u8)
 }.slice();
 
-// Deprecated alias of Sentence_Terminal
 internal static slice<T> inPropTest = new T[]{
     new(0x0046, "ASCII_Hex_Digit"u8),
     new(0x200F, "Bidi_Control"u8),
@@ -84,7 +83,7 @@ internal static slice<T> inPropTest = new T[]{
     new(0x300D, "Quotation_Mark"u8),
     new(0x2EF3, "Radical"u8),
     new(0x1f1ff, "Regional_Indicator"u8),
-    new(0x061F, "STerm"u8),
+    new(0x061F, "STerm"u8), // Deprecated alias of Sentence_Terminal
     new(0x061F, "Sentence_Terminal"u8),
     new(0x2071, "Soft_Dotted"u8),
     new(0x003A, "Terminal_Punctuation"u8),

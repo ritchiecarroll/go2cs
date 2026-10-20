@@ -15,11 +15,12 @@ internal static void _ᴛ1() {
     _ = x[attrStyle - 3];
     _ = x[attrURL - 4];
     _ = x[attrSrcset - 5];
+    _ = x[attrMetaContent - 6];
 }
 
-internal static readonly @string _attr_name = "attrNoneattrScriptattrScriptTypeattrStyleattrURLattrSrcset"u8;
+internal static readonly @string _attr_name = "attrNoneattrScriptattrScriptTypeattrStyleattrURLattrSrcsetattrMetaContent"u8;
 
-internal static array<uint8> _attr_index = new uint8[]{0, 8, 18, 32, 41, 48, 58}.array();
+internal static array<uint8> _attr_index = new uint8[]{0, 8, 18, 32, 41, 48, 58, 73}.array();
 
 internal static @string String(this attr i) {
     if (i >= ((attr)(uint8)(len(_attr_index) - 1))) {

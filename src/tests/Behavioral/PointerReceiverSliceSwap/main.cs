@@ -17,7 +17,7 @@ internal static void set(this ref ints p, nint i, nint v) {
 internal static void show(ref ints p) {
     foreach (var (i, x) in p) {
         if (i > 0) {
-            fmt.Print((@string)" "u8);
+            fmt.Print(" ");
         }
         fmt.Print(x);
     }
@@ -45,7 +45,7 @@ internal static void setAt(this ref cells c, nint i, nint v) {
 internal static void showCells(ref cells c) {
     foreach (var (i, x) in c) {
         if (i > 0) {
-            fmt.Print((@string)" "u8);
+            fmt.Print(" ");
         }
         fmt.Print(x.v);
     }
@@ -58,21 +58,25 @@ internal static void Main() {
     p.swap(1, 2);
     p.set(0, 99);
     show(ref (p).DerefOrNull());
+
     var q = Ꮡ(new ints(new nint[]{1, 2, 3, 4, 5}.slice()));
     for ((nint i, nint j) = (0, len(q.ValueSlot) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         q.swap(i, j);
     }
     show(ref (q).DerefOrNull());
+
     var c = Ꮡ(new cells(new cell[]{new(10), new(20), new(30), new(40)}.slice()));
     c.swapAt(0, 3);
     c.swapAt(1, 2);
     c.setAt(0, 99);
     showCells(ref (c).DerefOrNull());
+
     var d = Ꮡ(new cells(new cell[]{new(1), new(2), new(3), new(4), new(5)}.slice()));
     for ((nint i, nint j) = (0, len(d.ValueSlot) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         d.swapAt(i, j);
     }
     showCells(ref (d).DerefOrNull());
+
     var e = Ꮡ(new cells(new cell[]{new(5), new(3), new(9), new(1), new(7), new(2), new(8)}.slice()));
     for (nint i = 0; i < len(e.ValueSlot); i++) {
         nint min = i;

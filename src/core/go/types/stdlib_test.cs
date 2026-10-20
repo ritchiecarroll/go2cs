@@ -53,12 +53,12 @@ internal static readonly @string srcˢ = "src"u8;
 internal static readonly object packagesTypecheckedInˢ = (@string)"packages typechecked in"u8;
 
 public static partial void TestStdlib(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
+
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     // Collect non-test files.
     var dirFiles = new map<@string, slice<@string>>();
     @string root = filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), srcˢ);
@@ -66,11 +66,14 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
     walkPkgDirs(root, (@string dir, slice<@string> filenames) => {
         dirFilesʗ1[dir] = filenames;
     }, Ꮡt.Error);
+
     var c = Ꮡ(new stdlibChecker(
         dirFiles: dirFiles,
         pkgs: new map<@string, ж<futurePackage>>()
     ));
+
     var start = time.Now();
+
     // Though we read files while parsing, type-checking is otherwise CPU bound.
     //
     // This doesn't achieve great CPU utilization as many packages may block
@@ -79,8 +82,10 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
     // type-checking (see golang/go#47729).
     var cpulimit = new channel<EmptyStruct>(runtime.GOMAXPROCS(0));
     ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+
     foreach (var (dir, _) in dirFiles) {
         @string dirΔ1 = dir;
+
         cpulimit.ᐸꟷ(new EmptyStruct());
         Ꮡwg.Add(1);
         var cʗ1 = c;
@@ -93,6 +98,7 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
                     Ꮡwg.Done();
                     ᐸꟷ(cpulimitʗ2);
                 }, ref ᒐ);
+
                 var (_, err) = cʗ1.getDirPackage(dirΔ1);
                 if (err != default!) {
                     Ꮡt.Errorf("error checking %s: %v"u8, dirΔ1, err);
@@ -102,7 +108,9 @@ public static partial void TestStdlib(ж<testing.T> Ꮡt) {
             finally { ᒐ.Run(); }
         });
     }
+
     Ꮡwg.Wait();
+
     if (testing.Verbose()) {
         fmt.Println(len(dirFiles), packagesTypecheckedInˢ, time.Since(start));
     }
@@ -132,10 +140,12 @@ internal static (ж<types.Package>, error) ImportFrom(this ж<stdlibChecker> Ꮡ
         // unsafe cannot be type checked normally.
         return (Unsafe, default!);
     }
+
     var (p, err) = Δbuild.ᏑDefault.Import(path, dir, Δbuild.FindOnly);
     if (err != default!) {
         return (default!, err);
     }
+
     (var pkg, err) = Ꮡc.getDirPackage((~p).Dir);
     if (pkg != nil) {
         // As long as pkg is non-nil, avoid redundant errors related to failed
@@ -197,18 +207,19 @@ internal static @string firstComment(@string filename) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        array<byte> src = new(4096); /* (4 << (int)(10)) */                      // read at most 4KB
+
+        array<byte> src = new(4096); /* (4 << 10) */                      // read at most 4KB
         var (n, _) = f.Read(src[..]);
+
         @string first = default!;
         scanner.Scanner s = default!;
-        s.Init(fset.AddFile(""u8, fset.Base(), n), src.slice(0, n), default!, /* ignore errors */
- scanner.ScanComments);
+        s.Init(fset.AddFile(""u8, fset.Base(), n), src.slice(0, n), default!, /* ignore errors */ scanner.ScanComments);
         while (ᐧ) {
             var (_, tok, lit) = s.Scan();
             var exprᴛ1 = tok;
             if (exprᴛ1 == token.COMMENT) {
+                // remove trailing */ of multi-line comment
                 if (lit[1] == (rune)'*') {
-                    // remove trailing */ of multi-line comment
                     lit = lit.slice(0, len(lit) - 2);
                 }
                 @string contents = strings.TrimSpace(lit[2..]);
@@ -218,11 +229,11 @@ internal static @string firstComment(@string filename) {
                 if (first == ""u8) {
                     first = contents; // contents may be "" but that's ok
                 }
+                // continue as we may still see build tags
             }
             else if (exprᴛ1 == token.PACKAGE || exprᴛ1 == token.EOF) {
                 return first;
             }
-
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -236,11 +247,9 @@ internal static readonly @string goexperimentˢ2 = "-goexperiment"u8;
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string prefixᶜ3 = "-lang="u8;
 
-// continue as we may still see build tags
 internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸꓸstring ignoreʗp) {
     var ignore = ignoreʗp.sslice();
 
-    ref var t = ref Ꮡt.DerefOrNull();
     var (files, err) = os.ReadDir(path);
     if (err != default!) {
         // cmd/distpack deletes GOROOT/test, so skip the test if it isn't present.
@@ -257,16 +266,19 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
         }
         Ꮡt.Fatal(err);
     }
+
     var excluded = new map<@string, bool>();
     foreach (var (_, filename) in ignore) {
         excluded[filename] = true;
     }
+
     var fset = token.NewFileSet();
     foreach (var (_, f) in files) {
         // filter directory contents
         if (f.IsDir() || !strings.HasSuffix(f.Name(), ".go"u8) || excluded[f.Name()]) {
             continue;
         }
+
         // get per-file instructions
         var expectErrors = false;
         @string filename = filepath.Join(path, f.Name());
@@ -298,9 +310,9 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
                         }
                     }
                 }
-
             }
         }
+
         // parse and type-check file
         var (@file, errΔ3) = parser.ParseFile(fset, filename, default!, 0);
         if (errΔ3 == default!) {
@@ -311,6 +323,7 @@ internal static void testTestDir(ж<testing.T> Ꮡt, @string path, params ꓸꓸ
             );
             (_, errΔ3) = Ꮡconf.Check(filename, fset, new ж<ast.File>[]{@file}.slice(), nil);
         }
+
         if (expectErrors){
             if (errΔ3 == default!) {
                 Ꮡt.Errorf("expected errors but found none in %s"u8, filename);
@@ -333,26 +346,21 @@ internal static readonly @string linkname2Goˢ = "linkname2.go"u8;
 internal static readonly @string linkname3Goˢ = "linkname3.go"u8;
 
 public static void TestStdTest(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     if (testing.Short() && testenv.Builder() == ""u8) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
+
     testTestDir(Ꮡt, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ),
         cmplxdivideGoˢ, // also needs file cmplxdivide1.go - ignore
-
         directiveGoˢ, // tests compiler rejection of bad directive placement - ignore
-
         directive2Goˢ, // tests compiler rejection of bad directive placement - ignore
-
         embedfuncGoˢ, // tests //go:embed
-
         embedversGoˢ, // tests //go:embed
-
         linkname2Goˢ, // go/types doesn't check validity of //go:xxx directives
-
-        linkname3Goˢ);
+        linkname3Goˢ // go/types doesn't check validity of //go:xxx directives
+    );
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -390,61 +398,39 @@ internal static readonly @string issue51733Goˢ = "issue51733.go"u8;
 internal static readonly @string notinheap2Goˢ = "notinheap2.go"u8;
 internal static readonly @string notinheap3Goˢ = "notinheap3.go"u8;
 
-// go/types doesn't check validity of //go:xxx directives
 public static void TestStdFixed(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     if (testing.Short() && testenv.Builder() == ""u8) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
+
     testTestDir(Ꮡt, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ, fixedbugsˢ),
         bug248Goˢ, bug302Goˢ, bug369Goˢ, // complex test instructions - ignore
-
         bug398Goˢ, // go/types doesn't check for anonymous interface cycles (go.dev/issue/56103)
-
         issue6889Goˢ, // gc-specific test
-
         issue11362Goˢ, // canonical import path check
-
         issue16369Goˢ, // go/types handles this correctly - not an issue
-
         issue18459Goˢ, // go/types doesn't check validity of //go:xxx directives
-
         issue18882Goˢ, // go/types doesn't check validity of //go:xxx directives
-
         issue20027Goˢ, // go/types does not have constraints on channel element size
-
         issue20529Goˢ, // go/types does not have constraints on stack size
-
         issue22200Goˢ, // go/types does not have constraints on stack size
-
         issue22200bGoˢ, // go/types does not have constraints on stack size
-
         issue25507Goˢ, // go/types does not have constraints on stack size
-
         issue20780Goˢ, // go/types does not have constraints on stack size
-
         bug251Goˢ, // go.dev/issue/34333 which was exposed with fix for go.dev/issue/34151
-
         issue42058aGoˢ, // go/types does not have constraints on channel element size
-
         issue42058bGoˢ, // go/types does not have constraints on channel element size
-
         issue48097Goˢ, // go/types doesn't check validity of //go:xxx directives, and non-init bodyless function
-
         issue48230Goˢ, // go/types doesn't check validity of //go:xxx directives
-
         issue49767Goˢ, // go/types does not have constraints on channel element size
-
         issue49814Goˢ, // go/types does not have constraints on array size
-
         issue56103Goˢ, // anonymous interface cycles; will be a type checker error in 1.22
-
         issue52697Goˢ, // go/types does not have constraints on stack size
- // These tests requires runtime/cgo.Incomplete, which is only available on some platforms.
- // However, go/types does not know about build constraints.
 
+        // These tests requires runtime/cgo.Incomplete, which is only available on some platforms.
+        // However, go/types does not know about build constraints.
         bug514Goˢ,
         issue40954Goˢ,
         issue42032Goˢ,
@@ -460,6 +446,7 @@ internal static readonly @string kenˢ = "ken"u8;
 
 public static void TestStdKen(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     testTestDir(Ꮡt, filepath.Join(testenv.GOROOT(new types_test_package.testing_TжTB(Ꮡt)), testˢ, kenˢ));
 }
 
@@ -483,6 +470,7 @@ internal static readonly object packageˢ = (@string)"package"u8;
 // typecheckFiles typechecks the given package files.
 internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@string> filenames, types.Importer importer) {
     var fset = token.NewFileSet();
+
     // Parse package files.
     slice<ж<ast.File>> files = default!;
     foreach (var (_, filename) in filenames) {
@@ -490,8 +478,10 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
+
         files = append(files, @file);
     }
+
     if (testing.Verbose()) {
         ᏑprintPackageMu.Lock();
         fmt.Println(packageˢ, (~(~files[0]).Name).Name);
@@ -500,6 +490,7 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
         }
         ᏑprintPackageMu.Unlock();
     }
+
     // Typecheck package files.
     ref var errs = ref heap<slice<error>>(out var Ꮡerrs);
     ref var conf = ref heap<types.Config>(out var Ꮡconf);
@@ -516,7 +507,9 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
     if (err != default!) {
         return (pkg, err);
     }
+
     // Perform checks of API invariants.
+
     // All Objects have a package, except predeclared ones.
     var errorError = Universe.Lookup(errorˢ3).Type().Underlying()._<ж<types.Interface>>().ExplicitMethod(0); // (error).Error
     foreach (var (id, obj) in info.Uses) {
@@ -530,6 +523,7 @@ internal static (ж<types.Package>, error) typecheckFiles(@string path, slice<@s
             }
         }
     }
+
     return (pkg, default!);
 }
 
@@ -586,7 +580,9 @@ internal static void walk(this ref walker w, @string dir) {
         w.errh(err);
         return;
     }
+
     // apply pkgh to the files in directory dir
+
     // Don't get test files as these packages are imported.
     (var pkgFiles, err) = pkgFilenames(dir, false);
     if (err != default!) {
@@ -596,6 +592,7 @@ internal static void walk(this ref walker w, @string dir) {
     if (pkgFiles != default!) {
         w.pkgh(dir, pkgFiles);
     }
+
     // traverse subdirectories, but don't walk into testdata
     foreach (var (_, f) in files) {
         if (f.IsDir() && f.Name() != "testdata"u8) {

@@ -4,9 +4,6 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object recoveredˢ = (@string)"  recovered:"u8;
-
 internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
     nint result = default!;
     bool recovered = default!;
@@ -15,7 +12,7 @@ internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
-                    fmt.Println(recoveredˢ, r);
+                    fmt.Println("  recovered:", r);
                     (result, recovered) = (-1, true);
                 }
             }
@@ -72,10 +69,13 @@ internal static bool /*ok*/ outerGuard(nint a, nint b) {
 internal static void Main() {
     var (q, rec) = safeDiv(10, 2);
     fmt.Println(q, rec);
+
     var (q2, rec2) = safeDiv(7, 0);
     fmt.Println(q2, rec2);
+
     var (m, mrec) = safeMod(9, 0);
     fmt.Println(m, mrec);
+
     fmt.Println(outerGuard(4, 2));
     fmt.Println(outerGuard(4, 0));
 }

@@ -111,7 +111,6 @@ public static void TestMatch(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct globTestsᴛ1 /*dyn*/ {
     internal @string pattern, result;
 }
@@ -178,7 +177,6 @@ public static void TestGlobUNC(ж<testing.T> Ꮡt) {
     Glob(@"\\?\C:\*"u8);
 }
 
-
 partial struct globSymlinkTestsᴛ1 /*dyn*/ {
     internal @string path, dest;
     internal bool brokenLink;
@@ -190,6 +188,7 @@ internal static slice<globSymlinkTestsᴛ1> globSymlinkTests = new globSymlinkTe
 
 public static void TestGlobSymlink(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     @string tmpDir = Ꮡt.TempDir();
     foreach (var (_, tt) in globSymlinkTests) {
         @string path = Join(tmpDir, tt.path);
@@ -272,6 +271,7 @@ public static void TestWindowsGlob(ж<testing.T> Ꮡt) {
     if (runtime.GOOS != "windows"u8) {
         Ꮡt.Skipf("skipping windows specific test"u8);
     }
+
     @string tmpDir = tempDirCanonical(Ꮡt);
     if (len(tmpDir) < 3) {
         Ꮡt.Fatalf("tmpDir path %q is too short"u8, tmpDir);
@@ -279,6 +279,7 @@ public static void TestWindowsGlob(ж<testing.T> Ꮡt) {
     if (tmpDir[1] != (rune)':') {
         Ꮡt.Fatalf("tmpDir path %q must have drive letter in it"u8, tmpDir);
     }
+
     var dirs = new @string[]{
         "a"u8,
         "b"u8,
@@ -299,6 +300,7 @@ public static void TestWindowsGlob(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     var tests = new globTest[]{
         new("a"u8, new @string[]{"a"u8}.slice()),
         new("b"u8, new @string[]{"b"u8}.slice()),
@@ -311,6 +313,7 @@ public static void TestWindowsGlob(ж<testing.T> Ꮡt) {
         new("?r"u8, new @string[]{}.slice()),
         new("d*/*/bin/git.exe"u8, new @string[]{"dir/d/bin/git.exe"u8}.slice())
     }.slice();
+
     // test absolute paths
     foreach (var (_, vᴛ1) in tests) {
         var test = vᴛ1;
@@ -340,6 +343,7 @@ public static void TestWindowsGlob(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // test relative paths
     Ꮡt.Chdir(tmpDir);
     foreach (var (_, vᴛ2) in tests) {

@@ -42,13 +42,19 @@ using static go.crypto.ecdh_package;
 // this way is what keeps startup free of reflection.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<PrivateKey, KeyExchanger>(Pointer = true)]
 [assembly: GoImplement<nistCurve, ΔCurve>(Pointer = true)]
 [assembly: GoImplement<x25519Curve, ΔCurve>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<ΔPublicKey, ж<ΔPublicKey>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -58,9 +64,9 @@ using static go.crypto.ecdh_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCABI2AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;151=ConstantTimeCompare/1/1/1")]
-[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABkwgtaigoKClIKClNyWgpaCgpYACRSCgoKUgoKUgpTWooKCgpSCgpTcloKClAAJFNbGgpS4goKClJSCgpSUpgAJEIKUAAIQ0KQABRgAAxLQpAAFGAADEtCkAAUY", "", "", "45=Bytes/1/1/3;60=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;100=Clone/1/1/2,Bytes/1/1/3;112=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;136=Clone/1/1/2")]
-[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKEgoKChOKCgoKEgoKCgoKCgoSCgoKCgoKCgoKCgoKEgoKCgpaChIKCqJKCgpQ=", "", "", "75=Clone/1/1/2;89=Clone/1/1/2")]
+[assembly: go.GoPositionMap("crypto/ecdh/ecdh.go", "ecdh.cs", "AEKIAZaiAAIU8oKClKiCAAwaABE0AA4CgpSolqIAAhTygoKUqIKmgqqi", "", "", "87=ConstantTimeCompare/1/1/1;163=ConstantTimeCompare/1/1/1")]
+[assembly: go.GoPositionMap("crypto/ecdh/nist.go", "nist.cs", "ABoygtaigoKClIKClNymlIKmgoKmAAkUgoKClIKClIKU1qKCgoKUgoKU3KaCgpQACRTWxoKUuIKCgpSUgoKUlKYACRCClAACENCkAAUYAAMS0KQABRgAAxLQpAAFGA==", "", "", "46=Bytes/1/1/3;66=Bytes/1/2/2,PublicKey/1/2/6,Bytes/2/2/6,PublicKey/2/2/7;106=Clone/1/1/2,Bytes/1/1/3;119=Clone/1/1/2,PublicKey/1/2/6,Bytes/1/1/6,PublicKey/2/2/7;143=Clone/1/1/2")]
+[assembly: go.GoPositionMap("crypto/ecdh/x25519.go", "x25519.cs", "ABQ20KT4gtaCgpSCgoCCpNaCgpSClIKCuO6CgpSClAAIDLKCgoKUpoKUgoKClOKCgoKUgoKCgoKCgpSCgoKCgoKCgoKCgoKUgoKCgqaClIKCqJKCgpQ=", "", "", "75=Clone/1/1/2;89=Clone/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -77,6 +83,7 @@ public static partial class ecdh_package
     // <TypeAccessibility>
     internal partial struct nistCurve {}
     internal partial struct x25519Curve {}
+    public partial interface KeyExchanger {}
     public partial interface ΔCurve {}
     public partial struct PrivateKey {}
     public partial struct ΔPublicKey {}
@@ -95,7 +102,7 @@ public static partial class ecdh_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140only() => builtin.initPackage(typeof(go.crypto.@internal.fips140only_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸecdh() => builtin.initPackage(typeof(go.crypto.@internal.fips140.ecdh_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸedwards25519ꓸfield() => builtin.initPackage(typeof(go.crypto.@internal.fips140.edwards25519.field_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrandutil() => builtin.initPackage(typeof(go.crypto.@internal.randutil_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrand() => builtin.initPackage(typeof(go.crypto.@internal.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsubtle() => builtin.initPackage(typeof(go.crypto.subtle_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));

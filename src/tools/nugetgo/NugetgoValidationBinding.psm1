@@ -42,10 +42,13 @@ function Get-NugetgoProjectInputDigest([string]$ProjectFile) {
 <#
 .SYNOPSIS
     The reasons -Proof (MODULE.md's rows, import path -> digest) is not a proof of -Packed (each packed package's import
-    path -> its project's digest); empty when it is. A packed package with no proof row is not a reason: a package with
-    no Go tests has no proof page.
+    path -> its project's digest); empty when it is. A packed package with no proof row is a reason only when it is in
+    -Tested, the packed packages with Go tests (Get-NugetgoTestedImportPaths): a package with no Go tests has no proof
+    page, and one WITH Go tests and no row is one whose tests the -tests run did not validate (COORD ruling 2026-10-13,
+    the go-cmp dry run, where the module's root package lost its comparison to the package deadline and MODULE.md
+    simply had no row for it).
 #>
-function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed) {
+function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed, [string[]]$Tested = @()) {
     $reasons = New-Object System.Collections.Generic.List[string]
     if ($Proof.Count -eq 0) { $reasons.Add('the proof lists no package'); return $reasons.ToArray() }
     foreach ($path in @($Proof.Keys | Sort-Object)) {
@@ -62,7 +65,30 @@ function Test-NugetgoValidationBinding([hashtable]$Proof, [hashtable]$Packed) {
             $reasons.Add("${path}: the proof was made from inputs $proven, the packed tree from $packedDigest")
         }
     }
+    foreach ($path in @($Tested | Sort-Object -Unique)) {
+        if ($Packed.ContainsKey($path) -and -not $Proof.ContainsKey($path)) {
+            $reasons.Add("$path has Go tests and no proof row: the -tests run did not validate it. Runbook step 1.2 exits non-zero when a tested package fails, and MODULE.md names it under 'Packages that did not validate'; re-run step 1.2 until it exits 0")
+        }
+    }
     return $reasons.ToArray()
 }
 
-Export-ModuleMember -Function Get-NugetgoProofInputDigests, Get-NugetgoProjectInputDigest, Test-NugetgoValidationBinding
+<#
+.SYNOPSIS
+    The import paths among -ImportPaths whose package directory in the module source (-ModuleDir, the module root for
+    -ModulePath) holds Go test files: *_test.go in the package's own directory, the predicate the -tests -recurse driver
+    uses to choose the packages it validates (mainModulePackagesWithTests).
+#>
+function Get-NugetgoTestedImportPaths([string]$ModuleDir, [string]$ModulePath, [string[]]$ImportPaths) {
+    $tested = New-Object System.Collections.Generic.List[string]
+    foreach ($path in @($ImportPaths | Sort-Object -Unique)) {
+        if ($path -ceq $ModulePath) { $rel = '' }
+        elseif ($path.StartsWith("$ModulePath/", [System.StringComparison]::Ordinal)) { $rel = $path.Substring($ModulePath.Length + 1) }
+        else { continue }
+        $dir = if ($rel) { Join-Path $ModuleDir $rel } else { $ModuleDir }
+        if ((Test-Path -LiteralPath $dir -PathType Container) -and @(Get-ChildItem -LiteralPath $dir -Filter '*_test.go' -File).Count -gt 0) { $tested.Add($path) }
+    }
+    return $tested.ToArray()
+}
+
+Export-ModuleMember -Function Get-NugetgoProofInputDigests, Get-NugetgoProjectInputDigest, Test-NugetgoValidationBinding, Get-NugetgoTestedImportPaths

@@ -51,6 +51,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
     // Use unregistered cache for functionality tests,
     // to keep the runtime from clearing behind our backs.
     var c = @new<global::go.crypto.@internal.boring.bcache_package.Cache<nint, int32>>();
+
     // Create many entries.
     var m = new map<ж<nint>, ж<int32>>();
     for (nint i = 0; i < 10000; i++) {
@@ -59,6 +60,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
         m[k] = v;
         c.Put(k, v);
     }
+
     // Overwrite a random 20% of those.
     nint n = 0;
     foreach (var (k, _) in m) {
@@ -71,6 +73,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Check results.
     foreach (var (k, v) in m) {
         {
@@ -79,6 +82,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     c.Clear();
     foreach (var (k, _) in m) {
         {
@@ -87,6 +91,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Check that registered cache is cleared at GC.
     c = ᏑregisteredCache;
     foreach (var (k, v) in m) {
@@ -100,6 +105,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // Check that cache works for concurrent access.
     // Lists are discarded if they reach 1000 entries,
     // and there are cacheSize list heads, so we should be
@@ -117,6 +123,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
             GoFrame ᒐ = default;
             try {
                 defer(Ꮡwg.Done, ref ᒐ);
+
                 var mΔ1 = new map<ж<nint>, ж<int32>>();
                 for (nint j = 0; j < cacheSize; j++) {
                     var (k, v) = (next<nint>(), next<int32>());
@@ -125,6 +132,7 @@ public static partial void TestCache(ж<testing.T> Ꮡt) {
                 }
                 Ꮡbarrier.Done();
                 Ꮡbarrier.Wait();
+
                 foreach (var (k, v) in mΔ1) {
                     {
                         var cv = cʗ1.Get(k); if (cv != v) {

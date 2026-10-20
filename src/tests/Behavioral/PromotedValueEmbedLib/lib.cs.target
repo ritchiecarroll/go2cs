@@ -11,7 +11,7 @@ internal static @string Name(this ref common c) {
 }
 
 partial struct Widget {
-    internal partial ref common common { get; }
+    /*embed*/ internal common common;
 }
 
 public static ж<Widget> New(@string label) {

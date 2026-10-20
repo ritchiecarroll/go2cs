@@ -59,6 +59,8 @@ partial struct CaseRange {
     public d Delta;
 }
 
+// SpecialCase represents language-specific case mappings such as Turkish.
+// Methods of SpecialCase customize (by overriding) the standard mappings.
 partial struct SpecialCase /*[]CaseRange*/;
 
 // BUG(r): There is no mechanism for full case folding, that is, for
@@ -66,11 +68,8 @@ partial struct SpecialCase /*[]CaseRange*/;
 
 // Indices into the Delta arrays inside CaseRanges for case mapping.
 public static UntypedInt UpperCase => iota;
-
 public static UntypedInt LowerCase => 1;
-
 public static UntypedInt TitleCase => 2;
-
 public static UntypedInt MaxCase => 3;
 
 /* [MaxCase]rune */
@@ -99,11 +98,12 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
         }
         return false;
     }
+
     // binary search over ranges
     nint lo = 0;
     nint hi = len(ranges);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = Ꮡ(ranges, m);
         if ((~range_).Lo <= r && r <= (~range_).Hi) {
             return (~range_).Stride == 1 || (uint16)((uint16)(r - (~range_).Lo) % (~range_).Stride) == 0;
@@ -131,11 +131,12 @@ internal static bool is32(slice<Range32> ranges, uint32 r) {
         }
         return false;
     }
+
     // binary search over ranges
     nint lo = 0;
     nint hi = len(ranges);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var range_ = ranges[m];
         if (range_.Lo <= r && r <= range_.Hi) {
             return range_.Stride == 1 || (r - range_.Lo) % range_.Stride == 0;
@@ -213,7 +214,7 @@ internal static ж<CaseRange> lookupCaseRange(rune r, slice<CaseRange> caseRange
     nint lo = 0;
     nint hi = len(caseRange);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         var cr = Ꮡ(caseRange, m);
         if ((rune)(~cr).Lo <= r && r <= (rune)(~cr).Hi) {
             return cr;
@@ -241,7 +242,7 @@ internal static rune convertCase(nint _case, rune r, ref CaseRange cr) {
         // bit in the sequence offset.
         // The constants UpperCase and TitleCase are even while LowerCase
         // is odd so we take the low bit from _case.
-        return (rune)cr.Lo + ((rune)((rune)((r - (rune)cr.Lo) & ~1) | (rune)((nint)(_case & 1))));
+        return (rune)cr.Lo + ((rune)((r - (rune)cr.Lo) & ~1) | (rune)(_case & 1));
     }
     return r + delta;
 }
@@ -291,8 +292,7 @@ public static rune ToLower(rune r) {
 // ToTitle maps the rune to title case.
 public static rune ToTitle(rune r) {
     if (r <= MaxASCII) {
-        if ((rune)'a' <= r && r <= (rune)'z') {
-            // title case is upper case for ASCII
+        if ((rune)'a' <= r && r <= (rune)'z') { // title case is upper case for ASCII
             r -= (rune)'a' - (rune)'A';
         }
         return r;
@@ -302,7 +302,7 @@ public static rune ToTitle(rune r) {
 
 // ToUpper maps the rune to upper case giving priority to the special mapping.
 public static rune ToUpper(this SpecialCase special, rune r) {
-    var (r1, hadMapping) = to(UpperCase, r, ((slice<CaseRange>)special));
+    var (r1, hadMapping) = to(UpperCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = ToUpper(r);
     }
@@ -311,7 +311,7 @@ public static rune ToUpper(this SpecialCase special, rune r) {
 
 // ToTitle maps the rune to title case giving priority to the special mapping.
 public static rune ToTitle(this SpecialCase special, rune r) {
-    var (r1, hadMapping) = to(TitleCase, r, ((slice<CaseRange>)special));
+    var (r1, hadMapping) = to(TitleCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = ToTitle(r);
     }
@@ -320,7 +320,7 @@ public static rune ToTitle(this SpecialCase special, rune r) {
 
 // ToLower maps the rune to lower case giving priority to the special mapping.
 public static rune ToLower(this SpecialCase special, rune r) {
-    var (r1, hadMapping) = to(LowerCase, r, ((slice<CaseRange>)special));
+    var (r1, hadMapping) = to(LowerCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = ToLower(r);
     }
@@ -358,14 +358,16 @@ public static rune SimpleFold(rune r) {
     if (r < 0 || r > MaxRune) {
         return r;
     }
+
     if ((nint)r < len(asciiFold)) {
         return (rune)asciiFold[r];
     }
+
     // Consult caseOrbit table for special cases.
     nint lo = 0;
     nint hi = len(caseOrbit);
     while (lo < hi) {
-        nint m = (nint)(((nuint)(lo + hi) >> (int)(1)));
+        nint m = (nint)((nuint)(lo + hi) >> 1);
         if ((rune)caseOrbit[m].From < r){
             lo = m + 1;
         } else {
@@ -375,6 +377,7 @@ public static rune SimpleFold(rune r) {
     if (lo < len(caseOrbit) && (rune)caseOrbit[lo].From == r) {
         return (rune)caseOrbit[lo].To;
     }
+
     // No folding specified. This is a one- or two-element
     // equivalence class containing rune and ToLower(rune)
     // and ToUpper(rune) if they are different from rune.

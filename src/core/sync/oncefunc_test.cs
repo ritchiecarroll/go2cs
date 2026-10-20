@@ -165,14 +165,11 @@ public static void TestOnceFuncPanicNil(ж<Δtesting.T> Ꮡt) {
         case ж<Δruntime.PanicNilError> _: {
             return;
         }}
-
         Ꮡt.Fatalf("%s: want nil panic, got %v"u8, label, p);
     });
 }
 
 public static partial void TestOnceFuncGoexit(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // If f calls Goexit, the results are unspecified. But check that f doesn't
     // get called twice.
     nint calls = 0;
@@ -212,6 +209,7 @@ public static void TestOnceFuncPanicTraceback(ж<Δtesting.T> Ꮡt) {
         // Test that on the first invocation of a OnceFunc, the stack trace goes all
         // the way to the origin of the panic.
         var f = Δsync.OnceFunc(onceFuncPanic);
+
         defer([MethodImpl(MethodImplOptions.NoInlining)] () => {
             {
                 var p = recover(); if (!AreEqual(p, (@string)("x"))) {
@@ -221,7 +219,7 @@ public static void TestOnceFuncPanicTraceback(ж<Δtesting.T> Ꮡt) {
             var stack = debug.Stack();
             @string want = syncTestOnceFuncPanicˢ;
             if (!bytes.Contains(stack, slice<byte>(want))) {
-                Ꮡt.Fatalf("want stack containing %v, got:\n%s"u8, want, ((@string)stack));
+                Ꮡt.Fatalf("want stack containing %v, got:\n%s"u8, want, (@string)stack);
             }
         }, ref ᒐ);
         f();
@@ -308,6 +306,7 @@ internal static void gcwaitfin() {
 
 internal static Action onceFunc = Δsync.OnceFunc(() => {
 });
+
 internal static ж<Δsync.Once> ᏑonceFuncOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceFuncOnce => ref ᏑonceFuncOnce.Value;
 
@@ -352,6 +351,7 @@ public static void BenchmarkOnceFunc(ж<Δtesting.B> Ꮡb) {
 }
 
 internal static Func<nint> onceValue = Δsync.OnceValue(nint () => 42);
+
 internal static ж<Δsync.Once> ᏑonceValueOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceValueOnce => ref ᏑonceValueOnce.Value;
 internal static nint onceValueValue;

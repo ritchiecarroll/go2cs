@@ -4,12 +4,17 @@
 namespace go;
 
 using bytes = bytes_package;
+using context = context_package;
 using fmt = fmt_package;
 using abi = @internal.abi_package;
+using asan = @internal.asan_package;
+using msan = @internal.msan_package;
+using race = @internal.race_package;
 using testenv = @internal.testenv_package;
 using Δregexp = regexp_package;
 using Δruntime = runtime_package;
 using Δdebug = global::go.runtime.debug_package;
+using pprof = global::go.runtime.pprof_package;
 using strconv = strconv_package;
 using strings = strings_package;
 using Δsync = sync_package;
@@ -47,6 +52,7 @@ public static void TestTracebackInlined(ж<testing.T> Ꮡt) {
     void check(ж<testing.T> tΔ1, ж<ttiResult> r, params ꓸꓸꓸstring funcsʗp) {
         var funcs = funcsʗp.sslice();
         tΔ1.Helper();
+
         // Check the printed traceback.
         var frames = parseTraceback1(tΔ1, (~r).printed).Value.frames;
         tΔ1.Log((~r).printed);
@@ -74,24 +80,28 @@ public static void TestTracebackInlined(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     var checkʗ1 = check;
     Ꮡt.Run(simpleˢ, (ж<testing.T> tΔ2) => {
         // Check a simple case of inlining
         var r = ttiSimple1();
         checkʗ1(tΔ2, r, runtimeTestTtiSimple3ˢ, runtimeTestTtiSimple2ˢ, runtimeTestTtiSimple1ˢ);
     });
+
     var checkʗ2 = check;
     Ꮡt.Run(sigpanicˢ, (ж<testing.T> tΔ3) => {
         // Check that sigpanic from an inlined function prints correctly
         var r = ttiSigpanic1();
-        checkʗ2(tΔ3, r, runtimeTestTtiSigpanic1ˢ, panicˢ, runtimeTestTtiSigpanic3ˢ, runtimeTestTtiSigpanic2ˢ, runtimeTestTtiSigpanic1ˢ2);
+        checkʗ2(tΔ3, r, runtimeTestTtiSigpanic1ˢ, panicˢ2, runtimeTestTtiSigpanic3ˢ, runtimeTestTtiSigpanic2ˢ, runtimeTestTtiSigpanic1ˢ2);
     });
+
     var checkʗ3 = check;
     Ꮡt.Run(wrapperˢ, (ж<testing.T> tΔ4) => {
         // Check that a method inlined into a wrapper prints correctly
         var r = ttiWrapper1();
         checkʗ3(tΔ4, r, runtimeTestTtiWrapperM1ˢ, runtimeTestTtiWrapper1ˢ);
     });
+
     var checkʗ4 = check;
     Ꮡt.Run(excludedˢ, (ж<testing.T> tΔ5) => {
         // Check that when F -> G is inlined and F is excluded from stack
@@ -109,7 +119,7 @@ partial struct ttiResult {
 internal static partial ж<ttiResult> ttiLeaf() {
     // Get a printed stack trace.
     ref var printed = ref heap<@string>(out var Ꮡprinted);
-    printed = ((@string)Δdebug.Stack());
+    printed = (@string)Δdebug.Stack();
     return Ꮡ(new ttiResult(printed));
 }
 
@@ -201,8 +211,6 @@ internal static readonly @string runtimeDebugStackˢ = "runtime/debug.Stack"u8;
 internal static readonly @string runtimeTestTteStackˢ = "runtime_test.tteStack"u8;
 
 public static void TestTracebackElision(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test printing exactly the maximum number of frames to make sure we don't
     // print any "elided" message, eliding exactly 1 so we have to pick back up
     // in the paused physical frame, and eliding 10 so we have to advance the
@@ -210,11 +218,13 @@ public static void TestTracebackElision(ж<testing.T> Ꮡt) {
     foreach (var (_, elided) in new nint[]{0, 1, 10}.slice()) {
         Ꮡt.Run(fmt.Sprintf("elided=%d"u8, elided), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             nint n = elided + (nint)runtime_internal_test_package.TracebackInnerFrames + (nint)runtime_internal_test_package.TracebackOuterFrames;
+
             // Start a new goroutine so we have control over the whole stack.
             var stackChan = new channel<@string>(0);
             goǃ(tteStack, n, stackChan.WithDirection(GoChanDir.Send));
             @string stack = ᐸꟷ(stackChan);
             var tb = parseTraceback1(tΔ1, stack);
+
             // Check the traceback.
             nint i = 0;
             while (i < n) {
@@ -294,7 +304,6 @@ internal static void tteStack(nint n, channel/*<-*/<@string> stack) {
         throw panic("unreachable");
         break;
     }}
-
 }
 
 internal static partial @string tte0(nint n) {
@@ -312,7 +321,7 @@ internal static partial @string tte2(nint n) {
         throw panic("bad n");
     }
     if (n == 2) {
-        return ((@string)Δdebug.Stack());
+        return (@string)Δdebug.Stack();
     }
     return tte1(n - 1);
 }
@@ -364,13 +373,14 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
         }
         return y;
     }
-    var tests = new TestTracebackArgs_tests[]{ // simple ints
 
+    var tests = new TestTracebackArgs_tests[]{
+        // simple ints
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs1(1, 2, 3, 4, 5),
             "testTracebackArgs1(0x1, 0x2, 0x3, 0x4, 0x5)"u8
-        ), // some aggregates
-
+        ),
+        // some aggregates
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs2(false, new TestTracebackArgs_b(1, 2, 3, new nint[]{4, 5}.array()), new nint[]{}.array(), new byte[]{6, 7, 8}.array()),
             "testTracebackArgs2(0x0, {0x1, 0x2, 0x3, {0x4, 0x5}}, {}, {0x6, 0x7, 0x8})"u8
@@ -378,74 +388,76 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs3(new byte[]{1, 2, 3}.array(), 4, 5, 6, new byte[]{7, 8, 9}.array()),
             "testTracebackArgs3({0x1, 0x2, 0x3}, 0x4, 0x5, 0x6, {0x7, 0x8, 0x9})"u8
-        ), // too deeply nested type
-
+        ),
+        // too deeply nested type
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs4(false, new array<array<array<array<array<array<array<array<array<nint>>>>>>>>>[]{}.array(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1, () => new(1))))))))))),
             "testTracebackArgs4(0x0, {{{{{...}}}}})"u8
-        ), // a lot of zero-sized type
-
+        ),
+        // a lot of zero-sized type
         new(
             () => {
                 var z = new nint[]{}.array();
                 return testTracebackArgs5(false, new TestTracebackArgs_x(1, z.Clone(), new array<nint>[]{}.array(2, () => new(0))), z, z, z, z, z, z, z, z, z, z, z, z);
             },
             "testTracebackArgs5(0x0, {0x1, {}, {{}, {}}}, {}, {}, {}, {}, {}, ...)"u8
-        ), // edge cases for ...
- // no ... for 10 args
+        ),
 
+        // edge cases for ...
+        // no ... for 10 args
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs6a(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
             "testTracebackArgs6a(0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa)"u8
-        ), // has ... for 11 args
-
+        ),
+        // has ... for 11 args
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs6b(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
             "testTracebackArgs6b(0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, ...)"u8
-        ), // no ... for aggregates with 10 words
-
+        ),
+        // no ... for aggregates with 10 words
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7a(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array()),
             "testTracebackArgs7a({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa})"u8
-        ), // has ... for aggregates with 11 words
-
+        ),
+        // has ... for aggregates with 11 words
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7b(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.array()),
             "testTracebackArgs7b({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, ...})"u8
-        ), // no ... for aggregates, but with more args
-
+        ),
+        // no ... for aggregates, but with more args
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7c(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}.array(), 11),
             "testTracebackArgs7c({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa}, ...)"u8
-        ), // has ... for aggregates and also for more args
-
+        ),
+        // has ... for aggregates and also for more args
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs7d(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}.array(), 12),
             "testTracebackArgs7d({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, ...}, ...)"u8
-        ), // nested aggregates, no ...
-
+        ),
+        // nested aggregates, no ...
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8a(new testArgsType8a(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10}.array())),
             "testTracebackArgs8a({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa}})"u8
-        ), // nested aggregates, ... in inner but not outer
-
+        ),
+        // nested aggregates, ... in inner but not outer
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8b(new testArgsType8b(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10, 11}.array())),
             "testTracebackArgs8b({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa, ...}})"u8
-        ), // nested aggregates, ... in outer but not inner
-
+        ),
+        // nested aggregates, ... in outer but not inner
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8c(new testArgsType8c(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10}.array(), 11)),
             "testTracebackArgs8c({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa}, ...})"u8
-        ), // nested aggregates, ... in both inner and outer
-
+        ),
+        // nested aggregates, ... in both inner and outer
         new(
             [MethodImpl(MethodImplOptions.NoInlining)] () => testTracebackArgs8d(new testArgsType8d(1, 2, 3, 4, 5, 6, 7, 8, new nint[]{9, 10, 11}.array(), 12)),
             "testTracebackArgs8d({0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, {0x9, 0xa, ...}, ...})"u8
-        ), // Register argument liveness.
- // 1, 3 are used and live, 2, 4 are dead (in register ABI).
- // Address-taken (7) and stack ({5, 6}) args are always live.
+        ),
 
+        // Register argument liveness.
+        // 1, 3 are used and live, 2, 4 are dead (in register ABI).
+        // Address-taken (7) and stack ({5, 6}) args are always live.
         new(
             () => {
                 poisonStack(); // poison arg area to make output deterministic
@@ -454,9 +466,9 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
             abiSel(
                 testTracebackArgs90x1ˢ,
                 testTracebackArgs90x10x2ˢ)
-        ), // No live.
- // (Note: this assume at least 5 int registers if register ABI is used.)
-
+        ),
+        // No live.
+        // (Note: this assume at least 5 int registers if register ABI is used.)
         new(
             () => {
                 poisonStack(); // poison arg area to make output deterministic
@@ -465,9 +477,9 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
             abiSel(
                 testTracebackArgs10ˢ,
                 testTracebackArgs100x1ˢ)
-        ), // Conditional spills.
- // Spill in conditional, not executed.
-
+        ),
+        // Conditional spills.
+        // Spill in conditional, not executed.
         new(
             () => {
                 poisonStack(); // poison arg area to make output deterministic
@@ -476,9 +488,9 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
             abiSel(
                 testTracebackArgs11aˢ,
                 testTracebackArgs11a0x1ˢ)
-        ), // 2 spills in conditional, not executed; 3 spills in conditional, executed, but not statically known.
- // So print 0x3?.
-
+        ),
+        // 2 spills in conditional, not executed; 3 spills in conditional, executed, but not statically known.
+        // So print 0x3?.
         new(
             () => {
                 poisonStack(); // poison arg area to make output deterministic
@@ -487,16 +499,16 @@ public static void TestTracebackArgs(ж<testing.T> Ꮡt) {
             abiSel(
                 testTracebackArgs11bˢ,
                 testTracebackArgs11b0x1ˢ)
-        ), // Make sure spilled slice data pointers are spilled to the right location
- // to ensure we see it listed without a ?.
- // See issue 64414.
-
+        ),
+        // Make sure spilled slice data pointers are spilled to the right location
+        // to ensure we see it listed without a ?.
+        // See issue 64414.
         new(
             () => {
                 poisonStack();
                 return testTracebackArgsSlice(testTracebackArgsSliceBackingStore[..]);
-            }, // Note: capacity of the slice might be junk, as it is not used.
-
+            },
+            // Note: capacity of the slice might be junk, as it is not used.
             fmt.Sprintf("testTracebackArgsSlice({%p, 0x2, "u8, ᏑtestTracebackArgsSliceBackingStore.at<nint>(0))
         )
     }.slice();
@@ -712,8 +724,8 @@ internal static partial nint testTracebackArgs8d(testArgsType8d a) {
 //go:noinline
 internal static partial nint testTracebackArgs9(int64 a, int32 b, int16 c, int8 d, /*[2]*/ array<nint> x, nint yʗp) {
     x = x.Clone();
-
     ref var y = ref heap(yʗp, out var Ꮡy);
+
     if (a < 0) {
         println(Ꮡy); // take address, make y live, even if no longer used at traceback
     }
@@ -765,8 +777,7 @@ internal static partial nint testTracebackArgs11b(int32 a, int32 b, int32 c, int
         builtin.print(); // spill c in a conditional
         x = c;
     }
-    if (d < 0) {
-        // d is always needed
+    if (d < 0) { // d is always needed
         return (nint)(x + d);
     }
     return Δruntime.Stack(testTracebackArgsBuf[..], false);
@@ -801,12 +812,12 @@ public static partial void TestTracebackParentChildGoroutines(ж<testing.T> Ꮡt
         GoFrame ᒐ = default;
         try {
             defer(Ꮡwg.Done, ref ᒐ);
-            var buf = new slice<byte>((1 << (int)(10)));
+            var buf = new slice<byte>((1 << 10));
             // We collect the stack only for this goroutine (by passing
             // false to runtime.Stack). We expect to see the current
             // goroutine ID, and the parent goroutine ID in a message like
             // "created by ... in goroutine N".
-            @string stack = ((@string)(buf.slice(0, Δruntime.Stack(buf, false))));
+            @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
             @string child = fmt.Sprintf("goroutine %d"u8, runtime_internal_test_package.Goid());
             if (!strings.Contains(stack, parent) || !strings.Contains(stack, child)) {
                 Ꮡt.Errorf("did not see parent (%s) and child (%s) IDs in stack, got %s"u8, parent, child, stack);
@@ -876,12 +887,13 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
         (line, tb, _) = strings.Cut(tb, "\n"u8);
         lineNo++;
         switch (ᐧ) {
-        case {} when strings.HasPrefix(line, goroutineˢ): {
+        case {} when strings.HasPrefix(line, goroutineˢ2): {
             cur = Ꮡ(new traceback(nil));
             tbs = append(tbs, cur);
             break;
         }
         case {} when line == ""u8: {
+            // Separator between goroutines
             cur = default!;
             break;
         }
@@ -889,8 +901,7 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             fatal(unexpectedIndentˢ);
             break;
         }
-        case {} when strings.HasPrefix(line, // Separator between goroutines
- createdByˢ): {
+        case {} when strings.HasPrefix(line, createdByˢ2): {
             @string funcName = line[(int)(len("created by "))..];
             cur.Value.createdBy = parseFrame(funcName, ""u8);
             break;
@@ -906,15 +917,14 @@ internal static slice<ж<traceback>> parseTraceback(ж<testing.T> Ꮡt, @string 
             break;
         }
         case {} when elidedRe.MatchString(line): {
+            // "...N frames elided..."
             var nStr = elidedRe.FindStringSubmatch(line);
             ref var n = ref heap<nint>(out var Ꮡn);
             (n, _) = strconv.Atoi(nStr[1]);
-            var frame = Ꮡ(new tbFrame( // "...N frames elided..."
-elided: n));
+            var frame = Ꮡ(new tbFrame(elided: n));
             cur.Value.frames = append((~cur).frames, frame);
             break;
         }}
-
     }
     return tbs;
 }
@@ -964,23 +974,23 @@ public static void TestTracebackGeneric(ж<testing.T> Ꮡt) {
             var xʗ1 = x;
 
             var xʗ2 = x;
-    var tests = new TestTracebackGeneric_tests[]{ // function, not inlined
-
+    var tests = new TestTracebackGeneric_tests[]{
+        // function, not inlined
         new(
             testTracebackGenericFn<nint>,
             "testTracebackGenericFn[...]("u8
-        ), // function, inlined
-
+        ),
+        // function, inlined
         new(
             (slice<byte> bufΔ1) => testTracebackGenericFnInlined<nint>(bufΔ1),
             "testTracebackGenericFnInlined[...]("u8
-        ), // method, not inlined
-
+        ),
+        // method, not inlined
         new(
             (slice<byte> p1) => xʗ1.M(p1),
             "testTracebackGenericTyp[...].M("u8
-        ), // method, inlined
-
+        ),
+        // method, inlined
         new(
             (slice<byte> bufΔ2) => xʗ2.Inlined(bufΔ2),
             "testTracebackGenericTyp[...].Inlined("u8
@@ -993,11 +1003,121 @@ public static void TestTracebackGeneric(ж<testing.T> Ꮡt) {
         if (!bytes.Contains(got, slice<byte>(test.expect))) {
             Ꮡt.Errorf("traceback does not contain expected string: want %q, got\n%s"u8, test.expect, got);
         }
-        if (bytes.Contains(got, slice<byte>("shape"u8))) {
-            // should not contain shape name
+        if (bytes.Contains(got, slice<byte>("shape"u8))) { // should not contain shape name
             Ꮡt.Errorf("traceback contains shape name: got\n%s"u8, got);
         }
     }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object skippedTestSanitizerˢ = (@string)"skipped test: sanitizer builds use cgo"u8;
+internal static readonly @string setCgoTracebackNoCgoˢ = "SetCgoTracebackNoCgo"u8;
+
+public static void TestSetCgoTracebackNoCgo(ж<testing.T> Ꮡt) {
+    if (asan.Enabled || msan.Enabled || race.Enabled) {
+        Ꮡt.Skip(skippedTestSanitizerˢ);
+    }
+
+    @string output = runTestProg(Ꮡt, testprogˢ, setCgoTracebackNoCgoˢ);
+    @string want = "OK\n"u8;
+    if (output != want) {
+        Ꮡt.Fatalf("want %s, got %s\n"u8, want, output);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string tracebacklabels1ˢ = "tracebacklabels=1"u8;
+internal static readonly @string foobarˢ = "foobar"u8;
+internal static readonly @string bazˢ = "baz"u8;
+internal static readonly @string fizzleˢ = "fizzle"u8;
+internal static readonly @string bitˢ = "bit"u8;
+internal static readonly @string bazˢ2 = "baz\n"u8;
+internal static readonly @string bItˢ = "b\u001bit"u8;
+internal static readonly @string fooBaRˢ = "foo\"ba\x00r"u8;
+internal static readonly @string foobaRˢ = "fooba\x00r"u8;
+internal static readonly @string fizzLeˢ = "fizz\tle"u8;
+internal static readonly @string boopˢ = "\U00045678boop"u8;
+internal static readonly @string fizZlEˢ = "fiz\\zl\re"u8;
+
+internal partial struct TestTracebackGoroutineLabels_type /*dyn*/ {
+    internal pprof.LabelSet l;
+    internal @string expTB;
+}
+
+public static void TestTracebackGoroutineLabels(ж<testing.T> Ꮡt) {
+    Ꮡt.Setenv(godebugˢ, tracebacklabels1ˢ);
+    foreach (var (_, vᴛ1) in new TestTracebackGoroutineLabels_type[]{
+        new(l: pprof.Labels(foobarˢ, bazˢ), expTB: @"{""foobar"": ""baz""}"u8),
+        // Make sure the keys are sorted because the runtime/pprof package sorts for consistency
+        new(l: pprof.Labels(foobarˢ, bazˢ, fizzleˢ, bitˢ), expTB: @"{""fizzle"": ""bit"", ""foobar"": ""baz""}"u8),
+        // make sure newlines get escaped
+        new(l: pprof.Labels(fizzleˢ, bitˢ, foobarˢ, bazˢ2), expTB: @"{""fizzle"": ""bit"", ""foobar"": ""baz\n""}"u8),
+        // make sure null and escape bytes are properly escaped
+        new(l: pprof.Labels(fizzleˢ, bItˢ, fooBaRˢ, bazˢ2), expTB: @"{""fizzle"": ""b\x1bit"", ""foo\""ba\x00r"": ""baz\n""}"u8),
+        // verify that simple 16-bit unicode runes are escaped with \u, including a greek upper-case sigma and an arbitrary unicode character.
+        new(l: pprof.Labels(fizzleˢ, "\u1234Σ", foobaRˢ, bazˢ2), expTB: @"{""fizzle"": ""\u1234\u03a3"", ""fooba\x00r"": ""baz\n""}"u8),
+        // verify that 32-bit unicode runes are escaped with \U along with tabs
+        new(l: pprof.Labels(fizzLeˢ, boopˢ, foobaRˢ, bazˢ2), expTB: @"{""fizz\tle"": ""\U00045678boop"", ""fooba\x00r"": ""baz\n""}"u8),
+        // verify carriage returns and backslashes get escaped along with our nulls, newlines and a 32-bit unicode character
+        new(l: pprof.Labels(fizZlEˢ, boopˢ, foobaRˢ, bazˢ2), expTB: @"{""fiz\\zl\re"": ""\U00045678boop"", ""fooba\x00r"": ""baz\n""}"u8)
+    }.slice()) {
+        ref var tbl = ref heap(new TestTracebackGoroutineLabels_type(), out var Ꮡtbl);
+        tbl = vᴛ1;
+
+        var tblʗ1 = tbl;
+        Ꮡt.Run(tbl.expTB, (ж<testing.T> tΔ1) => {
+            var tblʗ2 = tblʗ1;
+            var verifyLabels = [MethodImpl(MethodImplOptions.NoInlining)] () => {
+                tΔ1.Helper();
+                var buf = new slice<byte>((1 << 10));
+                // We collect the stack only for this goroutine (by passing
+                // false to runtime.Stack). We expect to see the parent's goroutine labels in the traceback.
+                @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
+                if (!strings.Contains(stack, "labels:"u8 + tblʗ2.expTB)) {
+                    tΔ1.Errorf("failed to find goroutine labels with labels %s (as %s) got:\n%s\n---"u8, tblʗ2.l, tblʗ2.expTB, stack);
+                }
+            };
+            // Use a clean context so the testing package can add whatever goroutine labels it wants to the testing.T context.
+            var lblCtx = pprof.WithLabels(context.Background(), tblʗ1.l);
+            pprof.SetGoroutineLabels(lblCtx);
+            ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+            // make sure the labels are visible in a child goroutine
+            Ꮡwg.Go(verifyLabels);
+            // and in this parent goroutine
+            verifyLabels();
+            Ꮡwg.Wait();
+        });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string tracebacklabels0ˢ = "tracebacklabels=0"u8;
+internal static readonly @string labelsˢ = "labels:"u8;
+
+public static void TestTracebackGoroutineLabelsDisabledGODEBUG(ж<testing.T> Ꮡt) {
+    Ꮡt.Setenv(godebugˢ, tracebacklabels0ˢ);
+    ref var lbls = ref heap<pprof.LabelSet>(out var Ꮡlbls);
+    lbls = pprof.Labels(foobarˢ, bazˢ);
+    var lblsʗ1 = lbls;
+    var verifyLabels = [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        Ꮡt.Helper();
+        var buf = new slice<byte>((1 << 10));
+        // We collect the stack only for this goroutine (by passing
+        // false to runtime.Stack).
+        @string stack = (@string)(buf.slice(0, Δruntime.Stack(buf, false)));
+        if (strings.Contains(stack, labelsˢ)) {
+            Ꮡt.Errorf("found goroutine labels with labels %s  got:\n%s\n---"u8, lblsʗ1, stack);
+        }
+    };
+    // Use a clean context so the testing package can add whatever goroutine labels it wants to the testing.T context.
+    var lblCtx = pprof.WithLabels(context.Background(), lbls);
+    pprof.SetGoroutineLabels(lblCtx);
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    // make sure the labels are visible in a child goroutine
+    Ꮡwg.Go(verifyLabels);
+    // and in this parent goroutine
+    verifyLabels();
+    Ꮡwg.Wait();
 }
 
 } // end runtime_test_package

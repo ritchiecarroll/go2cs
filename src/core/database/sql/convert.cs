@@ -57,9 +57,10 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
     // it isn't expecting. The final error will be thrown
     // in the argument converter loop.
     nint index = nv.Ordinal - 1;
-    if (c.want <= index) {
+    if (c.want >= 0 && c.want <= index) {
         return default!;
     }
+
     // First, see if the value itself knows how to convert
     // itself to a driver type. For example, a NullString
     // struct changing into a string or nil.
@@ -75,6 +76,7 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
             nv.Value = sv;
         }
     }
+
     // Second, ask the column to sanity check itself. For
     // example, drivers might use this to make sure that
     // an int64 values being inserted into a 16-bit
@@ -99,8 +101,8 @@ internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> �
 // interface.
 internal static error /*err*/ defaultCheckNamedValue(ж<driver.NamedValue> Ꮡnv) {
     error err = default!;
-
     ref var nv = ref Ꮡnv.DerefOrNull();
+
     (nv.Value, err) = driver.DefaultParameterConverter.ConvertValue(nv.Value);
     return err;
 }
@@ -115,10 +117,12 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     ref var ds = ref Ꮡds.DerefOrNull();
 
     var nvargs = new slice<driver.NamedValue>(len(args));
+
     // -1 means the driver doesn't know how to count the number of
     // placeholders, so we won't sanity check input here and instead let the
     // driver deal with errors.
     nint want = -1;
+
     driver.Stmt si = default!;
     ccChecker cc = default!;
     if (Ꮡds != nil) {
@@ -126,6 +130,7 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         want = ds.si.NumInput();
         cc.want = want;
     }
+
     // Check all types of interfaces from the start.
     // Drivers may opt to use the NamedValueChecker for special
     // argument types, then return driver.ErrSkip to pass it along
@@ -138,6 +143,7 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
     if (ok) {
         cc.cci = cci;
     }
+
     // Loop through all the arguments, checking each one.
     // If no error is returned simply increment the index
     // and continue. However, if driver.ErrRemoveArgument
@@ -162,6 +168,7 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         }
         nv.Value.Ordinal = n + 1;
         nv.Value.Value = arg;
+
         // Checking sequence has four routes:
         // A: 1. Default
         // B: 1. NamedValueChecker 2. Column Converter 3. Default
@@ -212,13 +219,14 @@ nextCheck:
         else { /* default: */
             return (default!, fmt.Errorf("sql: converting argument %s type: %w"u8, describeNamedValue(ref (nv).DerefOrNull()), err));
         }
-
     }
+
     // Check the length of arguments after conversion to allow for omitted
     // arguments.
     if (want != -1 && len(nvargs) != want) {
         return (default!, fmt.Errorf("sql: expected %d arguments, got %d"u8, want, len(nvargs)));
     }
+
     return (nvargs, default!);
 }
 
@@ -283,7 +291,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             if (d == nil) {
                 return errNilPtr;
             }
-            d.Value = ((@string)s);
+            d.Value = (@string)s;
             return default!;
         }
         case ж<any> d: {
@@ -368,11 +376,11 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         }}
         break;
     }
+    // The driver is returning a cursor the client may iterate over.
     case {} Δs when Δs._<driver.Rows>(out var s): {
         switch (dest.type()) {
         case ж<Rows> d: {
             if (d == nil) {
-                // The driver is returning a cursor the client may iterate over.
                 return errNilPtr;
             }
             if (Ꮡrows == nil) {
@@ -384,10 +392,10 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
                 },
                 rowsi: s
             );
+            // Chain the cancel function.
             var parentCancel = rows.cancel;
             var parentCancelʗ1 = parentCancel;
             rows.cancel = () => {
-                // Chain the cancel function.
                 // When Rows.cancel is called, the closemu will be locked as well.
                 // So we can access rs.lasterr.
                 d.close(Ꮡrows.Value.lasterr);
@@ -399,7 +407,9 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         }}
         break;
     }}
+
     reflectꓸValue sv = new(nil);
+
     switch (dest.type()) {
     case ж<@string> d: {
         sv = reflect.ValueOf(src);
@@ -408,7 +418,6 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             d.Value = asString(src);
             return default!;
         }
-
         break;
     }
     case ж<slice<byte>> d: {
@@ -442,11 +451,13 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         d.ValueSlot = src;
         return default!;
     }}
+
     {
         var (scanner, ok) = dest._<Scanner>(ᐧ); if (ok) {
             return scanner.Scan(src);
         }
     }
+
     var dpv = reflect.ValueOf(dest);
     if (dpv.Kind() != reflect.ΔPointer) {
         return errors.New(destinationNotAPointerˢ);
@@ -454,9 +465,11 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
     if (dpv.IsNil()) {
         return errNilPtr;
     }
+
     if (!sv.IsValid()) {
         sv = reflect.ValueOf(src);
     }
+
     var dv = reflect.Indirect(dpv);
     if (sv.IsValid() && sv.Type().AssignableTo(dv.Type())) {
         switch (src.type()) {
@@ -471,10 +484,12 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
         }}
         return default!;
     }
+
     if (dv.Kind() == sv.Kind() && sv.Type().ConvertibleTo(dv.Type())) {
         dv.Set(sv.Convert(dv.Type()));
         return default!;
     }
+
     // The following conversions use a string value as an intermediate representation
     // to convert between various numeric types.
     //
@@ -538,7 +553,7 @@ internal static error convertAssignRows(any dest, any src, ж<Rows> Ꮡrows) {
             return default!;
         }
         case slice<byte> v: {
-            dv.SetString(((@string)v));
+            dv.SetString((@string)v);
             return default!;
         }}
     }
@@ -561,7 +576,7 @@ internal static @string asString(any src) {
         return v;
     }
     case slice<byte> v: {
-        return ((@string)v);
+        return (@string)v;
     }}
     var rv = reflect.ValueOf(src);
     var exprᴛ1 = rv.Kind();
@@ -580,7 +595,6 @@ internal static @string asString(any src) {
     if (exprᴛ1 == reflect.ΔBool) {
         return strconv.FormatBool(rv.Bool());
     }
-
     return fmt.Sprintf("%v"u8, src);
 }
 
@@ -608,7 +622,6 @@ internal static (slice<byte> b, bool ok) asBytes(slice<byte> buf, reflectꓸValu
         @string s = rv.String();
         return (append(buf, s.ꓸꓸꓸ), true);
     }
-
     return (b, ok);
 }
 

@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto.@internal.fips140;
 
-using subtle = go.crypto.@internal.fips140.subtle_package;
-using go.crypto.@internal.fips140;
+using constanttime = go.crypto.@internal.constanttime_package;
+using go.crypto.@internal;
 
 partial class edwards25519_package {
 
@@ -98,15 +98,14 @@ internal static void FromP3(this ref nafLookupTable8 v, ж<Point> Ꮡq) {
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
 internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡdest, int8 x) {
-    ref var dest = ref Ꮡdest.DerefOrNull();
-
     // Compute xabs = |x|
-    var xmask = (int8)((x >> (int)(7)));
+    var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
+
     Ꮡdest.Zero();
     for (nint j = 1; j <= 8; j++) {
         // Set dest = j*Q if |x| = j
-        nint cond = subtle.ConstantTimeByteEq(xabs, (uint8)j);
+        nint cond = constanttime.ByteEq(xabs, (uint8)j);
         Ꮡdest.Select(Ꮡ(v.points, j - 1), Ꮡdest, cond);
     }
     // Now dest = |x|*Q, conditionally negate to get x*Q
@@ -115,15 +114,14 @@ internal static void SelectInto(this ref projLookupTable v, ж<projCached> Ꮡde
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
 internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> Ꮡdest, int8 x) {
-    ref var dest = ref Ꮡdest.DerefOrNull();
-
     // Compute xabs = |x|
-    var xmask = (int8)((x >> (int)(7)));
+    var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
+
     Ꮡdest.Zero();
     for (nint j = 1; j <= 8; j++) {
         // Set dest = j*Q if |x| = j
-        nint cond = subtle.ConstantTimeByteEq(xabs, (uint8)j);
+        nint cond = constanttime.ByteEq(xabs, (uint8)j);
         Ꮡdest.Select(Ꮡ(v.points, j - 1), Ꮡdest, cond);
     }
     // Now dest = |x|*Q, conditionally negate to get x*Q

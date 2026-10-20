@@ -15,7 +15,6 @@ using text;
 
 partial class gccgoimporter_internal_test_package {
 
-
 partial struct typeParserTestsᴛ1 /*dyn*/ {
     internal @string id, typ, want, underlying, methods;
 }
@@ -49,25 +48,30 @@ public static void TestTypeParser(ж<testing.T> Ꮡt) {
         p.pkgpath = test.id;
         p.maybeCreatePackage();
         var typ = Ꮡp.parseType(p.pkg);
+
         if (p.tok != scanner.EOF) {
             Ꮡt.Errorf("expected full parse, stopped at %q"u8, p.lit);
         }
+
         // interfaces must be explicitly completed
         {
             var (ityp, _) = typ._<ж<types.Interface>>(ᐧ); if (ityp != nil) {
                 ityp.Complete();
             }
         }
+
         @string got = typ.String();
         if (got != test.want) {
             Ꮡt.Errorf("got type %q, expected %q"u8, got, test.want);
         }
+
         if (test.underlying != ""u8) {
             @string underlying = typ.Underlying().String();
             if (underlying != test.underlying) {
                 Ꮡt.Errorf("got underlying type %q, expected %q"u8, underlying, test.underlying);
             }
         }
+
         if (test.methods != ""u8) {
             var nt = typ._<ж<types.Named>>();
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

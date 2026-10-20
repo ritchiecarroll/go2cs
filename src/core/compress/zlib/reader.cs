@@ -39,8 +39,11 @@ partial class zlib_package {
 internal static UntypedInt zlibDeflate => 8;
 internal static UntypedInt zlibMaxWindow => 7;
 
+// ErrChecksum is returned when reading ZLIB data that has an invalid checksum.
 public static error ErrChecksum = errors.New("zlib: invalid checksum"u8);
+// ErrDictionary is returned when reading ZLIB data that has an invalid dictionary.
 public static error ErrDictionary = errors.New("zlib: invalid dictionary"u8);
+// ErrHeader is returned when reading ZLIB data that has an invalid header.
 public static error ErrHeader = errors.New("zlib: invalid header"u8);
 
 partial struct reader {
@@ -89,6 +92,7 @@ internal static (nint, error) Read(this ref reader z, slice<byte> p) {
     if (z.err != default!) {
         return (0, z.err);
     }
+
     nint n = default!;
     (n, z.err) = z.decompressor.Read(p);
     z.digest.Write(p.slice(0, n));
@@ -96,6 +100,7 @@ internal static (nint, error) Read(this ref reader z, slice<byte> p) {
         // In the normal case we return here.
         return (n, z.err);
     }
+
     // Finished file; check checksum.
     {
         var (_, err) = io.ReadFull(new flate_ReaderᴠReader(z.r), z.scratch[0..4]); if (err != default!) {
@@ -135,6 +140,7 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
             z.r = new bufio_ReaderжReader(bufio.NewReader(r));
         }
     }
+
     // Read the header (RFC 1950 section 2.2.).
     (_, z.err) = io.ReadFull(z.r, z.scratch[0..2]);
     if (z.err != default!) {
@@ -144,7 +150,7 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
         return z.err;
     }
     var h = binary.BigEndian.Uint16(z.scratch[..2]);
-    if (((byte)(z.scratch[0] & 0x0f) != zlibDeflate) || ((byte)((z.scratch[0] >> (int)(4))) > zlibMaxWindow) || ((uint16)(h % 31) != 0)) {
+    if (((byte)(z.scratch[0] & 0x0f) != zlibDeflate) || ((byte)((z.scratch[0] >> 4)) > zlibMaxWindow) || ((uint16)(h % 31) != 0)) {
         z.err = ErrHeader;
         return z.err;
     }
@@ -163,6 +169,7 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
             return z.err;
         }
     }
+
     if (z.decompressor == default!){
         if (haveDict){
             z.decompressor = flate.NewReaderDict(z.r, dict);

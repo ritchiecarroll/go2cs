@@ -51,6 +51,12 @@ using static go.vendor.golang.org.x.crypto.cryptobyte_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -59,9 +65,9 @@ using static go.vendor.golang.org.x.crypto.cryptobyte_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1.go", "asn1.cs", "ABAswqqiqJKmgoKCgpaCgsySgoKCloKCzLKCloLKgoKCgpSClJKClIKClMySkt6ygoKUkrqStoKClLyikoK4goKClIKogoKCgpa4goKWgpaCgqimgpKCgpaCgsqCgoKUyoKq2IKUgoKClK7igriCgpSCAAIQ8oKClpS0tKYAAhLi5IKClIL0goKUgqSktMiClJSClJSUppSCgoKUlIKClIKClJSmooKClIKUgpSCpoKCgpSmgoKClIKCpoKCpoKCgpSmgoKUlJSUgoKUrLKCqsKCgoKUgpSCpqKCgoK4gpSCuoKWgoKCpqrCgoK6jMKClIKClIKWgoKClJSCqsKCgpSCgoKUgIKkgs7CgoKUhIKCgriClIKWgIKmuJSCqsKChJaCgoaWgoKs0oKCloKClIKssgACENKCgpQAAhDSgoKUAAIQ0gACEPKqwoKUqqKCruKCgpSClKqigpSCrsKCgoKUggALBrSAgpTWtJSClK7ygoKClIKUgoKClJSUruKCgoKWgoKWprKClITcloKe0pSCuIKEgpaCgrqUlJSWgpSUloKUgpY=", "38-48:1;53-63:1;72-97:1;102-104:1;115-117:1;122-130:1;136-139:1;182-192:1;196-202:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/builder.go", "builder.cs", "ACFKsgAEELIABRCiqqKClKqigpSokqiSqqKokqiSqJKokgALRpKokqiSqJKmwoKEgoSCgpaAkpTKoqS0gpaShIKWAAcSgoKC6IKClIKChIKCloSClriClJKCgpKCgpKCgpKCgpKCgpSCgrqCgoKCgpSCloKCgpSCgpaCluaigpSClIKUgoKUrLKClIKUgoKUgpSClAAKHNKCgg==", "168-181:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/string.go", "string.cs", "ABc0ooKUgoKokqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqaigoKUgoKClIKmooKClIKCgpSCgpSCqqKssqyyqsKCgpSCqqKCgoKUqJI=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/asn1.go", "asn1.cs", "ABAswqqiqJKmgoKCgqaCgsySgoKCpoKCzLKCpoLKgoKCgpSClJKClIKClMySkt6ygoKUkrqStoKClLyikoK4goKClIK4goKCgqa4goKmgqaCgrimgpKCgqaCgsqCgoKUyoKq2IKUgoKClK7igriCgpSCAAIQ8oKCppS0tKYAAhLi5IKClIL0goKUgqSktMiClJSClJSUppSCgoKUlIKClIKClJSmooKClIKUgpSCpoKCgpSmgoKClIKCpoKCpoKCgpSmgoKUlJSUgoKUrLKCqsKCgoKUgpSCpqKCgoK4gpSCyoKmgoKCpqrCgoLKnMKClIKClIKmgoKClJSCqsKCgpSCgoKUgIKkgs7CgoKUlIKCgriClIKmgIK2uJSCqsKChKaCgoamgoKs0oKCpoKClIKssgACENKCgpQAAhDSgoKUAAIQ0gACENKqooKUqqKCruKCgpSClKqigpSCrsKCgoKUggALBrSAgpTWpJSClK7ygoKClIKUgoKClJSUruKCgoKmgoKmprKClJTcpoKu0pSCuIKUgqaCgsqUlJSmgpSUpoKUgqY=", "38-48:1;53-63:1;72-97:1;102-104:1;115-117:1;122-130:1;136-139:1;182-192:1;196-202:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/builder.go", "builder.cs", "ACFKsgAEELIABRCiqqKClKqigpSokqiSqqKokqiSqJKokgAhRpKokqiSqJKmwoKUgpSCgqaAkpTaoqS0gqaSlIKmAAgSgoKC6IKClIKClIKCppSCpriClJKCgpKCgpKCgpKCgpKCgpSCgsqCgoKCgpSCpoKCgpSCgqaCpuaigpSClIKUgoKUrLKClIKUgoKUgpSClAAKHNKCgg==", "168-181:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/crypto/cryptobyte/string.go", "string.cs", "ABk0ooKUgoKokqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqrCgoKUgqaigoKUgoKClIKmooKClIKCgpSCgpSCqqKssqyyqsKCgpSCqqKCgoKUqJI=")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.crypto;

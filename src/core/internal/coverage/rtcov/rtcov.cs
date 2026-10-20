@@ -38,7 +38,6 @@ partial struct CovCounterBlob {
 
 // Meta is the top-level container for bits of state related to
 // code coverage meta-data in the runtime.
-
 partial struct Metaᴛ1 /*dyn*/ {
     // List contains the list of currently registered meta-data
     // blobs for the running program.
@@ -87,6 +86,7 @@ public static uint32 AddMeta(@unsafe.Pointer p, uint32 dlen, /*[16]*/ array<byte
         // package; we'll use the map to fix things up later on.
         Meta.PkgMap[pkgid] = slot;
     }
+
     // ID zero is reserved as invalid.
     return (uint32)(slot + 1);
 }

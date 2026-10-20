@@ -12,11 +12,13 @@ using static go.sync_internal_test_package;
 
 partial class sync_test_package {
 
-// The Pool's New function should generally only return pointer
-// types, since a pointer can be put into the return interface
-// value without an allocation:
 internal static ж<Δsync.Pool> ᏑbufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
-    New: () => @new<bytes.Buffer>()
+    New: () => {
+        // The Pool's New function should generally only return pointer
+        // types, since a pointer can be put into the return interface
+        // value without an allocation:
+        return @new<bytes.Buffer>();
+    }
 ));
 internal static ref Δsync.Pool bufPool => ref ᏑbufPool.Value;
 
@@ -44,8 +46,7 @@ internal static readonly @string searchQFlowersˢ = "/search?q=flowers"u8;
 
 public static void ExamplePool() {
     Log(new Δos.FileжWriter(Δos.Stdout), pathˢ, searchQFlowersˢ);
+    // Output: 2006-01-02T15:04:05Z path=/search?q=flowers
 }
-
-// Output: 2006-01-02T15:04:05Z path=/search?q=flowers
 
 } // end sync_test_package

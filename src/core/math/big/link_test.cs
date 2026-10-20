@@ -42,7 +42,7 @@ package main
 import _ "math/big"
 func main() {}
 
-"""u8);
+"""u8.Raw());
     {
         var errΔ1 = os.WriteFile(goFile, @file, 420); if (errΔ1 != default!) {
             Ꮡt.Fatal(errΔ1);
@@ -55,6 +55,7 @@ func main() {}
             Ꮡt.Fatalf("compile: %v, %s"u8, errΔ2, @out);
         }
     }
+
     cmd = exec.Command(goBin, toolˢ, "nm", xExeˢ);
     cmd.Value.Dir = tmp;
     var (nm, err) = cmd.CombinedOutput();

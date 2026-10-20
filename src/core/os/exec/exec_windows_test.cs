@@ -48,13 +48,14 @@ internal static readonly @string markerᶜ = "arrakis, dune, desert planet"u8;
 
 public static void TestPipePassing(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (r, w, err) = os.Pipe();
     if (err != default!) {
         Ꮡt.Error(err);
     }
     @string marker = markerᶜ;
     var childProc = helperCommand(Ꮡt, pipehandleˢ, strconv.FormatUint((uint64)w.Fd(), 16), marker);
-    childProc.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{((syscallꓸHandle)w.Fd())}.slice()));
+    childProc.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(AdditionalInheritedHandles: new syscallꓸHandle[]{(syscallꓸHandle)w.Fd()}.slice()));
     err = childProc.Start();
     if (err != default!) {
         Ꮡt.Error(err);
@@ -66,7 +67,7 @@ public static void TestPipePassing(ж<testing.T> Ꮡt) {
     }
     r.Close();
     if (((sstring)response) != marker) {
-        Ꮡt.Errorf("got %q; want %q"u8, ((@string)response), marker);
+        Ꮡt.Errorf("got %q; want %q"u8, (@string)response, marker);
     }
     err = childProc.Wait();
     if (err != default!) {
@@ -80,6 +81,7 @@ internal static readonly @string cExit88ˢ = "/c exit 88"u8;
 
 public static void TestNoInheritHandles(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var cmd = testenv.Command(new exec_test_package.testing_TжTB(Ꮡt), cmdˢ, cExit88ˢ);
     cmd.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(NoInheritHandles: true));
     var err = cmd.Run();
@@ -102,6 +104,7 @@ internal static readonly object noSystemrootFoundˢ = (@string)"no SYSTEMROOT fo
 public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     var cmd = helperCommand(Ꮡt, echoenvˢ, systemrootˢ);
+
     // Explicitly remove SYSTEMROOT from the command's environment.
     slice<@string> env = default!;
     foreach (var (_, kv) in cmd.Environ()) {
@@ -111,11 +114,12 @@ public static void TestChildCriticalEnv(ж<testing.T> Ꮡt) {
         }
     }
     cmd.Value.Env = env;
+
     var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    if (strings.TrimSpace(((@string)@out)) == ""u8) {
+    if (strings.TrimSpace((@string)@out) == ""u8) {
         Ꮡt.Error(noSystemrootFoundˢ);
     }
 }

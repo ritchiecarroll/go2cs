@@ -35,7 +35,6 @@ internal static nint tokenclass(token.Token tok) {
     case {} when tok.IsKeyword(): {
         return keyword;
     }}
-
     return special;
 }
 
@@ -45,26 +44,22 @@ internal partial struct elt {
     internal nint @class;
 }
 
-// Special tokens
-// issue 11151
-// Identifiers and basic type literals
-// was bug (issue 4000)
-// was bug (issue 4000)
-// Operators and delimiters
-// Keywords
 internal static slice<elt> tokens = new elt[]{
+    // Special tokens
     new(token.COMMENT, "/* a comment */"u8, special),
     new(token.COMMENT, "// a comment \n"u8, special),
     new(token.COMMENT, "/*\r*/"u8, special),
-    new(token.COMMENT, "/**\r/*/"u8, special),
+    new(token.COMMENT, "/**\r/*/"u8, special), // issue 11151
     new(token.COMMENT, "/**\r\r/*/"u8, special),
     new(token.COMMENT, "//\r\n"u8, special),
+
+    // Identifiers and basic type literals
     new(token.IDENT, "foobar"u8, literal),
     new(token.IDENT, "a۰۱۸"u8, literal),
     new(token.IDENT, "foo६४"u8, literal),
     new(token.IDENT, "bar９８７６"u8, literal),
-    new(token.IDENT, "ŝ"u8, literal),
-    new(token.IDENT, "ŝfoo"u8, literal),
+    new(token.IDENT, "ŝ"u8, literal), // was bug (issue 4000)
+    new(token.IDENT, "ŝfoo"u8, literal), // was bug (issue 4000)
     new(token.INT, "0"u8, literal),
     new(token.INT, "1"u8, literal),
     new(token.INT, "123456789012345678890"u8, literal),
@@ -97,11 +92,13 @@ internal static slice<elt> tokens = new elt[]{
     new(token.STRING, "`"u8 + """
 foo
 	                        bar
-"""u8 + "`"u8,
+"""u8.Raw() + "`"u8,
         literal
     ),
     new(token.STRING, "`\r`"u8, literal),
     new(token.STRING, "`foo\r\nbar`"u8, literal),
+
+    // Operators and delimiters
     new(token.ADD, "+"u8, @operator),
     new(token.SUB, "-"u8, @operator),
     new(token.MUL, "*"u8, @operator),
@@ -150,6 +147,8 @@ foo
     new(token.SEMICOLON, ";"u8, @operator),
     new(token.COLON, ":"u8, @operator),
     new(token.TILDE, "~"u8, @operator),
+
+    // Keywords
     new(token.BREAK, "break"u8, keyword),
     new(token.CASE, "case"u8, keyword),
     new(token.CHAN, "chan"u8, keyword),
@@ -199,8 +198,6 @@ internal static nint newlineCount(@string s) {
 }
 
 internal static void checkPos(ж<testing.T> Ꮡt, @string lit, tokenꓸPos p, tokenꓸPosition expected) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var pos = fset.Position(p);
     // Check cleaned filenames so that we don't have to worry about
     // different os.PathSeparator values.
@@ -220,16 +217,17 @@ internal static void checkPos(ж<testing.T> Ꮡt, @string lit, tokenꓸPos p, to
 
 // Verify that calling Scan() provides the correct results.
 public static void TestScan(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     nint whitespace_linecount = newlineCount(whitespace);
+
     // error handler
     var eh = (tokenꓸPosition _, @string msg) => {
         Ꮡt.Errorf("error handler called (msg = %s)"u8, msg);
     };
+
     // verify scan
     global::go.go.scanner_package.Scanner s = default!;
     s.Init(fset.AddFile(""u8, fset.Base(), len(source)), source, new Action<tokenꓸPosition, @string>(eh), (global::go.go.scanner_package.Mode)(ScanComments | dontInsertSemis));
+
     // set up expected position
     var epos = new tokenꓸPosition(
         Filename: ""u8,
@@ -237,16 +235,19 @@ public static void TestScan(ж<testing.T> Ꮡt) {
         Line: 1,
         Column: 1
     );
+
     nint index = 0;
     while (ᐧ) {
         var (pos, tok, lit) = s.Scan();
+
         // check position
         if (tok == token.EOF) {
             // correction for EOF
-            epos.Line = newlineCount(((@string)source));
+            epos.Line = newlineCount((@string)source);
             epos.Column = 2;
         }
         checkPos(Ꮡt, lit, pos, epos);
+
         // check token
         var e = new elt(token.EOF, ""u8, special);
         if (index < len(tokens)) {
@@ -256,18 +257,20 @@ public static void TestScan(ж<testing.T> Ꮡt) {
         if (tok != e.tok) {
             Ꮡt.Errorf("bad token for %q: got %s, expected %s"u8, lit, tok, e.tok);
         }
+
         // check token class
         if (tokenclass(tok) != e.@class) {
             Ꮡt.Errorf("bad class for %q: got %d, expected %d"u8, lit, tokenclass(tok), e.@class);
         }
+
         // check literal
         @string elit = ""u8;
         var exprᴛ1 = e.tok;
         if (exprᴛ1 == token.COMMENT) {
-            elit = ((@string)stripCR(slice<byte>(e.lit), // no CRs in comments
- e.lit[1] == (rune)'*'));
+            // no CRs in comments
+            elit = (@string)stripCR(slice<byte>(e.lit), e.lit[1] == (rune)'*');
+            //-style comment literal doesn't contain newline
             if (elit[1] == (rune)'/') {
-                //-style comment literal doesn't contain newline
                 elit = elit.slice(0, len(elit) - 1);
             }
         }
@@ -282,24 +285,26 @@ public static void TestScan(ж<testing.T> Ꮡt) {
                 // no CRs in raw string literals
                 elit = e.lit;
                 if (elit[0] == (rune)'`') {
-                    elit = ((@string)stripCR(slice<byte>(elit), false));
+                    elit = (@string)stripCR(slice<byte>(elit), false);
                 }
             } else 
             if (e.tok.IsKeyword()) {
                 elit = e.lit;
             }
         }
-
         if (lit != elit) {
             Ꮡt.Errorf("bad literal for %q: got %q, expected %q"u8, lit, lit, elit);
         }
+
         if (tok == token.EOF) {
             break;
         }
+
         // update position
         epos.Offset += len(e.lit) + len(whitespace);
         epos.Line += newlineCount(e.lit) + whitespace_linecount;
     }
+
     if (s.ErrorCount != 0) {
         Ꮡt.Errorf("found %d errors"u8, s.ErrorCount);
     }
@@ -322,7 +327,7 @@ public static void TestStripCR(ж<testing.T> Ꮡt) {
         new("/*\r/\r*\r/*/"u8, "/*/*\r/*/"u8),
         new("/*\r\r\r\r*/"u8, "/**/"u8)
     }.slice()) {
-        @string got = ((@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*'));
+        @string got = (@string)stripCR(slice<byte>(test.have), len(test.have) >= 2 && test.have[1] == (rune)'*');
         if (got != test.want) {
             Ꮡt.Errorf("stripCR(%q) = %q; want %q"u8, test.have, got, test.want);
         }
@@ -341,6 +346,7 @@ internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, 
         want = strings.ReplaceAll(want, commentˢ2, ""u8); // if at end
         want = strings.ReplaceAll(want, commentˢ3, ""u8); // if sole token
     }
+
     var @file = fset.AddFile(testSemisˢ, fset.Base(), len(input));
     global::go.go.scanner_package.Scanner scan = default!;
     scan.Init(@file, slice<byte>(input), default!, mode);
@@ -368,14 +374,12 @@ internal static void checkSemi(ж<testing.T> Ꮡt, @string input, @string want, 
     }
 }
 
-// first BOM is ignored
-
 partial struct semicolonTestsᴛ1 /*dyn*/ {
     internal @string input, want;
 }
 internal static array<semicolonTestsᴛ1> semicolonTests = new semicolonTestsᴛ1[]{
     new(""u8, ""u8),
-    new("\ufeff;"u8, ";"u8),
+    new("\ufeff;"u8, ";"u8), // first BOM is ignored
     new(";"u8, ";"u8),
     new("foo\n"u8, "IDENT ;"u8),
     new("123\n"u8, "INT ;"u8),
@@ -483,6 +487,7 @@ public static void TestSemicolons(ж<testing.T> Ꮡt) {
         @string want = test.want;
         checkSemi(Ꮡt, input, want, 0);
         checkSemi(Ꮡt, input, want, ScanComments);
+
         // if the input ended in newlines, the input must tokenize the
         // same with or without those newlines
         for (nint i = len(input) - 1; i >= 0 && input[i] == (rune)'\n'; i--) {
@@ -498,47 +503,39 @@ internal partial struct segment {
     internal nint line, column;   // line and column for current token; error position for invalid line directives
 }
 
-// exactly one token per line since the test consumes one token per segment
-// bad line comment, ignored
-// bad line comment, ignored (use existing, prior filename)
-// bad line comment, ignored (use existing, prior filename)
-// tests for new line directive syntax
-// missing filename means empty filename
-// missing filename means current filename
-// missing filename means empty filename
-// missing filename means current filename
-// line-directive relative column
-// absolute column since on new line
 internal static slice<segment> segments = new segment[]{
+    // exactly one token per line since the test consumes one token per segment
     new("  line1"u8, "TestLineDirectives"u8, 1, 3),
     new("\nline2"u8, "TestLineDirectives"u8, 2, 1),
-    new("\nline3  //line File1.go:100"u8, "TestLineDirectives"u8, 3, 1),
+    new("\nline3  //line File1.go:100"u8, "TestLineDirectives"u8, 3, 1), // bad line comment, ignored
     new("\nline4"u8, "TestLineDirectives"u8, 4, 1),
     new("\n//line File1.go:100\n  line100"u8, "File1.go"u8, 100, 0),
     new("\n//line  \t :42\n  line1"u8, " \t "u8, 42, 0),
     new("\n//line File2.go:200\n  line200"u8, "File2.go"u8, 200, 0),
     new("\n//line foo\t:42\n  line42"u8, "foo\t"u8, 42, 0),
-    new("\n //line foo:42\n  line43"u8, "foo\t"u8, 44, 0),
-    new("\n//line foo 42\n  line44"u8, "foo\t"u8, 46, 0),
+    new("\n //line foo:42\n  line43"u8, "foo\t"u8, 44, 0), // bad line comment, ignored (use existing, prior filename)
+    new("\n//line foo 42\n  line44"u8, "foo\t"u8, 46, 0), // bad line comment, ignored (use existing, prior filename)
     new("\n//line /bar:42\n  line45"u8, "/bar"u8, 42, 0),
     new("\n//line ./foo:42\n  line46"u8, "foo"u8, 42, 0),
     new("\n//line a/b/c/File1.go:100\n  line100"u8, "a/b/c/File1.go"u8, 100, 0),
     new("\n//line c:\\bar:42\n  line200"u8, "c:\\bar"u8, 42, 0),
     new("\n//line c:\\dir\\File1.go:100\n  line201"u8, "c:\\dir\\File1.go"u8, 100, 0),
-    new("\n//line :100\na1"u8, ""u8, 100, 0),
+
+    // tests for new line directive syntax
+    new("\n//line :100\na1"u8, ""u8, 100, 0), // missing filename means empty filename
     new("\n//line bar:100\nb1"u8, "bar"u8, 100, 0),
-    new("\n//line :100:10\nc1"u8, "bar"u8, 100, 10),
+    new("\n//line :100:10\nc1"u8, "bar"u8, 100, 10), // missing filename means current filename
     new("\n//line foo:100:10\nd1"u8, "foo"u8, 100, 10),
-    new("\n/*line :100*/a2"u8, ""u8, 100, 0),
+    new("\n/*line :100*/a2"u8, ""u8, 100, 0), // missing filename means empty filename
     new("\n/*line bar:100*/b2"u8, "bar"u8, 100, 0),
-    new("\n/*line :100:10*/c2"u8, "bar"u8, 100, 10),
+    new("\n/*line :100:10*/c2"u8, "bar"u8, 100, 10), // missing filename means current filename
     new("\n/*line foo:100:10*/d2"u8, "foo"u8, 100, 10),
-    new("\n/*line foo:100:10*/    e2"u8, "foo"u8, 100, 14),
-    new("\n/*line foo:100:10*/\n\nf2"u8, "foo"u8, 102, 1)
+    new("\n/*line foo:100:10*/    e2"u8, "foo"u8, 100, 14), // line-directive relative column
+    new("\n/*line foo:100:10*/\n\nf2"u8, "foo"u8, 102, 1) // absolute column since on new line
 }.slice();
 
-// exactly one token per line since the test consumes one token per segment
 internal static slice<segment> dirsegments = new segment[]{
+    // exactly one token per line since the test consumes one token per segment
     new("  line1"u8, "TestLineDir/TestLineDirectives"u8, 1, 3),
     new("\n//line File1.go:100\n  line100"u8, "TestLineDir/File1.go"u8, 100, 0)
 }.slice();
@@ -571,6 +568,7 @@ internal static void testSegments(ж<testing.T> Ꮡt, slice<segment> segments, @
     foreach (var (_, e) in segments) {
         src += e.srcline;
     }
+
     // verify scan
     global::go.go.scanner_package.Scanner S = default!;
     var @file = fset.AddFile(filename, fset.Base(), len(src));
@@ -587,12 +585,12 @@ internal static void testSegments(ж<testing.T> Ꮡt, slice<segment> segments, @
             Column: s.column
         ));
     }
+
     if (S.ErrorCount != 0) {
         Ꮡt.Errorf("got %d errors"u8, S.ErrorCount);
     }
 }
 
-// foo is considered part of the filename
 // The filename is used for the error message in these test cases.
 // The first line directive is valid and used to control the expected error line.
 internal static slice<segment> invalidSegments = new segment[]{
@@ -600,7 +598,7 @@ internal static slice<segment> invalidSegments = new segment[]{
     new("\n//line :2:1\n//line foobar:\ndummy"u8, "invalid line number: "u8, 2, 15),
     new("\n//line :5:1\n//line :0\ndummy"u8, "invalid line number: 0"u8, 5, 9),
     new("\n//line :10:1\n//line :1:0\ndummy"u8, "invalid column number: 0"u8, 10, 11),
-    new("\n//line :1:1\n//line :foo:0\ndummy"u8, "invalid line number: 0"u8, 1, 13)
+    new("\n//line :1:1\n//line :foo:0\ndummy"u8, "invalid line number: 0"u8, 1, 13) // foo is considered part of the filename
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -613,6 +611,7 @@ public static void TestInvalidLineDirectives(ж<testing.T> Ꮡt) {
     foreach (var (_, e) in invalidSegments) {
         src += e.srcline;
     }
+
     // verify scan
     global::go.go.scanner_package.Scanner S = default!;
     ref var s = ref heap(new segment(), out var Ꮡs);               // current segment
@@ -630,6 +629,7 @@ public static void TestInvalidLineDirectives(ж<testing.T> Ꮡt) {
 
         S.Scan();
     }
+
     if (S.ErrorCount != len(invalidSegments)) {
         Ꮡt.Errorf("got %d errors; want %d"u8, S.ErrorCount, len(invalidSegments));
     }
@@ -644,6 +644,7 @@ internal static readonly @string src2ˢ = "src2"u8;
 // Verify that initializing the same scanner more than once works correctly.
 public static void TestInit(ж<testing.T> Ꮡt) {
     global::go.go.scanner_package.Scanner s = default!;
+
     // 1st init
     @string src1 = ifTrueˢ;
     var f1 = fset.AddFile(src1ˢ, fset.Base(), len(src1));
@@ -657,6 +658,7 @@ public static void TestInit(ж<testing.T> Ꮡt) {
     if (tok != token.LBRACE) {
         Ꮡt.Errorf("bad token: got %s, expected %s"u8, tok, token.LBRACE);
     }
+
     // 2nd init
     @string src2 = goTrueˢ;
     var f2 = fset.AddFile(src2ˢ, fset.Base(), len(src2));
@@ -668,6 +670,7 @@ public static void TestInit(ж<testing.T> Ꮡt) {
     if (tok != token.GO) {
         Ꮡt.Errorf("bad token: got %s, expected %s"u8, tok, token.GO);
     }
+
     if (s.ErrorCount != 0) {
         Ꮡt.Errorf("found %d errors"u8, s.ErrorCount);
     }
@@ -685,10 +688,12 @@ public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
 // different file, but same line
 // same file, decreasing line number
     @string src = srcᶜ; // original file, line 1 again
+
     ref var list = ref heap<global::go.go.scanner_package.ErrorList>(out var Ꮡlist);
     var eh = (tokenꓸPosition pos, @string msg) => {
         Ꮡlist.ValueSlot.Add(pos, msg);
     };
+
     global::go.go.scanner_package.Scanner s = default!;
     s.Init(fset.AddFile(file1ˢ, fset.Base(), len(src)), slice<byte>(src), new Action<tokenꓸPosition, @string>(eh), dontInsertSemis);
     while (ᐧ) {
@@ -698,18 +703,22 @@ public static void TestStdErrorHandler(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     if (len(list) != s.ErrorCount) {
         Ꮡt.Errorf("found %d errors, expected %d"u8, len(list), s.ErrorCount);
     }
+
     if (len(list) != 9) {
         Ꮡt.Errorf("found %d raw errors, expected 9"u8, len(list));
         PrintError(new os.FileжWriter(os.Stderr), list);
     }
+
     list.Sort();
     if (len(list) != 9) {
         Ꮡt.Errorf("found %d sorted errors, expected 9"u8, len(list));
         PrintError(new os.FileжWriter(os.Stderr), list);
     }
+
     Ꮡlist.RemoveMultiples();
     if (len(list) != 4) {
         Ꮡt.Errorf("found %d one-per-line errors, expected 4"u8, len(list));
@@ -754,13 +763,6 @@ internal static void checkError(ж<testing.T> Ꮡt, @string src, token.Token tok
     }
 }
 
-// two periods, not invalid token (issue #28112)
-// issue 17621
-// only first BOM is ignored
-// only first BOM is ignored
-// only first BOM is ignored
-// only first BOM is ignored
-
 partial struct errorsᴛ1 /*dyn*/ {
     internal @string src;
     internal token.Token tok;
@@ -772,7 +774,7 @@ internal static slice<errorsᴛ1> errors = new errorsᴛ1[]{
     new("\a"u8, token.ILLEGAL, 0, ""u8, "illegal character U+0007"u8),
     new(@"#"u8, token.ILLEGAL, 0, ""u8, "illegal character U+0023 '#'"u8),
     new(@"…"u8, token.ILLEGAL, 0, ""u8, "illegal character U+2026 '…'"u8),
-    new(".."u8, token.PERIOD, 0, ""u8, ""u8),
+    new(".."u8, token.PERIOD, 0, ""u8, ""u8), // two periods, not invalid token (issue #28112)
     new(@"' '"u8, token.CHAR, 0, @"' '"u8, ""u8),
     new(@"''"u8, token.CHAR, 0, @"''"u8, "illegal rune literal"u8),
     new(@"'12'"u8, token.CHAR, 0, @"'12'"u8, "illegal rune literal"u8),
@@ -817,16 +819,16 @@ internal static slice<errorsᴛ1> errors = new errorsᴛ1[]{
     new("078."u8, token.FLOAT, 0, "078."u8, ""u8),
     new("07801234567."u8, token.FLOAT, 0, "07801234567."u8, ""u8),
     new("078e0"u8, token.FLOAT, 0, "078e0"u8, ""u8),
-    new("0E"u8, token.FLOAT, 2, "0E"u8, "exponent has no digits"u8),
+    new("0E"u8, token.FLOAT, 2, "0E"u8, "exponent has no digits"u8), // issue 17621
     new("078"u8, token.INT, 2, "078"u8, "invalid digit '8' in octal literal"u8),
     new("07090000008"u8, token.INT, 3, "07090000008"u8, "invalid digit '9' in octal literal"u8),
     new("0x"u8, token.INT, 2, "0x"u8, "hexadecimal literal has no digits"u8),
     new(((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66, 0x22})), token.STRING, 4, ((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66, 0x22})), "illegal character NUL"u8),
     new(((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x80, 0x64, 0x65, 0x66, 0x22})), token.STRING, 4, ((@string)(new byte[]{0x22, 0x61, 0x62, 0x63, 0x80, 0x64, 0x65, 0x66, 0x22})), "illegal UTF-8 encoding"u8),
-    new("\ufeff\ufeff"u8, token.ILLEGAL, 3, "\ufeff\ufeff"u8, "illegal byte order mark"u8),
-    new("//\ufeff"u8, token.COMMENT, 2, "//\ufeff"u8, "illegal byte order mark"u8),
-    new("'\ufeff"u8 + @"'"u8, token.CHAR, 1, "'\ufeff"u8 + @"'"u8, "illegal byte order mark"u8),
-    new(@""""u8 + "abc\ufeffdef"u8 + @""""u8, token.STRING, 4, @""""u8 + "abc\ufeffdef"u8 + @""""u8, "illegal byte order mark"u8),
+    new("\ufeff\ufeff"u8, token.ILLEGAL, 3, "\ufeff\ufeff"u8, "illegal byte order mark"u8), // only first BOM is ignored
+    new("//\ufeff"u8, token.COMMENT, 2, "//\ufeff"u8, "illegal byte order mark"u8), // only first BOM is ignored
+    new("'\ufeff"u8 + @"'"u8, token.CHAR, 1, "'\ufeff"u8 + @"'"u8, "illegal byte order mark"u8), // only first BOM is ignored
+    new(@""""u8 + "abc\ufeffdef"u8 + @""""u8, token.STRING, 4, @""""u8 + "abc\ufeffdef"u8 + @""""u8, "illegal byte order mark"u8), // only first BOM is ignored
     new(((@string)(new byte[]{0x61, 0x62, 0x63, 0x00, 0x64, 0x65, 0x66})), token.IDENT, 3, "abc"u8, "illegal character NUL"u8),
     new("abc\x00"u8, token.IDENT, 3, "abc"u8, "illegal character NUL"u8),
     new("“abc”"u8, token.ILLEGAL, 0, "abc"u8, @"curly quotation mark '“' (use neutral '""')"u8)
@@ -859,7 +861,7 @@ internal static readonly @string srcᶜ1 = """
 		// foo
 		}
 	
-"""u8;
+"""u8.Raw();
 
 // Verify that no comments show up as literal values when skipping comments.
 public static void TestIssue10213(ж<testing.T> Ꮡt) {
@@ -882,8 +884,6 @@ public static void TestIssue10213(ж<testing.T> Ꮡt) {
 internal static readonly @string srcᶜ2 = "... .. 0.. .."u8;
 
 public static void TestIssue28112(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     @string src = srcᶜ2; // make sure to have stand-alone ".." immediately before EOF to test EOF behavior
     var tokens = new token.Token[]{token.ELLIPSIS, token.PERIOD, token.PERIOD, token.FLOAT, token.PERIOD, token.PERIOD, token.PERIOD, token.EOF}.slice();
     global::go.go.scanner_package.Scanner s = default!;
@@ -959,23 +959,23 @@ internal partial struct TestNumbers_type /*dyn*/ {
 }
 
 public static void TestNumbers(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestNumbers_type[]{ // binaries
-
+    foreach (var (_, test) in new TestNumbers_type[]{
+        // binaries
         new(token.INT, "0b0"u8, "0b0"u8, ""u8),
         new(token.INT, "0b1010"u8, "0b1010"u8, ""u8),
         new(token.INT, "0B1110"u8, "0B1110"u8, ""u8),
         new(token.INT, "0b"u8, "0b"u8, "binary literal has no digits"u8),
         new(token.INT, "0b0190"u8, "0b0190"u8, "invalid digit '9' in binary literal"u8),
         new(token.INT, "0b01a0"u8, "0b01 a0"u8, ""u8), // only accept 0-9
-
         new(token.FLOAT, "0b."u8, "0b."u8, "invalid radix point in binary literal"u8),
         new(token.FLOAT, "0b.1"u8, "0b.1"u8, "invalid radix point in binary literal"u8),
         new(token.FLOAT, "0b1.0"u8, "0b1.0"u8, "invalid radix point in binary literal"u8),
         new(token.FLOAT, "0b1e10"u8, "0b1e10"u8, "'e' exponent requires decimal mantissa"u8),
         new(token.FLOAT, "0b1P-1"u8, "0b1P-1"u8, "'P' exponent requires hexadecimal mantissa"u8),
         new(token.IMAG, "0b10i"u8, "0b10i"u8, ""u8),
-        new(token.IMAG, "0b10.0i"u8, "0b10.0i"u8, "invalid radix point in binary literal"u8), // octals
+        new(token.IMAG, "0b10.0i"u8, "0b10.0i"u8, "invalid radix point in binary literal"u8),
 
+        // octals
         new(token.INT, "0o0"u8, "0o0"u8, ""u8),
         new(token.INT, "0o1234"u8, "0o1234"u8, ""u8),
         new(token.INT, "0O1234"u8, "0O1234"u8, ""u8),
@@ -983,31 +983,31 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.INT, "0o8123"u8, "0o8123"u8, "invalid digit '8' in octal literal"u8),
         new(token.INT, "0o1293"u8, "0o1293"u8, "invalid digit '9' in octal literal"u8),
         new(token.INT, "0o12a3"u8, "0o12 a3"u8, ""u8), // only accept 0-9
-
         new(token.FLOAT, "0o."u8, "0o."u8, "invalid radix point in octal literal"u8),
         new(token.FLOAT, "0o.2"u8, "0o.2"u8, "invalid radix point in octal literal"u8),
         new(token.FLOAT, "0o1.2"u8, "0o1.2"u8, "invalid radix point in octal literal"u8),
         new(token.FLOAT, "0o1E+2"u8, "0o1E+2"u8, "'E' exponent requires decimal mantissa"u8),
         new(token.FLOAT, "0o1p10"u8, "0o1p10"u8, "'p' exponent requires hexadecimal mantissa"u8),
         new(token.IMAG, "0o10i"u8, "0o10i"u8, ""u8),
-        new(token.IMAG, "0o10e0i"u8, "0o10e0i"u8, "'e' exponent requires decimal mantissa"u8), // 0-octals
+        new(token.IMAG, "0o10e0i"u8, "0o10e0i"u8, "'e' exponent requires decimal mantissa"u8),
 
+        // 0-octals
         new(token.INT, "0"u8, "0"u8, ""u8),
         new(token.INT, "0123"u8, "0123"u8, ""u8),
         new(token.INT, "08123"u8, "08123"u8, "invalid digit '8' in octal literal"u8),
         new(token.INT, "01293"u8, "01293"u8, "invalid digit '9' in octal literal"u8),
         new(token.INT, "0F."u8, "0 F ."u8, ""u8), // only accept 0-9
-
         new(token.INT, "0123F."u8, "0123 F ."u8, ""u8),
-        new(token.INT, "0123456x"u8, "0123456 x"u8, ""u8), // decimals
+        new(token.INT, "0123456x"u8, "0123456 x"u8, ""u8),
 
+        // decimals
         new(token.INT, "1"u8, "1"u8, ""u8),
         new(token.INT, "1234"u8, "1234"u8, ""u8),
         new(token.INT, "1f"u8, "1 f"u8, ""u8), // only accept 0-9
-
         new(token.IMAG, "0i"u8, "0i"u8, ""u8),
-        new(token.IMAG, "0678i"u8, "0678i"u8, ""u8), // decimal floats
+        new(token.IMAG, "0678i"u8, "0678i"u8, ""u8),
 
+        // decimal floats
         new(token.FLOAT, "0."u8, "0."u8, ""u8),
         new(token.FLOAT, "123."u8, "123."u8, ""u8),
         new(token.FLOAT, "0123."u8, "0123."u8, ""u8),
@@ -1039,16 +1039,18 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.IMAG, "123.123i"u8, "123.123i"u8, ""u8),
         new(token.IMAG, "123e+0i"u8, "123e+0i"u8, ""u8),
         new(token.IMAG, "123.E-10i"u8, "123.E-10i"u8, ""u8),
-        new(token.IMAG, ".123E+10i"u8, ".123E+10i"u8, ""u8), // hexadecimals
+        new(token.IMAG, ".123E+10i"u8, ".123E+10i"u8, ""u8),
 
+        // hexadecimals
         new(token.INT, "0x0"u8, "0x0"u8, ""u8),
         new(token.INT, "0x1234"u8, "0x1234"u8, ""u8),
         new(token.INT, "0xcafef00d"u8, "0xcafef00d"u8, ""u8),
         new(token.INT, "0XCAFEF00D"u8, "0XCAFEF00D"u8, ""u8),
         new(token.INT, "0x"u8, "0x"u8, "hexadecimal literal has no digits"u8),
         new(token.INT, "0x1g"u8, "0x1 g"u8, ""u8),
-        new(token.IMAG, "0xf00i"u8, "0xf00i"u8, ""u8), // hexadecimal floats
+        new(token.IMAG, "0xf00i"u8, "0xf00i"u8, ""u8),
 
+        // hexadecimal floats
         new(token.FLOAT, "0x0p0"u8, "0x0p0"u8, ""u8),
         new(token.FLOAT, "0x12efp-123"u8, "0x12efp-123"u8, ""u8),
         new(token.FLOAT, "0xABCD.p+0"u8, "0xABCD.p+0"u8, ""u8),
@@ -1064,8 +1066,9 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(token.FLOAT, "0xeP-"u8, "0xeP-"u8, "exponent has no digits"u8),
         new(token.FLOAT, "0x1234PAB"u8, "0x1234P AB"u8, "exponent has no digits"u8),
         new(token.FLOAT, "0x1.2p1a"u8, "0x1.2p1 a"u8, ""u8),
-        new(token.IMAG, "0xf00.bap+12i"u8, "0xf00.bap+12i"u8, ""u8), // separators
+        new(token.IMAG, "0xf00.bap+12i"u8, "0xf00.bap+12i"u8, ""u8),
 
+        // separators
         new(token.INT, "0b_1000_0001"u8, "0b_1000_0001"u8, ""u8),
         new(token.INT, "0o_600"u8, "0o_600"u8, ""u8),
         new(token.INT, "0_466"u8, "0_466"u8, ""u8),
@@ -1094,6 +1097,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         foreach (var (i, want) in strings.Split(test.tokens, " "u8)) {
             err = ""u8;
             var (_, tokΔ1, lit) = s.Scan();
+
             // compute lit where for tokens where lit is not defined
             var exprᴛ1 = tokΔ1;
             if (exprᴛ1 == token.PERIOD) {
@@ -1114,10 +1118,12 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
                     Ꮡt.Errorf("%q: got error %q; want %q"u8, test.src, err, test.err);
                 }
             }
+
             if (lit != want) {
                 Ꮡt.Errorf("%q: got literal %q (%s); want %s"u8, test.src, lit, tokΔ1, want);
             }
         }
+
         // make sure we read all
         var (_, tok, _) = s.Scan();
         if (tok == token.SEMICOLON) {

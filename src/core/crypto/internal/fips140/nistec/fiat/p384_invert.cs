@@ -37,6 +37,7 @@ public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> 
     ж<P384Element> t1 = @new<P384Element>();
     ж<P384Element> t2 = @new<P384Element>();
     ж<P384Element> t3 = @new<P384Element>();
+
     z.Square(Ꮡx);
     z.Mul(Ꮡx, z);
     z.Square(z);
@@ -95,6 +96,7 @@ public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> 
         z.Square(z);
     }
     z.Mul(Ꮡx, z);
+
     return Ꮡe.Set(z);
 }
 

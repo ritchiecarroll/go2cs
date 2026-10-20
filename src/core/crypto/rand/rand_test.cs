@@ -53,6 +53,7 @@ internal static void testRead(ж<testing.T> Ꮡt, Func<slice<byte>, (nint, error
     if (n != len(b) || err != default!) {
         Ꮡt.Fatalf("Read(buf) = %d, %s"u8, n, err);
     }
+
     ref var z = ref heap(new bytes.Buffer(), out var Ꮡz);
     var (f, _) = flate.NewWriter(new rand_test_package.bytes_BufferжWriter(Ꮡz), 5);
     f.Write(b);
@@ -87,7 +88,7 @@ public static void TestLargeRead(ж<testing.T> Ꮡt) {
 
 internal static void testLargeRead(ж<testing.T> Ꮡt, Func<slice<byte>, (nint, error)> Read) {
     // 40MiB, more than the documented maximum of 32Mi-1 on Linux 32-bit.
-    var b = new slice<byte>((40 << (int)(20)));
+    var b = new slice<byte>((40 << 20));
     {
         var (n, err) = Read(b); if (err != default!){
             Ꮡt.Fatal(err);
@@ -210,6 +211,7 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
             Ꮡt.Skip(skippingTestInShortModeˢ);
         }
         testenv.MustHaveExec(new rand_test_package.testing_TжTB(Ꮡt));
+
         // We run this test in a subprocess because it's expected to crash.
         if (os.Getenv(goTestReadErrorˢ) == "1"u8) {
             defer((io.Reader r) => {
@@ -220,6 +222,7 @@ public static void TestReadError(ж<testing.T> Ꮡt) {
             Ꮡt.Error(readDidNotCrashˢ);
             return;
         }
+
         var cmd = testenv.Command(new rand_test_package.testing_TжTB(Ꮡt), os.Args[0], testRunTestReadErrorˢ);
         cmd.Value.Env = append(os.Environ(), "GO_TEST_READ_ERROR=1"u8);
         var (@out, err) = cmd.CombinedOutput();
@@ -243,7 +246,7 @@ public static void BenchmarkRead(ж<testing.B> Ꮡb) {
         benchmarkRead(bΔ2, 32);
     });
     Ꮡb.Run("4K"u8, (ж<testing.B> bΔ3) => {
-        benchmarkRead(bΔ3, (4 << (int)(10)));
+        benchmarkRead(bΔ3, 4 << 10);
     });
 }
 

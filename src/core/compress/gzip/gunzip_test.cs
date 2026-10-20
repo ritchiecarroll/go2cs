@@ -27,18 +27,9 @@ internal partial struct gunzipTest {
     internal error err;
 }
 
-// has 1 empty fixed-huffman block
-// has 1 non-empty fixed huffman block
-// concatenation
-// has a fixed huffman block with some length-distance pairs
-// has dynamic huffman blocks
-// has 1 non-empty fixed huffman block then garbage
-// has 1 non-empty fixed huffman block not enough header
-// has 1 non-empty fixed huffman block but corrupt checksum
-// has 1 non-empty fixed huffman block but corrupt size
 internal static slice<gunzipTest> gunzipTests;
 internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
-    new(
+    new( // has 1 empty fixed-huffman block
         "empty.txt"u8,
         "empty.txt"u8,
         ""u8,
@@ -61,7 +52,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         default!
     ),
-    new(
+    new( // has 1 non-empty fixed huffman block
         "hello.txt"u8,
         "hello.txt"u8,
         "hello world\n"u8,
@@ -75,7 +66,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         default!
     ),
-    new(
+    new( // concatenation
         "hello.txt"u8,
         "hello.txt x2"u8,
         "hello world\n"u8 + "hello world\n"u8,
@@ -95,7 +86,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         default!
     ),
-    new(
+    new( // has a fixed huffman block with some length-distance pairs
         "shesells.txt"u8,
         "shesells.txt"u8,
         "she sells seashells by the seashore\n"u8,
@@ -111,7 +102,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         default!
     ),
-    new(
+    new( // has dynamic huffman blocks
         "gettysburg"u8,
         "gettysburg"u8,
         "  Four score and seven years ago our fathers brought forth on\n"u8 + "this continent, a new nation, conceived in Liberty, and dedicated\n"u8 + "to the proposition that all men are created equal.\n"u8 + "  Now we are engaged in a great Civil War, testing whether that\n"u8 + "nation, or any nation so conceived and so dedicated, can long\n"u8 + "endure.\n"u8 + "  We are met on a great battle-field of that war.\n"u8 + "  We have come to dedicate a portion of that field, as a final\n"u8 + "resting place for those who here gave their lives that that\n"u8 + "nation might live.  It is altogether fitting and proper that\n"u8 + "we should do this.\n"u8 + "  But, in a larger sense, we can not dedicate — we can not\n"u8 + "consecrate — we can not hallow — this ground.\n"u8 + "  The brave men, living and dead, who struggled here, have\n"u8 + "consecrated it, far above our poor power to add or detract.\n"u8 + "The world will little note, nor long remember what we say here,\n"u8 + "but it can never forget what they did here.\n"u8 + "  It is for us the living, rather, to be dedicated here to the\n"u8 + "unfinished work which they who fought here have thus far so\n"u8 + "nobly advanced.  It is rather for us to be here dedicated to\n"u8 + "the great task remaining before us — that from these honored\n"u8 + "dead we take increased devotion to that cause for which they\n"u8 + "gave the last full measure of devotion —\n"u8 + "  that we here highly resolve that these dead shall not have\n"u8 + "died in vain — that this nation, under God, shall have a new\n"u8 + "birth of freedom — and that government of the people, by the\n"u8 + "people, for the people, shall not perish from this earth.\n"u8 + "\n"u8 + "Abraham Lincoln, November 19, 1863, Gettysburg, Pennsylvania\n"u8,
@@ -221,7 +212,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         default!
     ),
-    new(
+    new( // has 1 non-empty fixed huffman block then garbage
         "hello.txt"u8,
         "hello.txt + garbage"u8,
         "hello world\n"u8,
@@ -235,7 +226,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         ErrHeader
     ),
-    new(
+    new( // has 1 non-empty fixed huffman block not enough header
         "hello.txt"u8,
         "hello.txt + garbage"u8,
         "hello world\n"u8,
@@ -249,7 +240,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         io.ErrUnexpectedEOF
     ),
-    new(
+    new( // has 1 non-empty fixed huffman block but corrupt checksum
         "hello.txt"u8,
         "hello.txt + corrupt checksum"u8,
         "hello world\n"u8,
@@ -263,7 +254,7 @@ internal static void initᴛgunzipTests() { gunzipTests = new gunzipTest[]{
         }.slice(),
         ErrChecksum
     ),
-    new(
+    new( // has 1 non-empty fixed huffman block but corrupt size
         "hello.txt"u8,
         "hello.txt + corrupt size"u8,
         "hello world\n"u8,
@@ -385,6 +376,7 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
         // It is intended behavior that Reader.Reset can be called on a zero-value
         // Reader and be the equivalent as if NewReader was used instead.
         var r1 = @new<global::go.compress.gzip_package.Reader>();
+
         var b = @new<bytes.Buffer>();
         foreach (var (_, tt) in gunzipTests) {
             // Test NewReader.
@@ -408,6 +400,7 @@ public static void TestDecompressor(ж<testing.T> Ꮡt) {
             if (s != tt.raw) {
                 Ꮡt.Errorf("%s: got %d-byte %q want %d-byte %q"u8, tt.desc, n, s, len(tt.raw), tt.raw);
             }
+
             // Test Reader.Reset.
             @in = bytes.NewReader(tt.gzip);
             err = r1.Reset(new gzip_test_package.bytes_ReaderжReader(@in));
@@ -474,6 +467,7 @@ public static partial void TestIssue6550(ж<testing.T> Ꮡt) {
             break;
         }
         case 1 when selᴛ2.ꟷᐳ(out _): {
+            // ok
             break;
         }}
     }
@@ -487,7 +481,6 @@ internal static readonly object cannotFindHelloTxtX2Inˢ = (@string)"cannot find
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string helloᶜ = "hello world\n"u8;
 
-// ok
 public static void TestMultistreamFalse(ж<testing.T> Ꮡt) {
     // Find concatenation test.
     gunzipTest tt = default!;
@@ -499,6 +492,7 @@ public static void TestMultistreamFalse(ж<testing.T> Ꮡt) {
         }
     }
     Ꮡt.Fatal(cannotFindHelloTxtX2Inˢ);
+
 Found:
     var br = bytes.NewReader(tt.gzip);
     ref var r = ref heap(new global::go.compress.gzip_package.Reader(), out var Ꮡr);
@@ -507,13 +501,16 @@ Found:
             Ꮡt.Fatalf("first reset: %v"u8, errΔ1);
         }
     }
+
     // Expect two streams with "hello world\n", then real EOF.
     @string hello = helloᶜ;
+
     r.Multistream(false);
     var (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
     if (((sstring)data) != hello || err != default!) {
-        Ꮡt.Fatalf("first stream = %q, %v, want %q, %v"u8, ((@string)data), err, hello, (any)(default!));
+        Ꮡt.Fatalf("first stream = %q, %v, want %q, %v"u8, (@string)data, err, hello, (any)(default!));
     }
+
     {
         var errΔ2 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (errΔ2 != default!) {
             Ꮡt.Fatalf("second reset: %v"u8, errΔ2);
@@ -522,8 +519,9 @@ Found:
     r.Multistream(false);
     (data, err) = io.ReadAll(new gzip_test_package.gzip_ReaderжReader(Ꮡr));
     if (((sstring)data) != hello || err != default!) {
-        Ꮡt.Fatalf("second stream = %q, %v, want %q, %v"u8, ((@string)data), err, hello, (any)(default!));
+        Ꮡt.Fatalf("second stream = %q, %v, want %q, %v"u8, (@string)data, err, hello, (any)(default!));
     }
+
     {
         var errΔ3 = r.Reset(new gzip_test_package.bytes_ReaderжReader(br)); if (!AreEqual(errΔ3, io.EOF)) {
             Ꮡt.Fatalf("third reset: err=%v, want io.EOF"u8, errΔ3);
@@ -564,10 +562,11 @@ public static void TestTruncatedStreams(ж<testing.T> Ꮡt) {
             }.slice()
         )
     }.slice();
+
     // Intentionally iterate starting with at least one byte in the stream.
     foreach (var (_, tc) in cases) {
         for (nint i = 1; i < len(tc.data); i++) {
-            var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader(((@string)(tc.data.slice(0, i))))));
+            var (r, err) = NewReader(new gzip_test_package.strings_ReaderжReader(strings.NewReader((@string)(tc.data.slice(0, i)))));
             if (err != default!) {
                 if (!AreEqual(err, io.ErrUnexpectedEOF)) {
                     Ꮡt.Errorf("NewReader(%s-%d) on truncated stream: got %v, want %v"u8, tc.name, i, err, io.ErrUnexpectedEOF);

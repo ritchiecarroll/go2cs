@@ -57,6 +57,8 @@ partial interface CounterVisitor {
     error VisitFuncs(Func<uint32, uint32, slice<uint32>, error> f);
 }
 
+// CounterVisitorFn describes a callback function invoked when writing
+// coverage counter data.
 // type CounterVisitorFn is a methodless func type — rendered inline as its base delegate
 
 // Write writes the contents of the count-data file to the writer
@@ -64,8 +66,8 @@ partial interface CounterVisitor {
 // if something went wrong somewhere with the write.
 public static error Write(this ж<CoverageDataWriter> Ꮡcfw, /*[16]*/ array<byte> metaFileHash, map<@string, @string> args, CounterVisitor visitor) {
     metaFileHash = metaFileHash.Clone();
-
     ref var cfw = ref Ꮡcfw.DerefOrNull();
+
     {
         var err = cfw.writeHeader(metaFileHash); if (err != default!) {
             return err;
@@ -81,7 +83,7 @@ internal static error padToFourByteBoundary(ж<slicewriter.WriteSeeker> Ꮡws) {
     var zeros = new byte[]{0, 0, 0, 0}.slice();
     var rem = (uint32)sz % 4;
     if (rem != 0) {
-        var pad = zeros.slice(0, (nint)((4 - rem)));
+        var pad = zeros.slice(0, (nint)(4 - rem));
         {
             var (nw, err) = ws.Write(pad); if (err != default!){
                 return err;
@@ -135,6 +137,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
         }
     }
     var hdrsz = (uint32)len(ws.BytesWritten());
+
     // Write string table and args to a byte slice (since we need
     // to capture offsets at various points), then emit the slice
     // once we are done.
@@ -145,7 +148,9 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
         }
     }
     cfw.csh.StrTabLen = (uint32)len(ws.BytesWritten()) - hdrsz;
+
     var akeys = slices.Sorted(maps.Keys<map<@string, @string>, @string, @string>(args));
+
     error wrULEB128(nuint v) {
         Ꮡcfw.Value.tmp = Ꮡcfw.Value.tmp[..0];
         Ꮡcfw.Value.tmp = uleb128.AppendUleb128(Ꮡcfw.Value.tmp, v);
@@ -156,6 +161,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
         }
         return default!;
     }
+
     // Count of arg pairs.
     {
         var err = wrULEB128((nuint)len(args)); if (err != default!) {
@@ -184,6 +190,7 @@ internal static error writeSegmentPreamble(this ж<CoverageDataWriter> Ꮡcfw, m
         }
     }
     cfw.csh.ArgsLen = (uint32)len(ws.BytesWritten()) - (cfw.csh.StrTabLen + hdrsz);
+
     return default!;
 }
 
@@ -195,11 +202,13 @@ public static error AppendSegment(this ж<CoverageDataWriter> Ꮡcfw, map<@strin
     cfw.stab = Ꮡ(new stringtab.Writer(nil));
     cfw.stab.InitWriter();
     cfw.stab.Lookup(""u8);
+
     error err = default!;
     foreach (var (k, v) in args) {
         cfw.stab.Lookup(k);
         cfw.stab.Lookup(v);
     }
+
     var ws = Ꮡ(new slicewriter.WriteSeeker(nil));
     {
         err = Ꮡcfw.writeSegmentPreamble(args, ws); if (err != default!) {
@@ -303,6 +312,7 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
         }
         return default!;
     }
+
     // Write out entries for each live function.
     var wrvalʗ1 = wrval;
     var emitter = error (uint32 pkid, uint32 funcid, slice<uint32> counters) => {
@@ -312,11 +322,13 @@ internal static error writeCounters(this ж<CoverageDataWriter> Ꮡcfw, CounterV
                 return err;
             }
         }
+
         {
             var err = wrvalʗ1(pkid); if (err != default!) {
                 return err;
             }
         }
+
         {
             var err = wrvalʗ1(funcid); if (err != default!) {
                 return err;

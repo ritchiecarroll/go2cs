@@ -8,6 +8,10 @@
 //
 // Build information is available for the currently running binary in
 // runtime/debug.ReadBuildInfo.
+
+// Type alias for build info. We cannot move the types here, since
+// runtime/debug would need to import this package, which would make it
+// a much larger dependency.
 global using BuildInfo = go.runtime.debug_package.BuildInfo;
 
 namespace go.debug;
@@ -74,8 +78,7 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
 
         defer(() => {
             {
-                ref var pathErr = ref heap<ж<fs.PathError>>(out var ᏑpathErr);
-                pathErr = ((ж<fs.PathError>)nil); if (errors.As(Ꮡerr.ValueSlot, ᏑpathErr)){
+                var (_, ok) = errors.AsType<ж<fs.PathError>>(Ꮡerr.ValueSlot); if (ok){
                     Ꮡerr.ValueSlot = fmt.Errorf("could not read Go build info: %w"u8, Ꮡerr.ValueSlot);
                 } else 
                 if (Ꮡerr.ValueSlot != default!) {
@@ -83,6 +86,7 @@ public static (ж<BuildInfo> info, error err) ReadFile(@string name) {
                 }
             }
         }, ref ᒐ);
+
         (var f, err) = os.Open(name);
         if (err != default!) {
             (info, err) = (default!, err); goto ᒐdone;
@@ -138,6 +142,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
             return ("", "", errUnrecognizedFormat);
         }
     }
+
     exe x = default!;
     switch (ᐧ) {
     case {} when bytes.HasPrefix(ident, slice<byte>(((@string)(new byte[]{0x7f, 0x45, 0x4c, 0x46})))): {
@@ -201,10 +206,12 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     if (dataSize == 0) {
         return ("", "", errNotGoExe);
     }
+
     (var addr, err) = searchMagic(x, dataAddr, dataSize);
     if (err != default!) {
         return ("", "", err);
     }
+
     // Read in the full header first.
     (var header, err) = readData(x, addr, buildInfoHeaderSize);
     if (AreEqual(err, io.EOF)){
@@ -216,15 +223,19 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     if (len(header) < buildInfoHeaderSize) {
         return ("", "", errNotGoExe);
     }
+
     const nint ptrSizeOffset = 14;
     const nint flagsOffset = 15;
     const nint versPtrOffset = 16;
+
     const byte flagsEndianMask = 0x1;
     UntypedInt flagsEndianLittle = 0x0;
     const byte flagsEndianBig = 0x1;
+
     const byte flagsVersionMask = 0x2;
     UntypedInt flagsVersionPtr = 0x0;
     const byte flagsVersionInl = 0x2;
+
     // Decode the blob. The blob is a 32-byte header, optionally followed
     // by 2 varint-prefixed string contents.
     //
@@ -292,6 +303,7 @@ internal static (@string vers, @string mod, error err) readRawBuildInfo(io.Reade
     } else {
         mod = ""u8;
     }
+
     return (vers, mod, default!);
 }
 
@@ -302,7 +314,6 @@ internal static bool hasPlan9Magic(slice<byte> magic) {
         if (exprᴛ1 == plan9obj.Magic386 || exprᴛ1 == plan9obj.MagicAMD64 || exprᴛ1 == plan9obj.MagicARM) {
             return true;
         }
-
     }
     return false;
 }
@@ -319,11 +330,13 @@ internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
     if (err != default!) {
         return ("", 0, err);
     }
+
     var (length, n) = binary.Uvarint(b);
     if (n <= 0) {
         return ("", 0, errNotGoExe);
     }
     addr += (uint64)n;
+
     (b, err) = readData(x, addr, length);
     if (AreEqual(err, io.EOF)){
         return ("", 0, errNotGoExe);
@@ -339,7 +352,8 @@ internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
         // Section ended before we could read the full string.
         return ("", 0, errNotGoExe);
     }
-    return (((@string)b), addr + length, default!);
+
+    return ((@string)b, addr + length, default!);
 }
 
 // readString returns the string at address addr in the executable x.
@@ -354,7 +368,7 @@ internal static @string readString(exe x, nint ptrSize, Func<slice<byte>, uint64
     if (err != default! || (uint64)len(data) < dataLen) {
         return ""u8;
     }
-    return ((@string)data);
+    return (@string)data;
 }
 
 internal static UntypedInt searchChunkSize => /* 1 << 20 */ 1048576; // 1 MB
@@ -367,11 +381,13 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         // Overflow.
         return (0, errUnrecognizedFormat);
     }
+
     // Round up start; magic can't occur in the initial unaligned portion.
-    start = (uint64)((start + (uint64)buildInfoAlign - 1) & ~(uint64)((buildInfoAlign - 1)));
+    start = (start + (uint64)buildInfoAlign - 1) & ~(uint64)(buildInfoAlign - 1);
     if (start >= end) {
         return (0, errNotGoExe);
     }
+
     slice<byte> buf = default!;
     while (start < end) {
         // Read in chunks to avoid consuming too much memory if data is large.
@@ -384,6 +400,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         if (chunkSize > remaining) {
             chunkSize = remaining;
         }
+
         if (buf == default!){
             buf = new slice<byte>((nint)(chunkSize));
         } else {
@@ -392,6 +409,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
             buf = buf.slice(0, (nint)(chunkSize));
             clear(buf);
         }
+
         var (n, err) = readDataInto(x, start, buf);
         if (AreEqual(err, io.EOF)){
             // EOF before finding the magic; must not be a Go executable.
@@ -400,6 +418,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
         if (err != default!) {
             return (0, err);
         }
+
         var data = buf.slice(0, n);
         while (len(data) > 0) {
             nint i = bytes.Index(data, buildInfoMagic);
@@ -412,7 +431,7 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
             }
             if (i % (nint)buildInfoAlign != 0) {
                 // Found magic, but misaligned. Keep searching.
-                nint next = (nint)((i + (nint)buildInfoAlign - 1) & ~(nint)(buildInfoAlign - 1));
+                nint next = (i + (nint)buildInfoAlign - 1) & ~(nint)(buildInfoAlign - 1);
                 if (next > len(data)) {
                     // Corrupt object file: the remaining
                     // count says there is more data,
@@ -425,8 +444,10 @@ internal static (uint64, error) searchMagic(exe x, uint64 start, uint64 size) {
             // Good match!
             return (start + (uint64)i, default!);
         }
+
         start += chunkSize;
     }
+
     return (0, errNotGoExe);
 }
 
@@ -435,6 +456,7 @@ internal static (slice<byte>, error) readData(exe x, uint64 addr, uint64 size) {
     if (err != default!) {
         return (default!, err);
     }
+
     (var b, err) = saferio.ReadDataAt(r, size, 0);
     if (len(b) > 0 && AreEqual(err, io.EOF)) {
         err = default!;
@@ -447,6 +469,7 @@ internal static (nint, error) readDataInto(exe x, uint64 addr, slice<byte> b) {
     if (err != default!) {
         return (0, err);
     }
+
     (var n, err) = r.ReadAt(b, 0);
     if (n > 0 && AreEqual(err, io.EOF)) {
         err = default!;
@@ -513,21 +536,13 @@ internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) {
 internal static (uint64, uint64) DataStart(this ref peExe x) {
     // Assume data is first writable section.
     UntypedInt IMAGE_SCN_CNT_CODE = 0x00000020;
-    
     UntypedInt IMAGE_SCN_CNT_INITIALIZED_DATA = 0x00000040;
-    
     UntypedInt IMAGE_SCN_CNT_UNINITIALIZED_DATA = 0x00000080;
-    
     UntypedInt IMAGE_SCN_MEM_EXECUTE = 0x20000000;
-    
     UntypedInt IMAGE_SCN_MEM_READ = 0x40000000;
-    
     UntypedInt IMAGE_SCN_MEM_WRITE = 0x80000000;
-    
     UntypedInt IMAGE_SCN_MEM_DISCARDABLE = 0x2000000;
-    
     UntypedInt IMAGE_SCN_LNK_NRELOC_OVFL = 0x1000000;
-    
     const uint32 IMAGE_SCN_ALIGN_32BYTES = 0x600000;
     foreach (var (_, sect) in (~x.f).Sections) {
         if ((~sect).VirtualAddress != 0 && (~sect).Size != 0 && (uint32)((~sect).Characteristics & ~IMAGE_SCN_ALIGN_32BYTES) == (uint32)((UntypedInt)(IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ) | (uint32)IMAGE_SCN_MEM_WRITE)) {

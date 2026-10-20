@@ -16,6 +16,7 @@ internal static void Main() {
     fmt.Println(a * b);
     fmt.Println(a / b);
     fmt.Println(((Flags)0 - a) + a);
+
     Mask m = 5;
     fmt.Println((Mask)(m | 2));
 }

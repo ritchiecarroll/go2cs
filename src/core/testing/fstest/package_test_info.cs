@@ -46,7 +46,7 @@ using static global::go.testing.fstest_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("testing/fstest/mapfs_test.go", "mapfs_test.cs", "ABUcgriAgsiCuIKSgoKUgpTqgoL4gqaCgoKC", "30-37:1")]
-[assembly: go.GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABckgoSChICCpoCCpoCC+IKmgILsgoKClOqC3Ib2gsqAggAIDoKClAAJBoKCgpSEgpqigpSmgg==", "65-67:1")]
+[assembly: go.GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABckgpSClICCtoCCtoCC+IKmgILsgoKClOqC3Ib2gsqAggAIDoKClAAJBoKCgpSUgqqigpSmgg==", "65-67:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

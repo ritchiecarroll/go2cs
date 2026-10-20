@@ -118,6 +118,7 @@ public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var m = ref heap(new Δsync.RWMutex(), out var Ꮡm);
+
         Ꮡm.Lock();
         if (Ꮡm.TryLock()) {
             Ꮡt.Fatalf("TryLock succeeded with mutex locked"u8);
@@ -126,10 +127,12 @@ public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("TryRLock succeeded with mutex locked"u8);
         }
         Ꮡm.Unlock();
+
         if (!Ꮡm.TryLock()) {
             Ꮡt.Fatalf("TryLock failed with mutex unlocked"u8);
         }
         Ꮡm.Unlock();
+
         if (!Ꮡm.TryRLock()) {
             Ꮡt.Fatalf("TryRLock failed with mutex unlocked"u8);
         }
@@ -141,6 +144,7 @@ public static void TestRWMutex(ж<Δtesting.T> Ꮡt) {
         }
         Ꮡm.RUnlock();
         Ꮡm.RUnlock();
+
         defer(Δruntime.GOMAXPROCS, Δruntime.GOMAXPROCS(-1), ref ᒐ);
         nint n = 1000;
         if (Δtesting.Short()) {
@@ -212,7 +216,7 @@ public static partial void TestRLocker(ж<Δtesting.T> Ꮡt) {
 }
 
 internal partial struct BenchmarkRWMutexUncontended_PaddedRWMutex /*dyn*/ {
-    public partial ref sync_package.RWMutex RWMutex { get; }
+    /*embed*/ public sync_package.RWMutex RWMutex;
     internal array<uint32> pad = new(32);
 }
 

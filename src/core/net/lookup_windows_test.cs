@@ -29,7 +29,7 @@ internal static slice<@string> lookupTestIPs = new @string[]{"8.8.8.8"u8, "1.1.1
 
 internal static @string toJson(any v) {
     var (data, _) = json.Marshal(v);
-    return ((@string)data);
+    return (@string)data;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -63,6 +63,7 @@ internal static readonly object noResultsˢ = (@string)"no results"u8;
 
 public static void TestNSLookupMX(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     testLookup(Ꮡt, (ж<testing.T> tΔ1, ж<global::go.net_package.Resolver> r, @string server) => {
         var (mx, err) = r.LookupMX(context.Background(), server);
         if (err != default!) {
@@ -93,6 +94,7 @@ public static void TestNSLookupMX(ж<testing.T> Ꮡt) {
 
 public static void TestNSLookupCNAME(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     testLookup(Ꮡt, (ж<testing.T> tΔ1, ж<global::go.net_package.Resolver> r, @string server) => {
         var (cname, err) = r.LookupCNAME(context.Background(), server);
         if (err != default!) {
@@ -113,6 +115,7 @@ public static void TestNSLookupCNAME(ж<testing.T> Ꮡt) {
 
 public static void TestNSLookupNS(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     testLookup(Ꮡt, (ж<testing.T> tΔ1, ж<global::go.net_package.Resolver> r, @string server) => {
         var (ns, err) = r.LookupNS(context.Background(), server);
         if (err != default!) {
@@ -136,6 +139,7 @@ public static void TestNSLookupNS(ж<testing.T> Ꮡt) {
 
 public static void TestNSLookupTXT(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     testLookup(Ꮡt, (ж<testing.T> tΔ1, ж<global::go.net_package.Resolver> r, @string server) => {
         var (txt, err) = r.LookupTXT(context.Background(), server);
         if (err != default!) {
@@ -158,6 +162,7 @@ public static void TestNSLookupTXT(ж<testing.T> Ꮡt) {
 
 public static void TestLookupLocalPTR(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     var (addr, err) = localIP();
     if (err != default!) {
         Ꮡt.Errorf("failed to get local ip: %s"u8, err);
@@ -182,6 +187,7 @@ public static void TestLookupLocalPTR(ж<testing.T> Ꮡt) {
 
 public static void TestLookupPTR(ж<testing.T> Ꮡt) {
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
     foreach (var (_, addr) in lookupTestIPs) {
         var (names, err) = LookupAddr(addr);
         if (err != default!) {
@@ -330,6 +336,7 @@ internal static (slice<@string> txt, error err) nslookupTXT(@string name) {
     txt = new slice<@string>(0, 10);
     // linux
     // golang.org      text = "v=spf1 redirect=_spf.google.com"
+
     // windows
     // golang.org      text =
     //
@@ -348,9 +355,9 @@ internal static (@string, error) ping(@string name) {
     var cmd = exec.Command(pingˢ, "-n"u8, "1", "-a", name);
     var (stdoutStderr, err) = cmd.CombinedOutput();
     if (err != default!) {
-        return ("", fmt.Errorf("%v: %v"u8, err, ((@string)stdoutStderr)));
+        return ("", fmt.Errorf("%v: %v"u8, err, (@string)stdoutStderr));
     }
-    @string r = strings.ReplaceAll(((@string)stdoutStderr), "\r\n"u8, "\n"u8);
+    @string r = strings.ReplaceAll((@string)stdoutStderr, "\r\n"u8, "\n"u8);
     return (r, default!);
 }
 
@@ -389,7 +396,9 @@ internal static (global::go.net_package.IP ip, error err) localIP() {
         }
         var connʗ1 = conn;
         defer(() => connʗ1.Close(), ref ᒐ);
+
         var localAddr = conn.LocalAddr()._<ж<global::go.net_package.UDPAddr>>();
+
         (ip, err) = ((~localAddr).IP, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

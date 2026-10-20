@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -24,7 +23,6 @@ using static go.mime.multipart_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<slowReader, ж<slowReader>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -35,9 +33,9 @@ using static go.mime.multipart_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("mime/multipart/formdata_test.go", "formdata_test.cs", "ABwkooKCgoKUkoCSpICSpIKAgqSCgoCCpKLUooKCgoKUlICSxKaygoKCgpSUgoCCpKLWsoKCgoKUgpSUgJLEpLSCgoKClJSAksTkooKUgpSCgpSCgoKUgIKkABp4goKCjoSCgpQAChaygpSCguqigpSCggAJDIrCgoKCgoKUgIKkgoKUlAALCqKsgoLKgoKCgsqCgviSgoKCgIKkgoKCAAUQooLqooKCpqKCgoKCgoKClJSAgqSCgoKClIKCgIKkgoKClIKAgraCgoKmgoKUkoKClIKClIKUgIKkgoKUgrQACgSCABEogoKUsoKUgoKCgpSCgpSCgpSClICCpIKCgqSCtAAPCIIADRqSgoKCgoKogoKCAAcQgoKU9oKsgoLcgoL4kriCgoKAgqSSgoKCgoKU", "270-274:1;277-283:2;286-291:3;293-305:4;419-451:1;469-484:1;503-508:1;511-516:2;518-542:3;529-540:3.1", "", "516=Sprintf/1/1/1;579=NewReader/1/1/1")]
-[assembly: go.GoPositionMap("mime/multipart/multipart_test.go", "multipart_test.cs", "ABkmgoKClIKUgpSClIK4goKmgoKUuIIACRSigoKAkqSAktoAJASCAAA8gqaCgqaCgqaCggAUBqKCgpaCgoKUgIKkgIKkgIKkgoCCpoKClJaWgoKClICSpIKAgqSCgqaCqIKCgpSClIKAgqSogoKCqIKClILoggAIFIKKhIKCgoKClIKClIKCgpaCgpSCAA4agoKCgpTWgoKCgoKUgpSCuKIAFSCCgoSCgpSCggAIEoKClAAHEIKCgpQAFwyyAAAQioLegpKCgpaClIKCgpSWhKTY5uyGhIKCgpSCgoKUgsqCgoIACAqUgoKCgpSAgqSCgoKUgoKCABQIlgAAGKiCgpSAgqSCgoKUlIKCqIKClICCpoKCgpSUgoLq1oKClJKCgoKogoKClICCpIKClICCpoKCqIKCloKCtP6CAC8eAI8C5gSCgoKCgoKCgpSCgpSCgoKUlIKCgpKCgoIACRCCgoKCgpSClIKClOiCgoKClIKCgoKCgoKCgoKCgoKCgpSCgpSCyoIACRSCgoKCgpSCgqaCgoLWgoKCgJI=", "151-156:1;375-390:1;432-434:1", "", "54=escapeString/1/2/1,escapeString/2/2/1;246=String/1/1/1;434=NewReader/1/3/2,NewReader/2/3/4,MultiReader/1/1/1;714=formData/1/9/12,formData/2/9/13,formData/3/9/14,formData/4/9/15,formData/5/9/16,formData/6/9/17,formData/7/9/18,formData/8/9/19,formData/9/9/20,Replace/1/11/111,Replace/2/11/140,Replace/3/11/158,Repeat/1/8/183,Replace/4/11/179,Repeat/2/8/186,Repeat/3/8/199,Replace/5/11/195,Repeat/4/8/202,Repeat/5/8/217,Replace/6/11/213,Repeat/6/8/220,Replace/7/11/235,Repeat/7/8/240,Replace/8/11/241,Repeat/8/8/250,Replace/9/11/263,Replace/10/11/276,Replace/11/11/291,roundTripParseTest/1/1/304;1080=formData/1/5/3,formData/2/5/4,formData/3/5/5,formData/4/5/6,formData/5/5/7")]
-[assembly: go.GoPositionMap("mime/multipart/writer_test.go", "writer_test.cs", "ABkggoSCgoKCgpSCgoKUgoKClIKClIKohIKClICSpIKClICSpoKClICSpIKClICSpoKCAAsIggAMIIKCgoKCgpKCgoKWgoKCkoKSgIKmgoKAggAJDMqCgqKClILmgoKCgIKmAAYQgoKUhISCgg==", "139-142:1", "", "109=Repeat/1/2/8,Repeat/2/2/9")]
+[assembly: go.GoPositionMap("mime/multipart/formdata_test.go", "formdata_test.cs", "ABwkooKCgoKUkoCSpICSpIKAgqSCgoCCpKLUooKCgoKUpICSxKaygoKCgpSkgoCCpKLWsoKCgoKUgpSkgJLEpLSCgoKClKSAksTkooKUgpSCgpSCgoKUgIKkABp4goKCnpSCgpQAChaygpSCguqigpSCggAJDIrCgoKCgoKUgIKkgoKUlAALCqKsgoLKgoKCgsqCgviSgoKCgIKkgoKCAAUQooLqooKCpqKCgoKCgoKClJSAgqSCgoKClIKCgIKkgoKClIKAgraCgoKmgoKUkoKClIKClIKUgIKkgoKUgrQACgSCABAogoKUsoKUgoKCgpSCgpSCgpSClICCpIKCgqSCtAAPCIIADRqSgoKCgoKogoKCAAcQgoKU9oKsgoLcgoL4kriCgoKAgqSSgoKCgoKU", "270-274:1;277-283:2;286-291:3;293-305:4;419-451:1;469-484:1;503-508:1;511-516:2;518-542:3;529-540:3.1", "", "521=Sprintf/1/1/1;584=NewReader/1/1/1")]
+[assembly: go.GoPositionMap("mime/multipart/multipart_test.go", "multipart_test.cs", "ABkmgoKClIKUgpSClIK4goKmgoKUuIIACRSigoKAkqSAktoAJASCAAA8gqaCgqaCgqaCggAUBqKCgqaCgoKUgIKkgIKkgIKkgoCCtoKClKamgoKClICSpIKAgqSCgqaCuIKCgpSClIKAgqS4goKCuIKClILoggAJFIKKlIKCgoKClIKClIKCgqaCgpSCAA4agoKCgpTWgoKCgoKUgpSCuKIAFSCCgpSCgpSCggAIEoKClAAHEIKCgpQAFwyyAAAQioLugpKCgqaClIKCgpSmlKTo5uyWlIKCgpSCgoKUgsqCgoIACAqUgoKCgpSAgqSCgoKUgoKCABQIlgABGLiCgpSAgqSCgoKUlIKCuIKClICCtoKCgpSUgoLq1oKClJKCgoK4goKClICCpIKClICCtoKCuIKCpoKCtP6CAA4eAMEC5gSCgoKCgoKCgpSCgpSCgoKUlIKCgpKCgoIACRCCgoKCgpSClIKClOiCgoKClIKCgoKCgoKCgoKCgoKCgpSCgpSCyoIACRSCgoKCgpSCgqaCgoLWgoKCgJI=", "151-156:1;375-390:1;432-434:1", "", "54=escapeString/1/2/1,escapeString/2/2/1;251=String/1/1/1;445=NewReader/1/3/2,NewReader/2/3/4,MultiReader/1/1/1;707=formData/1/9/12,formData/2/9/13,formData/3/9/14,formData/4/9/15,formData/5/9/16,formData/6/9/17,formData/7/9/18,formData/8/9/19,formData/9/9/20,Replace/1/11/111,Replace/2/11/140,Replace/3/11/158,Repeat/1/8/183,Replace/4/11/179,Repeat/2/8/186,Repeat/3/8/199,Replace/5/11/195,Repeat/4/8/202,Repeat/5/8/217,Replace/6/11/213,Repeat/6/8/220,Replace/7/11/235,Repeat/7/8/240,Replace/8/11/241,Repeat/8/8/250,Replace/9/11/263,Replace/10/11/276,Replace/11/11/291,roundTripParseTest/1/1/304;1123=formData/1/5/3,formData/2/5/4,formData/3/5/5,formData/4/5/6,formData/5/5/7")]
+[assembly: go.GoPositionMap("mime/multipart/writer_test.go", "writer_test.cs", "ABkggpSCgoKCgpSCgoKUgoKClIKClIK4lIKClICSpIKClICStoKClICSpIKClICStoKCAAsIggAMIIKCgoKCgpKCgoKmgoKCkoKSgIK2goKAggAJDMqCgqKClILmgoKCgIK2AAcQgoKUlJSCgg==", "139-142:1", "", "114=Repeat/1/2/8,Repeat/2/2/9")]
 // </GoSourcePositionMaps>
 
 namespace go.mime;

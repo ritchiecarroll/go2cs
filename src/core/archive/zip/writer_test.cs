@@ -34,7 +34,6 @@ public partial struct WriteTest {
     public fs.FileMode Mode;
 }
 
-// large data set in the test
 internal static slice<WriteTest> writeTests = new WriteTest[]{
     new(
         Name: "foo"u8,
@@ -44,7 +43,7 @@ internal static slice<WriteTest> writeTests = new WriteTest[]{
     ),
     new(
         Name: "bar"u8,
-        Data: default!,
+        Data: default!, // large data set in the test
         Method: Deflate,
         Mode: 420
     ),
@@ -86,7 +85,7 @@ internal static readonly object randReadFailedˢ = (@string)"rand.Read failed:"u
 public static void TestWriter(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var largeData = new slice<byte>((1 << (int)(17)));
+        var largeData = new slice<byte>((1 << 17));
         {
             var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != default!) {
                 Ꮡt.Fatal(randReadFailedˢ, errΔ1);
@@ -96,20 +95,24 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         defer(() => {
             writeTests[1].Data = default!;
         }, ref ᒐ);
+
         // write a zip file
         var buf = @new<bytes.Buffer>();
         var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
+
         foreach (var (_, vᴛ1) in writeTests) {
             ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
             wt = vᴛ1;
 
             testCreate(Ꮡt, w, Ꮡwt);
         }
+
         {
             var errΔ2 = w.Close(); if (errΔ2 != default!) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         // read it back
         var (r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
         if (err != default!) {
@@ -139,6 +142,7 @@ public static void TestWriterComment(ж<testing.T> Ꮡt) {
         new(strings.Repeat("a"u8, uint16max), true),
         new(strings.Repeat("a"u8, uint16max + 1), false)
     }.slice();
+
     foreach (var (_, test) in tests) {
         // write a zip file
         var buf = @new<bytes.Buffer>();
@@ -155,18 +159,22 @@ public static void TestWriterComment(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         {
             var errΔ2 = w.Close(); if (test.ok == (errΔ2 != default!)) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         if ((~w).closed != test.ok) {
             Ꮡt.Fatalf("Writer.closed: got %v, want %v"u8, (~w).closed, test.ok);
         }
+
         // skip read test in failure cases
         if (!test.ok) {
             continue;
         }
+
         // read it back
         var (r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
         if (err != default!) {
@@ -219,16 +227,18 @@ public static void TestWriterUTF8(ж<testing.T> Ꮡt) {
             flags: 0x808
         ),
         new(
-            name: ((@string)(new byte[]{0x93, 0xfa, 0x96, 0x7b, 0x8c, 0xea, 0x2e, 0x74, 0x78, 0x74})), // Name is Japanese encoded in Shift JIS.
-
+            // Name is Japanese encoded in Shift JIS.
+            name: ((@string)(new byte[]{0x93, 0xfa, 0x96, 0x7b, 0x8c, 0xea, 0x2e, 0x74, 0x78, 0x74})),
             comment: "in the 世界"u8,
             flags: 0x008 // UTF-8 must not be set
 
         )
     }.slice();
+
     // write a zip file
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
+
     foreach (var (_, test) in utf8Tests) {
         var h = Ꮡ(new FileHeader(
             Name: test.name,
@@ -242,11 +252,13 @@ public static void TestWriterUTF8(ж<testing.T> Ꮡt) {
         }
         wΔ1.Write(new byte[]{}.slice());
     }
+
     {
         var errΔ2 = w.Close(); if (errΔ2 != default!) {
             Ꮡt.Fatal(errΔ2);
         }
     }
+
     // read it back
     var (r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
     if (err != default!) {
@@ -281,6 +293,7 @@ public static void TestWriterTime(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("unexpected Close error: %v"u8, errΔ2);
         }
     }
+
     var (want, err) = os.ReadFile(testdataTimeGoZipˢ);
     if (err != default!) {
         Ꮡt.Fatalf("unexpected ReadFile error: %v"u8, err);
@@ -296,7 +309,7 @@ public static void TestWriterTime(ж<testing.T> Ꮡt) {
 public static void TestWriterOffset(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        var largeData = new slice<byte>((1 << (int)(17)));
+        var largeData = new slice<byte>((1 << 17));
         {
             var (_, errΔ1) = rand.Read(largeData); if (errΔ1 != default!) {
                 Ꮡt.Fatal(randReadFailedˢ, errΔ1);
@@ -306,23 +319,27 @@ public static void TestWriterOffset(ж<testing.T> Ꮡt) {
         defer(() => {
             writeTests[1].Data = default!;
         }, ref ᒐ);
+
         // write a zip file
         var buf = @new<bytes.Buffer>();
         var existingData = new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3}.slice();
         var (n, _) = buf.Write(existingData);
         var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
         w.SetOffset((int64)n);
+
         foreach (var (_, vᴛ1) in writeTests) {
             ref var wt = ref heap(new WriteTest(), out var Ꮡwt);
             wt = vᴛ1;
 
             testCreate(Ꮡt, w, Ꮡwt);
         }
+
         {
             var errΔ2 = w.Close(); if (errΔ2 != default!) {
                 Ꮡt.Fatal(errΔ2);
             }
         }
+
         // read it back
         var (r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
         if (err != default!) {
@@ -412,21 +429,24 @@ public static void TestWriterDirAttributes(ж<testing.T> Ꮡt) {
         }
     }
     var b = buf.Bytes();
+
     array<byte> sig = new(4);
     binary.LittleEndian.PutUint32(sig[..], (uint32)fileHeaderSignature);
+
     nint idx = bytes.Index(b, sig[..]);
     if (idx == -1) {
         Ꮡt.Fatal(fileHeaderNotFoundˢ);
     }
     b = b.slice(idx);
-    if (!bytes.Equal(b[6..10], new byte[]{0, 0, 0, 0}.slice())) {
-        // FileHeader.Flags: 0, FileHeader.Method: 0
+
+    if (!bytes.Equal(b[6..10], new byte[]{0, 0, 0, 0}.slice())) { // FileHeader.Flags: 0, FileHeader.Method: 0
         Ꮡt.Errorf("unexpected method and flags: %v"u8, b[6..10]);
     }
-    if (!bytes.Equal(b[14..26], new slice<byte>(12))) {
-        // FileHeader.{CRC32,CompressSize,UncompressedSize} all zero.
+
+    if (!bytes.Equal(b[14..26], new slice<byte>(12))) { // FileHeader.{CRC32,CompressSize,UncompressedSize} all zero.
         Ꮡt.Errorf("unexpected crc, compress and uncompressed size to be 0 was: %v"u8, b[14..26]);
     }
+
     binary.LittleEndian.PutUint32(sig[..], (uint32)dataDescriptorSignature);
     if (bytes.Contains(b, sig[..])) {
         Ꮡt.Error(thereShouldBeNoDataˢ);
@@ -448,6 +468,7 @@ public static void TestWriterCopy(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     // read it back
     var (src, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
     if (err != default!) {
@@ -459,6 +480,7 @@ public static void TestWriterCopy(ж<testing.T> Ꮡt) {
 
         testReadFile(Ꮡt, (~src).File[i], Ꮡwt);
     }
+
     // make a new zip file copying the old compressed data.
     var buf2 = @new<bytes.Buffer>();
     var dst = NewWriter(new zip_test_package.bytes_BufferжWriter(buf2));
@@ -474,6 +496,7 @@ public static void TestWriterCopy(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ3);
         }
     }
+
     // read the new one back
     (var r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf2.Bytes())), (int64)buf2.Len());
     if (err != default!) {
@@ -511,15 +534,18 @@ public static void TestWriterCreateRaw(ж<testing.T> Ꮡt) {
             method: Deflate
         )
     }.slice();
+
     // write a zip file
     var archive = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(archive));
+
     foreach (var (i, _) in files) {
         var f = Ꮡ(files, i);
         f.Value.crc32 = crc32.ChecksumIEEE((~f).content);
         var size = (uint64)len((~f).content);
         f.Value.uncompressedSize = size;
         f.Value.compressedSize = size;
+
         slice<byte> compressedContent = default!;
         if ((~f).method == Deflate) {
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -538,6 +564,7 @@ public static void TestWriterCreateRaw(ж<testing.T> Ꮡt) {
             compressedContent = buf.Bytes();
             f.Value.compressedSize = (uint64)len(compressedContent);
         }
+
         var h = Ꮡ(new FileHeader(
             Name: (~f).name,
             Method: (~f).method,
@@ -559,11 +586,13 @@ public static void TestWriterCreateRaw(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("%s Write got %v; want nil"u8, (~f).name, errΔ2);
         }
     }
+
     {
         var errΔ3 = w.Close(); if (errΔ3 != default!) {
             Ꮡt.Fatal(errΔ3);
         }
     }
+
     // read it back
     var (r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(archive.Bytes())), (int64)archive.Len());
     if (err != default!) {
@@ -589,16 +618,19 @@ public static void TestWriterCreateRaw(ж<testing.T> Ꮡt) {
         if ((~got).UncompressedSize64 != want.uncompressedSize) {
             Ꮡt.Errorf("%s: got UncompressedSize64 %d; want %d"u8, want.name, (~got).UncompressedSize64, want.uncompressedSize);
         }
+
         var (rΔ1, errΔ4) = got.Open();
         if (errΔ4 != default!) {
             Ꮡt.Errorf("%s: Open err = %v"u8, (~got).Name, errΔ4);
             continue;
         }
+
         (var buf, errΔ4) = io.ReadAll(rΔ1);
         if (errΔ4 != default!) {
             Ꮡt.Errorf("%s: ReadAll err = %v"u8, (~got).Name, errΔ4);
             continue;
         }
+
         if (!bytes.Equal(buf, want.content)) {
             Ꮡt.Errorf("%v: ReadAll returned unexpected bytes"u8, (~got).Name);
         }
@@ -654,7 +686,8 @@ internal static void testReadFile(ж<testing.T> Ꮡt, ж<global::go.archive.zip_
 public static void BenchmarkCompressedZipGarbage(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bigBuf = bytes.Repeat(slice<byte>("a"u8), (1 << (int)(20)));
+    var bigBuf = bytes.Repeat(slice<byte>("a"u8), 1 << 20);
+
     var bigBufʗ1 = bigBuf;
     void runOnce(ж<bytes.Buffer> buf) {
         buf.Reset();
@@ -668,12 +701,14 @@ public static void BenchmarkCompressedZipGarbage(ж<testing.B> Ꮡb) {
         }
         zw.Close();
     }
+
     b.ReportAllocs();
     // Run once and then reset the timer.
     // This effectively discards the very large initial flate setup cost,
     // as well as the initialization of bigBuf.
     runOnce(Ꮡ(new bytes.Buffer(nil)));
     b.ResetTimer();
+
     var runOnceʗ1 = runOnce;
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -695,17 +730,15 @@ internal static fs.FS writeTestsToFS(slice<WriteTest> tests) {
 }
 
 public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var buf = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(buf));
     var tests = new WriteTest[]{
         new(Name: "emptyfolder"u8, Mode: (fs.FileMode)(493 | os.ModeDir)),
         new(Name: "file.go"u8, Data: slice<byte>("hello"u8), Mode: 420),
         new(Name: "subfolder/another.go"u8, Data: slice<byte>("world"u8), Mode: 420)
+        // Notably missing here is the "subfolder" directory. This makes sure even
+        // if we don't have a subfolder directory listed.
     }.slice();
-    // Notably missing here is the "subfolder" directory. This makes sure even
-    // if we don't have a subfolder directory listed.
     var err = w.AddFS(writeTestsToFS(tests));
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -715,8 +748,10 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     // Add subfolder into fsys to match what we'll read from the zip.
     tests = append(tests.slice(0, 2, 2), new WriteTest(Name: "subfolder"u8, Mode: (fs.FileMode)(365 | os.ModeDir)), tests[2]);
+
     // read it back
     (var r, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
     if (err != default!) {

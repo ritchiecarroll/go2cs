@@ -5,7 +5,9 @@ namespace go.crypto.@internal.fips140;
 
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using errors = errors_package;
+using bits = math.bits_package;
 using go.crypto.@internal.fips140deps;
+using math;
 
 partial class edwards25519_package {
 
@@ -61,9 +63,6 @@ public static ж<Scalar> NewScalar() {
 // MultiplyAdd sets s = x * y + z mod l, and returns s. It is equivalent to
 // using Multiply and then Add.
 public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy, ж<Scalar> Ꮡz) {
-    ref var s = ref Ꮡs.DerefOrNull();
-    ref var z = ref Ꮡz.DerefOrNull();
-
     // Make a copy of z in case it aliases s.
     var zCopy = @new<Scalar>().Set(Ꮡz);
     return Ꮡs.Multiply(Ꮡx, Ꮡy).Add(Ꮡs, zCopy);
@@ -134,6 +133,7 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
     if (len(x) != 64) {
         return (default!, errors.New(edwards25519Invalidˢ));
     }
+
     // We have a value x of 512 bits, but our fiatScalarFromBytes function
     // expects an input lower than l, which is a little over 252 bits.
     //
@@ -144,11 +144,13 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
     //
     // We then precompute 2^168 and 2^336 modulo l, and perform the reduction
     // with two multiplications and two additions.
+
     Ꮡs.setShortBytes(x[..21]);
     var t = @new<Scalar>().setShortBytes(x[21..42]);
     Ꮡs.Add(Ꮡs, t.Multiply(t, scalarTwo168));
     t.setShortBytes(x[42..]);
     Ꮡs.Add(Ꮡs, t.Multiply(t, scalarTwo336));
+
     return (Ꮡs, default!);
 }
 
@@ -196,10 +198,12 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
     if (!isReduced(x)) {
         return (default!, errors.New(invalidScalarEncodingˢ));
     }
+
     var ᴛ3 = nonnil(ref s).s.Value;
     fiatScalarFromBytes(ref ᴛ3, Ꮡ(array<byte>.Alias(x, 32)));
     var ᴛ4 = (fiatScalarNonMontgomeryDomainFieldElement)((nonnil(ref s).s).Value);
     fiatScalarToMontgomery(ref nonnil(ref s).s, ref ᴛ4);
+
     return (Ꮡs, default!);
 }
 
@@ -212,17 +216,24 @@ internal static bool isReduced(slice<byte> s) {
     if (len(s) != 32) {
         return false;
     }
-    for (nint i = len(s) - 1; i >= 0; i--) {
-        switch (ᐧ) {
-        case {} when s[i] > scalarMinusOneBytes[i]: {
-            return false;
-        }
-        case {} when s[i] < scalarMinusOneBytes[i]: {
-            return true;
-        }}
 
-    }
-    return true;
+    var s0 = byteorder.LEUint64(s[..8]);
+    var s1 = byteorder.LEUint64(s[8..16]);
+    var s2 = byteorder.LEUint64(s[16..24]);
+    var s3 = byteorder.LEUint64(s[24..]);
+
+    var l0 = byteorder.LEUint64(scalarMinusOneBytes[..8]);
+    var l1 = byteorder.LEUint64(scalarMinusOneBytes[8..16]);
+    var l2 = byteorder.LEUint64(scalarMinusOneBytes[16..24]);
+    var l3 = byteorder.LEUint64(scalarMinusOneBytes[24..]);
+
+    // Do a constant time subtraction chain scalarMinusOneBytes - s. If there is
+    // a borrow at the end, then s > scalarMinusOneBytes.
+    var (_, b) = bits.Sub64(l0, s0, 0);
+    (_, b) = bits.Sub64(l1, s1, b);
+    (_, b) = bits.Sub64(l2, s2, b);
+    (_, b) = bits.Sub64(l3, s3, b);
+    return b == 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -247,6 +258,7 @@ public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, sli
     if (len(x) != 32) {
         return (default!, errors.New(edwards25519Invalidˢ2));
     }
+
     // We need to use the wide reduction from SetUniformBytes, since clamping
     // sets the 2^254 bit, making the value higher than the order.
     array<byte> wideBytes = new(64);
@@ -286,21 +298,19 @@ public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     uint64 nonzero = default!;
     var ᴛ6 = diff.Value;
     fiatScalarNonzero(ref nonzero, ref ᴛ6);
-    nonzero |= (uint64)((nonzero >> (int)(32)));
-    nonzero |= (uint64)((nonzero >> (int)(16)));
-    nonzero |= (uint64)((nonzero >> (int)(8)));
-    nonzero |= (uint64)((nonzero >> (int)(4)));
-    nonzero |= (uint64)((nonzero >> (int)(2)));
-    nonzero |= (uint64)((nonzero >> (int)(1)));
-    return (nint)((nint)(~nonzero) & 1);
+    nonzero |= (uint64)((nonzero >> 32));
+    nonzero |= (uint64)((nonzero >> 16));
+    nonzero |= (uint64)((nonzero >> 8));
+    nonzero |= (uint64)((nonzero >> 4));
+    nonzero |= (uint64)((nonzero >> 2));
+    nonzero |= (uint64)((nonzero >> 1));
+    return (nint)(~nonzero) & 1;
 }
 
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.
 //
 // w must be between 2 and 8, or nonAdjacentForm will panic.
 internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
-    ref var s = ref Ꮡs.DerefOrNull();
-
     // This implementation is adapted from the one
     // in curve25519-dalek and is documented there:
     // https://github.com/dalek-cryptography/curve25519-dalek/blob/f630041af28e9a405255f98a8a93adca18e4315b/src/scalar.rs#L800-L871
@@ -314,13 +324,17 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
     if (w > 8) {
         throw panic("NAF digits must fit in int8");
     }
+
     array<int8> naf = new(256);
     array<uint64> digits = new(5);
+
     for (nint i = 0; i < 4; i++) {
         digits[i] = byteorder.LEUint64(b.slice(i * 8));
     }
+
     var width = (uint64)(((uint64)1).Lsh(w));
     var windowMask = (uint64)(width - 1);
+
     nuint pos = (nuint)0;
     var carry = (uint64)0;
     while (pos < 256) {
@@ -332,11 +346,13 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
             bitBuf = digits[indexU64].Rsh(indexBit);
         } else {
             // Combine the current 64 bits with bits from the next 64
-            bitBuf = (uint64)((digits[indexU64].Rsh(indexBit)) | (digits[1 + indexU64].Lsh((64 - indexBit))));
+            bitBuf = (digits[indexU64].Rsh(indexBit)) | (digits[1 + indexU64].Lsh((64 - indexBit)));
         }
+
         // Add carry into the current window
-        var window = carry + ((uint64)(bitBuf & windowMask));
-        if ((uint64)(window & 1) == 0) {
+        var window = carry + (bitBuf & windowMask);
+
+        if ((window & 1) == 0) {
             // If the window value is even, preserve the carry and continue.
             // Why is the carry preserved?
             // If carry == 0 and window & 1 == 0,
@@ -346,6 +362,7 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
             pos += 1;
             continue;
         }
+
         if (window < width / 2){
             carry = 0;
             naf[pos] = (int8)window;
@@ -353,6 +370,7 @@ internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) {
             carry = 1;
             naf[pos] = (int8)((int8)window - (int8)width);
         }
+
         pos += w;
     }
     return naf.Clone();
@@ -363,18 +381,22 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");
     }
+
     array<int8> digits = new(64);
+
     // Compute unsigned radix-16 digits:
     for (nint i = 0; i < 32; i++) {
         digits[2 * i] = (int8)((byte)(b[i] & 15));
-        digits[2 * i + 1] = (int8)((byte)(((b[i] >> (int)(4))) & 15));
+        digits[2 * i + 1] = (int8)((byte)((b[i] >> 4) & 15));
     }
+
     // Recenter coefficients:
     for (nint i = 0; i < 63; i++) {
-        var carry = (int8)(((int8)(digits[i] + 8) >> (int)(4)));
-        digits[i] -= (int8)(carry << (int)(4));
+        var carry = (int8)(((int8)(digits[i] + 8) >> 4));
+        digits[i] -= (int8)(carry << 4);
         digits[i + 1] += carry;
     }
+
     return digits.Clone();
 }
 

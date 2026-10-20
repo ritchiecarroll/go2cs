@@ -52,87 +52,60 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     }
 }
 
-// {struct {
-// 	x (interface {
-// 		a(func(func(int) int) func(func(int)) int)
-// 		b()
-// 	})
-// }{},
-// 	"interface { reflectlite_test.a(func(func(int) int) func(func(int)) int); reflectlite_test.b() }",
-// },
-
     partial struct Δtype /*dyn*/ {
         internal nint x;
     }
-
     partial struct Δtypeᴛ1 /*dyn*/ {
         internal int8 x;
     }
-
     partial struct Δtypeᴛ2 /*dyn*/ {
         internal int16 x;
     }
-
     partial struct Δtypeᴛ3 /*dyn*/ {
         internal int32 x;
     }
-
     partial struct Δtypeᴛ4 /*dyn*/ {
         internal int64 x;
     }
-
     partial struct Δtypeᴛ5 /*dyn*/ {
         internal nuint x;
     }
-
     partial struct Δtypeᴛ6 /*dyn*/ {
         internal uint8 x;
     }
-
     partial struct Δtypeᴛ7 /*dyn*/ {
         internal uint16 x;
     }
-
     partial struct Δtypeᴛ8 /*dyn*/ {
         internal uint32 x;
     }
-
     partial struct Δtypeᴛ9 /*dyn*/ {
         internal uint64 x;
     }
-
     partial struct Δtypeᴛ10 /*dyn*/ {
         internal float32 x;
     }
-
     partial struct Δtypeᴛ11 /*dyn*/ {
         internal float64 x;
     }
-
     partial struct Δtypeᴛ12 /*dyn*/ {
         internal ж<ж<int8>> x;
     }
-
     partial struct Δtypeᴛ13 /*dyn*/ {
         internal ж<ж<integer>> x;
     }
-
     partial struct Δtypeᴛ14 /*dyn*/ {
         internal array<int32> x = new(32);
     }
-
     partial struct Δtypeᴛ15 /*dyn*/ {
         internal slice<int8> x;
     }
-
     partial struct Δtypeᴛ16 /*dyn*/ {
         internal map<@string, int32> x;
     }
-
     partial struct Δtypeᴛ17 /*dyn*/ {
         internal channel/*<-*/<@string> x = channel/*<-*/<@string>.SendOnly;
     }
-
     partial struct typeᴛ18_x /*dyn*/ {
         internal channel<ж<int32>> c;
         internal float32 d;
@@ -141,11 +114,9 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ18 /*dyn*/ {
         internal typeᴛ18_x x;
     }
-
     partial struct Δtypeᴛ19 /*dyn*/ {
         internal Action<int8, int32> x;
     }
-
     partial struct typeᴛ20_x /*dyn*/ {
         internal Action<channel<ж<integer>>, ж<int8>> c;
     }
@@ -153,7 +124,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ20 /*dyn*/ {
         internal typeᴛ20_x x;
     }
-
     partial struct typeᴛ21_x /*dyn*/ {
         internal int8 a;
         internal int32 b;
@@ -162,7 +132,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ21 /*dyn*/ {
         internal typeᴛ21_x x;
     }
-
     partial struct typeᴛ22_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
@@ -172,7 +141,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ22 /*dyn*/ {
         internal typeᴛ22_x x;
     }
-
     partial struct typeᴛ23_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
@@ -183,7 +151,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ23 /*dyn*/ {
         internal typeᴛ23_x x;
     }
-
     partial struct typeᴛ24_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
@@ -195,7 +162,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ24 /*dyn*/ {
         internal typeᴛ24_x x;
     }
-
     partial struct typeᴛ25_x /*dyn*/ {
         internal int8 a;
         internal int8 b;
@@ -208,7 +174,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ25 /*dyn*/ {
         internal typeᴛ25_x x;
     }
-
     partial struct typeᴛ26_x /*dyn*/ {
         internal int8 a; /*`reflect:"hi there"`*/
     }
@@ -216,7 +181,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ26 /*dyn*/ {
         internal typeᴛ26_x x;
     }
-
     partial struct typeᴛ27_x /*dyn*/ {
         internal int8 a; /*`reflect:"hi \x00there\t\n\"\\"`*/
     }
@@ -224,7 +188,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ27 /*dyn*/ {
         internal typeᴛ27_x x;
     }
-
     partial struct typeᴛ28_x /*dyn*/ {
         internal Actionꓸꓸꓸ<nint> f;
     }
@@ -232,7 +195,6 @@ internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     partial struct Δtypeᴛ28 /*dyn*/ {
         internal typeᴛ28_x x;
     }
-
     partial struct typeᴛ29_x /*dyn*/ {
         /*embed*/ internal int32 int32;
         /*embed*/ internal int64 int64;
@@ -292,6 +254,14 @@ internal static slice<pair> typeTests = new pair[]{
     new(new Δtypeᴛ28(),
         "struct { f func(...int) }"u8
     ),
+    // {struct {
+    // 	x (interface {
+    // 		a(func(func(int) int) func(func(int)) int)
+    // 		b()
+    // 	})
+    // }{},
+    // 	"interface { reflectlite_test.a(func(func(int) int) func(func(int)) int); reflectlite_test.b() }",
+    // },
     new(new Δtypeᴛ29(),
         "struct { int32; int64 }"u8
     )
@@ -410,7 +380,6 @@ public static void TestSetValue(ж<testing.T> Ꮡt) {
         else if (exprᴛ1 == abi.Bool) {
             v.Set(ValueOf(true));
         }
-
         @string s = valueToString(v);
         if (s != tt.s) {
             Ꮡt.Errorf("#%d: have %#q, want %#q"u8, i, s, tt.s);
@@ -429,25 +398,25 @@ internal partial struct TestCanSetField_Embed /*dyn*/ {
 }
 
 internal partial struct TestCanSetField_S1 /*dyn*/ {
-    internal partial ref TestCanSetField_embed embed { get; }
+    /*embed*/ internal TestCanSetField_embed embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S2 /*dyn*/ {
-    internal partial ref ж<TestCanSetField_embed> embed { get; }
+    /*embed*/ internal ж<TestCanSetField_embed> embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S3 /*dyn*/ {
-    public partial ref TestCanSetField_Embed Embed { get; }
+    /*embed*/ public TestCanSetField_Embed Embed;
     internal nint x;
     public nint X;
 }
 
 internal partial struct TestCanSetField_S4 /*dyn*/ {
-    public partial ref ж<TestCanSetField_Embed> Embed { get; }
+    /*embed*/ public ж<TestCanSetField_Embed> Embed;
     internal nint x;
     public nint X;
 }
@@ -501,6 +470,7 @@ public static void TestCanSetField(ж<testing.T> Ꮡt) {
         }.slice()
     )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestCanSetField_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -529,7 +499,7 @@ internal static ж<nint> Ꮡ_i = new StandardBox<nint>(7);
 internal static ref nint _i => ref Ꮡ_i.Value;
 
 internal static slice<pair> valueToStringTests = new pair[]{
-    new((nint)(123), "123"u8),
+    new((nint)123, "123"u8),
     new(123.5D, "123.5"u8),
     new((byte)123, "123"u8),
     new((@string)"abc"u8, "abc"u8),
@@ -579,8 +549,9 @@ internal static readonly @string structCChanInt32DFloat32ˢ2 = "struct { c chan 
 
 public static void TestAll(ж<testing.T> Ꮡt) {
     testType(Ꮡt, 1, TypeOf((int8)0), int8ˢ);
-    testType(Ꮡt, 2, TypeOf(((ж<int8>)nil)).Elem(), int8ˢ);
-    var typ = TypeOf(((ж<typeᴛ18_x>)nil));
+    testType(Ꮡt, 2, TypeOf((ж<int8>)nil).Elem(), int8ˢ);
+
+    var typ = TypeOf((ж<typeᴛ18_x>)nil);
     testType(Ꮡt, 3, typ, structCChanInt32DFloat32ˢ);
     var etyp = typ.Elem();
     testType(Ꮡt, 4, etyp, structCChanInt32DFloat32ˢ2);
@@ -595,8 +566,6 @@ internal partial struct TestInterfaceValue_inter /*dyn*/ {
 }
 
 public static void TestInterfaceValue(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var inter = ref heap(new TestInterfaceValue_inter(), out var Ꮡinter);
     inter.E = 123.456D;
     var v1 = ValueOf(Ꮡinter);
@@ -604,6 +573,7 @@ public static void TestInterfaceValue(ж<testing.T> Ꮡt) {
     // assert(t, TypeString(v2.Type()), "interface {}")
     var v3 = v2.Elem();
     assert(Ꮡt, TypeString(v3.Type()), float64ˢ);
+
     var i3 = reflectlite_internal_test_package.ToInterface(v2);
     {
         var (_, ok) = i3._<float64>(ᐧ); if (!ok) {
@@ -624,7 +594,6 @@ public static void TestFunctionValue(ж<testing.T> Ꮡt) {
     }
     assert(Ꮡt, TypeString(v.Type()), funcˢ);
 }
-
 
 partial struct appendTestsᴛ1 /*dyn*/ {
     internal slice<nint> orig, extra;
@@ -686,9 +655,7 @@ partial struct DeepEqualTest {
 
 // Simple functions for DeepEqual tests.
 internal static Action fn1;         // nil.
-
 internal static Action fn2;         // nil.
-
 internal static Action fn3 = () => {
     fn1();
 }; // Not nil.
@@ -711,18 +678,15 @@ internal static ref Loopy loopy2 => ref Ꮡloopy2.ValueSlot;
 [GoInit] internal static void init() {
     loop1 = Ꮡloop2;
     loop2 = Ꮡloop1;
+
     loopy1 = Ꮡloopy2;
     loopy2 = Ꮡloopy1;
 }
 
-// Equalities
-// Inequalities
-// Nil vs empty: not the same.
-// Mismatched types
-// Possible loops.
 internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
+    // Equalities
     new(default!, default!, true),
-    new((nint)(1), (nint)(1), true),
+    new((nint)1, (nint)1, true),
     new((int32)1, (int32)1, true),
     new(0.5D, 0.5D, true),
     new((float32)0.5F, (float32)0.5F, true),
@@ -730,10 +694,12 @@ internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     new(new slice<nint>(10), new slice<nint>(10), true),
     new(Ꮡ(new nint[]{1, 2, 3}.array()), Ꮡ(new nint[]{1, 2, 3}.array()), true),
     new(new Basic(1, 0.5F), new Basic(1, 0.5F), true),
-    new(((error)default!), ((error)default!), true),
+    new((error)default!, (error)default!, true),
     new(new map<nint, @string>{[1] = "one"u8, [2] = "two"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, true),
     new((fn1).OrTypedNilFunc(), (fn2).OrTypedNilFunc(), true),
-    new((nint)(1), (nint)(2), false),
+
+    // Inequalities
+    new((nint)1, (nint)2, false),
     new((int32)1, (int32)2, false),
     new(0.5D, 0.6D, false),
     new((float32)0.5F, (float32)0.6F, false),
@@ -746,8 +712,8 @@ internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     new(new map<nint, @string>{[1] = "one"u8, [2] = "txo"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new map<nint, @string>{[1] = "one"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
     new(new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, new map<nint, @string>{[1] = "one"u8}, false),
-    new(default!, (nint)(1), false),
-    new((nint)(1), default!, false),
+    new(default!, (nint)1, false),
+    new((nint)1, default!, false),
     new((fn1).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new((fn3).OrTypedNilFunc(), (fn3).OrTypedNilFunc(), false),
     new(new slice<nint>[]{new nint[]{1}.slice()}.slice(), new slice<nint>[]{new nint[]{2}.slice()}.slice(), false),
@@ -758,19 +724,25 @@ internal static slice<DeepEqualTest> typeOfTests = new DeepEqualTest[]{
     new(new float64[]{math.NaN()}.slice(), new self(nil), true),
     new(new map<float64, float64>{[math.NaN()] = 1D}, new map<float64, float64>{[1D] = 2D}, false),
     new(new map<float64, float64>{[math.NaN()] = 1D}, new self(nil), true),
+
+    // Nil vs empty: not the same.
     new(new nint[]{}.slice(), slice<nint>(default!), false),
     new(new nint[]{}.slice(), new nint[]{}.slice(), true),
     new(slice<nint>(default!), slice<nint>(default!), true),
-    new(new map<nint, nint>{}, ((map<nint, nint>)default!), false),
+    new(new map<nint, nint>{}, (map<nint, nint>)default!, false),
     new(new map<nint, nint>{}, new map<nint, nint>{}, true),
-    new(((map<nint, nint>)default!), ((map<nint, nint>)default!), true),
-    new((nint)(1), 1.0D, false),
+    new((map<nint, nint>)default!, (map<nint, nint>)default!, true),
+
+    // Mismatched types
+    new((nint)1, 1.0D, false),
     new((int32)1, (int64)1, false),
     new(0.5D, (@string)"hello"u8, false),
     new(new nint[]{1, 2, 3}.slice(), new nint[]{1, 2, 3}.array(), false),
-    new(Ꮡ(new any[]{(nint)(1), (nint)(2), (nint)(4)}.array()), Ꮡ(new any[]{(nint)(1), (nint)(2), (@string)"s"u8}.array()), false),
+    new(Ꮡ(new any[]{(nint)1, (nint)2, (nint)4}.array()), Ꮡ(new any[]{(nint)1, (nint)2, (@string)"s"u8}.array()), false),
     new(new Basic(1, 0.5F), new NotBasic(new Basic(1, 0.5F)), false),
     new(new map<nuint, @string>{[1] = "one"u8, [2] = "two"u8}, new map<nint, @string>{[2] = "two"u8, [1] = "one"u8}, false),
+
+    // Possible loops.
     new(Ꮡloop1, Ꮡloop1, true),
     new(Ꮡloop1, Ꮡloop2, true),
     new(Ꮡloopy1, Ꮡloopy1, true),
@@ -867,27 +839,33 @@ public static void TestIsNil(ж<testing.T> Ꮡt) {
         var v = reflectlite_internal_test_package.Zero(ty);
         v.IsNil(); // panics if not okay to call
     }
+
     // Check the implementations
     TestIsNil_doNil pi = default!;
     Nil(pi, Ꮡt);
     pi.x = @new<nint>();
     NotNil(pi, Ꮡt);
+
     TestIsNil_si si = default!;
     Nil(si, Ꮡt);
     si.x = new slice<nint>(10);
     NotNil(si, Ꮡt);
+
     TestIsNil_doNilᴛ4 ci = default!;
     Nil(ci, Ꮡt);
     ci.x = new channel<nint>(0);
     NotNil(ci, Ꮡt);
+
     TestIsNil_mi mi = default!;
     Nil(mi, Ꮡt);
     mi.x = new map<nint, nint>();
     NotNil(mi, Ꮡt);
+
     TestIsNil_doNilᴛ1 ii = default!;
     Nil(ii, Ꮡt);
-    ii.x = (nint)(2);
+    ii.x = (nint)2;
     NotNil(ii, Ꮡt);
+
     TestIsNil_fi fi = default!;
     Nil(fi, Ꮡt);
     fi.x = TestIsNil;
@@ -939,9 +917,8 @@ public static nint GCMethod(this Point p, nint k) {
 
 // This will be index 3.
 public static void NoArgs(this Point p) {
+    // Exercise no-argument/no-result paths.
 }
-
-// Exercise no-argument/no-result paths.
 
 // This will be index 4.
 public static nint TotalDist(this Point p, params ꓸꓸꓸPoint pointsʗp) {
@@ -993,15 +970,15 @@ public static void TestImportPath(ж<testing.T> Ꮡt) {
         new(TypeOf((rune)0), ""u8),
         new(TypeOf(slice<byte>(default!)), ""u8),
         new(TypeOf(slice<rune>(default!)), ""u8),
-        new(TypeOf(((@string)""u8)), ""u8),
-        new(TypeOf(((ж<any>)nil)).Elem(), ""u8),
-        new(TypeOf(((ж<byte>)nil)), ""u8),
-        new(TypeOf(((ж<rune>)nil)), ""u8),
-        new(TypeOf(((ж<int64>)nil)), ""u8),
+        new(TypeOf((@string)""u8), ""u8),
+        new(TypeOf((ж<any>)nil).Elem(), ""u8),
+        new(TypeOf((ж<byte>)nil), ""u8),
+        new(TypeOf((ж<rune>)nil), ""u8),
+        new(TypeOf((ж<int64>)nil), ""u8),
         new(TypeOf(new map<@string, nint>{}), ""u8),
-        new(TypeOf(((ж<error>)nil)).Elem(), ""u8),
-        new(TypeOf(((ж<Point>)nil)), ""u8),
-        new(TypeOf(((ж<Point>)nil)).Elem(), "internal/reflectlite_test"u8)
+        new(TypeOf((ж<error>)nil).Elem(), ""u8),
+        new(TypeOf((ж<Point>)nil), ""u8),
+        new(TypeOf((ж<Point>)nil).Elem(), "internal/reflectlite_test"u8)
     }.slice();
     foreach (var (_, test) in tests) {
         {
@@ -1037,6 +1014,7 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
     noAlloc(Ꮡt, 100, (nint j) => {
         any i = default!;
         reflectlite.Value v = new(nil);
+
         i = new nint[]{j, j, j}.slice();
         v = ValueOf(i);
         if (v.Len() != 3) {
@@ -1046,6 +1024,7 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
     noAlloc(Ꮡt, 100, (nint j) => {
         any i = default!;
         reflectlite.Value v = new(nil);
+
         i = nint (nint jΔ1) => jΔ1;
         v = ValueOf(i);
         if (reflectlite_internal_test_package.ToInterface(v)._<Func<nint, nint>>()(j) != j) {
@@ -1060,7 +1039,7 @@ internal partial struct TestSetPanic_t0 /*dyn*/ {
 
 internal partial struct TestSetPanic_t1 /*dyn*/ {
     public nint Y;
-    internal partial ref TestSetPanic_t0 t0 { get; }
+    /*embed*/ internal TestSetPanic_t0 t0;
 }
 
 internal partial struct TestSetPanic_T2 /*dyn*/ {
@@ -1070,8 +1049,8 @@ internal partial struct TestSetPanic_T2 /*dyn*/ {
 
 internal partial struct TestSetPanic_T /*dyn*/ {
     public nint X;
-    internal partial ref TestSetPanic_t1 t1 { get; }
-    public partial ref TestSetPanic_T2 T2 { get; }
+    /*embed*/ internal TestSetPanic_t1 t1;
+    /*embed*/ public TestSetPanic_T2 T2;
     public TestSetPanic_t1 NamedT1;
     public TestSetPanic_T2 NamedT2;
     internal TestSetPanic_t1 namedT1;
@@ -1086,211 +1065,213 @@ public static void TestSetPanic(ж<testing.T> Ꮡt) {
     void clear(reflectlite.Value vΔ1) {
         vΔ1.Set(reflectlite_internal_test_package.Zero(vΔ1.Type()));
     }
+
     // not addressable
     ref var v = ref heap<reflectlite.Value>(out var Ꮡv);
     v = ValueOf(new TestSetPanic_T(nil));
     var clearʗ1 = clear;
     bad(() => {
-        clearʗ1(reflectlite_internal_test_package.Field(Ꮡv.Value, 0)); // .X
-    });
+        clearʗ1(reflectlite_internal_test_package.Field(Ꮡv.Value, 0));
+    }); // .X
     var clearʗ2 = clear;
     bad(() => {
-        clearʗ2(reflectlite_internal_test_package.Field(Ꮡv.Value, 1)); // .t1
-    });
+        clearʗ2(reflectlite_internal_test_package.Field(Ꮡv.Value, 1));
+    }); // .t1
     var clearʗ3 = clear;
     bad(() => {
-        clearʗ3(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 0)); // .t1.Y
-    });
+        clearʗ3(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 0));
+    }); // .t1.Y
     var clearʗ4 = clear;
     bad(() => {
-        clearʗ4(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1)); // .t1.t0
-    });
+        clearʗ4(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1));
+    }); // .t1.t0
     var clearʗ5 = clear;
     bad(() => {
-        clearʗ5(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1), 0)); // .t1.t0.W
-    });
+        clearʗ5(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1), 0));
+    }); // .t1.t0.W
     var clearʗ6 = clear;
     bad(() => {
-        clearʗ6(reflectlite_internal_test_package.Field(Ꮡv.Value, 2)); // .T2
-    });
+        clearʗ6(reflectlite_internal_test_package.Field(Ꮡv.Value, 2));
+    }); // .T2
     var clearʗ7 = clear;
     bad(() => {
-        clearʗ7(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 0)); // .T2.Z
-    });
+        clearʗ7(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 0));
+    }); // .T2.Z
     var clearʗ8 = clear;
     bad(() => {
-        clearʗ8(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1)); // .T2.namedT0
-    });
+        clearʗ8(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1));
+    }); // .T2.namedT0
     var clearʗ9 = clear;
     bad(() => {
-        clearʗ9(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1), 0)); // .T2.namedT0.W
-    });
+        clearʗ9(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1), 0));
+    }); // .T2.namedT0.W
     var clearʗ10 = clear;
     bad(() => {
-        clearʗ10(reflectlite_internal_test_package.Field(Ꮡv.Value, 3)); // .NamedT1
-    });
+        clearʗ10(reflectlite_internal_test_package.Field(Ꮡv.Value, 3));
+    }); // .NamedT1
     var clearʗ11 = clear;
     bad(() => {
-        clearʗ11(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 0)); // .NamedT1.Y
-    });
+        clearʗ11(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 0));
+    }); // .NamedT1.Y
     var clearʗ12 = clear;
     bad(() => {
-        clearʗ12(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1)); // .NamedT1.t0
-    });
+        clearʗ12(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1));
+    }); // .NamedT1.t0
     var clearʗ13 = clear;
     bad(() => {
-        clearʗ13(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1), 0)); // .NamedT1.t0.W
-    });
+        clearʗ13(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1), 0));
+    }); // .NamedT1.t0.W
     var clearʗ14 = clear;
     bad(() => {
-        clearʗ14(reflectlite_internal_test_package.Field(Ꮡv.Value, 4)); // .NamedT2
-    });
+        clearʗ14(reflectlite_internal_test_package.Field(Ꮡv.Value, 4));
+    }); // .NamedT2
     var clearʗ15 = clear;
     bad(() => {
-        clearʗ15(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 0)); // .NamedT2.Z
-    });
+        clearʗ15(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 0));
+    }); // .NamedT2.Z
     var clearʗ16 = clear;
     bad(() => {
-        clearʗ16(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1)); // .NamedT2.namedT0
-    });
+        clearʗ16(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1));
+    }); // .NamedT2.namedT0
     var clearʗ17 = clear;
     bad(() => {
-        clearʗ17(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1), 0)); // .NamedT2.namedT0.W
-    });
+        clearʗ17(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1), 0));
+    }); // .NamedT2.namedT0.W
     var clearʗ18 = clear;
     bad(() => {
-        clearʗ18(reflectlite_internal_test_package.Field(Ꮡv.Value, 5)); // .namedT1
-    });
+        clearʗ18(reflectlite_internal_test_package.Field(Ꮡv.Value, 5));
+    }); // .namedT1
     var clearʗ19 = clear;
     bad(() => {
-        clearʗ19(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 0)); // .namedT1.Y
-    });
+        clearʗ19(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 0));
+    }); // .namedT1.Y
     var clearʗ20 = clear;
     bad(() => {
-        clearʗ20(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1)); // .namedT1.t0
-    });
+        clearʗ20(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1));
+    }); // .namedT1.t0
     var clearʗ21 = clear;
     bad(() => {
-        clearʗ21(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1), 0)); // .namedT1.t0.W
-    });
+        clearʗ21(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1), 0));
+    }); // .namedT1.t0.W
     var clearʗ22 = clear;
     bad(() => {
-        clearʗ22(reflectlite_internal_test_package.Field(Ꮡv.Value, 6)); // .namedT2
-    });
+        clearʗ22(reflectlite_internal_test_package.Field(Ꮡv.Value, 6));
+    }); // .namedT2
     var clearʗ23 = clear;
     bad(() => {
-        clearʗ23(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 0)); // .namedT2.Z
-    });
+        clearʗ23(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 0));
+    }); // .namedT2.Z
     var clearʗ24 = clear;
     bad(() => {
-        clearʗ24(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1)); // .namedT2.namedT0
-    });
+        clearʗ24(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1));
+    }); // .namedT2.namedT0
     var clearʗ25 = clear;
     bad(() => {
-        clearʗ25(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1), 0)); // .namedT2.namedT0.W
-    });
+        clearʗ25(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1), 0));
+    }); // .namedT2.namedT0.W
+
     // addressable
     v = ValueOf(Ꮡ(new TestSetPanic_T(nil))).Elem();
     var clearʗ26 = clear;
     ok(() => {
-        clearʗ26(reflectlite_internal_test_package.Field(Ꮡv.Value, 0)); // .X
-    });
+        clearʗ26(reflectlite_internal_test_package.Field(Ꮡv.Value, 0));
+    }); // .X
     var clearʗ27 = clear;
     bad(() => {
-        clearʗ27(reflectlite_internal_test_package.Field(Ꮡv.Value, 1)); // .t1
-    });
+        clearʗ27(reflectlite_internal_test_package.Field(Ꮡv.Value, 1));
+    }); // .t1
     var clearʗ28 = clear;
     ok(() => {
-        clearʗ28(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 0)); // .t1.Y
-    });
+        clearʗ28(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 0));
+    }); // .t1.Y
     var clearʗ29 = clear;
     bad(() => {
-        clearʗ29(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1)); // .t1.t0
-    });
+        clearʗ29(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1));
+    }); // .t1.t0
     var clearʗ30 = clear;
     ok(() => {
-        clearʗ30(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1), 0)); // .t1.t0.W
-    });
+        clearʗ30(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 1), 1), 0));
+    }); // .t1.t0.W
     var clearʗ31 = clear;
     ok(() => {
-        clearʗ31(reflectlite_internal_test_package.Field(Ꮡv.Value, 2)); // .T2
-    });
+        clearʗ31(reflectlite_internal_test_package.Field(Ꮡv.Value, 2));
+    }); // .T2
     var clearʗ32 = clear;
     ok(() => {
-        clearʗ32(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 0)); // .T2.Z
-    });
+        clearʗ32(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 0));
+    }); // .T2.Z
     var clearʗ33 = clear;
     bad(() => {
-        clearʗ33(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1)); // .T2.namedT0
-    });
+        clearʗ33(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1));
+    }); // .T2.namedT0
     var clearʗ34 = clear;
     bad(() => {
-        clearʗ34(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1), 0)); // .T2.namedT0.W
-    });
+        clearʗ34(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 2), 1), 0));
+    }); // .T2.namedT0.W
     var clearʗ35 = clear;
     ok(() => {
-        clearʗ35(reflectlite_internal_test_package.Field(Ꮡv.Value, 3)); // .NamedT1
-    });
+        clearʗ35(reflectlite_internal_test_package.Field(Ꮡv.Value, 3));
+    }); // .NamedT1
     var clearʗ36 = clear;
     ok(() => {
-        clearʗ36(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 0)); // .NamedT1.Y
-    });
+        clearʗ36(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 0));
+    }); // .NamedT1.Y
     var clearʗ37 = clear;
     bad(() => {
-        clearʗ37(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1)); // .NamedT1.t0
-    });
+        clearʗ37(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1));
+    }); // .NamedT1.t0
     var clearʗ38 = clear;
     ok(() => {
-        clearʗ38(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1), 0)); // .NamedT1.t0.W
-    });
+        clearʗ38(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 3), 1), 0));
+    }); // .NamedT1.t0.W
     var clearʗ39 = clear;
     ok(() => {
-        clearʗ39(reflectlite_internal_test_package.Field(Ꮡv.Value, 4)); // .NamedT2
-    });
+        clearʗ39(reflectlite_internal_test_package.Field(Ꮡv.Value, 4));
+    }); // .NamedT2
     var clearʗ40 = clear;
     ok(() => {
-        clearʗ40(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 0)); // .NamedT2.Z
-    });
+        clearʗ40(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 0));
+    }); // .NamedT2.Z
     var clearʗ41 = clear;
     bad(() => {
-        clearʗ41(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1)); // .NamedT2.namedT0
-    });
+        clearʗ41(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1));
+    }); // .NamedT2.namedT0
     var clearʗ42 = clear;
     bad(() => {
-        clearʗ42(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1), 0)); // .NamedT2.namedT0.W
-    });
+        clearʗ42(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 4), 1), 0));
+    }); // .NamedT2.namedT0.W
     var clearʗ43 = clear;
     bad(() => {
-        clearʗ43(reflectlite_internal_test_package.Field(Ꮡv.Value, 5)); // .namedT1
-    });
+        clearʗ43(reflectlite_internal_test_package.Field(Ꮡv.Value, 5));
+    }); // .namedT1
     var clearʗ44 = clear;
     bad(() => {
-        clearʗ44(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 0)); // .namedT1.Y
-    });
+        clearʗ44(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 0));
+    }); // .namedT1.Y
     var clearʗ45 = clear;
     bad(() => {
-        clearʗ45(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1)); // .namedT1.t0
-    });
+        clearʗ45(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1));
+    }); // .namedT1.t0
     var clearʗ46 = clear;
     bad(() => {
-        clearʗ46(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1), 0)); // .namedT1.t0.W
-    });
+        clearʗ46(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 5), 1), 0));
+    }); // .namedT1.t0.W
     var clearʗ47 = clear;
     bad(() => {
-        clearʗ47(reflectlite_internal_test_package.Field(Ꮡv.Value, 6)); // .namedT2
-    });
+        clearʗ47(reflectlite_internal_test_package.Field(Ꮡv.Value, 6));
+    }); // .namedT2
     var clearʗ48 = clear;
     bad(() => {
-        clearʗ48(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 0)); // .namedT2.Z
-    });
+        clearʗ48(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 0));
+    }); // .namedT2.Z
     var clearʗ49 = clear;
     bad(() => {
-        clearʗ49(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1)); // .namedT2.namedT0
-    });
+        clearʗ49(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1));
+    }); // .namedT2.namedT0
     var clearʗ50 = clear;
     bad(() => {
-        clearʗ50(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1), 0)); // .namedT2.namedT0.W
-    });
+        clearʗ50(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(reflectlite_internal_test_package.Field(Ꮡv.Value, 6), 1), 0));
+    }); // .namedT2.namedT0.W
 }
 
 internal static void shouldPanic(Action f) {
@@ -1357,18 +1338,18 @@ partial struct B<T> {
             void F();
         }
 internal static slice<nameTest> nameTests = new nameTest[]{
-    new(((ж<int32>)nil), "int32"u8),
-    new(((ж<D1>)nil), "D1"u8),
-    new(((ж<slice<D1>>)nil), ""u8),
-    new(((ж<channel<D1>>)nil), ""u8),
-    new(((ж<Func<D1>>)nil), ""u8),
-    new(((ж</*<-*/channel<D1>>)nil), ""u8),
-    new(((ж<channel/*<-*/<D1>>)nil), ""u8),
-    new(((ж<any>)nil), ""u8),
-    new(((ж<Δtypeᴛ30>)nil), ""u8),
-    new(((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil), "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"u8),
-    new(((ж<B<A>>)nil), "B[internal/reflectlite_test.A]"u8),
-    new(((ж<B<B<A>>>)nil), "B[internal/reflectlite_test.B[internal/reflectlite_test.A]]"u8)
+    new((ж<int32>)nil, "int32"u8),
+    new((ж<D1>)nil, "D1"u8),
+    new((ж<slice<D1>>)nil, ""u8),
+    new((ж<channel<D1>>)nil, ""u8),
+    new((ж<Func<D1>>)nil, ""u8),
+    new((ж</*<-*/channel<D1>>)nil, ""u8),
+    new((ж<channel/*<-*/<D1>>)nil, ""u8),
+    new((ж<any>)nil, ""u8),
+    new((ж<Δtypeᴛ30>)nil, ""u8),
+    new((ж<TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678>)nil, "TheNameOfThisTypeIsExactly255BytesLongSoWhenTheCompilerPrependsTheReflectTestPackageNameAndExtraStarTheLinkerRuntimeAndReflectPackagesWillHaveToCorrectlyDecodeTheSecondLengthByte0123456789_0123456789_0123456789_0123456789_0123456789_012345678"u8),
+    new((ж<B<A>>)nil, "B[internal/reflectlite_test.A]"u8),
+    new((ж<B<B<A>>>)nil, "B[internal/reflectlite_test.B[internal/reflectlite_test.A]]"u8)
 }.slice();
 
 public static void TestNames(ж<testing.T> Ꮡt) {
@@ -1416,7 +1397,7 @@ partial struct Talias1 {
 }
 
 partial struct Talias2 {
-    public partial ref Tint Tint { get; }
+    /*embed*/ public Tint Tint;
     /*embed*/ public Tint2 Tint2;
 }
 
@@ -1431,6 +1412,7 @@ public static void TestAliasNames(ж<testing.T> Ꮡt) {
     if (@out != want) {
         Ꮡt.Errorf("Talias1 print:\nhave: %s\nwant: %s"u8, @out, want);
     }
+
     var t2 = new Talias2(Tint: 1, Tint2: 2);
     @out = fmt.Sprintf("%#v"u8, t2);
     want = reflectliteTestTalias2ˢ;

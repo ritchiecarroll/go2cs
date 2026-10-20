@@ -9,7 +9,9 @@ partial class cpu_package {
 
 internal static UntypedInt _AT_HWCAP => 16;
 internal static UntypedInt _AT_HWCAP2 => 26;
+
 internal static readonly @string procAuxv = "/proc/self/auxv"u8;
+
 internal const nint uintSize = /* int(32 << (^uint(0) >> 63)) */ 64;
 
 // For those platforms don't have a 'cpuid' equivalent we use HWCAP/HWCAP2
@@ -34,11 +36,11 @@ internal static error readHWCAP() {
                 else if (exprᴛ1 == _AT_HWCAP2) {
                     hwCap2 = val;
                 }
-
             }
             return default!;
         }
     }
+
     var (buf, err) = os.ReadFile(procAuxv);
     if (err != default!) {
         // e.g. on android /proc/self/auxv is not accessible, so silently
@@ -64,7 +66,6 @@ internal static error readHWCAP() {
             buf = buf[16..];
             break;
         }}
-
         var exprᴛ2 = tag;
         if (exprᴛ2 == _AT_HWCAP) {
             hwCap = val;
@@ -72,7 +73,6 @@ internal static error readHWCAP() {
         else if (exprᴛ2 == _AT_HWCAP2) {
             hwCap2 = val;
         }
-
     }
     return default!;
 }

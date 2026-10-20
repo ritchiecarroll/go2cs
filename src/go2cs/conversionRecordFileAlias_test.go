@@ -24,6 +24,7 @@ import (
 // declared (CS0246 'st'). go-cmp's internal test reached it through `ts "…/internal/teststructs"`.
 // Every qualifier a record carries must be declared in the same file.
 func TestConversionRecordQualifiersAreDeclaredInPackageInfo(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
 

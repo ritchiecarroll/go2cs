@@ -50,11 +50,13 @@ internal static (slice<byte>, error) format(slice<byte> src, checkMode mode) {
     if (err != default!) {
         return (default!, fmt.Errorf("parse: %s\n%s"u8, err, src));
     }
+
     // filter exports if necessary
     if ((checkMode)(mode & export) != 0) {
         ast.FileExports(f); // ignore result
         f.Value.Comments = default!; // don't print comments that are not in AST
     }
+
     // determine printer configuration
     ref var cfg = ref heap<global::go.go.printer_package.Config>(out var Ꮡcfg);
     cfg = new Config(Tabwidth: tabwidth);
@@ -64,6 +66,7 @@ internal static (slice<byte>, error) format(slice<byte> src, checkMode mode) {
     if ((checkMode)(mode & normNumber) != 0) {
         cfg.Mode |= (global::go.go.printer_package.Mode)(normalizeNumbers);
     }
+
     // print AST
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
@@ -71,6 +74,7 @@ internal static (slice<byte>, error) format(slice<byte> src, checkMode mode) {
             return (default!, fmt.Errorf("print: %s"u8, errΔ1));
         }
     }
+
     // make sure formatted output is syntactically correct
     var res = buf.Bytes();
     {
@@ -78,6 +82,7 @@ internal static (slice<byte>, error) format(slice<byte> src, checkMode mode) {
             return (default!, fmt.Errorf("re-parse: %s\n%s"u8, errΔ2, buf.Bytes()));
         }
     }
+
     return (res, default!);
 }
 
@@ -95,7 +100,7 @@ internal static error checkEqual(@string aname, @string bname, slice<byte> a, sl
     if (bytes.Equal(a, b)) {
         return default!;
     }
-    return errors.New(((@string)diff.Diff(aname, a, bname, b)));
+    return errors.New((@string)diff.Diff(aname, a, bname, b));
 }
 
 internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden, checkMode mode) {
@@ -104,11 +109,13 @@ internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden
         Ꮡt.Error(err);
         return;
     }
+
     (var res, err) = format(src, mode);
     if (err != default!) {
         Ꮡt.Error(err);
         return;
     }
+
     // update golden files if necessary
     if (update.Value) {
         {
@@ -118,12 +125,14 @@ internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden
         }
         return;
     }
+
     // get golden
     (var gld, err) = os.ReadFile(golden);
     if (err != default!) {
         Ꮡt.Error(err);
         return;
     }
+
     // formatted source and golden must be the same
     {
         var errΔ2 = checkEqual(fmt.Sprintf("format(%v)"u8, source), golden, res, gld); if (errΔ2 != default!) {
@@ -131,6 +140,7 @@ internal static void runcheck(ж<testing.T> Ꮡt, @string source, @string golden
             return;
         }
     }
+
     if ((checkMode)(mode & idempotent) != 0) {
         // formatting golden must be idempotent
         // (This is very difficult to achieve in general and for now
@@ -156,22 +166,22 @@ internal static partial void check(ж<testing.T> Ꮡt, @string source, @string g
         runcheck(Ꮡt, source, golden, mode);
         ccʗ1.ᐸꟷ(0);
     });
+
     // wait with timeout
     var selᴛ1 = time.After((time.Duration)(10000000000L));
     var selᴛ2 = cc;
     switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-    case 0 when selᴛ1.ꟷᐳ(out _): {
-        Ꮡt.Errorf("%s: running too slowly"u8, // plenty of a safety margin, even for very slow machines
- // test running past time out
- source);
+    case 0 when selᴛ1.ꟷᐳ(out _): { // plenty of a safety margin, even for very slow machines
+        // test running past time out
+        Ꮡt.Errorf("%s: running too slowly"u8, source);
         break;
     }
     case 1 when selᴛ2.ꟷᐳ(out _): {
+        // test finished within allotted time margin
         break;
     }}
 }
 
-// test finished within allotted time margin
 internal partial struct entry {
     internal @string source, golden;
     internal checkMode mode;
@@ -212,6 +222,8 @@ public static void TestFiles(ж<testing.T> Ꮡt) {
         Ꮡt.Run(e.source, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             check(tΔ1, source, golden, mode);
+            // TODO(gri) check that golden is idempotent
+            //check(t, golden, golden, e.mode)
         });
     }
 }
@@ -223,30 +235,31 @@ internal static readonly @string srcᶜ = """
 	// comment 3
 	package main
 	
-"""u8;
-
-// TODO(gri) check that golden is idempotent
-//check(t, golden, golden, e.mode)
+"""u8.Raw();
 
 // TestLineComments, using a simple test case, checks that consecutive line
 // comments are properly terminated with a newline even if the AST position
 // information is incorrect.
 public static void TestLineComments(ж<testing.T> Ꮡt) {
     @string src = srcᶜ;
+
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {
         throw panic(err); // error in test
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     fset = token.NewFileSet(); // use the wrong file set
     Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil());
+
     nint nlines = 0;
     foreach (var (_, ch) in buf.Bytes()) {
         if (ch == (rune)'\n') {
             nlines++;
         }
     }
+
     const nint expected = 3;
     if (nlines < expected) {
         Ꮡt.Errorf("got %d, expected %d\n"u8, nlines, (nint)(expected));
@@ -345,7 +358,7 @@ func fibo(n int) {
 	return fibo(n-1) + fibo(n-2)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Verify that the printer produces a correct program
 // even if the position information of comments introducing newlines
@@ -353,17 +366,19 @@ func fibo(n int) {
 public static void TestBadComments(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     @string src = srcᶜ2;
+
     var (f, err) = parser.ParseFile(fset, ""u8, src, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Error(err); // error in test
     }
+
     var comment = (~(~f).Comments[0]).List[0];
     ref var pos = ref heap<tokenꓸPos>(out var Ꮡpos);
     pos = comment.Pos();
-    if (fset.PositionFor(pos, false).Offset != 1) {
-        /* absolute position */
+    if (fset.PositionFor(pos, false /* absolute position */).Offset != 1) {
         Ꮡt.Error(expectedOffset1ˢ); // error in test
     }
+
     testComment(Ꮡt, f, len(src), Ꮡ(new ast.Comment(Slash: pos, Text: "//-style comment"u8)));
     testComment(Ꮡt, f, len(src), Ꮡ(new ast.Comment(Slash: pos, Text: "/*-style comment */"u8)));
     testComment(Ꮡt, f, len(src), Ꮡ(new ast.Comment(Slash: pos, Text: "/*-style \n comment */"u8)));
@@ -419,32 +434,37 @@ func (t *t) foo(a, b, c int) int {
 		c*t.z
 }
 
-"""u8;
+"""u8.Raw();
 
 // Verify that the SourcePos mode emits correct //line directives
 // by testing that position information for matching identifiers
 // is maintained.
 public static void TestSourcePos(ж<testing.T> Ꮡt) {
     @string src = srcᶜ3;
+
     // parse original
     var (f1, err) = parser.ParseFile(fset, srcˢ, src, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // pretty-print original
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     err = (Ꮡ(new Config(Mode: (global::go.go.printer_package.Mode)(UseSpaces | SourcePos), Tabwidth: 8))).Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f1.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // parse pretty printed original
     // (//line directives must be interpreted even w/o parser.ParseComments set)
     (var f2, err) = parser.ParseFile(fset, ""u8, buf.Bytes(), 0);
     if (err != default!) {
         Ꮡt.Fatalf("%s\n%s"u8, err, buf.Bytes());
     }
+
     // At this point the position information of identifiers in f2 should
     // match the position information of corresponding identifiers in f1.
+
     // number of identifiers must be > 0 (test should run) and must match
     nint n1 = identCount(f1);
     nint n2 = identCount(f2);
@@ -454,13 +474,16 @@ public static void TestSourcePos(ж<testing.T> Ꮡt) {
     if (n2 != n1) {
         Ꮡt.Errorf("got %d idents; want %d"u8, n2, n1);
     }
+
     // verify that all identifiers have correct line information
     var i2range = idents(f2);
     foreach (var i1 in idents(f1)) {
         var i2 = ᐸꟷ(i2range);
+
         if ((~i2).Name != (~i1).Name) {
             Ꮡt.Errorf("got ident %s; want %s"u8, (~i2).Name, (~i1).Name);
         }
+
         // here we care about the relative (line-directive adjusted) positions
         nint l1 = fset.Position(i1.Pos()).Line;
         nint l2 = fset.Position(i2.Pos()).Line;
@@ -468,6 +491,7 @@ public static void TestSourcePos(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("got line %d; want %d for %s"u8, l2, l1, (~i1).Name);
         }
     }
+
     if (Ꮡt.Failed()) {
         Ꮡt.Logf("\n%s"u8, buf.Bytes());
     }
@@ -488,7 +512,7 @@ var x, y, z int
 func g() { // line 8
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string wantᶜ = """
@@ -504,18 +528,21 @@ var x, y, z int
 func g() {
 }
 
-"""u8;
+"""u8.Raw();
 
 // Verify that the SourcePos mode doesn't emit unnecessary //line directives
 // before empty lines.
 public static void TestIssue5945(ж<testing.T> Ꮡt) {
     @string orig = origᶜ;
+
     @string want = wantᶜ;
+
     // parse original
     var (f1, err) = parser.ParseFile(fset, srcGoˢ, orig, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // pretty-print original
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     err = (Ꮡ(new Config(Mode: (global::go.go.printer_package.Mode)(UseSpaces | SourcePos), Tabwidth: 8))).Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f1.OrTypedNil());
@@ -523,6 +550,7 @@ public static void TestIssue5945(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     @string got = Ꮡbuf.String();
+
     // compare original with desired output
     if (got != want) {
         Ꮡt.Errorf("got:\n%s\nwant:\n%s\n"u8, got, want);
@@ -541,11 +569,13 @@ public static void TestDeclLists(ж<testing.T> Ꮡt) {
         if (err != default!) {
             throw panic(err); // error in test
         }
+
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, (~@file).Decls); // only print declarations
         if (err != default!) {
             throw panic(err); // error in test
         }
+
         @string @out = Ꮡbuf.String();
         if (@out != src) {
             Ꮡt.Errorf("\ngot : %q\nwant: %q\n"u8, @out, src);
@@ -565,11 +595,13 @@ public static void TestStmtLists(ж<testing.T> Ꮡt) {
         if (err != default!) {
             throw panic(err); // error in test
         }
+
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, (~(~(~@file).Decls[0]._<ж<ast.FuncDecl>>()).Body).List); // only print statements
         if (err != default!) {
             throw panic(err); // error in test
         }
+
         @string @out = Ꮡbuf.String();
         if (@out != src) {
             Ꮡt.Errorf("\ngot : %q\nwant: %q\n"u8, @out, src);
@@ -592,10 +624,12 @@ public static void TestBaseIndent(ж<testing.T> Ꮡt) {
     if (err != default!) {
         throw panic(err); // error in test
     }
+
     (var @file, err) = parser.ParseFile(fset, filename, src, 0);
     if (err != default!) {
         throw panic(err); // error in test
     }
+
     for (nint indent = 0; indent < 4; indent++) {
         ref var indentΔ1 = ref heap<nint>(out var ᏑindentΔ1);
         indentΔ1 = indent;
@@ -633,7 +667,7 @@ package p
 
 func f()
 
-"""u8;
+"""u8.Raw();
 
 // TestFuncType tests that an ast.FuncType with a nil Params field
 // can be printed (per go/ast specification). Test case for issue 3870.
@@ -646,6 +680,7 @@ public static void TestFuncType(ж<testing.T> Ꮡt) {
         )))
         }.slice()
     ));
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, src.OrTypedNil()); if (err != default!) {
@@ -653,7 +688,9 @@ public static void TestFuncType(ж<testing.T> Ꮡt) {
         }
     }
     @string got = Ꮡbuf.String();
+
     @string want = wantᶜ1;
+
     if (got != want) {
         Ꮡt.Fatalf("got:\n%s\nwant:\n%s\n"u8, got, want);
     }
@@ -750,7 +787,7 @@ internal static readonly @string srcᶜ4 = """
 package p
 func _() {}
 
-"""u8;
+"""u8.Raw();
 
 // TestX is a skeleton test that can be filled in for debugging one-off cases.
 // Do not remove.
@@ -777,44 +814,53 @@ func foo() {
 type bar int // comment2
 
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string fooᶜ = """
 func foo() {
 	// comment inside func
 }
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string barᶜ = """
 // leading comment
 type bar int	// comment2
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCommentedNode(ж<testing.T> Ꮡt) {
     @string input = inputᶜ;
+
     @string foo = fooᶜ;
+
     @string bar = barᶜ;
+
     var fset = token.NewFileSet();
     var (f, err) = parser.ParseFile(fset, inputGoˢ, input, parser.ParseComments);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
     err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, Ꮡ(new CommentedNode(Node: (~f).Decls[0], Comments: (~f).Comments)));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (Ꮡbuf.String() != foo) {
         Ꮡt.Errorf("got %q, want %q"u8, Ꮡbuf.String(), foo);
     }
+
     buf.Reset();
+
     err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, Ꮡ(new CommentedNode(Node: (~f).Decls[1], Comments: (~f).Comments)));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (Ꮡbuf.String() != bar) {
         Ꮡt.Errorf("got %q, want %q"u8, Ꮡbuf.String(), bar);
     }
@@ -833,6 +879,7 @@ public static void TestIssue11151(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil());
     @string got = Ꮡbuf.String();
@@ -840,6 +887,7 @@ public static void TestIssue11151(ж<testing.T> Ꮡt) {
     if (got != want) {
         Ꮡt.Errorf("\ngot : %q\nwant: %q"u8, got, want);
     }
+
     // the resulting program must be valid
     (_, err) = parser.ParseFile(fset, ""u8, got, 0);
     if (err != default!) {
@@ -860,6 +908,7 @@ public static void TestParenthesizedDecl(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // print the original package
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     err = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, f.OrTypedNil());
@@ -867,6 +916,7 @@ public static void TestParenthesizedDecl(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     @string original = Ꮡbuf.String();
+
     // now remove parentheses from the declaration
     for (nint i = 0; i != len((~f).Decls); i++) {
         (~f).Decls[i]._<ж<ast.GenDecl>>().Value.Lparen = token.NoPos;
@@ -877,6 +927,7 @@ public static void TestParenthesizedDecl(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     @string noparen = Ꮡbuf.String();
+
     if (noparen != original) {
         Ꮡt.Errorf("got %q, want %q"u8, noparen, original);
     }
@@ -891,7 +942,7 @@ func f() {
                 call(),
         }
 }
-"""u8;
+"""u8.Raw();
 internal static readonly @string returnCallˢ = "return call()"u8;
 
 // Verify that we don't print a newline between "return" and its results, as
@@ -903,10 +954,12 @@ public static void TestIssue32854(ж<testing.T> Ꮡt) {
     if (err != default!) {
         throw panic(err);
     }
+
     // Replace the result with call(), which is on the next line.
     var fd = (~@file).Decls[0]._<ж<ast.FuncDecl>>();
     var ret = (~(~fd).Body).List[0]._<ж<ast.ReturnStmt>>();
     ret.Value.Results[0] = (~(~ret).Results[0]._<ж<ast.CompositeLit>>()).Elts[0];
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     {
         var errΔ1 = Fprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), fset, ret.OrTypedNil()); if (errΔ1 != default!) {
@@ -926,8 +979,6 @@ internal static readonly @string fooBarBarGoˢ = "foo\nbar/bar.go"u8;
 internal static readonly @string packageBarˢ = @"package bar"u8;
 
 public static void TestSourcePosNewline(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // We don't provide a syntax for escaping or unescaping characters in line
     // directives (see https://go.dev/issue/24183#issuecomment-372449628).
     // As a result, we cannot write a line directive with the correct path for a
@@ -940,9 +991,9 @@ public static void TestSourcePosNewline(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var cfg = Ꮡ(new Config(
         Mode: SourcePos, // emit line comments
-
         Tabwidth: 8
     ));
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using math = @internal.runtime.math_package;
+using Δmath = @internal.runtime.math_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
@@ -14,6 +14,7 @@ internal static void unsafestring(@unsafe.Pointer ptr, nint len) {
     if (len < 0) {
         panicunsafestringlen();
     }
+
     if ((uintptr)len > ((uintptr)0 - (uintptr)ptr)) {
         if (ptr == nil) {
             panicunsafestringnilptr();
@@ -36,6 +37,7 @@ internal static readonly @string checkptrUnsafeStringˢ = "checkptr: unsafe.Stri
 
 internal static void unsafestringcheckptr(@unsafe.Pointer ptr, int64 len64) {
     unsafestring64(ptr, len64);
+
     // Check that underlying array doesn't straddle multiple heap objects.
     // unsafestring64 has already checked for overflow.
     if (checkptrStraddles(ptr, (uintptr)len64)) {
@@ -62,12 +64,14 @@ internal static void unsafeslice(ref _type et, @unsafe.Pointer ptr, nint len) {
     if (len < 0) {
         panicunsafeslicelen1(sys.GetCallerPC());
     }
+
     if (et.Size_ == 0) {
         if (ptr == nil && len > 0) {
             panicunsafeslicenilptr1(sys.GetCallerPC());
         }
     }
-    var (mem, overflow) = math.MulUintptr(et.Size_, (uintptr)len);
+
+    var (mem, overflow) = Δmath.MulUintptr(et.Size_, (uintptr)len);
     if (overflow || mem > ((uintptr)0 - (uintptr)ptr)) {
         if (ptr == nil) {
             panicunsafeslicenilptr1(sys.GetCallerPC());
@@ -90,6 +94,7 @@ internal static readonly @string checkptrUnsafeSliceˢ = "checkptr: unsafe.Slice
 
 internal static void unsafeslicecheckptr(ref _type et, @unsafe.Pointer ptr, int64 len64) {
     unsafeslice64(ref et, ptr, len64);
+
     // Check that underlying array doesn't straddle multiple heap objects.
     // unsafeslice64 has already checked for overflow.
     if (checkptrStraddles(ptr, (uintptr)len64 * et.Size_)) {

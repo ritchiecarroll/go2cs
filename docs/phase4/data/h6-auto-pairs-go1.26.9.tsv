@@ -1,0 +1,198 @@
+# h6-auto-pairs-go1.26.9.tsv -- the H6 audit's .auto pair per marked hand-own row (i9, ruled COORD 2026-10-15).
+# Rows: the 182 of docs/phase4/AUDIT-h6-handown-go1.26.9.md section 4 at 47ebebf76c77885ecdbfa8f8cebe372ae7e3361f, in table order.
+# Roots: the H5 re-run stage on i9; h4a converted at go1.24.13 and h5 at go1.26.9 from ONE binary (sha256
+#   cea40a5d6f9c...), each seeded from the landing e0e95b3424 with its own pin. h5 is the root AFTER H5c -Apply.
+# side_file: the file the pair compares, by the go124 audit's sides -- 'auto:<path>.cs.auto' for an .auto
+#   differential, 'principal:<principal .cs>' for a *_impl.cs whose principal the audit names (the principal's
+#   converted .cs at each release), '-' for a principal NOT named (derived per row by its lane) or a manual
+#   upstream diff (no converter side). A principal the audit spells per-GOOS in brace form, e.g.
+#   'runtime/{windows,linux,darwin}/trace.cs', is three files: its hash and written columns read
+#   '<goos>=<value>' joined by ';', in that order.
+# sha256: of the root's bytes as they lie on disk, or 'absent'. written: 'run' when the file is newer than that
+#   root's sentinel, 'seed' when it is not -- a seed file is either an identical re-emission (the converter skips
+#   an identical write) or a stale seed copy, which mtime cannot separate.
+# substantive: the audit's instrument class is touched-substantive (these rows' files are published under
+#   docs/phase4/data/h6-auto-pairs/{h4a,h5}/, mirroring src/core).
+path	evidence_class	side_file	h4a_sha256	h4a_written	h5_sha256	h5_written	substantive
+runtime/cpusampler_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/cputicks_impl.cs	principal .auto — `runtime/cputicks.cs`	principal:runtime/cputicks.cs	e9c73121d249907250ecb907f1b4e55e023e3bbe1452fc6db868ad14ddd11fdb	seed	e9c73121d249907250ecb907f1b4e55e023e3bbe1452fc6db868ad14ddd11fdb	seed	no
+runtime/darwin/cpuprof_darwin_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/darwin/libccall_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/darwin/lock_sema_impl.cs	principal .auto — `runtime/darwin/lock_sema.cs`	principal:runtime/darwin/lock_sema.cs	f0f8ae11d8716a61d8d4b0c874fb42450736a14ce90908a701a36c6eb8ce7f6c	seed	f0f8ae11d8716a61d8d4b0c874fb42450736a14ce90908a701a36c6eb8ce7f6c	seed	no
+runtime/darwin/nanotime_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/darwin/os_darwin_impl.cs	principal .auto — `runtime/darwin/os_darwin.cs`	principal:runtime/darwin/os_darwin.cs	ed21532e607d12acc4790281f1d14bd065dda8dc4e6f644f81b495ba4299ebc7	run	313806b5740e65c2fc2b3f82863c8244b41a82077a5416440c12ba0eecc9d813	run	yes
+runtime/darwin/sigaction_impl.cs	principal .auto — principal not named	-	-	-	-	-	yes
+runtime/darwin/signal_posix_darwin_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/darwin/sigprocmask_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/darwin/sys_darwin_signote_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/debug/stubs_impl.cs	principal .auto — `runtime/debug/stubs.cs`	principal:runtime/debug/stubs.cs	5e3efad69dc8a9dcec1b1c026627ed5899edf27adf0e4c76c000bce68c6b4b1a	seed	5e3efad69dc8a9dcec1b1c026627ed5899edf27adf0e4c76c000bce68c6b4b1a	seed	no
+runtime/debuglog_impl.cs	principal .auto — `runtime/debuglog.cs`	principal:runtime/debuglog.cs	aa613ce3179475679c3b15d2a56ecac866744bed9a9ea3319c4efc40a661a3f1	seed	3068a97ab961c4d97acdf69818903da76a9eabe4627a896659d45948e8175327	run	yes
+runtime/goargs_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/goenvs_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/hostofrecord_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/linux/cpuprof_linux_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/linux/lock_futex_impl.cs	principal .auto — `runtime/linux/lock_futex.cs`	principal:runtime/linux/lock_futex.cs	265196f2196554889f80b020f097858d60db26bec64ea64fa3d15b9b91af2b5c	seed	265196f2196554889f80b020f097858d60db26bec64ea64fa3d15b9b91af2b5c	seed	no
+runtime/linux/mem_linux_impl.cs	principal .auto — `runtime/linux/mem_linux.cs`	principal:runtime/linux/mem_linux.cs	75e7375b49b84eddb3d7b621657f7fdda227a92037a194e393edc18d75457088	seed	ac5bc1eb9a78badeb57188fa7beceaa55f19bf3070d764c69a0c86a990015b0c	run	yes
+runtime/linux/nanotime_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/linux/netpoll_epoll_impl.cs	principal .auto — `runtime/linux/netpoll_epoll.cs`	principal:runtime/linux/netpoll_epoll.cs	b94d37007d1988831e1c6bbedde1e84a20835dc172e2c810370fd50a850d7dfe	seed	5a65a6cc9f391fbd5ba20b1e14f5c3062850170e9e464a6cfb9517948d49f7d8	run	yes
+runtime/linux/os_linux_impl.cs	principal .auto — `runtime/linux/os_linux.cs`	principal:runtime/linux/os_linux.cs	ed3341f411521098d71ccfb423680da6031e608ff83b7365c714f3197e2f48b7	seed	18501ce38851720deae003e1cccbf36e32befdec838de04aa1b3e9f3acb9979e	run	yes
+runtime/linux/signal_posix_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/linux/sigprocmask_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/linux/stubs2_impl.cs	principal .auto — `runtime/linux/stubs2.cs`	principal:runtime/linux/stubs2.cs	6400cb381783f6179d2ee4c068b96ac3a02084b36f647d0be3567608ff8e27ba	seed	6400cb381783f6179d2ee4c068b96ac3a02084b36f647d0be3567608ff8e27ba	seed	no
+runtime/lock_managed_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/managed_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/mcleanup.cs	.auto differential	auto:runtime/mcleanup.cs.auto	e65331c7be2ca1a9f1a05e7e29c1a14750aef56c0d91ce86d275927623c115eb	run	8140dce5667714f24c1b07228f7ff7dda082d50aa313d0cf74b98daa8b0ff759	run	yes
+runtime/metrics/sample.cs	.auto differential	auto:runtime/metrics/sample.cs.auto	c67862aec5dbcb58e0ec9042b76bdbdb489774ea3e14721b642e771392b06c93	run	c67862aec5dbcb58e0ec9042b76bdbdb489774ea3e14721b642e771392b06c93	run	no
+runtime/mfinal.cs	.auto differential	auto:runtime/mfinal.cs.auto	958081f7c662dece95895f0d5fd4cc935f323e7c8c362cfd190b05fdeacae851	run	c43a6034ebdb3c0301333228a55a65e028d4e98236746244caa1451ea44e3fe0	run	yes
+runtime/mgc_impl.cs	principal .auto — `runtime/mgc.cs`	principal:runtime/mgc.cs	d213a6a5f7bd8ece63f28e3df4aae5c69082154c4a8e4840af16b9009733c537	run	1e1c611cc362d8061ad63120777041fb25164c1df1fbf8d2a145f0933d9eca59	run	yes
+runtime/mprof_impl.cs	principal .auto — `runtime/mprof.cs`	principal:runtime/mprof.cs	67a7687a84ebc32d5047d312966ad7db5f2ee8e12948ffe38002bbdb0fe0a187	seed	d93988f3ead80a97e8108a34b0b9f3a46df6f47e727e026f351c6a1569e2a039	run	yes
+runtime/panic_impl.cs	principal .auto — `runtime/panic.cs`	principal:runtime/panic.cs	cf2af5f084b4dce8452d6c3c4114f3aca72699b91cc0477304cc8f3737bf5cd3	seed	50f4e18ddd0ac16f14bbe9d8cf1846d067312fb4d1f55887113bab1bc4fa4fbe	run	yes
+runtime/panicvalues_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/park_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/pprof/darwin/proto_darwin_impl.cs	principal .auto — `runtime/pprof/darwin/proto_darwin.cs`	principal:runtime/pprof/darwin/proto_darwin.cs	03f22dddde346861ee347082dcd1929d85385405f812d1d1bbd72f915a133785	seed	03f22dddde346861ee347082dcd1929d85385405f812d1d1bbd72f915a133785	seed	no
+runtime/pprof/linux/proto_other_impl.cs	principal .auto — `runtime/pprof/linux/proto_other.cs`	principal:runtime/pprof/linux/proto_other.cs	3793fcf4beab40b3fdca66ac6186b264db556bb8a656f9b3054ff290a8284791	seed	3793fcf4beab40b3fdca66ac6186b264db556bb8a656f9b3054ff290a8284791	seed	no
+runtime/pprof/proflabel_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/pprof/symtab_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/pprof/windows/proto_windows_impl.cs	principal .auto — `runtime/pprof/windows/proto_windows.cs`	principal:runtime/pprof/windows/proto_windows.cs	f7ec8f5ca39527dd8ee347a15f7d56a236eb718f285b7d070d0a817998512f97	seed	c49b8f43c59d93349e840aca438f29d6515fb755e6e85d1ce59336fc867d0b68	run	yes
+runtime/profbuf_impl.cs	principal .auto — `runtime/profbuf.cs`	principal:runtime/profbuf.cs	75a8dffe5b81ceeda607153f09cf4c37fdd90bc48f7d2ecf9a7107b465ab836a	seed	5f7ce704c03caad613f62dfb0d5a8e695f739da82396fcbcbd41333f8cae7207	run	yes
+runtime/runtime2.cs	.auto differential	auto:runtime/runtime2.cs.auto	17bfa89a050803ef3a33cabb33665bfbba41a88ab9f655d3515f3a49c1b31ba0	run	346421663992dbe841571fbf49e81d986ecf06fbd72d4c87f5beef352db6bb23	run	yes
+runtime/runtime2_impl.cs	principal .auto — `runtime/runtime2.cs`	principal:runtime/runtime2.cs	71e8b383577bdd08ba96e6f767b17934522fac41aa7652033988be5ee0be3f36	seed	71e8b383577bdd08ba96e6f767b17934522fac41aa7652033988be5ee0be3f36	seed	yes
+runtime/stubs_impl.cs	principal .auto — `runtime/stubs.cs`	principal:runtime/stubs.cs	9aa4e730905b02bdba3cb1b71d4c7c29b62c4587cc2041d233e80681ac486d89	seed	caaa86a7bff149c7dfe14be16dffef66d77780b6d6b31d82e97aa3923a6aebab	run	yes
+runtime/trace_impl.cs	principal .auto — `runtime/{windows,linux,darwin}/trace.cs`	principal:runtime/{windows,linux,darwin}/trace.cs	windows=cc29ea3779ebdcaafbd2c2a3e9bd72b96f5aed1a134a619d9a3d6262ba262791;linux=370412b7738d91ac2e22338c37e86a64da5e7524fbe68b053aa15e65b734584f;darwin=370412b7738d91ac2e22338c37e86a64da5e7524fbe68b053aa15e65b734584f	windows=seed;linux=seed;darwin=seed	windows=20ea2b13686e26209454e0668a7370169e00346fe6a2ddbe7f07edb679db0374;linux=a38d2dcc3ed99612c2115f6af24286c1652e85aa5d84f5a800843347246989fe;darwin=a38d2dcc3ed99612c2115f6af24286c1652e85aa5d84f5a800843347246989fe	windows=run;linux=run;darwin=run	yes
+runtime/tracemap_impl.cs	principal .auto — `runtime/tracemap.cs`	principal:runtime/tracemap.cs	e4272317f7a4f7d91645eccef5ea0ee7d2d4f0af1354218cf2dfd81efa142b92	seed	b1095c1d5c7b0743cd2fd0e2e59dbc3c25188bc055aa60c3c5a1043f91c7e7e5	run	no
+crypto/internal/boring/bcache/cache.cs	.auto differential	auto:crypto/internal/boring/bcache/cache.cs.auto	e8e50bcd013e0ac9af5db4d1ba274440207b0b98e4e818624ac113c2a885808e	run	e8e50bcd013e0ac9af5db4d1ba274440207b0b98e4e818624ac113c2a885808e	run	no
+crypto/internal/fips140/alias/alias_impl.cs	principal .auto — `crypto/internal/fips140/alias/alias.cs`	principal:crypto/internal/fips140/alias/alias.cs	ef72c3d73773e803e89d4772069a056eabfc2d24669d2f0879c0e0bf0146d8c8	seed	ef72c3d73773e803e89d4772069a056eabfc2d24669d2f0879c0e0bf0146d8c8	seed	no
+crypto/internal/fips140/check/check_impl.cs	principal .auto — `crypto/internal/fips140/check/check.cs`	principal:crypto/internal/fips140/check/check.cs	dedd2eea787bb0657fa00c822add943f2b78708ad39bbc255a8ee9855fc5e699	seed	dedd2eea787bb0657fa00c822add943f2b78708ad39bbc255a8ee9855fc5e699	seed	yes
+crypto/internal/fips140/nistec/fiat/p256_impl.cs	principal .auto — `crypto/internal/fips140/nistec/fiat/p256.cs`	principal:crypto/internal/fips140/nistec/fiat/p256.cs	9bbb630c55e5a3bfe1d8fbc3c1e587c301f7967d592d2fcd98cb2857d58cb4d2	seed	4319f37ba780884672410182bd5d8befa85d58de6556f5c2e772be78cd2c626a	run	yes
+crypto/internal/fips140/nistec/p256_impl.cs	principal .auto — `crypto/internal/fips140/nistec/p256.cs`	principal:crypto/internal/fips140/nistec/p256.cs	0727aba328252027c13f42b34de917e5491ee285ab32b6ea194046c897558325	seed	762600b86101a0f275ac9c3bbc573974d9f89a03309af29864f493c8164dc00e	run	yes
+crypto/internal/fips140/sha3/keccakf_impl.cs	principal .auto — `crypto/internal/fips140/sha3/keccakf.cs`	principal:crypto/internal/fips140/sha3/keccakf.cs	adfc59e7d9475465f949e120369bf6581069359b35a1b9097e6e3f5bf592bc86	seed	adfc59e7d9475465f949e120369bf6581069359b35a1b9097e6e3f5bf592bc86	seed	no
+crypto/internal/fips140/subtle/xor_generic.cs	.auto differential	auto:crypto/internal/fips140/subtle/xor_generic.cs.auto	85e66630bb43d3a3bd1a75c468b8f7624366c17eb19d2d6ff8fb311f86d70bb2	run	7174f842c0ee3a881673faf736a4299a8d3186ec37b76757a72e7d27f244f90f	run	yes
+crypto/rand/rand_impl.cs	principal .auto — `crypto/rand/rand.cs`	principal:crypto/rand/rand.cs	10958d2d275e3472829e6d39123ab4ed27248f2f49f2f0f1f53b5559e8429ec9	seed	146e834492f394b1a929149ec24fefda71eca20986958090eb651e99421a66d5	run	yes
+debug/pe/symbol_impl.cs	principal .auto — `debug/pe/symbol.cs`	principal:debug/pe/symbol.cs	f05eca59667743fd11578e2c36c096a493eef25b06fef0bc53f1f4e84ac0aedb	seed	f05eca59667743fd11578e2c36c096a493eef25b06fef0bc53f1f4e84ac0aedb	seed	no
+hash/crc32/crc32_amd64.cs	.auto differential	auto:hash/crc32/crc32_amd64.cs.auto	d91e00b5266b9f5b7bdc26e5374f49cc685972af83fd47efe48c7b0294537a1d	run	8fc3598691871cbac341427c3d97a62f73be3a9b3c66b91521b343f289e91358	run	yes
+internal/abi/type_impl.cs	principal .auto — `internal/abi/type.cs`	principal:internal/abi/type.cs	09a3c45841e23d709d4dd0e482bba7e52e4204a66e6a7b760b2b496a7e1f5d62	seed	a4f69ddead0e6ad8ad9ca3b34146da937af4d32dc472ac3a13ddc00e289d652b	run	yes
+internal/chacha8rand/chacha8_impl.cs	principal .auto — `internal/chacha8rand/chacha8.cs`	principal:internal/chacha8rand/chacha8.cs	f0dd460ebd978674d099d09a01da85448a65c9fed534692a23fcc884781ee860	seed	dd9e8b69dbad129ae2735f4e158c13acbdc1d40da5a4ec73e37415d230be3ca9	run	yes
+internal/cpu/cpu_x86_impl.cs	principal .auto — `internal/cpu/cpu_x86.cs`	principal:internal/cpu/cpu_x86.cs	fd5149c7f5d830a931850b928f1141aa6ce104e094ab2fc4a290c5f71326ded0	seed	b59b72774310b0ecd7b749c453d393196f005938e32c4a84b7879522b43247a0	run	yes
+internal/reflectlite/swapper_impl.cs	principal .auto — `internal/reflectlite/swapper.cs`	principal:internal/reflectlite/swapper.cs	f4b9ff4e7b1f53e809d11f8cf2e687d52114ee44e9c8675a3c1ea2d6bf115ab7	seed	f4b9ff4e7b1f53e809d11f8cf2e687d52114ee44e9c8675a3c1ea2d6bf115ab7	seed	no
+internal/runtime/atomic/atomic_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/runtime/maps/runtime_impl.cs	principal .auto — `internal/runtime/maps/runtime.cs`	principal:internal/runtime/maps/runtime.cs	e3b8d140563ffa4e019c2b6e72eb9eeed97122b840623d46f6647e3618d68d1d	seed	58a9db6357947e4d10a65e5261a69a0809d81b7e01fbc0cd82420fdf023d9043	run	yes
+internal/runtime/syscall/linux/linux/syscall_linux_impl.cs	principal .auto — `internal/runtime/syscall/linux/linux/syscall_linux.cs`	principal:internal/runtime/syscall/linux/linux/syscall_linux.cs	absent	-	a0256d33da33fc2373addd4e6b044cd749993359113912bb64d4a074e3833b7d	run	yes
+math/bits/bits_impl.cs	principal .auto — `math/bits/bits.cs`	principal:math/bits/bits.cs	7e41baafe763b74e6bb7a98ea7ea410fb25023ca1081f54766477edebc0faecc	seed	d037530d11f7cc28a171269f54c941e9f32f984e8043d32528351c837bf660dd	run	yes
+math/rand/rand_impl.cs	principal .auto — `math/rand/rand.cs`	principal:math/rand/rand.cs	8bb4a95792bddea2709d2ebddbad3bef6e5b42536d65d2c113fbeb7be16c3f0d	run	8bb4a95792bddea2709d2ebddbad3bef6e5b42536d65d2c113fbeb7be16c3f0d	run	no
+math/rand/v2/rand_impl.cs	principal .auto — `math/rand/v2/rand.cs`	principal:math/rand/v2/rand.cs	69a4d29786cd181718b80573474c6500391f2dcd2bd3c08dcb7390a713cfb9e3	run	69a4d29786cd181718b80573474c6500391f2dcd2bd3c08dcb7390a713cfb9e3	run	no
+reflect/deepequal_impl.cs	principal .auto — `reflect/deepequal.cs`	principal:reflect/deepequal.cs	2d0893945bdac66ba0127cd48a417aa8391802d959e161f937c013cd0032ae6f	seed	2d0893945bdac66ba0127cd48a417aa8391802d959e161f937c013cd0032ae6f	seed	no
+reflect/makefunc_impl.cs	principal .auto — `reflect/makefunc.cs`	principal:reflect/makefunc.cs	cca6e448f065d26caa06610f961d733f02591b50b60334067ee264a6656ad21a	seed	ffcd7ab892a3fb3aa16414745ce9acca459b1a0bbc4825dd6d0c4337c7bcd95f	run	yes
+reflect/value_impl.cs	principal .auto — `reflect/value.cs`	principal:reflect/value.cs	3a61152d444837b71b54923dbc97d6ee46f6a6784fa4ecba7b84dba2a2dba366	seed	d8335b9c55ac44928f43c4f8a70d812dc91768cfa628e1f4dc0f0af88d8567fc	run	yes
+runtime/arena_impl.cs	principal .auto — `runtime/{windows,linux,darwin}/arena.cs`	principal:runtime/{windows,linux,darwin}/arena.cs	windows=8b6a7e65844f23e673161b3308a48981224ae127c8d0a4681ca323ea1c33c85d;linux=5935f5b4b830448abfb631e7ff1166b8a96517acd317c3315d21e6f795e74b33;darwin=5935f5b4b830448abfb631e7ff1166b8a96517acd317c3315d21e6f795e74b33	windows=seed;linux=seed;darwin=seed	windows=36341fbc25a52082e3dfd056400f1e31e8aa2d6f50a5239a4760a58966c34677;linux=a6c7d415f89190e94abc98d305a4e3c5255e7edf736cb12cfce97bf2537f2007;darwin=a6c7d415f89190e94abc98d305a4e3c5255e7edf736cb12cfce97bf2537f2007	windows=run;linux=run;darwin=run	yes
+runtime/hash_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/malloc_impl.cs	principal .auto — `runtime/{windows,linux,darwin}/malloc.cs`	principal:runtime/{windows,linux,darwin}/malloc.cs	windows=0da241108c175e4de8793a4b0250f55e76d9d012d3064c557bcb0df3310a9ced;linux=b6d198fe56a5ceb4e1e22fa5257e56b8cce629ffa1bb28e560e67a5aeadd0fde;darwin=b6d198fe56a5ceb4e1e22fa5257e56b8cce629ffa1bb28e560e67a5aeadd0fde	windows=seed;linux=seed;darwin=seed	windows=7b4eea825afc8172d72e6784ac369620d5a44bef029844fa76306fffdc1693e8;linux=891366657d75c3d61bf1a8904091f329fe0a013af48a9f35a8b3ea0768403dcb;darwin=891366657d75c3d61bf1a8904091f329fe0a013af48a9f35a8b3ea0768403dcb	windows=run;linux=run;darwin=run	yes
+runtime/mbitmap_impl.cs	principal .auto — `runtime/mbitmap.cs`	principal:runtime/mbitmap.cs	5f6593af18d22d3e1e43d3a4fb70e7896c42fc419215743a9c831aac10f7a007	seed	e8bb6060432914371ce3680fe974842538d8e5af945aa9657ad31230b5ec81f0	run	yes
+runtime/mem_persistent_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/memmove_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/mranges_impl.cs	principal .auto — `runtime/mranges.cs`	principal:runtime/mranges.cs	1eea80118696af5b23d7b84c547fdf8e31f15d2fae07f973a8b9dd1799639ea2	seed	1eea80118696af5b23d7b84c547fdf8e31f15d2fae07f973a8b9dd1799639ea2	seed	no
+runtime/netpoll_impl.cs	principal .auto — `runtime/netpoll.cs`	principal:runtime/netpoll.cs	638a3df6511812a33dcf4ea2bf2c61010085c483bb32efc39469aa3755542cb4	seed	90a1e780b969ce4ced0b6963b1588b8a55777994f590fe47c8a249c2ce2c198e	run	yes
+runtime/pinner_impl.cs	principal .auto — `runtime/pinner.cs`	principal:runtime/pinner.cs	085f00dbb1899e405bfaa485925d238736db5de9ecf995b3b3a3016349fd013f	seed	c8ac00e5a791c971af59a73a0aff3132e3fe123f0ad05f5ae0011504afad6db9	run	yes
+runtime/sema_impl.cs	principal .auto — `runtime/sema.cs`	principal:runtime/sema.cs	8138052fa62096010725897b1414f0648b53c3f6c0de1f432a42e1f5445e326f	seed	9c4626a3d7c1dff4ad559a17e04a37d9af4e1b36c3bf477d44dc9ad19678fc1f	run	yes
+runtime/syscall_managed_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/windows/cpuprof_windows_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/windows/lock_sema_impl.cs	principal .auto — `runtime/windows/lock_sema.cs`	principal:runtime/windows/lock_sema.cs	b80c59e714a28626970a7e682cde99fee5325347eb3f40fa1b3f1611f50c6af3	seed	b80c59e714a28626970a7e682cde99fee5325347eb3f40fa1b3f1611f50c6af3	seed	no
+runtime/windows/mem_windows_impl.cs	principal .auto — `runtime/windows/mem_windows.cs`	principal:runtime/windows/mem_windows.cs	e98744b20a66ada46de417fcf25d70df209d43fc0403f624f5a479b2be6e6ce7	seed	f0d72f8757a100600ac014c4a4bde52535b532b8e074277d58c6fade0540417b	run	yes
+runtime/windows/nanotime_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+runtime/windows/netpoll_windows_impl.cs	principal .auto — `runtime/windows/netpoll_windows.cs`	principal:runtime/windows/netpoll_windows.cs	ac68e49ede503247457e405671aee49c42fa72dee7fa854b297335b639ddf5c0	seed	90a9816057ecc5d623874a51a781f5bd3b04549ebdb1dd11f027db52a159e7bb	run	yes
+runtime/windows/os_windows_impl.cs	principal .auto — `runtime/windows/os_windows.cs`	principal:runtime/windows/os_windows.cs	287f26379320d15d1096a604c0255b35250a9d3d4e0b8bd93d2059ba3a80624d	run	0c12a335ea7792a15d78ca66520007113fe12b08bf411ad2b5d1651b2b7993ea	run	yes
+runtime/windows/signal_windows_impl.cs	principal .auto — `runtime/windows/signal_windows.cs`	principal:runtime/windows/signal_windows.cs	6b48d3a02e3abcdfc4bd8b7086bf991fd47837b454c66b7c0c0e8eb82f17437d	seed	e54cca2bb8489bb86c4f3f6636582610ef03831aa5e6d24878205eb8b7c12db2	run	yes
+runtime/windows/usleep_windows_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+slices/slices_impl.cs	principal .auto — `slices/slices.cs`	principal:slices/slices.cs	176dccf2ad06671b7a965e46ed8707e5ee157f485c8424f6e34684e6dee15240	seed	fad1fcccd0078a9185c74741563fdefaa604086f5c7b1fd7a75d3518dde7822c	run	no
+vendor/golang.org/x/crypto/internal/alias/alias_purego_impl.cs	principal .auto — `vendor/golang.org/x/crypto/internal/alias/alias_purego.cs`	principal:vendor/golang.org/x/crypto/internal/alias/alias_purego.cs	4559190f973ebca7aef4ac3e62fbdf475db8e1d8fb43c916aaf389839af63c46	seed	4559190f973ebca7aef4ac3e62fbdf475db8e1d8fb43c916aaf389839af63c46	seed	no
+internal/poll/darwin/runtime_netpoll_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/poll/fd_mutex_impl.cs	principal .auto — `internal/poll/fd_mutex.cs`	principal:internal/poll/fd_mutex.cs	d3ef1bcb33e7c4d03271ef42d442f4ae8625dcde5ff1076b4c09640d965c7a5b	seed	5f4b7af03aacf537710a180cd716f29ee2b2220a5977bc0f12940b66e0f47ef0	run	yes
+internal/poll/linux/fd_writev_unix.cs	.auto differential	auto:internal/poll/linux/fd_writev_unix.cs.auto	451d6e5f24cc1ab22727991c88d38952f387ef3361bf4fe78433dcb15ac17b34	seed	451d6e5f24cc1ab22727991c88d38952f387ef3361bf4fe78433dcb15ac17b34	seed	no
+internal/poll/linux/runtime_netpoll_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/poll/runtime_sema_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/poll/windows/fd_windows_impl.cs	principal .auto — `internal/poll/windows/fd_windows.cs`	principal:internal/poll/windows/fd_windows.cs	6c7d0a0c0029710aec5e0d0e9735ddef3b93465259a8fe34f2bc35f8a16bd2f8	seed	a6c7187343d6027677c335f2aa6cff2c8109bb62110ae54616cf9fbcf797e660	run	yes
+internal/poll/windows/runtime_netpoll_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/unix/darwin/net_darwin_impl.cs	principal .auto — `internal/syscall/unix/darwin/net_darwin.cs`	principal:internal/syscall/unix/darwin/net_darwin.cs	b17fb613ea1c972924aa2c849430b888d1cd21b04cee740eb55d75c5111fa754	seed	b17fb613ea1c972924aa2c849430b888d1cd21b04cee740eb55d75c5111fa754	seed	no
+internal/syscall/unix/darwin/user_darwin_impl.cs	principal .auto — `internal/syscall/unix/darwin/user_darwin.cs`	principal:internal/syscall/unix/darwin/user_darwin.cs	d306337803679f7521a2a1ecb73f74acca798d3cc9110c0d458cef739dc6a3b3	seed	d306337803679f7521a2a1ecb73f74acca798d3cc9110c0d458cef739dc6a3b3	seed	no
+internal/syscall/unix/linux/net_linux_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/unix/linux/siginfo_linux.cs	.auto differential	auto:internal/syscall/unix/linux/siginfo_linux.cs.auto	c875ee78f6a99ace75c18ebb2e3c87b5e49f60dea77b0ec2f392915d9b1a5d10	seed	c875ee78f6a99ace75c18ebb2e3c87b5e49f60dea77b0ec2f392915d9b1a5d10	seed	no
+internal/syscall/windows/exec_windows_test.cs	.auto differential	auto:internal/syscall/windows/exec_windows_test.cs.auto	2570fdcb50d3e10b78cce09f177c3df1879bc2cd7faf272289d37bc0c4be2fe4	seed	2570fdcb50d3e10b78cce09f177c3df1879bc2cd7faf272289d37bc0c4be2fe4	seed	yes
+internal/syscall/windows/registry/registry_test.cs	.auto differential	auto:internal/syscall/windows/registry/registry_test.cs.auto	21396024eae05e1fdfbe35defd23092ae3bac4ac9db04b290387c794d9419da0	seed	21396024eae05e1fdfbe35defd23092ae3bac4ac9db04b290387c794d9419da0	seed	yes
+internal/syscall/windows/registry/windows/value.cs	.auto differential	auto:internal/syscall/windows/registry/windows/value.cs.auto	1082843b83b94ba10d66ff50d29feb8a8bd3704bf2b23d8214a21140fc5d03a0	run	be8ba0ede114e94a9ab8046084666bbf39aa2bffc88caa3109fd9bca3e6a0e04	run	yes
+internal/syscall/windows/windows/net_windows_impl.cs	principal .auto — `internal/syscall/windows/windows/net_windows.cs`	principal:internal/syscall/windows/windows/net_windows.cs	645d415667904256bc3c2795883ddcbc00947cac8e858274a486772d5670bf71	seed	4dc6d2d39de66f7116f7e168a6febb9b034418cd89a93344041b5c51ebbc9e04	run	yes
+internal/syscall/windows/windows/security_windows_impl.cs	principal .auto — `internal/syscall/windows/windows/security_windows.cs`	principal:internal/syscall/windows/windows/security_windows.cs	ab02dd338f23e3c552383a616ae342bb778e14e9d7ffeee27b141f36db9c50a9	seed	b4fe643d721bea9ac28574b252d3e726f1ab2430bdb4f3a050d0236e73062b76	run	no
+internal/syscall/windows/windows/syscall_windows_impl.cs	principal .auto — `internal/syscall/windows/windows/syscall_windows.cs`	principal:internal/syscall/windows/windows/syscall_windows.cs	e377369d6caf1724f351c6a6e9c6e44532ee47f2f3082b5da75a79be269c8d26	seed	011dc7a3c951f2b11950169bedf507e08a91e59ad0bc5fa2a33e60c436689d8a	run	yes
+internal/syscall/windows/windows/zsyscall_windows_impl.cs	principal .auto — `internal/syscall/windows/windows/zsyscall_windows.cs`	principal:internal/syscall/windows/windows/zsyscall_windows.cs	5e14d37dfafac76d04cade659e1461923a331eb10061f5d8efbc70c7c06d22ef	seed	6715d8af4559563ecbbfd006334ec06275d444eebca2abc0ae4d2de108c22a95	run	yes
+internal/syscall/windows/windows/zsyscall_windows_module_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/windows/windows/zsyscall_windows_ntfile_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/windows/windows/zsyscall_windows_privilege_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/windows/windows/zsyscall_windows_ptrout_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/windows/windows/zsyscall_windows_version_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/syscall/windows/windows/zsyscall_windows_wsa_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+net/dnsclient_impl.cs	principal .auto — `net/dnsclient.cs`	principal:net/dnsclient.cs	06c22c5166c89bc0476469b2afc1b5fafdd63b5cfab54d2fb8b1c8e9a570b91a	run	9f6371b2af4de94c464b6fa360375de0fdedce8d714021b64efebc4816f65c8c	run	yes
+net/windows/interface_windows_impl.cs	principal .auto — `net/windows/interface_windows.cs`	principal:net/windows/interface_windows.cs	90f1d163e737ad4e133d52ec24fe95fff284bba4c404d8ad95f159bb6bc333f4	seed	90f1d163e737ad4e133d52ec24fe95fff284bba4c404d8ad95f159bb6bc333f4	seed	yes
+net/windows/lookup_windows.cs	.auto differential	auto:net/windows/lookup_windows.cs.auto	dd0b21e265225f2132f7f910b2902579abb265137b4a87c1c32d9b2e4d34db1e	run	d7a5802e763ef5ad1bf20ab6f3d0352c676ab40e6b2c1c9abc24204fdfb67909	run	yes
+os/darwin/dir_darwin_impl.cs	principal .auto — `os/darwin/dir_darwin.cs`	principal:os/darwin/dir_darwin.cs	1b237cc82a819f2f237578357ee12b6393bcb33ab9cf249380a1f166efe194dd	seed	1b237cc82a819f2f237578357ee12b6393bcb33ab9cf249380a1f166efe194dd	seed	yes
+os/linux/wait_waitid.cs	.auto differential	auto:os/linux/wait_waitid.cs.auto	000d915c8924346842652c669ad0ac29a966e91d1e7290b7b6d96a17f1848ad5	seed	000d915c8924346842652c669ad0ac29a966e91d1e7290b7b6d96a17f1848ad5	seed	no
+os/tempfile_impl.cs	principal .auto — `os/tempfile.cs`	principal:os/tempfile.cs	2550fc8036b718c99ee2b8dd202a2b402ad2966b6365c575d3392e739fd45a06	run	8aa239705fd5e65f206e7bf0987df0f5a46ed85d14170a158d76337fa8490e1e	run	yes
+os/user/windows/lookup_windows_impl.cs	principal .auto — `os/user/windows/lookup_windows.cs`	principal:os/user/windows/lookup_windows.cs	5ff77bd9063bb9a05ea2797a7c986092f5b60042c4ebf5986db1e84d4d94d94e	seed	5ff77bd9063bb9a05ea2797a7c986092f5b60042c4ebf5986db1e84d4d94d94e	seed	no
+os/windows/dir_windows_impl.cs	principal .auto — `os/windows/dir_windows.cs`	principal:os/windows/dir_windows.cs	5b8030d7ad9a6d55876da109a9cc5f067a7032c35de67a3a2b662943399cdeae	seed	5b8030d7ad9a6d55876da109a9cc5f067a7032c35de67a3a2b662943399cdeae	seed	no
+os/windows/file_windows_impl.cs	principal .auto — `os/windows/file_windows.cs`	principal:os/windows/file_windows.cs	7646d4ca8cee3c26589fb0494c35bff92ed312d3ce537f263550e7954eadaa0f	seed	9c2fdc04a828a7c1ea399523a0f369db0b2c02edf2f408534c5e5684a17ce195	run	yes
+syscall/darwin/exec_libc2_impl.cs	principal .auto — `syscall/darwin/exec_libc2.cs`	principal:syscall/darwin/exec_libc2.cs	1eed928b7f19ead9d2b3a3c09bc25209e8a8d99aaafd3dd3b0120d562dc5878d	seed	a4635a9cbad584f2e21c65bf3de98ce29886427aac538fcfc20c8dd969915da6	run	yes
+syscall/darwin/sockaddr_darwin_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/darwin/syscall_darwin_impl.cs	principal .auto — `syscall/darwin/syscall_darwin.cs`	principal:syscall/darwin/syscall_darwin.cs	b98ea3135ad4192056528c26c7a95e52dce522fb480fd5cf789f29e498c8063f	seed	e8652e00c6c19002bb7d0219f1248b55d410dbd884e5ea0b39bcf89c4a652109	run	yes
+syscall/linux/cgocaller_linux_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/linux/exec_unix.cs	.auto differential	auto:syscall/linux/exec_unix.cs.auto	12f88d959f95810d087ff3047df8aa185a85192f7383ba36cba947d81f3ed74e	seed	e59a681a82e7a3b0d40bf01f02d1a1b14a635548afcd51a64ce7d7225ab6d8f0	run	yes
+syscall/linux/sockaddr_linux_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/linux/structclass_linux_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/linux/syscall_linux_amd64_impl.cs	principal .auto — `syscall/linux/syscall_linux_amd64.cs`	principal:syscall/linux/syscall_linux_amd64.cs	bd81e822ba10ca6b4ebf4f449cc17b6bbb5ffcc3a522cb4098119a98d325c915	seed	bd81e822ba10ca6b4ebf4f449cc17b6bbb5ffcc3a522cb4098119a98d325c915	seed	no
+syscall/linux/syscall_linux_impl.cs	principal .auto — `syscall/linux/syscall_linux.cs`	principal:syscall/linux/syscall_linux.cs	a3a74db3fe9ae922b0230f60ec13f776761760c92a2ddc39bbf857d005b0a82b	seed	fc0fe951cd05a5f99653db0df51a2edbf985865d9dd43785688107a0466a2eb5	run	yes
+syscall/linux/zsyscall_linux_amd64_impl.cs	principal .auto — `syscall/linux/zsyscall_linux_amd64.cs`	principal:syscall/linux/zsyscall_linux_amd64.cs	cb1d2315187c84c1855bcf39417b53be33c017b309b1e13526070a4da4d442e9	seed	cb1d2315187c84c1855bcf39417b53be33c017b309b1e13526070a4da4d442e9	seed	no
+syscall/syscall_impl.cs	principal .auto — `syscall/{windows,linux,darwin}/syscall.cs`	principal:syscall/{windows,linux,darwin}/syscall.cs	windows=f5e4c2b8e340899ab1873e96a5e3fcbcd7fc73eb517c12e9f9760f38d9052e60;linux=cbeeabaaffa34c1ed15c140db05105f8fe11f5b43c1213cad065167159d164f3;darwin=cbeeabaaffa34c1ed15c140db05105f8fe11f5b43c1213cad065167159d164f3	windows=seed;linux=seed;darwin=seed	windows=0853e1c72fe15104104750128ca2c536a144e3db34d6241bc4be5b3d78a58a98;linux=d4be2df02a1c13e92c429d0dce3133e85b1fd5fb78c6769fbc6f73f5d5092c0e;darwin=d4be2df02a1c13e92c429d0dce3133e85b1fd5fb78c6769fbc6f73f5d5092c0e	windows=run;linux=run;darwin=run	yes
+syscall/windows/dll_windows.cs	.auto differential	auto:syscall/windows/dll_windows.cs.auto	b4959b7dbb15f6f580ec8cdb1e5fe24fdf9d55b8a968ef7e2d9e0e2dc0e6b5b8	run	16d4ec0e724232a23f014e93855330423e89e959e0f82e20c5db6b4ec5ac81cd	run	yes
+syscall/windows/exec_windows.cs	.auto differential	auto:syscall/windows/exec_windows.cs.auto	6d8e4873f6241afbf981b3e6176aa861c96e9911936c537804e6437ece5db86c	run	481f86cd464b2b50420fb6721405d88107454f9f682ed3b4ab4f3c6b7c08fe8f	run	yes
+syscall/windows/security_windows.cs	.auto differential	auto:syscall/windows/security_windows.cs.auto	f228c3d44bc17b858c2a4bf7d9451fda45dae7d4cf888e55f8f77d228c9328b0	run	f228c3d44bc17b858c2a4bf7d9451fda45dae7d4cf888e55f8f77d228c9328b0	run	no
+syscall/windows/syscall_windows_callback_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/syscall_windows_impl.cs	principal .auto — `syscall/windows/syscall_windows.cs`	principal:syscall/windows/syscall_windows.cs	905eea19e35039ae3f9cc786d6c9767552f7275cb1dbc5dda60643f0447c4355	seed	cd0320c3fb72493a205cbd3d78d0844f521bcdf8abbd98f73b9f2e59da23ac2c	run	yes
+syscall/windows/zsyscall_windows_addrinfo_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/zsyscall_windows_certchain_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/zsyscall_windows_dnsrecord_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/zsyscall_windows_impl.cs	principal .auto — `syscall/windows/zsyscall_windows.cs`	principal:syscall/windows/zsyscall_windows.cs	4e55e500e5f5eab0bc61a0c1b56d12161558af93a98e162334ab800799b2d171	seed	debdff88426bd0ab054f256d9db1d3f308d0d91226b43784774aa7e3ebb344c7	run	yes
+syscall/windows/zsyscall_windows_netdb_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/zsyscall_windows_ptrout_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/zsyscall_windows_startupinfo_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+syscall/windows/zsyscall_windows_wsa_impl.cs	principal .auto — principal not named	-	-	-	-	-	no
+internal/godebug/godebug.cs	.auto differential	auto:internal/godebug/godebug.cs.auto	edd43830ff7e5393c9aa77ac3f73b6906b2fd41efe7a457195a24c93d82bd6c7	run	43029cb8adf2c47f4e9bd56973488060a883c2d5d5c61bf756022aaa822ae761	run	yes
+internal/sync/hashtriemap.cs	.auto differential	auto:internal/sync/hashtriemap.cs.auto	0c0f7b357f9c555b543ff7ed2e95cf223596f4d692b336e893e730ec7a16a242	run	f155d70217fb18aa969ff41bdf82dc84ed69be29169c54d72f4678f03ea09110	run	yes
+internal/sync/runtime_impl.cs	principal .auto — `internal/sync/runtime.cs`	principal:internal/sync/runtime.cs	c4dc884c7ca2fb9bea240229e00812ffd12b1efb2762f6cc0413c71bb735eb9a	seed	c4dc884c7ca2fb9bea240229e00812ffd12b1efb2762f6cc0413c71bb735eb9a	seed	no
+internal/synctest/synctest_impl.cs	principal .auto — `internal/synctest/synctest.cs`	principal:internal/synctest/synctest.cs	25f8d14319c841b614edf4e6c51ffdfca779f3ef16eb4f19b418223f5b3313c2	seed	d7df9fad419f37c24a8acbf5b727a5d9908a87b0c45f70def071daaa044388df	run	yes
+internal/testenv/testenv_impl.cs	principal .auto — `internal/testenv/testenv.cs`	principal:internal/testenv/testenv.cs	b561674f1b6f896a30f3ae1b62eaa72a873b4048b9209c80807b7917cc42c9a2	seed	6d1f6e3196d634ca7bda816fcd6777f30f443ecf9801e18b16780844328c1b4d	run	yes
+iter/iter_impl.cs	principal .auto — `iter/iter.cs`	principal:iter/iter.cs	cbd15e69354bbd9bd37280b532ba82b8406c8a94145f85929d7ec4fc0c9fbcb5	seed	440f9870b6a657b1ef24da6bd1b606638b7f0f370a45359447b8f3e3726c3e5a	run	yes
+sync/atomic/type.cs	.auto differential	auto:sync/atomic/type.cs.auto	4f7c0fb51430f988ec45cc4ede2e79a27c8765ac3152a2822a8b8a5b95ac4b9f	run	30776447e9c7b148b7fcdb46beec72861329975833f991ed9f221ac4423ef7b5	run	no
+sync/atomic/value.cs	.auto differential	auto:sync/atomic/value.cs.auto	22a24ff0cf1d62ce2485eca2cb72593a9aa355c7af775ccd390cf7e4872130f9	run	0c04c0a9d0d2c2f27c3226a00e6fdfe7716dc7b3b3e86953d99fccb40048544b	run	no
+sync/cond_impl.cs	principal .auto — `sync/cond.cs`	principal:sync/cond.cs	836bb4fad75a8896495f1fff6e2b06d089e232ec3443a9d9f51bf7535cc6122f	seed	836bb4fad75a8896495f1fff6e2b06d089e232ec3443a9d9f51bf7535cc6122f	seed	no
+sync/mutex.cs	.auto differential	auto:sync/mutex.cs.auto	e6a7fdb44565054c3f583ccf484ad0379db8cb1aac3793048d3225bdad9fa8ac	run	e6a7fdb44565054c3f583ccf484ad0379db8cb1aac3793048d3225bdad9fa8ac	run	no
+sync/once.cs	.auto differential	auto:sync/once.cs.auto	980b74dceddd59f825fde123e1dbde5e3687e75c93032ab2365047e3aebe40cd	run	e7252f63c47796a79b5950544c6d3064cb0bf1122eaea01ffe7546602e845519	run	yes
+sync/oncefunc.cs	.auto differential	auto:sync/oncefunc.cs.auto	854d59d2b35a18031c5fa835f9cbb737f97116bf10f2900571fcd9852d3f61c6	seed	cd1f9bad6100dc748315a0fcd000d4f32c0afc71b7cf9adade02e74815b6ed3c	run	yes
+sync/pool.cs	.auto differential	auto:sync/pool.cs.auto	0d32240a5a3ef251e63181dc79ff96b3f477c9ec37f2672a27152e82e7ea4866	run	2ac4d885403e754d204cc5285fdd336a2d83ca3bdd0c040c1dbf3ba636205b90	run	yes
+sync/poolqueue.cs	.auto differential	auto:sync/poolqueue.cs.auto	72beb17a68c26ca15bdcf878b0234e26cc0b3a121a7246f1095677ef1990c3c5	run	72beb17a68c26ca15bdcf878b0234e26cc0b3a121a7246f1095677ef1990c3c5	run	no
+sync/runtime_impl.cs	principal .auto — `sync/runtime.cs`	principal:sync/runtime.cs	5c09acef44b154236e97eb24b4cf9fa17fc36a73fb8a77daca3f6b1d3ef04b11	seed	23d67318dfedd01bd370d477e3d4d754d677e392c3afec35e5c6fdae38875251	run	yes
+sync/rwmutex.cs	.auto differential	auto:sync/rwmutex.cs.auto	e27f8bb9633b512fa0d44520ea61dfd4a409a419ebb660097f911496eea578c8	run	e27f8bb9633b512fa0d44520ea61dfd4a409a419ebb660097f911496eea578c8	run	no
+sync/waitgroup.cs	.auto differential	auto:sync/waitgroup.cs.auto	34921c816f45c29f1949f43fa09d45692291812f30b3c3e4711d080a4089780d	run	827a39782dbd3412ee0a526e20a948040cf626d1adf00659fe27a0ed5e2779d5	run	yes
+testing/ExportTest.cs	manual upstream diff	-	-	-	-	-	no
+testing/HostDescriptorLimit.cs	manual upstream diff	-	-	-	-	-	no
+testing/LongPathTree.cs	manual upstream diff	-	-	-	-	-	no
+testing/PackageAncestry.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestExecution.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestFlagBridge.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestFormat.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestHost.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestOptions.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestRegistry.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestReporter.cs	manual upstream diff	-	-	-	-	-	no
+testing/TestRunner.cs	manual upstream diff	-	-	-	-	-	no
+testing/testing.cs	manual upstream diff	-	-	-	-	-	yes
+time/sleep_impl.cs	principal .auto — `time/sleep.cs`	principal:time/sleep.cs	e5994cd538b16ad0dcefd11737f2989d74fbbedfbcee594428483cfb2c6f93ae	seed	e5994cd538b16ad0dcefd11737f2989d74fbbedfbcee594428483cfb2c6f93ae	seed	yes
+time/tick.cs	.auto differential	auto:time/tick.cs.auto	2435718dbe1b0c75ea8a89c7b50b0a45bb84a6368f4bfd39b6ef0600b568a0d7	run	2435718dbe1b0c75ea8a89c7b50b0a45bb84a6368f4bfd39b6ef0600b568a0d7	run	no
+unique/clone.cs	.auto differential	auto:unique/clone.cs.auto	358ad0140e48d445760aefd9e17aa57d33c4fdca296c2eb1c4ea1133f2c13964	run	18aefecbf5e753ee80867b60d3bcf63e9cd2417ec30925e3f08987a545cce096	run	yes
+unsafe/unsafe.cs	manual upstream diff	-	-	-	-	-	no
+weak/pointer.cs	.auto differential	auto:weak/pointer.cs.auto	438c38465356eae0a8c43534fa45cae0f00fdfc1d96ca31e4db17caef1396568	run	939d28428b31be6b464376e523e70015219a8ba435747413369917f30fc00b12	run	no

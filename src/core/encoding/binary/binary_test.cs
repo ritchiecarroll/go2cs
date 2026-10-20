@@ -119,7 +119,6 @@ internal static void checkResult(ж<testing.T> Ꮡt, @string dir, global::go.enc
     }
 }
 
-
 partial struct encodersᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<global::go.encoding.binary_package.ByteOrder, any, (slice<byte>, error)> fn;
@@ -138,10 +137,12 @@ internal static void initᴛencoders() { encoders = new encodersᴛ1[]{
         "Encode"u8,
         (global::go.encoding.binary_package.ByteOrder order, any data) => {
             nint size = Size(data);
+
             slice<byte> buf = default!;
             if (size > 0) {
                 buf = new slice<byte>(Size(data));
             }
+
             var (n, err) = Encode(buf, order, data);
             if (err == default! && n != size) {
                 return (default!, fmt.Errorf("returned size %d instead of %d"u8, n, size));
@@ -153,7 +154,6 @@ internal static void initᴛencoders() { encoders = new encodersᴛ1[]{
     (global::go.encoding.binary_package.ByteOrder order, any data) => Append(default!, order, data)
 )
 }.slice(); }
-
 
 partial struct decodersᴛ1 /*dyn*/ {
     internal @string name;
@@ -243,6 +243,7 @@ public static void TestReadSlice(ж<testing.T> Ꮡt) {
         var err = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(src)), BigEndian, Δslice);
         checkResult(tΔ1, readSliceˢ, BigEndian, err, Δslice, res);
     });
+
     Ꮡt.Run(decodeˢ, (ж<testing.T> tΔ2) => {
         var Δslice = new slice<int32>(2);
         var (_, err) = Decode(src, BigEndian, Δslice);
@@ -325,7 +326,6 @@ public static void TestSliceRoundTrip(ж<testing.T> Ꮡt) {
                         if (exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64) {
                             unsigned = true;
                         }
-
                         for (nint i = 0; i < srcʗ1.Len(); i++) {
                             if (unsigned){
                                 srcʗ1.Index(i).SetUint((uint64)(i * 0x07654321));
@@ -371,6 +371,7 @@ public static void TestWriteT(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("WriteT: have err == nil, want non-nil"u8);
                 }
             }
+
             var tv = reflect.Indirect(reflect.ValueOf(ts));
             for ((nint i, nint n) = (0, tv.NumField()); i < n; i++) {
                 @string typ = tv.Field(i).Type().String();
@@ -431,6 +432,7 @@ public static void TestBlankFields(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Error(err);
             }
+
             // zero values must have been written for blank fields
             ref var p = ref heap(new BlankFieldsProbe(), out var Ꮡp);
             {
@@ -438,15 +440,18 @@ public static void TestBlankFields(ж<testing.T> Ꮡt) {
                     tΔ1.Error(errΔ1);
                 }
             }
+
             // quick test: only check first value of slices
             if (p.P0 != 0 || p.P1[0] != 0 || p.P2[0] != 0 || p.P3.F[0] != 0F) {
                 tΔ1.Errorf("non-zero values for originally blank fields: %#v"u8, p);
             }
+
             // write p and see if we can probe only some fields
             (buf, err) = encʗ1.fn(LittleEndian, Ꮡp);
             if (err != default!) {
                 tΔ1.Error(err);
             }
+
             // read should ignore blank fields in b2
             ref var b2 = ref heap(new BlankFields(), out var Ꮡb2);
             {
@@ -485,6 +490,7 @@ public static void TestSizeStructCache(ж<testing.T> Ꮡt) {
 
     // Reset the cache, otherwise multiple test runs fail.
     structSize = new sync.Map(nil);
+
     nint count() {
         nint i = default!;
         ᏑstructSize.Range((any _Δp0, any _Δp1) => {
@@ -493,6 +499,7 @@ public static void TestSizeStructCache(ж<testing.T> Ꮡt) {
         });
         return i;
     }
+
     nint total = default!;
     var countʗ1 = count;
     nint added() {
@@ -500,6 +507,7 @@ public static void TestSizeStructCache(ж<testing.T> Ꮡt) {
         total += delta;
         return delta;
     }
+
     var testcases = new TestSizeStructCache_testcases[]{
         new(@new<TestSizeStructCache_foo>(), 1),
         new(Ꮡ(new array<TestSizeStructCache_foo>(1)), 0),
@@ -511,10 +519,12 @@ public static void TestSizeStructCache(ж<testing.T> Ꮡt) {
         new(Ꮡ(new array<TestSizeStructCache_type>(1, () => new())), 0),
         new(new slice<TestSizeStructCache_type>(1, () => new()), 0)
     }.slice();
+
     foreach (var (_, tc) in testcases) {
         if (Size(tc.val) == -1) {
             Ꮡt.Fatalf("Can't get the size of %T"u8, tc.val);
         }
+
         {
             nint n = added(); if (n != tc.want) {
                 Ꮡt.Errorf("Sizing %T added %d entries to the cache, want %d"u8, tc.val, n, tc.want);
@@ -527,26 +537,26 @@ public static void TestSizeInvalid(ж<testing.T> Ꮡt) {
     var testcases = new any[]{
         (nint)0,
         @new<nint>(),
-        ((ж<nint>)nil),
+        (ж<nint>)nil,
         new nuint[]{}.array(1),
         Ꮡ(new array<nuint>(1)),
         ж<array<nuint>>.NilBoxOfDims(1L),
         new nint[]{}.slice(),
         slice<nint>(default!),
         @new<slice<nint>>(),
-        ((ж<slice<nint>>)nil),
-        ((ж<int8>)nil),
-        ((ж<uint8>)nil),
-        ((ж<int16>)nil),
-        ((ж<uint16>)nil),
-        ((ж<int32>)nil),
-        ((ж<uint32>)nil),
-        ((ж<int64>)nil),
-        ((ж<uint64>)nil),
-        ((ж<float32>)nil),
-        ((ж<float64>)nil),
-        ((ж<complex64>)nil),
-        ((ж<complex128>)nil)
+        (ж<slice<nint>>)nil,
+        (ж<int8>)nil,
+        (ж<uint8>)nil,
+        (ж<int16>)nil,
+        (ж<uint16>)nil,
+        (ж<int32>)nil,
+        (ж<uint32>)nil,
+        (ж<int64>)nil,
+        (ж<uint64>)nil,
+        (ж<float32>)nil,
+        (ж<float64>)nil,
+        (ж<complex64>)nil,
+        (ж<complex128>)nil
     }.slice();
     foreach (var (_, tc) in testcases) {
         {
@@ -576,6 +586,7 @@ public static void TestUnexportedRead(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     foreach (var (_, vᴛ1) in decoders) {
         ref var dec = ref heap(new decodersᴛ1(), out var Ꮡdec);
         dec = vᴛ1;
@@ -619,7 +630,7 @@ public static void TestReadErrorMsg(ж<testing.T> Ꮡt) {
                     }
                 }
             }
-            read((nint)(0));
+            read((nint)0);
             ref var s = ref heap<ж<EmptyStruct>>(out var Ꮡs);
             s = @new<EmptyStruct>();
             read(Ꮡs);
@@ -641,10 +652,12 @@ internal partial struct TestReadTruncated_b2 /*dyn*/ {
 
 public static void TestReadTruncated(ж<testing.T> Ꮡt) {
     @string data = dataᶜ;
+
     ref var b1 = ref heap<slice<int32>>(out var Ꮡb1);
 
     b1 = new slice<int32>(4);
     ref var b2 = ref heap(new TestReadTruncated_b2(), out var Ꮡb2);
+
     for (nint i = 0; i <= len(data); i++) {
         error errWant = default!;
         var exprᴛ1 = i;
@@ -738,6 +751,7 @@ public static void TestByteOrder(ж<testing.T> Ꮡt) {
             if (len(buf) != (nint)(offset + 2)) {
                 Ꮡt.Errorf("AppendUint16: len(buf) = %d, want %d"u8, len(buf), (nint)(offset + 2));
             }
+
             var want32 = (uint32)value;
             order.PutUint32(buf[..4], want32);
             {
@@ -754,6 +768,7 @@ public static void TestByteOrder(ж<testing.T> Ꮡt) {
             if (len(buf) != (nint)(offset + 4)) {
                 Ꮡt.Errorf("AppendUint32: len(buf) = %d, want %d"u8, len(buf), (nint)(offset + 4));
             }
+
             var want64 = (uint64)value;
             order.PutUint64(buf[..8], want64);
             {
@@ -802,6 +817,7 @@ internal static void testReadInvalidDestination(ж<testing.T> Ꮡt, global::go.e
         (uint64)0,
         (bool)false
     }.slice();
+
     foreach (var (_, dst) in destinations) {
         var err = go.encoding.binary_package.Read(new binary_test_package.bytes_ReaderжReader(bytes.NewReader(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.slice())), order, dst);
         @string want = fmt.Sprintf("binary.Read: invalid type %T"u8, dst);
@@ -824,6 +840,7 @@ public static void TestNoFixedSize(ж<testing.T> Ꮡt) {
         Weight: 67.3D,
         Height: 177.8D
     );
+
     foreach (var (_, vᴛ1) in encoders) {
         ref var enc = ref heap(new encodersᴛ1(), out var Ꮡenc);
         enc = vᴛ1;
@@ -966,6 +983,7 @@ public static void BenchmarkAppendStruct(ж<testing.B> Ꮡb) {
     var buf = new slice<byte>(0, Size(Ꮡs));
     b.SetBytes((int64)cap(buf));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         Encode(buf, BigEndian, Ꮡs);
     }

@@ -83,12 +83,14 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> Ꮡn, n
         return (default!, err);
     }
     var dP = bigmod.NewNat().Mod(Ꮡd, pMinusOneMod).Bytes(pMinusOneMod);
+
     var qMinusOne = q.Nat().SubOne(Ꮡq);
     (var qMinusOneMod, err) = bigmod.NewModulus(qMinusOne.Bytes(Ꮡq));
     if (err != default!) {
         return (default!, err);
     }
     var dQ = bigmod.NewNat().Mod(Ꮡd, qMinusOneMod).Bytes(qMinusOneMod);
+
     // Constant-time modular inversion with prime modulus by Fermat's Little
     // Theorem: qInv = q⁻¹ mod p = q^(p-2) mod p.
     if (p.Nat().IsOdd() == 0) {
@@ -98,6 +100,7 @@ internal static (ж<PrivateKey>, error) newPrivateKey(ж<bigmod.Modulus> Ꮡn, n
     var pMinusTwo = p.Nat().SubOne(Ꮡp).SubOne(Ꮡp).Bytes(Ꮡp);
     var qInv = bigmod.NewNat().Mod(q.Nat(), Ꮡp);
     qInv.Exp(qInv, pMinusTwo, Ꮡp);
+
     var pk = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
             N: Ꮡn, E: e
@@ -136,6 +139,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithPrecomputation(slice<byte
     if (err != default!) {
         return (default!, err);
     }
+
     var pk = Ꮡ(new PrivateKey(
         pub: new ΔPublicKey(
             N: n, E: e
@@ -210,6 +214,8 @@ internal static readonly @string cryptoRsaInvalidPrimeˢ = "crypto/rsa: invalid 
 internal static readonly @string cryptoRsaPQNˢ = "crypto/rsa: p * q != n"u8;
 internal static readonly @string cryptoRsaInvalidCrtˢ = "crypto/rsa: invalid CRT exponent"u8;
 internal static readonly @string cryptoRsaInvalidCrtˢ2 = "crypto/rsa: invalid CRT coefficient"u8;
+internal static readonly @string cryptoRsaDDoesNotMatchDPˢ = "crypto/rsa: d does not match dP"u8;
+internal static readonly @string cryptoRsaDDoesNotMatchDQˢ = "crypto/rsa: d does not match dQ"u8;
 internal static readonly @string cryptoRsaPQˢ = "crypto/rsa: p == q"u8;
 internal static readonly @string cryptoRsaPQTooSmallˢ = "crypto/rsa: |p - q| too small"u8;
 internal static readonly @string cryptoRsaDTooSmallˢ = "crypto/rsa: d too small"u8;
@@ -218,6 +224,7 @@ internal static readonly @string cryptoRsaDTooSmallˢ = "crypto/rsa: d too small
 // is allowed to modify priv.fipsApproved.
 internal static error checkPrivateKey(ref PrivateKey priv) {
     priv.fipsApproved = true;
+
     {
         var (fipsApproved, errΔ1) = checkPublicKey(ref nonnil(ref priv).pub); if (errΔ1 != default!){
             return errΔ1;
@@ -226,18 +233,22 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
             priv.fipsApproved = false;
         }
     }
+
     if (priv.dP == default!) {
         // Legacy and deprecated multi-prime keys.
         priv.fipsApproved = false;
         return default!;
     }
+
     var N = priv.pub.N;
     var p = priv.p;
     var q = priv.q;
+
     // FIPS 186-5, Section 5.1 requires "that p and q be of the same bit length."
     if (p.BitLen() != q.BitLen()) {
         priv.fipsApproved = false;
     }
+
     // Check that pq ≡ 1 mod N (and that p < N and q < N).
     var pN = bigmod.NewNat().ExpandFor(N);
     {
@@ -254,6 +265,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (pN.Mul(qN, N).IsZero() != 1) {
         return errors.New(cryptoRsaPQNˢ);
     }
+
     // Check that de ≡ 1 mod p-1, and de ≡ 1 mod q-1.
     //
     // This implies that e is coprime to each p-1 as e has a multiplicative
@@ -261,8 +273,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     // It also implies that a^de ≡ a mod p as a^(p-1) ≡ 1 mod p. Thus a^de ≡ a
     // mod n for all a coprime to n, as required.
     //
-    // This checks dP, dQ, and e. We don't check d because it is not actually
-    // used in the RSA private key operation.
+    // This checks dP, dQ, and e.
     var (pMinus1, err) = bigmod.NewModulus(p.Nat().SubOne(p).Bytes(p));
     if (err != default!) {
         return errors.New(cryptoRsaInvalidPrimeˢ);
@@ -277,6 +288,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (de.IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ);
     }
+
     (var qMinus1, err) = bigmod.NewModulus(q.Nat().SubOne(q).Bytes(q));
     if (err != default!) {
         return errors.New(cryptoRsaInvalidPrimeˢ);
@@ -290,6 +302,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (de.IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ);
     }
+
     // Check that qInv * q ≡ 1 mod p.
     (var qP, err) = bigmod.NewNat().SetOverflowingBytes(q.Nat().Bytes(q), p);
     if (err != default!) {
@@ -299,6 +312,18 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (qP.Mul(priv.qInv, p).IsOne() != 1) {
         return errors.New(cryptoRsaInvalidCrtˢ2);
     }
+
+    // Check d against dP and dQ, even though we never actually use d,
+    // to make sure the key is consistent.
+    var dP1 = bigmod.NewNat().Mod(priv.d, pMinus1);
+    if (dP1.Equal(dP) != 1) {
+        return errors.New(cryptoRsaDDoesNotMatchDPˢ);
+    }
+    var dQ1 = bigmod.NewNat().Mod(priv.d, qMinus1);
+    if (dQ1.Equal(dQ) != 1) {
+        return errors.New(cryptoRsaDDoesNotMatchDQˢ);
+    }
+
     // Check that |p - q| > 2^(nlen/2 - 100).
     //
     // If p and q are very close to each other, then N=pq can be trivially
@@ -326,6 +351,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (diff.BitLenVarTime() <= N.BitLen() / 2 - 100) {
         return errors.New(cryptoRsaPQTooSmallˢ);
     }
+
     // Check that d > 2^(nlen/2).
     //
     // See section 3 of https://crypto.stanford.edu/~dabo/papers/RSA-survey.pdf
@@ -335,6 +361,7 @@ internal static error checkPrivateKey(ref PrivateKey priv) {
     if (priv.d.BitLenVarTime() <= N.BitLen() / 2) {
         return errors.New(cryptoRsaDTooSmallˢ);
     }
+
     return default!;
 }
 
@@ -369,12 +396,12 @@ internal static (bool fipsApproved, error err) checkPublicKey(ref ΔPublicKey pu
     }
     // e needs to be coprime with p-1 and q-1, since it must be invertible
     // modulo λ(pq). Since p and q are prime, this means e needs to be odd.
-    if ((nint)(pub.E & 1) == 0) {
+    if ((pub.E & 1) == 0) {
         return (false, errors.New(cryptoRsaPublicExponentˢ2));
     }
     // FIPS 186-5, Section 5.5(e): "The exponent e shall be an odd, positive
     // integer such that 2¹⁶ < e < 2²⁵⁶."
-    if (pub.E <= (1 << (int)(16))) {
+    if (pub.E <= 1 << 16) {
         fipsApproved = false;
     }
     // We require pub.E to fit into a 32-bit integer so that we
@@ -436,13 +463,16 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
     if (!priv.fipsApproved) {
         fips140.RecordNonApproved();
     }
+
     ж<bigmodꓸNat> m = default!;
     var N = priv.pub.N;
     nint E = priv.pub.E;
+
     var (c, err) = bigmod.NewNat().SetBytes(ciphertext, N);
     if (err != default!) {
         return (default!, ErrDecryption);
     }
+
     if (priv.dP == default!){
         // Legacy codepath for deprecated multi-prime keys.
         fips140.RecordNonApproved();
@@ -463,12 +493,14 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
         // m = m + m2 mod N
         m.Add(m2.ExpandFor(N), N);
     }
+
     if (check) {
         var c1 = bigmod.NewNat().ExpShortVarTime(m, (nuint)E, N);
         if (c1.Equal(c) != 1) {
             return (default!, ErrDecryption);
         }
     }
+
     return (m.Bytes(N), default!);
 }
 

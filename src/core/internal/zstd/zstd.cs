@@ -79,6 +79,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 // This permits reusing a Reader rather than allocating a new one.
 public static void Reset(this ref Reader r, io.Reader input) {
     r.r = input;
+
     // Several fields are preserved to avoid allocation.
     // Others are always set before they are used.
     r.sawFrameHeader = false;
@@ -89,21 +90,20 @@ public static void Reset(this ref Reader r, io.Reader input) {
     r.blockOffset = 0;
     r.buffer = r.buffer[..0];
     r.off = 0;
+    // repeatedOffset1
+    // repeatedOffset2
+    // repeatedOffset3
+    // huffmanTable
+    // huffmanTableBits
+    // window
+    // compressedBuf
+    // literals
+    // seqTables
+    // seqTableBits
+    // seqTableBuffers
+    // scratch
+    // fseScratch
 }
-
-// repeatedOffset1
-// repeatedOffset2
-// repeatedOffset3
-// huffmanTable
-// huffmanTableBits
-// window
-// compressedBuf
-// literals
-// seqTables
-// seqTableBits
-// seqTableBuffers
-// scratch
-// fseScratch
 
 // Read implements [io.Reader].
 public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) {
@@ -172,6 +172,7 @@ internal static readonly @string dictionariesAreNotˢ = "dictionaries are not su
 internal static error readFrameHeader(this ref Reader r) {
 retry:
     nint relativeOffset = 0;
+
     // Read magic number. RFC 3.1.1.
     {
         var (_, err) = io.ReadFull(r.r, r.scratch[..4]); if (err != default!) {
@@ -182,6 +183,7 @@ retry:
             return r.wrapError(relativeOffset, err);
         }
     }
+
     {
         var magic = binary.LittleEndian.Uint32(r.scratch[..4]); if (magic != 0xfd2fb528U) {
             if (magic >= 0x184d2a50 && magic <= 0x184d2a5f) {
@@ -195,10 +197,13 @@ retry:
                 r.readOneFrame = true;
                 goto retry;
             }
+
             return r.makeError(relativeOffset, invalidMagicNumberˢ);
         }
     }
+
     relativeOffset += 4;
+
     // Read Frame_Header_Descriptor. RFC 3.1.1.1.1.
     {
         var (_, err) = io.ReadFull(r.r, r.scratch[..1]); if (err != default!) {
@@ -206,24 +211,30 @@ retry:
         }
     }
     var descriptor = r.scratch[0];
-    var singleSegment = (byte)(descriptor & ((byte)(1 << (int)(5)))) != 0;
-    nint fcsFieldSize = ((nint)1).Lsh((uint64)(((descriptor >> (int)(6)))));
+
+    var singleSegment = (byte)(descriptor & ((byte)(1 << 5))) != 0;
+
+    nint fcsFieldSize = ((nint)1).Lsh((uint64)(descriptor >> 6));
     if (fcsFieldSize == 1 && !singleSegment) {
         fcsFieldSize = 0;
     }
+
     nint windowDescriptorSize = default!;
     if (singleSegment){
         windowDescriptorSize = 0;
     } else {
         windowDescriptorSize = 1;
     }
-    if ((byte)(descriptor & ((byte)(1 << (int)(3)))) != 0) {
+
+    if ((byte)(descriptor & ((byte)(1 << 3))) != 0) {
         return r.makeError(relativeOffset, reservedBitSetInFrameˢ);
     }
-    r.hasChecksum = (byte)(descriptor & ((byte)(1 << (int)(2)))) != 0;
+
+    r.hasChecksum = (byte)(descriptor & ((byte)(1 << 2))) != 0;
     if (r.hasChecksum) {
         r.checksum.reset();
     }
+
     // Dictionary_ID_Flag. RFC 3.1.1.1.1.6.
     nint dictionaryIdSize = 0;
     {
@@ -231,30 +242,36 @@ retry:
             dictionaryIdSize = ((nint)1).Lsh((uint64)((byte)(dictIdFlag - 1)));
         }
     }
+
     relativeOffset++;
+
     nint headerSize = windowDescriptorSize + dictionaryIdSize + fcsFieldSize;
+
     {
         var (_, err) = io.ReadFull(r.r, r.scratch.slice(0, headerSize)); if (err != default!) {
             return r.wrapNonEOFError(relativeOffset, err);
         }
     }
+
     // Figure out the maximum amount of data we need to retain
     // for backreferences.
     uint64 windowSize = default!;
     if (!singleSegment) {
         // Window descriptor. RFC 3.1.1.1.2.
         var windowDescriptor = r.scratch[0];
-        var exponent = (uint64)((windowDescriptor >> (int)(3)));
+        var exponent = (uint64)(windowDescriptor >> 3);
         var mantissa = (uint64)((byte)(windowDescriptor & 7));
         var windowLog = exponent + 10;
         var windowBase = ((uint64)1).Lsh(windowLog);
         var windowAdd = (windowBase / 8) * mantissa;
         windowSize = windowBase + windowAdd;
+
         // Default zstd sets limits on the window size.
-        if (fuzzing && (windowLog > 31 || windowSize > ((uint64)1 << (int)(27)))) {
+        if (fuzzing && (windowLog > 31 || windowSize > (uint64)1 << 27)) {
             return r.makeError(relativeOffset, windowSizeTooLargeˢ);
         }
     }
+
     // Dictionary_ID. RFC 3.1.1.1.3.
     if (dictionaryIdSize != 0) {
         var dictionaryId = r.scratch.slice(windowDescriptorSize, windowDescriptorSize + dictionaryIdSize);
@@ -265,6 +282,7 @@ retry:
             }
         }
     }
+
     // Frame_Content_Size. RFC 3.1.1.1.4.
     r.frameSizeUnknown = false;
     r.remainingFrameSize = 0;
@@ -301,15 +319,19 @@ retry:
     if (singleSegment) {
         windowSize = r.remainingFrameSize;
     }
+
     // RFC 8878 3.1.1.1.1.2. permits us to set an 8M max on window size.
     const uint64 maxWindowSize = /* 8 << 20 */ 8388608;
     if (windowSize > maxWindowSize) {
         windowSize = maxWindowSize;
     }
+
     relativeOffset += headerSize;
+
     r.sawFrameHeader = true;
     r.readOneFrame = true;
     r.blockOffset += (int64)relativeOffset;
+
     // Prepare to read blocks from the frame.
     r.repeatedOffset1 = 1;
     r.repeatedOffset2 = 4;
@@ -319,23 +341,28 @@ retry:
     r.seqTables[0] = default!;
     r.seqTables[1] = default!;
     r.seqTables[2] = default!;
+
     return default!;
 }
 
 // skipFrame skips a skippable frame. RFC 3.1.2.
 internal static error skipFrame(this ref Reader r) {
     nint relativeOffset = 0;
+
     {
         var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != default!) {
             return r.wrapNonEOFError(relativeOffset, errΔ1);
         }
     }
+
     relativeOffset += 4;
+
     var size = binary.LittleEndian.Uint32(r.scratch[..4]);
     if (size == 0) {
         r.blockOffset += (int64)relativeOffset;
         return default!;
     }
+
     {
         var (seeker, ok) = r.r._<io.Seeker>(ᐧ); if (ok) {
             r.blockOffset += (int64)relativeOffset;
@@ -353,6 +380,7 @@ internal static error skipFrame(this ref Reader r) {
                 r.blockOffset += end - prev;
                 return r.makeEOFError(0);
             }
+
             // The new offset is valid, so seek to it.
             (_, errΔ2) = seeker.Seek(prev + (int64)size, io.SeekStart);
             if (errΔ2 != default!) {
@@ -362,6 +390,7 @@ internal static error skipFrame(this ref Reader r) {
             return default!;
         }
     }
+
     var (n, err) = io.CopyN(io.Discard, r.r, (int64)size);
     relativeOffset += (nint)n;
     if (err != default!) {
@@ -382,23 +411,29 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint relativeOffset = 0;
+
     // Read Block_Header. RFC 3.1.1.2.
     {
         var (_, err) = io.ReadFull(r.r, r.scratch[..3]); if (err != default!) {
             return r.wrapNonEOFError(relativeOffset, err);
         }
     }
+
     relativeOffset += 3;
-    var header = (uint32)((uint32)((uint32)r.scratch[0] | (((uint32)r.scratch[1] << (int)(8)))) | (((uint32)r.scratch[2] << (int)(16))));
-    var lastBlock = (uint32)(header & 1) != 0;
-    var blockType = (uint32)(((header >> (int)(1))) & 3);
-    nint blockSize = (nint)((header >> (int)(3)));
+
+    var header = (uint32)r.scratch[0] | ((uint32)r.scratch[1] << 8) | ((uint32)r.scratch[2] << 16);
+
+    var lastBlock = (header & 1) != 0;
+    var blockType = (header >> 1) & 3;
+    nint blockSize = (nint)(header >> 3);
+
     // Maximum block size is smaller of window size and 128K.
     // We don't record the window size for a single segment frame,
     // so just use 128K. RFC 3.1.1.2.3, 3.1.1.2.4.
-    if (blockSize > (128 << (int)(10)) || (r.window.size > 0 && blockSize > r.window.size)) {
+    if (blockSize > 128 << 10 || (r.window.size > 0 && blockSize > r.window.size)) {
         return r.makeError(relativeOffset, blockSizeTooLargeˢ);
     }
+
     // Handle different block types. RFC 3.1.1.2.2.
     switch (blockType) {
     case 0: {
@@ -447,9 +482,11 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         }
         r.remainingFrameSize -= (uint64)builtin.len(r.buffer);
     }
+
     if (r.hasChecksum) {
         r.checksum.update(r.buffer);
     }
+
     if (!lastBlock){
         r.window.save(r.buffer);
     } else {
@@ -463,15 +500,18 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
                     return r.wrapNonEOFError(0, err);
                 }
             }
+
             var inputChecksum = binary.LittleEndian.Uint32(r.scratch[..4]);
             var dataChecksum = (uint32)r.checksum.digest();
             if (inputChecksum != dataChecksum) {
                 return r.wrapError(0, fmt.Errorf("invalid checksum: got %#x want %#x"u8, dataChecksum, inputChecksum));
             }
+
             r.blockOffset += 4;
         }
         r.sawFrameHeader = false;
     }
+
     return default!;
 }
 

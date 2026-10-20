@@ -41,6 +41,12 @@ using static go.crypto.@internal.fips140.drbg_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -50,8 +56,9 @@ using static go.crypto.@internal.fips140.drbg_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/drbg/cast.go", "cast.cs", "AA0cuIIABxAABxAABxDcgoKCgoKU", "18-57:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "ACVMlISCqISCgpaCgoKCpsaCgoKWhIKClKaigoKCgoKm1ISCgoKo1ISCqIKogsqogoKWlpY=")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "AA8glIKClM7SgoIABhCShIKEgoKAypKUgqS0AAkY0oCCgqaCgoKqooCCgqaCgg==", "53-55:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/ctrdrbg.go", "ctrdrbg.cs", "AC1clJSCuJSCgqaCgoKCpsaCgoKmlIKClKaigoKCgoKm1JSCgoKo1JSCuIK4gsq4goKmpqY=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/entropy_fips140.go", "entropy_fips140.cs", "AB48goKS7oCCpJQ=")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/drbg/rand.go", "rand.cs", "AB0wAAMS0oKUgoKCpoKCAAcQgpSCgpSSgriCgoDKgoKktAAEEtIADBqigIKCtoKC", "60-64:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -78,16 +85,16 @@ public static partial class drbg_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸentropy() => builtin.initPackage(typeof(go.crypto.@internal.entropy_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸentropyꓸv1_0_0() => builtin.initPackage(typeof(go.crypto.@internal.entropy.v1_0_0.entropy_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140() => builtin.initPackage(typeof(go.crypto.@internal.fips140_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸaes() => builtin.initPackage(typeof(go.crypto.@internal.fips140.aes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸcheck() => builtin.initPackage(typeof(go.crypto.@internal.fips140.check_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsubtle() => builtin.initPackage(typeof(go.crypto.@internal.fips140.subtle_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸrandutil() => builtin.initPackage(typeof(go.crypto.@internal.randutil_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸsysrand() => builtin.initPackage(typeof(go.crypto.@internal.sysrand_package));
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
+    [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(go.sync.atomic_package));
     // </ImportInitializers>
 }

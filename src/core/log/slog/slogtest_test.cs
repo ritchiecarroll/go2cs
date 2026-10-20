@@ -14,6 +14,7 @@ using slogtest = go.testing.slogtest_package;
 using encoding;
 using go.log;
 using go.testing;
+using iter = iter_package;
 using static go.log.slog_internal_test_package;
 
 partial class slog_test_package {
@@ -55,13 +56,13 @@ public static void TestSlogtest(ж<testing.T> Ꮡt) {
 
 internal static (slice<map<@string, any>>, error) parseLines(slice<byte> src, Func<slice<byte>, (map<@string, any>, error)> parse) {
     slice<map<@string, any>> records = default!;
-    foreach (var (_, line) in bytes.Split(src, new byte[]{(rune)'\n'}.slice())) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(src, new byte[]{(rune)'\n'}.slice()).Invoke)) {
         if (len(line) == 0) {
             continue;
         }
         var (m, err) = parse(line);
         if (err != default!) {
-            return (default!, fmt.Errorf("%s: %w"u8, ((@string)line), err));
+            return (default!, fmt.Errorf("%s: %w"u8, (@string)line, err));
         }
         records = append(records, m);
     }
@@ -86,7 +87,7 @@ internal static (map<@string, any>, error) parseJSON(slice<byte> bs) {
 // handler behavior, not parsing.
 internal static (map<@string, any>, error) parseText(slice<byte> bs) {
     var top = new map<@string, any>{};
-    @string s = ((@string)bytes.TrimSpace(bs));
+    @string s = (@string)bytes.TrimSpace(bs);
     while (len(s) > 0) {
         var (kv, rest, _) = strings.Cut(s, " "u8); // assumes exactly one space between attrs
         var (k, value, found) = strings.Cut(kv, "="u8);

@@ -22,7 +22,8 @@ partial interface SubFS :
 // Otherwise, if fs implements [SubFS], Sub returns fsys.Sub(dir).
 // Otherwise, Sub returns a new [FS] implementation sub that,
 // in effect, implements sub.Open(name) as fsys.Open(path.Join(dir, name)).
-// The implementation also translates calls to ReadDir, ReadFile, and Glob appropriately.
+// The implementation also translates calls to ReadDir, ReadFile,
+// ReadLink, Lstat, and Glob appropriately.
 //
 // Note that Sub(os.DirFS("/"), "prefix") is equivalent to os.DirFS("/prefix")
 // and that neither of them guarantees to avoid operating system
@@ -44,6 +45,16 @@ public static (FS, error) Sub(FS fsys, @string dir) {
     }
     return (new subFSжFS(Ꮡ(new subFS(fsys, dir))), default!);
 }
+
+internal static FS _ᴛ1ʗ = new subFSжFS(((ж<subFS>)nil));
+
+internal static ReadDirFS _ᴛ2ʗ = new subFSжReadDirFS(((ж<subFS>)nil));
+
+internal static ReadFileFS _ᴛ3ʗ = new subFSжReadFileFS(((ж<subFS>)nil));
+
+internal static ReadLinkFS _ᴛ4ʗ = new subFSжReadLinkFS(((ж<subFS>)nil));
+
+internal static GlobFS _ᴛ5ʗ = new subFSжGlobFS(((ж<subFS>)nil));
 
 partial struct subFS {
     internal FS fsys;
@@ -116,6 +127,36 @@ internal static (slice<byte>, error) ReadFile(this ref subFS f, @string name) {
     return (data, f.fixErr(err));
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string readlinkˢ = "readlink"u8;
+
+internal static (@string, error) ReadLink(this ref subFS f, @string name) {
+    var (full, err) = f.fullName(readlinkˢ, name);
+    if (err != default!) {
+        return ("", err);
+    }
+    (var target, err) = ReadLink(f.fsys, full);
+    if (err != default!) {
+        return ("", f.fixErr(err));
+    }
+    return (target, default!);
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+private static readonly @string lstatˢ = "lstat"u8;
+
+internal static (FileInfo, error) Lstat(this ref subFS f, @string name) {
+    var (full, err) = f.fullName(lstatˢ, name);
+    if (err != default!) {
+        return (default!, err);
+    }
+    (var info, err) = Lstat(f.fsys, full);
+    if (err != default!) {
+        return (default!, f.fixErr(err));
+    }
+    return (info, default!);
+}
+
 internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) {
     // Check pattern is well-formed.
     {
@@ -126,6 +167,7 @@ internal static (slice<@string>, error) Glob(this ref subFS f, @string pattern) 
     if (pattern == "."u8) {
         return (new @string[]{"."u8}.slice(), default!);
     }
+
     @string full = f.dir + "/"u8 + pattern;
     var (list, err) = Glob(f.fsys, full);
     foreach (var (i, name) in list) {

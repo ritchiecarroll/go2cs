@@ -50,6 +50,12 @@ using static global::go.flag_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -58,9 +64,9 @@ using static global::go.flag_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("flag/example_test.go", "example_test.cs", "ABEi/oKYggAEEKLcAAgMgpSCgoKUlAAIEqam")]
-[assembly: go.GoPositionMap("flag/example_value_test.go", "example_value_test.cs", "ABEigoKUpoKAgpSkpuSCgoSC")]
-[assembly: go.GoPositionMap("flag/flag_test.go", "flag_test.cs", "AB4wgoKUABwGgoKCgoKCgoKCgoKEkoKCgoKClLS0tLS0griCgoKCpoKCgoKCuIKCgoKCgoKCgoKCgoKCgqiSgJKCuIKCgoKCgoKCgoSCgoKCgpSUpKSkpKSkpKSCuOaCgoCSgpSCABwIooKUgoKCgoKCgoKCggALGICCpIKUgpSClIKUgpSClIKUgpSClIKUgpKC6IKAktaCzIKmgoLmgoKCgoKCgIKkgpSCgviCgoKCgoKUgIKkgpSCgIKmkoKCgIK2goKYgIK2gIKSgIIACAiCgoKAkoKCAAgSgqaCgpSmgqaCgoKCgoKCgIKCuIKWguiCgoKCgoKClIKCgoKUlIKCgoLogoKCgoKCgIIACAzCgJKCkJKCgoCCpIKCgoKEgrQAEQaSgoKAkoKUgoKUgpSCgqaCgpSClIKWkoKCgoKUggAKFoKCpoKClAA8TIKCgoKCgoKCgoKCgoKCgoKCgoKCgoL6koKUgoKCgIKkgIL6soKCgoCSgoKCgILE5IKCgoKEgpSClIKWgoKCgoSClIKUggAICIKCgoKCgoKCgoKUgoKCgpSC+oLugoKCgoKCgpSCgoKUggAPCoKEgoKCgoKUgpYAFzqigrqClIKUgtyigoKktICC5rai9IIACRyyhIKChKKClICCAA0KggAJHIKEgoKEgoSSlICCAAkKgoKCgoKClICCpIKUgoCCppKCgoCCtoKCmICCtoCCkoCCAAwIopSWkg==", "41-41:1;42-42:2;46-66:3;103-103:4;120-149:1;155-155:1;231-231:1;273-276:1;297-299:2;315-315:1;403-403:1;405-405:2;426-426:1;566-566:1;725-736:1;762-765:1;797-799:1;810-813:1;834-836:2;855-857:1", "", "924=Environ/1/1/1")]
+[assembly: go.GoPositionMap("flag/example_test.go", "example_test.cs", "ABEi/oKYggAFEKLcAAgMgpSCgoKUlAAIEqam")]
+[assembly: go.GoPositionMap("flag/example_value_test.go", "example_value_test.cs", "ABEigoKUpoKAgpSkpuSCgpSC")]
+[assembly: go.GoPositionMap("flag/flag_test.go", "flag_test.cs", "AB4wgoKUABwGgoKCgoKCgoKCgoKUkoKCgoKClLS0tLSkgriCgoKCpoKCgoKCuIKCgoKCgoKCgoKCgoKCgqiSgJKCuIKCgoKCgoKCgpSCgoKCgpSUpKSkpKSkpJSCuOaCgoCSgpSCABwIooKUgoKCgoKCgoKCggALGICCpIKUgpSClIKUgpSClIKUgpSClIKUgpKC6IKAktaC3IKmgoLmgoKCgoKCgIKkgpSCgviCgoKCgoKUgIKkgpSCgIKmkoKCgIK2goKYgIK2gIKSgIIACAiCgoKAkoKCAAgSgqaCgpSmgqaCgoKCgoKCgIKCyIKmguiCgoKCgoKClIKCgoKUlIKCgoLogoKCgoKCgIIACAzCgJKCkJKCgoCCpIKCgoKUgrQAEQaSgoKAkoKUgoKUgpSCgqaCgpSClIKWkoKCgoKUggAKFoKCpoKClAA8TIKCgoKCgoKCgoKCgoKCgoKCgoKCgoL6koKUgoKCgIKkgIL6soKCgoCSgoKCgILE5IKCgoKUgpSClIKmgoKCgpSClIKUggAICIKCgoKCgoKCgoKUgoKCgpSC+oLugoKCgoKCgpSCgoKUggAPCoKUgoKCgoKUgqYAGDqigrqClIKUgtyigoKktICC5rai9IIAChyylIKClKKClICCAA0KggAKHIKUgoKUgpSSlICCAAkKgoKCgoKClICCpIKUgoCCppKCgoCCtoKCmICCtoCCkoCCAAwIgpSmkg==", "41-41:1;42-42:2;46-66:3;103-103:4;120-149:1;155-155:1;231-231:1;273-276:1;297-299:2;315-315:1;403-403:1;405-405:2;426-426:1;566-566:1;725-736:1;762-765:1;797-799:1;810-813:1;834-836:2;855-857:1", "", "934=Environ/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -61,6 +61,7 @@ public static void TestECDH(ж<testing.T> Ꮡt) {
         if (err != default!) {
             tΔ1.Fatal(err);
         }
+
         (var alicePubKey, err) = curve.NewPublicKey(aliceKey.PublicKey().Bytes());
         if (err != default!) {
             tΔ1.Error(err);
@@ -71,6 +72,7 @@ public static void TestECDH(ж<testing.T> Ꮡt) {
         if (!aliceKey.PublicKey().Equal(alicePubKey.OrTypedNil())) {
             tΔ1.Error(encodedAndDecodedPublicˢ);
         }
+
         (var alicePrivKey, err) = curve.NewPrivateKey(aliceKey.Bytes());
         if (err != default!) {
             tΔ1.Error(err);
@@ -81,6 +83,7 @@ public static void TestECDH(ж<testing.T> Ꮡt) {
         if (!aliceKey.Equal(alicePrivKey.OrTypedNil())) {
             tΔ1.Error(encodedAndDecodedPrivateˢ);
         }
+
         (var bobSecret, err) = bobKey.ECDH(aliceKey.PublicKey());
         if (err != default!) {
             tΔ1.Fatal(err);
@@ -89,6 +92,7 @@ public static void TestECDH(ж<testing.T> Ꮡt) {
         if (err != default!) {
             tΔ1.Fatal(err);
         }
+
         if (!bytes.Equal(bobSecret, aliceSecret)) {
             tΔ1.Error(twoEcdhComputationsCameˢ);
         }
@@ -113,6 +117,7 @@ public static void TestGenerateKey(ж<testing.T> Ꮡt) {
         if (err != default!) {
             tΔ1.Fatal(err);
         }
+
         // GenerateKey does rejection sampling. If the masking works correctly,
         // the probability of a rejection is 1-ord(G)/2^ceil(log2(ord(G))),
         // which for all curves is small enough (at most 2^-32, for P-256) that
@@ -127,18 +132,13 @@ public static void TestGenerateKey(ж<testing.T> Ꮡt) {
     });
 }
 
-// NIST vectors from CAVS 14.1, ECC CDH Primitive (SP800-56A).
-// For some reason all field elements in the test vector (both scalars and
-// base field elements), but not the shared secret output, have two extra
-// leading zero bytes (which in big-endian are irrelevant). Removed here.
-// X25519 test vector from RFC 7748, Section 6.1.
-
 partial struct vectorsᴛ1 /*dyn*/ {
     public @string PrivateKey, PublicKey;
     public @string PeerPublicKey;
     public @string SharedSecret;
 }
 internal static map<ecdhꓸCurve, vectorsᴛ1> vectors = new map<ecdhꓸCurve, vectorsᴛ1>{
+    // NIST vectors from CAVS 14.1, ECC CDH Primitive (SP800-56A).
     [ecdh.P256()] = new(
         PrivateKey: "7d7dc5f71eb29ddaf80d6214632eeae03d9058af1fb6d22ed80badb62bc1a534"u8,
         PublicKey: "04ead218590119e8876b29146ff89ca61770c4edbbf97d38ce385ed281d8a6b230"u8 + "28af61281fd35e2fa7002523acc85a429cb06ee6648325389f59edfce1405141"u8,
@@ -151,12 +151,16 @@ internal static map<ecdhꓸCurve, vectorsᴛ1> vectors = new map<ecdhꓸCurve, v
         PeerPublicKey: "04a7c76b970c3b5fe8b05d2838ae04ab47697b9eaf52e764592efda27fe7513272734466b400091adbf2d68c58e0c50066"u8 + "ac68f19f2e1cb879aed43a9969b91a0839c4c38a49749b661efedf243451915ed0905a32b060992b468c64766fc8437a"u8,
         SharedSecret: "5f9d29dc5e31a163060356213669c8ce132e22f57c9a04f40ba7fcead493b457e5621e766c40a2e3d4d6a04b25e533f1"u8
     ),
+    // For some reason all field elements in the test vector (both scalars and
+    // base field elements), but not the shared secret output, have two extra
+    // leading zero bytes (which in big-endian are irrelevant). Removed here.
     [ecdh.P521()] = new(
         PrivateKey: "017eecc07ab4b329068fba65e56a1f8890aa935e57134ae0ffcce802735151f4eac6564f6ee9974c5e6887a1fefee5743ae2241bfeb95d5ce31ddcb6f9edb4d6fc47"u8,
         PublicKey: "0400602f9d0cf9e526b29e22381c203c48a886c2b0673033366314f1ffbcba240ba42f4ef38a76174635f91e6b4ed34275eb01c8467d05ca80315bf1a7bbd945f550a5"u8 + "01b7c85f26f5d4b2d7355cf6b02117659943762b6d1db5ab4f1dbc44ce7b2946eb6c7de342962893fd387d1b73d7a8672d1f236961170b7eb3579953ee5cdc88cd2d"u8,
         PeerPublicKey: "0400685a48e86c79f0f0875f7bc18d25eb5fc8c0b07e5da4f4370f3a9490340854334b1e1b87fa395464c60626124a4e70d0f785601d37c09870ebf176666877a2046d"u8 + "01ba52c56fc8776d9e8f5db4f0cc27636d0b741bbe05400697942e80b739884a83bde99e0f6716939e632bc8986fa18dccd443a348b6c3e522497955a4f3c302f676"u8,
         SharedSecret: "005fc70477c3e63bc3954bd0df3ea0d1f41ee21746ed95fc5e1fdf90930d5e136672d72cc770742d1711c3c3a4c334a0ad9759436a4d3c5bf6e74b9578fac148c831"u8
     ),
+    // X25519 test vector from RFC 7748, Section 6.1.
     [ecdh.X25519()] = new(
         PrivateKey: "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"u8,
         PublicKey: "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"u8,
@@ -222,6 +226,7 @@ public static void TestX25519Failure(ж<testing.T> Ꮡt) {
     var lowOrderPoint = hexDecode(Ꮡt, "e0eb7a7c3b41b8ae1656e3faf19fc46ada098deb9c32b1fd866205165f49b800"u8);
     var randomScalar = new slice<byte>(32);
     rand.Read(randomScalar);
+
     var identityʗ1 = identity;
     var randomScalarʗ1 = randomScalar;
     Ꮡt.Run(identityPointˢ, (ж<testing.T> tΔ1) => {
@@ -255,49 +260,49 @@ internal static void testX25519Failure(ж<testing.T> Ꮡt, slice<byte> @private,
     }
 }
 
-// Bad lengths.
-// Zero.
-// Order of the curve and above.
-// Bad lengths.
-// Zero.
-// Order of the curve and above.
-// Bad lengths.
-// Zero.
-// Order of the curve and above.
-// X25519 only rejects bad lengths.
 internal static map<ecdhꓸCurve, slice<@string>> invalidPrivateKeys = new map<ecdhꓸCurve, slice<@string>>{
     [ecdh.P256()] = new @string[]{
+        // Bad lengths.
         ""u8,
         "01"u8,
         "01010101010101010101010101010101010101010101010101010101010101"u8,
         "000101010101010101010101010101010101010101010101010101010101010101"u8,
         strings.Repeat("01"u8, 200),
+        // Zero.
         "0000000000000000000000000000000000000000000000000000000000000000"u8,
+        // Order of the curve and above.
         "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"u8,
         "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632552"u8,
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8}.slice(),
     [ecdh.P384()] = new @string[]{
+        // Bad lengths.
         ""u8,
         "01"u8,
         "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"u8,
         "00010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"u8,
         strings.Repeat("01"u8, 200),
+        // Zero.
         "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8,
+        // Order of the curve and above.
         "ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973"u8,
         "ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52974"u8,
         "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"u8}.slice(),
     [ecdh.P521()] = new @string[]{
+        // Bad lengths.
         ""u8,
         "01"u8,
         "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"u8,
         "00010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101"u8,
         strings.Repeat("01"u8, 200),
+        // Zero.
         "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8,
+        // Order of the curve and above.
         "01fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409"u8,
         "01fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e9138640a"u8,
         "11fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409"u8,
         "03fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff4a30d0f077e5f2cd6ff980291ee134ba0776b937113388f5d76df6e3d2270c812"u8}.slice(),
     [ecdh.X25519()] = new @string[]{
+        // X25519 only rejects bad lengths.
         ""u8,
         "01"u8,
         "01010101010101010101010101010101010101010101010101010101010101"u8,
@@ -326,44 +331,44 @@ public static void TestNewPrivateKey(ж<testing.T> Ꮡt) {
     });
 }
 
-// Bad lengths.
-// Infinity.
-// Compressed encodings.
-// Points not on the curve.
-// Bad lengths.
-// Infinity.
-// Compressed encodings.
-// Points not on the curve.
-// Bad lengths.
-// Infinity.
-// Compressed encodings.
-// Points not on the curve.
 internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ecdhꓸCurve, slice<@string>>{
     [ecdh.P256()] = new @string[]{
+        // Bad lengths.
         ""u8,
         "04"u8,
         strings.Repeat("04"u8, 200),
+        // Infinity.
         "00"u8,
+        // Compressed encodings.
         "036b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296"u8,
         "02e2534a3532d08fbba02dde659ee62bd0031fe2db785596ef509302446b030852"u8,
+        // Points not on the curve.
         "046b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c2964fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f6"u8,
         "0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8}.slice(),
     [ecdh.P384()] = new @string[]{
+        // Bad lengths.
         ""u8,
         "04"u8,
         strings.Repeat("04"u8, 200),
+        // Infinity.
         "00"u8,
+        // Compressed encodings.
         "03aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7"u8,
         "0208d999057ba3d2d969260045c55b97f089025959a6f434d651d207d19fb96e9e4fe0e86ebe0e64f85b96a9c75295df61"u8,
+        // Points not on the curve.
         "04aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab73617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e60"u8,
         "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8}.slice(),
     [ecdh.P521()] = new @string[]{
+        // Bad lengths.
         ""u8,
         "04"u8,
         strings.Repeat("04"u8, 200),
+        // Infinity.
         "00"u8,
+        // Compressed encodings.
         "030035b5df64ae2ac204c354b483487c9070cdc61c891c5ff39afc06c5d55541d3ceac8659e24afe3d0750e8b88e9f078af066a1d5025b08e5a5e2fbc87412871902f3"u8,
         "0200c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66"u8,
+        // Points not on the curve.
         "0400c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66011839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16651"u8,
         "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8}.slice(),
     [ecdh.X25519()] = new @string[]{}.slice()
@@ -419,6 +424,7 @@ public static void BenchmarkECDH(ж<testing.B> Ꮡb) {
         var rand = new cipher.StreamReader(
             S: new chacha20.CipherжStream(c), R: zeroReader
         );
+
         (var peerKey, err) = curve.GenerateKey(new cipher_StreamReaderᴠReader(rand));
         if (err != default!) {
             bΔ1.Fatal(err);
@@ -426,7 +432,9 @@ public static void BenchmarkECDH(ж<testing.B> Ꮡb) {
         var peerShare = peerKey.PublicKey().Bytes();
         bΔ1.ResetTimer();
         bΔ1.ReportAllocs();
+
         byte allocationsSink = default!;
+
         for (nint i = 0; i < (~bΔ1).N; i++) {
             var (key, errΔ1) = curve.GenerateKey(new cipher_StreamReaderᴠReader(rand));
             if (errΔ1 != default!) {
@@ -491,7 +499,7 @@ func main() {
 	println("OK")
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object testRequiresRunningGoˢ = (@string)"test requires running 'go build'"u8;
@@ -516,22 +524,25 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(testRequiresRunningGoˢ);
     }
     testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
+
     @string dir = Ꮡt.TempDir();
     @string hello = filepath.Join(dir, helloGoˢ);
     var err = os.WriteFile(hello, slice<byte>(linkerTestProgram), 436);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     @string run(params ꓸꓸꓸstring argsʗp) {
         var args = argsʗp.slice();
         var cmd = exec.Command(args[0], args[1..].ꓸꓸꓸ);
         cmd.Value.Dir = dir;
         var (@out, errΔ1) = cmd.CombinedOutput();
         if (errΔ1 != default!) {
-            Ꮡt.Fatalf("%v: %v\n%s"u8, args, errΔ1, ((@string)@out));
+            Ꮡt.Fatalf("%v: %v\n%s"u8, args, errΔ1, (@string)@out);
         }
-        return ((@string)@out);
+        return (@string)@out;
     }
+
     @string goBin = testenv.GoToolPath(new testing_TжTB(Ꮡt));
     run(goBin, buildˢ, "-o", helloExeˢ, helloGoˢ);
     {
@@ -539,6 +550,7 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
             Ꮡt.Error(unexpectedOutputˢ, @out);
         }
     }
+
     // List all text symbols under crypto/... and make sure there are some for
     // P256, but none for the other curves.
     bool consistent = default!;
@@ -572,11 +584,13 @@ public static void TestMismatchedCurves(ж<testing.T> Ꮡt) {
         new("P521"u8, ecdh.P521()),
         new("X25519"u8, ecdh.X25519())
     }.slice();
+
     foreach (var (_, privCurve) in curves) {
         var (priv, err) = privCurve.curve.GenerateKey(rand.Reader);
         if (err != default!) {
             Ꮡt.Fatalf("failed to generate test key: %s"u8, err);
         }
+
         foreach (var (_, vᴛ1) in curves) {
             ref var pubCurve = ref heap(new TestMismatchedCurves_curves(), out var ᏑpubCurve);
             pubCurve = vᴛ1;

@@ -19,7 +19,7 @@ partial class net_package {
 // both address families are to be supported.
 // See inet6(4) for details.
 partial struct ipStackCapabilities {
-    public partial ref sync_package.Once Once { get; }             // guards following
+    /*embed*/ public sync_package.Once Once;             // guards following
     internal bool ipv4Enabled;
     internal bool ipv6Enabled;
     internal bool ipv4MappedIPv6Enabled;
@@ -57,6 +57,7 @@ internal static bool supportsIPv4map() {
     return ipStackCaps.ipv4MappedIPv6Enabled;
 }
 
+// An addrList represents a list of network endpoint addresses.
 partial struct addrList /*[]ΔAddr*/;
 
 // isIPv4 reports whether addr contains an IPv4 address.
@@ -86,14 +87,13 @@ internal static ΔAddr forResolve(this addrList addrs, @string network, @string 
     bool want6 = default!;
     var exprᴛ1 = network;
     if (exprᴛ1 == "ip"u8) {
-        want6 = bytealg.CountString(addr, // IPv6 literal (addr does NOT contain a port)
- (rune)':') > 0;
+        // IPv6 literal (addr does NOT contain a port)
+        want6 = bytealg.CountString(addr, (rune)':') > 0;
     }
     else if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "udp"u8) {
-        want6 = bytealg.CountString(addr, // IPv6 literal. (addr contains a port, so look for '[')
- (rune)'[') > 0;
+        // IPv6 literal. (addr contains a port, so look for '[')
+        want6 = bytealg.CountString(addr, (rune)'[') > 0;
     }
-
     if (want6) {
         return addrs.first(isNotIPv4);
     }
@@ -192,11 +192,13 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
     }
     nint j = 0;
     nint k = 0;
+
     // The port starts after the last colon.
     nint i = bytealg.LastIndexByteString(hostport, (rune)':');
     if (i < 0) {
         return addrErr(hostport, missingPort);
     }
+
     if (hostport[0] == (rune)'['){
         // Expect the first ']' just before the last ':'.
         nint end = bytealg.IndexByteString(hostport, (rune)']');
@@ -205,21 +207,20 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
         }
         var exprᴛ1 = end + 1;
         if (exprᴛ1 == len(hostport)) {
-            return addrErr(hostport, // There can't be a ':' behind the ']' now.
- missingPort);
+            // There can't be a ':' behind the ']' now.
+            return addrErr(hostport, missingPort);
         }
         if (exprᴛ1 == i) {
+            // The expected result.
         }
         else { /* default: */
+            // Either ']' isn't followed by a colon, or it is
+            // followed by a colon that is not the last one.
             if (hostport[end + 1] == (rune)':') {
-                // The expected result.
-                // Either ']' isn't followed by a colon, or it is
-                // followed by a colon that is not the last one.
                 return addrErr(hostport, tooManyColons);
             }
             return addrErr(hostport, missingPort);
         }
-
         host = hostport.slice(1, end);
         (j, k) = (1, end + 1); // there can't be a '[' resp. ']' before these positions
     } else {
@@ -234,6 +235,7 @@ public static (@string host, @string port, error err) SplitHostPort(@string host
     if (bytealg.IndexByteString(hostport.slice(k), (rune)']') >= 0) {
         return addrErr(hostport, unexpectedInAddressˢ2);
     }
+
     port = hostport.slice(i + 1);
     return (host, port, default!);
 }
@@ -300,7 +302,6 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     else { /* default: */
         return (default!, ((UnknownNetworkError)net));
     }
-
     var portnumʗ1 = portnum;
     var inetaddr = ΔAddr (IPAddr ip) => {
         var exprᴛ2 = net;
@@ -316,11 +317,11 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
         { /* default: */
             throw panic("unexpected network: " + net);
         }
-
     };
     if (host == ""u8) {
         return (new addrList(new ΔAddr[]{inetaddr(new IPAddr(nil))}.slice()), default!);
     }
+
     // Try as a literal IP address, then as a DNS name.
     (var ips, err) = Ꮡr.lookupIPAddr(ctx, net, host);
     if (err != default!) {
@@ -333,6 +334,7 @@ internal static (addrList, error) internetAddrList(this ж<Resolver> Ꮡr, conte
     if (len(ips) == 1 && ips[0].IP.Equal(IPv6unspecified)) {
         ips = append(ips, new IPAddr(IP: IPv4zero));
     }
+
     Func<IPAddr, bool> filter = default!;
     if (net != ""u8 && net[len(net) - 1] == (rune)'4') {
         filter = ipv4only;

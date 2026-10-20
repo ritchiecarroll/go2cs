@@ -16,12 +16,14 @@ using go.image.@internal;
 
 partial class jpeg_package {
 
+// A FormatError reports that the input is not a valid JPEG.
 partial struct FormatError /*@string*/;
 
 public static @string Error(this FormatError e) {
     return "invalid JPEG format: "u8 + ((@string)e);
 }
 
+// An UnsupportedError reports that the input uses a valid but unimplemented JPEG feature.
 partial struct UnsupportedError /*@string*/;
 
 public static @string Error(this UnsupportedError e) {
@@ -43,6 +45,7 @@ internal static UntypedInt acTable => 1;
 internal static UntypedInt maxTc => 1;
 internal static UntypedInt maxTh => 3;
 internal static UntypedInt maxTq => 3;
+
 internal static UntypedInt maxComponents => 4;
 
 internal static UntypedInt sof0Marker => 0xc0; // Start Of Frame (Baseline Sequential).
@@ -57,15 +60,16 @@ internal static UntypedInt sosMarker => 0xda; // Start Of Scan.
 internal static UntypedInt dqtMarker => 0xdb; // Define Quantization Table.
 internal static UntypedInt driMarker => 0xdd; // Define Restart Interval.
 internal static UntypedInt comMarker => 0xfe; // COMment.
+// "APPlication specific" markers aren't part of the JPEG spec per se,
+// but in practice, their use is described at
+// https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html
 internal static UntypedInt app0Marker => 0xe0;
 internal static UntypedInt app14Marker => 0xee;
 internal static UntypedInt app15Marker => 0xef;
 
 // See https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
 internal static UntypedInt adobeTransformUnknown => 0;
-
 internal static UntypedInt adobeTransformYCbCr => 1;
-
 internal static UntypedInt adobeTransformYCbCrK => 2;
 
 // unzig maps from the zig-zag ordering to the natural ordering. For example,
@@ -224,7 +228,9 @@ internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
         d.bytes.nUnreadable = 2;
         return (0xff, default!);
     }
+
     d.bytes.nUnreadable = 0;
+
     (x, err) = d.readByte();
     if (err != default!) {
         return (0, err);
@@ -233,6 +239,7 @@ internal static (byte x, error err) readByteStuffedByte(this ref decoder d) {
     if (x != 0xff) {
         return (x, default!);
     }
+
     (x, err) = d.readByte();
     if (err != default!) {
         return (0, err);
@@ -254,6 +261,7 @@ internal static error readFull(this ref decoder d, slice<byte> p) {
         }
         d.bytes.nUnreadable = 0;
     }
+
     while (ᐧ) {
         nint n = copy(p, d.bytes.buf.slice(d.bytes.i, d.bytes.j));
         p = p.slice(n);
@@ -279,6 +287,7 @@ internal static error ignore(this ref decoder d, nint n) {
         }
         d.bytes.nUnreadable = 0;
     }
+
     while (ᐧ) {
         nint m = d.bytes.j - d.bytes.i;
         if (m > n) {
@@ -313,22 +322,18 @@ internal static error processSOF(this ref decoder d, nint n) {
         return ((FormatError)(@string)multipleSofMarkersˢ);
     }
     var exprᴛ1 = n;
-    if (exprᴛ1 == 6 + 3 * 1) {
+    if (exprᴛ1 == 6 + 3 * 1) { // Grayscale image.
         d.nComp = 1;
     }
-    else if (exprᴛ1 == 6 + 3 * 3) {
+    else if (exprᴛ1 == 6 + 3 * 3) { // YCbCr or RGB image.
         d.nComp = 3;
     }
-    else if (exprᴛ1 == 6 + 3 * 4) {
+    else if (exprᴛ1 == 6 + 3 * 4) { // YCbCrK or CMYK image.
         d.nComp = 4;
     }
     else { /* default: */
         return ((UnsupportedError)(@string)numberOfComponentsˢ);
     }
-
-    // Grayscale image.
-    // YCbCr or RGB image.
-    // YCbCrK or CMYK image.
     {
         var err = d.readFull(d.tmp.slice(0, n)); if (err != default!) {
             return err;
@@ -338,11 +343,12 @@ internal static error processSOF(this ref decoder d, nint n) {
     if (d.tmp[0] != 8) {
         return ((UnsupportedError)(@string)precisionˢ);
     }
-    d.height = ((nint)d.tmp[1] << (int)(8)) + (nint)d.tmp[2];
-    d.width = ((nint)d.tmp[3] << (int)(8)) + (nint)d.tmp[4];
+    d.height = ((nint)d.tmp[1] << 8) + (nint)d.tmp[2];
+    d.width = ((nint)d.tmp[3] << 8) + (nint)d.tmp[4];
     if ((nint)d.tmp[5] != d.nComp) {
         return ((FormatError)(@string)sofHasWrongLengthˢ);
     }
+
     for (nint i = 0; i < d.nComp; i++) {
         d.comp[i].c = d.tmp[6 + 3 * i];
         // Section B.2.2 states that "the value of C_i shall be different from
@@ -352,12 +358,14 @@ internal static error processSOF(this ref decoder d, nint n) {
                 return ((FormatError)(@string)repeatedComponentˢ);
             }
         }
+
         d.comp[i].tq = d.tmp[8 + 3 * i];
         if (d.comp[i].tq > maxTq) {
             return ((FormatError)(@string)badTqValueˢ);
         }
+
         var hv = d.tmp[7 + 3 * i];
-        nint h = (nint)((hv >> (int)(4)));
+        nint h = (nint)(hv >> 4);
         nint v = (nint)((byte)(hv & 0x0f));
         if (h < 1 || 4 < h || v < 1 || 4 < v) {
             return ((FormatError)(@string)lumaChromaSubsamplingˢ);
@@ -367,69 +375,65 @@ internal static error processSOF(this ref decoder d, nint n) {
         }
         switch (d.nComp) {
         case 1: {
+            // If a JPEG image has only one component, section A.2 says "this data
+            // is non-interleaved by definition" and section A.2.2 says "[in this
+            // case...] the order of data units within a scan shall be left-to-right
+            // and top-to-bottom... regardless of the values of H_1 and V_1". Section
+            // 4.8.2 also says "[for non-interleaved data], the MCU is defined to be
+            // one data unit". Similarly, section A.1.1 explains that it is the ratio
+            // of H_i to max_j(H_j) that matters, and similarly for V. For grayscale
+            // images, H_1 is the maximum H_j for all components j, so that ratio is
+            // always 1. The component's (h, v) is effectively always (1, 1): even if
+            // the nominal (h, v) is (2, 1), a 20x5 image is encoded in three 8x8
+            // MCUs, not two 16x8 MCUs.
             (h, v) = (1, 1);
             break;
         }
         case 3: {
+            // For YCbCr images, we only support 4:4:4, 4:4:0, 4:2:2, 4:2:0,
+            // 4:1:1 or 4:1:0 chroma subsampling ratios. This implies that the
+            // (h, v) values for the Y component are either (1, 1), (1, 2),
+            // (2, 1), (2, 2), (4, 1) or (4, 2), and the Y component's values
+            // must be a multiple of the Cb and Cr component's values. We also
+            // assume that the two chroma components have the same subsampling
+            // ratio.
             switch (i) {
-            case 0: {
+            case 0: { // Y.
+                // We have already verified, above, that h and v are both
+                // either 1, 2 or 4, so invalid (h, v) combinations are those
+                // with v == 4.
                 if (v == 4) {
-                    // If a JPEG image has only one component, section A.2 says "this data
-                    // is non-interleaved by definition" and section A.2.2 says "[in this
-                    // case...] the order of data units within a scan shall be left-to-right
-                    // and top-to-bottom... regardless of the values of H_1 and V_1". Section
-                    // 4.8.2 also says "[for non-interleaved data], the MCU is defined to be
-                    // one data unit". Similarly, section A.1.1 explains that it is the ratio
-                    // of H_i to max_j(H_j) that matters, and similarly for V. For grayscale
-                    // images, H_1 is the maximum H_j for all components j, so that ratio is
-                    // always 1. The component's (h, v) is effectively always (1, 1): even if
-                    // the nominal (h, v) is (2, 1), a 20x5 image is encoded in three 8x8
-                    // MCUs, not two 16x8 MCUs.
-                    // For YCbCr images, we only support 4:4:4, 4:4:0, 4:2:2, 4:2:0,
-                    // 4:1:1 or 4:1:0 chroma subsampling ratios. This implies that the
-                    // (h, v) values for the Y component are either (1, 1), (1, 2),
-                    // (2, 1), (2, 2), (4, 1) or (4, 2), and the Y component's values
-                    // must be a multiple of the Cb and Cr component's values. We also
-                    // assume that the two chroma components have the same subsampling
-                    // ratio.
-                    // Y.
-                    // We have already verified, above, that h and v are both
-                    // either 1, 2 or 4, so invalid (h, v) combinations are those
-                    // with v == 4.
                     return errUnsupportedSubsamplingRatio;
                 }
                 break;
             }
-            case 1: {
+            case 1: { // Cb.
                 if (rem(d.comp[0].h, h) != 0 || rem(d.comp[0].v, v) != 0) {
-                    // Cb.
                     return errUnsupportedSubsamplingRatio;
                 }
                 break;
             }
-            case 2: {
+            case 2: { // Cr.
                 if (d.comp[1].h != h || d.comp[1].v != v) {
-                    // Cr.
                     return errUnsupportedSubsamplingRatio;
                 }
                 break;
             }}
-
             break;
         }
         case 4: {
+            // For 4-component images (either CMYK or YCbCrK), we only support two
+            // hv vectors: [0x11 0x11 0x11 0x11] and [0x22 0x11 0x11 0x22].
+            // Theoretically, 4-component JPEG images could mix and match hv values
+            // but in practice, those two combinations are the only ones in use,
+            // and it simplifies the applyBlack code below if we can assume that:
+            //	- for CMYK, the C and K channels have full samples, and if the M
+            //	  and Y channels subsample, they subsample both horizontally and
+            //	  vertically.
+            //	- for YCbCrK, the Y and K channels have full samples.
             switch (i) {
             case 0: {
                 if (hv != 0x11 && hv != 0x22) {
-                    // For 4-component images (either CMYK or YCbCrK), we only support two
-                    // hv vectors: [0x11 0x11 0x11 0x11] and [0x22 0x11 0x11 0x22].
-                    // Theoretically, 4-component JPEG images could mix and match hv values
-                    // but in practice, those two combinations are the only ones in use,
-                    // and it simplifies the applyBlack code below if we can assume that:
-                    //	- for CMYK, the C and K channels have full samples, and if the M
-                    //	  and Y channels subsample, they subsample both horizontally and
-                    //	  vertically.
-                    //	- for YCbCrK, the Y and K channels have full samples.
                     return errUnsupportedSubsamplingRatio;
                 }
                 break;
@@ -446,7 +450,6 @@ internal static error processSOF(this ref decoder d, nint n) {
                 }
                 break;
             }}
-
             break;
         }}
 
@@ -473,7 +476,7 @@ loop:
         if (tq > maxTq) {
             return ((FormatError)(@string)badTqValueˢ);
         }
-        switch ((x >> (int)(4))) {
+        switch ((x >> 4)) {
         default: {
             return ((FormatError)(@string)badPqValueˢ);
         }
@@ -503,11 +506,10 @@ loop:
                 }
             }
             foreach (var (i, _) in d.quant[tq]) {
-                d.quant[tq][i] = (int32)(((int32)d.tmp[2 * i] << (int)(8)) | (int32)d.tmp[2 * i + 1]);
+                d.quant[tq][i] = (int32)d.tmp[2 * i] << 8 | (int32)d.tmp[2 * i + 1];
             }
             break;
         }}
-
 continue_loop:;
     }
 break_loop:;
@@ -530,7 +532,7 @@ internal static error processDRI(this ref decoder d, nint n) {
             return err;
         }
     }
-    d.ri = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1];
+    d.ri = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1];
     return default!;
 }
 
@@ -544,7 +546,9 @@ internal static error processApp0Marker(this ref decoder d, nint n) {
         }
     }
     n -= 5;
+
     d.jfif = d.tmp[0] == (rune)'J' && d.tmp[1] == (rune)'F' && d.tmp[2] == (rune)'I' && d.tmp[3] == (rune)'F' && d.tmp[4] == (rune)'\x00';
+
     if (n > 0) {
         return d.ignore(n);
     }
@@ -561,10 +565,12 @@ internal static error processApp14Marker(this ref decoder d, nint n) {
         }
     }
     n -= 12;
+
     if (d.tmp[0] == (rune)'A' && d.tmp[1] == (rune)'d' && d.tmp[2] == (rune)'o' && d.tmp[3] == (rune)'b' && d.tmp[4] == (rune)'e') {
         d.adobeTransformValid = true;
         d.adobeTransform = d.tmp[11];
     }
+
     if (n > 0) {
         return d.ignore(n);
     }
@@ -580,6 +586,7 @@ internal static readonly @string missingSosMarkerˢ = "missing SOS marker"u8;
 // decode reads a JPEG image from r and returns it as an image.Image.
 internal static (image.Image, error) decode(this ref decoder d, io.Reader r, bool configOnly) {
     d.r = r;
+
     // Check for the Start Of Image marker.
     {
         var err = d.readFull(d.tmp[..2]); if (err != default!) {
@@ -589,6 +596,7 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
     if (d.tmp[0] != 0xff || d.tmp[1] != soiMarker) {
         return (default!, ((FormatError)(@string)missingSoiMarkerˢ));
     }
+
     // Process the remaining segments until the End Of Image marker.
     while (ᐧ) {
         var err = d.readFull(d.tmp[..2]);
@@ -635,8 +643,7 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
                 return (default!, err);
             }
         }
-        if (marker == eoiMarker) {
-            // End Of Image.
+        if (marker == eoiMarker) { // End Of Image.
             break;
         }
         if (rst0Marker <= marker && marker <= rst7Marker) {
@@ -648,6 +655,7 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
             // so we check for this before we read the 16-bit length of the segment.
             continue;
         }
+
         // Read the 16-bit length of the segment. The value includes the 2 bytes for the
         // length itself, so we subtract 2 to get the number of remaining bytes.
         {
@@ -655,10 +663,11 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
                 return (default!, err);
             }
         }
-        nint n = ((nint)d.tmp[0] << (int)(8)) + (nint)d.tmp[1] - 2;
+        nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
             return (default!, ((FormatError)(@string)shortSegmentLengthˢ));
         }
+
         var exprᴛ1 = marker;
         if (exprᴛ1 == sof0Marker || exprᴛ1 == sof1Marker || exprᴛ1 == sof2Marker) {
             d.baseline = marker == sof0Marker;
@@ -705,18 +714,17 @@ internal static (image.Image, error) decode(this ref decoder d, io.Reader r, boo
             if (app0Marker <= marker && marker <= app15Marker || marker == comMarker){
                 err = d.ignore(n);
             } else 
-            if (marker < 0xc0){
-                // See Table B.1 "Marker code assignments".
+            if (marker < 0xc0){ // See Table B.1 "Marker code assignments".
                 err = ((FormatError)(@string)unknownMarkerˢ);
             } else {
                 err = ((UnsupportedError)(@string)unknownMarkerˢ);
             }
         }
-
         if (err != default!) {
             return (default!, err);
         }
     }
+
     if (d.progressive) {
         {
             var err = d.reconstructProgressiveImage(); if (err != default!) {
@@ -758,6 +766,7 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
     if (!d.adobeTransformValid) {
         return (default!, ((UnsupportedError)(@string)unknownColorModel4ˢ));
     }
+
     // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
     // or CMYK)" as per
     // https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
@@ -781,6 +790,7 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
             Rect: (~imgΔ1).Rect
         ))), default!);
     }
+
     // The first three channels (cyan, magenta, yellow) of the CMYK
     // were decoded into d.img3, but each channel was decoded into a separate
     // []byte slice, and some channels may be subsampled. We interleave the
@@ -788,6 +798,7 @@ internal static (image.Image, error) applyBlack(this ref decoder d) {
     // contiguous bytes per pixel.
     var bounds = d.img3.Bounds();
     var img = image.NewCMYK(bounds);
+
     var translations = new applyBlack_translations[]{
         new((~d.img3).Y, (~d.img3).YStride),
         new((~d.img3).Cb, (~d.img3).CStride),
@@ -887,7 +898,6 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             Height: d.height
         ), default!);
     }}
-
     return (new image.Config(nil), ((FormatError)(@string)missingSofMarkerˢ));
 }
 

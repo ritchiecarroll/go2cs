@@ -27,35 +27,45 @@ internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) {
         nint need = blockSize - builtin.len(r.compressedBuf);
         r.compressedBuf = appendꓸꓸꓸ(r.compressedBuf, makeꓸꓸꓸ<byte>(need));
     }
+
     {
         var (_, errΔ1) = io.ReadFull(r.r, r.compressedBuf); if (errΔ1 != default!) {
             return r.wrapNonEOFError(0, errΔ1);
         }
     }
-    var data = ((block)r.compressedBuf);
+
+    var data = (block)r.compressedBuf;
     nint off = 0;
     r.buffer = r.buffer[..0];
+
     var (litoff, litbuf, err) = Ꮡr.readLiterals(data, off, r.literals[..0]);
     if (err != default!) {
         return err;
     }
     r.literals = litbuf;
+
     off = litoff;
+
     (var seqCount, off, err) = Ꮡr.initSeqs(data, off);
     if (err != default!) {
         return err;
     }
+
     if (seqCount == 0) {
         // No sequences, just literals.
         if (off < builtin.len(data)) {
             return r.makeError(off, extraneousDataAfterNoˢ);
         }
+
         r.buffer = appendꓸꓸꓸ(r.buffer, litbuf);
+
         return default!;
     }
+
     return Ꮡr.execSeqs(data, off, litbuf, seqCount);
 }
 
+// seqCode is the kind of sequence codes we have to handle.
 partial struct seqCode /*num:nint*/;
 
 internal static seqCode seqLiteral => /* iota */ 0;
@@ -112,11 +122,13 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
     if (off >= builtin.len(data)) {
         return (0, 0, r.makeEOFError(off));
     }
+
     var seqHdr = data[off];
     off++;
     if (seqHdr == 0) {
         return (0, off, default!);
     }
+
     nint seqCount = default!;
     if (seqHdr < 128){
         seqCount = (nint)seqHdr;
@@ -125,16 +137,18 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
         if (off >= builtin.len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
-        seqCount = ((((nint)seqHdr - 128) << (int)(8))) + (nint)data[off];
+        seqCount = (((nint)seqHdr - 128) << 8) + (nint)data[off];
         off++;
     } else {
         if (off + 1 >= builtin.len(data)) {
             return (0, 0, r.makeEOFError(off));
         }
-        seqCount = (nint)data[off] + (((nint)data[off + 1] << (int)(8))) + 0x7f00;
+        seqCount = (nint)data[off] + ((nint)data[off + 1] << 8) + 0x7f00;
         off += 2;
     }
+
     // Read the Symbol_Compression_Modes byte.
+
     if (off >= builtin.len(data)) {
         return (0, 0, r.makeEOFError(off));
     }
@@ -143,20 +157,25 @@ internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, n
         return (0, 0, r.makeError(off, invalidSymbolCompressionˢ));
     }
     off++;
+
     // Set up the FSE tables used to decode the sequence codes.
+
     error err = default!;
-    (off, err) = Ꮡr.setSeqTable(data, off, seqLiteral, (byte)(((symMode >> (int)(6))) & 3));
+    (off, err) = Ꮡr.setSeqTable(data, off, seqLiteral, (byte)((symMode >> 6) & 3));
     if (err != default!) {
         return (0, 0, err);
     }
-    (off, err) = Ꮡr.setSeqTable(data, off, seqOffset, (byte)(((symMode >> (int)(4))) & 3));
+
+    (off, err) = Ꮡr.setSeqTable(data, off, seqOffset, (byte)((symMode >> 4) & 3));
     if (err != default!) {
         return (0, 0, err);
     }
-    (off, err) = Ꮡr.setSeqTable(data, off, seqMatch, (byte)(((symMode >> (int)(2))) & 3));
+
+    (off, err) = Ꮡr.setSeqTable(data, off, seqMatch, (byte)((symMode >> 2) & 3));
     if (err != default!) {
         return (0, 0, err);
     }
+
     return (seqCount, off, default!);
 }
 
@@ -172,20 +191,22 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
     var info = ᏑseqCodeInfo.at<seqCodeInfoData>(kind);
     switch (mode) {
     case 0: {
+        // Predefined_Mode
         r.seqTables[kind] = info.Value.predefTable;
         r.seqTableBits[kind] = (uint8)(~info).predefTableBits;
         return (off, default!);
     }
     case 1: {
+        // RLE_Mode
         if (off >= builtin.len(data)) {
-            // Predefined_Mode
-            // RLE_Mode
             return (0, r.makeEOFError(off));
         }
         var rle = data[off];
         off++;
-        var entry = new fseEntry[]{ // Build a simple baseline table that always returns rle.
 
+        // Build a simple baseline table that always returns rle.
+
+        var entry = new fseEntry[]{
             new(
                 sym: rle,
                 bits: 0,
@@ -201,42 +222,46 @@ internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint
                 return (0, err);
             }
         }
+
         r.seqTables[kind] = r.seqTableBuffers[kind];
         r.seqTableBits[kind] = 0;
         return (off, default!);
     }
     case 2: {
+        // FSE_Compressed_Mode
         if (cap(r.fseScratch) < ((nint)1).Lsh((int64)((~info).maxBits))) {
-            // FSE_Compressed_Mode
             r.fseScratch = new slice<fseEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
         r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)((~info).maxBits)));
+
         var (tableBits, roff, err) = Ꮡr.readFSE(data, off, (~info).maxSym, (~info).maxBits, r.fseScratch);
         if (err != default!) {
             return (0, err);
         }
         r.fseScratch = r.fseScratch.slice(0, ((nint)1).Lsh((int64)(tableBits)));
+
         if (cap(r.seqTableBuffers[kind]) == 0) {
             r.seqTableBuffers[kind] = new slice<fseBaselineEntry>(((nint)1).Lsh((int64)((~info).maxBits)));
         }
         r.seqTableBuffers[kind] = r.seqTableBuffers[kind].slice(0, ((nint)1).Lsh((int64)(tableBits)));
+
         {
             var errΔ1 = (~info).toBaseline(Ꮡr, roff, r.fseScratch, r.seqTableBuffers[kind]); if (errΔ1 != default!) {
                 return (0, errΔ1);
             }
         }
+
         r.seqTables[kind] = r.seqTableBuffers[kind];
         r.seqTableBits[kind] = (uint8)tableBits;
         return (roff, default!);
     }
     case 3: {
+        // Repeat_Mode
         if (builtin.len(r.seqTables[kind]) == 0) {
-            // Repeat_Mode
             return (0, r.makeError(off, missingRepeatSequenceFseˢ));
         }
         return (off, default!);
     }}
-
     throw panic("unreachable");
 }
 
@@ -255,42 +280,52 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
     if (err != default!) {
         return err;
     }
+
     (var literalState, err) = rbr.val(r.seqTableBits[seqLiteral]);
     if (err != default!) {
         return err;
     }
+
     (var offsetState, err) = rbr.val(r.seqTableBits[seqOffset]);
     if (err != default!) {
         return err;
     }
+
     (var matchState, err) = rbr.val(r.seqTableBits[seqMatch]);
     if (err != default!) {
         return err;
     }
+
     // Read and perform all the sequences. RFC 3.1.1.4.
+
     nint seq = 0;
     while (seq < seqCount) {
-        if (builtin.len(r.buffer) + builtin.len(litbuf) > (128 << (int)(10))) {
+        if (builtin.len(r.buffer) + builtin.len(litbuf) > 128 << 10) {
             return rbr.makeError(uncompressedSizeTooBigˢ);
         }
+
         var ptoffset = Ꮡ(r.seqTables[seqOffset], offsetState);
         var ptmatch = Ꮡ(r.seqTables[seqMatch], matchState);
         var ptliteral = Ꮡ(r.seqTables[seqLiteral], literalState);
+
         var (add, errΔ1) = rbr.val((~ptoffset).basebits);
         if (errΔ1 != default!) {
             return errΔ1;
         }
         var offset = (~ptoffset).baseline + add;
+
         (add, errΔ1) = rbr.val((~ptmatch).basebits);
         if (errΔ1 != default!) {
             return errΔ1;
         }
         var match = (~ptmatch).baseline + add;
+
         (add, errΔ1) = rbr.val((~ptliteral).basebits);
         if (errΔ1 != default!) {
             return errΔ1;
         }
         var literal = (~ptliteral).baseline + add;
+
         // Handle repeat offsets. RFC 3.1.1.5.
         // See the comment in makeOffsetBaselineFSE.
         if ((~ptoffset).basebits > 1){
@@ -326,8 +361,8 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
                 r.repeatedOffset1 = offset;
                 break;
             }}
-
         }
+
         seq++;
         if (seq < seqCount) {
             // Update the states.
@@ -336,21 +371,26 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
                 return errΔ1;
             }
             literalState = (uint32)(~ptliteral).@base + add;
+
             (add, errΔ1) = rbr.val((~ptmatch).bits);
             if (errΔ1 != default!) {
                 return errΔ1;
             }
             matchState = (uint32)(~ptmatch).@base + add;
+
             (add, errΔ1) = rbr.val((~ptoffset).bits);
             if (errΔ1 != default!) {
                 return errΔ1;
             }
             offsetState = (uint32)(~ptoffset).@base + add;
         }
+
         // The next sequence is now in literal, offset, match.
+
         if (debug) {
             println((@string)"literal"u8, literal, (@string)"offset"u8, offset, (@string)"match"u8, match);
         }
+
         // Copy literal bytes from litbuf.
         if (literal > (uint32)builtin.len(litbuf)) {
             return rbr.makeError(literalByteOverflowˢ);
@@ -359,6 +399,7 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
             r.buffer = appendꓸꓸꓸ(r.buffer, litbuf.slice(0, (nint)(literal)));
             litbuf = litbuf.slice((nint)(literal));
         }
+
         if (match > 0) {
             {
                 var errΔ2 = r.copyFromWindow(Ꮡrbr, offset, match); if (errΔ2 != default!) {
@@ -367,10 +408,13 @@ internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice
             }
         }
     }
+
     r.buffer = appendꓸꓸꓸ(r.buffer, litbuf);
+
     if (rbr.cnt != 0) {
         return r.makeError(off, extraneousDataAfterˢ);
     }
+
     return default!;
 }
 
@@ -385,6 +429,7 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     if (offset == 0) {
         return rbr.makeError(invalidZeroOffsetˢ);
     }
+
     // Offset may point into the buffer or the window and
     // match may extend past the end of the initial buffer.
     // |--r.window--|--r.buffer--|
@@ -407,6 +452,7 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     } else {
         bufferOffset = lenBlock - offset;
     }
+
     // We are being asked to copy data that we are adding to the
     // buffer in the same copy.
     while (match > 0) {

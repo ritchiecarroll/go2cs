@@ -45,6 +45,12 @@ using static global::go.image.gif_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -53,9 +59,9 @@ using static global::go.image.gif_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/gif/fuzz_test.go", "fuzz_test.cs", "ABggooKWgoKUgoKUgoKUloKCgpSClIKClKKCgoKUgoKUgoKC", "36-64:1")]
-[assembly: go.GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "ACRClpKCgoCCpICCpAAPBoi0ABM4goKCyoKCgoKUqJaolpSClIKEgoKogpQABhKC3IKCgoKClIKCpoKCgpSCgpSEgoKUgoKCyoKUgoKCAA0MAA0ggoKCgpSC6JSClIKCqIKCgpaCgpSmgqiClpaCgoKEhNaCgpaClpaCgoKEloKClLiCloIABxKWloKCgoSEAAwGggAcRLKSgoKUgoKClIKClIKUggAJDIKCgoKUgoKUgvyygoLKgoKUgoCCpIKCgoKAgqSCgILE1KKCgpSCgpSCgoKCuIKCgpSCgpSCgg==", "357-377:1", "", "133=Rect/1/1/3")]
-[assembly: go.GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABcqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmyuQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gpTKgoKClIKCpu6CgpSCgoKUypaCgIKkgoKClIKCloKUgpSAkqaClIKUgpSClIKWgoKClJKClIKClILKgKKAooDkgoKClriAgqbKgpSAgviCgILIgsqCAAgSgoKCpoLcou6CuIKAgoKkgoKClICC3IKCuIKCgoKChIKAgoKkgoKClICCgqaSlLqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAOIIKAgqSCgpSClIKAgtqikoKCgoKCqAALGoKCggAJDIKCgoCCyoKEgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoKogoKCgpSCgpSCgqgACRSCgoKClIKClgAJFIKCuKKCgoKWgoKCgriigoKCgoIABxKCgoKC6KKCgpSCgoSCgoKCuKKCgpTKgoSCgoKC", "398-402:1", "", "209=Bounds/1/1/1;354=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;393=Add/1/1/2;419=Add/1/1/2;479=Rect/1/1/1,NewPaletted/1/1/1;518=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;568=Rect/1/1/2,NewPaletted/1/1/2;630=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;748=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
+[assembly: go.GoPositionMap("image/gif/fuzz_test.go", "fuzz_test.cs", "ABggooKmgoKUgoKUgoKUpoKCgpSClIKClKKCgoKUgoKUgoKC", "36-64:1")]
+[assembly: go.GoPositionMap("image/gif/reader_test.go", "reader_test.cs", "ACVClpKCgoCCpICCpAAPBojEABM4goKCyoKCgoKUuKa4ppSClIKUgoK4gpQABhKC3IKCgoKClIKCpoKCgpSCgpSUgoKUgoKCyoKUgoKC3AAPIIKCgoKUguiUgpSCgriCgoKmgoKUpoK4gqamgoKClJTWgoKmgqamgoKClKaCgpS4gqaCAAgSpqaCgoKUlAAMBoIAGkSykoKClIKCgpSCgpSClIIACQyCgoKClIKClIL8soKCyoKClIKAgqSCgoKCgIKkgoCCxNSigoKUgoKUgoKCgriCgoKUgoKUgoI=", "357-377:1", "", "141=Rect/1/1/3")]
+[assembly: go.GoPositionMap("image/gif/writer_test.go", "writer_test.cs", "ABcqooKClJKC1qKCgpSS1oKCgpSqooKqopKCgoKCgoKCgoKmytQABRKCgoKCgpSCgoKClIKCgpSCgqaCgoLKgoKClIKCgoKUgoKUgpSCvKKCgpSCgqaCgoKmgoKCpqb6gqTKgoKClIKCpu6CgpSCgoKUyqaCgIKkgoKClIKCpoKUgpSAkraClIKUgpSClIKmgoKClJKClIKClILKgKKAooDkgoKCpriAgrbKgpSAgviCgILIgsqCAAgSgoKCpoLcgu6CuIKAgoKkgoKClICC7IKCuIKCgoKClIKAgoKkgoKClICCgraSlMqAgqSAgtoACRSCpriCgoKmgtyCkgAPJgAPIIKAgqSCgpSClIKAgtqikoKCgoKCuAAMGoKCggAJDIKCgoCC2oKUgoKCgIKkgIKkgpSCuKaCAAoWgoKCgIKCpICCAAoUgqaCgoK4goKCgpSCgpSCgrgACRSCgoKClIKCpgAJFIKCuKKCgoKmgoKCgriigoKCgoIACBKCgoKC6KKCgpSCgpSCgoKCuKKCgpTKgpSCgoKC", "398-402:1", "", "209=Bounds/1/1/1;360=Rect/1/3/1,NewPaletted/1/3/1,Rect/2/3/2,NewPaletted/2/3/2,Rect/3/3/3,NewPaletted/3/3/3;397=Add/1/1/2;424=Add/1/1/2;487=Rect/1/1/1,NewPaletted/1/1/1;526=Rect/1/4/2,NewPaletted/1/4/2,Rect/2/4/3,NewPaletted/2/4/3,Rect/3/4/4,NewPaletted/3/4/4,Rect/4/4/5,NewPaletted/4/4/5;578=Rect/1/1/2,NewPaletted/1/1/2;643=Rect/1/9/1,Rect/2/9/2,Rect/3/9/3,Rect/4/9/4,Rect/5/9/5,Rect/6/9/6,Rect/7/9/7,Rect/8/9/8,Rect/9/9/9;765=Intn/1/3/1,Intn/2/3/2,Intn/3/3/3")]
 // </GoSourcePositionMaps>
 
 namespace go.image;

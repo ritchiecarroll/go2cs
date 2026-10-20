@@ -74,7 +74,7 @@ public static error UnmarshalJSON(this ref TAlias tt, slice<byte> data) {
             return err;
         }
     }
-    tt = ((TAlias)t);
+    tt = (TAlias)t;
     return default!;
 }
 
@@ -94,7 +94,7 @@ internal static map<@string, any> ifaceNumAsFloat64 = new map<@string, any>{
 internal static map<@string, any> ifaceNumAsNumber = new map<@string, any>{
     ["k1"u8] = ((global::go.encoding.json_package.Number)(@string)"1"u8),
     ["k2"u8] = (@string)"s"u8,
-    ["k3"u8] = new any[]{((global::go.encoding.json_package.Number)(@string)"1"u8), ((global::go.encoding.json_package.Number)(@string)"2.0"u8), ((global::go.encoding.json_package.Number)(@string)"3e-3"u8)}.slice(),
+    ["k3"u8] = new any[]{(global::go.encoding.json_package.Number)(@string)"1"u8, (global::go.encoding.json_package.Number)(@string)"2.0"u8, (global::go.encoding.json_package.Number)(@string)"3e-3"u8}.slice(),
     ["k4"u8] = new map<@string, any>{["kk1"u8] = (@string)"s"u8, ["kk2"u8] = ((global::go.encoding.json_package.Number)(@string)"2"u8)}
 };
 
@@ -135,7 +135,7 @@ public static error UnmarshalText(this ref unmarshalerText u, slice<byte> b) {
     if (pos == -1) {
         return errors.New(missingSeparatorˢ);
     }
-    (u.A, u.B) = (((@string)(b.slice(0, pos))), ((@string)(b.slice(pos + 1))));
+    (u.A, u.B) = ((@string)(b.slice(0, pos)), (@string)(b.slice(pos + 1)));
     return default!;
 }
 
@@ -145,6 +145,7 @@ internal partial struct ustructText {
     public unmarshalerText M;
 }
 
+// u8marshal is an integer type that can marshal/unmarshal itself.
 internal partial struct u8marshal /*num:uint8*/;
 
 internal static (slice<byte>, error) MarshalText(this u8marshal u8) {
@@ -157,11 +158,11 @@ internal static error UnmarshalText(this ref u8marshal u8, slice<byte> b) {
     if (!bytes.HasPrefix(b, new byte[]{(rune)'u'}.slice())) {
         return errMissingU8Prefix;
     }
-    var (n, err) = strconv.Atoi(((@string)(b[1..])));
+    var (n, err) = strconv.Atoi((@string)(b[1..]));
     if (err != default!) {
         return err;
     }
-    u8 = ((u8marshal)(uint8)n);
+    u8 = (u8marshal)(uint8)n;
     return default!;
 }
 
@@ -172,11 +173,13 @@ internal static ref unmarshaler umtrue => ref Ꮡumtrue.Value;
 internal static ж<slice<unmarshaler>> Ꮡumslice = new StandardBox<slice<unmarshaler>>(new unmarshaler[]{new(true)}.slice());
 internal static ref slice<unmarshaler> umslice => ref Ꮡumslice.ValueSlot;
 internal static ustruct umstruct = new ustruct(new unmarshaler(true));
+
 internal static ж<unmarshalerText> ᏑumtrueXY = new StandardBox<unmarshalerText>(new unmarshalerText("x"u8, "y"u8));
 internal static ref unmarshalerText umtrueXY => ref ᏑumtrueXY.Value;
 internal static ж<slice<unmarshalerText>> ᏑumsliceXY = new StandardBox<slice<unmarshalerText>>(new unmarshalerText[]{new("x"u8, "y"u8)}.slice());
 internal static ref slice<unmarshalerText> umsliceXY => ref ᏑumsliceXY.ValueSlot;
 internal static ustructText umstructXY = new ustructText(new unmarshalerText("x"u8, "y"u8));
+
 internal static map<unmarshalerText, bool> ummapXY = new map<unmarshalerText, bool>{[new("x"u8, "y"u8)] = true};
 
 // Test data structures for anonymous fields.
@@ -305,11 +308,11 @@ internal static error UnmarshalJSON(this ref byteWithMarshalJSON b, slice<byte> 
     if (len(data) != 5 || data[0] != (rune)'"' || data[1] != (rune)'Z' || data[4] != (rune)'"') {
         return fmt.Errorf("bad quoted string"u8);
     }
-    var (i, err) = strconv.ParseInt(((@string)(data[2..4])), 16, 8);
+    var (i, err) = strconv.ParseInt((@string)(data[2..4]), 16, 8);
     if (err != default!) {
         return fmt.Errorf("bad hex"u8);
     }
-    b = ((byteWithMarshalJSON)(byte)i);
+    b = (byteWithMarshalJSON)(byte)i;
     return default!;
 }
 
@@ -333,11 +336,11 @@ internal static error UnmarshalText(this ref byteWithMarshalText b, slice<byte> 
     if (len(data) != 3 || data[0] != (rune)'Z') {
         return fmt.Errorf("bad quoted string"u8);
     }
-    var (i, err) = strconv.ParseInt(((@string)(data[1..3])), 16, 8);
+    var (i, err) = strconv.ParseInt((@string)(data[1..3]), 16, 8);
     if (err != default!) {
         return fmt.Errorf("bad hex"u8);
     }
-    b = ((byteWithMarshalText)(byte)i);
+    b = (byteWithMarshalText)(byte)i;
     return default!;
 }
 
@@ -361,11 +364,11 @@ internal static error UnmarshalJSON(this ref intWithMarshalJSON b, slice<byte> d
     if (len(data) != 5 || data[0] != (rune)'"' || data[1] != (rune)'Z' || data[4] != (rune)'"') {
         return fmt.Errorf("bad quoted string"u8);
     }
-    var (i, err) = strconv.ParseInt(((@string)(data[2..4])), 16, 8);
+    var (i, err) = strconv.ParseInt((@string)(data[2..4]), 16, 8);
     if (err != default!) {
         return fmt.Errorf("bad hex"u8);
     }
-    b = ((intWithMarshalJSON)(nint)i);
+    b = (intWithMarshalJSON)(nint)i;
     return default!;
 }
 
@@ -389,11 +392,11 @@ internal static error UnmarshalText(this ref intWithMarshalText b, slice<byte> d
     if (len(data) != 3 || data[0] != (rune)'Z') {
         return fmt.Errorf("bad quoted string"u8);
     }
-    var (i, err) = strconv.ParseInt(((@string)(data[1..3])), 16, 8);
+    var (i, err) = strconv.ParseInt((@string)(data[1..3]), 16, 8);
     if (err != default!) {
         return fmt.Errorf("bad hex"u8);
     }
-    b = ((intWithMarshalText)(nint)i);
+    b = (intWithMarshalText)(nint)i;
     return default!;
 }
 
@@ -420,46 +423,6 @@ public partial struct DoublePtr {
     public ж<ж<nint>> J;
 }
 
-// basic types
-// raw values with whitespace
-// Z has a "-" tag.
-// syntax errors
-// raw value errors
-// array tests
-// empty array to interface test
-// composite tests
-// unmarshal interface test
-// use "false" so test will fail if custom unmarshaler is not called
-// UnmarshalText interface test
-// integer-keyed map test
-// Check that MarshalText and UnmarshalText take precedence
-// over default integer handling in map keys.
-// integer-keyed map errors
-// Map keys can be encoding.TextUnmarshalers.
-// If multiple values for the same key exists, only the most recent value is used.
-// invalid UTF-8 is coerced to valid UTF-8.
-// Used to be issue 8305, but time.Time implements encoding.TextUnmarshaler so this works now.
-// issue 8305
-// related to issue 13783.
-// Go 1.7 changed marshaling a slice of typed byte to use the methods on the byte type,
-// similar to marshaling a slice of typed int.
-// These tests check that, assuming the byte type also has valid decoding methods,
-// either the old base64 string encoding or the new per-element encoding can be
-// successfully unmarshaled. The custom unmarshalers were accessible in earlier
-// versions of Go, even though the custom marshaler was not.
-// ints work with the marshaler but not the base64 []byte case
-// issue 15146.
-// invalid inputs in wrongStringTests below.
-// additional tests for disallowUnknownFields
-// issue 26444
-// UnmarshalTypeError without field & struct values
-// trying to decode JSON arrays or objects via TextUnmarshaler
-// #22369
-// #14702
-// Verify that syntactic errors are immediately fatal,
-// while semantic errors are lazily reported
-// (i.e., allow processing to continue).
-
 partial struct unmarshalTestsᴛ1 /*dyn*/ {
     public partial ref CaseName CaseName { get; }
     internal @string @in;
@@ -470,26 +433,23 @@ partial struct unmarshalTestsᴛ1 /*dyn*/ {
     internal bool golden;
     internal bool disallowUnknownFields;
 }
-
             partial struct Δtype /*dyn*/ {
                 public global::go.encoding.json_package.Number A;
             }
-
             partial struct Δtypeᴛ1 /*dyn*/ {
                 public global::go.encoding.json_package.Number A; /*`json:",string"`*/
             }
-
             partial struct Δtypeᴛ2 /*dyn*/ {
                 public global::go.encoding.json_package.Number N;
             }
-
             partial struct Δtypeᴛ3 /*dyn*/ {
                 public global::go.encoding.json_package.Number N; /*`json:",string"`*/
             }
 internal static slice<unmarshalTestsᴛ1> unmarshalTests;
 internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTestsᴛ1[]{
+    // basic types
     new(CaseName: Name(""u8), @in: @"true"u8, ptr: @new<bool>(), @out: true),
-    new(CaseName: Name(""u8), @in: @"1"u8, ptr: @new<nint>(), @out: (nint)(1)),
+    new(CaseName: Name(""u8), @in: @"1"u8, ptr: @new<nint>(), @out: (nint)1),
     new(CaseName: Name(""u8), @in: @"1.2"u8, ptr: @new<float64>(), @out: 1.2D),
     new(CaseName: Name(""u8), @in: @"-5"u8, ptr: @new<int16>(), @out: (int16)(-5)),
     new(CaseName: Name(""u8), @in: @"2"u8, ptr: @new<global::go.encoding.json_package.Number>(), @out: ((global::go.encoding.json_package.Number)(@string)"2"u8), useNumber: true),
@@ -512,11 +472,15 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: @"{""F1"":1,""F2"":2,""F3"":3}"u8, ptr: @new<V>(), @out: new V(F1: ((global::go.encoding.json_package.Number)(@string)"1"u8), F2: (int32)2, F3: ((global::go.encoding.json_package.Number)(@string)"3"u8)), useNumber: true),
     new(CaseName: Name(""u8), @in: @"{""k1"":1,""k2"":""s"",""k3"":[1,2.0,3e-3],""k4"":{""kk1"":""s"",""kk2"":2}}"u8, ptr: @new<any>(), @out: ifaceNumAsFloat64),
     new(CaseName: Name(""u8), @in: @"{""k1"":1,""k2"":""s"",""k3"":[1,2.0,3e-3],""k4"":{""kk1"":""s"",""kk2"":2}}"u8, ptr: @new<any>(), @out: ifaceNumAsNumber, useNumber: true),
+
+    // raw values with whitespace
     new(CaseName: Name(""u8), @in: "\n true "u8, ptr: @new<bool>(), @out: true),
-    new(CaseName: Name(""u8), @in: "\t 1 "u8, ptr: @new<nint>(), @out: (nint)(1)),
+    new(CaseName: Name(""u8), @in: "\t 1 "u8, ptr: @new<nint>(), @out: (nint)1),
     new(CaseName: Name(""u8), @in: "\r 1.2 "u8, ptr: @new<float64>(), @out: 1.2D),
     new(CaseName: Name(""u8), @in: "\t -5 \n"u8, ptr: @new<int16>(), @out: (int16)(-5)),
     new(CaseName: Name(""u8), @in: "\t \"a\\u1234\" \n"u8, ptr: @new<@string>(), @out: (@string)"a\u1234"u8),
+
+    // Z has a "-" tag.
     new(CaseName: Name(""u8), @in: @"{""Y"": 1, ""Z"": 2}"u8, ptr: @new<T>(), @out: new T(Y: 1)),
     new(CaseName: Name(""u8), @in: @"{""Y"": 1, ""Z"": 2}"u8, ptr: @new<T>(), @out: new T(Y: 1), err: fmt.Errorf("json: unknown field \"Z\""u8), disallowUnknownFields: true),
     new(CaseName: Name(""u8), @in: @"{""alpha"": ""abc"", ""alphabet"": ""xyz""}"u8, ptr: @new<U>(), @out: new U(Alphabet: "abc"u8)),
@@ -524,11 +488,15 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: @"{""alpha"": ""abc""}"u8, ptr: @new<U>(), @out: new U(Alphabet: "abc"u8)),
     new(CaseName: Name(""u8), @in: @"{""alphabet"": ""xyz""}"u8, ptr: @new<U>(), @out: new U(nil)),
     new(CaseName: Name(""u8), @in: @"{""alphabet"": ""xyz""}"u8, ptr: @new<U>(), err: fmt.Errorf("json: unknown field \"alphabet\""u8), disallowUnknownFields: true),
+
+    // syntax errors
     new(CaseName: Name(""u8), @in: @"{""X"": ""foo"", ""Y""}"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' after object key"u8, 17)))),
     new(CaseName: Name(""u8), @in: @"[1, 2, 3+]"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '+' after array element"u8, 9)))),
     new(CaseName: Name(""u8), @in: @"{""X"":12x}"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character 'x' after object key:value pair"u8, 8))), useNumber: true),
     new(CaseName: Name(""u8), @in: @"[2, 3"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(msg: "unexpected end of JSON input"u8, Offset: 5)))),
     new(CaseName: Name(""u8), @in: @"{""F3"": -}"u8, ptr: @new<V>(), err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(msg: "invalid character '}' in numeric literal"u8, Offset: 9)))),
+
+    // raw value errors
     new(CaseName: Name(""u8), @in: "\x01 42"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' looking for beginning of value"u8, 1)))),
     new(CaseName: Name(""u8), @in: " 42 \x01"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' after top-level value"u8, 5)))),
     new(CaseName: Name(""u8), @in: "\x01 true"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' looking for beginning of value"u8, 1)))),
@@ -537,14 +505,20 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: " 3.4 \x01"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' after top-level value"u8, 6)))),
     new(CaseName: Name(""u8), @in: "\x01 \"string\""u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' looking for beginning of value"u8, 1)))),
     new(CaseName: Name(""u8), @in: " \"string\" \x01"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' after top-level value"u8, 11)))),
+
+    // array tests
     new(CaseName: Name(""u8), @in: @"[1, 2, 3]"u8, ptr: Ꮡ(new array<nint>(3)), @out: new nint[]{1, 2, 3}.array()),
     new(CaseName: Name(""u8), @in: @"[1, 2, 3]"u8, ptr: Ꮡ(new array<nint>(1)), @out: new nint[]{1}.array()),
     new(CaseName: Name(""u8), @in: @"[1, 2, 3]"u8, ptr: Ꮡ(new array<nint>(5)), @out: new nint[]{1, 2, 3, 0, 0}.array()),
     new(CaseName: Name(""u8), @in: @"[1, 2, 3]"u8, ptr: @new<MustNotUnmarshalJSON>(), err: errors.New("MustNotUnmarshalJSON was used"u8)),
+
+    // empty array to interface test
     new(CaseName: Name(""u8), @in: @"[]"u8, ptr: @new<slice<any>>(), @out: new any[]{}.slice()),
     new(CaseName: Name(""u8), @in: @"null"u8, ptr: @new<slice<any>>(), @out: slice<any>(default!)),
     new(CaseName: Name(""u8), @in: @"{""T"":[]}"u8, ptr: @new<map<@string, any>>(), @out: new map<@string, any>{["T"u8] = new any[]{}.slice()}),
     new(CaseName: Name(""u8), @in: @"{""T"":null}"u8, ptr: @new<map<@string, any>>(), @out: new map<@string, any>{["T"u8] = ((any)default!)}),
+
+    // composite tests
     new(CaseName: Name(""u8), @in: allValueIndent, ptr: @new<All>(), @out: allValue),
     new(CaseName: Name(""u8), @in: allValueCompact, ptr: @new<All>(), @out: allValue),
     new(CaseName: Name(""u8), @in: allValueIndent, ptr: @new<ж<All>>(), @out: ᏑallValue),
@@ -553,16 +527,22 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: pallValueCompact, ptr: @new<All>(), @out: pallValue),
     new(CaseName: Name(""u8), @in: pallValueIndent, ptr: @new<ж<All>>(), @out: ᏑpallValue),
     new(CaseName: Name(""u8), @in: pallValueCompact, ptr: @new<ж<All>>(), @out: ᏑpallValue),
-    new(CaseName: Name(""u8), @in: @"{""T"":false}"u8, ptr: @new<unmarshaler>(), @out: umtrue),
+
+    // unmarshal interface test
+    new(CaseName: Name(""u8), @in: @"{""T"":false}"u8, ptr: @new<unmarshaler>(), @out: umtrue), // use "false" so test will fail if custom unmarshaler is not called
     new(CaseName: Name(""u8), @in: @"{""T"":false}"u8, ptr: @new<ж<unmarshaler>>(), @out: Ꮡumtrue),
     new(CaseName: Name(""u8), @in: @"[{""T"":false}]"u8, ptr: @new<slice<unmarshaler>>(), @out: umslice),
     new(CaseName: Name(""u8), @in: @"[{""T"":false}]"u8, ptr: @new<ж<slice<unmarshaler>>>(), @out: Ꮡumslice),
     new(CaseName: Name(""u8), @in: @"{""M"":{""T"":""x:y""}}"u8, ptr: @new<ustruct>(), @out: umstruct),
+
+    // UnmarshalText interface test
     new(CaseName: Name(""u8), @in: @"""x:y"""u8, ptr: @new<unmarshalerText>(), @out: umtrueXY),
     new(CaseName: Name(""u8), @in: @"""x:y"""u8, ptr: @new<ж<unmarshalerText>>(), @out: ᏑumtrueXY),
     new(CaseName: Name(""u8), @in: @"[""x:y""]"u8, ptr: @new<slice<unmarshalerText>>(), @out: umsliceXY),
     new(CaseName: Name(""u8), @in: @"[""x:y""]"u8, ptr: @new<ж<slice<unmarshalerText>>>(), @out: ᏑumsliceXY),
     new(CaseName: Name(""u8), @in: @"{""M"":""x:y""}"u8, ptr: @new<ustructText>(), @out: umstructXY),
+
+    // integer-keyed map test
     new(
         CaseName: Name(""u8),
         @in: @"{""-1"":""a"",""0"":""b"",""1"":""c""}"u8,
@@ -593,6 +573,9 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<map<uintptr, bool>>(),
         @out: new map<uintptr, bool>{[0] = false, [10] = true}
     ),
+
+    // Check that MarshalText and UnmarshalText take precedence
+    // over default integer handling in map keys.
     new(
         CaseName: Name(""u8),
         @in: @"{""u2"":4}"u8,
@@ -606,6 +589,8 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         @out: new map<u8marshal, nint>{},
         err: errMissingU8Prefix
     ),
+
+    // integer-keyed map errors
     new(
         CaseName: Name(""u8),
         @in: @"{""abc"":""abc""}"u8,
@@ -648,7 +633,10 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         @out: new map<@string, map<nuint, nint>>{["F"u8] = new map<nuint, nint>{[3] = 4}},
         err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number a"u8, Type: reflect.TypeFor<nuint>(), Offset: 7)))
     ),
+
+    // Map keys can be encoding.TextUnmarshalers.
     new(CaseName: Name(""u8), @in: @"{""x:y"":true}"u8, ptr: @new<map<unmarshalerText, bool>>(), @out: ummapXY),
+    // If multiple values for the same key exists, only the most recent value is used.
     new(CaseName: Name(""u8), @in: @"{""x:y"":false,""x:y"":true}"u8, ptr: @new<map<unmarshalerText, bool>>(), @out: ummapXY),
     new(
         CaseName: Name(""u8),
@@ -674,7 +662,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
 			"Z": 17,
 			"Q": 18
 		}
-"""u8,
+"""u8.Raw(),
         ptr: @new<Top>(),
         @out: new Top(
             Level0: 1,
@@ -748,6 +736,8 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<DoublePtr>(),
         @out: new DoublePtr(I: nil, J: nil)
     ),
+
+    // invalid UTF-8 is coerced to valid UTF-8.
     new(
         CaseName: Name(""u8),
         @in: ((@string)(new byte[]{0x22, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xff, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x22})),
@@ -790,12 +780,16 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<@string>(),
         @out: (@string)"hello\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdworld"u8
     ),
+
+    // Used to be issue 8305, but time.Time implements encoding.TextUnmarshaler so this works now.
     new(
         CaseName: Name(""u8),
         @in: @"{""2009-11-10T23:00:00Z"": ""hello world""}"u8,
         ptr: @new<map<time.Time, @string>>(),
         @out: new map<time.Time, @string>{[time.Date(2009, 11, 10, 23, 0, 0, 0, time.ΔUTC)] = "hello world"u8}
     ),
+
+    // issue 8305
     new(
         CaseName: Name(""u8),
         @in: @"{""2009-11-10T23:00:00Z"": ""hello world""}"u8,
@@ -808,6 +802,14 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<map<unmarshaler, @string>>(),
         err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "object"u8, Type: reflect.TypeFor<map<unmarshaler, @string>>(), Offset: 1)))
     ),
+
+    // related to issue 13783.
+    // Go 1.7 changed marshaling a slice of typed byte to use the methods on the byte type,
+    // similar to marshaling a slice of typed int.
+    // These tests check that, assuming the byte type also has valid decoding methods,
+    // either the old base64 string encoding or the new per-element encoding can be
+    // successfully unmarshaled. The custom unmarshalers were accessible in earlier
+    // versions of Go, even though the custom marshaler was not.
     new(
         CaseName: Name(""u8),
         @in: @"""AQID"""u8,
@@ -860,6 +862,8 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         @out: new byteWithPtrMarshalText[]{1, 2, 3}.slice(),
         golden: true
     ),
+
+    // ints work with the marshaler but not the base64 []byte case
     new(
         CaseName: Name(""u8),
         @in: @"[""Z01"",""Z02"",""Z03""]"u8,
@@ -937,6 +941,9 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
             Offset: 19
         )))
     ),
+
+    // issue 15146.
+    // invalid inputs in wrongStringTests below.
     new(CaseName: Name(""u8), @in: @"{""B"":""true""}"u8, ptr: @new<B>(), @out: new B(true), golden: true),
     new(CaseName: Name(""u8), @in: @"{""B"":""false""}"u8, ptr: @new<B>(), @out: new B(false), golden: true),
     new(CaseName: Name(""u8), @in: @"{""B"": ""maybe""}"u8, ptr: @new<B>(), err: errors.New(@"json: invalid use of ,string struct tag, trying to unmarshal ""maybe"" into bool"u8)),
@@ -945,6 +952,8 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: @"{""B"": ""null""}"u8, ptr: @new<B>(), @out: new B(false)),
     new(CaseName: Name(""u8), @in: @"{""B"": ""nul""}"u8, ptr: @new<B>(), err: errors.New(@"json: invalid use of ,string struct tag, trying to unmarshal ""nul"" into bool"u8)),
     new(CaseName: Name(""u8), @in: @"{""B"": [2, 3]}"u8, ptr: @new<B>(), err: errors.New(@"json: invalid use of ,string struct tag, trying to unmarshal unquoted value into bool"u8)),
+
+    // additional tests for disallowUnknownFields
     new(
         CaseName: Name(""u8),
         @in: """
@@ -970,7 +979,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
 			"Q": 18,
 			"extra": true
 		}
-"""u8,
+"""u8.Raw(),
         ptr: @new<Top>(),
         @out: new Top(
             Level0: 1,
@@ -1022,7 +1031,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
 			"Z": 17,
 			"Q": 18
 		}
-"""u8,
+"""u8.Raw(),
         ptr: @new<Top>(),
         @out: new Top(
             Level0: 1,
@@ -1049,6 +1058,8 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         err: fmt.Errorf("json: unknown field \"extra\""u8),
         disallowUnknownFields: true
     ),
+    // issue 26444
+    // UnmarshalTypeError without field & struct values
     new(
         CaseName: Name(""u8),
         @in: @"{""data"":{""test1"": ""bob"", ""test2"": 123}}"u8,
@@ -1063,6 +1074,8 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         @out: new mapStringToStringData(Data: new map<@string, @string>{["test1"u8] = ""u8, ["test2"u8] = "bob"u8}),
         err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: reflect.TypeFor<@string>(), Offset: 21, Struct: "mapStringToStringData"u8, Field: "data"u8)))
     ),
+
+    // trying to decode JSON arrays or objects via TextUnmarshaler
     new(
         CaseName: Name(""u8),
         @in: @"[1, 2, 3]"u8,
@@ -1075,6 +1088,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<MustNotUnmarshalText>(),
         err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "object"u8, Type: reflect.TypeFor<ж<MustNotUnmarshalText>>(), Offset: 1)))
     ),
+    // #22369
     new(
         CaseName: Name(""u8),
         @in: @"{""PP"": {""T"": {""Y"": ""bad-type""}}}"u8,
@@ -1100,6 +1114,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
             Offset: 44
         )))
     ),
+    // #14702
     new(
         CaseName: Name(""u8),
         @in: @"invalid"u8,
@@ -1170,6 +1185,10 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<Δtypeᴛ3>(),
         @out: new Δtypeᴛ3("5"u8)
     ),
+
+    // Verify that syntactic errors are immediately fatal,
+    // while semantic errors are lazily reported
+    // (i.e., allow processing to continue).
     new(
         CaseName: Name(""u8),
         @in: @"[1,2,true,4,5}"u8,
@@ -1195,6 +1214,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
         diff(Ꮡt, b, slice<byte>(allValueCompact));
         return;
     }
+
     (b, err) = Marshal(pallValue);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -1241,7 +1261,7 @@ public static void TestMarshalNumberZeroVal(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
-    @string got = ((@string)@out);
+    @string got = (@string)@out;
     if (got != "0"u8) {
         Ꮡt.Fatalf("Marshal: got %s, want 0"u8, got);
     }
@@ -1305,9 +1325,9 @@ internal static bool equalError(error a, error b) {
         case ж<global::go.encoding.json_package.UnsupportedValueError> _: {
             return true;
         }}
-
         return false;
     }
+
     if (a == default! || b == default!) {
         return a == default! && b == default!;
     }
@@ -1318,8 +1338,6 @@ internal static bool equalError(error a, error b) {
 }
 
 public static void TestUnmarshal(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, vᴛ1) in unmarshalTests) {
         ref var tt = ref heap(new unmarshalTestsᴛ1(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1338,13 +1356,16 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
             if (ttʗ1.ptr == default!) {
                 return;
             }
+
             var typ = reflect.TypeOf(ttʗ1.ptr);
             if (typ.Kind() != reflect.ΔPointer) {
                 tΔ1.Fatalf("%s: unmarshalTest.ptr %T is not a pointer type"u8, ttʗ1.Where, ttʗ1.ptr);
             }
             typ = typ.Elem();
+
             // v = new(right-type)
             var v = reflect.New(typ);
+
             if (!reflect.DeepEqual(ttʗ1.ptr, v.Interface())) {
                 // There's no reason for ptr to point to non-zero data,
                 // as we decode into new(right-type), so the data is
@@ -1354,6 +1375,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
                 // data, see TestPrefilled.
                 tΔ1.Fatalf("%s: unmarshalTest.ptr %#v is not a pointer to a zero value"u8, ttʗ1.Where, ttʗ1.ptr);
             }
+
             var dec = NewDecoder(new json_test_package.bytes_ReaderжReader(bytes.NewReader(@in)));
             if (ttʗ1.useNumber) {
                 dec.UseNumber();
@@ -1378,6 +1400,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("%s: Decode:\n\tgot:  %#+v\n\twant: %#+v\n\n\tgotJSON:  %s\n\twantJSON: %s"u8, ttʗ1.Where, got, ttʗ1.@out, gotJSON, wantJSON);
                 }
             }
+
             // Check round trip also decodes correctly.
             if (ttʗ1.err == default!) {
                 var (enc, err) = Marshal(v.Interface());
@@ -1400,7 +1423,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
                 if (!reflect.DeepEqual(v.Elem().Interface(), vv.Elem().Interface())) {
                     tΔ1.Fatalf("%s: Decode:\n\tgot:  %#+v\n\twant: %#+v\n\n\tgotJSON:  %s\n\twantJSON: %s"u8,
                         ttʗ1.Where, v.Elem().Interface(), vv.Elem().Interface(),
-                        stripWhitespace(((@string)enc)), stripWhitespace(((@string)@in)));
+                        stripWhitespace((@string)enc), stripWhitespace((@string)@in));
                 }
             }
         });
@@ -1448,7 +1471,7 @@ public static void TestNumberAccessors(ж<testing.T> Ꮡt) {
 
         var ttʗ1 = tt;
         Ꮡt.Run(tt.Name, (ж<testing.T> tΔ1) => {
-            global::go.encoding.json_package.Number n = ((global::go.encoding.json_package.Number)ttʗ1.@in);
+            global::go.encoding.json_package.Number n = (global::go.encoding.json_package.Number)ttʗ1.@in;
             {
                 @string got = n.String(); if (got != ttʗ1.@in) {
                     tΔ1.Errorf("%s: Number(%q).String() = %s, want %s"u8, ttʗ1.Where, ttʗ1.@in, got, ttʗ1.@in);
@@ -1801,7 +1824,7 @@ internal static @string allValueIndent = """
 	"Interface": 5.2,
 	"PInterface": null
 }
-"""u8;
+"""u8.Raw();
 
 internal static @string allValueCompact = stripWhitespace(allValueIndent);
 
@@ -1892,7 +1915,7 @@ internal static @string pallValueIndent = """
 	"Interface": null,
 	"PInterface": 5.2
 }
-"""u8;
+"""u8.Raw();
 
 internal static @string pallValueCompact = stripWhitespace(pallValueIndent);
 
@@ -1913,6 +1936,7 @@ public static void TestRefUnmarshal(ж<testing.T> Ꮡt) {
     );
     want.R1.Value = 12;
     want.R3.Value = 13;
+
     ref var got = ref heap(new TestRefUnmarshal_S(), out var Ꮡgot);
     {
         var err = Unmarshal(slice<byte>(@"{""R0"":""ref"",""R1"":""ref"",""R2"":""ref"",""R3"":""ref""}"u8), Ꮡgot); if (err != default!) {
@@ -1950,7 +1974,6 @@ public static void TestEmptyString(ж<testing.T> Ꮡt) {
             break;
         }}
     }
-
 }
 
 internal partial struct TestNullString_T /*dyn*/ {
@@ -1983,7 +2006,6 @@ public static void TestNullString(ж<testing.T> Ꮡt) {
             break;
         }}
     }
-
 }
 
 internal static ж<T> addr<T>(T vʗp) {
@@ -2012,41 +2034,41 @@ public static void TestInterfaceSet(ж<testing.T> Ꮡt) {
         new(Name(""u8), (@string)"foo"u8, @"null"u8, default!),
         new(Name(""u8), new map<@string, any>{}, @"true"u8, true),
         new(Name(""u8), new @string[]{}.slice(), @"true"u8, true),
-        new(Name(""u8), ((any)default!), @"null"u8, ((any)default!)),
-        new(Name(""u8), ((ж<nint>)nil), @"null"u8, ((any)default!)),
-        new(Name(""u8), addr((nint)(0)).OrTypedNil(), @"null"u8, ((any)default!)),
-        new(Name(""u8), addr((nint)(1)).OrTypedNil(), @"null"u8, ((any)default!)),
-        new(Name(""u8), ((ж<ж<nint>>)nil), @"null"u8, ((any)default!)),
+        new(Name(""u8), (any)default!, @"null"u8, (any)default!),
+        new(Name(""u8), (ж<nint>)nil, @"null"u8, (any)default!),
+        new(Name(""u8), addr((nint)0).OrTypedNil(), @"null"u8, (any)default!),
+        new(Name(""u8), addr((nint)1).OrTypedNil(), @"null"u8, (any)default!),
+        new(Name(""u8), (ж<ж<nint>>)nil, @"null"u8, (any)default!),
         new(Name(""u8), addr<ж<nint>>(nil).OrTypedNil(), @"null"u8, addr<ж<nint>>(nil).OrTypedNil()),
-        new(Name(""u8), addr(addr((nint)(1))).OrTypedNil(), @"null"u8, addr<ж<nint>>(nil).OrTypedNil()),
-        new(Name(""u8), ((ж<ж<ж<nint>>>)nil), @"null"u8, ((any)default!)),
+        new(Name(""u8), addr(addr((nint)1)).OrTypedNil(), @"null"u8, addr<ж<nint>>(nil).OrTypedNil()),
+        new(Name(""u8), (ж<ж<ж<nint>>>)nil, @"null"u8, (any)default!),
         new(Name(""u8), addr<ж<ж<nint>>>(nil).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
         new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
-        new(Name(""u8), addr(addr(addr((nint)(1)))).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
-        new(Name(""u8), ((any)default!), @"2"u8, (float64)2D),
+        new(Name(""u8), addr(addr(addr((nint)1))).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
+        new(Name(""u8), (any)default!, @"2"u8, (float64)2D),
         new(Name(""u8), (nint)1, @"2"u8, (float64)2D),
-        new(Name(""u8), ((ж<nint>)nil), @"2"u8, (float64)2D),
-        new(Name(""u8), addr((nint)(0)).OrTypedNil(), @"2"u8, addr((nint)(2)).OrTypedNil()),
-        new(Name(""u8), addr((nint)(1)).OrTypedNil(), @"2"u8, addr((nint)(2)).OrTypedNil()),
-        new(Name(""u8), ((ж<ж<nint>>)nil), @"2"u8, (float64)2D),
-        new(Name(""u8), addr<ж<nint>>(nil).OrTypedNil(), @"2"u8, addr(addr((nint)(2))).OrTypedNil()),
-        new(Name(""u8), addr(addr((nint)(1))).OrTypedNil(), @"2"u8, addr(addr((nint)(2))).OrTypedNil()),
-        new(Name(""u8), ((ж<ж<ж<nint>>>)nil), @"2"u8, (float64)2D),
-        new(Name(""u8), addr<ж<ж<nint>>>(nil).OrTypedNil(), @"2"u8, addr(addr(addr((nint)(2)))).OrTypedNil()),
-        new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"2"u8, addr(addr(addr((nint)(2)))).OrTypedNil()),
-        new(Name(""u8), addr(addr(addr((nint)(1)))).OrTypedNil(), @"2"u8, addr(addr(addr((nint)(2)))).OrTypedNil()),
-        new(Name(""u8), ((any)default!), @"{}"u8, new map<@string, any>{}),
+        new(Name(""u8), (ж<nint>)nil, @"2"u8, (float64)2D),
+        new(Name(""u8), addr((nint)0).OrTypedNil(), @"2"u8, addr((nint)2).OrTypedNil()),
+        new(Name(""u8), addr((nint)1).OrTypedNil(), @"2"u8, addr((nint)2).OrTypedNil()),
+        new(Name(""u8), (ж<ж<nint>>)nil, @"2"u8, (float64)2D),
+        new(Name(""u8), addr<ж<nint>>(nil).OrTypedNil(), @"2"u8, addr(addr((nint)2)).OrTypedNil()),
+        new(Name(""u8), addr(addr((nint)1)).OrTypedNil(), @"2"u8, addr(addr((nint)2)).OrTypedNil()),
+        new(Name(""u8), (ж<ж<ж<nint>>>)nil, @"2"u8, (float64)2D),
+        new(Name(""u8), addr<ж<ж<nint>>>(nil).OrTypedNil(), @"2"u8, addr(addr(addr((nint)2))).OrTypedNil()),
+        new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"2"u8, addr(addr(addr((nint)2))).OrTypedNil()),
+        new(Name(""u8), addr(addr(addr((nint)1))).OrTypedNil(), @"2"u8, addr(addr(addr((nint)2))).OrTypedNil()),
+        new(Name(""u8), (any)default!, @"{}"u8, new map<@string, any>{}),
         new(Name(""u8), (nint)1, @"{}"u8, new map<@string, any>{}),
-        new(Name(""u8), ((ж<nint>)nil), @"{}"u8, new map<@string, any>{}),
-        new(Name(""u8), addr((nint)(0)).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
-        new(Name(""u8), addr((nint)(1)).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
-        new(Name(""u8), ((ж<ж<nint>>)nil), @"{}"u8, new map<@string, any>{}),
+        new(Name(""u8), (ж<nint>)nil, @"{}"u8, new map<@string, any>{}),
+        new(Name(""u8), addr((nint)0).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
+        new(Name(""u8), addr((nint)1).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
+        new(Name(""u8), (ж<ж<nint>>)nil, @"{}"u8, new map<@string, any>{}),
         new(Name(""u8), addr<ж<nint>>(nil).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
-        new(Name(""u8), addr(addr((nint)(1))).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
-        new(Name(""u8), ((ж<ж<ж<nint>>>)nil), @"{}"u8, new map<@string, any>{}),
+        new(Name(""u8), addr(addr((nint)1)).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
+        new(Name(""u8), (ж<ж<ж<nint>>>)nil, @"{}"u8, new map<@string, any>{}),
         new(Name(""u8), addr<ж<ж<nint>>>(nil).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
         new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil()),
-        new(Name(""u8), addr(addr(addr((nint)(1)))).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil())
+        new(Name(""u8), addr(addr(addr((nint)1))).OrTypedNil(), @"{}"u8, errUnmarshal.OrTypedNil())
     }.slice();
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestInterfaceSet_tests(), out var Ꮡtt);
@@ -2148,7 +2170,7 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
 				"Buffer": null,
 				"Struct": null
 			}
-"""u8);
+"""u8.Raw());
     ref var nulls = ref heap<NullTest>(out var Ꮡnulls);
     nulls = new NullTest(
         Bool: true,
@@ -2179,7 +2201,9 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
         Time: time.Unix(123456789, 0),
         BigInt: big.NewInt(123).Value
     );
+
     @string before = nulls.Time.String();
+
     var err = Unmarshal(jsonData, Ꮡnulls);
     if (err != default!) {
         Ꮡt.Errorf("Unmarshal of null values failed: %v"u8, err);
@@ -2187,6 +2211,7 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
     if (!nulls.Bool || nulls.Int != 2 || nulls.Int8 != 3 || nulls.Int16 != 4 || nulls.Int32 != 5 || nulls.Int64 != 6 || nulls.Uint != 7 || nulls.Uint8 != 8 || nulls.Uint16 != 9 || nulls.Uint32 != 10 || nulls.Uint64 != 11 || nulls.Float32 != 12.1F || nulls.Float64 != 13.1D || nulls.String != "14"u8) {
         Ꮡt.Errorf("Unmarshal of null values affected primitives"u8);
     }
+
     if (nulls.PBool != nil) {
         Ꮡt.Errorf("Unmarshal of null did not clear nulls.PBool"u8);
     }
@@ -2217,8 +2242,9 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
     if (nulls.PStruct != nil) {
         Ꮡt.Errorf("Unmarshal of null did not clear nulls.PStruct"u8);
     }
+
     if (((@string)(slice<byte>)nulls.Raw) != "null"u8) {
-        Ꮡt.Errorf("Unmarshal of RawMessage null did not record null: %v"u8, ((@string)(slice<byte>)nulls.Raw));
+        Ꮡt.Errorf("Unmarshal of RawMessage null did not record null: %v"u8, (@string)(slice<byte>)nulls.Raw);
     }
     if (nulls.Time.String() != before) {
         Ꮡt.Errorf("Unmarshal of time.Time null set time to %v"u8, nulls.Time.String());
@@ -2272,7 +2298,7 @@ internal partial struct TestByteKind_byteKind /*[]byte*/;
 // and then unmarshaled.
 // Issue 8962.
 public static void TestByteKind(ж<testing.T> Ꮡt) {
-    var want = ((TestByteKind_byteKind)slice<byte>((@string)"hello"u8));
+    var want = (TestByteKind_byteKind)slice<byte>((@string)"hello"u8);
     var (data, err) = Marshal(want);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -2316,9 +2342,7 @@ internal partial struct TestUnmarshalTypeError_tests /*dyn*/ {
 public static void TestUnmarshalTypeError(ж<testing.T> Ꮡt) {
     var tests = new TestUnmarshalTypeError_tests[]{
         new(Name(""u8), @new<@string>(), @"{""user"": ""name""}"u8), // issue 4628.
-
         new(Name(""u8), @new<error>(), @"{}"u8), // issue 4222
-
         new(Name(""u8), @new<error>(), @"[]"u8),
         new(Name(""u8), @new<error>(), @""""""u8),
         new(Name(""u8), @new<error>(), @"123"u8),
@@ -2390,6 +2414,7 @@ internal static readonly @string nameBobMX123M2Y456AbcdZˢ = @"{""Name"": ""Bob"
 public static void TestUnmarshalUnexported(ж<testing.T> Ꮡt) {
     @string input = nameBobMX123M2Y456AbcdZˢ;
     var want = Ꮡ(new unexportedFields(Name: "Bob"u8));
+
     var @out = Ꮡ(new unexportedFields(nil));
     var err = Unmarshal(slice<byte>(input), @out.OrTypedNil());
     if (err != default!) {
@@ -2400,17 +2425,19 @@ public static void TestUnmarshalUnexported(ж<testing.T> Ꮡt) {
     }
 }
 
+// Time3339 is a time.Time which encodes to and from JSON
+// as an RFC 3339 time in UTC.
 public partial struct Time3339 /*global::go.time_package.Time*/;
 
 public static error UnmarshalJSON(this ref Time3339 t, slice<byte> b) {
     if (len(b) < 2 || b[0] != (rune)'"' || b[len(b) - 1] != (rune)'"') {
         return fmt.Errorf("types: failed to unmarshal non-string value %q as an RFC 3339 time"u8, b);
     }
-    var (tm, err) = time.Parse(time.RFC3339, ((@string)(b.slice(1, len(b) - 1))));
+    var (tm, err) = time.Parse(time.RFC3339, (@string)(b.slice(1, len(b) - 1)));
     if (err != default!) {
         return err;
     }
-    t = ((Time3339)tm);
+    t = (Time3339)tm;
     return default!;
 }
 
@@ -2431,7 +2458,6 @@ public static void TestUnmarshalJSONLiteralError(ж<testing.T> Ꮡt) {
             break;
         }}
     }
-
 }
 
 // Test that extra object elements in an array do not result in a
@@ -2440,6 +2466,7 @@ public static void TestUnmarshalJSONLiteralError(ж<testing.T> Ꮡt) {
 public static void TestSkipArrayObjects(ж<testing.T> Ꮡt) {
     @string json = @"[{}]"u8;
     ref var dest = ref heap(new array<any>(0), out var Ꮡdest);
+
     var err = Unmarshal(slice<byte>(json), Ꮡdest);
     if (err != default!) {
         Ꮡt.Errorf("Unmarshal error: %v"u8, err);
@@ -2519,10 +2546,10 @@ public static void TestInvalidUnmarshal(ж<testing.T> Ꮡt) {
     var tests = new TestInvalidUnmarshal_tests[]{
         new(Name(""u8), @"{""a"":""1""}"u8, default!, new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(nil)))),
         new(Name(""u8), @"{""a"":""1""}"u8, new EmptyStruct(), new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<EmptyStruct>())))),
-        new(Name(""u8), @"{""a"":""1""}"u8, ((ж<nint>)nil), new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<ж<nint>>())))),
+        new(Name(""u8), @"{""a"":""1""}"u8, (ж<nint>)nil, new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<ж<nint>>())))),
         new(Name(""u8), @"123"u8, default!, new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(nil)))),
         new(Name(""u8), @"123"u8, new EmptyStruct(), new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<EmptyStruct>())))),
-        new(Name(""u8), @"123"u8, ((ж<nint>)nil), new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<ж<nint>>())))),
+        new(Name(""u8), @"123"u8, (ж<nint>)nil, new global::go.encoding.json_package.InvalidUnmarshalErrorжerror(Ꮡ(new InvalidUnmarshalError(reflect.TypeFor<ж<nint>>())))),
         new(Name(""u8), @"123"u8, @new<net.IP>(), new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: reflect.TypeFor<ж<net.IP>>(), Offset: 3))))
     }.slice();
     foreach (var (_, vᴛ1) in tests) {
@@ -2543,7 +2570,6 @@ public static void TestInvalidUnmarshal(ж<testing.T> Ꮡt) {
                     break;
                 }}
             }
-
         });
     }
 }
@@ -2564,10 +2590,12 @@ public static void TestInvalidStringOption(ж<testing.T> Ꮡt) {
     num = 0;
     ref var item = ref heap<TestInvalidStringOption_item>(out var Ꮡitem);
     item = new TestInvalidStringOption_item(M: new map<@string, @string>(), S: new slice<@string>(0), I: num, P: Ꮡnum);
+
     var (data, err) = Marshal(item);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
+
     err = Unmarshal(data, Ꮡitem);
     if (err != default!) {
         Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
@@ -2650,70 +2678,70 @@ internal partial struct TestUnmarshalEmbeddedUnexported_tests /*dyn*/ {
 // exported methods, don't cause a panic trying to get its value.
 public static void TestUnmarshalEmbeddedUnexported(ж<testing.T> Ꮡt) {
     var tests = new TestUnmarshalEmbeddedUnexported_tests[]{new(
-        CaseName: Name(""u8), // Error since we cannot set S1.embed1, but still able to set S1.R.
-
+        // Error since we cannot set S1.embed1, but still able to set S1.R.
+        CaseName: Name(""u8),
         @in: @"{""R"":2,""Q"":1}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S1>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S1(R: 2)),
         err: fmt.Errorf("json: cannot set embedded pointer to unexported struct: json.embed1"u8)
     ), new(
-        CaseName: Name(""u8), // The top level Q field takes precedence.
-
+        // The top level Q field takes precedence.
+        CaseName: Name(""u8),
         @in: @"{""Q"":1}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S2>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S2(Q: 1))
     ), new(
-        CaseName: Name(""u8), // No issue with non-pointer variant.
-
+        // No issue with non-pointer variant.
+        CaseName: Name(""u8),
         @in: @"{""R"":2,""Q"":1}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S3>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S3(embed1: new TestUnmarshalEmbeddedUnexported_embed1(Q: 1), R: 2))
     ), new(
-        CaseName: Name(""u8), // No error since both embedded structs have field R, which annihilate each other.
- // Thus, no attempt is made at setting S4.embed1.
-
+        // No error since both embedded structs have field R, which annihilate each other.
+        // Thus, no attempt is made at setting S4.embed1.
+        CaseName: Name(""u8),
         @in: @"{""R"":2}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S4>(),
         @out: @new<TestUnmarshalEmbeddedUnexported_S4>()
     ), new(
-        CaseName: Name(""u8), // Error since we cannot set S5.embed1, but still able to set S5.R.
-
+        // Error since we cannot set S5.embed1, but still able to set S5.R.
+        CaseName: Name(""u8),
         @in: @"{""R"":2,""Q"":1}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S5>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S5(R: 2)),
         err: fmt.Errorf("json: cannot set embedded pointer to unexported struct: json.embed3"u8)
     ), new(
-        CaseName: Name(""u8), // Issue 24152, ensure decodeState.indirect does not panic.
-
+        // Issue 24152, ensure decodeState.indirect does not panic.
+        CaseName: Name(""u8),
         @in: @"{""embed1"": {""Q"": 1}}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S6>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S6(new TestUnmarshalEmbeddedUnexported_embed1(1)))
     ), new(
-        CaseName: Name(""u8), // Issue 24153, check that we can still set forwarded fields even in
- // the presence of a name conflict.
- //
- // This relies on obscure behavior of reflect where it is possible
- // to set a forwarded exported field on an unexported embedded struct
- // even though there is a name conflict, even when it would have been
- // impossible to do so according to Go visibility rules.
- // Go forbids this because it is ambiguous whether S7.Q refers to
- // S7.embed1.Q or S7.embed2.Q. Since embed1 and embed2 are unexported,
- // it should be impossible for an external package to set either Q.
- //
- // It is probably okay for a future reflect change to break this.
-
+        // Issue 24153, check that we can still set forwarded fields even in
+        // the presence of a name conflict.
+        //
+        // This relies on obscure behavior of reflect where it is possible
+        // to set a forwarded exported field on an unexported embedded struct
+        // even though there is a name conflict, even when it would have been
+        // impossible to do so according to Go visibility rules.
+        // Go forbids this because it is ambiguous whether S7.Q refers to
+        // S7.embed1.Q or S7.embed2.Q. Since embed1 and embed2 are unexported,
+        // it should be impossible for an external package to set either Q.
+        //
+        // It is probably okay for a future reflect change to break this.
+        CaseName: Name(""u8),
         @in: @"{""embed1"": {""Q"": 1}, ""Q"": 2}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S7>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S7(new TestUnmarshalEmbeddedUnexported_embed1(1), new TestUnmarshalEmbeddedUnexported_embed2(2)))
     ), new(
-        CaseName: Name(""u8), // Issue 24153, similar to the S7 case.
-
+        // Issue 24153, similar to the S7 case.
+        CaseName: Name(""u8),
         @in: @"{""embed1"": {""Q"": 1}, ""embed2"": {""Q"": 2}, ""Q"": 3}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S8>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S8(new TestUnmarshalEmbeddedUnexported_embed1(1), new TestUnmarshalEmbeddedUnexported_embed2(2), 3))
     ), new(
-        CaseName: Name(""u8), // Issue 228145, similar to the cases above.
-
+        // Issue 228145, similar to the cases above.
+        CaseName: Name(""u8),
         @in: @"{""embed"": {}}"u8,
         ptr: @new<TestUnmarshalEmbeddedUnexported_S9>(),
         @out: Ꮡ(new TestUnmarshalEmbeddedUnexported_S9(nil))
@@ -2788,7 +2816,7 @@ internal partial struct unmarshalPanic {
 }
 
 internal static error UnmarshalJSON(this unmarshalPanic _Δp0, slice<byte> _Δp1) {
-    throw panic((nint)(0xdead));
+    throw panic((nint)0xdead);
 }
 
 public static void TestUnmarshalPanic(ж<testing.T> Ꮡt) {
@@ -2796,7 +2824,7 @@ public static void TestUnmarshalPanic(ж<testing.T> Ꮡt) {
     try {
         defer(() => {
             {
-                var got = recover(); if (!reflect.DeepEqual(got, (nint)(0xdead))) {
+                var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
                     Ꮡt.Errorf("panic() = (%T)(%v), want 0xdead"u8, got, got);
                 }
             }
@@ -2814,6 +2842,7 @@ public static void TestUnmarshalRecursivePointer(ж<testing.T> Ꮡt) {
     ref var v = ref heap<any>(out var Ꮡv);
     v = Ꮡv;
     var data = slice<byte>(@"{""a"": ""b""}"u8);
+
     {
         var err = Unmarshal(data, v); if (err != default!) {
             Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
@@ -2824,7 +2853,7 @@ public static void TestUnmarshalRecursivePointer(ж<testing.T> Ꮡt) {
 internal partial struct textUnmarshalerString /*@string*/;
 
 internal static error UnmarshalText(this ref textUnmarshalerString m, slice<byte> text) {
-    m = ((textUnmarshalerString)strings.ToLower(((@string)text)));
+    m = (textUnmarshalerString)strings.ToLower((@string)text);
     return default!;
 }
 
@@ -2840,6 +2869,7 @@ public static void TestUnmarshalMapWithTextUnmarshalerStringKey(ж<testing.T> �
             Ꮡt.Fatalf("Unmarshal error: %v"u8, err);
         }
     }
+
     {
         var (_, ok) = p[fooˢ, ꟷ]; if (!ok) {
             Ꮡt.Errorf(@"key ""foo"" missing in map: %v"u8, p);
@@ -2866,6 +2896,7 @@ public static void TestUnmarshalRescanLiteralMangledUnquote(ж<testing.T> Ꮡt) 
         }
     }
     var wantT = new TestUnmarshalRescanLiteralMangledUnquote_T("aaa\tbbb"u8);
+
     var (b, err) = Marshal(wantT);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -2879,8 +2910,10 @@ public static void TestUnmarshalRescanLiteralMangledUnquote(ж<testing.T> Ꮡt) 
     if (gotT != wantT) {
         Ꮡt.Errorf("Marshal/Unmarshal roundtrip:\n\tgot:  %q\n\twant: %q"u8, gotT, wantT);
     }
+
     // See golang.org/issues/39555.
     var input = new map<textUnmarshalerString, @string>{["FOO"u8] = ""u8, [@""""u8] = ""u8};
+
     (var encoded, err) = Marshal(input);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -2952,6 +2985,7 @@ public static void TestUnmarshalMaxDepth(ж<testing.T> Ꮡt) {
         errMaxDepth: true
     )
     }.slice();
+
     var targets = new TestUnmarshalMaxDepth_targets[]{new(
         CaseName: Name(unstructuredˢ),
         newValue: () => {
@@ -2981,6 +3015,7 @@ public static void TestUnmarshalMaxDepth(ж<testing.T> Ꮡt) {
         }
     )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestUnmarshalMaxDepth_tests(), out var Ꮡtt);
         tt = vᴛ1;

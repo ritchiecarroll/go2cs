@@ -95,6 +95,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b));
 }
 
+internal static (hash.Cloner, error) Clone(this ref digest d) {
+    ref var r = ref heap<digest>(out var Ꮡr);
+    r = d.ΔClone();
+    return (new digestжCloner(Ꮡr), default!);
+}
+
 internal static void Reset(this ref digest d) {
     d.h[0] = init0;
     d.h[1] = init1;
@@ -132,9 +138,9 @@ internal static readonly @string cryptoSha1UseOfSha1IsNotˢ = "crypto/sha1: use 
 internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default!;
     error err = default!;
-
     ref var d = ref Ꮡd.DerefOrNull();
-    if (fips140only.Enabled) {
+
+    if (fips140only.Enforced()) {
         return (0, errors.New(cryptoSha1UseOfSha1IsNotˢ));
     }
     boring.Unreachable();
@@ -150,7 +156,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
         p = p.slice(n);
     }
     if (len(p) >= chunk) {
-        nint n = (nint)(len(p) & ~(nint)(chunk - 1));
+        nint n = len(p) & ~(nint)(chunk - 1);
         block(ref (Ꮡd).DerefOrNull(), p.slice(0, n));
         p = p.slice(n);
     }
@@ -172,9 +178,10 @@ internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
 internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode");
     }
+
     var len = d.len;
     // Padding.  Add a 1 bit and 0 bits until 56 bytes mod 64.
     array<byte> tmp = new(72); /* 64 + 8 */                   // padding + length buffer
@@ -185,20 +192,25 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
     } else {
         t = 64 + 56 - len % 64;
     }
+
     // Length in bits.
     len <<= (int)(3);
     var padlen = tmp.slice(0, (nint)(t + 8));
     byteorder.BEPutUint64(padlen.slice((nint)(t)), len);
     Ꮡd.Write(padlen);
+
     if (d.nx != 0) {
         throw panic("d.nx != 0");
     }
+
     array<byte> digest = new(20); /* ΔSize */
+
     byteorder.BEPutUint32(digest[0..], d.h[0]);
     byteorder.BEPutUint32(digest[4..], d.h[1]);
     byteorder.BEPutUint32(digest[8..], d.h[2]);
     byteorder.BEPutUint32(digest[12..], d.h[3]);
     byteorder.BEPutUint32(digest[16..], d.h[4]);
+
     return digest.Clone();
 }
 
@@ -213,38 +225,47 @@ internal static slice<byte> ConstantTimeSum(this ref digest d, slice<byte> @in) 
 internal static array<byte> constSum(this ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode");
     }
+
     array<byte> length = new(8);
-    var l = (d.len << (int)(3));
+    var l = d.len << 3;
     for (nuint i = (nuint)0; i < 8; i++) {
         length[i] = (byte)(l.Rsh((56 - 8 * i)));
     }
+
     var nx = (byte)d.nx;
     var t = (byte)(nx - 56); // if nx < 56 then the MSB of t is one
-    var mask1b = (byte)(((int8)t >> (int)(7))); // mask1b is 0xFF iff one block is enough
+    var mask1b = (byte)((int8)t >> 7); // mask1b is 0xFF iff one block is enough
+
     var separator = (byte)0x80; // gets reset to 0x00 once used
     for (var i = (byte)0; i < chunk; i++) {
-        var mask = (byte)(((int8)(i - nx) >> (int)(7))); // 0x00 after the end of data
+        var mask = (byte)((int8)(i - nx) >> 7); // 0x00 after the end of data
+
         // if we reached the end of the data, replace with 0x80 or 0x00
         d.x[i] = (byte)(((byte)(((byte)(~mask)) & separator)) | ((byte)(mask & d.x[i])));
+
         // zero the separator once used
         separator &= (byte)(mask);
+
         if (i >= 56) {
             // we might have to write the length here if all fit in one block
             d.x[i] |= (byte)((byte)(mask1b & length[(byte)(i - 56)]));
         }
     }
+
     // compress, and only keep the digest if all fit in one block
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
+
     array<byte> digest = new(20); /* ΔSize */
     foreach (var (i, s) in d.h.ΔRangeSnapshot()) {
-        digest[i * 4] = (byte)(mask1b & (byte)((s >> (int)(24))));
-        digest[i * 4 + 1] = (byte)(mask1b & (byte)((s >> (int)(16))));
-        digest[i * 4 + 2] = (byte)(mask1b & (byte)((s >> (int)(8))));
+        digest[i * 4] = (byte)(mask1b & (byte)(s >> 24));
+        digest[i * 4 + 1] = (byte)(mask1b & (byte)(s >> 16));
+        digest[i * 4 + 2] = (byte)(mask1b & (byte)(s >> 8));
         digest[i * 4 + 3] = (byte)(mask1b & (byte)s);
     }
+
     for (var i = (byte)0; i < chunk; i++) {
         // second block, it's always past the end of data, might start with 0x80
         if (i < 56){
@@ -254,14 +275,17 @@ internal static array<byte> constSum(this ж<digest> Ꮡd) {
             d.x[i] = length[(byte)(i - 56)];
         }
     }
+
     // compress, and only keep the digest if we actually needed the second block
     block(ref (Ꮡd).DerefOrNull(), d.x[..]);
+
     foreach (var (i, s) in d.h.ΔRangeSnapshot()) {
-        digest[i * 4] |= (byte)((byte)(((byte)(~mask1b)) & (byte)((s >> (int)(24)))));
-        digest[i * 4 + 1] |= (byte)((byte)(((byte)(~mask1b)) & (byte)((s >> (int)(16)))));
-        digest[i * 4 + 2] |= (byte)((byte)(((byte)(~mask1b)) & (byte)((s >> (int)(8)))));
+        digest[i * 4] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 24)));
+        digest[i * 4 + 1] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 16)));
+        digest[i * 4 + 2] |= (byte)((byte)(((byte)(~mask1b)) & (byte)(s >> 8)));
         digest[i * 4 + 3] |= (byte)((byte)(((byte)(~mask1b)) & (byte)s));
     }
+
     return digest.Clone();
 }
 
@@ -270,7 +294,7 @@ public static array<byte> Sum(slice<byte> data) {
     if (boring.Enabled) {
         return boring.SHA1(data);
     }
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode");
     }
     ref var d = ref heap(new digest(), out var Ꮡd);

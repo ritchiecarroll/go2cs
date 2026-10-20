@@ -12,9 +12,11 @@ internal static void initᴛCategories() { Categories = new map<@string, ж<Rang
     ["C"u8] = C,
     ["Cc"u8] = Cc,
     ["Cf"u8] = Cf,
+    ["Cn"u8] = Cn,
     ["Co"u8] = Co,
     ["Cs"u8] = Cs,
     ["L"u8] = L,
+    ["LC"u8] = LC,
     ["Ll"u8] = Ll,
     ["Lm"u8] = Lm,
     ["Lo"u8] = Lo,
@@ -47,33 +49,665 @@ internal static void initᴛCategories() { Categories = new map<@string, ж<Rang
     ["Zs"u8] = Zs
 }; }
 
+// CategoryAliases maps category aliases to standard category names.
+public static map<@string, @string> CategoryAliases = new map<@string, @string>{
+    ["Cased_Letter"u8] = "LC"u8,
+    ["Close_Punctuation"u8] = "Pe"u8,
+    ["Combining_Mark"u8] = "M"u8,
+    ["Connector_Punctuation"u8] = "Pc"u8,
+    ["Control"u8] = "Cc"u8,
+    ["Currency_Symbol"u8] = "Sc"u8,
+    ["Dash_Punctuation"u8] = "Pd"u8,
+    ["Decimal_Number"u8] = "Nd"u8,
+    ["Enclosing_Mark"u8] = "Me"u8,
+    ["Final_Punctuation"u8] = "Pf"u8,
+    ["Format"u8] = "Cf"u8,
+    ["Initial_Punctuation"u8] = "Pi"u8,
+    ["Letter"u8] = "L"u8,
+    ["Letter_Number"u8] = "Nl"u8,
+    ["Line_Separator"u8] = "Zl"u8,
+    ["Lowercase_Letter"u8] = "Ll"u8,
+    ["Mark"u8] = "M"u8,
+    ["Math_Symbol"u8] = "Sm"u8,
+    ["Modifier_Letter"u8] = "Lm"u8,
+    ["Modifier_Symbol"u8] = "Sk"u8,
+    ["Nonspacing_Mark"u8] = "Mn"u8,
+    ["Number"u8] = "N"u8,
+    ["Open_Punctuation"u8] = "Ps"u8,
+    ["Other"u8] = "C"u8,
+    ["Other_Letter"u8] = "Lo"u8,
+    ["Other_Number"u8] = "No"u8,
+    ["Other_Punctuation"u8] = "Po"u8,
+    ["Other_Symbol"u8] = "So"u8,
+    ["Paragraph_Separator"u8] = "Zp"u8,
+    ["Private_Use"u8] = "Co"u8,
+    ["Punctuation"u8] = "P"u8,
+    ["Separator"u8] = "Z"u8,
+    ["Space_Separator"u8] = "Zs"u8,
+    ["Spacing_Mark"u8] = "Mc"u8,
+    ["Surrogate"u8] = "Cs"u8,
+    ["Symbol"u8] = "S"u8,
+    ["Titlecase_Letter"u8] = "Lt"u8,
+    ["Unassigned"u8] = "Cn"u8,
+    ["Uppercase_Letter"u8] = "Lu"u8,
+    ["cntrl"u8] = "Cc"u8,
+    ["digit"u8] = "Nd"u8,
+    ["punct"u8] = "P"u8
+};
+
 internal static ж<RangeTable> _C = Ꮡ(new RangeTable(
     R16: new Range16[]{
         new(0x0000, 0x001f, 1),
         new(0x007f, 0x009f, 1),
-        new(0x00ad, 0x0600, 1363),
-        new(0x0601, 0x0605, 1),
+        new(0x00ad, 0x0378, 715),
+        new(0x0379, 0x0380, 7),
+        new(0x0381, 0x0383, 1),
+        new(0x038b, 0x038d, 2),
+        new(0x03a2, 0x0530, 398),
+        new(0x0557, 0x0558, 1),
+        new(0x058b, 0x058c, 1),
+        new(0x0590, 0x05c8, 56),
+        new(0x05c9, 0x05cf, 1),
+        new(0x05eb, 0x05ee, 1),
+        new(0x05f5, 0x0605, 1),
         new(0x061c, 0x06dd, 193),
-        new(0x070f, 0x0890, 385),
-        new(0x0891, 0x08e2, 81),
-        new(0x180e, 0x200b, 2045),
+        new(0x070e, 0x070f, 1),
+        new(0x074b, 0x074c, 1),
+        new(0x07b2, 0x07bf, 1),
+        new(0x07fb, 0x07fc, 1),
+        new(0x082e, 0x082f, 1),
+        new(0x083f, 0x085c, 29),
+        new(0x085d, 0x085f, 2),
+        new(0x086b, 0x086f, 1),
+        new(0x088f, 0x0897, 1),
+        new(0x08e2, 0x0984, 162),
+        new(0x098d, 0x098e, 1),
+        new(0x0991, 0x0992, 1),
+        new(0x09a9, 0x09b1, 8),
+        new(0x09b3, 0x09b5, 1),
+        new(0x09ba, 0x09bb, 1),
+        new(0x09c5, 0x09c6, 1),
+        new(0x09c9, 0x09ca, 1),
+        new(0x09cf, 0x09d6, 1),
+        new(0x09d8, 0x09db, 1),
+        new(0x09de, 0x09e4, 6),
+        new(0x09e5, 0x09ff, 26),
+        new(0x0a00, 0x0a04, 4),
+        new(0x0a0b, 0x0a0e, 1),
+        new(0x0a11, 0x0a12, 1),
+        new(0x0a29, 0x0a31, 8),
+        new(0x0a34, 0x0a3a, 3),
+        new(0x0a3b, 0x0a3d, 2),
+        new(0x0a43, 0x0a46, 1),
+        new(0x0a49, 0x0a4a, 1),
+        new(0x0a4e, 0x0a50, 1),
+        new(0x0a52, 0x0a58, 1),
+        new(0x0a5d, 0x0a5f, 2),
+        new(0x0a60, 0x0a65, 1),
+        new(0x0a77, 0x0a80, 1),
+        new(0x0a84, 0x0a8e, 10),
+        new(0x0a92, 0x0aa9, 23),
+        new(0x0ab1, 0x0ab4, 3),
+        new(0x0aba, 0x0abb, 1),
+        new(0x0ac6, 0x0ace, 4),
+        new(0x0acf, 0x0ad1, 2),
+        new(0x0ad2, 0x0adf, 1),
+        new(0x0ae4, 0x0ae5, 1),
+        new(0x0af2, 0x0af8, 1),
+        new(0x0b00, 0x0b04, 4),
+        new(0x0b0d, 0x0b0e, 1),
+        new(0x0b11, 0x0b12, 1),
+        new(0x0b29, 0x0b31, 8),
+        new(0x0b34, 0x0b3a, 6),
+        new(0x0b3b, 0x0b45, 10),
+        new(0x0b46, 0x0b49, 3),
+        new(0x0b4a, 0x0b4e, 4),
+        new(0x0b4f, 0x0b54, 1),
+        new(0x0b58, 0x0b5b, 1),
+        new(0x0b5e, 0x0b64, 6),
+        new(0x0b65, 0x0b78, 19),
+        new(0x0b79, 0x0b81, 1),
+        new(0x0b84, 0x0b8b, 7),
+        new(0x0b8c, 0x0b8d, 1),
+        new(0x0b91, 0x0b96, 5),
+        new(0x0b97, 0x0b98, 1),
+        new(0x0b9b, 0x0b9d, 2),
+        new(0x0ba0, 0x0ba2, 1),
+        new(0x0ba5, 0x0ba7, 1),
+        new(0x0bab, 0x0bad, 1),
+        new(0x0bba, 0x0bbd, 1),
+        new(0x0bc3, 0x0bc5, 1),
+        new(0x0bc9, 0x0bce, 5),
+        new(0x0bcf, 0x0bd1, 2),
+        new(0x0bd2, 0x0bd6, 1),
+        new(0x0bd8, 0x0be5, 1),
+        new(0x0bfb, 0x0bff, 1),
+        new(0x0c0d, 0x0c11, 4),
+        new(0x0c29, 0x0c3a, 17),
+        new(0x0c3b, 0x0c45, 10),
+        new(0x0c49, 0x0c4e, 5),
+        new(0x0c4f, 0x0c54, 1),
+        new(0x0c57, 0x0c5b, 4),
+        new(0x0c5c, 0x0c5e, 2),
+        new(0x0c5f, 0x0c64, 5),
+        new(0x0c65, 0x0c70, 11),
+        new(0x0c71, 0x0c76, 1),
+        new(0x0c8d, 0x0c91, 4),
+        new(0x0ca9, 0x0cb4, 11),
+        new(0x0cba, 0x0cbb, 1),
+        new(0x0cc5, 0x0cc9, 4),
+        new(0x0cce, 0x0cd4, 1),
+        new(0x0cd7, 0x0cdc, 1),
+        new(0x0cdf, 0x0ce4, 5),
+        new(0x0ce5, 0x0cf0, 11),
+        new(0x0cf4, 0x0cff, 1),
+        new(0x0d0d, 0x0d11, 4),
+        new(0x0d45, 0x0d49, 4),
+        new(0x0d50, 0x0d53, 1),
+        new(0x0d64, 0x0d65, 1),
+        new(0x0d80, 0x0d84, 4),
+        new(0x0d97, 0x0d99, 1),
+        new(0x0db2, 0x0dbc, 10),
+        new(0x0dbe, 0x0dbf, 1),
+        new(0x0dc7, 0x0dc9, 1),
+        new(0x0dcb, 0x0dce, 1),
+        new(0x0dd5, 0x0dd7, 2),
+        new(0x0de0, 0x0de5, 1),
+        new(0x0df0, 0x0df1, 1),
+        new(0x0df5, 0x0e00, 1),
+        new(0x0e3b, 0x0e3e, 1),
+        new(0x0e5c, 0x0e80, 1),
+        new(0x0e83, 0x0e85, 2),
+        new(0x0e8b, 0x0ea4, 25),
+        new(0x0ea6, 0x0ebe, 24),
+        new(0x0ebf, 0x0ec5, 6),
+        new(0x0ec7, 0x0ecf, 8),
+        new(0x0eda, 0x0edb, 1),
+        new(0x0ee0, 0x0eff, 1),
+        new(0x0f48, 0x0f6d, 37),
+        new(0x0f6e, 0x0f70, 1),
+        new(0x0f98, 0x0fbd, 37),
+        new(0x0fcd, 0x0fdb, 14),
+        new(0x0fdc, 0x0fff, 1),
+        new(0x10c6, 0x10c8, 2),
+        new(0x10c9, 0x10cc, 1),
+        new(0x10ce, 0x10cf, 1),
+        new(0x1249, 0x124e, 5),
+        new(0x124f, 0x1257, 8),
+        new(0x1259, 0x125e, 5),
+        new(0x125f, 0x1289, 42),
+        new(0x128e, 0x128f, 1),
+        new(0x12b1, 0x12b6, 5),
+        new(0x12b7, 0x12bf, 8),
+        new(0x12c1, 0x12c6, 5),
+        new(0x12c7, 0x12d7, 16),
+        new(0x1311, 0x1316, 5),
+        new(0x1317, 0x135b, 68),
+        new(0x135c, 0x137d, 33),
+        new(0x137e, 0x137f, 1),
+        new(0x139a, 0x139f, 1),
+        new(0x13f6, 0x13f7, 1),
+        new(0x13fe, 0x13ff, 1),
+        new(0x169d, 0x169f, 1),
+        new(0x16f9, 0x16ff, 1),
+        new(0x1716, 0x171e, 1),
+        new(0x1737, 0x173f, 1),
+        new(0x1754, 0x175f, 1),
+        new(0x176d, 0x1771, 4),
+        new(0x1774, 0x177f, 1),
+        new(0x17de, 0x17df, 1),
+        new(0x17ea, 0x17ef, 1),
+        new(0x17fa, 0x17ff, 1),
+        new(0x180e, 0x181a, 12),
+        new(0x181b, 0x181f, 1),
+        new(0x1879, 0x187f, 1),
+        new(0x18ab, 0x18af, 1),
+        new(0x18f6, 0x18ff, 1),
+        new(0x191f, 0x192c, 13),
+        new(0x192d, 0x192f, 1),
+        new(0x193c, 0x193f, 1),
+        new(0x1941, 0x1943, 1),
+        new(0x196e, 0x196f, 1),
+        new(0x1975, 0x197f, 1),
+        new(0x19ac, 0x19af, 1),
+        new(0x19ca, 0x19cf, 1),
+        new(0x19db, 0x19dd, 1),
+        new(0x1a1c, 0x1a1d, 1),
+        new(0x1a5f, 0x1a7d, 30),
+        new(0x1a7e, 0x1a8a, 12),
+        new(0x1a8b, 0x1a8f, 1),
+        new(0x1a9a, 0x1a9f, 1),
+        new(0x1aae, 0x1aaf, 1),
+        new(0x1acf, 0x1aff, 1),
+        new(0x1b4d, 0x1b4f, 1),
+        new(0x1b7f, 0x1bf4, 117),
+        new(0x1bf5, 0x1bfb, 1),
+        new(0x1c38, 0x1c3a, 1),
+        new(0x1c4a, 0x1c4c, 1),
+        new(0x1c89, 0x1c8f, 1),
+        new(0x1cbb, 0x1cbc, 1),
+        new(0x1cc8, 0x1ccf, 1),
+        new(0x1cfb, 0x1cff, 1),
+        new(0x1f16, 0x1f17, 1),
+        new(0x1f1e, 0x1f1f, 1),
+        new(0x1f46, 0x1f47, 1),
+        new(0x1f4e, 0x1f4f, 1),
+        new(0x1f58, 0x1f5e, 2),
+        new(0x1f7e, 0x1f7f, 1),
+        new(0x1fb5, 0x1fc5, 16),
+        new(0x1fd4, 0x1fd5, 1),
+        new(0x1fdc, 0x1ff0, 20),
+        new(0x1ff1, 0x1ff5, 4),
+        new(0x1fff, 0x200b, 12),
         new(0x200c, 0x200f, 1),
         new(0x202a, 0x202e, 1),
-        new(0x2060, 0x2064, 1),
-        new(0x2066, 0x206f, 1),
-        new(0xd800, 0xf8ff, 1),
-        new(0xfeff, 0xfff9, 250),
-        new(0xfffa, 0xfffb, 1)
+        new(0x2060, 0x206f, 1),
+        new(0x2072, 0x2073, 1),
+        new(0x208f, 0x209d, 14),
+        new(0x209e, 0x209f, 1),
+        new(0x20c1, 0x20cf, 1),
+        new(0x20f1, 0x20ff, 1),
+        new(0x218c, 0x218f, 1),
+        new(0x2427, 0x243f, 1),
+        new(0x244b, 0x245f, 1),
+        new(0x2b74, 0x2b75, 1),
+        new(0x2b96, 0x2cf4, 350),
+        new(0x2cf5, 0x2cf8, 1),
+        new(0x2d26, 0x2d28, 2),
+        new(0x2d29, 0x2d2c, 1),
+        new(0x2d2e, 0x2d2f, 1),
+        new(0x2d68, 0x2d6e, 1),
+        new(0x2d71, 0x2d7e, 1),
+        new(0x2d97, 0x2d9f, 1),
+        new(0x2da7, 0x2ddf, 8),
+        new(0x2e5e, 0x2e7f, 1),
+        new(0x2e9a, 0x2ef4, 90),
+        new(0x2ef5, 0x2eff, 1),
+        new(0x2fd6, 0x2fef, 1),
+        new(0x2ffc, 0x2fff, 1),
+        new(0x3040, 0x3097, 87),
+        new(0x3098, 0x3100, 104),
+        new(0x3101, 0x3104, 1),
+        new(0x3130, 0x318f, 95),
+        new(0x31e4, 0x31ef, 1),
+        new(0x321f, 0xa48d, 29294),
+        new(0xa48e, 0xa48f, 1),
+        new(0xa4c7, 0xa4cf, 1),
+        new(0xa62c, 0xa63f, 1),
+        new(0xa6f8, 0xa6ff, 1),
+        new(0xa7cb, 0xa7cf, 1),
+        new(0xa7d2, 0xa7d4, 2),
+        new(0xa7da, 0xa7f1, 1),
+        new(0xa82d, 0xa82f, 1),
+        new(0xa83a, 0xa83f, 1),
+        new(0xa878, 0xa87f, 1),
+        new(0xa8c6, 0xa8cd, 1),
+        new(0xa8da, 0xa8df, 1),
+        new(0xa954, 0xa95e, 1),
+        new(0xa97d, 0xa97f, 1),
+        new(0xa9ce, 0xa9da, 12),
+        new(0xa9db, 0xa9dd, 1),
+        new(0xa9ff, 0xaa37, 56),
+        new(0xaa38, 0xaa3f, 1),
+        new(0xaa4e, 0xaa4f, 1),
+        new(0xaa5a, 0xaa5b, 1),
+        new(0xaac3, 0xaada, 1),
+        new(0xaaf7, 0xab00, 1),
+        new(0xab07, 0xab08, 1),
+        new(0xab0f, 0xab10, 1),
+        new(0xab17, 0xab1f, 1),
+        new(0xab27, 0xab2f, 8),
+        new(0xab6c, 0xab6f, 1),
+        new(0xabee, 0xabef, 1),
+        new(0xabfa, 0xabff, 1),
+        new(0xd7a4, 0xd7af, 1),
+        new(0xd7c7, 0xd7ca, 1),
+        new(0xd7fc, 0xf8ff, 1),
+        new(0xfa6e, 0xfa6f, 1),
+        new(0xfada, 0xfaff, 1),
+        new(0xfb07, 0xfb12, 1),
+        new(0xfb18, 0xfb1c, 1),
+        new(0xfb37, 0xfb3d, 6),
+        new(0xfb3f, 0xfb45, 3),
+        new(0xfbc3, 0xfbd2, 1),
+        new(0xfd90, 0xfd91, 1),
+        new(0xfdc8, 0xfdce, 1),
+        new(0xfdd0, 0xfdef, 1),
+        new(0xfe1a, 0xfe1f, 1),
+        new(0xfe53, 0xfe67, 20),
+        new(0xfe6c, 0xfe6f, 1),
+        new(0xfe75, 0xfefd, 136),
+        new(0xfefe, 0xff00, 1),
+        new(0xffbf, 0xffc1, 1),
+        new(0xffc8, 0xffc9, 1),
+        new(0xffd0, 0xffd1, 1),
+        new(0xffd8, 0xffd9, 1),
+        new(0xffdd, 0xffdf, 1),
+        new(0xffe7, 0xffef, 8),
+        new(0xfff0, 0xfffb, 1),
+        new(0xfffe, 0xffff, 1)
     }.slice(),
     R32: new Range32[]{
-        new(0x110bd, 0x110cd, 16),
+        new(0x1000c, 0x10027, 27),
+        new(0x1003b, 0x1003e, 3),
+        new(0x1004e, 0x1004f, 1),
+        new(0x1005e, 0x1007f, 1),
+        new(0x100fb, 0x100ff, 1),
+        new(0x10103, 0x10106, 1),
+        new(0x10134, 0x10136, 1),
+        new(0x1018f, 0x1019d, 14),
+        new(0x1019e, 0x1019f, 1),
+        new(0x101a1, 0x101cf, 1),
+        new(0x101fe, 0x1027f, 1),
+        new(0x1029d, 0x1029f, 1),
+        new(0x102d1, 0x102df, 1),
+        new(0x102fc, 0x102ff, 1),
+        new(0x10324, 0x1032c, 1),
+        new(0x1034b, 0x1034f, 1),
+        new(0x1037b, 0x1037f, 1),
+        new(0x1039e, 0x103c4, 38),
+        new(0x103c5, 0x103c7, 1),
+        new(0x103d6, 0x103ff, 1),
+        new(0x1049e, 0x1049f, 1),
+        new(0x104aa, 0x104af, 1),
+        new(0x104d4, 0x104d7, 1),
+        new(0x104fc, 0x104ff, 1),
+        new(0x10528, 0x1052f, 1),
+        new(0x10564, 0x1056e, 1),
+        new(0x1057b, 0x1058b, 16),
+        new(0x10593, 0x10596, 3),
+        new(0x105a2, 0x105b2, 16),
+        new(0x105ba, 0x105bd, 3),
+        new(0x105be, 0x105ff, 1),
+        new(0x10737, 0x1073f, 1),
+        new(0x10756, 0x1075f, 1),
+        new(0x10768, 0x1077f, 1),
+        new(0x10786, 0x107b1, 43),
+        new(0x107bb, 0x107ff, 1),
+        new(0x10806, 0x10807, 1),
+        new(0x10809, 0x10836, 45),
+        new(0x10839, 0x1083b, 1),
+        new(0x1083d, 0x1083e, 1),
+        new(0x10856, 0x1089f, 73),
+        new(0x108a0, 0x108a6, 1),
+        new(0x108b0, 0x108df, 1),
+        new(0x108f3, 0x108f6, 3),
+        new(0x108f7, 0x108fa, 1),
+        new(0x1091c, 0x1091e, 1),
+        new(0x1093a, 0x1093e, 1),
+        new(0x10940, 0x1097f, 1),
+        new(0x109b8, 0x109bb, 1),
+        new(0x109d0, 0x109d1, 1),
+        new(0x10a04, 0x10a07, 3),
+        new(0x10a08, 0x10a0b, 1),
+        new(0x10a14, 0x10a18, 4),
+        new(0x10a36, 0x10a37, 1),
+        new(0x10a3b, 0x10a3e, 1),
+        new(0x10a49, 0x10a4f, 1),
+        new(0x10a59, 0x10a5f, 1),
+        new(0x10aa0, 0x10abf, 1),
+        new(0x10ae7, 0x10aea, 1),
+        new(0x10af7, 0x10aff, 1),
+        new(0x10b36, 0x10b38, 1),
+        new(0x10b56, 0x10b57, 1),
+        new(0x10b73, 0x10b77, 1),
+        new(0x10b92, 0x10b98, 1),
+        new(0x10b9d, 0x10ba8, 1),
+        new(0x10bb0, 0x10bff, 1),
+        new(0x10c49, 0x10c7f, 1),
+        new(0x10cb3, 0x10cbf, 1),
+        new(0x10cf3, 0x10cf9, 1),
+        new(0x10d28, 0x10d2f, 1),
+        new(0x10d3a, 0x10e5f, 1),
+        new(0x10e7f, 0x10eaa, 43),
+        new(0x10eae, 0x10eaf, 1),
+        new(0x10eb2, 0x10efc, 1),
+        new(0x10f28, 0x10f2f, 1),
+        new(0x10f5a, 0x10f6f, 1),
+        new(0x10f8a, 0x10faf, 1),
+        new(0x10fcc, 0x10fdf, 1),
+        new(0x10ff7, 0x10fff, 1),
+        new(0x1104e, 0x11051, 1),
+        new(0x11076, 0x1107e, 1),
+        new(0x110bd, 0x110c3, 6),
+        new(0x110c4, 0x110cf, 1),
+        new(0x110e9, 0x110ef, 1),
+        new(0x110fa, 0x110ff, 1),
+        new(0x11135, 0x11148, 19),
+        new(0x11149, 0x1114f, 1),
+        new(0x11177, 0x1117f, 1),
+        new(0x111e0, 0x111f5, 21),
+        new(0x111f6, 0x111ff, 1),
+        new(0x11212, 0x11242, 48),
+        new(0x11243, 0x1127f, 1),
+        new(0x11287, 0x11289, 2),
+        new(0x1128e, 0x1129e, 16),
+        new(0x112aa, 0x112af, 1),
+        new(0x112eb, 0x112ef, 1),
+        new(0x112fa, 0x112ff, 1),
+        new(0x11304, 0x1130d, 9),
+        new(0x1130e, 0x11311, 3),
+        new(0x11312, 0x11329, 23),
+        new(0x11331, 0x11334, 3),
+        new(0x1133a, 0x11345, 11),
+        new(0x11346, 0x11349, 3),
+        new(0x1134a, 0x1134e, 4),
+        new(0x1134f, 0x11351, 2),
+        new(0x11352, 0x11356, 1),
+        new(0x11358, 0x1135c, 1),
+        new(0x11364, 0x11365, 1),
+        new(0x1136d, 0x1136f, 1),
+        new(0x11375, 0x113ff, 1),
+        new(0x1145c, 0x11462, 6),
+        new(0x11463, 0x1147f, 1),
+        new(0x114c8, 0x114cf, 1),
+        new(0x114da, 0x1157f, 1),
+        new(0x115b6, 0x115b7, 1),
+        new(0x115de, 0x115ff, 1),
+        new(0x11645, 0x1164f, 1),
+        new(0x1165a, 0x1165f, 1),
+        new(0x1166d, 0x1167f, 1),
+        new(0x116ba, 0x116bf, 1),
+        new(0x116ca, 0x116ff, 1),
+        new(0x1171b, 0x1171c, 1),
+        new(0x1172c, 0x1172f, 1),
+        new(0x11747, 0x117ff, 1),
+        new(0x1183c, 0x1189f, 1),
+        new(0x118f3, 0x118fe, 1),
+        new(0x11907, 0x11908, 1),
+        new(0x1190a, 0x1190b, 1),
+        new(0x11914, 0x11917, 3),
+        new(0x11936, 0x11939, 3),
+        new(0x1193a, 0x11947, 13),
+        new(0x11948, 0x1194f, 1),
+        new(0x1195a, 0x1199f, 1),
+        new(0x119a8, 0x119a9, 1),
+        new(0x119d8, 0x119d9, 1),
+        new(0x119e5, 0x119ff, 1),
+        new(0x11a48, 0x11a4f, 1),
+        new(0x11aa3, 0x11aaf, 1),
+        new(0x11af9, 0x11aff, 1),
+        new(0x11b0a, 0x11bff, 1),
+        new(0x11c09, 0x11c37, 46),
+        new(0x11c46, 0x11c4f, 1),
+        new(0x11c6d, 0x11c6f, 1),
+        new(0x11c90, 0x11c91, 1),
+        new(0x11ca8, 0x11cb7, 15),
+        new(0x11cb8, 0x11cff, 1),
+        new(0x11d07, 0x11d0a, 3),
+        new(0x11d37, 0x11d39, 1),
+        new(0x11d3b, 0x11d3e, 3),
+        new(0x11d48, 0x11d4f, 1),
+        new(0x11d5a, 0x11d5f, 1),
+        new(0x11d66, 0x11d69, 3),
+        new(0x11d8f, 0x11d92, 3),
+        new(0x11d99, 0x11d9f, 1),
+        new(0x11daa, 0x11edf, 1),
+        new(0x11ef9, 0x11eff, 1),
+        new(0x11f11, 0x11f3b, 42),
+        new(0x11f3c, 0x11f3d, 1),
+        new(0x11f5a, 0x11faf, 1),
+        new(0x11fb1, 0x11fbf, 1),
+        new(0x11ff2, 0x11ffe, 1),
+        new(0x1239a, 0x123ff, 1),
+        new(0x1246f, 0x12475, 6),
+        new(0x12476, 0x1247f, 1),
+        new(0x12544, 0x12f8f, 1),
+        new(0x12ff3, 0x12fff, 1),
         new(0x13430, 0x1343f, 1),
-        new(0x1bca0, 0x1bca3, 1),
+        new(0x13456, 0x143ff, 1),
+        new(0x14647, 0x167ff, 1),
+        new(0x16a39, 0x16a3f, 1),
+        new(0x16a5f, 0x16a6a, 11),
+        new(0x16a6b, 0x16a6d, 1),
+        new(0x16abf, 0x16aca, 11),
+        new(0x16acb, 0x16acf, 1),
+        new(0x16aee, 0x16aef, 1),
+        new(0x16af6, 0x16aff, 1),
+        new(0x16b46, 0x16b4f, 1),
+        new(0x16b5a, 0x16b62, 8),
+        new(0x16b78, 0x16b7c, 1),
+        new(0x16b90, 0x16e3f, 1),
+        new(0x16e9b, 0x16eff, 1),
+        new(0x16f4b, 0x16f4e, 1),
+        new(0x16f88, 0x16f8e, 1),
+        new(0x16fa0, 0x16fdf, 1),
+        new(0x16fe5, 0x16fef, 1),
+        new(0x16ff2, 0x16fff, 1),
+        new(0x187f8, 0x187ff, 1),
+        new(0x18cd6, 0x18cff, 1),
+        new(0x18d09, 0x1afef, 1),
+        new(0x1aff4, 0x1affc, 8),
+        new(0x1afff, 0x1b123, 292),
+        new(0x1b124, 0x1b131, 1),
+        new(0x1b133, 0x1b14f, 1),
+        new(0x1b153, 0x1b154, 1),
+        new(0x1b156, 0x1b163, 1),
+        new(0x1b168, 0x1b16f, 1),
+        new(0x1b2fc, 0x1bbff, 1),
+        new(0x1bc6b, 0x1bc6f, 1),
+        new(0x1bc7d, 0x1bc7f, 1),
+        new(0x1bc89, 0x1bc8f, 1),
+        new(0x1bc9a, 0x1bc9b, 1),
+        new(0x1bca0, 0x1ceff, 1),
+        new(0x1cf2e, 0x1cf2f, 1),
+        new(0x1cf47, 0x1cf4f, 1),
+        new(0x1cfc4, 0x1cfff, 1),
+        new(0x1d0f6, 0x1d0ff, 1),
+        new(0x1d127, 0x1d128, 1),
         new(0x1d173, 0x1d17a, 1),
-        new(0xe0001, 0xe0020, 31),
-        new(0xe0021, 0xe007f, 1),
-        new(0xf0000, 0xffffd, 1),
-        new(0x100000, 0x10fffd, 1)
+        new(0x1d1eb, 0x1d1ff, 1),
+        new(0x1d246, 0x1d2bf, 1),
+        new(0x1d2d4, 0x1d2df, 1),
+        new(0x1d2f4, 0x1d2ff, 1),
+        new(0x1d357, 0x1d35f, 1),
+        new(0x1d379, 0x1d3ff, 1),
+        new(0x1d455, 0x1d49d, 72),
+        new(0x1d4a0, 0x1d4a1, 1),
+        new(0x1d4a3, 0x1d4a4, 1),
+        new(0x1d4a7, 0x1d4a8, 1),
+        new(0x1d4ad, 0x1d4ba, 13),
+        new(0x1d4bc, 0x1d4c4, 8),
+        new(0x1d506, 0x1d50b, 5),
+        new(0x1d50c, 0x1d515, 9),
+        new(0x1d51d, 0x1d53a, 29),
+        new(0x1d53f, 0x1d545, 6),
+        new(0x1d547, 0x1d549, 1),
+        new(0x1d551, 0x1d6a6, 341),
+        new(0x1d6a7, 0x1d7cc, 293),
+        new(0x1d7cd, 0x1da8c, 703),
+        new(0x1da8d, 0x1da9a, 1),
+        new(0x1daa0, 0x1dab0, 16),
+        new(0x1dab1, 0x1deff, 1),
+        new(0x1df1f, 0x1df24, 1),
+        new(0x1df2b, 0x1dfff, 1),
+        new(0x1e007, 0x1e019, 18),
+        new(0x1e01a, 0x1e022, 8),
+        new(0x1e025, 0x1e02b, 6),
+        new(0x1e02c, 0x1e02f, 1),
+        new(0x1e06e, 0x1e08e, 1),
+        new(0x1e090, 0x1e0ff, 1),
+        new(0x1e12d, 0x1e12f, 1),
+        new(0x1e13e, 0x1e13f, 1),
+        new(0x1e14a, 0x1e14d, 1),
+        new(0x1e150, 0x1e28f, 1),
+        new(0x1e2af, 0x1e2bf, 1),
+        new(0x1e2fa, 0x1e2fe, 1),
+        new(0x1e300, 0x1e4cf, 1),
+        new(0x1e4fa, 0x1e7df, 1),
+        new(0x1e7e7, 0x1e7ec, 5),
+        new(0x1e7ef, 0x1e7ff, 16),
+        new(0x1e8c5, 0x1e8c6, 1),
+        new(0x1e8d7, 0x1e8ff, 1),
+        new(0x1e94c, 0x1e94f, 1),
+        new(0x1e95a, 0x1e95d, 1),
+        new(0x1e960, 0x1ec70, 1),
+        new(0x1ecb5, 0x1ed00, 1),
+        new(0x1ed3e, 0x1edff, 1),
+        new(0x1ee04, 0x1ee20, 28),
+        new(0x1ee23, 0x1ee25, 2),
+        new(0x1ee26, 0x1ee28, 2),
+        new(0x1ee33, 0x1ee38, 5),
+        new(0x1ee3a, 0x1ee3c, 2),
+        new(0x1ee3d, 0x1ee41, 1),
+        new(0x1ee43, 0x1ee46, 1),
+        new(0x1ee48, 0x1ee4c, 2),
+        new(0x1ee50, 0x1ee53, 3),
+        new(0x1ee55, 0x1ee56, 1),
+        new(0x1ee58, 0x1ee60, 2),
+        new(0x1ee63, 0x1ee65, 2),
+        new(0x1ee66, 0x1ee6b, 5),
+        new(0x1ee73, 0x1ee7d, 5),
+        new(0x1ee7f, 0x1ee8a, 11),
+        new(0x1ee9c, 0x1eea0, 1),
+        new(0x1eea4, 0x1eeaa, 6),
+        new(0x1eebc, 0x1eeef, 1),
+        new(0x1eef2, 0x1efff, 1),
+        new(0x1f02c, 0x1f02f, 1),
+        new(0x1f094, 0x1f09f, 1),
+        new(0x1f0af, 0x1f0b0, 1),
+        new(0x1f0c0, 0x1f0d0, 16),
+        new(0x1f0f6, 0x1f0ff, 1),
+        new(0x1f1ae, 0x1f1e5, 1),
+        new(0x1f203, 0x1f20f, 1),
+        new(0x1f23c, 0x1f23f, 1),
+        new(0x1f249, 0x1f24f, 1),
+        new(0x1f252, 0x1f25f, 1),
+        new(0x1f266, 0x1f2ff, 1),
+        new(0x1f6d8, 0x1f6db, 1),
+        new(0x1f6ed, 0x1f6ef, 1),
+        new(0x1f6fd, 0x1f6ff, 1),
+        new(0x1f777, 0x1f77a, 1),
+        new(0x1f7da, 0x1f7df, 1),
+        new(0x1f7ec, 0x1f7ef, 1),
+        new(0x1f7f1, 0x1f7ff, 1),
+        new(0x1f80c, 0x1f80f, 1),
+        new(0x1f848, 0x1f84f, 1),
+        new(0x1f85a, 0x1f85f, 1),
+        new(0x1f888, 0x1f88f, 1),
+        new(0x1f8ae, 0x1f8af, 1),
+        new(0x1f8b2, 0x1f8ff, 1),
+        new(0x1fa54, 0x1fa5f, 1),
+        new(0x1fa6e, 0x1fa6f, 1),
+        new(0x1fa7d, 0x1fa7f, 1),
+        new(0x1fa89, 0x1fa8f, 1),
+        new(0x1fabe, 0x1fac6, 8),
+        new(0x1fac7, 0x1facd, 1),
+        new(0x1fadc, 0x1fadf, 1),
+        new(0x1fae9, 0x1faef, 1),
+        new(0x1faf9, 0x1faff, 1),
+        new(0x1fb93, 0x1fbcb, 56),
+        new(0x1fbcc, 0x1fbef, 1),
+        new(0x1fbfa, 0x1ffff, 1),
+        new(0x2a6e0, 0x2a6ff, 1),
+        new(0x2b73a, 0x2b73f, 1),
+        new(0x2b81e, 0x2b81f, 1),
+        new(0x2cea2, 0x2ceaf, 1),
+        new(0x2ebe1, 0x2f7ff, 1),
+        new(0x2fa1e, 0x2ffff, 1),
+        new(0x3134b, 0x3134f, 1),
+        new(0x323b0, 0xe00ff, 1),
+        new(0xe01f0, 0x10ffff, 1)
     }.slice(),
     LatinOffset: 2
 ));
@@ -108,6 +742,617 @@ internal static ж<RangeTable> _Cf = Ꮡ(new RangeTable(
         new(0x1d173, 0x1d17a, 1),
         new(0xe0001, 0xe0020, 31),
         new(0xe0021, 0xe007f, 1)
+    }.slice()
+));
+
+internal static ж<RangeTable> _Cn = Ꮡ(new RangeTable(
+    R16: new Range16[]{
+        new(0x0378, 0x0379, 1),
+        new(0x0380, 0x0383, 1),
+        new(0x038b, 0x038d, 2),
+        new(0x03a2, 0x0530, 398),
+        new(0x0557, 0x0558, 1),
+        new(0x058b, 0x058c, 1),
+        new(0x0590, 0x05c8, 56),
+        new(0x05c9, 0x05cf, 1),
+        new(0x05eb, 0x05ee, 1),
+        new(0x05f5, 0x05ff, 1),
+        new(0x070e, 0x074b, 61),
+        new(0x074c, 0x07b2, 102),
+        new(0x07b3, 0x07bf, 1),
+        new(0x07fb, 0x07fc, 1),
+        new(0x082e, 0x082f, 1),
+        new(0x083f, 0x085c, 29),
+        new(0x085d, 0x085f, 2),
+        new(0x086b, 0x086f, 1),
+        new(0x088f, 0x0892, 3),
+        new(0x0893, 0x0897, 1),
+        new(0x0984, 0x098d, 9),
+        new(0x098e, 0x0991, 3),
+        new(0x0992, 0x09a9, 23),
+        new(0x09b1, 0x09b3, 2),
+        new(0x09b4, 0x09b5, 1),
+        new(0x09ba, 0x09bb, 1),
+        new(0x09c5, 0x09c6, 1),
+        new(0x09c9, 0x09ca, 1),
+        new(0x09cf, 0x09d6, 1),
+        new(0x09d8, 0x09db, 1),
+        new(0x09de, 0x09e4, 6),
+        new(0x09e5, 0x09ff, 26),
+        new(0x0a00, 0x0a04, 4),
+        new(0x0a0b, 0x0a0e, 1),
+        new(0x0a11, 0x0a12, 1),
+        new(0x0a29, 0x0a31, 8),
+        new(0x0a34, 0x0a3a, 3),
+        new(0x0a3b, 0x0a3d, 2),
+        new(0x0a43, 0x0a46, 1),
+        new(0x0a49, 0x0a4a, 1),
+        new(0x0a4e, 0x0a50, 1),
+        new(0x0a52, 0x0a58, 1),
+        new(0x0a5d, 0x0a5f, 2),
+        new(0x0a60, 0x0a65, 1),
+        new(0x0a77, 0x0a80, 1),
+        new(0x0a84, 0x0a8e, 10),
+        new(0x0a92, 0x0aa9, 23),
+        new(0x0ab1, 0x0ab4, 3),
+        new(0x0aba, 0x0abb, 1),
+        new(0x0ac6, 0x0ace, 4),
+        new(0x0acf, 0x0ad1, 2),
+        new(0x0ad2, 0x0adf, 1),
+        new(0x0ae4, 0x0ae5, 1),
+        new(0x0af2, 0x0af8, 1),
+        new(0x0b00, 0x0b04, 4),
+        new(0x0b0d, 0x0b0e, 1),
+        new(0x0b11, 0x0b12, 1),
+        new(0x0b29, 0x0b31, 8),
+        new(0x0b34, 0x0b3a, 6),
+        new(0x0b3b, 0x0b45, 10),
+        new(0x0b46, 0x0b49, 3),
+        new(0x0b4a, 0x0b4e, 4),
+        new(0x0b4f, 0x0b54, 1),
+        new(0x0b58, 0x0b5b, 1),
+        new(0x0b5e, 0x0b64, 6),
+        new(0x0b65, 0x0b78, 19),
+        new(0x0b79, 0x0b81, 1),
+        new(0x0b84, 0x0b8b, 7),
+        new(0x0b8c, 0x0b8d, 1),
+        new(0x0b91, 0x0b96, 5),
+        new(0x0b97, 0x0b98, 1),
+        new(0x0b9b, 0x0b9d, 2),
+        new(0x0ba0, 0x0ba2, 1),
+        new(0x0ba5, 0x0ba7, 1),
+        new(0x0bab, 0x0bad, 1),
+        new(0x0bba, 0x0bbd, 1),
+        new(0x0bc3, 0x0bc5, 1),
+        new(0x0bc9, 0x0bce, 5),
+        new(0x0bcf, 0x0bd1, 2),
+        new(0x0bd2, 0x0bd6, 1),
+        new(0x0bd8, 0x0be5, 1),
+        new(0x0bfb, 0x0bff, 1),
+        new(0x0c0d, 0x0c11, 4),
+        new(0x0c29, 0x0c3a, 17),
+        new(0x0c3b, 0x0c45, 10),
+        new(0x0c49, 0x0c4e, 5),
+        new(0x0c4f, 0x0c54, 1),
+        new(0x0c57, 0x0c5b, 4),
+        new(0x0c5c, 0x0c5e, 2),
+        new(0x0c5f, 0x0c64, 5),
+        new(0x0c65, 0x0c70, 11),
+        new(0x0c71, 0x0c76, 1),
+        new(0x0c8d, 0x0c91, 4),
+        new(0x0ca9, 0x0cb4, 11),
+        new(0x0cba, 0x0cbb, 1),
+        new(0x0cc5, 0x0cc9, 4),
+        new(0x0cce, 0x0cd4, 1),
+        new(0x0cd7, 0x0cdc, 1),
+        new(0x0cdf, 0x0ce4, 5),
+        new(0x0ce5, 0x0cf0, 11),
+        new(0x0cf4, 0x0cff, 1),
+        new(0x0d0d, 0x0d11, 4),
+        new(0x0d45, 0x0d49, 4),
+        new(0x0d50, 0x0d53, 1),
+        new(0x0d64, 0x0d65, 1),
+        new(0x0d80, 0x0d84, 4),
+        new(0x0d97, 0x0d99, 1),
+        new(0x0db2, 0x0dbc, 10),
+        new(0x0dbe, 0x0dbf, 1),
+        new(0x0dc7, 0x0dc9, 1),
+        new(0x0dcb, 0x0dce, 1),
+        new(0x0dd5, 0x0dd7, 2),
+        new(0x0de0, 0x0de5, 1),
+        new(0x0df0, 0x0df1, 1),
+        new(0x0df5, 0x0e00, 1),
+        new(0x0e3b, 0x0e3e, 1),
+        new(0x0e5c, 0x0e80, 1),
+        new(0x0e83, 0x0e85, 2),
+        new(0x0e8b, 0x0ea4, 25),
+        new(0x0ea6, 0x0ebe, 24),
+        new(0x0ebf, 0x0ec5, 6),
+        new(0x0ec7, 0x0ecf, 8),
+        new(0x0eda, 0x0edb, 1),
+        new(0x0ee0, 0x0eff, 1),
+        new(0x0f48, 0x0f6d, 37),
+        new(0x0f6e, 0x0f70, 1),
+        new(0x0f98, 0x0fbd, 37),
+        new(0x0fcd, 0x0fdb, 14),
+        new(0x0fdc, 0x0fff, 1),
+        new(0x10c6, 0x10c8, 2),
+        new(0x10c9, 0x10cc, 1),
+        new(0x10ce, 0x10cf, 1),
+        new(0x1249, 0x124e, 5),
+        new(0x124f, 0x1257, 8),
+        new(0x1259, 0x125e, 5),
+        new(0x125f, 0x1289, 42),
+        new(0x128e, 0x128f, 1),
+        new(0x12b1, 0x12b6, 5),
+        new(0x12b7, 0x12bf, 8),
+        new(0x12c1, 0x12c6, 5),
+        new(0x12c7, 0x12d7, 16),
+        new(0x1311, 0x1316, 5),
+        new(0x1317, 0x135b, 68),
+        new(0x135c, 0x137d, 33),
+        new(0x137e, 0x137f, 1),
+        new(0x139a, 0x139f, 1),
+        new(0x13f6, 0x13f7, 1),
+        new(0x13fe, 0x13ff, 1),
+        new(0x169d, 0x169f, 1),
+        new(0x16f9, 0x16ff, 1),
+        new(0x1716, 0x171e, 1),
+        new(0x1737, 0x173f, 1),
+        new(0x1754, 0x175f, 1),
+        new(0x176d, 0x1771, 4),
+        new(0x1774, 0x177f, 1),
+        new(0x17de, 0x17df, 1),
+        new(0x17ea, 0x17ef, 1),
+        new(0x17fa, 0x17ff, 1),
+        new(0x181a, 0x181f, 1),
+        new(0x1879, 0x187f, 1),
+        new(0x18ab, 0x18af, 1),
+        new(0x18f6, 0x18ff, 1),
+        new(0x191f, 0x192c, 13),
+        new(0x192d, 0x192f, 1),
+        new(0x193c, 0x193f, 1),
+        new(0x1941, 0x1943, 1),
+        new(0x196e, 0x196f, 1),
+        new(0x1975, 0x197f, 1),
+        new(0x19ac, 0x19af, 1),
+        new(0x19ca, 0x19cf, 1),
+        new(0x19db, 0x19dd, 1),
+        new(0x1a1c, 0x1a1d, 1),
+        new(0x1a5f, 0x1a7d, 30),
+        new(0x1a7e, 0x1a8a, 12),
+        new(0x1a8b, 0x1a8f, 1),
+        new(0x1a9a, 0x1a9f, 1),
+        new(0x1aae, 0x1aaf, 1),
+        new(0x1acf, 0x1aff, 1),
+        new(0x1b4d, 0x1b4f, 1),
+        new(0x1b7f, 0x1bf4, 117),
+        new(0x1bf5, 0x1bfb, 1),
+        new(0x1c38, 0x1c3a, 1),
+        new(0x1c4a, 0x1c4c, 1),
+        new(0x1c89, 0x1c8f, 1),
+        new(0x1cbb, 0x1cbc, 1),
+        new(0x1cc8, 0x1ccf, 1),
+        new(0x1cfb, 0x1cff, 1),
+        new(0x1f16, 0x1f17, 1),
+        new(0x1f1e, 0x1f1f, 1),
+        new(0x1f46, 0x1f47, 1),
+        new(0x1f4e, 0x1f4f, 1),
+        new(0x1f58, 0x1f5e, 2),
+        new(0x1f7e, 0x1f7f, 1),
+        new(0x1fb5, 0x1fc5, 16),
+        new(0x1fd4, 0x1fd5, 1),
+        new(0x1fdc, 0x1ff0, 20),
+        new(0x1ff1, 0x1ff5, 4),
+        new(0x1fff, 0x2065, 102),
+        new(0x2072, 0x2073, 1),
+        new(0x208f, 0x209d, 14),
+        new(0x209e, 0x209f, 1),
+        new(0x20c1, 0x20cf, 1),
+        new(0x20f1, 0x20ff, 1),
+        new(0x218c, 0x218f, 1),
+        new(0x2427, 0x243f, 1),
+        new(0x244b, 0x245f, 1),
+        new(0x2b74, 0x2b75, 1),
+        new(0x2b96, 0x2cf4, 350),
+        new(0x2cf5, 0x2cf8, 1),
+        new(0x2d26, 0x2d28, 2),
+        new(0x2d29, 0x2d2c, 1),
+        new(0x2d2e, 0x2d2f, 1),
+        new(0x2d68, 0x2d6e, 1),
+        new(0x2d71, 0x2d7e, 1),
+        new(0x2d97, 0x2d9f, 1),
+        new(0x2da7, 0x2ddf, 8),
+        new(0x2e5e, 0x2e7f, 1),
+        new(0x2e9a, 0x2ef4, 90),
+        new(0x2ef5, 0x2eff, 1),
+        new(0x2fd6, 0x2fef, 1),
+        new(0x2ffc, 0x2fff, 1),
+        new(0x3040, 0x3097, 87),
+        new(0x3098, 0x3100, 104),
+        new(0x3101, 0x3104, 1),
+        new(0x3130, 0x318f, 95),
+        new(0x31e4, 0x31ef, 1),
+        new(0x321f, 0xa48d, 29294),
+        new(0xa48e, 0xa48f, 1),
+        new(0xa4c7, 0xa4cf, 1),
+        new(0xa62c, 0xa63f, 1),
+        new(0xa6f8, 0xa6ff, 1),
+        new(0xa7cb, 0xa7cf, 1),
+        new(0xa7d2, 0xa7d4, 2),
+        new(0xa7da, 0xa7f1, 1),
+        new(0xa82d, 0xa82f, 1),
+        new(0xa83a, 0xa83f, 1),
+        new(0xa878, 0xa87f, 1),
+        new(0xa8c6, 0xa8cd, 1),
+        new(0xa8da, 0xa8df, 1),
+        new(0xa954, 0xa95e, 1),
+        new(0xa97d, 0xa97f, 1),
+        new(0xa9ce, 0xa9da, 12),
+        new(0xa9db, 0xa9dd, 1),
+        new(0xa9ff, 0xaa37, 56),
+        new(0xaa38, 0xaa3f, 1),
+        new(0xaa4e, 0xaa4f, 1),
+        new(0xaa5a, 0xaa5b, 1),
+        new(0xaac3, 0xaada, 1),
+        new(0xaaf7, 0xab00, 1),
+        new(0xab07, 0xab08, 1),
+        new(0xab0f, 0xab10, 1),
+        new(0xab17, 0xab1f, 1),
+        new(0xab27, 0xab2f, 8),
+        new(0xab6c, 0xab6f, 1),
+        new(0xabee, 0xabef, 1),
+        new(0xabfa, 0xabff, 1),
+        new(0xd7a4, 0xd7af, 1),
+        new(0xd7c7, 0xd7ca, 1),
+        new(0xd7fc, 0xd7ff, 1),
+        new(0xfa6e, 0xfa6f, 1),
+        new(0xfada, 0xfaff, 1),
+        new(0xfb07, 0xfb12, 1),
+        new(0xfb18, 0xfb1c, 1),
+        new(0xfb37, 0xfb3d, 6),
+        new(0xfb3f, 0xfb45, 3),
+        new(0xfbc3, 0xfbd2, 1),
+        new(0xfd90, 0xfd91, 1),
+        new(0xfdc8, 0xfdce, 1),
+        new(0xfdd0, 0xfdef, 1),
+        new(0xfe1a, 0xfe1f, 1),
+        new(0xfe53, 0xfe67, 20),
+        new(0xfe6c, 0xfe6f, 1),
+        new(0xfe75, 0xfefd, 136),
+        new(0xfefe, 0xff00, 2),
+        new(0xffbf, 0xffc1, 1),
+        new(0xffc8, 0xffc9, 1),
+        new(0xffd0, 0xffd1, 1),
+        new(0xffd8, 0xffd9, 1),
+        new(0xffdd, 0xffdf, 1),
+        new(0xffe7, 0xffef, 8),
+        new(0xfff0, 0xfff8, 1),
+        new(0xfffe, 0xffff, 1)
+    }.slice(),
+    R32: new Range32[]{
+        new(0x1000c, 0x10027, 27),
+        new(0x1003b, 0x1003e, 3),
+        new(0x1004e, 0x1004f, 1),
+        new(0x1005e, 0x1007f, 1),
+        new(0x100fb, 0x100ff, 1),
+        new(0x10103, 0x10106, 1),
+        new(0x10134, 0x10136, 1),
+        new(0x1018f, 0x1019d, 14),
+        new(0x1019e, 0x1019f, 1),
+        new(0x101a1, 0x101cf, 1),
+        new(0x101fe, 0x1027f, 1),
+        new(0x1029d, 0x1029f, 1),
+        new(0x102d1, 0x102df, 1),
+        new(0x102fc, 0x102ff, 1),
+        new(0x10324, 0x1032c, 1),
+        new(0x1034b, 0x1034f, 1),
+        new(0x1037b, 0x1037f, 1),
+        new(0x1039e, 0x103c4, 38),
+        new(0x103c5, 0x103c7, 1),
+        new(0x103d6, 0x103ff, 1),
+        new(0x1049e, 0x1049f, 1),
+        new(0x104aa, 0x104af, 1),
+        new(0x104d4, 0x104d7, 1),
+        new(0x104fc, 0x104ff, 1),
+        new(0x10528, 0x1052f, 1),
+        new(0x10564, 0x1056e, 1),
+        new(0x1057b, 0x1058b, 16),
+        new(0x10593, 0x10596, 3),
+        new(0x105a2, 0x105b2, 16),
+        new(0x105ba, 0x105bd, 3),
+        new(0x105be, 0x105ff, 1),
+        new(0x10737, 0x1073f, 1),
+        new(0x10756, 0x1075f, 1),
+        new(0x10768, 0x1077f, 1),
+        new(0x10786, 0x107b1, 43),
+        new(0x107bb, 0x107ff, 1),
+        new(0x10806, 0x10807, 1),
+        new(0x10809, 0x10836, 45),
+        new(0x10839, 0x1083b, 1),
+        new(0x1083d, 0x1083e, 1),
+        new(0x10856, 0x1089f, 73),
+        new(0x108a0, 0x108a6, 1),
+        new(0x108b0, 0x108df, 1),
+        new(0x108f3, 0x108f6, 3),
+        new(0x108f7, 0x108fa, 1),
+        new(0x1091c, 0x1091e, 1),
+        new(0x1093a, 0x1093e, 1),
+        new(0x10940, 0x1097f, 1),
+        new(0x109b8, 0x109bb, 1),
+        new(0x109d0, 0x109d1, 1),
+        new(0x10a04, 0x10a07, 3),
+        new(0x10a08, 0x10a0b, 1),
+        new(0x10a14, 0x10a18, 4),
+        new(0x10a36, 0x10a37, 1),
+        new(0x10a3b, 0x10a3e, 1),
+        new(0x10a49, 0x10a4f, 1),
+        new(0x10a59, 0x10a5f, 1),
+        new(0x10aa0, 0x10abf, 1),
+        new(0x10ae7, 0x10aea, 1),
+        new(0x10af7, 0x10aff, 1),
+        new(0x10b36, 0x10b38, 1),
+        new(0x10b56, 0x10b57, 1),
+        new(0x10b73, 0x10b77, 1),
+        new(0x10b92, 0x10b98, 1),
+        new(0x10b9d, 0x10ba8, 1),
+        new(0x10bb0, 0x10bff, 1),
+        new(0x10c49, 0x10c7f, 1),
+        new(0x10cb3, 0x10cbf, 1),
+        new(0x10cf3, 0x10cf9, 1),
+        new(0x10d28, 0x10d2f, 1),
+        new(0x10d3a, 0x10e5f, 1),
+        new(0x10e7f, 0x10eaa, 43),
+        new(0x10eae, 0x10eaf, 1),
+        new(0x10eb2, 0x10efc, 1),
+        new(0x10f28, 0x10f2f, 1),
+        new(0x10f5a, 0x10f6f, 1),
+        new(0x10f8a, 0x10faf, 1),
+        new(0x10fcc, 0x10fdf, 1),
+        new(0x10ff7, 0x10fff, 1),
+        new(0x1104e, 0x11051, 1),
+        new(0x11076, 0x1107e, 1),
+        new(0x110c3, 0x110cc, 1),
+        new(0x110ce, 0x110cf, 1),
+        new(0x110e9, 0x110ef, 1),
+        new(0x110fa, 0x110ff, 1),
+        new(0x11135, 0x11148, 19),
+        new(0x11149, 0x1114f, 1),
+        new(0x11177, 0x1117f, 1),
+        new(0x111e0, 0x111f5, 21),
+        new(0x111f6, 0x111ff, 1),
+        new(0x11212, 0x11242, 48),
+        new(0x11243, 0x1127f, 1),
+        new(0x11287, 0x11289, 2),
+        new(0x1128e, 0x1129e, 16),
+        new(0x112aa, 0x112af, 1),
+        new(0x112eb, 0x112ef, 1),
+        new(0x112fa, 0x112ff, 1),
+        new(0x11304, 0x1130d, 9),
+        new(0x1130e, 0x11311, 3),
+        new(0x11312, 0x11329, 23),
+        new(0x11331, 0x11334, 3),
+        new(0x1133a, 0x11345, 11),
+        new(0x11346, 0x11349, 3),
+        new(0x1134a, 0x1134e, 4),
+        new(0x1134f, 0x11351, 2),
+        new(0x11352, 0x11356, 1),
+        new(0x11358, 0x1135c, 1),
+        new(0x11364, 0x11365, 1),
+        new(0x1136d, 0x1136f, 1),
+        new(0x11375, 0x113ff, 1),
+        new(0x1145c, 0x11462, 6),
+        new(0x11463, 0x1147f, 1),
+        new(0x114c8, 0x114cf, 1),
+        new(0x114da, 0x1157f, 1),
+        new(0x115b6, 0x115b7, 1),
+        new(0x115de, 0x115ff, 1),
+        new(0x11645, 0x1164f, 1),
+        new(0x1165a, 0x1165f, 1),
+        new(0x1166d, 0x1167f, 1),
+        new(0x116ba, 0x116bf, 1),
+        new(0x116ca, 0x116ff, 1),
+        new(0x1171b, 0x1171c, 1),
+        new(0x1172c, 0x1172f, 1),
+        new(0x11747, 0x117ff, 1),
+        new(0x1183c, 0x1189f, 1),
+        new(0x118f3, 0x118fe, 1),
+        new(0x11907, 0x11908, 1),
+        new(0x1190a, 0x1190b, 1),
+        new(0x11914, 0x11917, 3),
+        new(0x11936, 0x11939, 3),
+        new(0x1193a, 0x11947, 13),
+        new(0x11948, 0x1194f, 1),
+        new(0x1195a, 0x1199f, 1),
+        new(0x119a8, 0x119a9, 1),
+        new(0x119d8, 0x119d9, 1),
+        new(0x119e5, 0x119ff, 1),
+        new(0x11a48, 0x11a4f, 1),
+        new(0x11aa3, 0x11aaf, 1),
+        new(0x11af9, 0x11aff, 1),
+        new(0x11b0a, 0x11bff, 1),
+        new(0x11c09, 0x11c37, 46),
+        new(0x11c46, 0x11c4f, 1),
+        new(0x11c6d, 0x11c6f, 1),
+        new(0x11c90, 0x11c91, 1),
+        new(0x11ca8, 0x11cb7, 15),
+        new(0x11cb8, 0x11cff, 1),
+        new(0x11d07, 0x11d0a, 3),
+        new(0x11d37, 0x11d39, 1),
+        new(0x11d3b, 0x11d3e, 3),
+        new(0x11d48, 0x11d4f, 1),
+        new(0x11d5a, 0x11d5f, 1),
+        new(0x11d66, 0x11d69, 3),
+        new(0x11d8f, 0x11d92, 3),
+        new(0x11d99, 0x11d9f, 1),
+        new(0x11daa, 0x11edf, 1),
+        new(0x11ef9, 0x11eff, 1),
+        new(0x11f11, 0x11f3b, 42),
+        new(0x11f3c, 0x11f3d, 1),
+        new(0x11f5a, 0x11faf, 1),
+        new(0x11fb1, 0x11fbf, 1),
+        new(0x11ff2, 0x11ffe, 1),
+        new(0x1239a, 0x123ff, 1),
+        new(0x1246f, 0x12475, 6),
+        new(0x12476, 0x1247f, 1),
+        new(0x12544, 0x12f8f, 1),
+        new(0x12ff3, 0x12fff, 1),
+        new(0x13456, 0x143ff, 1),
+        new(0x14647, 0x167ff, 1),
+        new(0x16a39, 0x16a3f, 1),
+        new(0x16a5f, 0x16a6a, 11),
+        new(0x16a6b, 0x16a6d, 1),
+        new(0x16abf, 0x16aca, 11),
+        new(0x16acb, 0x16acf, 1),
+        new(0x16aee, 0x16aef, 1),
+        new(0x16af6, 0x16aff, 1),
+        new(0x16b46, 0x16b4f, 1),
+        new(0x16b5a, 0x16b62, 8),
+        new(0x16b78, 0x16b7c, 1),
+        new(0x16b90, 0x16e3f, 1),
+        new(0x16e9b, 0x16eff, 1),
+        new(0x16f4b, 0x16f4e, 1),
+        new(0x16f88, 0x16f8e, 1),
+        new(0x16fa0, 0x16fdf, 1),
+        new(0x16fe5, 0x16fef, 1),
+        new(0x16ff2, 0x16fff, 1),
+        new(0x187f8, 0x187ff, 1),
+        new(0x18cd6, 0x18cff, 1),
+        new(0x18d09, 0x1afef, 1),
+        new(0x1aff4, 0x1affc, 8),
+        new(0x1afff, 0x1b123, 292),
+        new(0x1b124, 0x1b131, 1),
+        new(0x1b133, 0x1b14f, 1),
+        new(0x1b153, 0x1b154, 1),
+        new(0x1b156, 0x1b163, 1),
+        new(0x1b168, 0x1b16f, 1),
+        new(0x1b2fc, 0x1bbff, 1),
+        new(0x1bc6b, 0x1bc6f, 1),
+        new(0x1bc7d, 0x1bc7f, 1),
+        new(0x1bc89, 0x1bc8f, 1),
+        new(0x1bc9a, 0x1bc9b, 1),
+        new(0x1bca4, 0x1ceff, 1),
+        new(0x1cf2e, 0x1cf2f, 1),
+        new(0x1cf47, 0x1cf4f, 1),
+        new(0x1cfc4, 0x1cfff, 1),
+        new(0x1d0f6, 0x1d0ff, 1),
+        new(0x1d127, 0x1d128, 1),
+        new(0x1d1eb, 0x1d1ff, 1),
+        new(0x1d246, 0x1d2bf, 1),
+        new(0x1d2d4, 0x1d2df, 1),
+        new(0x1d2f4, 0x1d2ff, 1),
+        new(0x1d357, 0x1d35f, 1),
+        new(0x1d379, 0x1d3ff, 1),
+        new(0x1d455, 0x1d49d, 72),
+        new(0x1d4a0, 0x1d4a1, 1),
+        new(0x1d4a3, 0x1d4a4, 1),
+        new(0x1d4a7, 0x1d4a8, 1),
+        new(0x1d4ad, 0x1d4ba, 13),
+        new(0x1d4bc, 0x1d4c4, 8),
+        new(0x1d506, 0x1d50b, 5),
+        new(0x1d50c, 0x1d515, 9),
+        new(0x1d51d, 0x1d53a, 29),
+        new(0x1d53f, 0x1d545, 6),
+        new(0x1d547, 0x1d549, 1),
+        new(0x1d551, 0x1d6a6, 341),
+        new(0x1d6a7, 0x1d7cc, 293),
+        new(0x1d7cd, 0x1da8c, 703),
+        new(0x1da8d, 0x1da9a, 1),
+        new(0x1daa0, 0x1dab0, 16),
+        new(0x1dab1, 0x1deff, 1),
+        new(0x1df1f, 0x1df24, 1),
+        new(0x1df2b, 0x1dfff, 1),
+        new(0x1e007, 0x1e019, 18),
+        new(0x1e01a, 0x1e022, 8),
+        new(0x1e025, 0x1e02b, 6),
+        new(0x1e02c, 0x1e02f, 1),
+        new(0x1e06e, 0x1e08e, 1),
+        new(0x1e090, 0x1e0ff, 1),
+        new(0x1e12d, 0x1e12f, 1),
+        new(0x1e13e, 0x1e13f, 1),
+        new(0x1e14a, 0x1e14d, 1),
+        new(0x1e150, 0x1e28f, 1),
+        new(0x1e2af, 0x1e2bf, 1),
+        new(0x1e2fa, 0x1e2fe, 1),
+        new(0x1e300, 0x1e4cf, 1),
+        new(0x1e4fa, 0x1e7df, 1),
+        new(0x1e7e7, 0x1e7ec, 5),
+        new(0x1e7ef, 0x1e7ff, 16),
+        new(0x1e8c5, 0x1e8c6, 1),
+        new(0x1e8d7, 0x1e8ff, 1),
+        new(0x1e94c, 0x1e94f, 1),
+        new(0x1e95a, 0x1e95d, 1),
+        new(0x1e960, 0x1ec70, 1),
+        new(0x1ecb5, 0x1ed00, 1),
+        new(0x1ed3e, 0x1edff, 1),
+        new(0x1ee04, 0x1ee20, 28),
+        new(0x1ee23, 0x1ee25, 2),
+        new(0x1ee26, 0x1ee28, 2),
+        new(0x1ee33, 0x1ee38, 5),
+        new(0x1ee3a, 0x1ee3c, 2),
+        new(0x1ee3d, 0x1ee41, 1),
+        new(0x1ee43, 0x1ee46, 1),
+        new(0x1ee48, 0x1ee4c, 2),
+        new(0x1ee50, 0x1ee53, 3),
+        new(0x1ee55, 0x1ee56, 1),
+        new(0x1ee58, 0x1ee60, 2),
+        new(0x1ee63, 0x1ee65, 2),
+        new(0x1ee66, 0x1ee6b, 5),
+        new(0x1ee73, 0x1ee7d, 5),
+        new(0x1ee7f, 0x1ee8a, 11),
+        new(0x1ee9c, 0x1eea0, 1),
+        new(0x1eea4, 0x1eeaa, 6),
+        new(0x1eebc, 0x1eeef, 1),
+        new(0x1eef2, 0x1efff, 1),
+        new(0x1f02c, 0x1f02f, 1),
+        new(0x1f094, 0x1f09f, 1),
+        new(0x1f0af, 0x1f0b0, 1),
+        new(0x1f0c0, 0x1f0d0, 16),
+        new(0x1f0f6, 0x1f0ff, 1),
+        new(0x1f1ae, 0x1f1e5, 1),
+        new(0x1f203, 0x1f20f, 1),
+        new(0x1f23c, 0x1f23f, 1),
+        new(0x1f249, 0x1f24f, 1),
+        new(0x1f252, 0x1f25f, 1),
+        new(0x1f266, 0x1f2ff, 1),
+        new(0x1f6d8, 0x1f6db, 1),
+        new(0x1f6ed, 0x1f6ef, 1),
+        new(0x1f6fd, 0x1f6ff, 1),
+        new(0x1f777, 0x1f77a, 1),
+        new(0x1f7da, 0x1f7df, 1),
+        new(0x1f7ec, 0x1f7ef, 1),
+        new(0x1f7f1, 0x1f7ff, 1),
+        new(0x1f80c, 0x1f80f, 1),
+        new(0x1f848, 0x1f84f, 1),
+        new(0x1f85a, 0x1f85f, 1),
+        new(0x1f888, 0x1f88f, 1),
+        new(0x1f8ae, 0x1f8af, 1),
+        new(0x1f8b2, 0x1f8ff, 1),
+        new(0x1fa54, 0x1fa5f, 1),
+        new(0x1fa6e, 0x1fa6f, 1),
+        new(0x1fa7d, 0x1fa7f, 1),
+        new(0x1fa89, 0x1fa8f, 1),
+        new(0x1fabe, 0x1fac6, 8),
+        new(0x1fac7, 0x1facd, 1),
+        new(0x1fadc, 0x1fadf, 1),
+        new(0x1fae9, 0x1faef, 1),
+        new(0x1faf9, 0x1faff, 1),
+        new(0x1fb93, 0x1fbcb, 56),
+        new(0x1fbcc, 0x1fbef, 1),
+        new(0x1fbfa, 0x1ffff, 1),
+        new(0x2a6e0, 0x2a6ff, 1),
+        new(0x2b73a, 0x2b73f, 1),
+        new(0x2b81e, 0x2b81f, 1),
+        new(0x2cea2, 0x2ceaf, 1),
+        new(0x2ebe1, 0x2f7ff, 1),
+        new(0x2fa1e, 0x2ffff, 1),
+        new(0x3134b, 0x3134f, 1),
+        new(0x323b0, 0xe0000, 1),
+        new(0xe0002, 0xe001f, 1),
+        new(0xe0080, 0xe00ff, 1),
+        new(0xe01f0, 0xeffff, 1),
+        new(0xffffe, 0xfffff, 1),
+        new(0x10fffe, 0x10ffff, 1)
     }.slice()
 ));
 
@@ -756,6 +2001,149 @@ internal static ж<RangeTable> _L = Ꮡ(new RangeTable(
         new(0x31350, 0x323af, 1)
     }.slice(),
     LatinOffset: 6
+));
+
+internal static ж<RangeTable> _LC = Ꮡ(new RangeTable(
+    R16: new Range16[]{
+        new(0x0041, 0x005a, 1),
+        new(0x0061, 0x007a, 1),
+        new(0x00b5, 0x00c0, 11),
+        new(0x00c1, 0x00d6, 1),
+        new(0x00d8, 0x00f6, 1),
+        new(0x00f8, 0x01ba, 1),
+        new(0x01bc, 0x01bf, 1),
+        new(0x01c4, 0x0293, 1),
+        new(0x0295, 0x02af, 1),
+        new(0x0370, 0x0373, 1),
+        new(0x0376, 0x0377, 1),
+        new(0x037b, 0x037d, 1),
+        new(0x037f, 0x0386, 7),
+        new(0x0388, 0x038a, 1),
+        new(0x038c, 0x038e, 2),
+        new(0x038f, 0x03a1, 1),
+        new(0x03a3, 0x03f5, 1),
+        new(0x03f7, 0x0481, 1),
+        new(0x048a, 0x052f, 1),
+        new(0x0531, 0x0556, 1),
+        new(0x0560, 0x0588, 1),
+        new(0x10a0, 0x10c5, 1),
+        new(0x10c7, 0x10cd, 6),
+        new(0x10d0, 0x10fa, 1),
+        new(0x10fd, 0x10ff, 1),
+        new(0x13a0, 0x13f5, 1),
+        new(0x13f8, 0x13fd, 1),
+        new(0x1c80, 0x1c88, 1),
+        new(0x1c90, 0x1cba, 1),
+        new(0x1cbd, 0x1cbf, 1),
+        new(0x1d00, 0x1d2b, 1),
+        new(0x1d6b, 0x1d77, 1),
+        new(0x1d79, 0x1d9a, 1),
+        new(0x1e00, 0x1f15, 1),
+        new(0x1f18, 0x1f1d, 1),
+        new(0x1f20, 0x1f45, 1),
+        new(0x1f48, 0x1f4d, 1),
+        new(0x1f50, 0x1f57, 1),
+        new(0x1f59, 0x1f5f, 2),
+        new(0x1f60, 0x1f7d, 1),
+        new(0x1f80, 0x1fb4, 1),
+        new(0x1fb6, 0x1fbc, 1),
+        new(0x1fbe, 0x1fc2, 4),
+        new(0x1fc3, 0x1fc4, 1),
+        new(0x1fc6, 0x1fcc, 1),
+        new(0x1fd0, 0x1fd3, 1),
+        new(0x1fd6, 0x1fdb, 1),
+        new(0x1fe0, 0x1fec, 1),
+        new(0x1ff2, 0x1ff4, 1),
+        new(0x1ff6, 0x1ffc, 1),
+        new(0x2102, 0x2107, 5),
+        new(0x210a, 0x2113, 1),
+        new(0x2115, 0x2119, 4),
+        new(0x211a, 0x211d, 1),
+        new(0x2124, 0x212a, 2),
+        new(0x212b, 0x212d, 1),
+        new(0x212f, 0x2134, 1),
+        new(0x2139, 0x213c, 3),
+        new(0x213d, 0x213f, 1),
+        new(0x2145, 0x2149, 1),
+        new(0x214e, 0x2183, 53),
+        new(0x2184, 0x2c00, 2684),
+        new(0x2c01, 0x2c7b, 1),
+        new(0x2c7e, 0x2ce4, 1),
+        new(0x2ceb, 0x2cee, 1),
+        new(0x2cf2, 0x2cf3, 1),
+        new(0x2d00, 0x2d25, 1),
+        new(0x2d27, 0x2d2d, 6),
+        new(0xa640, 0xa66d, 1),
+        new(0xa680, 0xa69b, 1),
+        new(0xa722, 0xa76f, 1),
+        new(0xa771, 0xa787, 1),
+        new(0xa78b, 0xa78e, 1),
+        new(0xa790, 0xa7ca, 1),
+        new(0xa7d0, 0xa7d1, 1),
+        new(0xa7d3, 0xa7d5, 2),
+        new(0xa7d6, 0xa7d9, 1),
+        new(0xa7f5, 0xa7f6, 1),
+        new(0xa7fa, 0xab30, 822),
+        new(0xab31, 0xab5a, 1),
+        new(0xab60, 0xab68, 1),
+        new(0xab70, 0xabbf, 1),
+        new(0xfb00, 0xfb06, 1),
+        new(0xfb13, 0xfb17, 1),
+        new(0xff21, 0xff3a, 1),
+        new(0xff41, 0xff5a, 1)
+    }.slice(),
+    R32: new Range32[]{
+        new(0x10400, 0x1044f, 1),
+        new(0x104b0, 0x104d3, 1),
+        new(0x104d8, 0x104fb, 1),
+        new(0x10570, 0x1057a, 1),
+        new(0x1057c, 0x1058a, 1),
+        new(0x1058c, 0x10592, 1),
+        new(0x10594, 0x10595, 1),
+        new(0x10597, 0x105a1, 1),
+        new(0x105a3, 0x105b1, 1),
+        new(0x105b3, 0x105b9, 1),
+        new(0x105bb, 0x105bc, 1),
+        new(0x10c80, 0x10cb2, 1),
+        new(0x10cc0, 0x10cf2, 1),
+        new(0x118a0, 0x118df, 1),
+        new(0x16e40, 0x16e7f, 1),
+        new(0x1d400, 0x1d454, 1),
+        new(0x1d456, 0x1d49c, 1),
+        new(0x1d49e, 0x1d49f, 1),
+        new(0x1d4a2, 0x1d4a5, 3),
+        new(0x1d4a6, 0x1d4a9, 3),
+        new(0x1d4aa, 0x1d4ac, 1),
+        new(0x1d4ae, 0x1d4b9, 1),
+        new(0x1d4bb, 0x1d4bd, 2),
+        new(0x1d4be, 0x1d4c3, 1),
+        new(0x1d4c5, 0x1d505, 1),
+        new(0x1d507, 0x1d50a, 1),
+        new(0x1d50d, 0x1d514, 1),
+        new(0x1d516, 0x1d51c, 1),
+        new(0x1d51e, 0x1d539, 1),
+        new(0x1d53b, 0x1d53e, 1),
+        new(0x1d540, 0x1d544, 1),
+        new(0x1d546, 0x1d54a, 4),
+        new(0x1d54b, 0x1d550, 1),
+        new(0x1d552, 0x1d6a5, 1),
+        new(0x1d6a8, 0x1d6c0, 1),
+        new(0x1d6c2, 0x1d6da, 1),
+        new(0x1d6dc, 0x1d6fa, 1),
+        new(0x1d6fc, 0x1d714, 1),
+        new(0x1d716, 0x1d734, 1),
+        new(0x1d736, 0x1d74e, 1),
+        new(0x1d750, 0x1d76e, 1),
+        new(0x1d770, 0x1d788, 1),
+        new(0x1d78a, 0x1d7a8, 1),
+        new(0x1d7aa, 0x1d7c2, 1),
+        new(0x1d7c4, 0x1d7cb, 1),
+        new(0x1df00, 0x1df09, 1),
+        new(0x1df0b, 0x1df1e, 1),
+        new(0x1df25, 0x1df2a, 1),
+        new(0x1e900, 0x1e943, 1)
+    }.slice(),
+    LatinOffset: 5
 ));
 
 internal static ж<RangeTable> _Ll = Ꮡ(new RangeTable(
@@ -3751,97 +5139,53 @@ internal static ж<RangeTable> _Zs = Ꮡ(new RangeTable(
 
 // These variables have type *RangeTable.
 public static ж<RangeTable> Cc = _Cc; // Cc is the set of Unicode characters in category Cc (Other, control).
-
 public static ж<RangeTable> Cf = _Cf; // Cf is the set of Unicode characters in category Cf (Other, format).
-
+public static ж<RangeTable> Cn = _Cn; // Cn is the set of Unicode characters in category Cn (Other, not assigned).
 public static ж<RangeTable> Co = _Co; // Co is the set of Unicode characters in category Co (Other, private use).
-
 public static ж<RangeTable> Cs = _Cs; // Cs is the set of Unicode characters in category Cs (Other, surrogate).
-
 public static ж<RangeTable> Digit = _Nd; // Digit is the set of Unicode characters with the "decimal digit" property.
-
 public static ж<RangeTable> Nd = _Nd; // Nd is the set of Unicode characters in category Nd (Number, decimal digit).
-
+public static ж<RangeTable> LC = _LC; // LC is the set of Unicode characters in category LC (Letter, cased: Ll | Lt | Lu).
 public static ж<RangeTable> Letter = _L; // Letter/L is the set of Unicode letters, category L.
-
 public static ж<RangeTable> L = _L;
-
 public static ж<RangeTable> Lm = _Lm; // Lm is the set of Unicode characters in category Lm (Letter, modifier).
-
 public static ж<RangeTable> Lo = _Lo; // Lo is the set of Unicode characters in category Lo (Letter, other).
-
 public static ж<RangeTable> Lower = _Ll; // Lower is the set of Unicode lower case letters.
-
 public static ж<RangeTable> Ll = _Ll; // Ll is the set of Unicode characters in category Ll (Letter, lowercase).
-
 public static ж<RangeTable> Mark = _M; // Mark/M is the set of Unicode mark characters, category M.
-
 public static ж<RangeTable> M = _M;
-
 public static ж<RangeTable> Mc = _Mc; // Mc is the set of Unicode characters in category Mc (Mark, spacing combining).
-
 public static ж<RangeTable> Me = _Me; // Me is the set of Unicode characters in category Me (Mark, enclosing).
-
 public static ж<RangeTable> Mn = _Mn; // Mn is the set of Unicode characters in category Mn (Mark, nonspacing).
-
 public static ж<RangeTable> Nl = _Nl; // Nl is the set of Unicode characters in category Nl (Number, letter).
-
 public static ж<RangeTable> No = _No; // No is the set of Unicode characters in category No (Number, other).
-
 public static ж<RangeTable> Number = _N; // Number/N is the set of Unicode number characters, category N.
-
 public static ж<RangeTable> N = _N;
-
-public static ж<RangeTable> Other = _C; // Other/C is the set of Unicode control and special characters, category C.
-
+public static ж<RangeTable> Other = _C; // Other/C is the set of Unicode control, special, and unassigned code points, category C.
 public static ж<RangeTable> C = _C;
-
 public static ж<RangeTable> Pc = _Pc; // Pc is the set of Unicode characters in category Pc (Punctuation, connector).
-
 public static ж<RangeTable> Pd = _Pd; // Pd is the set of Unicode characters in category Pd (Punctuation, dash).
-
 public static ж<RangeTable> Pe = _Pe; // Pe is the set of Unicode characters in category Pe (Punctuation, close).
-
 public static ж<RangeTable> Pf = _Pf; // Pf is the set of Unicode characters in category Pf (Punctuation, final quote).
-
 public static ж<RangeTable> Pi = _Pi; // Pi is the set of Unicode characters in category Pi (Punctuation, initial quote).
-
 public static ж<RangeTable> Po = _Po; // Po is the set of Unicode characters in category Po (Punctuation, other).
-
 public static ж<RangeTable> Ps = _Ps; // Ps is the set of Unicode characters in category Ps (Punctuation, open).
-
 public static ж<RangeTable> Punct = _P; // Punct/P is the set of Unicode punctuation characters, category P.
-
 public static ж<RangeTable> P = _P;
-
 public static ж<RangeTable> Sc = _Sc; // Sc is the set of Unicode characters in category Sc (Symbol, currency).
-
 public static ж<RangeTable> Sk = _Sk; // Sk is the set of Unicode characters in category Sk (Symbol, modifier).
-
 public static ж<RangeTable> Sm = _Sm; // Sm is the set of Unicode characters in category Sm (Symbol, math).
-
 public static ж<RangeTable> So = _So; // So is the set of Unicode characters in category So (Symbol, other).
-
 public static ж<RangeTable> Space = _Z; // Space/Z is the set of Unicode space characters, category Z.
-
 public static ж<RangeTable> Z = _Z;
-
 public static ж<RangeTable> Symbol = _S; // Symbol/S is the set of Unicode symbol characters, category S.
-
 public static ж<RangeTable> S = _S;
-
 public static ж<RangeTable> Title = _Lt; // Title is the set of Unicode title case letters.
-
 public static ж<RangeTable> Lt = _Lt; // Lt is the set of Unicode characters in category Lt (Letter, titlecase).
-
 public static ж<RangeTable> Upper = _Lu; // Upper is the set of Unicode upper case letters.
-
 public static ж<RangeTable> Lu = _Lu; // Lu is the set of Unicode characters in category Lu (Letter, uppercase).
-
 public static ж<RangeTable> Zl = _Zl; // Zl is the set of Unicode characters in category Zl (Separator, line).
-
 public static ж<RangeTable> Zp = _Zp; // Zp is the set of Unicode characters in category Zp (Separator, paragraph).
-
 public static ж<RangeTable> Zs = _Zs; // Zs is the set of Unicode characters in category Zs (Separator, space).
 
 // Scripts is the set of Unicode script tables.
@@ -5877,329 +7221,167 @@ internal static ж<RangeTable> _Zanabazar_Square = Ꮡ(new RangeTable(
 
 // These variables have type *RangeTable.
 public static ж<RangeTable> Adlam = _Adlam;                 // Adlam is the set of Unicode characters in script Adlam.
-
 public static ж<RangeTable> Ahom = _Ahom;                  // Ahom is the set of Unicode characters in script Ahom.
-
 public static ж<RangeTable> Anatolian_Hieroglyphs = _Anatolian_Hieroglyphs; // Anatolian_Hieroglyphs is the set of Unicode characters in script Anatolian_Hieroglyphs.
-
 public static ж<RangeTable> Arabic = _Arabic;                // Arabic is the set of Unicode characters in script Arabic.
-
 public static ж<RangeTable> Armenian = _Armenian;              // Armenian is the set of Unicode characters in script Armenian.
-
 public static ж<RangeTable> Avestan = _Avestan;               // Avestan is the set of Unicode characters in script Avestan.
-
 public static ж<RangeTable> Balinese = _Balinese;              // Balinese is the set of Unicode characters in script Balinese.
-
 public static ж<RangeTable> Bamum = _Bamum;                 // Bamum is the set of Unicode characters in script Bamum.
-
 public static ж<RangeTable> Bassa_Vah = _Bassa_Vah;             // Bassa_Vah is the set of Unicode characters in script Bassa_Vah.
-
 public static ж<RangeTable> Batak = _Batak;                 // Batak is the set of Unicode characters in script Batak.
-
 public static ж<RangeTable> Bengali = _Bengali;               // Bengali is the set of Unicode characters in script Bengali.
-
 public static ж<RangeTable> Bhaiksuki = _Bhaiksuki;             // Bhaiksuki is the set of Unicode characters in script Bhaiksuki.
-
 public static ж<RangeTable> Bopomofo = _Bopomofo;              // Bopomofo is the set of Unicode characters in script Bopomofo.
-
 public static ж<RangeTable> Brahmi = _Brahmi;                // Brahmi is the set of Unicode characters in script Brahmi.
-
 public static ж<RangeTable> Braille = _Braille;               // Braille is the set of Unicode characters in script Braille.
-
 public static ж<RangeTable> Buginese = _Buginese;              // Buginese is the set of Unicode characters in script Buginese.
-
 public static ж<RangeTable> Buhid = _Buhid;                 // Buhid is the set of Unicode characters in script Buhid.
-
 public static ж<RangeTable> Canadian_Aboriginal = _Canadian_Aboriginal;   // Canadian_Aboriginal is the set of Unicode characters in script Canadian_Aboriginal.
-
 public static ж<RangeTable> Carian = _Carian;                // Carian is the set of Unicode characters in script Carian.
-
 public static ж<RangeTable> Caucasian_Albanian = _Caucasian_Albanian;    // Caucasian_Albanian is the set of Unicode characters in script Caucasian_Albanian.
-
 public static ж<RangeTable> Chakma = _Chakma;                // Chakma is the set of Unicode characters in script Chakma.
-
 public static ж<RangeTable> Cham = _Cham;                  // Cham is the set of Unicode characters in script Cham.
-
 public static ж<RangeTable> Cherokee = _Cherokee;              // Cherokee is the set of Unicode characters in script Cherokee.
-
 public static ж<RangeTable> Chorasmian = _Chorasmian;            // Chorasmian is the set of Unicode characters in script Chorasmian.
-
 public static ж<RangeTable> Common = _Common;                // Common is the set of Unicode characters in script Common.
-
 public static ж<RangeTable> Coptic = _Coptic;                // Coptic is the set of Unicode characters in script Coptic.
-
 public static ж<RangeTable> Cuneiform = _Cuneiform;             // Cuneiform is the set of Unicode characters in script Cuneiform.
-
 public static ж<RangeTable> Cypriot = _Cypriot;               // Cypriot is the set of Unicode characters in script Cypriot.
-
 public static ж<RangeTable> Cypro_Minoan = _Cypro_Minoan;          // Cypro_Minoan is the set of Unicode characters in script Cypro_Minoan.
-
 public static ж<RangeTable> Cyrillic = _Cyrillic;              // Cyrillic is the set of Unicode characters in script Cyrillic.
-
 public static ж<RangeTable> Deseret = _Deseret;               // Deseret is the set of Unicode characters in script Deseret.
-
 public static ж<RangeTable> Devanagari = _Devanagari;            // Devanagari is the set of Unicode characters in script Devanagari.
-
 public static ж<RangeTable> Dives_Akuru = _Dives_Akuru;           // Dives_Akuru is the set of Unicode characters in script Dives_Akuru.
-
 public static ж<RangeTable> Dogra = _Dogra;                 // Dogra is the set of Unicode characters in script Dogra.
-
 public static ж<RangeTable> Duployan = _Duployan;              // Duployan is the set of Unicode characters in script Duployan.
-
 public static ж<RangeTable> Egyptian_Hieroglyphs = _Egyptian_Hieroglyphs;  // Egyptian_Hieroglyphs is the set of Unicode characters in script Egyptian_Hieroglyphs.
-
 public static ж<RangeTable> Elbasan = _Elbasan;               // Elbasan is the set of Unicode characters in script Elbasan.
-
 public static ж<RangeTable> Elymaic = _Elymaic;               // Elymaic is the set of Unicode characters in script Elymaic.
-
 public static ж<RangeTable> Ethiopic = _Ethiopic;              // Ethiopic is the set of Unicode characters in script Ethiopic.
-
 public static ж<RangeTable> Georgian = _Georgian;              // Georgian is the set of Unicode characters in script Georgian.
-
 public static ж<RangeTable> Glagolitic = _Glagolitic;            // Glagolitic is the set of Unicode characters in script Glagolitic.
-
 public static ж<RangeTable> Gothic = _Gothic;                // Gothic is the set of Unicode characters in script Gothic.
-
 public static ж<RangeTable> Grantha = _Grantha;               // Grantha is the set of Unicode characters in script Grantha.
-
 public static ж<RangeTable> Greek = _Greek;                 // Greek is the set of Unicode characters in script Greek.
-
 public static ж<RangeTable> Gujarati = _Gujarati;              // Gujarati is the set of Unicode characters in script Gujarati.
-
 public static ж<RangeTable> Gunjala_Gondi = _Gunjala_Gondi;         // Gunjala_Gondi is the set of Unicode characters in script Gunjala_Gondi.
-
 public static ж<RangeTable> Gurmukhi = _Gurmukhi;              // Gurmukhi is the set of Unicode characters in script Gurmukhi.
-
 public static ж<RangeTable> Han = _Han;                   // Han is the set of Unicode characters in script Han.
-
 public static ж<RangeTable> Hangul = _Hangul;                // Hangul is the set of Unicode characters in script Hangul.
-
 public static ж<RangeTable> Hanifi_Rohingya = _Hanifi_Rohingya;       // Hanifi_Rohingya is the set of Unicode characters in script Hanifi_Rohingya.
-
 public static ж<RangeTable> Hanunoo = _Hanunoo;               // Hanunoo is the set of Unicode characters in script Hanunoo.
-
 public static ж<RangeTable> Hatran = _Hatran;                // Hatran is the set of Unicode characters in script Hatran.
-
 public static ж<RangeTable> Hebrew = _Hebrew;                // Hebrew is the set of Unicode characters in script Hebrew.
-
 public static ж<RangeTable> Hiragana = _Hiragana;              // Hiragana is the set of Unicode characters in script Hiragana.
-
 public static ж<RangeTable> Imperial_Aramaic = _Imperial_Aramaic;      // Imperial_Aramaic is the set of Unicode characters in script Imperial_Aramaic.
-
 public static ж<RangeTable> Inherited = _Inherited;             // Inherited is the set of Unicode characters in script Inherited.
-
 public static ж<RangeTable> Inscriptional_Pahlavi = _Inscriptional_Pahlavi; // Inscriptional_Pahlavi is the set of Unicode characters in script Inscriptional_Pahlavi.
-
 public static ж<RangeTable> Inscriptional_Parthian = _Inscriptional_Parthian; // Inscriptional_Parthian is the set of Unicode characters in script Inscriptional_Parthian.
-
 public static ж<RangeTable> Javanese = _Javanese;              // Javanese is the set of Unicode characters in script Javanese.
-
 public static ж<RangeTable> Kaithi = _Kaithi;                // Kaithi is the set of Unicode characters in script Kaithi.
-
 public static ж<RangeTable> Kannada = _Kannada;               // Kannada is the set of Unicode characters in script Kannada.
-
 public static ж<RangeTable> Katakana = _Katakana;              // Katakana is the set of Unicode characters in script Katakana.
-
 public static ж<RangeTable> Kawi = _Kawi;                  // Kawi is the set of Unicode characters in script Kawi.
-
 public static ж<RangeTable> Kayah_Li = _Kayah_Li;              // Kayah_Li is the set of Unicode characters in script Kayah_Li.
-
 public static ж<RangeTable> Kharoshthi = _Kharoshthi;            // Kharoshthi is the set of Unicode characters in script Kharoshthi.
-
 public static ж<RangeTable> Khitan_Small_Script = _Khitan_Small_Script;   // Khitan_Small_Script is the set of Unicode characters in script Khitan_Small_Script.
-
 public static ж<RangeTable> Khmer = _Khmer;                 // Khmer is the set of Unicode characters in script Khmer.
-
 public static ж<RangeTable> Khojki = _Khojki;                // Khojki is the set of Unicode characters in script Khojki.
-
 public static ж<RangeTable> Khudawadi = _Khudawadi;             // Khudawadi is the set of Unicode characters in script Khudawadi.
-
 public static ж<RangeTable> Lao = _Lao;                   // Lao is the set of Unicode characters in script Lao.
-
 public static ж<RangeTable> Latin = _Latin;                 // Latin is the set of Unicode characters in script Latin.
-
 public static ж<RangeTable> Lepcha = _Lepcha;                // Lepcha is the set of Unicode characters in script Lepcha.
-
 public static ж<RangeTable> Limbu = _Limbu;                 // Limbu is the set of Unicode characters in script Limbu.
-
 public static ж<RangeTable> Linear_A = _Linear_A;              // Linear_A is the set of Unicode characters in script Linear_A.
-
 public static ж<RangeTable> Linear_B = _Linear_B;              // Linear_B is the set of Unicode characters in script Linear_B.
-
 public static ж<RangeTable> Lisu = _Lisu;                  // Lisu is the set of Unicode characters in script Lisu.
-
 public static ж<RangeTable> Lycian = _Lycian;                // Lycian is the set of Unicode characters in script Lycian.
-
 public static ж<RangeTable> Lydian = _Lydian;                // Lydian is the set of Unicode characters in script Lydian.
-
 public static ж<RangeTable> Mahajani = _Mahajani;              // Mahajani is the set of Unicode characters in script Mahajani.
-
 public static ж<RangeTable> Makasar = _Makasar;               // Makasar is the set of Unicode characters in script Makasar.
-
 public static ж<RangeTable> Malayalam = _Malayalam;             // Malayalam is the set of Unicode characters in script Malayalam.
-
 public static ж<RangeTable> Mandaic = _Mandaic;               // Mandaic is the set of Unicode characters in script Mandaic.
-
 public static ж<RangeTable> Manichaean = _Manichaean;            // Manichaean is the set of Unicode characters in script Manichaean.
-
 public static ж<RangeTable> Marchen = _Marchen;               // Marchen is the set of Unicode characters in script Marchen.
-
 public static ж<RangeTable> Masaram_Gondi = _Masaram_Gondi;         // Masaram_Gondi is the set of Unicode characters in script Masaram_Gondi.
-
 public static ж<RangeTable> Medefaidrin = _Medefaidrin;           // Medefaidrin is the set of Unicode characters in script Medefaidrin.
-
 public static ж<RangeTable> Meetei_Mayek = _Meetei_Mayek;          // Meetei_Mayek is the set of Unicode characters in script Meetei_Mayek.
-
 public static ж<RangeTable> Mende_Kikakui = _Mende_Kikakui;         // Mende_Kikakui is the set of Unicode characters in script Mende_Kikakui.
-
 public static ж<RangeTable> Meroitic_Cursive = _Meroitic_Cursive;      // Meroitic_Cursive is the set of Unicode characters in script Meroitic_Cursive.
-
 public static ж<RangeTable> Meroitic_Hieroglyphs = _Meroitic_Hieroglyphs;  // Meroitic_Hieroglyphs is the set of Unicode characters in script Meroitic_Hieroglyphs.
-
 public static ж<RangeTable> Miao = _Miao;                  // Miao is the set of Unicode characters in script Miao.
-
 public static ж<RangeTable> Modi = _Modi;                  // Modi is the set of Unicode characters in script Modi.
-
 public static ж<RangeTable> Mongolian = _Mongolian;             // Mongolian is the set of Unicode characters in script Mongolian.
-
 public static ж<RangeTable> Mro = _Mro;                   // Mro is the set of Unicode characters in script Mro.
-
 public static ж<RangeTable> Multani = _Multani;               // Multani is the set of Unicode characters in script Multani.
-
 public static ж<RangeTable> Myanmar = _Myanmar;               // Myanmar is the set of Unicode characters in script Myanmar.
-
 public static ж<RangeTable> Nabataean = _Nabataean;             // Nabataean is the set of Unicode characters in script Nabataean.
-
 public static ж<RangeTable> Nag_Mundari = _Nag_Mundari;           // Nag_Mundari is the set of Unicode characters in script Nag_Mundari.
-
 public static ж<RangeTable> Nandinagari = _Nandinagari;           // Nandinagari is the set of Unicode characters in script Nandinagari.
-
 public static ж<RangeTable> New_Tai_Lue = _New_Tai_Lue;           // New_Tai_Lue is the set of Unicode characters in script New_Tai_Lue.
-
 public static ж<RangeTable> Newa = _Newa;                  // Newa is the set of Unicode characters in script Newa.
-
 public static ж<RangeTable> Nko = _Nko;                   // Nko is the set of Unicode characters in script Nko.
-
 public static ж<RangeTable> Nushu = _Nushu;                 // Nushu is the set of Unicode characters in script Nushu.
-
 public static ж<RangeTable> Nyiakeng_Puachue_Hmong = _Nyiakeng_Puachue_Hmong; // Nyiakeng_Puachue_Hmong is the set of Unicode characters in script Nyiakeng_Puachue_Hmong.
-
 public static ж<RangeTable> Ogham = _Ogham;                 // Ogham is the set of Unicode characters in script Ogham.
-
 public static ж<RangeTable> Ol_Chiki = _Ol_Chiki;              // Ol_Chiki is the set of Unicode characters in script Ol_Chiki.
-
 public static ж<RangeTable> Old_Hungarian = _Old_Hungarian;         // Old_Hungarian is the set of Unicode characters in script Old_Hungarian.
-
 public static ж<RangeTable> Old_Italic = _Old_Italic;            // Old_Italic is the set of Unicode characters in script Old_Italic.
-
 public static ж<RangeTable> Old_North_Arabian = _Old_North_Arabian;     // Old_North_Arabian is the set of Unicode characters in script Old_North_Arabian.
-
 public static ж<RangeTable> Old_Permic = _Old_Permic;            // Old_Permic is the set of Unicode characters in script Old_Permic.
-
 public static ж<RangeTable> Old_Persian = _Old_Persian;           // Old_Persian is the set of Unicode characters in script Old_Persian.
-
 public static ж<RangeTable> Old_Sogdian = _Old_Sogdian;           // Old_Sogdian is the set of Unicode characters in script Old_Sogdian.
-
 public static ж<RangeTable> Old_South_Arabian = _Old_South_Arabian;     // Old_South_Arabian is the set of Unicode characters in script Old_South_Arabian.
-
 public static ж<RangeTable> Old_Turkic = _Old_Turkic;            // Old_Turkic is the set of Unicode characters in script Old_Turkic.
-
 public static ж<RangeTable> Old_Uyghur = _Old_Uyghur;            // Old_Uyghur is the set of Unicode characters in script Old_Uyghur.
-
 public static ж<RangeTable> Oriya = _Oriya;                 // Oriya is the set of Unicode characters in script Oriya.
-
 public static ж<RangeTable> Osage = _Osage;                 // Osage is the set of Unicode characters in script Osage.
-
 public static ж<RangeTable> Osmanya = _Osmanya;               // Osmanya is the set of Unicode characters in script Osmanya.
-
 public static ж<RangeTable> Pahawh_Hmong = _Pahawh_Hmong;          // Pahawh_Hmong is the set of Unicode characters in script Pahawh_Hmong.
-
 public static ж<RangeTable> Palmyrene = _Palmyrene;             // Palmyrene is the set of Unicode characters in script Palmyrene.
-
 public static ж<RangeTable> Pau_Cin_Hau = _Pau_Cin_Hau;           // Pau_Cin_Hau is the set of Unicode characters in script Pau_Cin_Hau.
-
 public static ж<RangeTable> Phags_Pa = _Phags_Pa;              // Phags_Pa is the set of Unicode characters in script Phags_Pa.
-
 public static ж<RangeTable> Phoenician = _Phoenician;            // Phoenician is the set of Unicode characters in script Phoenician.
-
 public static ж<RangeTable> Psalter_Pahlavi = _Psalter_Pahlavi;       // Psalter_Pahlavi is the set of Unicode characters in script Psalter_Pahlavi.
-
 public static ж<RangeTable> Rejang = _Rejang;                // Rejang is the set of Unicode characters in script Rejang.
-
 public static ж<RangeTable> Runic = _Runic;                 // Runic is the set of Unicode characters in script Runic.
-
 public static ж<RangeTable> Samaritan = _Samaritan;             // Samaritan is the set of Unicode characters in script Samaritan.
-
 public static ж<RangeTable> Saurashtra = _Saurashtra;            // Saurashtra is the set of Unicode characters in script Saurashtra.
-
 public static ж<RangeTable> Sharada = _Sharada;               // Sharada is the set of Unicode characters in script Sharada.
-
 public static ж<RangeTable> Shavian = _Shavian;               // Shavian is the set of Unicode characters in script Shavian.
-
 public static ж<RangeTable> Siddham = _Siddham;               // Siddham is the set of Unicode characters in script Siddham.
-
 public static ж<RangeTable> SignWriting = _SignWriting;           // SignWriting is the set of Unicode characters in script SignWriting.
-
 public static ж<RangeTable> Sinhala = _Sinhala;               // Sinhala is the set of Unicode characters in script Sinhala.
-
 public static ж<RangeTable> Sogdian = _Sogdian;               // Sogdian is the set of Unicode characters in script Sogdian.
-
 public static ж<RangeTable> Sora_Sompeng = _Sora_Sompeng;          // Sora_Sompeng is the set of Unicode characters in script Sora_Sompeng.
-
 public static ж<RangeTable> Soyombo = _Soyombo;               // Soyombo is the set of Unicode characters in script Soyombo.
-
 public static ж<RangeTable> Sundanese = _Sundanese;             // Sundanese is the set of Unicode characters in script Sundanese.
-
 public static ж<RangeTable> Syloti_Nagri = _Syloti_Nagri;          // Syloti_Nagri is the set of Unicode characters in script Syloti_Nagri.
-
 public static ж<RangeTable> Syriac = _Syriac;                // Syriac is the set of Unicode characters in script Syriac.
-
 public static ж<RangeTable> Tagalog = _Tagalog;               // Tagalog is the set of Unicode characters in script Tagalog.
-
 public static ж<RangeTable> Tagbanwa = _Tagbanwa;              // Tagbanwa is the set of Unicode characters in script Tagbanwa.
-
 public static ж<RangeTable> Tai_Le = _Tai_Le;                // Tai_Le is the set of Unicode characters in script Tai_Le.
-
 public static ж<RangeTable> Tai_Tham = _Tai_Tham;              // Tai_Tham is the set of Unicode characters in script Tai_Tham.
-
 public static ж<RangeTable> Tai_Viet = _Tai_Viet;              // Tai_Viet is the set of Unicode characters in script Tai_Viet.
-
 public static ж<RangeTable> Takri = _Takri;                 // Takri is the set of Unicode characters in script Takri.
-
 public static ж<RangeTable> Tamil = _Tamil;                 // Tamil is the set of Unicode characters in script Tamil.
-
 public static ж<RangeTable> Tangsa = _Tangsa;                // Tangsa is the set of Unicode characters in script Tangsa.
-
 public static ж<RangeTable> Tangut = _Tangut;                // Tangut is the set of Unicode characters in script Tangut.
-
 public static ж<RangeTable> Telugu = _Telugu;                // Telugu is the set of Unicode characters in script Telugu.
-
 public static ж<RangeTable> Thaana = _Thaana;                // Thaana is the set of Unicode characters in script Thaana.
-
 public static ж<RangeTable> Thai = _Thai;                  // Thai is the set of Unicode characters in script Thai.
-
 public static ж<RangeTable> Tibetan = _Tibetan;               // Tibetan is the set of Unicode characters in script Tibetan.
-
 public static ж<RangeTable> Tifinagh = _Tifinagh;              // Tifinagh is the set of Unicode characters in script Tifinagh.
-
 public static ж<RangeTable> Tirhuta = _Tirhuta;               // Tirhuta is the set of Unicode characters in script Tirhuta.
-
 public static ж<RangeTable> Toto = _Toto;                  // Toto is the set of Unicode characters in script Toto.
-
 public static ж<RangeTable> Ugaritic = _Ugaritic;              // Ugaritic is the set of Unicode characters in script Ugaritic.
-
 public static ж<RangeTable> Vai = _Vai;                   // Vai is the set of Unicode characters in script Vai.
-
 public static ж<RangeTable> Vithkuqi = _Vithkuqi;              // Vithkuqi is the set of Unicode characters in script Vithkuqi.
-
 public static ж<RangeTable> Wancho = _Wancho;                // Wancho is the set of Unicode characters in script Wancho.
-
 public static ж<RangeTable> Warang_Citi = _Warang_Citi;           // Warang_Citi is the set of Unicode characters in script Warang_Citi.
-
 public static ж<RangeTable> Yezidi = _Yezidi;                // Yezidi is the set of Unicode characters in script Yezidi.
-
 public static ж<RangeTable> Yi = _Yi;                    // Yi is the set of Unicode characters in script Yi.
-
 public static ж<RangeTable> Zanabazar_Square = _Zanabazar_Square;      // Zanabazar_Square is the set of Unicode characters in script Zanabazar_Square.
 
 // Properties is the set of Unicode property tables.
@@ -7400,73 +8582,39 @@ internal static ж<RangeTable> _White_Space = Ꮡ(new RangeTable(
 
 // These variables have type *RangeTable.
 public static ж<RangeTable> ASCII_Hex_Digit = _ASCII_Hex_Digit;                   // ASCII_Hex_Digit is the set of Unicode characters with property ASCII_Hex_Digit.
-
 public static ж<RangeTable> Bidi_Control = _Bidi_Control;                      // Bidi_Control is the set of Unicode characters with property Bidi_Control.
-
 public static ж<RangeTable> Dash = _Dash;                              // Dash is the set of Unicode characters with property Dash.
-
 public static ж<RangeTable> Deprecated = _Deprecated;                        // Deprecated is the set of Unicode characters with property Deprecated.
-
 public static ж<RangeTable> Diacritic = _Diacritic;                         // Diacritic is the set of Unicode characters with property Diacritic.
-
 public static ж<RangeTable> Extender = _Extender;                          // Extender is the set of Unicode characters with property Extender.
-
 public static ж<RangeTable> Hex_Digit = _Hex_Digit;                         // Hex_Digit is the set of Unicode characters with property Hex_Digit.
-
 public static ж<RangeTable> Hyphen = _Hyphen;                            // Hyphen is the set of Unicode characters with property Hyphen.
-
 public static ж<RangeTable> IDS_Binary_Operator = _IDS_Binary_Operator;               // IDS_Binary_Operator is the set of Unicode characters with property IDS_Binary_Operator.
-
 public static ж<RangeTable> IDS_Trinary_Operator = _IDS_Trinary_Operator;              // IDS_Trinary_Operator is the set of Unicode characters with property IDS_Trinary_Operator.
-
 public static ж<RangeTable> Ideographic = _Ideographic;                       // Ideographic is the set of Unicode characters with property Ideographic.
-
 public static ж<RangeTable> Join_Control = _Join_Control;                      // Join_Control is the set of Unicode characters with property Join_Control.
-
 public static ж<RangeTable> Logical_Order_Exception = _Logical_Order_Exception;           // Logical_Order_Exception is the set of Unicode characters with property Logical_Order_Exception.
-
 public static ж<RangeTable> Noncharacter_Code_Point = _Noncharacter_Code_Point;           // Noncharacter_Code_Point is the set of Unicode characters with property Noncharacter_Code_Point.
-
 public static ж<RangeTable> Other_Alphabetic = _Other_Alphabetic;                  // Other_Alphabetic is the set of Unicode characters with property Other_Alphabetic.
-
 public static ж<RangeTable> Other_Default_Ignorable_Code_Point = _Other_Default_Ignorable_Code_Point; // Other_Default_Ignorable_Code_Point is the set of Unicode characters with property Other_Default_Ignorable_Code_Point.
-
 public static ж<RangeTable> Other_Grapheme_Extend = _Other_Grapheme_Extend;             // Other_Grapheme_Extend is the set of Unicode characters with property Other_Grapheme_Extend.
-
 public static ж<RangeTable> Other_ID_Continue = _Other_ID_Continue;                 // Other_ID_Continue is the set of Unicode characters with property Other_ID_Continue.
-
 public static ж<RangeTable> Other_ID_Start = _Other_ID_Start;                    // Other_ID_Start is the set of Unicode characters with property Other_ID_Start.
-
 public static ж<RangeTable> Other_Lowercase = _Other_Lowercase;                   // Other_Lowercase is the set of Unicode characters with property Other_Lowercase.
-
 public static ж<RangeTable> Other_Math = _Other_Math;                        // Other_Math is the set of Unicode characters with property Other_Math.
-
 public static ж<RangeTable> Other_Uppercase = _Other_Uppercase;                   // Other_Uppercase is the set of Unicode characters with property Other_Uppercase.
-
 public static ж<RangeTable> Pattern_Syntax = _Pattern_Syntax;                    // Pattern_Syntax is the set of Unicode characters with property Pattern_Syntax.
-
 public static ж<RangeTable> Pattern_White_Space = _Pattern_White_Space;               // Pattern_White_Space is the set of Unicode characters with property Pattern_White_Space.
-
 public static ж<RangeTable> Prepended_Concatenation_Mark = _Prepended_Concatenation_Mark;      // Prepended_Concatenation_Mark is the set of Unicode characters with property Prepended_Concatenation_Mark.
-
 public static ж<RangeTable> Quotation_Mark = _Quotation_Mark;                    // Quotation_Mark is the set of Unicode characters with property Quotation_Mark.
-
 public static ж<RangeTable> Radical = _Radical;                           // Radical is the set of Unicode characters with property Radical.
-
 public static ж<RangeTable> Regional_Indicator = _Regional_Indicator;                // Regional_Indicator is the set of Unicode characters with property Regional_Indicator.
-
 public static ж<RangeTable> STerm = _Sentence_Terminal;                 // STerm is an alias for Sentence_Terminal.
-
 public static ж<RangeTable> Sentence_Terminal = _Sentence_Terminal;                 // Sentence_Terminal is the set of Unicode characters with property Sentence_Terminal.
-
 public static ж<RangeTable> Soft_Dotted = _Soft_Dotted;                       // Soft_Dotted is the set of Unicode characters with property Soft_Dotted.
-
 public static ж<RangeTable> Terminal_Punctuation = _Terminal_Punctuation;              // Terminal_Punctuation is the set of Unicode characters with property Terminal_Punctuation.
-
 public static ж<RangeTable> Unified_Ideograph = _Unified_Ideograph;                 // Unified_Ideograph is the set of Unicode characters with property Unified_Ideograph.
-
 public static ж<RangeTable> Variation_Selector = _Variation_Selector;                // Variation_Selector is the set of Unicode characters with property Variation_Selector.
-
 public static ж<RangeTable> White_Space = _White_Space;                       // White_Space is the set of Unicode characters with property White_Space.
 
 // CaseRanges is the table describing case mappings for all letters with
@@ -7805,519 +8953,263 @@ internal static slice<CaseRange> _CaseRanges = new CaseRange[]{
     new(0x1E922, 0x1E943, new d(new rune[]{-34, 0, -34}.array()))
 }.slice();
 
-// '\x00'
-// '\x01'
-// '\x02'
-// '\x03'
-// '\x04'
-// '\x05'
-// '\x06'
-// '\a'
-// '\b'
-// '\t'
-// '\n'
-// '\v'
-// '\f'
-// '\r'
-// '\x0e'
-// '\x0f'
-// '\x10'
-// '\x11'
-// '\x12'
-// '\x13'
-// '\x14'
-// '\x15'
-// '\x16'
-// '\x17'
-// '\x18'
-// '\x19'
-// '\x1a'
-// '\x1b'
-// '\x1c'
-// '\x1d'
-// '\x1e'
-// '\x1f'
-// ' '
-// '!'
-// '"'
-// '#'
-// '$'
-// '%'
-// '&'
-// '\''
-// '('
-// ')'
-// '*'
-// '+'
-// ','
-// '-'
-// '.'
-// '/'
-// '0'
-// '1'
-// '2'
-// '3'
-// '4'
-// '5'
-// '6'
-// '7'
-// '8'
-// '9'
-// ':'
-// ';'
-// '<'
-// '='
-// '>'
-// '?'
-// '@'
-// 'A'
-// 'B'
-// 'C'
-// 'D'
-// 'E'
-// 'F'
-// 'G'
-// 'H'
-// 'I'
-// 'J'
-// 'K'
-// 'L'
-// 'M'
-// 'N'
-// 'O'
-// 'P'
-// 'Q'
-// 'R'
-// 'S'
-// 'T'
-// 'U'
-// 'V'
-// 'W'
-// 'X'
-// 'Y'
-// 'Z'
-// '['
-// '\\'
-// ']'
-// '^'
-// '_'
-// '`'
-// 'a'
-// 'b'
-// 'c'
-// 'd'
-// 'e'
-// 'f'
-// 'g'
-// 'h'
-// 'i'
-// 'j'
-// 'k'
-// 'l'
-// 'm'
-// 'n'
-// 'o'
-// 'p'
-// 'q'
-// 'r'
-// 's'
-// 't'
-// 'u'
-// 'v'
-// 'w'
-// 'x'
-// 'y'
-// 'z'
-// '{'
-// '|'
-// '}'
-// '~'
-// '\x7f'
-// '\u0080'
-// '\u0081'
-// '\u0082'
-// '\u0083'
-// '\u0084'
-// '\u0085'
-// '\u0086'
-// '\u0087'
-// '\u0088'
-// '\u0089'
-// '\u008a'
-// '\u008b'
-// '\u008c'
-// '\u008d'
-// '\u008e'
-// '\u008f'
-// '\u0090'
-// '\u0091'
-// '\u0092'
-// '\u0093'
-// '\u0094'
-// '\u0095'
-// '\u0096'
-// '\u0097'
-// '\u0098'
-// '\u0099'
-// '\u009a'
-// '\u009b'
-// '\u009c'
-// '\u009d'
-// '\u009e'
-// '\u009f'
-// '\u00a0'
-// '¡'
-// '¢'
-// '£'
-// '¤'
-// '¥'
-// '¦'
-// '§'
-// '¨'
-// '©'
-// 'ª'
-// '«'
-// '¬'
-// '\u00ad'
-// '®'
-// '¯'
-// '°'
-// '±'
-// '²'
-// '³'
-// '´'
-// 'µ'
-// '¶'
-// '·'
-// '¸'
-// '¹'
-// 'º'
-// '»'
-// '¼'
-// '½'
-// '¾'
-// '¿'
-// 'À'
-// 'Á'
-// 'Â'
-// 'Ã'
-// 'Ä'
-// 'Å'
-// 'Æ'
-// 'Ç'
-// 'È'
-// 'É'
-// 'Ê'
-// 'Ë'
-// 'Ì'
-// 'Í'
-// 'Î'
-// 'Ï'
-// 'Ð'
-// 'Ñ'
-// 'Ò'
-// 'Ó'
-// 'Ô'
-// 'Õ'
-// 'Ö'
-// '×'
-// 'Ø'
-// 'Ù'
-// 'Ú'
-// 'Û'
-// 'Ü'
-// 'Ý'
-// 'Þ'
-// 'ß'
-// 'à'
-// 'á'
-// 'â'
-// 'ã'
-// 'ä'
-// 'å'
-// 'æ'
-// 'ç'
-// 'è'
-// 'é'
-// 'ê'
-// 'ë'
-// 'ì'
-// 'í'
-// 'î'
-// 'ï'
-// 'ð'
-// 'ñ'
-// 'ò'
-// 'ó'
-// 'ô'
-// 'õ'
-// 'ö'
-// '÷'
-// 'ø'
-// 'ù'
-// 'ú'
-// 'û'
-// 'ü'
-// 'ý'
-// 'þ'
-// 'ÿ'
 internal static array<uint8> properties = new array<uint8>(256){
-    [0x00] = pC,
-    [0x01] = pC,
-    [0x02] = pC,
-    [0x03] = pC,
-    [0x04] = pC,
-    [0x05] = pC,
-    [0x06] = pC,
-    [0x07] = pC,
-    [0x08] = pC,
-    [0x09] = pC,
-    [0x0A] = pC,
-    [0x0B] = pC,
-    [0x0C] = pC,
-    [0x0D] = pC,
-    [0x0E] = pC,
-    [0x0F] = pC,
-    [0x10] = pC,
-    [0x11] = pC,
-    [0x12] = pC,
-    [0x13] = pC,
-    [0x14] = pC,
-    [0x15] = pC,
-    [0x16] = pC,
-    [0x17] = pC,
-    [0x18] = pC,
-    [0x19] = pC,
-    [0x1A] = pC,
-    [0x1B] = pC,
-    [0x1C] = pC,
-    [0x1D] = pC,
-    [0x1E] = pC,
-    [0x1F] = pC,
-    [0x20] = (uint8)((uint8)pZ | (uint8)pp),
-    [0x21] = (uint8)((uint8)pP | (uint8)pp),
-    [0x22] = (uint8)((uint8)pP | (uint8)pp),
-    [0x23] = (uint8)((uint8)pP | (uint8)pp),
-    [0x24] = (uint8)((uint8)pS | (uint8)pp),
-    [0x25] = (uint8)((uint8)pP | (uint8)pp),
-    [0x26] = (uint8)((uint8)pP | (uint8)pp),
-    [0x27] = (uint8)((uint8)pP | (uint8)pp),
-    [0x28] = (uint8)((uint8)pP | (uint8)pp),
-    [0x29] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2A] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2B] = (uint8)((uint8)pS | (uint8)pp),
-    [0x2C] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2D] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2E] = (uint8)((uint8)pP | (uint8)pp),
-    [0x2F] = (uint8)((uint8)pP | (uint8)pp),
-    [0x30] = (uint8)((uint8)pN | (uint8)pp),
-    [0x31] = (uint8)((uint8)pN | (uint8)pp),
-    [0x32] = (uint8)((uint8)pN | (uint8)pp),
-    [0x33] = (uint8)((uint8)pN | (uint8)pp),
-    [0x34] = (uint8)((uint8)pN | (uint8)pp),
-    [0x35] = (uint8)((uint8)pN | (uint8)pp),
-    [0x36] = (uint8)((uint8)pN | (uint8)pp),
-    [0x37] = (uint8)((uint8)pN | (uint8)pp),
-    [0x38] = (uint8)((uint8)pN | (uint8)pp),
-    [0x39] = (uint8)((uint8)pN | (uint8)pp),
-    [0x3A] = (uint8)((uint8)pP | (uint8)pp),
-    [0x3B] = (uint8)((uint8)pP | (uint8)pp),
-    [0x3C] = (uint8)((uint8)pS | (uint8)pp),
-    [0x3D] = (uint8)((uint8)pS | (uint8)pp),
-    [0x3E] = (uint8)((uint8)pS | (uint8)pp),
-    [0x3F] = (uint8)((uint8)pP | (uint8)pp),
-    [0x40] = (uint8)((uint8)pP | (uint8)pp),
-    [0x41] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x42] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x43] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x44] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x45] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x46] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x47] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x48] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x49] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4A] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4B] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4C] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4D] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4E] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x4F] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x50] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x51] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x52] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x53] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x54] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x55] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x56] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x57] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x58] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x59] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x5A] = (uint8)((uint8)pLu | (uint8)pp),
-    [0x5B] = (uint8)((uint8)pP | (uint8)pp),
-    [0x5C] = (uint8)((uint8)pP | (uint8)pp),
-    [0x5D] = (uint8)((uint8)pP | (uint8)pp),
-    [0x5E] = (uint8)((uint8)pS | (uint8)pp),
-    [0x5F] = (uint8)((uint8)pP | (uint8)pp),
-    [0x60] = (uint8)((uint8)pS | (uint8)pp),
-    [0x61] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x62] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x63] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x64] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x65] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x66] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x67] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x68] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x69] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6A] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6B] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6C] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6D] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6E] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x6F] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x70] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x71] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x72] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x73] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x74] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x75] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x76] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x77] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x78] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x79] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x7A] = (uint8)((uint8)pLl | (uint8)pp),
-    [0x7B] = (uint8)((uint8)pP | (uint8)pp),
-    [0x7C] = (uint8)((uint8)pS | (uint8)pp),
-    [0x7D] = (uint8)((uint8)pP | (uint8)pp),
-    [0x7E] = (uint8)((uint8)pS | (uint8)pp),
-    [0x7F] = pC,
-    [0x80] = pC,
-    [0x81] = pC,
-    [0x82] = pC,
-    [0x83] = pC,
-    [0x84] = pC,
-    [0x85] = pC,
-    [0x86] = pC,
-    [0x87] = pC,
-    [0x88] = pC,
-    [0x89] = pC,
-    [0x8A] = pC,
-    [0x8B] = pC,
-    [0x8C] = pC,
-    [0x8D] = pC,
-    [0x8E] = pC,
-    [0x8F] = pC,
-    [0x90] = pC,
-    [0x91] = pC,
-    [0x92] = pC,
-    [0x93] = pC,
-    [0x94] = pC,
-    [0x95] = pC,
-    [0x96] = pC,
-    [0x97] = pC,
-    [0x98] = pC,
-    [0x99] = pC,
-    [0x9A] = pC,
-    [0x9B] = pC,
-    [0x9C] = pC,
-    [0x9D] = pC,
-    [0x9E] = pC,
-    [0x9F] = pC,
-    [0xA0] = pZ,
-    [0xA1] = (uint8)((uint8)pP | (uint8)pp),
-    [0xA2] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA3] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA4] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA5] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA6] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA7] = (uint8)((uint8)pP | (uint8)pp),
-    [0xA8] = (uint8)((uint8)pS | (uint8)pp),
-    [0xA9] = (uint8)((uint8)pS | (uint8)pp),
-    [0xAA] = (uint8)((uint8)pLo | (uint8)pp),
-    [0xAB] = (uint8)((uint8)pP | (uint8)pp),
-    [0xAC] = (uint8)((uint8)pS | (uint8)pp),
-    [0xAD] = 0,
-    [0xAE] = (uint8)((uint8)pS | (uint8)pp),
-    [0xAF] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB0] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB1] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB2] = (uint8)((uint8)pN | (uint8)pp),
-    [0xB3] = (uint8)((uint8)pN | (uint8)pp),
-    [0xB4] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB5] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xB6] = (uint8)((uint8)pP | (uint8)pp),
-    [0xB7] = (uint8)((uint8)pP | (uint8)pp),
-    [0xB8] = (uint8)((uint8)pS | (uint8)pp),
-    [0xB9] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBA] = (uint8)((uint8)pLo | (uint8)pp),
-    [0xBB] = (uint8)((uint8)pP | (uint8)pp),
-    [0xBC] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBD] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBE] = (uint8)((uint8)pN | (uint8)pp),
-    [0xBF] = (uint8)((uint8)pP | (uint8)pp),
-    [0xC0] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC1] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC2] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC3] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC4] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC5] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC6] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC7] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC8] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xC9] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCA] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCB] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCC] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCD] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCE] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xCF] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD0] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD1] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD2] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD3] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD4] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD5] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD6] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD7] = (uint8)((uint8)pS | (uint8)pp),
-    [0xD8] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xD9] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDA] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDB] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDC] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDD] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDE] = (uint8)((uint8)pLu | (uint8)pp),
-    [0xDF] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE0] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE1] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE2] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE3] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE4] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE5] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE6] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE7] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE8] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xE9] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEA] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEB] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEC] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xED] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEE] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xEF] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF0] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF1] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF2] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF3] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF4] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF5] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF6] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF7] = (uint8)((uint8)pS | (uint8)pp),
-    [0xF8] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xF9] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFA] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFB] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFC] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFD] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFE] = (uint8)((uint8)pLl | (uint8)pp),
-    [0xFF] = (uint8)((uint8)pLl | (uint8)pp)
+    [0x00] = pC, // '\x00'
+    [0x01] = pC, // '\x01'
+    [0x02] = pC, // '\x02'
+    [0x03] = pC, // '\x03'
+    [0x04] = pC, // '\x04'
+    [0x05] = pC, // '\x05'
+    [0x06] = pC, // '\x06'
+    [0x07] = pC, // '\a'
+    [0x08] = pC, // '\b'
+    [0x09] = pC, // '\t'
+    [0x0A] = pC, // '\n'
+    [0x0B] = pC, // '\v'
+    [0x0C] = pC, // '\f'
+    [0x0D] = pC, // '\r'
+    [0x0E] = pC, // '\x0e'
+    [0x0F] = pC, // '\x0f'
+    [0x10] = pC, // '\x10'
+    [0x11] = pC, // '\x11'
+    [0x12] = pC, // '\x12'
+    [0x13] = pC, // '\x13'
+    [0x14] = pC, // '\x14'
+    [0x15] = pC, // '\x15'
+    [0x16] = pC, // '\x16'
+    [0x17] = pC, // '\x17'
+    [0x18] = pC, // '\x18'
+    [0x19] = pC, // '\x19'
+    [0x1A] = pC, // '\x1a'
+    [0x1B] = pC, // '\x1b'
+    [0x1C] = pC, // '\x1c'
+    [0x1D] = pC, // '\x1d'
+    [0x1E] = pC, // '\x1e'
+    [0x1F] = pC, // '\x1f'
+    [0x20] = (uint8)((uint8)pZ | (uint8)pp), // ' '
+    [0x21] = (uint8)((uint8)pP | (uint8)pp), // '!'
+    [0x22] = (uint8)((uint8)pP | (uint8)pp), // '"'
+    [0x23] = (uint8)((uint8)pP | (uint8)pp), // '#'
+    [0x24] = (uint8)((uint8)pS | (uint8)pp), // '$'
+    [0x25] = (uint8)((uint8)pP | (uint8)pp), // '%'
+    [0x26] = (uint8)((uint8)pP | (uint8)pp), // '&'
+    [0x27] = (uint8)((uint8)pP | (uint8)pp), // '\''
+    [0x28] = (uint8)((uint8)pP | (uint8)pp), // '('
+    [0x29] = (uint8)((uint8)pP | (uint8)pp), // ')'
+    [0x2A] = (uint8)((uint8)pP | (uint8)pp), // '*'
+    [0x2B] = (uint8)((uint8)pS | (uint8)pp), // '+'
+    [0x2C] = (uint8)((uint8)pP | (uint8)pp), // ','
+    [0x2D] = (uint8)((uint8)pP | (uint8)pp), // '-'
+    [0x2E] = (uint8)((uint8)pP | (uint8)pp), // '.'
+    [0x2F] = (uint8)((uint8)pP | (uint8)pp), // '/'
+    [0x30] = (uint8)((uint8)pN | (uint8)pp), // '0'
+    [0x31] = (uint8)((uint8)pN | (uint8)pp), // '1'
+    [0x32] = (uint8)((uint8)pN | (uint8)pp), // '2'
+    [0x33] = (uint8)((uint8)pN | (uint8)pp), // '3'
+    [0x34] = (uint8)((uint8)pN | (uint8)pp), // '4'
+    [0x35] = (uint8)((uint8)pN | (uint8)pp), // '5'
+    [0x36] = (uint8)((uint8)pN | (uint8)pp), // '6'
+    [0x37] = (uint8)((uint8)pN | (uint8)pp), // '7'
+    [0x38] = (uint8)((uint8)pN | (uint8)pp), // '8'
+    [0x39] = (uint8)((uint8)pN | (uint8)pp), // '9'
+    [0x3A] = (uint8)((uint8)pP | (uint8)pp), // ':'
+    [0x3B] = (uint8)((uint8)pP | (uint8)pp), // ';'
+    [0x3C] = (uint8)((uint8)pS | (uint8)pp), // '<'
+    [0x3D] = (uint8)((uint8)pS | (uint8)pp), // '='
+    [0x3E] = (uint8)((uint8)pS | (uint8)pp), // '>'
+    [0x3F] = (uint8)((uint8)pP | (uint8)pp), // '?'
+    [0x40] = (uint8)((uint8)pP | (uint8)pp), // '@'
+    [0x41] = (uint8)((uint8)pLu | (uint8)pp), // 'A'
+    [0x42] = (uint8)((uint8)pLu | (uint8)pp), // 'B'
+    [0x43] = (uint8)((uint8)pLu | (uint8)pp), // 'C'
+    [0x44] = (uint8)((uint8)pLu | (uint8)pp), // 'D'
+    [0x45] = (uint8)((uint8)pLu | (uint8)pp), // 'E'
+    [0x46] = (uint8)((uint8)pLu | (uint8)pp), // 'F'
+    [0x47] = (uint8)((uint8)pLu | (uint8)pp), // 'G'
+    [0x48] = (uint8)((uint8)pLu | (uint8)pp), // 'H'
+    [0x49] = (uint8)((uint8)pLu | (uint8)pp), // 'I'
+    [0x4A] = (uint8)((uint8)pLu | (uint8)pp), // 'J'
+    [0x4B] = (uint8)((uint8)pLu | (uint8)pp), // 'K'
+    [0x4C] = (uint8)((uint8)pLu | (uint8)pp), // 'L'
+    [0x4D] = (uint8)((uint8)pLu | (uint8)pp), // 'M'
+    [0x4E] = (uint8)((uint8)pLu | (uint8)pp), // 'N'
+    [0x4F] = (uint8)((uint8)pLu | (uint8)pp), // 'O'
+    [0x50] = (uint8)((uint8)pLu | (uint8)pp), // 'P'
+    [0x51] = (uint8)((uint8)pLu | (uint8)pp), // 'Q'
+    [0x52] = (uint8)((uint8)pLu | (uint8)pp), // 'R'
+    [0x53] = (uint8)((uint8)pLu | (uint8)pp), // 'S'
+    [0x54] = (uint8)((uint8)pLu | (uint8)pp), // 'T'
+    [0x55] = (uint8)((uint8)pLu | (uint8)pp), // 'U'
+    [0x56] = (uint8)((uint8)pLu | (uint8)pp), // 'V'
+    [0x57] = (uint8)((uint8)pLu | (uint8)pp), // 'W'
+    [0x58] = (uint8)((uint8)pLu | (uint8)pp), // 'X'
+    [0x59] = (uint8)((uint8)pLu | (uint8)pp), // 'Y'
+    [0x5A] = (uint8)((uint8)pLu | (uint8)pp), // 'Z'
+    [0x5B] = (uint8)((uint8)pP | (uint8)pp), // '['
+    [0x5C] = (uint8)((uint8)pP | (uint8)pp), // '\\'
+    [0x5D] = (uint8)((uint8)pP | (uint8)pp), // ']'
+    [0x5E] = (uint8)((uint8)pS | (uint8)pp), // '^'
+    [0x5F] = (uint8)((uint8)pP | (uint8)pp), // '_'
+    [0x60] = (uint8)((uint8)pS | (uint8)pp), // '`'
+    [0x61] = (uint8)((uint8)pLl | (uint8)pp), // 'a'
+    [0x62] = (uint8)((uint8)pLl | (uint8)pp), // 'b'
+    [0x63] = (uint8)((uint8)pLl | (uint8)pp), // 'c'
+    [0x64] = (uint8)((uint8)pLl | (uint8)pp), // 'd'
+    [0x65] = (uint8)((uint8)pLl | (uint8)pp), // 'e'
+    [0x66] = (uint8)((uint8)pLl | (uint8)pp), // 'f'
+    [0x67] = (uint8)((uint8)pLl | (uint8)pp), // 'g'
+    [0x68] = (uint8)((uint8)pLl | (uint8)pp), // 'h'
+    [0x69] = (uint8)((uint8)pLl | (uint8)pp), // 'i'
+    [0x6A] = (uint8)((uint8)pLl | (uint8)pp), // 'j'
+    [0x6B] = (uint8)((uint8)pLl | (uint8)pp), // 'k'
+    [0x6C] = (uint8)((uint8)pLl | (uint8)pp), // 'l'
+    [0x6D] = (uint8)((uint8)pLl | (uint8)pp), // 'm'
+    [0x6E] = (uint8)((uint8)pLl | (uint8)pp), // 'n'
+    [0x6F] = (uint8)((uint8)pLl | (uint8)pp), // 'o'
+    [0x70] = (uint8)((uint8)pLl | (uint8)pp), // 'p'
+    [0x71] = (uint8)((uint8)pLl | (uint8)pp), // 'q'
+    [0x72] = (uint8)((uint8)pLl | (uint8)pp), // 'r'
+    [0x73] = (uint8)((uint8)pLl | (uint8)pp), // 's'
+    [0x74] = (uint8)((uint8)pLl | (uint8)pp), // 't'
+    [0x75] = (uint8)((uint8)pLl | (uint8)pp), // 'u'
+    [0x76] = (uint8)((uint8)pLl | (uint8)pp), // 'v'
+    [0x77] = (uint8)((uint8)pLl | (uint8)pp), // 'w'
+    [0x78] = (uint8)((uint8)pLl | (uint8)pp), // 'x'
+    [0x79] = (uint8)((uint8)pLl | (uint8)pp), // 'y'
+    [0x7A] = (uint8)((uint8)pLl | (uint8)pp), // 'z'
+    [0x7B] = (uint8)((uint8)pP | (uint8)pp), // '{'
+    [0x7C] = (uint8)((uint8)pS | (uint8)pp), // '|'
+    [0x7D] = (uint8)((uint8)pP | (uint8)pp), // '}'
+    [0x7E] = (uint8)((uint8)pS | (uint8)pp), // '~'
+    [0x7F] = pC, // '\x7f'
+    [0x80] = pC, // '\u0080'
+    [0x81] = pC, // '\u0081'
+    [0x82] = pC, // '\u0082'
+    [0x83] = pC, // '\u0083'
+    [0x84] = pC, // '\u0084'
+    [0x85] = pC, // '\u0085'
+    [0x86] = pC, // '\u0086'
+    [0x87] = pC, // '\u0087'
+    [0x88] = pC, // '\u0088'
+    [0x89] = pC, // '\u0089'
+    [0x8A] = pC, // '\u008a'
+    [0x8B] = pC, // '\u008b'
+    [0x8C] = pC, // '\u008c'
+    [0x8D] = pC, // '\u008d'
+    [0x8E] = pC, // '\u008e'
+    [0x8F] = pC, // '\u008f'
+    [0x90] = pC, // '\u0090'
+    [0x91] = pC, // '\u0091'
+    [0x92] = pC, // '\u0092'
+    [0x93] = pC, // '\u0093'
+    [0x94] = pC, // '\u0094'
+    [0x95] = pC, // '\u0095'
+    [0x96] = pC, // '\u0096'
+    [0x97] = pC, // '\u0097'
+    [0x98] = pC, // '\u0098'
+    [0x99] = pC, // '\u0099'
+    [0x9A] = pC, // '\u009a'
+    [0x9B] = pC, // '\u009b'
+    [0x9C] = pC, // '\u009c'
+    [0x9D] = pC, // '\u009d'
+    [0x9E] = pC, // '\u009e'
+    [0x9F] = pC, // '\u009f'
+    [0xA0] = pZ, // '\u00a0'
+    [0xA1] = (uint8)((uint8)pP | (uint8)pp), // '¡'
+    [0xA2] = (uint8)((uint8)pS | (uint8)pp), // '¢'
+    [0xA3] = (uint8)((uint8)pS | (uint8)pp), // '£'
+    [0xA4] = (uint8)((uint8)pS | (uint8)pp), // '¤'
+    [0xA5] = (uint8)((uint8)pS | (uint8)pp), // '¥'
+    [0xA6] = (uint8)((uint8)pS | (uint8)pp), // '¦'
+    [0xA7] = (uint8)((uint8)pP | (uint8)pp), // '§'
+    [0xA8] = (uint8)((uint8)pS | (uint8)pp), // '¨'
+    [0xA9] = (uint8)((uint8)pS | (uint8)pp), // '©'
+    [0xAA] = (uint8)((uint8)pLo | (uint8)pp), // 'ª'
+    [0xAB] = (uint8)((uint8)pP | (uint8)pp), // '«'
+    [0xAC] = (uint8)((uint8)pS | (uint8)pp), // '¬'
+    [0xAD] = 0, // '\u00ad'
+    [0xAE] = (uint8)((uint8)pS | (uint8)pp), // '®'
+    [0xAF] = (uint8)((uint8)pS | (uint8)pp), // '¯'
+    [0xB0] = (uint8)((uint8)pS | (uint8)pp), // '°'
+    [0xB1] = (uint8)((uint8)pS | (uint8)pp), // '±'
+    [0xB2] = (uint8)((uint8)pN | (uint8)pp), // '²'
+    [0xB3] = (uint8)((uint8)pN | (uint8)pp), // '³'
+    [0xB4] = (uint8)((uint8)pS | (uint8)pp), // '´'
+    [0xB5] = (uint8)((uint8)pLl | (uint8)pp), // 'µ'
+    [0xB6] = (uint8)((uint8)pP | (uint8)pp), // '¶'
+    [0xB7] = (uint8)((uint8)pP | (uint8)pp), // '·'
+    [0xB8] = (uint8)((uint8)pS | (uint8)pp), // '¸'
+    [0xB9] = (uint8)((uint8)pN | (uint8)pp), // '¹'
+    [0xBA] = (uint8)((uint8)pLo | (uint8)pp), // 'º'
+    [0xBB] = (uint8)((uint8)pP | (uint8)pp), // '»'
+    [0xBC] = (uint8)((uint8)pN | (uint8)pp), // '¼'
+    [0xBD] = (uint8)((uint8)pN | (uint8)pp), // '½'
+    [0xBE] = (uint8)((uint8)pN | (uint8)pp), // '¾'
+    [0xBF] = (uint8)((uint8)pP | (uint8)pp), // '¿'
+    [0xC0] = (uint8)((uint8)pLu | (uint8)pp), // 'À'
+    [0xC1] = (uint8)((uint8)pLu | (uint8)pp), // 'Á'
+    [0xC2] = (uint8)((uint8)pLu | (uint8)pp), // 'Â'
+    [0xC3] = (uint8)((uint8)pLu | (uint8)pp), // 'Ã'
+    [0xC4] = (uint8)((uint8)pLu | (uint8)pp), // 'Ä'
+    [0xC5] = (uint8)((uint8)pLu | (uint8)pp), // 'Å'
+    [0xC6] = (uint8)((uint8)pLu | (uint8)pp), // 'Æ'
+    [0xC7] = (uint8)((uint8)pLu | (uint8)pp), // 'Ç'
+    [0xC8] = (uint8)((uint8)pLu | (uint8)pp), // 'È'
+    [0xC9] = (uint8)((uint8)pLu | (uint8)pp), // 'É'
+    [0xCA] = (uint8)((uint8)pLu | (uint8)pp), // 'Ê'
+    [0xCB] = (uint8)((uint8)pLu | (uint8)pp), // 'Ë'
+    [0xCC] = (uint8)((uint8)pLu | (uint8)pp), // 'Ì'
+    [0xCD] = (uint8)((uint8)pLu | (uint8)pp), // 'Í'
+    [0xCE] = (uint8)((uint8)pLu | (uint8)pp), // 'Î'
+    [0xCF] = (uint8)((uint8)pLu | (uint8)pp), // 'Ï'
+    [0xD0] = (uint8)((uint8)pLu | (uint8)pp), // 'Ð'
+    [0xD1] = (uint8)((uint8)pLu | (uint8)pp), // 'Ñ'
+    [0xD2] = (uint8)((uint8)pLu | (uint8)pp), // 'Ò'
+    [0xD3] = (uint8)((uint8)pLu | (uint8)pp), // 'Ó'
+    [0xD4] = (uint8)((uint8)pLu | (uint8)pp), // 'Ô'
+    [0xD5] = (uint8)((uint8)pLu | (uint8)pp), // 'Õ'
+    [0xD6] = (uint8)((uint8)pLu | (uint8)pp), // 'Ö'
+    [0xD7] = (uint8)((uint8)pS | (uint8)pp), // '×'
+    [0xD8] = (uint8)((uint8)pLu | (uint8)pp), // 'Ø'
+    [0xD9] = (uint8)((uint8)pLu | (uint8)pp), // 'Ù'
+    [0xDA] = (uint8)((uint8)pLu | (uint8)pp), // 'Ú'
+    [0xDB] = (uint8)((uint8)pLu | (uint8)pp), // 'Û'
+    [0xDC] = (uint8)((uint8)pLu | (uint8)pp), // 'Ü'
+    [0xDD] = (uint8)((uint8)pLu | (uint8)pp), // 'Ý'
+    [0xDE] = (uint8)((uint8)pLu | (uint8)pp), // 'Þ'
+    [0xDF] = (uint8)((uint8)pLl | (uint8)pp), // 'ß'
+    [0xE0] = (uint8)((uint8)pLl | (uint8)pp), // 'à'
+    [0xE1] = (uint8)((uint8)pLl | (uint8)pp), // 'á'
+    [0xE2] = (uint8)((uint8)pLl | (uint8)pp), // 'â'
+    [0xE3] = (uint8)((uint8)pLl | (uint8)pp), // 'ã'
+    [0xE4] = (uint8)((uint8)pLl | (uint8)pp), // 'ä'
+    [0xE5] = (uint8)((uint8)pLl | (uint8)pp), // 'å'
+    [0xE6] = (uint8)((uint8)pLl | (uint8)pp), // 'æ'
+    [0xE7] = (uint8)((uint8)pLl | (uint8)pp), // 'ç'
+    [0xE8] = (uint8)((uint8)pLl | (uint8)pp), // 'è'
+    [0xE9] = (uint8)((uint8)pLl | (uint8)pp), // 'é'
+    [0xEA] = (uint8)((uint8)pLl | (uint8)pp), // 'ê'
+    [0xEB] = (uint8)((uint8)pLl | (uint8)pp), // 'ë'
+    [0xEC] = (uint8)((uint8)pLl | (uint8)pp), // 'ì'
+    [0xED] = (uint8)((uint8)pLl | (uint8)pp), // 'í'
+    [0xEE] = (uint8)((uint8)pLl | (uint8)pp), // 'î'
+    [0xEF] = (uint8)((uint8)pLl | (uint8)pp), // 'ï'
+    [0xF0] = (uint8)((uint8)pLl | (uint8)pp), // 'ð'
+    [0xF1] = (uint8)((uint8)pLl | (uint8)pp), // 'ñ'
+    [0xF2] = (uint8)((uint8)pLl | (uint8)pp), // 'ò'
+    [0xF3] = (uint8)((uint8)pLl | (uint8)pp), // 'ó'
+    [0xF4] = (uint8)((uint8)pLl | (uint8)pp), // 'ô'
+    [0xF5] = (uint8)((uint8)pLl | (uint8)pp), // 'õ'
+    [0xF6] = (uint8)((uint8)pLl | (uint8)pp), // 'ö'
+    [0xF7] = (uint8)((uint8)pS | (uint8)pp), // '÷'
+    [0xF8] = (uint8)((uint8)pLl | (uint8)pp), // 'ø'
+    [0xF9] = (uint8)((uint8)pLl | (uint8)pp), // 'ù'
+    [0xFA] = (uint8)((uint8)pLl | (uint8)pp), // 'ú'
+    [0xFB] = (uint8)((uint8)pLl | (uint8)pp), // 'û'
+    [0xFC] = (uint8)((uint8)pLl | (uint8)pp), // 'ü'
+    [0xFD] = (uint8)((uint8)pLl | (uint8)pp), // 'ý'
+    [0xFE] = (uint8)((uint8)pLl | (uint8)pp), // 'þ'
+    [0xFF] = (uint8)((uint8)pLl | (uint8)pp) // 'ÿ'
 };
 
 internal static array<uint16> asciiFold = new uint16[]{
@@ -8873,8 +9765,8 @@ internal static ж<RangeTable> foldInherited = Ꮡ(new RangeTable(
     }.slice()
 ));
 
-// Range entries: 3535 16-bit, 2031 32-bit, 5566 total.
-// Range bytes: 21210 16-bit, 24372 32-bit, 45582 total.
+// Range entries: 4177 16-bit, 2714 32-bit, 6891 total.
+// Range bytes: 25062 16-bit, 32568 32-bit, 57630 total.
 // Fold orbit bytes: 88 pairs, 352 bytes
 
 } // end unicode_package

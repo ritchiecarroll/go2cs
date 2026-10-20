@@ -65,6 +65,12 @@ using static go.vendor.golang.org.x.net.nettest_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -73,8 +79,8 @@ using static go.vendor.golang.org.x.net.nettest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/conntest.go", "conntest.cs", "ACM80oCSgJKAkoCSgJKAkoCSgJKAkoCSgAAICqKCgoKUgpCSkpKCppKi1pKChIKSgoCCpICCuJKCgIKkgIKkloCCzMKChKKCgoKCgIKClKaCgoKUgoKWgIKCtoCCxJSCkqaAgsSowoSChIKCgqKEgoKCgoKCgsbEqMKEgoSCgoKihIKCgoKCgoLGxKaShIKCgoCCypKEgoKCgILMooSEgoKClIKCgpSE6sKCgoSCsoKCgoKikrKCgoKUgoK0krKCgoKUgoK0sqiigoSCooKCopKigoKClKKShIKCqsKEgoKWgqKCgqKSooKCgoK0kqKCgoKCtLLYooKUiKKCgqKCopKigqKSooKikqKCopKigqKSooKikqKCoqSEgqqigoCCgoKUuPyigoCCpoKCgIKkgIKkgr6ygoKCkoKUgoKCgpSCgqaAggAMEMKCgg==", "31-31:1;32-32:2;33-33:3;34-34:4;35-35:5;36-36:6;37-37:7;38-38:8;39-39:9;40-40:10;41-41:11;53-53:1;54-59:2;55-58:2.1;70-78:1;80-89:2;102-132:1;155-168:1;183-196:1;254-260:1;261-271:2;272-282:3;292-296:1;297-304:2;323-327:1;328-335:2;336-343:3;359-362:1;363-366:2;367-370:3;371-374:4;375-378:5;379-382:6;383-386:7;439-442:1")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/nettest.go", "nettest.cs", "AB08goSCAAgGgoCCpICCgqSAgqSAgoKkgpiikoKCtsiCgqqigqqigqqigq7CgpiUxpSkotiUpMaUxpSkpKqigKaSxgACENKClIKAgraCtoK2graCgpSk7sKClIKAgraCtoK2graCgpSk6qKCgpSCgpSCgoKu4rakgpSCgpSqooKClLKCpq7CtqSCgpSygpSAgqSUpoKCgpSClICC1oCC2KaCgpSUgILGkpSAgsaAgqSAgsY=")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/conntest.go", "conntest.cs", "ACc80oCSgJKAkoCSgJKAkoCSgJKAkoCSgAAICqKCgoKUgpCSkpKCppKi1pKClIKSgoCCpICCyJKCgIKkgIKkpoCCzMKClKKCgoKCgIKClLaCgoKUgoKmgIKCtoCCxKSCkraAgsSowpSClIKCgqKUgoKCgoKCgsbEqMKUgpSCgoKilIKCgoKCgoLGxKaSlIKCgoCCypKUgoKCgILMopSUgoKClIKCgpSU6sKCgpSCsoKCgoKikrKCgoKUgoK0krKCgoKUgoK0sqiigpSCooKCopKigoKClKKSlIKCqsKUgoKmgqKCgqKSooKCgoK0kqKCgoKCtLLYooKUmKKCgqKCopKigqKSooKikqKCopKigqKSooKikqKCoqSUgqqigoCCgoKUuPyigoCCtoKCgIKkgIKkgr6ygoKCkoKUgoKCgpSCgqaAggAMEMKCgg==", "31-31:1;32-32:2;33-33:3;34-34:4;35-35:5;36-36:6;37-37:7;38-38:8;39-39:9;40-40:10;41-41:11;53-53:1;54-59:2;55-58:2.1;70-78:1;80-89:2;102-132:1;155-168:1;183-196:1;254-260:1;261-271:2;272-282:3;292-296:1;297-304:2;323-327:1;328-335:2;336-343:3;359-362:1;363-366:2;367-370:3;371-374:4;375-378:5;379-382:6;383-386:7;439-442:1")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/nettest.go", "nettest.cs", "AB48gpSCAAgGgoCCpICCgqSAgqSAgoKkgriCgoKCtriCgqqigqqigqqigq7CgriUtpSkgsiUpLaUppSklKqigLaCtgACENKClIKAgraCtoK2graCgpSU7sKClIKAgraCtoK2graCgpSU6qKCgpSCgpSCgoKu4raUgpSCgpSqooKClLKCpq7CtpSCgpSygpSAgqSUpoKCgpSClICC1oCC2KaCgpSUgILGgpSAgsaAgqSAgrY=")]
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/nettest/nettest_unix.go", "nettest_unix.cs", "AAoWgoKCgpSClA==")]
 // </GoSourcePositionMaps>
 

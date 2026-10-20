@@ -23,6 +23,7 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("empty queue has cap %d; want 0"u8, n);
         }
     }
+
     // As we add elements, len should grow.
     nint N = 32;
     for (nint i = 0; i < N; i++) {
@@ -41,6 +42,7 @@ public static void TestQueue(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // As we remove and add elements, len should shrink and grow.
     // We should also remove elements in the same order they were added.
     nint want = 0;

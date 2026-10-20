@@ -133,6 +133,7 @@ using go.golib;
 using go.@internal.runtime;
 using abi = go.@internal.abi_package;
 using profilerecord = go.@internal.profilerecord_package;
+using label = go.@internal.runtime.pprof.label_package;
 using @unsafe = go.unsafe_package;
 
 [module: go.GoManualConversion]
@@ -589,8 +590,8 @@ partial class runtime_package
     private static void gcCycleLocked(bool forced)
     {
         // Go's gcStart runs clearpools() at the START of every cycle, and that is what ages
-        // sync.Pool's victim cache — without it a Pool never releases what it cached. All three of
-        // clearpools' arms are wired here.
+        // sync.Pool's victim cache — without it a Pool never releases what it cached. Both of
+        // clearpools' cache arms are wired here (Go 1.25 removed the third, unique's; see below).
         if (poolcleanup != default!)
             poolcleanup();
 
@@ -609,19 +610,18 @@ partial class runtime_package
         // any more, which is the point rather than a defect.
         golib.BoringCaches.ClearAll();
 
-        // unique's map cleanup, the second arm — verbatim clearpools(): a NON-BLOCKING send that
-        // wakes the goroutine unique_runtime_registerUniqueMapCleanup parked on this channel, which
-        // evicts every intern-map entry whose weak pointer has gone nil. Inert until unique.Make has
-        // run (the channel is nil before registration), so nothing else pays for it.
+        // unique's map cleanup WAS clearpools' second arm through Go 1.24: a NON-BLOCKING send on
+        // uniqueMapCleanup that woke the goroutine unique_runtime_registerUniqueMapCleanup parked,
+        // which evicted every intern-map entry whose weak pointer had gone nil. Go 1.25 deletes the
+        // channel, the registration and this arm (go1.25.14's mgc.go names none of them). unique
+        // now evicts through runtime.AddCleanup, and its drainMaps waits on
+        // unique_runtime_blockUntilEmptyCleanupQueue (mcleanup.cs), so the cleanup queue drained
+        // below carries the eviction, and nothing here is owed to unique.
         //
-        // Wiring it is not cosmetic: `unique`'s own suite calls drainMaps() — arm a one-shot
-        // notification, runtime.GC(), then BLOCK on `<-wait` until the cleanup runs — so with this
-        // arm missing the cleanup could never run and every TestHandle subtest deadlocked, taking
-        // the whole test host to its package timeout and erasing the verdicts of the rows that had
-        // nothing to do with it. That deadlock only became REACHABLE once internal/weak stopped
-        // panicking (its hand-own, same arc); before that the subtests died one frame earlier.
-        if (uniqueMapCleanup != default!)
-            uniqueMapCleanup.TrySend(new EmptyStruct());
+        // Why the 1.24 arm was wired, kept as the reason the replacement path matters: `unique`'s own
+        // suite calls drainMaps(), which runs runtime.GC() and then BLOCKS until the cleanup has run.
+        // With the arm missing, every TestHandle subtest deadlocked, taking the whole test host to its
+        // package timeout and erasing the verdicts of the rows that had nothing to do with it.
 
         // Go's GC() is documented to complete a full cycle, and callers (sync's pool/oncefunc
         // tests among them) rely on finalizers having RUN by the time it returns. The second
@@ -1006,7 +1006,7 @@ partial class runtime_package
         bool writeLabels = labels != nil && len(labels) == len(Δp);
 
         if (len(Δp) == 0)
-            return ((nint)gcount(), false);
+            return ((nint)gcount(false), false);
 
         semacquire(ᏑgoroutineProfile.of(goroutineProfileᴛ1.Ꮡsema));
 
@@ -1055,7 +1055,7 @@ partial class runtime_package
     // arenas, spans and goroutine stacks; the managed model has none of them (the CLR owns the
     // heap), so the dump is truthful and empty rather than invented. The params record says what
     // this host can say: pointer byte order and size, no Go arena (0, 0), GOARCH, the Go release the
-    // corpus was converted from, ncpu. TestSchedPauseMetrics asserts the pause accounting, not the
+    // corpus was converted from, numCPUStartup (ncpu before Go 1.25). TestSchedPauseMetrics asserts the pause accounting, not the
     // contents. runtime/debug's own WriteHeapDump forwards here (WriteHeapDumpManaged).
     internal static void runtime_debug_WriteHeapDump(uintptr fd)
     {
@@ -1080,7 +1080,7 @@ partial class runtime_package
         uvarint(0);
         str(global::go.@internal.goarch_package.GOARCH);
         str(buildVersion);
-        uvarint((uint64)ncpu);
+        uvarint((uint64)numCPUStartup);
         uvarint((uint64)tagEOF);
 
         // THE WRITE IS MANAGED, on every target. It used to go through runtime.write, which is a
@@ -1212,8 +1212,10 @@ partial class runtime_package
     }
 
     // gcount is the body NumGoroutine above used to call, and the one THREE other consumers still
-    // reach directly: metrics.cs's /sched/goroutines compute closure, and mprof.cs's goroutine-profile
-    // size and count. Hand-owning NumGoroutine alone left all three on the auto body's clamped
+    // reach directly: metrics_impl.cs's /sched/goroutines compute, and mprof.cs's goroutine-profile
+    // size and count. Go 1.26 added includeSys (proc.go): the metrics total counts the runtime's own
+    // goroutines too (gcount(true)), the profiles do not (gcount(false)), so the registry answers
+    // Count or UserCount. Hand-owning NumGoroutine alone left all three on the auto body's clamped
     // constant 1, so a program could report a true count through the public API and a fabricated one
     // through its own metrics and profiles in the same breath.
     //
@@ -1225,9 +1227,9 @@ partial class runtime_package
     // cannot report fewer goroutines than the caller's own, so there is no nonsense to clamp and a
     // floor could only hide a real zero if one ever arose. The count's measured divergence — early by
     // one climbing, late to decay — is in this file's Honest-divergences ledger.
-    internal static int32 gcount()
+    internal static int32 gcount(bool includeSys)
     {
-        int n = Goroutine.UserCount;
+        int n = includeSys ? Goroutine.Count : Goroutine.UserCount;
 
         return n < 1 ? 1 : n;
     }
@@ -1595,7 +1597,79 @@ partial class runtime_package
             ? WaitReasons.Text(goroutine.Reason)
             : "running";
 
-        trace.Append("goroutine ").Append(id).Append(" [").Append(status).Append("]:\n");
+        trace.Append("goroutine ").Append(id).Append(" [").Append(status);
+        appendGoroutineLabels(trace, goroutine);
+        trace.Append("]:\n");
+    }
+
+    // Go 1.26's goroutineheader tail (go1.26.9 traceback.go:1279-1290): with GODEBUG tracebacklabels=1
+    // (default 0), a goroutine carrying pprof labels prints ` labels:{"k": "v", ...}` before the `]:`, in
+    // label.Set's order (runtime/pprof sorts by key), each key and value through printquoted. The labels
+    // are the pointer runtime_setProfLabel stores: the CALLER's own from golib's AsyncLocal, which is
+    // authoritative for it, and another goroutine's from its slot.
+    private static void appendGoroutineLabels(StringBuilder trace, Goroutine? goroutine)
+    {
+        if (goroutine is null || Ꮡdebug.of(debugᴛ1.Ꮡtracebacklabels).Load() != 1)
+            return;
+
+        object? stored = ReferenceEquals(goroutine, Goroutine.Current) ? Goroutine.GetProfileLabels() : goroutine.ProfileLabels;
+
+        if (stored is not @unsafe.Pointer labelsPointer || labelsPointer == nil)
+            return;
+
+        slice<label.Label> labels = ((ж<label.Set>)(uintptr)labelsPointer).Value.List;
+
+        if (len(labels) == 0)
+            return;
+
+        trace.Append(" labels:{");
+
+        for (nint i = 0; i < len(labels); i++)
+        {
+            appendQuoted(trace, labels[i].Key);
+            trace.Append(": ");
+            appendQuoted(trace, labels[i].Value);
+
+            if (i < len(labels) - 1)
+                trace.Append(", ");
+        }
+
+        trace.Append('}');
+    }
+
+    // Go's printquoted (go1.26.9 print.go:212-246), into a builder: printable ASCII as is; \n, \r, \t,
+    // \\ and \" escaped; any other rune below 127 as \xHH, below 0x10000 as \uHHHH, else \UHHHHHHHH,
+    // lower-case hex. Go's `for _, r := range s` yields U+FFFD for each invalid byte, ONE byte at a time,
+    // which golib's @string enumerator reproduces (.NET's Rune.DecodeFromUtf8 would consume a maximal
+    // invalid subpart instead: E2 82 41 is two U+FFFD and an A in Go, one U+FFFD and an A there). Each
+    // U+FFFD prints as the \ufffd escape.
+    private static void appendQuoted(StringBuilder trace, @string s)
+    {
+        trace.Append('"');
+
+        foreach ((nint _, rune runeValue) in s)
+        {
+            int r = runeValue;
+
+            switch (r)
+            {
+                case '\n': trace.Append("\\n"); continue;
+                case '\r': trace.Append("\\r"); continue;
+                case '\t': trace.Append("\\t"); continue;
+                case '\\' or '"': trace.Append('\\').Append((char)r); continue;
+            }
+
+            if (r is >= ' ' and <= '~')
+                trace.Append((char)r);
+            else if (r < 127)
+                trace.Append("\\x").Append(r.ToString("x2"));
+            else if (r < 0x1_0000)
+                trace.Append("\\u").Append(r.ToString("x4"));
+            else
+                trace.Append("\\U").Append(r.ToString("x8"));
+        }
+
+        trace.Append('"');
     }
 
     // Renders frames the way Go's traceback does — `<pkg>.<Func>()` on one line, a tab-indented
@@ -2227,10 +2301,13 @@ partial class runtime_package
     // always did. Both facts consumed here — the Go line and the literal spans — come from the ONE
     // GoPositionMap record, the same indivisibility the position half rests on.
     //
-    // Known edge, stated rather than guarded: line granularity cannot split two literals sharing
-    // one Go line, nor a frame in an OUTER literal sitting on the very line a nested literal
-    // starts — the innermost span wins the tie, which favors the far more common frame (a body
-    // line of the nested literal) over the rarer one (the outer literal mid-call on that line).
+    // A frame in an OUTER literal stopped on the very line a nested literal starts on (Go's
+    // `marker(func() {`, the caller mid-call) sits in both spans by line. The method's FIRST statement
+    // decides: it lies inside the method's own literal and before the nested one, so the span must
+    // contain it too (FuncLiteralFor's entry line). Measured: runtime TestRuntimeLockMetricsAndProfile's
+    // `fn` frame at metrics_test.go:1192 read func4.1.1, its nested literal's name, where Go says func4.1.
+    // Known edge, stated rather than guarded: line granularity still cannot split two literals that
+    // share their FIRST line as well.
     //
     // The frame's C# line is read at its IL OFFSET through this file's own PDB reader (the one reader:
     // methodSourcePosition), never from a StackFrame's file info, so no capture has to ask the CLR to
@@ -2252,7 +2329,10 @@ partial class runtime_package
         if (goLine <= 0)
             return null;
 
-        return record.FuncLiteralFor(goLine);
+        (string? entryFile, int entryCsLine) = methodSourcePosition(method);
+        int entryGoLine = entryFile == csFile && entryCsLine > 0 ? record.GoLineFor(entryCsLine) : 0;
+
+        return record.FuncLiteralFor(goLine, entryGoLine);
     }
 
     // The same suffix for a method with NO live frame: a synthetic PC (a CPU profile's sampled method,
@@ -3113,9 +3193,10 @@ partial class runtime_package
         // literal answers the nested literal's name — or null when no recorded span contains it.
         // Innermost is the largest start line among the containing spans (spans nest lexically),
         // with the smaller end winning a shared start; a full tie keeps the first recorded entry.
-        public string? FuncLiteralFor(int goLine)
+        // entryGoLine (the frame's method's first statement, 0 for none) narrows the spans first.
+        public string? FuncLiteralFor(int goLine, int entryGoLine = 0)
         {
-            int best = innermostFuncLiteral(goLine);
+            int best = innermostFuncLiteral(goLine, entryGoLine);
 
             return best < 0 ? null : m_litSuffixes![best];
         }
@@ -3193,7 +3274,12 @@ partial class runtime_package
             return best < 0 ? 0 : m_litStarts![best];
         }
 
-        private int innermostFuncLiteral(int goLine)
+        // entryGoLine, when positive, is the Go line of the frame's METHOD's first statement: a span must
+        // contain it too. That splits the tie line granularity alone cannot: an outer literal stopped on
+        // the line a nested literal starts on. Both spans contain the frame's line, but only the outer
+        // one contains the outer method's first statement. When no span contains both, the frame line
+        // alone decides, as before.
+        private int innermostFuncLiteral(int goLine, int entryGoLine = 0)
         {
             decodeFuncLits();
 
@@ -3206,9 +3292,15 @@ partial class runtime_package
                 if (goLine < starts[i] || goLine > ends[i])
                     continue;
 
+                if (entryGoLine > 0 && (entryGoLine < starts[i] || entryGoLine > ends[i]))
+                    continue;
+
                 if (best < 0 || starts[i] > starts[best] || (starts[i] == starts[best] && ends[i] < ends[best]))
                     best = i;
             }
+
+            if (best < 0 && entryGoLine > 0)
+                return innermostFuncLiteral(goLine);
 
             return best;
         }
@@ -3497,6 +3589,10 @@ partial class runtime_package
         // suspendedAtReportedCall), so the line is that call's rather than returnSiteILOffset's answer.
         public bool SuspendedAtReportedCall;
 
+        // The method the frame is suspended calling, kept when the capture found a call of it after the
+        // reported offset, so Resolve can settle the call by it (calleeSettledCallSite). Null otherwise.
+        public System.Reflection.MethodBase? Callee;
+
         // A method value's `-fm` wrapper (goMethodValueName): Go's traceback never shows one, so
         // Frames.Next skips it. Known at RESOLVE time only -- it needs the PDB, which capture never reads
         // -- so runtime.Callers still COUNTS the wrapper's pc where Go's does not.
@@ -3527,7 +3623,10 @@ partial class runtime_package
                     // The LINE is the call's (Go's pc-1): see returnSiteILOffset. The NAME below is read
                     // at the REPORTED offset, as it always was -- a literal is named by the frame's own
                     // line, never by the method's first sequence point.
-                    int callSite = !ReturnAddress ? -1 : SuspendedAtReportedCall ? ILOffset : returnSiteILOffset(Method, ILOffset);
+                    int callSite = !ReturnAddress ? -1 :
+                        SuspendedAtReportedCall ? ILOffset :
+                        Callee is { } callee && calleeSettledCallSite(Method, ILOffset, callee) is >= 0 and var settled ? settled :
+                        returnSiteILOffset(Method, ILOffset);
                     (string file, int line) = goILPosition(Method, callSite >= 0 ? callSite : ILOffset);
                     File = file;
                     Line = line;
@@ -3570,11 +3669,16 @@ partial class runtime_package
     // TieredCompilation=0 default a site has one pc for the life of the process (pinned by GolibTests'
     // LazyCallersTests.ACallSiteHasOnePcAcrossCalls); only a tiering promotion, which recompiles the
     // method, can give the same site a second one.
-    private readonly record struct CallSiteKey(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, bool SuspendedAtReportedCall);
+    private readonly record struct CallSiteKey(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, bool SuspendedAtReportedCall, System.Reflection.MethodBase? Callee);
+
+    // A frame as a capture sees it: the site, and the raw callee directly inside it. Maps to the canonical
+    // site's token (internCallerFrame), so the capture's callee tests run once per observed pair.
+    private readonly record struct ObservedSite(RuntimeMethodHandle Method, int Offset, bool NativeOffset, bool ReturnAddress, System.Reflection.MethodBase? Callee);
 
     private static readonly object s_callerTableLock = new();
     private static readonly Dictionary<string, nuint> s_callerTokens = new();
     private static readonly Dictionary<CallSiteKey, nuint> s_callSiteTokens = new();
+    private static readonly Dictionary<ObservedSite, nuint> s_observedSiteTokens = new();
     private static readonly List<CallerFrameRecord> s_callerRecords = new();
 
     // EVERY CALL SITE OWNS A SPAN, AND ITS TOKEN SITS IN THE MIDDLE. Go's consumers do arithmetic on a
@@ -4122,22 +4226,47 @@ partial class runtime_package
     // IL offset seen both ways is two sites. `callee` is the raw frame directly inside this one (the method
     // this frame is suspended calling, or its generated forwarder), null where none is known; see
     // suspendedAtReportedCall. It joins the key too: one reported offset can be either kind of mapping.
+    // When the reported offset is not itself the call, the callee is kept for Resolve to settle the call
+    // by (calleeSettledCallSite) wherever a call of it follows that offset: the test here reads the IL
+    // only, because the statement bounds the settling needs come from the symbol file, which a capture
+    // never opens (LazyCallersTests).
+    //
+    // THE HOT PATH IS ONE LOOKUP. What the callee says about a site (suspendedAtReportedCall, callsCalleeAfter)
+    // is a function of the method, the offset and the callee, so it is computed the FIRST time that triple is
+    // seen and never again: the observed triple maps straight to its token. Computed on every capture, the
+    // callee tests made runtime.Callers 30% slower (measured 2026-10-20, windows, Release, a depth-8 stack:
+    // 4.4-4.6 -> 5.8-6.0 us). The token itself is the CANONICAL site's, which carries the callee only where
+    // it settles a call, so callees that settle nothing (a virtual call's implementations, an inlined
+    // callee's caller) still share one token, as Go's one PC.
     private static uintptr internCallerFrame(System.Reflection.MethodBase method, StackFrame frame, bool returnAddress = true, System.Reflection.MethodBase? callee = null)
     {
         int ilOffset = frame.GetILOffset();
-        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
         bool nativeOffset = ilOffset < 0 && !System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported;
-        CallSiteKey key = new(method.MethodHandle, nativeOffset ? frame.GetNativeOffset() : ilOffset, nativeOffset, returnAddress, atReportedCall);
+        int offset = nativeOffset ? frame.GetNativeOffset() : ilOffset;
+        ObservedSite observed = new(method.MethodHandle, offset, nativeOffset, returnAddress, returnAddress ? callee : null);
 
         lock (s_callerTableLock)
         {
-            if (s_callSiteTokens.TryGetValue(key, out nuint token))
-                return token;
+            if (s_observedSiteTokens.TryGetValue(observed, out nuint seen))
+                return seen;
+        }
 
-            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall });
-            // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
-            token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
-            s_callSiteTokens[key] = token;
+        // First sight of this site with this callee: read what the callee settles (the IL only), outside the lock.
+        bool atReportedCall = returnAddress && callee is not null && suspendedAtReportedCall(method, ilOffset, callee);
+        System.Reflection.MethodBase? settlingCallee = returnAddress && callee is not null && !atReportedCall && callsCalleeAfter(method, ilOffset, callee) ? callee : null;
+        CallSiteKey key = new(method.MethodHandle, offset, nativeOffset, returnAddress, atReportedCall, settlingCallee);
+
+        lock (s_callerTableLock)
+        {
+            if (!s_callSiteTokens.TryGetValue(key, out nuint token))
+            {
+                s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = returnAddress, SuspendedAtReportedCall = atReportedCall, Callee = settlingCallee });
+                // The middle of the new site's span; never 0, so Go's zero-pc sentinel stays invalid.
+                token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
+                s_callSiteTokens[key] = token;
+            }
+
+            s_observedSiteTokens[observed] = token;
             return token;
         }
     }
@@ -4220,15 +4349,84 @@ partial class runtime_package
         if (ilOffset < 0 || callSiteOffsets(method) is not { } calls || Array.BinarySearch(calls, ilOffset) < 0)
             return false;
 
-        if (callTarget(method, ilOffset) is not { } target)
-            return false;
+        return callTarget(method, ilOffset) is { } target && targetsCallee(target, callee);
+    }
 
+    // Whether a call naming `target` is a call of `callee`, the method of the raw frame it is suspended in.
+    private static bool targetsCallee(System.Reflection.MethodBase target, System.Reflection.MethodBase callee)
+    {
         if (target.Module == callee.Module && target.MetadataToken == callee.MetadataToken)
             return true;
 
         // A virtual or interface call names the slot; the frame is the override or the implementation.
         return (target.IsVirtual || target.IsAbstract) &&
             (callee.Name == target.Name || callee.Name.EndsWith("." + target.Name, StringComparison.Ordinal));
+    }
+
+    // Whether a call of `callee` follows `ilOffset` in the method's IL: the capture's test for keeping the callee
+    // for Resolve (calleeSettledCallSite). The IL only, so it opens no symbol file.
+    private static bool callsCalleeAfter(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
+    {
+        if (ilOffset < 0 || callSiteOffsets(method) is not { } calls)
+            return false;
+
+        int index = Array.BinarySearch(calls, ilOffset);
+
+        for (int i = index < 0 ? ~index : index; i < calls.Length; i++)
+        {
+            if (callTarget(method, calls[i]) is { } target && targetsCallee(target, callee))
+                return true;
+        }
+
+        return false;
+    }
+
+    // THE CALL THE FRAME IS SUSPENDED IN, settled at Resolve by the callee, or -1 when the callee settles
+    // nothing and returnSiteILOffset's reading stands. The reported offset being a call of the callee is
+    // settled at capture (suspendedAtReportedCall); this settles the other case: returnSiteILOffset names a
+    // call that does NOT target the callee, so it cannot be the suspended one, and the reported offset's
+    // statement holds exactly ONE call of the callee at or after that offset. That call it is.
+    //
+    // This is the optimized JIT inside an expression that keeps a value on the evaluation stack from one call
+    // to the next (a method chain `a.F().G().H()`), which has no mapping between its calls: every frame
+    // suspended in the chain reports the chain's first offset, and "the first call after" named the box the
+    // chain starts from, not the call. Measured 2026-10-20 on CallerLineMultiLine's S1 (Release, TC0 and
+    // tiered alike): Main reported IL 0xB1 for the call of Done at 0xD7, the line read the statement's first
+    // (89) where Go's is the call's (92); Debug reported 0xDB, the call itself.
+    //
+    // NEVER A GUESS: two or more calls of the callee after the reported offset (the chain's Add, Add, Add)
+    // cannot be told apart from that offset, and keep returnSiteILOffset's answer, as before. A callee the
+    // JIT inlined away left no frame, so its caller's frame names a callee no call here targets: unsettled.
+    private static int calleeSettledCallSite(System.Reflection.MethodBase method, int ilOffset, System.Reflection.MethodBase callee)
+    {
+        int candidate = returnSiteILOffset(method, ilOffset);
+
+        if (candidate < 0 || callTarget(method, candidate) is not { } named || targetsCallee(named, callee))
+            return -1;
+
+        if (callSiteOffsets(method) is not { } calls || sequencePointOffsets(method) is not { Length: > 0 } statements)
+            return -1;
+
+        int index = Array.BinarySearch(statements, ilOffset);
+
+        if (index < 0)
+            index = ~index - 1;
+
+        int end = index >= 0 && index + 1 < statements.Length ? statements[index + 1] : int.MaxValue;
+        int found = -1;
+
+        foreach (int call in calls)
+        {
+            if (call < ilOffset || call >= end || callTarget(method, call) is not { } target || !targetsCallee(target, callee))
+                continue;
+
+            if (found >= 0)
+                return -1;
+
+            found = call;
+        }
+
+        return found;
     }
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Reflection.MethodBase, int), System.Reflection.MethodBase?> s_callTargets = new();
@@ -4676,6 +4874,13 @@ partial class runtime_package
         "runtime.panicwrap" => 332,     // runtime/error.go
         "runtime.sigpanic" => GOOS == "windows"u8 ? 392 : 906, // runtime/signal_windows.go : signal_unix.go
         "testing.tRunner" => 1642,      // testing/testing.go
+        // The allocator frames a heap-profile record starts with (memProfileAlloc). Go 1.26 records them
+        // and Go 1.24 did not, so their lines are go1.26.9's.
+        "runtime.mallocgc" => 1067,     // runtime/malloc.go
+        "runtime.newobject" => 2156,    // runtime/malloc.go
+        "runtime.newarray" => 2199,     // runtime/malloc.go
+        "runtime.makeslice" => 102,     // runtime/slice.go
+        "runtime.growslice" => 178,     // runtime/slice.go
         _ => 0
     };
 
@@ -5481,7 +5686,7 @@ partial class runtime_package
         if (v is IValueAdapter { Value: not null } valueAdapter)
             v = valueAdapter.Value;
 
-        abi.ΔKind kind = (abi.ΔKind)(Ꮡt.Value.Kind_ & abi.KindMask);
+        abi.ΔKind kind = abi.Kind(Ꮡt);
 
         if (kind >= abi.Bool && kind <= abi.Uintptr)
         {

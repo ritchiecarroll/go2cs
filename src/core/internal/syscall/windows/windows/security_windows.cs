@@ -54,7 +54,7 @@ public static error AdjustTokenPrivileges(syscall.Token token, bool disableAllPr
 }
 
 //sys DuplicateTokenEx(hExistingToken syscall.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *syscall.Token) (err error) = advapi32.DuplicateTokenEx
-//sys SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
+//sys SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation unsafe.Pointer, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
 partial struct SID_AND_ATTRIBUTES {
     public ж<syscall.SID> Sid;
     public uint32 Attributes;
@@ -182,8 +182,11 @@ partial struct SID_IDENTIFIER_AUTHORITY {
 }
 
 public static UntypedInt SID_REVISION => 1;
+// https://learn.microsoft.com/en-us/windows/win32/services/localsystem-account
 public static UntypedInt SECURITY_LOCAL_SYSTEM_RID => 18;
+// https://learn.microsoft.com/en-us/windows/win32/services/localservice-account
 public static UntypedInt SECURITY_LOCAL_SERVICE_RID => 19;
+// https://learn.microsoft.com/en-us/windows/win32/services/networkservice-account
 public static UntypedInt SECURITY_NETWORK_SERVICE_RID => 20;
 
 public static SID_IDENTIFIER_AUTHORITY SECURITY_NT_AUTHORITY = new SID_IDENTIFIER_AUTHORITY(

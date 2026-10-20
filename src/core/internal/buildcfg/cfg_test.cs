@@ -37,6 +37,7 @@ public static void TestConfigFlags(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Wrong parsing of GOAMD64=1"u8);
         }
     }
+
     os.Setenv(goriscv64ˢ, rva20u64ˢ);
     if (goriscv64() != 20) {
         Ꮡt.Errorf("Wrong parsing of RISCV64=rva20u64"u8);
@@ -104,18 +105,23 @@ internal static readonly @string lseˢ = ",lse"u8;
 
 public static void TestGoarm64FeaturesSupports(ж<testing.T> Ꮡt) {
     var (g, _) = ParseGoarm64(v93ˢ);
+
     if (!g.Supports(v93ˢ)) {
         Ꮡt.Errorf("Wrong goarm64Features.Supports for v9.3, v9.3"u8);
     }
+
     if (g.Supports(v94ˢ)) {
         Ꮡt.Errorf("Wrong goarm64Features.Supports for v9.3, v9.4"u8);
     }
+
     if (!g.Supports(v88ˢ)) {
         Ꮡt.Errorf("Wrong goarm64Features.Supports for v9.3, v8.8"u8);
     }
+
     if (g.Supports(v89ˢ)) {
         Ꮡt.Errorf("Wrong goarm64Features.Supports for v9.3, v8.9"u8);
     }
+
     if (g.Supports(lseˢ)) {
         Ꮡt.Errorf("Wrong goarm64Features.Supports for v9.3, ,lse"u8);
     }
@@ -129,7 +135,9 @@ internal static readonly object wrongTagsForGoarm64V95ˢ = (@string)"Wrong tags 
 public static void TestGogoarchTags(ж<testing.T> Ꮡt) {
     @string old_goarch = GOARCH;
     var old_goarm64 = GOARM64;
+
     GOARCH = arm64ˢ;
+
     os.Setenv(goarm64ˢ, v95ˢ);
     GOARM64 = goarm64();
     var tags = gogoarchTags();
@@ -145,6 +153,7 @@ public static void TestGogoarchTags(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     GOARCH = old_goarch;
     GOARM64 = old_goarm64;
 }

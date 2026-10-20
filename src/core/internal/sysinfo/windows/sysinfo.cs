@@ -19,11 +19,13 @@ public static Func<@string> CPUName = sync.OnceValue(@string () => {
             return name;
         }
     }
+
     {
         @string name = osCPUInfoName(); if (name != ""u8) {
             return name;
         }
     }
+
     return ""u8;
 });
 

@@ -96,9 +96,11 @@ partial class runtime_package
     // that branch is the only branch. This is a faithful implementation, not an approximation.
     internal static partial void systemstack(Action fn) => fn();
 
-    // procyield spins for the given number of iterations, emitting the architecture's pause hint.
-    // Thread.SpinWait is the CLR's spelling of exactly that.
-    internal static partial void procyield(uint32 cycles) => Thread.SpinWait((int)cycles);
+    // procyieldAsm spins for the given number of iterations, emitting the architecture's pause hint.
+    // Thread.SpinWait is the CLR's spelling of exactly that. Go 1.26 gave procyield a Go body (stubs.go:
+    // return on 0 cycles, else procyieldAsm), so the converted procyield is bodied and this part implements
+    // the bodyless assembly half it calls.
+    internal static partial void procyieldAsm(uint32 cycles) => Thread.SpinWait((int)cycles);
 
     // testSPWrite exists only for runtime's own TestSPWrite (#62326): on amd64 it is an assembly frame
     // with a 16 KB locals area that writes SP, so Go's stack-growth prologue has to be traced back from
@@ -414,6 +416,7 @@ partial class runtime_package
         WaitReason.SynctestChanReceive => waitReasonSynctestChanReceive,
         WaitReason.SynctestChanSend => waitReasonSynctestChanSend,
         WaitReason.SynctestSelect => waitReasonSynctestSelect,
+        WaitReason.SynctestWaitGroupWait => waitReasonSynctestWaitGroupWait,
         _ => waitReasonZero,
     };
 

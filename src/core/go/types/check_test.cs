@@ -131,7 +131,8 @@ internal static error parseFlags(slice<byte> src, ж<flag.FlagSet> Ꮡflags) {
     if (end < 0 || end > maxLen) {
         return fmt.Errorf("flags comment line too long"u8);
     }
-    return Ꮡflags.Parse(strings.Fields(((@string)(src.slice(0, end)))));
+
+    return Ꮡflags.Parse(strings.Fields((@string)(src.slice(0, end))));
 }
 
 // testFiles type-checks the package consisting of the given files, and
@@ -172,11 +173,12 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
     GoFrame ᒐ = default;
     try {
         var opts = optsʗp.sslice();
-
         ref var t = ref Ꮡt.DerefOrNull();
+
         if (len(filenames) == 0) {
             Ꮡt.Fatal(noSourceFilesˢ);
         }
+
         // parse files
         ref var errlist = ref heap<slice<error>>(out var Ꮡerrlist);
         (var files, errlist) = parseFiles(Ꮡt, filenames, srcs, parser.AllErrors);
@@ -191,6 +193,7 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                 Ꮡt.Error(err);
             }
         }
+
         // set up typechecker
         ref var conf = ref heap(new types.Config(), out var Ꮡconf);
         boolFieldAddr(Ꮡconf, traceˢ).Value = manual && testing.Verbose();
@@ -214,10 +217,12 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         };
+
         // apply custom configuration
         foreach (var (_, opt) in opts) {
             opt(Ꮡconf);
         }
+
         // apply flag setting (overrides custom configuration)
         ref var goexperiment = ref heap(new @string(), out var Ꮡgoexperiment);
         ref var gotypesalias = ref heap(new @string(), out var Ꮡgotypesalias);
@@ -231,15 +236,18 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                 Ꮡt.Fatal(err);
             }
         }
+
         if (goexperiment != ""u8) {
             var revert = setGOEXPERIMENT(goexperiment);
             var revertʗ1 = revert;
             defer(revertʗ1, ref ᒐ);
         }
+
         // By default, gotypesalias is not set.
         if (gotypesalias != ""u8) {
             Ꮡt.Setenv(godebugˢ, "gotypesalias="u8 + gotypesalias);
         }
+
         // Provide Config.Info with all maps so that info recording is tested.
         ref var info = ref heap<typesꓸInfo>(out var Ꮡinfo);
         info = new typesꓸInfo(
@@ -252,11 +260,13 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
             Scopes: new map<ast.Node, ж<typesꓸScope>>(),
             FileVersions: new map<ж<ast.File>, @string>()
         );
+
         // typecheck
         Ꮡconf.Check(pkgName, fset, files, Ꮡinfo);
         if (listErrors) {
             return;
         }
+
         // collect expected errors
         var errmap = new map<@string, map<nint, slice<comment>>>();
         foreach (var (i, filename) in filenames) {
@@ -266,10 +276,12 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                 }
             }
         }
+
         // match against found errors
         slice<nint> indices = default!;     // list indices of matching errors, reused for each error
         foreach (var (_, err) in errlist) {
             var (gotPos, gotMsg) = unpackError(fset, err);
+
             // find list of errors for the respective error line
             @string filename = gotPos.Filename;
             var filemap = errmap[filename];
@@ -278,6 +290,7 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
             if (filemap != default!) {
                 errList = filemap[line];
             }
+
             // At least one of the errors in errList should match the current error.
             indices = indices[..0];
             foreach (var (i, want) in errList) {
@@ -315,6 +328,7 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                 continue;
             }
             // len(indices) > 0
+
             // If there are multiple matching errors, select the one with the closest column position.
             nint index = -1; // index of matching error
             nint delta = default!;
@@ -325,11 +339,13 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                     }
                 }
             }
+
             // The closest column position must be within expected colDelta.
             const nint colDelta = 0; // go/types errors are positioned correctly
             if (delta > colDelta) {
                 Ꮡt.Errorf("%s: got col = %d; want %d"u8, gotPos, gotPos.Column, errList[index].col);
             }
+
             // eliminate from errList
             {
                 nint n = len(errList) - 1; if (n > 0){
@@ -341,11 +357,13 @@ internal static void testFilesImpl(ж<testing.T> Ꮡt, slice<@string> filenames,
                     delete(filemap, line);
                 }
             }
+
             // if filemap is empty, eliminate from errmap
             if (len(filemap) == 0) {
                 delete(errmap, filename);
             }
         }
+
         // there should be no expected errors left
         if (len(errmap) > 0) {
             Ꮡt.Errorf("--- %s: unreported errors:"u8, pkgName);
@@ -367,7 +385,7 @@ internal static readonly @string go116codeˢ = "go116code"u8;
 
 internal static errors.Code readCode(typesꓸError err) {
     var v = reflect.ValueOf(err);
-    return ((errors.Code)(nint)v.FieldByName(go116codeˢ).Int());
+    return (errors.Code)(nint)v.FieldByName(go116codeˢ).Int();
 }
 
 // boolFieldAddr(conf, name) returns the address of the boolean field conf.<name>.
@@ -422,14 +440,17 @@ internal static readonly object testManualMustHaveOnlyˢ = (@string)"TestManual:
 // flag.
 public static void TestManual(ж<testing.T> Ꮡt) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     var filenames = flag.Args();
     if (len(filenames) == 0) {
         filenames = new @string[]{filepath.FromSlash(testdataManualGoˢ)}.slice();
     }
+
     var (info, err) = os.Stat(filenames[0]);
     if (err != default!) {
         Ꮡt.Fatalf("TestManual: %v"u8, err);
     }
+
     DefPredeclaredTestFuncs();
     if (info.IsDir()){
         if (len(filenames) > 1) {
@@ -488,6 +509,7 @@ public static void TestCheck(ж<testing.T> Ꮡt) {
             buildcfg.Experiment.RangeFunc = old;
         }, ref ᒐ);
         buildcfg.Experiment.RangeFunc = true;
+
         DefPredeclaredTestFuncs();
         testDirFiles(Ꮡt, internalTypesTestdataˢ, false);
     }
@@ -526,13 +548,16 @@ public static void TestLocal(ж<testing.T> Ꮡt) {
 internal static void testDirFiles(ж<testing.T> Ꮡt, @string dir, bool manual) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
     dir = filepath.FromSlash(dir);
+
     var (fis, err) = os.ReadDir(dir);
     if (err != default!) {
         Ꮡt.Error(err);
         return;
     }
+
     foreach (var (_, fi) in fis) {
         @string path = filepath.Join(dir, fi.Name());
+
         // If fi is a directory, its files make up a single package.
         if (fi.IsDir()){
             testDir(Ꮡt, path, manual);
@@ -546,15 +571,18 @@ internal static void testDirFiles(ж<testing.T> Ꮡt, @string dir, bool manual) 
 
 internal static void testDir(ж<testing.T> Ꮡt, @string dir, bool manual) {
     testenv.MustHaveGoBuild(new types_test_package.testing_TжTB(Ꮡt));
+
     var (fis, err) = os.ReadDir(dir);
     if (err != default!) {
         Ꮡt.Error(err);
         return;
     }
+
     slice<@string> filenames = default!;
     foreach (var (_, fi) in fis) {
         filenames = append(filenames, filepath.Join(dir, fi.Name()));
     }
+
     var filenamesʗ1 = filenames;
     Ꮡt.Run(filepath.Base(dir), (ж<testing.T> tΔ1) => {
         testPkg(tΔ1, filenamesʗ1, manual);

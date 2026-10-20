@@ -51,6 +51,7 @@ public static void TestURLFilters(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string input = ("\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f"u8 + "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f"u8 + @" !""#$%&'()*+,-./"u8 + @"0123456789:;<=>?"u8 + @"@ABCDEFGHIJKLMNO"u8 + @"PQRSTUVWXYZ[\]^_"u8 + "`abcdefghijklmno"u8 + "pqrstuvwxyz{|}~\x7f"u8 + "\u00A0\u0100\u2028\u2029\ufeff\U0001D11E"u8);
+
     var tests = new TestURLFilters_tests[]{
         new(
             "urlEscaper"u8,
@@ -63,6 +64,7 @@ public static void TestURLFilters(ж<testing.T> Ꮡt) {
             "%00%01%02%03%04%05%06%07%08%09%0a%0b%0c%0d%0e%0f"u8 + "%10%11%12%13%14%15%16%17%18%19%1a%1b%1c%1d%1e%1f"u8 + "%20!%22#$%25&%27%28%29*+,-./"u8 + "0123456789:;%3c=%3e?"u8 + "@ABCDEFGHIJKLMNO"u8 + "PQRSTUVWXYZ[%5c]%5e_"u8 + "%60abcdefghijklmno"u8 + "pqrstuvwxyz%7b%7c%7d~%7f"u8 + "%c2%a0%c4%80%e2%80%a8%e2%80%a9%ef%bb%bf%f0%9d%84%9e"u8
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         {
             @string s = test.escaper(input); if (s != test.escaped) {
@@ -112,6 +114,7 @@ public static void TestSrcsetFilter(ж<testing.T> Ꮡt) {
             "/bogus#,#ZgotmplZ"u8
         )
     }.slice();
+
     foreach (var (_, test) in tests) {
         {
             @string got = srcsetFilterAndEscaper(test.input); if (got != test.want) {

@@ -29,8 +29,8 @@ partial struct common {
 // as unexported by all other clients.
 partial struct Template {
     internal @string name;
-    public partial ref ж<text.template.parse_package.Tree> Tree { get; }
-    internal partial ref ж<common> common { get; }
+    /*embed*/ public ж<text.template.parse_package.Tree> Tree;
+    /*embed*/ internal ж<common> common;
     internal @string leftDelim;
     internal @string rightDelim;
 }
@@ -96,6 +96,7 @@ public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) {
         if (t.common == nil) {
             return (nt, default!);
         }
+        nt.Value.option = t.option;
         Ꮡt.of(Template.ᏑmuTmpl).RLock();
         ᒐd1 = true;
         foreach (var (k, v) in t.tmpl) {

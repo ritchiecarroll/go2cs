@@ -47,10 +47,12 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(result.OrTypedNil(), certificate.OrTypedNil())) {
         Ꮡt.Errorf("#0 got:%#v want:%#v"u8, result.OrTypedNil(), certificate.OrTypedNil());
     }
+
     (result, remainder) = Decode(remainder);
     if (!reflect.DeepEqual(result.OrTypedNil(), privateKey.OrTypedNil())) {
         Ꮡt.Errorf("#1 got:%#v want:%#v"u8, result.OrTypedNil(), privateKey.OrTypedNil());
     }
+
     bool isEmpty(ж<global::go.encoding.pem_package.Block> block) => block != nil && (~block).Type == "EMPTY"u8 && len((~block).Headers) == 0 && len((~block).Bytes) == 0;
     (result, remainder) = Decode(remainder);
     if (!isEmpty(result)) {
@@ -64,13 +66,16 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     if (!isEmpty(result)) {
         Ꮡt.Errorf("#4 should be empty but got:%#v"u8, result.OrTypedNil());
     }
+
     (result, remainder) = Decode(remainder);
     if (result == nil || (~result).Type != "VALID HEADERS"u8 || len((~result).Headers) != 1) {
         Ꮡt.Errorf("#5 expected single header block but got :%v"u8, result.OrTypedNil());
     }
+
     if (len(remainder) != 0) {
-        Ꮡt.Errorf("expected nothing remaining of pemData, but found %s"u8, ((@string)remainder));
+        Ꮡt.Errorf("expected nothing remaining of pemData, but found %s"u8, (@string)remainder);
     }
+
     (result, _) = Decode(slice<byte>(pemPrivateKey2));
     if (!reflect.DeepEqual(result.OrTypedNil(), privateKey2.OrTypedNil())) {
         Ꮡt.Errorf("#2 got:%#v want:%#v"u8, result.OrTypedNil(), privateKey2.OrTypedNil());
@@ -82,44 +87,43 @@ internal static readonly @string pemTooFewEndingDashes = """
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemTooManyEndingDashes = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO------
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemTrailingNonWhitespace = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END FOO----- .
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemWrongEndingType = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----END BAR-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemMissingEndingSpace = """
 
 -----BEGIN FOO-----
 dGVzdA==
 -----ENDBAR-----
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string pemMissingEndLine = """
 
 -----BEGIN FOO-----
 Header: 1
-"""u8;
+"""u8.Raw();
 
 internal static @string pemRepeatingBegin = strings.Repeat("-----BEGIN \n"u8, 10);
-
 
 partial struct badPEMTestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -217,16 +221,19 @@ public static void TestLineBreaker(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d: error from Close: %s"u8, i, err);
             continue;
         }
+
         {
             @string got = buf.String(); if (got != test.@out) {
                 Ꮡt.Errorf("#%d: got:%s want:%s"u8, i, got, test.@out);
             }
         }
     }
+
     foreach (var (i, test) in lineBreakerTests) {
         var buf = @new<strings.Builder>();
         global::go.encoding.pem_package.lineBreaker breaker = new();
         breaker.@out = new pem_test_package.strings_BuilderжWriter(buf);
+
         for (nint iΔ1 = 0; iΔ1 < len(test.@in); iΔ1++) {
             var (_, errΔ1) = breaker.Write(slice<byte>(test.@in.slice(iΔ1, iΔ1 + 1)));
             if (errΔ1 != default!) {
@@ -239,6 +246,7 @@ public static void TestLineBreaker(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d: error from Close (byte by byte): %s"u8, i, err);
             continue;
         }
+
         {
             @string got = buf.String(); if (got != test.@out) {
                 Ꮡt.Errorf("#%d: (byte by byte) got:%s want:%s"u8, i, got, test.@out);
@@ -248,11 +256,10 @@ public static void TestLineBreaker(ж<testing.T> Ꮡt) {
 }
 
 public static void TestFuzz(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // PEM is a text-based format. Assume header fields with leading/trailing spaces
     // or embedded newlines will not round trip correctly and don't need to be tested.
     bool isBad(@string s) => strings.ContainsAny(s, "\r\n"u8) || strings.TrimSpace(s) != s;
+
     var isBadʗ1 = isBad;
     var testRoundtrip = (global::go.encoding.pem_package.Block blockʗp) => {
         ref var block = ref heap(blockʗp, out var Ꮡblock);
@@ -268,6 +275,7 @@ public static void TestFuzz(ж<testing.T> Ꮡt) {
                 return true;
             }
         }
+
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         {
             var err = Encode(new pem_test_package.bytes_BufferжWriter(Ꮡbuf), Ꮡblock); if (err != default!) {
@@ -294,6 +302,7 @@ public static void TestFuzz(ж<testing.T> Ꮡt) {
         }
         return true;
     };
+
     // Explicitly test the empty block.
     if (!testRoundtrip(new Block(
         Type: "EMPTY"u8,
@@ -302,6 +311,7 @@ public static void TestFuzz(ж<testing.T> Ꮡt) {
     ))) {
         return;
     }
+
     quick.Check((testRoundtrip).OrTypedNilFunc(), nil);
 }
 
@@ -407,7 +417,7 @@ Header: 1
 Header: 1
 
 -----END VALID HEADERS-----
-"""u8);
+"""u8.Raw());
 
 internal static ж<global::go.encoding.pem_package.Block> certificate = Ꮡ(new Block(Type: "CERTIFICATE"u8,
     Headers: new map<@string, @string>{},
@@ -641,7 +651,7 @@ N4XPksobn/NO2IDvPM7N9ZCe+aeyDEkE8QmP6mPScLuGvzSrsgOxWTMWF7Dbdzj0
 tJQLJRZ+ItT5Irl4owSEBNLahC1j3fhQavbj9WVAfKk=
 -----END RSA TESTING KEY-----
 
-"""u8);
+"""u8.Raw());
 
 public static void TestBadEncode(ж<testing.T> Ꮡt) {
     var b = Ꮡ(new Block(Type: "BAD"u8, Headers: new map<@string, @string>{["X:Y"u8] = "Z"u8}));
@@ -687,7 +697,7 @@ foo foo foo
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading garbage on block"u8,
@@ -698,7 +708,7 @@ MCowBQYDK2VwAyEApVjJeLW5MoP6uR3+OeITokM+rBDng6dgl1vvhcy+wws=
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading garbage"u8,
@@ -707,7 +717,7 @@ foo foo foo
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading partial block"u8,
@@ -717,7 +727,7 @@ foo foo foo
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "multiple BEGIN"u8,
@@ -727,7 +737,7 @@ aGVsbG8=
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "multiple END"u8,
@@ -737,7 +747,7 @@ aGVsbG8=
 -----END TEST BLOCK-----
 -----END TEST BLOCK-----
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         ),
         new(
             name: "leading malformed BEGIN"u8,
@@ -748,7 +758,7 @@ aGVsbG8=
 -----BEGIN TEST BLOCK-----
 aGVsbG8=
 -----END TEST BLOCK-----
-"""u8
+"""u8.Raw()
         )
     }.slice()) {
         ref var tc = ref heap(new TestDecodeStrangeCases_type(), out var Ꮡtc);
@@ -775,11 +785,12 @@ aGVsbG8=
 internal static readonly @string endPublicKeyˢ = """
 
 -----END PUBLIC KEY-----
-"""u8;
+"""u8.Raw();
 internal static readonly object unexpectedBlockˢ = (@string)"unexpected block"u8;
 
 public static void TestJustEnd(ж<testing.T> Ꮡt) {
     @string pemData = endPublicKeyˢ;
+
     var (block, _) = Decode(slice<byte>(pemData));
     if (block != nil) {
         Ꮡt.Fatal(unexpectedBlockˢ);

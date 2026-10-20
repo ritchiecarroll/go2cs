@@ -21,12 +21,12 @@ partial class goroot_package {
 private static readonly @string srcˢ = "src"u8;
 
 // IsStandardPackage reports whether path is a standard package,
-// given goroot and compiler.
-public static bool IsStandardPackage(@string goroot, @string compiler, @string path) {
+// given goroot and compiler. readDir accepts OS filesystem paths.
+public static bool IsStandardPackage(Func<@string, (slice<fs.DirEntry>, error)> readDir, @string goroot, @string compiler, @string path) {
     var exprᴛ1 = compiler;
     if (exprᴛ1 == "gc"u8) {
         @string dir = filepath.Join(goroot, srcˢ, path);
-        var (dirents, err) = os.ReadDir(dir);
+        var (dirents, err) = readDir(dir);
         if (err != default!) {
             return false;
         }
@@ -43,10 +43,9 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
     { /* default: */
         throw panic("unknown compiler " + compiler);
     }
-
 }
 
-// gccgoSearch holds the gccgo search directories.
+// gccgoDirs holds the gccgo search directories.
 partial struct gccgoDirs {
     internal sync.Once once;
     internal slice<@string> dirs;
@@ -69,6 +68,8 @@ private static readonly @string prefixᶜ = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
 internal static void init(this ref gccgoDirs gd) {
+    var lastDirsᴷ = new stackAppend<@string>();
+
     @string gccgo = os.Getenv(gccgoˢ);
     if (gccgo == ""u8) {
         gccgo = gccgoˢ2;
@@ -77,6 +78,7 @@ internal static void init(this ref gccgoDirs gd) {
     if (err != default!) {
         return;
     }
+
     (var allDirs, err) = exec.Command(bin, printSearchDirsˢ).Output();
     if (err != default!) {
         return;
@@ -85,24 +87,28 @@ internal static void init(this ref gccgoDirs gd) {
     if (err != default!) {
         return;
     }
-    @string version = strings.TrimSpace(((@string)versionB));
+    @string version = strings.TrimSpace((@string)versionB);
     (var machineB, err) = exec.Command(bin, dumpmachineˢ).Output();
     if (err != default!) {
         return;
     }
-    @string machine = strings.TrimSpace(((@string)machineB));
-    var dirsEntries = strings.Split(((@string)allDirs), "\n"u8);
+    @string machine = strings.TrimSpace((@string)machineB);
+
+    var dirsEntries = strings.Split((@string)allDirs, "\n"u8);
     @string prefix = prefixᶜ;
     slice<@string> dirs = default!;
     foreach (var (_, dirEntry) in dirsEntries) {
-        if (strings.HasPrefix(dirEntry, prefix)) {
-            dirs = filepath.SplitList(strings.TrimPrefix(dirEntry, prefix));
-            break;
+        {
+            var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
+                dirs = filepath.SplitList(after);
+                break;
+            }
         }
     }
     if (len(dirs) == 0) {
         return;
     }
+
     slice<@string> lastDirs = default!;
     foreach (var (_, dir) in dirs) {
         @string goDir = filepath.Join(dir, "go", version);
@@ -119,7 +125,7 @@ internal static void init(this ref gccgoDirs gd) {
         }
         {
             var (fi, errΔ2) = os.Stat(dir); if (errΔ2 == default! && fi.IsDir()) {
-                lastDirs = append(lastDirs, dir);
+                lastDirs = append(lastDirsᴷ, lastDirs, dir);
             }
         }
     }
@@ -139,10 +145,12 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     if (strings.Contains(path.slice(0, i), "."u8)) {
         return false;
     }
+
     if (path == "unsafe"u8) {
         // Special case.
         return true;
     }
+
     Ꮡgd.of(gccgoDirs.Ꮡonce).Do(Ꮡgd.init);
     if (gd.dirs == default!) {
         // We couldn't find the gccgo search directories.
@@ -150,6 +158,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
         // '.', is that this is a standard library package.
         return true;
     }
+
     foreach (var (_, dir) in gd.dirs) {
         @string full = filepath.Join(dir, path) + ".gox"u8;
         {
@@ -158,6 +167,7 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
             }
         }
     }
+
     return false;
 }
 

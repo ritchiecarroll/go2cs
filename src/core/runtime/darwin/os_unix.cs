@@ -6,6 +6,8 @@ namespace go;
 
 partial class runtime_package {
 
+// These values are the same on all known Unix systems.
+// If we find a discrepancy some day, we can split them out.
 internal static UntypedInt _F_SETFD => 2;
 internal static UntypedInt _FD_CLOEXEC => 1;
 

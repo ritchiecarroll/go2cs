@@ -174,17 +174,19 @@
     <ProjectReference Include="$(go2csPath)core/encoding/binary/encoding.binary.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/event/go122/internal.trace.event.go122.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/event/internal.trace.event.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/trace/internal/oldtrace/internal.trace.internal.oldtrace.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/internal/tracev1/internal.trace.internal.tracev1.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/tracev2/internal.trace.tracev2.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/version/internal.trace.version.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/iter/iter.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
+    <ProjectReference Include="$(go2csPath)core/regexp/regexp.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/sort/sort.csproj" />
+    <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
+    <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
   </ItemGroup>
 
   <ItemGroup>

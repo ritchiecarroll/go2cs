@@ -48,9 +48,11 @@ public static void TestEMSAPSS(ж<testing.T> Ꮡt) {
         0x6f, 0x9d, 0x8b, 0xc8, 0x16, 0xd9, 0x7c, 0xd7, 0xa2, 0xc4,
         0x3b, 0xad, 0x54, 0x6f, 0xbe, 0x8c, 0xfe, 0xbc
     }.slice();
+
     var hash = sha1.New();
     hash.Write(msg);
     var hashed = hash.Sum(default!);
+
     var (encoded, err) = emsaPSSEncode(hashed, 1023, salt, new rsa_internal_test_package.hash_HashᴠHash(sha1.New()));
     if (err != default!) {
         Ꮡt.Errorf("Error from emsaPSSEncode: %s\n"u8, err);
@@ -58,6 +60,7 @@ public static void TestEMSAPSS(ж<testing.T> Ꮡt) {
     if (!bytes.Equal(encoded, expected)) {
         Ꮡt.Errorf("Bad encoding. got %x, want %x"u8, encoded, expected);
     }
+
     {
         err = emsaPSSVerify(hashed, encoded, 1023, len(salt), new rsa_internal_test_package.hash_HashᴠHash(sha1.New())); if (err != default!) {
             Ꮡt.Errorf("Bad verification: %s"u8, err);

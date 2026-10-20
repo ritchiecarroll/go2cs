@@ -27,6 +27,12 @@ using static global::go.io.ioutil_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -35,8 +41,8 @@ using static global::go.io.ioutil_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/ioutil/ioutil_test.go", "ioutil_test.cs", "ABEggoKClIL4goKCgpaCgoKW1oKCgpSCiICCpoKCloKogubCgpSCqIKClIKEgoKCgpSCgpSCgpSCtKSCgoKCloKCgpaCgoKUtMaClII=")]
-[assembly: go.GoPositionMap("io/ioutil/tempfile_test.go", "tempfile_test.cs", "ABYiooKClISCgoK05KLKgoKCgpSCgoKC2AANCqKCgpSEggAIGLKygpKCpoKCkoKkgrTEAAsEooKClgAEEoSigoKUhIKCtJSyooIACBSSgvzCgoKUhIKCgILEAAoEooKClISCAAgYspKCgoKSgqSC2A==", "77-93:1;79-83:1.1;114-125:1;128-131:2;140-143:3;183-194:1")]
+[assembly: go.GoPositionMap("io/ioutil/ioutil_test.go", "ioutil_test.cs", "ABEggoKClIL4goKCgqaCgoKm1oKCgpSCmICCtoKCpoK4guaigpSCuIKClIKUgoKCgpSCgpSCgpSCtKSCgoKCpoKCgqaCgoKUtLaClII=")]
+[assembly: go.GoPositionMap("io/ioutil/tempfile_test.go", "tempfile_test.cs", "ABYiooKClJSCgoK05KLKgoKCgpSCgoKC2AANCqKCgpSUggAIGLKygpKCpoKCkoKkgrTEAAsEooKCpgAFEpSigoKUlIKCtKSyooIACRSSgvzCgoKUlIKCgILEAAoEooKClJSCAAgYspKCgoKSgqSC2A==", "77-93:1;79-83:1.1;114-125:1;128-131:2;140-143:3;183-194:1")]
 // </GoSourcePositionMaps>
 
 namespace go.io;

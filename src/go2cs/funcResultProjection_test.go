@@ -128,7 +128,7 @@ func loadFuncResultFixture(t *testing.T) (*Visitor, map[string]*ast.CallExpr) {
 	// map up and restore it so these tests neither panic on a nil map nor leak into a sibling test.
 	previousProxies := constraintProxies
 	t.Cleanup(func() { constraintProxies = previousProxies })
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 
 	production := loadProductionForDir(t, dir)
 	visitor := &Visitor{info: production.TypesInfo, pkg: production.Types}
@@ -403,6 +403,8 @@ func TestFuncResultProjectionNegativeControls(t *testing.T) {
 // Go checker already admitted) while the RECORDED and RENDERED name stays the projection — the same
 // two-instantiation split funcResultProjection itself carries.
 func TestProjectedGenericConstraintRecordsItsAdapter(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
 	visitor, calls := loadFuncResultFixture(t)
 	funIdent, typeArgs := funcResultInstance(t, visitor, calls, "pairCall")
 

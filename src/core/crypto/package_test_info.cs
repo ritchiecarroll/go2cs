@@ -37,7 +37,7 @@ using static global::go.crypto_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABAclIKCgpTUgtSC1ILUgqSUgpKCgpSCAAgEwoKCgpKCgpSCgqai", "50-59:1")]
-[assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoqwoKCgoKClISCgoKClIKCgpaCgpaCAAgQgoKUgpQ=", "", "", "56=GOROOT/1/1/3")]
+[assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoqwoKCgoKClJSCgoKClIKCgqaCgqaCAAgQgoKUgpQ=", "", "", "59=GOROOT/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;

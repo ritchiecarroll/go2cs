@@ -9,16 +9,17 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
-using errors = @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
+using iter = iter_package;
 using ꓸꓸꓸType = Span<types_package.ΔType>;
 
 partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string haveUntypedNilˢ = "have untyped nil"u8;
 internal static readonly @string argumentToDeleteˢ = "argument to delete"u8;
+internal static readonly @string argumentToNewˢ = "argument to new"u8;
 internal static readonly @string argumentToPanicˢ = "argument to panic"u8;
 internal static readonly @string argumentToUnsafeAddˢ = "argument to unsafe.Add"u8;
 internal static readonly @string lengthˢ = "length"u8;
@@ -38,8 +39,11 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var x = ref Ꮡx.DerefOrNull();
         ref var call = ref Ꮡcall.DerefOrNull();
+        var typesᴷ = new stackAppend<ΔType>();
+        var sizesᴷ = new stackAppend<int64>();
 
         var argList = call.Args;
+
         // append is the only built-in that permits the use of ... for the last argument
         var bin = predeclaredFuncs[id];
         if (hasDots(ref (Ꮡcall).DerefOrNull()) && id != _Append) {
@@ -49,6 +53,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             Ꮡcheck.use(argList.ꓸꓸꓸ);
             return default!;
         }
+
         // For len(x) and cap(x) we need to know if x contains any function calls or
         // receive operations. Save/restore current setting and set hasCallOrRecv to
         // false for the evaluation of x so that we can check it afterwards.
@@ -60,6 +65,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }, Ꮡcheck.Value.hasCallOrRecv, ref ᒐ);
             check.hasCallOrRecv = false;
         }
+
         // Evaluate arguments for built-ins that use ordinary (value) arguments.
         // For built-ins with special argument handling (make, new, etc.),
         // evaluation is done by the respective built-in code.
@@ -67,24 +73,24 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
         nint nargs = default!;
         var exprᴛ1 = id;
         if (exprᴛ1 == _Make || exprᴛ1 == _New || exprᴛ1 == _Offsetof || exprᴛ1 == _Trace) {
+            // arguments require special handling
             nargs = len(argList);
         }
         else { /* default: */
+            // check all arguments
             args = Ꮡcheck.exprList(argList);
             nargs = len(args);
             foreach (var (_, a) in args) {
-                // check all arguments
                 if ((~a).mode == invalid) {
                     return default!;
                 }
             }
+            // first argument is always in x
             if (nargs > 0) {
-                // first argument is always in x
                 x = args[0].Value;
             }
         }
 
-        // arguments require special handling
         // check argument count
         {
             @string msg = ""u8;
@@ -99,86 +105,80 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 return default!;
             }
         }
+
         var exprᴛ2 = id;
         if (exprᴛ2 == _Append) {
-            do {
-                var S = x.typ;
-// append(s S, x ...T) S, where T is the element type of S
-// spec: "The variadic function append appends zero or more values x to s of type
-// S, which must be a slice type, and returns the resulting slice, also of type S.
-// The values x are passed to a parameter of type ...T where T is the element type
-// of S and the respective parameter passing rules apply."
-                ΔType T = default!;
-                {
-                    var (s, _) = coreType(S)._<ж<Slice>>(ᐧ); if (s != nil){
-                        T = s.Value.elem;
-                    } else {
-                        @string cause = default!;
-                        switch (ᐧ) {
-                        case {} when x.isNil(): {
-                            cause = haveUntypedNilˢ;
-                            break;
-                        }
-                        case {} when isTypeParam(S): {
-                            {
-                                var u = coreType(S); if (u != default!){
-                                    cause = Ꮡcheck.sprintf("%s has core type %s"u8, Ꮡx.OrTypedNil(), u);
-                                } else {
-                                    cause = Ꮡcheck.sprintf("%s has no core type"u8, Ꮡx.OrTypedNil());
-                                }
-                            }
-                            break;
-                        }
-                        default: {
-                            cause = Ꮡcheck.sprintf("have %s"u8, Ꮡx.OrTypedNil());
-                            break;
-                        }}
+            // append(s S, x ...E) S, where E is the element type of S
+            // spec: "The variadic function append appends zero or more values x to
+            // a slice s of type S and returns the resulting slice, also of type S.
+            // The values x are passed to a parameter of type ...E where E is the
+            // element type of S and the respective parameter passing rules apply.
+            // As a special case, append also accepts a first argument assignable
+            // to type []byte with a second argument of string type followed by ... .
+            // This form appends the bytes of the string."
+            // In either case, the first argument must be a slice; in particular it
+            // cannot be the predeclared nil value. Note that nil is not excluded by
+            // the assignability requirement alone for the special case (go.dev/issue/76220).
+            // spec: "If S is a type parameter, all types in its type set
+            // must have the same underlying slice type []E."
+            var (E, err) = sliceElem(Ꮡx);
+            if (err != nil) {
+                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAppend, "invalid append: %s"u8, err.format(Ꮡcheck));
+                return default!;
+            }
 
-                        // don't use invalidArg prefix here as it would repeat "argument" in the error message
-                        Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidAppend, "first argument to append must be a slice; %s"u8, cause);
-                        return default!;
-                    }
-                }
-                if (nargs == 2 && hasDots(ref (Ꮡcall).DerefOrNull())) {
-                    // spec: "As a special case, append also accepts a first argument assignable
-                    // to type []byte with a second argument of string type followed by ... .
-                    // This form appends the bytes of the string.
-                    {
-                        var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, new SliceжΔType(NewSlice(universeByte)), nil); if (ok) {
-                            var y = args[1];
+            // Handle append(bytes, y...) special case, where
+            // the type set of y is {string} or {string, []byte}.
+            ж<ΔSignature> sig = default!;
+            if (nargs == 2 && hasDots(ref (Ꮡcall).DerefOrNull())) {
+                {
+                    var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, new SliceжΔType(NewSlice(universeByte)), nil); if (ok) {
+                        var y = args[1];
+                        var hasString = false;
+                        foreach (var (_, u) in range<ΔType, ΔType>(typeset((~y).typ).Invoke)) {
                             {
-                                var t = coreString((~y).typ); if (t != default! && isString(t)) {
-                                    if (check.recordTypes()) {
-                                        var sigΔ1 = makeSig(S, S, (~y).typ);
-                                        sigΔ1.Value.variadic = true;
-                                        check.recordBuiltinType(call.Fun, sigΔ1);
-                                    }
-                                    x.mode = value;
-                                    x.typ = S;
+                                var (s, _) = u._<ж<Slice>>(ᐧ); if (s != nil && Identical((~s).elem, universeByte)){
+                                    // typeset ⊇ {[]byte}
+                                } else 
+                                if (u != default! && isString(u)){
+                                    // typeset ⊇ {string}
+                                    hasString = true;
+                                } else {
+                                    y = default!;
                                     break;
                                 }
                             }
                         }
+                        if (y != nil && hasString) {
+                            // setting the signature also signals that we're done
+                            sig = makeSig(x.typ, x.typ, (~y).typ);
+                            sig.Value.variadic = true;
+                        }
                     }
                 }
-                var sig = makeSig(S, // check general case by creating custom signature
- S, new SliceжΔType(NewSlice(T))); // []T required for variadic signature
+            }
+
+            // general case
+            if (sig == nil) {
+                // check arguments by creating custom signature
+                sig = makeSig(x.typ, x.typ, new SliceжΔType(NewSlice(E))); // []E required for variadic signature
                 sig.Value.variadic = true;
-                Ꮡcheck.arguments(Ꮡcall, sig, default!, default!, args, default!, default!); // discard result (we know the result type)
-                x.mode = value;
-                x.typ = S;
-                if (check.recordTypes()) {
-                    // ok to continue even if check.arguments reported errors
-                    check.recordBuiltinType(call.Fun, sig);
-                }
-            } while (false);
+                Ꮡcheck.arguments(Ꮡcall, sig, default!, default!, args, default!); // discard result (we know the result type)
+                // ok to continue even if check.arguments reported errors
+            }
+
+            if (check.recordTypes()) {
+                check.recordBuiltinType(call.Fun, sig);
+            }
+            x.mode = value;
+            // x.typ is unchanged
         }
         else if (exprᴛ2 == _Cap || exprᴛ2 == _Len) {
+            // cap(x)
+            // len(x)
             var mode = invalid;
-// cap(x)
-// len(x)
             constant.Value val = default!;
-            var switchᴛ1 = arrayPtrDeref(under(x.typ));
+            var switchᴛ1 = arrayPtrDeref(x.typ.Underlying());
             switch (switchᴛ1.type()) {
             case ж<Basic> t: {
                 if (isString(new BasicжΔType(t)) && id == _Len) {
@@ -193,11 +193,11 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
             case ж<Array> t: {
                 mode = value;
+                // spec: "The expressions len(s) and cap(s) are constants
+                // if the type of s is an array or pointer to an array and
+                // the expression s does not contain channel receives or
+                // function calls; in this case s is not evaluated."
                 if (!check.hasCallOrRecv) {
-                    // spec: "The expressions len(s) and cap(s) are constants
-                    // if the type of s is an array or pointer to an array and
-                    // the expression s does not contain channel receives or
-                    // function calls; in this case s is not evaluated."
                     mode = constant_;
                     if ((~t).len >= 0){
                         val = constant.MakeInt64((~t).len);
@@ -250,9 +250,10 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 }
                 break;
             }}
+
             if (mode == invalid) {
                 // avoid error if underlying type is invalid
-                if (isValid(under(x.typ))) {
+                if (isValid(x.typ.Underlying())) {
                     errors.Code code = InvalidCap;
                     if (id == _Len) {
                         code = InvalidLen;
@@ -261,37 +262,40 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 }
                 return default!;
             }
+
+            // record the signature before changing x.typ
             if (check.recordTypes() && mode != constant_) {
-                // record the signature before changing x.typ
                 check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Int]), x.typ));
             }
+
             x.mode = mode;
             x.typ = new BasicжΔType(Typ[Int]);
             x.val = val;
         }
         else if (exprᴛ2 == _Clear) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // clear(m)
- go1_21, "clear"u8);
+            // clear(m)
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_21, "clear"u8);
+
             if (!underIs(x.typ, (ΔType u) => {
                 switch (u.type()) {
                 case ж<Map> _:
                 case ж<Slice> _: {
                     return true;
                 }}
-
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClear, invalidArg + "cannot clear %s: argument must be (or constrained by) map or slice", Ꮡx.OrTypedNil());
                 return false;
             })) {
                 return default!;
             }
+
             x.mode = novalue;
             if (check.recordTypes()) {
                 check.recordBuiltinType(call.Fun, makeSig(default!, x.typ));
             }
         }
         else if (exprᴛ2 == _Close) {
-            if (!underIs(x.typ, // close(c)
- (ΔType u) => {
+            // close(c)
+            if (!underIs(x.typ, (ΔType u) => {
                 var (uch, _) = u._<ж<Chan>>(ᐧ);
                 if (uch == nil) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidClose, invalidOp + "cannot close non-channel %s", Ꮡx.OrTypedNil());
@@ -311,11 +315,12 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _Complex) {
+            // complex(x, y floatT) complexT
             var y = args[1];
+
+            // convert or check untyped arguments
             nint d = 0;
             if (isUntyped(x.typ)) {
-                // complex(x, y floatT) complexT
-                // convert or check untyped arguments
                 d |= (nint)(1);
             }
             if (isUntyped((~y).typ)) {
@@ -323,29 +328,29 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
             switch (d) {
             case 0: {
+                // x and y are typed => nothing to do
                 break;
             }
             case 1: {
-                Ꮡcheck.convertUntyped(Ꮡx, // x and y are typed => nothing to do
- // only x is untyped => convert to type of y
- (~y).typ);
+                // only x is untyped => convert to type of y
+                Ꮡcheck.convertUntyped(Ꮡx, (~y).typ);
                 break;
             }
             case 2: {
-                Ꮡcheck.convertUntyped(y, // only y is untyped => convert to type of x
- x.typ);
+                // only y is untyped => convert to type of x
+                Ꮡcheck.convertUntyped(y, x.typ);
                 break;
             }
             case 3: {
+                // x and y are untyped =>
+                // 1) if both are constants, convert them to untyped
+                //    floating-point numbers if possible,
+                // 2) if one of them is not constant (possible because
+                //    it contains a shift that is yet untyped), convert
+                //    both of them to float64 since they must have the
+                //    same type to succeed (this will result in an error
+                //    because shifts of floats are not permitted)
                 if (x.mode == constant_ && (~y).mode == constant_){
-                    // x and y are untyped =>
-                    // 1) if both are constants, convert them to untyped
-                    //    floating-point numbers if possible,
-                    // 2) if one of them is not constant (possible because
-                    //    it contains a shift that is yet untyped), convert
-                    //    both of them to float64 since they must have the
-                    //    same type to succeed (this will result in an error
-                    //    because shifts of floats are not permitted)
                     void toFloat(ж<operand> xΔ4) {
                         if (isNumeric((~xΔ4).typ) && constant.Sign(constant.Imag((~xΔ4).val)) == 0) {
                             xΔ4.Value.typ = new BasicжΔType(Typ[ΔUntypedFloat]);
@@ -356,26 +361,27 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 } else {
                     Ꮡcheck.convertUntyped(Ꮡx, new BasicжΔType(Typ[Float64]));
                     Ꮡcheck.convertUntyped(y, new BasicжΔType(Typ[Float64]));
+                    // x and y should be invalid now, but be conservative
+                    // and check below
                 }
                 break;
             }}
-
             if (x.mode == invalid || (~y).mode == invalid) {
-                // x and y should be invalid now, but be conservative
-                // and check below
                 return default!;
             }
-            if (!Identical(x.typ, // both argument types must be identical
- (~y).typ)) {
+
+            // both argument types must be identical
+            if (!Identical(x.typ, (~y).typ)) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidComplex, invalidOp + "%v (mismatched types %s and %s)", Ꮡcall.OrTypedNil(), x.typ, (~y).typ);
                 return default!;
             }
+
+            // the argument types must be of floating-point type
+            // (applyTypeFunc never calls f with a type parameter)
             var f = ΔType (ΔType typ) => {
-                // the argument types must be of floating-point type
-                // (applyTypeFunc never calls f with a type parameter)
                 assert(!isTypeParam(typ));
                 {
-                    var (t, _) = under(typ)._<ж<Basic>>(ᐧ); if (t != nil) {
+                    var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
                         var exprᴛ3 = (~t).kind;
                         if (exprᴛ3 == Float32) {
                             return new BasicжΔType(Typ[Complex64]);
@@ -386,7 +392,6 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                         if (exprᴛ3 == ΔUntypedFloat) {
                             return new BasicжΔType(Typ[ΔUntypedComplex]);
                         }
-
                     }
                 }
                 return default!;
@@ -396,34 +401,75 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidComplex, invalidArg + "arguments have type %s, expected floating-point", x.typ);
                 return default!;
             }
+
+            // if both arguments are constants, the result is a constant
             if (x.mode == constant_ && (~y).mode == constant_){
-                // if both arguments are constants, the result is a constant
                 x.val = constant.BinaryOp(constant.ToFloat(x.val), token.ADD, constant.MakeImag(constant.ToFloat((~y).val)));
             } else {
                 x.mode = value;
             }
+
             if (check.recordTypes() && x.mode != constant_) {
                 check.recordBuiltinType(call.Fun, makeSig(resTyp, x.typ, x.typ));
             }
+
             x.typ = resTyp;
         }
         else if (exprᴛ2 == _Copy) {
-            var (dst, _) = coreType(x.typ)._<ж<Slice>>(ᐧ);
+            // copy(x, y []E) int
+            // spec: "The function copy copies slice elements from a source src to a destination
+            // dst and returns the number of elements copied. Both arguments must have identical
+            // element type E and must be assignable to a slice of type []E.
+            // The number of elements copied is the minimum of len(src) and len(dst).
+            // As a special case, copy also accepts a destination argument assignable to type
+            // []byte with a source argument of a string type.
+            // This form copies the bytes from the string into the byte slice."
+            // get special case out of the way
             var y = args[1];
-            var src0 = coreString((~y).typ);
-            if (src0 != default! && isString(src0)) {
-                // copy(x, y []T) int
-                src0 = new SliceжΔType(NewSlice(universeByte));
+            bool special = default!;
+            {
+                var (ok, _) = Ꮡx.assignableTo(Ꮡcheck, new SliceжΔType(NewSlice(universeByte)), nil); if (ok) {
+                    special = true;
+                    foreach (var (_, u) in range<ΔType, ΔType>(typeset((~y).typ).Invoke)) {
+                        {
+                            var (s, _) = u._<ж<Slice>>(ᐧ); if (s != nil && Identical((~s).elem, universeByte)){
+                                // typeset ⊇ {[]byte}
+                            } else 
+                            if (u != default! && isString(u)){
+                                // typeset ⊇ {string}
+                            } else {
+                                special = false;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-            var (src, _) = src0._<ж<Slice>>(ᐧ);
-            if (dst == nil || src == nil) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "copy expects slice arguments; found %s and %s", Ꮡx.OrTypedNil(), y.OrTypedNil());
-                return default!;
+
+            // general case
+            if (!special) {
+                // spec: "If the type of one or both arguments is a type parameter, all types
+                // in their respective type sets must have the same underlying slice type []E."
+                var (dstE, err) = sliceElem(Ꮡx);
+                if (err != nil) {
+                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, "invalid copy: %s"u8, err.format(Ꮡcheck));
+                    return default!;
+                }
+                (var srcE, err) = sliceElem(y);
+                if (err != nil) {
+                    // If we have a string, for a better error message proceed with byte element type.
+                    if (!allString((~y).typ)) {
+                        Ꮡcheck.errorf(new operandжpositioner(y), InvalidCopy, "invalid copy: %s"u8, err.format(Ꮡcheck));
+                        return default!;
+                    }
+                    srcE = universeByte;
+                }
+                if (!Identical(dstE, srcE)) {
+                    Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, "invalid copy: arguments %s and %s have different element types %s and %s"u8, Ꮡx.OrTypedNil(), y.OrTypedNil(), dstE, srcE);
+                    return default!;
+                }
             }
-            if (!Identical((~dst).elem, (~src).elem)) {
-                Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidCopy, invalidArg + "arguments to copy %s and %s have different element types %s and %s", Ꮡx.OrTypedNil(), y.OrTypedNil(), (~dst).elem, (~src).elem);
-                return default!;
-            }
+
             if (check.recordTypes()) {
                 check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Int]), x.typ, (~y).typ));
             }
@@ -431,10 +477,10 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             x.typ = new BasicжΔType(Typ[Int]);
         }
         else if (exprᴛ2 == _Delete) {
+            // delete(map_, key)
+            // map_ must be a map type or a type parameter describing map types.
+            // The key cannot be a type parameter for now.
             var map_ = x.typ;
-// delete(map_, key)
-// map_ must be a map type or a type parameter describing map types.
-// The key cannot be a type parameter for now.
             ref var key = ref heap<ΔType>(out var Ꮡkey);
             if (!underIs(map_, (ΔType u) => {
                 var (map_Δ1, _) = u._<ж<Map>>(ᐧ);
@@ -451,21 +497,23 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             })) {
                 return default!;
             }
+
             x = args[1].Value; // key
             Ꮡcheck.assignment(Ꮡx, key, argumentToDeleteˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             x.mode = novalue;
             if (check.recordTypes()) {
                 check.recordBuiltinType(call.Fun, makeSig(default!, map_, key));
             }
         }
         else if (exprᴛ2 == _Imag || exprᴛ2 == _Real) {
+            // imag(complexT) floatT
+            // real(complexT) floatT
+            // convert or check untyped argument
             if (isUntyped(x.typ)) {
-                // imag(complexT) floatT
-                // real(complexT) floatT
-                // convert or check untyped argument
                 if (x.mode == constant_){
                     // an untyped constant number can always be considered
                     // as a complex constant
@@ -484,12 +532,13 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                     }
                 }
             }
+
+            // the argument must be of complex type
+            // (applyTypeFunc never calls f with a type parameter)
             var f = ΔType (ΔType typ) => {
-                // the argument must be of complex type
-                // (applyTypeFunc never calls f with a type parameter)
                 assert(!isTypeParam(typ));
                 {
-                    var (t, _) = under(typ)._<ж<Basic>>(ᐧ); if (t != nil) {
+                    var (t, _) = typ.Underlying()._<ж<Basic>>(ᐧ); if (t != nil) {
                         var exprᴛ4 = (~t).kind;
                         if (exprᴛ4 == Complex64) {
                             return new BasicжΔType(Typ[Float32]);
@@ -500,7 +549,6 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                         if (exprᴛ4 == ΔUntypedComplex) {
                             return new BasicжΔType(Typ[ΔUntypedFloat]);
                         }
-
                     }
                 }
                 return default!;
@@ -514,8 +562,9 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), code, invalidArg + "argument has type %s, expected complex type", x.typ);
                 return default!;
             }
+
+            // if the argument is a constant, the result is a constant
             if (x.mode == constant_){
-                // if the argument is a constant, the result is a constant
                 if (id == _Real){
                     x.val = constant.Real(x.val);
                 } else {
@@ -524,22 +573,44 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             } else {
                 x.mode = value;
             }
+
             if (check.recordTypes() && x.mode != constant_) {
                 check.recordBuiltinType(call.Fun, makeSig(resTyp, x.typ));
             }
+
             x.typ = resTyp;
         }
         else if (exprᴛ2 == _Make) {
+            // make(T, n)
+            // make(T, n, m)
+            // (no argument evaluated yet)
             var arg0 = argList[0];
             var T = Ꮡcheck.varType(arg0);
             if (!isValid(T)) {
-                // make(T, n)
-                // make(T, n, m)
-                // (no argument evaluated yet)
                 return default!;
             }
+
+            var (u, err) = commonUnder(T, (ΔType _Δp0, ΔType uΔ1) => {
+                switch (uΔ1.type()) {
+                case ж<Slice> _:
+                case ж<Map> _:
+                case ж<Chan> _: {
+                    return default!; // ok
+                }
+                case null: {
+                    return typeErrorf("no specific type"u8);
+                }
+                default: {
+                    return typeErrorf("type must be slice, map, or channel"u8);
+                }}
+            });
+            if (err != nil) {
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), InvalidMake, invalidArg + "cannot make %s: %s", arg0, err.format(Ꮡcheck));
+                return default!;
+            }
+
             nint min = default!;     // minimum number of arguments
-            switch (coreType(T).type()) {
+            switch (u.type()) {
             case ж<Slice>: {
                 min = 2;
                 break;
@@ -549,64 +620,67 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 min = 1;
                 break;
             }
-            case null: {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), InvalidMake, invalidArg + "cannot make %s: no core type", arg0);
-                return default!;
-            }
             default: {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), InvalidMake, invalidArg + "cannot make %s; type must be slice, map, or channel", arg0);
-                return default!;
+                // any other type was excluded above
+                throw panic("unreachable");
+                break;
             }}
-
             if (nargs < min || min + 1 < nargs) {
                 Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), WrongArgCount, invalidOp + "%v expects %d or %d arguments; found %d", Ꮡcall.OrTypedNil(), min, min + 1, nargs);
                 return default!;
             }
+
             var types = new ΔType[]{T}.slice();
             slice<int64> sizes = default!;           // constant integer arguments, if any
             foreach (var (_, arg) in argList[1..]) {
                 var (typ, size) = Ꮡcheck.index(arg, -1); // ok to continue with typ == Typ[Invalid]
-                types = append(types, typ);
+                types = append(typesᴷ, types, typ);
                 if (size >= 0) {
-                    sizes = append(sizes, size);
+                    sizes = append(sizesᴷ, sizes, size);
                 }
             }
             if (len(sizes) == 2 && sizes[0] > sizes[1]) {
                 Ꮡcheck.error(new ast_Exprᴠpositioner(argList[1]), SwappedMakeArgs, invalidArg + "length and capacity swapped");
+                // safe to continue
             }
             x.mode = value;
             x.typ = T;
             if (check.recordTypes()) {
-                // safe to continue
                 check.recordBuiltinType(call.Fun, makeSig(x.typ, types.ꓸꓸꓸ));
             }
         }
         else if (exprᴛ2 == _Max || exprᴛ2 == _Min) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // max(x, ...)
- // min(x, ...)
- go1_21, "built-in %s"u8, bin.name);
+            // max(x, ...)
+            // min(x, ...)
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_21, "built-in %s"u8, bin.name);
+
             token.Token op = token.LSS;
             if (id == _Max) {
                 op = token.GTR;
             }
+
             foreach (var (i, a) in args) {
                 if ((~a).mode == invalid) {
                     return default!;
                 }
+
                 if (!allOrdered((~a).typ)) {
                     Ꮡcheck.errorf(new operandжpositioner(a), InvalidMinMaxOperand, invalidArg + "%s cannot be ordered", a.OrTypedNil());
                     return default!;
                 }
+
                 // The first argument is already in x and there's nothing left to do.
                 if (i > 0) {
                     Ꮡcheck.matchTypes(Ꮡx, a);
                     if (x.mode == invalid) {
                         return default!;
                     }
+
                     if (!Identical(x.typ, (~a).typ)) {
                         Ꮡcheck.errorf(new operandжpositioner(a), MismatchedTypes, invalidArg + "mismatched types %s (previous argument) and %s (type of %s)", x.typ, (~a).typ, (~a).expr);
                         return default!;
                     }
+
                     if (x.mode == constant_ && (~a).mode == constant_){
                         if (constant.Compare((~a).val, op, x.val)) {
                             x = a.Value;
@@ -616,8 +690,9 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                     }
                 }
             }
+
+            // If nargs == 1, make sure x.mode is either a value or a constant.
             if (x.mode != constant_) {
-                // If nargs == 1, make sure x.mode is either a value or a constant.
                 x.mode = value;
                 // A value must not be untyped.
                 Ꮡcheck.assignment(Ꮡx, new InterfaceжΔType(ᏑemptyInterface), "argument to built-in "u8 + bin.name);
@@ -625,10 +700,12 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                     return default!;
                 }
             }
+
+            // Use the final type computed above for all arguments.
             foreach (var (_, a) in args) {
-                // Use the final type computed above for all arguments.
                 Ꮡcheck.updateExprType((~a).expr, x.typ, true);
             }
+
             if (check.recordTypes() && x.mode != constant_) {
                 var types = new slice<ΔType>(nargs);
                 foreach (var (i, _) in types) {
@@ -638,23 +715,45 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _New) {
-            var T = Ꮡcheck.varType(argList[0]);
-            if (!isValid(T)) {
-                // new(T)
-                // (no argument evaluated yet)
+            // new(T) or new(expr)
+            // (no argument evaluated yet)
+            var arg = argList[0];
+            Ꮡcheck.exprOrType(Ꮡx, arg, false);
+            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(byte)(novalue)) | (nuint)(1 << (int)(byte)(Δbuiltinᴛ))));
+            var exprᴛ5 = x.mode;
+            if (exprᴛ5 == invalid) {
                 return default!;
             }
+            if (exprᴛ5 == typexpr) {
+                // new(T)
+                Ꮡcheck.validVarType(arg, x.typ);
+            }
+            else { /* default: */
+                // new(expr)
+                if (isUntyped(x.typ)) {
+                    // check for overflow and untyped nil
+                    Ꮡcheck.assignment(Ꮡx, default!, argumentToNewˢ);
+                    if (x.mode == invalid) {
+                        return default!;
+                    }
+                    assert(isTyped(x.typ));
+                }
+                // report version error only if there are no other errors
+                Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_26, "new(%s)"u8, arg);
+            }
+
+            var T = x.typ;
             x.mode = value;
-            x.typ = new PointerжΔType(Ꮡ(new Pointer(@base: T)));
+            x.typ = new PointerжΔType(NewPointer(T));
             if (check.recordTypes()) {
                 check.recordBuiltinType(call.Fun, makeSig(x.typ, T));
             }
         }
         else if (exprᴛ2 == _Panic) {
+            // panic(x)
+            // record panic call if inside a function with result parameters
+            // (for use in Checker.isTerminating)
             if (check.sig != nil && (~check.sig).results.Len() > 0) {
-                // panic(x)
-                // record panic call if inside a function with result parameters
-                // (for use in Checker.isTerminating)
                 // function has result parameters
                 var p = check.isPanic;
                 if (p == default!) {
@@ -664,10 +763,12 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 }
                 p[Ꮡcall] = true;
             }
+
             Ꮡcheck.assignment(Ꮡx, new InterfaceжΔType(ᏑemptyInterface), argumentToPanicˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             x.mode = novalue;
             if (check.recordTypes()) {
                 check.recordBuiltinType(call.Fun, makeSig(default!, new InterfaceжΔType(ᏑemptyInterface)));
@@ -687,30 +788,34 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                     @params[i] = a.Value.typ;
                 }
             }
+
             x.mode = novalue;
             if (check.recordTypes()) {
                 check.recordBuiltinType(call.Fun, makeSig(default!, @params.ꓸꓸꓸ));
             }
         }
         else if (exprᴛ2 == _Recover) {
+            // recover() interface{}
             x.mode = value;
             x.typ = new InterfaceжΔType(ᏑemptyInterface);
             if (check.recordTypes()) {
-                // recover() interface{}
                 check.recordBuiltinType(call.Fun, makeSig(x.typ));
             }
         }
         else if (exprᴛ2 == _Add) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.Add(ptr unsafe.Pointer, len IntegerType) unsafe.Pointer
- go1_17, "unsafe.Add"u8);
+            // unsafe.Add(ptr unsafe.Pointer, len IntegerType) unsafe.Pointer
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_17, "unsafe.Add"u8);
+
             Ꮡcheck.assignment(Ꮡx, new BasicжΔType(Typ[UnsafePointer]), argumentToUnsafeAddˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             var y = args[1];
             if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeAdd, lengthˢ, true)) {
                 return default!;
             }
+
             x.mode = value;
             x.typ = new BasicжΔType(Typ[UnsafePointer]);
             if (check.recordTypes()) {
@@ -718,11 +823,12 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _Alignof) {
-            Ꮡcheck.assignment(Ꮡx, // unsafe.Alignof(x T) uintptr
- default!, argumentToUnsafeAlignofˢ);
+            // unsafe.Alignof(x T) uintptr
+            Ꮡcheck.assignment(Ꮡx, default!, argumentToUnsafeAlignofˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             if (hasVarSize(x.typ, default!)){
                 x.mode = value;
                 if (check.recordTypes()) {
@@ -731,24 +837,26 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             } else {
                 x.mode = constant_;
                 x.val = constant.MakeInt64(check.conf.alignof(x.typ));
+                // result is constant - no need to record signature
             }
             x.typ = new BasicжΔType(Typ[Uintptr]);
         }
         else if (exprᴛ2 == _Offsetof) {
+            // unsafe.Offsetof(x T) uintptr, where x must be a selector
+            // (no argument evaluated yet)
             var arg0 = argList[0];
             var (selx, _) = ast.Unparen(arg0)._<ж<ast.SelectorExpr>>(ᐧ);
             if (selx == nil) {
-                // result is constant - no need to record signature
-                // unsafe.Offsetof(x T) uintptr, where x must be a selector
-                // (no argument evaluated yet)
                 Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), BadOffsetofSyntax, invalidArg + "%s is not a selector expression", arg0);
                 Ꮡcheck.use(arg0);
                 return default!;
             }
+
             Ꮡcheck.expr(nil, Ꮡx, (~selx).X);
             if (x.mode == invalid) {
                 return default!;
             }
+
             var @base = derefStructPtr(x.typ);
             @string sel = selx.Value.Sel.Value.Name;
             var (obj, index, indirect) = lookupFieldOrMethod(@base, false, check.pkg, sel, false);
@@ -758,22 +866,23 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 return default!;
             }
             case ж<Func>: {
-                Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), // TODO(gri) Using derefStructPtr may result in methods being found
- // that don't actually exist. An error either way, but the error
- // message is confusing. See: https://play.golang.org/p/al75v23kUy ,
- // but go/types reports: "invalid argument: x.m is a method value".
- InvalidOffsetof, invalidArg + "%s is a method value", arg0);
+                // TODO(gri) Using derefStructPtr may result in methods being found
+                // that don't actually exist. An error either way, but the error
+                // message is confusing. See: https://play.golang.org/p/al75v23kUy ,
+                // but go/types reports: "invalid argument: x.m is a method value".
+                Ꮡcheck.errorf(new ast_Exprᴠpositioner(arg0), InvalidOffsetof, invalidArg + "%s is a method value", arg0);
                 return default!;
             }}
-
             if (indirect) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidOffsetof, invalidArg + "field %s is embedded via a pointer in %s", sel, @base);
                 return default!;
             }
-            check.recordSelection(selx, // TODO(gri) Should we pass x.typ instead of base (and have indirect report if derefStructPtr indirected)?
- FieldVal, @base, obj, index, false);
+
+            // TODO(gri) Should we pass x.typ instead of base (and have indirect report if derefStructPtr indirected)?
+            check.recordSelection(selx, FieldVal, @base, obj, index, false);
+
+            // record the selector expression (was bug - go.dev/issue/47895)
             {
-                // record the selector expression (was bug - go.dev/issue/47895)
                 ref var mode = ref heap<operandMode>(out var Ꮡmode);
                 mode = value;
                 if (x.mode == variable || indirect) {
@@ -781,11 +890,12 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 }
                 check.record(Ꮡ(new operand(mode, new ast.SelectorExprжExpr(selx), obj.Type(), default!, 0)));
             }
-            if (hasVarSize(@base, // The field offset is considered a variable even if the field is declared before
- // the part of the struct which is variable-sized. This makes both the rules
- // simpler and also permits (or at least doesn't prevent) a compiler from re-
- // arranging struct fields if it wanted to.
- default!)){
+
+            // The field offset is considered a variable even if the field is declared before
+            // the part of the struct which is variable-sized. This makes both the rules
+            // simpler and also permits (or at least doesn't prevent) a compiler from re-
+            // arranging struct fields if it wanted to.
+            if (hasVarSize(@base, default!)){
                 x.mode = value;
                 if (check.recordTypes()) {
                     check.recordBuiltinType(call.Fun, makeSig(new BasicжΔType(Typ[Uintptr]), obj.Type()));
@@ -798,16 +908,17 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 }
                 x.mode = constant_;
                 x.val = constant.MakeInt64(offs);
+                // result is constant - no need to record signature
             }
             x.typ = new BasicжΔType(Typ[Uintptr]);
         }
         else if (exprᴛ2 == _Sizeof) {
-            Ꮡcheck.assignment(Ꮡx, // result is constant - no need to record signature
- // unsafe.Sizeof(x T) uintptr
- default!, argumentToUnsafeSizeofˢ);
+            // unsafe.Sizeof(x T) uintptr
+            Ꮡcheck.assignment(Ꮡx, default!, argumentToUnsafeSizeofˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             if (hasVarSize(x.typ, default!)){
                 x.mode = value;
                 if (check.recordTypes()) {
@@ -821,22 +932,26 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 }
                 x.mode = constant_;
                 x.val = constant.MakeInt64(size);
+                // result is constant - no need to record signature
             }
             x.typ = new BasicжΔType(Typ[Uintptr]);
         }
         else if (exprᴛ2 == _Slice) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // result is constant - no need to record signature
- // unsafe.Slice(ptr *T, len IntegerType) []T
- go1_17, "unsafe.Slice"u8);
-            var (ptr, _) = coreType(x.typ)._<ж<Pointer>>(ᐧ);
+            // unsafe.Slice(ptr *T, len IntegerType) []T
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_17, "unsafe.Slice"u8);
+
+            var (u, _) = commonUnder(x.typ, default!);
+            var (ptr, _) = u._<ж<Pointer>>(ᐧ);
             if (ptr == nil) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSlice, invalidArg + "%s is not a pointer", Ꮡx.OrTypedNil());
                 return default!;
             }
+
             var y = args[1];
             if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeSlice, lengthˢ, false)) {
                 return default!;
             }
+
             x.mode = value;
             x.typ = new SliceжΔType(NewSlice((~ptr).@base));
             if (check.recordTypes()) {
@@ -844,13 +959,16 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _SliceData) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.SliceData(slice []T) *T
- go1_20, "unsafe.SliceData"u8);
-            var (Δslice, _) = coreType(x.typ)._<ж<Slice>>(ᐧ);
+            // unsafe.SliceData(slice []T) *T
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_20, "unsafe.SliceData"u8);
+
+            var (u, _) = commonUnder(x.typ, default!);
+            var (Δslice, _) = u._<ж<Slice>>(ᐧ);
             if (Δslice == nil) {
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidUnsafeSliceData, invalidArg + "%s is not a slice", Ꮡx.OrTypedNil());
                 return default!;
             }
+
             x.mode = value;
             x.typ = new PointerжΔType(NewPointer((~Δslice).elem));
             if (check.recordTypes()) {
@@ -858,16 +976,19 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _String) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.String(ptr *byte, len IntegerType) string
- go1_20, "unsafe.String"u8);
+            // unsafe.String(ptr *byte, len IntegerType) string
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_20, "unsafe.String"u8);
+
             Ꮡcheck.assignment(Ꮡx, new PointerжΔType(NewPointer(universeByte)), argumentToUnsafeStringˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             var y = args[1];
             if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeString, lengthˢ, false)) {
                 return default!;
             }
+
             x.mode = value;
             x.typ = new BasicжΔType(Typ[ΔString]);
             if (check.recordTypes()) {
@@ -875,12 +996,14 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _StringData) {
-            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), // unsafe.StringData(str string) *byte
- go1_20, "unsafe.StringData"u8);
+            // unsafe.StringData(str string) *byte
+            Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_20, "unsafe.StringData"u8);
+
             Ꮡcheck.assignment(Ꮡx, new BasicжΔType(Typ[ΔString]), argumentToUnsafeˢ);
             if (x.mode == invalid) {
                 return default!;
             }
+
             x.mode = value;
             x.typ = new PointerжΔType(NewPointer(universeByte));
             if (check.recordTypes()) {
@@ -888,10 +1011,10 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
         }
         else if (exprᴛ2 == _Assert) {
+            // assert(pred) causes a typechecker error if pred is false.
+            // The result of assert is the value of pred if there is no error.
+            // Note: assert is only available in self-test mode.
             if (x.mode != constant_ || !isBoolean(x.typ)) {
-                // assert(pred) causes a typechecker error if pred is false.
-                // The result of assert is the value of pred if there is no error.
-                // Note: assert is only available in self-test mode.
                 Ꮡcheck.errorf(new operandжpositioner(Ꮡx), Test, invalidArg + "%s is not a boolean constant", Ꮡx.OrTypedNil());
                 return default!;
             }
@@ -901,18 +1024,18 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             }
             if (!constant.BoolVal(x.val)) {
                 Ꮡcheck.errorf(new ast_CallExprжpositioner(Ꮡcall), Test, "%v failed"u8, Ꮡcall.OrTypedNil());
+                // compile-time assertion failure - safe to continue
             }
+            // result is constant - no need to record signature
         }
         else if (exprᴛ2 == _Trace) {
             do {
+                // trace(x, y, z, ...) dumps the positions, expressions, and
+                // values of its arguments. The result of trace is the value
+                // of the first argument.
+                // Note: trace is only available in self-test mode.
+                // (no argument evaluated yet)
                 if (nargs == 0) {
-                    // compile-time assertion failure - safe to continue
-                    // result is constant - no need to record signature
-                    // trace(x, y, z, ...) dumps the positions, expressions, and
-                    // values of its arguments. The result of trace is the value
-                    // of the first argument.
-                    // Note: trace is only available in self-test mode.
-                    // (no argument evaluated yet)
                     Ꮡcheck.dump(vTraceWithoutArgumentsˢ, call.Pos());
                     x.mode = novalue;
                     break;
@@ -927,18 +1050,45 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
                 if (x.mode == invalid) {
                     return default!;
                 }
+                // trace is only available in test mode - no need to record signature
             } while (false);
         }
         else { /* default: */
             throw panic("unreachable");
         }
 
-        // trace is only available in test mode - no need to record signature
         assert(x.mode != invalid);
         return true;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
+}
+
+// sliceElem returns the slice element type for a slice operand x
+// or a type error if x is not a slice (or a type set of slices).
+internal static (ΔType, ж<typeError>) sliceElem(ж<operand> Ꮡx) {
+    ref var x = ref Ꮡx.DerefOrNull();
+
+    ΔType E = default!;
+    foreach (var (_, u) in range<ΔType, ΔType>(typeset(x.typ).Invoke)) {
+        var (s, _) = u._<ж<Slice>>(ᐧ);
+        if (s == nil) {
+            if (x.isNil()){
+                // Printing x in this case would just print "nil".
+                // Special case this so we can emphasize "untyped".
+                return (default!, typeErrorf("argument must be a slice; have untyped nil"u8));
+            } else {
+                return (default!, typeErrorf("argument must be a slice; have %s"u8, Ꮡx.OrTypedNil()));
+            }
+        }
+        if (E == default!){
+            E = s.Value.elem;
+        } else 
+        if (!Identical(E, (~s).elem)) {
+            return (default!, typeErrorf("mismatched slice element types %s and %s in %s"u8, E, (~s).elem, Ꮡx.OrTypedNil()));
+        }
+    }
+    return (E, default!);
 }
 
 // hasVarSize reports if the size of type t is variable due to type parameters
@@ -969,7 +1119,8 @@ internal static bool /*varSized*/ hasVarSize(ΔType t, map<ж<Named>, bool> seen
                 }, ref ᒐ);
             }
         }
-        var switchᴛ3 = under(t);
+
+        var switchᴛ3 = t.Underlying();
         switch (switchᴛ3.type()) {
         case ж<Array> u: {
             varSized = hasVarSize((~u).elem, seen); goto ᒐdone;
@@ -1028,6 +1179,7 @@ internal static ΔType applyTypeFunc(this ж<Checker> Ꮡcheck, Func<ΔType, ΔT
             })) {
                 return default!;
             }
+
             // We can type-check this fine but we're introducing a synthetic
             // type parameter for the result. It's not clear what the API
             // implications are here. Report an error for 1.18 (see go.dev/issue/50912),
@@ -1046,17 +1198,19 @@ internal static ΔType applyTypeFunc(this ж<Checker> Ꮡcheck, Func<ΔType, ΔT
             else { /* default: */
                 throw panic("unreachable");
             }
-
             Ꮡcheck.softErrorf(new operandжpositioner(Ꮡx), code, "%s not supported as argument to built-in %s for go1.18 (see go.dev/issue/50937)"u8, Ꮡx.OrTypedNil(), predeclaredFuncs[id].name);
+
             // Construct a suitable new type parameter for the result type.
             // The type parameter is placed in the current package so export/import
             // works as expected.
             var tpar = NewTypeName(nopos, check.pkg, (~(~tp).obj).name, default!);
             var ptyp = Ꮡcheck.newTypeParam(tpar, new InterfaceжΔType(NewInterfaceType(default!, new ΔType[]{new UnionжΔType(NewUnion(terms))}.slice()))); // assigns type to tpar as a side-effect
             ptyp.Value.index = tp.Value.index;
+
             return new TypeParamжΔType(ptyp);
         }
     }
+
     return f(x.typ);
 }
 
@@ -1067,13 +1221,13 @@ internal static ж<ΔSignature> makeSig(ΔType res, params ꓸꓸꓸType argsʗp
 
     var list = new slice<ж<Var>>(len(args));
     foreach (var (i, param) in args) {
-        list[i] = NewVar(nopos, nil, ""u8, Default(param));
+        list[i] = NewParam(nopos, nil, ""u8, Default(param));
     }
     var @params = NewTuple(list.ꓸꓸꓸ);
     ж<Tuple> result = default!;
     if (res != default!) {
         assert(!isUntyped(res));
-        result = NewTuple(NewVar(nopos, nil, ""u8, res));
+        result = NewTuple(newVar(ResultVar, nopos, nil, ""u8, res));
     }
     return Ꮡ(new ΔSignature(@params: @params, results: result));
 }
@@ -1084,7 +1238,7 @@ internal static ΔType arrayPtrDeref(ΔType typ) {
     {
         var (p, ok) = Unalias(typ)._<ж<Pointer>>(ᐧ); if (ok) {
             {
-                var (a, _) = under((~p).@base)._<ж<Array>>(ᐧ); if (a != nil) {
+                var (a, _) = (~p).@base.Underlying()._<ж<Array>>(ᐧ); if (a != nil) {
                     return new ArrayжΔType(a);
                 }
             }

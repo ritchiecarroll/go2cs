@@ -10,8 +10,9 @@ internal static void Main() {
         tt = vᴛ1;
 
         var p = Ꮡtt;
-        fmt.Println(((@string)(~p).a), ((@string)(~p).b), (~p).i);
+        fmt.Println((@string)(~p).a, (@string)(~p).b, (~p).i);
     }
+
     foreach (var (_, vᴛ2) in sizeTests) {
         ref var st = ref heap(new sizeTestsᴛ1(), out var Ꮡst);
         st = vᴛ2;
@@ -19,6 +20,7 @@ internal static void Main() {
         var q = Ꮡst;
         fmt.Println((~q).name, (~q).want);
     }
+
     fmt.Println(new Bee(nil).probe());
     fmt.Println(new Why(nil).probe());
 }

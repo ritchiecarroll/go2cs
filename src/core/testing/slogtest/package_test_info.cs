@@ -36,7 +36,7 @@ using static global::go.testing.slogtest_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/slogtest/run_test.go", "run_test.cs", "ABEegoSCgpSCkoCCpJY=", "18-21:1;22-28:2")]
+[assembly: go.GoPositionMap("testing/slogtest/run_test.go", "run_test.cs", "ABEegpSCgpSCkoCCpKY=", "18-21:1;22-28:2")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

@@ -21,9 +21,7 @@ internal static bool hasSOLMPTCP; // only valid if mptcpAvailable is true
 
 // These constants aren't in the syscall package, which is frozen
 internal static UntypedInt _IPPROTO_MPTCP => 0x106;
-
 internal static UntypedInt _SOL_MPTCP => 0x11c;
-
 internal static UntypedInt _MPTCP_INFO => 0x1;
 
 internal static bool supportsMultipathTCP() {
@@ -39,28 +37,25 @@ internal static void initMPTCPavailable() {
         family = syscall.AF_INET6;
     }
     var (s, err) = sysSocket(family, syscall.SOCK_STREAM, _IPPROTO_MPTCP);
+
     var matchᴛ1 = false;
-    if (errors.Is(err, syscall.EPROTONOSUPPORT)) { matchᴛ1 = true;
+    if (errors.Is(err, syscall.EPROTONOSUPPORT)) { matchᴛ1 = true; // Not supported: >= v5.6
         return;
     }
-    if (errors.Is(err, // Not supported: >= v5.6
- syscall.EINVAL)) { matchᴛ1 = true;
+    if (errors.Is(err, syscall.EINVAL)) { matchᴛ1 = true; // Not supported: < v5.6
         return;
     }
-    if (err == default!) { matchᴛ1 = true;
+    if (err == default!) { matchᴛ1 = true; // Supported and no error
         poll.CloseFunc(s);
         fallthrough = true;
     }
     if (fallthrough || !matchᴛ1) { /* default: */
+        // another error: MPTCP was not available but it might be later
         mptcpAvailable = true;
     }
 
-    // Not supported: < v5.6
-    // Supported and no error
-    // another error: MPTCP was not available but it might be later
-    var (major, minor) = unix.KernelVersion();
-    // SOL_MPTCP only supported from kernel 5.16
-    hasSOLMPTCP = major > 5 || (major == 5 && minor >= 16);
+    // SOL_MPTCP only supported from kernel 5.16.
+    hasSOLMPTCP = unix.KernelVersionGE(5, 16);
 }
 
 internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> Ꮡraddr) {
@@ -71,6 +66,7 @@ internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context
             }
         }
     }
+
     // Fallback to dialTCP if Multipath TCP isn't supported on this operating
     // system. But also fallback in case of any error with MPTCP.
     //
@@ -88,6 +84,7 @@ internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl,
             }
         }
     }
+
     // Fallback to listenTCP if Multipath TCP isn't supported on this operating
     // system. But also fallback in case of any error with MPTCP.
     //
@@ -110,6 +107,7 @@ internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl,
 // Older kernels will always return them even if MPTCP is used: not usable.
 internal static bool hasFallenBack(ж<netFD> Ꮡfd) {
     var (_, err) = Ꮡfd.of(netFD.Ꮡpfd).GetsockoptInt(_SOL_MPTCP, _MPTCP_INFO);
+
     // 2 expected errors in case of fallback depending on the address family
     //   - AF_INET:  EOPNOTSUPP
     //   - AF_INET6: ENOPROTOOPT
@@ -123,6 +121,7 @@ internal static bool hasFallenBack(ж<netFD> Ꮡfd) {
 // a fallback to TCP has been done.
 internal static bool isUsingMPTCPProto(ж<netFD> Ꮡfd) {
     var (proto, _) = Ꮡfd.of(netFD.Ꮡpfd).GetsockoptInt(syscall.SOL_SOCKET, syscall.SO_PROTOCOL);
+
     return proto == _IPPROTO_MPTCP;
 }
 
@@ -134,9 +133,11 @@ internal static bool isUsingMultipathTCP(ж<netFD> Ꮡfd) {
     if (!supportsMultipathTCP()) {
         return false;
     }
+
     if (hasSOLMPTCP) {
         return !hasFallenBack(Ꮡfd);
     }
+
     return isUsingMPTCPProto(Ꮡfd);
 }
 

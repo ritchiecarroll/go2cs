@@ -23,6 +23,7 @@ import (
 )
 
 func TestAnElidedEmptyInterfaceCompositeBoxesItsElementsAtTheirGoTypes(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -76,11 +77,11 @@ func main() {
 	// Each element boxes at its Go type: a string literal through @string, an untyped constant through its
 	// default type, a pointer as its box.
 	for _, want := range []string{
-		`new any[]{(nint)(1), (nint)(2)}.array()`,
+		`new any[]{(nint)1, (nint)2}.array()`,
 		`new any[]{(@string)"a"u8, (@string)"b"u8}.array()`,
 		`new any[]{1.5D, (rune)'x'}.slice()`,
 		`new any[]{(@string)("c"u8 + "d"u8), true}.slice()`,
-		`Ꮡ(new any[]{(nint)(1), (@string)"p"u8}.array())`,
+		`Ꮡ(new any[]{(nint)1, (@string)"p"u8}.array())`,
 		`new any[]{p.OrTypedNil()}.slice()`,
 	} {
 		if !strings.Contains(mainCs, want) {
@@ -91,8 +92,8 @@ func main() {
 	// CONTROLS: an elided literal of a concrete element type, and a typed `[]any` literal, keep their emission.
 	for _, want := range []string{
 		`new nint[]{1, 2}.slice()`,
-		`new @string[]{"x"u8}.slice()`,
-		`new any[]{(@string)"flat"u8, (nint)(3)}.slice()`,
+		`new @string[]{"x"}.slice()`, // a `string` element takes the plain literal (hoistedLiteralOperations.go)
+		`new any[]{(@string)"flat"u8, (nint)3}.slice()`,
 	} {
 		if !strings.Contains(mainCs, want) {
 			t.Errorf("control: want %q unchanged:\n%s", want, mainCs)

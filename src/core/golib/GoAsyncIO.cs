@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace go.golib;
@@ -52,7 +53,24 @@ public static class GoAsyncIO
     // golib must not know what a `*Overlapped` is. Equality is the key's own — for a go2cs pointer
     // that is (source box, field identity), which is exactly the property that makes three separate
     // mints of `&o.o` at three call sites resolve to ONE record.
-    private static readonly ConcurrentDictionary<object, Lazy<object>> s_operationState = new();
+    private static readonly ConcurrentDictionary<object, operationSlot> s_operationState = new();
+
+    // Descriptors the WAITER has taken off the completion mechanism (see MarkUnassociated). A
+    // submitting package reads this to decide how to issue an operation, and a record keeps the
+    // answer it was built under, so a mark retires every record built before it.
+    private static readonly ConcurrentDictionary<nuint, bool> s_unassociated = new();
+
+    // One operation's state, plus the (descriptor, mode) a submit bound it to and whether that
+    // descriptor was unassociated when it did. A slot made by GetOrCreateOperationState alone is
+    // UNBOUND and matches any binding; a slot made by GetOrBindOperationState matches only its own
+    // pair and association state (see that method for why).
+    private sealed class operationSlot(Lazy<object> state, bool bound, nuint descriptor, nint mode, bool unassociated = false)
+    {
+        internal readonly Lazy<object> State = state;
+
+        internal bool Matches(nuint other, nint otherMode) =>
+            !bound || (descriptor == other && mode == otherMode && unassociated == IsUnassociated(other));
+    }
 
     // Completion work an operation owes, keyed the same way its state is (netpoll design SS4.8).
     // Separate from s_operationState because it is per-SUBMISSION and transient, while the state is
@@ -74,9 +92,16 @@ public static class GoAsyncIO
     public static void SetReadiness(nuint descriptor, Action<nint>? sink)
     {
         if (sink is null)
+        {
             s_sinks.TryRemove(descriptor, out _);
+        }
         else
+        {
+            // A new registration is a new descriptor that reuses a retired number, so it starts
+            // associable whatever the old one was marked.
+            s_unassociated.TryRemove(descriptor, out _);
             s_sinks[descriptor] = sink;
+        }
     }
 
     /// <summary>
@@ -101,6 +126,20 @@ public static class GoAsyncIO
 
         return true;
     }
+
+    /// <summary>
+    /// Reports whether a readiness sink is registered for <paramref name="descriptor"/>, which is to
+    /// say whether the WAITER owns the descriptor's completions.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor to look up.</param>
+    /// <returns><c>true</c> when a sink is registered.</returns>
+    /// <remarks>
+    /// A submitting package whose OS routine also serves callers OUTSIDE the waiter reads this to
+    /// choose: an operation on a descriptor the waiter owns is issued through the completion
+    /// mechanism, and any other is issued exactly as the caller wrote it. Associating a descriptor
+    /// nobody waits on would route its completions to a port nobody reads.
+    /// </remarks>
+    public static bool HasReadiness(nuint descriptor) => s_sinks.ContainsKey(descriptor);
 
     /// <summary>
     /// Gets the submitting package's state for <paramref name="descriptor"/>, creating it EXACTLY
@@ -150,10 +189,40 @@ public static class GoAsyncIO
     public static void RemoveDescriptor(nuint descriptor)
     {
         s_sinks.TryRemove(descriptor, out _);
+        s_unassociated.TryRemove(descriptor, out _);
 
         if (s_descriptorState.TryRemove(descriptor, out Lazy<object>? lazy) && lazy.IsValueCreated)
             (lazy.Value as IDisposable)?.Dispose();
     }
+
+    /// <summary>
+    /// Records that the WAITER has taken <paramref name="descriptor"/> off the completion mechanism,
+    /// so no submitting package may associate it with one again.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor the waiter disassociated.</param>
+    /// <remarks>
+    /// <para>
+    /// This is Go's <c>(*FD).DisassociateIOCP</c> post-condition: the handle belongs to no completion
+    /// port, and its later IO waits on the operation's own event (<c>waitIO</c>'s non-pollable arm).
+    /// A submitting package that associates descriptors LAZILY, at the first operation, would
+    /// otherwise associate a disassociated handle again on its next submit, and route that
+    /// operation's completion to a port nobody is waiting on.
+    /// </para>
+    /// <para>
+    /// The mark lives until <see cref="RemoveDescriptor"/> retires the descriptor or a new
+    /// <see cref="SetReadiness"/> registers its number again. Every operation record built before
+    /// the mark stops matching (see <see cref="GetOrBindOperationState"/>), so the next submit on
+    /// that descriptor builds a record under the new state.
+    /// </para>
+    /// </remarks>
+    public static void MarkUnassociated(nuint descriptor) => s_unassociated[descriptor] = true;
+
+    /// <summary>
+    /// Reports whether <paramref name="descriptor"/> was marked by <see cref="MarkUnassociated"/>.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor to look up.</param>
+    /// <returns><c>true</c> when the descriptor may not be associated.</returns>
+    public static bool IsUnassociated(nuint descriptor) => s_unassociated.ContainsKey(descriptor);
 
     /// <summary>
     /// Gets the submitting package's state for one operation, creating it EXACTLY once.
@@ -164,7 +233,58 @@ public static class GoAsyncIO
     /// <remarks>See <see cref="GetOrCreateDescriptorState"/> for why this is not a bare
     /// <c>GetOrAdd</c>.</remarks>
     public static object GetOrCreateOperationState(object key, Func<object> factory) =>
-        s_operationState.GetOrAdd(key, _ => new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+        s_operationState.GetOrAdd(key, _ => new operationSlot(new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication), false, 0, 0)).State.Value;
+
+    /// <summary>
+    /// Gets the state for one operation BOUND to <paramref name="descriptor"/> and
+    /// <paramref name="mode"/>, creating it exactly once, and retiring a record the same key holds
+    /// for a different binding.
+    /// </summary>
+    /// <param name="key">Pointer the operation is named by.</param>
+    /// <param name="descriptor">Descriptor this submission is for.</param>
+    /// <param name="mode">Submitting package's own mode value.</param>
+    /// <param name="factory">Builds the state on the one thread that wins the race.</param>
+    /// <returns>The one state object for this operation and binding.</returns>
+    /// <remarks>
+    /// <para>
+    /// A record keeps what it was created for: its OS association belongs to one descriptor, and its
+    /// completion signals one mode. Through Go 1.24 that matched the key's life, because each FD
+    /// owned exactly one read and one write operation. Go 1.26's internal/poll takes every operation
+    /// from a process-wide <c>sync.Pool</c> (<c>fd_windows.go</c>'s <c>operationPool</c>), so one
+    /// key is reused across descriptors and across modes, and a record found by key alone would
+    /// submit on the wrong association and wake the wrong waiter.
+    /// </para>
+    /// <para>
+    /// So a key reused for a different pair gets a NEW record, and so does a key whose descriptor was
+    /// marked by <see cref="MarkUnassociated"/> after its record was built. The old one is removed with any
+    /// pending completion work and disposed when disposable. That is safe because a pooled
+    /// operation goes back to the pool only after <c>execIO</c> has harvested it: nothing is in
+    /// flight on the record being retired.
+    /// </para>
+    /// </remarks>
+    public static object GetOrBindOperationState(object key, nuint descriptor, nint mode, Func<object> factory)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(factory);
+
+        while (true)
+        {
+            operationSlot slot = s_operationState.GetOrAdd(key, _ =>
+                new operationSlot(new Lazy<object>(factory, LazyThreadSafetyMode.ExecutionAndPublication), true, descriptor, mode,
+                    IsUnassociated(descriptor)));
+
+            if (slot.Matches(descriptor, mode))
+                return slot.State.Value;
+
+            if (s_operationState.TryRemove(new KeyValuePair<object, operationSlot>(key, slot)))
+            {
+                s_operationCompletions.TryRemove(key, out _);
+
+                if (slot.State.IsValueCreated)
+                    (slot.State.Value as IDisposable)?.Dispose();
+            }
+        }
+    }
 
     /// <summary>
     /// Gets the submitting package's state for one operation without creating it.
@@ -174,7 +294,7 @@ public static class GoAsyncIO
     /// <returns><c>true</c> when a state object exists for this operation.</returns>
     public static bool TryGetOperationState(object key, out object? state)
     {
-        state = s_operationState.TryGetValue(key, out Lazy<object>? lazy) ? lazy.Value : null;
+        state = s_operationState.TryGetValue(key, out operationSlot? slot) ? slot.State.Value : null;
 
         return state is not null;
     }
@@ -191,7 +311,34 @@ public static class GoAsyncIO
         // LATER operation that reuses this key inherit a decode meant for the dead one.
         s_operationCompletions.TryRemove(key, out _);
 
-        return s_operationState.TryRemove(key, out Lazy<object>? lazy) && lazy.IsValueCreated ? lazy.Value : null;
+        return s_operationState.TryRemove(key, out operationSlot? slot) && slot.State.IsValueCreated ? slot.State.Value : null;
+    }
+
+    /// <summary>
+    /// Removes one operation's state only while <paramref name="key"/> still names
+    /// <paramref name="state"/>.
+    /// </summary>
+    /// <param name="key">Pointer the operation is named by.</param>
+    /// <param name="state">The state the caller is retiring.</param>
+    /// <returns><c>true</c> when that state was removed.</returns>
+    /// <remarks>
+    /// For an owner retiring records it created, such as a descriptor's teardown: since
+    /// <see cref="GetOrBindOperationState"/> can re-bind a key to a NEW record for another
+    /// descriptor, removing by key alone could retire that other descriptor's live record.
+    /// </remarks>
+    public static bool RemoveOperationState(object key, object state)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+
+        if (!s_operationState.TryGetValue(key, out operationSlot? slot) || !slot.State.IsValueCreated ||
+            !ReferenceEquals(slot.State.Value, state))
+            return false;
+
+        if (!s_operationState.TryRemove(new KeyValuePair<object, operationSlot>(key, slot)))
+            return false;
+
+        s_operationCompletions.TryRemove(key, out _);
+        return true;
     }
 
     /// <summary>
@@ -289,10 +436,11 @@ public static class GoAsyncIO
         Func<nuint, object, nint, object> factory = s_operationFactory
             ?? throw new InvalidOperationException("GoAsyncIO: no operation factory registered");
 
-        // GetOrCreateOperationState's Lazy(ExecutionAndPublication) is what holds this to ONE record
+        // GetOrBindOperationState's Lazy(ExecutionAndPublication) is what holds this to ONE record
         // per waiter: a bare GetOrAdd runs its factory more than once under contention, and each
-        // discarded record here owns native resources nothing would ever free (measured at S2b).
-        object state = GetOrCreateOperationState(key, () => factory(descriptor, key, mode));
+        // discarded record here owns native resources nothing would ever free (measured at S2b). The
+        // binding is what keeps a POOLED operation (Go 1.26) from reusing another descriptor's record.
+        object state = GetOrBindOperationState(key, descriptor, mode, () => factory(descriptor, key, mode));
 
         return state is IGoAsyncOperation operation
             ? operation.RearmForSubmit()
@@ -372,6 +520,70 @@ public static class GoAsyncIO
 
         onComplete(bytesTransferred);
         return true;
+    }
+
+    // The parts other packages add to the first read deadline's pre-pay, in registration order.
+    private static readonly List<Action> s_deadlinePathPrepay = [];
+
+    /// <summary>
+    /// Registers a package's part of the first read deadline's one-time costs, for the poller to pay
+    /// when it starts.
+    /// </summary>
+    /// <param name="part">Work that compiles or first-touches that package's part of the path.</param>
+    /// <remarks>
+    /// <para>
+    /// A process's first read deadline would otherwise compile its path between the deadline instant
+    /// and the read's return (<c>internal/poll/deadline_prepay_impl.cs</c>). The path runs through
+    /// several packages, and the poller cannot name what is private to them or what lives above it
+    /// (<c>os</c> imports <c>internal/poll</c>), so each package registers its own part here, from its
+    /// module initializer, and the poller runs them all once. It lives in golib for the reason this
+    /// type does: it is the one assembly all of them see.
+    /// </para>
+    /// <para>
+    /// A part must not open, wait on or arm anything: it only compiles, or calls what Go would allow
+    /// on values nobody else holds.
+    /// </para>
+    /// </remarks>
+    public static void AddDeadlinePathPrepay(Action part)
+    {
+        ArgumentNullException.ThrowIfNull(part);
+
+        lock (s_deadlinePathPrepay)
+            s_deadlinePathPrepay.Add(part);
+    }
+
+    /// <summary>
+    /// Runs every part registered with <see cref="AddDeadlinePathPrepay"/>, each in its own try.
+    /// </summary>
+    /// <remarks>
+    /// The poller calls this once, from inside the FD.Init that started it. Go has no such step, so
+    /// nothing here may fail that FD.Init: a part that throws ends only itself, and its costs fall on
+    /// the first deadline instead.
+    /// </remarks>
+    public static void RunDeadlinePathPrepay()
+    {
+        Action[] parts;
+
+        lock (s_deadlinePathPrepay)
+            parts = [.. s_deadlinePathPrepay];
+
+        RunEach(parts);
+    }
+
+    // Runs each part in its own try, so one that throws cannot skip another.
+    internal static void RunEach(IEnumerable<Action> parts)
+    {
+        foreach (Action part in parts)
+        {
+            try
+            {
+                part();
+            }
+            catch (Exception)
+            {
+                // Leaves this part's costs to the first deadline.
+            }
+        }
     }
 }
 

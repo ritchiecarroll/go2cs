@@ -15,22 +15,18 @@ using hash;
 
 partial class gzip_package {
 
-// These constants are copied from the flate package, so that code that imports
-// "compress/gzip" does not also have to import "compress/flate".
+// These constants are copied from the [flate] package, so that code that imports
+// [compress/gzip] does not also have to import [compress/flate].
 public static UntypedInt NoCompression => /* flate.NoCompression */ 0;
-
 public static UntypedInt BestSpeed => /* flate.BestSpeed */ 1;
-
 public static UntypedInt BestCompression => /* flate.BestCompression */ 9;
-
 public static UntypedInt DefaultCompression => /* flate.DefaultCompression */ -1;
-
 public static UntypedInt HuffmanOnly => /* flate.HuffmanOnly */ -2;
 
-// A Writer is an io.WriteCloser.
+// A Writer is an [io.WriteCloser].
 // Writes to a Writer are compressed and written to w.
 partial struct Writer {
-    public partial ref Header Header { get; }      // written at first call to Write, Flush, or Close
+    /*embed*/ public Header Header;      // written at first call to Write, Flush, or Close
     internal io.Writer w;
     internal nint level;
     internal bool wroteHeader;
@@ -48,7 +44,7 @@ partial struct Writer {
 // It is the caller's responsibility to call Close on the [Writer] when done.
 // Writes may be buffered and not flushed until Close.
 //
-// Callers that wish to set the fields in Writer.Header must do so before
+// Callers that wish to set the fields in Writer.[Header] must do so before
 // the first call to Write, Flush, or Close.
 public static ж<Writer> NewWriter(io.Writer w) {
     var (z, _) = NewWriterLevel(w, DefaultCompression);
@@ -77,9 +73,8 @@ internal static void init(this ref Writer z, io.Writer w, nint level) {
     }
     z = new Writer(
         Header: new Header(
-            OS: 255
-        ), // unknown
-
+            OS: 255 // unknown
+        ),
         w: w,
         level: level,
         compressor: compressor

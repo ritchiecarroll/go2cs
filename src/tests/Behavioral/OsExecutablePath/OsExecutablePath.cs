@@ -9,29 +9,23 @@ using path;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object errorIsNilˢ = (@string)"error is nil:"u8;
-private static readonly object errorˢ = (@string)"error:"u8;
-private static readonly object pathIsAbsoluteˢ = (@string)"path is absolute:"u8;
-private static readonly object pathExistsˢ = (@string)"path exists:"u8;
-private static readonly object pathIsARegularFileˢ = (@string)"path is a regular file:"u8;
-private static readonly object secondCallAgreesˢ = (@string)"second call agrees:"u8;
-
 internal static void Main() {
     var (path, err) = os.Executable();
-    fmt.Println(errorIsNilˢ, err == default!);
+    fmt.Println("error is nil:", err == default!);
     if (err != default!) {
-        fmt.Println(errorˢ, err);
+        fmt.Println("error:", err);
         return;
     }
-    fmt.Println(pathIsAbsoluteˢ, filepath.IsAbs(path));
+    fmt.Println("path is absolute:", filepath.IsAbs(path));
+
     var (info, statErr) = os.Stat(path);
-    fmt.Println(pathExistsˢ, statErr == default!);
+    fmt.Println("path exists:", statErr == default!);
     if (statErr == default!) {
-        fmt.Println(pathIsARegularFileˢ, info.Mode().IsRegular());
+        fmt.Println("path is a regular file:", info.Mode().IsRegular());
     }
+
     var (again, err2) = os.Executable();
-    fmt.Println(secondCallAgreesˢ, err2 == default! && again == path);
+    fmt.Println("second call agrees:", err2 == default! && again == path);
 }
 
 } // end main_package

@@ -57,7 +57,7 @@ internal static readonly @string wantᶜ1 = """
  "str": {},
  "sto": {}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
     @string want = wantᶜ1;
@@ -65,12 +65,13 @@ public static void TestOmitEmpty(ж<testing.T> Ꮡt) {
     o.Sw = somethingˢ;
     o.Mr = new map<@string, any>{};
     o.Mo = new map<@string, any>{};
+
     var (got, err) = MarshalIndent(Ꮡo, ""u8, " "u8);
     if (err != default!) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
     }
@@ -143,7 +144,7 @@ internal static readonly @string wantᶜ2 = """
  "nps3": {},
  "nps4": {}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitZero(ж<testing.T> Ꮡt) {
     @string want = wantᶜ2;
@@ -152,19 +153,23 @@ public static void TestOmitZero(ж<testing.T> Ꮡt) {
     o.SloNonNil = new slice<@string>(0);
     o.Mr = new map<@string, any>{};
     o.Mo = new map<@string, any>{};
+
     o.Foo = -0D;
     o.Foo2 = new float64[]{+0D, -0D}.array();
+
     o.TimeLocal = new time.Time(nil).Local();
+
     o.NonNilIsZeroer = new json_test_package.time_TimeᴠisZeroer(new time.Time(nil));
     o.NoPanicStruct0 = new json_internal_test_package.NoPanicStructжisZeroer(((ж<NoPanicStruct>)nil));
     o.NoPanicStruct1 = new json_internal_test_package.NoPanicStructжisZeroer(Ꮡ(new NoPanicStruct(nil)));
     o.NoPanicStruct3 = Ꮡ(new NoPanicStruct(nil));
+
     var (got, err) = MarshalIndent(Ꮡo, ""u8, " "u8);
     if (err != default!) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
     }
@@ -186,7 +191,7 @@ internal static readonly @string wantᶜ3 = """
   "nps4": {}
  }
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
     @string want = wantᶜ3;
@@ -196,7 +201,7 @@ public static void TestOmitZeroMap(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             fmt.Println(gotΔ1);
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
@@ -237,7 +242,7 @@ internal static readonly @string wantᶜ4 = """
  "str": {},
  "nzs": {}
 }
-"""u8;
+"""u8.Raw();
 
 public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
     @string want = wantᶜ4;
@@ -246,12 +251,13 @@ public static void TestOmitEmptyZero(ж<testing.T> Ꮡt) {
     o.SloNonNil = new slice<@string>(0);
     o.Mr = new map<@string, any>{};
     o.Mo = new map<@string, any>{};
+
     var (got, err) = MarshalIndent(Ꮡo, ""u8, " "u8);
     if (err != default!) {
         Ꮡt.Fatalf("MarshalIndent error: %v"u8, err);
     }
     {
-        @string gotΔ1 = ((@string)got); if (gotΔ1 != want) {
+        @string gotΔ1 = (@string)got; if (gotΔ1 != want) {
             Ꮡt.Errorf("MarshalIndent:\n\tgot:  %s\n\twant: %s\n"u8, indentNewlines(gotΔ1), indentNewlines(want));
         }
     }
@@ -295,15 +301,14 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
 	"StrStr": "\"xzbit\"",
 	"NumberStr": "46"
 }
-"""u8
+"""u8.Raw()
     ), new(
-        CaseName: Name(stringDoubleEscapesˢ), // See golang.org/issues/38173.
-
+        // See golang.org/issues/38173.
+        CaseName: Name(stringDoubleEscapesˢ),
         @in: new StringTag(
             StrStr: "\b\f\n\r\t\"\\"u8,
-            NumberStr: "0"u8
-        ), // just to satisfy the roundtrip
-
+            NumberStr: "0"u8 // just to satisfy the roundtrip
+        ),
         want: """
 {
 	"BoolStr": "false",
@@ -312,7 +317,7 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
 	"StrStr": "\"\\b\\f\\n\\r\\t\\\"\\\\\"",
 	"NumberStr": "0"
 }
-"""u8
+"""u8.Raw()
     )
     }.slice();
     foreach (var (_, vᴛ1) in tests) {
@@ -325,10 +330,11 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
                 tΔ1.Fatalf("%s: MarshalIndent error: %v"u8, Ꮡtt.Value.Where, err);
             }
             {
-                @string gotΔ1 = ((@string)got); if (gotΔ1 != Ꮡtt.Value.want) {
+                @string gotΔ1 = (@string)got; if (gotΔ1 != Ꮡtt.Value.want) {
                     tΔ1.Fatalf("%s: MarshalIndent:\n\tgot:  %s\n\twant: %s"u8, Ꮡtt.Value.Where, stripWhitespace(gotΔ1), stripWhitespace(Ꮡtt.Value.want));
                 }
             }
+
             // Verify that it round-trips.
             ref var s2 = ref heap(new StringTag(), out var Ꮡs2);
             {
@@ -337,12 +343,13 @@ public static void TestRoundtripStringTag(ж<testing.T> Ꮡt) {
                 }
             }
             if (!reflect.DeepEqual(s2, Ꮡtt.Value.@in)) {
-                tΔ1.Fatalf("%s: Decode:\n\tinput: %s\n\tgot:  %#v\n\twant: %#v"u8, Ꮡtt.Value.Where, indentNewlines(((@string)got)), s2, Ꮡtt.Value.@in);
+                tΔ1.Fatalf("%s: Decode:\n\tinput: %s\n\tgot:  %#v\n\twant: %#v"u8, Ꮡtt.Value.Where, indentNewlines((@string)got), s2, Ꮡtt.Value.@in);
             }
         });
     }
 }
 
+// byte slices are special even if they're renamed types.
 internal partial struct renamedByte /*num:byte*/;
 
 internal partial struct renamedByteSlice /*[]byte*/;
@@ -353,7 +360,7 @@ internal partial struct renamedRenamedByteSlice /*[]renamedByte*/;
 internal static readonly @string ywJjˢ = @"""YWJj"""u8;
 
 public static void TestEncodeRenamedByteSlice(ж<testing.T> Ꮡt) {
-    var s = ((renamedByteSlice)slice<byte>((@string)"abc"u8));
+    var s = (renamedByteSlice)slice<byte>((@string)"abc"u8);
     var (got, err) = Marshal(s);
     if (err != default!) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -400,8 +407,10 @@ internal static slice<RecursiveSlice> recursiveSliceCycle = new RecursiveSlice[]
     var ptr = Ꮡ(new SamePointerNoCycle(nil));
     samePointerNoCycle.Value.Ptr1 = ptr;
     samePointerNoCycle.Value.Ptr2 = ptr;
+
     pointerCycle.Value.Ptr = pointerCycle;
     pointerCycleIndirect.Value.Ptrs = new any[]{pointerCycleIndirect.OrTypedNil()}.slice();
+
     mapCycle["x"u8] = mapCycle;
     sliceCycle[0] = sliceCycle;
     sliceNoCycle[1] = sliceNoCycle[..1];
@@ -483,6 +492,7 @@ public static void TestMarshalTextFloatMap(ж<testing.T> Ꮡt) {
     }
 }
 
+// Ref has Marshaler and Unmarshaler methods with pointer receiver.
 public partial struct Ref /*num:nint*/;
 
 public static (slice<byte>, error) MarshalJSON(this ref Ref _) {
@@ -494,12 +504,14 @@ public static error UnmarshalJSON(this ref Ref r, slice<byte> _) {
     return default!;
 }
 
+// Val has Marshaler methods with value receiver.
 public partial struct Val /*num:nint*/;
 
 public static (slice<byte>, error) MarshalJSON(this Val _) {
     return (slice<byte>(@"""val"""u8), default!);
 }
 
+// RefText has Marshaler and Unmarshaler methods with pointer receiver.
 public partial struct RefText /*num:nint*/;
 
 public static (slice<byte>, error) MarshalText(this ref RefText _) {
@@ -511,6 +523,7 @@ public static error UnmarshalText(this ref RefText r, slice<byte> _) {
     return default!;
 }
 
+// ValText has Marshaler methods with value receiver.
 public partial struct ValText /*num:nint*/;
 
 public static (slice<byte>, error) MarshalText(this ValText _) {
@@ -550,18 +563,20 @@ public static void TestRefValMarshal(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b); if (got != want) {
+        @string got = (@string)b; if (got != want) {
             Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
     }
 }
 
+// C implements Marshaler and returns unescaped JSON.
 public partial struct C /*num:nint*/;
 
 public static (slice<byte>, error) MarshalJSON(this C _) {
     return (slice<byte>(@"""<&>"""u8), default!);
 }
 
+// CText implements Marshaler and returns unescaped text.
 public partial struct CText /*num:nint*/;
 
 public static (slice<byte>, error) MarshalText(this CText _) {
@@ -580,10 +595,11 @@ public static void TestMarshalerEscaping(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b); if (got != want) {
+        @string got = (@string)b; if (got != want) {
             Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
     }
+
     CText ct = default!;
     want = u003cU0026U003eˢ2;
     (b, err) = Marshal(ct);
@@ -591,7 +607,7 @@ public static void TestMarshalerEscaping(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b); if (got != want) {
+        @string got = (@string)b; if (got != want) {
             Ꮡt.Errorf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
     }
@@ -730,40 +746,40 @@ internal partial struct TestAnonymousFields_Sᴛ9 /*dyn*/ {
 
 public static void TestAnonymousFields(ж<testing.T> Ꮡt) {
     var tests = new TestAnonymousFields_tests[]{new(
-        CaseName: Name(ambiguousFieldˢ), // Both S1 and S2 have a field named X. From the perspective of S,
- // it is ambiguous which one X refers to.
- // This should not serialize either field.
-
+        // Both S1 and S2 have a field named X. From the perspective of S,
+        // it is ambiguous which one X refers to.
+        // This should not serialize either field.
+        CaseName: Name(ambiguousFieldˢ),
         makeInput: () => {
             return new TestAnonymousFields_S(new TestAnonymousFields_S1(1, 2), new TestAnonymousFields_S2(3, 4));
         },
         want: @"{}"u8
     ), new(
-        CaseName: Name(dominantFieldˢ), // Both S1 and S2 have a field named X, but since S has an X field as
- // well, it takes precedence over S1.X and S2.X.
-
+        CaseName: Name(dominantFieldˢ),
+        // Both S1 and S2 have a field named X, but since S has an X field as
+        // well, it takes precedence over S1.X and S2.X.
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ1(new TestAnonymousFields_S1ᴛ1(1, 2), new TestAnonymousFields_S2ᴛ1(3, 4), 5, 6);
         },
         want: @"{""X"":6}"u8
     ), new(
-        CaseName: Name(unexportedEmbeddedIntˢ), // Unexported embedded field of non-struct type should not be serialized.
-
+        // Unexported embedded field of non-struct type should not be serialized.
+        CaseName: Name(unexportedEmbeddedIntˢ),
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ2(5);
         },
         want: @"{}"u8
     ), new(
-        CaseName: Name(exportedEmbeddedIntˢ), // Exported embedded field of non-struct type should be serialized.
-
+        // Exported embedded field of non-struct type should be serialized.
+        CaseName: Name(exportedEmbeddedIntˢ),
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ3(5);
         },
         want: @"{""MyInt"":5}"u8
     ), new(
-        CaseName: Name("UnexportedEmbeddedIntPointer"u8), // Unexported embedded field of pointer to non-struct type
- // should not be serialized.
-
+        // Unexported embedded field of pointer to non-struct type
+        // should not be serialized.
+        CaseName: Name("UnexportedEmbeddedIntPointer"u8),
         makeInput: () => {
             var s = new TestAnonymousFields_Sᴛ4(@new<TestAnonymousFields_myIntᴛ1>());
             s.myInt.Value = 5;
@@ -771,9 +787,9 @@ public static void TestAnonymousFields(ж<testing.T> Ꮡt) {
         },
         want: @"{}"u8
     ), new(
-        CaseName: Name("ExportedEmbeddedIntPointer"u8), // Exported embedded field of pointer to non-struct type
- // should be serialized.
-
+        // Exported embedded field of pointer to non-struct type
+        // should be serialized.
+        CaseName: Name("ExportedEmbeddedIntPointer"u8),
         makeInput: () => {
             var s = new TestAnonymousFields_Sᴛ5(@new<TestAnonymousFields_MyIntᴛ1>());
             s.MyInt.Value = 5;
@@ -781,42 +797,43 @@ public static void TestAnonymousFields(ж<testing.T> Ꮡt) {
         },
         want: @"{""MyInt"":5}"u8
     ), new(
-        CaseName: Name(embeddedStructˢ), // Exported fields of embedded structs should have their
- // exported fields be serialized regardless of whether the struct types
- // themselves are exported.
-
+        // Exported fields of embedded structs should have their
+        // exported fields be serialized regardless of whether the struct types
+        // themselves are exported.
+        CaseName: Name(embeddedStructˢ),
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ6(new TestAnonymousFields_s1(1, 2), new TestAnonymousFields_S2ᴛ2(3, 4));
         },
         want: @"{""X"":2,""Y"":4}"u8
     ), new(
-        CaseName: Name(embeddedStructPointerˢ), // Exported fields of pointers to embedded structs should have their
- // exported fields be serialized regardless of whether the struct types
- // themselves are exported.
-
+        // Exported fields of pointers to embedded structs should have their
+        // exported fields be serialized regardless of whether the struct types
+        // themselves are exported.
+        CaseName: Name(embeddedStructPointerˢ),
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ7(Ꮡ(new TestAnonymousFields_s1ᴛ1(1, 2)), Ꮡ(new TestAnonymousFields_S2ᴛ3(3, 4)));
         },
         want: @"{""X"":2,""Y"":4}"u8
     ), new(
-        CaseName: Name(nestedStructAndIntsˢ), // Exported fields on embedded unexported structs at multiple levels
- // of nesting should still be serialized.
-
+        // Exported fields on embedded unexported structs at multiple levels
+        // of nesting should still be serialized.
+        CaseName: Name(nestedStructAndIntsˢ),
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ8(new TestAnonymousFields_s1ᴛ2(1, 2, new TestAnonymousFields_s2(3, 4)), 6);
         },
         want: @"{""MyInt1"":1,""MyInt2"":3}"u8
     ), new(
-        CaseName: Name("EmbeddedFieldBehindNilPointer"u8), // If an anonymous struct pointer field is nil, we should ignore
- // the embedded fields behind it. Not properly doing so may
- // result in the wrong output or reflect panics.
-
+        // If an anonymous struct pointer field is nil, we should ignore
+        // the embedded fields behind it. Not properly doing so may
+        // result in the wrong output or reflect panics.
+        CaseName: Name("EmbeddedFieldBehindNilPointer"u8),
         makeInput: () => {
             return new TestAnonymousFields_Sᴛ9(nil);
         },
         want: @"{}"u8
     )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestAnonymousFields_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -854,6 +871,9 @@ public partial struct BugX {
     public partial ref BugB BugB { get; }
 }
 
+// golang.org/issue/16042.
+// Even if a nil interface value is passed in, as long as
+// it implements Marshaler, it should be marshaled.
 internal partial struct nilJSONMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalJSON(this ж<nilJSONMarshaler> Ꮡnm) {
@@ -865,6 +885,9 @@ internal static (slice<byte>, error) MarshalJSON(this ж<nilJSONMarshaler> Ꮡnm
     return Marshal("zenil:" + ((@string)(nm)));
 }
 
+// golang.org/issue/34235.
+// Even if a nil interface value is passed in, as long as
+// it implements encoding.TextMarshaler, it should be marshaled.
 internal partial struct nilTextMarshaler /*@string*/;
 
 internal static (slice<byte>, error) MarshalText(this ж<nilTextMarshaler> Ꮡnm) {
@@ -905,15 +928,15 @@ public static void TestNilMarshal(ж<testing.T> Ꮡt) {
         new(Name(""u8), @new<float64>(), @"0"u8),
         new(Name(""u8), slice<any>(default!), @"null"u8),
         new(Name(""u8), slice<@string>(default!), @"null"u8),
-        new(Name(""u8), ((map<@string, @string>)default!), @"null"u8),
+        new(Name(""u8), (map<@string, @string>)default!, @"null"u8),
         new(Name(""u8), slice<byte>(default!), @"null"u8),
         new(Name(""u8), new TestNilMarshal_type("gopher"u8), @"{""M"":""gopher""}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ1(), @"{""M"":null}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ1(new json_internal_test_package.nilJSONMarshalerжMarshaler(((ж<nilJSONMarshaler>)nil))), @"{""M"":""0zenil0""}"u8),
-        new(Name(""u8), new TestNilMarshal_typeᴛ2(((ж<nilJSONMarshaler>)nil)), @"{""M"":null}"u8),
+        new(Name(""u8), new TestNilMarshal_typeᴛ2((ж<nilJSONMarshaler>)nil), @"{""M"":null}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ3(), @"{""M"":null}"u8),
         new(Name(""u8), new TestNilMarshal_typeᴛ3(new json_internal_test_package.nilTextMarshalerжTextMarshaler(((ж<nilTextMarshaler>)nil))), @"{""M"":""0zenil0""}"u8),
-        new(Name(""u8), new TestNilMarshal_typeᴛ2(((ж<nilTextMarshaler>)nil)), @"{""M"":null}"u8)
+        new(Name(""u8), new TestNilMarshal_typeᴛ2((ж<nilTextMarshaler>)nil), @"{""M"":null}"u8)
     }.slice();
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestNilMarshal_tests(), out var Ꮡtt);
@@ -933,7 +956,6 @@ public static void TestNilMarshal(ж<testing.T> Ꮡt) {
                     break;
                 }}
             }
-
         });
     }
 }
@@ -953,7 +975,7 @@ public static void TestEmbeddedBug(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = @"{""S"":""B""}"u8;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -966,7 +988,7 @@ public static void TestEmbeddedBug(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     want = a23ˢ;
-    got = ((@string)b);
+    got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -997,7 +1019,7 @@ public static void TestTaggedFieldDominates(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = sBugDˢ;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1024,7 +1046,7 @@ public static void TestDuplicatedFieldDisappears(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = @"{}"u8;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1039,7 +1061,8 @@ internal partial struct TestIssue10281_Foo /*dyn*/ {
 
 public static void TestIssue10281(ж<testing.T> Ꮡt) {
     ref var x = ref heap<TestIssue10281_Foo>(out var Ꮡx);
-    x = new TestIssue10281_Foo(((global::go.encoding.json_package.Number)(@string)invalidˢ));
+    x = new TestIssue10281_Foo((global::go.encoding.json_package.Number)(@string)invalidˢ);
+
     {
         var (_, err) = Marshal(Ꮡx); if (err == default!) {
             Ꮡt.Fatalf("Marshal error: got nil, want non-nil"u8);
@@ -1077,6 +1100,7 @@ public static void TestMarshalErrorAndReuseEncodeState(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Errorf("Marshal error: %v"u8, err);
         }
+
         ref var got = ref heap(new TestMarshalErrorAndReuseEncodeState_Data(), out var Ꮡgot);
         {
             var errΔ2 = Unmarshal(b, Ꮡgot); if (errΔ2 != default!) {
@@ -1118,7 +1142,7 @@ public static void TestEncodePointerString(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal error: %v"u8, err);
     }
     {
-        @string got = ((@string)b);
+        @string got = (@string)b;
         @string want = n42ˢ; if (got != want) {
             Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
         }
@@ -1140,9 +1164,7 @@ public static void TestEncodePointerString(ж<testing.T> Ꮡt) {
             break;
         }}
     }
-
 }
-
 
 partial struct encodeStringTestsᴛ1 /*dyn*/ {
     internal @string @in;
@@ -1190,7 +1212,7 @@ public static void TestEncodeString(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Marshal(%q) error: %v"u8, tt.@in, err);
             continue;
         }
-        @string @out = ((@string)b);
+        @string @out = (@string)b;
         if (@out != tt.@out) {
             Ꮡt.Errorf("Marshal(%q) = %#q, want %#q"u8, tt.@in, @out, tt.@out);
         }
@@ -1260,10 +1282,10 @@ internal partial struct TestEncodeBytekind_tests /*dyn*/ {
 public static void TestEncodeBytekind(ж<testing.T> Ꮡt) {
     var tests = new TestEncodeBytekind_tests[]{
         new(Name(""u8), (byte)7, "7"u8),
-        new(Name(""u8), ((jsonbyte)7), @"{""JB"":7}"u8),
-        new(Name(""u8), ((textbyte)4), @"""TB:4"""u8),
-        new(Name(""u8), ((jsonint)5), @"{""JI"":5}"u8),
-        new(Name(""u8), ((textint)1), @"""TI:1"""u8),
+        new(Name(""u8), (jsonbyte)7, @"{""JB"":7}"u8),
+        new(Name(""u8), (textbyte)4, @"""TB:4"""u8),
+        new(Name(""u8), (jsonint)5, @"{""JI"":5}"u8),
+        new(Name(""u8), (textint)1, @"""TI:1"""u8),
         new(Name(""u8), new byte[]{0, 1}.slice(), @"""AAE="""u8),
         new(Name(""u8), new jsonbyte[]{0, 1}.slice(), @"[{""JB"":0},{""JB"":1}]"u8),
         new(Name(""u8), new slice<jsonbyte>[]{new jsonbyte[]{0, 1}.slice(), new jsonbyte[]{3}.slice()}.slice(), @"[[{""JB"":0},{""JB"":1}],[{""JB"":3}]]"u8),
@@ -1283,7 +1305,7 @@ public static void TestEncodeBytekind(ж<testing.T> Ꮡt) {
             if (err != default!) {
                 tΔ1.Errorf("%s: Marshal error: %v"u8, ttʗ1.Where, err);
             }
-            @string got = ((@string)b);
+            @string got = (@string)b;
             @string want = ttʗ1.want;
             if (got != want) {
                 tΔ1.Errorf("%s: Marshal:\n\tgot:  %s\n\twant: %s"u8, ttʗ1.Where, got, want);
@@ -1331,50 +1353,33 @@ public static void TestNilMarshalerTextMapKey(ж<testing.T> Ꮡt) {
 
 internal static Func<@string, ж<regexp.Regexp>> re = regexp.MustCompile;
 
-// no binary exponential notation
-// no leading + sign
-// no unnecessary leading zeros
-// leading zero required before decimal point
-// no trailing decimal
-// no trailing zero in fraction
-// exponential notation must have normalized mantissa
-// positive exponent must be signed
-// exponent must not have leading zeros
-// not tiny enough for exponential notation
-// not big enough for exponential notation
-// too tiny, should use exponential notation
-// too big, should use exponential notation
-// too many significant digits in integer
-// too many significant digits in decimal
-// below here for float32 only
-// too many significant digits in integer
-// too many significant digits in decimal
 // syntactic checks on form of marshaled floating point numbers.
 internal static slice<ж<regexp.Regexp>> badFloatREs = new ж<regexp.Regexp>[]{
-    re(@"p"u8),
-    re(@"^\+"u8),
-    re(@"^-?0[^.]"u8),
-    re(@"^-?\."u8),
-    re(@"\.(e|$)"u8),
-    re(@"\.[0-9]+0(e|$)"u8),
-    re(@"^-?(0|[0-9]{2,})\..*e"u8),
-    re(@"e[0-9]"u8),
-    re(@"e[+-]0"u8),
-    re(@"e-[1-6]$"u8),
-    re(@"e+(.|1.|20)$"u8),
-    re(@"^-?0\.0000000"u8),
-    re(@"^-?[0-9]{22}"u8),
-    re(@"[1-9][0-9]{16}[1-9]"u8),
-    re(@"[1-9][0-9.]{17}[1-9]"u8),
-    re(@"[1-9][0-9]{8}[1-9]"u8),
-    re(@"[1-9][0-9.]{9}[1-9]"u8)
+    re(@"p"u8), // no binary exponential notation
+    re(@"^\+"u8), // no leading + sign
+    re(@"^-?0[^.]"u8), // no unnecessary leading zeros
+    re(@"^-?\."u8), // leading zero required before decimal point
+    re(@"\.(e|$)"u8), // no trailing decimal
+    re(@"\.[0-9]+0(e|$)"u8), // no trailing zero in fraction
+    re(@"^-?(0|[0-9]{2,})\..*e"u8), // exponential notation must have normalized mantissa
+    re(@"e[0-9]"u8), // positive exponent must be signed
+    re(@"e[+-]0"u8), // exponent must not have leading zeros
+    re(@"e-[1-6]$"u8), // not tiny enough for exponential notation
+    re(@"e+(.|1.|20)$"u8), // not big enough for exponential notation
+    re(@"^-?0\.0000000"u8), // too tiny, should use exponential notation
+    re(@"^-?[0-9]{22}"u8), // too big, should use exponential notation
+    re(@"[1-9][0-9]{16}[1-9]"u8), // too many significant digits in integer
+    re(@"[1-9][0-9.]{17}[1-9]"u8), // too many significant digits in decimal
+    // below here for float32 only
+    re(@"[1-9][0-9]{8}[1-9]"u8), // too many significant digits in integer
+    re(@"[1-9][0-9.]{9}[1-9]"u8) // too many significant digits in decimal
 }.slice();
 
 public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     nint nfail = 0;
     void test(float64 f, nint bits) {
-        var vf = ((any)f);
+        var vf = (any)f;
         if (bits == 32) {
             f = (float64)(float32)f; // round
             vf = (float32)f;
@@ -1385,7 +1390,8 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
             nfail++;
             return;
         }
-        @string @out = ((@string)bout);
+        @string @out = (@string)bout;
+
         // result must convert back to the same float
         (var g, err) = strconv.ParseFloat(@out, bits);
         if (err != default!) {
@@ -1393,12 +1399,12 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
             nfail++;
             return;
         }
-        if (f != g || fmt.Sprint(f) != fmt.Sprint(g)) {
-            // fmt.Sprint handles ±0
+        if (f != g || fmt.Sprint(f) != fmt.Sprint(g)) { // fmt.Sprint handles ±0
             Ꮡt.Errorf("ParseFloat(%q):\n\tgot:  %g\n\twant: %g"u8, @out, (float32)g, vf);
             nfail++;
             return;
         }
+
         var bad = badFloatREs;
         if (bits == 64) {
             bad = bad.slice(0, len(bad) - 2);
@@ -1411,8 +1417,10 @@ public static void TestMarshalFloat(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     float64 bigger = math.Inf(+1);
     float64 smaller = math.Inf(-1);
+
     @string digits = "1.2345678901234567890123"u8;
     for (nint i = len(digits); i >= 2; i--) {
         if (testing.Short() && i < len(digits) - 4) {
@@ -1487,8 +1495,9 @@ public static void TestMarshalRawMessageValue(ж<testing.T> Ꮡt) {
     ref var rawText = ref heap<global::go.encoding.json_package.RawMessage>(out var ᏑrawText);
 
     rawText = ((global::go.encoding.json_package.RawMessage)slice<byte>(@"""foo"""u8));
-    var tests = new TestMarshalRawMessageValue_tests[]{ // Test with nil RawMessage.
 
+    var tests = new TestMarshalRawMessageValue_tests[]{
+        // Test with nil RawMessage.
         new(Name(""u8), rawNil, "null"u8, true),
         new(Name(""u8), ᏑrawNil, "null"u8, true),
         new(Name(""u8), new any[]{rawNil}.slice(), "[null]"u8, true),
@@ -1506,8 +1515,9 @@ public static void TestMarshalRawMessageValue(ж<testing.T> Ꮡt) {
         new(Name(""u8), new TestMarshalRawMessageValue_T1(rawNil), "{}"u8, true),
         new(Name(""u8), new TestMarshalRawMessageValue_T2(ᏑrawNil), @"{""M"":null}"u8, true),
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T1(rawNil)), "{}"u8, true),
-        new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T2(ᏑrawNil)), @"{""M"":null}"u8, true), // Test with empty, but non-nil, RawMessage.
+        new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T2(ᏑrawNil)), @"{""M"":null}"u8, true),
 
+        // Test with empty, but non-nil, RawMessage.
         new(Name(""u8), rawEmpty, ""u8, false),
         new(Name(""u8), ᏑrawEmpty, ""u8, false),
         new(Name(""u8), new any[]{rawEmpty}.slice(), ""u8, false),
@@ -1525,38 +1535,33 @@ public static void TestMarshalRawMessageValue(ж<testing.T> Ꮡt) {
         new(Name(""u8), new TestMarshalRawMessageValue_T1(rawEmpty), "{}"u8, true),
         new(Name(""u8), new TestMarshalRawMessageValue_T2(ᏑrawEmpty), ""u8, false),
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T1(rawEmpty)), "{}"u8, true),
-        new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T2(ᏑrawEmpty)), ""u8, false), // Test with RawMessage with some text.
- //
- // The tests below marked with Issue6458 used to generate "ImZvbyI=" instead "foo".
- // This behavior was intentionally changed in Go 1.8.
- // See https://golang.org/issues/14493#issuecomment-255857318
+        new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T2(ᏑrawEmpty)), ""u8, false),
 
+        // Test with RawMessage with some text.
+        //
+        // The tests below marked with Issue6458 used to generate "ImZvbyI=" instead "foo".
+        // This behavior was intentionally changed in Go 1.8.
+        // See https://golang.org/issues/14493#issuecomment-255857318
         new(Name(""u8), rawText, @"""foo"""u8, true), // Issue6458
-
         new(Name(""u8), ᏑrawText, @"""foo"""u8, true),
         new(Name(""u8), new any[]{rawText}.slice(), @"[""foo""]"u8, true), // Issue6458
-
         new(Name(""u8), Ꮡ(new any[]{rawText}.slice()), @"[""foo""]"u8, true), // Issue6458
-
         new(Name(""u8), new any[]{ᏑrawText}.slice(), @"[""foo""]"u8, true),
         new(Name(""u8), Ꮡ(new any[]{ᏑrawText}.slice()), @"[""foo""]"u8, true),
         new(Name(""u8), new TestMarshalRawMessageValue_type(rawText), @"{""M"":""foo""}"u8, true), // Issue6458
-
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_type(rawText)), @"{""M"":""foo""}"u8, true),
         new(Name(""u8), new TestMarshalRawMessageValue_typeᴛ1(ᏑrawText), @"{""M"":""foo""}"u8, true),
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_typeᴛ1(ᏑrawText)), @"{""M"":""foo""}"u8, true),
         new(Name(""u8), new map<@string, any>{["M"u8] = rawText}, @"{""M"":""foo""}"u8, true), // Issue6458
-
         new(Name(""u8), Ꮡ(new map<@string, any>{["M"u8] = rawText}), @"{""M"":""foo""}"u8, true), // Issue6458
-
         new(Name(""u8), new map<@string, any>{["M"u8] = ᏑrawText}, @"{""M"":""foo""}"u8, true),
         new(Name(""u8), Ꮡ(new map<@string, any>{["M"u8] = ᏑrawText}), @"{""M"":""foo""}"u8, true),
         new(Name(""u8), new TestMarshalRawMessageValue_T1(rawText), @"{""M"":""foo""}"u8, true), // Issue6458
-
         new(Name(""u8), new TestMarshalRawMessageValue_T2(ᏑrawText), @"{""M"":""foo""}"u8, true),
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T1(rawText)), @"{""M"":""foo""}"u8, true),
         new(Name(""u8), Ꮡ(new TestMarshalRawMessageValue_T2(ᏑrawText)), @"{""M"":""foo""}"u8, true)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestMarshalRawMessageValue_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1574,7 +1579,7 @@ public static void TestMarshalRawMessageValue(ж<testing.T> Ꮡt) {
                 }
             }
             {
-                @string got = ((@string)b); if (got != ttʗ1.want) {
+                @string got = (@string)b; if (got != ttʗ1.want) {
                     tΔ1.Errorf("%s: Marshal:\n\tinput: %#v\n\tgot:  %s\n\twant: %s"u8, ttʗ1.Where, ttʗ1.@in, got, ttʗ1.want);
                 }
             }
@@ -1586,7 +1591,7 @@ internal partial struct marshalPanic {
 }
 
 internal static (slice<byte>, error) MarshalJSON(this marshalPanic _) {
-    throw panic((nint)(0xdead));
+    throw panic((nint)0xdead);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1597,7 +1602,7 @@ public static void TestMarshalPanic(ж<testing.T> Ꮡt) {
     try {
         defer(() => {
             {
-                var got = recover(); if (!reflect.DeepEqual(got, (nint)(0xdead))) {
+                var got = recover(); if (!reflect.DeepEqual(got, (nint)0xdead)) {
                     Ꮡt.Errorf("panic() = (%T)(%v), want 0xdead"u8, got, got);
                 }
             }
@@ -1623,7 +1628,7 @@ public static void TestMarshalUncommonFieldNames(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(marshalErrorˢ, err);
     }
     @string want = a000A0ˢ;
-    @string got = ((@string)b);
+    @string got = (@string)b;
     if (got != want) {
         Ꮡt.Fatalf("Marshal:\n\tgot:  %s\n\twant: %s"u8, got, want);
     }
@@ -1645,6 +1650,7 @@ public static void TestMarshalerError(ж<testing.T> Ꮡt) {
     @string s = testVariableˢ;
     var st = reflect.TypeOf(s);
     @string errText = errTextᶜ;
+
     var tests = new TestMarshalerError_tests[]{new(
         Name(""u8),
         Ꮡ(new MarshalerError(st, fmt.Errorf(errText), ""u8)),
@@ -1655,6 +1661,7 @@ public static void TestMarshalerError(ж<testing.T> Ꮡt) {
         "json: error calling TestMarshalerError for type "u8 + st.String() + ": "u8 + errText
     )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestMarshalerError_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -1688,7 +1695,7 @@ public static void TestIssue63379(ж<testing.T> Ꮡt) {
         "{}\u2028"u8,
         "{}\u2029"u8
     }.slice()) {
-        var (_, err) = Marshal(((marshaledValue)v));
+        var (_, err) = Marshal((marshaledValue)v);
         if (err == default!) {
             Ꮡt.Errorf("expected error for %q"u8, v);
         }

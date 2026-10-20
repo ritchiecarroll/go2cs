@@ -26,34 +26,40 @@ public static partial void TestIndicator(ж<testing.T> Ꮡt) {
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     if (!fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeTrueIfˢ);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     fips140.RecordApproved();
     if (!fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeTrueIfˢ2);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordNonApproved();
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ2);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     fips140.RecordNonApproved();
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ3);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordNonApproved();
     fips140.RecordApproved();
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ4);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordNonApproved();
     ref var done = ref heap<channel<EmptyStruct>>(out var Ꮡdone);
@@ -67,6 +73,7 @@ public static partial void TestIndicator(ж<testing.T> Ꮡt) {
     if (fips140.ServiceIndicator()) {
         Ꮡt.Error(indicatorShouldBeFalseIfˢ5);
     }
+
     fips140.ResetServiceIndicator();
     fips140.RecordApproved();
     done = new channel<EmptyStruct>(0);

@@ -386,6 +386,12 @@ src/core/log/**/[Oo]bj/
 /src/reports/
 /src/stdlib_conversion_progress.txt
 
+# A multi-platform -stdlib emission (-platforms) stages one full per-target copy of the corpus in
+# .go2cs-platform-stage under its output root, beside core, and removes it when it ends. A run that
+# dies before its cleanup leaves the stage behind until the next run reclaims it; ignored at any
+# depth, since the output root is wherever -go2cspath points.
+.go2cs-platform-stage/
+
 # GitHub Copilot custom instructions file (may be auto-created by Visual Studio)
 .github/copilot-instructions.md
 src/.github/copilot-instructions.md

@@ -69,8 +69,13 @@ using static go.@internal.fuzz_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<mutator, ж<mutator>>]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -81,18 +86,18 @@ using static go.@internal.fuzz_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("internal/fuzz/counters_supported.go", "counters_supported.cs", "AAoiwoKC")]
-[assembly: global::go.GoPositionMap("internal/fuzz/coverage.go", "coverage.cs", "AAscooKuwoKigoKCgryigpSCgoKCpoKUgoKUqqKCgpSqooKCpqqigoKmpoKCgpS4kg==")]
-[assembly: global::go.GoPositionMap("internal/fuzz/encoding.go", "encoding.cs", "ABgwwoKUpoIACgS0AAwaAAoWxoKUxgADHAANApTK5NS2qJKClIKClIKClIKigoKUgoKUlAAKBoKCgoKUgoKUgpSEgIKClIKClIKClIKClKaCgIKCgpSUpKS2goKUgoKClIKSgpTKmICClIKWgrSSlIKUlMSmlLSClMS4gKSClLSClKS2gpSCgpSCgpSClIKUpIKUpIKUpIKUgqSClLSClIKClKSClIKClKTakp7SpIKkgqSCpLTKkpSCpIKkgqSCpLQ=")]
-[assembly: global::go.GoPositionMap("internal/fuzz/fuzz.go", "fuzz.cs", "AE2qAQAOAoCCpIKUgpSUloKCloKCgriCkpaSgrKCgoKUqLiUgpSClIKCuoKigpSCgoKUggAHEoKCgoSCgoKCgoKmgoKygoKUgoKU3oKCkpSClIKWgoKCloKCgpb4uIKCstqSlISCgoKCgpSCpoKUyoKCkqaCgoLKggAHEqSCgoIABhCCgoKCgu6AAAgSpqaCgoKClIKCupSCgoKCAAsaggAIEKaCgoKCAAgUuLYAFiCCpoKmggAHGOKCsoKClIKCgpSCgILalIKUABlCooKWAIEBxgKUgoKmAAgSgIKkgoKCgrqCgriCgqaCgqaUhIKCgoKUgoKClqaCgoKmgoKCgoKUpIKUgoKClKaCAAIaAAoCppSCppSWgoKUyoKUpoKWgoKClIKCpqiSgqqigryiggAGEIKWyqqippSCgpSEgpSCkoKClIKCuIKCgqaqooIAAiAADQKssoKUgoKCgpSqoqiCAAIQ0oCCpIKCgKbsgIKkAAkUgoKClK7CgoKSgpSCgtyClIKCgpSCgoKClJSClKaCgoKUgIKkqqKClIKClIKCpq7igoKAgqSAgoKkpoKmgoKCpqYAEyiUgqaigg==", "119-144:1;149-164:2;184-194:3", "", "170=New/1/1/2;291=New/1/1/2;311=diffCoverage/1/1/3,countBits/1/1/3;323=countBits/1/1/3;364=countBits/1/2/5,countBits/2/2/6;654=Now/1/2/2,Now/2/2/6;768=warmupRun/1/1/3")]
-[assembly: global::go.GoPositionMap("internal/fuzz/mem.go", "mem.cs", "ADF2tNr0goKUooKCuoKAgriC6JKqooKCqJKCrLKCgpSCAAIS4oKClA==", "72-77:1")]
-[assembly: global::go.GoPositionMap("internal/fuzz/minimize.go", "minimize.cs", "AAkWgqai3JaCgoKUgoKmuoKClIKCgoKmgqaogoKCgpSCgoKmgoLMgoKCloKClKbG")]
-[assembly: global::go.GoPositionMap("internal/fuzz/mutator.go", "mutator.cs", "ABImgqaCpoKClKqigKSkpNoACRCogpS0tLS0tLS0tLS0gsbExIKUgpSClIK0gpSClIKUgsTIgoKCgpaSlJSUgqaSlJSUgtqCgoKClpKUlJaCppKUlJSC2oKCgpaSlIKUlIKmkpSClJSCpoKSlIKUlIKmkpSCAAgOABQq0pKCgpSWgoKAgoIACAyCggAEEIKClII=", "259-264:1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/coverage.go", "coverage.cs", "AAscooKuwoKCvKKClIKCgoKmgpSCgpSqooKClKqigoKmqqKCgqamgoKClLiSAAwWgoKCgoKCgg==")]
+[assembly: global::go.GoPositionMap("internal/fuzz/encoding.go", "encoding.cs", "ABkwwoKUpoIACgS0AAwaAAoWxoKUxgAPHIKU6rTEtqiSgpSCgpSCgpSCooKClIKClJQACgaCgoKClIKClIKUlICCgpSCgpSCgpSCgpS2goCCgoKUlKSkpoKClIKCgpSCkoKU2piAgpSCpoK0gpSClJTEppS0gpTEyICkgpS0gpSkpoKUgoKUgoKUgpSClKSClKSClKSClIKkgpS0gpSCgpSkgpSCgpSkypLugqSCpIKkgqS0upKUgqSCpIKkgqS0")]
+[assembly: global::go.GoPositionMap("internal/fuzz/fuzz.go", "fuzz.cs", "AE2qAQAOAoCCpIKUgpSUpoKCpoKCgsiCkqaSgrKCgoKUuLiUgpSClIKCyoKigpSCgoKUggAIEoKCgpSCgoKCgoKmgoKygoKUgoKU7oKCkqSClIKmgoKCpoKCgqYACQjIgoKC6oKUlIKCgoKClIKmgpTKgoKSpoKCgsqCAAcSpIKCggAGEIKCgoKC7oAACBKmpoKCgoKUgoK6lIKCgoIACxqCAAgQpoKCgoIACRTItgAUIIKmgqaCAAcY4oKygoKUgoKClIKAgtqUgpQAGUKigqYAgQHGArSCgqYACBKAgqSCgoKCyoKCuIKCpoKCppSUgoKCgpSCgoKmpoKCgqaCgoKCgpSkgpSCgoKUpoIAAhoACgKmlIKmlKaCgpTKgpSmgqaCgoKUgoKmqJKCqqKCvKKCAAYQgqbKqqKmlIKClJSClIKSgoKUgoK4goKCpqqiggACIAANAqyygpSCgoKClKqiqIIAAhDSgIKkgoKApuyAgqQACRSigoKUrsKCgpKClIKC3IKUgoKClIKCgoKUlIKUpoKCgpSAgqSqooKUgoKUgoKmruKCgoCCpICCgqSmgqaCgoKmpgATKJSCpqKC", "119-144:1;149-164:2;184-194:3", "", "176=New/1/1/2;305=New/1/1/2;325=diffCoverage/1/1/3,countBits/1/1/3;337=countBits/1/1/3;378=countBits/1/2/5,countBits/2/2/6;671=Now/1/2/2,Now/2/2/6;789=warmupRun/1/1/3")]
+[assembly: global::go.GoPositionMap("internal/fuzz/mem.go", "mem.cs", "ADF2tNr0goKUooKCyoKAgsiC6JKqooKCqJKCrLKCgpSCAAIS4oKClA==", "72-77:1")]
+[assembly: global::go.GoPositionMap("internal/fuzz/minimize.go", "minimize.cs", "AAkWgqai3KaCgoKUgoKmyoKClIKCgoKmgqa4goKCgpSCgoKmgoLcgoKCpoKClKbG")]
+[assembly: global::go.GoPositionMap("internal/fuzz/mutator.go", "mutator.cs", "ABImgqaCpoKClKqigKSkpMoACRC4gpS0tLS0tLS0tLS0gsa0tIKUgpSClIK0gpSClIKUgsTIgoKCgqaClJSUgraClJSUgsqCgoKCpoKUlKaCtoKUlJSCyoKCgqaClIKUlIK2gpSClJSCtoKClIKUlIK2gpSC/gAUKtKSgoKUpoKCgIKCAAgMgoIABBCCgpSC", "259-264:1")]
 [assembly: global::go.GoPositionMap("internal/fuzz/mutators_byteslice.go", "mutators_byteslice.cs", "AAoQsoKUgoKCgqrCgoKClIKCgpSqwoKUgoKClLiClKamppSCgqiygpSCgoKUgoKosoKUgoKosoKUuIKosoKUgoKClIKosoKUgoKClJSosoKUgoKUgoKCqLKClIKClIKCgqiygpSCgpSCgoKqwoKUgoKqwoKUgoKCqsKClIKCgqiygpQACBKCgpSCgoKClKiygpSCgoKClKiygpSCgoLKgoKUqLKClIKCgsqCgpSmgsqClIKCgoKCgg==")]
-[assembly: global::go.GoPositionMap("internal/fuzz/pcg.go", "pcg.cs", "ADBYgoKCgpKClKaokoKCgIKkgoKCgoKCpoKCprKCpoKCqJKCgqqigpQAAhDSgoKCgoKCgoKmqJIAChay")]
+[assembly: global::go.GoPositionMap("internal/fuzz/pcg.go", "pcg.cs", "ADFYgoKCgpKClKaokoKCgIKkgoKCgoKCpoKCprKCpoKCqJKCgqqigpQAAhDSgoKCgoKCgoKmqJIAChay")]
 [assembly: global::go.GoPositionMap("internal/fuzz/queue.go", "queue.cs", "ABcugqaCgoKClIKCgpSCpoKClIKCpoKClIKCgoKmgoKUpoI=")]
-[assembly: global::go.GoPositionMap("internal/fuzz/sys_posix.go", "sys_posix.cs", "ABMkgoKCgoKWqqiypoKUgoKmqqKCgoL4soKCgoKClIKClIKCgpSCgqqigoKUgqyygoKUggACHAALAgABEqQ=", "", "", "37=Munmap/1/1/1,Close/1/1/2")]
+[assembly: global::go.GoPositionMap("internal/fuzz/sys_posix.go", "sys_posix.cs", "ABMkgoKCgoKmqsiypoKUgoKmqqKCgoL4soKCgoKClIKClIKCgpSCgqqigoKUgqyygoKUggACHAALAgAHEqQ=", "", "", "40=Munmap/1/1/1,Close/1/1/2")]
 [assembly: global::go.GoPositionMap("internal/fuzz/trace.go", "trace.cs", "AAowAAwCoqKkoqKipKI=")]
-[assembly: global::go.GoPositionMap("internal/fuzz/worker.go", "worker.cs", "ADF+goKClIKCAAoWkoKClIIAAhoADQSUgoCCuNaCkpSogpKUAAoWlICmqMr8goKUgpSUppSA3KSmyoKUAAkUuJLK3IKmggAHEgAFEgAKAoKCgqbKgpSC3AAHEAAIFIKWAA4WggACFgAKAoKUgIKkgIKCgpSUpqQAAhoADwKClIKChIKCAAgUgoKUkoKCgpSSloCCgoLcgoKCgoSCgpYABhgACwKClKakloKCggAIDoKSgpaCuJaCgraCgoKCqIKWgoKogoKoAAwgAAoCkoKUxoKUkoKC6ACBAa4CAAwCgoKCgoCCgpS4gpS0tLSmgIIAEzYAEAKCgoKUlJKQlIKCgqSCgpKClIKCloKCgpSChKaygoKCgoKClJSClJaCgoKClIKClJaCpKSCgpSEgoKCgpSCgoKUggAKDNKSkJKCkJKCgpSCgoKCyoKCgoKCgoLugpS4AAUQAAkCkpKCgqiCzIKCgoKkgpTMwoKUtLS0goKCgoKCgriUpoKUgpSUtMSkpqKCqqIAECSCrAAIAoKogIKCyoCCgqQADBSYAAsCgoSSgpSAkoKCgpSCgoKClIKCloKCgoKCgpaCgpTKlLS0tJSWlIKCgrqCgoKmgoKCuIKCggAICAALAoKEgoKUgoKCgpSChIKCgpSCgpSQkoSClISCgoKUgpSCgqaEgoLcpqjo4oKCgoLaooKCgIKkAA8gooCCpIiigqKClrSk", "386-389:1;426-429:1;491-499:1;492-494:1.1;715-715:1;724-727:2;741-743:3;744-759:4;805-805:1;807-807:2;855-858:1;881-912:2;996-996:1;1100-1100:1;1184-1187:1", "", "274=Sprintf/1/1/2;518=newMutator/1/1/11")]
+[assembly: global::go.GoPositionMap("internal/fuzz/worker.go", "worker.cs", "AD1+goKClIKCAAkWkoKClIIAAhoADQSUgoCCyOaCgpS4goKUAAoWlICmyMrcgoKUgpSUppSA3KSmyoKUAAkUyILK3IKmggAHEgAFEgAKAoKCgrbKgpSC3AAHEAAJFIKmAA4WggACFgAKAoKUgIKkgIKCgpSUpqQAAhoADwKClIKClIKCAAkUgoKUkoKCgpSSpoCCgoLsgoKCgpSCgqYABhgACwKClLaUpoKCggAIDoKSgqaCuKaCgsaCgoKCuIKmgoK4goK4AAYgAAoCkoKUxoKUkoKC6ACBAa4CAAwCgoKCgoCCgpTIgpS0tLSmgIIAEzYAEAKCgoKUlJKQpIKCgqSCgpKClIKCpoKCgpSClKaygoKCgoKClJSClKaCgoKClIKClKaCpKSCgpSUgoKCgpSCgoKUggAKDNKSkJKCkJKCgpSCgoKC2oKCgoKCgoLugpS4AAUQAAkCkpKCgqiC3IKCgoKkgpTcwoKUtLSkgoKCgoKCgriUpoKUgpSUtMSkpqKCqqIAECSCrAAIAoK4gIKC2oCCgqQADBSYAAsCgpSSgpSAkoKCgpSCgoKClIKCpoKCgoKCgqaCgpTKlLS0pJSmlIKCgsqCgoKmgoKCuIKCggAICAALAoKUgoKUgoKCgpSClIKCgpSCgpSQkpSClISCgoKUgpSCgqaUgoLcprjo4oKCgoLaooKCgIKkAA8gooCCpJiigqKCprSk", "386-389:1;426-429:1;491-499:1;492-494:1.1;715-715:1;724-727:2;741-743:3;744-759:4;805-805:1;807-807:2;855-858:1;881-912:2;996-996:1;1100-1100:1;1184-1187:1", "", "287=Sprintf/1/1/2;541=newMutator/1/1/11")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -164,7 +169,7 @@ public static partial class fuzz_package
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
-    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(global::go.strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(global::go.sync_package));
     [GoInit] internal static void initᴛᴛimportꓸsyncꓸatomic() => builtin.initPackage(typeof(global::go.sync.atomic_package));

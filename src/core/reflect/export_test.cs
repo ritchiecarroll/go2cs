@@ -52,10 +52,12 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
     argSize = abid.stackCallArgsSize;
     retOffset = abid.retOffset;
     frametype = toType(ft);
+
     // Expand stack pointer bitmap into byte-map.
     for (var i = (uint32)0; i < (~abid.stackPtrs).n; i++) {
-        stack = builtin.append(stack, (byte)(((~abid.stackPtrs).data[i / 8] >> (int)((i % 8))) & 1));
+        stack = builtin.append(stack, (byte)((~abid.stackPtrs).data[i / 8] >> (int)(i % 8) & 1));
     }
+
     // Expand register pointer bitmaps into byte-maps.
     byte bool2byte(bool b) {
         if (b) {
@@ -67,13 +69,14 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         inReg = builtin.append(inReg, bool2byte(abid.inRegPtrs.Get(i)));
         outReg = builtin.append(outReg, bool2byte(abid.outRegPtrs.Get(i)));
     }
+
     // Expand frame type's GC bitmap into byte-map.
     ptrs = ft.Pointers();
     if (ptrs) {
         var nptrs = (~ft).PtrBytes / (uintptr)goarch.PtrSize;
         var gcdata = ft.GcSlice(0, (nptrs + 7) / 8);
         for (var i = (uintptr)0; i < nptrs; i++) {
-            gc = builtin.append(gc, (byte)((gcdata[i / 8] >> (int)((i % 8))) & 1));
+            gc = builtin.append(gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
         }
     }
     return (frametype, argSize, retOffset, stack, gc, inReg, outReg, ptrs);
@@ -111,13 +114,14 @@ internal static pinUnexpMeth pinUnexpMethI = ((pinUnexpMeth)new EmbedWithUnexpMe
 
 public static ж<byte> FirstMethodNameBytes(global::go.reflect_package.ΔType t) {
     _ = pinUnexpMethI;
+
     var ut = t.uncommon();
     if (ut == nil) {
         throw panic("type has no methods");
     }
     var m = ut.Methods()[0];
     var mname = t._<ж<global::go.reflect_package.rtype>>().nameOff(m.Name);
-    if ((byte)(mname.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << (int)(2)))) == 0) {
+    if ((byte)(mname.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         throw panic("method name does not have pkgPath *string");
     }
     return mname.Bytes;

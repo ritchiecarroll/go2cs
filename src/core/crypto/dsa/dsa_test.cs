@@ -20,6 +20,7 @@ internal static void testSignAndVerify(ж<testing.T> Ꮡt, nint i, ж<global::go
         Ꮡt.Errorf("%d: error signing: %s"u8, i, err);
         return;
     }
+
     if (!Verify(Ꮡpriv.of(global::go.crypto.dsa_package.PrivateKey.ᏑPublicKey), hashed, r, s)) {
         Ꮡt.Errorf("%d: Verify failed"u8, i);
     }
@@ -29,17 +30,21 @@ internal static void testParameterGeneration(ж<testing.T> Ꮡt, global::go.cryp
     Ꮡt.Helper();
     ref var priv = ref heap(new global::go.crypto.dsa_package.PrivateKey(), out var Ꮡpriv);
     var @params = Ꮡpriv.of(global::go.crypto.dsa_package.PrivateKey.ᏑParameters);
+
     var err = GenerateParameters(@params, rand.Reader, sizes);
     if (err != default!) {
         Ꮡt.Errorf("%d: %s"u8, (nint)sizes, err);
         return;
     }
+
     if ((~@params).P.BitLen() != L) {
         Ꮡt.Errorf("%d: params.BitLen got:%d want:%d"u8, (nint)sizes, (~@params).P.BitLen(), L);
     }
+
     if ((~@params).Q.BitLen() != N) {
         Ꮡt.Errorf("%d: q.BitLen got:%d want:%d"u8, (nint)sizes, (~@params).Q.BitLen(), L);
     }
+
     var one = @new<bigꓸInt>();
     one.SetInt64(1);
     var pm1 = @new<bigꓸInt>().Sub((~@params).P, one);
@@ -51,11 +56,13 @@ internal static void testParameterGeneration(ж<testing.T> Ꮡt, global::go.cryp
     if (x.Cmp(one) == 0) {
         Ꮡt.Errorf("%d: invalid generator"u8, (nint)sizes);
     }
+
     err = GenerateKey(Ꮡpriv, rand.Reader);
     if (err != default!) {
         Ꮡt.Errorf("error generating key: %s"u8, err);
         return;
     }
+
     testSignAndVerify(Ꮡt, (nint)sizes, Ꮡpriv);
 }
 
@@ -66,6 +73,7 @@ public static void TestParameterGeneration(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingParameterˢ);
     }
+
     testParameterGeneration(Ꮡt, L1024N160, 1024, 160);
     testParameterGeneration(Ꮡt, L2048N224, 2048, 224);
     testParameterGeneration(Ꮡt, L2048N256, 2048, 256);
@@ -93,6 +101,7 @@ public static void TestSignAndVerify(ж<testing.T> Ꮡt) {
         ),
         X: fromHex("5078D4D29795CBE76D3AACFE48C9AF0BCDBEE91A"u8)
     );
+
     testSignAndVerify(Ꮡt, 0, Ꮡpriv);
 }
 
@@ -106,6 +115,7 @@ public static void TestSignAndVerifyWithBadPublicKey(ж<testing.T> Ꮡt) {
         ),
         Y: fromHex("32969E5780CFE1C849A1C276D7AEB4F38A23B591739AA2FE197349AEEBD31366AEE5EB7E6C6DDB7C57D02432B30DB5AA66D9884299FAA72568944E4EEDC92EA3FBC6F39F53412FBCC563208F7C15B737AC8910DBC2D9C9B8C001E72FDC40EB694AB1F06A5A2DBD18D9E36C66F31F566742F11EC0A52E9F7B89355C02FB5D32D2"u8)
     );
+
     if (Verify(Ꮡpub, slice<byte>("testing"u8), fromHex("2"u8), fromHex("4"u8))) {
         Ꮡt.Errorf("Verify unexpected success with non-existent mod inverse of Q"u8);
     }
@@ -122,6 +132,7 @@ public static void TestSigningWithDegenerateKeys(ж<testing.T> Ꮡt) {
         new("00"u8, "01"u8, "00"u8, "00"u8, "00"u8),
         new("01"u8, "ff"u8, "00"u8, "00"u8, "00"u8)
     }.slice();
+
     foreach (var (i, test) in badKeys) {
         ref var priv = ref heap<global::go.crypto.dsa_package.PrivateKey>(out var Ꮡpriv);
         priv = new PrivateKey(
@@ -135,6 +146,7 @@ public static void TestSigningWithDegenerateKeys(ж<testing.T> Ꮡt) {
             ),
             X: fromHex(test.x)
         );
+
         var hashed = slice<byte>("testing"u8);
         {
             var (_, _, err) = Sign(rand.Reader, Ꮡpriv, hashed); if (err == default!) {

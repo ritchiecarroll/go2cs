@@ -98,6 +98,26 @@ public class GoAsyncIOTests
     }
 
     [TestMethod]
+    public void HasReadinessFollowsTheSinkFromOpenToClose()
+    {
+        // syscall's readFile/writeFile take the completion seam only for a descriptor the poller owns,
+        // and this is how they ask. It must follow the SINK, not the descriptor's other state: a
+        // disassociated descriptor is still the poller's until pollClose retires it.
+        nuint descriptor = nextDescriptor();
+
+        Assert.IsFalse(GoAsyncIO.HasReadiness(descriptor), "a descriptor nobody registered");
+
+        GoAsyncIO.SetReadiness(descriptor, _ => { });
+        Assert.IsTrue(GoAsyncIO.HasReadiness(descriptor), "registered by pollOpen");
+
+        GoAsyncIO.MarkUnassociated(descriptor);
+        Assert.IsTrue(GoAsyncIO.HasReadiness(descriptor), "disassociated, still the poller's");
+
+        GoAsyncIO.RemoveDescriptor(descriptor);
+        Assert.IsFalse(GoAsyncIO.HasReadiness(descriptor), "retired by pollClose");
+    }
+
+    [TestMethod]
     public void DescriptorStateIsCreatedExactlyOnceUnderContention()
     {
         // THE MEASURED REQUIREMENT. A bare GetOrAdd builds one object per racing thread and keeps
@@ -485,4 +505,229 @@ public class GoAsyncIOTests
         Assert.AreEqual(11, ran);
     }
 
+    // ---- Pooled operations (Go 1.26) ---------------------------------------------------------
+    //
+    // Go 1.26's internal/poll takes every overlapped operation from a process-wide sync.Pool
+    // (fd_windows.go's operationPool) instead of one read and one write operation per FD, so ONE key
+    // reaches RearmOperation for several descriptors and for both modes. A record is bound to the
+    // descriptor and mode it was created for (its completion-port association and the mode its
+    // completion signals), so a key reused for another pair must get a NEW record, and the old one
+    // must be retired. Through Go 1.24 the key never changed binding, which is why the table was keyed
+    // by the operation alone.
+
+    private sealed class BoundOperation(nuint descriptor, nint mode) : IGoAsyncOperation, IDisposable
+    {
+        internal readonly nuint Descriptor = descriptor;
+        internal readonly nint Mode = mode;
+        internal int Disposals;
+
+        public nuint NativeAddress => 0x5000;
+
+        public nuint RearmForSubmit() => 0x6000;
+
+        public nuint StageBytes(int byteCount) => 0x7000;
+
+        public void Dispose() => Disposals++;
+    }
+
+    private static readonly Func<nuint, object, nint, object> s_boundFactory =
+        (descriptor, _, mode) => new BoundOperation(descriptor, mode);
+
+    private static BoundOperation boundStateOf(object key)
+    {
+        Assert.IsTrue(GoAsyncIO.TryGetOperationState(key, out object? state));
+        return (BoundOperation)state!;
+    }
+
+    [TestMethod]
+    public void RearmOperation_APooledKeyReusedForAnotherDescriptor_GetsANewRecord()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(11, key, 'r');
+        BoundOperation first = boundStateOf(key);
+
+        GoAsyncIO.RearmOperation(12, key, 'r');
+        BoundOperation second = boundStateOf(key);
+
+        Assert.AreNotSame(first, second, "a pooled operation submitted on another descriptor must not reuse the first descriptor's record");
+        Assert.AreEqual((nuint)12, second.Descriptor);
+        Assert.AreEqual(1, first.Disposals, "the retired record is disposed");
+
+        GoAsyncIO.RemoveOperationState(key);
+    }
+
+    [TestMethod]
+    public void RearmOperation_APooledKeyReusedForTheOtherMode_GetsANewRecord()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(13, key, 'r');
+        BoundOperation read = boundStateOf(key);
+
+        GoAsyncIO.RearmOperation(13, key, 'w');
+        BoundOperation write = boundStateOf(key);
+
+        Assert.AreNotSame(read, write, "a write must not signal through a record bound to 'r'");
+        Assert.AreEqual((nint)'w', write.Mode);
+        Assert.AreEqual(1, read.Disposals);
+
+        GoAsyncIO.RemoveOperationState(key);
+    }
+
+    [TestMethod]
+    public void RearmOperation_Rebinding_DropsTheRetiredRecordsPendingCompletion()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(14, key, 'r');
+        GoAsyncIO.SetOperationCompletion(key, _ => Assert.Fail("a decode registered for the retired record ran"));
+
+        GoAsyncIO.RearmOperation(15, key, 'r');
+
+        Assert.IsFalse(GoAsyncIO.CompleteOperation(key, 0));
+        GoAsyncIO.RemoveOperationState(key);
+    }
+
+    [TestMethod]
+    public void RemoveOperationState_WithAState_RetiresOnlyThatState()
+    {
+        // A descriptor's teardown removes the records IT created. After a re-bind the key names
+        // another descriptor's live record, which a removal by key alone would retire.
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_boundFactory);
+        object key = new();
+
+        GoAsyncIO.RearmOperation(16, key, 'r');
+        BoundOperation first = boundStateOf(key);
+
+        GoAsyncIO.RearmOperation(17, key, 'r');
+        BoundOperation second = boundStateOf(key);
+
+        Assert.IsFalse(GoAsyncIO.RemoveOperationState(key, first), "the retired record no longer owns the key");
+        Assert.AreSame(second, boundStateOf(key));
+
+        Assert.IsTrue(GoAsyncIO.RemoveOperationState(key, second));
+        Assert.IsFalse(GoAsyncIO.TryGetOperationState(key, out _));
+    }
+
+    // ---- Disassociated descriptors -----------------------------------------------------------
+    //
+    // net's dup() and os's File.Fd() take a socket off the completion port (internal/poll's
+    // DisassociateIOCP), after which Go's waitIO waits on each operation's own event. The submit seam
+    // binds a socket to a port LAZILY, at its first overlapped submit, so the poller's hand-own MARKS
+    // the descriptor instead, and a record built before the mark must not serve a submit after it: its
+    // overlapped would carry no event and complete to a port nobody waits on.
+
+    private sealed class AssociationRecord(bool unassociated) : IGoAsyncOperation, IDisposable
+    {
+        internal readonly bool Unassociated = unassociated;
+        internal int Disposals;
+
+        public nuint NativeAddress => 0x5000;
+
+        public nuint RearmForSubmit() => 0x6000;
+
+        public nuint StageBytes(int byteCount) => 0x7000;
+
+        public void Dispose() => Disposals++;
+    }
+
+    // The factory reads the mark exactly as the seam's does, at creation.
+    private static readonly Func<nuint, object, nint, object> s_associationFactory =
+        (descriptor, _, _) => new AssociationRecord(GoAsyncIO.IsUnassociated(descriptor));
+
+    private static AssociationRecord associationStateOf(object key)
+    {
+        Assert.IsTrue(GoAsyncIO.TryGetOperationState(key, out object? state));
+        return (AssociationRecord)state!;
+    }
+
+    [TestMethod]
+    public void MarkUnassociated_RetiresTheRecordBuiltBeforeIt()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_associationFactory);
+        nuint descriptor = nextDescriptor();
+        object key = new();
+
+        GoAsyncIO.RearmOperation(descriptor, key, 'r');
+        AssociationRecord bound = associationStateOf(key);
+        Assert.IsFalse(bound.Unassociated);
+
+        GoAsyncIO.MarkUnassociated(descriptor);
+        GoAsyncIO.RearmOperation(descriptor, key, 'r');
+        AssociationRecord unbound = associationStateOf(key);
+
+        Assert.AreNotSame(bound, unbound, "a submit after the mark must not reuse the record built for the port");
+        Assert.IsTrue(unbound.Unassociated, "the new record is built under the mark");
+        Assert.AreEqual(1, bound.Disposals, "the retired record is disposed");
+
+        GoAsyncIO.RemoveOperationState(key);
+        GoAsyncIO.RemoveDescriptor(descriptor);
+    }
+
+    [TestMethod]
+    public void MarkUnassociated_KeepsTheRecordBuiltUnderIt()
+    {
+        GoAsyncIO.ReplaceOperationFactoryForTesting(s_associationFactory);
+        nuint descriptor = nextDescriptor();
+        object key = new();
+
+        GoAsyncIO.MarkUnassociated(descriptor);
+        GoAsyncIO.RearmOperation(descriptor, key, 'w');
+        AssociationRecord first = associationStateOf(key);
+
+        GoAsyncIO.RearmOperation(descriptor, key, 'w');
+
+        Assert.AreSame(first, associationStateOf(key), "the mark does not churn records built under it");
+        Assert.IsTrue(first.Unassociated);
+        Assert.AreEqual(0, first.Disposals);
+
+        GoAsyncIO.RemoveOperationState(key);
+        GoAsyncIO.RemoveDescriptor(descriptor);
+    }
+
+    [TestMethod]
+    public void MarkUnassociated_IsClearedWhenTheDescriptorIsRetiredOrRegisteredAgain()
+    {
+        // The kernel reissues descriptor numbers, so a mark must not outlive the socket it was made for.
+        nuint retired = nextDescriptor();
+        GoAsyncIO.MarkUnassociated(retired);
+        Assert.IsTrue(GoAsyncIO.IsUnassociated(retired));
+
+        GoAsyncIO.RemoveDescriptor(retired);
+        Assert.IsFalse(GoAsyncIO.IsUnassociated(retired), "RemoveDescriptor retires the mark");
+
+        nuint reused = nextDescriptor();
+        GoAsyncIO.MarkUnassociated(reused);
+        GoAsyncIO.SetReadiness(reused, null);
+        Assert.IsTrue(GoAsyncIO.IsUnassociated(reused), "unregistering a sink is not a new socket");
+
+        GoAsyncIO.SetReadiness(reused, _ => { });
+        Assert.IsFalse(GoAsyncIO.IsUnassociated(reused), "a new registration is a new socket");
+
+        GoAsyncIO.RemoveDescriptor(reused);
+    }
+
+    // The deadline pre-pay's parts run inside the FD.Init that starts the poller, so a part that throws
+    // must neither fail that FD.Init nor skip a part registered after it (G's review of the pre-pay:
+    // red at dd65b04763 with a planted throwing hook, where the first os.Pipe failed in FD.Init).
+    [TestMethod]
+    public void DeadlinePathPrepayPartThatThrowsStillRunsTheNextPart()
+    {
+        List<string> ran = [];
+
+        GoAsyncIO.RunEach([
+            () =>
+            {
+                ran.Add("throws");
+                throw new InvalidOperationException("planted pre-pay failure");
+            },
+            () => ran.Add("next")
+        ]);
+
+        CollectionAssert.AreEqual(new[] { "throws", "next" }, ran);
+    }
 }

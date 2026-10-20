@@ -43,7 +43,7 @@ public static partial void TestVendorPackages(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    foreach (var (_, fullPkg) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, fullPkg) in strings.Split((@string)@out, "\n"u8)) {
         var (pkg, found) = strings.CutPrefix(fullPkg, vendorˢ2);
         if (!found) {
             (_, pkg, found) = strings.Cut(fullPkg, vendorˢ3);
@@ -57,7 +57,7 @@ public static partial void TestVendorPackages(ж<testing.T> Ꮡt) {
 		Package %q should not be vendored into this repo.
 		After getting approval from the Go team, add it to allowedPackagePrefixes
 		in %s.
-"""u8,
+"""u8.Raw(),
                 pkg, thisFile);
         }
     }

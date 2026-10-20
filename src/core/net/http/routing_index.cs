@@ -59,8 +59,8 @@ internal static void addPattern(this ref routingIndex idx, ж<pattern> Ꮡpat) {
 // patterns that we might need to.
 internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
     error err = default!;
-
     ref var pat = ref Ꮡpat.DerefOrNull();
+
     // Terminology:
     //   dollar pattern: one ending in "{$}"
     //   multi pattern: one ending in a trailing slash or "{x...}" wildcard
@@ -78,6 +78,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
         }
         return default!;
     }
+
     // Our simple indexing scheme doesn't try to prune multi patterns; assume
     // any of them can match the argument.
     {
@@ -123,6 +124,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
         apply(wmin);
         return err;
     }
+
     // This pattern is all wildcards.
     // Check it against everything.
     foreach (var (_, pats) in idx.segments) {

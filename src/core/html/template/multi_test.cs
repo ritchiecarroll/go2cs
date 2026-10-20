@@ -17,7 +17,6 @@ using text.template;
 
 partial class template_internal_test_package {
 
-// User-defined function: test argument evaluator.
 internal static slice<execTest> multiExecTests;
 internal static void initᴛmultiExecTests() { multiExecTests = new execTest[]{
     new("empty"u8, ""u8, ""u8, default!, true),
@@ -29,6 +28,8 @@ internal static void initᴛmultiExecTests() { multiExecTests = new execTest[]{
     new("invoke dotV"u8, @"{{template ""dotV"" .U}}"u8, "v"u8, tVal.OrTypedNil(), true),
     new("invoke nested int"u8, @"{{template ""nested"" .I}}"u8, "17"u8, tVal.OrTypedNil(), true),
     new("variable declared by template"u8, @"{{template ""nested"" $x:=.SI}},{{index $x 1}}"u8, "[3 4 5],4"u8, tVal.OrTypedNil(), true),
+
+    // User-defined function: test argument evaluator.
     new("testFunc literal"u8, @"{{oneArg ""joe""}}"u8, "oneArg=joe"u8, tVal.OrTypedNil(), true),
     new("testFunc ."u8, @"{{oneArg .}}"u8, "oneArg=joe"u8, (@string)"joe"u8, true)
 }.slice(); }
@@ -39,14 +40,14 @@ internal static readonly @string multiText1 = """
 	{{define "x"}}TEXT{{end}}
 	{{define "dotV"}}{{.V}}{{end}}
 
-"""u8;
+"""u8.Raw();
 
 internal static readonly @string multiText2 = """
 
 	{{define "dot"}}{{.}}{{end}}
 	{{define "nested"}}{{template "dot" .}}{{end}}
 
-"""u8;
+"""u8.Raw();
 
 public static void TestMultiExecute(ж<testing.T> Ꮡt) {
     // Declare a couple of templates first.
@@ -109,12 +110,14 @@ internal static readonly @string fileTmplˢ = "file*.tmpl"u8;
 
 public static void TestParseFS(ж<testing.T> Ꮡt) {
     var fs = os.DirFS(testdataˢ);
+
     {
         var (_, err) = ParseFS(fs, doesNotExistˢ);
         if (err == default!) {
             Ꮡt.Error(expectedErrorForNonˢ);
         }
     }
+
     {
         var template = New(rootˢ);
         var (_, err) = template.ParseFS(fs, file1Tmplˢ, file2Tmplˢ);
@@ -123,6 +126,7 @@ public static void TestParseFS(ж<testing.T> Ꮡt) {
         }
         testExecute(multiExecTests, template, Ꮡt);
     }
+
     {
         var template = New(rootˢ);
         var (_, err) = template.ParseFS(fs, fileTmplˢ);
@@ -135,7 +139,7 @@ public static void TestParseFS(ж<testing.T> Ꮡt) {
 
 // In these tests, actual content (not just template definitions) comes from the parsed files.
 internal static slice<execTest> templateFileExecTests = new execTest[]{
-    new("test"u8, @"{{template ""tmpl1.tmpl""}}{{template ""tmpl2.tmpl""}}"u8, "template1\n\ny\ntemplate2\n\nx\n"u8, (nint)(0), true)
+    new("test"u8, @"{{template ""tmpl1.tmpl""}}{{template ""tmpl2.tmpl""}}"u8, "template1\n\ny\ntemplate2\n\nx\n"u8, (nint)0, true)
 }.slice();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -295,11 +299,12 @@ public static void TestEmptyTemplate(ж<testing.T> Ꮡt) {
         new(new @string[]{""u8, ""u8}.slice(), "twice"u8, ""u8),
         new(new @string[]{"{{.}}"u8, "{{.}}"u8}.slice(), "twice"u8, "twice"u8),
         new(new @string[]{"{{/* a comment */}}"u8, "{{/* a comment */}}"u8}.slice(), "comment"u8, ""u8),
-        new(new @string[]{"{{.}}"u8, ""u8}.slice(), "twice"u8, "twice"u8)
+        new(new @string[]{"{{.}}"u8, ""u8}.slice(), "twice"u8, "twice"u8) // TODO: should want "" not "twice"
     }.slice();
-    // TODO: should want "" not "twice"
+
     foreach (var (i, c) in cases) {
         var root = New(rootˢ);
+
         ж<global::go.html.template_package.Template> m = default!;
         error err = default!;
         foreach (var (_, d) in c.defn) {
@@ -330,8 +335,6 @@ internal static readonly object stylesheetˢ = (@string)"stylesheet"u8;
 // templates added in that release, which got different answers depending
 // on the order templates appeared in the internal map.
 public static void TestIssue19294(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // The empty block in "xhtml" should be replaced during execution
     // by the contents of "stylesheet", but if the internal map associating
     // names with templates is built in the wrong order, the empty block
@@ -353,7 +356,7 @@ public static void TestIssue19294(ж<testing.T> Ꮡt) {
             }
         }
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-        res.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), (nint)(0));
+        res.Execute(new template_test_package.strings_BuilderжWriter(Ꮡbuf), (nint)0);
         if (buf.String() != "stylesheet"u8) {
             Ꮡt.Fatalf("iteration %d: got %q; expected %q"u8, i, buf.String(), stylesheetˢ);
         }

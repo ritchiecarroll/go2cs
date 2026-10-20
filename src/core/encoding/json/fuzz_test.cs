@@ -29,7 +29,8 @@ public static void FuzzUnmarshalJSON(ж<testing.F> Ꮡf) {
 "int": 1e5,
 "float": 3e-9"
 }
-"""u8));
+"""u8.Raw()));
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         foreach (var (_, typ) in new Func<any>[]{
             () => @new<any>(),
@@ -42,10 +43,12 @@ public static void FuzzUnmarshalJSON(ж<testing.F> Ꮡf) {
                     return;
                 }
             }
+
             var (encoded, err) = Marshal(i);
             if (err != default!) {
                 t.Fatalf("failed to marshal: %s"u8, err);
             }
+
             {
                 var errΔ1 = Unmarshal(encoded, i); if (errΔ1 != default!) {
                     t.Fatalf("failed to roundtrip: %s"u8, errΔ1);
@@ -74,7 +77,8 @@ public static void FuzzDecoderToken(ж<testing.F> Ꮡf) {
 "int": 1e5,
 "float": 3e-9"
 }
-"""u8));
+"""u8.Raw()));
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         var r = bytes.NewReader(b);
         var d = NewDecoder(new json_test_package.bytes_ReaderжReader(r));

@@ -125,7 +125,7 @@ func loadProxyFixture(t *testing.T) proxyFixture {
 	// nil map nor leak registrations into a sibling test.
 	previousProxies := constraintProxies
 	t.Cleanup(func() { constraintProxies = previousProxies })
-	constraintProxies = make(map[string][2]string)
+	constraintProxies = make(map[string][3]string)
 
 	production := loadProductionForDir(t, dir)
 	fixture := proxyFixture{

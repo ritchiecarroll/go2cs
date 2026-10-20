@@ -32,6 +32,12 @@ using static global::go.compress.lzw_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -40,8 +46,8 @@ using static global::go.compress.lzw_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/lzw/reader_test.go", "reader_test.cs", "ABs0ADh2ooKCgoKUpKSkgoKSgoKCgoKUpoKmlILGpKKCgoKClKSkpIKCkoKCgoKClKaCppaCgoKCgoKUgsbYgoKmgoKCgoKCgIK2gpQABxDmAAcUkoKClIKUggAcPIKEgoKCuIL4goKClIKWgoKCgoKUlIKWgoKigoKCgoKCpqKCgoKCgoKCgoI=", "274-285:1;289-298:2;299-311:3")]
-[assembly: go.GoPositionMap("compress/lzw/writer_test.go", "writer_test.cs", "ABQkAAUQ1IKCgpSmgoKCloKSwpKSgpKCgoKCgpSCgoKUgsaSgqaCgoKClIKClIKClIKCgsakgoKUgoKUpoLKgoKCkoKCgpSUgoKAgqaAgqaChISAgqaAgqSEggAHEIKCgoLogoKAgqSAgsgACRCCgoKClIKEgoKWgsqCgoKUgpaCgoKCgoKUlIKCkoKCgoKmkoKCgoKC", "44-65:1;111-149:1;113-147:1.1;220-227:1;228-236:2")]
+[assembly: go.GoPositionMap("compress/lzw/reader_test.go", "reader_test.cs", "ABk0ADp2ooKCgoKUpKSUgoKSgoKCgoKUpoKmlILGpKKCgoKClKSklIKCkoKCgoKClKaCpqaCgoKCgoKUgsbYgoKmgoKCgoKCgIK2gpQABxDmAAcUkoKClIKUggAdPIKUgoKCuIL4goKClIKmgoKCgoKUlIKmgoKigoKCgoKCpqKCgoKCgoKCgoI=", "274-285:1;289-298:2;299-311:3")]
+[assembly: go.GoPositionMap("compress/lzw/writer_test.go", "writer_test.cs", "ABQkAAUQ1IKCgpS2goKCpoKSwpKSgpKCgoKCgpSCgoKUgsaSgraCgoKClIKClIKClIKCgsakgoKUgoKUpoLKgoKCkoKCgpSUgoKAgraAgraClJSAgraAgqSUggAHEIKCgoLogoKAgqSAgsgACRCCgoKClIKUgoKmgsqCgoKUgqaCgoKCgoKUlIKCkoKCgoKmkoKCgoKC", "44-65:1;111-149:1;113-147:1.1;220-227:1;228-236:2")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

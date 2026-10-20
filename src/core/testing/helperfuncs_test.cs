@@ -46,20 +46,20 @@ private static readonly @string genericFloat64ˢ = "GenericFloat64"u8;
 private static readonly @string genericIntˢ = "GenericInt"u8;
 
 internal static void testHelper(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Check combinations of directly and indirectly
     // calling helper functions.
     notHelper(Ꮡt, "0"u8);
     helper(Ꮡt, "1"u8);
     notHelperCallingHelper(Ꮡt, "2"u8);
     helperCallingHelper(Ꮡt, "3"u8);
+
     // Check a function literal closing over t that uses Helper.
     void fn(@string msg) {
         Ꮡt.Helper();
         Ꮡt.Error(msg);
     }
     fn("4"u8);
+
     Ꮡt.Run(subˢ, (ж<testing.T> tΔ1) => {
         helper(tΔ1, "5"u8);
         notHelperCallingHelper(tΔ1, "6"u8);
@@ -68,6 +68,7 @@ internal static void testHelper(ж<testing.T> Ꮡt) {
         tΔ1.Helper();
         tΔ1.Error((@string)"7"u8);
     });
+
     // Check that right caller is reported for func passed to Cleanup when
     // multiple cleanup functions have been registered.
     Ꮡt.Cleanup(() => {
@@ -78,12 +79,15 @@ internal static void testHelper(ж<testing.T> Ꮡt) {
         Ꮡt.Helper();
         Ꮡt.Error((@string)"9"u8);
     });
+
     // Check that helper-ness propagates up through subtests
     // to helpers above. See https://golang.org/issue/44887.
     helperSubCallingHelper(Ꮡt, "11"u8);
+
     // Check that helper-ness propagates up through panic/recover.
     // See https://golang.org/issue/31154.
     recoverHelper(Ꮡt, "12"u8);
+
     genericHelper<float64>(Ꮡt, genericFloat64ˢ);
     genericIntHelper(Ꮡt, genericIntˢ);
 }

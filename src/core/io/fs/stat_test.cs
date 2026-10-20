@@ -34,9 +34,11 @@ public static void TestStat(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Stat(%s) = %v, %v, want Mode:0456, nil"u8, desc, infoStr, errΔ1);
         }
     }
+
     // Test that Stat uses the method when present.
     var (info, err) = Stat(new statOnly(new fstest_MapFSᴠStatFS(testFsys)), helloTxtˢ);
     check(statOnlyˢ, info, err);
+
     // Test that Stat uses Open when the method is not present.
     (info, err) = Stat(new openOnly(testFsys), helloTxtˢ);
     check(openOnlyˢ, info, err);

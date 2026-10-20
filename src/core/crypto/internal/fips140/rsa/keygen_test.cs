@@ -27,6 +27,7 @@ public static void TestMillerRabin(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     bool expected = default!;
     @string W = default!;
     @string B = default!;
@@ -38,6 +39,7 @@ public static void TestMillerRabin(ж<testing.T> Ꮡt) {
         if (len(line) == 0 || line[0] == (rune)'#') {
             continue;
         }
+
         var (k, v, _) = strings.Cut(line, " = "u8);
         var exprᴛ1 = k;
         if (exprᴛ1 == "Result"u8) {
@@ -51,13 +53,13 @@ public static void TestMillerRabin(ж<testing.T> Ꮡt) {
             else { /* default: */
                 Ꮡt.Fatalf("unknown result %q on line %d"u8, v, lineNum);
             }
-
         }
         else if (exprᴛ1 == "W"u8) {
             W = v;
         }
         else if (exprᴛ1 == "B"u8) {
             B = v;
+
             Ꮡt.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
                 if (len(W) % 2 != 0) {
                     W = "0"u8 + W;
@@ -65,18 +67,21 @@ public static void TestMillerRabin(ж<testing.T> Ꮡt) {
                 while (len(B) < len(W)) {
                     B = "0"u8 + B;
                 }
+
                 var (mr, errΔ2) = millerRabinSetup(decodeHex(tΔ2, W));
                 if (errΔ2 != default!) {
                     tΔ2.Logf("W = %s"u8, W);
                     tΔ2.Logf("B = %s"u8, B);
                     tΔ2.Fatalf("failed to set up Miller-Rabin test: %v"u8, errΔ2);
                 }
+
                 (var result, errΔ2) = millerRabinIteration(ref (mr).DerefOrNull(), decodeHex(tΔ2, B));
                 if (errΔ2 != default!) {
                     tΔ2.Logf("W = %s"u8, W);
                     tΔ2.Logf("B = %s"u8, B);
                     tΔ2.Fatalf("failed to run Miller-Rabin test: %v"u8, errΔ2);
                 }
+
                 if (result != expected) {
                     tΔ2.Logf("W = %s"u8, W);
                     tΔ2.Logf("B = %s"u8, B);
@@ -87,7 +92,6 @@ public static void TestMillerRabin(ж<testing.T> Ꮡt) {
         else { /* default: */
             Ꮡt.Fatalf("unknown key %q on line %d"u8, k, lineNum);
         }
-
     }
     {
         var errΔ3 = scanner.Err(); if (errΔ3 != default!) {
@@ -103,12 +107,11 @@ internal static readonly object skippingTestWithLcm1ˢ = (@string)"skipping test
 internal static readonly object gcdTooLargeˢ = (@string)"GCD too large"u8;
 
 public static void TestTotient(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (f, err) = os.Open(testdataGcdLcmTestsTxtˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     @string GCD = default!;
     @string A = default!;
     @string B = default!;
@@ -121,6 +124,7 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
         if (len(line) == 0 || line[0] == (rune)'#') {
             continue;
         }
+
         var (k, v, _) = strings.Cut(line, " = "u8);
         var exprᴛ1 = k;
         if (exprᴛ1 == "GCD"u8) {
@@ -134,6 +138,7 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
         }
         else if (exprᴛ1 == "LCM"u8) {
             LCM = v;
+
             Ꮡt.Run(fmt.Sprintf("line %d"u8, lineNum), (ж<testing.T> tΔ2) => {
                 if (A == "0"u8 || B == "0"u8) {
                     tΔ2.Skip(skippingTestWithZeroˢ);
@@ -141,10 +146,12 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
                 if (LCM == "1"u8) {
                     tΔ2.Skip(skippingTestWithLcm1ˢ);
                 }
+
                 var (p, _) = bigmod.NewModulus(addOne(decodeHex(tΔ2, A)));
                 var (a, _) = bigmod.NewNat().SetBytes(decodeHex(tΔ2, A), p);
                 var (q, _) = bigmod.NewModulus(addOne(decodeHex(tΔ2, B)));
                 var (b, _) = bigmod.NewNat().SetBytes(decodeHex(tΔ2, B), q);
+
                 var (gcd, errΔ2) = bigmod.NewNat().GCDVarTime(a, b);
                 // GCD doesn't work if a and b are both even, but LCM handles it.
                 if (errΔ2 == default!) {
@@ -154,6 +161,7 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
                         }
                     }
                 }
+
                 (var lcm, errΔ2) = totient(p, q);
                 if (oddDivisorLargerThan32Bits(decodeHex(tΔ2, GCD))) {
                     if (!AreEqual(errΔ2, errDivisorTooLarge)) {
@@ -174,7 +182,6 @@ public static void TestTotient(ж<testing.T> Ꮡt) {
         else { /* default: */
             Ꮡt.Fatalf("unknown key %q on line %d"u8, k, lineNum);
         }
-
     }
     {
         var errΔ3 = scanner.Err(); if (errΔ3 != default!) {

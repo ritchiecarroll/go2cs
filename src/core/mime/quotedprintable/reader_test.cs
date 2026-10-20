@@ -32,40 +32,41 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         new(@in: "foo bar"u8, want: "foo bar"u8),
         new(@in: "foo bar=3D"u8, want: "foo bar="u8),
         new(@in: "foo bar=3d"u8, want: "foo bar="u8), // lax.
-
         new(@in: "foo bar=\n"u8, want: "foo bar"u8),
         new(@in: "foo bar\n"u8, want: "foo bar\n"u8), // somewhat lax.
-
         new(@in: "foo bar=0"u8, want: "foo bar=0"u8), // lax
-
         new(@in: "foo bar=0D=0A"u8, want: "foo bar\r\n"u8),
         new(@in: " A B        \r\n C "u8, want: " A B\r\n C"u8),
         new(@in: " A B =\r\n C "u8, want: " A B  C"u8),
         new(@in: " A B =\n C "u8, want: " A B  C"u8), // lax. treating LF as CRLF
-
         new(@in: "foo=\nbar"u8, want: "foobar"u8),
         new(@in: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72})), want: "foo"u8, err: (@string)"quotedprintable: invalid unescaped byte 0x00 in body"u8),
-        new(@in: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xff})), want: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xff}))), // Equal sign.
+        new(@in: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xff})), want: ((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x20, 0x62, 0x61, 0x72, 0xff}))),
 
+        // Equal sign.
         new(@in: "=3D30\n"u8, want: "=30\n"u8),
-        new(@in: "=00=FF0=\n"u8, want: ((@string)(new byte[]{0x00, 0xff, 0x30}))), // Trailing whitespace
+        new(@in: "=00=FF0=\n"u8, want: ((@string)(new byte[]{0x00, 0xff, 0x30}))),
 
+        // Trailing whitespace
         new(@in: "foo  \n"u8, want: "foo\n"u8),
-        new(@in: "foo  \n\nfoo =\n\nfoo=20\n\n"u8, want: "foo\n\nfoo \nfoo \n\n"u8), // Tests that we allow bare \n and \r through, despite it being strictly
- // not permitted per RFC 2045, Section 6.7 Page 22 bullet (4).
+        new(@in: "foo  \n\nfoo =\n\nfoo=20\n\n"u8, want: "foo\n\nfoo \nfoo \n\n"u8),
 
+        // Tests that we allow bare \n and \r through, despite it being strictly
+        // not permitted per RFC 2045, Section 6.7 Page 22 bullet (4).
         new(@in: "foo\nbar"u8, want: "foo\nbar"u8),
         new(@in: "foo\rbar"u8, want: "foo\rbar"u8),
-        new(@in: "foo\r\nbar"u8, want: "foo\r\nbar"u8), // Different types of soft line-breaks.
+        new(@in: "foo\r\nbar"u8, want: "foo\r\nbar"u8),
 
+        // Different types of soft line-breaks.
         new(@in: "foo=\r\nbar"u8, want: "foobar"u8),
         new(@in: "foo=\nbar"u8, want: "foobar"u8),
         new(@in: "foo=\rbar"u8, want: "foo"u8, err: (@string)"quotedprintable: invalid hex byte 0x0d"u8),
-        new(@in: "foo=\r\r\r \nbar"u8, want: "foo"u8, err: (@string)@"quotedprintable: invalid bytes after =: ""\r\r\r \n"""u8), // Issue 15486, accept trailing soft line-break at end of input.
-
+        new(@in: "foo=\r\r\r \nbar"u8, want: "foo"u8, err: (@string)@"quotedprintable: invalid bytes after =: ""\r\r\r \n"""u8),
+        // Issue 15486, accept trailing soft line-break at end of input.
         new(@in: "foo="u8, want: "foo"u8),
-        new(@in: "="u8, want: ""u8, err: (@string)@"quotedprintable: invalid bytes after =: """""u8), // Example from RFC 2045:
+        new(@in: "="u8, want: ""u8, err: (@string)@"quotedprintable: invalid bytes after =: """""u8),
 
+        // Example from RFC 2045:
         new(@in: "Now's the time =\n"u8 + "for all folk to come=\n"u8 + " to the aid of their country."u8,
             want: "Now's the time for all folk to come to the aid of their country."u8),
         new(@in: "accept UTF-8 right quotation mark: ’"u8,
@@ -128,13 +129,13 @@ OK: 28934
 invalid bytes after =: 3949
 quotedprintable: invalid hex byte 0x0d: 2048
 unexpected EOF: 194
-"""u8;
+"""u8.Raw();
 internal static readonly @string ok896InvalidBytesAfterˢ = """
 OK: 896
 invalid bytes after =: 100
 quotedprintable: invalid hex byte 0x0d: 26
 unexpected EOF: 3
-"""u8;
+"""u8.Raw();
 
 public static void TestExhaustive(ж<testing.T> Ꮡt) {
     if (useQprint.Value) {
@@ -143,6 +144,7 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Error looking for qprint: %v"u8, err);
         }
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     var res = new map<@string, nint>();
     nint n = 6;
@@ -246,6 +248,7 @@ public static void TestExhaustive(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         want = ok896InvalidBytesAfterˢ;
     }
+
     if (got != want) {
         Ꮡt.Errorf("Got:\n%s\nWant:\n%s"u8, got, want);
     }

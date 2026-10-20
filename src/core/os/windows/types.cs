@@ -1,7 +1,15 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// A FileInfo describes a file and is returned by [Stat] and [Lstat].
 global using FileInfo = go.io.fs_package.FileInfo;
+
+// A FileMode represents a file's mode and permission bits.
+// The bits have the same definition on all systems, so that
+// information about files can be moved from one system
+// to another portably. Not all bits apply to all systems.
+// The only required bit is [ModeDir] for directories.
 global using FileMode = go.io.fs_package.FileMode;
 
 namespace go;
@@ -21,7 +29,7 @@ public static nint Getpagesize() {
 //
 // The methods of File are safe for concurrent use.
 partial struct File {
-    internal partial ref ж<@file> @file { get; } // os specific
+    /*embed*/ internal ж<@file> @file; // os specific
 }
 
 // The defined file mode bits are the most significant bits of the [FileMode].
@@ -29,32 +37,23 @@ partial struct File {
 // The values of these bits should be considered part of the public API and
 // may be used in wire protocols or disk representations: they must not be
 // changed, although new bits might be added.
+// The single letters are the abbreviations
+// used by the String method's formatting.
 public static fs.FileMode ModeDir => /* fs.ModeDir */ 2147483648; // d: is a directory
-
 public static fs.FileMode ModeAppend => /* fs.ModeAppend */ 1073741824; // a: append-only
-
 public static fs.FileMode ModeExclusive => /* fs.ModeExclusive */ 536870912; // l: exclusive use
-
 public static fs.FileMode ModeTemporary => /* fs.ModeTemporary */ 268435456; // T: temporary file; Plan 9 only
-
 public static fs.FileMode ModeSymlink => /* fs.ModeSymlink */ 134217728; // L: symbolic link
-
 public static fs.FileMode ModeDevice => /* fs.ModeDevice */ 67108864; // D: device file
-
 public static fs.FileMode ModeNamedPipe => /* fs.ModeNamedPipe */ 33554432; // p: named pipe (FIFO)
-
 public static fs.FileMode ModeSocket => /* fs.ModeSocket */ 16777216; // S: Unix domain socket
-
 public static fs.FileMode ModeSetuid => /* fs.ModeSetuid */ 8388608; // u: setuid
-
 public static fs.FileMode ModeSetgid => /* fs.ModeSetgid */ 4194304; // g: setgid
-
 public static fs.FileMode ModeCharDevice => /* fs.ModeCharDevice */ 2097152; // c: Unix character device, when ModeDevice is set
-
 public static fs.FileMode ModeSticky => /* fs.ModeSticky */ 1048576; // t: sticky
-
 public static fs.FileMode ModeIrregular => /* fs.ModeIrregular */ 524288; // ?: non-regular file; nothing else is known about this file
 
+// Mask for the type bits. For regular files, none will be set.
 public static fs.FileMode ModeType => /* fs.ModeType */ 2401763328;
 
 public static fs.FileMode ModePerm => /* fs.ModePerm */ 511; // Unix permission bits, 0o777

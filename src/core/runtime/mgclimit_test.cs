@@ -20,6 +20,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     UntypedInt procs = 14;
+
     // Create mock time.
     var ticks = (int64)0;
     int64 advance(time.Duration d) {
@@ -27,31 +28,39 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         ticks += (int64)d;
         return ticks;
     }
+
     // assistTime computes the CPU time for assists using frac of GOMAXPROCS
     // over the wall-clock duration d.
     int64 assistTime(time.Duration d, float64 frac) {
         Ꮡt.Helper();
         return (int64)(frac * (float64)(int64)d * (float64)procs);
     }
+
     var l = runtime_internal_test_package.NewGCCPULimiter(ticks, procs);
+
     // Do the whole test twice to make sure state doesn't leak across.
     uint64 baseOverflow = default!;  // Track total overflow across iterations.
     for (nint i = 0; i < 2; i++) {
         Ꮡt.Logf("Iteration %d"u8, i + 1);
+
         if (l.Capacity() != (uint64)(/* procs * CapacityPerProc */ 14000000000UL)) {
             Ꮡt.Fatalf("unexpected capacity: %d"u8, l.Capacity());
         }
         if (l.Fill() != 0) {
             Ꮡt.Fatalf("expected empty bucket to start"u8);
         }
+
         // Test filling the bucket with just mutator time.
+
         l.Update(advance(10 * time.Millisecond));
         l.Update(advance(1 * time.ΔSecond));
         l.Update(advance((time.Duration)(3600000000000L)));
         if (l.Fill() != 0) {
             Ꮡt.Fatalf("expected empty bucket from only accumulating mutator time, got fill of %d cpu-ns"u8, l.Fill());
         }
+
         // Test needUpdate.
+
         if (l.NeedUpdate(advance(runtime_internal_test_package.GCCPULimiterUpdatePeriod / 2))) {
             Ꮡt.Fatal(needUpdateEvenThoughˢ);
         }
@@ -62,14 +71,18 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (l.NeedUpdate(advance(0))) {
             Ꮡt.Fatal(needUpdateEvenThoughJustˢ);
         }
+
         // Test transitioning the bucket to enable the GC.
+
         l.StartGCTransition(true, advance(109 * time.Millisecond));
         l.FinishGCTransition(advance(2 * time.Millisecond + 1 * time.Microsecond));
+
         {
             var expect = (uint64)(int64)((2 * time.Millisecond + 1 * time.Microsecond) * (int64)procs); if (l.Fill() != expect) {
                 Ꮡt.Fatalf("expected fill of %d, got %d cpu-ns"u8, expect, l.Fill());
             }
         }
+
         // Test passing time without assists during a GC. Specifically, just enough to drain the bucket to
         // exactly procs nanoseconds (easier to get to because of rounding).
         //
@@ -84,21 +97,24 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         // And here we want n=procs:
         var factor = (1D / (1D - 2D * runtime_internal_test_package.GCBackgroundUtilization));
         var fill = (2 * time.Millisecond + 1 * time.Microsecond) * (int64)procs;
-        l.Update(advance(((time.Duration)(int64)(factor * (float64)(int64)(fill - (int64)procs) / (float64)procs))));
+        l.Update(advance((time.Duration)(int64)(factor * (float64)(int64)(fill - (int64)procs) / (float64)procs)));
         if (l.Fill() != procs) {
             Ꮡt.Fatalf("expected fill %d cpu-ns from draining after a GC started, got fill of %d cpu-ns"u8, (nint)(procs), l.Fill());
         }
+
         // Drain to zero for the rest of the test.
         l.Update(advance((time.Duration)(28000000000L)));
         if (l.Fill() != 0) {
             Ꮡt.Fatalf("expected empty bucket from draining, got fill of %d cpu-ns"u8, l.Fill());
         }
+
         // Test filling up the bucket with 50% total GC work (so, not moving the bucket at all).
         l.AddAssistTime(assistTime(10 * time.Millisecond, 0.5D - runtime_internal_test_package.GCBackgroundUtilization));
         l.Update(advance(10 * time.Millisecond));
         if (l.Fill() != 0) {
             Ꮡt.Fatalf("expected empty bucket from 50%% GC work, got fill of %d cpu-ns"u8, l.Fill());
         }
+
         // Test adding to the bucket overall with 100% GC work.
         l.AddAssistTime(assistTime(time.Millisecond, 1.0D - runtime_internal_test_package.GCBackgroundUtilization));
         l.Update(advance(time.Millisecond));
@@ -113,6 +129,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Test filling the bucket exactly full.
         l.AddAssistTime(assistTime((int64)runtime_internal_test_package.CapacityPerProc - time.Millisecond, 1.0D - runtime_internal_test_package.GCBackgroundUtilization));
         l.Update(advance((int64)runtime_internal_test_package.CapacityPerProc - time.Millisecond));
@@ -128,6 +145,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Test adding with a delta of exactly zero. That is, GC work is exactly 50% of all resources.
         // Specifically, the limiter should still be on, and no overflow should accumulate.
         l.AddAssistTime(assistTime(1 * time.ΔSecond, 0.5D - runtime_internal_test_package.GCBackgroundUtilization));
@@ -144,6 +162,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Drain the bucket by half.
         l.AddAssistTime(assistTime(runtime_internal_test_package.CapacityPerProc, 0D));
         l.Update(advance(runtime_internal_test_package.CapacityPerProc));
@@ -158,6 +177,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Test overfilling the bucket.
         l.AddAssistTime(assistTime(runtime_internal_test_package.CapacityPerProc, 1.0D - runtime_internal_test_package.GCBackgroundUtilization));
         l.Update(advance(runtime_internal_test_package.CapacityPerProc));
@@ -175,6 +195,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Test ending the cycle with some assists left over.
         l.AddAssistTime(assistTime(1 * time.Millisecond, 1.0D - runtime_internal_test_package.GCBackgroundUtilization));
         l.StartGCTransition(false, advance(1 * time.Millisecond));
@@ -192,6 +213,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Make sure the STW adds to the bucket.
         l.FinishGCTransition(advance(5 * time.Millisecond));
         if (l.Fill() != l.Capacity()) {
@@ -208,6 +230,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Resize procs up and make sure limiting stops.
         var expectFill = l.Capacity();
         l.ResetCapacity(advance(0), procs + 10);
@@ -225,6 +248,7 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Resize procs down and make sure limiting begins again.
         // Also make sure resizing doesn't affect overflow. This isn't
         // a case where we want to report overflow, because we're not
@@ -245,8 +269,10 @@ public static void TestGCCPULimiter(ж<testing.T> Ꮡt) {
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         // Get back to a zero state. The top of the loop will double check.
         l.ResetCapacity(advance((time.Duration)(14000000000L)), procs);
+
         // Track total overflow for future iterations.
         baseOverflow += (uint64)(int64)((time.Duration)(7084000000L));
     }

@@ -14,6 +14,7 @@
     <div class="header-status">
       <i id="connection-dot"></i>
       <span id="connection-label" aria-live="polite">Connecting to Tour of Go</span>
+      <span id="warmup-status" class="warmup-status" aria-live="polite" hidden></span>
       <a id="solutions-link" class="header-link" target="_blank" rel="noopener noreferrer" hidden></a>
     </div>
     <div class="brand">
@@ -58,7 +59,7 @@
         </div>
         <div class="actions">
           <label class="sync-run" title="Build and run .NET whenever the Tour of Go program runs">
-            <input id="sync-run" type="checkbox">
+            <input id="sync-run" type="checkbox" checked>
             <span>Run with Go</span>
           </label>
           <button id="convert-button" class="button secondary" type="button" disabled>Convert</button>

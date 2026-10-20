@@ -25,21 +25,25 @@ internal static (int64 written, bool handled, error err) writeTo(this ж<File> �
 
     var (pfd, network) = getPollFDAndNetwork(w);
     // TODO(panjf2000): same as File.spliceToFile.
-    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP(((@string)network))) {
+    if (pfd == nil || !(~pfd).IsStream || !isUnixOrTCP((@string)network)) {
         return (written, handled, err);
     }
+
     (var sc, err) = Ꮡf.SyscallConn();
     if (err != default!) {
         return (written, handled, err);
     }
+
     var pfdʗ1 = pfd;
     var rerr = sc.Read((uintptr fd) => {
-        (written, Ꮡerr.ValueSlot, handled) = poll.SendFile(pfdʗ1, (nint)fd, 0);
+        (written, Ꮡerr.ValueSlot, handled) = poll.SendFile(pfdʗ1, fd, 0);
         return true;
     });
+
     if (err == default!) {
         err = rerr;
     }
+
     return (written, handled, wrapSyscallError(sendfileˢ, err));
 }
 
@@ -47,8 +51,8 @@ internal static (int64 written, bool handled, error err) readFrom(this ж<File> 
     int64 written = default!;
     bool handled = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     // Neither copy_file_range(2) nor splice(2) supports destinations opened with
     // O_APPEND, so don't bother to try zero-copy with these system calls.
     //
@@ -57,6 +61,7 @@ internal static (int64 written, bool handled, error err) readFrom(this ж<File> 
     if (f.appendMode) {
         return (0, false, default!);
     }
+
     (written, handled, err) = Ꮡf.copyFileRange(r);
     if (handled) {
         return (written, handled, err);
@@ -79,6 +84,7 @@ internal static (int64 written, bool handled, error err) spliceToFile(this ж<Fi
             return (0, true, default!);
         }
     }
+
     var (pfd, _) = getPollFDAndNetwork(r);
     // TODO(panjf2000): run some tests to see if we should unlock the non-streams for splice.
     // Streams benefit the most from the splice(2), non-streams are not even supported in old kernels
@@ -90,10 +96,13 @@ internal static (int64 written, bool handled, error err) spliceToFile(this ж<Fi
     if (pfd == nil || !(~pfd).IsStream) {
         return (written, handled, err);
     }
+
     (written, handled, err) = pollSplice(Ꮡf.of(File.Ꮡpfd), pfd, remain);
+
     if (lr != nil) {
         lr.Value.N = remain - written;
     }
+
     return (written, handled, wrapSyscallError(spliceˢ, err));
 }
 
@@ -113,6 +122,7 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
             return (0, true, default!);
         }
     }
+
     ж<File> src = default!;
     switch (r.type()) {
     case ж<File> v: {
@@ -127,11 +137,13 @@ internal static (int64 written, bool handled, error err) copyFileRange(this ж<F
         var v = r;
         return (0, false, default!);
     }}
+
     if (src.checkValid(readFromˢ) != default!) {
         // Avoid returning the error as we report handled as false,
         // leave further error handling as the responsibility of the caller.
         return (0, false, default!);
     }
+
     (written, handled, err) = pollCopyFileRange(Ꮡf.of(File.Ꮡpfd), src.of(File.Ꮡpfd), remain);
     if (lr != nil) {
         lr.Value.N -= written;
@@ -171,7 +183,6 @@ internal static bool isUnixOrTCP(@string network) {
     { /* default: */
         return false;
     }
-
 }
 
 } // end os_package

@@ -118,6 +118,7 @@ internal static ref renamedComplex64 renamedComplex64Val => ref ᏑrenamedComple
 internal static ж<renamedComplex128> ᏑrenamedComplex128Val = new StandardBox<renamedComplex128>(default(renamedComplex128));
 internal static ref renamedComplex128 renamedComplex128Val => ref ᏑrenamedComplex128Val.Value;
 
+// Xs accepts any non-empty run of the verb character
 partial struct Xs /*@string*/;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -128,11 +129,11 @@ public static error Scan(this ref Xs x, fmt.ScanState state, rune verb) {
     if (err != default!) {
         return err;
     }
-    @string s = ((@string)tok);
+    @string s = (@string)tok;
     if (!Δregexp.MustCompile("^"u8 + ((@string)verb) + "+$"u8).MatchString(s)) {
         return errors.New(syntaxErrorForXsˢ);
     }
-    x = ((Xs)s);
+    x = (Xs)s;
     return default!;
 }
 
@@ -154,39 +155,33 @@ public static error Scan(this ж<IntString> Ꮡs, fmt.ScanState state, rune verb
             return errΔ1;
         }
     }
+
     var (tok, err) = state.Token(true, default!);
     if (err != default!) {
         return err;
     }
-    s.s = ((@string)tok);
+    s.s = (@string)tok;
     return default!;
 }
 
 internal static ж<IntString> ᏑintStringVal = new StandardBox<IntString>(default(IntString));
 internal static ref IntString intStringVal => ref ᏑintStringVal.Value;
 
-// Basic types
-// boolean test vals toggle to be sure they are written
-// restored to zero value
-// Carriage-return followed by newline. (We treat \r\n as \n always.)
-// Renamed types
-// Custom scanners.
-// Fixed bugs
-// was: integer overflow
 internal static slice<ScanTest> scanTests = new ScanTest[]{
-    new("T\n"u8, ᏑboolVal, true),
-    new("F\n"u8, ᏑboolVal, false),
-    new("21\n"u8, ᏑintVal, (nint)(21)),
-    new("2_1\n"u8, ᏑintVal, (nint)(21)),
-    new("0\n"u8, ᏑintVal, (nint)(0)),
-    new("000\n"u8, ᏑintVal, (nint)(0)),
-    new("0x10\n"u8, ᏑintVal, (nint)(0x10)),
-    new("0x_1_0\n"u8, ᏑintVal, (nint)(0x10)),
+    // Basic types
+    new("T\n"u8, ᏑboolVal, true), // boolean test vals toggle to be sure they are written
+    new("F\n"u8, ᏑboolVal, false), // restored to zero value
+    new("21\n"u8, ᏑintVal, (nint)21),
+    new("2_1\n"u8, ᏑintVal, (nint)21),
+    new("0\n"u8, ᏑintVal, (nint)0),
+    new("000\n"u8, ᏑintVal, (nint)0),
+    new("0x10\n"u8, ᏑintVal, (nint)0x10),
+    new("0x_1_0\n"u8, ᏑintVal, (nint)0x10),
     new("-0x10\n"u8, ᏑintVal, (nint)(-0x10)),
-    new("0377\n"u8, ᏑintVal, (nint)(255)),
-    new("0_3_7_7\n"u8, ᏑintVal, (nint)(255)),
-    new("0o377\n"u8, ᏑintVal, (nint)(255)),
-    new("0o_3_7_7\n"u8, ᏑintVal, (nint)(255)),
+    new("0377\n"u8, ᏑintVal, (nint)255),
+    new("0_3_7_7\n"u8, ᏑintVal, (nint)255),
+    new("0o377\n"u8, ᏑintVal, (nint)255),
+    new("0o_3_7_7\n"u8, ᏑintVal, (nint)255),
     new("-0377\n"u8, ᏑintVal, (nint)(-255)),
     new("-0o377\n"u8, ᏑintVal, (nint)(-255)),
     new("0\n"u8, ᏑuintVal, (nuint)0),
@@ -238,93 +233,52 @@ internal static slice<ScanTest> scanTests = new ScanTest[]{
     new("-0x1ep-1-0x1p2i\n"u8, Ꮡcomplex128Val, (complex128)(-15D + -4D.i())),
     new("-0x1_Ep-1-0x1p0_2i\n"u8, Ꮡcomplex128Val, (complex128)(-15D + -4D.i())),
     new("hello\n"u8, ᏑstringVal, (@string)"hello"u8),
+
+    // Carriage-return followed by newline. (We treat \r\n as \n always.)
     new("hello\r\n"u8, ᏑstringVal, (@string)"hello"u8),
     new("27\r\n"u8, Ꮡuint8Val, (uint8)27),
-    new("true\n"u8, ᏑrenamedBoolVal, ((renamedBool)true)),
-    new("F\n"u8, ᏑrenamedBoolVal, ((renamedBool)false)),
-    new("101\n"u8, ᏑrenamedIntVal, ((renamedInt)101)),
-    new("102\n"u8, ᏑrenamedIntVal, ((renamedInt)102)),
-    new("103\n"u8, ᏑrenamedUintVal, ((renamedUint)103)),
-    new("104\n"u8, ᏑrenamedUintVal, ((renamedUint)104)),
-    new("105\n"u8, ᏑrenamedInt8Val, ((renamedInt8)105)),
-    new("106\n"u8, ᏑrenamedInt16Val, ((renamedInt16)106)),
-    new("107\n"u8, ᏑrenamedInt32Val, ((renamedInt32)107)),
-    new("108\n"u8, ᏑrenamedInt64Val, ((renamedInt64)108)),
-    new("109\n"u8, ᏑrenamedUint8Val, ((renamedUint8)109)),
-    new("110\n"u8, ᏑrenamedUint16Val, ((renamedUint16)110)),
-    new("111\n"u8, ᏑrenamedUint32Val, ((renamedUint32)111)),
-    new("112\n"u8, ᏑrenamedUint64Val, ((renamedUint64)112)),
-    new("113\n"u8, ᏑrenamedUintptrVal, ((renamedUintptr)113)),
-    new("114\n"u8, ᏑrenamedStringVal, ((renamedString)(@string)"114"u8)),
-    new("115\n"u8, ᏑrenamedBytesVal, ((renamedBytes)slice<byte>("115"u8))),
-    new("  vvv "u8, ᏑxVal, ((Xs)(@string)"vvv"u8)),
+
+    // Renamed types
+    new("true\n"u8, ᏑrenamedBoolVal, (renamedBool)true),
+    new("F\n"u8, ᏑrenamedBoolVal, (renamedBool)false),
+    new("101\n"u8, ᏑrenamedIntVal, (renamedInt)101),
+    new("102\n"u8, ᏑrenamedIntVal, (renamedInt)102),
+    new("103\n"u8, ᏑrenamedUintVal, (renamedUint)103),
+    new("104\n"u8, ᏑrenamedUintVal, (renamedUint)104),
+    new("105\n"u8, ᏑrenamedInt8Val, (renamedInt8)105),
+    new("106\n"u8, ᏑrenamedInt16Val, (renamedInt16)106),
+    new("107\n"u8, ᏑrenamedInt32Val, (renamedInt32)107),
+    new("108\n"u8, ᏑrenamedInt64Val, (renamedInt64)108),
+    new("109\n"u8, ᏑrenamedUint8Val, (renamedUint8)109),
+    new("110\n"u8, ᏑrenamedUint16Val, (renamedUint16)110),
+    new("111\n"u8, ᏑrenamedUint32Val, (renamedUint32)111),
+    new("112\n"u8, ᏑrenamedUint64Val, (renamedUint64)112),
+    new("113\n"u8, ᏑrenamedUintptrVal, (renamedUintptr)113),
+    new("114\n"u8, ᏑrenamedStringVal, (renamedString)(@string)"114"u8),
+    new("115\n"u8, ᏑrenamedBytesVal, (renamedBytes)slice<byte>("115"u8)),
+
+    // Custom scanners.
+    new("  vvv "u8, ᏑxVal, (Xs)(@string)"vvv"u8),
     new(" 1234hello"u8, ᏑintStringVal, new IntString(1234, "hello"u8)),
-    new("2147483648\n"u8, Ꮡint64Val, (int64)2147483648L)
+
+    // Fixed bugs
+    new("2147483648\n"u8, Ꮡint64Val, (int64)2147483648L) // was: integer overflow
 }.slice();
 
-// only %v takes underscores
-// only %v takes underscores
-// only %v takes underscores
-// Strings
-// Byte slices
-// Renamed types
-// Interesting formats
-// %% at end of string.
-// Corner cases
-// Custom scanner.
-// Fixed bugs
-// ok
-// was: "unexpected newline"
-// was: "EOF"; 0 was taken as base prefix and not counted.
-// was: "EOF"; 0 was taken as base prefix and not counted.
-// %c must accept a blank.
-// %c must accept any space.
-// %c must accept any space.
-// %% matches literal %.
-// %% matches literal %.
-// space handling
-// expected space in input to match format
-// expected space in input to match format
-// input does not match format
-// input does not match format
-// expected space in input to match format
-// expected space in input to match format
-// expected space in input to match format
-// expected space in input to match format
-// expected space in input to match format
-// expected space in input to match format
-// expected space in input to match format
-// unexpected EOF
-// unexpected EOF
-// input does not match format
-// unexpected EOF
-// input does not match format
-// input does not match format
-// input does not match format
-// input does not match format
-// input does not match format
-// expected space in input to match format
-// newline in input does not match format
-// expected space in input to match format
-// expected space in input to match format
-// input does not match format
-// input does not match format
-// expected space in input to match format
-// expected space in input to match format
 internal static slice<ScanfTest> scanfTests = new ScanfTest[]{
     new("%v"u8, "TRUE\n"u8, ᏑboolVal, true),
     new("%t"u8, "false\n"u8, ᏑboolVal, false),
     new("%v"u8, "-71\n"u8, ᏑintVal, (nint)(-71)),
     new("%v"u8, "-7_1\n"u8, ᏑintVal, (nint)(-71)),
-    new("%v"u8, "0b111\n"u8, ᏑintVal, (nint)(7)),
-    new("%v"u8, "0b_1_1_1\n"u8, ᏑintVal, (nint)(7)),
-    new("%v"u8, "0377\n"u8, ᏑintVal, (nint)(255)),
-    new("%v"u8, "0_3_7_7\n"u8, ᏑintVal, (nint)(255)),
-    new("%v"u8, "0o377\n"u8, ᏑintVal, (nint)(255)),
-    new("%v"u8, "0o_3_7_7\n"u8, ᏑintVal, (nint)(255)),
-    new("%v"u8, "0x44\n"u8, ᏑintVal, (nint)(0x44)),
-    new("%v"u8, "0x_4_4\n"u8, ᏑintVal, (nint)(0x44)),
-    new("%d"u8, "72\n"u8, ᏑintVal, (nint)(72)),
+    new("%v"u8, "0b111\n"u8, ᏑintVal, (nint)7),
+    new("%v"u8, "0b_1_1_1\n"u8, ᏑintVal, (nint)7),
+    new("%v"u8, "0377\n"u8, ᏑintVal, (nint)255),
+    new("%v"u8, "0_3_7_7\n"u8, ᏑintVal, (nint)255),
+    new("%v"u8, "0o377\n"u8, ᏑintVal, (nint)255),
+    new("%v"u8, "0o_3_7_7\n"u8, ᏑintVal, (nint)255),
+    new("%v"u8, "0x44\n"u8, ᏑintVal, (nint)0x44),
+    new("%v"u8, "0x_4_4\n"u8, ᏑintVal, (nint)0x44),
+    new("%d"u8, "72\n"u8, ᏑintVal, (nint)72),
     new("%c"u8, "a\n"u8, ᏑruneVal, (rune)'a'),
     new("%c"u8, "\u5072\n"u8, ᏑruneVal, (rune)'\u5072'),
     new("%c"u8, "\u1234\n"u8, ᏑruneVal, (rune)'\u1234'),
@@ -332,12 +286,12 @@ internal static slice<ScanfTest> scanfTests = new ScanfTest[]{
     new("%d"u8, "+74\n"u8, Ꮡint16Val, (int16)74),
     new("%d"u8, "75\n"u8, Ꮡint32Val, (int32)75),
     new("%d"u8, "76\n"u8, Ꮡint64Val, (int64)76),
-    new("%b"u8, "1001001\n"u8, ᏑintVal, (nint)(73)),
-    new("%o"u8, "075\n"u8, ᏑintVal, (nint)(61)),
-    new("%x"u8, "a75\n"u8, ᏑintVal, (nint)(0xa75)),
+    new("%b"u8, "1001001\n"u8, ᏑintVal, (nint)73),
+    new("%o"u8, "075\n"u8, ᏑintVal, (nint)61),
+    new("%x"u8, "a75\n"u8, ᏑintVal, (nint)0xa75),
     new("%v"u8, "71\n"u8, ᏑuintVal, (nuint)71),
     new("%d"u8, "72\n"u8, ᏑuintVal, (nuint)72),
-    new("%d"u8, "7_2\n"u8, ᏑuintVal, (nuint)7),
+    new("%d"u8, "7_2\n"u8, ᏑuintVal, (nuint)7), // only %v takes underscores
     new("%d"u8, "73\n"u8, Ꮡuint8Val, (uint8)73),
     new("%d"u8, "74\n"u8, Ꮡuint16Val, (uint16)74),
     new("%d"u8, "75\n"u8, Ꮡuint32Val, (uint32)75),
@@ -346,10 +300,10 @@ internal static slice<ScanfTest> scanfTests = new ScanfTest[]{
     new("%b"u8, "1001001\n"u8, ᏑuintVal, (nuint)73),
     new("%b"u8, "100_1001\n"u8, ᏑuintVal, (nuint)4),
     new("%o"u8, "075\n"u8, ᏑuintVal, (nuint)61),
-    new("%o"u8, "07_5\n"u8, ᏑuintVal, (nuint)7),
+    new("%o"u8, "07_5\n"u8, ᏑuintVal, (nuint)7), // only %v takes underscores
     new("%x"u8, "a75\n"u8, ᏑuintVal, (nuint)0xa75),
     new("%x"u8, "A75\n"u8, ᏑuintVal, (nuint)0xa75),
-    new("%x"u8, "A7_5\n"u8, ᏑuintVal, (nuint)0xa7),
+    new("%x"u8, "A7_5\n"u8, ᏑuintVal, (nuint)0xa7), // only %v takes underscores
     new("%U"u8, "U+1234\n"u8, ᏑintVal, (nint)0x1234),
     new("%U"u8, "U+4567\n"u8, ᏑuintVal, (nuint)0x4567),
     new("%e"u8, "2.3\n"u8, Ꮡfloat64Val, 2.3D),
@@ -361,139 +315,155 @@ internal static slice<ScanfTest> scanfTests = new ScanfTest[]{
     new("%f"u8, "2.3p-66\n"u8, Ꮡfloat64Val, 2.3D / (73786976294838206464D)),
     new("%G"u8, "0x2.3p-66\n"u8, Ꮡfloat64Val, (float64)35D / (1180591620717411303424D)),
     new("%E"u8, "2_3.4_5\n"u8, Ꮡfloat64Val, 23.45D),
+
+    // Strings
     new("%s"u8, "using-%s\n"u8, ᏑstringVal, (@string)"using-%s"u8),
     new("%x"u8, "7573696e672d2578\n"u8, ᏑstringVal, (@string)"using-%x"u8),
     new("%X"u8, "7573696E672D2558\n"u8, ᏑstringVal, (@string)"using-%X"u8),
     new("%q"u8, @"""quoted\twith\\do\u0075bl\x65s"""u8 + "\n"u8, ᏑstringVal, (@string)"quoted\twith\\doubles"u8),
     new("%q"u8, "`quoted with backs`\n"u8, ᏑstringVal, (@string)"quoted with backs"u8),
+
+    // Byte slices
     new("%s"u8, "bytes-%s\n"u8, ᏑbytesVal, slice<byte>("bytes-%s"u8)),
     new("%x"u8, "62797465732d2578\n"u8, ᏑbytesVal, slice<byte>("bytes-%x"u8)),
     new("%X"u8, "62797465732D2558\n"u8, ᏑbytesVal, slice<byte>("bytes-%X"u8)),
     new("%q"u8, @"""bytes\rwith\vdo\u0075bl\x65s"""u8 + "\n"u8, ᏑbytesVal, slice<byte>("bytes\rwith\vdoubles"u8)),
     new("%q"u8, "`bytes with backs`\n"u8, ᏑbytesVal, slice<byte>("bytes with backs"u8)),
-    new("%v\n"u8, "true\n"u8, ᏑrenamedBoolVal, ((renamedBool)true)),
-    new("%t\n"u8, "F\n"u8, ᏑrenamedBoolVal, ((renamedBool)false)),
-    new("%v"u8, "101\n"u8, ᏑrenamedIntVal, ((renamedInt)101)),
-    new("%c"u8, "\u0101\n"u8, ᏑrenamedIntVal, ((renamedInt)(rune)'\u0101')),
-    new("%o"u8, "0146\n"u8, ᏑrenamedIntVal, ((renamedInt)102)),
-    new("%v"u8, "103\n"u8, ᏑrenamedUintVal, ((renamedUint)103)),
-    new("%d"u8, "104\n"u8, ᏑrenamedUintVal, ((renamedUint)104)),
-    new("%d"u8, "105\n"u8, ᏑrenamedInt8Val, ((renamedInt8)105)),
-    new("%d"u8, "106\n"u8, ᏑrenamedInt16Val, ((renamedInt16)106)),
-    new("%d"u8, "107\n"u8, ᏑrenamedInt32Val, ((renamedInt32)107)),
-    new("%d"u8, "108\n"u8, ᏑrenamedInt64Val, ((renamedInt64)108)),
-    new("%x"u8, "6D\n"u8, ᏑrenamedUint8Val, ((renamedUint8)109)),
-    new("%o"u8, "0156\n"u8, ᏑrenamedUint16Val, ((renamedUint16)110)),
-    new("%d"u8, "111\n"u8, ᏑrenamedUint32Val, ((renamedUint32)111)),
-    new("%d"u8, "112\n"u8, ᏑrenamedUint64Val, ((renamedUint64)112)),
-    new("%d"u8, "113\n"u8, ᏑrenamedUintptrVal, ((renamedUintptr)113)),
-    new("%s"u8, "114\n"u8, ᏑrenamedStringVal, ((renamedString)(@string)"114"u8)),
-    new("%q"u8, "\"1155\"\n"u8, ᏑrenamedBytesVal, ((renamedBytes)slice<byte>("1155"u8))),
-    new("%g"u8, "116e1\n"u8, ᏑrenamedFloat32Val, ((renamedFloat32)116e1F)),
-    new("%g"u8, "-11.7e+1"u8, ᏑrenamedFloat64Val, ((renamedFloat64)(-11.7e+1D))),
-    new("%g"u8, "11+6e1i\n"u8, ᏑrenamedComplex64Val, ((renamedComplex64)(11F + 60F.i()))),
-    new("%g"u8, "-11.+7e+1i"u8, ᏑrenamedComplex128Val, ((renamedComplex128)(-11D + 70D.i()))),
-    new("here is\tthe value:%d"u8, "here is   the\tvalue:118\n"u8, ᏑintVal, (nint)(118)),
-    new("%% %%:%d"u8, "% %:119\n"u8, ᏑintVal, (nint)(119)),
-    new("%d%%"u8, "42%"u8, ᏑintVal, (nint)(42)),
+
+    // Renamed types
+    new("%v\n"u8, "true\n"u8, ᏑrenamedBoolVal, (renamedBool)true),
+    new("%t\n"u8, "F\n"u8, ᏑrenamedBoolVal, (renamedBool)false),
+    new("%v"u8, "101\n"u8, ᏑrenamedIntVal, (renamedInt)101),
+    new("%c"u8, "\u0101\n"u8, ᏑrenamedIntVal, (renamedInt)(rune)'\u0101'),
+    new("%o"u8, "0146\n"u8, ᏑrenamedIntVal, (renamedInt)102),
+    new("%v"u8, "103\n"u8, ᏑrenamedUintVal, (renamedUint)103),
+    new("%d"u8, "104\n"u8, ᏑrenamedUintVal, (renamedUint)104),
+    new("%d"u8, "105\n"u8, ᏑrenamedInt8Val, (renamedInt8)105),
+    new("%d"u8, "106\n"u8, ᏑrenamedInt16Val, (renamedInt16)106),
+    new("%d"u8, "107\n"u8, ᏑrenamedInt32Val, (renamedInt32)107),
+    new("%d"u8, "108\n"u8, ᏑrenamedInt64Val, (renamedInt64)108),
+    new("%x"u8, "6D\n"u8, ᏑrenamedUint8Val, (renamedUint8)109),
+    new("%o"u8, "0156\n"u8, ᏑrenamedUint16Val, (renamedUint16)110),
+    new("%d"u8, "111\n"u8, ᏑrenamedUint32Val, (renamedUint32)111),
+    new("%d"u8, "112\n"u8, ᏑrenamedUint64Val, (renamedUint64)112),
+    new("%d"u8, "113\n"u8, ᏑrenamedUintptrVal, (renamedUintptr)113),
+    new("%s"u8, "114\n"u8, ᏑrenamedStringVal, (renamedString)(@string)"114"u8),
+    new("%q"u8, "\"1155\"\n"u8, ᏑrenamedBytesVal, (renamedBytes)slice<byte>("1155"u8)),
+    new("%g"u8, "116e1\n"u8, ᏑrenamedFloat32Val, (renamedFloat32)116e1F),
+    new("%g"u8, "-11.7e+1"u8, ᏑrenamedFloat64Val, (renamedFloat64)(-11.7e+1D)),
+    new("%g"u8, "11+6e1i\n"u8, ᏑrenamedComplex64Val, (renamedComplex64)(11F + 60F.i())),
+    new("%g"u8, "-11.+7e+1i"u8, ᏑrenamedComplex128Val, (renamedComplex128)(-11D + 70D.i())),
+
+    // Interesting formats
+    new("here is\tthe value:%d"u8, "here is   the\tvalue:118\n"u8, ᏑintVal, (nint)118),
+    new("%% %%:%d"u8, "% %:119\n"u8, ᏑintVal, (nint)119),
+    new("%d%%"u8, "42%"u8, ᏑintVal, (nint)42), // %% at end of string.
+
+    // Corner cases
     new("%x"u8, "FFFFFFFF\n"u8, Ꮡuint32Val, (uint32)0xFFFFFFFFU),
-    new("%s"u8, "  sss "u8, ᏑxVal, ((Xs)(@string)"sss"u8)),
-    new("%2s"u8, "sssss"u8, ᏑxVal, ((Xs)(@string)"ss"u8)),
-    new("%d\n"u8, "27\n"u8, ᏑintVal, (nint)(27)),
-    new("%d\n"u8, "28 \n"u8, ᏑintVal, (nint)(28)),
-    new("%v"u8, "0"u8, ᏑintVal, (nint)(0)),
-    new("%v"u8, "0"u8, ᏑuintVal, (nuint)0),
-    new("%c"u8, " "u8, ᏑuintVal, (nuint)(rune)' '),
-    new("%c"u8, "\t"u8, ᏑuintVal, (nuint)(rune)'\t'),
-    new("%c"u8, "\n"u8, ᏑuintVal, (nuint)(rune)'\n'),
-    new("%d%%"u8, "23%\n"u8, ᏑuintVal, (nuint)23),
-    new("%%%d"u8, "%23\n"u8, ᏑuintVal, (nuint)23),
-    new("%d"u8, "27"u8, ᏑintVal, (nint)(27)),
-    new("%d"u8, "27 "u8, ᏑintVal, (nint)(27)),
-    new("%d"u8, " 27"u8, ᏑintVal, (nint)(27)),
-    new("%d"u8, " 27 "u8, ᏑintVal, (nint)(27)),
-    new("X%d"u8, "X27"u8, ᏑintVal, (nint)(27)),
-    new("X%d"u8, "X27 "u8, ᏑintVal, (nint)(27)),
-    new("X%d"u8, "X 27"u8, ᏑintVal, (nint)(27)),
-    new("X%d"u8, "X 27 "u8, ᏑintVal, (nint)(27)),
-    new("X %d"u8, "X27"u8, ᏑintVal, default!),
-    new("X %d"u8, "X27 "u8, ᏑintVal, default!),
-    new("X %d"u8, "X 27"u8, ᏑintVal, (nint)(27)),
-    new("X %d"u8, "X 27 "u8, ᏑintVal, (nint)(27)),
-    new("%dX"u8, "27X"u8, ᏑintVal, (nint)(27)),
-    new("%dX"u8, "27 X"u8, ᏑintVal, default!),
-    new("%dX"u8, " 27X"u8, ᏑintVal, (nint)(27)),
-    new("%dX"u8, " 27 X"u8, ᏑintVal, default!),
-    new("%d X"u8, "27X"u8, ᏑintVal, default!),
-    new("%d X"u8, "27 X"u8, ᏑintVal, (nint)(27)),
-    new("%d X"u8, " 27X"u8, ᏑintVal, default!),
-    new("%d X"u8, " 27 X"u8, ᏑintVal, (nint)(27)),
-    new("X %d X"u8, "X27X"u8, ᏑintVal, default!),
-    new("X %d X"u8, "X27 X"u8, ᏑintVal, default!),
-    new("X %d X"u8, "X 27X"u8, ᏑintVal, default!),
-    new("X %d X"u8, "X 27 X"u8, ᏑintVal, (nint)(27)),
-    new("X %s X"u8, "X27X"u8, ᏑstringVal, default!),
-    new("X %s X"u8, "X27 X"u8, ᏑstringVal, default!),
-    new("X %s X"u8, "X 27X"u8, ᏑstringVal, default!),
+
+    // Custom scanner.
+    new("%s"u8, "  sss "u8, ᏑxVal, (Xs)(@string)"sss"u8),
+    new("%2s"u8, "sssss"u8, ᏑxVal, (Xs)(@string)"ss"u8),
+
+    // Fixed bugs
+    new("%d\n"u8, "27\n"u8, ᏑintVal, (nint)27), // ok
+    new("%d\n"u8, "28 \n"u8, ᏑintVal, (nint)28), // was: "unexpected newline"
+    new("%v"u8, "0"u8, ᏑintVal, (nint)0), // was: "EOF"; 0 was taken as base prefix and not counted.
+    new("%v"u8, "0"u8, ᏑuintVal, (nuint)0), // was: "EOF"; 0 was taken as base prefix and not counted.
+    new("%c"u8, " "u8, ᏑuintVal, (nuint)(rune)' '), // %c must accept a blank.
+    new("%c"u8, "\t"u8, ᏑuintVal, (nuint)(rune)'\t'), // %c must accept any space.
+    new("%c"u8, "\n"u8, ᏑuintVal, (nuint)(rune)'\n'), // %c must accept any space.
+    new("%d%%"u8, "23%\n"u8, ᏑuintVal, (nuint)23), // %% matches literal %.
+    new("%%%d"u8, "%23\n"u8, ᏑuintVal, (nuint)23), // %% matches literal %.
+
+    // space handling
+    new("%d"u8, "27"u8, ᏑintVal, (nint)27),
+    new("%d"u8, "27 "u8, ᏑintVal, (nint)27),
+    new("%d"u8, " 27"u8, ᏑintVal, (nint)27),
+    new("%d"u8, " 27 "u8, ᏑintVal, (nint)27),
+    new("X%d"u8, "X27"u8, ᏑintVal, (nint)27),
+    new("X%d"u8, "X27 "u8, ᏑintVal, (nint)27),
+    new("X%d"u8, "X 27"u8, ᏑintVal, (nint)27),
+    new("X%d"u8, "X 27 "u8, ᏑintVal, (nint)27),
+    new("X %d"u8, "X27"u8, ᏑintVal, default!), // expected space in input to match format
+    new("X %d"u8, "X27 "u8, ᏑintVal, default!), // expected space in input to match format
+    new("X %d"u8, "X 27"u8, ᏑintVal, (nint)27),
+    new("X %d"u8, "X 27 "u8, ᏑintVal, (nint)27),
+    new("%dX"u8, "27X"u8, ᏑintVal, (nint)27),
+    new("%dX"u8, "27 X"u8, ᏑintVal, default!), // input does not match format
+    new("%dX"u8, " 27X"u8, ᏑintVal, (nint)27),
+    new("%dX"u8, " 27 X"u8, ᏑintVal, default!), // input does not match format
+    new("%d X"u8, "27X"u8, ᏑintVal, default!), // expected space in input to match format
+    new("%d X"u8, "27 X"u8, ᏑintVal, (nint)27),
+    new("%d X"u8, " 27X"u8, ᏑintVal, default!), // expected space in input to match format
+    new("%d X"u8, " 27 X"u8, ᏑintVal, (nint)27),
+    new("X %d X"u8, "X27X"u8, ᏑintVal, default!), // expected space in input to match format
+    new("X %d X"u8, "X27 X"u8, ᏑintVal, default!), // expected space in input to match format
+    new("X %d X"u8, "X 27X"u8, ᏑintVal, default!), // expected space in input to match format
+    new("X %d X"u8, "X 27 X"u8, ᏑintVal, (nint)27),
+    new("X %s X"u8, "X27X"u8, ᏑstringVal, default!), // expected space in input to match format
+    new("X %s X"u8, "X27 X"u8, ᏑstringVal, default!), // expected space in input to match format
+    new("X %s X"u8, "X 27X"u8, ᏑstringVal, default!), // unexpected EOF
     new("X %s X"u8, "X 27 X"u8, ᏑstringVal, (@string)"27"u8),
-    new("X%sX"u8, "X27X"u8, ᏑstringVal, default!),
-    new("X%sX"u8, "X27 X"u8, ᏑstringVal, default!),
-    new("X%sX"u8, "X 27X"u8, ᏑstringVal, default!),
-    new("X%sX"u8, "X 27 X"u8, ᏑstringVal, default!),
+    new("X%sX"u8, "X27X"u8, ᏑstringVal, default!), // unexpected EOF
+    new("X%sX"u8, "X27 X"u8, ᏑstringVal, default!), // input does not match format
+    new("X%sX"u8, "X 27X"u8, ᏑstringVal, default!), // unexpected EOF
+    new("X%sX"u8, "X 27 X"u8, ᏑstringVal, default!), // input does not match format
     new("X%s"u8, "X27"u8, ᏑstringVal, (@string)"27"u8),
     new("X%s"u8, "X27 "u8, ᏑstringVal, (@string)"27"u8),
     new("X%s"u8, "X 27"u8, ᏑstringVal, (@string)"27"u8),
     new("X%s"u8, "X 27 "u8, ᏑstringVal, (@string)"27"u8),
-    new("X%dX"u8, "X27X"u8, ᏑintVal, (nint)(27)),
-    new("X%dX"u8, "X27 X"u8, ᏑintVal, default!),
-    new("X%dX"u8, "X 27X"u8, ᏑintVal, (nint)(27)),
-    new("X%dX"u8, "X 27 X"u8, ᏑintVal, default!),
-    new("X%dX"u8, "X27X"u8, ᏑintVal, (nint)(27)),
-    new("X%dX"u8, "X27X "u8, ᏑintVal, (nint)(27)),
-    new("X%dX"u8, " X27X"u8, ᏑintVal, default!),
-    new("X%dX"u8, " X27X "u8, ᏑintVal, default!),
-    new("X%dX\n"u8, "X27X"u8, ᏑintVal, (nint)(27)),
-    new("X%dX \n"u8, "X27X "u8, ᏑintVal, (nint)(27)),
-    new("X%dX\n"u8, "X27X\n"u8, ᏑintVal, (nint)(27)),
-    new("X%dX\n"u8, "X27X \n"u8, ᏑintVal, (nint)(27)),
-    new("X%dX \n"u8, "X27X"u8, ᏑintVal, (nint)(27)),
-    new("X%dX \n"u8, "X27X "u8, ᏑintVal, (nint)(27)),
-    new("X%dX \n"u8, "X27X\n"u8, ᏑintVal, (nint)(27)),
-    new("X%dX \n"u8, "X27X \n"u8, ᏑintVal, (nint)(27)),
+    new("X%dX"u8, "X27X"u8, ᏑintVal, (nint)27),
+    new("X%dX"u8, "X27 X"u8, ᏑintVal, default!), // input does not match format
+    new("X%dX"u8, "X 27X"u8, ᏑintVal, (nint)27),
+    new("X%dX"u8, "X 27 X"u8, ᏑintVal, default!), // input does not match format
+    new("X%dX"u8, "X27X"u8, ᏑintVal, (nint)27),
+    new("X%dX"u8, "X27X "u8, ᏑintVal, (nint)27),
+    new("X%dX"u8, " X27X"u8, ᏑintVal, default!), // input does not match format
+    new("X%dX"u8, " X27X "u8, ᏑintVal, default!), // input does not match format
+    new("X%dX\n"u8, "X27X"u8, ᏑintVal, (nint)27),
+    new("X%dX \n"u8, "X27X "u8, ᏑintVal, (nint)27),
+    new("X%dX\n"u8, "X27X\n"u8, ᏑintVal, (nint)27),
+    new("X%dX\n"u8, "X27X \n"u8, ᏑintVal, (nint)27),
+    new("X%dX \n"u8, "X27X"u8, ᏑintVal, (nint)27),
+    new("X%dX \n"u8, "X27X "u8, ᏑintVal, (nint)27),
+    new("X%dX \n"u8, "X27X\n"u8, ᏑintVal, (nint)27),
+    new("X%dX \n"u8, "X27X \n"u8, ᏑintVal, (nint)27),
     new("X%c"u8, "X\n"u8, ᏑruneVal, (rune)'\n'),
     new("X%c"u8, "X \n"u8, ᏑruneVal, (rune)' '),
-    new("X %c"u8, "X!"u8, ᏑruneVal, default!),
-    new("X %c"u8, "X\n"u8, ᏑruneVal, default!),
+    new("X %c"u8, "X!"u8, ᏑruneVal, default!), // expected space in input to match format
+    new("X %c"u8, "X\n"u8, ᏑruneVal, default!), // newline in input does not match format
     new("X %c"u8, "X !"u8, ᏑruneVal, (rune)'!'),
     new("X %c"u8, "X \n"u8, ᏑruneVal, (rune)'\n'),
-    new(" X%dX"u8, "X27X"u8, ᏑintVal, default!),
-    new(" X%dX"u8, "X27X "u8, ᏑintVal, default!),
-    new(" X%dX"u8, " X27X"u8, ᏑintVal, (nint)(27)),
-    new(" X%dX"u8, " X27X "u8, ᏑintVal, (nint)(27)),
-    new("X%dX "u8, "X27X"u8, ᏑintVal, (nint)(27)),
-    new("X%dX "u8, "X27X "u8, ᏑintVal, (nint)(27)),
-    new("X%dX "u8, " X27X"u8, ᏑintVal, default!),
-    new("X%dX "u8, " X27X "u8, ᏑintVal, default!),
-    new(" X%dX "u8, "X27X"u8, ᏑintVal, default!),
-    new(" X%dX "u8, "X27X "u8, ᏑintVal, default!),
-    new(" X%dX "u8, " X27X"u8, ᏑintVal, (nint)(27)),
-    new(" X%dX "u8, " X27X "u8, ᏑintVal, (nint)(27)),
-    new("%d\nX"u8, "27\nX"u8, ᏑintVal, (nint)(27)),
-    new("%dX\n X"u8, "27X\n X"u8, ᏑintVal, (nint)(27))
+    new(" X%dX"u8, "X27X"u8, ᏑintVal, default!), // expected space in input to match format
+    new(" X%dX"u8, "X27X "u8, ᏑintVal, default!), // expected space in input to match format
+    new(" X%dX"u8, " X27X"u8, ᏑintVal, (nint)27),
+    new(" X%dX"u8, " X27X "u8, ᏑintVal, (nint)27),
+    new("X%dX "u8, "X27X"u8, ᏑintVal, (nint)27),
+    new("X%dX "u8, "X27X "u8, ᏑintVal, (nint)27),
+    new("X%dX "u8, " X27X"u8, ᏑintVal, default!), // input does not match format
+    new("X%dX "u8, " X27X "u8, ᏑintVal, default!), // input does not match format
+    new(" X%dX "u8, "X27X"u8, ᏑintVal, default!), // expected space in input to match format
+    new(" X%dX "u8, "X27X "u8, ᏑintVal, default!), // expected space in input to match format
+    new(" X%dX "u8, " X27X"u8, ᏑintVal, (nint)27),
+    new(" X%dX "u8, " X27X "u8, ᏑintVal, (nint)27),
+    new("%d\nX"u8, "27\nX"u8, ᏑintVal, (nint)27),
+    new("%dX\n X"u8, "27X\n X"u8, ᏑintVal, (nint)27)
 }.slice();
 
 internal static slice<ScanTest> overflowTests = new ScanTest[]{
-    new("128"u8, Ꮡint8Val, (nint)(0)),
-    new("32768"u8, Ꮡint16Val, (nint)(0)),
-    new("-129"u8, Ꮡint8Val, (nint)(0)),
-    new("-32769"u8, Ꮡint16Val, (nint)(0)),
-    new("256"u8, Ꮡuint8Val, (nint)(0)),
-    new("65536"u8, Ꮡuint16Val, (nint)(0)),
-    new("1e100"u8, Ꮡfloat32Val, (nint)(0)),
-    new("1e500"u8, Ꮡfloat64Val, (nint)(0)),
-    new("(1e100+0i)"u8, Ꮡcomplex64Val, (nint)(0)),
-    new("(1+1e100i)"u8, Ꮡcomplex64Val, (nint)(0)),
-    new("(1-1e500i)"u8, Ꮡcomplex128Val, (nint)(0))
+    new("128"u8, Ꮡint8Val, (nint)0),
+    new("32768"u8, Ꮡint16Val, (nint)0),
+    new("-129"u8, Ꮡint8Val, (nint)0),
+    new("-32769"u8, Ꮡint16Val, (nint)0),
+    new("256"u8, Ꮡuint8Val, (nint)0),
+    new("65536"u8, Ꮡuint16Val, (nint)0),
+    new("1e100"u8, Ꮡfloat32Val, (nint)0),
+    new("1e500"u8, Ꮡfloat64Val, (nint)0),
+    new("(1e100+0i)"u8, Ꮡcomplex64Val, (nint)0),
+    new("(1+1e100i)"u8, Ꮡcomplex64Val, (nint)0),
+    new("(1-1e500i)"u8, Ꮡcomplex128Val, (nint)0)
 }.slice();
 
 internal static ж<bool> Ꮡtruth = new StandardBox<bool>(default(bool));
@@ -532,40 +502,42 @@ internal static ref rune r2 => ref Ꮡr2.Value;
 internal static ж<rune> Ꮡr3 = new StandardBox<rune>(default(rune));
 internal static ref rune r3 => ref Ꮡr3.Value;
 
-// Custom scanners.
-// Errors
-// Slightly odd error, but correct.
-// Bad UTF-8: should see every byte.
-// Fixed bugs
 internal static slice<ScanfMultiTest> multiTests = new ScanfMultiTest[]{
     new(""u8, ""u8, new any[]{}.slice(), new any[]{}.slice(), ""u8),
-    new("%d"u8, "23"u8, args(Ꮡi), args((nint)(23)), ""u8),
+    new("%d"u8, "23"u8, args(Ꮡi), args((nint)23), ""u8),
     new("%2s%3s"u8, "22333"u8, args(Ꮡs, Ꮡt), args((@string)"22"u8, (@string)"333"u8), ""u8),
-    new("%2d%3d"u8, "44555"u8, args(Ꮡi, Ꮡj), args((nint)(44), (nint)(555)), ""u8),
-    new("%2d.%3d"u8, "66.777"u8, args(Ꮡi, Ꮡj), args((nint)(66), (nint)(777)), ""u8),
-    new("%d, %d"u8, "23, 18"u8, args(Ꮡi, Ꮡj), args((nint)(23), (nint)(18)), ""u8),
-    new("%3d22%3d"u8, "33322333"u8, args(Ꮡi, Ꮡj), args((nint)(333), (nint)(333)), ""u8),
+    new("%2d%3d"u8, "44555"u8, args(Ꮡi, Ꮡj), args((nint)44, (nint)555), ""u8),
+    new("%2d.%3d"u8, "66.777"u8, args(Ꮡi, Ꮡj), args((nint)66, (nint)777), ""u8),
+    new("%d, %d"u8, "23, 18"u8, args(Ꮡi, Ꮡj), args((nint)23, (nint)18), ""u8),
+    new("%3d22%3d"u8, "33322333"u8, args(Ꮡi, Ꮡj), args((nint)333, (nint)333), ""u8),
     new("%6vX=%3fY"u8, "3+2iX=2.5Y"u8, args(Ꮡc, Ꮡf), args((3D + 2D.i()), 2.5D), ""u8),
-    new("%d%s"u8, "123abc"u8, args(Ꮡi, Ꮡs), args((nint)(123), (@string)"abc"u8), ""u8),
+    new("%d%s"u8, "123abc"u8, args(Ꮡi, Ꮡs), args((nint)123, (@string)"abc"u8), ""u8),
     new("%c%c%c"u8, "2\u50c2X"u8, args(Ꮡr1, Ꮡr2, Ꮡr3), args((rune)'2', (rune)'\u50c2', (rune)'X'), ""u8),
-    new("%5s%d"u8, " 1234567 "u8, args(Ꮡs, Ꮡi), args((@string)"12345"u8, (nint)(67)), ""u8),
-    new("%5s%d"u8, " 12 34 567 "u8, args(Ꮡs, Ꮡi), args((@string)"12"u8, (nint)(34)), ""u8),
-    new("%e%f"u8, "eefffff"u8, args(Ꮡx, Ꮡy), args(((Xs)(@string)"ee"u8), ((Xs)(@string)"fffff"u8)), ""u8),
+    new("%5s%d"u8, " 1234567 "u8, args(Ꮡs, Ꮡi), args((@string)"12345"u8, (nint)67), ""u8),
+    new("%5s%d"u8, " 12 34 567 "u8, args(Ꮡs, Ꮡi), args((@string)"12"u8, (nint)34), ""u8),
+
+    // Custom scanners.
+    new("%e%f"u8, "eefffff"u8, args(Ꮡx, Ꮡy), args((Xs)(@string)"ee"u8, (Xs)(@string)"fffff"u8), ""u8),
     new("%4v%s"u8, "12abcd"u8, args(Ꮡz, Ꮡs), args(new IntString(12, "ab"u8), (@string)"cd"u8), ""u8),
+
+    // Errors
     new("%t"u8, "23 18"u8, args(Ꮡi), default!, "bad verb"u8),
-    new("%d %d %d"u8, "23 18"u8, args(Ꮡi, Ꮡj), args((nint)(23), (nint)(18)), "too few operands"u8),
-    new("%d %d"u8, "23 18 27"u8, args(Ꮡi, Ꮡj, Ꮡk), args((nint)(23), (nint)(18)), "too many operands"u8),
+    new("%d %d %d"u8, "23 18"u8, args(Ꮡi, Ꮡj), args((nint)23, (nint)18), "too few operands"u8),
+    new("%d %d"u8, "23 18 27"u8, args(Ꮡi, Ꮡj, Ꮡk), args((nint)23, (nint)18), "too many operands"u8),
     new("%c"u8, "\u0100"u8, args(Ꮡint8Val), default!, "overflow"u8),
     new("X%d"u8, "10X"u8, args(ᏑintVal), default!, "input does not match format"u8),
-    new("%d%"u8, "42%"u8, args(ᏑintVal), args((nint)(42)), "missing verb: % at end of format string"u8),
-    new("%d% "u8, "42%"u8, args(ᏑintVal), args((nint)(42)), "too few operands for format '% '"u8),
-    new("%%%d"u8, "xxx 42"u8, args(ᏑintVal), args((nint)(42)), "missing literal %"u8),
-    new("%%%d"u8, "x42"u8, args(ᏑintVal), args((nint)(42)), "missing literal %"u8),
-    new("%%%d"u8, "42"u8, args(ᏑintVal), args((nint)(42)), "missing literal %"u8),
-    new("%c%c%c"u8, ((@string)(new byte[]{0xc2, 0x58, 0xc2})), args(Ꮡr1, Ꮡr2, Ꮡr3), args((int32)(utf8.RuneError), (rune)'X', (int32)(utf8.RuneError)), ""u8),
-    new("%v%v"u8, "FALSE23"u8, args(Ꮡtruth, Ꮡi), args(false, (nint)(23)), ""u8)
-}.slice();
+    new("%d%"u8, "42%"u8, args(ᏑintVal), args((nint)42), "missing verb: % at end of format string"u8),
+    new("%d% "u8, "42%"u8, args(ᏑintVal), args((nint)42), "too few operands for format '% '"u8), // Slightly odd error, but correct.
+    new("%%%d"u8, "xxx 42"u8, args(ᏑintVal), args((nint)42), "missing literal %"u8),
+    new("%%%d"u8, "x42"u8, args(ᏑintVal), args((nint)42), "missing literal %"u8),
+    new("%%%d"u8, "42"u8, args(ᏑintVal), args((nint)42), "missing literal %"u8),
 
+    // Bad UTF-8: should see every byte.
+    new("%c%c%c"u8, ((@string)(new byte[]{0xc2, 0x58, 0xc2})), args(Ꮡr1, Ꮡr2, Ꮡr3), args((int32)(utf8.RuneError), (rune)'X', (int32)(utf8.RuneError)), ""u8),
+
+    // Fixed bugs
+    new("%v%v"u8, "FALSE23"u8, args(Ꮡtruth, Ꮡi), args(false, (nint)23), ""u8)
+}.slice();
 
 partial struct readersᴛ1 /*dyn*/ {
     internal @string name;
@@ -977,7 +949,6 @@ public static void TestEOFAtEndOfInput(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct eofTestsᴛ1 /*dyn*/ {
     internal @string format;
     internal any v;
@@ -1055,7 +1026,7 @@ public static error Scan(this ref TwoLines t, fmt.ScanState state, rune verb) {
             nlCount++;
         }
     }
-    t = ((TwoLines)((@string)chars));
+    t = (TwoLines)((@string)chars);
     return default!;
 }
 
@@ -1170,8 +1141,8 @@ partial struct RecursiveInt {
 
 public static error /*err*/ Scan(this ж<RecursiveInt> Ꮡr, fmt.ScanState state, rune verb) {
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     (_, err) = Fscan(new fmt_test_package.fmt_ScanStateᴠReader(state), Ꮡr.of(RecursiveInt.Ꮡi));
     if (err != default!) {
         return err;
@@ -1193,9 +1164,9 @@ public static error /*err*/ Scan(this ж<RecursiveInt> Ꮡr, fmt.ScanState state
 // performance more directly.
 internal static error /*err*/ scanInts(ж<RecursiveInt> Ꮡr, ж<bytes.Buffer> Ꮡb) {
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
+
     r.next = default!;
     (_, err) = Fscan(new fmt_test_package.bytes_BufferжReader(Ꮡb), Ꮡr.of(RecursiveInt.Ꮡi));
     if (err != default!) {
@@ -1300,7 +1271,7 @@ public static void BenchmarkScanRecursiveIntReaderWrapper(ж<Δtesting.B> Ꮡb) 
     var ints = makeInts(intCount);
     ref var r = ref heap(new RecursiveInt(), out var Ꮡr);
     for (nint i = 0; i < b.N; i++) {
-        var buf = new BenchmarkScanRecursiveIntReaderWrapper_buf(new fmt_test_package.strings_ReaderжReader(strings.NewReader(((@string)ints))));
+        var buf = new BenchmarkScanRecursiveIntReaderWrapper_buf(new fmt_test_package.strings_ReaderжReader(strings.NewReader((@string)ints)));
         b.StartTimer();
         Fscan(buf, Ꮡr);
         b.StopTimer();
@@ -1336,6 +1307,7 @@ public static void TestHexBytes(ж<Δtesting.T> Ꮡt) {
     }
     check(simpleˢ, a);
     a = default!;
+
     (n, err) = Sscanf("00010203 00010203"u8, "%x %x"u8, Ꮡa, Ꮡb);
     if (n != 2 || err != default!) {
         Ꮡt.Errorf("simple pair: got count, err = %d, %v; expected 2, nil"u8, n, err);
@@ -1344,12 +1316,14 @@ public static void TestHexBytes(ж<Δtesting.T> Ꮡt) {
     check(simplePairBˢ, b);
     a = default!;
     b = default!;
+
     (n, err) = Sscanf("00010203:"u8, "%x"u8, Ꮡa);
     if (n != 1 || err != default!) {
         Ꮡt.Errorf("colon: got count, err = %d, %v; expected 1, nil"u8, n, err);
     }
     check(colonˢ, a);
     a = default!;
+
     (n, err) = Sscanf("00010203:00010203"u8, "%x:%x"u8, Ꮡa, Ꮡb);
     if (n != 2 || err != default!) {
         Ꮡt.Errorf("colon pair: got count, err = %d, %v; expected 2, nil"u8, n, err);
@@ -1358,6 +1332,7 @@ public static void TestHexBytes(ж<Δtesting.T> Ꮡt) {
     check(colonPairBˢ, b);
     a = default!;
     b = default!;
+
     // This one fails because there is a hex byte after the data,
     // that is, an odd number of hex input bytes.
     (n, err) = Sscanf("000102034:"u8, "%x"u8, Ꮡa);
@@ -1433,11 +1408,6 @@ internal partial struct TestScanfNewlineMatchFormat_type /*dyn*/ {
 public static void TestScanfNewlineMatchFormat(ж<Δtesting.T> Ꮡt) {
     ref var a = ref heap(new nint(), out var Ꮡa);
     ref var b = ref heap(new nint(), out var Ꮡb);
-// fails: space after nl in input but not pattern
-// fails: space after nl in input but not pattern
-// fails: space after nl in input but not pattern
-// fails: space after nl in input but not pattern
-// fails: space after nl in input but not pattern
     slice<TestScanfNewlineMatchFormat_type> tests = new TestScanfNewlineMatchFormat_type[]{
         new("newline in both"u8, "1\n2"u8, "%d\n%d\n"u8, 2, true),
         new("newline in input"u8, "1\n2"u8, "%d %d"u8, 1, false),
@@ -1467,17 +1437,17 @@ public static void TestScanfNewlineMatchFormat(ж<Δtesting.T> Ꮡt) {
         new("space vs newline no-percent 0001"u8, "1\n2"u8, "1\n 2"u8, 0, true),
         new("space vs newline no-percent 0010"u8, "1\n2"u8, "1 \n2"u8, 0, true),
         new("space vs newline no-percent 0011"u8, "1\n2"u8, "1 \n 2"u8, 0, true),
-        new("space vs newline no-percent 0100"u8, "1\n 2"u8, "1\n2"u8, 0, false),
-        new("space vs newline no-percent 0101"u8, "1\n 2"u8, "1\n2 "u8, 0, false),
-        new("space vs newline no-percent 0110"u8, "1\n 2"u8, "1 \n2"u8, 0, false),
+        new("space vs newline no-percent 0100"u8, "1\n 2"u8, "1\n2"u8, 0, false), // fails: space after nl in input but not pattern
+        new("space vs newline no-percent 0101"u8, "1\n 2"u8, "1\n2 "u8, 0, false), // fails: space after nl in input but not pattern
+        new("space vs newline no-percent 0110"u8, "1\n 2"u8, "1 \n2"u8, 0, false), // fails: space after nl in input but not pattern
         new("space vs newline no-percent 0111"u8, "1\n 2"u8, "1 \n 2"u8, 0, true),
         new("space vs newline no-percent 1000"u8, "1 \n2"u8, "1\n2"u8, 0, true),
         new("space vs newline no-percent 1001"u8, "1 \n2"u8, "1\n 2"u8, 0, true),
         new("space vs newline no-percent 1010"u8, "1 \n2"u8, "1 \n2"u8, 0, true),
         new("space vs newline no-percent 1011"u8, "1 \n2"u8, "1 \n 2"u8, 0, true),
-        new("space vs newline no-percent 1100"u8, "1 \n 2"u8, "1\n2"u8, 0, false),
+        new("space vs newline no-percent 1100"u8, "1 \n 2"u8, "1\n2"u8, 0, false), // fails: space after nl in input but not pattern
         new("space vs newline no-percent 1101"u8, "1 \n 2"u8, "1\n 2"u8, 0, true),
-        new("space vs newline no-percent 1110"u8, "1 \n 2"u8, "1 \n2"u8, 0, false),
+        new("space vs newline no-percent 1110"u8, "1 \n 2"u8, "1 \n2"u8, 0, false), // fails: space after nl in input but not pattern
         new("space vs newline no-percent 1111"u8, "1 \n 2"u8, "1 \n 2"u8, 0, true)
     }.slice();
     foreach (var (_, test) in tests) {

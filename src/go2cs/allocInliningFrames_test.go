@@ -131,6 +131,7 @@ func keepsOwnFrame(line string) bool {
 }
 
 func TestThinAllocatorsInAHeapProfileReaderAreNotInlined(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs, libCs := convertAllocInliningFixture(t)
 
 	for _, name := range []string{"genericAlloc", "newBox"} {

@@ -48,6 +48,7 @@ internal static replacer build(this ref Replacer b) {
     if (len(oldnew) == 2 && len(oldnew[0]) > 1) {
         return new singleStringReplacerжreplacer(makeSingleStringReplacer(oldnew[0], oldnew[1]));
     }
+
     var allNewBytes = true;
     for (nint i = 0; i < len(oldnew); i += 2) {
         if (len(oldnew[i]) != 1) {
@@ -57,6 +58,7 @@ internal static replacer build(this ref Replacer b) {
             allNewBytes = false;
         }
     }
+
     if (allNewBytes) {
         ref var rΔ1 = ref heap<byteReplacer>(out var ᏑrΔ1);
         rΔ1 = new byteReplacer(new byte[256].array());
@@ -72,6 +74,7 @@ internal static replacer build(this ref Replacer b) {
         }
         return new byteReplacerжreplacer(ᏑrΔ1);
     }
+
     ref var r = ref heap<byteStringReplacer>(out var Ꮡr);
     r = new byteStringReplacer(toReplace: new slice<@string>(0, len(oldnew) / 2));
     // The first occurrence of old->new map takes precedence
@@ -84,7 +87,7 @@ internal static replacer build(this ref Replacer b) {
             // We need to use string([]byte{o}) instead of string(o),
             // to avoid utf8 encoding of o.
             // E. g. byte(150) produces string of length 2.
-            r.toReplace = append(r.toReplace, ((@string)new byte[]{o}.slice()));
+            r.toReplace = append(r.toReplace, (@string)new byte[]{o}.slice());
         }
         r.replacements[o] = slice<byte>(n);
     }
@@ -167,6 +170,7 @@ internal static void add(this ref trieNode t, @string key, @string val, nint pri
         }
         return;
     }
+
     if (t.prefix != ""u8){
         // Need to split the prefix among multiple nodes.
         nint n = default!;       // length of the longest common prefix
@@ -227,8 +231,8 @@ internal static (@string val, nint keylen, bool found) lookup(this ж<genericRep
     @string val = default!;
     nint keylen = default!;
     bool found = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     // Iterate down the trie to the end, and grab the value and keylen with
     // the highest priority.
     nint bestPriority = 0;
@@ -241,6 +245,7 @@ internal static (@string val, nint keylen, bool found) lookup(this ж<genericRep
             keylen = n;
             found = true;
         }
+
         if (s == ""u8) {
             break;
         }
@@ -284,9 +289,11 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
             r.Value.mapping[key[j]] = 1;
         }
     }
+
     foreach (var (_, b) in (~r).mapping.ΔRangeSnapshot()) {
         r.Value.tableSize += (nint)b;
     }
+
     byte index = default!;
     foreach (var (i, b) in (~r).mapping.ΔRangeSnapshot()) {
         if (b == 0){
@@ -298,6 +305,7 @@ internal static ж<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
     }
     // Ensure root node uses a lookup table (for performance).
     r.Value.root.table = new slice<ж<trieNode>>((~r).tableSize);
+
     for (nint i = 0; i < len(oldnew); i += 2) {
         r.of(genericReplacer.Ꮡroot).add(oldnew[i], oldnew[i + 1], len(oldnew) - i, r);
     }
@@ -338,14 +346,14 @@ internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) {
     ref var buf = ref heap<appendSliceWriter>(out var Ꮡbuf);
     buf = new appendSliceWriter(0, len(s));
     Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);
-    return ((@string)(slice<byte>)buf);
+    return (@string)(slice<byte>)buf;
 }
 
 internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
     nint n = default!;
     error err = default!;
-
     ref var r = ref Ꮡr.DerefOrNull();
+
     var sw = getStringWriter(w);
     nint last = default!;
     nint wn = default!;
@@ -359,6 +367,7 @@ internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, i
                 continue;
             }
         }
+
         // Ignore the empty match iff the previous loop found the empty match.
         var (val, keylen, match) = Ꮡr.lookup(s.slice(i), prevMatchEmpty);
         prevMatchEmpty = match && keylen == 0;
@@ -449,6 +458,9 @@ internal static (nint n, error err) WriteString(this ref singleStringReplacer r,
     return (n, err);
 }
 
+// byteReplacer is the implementation that's used when all the "old"
+// and "new" values are single ASCII bytes.
+// The array contains replacement bytes indexed by old byte.
 partial struct byteReplacer /*[256]byte*/;
 
 internal static @string Replace(this ref byteReplacer r, @string s) {
@@ -465,7 +477,7 @@ internal static @string Replace(this ref byteReplacer r, @string s) {
     if (buf == default!) {
         return s;
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) {
@@ -561,7 +573,7 @@ internal static @string Replace(this ref byteStringReplacer r, @string s) {
             j++;
         }
     }
-    return ((@string)buf);
+    return (@string)buf;
 }
 
 internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) {

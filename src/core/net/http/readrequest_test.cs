@@ -30,30 +30,8 @@ internal static @string noBodyStr = ""u8;
 
 internal static global::go.net.http_package.ΔHeader noTrailer = default!;
 
-// Baseline test; All Request fields included for template use
-// GET request with no body (the normal case)
-// Tests that we don't parse a path that looks like a
-// scheme-relative URI as a scheme-relative URI.
-// Tests a bogus absolute-path on the Request-Line (RFC 7230 section 5.3.1)
-// Tests missing URL:
-// Tests chunked body with trailer:
-// Tests chunked body and a bogus Content-Length which should be deleted.
-// to be removed.
-// Tests chunked body and an invalid Content-Length.
-// raise an error
-// CONNECT request with domain name:
-// CONNECT request with IP address:
-// CONNECT request for RPC:
-// SSDP Notify request. golang.org/issue/3692
-// OPTIONS request. Similar to golang.org/issue/3692
-// Connection: close. golang.org/issue/8261
-// This wasn't removed from Go 1.0 to
-// Go 1.3, so locking it in that we
-// keep this:
-// HEAD with Content-Length 0. Make sure this is permitted,
-// since I think we used to send it.
-// http2 client preface:
 internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>(new reqTest[]{
+    // Baseline test; All Request fields included for template use
     new(
         "GET http://www.techcrunch.com/ HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Content-Length: 7\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8 + "abcdef\n???"u8,
         Ꮡ(new Request(
@@ -85,6 +63,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // GET request with no body (the normal case)
     new(
         "GET / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -105,6 +85,9 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // Tests that we don't parse a path that looks like a
+    // scheme-relative URI as a scheme-relative URI.
     new(
         "GET //user@host/is/actually/a/path/ HTTP/1.1\r\n"u8 + "Host: test\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -125,6 +108,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // Tests a bogus absolute-path on the Request-Line (RFC 7230 section 5.3.1)
     new(
         "GET ../../../../etc/passwd HTTP/1.1\r\n"u8 + "Host: test\r\n\r\n"u8,
         nil,
@@ -132,6 +117,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         @"parse ""../../../../etc/passwd"": invalid URI for request"u8
     ),
+
+    // Tests missing URL:
     new(
         "GET  HTTP/1.1\r\n"u8 + "Host: test\r\n\r\n"u8,
         nil,
@@ -139,6 +126,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         @"parse """": empty url"u8
     ),
+
+    // Tests chunked body with trailer:
     new(
         "POST / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + "3\r\nfoo\r\n"u8 + "3\r\nbar\r\n"u8 + "0\r\n"u8 + "Trailer-Key: Trailer-Value\r\n"u8 + "\r\n"u8,
         Ꮡ(new Request(
@@ -161,8 +150,11 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         }),
         noError
     ),
+
+    // Tests chunked body and a bogus Content-Length which should be deleted.
     new(
-        "POST / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Content-Length: 9999\r\n\r\n"u8 + "3\r\nfoo\r\n"u8 + "3\r\nbar\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
+        "POST / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Content-Length: 9999\r\n\r\n"u8 + // to be removed.
+            "3\r\nfoo\r\n"u8 + "3\r\nbar\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
         Ꮡ(new Request(
             Method: "POST"u8,
             URL: Ꮡ(new url.URL(
@@ -181,13 +173,18 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // Tests chunked body and an invalid Content-Length.
     new(
-        "POST / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Content-Length: notdigits\r\n\r\n"u8 + "3\r\nfoo\r\n"u8 + "3\r\nbar\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
+        "POST / HTTP/1.1\r\n"u8 + "Host: foo.com\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "Content-Length: notdigits\r\n\r\n"u8 + // raise an error
+            "3\r\nfoo\r\n"u8 + "3\r\nbar\r\n"u8 + "0\r\n"u8 + "\r\n"u8,
         nil,
         noBodyStr,
         noTrailer,
         @"bad Content-Length ""notdigits"""u8
     ),
+
+    // CONNECT request with domain name:
     new(
         "CONNECT www.google.com:443 HTTP/1.1\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -208,6 +205,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // CONNECT request with IP address:
     new(
         "CONNECT 127.0.0.1:6060 HTTP/1.1\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -228,6 +227,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // CONNECT request for RPC:
     new(
         "CONNECT /_goRPC_ HTTP/1.1\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -248,6 +249,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // SSDP Notify request. golang.org/issue/3692
     new(
         "NOTIFY * HTTP/1.1\r\nServer: foo\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -269,6 +272,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // OPTIONS request. Similar to golang.org/issue/3692
     new(
         "OPTIONS * HTTP/1.1\r\nServer: foo\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -290,6 +295,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // Connection: close. golang.org/issue/8261
     new(
         "GET / HTTP/1.1\r\nHost: issue8261.com\r\nConnection: close\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -298,6 +305,9 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
                 Path: "/"u8
             )),
             Header: new ΔHeader(new map<@string, slice<@string>>{
+                // This wasn't removed from Go 1.0 to
+                // Go 1.3, so locking it in that we
+                // keep this:
                 ["Connection"u8] = new @string[]{"close"u8}.slice()
             }),
             Host: "issue8261.com"u8,
@@ -311,6 +321,9 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // HEAD with Content-Length 0. Make sure this is permitted,
+    // since I think we used to send it.
     new(
         "HEAD / HTTP/1.1\r\nHost: issue8261.com\r\nConnection: close\r\nContent-Length: 0\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -333,6 +346,8 @@ internal static ж<slice<reqTest>> ᏑreqTests = new StandardBox<slice<reqTest>>
         noTrailer,
         noError
     ),
+
+    // http2 client preface:
     new(
         "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"u8,
         Ꮡ(new Request(
@@ -393,8 +408,6 @@ internal static slice<byte> reqBytes(@string req) {
     return slice<byte>(strings.ReplaceAll(strings.TrimSpace(req), "\n"u8, "\r\n"u8) + "\r\n\r\n");
 }
 
-// golang.org/issue/22464
-
 partial struct badRequestTestsᴛ1 /*dyn*/ {
     internal @string name;
     internal slice<byte> req;
@@ -407,7 +420,7 @@ Content-Length: 3
 Content-Length: 4
 
 abc
-"""u8)),
+"""u8.Raw())),
     new("smuggle_two_content_len_head"u8, reqBytes("""
 HEAD / HTTP/1.1
 Host: foo
@@ -415,15 +428,17 @@ Content-Length: 4
 Content-Length: 5
 
 1234
-"""u8)),
+"""u8.Raw())),
+
+    // golang.org/issue/22464
     new("leading_space_in_header"u8, reqBytes("""
 GET / HTTP/1.1
  Host: foo
-"""u8)),
+"""u8.Raw())),
     new("leading_tab_in_header"u8, reqBytes("""
 GET / HTTP/1.1
 
-"""u8 + "\t"u8 + @"Host: foo"u8))
+"""u8.Raw() + "\t"u8 + @"Host: foo"u8))
 }.slice();
 
 public static void TestReadRequest_Bad(ж<testing.T> Ꮡt) {

@@ -382,6 +382,7 @@ public static void TestFailure(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Error was not a CheckError: %s"u8, err);
         }
     }
+
     err = CheckEqual(fUint, fUint32, nil);
     if (err == default!) {
         Ꮡt.Errorf("#1 CheckEqual didn't return an error"u8);
@@ -391,6 +392,7 @@ public static void TestFailure(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#1 Error was not a SetupError: %s"u8, err);
         }
     }
+
     err = CheckEqual((nint x, nint y) => {
     }, (nint x) => {
     }, nil);
@@ -402,6 +404,7 @@ public static void TestFailure(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#2 Error was not a SetupError: %s"u8, err);
         }
     }
+
     err = CheckEqual(nint (nint x) => 0, int32 (nint x) => 0, nil);
     if (err == default!) {
         Ꮡt.Errorf("#3 CheckEqual didn't return an error"u8);
@@ -478,7 +481,7 @@ public static void TestInt64(ж<testing.T> Ꮡt) {
     };
     var cfg = Ꮡ(new Config(MaxCount: 10000));
     Check((f).OrTypedNilFunc(), cfg);
-    if (((uint64)lo >> (int)(62)) == 0 || ((uint64)hi >> (int)(62)) == 0) {
+    if ((uint64)lo >> 62 == 0 || (uint64)hi >> 62 == 0) {
         Ꮡt.Errorf("int64 returned range %#016x,%#016x; does not look like full range"u8, lo, hi);
     }
 }

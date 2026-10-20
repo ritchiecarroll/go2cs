@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace go;
@@ -108,6 +109,47 @@ public interface IGoTypeOpsSource
     IGoTypeOps TypeOps { get; }
 }
 
+/// <summary>
+/// A converted struct's field-box table: implemented by go2cs-gen on the struct's generated part (trim stage 3d, family E)
+/// so reflect's addressable <c>Value.Field(i)</c> builds a field's alias box through compiled code -- the view converted
+/// code builds for <c>&amp;s.f</c>, <c>box.of(S.Ꮡf)</c> -- where it used to emit a DynamicMethod Native AOT cannot run.
+/// </summary>
+/// <remarks>Reached like <see cref="IGoTypeOpsSource"/>, through the struct's zero value; read by GoReflect.FieldAliasBox.</remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IGoFieldBoxSource
+{
+    /// <summary>
+    /// The alias box (<c>ж&lt;F&gt;</c>) of the Go field <paramref name="field"/> of the struct <paramref name="parentBox"/>
+    /// (a <c>ж&lt;S&gt;</c>) points to, or <c>null</c> when the struct has no such field. A blank field is named by its
+    /// C# field name, since its Go name <c>_</c> repeats.
+    /// </summary>
+    object? FieldBox(string field, object parentBox);
+}
+
+/// <summary>
+/// A converted GENERIC type's Go methods, closed over its own type arguments: implemented by go2cs-gen on the generated
+/// part of every generic type with Go methods, so golib's method-set candidate source hands reflect and the interface
+/// shells a method compiled code instantiated, where it would otherwise need <c>MethodInfo.MakeGenericMethod</c>, which
+/// Native AOT answers only for an instantiation it happened to compile.
+/// </summary>
+/// <remarks>
+/// A Go method of <c>Pair[K, V]</c> is emitted as the generic extension method <c>String&lt;K, V&gt;(this Pair&lt;K, V&gt;)</c>.
+/// Each arm returns the <see cref="Delegate.Method"/> of a delegate the generated part creates over the type's own type
+/// parameters, so each instantiation the program constructs compiles its own closed methods. Reached like
+/// <see cref="IGoFieldBoxSource"/>, through the type's zero value; read by <c>TypeExtensions.GetGoMethodSetCandidates</c>.
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IGoMethodSource
+{
+    /// <summary>
+    /// The method named <paramref name="name"/> (its metadata name, as reflection reads it), closed over this type's type
+    /// arguments, or <c>null</c> when the type has no such method. <paramref name="pointerReceiver"/> asks for a
+    /// pointer-receiver method, in its bindable <c>ж&lt;T&gt;</c> form; otherwise the value-receiver method (or its
+    /// copy-bound <c>this ref T</c> form).
+    /// </summary>
+    MethodInfo? GoMethod(string name, bool pointerReceiver);
+}
+
 /// <summary>Finds the <see cref="IGoTypeOps"/> of a type known only at run time (trim stage 3c-2b).</summary>
 public static class GoTypeOps
 {
@@ -174,6 +216,10 @@ public static class GoTypeOps
         "The types are the program's generated Go types, which Native AOT has constructed " +
         "(measured on the package consumer and the 3c-2a reflect probe).")]
     private static object uninitialized(Type type) => RuntimeHelpers.GetUninitializedObject(type);
+
+    // The same zero value, for the field-box table's lookup (GoReflect.FieldAliasBox, IGoFieldBoxSource): only its source
+    // member is read, never a field. A primitive or enum has no table; the caller asks for value types only.
+    internal static object? Uninitialized(Type type) => isSourceCandidate(type) ? uninitialized(type) : null;
 
     // The one dynamic-code site on these paths (trim stage 3d's boundary): a type no compiled code names the operations of.
     [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "GoTypeOps<T> has no member requirements on T.")]

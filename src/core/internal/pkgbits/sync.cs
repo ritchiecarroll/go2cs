@@ -22,6 +22,7 @@ internal static slice<@string> fmtFrames(params ꓸꓸꓸuintptr pcsʗp) {
     walkFrames(pcs, (@string @file, nint line, @string name, uintptr offset) => {
         // Trim package from function name. It's just redundant noise.
         name = strings.TrimPrefix(name, cmdCompileInternalNoderˢ);
+
         Ꮡres.ValueSlot = append(Ꮡres.ValueSlot, fmt.Sprintf("%s:%v: %s +0x%v"u8, @file, line, name, offset));
     });
     return res;
@@ -36,6 +37,7 @@ internal static void walkFrames(slice<uintptr> pcs, Action<@string, nint, @strin
     if (len(pcs) == 0) {
         return;
     }
+
     var frames = Δruntime.CallersFrames(pcs);
     while (ᐧ) {
         var (frame, more) = frames.Next();
@@ -46,11 +48,17 @@ internal static void walkFrames(slice<uintptr> pcs, Action<@string, nint, @strin
     }
 }
 
+// SyncMarker is an enum type that represents markers that may be
+// written to export data to ensure the reader and writer stay
+// synchronized.
 partial struct SyncMarker /*num:nint*/;
 
 //go:generate stringer -type=SyncMarker -trimprefix=Sync
 internal static SyncMarker _ᴛ1ʗ => /* iota */ 0;
+
 // Public markers (known to go/types importers).
+
+// Low-level coding markers.
 public static SyncMarker SyncEOF => 1;
 public static SyncMarker SyncBool => 2;
 public static SyncMarker SyncInt64 => 3;
@@ -61,6 +69,8 @@ public static SyncMarker SyncVal => 7;
 public static SyncMarker SyncRelocs => 8;
 public static SyncMarker SyncReloc => 9;
 public static SyncMarker SyncUseReloc => 10;
+
+// Higher-level object and type markers.
 public static SyncMarker SyncPublic => 11;
 public static SyncMarker SyncPos => 12;
 public static SyncMarker SyncPosBase => 13;
@@ -79,11 +89,15 @@ public static SyncMarker SyncCodeObj => 25;
 public static SyncMarker SyncSym => 26;
 public static SyncMarker SyncLocalIdent => 27;
 public static SyncMarker SyncSelector => 28;
+
+// Private markers (only known to cmd/compile).
 public static SyncMarker SyncPrivate => 29;
+
 public static SyncMarker SyncFuncExt => 30;
 public static SyncMarker SyncVarExt => 31;
 public static SyncMarker SyncTypeExt => 32;
 public static SyncMarker SyncPragma => 33;
+
 public static SyncMarker SyncExprList => 34;
 public static SyncMarker SyncExprs => 35;
 public static SyncMarker SyncExpr => 36;
@@ -92,6 +106,7 @@ public static SyncMarker SyncAssign => 38;
 public static SyncMarker SyncOp => 39;
 public static SyncMarker SyncFuncLit => 40;
 public static SyncMarker SyncCompLit => 41;
+
 public static SyncMarker SyncDecl => 42;
 public static SyncMarker SyncFuncBody => 43;
 public static SyncMarker SyncOpenScope => 44;
@@ -99,6 +114,7 @@ public static SyncMarker SyncCloseScope => 45;
 public static SyncMarker SyncCloseAnotherScope => 46;
 public static SyncMarker SyncDeclNames => 47;
 public static SyncMarker SyncDeclName => 48;
+
 public static SyncMarker SyncStmts => 49;
 public static SyncMarker SyncBlockStmt => 50;
 public static SyncMarker SyncIfStmt => 51;
@@ -117,6 +133,7 @@ public static SyncMarker SyncStmt1 => 63;
 public static SyncMarker SyncStmtsEnd => 64;
 public static SyncMarker SyncLabel => 65;
 public static SyncMarker SyncOptLabel => 66;
+
 public static SyncMarker SyncMultiExpr => 67;
 public static SyncMarker SyncRType => 68;
 public static SyncMarker SyncConvRTTI => 69;

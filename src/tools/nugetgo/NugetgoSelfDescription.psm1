@@ -44,7 +44,8 @@ function Get-NugetgoPackedPackages {
 
 function Get-NugetgoThirdPartyRequires {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ThirdPartyPackage = @())
+    # -AllowUnreferenced: one flavor of a module whose requires differ by GOOS (nugetgo-pack.ps1 checks the union instead).
+    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ThirdPartyPackage = @(), [switch]$AllowUnreferenced)
 
     # -ThirdPartyPackage '<module>=<nuget-id>@<package-version>', one per dependency module.
     $named = @{}
@@ -100,7 +101,7 @@ function Get-NugetgoThirdPartyRequires {
     }
 
     foreach ($module in $named.Keys) {
-        if (-not $modules.Contains($module)) { throw "REFUSED: -ThirdPartyPackage names $module, which no packed package references" }
+        if (-not $modules.Contains($module) -and -not $AllowUnreferenced) { throw "REFUSED: -ThirdPartyPackage names $module, which no packed package references" }
     }
 
     foreach ($module in $modules) {
@@ -117,7 +118,7 @@ function Get-NugetgoThirdPartyRequires {
 #>
 function Select-NugetgoPackedLibraries {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ExcludePackage = @())
+    param([Parameter(Mandatory)][string]$RecurseRoot, [Parameter(Mandatory)][object[]]$Libraries, [string[]]$ExcludePackage = @(), [string[]]$TestOnlyPackage = @())
 
     $srcRoot = Join-Path $RecurseRoot 'src'
     $byPath = @{}
@@ -126,6 +127,11 @@ function Select-NugetgoPackedLibraries {
     $excluded = @{}
     foreach ($importPath in @($ExcludePackage | Where-Object { $_ })) {
         if (-not $byPath.ContainsKey($importPath)) { throw "REFUSED: -ExcludePackage $importPath names no library package of the module under $srcRoot" }
+        $excluded[[System.IO.Path]::GetFullPath($byPath[$importPath].FullName)] = $importPath
+    }
+    # -TestOnlyPackage (Get-NugetgoTestOnlyPackages): left out as well. One the -recurse=nuget root did not convert has
+    # nothing to leave out, so it is not a refusal.
+    foreach ($importPath in @($TestOnlyPackage | Where-Object { $_ -and $byPath.ContainsKey($_) })) {
         $excluded[[System.IO.Path]::GetFullPath($byPath[$importPath].FullName)] = $importPath
     }
 
@@ -143,4 +149,69 @@ function Select-NugetgoPackedLibraries {
     return $kept
 }
 
-Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries
+<#
+.SYNOPSIS
+    The module's test-only internal packages (COORD ruling 2026-10-13): Excluded, the ones a pack leaves out, and Kept,
+    the ones it packs because they have Go tests of their own.
+.DESCRIPTION
+    Production is every non-internal, non-main package of the module and every package a main package imports, closed
+    over NON-TEST imports within the module, read with `go list` in -ModuleDir once per -Platforms entry ('goos/goarch')
+    and unioned: a package production on any shipped platform is production. A library package outside that closure is
+    test-only -- imported only from _test.go files, or imported by nothing. It is internal by construction, because
+    every non-internal package is a root, so the rule never reaches a public helper. A test-only package with Go tests
+    of its own is Kept: its proof row stays a proof of something shipped.
+#>
+function Get-NugetgoTestOnlyPackages {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$ModuleDir, [Parameter(Mandatory)][string]$ModulePath, [Parameter(Mandatory)][string[]]$Platforms)
+
+    $inModule = { param($p) $p -ceq $ModulePath -or $p.StartsWith("$ModulePath/", [System.StringComparison]::Ordinal) }
+    $isInternal = { param($p) @($p.Substring($ModulePath.Length).Trim('/') -split '/') -contains 'internal' }
+    $libraries = New-Object 'System.Collections.Generic.SortedSet[string]' ([StringComparer]::Ordinal)
+    $production = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
+    $tested = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
+    $saved = @{ GOOS = $env:GOOS; GOARCH = $env:GOARCH; GOFLAGS = $env:GOFLAGS }
+
+    Push-Location -LiteralPath $ModuleDir
+    try {
+        foreach ($platform in $Platforms) {
+            $goos, $goarch = $platform -split '/', 2
+            $env:GOOS = $goos; $env:GOARCH = $goarch; $env:GOFLAGS = '-mod=mod'
+            $lines = @(& go list -e -f '{{.ImportPath}}|{{.Name}}|{{join .Imports ","}}|{{len .GoFiles}}|{{len .TestGoFiles}}|{{len .XTestGoFiles}}' ./... 2>$null)
+            if ($LASTEXITCODE -ne 0) { throw "REFUSED: go list could not read $ModuleDir for $platform ($LASTEXITCODE)" }
+
+            $imports = @{}
+            $roots = New-Object System.Collections.Generic.List[string]
+            foreach ($line in $lines) {
+                $path, $name, $importList, $goFiles, $testFiles, $xTestFiles = $line -split '\|'
+                if (-not (& $inModule $path)) { continue }
+                if ([int]$testFiles + [int]$xTestFiles -gt 0) { [void]$tested.Add($path) }
+                $imports[$path] = @($importList -split ',' | Where-Object { $_ -and (& $inModule $_) })
+                if ([int]$goFiles -eq 0) { continue }
+                if ($name -ceq 'main') { foreach ($i in $imports[$path]) { $roots.Add($i) } ; continue }
+                [void]$libraries.Add($path)
+                if (-not (& $isInternal $path)) { $roots.Add($path) }
+            }
+
+            $stack = New-Object System.Collections.Generic.Stack[string]
+            foreach ($r in $roots) { $stack.Push($r) }
+            while ($stack.Count -gt 0) {
+                $p = $stack.Pop()
+                if (-not $production.Add($p)) { continue }
+                foreach ($i in @($imports[$p])) { if ($i) { $stack.Push($i) } }
+            }
+        }
+    }
+    finally {
+        Pop-Location
+        foreach ($k in $saved.Keys) { if ($null -eq $saved[$k]) { Remove-Item "Env:$k" -ErrorAction SilentlyContinue } else { Set-Item "Env:$k" $saved[$k] } }
+    }
+
+    $testOnly = @($libraries | Where-Object { -not $production.Contains($_) })
+    return [pscustomobject]@{
+        Excluded = @($testOnly | Where-Object { -not $tested.Contains($_) })
+        Kept     = @($testOnly | Where-Object { $tested.Contains($_) })
+    }
+}
+
+Export-ModuleMember -Function Get-NugetgoPackedPackages, Get-NugetgoThirdPartyRequires, Select-NugetgoPackedLibraries, Get-NugetgoTestOnlyPackages

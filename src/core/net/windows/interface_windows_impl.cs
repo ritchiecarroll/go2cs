@@ -17,7 +17,7 @@
 // that buffer as a linked record:
 //
 //     b = make([]byte, l)
-//     windows.GetAdaptersAddresses(AF_UNSPEC, flags, 0, (*windows.IpAdapterAddresses)(unsafe.Pointer(&b[0])), &l)
+//     windows.GetAdaptersAddresses(AF_UNSPEC, flags, nil, (*windows.IpAdapterAddresses)(unsafe.Pointer(&b[0])), &l)
 //     for aa := (*windows.IpAdapterAddresses)(unsafe.Pointer(&b[0])); aa != nil; aa = aa.Next { … }
 //
 // The CALL is legitimate -- a byte buffer is a byte buffer, and the kernel writes native bytes into
@@ -258,7 +258,7 @@ partial class net_package
                 // wrapper correct here (see the file header). `l` crosses as an ordinary golib heap
                 // box, exactly as the auto conversion passed it -- it is a bare uint32, so its
                 // managed layout IS its native one.
-                var err = windows.GetAdaptersAddresses(syscall.AF_UNSPEC, flags, 0,
+                var err = windows.GetAdaptersAddresses(syscall.AF_UNSPEC, flags, nil,
                     (ж<windows.IpAdapterAddresses>)(uintptr)buffer, Ꮡl);
 
                 if (err == default!) {

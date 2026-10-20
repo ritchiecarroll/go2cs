@@ -18,8 +18,8 @@ internal static ж<nistCurve<P224PointжnistPoint>> p224 = Ꮡ(new nistCurve<P22
 internal static void initP224() {
     p224.Value.@params = Ꮡ(new CurveParams(
         Name: "P-224"u8,
-        BitSize: 224, // SP 800-186, Section 3.2.1.2
-
+        BitSize: 224,
+        // SP 800-186, Section 3.2.1.2
         P: bigFromDecimal("26959946667150639794667015087019630673557916260026308143510066298881"u8),
         N: bigFromDecimal("26959946667150639794667015087019625940457807714424391721682722368061"u8),
         B: bigFromHex("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4"u8),
@@ -28,20 +28,15 @@ internal static void initP224() {
     ));
 }
 
-partial struct p256Curve {
-    internal partial ref nistCurve<P256PointжnistPoint> nistCurve { get; }
-}
-
-internal static ж<p256Curve> p256 = Ꮡ(new p256Curve(new nistCurve<P256PointжnistPoint>(
+internal static ж<nistCurve<P256PointжnistPoint>> p256 = Ꮡ(new nistCurve<P256PointжnistPoint>(
     newPoint: () => nistec.NewP256Point()
-)
 ));
 
 internal static void initP256() {
     p256.Value.@params = Ꮡ(new CurveParams(
         Name: "P-256"u8,
-        BitSize: 256, // SP 800-186, Section 3.2.1.3
-
+        BitSize: 256,
+        // SP 800-186, Section 3.2.1.3
         P: bigFromDecimal("115792089210356248762697446949407573530086143415290314195533631308867097853951"u8),
         N: bigFromDecimal("115792089210356248762697446949407573529996955224135760342422259061068512044369"u8),
         B: bigFromHex("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b"u8),
@@ -57,8 +52,8 @@ internal static ж<nistCurve<P384PointжnistPoint>> p384 = Ꮡ(new nistCurve<P38
 internal static void initP384() {
     p384.Value.@params = Ꮡ(new CurveParams(
         Name: "P-384"u8,
-        BitSize: 384, // SP 800-186, Section 3.2.1.4
-
+        BitSize: 384,
+        // SP 800-186, Section 3.2.1.4
         P: bigFromDecimal("394020061963944792122790401001436138050797392704654"u8 + "46667948293404245721771496870329047266088258938001861606973112319"u8),
         N: bigFromDecimal("394020061963944792122790401001436138050797392704654"u8 + "46667946905279627659399113263569398956308152294913554433653942643"u8),
         B: bigFromHex("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088"u8 + "f5013875ac656398d8a2ed19d2a85c8edd3ec2aef"u8),
@@ -74,8 +69,8 @@ internal static ж<nistCurve<P521PointжnistPoint>> p521 = Ꮡ(new nistCurve<P52
 internal static void initP521() {
     p521.Value.@params = Ꮡ(new CurveParams(
         Name: "P-521"u8,
-        BitSize: 521, // SP 800-186, Section 3.2.1.5
-
+        BitSize: 521,
+        // SP 800-186, Section 3.2.1.5
         P: bigFromDecimal("68647976601306097149819007990813932172694353001433"u8 + "0540939446345918554318339765605212255964066145455497729631139148"u8 + "0858037121987999716643812574028291115057151"u8),
         N: bigFromDecimal("68647976601306097149819007990813932172694353001433"u8 + "0540939446345918554318339765539424505774633321719753296399637136"u8 + "3321113864768612440380340372808892707005449"u8),
         B: bigFromHex("0051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8"u8 + "b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef"u8 + "451fd46b503f00"u8),
@@ -140,9 +135,9 @@ internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<P
     where Point : nistPoint<Point>
 {
     Point p = GoZero<Point>();
-
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
+
     // (0, 0) is by convention the point at infinity, which can't be represented
     // in affine coordinates. See Issue 37294.
     if (x.Sign() == 0 && y.Sign() == 0) {
@@ -247,28 +242,6 @@ internal static (ж<bigꓸInt>, ж<bigꓸInt>) ScalarBaseMult<Point>(this ref ni
         throw panic("crypto/elliptic: nistec rejected normalized scalar");
     }
     return curve.pointToAffine(p);
-}
-
-// CombinedMult returns [s1]G + [s2]P where G is the generator. It's used
-// through an interface upgrade in crypto/ecdsa.
-internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) CombinedMult<Point>(this ref nistCurve<Point> curve, ж<bigꓸInt> ᏑPx, ж<bigꓸInt> ᏑPy, slice<byte> s1, slice<byte> s2)
-    where Point : nistPoint<Point>
-{
-    s1 = curve.normalizeScalar(s1);
-    var (q, err) = curve.newPoint().ScalarBaseMult(s1);
-    if (err != default!) {
-        throw panic("crypto/elliptic: nistec rejected normalized scalar");
-    }
-    (var p, err) = curve.pointFromAffine(ᏑPx, ᏑPy);
-    if (err != default!) {
-        throw panic("crypto/elliptic: CombinedMult was called on an invalid point");
-    }
-    s2 = curve.normalizeScalar(s2);
-    (p, err) = p.ScalarMult(p, s2);
-    if (err != default!) {
-        throw panic("crypto/elliptic: nistec rejected normalized scalar");
-    }
-    return curve.pointToAffine(p.Add(p, q));
 }
 
 internal static (ж<bigꓸInt> x, ж<bigꓸInt> y) Unmarshal<Point>(this ref nistCurve<Point> curve, slice<byte> data)

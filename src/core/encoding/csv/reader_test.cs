@@ -36,13 +36,6 @@ internal partial struct readTest {
 // the start of a field, a record boundary and the position of an error respectively.
 // They are removed before parsing and are used to verify the position
 // information reported by FieldPos.
-// Issue 19019
-// Issue 21201
-// Issue 19410
-// λ and θ start with the same byte.
-// This tests that the parser doesn't confuse such characters.
-// The implementation may read each line in several chunks if it doesn't fit entirely
-// in the read buffer, so we should test the code to handle that condition.
 internal static slice<readTest> readTests;
 internal static void initᴛreadTests() { readTests = new readTest[]{new(
     Name: "Simple"u8,
@@ -65,7 +58,7 @@ b",§"ccc"
 ¶§"a,a",§"b""bb",§"ccc"
 ¶§zzz,§yyy,§xxx
 
-"""u8,
+"""u8.Raw(),
     Output: new slice<@string>[]{
         new @string[]{"#field1"u8, "field2"u8, "field3"u8}.slice(),
         new @string[]{"aaa"u8, "bb\nb"u8, "ccc"u8}.slice(),
@@ -90,7 +83,7 @@ b",§"ccc"
 line",§"one line",§"three
 line
 field"
-"""u8,
+"""u8.Raw(),
     Output: new slice<@string>[]{new @string[]{"two\nline"u8, "one line"u8, "three\nline\nfield"u8}.slice()}.slice()
 ), new(
     Name: "BlankLine"u8,
@@ -228,7 +221,7 @@ field"
 ¶§"x",§"",§"",§""
 ¶§"",§"",§"",§""
 
-"""u8,
+"""u8.Raw(),
     Output: new slice<@string>[]{
         new @string[]{"x"u8, "y"u8, "z"u8, "w"u8}.slice(),
         new @string[]{"x"u8, "y"u8, "z"u8, ""u8}.slice(),
@@ -258,7 +251,7 @@ field"
     }.slice(),
     ReuseRecord: true
 ), new(
-    Name: "StartLine1"u8,
+    Name: "StartLine1"u8, // Issue 19019
     Input: "§a,\"b\nc∑\"d,e"u8,
     Errors: new error[]{new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice()
 ), new(
@@ -267,13 +260,13 @@ field"
     Errors: new error[]{default!, new global::go.encoding.csv_package.ParseErrorжerror(Ꮡ(new ParseError(Err: ErrQuote)))}.slice(),
     Output: new slice<@string>[]{new @string[]{"a"u8, "b"u8}.slice()}.slice()
 ), new(
-    Name: "CRLFInQuotedField"u8,
+    Name: "CRLFInQuotedField"u8, // Issue 21201
     Input: "§A,§\"Hello\r\nHi\",§B\r\n"u8,
     Output: new slice<@string>[]{
         new @string[]{"A"u8, "Hello\nHi"u8, "B"u8}.slice()
     }.slice()
 ), new(
-    Name: "BinaryBlobField"u8,
+    Name: "BinaryBlobField"u8, // Issue 19410
     Input: ((@string)(new byte[]{0xc2, 0xa7, 0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c, 0x2c, 0xc2, 0xa7, 0x61, 0x6b, 0x74, 0x61, 0x75})),
     Output: new slice<@string>[]{new @string[]{((@string)(new byte[]{0x78, 0x30, 0x39, 0x41, 0xb4, 0x1c})), "aktau"u8}.slice()}.slice()
 ), new(
@@ -330,6 +323,8 @@ field"
     Comma: (rune)'€',
     Comment: (rune)'λ'
 ), new(
+    // λ and θ start with the same byte.
+    // This tests that the parser doesn't confuse such characters.
     Name: "NonASCIICommaConfusion"u8,
     Input: "§\"abθcd\"λ§efθgh"u8,
     Output: new slice<@string>[]{new @string[]{"abθcd"u8, "efθgh"u8}.slice()}.slice(),
@@ -348,6 +343,8 @@ field"
     Name: "MultipleCRLF"u8,
     Input: "\r\n\r\n\r\n\r\n"u8
 ), new(
+    // The implementation may read each line in several chunks if it doesn't fit entirely
+    // in the read buffer, so we should test the code to handle that condition.
     Name: "HugeLines"u8,
     Input: strings.Repeat("#ignore\n"u8, 10000) + "§"u8 + strings.Repeat("@"u8, 5000) + ",§"u8 + strings.Repeat("*"u8, 5000),
     Output: new slice<@string>[]{new @string[]{strings.Repeat("@"u8, 5000), strings.Repeat("*"u8, 5000)}.slice()}.slice(),
@@ -418,6 +415,7 @@ public static void TestRead(ж<testing.T> Ꮡt) {
     (ж<global::go.encoding.csv_package.Reader>, slice<slice<array<nint>>>, map<nint, array<nint>>, @string) newReader(readTest tt) {
         var (positions, errPositions, input) = makePositions(tt.Input);
         var r = NewReader(new csv_test_package.strings_ReaderжReader(strings.NewReader(input)));
+
         if (tt.Comma != 0) {
             r.Value.Comma = tt.Comma;
         }
@@ -432,6 +430,7 @@ public static void TestRead(ж<testing.T> Ꮡt) {
         r.Value.ReuseRecord = tt.ReuseRecord;
         return (r, positions, errPositions, input);
     }
+
     foreach (var (_, vᴛ1) in readTests) {
         ref var tt = ref heap(new readTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -458,12 +457,14 @@ public static void TestRead(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             // Check input offset after call ReadAll()
             nint inputByteSize = len(input);
             var inputOffset = r.InputOffset();
             if (err == default! && (int64)inputByteSize != inputOffset) {
                 tΔ1.Errorf("wrong input offset after call ReadAll():\ngot:  %d\nwant: %d\ninput: %s"u8, inputOffset, inputByteSize, input);
             }
+
             // Check field and error positions.
             (r, _, _, _) = newReaderʗ1(ttʗ1);
             for (nint recNum = 0; ᐧ ; recNum++) {
@@ -553,6 +554,7 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
     nint line = 1;
     nint col = 1;
     nint recNum = 0;
+
     while (len(text) > 0) {
         var (r, size) = utf8.DecodeRuneInString(text);
         switch (r) {
@@ -583,10 +585,9 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
             col += size;
             break;
         }}
-
         text = text.slice(size);
     }
-    return (positions, errPositions, ((@string)buf));
+    return (positions, errPositions, (@string)buf);
 }
 
 // nTimes is an io.Reader which yields the string s n times.
@@ -651,7 +652,7 @@ x,,,
 "x","","",""
 "","","",""
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkRead(ж<testing.B> Ꮡb) {
     benchmarkRead(Ꮡb, default!, benchmarkCSVData);
@@ -676,7 +677,7 @@ xxxxxxxxxxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,zzzzzzzzzzzzzzzzzzzzzz
 ,,zzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz,wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww,vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-"""u8;
+"""u8.Raw();
 
 public static void BenchmarkReadLargeFields(ж<testing.B> Ꮡb) {
     benchmarkRead(Ꮡb, default!, strings.Repeat(xxxxxxxxxxxxxxxxˢ, 3));

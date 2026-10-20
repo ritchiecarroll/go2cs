@@ -19,21 +19,37 @@ using bytes = bytes_package;
 
 partial class bidi_package {
 
-partial struct ΔDirection /*num:nint*/;
-
 // This API tries to avoid dealing with embedding levels for now. Under the hood
 // these will be computed, but the question is to which extent the user should
 // know they exist. We should at some point allow the user to specify an
 // embedding hierarchy, though.
+
+// A Direction indicates the overall flow of text.
+partial struct ΔDirection /*num:nint*/;
+
+// LeftToRight indicates the text contains no right-to-left characters and
+// that either there are some left-to-right characters or the option
+// DefaultDirection(LeftToRight) was passed.
 public static ΔDirection LeftToRight => /* iota */ 0;
+
+// RightToLeft indicates the text contains no left-to-right characters and
+// that either there are some right-to-left characters or the option
+// DefaultDirection(RightToLeft) was passed.
 public static ΔDirection RightToLeft => 1;
+
+// Mixed indicates text contains both left-to-right and right-to-left
+// characters.
 public static ΔDirection Mixed => 2;
+
+// Neutral means that text contains no left-to-right and right-to-left
+// characters and that no default direction has been set.
 public static ΔDirection Neutral => 3;
 
 public partial struct options {
     internal ΔDirection defaultDirection;
 }
 
+// An Option is an option for Bidi processing.
 // type Option is a methodless func type — rendered inline as its base delegate
 
 // ICU allows the user to define embedding levels. This may be used, for example,
@@ -81,6 +97,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
     p.pairTypes = default!;
     p.pairValues = default!;
     p.types = default!;
+
     foreach (var (_, r) in p.runes) {
         var (props, i) = LookupRune(r);
         bytecount += i;
@@ -100,7 +117,7 @@ internal static (nint n, error err) prepareInput(this ref Paragraph p) {
             p.pairValues = append(p.pairValues, r);
         } else {
             p.pairTypes = append(p.pairTypes, bpNone);
-            p.pairValues = append(p.pairValues, (rune)(0));
+            p.pairValues = append(p.pairValues, (rune)0);
         }
     }
     return (bytecount, default!);
@@ -165,8 +182,10 @@ public static ΔRun RunAt(this ref Paragraph p, nint pos) {
 
 internal static Ordering calculateOrdering(slice<level> levels, slice<rune> runes) {
     ΔDirection curDir = default!;
+
     ΔDirection prevDir = Neutral;
     nint prevI = 0;
+
     var o = new Ordering(nil);
     // lvl = 0,2,4,...: left to right
     // lvl = 1,3,5,...: right to left
@@ -199,10 +218,11 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
     if (len(p.types) == 0) {
         return (new Ordering(nil), default!);
     }
+
     foreach (var (_, fn) in p.opts) {
         fn(Ꮡp.of(Paragraph.Ꮡoptions));
     }
-    var lvl = ((level)(-1));
+    var lvl = (level)(-1);
     if (p.options.defaultDirection == RightToLeft) {
         lvl = 1;
     }
@@ -210,7 +230,9 @@ public static (Ordering, error) Order(this ж<Paragraph> Ꮡp) {
     if (err != default!) {
         return (new Ordering(nil), err);
     }
+
     var levels = para.getLevels(new nint[]{len(p.types)}.slice());
+
     p.o = calculateOrdering(levels, p.runes);
     return (p.o, default!);
 }
@@ -275,7 +297,7 @@ partial struct ΔRun {
 
 // String returns the text of the run in its original order.
 public static @string String(this ref ΔRun r) {
-    return ((@string)r.runes);
+    return (@string)r.runes;
 }
 
 // Bytes returns the text of the run in its original order.
@@ -306,16 +328,19 @@ public static slice<byte> AppendReverse(slice<byte> @out, slice<byte> @in) {
     var ret = new slice<byte>(len(@in) + len(@out));
     copy(ret, @out);
     var inRunes = bytes.Runes(@in);
+
     foreach (var (i, r) in inRunes) {
         var (prop, _) = LookupRune(r);
         if (prop.IsBracket()) {
             inRunes[i] = prop.reverseBracket(r);
         }
     }
+
     for ((nint i, nint j) = (0, len(inRunes) - 1); i < j; (i, j) = (i + 1, j - 1)) {
         (inRunes[i], inRunes[j]) = (inRunes[j], inRunes[i]);
     }
-    copy(ret.slice(len(@out)), ((@string)inRunes));
+    copy(ret.slice(len(@out)), (@string)inRunes);
+
     return ret;
 }
 
@@ -334,7 +359,7 @@ public static @string ReverseString(@string s) {
             ret[li - i - 1] = r;
         }
     }
-    return ((@string)ret);
+    return (@string)ret;
 }
 
 } // end bidi_package

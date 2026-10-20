@@ -24,8 +24,7 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
     slice<Interface> ift = default!;
     foreach (var (_, aa) in aas) {
         var index = aa.Value.IfIndex;
-        if (index == 0) {
-            // ipv6IfIndex is a substitute for ifIndex
+        if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
             index = aa.Value.Ipv6IfIndex;
         }
         if (ifindex == 0 || ifindex == (nint)index) {
@@ -54,7 +53,6 @@ internal static (slice<Interface>, error) interfaceTable(nint ifindex) {
             else if (exprᴛ1 == windows.IF_TYPE_ATM) {
                 ifi.Flags |= (Flags)((Flags)((Flags)(FlagBroadcast | FlagPointToPoint) | FlagMulticast)); // assume all services available; LANE, point-to-point and point-to-multipoint
             }
-
             if ((~aa).Mtu == 0xffffffffU){
                 ifi.MTU = -1;
             } else {
@@ -89,8 +87,7 @@ internal static (slice<ΔAddr>, error) interfaceAddrTable(ж<Interface> Ꮡifi) 
     slice<ΔAddr> ifat = default!;
     foreach (var (_, aa) in aas) {
         var index = aa.Value.IfIndex;
-        if (index == 0) {
-            // ipv6IfIndex is a substitute for ifIndex
+        if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
             index = aa.Value.Ipv6IfIndex;
         }
         if (Ꮡifi == nil || ifi.Index == (nint)index) {
@@ -145,8 +142,7 @@ internal static (slice<ΔAddr>, error) interfaceMulticastAddrTable(ж<Interface>
     slice<ΔAddr> ifat = default!;
     foreach (var (_, aa) in aas) {
         var index = aa.Value.IfIndex;
-        if (index == 0) {
-            // ipv6IfIndex is a substitute for ifIndex
+        if (index == 0) { // ipv6IfIndex is a substitute for ifIndex
             index = aa.Value.Ipv6IfIndex;
         }
         if (Ꮡifi == nil || ifi.Index == (nint)index) {

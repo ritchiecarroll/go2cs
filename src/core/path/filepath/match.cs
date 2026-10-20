@@ -31,12 +31,14 @@ public static error ErrBadPattern = errors.New("syntax error in pattern"u8);
 //		'[' [ '^' ] { character-range } ']'
 //		            character class (must be non-empty)
 //		c           matches character c (c != '*', '?', '\\', '[')
-//		'\\' c      matches character c
+//		'\\' c      matches character c (except on Windows)
 //
 //	character-range:
 //		c           matches character c (c != '\\', '-', ']')
-//		'\\' c      matches character c
+//		'\\' c      matches character c (except on Windows)
 //		lo '-' hi   matches character c for lo <= c <= hi
+//
+// Path segments in the pattern must be separated by [Separator].
 //
 // Match requires pattern to match all of name, not just a substring.
 // The only possible returned error is [ErrBadPattern], when pattern
@@ -52,7 +54,7 @@ Pattern:
         (star, chunk, pattern) = scanChunk(pattern);
         if (star && chunk == ""u8) {
             // Trailing * matches rest of string unless it has a /.
-            return (!strings.Contains(name, ((@string)(rune)Separator)), default!);
+            return (!strings.Contains(name, (@string)(rune)Separator), default!);
         }
         // Look for match at current position.
         var (t, ok, errΔ1) = matchChunk(chunk, name);
@@ -101,16 +103,12 @@ internal static (bool star, @string chunk, @string rest) scanChunk(@string patte
         star = true;
     }
     var inrange = false;
-    nint i = default!;
-Scan:
-    for (i = 0; i < len(pattern); i++) {
+    for (nint i = 0; i < len(pattern); i++) {
         switch (pattern[i]) {
         case (rune)'\\': {
-            if (runtime.GOOS != "windows"u8) {
-                // error check handled in matchChunk: bad pattern.
-                if (i + 1 < len(pattern)) {
-                    i++;
-                }
+            // error check handled in matchChunk: bad pattern.
+            if (runtime.GOOS != "windows"u8 && i + 1 < len(pattern)) {
+                i++;
             }
             break;
         }
@@ -124,15 +122,12 @@ Scan:
         }
         case (rune)'*': {
             if (!inrange) {
-                goto break_Scan;
+                return (star, pattern.slice(0, i), pattern.slice(i));
             }
             break;
         }}
-
-continue_Scan:;
     }
-break_Scan:;
-    return (star, pattern.slice(0, i), pattern.slice(i));
+    return (star, pattern, "");
 }
 
 // matchChunk checks whether chunk matches the beginning of s.
@@ -146,9 +141,7 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
     // checking that the pattern is well-formed but no longer reading s.
     var failed = false;
     while (len(chunk) > 0) {
-        if (!failed && len(s) == 0) {
-            failed = true;
-        }
+        failed = failed || len(s) == 0;
         var exprᴛ1 = chunk[0];
         var matchᴛ1 = false;
         if (exprᴛ1 is (rune)'[') { matchᴛ1 = true;
@@ -160,16 +153,16 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                 s = s.slice(n);
             }
             chunk = chunk[1..];
+            // possibly negated
             var negated = false;
             if (len(chunk) > 0 && chunk[0] == (rune)'^') {
-                // possibly negated
                 negated = true;
                 chunk = chunk[1..];
             }
+            // parse all ranges
             var match = false;
             nint nrange = 0;
             while (ᐧ) {
-                // parse all ranges
                 if (len(chunk) > 0 && chunk[0] == (rune)']' && nrange > 0) {
                     chunk = chunk[1..];
                     break;
@@ -189,20 +182,14 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
                         }
                     }
                 }
-                if (loΔ1 <= r && r <= hiΔ1) {
-                    match = true;
-                }
+                match = match || loΔ1 <= r && r <= hiΔ1;
                 nrange++;
             }
-            if (match == negated) {
-                failed = true;
-            }
+            failed = failed || match == negated;
         }
         else if (exprᴛ1 is (rune)'?') { matchᴛ1 = true;
             if (!failed) {
-                if (s[0] == Separator) {
-                    failed = true;
-                }
+                failed = s[0] == Separator;
                 var (_, n) = utf8.DecodeRuneInString(s);
                 s = s.slice(n);
             }
@@ -219,14 +206,11 @@ internal static (@string rest, bool ok, error err) matchChunk(@string chunk, @st
         }
         if (fallthrough || !matchᴛ1) { /* default: */
             if (!failed) {
-                if (chunk[0] != s[0]) {
-                    failed = true;
-                }
+                failed = chunk[0] != s[0];
                 s = s[1..];
             }
             chunk = chunk[1..];
         }
-
     }
     if (failed) {
         return ("", false, default!);
@@ -283,6 +267,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     if (depth == pathSeparatorsLimit) {
         return (default!, ErrBadPattern);
     }
+
     // Check pattern is well-formed.
     {
         var (_, errΔ1) = Match(pattern, ""u8); if (errΔ1 != default!) {
@@ -297,6 +282,7 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
         }
         return (new @string[]{pattern}.slice(), default!);
     }
+
     var (dir, @file) = Split(pattern);
     nint volumeLen = 0;
     if (runtime.GOOS == "windows"u8){
@@ -304,13 +290,16 @@ internal static (slice<@string> matches, error err) globWithLimit(@string patter
     } else {
         dir = cleanGlobPath(dir);
     }
+
     if (!hasMeta(dir.slice(volumeLen))) {
         return glob(dir, @file, default!);
     }
+
     // Prevent infinite recursion. See issue 15879.
     if (dir == pattern) {
         return (default!, ErrBadPattern);
     }
+
     slice<@string> m = default!;
     (m, err) = globWithLimit(dir, depth + 1);
     if (err != default!) {
@@ -332,15 +321,13 @@ internal static @string cleanGlobPath(@string path) {
         return "."u8;
     }
     if (exprᴛ1 == ((@string)(rune)Separator)) {
+        // do nothing to the path
         return path;
     }
     { /* default: */
         return path.slice(0, len(path) - 1); // chop off trailing separator
     }
-
 }
-
-// do nothing to the path
 
 // cleanGlobPathWindows is windows version of cleanGlobPath.
 internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string path) {
@@ -349,22 +336,19 @@ internal static (nint prefixLen, @string cleaned) cleanGlobPathWindows(@string p
     case {} when path == ""u8: {
         return (0, ".");
     }
-    case {} when vollen + 1 == len(path) && os.IsPathSeparator(path[len(path) - 1]): {
+    case {} when vollen + 1 == len(path) && os.IsPathSeparator(path[len(path) - 1]): { // /, \, C:\ and C:/
+        // do nothing to the path
         return (vollen + 1, path);
     }
-    case {} when vollen == len(path) && len(path) == 2: {
+    case {} when vollen == len(path) && len(path) == 2: { // C:
         return (vollen, path + "."); // convert C: into C:.
     }
     default: {
         if (vollen >= len(path)) {
-            // /, \, C:\ and C:/
-            // do nothing to the path
-            // C:
             vollen = len(path) - 1;
         }
         return (vollen, path.slice(0, len(path) - 1)); // chop off trailing separator
     }}
-
 }
 
 // glob searches for files matching pattern in the directory dir
@@ -390,8 +374,10 @@ internal static (slice<@string> m, error e) glob(@string dir, @string pattern, s
         }
         var dʗ1 = d;
         defer(() => dʗ1.Close(), ref ᒐ);
+
         var (names, _) = d.Readdirnames(-1);
         slices.Sort<slice<@string>, @string>(names);
+
         foreach (var (_, n) in names) {
             var (matched, errΔ1) = Match(pattern, n);
             if (errΔ1 != default!) {

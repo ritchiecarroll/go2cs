@@ -12,45 +12,42 @@ using token = global::go.go.token_package;
 
 partial class ast_internal_test_package {
 
-// basic types
-// maps
-// pointers
-// arrays
-// slices
-// structs
-
 partial struct testsᴛ1 /*dyn*/ {
     internal any x; // x is printed as s
     internal @string s;
 }
-
     partial struct Δtype /*dyn*/ {
         internal nint x;
     }
-
     partial struct Δtypeᴛ1 /*dyn*/ {
         public nint X;
         internal nint y;
     }
-
     partial struct Δtypeᴛ2 /*dyn*/ {
         public nint X, Y;
     }
 internal static slice<testsᴛ1> tests = new testsᴛ1[]{
+    // basic types
     new(default!, "0  nil"u8),
     new(true, "0  true"u8),
-    new((nint)(42), "0  42"u8),
+    new((nint)42, "0  42"u8),
     new(3.14D, "0  3.14"u8),
     new(1D + 2.718D.i(), "0  (1+2.718i)"u8),
     new((@string)"foobar"u8, "0  \"foobar\""u8),
+
+    // maps
     new(new map<global::go.go.ast_package.Expr, @string>{}, @"0  map[ast.Expr]string (len = 0) {}"u8),
     new(new map<@string, nint>{["a"u8] = 1},
         """
 0  map[string]int (len = 1) {
 		1  .  "a": 1
 		2  }
-"""u8),
+"""u8.Raw()),
+
+    // pointers
     new(@new<nint>(), "0  *0"u8),
+
+    // arrays
     new(new nint[]{}.array(), @"0  [0]int {}"u8),
     new(new nint[]{1, 2, 3}.array(),
         """
@@ -59,13 +56,15 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 		2  .  1: 2
 		3  .  2: 3
 		4  }
-"""u8),
+"""u8.Raw()),
     new(new nint[]{42}.array(),
         """
 0  [1]int {
 		1  .  0: 42
 		2  }
-"""u8),
+"""u8.Raw()),
+
+    // slices
     new(new nint[]{}.slice(), @"0  []int (len = 0) {}"u8),
     new(new nint[]{1, 2, 3}.slice(),
         """
@@ -74,7 +73,9 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 		2  .  1: 2
 		3  .  2: 3
 		4  }
-"""u8),
+"""u8.Raw()),
+
+    // structs
     new(new EmptyStruct(), @"0  struct {} {}"u8),
     new(new Δtype(7), @"0  struct { x int } {}"u8),
     new(new Δtypeᴛ1(42, 991),
@@ -82,14 +83,14 @@ internal static slice<testsᴛ1> tests = new testsᴛ1[]{
 0  struct { X int; y int } {
 		1  .  X: 42
 		2  }
-"""u8),
+"""u8.Raw()),
     new(new Δtypeᴛ2(42, 991),
         """
 0  struct { X int; Y int } {
 		1  .  X: 42
 		2  .  Y: 991
 		3  }
-"""u8)
+"""u8.Raw())
 }.slice();
 
 // Split s into lines, trim whitespace from all lines, and return

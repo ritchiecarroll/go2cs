@@ -93,6 +93,7 @@ public static void Broadcast(this ж<Cond> Ꮡc) {
     runtime_notifyListNotifyAll(Ꮡc.of(Cond.Ꮡnotify));
 }
 
+// copyChecker holds back pointer to itself to detect object copying.
 partial struct copyChecker /*num:uintptr*/;
 
 // go2cs generated this placeholder — func check is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

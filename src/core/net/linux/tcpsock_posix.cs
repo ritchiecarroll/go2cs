@@ -104,6 +104,7 @@ internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, co
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
     var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжΔsockaddr(Ꮡladdr), new TCPAddrжΔsockaddr(Ꮡraddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
+
     // TCP has a rarely used mechanism called a 'simultaneous connection' in
     // which Dial("tcp", addr1, addr2) run on the machine at addr1 can
     // connect to a simultaneous Dial("tcp", addr2, addr1) run on the machine
@@ -134,6 +135,7 @@ internal static (ж<TCPConn>, error) doDialTCPProto(this ж<sysDialer> Ꮡsd, co
         }
         (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжΔsockaddr(Ꮡladdr), new TCPAddrжΔsockaddr(Ꮡraddr), syscall.SOCK_STREAM, proto, dialˢ, ctrlCtxFn);
     }
+
     if (err != default!) {
         return (default!, err);
     }
@@ -145,6 +147,7 @@ internal static bool selfConnect(ref netFD fd, error err) {
     if (err != default!) {
         return false;
     }
+
     // The socket constructor can return an fd with raddr nil under certain
     // unknown conditions. The errors in the calls there to Getpeername
     // are discarded, but we can't catch the problem there because those

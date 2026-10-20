@@ -33,6 +33,7 @@ public static void TestWinSplitListTestsAreValid(ж<testing.T> Ꮡt) {
     if (comspec == ""u8) {
         Ꮡt.Fatal(comSpecMustBeSetˢ);
     }
+
     foreach (var (ti, tt) in winsplitlisttests) {
         testWinSplitListTestIsValid(Ꮡt, ti, tt, comspec);
     }
@@ -47,6 +48,7 @@ internal static readonly @string cmdfileᶜ = @"printdir.cmd"u8;
 internal static void testWinSplitListTestIsValid(ж<testing.T> Ꮡt, nint ti, SplitListTest tt, @string comspec) {
     @string cmdfile = cmdfileᶜ;
     fs.FileMode perm = /* 0700 */ 448;
+
     ref var tmp = ref heap<@string>(out var Ꮡtmp);
     tmp = Ꮡt.TempDir();
     foreach (var (i, d) in tt.result) {
@@ -81,8 +83,10 @@ internal static void testWinSplitListTestIsValid(ж<testing.T> Ꮡt, nint ti, Sp
             }
         }
     }
+
     // on some systems, SystemRoot is required for cmd to work
     @string systemRoot = os.Getenv(systemRootˢ);
+
     foreach (var (i, d) in tt.result) {
         if (d == ""u8) {
             continue;
@@ -105,20 +109,21 @@ internal static void testWinSplitListTestIsValid(ж<testing.T> Ꮡt, nint ti, Sp
             return;
         }
         default: {
-            err = os.Remove(filepath.Join(tmp, // unshadow cmdfile in next directory
- d, cmdfile));
+            // unshadow cmdfile in next directory
+            err = os.Remove(filepath.Join(tmp, d, cmdfile));
             if (err != default!) {
                 Ꮡt.Fatalf("Remove test command failed: %v"u8, err);
             }
             break;
         }}
-
     }
 }
 
 public static void TestWindowsEvalSymlinks(ж<testing.T> Ꮡt) {
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     @string tmpDir = tempDirCanonical(Ꮡt);
+
     if (len(tmpDir) < 3) {
         Ꮡt.Fatalf("tmpDir path %q is too short"u8, tmpDir);
     }
@@ -126,6 +131,7 @@ public static void TestWindowsEvalSymlinks(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("tmpDir path %q must have drive letter in it"u8, tmpDir);
     }
     var test = new EvalSymlinksTest("test/linkabswin"u8, tmpDir[..3]);
+
     // Create the symlink farm using relative paths.
     var testdirs = append(EvalSymlinksTestDirs, test);
     foreach (var (_, d) in testdirs) {
@@ -140,17 +146,23 @@ public static void TestWindowsEvalSymlinks(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     @string path = simpleJoin(tmpDir, test.path);
+
     testEvalSymlinks(Ꮡt, path, test.dest);
+
     testEvalSymlinksAfterChdir(Ꮡt, path, "."u8, test.dest);
+
     testEvalSymlinksAfterChdir(Ꮡt,
         path,
         filepath.VolumeName(tmpDir) + "."u8,
         test.dest);
+
     testEvalSymlinksAfterChdir(Ꮡt,
         simpleJoin(tmpDir, testˢ),
         simpleJoin(".."u8, test.path),
         test.dest);
+
     testEvalSymlinksAfterChdir(Ꮡt, tmpDir, test.path, test.dest);
 }
 
@@ -164,6 +176,7 @@ public static void TestEvalSymlinksCanonicalNames(ж<testing.T> Ꮡt) {
         "testing_long_dir"u8,
         "TEST2"u8
     }.slice();
+
     foreach (var (_, d) in dirs) {
         @string dir = filepath.Join(ctmp, d);
         var err = os.Mkdir(dir, 493);
@@ -237,11 +250,11 @@ internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     var (@out, _) = exec.Command(fsutilˢ, "8dot3name"u8, queryˢ, vol).CombinedOutput();
     // Check that system has "Volume level setting" set.
     @string expected = theRegistryStateOfˢ;
-    if (!strings.Contains(((@string)@out), expected)) {
+    if (!strings.Contains((@string)@out, expected)) {
         // Windows 10 version of fsutil has different output message.
         @string expectedWindow10 = theRegistryStateIs2Perˢ;
-        if (!strings.Contains(((@string)@out), expectedWindow10)) {
-            return fmt.Errorf("fsutil output should contain %q, but is %q"u8, expected, ((@string)@out));
+        if (!strings.Contains((@string)@out, expectedWindow10)) {
+            return fmt.Errorf("fsutil output should contain %q, but is %q"u8, expected, (@string)@out);
         }
     }
     // Now check the volume setting.
@@ -251,8 +264,8 @@ internal static error checkVolume8dot3Setting(@string vol, bool enabled) {
     } else {
         expected = fmt.Sprintf(expected, disabledˢ, vol);
     }
-    if (!strings.Contains(((@string)@out), expected)) {
-        return fmt.Errorf("unexpected fsutil output: %q"u8, ((@string)@out));
+    if (!strings.Contains((@string)@out, expected)) {
+        return fmt.Errorf("unexpected fsutil output: %q"u8, (@string)@out);
     }
     return default!;
 }
@@ -280,7 +293,7 @@ internal static error setVolume8dot3Setting(@string vol, bool enabled) {
             expectedWindow10 = fmt.Sprintf(expectedWindow10, disabledˢ, vol);
         }
         if (@outᴛ1 != expectedWindow10) {
-            return fmt.Errorf("%v command failed: %q"u8, cmd, ((@string)@out));
+            return fmt.Errorf("%v command failed: %q"u8, cmd, (@string)@out);
         }
     }
     return default!;
@@ -303,6 +316,7 @@ public static void TestEvalSymlinksCanonicalNamesWith8dot3Disabled(ж<testing.T>
         if (len(tempVol) != 2) {
             Ꮡt.Fatalf("unexpected temp volume name %q"u8, tempVol);
         }
+
         var err = checkVolume8dot3Setting(tempVol, true);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -352,22 +366,26 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
     var stubBase = (@string, error) (@string path) => {
         @string vol = filepath.VolumeName(path);
         path = path.slice(len(vol));
+
         if (strings.Contains(path, "/"u8)) {
             return ("", fmt.Errorf("invalid path is given to base: %s"u8, vol + path));
         }
+
         if (path == ""u8 || path == "."u8 || path == @"\"u8) {
             return ("", fmt.Errorf("invalid path is given to base: %s"u8, vol + path));
         }
+
         nint i = strings.LastIndexByte(path, filepath.Separator);
-        if (i == len(path) - 1) {
-            // trailing '\' is invalid
+        if (i == len(path) - 1) { // trailing '\' is invalid
             return ("", fmt.Errorf("invalid path is given to base: %s"u8, vol + path));
         }
         if (i == -1) {
             return (strings.ToUpper(path), default!);
         }
+
         return (strings.ToUpper(path.slice(i + 1)), default!);
     };
+
     // On this test, toNorm should be same as string.ToUpper(filepath.Clean(path)) except empty string.
     var tests = new TestToNorm_tests[]{
         new(""u8, ""u8),
@@ -386,6 +404,7 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
         new(@"C:\foo/bar\"u8, @"C:\FOO\BAR"u8),
         new("C:/ふー/バー"u8, @"C:\ふー\バー"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         @string path = default!;
         if (test.arg != ""u8) {
@@ -399,66 +418,81 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("toNorm(%s) returns %s, but %s expected\n"u8, test.arg, got, test.want);
         }
     }
-    @string testPath = tmpTestFooBarˢ;
-    var testsDir = new TestToNorm_testsDir[]{ // test absolute paths
 
+    @string testPath = tmpTestFooBarˢ;
+
+    var testsDir = new TestToNorm_testsDir[]{
+        // test absolute paths
         new("."u8, @"{{tmp}}\test\foo\bar"u8, @"{{tmp}}\test\foo\bar"u8),
         new("."u8, @"{{tmp}}\.\test/foo\bar"u8, @"{{tmp}}\test\foo\bar"u8),
         new("."u8, @"{{tmp}}\test\..\test\foo\bar"u8, @"{{tmp}}\test\foo\bar"u8),
-        new("."u8, @"{{tmp}}\TEST\FOO\BAR"u8, @"{{tmp}}\test\foo\bar"u8), // test relative paths begin with drive letter
+        new("."u8, @"{{tmp}}\TEST\FOO\BAR"u8, @"{{tmp}}\test\foo\bar"u8),
 
+        // test relative paths begin with drive letter
         new(@"{{tmp}}\test"u8, @"{{tmpvol}}."u8, @"{{tmpvol}}."u8),
         new(@"{{tmp}}\test"u8, @"{{tmpvol}}.."u8, @"{{tmpvol}}.."u8),
         new(@"{{tmp}}\test"u8, @"{{tmpvol}}foo\bar"u8, @"{{tmpvol}}foo\bar"u8),
         new(@"{{tmp}}\test"u8, @"{{tmpvol}}.\foo\bar"u8, @"{{tmpvol}}foo\bar"u8),
         new(@"{{tmp}}\test"u8, @"{{tmpvol}}foo\..\foo\bar"u8, @"{{tmpvol}}foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"{{tmpvol}}FOO\BAR"u8, @"{{tmpvol}}foo\bar"u8), // test relative paths begin with '\'
+        new(@"{{tmp}}\test"u8, @"{{tmpvol}}FOO\BAR"u8, @"{{tmpvol}}foo\bar"u8),
 
+        // test relative paths begin with '\'
         new("{{tmp}}"u8, @"{{tmpnovol}}\test\foo\bar"u8, @"{{tmpnovol}}\test\foo\bar"u8),
         new("{{tmp}}"u8, @"{{tmpnovol}}\.\test\foo\bar"u8, @"{{tmpnovol}}\test\foo\bar"u8),
         new("{{tmp}}"u8, @"{{tmpnovol}}\test\..\test\foo\bar"u8, @"{{tmpnovol}}\test\foo\bar"u8),
-        new("{{tmp}}"u8, @"{{tmpnovol}}\TEST\FOO\BAR"u8, @"{{tmpnovol}}\test\foo\bar"u8), // test relative paths begin without '\'
+        new("{{tmp}}"u8, @"{{tmpnovol}}\TEST\FOO\BAR"u8, @"{{tmpnovol}}\test\foo\bar"u8),
 
+        // test relative paths begin without '\'
         new(@"{{tmp}}\test"u8, "."u8, @"."u8),
         new(@"{{tmp}}\test"u8, ".."u8, @".."u8),
         new(@"{{tmp}}\test"u8, @"foo\bar"u8, @"foo\bar"u8),
         new(@"{{tmp}}\test"u8, @".\foo\bar"u8, @"foo\bar"u8),
         new(@"{{tmp}}\test"u8, @"foo\..\foo\bar"u8, @"foo\bar"u8),
-        new(@"{{tmp}}\test"u8, @"FOO\BAR"u8, @"foo\bar"u8), // test UNC paths
+        new(@"{{tmp}}\test"u8, @"FOO\BAR"u8, @"foo\bar"u8),
 
+        // test UNC paths
         new("."u8, @"\\localhost\c$"u8, @"\\localhost\c$"u8)
     }.slice();
+
     @string ctmp = tempDirCanonical(Ꮡt);
     {
         var errΔ2 = os.MkdirAll(strings.ReplaceAll(testPath, tmpˢ, ctmp), 511); if (errΔ2 != default!) {
             Ꮡt.Fatal(errΔ2);
         }
     }
+
     var (cwd, err) = os.Getwd();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     Ꮡt.Chdir("."u8); // Ensure cwd is restored after the test.
+
     @string tmpVol = filepath.VolumeName(ctmp);
     if (len(tmpVol) != 2) {
         Ꮡt.Fatalf("unexpected temp volume name %q"u8, tmpVol);
     }
+
     @string tmpNoVol = ctmp.slice(len(tmpVol));
+
     var replacer = strings.NewReplacer(tmpˢ, ctmp, tmpvolˢ, tmpVol, tmpnovolˢ, tmpNoVol);
+
     foreach (var (_, test) in testsDir) {
         @string wd = replacer.Replace(test.wd);
         @string arg = replacer.Replace(test.arg);
         @string want = replacer.Replace(test.want);
+
         if (test.wd == "."u8){
             var errΔ3 = os.Chdir(cwd);
             if (errΔ3 != default!) {
                 Ꮡt.Error(errΔ3);
+
                 continue;
             }
         } else {
             var errΔ4 = os.Chdir(wd);
             if (errΔ4 != default!) {
                 Ꮡt.Error(errΔ4);
+
                 continue;
             }
         }
@@ -478,8 +512,6 @@ public static void TestToNorm(ж<testing.T> Ꮡt) {
 public static void TestUNC(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         // Test that this doesn't go into an infinite recursion.
         // See golang.org/issue/15879.
         defer(debug.SetMaxStack, debug.SetMaxStack(1000000), ref ᒐ);
@@ -495,13 +527,13 @@ internal static readonly @string mklinkˢ = "mklink"u8;
 
 internal static void testWalkMklink(ж<testing.T> Ꮡt, @string linktype) {
     var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains(((@string)output), fmt.Sprintf(" /%s "u8, linktype))) {
+    if (!strings.Contains((@string)output, fmt.Sprintf(" /%s "u8, linktype))) {
         Ꮡt.Skipf(@"skipping test; mklink does not supports /%s parameter"u8, linktype);
     }
     testWalkSymlink(Ꮡt, error (@string target, @string link) => {
         var (outputΔ1, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/" + linktype, link, target).CombinedOutput();
         if (err != default!) {
-            return fmt.Errorf(@"""mklink /%s %v %v"" command failed: %v\n%v"u8, linktype, link, target, err, ((@string)outputΔ1));
+            return fmt.Errorf(@"""mklink /%s %v %v"" command failed: %v\n%v"u8, linktype, link, target, err, (@string)outputΔ1);
         }
         return default!;
     });
@@ -525,8 +557,6 @@ internal static readonly @string fileˢ2 = "-File"u8;
 internal static readonly object skippingTestBecauseˢ = (@string)"skipping test because failed to create VHD: "u8;
 
 internal static slice<byte> createMountPartition(ж<testing.T> Ꮡt, @string vhd, @string args) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExecPath(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ);
     Ꮡt.Cleanup(() => {
         var cmdΔ1 = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ, commandˢ, fmt.Sprintf("Dismount-VHD %q"u8, vhd));
@@ -543,6 +573,7 @@ internal static slice<byte> createMountPartition(ж<testing.T> Ꮡt, @string vhd
             }
         }
     });
+
     @string script = filepath.Join(Ꮡt.TempDir(), testPs1ˢ);
     @string cmd = strings.Join(new @string[]{
         "$ErrorActionPreference = \"Stop\""u8,
@@ -554,6 +585,7 @@ internal static slice<byte> createMountPartition(ж<testing.T> Ꮡt, @string vhd
         "$vol = $part | Format-Volume -FileSystem NTFS"u8,
         args
     }.slice(), "\n"u8);
+
     var err = os.WriteFile(script, slice<byte>(cmd), 438);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -561,7 +593,7 @@ internal static slice<byte> createMountPartition(ж<testing.T> Ꮡt, @string vhd
     (var output, err) = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), powershellˢ, fileˢ2, script).CombinedOutput();
     if (err != default!) {
         // This can happen if Hyper-V is not installed or enabled.
-        Ꮡt.Skip(skippingTestBecauseˢ, err, ((@string)output));
+        Ꮡt.Skip(skippingTestBecauseˢ, err, (@string)output);
     }
     return output;
 }
@@ -584,14 +616,17 @@ public static void TestEvalSymlinksJunctionToVolumeID(ж<testing.T> Ꮡt) {
         Ꮡt.Skip(skippingTestBecauseˢ2);
     }
     Ꮡt.Parallel();
+
     var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains(((@string)output), " /J "u8)) {
+    if (!strings.Contains((@string)output, " /J "u8)) {
         Ꮡt.Skip(skippingTestBecauseˢ3);
     }
+
     @string tmpdir = tempDirCanonical(Ꮡt);
     @string vhd = filepath.Join(tmpdir, testVhdxˢ);
     output = createMountPartition(Ꮡt, vhd, writeHostVolPathˢ);
-    @string vol = ((@string)output);
+    @string vol = (@string)output;
+
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
     (output, var err) = testenv.Command(new filepath_test_package.testing_TжTB(Ꮡt), cmdˢ, "/c"u8, mklinkˢ, "/J", dirlink, vol).CombinedOutput();
     if (err != default!) {
@@ -607,22 +642,23 @@ public static void TestEvalSymlinksJunctionToVolumeID(ж<testing.T> Ꮡt) {
 }
 
 public static void TestEvalSymlinksMountPointRecursion(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Test that EvalSymlinks doesn't follow recursive mount points.
     // See go.dev/issue/40176.
     if (winsymlink.Value() == "0"u8) {
         Ꮡt.Skip(skippingTestBecauseˢ2);
     }
     Ꮡt.Parallel();
+
     @string tmpdir = tempDirCanonical(Ꮡt);
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
     var err = os.Mkdir(dirlink, 493);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     @string vhd = filepath.Join(tmpdir, testVhdxˢ);
     createMountPartition(Ꮡt, vhd, fmt.Sprintf("$part | Add-PartitionAccessPath -AccessPath %q\n"u8, dirlink));
+
     (var got, err) = filepath.EvalSymlinks(dirlink);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -638,21 +674,25 @@ internal static readonly @string filelinkˢ = "filelink"u8;
 
 public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
     var (output, _) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/?").Output();
-    if (!strings.Contains(((@string)output), " /J "u8)) {
+    if (!strings.Contains((@string)output, " /J "u8)) {
         Ꮡt.Skip(skippingTestBecauseˢ3);
     }
+
     @string tmpdir = tempDirCanonical(Ꮡt);
+
     @string vol = filepath.VolumeName(tmpdir);
     (output, var err) = exec.Command(cmdˢ, "/c"u8, mountvolˢ, vol, "/L").CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("failed to run mountvol %v /L: %v %q"u8, vol, err, output);
     }
-    @string target = strings.Trim(((@string)output), " \n\r"u8);
+    @string target = strings.Trim((@string)output, " \n\r"u8);
+
     @string dirlink = filepath.Join(tmpdir, dirlinkˢ);
     (output, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, "/J", dirlink, target).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("failed to run mklink %v %v: %v %q"u8, dirlink, target, err, output);
     }
+
     (var got, err) = filepath.EvalSymlinks(dirlink);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -670,23 +710,29 @@ public static void TestNTNamespaceSymlink(ж<testing.T> Ꮡt) {
     if (got != want) {
         Ꮡt.Errorf(@"EvalSymlinks(%q): got %q, want %q"u8, dirlink, got, want);
     }
+
     // Make sure we have sufficient privilege to run mklink command.
     testenv.MustHaveSymlink(new filepath_test_package.testing_TжTB(Ꮡt));
+
     @string @file = filepath.Join(tmpdir, fileˢ);
     err = os.WriteFile(@file, slice<byte>(""u8), 438);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     target = filepath.Join(target, @file.slice(len(filepath.VolumeName(@file))));
+
     @string filelink = filepath.Join(tmpdir, filelinkˢ);
     (output, err) = exec.Command(cmdˢ, "/c"u8, mklinkˢ, filelink, target).CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("failed to run mklink %v %v: %v %q"u8, filelink, target, err, output);
     }
+
     (got, err) = filepath.EvalSymlinks(filelink);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     if (winreadlinkvolume.Value() == "0"u8){
         want = @file;
     } else {
@@ -716,6 +762,7 @@ public static void TestIssue52476(ж<testing.T> Ꮡt) {
         new(@"\."u8, @"C:"u8, @"\C:"u8),
         new(@"\"u8, @"C:"u8, @"\C:"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         @string got = filepath.Join(test.lhs, test.rhs);
         if (got != test.want) {

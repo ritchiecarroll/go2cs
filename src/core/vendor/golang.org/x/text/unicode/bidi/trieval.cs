@@ -3,6 +3,7 @@ namespace go.vendor.golang.org.x.text.unicode;
 
 partial class bidi_package {
 
+// Class is the Unicode BiDi class. Each rune has a single class.
 partial struct ΔClass /*num:nuint*/;
 
 public static ΔClass L => /* iota */ 0;      // LeftToRight
@@ -20,7 +21,9 @@ public static ΔClass BN => 11;     // BoundaryNeutral
 public static ΔClass NSM => 12;    // NonspacingMark
 public static ΔClass AL => 13;     // ArabicLetter
 public static ΔClass Control => 14; // Control LRO - PDI
+
 internal static ΔClass numClass => 15;
+
 public static ΔClass LRO => 16; // LeftToRightOverride
 public static ΔClass RLO => 17; // RightToLeftOverride
 public static ΔClass LRE => 18; // LeftToRightEmbedding
@@ -30,6 +33,7 @@ public static ΔClass LRI => 21; // LeftToRightIsolate
 public static ΔClass RLI => 22; // RightToLeftIsolate
 public static ΔClass FSI => 23; // FirstStrongIsolate
 public static ΔClass PDI => 24; // PopDirectionalIsolate
+
 internal static ΔClass unknownClass => /* ^Class(0) */ unchecked((ΔClass)18446744073709551615);
 
 // A trie entry has the following bits:

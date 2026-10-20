@@ -42,6 +42,12 @@ using static go.iter_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -50,7 +56,7 @@ using static go.iter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOAB0AOmAAIwABkCAAYSooKCgpSCgpSClIKCgoKCpoKAgpKCpIKUgoKCopKyhIKUgpSCgoKWgpSUppSShIKCgoKWgpSUygACMgAZAgAHFKKCgoKUgoKUgpSCgoKCgqaCgIKSgqSClIKCgoKiksKEgpSClIKCgpaClJSmlJKEgoKCgpaClJTKyg==", "269-303:1;275-288:1.1;290-298:1.2;304-328:2;329-348:3;385-420:1;391-404:1.1;406-414:1.2;421-445:2;446-465:3")]
+[assembly: go.GoPositionMap("iter/iter.go", "iter.cs", "AOoB1AOmAAwwABkCAAASooKCgpSCgpSClIKCgoKCpoKAgpKCpIKUgoKCopKylIKUgpSCgoKmgpSUppSSlIKCgoKmgpSUygANMgAZAgAAFKKCgoKUgoKUgpSCgoKCgqaCgIKSgqSClIKCgoKiksKUgpSClIKCgqaClJSmlJKUgoKCgqaClJTKyg==", "271-305:1;277-290:1.1;292-300:1.2;306-330:2;331-350:3;387-422:1;393-406:1.1;408-416:1.2;423-447:2;448-467:3")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -65,6 +71,8 @@ public static partial class iter_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct Pull2_pull<K, V> {}
+    internal partial struct Pull_pull<V> {}
     internal partial struct coro {}
     // </TypeAccessibility>
 

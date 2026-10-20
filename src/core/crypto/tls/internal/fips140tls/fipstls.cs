@@ -5,9 +5,9 @@
 // Package fips140tls controls whether crypto/tls requires FIPS-approved settings.
 namespace go.crypto.tls.@internal;
 
-using fips140 = go.crypto.@internal.fips140_package;
+using fips140 = go.crypto.fips140_package;
 using atomic = sync.atomic_package;
-using go.crypto.@internal;
+using go.crypto;
 using sync;
 
 partial class fips140tls_package {
@@ -16,7 +16,7 @@ internal static ж<atomic.Bool> Ꮡrequired = new StandardBox<atomic.Bool>(defau
 internal static ref atomic.Bool @required => ref Ꮡrequired.Value;
 
 [GoInit] internal static void init() {
-    if (fips140.Enabled) {
+    if (fips140.Enabled()) {
         Force();
     }
 }

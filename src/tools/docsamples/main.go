@@ -43,11 +43,16 @@
 //
 // usage, from the repository root:
 //
-//	docsamples [-base REF] [-target REF] [-write] [-recite] [-v] [page ...]
+//	docsamples [-base REF] [-target REF] [-goroot DIR] [-write] [-recite] [-v] [page ...]
 //
 // -recite corrects a comment whose lines do not hold its sample: when every run of the sample is in
 // the base file as written, in order, but not inside the cited stretch, the sample is taken where it
 // is and the comment is rewritten to the stretch it spans.
+//
+// -goroot reads a GOROOT/<path> comment from <path> under DIR, the Go toolchain the pages describe
+// (the repository's pinned one). A toolchain is not versioned by the repository's refs, so the file is
+// the same at both refs. Without -goroot such a comment names no file the tool can read, and is refused
+// as missing.
 //
 // REF is a git ref, or WORKTREE for the files on disk. The default for both is HEAD, which rewrites
 // nothing unless a sample has drifted. With no page arguments it reads every tracked page under docs/
@@ -862,7 +867,11 @@ func regenerate(page string, lines []string, base, target fileReader, recite boo
 	return out, outcomes
 }
 
-func gitReader(ref string) fileReader {
+// gorootPrefix marks a comment path in the pinned Go toolchain rather than the repository.
+const gorootPrefix = "GOROOT/"
+
+// gitReader reads a path at ref, and a GOROOT/ path from goroot ("" reads none) at every ref.
+func gitReader(ref, goroot string) fileReader {
 	cache := map[string][]string{}
 	missing := map[string]bool{}
 
@@ -878,7 +887,13 @@ func gitReader(ref string) fileReader {
 		var data []byte
 		var err error
 
-		if ref == "WORKTREE" {
+		if rest, ok := strings.CutPrefix(path, gorootPrefix); ok {
+			if goroot == "" {
+				err = os.ErrNotExist
+			} else {
+				data, err = os.ReadFile(filepath.Join(goroot, filepath.FromSlash(rest)))
+			}
+		} else if ref == "WORKTREE" {
 			data, err = os.ReadFile(filepath.FromSlash(path))
 		} else {
 			data, err = exec.Command("git", "show", ref+":"+path).Output()
@@ -929,10 +944,19 @@ func main() {
 	write := flag.Bool("write", false, "write the regenerated pages; without it the tool only reports")
 	verbose := flag.Bool("v", false, "list every refusal, not only the errors")
 	recite := flag.Bool("recite", false, "take a sample found in its file outside the cited lines, and correct the comment")
+	goroot := flag.String("goroot", "", "the Go toolchain a GOROOT/<path> comment is read from")
 	flag.Parse()
 
 	if *targetRef == "" {
 		*targetRef = *baseRef
+	}
+
+	// A wrong directory would turn every GOROOT/ comment into a quiet "missing" note.
+	if *goroot != "" {
+		if info, err := os.Stat(filepath.Join(*goroot, "src")); err != nil || !info.IsDir() {
+			fmt.Fprintf(os.Stderr, "-goroot %s: not a Go toolchain (no src directory)\n", *goroot)
+			os.Exit(2)
+		}
 	}
 
 	pages := flag.Args()
@@ -946,11 +970,11 @@ func main() {
 		}
 	}
 
-	base := gitReader(*baseRef)
+	base := gitReader(*baseRef, *goroot)
 	target := base
 
 	if *targetRef != *baseRef {
-		target = gitReader(*targetRef)
+		target = gitReader(*targetRef, *goroot)
 	}
 
 	count := map[string]int{}

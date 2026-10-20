@@ -32,7 +32,7 @@ partial struct fileStat {
     // what syscall.GetFileType returns
     internal uint32 filetype;
     // used to implement SameFile
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string path;
     internal uint32 vol;
     internal uint32 idxhi;
@@ -50,8 +50,9 @@ internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationBy
     if (err != default!) {
         return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "GetFileInformationByHandle"u8, Path: path, Err: err))));
     }
+
     ref var reparseTag = ref heap(new uint32(), out var ᏑreparseTag);
-    if ((uint32)(d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+    if ((d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         ref var ti = ref heap(new windows.FILE_ATTRIBUTE_TAG_INFO(), out var Ꮡti);
         err = windows.GetFileInformationByHandleEx(h, windows.FileAttributeTagInfo, Ꮡti.Reinterpret<windows.FILE_ATTRIBUTE_TAG_INFO, byte>(), (uint32)/* unsafe.Sizeof(ti) */ (uintptr)8);
         if (err != default!) {
@@ -59,6 +60,7 @@ internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationBy
         }
         reparseTag = ti.ReparseTag;
     }
+
     return (Ꮡ(new fileStat(
         name: filepathlite.Base(path),
         FileAttributes: d.FileAttributes,
@@ -71,12 +73,11 @@ internal static (ж<fileStat> fs, error err) newFileStatFromGetFileInformationBy
         idxhi: d.FileIndexHigh,
         idxlo: d.FileIndexLow,
         ReparseTag: reparseTag
+        // fileStat.path is used by os.SameFile to decide if it needs
+        // to fetch vol, idxhi and idxlo. But these are already set,
+        // so set fileStat.path to "" to prevent os.SameFile doing it again.
     )), default!);
 }
-
-// fileStat.path is used by os.SameFile to decide if it needs
-// to fetch vol, idxhi and idxlo. But these are already set,
-// so set fileStat.path to "" to prevent os.SameFile doing it again.
 
 // newFileStatFromWin32FileAttributeData copies all required information
 // from syscall.Win32FileAttributeData d into the newly created fileStat.
@@ -105,10 +106,10 @@ internal static ж<fileStat> newFileStatFromFileIDBothDirInfo(ж<windows.FILE_ID
         CreationTime: d.CreationTime,
         LastAccessTime: d.LastAccessTime,
         LastWriteTime: d.LastWriteTime,
-        FileSizeHigh: (uint32)((d.EndOfFile >> (int)(32))),
+        FileSizeHigh: (uint32)(d.EndOfFile >> 32),
         FileSizeLow: (uint32)d.EndOfFile,
         ReparseTag: d.EaSize,
-        idxhi: (uint32)((d.FileID >> (int)(32))),
+        idxhi: (uint32)(d.FileID >> 32),
         idxlo: (uint32)d.FileID
     ));
 }
@@ -123,7 +124,7 @@ internal static ж<fileStat> newFileStatFromFileFullDirInfo(ж<windows.FILE_FULL
         CreationTime: d.CreationTime,
         LastAccessTime: d.LastAccessTime,
         LastWriteTime: d.LastWriteTime,
-        FileSizeHigh: (uint32)((d.EndOfFile >> (int)(32))),
+        FileSizeHigh: (uint32)(d.EndOfFile >> 32),
         FileSizeLow: (uint32)d.EndOfFile,
         ReparseTag: d.EaSize
     ));
@@ -140,7 +141,7 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ref syscall.Win32findd
         FileSizeHigh: d.FileSizeHigh,
         FileSizeLow: d.FileSizeLow
     ));
-    if ((uint32)(d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+    if ((d.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         // Per https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-win32_find_dataw:
         // “If the dwFileAttributes member includes the FILE_ATTRIBUTE_REPARSE_POINT
         // attribute, this member specifies the reparse point tag. Otherwise, this
@@ -157,11 +158,11 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ref syscall.Win32findd
 // and https://learn.microsoft.com/en-us/windows/win32/fileio/reparse-point-tags.
 internal static bool isReparseTagNameSurrogate(this ref fileStat fs) {
     // True for IO_REPARSE_TAG_SYMLINK and IO_REPARSE_TAG_MOUNT_POINT.
-    return (uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0 && (uint32)(fs.ReparseTag & 0x20000000) != 0;
+    return (fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0 && (fs.ReparseTag & 0x20000000) != 0;
 }
 
 internal static int64 Size(this ref fileStat fs) {
-    return ((int64)fs.FileSizeHigh << (int)(32)) + (int64)fs.FileSizeLow;
+    return ((int64)fs.FileSizeHigh << 32) + (int64)fs.FileSizeLow;
 }
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink"u8);
@@ -181,11 +182,12 @@ internal static FileMode Mode(this ref fileStat fs) {
 internal static FileMode /*m*/ mode(this ref fileStat fs) {
     FileMode m = default!;
 
-    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
         m |= (FileMode)(292);
     } else {
         m |= (FileMode)(438);
     }
+
     // Windows reports the FILE_ATTRIBUTE_DIRECTORY bit for reparse points
     // that refer to directories, such as symlinks and mount points.
     // However, we follow symlink POSIX semantics and do not set the mode bits.
@@ -196,9 +198,10 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
     // the same way for consistency. Also, mount points can contain infinite
     // loops, so it is not safe to walk them without special handling.
     if (!fs.isReparseTagNameSurrogate()) {
-        if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
             m |= (fs.FileMode)((fs.FileMode)(ModeDir | 73));
         }
+
         var exprᴛ1 = fs.filetype;
         if (exprᴛ1 == syscall.FILE_TYPE_PIPE) {
             m |= (fs.FileMode)(ModeNamedPipe);
@@ -206,9 +209,9 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
         else if (exprᴛ1 == syscall.FILE_TYPE_CHAR) {
             m |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
         }
-
     }
-    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         var exprᴛ2 = fs.ReparseTag;
         if (exprᴛ2 == syscall.IO_REPARSE_TAG_SYMLINK) {
             m |= (fs.FileMode)(ModeSymlink);
@@ -217,25 +220,24 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
             m |= (fs.FileMode)(ModeSocket);
         }
         else if (exprᴛ2 == windows.IO_REPARSE_TAG_DEDUP) {
+            // If the Data Deduplication service is enabled on Windows Server, its
+            // Optimization job may convert regular files to IO_REPARSE_TAG_DEDUP
+            // whenever that job runs.
+            //
+            // However, DEDUP reparse points remain similar in most respects to
+            // regular files: they continue to support random-access reads and writes
+            // of persistent data, and they shouldn't add unexpected latency or
+            // unavailability in the way that a network filesystem might.
+            //
+            // Go programs may use ModeIrregular to filter out unusual files (such as
+            // raw device files on Linux, POSIX FIFO special files, and so on), so
+            // to avoid files changing unpredictably from regular to irregular we will
+            // consider DEDUP files to be close enough to regular to treat as such.
         }
         else { /* default: */
             m |= (fs.FileMode)(ModeIrregular);
         }
-
     }
-    // If the Data Deduplication service is enabled on Windows Server, its
-    // Optimization job may convert regular files to IO_REPARSE_TAG_DEDUP
-    // whenever that job runs.
-    //
-    // However, DEDUP reparse points remain similar in most respects to
-    // regular files: they continue to support random-access reads and writes
-    // of persistent data, and they shouldn't add unexpected latency or
-    // unavailability in the way that a network filesystem might.
-    //
-    // Go programs may use ModeIrregular to filter out unusual files (such as
-    // raw device files on Linux, POSIX FIFO special files, and so on), so
-    // to avoid files changing unpredictably from regular to irregular we will
-    // consider DEDUP files to be close enough to regular to treat as such.
     return m;
 }
 
@@ -246,7 +248,7 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
 internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     FileMode m = default!;
 
-    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0){
         m |= (FileMode)(292);
     } else {
         m |= (FileMode)(438);
@@ -254,7 +256,7 @@ internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     if (fs.ReparseTag == syscall.IO_REPARSE_TAG_SYMLINK || fs.ReparseTag == windows.IO_REPARSE_TAG_MOUNT_POINT) {
         return (FileMode)(m | ModeSymlink);
     }
-    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_DIRECTORY) != 0) {
         m |= (fs.FileMode)((fs.FileMode)(ModeDir | 73));
     }
     var exprᴛ1 = fs.filetype;
@@ -264,15 +266,14 @@ internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     else if (exprᴛ1 == syscall.FILE_TYPE_CHAR) {
         m |= (fs.FileMode)((fs.FileMode)(ModeDevice | ModeCharDevice));
     }
-
-    if ((uint32)(fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
+    if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0) {
         if (fs.ReparseTag == windows.IO_REPARSE_TAG_AF_UNIX) {
             m |= (fs.FileMode)(ModeSocket);
         }
         if ((FileMode)(m & ModeType) == 0) {
             if (fs.ReparseTag == windows.IO_REPARSE_TAG_DEDUP){
-            } else {
                 // See comment in fs.Mode.
+            } else {
                 m |= (fs.FileMode)(ModeIrregular);
             }
         }
@@ -317,6 +318,7 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
         if (err != default!) {
             return err;
         }
+
         // Per https://learn.microsoft.com/en-us/windows/win32/fileio/reparse-points-and-file-operations,
         // “Applications that use the CreateFile function should specify the
         // FILE_FLAG_OPEN_REPARSE_POINT flag when opening the file if it is a reparse
@@ -332,6 +334,7 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
         // resolved when the fileStat was created, so we don't need to worry about
         // resolving symlink reparse points again here.
         var attrs = (uint32)((uint32)((uint32)syscall.FILE_FLAG_BACKUP_SEMANTICS | (uint32)syscall.FILE_FLAG_OPEN_REPARSE_POINT));
+
         (var h, err) = syscall.CreateFile(pathp, 0, 0, nil, syscall.OPEN_EXISTING, attrs, 0);
         if (err != default!) {
             return err;

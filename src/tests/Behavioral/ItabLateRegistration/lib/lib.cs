@@ -40,26 +40,27 @@ partial struct Blank {
     public nint N;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string blankˢ = "blank"u8;
-
 public static @string Tag(this Blank b) {
-    return blankˢ;
+    return "blank";
 }
 
 public static (@string, bool) TryName(any v) {
     var (n, ok) = v._<Named>(ᐧ);
+
     if (!ok) {
         return ("-", false);
     }
+
     return (n.Name(), true);
 }
 
 public static (nint, bool) TrySize(any v) {
     var (s, ok) = v._<Sized>(ᐧ);
+
     if (!ok) {
         return (-1, false);
     }
+
     return (s.Size(), true);
 }
 

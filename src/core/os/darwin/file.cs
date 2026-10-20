@@ -50,6 +50,7 @@ using testlog = @internal.testlog_package;
 using Δio = io_package;
 using fs = go.io.fs_package;
 using runtime = runtime_package;
+using slices = slices_package;
 using syscall = syscall_package;
 using time = time_package;
 using @unsafe = unsafe_package;
@@ -74,38 +75,29 @@ public static @string Name(this ref File f) {
 // to a file opened later.
 public static ж<File> Stdin;
 internal static void initᴛStdin() { Stdin = NewFile((uintptr)syscall.Stdin, "/dev/stdin"u8); }
-
 public static ж<File> Stdout;
 internal static void initᴛStdout() { Stdout = NewFile((uintptr)syscall.Stdout, "/dev/stdout"u8); }
-
 public static ж<File> Stderr;
 internal static void initᴛStderr() { Stderr = NewFile((uintptr)syscall.Stderr, "/dev/stderr"u8); }
 
 // Flags to OpenFile wrapping those of the underlying system. Not all
 // flags may be implemented on a given system.
+// Exactly one of O_RDONLY, O_WRONLY, or O_RDWR must be specified.
 public const nint O_RDONLY = /* syscall.O_RDONLY */ 0;             // open the file read-only.
-
 public const nint O_WRONLY = /* syscall.O_WRONLY */ 1;             // open the file write-only.
-
 public const nint O_RDWR = /* syscall.O_RDWR */ 2;               // open the file read-write.
-
+// The remaining values may be or'ed in to control behavior.
 public const nint O_APPEND = /* syscall.O_APPEND */ 8;             // append data to the file when writing.
-
 public const nint O_CREATE = /* syscall.O_CREAT */ 512;             // create a new file if none exists.
-
 public const nint O_EXCL = /* syscall.O_EXCL */ 2048;               // used with O_CREATE, file must not exist.
-
 public const nint O_SYNC = /* syscall.O_SYNC */ 128;               // open for synchronous I/O.
-
 public const nint O_TRUNC = /* syscall.O_TRUNC */ 1024;              // truncate regular writable file when opened.
 
 // Seek whence values.
 //
 // Deprecated: Use io.SeekStart, io.SeekCurrent, and io.SeekEnd.
 public const nint SEEK_SET = 0; // seek relative to the origin of the file
-
 public const nint SEEK_CUR = 1; // seek relative to the current offset
-
 public const nint SEEK_END = 2; // seek relative to the end
 
 // LinkError records an error during a link or symlink or rename
@@ -125,6 +117,25 @@ public static error Unwrap(this ref LinkError e) {
     return e.Err;
 }
 
+// NewFile returns a new [File] with the given file descriptor and name.
+// The returned value will be nil if fd is not a valid file descriptor.
+//
+// NewFile's behavior differs on some platforms:
+//
+//   - On Unix, if fd is in non-blocking mode, NewFile will attempt to return a pollable file.
+//   - On Windows, if fd is opened for asynchronous I/O (that is, [syscall.FILE_FLAG_OVERLAPPED]
+//     has been specified in the [syscall.CreateFile] call), NewFile will attempt to return a pollable
+//     file by associating fd with the Go runtime I/O completion port.
+//     The I/O operations will be performed synchronously if the association fails.
+//
+// Only pollable files support [File.SetDeadline], [File.SetReadDeadline], and [File.SetWriteDeadline].
+//
+// After passing it to NewFile, fd may become invalid under the same conditions described
+// in the comments of [File.Fd], and the same constraints apply.
+public static ж<File> NewFile(uintptr fd, @string name) {
+    return newFileFromNewFile(fd, name);
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string readˢ = "read"u8;
 
@@ -133,8 +144,8 @@ internal static readonly @string readˢ = "read"u8;
 // At end of file, Read returns 0, io.EOF.
 public static (nint n, error err) Read(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -154,16 +165,18 @@ internal static readonly @string negativeOffsetˢ = "negative offset"u8;
 public static (nint n, error err) ReadAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
         }
     }
+
     if (off < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readat"u8, Path: f.name, Err: errors.New(negativeOffsetˢ)))));
     }
+
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pread(b, off);
         if (e != default!) {
@@ -183,8 +196,8 @@ internal static readonly @string writeˢ = "write"u8;
 // ReadFrom implements io.ReaderFrom.
 public static (int64 n, error err) ReadFrom(this ж<File> Ꮡf, Δio.Reader r) {
     int64 n = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -212,8 +225,8 @@ internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1
 // than ReadFrom. This is used to permit ReadFrom to call io.Copy
 // without leading to a recursive call to ReadFrom.
 partial struct fileWithoutReadFrom {
-    internal partial ref noReadFrom noReadFrom { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ internal noReadFrom noReadFrom;
+    /*embed*/ public ж<File> File;
 }
 
 internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
@@ -226,8 +239,8 @@ internal static (int64, error) genericReadFrom(ж<File> Ꮡf, Δio.Reader r) {
 public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     nint n = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -240,10 +253,13 @@ public static (nint n, error err) Write(this ж<File> Ꮡf, slice<byte> b) {
     if (n != len(b)) {
         err = Δio.ErrShortWrite;
     }
+
     epipecheck(ref (Ꮡf).DerefOrNull(), e);
+
     if (e != default!) {
         err = f.wrapErr(writeˢ, e);
     }
+
     return (n, err);
 }
 
@@ -253,12 +269,12 @@ internal static error errWriteAtInAppendMode = errors.New("os: invalid use of Wr
 // It returns the number of bytes written and an error, if any.
 // WriteAt returns a non-nil error when n != len(b).
 //
-// If file was opened with the O_APPEND flag, WriteAt returns an error.
+// If file was opened with the [O_APPEND] flag, WriteAt returns an error.
 public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default!;
     error err = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(writeˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -267,9 +283,11 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
     if (f.appendMode) {
         return (0, errWriteAtInAppendMode);
     }
+
     if (off < 0) {
         return (0, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "writeat"u8, Path: f.name, Err: errors.New(negativeOffsetˢ)))));
     }
+
     while (len(b) > 0) {
         var (m, e) = Ꮡf.pwrite(b, off);
         if (e != default!) {
@@ -286,8 +304,8 @@ public static (nint n, error err) WriteAt(this ж<File> Ꮡf, slice<byte> b, int
 // WriteTo implements io.WriterTo.
 public static (int64 n, error err) WriteTo(this ж<File> Ꮡf, Δio.Writer w) {
     int64 n = default!;
-
     ref var f = ref Ꮡf.DerefOrNull();
+
     {
         var errΔ1 = Ꮡf.checkValid(readˢ); if (errΔ1 != default!) {
             return (0, errΔ1);
@@ -315,8 +333,8 @@ internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) 
 // than WriteTo. This is used to permit WriteTo to call io.Copy
 // without leading to a recursive call to WriteTo.
 partial struct fileWithoutWriteTo {
-    internal partial ref noWriteTo noWriteTo { get; }
-    public partial ref ж<File> File { get; }
+    /*embed*/ internal noWriteTo noWriteTo;
+    /*embed*/ public ж<File> File;
 }
 
 internal static (int64, error) genericWriteTo(ж<File> Ꮡf, Δio.Writer w) {
@@ -330,7 +348,7 @@ internal static readonly @string seekˢ = "seek"u8;
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-// The behavior of Seek on a file opened with O_APPEND is not specified.
+// The behavior of Seek on a file opened with [O_APPEND] is not specified.
 public static (int64 ret, error err) Seek(this ж<File> Ꮡf, int64 offset, nint whence) {
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -358,21 +376,25 @@ public static (nint n, error err) WriteString(this ж<File> Ꮡf, @string s) {
 
 // Mkdir creates a new directory with the specified name and permission
 // bits (before umask).
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Mkdir(@string name, FileMode perm) {
     @string longName = fixLongPath(name);
     var e = ignoringEINTR(() => syscall.Mkdir(longName, syscallMode(perm)));
+
     if (e != default!) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdir"u8, Path: name, Err: e)));
     }
+
     // mkdir(2) itself won't handle the sticky bit on *BSD and Solaris
     if (!supportsCreateWithStickyBit && (FileMode)(perm & ModeSticky) != 0) {
         e = setStickyBit(name);
+
         if (e != default!) {
             Remove(name);
             return e;
         }
     }
+
     return default!;
 }
 
@@ -386,7 +408,7 @@ internal static error setStickyBit(@string name) {
 }
 
 // Chdir changes the current working directory to the named directory.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Chdir(@string dir) {
     {
         var e = syscall.Chdir(dir); if (e != default!) {
@@ -417,8 +439,8 @@ public static error Chdir(@string dir) {
 
 // Open opens the named file for reading. If successful, methods on
 // the returned file can be used for reading; the associated file
-// descriptor has mode O_RDONLY.
-// If there is an error, it will be of type *PathError.
+// descriptor has mode [O_RDONLY].
+// If there is an error, it will be of type [*PathError].
 public static (ж<File>, error) Open(@string name) {
     return OpenFile(name, O_RDONLY, 0);
 }
@@ -426,27 +448,28 @@ public static (ж<File>, error) Open(@string name) {
 // Create creates or truncates the named file. If the file already exists,
 // it is truncated. If the file does not exist, it is created with mode 0o666
 // (before umask). If successful, methods on the returned File can
-// be used for I/O; the associated file descriptor has mode O_RDWR.
+// be used for I/O; the associated file descriptor has mode [O_RDWR].
 // The directory containing the file must already exist.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static (ж<File>, error) Create(@string name) {
     return OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_TRUNC), 438);
 }
 
 // OpenFile is the generalized open call; most users will use Open
 // or Create instead. It opens the named file with specified flag
-// (O_RDONLY etc.). If the file does not exist, and the O_CREATE flag
+// ([O_RDONLY] etc.). If the file does not exist, and the [O_CREATE] flag
 // is passed, it is created with mode perm (before umask);
 // the containing directory must exist. If successful,
 // methods on the returned File can be used for I/O.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static (ж<File>, error) OpenFile(@string name, nint flag, FileMode perm) {
     testlog.Open(name);
     var (f, err) = openFileNolog(name, flag, perm);
     if (err != default!) {
         return (default!, err);
     }
-    f.Value.appendMode = (nint)(flag & O_APPEND) != 0;
+    f.Value.appendMode = (flag & O_APPEND) != 0;
+
     return (f, default!);
 }
 
@@ -460,10 +483,6 @@ internal static (ж<File>, error) openDir(@string name) {
     return openDirNolog(name);
 }
 
-// lstat is overridden in tests.
-internal static ж<Func<@string, (FileInfo, error)>> Ꮡlstat = new StandardBox<Func<@string, (FileInfo, error)>>(Lstat);
-internal static ref Func<@string, (FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;
-
 // Rename renames (moves) oldpath to newpath.
 // If newpath already exists and is not a directory, Rename replaces it.
 // If newpath already exists and is a directory, Rename returns an error.
@@ -475,7 +494,7 @@ public static error Rename(@string oldpath, @string newpath) {
 }
 
 // Readlink returns the destination of the named symbolic link.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 //
 // If the link destination is relative, Readlink returns the relative path
 // without resolving it to an absolute one.
@@ -551,6 +570,7 @@ internal static readonly @string pathInXdgCacheHomeIsˢ = "path in $XDG_CACHE_HO
 // the path in $XDG_CACHE_HOME is relative, then it will return an error.
 public static (@string, error) UserCacheDir() {
     @string dir = default!;
+
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "windows"u8) {
         dir = Getenv(localAppDataˢ);
@@ -572,10 +592,9 @@ public static (@string, error) UserCacheDir() {
         }
         dir += "/lib/cache"u8;
     }
-    else { /* default: */
+    else { /* default: */ // Unix
         dir = Getenv(xdgCacheHomeˢ);
         if (dir == ""u8){
-            // Unix
             dir = Getenv(homeˢ);
             if (dir == ""u8) {
                 return ("", errors.New(neitherXdgCacheHomeNorˢ));
@@ -612,6 +631,7 @@ internal static readonly @string pathInXdgConfigHomeIsˢ = "path in $XDG_CONFIG_
 // the path in $XDG_CONFIG_HOME is relative, then it will return an error.
 public static (@string, error) UserConfigDir() {
     @string dir = default!;
+
     var exprᴛ1 = runtime.GOOS;
     if (exprᴛ1 == "windows"u8) {
         dir = Getenv(appDataˢ);
@@ -633,10 +653,9 @@ public static (@string, error) UserConfigDir() {
         }
         dir += "/lib"u8;
     }
-    else { /* default: */
+    else { /* default: */ // Unix
         dir = Getenv(xdgConfigHomeˢ);
         if (dir == ""u8){
-            // Unix
             dir = Getenv(homeˢ);
             if (dir == ""u8) {
                 return ("", errors.New(neitherXdgConfigHomeNorˢ));
@@ -676,13 +695,12 @@ public static (@string, error) UserHomeDir() {
     else if (exprᴛ1 == "plan9"u8) {
         (env, enverr) = (homeˢ2, homeˢ4);
     }
-
     {
         @string v = Getenv(env); if (v != ""u8) {
             return (v, default!);
         }
     }
-    // On some geese the home directory is not always defined.
+    // On some operating systems the home directory is not always defined.
     var exprᴛ2 = runtime.GOOS;
     if (exprᴛ2 == "android"u8) {
         return (sdcardˢ, default!);
@@ -690,19 +708,18 @@ public static (@string, error) UserHomeDir() {
     if (exprᴛ2 == "ios"u8) {
         return ("/", default!);
     }
-
     return ("", errors.New(enverr + " is not defined"u8));
 }
 
 // Chmod changes the mode of the named file to mode.
 // If the file is a symbolic link, it changes the mode of the link's target.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 //
 // A different subset of the mode bits are used, depending on the
 // operating system.
 //
-// On Unix, the mode's permission bits, ModeSetuid, ModeSetgid, and
-// ModeSticky are used.
+// On Unix, the mode's permission bits, [ModeSetuid], [ModeSetgid], and
+// [ModeSticky] are used.
 //
 // On Windows, only the 0o200 bit (owner writable) of mode is used; it
 // controls whether the file's read-only attribute is set or cleared.
@@ -710,14 +727,14 @@ public static (@string, error) UserHomeDir() {
 // and earlier, use a non-zero mode. Use mode 0o400 for a read-only
 // file and 0o600 for a readable+writable file.
 //
-// On Plan 9, the mode's permission bits, ModeAppend, ModeExclusive,
-// and ModeTemporary are used.
+// On Plan 9, the mode's permission bits, [ModeAppend], [ModeExclusive],
+// and [ModeTemporary] are used.
 public static error Chmod(@string name, FileMode mode) {
     return chmod(name, mode);
 }
 
 // Chmod changes the mode of the file to mode.
-// If there is an error, it will be of type *PathError.
+// If there is an error, it will be of type [*PathError].
 public static error Chmod(this ж<File> Ꮡf, FileMode mode) {
     return Ꮡf.chmod(mode);
 }
@@ -783,6 +800,27 @@ public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
     return (new rawConnжRawConn(ᴛ1), ᴛ2);
 }
 
+// Fd returns the system file descriptor or handle referencing the open file.
+// If f is closed, the descriptor becomes invalid.
+// If f is garbage collected, a finalizer may close the descriptor,
+// making it invalid; see [runtime.SetFinalizer] for more information on when
+// a finalizer might be run.
+//
+// Do not close the returned descriptor; that could cause a later
+// close of f to close an unrelated descriptor.
+//
+// Fd's behavior differs on some platforms:
+//
+//   - On Unix and Windows, [File.SetDeadline] methods will stop working.
+//   - On Windows, the file descriptor will be disassociated from the
+//     Go runtime I/O completion port if there are no concurrent I/O
+//     operations on the file.
+//
+// For most uses prefer the f.SyscallConn method.
+public static uintptr Fd(this ж<File> Ꮡf) {
+    return Ꮡf.fd();
+}
+
 // DirFS returns a file system (an fs.FS) for the tree of files rooted at the directory dir.
 //
 // Note that DirFS("/prefix") only guarantees that the Open calls it makes to the
@@ -798,11 +836,19 @@ public static (syscall.RawConn, error) SyscallConn(this ж<File> Ꮡf) {
 //
 // The directory dir must not be "".
 //
-// The result implements [io/fs.StatFS], [io/fs.ReadFileFS] and
-// [io/fs.ReadDirFS].
+// The result implements [io/fs.StatFS], [io/fs.ReadFileFS], [io/fs.ReadDirFS], and
+// [io/fs.ReadLinkFS].
 public static fs.FS DirFS(@string dir) {
     return ((dirFS)dir);
 }
+
+internal static fs.StatFS _ᴛ1ʗ = ((dirFS)(@string)""u8);
+
+internal static fs.ReadFileFS _ᴛ2ʗ = ((dirFS)(@string)""u8);
+
+internal static fs.ReadDirFS _ᴛ3ʗ = ((dirFS)(@string)""u8);
+
+internal static fs.ReadLinkFS _ᴛ4ʗ = ((dirFS)(@string)""u8);
 
 partial struct dirFS /*@string*/;
 
@@ -879,6 +925,28 @@ internal static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
     return (f, default!);
 }
 
+internal static (fs.FileInfo, error) Lstat(this dirFS dir, @string name) {
+    var (fullname, err) = dir.join(name);
+    if (err != default!) {
+        return (default!, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat"u8, Path: name, Err: err))));
+    }
+    (var f, err) = Lstat(fullname);
+    if (err != default!) {
+        // See comment in dirFS.Open.
+        err._<ж<PathError>>().Value.Path = name;
+        return (default!, err);
+    }
+    return (f, default!);
+}
+
+internal static (@string, error) ReadLink(this dirFS dir, @string name) {
+    var (fullname, err) = dir.join(name);
+    if (err != default!) {
+        return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink"u8, Path: name, Err: err))));
+    }
+    return Readlink(fullname);
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string osDirFSWithEmptyRootˢ = "os: DirFS with empty root"u8;
 
@@ -910,33 +978,50 @@ public static (slice<byte>, error) ReadFile(@string name) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
-        return readFileContents(f);
+
+        return readFileContents(statOrZero(f), f.Read);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
-    nint size = default!;
+internal static int64 statOrZero(ж<File> Ꮡf) {
     {
-        var (info, err) = Ꮡf.Stat(); if (err == default!) {
-            var size64 = info.Size();
-            if ((int64)(nint)size64 == size64) {
-                size = (nint)size64;
-            }
+        var (fi, err) = Ꮡf.Stat(); if (err == default!) {
+            return fi.Size();
         }
     }
-    size++; // one byte for final read at EOF
-    // If a file claims a small size, read at least 512 bytes.
-    // In particular, files in Linux's /proc claim size 0 but
-    // then do not work right if read in small pieces,
-    // so an initial read of 1 byte would not work correctly.
-    if (size < 512) {
-        size = 512;
+    return 0;
+}
+
+// readFileContents reads the contents of a file using the provided read function
+// (*os.File.Read, except in tests) one or more times, until an error is seen.
+//
+// The provided size is the stat size of the file, which might be 0 for a
+// /proc-like file that doesn't report a size.
+internal static (slice<byte>, error) readFileContents(int64 statSize, Func<slice<byte>, (nint, error)> read) {
+    var zeroSize = statSize == 0;
+
+    // Figure out how big to make the initial slice. For files with known size
+    // that fit in memory, use that size + 1. Otherwise, use a small buffer and
+    // we'll grow.
+    nint size = default!;
+    if ((int64)(nint)statSize == statSize) {
+        size = (nint)statSize;
     }
+    size++; // one byte for final read at EOF
+
+    const nint minBuf = 512;
+    // If a file claims a small size, read at least 512 bytes. In particular,
+    // files in Linux's /proc claim size 0 but then do not work right if read in
+    // small pieces, so an initial read of 1 byte would not work correctly.
+    if (size < minBuf) {
+        size = minBuf;
+    }
+
     var data = new slice<byte>(0, size);
     while (ᐧ) {
-        var (n, err) = Ꮡf.Read(data.slice(len(data), cap(data)));
+        var (n, err) = read(data.slice(len(data), cap(data)));
         data = data.slice(0, len(data) + n);
         if (err != default!) {
             if (AreEqual(err, Δio.EOF)) {
@@ -944,9 +1029,13 @@ internal static (slice<byte>, error) readFileContents(ж<File> Ꮡf) {
             }
             return (data, err);
         }
-        if (len(data) >= cap(data)) {
-            var d = append(data.slice(0, cap(data)), (byte)(0));
-            data = d.slice(0, len(data));
+
+        // If we're either out of capacity or if the file was a /proc-like zero
+        // sized file, grow the buffer. Per Issue 72080, we always want to issue
+        // Read calls on zero-length files with a non-tiny buffer size.
+        nint capRemain = cap(data) - len(data);
+        if (capRemain == 0 || (zeroSize && capRemain < minBuf)) {
+            data = slices.Grow<slice<byte>, byte>(data, minBuf);
         }
     }
 }

@@ -11,14 +11,6 @@ using static go.math.big_package;
 
 partial class big_internal_test_package {
 
-// invalid inputs
-// invalid inputs with separators
-// (smoke tests only - a comprehensive set of tests is in natconv_test.go)
-// separators are not permitted for bases != 0
-// valid inputs
-// valid input with separators
-// (smoke tests only - a comprehensive set of tests is in natconv_test.go)
-
 partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string @in;
     internal @string @out;
@@ -27,6 +19,7 @@ partial struct stringTestsᴛ1 /*dyn*/ {
     internal bool ok;
 }
 internal static slice<stringTestsᴛ1> stringTests = new stringTestsᴛ1[]{
+    // invalid inputs
     new(@in: ""u8),
     new(@in: "a"u8),
     new(@in: "z"u8),
@@ -42,13 +35,18 @@ internal static slice<stringTestsᴛ1> stringTests = new stringTestsᴛ1[]{
     new(@in: "8"u8, @base: 8),
     new(@in: "0xg"u8, @base: 0),
     new(@in: "g"u8, @base: 16),
+
+    // invalid inputs with separators
+    // (smoke tests only - a comprehensive set of tests is in natconv_test.go)
     new(@in: "_"u8),
     new(@in: "0_"u8),
     new(@in: "_0"u8),
     new(@in: "-1__0"u8),
     new(@in: "0x10_"u8),
-    new(@in: "1_000"u8, @base: 10),
+    new(@in: "1_000"u8, @base: 10), // separators are not permitted for bases != 0
     new(@in: "d_e_a_d"u8, @base: 16),
+
+    // valid inputs
     new("0"u8, "0"u8, 0, 0, true),
     new("0"u8, "0"u8, 10, 0, true),
     new("0"u8, "0"u8, 16, 0, true),
@@ -81,6 +79,9 @@ internal static slice<stringTestsᴛ1> stringTests = new stringTestsᴛ1[]{
     new("A"u8, "A"u8, 37, 36, true),
     new("ABCXYZ"u8, "abcxyz"u8, 36, 623741435, true),
     new("ABCXYZ"u8, "ABCXYZ"u8, 62, 33536793425L, true),
+
+    // valid input with separators
+    // (smoke tests only - a comprehensive set of tests is in natconv_test.go)
     new("1_000"u8, "1000"u8, 0, 1000, true),
     new("0b_1010"u8, "10"u8, 0, 10, true),
     new("+0o_660"u8, "432"u8, 0, 432, true),
@@ -93,15 +94,18 @@ public static void TestIntText(ж<testing.T> Ꮡt) {
         if (!test.ok) {
             continue;
         }
+
         var (_, ok) = z.SetString(test.@in, test.@base);
         if (!ok) {
             Ꮡt.Errorf("%v: failed to parse"u8, test);
             continue;
         }
+
         nint @base = test.@base;
         if (@base == 0) {
             @base = 10;
         }
+
         {
             @string got = z.Text(@base); if (got != test.@out) {
                 Ꮡt.Errorf("%v: got %s; want %s"u8, test, got, test.@out);
@@ -117,19 +121,22 @@ public static void TestAppendText(ж<testing.T> Ꮡt) {
         if (!test.ok) {
             continue;
         }
+
         var (_, ok) = z.SetString(test.@in, test.@base);
         if (!ok) {
             Ꮡt.Errorf("%v: failed to parse"u8, test);
             continue;
         }
+
         nint @base = test.@base;
         if (@base == 0) {
             @base = 10;
         }
+
         nint i = len(buf);
         buf = z.Append(buf, @base);
         {
-            @string got = ((@string)(buf.slice(i))); if (got != test.@out) {
+            @string got = (@string)(buf.slice(i)); if (got != test.@out) {
                 Ꮡt.Errorf("%v: got %s; want %s"u8, test, got, test.@out);
             }
         }
@@ -147,7 +154,6 @@ internal static @string format(nint @base) {
     case 16: {
         return "%x"u8;
     }}
-
     return "%d"u8;
 }
 
@@ -158,6 +164,7 @@ public static void TestGetString(ж<testing.T> Ꮡt) {
             continue;
         }
         z.SetInt64(test.val);
+
         if (test.@base == 10) {
             {
                 @string gotΔ1 = z.String(); if (gotΔ1 != test.@out) {
@@ -165,6 +172,7 @@ public static void TestGetString(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         @string f = format(test.@base);
         @string got = fmt.Sprintf(f, z.OrTypedNil());
         if (f == "%d"u8){
@@ -206,12 +214,14 @@ public static void TestSetString(ж<testing.T> Ꮡt) {
             }
             continue;
         }
+
         if (ok1 && !isNormalized(n1)) {
             Ꮡt.Errorf("#%d (input '%s'): %v is not normalized"u8, i, test.@in, n1.Value);
         }
         if (ok2 && !isNormalized(n2)) {
             Ꮡt.Errorf("#%d (input '%s'): %v is not normalized"u8, i, test.@in, n2.Value);
         }
+
         if (n1.Cmp(expected) != 0) {
             Ꮡt.Errorf("#%d (input '%s') got: %s want: %d"u8, i, test.@in, n1.OrTypedNil(), test.val);
         }
@@ -220,8 +230,6 @@ public static void TestSetString(ж<testing.T> Ꮡt) {
         }
     }
 }
-
-// 2**24 - 1
 
 partial struct formatTestsᴛ1 /*dyn*/ {
     internal @string input;
@@ -357,7 +365,7 @@ internal static slice<formatTestsᴛ1> formatTests = new formatTestsᴛ1[]{
     new("-1234"u8, "%-8.6d"u8, "-001234 "u8),
     new("-1234"u8, "%-8.7d"u8, "-0001234"u8),
     new("-1234"u8, "%-8.8d"u8, "-00001234"u8),
-    new("16777215"u8, "%b"u8, "111111111111111111111111"u8),
+    new("16777215"u8, "%b"u8, "111111111111111111111111"u8), // 2**24 - 1
     new("0"u8, "%.d"u8, ""u8),
     new("0"u8, "%.0d"u8, ""u8),
     new("0"u8, "%3.d"u8, ""u8)
@@ -379,7 +387,6 @@ public static void TestFormat(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct scanTestsᴛ1 /*dyn*/ {
     internal @string input;

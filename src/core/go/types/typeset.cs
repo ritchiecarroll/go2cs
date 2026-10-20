@@ -6,10 +6,10 @@
 namespace go.go;
 
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 using slices = slices_package;
 using strings = strings_package;
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -53,7 +53,7 @@ internal static bool IsComparable(this ref _TypeSet s, map<ΔType, bool> seen) {
         return s.comparable;
     }
     var seenʗ1 = seen;
-    return s.@is((ж<Δterm> t) => t != nil && comparableType((~t).typ, false, seenʗ1, default!));
+    return s.@is((ж<Δterm> t) => t != nil && comparableType((~t).typ, false, seenʗ1) == nil);
 }
 
 // NumMethods returns the number of methods available.
@@ -86,6 +86,7 @@ internal static @string String(this ref _TypeSet s) {
 
     var hasMethods = len(s.methods) > 0;
     var hasTerms = s.hasTerms();
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡbuf.WriteByte((rune)'{');
     if (s.comparable) {
@@ -125,28 +126,29 @@ internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
     return s1.terms.subsetOf(s2.terms);
 }
 
-// typeset is an iterator over the (type/underlying type) pairs in s.
-// If s has no specific terms, typeset calls yield with (nil, nil).
-// In any case, typeset is guaranteed to call yield at least once.
-internal static void typeset(this ref _TypeSet s, Func<ΔType, ΔType, bool> yield) {
+// all reports whether f(t, u) is true for each (type/underlying type) pairs in s.
+// If s has no specific terms, all calls f(nil, nil).
+// In any case, all is guaranteed to call f at least once.
+internal static bool all(this ref _TypeSet s, Func<ΔType, ΔType, bool> f) {
     if (!s.hasTerms()) {
-        yield(default!, default!);
-        return;
+        return f(default!, default!);
     }
+
     foreach (var (_, t) in s.terms) {
         assert((~t).typ != default!);
-        // Unalias(x) == under(x) for ~x terms
+        // Unalias(x) == x.Underlying() for ~x terms
         var u = Unalias((~t).typ);
         if (!(~t).tilde) {
-            u = under(u);
+            u = u.Underlying();
         }
         if (debug) {
-            assert(Identical(u, under(u)));
+            assert(Identical(u, u.Underlying()));
         }
-        if (!yield((~t).typ, u)) {
-            break;
+        if (!f((~t).typ, u)) {
+            return false;
         }
     }
+    return true;
 }
 
 // is calls f with the specific type terms of s and reports whether
@@ -183,6 +185,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         if (ityp.tset != nil) {
             return ityp.tset;
         }
+
         // If the interface is not fully set up yet, the type set will
         // not be complete, which may lead to errors when using the
         // type set (e.g. missing method). Don't compute a partial type
@@ -196,6 +199,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         if (!ityp.complete) {
             return ᏑtopTypeSet;
         }
+
         if (Ꮡcheck != nil && (~check.conf)._Trace) {
             // Types don't generally have position information.
             // If we don't have a valid pos provided, try to use
@@ -203,6 +207,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
             if (!pos.IsValid() && len(ityp.methods) > 0) {
                 pos = ityp.methods[0].Value.pos;
             }
+
             Ꮡcheck.trace(pos, typeSetForSˢ, Ꮡityp.OrTypedNil());
             check.indent++;
             defer(() => {
@@ -210,12 +215,14 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                 Ꮡcheck.trace(pos, "=> %s "u8, Ꮡityp.typeSet().OrTypedNil());
             }, ref ᒐ);
         }
+
         // An infinitely expanding interface (due to a cycle) is detected
         // elsewhere (Checker.validType), so here we simply assume we only
         // have valid interfaces. Mark the interface as complete to avoid
         // infinite recursion if the validType check occurs later for some
         // reason.
         ityp.tset = Ꮡ(new _TypeSet(terms: allTermlist)); // TODO(gri) is this sufficient?
+
         map<ж<Union>, ж<_TypeSet>> unionSets = default!;
         if (Ꮡcheck != nil){
             if (check.unionTypeSets == default!) {
@@ -225,6 +232,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         } else {
             unionSets = new map<ж<Union>, ж<_TypeSet>>();
         }
+
         // Methods of embedded interfaces are collected unchanged; i.e., the identity
         // of a method I.m's Func Object of an interface I is the same as that of
         // the method m in an interface that embeds interface I. On the other hand,
@@ -237,6 +245,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         // Object and give it the position of a corresponding embedded interface. Then
         // we can get rid of the mpos map below and simply use the cloned method's
         // position.
+
         ref var seen = ref heap<objset>(out var Ꮡseen);
         ref var allMethods = ref heap<slice<ж<Func>>>(out var ᏑallMethods);
         var mpos = new map<ж<Func>, tokenꓸPos>(); // method specification or method embedding position, for good error messages
@@ -253,38 +262,39 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                 case {} when @explicit: {
                     if (Ꮡcheck != nil) {
                         var err = Ꮡcheck.newError(DuplicateDecl);
-                        err.addf(((atPos)posΔ1), "duplicate method %s"u8, (~m).name);
-                        err.addf(((atPos)mposʗ1[other._<ж<Func>>()]), "other declaration of method %s"u8, (~m).name);
+                        err.addf((atPos)posΔ1, "duplicate method %s"u8, (~m).name);
+                        err.addf((atPos)mposʗ1[other._<ж<Func>>()], "other declaration of method %s"u8, (~m).name);
                         err.report();
                     }
                     break;
                 }
                 default: {
+                    // We have a duplicate method name in an embedded (not explicitly declared) method.
+                    // Check method signatures after all types are computed (go.dev/issue/33656).
+                    // If we're pre-go1.14 (overlapping embeddings are not permitted), report that
+                    // error here as well (even though we could do it eagerly) because it's the same
+                    // error message.
                     if (Ꮡcheck != nil) {
-                        // We have a duplicate method name in an embedded (not explicitly declared) method.
-                        // Check method signatures after all types are computed (go.dev/issue/33656).
-                        // If we're pre-go1.14 (overlapping embeddings are not permitted), report that
-                        // error here as well (even though we could do it eagerly) because it's the same
-                        // error message.
                         var mposʗ2 = mposʗ1;
                         var otherʗ1 = other;
                         Ꮡcheck.Value.later(() => {
                             if (posΔ1.IsValid() && !Ꮡcheck.Value.allowVersion(go1_14) || !Identical((~m).typ, otherʗ1.Type())) {
                                 var err = Ꮡcheck.newError(DuplicateDecl);
-                                err.addf(((atPos)posΔ1), "duplicate method %s"u8, (~m).name);
-                                err.addf(((atPos)mposʗ2[otherʗ1._<ж<Func>>()]), "other declaration of method %s"u8, (~m).name);
+                                err.addf((atPos)posΔ1, "duplicate method %s"u8, (~m).name);
+                                err.addf((atPos)mposʗ2[otherʗ1._<ж<Func>>()], "other declaration of method %s"u8, (~m).name);
                                 err.report();
                             }
-                        }).describef(((atPos)posΔ1), "duplicate method check for %s"u8, (~m).name);
+                        }).describef((atPos)posΔ1, "duplicate method check for %s"u8, (~m).name);
                     }
                     break;
                 }}
             }
-
         }
+
         foreach (var (_, m) in ityp.methods) {
             addMethod((~m).pos, m, true);
         }
+
         // collect embedded elements
         var allTerms = allTermlist;
         var allComparable = false;
@@ -297,14 +307,14 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
             }
             bool comparable = default!;
             termlist terms = default!;
-            var switchᴛ16 = under(typ);
-            switch (switchᴛ16.type()) {
+            var switchᴛ15 = typ.Underlying();
+            switch (switchᴛ15.type()) {
             case ж<Interface> u: {
+                // For now we don't permit type parameters as constraints.
                 assert(!isTypeParam(typ));
-                var tset = computeInterfaceTypeSet(Ꮡcheck, // For now we don't permit type parameters as constraints.
- posΔ2, u);
-                if (posΔ2.IsValid() && Ꮡcheck != nil && check.isImportedConstraint(typ) && !Ꮡcheck.verifyVersionf(((atPos)posΔ2), // If typ is local, an error was already reported where typ is specified/defined.
- go1_18, "embedding constraint interface %s"u8, typ)) {
+                var tset = computeInterfaceTypeSet(Ꮡcheck, posΔ2, u);
+                // If typ is local, an error was already reported where typ is specified/defined.
+                if (posΔ2.IsValid() && Ꮡcheck != nil && check.isImportedConstraint(typ) && !Ꮡcheck.verifyVersionf((atPos)posΔ2, go1_18, "embedding constraint interface %s"u8, typ)) {
                     continue;
                 }
                 comparable = tset.Value.comparable;
@@ -315,7 +325,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                 break;
             }
             case ж<Union> u: {
-                if (posΔ2.IsValid() && Ꮡcheck != nil && !Ꮡcheck.verifyVersionf(((atPos)posΔ2), go1_18, "embedding interface element %s"u8, u.OrTypedNil())) {
+                if (posΔ2.IsValid() && Ꮡcheck != nil && !Ꮡcheck.verifyVersionf((atPos)posΔ2, go1_18, "embedding interface element %s"u8, u.OrTypedNil())) {
                     continue;
                 }
                 var tset = computeUnionTypeSet(Ꮡcheck, unionSets, posΔ2, u);
@@ -328,27 +338,30 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
                 break;
             }
             default: {
-                var u = switchᴛ16;
+                var u = switchᴛ15;
                 if (!isValid(u)) {
                     continue;
                 }
-                if (posΔ2.IsValid() && Ꮡcheck != nil && !Ꮡcheck.verifyVersionf(((atPos)posΔ2), go1_18, "embedding non-interface type %s"u8, typ)) {
+                if (posΔ2.IsValid() && Ꮡcheck != nil && !Ꮡcheck.verifyVersionf((atPos)posΔ2, go1_18, "embedding non-interface type %s"u8, typ)) {
                     continue;
                 }
                 terms = new termlist(new ж<Δterm>[]{Ꮡ(new Δterm(false, typ))}.slice());
                 break;
             }}
+
             // The type set of an interface is the intersection of the type sets of all its elements.
             // Due to language restrictions, only embedded interfaces can add methods, they are handled
             // separately. Here we only need to intersect the term lists and comparable bits.
             (allTerms, allComparable) = intersectTermLists(allTerms, allComparable, terms, comparable);
         }
+
         ityp.tset.Value.comparable = allComparable;
         if (len(allMethods) != 0) {
             sortMethods(allMethods);
             ityp.tset.Value.methods = allMethods;
         }
         ityp.tset.Value.terms = allTerms;
+
         return ityp.tset;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -371,8 +384,7 @@ internal static (termlist, bool) intersectTermLists(termlist xterms, bool xcomp,
         nint i = 0;
         foreach (var (_, t) in terms) {
             assert((~t).typ != default!);
-            if (comparableType((~t).typ, false, /* strictly comparable */
- default!, default!)) {
+            if (comparableType((~t).typ, false, /* strictly comparable */ default!) == nil) {
                 terms[i] = t;
                 i++;
             }
@@ -419,14 +431,16 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> Ꮡcheck, map<ж<Un
             return tset;
         }
     }
+
     // avoid infinite recursion (see also computeInterfaceTypeSet)
     unionSets[Ꮡutyp] = @new<_TypeSet>();
+
     termlist allTerms = default!;
     foreach (var (_, vᴛ1) in utyp.terms) {
         var t = vᴛ1;
 
         termlist terms = default!;
-        var u = under((~t).typ);
+        var u = (~t).typ.Underlying();
         {
             var (ui, _) = u._<ж<Interface>>(ᐧ); if (ui != nil){
                 // For now we don't permit type parameters as constraints.
@@ -449,13 +463,14 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> Ꮡcheck, map<ж<Un
         allTerms = allTerms.union(terms);
         if (len(allTerms) > maxTermCount) {
             if (Ꮡcheck != nil) {
-                Ꮡcheck.errorf(((atPos)pos), InvalidUnion, "cannot handle more than %d union terms (implementation limitation)"u8, (nint)(maxTermCount));
+                Ꮡcheck.errorf((atPos)pos, InvalidUnion, "cannot handle more than %d union terms (implementation limitation)"u8, (nint)(maxTermCount));
             }
             unionSets[Ꮡutyp] = ᏑinvalidTypeSet;
             return unionSets[Ꮡutyp];
         }
     }
     unionSets[Ꮡutyp].Value.terms = allTerms;
+
     return unionSets[Ꮡutyp];
 }
 

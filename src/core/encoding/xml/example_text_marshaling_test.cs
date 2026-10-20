@@ -19,7 +19,7 @@ public static Size Small => 1;
 public static Size Large => 2;
 
 public static error UnmarshalText(this ref Size s, slice<byte> text) {
-    var exprᴛ1 = strings.ToLower(((@string)text));
+    var exprᴛ1 = strings.ToLower((@string)text);
     if (exprᴛ1 == "small"u8) {
         s = Small;
     }
@@ -29,7 +29,6 @@ public static error UnmarshalText(this ref Size s, slice<byte> text) {
     else { /* default: */
         s = Unrecognized;
     }
-
     return default!;
 }
 
@@ -50,7 +49,6 @@ public static (slice<byte>, error) MarshalText(this Size s) {
     else { /* default: */
         name = unrecognizedˢ;
     }
-
     return (slice<byte>(name), default!);
 }
 
@@ -67,7 +65,7 @@ internal static readonly @string sizesSizeSmallSizeSizeˢ = """
 		<size>small</size>
 		<size>large</size>
 	</sizes>
-"""u8;
+"""u8.Raw();
 
 internal partial struct Example_textMarshalXML_inventory /*dyn*/ {
     public slice<Size> Sizes; /*`xml:"size"`*/
@@ -81,18 +79,20 @@ public static void Example_textMarshalXML() {
             log.Fatal(err);
         }
     }
+
     var counts = new map<Size, nint>();
     foreach (var (_, size) in inventory.Sizes) {
         counts[size] += 1;
     }
+
     fmt.Printf("Inventory Counts:\n* Small:        %d\n* Large:        %d\n* Unrecognized: %d\n"u8,
         counts[Small], counts[Large], counts[Unrecognized]);
-}
 
-// Output:
-// Inventory Counts:
-// * Small:        3
-// * Large:        2
-// * Unrecognized: 3
+    // Output:
+    // Inventory Counts:
+    // * Small:        3
+    // * Large:        2
+    // * Unrecognized: 3
+}
 
 } // end xml_test_package

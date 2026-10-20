@@ -46,12 +46,14 @@ public static void TestFloatZeroValue(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("zero value = %s; want 0.0"u8, s);
         }
     }
+
     // zero value has precision 0
     {
         nuint prec = x.Prec(); if (prec != 0) {
             Ꮡt.Errorf("prec = %d; want 0"u8, prec);
         }
     }
+
     // zero value can be used in any and all positions of binary operations
     ж<global::go.math.big_package.Float> make(nint xΔ1) {
         ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
@@ -73,11 +75,11 @@ public static void TestFloatZeroValue(ж<testing.T> Ꮡt) {
         new(0, 0, 0, 0, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
         new(0, 1, 2, 2, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
         new(1, 2, 0, 0, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
-        new(2, 0, 1, 0, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))), // {0, 0, 0, 0, '/', (*Float).Quo}, // panics
+        new(2, 0, 1, 0, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
 
+        // {0, 0, 0, 0, '/', (*Float).Quo}, // panics
         new(0, 2, 1, 2, (rune)'/', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Quo))),
         new(1, 2, 0, 0, (rune)'/', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Quo))), // = +Inf
-
         new(2, 0, 1, 0, (rune)'/', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Quo)))
     }.slice()) {
         var z = make(test.z);
@@ -90,9 +92,10 @@ public static void TestFloatZeroValue(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%d %c %d = %d; want %d"u8, test.x, test.opname, test.y, got, test.want);
         }
     }
+
+    // TODO(gri) test how precision is set for zero value results
 }
 
-// TODO(gri) test how precision is set for zero value results
 internal static ж<global::go.math.big_package.Float> makeFloat(@string s) {
     var (x, _, err) = ParseFloat(s, 0, 1000, ToNearestEven);
     if (err != default!) {
@@ -109,20 +112,22 @@ internal partial struct TestFloatSetPrec_type /*dyn*/ {
 }
 
 public static void TestFloatSetPrec(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFloatSetPrec_type[]{ // prec 0
-
+    foreach (var (_, test) in new TestFloatSetPrec_type[]{
+        // prec 0
         new("0"u8, 0, "0"u8, Exact),
         new("-0"u8, 0, "-0"u8, Exact),
         new("-Inf"u8, 0, "-Inf"u8, Exact),
         new("+Inf"u8, 0, "+Inf"u8, Exact),
         new("123"u8, 0, "0"u8, Below),
-        new("-123"u8, 0, "-0"u8, Above), // prec at upper limit
+        new("-123"u8, 0, "-0"u8, Above),
 
+        // prec at upper limit
         new("0"u8, MaxPrec, "0"u8, Exact),
         new("-0"u8, MaxPrec, "-0"u8, Exact),
         new("-Inf"u8, MaxPrec, "-Inf"u8, Exact),
-        new("+Inf"u8, MaxPrec, "+Inf"u8, Exact), // just a few regular cases - general rounding is tested elsewhere
+        new("+Inf"u8, MaxPrec, "+Inf"u8, Exact),
 
+        // just a few regular cases - general rounding is tested elsewhere
         new("1.5"u8, 1, "2"u8, Above),
         new("-1.5"u8, 1, "-2"u8, Below),
         new("123"u8, 1000000, "123"u8, Exact),
@@ -274,13 +279,9 @@ public static void TestFloatSetMantExp(ж<testing.T> Ꮡt) {
         new("-Inf"u8, -1234, "-Inf"u8),
         new("0"u8, MinExp, "0"u8),
         new("0.25"u8, MinExp, "+0"u8), // exponent underflow
-
         new("-0.25"u8, MinExp, "-0"u8), // exponent underflow
-
         new("1"u8, MaxExp, "+Inf"u8), // exponent overflow
-
         new("2"u8, MaxExp - 1, "+Inf"u8), // exponent overflow
-
         new("0.75"u8, 1, "1.5"u8),
         new("0.5"u8, 11, "1024"u8),
         new("-0.5"u8, -2, "-0.125"u8),
@@ -410,10 +411,10 @@ internal static void testFloatRound(ж<testing.T> Ꮡt, int64 x, int64 r, nuint 
     else { /* default: */
         throw panic("unreachable");
     }
-
     if (!ok) {
         Ꮡt.Fatalf("incorrect test data for prec = %d, %s: x = %s, r = %s"u8, prec, mode, toBinary(x), toBinary(r));
     }
+
     // compute expected accuracy
     var a = Exact;
     switch (ᐧ) {
@@ -428,6 +429,7 @@ internal static void testFloatRound(ж<testing.T> Ꮡt, int64 x, int64 r, nuint 
 
     // round
     var f = @new<global::go.math.big_package.Float>().SetMode(mode).SetInt64(x).SetPrec(prec);
+
     // check result
     var r1 = f.int64();
     nuint p1 = f.Prec();
@@ -439,6 +441,7 @@ internal static void testFloatRound(ж<testing.T> Ꮡt, int64 x, int64 r, nuint 
             toBinary(r), prec, a);
         return;
     }
+
     // g and f should be the same
     // (rounding by SetPrec after SetInt64 using default precision
     // should be the same as rounding by SetInt64 after setting the
@@ -452,6 +455,7 @@ internal static void testFloatRound(ж<testing.T> Ꮡt, int64 x, int64 r, nuint 
             toBinary(r));
         return;
     }
+
     // h and f should be the same
     // (repeated rounding should be idempotent)
     var h = @new<global::go.math.big_package.Float>().SetMode(mode).SetPrec(prec).Set(f);
@@ -544,12 +548,15 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         var n = fromBinary(test.naway);
         var a = fromBinary(test.away);
         nuint prec = test.prec;
+
         testFloatRound(Ꮡt, x, z, prec, ToZero);
         testFloatRound(Ꮡt, x, e, prec, ToNearestEven);
         testFloatRound(Ꮡt, x, n, prec, ToNearestAway);
         testFloatRound(Ꮡt, x, a, prec, AwayFromZero);
+
         testFloatRound(Ꮡt, x, z, prec, ToNegativeInf);
         testFloatRound(Ꮡt, x, a, prec, ToPositiveInf);
+
         testFloatRound(Ꮡt, -x, -a, prec, ToNegativeInf);
         testFloatRound(Ꮡt, -x, -z, prec, ToPositiveInf);
     }
@@ -579,7 +586,7 @@ public static void TestFloatSetUint64(ж<testing.T> Ꮡt) {
         10,
         100,
         (uint64)(4294967296L - 1),
-        ((uint64)1 << (int)(32)),
+        (uint64)1 << 32,
         18446744073709551615UL
     }.slice()) {
         ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
@@ -590,12 +597,13 @@ public static void TestFloatSetUint64(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // test basic rounding behavior (exhaustive rounding testing is done elsewhere)
     const uint64 x = 0x8765432187654321;              // 64 bits needed
     for (nuint prec = (nuint)1; prec <= 64; prec++) {
         var f = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(ToZero).SetUint64(x);
         var got = f.uint64();
-        var want = (uint64)(x & ~(((uint64)1).Lsh((64 - prec)) - 1)); // cut off (round to zero) low 64-prec bits
+        var want = x & ~(((uint64)1).Lsh((64 - prec)) - 1); // cut off (round to zero) low 64-prec bits
         if (got != want) {
             Ꮡt.Errorf("got %#x (%s); want %#x"u8, got, f.Text((rune)'p', 0), want);
         }
@@ -616,7 +624,7 @@ public static void TestFloatSetInt64(ж<testing.T> Ꮡt) {
         var want = vᴛ1;
 
         foreach (var (i, _) in new nint[]{}.array(2)) {
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 want = -want;
             }
             ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
@@ -628,12 +636,13 @@ public static void TestFloatSetInt64(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // test basic rounding behavior (exhaustive rounding testing is done elsewhere)
     const int64 x = 0x7654321076543210;              // 63 bits needed
     for (nuint prec = (nuint)1; prec <= 63; prec++) {
         var f = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(ToZero).SetInt64(x);
         var got = f.int64();
-        var want = (int64)(x & ~(((int64)1).Lsh((63 - prec)) - 1)); // cut off (round to zero) low 63-prec bits
+        var want = x & ~(((int64)1).Lsh((63 - prec)) - 1); // cut off (round to zero) low 63-prec bits
         if (got != want) {
             Ꮡt.Errorf("got %#x (%s); want %#x"u8, got, f.Text((rune)'p', 0), want);
         }
@@ -664,7 +673,7 @@ public static void TestFloatSetFloat64(ж<testing.T> Ꮡt) {
             var want = vᴛ1;
 
             foreach (var (i, _) in new nint[]{}.array(2)) {
-                if ((nint)(i & 1) != 0) {
+                if ((i & 1) != 0) {
                     want = -want;
                 }
                 ref var fΔ1 = ref heap(new global::go.math.big_package.Float(), out var ᏑfΔ1);
@@ -676,16 +685,18 @@ public static void TestFloatSetFloat64(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // test basic rounding behavior (exhaustive rounding testing is done elsewhere)
         const uint64 x = 0x8765432143218;           // 53 bits needed
         for (nuint prec = (nuint)1; prec <= 52; prec++) {
             var fΔ2 = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(ToZero).SetFloat64((float64)x);
             var (got, _) = fΔ2.Float64();
-            var want = (float64)((uint64)(x & ~(((uint64)1).Lsh((52 - prec)) - 1))); // cut off (round to zero) low 53-prec bits
+            var want = (float64)(x & ~(((uint64)1).Lsh((52 - prec)) - 1)); // cut off (round to zero) low 53-prec bits
             if (got != want) {
                 Ꮡt.Errorf("got %g (%s); want %g"u8, got, fΔ2.Text((rune)'p', 0), want);
             }
         }
+
         // test NaN
         defer(() => {
             {
@@ -720,8 +731,10 @@ public static void TestFloatSetInt(ж<testing.T> Ꮡt) {
             continue;
         }
         nint n = x.BitLen();
+
         ref var f = ref heap(new global::go.math.big_package.Float(), out var Ꮡf);
         Ꮡf.SetInt(Ꮡx);
+
         // check precision
         if (n < 64) {
             n = 64;
@@ -731,15 +744,17 @@ public static void TestFloatSetInt(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("got prec = %d; want %d"u8, prec, n);
             }
         }
+
         // check value
         @string got = Ꮡf.Text((rune)'g', 100);
         if (got != want) {
             Ꮡt.Errorf("got %s (%s); want %s"u8, got, Ꮡf.Text((rune)'p', 0), want);
         }
     }
+
+    // TODO(gri) test basic rounding behavior
 }
 
-// TODO(gri) test basic rounding behavior
 public static void TestFloatSetRat(ж<testing.T> Ꮡt) {
     foreach (var (_, want) in new @string[]{
         "0"u8,
@@ -750,8 +765,8 @@ public static void TestFloatSetRat(ж<testing.T> Ꮡt) {
         "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"u8,
         "1.2"u8,
         "3.14159265"u8
-    }.slice()) {
         // TODO(gri) expand
+    }.slice()) {
         ref var x = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡx);
         var (_, ok) = Ꮡx.SetString(want);
         if (!ok) {
@@ -759,11 +774,13 @@ public static void TestFloatSetRat(ж<testing.T> Ꮡt) {
             continue;
         }
         nint n = max(Ꮡx.Num().BitLen(), Ꮡx.Denom().BitLen());
+
         ref var f1 = ref heap(new global::go.math.big_package.Float(), out var Ꮡf1);
         ref var f2 = ref heap(new global::go.math.big_package.Float(), out var Ꮡf2);
         Ꮡf2.SetPrec(1000);
         Ꮡf1.SetRat(Ꮡx);
         Ꮡf2.SetRat(Ꮡx);
+
         // check precision when set automatically
         if (n < 64) {
             n = 64;
@@ -773,6 +790,7 @@ public static void TestFloatSetRat(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("got prec = %d; want %d"u8, prec, n);
             }
         }
+
         @string got = Ꮡf2.Text((rune)'g', 100);
         if (got != want) {
             Ꮡt.Errorf("got %s (%s); want %s"u8, got, Ꮡf2.Text((rune)'p', 0), want);
@@ -885,94 +903,75 @@ internal partial struct TestFloatFloat32_type /*dyn*/ {
 
 public static void TestFloatFloat32(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestFloatFloat32_type[]{
-        new("0"u8, 0F, Exact), // underflow to zero
+        new("0"u8, 0F, Exact),
 
+        // underflow to zero
         new("1e-1000"u8, 0F, Below),
         new("0x0.000002p-127"u8, 0F, Below),
-        new("0x.0000010p-126"u8, 0F, Below), // denormals
+        new("0x.0000010p-126"u8, 0F, Below),
 
+        // denormals
         new("1.401298464e-45"u8, math.SmallestNonzeroFloat32, Above), // rounded up to smallest denormal
-
         new("0x.ffffff8p-149"u8, math.SmallestNonzeroFloat32, Above), // rounded up to smallest denormal
-
         new("0x.0000018p-126"u8, math.SmallestNonzeroFloat32, Above), // rounded up to smallest denormal
-
         new("0x.0000020p-126"u8, math.SmallestNonzeroFloat32, Exact),
         new("0x.8p-148"u8, math.SmallestNonzeroFloat32, Exact),
         new("1p-149"u8, math.SmallestNonzeroFloat32, Exact),
         new("0x.fffffep-126"u8, math.Float32frombits(0x7fffff), Exact), // largest denormal
- // special denormal cases (see issues 14553, 14651)
 
+        // special denormal cases (see issues 14553, 14651)
         new("0x0.0000001p-126"u8, math.Float32frombits(0x00000000), Below), // underflow to zero
-
         new("0x0.0000008p-126"u8, math.Float32frombits(0x00000000), Below), // underflow to zero
-
         new("0x0.0000010p-126"u8, math.Float32frombits(0x00000000), Below), // rounded down to even
-
         new("0x0.0000011p-126"u8, math.Float32frombits(0x00000001), Above), // rounded up to smallest denormal
-
         new("0x0.0000018p-126"u8, math.Float32frombits(0x00000001), Above), // rounded up to smallest denormal
-
         new("0x1.0000000p-149"u8, math.Float32frombits(0x00000001), Exact), // smallest denormal
-
         new("0x0.0000020p-126"u8, math.Float32frombits(0x00000001), Exact), // smallest denormal
-
         new("0x0.fffffe0p-126"u8, math.Float32frombits(0x007fffff), Exact), // largest denormal
-
         new("0x1.0000000p-126"u8, math.Float32frombits(0x00800000), Exact), // smallest normal
-
         new("0x0.8p-149"u8, math.Float32frombits(0x000000000), Below), // rounded down to even
-
         new("0x0.9p-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
-
         new("0x0.ap-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
-
         new("0x0.bp-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
-
         new("0x0.cp-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
-
         new("0x1.0p-149"u8, math.Float32frombits(0x000000001), Exact), // smallest denormal
-
         new("0x1.7p-149"u8, math.Float32frombits(0x000000001), Below),
         new("0x1.8p-149"u8, math.Float32frombits(0x000000002), Above),
         new("0x1.9p-149"u8, math.Float32frombits(0x000000002), Above),
         new("0x2.0p-149"u8, math.Float32frombits(0x000000002), Exact),
         new("0x2.8p-149"u8, math.Float32frombits(0x000000002), Below), // rounded down to even
-
         new("0x2.9p-149"u8, math.Float32frombits(0x000000003), Above),
         new("0x3.0p-149"u8, math.Float32frombits(0x000000003), Exact),
         new("0x3.7p-149"u8, math.Float32frombits(0x000000003), Below),
         new("0x3.8p-149"u8, math.Float32frombits(0x000000004), Above), // rounded up to even
-
         new("0x4.0p-149"u8, math.Float32frombits(0x000000004), Exact),
         new("0x4.8p-149"u8, math.Float32frombits(0x000000004), Below), // rounded down to even
+        new("0x4.9p-149"u8, math.Float32frombits(0x000000005), Above),
 
-        new("0x4.9p-149"u8, math.Float32frombits(0x000000005), Above), // specific case from issue 14553
-
+        // specific case from issue 14553
         new("0x7.7p-149"u8, math.Float32frombits(0x000000007), Below),
         new("0x7.8p-149"u8, math.Float32frombits(0x000000008), Above),
-        new("0x7.9p-149"u8, math.Float32frombits(0x000000008), Above), // normals
+        new("0x7.9p-149"u8, math.Float32frombits(0x000000008), Above),
 
+        // normals
         new("0x.ffffffp-126"u8, math.Float32frombits(0x00800000), Above), // rounded up to smallest normal
-
         new("1p-126"u8, math.Float32frombits(0x00800000), Exact), // smallest normal
-
         new("0x1.fffffep-126"u8, math.Float32frombits(0x00ffffff), Exact),
         new("0x1.ffffffp-126"u8, math.Float32frombits(0x01000000), Above), // rounded up
-
         new("1"u8, 1F, Exact),
         new("1.000000000000000000001"u8, 1F, Below),
         new("12345.0"u8, 12345F, Exact),
         new("12345.000000000000000000001"u8, 12345F, Below),
         new("0x1.fffffe0p127"u8, math.MaxFloat32, Exact),
-        new("0x1.fffffe8p127"u8, math.MaxFloat32, Below), // overflow
+        new("0x1.fffffe8p127"u8, math.MaxFloat32, Below),
 
+        // overflow
         new("0x1.ffffff0p127"u8, (float32)math.Inf(+1), Above),
         new("0x1p128"u8, (float32)math.Inf(+1), Above),
         new("1e10000"u8, (float32)math.Inf(+1), Above),
         new("0x1.ffffff0p2147483646"u8, (float32)math.Inf(+1), Above), // overflow in rounding
- // inf
 
+        // inf
         new("Inf"u8, (float32)math.Inf(+1), Exact)
     }.slice()) {
         for (nint i = 0; i < 2; i++) {
@@ -985,17 +984,20 @@ public static void TestFloatFloat32(ж<testing.T> Ꮡt) {
                 tout = -tout;
                 tacc = (global::go.math.big_package.Accuracy)(-tacc);
             }
+
             // conversion should match strconv where syntax is agreeable
             {
                 var (f, err) = strconv.ParseFloat(tx, 32); if (err == default! && !alike32((float32)f, tout)) {
                     Ꮡt.Errorf("%s: got %g; want %g (incorrect test data)"u8, tx, f, tout);
                 }
             }
+
             var x = makeFloat(tx);
             var (@out, acc) = x.Float32();
             if (!alike32(@out, tout) || acc != tacc) {
                 Ꮡt.Errorf("%s: got %g (%#08x, %s); want %g (%#08x, %s)"u8, tx, @out, math.Float32bits(@out), acc, test.@out, math.Float32bits(test.@out), tacc);
             }
+
             // test that x.SetFloat64(float64(f)).Float32() == f
             ref var x2 = ref heap(new global::go.math.big_package.Float(), out var Ꮡx2);
             var (out2, acc2) = Ꮡx2.SetFloat64((float64)@out).Float32();
@@ -1015,81 +1017,69 @@ internal partial struct TestFloatFloat64_type /*dyn*/ {
 public static void TestFloatFloat64(ж<testing.T> Ꮡt) {
     UntypedFloat smallestNormalFloat64 = 2.2250738585072014e-308; // 1p-1022
     foreach (var (_, test) in new TestFloatFloat64_type[]{
-        new("0"u8, 0D, Exact), // underflow to zero
+        new("0"u8, 0D, Exact),
 
+        // underflow to zero
         new("1e-1000"u8, 0D, Below),
         new("0x0.0000000000001p-1023"u8, 0D, Below),
-        new("0x0.00000000000008p-1022"u8, 0D, Below), // denormals
+        new("0x0.00000000000008p-1022"u8, 0D, Below),
 
+        // denormals
         new("0x0.0000000000000cp-1022"u8, math.SmallestNonzeroFloat64, Above), // rounded up to smallest denormal
-
         new("0x0.00000000000010p-1022"u8, math.SmallestNonzeroFloat64, Exact), // smallest denormal
-
         new("0x.8p-1073"u8, math.SmallestNonzeroFloat64, Exact),
         new("1p-1074"u8, math.SmallestNonzeroFloat64, Exact),
         new("0x.fffffffffffffp-1022"u8, math.Float64frombits(0x000fffffffffffffUL), Exact), // largest denormal
- // special denormal cases (see issues 14553, 14651)
 
+        // special denormal cases (see issues 14553, 14651)
         new("0x0.00000000000001p-1022"u8, math.Float64frombits(0x00000000000000000), Below), // underflow to zero
-
         new("0x0.00000000000004p-1022"u8, math.Float64frombits(0x00000000000000000), Below), // underflow to zero
-
         new("0x0.00000000000008p-1022"u8, math.Float64frombits(0x00000000000000000), Below), // rounded down to even
-
         new("0x0.00000000000009p-1022"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
-
         new("0x0.0000000000000ap-1022"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
-
         new("0x0.8p-1074"u8, math.Float64frombits(0x00000000000000000), Below), // rounded down to even
-
         new("0x0.9p-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
-
         new("0x0.ap-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
-
         new("0x0.bp-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
-
         new("0x0.cp-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
-
         new("0x1.0p-1074"u8, math.Float64frombits(0x00000000000000001), Exact),
         new("0x1.7p-1074"u8, math.Float64frombits(0x00000000000000001), Below),
         new("0x1.8p-1074"u8, math.Float64frombits(0x00000000000000002), Above),
         new("0x1.9p-1074"u8, math.Float64frombits(0x00000000000000002), Above),
         new("0x2.0p-1074"u8, math.Float64frombits(0x00000000000000002), Exact),
         new("0x2.8p-1074"u8, math.Float64frombits(0x00000000000000002), Below), // rounded down to even
-
         new("0x2.9p-1074"u8, math.Float64frombits(0x00000000000000003), Above),
         new("0x3.0p-1074"u8, math.Float64frombits(0x00000000000000003), Exact),
         new("0x3.7p-1074"u8, math.Float64frombits(0x00000000000000003), Below),
         new("0x3.8p-1074"u8, math.Float64frombits(0x00000000000000004), Above), // rounded up to even
-
         new("0x4.0p-1074"u8, math.Float64frombits(0x00000000000000004), Exact),
         new("0x4.8p-1074"u8, math.Float64frombits(0x00000000000000004), Below), // rounded down to even
+        new("0x4.9p-1074"u8, math.Float64frombits(0x00000000000000005), Above),
 
-        new("0x4.9p-1074"u8, math.Float64frombits(0x00000000000000005), Above), // normals
-
+        // normals
         new("0x.fffffffffffff8p-1022"u8, math.Float64frombits(0x0010000000000000UL), Above), // rounded up to smallest normal
-
         new("1p-1022"u8, math.Float64frombits(0x0010000000000000UL), Exact), // smallest normal
-
         new("1"u8, 1D, Exact),
         new("1.000000000000000000001"u8, 1D, Below),
         new("12345.0"u8, 12345D, Exact),
         new("12345.000000000000000000001"u8, 12345D, Below),
         new("0x1.fffffffffffff0p1023"u8, math.MaxFloat64, Exact),
-        new("0x1.fffffffffffff4p1023"u8, math.MaxFloat64, Below), // overflow
+        new("0x1.fffffffffffff4p1023"u8, math.MaxFloat64, Below),
 
+        // overflow
         new("0x1.fffffffffffff8p1023"u8, math.Inf(+1), Above),
         new("0x1p1024"u8, math.Inf(+1), Above),
         new("1e10000"u8, math.Inf(+1), Above),
         new("0x1.fffffffffffff8p2147483646"u8, math.Inf(+1), Above), // overflow in rounding
+        new("Inf"u8, math.Inf(+1), Exact),
 
-        new("Inf"u8, math.Inf(+1), Exact), // selected denormalized values that were handled incorrectly in the past
-
+        // selected denormalized values that were handled incorrectly in the past
         new("0x.fffffffffffffp-1022"u8, smallestNormalFloat64 - math.SmallestNonzeroFloat64, Exact),
-        new("4503599627370495p-1074"u8, smallestNormalFloat64 - math.SmallestNonzeroFloat64, Exact), // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
+        new("4503599627370495p-1074"u8, smallestNormalFloat64 - math.SmallestNonzeroFloat64, Exact),
 
-        new("2.2250738585072011e-308"u8, 2.225073858507201e-308D, Below), // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
-
+        // https://www.exploringbinary.com/php-hangs-on-numeric-value-2-2250738585072011e-308/
+        new("2.2250738585072011e-308"u8, 2.225073858507201e-308D, Below),
+        // https://www.exploringbinary.com/java-hangs-when-converting-2-2250738585072012e-308/
         new("2.2250738585072012e-308"u8, 2.2250738585072014e-308D, Above)
     }.slice()) {
         for (nint i = 0; i < 2; i++) {
@@ -1102,17 +1092,20 @@ public static void TestFloatFloat64(ж<testing.T> Ꮡt) {
                 tout = -tout;
                 tacc = (global::go.math.big_package.Accuracy)(-tacc);
             }
+
             // conversion should match strconv where syntax is agreeable
             {
                 var (f, err) = strconv.ParseFloat(tx, 64); if (err == default! && !alike64(f, tout)) {
                     Ꮡt.Errorf("%s: got %g; want %g (incorrect test data)"u8, tx, f, tout);
                 }
             }
+
             var x = makeFloat(tx);
             var (@out, acc) = x.Float64();
             if (!alike64(@out, tout) || acc != tacc) {
                 Ꮡt.Errorf("%s: got %g (%#016x, %s); want %g (%#016x, %s)"u8, tx, @out, math.Float64bits(@out), acc, test.@out, math.Float64bits(test.@out), tacc);
             }
+
             // test that x.SetFloat64(f).Float64() == f
             ref var x2 = ref heap(new global::go.math.big_package.Float(), out var Ꮡx2);
             var (out2, acc2) = Ꮡx2.SetFloat64(@out).Float64();
@@ -1162,6 +1155,7 @@ public static void TestFloatInt(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: got %s (%s); want %s (%s)"u8, test.x, got, acc, test.want, test.acc);
         }
     }
+
     // check that supplied *Int is used
     foreach (var (_, f) in new @string[]{"0"u8, "1"u8, "-1"u8, "1234"u8}.slice()) {
         var x = makeFloat(f);
@@ -1210,6 +1204,7 @@ public static void TestFloatRat(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: got %s; want %s"u8, test.x, acc, test.acc);
             continue;
         }
+
         // inverse conversion
         if (res != nil) {
             var gotΔ1 = @new<global::go.math.big_package.Float>().SetPrec(64).SetRat(res);
@@ -1218,6 +1213,7 @@ public static void TestFloatRat(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // check that supplied *Rat is used
     foreach (var (_, f) in new @string[]{"0"u8, "1"u8, "-1"u8, "1234"u8}.slice()) {
         var x = makeFloat(f);
@@ -1245,6 +1241,7 @@ public static void TestFloatAbs(ж<testing.T> Ꮡt) {
         if (!alike(a, p)) {
             Ꮡt.Errorf("%s: got %s; want %s"u8, test, a.Text((rune)'g', 10), test);
         }
+
         var n = makeFloat("-"u8 + test);
         a.Abs(n);
         if (!alike(a, p)) {
@@ -1298,25 +1295,18 @@ public static void TestFloatInc(ж<testing.T> Ꮡt) {
 // Selected precisions with which to run various tests.
 internal static array<nuint> precList = new nuint[]{1, 2, 5, 8, 10, 16, 23, 24, 32, 50, 53, 64, 100, 128, 500, 511, 512, 513, 1000, 10000}.array();
 
-// = 0
-// = 1
-// = 2
-// = 1/2
-// = 2**10 == 1024
-// = 2**-10 == 1/1024
-// = 2**100 + 2**10 + 2**1
-// TODO(gri) add more test cases
 // Selected bits with which to run various tests.
 // Each entry is a list of bits representing a floating-point number (see fromBits).
 internal static array<ΔBits> bitsList = new ΔBits[]{
-    new nint[]{}.slice(),
-    new nint[]{0}.slice(),
-    new nint[]{1}.slice(),
-    new nint[]{-1}.slice(),
-    new nint[]{10}.slice(),
-    new nint[]{-10}.slice(),
-    new nint[]{100, 10, 1}.slice(),
+    new nint[]{}.slice(), // = 0
+    new nint[]{0}.slice(), // = 1
+    new nint[]{1}.slice(), // = 2
+    new nint[]{-1}.slice(), // = 1/2
+    new nint[]{10}.slice(), // = 2**10 == 1024
+    new nint[]{-10}.slice(), // = 2**-10 == 1/1024
+    new nint[]{100, 10, 1}.slice(), // = 2**100 + 2**10 + 2**1
     new nint[]{0, -1, -2, -10}.slice()
+    // TODO(gri) add more test cases
 }.array();
 
 // TestFloatAdd tests Float.Add/Sub by comparing the result of a "manual"
@@ -1333,6 +1323,7 @@ public static void TestFloatAdd(ж<testing.T> Ꮡt) {
             var y = ybits.ΔFloat();
             var zbits = xbits.add(ybits);
             var z = zbits.ΔFloat();
+
             foreach (var (i, mode) in new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array()) {
                 foreach (var (_, prec) in precList.ΔRangeSnapshot()) {
                     var got = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(mode);
@@ -1342,6 +1333,7 @@ public static void TestFloatAdd(ж<testing.T> Ꮡt) {
                         Ꮡt.Errorf("i = %d, prec = %d, %s:\n\t     %s %v\n\t+    %s %v\n\t=    %s\n\twant %s"u8,
                             i, prec, mode, x.OrTypedNil(), xbits, y.OrTypedNil(), ybits, got.OrTypedNil(), want.OrTypedNil());
                     }
+
                     got.Sub(z, x);
                     want = ybits.round(prec, mode);
                     if (got.Cmp(want) != 0) {
@@ -1390,18 +1382,21 @@ public static void TestFloatAdd32(ж<testing.T> Ꮡt) {
     for (nint d = 0; d <= 0x10; d++) {
         foreach (var (i, _) in new nint[]{}.array(2)) {
             var (x0, y0) = ((float64)@base, (float64)d);
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
             }
+
             var x = NewFloat(x0);
             var y = NewFloat(y0);
             var z = @new<global::go.math.big_package.Float>().SetPrec(24);
+
             z.Add(x, y);
             var (got, acc) = z.Float32();
             var want = (float32)y0 + (float32)x0;
             if (got != want || acc != Exact) {
                 Ꮡt.Errorf("d = %d: %g + %g = %g (%s); want %g (Exact)"u8, d, x0, y0, got, acc, want);
             }
+
             z.Sub(z, y);
             (got, acc) = z.Float32();
             want = (float32)want - (float32)y0;
@@ -1420,18 +1415,21 @@ public static void TestFloatAdd64(ж<testing.T> Ꮡt) {
     for (nint d = 0; d <= 0x10; d++) {
         foreach (var (i, _) in new nint[]{}.array(2)) {
             var (x0, y0) = ((float64)@base, (float64)d);
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
             }
+
             var x = NewFloat(x0);
             var y = NewFloat(y0);
             var z = @new<global::go.math.big_package.Float>().SetPrec(53);
+
             z.Add(x, y);
             var (got, acc) = z.Float64();
             var want = x0 + y0;
             if (got != want || acc != Exact) {
                 Ꮡt.Errorf("d = %d: %g + %g = %g (%s); want %g (Exact)"u8, d, x0, y0, got, acc, want);
             }
+
             z.Sub(z, y);
             (got, acc) = z.Float64();
             want -= y0;
@@ -1453,6 +1451,7 @@ public static void TestIssue20490(ж<testing.T> Ꮡt) {
         new(4D, -1D),
         new(-4D, -1D)
     }.slice();
+
     foreach (var (_, test) in tests) {
         var (a, b) = (NewFloat(test.a), NewFloat(test.b));
         var diff = @new<global::go.math.big_package.Float>().Sub(a, b);
@@ -1460,6 +1459,7 @@ public static void TestIssue20490(ж<testing.T> Ꮡt) {
         if (b.Cmp(diff) != 0) {
             Ꮡt.Errorf("got %g - %g = %g; want %g\n"u8, a.OrTypedNil(), NewFloat(test.b).OrTypedNil(), b.OrTypedNil(), diff.OrTypedNil());
         }
+
         b = NewFloat(test.b);
         var sum = @new<global::go.math.big_package.Float>().Add(a, b);
         b.Add(a, b);
@@ -1483,6 +1483,7 @@ public static void TestFloatMul(ж<testing.T> Ꮡt) {
             var y = ybits.ΔFloat();
             var zbits = xbits.mul(ybits);
             var z = zbits.ΔFloat();
+
             foreach (var (i, mode) in new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array()) {
                 foreach (var (_, prec) in precList.ΔRangeSnapshot()) {
                     var got = @new<global::go.math.big_package.Float>().SetPrec(prec).SetMode(mode);
@@ -1492,6 +1493,7 @@ public static void TestFloatMul(ж<testing.T> Ꮡt) {
                         Ꮡt.Errorf("i = %d, prec = %d, %s:\n\t     %v %v\n\t*    %v %v\n\t=    %v\n\twant %v"u8,
                             i, prec, mode, x.OrTypedNil(), xbits, y.OrTypedNil(), ybits, got.OrTypedNil(), want.OrTypedNil());
                     }
+
                     if (x.Sign() == 0) {
                         continue; // ignore div-0 case (not invertable)
                     }
@@ -1526,24 +1528,27 @@ public static void TestFloatMul64(ж<testing.T> Ꮡt) {
     }.slice()) {
         foreach (var (i, _) in new nint[]{}.array(8)) {
             var (x0, y0) = (test.x, test.y);
-            if ((nint)(i & 1) != 0) {
+            if ((i & 1) != 0) {
                 x0 = -x0;
             }
-            if ((nint)(i & 2) != 0) {
+            if ((i & 2) != 0) {
                 y0 = -y0;
             }
-            if ((nint)(i & 4) != 0) {
+            if ((i & 4) != 0) {
                 (x0, y0) = (y0, x0);
             }
+
             var x = NewFloat(x0);
             var y = NewFloat(y0);
             var z = @new<global::go.math.big_package.Float>().SetPrec(53);
+
             z.Mul(x, y);
             var (got, _) = z.Float64();
             var want = x0 * y0;
             if (got != want) {
                 Ꮡt.Errorf("%g * %g = %g; want %g"u8, x0, y0, got, want);
             }
+
             if (y0 == 0D) {
                 continue; // avoid division-by-zero
             }
@@ -1564,17 +1569,21 @@ public static void TestIssue6866(ж<testing.T> Ꮡt) {
         var three = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(3);
         var msix = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(-6);
         var psix = @new<global::go.math.big_package.Float>().SetPrec(prec).SetInt64(+6);
+
         var p = @new<global::go.math.big_package.Float>().SetPrec(prec);
         var z1 = @new<global::go.math.big_package.Float>().SetPrec(prec);
         var z2 = @new<global::go.math.big_package.Float>().SetPrec(prec);
+
         // z1 = 2 + 1.0/3*-6
         p.Quo(one, three);
         p.Mul(p, msix);
         z1.Add(two, p);
+
         // z2 = 2 - 1.0/3*+6
         p.Quo(one, three);
         p.Mul(p, psix);
         z2.Sub(two, p);
+
         if (z1.Cmp(z2) != 0) {
             Ꮡt.Fatalf("prec %d: got z1 = %v != z2 = %v; want z1 == z2\n"u8, prec, z1.OrTypedNil(), z2.OrTypedNil());
         }
@@ -1593,30 +1602,36 @@ public static void TestFloatQuo(ж<testing.T> Ꮡt) {
     // TODO(gri) make the test vary these precisions
     nint preci = 200; // precision of integer part
     nint precf = 20; // precision of fractional part
+
     for (nint i = 0; i < 8; i++) {
         // compute accurate (not rounded) result z
         var bits = new ΔBits(new nint[]{preci - 1}.slice());
-        if ((nint)(i & 3) != 0) {
-            bits = append(bits, (nint)(0));
+        if ((i & 3) != 0) {
+            bits = append(bits, (nint)0);
         }
-        if ((nint)(i & 2) != 0) {
+        if ((i & 2) != 0) {
             bits = append(bits, (nint)(-1));
         }
-        if ((nint)(i & 1) != 0) {
+        if ((i & 1) != 0) {
             bits = append(bits, -precf);
         }
         var z = bits.ΔFloat();
+
         // compute accurate x as z*y
         var y = NewFloat(3.14159265358979323e123D);
+
         var x = @new<global::go.math.big_package.Float>().SetPrec(z.Prec() + y.Prec()).SetMode(ToZero);
         x.Mul(z, y);
+
         // leave for debugging
         // fmt.Printf("x = %s\ny = %s\nz = %s\n", x, y, z)
+
         {
             var got = x.Acc(); if (got != Exact) {
                 Ꮡt.Errorf("got acc = %s; want exact"u8, got);
             }
         }
+
         // round accurate z for a variety of precisions and
         // modes and compare against result of x / y.
         foreach (var (_, mode) in new global::go.math.big_package.RoundingMode[]{ToZero, ToNearestEven, AwayFromZero}.array()) {
@@ -1642,6 +1657,7 @@ public static void TestFloatQuoSmoke(ж<testing.T> Ꮡt) {
     if (@long.Value) {
         n = 1000;
     }
+
     UntypedInt dprec = 3; // max. precision variation
     const nint prec = /* 10 + dprec */ 13; // enough bits to hold n precisely
     for (nint x = -n; x <= n; x++) {
@@ -1649,15 +1665,18 @@ public static void TestFloatQuoSmoke(ж<testing.T> Ꮡt) {
             if (y == 0) {
                 continue;
             }
+
             var a = (float64)x;
             var b = (float64)y;
             var c = a / b;
+
             // vary operand precision (only ok as long as a, b can be represented correctly)
             for (nint ad = -dprec; ad <= dprec; ad++) {
                 for (nint bd = -dprec; bd <= dprec; bd++) {
                     var A = @new<global::go.math.big_package.Float>().SetPrec((nuint)(prec + ad)).SetFloat64(a);
                     var B = @new<global::go.math.big_package.Float>().SetPrec((nuint)(prec + bd)).SetFloat64(b);
                     var C = @new<global::go.math.big_package.Float>().SetPrec(53).Quo(A, B); // C has float64 mantissa width
+
                     var (cc, acc) = C.Float64();
                     if (cc != c) {
                         Ꮡt.Errorf("%g/%g = %s; want %.5g\n"u8, a, b, C.Text((rune)'g', 5), c);
@@ -1727,7 +1746,6 @@ public static void TestFloatArithmeticSpecialValues(ж<testing.T> Ꮡt) {
                     throw panic("unreachable");
                     break;
                 }}
-
                 bool errnan = default!;    // set if execution of f panicked with ErrNaN
                 // protect execution of f
                 var gotʗ1 = got;
@@ -1779,44 +1797,29 @@ internal partial struct TestFloatArithmeticOverflow_type /*dyn*/ {
 public static void TestFloatArithmeticOverflow(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestFloatArithmeticOverflow_type[]{
         new(4, ToNearestEven, (rune)'+', "0"u8, "0"u8, "0"u8, Exact), // smoke test
-
         new(4, ToNearestEven, (rune)'+', "0x.8p+0"u8, "0x.8p+0"u8, "0x.8p+1"u8, Exact), // smoke test
-
         new(4, ToNearestEven, (rune)'+', "0"u8, "0x.8p2147483647"u8, "0x.8p+2147483647"u8, Exact),
         new(4, ToNearestEven, (rune)'+', "0x.8p2147483500"u8, "0x.8p2147483647"u8, "0x.8p+2147483647"u8, Below), // rounded to zero
-
         new(4, ToNearestEven, (rune)'+', "0x.8p2147483647"u8, "0x.8p2147483647"u8, "+Inf"u8, Above), // exponent overflow in +
-
         new(4, ToNearestEven, (rune)'+', "-0x.8p2147483647"u8, "-0x.8p2147483647"u8, "-Inf"u8, Below), // exponent overflow in +
-
         new(4, ToNearestEven, (rune)'-', "-0x.8p2147483647"u8, "0x.8p2147483647"u8, "-Inf"u8, Below), // exponent overflow in -
-
         new(4, ToZero, (rune)'+', "0x.fp2147483647"u8, "0x.8p2147483643"u8, "0x.fp+2147483647"u8, Below), // rounded to zero
-
         new(4, ToNearestEven, (rune)'+', "0x.fp2147483647"u8, "0x.8p2147483643"u8, "+Inf"u8, Above), // exponent overflow in rounding
-
         new(4, AwayFromZero, (rune)'+', "0x.fp2147483647"u8, "0x.8p2147483643"u8, "+Inf"u8, Above), // exponent overflow in rounding
-
         new(4, AwayFromZero, (rune)'-', "-0x.fp2147483647"u8, "0x.8p2147483644"u8, "-Inf"u8, Below), // exponent overflow in rounding
-
         new(4, ToNearestEven, (rune)'-', "-0x.fp2147483647"u8, "0x.8p2147483643"u8, "-Inf"u8, Below), // exponent overflow in rounding
-
         new(4, ToZero, (rune)'-', "-0x.fp2147483647"u8, "0x.8p2147483643"u8, "-0x.fp+2147483647"u8, Above), // rounded to zero
-
         new(4, ToNearestEven, (rune)'+', "0"u8, "0x.8p-2147483648"u8, "0x.8p-2147483648"u8, Exact),
         new(4, ToNearestEven, (rune)'+', "0x.8p-2147483648"u8, "0x.8p-2147483648"u8, "0x.8p-2147483647"u8, Exact),
         new(4, ToNearestEven, (rune)'*', "1"u8, "0x.8p2147483647"u8, "0x.8p+2147483647"u8, Exact),
         new(4, ToNearestEven, (rune)'*', "2"u8, "0x.8p2147483647"u8, "+Inf"u8, Above), // exponent overflow in *
-
         new(4, ToNearestEven, (rune)'*', "-2"u8, "0x.8p2147483647"u8, "-Inf"u8, Below), // exponent overflow in *
-
         new(4, ToNearestEven, (rune)'/', "0.5"u8, "0x.8p2147483647"u8, "0x.8p-2147483646"u8, Exact),
         new(4, ToNearestEven, (rune)'/', "0x.8p+0"u8, "0x.8p2147483647"u8, "0x.8p-2147483646"u8, Exact),
         new(4, ToNearestEven, (rune)'/', "0x.8p-1"u8, "0x.8p2147483647"u8, "0x.8p-2147483647"u8, Exact),
         new(4, ToNearestEven, (rune)'/', "0x.8p-2"u8, "0x.8p2147483647"u8, "0x.8p-2147483648"u8, Exact),
-        new(4, ToNearestEven, (rune)'/', "0x.8p-3"u8, "0x.8p2147483647"u8, "0"u8, Below)
+        new(4, ToNearestEven, (rune)'/', "0x.8p-3"u8, "0x.8p2147483647"u8, "0"u8, Below) // exponent underflow in /
     }.slice()) {
-        // exponent underflow in /
         var x = makeFloat(test.x);
         var y = makeFloat(test.y);
         var z = @new<global::go.math.big_package.Float>().SetPrec(test.prec).SetMode(test.mode);
@@ -1841,7 +1844,6 @@ public static void TestFloatArithmeticOverflow(ж<testing.T> Ꮡt) {
             throw panic("unreachable");
             break;
         }}
-
         {
             @string got = z.Text((rune)'p', 0); if (got != test.want || z.Acc() != test.acc) {
                 Ꮡt.Errorf(
@@ -1908,7 +1910,6 @@ public static void TestFloatArithmeticRounding(ж<testing.T> Ꮡt) {
             throw panic("unreachable");
             break;
         }}
-
         {
             var (got, acc) = Ꮡz.Int64(); if (got != test.want || acc != Exact) {
                 Ꮡt.Errorf("%s, %d bits: %d %c %d = %d (%s); want %d (Exact)"u8,
@@ -1950,7 +1951,6 @@ public static void TestFloatCmpSpecialValues(ж<testing.T> Ꮡt) {
                     want = +1;
                     break;
                 }}
-
                 if (got != want) {
                     Ꮡt.Errorf("(%g).Cmp(%g) = %v; want %v"u8, x, y, got, want);
                 }
@@ -1963,10 +1963,12 @@ public static void BenchmarkFloatAdd(ж<testing.B> Ꮡb) {
     var x = @new<global::go.math.big_package.Float>();
     var y = @new<global::go.math.big_package.Float>();
     var z = @new<global::go.math.big_package.Float>();
+
     foreach (var (_, prec) in new nuint[]{10, 100, 1000, 10000, 100000}.slice()) {
         x.SetPrec(prec).SetRat(NewRat(1, 3));
         y.SetPrec(prec).SetRat(NewRat(1, 6));
         z.SetPrec(prec);
+
         var xʗ1 = x;
         var yʗ1 = y;
         var zʗ1 = z;
@@ -1983,10 +1985,12 @@ public static void BenchmarkFloatSub(ж<testing.B> Ꮡb) {
     var x = @new<global::go.math.big_package.Float>();
     var y = @new<global::go.math.big_package.Float>();
     var z = @new<global::go.math.big_package.Float>();
+
     foreach (var (_, prec) in new nuint[]{10, 100, 1000, 10000, 100000}.slice()) {
         x.SetPrec(prec).SetRat(NewRat(1, 3));
         y.SetPrec(prec).SetRat(NewRat(1, 6));
         z.SetPrec(prec);
+
         var xʗ1 = x;
         var yʗ1 = y;
         var zʗ1 = z;

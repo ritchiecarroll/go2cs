@@ -6,8 +6,9 @@ namespace go.@internal;
 
 using bufio = bufio_package;
 using io = io_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using strings = strings_package;
+using global::go;
 
 partial class exportdata_package {
 
@@ -15,17 +16,18 @@ partial class exportdata_package {
 internal static nint readArchiveHeader(ж<bufio.Reader> Ꮡb, @string name) {
     // architecture-independent object file output
     UntypedInt HeaderSize = 60;
+
     array<byte> buf = new(60); /* HeaderSize */
     {
         var (_, err) = io.ReadFull(new bufio_ReaderжReader(Ꮡb), buf[..]); if (err != default!) {
             return -1;
         }
     }
-    @string aname = strings.Trim(((@string)(buf[0..16])), " "u8);
+    @string aname = strings.Trim((@string)(buf[0..16]), " "u8);
     if (!strings.HasPrefix(aname, name)) {
         return -1;
     }
-    @string asize = strings.Trim(((@string)(buf[48..58])), " "u8);
+    @string asize = strings.Trim((@string)(buf[48..58]), " "u8);
     var (i, _) = strconv.Atoi(asize);
     return i;
 }

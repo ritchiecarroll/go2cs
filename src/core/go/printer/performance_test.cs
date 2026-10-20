@@ -20,6 +20,7 @@ partial class printer_internal_test_package {
 
 internal static ж<ast.File> fileNode;
 internal static int64 fileSize;
+
 internal static ast.Decl declNode;
 internal static int64 declSize;
 
@@ -37,21 +38,26 @@ internal static readonly @string filenameᶜ = "testdata/parser.go"u8;
 // cannot initialize in init because (printer) Fprint launches goroutines.
 internal static void initialize() {
     @string filename = filenameᶜ;
+
     var (src, err) = os.ReadFile(filename);
     if (err != default!) {
         log.Fatalf("%s"u8, err);
     }
+
     (var @file, err) = parser.ParseFile(fset, filename, src, parser.ParseComments);
     if (err != default!) {
         log.Fatalf("%s"u8, err);
     }
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     testprint(new printer_test_package.bytes_BufferжWriter(Ꮡbuf), new ast.FileжNode(@file));
     if (!bytes.Equal(buf.Bytes(), src)) {
         log.Fatalf("print error: %s not idempotent"u8, filename);
     }
+
     fileNode = @file;
     fileSize = (int64)len(src);
+
     foreach (var (_, decl) in (~@file).Decls) {
         // The first global variable, which is pretty short:
         //

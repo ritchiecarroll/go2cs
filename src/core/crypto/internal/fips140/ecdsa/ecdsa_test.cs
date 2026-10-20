@@ -55,6 +55,7 @@ internal static void testRandomPoint<P>(ж<testing.T> Ꮡt, ж<global::go.crypto
     testingOnlyRejectionSamplingLooped = () => {
         loopCount++;
     };
+
     // A sequence of all ones will generate 2^N-1, which should be rejected.
     // (Unless, for example, we are masking too many bits.)
     ref var r = ref heap<io.Reader>(out var Ꮡr);
@@ -77,6 +78,7 @@ internal static void testRandomPoint<P>(ж<testing.T> Ꮡt, ж<global::go.crypto
         Ꮡt.Error(overflowWasNotRejectedˢ);
     }
     loopCount = 0;
+
     // A sequence of all zeroes will generate zero, which should be rejected.
     r = io.MultiReader(new ecdsa_internal_test_package.bytes_ReaderжReader(bytes.NewReader(bytes.Repeat(new byte[]{0}.slice(), 100))), rand.Reader);
     {
@@ -97,6 +99,7 @@ internal static void testRandomPoint<P>(ж<testing.T> Ꮡt, ж<global::go.crypto
         Ꮡt.Error(zeroWasNotRejectedˢ);
     }
     loopCount = 0;
+
     // P-256 has a 2⁻³² chance of randomly hitting a rejection. For P-224 it's
     // 2⁻¹¹², for P-384 it's 2⁻¹⁹⁴, and for P-521 it's 2⁻²⁶², so if we hit in
     // tests, something is horribly wrong. (For example, we are masking the

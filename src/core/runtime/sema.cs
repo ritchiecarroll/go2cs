@@ -58,7 +58,7 @@ partial struct semTableᴛ1 /*dyn*/ {
 partial struct semTable /*[251]semTableᴛ1*/;
 
 internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
-    return Ꮡ(t.Value, (((uintptr)Ꮡaddr >> (int)(3))) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
+    return Ꮡ(t.Value, ((uintptr)Ꮡaddr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
 
 // sync_runtime_Semacquire should be an internal detail,
@@ -110,8 +110,12 @@ internal static void sync_runtime_SemacquireRWMutex(ж<uint32> Ꮡaddr, bool lif
 }
 
 //go:linkname sync_runtime_SemacquireWaitGroup sync.runtime_SemacquireWaitGroup
-internal static void sync_runtime_SemacquireWaitGroup(ж<uint32> Ꮡaddr) {
-    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, waitReasonSyncWaitGroupWait);
+internal static void sync_runtime_SemacquireWaitGroup(ж<uint32> Ꮡaddr, bool synctestDurable) {
+    var reason = waitReasonSyncWaitGroupWait;
+    if (synctestDurable) {
+        reason = waitReasonSynctestWaitGroupWait;
+    }
+    semacquire1(Ꮡaddr, false, semaBlockProfile, 0, reason);
 }
 
 //go:linkname poll_runtime_Semrelease internal/poll.runtime_Semrelease
@@ -164,18 +168,21 @@ internal static bool cansemacquire(ж<uint32> Ꮡaddr) {
 // queue adds s to the blocked goroutines in semaRoot.
 internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sudog> Ꮡs, bool lifo) {
     ref var root = ref Ꮡroot.DerefOrNull();
-    ref var addr = ref Ꮡaddr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.g = getg();
-    s.elem = @unsafe.Pointer.FromPinnedBox(Ꮡaddr);
+    s.elem.set(@unsafe.Pointer.FromPinnedBox(Ꮡaddr));
+    // Storing this pointer so that we can trace the semaphore address
+    // from the blocked goroutine when checking for goroutine leaks.
+    s.g.Value.waiting = Ꮡs;
     s.next = default!;
     s.prev = default!;
     s.waiters = 0;
+
     ж<sudog> last = default!;
     var pt = Ꮡroot.of(semaRoot.Ꮡtreap);
     for (var t = pt.ValueSlot; t != nil; t = pt.ValueSlot) {
-        if ((~t).elem == @unsafe.Pointer.FromPinnedBox(Ꮡaddr)) {
+        if ((uintptr)Ꮡaddr == t.of(sudog.Ꮡelem).uintptr()) {
             // Already have addr in list.
             if (lifo){
                 // Substitute s in t's place in treap.
@@ -221,12 +228,13 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
             return;
         }
         last = t;
-        if ((uintptr)Ꮡaddr < (uintptr)(~t).elem){
+        if ((uintptr)Ꮡaddr < t.of(sudog.Ꮡelem).uintptr()){
             pt = t.of(sudog.Ꮡprev);
         } else {
             pt = t.of(sudog.Ꮡnext);
         }
     }
+
     // Add s as new leaf in tree of unique addrs.
     // The balanced tree is a treap using ticket as the random heap priority.
     // That is, it is a binary tree ordered according to the elem addresses,
@@ -238,9 +246,10 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
     //
     // s.ticket compared with zero in couple of places, therefore set lowest bit.
     // It will not affect treap's quality noticeably.
-    s.ticket = (uint32)(cheaprand() | 1);
+    s.ticket = cheaprand() | 1;
     s.parent = last;
     pt.ValueSlot = Ꮡs;
+
     // Rotate up into tree according to ticket (priority).
     while (s.parent != nil && (~s.parent).ticket > s.ticket) {
         if ((~s.parent).prev == Ꮡs){
@@ -264,22 +273,24 @@ internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr, ж<sud
 internal static (ж<sudog> found, int64 now, int64 tailtime) dequeue(this ж<semaRoot> Ꮡroot, ж<uint32> Ꮡaddr) {
     int64 now = default!;
     int64 tailtime = default!;
-
     ref var root = ref Ꮡroot.DerefOrNull();
-    ref var addr = ref Ꮡaddr.DerefOrNull();
+
     var ps = Ꮡroot.of(semaRoot.Ꮡtreap);
     var s = ps.ValueSlot;
+
     for (; s != nil; s = ps.ValueSlot) {
-        if ((~s).elem == @unsafe.Pointer.FromPinnedBox(Ꮡaddr)) {
+        if ((uintptr)Ꮡaddr == s.of(sudog.Ꮡelem).uintptr()) {
             goto Found;
         }
-        if ((uintptr)Ꮡaddr < (uintptr)(~s).elem){
+
+        if ((uintptr)Ꮡaddr < s.of(sudog.Ꮡelem).uintptr()){
             ps = s.of(sudog.Ꮡprev);
         } else {
             ps = s.of(sudog.Ꮡnext);
         }
     }
     return (default!, 0, 0);
+
 Found:
     now = (int64)0;
     if ((~s).acquiretime != 0) {
@@ -338,8 +349,10 @@ Found:
             tailtime = s.Value.acquiretime;
         }
     }
+    // Goroutine is no longer blocked. Clear the waiting pointer.
+    s.Value.g.Value.waiting = default!;
     s.Value.parent = default!;
-    s.Value.elem = default!;
+    s.of(sudog.Ꮡelem).set(nil);
     s.Value.next = default!;
     s.Value.prev = default!;
     s.Value.ticket = 0;
@@ -358,12 +371,14 @@ internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) {
     var Δp = x.parent;
     var y = x.next;
     var b = y.Value.prev;
+
     y.Value.prev = Ꮡx;
     x.parent = y;
     x.next = b;
     if (b != nil) {
         b.Value.parent = Ꮡx;
     }
+
     y.Value.parent = Δp;
     if (Δp == nil){
         root.treap = y;
@@ -390,12 +405,14 @@ internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) {
     var Δp = y.parent;
     var x = y.prev;
     var b = x.Value.next;
+
     x.Value.next = Ꮡy;
     y.parent = x;
     y.prev = b;
     if (b != nil) {
         b.Value.parent = Ꮡy;
     }
+
     x.Value.parent = Δp;
     if (Δp == nil){
         root.treap = x;
@@ -456,14 +473,20 @@ internal static void notifyListWait(ж<notifyList> Ꮡl, uint32 t) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     lockWithRank(Ꮡl.of(notifyList.Ꮡlock), lockRankNotifyList);
+
     // Return right away if this ticket has already been notified.
     if (less(t, l.notify)) {
         unlock(Ꮡl.of(notifyList.Ꮡlock));
         return;
     }
+
     // Enqueue itself.
     var s = acquireSudog();
     s.Value.g = getg();
+    // Storing this pointer so that we can trace the condvar address
+    // from the blocked goroutine when checking for goroutine leaks.
+    s.of(sudog.Ꮡelem).set(@unsafe.Pointer.FromPinnedBox(Ꮡl));
+    s.Value.g.Value.waiting = s;
     s.Value.ticket = t;
     s.Value.releasetime = 0;
     var t0 = (int64)0;
@@ -481,8 +504,15 @@ internal static void notifyListWait(ж<notifyList> Ꮡl, uint32 t) {
     if (t0 != 0) {
         blockevent((~s).releasetime - t0, 2);
     }
+    // Goroutine is no longer blocked. Clear up its waiting pointer,
+    // and clean up the sudog before releasing it.
+    s.Value.g.Value.waiting = default!;
+    s.of(sudog.Ꮡelem).set(nil);
     releaseSudog(s);
 }
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string semaphoreWakeOfSynctestˢ = "semaphore wake of synctest goroutine from outside bubble"u8;
 
 // notifyListNotifyAll notifies all entries in the list.
 //
@@ -495,25 +525,28 @@ internal static void notifyListNotifyAll(ж<notifyList> Ꮡl) {
     if (Ꮡl.of(notifyList.Ꮡwait).Load() == atomic.Load(Ꮡl.of(notifyList.Ꮡnotify))) {
         return;
     }
+
     // Pull the list out into a local variable, waiters will be readied
     // outside the lock.
     lockWithRank(Ꮡl.of(notifyList.Ꮡlock), lockRankNotifyList);
     var s = l.head;
     l.head = default!;
     l.tail = default!;
+
     // Update the next ticket to be notified. We can set it to the current
     // value of wait because any previous waiters are already in the list
     // or will notice that they have already been notified when trying to
     // add themselves to the list.
     atomic.Store(Ꮡl.of(notifyList.Ꮡnotify), Ꮡl.of(notifyList.Ꮡwait).Load());
     unlock(Ꮡl.of(notifyList.Ꮡlock));
+
     // Go through the local list and ready all waiters.
     while (s != nil) {
         var next = s.Value.next;
         s.Value.next = default!;
-        if ((~(~s).g).syncGroup != nil && (~getg()).syncGroup != (~(~s).g).syncGroup) {
+        if ((~(~s).g).bubble != nil && (~getg()).bubble != (~(~s).g).bubble) {
             println((@string)"semaphore wake of synctest goroutine"u8, (~(~s).g).goid, (@string)"from outside bubble"u8);
-            throw panic("semaphore wake of synctest goroutine from outside bubble");
+            fatal(semaphoreWakeOfSynctestˢ);
         }
         readyWithTime(ref (s).DerefOrNull(), 4);
         s = next;
@@ -531,15 +564,19 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
     if (Ꮡl.of(notifyList.Ꮡwait).Load() == atomic.Load(Ꮡl.of(notifyList.Ꮡnotify))) {
         return;
     }
+
     lockWithRank(Ꮡl.of(notifyList.Ꮡlock), lockRankNotifyList);
+
     // Re-check under the lock if we need to do anything.
     var t = l.notify;
     if (t == Ꮡl.of(notifyList.Ꮡwait).Load()) {
         unlock(Ꮡl.of(notifyList.Ꮡlock));
         return;
     }
+
     // Update the next notify ticket number.
     atomic.Store(Ꮡl.of(notifyList.Ꮡnotify), t + 1);
+
     // Try to find the g that needs to be notified.
     // If it hasn't made it to the list yet we won't find it,
     // but it won't park itself once it sees the new notify number.
@@ -553,7 +590,7 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
     // be too long. This applies even when the g is missing:
     // it hasn't yet gotten to sleep and has lost the race to
     // the (few) other g's that we find on the list.
-    for (var (Δp, s) = (((ж<sudog>)nil), l.head); s != nil; (Δp, s) = (s, s.Value.next)) {
+    for (var (Δp, s) = ((ж<sudog>)nil, l.head); s != nil; (Δp, s) = (s, s.Value.next)) {
         if ((~s).ticket == t) {
             var n = s.Value.next;
             if (Δp != nil){
@@ -566,9 +603,9 @@ internal static void notifyListNotifyOne(ж<notifyList> Ꮡl) {
             }
             unlock(Ꮡl.of(notifyList.Ꮡlock));
             s.Value.next = default!;
-            if ((~(~s).g).syncGroup != nil && (~getg()).syncGroup != (~(~s).g).syncGroup) {
+            if ((~(~s).g).bubble != nil && (~getg()).bubble != (~(~s).g).bubble) {
                 println((@string)"semaphore wake of synctest goroutine"u8, (~(~s).g).goid, (@string)"from outside bubble"u8);
-                throw panic("semaphore wake of synctest goroutine from outside bubble");
+                fatal(semaphoreWakeOfSynctestˢ);
             }
             readyWithTime(ref (s).DerefOrNull(), 4);
             return;

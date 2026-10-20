@@ -15,6 +15,7 @@ internal static readonly @string computerNameExˢ = "ComputerNameEx"u8;
 internal static (@string name, error err) hostname() {
     // Use PhysicalDnsHostname to uniquely identify host in a cluster
     const uint32 format = /* windows.ComputerNamePhysicalDnsHostname */ 5;
+
     ref var n = ref heap<uint32>(out var Ꮡn);
     n = (uint32)64;
     while (ᐧ) {
@@ -26,6 +27,7 @@ internal static (@string name, error err) hostname() {
         if (!AreEqual(errΔ1, syscall.ERROR_MORE_DATA)) {
             return ("", NewSyscallError(computerNameExˢ, errΔ1));
         }
+
         // If we received an ERROR_MORE_DATA, but n doesn't get larger,
         // something has gone wrong and we may be in an infinite loop
         if (n <= (uint32)len(b)) {

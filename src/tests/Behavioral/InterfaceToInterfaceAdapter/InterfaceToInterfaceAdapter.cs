@@ -14,8 +14,9 @@ internal static @string labelOf(localLabel l) {
 }
 
 internal static void Main() {
-    CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter"u8, Temp: 21D);
+    CrossPkgLib.Labeled foreign = new CrossPkgLib.Sensor(Name: "adapter", Temp: 21D);
     localLabel local = new CrossPkgLib_LabeledᴠlocalLabel(foreign);
+
     fmt.Println(labelOf(new CrossPkgLib_LabeledᴠlocalLabel(foreign)));
     fmt.Println(local.Label());
     fmt.Println(CrossPkgLib.Describe(foreign));

@@ -12,7 +12,6 @@ using Δreflect = reflect_package;
 
 partial class reflect_test_package {
 
-
 partial struct sourceAllᴛ1 /*dyn*/ {
     public reflectꓸValue Bool;
     public reflectꓸValue String;
@@ -31,7 +30,6 @@ internal static sourceAllᴛ1 sourceAll = new sourceAllᴛ1(
     SliceAny: ValueOf(@new<slice<any>>()).Elem(),
     MapStringAny: ValueOf(@new<map<@string, any>>()).Elem()
 );
-
 
 partial struct sinkAllᴛ1 /*dyn*/ {
     public bool RawBool;
@@ -195,6 +193,7 @@ public static void BenchmarkIsZero(ж<Δtesting.B> Ꮡb) {
     var s = new BenchmarkIsZero_s();
     s.ArrayInt_1024_NoZero[512] = 1;
     var source = ValueOf(s);
+
     for (nint i = 0; i < source.NumField(); i++) {
         @string name = source.Type().Field(i).Name;
         ref var value = ref heap<reflectꓸValue>(out var Ꮡvalue);
@@ -231,6 +230,7 @@ internal partial struct BenchmarkSetZero_type /*dyn*/ {
 
 public static void BenchmarkSetZero(ж<Δtesting.B> Ꮡb) {
     var source = ValueOf(@new<BenchmarkSetZero_type>()).Elem();
+
     for (nint i = 0; i < source.NumField(); i++) {
         @string name = source.Type().Field(i).Name;
         ref var value = ref heap<reflectꓸValue>(out var Ꮡvalue);
@@ -307,6 +307,7 @@ public static void BenchmarkCallMethod(ж<Δtesting.B> Ꮡb) {
 
     b.ReportAllocs();
     var z = @new<myint>();
+
     var v = ValueOf(z.inc);
     for (nint i = 0; i < b.N; i++) {
         v.Call(default!);
@@ -374,12 +375,13 @@ public static void BenchmarkPtrTo(ж<Δtesting.B> Ꮡb) {
     var ptrToThis = ValueOf(t).Elem().FieldByName(ptrToThisˢ);
     if (!ptrToThis.IsValid()) {
         Ꮡb.Skipf("%v has no ptrToThis field; was it removed from rtype?"u8, t); // TODO fix this at top of refactoring
+        // b.Fatalf("%v has no ptrToThis field; was it removed from rtype?", t)
     }
-    // b.Fatalf("%v has no ptrToThis field; was it removed from rtype?", t)
     if (ptrToThis.Int() != 0) {
         Ꮡb.Fatalf("%v.ptrToThis unexpectedly nonzero"u8, t);
     }
     b.ResetTimer();
+
     // Now benchmark calling PointerTo on it: we'll have to hit the ptrMap cache on
     // every call.
     var tʗ1 = t;
@@ -480,7 +482,7 @@ internal partial struct BenchmarkMap_tests /*dyn*/ {
 }
 
 public static void BenchmarkMap(ж<Δtesting.B> Ꮡb) {
-    var value = ValueOf(((BenchmarkMap_V)nil));
+    var value = ValueOf((BenchmarkMap_V)nil);
     var stringKeys = new @string[]{}.slice();
     var mapOfStrings = new map<@string, BenchmarkMap_V>{};
     var uint64Keys = new uint64[]{}.slice();
@@ -491,18 +493,22 @@ public static void BenchmarkMap(ж<Δtesting.B> Ꮡb) {
         @string stringKey = fmt.Sprintf("key%d"u8, i);
         stringKeys = append(stringKeys, stringKey);
         mapOfStrings[stringKey] = default!;
+
         var uint64Key = (uint64)i;
         uint64Keys = append(uint64Keys, uint64Key);
         mapOfUint64s[uint64Key] = default!;
-        BenchmarkMap_S userStringKey = ((BenchmarkMap_S)fmt.Sprintf("key%d"u8, i));
+
+        BenchmarkMap_S userStringKey = (BenchmarkMap_S)fmt.Sprintf("key%d"u8, i);
         userStringKeys = append(userStringKeys, userStringKey);
         mapOfUserStrings[userStringKey] = default!;
     }
+
     var tests = new BenchmarkMap_tests[]{
         new("StringKeys"u8, ValueOf(mapOfStrings), ValueOf(stringKeys), value),
         new("Uint64Keys"u8, ValueOf(mapOfUint64s), ValueOf(uint64Keys), value),
         new("UserStringKeys"u8, ValueOf(mapOfUserStrings), ValueOf(userStringKeys), value)
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new BenchmarkMap_tests(), out var Ꮡtt);
         tt = vᴛ1;

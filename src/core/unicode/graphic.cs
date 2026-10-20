@@ -9,25 +9,15 @@ partial class unicode_package {
 
 // Bit masks for each code point under U+0100, for fast lookup.
 internal static UntypedInt pC => /* 1 << iota */ 1; // a control character.
-
 internal static UntypedInt pP => 2; // a punctuation character.
-
 internal static UntypedInt pN => 4; // a numeral.
-
 internal static UntypedInt pS => 8; // a symbolic character.
-
 internal static UntypedInt pZ => 16; // a spacing character.
-
 internal static UntypedInt pLu => 32; // an upper-case letter.
-
 internal static UntypedInt pLl => 64; // a lower-case letter.
-
 internal static UntypedInt pp => 128; // a printable character according to Go's definition.
-
 internal static UntypedInt pg => /* pp | pZ */ 144; // a graphical character according to the Unicode definition.
-
 internal static UntypedInt pLo => /* pLl | pLu */ 96; // a letter that is neither upper nor lower case.
-
 internal static UntypedInt pLmask => /* pLo */ 96;
 
 // GraphicRanges defines the set of graphic characters according to Unicode.
@@ -147,7 +137,6 @@ public static bool IsSpace(rune r) {
         case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 0x85 or 0xA0: {
             return true;
         }}
-
         return false;
     }
     return isExcludingLatin(ref (White_Space).DerefOrNull(), r);

@@ -7,9 +7,6 @@ using strings = strings_package;
 
 partial class template_package {
 
-// Skip handler names from
-// https://www.w3.org/TR/html5/webappapis.html#event-handlers-on-elements,-document-objects,-and-window-objects
-// since we have special handling in attrType.
 // attrTypeMap[n] describes the value of the given attribute.
 // If an attribute affects (or can mask) the encoding or interpretation of
 // other content, or affects the contents, idempotency, or credentials of a
@@ -91,6 +88,9 @@ internal static map<@string, contentType> attrTypeMap = new map<@string, content
     ["multiple"u8] = contentTypePlain,
     ["name"u8] = contentTypePlain,
     ["novalidate"u8] = contentTypeUnsafe,
+    // Skip handler names from
+    // https://www.w3.org/TR/html5/webappapis.html#event-handlers-on-elements,-document-objects,-and-window-objects
+    // since we have special handling in attrType.
     ["open"u8] = contentTypePlain,
     ["optimum"u8] = contentTypePlain,
     ["pattern"u8] = contentTypeUnsafe,
@@ -167,6 +167,7 @@ internal static contentType attrType(@string name) {
     if (strings.HasPrefix(name, "on"u8)) {
         return contentTypeJS;
     }
+
     // Heuristics to prevent "javascript:..." injection in custom
     // data attributes and custom attributes like g:tweetUrl.
     // https://www.w3.org/TR/html5/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes

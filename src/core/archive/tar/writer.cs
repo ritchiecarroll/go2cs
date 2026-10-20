@@ -81,6 +81,7 @@ public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
         }
     }
     tw.hdr = hdr; // Shallow copy of Header
+
     // Avoid usage of the legacy TypeRegA flag, and automatically promote
     // it to use TypeReg or TypeDir.
     if (tw.hdr.Typeflag == TypeRegA) {
@@ -90,6 +91,7 @@ public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
             tw.hdr.Typeflag = TypeReg;
         }
     }
+
     // Round ModTime and ignore AccessTime and ChangeTime unless
     // the format is explicitly chosen.
     // This ensures nominal usage of WriteHeader (without specifying the format)
@@ -100,6 +102,7 @@ public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
         tw.hdr.AccessTime = new time.Time(nil);
         tw.hdr.ChangeTime = new time.Time(nil);
     }
+
     var (allowedFormats, paxHdrs, err) = tw.hdr.allowedFormats();
     switch (ᐧ) {
     case {} when allowedFormats.has(FormatUSTAR): {
@@ -117,7 +120,6 @@ public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     default: {
         return err; // Non-fatal error
     }}
-
 }
 
 internal static error writeUSTARHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
@@ -131,6 +133,7 @@ internal static error writeUSTARHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr)
             (namePrefix, hdr.Name) = (prefix, suffix);
         }
     }
+
     // Pack the main header.
     ref var f = ref heap(new formatter(), out var Ꮡf);
     var blk = Ꮡtw.templateV7Plus(Ꮡhdr, new Action<slice<byte>, @string>(Ꮡf.formatString), new Action<slice<byte>, int64>(Ꮡf.formatOctal));
@@ -152,6 +155,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
 
     @string realName = hdr.Name;
     var realSize = hdr.Size;
+
     // TODO(dsnet): Re-enable this when adding sparse support.
     // See https://golang.org/issue/22735
     /*
@@ -187,6 +191,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
 		}
 	*/
     _ = realSize;
+
     // Write PAX records to the output.
     var isGlobal = hdr.Typeflag == TypeXGlobalHeader;
     if (len(paxHdrs) > 0 || isGlobal) {
@@ -200,6 +205,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
             }
             Ꮡbuf.WriteString(rec);
         }
+
         // Write the extended header file.
         @string name = default!;
         byte flag = default!;
@@ -224,6 +230,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
             }
         }
     }
+
     // Pack the main header.
     ref var f = ref heap(new formatter(), out var Ꮡf);                   // Ignore errors since they are expected
     var fmtStr = (slice<byte> b, @string s) => {
@@ -236,6 +243,7 @@ internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, m
             return err;
         }
     }
+
     // TODO(dsnet): Re-enable this when adding sparse support.
     // See https://golang.org/issue/22735
     /*
@@ -276,6 +284,7 @@ internal static error writeGNUHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
             }
         }
     }
+
     // Pack the main header.
     ref var f = ref heap(new formatter(), out var Ꮡf);                   // Ignore errors since they are expected
     sparseDatas spd = default!;
@@ -331,6 +340,7 @@ internal static error writeGNUHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
             return err;
         }
     }
+
     // Write the extended sparse map and setup the sparse writer if necessary.
     if (len(spd) > 0) {
         // Use tw.w since the sparse map is not accounted for in hdr.Size.
@@ -359,10 +369,12 @@ internal static ж<block> templateV7Plus(this ж<Writer> Ꮡtw, ж<Header> Ꮡhd
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     tw.blk.reset();
+
     var modTime = hdr.ModTime;
     if (modTime.IsZero()) {
         modTime = time.Unix(0, 0);
     }
+
     var v7 = Ꮡtw.of(Writer.Ꮡblk).toV7();
     v7.typeFlag()[0] = hdr.Typeflag;
     fmtStr(v7.name(), hdr.Name);
@@ -372,11 +384,13 @@ internal static ж<block> templateV7Plus(this ж<Writer> Ꮡtw, ж<Header> Ꮡhd
     fmtNum(v7.gid(), (int64)hdr.Gid);
     fmtNum(v7.size(), hdr.Size);
     fmtNum(v7.modTime(), modTime.Unix());
+
     var ustar = Ꮡtw.of(Writer.Ꮡblk).toUSTAR();
     fmtStr(ustar.userName(), hdr.Uname);
     fmtStr(ustar.groupName(), hdr.Gname);
     fmtNum(ustar.devMajor(), hdr.Devmajor);
     fmtNum(ustar.devMinor(), hdr.Devminor);
+
     return Ꮡtw.of(Writer.Ꮡblk);
 }
 
@@ -387,12 +401,14 @@ internal static error writeRawFile(this ж<Writer> Ꮡtw, @string name, @string 
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     tw.blk.reset();
+
     // Best effort for the filename.
     name = toASCII(name);
     if (len(name) > nameSize) {
         name = name[..(int)(nameSize)];
     }
     name = strings.TrimRight(name, "/"u8);
+
     formatter f = default!;
     var v7 = Ꮡtw.of(Writer.Ꮡblk).toV7();
     v7.typeFlag()[0] = flag;
@@ -406,6 +422,7 @@ internal static error writeRawFile(this ж<Writer> Ꮡtw, @string name, @string 
     if (f.err != default!) {
         return f.err; // Only occurs if size condition is violated
     }
+
     // Write the header and data.
     {
         var errΔ1 = tw.writeRawHeader(Ꮡtw.of(Writer.Ꮡblk), (int64)len(data), flag); if (errΔ1 != default!) {
@@ -460,11 +477,20 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
             if (err != default!) {
                 return err;
             }
-            // TODO(#49580): Handle symlinks when fs.ReadLinkFS is available.
-            if (!d.IsDir() && !info.Mode().IsRegular()) {
-                return errors.New(tarCannotAddNonRegularˢ);
+            @string linkTarget = ""u8;
+            {
+                var typ = d.Type(); if (typ == fs.ModeSymlink){
+                    error errΔ1 = default!;
+                    (linkTarget, errΔ1) = fs.ReadLink(fsys, name);
+                    if (errΔ1 != default!) {
+                        return errΔ1;
+                    }
+                } else 
+                if (!typ.IsRegular() && typ != fs.ModeDir) {
+                    return errors.New(tarCannotAddNonRegularˢ);
+                }
             }
-            (var h, err) = FileInfoHeader(info, ""u8);
+            (var h, err) = FileInfoHeader(info, linkTarget);
             if (err != default!) {
                 return err;
             }
@@ -473,11 +499,11 @@ public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) {
                 h.Value.Name += "/"u8;
             }
             {
-                var errΔ1 = Ꮡtw.WriteHeader(h); if (errΔ1 != default!) {
-                    return errΔ1;
+                var errΔ2 = Ꮡtw.WriteHeader(h); if (errΔ2 != default!) {
+                    return errΔ2;
                 }
             }
-            if (d.IsDir()) {
+            if (!d.Type().IsRegular()) {
                 return default!;
             }
             (var f, err) = fsys.Open(name);
@@ -507,6 +533,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
     if (name[length - 1] == (rune)'/') {
         length--;
     }
+
     nint i = strings.LastIndex(name.slice(0, length), "/"u8);
     nint nlen = len(name) - i - 1; // nlen is length of suffix
     nint plen = i; // plen is length of prefix
@@ -565,11 +592,13 @@ public static error Close(this ref Writer tw) {
     if (tw.err != default!) {
         return tw.err;
     }
+
     // Trailer: two zero blocks.
     var err = tw.Flush();
     for (nint i = 0; i < 2 && err == default!; i++) {
         (_, err) = tw.w.Write(zeroBlock[..]);
     }
+
     // Ensure all future actions are invalid.
     tw.err = ErrWriteAfterClose;
     return err; // Report IO errors
@@ -603,7 +632,6 @@ internal static (nint n, error err) Write(this ref regFileWriter fw, slice<byte>
     default: {
         return (n, default!);
     }}
-
 }
 
 internal partial struct ReadFrom_dst /*dyn*/ {
@@ -639,17 +667,16 @@ internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<by
     if (overwrite) {
         b = b.slice(0, (nint)(sw.logicalRemaining()));
     }
+
     var b0 = b;
     var endPos = sw.pos + (int64)len(b);
     while (endPos > sw.pos && err == default!) {
         nint nf = default!;      // Bytes written in fragment
         var (dataStart, dataEnd) = (sw.sp[0].Offset, sw.sp[0].endOffset());
-        if (sw.pos < dataStart){
-            // In a hole fragment
+        if (sw.pos < dataStart){ // In a hole fragment
             var bf = b.slice(0, (nint)(min((int64)len(b), dataStart - sw.pos)));
             (nf, err) = new zeroWriter(nil).Write(bf);
-        } else {
-            // In a data fragment
+        } else { // In a data fragment
             var bf = b.slice(0, (nint)(min((int64)len(b), dataEnd - sw.pos)));
             (nf, err) = sw.fw.Write(bf);
         }
@@ -659,6 +686,7 @@ internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<by
             sw.sp = sw.sp[1..]; // Ensure last fragment always remains
         }
     }
+
     n = len(b0) - len(b);
     switch (ᐧ) {
     case {} when AreEqual(err, ErrWriteTooLong): {
@@ -676,14 +704,13 @@ internal static (nint n, error err) Write(this ref sparseFileWriter sw, slice<by
     default: {
         return (n, default!);
     }}
-
 }
 
 internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, io.Reader r) {
     int64 n = default!;
     error err = default!;
-
     ref var sw = ref Ꮡsw.DerefOrNull();
+
     var (rs, ok) = r._<io.ReadSeeker>(ᐧ);
     if (ok) {
         {
@@ -695,21 +722,20 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
     if (!ok) {
         return io.Copy(new ReadFrom_dst(new sparseFileWriterжWriter(Ꮡsw)), r);
     }
+
     bool readLastByte = default!;
     var pos0 = sw.pos;
     while (sw.logicalRemaining() > 0 && !readLastByte && err == default!) {
         int64 nf = default!;          // Size of fragment
         var (dataStart, dataEnd) = (sw.sp[0].Offset, sw.sp[0].endOffset());
-        if (sw.pos < dataStart){
-            // In a hole fragment
+        if (sw.pos < dataStart){ // In a hole fragment
             nf = dataStart - sw.pos;
             if (sw.physicalRemaining() == 0) {
                 readLastByte = true;
                 nf--;
             }
             (_, err) = rs.Seek(nf, io.SeekCurrent);
-        } else {
-            // In a data fragment
+        } else { // In a data fragment
             nf = dataEnd - sw.pos;
             (nf, err) = io.CopyN(sw.fw, rs, nf);
         }
@@ -718,12 +744,14 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
             sw.sp = sw.sp[1..]; // Ensure last fragment always remains
         }
     }
+
     // If the last fragment is a hole, then seek to 1-byte before EOF, and
     // read a single byte to ensure the file is the right size.
     if (readLastByte && err == default!) {
         (_, err) = mustReadFull(rs, new byte[]{0}.slice());
         sw.pos++;
     }
+
     n = sw.pos - pos0;
     switch (ᐧ) {
     case {} when AreEqual(err, io.EOF): {
@@ -741,7 +769,6 @@ internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, i
     default: {
         return (n, ensureEOF(rs));
     }}
-
 }
 
 internal static int64 logicalRemaining(this sparseFileWriter sw) {
@@ -778,7 +805,6 @@ internal static error ensureEOF(io.Reader r) {
     default: {
         return err;
     }}
-
 }
 
 } // end tar_package

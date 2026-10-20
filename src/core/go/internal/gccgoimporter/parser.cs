@@ -73,7 +73,7 @@ internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Read
         Ꮡp.Value.error(msg);
     };
     p.scanner.Value.Mode = (nuint)((nuint)(UntypedInt)((UntypedInt)(scanner.ScanIdents | scanner.ScanInts) | scanner.ScanFloats) | (nuint)scanner.ScanStrings);
-    p.scanner.Value.Whitespace = (uint64)((1 << (int)((rune)'\t')) | 4294967296L);
+    p.scanner.Value.Whitespace = (uint64)(1 << (int)((rune)'\t') | 4294967296L);
     p.scanner.Value.Filename = filename; // for good error messages
     p.next();
 }
@@ -147,7 +147,7 @@ internal static @string parseUnquotedString(this ref parser p) {
     Ꮡb.WriteString(p.scanner.TokenText());
     // This loop needs to examine each character before deciding whether to consume it. If we see a semicolon,
     // we need to let it be consumed by p.next().
-    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && (uint64)((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
+    for (var ch = p.scanner.Peek(); ch != (rune)'\n' && ch != (rune)';' && ch != scanner.EOF && ((~p.scanner).Whitespace & (((uint64)1).Lsh((nuint)ch))) == 0; ch = p.scanner.Peek()) {
         Ꮡb.WriteRune(ch);
         p.scanner.Next();
     }
@@ -164,7 +164,6 @@ internal static void next(this ref parser p) {
     else { /* default: */
         p.lit = ""u8;
     }
-
 }
 
 internal static (@string path, @string name) parseQualifiedName(this ref parser p) {
@@ -186,20 +185,21 @@ internal static (@string pkgpath, @string name) parseQualifiedNameStr(this ref p
     if (parts[0] == "") {
         parts = parts[1..];
     }
+
     switch (len(parts)) {
     case 0: {
         p.errorf("malformed qualified name: %q"u8, unquotedName);
         break;
     }
     case 1: {
+        // unqualified name
         pkgpath = p.pkgpath;
         name = parts[0];
         break;
     }
     default: {
-        pkgpath = strings.Join(parts.slice(0, len(parts) - 1), // unqualified name
- // qualified name, which may contain periods
- "."u8);
+        // qualified name, which may contain periods
+        pkgpath = strings.Join(parts.slice(0, len(parts) - 1), "."u8);
         name = parts[len(parts) - 1];
         break;
     }}
@@ -271,8 +271,8 @@ internal static readonly object embeddedFieldExpectedˢ = (@string)"embedded fie
 internal static (ж<types.Var> field, @string tag) parseField(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
     ж<types.Var> field = default!;
     @string tag = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     @string name = p.parseName();
     var (typ, n) = Ꮡp.parseTypeExtended(Ꮡpkg);
     var anon = false;
@@ -313,11 +313,11 @@ internal static readonly @string retˢ = "$ret"u8;
 internal static readonly @string escˢ = "esc"u8;
 
 // Param = Name ["..."] Type .
-internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
+internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) {
     ж<types.Var> param = default!;
     bool isVariadic = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     @string name = p.parseName();
     // Ignore names invented for inlinable functions.
     if (strings.HasPrefix(name, "p."u8) || strings.HasPrefix(name, "r."u8) || strings.HasPrefix(name, retˢ)) {
@@ -342,6 +342,7 @@ internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser
         typ = new types.SliceжΔType(types.NewSlice(typ));
     }
     param = types.NewParam(token.NoPos, Ꮡpkg, name, typ);
+    param.SetKind(kind);
     return (param, isVariadic);
 }
 
@@ -350,7 +351,7 @@ internal static ж<types.Var> parseVar(this ж<parser> Ꮡp, ж<types.Package> �
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string name = p.parseName();
-    var v = types.NewVar(token.NoPos, Ꮡpkg, name, Ꮡp.parseType(Ꮡpkg));
+    var v = types.NewVar(token.NoPos, Ꮡpkg, name, Ꮡp.parseType(Ꮡpkg)); // (types.PackageVar)
     if (name[0] == (rune)'.' || name[0] == (rune)'<') {
         // This is an unexported variable,
         // or a variable defined in a different package.
@@ -367,8 +368,8 @@ internal static readonly @string convertˢ = "convert"u8;
 internal static (constant.Value val, typesꓸType typ) parseConversion(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
     constant.Value val = default!;
     typesꓸType typ = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     p.expectKeyword(convertˢ);
     p.expect((rune)'(');
     typ = Ꮡp.parseType(Ꮡpkg);
@@ -389,8 +390,8 @@ internal static readonly object couldNotParseImagˢ = (@string)"could not parse 
 internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
     constant.Value val = default!;
     typesꓸType typ = default!;
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     // v3 changed to $false, $true, $convert, to avoid confusion
     // with variable names in inline function bodies.
     if (p.tok == (rune)'$') {
@@ -399,6 +400,7 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
             p.errorf("expected identifier after '$', got %s (%q)"u8, scanner.TokenString(p.tok), p.lit);
         }
     }
+
     var exprᴛ1 = p.tok;
     if (exprᴛ1 == scanner.ΔString) {
         @string str = p.parseString();
@@ -432,12 +434,14 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
         p.next();
         sign = "-"u8;
     }
+
     var exprᴛ3 = p.tok;
     if (exprᴛ3 == scanner.Int) {
         val = constant.MakeFromLiteral(sign + p.lit, token.INT, 0);
         if (val == default!) {
             p.error(couldNotParseIntegerˢ);
         }
+
         p.next();
         if (p.tok == (rune)'\''){
             p.next();
@@ -449,6 +453,7 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
     else if (exprᴛ3 == scanner.Float) {
         @string re = sign + p.lit;
         p.next();
+
         @string im = default!;
         var exprᴛ4 = p.tok;
         if (exprᴛ4 is (rune)'+') {
@@ -460,12 +465,12 @@ internal static (constant.Value val, typesꓸType typ) parseConstValue(this ж<p
             im = "-"u8 + p.expect(scanner.Float);
         }
         else if (exprᴛ4 == scanner.Ident) {
+            // re is in fact the imaginary component. Expect "i" below.
             im = re;
             re = "0"u8;
         }
         else { /* default: */
-            val = constant.MakeFromLiteral(re, // re is in fact the imaginary component. Expect "i" below.
- token.FLOAT, 0);
+            val = constant.MakeFromLiteral(re, token.FLOAT, 0);
             if (val == default!) {
                 p.error(couldNotParseFloatˢ);
             }
@@ -514,7 +519,6 @@ internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Packag
 // which don't have their actual type yet. When the type map is updated,
 // the actual type must replace a reserved entry (or we have an internal
 // error). Used for self-verification only - not required for correctness.
-
 partial struct reservedᴛ1 /*dyn*/ {
     /*embed*/ public global::go.go.types_package.ΔType Type;
 }
@@ -611,12 +615,14 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
     if (obj != default! && obj.Type() == default!) {
         p.errorf("%v has nil type"u8, obj);
     }
+
     if (p.tok == scanner.Ident && p.lit == "notinheap"u8) {
         p.next();
+        // The go/types package has no way of recording that
+        // this type is marked notinheap. Presumably no user
+        // of this package actually cares.
     }
-    // The go/types package has no way of recording that
-    // this type is marked notinheap. Presumably no user
-    // of this package actually cares.
+
     // type alias
     if (p.tok == (rune)'=') {
         p.next();
@@ -633,6 +639,7 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
         scope.Insert(obj);
         return tΔ2;
     }
+
     // defined type
     if (obj == default!) {
         // A named type may be referred to before the underlying type
@@ -642,9 +649,11 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
         scope.Insert(new types.TypeNameжObject(tname));
         obj = new types.TypeNameжObject(tname);
     }
+
     // use the previously imported (canonical), or newly created type
     var t = obj.Type();
     p.update(t, nlist);
+
     var (nt, ok) = t._<ж<types.Named>>(ᐧ);
     if (!ok) {
         // This can happen for unsafe.Pointer, which is a TypeName holding a Basic type.
@@ -654,6 +663,7 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
         }
         return t;
     }
+
     var underlying = Ꮡp.parseType(pkg);
     if (nt.Underlying() == default!) {
         if (underlying.Underlying() == default!){
@@ -663,6 +673,7 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
             nt.SetUnderlying(underlying.Underlying());
         }
     }
+
     if (p.tok == (rune)'\n') {
         p.next();
         // collect associated methods
@@ -679,17 +690,19 @@ internal static typesꓸType parseNamedType(this ж<parser> Ꮡp, slice<any> nli
                 p.expect((rune)'/');
             }
             p.expect((rune)'(');
-            var (receiver, _) = Ꮡp.parseParam(pkg);
+            var (receiver, _) = Ꮡp.parseParam(types.RecvVar, pkg);
             p.expect((rune)')');
             @string nameΔ1 = p.parseName();
-            var (@params, isVariadic) = Ꮡp.parseParamList(pkg);
+            var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, pkg);
             var results = Ꮡp.parseResultList(pkg);
             Ꮡp.skipInlineBody();
             p.expectEOL();
+
             var sig = types.NewSignatureType(receiver, default!, default!, @params, results, isVariadic);
             nt.AddMethod(types.NewFunc(token.NoPos, pkg, nameΔ1, sig));
         }
     }
+
     return new types.NamedжΔType(nt);
 }
 
@@ -704,8 +717,7 @@ internal static int64 parseInt64(this ref parser p) {
 
 internal static nint parseInt(this ref parser p) {
     @string lit = p.expect(scanner.Int);
-    var (n, err) = strconv.ParseInt(lit, 10, 0);
-    /* int */
+    var (n, err) = strconv.ParseInt(lit, 10, 0 /* int */);
     if (err != default!) {
         p.error(err);
     }
@@ -719,15 +731,20 @@ internal static typesꓸType parseArrayOrSliceType(this ж<parser> Ꮡp, ж<type
     p.expect((rune)'[');
     if (p.tok == (rune)']') {
         p.next();
+
         var tΔ1 = @new<types.Slice>();
         p.update(new types.SliceжΔType(tΔ1), nlist);
+
         tΔ1.Value = types.NewSlice(Ꮡp.parseType(Ꮡpkg)).Value;
         return new types.SliceжΔType(tΔ1);
     }
+
     var t = @new<types.Array>();
     p.update(new types.ArrayжΔType(t), nlist);
+
     var len = p.parseInt64();
     p.expect((rune)']');
+
     t.Value = types.NewArray(Ꮡp.parseType(Ꮡpkg), len).Value;
     return new types.ArrayжΔType(t);
 }
@@ -740,12 +757,15 @@ internal static typesꓸType parseMapType(this ж<parser> Ꮡp, ж<types.Package
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(mapˢ);
+
     var t = @new<types.Map>();
     p.update(new types.MapжΔType(t), nlist);
+
     p.expect((rune)'[');
     var key = Ꮡp.parseType(Ꮡpkg);
     p.expect((rune)']');
     var elem = Ꮡp.parseType(Ꮡpkg);
+
     t.Value = types.NewMap(key, elem).Value;
     return new types.MapжΔType(t);
 }
@@ -758,8 +778,10 @@ internal static typesꓸType parseChanType(this ж<parser> Ꮡp, ж<types.Packag
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(chanˢ);
+
     var t = @new<types.Chan>();
     p.update(new types.ChanжΔType(t), nlist);
+
     types.ChanDir dir = types.SendRecv;
     switch (p.tok) {
     case (rune)'-': {
@@ -769,8 +791,8 @@ internal static typesꓸType parseChanType(this ж<parser> Ꮡp, ж<types.Packag
         break;
     }
     case (rune)'<': {
+        // don't consume '<' if it belongs to Type
         if (p.scanner.Peek() == (rune)'-') {
-            // don't consume '<' if it belongs to Type
             p.next();
             p.expect((rune)'-');
             dir = types.RecvOnly;
@@ -790,10 +812,13 @@ internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Pack
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(structˢ);
+
     var t = @new<types.Struct>();
     p.update(new types.StructжΔType(t), nlist);
+
     slice<ж<types.Var>> fields = default!;
     slice<@string> tags = default!;
+
     p.expect((rune)'{');
     while (p.tok != (rune)'}' && p.tok != scanner.EOF) {
         var (field, tag) = Ꮡp.parseField(Ꮡpkg);
@@ -802,6 +827,7 @@ internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Pack
         tags = append(tags, tag);
     }
     p.expect((rune)'}');
+
     t.Value = types.NewStruct(fields, tags).Value;
     return new types.StructжΔType(t);
 }
@@ -810,17 +836,18 @@ internal static typesꓸType parseStructType(this ж<parser> Ꮡp, ж<types.Pack
 internal static readonly object notOnFinalArgumentˢ = (@string)"... not on final argument"u8;
 
 // ParamList = "(" [ { Parameter "," } Parameter ] ")" .
-internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) {
+internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> Ꮡpkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     slice<ж<types.Var>> list = default!;
     var isVariadic = false;
+
     p.expect((rune)'(');
     while (p.tok != (rune)')' && p.tok != scanner.EOF) {
         if (len(list) > 0) {
             p.expect((rune)',');
         }
-        var (par, variadic) = Ꮡp.parseParam(Ꮡpkg);
+        var (par, variadic) = Ꮡp.parseParam(kind, Ꮡpkg);
         list = append(list, par);
         if (variadic) {
             if (isVariadic) {
@@ -830,6 +857,7 @@ internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, ж<
         }
     }
     p.expect((rune)')');
+
     return (types.NewTuple(list.ꓸꓸꓸ), isVariadic);
 }
 
@@ -844,16 +872,17 @@ internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.P
             return default!;
         }
         var (taa, _) = Ꮡp.parseTypeAfterAngle(Ꮡpkg);
-        return types.NewTuple(types.NewParam(token.NoPos, Ꮡpkg, ""u8, taa));
+        var param = types.NewParam(token.NoPos, Ꮡpkg, ""u8, taa);
+        param.SetKind(types.ResultVar);
+        return types.NewTuple(param);
     }
     case (rune)'(': {
-        var (@params, _) = Ꮡp.parseParamList(Ꮡpkg);
+        var (@params, _) = Ꮡp.parseParamList(types.ResultVar, Ꮡpkg);
         return @params;
     }
     default: {
         return default!;
     }}
-
 }
 
 // FunctionType = ParamList ResultList .
@@ -862,8 +891,10 @@ internal static ж<typesꓸSignature> parseFunctionType(this ж<parser> Ꮡp, ж
 
     var t = @new<typesꓸSignature>();
     p.update(new types.ΔSignatureжΔType(t), nlist);
-    var (@params, isVariadic) = Ꮡp.parseParamList(Ꮡpkg);
+
+    var (@params, isVariadic) = Ꮡp.parseParamList(types.ParamVar, Ꮡpkg);
     var results = Ꮡp.parseResultList(Ꮡpkg);
+
     t.Value = types.NewSignatureType(nil, default!, default!, @params, results, isVariadic).Value;
     return t;
 }
@@ -882,9 +913,11 @@ internal static ж<types.Func> parseFunc(this ж<parser> Ꮡp, ж<types.Package>
         p.expect((rune)'*');
         p.expect((rune)'/');
     }
+
     @string name = p.parseName();
     var f = types.NewFunc(token.NoPos, Ꮡpkg, name, Ꮡp.parseFunctionType(Ꮡpkg, default!));
     Ꮡp.skipInlineBody();
+
     if (name[0] == (rune)'.' || name[0] == (rune)'<' || strings.ContainsRune(name, (rune)'$')) {
         // This is an unexported function,
         // or a function defined in a different package,
@@ -892,6 +925,7 @@ internal static ж<types.Func> parseFunc(this ж<parser> Ꮡp, ж<types.Package>
         // We only want to record exported functions.
         return default!;
     }
+
     return f;
 }
 
@@ -903,10 +937,13 @@ internal static typesꓸType parseInterfaceType(this ж<parser> Ꮡp, ж<types.P
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(interfaceˢ);
+
     var t = @new<types.Interface>();
     p.update(new types.InterfaceжΔType(t), nlist);
+
     slice<ж<types.Func>> methods = default!;
     slice<typesꓸType> embeddeds = default!;
+
     p.expect((rune)'{');
     while (p.tok != (rune)'}' && p.tok != scanner.EOF) {
         if (p.tok == (rune)'?'){
@@ -921,6 +958,7 @@ internal static typesꓸType parseInterfaceType(this ж<parser> Ꮡp, ж<types.P
         p.expect((rune)';');
     }
     p.expect((rune)'}');
+
     t.Value = types.NewInterfaceType(methods, embeddeds).Value;
     return new types.InterfaceжΔType(t);
 }
@@ -939,9 +977,12 @@ internal static typesꓸType parsePointerType(this ж<parser> Ꮡp, ж<types.Pac
         p.update(new types.BasicжΔType(tΔ1), nlist);
         return new types.BasicжΔType(tΔ1);
     }
+
     var t = @new<types.Pointer>();
     p.update(new types.PointerжΔType(t), nlist);
+
     t.Value = types.NewPointer(Ꮡp.parseType(Ꮡpkg, t.OrTypedNil())).Value;
+
     return new types.PointerжΔType(t);
 }
 
@@ -967,7 +1008,6 @@ internal static typesꓸType parseTypeSpec(this ж<parser> Ꮡp, ж<types.Packag
         if (exprᴛ2 == "interface"u8) {
             return Ꮡp.parseInterfaceType(Ꮡpkg, nlist);
         }
-
     }
     else if (exprᴛ1 is (rune)'*') {
         return Ꮡp.parsePointerType(Ꮡpkg, nlist);
@@ -983,6 +1023,9 @@ internal static typesꓸType parseTypeSpec(this ж<parser> Ꮡp, ж<types.Packag
     return default!;
 }
 
+// From gofrontend/go/export.h
+// Note that these values are negative in the gofrontend and have been made positive
+// in the gccgoimporter.
 internal static UntypedInt gccgoBuiltinINT8 => 1;
 internal static UntypedInt gccgoBuiltinINT16 => 2;
 internal static UntypedInt gccgoBuiltinINT32 => 3;
@@ -1020,8 +1063,8 @@ internal static typesꓸType lookupBuiltinType(nint typ) {
 // parseType updates the type map to t for all type numbers n.
 internal static typesꓸType parseType(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg, params ꓸꓸꓸany nʗp) {
     var n = nʗp.sslice();
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     p.expect((rune)'<');
     var (t, _) = Ꮡp.parseTypeAfterAngle(Ꮡpkg, n.ꓸꓸꓸ);
     return t;
@@ -1035,9 +1078,10 @@ internal static (typesꓸType t, nint n1) parseTypeAfterAngle(this ж<parser> �
     typesꓸType t = default!;
     nint n1 = default!;
     var n = nʗp.slice();
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     p.expectKeyword(typeˢ);
+
     n1 = 0;
     var exprᴛ1 = p.tok;
     if (exprᴛ1 == scanner.Int) {
@@ -1070,6 +1114,7 @@ internal static (typesꓸType t, nint n1) parseTypeAfterAngle(this ж<parser> �
     if (t == default! || AreEqual(t, reserved)) {
         p.errorf("internal error: bad return from parseType(%v)"u8, (any)(n));
     }
+
     p.expect((rune)'>');
     return (t, n1);
 }
@@ -1081,8 +1126,8 @@ internal static (typesꓸType t, nint n1) parseTypeExtended(this ж<parser> Ꮡp
     typesꓸType t = default!;
     nint n1 = default!;
     var n = nʗp.sslice();
-
     ref var p = ref Ꮡp.DerefOrNull();
+
     p.expect((rune)'<');
     (t, n1) = Ꮡp.parseTypeAfterAngle(Ꮡpkg, n.ꓸꓸꓸ);
     return (t, n1);
@@ -1109,13 +1154,16 @@ internal static void skipInlineBody(this ж<parser> Ꮡp) {
         } else {
             p.next();
         }
+
         p.expect((rune)':');
         nint want = p.parseInt();
         p.expect((rune)'>');
+
         defer((uint64 w) => {
             Ꮡp.Value.scanner.Value.Whitespace = w;
         }, (~Ꮡp.Value.scanner).Whitespace, ref ᒐ);
         p.scanner.Value.Whitespace = 0;
+
         nint got = 0;
         while (got < want) {
             var r = p.scanner.Next();
@@ -1139,23 +1187,28 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
+        var typeOffsetsᴷ = new stackAppend<parseTypes_typeOffset>();
 
         nint maxp1 = p.parseInt();
         nint exportedp1 = p.parseInt();
         p.typeList = new slice<typesꓸType>(maxp1, maxp1);
         slice<parseTypes_typeOffset> typeOffsets = default!;
+
         nint total = 0;
         for (nint i = 1; i < maxp1; i++) {
             nint len = p.parseInt();
-            typeOffsets = append(typeOffsets, new parseTypes_typeOffset(total, len));
+            typeOffsets = append(typeOffsetsᴷ, typeOffsets, new parseTypes_typeOffset(total, len));
             total += len;
         }
+
         defer((uint64 w) => {
             Ꮡp.Value.scanner.Value.Whitespace = w;
         }, (~Ꮡp.Value.scanner).Whitespace, ref ᒐ);
         p.scanner.Value.Whitespace = 0;
+
         // We should now have p.tok pointing to the final newline.
         // The next runes from the scanner should be the type data.
+
         ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
         while (sb.Len() < total) {
             var r = p.scanner.Next();
@@ -1165,10 +1218,12 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
             Ꮡsb.WriteRune(r);
         }
         @string allTypeData = sb.String();
+
         p.typeData = new @string[]{""u8}.slice(); // type 0, unused
         foreach (var (_, to) in typeOffsets) {
             p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }
+
         for (nint i = 1; i < exportedp1; i++) {
             Ꮡp.parseSavedType(Ꮡpkg, i, default!);
         }
@@ -1188,6 +1243,7 @@ internal static void parseSavedType(this ж<parser> Ꮡp, ж<types.Package> Ꮡp
             Ꮡp.Value.tok = tok;
             Ꮡp.Value.lit = lit;
         }, Ꮡp.Value.scanner, Ꮡp.Value.tok, Ꮡp.Value.lit, ref ᒐ);
+
         p.scanner = @new<scanner.Scanner>();
         Ꮡp.initScanner((~p.scanner).Filename, new strings_ReaderжReader(strings.NewReader(p.typeData[i])));
         p.expectKeyword(typeˢ);
@@ -1242,6 +1298,7 @@ internal static void parseInitDataDirective(this ж<parser> Ꮡp) {
             // unexpected token kind; panic
             p.expect(scanner.Ident);
         }
+
         var exprᴛ1 = p.lit;
         if (exprᴛ1 == "v1"u8 || exprᴛ1 == "v2"u8 || exprᴛ1 == "v3"u8) {
             p.version = p.lit;
@@ -1263,16 +1320,16 @@ internal static void parseInitDataDirective(this ж<parser> Ꮡp) {
         }
         else if (exprᴛ1 == "init_graph"u8) {
             p.next();
+            // The graph data is thrown away for now.
             while (p.tok != (rune)'\n' && p.tok != (rune)';' && p.tok != scanner.EOF) {
-                // The graph data is thrown away for now.
                 p.parseInt64();
                 p.parseInt64();
             }
             p.expectEOL();
         }
         else if (exprᴛ1 == "checksum"u8) {
+            // Don't let the scanner try to parse the checksum as a number.
             defer((nuint mode) => {
-                // Don't let the scanner try to parse the checksum as a number.
                 Ꮡp.Value.scanner.Value.Mode = mode;
             }, (~Ꮡp.Value.scanner).Mode, ref ᒐ);
             p.scanner.Value.Mode &= unchecked((nuint)~(nuint)((nuint)((nuint)scanner.ScanInts | (nuint)scanner.ScanFloats)));
@@ -1283,7 +1340,6 @@ internal static void parseInitDataDirective(this ж<parser> Ꮡp) {
         else { /* default: */
             p.errorf("unexpected identifier: %q"u8, p.lit);
         }
-
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -1307,6 +1363,7 @@ internal static void parseDirective(this ж<parser> Ꮡp) {
         // unexpected token kind; panic
         p.expect(scanner.Ident);
     }
+
     var exprᴛ1 = p.lit;
     if (exprᴛ1 == "v1"u8 || exprᴛ1 == "v2"u8 || exprᴛ1 == "v3"u8 || exprᴛ1 == "priority"u8 || exprᴛ1 == "init"u8 || exprᴛ1 == "init_graph"u8 || exprᴛ1 == "checksum"u8) {
         Ꮡp.parseInitDataDirective();
@@ -1382,7 +1439,6 @@ internal static void parseDirective(this ж<parser> Ꮡp) {
     else { /* default: */
         p.errorf("unexpected identifier: %q"u8, p.lit);
     }
-
 }
 
 // Package = { Directive } .

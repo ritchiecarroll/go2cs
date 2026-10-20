@@ -12,6 +12,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using httpguts = vendor.golang.org.x.net.http.httpguts_package;
 using go.net;
+using iter = iter_package;
 using vendor.golang.org.x.net.http;
 
 partial class httptest_package {
@@ -87,7 +88,9 @@ internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @s
     if (len(str) > 512) {
         str = str[..512];
     }
+
     var m = rw.Header();
+
     var (_, hasType) = m[contentTypeˢ, ꟷ];
     var hasTE = m.Get(transferEncodingˢ) != ""u8;
     if (!hasType && !hasTE) {
@@ -96,15 +99,20 @@ internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @s
         }
         m.Set(contentTypeˢ, http.DetectContentType(b));
     }
+
     rw.WriteHeader(200);
 }
 
 // Write implements http.ResponseWriter. The data in buf is written to
 // rw.Body, if not nil.
 public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) {
+    // Record the write, even if we're going to return an error.
     rw.writeHeader(buf, ""u8);
     if (rw.Body != nil) {
         rw.Body.Write(buf);
+    }
+    if (!bodyAllowedForStatus(rw.Code)) {
+        return (0, http.ErrBodyNotAllowed);
     }
     return (len(buf), default!);
 }
@@ -112,11 +120,31 @@ public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf)
 // WriteString implements [io.StringWriter]. The data in str is written
 // to rw.Body, if not nil.
 public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) {
+    // Record the write, even if we're going to return an error.
     rw.writeHeader(default!, str);
     if (rw.Body != nil) {
         rw.Body.WriteString(str);
     }
+    if (!bodyAllowedForStatus(rw.Code)) {
+        return (0, http.ErrBodyNotAllowed);
+    }
     return (len(str), default!);
+}
+
+// bodyAllowedForStatus reports whether a given response status code
+// permits a body. See RFC 7230, section 3.3.
+internal static bool bodyAllowedForStatus(nint status) {
+    switch (ᐧ) {
+    case {} when status >= 100 && status <= 199: {
+        return false;
+    }
+    case {} when status is 204: {
+        return false;
+    }
+    case {} when status is 304: {
+        return false;
+    }}
+    return true;
 }
 
 internal static void checkWriteHeaderCode(nint code) {
@@ -141,6 +169,7 @@ public static void WriteHeader(this ref ResponseRecorder rw, nint code) {
     if (rw.wroteHeader) {
         return;
     }
+
     checkWriteHeaderCode(code);
     rw.Code = code;
     rw.wroteHeader = true;
@@ -203,13 +232,13 @@ public static ж<http.Response> Result(this ref ResponseRecorder rw) {
         res.Value.Body = http.NoBody;
     }
     res.Value.ContentLength = parseContentLength((~res).Header.Get(contentLengthˢ));
+
     {
         var (trailers, ok) = rw.snapHeader[trailerˢ, ꟷ]; if (ok) {
             res.Value.Trailer = new httpꓸHeader(len(trailers));
             foreach (var (_, k) in trailers) {
-                foreach (var (_, vᴛ1) in strings.Split(k, ","u8)) {
-                    var kΔ1 = vᴛ1;
-
+                foreach (var iᴛ1 in range<@string>(strings.SplitSeq(k, ","u8).Invoke)) {
+                    var kΔ1 = iᴛ1;
                     kΔ1 = http.CanonicalHeaderKey(textproto.TrimString(kΔ1));
                     if (!httpguts.ValidTrailerHeader(kΔ1)) {
                         // Ignore since forbidden by RFC 7230, section 4.1.2.

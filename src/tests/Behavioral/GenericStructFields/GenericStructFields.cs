@@ -25,12 +25,9 @@ internal static T show<T>(this tag<T> t) {
 }
 
 partial struct wrapped<T> {
-    internal partial ref tag<T> tag { get; }
+    /*embed*/ internal tag<T> tag;
     internal nint count;
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string completedˢ = "completed"u8;
 
 internal static void Main() {
     var container = new Container(
@@ -39,7 +36,7 @@ internal static void Main() {
             Error: default!
         ),
         StringResult: new Result<@string>(
-            Value: "success"u8,
+            Value: "success",
             Error: default!
         ),
         FloatValues: new Result<float64>[]{
@@ -47,19 +44,22 @@ internal static void Main() {
             new(Value: 2.71D, Error: default!)
         }.slice(),
         Mappings: new map<@string, Result<bool>>{
-            ["completed"u8] = new(Value: true, Error: default!),
-            ["verified"u8] = new(Value: false, Error: fmt.Errorf("verification pending"u8))
+            ["completed"] = new(Value: true, Error: default!),
+            ["verified"] = new(Value: false, Error: fmt.Errorf("verification pending"u8))
         }
     );
+
     fmt.Printf("Int result: %d\n"u8, container.IntResult.Value);
     fmt.Printf("String result: %s\n"u8, container.StringResult.Value);
     fmt.Printf("First float value: %f\n"u8, container.FloatValues[0].Value);
-    fmt.Printf("Completion status: %t\n"u8, container.Mappings[completedˢ].Value);
+    fmt.Printf("Completion status: %t\n"u8, container.Mappings["completed"].Value);
+
     Δpool<nint> pl = default!;
-    pl.items = append(pl.items, (nint)(7), (nint)(8));
+    pl.items = append(pl.items, (nint)7, (nint)8);
     var (v, ok) = pl.take();
     fmt.Println(v, ok, new keeper(nil).pool());
-    var w = new wrapped<@string>(tag: new tag<@string>(label: "gen"u8), count: 2);
+
+    var w = new wrapped<@string>(tag: new tag<@string>(label: "gen"), count: 2);
     fmt.Println(w.label, w.tag.show(), w.count);
 }
 
@@ -80,11 +80,8 @@ internal static (T, bool) take<T>(this ref Δpool<T> p) {
 partial struct keeper {
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string keptˢ = "kept"u8;
-
 internal static @string pool(this keeper k) {
-    return keptˢ;
+    return "kept";
 }
 
 } // end main_package

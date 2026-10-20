@@ -67,6 +67,36 @@
 // communication (IPC) mechanisms such as sockets, pipes, remote
 // procedure call (RPC), shared memory mappings, or file system
 // operations may be more suitable despite the performance overheads.
+
+// A Symbol is a pointer to a variable or function.
+//
+// For example, a plugin defined as
+//
+//	package main
+//
+//	import "fmt"
+//
+//	var V int
+//
+//	func F() { fmt.Printf("Hello, number %d\n", V) }
+//
+// may be loaded with the [Open] function and then the exported package
+// symbols V and F can be accessed
+//
+//	p, err := plugin.Open("plugin_name.so")
+//	if err != nil {
+//		panic(err)
+//	}
+//	v, err := p.Lookup("V")
+//	if err != nil {
+//		panic(err)
+//	}
+//	f, err := p.Lookup("F")
+//	if err != nil {
+//		panic(err)
+//	}
+//	*v.(*int) = 7
+//	f.(func())() // prints "Hello, number 7"
 global using Symbol = object;
 
 namespace go;

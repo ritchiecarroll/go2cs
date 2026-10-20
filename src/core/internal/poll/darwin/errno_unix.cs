@@ -11,9 +11,7 @@ partial class poll_package {
 // Do the interface allocations only once for common
 // Errno values.
 internal static error errEAGAIN = ((Δsyscall.Errno)Δsyscall.EAGAIN);
-
 internal static error errEINVAL = ((Δsyscall.Errno)Δsyscall.EINVAL);
-
 internal static error errENOENT = ((Δsyscall.Errno)Δsyscall.ENOENT);
 
 // errnoErr returns common boxed Errno values, to prevent
@@ -32,7 +30,6 @@ internal static error errnoErr(Δsyscall.Errno e) {
     if (exprᴛ1 == Δsyscall.ENOENT) {
         return errENOENT;
     }
-
     return e;
 }
 

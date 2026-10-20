@@ -57,8 +57,10 @@ internal static (Shape, bool) classify(nint kind) {
 internal static void Main() {
     fmt.Println(pick(0).Area());
     fmt.Println(pick(1).Area());
+
     var (s0, ok0) = classify(0);
     fmt.Println(s0.Area(), ok0);
+
     var (s1, ok1) = classify(1);
     fmt.Println(s1.Area(), ok1);
 }

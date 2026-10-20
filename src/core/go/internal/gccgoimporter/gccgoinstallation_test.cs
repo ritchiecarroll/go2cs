@@ -11,10 +11,6 @@ using static global::go.go.@internal.gccgoimporter_package;
 
 partial class gccgoimporter_internal_test_package {
 
-// "encoding", // Added in GCC 4.9.
-// "go/format", // Added in GCC 4.8.
-// "image/color/palette", // Added in GCC 4.9.
-// "net/http/cookiejar", // Added in GCC 4.8.
 // importablePackages is a list of packages that we verify that we can
 // import. This should be all standard library packages in all relevant
 // versions of gccgo. Note that since gccgo follows a different release
@@ -66,6 +62,7 @@ internal static array<@string> importablePackages = new @string[]{
     "encoding/binary"u8,
     "encoding/csv"u8,
     "encoding/gob"u8,
+    // "encoding", // Added in GCC 4.9.
     "encoding/hex"u8,
     "encoding/json"u8,
     "encoding/pem"u8,
@@ -77,6 +74,7 @@ internal static array<@string> importablePackages = new @string[]{
     "go/ast"u8,
     "go/build"u8,
     "go/doc"u8,
+    // "go/format", // Added in GCC 4.8.
     "go/parser"u8,
     "go/printer"u8,
     "go/scanner"u8,
@@ -89,6 +87,7 @@ internal static array<@string> importablePackages = new @string[]{
     "html"u8,
     "html/template"u8,
     "image/color"u8,
+    // "image/color/palette", // Added in GCC 4.9.
     "image/draw"u8,
     "image/gif"u8,
     "image"u8,
@@ -107,6 +106,7 @@ internal static array<@string> importablePackages = new @string[]{
     "mime/multipart"u8,
     "net"u8,
     "net/http/cgi"u8,
+    // "net/http/cookiejar", // Added in GCC 4.8.
     "net/http/fcgi"u8,
     "net/http"u8,
     "net/http/httptest"u8,
@@ -153,19 +153,19 @@ internal static array<@string> importablePackages = new @string[]{
 internal static readonly object thisTestNeedsGccgoˢ = (@string)"This test needs gccgo"u8;
 
 public static void TestInstallationImporter(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // This test relies on gccgo being around.
     @string gpath = gccgoPath();
     if (gpath == ""u8) {
         Ꮡt.Skip(thisTestNeedsGccgoˢ);
     }
+
     global::go.go.@internal.gccgoimporter_package.GccgoInstallation inst = default!;
     var err = inst.InitFromDriver(gpath);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     var imp = inst.GetImporter(default!, default!);
+
     // Ensure we don't regress the number of packages we can parse. First import
     // all packages into the same map and then each individually.
     var pkgMap = new map<@string, ж<types.Package>>();
@@ -175,12 +175,14 @@ public static void TestInstallationImporter(ж<testing.T> Ꮡt) {
             Ꮡt.Error(err);
         }
     }
+
     foreach (var (_, pkg) in importablePackages.ΔRangeSnapshot()) {
         (_, err) = imp(new map<@string, ж<types.Package>>(), pkg, "."u8, default!);
         if (err != default!) {
             Ꮡt.Error(err);
         }
     }
+
     // Test for certain specific entities in the imported data.
     foreach (var (_, vᴛ1) in new importerTest[]{
         new(pkgpath: "io"u8, name: "Reader"u8, want: "type Reader interface{Read(p []byte) (n int, err error)}"u8),

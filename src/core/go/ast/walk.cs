@@ -37,17 +37,18 @@ public static void Walk(Visitor v, Node node) {
             return;
         }
     }
+
     // walk children
     // (the order of the cases matches the order
     // of the corresponding node types in ast.go)
     switch (node.type()) {
+    // Comments and fields
     case ж<Comment> n: {
+        // nothing to do
         break;
     }
     case ж<CommentGroup> n: {
-        walkList(v, // Comments and fields
- // nothing to do
- widen<ж<Comment>, Node>((~n).List, elemᴛ1 => new CommentжNode(elemᴛ1)));
+        walkList(v, widen<ж<Comment>, Node>((~n).List, elemᴛ1 => new CommentжNode(elemᴛ1)));
         break;
     }
     case ж<Field> n: {
@@ -70,16 +71,16 @@ public static void Walk(Visitor v, Node node) {
         walkList(v, widen<ж<Field>, Node>((~n).List, elemᴛ1 => new FieldжNode(elemᴛ1)));
         break;
     }
+    // Expressions
     case ж<BadExpr> _:
     case ж<Ident> _:
     case ж<BasicLit> _: {
         var n = node;
+        // nothing to do
         break;
     }
     case ж<Ellipsis> n: {
         if ((~n).Elt != default!) {
-            // Expressions
-            // nothing to do
             Walk(v, (~n).Elt);
         }
         break;
@@ -158,9 +159,9 @@ public static void Walk(Visitor v, Node node) {
         Walk(v, (~n).Value);
         break;
     }
+    // Types
     case ж<ArrayType> n: {
         if ((~n).Len != default!) {
-            // Types
             Walk(v, (~n).Len);
         }
         Walk(v, (~n).Elt);
@@ -195,21 +196,21 @@ public static void Walk(Visitor v, Node node) {
         Walk(v, (~n).Value);
         break;
     }
+    // Statements
     case ж<BadStmt> n: {
+        // nothing to do
         break;
     }
     case ж<DeclStmt> n: {
-        Walk(v, // Statements
- // nothing to do
- (~n).Decl);
+        Walk(v, (~n).Decl);
         break;
     }
     case ж<EmptyStmt> n: {
+        // nothing to do
         break;
     }
     case ж<LabeledStmt> n: {
-        Walk(v, // nothing to do
- new IdentжNode((~n).Label));
+        Walk(v, new IdentжNode((~n).Label));
         Walk(v, (~n).Stmt);
         break;
     }
@@ -322,9 +323,9 @@ public static void Walk(Visitor v, Node node) {
         Walk(v, new BlockStmtжNode((~n).Body));
         break;
     }
+    // Declarations
     case ж<ImportSpec> n: {
         if ((~n).Doc != nil) {
-            // Declarations
             Walk(v, new CommentGroupжNode((~n).Doc));
         }
         if ((~n).Name != nil) {
@@ -365,11 +366,11 @@ public static void Walk(Visitor v, Node node) {
         break;
     }
     case ж<BadDecl> n: {
+        // nothing to do
         break;
     }
     case ж<GenDecl> n: {
         if ((~n).Doc != nil) {
-            // nothing to do
             Walk(v, new CommentGroupжNode((~n).Doc));
         }
         walkList(v, (~n).Specs);
@@ -389,20 +390,20 @@ public static void Walk(Visitor v, Node node) {
         }
         break;
     }
+    // Files and packages
     case ж<File> n: {
         if ((~n).Doc != nil) {
-            // Files and packages
             Walk(v, new CommentGroupжNode((~n).Doc));
         }
         Walk(v, new IdentжNode((~n).Name));
         walkList(v, (~n).Decls);
+        // don't walk n.Comments - they have been
+        // visited already through the individual
+        // nodes
         break;
     }
     case ж<Package> n: {
         foreach (var (_, f) in (~n).Files) {
-            // don't walk n.Comments - they have been
-            // visited already through the individual
-            // nodes
             Walk(v, new FileжNode(f));
         }
         break;
@@ -412,6 +413,7 @@ public static void Walk(Visitor v, Node node) {
         throw panic(fmt.Sprintf("ast.Walk: unexpected node type %T"u8, n));
         break;
     }}
+
     v.Visit(default!);
 }
 
@@ -428,6 +430,11 @@ internal static Visitor Visit(this inspector f, Node node) {
 // f(node); node must not be nil. If f returns true, Inspect invokes f
 // recursively for each of the non-nil children of node, followed by a
 // call of f(nil).
+//
+// In many cases it may be more convenient to use [Preorder], which
+// returns an iterator over the sequence of nodes, or [PreorderStack],
+// which (like [Inspect]) provides control over descent into subtrees,
+// but additionally reports the stack of enclosing nodes.
 public static void Inspect(Node node, Func<Node, bool> f) {
     Walk(new inspectorᴠVisitor(NilSafeDelegateConversion<inspector, Func<Node, bool>>(f)), node);
 }
@@ -436,7 +443,8 @@ public static void Inspect(Node node, Func<Node, bool> f) {
 // beneath (and including) the specified root, in depth-first
 // preorder.
 //
-// For greater control over the traversal of each subtree, use [Inspect].
+// For greater control over the traversal of each subtree, use
+// [Inspect] or [PreorderStack].
 public static iter.Seq<Node> Preorder(Node root) {
     return (Func<Node, bool> yield) => {
         var ok = true;
@@ -448,6 +456,37 @@ public static iter.Seq<Node> Preorder(Node root) {
             return ok;
         });
     };
+}
+
+// PreorderStack traverses the tree rooted at root,
+// calling f before visiting each node.
+//
+// Each call to f provides the current node and traversal stack,
+// consisting of the original value of stack appended with all nodes
+// from root to n, excluding n itself. (This design allows calls
+// to PreorderStack to be nested without double counting.)
+//
+// If f returns false, the traversal skips over that subtree. Unlike
+// [Inspect], no second call to f is made after visiting node n.
+// (In practice, the second call is nearly always used only to pop the
+// stack, and it is surprisingly tricky to do this correctly.)
+public static void PreorderStack(Node root, slice<Node> stack, Func<Node, slice<Node>, bool> f) {
+    nint before = len(stack);
+    Inspect(root, (Node n) => {
+        if (n != default!){
+            if (!f(n, stack)) {
+                // Do not push, as there will be no corresponding pop.
+                return false;
+            }
+            stack = append(stack, n); // push
+        } else {
+            stack = stack.slice(0, len(stack) - 1); // pop
+        }
+        return true;
+    });
+    if (len(stack) != before) {
+        throw panic("push/pop mismatch");
+    }
 }
 
 } // end ast_package

@@ -95,10 +95,13 @@ public static void TestCountEncodeMallocs(ж<testing.T> Ꮡt) {
     if (runtime.GOMAXPROCS(0) > 1) {
         Ꮡt.Skip(skippingGomaxprocs1ˢ);
     }
+
     const nint N = 1000;
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
     var bench = Ꮡ(new Bench(7, 3.2D, "now is the time"u8, slice<byte>("for all good men"u8)));
+
     var benchʗ1 = bench;
     var encʗ1 = enc;
     var allocs = testing.AllocsPerRun(N, () => {
@@ -119,11 +122,14 @@ public static void TestCountDecodeMallocs(ж<testing.T> Ꮡt) {
     if (runtime.GOMAXPROCS(0) > 1) {
         Ꮡt.Skip(skippingGomaxprocs1ˢ);
     }
+
     const nint N = 1000;
+
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
     ref var bench = ref heap<ж<Bench>>(out var Ꮡbench);
     bench = Ꮡ(new Bench(7, 3.2D, "now is the time"u8, slice<byte>("for all good men"u8)));
+
     // Fill the buffer with enough to decode
     var encʗ1 = enc;
     testing.AllocsPerRun(N, () => {
@@ -132,6 +138,7 @@ public static void TestCountDecodeMallocs(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(encodeˢ, err);
         }
     });
+
     var dec = NewDecoder(new gob_test_package.bytes_BufferжReader(Ꮡbuf));
     var decʗ1 = dec;
     var allocs = testing.AllocsPerRun(N, () => {
@@ -154,6 +161,7 @@ internal static void benchmarkEncodeSlice(ж<testing.B> Ꮡb, any a) {
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
         var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(Ꮡbuf));
+
         while (pb.Next()) {
             buf.Reset();
             var err = enc.Encode(a);
@@ -250,10 +258,12 @@ internal static void benchmarkDecodeSlice(ж<testing.B> Ꮡb, any a) {
     if (err != default!) {
         Ꮡb.Fatal(err);
     }
+
     ref var ra = ref heap<reflectꓸValue>(out var Ꮡra);
     ra = reflect.ValueOf(a);
     var rt = ra.Type();
     b.ResetTimer();
+
     b.ReportAllocs();
     var raʗ1 = ra;
     var rtʗ1 = rt;
@@ -262,8 +272,10 @@ internal static void benchmarkDecodeSlice(ж<testing.B> Ꮡb, any a) {
         var rp = reflect.New(rtʗ1);
         rp.Elem().Set(reflect.MakeSlice(rtʗ1, raʗ1.Len(), raʗ1.Cap()));
         var p = rp.Interface();
+
         ref var bbuf = ref heap<benchmarkBuf>(out var Ꮡbbuf);
         bbuf = new benchmarkBuf(data: Ꮡbuf.Value.Bytes());
+
         while (pb.Next()) {
             bbuf.reset();
             var dec = NewDecoder(new gob_internal_test_package.benchmarkBufжReader(Ꮡbbuf));

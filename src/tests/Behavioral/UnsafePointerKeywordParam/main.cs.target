@@ -47,12 +47,15 @@ internal static void Main() {
     @unsafe.Pointer pa = @unsafe.Pointer.FromPinnedBox(Ꮡa);
     @unsafe.Pointer pb = @unsafe.Pointer.FromPinnedBox(Ꮡb);
     @unsafe.Pointer px = @unsafe.Pointer.FromPinnedBox(Ꮡx);
+
     fmt.Println(sameAs(pa, pa));
     fmt.Println(sameAs(pa, pb));
     fmt.Println(notNil(pa));
     fmt.Println(notNil(nil));
+
     fmt.Println(asUintptr(px) != 0);
     fmt.Println(deref(px));
+
     holder h = default!;
     store(ref h, px);
     fmt.Println(h.p == px);

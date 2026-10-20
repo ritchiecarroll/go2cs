@@ -20,6 +20,7 @@
   const conversionStatus = document.querySelector("#conversion-status");
   const connectionDot = document.querySelector("#connection-dot");
   const connectionLabel = document.querySelector("#connection-label");
+  const warmupStatus = document.querySelector("#warmup-status");
   const solutionsLink = document.querySelector("#solutions-link");
 
   let goSource = "";
@@ -36,10 +37,15 @@
   let activeOutput = "transpile";
   let synchronizedRunPending = false;
   let synchronizedRunProcessing = false;
+  let warmupState = "";
+  let warmupPoll = null;
+  let warmupReadyTimer = null;
 
+  // Run with Go is on unless this browser turned it off: only a stored "false" unchecks it.
   const syncRunStorageKey = "go2cs-run-with-go";
+  syncRunCheckbox.checked = true;
   try {
-    syncRunCheckbox.checked = localStorage.getItem(syncRunStorageKey) === "true";
+    syncRunCheckbox.checked = localStorage.getItem(syncRunStorageKey) !== "false";
   } catch {
     // The option still works for this page when storage is unavailable.
   }
@@ -94,12 +100,40 @@
     solutionsLink.textContent = solutions.text || url;
   }
 
+  // The server warms .NET up at start. While it does, the header says so and the page asks again
+  // every few seconds; once it ends, a short ".NET ready" replaces the notice. A failed or skipped
+  // warmup shows nothing: the first lesson simply pays the cold start.
+  function setWarmup(warmup) {
+    const state = warmup?.state || "";
+    const previous = warmupState;
+    warmupState = state;
+    clearTimeout(warmupPoll);
+    warmupPoll = null;
+
+    if (state === "running") {
+      clearTimeout(warmupReadyTimer);
+      warmupStatus.textContent = "Warming up .NET...";
+      warmupStatus.hidden = false;
+      warmupPoll = setTimeout(checkHealth, 3000);
+      return;
+    }
+    if (state === "ready" && previous === "running") {
+      warmupStatus.textContent = ".NET ready";
+      warmupStatus.hidden = false;
+      clearTimeout(warmupReadyTimer);
+      warmupReadyTimer = setTimeout(() => { warmupStatus.hidden = true; }, 4000);
+      return;
+    }
+    if (state !== "ready") warmupStatus.hidden = true;
+  }
+
   async function checkHealth() {
     try {
       const response = await fetch("/api/health");
       const health = await response.json();
       setConnection(health.tour, health.tour ? "Tour of Go connected" : "Tour of Go offline");
       setSolutionsLink(health.solutions);
+      setWarmup(health.warmup);
       for (const option of runtimeSelect.options) {
         const runtime = health.runtimes?.find(candidate => candidate.value === option.value);
         if (!runtime) continue;
@@ -115,6 +149,7 @@
       }
     } catch {
       setConnection(false, "Local server disconnected");
+      setWarmup(null);
     }
   }
 

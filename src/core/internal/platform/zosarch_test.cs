@@ -44,15 +44,16 @@ internal partial struct TestGenerated_listEntry /*dyn*/ {
 // TestGenerated verifies that zosarch.go is up to date,
 // or regenerates it if the -fix flag is set.
 public static void TestGenerated(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveGoRun(new testing_TжTB(Ꮡt));
+
     // Here we use 'go run cmd/dist' instead of 'go tool dist' in case the
     // installed cmd/dist is stale or missing. We don't want to miss a
     // skew in the data due to a stale binary.
     var cmd = testenv.Command(new testing_TжTB(Ꮡt), "go"u8, runˢ, cmdDistˢ, listˢ, jsonˢ, brokenˢ);
+
     // cmd/dist requires GOROOT to be set explicitly in the environment.
     cmd.Value.Env = append(cmd.Environ(), "GOROOT="u8 + testenv.GOROOT(new testing_TжTB(Ꮡt)));
+
     var (@out, err) = cmd.Output();
     if (err != default!) {
         {
@@ -68,6 +69,7 @@ public static void TestGenerated(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     var tmplOut = @new<bytes.Buffer>();
     var (ᴛ1, ᴛ2) = template.New(zosarchˢ).Parse(zosarchTmpl);
     var tmpl = template.Must(ᴛ1, ᴛ2);
@@ -75,6 +77,7 @@ public static void TestGenerated(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     cmd = testenv.Command(new testing_TжTB(Ꮡt), gofmtˢ);
     cmd.Value.Stdin = new bytes_ReaderжReader(bytes.NewReader(tmplOut.Bytes()));
     (var want, err) = cmd.Output();
@@ -87,10 +90,12 @@ public static void TestGenerated(ж<testing.T> Ꮡt) {
         }
         Ꮡt.Fatalf("%v: %v"u8, cmd.OrTypedNil(), err);
     }
+
     (var got, err) = os.ReadFile(zosarchGoˢ);
     if (err == default! && bytes.Equal(got, want)) {
         return;
     }
+
     if (!flagFix.Value) {
         if (err != default!){
             Ꮡt.Log(err);
@@ -99,6 +104,7 @@ public static void TestGenerated(ж<testing.T> Ꮡt) {
         }
         Ꮡt.Fatalf("zosarch.go is missing or out of date; to regenerate, run\ngo generate internal/platform"u8);
     }
+
     {
         var errΔ2 = os.WriteFile(zosarchGoˢ, want, 438); if (errΔ2 != default!) {
             Ꮡt.Fatal(errΔ2);
@@ -127,6 +133,6 @@ var distInfo = map[OSArch]osArchInfo {
 {{end}}
 }
 
-"""u8;
+"""u8.Raw();
 
 } // end platform_test_package

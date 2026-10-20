@@ -97,6 +97,7 @@ public static void TestNoExtraMethods(ж<testing.T> Ꮡt) {
 
 internal static void testNoExtraMethods(ж<testing.T> Ꮡt, Func<slice<byte>, cipher.Block> newBlock) {
     var b = newBlock(new slice<byte>(16));
+
     var ctr = NewCTR(b, new slice<byte>(16));
     var ctrExpected = new @string[]{"XORKeyStream"u8}.slice();
     {
@@ -104,6 +105,7 @@ internal static void testNoExtraMethods(ж<testing.T> Ꮡt, Func<slice<byte>, ci
             Ꮡt.Errorf("CTR: got %v, want %v"u8, got, ctrExpected);
         }
     }
+
     var cbc = NewCBCEncrypter(b, new slice<byte>(16));
     var cbcExpected = new @string[]{"BlockSize"u8, "CryptBlocks"u8, "SetIV"u8}.slice();
     {
@@ -117,6 +119,7 @@ internal static void testNoExtraMethods(ж<testing.T> Ꮡt, Func<slice<byte>, ci
             Ꮡt.Errorf("CBC: got %v, want %v"u8, got, cbcExpected);
         }
     }
+
     var (gcm, _) = NewGCM(b);
     var gcmExpected = new @string[]{"NonceSize"u8, "Open"u8, "Overhead"u8, "Seal"u8}.slice();
     {

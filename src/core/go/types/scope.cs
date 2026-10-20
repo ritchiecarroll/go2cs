@@ -94,6 +94,19 @@ public static Object Lookup(this ref ΔScope s, @string name) {
     return obj;
 }
 
+// lookupIgnoringCase returns the objects in scope s whose names match
+// the given name ignoring case. If exported is set, only exported names
+// are returned.
+internal static slice<Object> lookupIgnoringCase(this ref ΔScope s, @string name, bool exported) {
+    slice<Object> matches = default!;
+    foreach (var (_, n) in s.Names()) {
+        if ((!exported || isExported(n)) && strings.EqualFold(n, name)) {
+            matches = append(matches, s.Lookup(n));
+        }
+    }
+    return matches;
+}
+
 // Insert attempts to insert an object obj into scope s.
 // If s already contains an alternative object alt with
 // the same name, Insert leaves s unchanged and returns alt.
@@ -157,16 +170,20 @@ public static void WriteTo(this ж<ΔScope> Ꮡs, io.Writer w, nint n, bool recu
 
     @string ind = indᶜ;
     @string indn = strings.Repeat(ind, n);
+
     fmt.Fprintf(w, "%s%s scope %p {\n"u8, indn, s.comment, Ꮡs.OrTypedNil());
+
     @string indn1 = indn + ind;
     foreach (var (_, name) in s.Names()) {
         fmt.Fprintf(w, "%s%s\n"u8, indn1, s.Lookup(name));
     }
+
     if (recurse) {
         foreach (var (_, sΔ1) in s.children) {
             sΔ1.WriteTo(w, n + 1, recurse);
         }
     }
+
     fmt.Fprintf(w, "%s}\n"u8, indn);
 }
 
@@ -194,6 +211,7 @@ internal static Object resolve(@string name, Object obj) {
             var lazyʗ1 = lazy;
             lazy.of(lazyObject.Ꮡonce).Do(() => {
                 var objΔ1 = (~lazyʗ1).resolve();
+
                 {
                     var (_, okΔ1) = objΔ1._<ж<lazyObject>>(ᐧ); if (okΔ1) {
                         throw panic("recursive lazy object");
@@ -202,11 +220,13 @@ internal static Object resolve(@string name, Object obj) {
                 if (objΔ1.Name() != name) {
                     throw panic("lazy object has unexpected name");
                 }
+
                 if (objΔ1.Parent() == nil) {
                     objΔ1.setParent((~lazyʗ1).parent);
                 }
                 lazyʗ1.Value.obj = objΔ1;
             });
+
             obj = lazy.Value.obj;
         }
     }
@@ -251,19 +271,11 @@ internal static uint32 order(this ref lazyObject _) {
     throw panic("unreachable");
 }
 
-internal static Δcolor color(this ref lazyObject _) {
-    throw panic("unreachable");
-}
-
 internal static void setType(this ref lazyObject _Δp0, ΔType _Δp1) {
     throw panic("unreachable");
 }
 
 internal static void setOrder(this ref lazyObject _Δp0, uint32 _Δp1) {
-    throw panic("unreachable");
-}
-
-internal static void setColor(this ref lazyObject _, Δcolor Δcolor) {
     throw panic("unreachable");
 }
 

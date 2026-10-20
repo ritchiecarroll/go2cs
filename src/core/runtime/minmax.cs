@@ -83,7 +83,6 @@ internal static F forbits<F>(F xʗp, F yʗp)
     else if (exprᴛ1 == 8) {
         (Ꮡx.Reinterpret<F, uint64>()).Value |= (Ꮡy.Reinterpret<F, uint64>()).Value;
     }
-
     return x;
 }
 
@@ -100,7 +99,6 @@ internal static F fandbits<F>(F xʗp, F yʗp)
     else if (exprᴛ1 == 8) {
         (Ꮡx.Reinterpret<F, uint64>()).Value &= (Ꮡy.Reinterpret<F, uint64>()).Value;
     }
-
     return x;
 }
 

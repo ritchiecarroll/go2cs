@@ -107,6 +107,7 @@ func main() {
 }
 
 func TestNoinlineDirectiveKeepsTheFunctionsOwnFrame(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	mainCs := convertNoinlineDirectiveFixture(t)
 
 	for _, name := range []string{"mid", "bump"} {

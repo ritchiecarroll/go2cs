@@ -22,7 +22,6 @@ internal static error errnoErr(Δsyscall.Errno e) {
     if (exprᴛ1 == Δsyscall.ERROR_IO_PENDING) {
         return errERROR_IO_PENDING;
     }
-
     // TODO: add more here, after collecting data on the common
     // error values see on Windows. (perhaps when running
     // all.bat?)

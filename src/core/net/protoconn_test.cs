@@ -40,6 +40,7 @@ public static void TestTCPListenerSpecificMethods(ж<testing.T> Ꮡt) {
         defer(() => lnʗ1.Close(), ref ᒐ);
         ln.Addr();
         mustSetDeadline(new net_test_package.testing_TжTB(Ꮡt), ln.SetDeadline, 30 * time.ΔNanosecond);
+
         {
             var (c, errΔ1) = ln.Accept(); if (errΔ1 != default!){
                 if (!errΔ1._<ΔError>().Timeout()) {
@@ -58,6 +59,7 @@ public static void TestTCPListenerSpecificMethods(ж<testing.T> Ꮡt) {
                 c.of(global::go.net_package.TCPConn.Ꮡconn).Close();
             }
         }
+
         {
             var (f, errΔ3) = ln.File(); if (errΔ3 != default!){
                 condFatalf(Ꮡt, fileNetˢ, "%v"u8, errΔ3);
@@ -94,6 +96,7 @@ public static void TestTCPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ1);
             }
         }
+
         (var ra, err) = ResolveTCPAddr(tcp4ˢ, (~ls).Listener.Addr().String());
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -113,6 +116,7 @@ public static void TestTCPConnSpecificMethods(ж<testing.T> Ꮡt) {
         c.of(global::go.net_package.TCPConn.Ꮡconn).SetDeadline(time.Now().Add(someTimeout));
         c.of(global::go.net_package.TCPConn.Ꮡconn).SetReadDeadline(time.Now().Add(someTimeout));
         c.of(global::go.net_package.TCPConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
+
         {
             var (_, errΔ2) = c.of(global::go.net_package.TCPConn.Ꮡconn).Write(slice<byte>("TCPCONN TEST"u8)); if (errΔ2 != default!) {
                 Ꮡt.Fatal(errΔ2);
@@ -124,6 +128,7 @@ public static void TestTCPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
+
         foreach (var errΔ4 in ch) {
             Ꮡt.Error(errΔ4);
         }
@@ -152,6 +157,7 @@ public static void TestUDPConnSpecificMethods(ж<testing.T> Ꮡt) {
         c.of(global::go.net_package.UDPConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
         c.of(global::go.net_package.UDPConn.Ꮡconn).SetReadBuffer(2048);
         c.of(global::go.net_package.UDPConn.Ꮡconn).SetWriteBuffer(2048);
+
         var wb = slice<byte>("UDPCONN TEST"u8);
         var rb = new slice<byte>(128);
         {
@@ -174,6 +180,7 @@ public static void TestUDPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 condFatalf(Ꮡt, c.of(global::go.net_package.UDPConn.Ꮡconn).LocalAddr().Network(), "%v"u8, errΔ4);
             }
         }
+
         {
             var (f, errΔ5) = c.of(global::go.net_package.UDPConn.Ꮡconn).File(); if (errΔ5 != default!){
                 condFatalf(Ꮡt, fileNetˢ, "%v"u8, errΔ5);
@@ -181,6 +188,7 @@ public static void TestUDPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 f.Close();
             }
         }
+
         defer(() => {
             {
                 var p = recover(); if (p != default!) {
@@ -188,6 +196,7 @@ public static void TestUDPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         c.WriteToUDP(wb, nil);
         c.WriteMsgUDP(wb, default!, nil);
     }
@@ -206,6 +215,7 @@ public static void TestIPConnSpecificMethods(ж<testing.T> Ꮡt) {
         if (!testableNetwork(ip4ˢ)) {
             Ꮡt.Skip(skippingIp4NotSupportedˢ);
         }
+
         var (la, err) = ResolveIPAddr(ip4ˢ, "127.0.0.1"u8);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -228,6 +238,7 @@ public static void TestIPConnSpecificMethods(ж<testing.T> Ꮡt) {
         c.of(global::go.net_package.IPConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
         c.of(global::go.net_package.IPConn.Ꮡconn).SetReadBuffer(2048);
         c.of(global::go.net_package.IPConn.Ꮡconn).SetWriteBuffer(2048);
+
         {
             var (f, errΔ1) = c.of(global::go.net_package.IPConn.Ꮡconn).File(); if (errΔ1 != default!){
                 condFatalf(Ꮡt, fileNetˢ, "%v"u8, errΔ1);
@@ -235,6 +246,7 @@ public static void TestIPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 f.Close();
             }
         }
+
         defer(() => {
             {
                 var p = recover(); if (p != default!) {
@@ -242,6 +254,7 @@ public static void TestIPConnSpecificMethods(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         var wb = slice<byte>("IPCONN TEST"u8);
         c.WriteToIP(wb, nil);
         c.WriteMsgIP(wb, default!, nil);
@@ -259,6 +272,7 @@ public static void TestUnixListenerSpecificMethods(ж<testing.T> Ꮡt) {
         if (!testableNetwork(unixˢ)) {
             Ꮡt.Skip(unixTestˢ);
         }
+
         @string addr = testUnixAddr(new net_test_package.testing_TжTB(Ꮡt));
         var (la, err) = ResolveUnixAddr(unixˢ, addr);
         if (err != default!) {
@@ -273,6 +287,7 @@ public static void TestUnixListenerSpecificMethods(ж<testing.T> Ꮡt) {
         defer(Δos.Remove, addr, ref ᒐ);
         ln.Addr();
         mustSetDeadline(new net_test_package.testing_TжTB(Ꮡt), ln.SetDeadline, 30 * time.ΔNanosecond);
+
         {
             var (c, errΔ1) = ln.Accept(); if (errΔ1 != default!){
                 if (!errΔ1._<ΔError>().Timeout()) {
@@ -291,6 +306,7 @@ public static void TestUnixListenerSpecificMethods(ж<testing.T> Ꮡt) {
                 c.of(global::go.net_package.UnixConn.Ꮡconn).Close();
             }
         }
+
         {
             var (f, errΔ3) = ln.File(); if (errΔ3 != default!){
                 condFatalf(Ꮡt, fileNetˢ, "%v"u8, errΔ3);
@@ -312,9 +328,11 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
         if (!testableNetwork(unixgramˢ)) {
             Ꮡt.Skip(unixgramTestˢ);
         }
+
         @string addr1 = testUnixAddr(new net_test_package.testing_TжTB(Ꮡt));
         @string addr2 = testUnixAddr(new net_test_package.testing_TжTB(Ꮡt));
         @string addr3 = testUnixAddr(new net_test_package.testing_TжTB(Ꮡt));
+
         var (a1, err) = ResolveUnixAddr(unixgramˢ, addr1);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -333,6 +351,7 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
         c1.of(global::go.net_package.UnixConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
         c1.of(global::go.net_package.UnixConn.Ꮡconn).SetReadBuffer(2048);
         c1.of(global::go.net_package.UnixConn.Ꮡconn).SetWriteBuffer(2048);
+
         (var a2, err) = ResolveUnixAddr(unixgramˢ, addr2);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -351,6 +370,7 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
         c2.of(global::go.net_package.UnixConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
         c2.of(global::go.net_package.UnixConn.Ꮡconn).SetReadBuffer(2048);
         c2.of(global::go.net_package.UnixConn.Ꮡconn).SetWriteBuffer(2048);
+
         (var a3, err) = ResolveUnixAddr(unixgramˢ, addr3);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -369,6 +389,7 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
         c3.of(global::go.net_package.UnixConn.Ꮡconn).SetWriteDeadline(time.Now().Add(someTimeout));
         c3.of(global::go.net_package.UnixConn.Ꮡconn).SetReadBuffer(2048);
         c3.of(global::go.net_package.UnixConn.Ꮡconn).SetWriteBuffer(2048);
+
         var wb = slice<byte>("UNIXCONN TEST"u8);
         var rb1 = new slice<byte>(128);
         var rb2 = new slice<byte>(128);
@@ -413,6 +434,7 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ8);
             }
         }
+
         {
             var (f, errΔ9) = c1.of(global::go.net_package.UnixConn.Ꮡconn).File(); if (errΔ9 != default!){
                 condFatalf(Ꮡt, fileNetˢ, "%v"u8, errΔ9);
@@ -420,6 +442,7 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
                 f.Close();
             }
         }
+
         defer(() => {
             {
                 var p = recover(); if (p != default!) {
@@ -427,6 +450,7 @@ public static void TestUnixConnSpecificMethods(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         c1.WriteToUnix(wb, nil);
         c1.WriteMsgUnix(wb, default!, nil);
         c3.WriteToUnix(wb, nil);

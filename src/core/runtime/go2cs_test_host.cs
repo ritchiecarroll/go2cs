@@ -30,6 +30,9 @@ internal static class Go2CsTestHost
             "cgocall.go",
             "cgocallback.go",
             "cgocheck.go",
+            "cgroup_linux.go",
+            "cgroup_linux_test.go",
+            "cgroup_stubs.go",
             "chan.go",
             "chan_test.go",
             "chanbarrier_test.go",
@@ -46,6 +49,7 @@ internal static class Go2CsTestHost
             "covermeta.go",
             "cpuflags.go",
             "cpuflags_amd64.go",
+            "cpuflags_amd64_test.go",
             "cpuflags_arm64.go",
             "cpuprof.go",
             "cputicks.go",
@@ -64,6 +68,7 @@ internal static class Go2CsTestHost
             "debuglog_off.go",
             "debuglog_on.go",
             "debuglog_test.go",
+            "decoratemappings_test.go",
             "defer_test.go",
             "defs1_linux.go",
             "defs1_netbsd_386.go",
@@ -109,7 +114,6 @@ internal static class Go2CsTestHost
             "defs_openbsd_amd64.go",
             "defs_openbsd_arm.go",
             "defs_openbsd_arm64.go",
-            "defs_openbsd_mips64.go",
             "defs_openbsd_ppc64.go",
             "defs_openbsd_riscv64.go",
             "defs_plan9_386.go",
@@ -117,11 +121,7 @@ internal static class Go2CsTestHost
             "defs_plan9_arm.go",
             "defs_solaris.go",
             "defs_solaris_amd64.go",
-            "defs_windows.go",
-            "defs_windows_386.go",
-            "defs_windows_amd64.go",
-            "defs_windows_arm.go",
-            "defs_windows_arm64.go",
+            "dit.go",
             "ehooks_test.go",
             "env_plan9.go",
             "env_posix.go",
@@ -138,13 +138,12 @@ internal static class Go2CsTestHost
             "export_debug_test.go",
             "export_debuglog_test.go",
             "export_linux_test.go",
-            "export_map_noswiss_test.go",
-            "export_map_swiss_test.go",
             "export_mmap_test.go",
             "export_pipe2_test.go",
             "export_pipe_test.go",
             "export_test.go",
             "export_unix_test.go",
+            "export_vdso_linux_test.go",
             "export_windows_test.go",
             "extern.go",
             "fastlog2.go",
@@ -153,15 +152,20 @@ internal static class Go2CsTestHost
             "fds_nonunix.go",
             "fds_test.go",
             "fds_unix.go",
+            "fipsbypass.go",
             "float.go",
             "float_test.go",
             "gc_test.go",
             "gcinfo_test.go",
+            "gomaxprocs_windows_test.go",
+            "goroutineleakprofile_test.go",
             "hash32.go",
             "hash64.go",
             "hash_test.go",
             "heap_test.go",
             "heapdump.go",
+            "hexdump.go",
+            "hexdump_test.go",
             "histogram.go",
             "histogram_test.go",
             "iface.go",
@@ -172,13 +176,15 @@ internal static class Go2CsTestHost
             "lfstack_test.go",
             "libfuzzer.go",
             "linkname.go",
-            "linkname_swiss.go",
+            "linkname_shim.go",
             "linkname_unix.go",
+            "list.go",
+            "list_manual.go",
+            "list_manual_test.go",
+            "list_test.go",
             "lock_futex.go",
-            "lock_futex_tristate.go",
             "lock_js.go",
             "lock_sema.go",
-            "lock_sema_tristate.go",
             "lock_spinbit.go",
             "lock_wasip1.go",
             "lockrank.go",
@@ -186,18 +192,16 @@ internal static class Go2CsTestHost
             "lockrank_on.go",
             "lockrank_test.go",
             "malloc.go",
+            "malloc_generated.go",
+            "malloc_stubs.go",
+            "malloc_tables_generated.go",
+            "malloc_tables_plan9.go",
             "malloc_test.go",
+            "map.go",
             "map_benchmark_test.go",
-            "map_fast32_noswiss.go",
-            "map_fast32_swiss.go",
-            "map_fast64_noswiss.go",
-            "map_fast64_swiss.go",
-            "map_faststr_noswiss.go",
-            "map_faststr_swiss.go",
-            "map_noswiss.go",
-            "map_noswiss_test.go",
-            "map_swiss.go",
-            "map_swiss_test.go",
+            "map_fast32.go",
+            "map_fast64.go",
+            "map_faststr.go",
             "map_test.go",
             "mbarrier.go",
             "mbitmap.go",
@@ -221,6 +225,7 @@ internal static class Go2CsTestHost
             "memmove_linux_amd64_test.go",
             "memmove_test.go",
             "metrics.go",
+            "metrics_cgo_test.go",
             "metrics_test.go",
             "mfinal.go",
             "mfinal_test.go",
@@ -229,6 +234,8 @@ internal static class Go2CsTestHost
             "mgclimit.go",
             "mgclimit_test.go",
             "mgcmark.go",
+            "mgcmark_greenteagc.go",
+            "mgcmark_nogreenteagc.go",
             "mgcpacer.go",
             "mgcpacer_test.go",
             "mgcscavenge.go",
@@ -243,7 +250,6 @@ internal static class Go2CsTestHost
             "mkfastlog2table.go",
             "mklockrank.go",
             "mkpreempt.go",
-            "mksizeclasses.go",
             "mmap.go",
             "mpagealloc.go",
             "mpagealloc_32bit.go",
@@ -303,10 +309,11 @@ internal static class Go2CsTestHost
             "os_freebsd_arm.go",
             "os_freebsd_arm64.go",
             "os_freebsd_noauxv.go",
-            "os_freebsd_riscv64.go",
             "os_illumos.go",
             "os_js.go",
             "os_linux.go",
+            "os_linux32.go",
+            "os_linux64.go",
             "os_linux_arm.go",
             "os_linux_arm64.go",
             "os_linux_be64.go",
@@ -319,7 +326,6 @@ internal static class Go2CsTestHost
             "os_linux_ppc64x.go",
             "os_linux_riscv64.go",
             "os_linux_s390x.go",
-            "os_linux_x86.go",
             "os_netbsd.go",
             "os_netbsd_386.go",
             "os_netbsd_amd64.go",
@@ -330,11 +336,6 @@ internal static class Go2CsTestHost
             "os_openbsd.go",
             "os_openbsd_arm.go",
             "os_openbsd_arm64.go",
-            "os_openbsd_libc.go",
-            "os_openbsd_mips64.go",
-            "os_openbsd_syscall.go",
-            "os_openbsd_syscall1.go",
-            "os_openbsd_syscall2.go",
             "os_plan9.go",
             "os_plan9_arm.go",
             "os_solaris.go",
@@ -343,7 +344,6 @@ internal static class Go2CsTestHost
             "os_wasip1.go",
             "os_wasm.go",
             "os_windows.go",
-            "os_windows_arm.go",
             "os_windows_arm64.go",
             "panic.go",
             "panic32.go",
@@ -358,8 +358,15 @@ internal static class Go2CsTestHost
             "pprof/testdata/test64",
             "pprof/testdata/test64be",
             "preempt.go",
+            "preempt_amd64.go",
+            "preempt_arm64.go",
+            "preempt_loong64.go",
             "preempt_nonwindows.go",
+            "preempt_noxreg.go",
+            "preempt_xreg.go",
             "print.go",
+            "print_quoted_test.go",
+            "print_test.go",
             "proc.go",
             "proc_runtime_test.go",
             "proc_test.go",
@@ -377,6 +384,7 @@ internal static class Go2CsTestHost
             "race/testdata/issue12225_test.go",
             "race/testdata/issue12664_test.go",
             "race/testdata/issue13264_test.go",
+            "race/testdata/main_test.go",
             "race/testdata/map_test.go",
             "race/testdata/mop_test.go",
             "race/testdata/mutex_test.go",
@@ -388,6 +396,7 @@ internal static class Go2CsTestHost
             "race/testdata/select_test.go",
             "race/testdata/slice_test.go",
             "race/testdata/sync_test.go",
+            "race/testdata/synctest_test.go",
             "race/testdata/time_test.go",
             "race/testdata/waitgroup_test.go",
             "race0.go",
@@ -403,12 +412,18 @@ internal static class Go2CsTestHost
             "runtime1.go",
             "runtime2.go",
             "runtime_boring.go",
+            "runtime_clearenv.go",
             "runtime_linux_test.go",
             "runtime_mmap_test.go",
+            "runtime_noclearenv.go",
             "runtime_test.go",
             "runtime_unix_test.go",
             "rwmutex.go",
             "rwmutex_test.go",
+            "secret.go",
+            "secret_asm.go",
+            "secret_noasm.go",
+            "secret_nosecret.go",
             "security_aix.go",
             "security_issetugid.go",
             "security_linux.go",
@@ -419,6 +434,8 @@ internal static class Go2CsTestHost
             "sema.go",
             "sema_test.go",
             "semasleep_test.go",
+            "set_vma_name_linux.go",
+            "set_vma_name_stub.go",
             "sigaction.go",
             "signal_386.go",
             "signal_aix_ppc64.go",
@@ -459,7 +476,6 @@ internal static class Go2CsTestHost
             "signal_openbsd_amd64.go",
             "signal_openbsd_arm.go",
             "signal_openbsd_arm64.go",
-            "signal_openbsd_mips64.go",
             "signal_openbsd_ppc64.go",
             "signal_openbsd_riscv64.go",
             "signal_plan9.go",
@@ -469,6 +485,9 @@ internal static class Go2CsTestHost
             "signal_solaris_amd64.go",
             "signal_unix.go",
             "signal_windows.go",
+            "signal_windows_386.go",
+            "signal_windows_amd64.go",
+            "signal_windows_arm64.go",
             "signal_windows_test.go",
             "sigqueue.go",
             "sigqueue_note.go",
@@ -476,7 +495,6 @@ internal static class Go2CsTestHost
             "sigtab_aix.go",
             "sigtab_linux_generic.go",
             "sigtab_linux_mipsx.go",
-            "sizeclasses.go",
             "sizeof_test.go",
             "slice.go",
             "slice_test.go",
@@ -523,9 +541,6 @@ internal static class Go2CsTestHost
             "sys_mipsx.go",
             "sys_nonppc64x.go",
             "sys_openbsd.go",
-            "sys_openbsd1.go",
-            "sys_openbsd2.go",
-            "sys_openbsd3.go",
             "sys_ppc64x.go",
             "sys_riscv64.go",
             "sys_s390x.go",
@@ -534,6 +549,7 @@ internal static class Go2CsTestHost
             "syscall2_solaris.go",
             "syscall_aix.go",
             "syscall_solaris.go",
+            "syscall_test.go",
             "syscall_unix_test.go",
             "syscall_windows.go",
             "syscall_windows_test.go",
@@ -545,6 +561,7 @@ internal static class Go2CsTestHost
             "time.go",
             "time_fake.go",
             "time_nofake.go",
+            "time_plan9.go",
             "time_test.go",
             "timeasm.go",
             "timestub.go",
@@ -562,20 +579,21 @@ internal static class Go2CsTestHost
             "tracebuf.go",
             "tracecpu.go",
             "traceevent.go",
-            "traceexp.go",
             "tracemap.go",
             "traceregion.go",
             "traceruntime.go",
             "tracestack.go",
+            "tracestack_test.go",
             "tracestatus.go",
             "tracestring.go",
             "tracetime.go",
             "tracetype.go",
             "type.go",
-            "typekind.go",
             "unsafe.go",
             "unsafepoint_test.go",
             "utf8.go",
+            "valgrind.go",
+            "valgrind0.go",
             "vdso_elf32.go",
             "vdso_elf64.go",
             "vdso_freebsd.go",
@@ -594,6 +612,7 @@ internal static class Go2CsTestHost
             "vdso_linux_ppc64x.go",
             "vdso_linux_riscv64.go",
             "vdso_linux_s390x.go",
+            "vdso_linux_test.go",
             "vdso_test.go",
             "vgetrandom_linux.go",
             "vgetrandom_unsupported.go",
@@ -605,67 +624,74 @@ internal static class Go2CsTestHost
             "zcallback_windows.go",
         }, new string[]
         {
+            "_mkmalloc",
             "asan",
             "cgo",
             "coverage",
             "debug",
-            "internal",
             "metrics",
             "msan",
             "pprof",
             "race",
+            "secret",
             "testdata",
             "trace",
         }, new string[]
         {
-            "internal/wasitest/testdata",
             "pprof/testdata/mappingtest",
+            "secret/testdata",
             "testdata/testexithooks",
             "testdata/testfaketime",
             "testdata/testfds",
+            "testdata/testgoroutineleakprofile",
             "testdata/testprog",
             "testdata/testprogcgo",
             "testdata/testprognet",
             "testdata/testsuid",
             "testdata/testsynctest",
+            "testdata/testsyscall",
             "testdata/testwinlib",
             "testdata/testwinlibsignal",
             "testdata/testwinlibthrow",
             "testdata/testwinsignal",
             "testdata/testwintls",
         });
-        registry.Add("Test64BitReturnStdCall", runtime_test_package.Test64BitReturnStdCall, "syscall_windows_test.go", 65);
-        registry.Add("TestAbort", runtime_test_package.TestAbort, "crash_test.go", 805);
+        registry.Add("Test64BitReturnStdCall", runtime_test_package.Test64BitReturnStdCall, "syscall_windows_test.go", 67);
+        registry.Add("TestAbort", runtime_test_package.TestAbort, "crash_test.go", 896);
         registry.Add("TestAbortedPanic", runtime_test_package.TestAbortedPanic, "defer_test.go", 131);
         registry.Add("TestAddrRangesAdd", runtime_test_package.TestAddrRangesAdd, "mranges_test.go", 61);
         registry.Add("TestAddrRangesFindSucc", runtime_test_package.TestAddrRangesFindSucc, "mranges_test.go", 115);
-        registry.Add("TestAlias", runtime_test_package.TestAlias, "map_test.go", 141);
-        registry.Add("TestAppendGrowth", runtime_test_package.TestAppendGrowth, "runtime_test.go", 310);
-        registry.Add("TestAppendOverlap", runtime_test_package.TestAppendOverlap, "slice_test.go", 342);
-        registry.Add("TestAppendSliceGrowth", runtime_test_package.TestAppendSliceGrowth, "runtime_test.go", 331);
-        registry.Add("TestArenaCollision", runtime_test_package.TestArenaCollision, "malloc_test.go", 272);
-        registry.Add("TestArrayHash", runtime_test_package.TestArrayHash, "hash_test.go", 687);
-        registry.Add("TestAsyncPreempt", runtime_test_package.TestAsyncPreempt, "proc_test.go", 369);
-        registry.Add("TestAtoi", runtime_test_package.TestAtoi, "string_test.go", 423);
-        registry.Add("TestAtoi32", runtime_test_package.TestAtoi32, "string_test.go", 474);
+        registry.Add("TestAlias", runtime_test_package.TestAlias, "map_test.go", 143);
+        registry.Add("TestAppendByteCapInLoop", runtime_test_package.TestAppendByteCapInLoop, "slice_test.go", 647);
+        registry.Add("TestAppendByteInLoop", runtime_test_package.TestAppendByteInLoop, "slice_test.go", 517);
+        registry.Add("TestAppendGeneric", runtime_test_package.TestAppendGeneric, "slice_test.go", 694);
+        registry.Add("TestAppendGrowthHeap", runtime_test_package.TestAppendGrowthHeap, "runtime_test.go", 313);
+        registry.Add("TestAppendGrowthStack", runtime_test_package.TestAppendGrowthStack, "runtime_test.go", 333);
+        registry.Add("TestAppendOfArg", runtime_test_package.TestAppendOfArg, "slice_test.go", 719);
+        registry.Add("TestAppendOverlap", runtime_test_package.TestAppendOverlap, "slice_test.go", 348);
+        registry.Add("TestAppendPtrInLoop", runtime_test_package.TestAppendPtrInLoop, "slice_test.go", 578);
+        registry.Add("TestAppendSliceGrowth", runtime_test_package.TestAppendSliceGrowth, "runtime_test.go", 360);
+        registry.Add("TestArenaCollision", runtime_test_package.TestArenaCollision, "malloc_test.go", 631);
+        registry.Add("TestArrayHash", runtime_test_package.TestArrayHash, "hash_test.go", 684);
+        registry.Add("TestAsyncPreempt", runtime_test_package.TestAsyncPreempt, "proc_test.go", 374);
         registry.Add("TestAtomicAlignment", runtime_test_package.TestAtomicAlignment, "align_test.go", 25);
-        registry.Add("TestBadTraceback", runtime_test_package.TestBadTraceback, "crash_test.go", 765);
-        registry.Add("TestBigGOMAXPROCS", runtime_test_package.TestBigGOMAXPROCS, "proc_test.go", 1145);
-        registry.Add("TestBigItems", runtime_test_package.TestBigItems, "map_test.go", 361);
-        registry.Add("TestBigStackCallbackSyscall", runtime_test_package.TestBigStackCallbackSyscall, "syscall_windows_test.go", 1171);
+        registry.Add("TestBadTraceback", runtime_test_package.TestBadTraceback, "crash_test.go", 850);
+        registry.Add("TestBigGOMAXPROCS", runtime_test_package.TestBigGOMAXPROCS, "proc_test.go", 1160);
+        registry.Add("TestBigItems", runtime_test_package.TestBigItems, "map_test.go", 363);
+        registry.Add("TestBigStackCallbackSyscall", runtime_test_package.TestBigStackCallbackSyscall, "syscall_windows_test.go", 1176);
         registry.Add("TestBitCursor", runtime_test_package.TestBitCursor, "bitcursor_test.go", 12);
-        registry.Add("TestBlockLocked", runtime_test_package.TestBlockLocked, "proc_test.go", 231);
-        registry.Add("TestBlockingCallback", runtime_test_package.TestBlockingCallback, "syscall_windows_test.go", 238);
-        registry.Add("TestBreakpoint", runtime_test_package.TestBreakpoint, "crash_test.go", 410);
-        registry.Add("TestCDecl", runtime_test_package.TestCDecl, "syscall_windows_test.go", 125);
-        registry.Add("TestCPUMetricsSleep", runtime_test_package.TestCPUMetricsSleep, "metrics_test.go", 689);
-        registry.Add("TestCPUStats", runtime_test_package.TestCPUStats, "metrics_test.go", 1313);
-        registry.Add("TestCallback", runtime_test_package.TestCallback, "syscall_windows_test.go", 175);
-        registry.Add("TestCallbackGC", runtime_test_package.TestCallbackGC, "syscall_windows_test.go", 183);
-        registry.Add("TestCallbackInAnotherThread", runtime_test_package.TestCallbackInAnotherThread, "syscall_windows_test.go", 255);
-        registry.Add("TestCallbackPanic", runtime_test_package.TestCallbackPanic, "syscall_windows_test.go", 210);
-        registry.Add("TestCallbackPanicLocked", runtime_test_package.TestCallbackPanicLocked, "syscall_windows_test.go", 187);
-        registry.Add("TestCallbackPanicLoop", runtime_test_package.TestCallbackPanicLoop, "syscall_windows_test.go", 231);
+        registry.Add("TestBlockLocked", runtime_test_package.TestBlockLocked, "proc_test.go", 236);
+        registry.Add("TestBlockingCallback", runtime_test_package.TestBlockingCallback, "syscall_windows_test.go", 240);
+        registry.Add("TestBreakpoint", runtime_test_package.TestBreakpoint, "crash_test.go", 483);
+        registry.Add("TestCDecl", runtime_test_package.TestCDecl, "syscall_windows_test.go", 127);
+        registry.Add("TestCPUMetricsSleep", runtime_test_package.TestCPUMetricsSleep, "metrics_test.go", 692);
+        registry.Add("TestCPUStats", runtime_test_package.TestCPUStats, "metrics_test.go", 1449);
+        registry.Add("TestCallback", runtime_test_package.TestCallback, "syscall_windows_test.go", 177);
+        registry.Add("TestCallbackGC", runtime_test_package.TestCallbackGC, "syscall_windows_test.go", 185);
+        registry.Add("TestCallbackInAnotherThread", runtime_test_package.TestCallbackInAnotherThread, "syscall_windows_test.go", 257);
+        registry.Add("TestCallbackPanic", runtime_test_package.TestCallbackPanic, "syscall_windows_test.go", 212);
+        registry.Add("TestCallbackPanicLocked", runtime_test_package.TestCallbackPanicLocked, "syscall_windows_test.go", 189);
+        registry.Add("TestCallbackPanicLoop", runtime_test_package.TestCallbackPanicLoop, "syscall_windows_test.go", 233);
         registry.Add("TestCaller", runtime_test_package.TestCaller, "symtab_test.go", 14);
         registry.Add("TestCallers", runtime_test_package.TestCallers, "callers_test.go", 88);
         registry.Add("TestCallersAbortedPanic", runtime_test_package.TestCallersAbortedPanic, "callers_test.go", 152);
@@ -676,131 +702,146 @@ internal static class Go2CsTestHost
         registry.Add("TestCallersDivZeroPanic", runtime_test_package.TestCallersDivZeroPanic, "callers_test.go", 235);
         registry.Add("TestCallersDoublePanic", runtime_test_package.TestCallersDoublePanic, "callers_test.go", 111);
         registry.Add("TestCallersEndlineno", runtime_test_package.TestCallersEndlineno, "callers_test.go", 316);
-        registry.Add("TestCallersFromWrapper", runtime_test_package.TestCallersFromWrapper, "stack_test.go", 778);
+        registry.Add("TestCallersFromWrapper", runtime_test_package.TestCallersFromWrapper, "stack_test.go", 779);
         registry.Add("TestCallersNilPointerPanic", runtime_test_package.TestCallersNilPointerPanic, "callers_test.go", 214);
         registry.Add("TestCallersPanic", runtime_test_package.TestCallersPanic, "callers_test.go", 92);
+        registry.Add("TestCgroupGOMAXPROCSDontUpdate", runtime_test_package.TestCgroupGOMAXPROCSDontUpdate, "gomaxprocs_windows_test.go", 26);
         registry.Add("TestChan", runtime_test_package.TestChan, "chan_test.go", 17);
         registry.Add("TestChanSendBarrier", runtime_test_package.TestChanSendBarrier, "chanbarrier_test.go", 52);
-        registry.Add("TestChanSendInterface", runtime_test_package.TestChanSendInterface, "chan_test.go", 497);
+        registry.Add("TestChanSendInterface", runtime_test_package.TestChanSendInterface, "chan_test.go", 495);
         registry.Add("TestChanSendSelectBarrier", runtime_test_package.TestChanSendSelectBarrier, "chanbarrier_test.go", 47);
         registry.Add("TestCheckPtr", runtime_test_package.TestCheckPtr, "checkptr_test.go", 14);
         registry.Add("TestCheckPtr2", runtime_test_package.TestCheckPtr2, "checkptr_test.go", 67);
-        registry.Add("TestCleanup", runtime_test_package.TestCleanup, "mcleanup_test.go", 13);
-        registry.Add("TestCleanupAfterFinalizer", runtime_test_package.TestCleanupAfterFinalizer, "mcleanup_test.go", 81);
-        registry.Add("TestCleanupInteriorPointer", runtime_test_package.TestCleanupInteriorPointer, "mcleanup_test.go", 123);
-        registry.Add("TestCleanupMultiple", runtime_test_package.TestCleanupMultiple, "mcleanup_test.go", 42);
-        registry.Add("TestCleanupPointerEqualsArg", runtime_test_package.TestCleanupPointerEqualsArg, "mcleanup_test.go", 273);
-        registry.Add("TestCleanupStop", runtime_test_package.TestCleanupStop, "mcleanup_test.go", 161);
-        registry.Add("TestCleanupStopAfterCleanupRuns", runtime_test_package.TestCleanupStopAfterCleanupRuns, "mcleanup_test.go", 245);
-        registry.Add("TestCleanupStopMultiple", runtime_test_package.TestCleanupStopMultiple, "mcleanup_test.go", 185);
-        registry.Add("TestCleanupStopinterleavedMultiple", runtime_test_package.TestCleanupStopinterleavedMultiple, "mcleanup_test.go", 211);
-        registry.Add("TestCleanupZeroSizedStruct", runtime_test_package.TestCleanupZeroSizedStruct, "mcleanup_test.go", 75);
+        registry.Add("TestCleanup", runtime_test_package.TestCleanup, "mcleanup_test.go", 16);
+        registry.Add("TestCleanupAfterFinalizer", runtime_test_package.TestCleanupAfterFinalizer, "mcleanup_test.go", 84);
+        registry.Add("TestCleanupInteriorPointer", runtime_test_package.TestCleanupInteriorPointer, "mcleanup_test.go", 126);
+        registry.Add("TestCleanupLost", runtime_test_package.TestCleanupLost, "mcleanup_test.go", 304);
+        registry.Add("TestCleanupMultiple", runtime_test_package.TestCleanupMultiple, "mcleanup_test.go", 45);
+        registry.Add("TestCleanupPointerEqualsArg", runtime_test_package.TestCleanupPointerEqualsArg, "mcleanup_test.go", 276);
+        registry.Add("TestCleanupStop", runtime_test_package.TestCleanupStop, "mcleanup_test.go", 164);
+        registry.Add("TestCleanupStopAfterCleanupRuns", runtime_test_package.TestCleanupStopAfterCleanupRuns, "mcleanup_test.go", 248);
+        registry.Add("TestCleanupStopMultiple", runtime_test_package.TestCleanupStopMultiple, "mcleanup_test.go", 188);
+        registry.Add("TestCleanupStopinterleavedMultiple", runtime_test_package.TestCleanupStopinterleavedMultiple, "mcleanup_test.go", 214);
+        registry.Add("TestCleanupUnreachableClosure", runtime_test_package.TestCleanupUnreachableClosure, "mcleanup_test.go", 362);
+        registry.Add("TestCleanupUnreachablePointer", runtime_test_package.TestCleanupUnreachablePointer, "mcleanup_test.go", 345);
+        registry.Add("TestCleanupZeroSizedStruct", runtime_test_package.TestCleanupZeroSizedStruct, "mcleanup_test.go", 78);
         registry.Add("TestCmpIfaceConcreteAlloc", runtime_test_package.TestCmpIfaceConcreteAlloc, "iface_test.go", 58);
-        registry.Add("TestCollisions", runtime_test_package.TestCollisions, "hash_test.go", 806);
+        registry.Add("TestCollisions", runtime_test_package.TestCollisions, "hash_test.go", 803);
         registry.Add("TestCompareTempString", runtime_test_package.TestCompareTempString, "string_test.go", 239);
         registry.Add("TestConcatTempString", runtime_test_package.TestConcatTempString, "string_test.go", 226);
-        registry.Add("TestConcurrentMapIterateWrite", runtime_test_package.TestConcurrentMapIterateWrite, "crash_test.go", 649);
-        registry.Add("TestConcurrentMapReadWrite", runtime_test_package.TestConcurrentMapReadWrite, "crash_test.go", 635);
-        registry.Add("TestConcurrentMapWrites", runtime_test_package.TestConcurrentMapWrites, "crash_test.go", 621);
-        registry.Add("TestConcurrentMapWritesIssue69447", runtime_test_package.TestConcurrentMapWritesIssue69447, "crash_test.go", 664);
-        registry.Add("TestConcurrentReadsAfterGrowth", runtime_test_package.TestConcurrentReadsAfterGrowth, "map_test.go", 353);
-        registry.Add("TestConcurrentReadsAfterGrowthReflect", runtime_test_package.TestConcurrentReadsAfterGrowthReflect, "map_test.go", 357);
+        registry.Add("TestConcurrentMapIterateWrite", runtime_test_package.TestConcurrentMapIterateWrite, "crash_test.go", 728);
+        registry.Add("TestConcurrentMapReadWrite", runtime_test_package.TestConcurrentMapReadWrite, "crash_test.go", 711);
+        registry.Add("TestConcurrentMapWrites", runtime_test_package.TestConcurrentMapWrites, "crash_test.go", 694);
+        registry.Add("TestConcurrentMapWritesIssue69447", runtime_test_package.TestConcurrentMapWritesIssue69447, "crash_test.go", 746);
+        registry.Add("TestConcurrentReadsAfterGrowth", runtime_test_package.TestConcurrentReadsAfterGrowth, "map_test.go", 355);
+        registry.Add("TestConcurrentReadsAfterGrowthReflect", runtime_test_package.TestConcurrentReadsAfterGrowthReflect, "map_test.go", 359);
         registry.Add("TestConditionalDefers", runtime_test_package.TestConditionalDefers, "defer_test.go", 78);
-        registry.Add("TestCoroCgoCallback", runtime_test_package.TestCoroCgoCallback, "coro_test.go", 33);
-        registry.Add("TestCoroLockOSThread", runtime_test_package.TestCoroLockOSThread, "coro_test.go", 14);
-        registry.Add("TestCrashHandler", runtime_test_package.TestCrashHandler, "crash_test.go", 228);
-        registry.Add("TestCrashWhileTracing", runtime_test_package.TestCrashWhileTracing, "crash_test.go", 946);
-        registry.Add("TestCtrlHandler", runtime_test_package.TestCtrlHandler, "signal_windows_test.go", 149);
-        registry.Add("TestDLLPreloadMitigation", runtime_test_package.TestDLLPreloadMitigation, "syscall_windows_test.go", 1107);
+        registry.Add("TestCoroCgoCallback", runtime_test_package.TestCoroCgoCallback, "coro_test.go", 34);
+        registry.Add("TestCoroLockOSThread", runtime_test_package.TestCoroLockOSThread, "coro_test.go", 15);
+        registry.Add("TestCrashHandler", runtime_test_package.TestCrashHandler, "crash_test.go", 253);
+        registry.Add("TestCrashWhileTracing", runtime_test_package.TestCrashWhileTracing, "crash_test.go", 1032);
+        registry.Add("TestCtrlHandler", runtime_test_package.TestCtrlHandler, "signal_windows_test.go", 144);
+        registry.Add("TestDLLPreloadMitigation", runtime_test_package.TestDLLPreloadMitigation, "syscall_windows_test.go", 1112);
         registry.Add("TestDebugLog", runtime_test_package.TestDebugLog, "debuglog_test.go", 48);
         registry.Add("TestDebugLogInterleaving", runtime_test_package.TestDebugLogInterleaving, "debuglog_test.go", 81);
         registry.Add("TestDebugLogLongString", runtime_test_package.TestDebugLogLongString, "debuglog_test.go", 180);
         registry.Add("TestDebugLogSym", runtime_test_package.TestDebugLogSym, "debuglog_test.go", 69);
         registry.Add("TestDebugLogTypes", runtime_test_package.TestDebugLogTypes, "debuglog_test.go", 58);
         registry.Add("TestDebugLogWraparound", runtime_test_package.TestDebugLogWraparound, "debuglog_test.go", 149);
-        registry.Add("TestDeferDeleteSlow", runtime_test_package.TestDeferDeleteSlow, "map_test.go", 708);
+        registry.Add("TestDecorateMappings", runtime_test_package.TestDecorateMappings, "decoratemappings_test.go", 45);
+        registry.Add("TestDeferDeleteSlow", runtime_test_package.TestDeferDeleteSlow, "map_test.go", 710);
         registry.Add("TestDeferForFuncWithNoExit", runtime_test_package.TestDeferForFuncWithNoExit, "defer_test.go", 262);
-        registry.Add("TestDeferHeapAndStack", runtime_test_package.TestDeferHeapAndStack, "stack_test.go", 874);
+        registry.Add("TestDeferHeapAndStack", runtime_test_package.TestDeferHeapAndStack, "stack_test.go", 875);
         registry.Add("TestDeferKeepAlive", runtime_test_package.TestDeferKeepAlive, "mfinal_test.go", 238);
-        registry.Add("TestDeferLeafSigpanic", runtime_test_package.TestDeferLeafSigpanic, "stack_test.go", 328);
-        registry.Add("TestDeferLiveness", runtime_test_package.TestDeferLiveness, "stack_test.go", 867);
-        registry.Add("TestDeferPtrs", runtime_test_package.TestDeferPtrs, "stack_test.go", 243);
-        registry.Add("TestDeferPtrsGoexit", runtime_test_package.TestDeferPtrsGoexit, "stack_test.go", 263);
-        registry.Add("TestDeferPtrsPanic", runtime_test_package.TestDeferPtrsPanic, "stack_test.go", 289);
+        registry.Add("TestDeferLeafSigpanic", runtime_test_package.TestDeferLeafSigpanic, "stack_test.go", 329);
+        registry.Add("TestDeferLiveness", runtime_test_package.TestDeferLiveness, "stack_test.go", 868);
+        registry.Add("TestDeferPtrs", runtime_test_package.TestDeferPtrs, "stack_test.go", 244);
+        registry.Add("TestDeferPtrsGoexit", runtime_test_package.TestDeferPtrsGoexit, "stack_test.go", 264);
+        registry.Add("TestDeferPtrsPanic", runtime_test_package.TestDeferPtrsPanic, "stack_test.go", 290);
         registry.Add("TestDeferWithRepeatedRepanics", runtime_test_package.TestDeferWithRepeatedRepanics, "defer_test.go", 290);
+        registry.Add("TestDetectFinalizerAndCleanupLeaks", runtime_test_package.TestDetectFinalizerAndCleanupLeaks, "gc_test.go", 884);
         registry.Add("TestDisappearingDefer", runtime_test_package.TestDisappearingDefer, "defer_test.go", 113);
-        registry.Add("TestDoublePanic", runtime_test_package.TestDoublePanic, "crash_test.go", 1006);
-        registry.Add("TestEmptyKeyAndValue", runtime_test_package.TestEmptyKeyAndValue, "map_test.go", 410);
-        registry.Add("TestEmptyMapWithInterfaceKey", runtime_test_package.TestEmptyMapWithInterfaceKey, "map_test.go", 916);
+        registry.Add("TestDoublePanic", runtime_test_package.TestDoublePanic, "crash_test.go", 1093);
+        registry.Add("TestDoublePanicWithSameValue", runtime_test_package.TestDoublePanicWithSameValue, "crash_test.go", 423);
+        registry.Add("TestEmptyKeyAndValue", runtime_test_package.TestEmptyKeyAndValue, "map_test.go", 412);
+        registry.Add("TestEmptyMapWithInterfaceKey", runtime_test_package.TestEmptyMapWithInterfaceKey, "map_test.go", 893);
         registry.Add("TestEmptySlice", runtime_test_package.TestEmptySlice, "mfinal_test.go", 168);
         registry.Add("TestEmptyString", runtime_test_package.TestEmptyString, "mfinal_test.go", 200);
-        registry.Add("TestEnumWindows", runtime_test_package.TestEnumWindows, "syscall_windows_test.go", 137);
-        registry.Add("TestEqString", runtime_test_package.TestEqString, "runtime_test.go", 245);
-        registry.Add("TestExitHooks", runtime_test_package.TestExitHooks, "ehooks_test.go", 16);
+        registry.Add("TestEnumWindows", runtime_test_package.TestEnumWindows, "syscall_windows_test.go", 139);
+        registry.Add("TestEqString", runtime_test_package.TestEqString, "runtime_test.go", 248);
+        registry.Add("TestExitHooks", runtime_test_package.TestExitHooks, "ehooks_test.go", 13);
         registry.Add("TestFPUnwindAfterRecovery", runtime_test_package.TestFPUnwindAfterRecovery, "callers_test.go", 454);
+        registry.Add("TestFPUnwindStackGrowthAfterRecovery", runtime_test_package.TestFPUnwindStackGrowthAfterRecovery, "callers_test.go", 498);
         registry.Add("TestFakeTime", runtime_test_package.TestFakeTime, "time_test.go", 19);
         registry.Add("TestFastLog2", runtime_test_package.TestFastLog2, "fastlog2_test.go", 13);
         registry.Add("TestFillAligned", runtime_test_package.TestFillAligned, "mgcscavenge_test.go", 40);
         registry.Add("TestFinalizerInterfaceBig", runtime_test_package.TestFinalizerInterfaceBig, "mfinal_test.go", 81);
         registry.Add("TestFinalizerOnGlobal", runtime_test_package.TestFinalizerOnGlobal, "mfinal_test.go", 218);
+        registry.Add("TestFinalizerOrCleanupDeadlock", runtime_test_package.TestFinalizerOrCleanupDeadlock, "crash_test.go", 1166);
         registry.Add("TestFinalizerRegisterABI", runtime_test_package.TestFinalizerRegisterABI, "abi_test.go", 46);
         registry.Add("TestFinalizerType", runtime_test_package.TestFinalizerType, "mfinal_test.go", 24);
         registry.Add("TestFinalizerZeroSizedStruct", runtime_test_package.TestFinalizerZeroSizedStruct, "mfinal_test.go", 109);
-        registry.Add("TestFindBitRange64", runtime_test_package.TestFindBitRange64, "mpallocbits_test.go", 498);
+        registry.Add("TestFindBitRange64", runtime_test_package.TestFindBitRange64, "mpallocbits_test.go", 511);
         registry.Add("TestFixedGOROOT", runtime_test_package.TestFixedGOROOT, "env_test.go", 13);
         registry.Add("TestFloat64", runtime_test_package.TestFloat64, "softfloat64_test.go", 28);
-        registry.Add("TestFloatArgs", runtime_test_package.TestFloatArgs, "syscall_windows_test.go", 824);
-        registry.Add("TestFloatReturn", runtime_test_package.TestFloatReturn, "syscall_windows_test.go", 875);
-        registry.Add("TestFramePointerAdjust", runtime_test_package.TestFramePointerAdjust, "stack_test.go", 929);
+        registry.Add("TestFloatArgs", runtime_test_package.TestFloatArgs, "syscall_windows_test.go", 829);
+        registry.Add("TestFloatReturn", runtime_test_package.TestFloatReturn, "syscall_windows_test.go", 880);
+        registry.Add("TestFramePointerAdjust", runtime_test_package.TestFramePointerAdjust, "stack_test.go", 930);
+        registry.Add("TestFreegc", runtime_test_package.TestFreegc, "malloc_test.go", 239);
         registry.Add("TestFunctionAlignmentTraceback", runtime_test_package.TestFunctionAlignmentTraceback, "symtab_test.go", 220);
-        registry.Add("TestG0StackOverflow", runtime_test_package.TestG0StackOverflow, "crash_test.go", 900);
+        registry.Add("TestG0StackOverflow", runtime_test_package.TestG0StackOverflow, "crash_test.go", 988);
         registry.Add("TestGCCPULimiter", runtime_test_package.TestGCCPULimiter, "mgclimit_test.go", 13);
-        registry.Add("TestGCFairness", runtime_test_package.TestGCFairness, "proc_test.go", 380);
-        registry.Add("TestGCFairness2", runtime_test_package.TestGCFairness2, "proc_test.go", 388);
+        registry.Add("TestGCFairness", runtime_test_package.TestGCFairness, "proc_test.go", 385);
+        registry.Add("TestGCFairness2", runtime_test_package.TestGCFairness2, "proc_test.go", 393);
         registry.Add("TestGCInfo", runtime_test_package.TestGCInfo, "gcinfo_test.go", 19);
-        registry.Add("TestGCTestIsReachable", runtime_test_package.TestGCTestIsReachable, "gc_test.go", 273);
-        registry.Add("TestGCTestMoveStackOnNextCall", runtime_test_package.TestGCTestMoveStackOnNextCall, "gc_test.go", 213);
-        registry.Add("TestGCTestMoveStackRepeatedly", runtime_test_package.TestGCTestMoveStackRepeatedly, "gc_test.go", 256);
-        registry.Add("TestGCTestPointerClass", runtime_test_package.TestGCTestPointerClass, "gc_test.go", 306);
-        registry.Add("TestGcArraySlice", runtime_test_package.TestGcArraySlice, "gc_test.go", 69);
-        registry.Add("TestGcDeepNesting", runtime_test_package.TestGcDeepNesting, "gc_test.go", 39);
-        registry.Add("TestGcLastTime", runtime_test_package.TestGcLastTime, "gc_test.go", 123);
-        registry.Add("TestGcMapIndirection", runtime_test_package.TestGcMapIndirection, "gc_test.go", 55);
+        registry.Add("TestGCTestIsReachable", runtime_test_package.TestGCTestIsReachable, "gc_test.go", 278);
+        registry.Add("TestGCTestMoveStackOnNextCall", runtime_test_package.TestGCTestMoveStackOnNextCall, "gc_test.go", 218);
+        registry.Add("TestGCTestMoveStackRepeatedly", runtime_test_package.TestGCTestMoveStackRepeatedly, "gc_test.go", 261);
+        registry.Add("TestGCTestPointerClass", runtime_test_package.TestGCTestPointerClass, "gc_test.go", 311);
+        registry.Add("TestGOMAXPROCSUpdate", runtime_test_package.TestGOMAXPROCSUpdate, "gomaxprocs_windows_test.go", 12);
+        registry.Add("TestGcArraySlice", runtime_test_package.TestGcArraySlice, "gc_test.go", 71);
+        registry.Add("TestGcDeepNesting", runtime_test_package.TestGcDeepNesting, "gc_test.go", 41);
+        registry.Add("TestGcLastTime", runtime_test_package.TestGcLastTime, "gc_test.go", 125);
+        registry.Add("TestGcMapIndirection", runtime_test_package.TestGcMapIndirection, "gc_test.go", 57);
         registry.Add("TestGcPacer", runtime_test_package.TestGcPacer, "mgcpacer_test.go", 16);
-        registry.Add("TestGcRescan", runtime_test_package.TestGcRescan, "gc_test.go", 93);
-        registry.Add("TestGcSys", runtime_test_package.TestGcSys, "gc_test.go", 27);
-        registry.Add("TestGcZombieReporting", runtime_test_package.TestGcZombieReporting, "gc_test.go", 201);
-        registry.Add("TestGdbAutotmpTypes", runtime_test_package.TestGdbAutotmpTypes, "runtime-gdb_test.go", 583);
-        registry.Add("TestGdbBacktrace", runtime_test_package.TestGdbBacktrace, "runtime-gdb_test.go", 455);
-        registry.Add("TestGdbConst", runtime_test_package.TestGdbConst, "runtime-gdb_test.go", 669);
-        registry.Add("TestGdbInfCallstack", runtime_test_package.TestGdbInfCallstack, "runtime-gdb_test.go", 808);
-        registry.Add("TestGdbPanic", runtime_test_package.TestGdbPanic, "runtime-gdb_test.go", 734);
-        registry.Add("TestGdbPython", runtime_test_package.TestGdbPython, "runtime-gdb_test.go", 220);
-        registry.Add("TestGdbPythonCgo", runtime_test_package.TestGdbPythonCgo, "runtime-gdb_test.go", 224);
-        registry.Add("TestGetgThreadSwitch", runtime_test_package.TestGetgThreadSwitch, "proc_test.go", 1100);
-        registry.Add("TestGoNil", runtime_test_package.TestGoNil, "crash_test.go", 386);
-        registry.Add("TestGoexitCrash", runtime_test_package.TestGoexitCrash, "crash_test.go", 359);
-        registry.Add("TestGoexitDeadlock", runtime_test_package.TestGoexitDeadlock, "crash_test.go", 259);
-        registry.Add("TestGoexitDefer", runtime_test_package.TestGoexitDefer, "crash_test.go", 370);
-        registry.Add("TestGoexitInPanic", runtime_test_package.TestGoexitInPanic, "crash_test.go", 420);
-        registry.Add("TestGoroutineParallelism", runtime_test_package.TestGoroutineParallelism, "proc_test.go", 106);
-        registry.Add("TestGoroutineParallelism2", runtime_test_package.TestGoroutineParallelism2, "proc_test.go", 148);
-        registry.Add("TestGoroutineProfileTrivial", runtime_test_package.TestGoroutineProfileTrivial, "runtime_test.go", 350);
-        registry.Add("TestGroupSizeZero", runtime_test_package.TestGroupSizeZero, "map_swiss_test.go", 30);
-        registry.Add("TestGrowWithNaN", runtime_test_package.TestGrowWithNaN, "map_test.go", 151);
-        registry.Add("TestGrowWithNegativeZero", runtime_test_package.TestGrowWithNegativeZero, "map_test.go", 193);
+        registry.Add("TestGcRescan", runtime_test_package.TestGcRescan, "gc_test.go", 95);
+        registry.Add("TestGcSys", runtime_test_package.TestGcSys, "gc_test.go", 29);
+        registry.Add("TestGcZombieReporting", runtime_test_package.TestGcZombieReporting, "gc_test.go", 203);
+        registry.Add("TestGdbAutotmpTypes", runtime_test_package.TestGdbAutotmpTypes, "runtime-gdb_test.go", 586);
+        registry.Add("TestGdbBacktrace", runtime_test_package.TestGdbBacktrace, "runtime-gdb_test.go", 457);
+        registry.Add("TestGdbConst", runtime_test_package.TestGdbConst, "runtime-gdb_test.go", 662);
+        registry.Add("TestGdbInfCallstack", runtime_test_package.TestGdbInfCallstack, "runtime-gdb_test.go", 801);
+        registry.Add("TestGdbPanic", runtime_test_package.TestGdbPanic, "runtime-gdb_test.go", 727);
+        registry.Add("TestGdbPython", runtime_test_package.TestGdbPython, "runtime-gdb_test.go", 222);
+        registry.Add("TestGdbPythonCgo", runtime_test_package.TestGdbPythonCgo, "runtime-gdb_test.go", 226);
+        registry.Add("TestGetgThreadSwitch", runtime_test_package.TestGetgThreadSwitch, "proc_test.go", 1115);
+        registry.Add("TestGoNil", runtime_test_package.TestGoNil, "crash_test.go", 459);
+        registry.Add("TestGoexitCrash", runtime_test_package.TestGoexitCrash, "crash_test.go", 432);
+        registry.Add("TestGoexitDeadlock", runtime_test_package.TestGoexitDeadlock, "crash_test.go", 292);
+        registry.Add("TestGoexitDefer", runtime_test_package.TestGoexitDefer, "crash_test.go", 443);
+        registry.Add("TestGoexitInPanic", runtime_test_package.TestGoexitInPanic, "crash_test.go", 493);
+        registry.Add("TestGoroutineLeakProfile", runtime_test_package.TestGoroutineLeakProfile, "goroutineleakprofile_test.go", 16);
+        registry.Add("TestGoroutineParallelism", runtime_test_package.TestGoroutineParallelism, "proc_test.go", 111);
+        registry.Add("TestGoroutineParallelism2", runtime_test_package.TestGoroutineParallelism2, "proc_test.go", 153);
+        registry.Add("TestGoroutineProfileTrivial", runtime_test_package.TestGoroutineProfileTrivial, "runtime_test.go", 379);
+        registry.Add("TestGroupSizeZero", runtime_test_package.TestGroupSizeZero, "map_test.go", 1157);
+        registry.Add("TestGrowWithNaN", runtime_test_package.TestGrowWithNaN, "map_test.go", 153);
+        registry.Add("TestGrowWithNegativeZero", runtime_test_package.TestGrowWithNegativeZero, "map_test.go", 195);
+        registry.Add("TestHasAVX", runtime_test_package.TestHasAVX, "cpuflags_amd64_test.go", 12);
         registry.Add("TestHeapObjectsCanMove", runtime_test_package.TestHeapObjectsCanMove, "heap_test.go", 15);
-        registry.Add("TestHmapSize", runtime_test_package.TestHmapSize, "map_swiss_test.go", 18);
-        registry.Add("TestHugeGCInfo", runtime_test_package.TestHugeGCInfo, "gc_test.go", 145);
-        registry.Add("TestIdleMarkWorkerCount", runtime_test_package.TestIdleMarkWorkerCount, "mgcpacer_test.go", 1035);
-        registry.Add("TestIgnoreBogusMapHint", runtime_test_package.TestIgnoreBogusMapHint, "map_test.go", 668);
-        registry.Add("TestIncrementAfterBulkClearKeyStringValueInt", runtime_test_package.TestIncrementAfterBulkClearKeyStringValueInt, "map_test.go", 800);
-        registry.Add("TestIncrementAfterDeleteKeyStringValueInt", runtime_test_package.TestIncrementAfterDeleteKeyStringValueInt, "map_test.go", 771);
-        registry.Add("TestIncrementAfterDeleteKeyValueString", runtime_test_package.TestIncrementAfterDeleteKeyValueString, "map_test.go", 784);
-        registry.Add("TestIncrementAfterDeleteValueInt", runtime_test_package.TestIncrementAfterDeleteValueInt, "map_test.go", 732);
-        registry.Add("TestIncrementAfterDeleteValueInt32", runtime_test_package.TestIncrementAfterDeleteValueInt32, "map_test.go", 745);
-        registry.Add("TestIncrementAfterDeleteValueInt64", runtime_test_package.TestIncrementAfterDeleteValueInt64, "map_test.go", 758);
-        registry.Add("TestInitDeadlock", runtime_test_package.TestInitDeadlock, "crash_test.go", 247);
+        registry.Add("TestHexdumpWords", runtime_test_package.TestHexdumpWords, "hexdump_test.go", 106);
+        registry.Add("TestHexdumper", runtime_test_package.TestHexdumper, "hexdump_test.go", 18);
+        registry.Add("TestHmapSize", runtime_test_package.TestHmapSize, "map_test.go", 1145);
+        registry.Add("TestHugeGCInfo", runtime_test_package.TestHugeGCInfo, "gc_test.go", 147);
+        registry.Add("TestIdleMarkWorkerCount", runtime_test_package.TestIdleMarkWorkerCount, "mgcpacer_test.go", 1034);
+        registry.Add("TestIgnoreBogusMapHint", runtime_test_package.TestIgnoreBogusMapHint, "map_test.go", 670);
+        registry.Add("TestIncrementAfterBulkClearKeyStringValueInt", runtime_test_package.TestIncrementAfterBulkClearKeyStringValueInt, "map_test.go", 802);
+        registry.Add("TestIncrementAfterDeleteKeyStringValueInt", runtime_test_package.TestIncrementAfterDeleteKeyStringValueInt, "map_test.go", 773);
+        registry.Add("TestIncrementAfterDeleteKeyValueString", runtime_test_package.TestIncrementAfterDeleteKeyValueString, "map_test.go", 786);
+        registry.Add("TestIncrementAfterDeleteValueInt", runtime_test_package.TestIncrementAfterDeleteValueInt, "map_test.go", 734);
+        registry.Add("TestIncrementAfterDeleteValueInt32", runtime_test_package.TestIncrementAfterDeleteValueInt32, "map_test.go", 747);
+        registry.Add("TestIncrementAfterDeleteValueInt64", runtime_test_package.TestIncrementAfterDeleteValueInt64, "map_test.go", 760);
+        registry.Add("TestInitDeadlock", runtime_test_package.TestInitDeadlock, "crash_test.go", 280);
         registry.Add("TestInlineUnwinder", runtime_test_package.TestInlineUnwinder, "import_test.go", 39);
         registry.Add("TestIntString", runtime_test_package.TestIntString, "string_test.go", 309);
         registry.Add("TestIntStringAllocs", runtime_test_package.TestIntStringAllocs, "string_test.go", 330);
@@ -809,120 +850,140 @@ internal static class Go2CsTestHost
         registry.Add("TestIssue43921", runtime_test_package.TestIssue43921, "defer_test.go", 413);
         registry.Add("TestIssue43941", runtime_test_package.TestIssue43941, "defer_test.go", 475);
         registry.Add("TestIssue48807", runtime_test_package.TestIssue48807, "float_test.go", 11);
-        registry.Add("TestIssue59213", runtime_test_package.TestIssue59213, "signal_windows_test.go", 267);
-        registry.Add("TestIssue66841", runtime_test_package.TestIssue66841, "hash_test.go", 640);
-        registry.Add("TestIterGrowAndDelete", runtime_test_package.TestIterGrowAndDelete, "map_test.go", 251);
-        registry.Add("TestIterGrowWithGC", runtime_test_package.TestIterGrowWithGC, "map_test.go", 278);
+        registry.Add("TestIssue59213", runtime_test_package.TestIssue59213, "signal_windows_test.go", 262);
+        registry.Add("TestIssue66841", runtime_test_package.TestIssue66841, "hash_test.go", 638);
+        registry.Add("TestIterGrowAndDelete", runtime_test_package.TestIterGrowAndDelete, "map_test.go", 253);
+        registry.Add("TestIterGrowWithGC", runtime_test_package.TestIterGrowWithGC, "map_test.go", 280);
         registry.Add("TestLFStack", runtime_test_package.TestLFStack, "lfstack_test.go", 40);
         registry.Add("TestLFStackStress", runtime_test_package.TestLFStackStress, "lfstack_test.go", 84);
         registry.Add("TestLargeStringConcat", runtime_test_package.TestLargeStringConcat, "string_test.go", 217);
         registry.Add("TestLegacyFastrand", runtime_test_package.TestLegacyFastrand, "rand_test.go", 76);
-        registry.Add("TestLibraryCtrlHandler", runtime_test_package.TestLibraryCtrlHandler, "signal_windows_test.go", 201);
+        registry.Add("TestLibraryCtrlHandler", runtime_test_package.TestLibraryCtrlHandler, "signal_windows_test.go", 196);
         registry.Add("TestLineNumber", runtime_test_package.TestLineNumber, "symtab_test.go", 114);
+        registry.Add("TestListManualPush", runtime_test_package.TestListManualPush, "list_manual_test.go", 39);
+        registry.Add("TestListManualRemoveAll", runtime_test_package.TestListManualRemoveAll, "list_manual_test.go", 202);
+        registry.Add("TestListManualRemoveHead", runtime_test_package.TestListManualRemoveHead, "list_manual_test.go", 100);
+        registry.Add("TestListManualRemoveMiddle", runtime_test_package.TestListManualRemoveMiddle, "list_manual_test.go", 134);
+        registry.Add("TestListManualRemoveTail", runtime_test_package.TestListManualRemoveTail, "list_manual_test.go", 168);
+        registry.Add("TestListNIHPush", runtime_test_package.TestListNIHPush, "list_manual_test.go", 247);
+        registry.Add("TestListNIHRemoveAll", runtime_test_package.TestListNIHRemoveAll, "list_manual_test.go", 394);
+        registry.Add("TestListNIHRemoveHead", runtime_test_package.TestListNIHRemoveHead, "list_manual_test.go", 304);
+        registry.Add("TestListNIHRemoveMiddle", runtime_test_package.TestListNIHRemoveMiddle, "list_manual_test.go", 334);
+        registry.Add("TestListNIHRemoveTail", runtime_test_package.TestListNIHRemoveTail, "list_manual_test.go", 364);
+        registry.Add("TestListPush", runtime_test_package.TestListPush, "list_test.go", 26);
+        registry.Add("TestListRemoveAll", runtime_test_package.TestListRemoveAll, "list_test.go", 173);
+        registry.Add("TestListRemoveHead", runtime_test_package.TestListRemoveHead, "list_test.go", 83);
+        registry.Add("TestListRemoveMiddle", runtime_test_package.TestListRemoveMiddle, "list_test.go", 113);
+        registry.Add("TestListRemoveTail", runtime_test_package.TestListRemoveTail, "list_test.go", 143);
         registry.Add("TestLldbPython", runtime_test_package.TestLldbPython, "runtime-lldb_test.go", 136);
-        registry.Add("TestLockOSThreadAvoidsStatePropagation", runtime_test_package.TestLockOSThreadAvoidsStatePropagation, "proc_test.go", 995);
-        registry.Add("TestLockOSThreadExit", runtime_test_package.TestLockOSThreadExit, "proc_test.go", 978);
-        registry.Add("TestLockOSThreadNesting", runtime_test_package.TestLockOSThreadNesting, "proc_test.go", 950);
-        registry.Add("TestLockOSThreadTemplateThreadRace", runtime_test_package.TestLockOSThreadTemplateThreadRace, "proc_test.go", 1006);
+        registry.Add("TestLockOSThreadAvoidsStatePropagation", runtime_test_package.TestLockOSThreadAvoidsStatePropagation, "proc_test.go", 999);
+        registry.Add("TestLockOSThreadExit", runtime_test_package.TestLockOSThreadExit, "proc_test.go", 982);
+        registry.Add("TestLockOSThreadNesting", runtime_test_package.TestLockOSThreadNesting, "proc_test.go", 954);
+        registry.Add("TestLockOSThreadTemplateThreadRace", runtime_test_package.TestLockOSThreadTemplateThreadRace, "proc_test.go", 1010);
+        registry.Add("TestLockOSThreadVgetrandom", runtime_test_package.TestLockOSThreadVgetrandom, "proc_test.go", 1033);
         registry.Add("TestLockRankGenerated", runtime_test_package.TestLockRankGenerated, "lockrank_test.go", 16);
-        registry.Add("TestLockedDeadlock", runtime_test_package.TestLockedDeadlock, "crash_test.go", 251);
-        registry.Add("TestLockedDeadlock2", runtime_test_package.TestLockedDeadlock2, "crash_test.go", 255);
-        registry.Add("TestMainGoroutineID", runtime_test_package.TestMainGoroutineID, "crash_test.go", 394);
-        registry.Add("TestMallocBitsPopcntRange", runtime_test_package.TestMallocBitsPopcntRange, "mpallocbits_test.go", 116);
-        registry.Add("TestMapAppendAssignment", runtime_test_package.TestMapAppendAssignment, "map_test.go", 124);
-        registry.Add("TestMapAssignmentNan", runtime_test_package.TestMapAssignmentNan, "map_test.go", 81);
-        registry.Add("TestMapHugeZero", runtime_test_package.TestMapHugeZero, "map_test.go", 391);
-        registry.Add("TestMapInterfaceKey", runtime_test_package.TestMapInterfaceKey, "map_test.go", 846);
-        registry.Add("TestMapIterDeleteReplace", runtime_test_package.TestMapIterDeleteReplace, "map_test.go", 1179);
-        registry.Add("TestMapIterDuplicate", runtime_test_package.TestMapIterDuplicate, "map_test.go", 543);
-        registry.Add("TestMapIterOrder", runtime_test_package.TestMapIterOrder, "map_swiss_test.go", 44);
-        registry.Add("TestMapKeys", runtime_test_package.TestMapKeys, "map_test.go", 1063);
-        registry.Add("TestMapLargeKeyNoPointer", runtime_test_package.TestMapLargeKeyNoPointer, "map_test.go", 611);
-        registry.Add("TestMapLargeValNoPointer", runtime_test_package.TestMapLargeValNoPointer, "map_test.go", 637);
-        registry.Add("TestMapNanGrowIterator", runtime_test_package.TestMapNanGrowIterator, "map_test.go", 470);
-        registry.Add("TestMapOperatorAssignment", runtime_test_package.TestMapOperatorAssignment, "map_test.go", 105);
-        registry.Add("TestMapOperatorAssignmentNan", runtime_test_package.TestMapOperatorAssignmentNan, "map_test.go", 94);
-        registry.Add("TestMapSparseIterOrder", runtime_test_package.TestMapSparseIterOrder, "map_test.go", 507);
-        registry.Add("TestMapStringBytesLookup", runtime_test_package.TestMapStringBytesLookup, "map_test.go", 574);
-        registry.Add("TestMapTombstones", runtime_test_package.TestMapTombstones, "map_test.go", 815);
-        registry.Add("TestMapValues", runtime_test_package.TestMapValues, "map_test.go", 1082);
+        registry.Add("TestLockedDeadlock", runtime_test_package.TestLockedDeadlock, "crash_test.go", 284);
+        registry.Add("TestLockedDeadlock2", runtime_test_package.TestLockedDeadlock2, "crash_test.go", 288);
+        registry.Add("TestMainGoroutineID", runtime_test_package.TestMainGoroutineID, "crash_test.go", 467);
+        registry.Add("TestMallocBitsPopcntRange", runtime_test_package.TestMallocBitsPopcntRange, "mpallocbits_test.go", 120);
+        registry.Add("TestMapAppendAssignment", runtime_test_package.TestMapAppendAssignment, "map_test.go", 126);
+        registry.Add("TestMapAssignmentNan", runtime_test_package.TestMapAssignmentNan, "map_test.go", 83);
+        registry.Add("TestMapHugeZero", runtime_test_package.TestMapHugeZero, "map_test.go", 393);
+        registry.Add("TestMapInterfaceKey", runtime_test_package.TestMapInterfaceKey, "map_test.go", 823);
+        registry.Add("TestMapIterDeleteReplace", runtime_test_package.TestMapIterDeleteReplace, "map_test.go", 1118);
+        registry.Add("TestMapIterDuplicate", runtime_test_package.TestMapIterDuplicate, "map_test.go", 545);
+        registry.Add("TestMapIterOrder", runtime_test_package.TestMapIterOrder, "map_test.go", 1171);
+        registry.Add("TestMapLargeKeyNoPointer", runtime_test_package.TestMapLargeKeyNoPointer, "map_test.go", 613);
+        registry.Add("TestMapLargeValNoPointer", runtime_test_package.TestMapLargeValNoPointer, "map_test.go", 639);
+        registry.Add("TestMapNanGrowIterator", runtime_test_package.TestMapNanGrowIterator, "map_test.go", 472);
+        registry.Add("TestMapOperatorAssignment", runtime_test_package.TestMapOperatorAssignment, "map_test.go", 107);
+        registry.Add("TestMapOperatorAssignmentNan", runtime_test_package.TestMapOperatorAssignmentNan, "map_test.go", 96);
+        registry.Add("TestMapSparseIterOrder", runtime_test_package.TestMapSparseIterOrder, "map_test.go", 509);
+        registry.Add("TestMapStringBytesLookup", runtime_test_package.TestMapStringBytesLookup, "map_test.go", 576);
         registry.Add("TestMaxFloat", runtime_test_package.TestMaxFloat, "minmax_test.go", 58);
-        registry.Add("TestMemHash32Equality", runtime_test_package.TestMemHash32Equality, "hash_test.go", 22);
-        registry.Add("TestMemHash64Equality", runtime_test_package.TestMemHash64Equality, "hash_test.go", 39);
-        registry.Add("TestMemHashGlobalSeed", runtime_test_package.TestMemHashGlobalSeed, "map_test.go", 1132);
-        registry.Add("TestMemPprof", runtime_test_package.TestMemPprof, "crash_test.go", 574);
-        registry.Add("TestMemStats", runtime_test_package.TestMemStats, "malloc_test.go", 27);
-        registry.Add("TestMemclr", runtime_test_package.TestMemclr, "memmove_test.go", 371);
-        registry.Add("TestMemmove", runtime_test_package.TestMemmove, "memmove_test.go", 19);
-        registry.Add("TestMemmoveAlias", runtime_test_package.TestMemmoveAlias, "memmove_test.go", 61);
-        registry.Add("TestMemmoveAtomicity", runtime_test_package.TestMemmoveAtomicity, "memmove_test.go", 213);
-        registry.Add("TestMemmoveLarge0x180000", runtime_test_package.TestMemmoveLarge0x180000, "memmove_test.go", 99);
-        registry.Add("TestMemmoveOverlapLarge0x120000", runtime_test_package.TestMemmoveOverlapLarge0x120000, "memmove_test.go", 111);
-        registry.Add("TestMemoryLimit", runtime_test_package.TestMemoryLimit, "gc_test.go", 768);
-        registry.Add("TestMemoryLimitNoGCPercent", runtime_test_package.TestMemoryLimitNoGCPercent, "gc_test.go", 782);
-        registry.Add("TestMetricHeapUnusedLargeObjectOverflow", runtime_test_package.TestMetricHeapUnusedLargeObjectOverflow, "metrics_test.go", 1349);
+        registry.Add("TestMemHash32Equality", runtime_test_package.TestMemHash32Equality, "hash_test.go", 23);
+        registry.Add("TestMemHash64Equality", runtime_test_package.TestMemHash64Equality, "hash_test.go", 40);
+        registry.Add("TestMemHashGlobalSeed", runtime_test_package.TestMemHashGlobalSeed, "map_test.go", 1071);
+        registry.Add("TestMemPprof", runtime_test_package.TestMemPprof, "crash_test.go", 647);
+        registry.Add("TestMemStats", runtime_test_package.TestMemStats, "malloc_test.go", 28);
+        registry.Add("TestMemclr", runtime_test_package.TestMemclr, "memmove_test.go", 377);
+        registry.Add("TestMemmove", runtime_test_package.TestMemmove, "memmove_test.go", 21);
+        registry.Add("TestMemmoveAlias", runtime_test_package.TestMemmoveAlias, "memmove_test.go", 63);
+        registry.Add("TestMemmoveAtomicity", runtime_test_package.TestMemmoveAtomicity, "memmove_test.go", 215);
+        registry.Add("TestMemmoveLarge0x180000", runtime_test_package.TestMemmoveLarge0x180000, "memmove_test.go", 101);
+        registry.Add("TestMemmoveOverlapLarge0x120000", runtime_test_package.TestMemmoveOverlapLarge0x120000, "memmove_test.go", 113);
+        registry.Add("TestMemoryLimit", runtime_test_package.TestMemoryLimit, "gc_test.go", 773);
+        registry.Add("TestMemoryLimitNoGCPercent", runtime_test_package.TestMemoryLimitNoGCPercent, "gc_test.go", 787);
+        registry.Add("TestMetricHeapUnusedLargeObjectOverflow", runtime_test_package.TestMetricHeapUnusedLargeObjectOverflow, "metrics_test.go", 1485);
+        registry.Add("TestMexitSTW", runtime_test_package.TestMexitSTW, "proc_test.go", 1569);
         registry.Add("TestMinFloat", runtime_test_package.TestMinFloat, "minmax_test.go", 39);
         registry.Add("TestMinMaxInt", runtime_test_package.TestMinMaxInt, "minmax_test.go", 105);
         registry.Add("TestMinMaxString", runtime_test_package.TestMinMaxString, "minmax_test.go", 107);
         registry.Add("TestMinMaxStringTies", runtime_test_package.TestMinMaxStringTies, "minmax_test.go", 110);
         registry.Add("TestMinMaxUint8", runtime_test_package.TestMinMaxUint8, "minmax_test.go", 106);
-        registry.Add("TestMultiConsumer", runtime_test_package.TestMultiConsumer, "chan_test.go", 546);
-        registry.Add("TestMutexWaitTimeMetric", runtime_test_package.TestMutexWaitTimeMetric, "metrics_test.go", 564);
-        registry.Add("TestMyGenericFunc", runtime_test_package.TestMyGenericFunc, "gc_test.go", 796);
-        registry.Add("TestNegativeZero", runtime_test_package.TestNegativeZero, "map_test.go", 29);
-        registry.Add("TestNetpollBreak", runtime_test_package.TestNetpollBreak, "proc_test.go", 1108);
-        registry.Add("TestNetpollDeadlock", runtime_test_package.TestNetpollDeadlock, "crash_test.go", 522);
-        registry.Add("TestNetpollWaiters", runtime_test_package.TestNetpollWaiters, "crash_test.go", 1068);
+        registry.Add("TestMkmalloc", runtime_test_package.TestMkmalloc, "malloc_test.go", 845);
+        registry.Add("TestMoveToHeapCap", runtime_test_package.TestMoveToHeapCap, "slice_test.go", 763);
+        registry.Add("TestMoveToHeapClosure1", runtime_test_package.TestMoveToHeapClosure1, "slice_test.go", 784);
+        registry.Add("TestMoveToHeapClosure2", runtime_test_package.TestMoveToHeapClosure2, "slice_test.go", 801);
+        registry.Add("TestMoveToHeapClosure3", runtime_test_package.TestMoveToHeapClosure3, "slice_test.go", 835);
+        registry.Add("TestMoveToHeapEarly", runtime_test_package.TestMoveToHeapEarly, "slice_test.go", 753);
+        registry.Add("TestMultiConsumer", runtime_test_package.TestMultiConsumer, "chan_test.go", 544);
+        registry.Add("TestMutexWaitTimeMetric", runtime_test_package.TestMutexWaitTimeMetric, "metrics_test.go", 567);
+        registry.Add("TestMyGenericFunc", runtime_test_package.TestMyGenericFunc, "gc_test.go", 801);
+        registry.Add("TestNegativeZero", runtime_test_package.TestNegativeZero, "map_test.go", 31);
+        registry.Add("TestNetpollBreak", runtime_test_package.TestNetpollBreak, "proc_test.go", 1123);
+        registry.Add("TestNetpollDeadlock", runtime_test_package.TestNetpollDeadlock, "crash_test.go", 595);
+        registry.Add("TestNetpollWaiters", runtime_test_package.TestNetpollWaiters, "crash_test.go", 1157);
         registry.Add("TestNilName", runtime_test_package.TestNilName, "symtab_test.go", 160);
-        registry.Add("TestNoHelperGoroutines", runtime_test_package.TestNoHelperGoroutines, "crash_test.go", 402);
-        registry.Add("TestNoShrinkStackWhileParking", runtime_test_package.TestNoShrinkStackWhileParking, "chan_test.go", 629);
+        registry.Add("TestNoHelperGoroutines", runtime_test_package.TestNoHelperGoroutines, "crash_test.go", 475);
+        registry.Add("TestNoShrinkStackWhileParking", runtime_test_package.TestNoShrinkStackWhileParking, "chan_test.go", 627);
         registry.Add("TestNonEscapingConvT2E", runtime_test_package.TestNonEscapingConvT2E, "iface_test.go", 252);
         registry.Add("TestNonEscapingConvT2I", runtime_test_package.TestNonEscapingConvT2I, "iface_test.go", 272);
-        registry.Add("TestNonEscapingMap", runtime_test_package.TestNonEscapingMap, "map_test.go", 676);
+        registry.Add("TestNonEscapingMap", runtime_test_package.TestNonEscapingMap, "map_test.go", 678);
         registry.Add("TestNonOpenAndOpenDefers", runtime_test_package.TestNonOpenAndOpenDefers, "defer_test.go", 58);
         registry.Add("TestNonSSAableArgs", runtime_test_package.TestNonSSAableArgs, "defer_test.go", 204);
         registry.Add("TestNonblockRecvRace", runtime_test_package.TestNonblockRecvRace, "chan_test.go", 203);
         registry.Add("TestNonblockSelectRace", runtime_test_package.TestNonblockSelectRace, "chan_test.go", 240);
         registry.Add("TestNonblockSelectRace2", runtime_test_package.TestNonblockSelectRace2, "chan_test.go", 272);
-        registry.Add("TestNumCPU", runtime_test_package.TestNumCPU, "syscall_windows_test.go", 1020);
-        registry.Add("TestNumGoroutine", runtime_test_package.TestNumGoroutine, "proc_test.go", 396);
+        registry.Add("TestNumCPU", runtime_test_package.TestNumCPU, "syscall_windows_test.go", 1025);
+        registry.Add("TestNumGoroutine", runtime_test_package.TestNumGoroutine, "proc_test.go", 401);
         registry.Add("TestOpenAndNonOpenDefers", runtime_test_package.TestOpenAndNonOpenDefers, "defer_test.go", 28);
-        registry.Add("TestOutputDebugString", runtime_test_package.TestOutputDebugString, "syscall_windows_test.go", 622);
-        registry.Add("TestPageAccounting", runtime_test_package.TestPageAccounting, "gc_test.go", 416);
-        registry.Add("TestPageAllocAlloc", runtime_test_package.TestPageAllocAlloc, "mpagealloc_test.go", 224);
-        registry.Add("TestPageAllocAllocAndFree", runtime_test_package.TestPageAllocAllocAndFree, "mpagealloc_test.go", 985);
-        registry.Add("TestPageAllocAllocToCache", runtime_test_package.TestPageAllocAllocToCache, "mpagecache_test.go", 260);
+        registry.Add("TestOutputDebugString", runtime_test_package.TestOutputDebugString, "syscall_windows_test.go", 624);
+        registry.Add("TestPageAccounting", runtime_test_package.TestPageAccounting, "gc_test.go", 421);
+        registry.Add("TestPageAllocAlloc", runtime_test_package.TestPageAllocAlloc, "mpagealloc_test.go", 223);
+        registry.Add("TestPageAllocAllocAndFree", runtime_test_package.TestPageAllocAllocAndFree, "mpagealloc_test.go", 988);
+        registry.Add("TestPageAllocAllocToCache", runtime_test_package.TestPageAllocAllocToCache, "mpagecache_test.go", 259);
         registry.Add("TestPageAllocExhaust", runtime_test_package.TestPageAllocExhaust, "mpagealloc_test.go", 701);
-        registry.Add("TestPageAllocFree", runtime_test_package.TestPageAllocFree, "mpagealloc_test.go", 753);
+        registry.Add("TestPageAllocFree", runtime_test_package.TestPageAllocFree, "mpagealloc_test.go", 752);
         registry.Add("TestPageAllocGrow", runtime_test_package.TestPageAllocGrow, "mpagealloc_test.go", 44);
-        registry.Add("TestPageAllocScavenge", runtime_test_package.TestPageAllocScavenge, "mgcscavenge_test.go", 289);
+        registry.Add("TestPageAllocScavenge", runtime_test_package.TestPageAllocScavenge, "mgcscavenge_test.go", 300);
         registry.Add("TestPageCacheAlloc", runtime_test_package.TestPageCacheAlloc, "mpagecache_test.go", 26);
-        registry.Add("TestPageCacheFlush", runtime_test_package.TestPageCacheFlush, "mpagecache_test.go", 183);
-        registry.Add("TestPageCacheLeak", runtime_test_package.TestPageCacheLeak, "malloc_test.go", 237);
-        registry.Add("TestPallocBitsAlloc", runtime_test_package.TestPallocBitsAlloc, "mpallocbits_test.go", 331);
+        registry.Add("TestPageCacheFlush", runtime_test_package.TestPageCacheFlush, "mpagecache_test.go", 182);
+        registry.Add("TestPageCacheLeak", runtime_test_package.TestPageCacheLeak, "malloc_test.go", 596);
+        registry.Add("TestPallocBitsAlloc", runtime_test_package.TestPallocBitsAlloc, "mpallocbits_test.go", 338);
         registry.Add("TestPallocBitsAllocRange", runtime_test_package.TestPallocBitsAllocRange, "mpallocbits_test.go", 43);
-        registry.Add("TestPallocBitsFree", runtime_test_package.TestPallocBitsFree, "mpallocbits_test.go", 444);
-        registry.Add("TestPallocBitsSummarize", runtime_test_package.TestPallocBitsSummarize, "mpallocbits_test.go", 223);
-        registry.Add("TestPallocBitsSummarizeRandom", runtime_test_package.TestPallocBitsSummarizeRandom, "mpallocbits_test.go", 210);
+        registry.Add("TestPallocBitsFree", runtime_test_package.TestPallocBitsFree, "mpallocbits_test.go", 455);
+        registry.Add("TestPallocBitsSummarize", runtime_test_package.TestPallocBitsSummarize, "mpallocbits_test.go", 229);
+        registry.Add("TestPallocBitsSummarizeRandom", runtime_test_package.TestPallocBitsSummarizeRandom, "mpallocbits_test.go", 216);
         registry.Add("TestPallocDataFindScavengeCandidate", runtime_test_package.TestPallocDataFindScavengeCandidate, "mgcscavenge_test.go", 110);
-        registry.Add("TestPanicAfterGoexit", runtime_test_package.TestPanicAfterGoexit, "crash_test.go", 478);
-        registry.Add("TestPanicDeadlockGosched", runtime_test_package.TestPanicDeadlockGosched, "crash_test.go", 559);
-        registry.Add("TestPanicDeadlockSyscall", runtime_test_package.TestPanicDeadlockSyscall, "crash_test.go", 563);
-        registry.Add("TestPanicFar", runtime_test_package.TestPanicFar, "stack_test.go", 371);
-        registry.Add("TestPanicInlined", runtime_test_package.TestPanicInlined, "crash_test.go", 701);
-        registry.Add("TestPanicLoop", runtime_test_package.TestPanicLoop, "crash_test.go", 567);
+        registry.Add("TestPanicAfterGoexit", runtime_test_package.TestPanicAfterGoexit, "crash_test.go", 551);
+        registry.Add("TestPanicDeadlockGosched", runtime_test_package.TestPanicDeadlockGosched, "crash_test.go", 632);
+        registry.Add("TestPanicDeadlockSyscall", runtime_test_package.TestPanicDeadlockSyscall, "crash_test.go", 636);
+        registry.Add("TestPanicFar", runtime_test_package.TestPanicFar, "stack_test.go", 372);
+        registry.Add("TestPanicInlined", runtime_test_package.TestPanicInlined, "crash_test.go", 786);
+        registry.Add("TestPanicLoop", runtime_test_package.TestPanicLoop, "crash_test.go", 640);
         registry.Add("TestPanicNil", runtime_test_package.TestPanicNil, "panicnil_test.go", 14);
-        registry.Add("TestPanicOnUnsafeSlice", runtime_test_package.TestPanicOnUnsafeSlice, "crash_test.go", 1060);
-        registry.Add("TestPanicRace", runtime_test_package.TestPanicRace, "crash_test.go", 721);
-        registry.Add("TestPanicTraceback", runtime_test_package.TestPanicTraceback, "crash_test.go", 531);
-        registry.Add("TestPanicUseStack", runtime_test_package.TestPanicUseStack, "stack_test.go", 348);
-        registry.Add("TestPanicWhilePanicking", runtime_test_package.TestPanicWhilePanicking, "crash_test.go", 1018);
+        registry.Add("TestPanicOnUnsafeSlice", runtime_test_package.TestPanicOnUnsafeSlice, "crash_test.go", 1147);
+        registry.Add("TestPanicRace", runtime_test_package.TestPanicRace, "crash_test.go", 806);
+        registry.Add("TestPanicTraceback", runtime_test_package.TestPanicTraceback, "crash_test.go", 604);
+        registry.Add("TestPanicUseStack", runtime_test_package.TestPanicUseStack, "stack_test.go", 349);
+        registry.Add("TestPanicWhilePanicking", runtime_test_package.TestPanicWhilePanicking, "crash_test.go", 1105);
         registry.Add("TestPanicWithDirectlyPrintableCustomTypes", runtime_test_package.TestPanicWithDirectlyPrintableCustomTypes, "panic_test.go", 15);
         registry.Add("TestParallelRWMutexReaders", runtime_test_package.TestParallelRWMutexReaders, "rwmutex_test.go", 50);
-        registry.Add("TestParseByteCount", runtime_test_package.TestParseByteCount, "string_test.go", 485);
-        registry.Add("TestPeriodicGC", runtime_test_package.TestPeriodicGC, "gc_test.go", 166);
-        registry.Add("TestPhysicalMemoryUtilization", runtime_test_package.TestPhysicalMemoryUtilization, "malloc_test.go", 245);
-        registry.Add("TestPingPongHog", runtime_test_package.TestPingPongHog, "proc_test.go", 431);
+        registry.Add("TestParseByteCount", runtime_test_package.TestParseByteCount, "string_test.go", 391);
+        registry.Add("TestPeriodicGC", runtime_test_package.TestPeriodicGC, "gc_test.go", 168);
+        registry.Add("TestPhysicalMemoryUtilization", runtime_test_package.TestPhysicalMemoryUtilization, "malloc_test.go", 604);
+        registry.Add("TestPingPongHog", runtime_test_package.TestPingPongHog, "proc_test.go", 436);
         registry.Add("TestPinnerCgoCheckInterface", runtime_test_package.TestPinnerCgoCheckInterface, "pinner_test.go", 316);
         registry.Add("TestPinnerCgoCheckPinned2UnpinnedPanics", runtime_test_package.TestPinnerCgoCheckPinned2UnpinnedPanics, "pinner_test.go", 347);
         registry.Add("TestPinnerCgoCheckPtr2Pinned2Unpinned", runtime_test_package.TestPinnerCgoCheckPtr2Pinned2Unpinned, "pinner_test.go", 357);
@@ -944,153 +1005,169 @@ internal static class Go2CsTestHost
         registry.Add("TestPinnerReuse", runtime_test_package.TestPinnerReuse, "pinner_test.go", 237);
         registry.Add("TestPinnerSimple", runtime_test_package.TestPinnerSimple, "pinner_test.go", 50);
         registry.Add("TestPinnerTwoPinner", runtime_test_package.TestPinnerTwoPinner, "pinner_test.go", 124);
-        registry.Add("TestPreemptSplitBig", runtime_test_package.TestPreemptSplitBig, "proc_test.go", 553);
-        registry.Add("TestPreemption", runtime_test_package.TestPreemption, "proc_test.go", 314);
-        registry.Add("TestPreemptionAfterSyscall", runtime_test_package.TestPreemptionAfterSyscall, "proc_test.go", 1087);
-        registry.Add("TestPreemptionGC", runtime_test_package.TestPreemptionGC, "proc_test.go", 341);
-        registry.Add("TestPrintGC", runtime_test_package.TestPrintGC, "gc_test.go", 358);
-        registry.Add("TestProfBuf", runtime_test_package.TestProfBuf, "profbuf_test.go", 15);
-        registry.Add("TestPseudoRandomSend", runtime_test_package.TestPseudoRandomSend, "chan_test.go", 513);
+        registry.Add("TestPreemptSplitBig", runtime_test_package.TestPreemptSplitBig, "proc_test.go", 558);
+        registry.Add("TestPreemption", runtime_test_package.TestPreemption, "proc_test.go", 319);
+        registry.Add("TestPreemptionAfterSyscall", runtime_test_package.TestPreemptionAfterSyscall, "proc_test.go", 1102);
+        registry.Add("TestPreemptionGC", runtime_test_package.TestPreemptionGC, "proc_test.go", 346);
+        registry.Add("TestPrintGC", runtime_test_package.TestPrintGC, "gc_test.go", 363);
+        registry.Add("TestPrintQuoted", runtime_test_package.TestPrintQuoted, "print_quoted_test.go", 12);
+        registry.Add("TestProfBuf", runtime_test_package.TestProfBuf, "profbuf_test.go", 19);
+        registry.Add("TestProfBufDoubleWakeup", runtime_test_package.TestProfBufDoubleWakeup, "profbuf_test.go", 182);
+        registry.Add("TestProfBufWakeup", runtime_test_package.TestProfBufWakeup, "profbuf_test.go", 198);
+        registry.Add("TestPseudoRandomSend", runtime_test_package.TestPseudoRandomSend, "chan_test.go", 511);
         registry.Add("TestRWMutex", runtime_test_package.TestRWMutex, "rwmutex_test.go", 121);
-        registry.Add("TestRaiseException", runtime_test_package.TestRaiseException, "syscall_windows_test.go", 628);
+        registry.Add("TestRaiseException", runtime_test_package.TestRaiseException, "syscall_windows_test.go", 630);
         registry.Add("TestRangeStringCast", runtime_test_package.TestRangeStringCast, "string_test.go", 344);
-        registry.Add("TestReadMemStats", runtime_test_package.TestReadMemStats, "gc_test.go", 438);
-        registry.Add("TestReadMetrics", runtime_test_package.TestReadMetrics, "metrics_test.go", 42);
-        registry.Add("TestReadMetricsConsistency", runtime_test_package.TestReadMetricsConsistency, "metrics_test.go", 212);
-        registry.Add("TestReadMetricsCumulative", runtime_test_package.TestReadMetricsCumulative, "metrics_test.go", 477);
+        registry.Add("TestReadMemStats", runtime_test_package.TestReadMemStats, "gc_test.go", 443);
+        registry.Add("TestReadMetrics", runtime_test_package.TestReadMetrics, "metrics_test.go", 41);
+        registry.Add("TestReadMetricsCleanups", runtime_test_package.TestReadMetricsCleanups, "metrics_test.go", 1520);
+        registry.Add("TestReadMetricsConsistency", runtime_test_package.TestReadMetricsConsistency, "metrics_test.go", 211);
+        registry.Add("TestReadMetricsCumulative", runtime_test_package.TestReadMetricsCumulative, "metrics_test.go", 476);
+        registry.Add("TestReadMetricsFinalizers", runtime_test_package.TestReadMetricsFinalizers, "metrics_test.go", 1549);
+        registry.Add("TestReadMetricsSched", runtime_test_package.TestReadMetricsSched, "metrics_test.go", 1579);
         registry.Add("TestReadRandom", runtime_test_package.TestReadRandom, "rand_test.go", 14);
-        registry.Add("TestRecoverBeforePanicAfterGoexit", runtime_test_package.TestRecoverBeforePanicAfterGoexit, "crash_test.go", 498);
-        registry.Add("TestRecoverBeforePanicAfterGoexit2", runtime_test_package.TestRecoverBeforePanicAfterGoexit2, "crash_test.go", 510);
+        registry.Add("TestRecoverBeforePanicAfterGoexit", runtime_test_package.TestRecoverBeforePanicAfterGoexit, "crash_test.go", 571);
+        registry.Add("TestRecoverBeforePanicAfterGoexit2", runtime_test_package.TestRecoverBeforePanicAfterGoexit2, "crash_test.go", 583);
         registry.Add("TestRecoverMatching", runtime_test_package.TestRecoverMatching, "defer_test.go", 154);
-        registry.Add("TestRecoveredPanicAfterGoexit", runtime_test_package.TestRecoveredPanicAfterGoexit, "crash_test.go", 487);
-        registry.Add("TestRecursivePanic", runtime_test_package.TestRecursivePanic, "crash_test.go", 300);
-        registry.Add("TestRecursivePanic2", runtime_test_package.TestRecursivePanic2, "crash_test.go", 312);
-        registry.Add("TestRecursivePanic3", runtime_test_package.TestRecursivePanic3, "crash_test.go", 325);
-        registry.Add("TestRecursivePanic4", runtime_test_package.TestRecursivePanic4, "crash_test.go", 336);
-        registry.Add("TestRecursivePanic5", runtime_test_package.TestRecursivePanic5, "crash_test.go", 347);
-        registry.Add("TestRegisterClass", runtime_test_package.TestRegisterClass, "syscall_windows_test.go", 583);
-        registry.Add("TestReturnAfterStackGrowInCallback", runtime_test_package.TestReturnAfterStackGrowInCallback, "syscall_windows_test.go", 703);
-        registry.Add("TestRuntimeLockMetricsAndProfile", runtime_test_package.TestRuntimeLockMetricsAndProfile, "metrics_test.go", 951);
-        registry.Add("TestRuntimePanic", runtime_test_package.TestRuntimePanic, "crash_test.go", 860);
-        registry.Add("TestRuntimePanicWithRuntimeError", runtime_test_package.TestRuntimePanicWithRuntimeError, "crash_test.go", 433);
+        registry.Add("TestRecoveredPanicAfterGoexit", runtime_test_package.TestRecoveredPanicAfterGoexit, "crash_test.go", 560);
+        registry.Add("TestRecursivePanic", runtime_test_package.TestRecursivePanic, "crash_test.go", 333);
+        registry.Add("TestRecursivePanic2", runtime_test_package.TestRecursivePanic2, "crash_test.go", 345);
+        registry.Add("TestRecursivePanic3", runtime_test_package.TestRecursivePanic3, "crash_test.go", 358);
+        registry.Add("TestRecursivePanic4", runtime_test_package.TestRecursivePanic4, "crash_test.go", 369);
+        registry.Add("TestRecursivePanic5", runtime_test_package.TestRecursivePanic5, "crash_test.go", 380);
+        registry.Add("TestRegisterClass", runtime_test_package.TestRegisterClass, "syscall_windows_test.go", 585);
+        registry.Add("TestRepanickedMiddlePanic", runtime_test_package.TestRepanickedMiddlePanic, "crash_test.go", 401);
+        registry.Add("TestRepanickedPanic", runtime_test_package.TestRepanickedPanic, "crash_test.go", 392);
+        registry.Add("TestRepanickedPanicSandwich", runtime_test_package.TestRepanickedPanicSandwich, "crash_test.go", 412);
+        registry.Add("TestReturnAfterStackGrowInCallback", runtime_test_package.TestReturnAfterStackGrowInCallback, "syscall_windows_test.go", 708);
+        registry.Add("TestRuntimeLockMetricsAndProfile", runtime_test_package.TestRuntimeLockMetricsAndProfile, "metrics_test.go", 954);
+        registry.Add("TestRuntimePanic", runtime_test_package.TestRuntimePanic, "crash_test.go", 951);
+        registry.Add("TestRuntimePanicWithRuntimeError", runtime_test_package.TestRuntimePanicWithRuntimeError, "crash_test.go", 506);
         registry.Add("TestSPWrite", runtime_test_package.TestSPWrite, "import_test.go", 43);
-        registry.Add("TestScavChunkDataPack", runtime_test_package.TestScavChunkDataPack, "mgcscavenge_test.go", 832);
-        registry.Add("TestScavengeIndex", runtime_test_package.TestScavengeIndex, "mgcscavenge_test.go", 566);
-        registry.Add("TestScavengedBitsCleared", runtime_test_package.TestScavengedBitsCleared, "malloc_test.go", 253);
-        registry.Add("TestScavenger", runtime_test_package.TestScavenger, "mgcscavenge_test.go", 456);
-        registry.Add("TestSchedLocalQueue", runtime_test_package.TestSchedLocalQueue, "proc_test.go", 620);
-        registry.Add("TestSchedLocalQueueEmpty", runtime_test_package.TestSchedLocalQueueEmpty, "proc_test.go", 628);
-        registry.Add("TestSchedLocalQueueSteal", runtime_test_package.TestSchedLocalQueueSteal, "proc_test.go", 624);
-        registry.Add("TestSchedPauseMetrics", runtime_test_package.TestSchedPauseMetrics, "metrics_test.go", 856);
-        registry.Add("TestSehLookupFunctionEntry", runtime_test_package.TestSehLookupFunctionEntry, "runtime-seh_windows_test.go", 22);
-        registry.Add("TestSehUnwind", runtime_test_package.TestSehUnwind, "runtime-seh_windows_test.go", 127);
-        registry.Add("TestSehUnwindDoublePanic", runtime_test_package.TestSehUnwindDoublePanic, "runtime-seh_windows_test.go", 152);
-        registry.Add("TestSehUnwindNilPointerPanic", runtime_test_package.TestSehUnwindNilPointerPanic, "runtime-seh_windows_test.go", 174);
-        registry.Add("TestSehUnwindPanic", runtime_test_package.TestSehUnwindPanic, "runtime-seh_windows_test.go", 136);
-        registry.Add("TestSelectDuplicateChannel", runtime_test_package.TestSelectDuplicateChannel, "chan_test.go", 692);
-        registry.Add("TestSelectFairness", runtime_test_package.TestSelectFairness, "chan_test.go", 437);
-        registry.Add("TestSelectStackAdjust", runtime_test_package.TestSelectStackAdjust, "chan_test.go", 721);
-        registry.Add("TestSelectStress", runtime_test_package.TestSelectStress, "chan_test.go", 342);
+        registry.Add("TestScavChunkDataPack", runtime_test_package.TestScavChunkDataPack, "mgcscavenge_test.go", 846);
+        registry.Add("TestScavengeIndex", runtime_test_package.TestScavengeIndex, "mgcscavenge_test.go", 576);
+        registry.Add("TestScavengedBitsCleared", runtime_test_package.TestScavengedBitsCleared, "malloc_test.go", 612);
+        registry.Add("TestScavenger", runtime_test_package.TestScavenger, "mgcscavenge_test.go", 466);
+        registry.Add("TestSchedLocalQueue", runtime_test_package.TestSchedLocalQueue, "proc_test.go", 625);
+        registry.Add("TestSchedLocalQueueEmpty", runtime_test_package.TestSchedLocalQueueEmpty, "proc_test.go", 633);
+        registry.Add("TestSchedLocalQueueSteal", runtime_test_package.TestSchedLocalQueueSteal, "proc_test.go", 629);
+        registry.Add("TestSchedPauseMetrics", runtime_test_package.TestSchedPauseMetrics, "metrics_test.go", 859);
+        registry.Add("TestSehLookupFunctionEntry", runtime_test_package.TestSehLookupFunctionEntry, "runtime-seh_windows_test.go", 23);
+        registry.Add("TestSehUnwind", runtime_test_package.TestSehUnwind, "runtime-seh_windows_test.go", 140);
+        registry.Add("TestSehUnwindDoublePanic", runtime_test_package.TestSehUnwindDoublePanic, "runtime-seh_windows_test.go", 164);
+        registry.Add("TestSehUnwindNilPointerPanic", runtime_test_package.TestSehUnwindNilPointerPanic, "runtime-seh_windows_test.go", 186);
+        registry.Add("TestSehUnwindPanic", runtime_test_package.TestSehUnwindPanic, "runtime-seh_windows_test.go", 148);
+        registry.Add("TestSelectDuplicateChannel", runtime_test_package.TestSelectDuplicateChannel, "chan_test.go", 690);
+        registry.Add("TestSelectFairness", runtime_test_package.TestSelectFairness, "chan_test.go", 435);
+        registry.Add("TestSelectStackAdjust", runtime_test_package.TestSelectStackAdjust, "chan_test.go", 719);
+        registry.Add("TestSelectStress", runtime_test_package.TestSelectStress, "chan_test.go", 341);
         registry.Add("TestSelfSelect", runtime_test_package.TestSelfSelect, "chan_test.go", 303);
         registry.Add("TestSemaHandoff", runtime_test_package.TestSemaHandoff, "sema_test.go", 19);
         registry.Add("TestSemaHandoff1", runtime_test_package.TestSemaHandoff1, "sema_test.go", 40);
         registry.Add("TestSemaHandoff2", runtime_test_package.TestSemaHandoff2, "sema_test.go", 49);
-        registry.Add("TestSetPanicOnFault", runtime_test_package.TestSetPanicOnFault, "runtime_test.go", 194);
-        registry.Add("TestShrinkStackDuringBlockedSend", runtime_test_package.TestShrinkStackDuringBlockedSend, "chan_test.go", 597);
-        registry.Add("TestSideEffectOrder", runtime_test_package.TestSideEffectOrder, "slice_test.go", 334);
-        registry.Add("TestSimpleDeadlock", runtime_test_package.TestSimpleDeadlock, "crash_test.go", 243);
-        registry.Add("TestSingleBucketMapStringKeys_DupLen", runtime_test_package.TestSingleBucketMapStringKeys_DupLen, "map_test.go", 435);
-        registry.Add("TestSingleBucketMapStringKeys_NoDupLen", runtime_test_package.TestSingleBucketMapStringKeys_NoDupLen, "map_test.go", 448);
+        registry.Add("TestSetCgoTracebackNoCgo", runtime_test_package.TestSetCgoTracebackNoCgo, "traceback_test.go", 876);
+        registry.Add("TestSetPanicOnFault", runtime_test_package.TestSetPanicOnFault, "runtime_test.go", 197);
+        registry.Add("TestShrinkStackDuringBlockedSend", runtime_test_package.TestShrinkStackDuringBlockedSend, "chan_test.go", 595);
+        registry.Add("TestSideEffectOrder", runtime_test_package.TestSideEffectOrder, "slice_test.go", 340);
+        registry.Add("TestSimpleDeadlock", runtime_test_package.TestSimpleDeadlock, "crash_test.go", 276);
+        registry.Add("TestSingleBucketMapStringKeys_DupLen", runtime_test_package.TestSingleBucketMapStringKeys_DupLen, "map_test.go", 437);
+        registry.Add("TestSingleBucketMapStringKeys_NoDupLen", runtime_test_package.TestSingleBucketMapStringKeys_NoDupLen, "map_test.go", 450);
         registry.Add("TestSizeof", runtime_test_package.TestSizeof, "sizeof_test.go", 16);
-        registry.Add("TestSmhasherAppendedZeros", runtime_test_package.TestSmhasherAppendedZeros, "hash_test.go", 132);
-        registry.Add("TestSmhasherAvalanche", runtime_test_package.TestSmhasherAvalanche, "hash_test.go", 474);
-        registry.Add("TestSmhasherCyclic", runtime_test_package.TestSmhasherCyclic, "hash_test.go", 231);
-        registry.Add("TestSmhasherPermutation", runtime_test_package.TestSmhasherPermutation, "hash_test.go", 300);
-        registry.Add("TestSmhasherSanity", runtime_test_package.TestSmhasherSanity, "hash_test.go", 67);
-        registry.Add("TestSmhasherSeed", runtime_test_package.TestSmhasherSeed, "hash_test.go", 630);
-        registry.Add("TestSmhasherSmallKeys", runtime_test_package.TestSmhasherSmallKeys, "hash_test.go", 142);
-        registry.Add("TestSmhasherSparse", runtime_test_package.TestSmhasherSparse, "hash_test.go", 261);
-        registry.Add("TestSmhasherText", runtime_test_package.TestSmhasherText, "hash_test.go", 595);
-        registry.Add("TestSmhasherTwoNonzero", runtime_test_package.TestSmhasherTwoNonzero, "hash_test.go", 182);
-        registry.Add("TestSmhasherWindowed", runtime_test_package.TestSmhasherWindowed, "hash_test.go", 551);
-        registry.Add("TestSmhasherZeros", runtime_test_package.TestSmhasherZeros, "hash_test.go", 167);
-        registry.Add("TestStackAllOutput", runtime_test_package.TestStackAllOutput, "stack_test.go", 468);
-        registry.Add("TestStackCache", runtime_test_package.TestStackCache, "stack_test.go", 427);
-        registry.Add("TestStackGrowth", runtime_test_package.TestStackGrowth, "stack_test.go", 79);
-        registry.Add("TestStackGrowthCallback", runtime_test_package.TestStackGrowthCallback, "stack_test.go", 183);
-        registry.Add("TestStackMem", runtime_test_package.TestStackMem, "stack_test.go", 23);
-        registry.Add("TestStackOutput", runtime_test_package.TestStackOutput, "stack_test.go", 459);
-        registry.Add("TestStackOverflow", runtime_test_package.TestStackOverflow, "crash_test.go", 270);
-        registry.Add("TestStackPanic", runtime_test_package.TestStackPanic, "stack_test.go", 477);
-        registry.Add("TestStackWrapperCaller", runtime_test_package.TestStackWrapperCaller, "stack_test.go", 656);
-        registry.Add("TestStackWrapperCallers", runtime_test_package.TestStackWrapperCallers, "stack_test.go", 666);
-        registry.Add("TestStackWrapperStack", runtime_test_package.TestStackWrapperStack, "stack_test.go", 683);
-        registry.Add("TestStackWrapperStackInlinePanic", runtime_test_package.TestStackWrapperStackInlinePanic, "stack_test.go", 693);
-        registry.Add("TestStackWrapperStackPanic", runtime_test_package.TestStackWrapperStackPanic, "stack_test.go", 724);
+        registry.Add("TestSmhasherAppendedZeros", runtime_test_package.TestSmhasherAppendedZeros, "hash_test.go", 133);
+        registry.Add("TestSmhasherAvalanche", runtime_test_package.TestSmhasherAvalanche, "hash_test.go", 472);
+        registry.Add("TestSmhasherCyclic", runtime_test_package.TestSmhasherCyclic, "hash_test.go", 232);
+        registry.Add("TestSmhasherPermutation", runtime_test_package.TestSmhasherPermutation, "hash_test.go", 301);
+        registry.Add("TestSmhasherSanity", runtime_test_package.TestSmhasherSanity, "hash_test.go", 68);
+        registry.Add("TestSmhasherSeed", runtime_test_package.TestSmhasherSeed, "hash_test.go", 628);
+        registry.Add("TestSmhasherSmallKeys", runtime_test_package.TestSmhasherSmallKeys, "hash_test.go", 143);
+        registry.Add("TestSmhasherSparse", runtime_test_package.TestSmhasherSparse, "hash_test.go", 262);
+        registry.Add("TestSmhasherText", runtime_test_package.TestSmhasherText, "hash_test.go", 593);
+        registry.Add("TestSmhasherTwoNonzero", runtime_test_package.TestSmhasherTwoNonzero, "hash_test.go", 183);
+        registry.Add("TestSmhasherWindowed", runtime_test_package.TestSmhasherWindowed, "hash_test.go", 549);
+        registry.Add("TestSmhasherZeros", runtime_test_package.TestSmhasherZeros, "hash_test.go", 168);
+        registry.Add("TestStackAllOutput", runtime_test_package.TestStackAllOutput, "stack_test.go", 469);
+        registry.Add("TestStackCache", runtime_test_package.TestStackCache, "stack_test.go", 428);
+        registry.Add("TestStackGrowth", runtime_test_package.TestStackGrowth, "stack_test.go", 80);
+        registry.Add("TestStackGrowthCallback", runtime_test_package.TestStackGrowthCallback, "stack_test.go", 184);
+        registry.Add("TestStackMem", runtime_test_package.TestStackMem, "stack_test.go", 24);
+        registry.Add("TestStackOutput", runtime_test_package.TestStackOutput, "stack_test.go", 460);
+        registry.Add("TestStackOverflow", runtime_test_package.TestStackOverflow, "crash_test.go", 303);
+        registry.Add("TestStackPanic", runtime_test_package.TestStackPanic, "stack_test.go", 478);
+        registry.Add("TestStackWrapperCaller", runtime_test_package.TestStackWrapperCaller, "stack_test.go", 657);
+        registry.Add("TestStackWrapperCallers", runtime_test_package.TestStackWrapperCallers, "stack_test.go", 667);
+        registry.Add("TestStackWrapperStack", runtime_test_package.TestStackWrapperStack, "stack_test.go", 684);
+        registry.Add("TestStackWrapperStackInlinePanic", runtime_test_package.TestStackWrapperStackInlinePanic, "stack_test.go", 694);
+        registry.Add("TestStackWrapperStackPanic", runtime_test_package.TestStackWrapperStackPanic, "stack_test.go", 725);
         registry.Add("TestStartLine", runtime_test_package.TestStartLine, "start_line_test.go", 69);
         registry.Add("TestStartLineAsm", runtime_test_package.TestStartLineAsm, "start_line_amd64_test.go", 15);
-        registry.Add("TestStdCall", runtime_test_package.TestStdCall, "syscall_windows_test.go", 47);
-        registry.Add("TestStdcallAndCDeclCallbacks", runtime_test_package.TestStdcallAndCDeclCallbacks, "syscall_windows_test.go", 555);
-        registry.Add("TestStealOrder", runtime_test_package.TestStealOrder, "proc_test.go", 946);
-        registry.Add("TestStopCPUProfilingWithProfilerOff", runtime_test_package.TestStopCPUProfilingWithProfilerOff, "runtime_test.go", 153);
-        registry.Add("TestStopTheWorldDeadlock", runtime_test_package.TestStopTheWorldDeadlock, "proc_test.go", 33);
+        registry.Add("TestStdCall", runtime_test_package.TestStdCall, "syscall_windows_test.go", 49);
+        registry.Add("TestStdcallAndCDeclCallbacks", runtime_test_package.TestStdcallAndCDeclCallbacks, "syscall_windows_test.go", 557);
+        registry.Add("TestStealOrder", runtime_test_package.TestStealOrder, "proc_test.go", 950);
+        registry.Add("TestStopCPUProfilingWithProfilerOff", runtime_test_package.TestStopCPUProfilingWithProfilerOff, "runtime_test.go", 156);
+        registry.Add("TestStopTheWorldDeadlock", runtime_test_package.TestStopTheWorldDeadlock, "proc_test.go", 38);
         registry.Add("TestString2Slice", runtime_test_package.TestString2Slice, "string_test.go", 376);
-        registry.Add("TestStringConcatenationAllocs", runtime_test_package.TestStringConcatenationAllocs, "malloc_test.go", 140);
+        registry.Add("TestStringConcatenationAllocs", runtime_test_package.TestStringConcatenationAllocs, "malloc_test.go", 141);
         registry.Add("TestStringIndexHaystack", runtime_test_package.TestStringIndexHaystack, "string_test.go", 270);
         registry.Add("TestStringIndexNeedle", runtime_test_package.TestStringIndexNeedle, "string_test.go", 284);
         registry.Add("TestStringOnStack", runtime_test_package.TestStringOnStack, "string_test.go", 298);
         registry.Add("TestStringW", runtime_test_package.TestStringW, "string_test.go", 195);
-        registry.Add("TestStructHash", runtime_test_package.TestStructHash, "hash_test.go", 727);
-        registry.Add("TestSynctest", runtime_test_package.TestSynctest, "synctest_test.go", 11);
-        registry.Add("TestSyscallN", runtime_test_package.TestSyscallN, "syscall_windows_test.go", 767);
-        registry.Add("TestSyscallStackUsage", runtime_test_package.TestSyscallStackUsage, "syscall_windows_test.go", 1209);
-        registry.Add("TestSystemstackFramePointerAdjust", runtime_test_package.TestSystemstackFramePointerAdjust, "stack_test.go", 944);
-        registry.Add("TestThreadExhaustion", runtime_test_package.TestThreadExhaustion, "crash_test.go", 292);
-        registry.Add("TestTimeBeginPeriod", runtime_test_package.TestTimeBeginPeriod, "syscall_windows_test.go", 947);
+        registry.Add("TestStructHash", runtime_test_package.TestStructHash, "hash_test.go", 724);
+        registry.Add("TestSynctest", runtime_test_package.TestSynctest, "synctest_test.go", 13);
+        registry.Add("TestSynctestAssocConsts", runtime_test_package.TestSynctestAssocConsts, "synctest_test.go", 23);
+        registry.Add("TestSynctestCondSignalFromNoBubble", runtime_test_package.TestSynctestCondSignalFromNoBubble, "crash_test.go", 1250);
+        registry.Add("TestSyscallArgs", runtime_test_package.TestSyscallArgs, "syscall_test.go", 13);
+        registry.Add("TestSyscallN", runtime_test_package.TestSyscallN, "syscall_windows_test.go", 772);
+        registry.Add("TestSyscallStackUsage", runtime_test_package.TestSyscallStackUsage, "syscall_windows_test.go", 1214);
+        registry.Add("TestSystemstackFramePointerAdjust", runtime_test_package.TestSystemstackFramePointerAdjust, "stack_test.go", 948);
+        registry.Add("TestThreadExhaustion", runtime_test_package.TestThreadExhaustion, "crash_test.go", 325);
+        registry.Add("TestTimeBeginPeriod", runtime_test_package.TestTimeBeginPeriod, "syscall_windows_test.go", 952);
         registry.Add("TestTimeHistogram", runtime_test_package.TestTimeHistogram, "histogram_test.go", 15);
         registry.Add("TestTimeHistogramMetricsBuckets", runtime_test_package.TestTimeHistogramMetricsBuckets, "histogram_test.go", 76);
-        registry.Add("TestTimePprof", runtime_test_package.TestTimePprof, "crash_test.go", 779);
+        registry.Add("TestTimePprof", runtime_test_package.TestTimePprof, "crash_test.go", 867);
         registry.Add("TestTimeTimerType", runtime_test_package.TestTimeTimerType, "time_test.go", 100);
-        registry.Add("TestTimediv", runtime_test_package.TestTimediv, "runtime_test.go", 471);
-        registry.Add("TestTimerFairness", runtime_test_package.TestTimerFairness, "proc_test.go", 246);
-        registry.Add("TestTimerFairness2", runtime_test_package.TestTimerFairness2, "proc_test.go", 276);
-        registry.Add("TestTinyAlloc", runtime_test_package.TestTinyAlloc, "malloc_test.go", 157);
-        registry.Add("TestTinyAllocIssue37262", runtime_test_package.TestTinyAllocIssue37262, "malloc_test.go", 185);
+        registry.Add("TestTimerFairness", runtime_test_package.TestTimerFairness, "proc_test.go", 251);
+        registry.Add("TestTimerFairness2", runtime_test_package.TestTimerFairness2, "proc_test.go", 281);
+        registry.Add("TestTinyAlloc", runtime_test_package.TestTinyAlloc, "malloc_test.go", 158);
+        registry.Add("TestTinyAllocIssue37262", runtime_test_package.TestTinyAllocIssue37262, "malloc_test.go", 186);
+        registry.Add("TestTraceGCSTW", runtime_test_package.TestTraceGCSTW, "proc_test.go", 1240);
         registry.Add("TestTraceMap", runtime_test_package.TestTraceMap, "trace2map_test.go", 14);
         registry.Add("TestTraceMapConcurrent", runtime_test_package.TestTraceMapConcurrent, "trace2map_test.go", 50);
-        registry.Add("TestTracebackAncestors", runtime_test_package.TestTracebackAncestors, "stack_test.go", 827);
-        registry.Add("TestTracebackArgs", runtime_test_package.TestTracebackArgs, "traceback_test.go", 270);
-        registry.Add("TestTracebackElision", runtime_test_package.TestTracebackElision, "traceback_test.go", 163);
-        registry.Add("TestTracebackGeneric", runtime_test_package.TestTracebackGeneric, "traceback_test.go", 828);
-        registry.Add("TestTracebackInlined", runtime_test_package.TestTracebackInlined, "traceback_test.go", 23);
-        registry.Add("TestTracebackParentChildGoroutines", runtime_test_package.TestTracebackParentChildGoroutines, "traceback_test.go", 700);
-        registry.Add("TestTracebackRuntimeFunction", runtime_test_package.TestTracebackRuntimeFunction, "crash_test.go", 873);
-        registry.Add("TestTracebackRuntimeMethod", runtime_test_package.TestTracebackRuntimeMethod, "crash_test.go", 886);
+        registry.Add("TestTraceSTW", runtime_test_package.TestTraceSTW, "proc_test.go", 1193);
+        registry.Add("TestTracebackAncestors", runtime_test_package.TestTracebackAncestors, "stack_test.go", 828);
+        registry.Add("TestTracebackArgs", runtime_test_package.TestTracebackArgs, "traceback_test.go", 275);
+        registry.Add("TestTracebackElision", runtime_test_package.TestTracebackElision, "traceback_test.go", 168);
+        registry.Add("TestTracebackGeneric", runtime_test_package.TestTracebackGeneric, "traceback_test.go", 833);
+        registry.Add("TestTracebackGoroutineLabels", runtime_test_package.TestTracebackGoroutineLabels, "traceback_test.go", 888);
+        registry.Add("TestTracebackGoroutineLabelsDisabledGODEBUG", runtime_test_package.TestTracebackGoroutineLabelsDisabledGODEBUG, "traceback_test.go", 932);
+        registry.Add("TestTracebackInlined", runtime_test_package.TestTracebackInlined, "traceback_test.go", 28);
+        registry.Add("TestTracebackParentChildGoroutines", runtime_test_package.TestTracebackParentChildGoroutines, "traceback_test.go", 705);
+        registry.Add("TestTracebackRuntimeFunction", runtime_test_package.TestTracebackRuntimeFunction, "crash_test.go", 963);
+        registry.Add("TestTracebackRuntimeMethod", runtime_test_package.TestTracebackRuntimeMethod, "crash_test.go", 975);
         registry.Add("TestTracebackSystem", runtime_test_package.TestTracebackSystem, "traceback_system_test.go", 126);
-        registry.Add("TestTracebackSystemstack", runtime_test_package.TestTracebackSystemstack, "stack_test.go", 795);
-        registry.Add("TestTrailingZero", runtime_test_package.TestTrailingZero, "runtime_test.go", 269);
+        registry.Add("TestTracebackSystemstack", runtime_test_package.TestTracebackSystemstack, "stack_test.go", 796);
+        registry.Add("TestTrailingZero", runtime_test_package.TestTrailingZero, "runtime_test.go", 272);
         registry.Add("TestUnconditionalPanic", runtime_test_package.TestUnconditionalPanic, "defer_test.go", 15);
         registry.Add("TestUnsafePoint", runtime_test_package.TestUnsafePoint, "unsafepoint_test.go", 26);
         registry.Add("TestUserArena", runtime_test_package.TestUserArena, "arena_test.go", 38);
-        registry.Add("TestUserArenaClearsPointerBits", runtime_test_package.TestUserArenaClearsPointerBits, "arena_test.go", 322);
-        registry.Add("TestUserArenaClonePanic", runtime_test_package.TestUserArenaClonePanic, "arena_test.go", 512);
-        registry.Add("TestUserArenaClonePointer", runtime_test_package.TestUserArenaClonePointer, "arena_test.go", 433);
-        registry.Add("TestUserArenaCloneSlice", runtime_test_package.TestUserArenaCloneSlice, "arena_test.go", 459);
-        registry.Add("TestUserArenaCloneString", runtime_test_package.TestUserArenaCloneString, "arena_test.go", 379);
-        registry.Add("TestUserArenaLiveness", runtime_test_package.TestUserArenaLiveness, "arena_test.go", 230);
-        registry.Add("TestUserForcedGC", runtime_test_package.TestUserForcedGC, "gc_test.go", 576);
-        registry.Add("TestVDSO", runtime_test_package.TestVDSO, "crash_test.go", 203);
+        registry.Add("TestUserArenaClearsPointerBits", runtime_test_package.TestUserArenaClearsPointerBits, "arena_test.go", 332);
+        registry.Add("TestUserArenaClonePanic", runtime_test_package.TestUserArenaClonePanic, "arena_test.go", 527);
+        registry.Add("TestUserArenaClonePointer", runtime_test_package.TestUserArenaClonePointer, "arena_test.go", 448);
+        registry.Add("TestUserArenaCloneSlice", runtime_test_package.TestUserArenaCloneSlice, "arena_test.go", 474);
+        registry.Add("TestUserArenaCloneString", runtime_test_package.TestUserArenaCloneString, "arena_test.go", 394);
+        registry.Add("TestUserArenaLiveness", runtime_test_package.TestUserArenaLiveness, "arena_test.go", 235);
+        registry.Add("TestUserForcedGC", runtime_test_package.TestUserForcedGC, "gc_test.go", 581);
+        registry.Add("TestVDSO", runtime_test_package.TestVDSO, "crash_test.go", 225);
         registry.Add("TestVectoredHandlerDontCrashOnLibrary", runtime_test_package.TestVectoredHandlerDontCrashOnLibrary, "signal_windows_test.go", 78);
         registry.Add("TestVectoredHandlerExceptionInNonGoThread", runtime_test_package.TestVectoredHandlerExceptionInNonGoThread, "signal_windows_test.go", 20);
-        registry.Add("TestVersion", runtime_test_package.TestVersion, "runtime_test.go", 463);
-        registry.Add("TestWERDialogue", runtime_test_package.TestWERDialogue, "syscall_windows_test.go", 648);
-        registry.Add("TestWeakToStrongMarkTermination", runtime_test_package.TestWeakToStrongMarkTermination, "gc_test.go", 800);
-        registry.Add("TestWindowsStackMemory", runtime_test_package.TestWindowsStackMemory, "syscall_windows_test.go", 670);
-        registry.Add("TestYieldLocked", runtime_test_package.TestYieldLocked, "proc_test.go", 91);
-        registry.Add("TestYieldLockedProgress", runtime_test_package.TestYieldLockedProgress, "proc_test.go", 65);
-        registry.Add("TestYieldProgress", runtime_test_package.TestYieldProgress, "proc_test.go", 61);
+        registry.Add("TestVersion", runtime_test_package.TestVersion, "runtime_test.go", 492);
+        registry.Add("TestWERDialogue", runtime_test_package.TestWERDialogue, "syscall_windows_test.go", 650);
+        registry.Add("TestWeakToStrongMarkTermination", runtime_test_package.TestWeakToStrongMarkTermination, "gc_test.go", 805);
+        registry.Add("TestWindowsStackMemory", runtime_test_package.TestWindowsStackMemory, "syscall_windows_test.go", 672);
+        registry.Add("TestYieldLocked", runtime_test_package.TestYieldLocked, "proc_test.go", 96);
+        registry.Add("TestYieldLockedProgress", runtime_test_package.TestYieldLockedProgress, "proc_test.go", 70);
+        registry.Add("TestYieldProgress", runtime_test_package.TestYieldProgress, "proc_test.go", 66);
         registry.Add("TestZeroConvT2x", runtime_test_package.TestZeroConvT2x, "iface_test.go", 292);
-        registry.Add("TestZeroDivisionException", runtime_test_package.TestZeroDivisionException, "syscall_windows_test.go", 641);
+        registry.Add("TestZeroDivisionException", runtime_test_package.TestZeroDivisionException, "syscall_windows_test.go", 643);
         registry.SetTestMain(runtime_test_package.TestMain);
         return TestHost.Run(registry, args);
     }

@@ -7,16 +7,29 @@ using context = context_package;
 using bytealg = @internal.bytealg_package;
 using godebug = @internal.godebug_package;
 using nettrace = @internal.nettrace_package;
+using netip = net.netip_package;
 using syscall = syscall_package;
 using time = time_package;
 using @internal;
 using System.Runtime.CompilerServices;
+using net;
 
 partial class net_package {
 
+// defaultTCPKeepAliveIdle is a default constant value for TCP_KEEPIDLE.
+// See go.dev/issue/31510 for details.
 internal static time.Duration defaultTCPKeepAliveIdle => /* 15 * time.Second */ 15000000000;
+
+// defaultTCPKeepAliveInterval is a default constant value for TCP_KEEPINTVL.
+// It is the same as defaultTCPKeepAliveIdle, see go.dev/issue/31510 for details.
 internal static time.Duration defaultTCPKeepAliveInterval => /* 15 * time.Second */ 15000000000;
+
+// defaultTCPKeepAliveCount is a default constant value for TCP_KEEPCNT.
 internal static UntypedInt defaultTCPKeepAliveCount => 9;
+
+// For the moment, MultiPath TCP is used by default with listeners, if
+// available, but not with dialers.
+// See go.dev/issue/56539
 internal const bool defaultMPTCPEnabledListen = true;
 internal const bool defaultMPTCPEnabledDial = false;
 
@@ -28,8 +41,11 @@ internal const bool defaultMPTCPEnabledDial = false;
 //	3 == MPTCP enabled on dialers only
 internal static ж<godebug.Setting> multipathtcp = godebug.New("multipathtcp"u8);
 
+// mptcpStatusDial is a tristate for Multipath TCP on clients,
+// see go.dev/issue/56539
 partial struct mptcpStatusDial /*num:uint8*/;
 
+// The value 0 is the system default, linked to defaultMPTCPEnabledDial
 internal static mptcpStatusDial mptcpUseDefaultDial => /* iota */ 0;
 internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
@@ -46,8 +62,10 @@ internal static bool get(this ref mptcpStatusDial m) {
     // If MPTCP is forced via GODEBUG=multipathtcp=1
     if (multipathtcp.Value() == "1"u8 || multipathtcp.Value() == "3"u8) {
         multipathtcp.IncNonDefault();
+
         return true;
     }
+
     return defaultMPTCPEnabledDial;
 }
 
@@ -59,8 +77,11 @@ internal static void set(this ref mptcpStatusDial m, bool use) {
     }
 }
 
+// mptcpStatusListen is a tristate for Multipath TCP on servers,
+// see go.dev/issue/56539
 partial struct mptcpStatusListen /*num:uint8*/;
 
+// The value 0 is the system default, linked to defaultMPTCPEnabledListen
 internal static mptcpStatusListen mptcpUseDefaultListen => /* iota */ 0;
 internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
@@ -78,8 +99,10 @@ internal static bool get(this ref mptcpStatusListen m) {
     // enabled on dialers, but not on listeners.
     if (multipathtcp.Value() == "0"u8 || multipathtcp.Value() == "3"u8) {
         multipathtcp.IncNonDefault();
+
         return false;
     }
+
     return defaultMPTCPEnabledListen;
 }
 
@@ -217,8 +240,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
 internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
     time.Time earliest = default!;
 
-    if (d.Timeout != 0) {
-        // including negative, for historical reasons
+    if (d.Timeout != 0) { // including negative, for historical reasons
         earliest = now.Add(d.Timeout);
     }
     {
@@ -273,8 +295,7 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
     error err = default!;
 
     nint i = bytealg.LastIndexByteString(network, (rune)':');
-    if (i < 0) {
-        // no colon
+    if (i < 0) { // no colon
         var exprᴛ1 = network;
         if (exprᴛ1 == "tcp"u8 || exprᴛ1 == "tcp4"u8 || exprᴛ1 == "tcp6"u8) {
         }
@@ -290,7 +311,6 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
         else { /* default: */
             return ("", 0, ((UnknownNetworkError)network));
         }
-
         return (network, 0, default!);
     }
     afnet = network.slice(0, i);
@@ -306,7 +326,6 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
         }
         return (afnet, protoΔ2, default!);
     }
-
     return ("", 0, ((UnknownNetworkError)network));
 }
 
@@ -332,7 +351,6 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
         }
         return (new addrList(new ΔAddr[]{new UnixAddrжΔAddr(addrΔ2)}.slice()), default!);
     }
-
     (var addrs, err) = Ꮡr.internetAddrList(ctx, afnet, addr);
     if (err != default! || op != "dial"u8 || hint == default!) {
         return (addrs, err);
@@ -480,7 +498,7 @@ public static (Conn, error) DialTimeout(@string network, @string address, time.D
 
 // sysDialer contains a Dial's parameters and configuration.
 partial struct sysDialer {
-    public partial ref Dialer Dialer { get; }
+    /*embed*/ public Dialer Dialer;
     internal @string network, address;
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 }
@@ -517,49 +535,15 @@ internal static readonly @string dialˢ = "dial"u8;
 //
 // See func [Dial] for a description of the network and address
 // parameters.
-public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
+public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
 
-        if (ctx == default!) {
-            throw panic("nil context");
-        }
-        var deadline = d.deadline(ctx, time.Now());
-        if (!deadline.IsZero()) {
-            testHookStepTime();
-            {
-                var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
-                    var (subCtx, cancel) = context.WithDeadline(ctx, deadline);
-                    var cancelʗ1 = cancel;
-                    defer(() => cancelʗ1(), ref ᒐ);
-                    ctx = subCtx;
-                }
-            }
-        }
-        {
-            var oldCancel = d.Cancel; if (oldCancel != default!) {
-                var (subCtx, cancel) = context.WithCancel(ctx);
-                var cancelʗ2 = cancel;
-                defer(() => cancelʗ2(), ref ᒐ);
-                var cancelʗ3 = cancel;
-                var oldCancelʗ1 = oldCancel;
-                var subCtxʗ1 = subCtx;
-                goǃ(() => {
-                    var selᴛ1 = oldCancelʗ1;
-                    var selᴛ2 = subCtxʗ1.Done();
-                    switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
-                    case 0 when selᴛ1.ꟷᐳ(out _): {
-                        cancelʗ3();
-                        break;
-                    }
-                    case 1 when selᴛ2.ꟷᐳ(out _): {
-                        break;
-                    }}
-                });
-                ctx = subCtx;
-            }
-        }
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+
         // Shadow the nettrace (if any) during resolve so Connect events don't fire for DNS lookups.
         var resolveCtx = ctx;
         {
@@ -571,15 +555,18 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
                 resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(nil), Ꮡshadow);
             }
         }
+
         var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢ, network, address, d.LocalAddr);
         if (err != default!) {
             return (default!, new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: network, Source: default!, Addr: default!, Err: err))));
         }
+
         var sd = Ꮡ(new sysDialer(
             Dialer: d,
             network: network,
             address: address
         ));
+
         addrList primaries = default!;
         addrList fallbacks = default!;
         if (d.dualStack() && network == "tcp"u8){
@@ -587,7 +574,146 @@ public static partial (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Co
         } else {
             primaries = addrs;
         }
+
         return sd.dialParallel(ctx, primaries, fallbacks);
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+internal static partial (context.Context, Action) dialCtx(this ref Dialer d, context.Context ctx) {
+    if (ctx == default!) {
+        throw panic("nil context");
+    }
+    var deadline = d.deadline(ctx, time.Now());
+    Action cancel1 = default!;
+    Action cancel2 = default!;
+    if (!deadline.IsZero()) {
+        testHookStepTime();
+        {
+            var (dΔ1, ok) = ctx.Deadline(); if (!ok || deadline.Before(dΔ1)) {
+                context.Context subCtx = default!;
+                (subCtx, cancel1) = context.WithDeadline(ctx, deadline);
+                ctx = subCtx;
+            }
+        }
+    }
+    {
+        var oldCancel = d.Cancel; if (oldCancel != default!) {
+            var (subCtx, cancel2Δ1) = context.WithCancel(ctx);
+            var cancel2ʗ1 = cancel2Δ1;
+            var oldCancelʗ1 = oldCancel;
+            var subCtxʗ1 = subCtx;
+            goǃ(() => {
+                var selᴛ1 = oldCancelʗ1;
+                var selᴛ2 = subCtxʗ1.Done();
+                switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+                case 0 when selᴛ1.ꟷᐳ(out _): {
+                    cancel2ʗ1();
+                    break;
+                }
+                case 1 when selᴛ2.ꟷᐳ(out _): {
+                    break;
+                }}
+            });
+            ctx = subCtx;
+        }
+    }
+    var cancel1ʗ1 = cancel1;
+    var cancel2ʗ2 = cancel2;
+    return (ctx, () => {
+        if (cancel1ʗ1 != default!) {
+            cancel1ʗ1();
+        }
+        if (cancel2ʗ2 != default!) {
+            cancel2ʗ2();
+        }
+    });
+}
+
+// DialTCP acts like Dial for TCP networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be a TCP network name; see func Dial for details.
+public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialTCP(ctx, Ꮡd, network, TCPAddrFromAddrPort(laddr), TCPAddrFromAddrPort(raddr));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// DialUDP acts like Dial for UDP networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be a UDP network name; see func Dial for details.
+public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialUDP(ctx, Ꮡd, network, UDPAddrFromAddrPort(laddr), UDPAddrFromAddrPort(raddr));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// DialIP acts like Dial for IP networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be an IP network name; see func Dial for details.
+public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netipꓸAddr laddr, netipꓸAddr raddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialIP(ctx, Ꮡd, network, ipAddrFromAddr(laddr), ipAddrFromAddr(raddr));
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
+}
+
+// DialUnix acts like Dial for Unix networks using the provided context.
+//
+// The provided Context must be non-nil. If the context expires before
+// the connection is complete, an error is returned. Once successfully
+// connected, any expiration of the context will not affect the
+// connection.
+//
+// The network must be a Unix network name; see func Dial for details.
+public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> Ꮡladdr, ж<UnixAddr> Ꮡraddr) {
+    GoFrame ᒐ = default;
+    try {
+        ref var d = ref Ꮡd.DerefOrNull();
+
+        (ctx, var cancel) = d.dialCtx(ctx);
+        var cancelʗ1 = cancel;
+        defer(() => cancelʗ1(), ref ᒐ);
+        return dialUnix(ctx, Ꮡd, network, Ꮡladdr, Ꮡraddr);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }
@@ -610,9 +736,11 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
         if (len(fallbacks) == 0) {
             return Ꮡsd.dialSerial(ctx, primaries);
         }
+
         var returned = new channel<EmptyStruct>(0);
         defer(ᴛ1 => builtin.close(ᴛ1), returned, ref ᒐ);
         var results = new channel<dialParallel_dialResult>(0); // unbuffered
+
         var fallbacksʗ1 = fallbacks;
         var primariesʗ1 = primaries;
         var resultsʗ1 = results;
@@ -636,18 +764,22 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
                 break;
             }}
         }
+
         dialParallel_dialResult primary = default!;
         dialParallel_dialResult fallback = default!;
+
         // Start the main racer.
         var (primaryCtx, primaryCancel) = context.WithCancel(ctx);
         var primaryCancelʗ1 = primaryCancel;
         defer(() => primaryCancelʗ1(), ref ᒐ);
         var startRacerʗ1 = startRacer;
         goǃ(startRacerʗ1, primaryCtx, (bool)true);
+
         // Start the timer for the fallback racer.
         var fallbackTimer = time.NewTimer(Ꮡsd.of(sysDialer.ᏑDialer).fallbackDelay());
         var fallbackTimerʗ1 = fallbackTimer;
         defer(() => fallbackTimerʗ1.Stop(), ref ᒐ);
+
         while (ᐧ) {
             var selᴛ5 = (~fallbackTimer).C;
             var selᴛ6 = results;
@@ -695,6 +827,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
         ref var sd = ref Ꮡsd.DerefOrNull();
 
         error firstErr = default!;    // The error from the first address is most relevant.
+
         foreach (var (i, ra) in ras) {
             var selᴛ7 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
@@ -704,6 +837,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
             default: {
                 break;
             }}
+
             var dialCtx = ctx;
             {
                 var (deadline, hasDeadline) = ctx.Deadline(); if (hasDeadline) {
@@ -723,6 +857,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
                     }
                 }
             }
+
             var (c, err) = Ꮡsd.dialSingle(dialCtx, ra);
             if (err == default!) {
                 return (c, default!);
@@ -731,6 +866,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
                 firstErr = err;
             }
         }
+
         if (firstErr == default!) {
             firstErr = new OpErrorжerror(Ꮡ(new OpError(Op: "dial"u8, Net: sd.network, Source: default!, Addr: default!, Err: errMissingAddress)));
         }
@@ -914,7 +1050,7 @@ public static (Listener, error) Listen(this ref ListenConfig lc, context.Context
 // parameters.
 //
 // The ctx argument is used while resolving the address on which to listen;
-// it does not affect the returned Listener.
+// it does not affect the returned PacketConn.
 public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default!);
     if (err != default!) {
@@ -955,7 +1091,7 @@ public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context
 
 // sysListener contains a Listen's parameters and configuration.
 partial struct sysListener {
-    public partial ref ListenConfig ListenConfig { get; }
+    /*embed*/ public ListenConfig ListenConfig;
     internal @string network, address;
 }
 

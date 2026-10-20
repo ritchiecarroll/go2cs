@@ -12,10 +12,10 @@ using math;
 
 partial class bigmod_package {
 
+// _W is the size in bits of our limbs.
 internal static UntypedInt _W => /* bits.UintSize */ 64;
+// _S is the size in bytes of our limbs.
 internal static UntypedInt _S => /* _W / 8 */ 8;
-
-public partial struct choice /*num:nuint*/;
 
 // Note: These functions make many loops over all the words in a Nat.
 // These loops used to be in assembly, invisible to -race, -asan, and -msan,
@@ -25,6 +25,12 @@ public partial struct choice /*num:nuint*/;
 // propagate across inlining, we must also mark functions that inline
 // //go:norace functions - specifically, those that inline add, addMulVVW,
 // assign, cmpGeq, rshift1, and sub.
+
+// choice represents a constant-time boolean. The value of choice is always
+// either 1 or 0. We use an int instead of bool in order to make decisions in
+// constant time by turning it into a mask.
+public partial struct choice /*num:nuint*/;
+
 internal static choice not(choice c) {
     return (choice)(1 ^ c);
 }
@@ -44,7 +50,7 @@ internal static choice ctEq(nuint x, nuint y) {
     // If x != y, then either x - y or y - x will generate a carry.
     var (_, c1) = bits.Sub(x, y, 0);
     var (_, c2) = bits.Sub(y, x, 0);
-    return not(((choice)((nuint)(c1 | c2))));
+    return not((choice)(c1 | c2));
 }
 
 // Nat represents an arbitrary natural number
@@ -99,7 +105,8 @@ internal static ж<ΔNat> reset(this ж<ΔNat> Ꮡx, nint n) {
         x.limbs = new slice<nuint>(n);
         return Ꮡx;
     }
-    clear(x.limbs);
+    // Clear both the returned limbs and the previously used ones.
+    clear(x.limbs.slice(0, max(n, len(x.limbs))));
     x.limbs = x.limbs.slice(0, n);
     return Ꮡx;
 }
@@ -283,6 +290,7 @@ public static choice Equal(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
     var yLimbs = y.limbs.slice(0, size);
+
     choice equal = yes;
     for (nint i = 0; i < size; i++) {
         equal &= (choice)(ctEq(xLimbs[i], yLimbs[i]));
@@ -297,6 +305,7 @@ public static choice IsZero(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
+
     choice zero = yes;
     for (nint i = 0; i < size; i++) {
         zero &= (choice)(ctEq(xLimbs[i], 0));
@@ -311,9 +320,11 @@ public static choice IsOne(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
+
     if (len(xLimbs) == 0) {
         return no;
     }
+
     choice one = ctEq(xLimbs[0], 1);
     for (nint i = 1; i < size; i++) {
         one &= (choice)(ctEq(xLimbs[i], 0));
@@ -340,7 +351,7 @@ public static choice IsOdd(this ref ΔNat x) {
     if (len(x.limbs) == 0) {
         return no;
     }
-    return ((choice)((nuint)(x.limbs[0] & 1)));
+    return (choice)(x.limbs[0] & 1);
 }
 
 // TrailingZeroBitsVarTime returns the number of trailing zero bits in x.
@@ -370,13 +381,14 @@ internal static choice cmpGeq(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
     var yLimbs = y.limbs.slice(0, size);
+
     nuint c = default!;
     for (nint i = 0; i < size; i++) {
         (_, c) = bits.Sub(xLimbs[i], yLimbs[i], c);
     }
     // If there was a carry, then subtracting y underflowed, so
     // x is not greater than or equal to y.
-    return not(((choice)c));
+    return not((choice)c);
 }
 
 // assign sets x <- y if on == 1, and does nothing otherwise.
@@ -392,9 +404,10 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
     var yLimbs = y.limbs.slice(0, size);
+
     nuint mask = ctMask(on);
     for (nint i = 0; i < size; i++) {
-        xLimbs[i] ^= (nuint)((nuint)(mask & ((nuint)(xLimbs[i] ^ yLimbs[i]))));
+        xLimbs[i] ^= (nuint)((mask & (xLimbs[i] ^ yLimbs[i])));
     }
     return Ꮡx;
 }
@@ -406,12 +419,13 @@ internal static ж<ΔNat> assign(this ж<ΔNat> Ꮡx, choice on, ж<ΔNat> Ꮡy)
 //go:norace
 internal static nuint /*c*/ add(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     nuint c = default!;
-
     ref var y = ref Ꮡy.DerefOrNull();
+
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
     var yLimbs = y.limbs.slice(0, size);
+
     for (nint i = 0; i < size; i++) {
         (xLimbs[i], c) = bits.Add(xLimbs[i], yLimbs[i], c);
     }
@@ -425,12 +439,13 @@ internal static nuint /*c*/ add(this ref ΔNat x, ж<ΔNat> Ꮡy) {
 //go:norace
 internal static nuint /*c*/ sub(this ref ΔNat x, ж<ΔNat> Ꮡy) {
     nuint c = default!;
-
     ref var y = ref Ꮡy.DerefOrNull();
+
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
     var yLimbs = y.limbs.slice(0, size);
+
     for (nint i = 0; i < size; i++) {
         (xLimbs[i], c) = bits.Sub(xLimbs[i], yLimbs[i], c);
     }
@@ -448,22 +463,27 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
+
     nint shift = (nint)(n % (nuint)_W);
     nint shiftLimbs = (nint)(n / (nuint)_W);
+
     slice<nuint> shiftedLimbs = default!;
     if (shiftLimbs < size) {
         shiftedLimbs = xLimbs.slice(shiftLimbs);
     }
+
     foreach (var (i, _) in xLimbs) {
         if (i >= len(shiftedLimbs)) {
             xLimbs[i] = 0;
             continue;
         }
+
         xLimbs[i] = shiftedLimbs[i].Rsh((int64)(shift));
         if (i + 1 < len(shiftedLimbs)) {
-            xLimbs[i] |= (nuint)(shiftedLimbs[i + 1].Lsh((int64)(((nint)_W - shift))));
+            xLimbs[i] |= (nuint)(shiftedLimbs[i + 1].Lsh((int64)((nint)_W - shift)));
         }
     }
+
     return Ꮡx;
 }
 
@@ -475,6 +495,7 @@ public static nint BitLenVarTime(this ref ΔNat x) {
     // Eliminate bounds checks in the loop.
     nint size = len(x.limbs);
     var xLimbs = x.limbs.slice(0, size);
+
     for (nint i = size - 1; i >= 0; i--) {
         if (xLimbs[i] != 0) {
             return i * (nint)_W + bitLen(xLimbs[i]);
@@ -521,21 +542,25 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
     nuint n = (nuint)len((~rr).limbs);
     nuint mLen = (nuint)m.BitLen();
     nuint logR = (nuint)_W * n;
+
     // We start by computing R = 2^(_W * n) mod m. We can get pretty close, to
     // 2^⌊log₂m⌋, by setting the highest bit we can without having to reduce.
-    rr.Value.limbs[n - 1] = ((nuint)1 << (int)(((mLen - 1) % (nuint)_W)));
+    rr.Value.limbs[n - 1] = (nuint)1 << (int)((mLen - 1) % (nuint)_W);
     // Then we double until we reach 2^(_W * n).
     for (nuint iΔ1 = mLen - 1; iΔ1 < logR; iΔ1++) {
         rr.Add(rr, Ꮡm);
     }
+
     // Next we need to get from R to 2^(_W * n) R mod m (aka from one to R in
     // the Montgomery domain, meaning we can use Montgomery multiplication now).
     // We could do that by doubling _W * n times, or with a square-and-double
     // chain log2(_W * n) long. Turns out the fastest thing is to start out with
     // doublings, and switch to square-and-double once the exponent is large
     // enough to justify the cost of the multiplications.
+
     // The threshold is selected experimentally as a linear function of n.
     nuint threshold = n / 4;
+
     // We calculate how many of the most-significant bits of the exponent we can
     // compute before crossing the threshold, and we do it with doublings.
     nint i = bits.UintSize;
@@ -545,15 +570,17 @@ internal static ж<ΔNat> rr(ж<Modulus> Ꮡm) {
     for (nuint k = (nuint)0; k < logR.Rsh((int64)(i)); k++) {
         rr.Add(rr, Ꮡm);
     }
+
     // Then we process the remaining bits of the exponent with a
     // square-and-double chain.
     while (i > 0) {
         rr.montgomeryMul(rr, rr, Ꮡm);
         i--;
-        if ((nuint)(logR.Rsh((int64)(i)) & 1) != 0) {
+        if ((logR.Rsh((int64)(i)) & 1) != 0) {
             rr.Add(rr, Ꮡm);
         }
     }
+
     return rr;
 }
 
@@ -644,11 +671,13 @@ internal static ж<ΔNat> shiftIn(this ж<ΔNat> Ꮡx, nuint y, ж<Modulus> Ꮡm
     ref var m = ref Ꮡm.DerefOrNull();
 
     var d = NewNat().resetFor(Ꮡm);
+
     // Eliminate bounds checks in the loop.
     nint size = len((~m.nat).limbs);
     var xLimbs = x.limbs.slice(0, size);
     var dLimbs = (~d).limbs.slice(0, size);
     var mLimbs = (~m.nat).limbs.slice(0, size);
+
     // Each iteration of this loop computes x = 2x + b mod m, where b is a bit
     // from y. Effectively, it left-shifts x and adds y one bit at a time,
     // reducing it every time.
@@ -658,18 +687,18 @@ internal static ж<ΔNat> shiftIn(this ж<ΔNat> Ꮡx, nuint y, ж<Modulus> Ꮡm
     // based on whether 2x + b overflows m.
     choice needSubtraction = no;
     for (nint i = _W - 1; i >= 0; i--) {
-        nuint carry = (nuint)((y.Rsh((int64)(i))) & 1);
+        nuint carry = (y.Rsh((int64)(i))) & 1;
         nuint borrow = default!;
         nuint mask = ctMask(needSubtraction);
         for (nint iΔ1 = 0; iΔ1 < size; iΔ1++) {
-            nuint l = (nuint)(xLimbs[iΔ1] ^ ((nuint)(mask & ((nuint)(xLimbs[iΔ1] ^ dLimbs[iΔ1])))));
+            nuint l = xLimbs[iΔ1] ^ (mask & (xLimbs[iΔ1] ^ dLimbs[iΔ1]));
             (xLimbs[iΔ1], carry) = bits.Add(l, l, carry);
             (dLimbs[iΔ1], borrow) = bits.Sub(xLimbs[iΔ1], mLimbs[iΔ1], borrow);
         }
         // Like in maybeSubtractModulus, we need the subtraction if either it
         // didn't underflow (meaning 2x + b > m) or if computing 2x + b
         // overflowed (meaning 2x + b > 2^_W*n > m).
-        needSubtraction = (choice)(not(((choice)borrow)) | ((choice)carry));
+        needSubtraction = (choice)(not((choice)borrow) | ((choice)carry));
     }
     return Ꮡx.assign(needSubtraction, d);
 }
@@ -741,14 +770,13 @@ internal static ж<ΔNat> resetFor(this ж<ΔNat> Ꮡout, ж<Modulus> Ꮡm) {
 //
 //go:norace
 internal static void maybeSubtractModulus(this ж<ΔNat> Ꮡx, choice always, ж<Modulus> Ꮡm) {
-    ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     var t = NewNat().set(Ꮡx);
     nuint underflow = t.sub(m.nat);
     // We keep the result if x - m didn't underflow (meaning x >= m)
     // or if always was set.
-    choice keep = (choice)(not(((choice)underflow)) | always);
+    choice keep = (choice)(not((choice)underflow) | always);
     Ꮡx.assign(keep, t);
 }
 
@@ -766,7 +794,7 @@ public static ж<ΔNat> Sub(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
     // If the subtraction underflowed, add m.
     var t = NewNat().set(Ꮡx);
     t.add(m.nat);
-    Ꮡx.assign(((choice)underflow), t);
+    Ꮡx.assign((choice)underflow, t);
     return Ꮡx;
 }
 
@@ -774,9 +802,6 @@ public static ж<ΔNat> Sub(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
 //
 // The length of x must be the same as the modulus.
 public static ж<ΔNat> SubOne(this ж<ΔNat> Ꮡx, ж<Modulus> Ꮡm) {
-    ref var x = ref Ꮡx.DerefOrNull();
-    ref var m = ref Ꮡm.DerefOrNull();
-
     var one = NewNat().ExpandFor(Ꮡm);
     one.Value.limbs[0] = 1;
     // Sub asks for x to be reduced modulo m, while SubOne doesn't, but when
@@ -794,7 +819,7 @@ public static ж<ΔNat> Add(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
     ref var x = ref Ꮡx.DerefOrNull();
 
     nuint overflow = x.add(Ꮡy);
-    Ꮡx.maybeSubtractModulus(((choice)overflow), Ꮡm);
+    Ꮡx.maybeSubtractModulus((choice)overflow, Ꮡm);
     return Ꮡx;
 }
 
@@ -834,7 +859,6 @@ internal static ж<ΔNat> montgomeryReduction(this ж<ΔNat> Ꮡx, ж<Modulus> �
 //
 //go:norace
 internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<ΔNat> Ꮡb, ж<Modulus> Ꮡm) {
-    ref var x = ref Ꮡx.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -843,47 +867,13 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
     var mLimbs = (~m.nat).limbs.slice(0, n);
     var aLimbs = a.limbs.slice(0, n);
     var bLimbs = b.limbs.slice(0, n);
+
     var exprᴛ1 = n;
+    // The following specialized cases follow the exact same algorithm, but
+    // optimized for the sizes most used in RSA. addMulVVW is implemented in
+    // assembly with loop unrolling depending on the architecture and bounds
+    // checks are removed by the compiler thanks to the constant size.
     if (exprᴛ1 == 1024 / _W) {
-// Attempt to use a stack-allocated backing array.
-// bounds check elimination hint
-// Step 1 (T = a × b) is computed as a large pen-and-paper column
-// multiplication of two numbers with n base-2^_W digits. If we just
-// wanted to produce 2n-wide T, we would do
-//
-//   for i := 0; i < n; i++ {
-//       d := bLimbs[i]
-//       T[n+i] = addMulVVW(T[i:n+i], aLimbs, d)
-//   }
-//
-// where d is a digit of the multiplier, T[i:n+i] is the shifted
-// position of the product of that digit, and T[n+i] is the final carry.
-// Note that T[i] isn't modified after processing the i-th digit.
-//
-// Instead of running two loops, one for Step 1 and one for Steps 2–6,
-// the result of Step 1 is computed during the next loop. This is
-// possible because each iteration only uses T[i] in Step 2 and then
-// discards it in Step 6.
-// Step 6 is replaced by shifting the virtual window we operate
-// over: T of the algorithm is T[i:] for us. That means that T1 in
-// Step 2 (T mod 2^_W) is simply T[i]. k0 in Step 3 is our m0inv.
-// Step 4 and 5 add Y × m to T, which as mentioned above is stored
-// at T[i:]. The two carries (from a × d and Y × m) are added up in
-// the next word T[n+i], and the carry bit from that addition is
-// brought forward to the next iteration.
-// Finally for Step 7 we copy the final T window into x, and subtract m
-// if necessary (which as explained in maybeSubtractModulus can be the
-// case both if x >= m, or if x overflowed).
-//
-// The paper suggests in Section 4 that we can do an "Almost Montgomery
-// Multiplication" by subtracting only in the overflow case, but the
-// cost is very similar since the constant time subtraction tells us if
-// x >= m as a side effect, and taking care of the broken invariant is
-// highly undesirable (see https://go.dev/issue/13907).
-// The following specialized cases follow the exact same algorithm, but
-// optimized for the sizes most used in RSA. addMulVVW is implemented in
-// assembly with loop unrolling depending on the architecture and bounds
-// checks are removed by the compiler thanks to the constant size.
         UntypedInt nΔ4 = /* 1024 / _W */ 16; // compiler hint
         var T = new slice<nuint>(nΔ4 * 2);
         nuint c = default!;
@@ -895,7 +885,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
             (T[(nint)nΔ4 + i], c) = bits.Add(c1, c2, c);
         }
         copy((~Ꮡx.reset(nΔ4)).limbs, T[(int)(nΔ4)..]);
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
     else if (exprᴛ1 == 1536 / _W) {
         UntypedInt nΔ5 = /* 1536 / _W */ 24; // compiler hint
@@ -909,7 +899,7 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
             (T[(nint)nΔ5 + i], c) = bits.Add(c1, c2, c);
         }
         copy((~Ꮡx.reset(nΔ5)).limbs, T[(int)(nΔ5)..]);
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
     else if (exprᴛ1 == 2048 / _W) {
         UntypedInt nΔ6 = /* 2048 / _W */ 32; // compiler hint
@@ -923,29 +913,68 @@ internal static ж<ΔNat> montgomeryMul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa, ж<
             (T[(nint)nΔ6 + i], c) = bits.Add(c1, c2, c);
         }
         copy((~Ꮡx.reset(nΔ6)).limbs, T[(int)(nΔ6)..]);
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
     else { /* default: */
+        // Attempt to use a stack-allocated backing array.
         var T = new slice<nuint>(0, preallocLimbs * 2);
         if (cap(T) < n * 2) {
             T = new slice<nuint>(0, n * 2);
         }
         T = T.slice(0, n * 2);
+
         // This loop implements Word-by-Word Montgomery Multiplication, as
         // described in Algorithm 4 (Fig. 3) of "Efficient Software
         // Implementations of Modular Exponentiation" by Shay Gueron
         // [https://eprint.iacr.org/2011/239.pdf].
         nuint c = default!;
         for (nint i = 0; i < n; i++) {
-            _ = T[n + i];
+            _ = T[n + i]; // bounds check elimination hint
+
+            // Step 1 (T = a × b) is computed as a large pen-and-paper column
+            // multiplication of two numbers with n base-2^_W digits. If we just
+            // wanted to produce 2n-wide T, we would do
+            //
+            //   for i := 0; i < n; i++ {
+            //       d := bLimbs[i]
+            //       T[n+i] = addMulVVW(T[i:n+i], aLimbs, d)
+            //   }
+            //
+            // where d is a digit of the multiplier, T[i:n+i] is the shifted
+            // position of the product of that digit, and T[n+i] is the final carry.
+            // Note that T[i] isn't modified after processing the i-th digit.
+            //
+            // Instead of running two loops, one for Step 1 and one for Steps 2–6,
+            // the result of Step 1 is computed during the next loop. This is
+            // possible because each iteration only uses T[i] in Step 2 and then
+            // discards it in Step 6.
             nuint d = bLimbs[i];
             nuint c1 = addMulVVW(T.slice(i, n + i), aLimbs, d);
+
+            // Step 6 is replaced by shifting the virtual window we operate
+            // over: T of the algorithm is T[i:] for us. That means that T1 in
+            // Step 2 (T mod 2^_W) is simply T[i]. k0 in Step 3 is our m0inv.
             nuint Y = T[i] * m.m0inv;
+
+            // Step 4 and 5 add Y × m to T, which as mentioned above is stored
+            // at T[i:]. The two carries (from a × d and Y × m) are added up in
+            // the next word T[n+i], and the carry bit from that addition is
+            // brought forward to the next iteration.
             nuint c2 = addMulVVW(T.slice(i, n + i), mLimbs, Y);
             (T[n + i], c) = bits.Add(c1, c2, c);
         }
+
+        // Finally for Step 7 we copy the final T window into x, and subtract m
+        // if necessary (which as explained in maybeSubtractModulus can be the
+        // case both if x >= m, or if x overflowed).
+        //
+        // The paper suggests in Section 4 that we can do an "Almost Montgomery
+        // Multiplication" by subtracting only in the overflow case, but the
+        // cost is very similar since the constant time subtraction tells us if
+        // x >= m as a side effect, and taking care of the broken invariant is
+        // highly undesirable (see https://go.dev/issue/13907).
         copy((~Ꮡx.reset(n)).limbs, T.slice(n));
-        Ꮡx.maybeSubtractModulus(((choice)c), Ꮡm);
+        Ꮡx.maybeSubtractModulus((choice)c, Ꮡm);
     }
 
     return Ꮡx;
@@ -991,16 +1020,15 @@ public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
         var xR = NewNat().set(Ꮡx).montgomeryRepresentation(Ꮡm); // xR = x * R mod m
         return Ꮡx.montgomeryMul(xR, Ꮡy, Ꮡm); // x = xR * y / R mod m
     }
+
     nint n = len((~m.nat).limbs);
     var xLimbs = x.limbs.slice(0, n);
     var yLimbs = y.limbs.slice(0, n);
+
     var exprᴛ1 = n;
+    // The following specialized cases follow the exact same algorithm, but
+    // optimized for the sizes most used in RSA. See montgomeryMul for details.
     if (exprᴛ1 == 1024 / _W) {
-// Attempt to use a stack-allocated backing array.
-// T = x * y
-// x = T mod m
-// The following specialized cases follow the exact same algorithm, but
-// optimized for the sizes most used in RSA. See montgomeryMul for details.
         UntypedInt nΔ4 = /* 1024 / _W */ 16; // compiler hint
         var T = new slice<nuint>(nΔ4 * 2);
         for (nint i = 0; i < nΔ4; i++) {
@@ -1025,17 +1053,21 @@ public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
         return Ꮡx.Mod(Ꮡ(new ΔNat(limbs: T)), Ꮡm);
     }
     { /* default: */
+        // Attempt to use a stack-allocated backing array.
         var T = new slice<nuint>(0, preallocLimbs * 2);
         if (cap(T) < n * 2) {
             T = new slice<nuint>(0, n * 2);
         }
         T = T.slice(0, n * 2);
+
+        // T = x * y
         for (nint i = 0; i < n; i++) {
             T[n + i] = addMulVVW(T.slice(i, n + i), xLimbs, yLimbs[i]);
         }
+
+        // x = T mod m
         return Ꮡx.Mod(Ꮡ(new ΔNat(limbs: T)), Ꮡm);
     }
-
 }
 
 // Exp calculates out = x^e mod m.
@@ -1048,19 +1080,19 @@ public static ж<ΔNat> Mul(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡy, ж<Modulus> Ꮡ
 //go:norace
 public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e, ж<Modulus> Ꮡm) {
     ref var @out = ref Ꮡout.DerefOrNull();
-    ref var x = ref Ꮡx.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (!m.odd) {
         throw panic("bigmod: modulus for Exp must be odd");
     }
+
     // We use a 4 bit window. For our RSA workload, 4 bit windows are faster
     // than 2 bit windows, but use an extra 12 nats worth of scratch space.
     // Using bit sizes that don't divide 8 are more complex to implement, but
     // are likely to be more efficient if necessary.
-    var table = new ж<ΔNat>[]{ // table[i] = x ^ (i+1)
- // newNat calls are unrolled so they are allocated on the stack.
 
+    var table = new ж<ΔNat>[]{ // table[i] = x ^ (i+1)
+        // newNat calls are unrolled so they are allocated on the stack.
         NewNat(), NewNat(), NewNat(), NewNat(), NewNat(),
         NewNat(), NewNat(), NewNat(), NewNat(), NewNat(),
         NewNat(), NewNat(), NewNat(), NewNat(), NewNat()
@@ -1069,6 +1101,7 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e
     for (nint i = 1; i < len(table); i++) {
         table[i].montgomeryMul(table[i - 1], table[0], Ꮡm);
     }
+
     Ꮡout.resetFor(Ꮡm);
     @out.limbs[0] = 1;
     Ꮡout.montgomeryRepresentation(Ꮡm);
@@ -1081,16 +1114,19 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e
             Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
             Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
             Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
+
             // Select x^k in constant time from the table.
             nuint k = (nuint)((byte)((b.Rsh((int64)(j))) & 0b1111));
             foreach (var (i, _) in table) {
                 tmp.assign(ctEq(k, (nuint)(i + 1)), table[i]);
             }
+
             // Multiply by x^k, discarding the result if k = 0.
             tmp.montgomeryMul(Ꮡout, tmp, Ꮡm);
             Ꮡout.assign(not(ctEq(k, 0)), tmp);
         }
     }
+
     return Ꮡout.montgomeryReduction(Ꮡm);
 }
 
@@ -1114,7 +1150,7 @@ public static ж<ΔNat> ExpShortVarTime(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, n
     for (nint i = (nint)bits.UintSize - bits.Len(e) + 1; i < bits.UintSize; i++) {
         Ꮡout.montgomeryMul(Ꮡout, Ꮡout, Ꮡm);
         {
-            nuint k = (nuint)((e.Rsh((int64)(((nint)bits.UintSize - i - 1)))) & 1); if (k != 0) {
+            nuint k = (e.Rsh((int64)((nint)bits.UintSize - i - 1))) & 1; if (k != 0) {
                 Ꮡout.montgomeryMul(Ꮡout, xR, Ꮡm);
             }
         }
@@ -1159,7 +1195,7 @@ public static (ж<ΔNat>, error) GCDVarTime(this ж<ΔNat> Ꮡx, ж<ΔNat> Ꮡa,
 internal static readonly @string extendedGCDAOrMIsZeroˢ = "extendedGCD: a or m is zero"u8;
 internal static readonly @string extendedGCDBothAAndMAreˢ = "extendedGCD: both a and m are even"u8;
 
-// extendedGCD computes u and A such that a = GCD(a, m) and u = A*a - B*m.
+// extendedGCD computes u and A such that u = GCD(a, m) = A*a - B*m.
 //
 // u will have the size of the larger of a and m, and A will have the size of m.
 //
@@ -1167,9 +1203,9 @@ internal static readonly @string extendedGCDBothAAndMAreˢ = "extendedGCD: both 
 internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa, ж<ΔNat> Ꮡm) {
     ж<ΔNat> u = default!;
     ж<ΔNat> A = default!;
-
     ref var a = ref Ꮡa.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
+
     // This is the extended binary GCD algorithm described in the Handbook of
     // Applied Cryptography, Algorithm 14.61, adapted by BoringSSL to bound
     // coefficients and avoid negative numbers. For more details and proof of
@@ -1199,15 +1235,18 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
     if (a.IsOdd() == no && m.IsOdd() == no) {
         return (default!, default!, errors.New(extendedGCDBothAAndMAreˢ));
     }
+
     nint size = max(len(a.limbs), len(m.limbs));
     u = NewNat().set(Ꮡa).expand(size);
     var v = NewNat().set(Ꮡm).expand(size);
+
     A = NewNat().reset(len(m.limbs));
     A.Value.limbs[0] = 1;
     var B = NewNat().reset(len(a.limbs));
     var C = NewNat().reset(len(m.limbs));
     var D = NewNat().reset(len(a.limbs));
     D.Value.limbs[0] = 1;
+
     // Before and after each loop iteration, the following hold:
     //
     //   u = A*a - B*m
@@ -1235,10 +1274,12 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
                 D.Add(B, Ꮡ(new Modulus(nat: Ꮡa)));
             }
         }
+
         // Exactly one of u and v is now even.
         if (u.IsOdd() == v.IsOdd()) {
             throw panic("bigmod: internal error: u and v are not in the expected state");
         }
+
         // Halve the even one and adjust the corresponding coefficient.
         if (u.IsOdd() == no){
             rshift1(ref (u).DerefOrNull(), 0);
@@ -1249,8 +1290,7 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
                 rshift1(ref (A).DerefOrNull(), 0);
                 rshift1(ref (B).DerefOrNull(), 0);
             }
-        } else {
-            // v.IsOdd() == no
+        } else { // v.IsOdd() == no
             rshift1(ref (v).DerefOrNull(), 0);
             if (C.IsOdd() == yes || D.IsOdd() == yes){
                 rshift1(ref (C).DerefOrNull(), C.add(Ꮡm));
@@ -1260,6 +1300,7 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
                 rshift1(ref (D).DerefOrNull(), 0);
             }
         }
+
         if (v.IsZero() == yes) {
             return (u, A, default!);
         }
@@ -1270,12 +1311,13 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
 internal static void rshift1(ref ΔNat a, nuint carry) {
     nint size = len(a.limbs);
     var aLimbs = a.limbs.slice(0, size);
+
     foreach (var i in range(size)) {
         aLimbs[i] >>= (int)(1);
         if (i + 1 < size){
-            aLimbs[i] |= (nuint)((aLimbs[i + 1] << (int)((_W - 1))));
+            aLimbs[i] |= (nuint)((aLimbs[i + 1] << (int)(_W - 1)));
         } else {
-            aLimbs[i] |= (nuint)((carry << (int)((_W - 1))));
+            aLimbs[i] |= (nuint)((carry << (int)(_W - 1)));
         }
     }
 }
@@ -1289,6 +1331,7 @@ public static nuint DivShortVarTime(this ref ΔNat x, nuint y) {
     if (y == 0) {
         throw panic("bigmod: division by zero");
     }
+
     nuint r = default!;
     for (nint i = len(x.limbs) - 1; i >= 0; i--) {
         (x.limbs[i], r) = bits.Div(r, x.limbs[i], y);

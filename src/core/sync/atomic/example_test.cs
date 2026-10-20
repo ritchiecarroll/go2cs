@@ -74,13 +74,13 @@ public static void ExampleValue_readMostly() {
             }
             m2[key] = val; // do the update that we need
             Ꮡm.Store(m2); // atomically replace the current object with the new one
+            // At this point all new readers start working with the new version.
+            // The old version will be garbage collected once the existing readers
+            // (if any) are done with it.
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     };
-    // At this point all new readers start working with the new version.
-    // The old version will be garbage collected once the existing readers
-    // (if any) are done with it.
     _ = read;
     _ = insert;
 }

@@ -47,7 +47,7 @@ func main() {
 	freezing := FToC(-18)
 	fmt.Println(freezing, Boiling) }
 
-"""u8,
+"""u8.Raw(),
         """
 package main
 import "fmt"
@@ -57,10 +57,11 @@ func FToC(f float64) Celsius { return Celsius(f - 32 / 9 * 5) }
 const Boiling Celsius = 100
 func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get printed
 
-"""u8
+"""u8.Raw()
     }.slice()) {
         files = append(files, mustParse(fset, src));
     }
+
     // Type-check a package consisting of these files.
     // Type information for the imported "fmt" package
     // comes from $GOROOT/pkg/$GOOS_$GOOARCH/fmt.a.
@@ -70,12 +71,46 @@ func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Print the tree of scopes.
     // For determinism, we redact addresses.
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     pkg.Scope().WriteTo(new types_test_package.strings_BuilderжWriter(Ꮡbuf), 0, true);
     var rx = regexp.MustCompile(aFAFDˢ);
     fmt.Println(rx.ReplaceAllString(buf.String(), ""u8));
+
+    // Output:
+    // package "temperature" scope {
+    // .  const temperature.Boiling temperature.Celsius
+    // .  type temperature.Celsius float64
+    // .  func temperature.FToC(f float64) temperature.Celsius
+    // .  func temperature.Unused()
+    // .  func temperature.main()
+    // .  main scope {
+    // .  .  package fmt
+    // .  .  function scope {
+    // .  .  .  var freezing temperature.Celsius
+    // .  .  }
+    // .  }
+    // .  main scope {
+    // .  .  package fmt
+    // .  .  function scope {
+    // .  .  .  var c temperature.Celsius
+    // .  .  }
+    // .  .  function scope {
+    // .  .  .  var f float64
+    // .  .  }
+    // .  .  function scope {
+    // .  .  .  block scope {
+    // .  .  .  }
+    // .  .  .  block scope {
+    // .  .  .  .  block scope {
+    // .  .  .  .  .  var x int
+    // .  .  .  .  }
+    // .  .  .  }
+    // .  .  }
+    // .  }
+    // }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -94,40 +129,7 @@ func (c *Celsius) SetF(f float64) { *c = Celsius(f - 32 / 9 * 5) }
 type S struct { I; m int }
 type I interface { m() byte }
 
-"""u8;
-
-// Output:
-// package "temperature" scope {
-// .  const temperature.Boiling temperature.Celsius
-// .  type temperature.Celsius float64
-// .  func temperature.FToC(f float64) temperature.Celsius
-// .  func temperature.Unused()
-// .  func temperature.main()
-// .  main scope {
-// .  .  package fmt
-// .  .  function scope {
-// .  .  .  var freezing temperature.Celsius
-// .  .  }
-// .  }
-// .  main scope {
-// .  .  package fmt
-// .  .  function scope {
-// .  .  .  var c temperature.Celsius
-// .  .  }
-// .  .  function scope {
-// .  .  .  var f float64
-// .  .  }
-// .  .  function scope {
-// .  .  .  block scope {
-// .  .  .  }
-// .  .  .  block scope {
-// .  .  .  .  block scope {
-// .  .  .  .  .  var x int
-// .  .  .  .  }
-// .  .  .  }
-// .  .  }
-// .  }
-// }
+"""u8.Raw();
 
 // ExampleMethodSet prints the method sets of various types.
 public static void ExampleMethodSet() {
@@ -138,6 +140,7 @@ public static void ExampleMethodSet() {
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Type-check a package consisting of this file.
     // Type information for the imported packages
     // comes from $GOROOT/pkg/$GOOS_$GOOARCH/fmt.a.
@@ -147,6 +150,7 @@ public static void ExampleMethodSet() {
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Print the method sets of Celsius and *Celsius.
     var celsius = pkg.Scope().Lookup(celsiusˢ).Type();
     foreach (var (_, t) in new typesꓸType[]{celsius, new types.PointerжΔType(types.NewPointer(celsius))}.slice()) {
@@ -156,10 +160,22 @@ public static void ExampleMethodSet() {
         }
         fmt.Println();
     }
+
     // Print the method set of S.
     var styp = pkg.Scope().Lookup("S"u8).Type();
     fmt.Printf("Method set of %s:\n"u8, styp);
     fmt.Println(types.NewMethodSet(styp).OrTypedNil());
+
+    // Output:
+    // Method set of temperature.Celsius:
+    // method (temperature.Celsius) String() string
+    //
+    // Method set of *temperature.Celsius:
+    // method (*temperature.Celsius) SetF(f float64)
+    // method (*temperature.Celsius) String() string
+    //
+    // Method set of temperature.S:
+    // MethodSet {}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -182,18 +198,7 @@ func fib(x int) int {
 	}
 	return fib(x-1) - fib(x-2)
 }
-"""u8;
-
-// Output:
-// Method set of temperature.Celsius:
-// method (temperature.Celsius) String() string
-//
-// Method set of *temperature.Celsius:
-// method (*temperature.Celsius) SetF(f float64)
-// method (*temperature.Celsius) String() string
-//
-// Method set of temperature.S:
-// MethodSet {}
+"""u8.Raw();
 
 // ExampleInfo prints various facts recorded by the type checker in a
 // types.Info struct: definitions of and references to each named object,
@@ -205,6 +210,7 @@ public static void ExampleInfo() {
     // Cannot use typecheck helper.
     var fset = token.NewFileSet();
     var f = mustParse(fset, input);
+
     // Type-check the package.
     // We create an empty map for each kind of input
     // we're interested in, and Check populates them.
@@ -219,8 +225,10 @@ public static void ExampleInfo() {
     if (err != default!) {
         log.Fatal(err);
     }
+
     // Print package-level variables in initialization order.
     fmt.Printf("InitOrder: %v\n\n"u8, info.InitOrder);
+
     // For each named object, print the line and
     // column of its definition and each of its uses.
     fmt.Println(defsAndUsesOfEachNamedˢ);
@@ -242,6 +250,7 @@ public static void ExampleInfo() {
     slices.Sort<slice<@string>, @string>(items); // sort by line:col, in effect
     fmt.Println(strings.Join(items, "\n"u8));
     fmt.Println();
+
     fmt.Println(typesAndValuesOfEachˢ);
     items = default!;
     foreach (var (expr, tv) in info.Types) {
@@ -259,6 +268,62 @@ public static void ExampleInfo() {
     }
     slices.Sort<slice<@string>, @string>(items);
     fmt.Println(strings.Join(items, "\n"u8));
+
+    // Output:
+    // InitOrder: [c = "hello" b = S(c) a = len(b)]
+    //
+    // Defs and Uses of each named object:
+    // builtin len:
+    //   defined at -
+    //   used at 6:15
+    // func fib(x int) int:
+    //   defined at fib:8:6
+    //   used at 12:20, 12:9
+    // type S string:
+    //   defined at fib:4:6
+    //   used at 6:23
+    // type int:
+    //   defined at -
+    //   used at 8:12, 8:17
+    // type string:
+    //   defined at -
+    //   used at 4:8
+    // var b S:
+    //   defined at fib:6:8
+    //   used at 6:19
+    // var c string:
+    //   defined at fib:6:11
+    //   used at 6:25
+    // var x int:
+    //   defined at fib:8:10
+    //   used at 10:10, 12:13, 12:24, 9:5
+    //
+    // Types and Values of each expression:
+    //  4: 8 | string              | type    : string
+    //  6:15 | len                 | builtin : func(fib.S) int
+    //  6:15 | len(b)              | value   : int
+    //  6:19 | b                   | var     : fib.S
+    //  6:23 | S                   | type    : fib.S
+    //  6:23 | S(c)                | value   : fib.S
+    //  6:25 | c                   | var     : string
+    //  6:29 | "hello"             | value   : string = "hello"
+    //  8:12 | int                 | type    : int
+    //  8:17 | int                 | type    : int
+    //  9: 5 | x                   | var     : int
+    //  9: 5 | x < 2               | value   : untyped bool
+    //  9: 9 | 2                   | value   : int = 2
+    // 10:10 | x                   | var     : int
+    // 12: 9 | fib                 | value   : func(x int) int
+    // 12: 9 | fib(x - 1)          | value   : int
+    // 12: 9 | fib(x-1) - fib(x-2) | value   : int
+    // 12:13 | x                   | var     : int
+    // 12:13 | x - 1               | value   : int
+    // 12:15 | 1                   | value   : int = 1
+    // 12:20 | fib                 | value   : func(x int) int
+    // 12:20 | fib(x - 2)          | value   : int
+    // 12:24 | x                   | var     : int
+    // 12:24 | x - 2               | value   : int
+    // 12:26 | 2                   | value   : int = 2
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -266,61 +331,6 @@ internal static readonly @string varˢ = "var"u8;
 internal static readonly @string mapindexˢ = "mapindex"u8;
 internal static readonly @string unknownˢ = "unknown"u8;
 
-// Output:
-// InitOrder: [c = "hello" b = S(c) a = len(b)]
-//
-// Defs and Uses of each named object:
-// builtin len:
-//   defined at -
-//   used at 6:15
-// func fib(x int) int:
-//   defined at fib:8:6
-//   used at 12:20, 12:9
-// type S string:
-//   defined at fib:4:6
-//   used at 6:23
-// type int:
-//   defined at -
-//   used at 8:12, 8:17
-// type string:
-//   defined at -
-//   used at 4:8
-// var b S:
-//   defined at fib:6:8
-//   used at 6:19
-// var c string:
-//   defined at fib:6:11
-//   used at 6:25
-// var x int:
-//   defined at fib:8:10
-//   used at 10:10, 12:13, 12:24, 9:5
-//
-// Types and Values of each expression:
-//  4: 8 | string              | type    : string
-//  6:15 | len                 | builtin : func(fib.S) int
-//  6:15 | len(b)              | value   : int
-//  6:19 | b                   | var     : fib.S
-//  6:23 | S                   | type    : fib.S
-//  6:23 | S(c)                | value   : fib.S
-//  6:25 | c                   | var     : string
-//  6:29 | "hello"             | value   : string = "hello"
-//  8:12 | int                 | type    : int
-//  8:17 | int                 | type    : int
-//  9: 5 | x                   | var     : int
-//  9: 5 | x < 2               | value   : untyped bool
-//  9: 9 | 2                   | value   : int = 2
-// 10:10 | x                   | var     : int
-// 12: 9 | fib                 | value   : func(x int) int
-// 12: 9 | fib(x - 1)          | value   : int
-// 12: 9 | fib(x-1) - fib(x-2) | value   : int
-// 12:13 | x                   | var     : int
-// 12:13 | x - 1               | value   : int
-// 12:15 | 1                   | value   : int = 1
-// 12:20 | fib                 | value   : func(x int) int
-// 12:20 | fib(x - 2)          | value   : int
-// 12:24 | x                   | var     : int
-// 12:24 | x - 2               | value   : int
-// 12:26 | 2                   | value   : int = 2
 internal static @string mode(types.TypeAndValue tv) {
     switch (ᐧ) {
     case {} when tv.IsVoid(): {
@@ -347,7 +357,6 @@ internal static @string mode(types.TypeAndValue tv) {
     default: {
         return unknownˢ;
     }}
-
 }
 
 internal static @string exprString(ж<token.FileSet> Ꮡfset, ast.Expr expr) {

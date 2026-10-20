@@ -36,6 +36,7 @@ internal static void logFD(@string net, ж<poll.FD> Ꮡfd, error err) {
 
         ᏑlogMu.Lock();
         defer(ᏑlogMu.Unlock, ref ᒐ);
+
         loggedFDs[fd.Sysfd] = Ꮡ(new loggedFD(
             Net: net,
             FD: Ꮡfd,
@@ -49,6 +50,7 @@ internal static void logFD(@string net, ж<poll.FD> Ꮡfd, error err) {
 [GoInit] internal static void init() {
     loggedFDs = new map<syscallꓸHandle, ж<loggedFD>>();
     poll_internal_test_package.LogInitFD.ValueSlot = logFD;
+
     poll.InitWSA();
 }
 
@@ -59,6 +61,7 @@ internal static (ж<loggedFD> lfd, bool found) findLoggedFD(syscallꓸHandle h) 
     try {
         ᏑlogMu.Lock();
         defer(ᏑlogMu.Unlock, ref ᒐ);
+
         (lfd, found) = loggedFDs[h, ꟷ];
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -94,6 +97,7 @@ public static void TestFileFdsAreInitialised(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         err = checkFileIsNotPartOfNetpoll(f);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -126,7 +130,6 @@ public static void TestSerialFdsAreInitialised(ж<testing.T> Ꮡt) {
                                 tΔ1.Log(skippingˢ, err);
                                 return;
                             }
-
                         }
                     }
                     tΔ1.Fatal(err);
@@ -134,6 +137,7 @@ public static void TestSerialFdsAreInitialised(ж<testing.T> Ꮡt) {
                 var f = os.NewFile((uintptr)h, name);
                 var fʗ1 = f;
                 defer(() => fʗ1.Close(), ref ᒐ);
+
                 err = checkFileIsNotPartOfNetpoll(f);
                 if (err != default!) {
                     tΔ1.Fatal(err);
@@ -163,12 +167,14 @@ public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(() => Ꮡfd.Close(), ref ᒐ);
+
         const uint32 SIO_TCP_INFO = /* syscall.IOC_INOUT | syscall.IOC_VENDOR | 39 */ 3623878695;
         ref var inbuf = ref heap<uint32>(out var Ꮡinbuf);
         inbuf = (uint32)0;
         ref var outbuf = ref heap(new _TCP_INFO_v0(), out var Ꮡoutbuf);
         ref var cbbr = ref heap<uint32>(out var Ꮡcbbr);
         cbbr = (uint32)0;
+
         ref var ov = ref heap(new Δsyscall.Overlapped(), out var Ꮡov);
         // Create an event so that we can efficiently wait for completion
         // of a requested overlapped I/O operation.
@@ -177,6 +183,7 @@ public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("could not create the event!"u8);
         }
         defer(Δsyscall.CloseHandle, ov.HEvent, ref ᒐ);
+
         {
             err = Ꮡfd.WSAIoctl(
                 SIO_TCP_INFO,
@@ -190,6 +197,7 @@ public static void TestWSASocketConflict(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("could not perform the WSAIoctl: %v"u8, err);
             }
         }
+
         if (err != default! && errors.Is(err, Δsyscall.ERROR_IO_PENDING)) {
             // It is possible that the overlapped I/O operation completed
             // immediately so there is no need to wait for it to complete.

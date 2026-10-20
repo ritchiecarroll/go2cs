@@ -118,8 +118,8 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
 // all remaining fields.
 internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) {
     bool removedFields = default!;
-
     ref var fields = ref Ꮡfields.DerefOrNull();
+
     if (Ꮡfields == nil) {
         return removedFields;
     }
@@ -190,28 +190,25 @@ internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfie
 internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.Expr typ) {
     switch (typ.type()) {
     case ж<ast.Ident> t: {
+        // nothing to do
         break;
     }
     case ж<ast.ParenExpr> t: {
-        r.filterType(nil, // nothing to do
- (~t).X);
+        r.filterType(nil, (~t).X);
         break;
     }
-    case ж<ast.StarExpr> t: {
-        r.filterType(nil, // possibly an embedded type literal
- (~t).X);
+    case ж<ast.StarExpr> t: { // possibly an embedded type literal
+        r.filterType(nil, (~t).X);
         break;
     }
     case ж<ast.UnaryExpr> t: {
-        if ((~t).Op == token.TILDE) {
-            // approximation element
+        if ((~t).Op == token.TILDE) { // approximation element
             r.filterType(nil, (~t).X);
         }
         break;
     }
     case ж<ast.BinaryExpr> t: {
-        if ((~t).Op == token.OR) {
-            // union
+        if ((~t).Op == token.OR) { // union
             r.filterType(nil, (~t).X);
             r.filterType(nil, (~t).Y);
         }
@@ -253,11 +250,11 @@ internal static void filterType(this ref reader r, ж<namedType> Ꮡparent, ast.
 internal static bool filterSpec(this ref reader r, ast.Spec spec) {
     switch (spec.type()) {
     case ж<ast.ImportSpec> s: {
+        // always keep imports so we can collect them
         return true;
     }
     case ж<ast.ValueSpec> s: {
-        s.Value.Values = filterExprList((~s).Values, // always keep imports so we can collect them
- new Func<@string, bool>(token.IsExported), true);
+        s.Value.Values = filterExprList((~s).Values, new Func<@string, bool>(token.IsExported), true);
         if (len((~s).Values) > 0 || (~s).Type == default! && len((~s).Values) == 0){
             // If there are values declared on RHS, just replace the unexported
             // identifiers on the LHS with underscore, so that it matches
@@ -279,10 +276,10 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
         break;
     }
     case ж<ast.TypeSpec> s: {
+        // Don't filter type parameters here, by analogy with function parameters
+        // which are not filtered for top-level function declarations.
         {
             @string name = s.Value.Name.Value.Name; if (token.IsExported(name)){
-                // Don't filter type parameters here, by analogy with function parameters
-                // which are not filtered for top-level function declarations.
                 r.filterType(r.lookupType((~(~s).Name).Name), (~s).Type);
                 return true;
             } else 
@@ -340,6 +337,7 @@ internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec
             }
         }
     }
+
     nint j = 0;
     foreach (var (_, s) in list) {
         if (r.filterSpec(s)) {
@@ -357,12 +355,12 @@ internal static bool filterDecl(this ref reader r, ast.Decl decl) {
         return len((~d).Specs) > 0;
     }
     case ж<ast.FuncDecl> d: {
+        // ok to filter these methods early because any
+        // conflicting method will be filtered here, too -
+        // thus, removing these methods early will not lead
+        // to the false removal of possible conflicts
         return token.IsExported((~(~d).Name).Name);
     }}
-    // ok to filter these methods early because any
-    // conflicting method will be filtered here, too -
-    // thus, removing these methods early will not lead
-    // to the false removal of possible conflicts
     return false;
 }
 

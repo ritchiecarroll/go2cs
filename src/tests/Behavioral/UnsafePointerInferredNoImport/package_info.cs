@@ -51,7 +51,7 @@ using static go.main_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("consumer_blank.go", "consumer_blank.cs", "AAcWgpKCpoCsgoKCgg==")]
 [assembly: go.GoPositionMap("consumer_composite.go", "consumer_composite.cs", "AAYSgpKS")]
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAcSgpKEgoKCgoI=")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAcSgpKUgoKCgoI=")]
 [assembly: go.GoPositionMap("producer.go", "producer.cs", "AAcsgKaApoA=")]
 // </GoSourcePositionMaps>
 

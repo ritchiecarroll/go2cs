@@ -26,7 +26,6 @@ internal static bool cmp(color.Model cm, color.Color c0, color.Color c1) {
     return r0 == r1 && g0 == g1 && b0 == b1 && a0 == a1;
 }
 
-
 partial struct testImagesᴛ1 /*dyn*/ {
     internal @string name;
     internal Func<image> image;
@@ -116,6 +115,7 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
         finally { ᒐ.Run(); }
         ᒐdone: return ok;
     }
+
     var testCases = new TestNewXxxBadRectangle_testCases[]{
         new("RGBA"u8, (global::go.image_package.Rectangle r) => {
             NewRGBA(r);
@@ -154,6 +154,7 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
             NewNYCbCrA(r, YCbCrSubsampleRatio444);
         })
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         // Calling NewXxx(r) should fail (panic, since NewXxx doesn't return an
         // error) unless r's width and height are both non-negative.
@@ -169,6 +170,7 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
                 if (negDy) {
                     r.Max.Y = 27;
                 }
+
                 var got = call(tc.f, r);
                 var want = !negDx && !negDy;
                 if (got != want) {
@@ -177,6 +179,7 @@ public static void TestNewXxxBadRectangle(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Passing a Rectangle whose width and height is MaxInt should also fail
         // (panic), due to overflow.
         {
@@ -201,7 +204,7 @@ public static void Test16BitsPerColorChannel(ж<testing.T> Ꮡt) {
         var c = cm.Convert(new color.RGBA64(0x1234, 0x1234, 0x1234, 0x1234)); // Premultiplied alpha.
         var (r, _, _, _) = c.RGBA();
         if (r != 0x1234) {
-            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, c, (nint)(0x1234), r);
+            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, c, (nint)0x1234, r);
             continue;
         }
     }
@@ -211,24 +214,12 @@ public static void Test16BitsPerColorChannel(ж<testing.T> Ꮡt) {
         m.Set(1, 2, new color.NRGBA64(0xffff, 0xffff, 0xffff, 0x1357)); // Non-premultiplied alpha.
         var (r, _, _, _) = m.At(1, 2).RGBA();
         if (r != 0x1357) {
-            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, m, (nint)(0x1357), r);
+            Ꮡt.Errorf("%T: want red value 0x%04x got 0x%04x"u8, m, (nint)0x1357, r);
             continue;
         }
     }
 }
 
-// Most of the concrete image types in the testCases implement the
-// draw.RGBA64Image interface: they have a SetRGBA64 method. We use an
-// interface literal here, instead of importing "image/draw", to avoid
-// an import cycle.
-//
-// The YCbCr and NYCbCrA types are special-cased. Chroma subsampling
-// means that setting one pixel can modify neighboring pixels. They
-// don't have Set or SetRGBA64 methods because that side effect could
-// be surprising. Here, we just memset the channel buffers instead.
-//
-// The Uniform and Rectangle types are also special-cased, as they
-// don't have a Set or SetRGBA64 method.
 internal partial interface TestRGBA64Image_type /*dyn*/ {
     void SetRGBA64(nint x, nint y, color.RGBA64 c);
 }
@@ -240,11 +231,24 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
             s[i] = v;
         }
     }
+
     var r = Rect(0, 0, 3, 2);
     var testCases = new global::go.image_package.Image[]{new global::go.image_package.AlphaжImage(NewAlpha(r)), new global::go.image_package.Alpha16жImage(NewAlpha16(r)), new global::go.image_package.CMYKжImage(NewCMYK(r)), new global::go.image_package.GrayжImage(NewGray(r)), new global::go.image_package.Gray16жImage(NewGray16(r)), new global::go.image_package.NRGBAжImage(NewNRGBA(r)), new global::go.image_package.NRGBA64жImage(NewNRGBA64(r)), new global::go.image_package.NYCbCrAжImage(NewNYCbCrA(r, YCbCrSubsampleRatio444)), new global::go.image_package.PalettedжImage(NewPaletted(r, palette.Plan9)), new image_test_package.image_ΔRGBAжImage(NewRGBA(r)), new global::go.image_package.RGBA64жImage(NewRGBA64(r)), new global::go.image_package.UniformжImage(NewUniform(new color.RGBA64(nil))), new global::go.image_package.YCbCrжImage(NewYCbCr(r, YCbCrSubsampleRatio444)), new image_test_package.image_RectangleᴠImage(r)
     }.slice();
     foreach (var (_, tc) in testCases) {
         switch (tc.type()) {
+        // Most of the concrete image types in the testCases implement the
+        // draw.RGBA64Image interface: they have a SetRGBA64 method. We use an
+        // interface literal here, instead of importing "image/draw", to avoid
+        // an import cycle.
+        //
+        // The YCbCr and NYCbCrA types are special-cased. Chroma subsampling
+        // means that setting one pixel can modify neighboring pixels. They
+        // don't have Set or SetRGBA64 methods because that side effect could
+        // be surprising. Here, we just memset the channel buffers instead.
+        //
+        // The Uniform and Rectangle types are also special-cased, as they
+        // don't have a Set or SetRGBA64 method.
         case {} ΔtcΔ1 when ΔtcΔ1._<TestRGBA64Image_type>(out var tcΔ1): {
             tcΔ1.SetRGBA64(1, 1, new color.RGBA64(0x7FFF, 0x3FFF, 0x0000, 0x7FFF));
             break;
@@ -267,16 +271,17 @@ public static void TestRGBA64Image(ж<testing.T> Ꮡt) {
             break;
         }
         case Rectangle tcΔ1: {
+            // No-op. Rectangle pixels' colors are immutable. They're always
+            // color.Opaque.
             break;
         }
         default: {
             var tcΔ1 = tc;
-            Ꮡt.Errorf("could not initialize pixels for %T"u8, // No-op. Rectangle pixels' colors are immutable. They're always
- // color.Opaque.
- tcΔ1);
+            Ꮡt.Errorf("could not initialize pixels for %T"u8, tcΔ1);
             continue;
             break;
         }}
+
         // Check that RGBA64At(x, y) is equivalent to At(x, y).RGBA().
         var (rgba64Image, ok) = tc._<RGBA64Image>(ᐧ);
         if (!ok) {
@@ -336,6 +341,7 @@ public static void BenchmarkRGBAAt(ж<testing.B> Ꮡb) {
 
     var m = NewRGBA(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.RGBAAt(4, 5);
     }
@@ -347,6 +353,7 @@ public static void BenchmarkRGBASetRGBA(ж<testing.B> Ꮡb) {
     var m = NewRGBA(Rect(0, 0, 10, 10));
     var c = new colorꓸRGBA(0xff, 0xff, 0xff, 0x13);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetRGBA(4, 5, c);
     }
@@ -357,6 +364,7 @@ public static void BenchmarkRGBA64At(ж<testing.B> Ꮡb) {
 
     var m = NewRGBA64(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.RGBA64At(4, 5);
     }
@@ -368,6 +376,7 @@ public static void BenchmarkRGBA64SetRGBA64(ж<testing.B> Ꮡb) {
     var m = NewRGBA64(Rect(0, 0, 10, 10));
     var c = new color.RGBA64(0xffff, 0xffff, 0xffff, 0x1357);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetRGBA64(4, 5, c);
     }
@@ -378,6 +387,7 @@ public static void BenchmarkNRGBAAt(ж<testing.B> Ꮡb) {
 
     var m = NewNRGBA(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.NRGBAAt(4, 5);
     }
@@ -389,6 +399,7 @@ public static void BenchmarkNRGBASetNRGBA(ж<testing.B> Ꮡb) {
     var m = NewNRGBA(Rect(0, 0, 10, 10));
     var c = new color.NRGBA(0xff, 0xff, 0xff, 0x13);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetNRGBA(4, 5, c);
     }
@@ -399,6 +410,7 @@ public static void BenchmarkNRGBA64At(ж<testing.B> Ꮡb) {
 
     var m = NewNRGBA64(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.NRGBA64At(4, 5);
     }
@@ -410,6 +422,7 @@ public static void BenchmarkNRGBA64SetNRGBA64(ж<testing.B> Ꮡb) {
     var m = NewNRGBA64(Rect(0, 0, 10, 10));
     var c = new color.NRGBA64(0xffff, 0xffff, 0xffff, 0x1357);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetNRGBA64(4, 5, c);
     }
@@ -420,6 +433,7 @@ public static void BenchmarkAlphaAt(ж<testing.B> Ꮡb) {
 
     var m = NewAlpha(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.AlphaAt(4, 5);
     }
@@ -431,6 +445,7 @@ public static void BenchmarkAlphaSetAlpha(ж<testing.B> Ꮡb) {
     var m = NewAlpha(Rect(0, 0, 10, 10));
     var c = new color.Alpha(0x13);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetAlpha(4, 5, c);
     }
@@ -441,6 +456,7 @@ public static void BenchmarkAlpha16At(ж<testing.B> Ꮡb) {
 
     var m = NewAlpha16(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.Alpha16At(4, 5);
     }
@@ -452,6 +468,7 @@ public static void BenchmarkAlphaSetAlpha16(ж<testing.B> Ꮡb) {
     var m = NewAlpha16(Rect(0, 0, 10, 10));
     var c = new color.Alpha16(0x13);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetAlpha16(4, 5, c);
     }
@@ -462,6 +479,7 @@ public static void BenchmarkGrayAt(ж<testing.B> Ꮡb) {
 
     var m = NewGray(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.GrayAt(4, 5);
     }
@@ -473,6 +491,7 @@ public static void BenchmarkGraySetGray(ж<testing.B> Ꮡb) {
     var m = NewGray(Rect(0, 0, 10, 10));
     var c = new color.Gray(0x13);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetGray(4, 5, c);
     }
@@ -483,6 +502,7 @@ public static void BenchmarkGray16At(ж<testing.B> Ꮡb) {
 
     var m = NewGray16(Rect(0, 0, 10, 10));
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.Gray16At(4, 5);
     }
@@ -494,6 +514,7 @@ public static void BenchmarkGraySetGray16(ж<testing.B> Ꮡb) {
     var m = NewGray16(Rect(0, 0, 10, 10));
     var c = new color.Gray16(0x13);
     b.ResetTimer();
+
     for (nint i = 0; i < b.N; i++) {
         m.SetGray16(4, 5, c);
     }

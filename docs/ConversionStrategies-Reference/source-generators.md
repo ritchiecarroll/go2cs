@@ -9,6 +9,7 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 * **`ImplicitConvGenerator`** — emits the implicit conversion operators that let a [named type](type-aliasing.md#type-definitions) and its underlying types be used interchangeably.
 * **`StrGenerator`** — driven by an `sstring` parameter. For an [sstring twin](strings.md#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind), emits the `@string` overload that forwards to the `sstring` member under `[OverloadResolutionPriority(-1)]`, and for a package-level function the canonical value delegate `<Name>ᶠ`. Types are rendered fully qualified from the symbols, because the converted file's `using` aliases are not in scope in a generated file.
 * **`PartialStubGenerator`** — emits a throwing `partial` implementation for any bodyless `partial` method that has no other implementing part (e.g. assembly/cgo functions with no convertible body), while leaving real hand-written companion implementations untouched.
+* **`LiteralInterceptorGenerator`** — boxes a bare C# string literal the converter passes to an `any` slot as the Go string it is. For each such call it emits a file-local [interceptor](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string) that writes a cached, pre-boxed `@string` into the slot and calls the original method; a call it cannot intercept is `GO2CS0005`, and an overload that captured the literal is `GO2CS0006`. It runs on the same input compilation as the other generators, so it cannot see their output: it resolves a call whose other arguments use generated members from its one-member method group, and the converter keeps the pre-boxed field where the receiver or the bound overload is itself generated.
 * **`NoInliningPartialGenerator`** — the other direction: for a `partial` method that HAS a body and no declaring part, emits the declaring part carrying `[MethodImpl(MethodImplOptions.NoInlining)]`. This is how the converter's no-inline mark reaches a declared method; see [The no-inline mark rides a generated declaring part](#the-no-inline-mark-rides-a-generated-declaring-part).
 
 What the generators read is, for the most part, the code itself: where a type is declared, a receiver's `ref`, a parameter's type, and a few short comments written in Go's own spelling. [Marker comments: what converted code carries instead of an attribute](#marker-comments-what-converted-code-carries-instead-of-an-attribute) lists each of them and the attributes that remain. The records a package keeps out of view are classified in [Extended attributes: what stays on the declaration and what moves](#extended-attributes-what-stays-on-the-declaration-and-what-moves).
@@ -35,7 +36,7 @@ The deeper alternative — having the converter emit the access modifier on its 
 
 **Resolved (2026-07-25).** The blind spot above is closed at the root, without touching a single converted `.cs`: `package_info.cs` gains a **`TypeAccessibility`** section, emitted **inside the package class body** (its entries are type declarations, and the types they name are nested in that class), carrying one condensed single-line partial declaration per converter-emitted converted type:
 
-<!-- source: src/core/io/package_info.cs:88-146 (an excerpt of the section) -->
+<!-- source: src/core/io/package_info.cs:94-152 (an excerpt of the section) -->
 ```csharp
 [GoPackage("io")]
 public static partial class io_package
@@ -135,7 +136,7 @@ generator writes the overload that takes a pointer (`ж<Reader>`), and the runti
 to `Reader` and which to `*Reader`. A Go reader sees a receiver and whether it is a pointer, which is what the
 Go line showed.
 
-<!-- source: src/core/bufio/bufio.cs:215 -->
+<!-- source: src/core/bufio/bufio.cs:223 -->
 ```csharp
 public static (nint n, error err) Read(this ref Reader b, slice<byte> p) {
 ```
@@ -150,7 +151,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:910 -->
+<!-- source: src/core/time/time.cs:937 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -200,7 +201,7 @@ The converter writes the Go body once, on the member whose parameter is an `sstr
 the `@string` overload from it. No other converted function takes an `sstring` parameter, so the parameter
 type is the mark.
 
-<!-- source: src/core/unicode/utf8/utf8.cs:213 -->
+<!-- source: src/core/unicode/utf8/utf8.cs:218 -->
 ```csharp
 public static (rune r, nint size) DecodeRuneInString(sstring s) {
 ```
@@ -235,7 +236,8 @@ in a stack trace: in Go the two names are one function.
 - **A record that names a member the type does not have is refused by name.** The runtime checks each
   generated record against the type the first time it is read, and stops with the member's name instead of
   applying a fact to the wrong thing.
-- **A comment no record can carry is a build error** (`GO2CS0003`), never a silent loss. So is a record whose
+- **A comment no record can carry is a build error** (`GO2CS0003`; every `go2cs-gen` code is listed in
+  [diagnostic codes](../DiagnosticCodes.md)), never a silent loss. So is a record whose
   key would match two methods of one type; the error names both.
 - **The generators' tests are built from the converter's own output**, so a change in how the converter spells
   a marker fails a test instead of passing against a hand-written copy of the old spelling.

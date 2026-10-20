@@ -18,37 +18,44 @@ public static void TestZeroRat(ж<testing.T> Ꮡt) {
         ref var y = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡy);
         ref var z = ref heap(new global::go.math.big_package.ΔRat(), out var Ꮡz);
         Ꮡy.SetFrac64(0, 42);
+
         if (Ꮡx.Cmp(Ꮡy) != 0) {
             Ꮡt.Errorf("x and y should be both equal and zero"u8);
         }
+
         {
             @string s = Ꮡx.String(); if (s != "0/1"u8) {
                 Ꮡt.Errorf("got x = %s, want 0/1"u8, s);
             }
         }
+
         {
             @string s = Ꮡx.RatString(); if (s != "0"u8) {
                 Ꮡt.Errorf("got x = %s, want 0"u8, s);
             }
         }
+
         Ꮡz.Add(Ꮡx, Ꮡy);
         {
             @string s = Ꮡz.RatString(); if (s != "0"u8) {
                 Ꮡt.Errorf("got x+y = %s, want 0"u8, s);
             }
         }
+
         Ꮡz.Sub(Ꮡx, Ꮡy);
         {
             @string s = Ꮡz.RatString(); if (s != "0"u8) {
                 Ꮡt.Errorf("got x-y = %s, want 0"u8, s);
             }
         }
+
         Ꮡz.Mul(Ꮡx, Ꮡy);
         {
             @string s = Ꮡz.RatString(); if (s != "0"u8) {
                 Ꮡt.Errorf("got x*y = %s, want 0"u8, s);
             }
         }
+
         // check for division by zero
         defer(() => {
             {
@@ -79,7 +86,6 @@ public static void TestRatSign(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct ratCmpTestsᴛ1 /*dyn*/ {
     internal @string rat1, rat2;
     internal nint @out;
@@ -100,6 +106,7 @@ public static void TestRatCmp(ж<testing.T> Ꮡt) {
     foreach (var (i, test) in ratCmpTests) {
         var (x, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.rat1);
         var (y, _) = @new<global::go.math.big_package.ΔRat>().SetString(test.rat2);
+
         nint @out = x.Cmp(y);
         if (@out != test.@out) {
             Ꮡt.Errorf("#%d got out = %v; want %v"u8, i, @out, test.@out);
@@ -184,11 +191,11 @@ internal static void testRatBin(ж<testing.T> Ꮡt, nint i, @string name, Func<�
     var (y, _) = @new<global::go.math.big_package.ΔRat>().SetString(a.y);
     var (z, _) = @new<global::go.math.big_package.ΔRat>().SetString(a.z);
     var @out = f(@new<global::go.math.big_package.ΔRat>(), x, y);
+
     if (@out.Cmp(z) != 0) {
         Ꮡt.Errorf("%s #%d got %s want %s"u8, name, i, @out.OrTypedNil(), z.OrTypedNil());
     }
 }
-
 
 partial struct ratBinTestsᴛ1 /*dyn*/ {
     internal @string x, y;
@@ -229,20 +236,27 @@ public static void TestRatBin(ж<testing.T> Ꮡt) {
     foreach (var (i, test) in ratBinTests) {
         var arg = new ratBinArg(test.x, test.y, test.sum);
         testRatBin(Ꮡt, i, addˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
+
         arg = new ratBinArg(test.y, test.x, test.sum);
         testRatBin(Ꮡt, i, addSymmetricˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Add))), arg);
+
         arg = new ratBinArg(test.sum, test.x, test.y);
         testRatBin(Ꮡt, i, subˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
+
         arg = new ratBinArg(test.sum, test.y, test.x);
         testRatBin(Ꮡt, i, subSymmetricˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Sub))), arg);
+
         arg = new ratBinArg(test.x, test.y, test.prod);
         testRatBin(Ꮡt, i, mulˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
+
         arg = new ratBinArg(test.y, test.x, test.prod);
         testRatBin(Ꮡt, i, mulSymmetricˢ2, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Mul))), arg);
+
         if (test.x != "0"u8) {
             arg = new ratBinArg(test.prod, test.x, test.y);
             testRatBin(Ꮡt, i, quoˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Quo))), arg);
         }
+
         if (test.y != "0"u8) {
             arg = new ratBinArg(test.prod, test.y, test.x);
             testRatBin(Ꮡt, i, quoSymmetricˢ, new Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>(((Func<ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>, ж<global::go.math.big_package.ΔRat>>)(global::go.math.big_package.Quo))), arg);
@@ -258,6 +272,7 @@ public static void TestIssue820(ж<testing.T> Ꮡt) {
     if (z.Cmp(q) != 0) {
         Ꮡt.Errorf("got %s want %s"u8, z.OrTypedNil(), q.OrTypedNil());
     }
+
     y = NewRat(3, 1);
     x = NewRat(2, 1);
     z = y.Quo(x, y);
@@ -265,6 +280,7 @@ public static void TestIssue820(ж<testing.T> Ꮡt) {
     if (z.Cmp(q) != 0) {
         Ꮡt.Errorf("got %s want %s"u8, z.OrTypedNil(), q.OrTypedNil());
     }
+
     x = NewRat(3, 1);
     z = x.Quo(x, x);
     q = NewRat(3, 3);
@@ -272,7 +288,6 @@ public static void TestIssue820(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("got %s want %s"u8, z.OrTypedNil(), q.OrTypedNil());
     }
 }
-
 
 partial struct setFrac64Testsᴛ1 /*dyn*/ {
     internal int64 a, b;
@@ -305,24 +320,28 @@ public static void TestIssue2379(ж<testing.T> Ꮡt) {
     if (x.Cmp(q) != 0) {
         Ꮡt.Errorf("1) got %s want %s"u8, x.OrTypedNil(), q.OrTypedNil());
     }
+
     // 2) aliasing of numerator
     x = NewRat(2, 3);
     x.SetFrac(NewInt(3), x.Num());
     if (x.Cmp(q) != 0) {
         Ꮡt.Errorf("2) got %s want %s"u8, x.OrTypedNil(), q.OrTypedNil());
     }
+
     // 3) aliasing of denominator
     x = NewRat(2, 3);
     x.SetFrac(x.Denom(), NewInt(2));
     if (x.Cmp(q) != 0) {
         Ꮡt.Errorf("3) got %s want %s"u8, x.OrTypedNil(), q.OrTypedNil());
     }
+
     // 4) aliasing of numerator and denominator
     x = NewRat(2, 3);
     x.SetFrac(x.Denom(), x.Num());
     if (x.Cmp(q) != 0) {
         Ꮡt.Errorf("4) got %s want %s"u8, x.OrTypedNil(), q.OrTypedNil());
     }
+
     // 5) numerator and denominator are the same
     q = NewRat(1, 1);
     x = @new<global::go.math.big_package.ΔRat>();
@@ -338,24 +357,28 @@ public static void TestIssue3521(ж<testing.T> Ꮡt) {
     var b = @new<global::go.math.big_package.ΔInt>();
     a.SetString("64375784358435883458348587"u8, 0);
     b.SetString("4789759874531"u8, 0);
+
     // 0) a raw zero value has 1 as denominator
     var zero = @new<global::go.math.big_package.ΔRat>();
     var one = NewInt(1);
     if (zero.Denom().Cmp(one) != 0) {
         Ꮡt.Errorf("0) got %s want %s"u8, zero.Denom().OrTypedNil(), one.OrTypedNil());
     }
+
     // 1a) the denominator of an (uninitialized) zero value is not shared with the value
     var s = zero.of(global::go.math.big_package.ΔRat.Ꮡb);
     var d = zero.Denom();
     if (d == s) {
         Ꮡt.Errorf("1a) got %s (%p) == %s (%p) want different *Int values"u8, d.OrTypedNil(), d.OrTypedNil(), s.OrTypedNil(), s.OrTypedNil());
     }
+
     // 1b) the denominator of an (uninitialized) value is a new 1 each time
     var d1 = zero.Denom();
     var d2 = zero.Denom();
     if (d1 == d2) {
         Ꮡt.Errorf("1b) got %s (%p) == %s (%p) want different *Int values"u8, d1.OrTypedNil(), d1.OrTypedNil(), d2.OrTypedNil(), d2.OrTypedNil());
     }
+
     // 1c) the denominator of an initialized zero value is shared with the value
     var x = @new<global::go.math.big_package.ΔRat>();
     x.Set(x); // initialize x (any operation that sets x explicitly will do)
@@ -364,17 +387,20 @@ public static void TestIssue3521(ж<testing.T> Ꮡt) {
     if (d != s) {
         Ꮡt.Errorf("1c) got %s (%p) != %s (%p) want identical *Int values"u8, d.OrTypedNil(), d.OrTypedNil(), s.OrTypedNil(), s.OrTypedNil());
     }
+
     // 1d) a zero value remains zero independent of denominator
     x.Denom().Set(@new<global::go.math.big_package.ΔInt>().Neg(b));
     if (x.Cmp(zero) != 0) {
         Ꮡt.Errorf("1d) got %s want %s"u8, x.OrTypedNil(), zero.OrTypedNil());
     }
+
     // 1e) a zero value may have a denominator != 0 and != 1
     x.Num().Set(a);
     var qab = @new<global::go.math.big_package.ΔRat>().SetFrac(a, b);
     if (x.Cmp(qab) != 0) {
         Ꮡt.Errorf("1e) got %s want %s"u8, x.OrTypedNil(), qab.OrTypedNil());
     }
+
     // 2a) an integral value becomes a fraction depending on denominator
     x.SetFrac64(10, 2);
     x.Denom().SetInt64(3);
@@ -382,12 +408,14 @@ public static void TestIssue3521(ж<testing.T> Ꮡt) {
     if (x.Cmp(q53) != 0) {
         Ꮡt.Errorf("2a) got %s want %s"u8, x.OrTypedNil(), q53.OrTypedNil());
     }
+
     // 2b) an integral value becomes a fraction depending on denominator
     x = NewRat(10, 2);
     x.Denom().SetInt64(3);
     if (x.Cmp(q53) != 0) {
         Ꮡt.Errorf("2b) got %s want %s"u8, x.OrTypedNil(), q53.OrTypedNil());
     }
+
     // 3) changing the numerator/denominator of a Rat changes the Rat
     x.SetFrac(a, b);
     a = x.Num();
@@ -417,6 +445,7 @@ public static void TestFloat32Distribution(ж<testing.T> Ꮡt) {
     if (@long.Value) {
         (winc, einc) = ((uint64)1, 1); // soak test (~1.5s on x86-64)
     }
+
     foreach (var (_, sign) in (@string)"+-"u8) {
         foreach (var (_, a) in add) {
             for (var wid = (uint64)0; wid < 30; wid += winc) {
@@ -433,11 +462,13 @@ public static void TestFloat32Distribution(ж<testing.T> Ꮡt) {
                     }
                     var r = @new<global::go.math.big_package.ΔRat>().SetFrac(num, den);
                     var (f, _) = r.Float32();
+
                     if (!checkIsBestApprox32(Ꮡt, f, r)) {
                         // Append context information.
                         Ꮡt.Errorf("(input was mantissa %#x, exp %d; f = %g (%b); f ~ %g; r = %v)"u8,
                             b, exp, f, f, math.Ldexp((float64)b, exp), r.OrTypedNil());
                     }
+
                     checkNonLossyRoundtrip32(Ꮡt, f);
                 }
             }
@@ -463,6 +494,7 @@ public static void TestFloat64Distribution(ж<testing.T> Ꮡt) {
     if (@long.Value) {
         (winc, einc) = ((uint64)1, 1); // soak test (~75s on x86-64)
     }
+
     foreach (var (_, sign) in (@string)"+-"u8) {
         foreach (var (_, a) in add) {
             for (var wid = (uint64)0; wid < 60; wid += winc) {
@@ -479,11 +511,13 @@ public static void TestFloat64Distribution(ж<testing.T> Ꮡt) {
                     }
                     var r = @new<global::go.math.big_package.ΔRat>().SetFrac(num, den);
                     var (f, _) = r.Float64();
+
                     if (!checkIsBestApprox64(Ꮡt, f, r)) {
                         // Append context information.
                         Ꮡt.Errorf("(input was mantissa %#x, exp %d; f = %g (%b); f ~ %g; r = %v)"u8,
                             b, exp, f, f, math.Ldexp((float64)b, exp), r.OrTypedNil());
                     }
+
                     checkNonLossyRoundtrip64(Ꮡt, f);
                 }
             }
@@ -550,16 +584,16 @@ internal static ж<global::go.math.big_package.ΔRat> delta(ж<global::go.math.b
 // approximation of r.
 // Returns true on success.
 internal static bool checkIsBestApprox32(ж<testing.T> Ꮡt, float32 f, ж<global::go.math.big_package.ΔRat> Ꮡr) {
-    ref var r = ref Ꮡr.DerefOrNull();
-
     if (math.Abs((float64)f) >= math.MaxFloat32) {
         // Cannot check +Inf, -Inf, nor the float next to them (MaxFloat32).
         // But we have tests for these special cases.
         return true;
     }
+
     // r must be strictly between f0 and f1, the floats bracketing f.
     var f0 = math.Nextafter32(f, (float32)math.Inf(-1));
     var f1 = math.Nextafter32(f, (float32)math.Inf(+1));
+
     // For f to be correct, r must be closer to f than to f0 or f1.
     var df = delta(Ꮡr, (float64)f);
     var df0 = delta(Ꮡr, (float64)f0);
@@ -587,16 +621,16 @@ internal static bool checkIsBestApprox32(ж<testing.T> Ꮡt, float32 f, ж<globa
 // approximation of r.
 // Returns true on success.
 internal static bool checkIsBestApprox64(ж<testing.T> Ꮡt, float64 f, ж<global::go.math.big_package.ΔRat> Ꮡr) {
-    ref var r = ref Ꮡr.DerefOrNull();
-
     if (math.Abs(f) >= math.MaxFloat64) {
         // Cannot check +Inf, -Inf, nor the float next to them (MaxFloat64).
         // But we have tests for these special cases.
         return true;
     }
+
     // r must be strictly between f0 and f1, the floats bracketing f.
     var f0 = math.Nextafter(f, math.Inf(-1));
     var f1 = math.Nextafter(f, math.Inf(+1));
+
     // For f to be correct, r must be closer to f than to f0 or f1.
     var df = delta(Ꮡr, f);
     var df0 = delta(Ꮡr, f0);
@@ -621,11 +655,11 @@ internal static bool checkIsBestApprox64(ж<testing.T> Ꮡt, float64 f, ж<globa
 }
 
 internal static bool isEven32(float32 f) {
-    return (uint32)(math.Float32bits(f) & 1) == 0;
+    return (math.Float32bits(f) & 1) == 0;
 }
 
 internal static bool isEven64(float64 f) {
-    return (uint64)(math.Float64bits(f) & 1) == 0;
+    return (math.Float64bits(f) & 1) == 0;
 }
 
 public static void TestIsFinite(ж<testing.T> Ꮡt) {
@@ -722,8 +756,6 @@ internal partial struct TestIssue34919_type /*dyn*/ {
 // TestIssue34919 verifies that a Rat's denominator is not modified
 // when simply accessing the Rat value.
 public static void TestIssue34919(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, acc) in new TestIssue34919_type[]{
         new("Float32"u8, (ж<global::go.math.big_package.ΔRat> x) => {
             x.Float32();
@@ -743,8 +775,8 @@ public static void TestIssue34919(ж<testing.T> Ꮡt) {
         new("Num"u8, (ж<global::go.math.big_package.ΔRat> x) => {
             x.Num();
         })
-    }.slice()) {
         // {"Denom", func(x *Rat) { x.Denom() }}, TODO(gri) should we change the API? See issue #33792.
+    }.slice()) {
         // A denominator of length 0 is interpreted as 1. Make sure that
         // "materialization" of the denominator doesn't lead to setting
         // the underlying array element 0 to 1.

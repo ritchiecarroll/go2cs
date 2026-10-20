@@ -28,7 +28,7 @@ using trace = go.@internal.trace_package;
 using log = log_package;
 using math = math_package;
 using http = net.http_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using time = time_package;
@@ -36,6 +36,7 @@ using encoding;
 using go;
 using go.@internal;
 using io = io_package;
+using iter = iter_package;
 using net;
 
 partial class traceviewer_package {
@@ -62,7 +63,6 @@ public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, Func<trace.Ut
             mmuʗ1.HandleDetails(w, r);
             return;
         }
-
         http.ServeContent(w, r, ""u8, new time.Time(nil), new strings_ReaderжReadSeeker(strings.NewReader(templMMU)));
     };
 }
@@ -80,7 +80,7 @@ private static readonly @string flagsˢ = "flags"u8;
 
 internal static trace.UtilFlags requestUtilFlags(ж<http.Request> Ꮡr) {
     trace.UtilFlags flags = default!;
-    foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue(flagsˢ), "|"u8)) {
+    foreach (var flagStr in range<@string>(strings.SplitSeq(Ꮡr.FormValue(flagsˢ), "|"u8).Invoke)) {
         flags |= (trace.UtilFlags)(utilFlagNames[flagStr]);
     }
     return flags;
@@ -110,6 +110,7 @@ internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get
         m.cache[flags] = entry;
     }
     m.mu.Unlock();
+
     var entryʗ1 = entry;
     entry.of(mmuCacheEntry.Ꮡinit).Do(() => {
         var (util, err) = Ꮡm.Value.f(flags);
@@ -130,13 +131,15 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
         return;
     }
+
     slice<float64> quantiles = default!;
-    foreach (var (_, flagStr) in strings.Split(Ꮡr.FormValue(flagsˢ), "|"u8)) {
+    foreach (var flagStr in range<@string>(strings.SplitSeq(Ꮡr.FormValue(flagsˢ), "|"u8).Invoke)) {
         if (flagStr == "mut"u8) {
             quantiles = new float64[]{0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D}.slice();
             break;
         }
     }
+
     // Find a nice starting point for the plot.
     var xMin = time.ΔSecond;
     while (xMin > 1) {
@@ -160,7 +163,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         }
     }
     {
-        var maxMax = ((time.Duration)(maxEvent - minEvent)); if (xMax > maxMax) {
+        var maxMax = (time.Duration)(maxEvent - minEvent); if (xMax > maxMax) {
             xMax = maxMax;
         }
     }
@@ -169,7 +172,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
     UntypedInt samples = 100;
     var plot = new slice<slice<float64>>(samples);
     for (nint i = 0; i < samples; i++) {
-        var window = ((time.Duration)(int64)math.Exp((float64)i / /* (samples - 1) */ 99D * (logMax - logMin) + logMin));
+        var window = (time.Duration)(int64)math.Exp((float64)i / /* (samples - 1) */ 99D * (logMax - logMin) + logMin);
         if (quantiles == default!){
             plot[i] = new slice<float64>(2);
             plot[i][1] = mmuCurve.MMU(window);
@@ -179,6 +182,7 @@ internal static void HandlePlot(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<htt
         }
         plot[i][0] = (float64)(int64)window;
     }
+
     // Create JSON response.
     err = json.NewEncoder(new http_ResponseWriterᴠWriter(w)).Encode(new map<@string, any>{["xMin"u8] = (int64)xMin, ["xMax"u8] = (int64)xMax, ["quantiles"u8] = quantiles, ["curve"u8] = plot});
     if (err != default!) {
@@ -382,7 +386,7 @@ internal static @string templMMU = """
   </body>
 </html>
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string windowˢ = "window"u8;
@@ -396,18 +400,21 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
         return;
     }
+
     @string windowStr = Ꮡr.FormValue(windowˢ);
     (var window, err) = strconv.ParseUint(windowStr, 10, 64);
     if (err != default!) {
         http.Error(w, fmt.Sprintf("failed to parse window parameter %q: %v"u8, windowStr, err), http.StatusBadRequest);
         return;
     }
-    var worst = mmuCurve.Examples(((time.Duration)(int64)window), 10);
+    var worst = mmuCurve.Examples((time.Duration)(int64)window, 10);
+
     // Construct a link for each window.
     slice<linkedUtilWindow> links = default!;
     foreach (var (_, ui) in worst) {
-        links = append(links, m.newLinkedUtilWindow(ui, ((time.Duration)(int64)window)));
+        links = append(links, m.newLinkedUtilWindow(ui, (time.Duration)(int64)window));
     }
+
     err = json.NewEncoder(new http_ResponseWriterᴠWriter(w)).Encode(links);
     if (err != default!) {
         log.Printf("failed to serialize trace: %v"u8, err);
@@ -416,7 +423,7 @@ internal static void HandleDetails(this ж<mmu> Ꮡm, http.ResponseWriter w, ж<
 }
 
 partial struct linkedUtilWindow {
-    public partial ref go.@internal.trace_package.UtilWindow UtilWindow { get; }
+    /*embed*/ public go.@internal.trace_package.UtilWindow UtilWindow;
     public @string URL;
 }
 

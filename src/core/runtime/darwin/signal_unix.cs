@@ -5,6 +5,7 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using goexperiment = @internal.goexperiment_package;
 using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
@@ -91,9 +92,7 @@ internal static ref array<uint32> handlingSig => ref ᏑhandlingSig.Value;
 // channels for synchronizing signal mask updates with the signal mask
 // thread
 internal static channel<uint32> disableSigChan;
-
 internal static channel<uint32> enableSigChan;
-
 internal static channel<EmptyStruct> maskUpdatedChan;
 
 /* [GoInit] runtime bootstrap init - not run; .NET is the runtime */ internal static void initΔ8() {
@@ -117,19 +116,23 @@ internal static void initsig(bool preinit) {
         // It's now OK for signal handlers to run.
         signalsOK = true;
     }
+
     // For c-archive/c-shared this is called by libpreinit with
     // preinit == true.
     if ((isarchive || islibrary) && !preinit) {
         return;
     }
+
     for (var i = (uint32)0; i < _NSIG; i++) {
         var t = Ꮡsigtable.at<sigTabT>((ulong)(i));
-        if ((~t).flags == 0 || (int32)((~t).flags & (int32)_SigDefault) != 0) {
+        if ((~t).flags == 0 || ((~t).flags & (int32)_SigDefault) != 0) {
             continue;
         }
+
         // We don't need to use atomic operations here because
         // there shouldn't be any other goroutines running yet.
         fwdSig[i] = getsig(i);
+
         if (!sigInstallGoHandler(i)) {
             // Even if we are not installing a signal handler,
             // set SA_ONSTACK if necessary.
@@ -141,6 +144,7 @@ internal static void initsig(bool preinit) {
             }
             continue;
         }
+
         handlingSig[i] = 1;
         setsig(i, abi.FuncPCABIInternal(sighandler));
     }
@@ -165,15 +169,18 @@ internal static bool sigInstallGoHandler(uint32 sig) {
         // in non-cgo binaries.
         return true;
     }
+
     var t = Ꮡsigtable.at<sigTabT>((ulong)(sig));
-    if ((int32)((~t).flags & (int32)_SigSetStack) != 0) {
+    if (((~t).flags & (int32)_SigSetStack) != 0) {
         return false;
     }
+
     // When built using c-archive or c-shared, only install signal
     // handlers for synchronous signals and SIGPIPE and sigPreempt.
-    if ((isarchive || islibrary) && (int32)((~t).flags & (int32)_SigPanic) == 0 && sig != _SIGPIPE && sig != sigPreempt) {
+    if ((isarchive || islibrary) && ((~t).flags & (int32)_SigPanic) == 0 && sig != _SIGPIPE && sig != sigPreempt) {
         return false;
     }
+
     return true;
 }
 
@@ -226,6 +233,7 @@ internal static void setProcessCPUProfilerTimer(int32 hz) {
             atomic.Storeuintptr(ᏑfwdSig.at<uintptr>(_SIGPROF), h);
             setsig(_SIGPROF, abi.FuncPCABIInternal(sighandler));
         }
+
         ref var it = ref heap(new itimerval(), out var Ꮡit);
         it.it_interval.tv_sec = 0;
         it.it_interval.set_usec(1000000 / hz);
@@ -233,6 +241,7 @@ internal static void setProcessCPUProfilerTimer(int32 hz) {
         setitimer(_ITIMER_PROF, Ꮡit, nil);
     } else {
         setitimer(_ITIMER_PROF, Ꮡ(new itimerval(nil)), nil);
+
         // If the Go signal handler should be disabled by default,
         // switch back to the signal handler that was installed
         // when we enabled profiling. We don't try to handle the case
@@ -276,9 +285,11 @@ internal static void doSigPreempt(ж<g> Ꮡgp, ж<sigctxt> Ꮡctxt) {
             }
         }
     }
+
     // Acknowledge the preemption.
     gp.m.of(m.ᏑpreemptGen).Add(1);
     gp.m.of(m.ᏑsignalPending).Store(0);
+
     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
         ᏑpendingPreemptSignals.Add(-1);
     }
@@ -298,10 +309,12 @@ internal static void preemptM(ж<m> Ꮡmp) {
     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
         ᏑexecLock.rlock();
     }
+
     if (Ꮡmp.of(m.ᏑsignalPending).CompareAndSwap(0, 1)) {
         if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
             ᏑpendingPreemptSignals.Add(1);
         }
+
         // If multiple threads are preempting the same M, it may send many
         // signals to the same M such that it hardly make progress, causing
         // live-lock problem. Apparently this could happen on darwin. See
@@ -309,6 +322,7 @@ internal static void preemptM(ж<m> Ꮡmp) {
         // Only send a signal if there isn't already one pending.
         signalM(ref (Ꮡmp).DerefOrNull(), sigPreempt);
     }
+
     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
         ᏑexecLock.runlock();
     }
@@ -340,7 +354,6 @@ internal static ж<g> sigFetchG(ж<sigctxt> Ꮡc) {
             return default!;
         }
     }
-
     return getg();
 }
 
@@ -399,18 +412,27 @@ internal static void sigtrampgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         }
         return;
     }
+
     setg((~(~gp).m).gsignal);
+
     // If some non-Go code called sigaltstack, adjust.
     ref var gsignalStack = ref heap(new gsignalStack(), out var ᏑgsignalStack);
     var setStack = adjustSignalStack(sig, (~gp).m, ᏑgsignalStack);
     if (setStack) {
         gp.Value.m.Value.gsignal.Value.stktopsp = sys.GetCallerSP();
     }
+
     if ((~gp).stackguard0 == stackFork) {
         signalDuringFork(sig);
     }
+
     c.fixsigcode(sig);
     sighandler(sig, Ꮡinfo, ctx, gp);
+
+    if (goexperiment.RuntimeSecret && (~gp).secret > 0) {
+        atomic.Store((~gp).m.of(m.ᏑsignalSecret), 1);
+    }
+
     setg(gp);
     if (setStack) {
         restoreGsignalStack(ᏑgsignalStack);
@@ -450,6 +472,7 @@ internal static void sigprofNonGo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Point
             cpuprof.addNonGo(sigprofCallers.slice(0, n));
         }
     }
+
     atomic.Store(ᏑsigprofCallersUse, 0);
 }
 
@@ -478,19 +501,21 @@ internal static void sigprofNonGoPC(uintptr pc) {
 //go:nosplit
 internal static bool adjustSignalStack(uint32 sigʗp, ж<m> Ꮡmp, ж<gsignalStack> ᏑgsigStack) {
     ref var mp = ref Ꮡmp.DerefOrNull();
-
     ref var sig = ref heap(sigʗp, out var Ꮡsig);
+
     var sp = (uintptr)Ꮡsig;
     if (sp >= (~mp.gsignal).stack.lo && sp < (~mp.gsignal).stack.hi) {
         return false;
     }
+
     ref var st = ref heap(new stackt(), out var Ꮡst);
     sigaltstack(nil, Ꮡst);
     var stsp = (uintptr)st.ss_sp;
-    if ((int32)(st.ss_flags & (int32)_SS_DISABLE) == 0 && sp >= stsp && sp < stsp + st.ss_size) {
+    if ((st.ss_flags & (int32)_SS_DISABLE) == 0 && sp >= stsp && sp < stsp + st.ss_size) {
         setGsignalStack(ref st, ᏑgsigStack);
         return true;
     }
+
     if (sp >= (~mp.g0).stack.lo && sp < (~mp.g0).stack.hi) {
         // The signal was delivered on the g0 stack.
         // This can happen when linked with C code
@@ -508,9 +533,10 @@ internal static bool adjustSignalStack(uint32 sigʗp, ж<m> Ꮡmp, ж<gsignalSta
         setGsignalStack(ref stΔ1, ᏑgsigStack);
         return true;
     }
+
     // sp is not within gsignal stack, g0 stack, or sigaltstack. Bad.
     // Call indirectly to avoid nosplit stack overflow on OpenBSD.
-    adjustSignalStack2Indirect(sig, sp, Ꮡmp, (int32)(st.ss_flags & (int32)_SS_DISABLE) != 0);
+    adjustSignalStack2Indirect(sig, sp, Ꮡmp, (st.ss_flags & (int32)_SS_DISABLE) != 0);
     return false;
 }
 
@@ -574,6 +600,7 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
     var gsignal = getg();
     var mp = gsignal.Value.m;
     var c = Ꮡ(new sigctxt(Ꮡinfo, ctxt.Value));
+
     // Cgo TSAN (not the Go race detector) intercepts signals and calls the
     // signal handler at a later time. When the signal handler is called, the
     // memory may have changed, but the signal context remains old. The
@@ -585,6 +612,7 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
     // For delayed signals, the handler is called on the g0 stack (see
     // adjustSignalStack).
     var delayedSignal = cgo_yield.Value != nil && mp != nil && (~gsignal).stack == (~(~mp).g0).stack;
+
     if (sig == _SIGPROF) {
         // Some platforms (Linux) have per-thread timers, which we use in
         // combination with the process-wide timer. Avoid double-counting.
@@ -593,12 +621,15 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         }
         return;
     }
+
     if (sig == _SIGTRAP && testSigtrap != default! && testSigtrap(Ꮡinfo, c, Ꮡgp)) {
         return;
     }
+
     if (sig == _SIGUSR1 && testSigusr1 != default! && testSigusr1(Ꮡgp)) {
         return;
     }
+
     if ((GOOS == "linux"u8 || GOOS == "android"u8) && sig == sigPerThreadSyscall) {
         // sigPerThreadSyscall is the same signal used by glibc for
         // per-thread syscalls on Linux. We use it for the same purpose
@@ -607,18 +638,20 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         runPerThreadSyscall();
         return;
     }
+
     if (sig == sigPreempt && debug.asyncpreemptoff == 0 && !delayedSignal) {
         // Might be a preemption signal.
         doSigPreempt(Ꮡgp, c);
+        // Even if this was definitely a preemption signal, it
+        // may have been coalesced with another signal, so we
+        // still let it through to the application.
     }
-    // Even if this was definitely a preemption signal, it
-    // may have been coalesced with another signal, so we
-    // still let it through to the application.
+
     var flags = (int32)_SigThrow;
     if (sig < (uint32)len(sigtable)) {
         flags = sigtable[sig].flags;
     }
-    if (!c.sigFromUser() && (int32)(flags & (int32)_SigPanic) != 0 && (gp.throwsplit || Ꮡgp != (~mp).curg)) {
+    if (!c.sigFromUser() && (flags & (int32)_SigPanic) != 0 && (gp.throwsplit || Ꮡgp != (~mp).curg)) {
         // We can't safely sigpanic because it may grow the
         // stack. Abort in the signal handler instead.
         //
@@ -632,7 +665,7 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         // causes a memory fault. Don't turn that into a panic.
         flags = _SigThrow;
     }
-    if (!c.sigFromUser() && (int32)(flags & (int32)_SigPanic) != 0) {
+    if (!c.sigFromUser() && (flags & (int32)_SigPanic) != 0) {
         // The signal is going to cause a panic.
         // Arrange the stack so that it looks like the point
         // where the signal occurred made a call to the
@@ -644,23 +677,29 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         gp.sigcode0 = (uintptr)c.sigcode();
         gp.sigcode1 = c.fault();
         gp.sigpc = c.sigpc();
+
         c.preparePanic(sig, Ꮡgp);
         return;
     }
-    if (c.sigFromUser() || (int32)(flags & (int32)_SigNotify) != 0) {
+
+    if (c.sigFromUser() || (flags & (int32)_SigNotify) != 0) {
         if (sigsend(sig)) {
             return;
         }
     }
+
     if (c.sigFromUser() && signal_ignored(sig)) {
         return;
     }
+
     if (sig == _SIGSYS && c.sigFromSeccomp() && atomic.Load(ᏑsigsysIgnored) != 0) {
         return;
     }
-    if ((int32)(flags & (int32)_SigKill) != 0) {
+
+    if ((flags & (int32)_SigKill) != 0) {
         dieFromSignal(sig);
     }
+
     // _SigThrow means that we should exit now.
     // If we get here with _SigPanic, it means that the signal
     // was sent to us by a program (c.sigFromUser() is true);
@@ -668,17 +707,21 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
     if ((int32)(flags & ((int32)((int32)_SigThrow | (int32)_SigPanic))) == 0) {
         return;
     }
+
     mp.Value.throwing = throwTypeRuntime;
     mp.of(m.Ꮡcaughtsig).set(Ꮡgp);
+
     if (Ꮡcrashing.Load() == 0) {
         startpanic_m();
     }
+
     Ꮡgp = fatalsignal(sig, c, Ꮡgp, ref (mp).DerefOrNull()); gp = ref Ꮡgp.DerefOrNull();
+
     var (level, _, docrash) = gotraceback();
     if (level > 0) {
         goroutineheader(Ꮡgp);
         tracebacktrap(c.sigpc(), c.sigsp(), c.siglr(), Ꮡgp);
-        if (Ꮡcrashing.Load() > 0 && Ꮡgp != (~mp).curg && (~mp).curg != nil && (uint32)(readgstatus((~mp).curg) & ~(uint32)_Gscan) == _Grunning){
+        if (Ꮡcrashing.Load() > 0 && Ꮡgp != (~mp).curg && (~mp).curg != nil && (readgstatus((~mp).curg) & ~(uint32)_Gscan) == _Grunning){
             // tracebackothers on original m skipped this one; trace it now.
             goroutineheader((~mp).curg);
             traceback(~(uintptr)0, ~(uintptr)0, 0, (~mp).curg);
@@ -689,9 +732,11 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         }
         dumpregs(c);
     }
+
     if (docrash) {
         uint32 crashSleepMicros = 5000;
         uint32 watchdogTimeoutMicros = 2000 * crashSleepMicros;
+
         var isCrashThread = false;
         if (Ꮡcrashing.CompareAndSwap(0, 1)){
             isCrashThread = true;
@@ -723,6 +768,7 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
             while (timeout > 0 && (Ꮡcrashing.Load() < mcount() - (int32)ᏑextraMLength.Load())) {
                 usleep(crashSleepMicros);
                 timeout -= crashSleepMicros;
+
                 {
                     var cΔ1 = Ꮡcrashing.Load(); if (cΔ1 > maxCrashing) {
                         // We make progress, so reset the watchdog timeout
@@ -743,7 +789,9 @@ internal static void sighandler(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer
         printDebugLog();
         crash();
     }
+
     printDebugLog();
+
     exit(2);
 }
 
@@ -756,12 +804,14 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
     } else {
         print((@string)"Signal "u8, sig, (@string)"\n"u8);
     }
+
     if (isSecureMode()) {
         exit(2);
     }
-    print((@string)"PC="u8, ((Δhex)(uint64)c.sigpc()), (@string)" m="u8, mp.id, (@string)" sigcode="u8, c.sigcode());
+
+    print((@string)"PC="u8, (Δhex)(uint64)c.sigpc(), (@string)" m="u8, mp.id, (@string)" sigcode="u8, c.sigcode());
     if (sig == _SIGSEGV || sig == _SIGBUS) {
-        print((@string)" addr="u8, ((Δhex)(uint64)c.fault()));
+        print((@string)" addr="u8, (Δhex)(uint64)c.fault());
     }
     print((@string)"\n"u8);
     if (mp.incgo && Ꮡgp == mp.g0 && mp.curg != nil) {
@@ -790,7 +840,7 @@ internal static ж<g> fatalsignal(uint32 sig, ж<sigctxt> Ꮡc, ж<g> Ꮡgp, ref
         print((@string)"instruction bytes:"u8);
         var b = (ж<array<byte>>)(uintptr)((@unsafe.Pointer)pc);
         for (var i = (uintptr)0; i < n; i++) {
-            print((@string)" "u8, ((Δhex)(uint64)b.Value[i]));
+            print((@string)" "u8, (Δhex)(uint64)b.Value[i]);
         }
         println();
     }
@@ -825,33 +875,34 @@ internal static void sigpanic() {
     if (!canpanic()) {
         @throw(unexpectedSignalDuringˢ);
     }
+
     var exprᴛ1 = (~gp).sig;
     if (exprᴛ1 == _SIGBUS) {
         if ((~gp).sigcode0 == _BUS_ADRERR && (~gp).sigcode1 < 0x1000) {
             panicmem();
         }
+        // Support runtime/debug.SetPanicOnFault.
         if ((~gp).paniconfault) {
-            // Support runtime/debug.SetPanicOnFault.
             panicmemAddr((~gp).sigcode1);
         }
-        print((@string)"unexpected fault address "u8, ((Δhex)(uint64)(~gp).sigcode1), (@string)"\n"u8);
+        print((@string)"unexpected fault address "u8, (Δhex)(uint64)(~gp).sigcode1, (@string)"\n"u8);
         @throw(faultˢ);
     }
     else if (exprᴛ1 == _SIGSEGV) {
         if (((~gp).sigcode0 == 0 || (~gp).sigcode0 == _SEGV_MAPERR || (~gp).sigcode0 == _SEGV_ACCERR) && (~gp).sigcode1 < 0x1000) {
             panicmem();
         }
+        // Support runtime/debug.SetPanicOnFault.
         if ((~gp).paniconfault) {
-            // Support runtime/debug.SetPanicOnFault.
             panicmemAddr((~gp).sigcode1);
         }
         if (inUserArenaChunk((~gp).sigcode1)){
             // We could check that the arena chunk is explicitly set to fault,
             // but the fact that we faulted on accessing it is enough to prove
             // that it is.
-            print((@string)"accessed data from freed user arena "u8, ((Δhex)(uint64)(~gp).sigcode1), (@string)"\n"u8);
+            print((@string)"accessed data from freed user arena "u8, (Δhex)(uint64)(~gp).sigcode1, (@string)"\n"u8);
         } else {
-            print((@string)"unexpected fault address "u8, ((Δhex)(uint64)(~gp).sigcode1), (@string)"\n"u8);
+            print((@string)"unexpected fault address "u8, (Δhex)(uint64)(~gp).sigcode1, (@string)"\n"u8);
         }
         @throw(faultˢ);
     }
@@ -863,7 +914,6 @@ internal static void sigpanic() {
         else if (exprᴛ2 == _FPE_INTOVF) {
             panicoverflow();
         }
-
         panicfloat();
     }
 
@@ -885,6 +935,7 @@ internal static void dieFromSignal(uint32 sig) {
     // Mark the signal as unhandled to ensure it is forwarded.
     atomic.Store(ᏑhandlingSig.at<uint32>((ulong)(sig)), 0);
     raise(sig);
+
     // That should have killed us. On some systems, though, raise
     // sends the signal to the whole process rather than to just
     // the current thread, which means that the signal may not yet
@@ -893,12 +944,15 @@ internal static void dieFromSignal(uint32 sig) {
     osyield();
     osyield();
     osyield();
+
     // If that didn't work, try _SIG_DFL.
     setsig(sig, _SIG_DFL);
     raise(sig);
+
     osyield();
     osyield();
     osyield();
+
     // If we are still somehow running, just exit with the wrong status.
     exit(2);
 }
@@ -913,6 +967,7 @@ internal static void raisebadsignal(uint32 sig, ж<sigctxt> Ꮡc) {
         // Ignore profiling signals that arrive on non-Go threads.
         return;
     }
+
     uintptr handler = default!;
     int32 flags = default!;
     if (sig >= _NSIG){
@@ -921,10 +976,12 @@ internal static void raisebadsignal(uint32 sig, ж<sigctxt> Ꮡc) {
         handler = atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((ulong)(sig)));
         flags = sigtable[sig].flags;
     }
+
     // If the signal is ignored, raising the signal is no-op.
-    if (handler == _SIG_IGN || (handler == _SIG_DFL && (int32)(flags & (int32)_SigIgn) != 0)) {
+    if (handler == _SIG_IGN || (handler == _SIG_DFL && (flags & (int32)_SigIgn) != 0)) {
         return;
     }
+
     // Reset the signal handler and raise the signal.
     // We are currently running inside a signal handler, so the
     // signal is blocked. We need to unblock it before raising the
@@ -935,6 +992,7 @@ internal static void raisebadsignal(uint32 sig, ж<sigctxt> Ꮡc) {
     // again.
     unblocksig(sig);
     setsig(sig, handler);
+
     // If we're linked into a non-Go program we want to try to
     // avoid modifying the original context in which the signal
     // was raised. If the handler is the default, we know it
@@ -948,11 +1006,14 @@ internal static void raisebadsignal(uint32 sig, ж<sigctxt> Ꮡc) {
     if (GOOS != "freebsd"u8 && (isarchive || islibrary) && handler == _SIG_DFL && !c.sigFromUser()) {
         return;
     }
+
     raise(sig);
+
     // Give the signal a chance to be delivered.
     // In almost all real cases the program is about to crash,
     // so sleeping here is not a waste of time.
     usleep(1000);
+
     // If the signal didn't cause the program to exit, restore the
     // Go signal handler and carry on.
     //
@@ -996,16 +1057,16 @@ internal static partial void ensureSigM() {
             }
             sigprocmask(_SIG_SETMASK, ᏑsigBlocked, nil);
             while (ᐧ) {
-                var selᴛ2 = enableSigChan;
-                var selᴛ3 = disableSigChan;
-                switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-                case 0 when selᴛ2.ꟷᐳ(out var sig): {
+                var selᴛ1 = enableSigChan;
+                var selᴛ2 = disableSigChan;
+                switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ))) {
+                case 0 when selᴛ1.ꟷᐳ(out var sig): {
                     if (sig > 0) {
                         sigdelset(ref (ᏑsigBlocked).DerefOrNull(), (nint)sig);
                     }
                     break;
                 }
-                case 1 when selᴛ3.ꟷᐳ(out var sig): {
+                case 1 when selᴛ2.ꟷᐳ(out var sig): {
                     if (sig > 0 && blockableSig(sig)) {
                         sigaddset(ref (ᏑsigBlocked).DerefOrNull(), (nint)sig);
                     }
@@ -1039,8 +1100,8 @@ internal static readonly @string nonGoCodeSetUpSignalˢ = "non-Go code set up si
 // sigaction without setting the SS_ONSTACK flag.
 internal static void sigNotOnStack(uint32 sig, uintptr sp, ref m mp) {
     println((@string)"signal"u8, sig, (@string)"received but handler not on signal stack"u8);
-    print((@string)"mp.gsignal stack ["u8, ((Δhex)(uint64)(~mp.gsignal).stack.lo), (@string)" "u8, ((Δhex)(uint64)(~mp.gsignal).stack.hi), (@string)"], "u8);
-    print((@string)"mp.g0 stack ["u8, ((Δhex)(uint64)(~mp.g0).stack.lo), (@string)" "u8, ((Δhex)(uint64)(~mp.g0).stack.hi), (@string)"], sp="u8, ((Δhex)(uint64)sp), (@string)"\n"u8);
+    print((@string)"mp.gsignal stack ["u8, (Δhex)(uint64)(~mp.gsignal).stack.lo, (@string)" "u8, (Δhex)(uint64)(~mp.gsignal).stack.hi, (@string)"], "u8);
+    print((@string)"mp.g0 stack ["u8, (Δhex)(uint64)(~mp.g0).stack.lo, (@string)" "u8, (Δhex)(uint64)(~mp.g0).stack.hi, (@string)"], sp="u8, (Δhex)(uint64)sp, (@string)"\n"u8);
     @throw(nonGoCodeSetUpSignalˢ);
 }
 
@@ -1099,10 +1160,11 @@ internal static bool sigfwdgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer c
     }
     var fwdFn = atomic.Loaduintptr(ᏑfwdSig.at<uintptr>((ulong)(sig)));
     var flags = sigtable[sig].flags;
+
     // If we aren't handling the signal, forward it.
     if (atomic.Load(ᏑhandlingSig.at<uint32>((ulong)(sig))) == 0 || !signalsOK) {
         // If the signal is ignored, doing nothing is the same as forwarding.
-        if (fwdFn == _SIG_IGN || (fwdFn == _SIG_DFL && (int32)(flags & (int32)_SigIgn) != 0)) {
+        if (fwdFn == _SIG_IGN || (fwdFn == _SIG_DFL && (flags & (int32)_SigIgn) != 0)) {
             return true;
         }
         // We are not handling the signal and there is no other handler to forward to.
@@ -1112,25 +1174,29 @@ internal static bool sigfwdgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer c
             dieFromSignal(sig);
             return false;
         }
+
         sigfwd(fwdFn, sig, Ꮡinfo, ctx);
         return true;
     }
+
     // This function and its caller sigtrampgo assumes SIGPIPE is delivered on the
     // originating thread. This property does not hold on macOS (golang.org/issue/33384),
     // so we have no choice but to ignore SIGPIPE.
     if ((GOOS == "darwin"u8 || GOOS == "ios"u8) && sig == _SIGPIPE) {
         return true;
     }
+
     // If there is no handler to forward to, no need to forward.
     if (fwdFn == _SIG_DFL) {
         return false;
     }
+
     var c = Ꮡ(new sigctxt(Ꮡinfo, ctx.Value));
     // Only forward synchronous signals and SIGPIPE.
     // Unfortunately, user generated SIGPIPEs will also be forwarded, because si_code
     // is set to _SI_USER even for a SIGPIPE raised from a write to a closed socket
     // or pipe.
-    if ((c.sigFromUser() || (int32)(flags & (int32)_SigPanic) == 0) && sig != _SIGPIPE) {
+    if ((c.sigFromUser() || (flags & (int32)_SigPanic) == 0) && sig != _SIGPIPE) {
         return false;
     }
     // Determine if the signal occurred inside Go code. We test that:
@@ -1142,10 +1208,12 @@ internal static bool sigfwdgo(uint32 sig, ж<siginfo> Ꮡinfo, @unsafe.Pointer c
     if (gp != nil && (~gp).m != nil && (~(~gp).m).curg != nil && !(~(~gp).m).isExtraInC && !(~(~gp).m).incgo) {
         return false;
     }
+
     // Signal not handled by Go, forward it.
     if (fwdFn != _SIG_IGN) {
         sigfwd(fwdFn, sig, Ꮡinfo, ctx);
     }
+
     return true;
 }
 
@@ -1175,22 +1243,6 @@ internal static void msigrestore(sigset sigmaskʗp) {
     sigprocmask(_SIG_SETMASK, Ꮡsigmask, nil);
 }
 
-// Apply GOOS-specific overrides here, rather than in osinit,
-// because osinit may be called before sigsetAllExiting is
-// initialized (#51913).
-// #42494 glibc and musl reserve some signals for
-// internal use and require they not be blocked by
-// the rest of a normal C runtime. When the go runtime
-// blocks...unblocks signals, temporarily, the blocked
-// interval of time is generally very short. As such,
-// these expectations of *libc code are mostly met by
-// the combined go+cgo system of threads. However,
-// when go causes a thread to exit, via a return from
-// mstart(), the combined runtime can deadlock if
-// these signals are blocked. Thus, don't block these
-// signals when exiting threads.
-// - glibc: SIGCANCEL (32), SIGSETXID (33)
-// - musl: SIGTIMER (32), SIGCANCEL (33), SIGSYNCCALL (34)
 // sigsetAllExiting is used by sigblock(true) when a thread is
 // exiting.
 internal static ж<sigset> ᏑsigsetAllExiting = new StandardBox<sigset>(default(sigset));
@@ -1198,11 +1250,29 @@ internal static ref sigset sigsetAllExiting => ref ᏑsigsetAllExiting.Value;
 internal static void initᴛsigsetAllExiting() { sigsetAllExiting = ((Func<sigset>)(() => {
     ref var res = ref heap<sigset>(out var Ꮡres);
     res = sigset_all;
+
+    // Apply GOOS-specific overrides here, rather than in osinit,
+    // because osinit may be called before sigsetAllExiting is
+    // initialized (#51913).
     if (GOOS == "linux"u8 && iscgo) {
+        // #42494 glibc and musl reserve some signals for
+        // internal use and require they not be blocked by
+        // the rest of a normal C runtime. When the go runtime
+        // blocks...unblocks signals, temporarily, the blocked
+        // interval of time is generally very short. As such,
+        // these expectations of *libc code are mostly met by
+        // the combined go+cgo system of threads. However,
+        // when go causes a thread to exit, via a return from
+        // mstart(), the combined runtime can deadlock if
+        // these signals are blocked. Thus, don't block these
+        // signals when exiting threads.
+        // - glibc: SIGCANCEL (32), SIGSETXID (33)
+        // - musl: SIGTIMER (32), SIGCANCEL (33), SIGSYNCCALL (34)
         sigdelset(ref (Ꮡres).DerefOrNull(), 32);
         sigdelset(ref (Ꮡres).DerefOrNull(), 33);
         sigdelset(ref (Ꮡres).DerefOrNull(), 34);
     }
+
     return res;
 }))(); }
 
@@ -1258,7 +1328,7 @@ internal static void minitSignalStack() {
     var mp = getg().Value.m;
     ref var st = ref heap(new stackt(), out var Ꮡst);
     sigaltstack(nil, Ꮡst);
-    if ((int32)(st.ss_flags & (int32)_SS_DISABLE) != 0 || !iscgo){
+    if ((st.ss_flags & (int32)_SS_DISABLE) != 0 || !iscgo){
         signalstack((~mp).gsignal.of(g.Ꮡstack));
         mp.Value.newSigstack = true;
     } else {
@@ -1317,7 +1387,7 @@ internal static void unminitSignals() {
 // decide on the disposition of those signals.
 internal static bool blockableSig(uint32 sig) {
     var flags = sigtable[sig].flags;
-    if ((int32)(flags & (int32)_SigUnblock) != 0) {
+    if ((flags & (int32)_SigUnblock) != 0) {
         return false;
     }
     if (sig == sigPreempt && preemptMSupported && debug.asyncpreemptoff == 0) {

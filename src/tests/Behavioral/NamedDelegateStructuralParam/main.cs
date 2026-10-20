@@ -6,11 +6,8 @@ partial class main_package {
 
 public delegate @string Handler(nint _Δp0, @string _Δp1);
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string handlerˢ = "handler"u8;
-
 internal static @string tag(this Handler h) {
-    return handlerˢ;
+    return "handler";
 }
 
 // type Plain is a methodless func type — rendered inline as its base delegate
@@ -25,21 +22,25 @@ internal static @string describe(nint n, @string s) {
 
 internal static void Main() {
     Handler h = describe;
-    fmt.Println(invoke(new Func<nint, @string, @string>(h), 1, "a"u8));
+    fmt.Println(invoke(new Func<nint, @string, @string>(h), 1, "a"));
     fmt.Println(h.tag());
+
     Func<nint, @string, @string> p = describe;
-    fmt.Println(invoke(p, 2, "b"u8));
-    fmt.Println(invoke(describe, 3, "c"u8));
-    fmt.Println(invoke((nint n, @string s) => s + "!"u8, 4, "d"u8));
+    fmt.Println(invoke(p, 2, "b"));
+
+    fmt.Println(invoke(describe, 3, "c"));
+    fmt.Println(invoke((nint n, @string s) => s + "!"u8, 4, "d"));
+
     Handler h2 = (nint n, @string s) => fmt.Sprintf("%s/%d"u8, s, n);
-    fmt.Println(invoke(new Func<nint, @string, @string>(h2), 5, "e"u8));
-    var sc = Ꮡ(new screen(prefix: "#"u8));
+    fmt.Println(invoke(new Func<nint, @string, @string>(h2), 5, "e"));
+
+    var sc = Ꮡ(new screen(prefix: "#"));
     
     var scʗ1 = sc;
     Handler handler = (nint p1, @string p2) => scʗ1.render(p1, p2);
-    fmt.Println(invoke(new Func<nint, @string, @string>(handler), 6, "f"u8));
-    handler = makeHandler("T:"u8);
-    fmt.Println(invoke(new Func<nint, @string, @string>(handler), 7, "g"u8));
+    fmt.Println(invoke(new Func<nint, @string, @string>(handler), 6, "f"));
+    handler = makeHandler("T:");
+    fmt.Println(invoke(new Func<nint, @string, @string>(handler), 7, "g"));
 }
 
 partial struct screen {

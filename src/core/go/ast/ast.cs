@@ -4,11 +4,16 @@
 
 // Package ast declares the types used to represent syntax trees for Go
 // packages.
+//
+// Syntax trees may be constructed directly, but they are typically
+// produced from Go source code by the parser; see the ParseFile
+// function in package [go/parser].
 namespace go.go;
 
 using token = global::go.go.token_package;
 using strings = strings_package;
 using global::go.go;
+using iter = iter_package;
 
 partial class ast_package {
 
@@ -75,7 +80,7 @@ public static tokenꓸPos Pos(this ref Comment c) {
 }
 
 public static tokenꓸPos End(this ref Comment c) {
-    return ((tokenꓸPos)((nint)c.Slash + len(c.Text)));
+    return (tokenꓸPos)((nint)c.Slash + len(c.Text));
 }
 
 // A CommentGroup represents a sequence of comments
@@ -112,6 +117,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Unless the result is empty, it is newline-terminated.
 public static @string Text(this ж<CommentGroup> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
+    var linesᴷ = new stackAppend<@string>();
 
     if (Ꮡg == nil) {
         return ""u8;
@@ -120,6 +126,7 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
     foreach (var (i, c) in g.List) {
         comments[i] = c.Value.Text;
     }
+
     var lines = new slice<@string>(0, 10); // most comments are less than 10 lines
     foreach (var (_, vᴛ1) in comments) {
         var c = vᴛ1;
@@ -128,9 +135,9 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
         // The parser has given us exactly the comment text.
         switch (c[1]) {
         case (rune)'/': {
+            //-style comment (no newline at the end)
             c = c[2..];
             if (len(c) == 0) {
-                //-style comment (no newline at the end)
                 // empty line
                 break;
             }
@@ -146,18 +153,20 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
             break;
         }
         case (rune)'*': {
+            /*-style comment */
             c = c.slice(2, len(c) - 2);
             break;
         }}
 
-        /*-style comment */
         // Split on newlines.
-        var cl = strings.Split(c, "\n"u8);
+        var cl = strings.SplitSeq(c, "\n"u8);
+
         // Walk lines, stripping trailing white space and adding to list.
-        foreach (var (_, l) in cl) {
+        foreach (var l in range<@string>(cl.Invoke)) {
             lines = append(lines, stripTrailingWhitespace(l));
         }
     }
+
     // Remove leading blank lines; convert runs of
     // interior blank lines to a single blank line.
     nint n = 0;
@@ -168,10 +177,12 @@ public static @string Text(this ж<CommentGroup> Ꮡg) {
         }
     }
     lines = lines.slice(0, n);
+
     // Add final "" entry to get trailing newline from Join.
     if (n > 0 && lines[n - 1] != "") {
-        lines = append(lines, ""u8);
+        lines = append(linesᴷ, lines, ""u8);
     }
+
     return strings.Join(lines, "\n"u8);
 }
 
@@ -190,6 +201,7 @@ internal static bool isDirective(@string c) {
     if (strings.HasPrefix(c, lineˢ) || strings.HasPrefix(c, externˢ) || strings.HasPrefix(c, exportˢ)) {
         return true;
     }
+
     // "//[a-z0-9]+:[a-z0-9]"
     // (The // has been removed.)
     nint colon = strings.Index(c, ":"u8);
@@ -300,37 +312,54 @@ public static nint NumFields(this ж<FieldList> Ꮡf) {
 
 // An expression is represented by a tree consisting of one
 // or more of the following concrete expression nodes.
+// A BadExpr node is a placeholder for an expression containing
+// syntax errors for which a correct expression node cannot be
+// created.
+//
 partial struct BadExpr {
     public tokenꓸPos From, To; // position range of bad expression
 }
 
-
+// An Ident node represents an identifier.
 partial struct Ident {
     public tokenꓸPos NamePos; // identifier position
     public @string Name;   // identifier name
     public ж<Object> Obj; // denoted object, or nil. Deprecated: see Object.
 }
 
-
+// An Ellipsis node stands for the "..." type in a
+// parameter list or the "..." length in an array type.
+//
 partial struct Ellipsis {
     public tokenꓸPos ΔEllipsis; // position of "..."
     public Expr Elt;      // ellipsis element type (parameter lists only); or nil
 }
 
-
+// A BasicLit node represents a literal of basic type.
+//
+// Note that for the CHAR and STRING kinds, the literal is stored
+// with its quotes. For example, for a double-quoted STRING, the
+// first and the last rune in the Value field will be ". The
+// [strconv.Unquote] and [strconv.UnquoteChar] functions can be
+// used to unquote STRING and CHAR values, respectively.
+//
+// For raw string literals (Kind == token.STRING && Value[0] == '`'),
+// the Value field contains the string text without carriage returns (\r) that
+// may have been present in the source.
 partial struct BasicLit {
     public tokenꓸPos ValuePos;   // literal position
+    public tokenꓸPos ValueEnd;   // position immediately after the literal
     public token.Token Kind; // token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
     public @string Value;     // literal string; e.g. 42, 0x7f, 3.14, 1e-9, 2.4i, 'a', '\x7f', "foo" or `\m\n\o`
 }
 
-
+// A FuncLit node represents a function literal.
 partial struct FuncLit {
     public ж<FuncType> Type; // function type
     public ж<BlockStmt> Body; // function body
 }
 
-
+// A CompositeLit node represents a composite literal.
 partial struct CompositeLit {
     public Expr Type;      // literal type; or nil
     public tokenꓸPos Lbrace; // position of "{"
@@ -339,20 +368,20 @@ partial struct CompositeLit {
     public bool Incomplete;      // true if (source) expressions are missing in the Elts list
 }
 
-
+// A ParenExpr node represents a parenthesized expression.
 partial struct ParenExpr {
     public tokenꓸPos Lparen; // position of "("
     public Expr X;      // parenthesized expression
     public tokenꓸPos Rparen; // position of ")"
 }
 
-
+// A SelectorExpr node represents an expression followed by a selector.
 partial struct SelectorExpr {
     public Expr X;   // expression
     public ж<Ident> Sel; // field selector
 }
 
-
+// An IndexExpr node represents an expression followed by an index.
 partial struct IndexExpr {
     public Expr X;      // expression
     public tokenꓸPos Lbrack; // position of "["
@@ -360,7 +389,8 @@ partial struct IndexExpr {
     public tokenꓸPos Rbrack; // position of "]"
 }
 
-
+// An IndexListExpr node represents an expression followed by multiple
+// indices.
 partial struct IndexListExpr {
     public Expr X;      // expression
     public tokenꓸPos Lbrack; // position of "["
@@ -368,7 +398,7 @@ partial struct IndexListExpr {
     public tokenꓸPos Rbrack; // position of "]"
 }
 
-
+// A SliceExpr node represents an expression followed by slice indices.
 partial struct SliceExpr {
     public Expr X;      // expression
     public tokenꓸPos Lbrack; // position of "["
@@ -379,7 +409,9 @@ partial struct SliceExpr {
     public tokenꓸPos Rbrack; // position of "]"
 }
 
-
+// A TypeAssertExpr node represents an expression followed by a
+// type assertion.
+//
 partial struct TypeAssertExpr {
     public Expr X;      // expression
     public tokenꓸPos Lparen; // position of "("
@@ -387,7 +419,7 @@ partial struct TypeAssertExpr {
     public tokenꓸPos Rparen; // position of ")"
 }
 
-
+// A CallExpr node represents an expression followed by an argument list.
 partial struct CallExpr {
     public Expr Fun;      // function expression
     public tokenꓸPos Lparen; // position of "("
@@ -396,20 +428,24 @@ partial struct CallExpr {
     public tokenꓸPos Rparen; // position of ")"
 }
 
-
+// A StarExpr node represents an expression of the form "*" Expression.
+// Semantically it could be a unary "*" expression, or a pointer type.
+//
 partial struct StarExpr {
     public tokenꓸPos Star; // position of "*"
     public Expr X;      // operand
 }
 
-
+// A UnaryExpr node represents a unary expression.
+// Unary "*" expressions are represented via StarExpr nodes.
+//
 partial struct UnaryExpr {
     public tokenꓸPos OpPos;   // position of Op
     public token.Token Op; // operator
     public Expr X;        // operand
 }
 
-
+// A BinaryExpr node represents a binary expression.
 partial struct BinaryExpr {
     public Expr X;        // left operand
     public tokenꓸPos OpPos;   // position of Op
@@ -417,13 +453,17 @@ partial struct BinaryExpr {
     public Expr Y;        // right operand
 }
 
-
+// A KeyValueExpr node represents (key : value) pairs
+// in composite literals.
+//
 partial struct KeyValueExpr {
     public Expr Key;
     public tokenꓸPos Colon; // position of ":"
     public Expr Value;
 }
 
+// The direction of a channel type is indicated by a bit
+// mask including one or both of the following constants.
 partial struct ChanDir /*num:nint*/;
 
 public static ChanDir SEND => /* 1 << iota */ 1;
@@ -432,13 +472,14 @@ public static ChanDir RECV => 2;
 // A type is represented by a tree consisting of one
 // or more of the following type-specific expression
 // nodes.
+// An ArrayType node represents an array or slice type.
 partial struct ArrayType {
     public tokenꓸPos Lbrack; // position of "["
     public Expr Len;      // Ellipsis node for [...]T array types, nil for slice types
     public Expr Elt;      // element type
 }
 
-
+// A StructType node represents a struct type.
 partial struct StructType {
     public tokenꓸPos Struct;  // position of "struct" keyword
     public ж<FieldList> Fields; // list of field declarations
@@ -447,6 +488,7 @@ partial struct StructType {
 
 // Pointer types are represented via StarExpr nodes.
 
+// A FuncType node represents a function type.
 partial struct FuncType {
     public tokenꓸPos Func;  // position of "func" keyword (token.NoPos if there is no "func")
     public ж<FieldList> TypeParams; // type parameters; or nil
@@ -454,21 +496,21 @@ partial struct FuncType {
     public ж<FieldList> Results; // (outgoing) results; or nil
 }
 
-
+// An InterfaceType node represents an interface type.
 partial struct InterfaceType {
     public tokenꓸPos Interface;  // position of "interface" keyword
     public ж<FieldList> Methods; // list of embedded interfaces, methods, or types
     public bool Incomplete;       // true if (source) methods or types are missing in the Methods list
 }
 
-
+// A MapType node represents a map type.
 partial struct MapType {
     public tokenꓸPos Map; // position of "map" keyword
     public Expr Key;
     public Expr Value;
 }
 
-
+// A ChanType node represents a channel type.
 partial struct ChanType {
     public tokenꓸPos Begin; // position of "chan" keyword or "<-" (whichever comes first)
     public tokenꓸPos Arrow; // position of "<-" (token.NoPos if there is no "<-")
@@ -557,8 +599,7 @@ public static tokenꓸPos Pos(this ref StructType x) {
 }
 
 public static tokenꓸPos Pos(this ref FuncType x) {
-    if (x.Func.IsValid() || x.Params == nil) {
-        // see issue 3870
+    if (x.Func.IsValid() || x.Params == nil) { // see issue 3870
         return x.Func;
     }
     return x.Params.Pos(); // interface method declarations have no "func" keyword
@@ -581,7 +622,7 @@ public static tokenꓸPos End(this ref BadExpr x) {
 }
 
 public static tokenꓸPos End(this ref Ident x) {
-    return ((tokenꓸPos)((nint)x.NamePos + len(x.Name)));
+    return (tokenꓸPos)((nint)x.NamePos + len(x.Name));
 }
 
 public static tokenꓸPos End(this ref Ellipsis x) {
@@ -592,7 +633,13 @@ public static tokenꓸPos End(this ref Ellipsis x) {
 }
 
 public static tokenꓸPos End(this ref BasicLit x) {
-    return ((tokenꓸPos)((nint)x.ValuePos + len(x.Value)));
+    if (!x.ValueEnd.IsValid()) {
+        // Not from parser; use a heuristic.
+        // (Incorrect for `...` containing \r\n;
+        // see https://go.dev/issue/76031.)
+        return (tokenꓸPos)((nint)x.ValuePos + len(x.Value));
+    }
+    return x.ValueEnd;
 }
 
 public static tokenꓸPos End(this ref FuncLit x) {
@@ -781,48 +828,59 @@ public static @string String(this ж<Ident> Ꮡid) {
 
 // A statement is represented by a tree consisting of one
 // or more of the following concrete statement nodes.
+// A BadStmt node is a placeholder for statements containing
+// syntax errors for which no correct statement nodes can be
+// created.
+//
 partial struct BadStmt {
     public tokenꓸPos From, To; // position range of bad statement
 }
 
-
+// A DeclStmt node represents a declaration in a statement list.
 partial struct DeclStmt {
     public Decl Decl; // *GenDecl with CONST, TYPE, or VAR token
 }
 
-
+// An EmptyStmt node represents an empty statement.
+// The "position" of the empty statement is the position
+// of the immediately following (explicit or implicit) semicolon.
+//
 partial struct EmptyStmt {
     public tokenꓸPos Semicolon; // position of following ";"
     public bool Implicit;      // if set, ";" was omitted in the source
 }
 
-
+// A LabeledStmt node represents a labeled statement.
 partial struct LabeledStmt {
     public ж<Ident> Label;
     public tokenꓸPos Colon; // position of ":"
     public Stmt Stmt;
 }
 
-
+// An ExprStmt node represents a (stand-alone) expression
+// in a statement list.
+//
 partial struct ExprStmt {
     public Expr X; // expression
 }
 
-
+// A SendStmt node represents a send statement.
 partial struct SendStmt {
     public Expr Chan;
     public tokenꓸPos Arrow; // position of "<-"
     public Expr Value;
 }
 
-
+// An IncDecStmt node represents an increment or decrement statement.
 partial struct IncDecStmt {
     public Expr X;
     public tokenꓸPos TokPos;   // position of Tok
     public token.Token Tok; // INC or DEC
 }
 
-
+// An AssignStmt node represents an assignment or
+// a short variable declaration.
+//
 partial struct AssignStmt {
     public slice<Expr> Lhs;
     public tokenꓸPos TokPos;   // position of Tok
@@ -830,39 +888,41 @@ partial struct AssignStmt {
     public slice<Expr> Rhs;
 }
 
-
+// A GoStmt node represents a go statement.
 partial struct GoStmt {
     public tokenꓸPos Go; // position of "go" keyword
     public ж<CallExpr> Call;
 }
 
-
+// A DeferStmt node represents a defer statement.
 partial struct DeferStmt {
     public tokenꓸPos Defer; // position of "defer" keyword
     public ж<CallExpr> Call;
 }
 
-
+// A ReturnStmt node represents a return statement.
 partial struct ReturnStmt {
     public tokenꓸPos Return; // position of "return" keyword
     public slice<Expr> Results; // result expressions; or nil
 }
 
-
+// A BranchStmt node represents a break, continue, goto,
+// or fallthrough statement.
+//
 partial struct BranchStmt {
     public tokenꓸPos TokPos;   // position of Tok
     public token.Token Tok; // keyword token (BREAK, CONTINUE, GOTO, FALLTHROUGH)
     public ж<Ident> Label;   // label name; or nil
 }
 
-
+// A BlockStmt node represents a braced statement list.
 partial struct BlockStmt {
     public tokenꓸPos Lbrace; // position of "{"
     public slice<Stmt> List;
     public tokenꓸPos Rbrace; // position of "}", if any (may be absent due to syntax error)
 }
 
-
+// An IfStmt node represents an if statement.
 partial struct IfStmt {
     public tokenꓸPos If; // position of "if" keyword
     public Stmt Init;      // initialization statement; or nil
@@ -871,7 +931,7 @@ partial struct IfStmt {
     public Stmt Else; // else branch; or nil
 }
 
-
+// A CaseClause represents a case of an expression or type switch statement.
 partial struct CaseClause {
     public tokenꓸPos Case; // position of "case" or "default" keyword
     public slice<Expr> List; // list of expressions or types; nil means default case
@@ -879,7 +939,7 @@ partial struct CaseClause {
     public slice<Stmt> Body; // statement list; or nil
 }
 
-
+// A SwitchStmt node represents an expression switch statement.
 partial struct SwitchStmt {
     public tokenꓸPos Switch;  // position of "switch" keyword
     public Stmt Init;       // initialization statement; or nil
@@ -887,7 +947,7 @@ partial struct SwitchStmt {
     public ж<BlockStmt> Body; // CaseClauses only
 }
 
-
+// A TypeSwitchStmt node represents a type switch statement.
 partial struct TypeSwitchStmt {
     public tokenꓸPos Switch;  // position of "switch" keyword
     public Stmt Init;       // initialization statement; or nil
@@ -895,7 +955,7 @@ partial struct TypeSwitchStmt {
     public ж<BlockStmt> Body; // CaseClauses only
 }
 
-
+// A CommClause node represents a case of a select statement.
 partial struct CommClause {
     public tokenꓸPos Case; // position of "case" or "default" keyword
     public Stmt Comm;      // send or receive statement; nil means default case
@@ -903,13 +963,13 @@ partial struct CommClause {
     public slice<Stmt> Body; // statement list; or nil
 }
 
-
+// A SelectStmt node represents a select statement.
 partial struct SelectStmt {
     public tokenꓸPos Select;  // position of "select" keyword
     public ж<BlockStmt> Body; // CommClauses only
 }
 
-
+// A ForStmt represents a for statement.
 partial struct ForStmt {
     public tokenꓸPos For; // position of "for" keyword
     public Stmt Init;      // initialization statement; or nil
@@ -918,7 +978,7 @@ partial struct ForStmt {
     public ж<BlockStmt> Body;
 }
 
-
+// A RangeStmt represents a for statement with a range clause.
 partial struct RangeStmt {
     public tokenꓸPos For;   // position of "for" keyword
     public Expr Key, Value;        // Key, Value may be nil
@@ -1070,7 +1130,7 @@ public static tokenꓸPos End(this ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
-    return ((tokenꓸPos)((nint)s.TokPos + len(s.Tok.String())));
+    return (tokenꓸPos)((nint)s.TokPos + len(s.Tok.String()));
 }
 
 public static tokenꓸPos End(this ref BlockStmt s) {
@@ -1200,13 +1260,14 @@ internal static void stmtNode(this ref RangeStmt _) {
 
 // A Spec node represents a single (non-parenthesized) import,
 // constant, type, or variable declaration.
+// The Spec type stands for any of *ImportSpec, *ValueSpec, and *TypeSpec.
 partial interface Spec :
     Node
 {
     void specNode();
 }
 
-
+// An ImportSpec node represents a single package import.
 partial struct ImportSpec {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<Ident> Name;     // local package name (including "."); or nil
@@ -1215,7 +1276,9 @@ partial struct ImportSpec {
     public tokenꓸPos EndPos;     // end of spec (overrides Path.Pos if nonzero)
 }
 
-
+// A ValueSpec node represents a constant or variable declaration
+// (ConstSpec or VarSpec production).
+//
 partial struct ValueSpec {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public slice<ж<Ident>> Names; // value names (len(Names) > 0)
@@ -1224,7 +1287,7 @@ partial struct ValueSpec {
     public ж<CommentGroup> Comment; // line comments; or nil
 }
 
-
+// A TypeSpec node represents a type declaration (TypeSpec production).
 partial struct TypeSpec {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<Ident> Name;     // type name
@@ -1285,11 +1348,25 @@ internal static void specNode(this ref TypeSpec _) {
 }
 
 // A declaration is represented by one of the following declaration nodes.
+// A BadDecl node is a placeholder for a declaration containing
+// syntax errors for which a correct declaration node cannot be
+// created.
+//
 partial struct BadDecl {
     public tokenꓸPos From, To; // position range of bad declaration
 }
 
-
+// A GenDecl node (generic declaration node) represents an import,
+// constant, type or variable declaration. A valid Lparen position
+// (Lparen.IsValid()) indicates a parenthesized declaration.
+//
+// Relationship between Tok value and Specs element type:
+//
+//	token.IMPORT  *ImportSpec
+//	token.CONST   *ValueSpec
+//	token.TYPE    *TypeSpec
+//	token.VAR     *ValueSpec
+//
 partial struct GenDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public tokenꓸPos TokPos;     // position of Tok
@@ -1299,7 +1376,7 @@ partial struct GenDecl {
     public tokenꓸPos Rparen; // position of ')', if any
 }
 
-
+// A FuncDecl node represents a function declaration.
 partial struct FuncDecl {
     public ж<CommentGroup> Doc; // associated documentation; or nil
     public ж<FieldList> Recv; // receiver (methods); or nil (functions)
@@ -1383,7 +1460,7 @@ partial struct File {
     public ж<Scope> Scope;       // package scope (this file only). Deprecated: see Object
     public slice<ж<ImportSpec>> Imports; // imports in this file
     public slice<ж<Ident>> Unresolved; // unresolved identifiers in this file. Deprecated: see Object
-    public slice<ж<CommentGroup>> Comments; // list of all comments in the source file
+    public slice<ж<CommentGroup>> Comments; // comments in the file, in lexical order
     public @string GoVersion;         // minimum Go version required by //go:build or // +build directives
 }
 
@@ -1457,7 +1534,7 @@ internal static (@string, bool) generator(ref File @file) {
             // opt: check Contains first to avoid unnecessary array allocation in Split.
             @string prefix = prefixᶜ;
             if (strings.Contains((~comment).Text, prefix)) {
-                foreach (var (_, line) in strings.Split((~comment).Text, "\n"u8)) {
+                foreach (var line in range<@string>(strings.SplitSeq((~comment).Text, "\n"u8).Invoke)) {
                     {
                         var (rest, ok) = strings.CutPrefix(line, prefix); if (ok) {
                             {

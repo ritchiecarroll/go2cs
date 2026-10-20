@@ -26,20 +26,20 @@ internal static void addXor(slice<byte> dst, slice<byte> src, uint32 a, uint32 b
         // good job with the generic code below.
         // See issue #25111 for more details.
         var v = (uint32)src[0];
-        v |= (uint32)(((uint32)src[1] << (int)(8)));
-        v |= (uint32)(((uint32)src[2] << (int)(16)));
-        v |= (uint32)(((uint32)src[3] << (int)(24)));
+        v |= (uint32)(((uint32)src[1] << 8));
+        v |= (uint32)(((uint32)src[2] << 16));
+        v |= (uint32)(((uint32)src[3] << 24));
         v ^= (uint32)(a + b);
         dst[0] = (byte)v;
-        dst[1] = (byte)((v >> (int)(8)));
-        dst[2] = (byte)((v >> (int)(16)));
-        dst[3] = (byte)((v >> (int)(24)));
+        dst[1] = (byte)(v >> 8);
+        dst[2] = (byte)(v >> 16);
+        dst[3] = (byte)(v >> 24);
     } else {
         a += b;
         dst[0] = (byte)(src[0] ^ (byte)a);
-        dst[1] = (byte)(src[1] ^ (byte)((a >> (int)(8))));
-        dst[2] = (byte)(src[2] ^ (byte)((a >> (int)(16))));
-        dst[3] = (byte)(src[3] ^ (byte)((a >> (int)(24))));
+        dst[1] = (byte)(src[1] ^ (byte)(a >> 8));
+        dst[2] = (byte)(src[2] ^ (byte)(a >> 16));
+        dst[3] = (byte)(src[3] ^ (byte)(a >> 24));
     }
 }
 

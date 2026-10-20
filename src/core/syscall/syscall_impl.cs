@@ -58,4 +58,15 @@ partial class syscall_package
     {
         runtime_package.syscallRuntimeUnsetenv(k);
     }
+
+    // Go 1.26 adds runtimeClearenv (syscall.go), which Clearenv calls before it empties env. The
+    // runtime pushes it from runtime_noclearenv.go, whose body unsets each key in turn, or on linux
+    // from runtime_clearenv.go, which calls the C library's clearenv when cgo is loaded and then
+    // reparses GODEBUG if env held it. There is no cgo here, so both reduce to the noclearenv body,
+    // and that is this body: runtimeUnsetenv per key reparses GODEBUG on the way, as each push does.
+    internal static partial void runtimeClearenv(map<@string, nint> env)
+    {
+        foreach (var entry in env)
+            runtimeUnsetenv(entry.Key);
+    }
 }

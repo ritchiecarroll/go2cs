@@ -33,6 +33,7 @@ import (
 // CS0030 on every unix flavor. Windows spells `WaitStatus` as a struct, so the pair is never
 // registered and the corpus never saw it.
 func TestNumericConversionRecordsBackingPrimitiveAsValueType(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads the standard-library closure via go/packages")
 	}

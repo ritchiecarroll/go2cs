@@ -21,15 +21,15 @@ internal static testpair bigtest = new testpair(
     "9jqo^BlbD-BleB1DJ+*+F(f,q/0JhKF<GL>Cj@.4Gp$d7F!,L7@<6@)/0JDEF<G%<+EV:2F!,\n"u8 + "O<DJ+*.@<*K0@<6L(Df-\\0Ec5e;DffZ(EZee.Bl.9pF\"AGXBPCsi+DGm>@3BB/F*&OCAfu2/AKY\n"u8 + "i(DIb:@FD,*)+C]U=@3BN#EcYf8ATD3s@q?d$AftVqCh[NqF<G:8+EV:.+Cf>-FD5W8ARlolDIa\n"u8 + "l(DId<j@<?3r@:F%a+D58'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G\n"u8 + ">uD.RTpAKYo'+CT/5+Cei#DII?(E,9)oF*2M7/c\n"u8
 );
 
-// Encode returns 0 when len(src) is 0
-// Wikipedia example
-// Special case when shortening !!!!! to z.
 internal static slice<testpair> pairs = new testpair[]{
+    // Encode returns 0 when len(src) is 0
     new(
         ""u8,
         ""u8
     ),
+    // Wikipedia example
     bigtest,
+    // Special case when shortening !!!!! to z.
     new(
         "\u0000\u0000\u0000\u0000"u8,
         "z"u8
@@ -57,7 +57,7 @@ internal static @string strip85(@string s) {
             w++;
         }
     }
-    return ((@string)(t.slice(0, w)));
+    return (@string)(t.slice(0, w));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -68,7 +68,7 @@ public static void TestEncode(ж<testing.T> Ꮡt) {
         var buf = new slice<byte>(MaxEncodedLen(len(p.decoded)));
         nint n = Encode(buf, slice<byte>(p.decoded));
         buf = buf.slice(0, n);
-        testEqual(Ꮡt, encodeQQWantQˢ, p.decoded, strip85(((@string)buf)), strip85(p.encoded));
+        testEqual(Ꮡt, encodeQQWantQˢ, p.decoded, strip85((@string)buf), strip85(p.encoded));
     }
 }
 
@@ -99,11 +99,11 @@ public static void TestEncoderBuffering(ж<testing.T> Ꮡt) {
                 end = len(input);
             }
             var (n, errΔ1) = encoder.Write(input.slice(pos, end));
-            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, ((error)default!));
+            testEqual(Ꮡt, writeQGaveErrorVWantVˢ, input.slice(pos, end), errΔ1, (error)default!);
             testEqual(Ꮡt, writeQGaveLengthVWantVˢ, input.slice(pos, end), n, end - pos);
         }
         var err = encoder.Close();
-        testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, ((error)default!));
+        testEqual(Ꮡt, closeGaveErrorVWantVˢ, err, (error)default!);
         testEqual(Ꮡt, encodingDOfQQWantQˢ, bs, bigtest.decoded, strip85(bb.String()), strip85(bigtest.encoded));
     }
 }
@@ -118,10 +118,10 @@ public static void TestDecode(ж<testing.T> Ꮡt) {
     foreach (var (_, p) in pairs) {
         var dbuf = new slice<byte>(4 * len(p.encoded));
         var (ndst, nsrc, err) = Decode(dbuf, slice<byte>(p.encoded), true);
-        testEqual(Ꮡt, decodeQErrorVWantVˢ, p.encoded, err, ((error)default!));
+        testEqual(Ꮡt, decodeQErrorVWantVˢ, p.encoded, err, (error)default!);
         testEqual(Ꮡt, decodeQNsrcVWantVˢ, p.encoded, nsrc, len(p.encoded));
         testEqual(Ꮡt, decodeQNdstVWantVˢ, p.encoded, ndst, len(p.decoded));
-        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, ((@string)(dbuf.slice(0, ndst))), p.decoded);
+        testEqual(Ꮡt, decodeQQWantQˢ, p.encoded, (@string)(dbuf.slice(0, ndst)), p.decoded);
     }
 }
 
@@ -139,7 +139,7 @@ public static void TestDecoder(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readFailedˢ, err);
         }
         testEqual(Ꮡt, readFromQLengthVWantVˢ, p.encoded, len(dbuf), len(p.decoded));
-        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, ((@string)dbuf), p.decoded);
+        testEqual(Ꮡt, decodingOfQQWantQˢ, p.encoded, (@string)dbuf, p.decoded);
         if (err != default!) {
             testEqual(Ꮡt, readFromQVWantVˢ, p.encoded, err, io.EOF);
         }
@@ -163,7 +163,7 @@ public static void TestDecoderBuffering(ж<testing.T> Ꮡt) {
         if (err != default! && !AreEqual(err, io.EOF)) {
             Ꮡt.Errorf("Read from %q at pos %d = %d, unexpected error %v"u8, bigtest.encoded, total, n, err);
         }
-        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, ((@string)(buf.slice(0, total))), bigtest.decoded);
+        testEqual(Ꮡt, decodingDOfQQWantQˢ, bs, bigtest.encoded, (@string)(buf.slice(0, total)), bigtest.decoded);
     }
 }
 
@@ -181,6 +181,7 @@ public static void TestDecodeCorrupt(ж<testing.T> Ꮡt) {
         new("v"u8, 0),
         new("!z!!!!!!!!!"u8, 1)
     }.slice();
+
     foreach (var (_, e) in examples) {
         var dbuf = new slice<byte>(4 * len(e.e));
         var (_, _, err) = Decode(dbuf, slice<byte>(e.e), true);
@@ -221,6 +222,7 @@ public static void TestBig(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("io.ReadAll(NewDecoder(...)): %v"u8, err);
     }
+
     if (!bytes.Equal(raw, decoded)) {
         nint i = default!;
         for (i = 0; i < len(decoded) && i < len(raw); i++) {

@@ -14,7 +14,6 @@ global using reflectꓸKind = go.reflect_package.ΔKind;
 global using reflectꓸMethod = go.reflect_package.ΔMethod;
 global using reflectꓸType = go.reflect_package.ΔType;
 global using reflectꓸValue = go.reflect_package.ΔValue;
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -27,9 +26,6 @@ using static global::go.crypto.@internal.fips140.edwards25519_internal_test_pack
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.edwards25519_package.Point, ж<global::go.crypto.@internal.fips140.edwards25519_package.Point>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.edwards25519_package.affineCached, ж<global::go.crypto.@internal.fips140.edwards25519_package.affineCached>>(Indirect = true)]
-[assembly: GoImplicitConv<global::go.crypto.@internal.fips140.edwards25519_package.projCached, ж<global::go.crypto.@internal.fips140.edwards25519_package.projCached>>(Indirect = true)]
 // </ImplicitConversions>
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
@@ -40,11 +36,11 @@ using static global::go.crypto.@internal.fips140.edwards25519_internal_test_pack
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519_test.go", "edwards25519_test.cs", "ABAcopSigoKygoKCitKCgoKmgoKCysaCgoCCpICCpIKmAAgGgoSCgoKCgpSEgoKCgpSClIKU1oKCAAgIlIKCgIKSgpKCpPaCAI4BqAKykoKClIKClIKUgIKkyoKCgpSmooKCgoKC", "259-275:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar_alias_test.go", "scalar_alias_test.cs", "AAwYgqK2gIK4gIK4lrLGgIK4goCCtoKAgriAgriCgIK2goCCtoKAgriWABAE1tbW5urqqoKC", "13-28:1;30-72:2;75-77:3;78-80:4;81-83:5;84-86:6;87-91:7;88-90:7.1;92-96:8;93-95:8.1;97-101:9;98-100:9.1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar_test.go", "scalar_test.cs", "ABQmooKClKayspjCgoLGtLaCtoKCuoIACAaSkpSmgpKUgILIgrSCgIKkgpSAgqaigIKklICCpoKCgoCCkoKSgsiCgoKygoKClIKClICCyJaCgoKCgIKmgoKCgoCCpoKCgoKAgsiCgoKUpoK0koKGkoKCgoSEloCCyIKkkoaSgoSWgILIgt4ACRaEgoLugoKCgoKkpoKClII=", "67-69:1;76-84:1;89-94:2;114-123:1;166-182:1;190-201:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult_test.go", "scalarmult_test.cs", "AA4cpJaCgoKCgpSEgoKClNaCgoKClKaCgoKClKaCgoKCgpSCgoKUpoKigoKygoKCgoKWgILIqJKSgoSChISWgILIpoSCgoKCgpSUgqiCgoKUgoK4gpKSgoKCloCC+IKChIK4gqK0hIKChIKWgILMsoSCuKKEgriihII=", "70-80:1;91-102:1;140-146:1;163-174:1")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/tables_test.go", "tables_test.cs", "AAoWgoKEooKCloKEgoKCgoKEgriCgoSigoKWgoSCgoKCgoSCuIKChLKCgoKWgoKEgoKChIKCgoSCuIKChLKCgoKWgoKEgoKChIKCgoSC")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519_test.go", "edwards25519_test.cs", "ABAcopSigoKygoKCitKCgoKmgoKCyqaCgoCCpICCpIKmAAgGgpSCgoKCgpSUgoKCgpSClIKU1oKCAAgIlIKCgIKSgpKCpPaCAI8BqAKykoKClIKClIKUgIKkyoKCgpSmooKCgoKC", "259-275:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar_alias_test.go", "scalar_alias_test.cs", "AAwYgqLGgILIgILIprLWgILIgoCCtoKAgsiAgsiCgIK2goCCtoKAgsimABAE1tbW5urqqoKC", "13-28:1;30-72:2;75-77:3;78-80:4;81-83:5;84-86:6;87-91:7;88-90:7.1;92-96:8;93-95:8.1;97-101:9;98-100:9.1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalar_test.go", "scalar_test.cs", "ABQmooKClKayspjCgoLGtMaCxoKC6oK2kpKkpoKSlICCyIK0goCCpIKUgIK2ooCCpJSAgraCgoKAgpKCkoLIgoKCsoKCgpSCgpSAgsiWgoKCgoCCtoKCgoKAgraCgoKCgILIgoKClKaCtJKClpKCgoKUlKaAgsiCpJKWkoKUpoCCyILuAAoWlIKC7oKCgoKCpKaCgpSC", "67-69:1;76-84:1;89-94:2;114-123:1;166-182:1;190-201:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult_test.go", "scalarmult_test.cs", "AA8ctJaCgoKCgpSUgoKClNaCgoKClKaCgoKClKaCgoKCgpSCgoKUpoKigoKygoKCgoKmgILIqJKSgpSClJSmgILIppSCgoKCgpSUgriCgoKUgoK4gpKSgoKCpoCC+IKClIK4gqLElIKClIKmgILMspSCuKKUgriilII=", "70-80:1;91-102:1;140-146:1;163-174:1")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/edwards25519/tables_test.go", "tables_test.cs", "AAoWgoKUooKCpoKUgoKCgoKUgriCgpSigoKmgpSCgoKCgpSCuIKClLKCgoKmgoKUgoKClIKCgpSCuIKClLKCgoKmgoKUgoKClIKCgpSC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

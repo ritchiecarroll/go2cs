@@ -19,7 +19,7 @@ internal static any escapeSink;
 
 public static T Escape<T>(T x) {
     if (alwaysFalse) {
-        escapeSink = x;
+        escapeSink = (x).OrTypedNilOf();
     }
     return x;
 }

@@ -55,7 +55,13 @@ partial class sync_package
     // (This comment formerly said the reason was unchanged -- true at 1.23, stale at 1.24.) The
     // hand-owned WaitGroup (waitgroup.cs) does not reach this stub; it parks under the same reason
     // on its own.
-    internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s) => RuntimeSemaphore.Acquire(s, WaitReason.SyncWaitGroupWait);
+    //
+    // Go 1.25 added synctestDurable (sync/runtime.go:17): WaitGroup.Wait passes true when the group is
+    // associated with the caller's synctest bubble, and sema.go:109-115 then parks with
+    // waitReasonSynctestWaitGroupWait ("sync.WaitGroup.Wait (durable)"), the reason a bubble counts as
+    // durably blocked, instead of waitReasonSyncWaitGroupWait.
+    internal static partial void runtime_SemacquireWaitGroup(ж<uint32> s, bool synctestDurable) =>
+        RuntimeSemaphore.Acquire(s, synctestDurable ? WaitReason.SynctestWaitGroupWait : WaitReason.SyncWaitGroupWait);
 
 
     internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, WaitReason.SyncRWMutexLock);

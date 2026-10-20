@@ -165,6 +165,7 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
         }
         return sm;
     }
+
     var nameFoo = new map<@string, @string>{["name"u8] = "foo"u8};
     var tests = new mediaTypeTest[]{
         new(@"form-data; name=""foo"""u8, "form-data"u8, nameFoo),
@@ -176,8 +177,9 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
             "form-data"u8,
             m(keyˢ, valueˢ, blahˢ, valueˢ, nameˢ, fooˢ)),
         new(@"foo; key=val1; key=the-key-appears-again-which-is-bogus"u8,
-            ""u8, m()), // From RFC 2231:
+            ""u8, m()),
 
+        // From RFC 2231:
         new(@"application/x-stuff; title*=us-ascii'en-us'This%20is%20%2A%2A%2Afun%2A%2A%2A"u8,
             "application/x-stuff"u8,
             m(titleˢ, thisIsFunˢ)),
@@ -187,273 +189,279 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
                 urlˢ2, ftpCsUtkEduPubMooreBulkˢ)),
         new(@"application/x-stuff; "u8 + @"title*0*=us-ascii'en'This%20is%20even%20more%20; "u8 + @"title*1*=%2A%2A%2Afun%2A%2A%2A%20; "u8 + @"title*2=""isn't it!"""u8,
             "application/x-stuff"u8,
-            m(titleˢ, thisIsEvenMoreFunIsnTItˢ)), // Tests from http://greenbytes.de/tech/tc2231/
- // Note: Backslash escape handling is a bit loose, like MSIE.
- // #attonly
+            m(titleˢ, thisIsEvenMoreFunIsnTItˢ)),
 
+        // Tests from http://greenbytes.de/tech/tc2231/
+        // Note: Backslash escape handling is a bit loose, like MSIE.
+
+        // #attonly
         new(@"attachment"u8,
             "attachment"u8,
-            m()), // #attonlyucase
-
+            m()),
+        // #attonlyucase
         new(@"ATTACHMENT"u8,
             "attachment"u8,
-            m()), // #attwithasciifilename
-
+            m()),
+        // #attwithasciifilename
         new(@"attachment; filename=""foo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)), // #attwithasciifilename25
-
+            m(filenameˢ, fooHtmlˢ)),
+        // #attwithasciifilename25
         new(@"attachment; filename=""0000000000111111111122222"""u8,
             "attachment"u8,
-            m(filenameˢ, "0000000000111111111122222")), // #attwithasciifilename35
-
+            m(filenameˢ, "0000000000111111111122222")),
+        // #attwithasciifilename35
         new(@"attachment; filename=""00000000001111111111222222222233333"""u8,
             "attachment"u8,
-            m(filenameˢ, "00000000001111111111222222222233333")), // #attwithasciifnescapedchar
-
+            m(filenameˢ, "00000000001111111111222222222233333")),
+        // #attwithasciifnescapedchar
         new(@"attachment; filename=""f\oo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fOoHtmlˢ)), // #attwithasciifnescapedquote
-
+            m(filenameˢ, fOoHtmlˢ)),
+        // #attwithasciifnescapedquote
         new(@"attachment; filename=""\""quoting\"" tested.html"""u8,
             "attachment"u8,
-            m(filenameˢ, quotingTestedHtmlˢ)), // #attwithquotedsemicolon
-
+            m(filenameˢ, quotingTestedHtmlˢ)),
+        // #attwithquotedsemicolon
         new(@"attachment; filename=""Here's a semicolon;.html"""u8,
             "attachment"u8,
-            m(filenameˢ, hereSASemicolonHtmlˢ)), // #attwithfilenameandextparam
-
+            m(filenameˢ, hereSASemicolonHtmlˢ)),
+        // #attwithfilenameandextparam
         new(@"attachment; foo=""bar""; filename=""foo.html"""u8,
             "attachment"u8,
-            m(fooˢ, barˢ, filenameˢ, fooHtmlˢ)), // #attwithfilenameandextparamescaped
-
+            m(fooˢ, barˢ, filenameˢ, fooHtmlˢ)),
+        // #attwithfilenameandextparamescaped
         new(@"attachment; foo=""\""\\"";filename=""foo.html"""u8,
             "attachment"u8,
-            m(fooˢ, "\"\\", filenameˢ, fooHtmlˢ)), // #attwithasciifilenameucase
-
+            m(fooˢ, "\"\\", filenameˢ, fooHtmlˢ)),
+        // #attwithasciifilenameucase
         new(@"attachment; FILENAME=""foo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)), // #attwithasciifilenamenq
-
+            m(filenameˢ, fooHtmlˢ)),
+        // #attwithasciifilenamenq
         new(@"attachment; filename=foo.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)), // #attwithasciifilenamenqs
-
+            m(filenameˢ, fooHtmlˢ)),
+        // #attwithasciifilenamenqs
         new(@"attachment; filename=foo.html ;"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)), // #attwithfntokensq
-
+            m(filenameˢ, fooHtmlˢ)),
+        // #attwithfntokensq
         new(@"attachment; filename='foo.html'"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ2)), // #attwithisofnplain
-
+            m(filenameˢ, fooHtmlˢ2)),
+        // #attwithisofnplain
         new(@"attachment; filename=""foo-ä.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attwithutf8fnplain
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attwithutf8fnplain
         new(@"attachment; filename=""foo-Ã¤.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ4)), // #attwithfnrawpctenca
-
+            m(filenameˢ, fooHtmlˢ4)),
+        // #attwithfnrawpctenca
         new(@"attachment; filename=""foo-%41.html"""u8,
             "attachment"u8,
-            m(filenameˢ, foo41Htmlˢ)), // #attwithfnusingpct
-
+            m(filenameˢ, foo41Htmlˢ)),
+        // #attwithfnusingpct
         new(@"attachment; filename=""50%.html"""u8,
             "attachment"u8,
-            m(filenameˢ, htmlˢ)), // #attwithfnrawpctencaq
-
+            m(filenameˢ, htmlˢ)),
+        // #attwithfnrawpctencaq
         new(@"attachment; filename=""foo-%\41.html"""u8,
             "attachment"u8,
-            m(filenameˢ, foo41Htmlˢ2)), // #attwithnamepct
-
+            m(filenameˢ, foo41Htmlˢ2)),
+        // #attwithnamepct
         new(@"attachment; name=""foo-%41.html"""u8,
             "attachment"u8,
-            m(nameˢ, foo41Htmlˢ)), // #attwithfilenamepctandiso
-
+            m(nameˢ, foo41Htmlˢ)),
+        // #attwithfilenamepctandiso
         new(@"attachment; name=""ä-%41.html"""u8,
             "attachment"u8,
-            m(nameˢ, htmlˢ2)), // #attwithfnrawpctenclong
-
+            m(nameˢ, htmlˢ2)),
+        // #attwithfnrawpctenclong
         new(@"attachment; filename=""foo-%c3%a4-%e2%82%ac.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooC3A4E282AcHtmlˢ)), // #attwithasciifilenamews1
-
+            m(filenameˢ, fooC3A4E282AcHtmlˢ)),
+        // #attwithasciifilenamews1
         new(@"attachment; filename =""foo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)), // #attmissingdisposition
-
+            m(filenameˢ, fooHtmlˢ)),
+        // #attmissingdisposition
         new(@"filename=foo.html"u8,
-            ""u8, m()), // #attmissingdisposition2
-
+            ""u8, m()),
+        // #attmissingdisposition2
         new(@"x=y; filename=foo.html"u8,
-            ""u8, m()), // #attmissingdisposition3
-
+            ""u8, m()),
+        // #attmissingdisposition3
         new(@"""foo; filename=bar;baz""; filename=qux"u8,
-            ""u8, m()), // #attmissingdisposition4
-
+            ""u8, m()),
+        // #attmissingdisposition4
         new(@"filename=foo.html, filename=bar.html"u8,
-            ""u8, m()), // #emptydisposition
-
+            ""u8, m()),
+        // #emptydisposition
         new(@"; filename=foo.html"u8,
-            ""u8, m()), // #doublecolon
-
+            ""u8, m()),
+        // #doublecolon
         new(@": inline; attachment; filename=foo.html"u8,
-            ""u8, m()), // #attandinline
-
+            ""u8, m()),
+        // #attandinline
         new(@"inline; attachment; filename=foo.html"u8,
-            ""u8, m()), // #attandinline2
-
+            ""u8, m()),
+        // #attandinline2
         new(@"attachment; inline; filename=foo.html"u8,
-            ""u8, m()), // #attbrokenquotedfn
-
+            ""u8, m()),
+        // #attbrokenquotedfn
         new(@"attachment; filename=""foo.html"".txt"u8,
-            ""u8, m()), // #attbrokenquotedfn2
-
+            ""u8, m()),
+        // #attbrokenquotedfn2
         new(@"attachment; filename=""bar"u8,
-            ""u8, m()), // #attbrokenquotedfn3
-
+            ""u8, m()),
+        // #attbrokenquotedfn3
         new(@"attachment; filename=foo""bar;baz""qux"u8,
-            ""u8, m()), // #attmultinstances
-
+            ""u8, m()),
+        // #attmultinstances
         new(@"attachment; filename=foo.html, attachment; filename=bar.html"u8,
-            ""u8, m()), // #attmissingdelim
-
+            ""u8, m()),
+        // #attmissingdelim
         new(@"attachment; foo=foo filename=bar"u8,
-            ""u8, m()), // #attmissingdelim2
-
+            ""u8, m()),
+        // #attmissingdelim2
         new(@"attachment; filename=bar foo=foo"u8,
-            ""u8, m()), // #attmissingdelim3
-
+            ""u8, m()),
+        // #attmissingdelim3
         new(@"attachment filename=bar"u8,
-            ""u8, m()), // #attreversed
-
+            ""u8, m()),
+        // #attreversed
         new(@"filename=foo.html; attachment"u8,
-            ""u8, m()), // #attconfusedparam
-
+            ""u8, m()),
+        // #attconfusedparam
         new(@"attachment; xfilename=foo.html"u8,
             "attachment"u8,
-            m(xfilenameˢ, fooHtmlˢ)), // #attcdate
-
+            m(xfilenameˢ, fooHtmlˢ)),
+        // #attcdate
         new(@"attachment; creation-date=""Wed, 12 Feb 1997 16:29:51 -0500"""u8,
             "attachment"u8,
-            m(creationDateˢ, wed12Feb19971629510500ˢ)), // #attmdate
-
+            m(creationDateˢ, wed12Feb19971629510500ˢ)),
+        // #attmdate
         new(@"attachment; modification-date=""Wed, 12 Feb 1997 16:29:51 -0500"""u8,
             "attachment"u8,
-            m(modificationDateˢ, wed12Feb19971629510500ˢ)), // #dispext
-
-        new(@"foobar"u8, "foobar"u8, m()), // #dispextbadfn
-
+            m(modificationDateˢ, wed12Feb19971629510500ˢ)),
+        // #dispext
+        new(@"foobar"u8, "foobar"u8, m()),
+        // #dispextbadfn
         new(@"attachment; example=""filename=example.txt"""u8,
             "attachment"u8,
-            m(exampleˢ, filenameExampleTxtˢ)), // #attwithfn2231utf8
-
+            m(exampleˢ, filenameExampleTxtˢ)),
+        // #attwithfn2231utf8
         new(@"attachment; filename*=UTF-8''foo-%c3%a4-%e2%82%ac.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ5)), // #attwithfn2231noc
-
+            m(filenameˢ, fooHtmlˢ5)),
+        // #attwithfn2231noc
         new(@"attachment; filename*=''foo-%c3%a4-%e2%82%ac.html"u8,
             "attachment"u8,
-            m()), // #attwithfn2231utf8comp
-
+            m()),
+        // #attwithfn2231utf8comp
         new(@"attachment; filename*=UTF-8''foo-a%cc%88.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooAHtmlˢ)), // #attwithfn2231ws2
-
+            m(filenameˢ, fooAHtmlˢ)),
+        // #attwithfn2231ws2
         new(@"attachment; filename*= UTF-8''foo-%c3%a4.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attwithfn2231ws3
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attwithfn2231ws3
         new(@"attachment; filename* =UTF-8''foo-%c3%a4.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attwithfn2231quot
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attwithfn2231quot
         new(@"attachment; filename*=""UTF-8''foo-%c3%a4.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attwithfn2231quot2
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attwithfn2231quot2
         new(@"attachment; filename*=""foo%20bar.html"""u8,
             "attachment"u8,
-            m()), // #attwithfn2231singleqmissing
-
+            m()),
+        // #attwithfn2231singleqmissing
         new(@"attachment; filename*=UTF-8'foo-%c3%a4.html"u8,
             "attachment"u8,
-            m()), // #attwithfn2231nbadpct1
-
+            m()),
+        // #attwithfn2231nbadpct1
         new(@"attachment; filename*=UTF-8''foo%"u8,
             "attachment"u8,
-            m()), // #attwithfn2231nbadpct2
-
+            m()),
+        // #attwithfn2231nbadpct2
         new(@"attachment; filename*=UTF-8''f%oo.html"u8,
             "attachment"u8,
-            m()), // #attwithfn2231dpct
-
+            m()),
+        // #attwithfn2231dpct
         new(@"attachment; filename*=UTF-8''A-%2541.html"u8,
             "attachment"u8,
-            m(filenameˢ, a41Htmlˢ)), // #attfncont
-
+            m(filenameˢ, a41Htmlˢ)),
+        // #attfncont
         new(@"attachment; filename*0=""foo.""; filename*1=""html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)), // #attfncontenc
-
+            m(filenameˢ, fooHtmlˢ)),
+        // #attfncontenc
         new(@"attachment; filename*0*=UTF-8''foo-%c3%a4; filename*1="".html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attfncontlz
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attfncontlz
         new(@"attachment; filename*0=""foo""; filename*01=""bar"""u8,
             "attachment"u8,
-            m(filenameˢ, fooˢ)), // #attfncontnc
-
+            m(filenameˢ, fooˢ)),
+        // #attfncontnc
         new(@"attachment; filename*0=""foo""; filename*2=""bar"""u8,
             "attachment"u8,
-            m(filenameˢ, fooˢ)), // #attfnconts1
-
+            m(filenameˢ, fooˢ)),
+        // #attfnconts1
         new(@"attachment; filename*1=""foo.""; filename*2=""html"""u8,
-            "attachment"u8, m()), // #attfncontord
-
+            "attachment"u8, m()),
+        // #attfncontord
         new(@"attachment; filename*1=""bar""; filename*0=""foo"""u8,
             "attachment"u8,
-            m(filenameˢ, foobarˢ)), // #attfnboth
-
+            m(filenameˢ, foobarˢ)),
+        // #attfnboth
         new(@"attachment; filename=""foo-ae.html""; filename*=UTF-8''foo-%c3%a4.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attfnboth2
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attfnboth2
         new(@"attachment; filename*=UTF-8''foo-%c3%a4.html; filename=""foo-ae.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)), // #attfnboth3
-
+            m(filenameˢ, fooHtmlˢ3)),
+        // #attfnboth3
         new(@"attachment; filename*0*=ISO-8859-15''euro-sign%3d%a4; filename*=ISO-8859-1''currency-sign%3d%a4"u8,
             "attachment"u8,
-            m()), // #attnewandfn
-
+            m()),
+        // #attnewandfn
         new(@"attachment; foobar=x; filename=""foo.html"""u8,
             "attachment"u8,
-            m(foobarˢ, "x", filenameˢ, fooHtmlˢ)), // Browsers also just send UTF-8 directly without RFC 2231,
- // at least when the source page is served with UTF-8.
+            m(foobarˢ, "x", filenameˢ, fooHtmlˢ)),
 
+        // Browsers also just send UTF-8 directly without RFC 2231,
+        // at least when the source page is served with UTF-8.
         new(@"form-data; firstname=""Брэд""; lastname=""Фицпатрик"""u8,
             "form-data"u8,
-            m(firstnameˢ, "Брэд", lastnameˢ, "Фицпатрик")), // Empty string used to be mishandled.
+            m(firstnameˢ, "Брэд", lastnameˢ, "Фицпатрик")),
 
-        new(@"foo; bar="""""u8, "foo"u8, m(barˢ, "")), // Microsoft browsers in intranet mode do not think they need to escape \ in file name.
+        // Empty string used to be mishandled.
+        new(@"foo; bar="""""u8, "foo"u8, m(barˢ, "")),
 
+        // Microsoft browsers in intranet mode do not think they need to escape \ in file name.
         new(@"form-data; name=""file""; filename=""C:\dev\go\robots.txt"""u8, "form-data"u8, m(nameˢ, fileˢ, filenameˢ, cDevGoRobotsTxtˢ)),
-        new(@"form-data; name=""file""; filename=""C:\新建文件夹\中文第二次测试.mp4"""u8, "form-data"u8, m(nameˢ, fileˢ, filenameˢ, cMp4ˢ)), // issue #46323 (https://github.com/golang/go/issues/46323)
+        new(@"form-data; name=""file""; filename=""C:\新建文件夹\中文第二次测试.mp4"""u8, "form-data"u8, m(nameˢ, fileˢ, filenameˢ, cMp4ˢ)),
 
+        // issue #46323 (https://github.com/golang/go/issues/46323)
         new(
+            // example from rfc2231-p.3 (https://datatracker.ietf.org/doc/html/rfc2231)
             """
 message/external-body; access-type=URL;
 		URL*0="ftp://";
 		URL*1="cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar";
-"""u8, // example from rfc2231-p.3 (https://datatracker.ietf.org/doc/html/rfc2231)
- // <-- trailing semicolon
-
+"""u8.Raw(), // <-- trailing semicolon
             @"message/external-body"u8,
             m(accessTypeˢ, urlˢ, urlˢ2, ftpCsUtkEduPubMooreBulkˢ)
-        ), // Issue #48866: duplicate parameters containing equal values should be allowed
+        ),
 
+        // Issue #48866: duplicate parameters containing equal values should be allowed
         new(@"text; charset=utf-8; charset=utf-8; format=fixed"u8, "text"u8, m(charsetˢ, utf8ˢ2, formatˢ, fixedˢ)),
         new(@"text; charset=utf-8; format=flowed; charset=utf-8"u8, "text"u8, m(charsetˢ, utf8ˢ2, formatˢ, flowedˢ))
     }.slice();
@@ -490,15 +498,15 @@ internal partial struct badMediaTypeTest {
     internal @string err;
 }
 
-// The following example is from real email delivered by gmail (error: missing semicolon)
-// and it is there to check behavior described in #19498
-// Tests from http://greenbytes.de/tech/tc2231/
 internal static slice<badMediaTypeTest> badMediaTypeTests = new badMediaTypeTest[]{
     new("bogus ;========="u8, "bogus"u8, "mime: invalid media parameter"u8),
+    // The following example is from real email delivered by gmail (error: missing semicolon)
+    // and it is there to check behavior described in #19498
     new("application/pdf; x-mac-type=\"3F3F3F3F\"; x-mac-creator=\"3F3F3F3F\" name=\"a.pdf\";"u8,
         "application/pdf"u8, "mime: invalid media parameter"u8),
     new("bogus/<script>alert</script>"u8, ""u8, "mime: expected token after slash"u8),
     new("bogus/bogus<script>alert</script>"u8, ""u8, "mime: unexpected content after media subtype"u8),
+    // Tests from http://greenbytes.de/tech/tc2231/
     new(@"""attachment"""u8, "attachment"u8, "mime: no media type"u8),
     new("attachment; filename=foo,bar.html"u8, "attachment"u8, "mime: invalid media parameter"u8),
     new("attachment; ;filename=foo"u8, "attachment"u8, "mime: invalid media parameter"u8),
@@ -538,9 +546,8 @@ internal partial struct formatTest {
     internal @string want;
 }
 
-// e.g. Content-Disposition values (RFC 2183); issue 11289
 internal static slice<formatTest> formatTests = new formatTest[]{
-    new("noslash"u8, new map<@string, @string>{["X"u8] = "Y"u8}, "noslash; x=Y"u8),
+    new("noslash"u8, new map<@string, @string>{["X"u8] = "Y"u8}, "noslash; x=Y"u8), // e.g. Content-Disposition values (RFC 2183); issue 11289
     new("foo bar/baz"u8, default!, ""u8),
     new("foo/bar baz"u8, default!, ""u8),
     new("attachment"u8, new map<@string, @string>{["filename"u8] = "ĄĄŽŽČČŠŠ"u8}, "attachment; filename*=utf-8''%C4%84%C4%84%C5%BD%C5%BD%C4%8C%C4%8C%C5%A0%C5%A0"u8),

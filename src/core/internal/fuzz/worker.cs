@@ -24,9 +24,21 @@ using global::go.os;
 
 partial class fuzz_package {
 
+// workerFuzzDuration is the amount of time a worker can spend testing random
+// variations of an input given by the coordinator.
 internal static time.Duration workerFuzzDuration => /* 100 * time.Millisecond */ 100000000;
+
+// workerTimeoutDuration is the amount of time a worker can go without
+// responding to the coordinator before being stopped.
 internal static time.Duration workerTimeoutDuration => /* 1 * time.Second */ 1000000000;
+
+// workerExitCode is used as an exit code by fuzz worker processes after an internal error.
+// This distinguishes internal errors from uncontrolled panics and other crashes.
+// Keep in sync with internal/fuzz.workerExitCode.
 internal static UntypedInt workerExitCode => 70;
+
+// workerSharedMemSize is the maximum size of the shared memory file used to
+// communicate with workers. This limits the size of fuzz inputs.
 internal static UntypedInt workerSharedMemSize => /* 100 << 20 */ 104857600; // 100 MB
 
 // worker manages a worker process running a test binary. The worker object
@@ -59,7 +71,6 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir,
         binPath: binPath,
         args: args,
         env: env.slice(0, len(env), len(env)), // copy on append to ensure workers don't overwrite each other.
-
         coordinator: Ꮡc,
         memMu: memMu
     )), default!);
@@ -98,23 +109,24 @@ internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
                 }
             }
         }
+
         var selᴛ7 = ctx.Done();
         var selᴛ8 = w.termC;
         var selᴛ9 = (~w.coordinator).inputC;
         var selᴛ10 = (~w.coordinator).minimizeC;
         switch (select(ᐸꟷ(selᴛ7, ꓸꓸꓸ), ᐸꟷ(selᴛ8, ꓸꓸꓸ), ᐸꟷ(selᴛ9, ꓸꓸꓸ), ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
         case 0 when selᴛ7.ꟷᐳ(out _): {
+            // Worker was told to stop.
             var err = Ꮡw.stop();
             if (err != default! && !w.interrupted && !isInterruptError(err)) {
-                // Worker was told to stop.
                 return err;
             }
             return ctx.Err();
         }
         case 1 when selᴛ8.ꟷᐳ(out _): {
+            // Worker process terminated unexpectedly while waiting for input.
             var err = Ꮡw.stop();
             if (w.interrupted) {
-                // Worker process terminated unexpectedly while waiting for input.
                 throw panic("worker interrupted after unexpected termination");
             }
             if (err == default! || isInterruptError(err)) {
@@ -137,14 +149,14 @@ internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
                     return fmt.Errorf("fuzzing process exited unexpectedly due to an internal failure: %w"u8, err);
                 }
             }
-            return fmt.Errorf("fuzzing process hung or terminated unexpectedly: %w"u8, // Worker exited non-zero or was terminated by a non-interrupt
- // signal (for example, SIGSEGV) while fuzzing.
- err);
+            // Worker exited non-zero or was terminated by a non-interrupt
+            // signal (for example, SIGSEGV) while fuzzing.
+            return fmt.Errorf("fuzzing process hung or terminated unexpectedly: %w"u8, err);
+            // TODO(jayconrod,katiehockman): if -keepfuzzing, restart worker.
         }
         case 2 when selᴛ9.ꟷᐳ(out var input): {
-            var args = new fuzzArgs( // TODO(jayconrod,katiehockman): if -keepfuzzing, restart worker.
- // Received input from coordinator.
-
+            // Received input from coordinator.
+            var args = new fuzzArgs(
                 Limit: input.limit,
                 Timeout: input.timeout,
                 Warmup: input.warmup,
@@ -199,8 +211,8 @@ internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) {
             break;
         }
         case 3 when selᴛ10.ꟷᐳ(out var input): {
-            var (result, err) = Ꮡw.minimize(ctx, // Received input to minimize from coordinator.
- input);
+            // Received input to minimize from coordinator.
+            var (result, err) = Ꮡw.minimize(ctx, input);
             if (err != default!) {
                 // Error minimizing. Send back the original input. If it didn't cause
                 // an error before, report it as causing an error now.
@@ -248,6 +260,7 @@ internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, conte
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
+
         var args = new minimizeArgs(
             Limit: input.limit,
             Timeout: input.timeout,
@@ -280,9 +293,11 @@ internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, conte
                 totalDuration: resp.Duration
             ), default!); goto ᒐdone;
         }
+
         if (input.crasherMsg != ""u8 && resp.Err == ""u8) {
             (min, err) = (new fuzzResult(nil), fmt.Errorf("attempted to minimize a crash but could not reproduce"u8)); goto ᒐdone;
         }
+
         (min, err) = (new fuzzResult(
             entry: entry,
             crasherMsg: resp.Err,
@@ -360,9 +375,11 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
         w.waitErr = default!;
         w.interrupted = false;
         w.termC = default!;
+
         var cmd = exec.Command(w.binPath, w.args.ꓸꓸꓸ);
         cmd.Value.Dir = w.dir;
         cmd.Value.Env = w.env.slice(0, len(w.env), len(w.env)); // copy on append to ensure workers don't overwrite each other.
+
         // Create the "fuzz_in" and "fuzz_out" pipes so we can communicate with
         // the worker. We don't use stdin and stdout, since the test binary may
         // do something else with those.
@@ -385,6 +402,7 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
         var fuzzOutWʗ1 = fuzzOutW;
         defer(() => fuzzOutWʗ1.Close(), ref ᒐ);
         setWorkerComm(ref (cmd).DerefOrNull(), new workerComm(fuzzIn: fuzzInR, fuzzOut: fuzzOutW, memMu: w.memMu));
+
         // Start the worker process.
         {
             var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
@@ -393,6 +411,7 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
                 err = errΔ1; goto ᒐdone;
             }
         }
+
         // Worker started successfully.
         // After this, w.client owns fuzzInW and fuzzOutR, so w.client.Close must be
         // called later by stop.
@@ -401,10 +420,12 @@ internal static partial error /*err*/ start(this ж<worker> Ꮡw) {
         var comm = new workerComm(fuzzIn: fuzzInW, fuzzOut: fuzzOutR, memMu: w.memMu);
         var m = newMutator();
         w.client = newWorkerClient(comm, m);
+
         goǃ(() => {
             Ꮡw.Value.waitErr = Ꮡw.Value.cmd.Wait();
             close(Ꮡw.Value.termC);
         });
+
         err = default!;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -430,21 +451,22 @@ internal static partial error stop(this ж<worker> Ꮡw) {
     var selᴛ11 = w.termC;
     switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
     case 0 when selᴛ11.ꟷᐳ(out _): {
+        // Worker already terminated.
         if (w.client == nil) {
-            // Worker already terminated.
             // stop already called.
             return w.waitErr;
         }
+        // Possible unexpected termination.
         w.client.Close();
         w.cmd = default!;
         w.client = default!;
         return w.waitErr;
     }
     default: {
+        // Worker still running.
         break;
     }}
-    // Possible unexpected termination.
-    // Worker still running.
+
     // Tell the worker to stop by closing fuzz_in. It won't actually stop until it
     // finishes with earlier calls.
     var closeC = new channel<EmptyStruct>(0);
@@ -453,6 +475,7 @@ internal static partial error stop(this ж<worker> Ꮡw) {
         Ꮡw.Value.client.Close();
         close(closeCʗ1);
     });
+
     var sig = os.Interrupt;
     if (Δruntime.GOOS == "windows"u8) {
         // Per https://golang.org/pkg/os/#Signal, “Interrupt is not implemented on
@@ -460,12 +483,14 @@ internal static partial error stop(this ж<worker> Ꮡw) {
         // Fall back to Kill instead.
         sig = os.ΔKill;
     }
+
     var t = time.NewTimer(workerTimeoutDuration);
     while (ᐧ) {
         var selᴛ12 = w.termC;
         var selᴛ13 = (~t).C;
         switch (select(ᐸꟷ(selᴛ12, ꓸꓸꓸ), ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
         case 0 when selᴛ12.ꟷᐳ(out _): {
+            // Worker terminated.
             t.Stop();
             ᐸꟷ(closeC);
             w.cmd = default!;
@@ -473,27 +498,25 @@ internal static partial error stop(this ж<worker> Ꮡw) {
             return w.waitErr;
         }
         case 1 when selᴛ13.ꟷᐳ(out _): {
+            // Timer fired before worker terminated.
             w.interrupted = true;
             var exprᴛ1 = sig;
             if (AreEqual(exprᴛ1, os.Interrupt)) {
+                // Try to stop the worker with SIGINT and wait a little longer.
                 (~w.cmd).Process.Signal(sig);
                 sig = os.ΔKill;
                 t.Reset(workerTimeoutDuration);
             }
             else if (AreEqual(exprᴛ1, os.ΔKill)) {
+                // Try to stop the worker with SIGKILL and keep waiting.
                 (~w.cmd).Process.Signal(sig);
                 sig = default!;
                 t.Reset(workerTimeoutDuration);
             }
             else if (AreEqual(exprᴛ1, default!)) {
-                fmt.Fprintf((~w.coordinator).opts.Log, // Worker terminated.
- // Timer fired before worker terminated.
- // Try to stop the worker with SIGINT and wait a little longer.
- // Try to stop the worker with SIGKILL and keep waiting.
- // Still waiting. Print a message to let the user know why.
- "waiting for fuzzing process to terminate...\n"u8);
+                // Still waiting. Print a message to let the user know why.
+                fmt.Fprintf((~w.coordinator).opts.Log, "waiting for fuzzing process to terminate...\n"u8);
             }
-
             break;
         }}
     }
@@ -647,7 +670,7 @@ partial struct workerComm {
 // processes in parallel and to collect inputs that caused crashes from shared
 // memory after a worker process terminates unexpectedly.
 partial struct workerServer {
-    internal partial ref workerComm workerComm { get; }
+    /*embed*/ internal workerComm workerComm;
     internal ж<mutator> m;
     // coverageMask is the local coverage data for the worker. It is
     // periodically updated to reflect the data in the coordinator when new
@@ -690,6 +713,7 @@ internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) {
                 }
             }
         }
+
         any resp = default!;
         switch (ᐧ) {
         case {} when c.Fuzz != nil: {
@@ -760,6 +784,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
         defer(() => {
             resp.TotalDuration = time.Since(startʗ1);
         }, ref ᒐ);
+
         if (args.Timeout != 0) {
             Action cancel = default!;
             (ctx, cancel) = context.WithTimeout(ctx, args.Timeout);
@@ -777,6 +802,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
             resp.InternalErr = fmt.Sprintf("mem.header().count %d already exceeds args.Limit %d"u8, (~mem.header()).count, args.Limit);
             goto ᒐdone;
         }
+
         var (originalVals, err) = unmarshalCorpusFile(mem.valueCopy());
         if (err != default!) {
             resp.InternalErr = err.Error();
@@ -784,6 +810,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
         }
         var vals = new slice<any>(len(originalVals));
         copy(vals, originalVals);
+
         var argsʗ1 = args;
         var memʗ2 = mem;
         bool shouldStop() => argsʗ1.Limit > 0 && (~memʗ2.header()).count >= argsʗ1.Limit;
@@ -806,6 +833,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
             }
             return (dur, default!, "");
         }
+
         if (args.Warmup) {
             var (dur, _, errMsg) = fuzzOnce(new CorpusEntry(Values: vals));
             if (errMsg != ""u8) {
@@ -818,6 +846,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
             }
             goto ᒐdone;
         }
+
         while (ᐧ) {
             var selᴛ14 = ctx.Done();
             switch (trySelect(ᐸꟷ(selᴛ14, ꓸꓸꓸ))) {
@@ -830,6 +859,7 @@ internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.
                     (~ws.m).r.save(mem.header().of(sharedMemHeader.ᏑrandState), mem.header().of(sharedMemHeader.ᏑrandInc));
                 }
                 ws.m.mutate(vals, builtin.cap(mem.valueRef()));
+
                 var entry = new CorpusEntry(Values: vals);
                 var (dur, cov, errMsg) = fuzzOnce(entry);
                 if (errMsg != ""u8) {
@@ -881,6 +911,7 @@ internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, 
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
+
         // Minimize the values in vals, then write to shared memory. We only write
         // to shared memory after completing minimization.
         (var success, err) = Ꮡws.minimizeInput(ctx, vals, mem, args);
@@ -917,9 +948,9 @@ internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, 
 // successful and an error if one was found.
 internal static (bool success, error retErr) minimizeInput(this ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) {
     error retErr = default!;
-
     ref var ws = ref Ꮡws.DerefOrNull();
     ref var mem = ref Ꮡmem.DerefOrNull();
+
     ref var keepCoverage = ref heap<slice<byte>>(out var ᏑkeepCoverage);
     keepCoverage = args.KeepCoverage;
     ref var memBytes = ref heap<slice<byte>>(out var ᏑmemBytes);
@@ -932,6 +963,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
     if (shouldStop()) {
         return (false, default!);
     }
+
     // Check that the original value preserves coverage or causes an error.
     // If not, then whatever caused us to think the value was interesting may
     // have been a flake, and we can't minimize it.
@@ -946,6 +978,7 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
         return (false, default!);
     }
     mem.header().Value.rawInMem = true;
+
     // tryMinimized runs the fuzz function with candidate replacing the value
     // at index valI. tryMinimized returns whether the input with candidate is
     // interesting for the same reason as the original input: it returns
@@ -962,14 +995,13 @@ internal static (bool success, error retErr) minimizeInput(this ж<workerServer>
             break;
         }
         case @string: {
-            valsʗ1[argsʗ2.Index] = ((@string)candidate);
+            valsʗ1[argsʗ2.Index] = (@string)candidate;
             break;
         }
         default: {
             throw panic("impossible");
             break;
         }}
-
         copy(bPtrʗ1.ValueSlot, candidate);
         bPtrʗ1.ValueSlot = (bPtrʗ1.ValueSlot).slice(0, len(candidate));
         Ꮡmem.Value.setValueLen(len(candidate));
@@ -1026,7 +1058,7 @@ internal static pingResponse ping(this ref workerServer ws, context.Context ctx,
 // workerClient to call methods in each worker process (handled by
 // workerServer).
 partial struct workerClient {
-    internal partial ref workerComm workerComm { get; }
+    /*embed*/ internal workerComm workerComm;
     internal ж<mutator> m;
     // mu is the mutex protecting the workerComm.fuzzIn pipe. This must be
     // locked before making calls to the workerServer. It prevents
@@ -1051,6 +1083,7 @@ internal static error Close(this ж<workerClient> Ꮡwc) {
 
         wc.mu.Lock();
         ᒐd1 = true;
+
         // Close fuzzIn. This signals to the server that there are no more calls,
         // and it should exit.
         {
@@ -1059,6 +1092,7 @@ internal static error Close(this ж<workerClient> Ꮡwc) {
                 return err;
             }
         }
+
         // Drain fuzzOut and close it. When the server exits, the kernel will close
         // its end of fuzzOut, and we'll get EOF.
         {
@@ -1091,11 +1125,12 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
     GoFrame ᒐ = default;
     try {
         ref var wc = ref Ꮡwc.DerefOrNull();
-
         ref var args = ref heap(argsʗp, out var Ꮡargs);
         ref var resp = ref Ꮡresp.Value;
+
         wc.mu.Lock();
         defer(Ꮡwc.of(workerClient.Ꮡmu).Unlock, ref ᒐ);
+
         ref var mem = ref heap<ж<sharedMem>>(out var Ꮡmem);
         (mem, var ok) = ᐸꟷ(wc.memMu, ꟷ);
         if (!ok) {
@@ -1119,6 +1154,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
             if (!isMinimizable(reflect.TypeOf(v))) {
                 continue;
             }
+
             wc.memMu.ᐸꟷ(mem);
             args.Index = i;
             var c = new call(Minimize: Ꮡargs);
@@ -1127,6 +1163,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
             if (!ok) {
                 (entryOut, resp, retErr) = (new CorpusEntry(), new minimizeResponse(nil), errSharedMemClosed); goto ᒐdone;
             }
+
             if (callErr != default!) {
                 retErr = callErr;
                 if (!(~mem.header()).rawInMem) {
@@ -1138,7 +1175,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
                 // caused the error.
                 switch (entryOut.Values[i].type()) {
                 case @string: {
-                    entryOut.Values[i] = ((@string)mem.valueCopy());
+                    entryOut.Values[i] = (@string)mem.valueCopy();
                     break;
                 }
                 case slice<byte>: {
@@ -1149,11 +1186,11 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
                     throw panic("impossible");
                     break;
                 }}
-
                 entryOut.Data = marshalCorpusFile(entryOut.Values.ꓸꓸꓸ);
                 // Stop minimizing; another unrecoverable error is likely to occur.
                 break;
             }
+
             if (resp.WroteToMem) {
                 // Minimization succeeded, and mem holds the marshaled data.
                 entryOut.Data = mem.valueCopy();
@@ -1162,6 +1199,7 @@ internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) mini
                     (entryOut, resp, retErr) = (new CorpusEntry(), new minimizeResponse(nil), fmt.Errorf("workerClient.minimize unmarshaling minimized value: %v"u8, err)); goto ᒐdone;
                 }
             }
+
             // Prepare for next iteration of the loop.
             if (args.Timeout != 0) {
                 args.Timeout -= resp.Duration;
@@ -1197,11 +1235,12 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
     GoFrame ᒐ = default;
     try {
         ref var wc = ref Ꮡwc.DerefOrNull();
-
         ref var args = ref heap(argsʗp, out var Ꮡargs);
         ref var resp = ref Ꮡresp.Value;
+
         wc.mu.Lock();
         defer(Ꮡwc.of(workerClient.Ꮡmu).Unlock, ref ᒐ);
+
         var (mem, ok) = ᐸꟷ(wc.memMu, ꟷ);
         if (!ok) {
             (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(nil), true, errSharedMemClosed); goto ᒐdone;
@@ -1214,6 +1253,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
         }
         mem.setValue(inp);
         wc.memMu.ᐸꟷ(mem);
+
         var c = new call(Fuzz: Ꮡargs);
         var callErr = wc.callLocked(ctx, c, Ꮡresp);
         if (resp.InternalErr != ""u8) {
@@ -1228,6 +1268,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
             Ꮡwc.Value.memMu.ᐸꟷ(memʗ1);
         }, ref ᒐ);
         resp.Count = mem.header().Value.count;
+
         if (!bytes.Equal(inp, mem.valueRef())) {
             (entryOut, resp, isInternalError, err) = (new CorpusEntry(), new fuzzResponse(nil), true, errors.New(workerServerFuzzModifiedˢ)); goto ᒐdone;
         }
@@ -1246,6 +1287,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
                 }
             }
             var dataOut = marshalCorpusFile(valuesOut.ꓸꓸꓸ);
+
             var h = sha256.Sum256(dataOut);
             @string name = fmt.Sprintf("%x"u8, h[..4]);
             entryOut = new CorpusEntry(
@@ -1260,6 +1302,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
                 entryOut.IsSeed = entryIn.IsSeed;
             }
         }
+
         (entryOut, resp, isInternalError, err) = (entryOut, resp, false, callErr);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -1319,6 +1362,7 @@ internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<b
         }
     }
     var done = new channel<EmptyStruct>(0);
+
     // This goroutine may stay blocked after Read returns because the underlying
     // read is blocked.
     nint n = default!;
@@ -1329,6 +1373,7 @@ internal static partial (nint, error) Read(this ж<contextReader> Ꮡcr, slice<b
         (n, Ꮡerr.ValueSlot) = Ꮡcr.Value.r.Read(bʗ1);
         close(doneʗ1);
     });
+
     var selᴛ15 = cr.ctx.Done();
     var selᴛ16 = done;
     switch (select(ᐸꟷ(selᴛ15, ꓸꓸꓸ), ᐸꟷ(selᴛ16, ꓸꓸꓸ))) {

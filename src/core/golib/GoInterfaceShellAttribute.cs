@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace go;
 
@@ -37,6 +38,14 @@ namespace go;
 [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
 public sealed class GoInterfaceShellAttribute : Attribute
 {
+    // What AdapterBinder reads of each shell by reflection, kept by both trimmers for every interface this attribute is
+    // kept on: a typeof argument to an attribute parameter carrying [DynamicallyAccessedMembers] keeps those members. A
+    // full-trim Native AOT publish otherwise dropped the object shell's constructor, and every duck-typed assertion over a
+    // value (fmt's Stringer against reflect.Kind, 2026-10-12) missed. The generic shell's bound-flags are static fields.
+    private const DynamicallyAccessedMemberTypes ObjectShellMembers = DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors;
+
+    private const DynamicallyAccessedMemberTypes GenericShellMembers = ObjectShellMembers | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields;
+
     /// <summary>
     /// Creates a new <see cref="GoInterfaceShellAttribute"/>.
     /// </summary>
@@ -53,7 +62,7 @@ public sealed class GoInterfaceShellAttribute : Attribute
     /// The interface's transitive Go method set, in the order the object shell's forwarders index it.
     /// Bare (unescaped) names, matching <see cref="System.Reflection.MemberInfo.Name"/>.
     /// </param>
-    public GoInterfaceShellAttribute(Type genericShell, Type? objectShell, params string[] methodNames)
+    public GoInterfaceShellAttribute([DynamicallyAccessedMembers(GenericShellMembers)] Type genericShell, [DynamicallyAccessedMembers(ObjectShellMembers)] Type? objectShell, params string[] methodNames)
     {
         GenericShell = genericShell;
         ObjectShell = objectShell;
@@ -63,11 +72,13 @@ public sealed class GoInterfaceShellAttribute : Attribute
     /// <summary>
     /// Gets the open generic delegate-bound shell type.
     /// </summary>
+    [DynamicallyAccessedMembers(GenericShellMembers)]
     public Type GenericShell { get; }
 
     /// <summary>
     /// Gets the non-generic reflective shell type, if one was emitted.
     /// </summary>
+    [DynamicallyAccessedMembers(ObjectShellMembers)]
     public Type? ObjectShell { get; }
 
     /// <summary>

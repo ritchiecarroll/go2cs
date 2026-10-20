@@ -39,7 +39,6 @@ internal static bool nameFilter(@string filename) {
     if (exprᴛ1 == "parser.go.orig"u8) {
         return true; // permit but should be ignored by ParseDir
     }
-
     return false;
 }
 
@@ -135,6 +134,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr"u8, src, x);
         }
     }
+
     // a valid type expression
     src = structXIntˢ;
     (x, err) = ParseExpr(src);
@@ -147,6 +147,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseExpr(%q): got %T, want *ast.StructType"u8, src, x);
         }
     }
+
     // an invalid expression
     src = "a + *"u8;
     (x, err) = ParseExpr(src);
@@ -161,6 +162,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseExpr(%q): got %T, want *ast.BinaryExpr"u8, src, x);
         }
     }
+
     // a valid expression followed by extra tokens is invalid
     src = aIXˢ;
     {
@@ -168,6 +170,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseExpr(%q): got no error"u8, src);
         }
     }
+
     // a semicolon is not permitted unless automatically inserted
     src = "a + b\n"u8;
     {
@@ -181,6 +184,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseExpr(%q): got no error"u8, src);
         }
     }
+
     // various other stuff following a valid expression
     @string validExpr = validExprᶜ;
     @string anything = anythingᶜ;
@@ -192,6 +196,7 @@ public static void TestParseExpr(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // ParseExpr must not crash
     foreach (var (_, srcΔ2) in valids) {
         ParseExpr(srcΔ2);
@@ -206,6 +211,7 @@ public static void TestColonEqualsScope(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // RHS refers to undefined globals; LHS does not.
     var @as = (~(~(~f).Decls[0]._<ж<ast.FuncDecl>>()).Body).List[0]._<ж<ast.AssignStmt>>();
     foreach (var (_, v) in (~@as).Rhs) {
@@ -230,6 +236,7 @@ public static void TestVarScope(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // RHS refers to undefined globals; LHS does not.
     var @as = (~(~(~(~(~f).Decls[0]._<ж<ast.FuncDecl>>()).Body).List[0]._<ж<ast.DeclStmt>>()).Decl._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.ValueSpec>>();
     foreach (var (_, v) in (~@as).Values) {
@@ -255,29 +262,29 @@ type T struct{}
 var x int
 func f() { L: }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestObjects(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     @string src = srcᶜ;
+
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, src, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var objects = new map<@string, ast.ObjKind>{
         ["p"u8] = ast.Bad, // not in a scope
-
         ["fmt"u8] = ast.Bad, // not resolved yet
-
         ["pi"u8] = ast.Con,
         ["T"u8] = ast.Typ,
         ["x"u8] = ast.Var,
         ["int"u8] = ast.Bad, // not resolved yet
-
         ["f"u8] = ast.Fun,
         ["L"u8] = ast.Lbl
     };
+
     var objectsʗ1 = objects;
     ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
         {
@@ -327,32 +334,34 @@ type s1b struct { *int }
 type s2b struct { byte; int; *float }
 type s3b struct { a, b *s3b; c []float }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestUnresolved(ж<testing.T> Ꮡt) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packagePFuncF1aIntFuncˢ, 0);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    @string want = "int "u8 + "byte int float "u8 + "int float "u8 + "complex "u8 + "complex "u8 + "int "u8 + "byte int float "u8 + "int float "u8 + "complex "u8 + "complex "u8 + "int "u8 + "byte int "u8 + "int float "u8 + "int "u8 + "byte int float "u8 + "float "u8; // s3a
-    // f1a
-    // f2a
-    // f3a
-    // f4a
-    // f5a
-    //
-    // f1b
-    // f2b
-    // f3b
-    // f4b
-    // f5b
-    //
-    // s1a
-    // s2a
-    // s3a
-    //
-    // s1a
-    // s2a
+
+    @string want = "int "u8 + // f1a
+        "byte int float "u8 + // f2a
+        "int float "u8 + // f3a
+        "complex "u8 + // f4a
+        "complex "u8 + // f5a
+        //
+        "int "u8 + // f1b
+        "byte int float "u8 + // f2b
+        "int float "u8 + // f3b
+        "complex "u8 + // f4b
+        "complex "u8 + // f5b
+        //
+        "int "u8 + // s1a
+        "byte int "u8 + // s2a
+        "int float "u8 + // s3a
+        //
+        "int "u8 + // s1a
+        "byte int float "u8 + // s2a
+        "float "u8; // s3a
+
     // collect unresolved identifiers
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (_, u) in (~f).Unresolved) {
@@ -360,6 +369,7 @@ public static void TestUnresolved(ж<testing.T> Ꮡt) {
         Ꮡbuf.WriteByte((rune)' ');
     }
     @string got = buf.String();
+
     if (got != want) {
         Ꮡt.Errorf("\ngot:  %s\nwant: %s"u8, got, want);
     }
@@ -385,7 +395,7 @@ func ExampleCount() {
 	// 5
 }
 
-"""u8;
+"""u8.Raw();
 
 public static void TestCommentGroups(ж<testing.T> Ꮡt) {
     var (f, err) = ParseFile(token.NewFileSet(), ""u8, packageP1a1b1c1d2a2bˢ, ParseComments);
@@ -498,7 +508,7 @@ type T struct {
 	f7 int ; /*f7a*/ /*f7b*/ //f7c
 }
 
-"""u8;
+"""u8.Raw();
 internal static readonly @string tF1ˢ = "T.F1"u8;
 internal static readonly @string f1LeadCommentˢ = "/* F1 lead comment *///"u8;
 internal static readonly @string f1LineCommentˢ = "/* F1 */// line comment"u8;
@@ -529,6 +539,7 @@ public static void TestLeadAndLineComments(ж<testing.T> Ꮡt) {
     checkFieldComments(Ꮡt, f, tF5ˢ, ""u8, f5LineCommentˢ);
     checkFieldComments(Ꮡt, f, tF6ˢ, ""u8, f6LineCommentˢ);
     checkFieldComments(Ꮡt, f, tF7ˢ, ""u8, f7aF7bF7cˢ);
+
     ast.FileExports(f);
     checkFieldComments(Ꮡt, f, tF1ˢ, f1LeadCommentˢ, f1LineCommentˢ);
     checkFieldComments(Ꮡt, f, tF2ˢ, f2LeadCommentˢ, f2LineCommentˢ);
@@ -560,6 +571,7 @@ public static void TestIssue9979(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         tokenꓸPos pos = default!;
         tokenꓸPos end = default!;
         var fsetʗ1 = fset;
@@ -574,14 +586,14 @@ public static void TestIssue9979(ж<testing.T> Ꮡt) {
                 break;
             }
             case ж<ast.EmptyStmt> s: {
+                // check containment
                 if (s.Pos() < pos || s.End() > end) {
-                    // check containment
                     Ꮡt.Errorf("%s: %T[%d, %d] not inside [%d, %d]"u8, src, s.OrTypedNil(), s.Pos(), s.End(), pos, end);
                 }
+                // check semicolon
                 nint offs = fsetʗ1.Position(s.Pos()).Offset;
                 {
                     var ch = src[offs]; if (ch != (rune)';' != (~s).Implicit) {
-                        // check semicolon
                         @string want = wantˢ;
                         if ((~s).Implicit) {
                             want = butIsImplicitˢ;
@@ -614,7 +626,7 @@ var lastDecl int
 
 /* end of file */
 
-"""u8;
+"""u8.Raw();
 
 public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
     @string src = srcᶜ1;
@@ -623,6 +635,7 @@ public static void TestFileStartEndPos(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // File{Start,End} spans the entire file, not just the declarations.
     {
         @string got = fset.Position((~f).FileStart).String();
@@ -654,20 +667,20 @@ internal static readonly @string wantSelᶜ = "&{fmt _}"u8;
 public static void TestIncompleteSelection(ж<testing.T> Ꮡt) {
     foreach (var (_, src) in new @string[]{
         "package p; var _ = fmt."u8, // at EOF
-
-        "package p; var _ = fmt.\ntype X int"u8
+        "package p; var _ = fmt.\ntype X int"u8 // not at EOF
     }.slice()) {
-        // not at EOF
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, ""u8, src, 0);
         if (err == default!) {
             Ꮡt.Errorf("ParseFile(%s) succeeded unexpectedly"u8, src);
             continue;
         }
+
         @string wantErr = wantErrᶜ;
         if (!strings.Contains(err.Error(), wantErr)) {
             Ꮡt.Errorf("ParseFile returned wrong error %q, want %q"u8, err, wantErr);
         }
+
         ref var sel = ref heap<ж<ast.SelectorExpr>>(out var Ꮡsel);
         ast.Inspect(new ast.FileжNode(f), (ast.Node n) => {
             {
@@ -697,7 +710,7 @@ internal static readonly @string srcᶜ2 = """
 package main
 type x int // comment
 
-"""u8;
+"""u8.Raw();
 
 public static void TestLastLineComment(ж<testing.T> Ꮡt) {
     @string src = srcᶜ2;
@@ -711,30 +724,6 @@ public static void TestLastLineComment(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("got %q, want %q"u8, comment, commentˢ);
     }
 }
-
-// The format expands the part inside « » many times.
-// A second set of brackets nested inside the first stops the repetition,
-// so that for example «(«1»)» expands to (((...((((1))))...))).
-// Scopes: InterfaceType, FuncType
-// Parser nodes: UnaryExpr, CompositeLit
-// Parser nodes: UnaryExpr, CompositeLit
-// Parser nodes: UnaryExpr, CompositeLit
-// Parser nodes: CompositeLit, KeyValueExpr
-// Parser nodes: SelectorExpr, CallExpr
-// Parser nodes: BinaryExpr, ParenExpr
-// Parser nodes: Ident, CallExpr
-// Parser nodes: ParenExpr, CallExpr
-// Parser nodes: IfStmt, BlockStmt. Scopes: IfStmt, BlockStmt
-// Scopes: TypeSwitchStmt, CaseClause
-// Scopes: TypeSwitchStmt, CaseClause
-// Scopes: ForStmt, BlockStmt
-// Scopes: ForStmt, BlockStmt
-// Scopes: ForStmt, BlockStmt
-// Scopes: RangeStmt, BlockStmt
-// Scopes: RangeStmt, BlockStmt
-// Scopes: RangeStmt, BlockStmt
-// Parser nodes: GoStmt, FuncLit
-// Parser nodes: DeferStmt, FuncLit
 
 partial struct parseDepthTestsᴛ1 /*dyn*/ {
     internal @string name;
@@ -753,6 +742,9 @@ partial struct parseDepthTestsᴛ1 /*dyn*/ {
     internal nint scopeMultiplier;
 }
 internal static slice<parseDepthTestsᴛ1> parseDepthTests = new parseDepthTestsᴛ1[]{
+    // The format expands the part inside « » many times.
+    // A second set of brackets nested inside the first stops the repetition,
+    // so that for example «(«1»)» expands to (((...((((1))))...))).
     new(name: "array"u8, format: "package main; var x «[1]»int"u8),
     new(name: "slice"u8, format: "package main; var x «[]»int"u8),
     new(name: "struct"u8, format: "package main; var x «struct { X «int» }»"u8, scope: true),
@@ -760,12 +752,12 @@ internal static slice<parseDepthTestsᴛ1> parseDepthTests = new parseDepthTests
     new(name: "func"u8, format: "package main; var x «func()»int"u8, scope: true),
     new(name: "chan"u8, format: "package main; var x «chan »int"u8),
     new(name: "chan2"u8, format: "package main; var x «<-chan »int"u8),
-    new(name: "interface"u8, format: "package main; var x «interface { M() «int» }»"u8, scope: true, scopeMultiplier: 2),
+    new(name: "interface"u8, format: "package main; var x «interface { M() «int» }»"u8, scope: true, scopeMultiplier: 2), // Scopes: InterfaceType, FuncType
     new(name: "map"u8, format: "package main; var x «map[int]»int"u8),
-    new(name: "slicelit"u8, format: "package main; var x = []any{«[]any{«»}»}"u8, parseMultiplier: 3),
-    new(name: "arraylit"u8, format: "package main; var x = «[1]any{«nil»}»"u8, parseMultiplier: 3),
-    new(name: "structlit"u8, format: "package main; var x = «struct{x any}{«nil»}»"u8, parseMultiplier: 3),
-    new(name: "maplit"u8, format: "package main; var x = «map[int]any{1:«nil»}»"u8, parseMultiplier: 3),
+    new(name: "slicelit"u8, format: "package main; var x = []any{«[]any{«»}»}"u8, parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
+    new(name: "arraylit"u8, format: "package main; var x = «[1]any{«nil»}»"u8, parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
+    new(name: "structlit"u8, format: "package main; var x = «struct{x any}{«nil»}»"u8, parseMultiplier: 3), // Parser nodes: UnaryExpr, CompositeLit
+    new(name: "maplit"u8, format: "package main; var x = «map[int]any{1:«nil»}»"u8, parseMultiplier: 3), // Parser nodes: CompositeLit, KeyValueExpr
     new(name: "element"u8, format: "package main; var x = struct{x any}{x: «{«»}»}"u8),
     new(name: "dot"u8, format: "package main; var x = «x.»x"u8),
     new(name: "index"u8, format: "package main; var x = x«[1]»"u8),
@@ -773,28 +765,28 @@ internal static slice<parseDepthTestsᴛ1> parseDepthTests = new parseDepthTests
     new(name: "slice3"u8, format: "package main; var x = x«[1:2:3]»"u8),
     new(name: "dottype"u8, format: "package main; var x = x«.(any)»"u8),
     new(name: "callseq"u8, format: "package main; var x = x«()»"u8),
-    new(name: "methseq"u8, format: "package main; var x = x«.m()»"u8, parseMultiplier: 2),
+    new(name: "methseq"u8, format: "package main; var x = x«.m()»"u8, parseMultiplier: 2), // Parser nodes: SelectorExpr, CallExpr
     new(name: "binary"u8, format: "package main; var x = «1+»1"u8),
-    new(name: "binaryparen"u8, format: "package main; var x = «1+(«1»)»"u8, parseMultiplier: 2),
+    new(name: "binaryparen"u8, format: "package main; var x = «1+(«1»)»"u8, parseMultiplier: 2), // Parser nodes: BinaryExpr, ParenExpr
     new(name: "unary"u8, format: "package main; var x = «^»1"u8),
     new(name: "addr"u8, format: "package main; var x = «& »x"u8),
     new(name: "star"u8, format: "package main; var x = «*»x"u8),
     new(name: "recv"u8, format: "package main; var x = «<-»x"u8),
-    new(name: "call"u8, format: "package main; var x = «f(«1»)»"u8, parseMultiplier: 2),
-    new(name: "conv"u8, format: "package main; var x = «(*T)(«1»)»"u8, parseMultiplier: 2),
+    new(name: "call"u8, format: "package main; var x = «f(«1»)»"u8, parseMultiplier: 2), // Parser nodes: Ident, CallExpr
+    new(name: "conv"u8, format: "package main; var x = «(*T)(«1»)»"u8, parseMultiplier: 2), // Parser nodes: ParenExpr, CallExpr
     new(name: "label"u8, format: "package main; func main() { «Label:» }"u8),
-    new(name: "if"u8, format: "package main; func main() { «if true { «» }»}"u8, parseMultiplier: 2, scope: true, scopeMultiplier: 2),
+    new(name: "if"u8, format: "package main; func main() { «if true { «» }»}"u8, parseMultiplier: 2, scope: true, scopeMultiplier: 2), // Parser nodes: IfStmt, BlockStmt. Scopes: IfStmt, BlockStmt
     new(name: "ifelse"u8, format: "package main; func main() { «if true {} else » {} }"u8, scope: true),
-    new(name: "switch"u8, format: "package main; func main() { «switch { default: «» }»}"u8, scope: true, scopeMultiplier: 2),
-    new(name: "typeswitch"u8, format: "package main; func main() { «switch x.(type) { default: «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "for0"u8, format: "package main; func main() { «for { «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "for1"u8, format: "package main; func main() { «for x { «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "for3"u8, format: "package main; func main() { «for f(); g(); h() { «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "forrange0"u8, format: "package main; func main() { «for range x { «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "forrange1"u8, format: "package main; func main() { «for x = range z { «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "forrange2"u8, format: "package main; func main() { «for x, y = range z { «» }» }"u8, scope: true, scopeMultiplier: 2),
-    new(name: "go"u8, format: "package main; func main() { «go func() { «» }()» }"u8, parseMultiplier: 2, scope: true),
-    new(name: "defer"u8, format: "package main; func main() { «defer func() { «» }()» }"u8, parseMultiplier: 2, scope: true),
+    new(name: "switch"u8, format: "package main; func main() { «switch { default: «» }»}"u8, scope: true, scopeMultiplier: 2), // Scopes: TypeSwitchStmt, CaseClause
+    new(name: "typeswitch"u8, format: "package main; func main() { «switch x.(type) { default: «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: TypeSwitchStmt, CaseClause
+    new(name: "for0"u8, format: "package main; func main() { «for { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: ForStmt, BlockStmt
+    new(name: "for1"u8, format: "package main; func main() { «for x { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: ForStmt, BlockStmt
+    new(name: "for3"u8, format: "package main; func main() { «for f(); g(); h() { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: ForStmt, BlockStmt
+    new(name: "forrange0"u8, format: "package main; func main() { «for range x { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
+    new(name: "forrange1"u8, format: "package main; func main() { «for x = range z { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
+    new(name: "forrange2"u8, format: "package main; func main() { «for x, y = range z { «» }» }"u8, scope: true, scopeMultiplier: 2), // Scopes: RangeStmt, BlockStmt
+    new(name: "go"u8, format: "package main; func main() { «go func() { «» }()» }"u8, parseMultiplier: 2, scope: true), // Parser nodes: GoStmt, FuncLit
+    new(name: "defer"u8, format: "package main; func main() { «defer func() { «» }()» }"u8, parseMultiplier: 2, scope: true), // Parser nodes: DeferStmt, FuncLit
     new(name: "select"u8, format: "package main; func main() { «select { default: «» }» }"u8, scope: true)
 }.slice();
 
@@ -835,6 +827,7 @@ public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
                     // on a per testcase basis.
                     n -= 10;
                 }
+
                 var (pre, mid, post) = split(ttʗ1.format);
                 if (strings.Contains(mid, "«"u8)){
                     var (left, @base, right) = split(mid);
@@ -843,6 +836,7 @@ public static void TestParseDepthLimit(ж<testing.T> Ꮡt) {
                     mid = strings.Repeat(mid, n);
                 }
                 @string input = pre + mid + post;
+
                 var fset = token.NewFileSet();
                 var (_, err) = ParseFile(fset, ""u8, input, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
                 if (size == "small"u8){
@@ -886,6 +880,7 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
                     // on a per testcase basis.
                     n -= 10;
                 }
+
                 var (pre, mid, post) = split(ttʗ1.format);
                 if (strings.Contains(mid, "«"u8)){
                     var (left, @base, right) = split(mid);
@@ -894,6 +889,7 @@ public static void TestScopeDepthLimit(ж<testing.T> Ꮡt) {
                     mid = strings.Repeat(mid, n);
                 }
                 @string input = pre + mid + post;
+
                 var fset = token.NewFileSet();
                 var (_, err) = ParseFile(fset, ""u8, input, DeclarationErrors);
                 if (size == "small"u8){
@@ -923,12 +919,14 @@ public static void TestRangePos(ж<testing.T> Ꮡt) {
         "package p; func _() { for k, v = range x {} }"u8,
         "package p; func _() { for k, v := range x {} }"u8
     }.slice();
+
     foreach (var (_, src) in testcases) {
         var fset = token.NewFileSet();
         var (f, err) = ParseFile(fset, src, src, 0);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
+
         var fsetʗ1 = fset;
         ast.Inspect(new ast.FileжNode(f), (ast.Node x) => {
             switch (x.type()) {
@@ -951,6 +949,7 @@ public static void TestIssue59180(ж<testing.T> Ꮡt) {
         "package p\n//line :1:9223372036854775806\n\n//"u8,
         "package p\n//line file:9223372036854775806\n\n//"u8
     }.slice();
+
     foreach (var (_, src) in testcases) {
         var (_, err) = ParseFile(token.NewFileSet(), ""u8, src, ParseComments);
         if (err == default!) {
@@ -968,6 +967,7 @@ public static void TestGoVersion(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     foreach (var (_, p) in pkgs) {
         @string want = strings.ReplaceAll((~p).Name, "_"u8, "."u8);
         if (want == "none"u8) {
@@ -991,9 +991,11 @@ public static void TestIssue57490(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("syntax error expected, but no error reported"u8);
     }
+
     // Because of the syntax error, the end position of the function declaration
     // is past the end of the file's position range.
     tokenꓸPos funcEnd = (~@file).Decls[0].End();
+
     // Offset(funcEnd) must not panic (to test panic, set debug=true in token package)
     // (panic: offset 35 out of bounds [0, 34] (position 36 out of bounds [1, 35]))
     var tokFile = fset.File(@file.Pos());
@@ -1011,11 +1013,13 @@ internal static readonly @string srcᶜ3 = "package p; type X[A (B),] struct{}"u
 
 public static void TestParseTypeParamsAsParenExpr(ж<testing.T> Ꮡt) {
     @string src = srcᶜ3;
+
     var fset = token.NewFileSet();
     var (f, err) = ParseFile(fset, testGoˢ, src, (global::go.go.parser_package.Mode)(ParseComments | SkipObjectResolution));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var typeParam = (~(~(~(~f).Decls[0]._<ж<ast.GenDecl>>()).Specs[0]._<ж<ast.TypeSpec>>()).TypeParams).List[0].Value.Type;
     var (_, ok) = typeParam._<ж<ast.ParenExpr>>(ᐧ);
     if (!ok) {

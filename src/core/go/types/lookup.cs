@@ -10,6 +10,51 @@ using bytes = bytes_package;
 
 partial class types_package {
 
+// LookupSelection selects the field or method whose ID is Id(pkg,
+// name), on a value of type T. If addressable is set, T is the type
+// of an addressable variable (this matters only for method lookups).
+// T must not be nil.
+//
+// If the selection is valid:
+//
+//   - [Selection.Obj] returns the field ([Var]) or method ([Func]);
+//   - [Selection.Indirect] reports whether there were any pointer
+//     indirections on the path to the field or method.
+//   - [Selection.Index] returns the index sequence, defined below.
+//
+// The last index entry is the field or method index in the (possibly
+// embedded) type where the entry was found, either:
+//
+//  1. the list of declared methods of a named type; or
+//  2. the list of all methods (method set) of an interface type; or
+//  3. the list of fields of a struct type.
+//
+// The earlier index entries are the indices of the embedded struct
+// fields traversed to get to the found entry, starting at depth 0.
+//
+// See also [LookupFieldOrMethod], which returns the components separately.
+public static (Selection, bool) LookupSelection(ΔType T, bool addressable, ж<Package> Ꮡpkg, @string name) {
+    var (obj, index, indirect) = LookupFieldOrMethod(T, addressable, Ꮡpkg, name);
+    SelectionKind kind = default!;
+    switch (obj.type()) {
+    case null: {
+        return (new Selection(nil), false);
+    }
+    case ж<Func>: {
+        kind = MethodVal;
+        break;
+    }
+    case ж<Var>: {
+        kind = FieldVal;
+        break;
+    }
+    default: {
+        throw panic(obj); // can't happen
+        break;
+    }}
+    return (new Selection(kind, T, obj, index, indirect), true);
+}
+
 // Internal use of LookupFieldOrMethod: If the obj result is a method
 // associated with a concrete (non-interface) type, the method's signature
 // may not be fully set up. Call Checker.objDecl(obj, nil) before accessing
@@ -40,6 +85,8 @@ partial class types_package {
 //   - If indirect is set, a method with a pointer receiver type was found
 //     but there was no pointer on the path from the actual receiver type to
 //     the method's formal receiver base type, nor was the receiver addressable.
+//
+// See also [LookupSelection], which returns the result as a [Selection].
 public static (Object obj, slice<nint> index, bool indirect) LookupFieldOrMethod(ΔType T, bool addressable, ж<Package> Ꮡpkg, @string name) {
     if (T == default!) {
         throw panic("LookupFieldOrMethod on nil type");
@@ -76,15 +123,17 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
             }
         }
     }
+
     (obj, index, indirect) = lookupFieldOrMethodImpl(T, addressable, Ꮡpkg, name, foldCase);
-    // If we didn't find anything and if we have a type parameter with a core type,
-    // see if there is a matching field (but not a method, those need to be declared
-    // explicitly in the constraint). If the constraint is a named pointer type (see
-    // above), we are ok here because only fields are accepted as results.
+
+    // If we didn't find anything and if we have a type parameter with a common underlying
+    // type, see if there is a matching field (but not a method, those need to be declared
+    // explicitly in the constraint). If the constraint is a named pointer type (see above),
+    // we are ok here because only fields are accepted as results.
     const bool enableTParamFieldLookup = false; // see go.dev/issue/51576
     if (enableTParamFieldLookup && obj == default! && isTypeParam(T)) {
         {
-            var t = coreType(T); if (t != default!) {
+            var (t, _) = commonUnder(T, default!); if (t != default!) {
                 (obj, index, indirect) = lookupFieldOrMethodImpl(t, addressable, Ꮡpkg, name, foldCase);
                 {
                     var (_, ok) = obj._<ж<Var>>(ᐧ); if (!ok) {
@@ -116,37 +165,43 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
     slice<nint> index = default!;
     bool indirect = default!;
 
-    ref var pkg = ref Ꮡpkg.DerefOrNull();
     // WARNING: The code in this function is extremely subtle - do not modify casually!
     if (name == "_"u8) {
         return (obj, index, indirect); // blank fields/methods are never found
     }
-    // Importantly, we must not call under before the call to deref below (nor
-    // does deref call under), as doing so could incorrectly result in finding
+
+    // Importantly, we must not call Underlying before the call to deref below (nor
+    // does deref call Underlying), as doing so could incorrectly result in finding
     // methods of the pointer base type when T is a (*Named) pointer type.
     var (typ, isPtr) = deref(T);
+
     // *typ where typ is an interface (incl. a type parameter) has no methods.
     if (isPtr) {
         {
-            var (_, ok) = under(typ)._<ж<Interface>>(ᐧ); if (ok) {
+            var (_, ok) = typ.Underlying()._<ж<Interface>>(ᐧ); if (ok) {
                 return (obj, index, indirect);
             }
         }
     }
+
     // Start with typ as single entry at shallowest depth.
     var current = new embeddedType[]{new(typ, default!, isPtr, false)}.slice();
+
     // seen tracks named types that we have seen already, allocated lazily.
     // Used to avoid endless searches in case of recursive types.
     //
     // We must use a lookup on identity rather than a simple map[*Named]bool as
     // instantiated types may be identical but not equal.
     instanceLookup seen = new();
+
     // search current depth
     while (len(current) > 0) {
         slice<embeddedType> next = default!;                          // embedded types found at current depth
+
         // look for (pkg, name) in all types at current depth
         foreach (var (_, e) in current) {
             var typΔ1 = e.typ;
+
             // If we have a named type, we may have associated methods.
             // Look for those first.
             {
@@ -162,6 +217,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
                         }
                     }
                     seen.add(named);
+
                     // look for a matching attached method
                     {
                         var (i, m) = named.lookupMethod(Ꮡpkg, name, foldCase); if (m != nil) {
@@ -178,10 +234,11 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
                     }
                 }
             }
-            switch (under(typΔ1).type()) {
+
+            switch (typΔ1.Underlying().type()) {
             case ж<Struct> t: {
+                // look for a matching field and collect embedded types
                 foreach (var (i, f) in (~t).fields) {
-                    // look for a matching field and collect embedded types
                     if (f.of(Var.Ꮡobject).sameId(Ꮡpkg, name, foldCase)) {
                         assert((~f).typ != default!);
                         index = concat(e.index, i);
@@ -212,9 +269,9 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
                 break;
             }
             case ж<Interface> t: {
+                // look for a matching method (interface may be a type parameter)
                 {
-                    var (i, m) = t.typeSet().LookupMethod(Ꮡpkg, // look for a matching method (interface may be a type parameter)
- name, foldCase); if (m != nil) {
+                    var (i, m) = t.typeSet().LookupMethod(Ꮡpkg, name, foldCase); if (m != nil) {
                         assert((~m).typ != default!);
                         index = concat(e.index, i);
                         if (obj != default! || e.multiples) {
@@ -227,6 +284,7 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
                 break;
             }}
         }
+
         if (obj != default!) {
             // found a potential match
             // spec: "A method call x.m() is valid if the method set of (the type of) x
@@ -243,8 +301,10 @@ internal static (Object obj, slice<nint> index, bool indirect) lookupFieldOrMeth
             }
             return (obj, index, indirect);
         }
+
         current = consolidateMultiples(next);
     }
+
     return (default!, default!, false); // not found
 }
 
@@ -263,14 +323,15 @@ internal static slice<embeddedType> consolidateMultiples(slice<embeddedType> lis
     if (len(list) <= 1) {
         return list; // at most one entry - nothing to do
     }
+
     nint n = 0; // number of entries w/ unique type
     var prev = new map<ΔType, nint>(); // index at which type was previously seen
     foreach (var (_, e) in list) {
         {
             var (i, found) = lookupType(prev, e.typ); if (found){
                 list[i].multiples = true;
-            } else {
                 // ignore this entry
+            } else {
                 prev[e.typ] = n;
                 list[n] = e;
                 n++;
@@ -287,11 +348,13 @@ internal static (nint, bool) lookupType(map<ΔType, nint> m, ΔType typ) {
             return (i, true);
         }
     }
+
     foreach (var (t, i) in m) {
         if (Identical(t, typ)) {
             return (i, true);
         }
     }
+
     return (0, false);
 }
 
@@ -353,13 +416,13 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
 // The comparator is used to compare signatures.
 // If a method is missing and cause is not nil, *cause describes the error.
 internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, bool @static, Func<ΔType, ΔType, bool> equivalent, ж<@string> Ꮡcause) {
-    ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
-    var methods = under(T)._<ж<Interface>>().typeSet().Value.methods; // T must be an interface
+    var methods = T.Underlying()._<ж<Interface>>().typeSet().Value.methods; // T must be an interface
     if (len(methods) == 0) {
         return (default!, false);
     }
+
     const nint ok = iota;
     const nint notFound = 1;
     const nint wrongName = 2;
@@ -368,16 +431,19 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
     const nint ambigSel = 5;
     const nint ptrRecv = 6;
     const nint field = 7;
+
     nint state = ok;
     ж<Func> m = default!;           // method on T we're trying to implement
     ж<Func> f = default!;           // method on V, if found (state is one of ok, wrongName, wrongSig)
+
     {
-        var (u, _) = under(V)._<ж<Interface>>(ᐧ); if (u != nil){
+        var (u, _) = V.Underlying()._<ж<Interface>>(ᐧ); if (u != nil){
             var tset = u.typeSet();
             foreach (var (_, vᴛ1) in methods) {
                 m = vᴛ1;
 
                 (_, f) = tset.LookupMethod((~m).pkg, (~m).name, false);
+
                 if (f == nil) {
                     if (!@static) {
                         continue;
@@ -385,6 +451,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
                     state = notFound;
                     break;
                 }
+
                 if (!equivalent((~f).typ, (~m).typ)) {
                     state = wrongSig;
                     break;
@@ -395,6 +462,7 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
                 m = vᴛ2;
 
                 var (obj, index, indirect) = lookupFieldOrMethodImpl(V, false, (~m).pkg, (~m).name, false);
+
                 // check if m is ambiguous, on *V, or on V with case-folding
                 if (obj == default!) {
                     switch (ᐧ) {
@@ -408,10 +476,9 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
                     }
                     default: {
                         state = notFound;
-                        (obj, _, _) = lookupFieldOrMethodImpl(V, false, (~m).pkg, (~m).name, true);
+                        (obj, _, _) = lookupFieldOrMethodImpl(V, false, (~m).pkg, (~m).name, true /* fold case */);
                         (f, _) = obj._<ж<Func>>(ᐧ);
                         if (f != nil) {
-                            /* fold case */
                             state = wrongName;
                             if ((~f).name == (~m).name) {
                                 // If the names are equal, f must be unexported
@@ -421,19 +488,21 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
                         }
                         break;
                     }}
-
                     break;
                 }
+
                 // we must have a method (not a struct field)
                 (f, _) = obj._<ж<Func>>(ᐧ);
                 if (f == nil) {
                     state = field;
                     break;
                 }
+
                 // methods may not have a fully set up signature yet
                 if (Ꮡcheck != nil) {
-                    Ꮡcheck.objDecl(new FuncжObject(f), nil);
+                    Ꮡcheck.objDecl(new FuncжObject(f));
                 }
+
                 if (!equivalent((~f).typ, (~m).typ)) {
                     state = wrongSig;
                     break;
@@ -441,15 +510,17 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
             }
         }
     }
+
     if (state == ok) {
         return (default!, false);
     }
+
     if (Ꮡcause != nil) {
         if (f != nil) {
             // This method may be formatted in funcString below, so must have a fully
             // set up signature.
             if (Ꮡcheck != nil) {
-                Ꮡcheck.objDecl(new FuncжObject(f), nil);
+                Ꮡcheck.objDecl(new FuncжObject(f));
             }
         }
         var exprᴛ1 = state;
@@ -467,7 +538,6 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
                 cause = Ꮡcheck.sprintf("(missing method %s)"u8, m.of(Func.Ꮡobject).Name());
                 break;
             }}
-
         }
         else if (exprᴛ1 == wrongName) {
             @string fs = Ꮡcheck.funcString(f, false);
@@ -512,8 +582,8 @@ internal static (ж<Func> method, bool wrongType) missingMethod(this ж<Checker>
         else { /* default: */
             throw panic("unreachable");
         }
-
     }
+
     return (m, state == wrongSig || state == ptrRecv);
 }
 
@@ -535,7 +605,7 @@ internal static bool hasAllMethods(this ж<Checker> Ꮡcheck, ΔType V, ΔType T
 // (directly or indirectly) embedded fields with invalid types.
 internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> seen) {
     {
-        var (S, _) = under(derefStructPtr(T))._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
+        var (S, _) = derefStructPtr(T).Underlying()._<ж<Struct>>(ᐧ); if (S != nil && !seen[S]) {
             if (seen == default!) {
                 seen = new map<ж<Struct>, bool>();
             }
@@ -551,7 +621,7 @@ internal static bool hasInvalidEmbeddedFields(ΔType T, map<ж<Struct>, bool> se
 }
 
 internal static bool isInterfacePtr(ΔType T) {
-    var (p, _) = under(T)._<ж<Pointer>>(ᐧ);
+    var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ);
     return p != nil && IsInterface((~p).@base);
 }
 
@@ -559,7 +629,7 @@ internal static bool isInterfacePtr(ΔType T) {
 internal static @string interfacePtrError(this ж<Checker> Ꮡcheck, ΔType T) {
     assert(isInterfacePtr(T));
     {
-        var (p, _) = under(T)._<ж<Pointer>>(ᐧ); if (isTypeParam((~p).@base)) {
+        var (p, _) = T.Underlying()._<ж<Pointer>>(ᐧ); if (isTypeParam((~p).@base)) {
             return Ꮡcheck.sprintf("type %s is pointer to type parameter, not type parameter"u8, T);
         }
     }
@@ -590,8 +660,6 @@ internal static @string funcString(this ж<Checker> Ꮡcheck, ж<Func> Ꮡf, boo
 // If the result is false and cause is not nil, *cause describes the error.
 // TODO(gri) replace calls to this function with calls to newAssertableTo.
 internal static bool assertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, ж<@string> Ꮡcause) {
-    ref var check = ref Ꮡcheck.DerefOrNull();
-
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
     //        dynamic type of x implements the interface T."
@@ -608,8 +676,6 @@ internal static bool assertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T,
 // The underlying type of V must be an interface.
 // If the result is false and cause is not nil, *cause is set to the error cause.
 internal static bool newAssertableTo(this ж<Checker> Ꮡcheck, ΔType V, ΔType T, ж<@string> Ꮡcause) {
-    ref var check = ref Ꮡcheck.DerefOrNull();
-
     // no static check is required if T is an interface
     // spec: "If T is an interface type, x.(T) asserts that the
     //        dynamic type of x implements the interface T."
@@ -642,9 +708,9 @@ internal static (ΔType, bool) deref(ΔType typ) {
 // (named or unnamed) struct and returns its base. Otherwise it returns typ.
 internal static ΔType derefStructPtr(ΔType typ) {
     {
-        var (p, _) = under(typ)._<ж<Pointer>>(ᐧ); if (p != nil) {
+        var (p, _) = typ.Underlying()._<ж<Pointer>>(ᐧ); if (p != nil) {
             {
-                var (_, ok) = under((~p).@base)._<ж<Struct>>(ᐧ); if (ok) {
+                var (_, ok) = (~p).@base.Underlying()._<ж<Struct>>(ᐧ); if (ok) {
                     return (~p).@base;
                 }
             }

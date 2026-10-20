@@ -459,6 +459,7 @@ public static void TestOpen(ж<testing.T> Ꮡt) {
     try {
         foreach (var (i, _) in fileTests) {
             var tt = Ꮡ(fileTests, i);
+
             ж<global::go.debug.elf_package.File> f = default!;
             error err = default!;
             if (path.Ext((~tt).@file) == ".gz"u8){
@@ -1084,7 +1085,7 @@ public static void TestCompressedDWARF(ж<testing.T> Ꮡt) {
         n++;
     }
     if (n != 18) {
-        Ꮡt.Fatalf("want %d DWARF entries, got %d"u8, (nint)(18), n);
+        Ꮡt.Fatalf("want %d DWARF entries, got %d"u8, (nint)18, n);
     }
 }
 
@@ -1114,6 +1115,7 @@ public static void TestCompressedSection(ж<testing.T> Ꮡt) {
         0, 2, 145, 108, 6, 0, 0, 0, 0, 1, 4, 179, 0, 0, 0, 2,
         145, 96, 0, 4, 8, 108, 0, 0, 0, 0
     }.slice();
+
     // Test Data method.
     (var b, err) = sec.Data();
     if (err != default!) {
@@ -1122,6 +1124,7 @@ public static void TestCompressedSection(ж<testing.T> Ꮡt) {
     if (!bytes.Equal(wantData, b)) {
         Ꮡt.Fatalf("want data %x, got %x"u8, wantData, b);
     }
+
     // Test Open method and seeking.
     var buf = new slice<byte>(len(b));
     var have = new slice<bool>(len(b));
@@ -1153,7 +1156,6 @@ public static void TestCompressedSection(ж<testing.T> Ꮡt) {
         else if (exprᴛ1 == io.SeekEnd) {
             offset = target - (int64)len(buf);
         }
-
         (pos, err) = sf.Seek(offset, whence);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1161,6 +1163,7 @@ public static void TestCompressedSection(ж<testing.T> Ꮡt) {
         if (pos != target) {
             Ꮡt.Fatalf("want position %d, got %d"u8, target, pos);
         }
+
         // Read data from the new position.
         var end = pos + 16;
         if (end > (int64)len(buf)) {
@@ -1191,7 +1194,6 @@ public static void TestNoSectionOverlaps(ж<testing.T> Ꮡt) {
     if (exprᴛ1 == "aix"u8 || exprᴛ1 == "android"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "wasip1"u8) {
         Ꮡt.Skipf("cmd/link doesn't produce ELF binaries on %s"u8, runtime.GOOS);
     }
-
     _ = (Func<@string, @string, (ж<net.IPAddr>, error)>)(net.ResolveIPAddr); // force dynamic linkage
     var (f, err) = Open(os.Args[0]);
     if (err != default!) {
@@ -1214,9 +1216,11 @@ public static void TestNoSectionOverlaps(ж<testing.T> Ꮡt) {
                     sih.Name, sjh.Name, sjh.Offset, sih.Offset, sih.Offset + sih.FileSize, sjh.Offset + sjh.FileSize);
             }
         }
+
         if ((global::go.debug.elf_package.SectionFlag)(sih.Flags & SHF_ALLOC) == 0) {
             continue;
         }
+
         // checking for overlap in address space
         foreach (var (j, sj) in (~f).Sections) {
             var sjh = sj.Value.SectionHeader;
@@ -1247,12 +1251,15 @@ public static void TestNobitsSection(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         @string wantError = unexpectedReadFromShtˢ;
         var bss = f.Section(bssˢ);
+
         (_, err) = bss.Data();
         if (err == default! || err.Error() != wantError) {
             Ꮡt.Fatalf("bss.Data() got error %q, want error %q"u8, err, wantError);
         }
+
         var r = bss.Open();
         var p = new slice<byte>(1);
         (_, err) = r.Read(p);
@@ -1320,8 +1327,10 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
         //   [65296] .strtab           STRTAB          00000000 17e944 08f74d 00      0   0  1
         //   [65297] .shstrtab         STRTAB          00000000 20e091 0cf3bb 00      0   0  1
         ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+
         {
             buf.Grow(0x55AF1C); // 3003468 + 40 * 65298
+
             var h = new Header32(
                 Ident: new byte[]{0x7F, (rune)'E', (rune)'L', (rune)'F', 0x01, 0x01, 0x01}.array(16),
                 Type: 1,
@@ -1334,14 +1343,17 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
                 Shstrndx: 0xFFFF
             );
             binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, h);
+
             // Zero out sections [1]~[65294].
             buf.Write(bytes.Repeat(new byte[]{0}.slice(), 0x13ED1C - binary.Size(h)));
+
             // Write section [65295]. Section [65295] are all zeros except for the
             // last 48 bytes.
             buf.Write(bytes.Repeat(new byte[]{0}.slice(), 0x03FC28 - 12 * 4));
             for (nint i = 0; i < 12; i++) {
-                binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)((nint)(0xFF00 | i)));
+                binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, (uint32)(0xFF00 | i));
             }
+
             // Write section [65296].
             buf.Write(new byte[]{0}.slice());
             buf.Write(slice<byte>("y.c\x00"u8));
@@ -1351,6 +1363,7 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
                 buf.Write(slice<byte>(name));
                 buf.Write(new byte[]{0}.slice());
             }
+
             // Write section [65297].
             buf.Write(new byte[]{0}.slice());
             buf.Write(slice<byte>(".symtab\x00"u8));
@@ -1368,6 +1381,7 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
             buf.Write(slice<byte>(".comment\x00"u8));
             buf.Write(slice<byte>(".note.GNU-stack\x00"u8));
             buf.Write(slice<byte>(".symtab_shndx\x00"u8));
+
             // Write section header table.
             // NULL
             binary.Write(new elf_internal_test_package.bytes_BufferжWriter(Ꮡbuf), binary.LittleEndian, new Section32(Name: 0, Size: 0xFF12, Link: 0xFF11));
@@ -1462,13 +1476,16 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
                 Addralign: 0x01
             ));
         }
+
         var data = buf.Bytes();
+
         var (f, err) = NewFile(new elf_internal_test_package.bytes_ReaderжReaderAt(bytes.NewReader(data)));
         if (err != default!) {
             Ꮡt.Errorf("cannot create file from data: %v"u8, err);
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         var wantFileHeader = new FileHeader(
             Class: ELFCLASS32,
             Data: ELFDATA2LSB,
@@ -1481,10 +1498,12 @@ public static void TestLargeNumberOfSections(ж<testing.T> Ꮡt) {
         if ((~f).FileHeader != wantFileHeader) {
             Ꮡt.Errorf("\nhave %#v\nwant %#v\n"u8, (~f).FileHeader, wantFileHeader);
         }
+
         nint wantSectionNum = 65298;
         if (len((~f).Sections) != wantSectionNum) {
             Ꮡt.Errorf("len(Sections) = %d, want %d"u8, len((~f).Sections), wantSectionNum);
         }
+
         var wantSectionHeader = new SectionHeader(
             Name: "section_0007"u8,
             Type: SHT_PROGBITS,
@@ -1523,10 +1542,12 @@ public static void TestDynValue(ж<testing.T> Ꮡt) {
         }
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var vals, err) = f.DynValue(DT_VERNEEDNUM);
         if (err != default!) {
             Ꮡt.Fatalf("DynValue(DT_VERNEEDNUM): got unexpected error %v"u8, err);
         }
+
         if (len(vals) != 1 || vals[0] != 1) {
             Ꮡt.Errorf("DynValue(DT_VERNEEDNUM): got %v, want [1]"u8, vals);
         }
@@ -1549,13 +1570,16 @@ public static void TestIssue59208(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     var sec = f.Section(debugInfoˢ);
+
     (var data, err) = os.ReadFile(orig);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var dn = new slice<byte>(len(data));
     var zoffset = (~sec).Offset + (uint64)(~sec).compressionOffset;
     copy(dn, data.slice(0, (nint)(zoffset)));
+
     (var ozd, err) = sec.Data();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1566,12 +1590,15 @@ public static void TestIssue59208(ж<testing.T> Ꮡt) {
     copy(ozd, new byte[]{1, 0, 0, 0}.slice());
     wr.Write(ozd);
     wr.Close();
+
     copy(dn.slice((nint)(zoffset)), buf.Bytes());
     copy(dn.slice((nint)((~sec).Offset + (~sec).FileSize)), data.slice((nint)((~sec).Offset + (~sec).FileSize)));
+
     (var nf, err) = NewFile(new elf_internal_test_package.bytes_ReaderжReaderAt(bytes.NewReader(dn)));
     if (err != default!) {
         Ꮡt.Error(err);
     }
+
     @string want = wantᶜ;
     (_, err) = nf.DWARF();
     if (err == default! || !strings.Contains(err.Error(), want)) {
@@ -1601,7 +1628,7 @@ public static void BenchmarkSymbols64(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("Symbols(): got unexpected error %v"u8, errΔ1);
             }
             if (len(symbols) != 73) {
-                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)(73));
+                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)73);
             }
         }
     }
@@ -1631,7 +1658,7 @@ public static void BenchmarkSymbols32(ж<testing.B> Ꮡb) {
                 Ꮡb.Fatalf("Symbols(): got unexpected error %v"u8, errΔ1);
             }
             if (len(symbols) != 74) {
-                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)(74));
+                Ꮡb.Errorf("\nhave %d symbols\nwant %d symbols\n"u8, len(symbols), (nint)74);
             }
         }
     }

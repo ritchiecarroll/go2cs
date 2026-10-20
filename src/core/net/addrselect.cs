@@ -104,8 +104,10 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     var attrDB = Ꮡb.of(byRFC6724Info.ᏑaddrAttr);
     var attrSourceDA = Ꮡa.of(byRFC6724Info.ᏑsrcAttr);
     var attrSourceDB = Ꮡb.of(byRFC6724Info.ᏑsrcAttr);
+
     const nint preferDA = -1;
     const nint preferDB = 1;
+
     // Rule 1: Avoid unusable destinations.
     // If DB is known to be unreachable or if Source(DB) is undefined, then
     // prefer DA.  Similarly, if DA is known to be unreachable or if
@@ -119,6 +121,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     if (!SourceDA.IsValid()) {
         return preferDB;
     }
+
     // Rule 2: Prefer matching scope.
     // If Scope(DA) = Scope(Source(DA)) and Scope(DB) <> Scope(Source(DB)),
     // then prefer DA.  Similarly, if Scope(DA) <> Scope(Source(DA)) and
@@ -129,17 +132,22 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     if ((~attrDA).Scope != (~attrSourceDA).Scope && (~attrDB).Scope == (~attrSourceDB).Scope) {
         return preferDB;
     }
+
     // Rule 3: Avoid deprecated addresses.
     // If Source(DA) is deprecated and Source(DB) is not, then prefer DB.
     // Similarly, if Source(DA) is not deprecated and Source(DB) is
     // deprecated, then prefer DA.
+
     // TODO(bradfitz): implement? low priority for now.
+
     // Rule 4: Prefer home addresses.
     // If Source(DA) is simultaneously a home address and care-of address
     // and Source(DB) is not, then prefer DA.  Similarly, if Source(DB) is
     // simultaneously a home address and care-of address and Source(DA) is
     // not, then prefer DB.
+
     // TODO(bradfitz): implement? low priority for now.
+
     // Rule 5: Prefer matching label.
     // If Label(Source(DA)) = Label(DA) and Label(Source(DB)) <> Label(DB),
     // then prefer DA.  Similarly, if Label(Source(DA)) <> Label(DA) and
@@ -150,6 +158,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     if ((~attrSourceDA).Label != (~attrDA).Label && (~attrSourceDB).Label == (~attrDB).Label) {
         return preferDB;
     }
+
     // Rule 6: Prefer higher precedence.
     // If Precedence(DA) > Precedence(DB), then prefer DA.  Similarly, if
     // Precedence(DA) < Precedence(DB), then prefer DB.
@@ -159,11 +168,14 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     if ((~attrDA).Precedence < (~attrDB).Precedence) {
         return preferDB;
     }
+
     // Rule 7: Prefer native transport.
     // If DA is reached via an encapsulating transition mechanism (e.g.,
     // IPv6 in IPv4) and DB is not, then prefer DB.  Similarly, if DB is
     // reached via encapsulation and DA is not, then prefer DA.
+
     // TODO(bradfitz): implement? low priority for now.
+
     // Rule 8: Prefer smaller scope.
     // If Scope(DA) < Scope(DB), then prefer DA.  Similarly, if Scope(DA) >
     // Scope(DB), then prefer DB.
@@ -173,6 +185,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     if ((~attrDA).Scope > (~attrDB).Scope) {
         return preferDB;
     }
+
     // Rule 9: Use the longest matching prefix.
     // When DA and DB belong to the same address family (both are IPv6 or
     // both are IPv4 [but see below]): If CommonPrefixLen(Source(DA), DA) >
@@ -185,6 +198,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
     if (DA.To4() == default! && DB.To4() == default!) {
         nint commonA = commonPrefixLen(SourceDA, DA);
         nint commonB = commonPrefixLen(SourceDB, DB);
+
         if (commonA > commonB) {
             return preferDA;
         }
@@ -192,6 +206,7 @@ internal static nint compareByRFC6724(byRFC6724Info aʗp, byRFC6724Info bʗp) {
             return preferDB;
         }
     }
+
     // Rule 10: Otherwise, leave the order unchanged.
     // If DA preceded DB in the original list, prefer DA.
     // Otherwise, prefer DB.
@@ -206,62 +221,62 @@ partial struct policyTableEntry {
 
 partial struct policyTable /*[]policyTableEntry*/;
 
-// "::1/128"
-// "::ffff:0:0/96"
-// IPv4-compatible, etc.
-// "::/96"
-// "2001::/32"
-// Teredo
-// "2002::/16"
-// 6to4
-// "3ffe::/16"
-// "fec0::/10"
-// "fc00::/7"
-// "::/0"
 // RFC 6724 section 2.1.
 // Items are sorted by the size of their Prefix.Mask.Size,
 internal static policyTable rfc6724policyTable = new policyTable(new policyTableEntry[]{
     new(
+        // "::1/128"
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.array()), 128),
         Precedence: 50,
         Label: 0
     ),
     new(
+        // "::ffff:0:0/96"
+        // IPv4-compatible, etc.
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff}.array(16)), 96),
         Precedence: 35,
         Label: 4
     ),
     new(
+        // "::/96"
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{}.array(16)), 96),
         Precedence: 1,
         Label: 3
     ),
     new(
+        // "2001::/32"
+        // Teredo
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x20, 0x01}.array(16)), 32),
         Precedence: 5,
         Label: 5
     ),
     new(
+        // "2002::/16"
+        // 6to4
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x20, 0x02}.array(16)), 16),
         Precedence: 30,
         Label: 2
     ),
     new(
+        // "3ffe::/16"
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x3f, 0xfe}.array(16)), 16),
         Precedence: 1,
         Label: 12
     ),
     new(
+        // "fec0::/10"
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0xfe, 0xc0}.array(16)), 10),
         Precedence: 1,
         Label: 11
     ),
     new(
+        // "fc00::/7"
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0xfc}.array(16)), 7),
         Precedence: 3,
         Label: 13
     ),
     new(
+        // "::/0"
         Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{}.array(16)), 0),
         Precedence: 40,
         Label: 1
@@ -284,6 +299,7 @@ internal static policyTableEntry Classify(this policyTable t, netipꓸAddr ip) {
     return new policyTableEntry(nil);
 }
 
+// RFC 6724 section 3.1.
 public partial struct scope /*num:uint8*/;
 
 internal static scope scopeInterfaceLocal => 0x1;
@@ -300,7 +316,7 @@ internal static scope classifyScope(netipꓸAddr ip) {
     var ipv6 = ip.Is6() && !ip.Is4In6();
     var ipv6AsBytes = ip.As16();
     if (ipv6 && ip.IsMulticast()) {
-        return ((scope)((byte)(ipv6AsBytes[1] & 0xf)));
+        return (scope)((byte)(ipv6AsBytes[1] & 0xf));
     }
     // Site-local addresses are defined in RFC 3513 section 2.5.6
     // (and deprecated in RFC 3879).

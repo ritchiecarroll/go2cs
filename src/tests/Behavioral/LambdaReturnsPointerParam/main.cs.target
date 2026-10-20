@@ -30,14 +30,16 @@ internal static ж<item> passthrough(ж<item> Ꮡit) {
 
 internal static void Main() {
     slice<entry> table = default!;
-    var a = Ꮡ(new item(name: "alpha"u8));
-    var b = Ꮡ(new item(name: "beta"u8));
+    var a = Ꮡ(new item(name: "alpha"));
+    var b = Ꮡ(new item(name: "beta"));
     table = addItem(table, a);
     table = addItem(table, b);
+
     foreach (var (_, e) in table) {
         var (it, err) = e.get();
         fmt.Println((~it).name, err);
     }
+
     fmt.Println((~pick(a)()).name);
     fmt.Println((~passthrough(b)).name);
 }

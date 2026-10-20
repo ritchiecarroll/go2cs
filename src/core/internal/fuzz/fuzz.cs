@@ -105,22 +105,26 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
             // Don't start more workers than we need.
             opts.Parallel = (nint)opts.Limit;
         }
+
         (var c, err) = newCoordinator(opts);
         if (err != default!) {
             goto ᒐdone;
         }
+
         if (opts.Timeout > 0) {
             Action cancel = default!;
             (ctx, cancel) = context.WithTimeout(ctx, opts.Timeout);
             var cancelʗ1 = cancel;
             defer(cancelʗ1, ref ᒐ);
         }
+
         // fuzzCtx is used to stop workers, for example, after finding a crasher.
         var (fuzzCtx, cancelWorkers) = context.WithCancel(ctx);
         var cancelWorkersʗ1 = cancelWorkers;
         defer(() => cancelWorkersʗ1(), ref ᒐ);
         ref var doneC = ref heap</*<-*/channel<EmptyStruct>>(out var ᏑdoneC);
         doneC = ctx.Done();
+
         // stop is called when a worker encounters a fatal error.
         ref var fuzzErr = ref heap<error>(out var ᏑfuzzErr);
         var stopping = false;
@@ -136,6 +140,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                     cʗ1.debugLogf("stop called at unknown. stopping: %t"u8, stopping);
                 }
             }
+
             if (AreEqual(errΔ2, fuzzCtxʗ1.Err()) || isInterruptError(errΔ2)) {
                 // Suppress cancellation errors and terminations due to SIGINT.
                 // The messages are not helpful since either the user triggered the error
@@ -152,6 +157,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
             cancelWorkersʗ2();
             ᏑdoneC.ValueSlot = default!;
         }
+
         // Ensure that any crash we find is written to the corpus, even if an error
         // or interruption occurs while minimizing it.
         var crashWritten = false;
@@ -173,12 +179,14 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 )));
             }
         }, ref ᒐ);
+
         // Start workers.
         // TODO(jayconrod): do we want to support fuzzing different binaries?
         @string dir = ""u8; // same as self
         @string binPath = os.Args[0];
         var args = appendꓸꓸꓸ(new @string[]{"-test.fuzzworker"u8}.slice(), os.Args[1..]);
         var env = os.Environ(); // same as self
+
         var errC = new channel<error>(0);
         var workers = new slice<ж<worker>>(opts.Parallel);
         foreach (var (i, _) in workers) {
@@ -205,6 +213,7 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 errCʗ1.ᐸꟷ(errΔ4);
             });
         }
+
         // Main event loop.
         // Do not return until all workers have terminated. We avoid a deadlock by
         // receiving messages from workers even after ctx is canceled.
@@ -214,22 +223,26 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
         defer(statTickerʗ1.Stop, ref ᒐ);
         var cʗ3 = c;
         defer(cʗ3.logStats, ref ᒐ);
+
         c.logStats();
         while (ᐧ) {
             // If there is an execution limit, and we've reached it, stop.
             if ((~c).opts.Limit > 0 && (~c).count >= (~c).opts.Limit) {
                 stop(default!);
             }
+
             channel<fuzzInput> inputC = default!;
             var (input, ok) = c.peekInput();
             if (ok && (~c).crashMinimizing == nil && !stopping) {
                 inputC = c.Value.inputC;
             }
+
             channel<fuzzMinimizeInput> minimizeC = default!;
             (var minimizeInput, ok) = c.peekMinimizeInput();
             if (ok && !stopping) {
                 minimizeC = c.Value.minimizeC;
             }
+
             var selᴛ1 = doneC;
             var selᴛ2 = errC;
             var selᴛ3 = (~c).resultC;
@@ -238,27 +251,28 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
             var selᴛ6 = (~statTicker).C;
             switch (select(ᐸꟷ(selᴛ1, ꓸꓸꓸ), ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ), selᴛ4, selᴛ5, ᐸꟷ(selᴛ6, ꓸꓸꓸ))) {
             case 0 when selᴛ1.ꟷᐳ(out _): {
+                // Interrupted, canceled, or timed out.
+                // stop sets doneC to nil, so we don't busy wait here.
                 stop(ctx.Err());
                 break;
             }
             case 1 when selᴛ2.ꟷᐳ(out var errΔ5): {
+                // A worker terminated, possibly after encountering a fatal error.
                 stop(errΔ5);
                 activeWorkers--;
                 if (activeWorkers == 0) {
-                    // Interrupted, canceled, or timed out.
-                    // stop sets doneC to nil, so we don't busy wait here.
-                    // A worker terminated, possibly after encountering a fatal error.
                     err = fuzzErr; goto ᒐdone;
                 }
                 break;
             }
             case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
                 ref var result = ref heap(resultᴛ1, out var Ꮡresult);
+                // Received response from worker.
                 if (stopping) {
-                    // Received response from worker.
                     break;
                 }
                 c.updateStats(result);
+
                 if (result.crasherMsg != ""u8){
                     if (c.warmupRun() && result.entry.IsSeed) {
                         @string target = filepath.Base((~c).opts.CorpusDir);
@@ -399,10 +413,12 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 break;
             }
             case 3: {
+                // Sent the next input to a worker.
                 c.sentInput(input);
                 break;
             }
             case 4: {
+                // Sent the next input for minimization to a worker.
                 c.sentMinimizeInput(minimizeInput);
                 break;
             }
@@ -411,16 +427,14 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
                 break;
             }}
         }
+
+        // TODO(jayconrod,katiehockman): if a crasher can't be written to the corpus,
+        // write to the cache instead.
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
     ᒐdone: return Ꮡerr.ValueSlot;
 }
-
-// Sent the next input to a worker.
-// Sent the next input for minimization to a worker.
-// TODO(jayconrod,katiehockman): if a crasher can't be written to the corpus,
-// write to the cache instead.
 
 // crashError wraps a crasher written to the seed corpus. It saves the name
 // of the file where the input causing the crasher was saved. The testing
@@ -514,6 +528,7 @@ internal static (slice<byte>, error) corpusEntryData(CorpusEntry ce) {
     if (ce.Data != default!) {
         return (ce.Data, default!);
     }
+
     return os.ReadFile(ce.Path);
 }
 
@@ -645,6 +660,8 @@ partial struct coordinator {
 }
 
 internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts opts) {
+    var valsᴷ = new stackAppend<any>();
+
     // Make sure all the seed corpus has marshaled data.
     foreach (var (i, _) in opts.Seed) {
         if (opts.Seed[i].Data == default! && opts.Seed[i].Values != default!) {
@@ -673,6 +690,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
             }
         }
     }
+
     nint covSize = len(coverage());
     if (covSize == 0){
         fmt.Fprintf((~c).opts.Log, "warning: the test binary was not built with coverage instrumentation, so fuzzing will run without coverage guidance and may be inefficient\n"u8);
@@ -692,17 +710,19 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         c.Value.coverageMask = new slice<byte>(covSize);
     }
     c.Value.warmupInputLeft = c.Value.warmupInputCount;
+
     if (len((~c).corpus.entries) == 0) {
         fmt.Fprintf((~c).opts.Log, "warning: starting with empty corpus\n"u8);
         slice<any> vals = default!;
         foreach (var (_, t) in opts.Types) {
-            vals = append(vals, zeroValue(t));
+            vals = append(valsᴷ, vals, zeroValue(t));
         }
         var data = marshalCorpusFile(vals.ꓸꓸꓸ);
         var h = sha256.Sum256(data);
         @string name = fmt.Sprintf("%x"u8, h[..4]);
         c.addCorpusEntries(false, new CorpusEntry(Path: name, Data: data));
     }
+
     return (c, default!);
 }
 
@@ -761,6 +781,7 @@ internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
         }
         c.refillInputQueue();
     }
+
     var (entry, ok) = c.inputQueue.peek();
     if (!ok) {
         throw panic("input queue empty after refill");
@@ -779,6 +800,7 @@ internal static (fuzzInput, bool) peekInput(this ref coordinator c) {
         input.limit = 1;
         return (input, true);
     }
+
     if (c.opts.Limit > 0) {
         input.limit = quo(c.opts.Limit, (int64)c.opts.Parallel);
         if (rem(c.opts.Limit, (int64)c.opts.Parallel) > 0) {
@@ -820,6 +842,7 @@ internal static void queueForMinimization(this ref coordinator c, fuzzResult res
     if (result.crasherMsg != ""u8) {
         c.minimizeQueue.clear();
     }
+
     var input = new fuzzMinimizeInput(
         entry: result.entry,
         crasherMsg: result.crasherMsg,
@@ -841,6 +864,7 @@ internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator
         return (new fuzzMinimizeInput(nil), false);
     }
     var input = v._<fuzzMinimizeInput>();
+
     if (c.opts.MinimizeTimeout > 0) {
         input.timeout = c.opts.MinimizeTimeout;
     }
@@ -936,10 +960,10 @@ internal static error readCache(this ref coordinator c) {
                 return err;
             }
         }
+        // TODO(jayconrod,katiehockman): consider printing some kind of warning
+        // indicating the number of files which were skipped because they are
+        // malformed.
     }
-    // TODO(jayconrod,katiehockman): consider printing some kind of warning
-    // indicating the number of files which were skipped because they are
-    // malformed.
     {
         var (_, errΔ2) = c.addCorpusEntries(false, entries.ꓸꓸꓸ); if (errΔ2 != default!) {
             return errΔ2;
@@ -956,9 +980,11 @@ partial struct MalformedCorpusError {
 }
 
 public static @string Error(this ref MalformedCorpusError e) {
+    var msgsᴷ = new stackAppend<@string>();
+
     slice<@string> msgs = default!;
     foreach (var (_, s) in e.errs) {
-        msgs = append(msgs, s.Error());
+        msgs = append(msgsᴷ, msgs, s.Error());
     }
     return strings.Join(msgs, "\n"u8);
 }
@@ -1074,7 +1100,7 @@ internal static any zeroValue(reflectꓸType t) {
 
 internal static slice<any> zeroVals = new any[]{
     slice<byte>(""u8),
-    ((@string)""u8),
+    (@string)""u8,
     false,
     (byte)0,
     (rune)0,

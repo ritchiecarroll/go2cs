@@ -77,6 +77,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
                 os.Remove(fʗ1.Name());
             }
         }, ref ᒐ);
+
         // Resize it to the correct size.
         nint totalSize = sharedMemSize(size);
         {
@@ -84,6 +85,7 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
                 (m, err) = (default!, errΔ1); goto ᒐdone;
             }
         }
+
         // Map the file into memory.
         var removeOnClose = true;
         (m, err) = sharedMemMapFile(f, totalSize, removeOnClose);

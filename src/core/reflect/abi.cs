@@ -29,9 +29,7 @@ partial class reflect_package {
 // commented out there should be the actual values once
 // we're ready to use the register ABI everywhere.
 internal static nint intArgRegs = abi.IntArgRegs;
-
 internal static nint floatArgRegs = abi.FloatArgRegs;
-
 internal static uintptr floatRegSize = (uintptr)abi.EffectiveFloatRegSize;
 
 // abiStep represents an ABI "instruction." Each instruction
@@ -49,6 +47,7 @@ partial struct abiStep {
     internal nint freg;    // FP register index, used if kind == abiStepFloatReg
 }
 
+// abiStepKind is the "op-code" for an abiStep instruction.
 partial struct abiStepKind /*num:nint*/;
 
 internal static abiStepKind abiStepBad => /* iota */ 0;
@@ -121,7 +120,7 @@ internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
     // We'll always be adding a new value, so do that first.
     nint pStart = len(a.steps);
     a.valueStart = builtin.append(a.valueStart, pStart);
-    if (t.Size() == 0) {
+    if (Ꮡt.Size() == 0) {
         // If the size of the argument type is zero, then
         // in order to degrade gracefully into ABI0, we need
         // to stack-assign this type. The reason is that
@@ -146,7 +145,7 @@ internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) {
         // Register assignment failed. Roll back any changes
         // and stack-assign.
         a = aOld;
-        a.stackAssign(t.Size(), (uintptr)t.Align());
+        a.stackAssign(Ꮡt.Size(), (uintptr)t.Align());
         return Ꮡ(a.steps, len(a.steps) - 1);
     }
     return default!;
@@ -165,7 +164,7 @@ internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡr
     a.valueStart = builtin.append(a.valueStart, len(a.steps));
     bool ok = default!;
     bool ptr = default!;
-    if (rcvr.IfaceIndir() || rcvr.Pointers()){
+    if (!rcvr.IsDirectIface() || rcvr.Pointers()){
         ok = a.assignIntN(0, goarch.PtrSize, 1, 0b1);
         ptr = true;
     } else {
@@ -256,7 +255,6 @@ internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignm
     a.steps = builtin.append(a.steps, new abiStep(
         kind: abiStepStack,
         offset: 0, // Only used for whole arguments, so the memory offset is 0.
-
         size: size,
         stkOff: a.stackBytes
     ));
@@ -310,12 +308,12 @@ internal static void dump(this ref abiDesc a) {
     println();
 }
 
-internal static void dumpPtrBitMap(abi.IntArgRegBitmap b) {
-    b = b.Clone();
+internal static void dumpPtrBitMap(abi.IntArgRegBitmap bʗp) {
+    ref var b = ref heap(bʗp.Clone(), out var Ꮡb);
 
     for (nint i = 0; i < intArgRegs; i++) {
         nint x = 0;
-        if (b.Get(i)) {
+        if (Ꮡb.Get(i)) {
             x = 1;
         }
         print((@string)" "u8, x);
@@ -332,11 +330,14 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
     // TODO(mknyszek): Remove this when we no longer have
     // caller reserved spill space.
     var spill = (uintptr)0;
+
     // Compute gc program & stack bitmap for stack arguments
     var stackPtrs = @new<bitVector>();
+
     // Compute the stack frame pointer bitmap and register
     // pointer bitmap for arguments.
     var inRegPtrs = new abi.IntArgRegBitmap(new uint8[2].array());
+
     // Compute abiSeq for input parameters.
     abiSeq @in = default!;
     if (Ꮡrcvr != nil) {
@@ -366,13 +367,16 @@ internal static abiDesc newAbiDesc(ж<funcType> Ꮡt, ж<abi.Type> Ꮡrcvr) {
         }
     }
     spill = align(spill, goarch.PtrSize);
+
     // From the input parameters alone, we now know
     // the stackCallArgsSize and retOffset.
     var stackCallArgsSize = @in.stackBytes;
     var retOffset = align(@in.stackBytes, goarch.PtrSize);
+
     // Compute the stack frame pointer bitmap and register
     // pointer bitmap for return values.
     var outRegPtrs = new abi.IntArgRegBitmap(new uint8[2].array());
+
     // Compute abiSeq for output parameters.
     abiSeq @out = default!;
     // Stack-assigned return values do not share
@@ -433,7 +437,6 @@ internal static void floatFromReg(ж<abi.RegArgs> Ꮡr, nint reg, uintptr argSiz
     else { /* default: */
         throw panic("bad argSize");
     }
-
 }
 
 // floatToReg stores a float value in its register representation in r.
@@ -450,7 +453,6 @@ internal static void floatToReg(ref abi.RegArgs r, nint reg, uintptr argSize, @u
     else { /* default: */
         throw panic("bad argSize");
     }
-
 }
 
 } // end reflect_package

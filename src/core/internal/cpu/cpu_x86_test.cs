@@ -53,9 +53,11 @@ internal static readonly @string cpuSse3ˢ = "#cpu.sse3"u8;
 
 public static void TestSSE3DebugOption(ж<testing.T> Ꮡt) {
     MustHaveDebugOptionsSupport(Ꮡt);
+
     if (godebug.New(cpuSse3ˢ).Value() != "off"u8) {
         Ꮡt.Skipf("skipping test: GODEBUG=cpu.sse3=off not set"u8);
     }
+
     var want = false;
     {
         var got = X86.HasSSE3; if (got != want) {

@@ -16,6 +16,7 @@ partial interface ΔCode {
     nint Value();
 }
 
+// A CodeVal distinguishes among go/constant.Value encodings.
 partial struct CodeVal /*num:nint*/;
 
 public static SyncMarker Marker(this CodeVal c) {
@@ -35,6 +36,7 @@ public static CodeVal ValBigInt => 3;
 public static CodeVal ValBigRat => 4;
 public static CodeVal ValBigFloat => 5;
 
+// A CodeType distinguishes among go/types.Type encodings.
 partial struct CodeType /*num:nint*/;
 
 public static SyncMarker Marker(this CodeType c) {
@@ -60,6 +62,7 @@ public static CodeType TypeInterface => 9;
 public static CodeType TypeUnion => 10;
 public static CodeType TypeTypeParam => 11;
 
+// A CodeObj distinguishes among go/types.Object encodings.
 partial struct CodeObj /*num:nint*/;
 
 public static SyncMarker Marker(this CodeObj c) {

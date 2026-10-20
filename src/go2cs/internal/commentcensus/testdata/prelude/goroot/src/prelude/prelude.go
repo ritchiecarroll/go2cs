@@ -1,0 +1,35 @@
+// prelude.go - Gbtc
+// Copyright © 2026 The go2cs Authors. All rights reserved.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+// Use of this source code is governed by the GNU Affero General Public License
+// version 3 only, which can be found in the LICENSE file.
+// Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
+
+package prelude
+
+func one(xs ...int) (n int) {
+	n = len(xs)
+	return
+}
+
+func sum(a [4]int, xs ...int) (n int) {
+	// first body comment
+	for _, x := range xs {
+		n += x
+	}
+	return n + a[0]
+}
+
+func esc(a [2]int, x int) (p *int, n int) {
+	n = a[1]
+	p = &x
+	return
+}
+
+func first(a [2]int) (n int) {
+	var z int
+
+	n = a[0] + z
+	return
+}

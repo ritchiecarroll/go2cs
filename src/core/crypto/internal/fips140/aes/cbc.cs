@@ -20,8 +20,8 @@ partial struct CBCEncrypter {
 // chaining mode, using the given Block.
 public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<byte> iv) {
     iv = iv.Clone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     return Ꮡ(new CBCEncrypter(b: b, iv: iv.Clone()));
 }
 
@@ -63,11 +63,13 @@ internal static void cryptBlocksEncGeneric(ref Block b, /*[16]*/ ж<array<byte>>
         // Write the xor to dst, then encrypt in place.
         subtle.XORBytes(dst[..(int)(ΔBlockSize)], src[..(int)(ΔBlockSize)], iv);
         encryptBlock(ref b, dst[..(int)(ΔBlockSize)], dst[..(int)(ΔBlockSize)]);
+
         // Move to the next block with this block as the next iv.
         iv = dst[..(int)(ΔBlockSize)];
         src = src[(int)(ΔBlockSize)..];
         dst = dst[(int)(ΔBlockSize)..];
     }
+
     // Save the iv for the next CryptBlocks call.
     copy(civ[..], iv);
 }
@@ -81,8 +83,8 @@ partial struct CBCDecrypter {
 // chaining mode, using the given Block.
 public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<byte> iv) {
     iv = iv.Clone();
-
     ref var b = ref Ꮡb.DerefOrNull();
+
     return Ꮡ(new CBCDecrypter(b: b, iv: iv.Clone()));
 }
 
@@ -125,17 +127,21 @@ internal static void cryptBlocksDecGeneric(ref Block b, /*[16]*/ ж<array<byte>>
     nint end = len(src);
     nint start = end - (nint)ΔBlockSize;
     nint prev = start - (nint)ΔBlockSize;
+
     // Copy the last block of ciphertext as the IV of the next call.
     var iv = civ.Clone();
     copy(civ[..], src.slice(start, end));
+
     while (start >= 0) {
         decryptBlock(ref b, dst.slice(start, end), src.slice(start, end));
+
         if (start > 0){
             subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), src.slice(prev, start));
         } else {
             // The first block is special because it uses the saved iv.
             subtle.XORBytes(dst.slice(start, end), dst.slice(start, end), iv[..]);
         }
+
         end -= ΔBlockSize;
         start -= ΔBlockSize;
         prev -= ΔBlockSize;

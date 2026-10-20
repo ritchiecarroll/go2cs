@@ -42,6 +42,20 @@ public static void Register(@string pkg, @string name, ж<bool> Ꮡavailable) {
     ));
 }
 
+// Packages returns the list of all packages for which alternative
+// implementations are registered.
+public static slice<@string> Packages() {
+    slice<@string> pkgs = default!;
+    var seen = new map<@string, bool>();
+    foreach (var (_, i) in allImplementations) {
+        if (!seen[i.Package]) {
+            pkgs = append(pkgs, i.Package);
+            seen[i.Package] = true;
+        }
+    }
+    return pkgs;
+}
+
 // List returns the names of all alternative implementations registered for the
 // given package, whether available or not. The implicit base implementation is
 // not included.

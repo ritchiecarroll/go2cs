@@ -43,12 +43,14 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
 
     testenv.MustHaveExec(new exec_test_package.testing_TжTB(Ꮡt));
     // Not parallel: uses Chdir and Setenv.
+
     @string tmpDir = filepath.Join(Ꮡt.TempDir(), testdirˢ);
     {
         var err = os.Mkdir(tmpDir, 511); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
+
     @string executable = execabsTestˢ;
     if (runtime.GOOS == "windows"u8) {
         executable += ".exe"u8;
@@ -60,7 +62,9 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
     }
     Ꮡt.Chdir(tmpDir);
     Ꮡt.Logf(". is %#q"u8, tmpDir);
+
     @string origPath = os.Getenv(pathVar);
+
     // Add "." to PATH so that exec.LookPath looks in the current directory on all systems.
     // And try to trick it with "../testdir" too.
     foreach (var (_, errdot) in new @string[]{"1"u8, "0"u8}.slice()) {
@@ -83,6 +87,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
                             }
                         }
                     }
+
                     var (_, err) = LookPath(execabsTestˢ);
                     if (errdot == "1"u8){
                         if (err == default!){
@@ -96,6 +101,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
                             tΔ2.Fatalf("LookPath failed unexpectedly: %v"u8, err);
                         }
                     }
+
                     var cmd = Command(execabsTestˢ);
                     if (errdot == "1"u8){
                         if ((~cmd).Err == default!){
@@ -110,6 +116,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
                             tΔ2.Fatalf("Command failed unexpectedly: %v"u8, err);
                         }
                     }
+
                     // Clearing cmd.Err should let the execution proceed,
                     // and it should fail because it's not a valid binary.
                     {
@@ -124,6 +131,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
             }
         });
     }
+
     // Test the behavior when the first entry in PATH is an absolute name for the
     // current directory.
     //
@@ -148,16 +156,19 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
                 tΔ3.Fatalf(@"LookPath(%#q) = %#q, %v, want \""%s...\"", nil"u8, good, found, err, good);
             }
         }
+
         {
             var (found, err) = LookPath(execabsTestˢ); if (err != default! || !strings.HasPrefix(found, good)) {
                 tΔ3.Fatalf(@"LookPath(%#q) = %#q, %v, want \""%s...\"", nil"u8, execabsTestˢ, found, err, good);
             }
         }
+
         var cmd = Command(execabsTestˢ);
         if ((~cmd).Err != default!) {
             tΔ3.Fatalf("Command(%#q).Err = %v; want nil"u8, execabsTestˢ, (~cmd).Err);
         }
     });
+
     Ꮡt.Run(pathVar + "=$OTHER"u8, (ж<testing.T> tΔ4) => {
         // Control case: if the lookup returns ErrDot when PATH is empty, then we
         // know that PATH implicitly includes ".". If it does not, then we don't
@@ -173,12 +184,14 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
                 tΔ4.Fatalf(@"with PATH='', LookPath(%#q) = %#q; want non-nil error"u8, execabsTestˢ, foundΔ1);
             }
         }
+
         // Set PATH to include an explicit directory that contains a completely
         // independent executable that happens to have the same name as an
         // executable in ".". If "." is included implicitly, looking up the
         // (unqualified) executable name will return ErrDot; otherwise, the
         // executable in "." should have no effect and the lookup should
         // unambiguously resolve to the directory in PATH.
+
         @string dir = tΔ4.TempDir();
         @string executableΔ1 = execabsTestˢ;
         if (runtime.GOOS == "windows"u8) {
@@ -190,6 +203,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
             }
         }
         tΔ4.Setenv(pathVar, dir + ((@string)(rune)filepath.ListSeparator) + origPath);
+
         var (found, err) = LookPath(execabsTestˢ);
         if (wantErrDot){
             @string wantFound = filepath.Join("."u8, executableΔ1);
@@ -203,6 +217,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
             }
         }
     });
+
     Action<ж<testing.T>> checker(@string test) => (ж<testing.T> tΔ5) => {
             tΔ5.Helper();
             tΔ5.Logf("PATH=%s"u8, os.Getenv(pathˢ));
@@ -214,6 +229,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
                 tΔ5.Errorf("%q: path returned should be \"\". Got %q"u8, test, p);
             }
         };
+
     // Reference behavior for the next test
     var checkerʗ1 = checker;
     Ꮡt.Run(pathVar + "=$OTHER2"u8, (ж<testing.T> tΔ6) => {
@@ -222,6 +238,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
         tΔ6.Run(dotdot1ˢ, checkerʗ1(abcˢ));
         tΔ6.Run(dotdot2ˢ, checkerʗ1(".."u8));
     });
+
     // Test the behavior when PATH contains an executable file which is not a directory
     var checkerʗ2 = checker;
     Ꮡt.Run(pathVar + "=exe"u8, (ж<testing.T> tΔ7) => {
@@ -233,6 +250,7 @@ public static void TestLookPath(ж<testing.T> Ꮡt) {
         tΔ7.Run(dotdot1ˢ, checkerʗ2(abcˢ));
         tΔ7.Run(dotdot2ˢ, checkerʗ2(".."u8));
     });
+
     // Test the behavior when PATH contains an executable file which is not a directory
     var checkerʗ3 = checker;
     Ꮡt.Run(pathVar + "=exe/xx"u8, (ж<testing.T> tΔ8) => {

@@ -25,12 +25,15 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
         ref var w = ref heap<pkgbits.Encoder>(out var Ꮡw);
         w = Ꮡpw.NewEncoder(pkgbits.RelocMeta, pkgbits.SyncPublic);
         Ꮡw.Flush();
+
         ref var b = ref heap(new strings.Builder(), out var Ꮡb);
         _ = Ꮡpw.DumpTo(new strings_BuilderжWriter(Ꮡb));
         @string input = b.String();
+
         ref var pr = ref heap<pkgbits.PkgDecoder>(out var Ꮡpr);
         pr = pkgbits.NewPkgDecoder(packageIdˢ, input);
         var r = Ꮡpr.NewDecoder(pkgbits.RelocMeta, pkgbits.PublicRootIdx, pkgbits.SyncPublic);
+
         if (r.Version() != w.Version()) {
             Ꮡt.Errorf("Expected reader version %q to be the writer version %q"u8, r.Version(), w.Version());
         }
@@ -64,6 +67,7 @@ public static void TestVersions(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Expected version %v to have field %v"u8, c.v, c.f);
         }
     }
+
     // does not have field tests
     foreach (var (_, c) in new TestVersions_vfpair[]{
         new(pkgbits.V0, pkgbits.Flags),

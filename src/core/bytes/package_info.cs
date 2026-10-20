@@ -41,6 +41,12 @@ using static go.bytes_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,10 +55,10 @@ using static go.bytes_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("bytes/buffer.go", "buffer.cs", "AClYkgADEtCswNzilJSokKigqKCmkKqygoKUgoKUrLKCgqyygIKCpKyylIKmgIKkgoKUgsqSgqamgoIAAhDSgpSCrLKCgoKUrLKCgoKUAAga4oKCgoKCgpaCgoKUgs7CgoIAChaCppSCgt7igoCCgoKUgoKCuILIgq7CgoKClIKu1IKClIKCgpSCruKClIKClJSCgoKUrsKCgoKUgoKClKqilIKUgoKCAAIQ8pSClIKCgoKUgoKCAAUQ0oKUgpSCppzCgpSCgpQAAhIACQKmgqjCgoKCgpSCgoIAAhIACAKCAAIYAAkAAAIQ4g==", "230-234:1")]
-[assembly: go.GoPositionMap("bytes/bytes.go", "bytes.cs", "ABMoxKyyqqKClIKCgoKCgoKUgoKClKq0gpSClIKCgoKUgrqSqJKokqiSqJKmgoKCpqiSgpSkpIKUpKSokgACENKClKSCgoKUlKSqsoKCgoKCgoKClKaCgqaCgoKChKaEhqKAgtqCgoKCgoKCptgABBDClJSCgpSigqaUgpSUgoKClJSCgIKCgqa2goKCgoKUgpSClIKClKaCgpSmgoK4rsKUlIKAgoKCpraCgoKigqaUgpSUgoKClIKCgoKmlIKCgoKUgpSCgpSCgpSmgoKUpoKCuKqigpSClIKUgpaCgoKCgoKUgoKUggACGAAJAAACEvIAAhLgrMKmnOaClIKCgoKCgpaUqIKCgpSClIKCgoKUgoKUgpSUkpQACRT2AAQUgoKCgoKUgoKCpoKmqIKogoKWqqKClJSWgoKClJSCgpSWgoKCgpSokqiSrviCgoKCgpSCgpSUAAImABACgsyClIKClISCAAEaAAoCgoKCgqaCgoKClKqigoKCgoKUlpKUlIKCgoKUlJSqooKCgoKClJaSgpSCgoKClJSUqJCoorqiuqK6ooKCgoKCgoKClIKCgoKClJSCgpSqtIKUpKSkpKaCpgACEAAICIKUgoKUgs6igoKUqqKCgoKUlKqiqqKClKqigpSssqyyrLKCgoKCgpSClJSssoKSgpSCgqYABB7CgoKClJSokqyygoKmqqKUlIKUgpSAkqSqopSUgpSClICSpKaCgpSUlKaigoKUlJSUpoKCkoKUgpSUlJSqooKUgpSAkqSmgoKUpqKCgpSUpoKCkoKUgpSUqrSCgoKmlIK6goKCgpSC3qaUqqKCgoKCgoKUAAIS4oKUlJSUgqiCgoKCgoKCgqaUgoKUggACENKsxIKCgoKCqIKogqaClKaEgoKChKKClIKUgpSCvIKogqaUgpS6goKUgpSoqJKClKSkgpSkppKUgoKCgoKCpoKClJSClIKUgoKClKakgoKCgoKCgoKClJSClIKCAAgSgoKUpgACEuKAgqSssoKUAAIS4oKUAAIS4oKU", "838-845:1", "758=unicode.SpecialCase.ToUpper;764=unicode.SpecialCase.ToLower;770=unicode.SpecialCase.ToTitle")]
-[assembly: go.GoPositionMap("bytes/iter.go", "iter.cs", "AAwk0oKCgoCClKSCprqSgoKCgpTOooKUkoKCgpSCgpSUAAMQwq7CrsKSgoKCgoKCgpSCgoKUpIKUlIIABBLCkoKCgoKClIKCgpSkgpSUgg==", "19-32:1;37-45:1;54-67:1;91-116:1;124-147:1")]
-[assembly: go.GoPositionMap("bytes/reader.go", "reader.cs", "ABc0ooKUrLCmwoKUgoKC2NSClIKUgoKUqJKCgpSCgtiSgpSCgqjSgoKUgoCCgqSCguiSgpSClIKC6JKCgpSkpKSkgpSCqMKCgpSCgoKUgoKClKiQppA=")]
+[assembly: go.GoPositionMap("bytes/buffer.go", "buffer.cs", "AC5kkgADEtCswNzilJQAAhDSgpSokKigqKCmkKqygoKUgoKUrLKCgqyygIKCpKyylIKmgIKkgoKUgsqSgqamgoIAAhDSgpSCrLKCgoKUrLKCgoKUAAga4oKCgoKCgqaCgoKUgs7CgoIAChaCppSCgt7igoCCgoKUgoKCuILIgq7CgoKClIKu1IKClIKCgpSCruKClIKClJSCgoKUrsKCgoKUgoKClKqilIKUgoKCAAIQ8pSClIKCgoKUgoKCAAUQ0oKUgpSCppzCgpSCgpQAAhIACQKmgqjCgoKCgpSCgoIAAhIACAKCAAIYAAkAAAIQ4g==", "248-252:1")]
+[assembly: go.GoPositionMap("bytes/bytes.go", "bytes.cs", "ABMoxKyyqqKClIKCgoKCgoKUgoKClKq0gpSClIKCgoKUgrqSqJKokqiSqJKmgoKCpqiSgpSkpIKUpJSokgACENKClKSCgoKUlKSqsoKCgoKCgoKClKaCgqaCgoKChKaUhqKAgtqCgoKCgoKCptgAAxDClJSCgpSigqaUgpSUgoKClJSCgIKCgqa2goKCgoKUgpSClIKClKaCgpSmgoK4rsKUlIKAgoKCpraCgoKigqaUgpSUgoKClIKCgoKmlIKCgoKUgpSCgpSCgpSmgoKUpoKCuKqigpSClIKUgqaCgoKCgoKUgoKUggACGAAJAAACEvIAAhLgrMKmAAEQAAgGgpSCgoKCgoKmlLiCgoKUgpSCgoKClIKClIKUlIKUAAkYAAsGAAUUgoKCgoKCpoKmuIK4goKmqqKClJSmgoKClJSCgpSmgoKCgpSokqiSrviCgoKCgpSUAAImABACgtyClIKClJSCAAIaAAoCgoKCgqaCgoKClKqigoKCgoKUpoKUlIKCgoKUlJSqooKCgoKClKaCgpSCgoKClJSUqJCoorqiuqK6ooKCgoKCgoKClIKCgoKClJSCgpSqtIKUpKSklKaCpgACEAAICIKUgoKUgs6igoKUqqKCgoKUlKqiqqKClKqigpSssqyyrLKCgoKClJSssoKSgpSCgqYADB7CgoKClJSokqyygoKmqqKUlIKUgpSAkqSqopSUgpSClICSpKaCgpSUlKaigoKUlJSUpoKCgoKUlJSUqqKClIKUgJKkpoKClKaigoKUlKaCgpKClIKUlKq0gqaUgpSUgoKClLjcqqKCgoKCgoKUAAIS4oKUlJSUgriCgoKCgoKCgqaCgoKCgoKmggACENKsxIKCgoKCuIK4gqaClKaUgoKClIKCgsqCuIKmlIKUyoKClIKUuKiSgpSkpIKUpLaClIKCgoKCgqaCgpSUgpSClIKCgpSmlIKCgoKCgoKCgpSUgpSCggAIEoKClKYAAhLigIKkrLKClAACEuKClAACEuKClA==", "834-841:1", "754=unicode.SpecialCase.ToUpper;760=unicode.SpecialCase.ToLower;766=unicode.SpecialCase.ToTitle")]
+[assembly: go.GoPositionMap("bytes/iter.go", "iter.cs", "AAwk0oKCgoCClKSCAAUQopKCgoKClJSUgoKClIKClJQAAxDCrsKuwpKCgoKCgoKClIKCgpSkgpSUggAEEsKSgoKCgoKClKSClJSC", "19-31:1;37-60:1;84-109:1;117-136:1")]
+[assembly: go.GoPositionMap("bytes/reader.go", "reader.cs", "ABc0ooKUrLCmwoKUgoKC2NSClIKUgoKUqJKCgpSCgtiSgpSCgqjSgoKUgoCCgqSCguiSgpSClIKC6JKCgpSkpKSUgpSCqMKCgpSCgoKUgoKClKiQppA=")]
 // </GoSourcePositionMaps>
 
 namespace go;

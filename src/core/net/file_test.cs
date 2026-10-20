@@ -20,7 +20,6 @@ partial class net_internal_test_package {
 //      golang.org/x/net/ipv4
 //      golang.org/x/net/ipv6
 //      golang.org/x/net/icmp
-
 partial struct fileConnTestsᴛ1 /*dyn*/ {
     internal @string network;
 }
@@ -44,6 +43,7 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                 Ꮡt.Logf("skipping %s test"u8, tt.network);
                 continue;
             }
+
             @string network = default!;
             @string address = default!;
             var exprᴛ2 = tt.network;
@@ -92,6 +92,7 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
             var addr = c1.LocalAddr();
+
             ж<Δos.File> f = default!;
             switch (c1.type()) {
             case ж<global::go.net_package.TCPConn> c1Δ1: {
@@ -124,6 +125,7 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
                 }
                 Ꮡt.Fatal(err);
             }
+
             (var c2, err) = FileConn(f);
             {
                 var errΔ2 = f.Close(); if (errΔ2 != default!) {
@@ -140,6 +142,7 @@ public static void TestFileConn(ж<testing.T> Ꮡt) {
             }
             var c2ʗ1 = c2;
             defer(() => c2ʗ1.Close(), ref ᒐ);
+
             {
                 var (_, errΔ3) = c2.Write(slice<byte>("FILECONN TEST"u8)); if (errΔ3 != default!) {
                     {
@@ -178,13 +181,14 @@ public static partial void TestFileListener(ж<testing.T> Ꮡt) {
                 Ꮡt.Logf("skipping %s test"u8, tt.network);
                 continue;
             }
+
             var ln1 = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tt.network);
             var exprᴛ2 = tt.network;
             if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
                 defer(Δos.Remove, ln1.Addr().String(), ref ᒐ);
             }
-
             var addr = ln1.Addr();
+
             ж<Δos.File> f = default!;
             error err = default!;
             switch (ln1.type()) {
@@ -208,7 +212,6 @@ public static partial void TestFileListener(ж<testing.T> Ꮡt) {
                     }
                 }
             }
-
             if (err != default!) {
                 {
                     var perr = parseCommonError(err); if (perr != default!) {
@@ -217,6 +220,7 @@ public static partial void TestFileListener(ж<testing.T> Ꮡt) {
                 }
                 Ꮡt.Fatal(err);
             }
+
             (var ln2, err) = FileListener(f);
             {
                 var errΔ3 = f.Close(); if (errΔ3 != default!) {
@@ -233,6 +237,7 @@ public static partial void TestFileListener(ж<testing.T> Ꮡt) {
             }
             var ln2ʗ1 = ln2;
             defer(() => ln2ʗ1.Close(), ref ᒐ);
+
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(1);
             var ln2ʗ2 = ln2;
@@ -293,13 +298,14 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
                 Ꮡt.Logf("skipping %s test"u8, tt.network);
                 continue;
             }
+
             var c1 = newLocalPacketListener(new net_test_package.testing_TжTB(Ꮡt), tt.network);
             var exprᴛ2 = tt.network;
             if (exprᴛ2 == "unixgram"u8) {
                 defer(Δos.Remove, c1.LocalAddr().String(), ref ᒐ);
             }
-
             var addr = c1.LocalAddr();
+
             ж<Δos.File> f = default!;
             error err = default!;
             switch (c1.type()) {
@@ -329,6 +335,7 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
                 }
                 Ꮡt.Fatal(err);
             }
+
             (var c2, err) = FilePacketConn(f);
             {
                 var errΔ2 = f.Close(); if (errΔ2 != default!) {
@@ -345,6 +352,7 @@ public static void TestFilePacketConn(ж<testing.T> Ꮡt) {
             }
             var c2ʗ1 = c2;
             defer(() => c2ʗ1.Close(), ref ᒐ);
+
             {
                 var (_, errΔ3) = c2.WriteTo(slice<byte>("FILEPACKETCONN TEST"u8), addr); if (errΔ3 != default!) {
                     {
@@ -375,10 +383,10 @@ public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
         if (exprᴛ1 == "plan9"u8 || exprᴛ1 == "windows"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
             Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
         }
-
         if (!testableNetwork(tcpˢ)) {
             Ꮡt.Skip(tcpNotSupportedˢ);
         }
+
         var handler = (ж<localServer> lsΔ1, global::go.net_package.Listener ln) => {
             GoFrame ᒐ = default;
             try {
@@ -394,6 +402,7 @@ public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         };
+
         var ls = newLocalServer(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
         var lsʗ1 = ls;
         defer(() => lsʗ1.teardown(), ref ᒐ);
@@ -402,6 +411,7 @@ public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
+
         const nint tries = 100;
         for (nint i = 0; i < tries; i++) {
             var (c1, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
@@ -409,6 +419,7 @@ public static partial void TestFileCloseRace(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
             var tc = c1._<ж<global::go.net_package.TCPConn>>();
+
             ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
             Ꮡwg.Add(2);
             var tcʗ1 = tc;

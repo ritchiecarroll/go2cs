@@ -17,30 +17,9 @@ internal partial struct parseTest {
     public @string Dump;
 }
 
-// Base cases
-// Malformed { } are treated as literals.
-// alt{emp{}emp{}} but got factored
-// Posix and Perl extensions
-//	{ `\C`, `byte{}` },  // probably never
-// Unicode, negatives, and a double negative.
-// Hex, octal.
-// More interesting regular expressions.
-// utf-8
-// Test precedences
-// Test flattening.
-// Test Perl quoted literals
-// Test Perl \A and \z
-// Test named captures
-// Case-folded literals
-// Strings
-// Factoring.
-// Bug fixes.
-// RE2 prefix_tests
-// Valid repetitions.
-// Valid nesting.
-// not nested at all
 internal static slice<parseTest> parseTests;
 internal static void initᴛparseTests() { parseTests = new parseTest[]{
+    // Base cases
     new(@"a"u8, @"lit{a}"u8),
     new(@"a."u8, @"cat{lit{a}dot{}}"u8),
     new(@"a.b"u8, @"cat{lit{a}dot{}lit{b}}"u8),
@@ -63,13 +42,14 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"a{2}?"u8, @"nrep{2,2 lit{a}}"u8),
     new(@"a{2,3}?"u8, @"nrep{2,3 lit{a}}"u8),
     new(@"a{2,}?"u8, @"nrep{2,-1 lit{a}}"u8),
+    // Malformed { } are treated as literals.
     new(@"x{1001"u8, @"str{x{1001}"u8),
     new(@"x{9876543210"u8, @"str{x{9876543210}"u8),
     new(@"x{9876543210,"u8, @"str{x{9876543210,}"u8),
     new(@"x{2,1"u8, @"str{x{2,1}"u8),
     new(@"x{1,9876543210"u8, @"str{x{1,9876543210}"u8),
     new(@""u8, @"emp{}"u8),
-    new(@"|"u8, @"emp{}"u8),
+    new(@"|"u8, @"emp{}"u8), // alt{emp{}emp{}} but got factored
     new(@"|x|"u8, @"alt{emp{}lit{x}emp{}}"u8),
     new(@"."u8, @"dot{}"u8),
     new(@"^"u8, @"bol{}"u8),
@@ -96,6 +76,8 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"abc"u8, @"str{abc}"u8),
     new(@"abc|def"u8, @"alt{str{abc}str{def}}"u8),
     new(@"abc|def|ghi"u8, @"alt{str{abc}str{def}str{ghi}}"u8),
+
+    // Posix and Perl extensions
     new(@"[[:lower:]]"u8, @"cc{0x61-0x7a}"u8),
     new(@"[a-z]"u8, @"cc{0x61-0x7a}"u8),
     new(@"[^[:lower:]]"u8, @"cc{0x0-0x60 0x7b-0x10ffff}"u8),
@@ -113,6 +95,9 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"(?i)\w"u8, @"cc{0x30-0x39 0x41-0x5a 0x5f 0x61-0x7a 0x17f 0x212a}"u8),
     new(@"(?i)\W"u8, @"cc{0x0-0x2f 0x3a-0x40 0x5b-0x5e 0x60 0x7b-0x17e 0x180-0x2129 0x212b-0x10ffff}"u8),
     new(@"[^\\]"u8, @"cc{0x0-0x5b 0x5d-0x10ffff}"u8),
+    //	{ `\C`, `byte{}` },  // probably never
+
+    // Unicode, negatives, and a double negative.
     new(@"\p{Braille}"u8, @"cc{0x2800-0x28ff}"u8),
     new(@"\P{Braille}"u8, @"cc{0x0-0x27ff 0x2900-0x10ffff}"u8),
     new(@"\p{^Braille}"u8, @"cc{0x0-0x27ff 0x2900-0x10ffff}"u8),
@@ -128,18 +113,26 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"(?i)[\p{Lu}]"u8, mkCharClass(isUpperFold)),
     new(@"\p{Any}"u8, @"dot{}"u8),
     new(@"\p{^Any}"u8, @"cc{}"u8),
+
+    // Hex, octal.
     new(@"[\012-\234]\141"u8, @"cat{cc{0xa-0x9c}lit{a}}"u8),
     new(@"[\x{41}-\x7a]\x61"u8, @"cat{cc{0x41-0x7a}lit{a}}"u8),
+
+    // More interesting regular expressions.
     new(@"a{,2}"u8, @"str{a{,2}}"u8),
     new(@"\.\^\$\\"u8, @"str{.^$\}"u8),
     new(@"[a-zABC]"u8, @"cc{0x41-0x43 0x61-0x7a}"u8),
     new(@"[^a]"u8, @"cc{0x0-0x60 0x62-0x10ffff}"u8),
-    new(@"[α-ε☺]"u8, @"cc{0x3b1-0x3b5 0x263a}"u8),
+    new(@"[α-ε☺]"u8, @"cc{0x3b1-0x3b5 0x263a}"u8), // utf-8
     new(@"a*{"u8, @"cat{star{lit{a}}lit{{}}"u8),
+
+    // Test precedences
     new(@"(?:ab)*"u8, @"star{str{ab}}"u8),
     new(@"(ab)*"u8, @"star{cap{str{ab}}}"u8),
     new(@"ab|cd"u8, @"alt{str{ab}str{cd}}"u8),
     new(@"a(b|c)d"u8, @"cat{lit{a}cap{cc{0x62-0x63}}lit{d}}"u8),
+
+    // Test flattening.
     new(@"(?:a)"u8, @"lit{a}"u8),
     new(@"(?:ab)(?:cd)"u8, @"str{abcd}"u8),
     new(@"(?:a+b+)(?:c+d+)"u8, @"cat{plus{lit{a}}plus{lit{b}}plus{lit{c}}plus{lit{d}}}"u8),
@@ -149,11 +142,15 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@".|a"u8, @"dot{}"u8),
     new(@"(?:[abc]|A|Z|hello|world)"u8, @"alt{cc{0x41 0x5a 0x61-0x63}str{hello}str{world}}"u8),
     new(@"(?:[abc]|A|Z)"u8, @"cc{0x41 0x5a 0x61-0x63}"u8),
+
+    // Test Perl quoted literals
     new(@"\Q+|*?{[\E"u8, @"str{+|*?{[}"u8),
     new(@"\Q+\E+"u8, @"plus{lit{+}}"u8),
     new(@"\Qab\E+"u8, @"cat{lit{a}plus{lit{b}}}"u8),
     new(@"\Q\\E"u8, @"lit{\}"u8),
     new(@"\Q\\\E"u8, @"str{\\}"u8),
+
+    // Test Perl \A and \z
     new(@"(?m)^"u8, @"bol{}"u8),
     new(@"(?m)$"u8, @"eol{}"u8),
     new(@"(?-m)^"u8, @"bot{}"u8),
@@ -162,15 +159,25 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"(?m)\z"u8, @"eot{\z}"u8),
     new(@"(?-m)\A"u8, @"bot{}"u8),
     new(@"(?-m)\z"u8, @"eot{\z}"u8),
+
+    // Test named captures
     new(@"(?P<name>a)"u8, @"cap{name:lit{a}}"u8),
     new(@"(?<name>a)"u8, @"cap{name:lit{a}}"u8),
+
+    // Case-folded literals
     new(@"[Aa]"u8, @"litfold{A}"u8),
     new(@"[\x{100}\x{101}]"u8, @"litfold{Ā}"u8),
     new(@"[Δδ]"u8, @"litfold{Δ}"u8),
+
+    // Strings
     new(@"abcde"u8, @"str{abcde}"u8),
     new(@"[Aa][Bb]cd"u8, @"cat{strfold{AB}str{cd}}"u8),
+
+    // Factoring.
     new(@"abc|abd|aef|bcx|bcy"u8, @"alt{cat{lit{a}alt{cat{lit{b}cc{0x63-0x64}}str{ef}}}cat{str{bc}cc{0x78-0x79}}}"u8),
     new(@"ax+y|ax+z|ay+w"u8, @"cat{lit{a}alt{cat{plus{lit{x}}lit{y}}cat{plus{lit{x}}lit{z}}cat{plus{lit{y}}lit{w}}}}"u8),
+
+    // Bug fixes.
     new(@"(?:.)"u8, @"dot{}"u8),
     new(@"(?:x|(?:xa))"u8, @"cat{lit{x}alt{emp{}lit{a}}}"u8),
     new(@"(?:.|(?:.a))"u8, @"cat{dot{}alt{emp{}lit{a}}}"u8),
@@ -182,6 +189,8 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"(?:(?:^).)"u8, @"cat{bol{}dot{}}"u8),
     new(@"(?-s)(?:(?:^).)"u8, @"cat{bol{}dnl{}}"u8),
     new(@"[\s\S]a"u8, @"cat{cc{0x0-0x10ffff}lit{a}}"u8),
+
+    // RE2 prefix_tests
     new(@"abc|abd"u8, @"cat{str{ab}cc{0x63-0x64}}"u8),
     new(@"a(?:b)c|abd"u8, @"cat{str{ab}cc{0x63-0x64}}"u8),
     new(@"abc|abd|aef|bcx|bcy"u8,
@@ -196,11 +205,15 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
         @"cat{rep{2,2 lit{x}}alt{lit{y}cat{cc{0x30-0x39}lit{y}}}}"u8),
     new(@"a.*?c|a.*?b"u8,
         @"cat{lit{a}alt{cat{nstar{dot{}}lit{c}}cat{nstar{dot{}}lit{b}}}}"u8),
+
+    // Valid repetitions.
     new(@"((((((((((x{2}){2}){2}){2}){2}){2}){2}){2}){2}))"u8, @""u8),
     new(@"((((((((((x{1}){2}){2}){2}){2}){2}){2}){2}){2}){2})"u8, @""u8),
+
+    // Valid nesting.
     new(strings.Repeat("("u8, 999) + strings.Repeat(")"u8, 999), @""u8),
     new(strings.Repeat("(?:"u8, 999) + strings.Repeat(")*"u8, 999), @""u8),
-    new("("u8 + strings.Repeat("|"u8, 12345) + ")"u8, @""u8)
+    new("("u8 + strings.Repeat("|"u8, 12345) + ")"u8, @""u8) // not nested at all
 }.slice(); }
 
 internal static global::go.regexp.syntax_package.Flags testFlags => /* MatchNL | PerlX | UnicodeGroups */ 204;
@@ -209,14 +222,14 @@ public static void TestParseSimple(ж<testing.T> Ꮡt) {
     testParseDump(Ꮡt, parseTests, testFlags);
 }
 
-// 0x17F is an old English long s (looks like an f) and folds to s.
-// 0x212A is the Kelvin symbol and folds to k.
-// [Aa][A-z...]
 internal static slice<parseTest> foldcaseTests = new parseTest[]{
     new(@"AbCdE"u8, @"strfold{ABCDE}"u8),
     new(@"[Aa]"u8, @"litfold{A}"u8),
     new(@"a"u8, @"litfold{A}"u8),
-    new(@"A[F-g]"u8, @"cat{litfold{A}cc{0x41-0x7a 0x17f 0x212a}}"u8),
+
+    // 0x17F is an old English long s (looks like an f) and folds to s.
+    // 0x212A is the Kelvin symbol and folds to k.
+    new(@"A[F-g]"u8, @"cat{litfold{A}cc{0x41-0x7a 0x17f 0x212a}}"u8), // [Aa][A-z...]
     new(@"[[:upper:]]"u8, @"cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"u8),
     new(@"[[:lower:]]"u8, @"cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"u8)
 }.slice();
@@ -338,7 +351,6 @@ internal static void dumpRegexp(ж<strings.Builder> Ꮡb, ж<global::go.regexp.s
         else { /* default: */
             Ꮡb.WriteString(opNames[re.Op]);
         }
-
     }
     Ꮡb.WriteByte((rune)'{');
     var exprᴛ2 = re.Op;
@@ -384,7 +396,6 @@ internal static void dumpRegexp(ж<strings.Builder> Ꮡb, ж<global::go.regexp.s
             }
         }
     }
-
     Ꮡb.WriteByte((rune)'}');
 }
 
@@ -450,19 +461,10 @@ public static void TestAppendRangeCollapse(ж<testing.T> Ꮡt) {
         r = appendRange(r, i + (rune)'a' - (rune)'A', i + (rune)'a' - (rune)'A');
     }
     if (((@string)r) != "AZaz"u8) {
-        Ꮡt.Errorf("appendRange interlaced A-Z a-z = %s, want AZaz"u8, ((@string)r));
+        Ꮡt.Errorf("appendRange interlaced A-Z a-z = %s, want AZaz"u8, (@string)r);
     }
 }
 
-// Invalid UTF-8
-// too much repetition
-// too much repetition
-// too much repetition
-// too deep
-// too deep
-// too long
-// too long
-// too many runes
 internal static slice<@string> invalidRegexps = new @string[]{
     @"("u8,
     @")"u8,
@@ -483,7 +485,7 @@ internal static slice<@string> invalidRegexps = new @string[]{
     @"x{9876543210}"u8,
     @"x{2,1}"u8,
     @"x{1,9876543210}"u8,
-    ((@string)(new byte[]{0xff})),
+    ((@string)(new byte[]{0xff})), // Invalid UTF-8
     ((@string)(new byte[]{0x5b, 0xff, 0x5d})),
     ((@string)(new byte[]{0x5b, 0x5c, 0xff, 0x5d})),
     ((@string)(new byte[]{0x5c, 0xff})),
@@ -500,14 +502,14 @@ internal static slice<@string> invalidRegexps = new @string[]{
     @"[a-Z]"u8,
     @"(?i)[a-Z]"u8,
     @"\Q\E*"u8,
-    @"a{100000}"u8,
-    @"a{100000,}"u8,
-    "((((((((((x{2}){2}){2}){2}){2}){2}){2}){2}){2}){2})"u8,
-    strings.Repeat("("u8, 1000) + strings.Repeat(")"u8, 1000),
-    strings.Repeat("(?:"u8, 1000) + strings.Repeat(")*"u8, 1000),
-    "("u8 + strings.Repeat("(xx?)"u8, 1000) + "){1000}"u8,
-    strings.Repeat("(xx?){1000}"u8, 1000),
-    strings.Repeat(@"\pL"u8, 27000)
+    @"a{100000}"u8, // too much repetition
+    @"a{100000,}"u8, // too much repetition
+    "((((((((((x{2}){2}){2}){2}){2}){2}){2}){2}){2}){2})"u8, // too much repetition
+    strings.Repeat("("u8, 1000) + strings.Repeat(")"u8, 1000), // too deep
+    strings.Repeat("(?:"u8, 1000) + strings.Repeat(")*"u8, 1000), // too deep
+    "("u8 + strings.Repeat("(xx?)"u8, 1000) + "){1000}"u8, // too long
+    strings.Repeat("(xx?){1000}"u8, 1000), // too long
+    strings.Repeat(@"\pL"u8, 27000) // too many runes
 }.slice();
 
 internal static slice<@string> onlyPerl = new @string[]{
@@ -571,8 +573,6 @@ public static void TestParseInvalidRegexps(ж<testing.T> Ꮡt) {
 }
 
 public static void TestToStringEquivalentParse(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, tt) in parseTests) {
         var (re, err) = Parse(tt.Regexp, testFlags);
         if (err != default!) {
@@ -588,6 +588,7 @@ public static void TestToStringEquivalentParse(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Parse(%#q).Dump() = %#q want %#q"u8, tt.Regexp, d, tt.Dump);
             continue;
         }
+
         @string s = re.String();
         if (s != tt.Regexp) {
             // If ToString didn't return the original regexp,
@@ -604,6 +605,7 @@ public static void TestToStringEquivalentParse(ж<testing.T> Ꮡt) {
             if (d != nd) {
                 Ꮡt.Errorf("Parse(%#q) -> %#q; %#q vs %#q"u8, tt.Regexp, s, d, nd);
             }
+
             @string ns = nre.String();
             if (s != ns) {
                 Ꮡt.Errorf("Parse(%#q) -> %#q -> %#q"u8, tt.Regexp, s, ns);
@@ -611,7 +613,6 @@ public static void TestToStringEquivalentParse(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct stringTestsᴛ1 /*dyn*/ {
     internal @string re;

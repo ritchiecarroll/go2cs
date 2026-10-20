@@ -61,6 +61,7 @@ private static readonly @string nameᶜ = "http2client"u8;
 
 public static void TestMetrics(ж<testing.T> Ꮡt) {
     @string name = nameᶜ; // must be a real name so runtime will accept it
+
     array<metrics.Sample> m = new(1);
     m[0].Name = "/godebug/non-default-behavior/" + name + ":events";
     metrics.Read(m[..]);
@@ -69,6 +70,7 @@ public static void TestMetrics(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("NonDefault kind = %v, want uint64"u8, kind);
         }
     }
+
     var s = New(name);
     s.Value();
     s.IncNonDefault();
@@ -108,11 +110,13 @@ public static void TestPanicNilRace(ж<testing.T> Ꮡt) {
         cmd.Value.Env = append((~cmd).Env, "GODEBUG=panicnil=1"u8);
         var (@out, err) = cmd.CombinedOutput();
         Ꮡt.Logf("output:\n%s"u8, @out);
+
         if (err != default!) {
             Ꮡt.Errorf("Was not expecting a crash"u8);
         }
         return;
     }
+
     var test = (ж<testing.T> tΔ1) => {
         GoFrame ᒐ = default;
         try {
@@ -143,26 +147,29 @@ public static void TestCmdBisect(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("exec bisect: %v\n%s"u8, err, @out);
     }
+
     slice<@string> want = default!;
     (var src, err) = os.ReadFile(godebugTestGoˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
-    foreach (var (i, line) in strings.Split(((@string)src), "\n"u8)) {
+    foreach (var (i, line) in strings.Split((@string)src, "\n"u8)) {
         if (strings.Contains(line, "BISECT"u8 + " "u8 + "BUG"u8)) {
             want = append(want, fmt.Sprintf("godebug_test.go:%d"u8, i + 1));
         }
     }
     slices.Sort<slice<@string>, @string>(want);
+
     slice<@string> have = default!;
-    foreach (var (_, line) in strings.Split(((@string)@out), "\n"u8)) {
+    foreach (var (_, line) in strings.Split((@string)@out, "\n"u8)) {
         if (strings.Contains(line, godebugTestGoˢ2)) {
             have = append(have, line.slice(strings.LastIndex(line, godebugTestGoˢ2)));
         }
     }
     slices.Sort<slice<@string>, @string>(have);
+
     if (!slices.Equal<slice<@string>, @string>(have, want)) {
-        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, ((@string)@out));
+        Ꮡt.Errorf("bad bisect output:\nhave %v\nwant %v\ncomplete output:\n%s"u8, have, want, (@string)@out);
     }
 }
 
@@ -184,6 +191,7 @@ public static void TestBisectTestCase(ж<testing.T> Ꮡt) {
         var c = s.Value() == "1"u8; // BISECT BUG
         var d = s.Value() == "1"u8; // BISECT BUG
         var e = s.Value() == "1"u8; // BISECT BUG
+
         if (a) {
             Ꮡt.Log((@string)"ok"u8);
         }

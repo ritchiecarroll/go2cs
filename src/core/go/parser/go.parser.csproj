@@ -172,6 +172,7 @@
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/ast/go.ast.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/build/constraint/go.build.constraint.csproj" />
+    <ProjectReference Include="$(go2csPath)core/go/internal/scannerhooks/go.internal.scannerhooks.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/scanner/go.scanner.csproj" />
     <ProjectReference Include="$(go2csPath)core/go/token/go.token.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />

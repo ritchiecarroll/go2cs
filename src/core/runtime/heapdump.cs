@@ -10,9 +10,12 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using gc = @internal.runtime.gc_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 
+[GoFieldAccess(typeof(stackmap), typeof(specialfinalizer), typeof(specialprofile))]
 partial class runtime_package {
 
 // go2cs generated this placeholder — func runtime_debug_WriteHeapDump is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -62,6 +65,7 @@ internal static unsafe void dwrite(@unsafe.Pointer data, uintptr len) {
         nbuf += len;
         return;
     }
+
     write(dumpfd, @unsafe.Pointer.FromPinnedBox(Ꮡbuf), (int32)nbuf);
     if (len >= bufSize){
         write(dumpfd, data, (int32)len);
@@ -90,7 +94,6 @@ internal static void flush() {
 // Note: when a bucket overflows we may end up
 // serializing a type more than once. That's ok.
 internal static UntypedInt typeCacheBuckets => 256;
-
 internal static UntypedInt typeCacheAssoc => 4;
 
 partial struct typeCacheBucket {
@@ -105,7 +108,7 @@ internal static void dumpint(uint64 v) {
     ref var buf = ref heap(new array<byte>(10), out var Ꮡbuf);
     nint n = default!;
     while (v >= 0x80) {
-        buf[n] = (byte)((uint64)(v | 0x80));
+        buf[n] = (byte)(v | 0x80);
         n++;
         v >>= (int)(7);
     }
@@ -146,9 +149,10 @@ internal static void dumptype(ж<_type> Ꮡt) {
     if (Ꮡt == nil) {
         return;
     }
+
     // If we've definitely serialized the type before,
     // no need to do it again.
-    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((uint32)(t.Hash & (uint32)((typeCacheBuckets - 1)))));
+    var b = Ꮡtypecache.at<typeCacheBucket>((ulong)((t.Hash & (uint32)(typeCacheBuckets - 1))));
     if (Ꮡt == (~b).t[0]) {
         return;
     }
@@ -162,12 +166,14 @@ internal static void dumptype(ж<_type> Ꮡt) {
             return;
         }
     }
+
     // Might not have been dumped yet. Dump it and
     // remember we did so.
     for (nint j = typeCacheAssoc - 1; j > 0; j--) {
         b.Value.t[j] = (~b).t[j - 1];
     }
     b.Value.t[0] = Ꮡt;
+
     // dump the type
     dumpint(tagType);
     dumpint((uint64)(uintptr)Ꮡt);
@@ -185,7 +191,7 @@ internal static void dumptype(ж<_type> Ꮡt) {
             dwrite(@unsafe.Pointer.FromPinnedBox(@unsafe.StringData(name)), (uintptr)len(name));
         }
     }
-    dumpbool((abiꓸKind)(t.Kind_ & abi.KindDirectIface) == 0 || t.Pointers());
+    dumpbool(!t.IsDirectIface() || t.Pointers());
 }
 
 // dump an object.
@@ -243,6 +249,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
     ref var child = ref Ꮡchild.DerefOrNull();
 
     var f = s.fn;
+
     // Figure out what we can about our stack map
     var pc = s.pc;
     var pcdata = (int32)(-1); // Use the entry map at function entry
@@ -257,12 +264,14 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
         pcdata = 0;
     }
     var stkmap = (ж<stackmap>)(uintptr)(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
+
     ref var bv = ref heap(new bitvector(), out var Ꮡbv);
-    if (stkmap != nil && (~stkmap).n > 0){
+    if (stkmap != nil && stkmap.n > 0){
         bv = stackmapdata(stkmap, pcdata);
     } else {
         bv.n = -1;
     }
+
     // Dump main body of stack frame.
     dumpint(tagStackFrame);
     dumpint((uint64)s.sp); // lowest address in frame
@@ -277,6 +286,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
         name = unknownFunctionˢ;
     }
     dumpstr(name);
+
     // Dump fields in the outargs section
     if (child.args.n >= 0){
         dumpbv(Ꮡchild.of(childInfo.Ꮡargs), child.argoff);
@@ -287,6 +297,7 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
             dumpint((uint64)off);
         }
     }
+
     // Dump fields in the local vars section
     if (stkmap == nil){
         // No locals information, dump everything.
@@ -295,20 +306,21 @@ internal static void dumpframe(ж<stkframe> Ꮡs, ж<childInfo> Ꮡchild) {
             dumpint((uint64)off);
         }
     } else 
-    if ((~stkmap).n < 0){
+    if (stkmap.n < 0){
         // Locals size information, dump just the locals.
-        var size = (uintptr)(-(~stkmap).n);
+        var size = (uintptr)(-stkmap.n);
         for (var off = s.varp - size - s.sp; off < s.varp - s.sp; off += goarch.PtrSize) {
             dumpint(fieldKindPtr);
             dumpint((uint64)off);
         }
     } else 
-    if ((~stkmap).n > 0) {
+    if (stkmap.n > 0) {
         // Locals bitmap information, scan just the pointers in
         // locals.
         dumpbv(Ꮡbv, s.varp - (uintptr)bv.n * (uintptr)goarch.PtrSize - s.sp);
     }
     dumpint(fieldKindEol);
+
     // Record arg info for parent.
     child.argoff = s.argp - s.fp;
     child.arglen = s.argBytes();
@@ -338,13 +350,14 @@ internal static void dumpgoroutine(ж<g> Ꮡgp) {
         pc = gp.sched.pc;
         lr = gp.sched.lr;
     }
+
     dumpint(tagGoroutine);
     dumpint((uint64)(uintptr)Ꮡgp);
     dumpint((uint64)sp);
     dumpint(gp.goid);
     dumpint((uint64)gp.gopc);
     dumpint((uint64)readgstatus(Ꮡgp));
-    dumpbool(isSystemGoroutine(ref (Ꮡgp).DerefOrNull(), false));
+    dumpbool(isSystemGoroutine(Ꮡgp, false));
     dumpbool(false); // isbackground
     dumpint((uint64)gp.waitsince);
     dumpstr(gp.waitreason.String());
@@ -352,6 +365,7 @@ internal static void dumpgoroutine(ж<g> Ꮡgp) {
     dumpint((uint64)(uintptr)gp.m);
     dumpint((uint64)(uintptr)gp._defer);
     dumpint((uint64)(uintptr)gp._panic);
+
     // dump stack
     ref var child = ref heap(new childInfo(), out var Ꮡchild);
     child.args.n = -1;
@@ -362,6 +376,7 @@ internal static void dumpgoroutine(ж<g> Ꮡgp) {
     for (Ꮡu.initAt(pc, sp, lr, Ꮡgp, 0); u.valid(); Ꮡu.next()) {
         dumpframe(Ꮡu.of(unwinder.Ꮡframe), Ꮡchild);
     }
+
     // dump defer & panic records
     for (var d = gp._defer; d != nil; d = d.Value.link) {
         dumpint(tagDefer);
@@ -396,24 +411,34 @@ internal static readonly @string dumpgsInStwBadStatusˢ = "dumpgs in STW - bad s
 
 internal static void dumpgs() {
     assertWorldStopped();
+
     // goroutines & stacks
     forEachG((ж<g> gp) => {
         var status = readgstatus(gp); // The world is stopped so gp will not be in a scan state.
         var exprᴛ1 = status;
-        if (exprᴛ1 == _Gdead) {
+        var matchᴛ2 = exprᴛ1 == _Grunning || (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) || (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting);
+        if (exprᴛ1 == _Grunning) {
+            // Dump goroutine if it's _Grunning only during a syscall. This is safe
+            // because the goroutine will just park without mutating its stack, since
+            // the world is stopped.
+            if ((~gp).syscallsp != 0) {
+                dumpgoroutine(gp);
+            }
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ2) { /* default: */
+            print((@string)"runtime: unexpected G.status "u8, (Δhex)(uint64)status, (@string)"\n"u8);
+            @throw(dumpgsInStwBadStatusˢ);
+        }
+        else if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) {
+            // ok
         }
         else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting) {
             dumpgoroutine(gp);
         }
-        else { /* default: */
-            print((@string)"runtime: unexpected G.status "u8, ((Δhex)(uint64)status), (@string)"\n"u8);
-            @throw(dumpgsInStwBadStatusˢ);
-        }
-
     });
 }
 
-// ok
 internal static void finq_callback(ж<funcval> Ꮡfn, @unsafe.Pointer obj, uintptr nret, ж<_type> Ꮡfint, ж<ptrtype> Ꮡot) {
     ref var fn = ref Ꮡfn.DerefOrNull();
 
@@ -428,17 +453,20 @@ internal static void finq_callback(ж<funcval> Ꮡfn, @unsafe.Pointer obj, uintp
 internal static void dumproots() {
     // To protect mheap_.allspans.
     assertWorldStopped();
+
     // TODO(mwhudson): dump datamask etc from all objects
     // data segment
     dumpint(tagData);
     dumpint((uint64)firstmoduledata.data);
     dumpmemrange((@unsafe.Pointer)firstmoduledata.data, firstmoduledata.edata - firstmoduledata.data);
     dumpfields(firstmoduledata.gcdatamask);
+
     // bss segment
     dumpint(tagBSS);
     dumpint((uint64)firstmoduledata.bss);
     dumpmemrange((@unsafe.Pointer)firstmoduledata.bss, firstmoduledata.ebss - firstmoduledata.bss);
     dumpfields(firstmoduledata.gcbssmask);
+
     // mspan.types
     foreach (var (_, s) in mheap_.allspans) {
         if (s.of(mspan.Ꮡstate).get() == mSpanInUse) {
@@ -448,11 +476,12 @@ internal static void dumproots() {
                     continue;
                 }
                 var spf = sp.Reinterpret<special, specialfinalizer>();
-                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + (uintptr)(~spf).special.offset);
-                dumpfinalizer(Δp, (~spf).fn, (~spf).fint, (~spf).ot);
+                @unsafe.Pointer Δp = (@unsafe.Pointer)(s.@base() + spf.special.offset);
+                dumpfinalizer(Δp, spf.fn, spf.fint, spf.ot);
             }
         }
     }
+
     // Finalizer queue
     iterate_finq(finq_callback);
 }
@@ -467,21 +496,24 @@ internal static readonly @string freemarkArrayDoesnTHaveˢ = "freemark array doe
 internal static void dumpobjs() {
     // To protect mheap_.allspans.
     assertWorldStopped();
+
     foreach (var (_, s) in mheap_.allspans) {
         if (s.of(mspan.Ꮡstate).get() != mSpanInUse) {
             continue;
         }
         var Δp = s.@base();
         var size = s.Value.elemsize;
-        var n = (((~s).npages << (int)(_PageShift))) / size;
+        var n = ((~s).npages << (int)(gc.PageShift)) / size;
         if (n > (uintptr)len(freemark)) {
             @throw(freemarkArrayDoesnTHaveˢ);
         }
+
         for (var freeIndex = (uint16)0; freeIndex < (~s).nelems; freeIndex++) {
             if (s.isFree((uintptr)freeIndex)) {
                 freemark[freeIndex] = true;
             }
         }
+
         for (var j = (uintptr)0; j < n; (j, Δp) = (j + 1, Δp + size)) {
             if (freemark[j]) {
                 freemark[j] = false;
@@ -512,7 +544,7 @@ internal static void dumpparams() {
             if (ha == nil) {
                 continue;
             }
-            var @base = arenaBase((arenaIdx)((((arenaIdx)(nuint)i1) << (int)(arenaL1Shift)) | ((arenaIdx)(nuint)i)));
+            var @base = arenaBase((arenaIdx)(((arenaIdx)(nuint)i1) << (int)(arenaL1Shift) | ((arenaIdx)(nuint)i)));
             if (arenaStart == 0 || @base < arenaStart) {
                 arenaStart = @base;
             }
@@ -525,7 +557,7 @@ internal static void dumpparams() {
     dumpint((uint64)arenaEnd);
     dumpstr(goarch.GOARCH);
     dumpstr(buildVersion);
-    dumpint((uint64)ncpu);
+    dumpint((uint64)numCPUStartup);
 }
 
 internal static void itab_callback(ж<itab> Ꮡtab) {
@@ -554,6 +586,7 @@ internal static void dumpms() {
 //go:systemstack
 internal static void dumpmemstats(ref MemStats m) {
     assertWorldStopped();
+
     // These ints should be identical to the exported
     // MemStats structure and should be ordered the same
     // way too.
@@ -638,6 +671,7 @@ internal static void dumpmemprof_callback(ж<bucket> Ꮡb, uintptr nstk, ж<uint
 internal static void dumpmemprof() {
     // To protect mheap_.allspans.
     assertWorldStopped();
+
     iterate_memprof(dumpmemprof_callback);
     foreach (var (_, s) in mheap_.allspans) {
         if (s.of(mspan.Ꮡstate).get() != mSpanInUse) {
@@ -648,10 +682,10 @@ internal static void dumpmemprof() {
                 continue;
             }
             var spp = sp.Reinterpret<special, specialprofile>();
-            var Δp = s.@base() + (uintptr)(~spp).special.offset;
+            var Δp = s.@base() + spp.special.offset;
             dumpint(tagAllocSample);
             dumpint((uint64)Δp);
-            dumpint((uint64)(uintptr)(~spp).b);
+            dumpint((uint64)(uintptr)spp.b);
         }
     }
 }
@@ -661,6 +695,7 @@ internal static ref slice<byte> dumphdr => ref Ꮡdumphdr.ValueSlot;
 
 internal static void mdump(ref MemStats m) {
     assertWorldStopped();
+
     // make sure we're done sweeping
     foreach (var (_, s) in mheap_.allspans) {
         if (s.of(mspan.Ꮡstate).get() == mSpanInUse) {
@@ -683,18 +718,23 @@ internal static void mdump(ref MemStats m) {
 
 internal static void writeheapdump_m(uintptr fd, ref MemStats m) {
     assertWorldStopped();
+
     var gp = getg();
     casGToWaiting((~(~gp).m).curg, _Grunning, waitReasonDumpingHeap);
+
     // Set dump file.
     dumpfd = fd;
+
     // Call dump routine.
     mdump(ref m);
+
     // Reset dump file.
     dumpfd = 0;
     if (tmpbuf != default!) {
         sysFree(@unsafe.Pointer.FromPinnedBox(Ꮡ(tmpbuf, 0)), (uintptr)len(tmpbuf), Ꮡmemstats.of(mstats.Ꮡother_sys));
         tmpbuf = default!;
     }
+
     casgstatus((~(~gp).m).curg, _Gwaiting, _Grunning);
 }
 
@@ -707,6 +747,7 @@ internal static void dumpfields(bitvector bvʗp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string heapdumpˢ = "heapdump"u8;
 internal static readonly @string heapdumpOutOfMemoryˢ = "heapdump: out of memory"u8;
 
 internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
@@ -717,7 +758,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             sysFree(@unsafe.Pointer.FromPinnedBox(Ꮡ(tmpbuf, 0)), (uintptr)len(tmpbuf), Ꮡmemstats.of(mstats.Ꮡother_sys));
         }
         var n = nptr / 8 + 1;
-        @unsafe.Pointer pΔ1 = (uintptr)sysAlloc(n, Ꮡmemstats.of(mstats.Ꮡother_sys));
+        @unsafe.Pointer pΔ1 = (uintptr)sysAlloc(n, Ꮡmemstats.of(mstats.Ꮡother_sys), heapdumpˢ);
         if (pΔ1 == nil) {
             @throw(heapdumpOutOfMemoryˢ);
         }
@@ -735,7 +776,7 @@ internal static unsafe bitvector makeheapobjbv(uintptr Δp, uintptr size) {
             }
         }
         var i = (addr - Δp) / (uintptr)goarch.PtrSize;
-        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)((i % 8))));
+        tmpbuf[i / 8] |= (byte)((byte)(1 << (int)(i % 8)));
     }
     return new bitvector((int32)nptr, Ꮡ(tmpbuf, 0));
 }

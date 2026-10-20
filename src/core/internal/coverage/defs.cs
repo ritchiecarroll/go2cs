@@ -192,6 +192,8 @@ partial struct CoverableUnit {
     public uint32 Parent;
 }
 
+// CounterMode tracks the "flavor" of the coverage counters being
+// used in a given coverage-instrumented program.
 partial struct CounterMode /*num:uint8*/;
 
 public static CounterMode CtrModeInvalid => /* iota */ 0;
@@ -226,7 +228,6 @@ public static @string String(this CounterMode cm) {
     if (exprᴛ1 == CtrModeTestMain) {
         return testmainˢ;
     }
-
     return invalidˢ;
 }
 
@@ -251,10 +252,11 @@ public static CounterMode ParseCounterMode(@string mode) {
     else { /* default: */
         cm = CtrModeInvalid;
     }
-
     return cm;
 }
 
+// CounterGranularity tracks the granularity of the coverage counters being
+// used in a given coverage-instrumented program.
 partial struct CounterGranularity /*num:uint8*/;
 
 public static CounterGranularity CtrGranularityInvalid => /* iota */ 0;
@@ -273,7 +275,6 @@ public static @string String(this CounterGranularity cm) {
     if (exprᴛ1 == CtrGranularityPerFunc) {
         return perfuncˢ;
     }
-
     return invalidˢ;
 }
 
@@ -357,13 +358,20 @@ public static readonly @string CounterFileTempl = "%s.%x.%d.%d"u8;
 
 public static readonly @string CounterFileRegexp = @"^%s\.(\S+)\.(\d+)\.(\d+)+$"u8;
 
+// CounterFlavor describes how function and counters are
+// stored/represented in the counter section of the file.
 partial struct CounterFlavor /*num:uint8*/;
 
+// "Raw" representation: all values (pkg ID, func ID, num counters,
+// and counters themselves) are stored as uint32's.
 public static CounterFlavor CtrRaw => /* iota + 1 */ 1;
+
+// "ULeb" representation: all values (pkg ID, func ID, num counters,
+// and counters themselves) are stored with ULEB128 encoding.
 public static CounterFlavor CtrULeb128 => 2;
 
 public static nint Round4(nint x) {
-    return (nint)((x + 3) & ~(nint)3);
+    return (x + 3) & ~(nint)3;
 }
 
 //.....................................................................

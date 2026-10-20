@@ -44,7 +44,7 @@ public static void TestMultiReader(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("#%d, expected %d bytes; got %d"u8,
                 nread, len(expected), n);
         }
-        @string got = ((@string)(Ꮡbuf.ValueSlot.slice(0, n)));
+        @string got = (@string)(Ꮡbuf.ValueSlot.slice(0, n));
         if (got != expected) {
             Ꮡt.Errorf("#%d, expected %q; got %q"u8,
                 nread, expected, got);
@@ -78,9 +78,8 @@ public static void TestMultiReader(ж<testing.T> Ꮡt) {
 public static void TestMultiReaderAsWriterTo(ж<testing.T> Ꮡt) {
     var mr = MultiReader(
         new io_test_package.strings_ReaderжReader(strings.NewReader(fooˢ2)),
-        MultiReader(
-            new io_test_package.strings_ReaderжReader(strings.NewReader(""u8)), // Tickle the buffer reusing codepath
-
+        MultiReader( // Tickle the buffer reusing codepath
+            new io_test_package.strings_ReaderжReader(strings.NewReader(""u8)),
             new io_test_package.strings_ReaderжReader(strings.NewReader(barˢ))));
     var (mrAsWriterTo, ok) = mr._<WriterTo>(ᐧ);
     if (!ok) {
@@ -174,24 +173,30 @@ internal partial interface testMultiWriter_sink /*dyn*/ :
 internal static void testMultiWriter(ж<testing.T> Ꮡt, testMultiWriter_sink sink) {
     var sha1Δ1 = sha1.New();
     var mw = MultiWriter(sha1Δ1, sink);
+
     @string sourceString = myInputTextˢ;
     var source = strings.NewReader(sourceString);
     var (written, err) = Copy(mw, new io_test_package.strings_ReaderжReader(source));
+
     if (written != (int64)len(sourceString)) {
         Ꮡt.Errorf("short write of %d, not %d"u8, written, len(sourceString));
     }
+
     if (err != default!) {
         Ꮡt.Errorf("unexpected error: %v"u8, err);
     }
+
     @string sha1hex = fmt.Sprintf("%x"u8, sha1Δ1.Sum(default!));
     if (sha1hex != "01cb303fa8c30a64123067c5aa6284ba7ec2d31b"u8) {
         Ꮡt.Error(incorrectSha1Valueˢ);
     }
+
     if (sink.String() != sourceString) {
         Ꮡt.Errorf("expected %q; got %q"u8, sourceString, sink.String());
     }
 }
 
+// writerFunc is a Writer implemented by the underlying func.
 internal delegate (nint, error) writerFunc(slice<byte> p);
 
 internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) {
@@ -200,8 +205,6 @@ internal static partial (nint, error) Write(this writerFunc f, slice<byte> p) {
 
 // Test that MultiWriter properly flattens chained multiWriters.
 public static partial void TestMultiWriterSingleChainFlatten(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var pc = new slice<uintptr>(1000); // 1000 should fit the full stack
     nint n = Δruntime.Callers(0, pc);
     nint myDepth = callDepth(pc.slice(0, n));
@@ -213,15 +216,17 @@ public static partial void TestMultiWriterSingleChainFlatten(ж<testing.T> Ꮡt)
         writeDepth += callDepth(pcʗ1.slice(0, nΔ1));
         return (0, default!);
     })));
+
     var mw = w;
     // chain a bunch of multiWriters
     for (nint i = 0; i < 100; i++) {
         mw = MultiWriter(w);
     }
+
     mw = MultiWriter(w, mw, w, mw);
     mw.Write(default!); // don't care about errors, just want to check the call-depth for Write
-    if (writeDepth != 4 * (myDepth + 2)) {
-        // 2 should be multiWriter.Write and writerFunc.Write
+
+    if (writeDepth != 4 * (myDepth + 2)) { // 2 should be multiWriter.Write and writerFunc.Write
         Ꮡt.Errorf("multiWriter did not flatten chained multiWriters: expected writeDepth %d, got %d"u8,
             4 * (myDepth + 2), writeDepth);
     }
@@ -269,6 +274,7 @@ public static void TestMultiWriterCopy(ж<testing.T> Ꮡt) {
     }
 }
 
+// readerFunc is a Reader implemented by the underlying func.
 internal delegate (nint, error) readerFunc(slice<byte> p);
 
 internal static partial (nint, error) Read(this readerFunc f, slice<byte> p) {
@@ -293,8 +299,6 @@ internal static readonly @string irrelevantˢ = "irrelevant"u8;
 
 // Test that MultiReader properly flattens chained multiReaders when Read is called
 public static partial void TestMultiReaderFlatten(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var pc = new slice<uintptr>(1000); // 1000 should fit the full stack
     nint n = Δruntime.Callers(0, pc);
     nint myDepth = callDepth(pc.slice(0, n));
@@ -306,18 +310,22 @@ public static partial void TestMultiReaderFlatten(ж<testing.T> Ꮡt) {
         readDepth = callDepth(pcʗ1.slice(0, nΔ1));
         return (0, errors.New(irrelevantˢ));
     })));
+
     // chain a bunch of multiReaders
     for (nint i = 0; i < 100; i++) {
         r = MultiReader(r);
     }
+
     r.Read(default!); // don't care about errors, just want to check the call-depth for Read
-    if (readDepth != myDepth + 2) {
-        // 2 should be multiReader.Read and fakeReader.Read
+
+    if (readDepth != myDepth + 2) { // 2 should be multiReader.Read and fakeReader.Read
         Ꮡt.Errorf("multiReader did not flatten chained multiReaders: expected readDepth %d, got %d"u8,
             myDepth + 2, readDepth);
     }
 }
 
+// byteAndEOFReader is a Reader which reads one byte (the underlying
+// byte) and EOF at once in its Read call.
 partial struct byteAndEOFReader /*num:byte*/;
 
 internal static (nint n, error err) Read(this byteAndEOFReader b, slice<byte> p) {
@@ -335,7 +343,7 @@ internal static readonly @string wantᶜ = "ab"u8;
 
 // This used to yield bytes forever; issue 16795.
 public static void TestMultiReaderSingleByteWithEOF(ж<testing.T> Ꮡt) {
-    var (got, err) = ReadAll(LimitReader(MultiReader(((byteAndEOFReader)(rune)'a'), ((byteAndEOFReader)(rune)'b')), 10));
+    var (got, err) = ReadAll(LimitReader(MultiReader((byteAndEOFReader)(rune)'a', (byteAndEOFReader)(rune)'b'), 10));
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
@@ -349,7 +357,7 @@ public static void TestMultiReaderSingleByteWithEOF(ж<testing.T> Ꮡt) {
 // chain continues to return EOF on its final read, rather than
 // yielding a (0, EOF).
 public static void TestMultiReaderFinalEOF(ж<testing.T> Ꮡt) {
-    var r = MultiReader(new io_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), ((byteAndEOFReader)(rune)'a'));
+    var r = MultiReader(new io_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), (byteAndEOFReader)(rune)'a');
     var buf = new slice<byte>(2);
     var (n, err) = r.Read(buf);
     if (n != 1 || !AreEqual(err, EOF)) {
@@ -361,8 +369,6 @@ public static void TestMultiReaderFinalEOF(ж<testing.T> Ꮡt) {
 internal static readonly object timeoutWaitingForˢ = (@string)"timeout waiting for collection of buf1"u8;
 
 public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     ref var mr = ref heap<Δio.Reader>(out var Ꮡmr);
     var closed = new channel<EmptyStruct>(0);
     // The closure ensures that we don't have a live reference to buf1
@@ -378,12 +384,14 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
             close(closedʗ2);
         });
     }))();
+
     var buf = new slice<byte>(4);
     {
         var (n, err) = ReadFull(mr, buf); if (err != default! || ((sstring)buf) != "foob"u8) {
             Ꮡt.Fatalf(@"ReadFull = %d (%q), %v; want 3, ""foo"", nil"u8, n, buf.slice(0, n), err);
         }
     }
+
     Δruntime.GC();
     var selᴛ1 = closed;
     var selᴛ2 = time.After((time.Duration)(5000000000L));
@@ -395,6 +403,7 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(timeoutWaitingForˢ);
         break;
     }}
+
     {
         var (n, err) = ReadFull(mr, buf[..2]); if (err != default! || ((sstring)(buf[..2])) != "ar"u8) {
             Ꮡt.Fatalf(@"ReadFull = %d (%q), %v; want 2, ""ar"", nil"u8, n, buf.slice(0, n), err);
@@ -405,22 +414,26 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
 public static void TestInterleavedMultiReader(ж<testing.T> Ꮡt) {
     var r1 = strings.NewReader("123"u8);
     var r2 = strings.NewReader("45678"u8);
+
     var mr1 = MultiReader(new io_test_package.strings_ReaderжReader(r1), new io_test_package.strings_ReaderжReader(r2));
     var mr2 = MultiReader(mr1);
+
     var buf = new slice<byte>(4);
+
     // Have mr2 use mr1's []Readers.
     // Consume r1 (and clear it for GC to handle) and consume part of r2.
     var (n, err) = ReadFull(mr2, buf);
     {
-        @string got = ((@string)(buf.slice(0, n))); if (got != "1234"u8 || err != default!) {
+        @string got = (@string)(buf.slice(0, n)); if (got != "1234"u8 || err != default!) {
             Ꮡt.Errorf(@"ReadFull(mr2) = (%q, %v), want (""1234"", nil)"u8, got, err);
         }
     }
+
     // Consume the rest of r2 via mr1.
     // This should not panic even though mr2 cleared r1.
     (n, err) = ReadFull(mr1, buf);
     {
-        @string got = ((@string)(buf.slice(0, n))); if (got != "5678"u8 || err != default!) {
+        @string got = (@string)(buf.slice(0, n)); if (got != "5678"u8 || err != default!) {
             Ꮡt.Errorf(@"ReadFull(mr1) = (%q, %v), want (""5678"", nil)"u8, got, err);
         }
     }

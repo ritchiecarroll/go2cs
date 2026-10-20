@@ -24,8 +24,8 @@ public static void BenchmarkCompareStringEqual(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var bytes = slice<byte>("Hello Gophers!"u8);
-    @string s1 = ((@string)bytes);
-    @string s2 = ((@string)bytes);
+    @string s1 = (@string)bytes;
+    @string s2 = (@string)bytes;
     for (nint i = 0; i < b.N; i++) {
         if (s1 != s2) {
             Ꮡb.Fatal(s1S2ˢ);
@@ -82,11 +82,11 @@ public static void BenchmarkCompareStringDifferentLength(ж<testing.B> Ꮡb) {
 public static void BenchmarkCompareStringBigUnaligned(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bytes = new slice<byte>(0, (1 << (int)(20)));
-    while (len(bytes) < (1 << (int)(20))) {
+    var bytes = new slice<byte>(0, (1 << 20));
+    while (len(bytes) < 1 << 20) {
         bytes = append(bytes, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
-    @string s1 = ((@string)bytes);
+    @string s1 = (@string)bytes;
     @string s2 = "hello"u8 + ((sstring)bytes);
     for (nint i = 0; i < b.N; i++) {
         if (s1 != s2[(int)(len("hello"))..]) {
@@ -99,12 +99,12 @@ public static void BenchmarkCompareStringBigUnaligned(ж<testing.B> Ꮡb) {
 public static void BenchmarkCompareStringBig(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
-    var bytes = new slice<byte>(0, (1 << (int)(20)));
-    while (len(bytes) < (1 << (int)(20))) {
+    var bytes = new slice<byte>(0, (1 << 20));
+    while (len(bytes) < 1 << 20) {
         bytes = append(bytes, ((@string)"Hello Gophers!"u8).ꓸꓸꓸ);
     }
-    @string s1 = ((@string)bytes);
-    @string s2 = ((@string)bytes);
+    @string s1 = (@string)bytes;
+    @string s2 = (@string)bytes;
     for (nint i = 0; i < b.N; i++) {
         if (s1 != s2) {
             Ꮡb.Fatal(s1S2ˢ);
@@ -131,13 +131,12 @@ public static void BenchmarkSliceByteToString(ж<testing.B> Ꮡb) {
     for (nint n = 0; n < 8; n++) {
         Ꮡb.Run(strconv.Itoa(len(buf)), (ж<testing.B> bΔ1) => {
             for (nint i = 0; i < (~bΔ1).N; i++) {
-                escapeString = ((@string)Ꮡbuf.ValueSlot);
+                escapeString = (@string)Ꮡbuf.ValueSlot;
             }
         });
         buf = appendꓸꓸꓸ(buf, buf);
     }
 }
-
 
 partial struct stringdataᴛ1 /*dyn*/ {
     internal @string name, data;
@@ -275,6 +274,7 @@ public static void TestStringW(ж<testing.T> Ꮡt) {
         "hello"u8,
         "a\u5566\u7788b"u8
     }.slice();
+
     foreach (var (_, s) in strings) {
         slice<uint16> b = default!;
         foreach (var (_, c) in s) {
@@ -283,7 +283,7 @@ public static void TestStringW(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("bad test: stringW can't handle >16 bit runes"u8);
             }
         }
-        b = append(b, (uint16)(0));
+        b = append(b, (uint16)0);
         @string r = runtime_internal_test_package.GostringW(b);
         if (r != s) {
             Ꮡt.Errorf("gostringW(%v) = %s, want %s"u8, b, r, s);
@@ -296,7 +296,7 @@ internal static readonly @string stringconcatˢ = "stringconcat"u8;
 
 public static void TestLargeStringConcat(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, stringconcatˢ);
-    @string want = "panic: "u8 + strings.Repeat("0"u8, (1 << (int)(10))) + strings.Repeat("1"u8, (1 << (int)(10))) + strings.Repeat("2"u8, (1 << (int)(10))) + strings.Repeat("3"u8, (1 << (int)(10)));
+    @string want = "panic: "u8 + strings.Repeat("0"u8, 1 << 10) + strings.Repeat("1"u8, 1 << 10) + strings.Repeat("2"u8, 1 << 10) + strings.Repeat("3"u8, 1 << 10);
     if (!strings.HasPrefix(output, want)) {
         Ꮡt.Fatalf("output does not start with %q:\n%s"u8, want, output);
     }
@@ -326,25 +326,25 @@ public static void TestCompareTempString(ж<testing.T> Ꮡt) {
     var bʗ1 = b;
     var n = testing.AllocsPerRun(1000, () => {
         if (((sstring)bʗ1) != s) {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) < s) {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) > s) {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) == s){
         } else {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) <= s){
         } else {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
         if (((sstring)bʗ1) >= s){
         } else {
-            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, ((@string)bʗ1), s);
+            Ꮡt.Fatalf("strings are not equal: '%v' and '%v'"u8, (@string)bʗ1, s);
         }
     });
     if (n != 0D) {
@@ -358,7 +358,7 @@ public static void TestStringIndexHaystack(ж<testing.T> Ꮡt) {
     @string needle = "ll"u8;
     var haystackʗ1 = haystack;
     var n = testing.AllocsPerRun(1000, () => {
-        if (strings.Index(((@string)haystackʗ1), needle) != 2) {
+        if (strings.Index((@string)haystackʗ1, needle) != 2) {
             Ꮡt.Fatalf("needle not found"u8);
         }
     });
@@ -373,7 +373,7 @@ public static void TestStringIndexNeedle(ж<testing.T> Ꮡt) {
     var needle = slice<byte>("ll"u8);
     var needleʗ1 = needle;
     var n = testing.AllocsPerRun(1000, () => {
-        if (strings.Index(haystack, ((@string)needleʗ1)) != 2) {
+        if (strings.Index(haystack, (@string)needleʗ1) != 2) {
             Ꮡt.Fatalf("needle not found"u8);
         }
     });
@@ -390,6 +390,7 @@ public static void TestStringOnStack(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 3; i++) {
         s = "a"u8 + s + "b"u8 + s + "c"u8;
     }
+
     {
         @string want = aaabcbabccbaabcbabcccˢ; if (s != want) {
             Ꮡt.Fatalf("want: '%v', got '%v'"u8, want, s);
@@ -408,10 +409,11 @@ public static void TestIntString(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("want '%v', got '%v'"u8, want, s);
         }
     }
+
     // Escaping result of intstring.
     array<@string> a = new(4);
     for (var i = (rune)0; i < 4; i++) {
-        a[i] = ((@string)(i + (rune)'0'));
+        a[i] = (@string)(i + (rune)'0');
     }
     s = a[0] + a[1] + a[2] + a[3];
     {
@@ -424,8 +426,8 @@ public static void TestIntString(ж<testing.T> Ꮡt) {
 public static void TestIntStringAllocs(ж<testing.T> Ꮡt) {
     var unknown = (rune)'0';
     var n = testing.AllocsPerRun(1000, () => {
-        @string s1 = ((@string)unknown);
-        @string s2 = ((@string)(unknown + 1));
+        @string s1 = (@string)unknown;
+        @string s2 = (@string)(unknown + 1);
         if (s1 == s2) {
             Ꮡt.Fatalf("bad"u8);
         }
@@ -471,8 +473,6 @@ internal static bool isZeroedR(slice<rune> r) {
 internal static readonly @string fooˢ3 = "foož"u8;
 
 public static void TestString2Slice(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // Make sure we don't return slices that expose
     // an unzeroed section of stack-allocated temp buf
     // between len and cap. See issue 14232.
@@ -487,104 +487,6 @@ public static void TestString2Slice(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static UntypedInt intSize => /* 32 << (^uint(0) >> 63) */ 64;
-
-partial struct atoi64Test {
-    internal @string @in;
-    internal int64 @out;
-    internal bool ok;
-}
-
-internal static ж<slice<atoi64Test>> Ꮡatoi64tests = new StandardBox<slice<atoi64Test>>(new atoi64Test[]{
-    new(""u8, 0, false),
-    new("0"u8, 0, true),
-    new("-0"u8, 0, true),
-    new("1"u8, 1, true),
-    new("-1"u8, -1, true),
-    new("12345"u8, 12345, true),
-    new("-12345"u8, -12345, true),
-    new("012345"u8, 12345, true),
-    new("-012345"u8, -12345, true),
-    new("12345x"u8, 0, false),
-    new("-12345x"u8, 0, false),
-    new("98765432100"u8, 98765432100L, true),
-    new("-98765432100"u8, -98765432100L, true),
-    new("20496382327982653440"u8, 0, false),
-    new("-20496382327982653440"u8, 0, false),
-    new("9223372036854775807"u8, 9223372036854775807L, true),
-    new("-9223372036854775807"u8, -(9223372036854775807L), true),
-    new("9223372036854775808"u8, 0, false),
-    new("-9223372036854775808"u8, -9223372036854775808L, true),
-    new("9223372036854775809"u8, 0, false),
-    new("-9223372036854775809"u8, 0, false)
-}.slice());
-internal static ref slice<atoi64Test> atoi64tests => ref Ꮡatoi64tests.ValueSlot;
-
-public static void TestAtoi(ж<testing.T> Ꮡt) {
-    var exprᴛ1 = intSize;
-    if (exprᴛ1 == 32) {
-        foreach (var (i, _) in atoi32tests) {
-            var test = Ꮡ(atoi32tests, i);
-            var (@out, ok) = runtime_internal_test_package.Atoi((~test).@in);
-            if ((~test).@out != (int32)@out || (~test).ok != ok) {
-                Ꮡt.Errorf("atoi(%q) = (%v, %v) want (%v, %v)"u8,
-                    (~test).@in, @out, ok, (~test).@out, (~test).ok);
-            }
-        }
-    }
-    else if (exprᴛ1 == 64) {
-        foreach (var (i, _) in atoi64tests) {
-            var test = Ꮡ(atoi64tests, i);
-            var (@out, ok) = runtime_internal_test_package.Atoi((~test).@in);
-            if ((~test).@out != (int64)@out || (~test).ok != ok) {
-                Ꮡt.Errorf("atoi(%q) = (%v, %v) want (%v, %v)"u8,
-                    (~test).@in, @out, ok, (~test).@out, (~test).ok);
-            }
-        }
-    }
-
-}
-
-partial struct atoi32Test {
-    internal @string @in;
-    internal int32 @out;
-    internal bool ok;
-}
-
-internal static ж<slice<atoi32Test>> Ꮡatoi32tests = new StandardBox<slice<atoi32Test>>(new atoi32Test[]{
-    new(""u8, 0, false),
-    new("0"u8, 0, true),
-    new("-0"u8, 0, true),
-    new("1"u8, 1, true),
-    new("-1"u8, -1, true),
-    new("12345"u8, 12345, true),
-    new("-12345"u8, -12345, true),
-    new("012345"u8, 12345, true),
-    new("-012345"u8, -12345, true),
-    new("12345x"u8, 0, false),
-    new("-12345x"u8, 0, false),
-    new("987654321"u8, 987654321, true),
-    new("-987654321"u8, -987654321, true),
-    new("2147483647"u8, (int32)(2147483648L - 1), true),
-    new("-2147483647"u8, (int32)(-(2147483648L - 1)), true),
-    new("2147483648"u8, 0, false),
-    new("-2147483648"u8, (int32)(-1 << (int)(31)), true),
-    new("2147483649"u8, 0, false),
-    new("-2147483649"u8, 0, false)
-}.slice());
-internal static ref slice<atoi32Test> atoi32tests => ref Ꮡatoi32tests.ValueSlot;
-
-public static void TestAtoi32(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in atoi32tests) {
-        var test = Ꮡ(atoi32tests, i);
-        var (@out, ok) = runtime_internal_test_package.Atoi32((~test).@in);
-        if ((~test).@out != @out || (~test).ok != ok) {
-            Ꮡt.Errorf("atoi32(%q) = (%v, %v) want (%v, %v)"u8,
-                (~test).@in, @out, ok, (~test).@out, (~test).ok);
-        }
-    }
-}
-
 internal partial struct TestParseByteCount_type /*dyn*/ {
     internal @string @in;
     internal int64 @out;
@@ -592,62 +494,69 @@ internal partial struct TestParseByteCount_type /*dyn*/ {
 }
 
 public static void TestParseByteCount(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestParseByteCount_type[]{ // Good numeric inputs.
-
+    foreach (var (_, test) in new TestParseByteCount_type[]{
+        // Good numeric inputs.
         new("1"u8, 1, true),
         new("12345"u8, 12345, true),
         new("012345"u8, 12345, true),
         new("98765432100"u8, 98765432100L, true),
-        new("9223372036854775807"u8, 9223372036854775807L, true), // Good trivial suffix inputs.
+        new("9223372036854775807"u8, 9223372036854775807L, true),
 
+        // Good trivial suffix inputs.
         new("1B"u8, 1, true),
         new("12345B"u8, 12345, true),
         new("012345B"u8, 12345, true),
         new("98765432100B"u8, 98765432100L, true),
-        new("9223372036854775807B"u8, 9223372036854775807L, true), // Good binary suffix inputs.
+        new("9223372036854775807B"u8, 9223372036854775807L, true),
 
-        new("1KiB"u8, ((int64)1 << (int)(10)), true),
-        new("05KiB"u8, ((int64)5 << (int)(10)), true),
-        new("1MiB"u8, ((int64)1 << (int)(20)), true),
-        new("10MiB"u8, ((int64)10 << (int)(20)), true),
-        new("1GiB"u8, ((int64)1 << (int)(30)), true),
+        // Good binary suffix inputs.
+        new("1KiB"u8, (int64)1 << 10, true),
+        new("05KiB"u8, (int64)5 << 10, true),
+        new("1MiB"u8, (int64)1 << 20, true),
+        new("10MiB"u8, (int64)10 << 20, true),
+        new("1GiB"u8, (int64)1 << 30, true),
         new("100GiB"u8, 107374182400L, true),
         new("1TiB"u8, 1099511627776L, true),
-        new("99TiB"u8, 108851651149824L, true), // Good zero inputs.
- //
- // -0 is an edge case, but no harm in supporting it.
+        new("99TiB"u8, 108851651149824L, true),
 
+        // Good zero inputs.
+        //
+        // -0 is an edge case, but no harm in supporting it.
         new("-0"u8, 0, true),
         new("0"u8, 0, true),
         new("0B"u8, 0, true),
         new("0KiB"u8, 0, true),
         new("0MiB"u8, 0, true),
         new("0GiB"u8, 0, true),
-        new("0TiB"u8, 0, true), // Bad inputs.
+        new("0TiB"u8, 0, true),
 
+        // Bad inputs.
         new(""u8, 0, false),
         new("-1"u8, 0, false),
         new("a12345"u8, 0, false),
         new("a12345B"u8, 0, false),
         new("12345x"u8, 0, false),
-        new("0x12345"u8, 0, false), // Bad numeric inputs.
+        new("0x12345"u8, 0, false),
 
+        // Bad numeric inputs.
         new("9223372036854775808"u8, 0, false),
         new("9223372036854775809"u8, 0, false),
         new("18446744073709551615"u8, 0, false),
         new("20496382327982653440"u8, 0, false),
         new("18446744073709551616"u8, 0, false),
         new("18446744073709551617"u8, 0, false),
-        new("9999999999999999999999"u8, 0, false), // Bad trivial suffix inputs.
+        new("9999999999999999999999"u8, 0, false),
 
+        // Bad trivial suffix inputs.
         new("9223372036854775808B"u8, 0, false),
         new("9223372036854775809B"u8, 0, false),
         new("18446744073709551615B"u8, 0, false),
         new("20496382327982653440B"u8, 0, false),
         new("18446744073709551616B"u8, 0, false),
         new("18446744073709551617B"u8, 0, false),
-        new("9999999999999999999999B"u8, 0, false), // Bad binary suffix inputs.
+        new("9999999999999999999999B"u8, 0, false),
 
+        // Bad binary suffix inputs.
         new("1Ki"u8, 0, false),
         new("05Ki"u8, 0, false),
         new("10Mi"u8, 0, false),
@@ -668,8 +577,9 @@ public static void TestParseByteCount(ж<testing.T> Ꮡt) {
         new("99999999999999999MiB"u8, 0, false),
         new("99999999999999GiB"u8, 0, false),
         new("99999999999TiB"u8, 0, false),
-        new("555EiB"u8, 0, false), // Mistaken SI suffix inputs.
+        new("555EiB"u8, 0, false),
 
+        // Mistaken SI suffix inputs.
         new("0KB"u8, 0, false),
         new("0MB"u8, 0, false),
         new("0GB"u8, 0, false),

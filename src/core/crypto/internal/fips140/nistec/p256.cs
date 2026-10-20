@@ -4,15 +4,15 @@
 //go:build (!amd64 && !arm64 && !ppc64le && !s390x) || purego
 namespace go.crypto.@internal.fips140;
 
+using constanttime = go.crypto.@internal.constanttime_package;
 using fiat = go.crypto.@internal.fips140.nistec.fiat_package;
-using subtle = go.crypto.@internal.fips140.subtle_package;
 using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
 using cpu = go.crypto.@internal.fips140deps.cpu_package;
 using errors = errors_package;
 using bits = math.bits_package;
 using sync = sync_package;
 using @unsafe = unsafe_package;
-using go.crypto.@internal.fips140;
+using go.crypto.@internal;
 using go.crypto.@internal.fips140.nistec;
 using go.crypto.@internal.fips140deps;
 using math;
@@ -69,14 +69,14 @@ internal static readonly @string invalidP256PointEncodingˢ = "invalid P256 poin
 // Otherwise, it returns p.
 public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byte> b) {
     switch (ᐧ) {
+    // Point at infinity.
     case {} when len(b) == 1 && b[0] == 0: {
         return (Ꮡp.Set(NewP256Point()), default!);
     }
+    // Uncompressed form.
     case {} when len(b) == p256UncompressedLength && b[0] == 4: {
         var (x, err) = @new<fiat.P256Element>().SetBytes(b[1..(int)(1 + p256ElementLength)]);
         if (err != default!) {
-            // Point at infinity.
-            // Uncompressed form.
             return (default!, err);
         }
         (var y, err) = @new<fiat.P256Element>().SetBytes(b[(int)(1 + p256ElementLength)..]);
@@ -93,23 +93,26 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
         Ꮡp.of(P256Point.Ꮡz).One();
         return (Ꮡp, default!);
     }
+    // Compressed form.
     case {} when len(b) == p256CompressedLength && (b[0] == 2 || b[0] == 3): {
         var (x, err) = @new<fiat.P256Element>().SetBytes(b[1..]);
         if (err != default!) {
-            // Compressed form.
             return (default!, err);
         }
-        var y = p256Polynomial(@new<fiat.P256Element>(), // y² = x³ - 3x + b
- x);
+
+        // y² = x³ - 3x + b
+        var y = p256Polynomial(@new<fiat.P256Element>(), x);
         if (!p256Sqrt(y, y)) {
             return (default!, errors.New(invalidP256Compressedˢ));
         }
+
+        // Select the positive or negative root, as indicated by the least
+        // significant bit, based on the encoding type byte.
         var otherRoot = @new<fiat.P256Element>();
-        otherRoot.Sub(otherRoot, // Select the positive or negative root, as indicated by the least
- // significant bit, based on the encoding type byte.
- y);
+        otherRoot.Sub(otherRoot, y);
         var cond = (byte)((byte)(y.Bytes()[p256ElementLength - 1] & 1) ^ (byte)(b[0] & 1));
         y.Select(otherRoot, y, (nint)cond);
+
         Ꮡp.of(P256Point.Ꮡx).Set(x);
         Ꮡp.of(P256Point.Ꮡy).Set(y);
         Ꮡp.of(P256Point.Ꮡz).One();
@@ -118,7 +121,6 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
     default: {
         return (default!, errors.New(invalidP256PointEncodingˢ));
     }}
-
 }
 
 internal static ж<fiat.P256Element> _p256B;
@@ -137,9 +139,11 @@ internal static ж<fiat.P256Element> p256B() {
 internal static ж<fiat.P256Element> p256Polynomial(ж<fiat.P256Element> Ꮡy2, ж<fiat.P256Element> Ꮡx) {
     Ꮡy2.Square(Ꮡx);
     Ꮡy2.Mul(Ꮡy2, Ꮡx);
+
     var threeX = @new<fiat.P256Element>().Add(Ꮡx, Ꮡx);
     threeX.Add(threeX, Ꮡx);
     Ꮡy2.Sub(Ꮡy2, threeX);
+
     return Ꮡy2.Add(Ꮡy2, p256B());
 }
 
@@ -147,9 +151,6 @@ internal static ж<fiat.P256Element> p256Polynomial(ж<fiat.P256Element> Ꮡy2, 
 internal static readonly @string p256PointNotOnCurveˢ = "P256 point not on curve"u8;
 
 internal static error p256CheckOnCurve(ж<fiat.P256Element> Ꮡx, ж<fiat.P256Element> Ꮡy) {
-    ref var x = ref Ꮡx.DerefOrNull();
-    ref var y = ref Ꮡy.DerefOrNull();
-
     // y² = x³ - 3x + b
     var rhs = p256Polynomial(@new<fiat.P256Element>(), Ꮡx);
     var lhs = @new<fiat.P256Element>().Square(Ꮡy);
@@ -175,12 +176,14 @@ internal static slice<byte> bytes(this ж<P256Point> Ꮡp, /*[65]*/ ж<array<byt
     // The SEC 1 representation of the point at infinity is a single zero byte,
     // and only infinity has z = 0.
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
-        return append(@out[..0], (byte)(0));
+        return append(@out[..0], (byte)0);
     }
+
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.of(P256Point.Ꮡz));
     var x = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), zinv);
     var y = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡy), zinv);
-    var buf = append(@out[..0], (byte)(4));
+
+    var buf = append(@out[..0], (byte)4);
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     buf = appendꓸꓸꓸ(buf, y.Bytes());
     return buf;
@@ -204,8 +207,10 @@ internal static (slice<byte>, error) bytesX(this ж<P256Point> Ꮡp, /*[32]*/ ж
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
         return (default!, errors.New(p256PointIsThePointAtˢ));
     }
+
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.of(P256Point.Ꮡz));
     var x = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), zinv);
+
     return (appendꓸꓸꓸ(@out[..0], x.Bytes()), default!);
 }
 
@@ -223,14 +228,16 @@ internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.of(P256Point.Ꮡz).IsZero() == 1) {
-        return append(@out[..0], (byte)(0));
+        return append(@out[..0], (byte)0);
     }
+
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.of(P256Point.Ꮡz));
     var x = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡx), zinv);
     var y = @new<fiat.P256Element>().Mul(Ꮡp.of(P256Point.Ꮡy), zinv);
+
     // Encode the sign of the y coordinate (indicated by the least significant
     // bit) as the encoding type (2 or 3).
-    var buf = append(@out[..0], (byte)(2));
+    var buf = append(@out[..0], (byte)2);
     buf[0] |= (byte)((byte)(y.Bytes()[p256ElementLength - 1] & 1));
     buf = appendꓸꓸꓸ(buf, x.Bytes());
     return buf;
@@ -283,6 +290,7 @@ public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж
     z3.Mul(t4, z3); // Z3 := t4 * Z3
     t1.Mul(t3, t0); // t1 := t3 * t0
     z3.Add(z3, t1); // Z3 := Z3 + t1
+
     Ꮡq.of(P256Point.Ꮡx).Set(x3);
     Ꮡq.of(P256Point.Ꮡy).Set(y3);
     Ꮡq.of(P256Point.Ꮡz).Set(z3);
@@ -327,6 +335,7 @@ public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) 
     z3.Mul(t0, t1); // Z3 := t0 * t1
     z3.Add(z3, z3); // Z3 := Z3 + Z3
     z3.Add(z3, z3); // Z3 := Z3 + Z3
+
     Ꮡq.of(P256Point.Ꮡx).Set(x3);
     Ꮡq.of(P256Point.Ꮡy).Set(y3);
     Ꮡq.of(P256Point.Ꮡz).Set(z3);
@@ -389,6 +398,7 @@ public static ж<P256Point> AddAffine(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡ
     z3.Mul(t4, z3); // Z3 ← t4 · Z3
     t1.Mul(t3, t0); // t1 ← t3 · t0
     z3.Add(z3, t1); // Z3 ← Z3 + t1
+
     Ꮡq.of(P256Point.Ꮡx).Select(Ꮡp1.of(P256Point.Ꮡx), x3, infinity);
     Ꮡq.of(P256Point.Ꮡy).Select(Ꮡp1.of(P256Point.Ꮡy), y3, infinity);
     Ꮡq.of(P256Point.Ꮡz).Select(Ꮡp1.of(P256Point.Ꮡz), z3, infinity);
@@ -403,6 +413,8 @@ public static ж<P256Point> Select(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1,
     return Ꮡq;
 }
 
+// p256OrdElement is a P-256 scalar field element in [0, ord(G)-1] in the
+// Montgomery domain (with R 2²⁵⁶) as four uint64 limbs in little-endian order.
 partial struct p256OrdElement /*[4]uint64*/;
 
 // SetBytes sets s to the big-endian value of x, reducing it as necessary.
@@ -412,10 +424,12 @@ internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡ
     if (len(x) != 32) {
         return (ж<p256OrdElement>.NilBoxOfDims(4L), errors.New(invalidScalarLengthˢ));
     }
+
     s.Value[0] = byteorder.BEUint64(x[24..]);
     s.Value[1] = byteorder.BEUint64(x[16..]);
     s.Value[2] = byteorder.BEUint64(x[8..]);
     s.Value[3] = byteorder.BEUint64(x[..]);
+
     // Ensure s is in the range [0, ord(G)-1]. Since 2 * ord(G) > 2²⁵⁶, we can
     // just conditionally subtract ord(G), keeping the result if it doesn't
     // underflow.
@@ -424,10 +438,11 @@ internal static (ж<p256OrdElement>, error) SetBytes(this ж<p256OrdElement> Ꮡ
     (var t2, b) = bits.Sub64(s.Value[2], 0xffffffffffffffffUL, b);
     (var t3, b) = bits.Sub64(s.Value[3], 0xffffffff00000000UL, b);
     var tMask = b - 1; // zero if subtraction underflowed
-    s.Value[0] ^= (uint64)((uint64)(((uint64)(t0 ^ s.Value[0])) & tMask));
-    s.Value[1] ^= (uint64)((uint64)(((uint64)(t1 ^ s.Value[1])) & tMask));
-    s.Value[2] ^= (uint64)((uint64)(((uint64)(t2 ^ s.Value[2])) & tMask));
-    s.Value[3] ^= (uint64)((uint64)(((uint64)(t3 ^ s.Value[3])) & tMask));
+    s.Value[0] ^= (uint64)(((t0 ^ s.Value[0]) & tMask));
+    s.Value[1] ^= (uint64)(((t1 ^ s.Value[1]) & tMask));
+    s.Value[2] ^= (uint64)(((t2 ^ s.Value[2]) & tMask));
+    s.Value[3] ^= (uint64)(((t3 ^ s.Value[3]) & tMask));
+
     return (Ꮡs, default!);
 }
 
@@ -451,12 +466,15 @@ internal static uint64 Rsh(this ж<p256OrdElement> Ꮡs, nint n) {
     // Shift in the more significant limb, if present.
     {
         nint iΔ1 = i + 1; if (iΔ1 < 4) {
-            res |= (uint64)(s.Value[iΔ1].Lsh((int64)((64 - n))));
+            res |= (uint64)(s.Value[iΔ1].Lsh((int64)(64 - n)));
         }
     }
     return res;
 }
 
+// p256Table is a table of the first 16 multiples of a point. Points are stored
+// at an index offset of -1 so [8]P is at index 7, P is at 0, and [16]P is at 15.
+// [0]P is the point at infinity and it's not stored.
 partial struct p256Table /*[16]P256Point*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
@@ -467,7 +485,7 @@ internal static void Select(this ref p256Table table, ж<P256Point> Ꮡp, uint8 
     }
     Ꮡp.Set(NewP256Point());
     for (var i = (uint8)1; i <= 16; i++) {
-        nint cond = subtle.ConstantTimeByteEq(i, n);
+        nint cond = constanttime.ByteEq(i, n);
         Ꮡp.Select(Ꮡ(table.Value, (uint8)(i - 1)), Ꮡp, cond);
     }
 }
@@ -487,11 +505,11 @@ internal static ж<p256Table> Compute(this ж<p256Table> Ꮡtable, ж<P256Point>
 }
 
 internal static (uint8, nint) boothW5(uint64 @in) {
-    var s = ~(((@in >> (int)(5))) - 1);
-    var d = (((uint64)1 << (int)(6))) - @in - 1;
-    d = (uint64)(((uint64)(d & s)) | ((uint64)(@in & (~s))));
-    d = ((d >> (int)(1))) + ((uint64)(d & 1));
-    return ((uint8)d, (nint)((uint64)(s & 1)));
+    var s = ~((@in >> 5) - 1);
+    var d = ((uint64)1 << 6) - @in - 1;
+    d = (d & s) | (@in & (~s));
+    d = (d >> 1) + (d & 1);
+    return ((uint8)d, (nint)(s & 1));
 }
 
 // ScalarMult sets r = scalar * q, where scalar is a 32-byte big endian value,
@@ -502,37 +520,45 @@ public static (ж<P256Point>, error) ScalarMult(this ж<P256Point> Ꮡp, ж<P256
     if (err != default!) {
         return (default!, err);
     }
+
     // Start scanning the window from the most significant bits. We move by
     // 5 bits at a time and need to finish at -1, so -1 + 5 * 51 = 254.
     nint index = 254;
+
     var (sel, sign) = boothW5(s.Rsh(index));
     // sign is always zero because the boothW5 input here is at
     // most two bits long, so the top bit is never set.
     _ = sign;
+
     // Neither Select nor Add have exceptions for the point at infinity /
     // selector zero, so we don't need to check for it here or in the loop.
     var table = @new<p256Table>().Compute(Ꮡq);
     table.Select(Ꮡp, sel);
+
     var t = NewP256Point();
     while (index >= 4) {
         index -= 5;
+
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
         Ꮡp.Double(Ꮡp);
+
         if (index >= 0){
-            (sel, sign) = boothW5((uint64)(s.Rsh(index) & 0b111111));
+            (sel, sign) = boothW5(s.Rsh(index) & 0b111111);
         } else {
             // Booth encoding considers a virtual zero bit at index -1,
             // so we shift left the least significant limb.
-            var wvalue = (uint64)(((s.Value[0] << (int)(1))) & 0b111111);
+            var wvalue = (s.Value[0] << 1) & 0b111111;
             (sel, sign) = boothW5(wvalue);
         }
+
         table.Select(t, sel);
         t.Negate(sign);
         Ꮡp.Add(Ꮡp, t);
     }
+
     return (Ꮡp, default!);
 }
 
@@ -544,6 +570,8 @@ public static ж<P256Point> Negate(this ж<P256Point> Ꮡp, nint cond) {
     return Ꮡp;
 }
 
+// p256AffineTable is a table of the first 32 multiples of a point. Points are
+// stored at an index offset of -1 like in p256Table, and [0]P is not stored.
 partial struct p256AffineTable /*[32]p256AffinePoint*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
@@ -554,7 +582,7 @@ internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> 
         throw panic("nistec: internal error: p256AffineTable.Select called with out-of-bounds value");
     }
     for (var i = (uint8)1; i <= 32; i++) {
-        nint cond = subtle.ConstantTimeByteEq(i, n);
+        nint cond = constanttime.ByteEq(i, n);
         Ꮡp.of(p256AffinePoint.Ꮡx).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡx), Ꮡp.of(p256AffinePoint.Ꮡx), cond);
         Ꮡp.of(p256AffinePoint.Ꮡy).Select(Ꮡ(table.Value, (uint8)(i - 1)).of(p256AffinePoint.Ꮡy), Ꮡp.of(p256AffinePoint.Ꮡy), cond);
     }
@@ -573,19 +601,17 @@ internal static ref ж<array<p256AffineTable>> p256GeneratorTables => ref Ꮡp25
 // go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static (uint8, nint) boothW6(uint64 @in) {
-    var s = ~(((@in >> (int)(6))) - 1);
-    var d = (((uint64)1 << (int)(7))) - @in - 1;
-    d = (uint64)(((uint64)(d & s)) | ((uint64)(@in & (~s))));
-    d = ((d >> (int)(1))) + ((uint64)(d & 1));
-    return ((uint8)d, (nint)((uint64)(s & 1)));
+    var s = ~((@in >> 6) - 1);
+    var d = ((uint64)1 << 7) - @in - 1;
+    d = (d & s) | (@in & (~s));
+    d = (d >> 1) + (d & 1);
+    return ((uint8)d, (nint)(s & 1));
 }
 
 // ScalarBaseMult sets p = scalar * generator, where scalar is a 32-byte big
 // endian value, and returns r. If scalar is not 32 bytes long, ScalarBaseMult
 // returns an error and the receiver is unchanged.
 public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, slice<byte> scalar) {
-    ref var p = ref Ꮡp.DerefOrNull();
-
     // This function works like ScalarMult above, but the table is fixed and
     // "pre-doubled" for each iteration, so instead of doubling we move to the
     // next table at each iteration.
@@ -593,38 +619,46 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     if (err != default!) {
         return (default!, err);
     }
+
     // Start scanning the window from the most significant bits. We move by
     // 6 bits at a time and need to finish at -1, so -1 + 6 * 42 = 251.
     nint index = 251;
+
     var (sel, sign) = boothW6(s.Rsh(index));
     // sign is always zero because the boothW6 input here is at
     // most five bits long, so the top bit is never set.
     _ = sign;
+
     var t = Ꮡ(new p256AffinePoint(nil));
     var table = p256GeneratorTables.at<p256AffineTable>((index + 1) / 6);
     table.Select(t, sel);
+
     // Select's output is undefined if the selector is zero, when it should be
     // the point at infinity (because infinity can't be represented in affine
     // coordinates). Here we conditionally set p to the infinity if sel is zero.
     // In the loop, that's handled by AddAffine.
-    nint selIsZero = subtle.ConstantTimeByteEq(sel, 0);
+    nint selIsZero = constanttime.ByteEq(sel, 0);
     Ꮡp.Select(NewP256Point(), t.Projective(), selIsZero);
+
     while (index >= 5) {
         index -= 6;
+
         if (index >= 0){
-            (sel, sign) = boothW6((uint64)(s.Rsh(index) & 0b1111111));
+            (sel, sign) = boothW6(s.Rsh(index) & 0b1111111);
         } else {
             // Booth encoding considers a virtual zero bit at index -1,
             // so we shift left the least significant limb.
-            var wvalue = (uint64)(((s.Value[0] << (int)(1))) & 0b1111111);
+            var wvalue = (s.Value[0] << 1) & 0b1111111;
             (sel, sign) = boothW6(wvalue);
         }
+
         var tableΔ1 = p256GeneratorTables.at<p256AffineTable>((index + 1) / 6);
         tableΔ1.Select(t, sel);
         t.Negate(sign);
-        nint selIsZeroΔ1 = subtle.ConstantTimeByteEq(sel, 0);
+        nint selIsZeroΔ1 = constanttime.ByteEq(sel, 0);
         Ꮡp.AddAffine(Ꮡp, t, selIsZeroΔ1);
     }
+
     return (Ꮡp, default!);
 }
 
@@ -639,9 +673,8 @@ public static ж<p256AffinePoint> Negate(this ж<p256AffinePoint> Ꮡp, nint con
 // p256Sqrt sets e to a square root of x. If x is not a square, p256Sqrt returns
 // false and e is unchanged. e and x can overlap.
 internal static bool /*isSquare*/ p256Sqrt(ж<fiat.P256Element> Ꮡe, ж<fiat.P256Element> Ꮡx) {
-    ref var x = ref Ꮡx.DerefOrNull();
-
     var (t0, t1) = (@new<fiat.P256Element>(), @new<fiat.P256Element>());
+
     // Since p = 3 mod 4, exponentiation by (p + 1) / 4 yields a square root candidate.
     //
     // The sequence of 7 multiplications and 253 squarings is derived from the
@@ -672,6 +705,7 @@ internal static bool /*isSquare*/ p256Sqrt(ж<fiat.P256Element> Ꮡe, ж<fiat.P2
     p256Square(t0, t0, 96);
     t0.Mul(Ꮡx, t0);
     p256Square(t0, t0, 94);
+
     // Check if the candidate t0 is indeed a square root of x.
     t1.Square(t0);
     if (t1.Equal(Ꮡx) != 1) {

@@ -295,9 +295,8 @@ internal static ж<fakeNetConnHalf> newSynctestNetConnHalf(netꓸAddr addr) {
         lockr: new channel<EmptyStruct>(1),
         lockrw: new channel<EmptyStruct>(1),
         lockc: new channel<EmptyStruct>(1),
-        bufMax: math.MaxInt
+        bufMax: math.MaxInt // unlimited
     ));
-    // unlimited
     h.unlock();
     return h;
 }
@@ -309,24 +308,19 @@ internal static void @lock(this ref fakeNetConnHalf h) {
     var selᴛ20 = h.lockrw;
     var selᴛ21 = h.lockc;
     switch (select(ᐸꟷ(selᴛ18, ꓸꓸꓸ), ᐸꟷ(selᴛ19, ꓸꓸꓸ), ᐸꟷ(selᴛ20, ꓸꓸꓸ), ᐸꟷ(selᴛ21, ꓸꓸꓸ))) {
-    case 0 when selᴛ18.ꟷᐳ(out _): {
+    case 0 when selᴛ18.ꟷᐳ(out _): { // writable
         break;
     }
-    case 1 when selᴛ19.ꟷᐳ(out _): {
+    case 1 when selᴛ19.ꟷᐳ(out _): { // readable
         break;
     }
-    case 2 when selᴛ20.ꟷᐳ(out _): {
+    case 2 when selᴛ20.ꟷᐳ(out _): { // readable and writable
         break;
     }
-    case 3 when selᴛ21.ꟷᐳ(out _): {
+    case 3 when selᴛ21.ꟷᐳ(out _): { // neither readable nor writable
         break;
     }}
 }
-
-// writable
-// readable
-// readable and writable
-// neither readable nor writable
 
 // h unlocks h.
 internal static void unlock(this ref fakeNetConnHalf h) {
@@ -349,7 +343,6 @@ internal static void unlock(this ref fakeNetConnHalf h) {
         h.lockc.ᐸꟷ(new EmptyStruct()); // neither readable nor writable
         break;
     }}
-
 }
 
 // waitAndLockForRead waits until h is readable and locks it.
@@ -365,9 +358,10 @@ internal static error waitAndLockForRead(this ж<fakeNetConnHalf> Ꮡh) {
         return default!; // readable
     }
     case 1 when selᴛ23.ꟷᐳ(out _): {
-        return default!; // readable and writable
+        return default!;
     }
     default: {
+        // readable and writable
         break;
     }}
     var ctx = Ꮡh.of(fakeNetConnHalf.Ꮡrctx).context();
@@ -400,9 +394,10 @@ internal static error waitAndLockForWrite(this ж<fakeNetConnHalf> Ꮡh) {
         return default!; // writable
     }
     case 1 when selᴛ28.ꟷᐳ(out _): {
-        return default!; // readable and writable
+        return default!;
     }
     default: {
+        // readable and writable
         break;
     }}
     var ctx = Ꮡh.of(fakeNetConnHalf.Ꮡwctx).context();

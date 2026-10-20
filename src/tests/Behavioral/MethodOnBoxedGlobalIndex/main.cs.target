@@ -37,9 +37,11 @@ internal static partial void keep(ж<tracer> Ꮡt) {
 internal static void Main() {
     keep(Ꮡtr);
     tr.tabs = new slice<buf>(2);
+
     Ꮡ(tr.tabs, 1).bump();
     Ꮡ(tr.tabs, 1).bump();
     Ꮡ(tr.tabs, 0).bump();
+
     fmt.Println(tr.tabs[0].get(), tr.tabs[1].get());
 }
 

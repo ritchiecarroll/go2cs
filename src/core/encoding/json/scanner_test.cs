@@ -85,10 +85,9 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
 	0,
 	-5e+2
 ]
-"""u8),
-        new(Name(""u8), "{\"\":\"<>&\u2028\u2029\"}"u8, "{\n\t\"\": \"<>&\u2028\u2029\"\n}"u8)
+"""u8.Raw()),
+        new(Name(""u8), "{\"\":\"<>&\u2028\u2029\"}"u8, "{\n\t\"\": \"<>&\u2028\u2029\"\n}"u8) // See golang.org/issue/34070
     }.slice();
-    // See golang.org/issue/34070
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestCompactAndIndent_tests(), out var Ꮡtt);
@@ -107,6 +106,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             Ꮡbuf.Value.Reset();
             {
                 var err = Compact(Ꮡbuf, slice<byte>(ttʗ1.indent)); if (err != default!){
@@ -118,6 +118,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             Ꮡbuf.Value.Reset();
             {
                 var err = Indent(Ꮡbuf, slice<byte>(ttʗ1.indent), ""u8, "\t"u8); if (err != default!){
@@ -129,6 +130,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             Ꮡbuf.Value.Reset();
             {
                 var err = Indent(Ꮡbuf, slice<byte>(ttʗ1.compact), ""u8, "\t"u8); if (err != default!){
@@ -218,6 +220,7 @@ public static void TestIndentBig(ж<testing.T> Ꮡt) {
         // indenting should make it bigger
         Ꮡt.Fatalf("Indent did not expand the input"u8);
     }
+
     // should be idempotent
     ref var buf1 = ref heap(new bytes.Buffer(), out var Ꮡbuf1);
     {
@@ -231,6 +234,7 @@ public static void TestIndentBig(ж<testing.T> Ꮡt) {
         diff(Ꮡt, b1, b);
         return;
     }
+
     // should get back to original
     buf1.Reset();
     {
@@ -318,7 +322,6 @@ internal static any genValue(nint n) {
         case 1: {
             return genMap(n);
         }}
-
     }
     switch (rand.Intn(3)) {
     case 0: {
@@ -330,7 +333,6 @@ internal static any genValue(nint n) {
     case 2: {
         return genString(30D);
     }}
-
     throw panic("unreachable");
 }
 
@@ -344,7 +346,7 @@ internal static @string genString(float64 stddev) {
         }
         c[i] = (rune)f;
     }
-    return ((@string)c);
+    return (@string)c;
 }
 
 internal static slice<any> genArray(nint n) {

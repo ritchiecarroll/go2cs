@@ -70,6 +70,7 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
             time.Sleep(time.ΔMinute);
             Δos.Exit(0);
         }
+
         if (Δos.Getenv(goWantHelperProcessˢ) == "child"u8) {
             // in child process
             @string dumpPath = Δos.Getenv(goWantHelperProcessFileˢ);
@@ -84,7 +85,9 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
             }
             Δos.Exit(0);
         }
+
         // run parent process
+
         var parent = exec.Command(Δos.Args[0], testRunˢ);
         parent.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=parent"u8);
         var err = parent.Start();
@@ -96,7 +99,9 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
             (~parentʗ1).Process.Kill();
             parentʗ1.Wait();
         }, ref ᒐ);
+
         // run child process
+
         UntypedInt _PROCESS_CREATE_PROCESS = 0x0080;
         UntypedInt _PROCESS_DUP_HANDLE = 0x0040;
         @string childDumpPath = filepath.Join(Ꮡt.TempDir(), ppidTxtˢ);
@@ -107,6 +112,7 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
         defer(syscall.CloseHandle, ph, ref ᒐ);
+
         var child = exec.Command(Δos.Args[0], testRunˢ);
         child.Value.Env = append(Δos.Environ(),
             "GO_WANT_HELPER_PROCESS=child"u8,
@@ -114,14 +120,14 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
         child.Value.SysProcAttr = Ꮡ(new syscall.SysProcAttr(ParentProcess: ph));
         (var childOutput, err) = child.CombinedOutput();
         if (err != default!) {
-            Ꮡt.Errorf("child failed: %v: %v"u8, err, ((@string)childOutput));
+            Ꮡt.Errorf("child failed: %v: %v"u8, err, (@string)childOutput);
         }
         (childOutput, err) = Δos.ReadFile(childDumpPath);
         if (err != default!) {
             Ꮡt.Fatalf("reading child output failed: %v"u8, err);
         }
         {
-            @string got = ((@string)childOutput);
+            @string got = (@string)childOutput;
             @string want = fmt.Sprintf("%d"u8, (~(~parent).Process).Pid); if (got != want) {
                 Ꮡt.Fatalf("child output: want %q, got %q"u8, want, got);
             }

@@ -31,6 +31,7 @@ partial struct Options {
     public NodeSet KeptNodes; // If non-nil, only use nodes in this set
 }
 
+// Nodes is an ordered collection of graph nodes.
 partial struct Nodes /*[]ж<Node>*/;
 
 // Node is an entry on a profiling report. It represents a unique
@@ -101,6 +102,7 @@ public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, in
             return;
         }
     }
+
     var info = Ꮡ(new Edge(Src: Ꮡn, Dest: Ꮡto, WeightDiv: dv, Weight: v, Residual: residual, Inline: inline));
     n.Out.Add(info);
     to.In.Add(info);
@@ -129,29 +131,40 @@ public static slice<@string> NameComponents(this ref NodeInfo i) {
             name = append(name, fun);
         }
     }
+
     switch (ᐧ) {
     case {} when i.Lineno is not 0: {
-        name = append(name, // User requested line numbers, provide what we have.
- fmt.Sprintf(":%d"u8, i.Lineno));
+        // User requested line numbers, provide what we have.
+        name = append(name, fmt.Sprintf(":%d"u8, i.Lineno));
         break;
     }
     case {} when i.Name != ""u8: {
+        // User requested function name. It was already included.
         break;
     }
     default: {
-        name = append(name, // User requested function name. It was already included.
- // Do not leave it empty if there is no information at all.
- "<unknown>"u8);
+        // Do not leave it empty if there is no information at all.
+        name = append(name, "<unknown>"u8);
         break;
     }}
-
     return name;
 }
 
+// NodeMap maps from a node info struct to a node. It is used to merge
+// report entries with the same info.
 partial struct NodeMap /*map[NodeInfo, ж<Node>]*/;
 
+// NodeSet is a collection of node info structs.
 partial struct NodeSet /*map[NodeInfo, bool]*/;
 
+// NodePtrSet is a collection of nodes. Trimming a graph or tree requires a set
+// of objects which uniquely identify the nodes to keep. In a graph, NodeInfo
+// works as a unique identifier; however, in a tree multiple nodes may share
+// identical NodeInfos. A *Node does uniquely identify a node so we can use that
+// instead. Though a *Node also uniquely identifies a node in a graph,
+// currently, during trimming, graphs are rebuilt from scratch using only the
+// NodeSet, so there would not be the required context of the initial graph to
+// allow for the use of *Node.
 partial struct NodePtrSet /*map[ж<Node>, bool]*/;
 
 // FindOrInsertNode takes the info for a node and either returns a matching node
@@ -165,11 +178,13 @@ public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet 
             }
         }
     }
+
     {
         var (nΔ1, ok) = nm[info, ꟷ]; if (ok) {
             return nΔ1;
         }
     }
+
     var n = Ꮡ(new Node(
         Info: info
     ));
@@ -187,6 +202,7 @@ public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet 
     return n;
 }
 
+// EdgeMap is used to represent the incoming/outgoing edges from a node.
 partial struct EdgeMap /*[]ж<Edge>*/;
 
 public static ж<Edge> FindTo(this EdgeMap em, ж<Node> Ꮡn) {
@@ -251,15 +267,12 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
         if (dw == 0 && w == 0) {
             continue;
         }
-        foreach (var (k, _) in seenNode) {
-            delete(seenNode, k);
-        }
-        foreach (var (k, _) in seenEdge) {
-            delete(seenEdge, k);
-        }
+        clear(seenNode);
+        clear(seenEdge);
         ж<Node> parent = default!;
         // A residual edge goes over one or more nodes that were not kept.
         var residual = false;
+
         // Group the sample frames, based on a global map.
         // Count only the last two frames as a call edge. Frames higher up
         // the stack are unlikely to be repeated calls (e.g. runtime.main
@@ -293,6 +306,7 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
                     seenEdge[new nodePair(n, parent)] = true;
                     parent.AddToEdgeDiv(n, dw, w, residual, ni != len(locNodes) - 1);
                 }
+
                 parent = n;
                 residual = false;
             }
@@ -302,6 +316,7 @@ public static ж<Graph> NewGraph(ж<Profile> Ꮡprof, ж<Options> Ꮡo) {
             parent.addSample(dw, w, true);
         }
     }
+
     return selectNodesForGraph(nodes, o.DropNegative);
 }
 
@@ -340,7 +355,6 @@ internal static bool isNegative(ref Node n) {
     default: {
         return false;
     }}
-
 }
 
 public partial struct locationMap {
@@ -404,6 +418,7 @@ internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Li
             objfile = m.Value.File;
         }
     }
+
     {
         var ni = nodeInfo(ref (Ꮡl).DerefOrNull(), li, objfile, ref (Ꮡo).DerefOrNull()); if (ni != nil) {
             return nm.FindOrInsertNode(ni.Value, o.KeptNodes);
@@ -450,22 +465,28 @@ internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) {
 
 // String returns a text representation of a graph, for debugging purposes.
 public static @string String(this ref Graph g) {
+    var sᴷ = new stackAppend<@string>();
+
     slice<@string> s = default!;
+
     var nodeIndex = new map<ж<Node>, nint>(len(g.Nodes));
+
     foreach (var (i, n) in g.Nodes) {
         nodeIndex[n] = i + 1;
     }
+
     foreach (var (i, n) in g.Nodes) {
         @string name = n.of(Node.ᏑInfo).PrintableName();
         slice<nint> @in = default!;
         slice<nint> @out = default!;
+
         foreach (var (_, from) in (~n).In) {
             @in = append(@in, nodeIndex[(~from).Src]);
         }
         foreach (var (_, to) in (~n).Out) {
             @out = append(@out, nodeIndex[(~to).Dest]);
         }
-        s = append(s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
+        s = append(sᴷ, s, fmt.Sprintf("%d: %s[flat=%d cum=%d] %x -> %v "u8, i + 1, name, (~n).Flat, (~n).Cum, @in, @out));
     }
     return strings.Join(s, "\n"u8);
 }
@@ -478,6 +499,7 @@ public static slice<ж<Edge>> Sort(this EdgeMap em) {
     foreach (var (_, w) in em) {
         el = append(el, w);
     }
+
     sort.Sort(el);
     return el;
 }
@@ -501,13 +523,16 @@ internal static bool Less(this edgeList el, nint i, nint j) {
     if ((~el[i]).Weight != (~el[j]).Weight) {
         return abs64((~el[i]).Weight) > abs64((~el[j]).Weight);
     }
+
     @string from1 = (~el[i]).Src.of(Node.ᏑInfo).PrintableName();
     @string from2 = (~el[j]).Src.of(Node.ᏑInfo).PrintableName();
     if (from1 != from2) {
         return from1 < from2;
     }
+
     @string to1 = (~el[i]).Dest.of(Node.ᏑInfo).PrintableName();
     @string to2 = (~el[j]).Dest.of(Node.ᏑInfo).PrintableName();
+
     return to1 < to2;
 }
 

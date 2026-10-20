@@ -183,10 +183,10 @@
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/bytealg/internal.bytealg.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/itoa/internal.itoa.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/nettrace/internal.nettrace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/poll/internal.poll.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/singleflight/internal.singleflight.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/stringslite/internal.stringslite.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
@@ -208,8 +208,8 @@
        records that the platform takes part in this package's axis and adds nothing beyond the
        shared list above, which is what lets a single-target reconvert reproduce this file. -->
   <ItemGroup Condition="'$(GoTargetOS)'=='darwin'">
+    <ProjectReference Include="$(go2csPath)core/internal/routebsd/internal.routebsd.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/unix/internal.syscall.unix.csproj" />
-    <ProjectReference Include="$(go2csPath)core/vendor/golang.org/x/net/route/vendor.golang.org.x.net.route.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'">

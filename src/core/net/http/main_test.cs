@@ -51,8 +51,9 @@ internal static partial slice<@string> /*gs*/ interestingGoroutines() {
     foreach (var (_, g) in strings.Split(((@string)buf), "\n\n"u8)) {
         var (_, stack, _) = strings.Cut(g, "\n"u8);
         stack = strings.TrimSpace(stack);
-        if (stack == ""u8 || strings.Contains(stack, testingMBeforeFunc1ˢ) || strings.Contains(stack, osSignalSignalRecvˢ) || strings.Contains(stack, createdByNetStartServerˢ) || strings.Contains(stack, createdByTestingRunTestsˢ) || strings.Contains(stack, closeWriteAndWaitˢ) || strings.Contains(stack, testingMainˢ) || strings.Contains(stack, // These only show up with GOTRACEBACK=2; Issue 5005 (comment 28)
- runtimeGoexitˢ) || strings.Contains(stack, createdByRuntimeGcˢ) || strings.Contains(stack, interestingGoroutinesˢ) || strings.Contains(stack, runtimeMHeapScavengerˢ)) {
+        if (stack == ""u8 || strings.Contains(stack, testingMBeforeFunc1ˢ) || strings.Contains(stack, osSignalSignalRecvˢ) || strings.Contains(stack, createdByNetStartServerˢ) || strings.Contains(stack, createdByTestingRunTestsˢ) || strings.Contains(stack, closeWriteAndWaitˢ) || strings.Contains(stack, testingMainˢ) ||
+            // These only show up with GOTRACEBACK=2; Issue 5005 (comment 28)
+            strings.Contains(stack, runtimeGoexitˢ) || strings.Contains(stack, createdByRuntimeGcˢ) || strings.Contains(stack, interestingGoroutinesˢ) || strings.Contains(stack, runtimeMHeapScavengerˢ)) {
             continue;
         }
         gs = append(gs, stack);
@@ -68,6 +69,7 @@ internal static bool goroutineLeaked() {
         // benchmark mode. Too distracting when there are false positives.
         return false;
     }
+
     map<@string, nint> stackCount = default!;
     for (nint i = 0; i < 5; i++) {
         nint n = 0;
@@ -135,6 +137,7 @@ internal static void afterTest(testing.TB t) {
         // of latency waiting for them to exit at the end of each test.
         return;
     }
+
     // We shouldn't be running the leak check for parallel tests, because we might
     // report the goroutines from a test that is still running as a leak from a
     // completely separate test that has just finished. So we use non-atomic loads
@@ -142,6 +145,7 @@ internal static void afterTest(testing.TB t) {
     // leak check so that the race detector will flag concurrent leak checks as a
     // race even if we don't detect any leaks.
     leakReported = true;
+
     @string bad = default!;
     var badSubstring = new map<@string, @string>{
         [").readLoop("u8] = "a Transport"u8,

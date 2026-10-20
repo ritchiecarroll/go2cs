@@ -57,7 +57,6 @@ public static slice<OSArch> List = new OSArch[]{
     new("wasip1"u8, "wasm"u8),
     new("windows"u8, "386"u8),
     new("windows"u8, "amd64"u8),
-    new("windows"u8, "arm"u8),
     new("windows"u8, "arm64"u8)
 }.slice();
 
@@ -74,7 +73,7 @@ internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
     [new("freebsd"u8, "amd64"u8)] = new(CgoSupported: true),
     [new("freebsd"u8, "arm"u8)] = new(CgoSupported: true),
     [new("freebsd"u8, "arm64"u8)] = new(CgoSupported: true),
-    [new("freebsd"u8, "riscv64"u8)] = new(CgoSupported: true),
+    [new("freebsd"u8, "riscv64"u8)] = new(CgoSupported: true, Broken: true),
     [new("illumos"u8, "amd64"u8)] = new(CgoSupported: true),
     [new("ios"u8, "amd64"u8)] = new(CgoSupported: true),
     [new("ios"u8, "arm64"u8)] = new(CgoSupported: true),
@@ -111,7 +110,6 @@ internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
     [new("wasip1"u8, "wasm"u8)] = new(),
     [new("windows"u8, "386"u8)] = new(CgoSupported: true, FirstClass: true),
     [new("windows"u8, "amd64"u8)] = new(CgoSupported: true, FirstClass: true),
-    [new("windows"u8, "arm"u8)] = new(Broken: true),
     [new("windows"u8, "arm64"u8)] = new(CgoSupported: true)
 };
 

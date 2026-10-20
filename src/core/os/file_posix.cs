@@ -4,6 +4,7 @@
 //go:build unix || (js && wasm) || wasip1 || windows
 namespace go;
 
+using testlog = @internal.testlog_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using time = time_package;
@@ -125,7 +126,7 @@ internal static error chmod(this ж<File> Ꮡf, FileMode mode) {
 // If there is an error, it will be of type [*PathError].
 //
 // On Windows or Plan 9, Chown always returns the [syscall.EWINDOWS] or
-// EPLAN9 error, wrapped in *PathError.
+// [syscall.EPLAN9] error, wrapped in [*PathError].
 public static error Chown(@string name, nint uid, nint gid) {
     var e = ignoringEINTR(() => syscall.Chown(name, uid, gid));
     if (e != default!) {
@@ -139,7 +140,7 @@ public static error Chown(@string name, nint uid, nint gid) {
 // If there is an error, it will be of type [*PathError].
 //
 // On Windows, it always returns the [syscall.EWINDOWS] error, wrapped
-// in *PathError.
+// in [*PathError].
 public static error Lchown(@string name, nint uid, nint gid) {
     var e = ignoringEINTR(() => syscall.Lchown(name, uid, gid));
     if (e != default!) {
@@ -155,7 +156,7 @@ internal static readonly @string chownˢ = "chown"u8;
 // If there is an error, it will be of type [*PathError].
 //
 // On Windows, it always returns the [syscall.EWINDOWS] error, wrapped
-// in *PathError.
+// in [*PathError].
 public static error Chown(this ж<File> Ꮡf, nint uid, nint gid) {
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -224,6 +225,16 @@ public static error Sync(this ж<File> Ꮡf) {
 // less precise time unit.
 // If there is an error, it will be of type [*PathError].
 public static error Chtimes(@string name, time.Time atime, time.Time mtime) {
+    var utimes = chtimesUtimes(atime, mtime);
+    {
+        var e = syscall.UtimesNano(fixLongPath(name), utimes[0..]); if (e != default!) {
+            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimes"u8, Path: name, Err: e)));
+        }
+    }
+    return default!;
+}
+
+internal static array<syscall.Timespec> chtimesUtimes(time.Time atime, time.Time mtime) {
     ref var utimes = ref heap(new array<syscall.Timespec>(2), out var Ꮡutimes);
     void set(nint i, time.Time t) {
         if (t.IsZero()){
@@ -234,12 +245,7 @@ public static error Chtimes(@string name, time.Time atime, time.Time mtime) {
     }
     set(0, atime);
     set(1, mtime);
-    {
-        var e = syscall.UtimesNano(fixLongPath(name), utimes[0..]); if (e != default!) {
-            return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "chtimes"u8, Path: name, Err: e)));
-        }
-    }
-    return default!;
+    return utimes.Clone();
 }
 
 // Chdir changes the current working directory to the file,
@@ -256,6 +262,14 @@ public static error Chdir(this ж<File> Ꮡf) {
     {
         var e = Ꮡf.of(File.Ꮡpfd).Fchdir(); if (e != default!) {
             return f.wrapErr(chdirˢ, e);
+        }
+    }
+    {
+        var log = testlog.Logger(); if (log != default!) {
+            var (wd, err) = Getwd();
+            if (err == default!) {
+                log.Chdir(wd);
+            }
         }
     }
     return default!;

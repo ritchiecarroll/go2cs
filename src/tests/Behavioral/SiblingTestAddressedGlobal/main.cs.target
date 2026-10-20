@@ -19,18 +19,19 @@ partial struct entry {
 internal static ж<entry> Ꮡhead = new StandardBox<entry>(default(entry));
 internal static ref entry head => ref Ꮡhead.Value;
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string firstˢ = "first"u8;
-
 internal static void Main() {
-    fmt.Println(lookup("a"u8));
+    fmt.Println(lookup("a"));
+
     lookup = @string (@string key) => "swapped:"u8 + key;
-    fmt.Println(lookup("b"u8));
+    fmt.Println(lookup("b"));
+
     counter += 3;
     counter++;
     fmt.Println(counter);
-    head.name = firstˢ;
+
+    head.name = "first";
     fmt.Println(head.name);
+
     fmt.Println(untouched);
 }
 

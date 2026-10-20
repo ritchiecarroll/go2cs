@@ -41,6 +41,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
     if (len(labels) != 0) {
         Ꮡt.Errorf("labels on background context: want [], got %v "u8, labels);
     }
+
     // Add a single label.
     ctx = WithLabels(ctx, Labels(keyˢ, valueˢ));
     // Retrieve it with Label.
@@ -53,6 +54,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
+
     // Add a label with a different key.
     ctx = WithLabels(ctx, Labels(key2ˢ, value2ˢ));
     (v, ok) = Label(ctx, key2ˢ);
@@ -64,6 +66,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
+
     // Add label with first key to test label replacement.
     ctx = WithLabels(ctx, Labels(keyˢ, value3ˢ));
     (v, ok) = Label(ctx, keyˢ);
@@ -75,6 +78,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
+
     // Labels called with two labels with the same key should pick the second.
     ctx = WithLabels(ctx, Labels(key4ˢ, value4aˢ, key4ˢ, value4bˢ));
     (v, ok) = Label(ctx, key4ˢ);
@@ -105,8 +109,9 @@ internal partial struct TestLabelMapStringer_type /*dyn*/ {
 public static void TestLabelMapStringer(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in new TestLabelMapStringer_type[]{
         new(
-            m: new labelMap(nil), // empty map
-
+            m: new labelMap(nil
+                // empty map
+            ),
             expected: "{}"u8
         ), new(
         m: new labelMap(
@@ -155,8 +160,10 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
             });
         }
     });
+
     Ꮡb.Run(mergeOneˢ, (ж<testing.B> bΔ2) => {
         var ctx = WithLabels(context.Background(), Labels(key1ˢ, val1ˢ));
+
         bΔ2.ReportAllocs();
         bΔ2.ResetTimer();
         for (nint i = 0; i < (~bΔ2).N; i++) {
@@ -164,8 +171,10 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
             });
         }
     });
+
     Ꮡb.Run(overwriteOneˢ, (ж<testing.B> bΔ3) => {
         var ctx = WithLabels(context.Background(), Labels(keyˢ, valˢ));
+
         bΔ3.ReportAllocs();
         bΔ3.ResetTimer();
         for (nint i = 0; i < (~bΔ3).N; i++) {
@@ -173,6 +182,7 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
             });
         }
     });
+
     foreach (var (_, scenario) in new @string[]{"ordered"u8, "unordered"u8}.slice()) {
         ref var labels = ref heap<slice<@string>>(out var Ꮡlabels);
         for (nint i = 0; i < 10; i++) {
@@ -181,6 +191,7 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
         if (scenario == "unordered"u8) {
             (labels[0], labels[len(labels) - 1]) = (labels[len(labels) - 1], labels[0]);
         }
+
         Ꮡb.Run(scenario, (ж<testing.B> bΔ4) => {
             bΔ4.Run(setManyˢ, (ж<testing.B> bΔ5) => {
                 bΔ5.ReportAllocs();
@@ -190,8 +201,10 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
                     });
                 }
             });
+
             bΔ4.Run(mergeManyˢ, (ж<testing.B> bΔ6) => {
                 var ctx = WithLabels(context.Background(), Labels(Ꮡlabels.ValueSlot.slice(0, len(Ꮡlabels.ValueSlot) / 2).ꓸꓸꓸ));
+
                 bΔ6.ResetTimer();
                 bΔ6.ReportAllocs();
                 for (nint i = 0; i < (~bΔ6).N; i++) {
@@ -199,8 +212,10 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
                     });
                 }
             });
+
             bΔ4.Run(overwriteManyˢ, (ж<testing.B> bΔ7) => {
                 var ctx = WithLabels(context.Background(), Labels(Ꮡlabels.ValueSlot.ꓸꓸꓸ));
+
                 bΔ7.ReportAllocs();
                 bΔ7.ResetTimer();
                 for (nint i = 0; i < (~bΔ7).N; i++) {
@@ -210,8 +225,8 @@ public static void BenchmarkLabels(ж<testing.B> Ꮡb) {
             });
         });
     }
-}
 
-// TODO: hit slow path in Labels
+    // TODO: hit slow path in Labels
+}
 
 } // end pprof_internal_test_package

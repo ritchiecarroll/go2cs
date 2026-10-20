@@ -30,6 +30,12 @@ using static global::go.testing.quick_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -38,7 +44,7 @@ using static global::go.testing.quick_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/quick/quick_test.go", "quick_test.cs", "AA0aoMigpIDIgKSAyICkgMiApIDIgKSAyICkgMiApIDIgKSAyICkgMiApIDIgKSAyICkooKUksqApIDIgKSAyID+gMiApIDIgKSAyICkgMiApIDIgKSAyICkgMiApIKCADEIgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAIEoKmgNSCpqKCgoKUgIKmgoKUgIKmooKUgIKmgoKUgIIADgyiAAAWpoKCAAoQgoL8so6CgriCkoKClIKUlIKCgg==", "228-228:1;245-245:2;245-245:3;253-253:4;253-253:5;275-275:1;280-280:1;290-290:1;302-304:1;313-321:1")]
+[assembly: go.GoPositionMap("testing/quick/quick_test.go", "quick_test.cs", "AA0aoMigpIDIgKSAyICkgMiApIDIgKSAyICkgMiApIDIgKSAyICkgMiApIDIgKSAyICkooKUksqApIDIgKSAyID+gMiApIDIgKSAyICkgMiApIDIgKSAyICkgMiApIKCADEIgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggAIEoKmgNSCpqKCgoKUgIK2goKUgIK2ooKUgIK2goKUgIIADgyiAAAWpoKCAAoQgoL8so6CgriCkoKClIKUlIKCgg==", "228-228:1;245-245:2;245-245:3;253-253:4;253-253:5;275-275:1;280-280:1;290-290:1;302-304:1;313-321:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

@@ -7,7 +7,6 @@
 global using static global::go.@internal.dag_package;
 
 // <ImportedTypeAliases>
-using testing = go.testing_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -20,8 +19,13 @@ using static global::go.@internal.dag_internal_test_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<global::go.@internal.dag_package.Graph, ж<global::go.@internal.dag_package.Graph>>(Indirect = true)]
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -32,7 +36,7 @@ using static global::go.@internal.dag_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/dag/alg_test.go", "alg_test.cs", "AA8agoKC1oKC7oKCAAwIgoKCgpSCgoKC", "35-39:1;40-45:2")]
-[assembly: go.GoPositionMap("internal/dag/parse_test.go", "parse_test.cs", "ABIigoKCgpSmooSCgoKWgoKCgoKSgpKCAAkMlISCgqg=")]
+[assembly: go.GoPositionMap("internal/dag/parse_test.go", "parse_test.cs", "ABIigoKCgpSmopSCgoKmgoKCgoKSgpKCAAkMlJSCgrg=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;

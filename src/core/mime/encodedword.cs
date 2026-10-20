@@ -16,9 +16,12 @@ using go.unicode;
 
 partial class mime_package {
 
+// A WordEncoder is an RFC 2047 encoded-word encoder.
 partial struct WordEncoder /*num:byte*/;
 
+// BEncoding represents Base64 encoding scheme as defined by RFC 2045.
 public static WordEncoder BEncoding => /* WordEncoder('b') */ 98;
+// QEncoding represents the Q-encoding scheme as defined by RFC 2047.
 public static WordEncoder QEncoding => /* WordEncoder('q') */ 113;
 
 internal static error errInvalidWord = errors.New("mime: invalid RFC 2047 encoded-word"u8);
@@ -49,6 +52,7 @@ internal static @string encodeWord(this WordEncoder e, @string charset, @string 
     // with word splits and too much for simpler inputs.
     // 48 is close to maxEncodedWordLen/2, but adjusted to allocator size class.
     Ꮡbuf.Grow(48);
+
     e.openWord(Ꮡbuf, charset);
     if (e == BEncoding){
         e.bEncode(Ꮡbuf, charset, s);
@@ -56,10 +60,15 @@ internal static @string encodeWord(this WordEncoder e, @string charset, @string 
         e.qEncode(Ꮡbuf, charset, s);
     }
     closeWord(Ꮡbuf);
+
     return buf.String();
 }
 
+// The maximum length of an encoded-word is 75 characters.
+// See RFC 2047, section 2.
 internal static UntypedInt maxEncodedWordLen => 75;
+// maxContentLen is how much content can be encoded, ignoring the header and
+// 2-byte footer.
 internal const nint maxContentLen = /* maxEncodedWordLen - len("=?UTF-8?q?") - len("?=") */ 63;
 
 internal static nint maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen);
@@ -74,6 +83,7 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
         w.Close();
         return;
     }
+
     nint currentLen = default!;
     nint last = default!;
     nint runeLen = default!;
@@ -81,6 +91,7 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
         // Multi-byte characters must not be split across encoded-words.
         // See RFC 2047, section 5.3.
         (_, runeLen) = utf8.DecodeRuneInString(s.slice(i));
+
         if (currentLen + runeLen <= maxBase64Len){
             currentLen += runeLen;
         } else {
@@ -103,6 +114,7 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
         writeQString(Ꮡbuf, s);
         return;
     }
+
     nint currentLen = default!;
     nint runeLen = default!;
     for (nint i = 0; i < len(s); i += runeLen) {
@@ -116,6 +128,7 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> Ꮡbuf, @st
             (_, runeLen) = utf8.DecodeRuneInString(s.slice(i));
             encLen = 3 * runeLen;
         }
+
         if (currentLen + encLen > maxContentLen) {
             e.splitWord(Ꮡbuf, charset);
             currentLen = 0;
@@ -141,12 +154,11 @@ internal static void writeQString(ж<strings.Builder> Ꮡbuf, @string s) {
             }
             default: {
                 Ꮡbuf.WriteByte((rune)'=');
-                Ꮡbuf.WriteByte(upperhex[(b >> (int)(4))]);
+                Ꮡbuf.WriteByte(upperhex[(b >> 4)]);
                 Ꮡbuf.WriteByte(upperhex[(byte)(b & 0x0f)]);
                 break;
             }}
         }
-
     }
 }
 
@@ -199,6 +211,7 @@ public static (@string, error) Decode(this ref WordDecoder d, @string word) {
         return ("", errInvalidWord);
     }
     word = word.slice(2, len(word) - 2);
+
     // split word "UTF-8?q?text" into "UTF-8", 'q', and "text"
     var (charset, text, _) = strings.Cut(word, "?"u8);
     if (charset == ""u8) {
@@ -208,10 +221,12 @@ public static (@string, error) Decode(this ref WordDecoder d, @string word) {
     if (len(encoding) != 1) {
         return ("", errInvalidWord);
     }
+
     var (content, err) = decode(encoding[0], text);
     if (err != default!) {
         return ("", err);
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     {
         var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != default!) {
@@ -229,9 +244,12 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
     if (i == -1) {
         return (header, default!);
     }
+
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
+
     Ꮡbuf.WriteString(header.slice(0, i));
     header = header.slice(i);
+
     var betweenWords = false;
     while (ᐧ) {
         nint start = strings.Index(header, "=?"u8);
@@ -239,50 +257,60 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
             break;
         }
         nint cur = start + len("=?");
+
         nint iΔ1 = strings.Index(header.slice(cur), "?"u8);
         if (iΔ1 == -1) {
             break;
         }
         @string charset = header.slice(cur, cur + iΔ1);
         cur += iΔ1 + len("?");
+
         if (len(header) < cur + len("Q??=")) {
             break;
         }
         var encoding = header[cur];
         cur++;
+
         if (header[cur] != (rune)'?') {
             break;
         }
         cur++;
+
         nint j = strings.Index(header.slice(cur), "?="u8);
         if (j == -1) {
             break;
         }
         @string text = header.slice(cur, cur + j);
         nint end = cur + j + len("?=");
+
         var (content, err) = decode(encoding, text);
         if (err != default!) {
             betweenWords = false;
-            Ꮡbuf.WriteString(header.slice(0, start + 2));
-            header = header.slice(start + 2);
+            Ꮡbuf.WriteString(header.slice(0, end));
+            header = header.slice(end);
             continue;
         }
+
         // Write characters before the encoded-word. White-space and newline
         // characters separating two encoded-words must be deleted.
         if (start > 0 && (!betweenWords || hasNonWhitespace(header.slice(0, start)))) {
             Ꮡbuf.WriteString(header.slice(0, start));
         }
+
         {
             var errΔ1 = d.convert(Ꮡbuf, charset, content); if (errΔ1 != default!) {
                 return ("", errΔ1);
             }
         }
+
         header = header.slice(end);
         betweenWords = true;
     }
+
     if (len(header) > 0) {
         Ꮡbuf.WriteString(header);
     }
+
     return (buf.String(), default!);
 }
 
@@ -297,7 +325,6 @@ internal static (slice<byte>, error) decode(byte encoding, @string text) {
     default: {
         return (default!, errInvalidWord);
     }}
-
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -342,7 +369,6 @@ internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf
         }
         break;
     }}
-
     return default!;
 }
 
@@ -351,16 +377,15 @@ internal static error convert(this ref WordDecoder d, ж<strings.Builder> Ꮡbuf
 internal static bool hasNonWhitespace(@string s) {
     foreach (var (_, b) in s) {
         switch (b) {
+        // Encoded-words can only be separated by linear white spaces which does
+        // not include vertical tabs (\v).
         case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\r': {
             break;
         }
         default: {
             return true;
         }}
-
     }
-    // Encoded-words can only be separated by linear white spaces which does
-    // not include vertical tabs (\v).
     return false;
 }
 
@@ -396,9 +421,9 @@ internal static (slice<byte>, error) qDecode(@string s) {
                 return (default!, errInvalidWord);
             }}
         }
-
         n++;
     }
+
     return (dec.slice(0, n), default!);
 }
 
@@ -417,7 +442,7 @@ internal static (byte, error) readHexByte(byte a, byte b) {
             return (0, err);
         }
     }
-    return ((byte)((byte)(hb << (int)(4)) | lb), default!);
+    return ((byte)((byte)(hb << 4) | lb), default!);
 }
 
 internal static (byte, error) fromHex(byte b) {
@@ -428,11 +453,10 @@ internal static (byte, error) fromHex(byte b) {
     case {} when b >= (rune)'A' && b <= (rune)'F': {
         return ((byte)(b - (rune)'A' + 10), default!);
     }
+    // Accept badly encoded bytes.
     case {} when b >= (rune)'a' && b <= (rune)'f': {
         return ((byte)(b - (rune)'a' + 10), default!);
     }}
-
-    // Accept badly encoded bytes.
     return (0, fmt.Errorf("mime: invalid hex byte %#02x"u8, b));
 }
 

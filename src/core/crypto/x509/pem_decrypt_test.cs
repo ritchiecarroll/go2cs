@@ -91,9 +91,6 @@ public static void TestEncrypt(ж<testing.T> Ꮡt) {
     }
 }
 
-// generated with:
-// openssl genrsa -aes128 -passout pass:asdf -out server.orig.key 128
-
 partial struct testDataᴛ1 /*dyn*/ {
     internal global::go.crypto.x509_package.PEMCipher kind;
     internal slice<byte> password;
@@ -118,7 +115,7 @@ XOH9VfTjb52q/I8Suozq9coVQwg4tXfIoYUdT//O+mB7zJb9HI9Ps77b9TxDE6Gm
 4C9brwZ3zg2vqXcwwV6QRZMtyll9rOpxkbw6NPlpfBqkc3xS51bbxivbO/Nve4KD
 r12ymjFNF4stXCfJnNqKoZ50BHmEEUDu5Wb0fpVn82XrGw7CYc4iug==
 -----END RSA TESTING KEY-----
-"""u8)),
+"""u8.Raw())),
         plainDER: """
 
 MIIBPAIBAAJBAPASZe+tCPU6p80AjHhDkVsLYa51D35e/YGa8QcZyooeZM8EHozo
@@ -128,7 +125,7 @@ QvkCIQD+GC1m+/do+QRurr0uo46Kx1LzLeSCrjBk34wiOp2+dwIhAPHfTLRXS2fv
 7rljm0bYa4+eDZpz+E8RcXEgzhhvcQQ9AiAI5eHZJGOyml3MXnQjiPi55WcDOw0w
 glcRgT6QCEtz2wIhANSyqaFtosIkHKqrDUGfz/bb5tqMYTAnBruVPaf/WEOBAiEA
 9xORWeRG1tRpso4+dYy4KdDkuLPIO01KY6neYGm3BCM=
-"""u8
+"""u8.Raw()
     ),
     new(
         kind: PEMCipher3DES,
@@ -147,7 +144,7 @@ ldw5w7WC7d13x2LsRkwo8ZrDKgIV+Y9GNvhuCCkTzNP0V3gNeJpd201HZHR+9n3w
 3z0VjR/MGqsfcy1ziEWMNOO53At3zlG6zP05aHMnMcZoVXadEK6L1gz++inSSDCq
 gI0UJP4e3JVB7AkgYymYAwiYALAkoEIuanxoc50njJk=
 -----END RSA TESTING KEY-----
-"""u8)),
+"""u8.Raw())),
         plainDER: """
 
 MIIBOwIBAAJBANOCXKdoNS/iP/MAbl9cf1/SF3P+Ns7ZeNL27CfmDh0O6Zduaax5
@@ -157,7 +154,7 @@ QQIhAP/jCkfejFcy4v15beqKzwz08/tslVjF+Yq41eJGejmxAiEA05pMoqfkyjcx
 fyvGhpoOyoCp71vSGUfR2I9CR65oKh0CIC1Msjs66LlfJtQctRq6bCEtFCxEcsP+
 eEjYo/Sk6WphAiEAxpgWPMJeU/shFT28gS+tmhjPZLpEoT1qkVlC14u0b3ECIQDX
 tZZZxCtPAm7shftEib0VU77Lk8MsXJcx2C4voRsjEw==
-"""u8
+"""u8.Raw()
     ),
     new(
         kind: PEMCipherAES128,
@@ -176,7 +173,7 @@ GZbBpf1jDH/pr0iGonuAdl2PCCZUiy+8eLsD2tyviHUkFLOB+ykYoJ5t8ngZ/B6D
 080LzLHPCrXKdlr/f50yhNWq08ZxMWQFkui+FDHPDUaEELKAXV8/5PDxw80Rtybo
 AVYoCVIbZXZCuCO81op8UcOgEpTtyU5Lgh3Mw5scQL0=
 -----END RSA TESTING KEY-----
-"""u8)),
+"""u8.Raw())),
         plainDER: """
 
 MIIBOgIBAAJBAMBlj5FxYtqbcy8wY89d/S7n0+r5MzD9F63BA/Lpl78vQKtdJ5dT
@@ -186,7 +183,7 @@ cQIhAOuqY7/115x5KCdGDMWi+jNaMxIvI4ETGwV40ykGzqlzAiEA0P9oEC3m9tHB
 kbpjSTxaNkrXxDgdEOZz8X0uOUUwHNsCIAwzcSCiGLyYJTULUmP1ESERfW1mlV78
 XzzESaJpIM/zAiBQkSTcl9VhcJreQqvjn5BnPZLP4ZHS4gPwJAGdsj5J4QIhAOVR
 B3WlRNTXR2WsJ5JdByezg9xzdXzULqmga0OE339a
-"""u8
+"""u8.Raw()
     ),
     new(
         kind: PEMCipherAES192,
@@ -205,7 +202,7 @@ ReUtTw8exmKsY4gsSjhkg5uiw7/ZB1Ihto0qnfQJgjGc680qGkT1d6JfvOfeYAk6
 xn5RqS/h8rYAYm64KnepfC9vIujo4NqpaREDmaLdX5MJPQ+SlytITQvgUsUq3q/t
 Ss85xjQEZH3hzwjQqdJvmA4hYP6SUjxYpBM+02xZ1Xw=
 -----END RSA TESTING KEY-----
-"""u8)),
+"""u8.Raw())),
         plainDER: """
 
 MIIBOwIBAAJBAMGcRrZiNNmtF20zyS6MQ7pdGx17aFDl+lTl+qnLuJRUCMUG05xs
@@ -215,7 +212,7 @@ qNkCIQD6cCIqLfzq/lYbZbQgAAjpBXeQVYsbvVtJrPrXJAlVVQIhAMXpDKMeFPMn
 J0g2rbx1gngx0qOa5r5iMU5w/noN4W2XAiBjf+WzCG5yFvazD+dOx3TC0A8+4x3P
 uZ3pWbaXf5PNuQIgAcdXarvhelH2w2piY1g3BPeFqhzBSCK/yLGxR82KIh8CIQDD
 +qGKsd09NhQ/G27y/DARzOYtml1NvdmCQAgsDIIOLA==
-"""u8
+"""u8.Raw()
     ),
     new(
         kind: PEMCipherAES256,
@@ -234,7 +231,7 @@ Pz3RZScwIuubzTGJ1x8EzdffYOsdCa9Mtgpp3L136+23dOd6L/qK2EG2fzrJSHs/
 sv5Z/KwlX+3MDEpPQpUwGPlGGdLnjI3UZ+cjgqBcoMiNc6HfgbBgYJSU6aDSHuCk
 clCwByxWkBNgJ2GrkwNrF26v+bGJJJNR4SKouY1jQf0=
 -----END RSA TESTING KEY-----
-"""u8)),
+"""u8.Raw())),
         plainDER: """
 
 MIIBOgIBAAJBAKy3GFkstoCHIEeUU/qO8207m8WSrjksR+p9B4tf1w5k+2O1V/GY
@@ -244,9 +241,11 @@ oQIhANPcOiLwOPT4sIUpRM5HG6BF1BI7L77VpyGVk8xNP7X/AiEA0LMHZtk4I+lJ
 nClgYp4Yh2JZ1Znbu7IoQMCEJCjwKDECIGd8Dzm5tViTkUW6Hs3Tlf73nNs65duF
 aRnSglss8I3pAiEAonEnKruawgD8RavDFR+fUgmQiPz4FnGGeVgfwpGG1JECIBYq
 PXHYtPqxQIbD2pScR5qum7iGUh11lEUPkmt+2uqS
-"""u8
+"""u8.Raw()
     ),
     new(
+        // generated with:
+        // openssl genrsa -aes128 -passout pass:asdf -out server.orig.key 128
         kind: PEMCipherAES128,
         password: slice<byte>("asdf"u8),
         pemData: slice<byte>(testingKey("""
@@ -259,13 +258,13 @@ DEK-Info: AES-128-CBC,74611ABC2571AF11B1BF9B69E62C89E7
 eND9l7C9meCirWovjj9QWVHrXyugFuDIqgdhQ8iHTgCfF3lrmcttVrbIfMDw+smD
 hTP8O1mS/MHl92NE0nhv0w==
 -----END RSA TESTING KEY-----
-"""u8)),
+"""u8.Raw())),
         plainDER: """
 
 MGMCAQACEQC6ssxmYuauuHGOCDAI54RdAgMBAAECEQCWIn6Yv2O+kBcDF7STctKB
 AgkA8SEfu/2i3g0CCQDGNlXbBHX7kQIIK3Ww5o0cYbECCQDCimPb0dYGsQIIeQ7A
 jryIst8=
-"""u8
+"""u8.Raw()
     )
 }.slice();
 
@@ -278,7 +277,7 @@ DEK-Info: AES-128-CBC,74611ABC2571AF11B1BF9B69E62C89E7
 6L8yXK2MTQUWBk4ZD6OvCiYp+mXyR1594TQ1K38MxGvDw5pwcDME2Lek8RrR5fd40P2XsL2Z4KKt
 ai+OP1BZUetfK6AW4MiqB2FDyIdOAJ8XeWuZy21Wtsh8wPD6yYOFM/w7WZL8weX3Y0TSeG/T
 -----END RSA TESTING KEY-----
-"""u8);
+"""u8.Raw());
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object badPemDataDecryptedˢ = (@string)"Bad PEM data decrypted successfully"u8;

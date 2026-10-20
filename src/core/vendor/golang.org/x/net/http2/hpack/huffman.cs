@@ -72,7 +72,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
     var cbits = (uint8)0;
     var sbits = (uint8)0;
     foreach (var (_, b) in v) {
-        cur = (nuint)((cur << (int)(8)) | (nuint)b);
+        cur = cur << 8 | (nuint)b;
         cbits += 8;
         sbits += 8;
         while (cbits >= 8) {
@@ -116,14 +116,18 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         return ErrInvalidHuffman;
     }
     {
-        nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((nuint)(cur & mask) != mask) {
+        nuint mask = (nuint)(((nuint)1).Lsh((uint64)(cbits)) - 1); if ((cur & mask) != mask) {
             // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
             return ErrInvalidHuffman;
         }
     }
+
     return default!;
 }
 
+// incomparable is a zero-width, non-comparable type. Adding it to a struct
+// makes that struct also non-comparable, and generally doesn't add
+// any size (as long as it's first).
 partial struct incomparable /*[0]Action*/;
 
 partial struct node {
@@ -155,8 +159,10 @@ internal static void buildRootHuffmanNode() {
     lazyRootHuffmanNode = newInternalNode();
     // allocate a leaf node for each of the 256 symbols
     var leaves = Ꮡ(new array<node>(256));
+
     foreach (var (sym, code) in huffmanCodes.ΔRangeSnapshot()) {
         var codeLen = huffmanCodeLen[sym];
+
         var cur = lazyRootHuffmanNode;
         while (codeLen > 8) {
             codeLen -= 8;
@@ -169,6 +175,7 @@ internal static void buildRootHuffmanNode() {
         var shift = (uint8)(8 - codeLen);
         nint start = (nint)(uint8)(code.Lsh((uint64)(shift)));
         nint end = (nint)(((nint)1).Lsh((uint64)(shift)));
+
         leaves.Value[sym].sym = (byte)sym;
         leaves.Value[sym].codeLen = codeLen;
         for (nint i = start; i < start + end; i++) {
@@ -183,7 +190,6 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     // This relies on the maximum huffman code length being 30 (See tables.go huffmanCodeLen array)
     // So if a uint64 buffer has less than 32 valid bits can always accommodate another huffmanCode.
     uint64 x = default!;             // buffer
-    
     nuint n = default!;           // number valid of bits present in x
     for (nint i = 0; i < builtin.len(s); i++) {
         var c = s[i];
@@ -193,7 +199,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
         if (n >= 32) {
             n %= 32; // Normally would be -= 32 but %= 32 informs compiler 0 <= n <= 31 for upcoming shift
             var yΔ1 = (uint32)(x.Rsh(n)); // Compiler doesn't combine memory writes if y isn't uint32
-            dst = append(dst, (byte)((yΔ1 >> (int)(24))), (byte)((yΔ1 >> (int)(16))), (byte)((yΔ1 >> (int)(8))), (byte)yΔ1);
+            dst = append(dst, (byte)(yΔ1 >> 24), (byte)(yΔ1 >> 16), (byte)(yΔ1 >> 8), (byte)yΔ1);
         }
     }
     // Add padding bits if necessary
@@ -203,7 +209,7 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
             UntypedInt eosNBits = 30;
             const uint64 eosPadByte = /* eosCode >> (eosNBits - 8) */ 255;
             nuint pad = 8 - over;
-            x = (uint64)((x.Lsh(pad)) | (eosPadByte.Rsh(over)));
+            x = (x.Lsh(pad)) | (eosPadByte.Rsh(over));
             n += pad; // 8 now divides into n exactly
         }
     }
@@ -217,16 +223,15 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
     }
     case 2: {
         var yΔ3 = (uint16)x;
-        return append(dst, (byte)((yΔ3 >> (int)(8))), (byte)yΔ3);
+        return append(dst, (byte)(yΔ3 >> 8), (byte)yΔ3);
     }
     case 3: {
-        var yΔ4 = (uint16)((x >> (int)(8)));
-        return append(dst, (byte)((yΔ4 >> (int)(8))), (byte)yΔ4, (byte)x);
+        var yΔ4 = (uint16)(x >> 8);
+        return append(dst, (byte)(yΔ4 >> 8), (byte)yΔ4, (byte)x);
     }}
-
     //	case 4:
     var y = (uint32)x;
-    return append(dst, (byte)((y >> (int)(24))), (byte)((y >> (int)(16))), (byte)((y >> (int)(8))), (byte)y);
+    return append(dst, (byte)(y >> 24), (byte)(y >> 16), (byte)(y >> 8), (byte)y);
 }
 
 // HuffmanEncodeLength returns the number of bytes required to encode

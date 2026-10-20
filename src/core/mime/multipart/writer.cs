@@ -74,7 +74,6 @@ public static error SetBoundary(this ref Writer w, @string boundary) {
             }
             break;
         }}
-
         return errors.New(mimeInvalidBoundaryˢ2);
     }
     w.boundary = boundary;
@@ -122,6 +121,7 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
     } else {
         fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "--%s\r\n"u8, w.boundary);
     }
+
     foreach (var (_, k) in slices.Sorted(maps.Keys<textproto.MIMEHeader, @string, slice<@string>>(header))) {
         foreach (var (_, v) in header[k]) {
             fmt.Fprintf(new bytes_BufferжWriter(Ꮡb), "%s: %s\r\n"u8, k, v);
@@ -139,8 +139,20 @@ public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIME
     return (new partжWriter(p), default!);
 }
 
-internal static ж<strings.Replacer> quoteEscaper = strings.NewReplacer("\\"u8, "\\\\", @"""", "\\\"");
+internal static ж<strings.Replacer> quoteEscaper = strings.NewReplacer("\\"u8, "\\\\", @"""", "\\\"", "\r", "%0D", "\n", "%0A");
 
+// escapeQuotes escapes special characters in field parameter values.
+//
+// For historical reasons, this uses \ escaping for " and \ characters,
+// and percent encoding for CR and LF.
+//
+// The WhatWG specification for form data encoding suggests that we should
+// use percent encoding for " (%22), and should not escape \.
+// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#multipart/form-data-encoding-algorithm
+//
+// Empirically, as of the time this comment was written, it is necessary
+// to escape \ characters or else Chrome (and possibly other browsers) will
+// interpet the unescaped \ as an escape.
 internal static @string escapeQuotes(@string s) {
     return quoteEscaper.Replace(s);
 }
@@ -153,9 +165,7 @@ internal static readonly @string applicationOctetStreamˢ = "application/octet-s
 // a new form-data header with the provided field name and file name.
 public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) {
     var h = new textproto.MIMEHeader(0);
-    h.Set(contentDispositionˢ,
-        fmt.Sprintf(@"form-data; name=""%s""; filename=""%s"""u8,
-            escapeQuotes(fieldname), escapeQuotes(filename)));
+    h.Set(contentDispositionˢ, FileContentDisposition(fieldname, filename));
     h.Set(contentTypeˢ, applicationOctetStreamˢ);
     return Ꮡw.CreatePart(h);
 }
@@ -167,6 +177,13 @@ public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string f
     h.Set(contentDispositionˢ,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
     return Ꮡw.CreatePart(h);
+}
+
+// FileContentDisposition returns the value of a Content-Disposition header
+// with the provided field name and file name.
+public static @string FileContentDisposition(@string fieldname, @string filename) {
+    return fmt.Sprintf(@"form-data; name=""%s""; filename=""%s"""u8,
+        escapeQuotes(fieldname), escapeQuotes(filename));
 }
 
 // WriteField calls [Writer.CreateFormField] and then writes the given value.

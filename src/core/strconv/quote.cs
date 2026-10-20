@@ -18,11 +18,11 @@ internal static bool contains(@string s, byte c) {
 }
 
 internal static @string quoteWith(@string s, byte quote, bool ASCIIonly, bool graphicOnly) {
-    return ((@string)appendQuotedWith(new slice<byte>(0, 3 * len(s) / 2), s, quote, ASCIIonly, graphicOnly));
+    return (@string)appendQuotedWith(new slice<byte>(0, 3 * len(s) / 2), s, quote, ASCIIonly, graphicOnly);
 }
 
 internal static @string quoteRuneWith(rune r, byte quote, bool ASCIIonly, bool graphicOnly) {
-    return ((@string)appendQuotedRuneWith(default!, r, quote, ASCIIonly, graphicOnly));
+    return (@string)appendQuotedRuneWith(default!, r, quote, ASCIIonly, graphicOnly);
 }
 
 internal static slice<byte> appendQuotedWith(slice<byte> buf, @string s, byte quote, bool ASCIIonly, bool graphicOnly) {
@@ -34,15 +34,11 @@ internal static slice<byte> appendQuotedWith(slice<byte> buf, @string s, byte qu
         buf = nBuf;
     }
     buf = append(buf, quote);
-    for (nint width = 0; len(s) > 0; s = s.slice(width)) {
-        var r = (rune)s[0];
-        width = 1;
-        if (r >= utf8.RuneSelf) {
-            (r, width) = utf8.DecodeRuneInString(s);
-        }
+    for ((var r, nint width) = ((rune)0, 0); len(s) > 0; s = s.slice(width)) {
+        (r, width) = utf8.DecodeRuneInString(s);
         if (width == 1 && r == utf8.RuneError) {
             buf = append(buf, ((@string)@"\x"u8).ꓸꓸꓸ);
-            buf = append(buf, lowerhex[(s[0] >> (int)(4))]);
+            buf = append(buf, lowerhex[(s[0] >> 4)]);
             buf = append(buf, lowerhex[(byte)(s[0] & 0xF)]);
             continue;
         }
@@ -63,8 +59,7 @@ internal static slice<byte> appendQuotedRuneWith(slice<byte> buf, rune r, byte q
 }
 
 internal static slice<byte> appendEscapedRune(slice<byte> buf, rune r, byte quote, bool ASCIIonly, bool graphicOnly) {
-    if (r == (rune)quote || r == (rune)'\\') {
-        // always backslashed
+    if (r == (rune)quote || r == (rune)'\\') { // always backslashed
         buf = append(buf, (byte)((rune)'\\'));
         buf = append(buf, (byte)r);
         return buf;
@@ -111,7 +106,7 @@ internal static slice<byte> appendEscapedRune(slice<byte> buf, rune r, byte quot
         var matchᴛ1 = false;
         if (r < (rune)' ' || r == 0x7f) { matchᴛ1 = true;
             buf = append(buf, ((@string)@"\x"u8).ꓸꓸꓸ);
-            buf = append(buf, lowerhex[((byte)r >> (int)(4))]);
+            buf = append(buf, lowerhex[((byte)r >> 4)]);
             buf = append(buf, lowerhex[(byte)((byte)r & 0xF)]);
         }
         else if (!utf8.ValidRune(r)) { matchᴛ1 = true;
@@ -121,19 +116,17 @@ internal static slice<byte> appendEscapedRune(slice<byte> buf, rune r, byte quot
         if (fallthrough || !matchᴛ1 && r is < 0x10000) {
             buf = append(buf, ((@string)@"\u"u8).ꓸꓸꓸ);
             for (nint s = 12; s >= 0; s -= 4) {
-                buf = append(buf, lowerhex[(rune)(r.Rsh((nuint)s) & 0xF)]);
+                buf = append(buf, lowerhex[(r.Rsh((nuint)s) & 0xF)]);
             }
         }
         else if (!matchᴛ1) { /* default: */
             buf = append(buf, ((@string)@"\U"u8).ꓸꓸꓸ);
             for (nint s = 28; s >= 0; s -= 4) {
-                buf = append(buf, lowerhex[(rune)(r.Rsh((nuint)s) & 0xF)]);
+                buf = append(buf, lowerhex[(r.Rsh((nuint)s) & 0xF)]);
             }
         }
-
         break;
     }}
-
     return buf;
 }
 
@@ -263,7 +256,6 @@ internal static (rune v, bool ok) unhex(byte b) {
     case {} when (rune)'A' <= c && c <= (rune)'F': {
         return (c - (rune)'A' + 10, true);
     }}
-
     return (v, ok);
 }
 
@@ -315,6 +307,7 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
     }
     var c = s[1];
     s = s[2..];
+
     switch (c) {
     case (rune)'a': {
         value = (rune)'\a';
@@ -359,7 +352,6 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
             n = 8;
             break;
         }}
-
         rune v = default!;
         if (len(s) < n) {
             err = ErrSyntax;
@@ -371,7 +363,7 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
                 err = ErrSyntax;
                 return (value, multibyte, tail, err);
             }
-            v = (rune)((v << (int)(4)) | x);
+            v = v << 4 | x;
         }
         s = s.slice(n);
         if (c == (rune)'x') {
@@ -393,14 +385,13 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
             err = ErrSyntax;
             return (value, multibyte, tail, err);
         }
-        for (nint j = 0; j < 2; j++) {
-            // one digit already; two more
+        for (nint j = 0; j < 2; j++) { // one digit already; two more
             var x = (rune)s[j] - (rune)'0';
             if (x < 0 || x > 7) {
                 err = ErrSyntax;
                 return (value, multibyte, tail, err);
             }
-            v = (rune)(((v << (int)(3))) | x);
+            v = (v << 3) | x;
         }
         s = s[2..];
         if (v > 255) {
@@ -426,7 +417,6 @@ public static (rune value, bool multibyte, @string tail, error err) UnquoteChar(
         err = ErrSyntax;
         return (value, multibyte, tail, err);
     }}
-
     tail = s;
     return (value, multibyte, tail, err);
 }
@@ -458,6 +448,8 @@ public static (@string, error) Unquote(@string s) {
 // otherwise the input prefix is provided verbatim.
 internal static (@string @out, @string rem, error err) unquote(@string @in, bool unescape) {
     @string @out = default!;
+    var bufᴷ = new stackAppend<byte>();
+    var bufᴷΔ1 = new stackAppend<byte>();
 
     // Determine the quote form and optimistically find the terminating quote.
     if (len(@in) < 2) {
@@ -469,6 +461,7 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
         return ("", @in, ErrSyntax);
     }
     end += 2; // position after terminating quote; may be wrong if escape sequences are present
+
     switch (quote) {
     case (rune)'`': {
         switch (ᐧ) {
@@ -481,26 +474,27 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
             break;
         }
         default: {
+            // Carriage return characters ('\r') inside raw string literals
+            // are discarded from the raw string value.
             var buf = new slice<byte>(0, end - len("`") - len("\r") - len("`"));
             for (nint i = len("`"); i < end - len("`"); i++) {
                 if (@in[i] != (rune)'\r') {
-                    buf = append(buf, @in[i]);
+                    buf = append(bufᴷ, buf, @in[i]);
                 }
             }
-            @out = ((@string)buf);
+            @out = (@string)buf;
             break;
         }}
-
+        // NOTE: Prior implementations did not verify that raw strings consist
+        // of valid UTF-8 characters and we continue to not verify it as such.
+        // The Go specification does not explicitly require valid UTF-8,
+        // but only mention that it is implicitly valid for Go source code
+        // (which must be valid UTF-8).
         return (@out, @in.slice(end), default!);
     }
     case (rune)'"' or (rune)'\'': {
-        if (!contains(@in.slice(0, end), // NOTE: Prior implementations did not verify that raw strings consist
- // of valid UTF-8 characters and we continue to not verify it as such.
- // The Go specification does not explicitly require valid UTF-8,
- // but only mention that it is implicitly valid for Go source code
- // (which must be valid UTF-8).
- // Handle quoted strings without any escape sequences.
- (rune)'\\') && !contains(@in.slice(0, end), (rune)'\n')) {
+        // Handle quoted strings without any escape sequences.
+        if (!contains(@in.slice(0, end), (rune)'\\') && !contains(@in.slice(0, end), (rune)'\n')) {
             bool valid = default!;
             switch (quote) {
             case (rune)'"': {
@@ -512,7 +506,6 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
                 valid = len("'") + n + len("'") == end && (r != utf8.RuneError || n != 1);
                 break;
             }}
-
             if (valid) {
                 @out = @in.slice(0, end);
                 if (unescape) {
@@ -521,6 +514,7 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
                 return (@out, @in.slice(end), default!);
             }
         }
+
         // Handle quoted strings with escape sequences.
         slice<byte> buf = default!;
         @string in0 = @in;
@@ -536,33 +530,36 @@ internal static (@string @out, @string rem, error err) unquote(@string @in, bool
                 return ("", in0, ErrSyntax);
             }
             @in = remΔ2;
+
             // Append the character if unescaping the input.
             if (unescape) {
                 if (r < utf8.RuneSelf || !multibyte){
-                    buf = append(buf, (byte)r);
+                    buf = append(bufᴷΔ1, buf, (byte)r);
                 } else {
                     buf = utf8.AppendRune(buf, r);
                 }
             }
+
             // Single quoted strings must be a single character.
             if (quote == (rune)'\'') {
                 break;
             }
         }
+
+        // Verify that the string ends with a terminating quote.
         if (!(len(@in) > 0 && @in[0] == quote)) {
-            // Verify that the string ends with a terminating quote.
             return ("", in0, ErrSyntax);
         }
         @in = @in[1..]; // skip terminating quote
+
         if (unescape) {
-            return (((@string)buf), @in, default!);
+            return ((@string)buf, @in, default!);
         }
         return (in0.slice(0, len(in0) - len(@in)), @in, default!);
     }
     default: {
         return ("", @in, ErrSyntax);
     }}
-
 }
 
 // bsearch is semantically the same as [slices.BinarySearch] (without NaN checks)
@@ -575,7 +572,7 @@ internal static (nint, bool) bsearch<S, E>(S s, E v)
     nint i = 0;
     nint j = n;
     while (i < j) {
-        nint h = i + ((j - i) >> (int)(1));
+        nint h = i + ((j - i) >> 1);
         if (s[h] < v){
             i = h + 1;
         } else {
@@ -607,23 +604,26 @@ public static bool IsPrint(rune r) {
         }
         return false;
     }
+
     // Same algorithm, either on uint16 or uint32 value.
     // First, find first i such that isPrint[i] >= x.
     // This is the index of either the start or end of a pair that might span x.
     // The start is even (isPrint[i&^1]) and the end is odd (isPrint[i|1]).
     // If we find x in a range, make sure x is not in isNotPrint list.
-    if (0 <= r && r < (rune)(1 << (int)(16))) {
+
+    if (0 <= r && r < (rune)(1 << 16)) {
         var (rrΔ1, isPrintΔ1, isNotPrintΔ1) = ((uint16)r, isPrint16, isNotPrint16);
         var (iΔ1, _) = bsearch(isPrintΔ1, rrΔ1);
-        if (iΔ1 >= len(isPrintΔ1) || rrΔ1 < isPrintΔ1[(nint)(iΔ1 & ~(nint)1)] || isPrintΔ1[(nint)(iΔ1 | 1)] < rrΔ1) {
+        if (iΔ1 >= len(isPrintΔ1) || rrΔ1 < isPrintΔ1[(iΔ1 & ~(nint)1)] || isPrintΔ1[(iΔ1 | 1)] < rrΔ1) {
             return false;
         }
         var (_, foundΔ1) = bsearch(isNotPrintΔ1, rrΔ1);
         return !foundΔ1;
     }
+
     var (rr, isPrint, isNotPrint) = ((uint32)r, isPrint32, isNotPrint32);
     var (i, _) = bsearch(isPrint, rr);
-    if (i >= len(isPrint) || rr < isPrint[(nint)(i & ~(nint)1)] || isPrint[(nint)(i | 1)] < rr) {
+    if (i >= len(isPrint) || rr < isPrint[(i & ~(nint)1)] || isPrint[(i | 1)] < rr) {
         return false;
     }
     if (r >= 0x20000) {

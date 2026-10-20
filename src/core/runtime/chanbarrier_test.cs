@@ -30,6 +30,7 @@ internal partial struct doRequest_async /*dyn*/ {
 internal static partial (ж<response>, error) doRequest(bool useSelect) {
     var ch = new channel<ж<doRequest_async>>(0);
     var done = new channel<EmptyStruct>(0);
+
     if (useSelect){
         var chʗ1 = ch;
         var doneʗ1 = done;
@@ -50,6 +51,7 @@ internal static partial (ж<response>, error) doRequest(bool useSelect) {
             chʗ2.ᐸꟷ(Ꮡ(new doRequest_async(resp: nil, err: new myError(nil))));
         });
     }
+
     var r = ᐸꟷ(ch);
     Δruntime.Gosched();
     return ((~r).resp, (~r).err);
@@ -84,7 +86,7 @@ internal static partial void testChanSendBarrier(bool useSelect) {
                     var (_, err) = doRequest(useSelect);
                     var (_, ok) = err._<myError>(ᐧ);
                     if (!ok) {
-                        throw panic((nint)(1));
+                        throw panic((nint)1);
                     }
                     garbage = makeByte();
                 }
@@ -99,7 +101,7 @@ internal static partial void testChanSendBarrier(bool useSelect) {
 
 //go:noinline
 internal static partial slice<byte> makeByte() {
-    return new slice<byte>((1 << (int)(10)));
+    return new slice<byte>((1 << 10));
 }
 
 } // end runtime_test_package

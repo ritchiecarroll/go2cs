@@ -10,9 +10,10 @@ using os = os_package;
 using filepath = path.filepath_package;
 using regexp = regexp_package;
 using slices = slices_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using fs = io.fs_package;
+using go;
 using go.@internal;
 using io;
 using io = io_package;
@@ -55,6 +56,9 @@ partial struct Pod {
 // issue warnings to stderr when it encounters non-fatal problems (for
 // orphans or a directory with no meta-data files).
 public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
+    var filesᴷ = new stackAppend<@string>();
+    var dirIndicesᴷ = new stackAppend<nint>();
+
     var files = new @string[]{}.slice();
     var dirIndices = new nint[]{}.slice();
     foreach (var (k, dir) in dirs) {
@@ -66,8 +70,8 @@ public static (slice<Pod>, error) CollectPods(slice<@string> dirs, bool warn) {
             if (e.IsDir()) {
                 continue;
             }
-            files = append(files, filepath.Join(dir, e.Name()));
-            dirIndices = append(dirIndices, k);
+            files = append(filesᴷ, files, filepath.Join(dir, e.Name()));
+            dirIndices = append(dirIndicesᴷ, dirIndices, k);
         }
     }
     return (collectPodsImpl(files, dirIndices, warn), default!);
@@ -143,11 +147,11 @@ internal static slice<Pod> collectPodsImpl(slice<@string> files, slice<nint> dir
                         mm[tag] = new protoPod(mf: f);
                     }
                 }
+                // FIXME: should probably check file length and hash here for
+                // the duplicate.
             }
         }
     }
-    // FIXME: should probably check file length and hash here for
-    // the duplicate.
     var counterRE = regexp.MustCompile(fmt.Sprintf(coverage.CounterFileRegexp, coverage.CounterFilePref));
     foreach (var (k, f) in files) {
         @string @base = filepath.Base(f);

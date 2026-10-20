@@ -33,6 +33,7 @@ public static void TestFinderNext(ж<testing.T> Ꮡt) {
         new("baa"u8, "aaaaa"u8, -1),
         new("at that"u8, "which finally halts.  at that point"u8, 22)
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         nint got = strings_internal_test_package.StringFind(tc.pat, tc.text);
         nint want = tc.index;
@@ -59,8 +60,8 @@ public static void TestFinderCreation(ж<testing.T> Ꮡt) {
             "mississi"u8,
             new array<nint>(256){[(rune)'i'] = 3, [(rune)'m'] = 7, [(rune)'s'] = 1},
             new nint[]{15, 14, 13, 7, 11, 10, 7, 1}.slice()
-        ), // From https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf
-
+        ),
+        // From https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf
         new(
             "abcxxxabc"u8,
             new array<nint>(256){[(rune)'a'] = 2, [(rune)'b'] = 1, [(rune)'c'] = 6, [(rune)'x'] = 3},
@@ -72,10 +73,12 @@ public static void TestFinderCreation(ж<testing.T> Ꮡt) {
             new nint[]{17, 16, 15, 14, 13, 12, 7, 10, 1}.slice()
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in testCases) {
         var tc = vᴛ1.ΔClone();
 
         var (bad, good) = strings_internal_test_package.DumpTables(tc.pattern);
+
         foreach (var (i, got) in bad) {
             nint want = tc.bad[i];
             if (want == 0) {
@@ -85,6 +88,7 @@ public static void TestFinderCreation(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("boyerMoore(%q) bad['%c']: got %d want %d"u8, tc.pattern, i, got, want);
             }
         }
+
         if (!slices.Equal<slice<nint>, nint>(good, tc.suf)) {
             Ꮡt.Errorf("boyerMoore(%q) got %v want %v"u8, tc.pattern, good, tc.suf);
         }

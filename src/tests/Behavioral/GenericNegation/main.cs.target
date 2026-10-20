@@ -33,22 +33,26 @@ internal static T negateNamedSigned<T>(T x)
 }
 
 internal static void Main() {
-    fmt.Println(negate(5));
+    fmt.Println(negate<nint>(5));
     fmt.Println(negate((int32)(-7)));
     fmt.Println(negate((int64)(1099511627776L)));
+
     fmt.Println(negate((uint32)1));
     fmt.Println(negate((uint64)0));
     fmt.Println(negate((uint64)1));
     fmt.Println(negate((nuint)3));
-    fmt.Println(negateSum(10, 32));
+
+    fmt.Println(negateSum<nint>(10, 32));
     fmt.Println(negateSum((uint32)2, (uint32)3));
-    fmt.Println(negateNamed(((counter)0)));
-    fmt.Println(negateNamed(((counter)1)));
-    fmt.Println(negateNamed((counter)((uint64)1 << (int)(63))));
-    fmt.Println(negateNamedSigned(((offset)9)));
-    fmt.Println(negateNamedSigned(((offset)(-9))));
+
+    fmt.Println(negateNamed((counter)0));
+    fmt.Println(negateNamed((counter)1));
+    fmt.Println(negateNamed((counter)((uint64)1 << 63)));
+    fmt.Println(negateNamedSigned((offset)9));
+    fmt.Println(negateNamedSigned((offset)(-9)));
+
     fmt.Println(negate(negate((uint64)12345)));
-    fmt.Println(negateNamed(negateNamed(((counter)999))));
+    fmt.Println(negateNamed(negateNamed((counter)999)));
 }
 
 } // end main_package

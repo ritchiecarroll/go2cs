@@ -35,12 +35,14 @@ internal static readonly @string cryptoDesUseOfDesIsNotˢ = "crypto/des: use of 
 
 // NewCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewCipher(slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoDesUseOfDesIsNotˢ));
     }
+
     if (len(key) != 8) {
         return (default!, ((KeySizeError)len(key)));
     }
+
     var c = @new<desCipher>();
     c.generateSubkeys(key);
     return (new desCipherжBlock(c), default!);
@@ -86,12 +88,14 @@ internal static readonly @string cryptoDesUseOfTripleDESˢ = "crypto/des: use of
 
 // NewTripleDESCipher creates and returns a new [cipher.Block].
 public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         return (default!, errors.New(cryptoDesUseOfTripleDESˢ));
     }
+
     if (len(key) != 24) {
         return (default!, ((KeySizeError)len(key)));
     }
+
     var c = @new<tripleDESCipher>();
     c.of(tripleDESCipher.Ꮡcipher1).generateSubkeys(key[..8]);
     c.of(tripleDESCipher.Ꮡcipher2).generateSubkeys(key[8..16]);
@@ -113,11 +117,14 @@ internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<
     if (alias.InexactOverlap(dst[..(int)(ΔBlockSize)], src[..(int)(ΔBlockSize)])) {
         throw panic("crypto/des: invalid buffer overlap");
     }
+
     var b = byteorder.BEUint64(src);
     b = permuteInitialBlock(b);
-    var (left, right) = ((uint32)((b >> (int)(32))), (uint32)b);
-    left = (uint32)(((left << (int)(1))) | ((left >> (int)(31))));
-    right = (uint32)(((right << (int)(1))) | ((right >> (int)(31))));
+    var (left, right) = ((uint32)(b >> 32), (uint32)b);
+
+    left = (left << 1) | (left >> 31);
+    right = (right << 1) | (right >> 31);
+
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher1.subkeys[2 * i], c.cipher1.subkeys[2 * i + 1]);
     }
@@ -127,9 +134,11 @@ internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher3.subkeys[2 * i], c.cipher3.subkeys[2 * i + 1]);
     }
-    left = (uint32)(((left << (int)(31))) | ((left >> (int)(1))));
-    right = (uint32)(((right << (int)(31))) | ((right >> (int)(1))));
-    var preOutput = (uint64)((((uint64)right << (int)(32))) | (uint64)left);
+
+    left = (left << 31) | (left >> 1);
+    right = (right << 31) | (right >> 1);
+
+    var preOutput = ((uint64)right << 32) | (uint64)left;
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 
@@ -143,11 +152,14 @@ internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<
     if (alias.InexactOverlap(dst[..(int)(ΔBlockSize)], src[..(int)(ΔBlockSize)])) {
         throw panic("crypto/des: invalid buffer overlap");
     }
+
     var b = byteorder.BEUint64(src);
     b = permuteInitialBlock(b);
-    var (left, right) = ((uint32)((b >> (int)(32))), (uint32)b);
-    left = (uint32)(((left << (int)(1))) | ((left >> (int)(31))));
-    right = (uint32)(((right << (int)(1))) | ((right >> (int)(31))));
+    var (left, right) = ((uint32)(b >> 32), (uint32)b);
+
+    left = (left << 1) | (left >> 31);
+    right = (right << 1) | (right >> 31);
+
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher3.subkeys[15 - 2 * i], c.cipher3.subkeys[15 - (2 * i + 1)]);
     }
@@ -157,9 +169,11 @@ internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<
     for (nint i = 0; i < 8; i++) {
         (left, right) = feistel(left, right, c.cipher1.subkeys[15 - 2 * i], c.cipher1.subkeys[15 - (2 * i + 1)]);
     }
-    left = (uint32)(((left << (int)(31))) | ((left >> (int)(1))));
-    right = (uint32)(((right << (int)(31))) | ((right >> (int)(1))));
-    var preOutput = (uint64)((((uint64)right << (int)(32))) | (uint64)left);
+
+    left = (left << 31) | (left >> 1);
+    right = (right << 31) | (right >> 1);
+
+    var preOutput = ((uint64)right << 32) | (uint64)left;
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 

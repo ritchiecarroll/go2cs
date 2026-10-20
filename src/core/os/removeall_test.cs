@@ -26,19 +26,20 @@ partial class os_test_package {
 internal static readonly @string testRemoveAllˢ = "_TestRemoveAll_"u8;
 
 public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     Ꮡt.Parallel();
+
     @string tmpDir = Ꮡt.TempDir();
     {
         var errΔ1 = RemoveAll(""u8); if (errΔ1 != default!) {
             Ꮡt.Errorf("RemoveAll(\"\"): %v; want nil"u8, errΔ1);
         }
     }
+
     @string @file = filepath.Join(tmpDir, fileˢ2);
     @string path = filepath.Join(tmpDir, testRemoveAllˢ);
     @string fpath = filepath.Join(path, fileˢ2);
     @string dpath = filepath.Join(path, dirˢ);
+
     // Make a regular file and remove
     var (fd, err) = Create(@file);
     if (err != default!) {
@@ -55,6 +56,7 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (first)"u8, @file);
         }
     }
+
     // Make directory with 1 file and remove.
     {
         var errΔ2 = MkdirAll(path, 511); if (errΔ2 != default!) {
@@ -76,6 +78,7 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (second)"u8, path);
         }
     }
+
     // Make directory with file and subdirectory and remove.
     {
         err = MkdirAll(dpath, 511); if (err != default!) {
@@ -102,6 +105,7 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatalf("Lstat %q succeeded after RemoveAll (third)"u8, path);
         }
     }
+
     // Chmod is not supported under Windows or wasip1 and test fails as root.
     if (Δruntime.GOOS != "windows"u8 && Δruntime.GOOS != "wasip1"u8 && Getuid() != 0) {
         // Make directory with file and subdirectory and trigger error.
@@ -110,6 +114,7 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatalf("MkdirAll %q: %s"u8, dpath, err);
             }
         }
+
         foreach (var (_, s) in new @string[]{fpath, dpath + "/file1"u8, path + "/zzz"u8}.slice()) {
             (fd, err) = Create(s);
             if (err != default!) {
@@ -122,6 +127,7 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatalf("Chmod %q 0: %s"u8, dpath, err);
             }
         }
+
         // No error checking here: either RemoveAll
         // will or won't be able to remove dpath;
         // either way we want to see if it removes fpath
@@ -131,6 +137,7 @@ public static void TestRemoveAll(ж<Δtesting.T> Ꮡt) {
         //	* running on a file system without permissions (FAT)
         RemoveAll(path);
         Chmod(dpath, 511);
+
         foreach (var (_, s) in new @string[]{fpath, path + "/zzz"u8}.slice()) {
             {
                 (_, err) = Lstat(s); if (err == default!) {
@@ -161,8 +168,10 @@ public static void TestRemoveAllLarge(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
     Ꮡt.Parallel();
+
     @string tmpDir = Ꮡt.TempDir();
     @string path = filepath.Join(tmpDir, testRemoveAllLargeˢ);
+
     // Make directory with 1000 files and remove.
     {
         var err = MkdirAll(path, 511); if (err != default!) {
@@ -205,6 +214,7 @@ public static void TestRemoveAllLongPath(ж<Δtesting.T> Ꮡt) {
 
     @string startPath = Ꮡt.TempDir();
     Ꮡt.Chdir(startPath);
+
     // Removing paths with over 4096 chars commonly fails.
     @string name = strings.Repeat("a"u8, 100);
     for (nint i = 0; i < 41; i++) {
@@ -219,12 +229,14 @@ public static void TestRemoveAllLongPath(ж<Δtesting.T> Ꮡt) {
             }
         }
     }
+
     // Chdir out of startPath before attempting to remove it,
     // otherwise RemoveAll fails on aix, illumos and solaris.
     var err = Chdir(filepath.Join(startPath, ".."));
     if (err != default!) {
         Ꮡt.Fatalf("Could not chdir: %s"u8, err);
     }
+
     err = RemoveAll(startPath);
     if (err != default!) {
         Ꮡt.Errorf("RemoveAll could not remove long file path %s: %s"u8, startPath, err);
@@ -233,6 +245,7 @@ public static void TestRemoveAllLongPath(ж<Δtesting.T> Ꮡt) {
 
 public static void TestRemoveAllDot(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Chdir(Ꮡt.TempDir());
+
     {
         var err = RemoveAll("."u8); if (err == default!) {
             Ꮡt.Errorf("RemoveAll succeed to remove ."u8);
@@ -242,6 +255,7 @@ public static void TestRemoveAllDot(ж<Δtesting.T> Ꮡt) {
 
 public static void TestRemoveAllDotDot(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string tempDir = Ꮡt.TempDir();
     @string subdir = filepath.Join(tempDir, "x");
     @string subsubdir = filepath.Join(subdir, "y");
@@ -272,6 +286,7 @@ public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         @string tempDir = Ꮡt.TempDir();
         @string subdir = filepath.Join(tempDir, "x");
         {
@@ -279,14 +294,17 @@ public static void TestRemoveReadOnlyDir(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(err);
             }
         }
+
         // If an error occurs make it more likely that removing the
         // temporary directory will succeed.
-        defer(Chmod, subdir, (fs.FileMode)(511), ref ᒐ);
+        defer(Chmod, subdir, (fs.FileMode)511, ref ᒐ);
+
         {
             var err = RemoveAll(subdir); if (err != default!) {
                 Ꮡt.Fatal(err);
             }
         }
+
         {
             var (_, err) = Stat(subdir); if (err == default!) {
                 Ꮡt.Error(subdirectoryWasNotˢ);
@@ -312,7 +330,9 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
         if (Getuid() == 0) {
             Ꮡt.Skip(skippingTestWhenRunningˢ);
         }
+
         Ꮡt.Parallel();
+
         @string tempDir = Ꮡt.TempDir();
         var dirs = new @string[]{
             "a"u8,
@@ -341,6 +361,7 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
             }
             return false;
         }
+
         foreach (var (_, dir) in dirs) {
             {
                 var errΔ1 = Mkdir(filepath.Join(tempDir, dir), 511); if (errΔ1 != default!) {
@@ -355,14 +376,17 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
                     Ꮡt.Fatal(errΔ2);
                 }
             }
+
             // Defer changing the mode back so that the deferred
             // RemoveAll(tempDir) can succeed.
-            defer(Chmod, d, (fs.FileMode)(511), ref ᒐ);
+            defer(Chmod, d, (fs.FileMode)511, ref ᒐ);
         }
+
         var err = RemoveAll(tempDir);
         if (err == default!) {
             Ꮡt.Fatal(removeAllSucceededˢ);
         }
+
         // The error should be of type *PathError.
         // see issue 30491 for details.
         {
@@ -375,6 +399,7 @@ public static void TestRemoveAllButReadOnlyAndPathError(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf("RemoveAll(%q): error has type %T, want *fs.PathError"u8, tempDir, err);
             }
         }
+
         foreach (var (_, dir) in dirs) {
             var (_, errΔ3) = Stat(filepath.Join(tempDir, dir));
             if (inReadonly(dir)){
@@ -401,7 +426,9 @@ public static void TestRemoveUnreadableDir(ж<Δtesting.T> Ꮡt) {
     if (Getuid() == 0) {
         Ꮡt.Skip(skippingTestWhenRunningˢ);
     }
+
     Ꮡt.Parallel();
+
     @string tempDir = Ꮡt.TempDir();
     @string target = filepath.Join(tempDir, "d0", "d1", "d2");
     {
@@ -432,8 +459,10 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Skip(skippingInShortModeˢ);
         }
         Ꮡt.Parallel();
+
         @string tmpDir = Ꮡt.TempDir();
         @string path = filepath.Join(tmpDir, "_TestRemoveAllWithMoreErrorThanReqSize_");
+
         // Make directory with 1025 read-only files.
         {
             var errΔ1 = MkdirAll(path, 511); if (errΔ1 != default!) {
@@ -448,6 +477,7 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
             }
             fd.Close();
         }
+
         // Make the parent directory read-only. On some platforms, this is what
         // prevents Remove from removing the files within that directory.
         {
@@ -455,10 +485,12 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
-        defer(Chmod, path, (fs.FileMode)(493), ref ᒐ);
+        defer(Chmod, path, (fs.FileMode)493, ref ᒐ);
+
         // This call should not hang, even on a platform that disallows file deletion
         // from read-only directories.
         var err = RemoveAll(path);
+
         if (Getuid() == 0) {
             // On many platforms, root can remove files from read-only directories.
             return;
@@ -474,12 +506,14 @@ public static void TestRemoveAllWithMoreErrorThanReqSize(ж<Δtesting.T> Ꮡt) {
             }
             Ꮡt.Fatal(removeAllReadOnlyˢ);
         }
+
         (var dir, err) = Open(path);
         if (err != default!) {
             Ꮡt.Fatal(err);
         }
         var dirʗ1 = dir;
         defer(() => dirʗ1.Close(), ref ᒐ);
+
         var (names, _) = dir.Readdirnames(1025);
         if (len(names) < 1025) {
             Ꮡt.Fatalf("RemoveAll(<read-only directory>) unexpectedly removed %d read-only files from that directory"u8, 1025 - len(names));
@@ -502,6 +536,7 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
     if (Δtesting.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
+
     @string env = envᶜ;
     {
         @string dir = Getenv(env); if (dir != ""u8) {
@@ -513,6 +548,7 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
             return;
         }
     }
+
     // Only test on Linux so that we can assume we have strace.
     // The code is OS-independent so if it passes on Linux
     // it should pass on other Unix systems.
@@ -528,6 +564,7 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Skipf("skipping because Executable failed: %v"u8, err);
     }
+
     // Create 100 directories.
     // The test is that we can remove them without calling fcntl
     // on each one.
@@ -551,6 +588,7 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
             }
         }
     }
+
     var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), binStraceˢ, "-f"u8, "-e", fcntlˢ, me, testRunˢ3);
     cmd = testenv.CleanCmdEnv(cmd);
     cmd.Value.Env = append((~cmd).Env, env + "=" + subdir);
@@ -561,6 +599,7 @@ public static void TestRemoveAllNoFcntl(ж<Δtesting.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     {
         nint got = bytes.Count(@out, slice<byte>("fcntl"u8)); if (got >= 100) {
             Ꮡt.Errorf("found %d fcntl calls, want < 100"u8, got);

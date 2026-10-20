@@ -67,11 +67,18 @@ public static float64 Trunc(float64 x) {
 }
 
 internal static float64 trunc(float64 x) {
-    if (x == 0D || IsNaN(x) || IsInf(x, 0)) {
-        return x;
+    if (Abs(x) < 1D) {
+        return Copysign(0D, x);
     }
-    var (d, _) = Modf(x);
-    return d;
+
+    var b = Float64bits(x);
+    nuint e = ((nuint)(b >> (int)(shift)) & (nuint)mask) - (nuint)bias;
+
+    // Keep the top 12+e bits, the integer part; clear the rest.
+    if (e < 64 - 12) {
+        b &= unchecked((uint64)~(uint64)(((uint64)1).Lsh((64 - 12 - e)) - 1));
+    }
+    return Float64frombits(b);
 }
 
 // Round returns the nearest integer, rounding half away from zero.
@@ -92,7 +99,7 @@ public static float64 Round(float64 x) {
     //   return t
     // }
     var bits = Float64bits(x);
-    nuint e = (nuint)((nuint)((bits >> (int)(shift))) & (nuint)mask);
+    nuint e = (nuint)(bits >> (int)(shift)) & (nuint)mask;
     if (e < bias){
         // Round abs(x) < 1 including denormals.
         bits &= (uint64)(signMask); // +-0
@@ -132,7 +139,7 @@ public static float64 RoundToEven(float64 x) {
     //   return t
     // }
     var bits = Float64bits(x);
-    nuint e = (nuint)((nuint)((bits >> (int)(shift))) & (nuint)mask);
+    nuint e = (nuint)(bits >> (int)(shift)) & (nuint)mask;
     if (e >= bias){
         // Round abs(x) >= 1.
         // - Large numbers without fractional components, infinity, and NaN are unchanged.
@@ -140,12 +147,12 @@ public static float64 RoundToEven(float64 x) {
         //   number is even or odd (respectively).
         const uint64 halfMinusULP = /* (1 << (shift - 1)) - 1 */ 2251799813685247;
         e -= bias;
-        bits += (halfMinusULP + (uint64)((bits.Rsh(((nuint)shift - e))) & 1)).Rsh(e);
+        bits += (halfMinusULP + ((bits.Rsh(((nuint)shift - e))) & 1)).Rsh(e);
         bits &= unchecked((uint64)~(uint64)(((uint64)fracMask).Rsh(e)));
     } else 
-    if (e == (nuint)(bias - 1) && (uint64)(bits & (uint64)fracMask) != 0){
+    if (e == (nuint)(bias - 1) && (bits & (uint64)fracMask) != 0){
         // Round 0.5 < abs(x) < 1.
-        bits = (uint64)((uint64)(bits & (uint64)signMask) | (uint64)uvone); // +-1
+        bits = bits & (uint64)signMask | (uint64)uvone; // +-1
     } else {
         // Round abs(x) <= 0.5 including denormals.
         bits &= (uint64)(signMask); // +-0

@@ -11,6 +11,8 @@ partial class runtime_package {
 
 internal const bool asanenabled = false;
 
+internal static UntypedInt asanenabledBit => 0;
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string asanˢ = "asan"u8;
 
@@ -32,6 +34,18 @@ internal static void asanpoison(@unsafe.Pointer addr, uintptr sz) {
 }
 
 internal static void asanregisterglobals(@unsafe.Pointer addr, uintptr sz) {
+    @throw(asanˢ);
+}
+
+internal static void lsanregisterrootregion(@unsafe.Pointer _Δp0, uintptr _Δp1) {
+    @throw(asanˢ);
+}
+
+internal static void lsanunregisterrootregion(@unsafe.Pointer _Δp0, uintptr _Δp1) {
+    @throw(asanˢ);
+}
+
+internal static void lsandoleakcheck() {
     @throw(asanˢ);
 }
 

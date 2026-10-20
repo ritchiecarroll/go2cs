@@ -19,8 +19,8 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
     fs.size = fs.sys.Size;
     var (ᴛ1, ᴛ2) = fs.sys.Mtim.Unix();
     fs.modTime = time.Unix(ᴛ1, ᴛ2);
-    fs.mode = ((FileMode)((uint32)(fs.sys.Mode & 511)));
-    var exprᴛ1 = (uint32)(fs.sys.Mode & (uint32)syscall.S_IFMT);
+    fs.mode = (FileMode)(fs.sys.Mode & 511);
+    var exprᴛ1 = (fs.sys.Mode & (uint32)syscall.S_IFMT);
     if (exprᴛ1 == syscall.S_IFBLK) {
         fs.mode |= (fs.FileMode)(ModeDevice);
     }
@@ -37,19 +37,18 @@ internal static void fillFileStatFromSys(ж<fileStat> Ꮡfs, @string name) {
         fs.mode |= (fs.FileMode)(ModeSymlink);
     }
     else if (exprᴛ1 == syscall.S_IFREG) {
+        // nothing to do
     }
     else if (exprᴛ1 == syscall.S_IFSOCK) {
         fs.mode |= (fs.FileMode)(ModeSocket);
     }
-
-    // nothing to do
-    if ((uint32)(fs.sys.Mode & (uint32)syscall.S_ISGID) != 0) {
+    if ((fs.sys.Mode & (uint32)syscall.S_ISGID) != 0) {
         fs.mode |= (fs.FileMode)(ModeSetgid);
     }
-    if ((uint32)(fs.sys.Mode & (uint32)syscall.S_ISUID) != 0) {
+    if ((fs.sys.Mode & (uint32)syscall.S_ISUID) != 0) {
         fs.mode |= (fs.FileMode)(ModeSetuid);
     }
-    if ((uint32)(fs.sys.Mode & (uint32)syscall.S_ISVTX) != 0) {
+    if ((fs.sys.Mode & (uint32)syscall.S_ISVTX) != 0) {
         fs.mode |= (fs.FileMode)(ModeSticky);
     }
 }

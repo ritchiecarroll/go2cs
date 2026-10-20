@@ -35,11 +35,13 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("ReadFile %s: error expected, none found"u8, filename);
     }
+
     filename = ioutilTestGoˢ;
     (contents, err) = ReadFile(filename);
     if (err != default!) {
         Ꮡt.Fatalf("ReadFile %s: %v"u8, filename, err);
     }
+
     checkSize(Ꮡt, filename, (int64)len(contents));
 }
 
@@ -53,18 +55,22 @@ public static void TestWriteFile(ж<testing.T> Ꮡt) {
     }
     @string filename = f.Name();
     @string data = "Programming today is a race between software engineers striving to "u8 + "build bigger and better idiot-proof programs, and the Universe trying "u8 + "to produce bigger and better idiots. So far, the Universe is winning."u8;
+
     {
         var errΔ1 = WriteFile(filename, slice<byte>(data), 420); if (errΔ1 != default!) {
             Ꮡt.Fatalf("WriteFile %s: %v"u8, filename, errΔ1);
         }
     }
+
     (var contents, err) = ReadFile(filename);
     if (err != default!) {
         Ꮡt.Fatalf("ReadFile %s: %v"u8, filename, err);
     }
+
     if (((sstring)contents) != data) {
-        Ꮡt.Fatalf("contents = %q\nexpected = %q"u8, ((@string)contents), data);
+        Ꮡt.Fatalf("contents = %q\nexpected = %q"u8, (@string)contents, data);
     }
+
     // cleanup
     f.Close();
     os.Remove(filename); // ignore error
@@ -77,14 +83,13 @@ private static readonly @string blurpTxtˢ = "blurp.txt"u8;
 public static void TestReadOnlyWriteFile(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         if (os.Getuid() == 0) {
             Ꮡt.Skipf("Root can write to read-only files anyway, so skip the read-only test."u8);
         }
         if (runtime.GOOS == "wasip1"u8) {
             Ꮡt.Skip(filePermissionsAreNotˢ);
         }
+
         // We don't want to use TempFile directly, since that opens a file for us as 0600.
         var (tempDir, err) = TempDir(""u8, Ꮡt.Name());
         if (err != default!) {
@@ -92,6 +97,7 @@ public static void TestReadOnlyWriteFile(ж<testing.T> Ꮡt) {
         }
         defer(os.RemoveAll, tempDir, ref ᒐ);
         @string filename = filepath.Join(tempDir, blurpTxtˢ);
+
         var shmorp = slice<byte>("shmorp"u8);
         var florp = slice<byte>("florp"u8);
         err = WriteFile(filename, shmorp, 292);
@@ -120,11 +126,13 @@ public static void TestReadDir(ж<testing.T> Ꮡt) {
     if (err == default!) {
         Ꮡt.Fatalf("ReadDir %s: error expected, none found"u8, dirname);
     }
+
     dirname = ".."u8;
     (var list, err) = ReadDir(dirname);
     if (err != default!) {
         Ꮡt.Fatalf("ReadDir %s: %v"u8, dirname, err);
     }
+
     var foundFile = false;
     var foundSubDir = false;
     foreach (var (_, dir) in list) {
@@ -137,7 +145,6 @@ public static void TestReadDir(ж<testing.T> Ꮡt) {
             foundSubDir = true;
             break;
         }}
-
     }
     if (!foundFile) {
         Ꮡt.Fatalf("ReadDir %s: io_test.go file not found"u8, dirname);

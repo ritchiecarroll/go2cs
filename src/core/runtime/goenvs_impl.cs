@@ -81,13 +81,20 @@ partial class runtime_package
         // TypeInitializationException that takes down the runtime assembly and everything that
         // depends on it. parsedebugvars' own failures are Go fatals already (cgocheck > 1 throws);
         // anything ELSE is converted into one here, reason and all, which is the exit Go would take.
+        //
+        // Go 1.26 splits parsedebugvars in two: parseRuntimeDebugVars(godebug) parses, and
+        // finishDebugVarsSetup stores godebugEnv and applies GOTRACEBACK. schedinit runs the parse
+        // early where the platform has the environment early, and otherwise after goenvs, which is
+        // the path taken here (envs is set above). The comments in this file that say parsedebugvars
+        // name the pair.
         try
         {
-            parsedebugvars();
+            parseRuntimeDebugVars(gogetenv(godebugˢ));
+            finishDebugVarsSetup();
         }
         catch (Exception ex)
         {
-            @throw($"parsedebugvars at startup: {ex.GetType().FullName}: {ex.Message}");
+            @throw($"parseRuntimeDebugVars at startup: {ex.GetType().FullName}: {ex.Message}");
         }
 
         // schedinit's order continues: parsedebugvars above, then gcinit, whose pacer reads GOGC and GOMEMLIMIT through
@@ -145,7 +152,8 @@ partial class runtime_package
             snapshot[i] = environment[i];
 
         envs = snapshot;
-        parsedebugvars();
+        parseRuntimeDebugVars(gogetenv(godebugˢ));
+        finishDebugVarsSetup();
     }
 
     public static int GoDebugProfStackDepth => debug.profstackdepth;

@@ -49,8 +49,8 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
             true
         ),
         new(
-            "package equivalentinterfaces; type T[P any] int"u8, // interface{interface{...}} is equivalent to interface{...}
-
+            // interface{interface{...}} is equivalent to interface{...}
+            "package equivalentinterfaces; type T[P any] int"u8,
             "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(new ж<types.Func>[]{NewFunc(nopos, nil, "M"u8, emptySignature)}.slice(), default!))
         }.slice(),
             "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(
@@ -61,8 +61,8 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
             true
         ),
         new(
-            "package equivalenttypesets; type T[P any] int"u8, // int|string is equivalent to string|int
-
+            // int|string is equivalent to string|int
+            "package equivalenttypesets; type T[P any] int"u8,
             "T"u8, new typesꓸType[]{new types.InterfaceжΔType(NewInterfaceType(default!, new typesꓸType[]{new types.UnionжΔType(NewUnion(new ж<typesꓸTerm>[]{NewTerm(false, new types.BasicжΔType(Typ[Int])), NewTerm(false, new types.BasicжΔType(Typ[ΔString]))}.slice()))
         }.slice()))
         }.slice(),
@@ -108,25 +108,30 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
             false
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var test = ref heap(new TestInstantiateEquality_tests(), out var Ꮡtest);
         test = vᴛ1;
 
         var pkg = mustTypecheck(test.src, nil, nil);
+
         var pkgʗ1 = pkg;
         var testʗ1 = test;
         Ꮡt.Run(pkg.Name(), (ж<testing.T> tΔ1) => {
             var ctxt = NewContext();
+
             var T1 = pkgʗ1.Scope().Lookup(testʗ1.name1).Type();
             var (res1, err) = Instantiate(ctxt, T1, testʗ1.targs1, false);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             var T2 = pkgʗ1.Scope().Lookup(testʗ1.name2).Type();
             (var res2, err) = Instantiate(ctxt, T2, testʗ1.targs2, false);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
+
             {
                 var gotEqual = AreEqual(res1, res2); if (gotEqual != testʗ1.wantEqual) {
                     tΔ1.Errorf("%s == %s: %t, want %t"u8, res1, res2, gotEqual, testʗ1.wantEqual);
@@ -173,7 +178,7 @@ type T[P any] struct{}
 var X T[int]
 
 
-"""u8;
+"""u8.Raw();
 
 internal partial struct TestMethodInstantiation_tests /*dyn*/ {
     internal @string decl;
@@ -191,6 +196,7 @@ public static void TestMethodInstantiation(ж<testing.T> Ꮡt) {
         new("func (r T[P]) m(T[P], P, string)"u8, "func (T[int]).m(T[int], int, string)"u8),
         new("func (r T[P]) m(T[P], T[string], T[int])"u8, "func (T[int]).m(T[int], T[string], T[int])"u8)
     }.slice();
+
     foreach (var (_, test) in tests) {
         @string src = prefix + test.decl;
         var pkg = mustTypecheck(src, nil, nil);
@@ -221,7 +227,7 @@ func (T[P]) m() {}
 
 var _ T[int]
 
-"""u8;
+"""u8.Raw();
 
 public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
     @string src = srcᶜ18;
@@ -231,6 +237,7 @@ public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
     if (obj == default!) {
         Ꮡt.Fatalf(@"LookupFieldOrMethod(%s, ""m"") = %v, want func m"u8, typ.OrTypedNil(), obj);
     }
+
     // Verify that the original method is not mutated by instantiating T (this
     // bug manifested when subst did not return a new signature).
     @string want = funcTPMˢ;
@@ -246,8 +253,7 @@ internal static @string stripAnnotations(@string s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     foreach (var (_, r) in s) {
         // strip #'s and subscript digits
-        if (r < (rune)'₀' || (rune)'₀' + 10 <= r) {
-            // '₀' == U+2080
+        if (r < (rune)'₀' || (rune)'₀' + 10 <= r) { // '₀' == U+2080
             Ꮡbuf.WriteRune(r);
         }
     }

@@ -28,6 +28,13 @@
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
   </PropertyGroup>
 
+  <!-- Same-package Go tests run in a separate assembly but retain package-private access. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).tests" />
+    <!-- reflect.StructOf mints synthesized structs into this fixed-name dynamic assembly; a field type that is internal here cannot be loaded from there without the grant. -->
+    <InternalsVisibleTo Include="go2cs.SynthesizedStructs" />
+  </ItemGroup>
+
   <!-- Build outputs are copied to $(OutDir), so this default must also defer to an explicit
        $(BaseOutputPath); otherwise that redirection silently never takes effect. -->
   <PropertyGroup Condition="'$(OutDir)'=='' AND '$(BaseOutputPath)'==''">
@@ -164,14 +171,19 @@
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/internal.trace.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/trace/raw/internal.trace.raw.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/trace/version/internal.trace.version.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/txtar/internal.txtar.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
+    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/regexp/regexp.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strconv/strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
+    <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,9 +9,8 @@ using syscall = syscall_package;
 
 partial class os_package {
 
-
 partial struct getwdCacheᴛ1 /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string dir;
 }
 internal static ж<getwdCacheᴛ1> ᏑgetwdCache = new StandardBox<getwdCacheᴛ1>(new getwdCacheᴛ1(nil));
@@ -41,6 +40,7 @@ public static (@string dir, error err) Getwd() {
         (dir, err) = syscall.Getwd();
         return (dir, NewSyscallError(getwdˢ, err));
     }
+
     // Clumsy but widespread kludge:
     // if $PWD is set and matches ".", use it.
     FileInfo dot = default!;
@@ -54,10 +54,11 @@ public static (@string dir, error err) Getwd() {
         if (errΔ1 == default! && SameFile(dot, d)) {
             return (dir, default!);
         }
+        // If err is ENAMETOOLONG here, the syscall.Getwd below will
+        // fail with the same error, too, but let's give it a try
+        // anyway as the fallback code is much slower.
     }
-    // If err is ENAMETOOLONG here, the syscall.Getwd below will
-    // fail with the same error, too, but let's give it a try
-    // anyway as the fallback code is much slower.
+
     // If the operating system provides a Getwd call, use it.
     if (syscall.ImplementsGetwd) {
         (dir, err) = ignoringEINTR2<@string>(syscall.Getwd);
@@ -69,6 +70,7 @@ public static (@string dir, error err) Getwd() {
             return (dir, NewSyscallError(getwdˢ, err));
         }
     }
+
     // We're trying to find our way back to ".".
     if (dot == default!) {
         (dot, err) = statNolog("."u8);
@@ -86,6 +88,7 @@ public static (@string dir, error err) Getwd() {
             return (dir, default!);
         }
     }
+
     // Root is a special case because it has no parent
     // and ends in a slash.
     (var root, err) = statNolog("/"u8);
@@ -96,19 +99,20 @@ public static (@string dir, error err) Getwd() {
     if (SameFile(root, dot)) {
         return ("/", default!);
     }
+
     // General algorithm: find name in parent
     // and then find name of parent. Each iteration
     // adds /name to the beginning of dir.
     dir = ""u8;
     for (@string parent = ".."u8; ᐧ ; parent = "../"u8 + parent) {
-        if (len(parent) >= 1024) {
-            // Sanity check
+        if (len(parent) >= 1024) { // Sanity check
             return ("", NewSyscallError(getwdˢ, syscall.ENAMETOOLONG));
         }
         var (fd, errΔ3) = openDirNolog(parent);
         if (errΔ3 != default!) {
             return ("", errΔ3);
         }
+
         while (ᐧ) {
             var (names, errΔ4) = fd.Readdirnames(100);
             if (errΔ4 != default!) {
@@ -130,6 +134,7 @@ public static (@string dir, error err) Getwd() {
                 }
             }
         }
+
 Found:
         (var pd, errΔ3) = fd.Stat();
         fd.Close();
@@ -142,10 +147,12 @@ Found:
         // Set up for next round.
         dot = pd;
     }
+
     // Save answer as hint to avoid the expensive path next time.
     ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Lock();
     getwdCache.dir = dir;
     ᏑgetwdCache.of(getwdCacheᴛ1.ᏑMutex).Unlock();
+
     return (dir, default!);
 }
 

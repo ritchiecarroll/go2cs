@@ -33,15 +33,21 @@ using go.crypto.@internal.fips140;
 
 partial class mlkem_package {
 
+// ML-KEM global constants.
 internal static UntypedInt n => 256;
 internal static UntypedInt q => 3329;
+
+// encodingSizeX is the byte size of a ringElement or nttElement encoded
+// by ByteEncode_X (FIPS 203, Algorithm 5).
 internal static UntypedInt encodingSize12 => /* n * 12 / 8 */ 384;
 internal static UntypedInt encodingSize11 => /* n * 11 / 8 */ 352;
 internal static UntypedInt encodingSize10 => /* n * 10 / 8 */ 320;
 internal static UntypedInt encodingSize5 => /* n * 5 / 8 */ 160;
 internal static UntypedInt encodingSize4 => /* n * 4 / 8 */ 128;
 internal static UntypedInt encodingSize1 => /* n * 1 / 8 */ 32;
+
 internal static UntypedInt messageSize => /* encodingSize1 */ 32;
+
 public static UntypedInt SharedKeySize => 32;
 public static UntypedInt SeedSize => /* 32 + 32 */ 64;
 
@@ -49,18 +55,14 @@ public static UntypedInt SeedSize => /* 32 + 32 */ 64;
 internal static UntypedInt k => 3;
 
 public static UntypedInt CiphertextSize768 => /* k*encodingSize10 + encodingSize4 */ 1088;
-
 public static UntypedInt EncapsulationKeySize768 => /* k*encodingSize12 + 32 */ 1184;
-
 internal static UntypedInt decapsulationKeySize768 => /* k*encodingSize12 + EncapsulationKeySize768 + 32 + 32 */ 2400;
 
 // ML-KEM-1024 parameters.
 internal static UntypedInt k1024 => 4;
 
 public static UntypedInt CiphertextSize1024 => /* k1024*encodingSize11 + encodingSize5 */ 1568;
-
 public static UntypedInt EncapsulationKeySize1024 => /* k1024*encodingSize12 + 32 */ 1568;
-
 internal static UntypedInt decapsulationKeySize1024 => /* k1024*encodingSize12 + EncapsulationKeySize1024 + 32 + 32 */ 3168;
 
 // A DecapsulationKey768 is the secret key used to decapsulate a shared key from a
@@ -70,8 +72,8 @@ partial struct DecapsulationKey768 {
     internal array<byte> z = new(32); // implicit rejection sampling seed
     internal array<byte> ρ = new(32); // sampleNTT seed for A, stored for the encapsulation key
     internal array<byte> h = new(32); // H(ek), stored for ML-KEM.Decaps_internal
-    internal partial ref encryptionKey encryptionKey { get; }
-    internal partial ref decryptionKey decryptionKey { get; }
+    /*embed*/ internal encryptionKey encryptionKey;
+    /*embed*/ internal decryptionKey decryptionKey;
 }
 
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
@@ -93,18 +95,22 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
     ref var dk = ref Ꮡdk.DerefOrNull();
 
     var b = new slice<byte>(0, decapsulationKeySize768);
+
     // ByteEncode₁₂(s)
     foreach (var (i, _) in dk.s) {
         b = polyByteEncode(b, dk.s[i]);
     }
+
     // ByteEncode₁₂(t) || ρ
     foreach (var (i, _) in dk.t) {
         b = polyByteEncode(b, dk.t[i]);
     }
     b = appendꓸꓸꓸ(b, dk.ρ[..]);
+
     // H(ek) || z
     b = appendꓸꓸꓸ(b, dk.h[..]);
     b = appendꓸꓸꓸ(b, dk.z[..]);
+
     return b;
 }
 
@@ -123,7 +129,7 @@ public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey
 partial struct EncapsulationKey768 {
     internal array<byte> ρ = new(32); // sampleNTT seed for A
     internal array<byte> h = new(32); // H(ek)
-    internal partial ref encryptionKey encryptionKey { get; }
+    /*embed*/ internal encryptionKey encryptionKey;
 }
 
 // Bytes returns the encapsulation key as a byte slice.
@@ -161,6 +167,7 @@ public static (ж<DecapsulationKey768>, error) GenerateKey768() {
 }
 
 internal static (ж<DecapsulationKey768>, error) generateKey(ж<DecapsulationKey768> Ꮡdk) {
+    fipsSelfTest();
     ref var d = ref heap(new array<byte>(32), out var Ꮡd);
     drbg.Read(d[..]);
     ref var z = ref heap(new array<byte>(32), out var Ꮡz);
@@ -174,6 +181,7 @@ internal static (ж<DecapsulationKey768>, error) generateKey(ж<DecapsulationKey
 // GenerateKeyInternal768 is a derandomized version of GenerateKey768,
 // exclusively for use in tests.
 public static ж<DecapsulationKey768> GenerateKeyInternal768(/*[32]*/ ж<array<byte>> Ꮡd, /*[32]*/ ж<array<byte>> Ꮡz) {
+    fipsSelfTest();
     var dk = Ꮡ(new DecapsulationKey768(nil));
     kemKeyGen(dk, Ꮡd, ref (Ꮡz).DerefOrNull());
     return dk;
@@ -209,6 +217,7 @@ public static (ж<DecapsulationKey768>, error) TestingOnlyNewDecapsulationKey768
     if (len(b) != decapsulationKeySize768) {
         return (default!, errors.New(mlkemInvalidNistˢ));
     }
+
     var dk = Ꮡ(new DecapsulationKey768(nil));
     foreach (var (i, _) in (~dk).s) {
         error errΔ1 = default!;
@@ -218,6 +227,7 @@ public static (ж<DecapsulationKey768>, error) TestingOnlyNewDecapsulationKey768
         }
         b = b[(int)(encodingSize12)..];
     }
+
     var (ek, err) = NewEncapsulationKey768(b[..(int)(EncapsulationKeySize768)]);
     if (err != default!) {
         return (default!, err);
@@ -226,16 +236,20 @@ public static (ж<DecapsulationKey768>, error) TestingOnlyNewDecapsulationKey768
     dk.Value.h = ek.Value.h.Clone();
     dk.Value.encryptionKey = ek.Value.encryptionKey.ΔClone();
     b = b[(int)(EncapsulationKeySize768)..];
+
     if (!bytes_package.Equal((~dk).h[..], b[..32])) {
         return (default!, errors.New(mlkemInconsistentHEkInˢ));
     }
     b = b[32..];
+
     copy((~dk).z[..], b);
+
     // Generate a random d value for use in Bytes(). This is a safety mechanism
     // that avoids returning a broken key vs a random key if this function is
     // called in contravention of the TestingOnlyNewDecapsulationKey768 function
     // comment advising against it.
     drbg.Read((~dk).d[..]);
+
     return (dk, default!);
 }
 
@@ -250,18 +264,21 @@ internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<
 
     dk.d = d.Clone();
     dk.z = z.Clone();
+
     var g = sha3.New512();
     g.Write(d[..]);
     g.Write(new byte[]{k}.slice()); // Module dimension as a domain separator.
     var G = g.Sum(new slice<byte>(0, 64));
     var (ρ, σ) = (G[..32], G[32..]);
     dk.ρ = new array<byte>(ρ, 32);
+
     var A = Ꮡdk.of(DecapsulationKey768.Ꮡa);
     for (var i = (byte)0; i < k; i++) {
         for (var j = (byte)0; j < k; j++) {
             A.Value[(byte)(i * (byte)k + j)] = sampleNTT(ρ, j, i);
         }
     }
+
     byte N = default!;
     var s = Ꮡdk.of(DecapsulationKey768.Ꮡs);
     foreach (var (i, _) in s.Value) {
@@ -273,14 +290,15 @@ internal static void kemKeyGen(ж<DecapsulationKey768> Ꮡdk, /*[32]*/ ж<array<
         e[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
+
     var t = Ꮡdk.of(DecapsulationKey768.Ꮡt);
-    foreach (var (i, _) in t.Value) {
-        // t = A ◦ s + e
+    foreach (var (i, _) in t.Value) { // t = A ◦ s + e
         t.Value[i] = e[i].Clone();
         foreach (var (j, _) in s.Value) {
             t.Value[i] = polyAdd<nttElement>(t.Value[i], nttMul(A.Value[i * (nint)k + j], s.Value[j]));
         }
     }
+
     var H = sha3.New256();
     var ek = dk.EncapsulationKey().Bytes();
     H.Write(ek);
@@ -321,6 +339,7 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this �
 }
 
 internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey768> Ꮡek, /*[1088]*/ ж<array<byte>> Ꮡcc) {
+    fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
     // Note that the modulus check (step 2 of the encapsulation key check from
@@ -332,6 +351,7 @@ internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
 public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey768> Ꮡek, /*[32]*/ ж<array<byte>> Ꮡm) {
+    fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1088));
     return kemEncaps(cc, ref (Ꮡek).DerefOrNull(), Ꮡm);
 }
@@ -342,8 +362,8 @@ public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInterna
 internal static (slice<byte> K, slice<byte> c) kemEncaps(/*[1088]*/ ж<array<byte>> Ꮡcc, ref EncapsulationKey768 ek, /*[32]*/ ж<array<byte>> Ꮡm) {
     slice<byte> K = default!;
     slice<byte> c = default!;
-
     ref var m = ref Ꮡm.DerefOrNull();
+
     var g = sha3.New512();
     g.Write(m[..]);
     g.Write(ek.h[..]);
@@ -372,9 +392,11 @@ internal static (ж<EncapsulationKey768>, error) parseEK(ж<EncapsulationKey768>
     if (len(ekPKE) != EncapsulationKeySize768) {
         return (default!, errors.New(mlkemInvalidˢ));
     }
+
     var h = sha3.New256();
     h.Write(ekPKE);
     h.Sum(ek.h[..0]);
+
     foreach (var (i, _) in ek.t) {
         error err = default!;
         (ek.t[i], err) = polyByteDecode<nttElement>(ekPKE[..(int)(encodingSize12)]);
@@ -384,11 +406,13 @@ internal static (ж<EncapsulationKey768>, error) parseEK(ж<EncapsulationKey768>
         ekPKE = ekPKE[(int)(encodingSize12)..];
     }
     copy(ek.ρ[..], ekPKE);
+
     for (var i = (byte)0; i < k; i++) {
         for (var j = (byte)0; j < k; j++) {
             ek.a[(byte)(i * (byte)k + j)] = sampleNTT(ek.ρ[..], j, i);
         }
     }
+
     return (Ꮡek, default!);
 }
 
@@ -410,20 +434,25 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
         N++;
     }
     var e2 = samplePolyCBD(rnd, N);
+
     var u = GoReflect.WithElemDims(new slice<ringElement>(k), 256); // NTT⁻¹(AT ◦ r) + e1
     foreach (var (i, _) in u) {
-        u[i] = e1[i].Clone();
+        nttElement uHat = default!;
         foreach (var (j, _) in r) {
             // Note that i and j are inverted, as we need the transposed of A.
-            u[i] = polyAdd<ringElement>(u[i], inverseNTT(nttMul(ex.a[j * (nint)k + i], r[j])));
+            uHat = polyAdd<nttElement>(uHat, nttMul(ex.a[j * (nint)k + i], r[j]));
         }
+        u[i] = polyAdd(e1[i], inverseNTT(uHat));
     }
+
     var μ = ringDecodeAndDecompress1(ref (Ꮡm).DerefOrNull());
+
     nttElement vNTT = default!;                  // t⊺ ◦ r
     foreach (var (i, _) in ex.t) {
         vNTT = polyAdd(vNTT, nttMul(ex.t[i], r[i]));
     }
     var v = polyAdd(polyAdd(inverseNTT(vNTT), e2), μ);
+
     var c = cc[..0];
     foreach (var (_, vᴛ1) in u) {
         var f = vᴛ1.Clone();
@@ -431,6 +460,7 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
         c = ringCompressAndEncode10(c, f);
     }
     c = ringCompressAndEncode4(c, v);
+
     return c;
 }
 
@@ -439,6 +469,7 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
 //
 // The shared key must be kept secret.
 public static (slice<byte> sharedKey, error err) Decapsulate(this ж<DecapsulationKey768> Ꮡdk, slice<byte> ciphertext) {
+    fipsSelfTest();
     if (len(ciphertext) != CiphertextSize768) {
         return (default!, errors.New(mlkemInvalidCiphertextˢ));
     }
@@ -448,6 +479,8 @@ public static (slice<byte> sharedKey, error err) Decapsulate(this ж<Decapsulati
     // validly generated by ML-KEM.KeyGen_internal.
     return (kemDecaps(ref (Ꮡdk).DerefOrNull(), c), default!);
 }
+
+internal static Action<nint> testingOnlyRejectionOutcome;
 
 // kemDecaps produces a shared key from a ciphertext.
 //
@@ -469,6 +502,11 @@ internal static slice<byte> /*K*/ kemDecaps(ref DecapsulationKey768 dk, /*[1088]
     J.Read(Kout);
     ref var cc = ref heap(new array<byte>(1088), out var Ꮡcc);
     var c1 = pkeEncrypt(Ꮡcc, ref nonnil(ref dk).encryptionKey, Ꮡ(array<byte>.Alias(m, 32)), r);
+
+    if (testingOnlyRejectionOutcome != default!) {
+        testingOnlyRejectionOutcome(subtle.ConstantTimeCompare(c[..], c1));
+    }
+
     subtle.ConstantTimeCopy(subtle.ConstantTimeCompare(c[..], c1), Kout, Kprime);
     return Kout;
 }
@@ -485,13 +523,16 @@ internal static slice<byte> pkeDecrypt(ref decryptionKey dx, /*[1088]*/ ж<array
         var bΔ1 = Ꮡ(array<byte>.Alias(c.slice((nint)encodingSize10 * i, (nint)encodingSize10 * (i + 1)), 320));
         u[i] = ringDecodeAndDecompress10(bΔ1);
     }
+
     var b = Ꮡ(array<byte>.Alias(c[(int)(encodingSize10 * k)..], 128));
     var v = ringDecodeAndDecompress4(ref (b).DerefOrNull());
+
     nttElement mask = default!;                  // s⊺ ◦ NTT(u)
     foreach (var (i, _) in dx.s) {
         mask = polyAdd(mask, nttMul(dx.s[i], ntt(u[i])));
     }
     var w = polySub(v, inverseNTT(mask));
+
     return ringCompressAndEncode1(default!, w);
 }
 

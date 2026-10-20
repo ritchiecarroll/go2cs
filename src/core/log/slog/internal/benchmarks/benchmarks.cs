@@ -32,11 +32,18 @@ partial class benchmarks_package {
 
 internal static readonly @string testMessage = "Test logging, but use a somewhat realistic message length."u8;
 
+partial struct @event {
+    public @string ID;
+    public nint Index;
+    public bool Flag;
+}
+
 internal static time.Time testTime = time.Date(2022, time.May, 1, 0, 0, 0, 0, time.ΔUTC);
 internal static @string testString = "7e3b3b2aaeff56a7108fe11e154200dd/7819479873059528190"u8;
 internal static nint testInt = 32768;
 internal static time.Duration testDuration = (time.Duration)(23000000000L);
 internal static error testError = errors.New("fail"u8);
+internal static @event testEvent = new @event("abcdefgh"u8, 65536, true);
 
 internal static slice<slog.Attr> testAttrs = new slog.Attr[]{
     slog.String("string"u8, testString),

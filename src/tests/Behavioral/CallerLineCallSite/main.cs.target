@@ -71,46 +71,46 @@ internal static void report(@string name, nint have, nint want) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object looksDeliciousˢ = (@string)"looks delicious"u8;
-private static readonly @string s1MethodVariadicOneˢ = "S1 method, variadic, one literal:"u8;
-private static readonly @string s2FuncOneConvertedˢ = "S2 func, one converted literal:"u8;
-private static readonly @string s3MethodNoArgsThenANonˢ = "S3 method, no args, then a non-call:"u8;
-private static readonly @string s4MethodResultUsedˢ = "S4 method, result used:"u8;
-private static readonly @string s5MethodVariadicThreeˢ = "S5 method, variadic, three args:"u8;
-private static readonly @string s6MethodStructLiteralArgˢ = "S6 method, struct literal arg:"u8;
-private static readonly @string s7FuncStructLiteralArgˢ = "S7 func, struct literal arg:"u8;
 private static readonly object litˢ = (@string)"lit"u8;
-private static readonly @string s8FuncVariadicOneLiteralˢ = "S8 func, variadic, one literal:"u8;
-private static readonly @string s9MethodOneLiteralNotˢ = "S9 method, one literal, not variadic:"u8;
 
 internal static void Main() {
     var e = Ꮡ(new E(nil));
     nint l = default!;
+
     e.Info(looksDeliciousˢ);
     l = line();
-    report(s1MethodVariadicOneˢ, got, l - 1);
-    plain((@string)"x"u8);
+    report("S1 method, variadic, one literal:", got, l - 1);
+
+    plain("x");
     l = line();
-    report(s2FuncOneConvertedˢ, got, l - 1);
+    report("S2 func, one converted literal:", got, l - 1);
+
     e.Bare();
     e.Value.n++;
-    report(s3MethodNoArgsThenANonˢ, got, line() - 2);
+    report("S3 method, no args, then a non-call:", got, line() - 2);
+
     nint r = e.Value((@string)"y"u8);
-    report(s4MethodResultUsedˢ, r, line() - 1);
-    e.Info((@string)"a"u8, (nint)(1), 2.5D);
+    report("S4 method, result used:", r, line() - 1);
+
+    e.Info((@string)"a"u8, (nint)1, 2.5D);
     l = line();
-    report(s5MethodVariadicThreeˢ, got, l - 1);
+    report("S5 method, variadic, three args:", got, l - 1);
+
     e.Take(new P(1, 2));
     l = line();
-    report(s6MethodStructLiteralArgˢ, got, l - 1);
+    report("S6 method, struct literal arg:", got, l - 1);
+
     takeP(new P(3, 4));
     l = line();
-    report(s7FuncStructLiteralArgˢ, got, l - 1);
-    plainV(litˢ);
+    report("S7 func, struct literal arg:", got, l - 1);
+
+    plainV("lit");
     l = line();
-    report(s8FuncVariadicOneLiteralˢ, got, l - 1);
+    report("S8 func, variadic, one literal:", got, l - 1);
+
     e.One(litˢ);
     l = line();
-    report(s9MethodOneLiteralNotˢ, got, l - 1);
+    report("S9 method, one literal, not variadic:", got, l - 1);
 }
 
 } // end main_package

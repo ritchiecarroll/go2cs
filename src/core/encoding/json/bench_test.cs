@@ -68,24 +68,28 @@ internal static void codeInit() {
         if (err != default!) {
             throw panic(err);
         }
+
         codeJSON = data;
+
         {
             var errΔ1 = Unmarshal(codeJSON, ᏑcodeStruct); if (errΔ1 != default!) {
                 throw panic("unmarshal code.json: " + errΔ1.Error());
             }
         }
+
         {
             (data, err) = Marshal(ᏑcodeStruct); if (err != default!) {
                 throw panic("marshal code.json: " + err.Error());
             }
         }
+
         if (!bytes.Equal(data, codeJSON)) {
             println((@string)"different lengths"u8, len(data), len(codeJSON));
             for (nint i = 0; i < len(data) && i < len(codeJSON); i++) {
                 if (data[i] != codeJSON[i]) {
                     println((@string)"re-marshal: changed at byte"u8, i);
-                    println((@string)"orig: "u8, ((@string)(codeJSON.slice(i - 10, i + 10))));
-                    println((@string)"new: "u8, ((@string)(data.slice(i - 10, i + 10))));
+                    println((@string)"orig: "u8, (@string)(codeJSON.slice(i - 10, i + 10)));
+                    println((@string)"new: "u8, (@string)(data.slice(i - 10, i + 10)));
                     break;
                 }
             }
@@ -139,6 +143,7 @@ public static void BenchmarkCodeEncoderError(ж<testing.B> Ꮡb) {
     ref var dummy = ref heap<BenchmarkCodeEncoderError_Dummy>(out var Ꮡdummy);
     dummy = new BenchmarkCodeEncoderError_Dummy(Name: "Dummy"u8);
     dummy.Next = Ꮡdummy;
+
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var enc = NewEncoder(io.Discard);
         while (pb.Next()) {
@@ -196,6 +201,7 @@ public static void BenchmarkCodeMarshalError(ж<testing.B> Ꮡb) {
     ref var dummy = ref heap<BenchmarkCodeMarshalError_Dummy>(out var Ꮡdummy);
     dummy = new BenchmarkCodeMarshalError_Dummy(Name: "Dummy"u8);
     dummy.Next = Ꮡdummy;
+
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         while (pb.Next()) {
             {
@@ -256,6 +262,7 @@ internal static Action<ж<testing.B>> benchMarshalBytesError(nint n) {
     ref var dummy = ref heap<benchMarshalBytesError_Dummy>(out var Ꮡdummy);
     dummy = new benchMarshalBytesError_Dummy(Name: "Dummy"u8);
     dummy.Next = Ꮡdummy;
+
     var vʗ1 = v;
     return (ж<testing.B> b) => {
         for (nint i = 0; i < (~b).N; i++) {
@@ -405,7 +412,6 @@ public static void BenchmarkDecoderStream(ж<testing.B> Ꮡb) {
                 break;
             }}
         }
-
     }
 }
 
@@ -593,6 +599,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
     if (testenv.Builder() != ""u8) {
         maxTypes = 1000; // restrict cache sizes on builders
     }
+
     // Dynamically generate many new types.
     var types = new slice<reflectꓸType>(maxTypes);
     var fs = new reflect.StructField[]{new(
@@ -604,10 +611,12 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
         fs[0].Name = fmt.Sprintf("TypeFieldsCache%d"u8, i);
         types[i] = reflect.StructOf(fs);
     }
+
     // clearClear clears the cache. Other JSON operations, must not be running.
     void clearCache() {
         fieldCache = new sync.Map(nil);
     }
+
     // MissTypes tests the performance of repeated cache misses.
     // This measures the time to rebuild a cache of size nt.
     for (nint nt = 1; nt <= maxTypes; nt *= 10) {
@@ -633,6 +642,7 @@ public static void BenchmarkTypeFieldsCache(ж<testing.B> Ꮡb) {
             }
         });
     }
+
     // HitTypes tests the performance of repeated cache hits.
     // This measures the average time of each cache lookup.
     for (nint nt = 1; nt <= maxTypes; nt *= 10) {
@@ -662,10 +672,13 @@ public static void BenchmarkEncodeMarshaler(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.ReportAllocs();
+
     ref var m = ref heap<BenchmarkEncodeMarshaler_m>(out var Ꮡm);
     m = new BenchmarkEncodeMarshaler_m();
+
     Ꮡb.RunParallel((ж<testing.PB> pb) => {
         var enc = NewEncoder(io.Discard);
+
         while (pb.Next()) {
             {
                 var err = enc.Encode(Ꮡm); if (err != default!) {

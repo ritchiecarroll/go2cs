@@ -25,17 +25,21 @@ internal static error equal(ж<global::go.go.token_package.FileSet> Ꮡp, ж<glo
             // avoid deadlock if p == q
             return default!;
         }
+
         // not strictly needed for the test
         Ꮡp.of(global::go.go.token_package.FileSet.Ꮡmutex).Lock();
         Ꮡq.of(global::go.go.token_package.FileSet.Ꮡmutex).Lock();
         defer(Ꮡq.of(global::go.go.token_package.FileSet.Ꮡmutex).Unlock, ref ᒐ);
         defer(Ꮡp.of(global::go.go.token_package.FileSet.Ꮡmutex).Unlock, ref ᒐ);
+
         if (p.@base != q.@base) {
             return fmt.Errorf("different bases: %d != %d"u8, p.@base, q.@base);
         }
+
         if (len(p.files) != len(q.files)) {
             return fmt.Errorf("different number of files: %d != %d"u8, len(p.files), len(q.files));
         }
+
         foreach (var (i, f) in p.files) {
             var g = q.files[i];
             if ((~f).name != (~g).name) {
@@ -60,6 +64,7 @@ internal static error equal(ж<global::go.go.token_package.FileSet> Ꮡp, ж<glo
                 }
             }
         }
+
         // we don't care about .last - it's just a cache
         return default!;
     }

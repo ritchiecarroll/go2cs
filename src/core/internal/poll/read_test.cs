@@ -62,7 +62,6 @@ internal static slice<@string> specialFiles() {
             "/sys/devices/system/cpu/online"u8
         }.slice();
     }
-
     var nps = ps[..0];
     foreach (var (_, p) in ps) {
         var (f, err) = os.Open(p);

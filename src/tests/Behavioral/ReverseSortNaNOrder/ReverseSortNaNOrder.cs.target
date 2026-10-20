@@ -73,18 +73,23 @@ internal static bool eq<T>(T a, T b) {
 
 internal static void Main() {
     var nan = Δmath.NaN();
+
     var ints = new Float64Slice(new float64[]{74D, 59D, 238D, -784D, 9845D, 959D, 905D, 0D, 42D}.slice());
     insertionSort(Reverse(ints));
     fmt.Println(ints);
+
     var floats = new Float64Slice(new float64[]{74.3D, 59.0D, Δmath.Inf(1), 238.2D, -784.0D, 2.3D, nan, nan, Δmath.Inf(-1), 905D}.slice());
     insertionSort(floats);
     fmt.Println(floats);
-    fmt.Println(isNaN(nan), isNaN(1.5D), isNaN((float32)Δmath.NaN()), isNaN(7), isNaN((@string)"x"));
+
+    fmt.Println(isNaN(nan), isNaN(1.5D), isNaN((float32)Δmath.NaN()), isNaN<nint>(7), isNaN((@string)"x"));
     fmt.Println(less(nan, -784.0D), less(-784.0D, nan), less(nan, nan), less(1.0D, 2.0D));
+
     fmt.Println(eq(nan, nan), eq(1.5D, 1.5D));
     fmt.Println(eq((float32)Δmath.NaN(), (float32)Δmath.NaN()), eq((float32)1.5F, (float32)1.5F));
     fmt.Println(eq(complex(nan, 0D), complex(nan, 0D)), eq(complex(1D, 2D), complex(1D, 2D)));
     fmt.Println(eq((complex64)complex(nan, 0D), (complex64)complex(nan, 0D)), eq((complex64)complex(1F, 2F), (complex64)complex(1F, 2F)));
+
     any bx = nan;
     any by = nan;
     fmt.Println(AreEqual(bx, by), AreEqual(((any)1.5D), ((any)1.5D)));

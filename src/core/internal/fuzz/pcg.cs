@@ -5,11 +5,12 @@ namespace go.@internal;
 
 using bits = global::go.math.bits_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using strings = strings_package;
 using atomic = global::go.sync.atomic_package;
 using time = time_package;
 using System.Runtime.InteropServices;
+using global::go;
 using global::go.math;
 using global::go.sync;
 
@@ -72,7 +73,7 @@ internal static ж<pcgRand> newPcgRand() {
     }
     var inc = ᏑglobalInc.Add(1);
     r.Value.state = now;
-    r.Value.inc = (uint64)(((inc << (int)(1))) | 1);
+    r.Value.inc = (inc << 1) | 1;
     r.step();
     r.Value.state += now;
     r.step();
@@ -101,7 +102,7 @@ internal static void restore(this ref pcgRand r, uint64 randState, uint64 randIn
 internal static uint32 uint32(this ref pcgRand r) {
     var x = r.state;
     r.step();
-    return bits.RotateLeft32((uint32)((((uint64)(((x >> (int)(18))) ^ x)) >> (int)(27))), -(nint)((x >> (int)(59))));
+    return bits.RotateLeft32((uint32)(((x >> 18) ^ x) >> 27), -(nint)(x >> 59));
 }
 
 // intn returns a pseudo-random number in [0, n).
@@ -130,12 +131,12 @@ internal static uint32 uint32n(this ref pcgRand r, uint32 n) {
             low = (uint32)prod;
         }
     }
-    return (uint32)((prod >> (int)(32)));
+    return (uint32)(prod >> 32);
 }
 
 // bool generates a random bool.
 internal static bool @bool(this ref pcgRand r) {
-    return (uint32)(r.uint32() & 1) == 0;
+    return (r.uint32() & 1) == 0;
 }
 
 // noCopy may be embedded into structs which must not be copied

@@ -93,9 +93,11 @@ internal static void testWriter(ж<testing.T> Ꮡt, bool binary) {
             want: strings.Repeat(" "u8, 75) + "=\r\n =20"u8
         )
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var buf = @new<strings.Builder>();
         var w = NewWriter(new quotedprintable_test_package.strings_BuilderжWriter(buf));
+
         @string want = tt.want;
         if (binary) {
             w.Value.Binary = true;
@@ -103,6 +105,7 @@ internal static void testWriter(ж<testing.T> Ꮡt, bool binary) {
                 want = tt.wantB;
             }
         }
+
         {
             var (_, err) = w.Write(slice<byte>(tt.@in)); if (err != default!) {
                 Ꮡt.Errorf("Write(%q): %v"u8, tt.@in, err);
@@ -135,12 +138,13 @@ public static void TestRoundTrip(ж<testing.T> Ꮡt) {
             Ꮡt.Fatalf("Close: %v"u8, errΔ2);
         }
     }
+
     var r = NewReader(new quotedprintable_test_package.bytes_BufferжReader(buf));
     var (gotBytes, err) = io.ReadAll(new quotedprintable_test_package.quotedprintable_ReaderжReader(r));
     if (err != default!) {
         Ꮡt.Fatalf("Error while reading from Reader: %v"u8, err);
     }
-    @string got = ((@string)gotBytes);
+    @string got = (@string)gotBytes;
     if (got != ((sstring)testMsg)) {
         Ꮡt.Errorf("Encoding and decoding changed the message, got:\n%s"u8, got);
     }

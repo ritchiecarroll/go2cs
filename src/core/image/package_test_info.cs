@@ -39,6 +39,12 @@ using static global::go.image_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -47,8 +53,8 @@ using static global::go.image_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/decode_example_test.go", "decode_example_test.cs", "ABowgoKCgpQACQYABxCCgoKUjtKCgqaCgoK6gqI=")]
-[assembly: go.GoPositionMap("image/decode_test.go", "decode_test.cs", "AB40AA4mooKClJLWooKClJLWgoKClKaCgoKCgoKCpoKCgpaCgoKCgoKCgoKUlIKCgpSCgoKUgoKClLi4lIKCgpSCgg==", "82-85:1", "", "125=At/1/2/1,Invoke/1/2/1,At/2/2/1,Invoke/2/2/1")]
+[assembly: go.GoPositionMap("image/decode_example_test.go", "decode_example_test.cs", "ABowgoKCgpQACQYABxCCgoKUntKCgqaCgoLKgqI=")]
+[assembly: go.GoPositionMap("image/decode_test.go", "decode_test.cs", "ABo0ABImooKClJLWooKClJLWgoKClKaCgoKCgoKCpoKCgqaCgoKCgoKCgoKUlIKCgpSCgoKUgoKClLi4lIKCgpSCgg==", "82-85:1", "", "126=At/1/2/1,Invoke/1/2/1,At/2/2/1,Invoke/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;

@@ -72,7 +72,7 @@ func f3() {
 
 // the very last comment
 
-"""u8;
+"""u8.Raw();
 
 // res maps a key of the form "line number: node type"
 // to the associated comments' text.
@@ -113,6 +113,7 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     var cmap = NewCommentMap(fset, new ast.FileжNode(f), (~f).Comments);
+
     // very correct association of comments
     foreach (var (n, list) in cmap) {
         @string key = fmt.Sprintf("%2d: %T"u8, fset.Position(n.Pos()).Line, n);
@@ -122,12 +123,14 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("%s: got %q; want %q"u8, key, got, want);
         }
     }
+
     // verify that no comments got lost
     {
         nint n = len(cmap.Comments()); if (n != len((~f).Comments)) {
             Ꮡt.Errorf("got %d comment groups in map; want %d"u8, n, len((~f).Comments));
         }
     }
+
     // support code to update test:
     // set genMap to true to generate res map
     const bool genMap = false;
@@ -150,6 +153,7 @@ public static void TestFilter(ж<testing.T> Ꮡt) {
         Ꮡt.Fatal(err);
     }
     var cmap = NewCommentMap(fset, new ast.FileжNode(f), (~f).Comments);
+
     // delete variable declaration
     foreach (var (i, decl) in (~f).Decls) {
         {
@@ -160,6 +164,7 @@ public static void TestFilter(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // check if comments are filtered correctly
     var cc = cmap.Filter(new ast.FileжNode(f));
     foreach (var (n, list) in cc) {

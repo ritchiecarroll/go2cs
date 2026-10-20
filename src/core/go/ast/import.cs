@@ -23,22 +23,25 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
             // Imports are always first.
             break;
         }
+
         if (!(~dΔ1).Lparen.IsValid()) {
             // Not a block: sorted by default.
             continue;
         }
+
         // Identify and sort runs of specs on successive lines.
         nint i = 0;
         var specs = (~dΔ1).Specs[..0];
         foreach (var (j, s) in (~dΔ1).Specs) {
             if (j > i && lineAt(Ꮡfset, s.Pos()) > 1 + lineAt(Ꮡfset, (~dΔ1).Specs[j - 1].End())) {
                 // j begins a new run. End this one.
-                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs.slice(i, j)));
+                specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), (~dΔ1).Specs.slice(i, j)));
                 i = j;
             }
         }
-        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), (~dΔ1).Specs.slice(i)));
+        specs = appendꓸꓸꓸ(specs, sortSpecs(Ꮡfset, ref (Ꮡf).DerefOrNull(), ref (dΔ1).DerefOrNull(), (~dΔ1).Specs.slice(i)));
         dΔ1.Value.Specs = specs;
+
         // Deduping can leave a blank line before the rparen; clean that up.
         if (len((~dΔ1).Specs) > 0) {
             var lastSpec = (~dΔ1).Specs[len((~dΔ1).Specs) - 1];
@@ -50,6 +53,7 @@ public static void SortImports(ж<token.FileSet> Ꮡfset, ж<File> Ꮡf) {
             }
         }
     }
+
     // Make File.Imports order consistent.
     f.Imports = f.Imports[..0];
     foreach (var (_, decl) in f.Decls) {
@@ -109,18 +113,20 @@ partial struct cgPos {
     internal ж<CommentGroup> cg;
 }
 
-internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, slice<Spec> specs) {
+internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, ref GenDecl d, slice<Spec> specs) {
     // Can't short-circuit here even if specs are already sorted,
     // since they might yet need deduplication.
     // A lone import, however, may be safely ignored.
     if (len(specs) <= 1) {
         return specs;
     }
+
     // Record positions for specs.
     var pos = new slice<posSpan>(len(specs));
     foreach (var (i, s) in specs) {
         pos[i] = new posSpan(s.Pos(), s.End());
     }
+
     // Identify comments in this range.
     tokenꓸPos begSpecs = pos[0].Start;
     tokenꓸPos endSpecs = pos[len(pos) - 1].End;
@@ -150,10 +156,12 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
             }
         }
     }
+
     slice<ж<CommentGroup>> comments = default!;
     if (last >= 0) {
         comments = f.Comments.slice(first, last + 1);
     }
+
     // Assign each comment to the import spec on the same line.
     var importComments = new map<ж<ImportSpec>, slice<cgPos>>{};
     nint specIndex = 0;
@@ -166,14 +174,15 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
         if (specIndex == 0 && pos[specIndex].Start > g.Pos()){
             left = true;
         } else 
-        if (specIndex + 1 < len(specs) && lineAt(Ꮡfset, // Or it can appear on the left of an import spec.
- pos[specIndex].Start) + 1 == lineAt(Ꮡfset, g.Pos())) {
+        if (specIndex + 1 < len(specs) && // Or it can appear on the left of an import spec.
+            lineAt(Ꮡfset, pos[specIndex].Start) + 1 == lineAt(Ꮡfset, g.Pos())) {
             specIndex++;
             left = true;
         }
         var s = specs[specIndex]._<ж<ImportSpec>>();
         importComments[s] = append(importComments[s], new cgPos(left: left, cg: g));
     }
+
     // Sort the import specs by import path.
     // Remove duplicates, when possible without data loss.
     // Reassign the import paths to have the same position sequence.
@@ -194,6 +203,7 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
         }
         return cmp.Compare(importComment(a), importComment(b));
     });
+
     // Dedup. Thanks to our sorting, we can just consider
     // adjacent pairs of imports.
     var deduped = specs[..0];
@@ -202,17 +212,24 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
             deduped = append(deduped, s);
         } else {
             tokenꓸPos p = s.Pos();
-            Ꮡfset.File(p).MergeLine(lineAt(Ꮡfset, p));
+            // This function is exited early when len(specs) <= 1,
+            // so d.Rparen must be populated (d.Rparen.IsValid() == true).
+            {
+                nint l = lineAt(Ꮡfset, p); if (l != lineAt(Ꮡfset, d.Rparen)) {
+                    Ꮡfset.File(p).MergeLine(l);
+                }
+            }
         }
     }
     specs = deduped;
+
     // Fix up comment positions
     foreach (var (i, s) in specs) {
         var sΔ1 = s._<ж<ImportSpec>>();
         if ((~sΔ1).Name != nil) {
             sΔ1.Value.Name.Value.NamePos = pos[i].Start;
         }
-        sΔ1.Value.Path.Value.ValuePos = pos[i].Start;
+        updateBasicLitPos((~sΔ1).Path, pos[i].Start);
         sΔ1.Value.EndPos = pos[i].End;
         foreach (var (_, g) in importComments[sΔ1]) {
             foreach (var (_, c) in (~g.cg).List) {
@@ -228,8 +245,23 @@ internal static slice<Spec> sortSpecs(ж<token.FileSet> Ꮡfset, ref File f, sli
             }
         }
     }
+
     slices.SortFunc(comments, (ж<CommentGroup> a, ж<CommentGroup> b) => cmp.Compare(a.Pos(), b.Pos()));
+
     return specs;
+}
+
+// updateBasicLitPos updates lit.Pos,
+// ensuring that lit.End is displaced by the same amount.
+// (See https://go.dev/issue/76395.)
+internal static void updateBasicLitPos(ж<BasicLit> Ꮡlit, tokenꓸPos pos) {
+    ref var lit = ref Ꮡlit.DerefOrNull();
+
+    tokenꓸPos len = lit.End() - lit.Pos();
+    lit.ValuePos = pos;
+    if (lit.ValueEnd.IsValid()) {
+        lit.ValueEnd = pos + len;
+    }
 }
 
 } // end ast_package

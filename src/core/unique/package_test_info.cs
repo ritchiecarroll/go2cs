@@ -47,8 +47,8 @@ using static global::go.unique_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("unique/clone_test.go", "clone_test.cs", "AA8cgoKCgoKCgqaipoKCgqKCgg==", "31-36:1")]
-[assembly: go.GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmooKCloKEkoKCgoKCuoSCAAUQgoKUgg==", "34-43:1")]
-[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "ADBKgoKCgoKCgoKmgoLmgoKChIKEgpSClIKWgrqShIKWzIKSAAgMgpamlIKCgpSCgoKUgoKU1oKCgpKUloS01taCgoKUgoKCgpSCgpSCgoI=", "55-73:1;91-96:1;127-129:1")]
+[assembly: go.GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmooKCpoKUkoKCgoKCypSCAAUQgoKUgg==", "34-43:1")]
+[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "ADJKgoKCgoKCgoKmgoLmgoKClIKUgpSClIKmgrqSlIKm3IKSAAkMgqamlIKCgpSCgoKUgoKU1oKCgpKUppS01taCgoKUgoKCgpSCgpSCgoI=", "55-73:1;91-96:1;127-129:1")]
 // </GoSourcePositionMaps>
 
 namespace go;

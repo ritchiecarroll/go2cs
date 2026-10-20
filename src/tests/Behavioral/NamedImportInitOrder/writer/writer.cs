@@ -5,10 +5,10 @@ using go.NamedImportInitOrder;
 
 partial class writer_package {
 
-public static @string Name = "writer"u8;
+public static @string Name = "writer";
 
 [GoInit] internal static void init() {
-    store.Value = "written-by-writer-init"u8;
+    store.Value = "written-by-writer-init";
 }
 
 } // end writer_package

@@ -1,13 +1,46 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 
-// Package json implements encoding and decoding of JSON as defined in
-// RFC 7159. The mapping between JSON and Go values is described
-// in the documentation for the Marshal and Unmarshal functions.
+// Package json implements encoding and decoding of JSON as defined in RFC 7159.
+// The mapping between JSON and Go values is described in the documentation for
+// the Marshal and Unmarshal functions.
 //
 // See "JSON and Go" for an introduction to this package:
 // https://golang.org/doc/articles/json_and_go.html
+//
+// # Security Considerations
+//
+// The JSON standard (RFC 7159) is lax in its definition of a number of parser
+// behaviors. As such, many JSON parsers behave differently in various
+// scenarios. These differences in parsers mean that systems that use multiple
+// independent JSON parser implementations may parse the same JSON object in
+// differing ways.
+//
+// Systems that rely on a JSON object being parsed consistently for security
+// purposes should be careful to understand the behaviors of this parser, as
+// well as how these behaviors may cause interoperability issues with other
+// parser implementations.
+//
+// Due to the Go Backwards Compatibility promise (https://go.dev/doc/go1compat)
+// there are a number of behaviors this package exhibits that may cause
+// interopability issues, but cannot be changed. In particular the following
+// parsing behaviors may cause issues:
+//
+//   - If a JSON object contains duplicate keys, keys are processed in the order
+//     they are observed, meaning later values will replace or be merged into
+//     prior values, depending on the field type (in particular maps and structs
+//     will have values merged, while other types have values replaced).
+//   - When parsing a JSON object into a Go struct, keys are considered in a
+//     case-insensitive fashion.
+//   - When parsing a JSON object into a Go struct, unknown keys in the JSON
+//     object are ignored (unless a [Decoder] is used and
+//     [Decoder.DisallowUnknownFields] has been called).
+//   - Invalid UTF-8 bytes in JSON strings are replaced by the Unicode
+//     replacement character.
+//   - Large JSON number integers will lose precision when unmarshaled into
+//     floating-point types.
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -176,11 +209,13 @@ public static (slice<byte>, error) Marshal(any v) {
     try {
         var e = newEncodeState();
         defer(ᏑencodeStatePool.Put, e.OrTypedNil(), ref ᒐ);
+
         var err = e.marshal(v, new encOpts(escapeHTML: true));
         if (err != default!) {
             return (default!, err);
         }
         var buf = appendꓸꓸꓸ(slice<byte>(default!), e.of(encodeState.ᏑBuffer).Bytes());
+
         return (buf, default!);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
@@ -272,7 +307,7 @@ internal static readonly @string hex = "0123456789abcdef"u8;
 
 // An encodeState encodes JSON into a bytes.Buffer.
 partial struct encodeState {
-    public partial ref bytes_package.Buffer Buffer { get; } // accumulated output
+    /*embed*/ public bytes_package.Buffer Buffer; // accumulated output
     // Keep track of what pointers we've seen in the current recursive call
     // path, to avoid cycles that could lead to a stack overflow. Only do
     // the relatively expensive map operations if ptrLevel is larger than
@@ -348,7 +383,6 @@ internal static bool isEmptyValue(reflectꓸValue v) {
     if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔInterface || exprᴛ1 == reflect.ΔPointer) {
         return v.IsZero();
     }
-
     return false;
 }
 
@@ -381,24 +415,23 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> typeEncoder(re
             return fiΔ1._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
         }
     }
+
     // To deal with recursive types, populate the map with an
-    // indirect func before we build it. This type waits on the
-    // real func (f) to be ready and then calls it. This indirect
-    // func is only used for recursive types.
-    ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
-    
-    ref var f = ref heap<Action<ж<encodeState>, reflectꓸValue, encOpts>>(out var Ꮡf);
-    Ꮡwg.Add(1);
+    // indirect func before we build it. If the type is recursive,
+    // the second lookup for the type will return the indirect func.
+    //
+    // This indirect func is only used for recursive types,
+    // and briefly during racing calls to typeEncoder.
+    var indirect = sync.OnceValue(Action<ж<encodeState>, reflectꓸValue, encOpts> () => newTypeEncoder(t, true));
+    var indirectʗ1 = indirect;
     var (fi, loaded) = ᏑencoderCache.LoadOrStore(t, new Action<ж<encodeState>, reflectꓸValue, encOpts>((ж<encodeState> e, reflectꓸValue v, encOpts opts) => {
-        Ꮡwg.Wait();
-        Ꮡf.ValueSlot(e, v, opts);
+        indirectʗ1()(e, v, opts);
     }));
     if (loaded) {
         return fi._<Action<ж<encodeState>, reflectꓸValue, encOpts>>();
     }
-    // Compute the real encoder and replace the indirect func with it.
-    f = newTypeEncoder(t, true);
-    Ꮡwg.Done();
+
+    var f = indirect();
     ᏑencoderCache.Store(t, (f).OrTypedNilFunc());
     return f;
 }
@@ -425,6 +458,7 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     if (t.Implements(textMarshalerType)) {
         return textMarshalerEncoder;
     }
+
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == reflect.ΔBool) {
         return boolEncoder;
@@ -465,7 +499,6 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newTypeEncoder
     { /* default: */
         return unsupportedTypeEncoder;
     }
-
 }
 
 internal static void invalidValueEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
@@ -479,7 +512,7 @@ internal static void marshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, e
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var (m, ok) = v.Interface()._<Marshaler>(ᐧ);
+    var (m, ok) = reflect.TypeAssert<Marshaler>(v);
     if (!ok) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -504,7 +537,7 @@ internal static void addrMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var m = va.Interface()._<Marshaler>();
+    var (m, _) = reflect.TypeAssert<Marshaler>(va);
     var (b, err) = m.MarshalJSON();
     if (err == default!) {
         Ꮡe.of(encodeState.ᏑBuffer).Grow(len(b));
@@ -524,7 +557,7 @@ internal static void textMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸValue 
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var (m, ok) = v.Interface()._<encoding.TextMarshaler>(ᐧ);
+    var (m, ok) = reflect.TypeAssert<encoding.TextMarshaler>(v);
     if (!ok) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
@@ -544,7 +577,7 @@ internal static void addrTextMarshalerEncoder(ж<encodeState> Ꮡe, reflectꓸVa
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
-    var m = va.Interface()._<encoding.TextMarshaler>();
+    var (m, _) = reflect.TypeAssert<encoding.TextMarshaler>(va);
     var (b, err) = m.MarshalText();
     if (err != default!) {
         e.error(new MarshalerErrorжerror(Ꮡ(new MarshalerError(v.Type(), err, "MarshalText"u8))));
@@ -585,6 +618,7 @@ internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflec
     if (math.IsInf(f, 0) || math.IsNaN(f)) {
         e.error(new UnsupportedValueErrorжerror(Ꮡ(new UnsupportedValueError(v, strconv.FormatFloat(f, (rune)'g', -1, (nint)bits)))));
     }
+
     // Convert as if by ES6 number to string conversion.
     // This matches most other JSON generators.
     // See golang.org/issue/6384 and golang.org/issue/14135.
@@ -644,17 +678,6 @@ internal static void stringEncoder(ж<encodeState> Ꮡe, reflectꓸValue v, encO
     }
 }
 
-// isValidNumber reports whether s is a valid JSON number literal.
-//
-// isValidNumber should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/bytedance/sonic
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname isValidNumber
 internal static bool isValidNumber(@string s) {
     // This function implements the JSON numbers grammar.
     // See https://tools.ietf.org/html/rfc7159#section-6
@@ -662,6 +685,7 @@ internal static bool isValidNumber(@string s) {
     if (s == ""u8) {
         return false;
     }
+
     // Optional -
     if (s[0] == (rune)'-') {
         s = s[1..];
@@ -669,6 +693,7 @@ internal static bool isValidNumber(@string s) {
             return false;
         }
     }
+
     // Digits
     switch (ᐧ) {
     default: {
@@ -693,6 +718,7 @@ internal static bool isValidNumber(@string s) {
             s = s[1..];
         }
     }
+
     // e or E followed by an optional - or + and
     // 1 or more digits.
     if (len(s) >= 2 && (s[0] == (rune)'e' || s[0] == (rune)'E')) {
@@ -707,6 +733,7 @@ internal static bool isValidNumber(@string s) {
             s = s[1..];
         }
     }
+
     // Make sure we are at the end.
     return s == ""u8;
 }
@@ -740,6 +767,7 @@ internal static void encode(this structEncoder se, ж<encodeState> Ꮡe, reflect
 FieldLoop:
     foreach (var (i, _) in se.fields.list) {
         var f = Ꮡ(se.fields.list, i);
+
         // Find the nested struct field by following f.index.
         var fv = v;
         foreach (var (_, iΔ1) in (~f).index) {
@@ -751,6 +779,7 @@ FieldLoop:
             }
             fv = fv.Field(iΔ1);
         }
+
         if (((~f).omitEmpty && isEmptyValue(fv)) || ((~f).omitZero && ((~f).isZero == default! && fv.IsZero() || ((~f).isZero != default! && (~f).isZero(fv))))) {
             continue;
         }
@@ -807,11 +836,10 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
             }
         }
         Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)'{');
+
         // Extract and sort the keys.
         slice<reflectWithString> sv = new slice<reflectWithString>(v.Len(), () => new());
-        
         ж<reflect.MapIter> mi = v.MapRange();
-        
         error err = default!;
         for (nint i = 0; mi.Next(); i++) {
             {
@@ -822,6 +850,7 @@ internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflectꓸ
             sv[i].v = mi.Value();
         }
         slices.SortFunc(sv, (reflectWithString i, reflectWithString j) => strings.Compare(i.ks, j.ks));
+
         foreach (var (i, kv) in sv) {
             if (i > 0) {
                 Ꮡe.of(encodeState.ᏑBuffer).WriteByte((rune)',');
@@ -846,20 +875,22 @@ internal static Action<ж<encodeState>, reflectꓸValue, encOpts> newMapEncoder(
             return unsupportedTypeEncoder;
         }
     }
-
     var me = new mapEncoder(typeEncoder(t.Elem()));
     var meʗ1 = me;
     return (ж<encodeState> p1, reflectꓸValue p2, encOpts p3) => meʗ1.encode(p1, p2, p3);
 }
 
 internal static void encodeByteSlice(ж<encodeState> Ꮡe, reflectꓸValue v, encOpts _) {
+    var bᴷ = new stackAppend<byte>();
+
     if (v.IsNil()) {
         Ꮡe.of(encodeState.ᏑBuffer).WriteString(nullˢ);
         return;
     }
+
     var s = v.Bytes();
     var b = Ꮡe.of(encodeState.ᏑBuffer).AvailableBuffer();
-    b = append(b, (byte)((rune)'"'));
+    b = append(bᴷ, b, (byte)((rune)'"'));
     b = base64.StdEncoding.AppendEncode(b, s);
     b = append(b, (byte)((rune)'"'));
     Ꮡe.of(encodeState.ᏑBuffer).Write(b);
@@ -1010,16 +1041,15 @@ internal static bool isValidTag(@string s) {
     foreach (var (_, c) in s) {
         switch (ᐧ) {
         case {} when strings.ContainsRune("!#$%&()*+-./:;<=>?@[]^_{|}~ "u8, c): {
+            // Backslash and quote chars are reserved, but
+            // otherwise any punctuation chars are allowed
+            // in a tag name.
             break;
         }
         case {} when !unicode.IsLetter(c) && !unicode.IsDigit(c): {
             return false;
         }}
-
     }
-    // Backslash and quote chars are reserved, but
-    // otherwise any punctuation chars are allowed
-    // in a tag name.
     return true;
 }
 
@@ -1043,12 +1073,12 @@ internal static (@string, error) resolveKeyName(reflectꓸValue k) {
         return (k.String(), default!);
     }
     {
-        var (tm, ok) = k.Interface()._<encoding.TextMarshaler>(ᐧ); if (ok) {
+        var (tm, ok) = reflect.TypeAssert<encoding.TextMarshaler>(k); if (ok) {
             if (k.Kind() == reflect.ΔPointer && k.IsNil()) {
                 return ("", default!);
             }
             var (buf, err) = tm.MarshalText();
-            return (((@string)buf), err);
+            return ((@string)buf, err);
         }
     }
     var exprᴛ1 = k.Kind();
@@ -1058,7 +1088,6 @@ internal static (@string, error) resolveKeyName(reflectꓸValue k) {
     if (exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr) {
         return (strconv.FormatUint(k.Uint(), 10), default!);
     }
-
     throw panic("unexpected map key type");
 }
 
@@ -1101,15 +1130,14 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
                     break;
                 }
                 default: {
-                    dst = append(dst, // This encodes bytes < 0x20 except for \b, \f, \n, \r and \t.
- // If escapeHTML is set, it also escapes <, >, and &
- // because they can lead to security holes when
- // user-controlled strings are rendered into JSON
- // and served to some browsers.
- (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> (int)(4))], hex[(byte)(b & 0xF)]);
+                    // This encodes bytes < 0x20 except for \b, \f, \n, \r and \t.
+                    // If escapeHTML is set, it also escapes <, >, and &
+                    // because they can lead to security holes when
+                    // user-controlled strings are rendered into JSON
+                    // and served to some browsers.
+                    dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'0'), (byte)((rune)'0'), hex[(b >> 4)], hex[(byte)(b & 0xF)]);
                     break;
                 }}
-
                 i++;
                 start = i;
                 continue;
@@ -1119,10 +1147,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // For now, cast only a small portion of byte slices to a string
         // so that it can be stack allocated. This slows down []byte slightly
         // due to the extra copy, but keeps string performance roughly the same.
-        nint n = len(src) - i;
-        if (n > utf8.UTFMax) {
-            n = utf8.UTFMax;
-        }
+        nint n = min(len(src) - i, (nint)(utf8.UTFMax));
         var (c, size) = utf8.DecodeRuneInString(src.slice(i, i + n).ToGoString());
         if (c == utf8.RuneError && size == 1) {
             dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
@@ -1140,7 +1165,7 @@ internal static slice<byte> appendString<Bytes>(slice<byte> dst, Bytes src, bool
         // See https://en.wikipedia.org/wiki/JSON#Safety.
         if (c == (rune)'\u2028' || c == (rune)'\u2029') {
             dst = append(dst, src.slice(start, i).ꓸꓸꓸ);
-            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(rune)(c & 0xF)]);
+            dst = append(dst, (byte)((rune)'\\'), (byte)((rune)'u'), (byte)((rune)'2'), (byte)((rune)'0'), (byte)((rune)'2'), hex[(c & 0xF)]);
             i += size;
             start = i;
             continue;
@@ -1180,40 +1205,34 @@ internal static readonly @string stringˢ = "string"u8;
 internal static readonly @string omitemptyˢ = "omitempty"u8;
 internal static readonly @string omitzeroˢ = "omitzero"u8;
 
-// typeFields returns a list of fields that JSON should recognize for the given type.
-// The algorithm is breadth-first search over the set of structs to include - the top struct
-// and then any reachable anonymous structs.
-//
-// typeFields should be an internal detail,
-// but widely used packages access it using linkname.
-// Notable members of the hall of shame include:
-//   - github.com/bytedance/sonic
-//
-// Do not remove or change the type signature.
-// See go.dev/issue/67401.
-//
-//go:linkname typeFields
 internal static structFields typeFields(reflectꓸType t) {
     // Anonymous fields to explore at the current level and the next.
     var current = new field[]{}.slice();
     var next = new field[]{new(typ: t)}.slice();
+
     // Count of queued names for current level and the next.
     map<reflectꓸType, nint> count = default!;
     map<reflectꓸType, nint> nextCount = default!;
+
     // Types already visited at an earlier level.
     var visited = new map<reflectꓸType, bool>{};
+
     // Fields found.
     slice<field> fields = default!;
+
     // Buffer to run appendHTMLEscape on field names.
     slice<byte> nameEscBuf = default!;
+
     while (len(next) > 0) {
         (current, next) = (next, current[..0]);
         (count, nextCount) = (nextCount, new map<reflectꓸType, nint>{});
+
         foreach (var (_, f) in current) {
             if (visited[f.typ]) {
                 continue;
             }
             visited[f.typ] = true;
+
             // Scan f.typ for fields to include.
             for (nint i = 0; i < f.typ.NumField(); i++) {
                 var sf = f.typ.Field(i);
@@ -1226,10 +1245,10 @@ internal static structFields typeFields(reflectꓸType t) {
                         // Ignore embedded fields of unexported non-struct types.
                         continue;
                     }
-                } else 
-                if (!sf.IsExported()) {
                     // Do not ignore embedded fields of unexported struct types
                     // since they may have exported fields.
+                } else 
+                if (!sf.IsExported()) {
                     // Ignore unexported non-embedded fields.
                     continue;
                 }
@@ -1244,11 +1263,13 @@ internal static structFields typeFields(reflectꓸType t) {
                 var index = new slice<nint>(len(f.index) + 1);
                 copy(index, f.index);
                 index[len(f.index)] = i;
+
                 var ft = sf.Type;
                 if (ft.Name() == ""u8 && ft.Kind() == reflect.ΔPointer) {
                     // Follow pointer.
                     ft = ft.Elem();
                 }
+
                 // Only strings, floats, integers, and booleans can be quoted.
                 var quoted = false;
                 if (opts.Contains(stringˢ)) {
@@ -1256,8 +1277,8 @@ internal static structFields typeFields(reflectꓸType t) {
                     if (exprᴛ1 == reflect.ΔBool || exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64 || exprᴛ1 == reflect.ΔUint || exprᴛ1 == reflect.Uint8 || exprᴛ1 == reflect.Uint16 || exprᴛ1 == reflect.Uint32 || exprᴛ1 == reflect.Uint64 || exprᴛ1 == reflect.Uintptr || exprᴛ1 == reflect.Float32 || exprᴛ1 == reflect.Float64 || exprᴛ1 == reflect.ΔString) {
                         quoted = true;
                     }
-
                 }
+
                 // Record found field and index sequence.
                 if (name != ""u8 || !sf.Anonymous || ft.Kind() != reflect.Struct) {
                     var tagged = name != ""u8;
@@ -1274,10 +1295,12 @@ internal static structFields typeFields(reflectꓸType t) {
                         quoted: quoted
                     );
                     field.nameBytes = slice<byte>(field.name);
+
                     // Build nameEscHTML and nameNonEsc ahead of time.
                     nameEscBuf = appendHTMLEscape(nameEscBuf[..0], field.nameBytes);
                     field.nameEscHTML = @""""u8 + ((sstring)nameEscBuf) + @""":"u8;
                     field.nameNonEsc = @""""u8 + field.name + @""":"u8;
+
                     if (field.omitZero) {
                         var tΔ2 = sf.Type;
                         // Provide a function that uses a type's IsZero method.
@@ -1313,8 +1336,8 @@ internal static structFields typeFields(reflectꓸType t) {
                             };
                             break;
                         }}
-
                     }
+
                     fields = append(fields, field);
                     if (count[f.typ] > 1) {
                         // If there were multiple instances, add a second,
@@ -1325,6 +1348,7 @@ internal static structFields typeFields(reflectꓸType t) {
                     }
                     continue;
                 }
+
                 // Record new anonymous struct to explore in next round.
                 nextCount[ft]++;
                 if (nextCount[ft] == 1) {
@@ -1333,6 +1357,7 @@ internal static structFields typeFields(reflectꓸType t) {
             }
         }
     }
+
     slices.SortFunc(fields, (field a, field b) => {
         // sort field by name, breaking ties with depth, then
         // breaking ties with "name came from json tag", then
@@ -1355,8 +1380,10 @@ internal static structFields typeFields(reflectꓸType t) {
         }
         return slices.Compare<slice<nint>, nint>(a.index, b.index);
     });
+
     // Delete all fields that are hidden by the Go rules for embedded fields,
     // except that fields with JSON tags are promoted.
+
     // The fields are sorted in primary order of name, secondary order
     // of field index length. Loop over names; for each name, delete
     // hidden fields by choosing the one dominant field that survives.
@@ -1372,8 +1399,7 @@ internal static structFields typeFields(reflectꓸType t) {
                 break;
             }
         }
-        if (advance == 1) {
-            // Only one field with this name
+        if (advance == 1) { // Only one field with this name
             @out = append(@out, fi);
             continue;
         }
@@ -1382,8 +1408,10 @@ internal static structFields typeFields(reflectꓸType t) {
             @out = append(@out, dominant);
         }
     }
+
     fields = @out;
     slices.SortFunc(fields, (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
+
     foreach (var (i, _) in fields) {
         var f = Ꮡ(fields, i);
         f.Value.encoder = typeEncoder(typeByIndex(t, (~f).index));

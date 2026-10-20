@@ -53,10 +53,11 @@ public static void TestEPIPE(ж<Δtesting.T> Ꮡt) {
             Ꮡt.Fatal(errΔ1);
         }
     }
+
     var expect = syscall.EPIPE;
     if (Δruntime.GOOS == "windows"u8) {
         // 232 is Windows error code ERROR_NO_DATA, "The pipe is being closed".
-        expect = ((syscall.Errno)232);
+        expect = (syscall.Errno)232;
     }
     // Every time we write to the pipe we should get an EPIPE.
     for (nint i = 0; i < 20; i++) {
@@ -116,17 +117,18 @@ public static void TestStdPipe(ж<Δtesting.T> Ꮡt) {
         else { /* default: */
             throw panic("unrecognized value for GO_TEST_STD_PIPE_HELPER");
         }
-
         // For stdout/stderr, we should have crashed with a broken pipe error.
         // The caller will be looking for that exit status,
         // so just exit normally here to cause a failure in the caller.
         // For descriptor 3, a normal exit is expected.
         Δos.Exit(0);
     }
+
     testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
     // This test cannot be run in parallel due to the same race as for TestEPIPE.
     // (We expect a write to a closed pipe can fail, but a concurrent fork of a
     // child process can cause the pipe to unexpectedly remain open.)
+
     var (r, w, err) = Δos.Pipe();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -178,6 +180,7 @@ public static void TestStdPipe(ж<Δtesting.T> Ꮡt) {
             }
         }
     }
+
     // Test redirecting stdout but not stderr.  Issue 40076.
     var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ2, testStdPipeˢ);
     cmd.Value.Stdout = new Δos.FileжWriter(w);
@@ -226,7 +229,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
             {
                 var (bΔ1, errΔ1) = Δos.ReadFile(procSysFsPipeMaxSizeˢ); if (errΔ1 == default!) {
                     {
-                        var (i, errΔ2) = strconv.Atoi(strings.TrimSpace(((@string)bΔ1))); if (errΔ2 == default!) {
+                        var (i, errΔ2) = strconv.Atoi(strings.TrimSpace((@string)bΔ1)); if (errΔ2 == default!) {
                             limit = i + 1;
                         }
                     }
@@ -234,6 +237,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
             }
             Ꮡt.Logf("using pipe write limit of %d"u8, limit);
         }
+
         var (r, w, err) = Δos.Pipe();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -242,6 +246,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
+
         // Close the read end of the pipe in a goroutine while we are
         // writing to the write end, or vice-versa.
         var rʗ2 = r;
@@ -251,6 +256,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
             // Write call. This is sloppy but the test will pass even
             // if we close before the read/write.
             time.Sleep(20 * time.Millisecond);
+
             error errΔ3 = default!;
             if (read){
                 errΔ3 = rʗ2.Close();
@@ -261,6 +267,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
                 Ꮡt.Error(errΔ3);
             }
         });
+
         var b = new slice<byte>(limit);
         if (read){
             (_, err) = r.Read(b[..]);
@@ -307,9 +314,8 @@ public static void TestReadNonblockingFd(ж<Δtesting.T> Ꮡt) {
         if (exprᴛ1 == "windows"u8) {
             Ꮡt.Skip(windowsDoesnTSupportˢ2);
         }
-
         if (Δos.Getenv(goWantReadNonblockingFdˢ) == "1"u8) {
-            var fd = ((syscallꓸHandle)Δos.Stdin.Fd());
+            var fd = (syscallꓸHandle)Δos.Stdin.Fd();
             syscall.SetNonblock(fd, true);
             defer(syscall.SetNonblock, fd, (bool)false, ref ᒐ);
             var (_, errΔ1) = Δos.Stdin.Read(new slice<byte>(1));
@@ -322,8 +328,10 @@ public static void TestReadNonblockingFd(ж<Δtesting.T> Ꮡt) {
             }
             Δos.Exit(0);
         }
+
         testenv.MustHaveExec(new os_test_package.testing_TжTB(Ꮡt));
         Ꮡt.Parallel();
+
         var (r, w, err) = Δos.Pipe();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -351,6 +359,7 @@ internal static readonly @string writerˢ = "writer"u8;
 
 public static void TestCloseWithBlockingReadByNewFile(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     array<syscallDescriptor> p = new(2);
     var err = syscall.Pipe(p[..]);
     if (err != default!) {
@@ -362,6 +371,7 @@ public static void TestCloseWithBlockingReadByNewFile(ж<Δtesting.T> Ꮡt) {
 
 public static void TestCloseWithBlockingReadByFd(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (r, w, err) = Δos.Pipe();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -373,10 +383,6 @@ public static void TestCloseWithBlockingReadByFd(ж<Δtesting.T> Ꮡt) {
 
 // Test that we don't let a blocking read prevent a close.
 internal static partial void testCloseWithBlockingRead(ж<Δtesting.T> Ꮡt, ж<Δos.File> Ꮡr, ж<Δos.File> Ꮡw) {
-    ref var t = ref Ꮡt.DerefOrNull();
-    ref var r = ref Ꮡr.DerefOrNull();
-    ref var w = ref Ꮡw.DerefOrNull();
-
     channel<EmptyStruct> enteringRead = new channel<EmptyStruct>(0);
     channel<EmptyStruct> done = new channel<EmptyStruct>(0);
     var doneʗ1 = done;
@@ -388,6 +394,7 @@ internal static partial void testCloseWithBlockingRead(ж<Δtesting.T> Ꮡt, ж<
         if (err == default!) {
             Ꮡt.Error(iOOnClosedPipeˢ);
         }
+
         {
             var (pe, ok) = err._<ж<fs.PathError>>(ᐧ); if (ok) {
                 err = pe.Value.Err;
@@ -398,11 +405,13 @@ internal static partial void testCloseWithBlockingRead(ж<Δtesting.T> Ꮡt, ж<
         }
         close(doneʗ1);
     });
+
     // Give the goroutine a chance to enter the Read
     // or Write call. This is sloppy but the test will
     // pass even if we close before the read/write.
     ᐸꟷ(enteringRead);
     time.Sleep(20 * time.Millisecond);
+
     {
         var err = Ꮡr.Close(); if (err != default!) {
             Ꮡt.Error(err);
@@ -416,10 +425,12 @@ internal static partial void testCloseWithBlockingRead(ж<Δtesting.T> Ꮡt, ж<
 
 public static void TestPipeEOF(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     var (r, w, err) = Δos.Pipe();
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     testPipeEOF(Ꮡt, new os_test_package.os_FileжReadCloser(r), new os_test_package.os_FileжWriteCloser(w));
 }
 
@@ -449,6 +460,7 @@ internal static partial void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r
             }
             ᐸꟷ(writerDoneʗ1);
         }, ref ᒐ);
+
         var write = new channel<nint>(1);
         var writeʗ1 = write;
         var writerDoneʗ2 = writerDone;
@@ -456,6 +468,7 @@ internal static partial void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r
             GoFrame ᒐ = default;
             try {
                 defer(ᴛ1 => close(ᴛ1), writerDoneʗ2, ref ᒐ);
+
                 foreach (var i in writeʗ1) {
                     time.Sleep(parkDelay);
                     var (_, errΔ2) = fmt.Fprintf(w, "line %d\n"u8, i);
@@ -464,6 +477,7 @@ internal static partial void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r
                         return;
                     }
                 }
+
                 time.Sleep(parkDelay);
                 {
                     var errΔ3 = w.Close(); if (errΔ3 != default!) {
@@ -474,6 +488,7 @@ internal static partial void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         var rbuf = bufio.NewReader(r);
         for (nint i = 0; i < 3; i++) {
             write.ᐸꟷ(i);
@@ -483,6 +498,7 @@ internal static partial void testPipeEOF(ж<Δtesting.T> Ꮡt, Δio.ReadCloser r
             }
             Ꮡt.Logf("%s\n"u8, bytes.TrimSpace(bΔ1));
         }
+
         close(write);
         var (b, err) = rbuf.ReadBytes((rune)'\n');
         if (!AreEqual(err, Δio.EOF) || len(b) != 0) {
@@ -509,6 +525,7 @@ public static partial void TestFdRace(ж<Δtesting.T> Ꮡt) {
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         var wʗ2 = w;
         void call() {
@@ -520,6 +537,7 @@ public static partial void TestFdRace(ж<Δtesting.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         const nint tries = 100;
         for (nint i = 0; i < tries; i++) {
             Ꮡwg.Add(1);
@@ -538,9 +556,8 @@ internal static readonly object readTimedOutˢ = (@string)"read timed out"u8;
 public static partial void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         Ꮡt.Parallel();
+
         var (r, w, err) = Δos.Pipe();
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -549,7 +566,9 @@ public static partial void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
+
         UntypedInt count = 10;
+
         var c = new channel<bool>(1);
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(1);
@@ -571,6 +590,7 @@ public static partial void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         Ꮡwg.Add(1);
         var cʗ2 = c;
         var rʗ3 = r;
@@ -585,6 +605,7 @@ public static partial void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
                 // will still pass, it just won't test anything.
                 time.Sleep(10 * time.Millisecond);
                 rʗ3.Fd();
+
                 // The bug was that Fd would hang until Read timed out.
                 // If the bug is fixed, then writing to w and closing r here
                 // will cause the Read to exit before the timeout expires.
@@ -594,6 +615,7 @@ public static partial void TestFdReadRace(ж<Δtesting.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         Ꮡwg.Wait();
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

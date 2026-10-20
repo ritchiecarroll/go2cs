@@ -20,12 +20,14 @@ partial struct holder {
 
 internal static void Main() {
     afoo.Inner x = new afoo.Inner(N: 1);
-    bfoo.Other y = new bfoo.Other(S: "s"u8);
+    bfoo.Other y = new bfoo.Other(S: "s");
     var z = new afoo.Inner(N: 2);
     fmt.Println(x.N, y.S, z.N);
+
     var l = new list(new afoo.Inner[]{new(N: 3)}.slice());
-    var t = new table(new map<@string, bfoo.Other>{["k"u8] = new(S: "v"u8)});
-    fmt.Println(l[0].N, t["k"u8].S);
+    var t = new table(new map<@string, bfoo.Other>{["k"] = new(S: "v")});
+    fmt.Println(l[0].N, t["k"].S);
+
     go.SameNameImportAlias.a.foo_package.ΔKind ka = new afoo.S(nil).Kind();
     go.SameNameImportAlias.b.foo_package.ΔKind kb = new bfoo.S(nil).Kind();
     var h = new holder(a: x, b: y, k: kb);

@@ -33,7 +33,7 @@ partial struct Template {
     internal ж<template.Template> text;
     // The underlying template's parse tree, updated to be HTML-safe.
     public ж<parse.Tree> Tree;
-    internal partial ref ж<nameSpace> nameSpace { get; } // common to all associated templates
+    /*embed*/ internal ж<nameSpace> nameSpace; // common to all associated templates
 }
 
 // escapeOK is a sentinel value used to indicate valid escaping.
@@ -89,8 +89,8 @@ public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) {
 //		Execution stops immediately with an error.
 public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.sslice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     t.text.Option(opt.ꓸꓸꓸ);
     return Ꮡt;
 }
@@ -240,10 +240,12 @@ public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) 
                 return (default!, errΔ1);
             }
         }
+
         var (ret, err) = t.text.Parse(text);
         if (err != default!) {
             return (default!, err);
         }
+
         // In general, all the named templates might have changed underfoot.
         // Regardless, some new ones may have been defined.
         // The template.Template set has been updated; update ours.
@@ -278,6 +280,7 @@ public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string
                 return (default!, errΔ1);
             }
         }
+
         t.nameSpace.of(nameSpace.Ꮡmu).Lock();
         defer(Ꮡt.Value.nameSpace.of(nameSpace.Ꮡmu).Unlock, ref ᒐ);
         var (text, err) = t.text.AddParseTree(name, Ꮡtree);
@@ -414,7 +417,7 @@ public static @string Name(this ref Template t) {
 public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    t.text.Funcs(((template.FuncMap)funcMap));
+    t.text.Funcs((template.FuncMap)funcMap);
     return Ꮡt;
 }
 
@@ -490,13 +493,14 @@ public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params �
 // template is nil, it is created from the first file.
 internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string, (@string, slice<byte>, error)> readFile, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     {
         var err = Ꮡt.checkCanParse(); if (err != default!) {
             return (default!, err);
         }
     }
+
     if (len(filenames) == 0) {
         // Not really a problem, but be consistent.
         return (default!, fmt.Errorf("html/template: no files named in call to ParseFiles"u8));
@@ -506,7 +510,7 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         if (err != default!) {
             return (default!, err);
         }
-        @string s = ((@string)b);
+        @string s = (@string)b;
         // First template becomes return value if not already defined,
         // and we use that one for subsequent New calls to associate
         // all the templates together. Also, if this file has the same name

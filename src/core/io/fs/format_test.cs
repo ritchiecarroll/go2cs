@@ -53,7 +53,6 @@ internal static (fs.FileInfo, error) Info(this ж<formatTest> Ꮡfs) {
     return (new formatTestжFileInfo(Ꮡfs), default!);
 }
 
-
 partial struct formatTestsᴛ1 /*dyn*/ {
     internal formatTest input;
     internal @string wantFileInfo;

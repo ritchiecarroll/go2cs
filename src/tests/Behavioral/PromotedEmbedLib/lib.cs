@@ -21,7 +21,7 @@ internal static Reading Report(this ж<common> Ꮡc) {
 }
 
 partial struct Counter {
-    internal partial ref common common { get; }
+    /*embed*/ internal common common;
     public @string Label;
 }
 

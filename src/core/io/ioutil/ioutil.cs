@@ -25,6 +25,8 @@ partial class ioutil_package {
 // as an error to be reported.
 //
 // Deprecated: As of Go 1.16, this function simply calls [io.ReadAll].
+//
+//go:fix inline
 public static (slice<byte>, error) ReadAll(io.Reader r) {
     return io.ReadAll(r);
 }
@@ -35,6 +37,8 @@ public static (slice<byte>, error) ReadAll(io.Reader r) {
 // to be reported.
 //
 // Deprecated: As of Go 1.16, this function simply calls [os.ReadFile].
+//
+//go:fix inline
 public static (slice<byte>, error) ReadFile(@string filename) {
     return os.ReadFile(filename);
 }
@@ -44,6 +48,8 @@ public static (slice<byte>, error) ReadFile(@string filename) {
 // (before umask); otherwise WriteFile truncates it before writing, without changing permissions.
 //
 // Deprecated: As of Go 1.16, this function simply calls [os.WriteFile].
+//
+//go:fix inline
 public static error WriteFile(@string filename, slice<byte> data, fs.FileMode perm) {
     return os.WriteFile(filename, data, perm);
 }
@@ -86,6 +92,8 @@ public static (slice<fs.FileInfo>, error) ReadDir(@string dirname) {
 // the provided Reader r.
 //
 // Deprecated: As of Go 1.16, this function simply calls [io.NopCloser].
+//
+//go:fix inline
 public static io.ReadCloser NopCloser(io.Reader r) {
     return io.NopCloser(r);
 }

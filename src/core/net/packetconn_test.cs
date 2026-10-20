@@ -39,6 +39,7 @@ public static void TestPacketConn(ж<testing.T> Ꮡt) {
             new("udp"u8, "127.0.0.1:0"u8, "127.0.0.1:0"u8),
             new("unixgram"u8, testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)), testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)))
         }.slice();
+
         void closer(global::go.net_package.PacketConn c, @string net, @string addr1, @string addr2) {
             c.Close();
             var exprᴛ1 = net;
@@ -46,8 +47,8 @@ public static void TestPacketConn(ж<testing.T> Ꮡt) {
                 Δos.Remove(addr1);
                 Δos.Remove(addr2);
             }
-
         }
+
         foreach (var (_, vᴛ1) in packetConnTests) {
             ref var tt = ref heap(new TestPacketConn_type(), out var Ꮡtt);
             tt = vᴛ1;
@@ -57,6 +58,7 @@ public static void TestPacketConn(ж<testing.T> Ꮡt) {
                 skipOrFatalFn();
                 continue;
             }
+
             var (c1, err) = ListenPacket(tt.net, tt.addr1);
             if (err != default!) {
                 Ꮡt.Fatal(err);
@@ -64,6 +66,7 @@ public static void TestPacketConn(ж<testing.T> Ꮡt) {
             var closerʗ1 = closer;
             defer(closerʗ1, c1, tt.net, tt.addr1, tt.addr2, ref ᒐ);
             c1.LocalAddr();
+
             (var c2, err) = ListenPacket(tt.net, tt.addr2);
             if (err != default!) {
                 Ꮡt.Fatal(err);
@@ -72,6 +75,7 @@ public static void TestPacketConn(ж<testing.T> Ꮡt) {
             defer(closerʗ2, c2, tt.net, tt.addr1, tt.addr2, ref ᒐ);
             c2.LocalAddr();
             var rb2 = new slice<byte>(128);
+
             {
                 var (_, errΔ1) = c1.WriteTo(wb, c2.LocalAddr()); if (errΔ1 != default!) {
                     Ꮡt.Fatal(errΔ1);
@@ -112,6 +116,7 @@ public static void TestConnAndPacketConn(ж<testing.T> Ꮡt) {
             new("udp"u8, "127.0.0.1:0"u8, "127.0.0.1:0"u8),
             new("unixgram"u8, testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)), testUnixAddr(new net_test_package.testing_TжTB(Ꮡt)))
         }.slice();
+
         void closer(global::go.net_package.PacketConn c, @string net, @string addr1, @string addr2) {
             c.Close();
             var exprᴛ1 = net;
@@ -119,8 +124,8 @@ public static void TestConnAndPacketConn(ж<testing.T> Ꮡt) {
                 Δos.Remove(addr1);
                 Δos.Remove(addr2);
             }
-
         }
+
         foreach (var (_, vᴛ1) in packetConnTests) {
             ref var tt = ref heap(new TestConnAndPacketConn_type(), out var Ꮡtt);
             tt = vᴛ1;
@@ -131,6 +136,7 @@ public static void TestConnAndPacketConn(ж<testing.T> Ꮡt) {
                 skipOrFatalFn();
                 continue;
             }
+
             var (c1, err) = ListenPacket(tt.net, tt.addr1);
             if (err != default!) {
                 Ꮡt.Fatal(err);
@@ -138,6 +144,7 @@ public static void TestConnAndPacketConn(ж<testing.T> Ꮡt) {
             var closerʗ1 = closer;
             defer(closerʗ1, c1, tt.net, tt.addr1, tt.addr2, ref ᒐ);
             c1.LocalAddr();
+
             (var c2, err) = Dial(tt.net, c1.LocalAddr().String());
             if (err != default!) {
                 Ꮡt.Fatal(err);
@@ -146,6 +153,7 @@ public static void TestConnAndPacketConn(ж<testing.T> Ꮡt) {
             defer(() => c2ʗ1.Close(), ref ᒐ);
             c2.LocalAddr();
             c2.RemoteAddr();
+
             {
                 var (_, errΔ1) = c2.Write(wb); if (errΔ1 != default!) {
                     Ꮡt.Fatal(errΔ1);
@@ -165,7 +173,6 @@ public static void TestConnAndPacketConn(ж<testing.T> Ꮡt) {
             else { /* default: */
                 dst = c2.LocalAddr();
             }
-
             {
                 var (_, errΔ3) = c1.WriteTo(wb, dst); if (errΔ3 != default!) {
                     Ꮡt.Fatal(errΔ3);

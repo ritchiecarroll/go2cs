@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using runtime = runtime_package;
 
 partial class main_package {
 
@@ -27,7 +28,8 @@ internal static void @catch(@string what, Action f) {
         defer(() => {
             {
                 var r = recover(); if (r != default!){
-                    fmt.Printf("%s recovered: %v\n"u8, what, r);
+                    var (_, isRuntimeError) = r._<runtimeꓸError>(ᐧ);
+                    fmt.Printf("%s recovered: %v runtime.Error: %v\n"u8, what, r, isRuntimeError);
                 } else {
                     fmt.Printf("%s NO PANIC\n"u8, what);
                 }
@@ -39,74 +41,68 @@ internal static void @catch(@string what, Action f) {
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string methodCallˢ = "method-call"u8;
-private static readonly @string fieldReadˢ = "field-read"u8;
-private static readonly @string fieldWriteˢ = "field-write"u8;
-private static readonly @string explicitDerefˢ = "explicit-deref"u8;
-private static readonly @string nestedFieldˢ = "nested-field"u8;
-private static readonly @string sliceElementˢ = "slice-element"u8;
-private static readonly @string mapValueˢ = "map-value"u8;
-private static readonly @string absentˢ = "absent"u8;
-private static readonly @string chainWalkˢ = "chain-walk"u8;
-private static readonly @string nilSafeMethodˢ = "nil-safe-method"u8;
-private static readonly @string realMethodˢ = "real-method"u8;
-private static readonly @string nilCompareˢ = "nil-compare"u8;
-private static readonly object stillRunningˢ = (@string)"still running:"u8;
-
 internal static void Main() {
     ж<node> p = default!;
     var pʗ1 = p;
-    @catch(methodCallˢ, () => {
+    @catch("method-call", () => {
         fmt.Println(pʗ1.label());
     });
+
     var pʗ2 = p;
-    @catch(fieldReadˢ, () => {
+    @catch("field-read", () => {
         fmt.Println((~pʗ2).name);
     });
+
     var pʗ3 = p;
-    @catch(fieldWriteˢ, () => {
-        pʗ3.Value.name = "x"u8;
+    @catch("field-write", () => {
+        pʗ3.Value.name = "x";
     });
+
     var pʗ4 = p;
-    @catch(explicitDerefˢ, () => {
+    @catch("explicit-deref", () => {
         fmt.Println(pʗ4.Value);
     });
+
     ref var b = ref heap(new box(), out var Ꮡb);
     var bʗ1 = b;
-    @catch(nestedFieldˢ, () => {
+    @catch("nested-field", () => {
         fmt.Println((~bʗ1.p).name);
     });
+
     var nodes = new slice<ж<node>>(2);
     var nodesʗ1 = nodes;
-    @catch(sliceElementˢ, () => {
+    @catch("slice-element", () => {
         fmt.Println((~nodesʗ1[0]).name);
     });
+
     var m = new map<@string, ж<node>>{};
     var mʗ1 = m;
-    @catch(mapValueˢ, () => {
-        fmt.Println((~mʗ1[absentˢ]).name);
+    @catch("map-value", () => {
+        fmt.Println((~mʗ1["absent"]).name);
     });
-    var real = Ꮡ(new node(name: "head"u8));
+
+    var real = Ꮡ(new node(name: "head"));
     var realʗ1 = real;
-    @catch(chainWalkˢ, () => {
+    @catch("chain-walk", () => {
         fmt.Println((~(~realʗ1).next).name);
     });
+
     var pʗ5 = p;
-    @catch(nilSafeMethodˢ, () => {
+    @catch("nil-safe-method", () => {
         fmt.Println(pʗ5.isNil());
     });
     var realʗ2 = real;
-    @catch(realMethodˢ, () => {
+    @catch("real-method", () => {
         fmt.Println(realʗ2.label());
     });
     var bʗ2 = b;
     var nodesʗ2 = nodes;
     var pʗ6 = p;
-    @catch(nilCompareˢ, () => {
+    @catch("nil-compare", () => {
         fmt.Println(pʗ6 == nil, bʗ2.p == nil, nodesʗ2[0] == nil);
     });
-    fmt.Println(stillRunningˢ, real.label());
+
+    fmt.Println("still running:", real.label());
 }
 
 } // end main_package

@@ -13,9 +13,11 @@ internal static nint accumulate(ж<nint> Ꮡcounter, slice<nint> vals) {
         }
         Ꮡcounter.Value += v;
     }
+
     foreach (var (_, v) in vals) {
         add(v);
     }
+
     return counter;
 }
 

@@ -48,6 +48,12 @@ using static go.go.scanner_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,8 +62,8 @@ using static go.go.scanner_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/scanner/errors.go", "errors.cs", "ABYwkqaUAAQQkqiQppCigKSCgriClIKUgpSssqiygoKCgoKCgqbYkpSkpKqigpSssoCCgqSC")]
-[assembly: global::go.GoPositionMap("go/scanner/scanner.go", "scanner.cs", "ADZ20oKCgoKUkpS2gpKSgsaClIKCgpS8ooKUAAc0ABEEgpSCgoKChIKCgoKChIKCuIKClKai3MSCgoKEpoKCgpSmgoKUqIKCgoKSgpSCgoKCqISC3oKCupKWgpammsSClIKEgoKolIKcspKClIKCgoKUppaCgrqCgpK4goKopoKCgqaCpoKmggACENIABxKClJSC7oKCgsqCgpSUgoKEgqaClKSkpoCigKKAAAIQAAkCgoKCgoKSgpSCpoKCgpSCpvaCgoSCgoKmgoKCgpSCtIK0grSCxqiCgoKUgpaCqICClLS0goKClIKCgqSCuIKCloKClIKAgrgACAaClKSkpKiSgoKWgoKCgrqCgoKUgsa0gpTGgpb+woSCkpSCpKSCpIKkgqSCgpSCpoKCgoKCgpSClIKCloKCluaUhIKCgoKUgoKUlIKClIKCgsyCltaUhIKCgoKUgoKUgqimgoKC3IKCptaUhIKCgoKClIKClIKogoKWpoKCAAMU0oKClKaCgoKUgoKUpoKCgpSCgoKClJQAAkIAIgKCpoKClpaWgoCkgpSClLaCxoK0gpSCgpSqgqSCgqSCgqSCgqTWgpKCgrakgqSkgqSkgqSkgqSCgraCgraklIKmgpSUlJSCprakpIKClLakpKSCgpS2pKa2gpSmgoLmgpY=")]
+[assembly: global::go.GoPositionMap("go/scanner/errors.go", "errors.cs", "ABYwkqaUAAYQkqiQppCigKSCgriClIKUgpSssqiygoKCgoKCgqbYkpSklKqigpSssoCCgqSC")]
+[assembly: global::go.GoPositionMap("go/scanner/scanner.go", "scanner.cs", "ADVokgALHtKCgoKClJKUxoKCgqqClKSCtoKUgoKClLyigpQACTQAEQSClIKCgoKUgoKCgoKUgoK4goKUpqLcxIKCgpSmgoKClKaCgpS4goKCgpKClIKCgoK4lILugoLKgqaCpqaaxIKUgpSCgriUgqyykoKUgoKCgpSmpoKCyoKCkriCgrimgoKCpoKmgqaCAAIQ0gAIEoKUlILugoKCyoKClJSCgpSCpoKUpJSmgKKAooAAAhAACQKCgoKCgpKClIKmgoKClIKm9oKClIKCgraCgoKClIK0grSCtIK2uIKCgpSCpoK4gIKUtKSCgoKUgoKCpILIgoKmgoKUgoCCyAAIBoKUpKSUqJKCgqaCgoKCyoKCgpSCxrSClLaCpv7ClIKSlIKkpIKkgqSCpIKClIKmgoKCgoKClIKUgoKmgoKm5pSUgoKCgpSCgpSUgoKUgoKC3IKm1pSUgoKCgpSCgpSCuKaCgoLcgoKm1pSUgoKCgoKUgoKUgriCgoKmpoKCAAMU0oKClKaCgoKUgoKUpoKCgpSCgoKClJQAAkIAIgKCpoKCpqamgoCkgpSClKaCxoK0gpSCgpTagqSCgoKkgoKkgoKCgqS2goKCgrakgqSkgqSkgqSkgqSCgraCgraklIKmgpSUlJSCprakpIKClLakpKSCgpS2pLamgpSmgoLGgqY=", "53-55:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -87,6 +93,7 @@ public static partial class scanner_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸgoꓸinternalꓸscannerhooks() => builtin.initPackage(typeof(global::go.go.@internal.scannerhooks_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));

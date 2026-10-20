@@ -17,6 +17,7 @@ using Δreflect = reflect_package;
 
 partial class reflect_test_package {
 
+// convert identical underlying types
 internal partial struct TestImplicitMapConversion_MyBuffer /*global::go.bytes_package.Buffer*/;
 
 public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
@@ -27,13 +28,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // direct
         var m = new map<nint, nint>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
         var (x, ok) = m[1, ꟷ];
         if (x != 2) {
             Ꮡt.Errorf("#1 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#1 MapIndex(1) = %d"u8, n);
             }
         }
@@ -42,13 +43,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // convert interface key
         var m = new map<any, nint>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
-        var (x, ok) = m[(nint)(1), ꟷ];
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
+        var (x, ok) = m[(nint)1, ꟷ];
         if (x != 2) {
             Ꮡt.Errorf("#2 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#2 MapIndex(1) = %d"u8, n);
             }
         }
@@ -57,13 +58,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // convert interface value
         var m = new map<nint, any>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
         var (x, ok) = m[1, ꟷ];
-        if (!AreEqual(x, (nint)(2))) {
+        if (!AreEqual(x, (nint)2)) {
             Ꮡt.Errorf("#3 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#3 MapIndex(1) = %d"u8, n);
             }
         }
@@ -72,13 +73,13 @@ public static void TestImplicitMapConversion(ж<Δtesting.T> Ꮡt) {
         // convert both interface key and interface value
         var m = new map<any, any>();
         var mv = ValueOf(m);
-        mv.SetMapIndex(ValueOf((nint)(1)), ValueOf((nint)(2)));
-        var (x, ok) = m[(nint)(1), ꟷ];
-        if (!AreEqual(x, (nint)(2))) {
+        mv.SetMapIndex(ValueOf((nint)1), ValueOf((nint)2));
+        var (x, ok) = m[(nint)1, ꟷ];
+        if (!AreEqual(x, (nint)2)) {
             Ꮡt.Errorf("#4 after SetMapIndex(1,2): %d, %t (map=%v)"u8, x, ok, m);
         }
         {
-            nint n = mv.MapIndex(ValueOf((nint)(1))).Interface()._<nint>(); if (n != 2) {
+            nint n = mv.MapIndex(ValueOf((nint)1)).Interface()._<nint>(); if (n != 2) {
                 Ꮡt.Errorf("#4 MapIndex(1) = %d"u8, n);
             }
         }
@@ -180,7 +181,6 @@ public static void TestImplicitAppendConversion(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-
 partial struct implementsTestsᴛ1 /*dyn*/ {
     internal any x;
     internal any t;
@@ -232,7 +232,6 @@ public static void TestImplements(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-// test runs implementsTests too
 internal static slice<implementsTestsᴛ1> assignableTests = new implementsTestsᴛ1[]{
     new(@new<channel<nint>>(), Ꮡ(/*<-*/channel<nint>.RecvOnly), true),
     new(Ꮡ(/*<-*/channel<nint>.RecvOnly), @new<channel<nint>>(), false),
@@ -240,6 +239,7 @@ internal static slice<implementsTestsᴛ1> assignableTests = new implementsTests
     new(@new<IntPtr>(), @new<ж<nint>>(), true),
     new(@new<IntPtr>(), @new<IntPtr1>(), false),
     new(@new<Ch>(), Ꮡ(/*<-*/channel<any>.RecvOnly), true)
+    // test runs implementsTests too
 }.slice();
 
 partial class IntPtr /*ж<nint>*/;

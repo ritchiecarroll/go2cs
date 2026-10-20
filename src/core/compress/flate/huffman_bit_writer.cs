@@ -7,23 +7,39 @@ using io = io_package;
 
 partial class flate_package {
 
+// The largest offset code.
 internal static UntypedInt offsetCodeCount => 30;
+
+// The special code used to mark the end of a block.
 internal static UntypedInt endBlockMarker => 256;
+
+// The first length code.
 internal static UntypedInt lengthCodesStart => 257;
+
+// The number of codegen codes.
 internal static UntypedInt codegenCodeCount => 19;
 internal static UntypedInt badCode => 255;
+
+// bufferFlushSize indicates the buffer size
+// after which bytes are flushed to the writer.
+// Should preferably be a multiple of 6, since
+// we accumulate 6 bytes between writes to the buffer.
 internal static UntypedInt bufferFlushSize => 240;
+
+// bufferSize is the actual output byte buffer size.
+// It must have additional headroom for a flush
+// which can contain up to 8 bytes.
 internal static UntypedInt bufferSize => /* bufferFlushSize + 8 */ 248;
 
-/* 257 */
-/* 260 */
-/* 270 */
-/* 280 */
 // The number of extra bits needed by length code X - LENGTH_CODES_START.
 internal static slice<int8> lengthExtraBits = new int8[]{
+    /* 257 */
     0, 0, 0,
+    /* 260 */
     0, 0, 0, 0, 0, 1, 1, 1, 1, 2,
+    /* 270 */
     2, 2, 2, 3, 3, 3, 3, 4, 4, 4,
+    /* 280 */
     4, 5, 5, 5, 5, 0
 }.slice();
 
@@ -101,8 +117,7 @@ internal static void flush(this ref huffmanBitWriter w) {
     while (w.nbits != 0) {
         w.bytes[n] = (byte)w.bits;
         w.bits >>= (int)(8);
-        if (w.nbits > 8){
-            // Avoid underflow
+        if (w.nbits > 8){ // Avoid underflow
             w.nbits -= 8;
         } else {
             w.nbits = 0;
@@ -134,11 +149,11 @@ internal static void writeBits(this ref huffmanBitWriter w, int32 b, nuint nb) {
         nint n = w.nbytes;
         var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
-        bytes[1] = (byte)((bits >> (int)(8)));
-        bytes[2] = (byte)((bits >> (int)(16)));
-        bytes[3] = (byte)((bits >> (int)(24)));
-        bytes[4] = (byte)((bits >> (int)(32)));
-        bytes[5] = (byte)((bits >> (int)(40)));
+        bytes[1] = (byte)(bits >> 8);
+        bytes[2] = (byte)(bits >> 16);
+        bytes[3] = (byte)(bits >> 24);
+        bytes[4] = (byte)(bits >> 32);
+        bytes[5] = (byte)(bits >> 40);
         n += 6;
         if (n >= bufferFlushSize) {
             w.write(w.bytes.slice(0, n));
@@ -156,7 +171,7 @@ internal static void writeBytes(this ref huffmanBitWriter w, slice<byte> bytes) 
         return;
     }
     nint n = w.nbytes;
-    if ((nuint)(w.nbits & 7) != 0) {
+    if ((w.nbits & 7) != 0) {
         w.err = ((InternalError)(@string)writeBytesWithUnfinishedˢ);
         return;
     }
@@ -200,11 +215,13 @@ internal static void generateCodegen(this ref huffmanBitWriter w, nint numLitera
     foreach (var (i, _) in cgnl) {
         cgnl[i] = (uint8)litEnc.codes[i].len;
     }
+
     cgnl = codegen.slice(numLiterals, numLiterals + numOffsets);
     foreach (var (i, _) in cgnl) {
         cgnl[i] = (uint8)offEnc.codes[i].len;
     }
     codegen[numLiterals + numOffsets] = badCode;
+
     var size = codegen[0];
     nint count = 1;
     nint outIndex = 0;
@@ -275,15 +292,16 @@ internal static void generateCodegen(this ref huffmanBitWriter w, nint numLitera
 internal static (nint size, nint numCodegens) dynamicSize(this ref huffmanBitWriter w, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc, nint extraBits) {
     nint size = default!;
     nint numCodegens = default!;
-
     ref var litEnc = ref ᏑlitEnc.DerefOrNull();
     ref var offEnc = ref ᏑoffEnc.DerefOrNull();
+
     numCodegens = len(w.codegenFreq);
     while (numCodegens > 4 && w.codegenFreq[codegenOrder[numCodegens - 1]] == 0) {
         numCodegens--;
     }
     nint header = 3 + 5 + 5 + 4 + (3 * numCodegens) + w.codegenEncoding.bitLength(w.codegenFreq[..]) + (nint)w.codegenFreq[16] * 2 + (nint)w.codegenFreq[17] * 3 + (nint)w.codegenFreq[18] * 7;
     size = header + litEnc.bitLength(w.literalFreq) + offEnc.bitLength(w.offsetFreq) + extraBits;
+
     return (size, numCodegens);
 }
 
@@ -318,11 +336,11 @@ internal static void writeCode(this ref huffmanBitWriter w, hcode c) {
         nint n = w.nbytes;
         var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
-        bytes[1] = (byte)((bits >> (int)(8)));
-        bytes[2] = (byte)((bits >> (int)(16)));
-        bytes[3] = (byte)((bits >> (int)(24)));
-        bytes[4] = (byte)((bits >> (int)(32)));
-        bytes[5] = (byte)((bits >> (int)(40)));
+        bytes[1] = (byte)(bits >> 8);
+        bytes[2] = (byte)(bits >> 16);
+        bytes[3] = (byte)(bits >> 24);
+        bytes[4] = (byte)(bits >> 32);
+        bytes[5] = (byte)(bits >> 40);
         n += 6;
         if (n >= bufferFlushSize) {
             w.write(w.bytes.slice(0, n));
@@ -349,10 +367,12 @@ internal static void writeDynamicHeader(this ref huffmanBitWriter w, nint numLit
     w.writeBits((int32)(numLiterals - 257), 5);
     w.writeBits((int32)(numOffsets - 1), 5);
     w.writeBits((int32)(numCodegens - 4), 4);
+
     for (nint iΔ1 = 0; iΔ1 < numCodegens; iΔ1++) {
         nuint value = (nuint)(~w.codegenEncoding).codes[codegenOrder[iΔ1]].len;
         w.writeBits((int32)value, 3);
     }
+
     nint i = 0;
     while (ᐧ) {
         nint codeWord = (nint)w.codegen[i];
@@ -361,6 +381,7 @@ internal static void writeDynamicHeader(this ref huffmanBitWriter w, nint numLit
             break;
         }
         w.writeCode((~w.codegenEncoding).codes[(uint32)codeWord]);
+
         switch (codeWord) {
         case 16: {
             w.writeBits((int32)w.codegen[i], 2);
@@ -377,7 +398,6 @@ internal static void writeDynamicHeader(this ref huffmanBitWriter w, nint numLit
             i++;
             break;
         }}
-
     }
 }
 
@@ -413,11 +433,15 @@ internal static void writeFixedHeader(this ref huffmanBitWriter w, bool isEof) {
 // stored block.
 // If the input is nil, the tokens will always be Huffman encoded.
 internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+    var tokensᴷ = new stackAppend<token>();
+
     if (w.err != default!) {
         return;
     }
-    tokens = append(tokens, (token)(endBlockMarker));
+
+    tokens = append(tokensᴷ, tokens, (token)(endBlockMarker));
     var (numLiterals, numOffsets) = w.indexTokens(tokens);
+
     nint extraBits = default!;
     var (storedSize, storable) = w.storedSize(input);
     if (storable) {
@@ -434,35 +458,42 @@ internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens
             extraBits += (nint)w.offsetFreq[offsetCode] * (nint)offsetExtraBits[offsetCode];
         }
     }
+
     // Figure out smallest code.
     // Fixed Huffman baseline.
     ж<huffmanEncoder> literalEncoding = fixedLiteralEncoding;
     ж<huffmanEncoder> offsetEncoding = fixedOffsetEncoding;
     nint size = w.fixedSize(extraBits);
+
     // Dynamic Huffman?
     nint numCodegens = default!;
+
     // Generate codegen and codegenFrequencies, which indicates how to encode
     // the literalEncoding and the offsetEncoding.
     w.generateCodegen(numLiterals, numOffsets, w.literalEncoding, w.offsetEncoding);
     w.codegenEncoding.generate(w.codegenFreq[..], 7);
     (var dynamicSize, numCodegens) = w.dynamicSize(w.literalEncoding, w.offsetEncoding, extraBits);
+
     if (dynamicSize < size) {
         size = dynamicSize;
         literalEncoding = w.literalEncoding;
         offsetEncoding = w.offsetEncoding;
     }
+
     // Stored bytes?
     if (storable && storedSize < size) {
         w.writeStoredHeader(len(input), eof);
         w.writeBytes(input);
         return;
     }
+
     // Huffman.
     if (literalEncoding == fixedLiteralEncoding){
         w.writeFixedHeader(eof);
     } else {
         w.writeDynamicHeader(numLiterals, numOffsets, numCodegens, eof);
     }
+
     // Write the tokens.
     w.writeTokens(tokens, (~literalEncoding).codes, (~offsetEncoding).codes);
 }
@@ -473,26 +504,33 @@ internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens
 // If input is supplied and the compression savings are below 1/16th of the
 // input size the block is stored.
 internal static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+    var tokensᴷ = new stackAppend<token>();
+
     if (w.err != default!) {
         return;
     }
-    tokens = append(tokens, (token)(endBlockMarker));
+
+    tokens = append(tokensᴷ, tokens, (token)(endBlockMarker));
     var (numLiterals, numOffsets) = w.indexTokens(tokens);
+
     // Generate codegen and codegenFrequencies, which indicates how to encode
     // the literalEncoding and the offsetEncoding.
     w.generateCodegen(numLiterals, numOffsets, w.literalEncoding, w.offsetEncoding);
     w.codegenEncoding.generate(w.codegenFreq[..], 7);
     var (size, numCodegens) = w.dynamicSize(w.literalEncoding, w.offsetEncoding, 0);
+
     // Store bytes, if we don't get a reasonable improvement.
     {
-        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> (int)(4)))) {
+        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
             w.writeStoredHeader(len(input), eof);
             w.writeBytes(input);
             return;
         }
     }
+
     // Write Huffman table.
     w.writeDynamicHeader(numLiterals, numOffsets, numCodegens, eof);
+
     // Write the tokens.
     w.writeTokens(tokens, (~w.literalEncoding).codes, (~w.offsetEncoding).codes);
 }
@@ -507,6 +545,7 @@ internal static (nint numLiterals, nint numOffsets) indexTokens(this ref huffman
 
     clear(w.literalFreq);
     clear(w.offsetFreq);
+
     foreach (var (_, t) in tokens) {
         if (t < matchType) {
             w.literalFreq[t.literal()]++;
@@ -517,6 +556,7 @@ internal static (nint numLiterals, nint numOffsets) indexTokens(this ref huffman
         w.literalFreq[(uint32)lengthCodesStart + lengthCode(length)]++;
         w.offsetFreq[offsetCode(offset)]++;
     }
+
     // get the number of literals
     numLiterals = len(w.literalFreq);
     while (w.literalFreq[numLiterals - 1] == 0) {
@@ -588,31 +628,40 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
     if (w.err != default!) {
         return;
     }
+
     // Clear histogram
     clear(w.literalFreq);
+
     // Add everything as literals
     histogram(input, w.literalFreq);
+
     w.literalFreq[endBlockMarker] = 1;
+
     const nint numLiterals = /* endBlockMarker + 1 */ 257;
     w.offsetFreq[0] = 1;
     const nint numOffsets = 1;
+
     w.literalEncoding.generate(w.literalFreq, 15);
+
     // Figure out smallest code.
     // Always use dynamic Huffman or Store
     nint numCodegens = default!;
+
     // Generate codegen and codegenFrequencies, which indicates how to encode
     // the literalEncoding and the offsetEncoding.
     w.generateCodegen(numLiterals, numOffsets, w.literalEncoding, huffOffset);
     w.codegenEncoding.generate(w.codegenFreq[..], 7);
     (var size, numCodegens) = w.dynamicSize(w.literalEncoding, huffOffset, 0);
+
     // Store bytes, if we don't get a reasonable improvement.
     {
-        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> (int)(4)))) {
+        var (ssize, storable) = w.storedSize(input); if (storable && ssize < (size + (size >> 4))) {
             w.writeStoredHeader(len(input), eof);
             w.writeBytes(input);
             return;
         }
     }
+
     // Huffman.
     w.writeDynamicHeader(numLiterals, numOffsets, numCodegens, eof);
     var encoding = (~w.literalEncoding).codes[..257];
@@ -631,11 +680,11 @@ internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice
         w.nbits -= 48;
         var bytes = w.bytes.slice(n, n + 6);
         bytes[0] = (byte)bits;
-        bytes[1] = (byte)((bits >> (int)(8)));
-        bytes[2] = (byte)((bits >> (int)(16)));
-        bytes[3] = (byte)((bits >> (int)(24)));
-        bytes[4] = (byte)((bits >> (int)(32)));
-        bytes[5] = (byte)((bits >> (int)(40)));
+        bytes[1] = (byte)(bits >> 8);
+        bytes[2] = (byte)(bits >> 16);
+        bytes[3] = (byte)(bits >> 24);
+        bytes[4] = (byte)(bits >> 32);
+        bytes[5] = (byte)(bits >> 40);
         n += 6;
         if (n < bufferFlushSize) {
             continue;

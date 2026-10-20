@@ -12,7 +12,6 @@ using static go.hash.adler32_package;
 
 partial class adler32_internal_test_package {
 
-
 partial struct goldenᴛ1 /*dyn*/ {
     internal uint32 @out;
     internal @string @in;
@@ -72,7 +71,7 @@ internal static uint32 checksum(slice<byte> p) {
         s1 = (s1 + (uint32)x) % (uint32)mod;
         s2 = (s2 + s1) % (uint32)mod;
     }
-    return (uint32)((s2 << (int)(16)) | s1);
+    return s2 << 16 | s1;
 }
 
 public static void TestGolden(ж<testing.T> Ꮡt) {
@@ -101,34 +100,42 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
     foreach (var (_, g) in golden) {
         var h = New();
         var h2 = New();
+
         io.WriteString(new adler32_internal_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(0, len(g.@in) / 2));
+
         var (state, err) = h._<encoding.BinaryMarshaler>().MarshalBinary();
         if (err != default!) {
             Ꮡt.Errorf("could not marshal: %v"u8, err);
             continue;
         }
+
         (var stateAppend, err) = h._<encoding.BinaryAppender>().AppendBinary(new slice<byte>(4, 32));
         if (err != default!) {
             Ꮡt.Errorf("could not marshal: %v"u8, err);
             continue;
         }
         stateAppend = stateAppend[4..];
+
         if (((sstring)state) != g.halfState) {
             Ꮡt.Errorf("checksum(%q) state = %q, want %q"u8, g.@in, state, g.halfState);
             continue;
         }
+
         if (((sstring)stateAppend) != g.halfState) {
             Ꮡt.Errorf("checksum(%q) state = %q, want %q"u8, g.@in, stateAppend, g.halfState);
             continue;
         }
+
         {
             var errΔ1 = h2._<encoding.BinaryUnmarshaler>().UnmarshalBinary(state); if (errΔ1 != default!) {
                 Ꮡt.Errorf("could not unmarshal: %v"u8, errΔ1);
                 continue;
             }
         }
+
         io.WriteString(new adler32_internal_test_package.hash_Hash32ᴠWriter(h), g.@in.slice(len(g.@in) / 2));
         io.WriteString(new adler32_internal_test_package.hash_Hash32ᴠWriter(h2), g.@in.slice(len(g.@in) / 2));
+
         if (h.Sum32() != h2.Sum32()) {
             Ꮡt.Errorf("checksum(%q) = 0x%x != marshaled (0x%x)"u8, g.@in, h.Sum32(), h2.Sum32());
         }
@@ -145,6 +152,7 @@ public static void BenchmarkAdler32KB(ж<testing.B> Ꮡb) {
     }
     var h = New();
     var @in = new slice<byte>(0, h.Size());
+
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
         h.Reset();

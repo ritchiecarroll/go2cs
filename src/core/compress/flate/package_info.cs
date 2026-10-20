@@ -48,6 +48,12 @@ using static go.compress.flate_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,13 +62,13 @@ using static go.compress.flate_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("compress/flate/deflate.go", "deflate.cs", "ACuCAQAvdoKUgoKCgpSUgoKCgqiCgpSmgoKUyoKCpoKCgoKUgoKUrtSClIKogqaWgoKCgoKUgoSCloKCgoKmlLiCquKCgpaWgoKogoKCloKChIKChIKCgoKUlKaUlIKCpqaCgIKkggAEELKqooKUgoKCgoK+soKCgoKmrMSCgqiClKS0grSCgrqWgpSUgqaCgoKCgoKCgoKmgoKWhIKCgpSCgoKUgpSUlIKUgoCCpJSmlIKCgoKUgoKCgoKCloaAgoK2qIKU3IKCgpSUgoKCpoKUpoSCgsqUlICCpKaCgoKUgoKAgqSmgoL8goKCpoKCgr6ygpSCgqaygpSCgoKCgqamooKUgoKCgoKUgqaChJSCgqSCgqSCgoKCgqSCpIKCgqSkpoKCgoKUpIKCpIKCgoKCgoKCgsiigpSClIKCgpSAgqSCgpSCAAIeAAwCgoCCpAACEuKCgoKUgoLugqYACBaiAAIYAAsGqJKssoCUgoKm")]
-[assembly: go.GoPositionMap("compress/flate/deflatefast.go", "deflatefast.cs", "ABE0goKmgoKoggAXMoKqtIK6goKCzJaCgoKEAA8ghIKCgoKCgoKClIKCgoSClIKUzAAIFMyCgpaCgoKCAAcSgoKCgoKChIKCgoKCuoKClIKCgqaCgpSssoKCqIKCgpSCgqaogoKogoKClIKCgsyCgqiCgoKCpqqippaCAAMQwpSCgqiCgsqUlA==")]
-[assembly: go.GoPositionMap("compress/flate/dict_decoder.go", "dict_decoder.cs", "ACNOsoSClISClIKCgpSokoKUqJKokqyyrLKssoIAAhDSgoKCgoIACBSCgoIADyKCloIAAhLigoKClIKWgpaCrLKCgoKClA==")]
-[assembly: go.GoPositionMap("compress/flate/huffman_bit_writer.go", "huffman_bit_writer.cs", "ABZMAAcQ7twACRQAFzKCAAoWgoKmgoKClIKCgoKSlJSUgoKmgoKUpoKClIKCgoKCgoKCgoKCgoKCgoKClOiCgpSCgoKUgoKCgpSClIIAAh4ADwLKlIKCloKClISCgoKmgoKCpoKCgoKCgoKClIKCgoKCpoKCgpSCgoKCgpSUgoKCgoKmgoKCgqaCpqjigoKUioqokgACErKClIKUpoKClIKCgoKCgoKCgoKCgoKCgoKClAADEtKClIKClIKCgoSCgpaCgoKCgpSElIK0grSC6oKClIKClIKCgqaCgpaSgpQAAhDSgpaChIKCypSUlKyigoa4goKEgoKCqIKCgqiClKgAAhDSgpaCqIKCloCCgoK4lq7ygoSCgoKUgoKCqIKCpoKClKaClIKCqqKClIKCgqaCgoKCgoKmgoKCgoKCAAgSgoKCgqyygqiWhISCgoSIyIKCloCCgoK4goKClIKCgoKmgoKCgoKCgoKCgoKClIKClJSCrLKCgg==", "", "", "79=newHuffmanEncoder/1/3/5,newHuffmanEncoder/2/3/6,newHuffmanEncoder/3/3/7;285=bitLength/1/1/1;286=bitLength/1/2/1,bitLength/2/2/2;292=bitLength/1/2/1,bitLength/2/2/2")]
-[assembly: go.GoPositionMap("compress/flate/huffman_code.go", "huffman_code.cs", "AC5okoKmgKSCqJKCgoKCgoKWgraCtoK2gvSUpoKCgoKUppKUgoKCgqYABCYADgKClIKCqIKeysSm3IKCuoSCgoLKgoKCloKUgpSCypSCloDKlJSCpoLugpaCgoKmgpSqwoKCgoLchIKCgpQAAxDiuJSUlIKCgpSogqaUlJSWlMqigqaApIKmgMiigqaApIKClKaApII=")]
-[assembly: go.GoPositionMap("compress/flate/inflate.go", "inflate.cs", "ACBGgsyAAAoUggAKFoIAKWbYtIKaopKCgpSClIKUAAgUgpaCgoKCggAGEIKWgoKCloKCgoKCgoKUgqiCgpSCgoKCgoLcgpSmgqaUgoKCgoKUuriCuIKUpoKCgswAKV6igoCCtoKCgoKClLaCgraAoqSCgrbYsoKCgoKClJSClIKCyoKClMzEtIKAgraCgpSCgoKUgpSCloKCgIK2goKUgpSCuoKCgpSUgoKWkoKClKSCgoKUtIKCtIKCtIKAgraCgoKClIKCqILegpauwpqUpKaEkoKCgpSCgpSCgoKCgpS0gqaCtIK0grSCtIK0grSCtIK0goKAgoK2goKWgoKCgIKCtoKClICCgriUtISCkoCCgraCgoK0griCgpaCloSSgoKUhIKCgoKUuraCloKCgoKUgoKCgpaCgoKWgqqigoKWgoKCgoKCloKCgpSmgoKClJSokoKUpoKCgpSCgoKo+riSgoKCgoKClIKClIKCgoKUgoKCgoKUgoLKgoCCgoK2gqaUpoKEkoKUgpSClIKUuILugoIAAhYACAKEgoKCgoKCAAIU8oSCgoKCgoI=", "767-783:1")]
-[assembly: go.GoPositionMap("compress/flate/token.go", "token.cs", "AA8oABw6ABQskKaSqJCmkKSApICmkoKUgpQ=")]
+[assembly: go.GoPositionMap("compress/flate/deflate.go", "deflate.cs", "ADuCAQA0eoKUgoKCgpSUgoKCgriCgpSmgoKUyoKCpoKCgoKUgoKUrtSClIK4gqamgoKCgoKUgpSCpoKCgoKmlLiCquKCgqamgoK4goKCpoKClIKClIKCgoKUlKaUlIKCpqaCgIKkggAEELKqooKUgoKCgoK+soKCgoKmrMSCgriClKS0gqSCgrqmgpSUgqaCgoKCgoKCgoKmgoKmlIKCgpSCgoKUgpSUlIKUgoCCpJSmlIKCgoKUgoKCgoKCpoaAgoK2qIKU3IKCgpSUgoKCpoKUppSCgsqUlICCpKaCgoKUgoKAgqSmgoL8goKCpoKCgr6ygpSCgqaygpSCgoKCgqamooKUgoKCgoKUgqaClJSCgqSCgqSCgoKCgqSCpIKCgqSUpoKCgoKUpIKCpIKCgoKCgoKCgriigpSClIKCgpSAgqSCgpSCAAIeAAwCgoCCpAACEuKCgoKUgoLugqYACBaiAAIYAAsGqJKssoCUgoKm")]
+[assembly: go.GoPositionMap("compress/flate/deflatefast.go", "deflatefast.cs", "ABc0goKmgoKoggAWMoKqtILKgoKC3KaCgoKUAA8glIKCgoKCgoKClIKCgpSClIKU3AAJFMyCgqaCgoKCAAgSgoKCgoKClIKCgoKCyoKClIKCgqaCgpSssoKCuIKCgpSCgqa4goK4goKClIKCgtyCgriCgoKCpqqipqaCAAMQwpSCgriCgsqUlA==")]
+[assembly: go.GoPositionMap("compress/flate/dict_decoder.go", "dict_decoder.cs", "ACNOspSClJSClIKCgpSokoKUqJKokqyyrLKssoIAAhDSgoKCgoIACRSCgoIAECKCpoIAAhLigoKClIKmgqaCrLKCgoKClA==")]
+[assembly: go.GoPositionMap("compress/flate/huffman_bit_writer.go", "huffman_bit_writer.cs", "ACJMAAsQ7twACRQAFzKCAAoWgoKmgoKClIKCgoKClJSUgoKmgoKUpoKClIKCgoKCgoKCgoKCgoKCgoKClOiCgpSCgoKUgoKCgpSClIIAAh4ADwLKlIKCpoKClJSCgoKmgoKCpoKCgoKCgoKClIKCgoKCpoKCgpSCgoKCgpSUgoKCgoKmgoKCgqaCpqjigoKUipqokgACErKClIKUpoKClIKCgoKCgoKCgoKCgoKCgoKClAADEtKClIKClIKCgpSCgqaCgoKCgpSUlIK0grSC2oKClIKClIKCgqaCgpaSgpQAAhDygqaClIKCypSUlLyigpbIgoKUgoKCuIKCgriClLgAAhDygqaCuIKCpoCCgoLIpq7ygpSCgoKUgoKCuIKCpoKClKaClIKCqqKClIKCgqaCgoKCgoKmgoKCgoKCAAgSgoKCgqyygrimlJSCgpSY2IKCpoCCgoLIgoKClIKCgoKmgoKCgoKCgoKCgoKClIKClJSCrLKCgg==", "", "", "95=newHuffmanEncoder/1/3/5,newHuffmanEncoder/2/3/6,newHuffmanEncoder/3/3/7;302=bitLength/1/1/1;303=bitLength/1/2/1,bitLength/2/2/2;310=bitLength/1/2/1,bitLength/2/2/2")]
+[assembly: go.GoPositionMap("compress/flate/huffman_code.go", "huffman_code.cs", "AC5okoKmgKSCqJKCgoKCgoKmgsaCxoLGgqSUpoKCgoKUppKUgoKCgqYABCYADgKClIKCuIKuytSm3IKCypSCgoLKgoKCpoKUgpSCypSCpoDKlJSCpoL+gqaCgoKmgpSqwoKCgoLclIKCgpQAAxDiuJSUlIKCgpS4gqaUlJSmlMqigqaApIKmgMiigqaApIKClKaApII=")]
+[assembly: go.GoPositionMap("compress/flate/inflate.go", "inflate.cs", "ACRGgtyAAAoUggAKFoIAKWbYxIKqopKCgpSClIKUAAkUgqaCgoKCggAHEIKmgoKCpoKCgoKCgoKUgriCgpSCgoKCgoLcgpSmgqaUgoKCgoKUyriCuIKUpoKCgtwAKV6igoCCtoKCgoKClMaCgsaAgqSCgsbIooKCgoKClJSClIKCyoKClMzEtIKAgraCgpSCgoKUgpSCpoKCgIK2goKUgpSCyoKCgpSUgoKWkoKClKSCgoKUtIKCtIKCpIKAgraCgoKClIKCuILugqauwqqUpKaEkoKCgpSCgpSCgoKCgpS0graCtIK0grSCtIK0grSCtIKUgoKAgoK2goKmgoKCgIKCtoKClICCgsiUtJSCgoCCgraCgoK0griCgqaCpoSSgoKUlIKCgoKUuraCpoKCgoKUgoKCgqaCgoKmgqqigoKmgoKCgoKCpoKCgpSmgoKClJSokoKUpoKCgpSCgoKo+riSgoKCgoKClIKClIKCgoKUgoKCgoKUgoLKgoCCgoK2gqaUpoKEkoKUgpSClIKUuILugoIAAhYACAKUgoKCgoKCAAIU8pSCgoKCgoI=", "767-783:1")]
+[assembly: go.GoPositionMap("compress/flate/token.go", "token.cs", "ABIoABw6ABQskKaSqJCmkKSApICmkoKUgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.compress;

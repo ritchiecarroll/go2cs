@@ -118,6 +118,11 @@ internal static void racegoend() {
     @throw(raceˢ);
 }
 
+internal static uintptr racectxstart(uintptr spawnctx, uintptr racectx) {
+    @throw(raceˢ);
+    return 0;
+}
+
 internal static void racectxend(uintptr racectx) {
     @throw(raceˢ);
 }

@@ -7,6 +7,7 @@ using syscall = syscall_package;
 
 partial class socktest_package {
 
+// Sockets maps a socket descriptor to the status of socket.
 partial struct ΔSockets /*map[syscallꓸHandle, Status]*/;
 
 internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscallꓸHandle s) {

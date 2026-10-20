@@ -62,7 +62,6 @@ internal static slice<uint64> weirdLimbs51 = new uint64[]{
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1)
 }.slice();
-
 internal static slice<uint64> weirdLimbs52 = new uint64[]{
     0, 0, 0, 0, 0, 0,
     1,
@@ -75,7 +74,7 @@ internal static slice<uint64> weirdLimbs52 = new uint64[]{
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
     (uint64)((2251799813685248L) - 1), (uint64)((2251799813685248L) - 1),
-    ((uint64)1 << (int)(51)),
+    (uint64)1 << 51,
     (uint64)((2251799813685248L) + 1),
     (uint64)((4503599627370496L) - 19),
     (uint64)((4503599627370496L) - 1)
@@ -119,14 +118,17 @@ public static void TestMultiplyDistributesOverAdd(ж<testing.T> Ꮡt) {
         var t1 = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>();
         t1.Add(Ꮡx, Ꮡy);
         t1.Multiply(t1, Ꮡz);
+
         // Compute t2 = x*z + y*z
         var t2 = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>();
         var t3 = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>();
         t2.Multiply(Ꮡx, Ꮡz);
         t3.Multiply(Ꮡy, Ꮡz);
         t2.Add(t2, t3);
+
         return t1.Equal(t2) == 1 && isInBounds(t1) && isInBounds(t2);
     };
+
     {
         var err = quick.Check((multiplyDistributesOverAdd).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);
@@ -141,12 +143,14 @@ public static void TestMul64to128(ж<testing.T> Ꮡt) {
     if (r.lo != 0x19 || r.hi != 0) {
         Ꮡt.Errorf("lo-range wide mult failed, got %d + %d*(2**64)"u8, r.lo, r.hi);
     }
+
     a = (uint64)18014398509481983UL; // 2^54 - 1
     b = (uint64)18014398509481983UL; // 2^54 - 1
     r = mul64(a, b);
     if (r.lo != 0xff80000000000001UL || r.hi != 0xfffffffffffUL) {
         Ꮡt.Errorf("hi-range wide mult failed, got %d + %d*(2**64)"u8, r.lo, r.hi);
     }
+
     a = (uint64)1125899906842661UL;
     b = (uint64)2097155;
     r = mul64(a, b);
@@ -170,9 +174,11 @@ public static void TestSetBytesRoundTrip(ж<testing.T> Ꮡt) {
         @in = @in.Clone();
         ref var fe = ref heap(feʗp, out var Ꮡfe);
         Ꮡfe.SetBytes(@in[..]);
+
         // Mask the most significant bit as it's ignored by SetBytes. (Now
         // instead of earlier so we check the masking in SetBytes is working.)
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(7))) - 1);
+        @in[len(@in) - 1] &= (byte)((1 << 7) - 1);
+
         return bytes_package.Equal(@in[..], fe.Bytes()) && isInBounds(Ꮡfe);
     };
     {
@@ -180,10 +186,12 @@ public static void TestSetBytesRoundTrip(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("failed bytes->FE->bytes round-trip: %v"u8, err);
         }
     }
+
     var f2 = (global::go.crypto.@internal.fips140.edwards25519.field_package.Element feʗp, global::go.crypto.@internal.fips140.edwards25519.field_package.Element rʗp) => {
         ref var fe = ref heap(feʗp, out var Ꮡfe);
         ref var r = ref heap(rʗp, out var Ꮡr);
         Ꮡr.SetBytes(fe.Bytes());
+
         // Intentionally not using Equal not to go through Bytes again.
         // Calling reduce because both Generate and SetBytes can produce
         // non-canonical representations.
@@ -206,6 +214,7 @@ public static void TestSetBytesRoundTrip(ж<testing.T> Ꮡt) {
             b: new byte[]{199, 23, 106, 112, 61, 77, 216, 79, 186, 60, 11, 118, 13, 16, 103, 15, 42, 32, 83, 250, 44, 57, 204, 198, 78, 199, 253, 119, 146, 172, 3, 122}.slice()
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestSetBytesRoundTrip_feRTTest(), out var Ꮡtt);
         tt = vᴛ1;
@@ -231,14 +240,18 @@ public static void TestBytesBigEquivalence(ж<testing.T> Ꮡt) {
         ref var fe = ref heap(feʗp, out var Ꮡfe);
         ref var fe1 = ref heap(fe1ʗp, out var Ꮡfe1);
         Ꮡfe.SetBytes(@in[..]);
-        @in[len(@in) - 1] &= (byte)(((1 << (int)(7))) - 1); // mask the most significant bit
+
+        @in[len(@in) - 1] &= (byte)((1 << 7) - 1); // mask the most significant bit
         var b = @new<bigꓸInt>().SetBytes(swapEndianness(@in[..]));
         Ꮡfe1.fromBig(b);
+
         if (fe != fe1) {
             return false;
         }
+
         var buf = new slice<byte>(32);
         buf = swapEndianness(fe1.toBig().FillBytes(buf));
+
         return bytes_package.Equal(fe.Bytes(), buf) && isInBounds(Ꮡfe) && isInBounds(Ꮡfe1);
     };
     {
@@ -255,6 +268,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
     if (n.BitLen() > 32 * 8) {
         throw panic("edwards25519: invalid field element input size");
     }
+
     var buf = new slice<byte>(0, 32);
     foreach (var (_, vᴛ1) in n.Bits()) {
         var word = vᴛ1;
@@ -267,6 +281,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
             word >>= (int)(8);
         }
     }
+
     Ꮡv.SetBytes(buf[..32]);
     return Ꮡv;
 }
@@ -282,6 +297,7 @@ internal static ж<global::go.crypto.@internal.fips140.edwards25519.field_packag
 // toBig returns v as a big.Int.
 internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140.edwards25519.field_package.Element v) {
     var buf = v.Bytes();
+
     var words = new slice<big.Word>(32 * 8 / bits.UintSize);
     foreach (var (n, _) in words) {
         for (nint i = 0; i < bits.UintSize; i += 8) {
@@ -292,6 +308,7 @@ internal static ж<bigꓸInt> toBig(this ref global::go.crypto.@internal.fips140
             buf = buf[1..];
         }
     }
+
     return @new<bigꓸInt>().SetBits(words);
 }
 
@@ -302,39 +319,44 @@ public static void TestDecimalConstants(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("sqrtM1 is %v, expected %v"u8, sqrtM1.OrTypedNil(), exp.OrTypedNil());
         }
     }
+    // d is in the parent package, and we don't want to expose d or fromDecimal.
+    // dString := "37095705934669439343138083508754565189542113879843219016388785533085940283555"
+    // if exp := new(Element).fromDecimal(dString); d.Equal(exp) != 1 {
+    // 	t.Errorf("d is %v, expected %v", d, exp)
+    // }
 }
 
-// d is in the parent package, and we don't want to expose d or fromDecimal.
-// dString := "37095705934669439343138083508754565189542113879843219016388785533085940283555"
-// if exp := new(Element).fromDecimal(dString); d.Equal(exp) != 1 {
-// 	t.Errorf("d is %v, expected %v", d, exp)
-// }
 public static void TestSetBytesRoundTripEdgeCases(ж<testing.T> Ꮡt) {
+    // TODO: values close to 0, close to 2^255-19, between 2^255-19 and 2^255-1,
+    // and between 2^255 and 2^256-1. Test both the documented SetBytes
+    // behavior, and that Bytes reduces them.
 }
-
-// TODO: values close to 0, close to 2^255-19, between 2^255-19 and 2^255-1,
-// and between 2^255 and 2^256-1. Test both the documented SetBytes
-// behavior, and that Bytes reduces them.
 
 // Tests self-consistency between Multiply and Square.
 public static void TestConsistency(ж<testing.T> Ꮡt) {
     ref var x = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡx);
     ref var x2 = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡx2);
     ref var x2sq = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡx2sq);
+
     x = new Element(1, 1, 1, 1, 1);
     Ꮡx2.Multiply(Ꮡx, Ꮡx);
     Ꮡx2sq.Square(Ꮡx);
+
     if (x2 != x2sq) {
         Ꮡt.Fatalf("all ones failed\nmul: %x\nsqr: %x\n"u8, x2, x2sq);
     }
+
     array<byte> bytes = new(32);
+
     var (_, err) = io.ReadFull(rand.Reader, bytes[..]);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     Ꮡx.SetBytes(bytes[..]);
+
     Ꮡx2.Multiply(Ꮡx, Ꮡx);
     Ꮡx2sq.Square(Ꮡx);
+
     if (x2 != x2sq) {
         Ꮡt.Fatalf("all ones failed\nmul: %x\nsqr: %x\n"u8, x2, x2sq);
     }
@@ -345,10 +367,12 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     x = new Element(1, 1, 1, 1, 1);
     ref var y = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡy);
     y = new Element(5, 4, 3, 2, 1);
+
     nint eq = x.Equal(Ꮡx);
     if (eq != 1) {
         Ꮡt.Errorf("wrong about equality"u8);
     }
+
     eq = x.Equal(Ꮡy);
     if (eq != 0) {
         Ꮡt.Errorf("wrong about inequality"u8);
@@ -361,24 +385,31 @@ public static void TestInvert(ж<testing.T> Ꮡt) {
     var one = new Element(1, 0, 0, 0, 0);
     ref var xinv = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡxinv);
     ref var r = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡr);
+
     Ꮡxinv.Invert(Ꮡx);
     Ꮡr.Multiply(Ꮡx, Ꮡxinv);
     Ꮡr.reduce();
+
     if (one != r) {
         Ꮡt.Errorf("inversion identity failed, got: %x"u8, r);
     }
+
     array<byte> bytes = new(32);
+
     var (_, err) = io.ReadFull(rand.Reader, bytes[..]);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
     Ꮡx.SetBytes(bytes[..]);
+
     Ꮡxinv.Invert(Ꮡx);
     Ꮡr.Multiply(Ꮡx, Ꮡxinv);
     Ꮡr.reduce();
+
     if (one != r) {
         Ꮡt.Errorf("random inversion identity failed, got: %x for field element %x"u8, r, x);
     }
+
     ref var zero = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡzero);
     zero = new Element(nil);
     Ꮡx.Set(Ꮡzero);
@@ -397,18 +428,25 @@ public static void TestSelectSwap(ж<testing.T> Ꮡt) {
     a = new Element(358744748052810UL, 1691584618240980UL, 977650209285361UL, 1429865912637724UL, 560044844278676UL);
     ref var b = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡb);
     b = new Element(84926274344903UL, 473620666599931UL, 365590438845504UL, 1028470286882429UL, 2146499180330972UL);
+
     ref var c = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡc);
     ref var d = ref heap(new global::go.crypto.@internal.fips140.edwards25519.field_package.Element(), out var Ꮡd);
+
     Ꮡc.Select(Ꮡa, Ꮡb, 1);
     Ꮡd.Select(Ꮡa, Ꮡb, 0);
+
     if (c.Equal(Ꮡa) != 1 || d.Equal(Ꮡb) != 1) {
         Ꮡt.Errorf("Select failed"u8);
     }
+
     c.Swap(Ꮡd, 0);
+
     if (c.Equal(Ꮡa) != 1 || d.Equal(Ꮡb) != 1) {
         Ꮡt.Errorf("Swap failed"u8);
     }
+
     c.Swap(Ꮡd, 1);
+
     if (c.Equal(Ꮡb) != 1 || d.Equal(Ꮡa) != 1) {
         Ꮡt.Errorf("Swap failed"u8);
     }
@@ -421,14 +459,18 @@ public static void TestMult32(ж<testing.T> Ꮡt) {
         for (nint i = 0; i < 100; i++) {
             t1.Mult32(Ꮡx, y);
         }
+
         var ty = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>();
         ty.Value.l0 = (uint64)y;
+
         var t2 = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>();
         for (nint i = 0; i < 100; i++) {
             t2.Multiply(Ꮡx, ty);
         }
+
         return t1.Equal(t2) == 1 && isInBounds(t1) && isInBounds(t2);
     };
+
     {
         var err = quick.Check((mult32EquivalentToMul).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);
@@ -444,46 +486,47 @@ internal partial struct TestSqrtRatio_test /*dyn*/ {
 }
 
 public static void TestSqrtRatio(ж<testing.T> Ꮡt) {
-// If u is 0, the function is defined to return (0, TRUE), even if v
-// is zero. Note that where used in this package, the denominator v
-// is never zero.
-// 0/1 == 0²
-// If u is non-zero and v is zero, defined to return (0, FALSE).
-// 2/1 is not square in this field.
-// 4/1 == 2²
-// 1/4 == (2⁻¹)² == (2^(p-2))² per Euler's theorem
     slice<TestSqrtRatio_test> tests = new TestSqrtRatio_test[]{
+        // If u is 0, the function is defined to return (0, TRUE), even if v
+        // is zero. Note that where used in this package, the denominator v
+        // is never zero.
         new(
             decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8),
             decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8),
             1, decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8)
         ),
+        // 0/1 == 0²
         new(
             decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8),
             decodeHex("0100000000000000000000000000000000000000000000000000000000000000"u8),
             1, decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8)
         ),
+        // If u is non-zero and v is zero, defined to return (0, FALSE).
         new(
             decodeHex("0100000000000000000000000000000000000000000000000000000000000000"u8),
             decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8),
             0, decodeHex("0000000000000000000000000000000000000000000000000000000000000000"u8)
         ),
+        // 2/1 is not square in this field.
         new(
             decodeHex("0200000000000000000000000000000000000000000000000000000000000000"u8),
             decodeHex("0100000000000000000000000000000000000000000000000000000000000000"u8),
             0, decodeHex("3c5ff1b5d8e4113b871bd052f9e7bcd0582804c266ffb2d4f4203eb07fdb7c54"u8)
         ),
+        // 4/1 == 2²
         new(
             decodeHex("0400000000000000000000000000000000000000000000000000000000000000"u8),
             decodeHex("0100000000000000000000000000000000000000000000000000000000000000"u8),
             1, decodeHex("0200000000000000000000000000000000000000000000000000000000000000"u8)
         ),
+        // 1/4 == (2⁻¹)² == (2^(p-2))² per Euler's theorem
         new(
             decodeHex("0100000000000000000000000000000000000000000000000000000000000000"u8),
             decodeHex("0400000000000000000000000000000000000000000000000000000000000000"u8),
             1, decodeHex("f6ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff3f"u8)
         )
     }.slice();
+
     foreach (var (i, tt) in tests) {
         var (u, _) = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().SetBytes(tt.u);
         var (v, _) = @new<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>().SetBytes(tt.v);
@@ -500,18 +543,23 @@ public static void TestCarryPropagate(ж<testing.T> Ꮡt) {
         a = a.Clone();
         var t1 = Ꮡ(new Element(a[0], a[1], a[2], a[3], a[4]));
         var t2 = Ꮡ(new Element(a[0], a[1], a[2], a[3], a[4]));
+
         t1.carryPropagate();
         t2.carryPropagateGeneric();
+
         if (t1.Value != t2.Value) {
             Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, t1.OrTypedNil(), t2.OrTypedNil());
         }
+
         return t1.Value == t2.Value && isInBounds(t2);
     };
+
     {
         var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);
         }
     }
+
     if (!asmLikeGeneric(new uint64[]{0xffffffffffffffffUL, 0xffffffffffffffffUL, 0xffffffffffffffffUL, 0xffffffffffffffffUL, 0xffffffffffffffffUL}.array())) {
         Ꮡt.Errorf("failed for {0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff}"u8);
     }
@@ -523,13 +571,17 @@ public static void TestFeSquare(ж<testing.T> Ꮡt) {
         t1 = a;
         ref var t2 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡt2);
         t2 = a;
+
         feSquareGeneric(Ꮡt1, ref (Ꮡt1).DerefOrNull());
         feSquare(Ꮡt2, ref (Ꮡt2).DerefOrNull());
+
         if (t1 != t2) {
             Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, t1, t2);
         }
+
         return t1 == t2 && isInBounds(Ꮡt2);
     };
+
     {
         var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);
@@ -547,14 +599,18 @@ public static void TestFeMul(ж<testing.T> Ꮡt) {
         b1 = b;
         ref var b2 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡb2);
         b2 = b;
+
         feMulGeneric(Ꮡa1, ref (Ꮡa1).DerefOrNull(), ref (Ꮡb1).DerefOrNull());
         feMul(Ꮡa2, ref (Ꮡa2).DerefOrNull(), ref (Ꮡb2).DerefOrNull());
+
         if (a1 != a2 || b1 != b2) {
             Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, a1, a2);
             Ꮡt.Logf("got: %#v,\nexpected: %#v"u8, b1, b2);
         }
+
         return a1 == a2 && isInBounds(Ꮡa2) && b1 == b2 && isInBounds(Ꮡb2);
     };
+
     {
         var err = quick.Check((asmLikeGeneric).OrTypedNilFunc(), quickCheckConfig(1024)); if (err != default!) {
             Ꮡt.Error(err);

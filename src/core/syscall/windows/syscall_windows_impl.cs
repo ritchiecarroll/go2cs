@@ -395,8 +395,7 @@ partial class syscall_package
     // is eight bytes of two four-byte fields, so the stack buffer IS the layout. A LOCAL buffer for
     // the duration of one call, never a field, for the reason stated in this file's header.
     //
-    // SetsockoptIPv6Mreq is deliberately NOT taken: Go returns EWINDOWS there, so there is no
-    // behaviour to preserve and a "fix" would invent one.
+    // SetsockoptIPv6Mreq is the same seam over `ipv6_mreq`; see its body below.
     public static unsafe error /*err*/ SetsockoptIPMreq(ΔHandle fd, nint level, nint opt, ж<IPMreq> Ꮡmreq) {
         byte* buffer = stackalloc byte[nativeIPMreqLen];
 
@@ -417,6 +416,34 @@ partial class syscall_package
 
     // sizeof(struct ip_mreq): two in_addr, no padding.
     private const int nativeIPMreqLen = 8;
+
+    // `ipv6_mreq` is an INLINE in6_addr (16 bytes) then the interface index as a ULONG -- 20 bytes.
+    //
+    // Go returned EWINDOWS here until 1.25, so this was left to the generated body; since 1.25 it is
+    // a real Setsockopt over the struct (syscall_windows.go), which net's joinIPv6Group reaches on
+    // IPV6_JOIN_GROUP. Converted, IPv6Mreq holds Multiaddr as a golib `array<byte>` reference, so
+    // the generated `Ꮡmreq.Reinterpret<IPv6Mreq, byte>()` has the defect SetsockoptIPMreq's comment
+    // describes. Same remedy: the stack buffer is the native image, filled field by field. The
+    // linux twin is structclass_linux_impl.cs's SetsockoptIPv6Mreq.
+    public static unsafe error /*err*/ SetsockoptIPv6Mreq(ΔHandle fd, nint level, nint opt, ж<IPv6Mreq> Ꮡmreq) {
+        byte* buffer = stackalloc byte[nativeIPv6MreqLen];
+
+        // A nil *IPv6Mreq reaches the kernel as a zeroed option, as for SetsockoptIPMreq.
+        if (Ꮡmreq is not null && !Ꮡmreq.IsNilPointer) {
+            ref var mreq = ref Ꮡmreq.Value;
+
+            for (nint i = 0; i < 16; i++) {
+                buffer[i] = mreq.Multiaddr[i];
+            }
+
+            *(uint32*)(buffer + 16) = mreq.Interface;
+        }
+
+        return Setsockopt(fd, (int32)level, (int32)opt, (ж<byte>)(uintptr)(void*)buffer, nativeIPv6MreqLen);
+    }
+
+    // sizeof(struct ipv6_mreq): in6_addr (16) then ULONG (4), no padding.
+    private const int nativeIPv6MreqLen = 20;
 
     // ConnectEx is the DIAL half of the submit seam and was hand-owned here (for the sockaddr layout
     // alone) before that seam existed. Two things changed when it landed.

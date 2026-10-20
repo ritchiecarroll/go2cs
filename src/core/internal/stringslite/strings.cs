@@ -45,8 +45,8 @@ public static nint Index(@string s, @string substr) {
         return -1;
     }
     case {} when n <= bytealg.MaxLen: {
+        // Use brute force when s and substr both are small
         if (len(s) <= bytealg.MaxBruteForce) {
-            // Use brute force when s and substr both are small
             return bytealg.IndexString(s, substr);
         }
         var c0Δ2 = substr[0];
@@ -80,7 +80,6 @@ public static nint Index(@string s, @string substr) {
         }
         return -1;
     }}
-
     var c0 = substr[0];
     var c1 = substr[1];
     nint i = 0;
@@ -99,7 +98,7 @@ public static nint Index(@string s, @string substr) {
         }
         i++;
         fails++;
-        if (fails >= 4 + (i >> (int)(4)) && i < t) {
+        if (fails >= 4 + (i >> 4) && i < t) {
             // See comment in ../bytes/bytes.go.
             nint j = bytealg.IndexRabinKarp(s.slice(i), substr);
             if (j < 0) {

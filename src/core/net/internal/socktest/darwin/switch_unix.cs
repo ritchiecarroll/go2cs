@@ -6,6 +6,7 @@ namespace go.net.@internal;
 
 partial class socktest_package {
 
+// Sockets maps a socket descriptor to the status of socket.
 partial struct ΔSockets /*map[nint, Status]*/;
 
 internal static ж<Status> sockso(this ж<Switch> Ꮡsw, nint s) {

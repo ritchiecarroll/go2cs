@@ -43,10 +43,20 @@ using static go.io.fs_package;
 [assembly: GoImplement<PathError, error>(Pointer = true)]
 [assembly: GoImplement<dirInfo, DirEntry>]
 [assembly: GoImplement<subFS, FS>(Pointer = true)]
+[assembly: GoImplement<subFS, GlobFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadDirFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadFileFS>(Pointer = true)]
+[assembly: GoImplement<subFS, ReadLinkFS>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -56,14 +66,15 @@ using static go.io.fs_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAki4oKCgoSCgoKUgpSCgoKCgoKUgoKEgoSCgpYAAhLigqiChIKCgoKU")]
-[assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ACtsAA0CgpaUqIKCgpSCgpSClAA+hgGSkpKSloCigKKAooCigAA3XoKCgoKCgoKmgoKUgoKClJSUqqKqoqiSqJIACRSApIDmkoI=")]
-[assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgriAgqSCgIKkloKEgqiCloKCgpSCgoKmqJKUpAAEEPKCgoKWgoKCgpSCpqqigpS2")]
-[assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIKmgoKUlIKCloKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]
-[assembly: go.GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIKmgoKUlIKAgoKCuIKCgoKUgoKCgpQ=")]
-[assembly: go.GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCpoKClJI=")]
-[assembly: go.GoPositionMap("io/fs/sub.go", "sub.cs", "ABJEAA4CgpSClICCpAAHEpKClKiSgpSClKiSgIKAgsbWgoKClILWgoKClIKmgoKClIKmlICCpIKWgoKCgoKUlNaigpSSgpQ=")]
-[assembly: go.GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygADaJKAgpSUpoKUgoKClKiCgoCCgpS2AAIeAAwCgoKUlIKU")]
+[assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
+[assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAAM16CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
+[assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
+[assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]
+[assembly: go.GoPositionMap("io/fs/readfile.go", "readfile.cs", "ABhAAAoCgIK2goKUpIKAgoKCyIKCgoKUgoKCgpQ=")]
+[assembly: go.GoPositionMap("io/fs/readlink.go", "readlink.cs", "ABY0soKClAACENKCgpQ=")]
+[assembly: go.GoPositionMap("io/fs/stat.go", "stat.cs", "ABAo4oCCtoKClJI=")]
+[assembly: go.GoPositionMap("io/fs/sub.go", "sub.cs", "ABJGAA8CgpSClICCpKaSkpKSAAYQkoKUqJKClIKUqJKAgoCCxtaCgoKUgtaCgoKUgqaCgoKUgtaCgoKUgoKU1oKCgpSCgpSmlICCpIKmgoKCgoKUlNaigpSSgpQ=")]
+[assembly: go.GoPositionMap("io/fs/walk.go", "walk.cs", "AA0eygAyaJKAgpSUtoKUgoKClLiCgoCCgpS2AAIeAAwCgoKUlIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.io;
@@ -89,6 +100,7 @@ public static partial class fs_package
     public partial interface ReadDirFS {}
     public partial interface ReadDirFile {}
     public partial interface ReadFileFS {}
+    public partial interface ReadLinkFS {}
     public partial interface StatFS {}
     public partial interface SubFS {}
     public partial struct FileMode {}

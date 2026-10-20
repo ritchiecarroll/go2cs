@@ -128,24 +128,18 @@ private static unsafe partial IntPtr win32GetProcAddress(IntPtr hModule, byte* l
 // putting it on SyscallN alone would cover one of eight entries. `fn` is checked as well as the
 // arguments: a token reaching the CALL TARGET is the same defect one step worse.
 //
-// SCOPE, stated because it bounds what this can promise: DIRECT pointer arguments only. A token
-// reached through a structure the trampoline does not decode is invisible here and stays the
-// mirror-and-transcribe remedy's business -- this door narrows the class, it does not close it.
-private static void refuseManagedPointerTokens(nuint fn, ReadOnlySpan<uintptr> a) {
+// SCOPE (amended 2026-10-16, the deep funnel). The call target is still refused here. An ARGUMENT token
+// is no longer refused at this door: syscalln hands the call to NativeStructMarshal.CallDeep, which
+// copies each token pointee to native memory at Go's layout -- pointer fields included, identity-mapped,
+// a token naming an array element carrying the run to the end of its backing -- and decodes every copy
+// back after the call. What has no native image (a string, slice, map, channel, func or interface
+// field) is refused there, by name. Go 1.26 added auto-converted callers of this shape
+// (WSADuplicateSocket under net.FileConn, SetEntriesInAcl under the os tests) that a hand-owned
+// blittable mirror per wrapper would have to chase one at a time.
+private static void refuseTokenCallTarget(nuint fn) {
     if (ManagedPointerTokens.IsTaggedToken(fn)) {
         throw panic("syscall: call target is a managed pointer token, not an address -- the " +
                     "pointee is reference-bearing and has no address to call");
-    }
-
-    for (int i = 0; i < a.Length; i++) {
-        if (!ManagedPointerTokens.IsTaggedToken((nuint)a[i])) {
-            continue;
-        }
-
-        throw panic($"syscall: argument {i} is a managed pointer token, not an address -- the " +
-                    "pointee is reference-bearing, so passing it to native code would read or " +
-                    "write memory that is not the caller's. Hand-own this wrapper against a " +
-                    "blittable mirror (see zsyscall_windows_version_impl.cs)");
     }
 }
 
@@ -154,9 +148,83 @@ private static void refuseManagedPointerTokens(nuint fn, ReadOnlySpan<uintptr> a
 // returns (always 0 here) and err is GetLastError after the call (cleared first, so a
 // succeeding API that does not touch last-error reports 0, matching Go).
 private static unsafe (uintptr r1, uintptr r2, Errno err) syscalln(nuint fn, ReadOnlySpan<uintptr> a) {
-    nuint r;
+    refuseTokenCallTarget(fn);
 
-    refuseManagedPointerTokens(fn, a);
+    if (a.Length > MaxSyscallArgs) {
+        throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
+    }
+
+    Span<nuint> words = stackalloc nuint[a.Length];
+    bool anyToken = false;
+
+    for (int i = 0; i < a.Length; i++) {
+        words[i] = (nuint)a[i];
+        anyToken |= ManagedPointerTokens.IsTaggedToken(words[i]);
+    }
+
+    // A reference-bearing pointee crosses as a deep native copy (NativeStructMarshal.CallDeep); every
+    // other call passes its words as they are. Last-error is read inside the call, before any decode.
+    if (anyToken) {
+        refuseRetainingProc(fn);
+    }
+
+    (nuint r, int lastError) = anyToken
+        ? NativeStructMarshal.CallDeep(words, fn, &callNative)
+        : callNative(fn, words);
+
+    return (r, 0, (Errno)(uint32)lastError);
+}
+
+private const int MaxSyscallArgs = 18;
+
+// RETAINED POINTERS. CallDeep frees every copy when the call returns, so a native function that KEEPS a
+// pointer argument (or one reached through it) past the call would write freed memory. Such a function is
+// refused by name before any copy is made. Keyed by "dll!proc"; empty today -- the 2026-10-16 census of
+// the live funnel sites found no retaining callee. A name added here needs its own hand-owned wrapper.
+private static readonly string[] RetainingProcs = [];
+
+private static System.Collections.Generic.Dictionary<nuint, string>? s_retainingProcAddresses;
+
+private static unsafe void refuseRetainingProc(nuint fn) {
+    if (RetainingProcs.Length == 0) {
+        return;
+    }
+
+    System.Collections.Generic.Dictionary<nuint, string>? addresses = System.Threading.Volatile.Read(ref s_retainingProcAddresses);
+
+    if (addresses is null) {
+        addresses = new System.Collections.Generic.Dictionary<nuint, string>();
+
+        foreach (string name in RetainingProcs) {
+            int bang = name.IndexOf('!');
+            IntPtr module = win32LoadLibraryEx(name[..bang], IntPtr.Zero, LOAD_LIBRARY_SEARCH_SYSTEM32);
+
+            if (module == IntPtr.Zero) {
+                continue;
+            }
+
+            byte[] proc = System.Text.Encoding.ASCII.GetBytes(name[(bang + 1)..] + "\0");
+
+            fixed (byte* procName = proc) {
+                IntPtr address = win32GetProcAddress(module, procName);
+
+                if (address != IntPtr.Zero) {
+                    addresses[(nuint)(nint)address] = name;
+                }
+            }
+        }
+
+        System.Threading.Volatile.Write(ref s_retainingProcAddresses, addresses);
+    }
+
+    if (addresses.TryGetValue(fn, out string? retaining)) {
+        throw panic($"syscall: {retaining} keeps a pointer argument past the call, so a Go value with no " +
+                    "native address cannot be copied for it; it needs a hand-owned wrapper");
+    }
+}
+
+private static unsafe (nuint r, int lastError) callNative(nuint fn, ReadOnlySpan<nuint> a) {
+    nuint r;
 
     Marshal.SetLastSystemError(0);
 
@@ -183,7 +251,7 @@ private static unsafe (uintptr r1, uintptr r2, Errno err) syscalln(nuint fn, Rea
         default: throw new ArgumentOutOfRangeException(nameof(a), "too many syscall arguments");
     }
 
-    return (r, 0, (Errno)(uint32)Marshal.GetLastSystemError());
+    return (r, Marshal.GetLastSystemError());
 }
 
 // The runtime-provided DLL loader entry points that OTHER packages reach by symbol via

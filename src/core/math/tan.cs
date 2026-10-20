@@ -58,26 +58,20 @@ partial class math_package {
 //
 //   Stephen L. Moshier
 //   moshier@na-net.ornl.gov
-// 0xc0c992d8d24f3f38
-// 0x413199eca5fc9ddd
-// 0xc1711fead3299176
+
 // tan coefficients
 internal static array<float64> _tanP = new float64[]{
-    -1.30936939181383777646e4D,
-    1.15351664838587416140e6D,
-    -1.79565251976484877988e7D
+    -1.30936939181383777646e4D, // 0xc0c992d8d24f3f38
+    1.15351664838587416140e6D, // 0x413199eca5fc9ddd
+    -1.79565251976484877988e7D // 0xc1711fead3299176
 }.array();
 
-// 0x40cab8a5eeb36572
-// 0xc13427bc582abc96
-// 0x4177d98fc2ead8ef
-// 0xc189afe03cbe5a31
 internal static array<float64> _tanQ = new float64[]{
     1.00000000000000000000e0D,
-    1.36812963470692954678e4D,
-    -1.32089234440210967447e6D,
-    2.50083801823357915839e7D,
-    -5.38695755929454629881e7D
+    1.36812963470692954678e4D, // 0x40cab8a5eeb36572
+    -1.32089234440210967447e6D, // 0xc13427bc582abc96
+    2.50083801823357915839e7D, // 0x4177d98fc2ead8ef
+    -5.38695755929454629881e7D // 0xc189afe03cbe5a31
 }.array();
 
 // Tan returns the tangent of the radian argument x.
@@ -121,20 +115,23 @@ internal static float64 tan(float64 x) {
     } else {
         j = (uint64)(x * /* (4 / Pi) */ 1.2732395447351628D); // integer part of x/(Pi/4), as integer for tests on the phase angle
         y = (float64)j; // integer part of x/(Pi/4), as float
+
         /* map zeros and singularities to origin */
-        if ((uint64)(j & 1) == 1) {
+        if ((j & 1) == 1) {
             j++;
             y++;
         }
+
         z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
     }
     var zz = z * z;
+
     if (zz > 1e-14D){
         y = z + z * (zz * (((_tanP[0] * zz) + _tanP[1]) * zz + _tanP[2]) / ((((zz + _tanQ[1]) * zz + _tanQ[2]) * zz + _tanQ[3]) * zz + _tanQ[4]));
     } else {
         y = z;
     }
-    if ((uint64)(j & 2) == 2) {
+    if ((j & 2) == 2) {
         y = -1D / y;
     }
     if (sign) {

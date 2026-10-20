@@ -33,7 +33,7 @@ public static @string Error(this KeySizeError k) {
 }
 
 // NewCipher creates and returns a new [cipher.Block].
-// The key argument should be the AES key,
+// The key argument must be the AES key,
 // either 16, 24, or 32 bytes to select
 // AES-128, AES-192, or AES-256.
 public static (cipher.Block, error) NewCipher(slice<byte> key) {
@@ -46,7 +46,6 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
         break;
         break;
     }}
-
     if (boring.Enabled) {
         return boring.NewAESCipher(key);
     }

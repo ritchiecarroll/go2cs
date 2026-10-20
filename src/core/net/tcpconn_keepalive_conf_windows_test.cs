@@ -22,8 +22,6 @@ internal static UntypedInt syscall_TCP_KEEPINTVL => /* windows.TCP_KEEPINTVL */ 
 internal static readonly object skippingOnWindowsˢ = (@string)"skipping on windows"u8;
 
 internal static void maybeSkipKeepAliveTest(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     // TODO(panjf2000): Unlike Unix-like OS's, old Windows (prior to Windows 10, version 1709)
     // 	doesn't provide any ways to retrieve the current TCP keep-alive settings, therefore
     // 	we're not able to run the test suite similar to Unix-like OS's on Windows.

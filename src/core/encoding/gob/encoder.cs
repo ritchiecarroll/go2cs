@@ -55,8 +55,7 @@ internal static void popWriter(this ref Encoder enc) {
 }
 
 internal static void setError(this ref Encoder enc, error err) {
-    if (enc.err == default!) {
-        // remember the first.
+    if (enc.err == default!) { // remember the first.
         enc.err = err;
     }
 }
@@ -98,10 +97,10 @@ internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffe
 // it's been sent before.
 internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflectꓸType actual) {
     bool sent = default!;
-
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
+
     {
         var (_, alreadySent) = enc.sent[actual, ꟷ]; if (alreadySent) {
             return false;
@@ -121,6 +120,7 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
     if (enc.err != default!) {
         return sent;
     }
+
     // Remember we've sent this type, both what the user gave us and the base type.
     enc.sent[ut.@base] = info.Value.id;
     if (!AreEqual(ut.user, ut.@base)) {
@@ -145,7 +145,6 @@ internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer 
             Ꮡenc.sendType(w, Ꮡstate, st.Elem());
         }
     }
-
     return true;
 }
 
@@ -159,48 +158,49 @@ internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<
         // we need to tell the other side that the base type is a GobEncoder.
         return Ꮡenc.sendActualType(w, Ꮡstate, ut, (~ut).@base);
     }
+
     // It's a concrete value, so drill down to the base type.
     {
         var rt = ut.Value.@base;
         var exprᴛ1 = rt.Kind();
         if (exprᴛ1 == reflect.ΔSlice) {
             do {
+                // If it's []uint8, don't send; it's considered basic.
                 if (rt.Elem().Kind() == reflect.Uint8) {
-                    // Basic types and interfaces do not need to be described.
-                    // If it's []uint8, don't send; it's considered basic.
                     return sent;
                 }
+                // Otherwise we do send.
                 break;
             } while (false);
         }
         else if (exprᴛ1 == reflect.Array) {
             do {
+                // arrays must be sent so we know their lengths and element types.
                 break;
             } while (false);
         }
         else if (exprᴛ1 == reflect.Map) {
             do {
+                // maps must be sent so we know their lengths and key/value types.
                 break;
             } while (false);
         }
         else if (exprᴛ1 == reflect.Struct) {
             do {
+                // structs must be sent so we know their fields.
                 break;
             } while (false);
         }
         else if (exprᴛ1 == reflect.Chan || exprᴛ1 == reflect.Func) {
+            // If we get here, it's a field of a struct; ignore it.
             return sent;
         }
         else { /* default: */
+            // Basic types and interfaces do not need to be described.
             return sent;
         }
     }
 
-    // Otherwise we do send.
-    // arrays must be sent so we know their lengths and element types.
-    // maps must be sent so we know their lengths and key/value types.
-    // structs must be sent so we know their fields.
-    // If we get here, it's a field of a struct; ignore it.
     return Ꮡenc.sendActualType(w, Ꮡstate, ut, (~ut).@base);
 }
 
@@ -273,30 +273,37 @@ public static error EncodeValue(this ж<Encoder> Ꮡenc, reflectꓸValue value) 
         if (value.Kind() == reflect.ΔPointer && value.IsNil()) {
             throw panic("gob: cannot encode nil pointer of type " + value.Type().String());
         }
+
         // Make sure we're single-threaded through here, so multiple
         // goroutines can share an encoder.
         enc.mutex.Lock();
         ᒐd1 = true;
+
         // Remove any nested writers remaining due to previous errors.
         enc.w = enc.w[0..1];
+
         var (ut, err) = validUserType(value.Type());
         if (err != default!) {
             return err;
         }
+
         enc.err = default!;
         enc.byteBuf.Reset();
         enc.byteBuf.Write(spaceForLength);
         var state = Ꮡenc.newEncoderState(Ꮡenc.of(Encoder.ᏑbyteBuf));
+
         Ꮡenc.sendTypeDescriptor(enc.writer(), state, ut);
         enc.sendTypeId(state, ut);
         if (enc.err != default!) {
             return enc.err;
         }
+
         // Encode the object.
         Ꮡenc.encode((~state).b, value, ut);
         if (enc.err == default!) {
             enc.writeMessage(enc.writer(), (~state).b);
         }
+
         enc.freeEncoderState(state);
         return enc.err;
     }

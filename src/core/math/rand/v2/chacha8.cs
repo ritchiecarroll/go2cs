@@ -31,8 +31,8 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
 // Seed resets the ChaCha8 to behave the same way as NewChaCha8(seed).
 public static void Seed(this ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     Ꮡc.of(ChaCha8.Ꮡstate).Init(seed);
     c.readLen = 0;
     c.readBuf = new byte[]{}.array(8);
@@ -60,8 +60,8 @@ public static uint64 Uint64(this ж<ChaCha8> Ꮡc) {
 public static (nint n, error err) Read(this ж<ChaCha8> Ꮡc, slice<byte> p) {
     nint n = default!;
     error err = default!;
-
     ref var c = ref Ꮡc.DerefOrNull();
+
     if (c.readLen > 0) {
         n = copy(p, c.readBuf.slice(len(c.readBuf) - c.readLen));
         c.readLen -= n;
@@ -127,8 +127,6 @@ public static (slice<byte>, error) AppendBinary(this ж<ChaCha8> Ꮡc, slice<byt
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
 public static (slice<byte>, error) MarshalBinary(this ж<ChaCha8> Ꮡc) {
-    ref var c = ref Ꮡc.DerefOrNull();
-
     // the maximum length of (chacha8rand.Marshal + c.readBuf + "readbuf:") is 64
     return Ꮡc.AppendBinary(new slice<byte>(0, 64));
 }

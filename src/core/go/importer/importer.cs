@@ -25,6 +25,8 @@ using global::go.go.@internal;
 
 partial class importer_package {
 
+// A Lookup function returns a reader to access package data for
+// a given import path, or an error if no matching package is found.
 // type Lookup is a methodless func type — rendered inline as its base delegate
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -73,6 +75,7 @@ public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string comp
         if (lookup != default!) {
             throw panic("source importer for custom import path lookup not supported (issue #13847).");
         }
+
         return new srcimporter.ImporterжImporter(srcimporter.New(Δbuild.ᏑDefault, Ꮡfset, new map<@string, ж<types.Package>>()));
     }
 
@@ -84,6 +87,8 @@ public static types.Importer ForCompiler(ж<token.FileSet> Ꮡfset, @string comp
 //
 // Deprecated: Use [ForCompiler], which populates a FileSet
 // with the positions of objects created by the importer.
+//
+//go:fix inline
 public static types.Importer For(@string compiler, Func<@string, (io.ReadCloser, error)> lookup) {
     return ForCompiler(token.NewFileSet(), compiler, lookup);
 }
@@ -108,8 +113,7 @@ partial struct gcimports {
 }
 
 internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) {
-    return m.ImportFrom(path, ""u8, /* no vendoring */
- 0);
+    return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
 
 internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
@@ -127,8 +131,7 @@ partial struct gccgoimports {
 }
 
 internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) {
-    return m.ImportFrom(path, ""u8, /* no vendoring */
- 0);
+    return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
 
 internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {

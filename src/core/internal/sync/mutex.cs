@@ -28,6 +28,31 @@ internal static UntypedInt mutexLocked => /* 1 << iota */ 1; // mutex is locked
 internal static UntypedInt mutexWoken => 2;
 internal static UntypedInt mutexStarving => 4;
 internal static UntypedInt mutexWaiterShift => /* iota */ 3;
+
+// Mutex fairness.
+//
+// Mutex can be in 2 modes of operations: normal and starvation.
+// In normal mode waiters are queued in FIFO order, but a woken up waiter
+// does not own the mutex and competes with new arriving goroutines over
+// the ownership. New arriving goroutines have an advantage -- they are
+// already running on CPU and there can be lots of them, so a woken up
+// waiter has good chances of losing. In such case it is queued at front
+// of the wait queue. If a waiter fails to acquire the mutex for more than 1ms,
+// it switches mutex to the starvation mode.
+//
+// In starvation mode ownership of the mutex is directly handed off from
+// the unlocking goroutine to the waiter at the front of the queue.
+// New arriving goroutines don't try to acquire the mutex even if it appears
+// to be unlocked, and don't try to spin. Instead they queue themselves at
+// the tail of the wait queue.
+//
+// If a waiter receives ownership of the mutex and sees that either
+// (1) it is the last waiter in the queue, or (2) it waited for less than 1 ms,
+// it switches mutex back to normal operation mode.
+//
+// Normal mode has considerably better performance as a goroutine can acquire
+// a mutex several times in a row even if there are blocked waiters.
+// Starvation mode is important to prevent pathological cases of tail latency.
 internal static UntypedFloat starvationThresholdNs => 1e6;
 
 // Lock locks m.
@@ -57,12 +82,14 @@ public static bool TryLock(this ж<Mutex> Ꮡm) {
     if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) != 0) {
         return false;
     }
+
     // There may be a goroutine waiting for the mutex, but we are
     // running now and can try to grab the mutex before that
     // goroutine wakes up.
-    if (!atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, (int32)(old | (int32)mutexLocked))) {
+    if (!atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, old | (int32)mutexLocked)) {
         return false;
     }
+
     if (race.Enabled) {
         race.Acquire((uintptr)@unsafe.Pointer.FromRef(ref m));
     }
@@ -87,7 +114,7 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
             // Active spinning makes sense.
             // Try to set mutexWoken flag to inform Unlock
             // to not wake other blocked goroutines.
-            if (!awoke && (int32)(old & (int32)mutexWoken) == 0 && (old >> (int)(mutexWaiterShift)) != 0 && atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, (int32)(old | (int32)mutexWoken))) {
+            if (!awoke && (old & (int32)mutexWoken) == 0 && old >> (int)(mutexWaiterShift) != 0 && atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, old | (int32)mutexWoken)) {
                 awoke = true;
             }
             runtime_doSpin();
@@ -97,7 +124,7 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
         }
         var @new = old;
         // Don't try to acquire starving mutex, new arriving goroutines must queue.
-        if ((int32)(old & (int32)mutexStarving) == 0) {
+        if ((old & (int32)mutexStarving) == 0) {
             @new |= (int32)(mutexLocked);
         }
         if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexStarving))) != 0) {
@@ -107,13 +134,13 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
         // But if the mutex is currently unlocked, don't do the switch.
         // Unlock expects that starving mutex has waiters, which will not
         // be true in this case.
-        if (starving && (int32)(old & (int32)mutexLocked) != 0) {
+        if (starving && (old & (int32)mutexLocked) != 0) {
             @new |= (int32)(mutexStarving);
         }
         if (awoke) {
             // The goroutine has been woken from sleep,
             // so we need to reset the flag in either case.
-            if ((int32)(@new & (int32)mutexWoken) == 0) {
+            if ((@new & (int32)mutexWoken) == 0) {
                 @throw(syncInconsistentMutexˢ);
             }
             @new &= ~(int32)(mutexWoken);
@@ -130,16 +157,16 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
             runtime_SemacquireMutex(Ꮡm.of(Mutex.Ꮡsema), queueLifo, 2);
             starving = starving || runtime_nanotime() - waitStartTime > (int64)starvationThresholdNs;
             old = m.state;
-            if ((int32)(old & (int32)mutexStarving) != 0) {
+            if ((old & (int32)mutexStarving) != 0) {
                 // If this goroutine was woken and mutex is in starvation mode,
                 // ownership was handed off to us but mutex is in somewhat
                 // inconsistent state: mutexLocked is not set and we are still
                 // accounted as waiter. Fix that.
-                if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexWoken))) != 0 || (old >> (int)(mutexWaiterShift)) == 0) {
+                if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexWoken))) != 0 || old >> (int)(mutexWaiterShift) == 0) {
                     @throw(syncInconsistentMutexˢ);
                 }
                 var delta = (int32)(mutexLocked - (1 << (int)(mutexWaiterShift)));
-                if (!starving || (old >> (int)(mutexWaiterShift)) == 1) {
+                if (!starving || old >> (int)(mutexWaiterShift) == 1) {
                     // Exit starvation mode.
                     // Critical to do it here and consider wait time.
                     // Starvation mode is so inefficient, that two goroutines
@@ -156,6 +183,7 @@ internal static void lockSlow(this ж<Mutex> Ꮡm) {
             old = m.state;
         }
     }
+
     if (race.Enabled) {
         race.Acquire((uintptr)@unsafe.Pointer.FromRef(ref m));
     }
@@ -171,6 +199,7 @@ public static void Unlock(this ж<Mutex> Ꮡm) {
         _ = m.state;
         race.Release((uintptr)@unsafe.Pointer.FromRef(ref m));
     }
+
     // Fast path: drop lock bit.
     var @new = atomic.AddInt32(Ꮡm.of(Mutex.Ꮡstate), -mutexLocked);
     if (@new != 0) {
@@ -186,10 +215,10 @@ internal static readonly @string syncUnlockOfUnlockedˢ = "sync: unlock of unloc
 internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
     ref var m = ref Ꮡm.DerefOrNull();
 
-    if ((int32)((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
+    if (((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
         fatal(syncUnlockOfUnlockedˢ);
     }
-    if ((int32)(@new & (int32)mutexStarving) == 0){
+    if ((@new & (int32)mutexStarving) == 0){
         var old = @new;
         while (ᐧ) {
             // If there are no waiters or a goroutine has already
@@ -198,11 +227,11 @@ internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) {
             // goroutine to the next waiter. We are not part of this chain,
             // since we did not observe mutexStarving when we unlocked the mutex above.
             // So get off the way.
-            if ((old >> (int)(mutexWaiterShift)) == 0 || (int32)(old & ((int32)((UntypedInt)(mutexLocked | mutexWoken) | (int32)mutexStarving))) != 0) {
+            if (old >> (int)(mutexWaiterShift) == 0 || (int32)(old & ((int32)((UntypedInt)(mutexLocked | mutexWoken) | (int32)mutexStarving))) != 0) {
                 return;
             }
             // Grab the right to wake someone.
-            @new = (int32)((old - (int32)(1 << (int)(mutexWaiterShift))) | (int32)mutexWoken);
+            @new = (old - (int32)(1 << (int)(mutexWaiterShift))) | (int32)mutexWoken;
             if (atomic.CompareAndSwapInt32(Ꮡm.of(Mutex.Ꮡstate), old, @new)) {
                 runtime_Semrelease(Ꮡm.of(Mutex.Ꮡsema), false, 2);
                 return;

@@ -4,17 +4,35 @@
 
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime", "unsafe", and "internal/abi"
+
+// A Kind represents the specific kind of type that a Type represents.
+// The zero Kind is not a valid kind.
 global using Kind = go.@internal.abi_package.ΔKind;
 global using nameOff = go.@internal.abi_package.NameOff;
 global using typeOff = go.@internal.abi_package.TypeOff;
 global using textOff = go.@internal.abi_package.TextOff;
+
+// uncommonType is present only for defined types or types with methods
+// (if T is a defined type, the uncommonTypes for T and *T have methods).
+// Using a pointer to this struct reduces the overall size required
+// to describe a non-defined type with no methods.
 global using uncommonType = go.@internal.abi_package.UncommonType;
+
+// arrayType represents a fixed array type.
 global using arrayType = go.@internal.abi_package.ΔArrayType;
+
+// chanType represents a channel type.
 global using chanType = go.@internal.abi_package.ChanType;
 global using funcType = go.@internal.abi_package.ΔFuncType;
 global using interfaceType = go.@internal.abi_package.ΔInterfaceType;
+
+// ptrType represents a pointer type.
 global using ptrType = go.@internal.abi_package.PtrType;
+
+// sliceType represents a slice type.
 global using sliceType = go.@internal.abi_package.SliceType;
+
+// structType represents a struct type.
 global using structType = go.@internal.abi_package.ΔStructType;
 
 namespace go.@internal;
@@ -79,13 +97,14 @@ partial interface ΔType {
  */
 public static abiꓸKind Ptr => /* abi.Pointer */ 22;
 
+// Import-and-export these constants as necessary
 public static abiꓸKind Interface => /* abi.Interface */ 20;
 public static abiꓸKind Slice => /* abi.Slice */ 23;
 public static abiꓸKind ΔString => /* abi.String */ 24;
 public static abiꓸKind Struct => /* abi.Struct */ 25;
 
 partial struct rtype {
-    public partial ref ж<@internal.abi_package.Type> Type { get; }
+    /*embed*/ public ж<@internal.abi_package.Type> Type;
 }
 
 // name is an encoded type name with optional extra data.
@@ -120,15 +139,15 @@ internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
 }
 
 internal static bool isExported(this Δname n) {
-    return (byte)((n.bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
+    return (byte)((n.bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 internal static bool hasTag(this Δname n) {
-    return (byte)((n.bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
+    return (byte)((n.bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 internal static bool embedded(this Δname n) {
-    return (byte)((n.bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
+    return (byte)((n.bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -140,7 +159,7 @@ internal static (nint, nint) readVarint(this Δname n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.data(off + i, readVarintˢ).Value;
-        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)((7 * i)));
+        v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }
@@ -172,7 +191,7 @@ internal static readonly @string nameFlagFieldˢ = "name flag field"u8;
 internal static readonly @string nameOffsetFieldˢ = "name offset field"u8;
 
 internal static @string pkgPath(abiꓸName n) {
-    if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << (int)(2)))) == 0) {
+    if (n.Bytes == nil || (byte)(n.DataChecked(0, nameFlagFieldˢ).Value & ((byte)(1 << 2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
@@ -184,7 +203,7 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((~(ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff)))[..], (~array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4))[..]);
+    copy(((ж<array<byte>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(ᏑnameOff))).slice(), array<byte>.AliasPointer(n.DataChecked(off, nameOffsetFieldˢ), 4).slice());
     var pkgPathName = new Δname((ж<byte>)(uintptr)(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(n.Bytes), nameOff)));
     return pkgPathName.name();
 }
@@ -261,7 +280,6 @@ internal static @string Name(this rtype t) {
             sqBrackets--;
             break;
         }}
-
         i--;
     }
     return s.slice(i + 1);
@@ -384,11 +402,13 @@ internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     if (ᏑT == ᏑV) {
         return true;
     }
+
     // Otherwise at least one of T and V must not be defined
     // and they must have the same kind.
     if (T.HasName() && V.HasName() || T.Kind() != V.Kind()) {
         return false;
     }
+
     // x's type T and V must  have identical underlying types.
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, true);
 }
@@ -400,9 +420,11 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
     if (cmpTags) {
         return ᏑT == ᏑV;
     }
+
     if (toRType(ᏑT).Name() != toRType(ᏑV).Name() || T.Kind() != V.Kind()) {
         return false;
     }
+
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, false);
 }
 

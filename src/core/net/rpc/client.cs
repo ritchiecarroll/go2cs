@@ -17,10 +17,12 @@ using global::go.net;
 
 partial class rpc_package {
 
+// ServerError represents an error that has been returned from
+// the remote side of the RPC connection.
 partial struct ServerError /*@string*/;
 
 public static @string Error(this ServerError e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 public static error ErrShutdown = errors.New("connection is shut down"u8);
@@ -75,6 +77,7 @@ internal static void send(this ж<Client> Ꮡclient, ж<ΔCall> Ꮡcall) {
 
         client.reqMutex.Lock();
         ᒐd1 = true;
+
         // Register this call.
         client.mutex.Lock();
         if (client.shutdown || client.closing) {
@@ -87,6 +90,7 @@ internal static void send(this ж<Client> Ꮡclient, ж<ΔCall> Ꮡcall) {
         client.seq++;
         client.pending[seq] = Ꮡcall;
         client.mutex.Unlock();
+
         // Encode and send the request.
         client.request.Seq = seq;
         client.request.ServiceMethod = call.ServiceMethod;
@@ -125,26 +129,27 @@ internal static void input(this ж<Client> Ꮡclient) {
         var call = client.pending[seq];
         delete(client.pending, seq);
         client.mutex.Unlock();
+
         switch (ᐧ) {
         case {} when call == nil: {
+            // We've got no pending call. That usually means that
+            // WriteRequest partially failed, and call was already
+            // removed; response is a server telling us about an
+            // error reading request body. We should still attempt
+            // to read error body, but there's no one to give it to.
             err = client.codec.ReadResponseBody(default!);
             if (err != default!) {
-                // We've got no pending call. That usually means that
-                // WriteRequest partially failed, and call was already
-                // removed; response is a server telling us about an
-                // error reading request body. We should still attempt
-                // to read error body, but there's no one to give it to.
                 err = errors.New("reading error body: "u8 + err.Error());
             }
             break;
         }
         case {} when response.Error != ""u8: {
+            // We've got an error response. Give this to the request;
+            // any subsequent requests will get the ReadResponseBody
+            // error if there is one.
             call.Value.Error = ((ServerError)response.Error);
             err = client.codec.ReadResponseBody(default!);
             if (err != default!) {
-                // We've got an error response. Give this to the request;
-                // any subsequent requests will get the ReadResponseBody
-                // error if there is one.
                 err = errors.New("reading error body: "u8 + err.Error());
             }
             call.done();
@@ -158,7 +163,6 @@ internal static void input(this ж<Client> Ꮡclient) {
             call.done();
             break;
         }}
-
     }
     // Terminate pending calls.
     client.reqMutex.Lock();
@@ -194,11 +198,11 @@ internal static void done(this ж<ΔCall> Ꮡcall) {
     case 0: {
         break;
     }
+    // ok
     default: {
+        // We don't want to block here. It is the caller's responsibility to make
+        // sure the channel has enough buffer space. See comment in Go().
         if (debugLog) {
-            // ok
-            // We don't want to block here. It is the caller's responsibility to make
-            // sure the channel has enough buffer space. See comment in Go().
             log.Println(rpcDiscardingCallReplyˢ);
         }
         break;
@@ -281,6 +285,7 @@ public static (ж<Client>, error) DialHTTPPath(@string network, @string address,
         return (default!, err);
     }
     io.WriteString(new net_ConnᴠWriter(conn), "CONNECT "u8 + path + " HTTP/1.0\n\n"u8);
+
     // Require successful HTTP response
     // before switching to RPC protocol.
     (var resp, err) = Δhttp.ReadResponse(bufio.NewReader(new net_ConnᴠReader(conn)), Ꮡ(new Δhttp.Request(Method: "CONNECT"u8)));

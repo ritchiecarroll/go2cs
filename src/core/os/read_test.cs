@@ -32,16 +32,19 @@ internal static readonly @string readTestGoˢ = "read_test.go"u8;
 
 public static void TestReadFile(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string filename = rumpelstilzchenˢ;
     var (contents, err) = ReadFile(filename);
     if (err == default!) {
         Ꮡt.Fatalf("ReadFile %s: error expected, none found"u8, filename);
     }
+
     filename = readTestGoˢ;
     (contents, err) = ReadFile(filename);
     if (err != default!) {
         Ꮡt.Fatalf("ReadFile %s: %v"u8, filename, err);
     }
+
     checkNamedSize(Ꮡt, filename, (int64)len(contents));
 }
 
@@ -52,6 +55,7 @@ public static void TestWriteFile(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var (f, err) = CreateTemp(""u8, osTestˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -59,18 +63,22 @@ public static void TestWriteFile(ж<Δtesting.T> Ꮡt) {
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
         defer(Remove, f.Name(), ref ᒐ);
+
         @string msg = "Programming today is a race between software engineers striving to "u8 + "build bigger and better idiot-proof programs, and the Universe trying "u8 + "to produce bigger and better idiots. So far, the Universe is winning."u8;
+
         {
             var errΔ1 = WriteFile(f.Name(), slice<byte>(msg), 420); if (errΔ1 != default!) {
                 Ꮡt.Fatalf("WriteFile %s: %v"u8, f.Name(), errΔ1);
             }
         }
+
         (var data, err) = ReadFile(f.Name());
         if (err != default!) {
             Ꮡt.Fatalf("ReadFile %s: %v"u8, f.Name(), err);
         }
+
         if (((sstring)data) != msg) {
-            Ꮡt.Fatalf("ReadFile: wrong data:\nhave %q\nwant %q"u8, ((@string)data), msg);
+            Ꮡt.Fatalf("ReadFile: wrong data:\nhave %q\nwant %q"u8, (@string)data, msg);
         }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -81,8 +89,6 @@ public static void TestWriteFile(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string blurpTxtˢ = "blurp.txt"u8;
 
 public static void TestReadOnlyWriteFile(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Getuid() == 0) {
         Ꮡt.Skipf("Root can write to read-only files anyway, so skip the read-only test."u8);
     }
@@ -90,8 +96,10 @@ public static void TestReadOnlyWriteFile(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Skip("no support for file permissions on " + Δruntime.GOOS);
     }
     Ꮡt.Parallel();
+
     // We don't want to use CreateTemp directly, since that opens a file for us as 0600.
     @string filename = filepath.Join(Ꮡt.TempDir(), blurpTxtˢ);
+
     var shmorp = slice<byte>("shmorp"u8);
     var florp = slice<byte>("florp"u8);
     var err = WriteFile(filename, shmorp, 292);
@@ -113,16 +121,19 @@ public static void TestReadOnlyWriteFile(ж<Δtesting.T> Ꮡt) {
 
 public static void TestReadDir(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string dirname = rumpelstilzchenˢ;
     var (_, err) = ReadDir(dirname);
     if (err == default!) {
         Ꮡt.Fatalf("ReadDir %s: error expected, none found"u8, dirname);
     }
+
     dirname = "."u8;
     (var list, err) = ReadDir(dirname);
     if (err != default!) {
         Ꮡt.Fatalf("ReadDir %s: %v"u8, dirname, err);
     }
+
     var foundFile = false;
     var foundSubDir = false;
     foreach (var (_, dir) in list) {
@@ -135,7 +146,6 @@ public static void TestReadDir(ж<Δtesting.T> Ꮡt) {
             foundSubDir = true;
             break;
         }}
-
     }
     if (!foundFile) {
         Ꮡt.Fatalf("ReadDir %s: read_test.go file not found"u8, dirname);

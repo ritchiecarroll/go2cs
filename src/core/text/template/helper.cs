@@ -57,8 +57,8 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 // the last one mentioned will be the one that results.
 public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     t.init();
     return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
 }
@@ -67,8 +67,8 @@ public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params �
 // template is nil, it is created from the first file.
 internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string, (@string, slice<byte>, error)> readFile, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     if (len(filenames) == 0) {
         // Not really a problem, but be consistent.
         return (default!, fmt.Errorf("template: no files named in call to ParseFiles"u8));
@@ -78,7 +78,7 @@ internal static (ж<Template>, error) parseFiles(ж<Template> Ꮡt, Func<@string
         if (err != default!) {
             return (default!, err);
         }
-        @string s = ((@string)b);
+        @string s = (@string)b;
         // First template becomes return value if not already defined,
         // and we use that one for subsequent New calls to associate
         // all the templates together. Also, if this file has the same name
@@ -158,8 +158,8 @@ public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸstring p
 // (Note that most file names serve as glob patterns matching only themselves.)
 public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
-
     ref var t = ref Ꮡt.DerefOrNull();
+
     t.init();
     return parseFS(Ꮡt, fsys, patterns);
 }

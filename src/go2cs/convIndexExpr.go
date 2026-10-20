@@ -173,6 +173,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	}
 
 	if v.isGenericTypeArgument(indexExpr) {
+		// A type argument taking a constraint proxy renders through the resolved type (see proxiedTypeInstantiation).
+		if render, ok := v.proxiedTypeInstantiation(indexExpr); ok {
+			return render
+		}
+
 		context := DefaultIdentContext()
 		context.isType = true
 
@@ -199,20 +204,20 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		// instantiation `clone[*thing](…)` — drops entirely: the position no longer exists in the
 		// emitted C# generic parameter list, and the remaining parameters infer from the value
 		// arguments (see explicitTypeArgsAfterErasure).
-		writtenCount := 1
+		written := []ast.Expr{indexExpr.Index}
 
-		if kept, erased := v.explicitTypeArgsAfterErasure(indexExpr.X, []ast.Expr{indexExpr.Index}); erased {
+		if kept, erased := v.explicitTypeArgsAfterErasure(indexExpr.X, written); erased {
 			if len(kept) == 0 {
 				return fmt.Sprintf("%s%s", v.convExpr(indexExpr.X, xContexts), ptrDeref)
 			}
 
-			writtenCount = len(kept)
+			written = kept
 		}
 
 		// A PARTIAL Go instantiation of a generic FUNCTION completes from the resolved instance —
 		// C# has no partial instantiation (CS0305). See completedInstantiationTypeArgs; a complete
 		// written list returns nil and the written argument renders verbatim.
-		if completed := v.completedInstantiationTypeArgs(indexExpr.X, writtenCount); completed != nil {
+		if completed := v.completedInstantiationTypeArgs(indexExpr.X, written); completed != nil {
 			return fmt.Sprintf("%s%s<%s>", v.convExpr(indexExpr.X, xContexts), ptrDeref, strings.Join(completed, ", "))
 		}
 
@@ -318,6 +323,14 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		assignContext := DefaultLambdaContext()
 		assignContext.isAssignment = true
 		xContexts = []ExprContext{assignContext}
+	}
+
+	// An element of an array field reached through a local reinterpreted from unsafe.Pointer reads in
+	// place through the field's view, in native memory too (see fieldAccess.go).
+	if selectorExpr, ok := ast.Unparen(indexExpr.X).(*ast.SelectorExpr); ok {
+		if box, ok := v.fieldAccessArrayField(selectorExpr); ok {
+			return fmt.Sprintf("%s.ElementRef(%s)", box, index)
+		}
 	}
 
 	baseExpr := v.convExpr(indexExpr.X, xContexts)

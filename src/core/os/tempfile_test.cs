@@ -22,6 +22,7 @@ internal static readonly @string notExistsˢ2 = "_not_exists_"u8;
 
 public static void TestCreateTemp(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string nonexistentDir = filepath.Join(Ꮡt.TempDir(), notExistsˢ2);
     var (f, err) = CreateTemp(nonexistentDir, fooˢ);
     if (f != nil || err == default!) {
@@ -37,6 +38,7 @@ public static void TestCreateTempPattern(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         Ꮡt.Parallel();
+
         var tests = new TestCreateTempPattern_tests[]{
             new("tempfile_test"u8, "tempfile_test"u8, ""u8),
             new("tempfile_test*"u8, "tempfile_test"u8, ""u8),
@@ -71,7 +73,9 @@ internal partial struct TestCreateTempBadPattern_tests /*dyn*/ {
 
 public static void TestCreateTempBadPattern(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string tmpDir = Ꮡt.TempDir();
+
     @string sep = sepᶜ1;
     var tests = new TestCreateTempBadPattern_tests[]{
         new("ioutil*test"u8, false),
@@ -126,16 +130,20 @@ public static void TestMkdirTemp(ж<Δtesting.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.Parallel();
+
     var (name, err) = MkdirTemp(notExistsˢ3, fooˢ);
     if (name != ""u8 || err == default!) {
         Ꮡt.Errorf("MkdirTemp(`/_not_exists_`, `foo`) = %v, %v"u8, name, err);
     }
+
     var tests = new TestMkdirTemp_tests[]{
         new("tempfile_test"u8, "tempfile_test"u8, ""u8),
         new("tempfile_test*"u8, "tempfile_test"u8, ""u8),
         new("tempfile_test*xyz"u8, "tempfile_test"u8, "xyz"u8)
     }.slice();
+
     @string dir = filepath.Clean(TempDir());
+
     void runTestMkdirTemp(ж<Δtesting.T> tΔ1, @string pattern, @string wantRePat) {
         GoFrame ᒐ = default;
         try {
@@ -144,6 +152,7 @@ public static void TestMkdirTemp(ж<Δtesting.T> Ꮡt) {
                 tΔ1.Fatalf("MkdirTemp(dir, `tempfile_test`) = %v, %v"u8, nameΔ1, errΔ1);
             }
             defer(Remove, nameΔ1, ref ᒐ);
+
             var re = Δregexp.MustCompile(wantRePat);
             if (!re.MatchString(nameΔ1)) {
                 tΔ1.Errorf("MkdirTemp(%q, %q) created bad name\n\t%q\ndid not match pattern\n\t%q"u8, dir, pattern, nameΔ1, wantRePat);
@@ -152,6 +161,7 @@ public static void TestMkdirTemp(ж<Δtesting.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
+
     foreach (var (_, vᴛ1) in tests) {
         ref var tt = ref heap(new TestMkdirTemp_tests(), out var Ꮡtt);
         tt = vᴛ1;
@@ -163,6 +173,7 @@ public static void TestMkdirTemp(ж<Δtesting.T> Ꮡt) {
             runTestMkdirTempʗ1(tΔ2, ttʗ1.pattern, wantRePat);
         });
     }
+
     // Separately testing "*xyz" (which has no prefix). That is when constructing the
     // pattern to assert on, as in the previous loop, using filepath.Join for an empty
     // prefix filepath.Join(dir, ""), produces the pattern:
@@ -171,7 +182,7 @@ public static void TestMkdirTemp(ж<Δtesting.T> Ꮡt) {
     //     "^<DIR>/[0-9]+xyz"
     var runTestMkdirTempʗ2 = runTestMkdirTemp;
     Ꮡt.Run(xyzˢ, (ж<Δtesting.T> tΔ3) => {
-        @string wantRePat = "^"u8 + Δregexp.QuoteMeta(filepath.Join(dir)) + Δregexp.QuoteMeta(((@string)(rune)filepath.Separator)) + "[0-9]+xyz$"u8;
+        @string wantRePat = "^"u8 + Δregexp.QuoteMeta(filepath.Join(dir)) + Δregexp.QuoteMeta((@string)(rune)filepath.Separator) + "[0-9]+xyz$"u8;
         runTestMkdirTempʗ2(tΔ3, xyzˢ, wantRePat);
     });
 }
@@ -183,6 +194,7 @@ internal static readonly @string notExistˢ = "not-exist"u8;
 // exist (or that it's empty and TempDir doesn't exist)
 public static void TestMkdirTempBadDir(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string badDir = filepath.Join(Ꮡt.TempDir(), notExistˢ);
     var (_, err) = MkdirTemp(badDir, fooˢ);
     {
@@ -202,7 +214,9 @@ internal partial struct TestMkdirTempBadPattern_tests /*dyn*/ {
 
 public static void TestMkdirTempBadPattern(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
+
     @string tmpDir = Ꮡt.TempDir();
+
     @string sep = sepᶜ2;
     var tests = new TestMkdirTempBadPattern_tests[]{
         new("ioutil*test"u8, false),

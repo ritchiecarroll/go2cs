@@ -23,7 +23,7 @@ partial class slog_package {
 // JSONHandler is a [Handler] that writes Records to an [io.Writer] as
 // line-delimited JSON objects.
 partial struct JSONHandler {
-    internal partial ref ж<commonHandler> commonHandler { get; }
+    /*embed*/ internal ж<commonHandler> commonHandler;
 }
 
 // NewJSONHandler creates a [JSONHandler] that writes to w,
@@ -67,9 +67,7 @@ public static ΔHandler WithGroup(this ref JSONHandler h, @string name) {
 // Otherwise, the key is "time"
 // and the value is output as with json.Marshal.
 //
-// If the Record's level is zero, the level is omitted.
-// Otherwise, the key is "level"
-// and the value of [Level.String] is output.
+// The level's key is "level" and its value is the result of calling [Level.String].
 //
 // If the AddSource option is set and source information is available,
 // the key is "source", and the value is a record of type [Source].
@@ -130,11 +128,11 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
         s.buf.ValueSlot = strconv.AppendUint(s.buf.ValueSlot, v.Uint64(), 10);
     }
     else if (exprᴛ1 == KindFloat64) {
+        // json.Marshal is funny about floats; it doesn't
+        // always match strconv.AppendFloat. So just call it.
+        // That's expensive, but floats are rare.
         {
-            var err = appendJSONMarshal(s.buf, // json.Marshal is funny about floats; it doesn't
- // always match strconv.AppendFloat. So just call it.
- // That's expensive, but floats are rare.
- v.Float64()); if (err != default!) {
+            var err = appendJSONMarshal(s.buf, v.Float64()); if (err != default!) {
                 return err;
             }
         }
@@ -143,8 +141,8 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
         s.buf.ValueSlot = strconv.AppendBool(s.buf.ValueSlot, v.Bool());
     }
     else if (exprᴛ1 == KindDuration) {
-        s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, // Do what json.Marshal does.
- (int64)v.Duration(), 10);
+        // Do what json.Marshal does.
+        s.buf.ValueSlot = strconv.AppendInt(s.buf.ValueSlot, (int64)v.Duration(), 10);
     }
     else if (exprᴛ1 == KindTime) {
         Ꮡs.appendTime(v.Time());
@@ -163,25 +161,55 @@ internal static error appendJSONValue(ж<handleState> Ꮡs, Value v) {
     else { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
     }
-
     return default!;
 }
 
-internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
-    ref var buf = ref Ꮡbuf.DerefOrNull();
-
+partial struct jsonEncoder {
+    internal ж<bytes.Buffer> buf;
     // Use a json.Encoder to avoid escaping HTML.
-    ref var bb = ref heap(new bytes.Buffer(), out var Ꮡbb);
-    var enc = json.NewEncoder(new bytes_BufferжWriter(Ꮡbb));
-    enc.SetEscapeHTML(false);
-    {
-        var err = enc.Encode(v); if (err != default!) {
-            return err;
-        }
+    internal ж<json.Encoder> json;
+}
+
+internal static ж<sync.Pool> jsonEncoderPool = Ꮡ(new sync.Pool(
+    New: () => {
+        var enc = Ꮡ(new jsonEncoder(
+            buf: @new<bytes.Buffer>()
+        ));
+        enc.Value.json = json.NewEncoder(new bytes_BufferжWriter((~enc).buf));
+        (~enc).json.SetEscapeHTML(false);
+        return enc.OrTypedNil();
     }
-    var bs = bb.Bytes();
-    buf.Write(bs.slice(0, len(bs) - 1)); // remove final newline
-    return default!;
+));
+
+internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
+    GoFrame ᒐ = default;
+    try {
+        ref var buf = ref Ꮡbuf.DerefOrNull();
+
+        var j = jsonEncoderPool.Get()._<ж<jsonEncoder>>();
+        var jʗ1 = j;
+        defer(() => {
+            // To reduce peak allocation, return only smaller buffers to the pool.
+            const nint maxBufferSize = /* 16 << 10 */ 16384;
+            if ((~jʗ1).buf.Cap() > maxBufferSize) {
+                return;
+            }
+            (~jʗ1).buf.Reset();
+            jsonEncoderPool.Put(jʗ1.OrTypedNil());
+        }, ref ᒐ);
+
+        {
+            var err = (~j).json.Encode(v); if (err != default!) {
+                return err;
+            }
+        }
+
+        var bs = (~j).buf.Bytes();
+        buf.Write(bs.slice(0, len(bs) - 1)); // remove final newline
+        return default!;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
+    finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -201,6 +229,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
     void str(@string sΔ1) {
         buf = builtin.append(buf, sΔ1.ꓸꓸꓸ);
     }
+
     nint start = 0;
     for (nint i = 0; i < len(s); ) {
         {
@@ -231,13 +260,12 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                     break;
                 }
                 default: {
+                    // This encodes bytes < 0x20 except for \t, \n and \r.
                     str(u00ˢ);
-                    @char(hex[(b >> (int)(4))]);
+                    @char(hex[(b >> 4)]);
                     @char(hex[(byte)(b & 0xF)]);
                     break;
                 }}
-
-                // This encodes bytes < 0x20 except for \t, \n and \r.
                 i++;
                 start = i;
                 continue;
@@ -265,7 +293,7 @@ internal static slice<byte> appendEscapedJSONString(slice<byte> buf, @string s) 
                 str(s.slice(start, i));
             }
             str(u202ˢ);
-            @char(hex[(rune)(c & 0xF)]);
+            @char(hex[(c & 0xF)]);
             i += size;
             start = i;
             continue;

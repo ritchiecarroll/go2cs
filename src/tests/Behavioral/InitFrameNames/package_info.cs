@@ -51,7 +51,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("a.go", "a.cs", "6oA=")]
-[assembly: go.GoPositionMap("main.go", "main.cs", "AAgagoKmlICkgKSApIKC9oKCgg==", "27-27:1")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "AAgagoKmlICkgKSApIKCpoKCgg==", "27-27:1")]
 [assembly: go.GoPositionMap("z.go", "z.cs", "6oA=")]
 // </GoSourcePositionMaps>
 

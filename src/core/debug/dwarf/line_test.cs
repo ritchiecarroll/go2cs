@@ -42,6 +42,7 @@ public static void TestLineELFGCC(ж<testing.T> Ꮡt) {
         new(Address: 0x400611, EndSequence: true)
     }.slice();
     var files = new slice<ж<dwarf.LineFile>>[]{new ж<dwarf.LineFile>[]{default!, file1H, file1C}.slice(), new ж<dwarf.LineFile>[]{default!, file2C}.slice()}.slice();
+
     testLineTable(Ꮡt, want, files, elfData(Ꮡt, testdataLineGccElfˢ));
 }
 
@@ -53,6 +54,7 @@ public static void TestLineELFGCCZstd(ж<testing.T> Ꮡt) {
     var zfile1H = Ꮡ(new LineFile(Name: "/home/iant/go/src/debug/dwarf/testdata/line1.h"u8));
     var zfile1C = Ꮡ(new LineFile(Name: "/home/iant/go/src/debug/dwarf/testdata/line1.c"u8));
     var zfile2C = Ꮡ(new LineFile(Name: "/home/iant/go/src/debug/dwarf/testdata/line2.c"u8));
+
     // Line table based on readelf --debug-dump=rawline,decodedline
     var want = new dwarf.LineEntry[]{
         new(Address: 0x401126, File: zfile1H, Line: 2, Column: 1, IsStmt: true),
@@ -76,6 +78,7 @@ public static void TestLineELFGCCZstd(ж<testing.T> Ꮡt) {
         new ж<dwarf.LineFile>[]{zfile1C, zfile1H, zfile1C}.slice(),
         new ж<dwarf.LineFile>[]{zfile2C, zfile2C}.slice()
     }.slice();
+
     testLineTable(Ꮡt, want, files, elfData(Ꮡt, testdataLineGccZstdElfˢ));
 }
 
@@ -99,6 +102,7 @@ public static void TestLineGCCWindows(ж<testing.T> Ꮡt) {
     var file1CΔ1 = toWindows(dwarf_test_package.file1C);
     var file1HΔ1 = toWindows(dwarf_test_package.file1H);
     var file2CΔ1 = toWindows(dwarf_test_package.file2C);
+
     // Line table based on objdump --dwarf=rawline,decodedline
     var want = new dwarf.LineEntry[]{
         new(Address: 0x401530, File: file1HΔ1, Line: 2, IsStmt: true),
@@ -119,6 +123,7 @@ public static void TestLineGCCWindows(ж<testing.T> Ꮡt) {
         new(Address: 0x40159b, EndSequence: true)
     }.slice();
     var files = new slice<ж<dwarf.LineFile>>[]{new ж<dwarf.LineFile>[]{default!, file1HΔ1, file1CΔ1}.slice(), new ж<dwarf.LineFile>[]{default!, file2CΔ1}.slice()}.slice();
+
     testLineTable(Ꮡt, want, files, peData(Ꮡt, testdataLineGccWinBinˢ));
 }
 
@@ -147,6 +152,7 @@ public static void TestLineELFClang(ж<testing.T> Ꮡt) {
         new(Address: 0x4005b0, EndSequence: true)
     }.slice();
     var files = new slice<ж<dwarf.LineFile>>[]{new ж<dwarf.LineFile>[]{default!, file1C, file1H}.slice(), new ж<dwarf.LineFile>[]{default!, file2C}.slice()}.slice();
+
     testLineTable(Ꮡt, want, files, elfData(Ꮡt, testdataLineClangElfˢ));
 }
 
@@ -169,6 +175,7 @@ public static void TestLineRnglists(ж<testing.T> Ꮡt) {
         new(Address: 0x40101d, EndSequence: true)
     }.slice();
     var files = new slice<ж<dwarf.LineFile>>[]{new ж<dwarf.LineFile>[]{@file}.slice()}.slice();
+
     testLineTable(Ꮡt, want, files, elfData(Ꮡt, testdataRnglistxElfˢ));
 }
 
@@ -186,6 +193,7 @@ internal static readonly object returnedˢ = (@string)"returned"u8;
 
 public static void TestLineSeek(ж<testing.T> Ꮡt) {
     var d = elfData(Ꮡt, testdataLineGccElfˢ);
+
     // Get the line table for the first CU.
     var (cu, err) = d.Reader().Next();
     if (err != default!) {
@@ -195,12 +203,14 @@ public static void TestLineSeek(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(dLineReaderˢ, err);
     }
+
     // Read entries forward.
     ref var line = ref heap(new dwarf.LineEntry(), out var Ꮡline);
     slice<dwarf.LineReaderPos> posTable = default!;
     slice<dwarf.LineEntry> table = default!;
     while (ᐧ) {
         posTable = append(posTable, lr.Tell());
+
         var errΔ1 = lr.Next(Ꮡline);
         if (errΔ1 != default!) {
             if (AreEqual(errΔ1, io.EOF)) {
@@ -210,6 +220,7 @@ public static void TestLineSeek(ж<testing.T> Ꮡt) {
         }
         table = append(table, line);
     }
+
     // Test that Reset returns to the first line.
     lr.Reset();
     {
@@ -220,6 +231,7 @@ public static void TestLineSeek(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(lrNextAfterResetReturnedˢ, line, insteadOfˢ, table[0]);
         }
     }
+
     // Check that entries match when seeking backward.
     for (nint i = len(posTable) - 1; i >= 0; i--) {
         lr.Seek(posTable[i]);
@@ -236,6 +248,7 @@ public static void TestLineSeek(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(lrNextAfterSeekToˢ, posTable[i], returnedˢ, line, insteadOfˢ, table[i]);
         }
     }
+
     // Check that seeking to a PC returns the right line.
     {
         var errΔ4 = lr.SeekPC(table[0].Address - 1, Ꮡline); if (!AreEqual(errΔ4, ErrUnknownPC)) {
@@ -251,6 +264,7 @@ public static void TestLineSeek(ж<testing.T> Ꮡt) {
             }
             continue;
         }
+
         var nextPC = table[i + 1].Address;
         for (var pc = testLine.Address; pc < nextPC; pc++) {
             {
@@ -273,9 +287,6 @@ internal static readonly object wantˢ = (@string)"Want:"u8;
 internal static readonly object lineTablesDoNotMatchGotˢ = (@string)"Line tables do not match. Got:"u8;
 
 internal static void testLineTable(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> want, slice<slice<ж<dwarf.LineFile>>> files, ж<dwarf.Data> Ꮡd) {
-    ref var t = ref Ꮡt.DerefOrNull();
-    ref var d = ref Ꮡd.DerefOrNull();
-
     // Get line table from d.
     slice<dwarf.LineEntry> got = default!;
     var dr = Ꮡd.Reader();
@@ -287,15 +298,18 @@ internal static void testLineTable(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> wa
         if (ent == nil) {
             break;
         }
+
         if ((~ent).Tag != TagCompileUnit) {
             dr.SkipChildren();
             continue;
         }
+
         // Ignore system compilation units (this happens in
         // the Windows binary). We'll still decode the line
         // table, but won't check it.
         @string name = ent.Val(AttrName)._<@string>();
         var ignore = strings.HasPrefix(name, cCrossdevˢ) || strings.HasPrefix(name, "../../"u8);
+
         // Decode CU's line table.
         (var lr, err) = Ꮡd.LineReader(ent);
         if (err != default!){
@@ -304,6 +318,7 @@ internal static void testLineTable(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> wa
         if (lr == nil) {
             continue;
         }
+
         while (ᐧ) {
             ref var line = ref heap(new dwarf.LineEntry(), out var Ꮡline);
             var errΔ1 = lr.Next(Ꮡline);
@@ -319,6 +334,7 @@ internal static void testLineTable(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> wa
             }
             got = append(got, line);
         }
+
         // Check file table.
         if (!ignore) {
             if (!compareFiles(files[0], lr.Files())) {
@@ -331,6 +347,7 @@ internal static void testLineTable(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> wa
             files = files[1..];
         }
     }
+
     // Compare line tables.
     if (!compareLines(Ꮡt, got, want)) {
         Ꮡt.Log(lineTablesDoNotMatchGotˢ);
@@ -376,6 +393,7 @@ internal static bool compareLines(ж<testing.T> Ꮡt, slice<dwarf.LineEntry> a, 
         Ꮡt.Errorf("len(a) == %d, len(b) == %d"u8, len(a), len(b));
         return false;
     }
+
     foreach (var (i, _) in a) {
         var (al, bl) = (a[i], b[i]);
         // If both are EndSequence, then the only other valid
@@ -409,13 +427,6 @@ partial struct joinTest {
     internal @string path;
 }
 
-// Note: the Go compiler currently emits DWARF line table paths
-// with '/' instead of '\' (see issues #19784, #36495). These
-// tests are to cover cases that might come up for Windows Go
-// binaries.
-// The following are "best effort". We shouldn't see relative
-// base directories in DWARF, but these test that pathJoin
-// doesn't fail miserably if it sees one.
 internal static slice<joinTest> joinTests = new joinTest[]{
     new("a"u8, "b"u8, "a/b"u8),
     new("a"u8, ""u8, "a"u8),
@@ -430,9 +441,18 @@ internal static slice<joinTest> joinTests = new joinTest[]{
     new(@"\\host\share\"u8, @"foo"u8, @"\\host\share\foo"u8),
     new(@"\\host\share\"u8, @"foo\bar"u8, @"\\host\share\foo\bar"u8),
     new(@"//host/share/"u8, @"foo/bar"u8, @"//host/share/foo/bar"u8),
+
+    // Note: the Go compiler currently emits DWARF line table paths
+    // with '/' instead of '\' (see issues #19784, #36495). These
+    // tests are to cover cases that might come up for Windows Go
+    // binaries.
     new(@"c:/workdir/go/src/x"u8, @"y.go"u8, @"c:/workdir/go/src/x/y.go"u8),
     new(@"d:/some/thing/"u8, @"b.go"u8, @"d:/some/thing/b.go"u8),
     new(@"e:\blah\"u8, @"foo.c"u8, @"e:\blah\foo.c"u8),
+
+    // The following are "best effort". We shouldn't see relative
+    // base directories in DWARF, but these test that pathJoin
+    // doesn't fail miserably if it sees one.
     new(@"C:"u8, @"a"u8, @"C:a"u8),
     new(@"C:"u8, @"a\b"u8, @"C:a\b"u8),
     new(@"C:."u8, @"a"u8, @"C:.\a"u8),

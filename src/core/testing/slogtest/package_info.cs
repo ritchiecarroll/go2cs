@@ -20,6 +20,7 @@ global using slogꓸHandler = go.log.slog_package.ΔHandler;
 global using slogꓸKind = go.log.slog_package.ΔKind;
 global using slogꓸLevel = go.log.slog_package.ΔLevel;
 global using slogꓸLogValuer = go.log.slog_package.ΔLogValuer;
+global using slogꓸSource = go.log.slog_package.ΔSource;
 global using timeꓸLocation = go.time_package.ΔLocation;
 global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
@@ -55,6 +56,12 @@ using static go.testing.slogtest_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -63,7 +70,7 @@ using static go.testing.slogtest_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/slogtest/slogtest.go", "slogtest.cs", "ACVIygALGAAJFAALGKQACRIAChYACxgACxgACxoADRwADh4ADh4ABxAADRyCAAcQpgAKFqQABzQAFASCgoKUgpiSgoCSpIKCgoCCyK7CspKCgpSCgoKCgIIACRKCgoCCpLiCgoCCpLiCgoCCpIKClLiCgoKClIKClAAUEqKCpoKCgpTugKSC", "285-298:1;305-310:1;314-319:1;323-332:1;336-346:1", "", "38=withSource/1/16/3,hasKey/1/8/8,hasKey/2/8/9,hasAttr/1/29/10,withSource/2/16/15,hasAttr/2/29/20,withSource/3/16/25,hasAttr/3/29/30,missingKey/1/6/31,hasAttr/4/29/32,withSource/4/16/37,missingKey/2/6/43,withSource/5/16/48,hasAttr/5/29/53,hasAttr/6/29/54,withSource/6/16/59,hasAttr/7/29/64,hasAttr/8/29/65,inGroup/1/11/65,hasAttr/9/29/66,withSource/7/16/71,hasAttr/10/29/76,missingKey/3/6/77,hasAttr/11/29/78,withSource/8/16/83,hasAttr/12/29/89,hasAttr/13/29/90,hasAttr/14/29/91,withSource/9/16/96,hasKey/3/8/101,hasKey/4/8/102,hasAttr/15/29/103,missingKey/4/6/104,hasAttr/16/29/105,inGroup/2/11/105,withSource/10/16/110,hasKey/5/8/115,hasKey/6/8/116,hasAttr/17/29/117,hasAttr/18/29/118,hasAttr/19/29/119,inGroup/3/11/119,hasAttr/20/29/120,inGroup/4/11/120,inGroup/5/11/120,withSource/11/16/125,hasKey/7/8/130,hasKey/8/8/131,hasAttr/21/29/132,hasAttr/22/29/133,hasAttr/23/29/134,inGroup/6/11/134,missingKey/5/6/135,inGroup/7/11/135,withSource/12/16/140,hasAttr/24/29/144,withSource/13/16/148,hasAttr/25/29/156,inGroup/8/11/156,hasAttr/26/29/157,inGroup/9/11/157,withSource/14/16/162,hasAttr/27/29/167,withSource/15/16/171,hasAttr/28/29/179,inGroup/10/11/179,hasAttr/29/29/180,inGroup/11/11/180,withSource/16/16/185,missingKey/6/6/191;189=String/1/1/2,Any/1/1/3,Group/1/1/1;212=String/1/1/1,Any/1/1/2")]
+[assembly: go.GoPositionMap("testing/slogtest/slogtest.go", "slogtest.cs", "ACVIygALGAAJFAALGKQACRIAChYACxgACxgACxoADRwADh4ADh4ADyAABxAADRyCAAcQpgAKFqQABzQAFgSCgoKUgqiSgoCSpIKCgoCCyK7CspKCgpSCgoKCgIIACRKCgoCCpLiCgoCCpLiCgoCCpIKClLiCgoKClIKClAAUEqKCpoKCgpTugKSC", "301-314:1;321-326:1;330-335:1;339-348:1;352-362:1", "", "38=withSource/1/17/3,hasKey/1/10/8,hasKey/2/10/9,hasAttr/1/32/10,withSource/2/17/15,hasAttr/2/32/20,withSource/3/17/25,hasAttr/3/32/30,missingKey/1/8/31,hasAttr/4/32/32,withSource/4/17/37,missingKey/2/8/43,withSource/5/17/48,hasAttr/5/32/53,hasAttr/6/32/54,withSource/6/17/59,hasAttr/7/32/64,hasAttr/8/32/65,inGroup/1/14/65,hasAttr/9/32/66,withSource/7/17/71,hasAttr/10/32/76,missingKey/3/8/77,hasAttr/11/32/78,withSource/8/17/83,hasAttr/12/32/89,hasAttr/13/32/90,hasAttr/14/32/91,withSource/9/17/96,hasKey/3/10/101,hasKey/4/10/102,hasAttr/15/32/103,missingKey/4/8/104,hasAttr/16/32/105,inGroup/2/14/105,withSource/10/17/110,hasKey/5/10/115,hasKey/6/10/116,hasAttr/17/32/117,hasAttr/18/32/118,hasAttr/19/32/119,inGroup/3/14/119,hasAttr/20/32/120,inGroup/4/14/120,inGroup/5/14/120,withSource/11/17/125,hasKey/7/10/130,hasKey/8/10/131,hasAttr/21/32/132,hasAttr/22/32/133,hasAttr/23/32/134,inGroup/6/14/134,missingKey/5/8/135,inGroup/7/14/135,withSource/12/17/140,hasKey/9/10/145,hasKey/10/10/146,hasAttr/24/32/147,hasAttr/25/32/148,hasAttr/26/32/149,inGroup/8/14/149,missingKey/6/8/150,inGroup/9/14/150,missingKey/7/8/151,inGroup/10/14/151,withSource/13/17/156,hasAttr/27/32/160,withSource/14/17/164,hasAttr/28/32/172,inGroup/11/14/172,hasAttr/29/32/173,inGroup/12/14/173,withSource/15/17/178,hasAttr/30/32/183,withSource/16/17/187,hasAttr/31/32/195,inGroup/13/14/195,hasAttr/32/32/196,inGroup/14/14/196,withSource/17/17/201,missingKey/8/8/207;205=String/1/1/2,Any/1/1/3,Group/1/1/1;228=String/1/1/1,Any/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;

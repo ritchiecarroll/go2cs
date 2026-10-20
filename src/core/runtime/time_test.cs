@@ -28,25 +28,32 @@ public static void TestFakeTime(ж<testing.T> Ꮡt) {
     if (Δruntime.GOOS == "windows"u8) {
         Ꮡt.Skip(faketimeNotSupportedOnˢ);
     }
+
     // Faketime is advanced in checkdead. External linking brings in cgo,
     // causing checkdead not working.
-    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), false);
+    testenv.MustInternalLink(new runtime_test_package.testing_TжTB(Ꮡt), deadlockBuildTypes);
+
     Ꮡt.Parallel();
+
     var (exe, err) = buildTestProg(Ꮡt, testfaketimeˢ, tagsFaketimeˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     ref var stdout = ref heap(new bytes.Buffer(), out var Ꮡstdout);
     ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
     var cmd = exec.Command(exe);
     cmd.Value.Stdout = new runtime_test_package.bytes_BufferжWriter(Ꮡstdout);
     cmd.Value.Stderr = new runtime_test_package.bytes_BufferжWriter(Ꮡstderr);
+
     err = testenv.CleanCmdEnv(cmd).Run();
     if (err != default!) {
         Ꮡt.Fatalf("exit status: %v\n%s"u8, err, Ꮡstderr.String());
     }
+
     Ꮡt.Logf("raw stdout: %q"u8, Ꮡstdout.String());
     Ꮡt.Logf("raw stderr: %q"u8, Ꮡstderr.String());
+
     var (f1, err1) = parseFakeTime(stdout.Bytes());
     if (err1 != default!) {
         Ꮡt.Fatal(err1);
@@ -55,6 +62,7 @@ public static void TestFakeTime(ж<testing.T> Ꮡt) {
     if (err2 != default!) {
         Ꮡt.Fatal(err2);
     }
+
     UntypedInt time0 = 1257894000000000000;
     var got = new slice<fakeTimeFrame>[]{f1, f2}.slice();
     slice<slice<fakeTimeFrame>> want = new slice<fakeTimeFrame>[]{new fakeTimeFrame[]{
@@ -97,7 +105,7 @@ internal static (slice<fakeTimeFrame>, error) parseFakeTime(slice<byte> x) {
         x = x[8..];
         var dlen = binary.BigEndian.Uint32(x);
         x = x[4..];
-        @string data = ((@string)(x.slice(0, (nint)(dlen))));
+        @string data = (@string)(x.slice(0, (nint)(dlen)));
         x = x.slice((nint)(dlen));
         frames = append(frames, new fakeTimeFrame(time, data));
     }
@@ -113,6 +121,7 @@ public static void TestTimeTimerType(ж<testing.T> Ꮡt) {
     // must have time.Timer and time.Ticker as a prefix
     // (meaning those two must have the same layout).
     var runtimeTimeTimer = reflect.TypeOf(new TimeTimer());
+
     var runtimeTimeTimerʗ1 = runtimeTimeTimer;
     void check(@string name, reflectꓸType typ) {
         nint n1 = runtimeTimeTimerʗ1.NumField();
@@ -134,6 +143,7 @@ public static void TestTimeTimerType(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     check(timeTimerˢ, reflect.TypeOf(new time.Timer(nil)));
     check(timeTickerˢ, reflect.TypeOf(new time.Ticker(nil)));
 }

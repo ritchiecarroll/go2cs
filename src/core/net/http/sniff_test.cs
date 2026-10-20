@@ -18,20 +18,13 @@ using Δhttp = global::go.net.http_package;
 
 partial class http_test_package {
 
-// Some nonsense.
-// Image types.
-// Audio types.
-// Video types.
-// Font types.
-// {"MS.FontObject", []byte("\x00\x00")},
-// Archive types
-
 partial struct sniffTestsᴛ1 /*dyn*/ {
     internal @string desc;
     internal slice<byte> data;
     internal @string contentType;
 }
 internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
+    // Some nonsense.
     new("Empty"u8, new byte[]{}.slice(), "text/plain; charset=utf-8"u8),
     new("Binary"u8, new byte[]{1, 2, 3}.slice(), "application/octet-stream"u8),
     new("HTML document #1"u8, slice<byte>(@"<HtMl><bOdY>blah blah blah</body></html>"u8), "text/html; charset=utf-8"u8),
@@ -40,6 +33,8 @@ internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
     new("HTML document #4 (leading CRLF)"u8, slice<byte>("\r\n<html>..."u8), "text/html; charset=utf-8"u8),
     new("Plain text"u8, slice<byte>(@"This is not HTML. It has ☃ though."u8), "text/plain; charset=utf-8"u8),
     new("XML"u8, slice<byte>("\n<?xml!"u8), "text/xml; charset=utf-8"u8),
+
+    // Image types.
     new("Windows icon"u8, slice<byte>("\x00\x00\x01\x00"u8), "image/x-icon"u8),
     new("Windows cursor"u8, slice<byte>("\x00\x00\x02\x00"u8), "image/x-icon"u8),
     new("BMP image"u8, slice<byte>("BM..."u8), "image/bmp"u8),
@@ -48,6 +43,8 @@ internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
     new("WEBP image"u8, slice<byte>("RIFF\x00\x00\x00\x00WEBPVP"u8), "image/webp"u8),
     new("PNG image"u8, slice<byte>(((@string)(new byte[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}))), "image/png"u8),
     new("JPEG image"u8, slice<byte>(((@string)(new byte[]{0xff, 0xd8, 0xff}))), "image/jpeg"u8),
+
+    // Audio types.
     new("MIDI audio"u8, slice<byte>("MThd\x00\x00\x00\x06\x00\x01"u8), "audio/midi"u8),
     new("MP3 audio/MPEG audio"u8, slice<byte>("ID3\x03\x00\x00\x00\x00\x0f"u8), "audio/mpeg"u8),
     new("WAV audio #1"u8, slice<byte>(((@string)(new byte[]{0x52, 0x49, 0x46, 0x46, 0x62, 0xb8, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45, 0x66, 0x6d, 0x74, 0x20, 0x12, 0x00, 0x00, 0x00, 0x06}))), "audio/wave"u8),
@@ -57,15 +54,22 @@ internal static slice<sniffTestsᴛ1> sniffTests = new sniffTestsᴛ1[]{
     new("Must not match OGG"u8, slice<byte>("owow\x00"u8), "application/octet-stream"u8),
     new("Must not match OGG"u8, slice<byte>("oooS\x00"u8), "application/octet-stream"u8),
     new("Must not match OGG"u8, slice<byte>("oggS\x00"u8), "application/octet-stream"u8),
+
+    // Video types.
     new("MP4 video"u8, slice<byte>(((@string)(new byte[]{0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x6d, 0x70, 0x34, 0x32, 0x00, 0x00, 0x00, 0x00, 0x6d, 0x70, 0x34, 0x32, 0x69, 0x73, 0x6f, 0x6d, 0x3c, 0x06, 0x74, 0xbf, 0x6d, 0x64, 0x61, 0x74}))), "video/mp4"u8),
     new("AVI video #1"u8, slice<byte>(((@string)(new byte[]{0x52, 0x49, 0x46, 0x46, 0x2c, 0x4f, 0x0a, 0x00, 0x41, 0x56, 0x49, 0x20, 0x4c, 0x49, 0x53, 0x54, 0xc3, 0x80}))), "video/avi"u8),
     new("AVI video #2"u8, slice<byte>(((@string)(new byte[]{0x52, 0x49, 0x46, 0x46, 0x2c, 0x0a, 0x00, 0x00, 0x41, 0x56, 0x49, 0x20, 0x4c, 0x49, 0x53, 0x54, 0xc3, 0x80}))), "video/avi"u8),
+
+    // Font types.
+    // {"MS.FontObject", []byte("\x00\x00")},
     new("TTF sample  I"u8, slice<byte>("\x00\x01\x00\x00\x00\x17\x01\x00\x00\x04\x01\x60\x4f"u8), "font/ttf"u8),
     new("TTF sample II"u8, slice<byte>(((@string)(new byte[]{0x00, 0x01, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x80, 0x00, 0x03, 0x00, 0x60, 0x46}))), "font/ttf"u8),
     new("OTTO sample  I"u8, slice<byte>(((@string)(new byte[]{0x4f, 0x54, 0x54, 0x4f, 0x00, 0x0e, 0x00, 0x80, 0x00, 0x03, 0x00, 0x60, 0x42, 0x41, 0x53, 0x45}))), "font/otf"u8),
     new("woff sample  I"u8, slice<byte>("\x77\x4f\x46\x46\x00\x01\x00\x00\x00\x00\x30\x54\x00\x0d\x00\x00"u8), "font/woff"u8),
     new("woff2 sample"u8, slice<byte>("\x77\x4f\x46\x32\x00\x01\x00\x00\x00"u8), "font/woff2"u8),
     new("wasm sample"u8, slice<byte>("\x00\x61\x73\x6d\x01\x00"u8), "application/wasm"u8),
+
+    // Archive types
     new("RAR v1.5-v4.0"u8, slice<byte>("Rar!\x1A\x07\x00"u8), "application/x-rar-compressed"u8),
     new("RAR v5+"u8, slice<byte>("Rar!\x1A\x07\x01\x00"u8), "application/x-rar-compressed"u8),
     new("Incorrect RAR v1.5-v4.0"u8, slice<byte>("Rar \x1A\x07\x00"u8), "application/octet-stream"u8),
@@ -98,6 +102,7 @@ internal static void testServerContentTypeSniff(ж<testing.T> Ꮡt, testMode mod
         })));
         var cstʗ1 = cst;
         defer(cstʗ1.close, ref ᒐ);
+
         foreach (var (i, tt) in sniffTests) {
             var (resp, err) = (~cst).c.Get((~(~cst).ts).URL + "/?i="u8 + strconv.Itoa(i));
             if (err != default!) {
@@ -143,10 +148,12 @@ internal static void testServerIssue5953(ж<testing.T> Ꮡt, testMode mode) {
         w.Header()[contentTypeˢ] = new @string[]{""u8}.slice();
         fmt.Fprintf(new http_test_package.http_ResponseWriterᴠWriter(w), "<html><head></head><body>hi</body></html>"u8);
     })));
+
     var (resp, err) = (~cst).c.Get((~(~cst).ts).URL);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var got = (~resp).Header[contentTypeˢ];
     var want = new @string[]{""u8}.slice();
     if (!slices.Equal<slice<@string>, @string>(got, want)) {
@@ -194,6 +201,7 @@ internal partial struct testContentTypeWithVariousSources_readerOnly /*dyn*/ {
 internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testMode mode) {
     @string input = inputᶜ;
     @string expected = expectedᶜ;
+
     foreach (var (_, vᴛ1) in new testContentTypeWithVariousSources_type[]{new(
         name: "write"u8,
         handler: (Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
@@ -251,6 +259,7 @@ internal static void testContentTypeWithVariousSources(ж<testing.T> Ꮡt, testM
         var testʗ1 = test;
         Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
             var cst = newClientServerTest(new http_test_package.testing_TжTB(tΔ1), mode, new http_test_package.http_HandlerFuncᴠΔHandler(NilSafeDelegateConversion<Δhttp.HandlerFunc, Action<Δhttp.ResponseWriter, ж<Δhttp.Request>>>(testʗ1.handler)));
+
             var (resp, err) = (~cst).c.Get((~(~cst).ts).URL);
             if (err != default!) {
                 tΔ1.Fatalf("Get: %v"u8, err);
@@ -297,7 +306,7 @@ internal static void testSniffWriteSize(ж<testing.T> Ꮡt, testMode mode) {
             Ꮡt.Errorf("write of %d bytes wrote %d bytes"u8, size, written);
         }
     })));
-    foreach (var (_, size) in new nint[]{0, 1, 200, 600, 999, 1000, 1023, 1024, (512 << (int)(10)), (1 << (int)(20))}.slice()) {
+    foreach (var (_, size) in new nint[]{0, 1, 200, 600, 999, 1000, 1023, 1024, 512 << 10, 1 << 20}.slice()) {
         var (res, err) = (~cst).c.Get(fmt.Sprintf("%s/?size=%d"u8, (~(~cst).ts).URL, size));
         if (err != default!) {
             Ꮡt.Fatalf("size %d: %v"u8, size, err);

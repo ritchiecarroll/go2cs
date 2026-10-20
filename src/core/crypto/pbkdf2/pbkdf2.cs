@@ -15,7 +15,6 @@ using fips140hash = go.crypto.@internal.fips140hash_package;
 using fips140only = go.crypto.@internal.fips140only_package;
 using errors = errors_package;
 using hash = hash_package;
-using fips140 = go.crypto.@internal.fips140_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 
@@ -35,7 +34,7 @@ private static readonly @string cryptoPbkdf2UseOfHashˢ = "crypto/pbkdf2: use of
 // can get a derived key for e.g. AES-256 (which needs a 32-byte key) by
 // doing:
 //
-//	dk := pbkdf2.Key(sha1.New, []byte("some password"), salt, 4096, 32)
+//	dk, err := pbkdf2.Key(sha1.New, "some password", salt, 4096, 32)
 //
 // Remember to get a good random salt. At least 8 bytes is recommended by the
 // RFC.
@@ -49,7 +48,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
     where Hash : hash.Hash
 {
     var fh = fips140hash.UnwrapNew(h);
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         if (keyLength < 112 / 8) {
             return (default!, errors.New(cryptoPbkdf2UseOfKeysˢ));
         }
@@ -60,7 +59,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
             return (default!, errors.New(cryptoPbkdf2UseOfHashˢ));
         }
     }
-    return pbkdf2.Key(widen<hash.Hash, fips140.Hash>(fh, elemᴛ0 => new hash_HashᴠHash(elemᴛ0)), password, salt, iter, keyLength);
+    return pbkdf2.Key(fh, password, salt, iter, keyLength);
 }
 
 } // end pbkdf2_package

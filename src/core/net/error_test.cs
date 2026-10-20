@@ -100,6 +100,7 @@ internal static error parseDialError(error nestedErr) {
     if (nestedErr == default!) {
         return default!;
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
         {
@@ -112,6 +113,7 @@ internal static error parseDialError(error nestedErr) {
         break;
     }}
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
+
 second:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -135,18 +137,17 @@ second:
         goto third;
         break;
     }
-    case ж<fs.PathError> err: {
+    case ж<fs.PathError> err: { // for Plan 9
         nestedErr = err.Value.Err;
         goto third;
         break;
     }}
-    // for Plan 9
     var exprᴛ1 = nestedErr;
     if (AreEqual(exprᴛ1, errCanceled) || AreEqual(exprᴛ1, ErrClosed) || AreEqual(exprᴛ1, errMissingAddress) || AreEqual(exprᴛ1, errNoSuitableAddress) || AreEqual(exprᴛ1, context.DeadlineExceeded) || AreEqual(exprᴛ1, context.Canceled)) {
         return default!;
     }
-
     return fmt.Errorf("unexpected type on 2nd nested level: %T"u8, nestedErr);
+
 third:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -188,6 +189,7 @@ public static void TestDialError(ж<testing.T> Ꮡt) {
         testHookLookupIP = (slice<global::go.net_package.IPAddr>, error) (context.Context ctx, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => (default!, new global::go.net_package.DNSErrorжerror(Ꮡ(new DNSError(Err: "dial error test"u8, Name: "name"u8, Server: "server"u8, IsTimeout: true))));
         Ꮡsw.Set(socktest.FilterConnect, (ж<socktest.Status> so) => (default!, errOpNotSupported));
         defer(Ꮡsw.Set, socktest.FilterConnect, (socktest.Filter)(default!), ref ᒐ);
+
         ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
         d = new Dialer(Timeout: someTimeout);
         foreach (var (i, tt) in dialErrorTests) {
@@ -243,10 +245,10 @@ public static void TestProtocolDialError(ж<testing.T> Ꮡt) {
         error err = default!;
         var exprᴛ2 = network;
         if (exprᴛ2 == "tcp"u8) {
-            (_, err) = DialTCP(network, nil, Ꮡ(new TCPAddr(Port: (1 << (int)(16)))));
+            (_, err) = DialTCP(network, nil, Ꮡ(new TCPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "udp"u8) {
-            (_, err) = DialUDP(network, nil, Ꮡ(new UDPAddr(Port: (1 << (int)(16)))));
+            (_, err) = DialUDP(network, nil, Ꮡ(new UDPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "ip:4294967296"u8) {
             (_, err) = DialIP(network, nil, nil);
@@ -254,7 +256,6 @@ public static void TestProtocolDialError(ж<testing.T> Ꮡt) {
         else if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8 || exprᴛ2 == "unixgram"u8) {
             (_, err) = DialUnix(network, nil, Ꮡ(new UnixAddr(Name: "//"u8)));
         }
-
         if (err == default!) {
             Ꮡt.Errorf("%s: should fail"u8, network);
             continue;
@@ -276,8 +277,6 @@ internal partial struct TestDialAddrError_type /*dyn*/ {
 }
 
 public static void TestDialAddrError(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "plan9"u8) {
         Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
@@ -286,12 +285,13 @@ public static void TestDialAddrError(ж<testing.T> Ꮡt) {
     if (!supportsIPv4() || !supportsIPv6()) {
         Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
     }
+
     foreach (var (_, vᴛ1) in new TestDialAddrError_type[]{
         new("tcp4"u8, "::1"u8, nil),
-        new("tcp4"u8, ""u8, Ꮡ(new TCPAddr(IP: IPv6loopback))), // We don't test the {"tcp6", "byte sequence", nil}
- // case for now because there is no easy way to
- // control name resolution.
-
+        new("tcp4"u8, ""u8, Ꮡ(new TCPAddr(IP: IPv6loopback))),
+        // We don't test the {"tcp6", "byte sequence", nil}
+        // case for now because there is no easy way to
+        // control name resolution.
         new("tcp6"u8, ""u8, Ꮡ(new TCPAddr(IP: new IP(new byte[]{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}.slice()))))
     }.slice()) {
         ref var tt = ref heap(new TestDialAddrError_type(), out var Ꮡtt);
@@ -369,6 +369,7 @@ public static void TestListenError(ж<testing.T> Ꮡt) {
         testHookLookupIP = (slice<global::go.net_package.IPAddr>, error) (context.Context _, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => (default!, new global::go.net_package.DNSErrorжerror(Ꮡ(new DNSError(Err: "listen error test"u8, Name: "name"u8, Server: "server"u8, IsTimeout: true))));
         Ꮡsw.Set(socktest.FilterListen, (ж<socktest.Status> so) => (default!, errOpNotSupported));
         defer(Ꮡsw.Set, socktest.FilterListen, (socktest.Filter)(default!), ref ᒐ);
+
         foreach (var (i, vᴛ1) in listenErrorTests) {
             ref var tt = ref heap(new prohibitionaryDialArgTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
@@ -437,6 +438,7 @@ public static void TestListenPacketError(ж<testing.T> Ꮡt) {
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
         testHookLookupIP = (slice<global::go.net_package.IPAddr>, error) (context.Context _, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => (default!, new global::go.net_package.DNSErrorжerror(Ꮡ(new DNSError(Err: "listen error test"u8, Name: "name"u8, Server: "server"u8, IsTimeout: true))));
+
         foreach (var (i, vᴛ1) in listenPacketErrorTests) {
             ref var tt = ref heap(new prohibitionaryDialArgTestsᴛ1(), out var Ꮡtt);
             tt = vᴛ1;
@@ -474,10 +476,10 @@ public static void TestProtocolListenError(ж<testing.T> Ꮡt) {
         error err = default!;
         var exprᴛ2 = network;
         if (exprᴛ2 == "tcp"u8) {
-            (_, err) = ListenTCP(network, Ꮡ(new TCPAddr(Port: (1 << (int)(16)))));
+            (_, err) = ListenTCP(network, Ꮡ(new TCPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "udp"u8) {
-            (_, err) = ListenUDP(network, Ꮡ(new UDPAddr(Port: (1 << (int)(16)))));
+            (_, err) = ListenUDP(network, Ꮡ(new UDPAddr(Port: (1 << 16))));
         }
         else if (exprᴛ2 == "ip:4294967296"u8) {
             (_, err) = ListenIP(network, nil);
@@ -488,7 +490,6 @@ public static void TestProtocolListenError(ж<testing.T> Ꮡt) {
         else if (exprᴛ2 == "unixgram"u8) {
             (_, err) = ListenUnixgram(network, Ꮡ(new UnixAddr(Name: "//"u8)));
         }
-
         if (err == default!) {
             Ꮡt.Errorf("%s: should fail"u8, network);
             continue;
@@ -509,6 +510,7 @@ internal static error parseReadError(error nestedErr) {
     if (nestedErr == default!) {
         return default!;
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
         {
@@ -524,6 +526,7 @@ internal static error parseReadError(error nestedErr) {
         return default!;
     }
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
+
 second:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -538,8 +541,8 @@ second:
     if (AreEqual(exprᴛ1, ErrClosed) || AreEqual(exprᴛ1, errTimeout) || AreEqual(exprᴛ1, poll.ErrNotPollable) || AreEqual(exprᴛ1, Δos.ErrDeadlineExceeded)) {
         return default!;
     }
-
     return fmt.Errorf("unexpected type on 2nd nested level: %T"u8, nestedErr);
+
 third:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -554,6 +557,7 @@ internal static error parseWriteError(error nestedErr) {
     if (nestedErr == default!) {
         return default!;
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
         {
@@ -566,6 +570,7 @@ internal static error parseWriteError(error nestedErr) {
         break;
     }}
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
+
 second:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -593,8 +598,8 @@ second:
     if (AreEqual(exprᴛ1, errCanceled) || AreEqual(exprᴛ1, ErrClosed) || AreEqual(exprᴛ1, errMissingAddress) || AreEqual(exprᴛ1, errTimeout) || AreEqual(exprᴛ1, Δos.ErrDeadlineExceeded) || AreEqual(exprᴛ1, ErrWriteToConnected) || AreEqual(exprᴛ1, Δio.ErrUnexpectedEOF)) {
         return default!;
     }
-
     return fmt.Errorf("unexpected type on 2nd nested level: %T"u8, nestedErr);
+
 third:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -612,6 +617,7 @@ internal static error parseCloseError(error nestedErr, bool isShutdown) {
     if (nestedErr == default!) {
         return default!;
     }
+
     // Because historically we have not exported the error that we
     // return for an operation on a closed network connection,
     // there are programs that test for the exact error string.
@@ -621,9 +627,11 @@ internal static error parseCloseError(error nestedErr, bool isShutdown) {
     if (!isShutdown && !strings.Contains(nestedErr.Error(), want)) {
         return fmt.Errorf("error string %q does not contain expected string %q"u8, nestedErr, want);
     }
+
     if (!isShutdown && !errors.Is(nestedErr, ErrClosed)) {
         return fmt.Errorf("errors.Is(%v, errClosed) returns false, want true"u8, nestedErr);
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
         {
@@ -636,6 +644,7 @@ internal static error parseCloseError(error nestedErr, bool isShutdown) {
         break;
     }}
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
+
 second:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -646,28 +655,25 @@ second:
         goto third;
         break;
     }
-    case ж<fs.PathError> err: {
+    case ж<fs.PathError> err: { // for Plan 9
         nestedErr = err.Value.Err;
         goto third;
         break;
     }}
-    // for Plan 9
     var exprᴛ1 = nestedErr;
     if (AreEqual(exprᴛ1, ErrClosed)) {
         return default!;
     }
-
     return fmt.Errorf("unexpected type on 2nd nested level: %T"u8, nestedErr);
+
 third:
     if (isPlatformError(nestedErr)) {
         return default!;
     }
     var exprᴛ2 = nestedErr;
-    if (AreEqual(exprᴛ2, fs.ErrClosed)) {
+    if (AreEqual(exprᴛ2, fs.ErrClosed)) { // for Plan 9
         return default!;
     }
-
-    // for Plan 9
     return fmt.Errorf("unexpected type on 3rd nested level: %T"u8, nestedErr);
 }
 
@@ -684,6 +690,7 @@ public static void TestCloseError(ж<testing.T> Ꮡt) {
             }
             var cʗ1 = c;
             defer(() => cʗ1.Close(), ref ᒐ);
+
             for (nint i = 0; i < 3; i++) {
                 err = c._<ж<global::go.net_package.TCPConn>>().CloseRead();
                 {
@@ -718,18 +725,21 @@ public static void TestCloseError(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
+
     Ꮡt.Run(udpˢ, (ж<testing.T> tΔ2) => {
         GoFrame ᒐ = default;
         try {
             if (!testableNetwork(udpˢ)) {
                 tΔ2.Skipf("skipping: udp not available"u8);
             }
+
             var (pc, err) = ListenPacket(udpˢ, "127.0.0.1:0"u8);
             if (err != default!) {
                 tΔ2.Fatal(err);
             }
             var pcʗ1 = pc;
             defer(() => pcʗ1.Close(), ref ᒐ);
+
             for (nint i = 0; i < 3; i++) {
                 err = pc.Close();
                 {
@@ -751,6 +761,7 @@ internal static error parseAcceptError(error nestedErr) {
     if (nestedErr == default!) {
         return default!;
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
         {
@@ -763,6 +774,7 @@ internal static error parseAcceptError(error nestedErr) {
         break;
     }}
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
+
 second:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -773,18 +785,17 @@ second:
         goto third;
         break;
     }
-    case ж<fs.PathError> err: {
+    case ж<fs.PathError> err: { // for Plan 9
         nestedErr = err.Value.Err;
         goto third;
         break;
     }}
-    // for Plan 9
     var exprᴛ1 = nestedErr;
     if (AreEqual(exprᴛ1, ErrClosed) || AreEqual(exprᴛ1, errTimeout) || AreEqual(exprᴛ1, poll.ErrNotPollable) || AreEqual(exprᴛ1, Δos.ErrDeadlineExceeded)) {
         return default!;
     }
-
     return fmt.Errorf("unexpected type on 2nd nested level: %T"u8, nestedErr);
+
 third:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -823,6 +834,7 @@ public static void TestAcceptError(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(err);
         }
     }
+
     time.Sleep(100 * time.Millisecond);
     ls.teardown();
 }
@@ -834,6 +846,7 @@ internal static error parseCommonError(error nestedErr) {
     if (nestedErr == default!) {
         return default!;
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.OpError> err: {
         {
@@ -846,6 +859,7 @@ internal static error parseCommonError(error nestedErr) {
         break;
     }}
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
+
 second:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -870,8 +884,8 @@ second:
     if (AreEqual(exprᴛ1, ErrClosed)) {
         return default!;
     }
-
     return fmt.Errorf("unexpected type on 2nd nested level: %T"u8, nestedErr);
+
 third:
     if (isPlatformError(nestedErr)) {
         return default!;
@@ -898,6 +912,7 @@ public static void TestFileError(ж<testing.T> Ꮡt) {
         defer(Δos.Remove, f.Name(), ref ᒐ);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         (var c, err) = FileConn(f);
         if (err != default!){
             if (c != default!) {
@@ -940,7 +955,9 @@ public static void TestFileError(ж<testing.T> Ꮡt) {
             pc.Close();
             Ꮡt.Error(shouldFailˢ);
         }
+
         ln = newLocalListener(new net_test_package.testing_TжTB(Ꮡt), tcpˢ);
+
         for (nint i = 0; i < 3; i++) {
             var (fΔ1, errΔ1) = ln._<ж<global::go.net_package.TCPListener>>().File();
             if (errΔ1 != default!){
@@ -963,16 +980,15 @@ internal static error parseLookupPortError(error nestedErr) {
     if (nestedErr == default!) {
         return default!;
     }
+
     switch (nestedErr.type()) {
     case ж<global::go.net_package.AddrError> _:
     case ж<global::go.net_package.DNSError> _: {
         return default!;
     }
-    case ж<fs.PathError>: {
+    case ж<fs.PathError>: { // for Plan 9
         return default!;
     }}
-
-    // for Plan 9
     return fmt.Errorf("unexpected type on 1st nested level: %T"u8, nestedErr);
 }
 

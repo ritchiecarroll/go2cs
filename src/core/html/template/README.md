@@ -2,18 +2,18 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-243_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.6/html.template.html) [![Docs](https://img.shields.io/badge/Docs-@1.24.13-00ADD8?logo=go)](https://pkg.go.dev/html/template@go1.24.13)\
-[![Source](https://img.shields.io/badge/Source-@1.24.13-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.24.13/src/html/template) [![Source](https://img.shields.io/badge/Source-@1.24.13.6-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.6/src/core/html/template)
+[![Tests](https://img.shields.io/badge/Tests-243_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/html.template.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/html/template@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/html/template) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/html/template)
 
 From C#, call this package through the static class go.html.template_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
-Package template (html/template) implements data-driven templates for generating HTML output safe against code injection. It provides the same interface as [text/template](https://pkg.go.dev/text/template@go1.24.13) and should be used instead of [text/template](https://pkg.go.dev/text/template@go1.24.13) whenever the output is HTML.
+Package template (html/template) implements data-driven templates for generating HTML output safe against code injection. It provides the same interface as [text/template](https://pkg.go.dev/text/template@go1.26.10) and should be used instead of [text/template](https://pkg.go.dev/text/template@go1.26.10) whenever the output is HTML.
 
-The documentation here focuses on the security features of the package. For information about how to program the templates themselves, see the documentation for [text/template](https://pkg.go.dev/text/template@go1.24.13).
+The documentation here focuses on the security features of the package. For information about how to program the templates themselves, see the documentation for [text/template](https://pkg.go.dev/text/template@go1.26.10).
 
 ### Introduction
 
-This package wraps [text/template](https://pkg.go.dev/text/template@go1.24.13) so you can share its template API to parse and execute HTML templates safely.
+This package wraps [text/template](https://pkg.go.dev/text/template@go1.26.10) so you can share its template API to parse and execute HTML templates safely.
 
 	tmpl, err := template.New("name").Parse(...)
 	// Error checking elided
@@ -22,6 +22,8 @@ This package wraps [text/template](https://pkg.go.dev/text/template@go1.24.13) s
 If successful, tmpl will now be injection-safe. Otherwise, err is an error defined in the docs for ErrorCode.
 
 HTML templates treat data values as plain text which should be encoded so they can be safely embedded in an HTML document. The escaping is contextual, so actions can appear within JavaScript, CSS, and URI contexts.
+
+Comments are stripped from output, except for those passed in via the \[HTML], \[CSS], and \[JS] types for their respective contexts.
 
 The security model used by this package assumes that template authors are trusted, while Execute's data parameter is not. More details are provided below.
 
@@ -183,7 +185,7 @@ that would have been produced if {{.}} was a regular string.
 
 ### Security Model
 
-[https://rawgit.com/mikesamuel/sanitized-jquery-templates/trunk/safetemplate.html#problem\_definition](https://rawgit.com/mikesamuel/sanitized-jquery-templates/trunk/safetemplate.html#problem_definition) defines "safe" as used by this package.
+[https://web.archive.org/web/20160501113828/http://js-quasis-libraries-and-repl.googlecode.com/svn/trunk/safetemplate.html#problem\_definition](https://web.archive.org/web/20160501113828/http://js-quasis-libraries-and-repl.googlecode.com/svn/trunk/safetemplate.html#problem_definition) defines "safe" as used by this package.
 
 This package assumes that template authors are trusted, that Execute's data parameter is not, and seeks to preserve the properties below in the face of untrusted data:
 

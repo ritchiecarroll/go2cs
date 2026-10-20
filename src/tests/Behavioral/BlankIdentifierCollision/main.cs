@@ -21,9 +21,6 @@ internal static void _ᴛ3() {
     _ = x;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object multiBlankOkˢ = (@string)"multiBlank ok"u8;
-
 internal static void multiBlank() {
     nint a = 1;
     nint b = 2;
@@ -33,7 +30,7 @@ internal static void multiBlank() {
     _ = b;
     _ = c;
     _ = d;
-    fmt.Println(multiBlankOkˢ);
+    fmt.Println("multiBlank ok");
 }
 
 internal delegate stateFn stateFn(nint _Δp0);
@@ -76,9 +73,6 @@ internal static nint bump(this ref counter c, nint d) {
     return c.n;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string pairˢ = "pair"u8;
-
 internal static void blankFuncValues() {
     _ = (Func<@string, nint, (@string, error)>)(pair);
     _ = (Action<nint>)(sink);
@@ -87,17 +81,21 @@ internal static void blankFuncValues() {
     _ = (stateFn)(lexNumber);
     _ = (Funcꓸꓸꓸ<nint, nint>)(total);
     _ = (Funcꓸꓸꓸ<@string, any, @string>)(fmt.Sprintfᶠ);
+
     var c = Ꮡ(new counter(nil));
     
     var cʗ1 = c;
     _ = (Func<nint, nint>)((nint p1) => cʗ1.bump(p1));
     _ = (Func<@string, nint>)((@string sΔ1) => len(sΔ1));
+
     var f = pair;
     _ = f;
+
     stateFn state = lexText;
     state = lexNumber;
     _ = state;
-    var (s, _) = f(pairˢ, 1);
+
+    var (s, _) = f("pair", 1);
     fmt.Println(s, count(), total(1, 2, 3), c.bump(5));
 }
 

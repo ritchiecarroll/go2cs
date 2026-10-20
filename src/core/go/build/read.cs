@@ -91,37 +91,25 @@ internal static byte readByte(this ref importReader r) {
     return c;
 }
 
-// readByteNoBuf is like readByte but doesn't buffer the byte.
-// It exhausts r.buf before reading from r.b.
-internal static byte readByteNoBuf(this ref importReader r) {
-    byte c = default!;
-    error err = default!;
-    if (len(r.buf) > 0){
-        c = r.buf[0];
-        r.buf = r.buf[1..];
-    } else {
-        (c, err) = r.b.ReadByte();
-        if (err == default! && c == 0) {
-            err = errNUL;
+// readRest reads the entire rest of the file into r.buf.
+internal static void readRest(this ref importReader r) {
+    while (ᐧ) {
+        if (len(r.buf) == cap(r.buf)) {
+            // Grow the buffer
+            r.buf = append(r.buf, (byte)0).slice(0, len(r.buf));
+        }
+        var (n, err) = r.b.Read(r.buf.slice(len(r.buf), cap(r.buf)));
+        r.buf = r.buf.slice(0, len(r.buf) + n);
+        if (err != default!) {
+            if (AreEqual(err, io.EOF)){
+                r.eof = true;
+            } else 
+            if (r.err == default!) {
+                r.err = err;
+            }
+            break;
         }
     }
-    if (err != default!) {
-        if (AreEqual(err, io.EOF)){
-            r.eof = true;
-        } else 
-        if (r.err == default!) {
-            r.err = err;
-        }
-        return 0;
-    }
-    r.pos.Offset++;
-    if (c == (rune)'\n'){
-        r.pos.Line++;
-        r.pos.Column = 1;
-    } else {
-        r.pos.Column++;
-    }
-    return c;
 }
 
 // peekByte returns the next byte from the input reader but does not advance beyond it.
@@ -135,6 +123,7 @@ internal static byte peekByte(this ref importReader r, bool skipSpace) {
         }
         return 0;
     }
+
     // Use r.peek as first input byte.
     // Don't just return r.peek here: it might have been left by peekByte(false)
     // and this might be peekByte(true).
@@ -174,7 +163,6 @@ internal static byte peekByte(this ref importReader r, bool skipSpace) {
                 continue;
                 break;
             }}
-
         }
         break;
     }
@@ -187,145 +175,6 @@ internal static byte nextByte(this ref importReader r, bool skipSpace) {
     var c = r.peekByte(skipSpace);
     r.peek = 0;
     return c;
-}
-
-internal static slice<byte> goEmbed = slice<byte>("go:embed"u8);
-
-// findEmbed advances the input reader to the next //go:embed comment.
-// It reports whether it found a comment.
-// (Otherwise it found an error or EOF.)
-internal static bool findEmbed(this ref importReader r, bool first) {
-    // The import block scan stopped after a non-space character,
-    // so the reader is not at the start of a line on the first call.
-    // After that, each //go:embed extraction leaves the reader
-    // at the end of a line.
-    var startLine = !first;
-    byte c = default!;
-    while (r.err == default! && !r.eof) {
-        c = r.readByteNoBuf();
-Reswitch:
-        switch (c) {
-        default: {
-            startLine = false;
-            break;
-        }
-        case (rune)'\n': {
-            startLine = true;
-            break;
-        }
-        case (rune)' ' or (rune)'\t': {
-            break;
-        }
-        case (rune)'"': {
-            startLine = false;
-            while (r.err == default!) {
-                // leave startLine alone
-                if (r.eof) {
-                    r.syntaxError();
-                }
-                c = r.readByteNoBuf();
-                if (c == (rune)'\\') {
-                    r.readByteNoBuf();
-                    if (r.err != default!) {
-                        r.syntaxError();
-                        return false;
-                    }
-                    continue;
-                }
-                if (c == (rune)'"') {
-                    c = r.readByteNoBuf();
-                    goto Reswitch;
-                }
-            }
-            goto Reswitch;
-            break;
-        }
-        case (rune)'`': {
-            startLine = false;
-            while (r.err == default!) {
-                if (r.eof) {
-                    r.syntaxError();
-                }
-                c = r.readByteNoBuf();
-                if (c == (rune)'`') {
-                    c = r.readByteNoBuf();
-                    goto Reswitch;
-                }
-            }
-            break;
-        }
-        case (rune)'\'': {
-            startLine = false;
-            while (r.err == default!) {
-                if (r.eof) {
-                    r.syntaxError();
-                }
-                c = r.readByteNoBuf();
-                if (c == (rune)'\\') {
-                    r.readByteNoBuf();
-                    if (r.err != default!) {
-                        r.syntaxError();
-                        return false;
-                    }
-                    continue;
-                }
-                if (c == (rune)'\'') {
-                    c = r.readByteNoBuf();
-                    goto Reswitch;
-                }
-            }
-            break;
-        }
-        case (rune)'/': {
-            c = r.readByteNoBuf();
-            switch (c) {
-            default: {
-                startLine = false;
-                goto Reswitch;
-                break;
-            }
-            case (rune)'*': {
-                byte c1 = default!;
-                while ((c != (rune)'*' || c1 != (rune)'/') && r.err == default!) {
-                    if (r.eof) {
-                        r.syntaxError();
-                    }
-                    (c, c1) = (c1, r.readByteNoBuf());
-                }
-                startLine = false;
-                break;
-            }
-            case (rune)'/': {
-                if (startLine) {
-                    // Try to read this as a //go:embed comment.
-                    foreach (var (i, _) in goEmbed) {
-                        c = r.readByteNoBuf();
-                        if (c != goEmbed[i]) {
-                            goto SkipSlashSlash;
-                        }
-                    }
-                    c = r.readByteNoBuf();
-                    if (c == (rune)' ' || c == (rune)'\t') {
-                        // Found one!
-                        return true;
-                    }
-                }
-SkipSlashSlash:
-                while (c != (rune)'\n' && r.err == default! && !r.eof) {
-                    c = r.readByteNoBuf();
-continue_SkipSlashSlash:;
-                }
-break_SkipSlashSlash:;
-                startLine = true;
-                break;
-            }}
-
-            break;
-        }}
-
-        break_Reswitch:;
-    }
-    return false;
 }
 
 // readKeyword reads the given keyword from the input.
@@ -390,7 +239,6 @@ internal static void readString(this ref importReader r) {
         r.syntaxError();
         break;
     }}
-
 }
 
 // readImport reads an import clause - optional identifier followed by quoted string -
@@ -431,6 +279,7 @@ internal static (slice<byte>, error) readComments(io.Reader f) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string packageˢ = "package"u8;
 internal static readonly @string importˢ = "import"u8;
+internal static readonly @string goEmbedˢ = "//go:embed"u8;
 
 // readGoInfo expects a Go file as input and reads the file up to and including the import section.
 // It records what it learned in *info.
@@ -441,6 +290,7 @@ internal static readonly @string importˢ = "import"u8;
 // not for syntax errors in the file itself.
 internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     var r = newImportReader(info.name, f);
+
     r.readKeyword(packageˢ);
     r.readIdent();
     while (r.peekByte(true) == (rune)'i') {
@@ -455,32 +305,36 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             r.readImport();
         }
     }
+
     info.header = r.Value.buf;
+
     // If we stopped successfully before EOF, we read a byte that told us we were done.
     // Return all but that last byte, which would cause a syntax error if we let it through.
     if ((~r).err == default! && !(~r).eof) {
         info.header = (~r).buf.slice(0, len((~r).buf) - 1);
     }
+
     // If we stopped for a syntax error, consume the whole file so that
     // we are sure we don't change the errors that go/parser returns.
     if (AreEqual((~r).err, errSyntax)) {
         r.Value.err = default!;
-        while ((~r).err == default! && !(~r).eof) {
-            r.readByte();
-        }
+        r.readRest();
         info.header = r.Value.buf;
     }
     if ((~r).err != default!) {
         return (~r).err;
     }
+
     if (info.fset == nil) {
         return default!;
     }
+
     // Parse file header & record imports.
     (info.parsed, info.parseErr) = parser.ParseFile(info.fset, info.name, info.header, (parser.Mode)(parser.ImportsOnly | parser.ParseComments));
     if (info.parseErr != default!) {
         return default!;
     }
+
     var hasEmbed = false;
     foreach (var (_, decl) in (~info.parsed).Decls) {
         var (d, ok) = decl._<ж<ast.GenDecl>>(ᐧ);
@@ -507,6 +361,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             if (path == "embed"u8) {
                 hasEmbed = true;
             }
+
             var doc = spec.Value.Doc;
             if (doc == nil && len((~d).Specs) == 1) {
                 doc = d.Value.Doc;
@@ -514,6 +369,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             info.imports = append(info.imports, new fileImport(path, spec.Pos(), doc));
         }
     }
+
     // Extract directives.
     foreach (var (_, group) in (~info.parsed).Comments) {
         if (group.Pos() >= (~info.parsed).Package) {
@@ -525,6 +381,7 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
             }
         }
     }
+
     // If the file imports "embed",
     // we have to look for //go:embed comments
     // in the remainder of the file.
@@ -534,26 +391,27 @@ internal static error readGoInfo(io.Reader f, ref fileInfo info) {
     // (near the package statement or imports), the compiler
     // will reject them. They can be (and have already been) ignored.
     if (hasEmbed) {
-        slice<byte> line = default!;
-        for (var first = true; r.findEmbed(first); first = false) {
-            line = line[..0];
-            var pos = r.Value.pos;
-            while (ᐧ) {
-                var c = r.readByteNoBuf();
-                if (c == (rune)'\n' || (~r).err != default! || (~r).eof) {
-                    break;
-                }
-                line = append(line, c);
+        r.readRest();
+        var fset = token.NewFileSet();
+        var @file = fset.AddFile((~r).pos.Filename, -1, len((~r).buf));
+        scanner.Scanner sc = default!;
+        sc.Init(@file, (~r).buf, default!, scanner.ScanComments);
+        while (ᐧ) {
+            var (pos, tok, lit) = sc.Scan();
+            if (tok == token.EOF) {
+                break;
             }
-            // Add args if line is well-formed.
-            // Ignore badly-formed lines - the compiler will report them when it finds them,
-            // and we can pretend they are not there to help go list succeed with what it knows.
-            var (embs, err) = parseGoEmbed(((@string)line), pos);
-            if (err == default!) {
-                info.embeds = appendꓸꓸꓸ(info.embeds, embs);
+            if (tok == token.COMMENT && strings.HasPrefix(lit, goEmbedˢ)) {
+                // Ignore badly-formed lines - the compiler will report them when it finds them,
+                // and we can pretend they are not there to help go list succeed with what it knows.
+                var (embs, err) = parseGoEmbed(fset, pos, lit);
+                if (err == default!) {
+                    info.embeds = appendꓸꓸꓸ(info.embeds, embs);
+                }
             }
         }
     }
+
     return default!;
 }
 
@@ -574,79 +432,21 @@ internal static bool isValidImport(@string s) {
     return s != ""u8;
 }
 
-// parseGoEmbed parses the text following "//go:embed" to extract the glob patterns.
+// parseGoEmbed parses a "//go:embed" to extract the glob patterns.
 // It accepts unquoted space-separated patterns as well as double-quoted and back-quoted Go strings.
-// This is based on a similar function in cmd/compile/internal/gc/noder.go;
-// this version calculates position information as well.
-internal static (slice<fileEmbed>, error) parseGoEmbed(@string args, tokenꓸPosition pos) {
-    void trimBytes(nint n) {
-        pos.Offset += n;
-        pos.Column += utf8.RuneCountInString(args.slice(0, n));
-        args = args.slice(n);
+// This must match the behavior of cmd/compile/internal/noder.go.
+internal static (slice<fileEmbed>, error) parseGoEmbed(ж<token.FileSet> Ꮡfset, tokenꓸPos pos, @string comment) {
+    var (dir, ok) = ast.ParseDirective(pos, comment);
+    if (!ok || dir.Tool != "go"u8 || dir.Name != "embed"u8) {
+        return (default!, default!);
     }
-    var trimBytesʗ1 = trimBytes;
-    void trimSpace() {
-        @string trim = strings.TrimLeftFunc(args, unicode.IsSpace);
-        trimBytesʗ1(len(args) - len(trim));
+    var (args, err) = dir.ParseArgs();
+    if (err != default!) {
+        return (default!, err);
     }
     slice<fileEmbed> list = default!;
-    for (trimSpace(); args != ""u8; trimSpace()) {
-        @string path = default!;
-        var pathPos = pos;
-Switch:
-        switch (args[0]) {
-        default: {
-            nint i = len(args);
-            foreach (var (j, c) in args) {
-                if (unicode.IsSpace(c)) {
-                    i = j;
-                    break;
-                }
-            }
-            path = args.slice(0, i);
-            trimBytes(i);
-            break;
-        }
-        case (rune)'`': {
-            bool ok = default!;
-            (path, _, ok) = strings.Cut(args[1..], "`"u8);
-            if (!ok) {
-                return (default!, fmt.Errorf("invalid quoted string in //go:embed: %s"u8, args));
-            }
-            trimBytes(1 + len(path) + 1);
-            break;
-        }
-        case (rune)'"': {
-            nint i = 1;
-            for (; i < len(args); i++) {
-                if (args[i] == (rune)'\\') {
-                    i++;
-                    continue;
-                }
-                if (args[i] == (rune)'"') {
-                    var (q, err) = strconv.Unquote(args.slice(0, i + 1));
-                    if (err != default!) {
-                        return (default!, fmt.Errorf("invalid quoted string in //go:embed: %s"u8, args.slice(0, i + 1)));
-                    }
-                    path = q;
-                    trimBytes(i + 1);
-                    goto break_Switch;
-                }
-            }
-            if (i >= len(args)) {
-                return (default!, fmt.Errorf("invalid quoted string in //go:embed: %s"u8, args));
-            }
-            break;
-        }}
-
-        break_Switch:;
-        if (args != ""u8) {
-            var (r, _) = utf8.DecodeRuneInString(args);
-            if (!unicode.IsSpace(r)) {
-                return (default!, fmt.Errorf("invalid quoted string in //go:embed: %s"u8, args));
-            }
-        }
-        list = append(list, new fileEmbed(path, pathPos));
+    foreach (var (_, arg) in args) {
+        list = append(list, new fileEmbed(arg.Arg, Ꮡfset.Position(arg.Pos)));
     }
     return (list, default!);
 }

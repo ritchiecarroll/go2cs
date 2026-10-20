@@ -14,15 +14,14 @@ partial class testing_test_package {
 // (If this were a real benchmark, not an example, this would be named
 // BenchmarkSomething.)
 public static void ExBenchmark(ж<testing.B> Ꮡb) {
-    ref var b = ref Ꮡb.DerefOrNull();
-
     // Generate a large random slice to use as an input.
     // Since this is done before the first call to b.Loop(),
     // it doesn't count toward the benchmark time.
-    var input = new slice<nint>((128 << (int)(10)));
+    var input = new slice<nint>((128 << 10));
     foreach (var (i, _) in input) {
         input[i] = rand.Int();
     }
+
     // Perform the benchmark.
     while (Ꮡb.Loop()) {
         // Normally, the compiler would be allowed to optimize away the call
@@ -31,10 +30,11 @@ public static void ExBenchmark(ж<testing.B> Ꮡb) {
         // aren't optimized away.
         sum(input);
     }
+
+    // Outside the loop, the timer is stopped, so we could perform
+    // cleanup if necessary without affecting the result.
 }
 
-// Outside the loop, the timer is stopped, so we could perform
-// cleanup if necessary without affecting the result.
 internal static nint sum(slice<nint> data) {
     nint total = 0;
     foreach (var (_, value) in data) {

@@ -52,6 +52,7 @@ namespace go;
 
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
+using goexperiment = @internal.goexperiment_package;
 using stringslite = @internal.stringslite_package;
 using @internal;
 using @internal.runtime;
@@ -116,9 +117,11 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
             @throw(suspendGFromNonˢ);
         }
     }
+
     // See https://golang.org/cl/21503 for justification of the yield delay.
     UntypedInt yieldDelay = /* 10 * 1000 */ 10000;
     int64 nextYield = default!;
+
     // Drive the goroutine to a preemption point.
     var stopped = false;
     ж<m> asyncM = default!;
@@ -129,94 +132,98 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
             var s = readgstatus(Ꮡgp);
             var exprᴛ1 = s;
             var matchᴛ1 = false;
-            if (exprᴛ1 == _Gdead) { matchᴛ1 = true;
-                return new suspendGState( // Someone else is suspending it. Wait
- // for them to finish.
- //
- // TODO: It would be nicer if we could
- // coalesce suspends.
- // Nothing to suspend.
- //
- // preemptStop may need to be cleared, but
- // doing that here could race with goroutine
- // reuse. Instead, goexit0 clears it.
-dead: true);
+            if (exprᴛ1 == _Gdead || exprᴛ1 == _Gdeadextra) { matchᴛ1 = true;
+                // Nothing to suspend.
+                //
+                // preemptStop may need to be cleared, but
+                // doing that here could race with goroutine
+                // reuse. Instead, goexit0 clears it.
+                return new suspendGState(dead: true);
             }
             if (exprᴛ1 == _Gcopystack) { matchᴛ1 = true;
+                // The stack is being copied. We need to wait
+                // until this is done.
             }
             else if (exprᴛ1 == _Gpreempted) { matchᴛ1 = true;
                 do {
-                    if (!casGFromPreempted(Ꮡgp, // The stack is being copied. We need to wait
- // until this is done.
- // We (or someone else) suspended the G. Claim
- // ownership of it by transitioning it to
- // _Gwaiting.
- _Gpreempted, _Gwaiting)) {
+                    // We (or someone else) suspended the G. Claim
+                    // ownership of it by transitioning it to
+                    // _Gwaiting.
+                    if (!casGFromPreempted(Ꮡgp, _Gpreempted, _Gwaiting)) {
                         break;
                     }
+
+                    // We stopped the G, so we have to ready it later.
                     stopped = true;
+
                     s = _Gwaiting;
                     fallthrough = true;
                 } while (false);
             }
-            if (fallthrough || !matchᴛ1 && (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting)) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gleaked)) { matchᴛ1 = true;
                 do {
-                    if (!castogscanstatus(Ꮡgp, // We stopped the G, so we have to ready it later.
- // Claim goroutine by setting scan bit.
- // This may race with execution or readying of gp.
- // The scan bit keeps it from transition state.
- s, (uint32)(s | (uint32)_Gscan))) {
+                    // Claim goroutine by setting scan bit.
+                    // This may race with execution or readying of gp.
+                    // The scan bit keeps it from transition state.
+                    if (!castogscanstatus(Ꮡgp, s, s | (uint32)_Gscan)) {
                         break;
                     }
+
+                    // Clear the preemption request. It's safe to
+                    // reset the stack guard because we hold the
+                    // _Gscan bit and thus own the stack.
                     gp.preemptStop = false;
                     gp.preempt = false;
                     gp.stackguard0 = gp.stack.lo + (uintptr)stackGuard;
-                    return new suspendGState( // Clear the preemption request. It's safe to
- // reset the stack guard because we hold the
- // _Gscan bit and thus own the stack.
- // The goroutine was already at a safe-point
- // and we've now locked that in.
- //
- // TODO: It would be much better if we didn't
- // leave it in _Gscan, but instead gently
- // prevented its scheduling until resumption.
- // Maybe we only use this to bump a suspended
- // count and the scheduler skips suspended
- // goroutines? That wouldn't be enough for
- // {_Gsyscall,_Gwaiting} -> _Grunning. Maybe
- // for all those transitions we need to check
- // suspended and deschedule?
-g: Ꮡgp, stopped: stopped);
+
+                    // The goroutine was already at a safe-point
+                    // and we've now locked that in.
+                    //
+                    // TODO: It would be much better if we didn't
+                    // leave it in _Gscan, but instead gently
+                    // prevented its scheduling until resumption.
+                    // Maybe we only use this to bump a suspended
+                    // count and the scheduler skips suspended
+                    // goroutines? That wouldn't be enough for
+                    // {_Gsyscall,_Gwaiting} -> _Grunning. Maybe
+                    // for all those transitions we need to check
+                    // suspended and deschedule?
+                    return new suspendGState(g: Ꮡgp, stopped: stopped);
                 } while (false);
             }
             else if (exprᴛ1 == _Grunning) {
                 do {
+                    // Optimization: if there is already a pending preemption request
+                    // (from the previous loop iteration), don't bother with the atomics.
                     if (gp.preemptStop && gp.preempt && gp.stackguard0 == stackPreempt && asyncM == gp.m && asyncM.of(m.ᏑpreemptGen).Load() == asyncGen) {
-                        // Optimization: if there is already a pending preemption request
-                        // (from the previous loop iteration), don't bother with the atomics.
                         break;
                     }
-                    if (!castogscanstatus(Ꮡgp, // Temporarily block state transitions.
- _Grunning, _Gscanrunning)) {
+
+                    // Temporarily block state transitions.
+                    if (!castogscanstatus(Ꮡgp, _Grunning, _Gscanrunning)) {
                         break;
                     }
+
+                    // Request synchronous preemption.
                     gp.preemptStop = true;
                     gp.preempt = true;
                     gp.stackguard0 = stackPreempt;
+
+                    // Prepare for asynchronous preemption.
                     var asyncM2 = gp.m;
                     var asyncGen2 = asyncM2.of(m.ᏑpreemptGen).Load();
                     var needAsync = asyncM != asyncM2 || asyncGen != asyncGen2;
                     asyncM = asyncM2;
                     asyncGen = asyncGen2;
-                    casfrom_Gscanstatus(Ꮡgp, // Request synchronous preemption.
- // Prepare for asynchronous preemption.
- _Gscanrunning, _Grunning);
+
+                    casfrom_Gscanstatus(Ꮡgp, _Gscanrunning, _Grunning);
+
+                    // Send asynchronous preemption. We do this
+                    // after CASing the G back to _Grunning
+                    // because preemptM may be synchronous and we
+                    // don't want to catch the G just spinning on
+                    // its status.
                     if (preemptMSupported && debug.asyncpreemptoff == 0 && needAsync) {
-                        // Send asynchronous preemption. We do this
-                        // after CASing the G back to _Grunning
-                        // because preemptM may be synchronous and we
-                        // don't want to catch the G just spinning on
-                        // its status.
                         // Rate limit preemptM calls. This is
                         // particularly important on Windows
                         // where preemptM is actually
@@ -232,9 +239,15 @@ g: Ꮡgp, stopped: stopped);
             }
             else if (!matchᴛ1) { /* default: */
                 do {
-                    if ((uint32)(s & (uint32)_Gscan) != 0) {
+                    if ((s & (uint32)_Gscan) != 0) {
+                        // Someone else is suspending it. Wait
+                        // for them to finish.
+                        //
+                        // TODO: It would be nicer if we could
+                        // coalesce suspends.
                         break;
                     }
+
                     dumpgstatus(Ꮡgp);
                     @throw(invalidGStatusˢ);
                 } while (false);
@@ -270,12 +283,13 @@ internal static void resumeG(suspendGState state) {
         // We didn't actually stop anything.
         return;
     }
+
     var gp = state.g;
     {
         var s = readgstatus(gp);
         var exprᴛ1 = s;
-        if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
-            casfrom_Gscanstatus(gp, s, (uint32)(s & ~(uint32)_Gscan));
+        if (exprᴛ1 == (uint32)((uint32)_Grunnable | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gwaiting | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gleaked | (uint32)_Gscan) || exprᴛ1 == (uint32)((uint32)_Gsyscall | (uint32)_Gscan)) {
+            casfrom_Gscanstatus(gp, s, s & ~(uint32)_Gscan);
         }
         else { /* default: */
             dumpgstatus(gp);
@@ -295,28 +309,59 @@ internal static void resumeG(suspendGState state) {
 //
 //go:nosplit
 internal static bool canPreemptM(ref m mp) {
-    return mp.locks == 0 && mp.mallocing == 0 && mp.preemptoff == ""u8 && (~mp.p.ptr()).status == _Prunning;
+    return mp.locks == 0 && mp.mallocing == 0 && mp.preemptoff == ""u8 && (~mp.p.ptr()).status == _Prunning && mp.curg != nil && (readgstatus(mp.curg) & ~(uint32)_Gscan) != _Gsyscall;
 }
 
 //go:generate go run mkpreempt.go
 
 // asyncPreempt saves all user registers and calls asyncPreempt2.
 //
-// When stack scanning encounters an asyncPreempt frame, it scans that
+// It saves GP registers (anything that might contain a pointer) to the G stack.
+// Hence, when stack scanning encounters an asyncPreempt frame, it scans that
 // frame and its parent frame conservatively.
+//
+// On some platforms, it saves large additional scalar-only register state such
+// as vector registers to an "extended register state" on the P.
 //
 // asyncPreempt is implemented in assembly.
 internal static partial void asyncPreempt();
 
+// asyncPreempt2 is the Go continuation of asyncPreempt.
+//
+// It must be deeply nosplit because there's untyped data on the stack from
+// asyncPreempt.
+//
+// It must not have any write barriers because we need to limit the amount of
+// stack it uses.
+//
 //go:nosplit
+//go:nowritebarrierrec
 internal static void asyncPreempt2() {
+    // We can't grow the stack with untyped data from asyncPreempt, so switch to
+    // the system stack right away.
+    mcall((ж<g> gpΔ1) => {
+        gpΔ1.Value.asyncSafePoint = true;
+
+        // Move the extended register state from the P to the G. We do this now that
+        // we're on the system stack to avoid stack splits.
+        xRegSave(ref (gpΔ1).DerefOrNull());
+
+        if ((~gpΔ1).preemptStop){
+            preemptPark(gpΔ1);
+        } else {
+            gopreempt_m(gpΔ1);
+        }
+        // The above functions never return.
+    });
+
+    // Do not grow the stack below here!
+
     var gp = getg();
-    gp.Value.asyncSafePoint = true;
-    if ((~gp).preemptStop){
-        mcall(preemptPark);
-    } else {
-        mcall(gopreempt_m);
-    }
+
+    // Put the extended register state back on the M so resumption can find it.
+    // We can't do this in asyncPreemptM because the park calls never return.
+    xRegRestore(gp);
+
     gp.Value.asyncSafePoint = false;
 }
 
@@ -329,19 +374,13 @@ internal static uintptr asyncPreemptStack = ~(uintptr)0;
     var total = funcMaxSPDelta(f);
     f = findfunc(abi.FuncPCABIInternal(asyncPreempt2));
     total += funcMaxSPDelta(f);
+    f = findfunc(abi.FuncPCABIInternal(xRegRestore));
+    total += funcMaxSPDelta(f);
     // Add some overhead for return PCs, etc.
     asyncPreemptStack = (uintptr)total + (uintptr)(8 * goarch.PtrSize);
     if (asyncPreemptStack > stackNosplit) {
-        // We need more than the nosplit limit. This isn't
-        // unsafe, but it may limit asynchronous preemption.
-        //
-        // This may be a problem if we start using more
-        // registers. In that case, we should store registers
-        // in a context object. If we pre-allocate one per P,
-        // asyncPreempt can spill just a few registers to the
-        // stack, then grab its context object and spill into
-        // it. When it enters the runtime, it would allocate a
-        // new context for the P.
+        // We need more than the nosplit limit. This isn't unsafe, but it may
+        // limit asynchronous preemption. Consider moving state into xRegState.
         print((@string)"runtime: asyncPreemptStack="u8, asyncPreemptStack, (@string)"\n"u8);
         @throw("async stack too large"u8);
     }
@@ -353,11 +392,10 @@ internal static bool wantAsyncPreempt(ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Check both the G and the P.
-    return (gp.preempt || (~gp.m).p != 0 && (~(~gp.m).p.ptr()).preempt) && (uint32)(readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Grunning;
+    return (gp.preempt || (~gp.m).p != 0 && (~(~gp.m).p.ptr()).preempt) && (readgstatus(Ꮡgp) & ~(uint32)_Gscan) == _Grunning;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string runtimeInternalˢ = "runtime/internal/"u8;
 internal static readonly @string internalRuntimeˢ = "internal/runtime/"u8;
 internal static readonly @string reflectˢ = "reflect."u8;
 internal static readonly @string badRestartPcˢ = "bad restart PC"u8;
@@ -382,20 +420,40 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     var mp = gp.m;
+
     // Only user Gs can have safe-points. We check this first
     // because it's extremely common that we'll catch mp in the
     // scheduler processing this G preemption.
     if ((~mp).curg != Ꮡgp) {
         return (false, 0);
     }
+
     // Check M state.
     if ((~mp).p == 0 || !canPreemptM(ref (mp).DerefOrNull())) {
         return (false, 0);
     }
+
     // Check stack space.
     if (sp < gp.stack.lo || sp - gp.stack.lo < asyncPreemptStack) {
         return (false, 0);
     }
+
+    // If we're in the middle of a secret computation, we can't
+    // allow any conservative scanning of stacks, as that may lead
+    // to secrets leaking out from the stack into work buffers.
+    // Additionally, the preemption code will store the
+    // machine state (including registers which may contain confidential
+    // information) into the preemption buffers.
+    //
+    // TODO(dmo): there's technically nothing stopping us from doing the
+    // preemption, granted that don't conservatively scan and we clean up after
+    // ourselves. This is made slightly harder by the xRegs cached allocations
+    // that can move between Gs and Ps. In any case, for the intended users (cryptography code)
+    // they are unlikely get stuck in unterminating loops.
+    if (goexperiment.RuntimeSecret && gp.secret > 0) {
+        return (false, 0);
+    }
+
     // Check if PC is an unsafe-point.
     var f = findfunc(pc);
     if (!f.valid()) {
@@ -435,7 +493,7 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
     // Check the inner-most name
     var (u, uf) = newInlineUnwinder(f, pc);
     @string name = u.srcFunc(uf).name();
-    if (stringslite.HasPrefix(name, runtimeˢ) || stringslite.HasPrefix(name, runtimeInternalˢ) || stringslite.HasPrefix(name, internalRuntimeˢ) || stringslite.HasPrefix(name, reflectˢ)) {
+    if (stringslite.HasPrefix(name, runtimeˢ) || stringslite.HasPrefix(name, internalRuntimeˢ) || stringslite.HasPrefix(name, reflectˢ)) {
         // For now we never async preempt the runtime or
         // anything closely tied to the runtime. Known issues
         // include: various points in the scheduler ("don't
@@ -456,18 +514,17 @@ internal static (bool, uintptr) isAsyncSafePoint(ж<g> Ꮡgp, uintptr pc, uintpt
     }
     var exprᴛ1 = up;
     if (exprᴛ1 == abi.UnsafePointRestart1 || exprᴛ1 == abi.UnsafePointRestart2) {
+        // Restartable instruction sequence. Back off PC to
+        // the start PC.
         if (startpc == 0 || startpc > pc || pc - startpc > 20) {
-            // Restartable instruction sequence. Back off PC to
-            // the start PC.
             @throw(badRestartPcˢ);
         }
         return (true, startpc);
     }
     if (exprᴛ1 == abi.UnsafePointRestartAtEntry) {
+        // Restart from the function entry at resumption.
         return (true, f.entry());
     }
-
-    // Restart from the function entry at resumption.
     return (true, pc);
 }
 

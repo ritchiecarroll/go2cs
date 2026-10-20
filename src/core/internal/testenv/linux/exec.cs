@@ -9,14 +9,13 @@ using fmt = fmt_package;
 using os = os_package;
 using exec = go.os.exec_package;
 using Δruntime = runtime_package;
-using strconv = strconv_package;
+using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
 using time = time_package;
 using go;
 using go.os;
-using Δsyscall = syscall_package;
 using ꓸꓸꓸstring = Span<@string>;
 
 partial class testenv_package {
@@ -49,32 +48,34 @@ public static void MustHaveExec(testing.TB t) {
     }
 }
 
-// Assume that exec always works on non-mobile platforms and Android.
-// ios has an exec syscall but on real iOS devices it might return a
-// permission error. In an emulated environment (such as a Corellium host)
-// it might succeed, so if we need to exec we'll just have to try it and
-// find out.
-//
-// As of 2023-04-19 wasip1 and js don't have exec syscalls at all, but we
-// may as well use the same path so that this branch can be tested without
-// an ios environment.
-// This isn't a standard 'go test' binary, so we don't know how to
-// self-exec in a way that should succeed without side effects.
-// Just forget it.
-// We know that this is a test executable. We should be able to run it with a
-// no-op flag to check for overall exec support.
 internal static Func<error> tryExec;
 internal static void initᴛtryExec() { tryExec = sync.OnceValue(error () => {
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "wasip1"u8 || exprᴛ1 == "js"u8 || exprᴛ1 == "ios"u8) {
     }
     else { /* default: */
+        // Assume that exec always works on non-mobile platforms and Android.
         return default!;
     }
 
+    // ios has an exec syscall but on real iOS devices it might return a
+    // permission error. In an emulated environment (such as a Corellium host)
+    // it might succeed, so if we need to exec we'll just have to try it and
+    // find out.
+    //
+    // As of 2023-04-19 wasip1 and js don't have exec syscalls at all, but we
+    // may as well use the same path so that this branch can be tested without
+    // an ios environment.
+
     if (!testing.Testing()) {
+        // This isn't a standard 'go test' binary, so we don't know how to
+        // self-exec in a way that should succeed without side effects.
+        // Just forget it.
         return errors.New("can't probe for exec support with a non-test executable"u8);
     }
+
+    // We know that this is a test executable. We should be able to run it with a
+    // no-op flag to check for overall exec support.
     var (exe, err) = exePath();
     if (err != default!) {
         return fmt.Errorf("can't probe for exec support: %w"u8, err);
@@ -90,6 +91,7 @@ internal static void initᴛtryExec() { tryExec = sync.OnceValue(error () => {
 // or fails the test if the path can not be obtained.
 public static @string Executable(testing.TB t) {
     MustHaveExec(t);
+
     var (exe, err) = exePath();
     if (err != default!) {
         @string msg = fmt.Sprintf("os.Executable error: %v"u8, err);
@@ -111,6 +113,7 @@ internal static ref sync.Map execPaths => ref ᏑexecPaths.Value; // path -> err
 // If not, MustHaveExecPath calls t.Skip with an explanation.
 public static void MustHaveExecPath(testing.TB t, @string path) {
     MustHaveExec(t);
+
     var (err, found) = ᏑexecPaths.Load(path);
     if (!found) {
         (_, err) = exec.LookPath(path);
@@ -175,8 +178,10 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
 
     t.Helper();
     MustHaveExec(t);
+
     Action cancelCtx = default!;
     time.Duration gracePeriod = default!;                 // unlimited unless the test has a deadline (to allow for interactive debugging)
+
     {
         var (tΔ1, ok) = t._<CommandContext_type>(ᐧ); if (ok) {
             {
@@ -193,6 +198,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
                             gracePeriod *= ((time.Duration)(int64)scale);
                         }
                     }
+
                     // If time allows, increase the termination grace period to 5% of the
                     // test's remaining time.
                     var testTimeout = time.Until(td);
@@ -201,6 +207,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
                             gracePeriod = gp;
                         }
                     }
+
                     // When we run commands that execute subprocesses, we want to reserve two
                     // grace periods to clean up: one for the delay between the first
                     // termination signal being sent (via the Cancel callback when the Context
@@ -211,6 +218,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
                     // (We want to ensure that the test process itself has enough time to
                     // log the output before it is also terminated.)
                     var cmdTimeout = testTimeout - 2 * gracePeriod;
+
                     {
                         var (cd, okΔ2) = ctx.Deadline(); if (!okΔ2 || time.Until(cd) > cmdTimeout) {
                             // Either ctx doesn't have a deadline, or its deadline would expire
@@ -223,6 +231,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
             }
         }
     }
+
     var cmd = exec.CommandContext(ctx, name, args.ꓸꓸꓸ);
     var cancelCtxʗ1 = cancelCtx;
     var cmdʗ1 = cmd;
@@ -244,6 +253,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
         return (~cmdʗ1).Process.Signal(new syscall_ΔSignalᴠΔSignal(Sigquit));
     };
     cmd.Value.WaitDelay = gracePeriod;
+
     var cancelCtxʗ2 = cancelCtx;
     var cmdʗ2 = cmd;
     t.Cleanup(() => {
@@ -254,6 +264,7 @@ public static ж<exec.Cmd> CommandContext(testing.TB t, context.Context ctx, @st
             t.Errorf("command was started, but test did not wait for it to complete: %v"u8, cmdʗ2.OrTypedNil());
         }
     });
+
     return cmd;
 }
 

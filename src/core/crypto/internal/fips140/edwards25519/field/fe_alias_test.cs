@@ -17,18 +17,21 @@ internal static Func<global::go.crypto.@internal.fips140.edwards25519.field_pack
         var x1 = x;
         ref var v1 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡv1);
         v1 = x;
+
         // Calculate a reference f(x) without aliasing.
         {
             var @out = f(Ꮡv, Ꮡx); if (@out != Ꮡv && isInBounds(@out)) {
                 return false;
             }
         }
+
         // Test aliasing the argument and the receiver.
         {
             var @out = f(Ꮡv1, Ꮡv1); if (@out != Ꮡv1 || v1 != v) {
                 return false;
             }
         }
+
         // Ensure the arguments was not modified.
         return x == x1;
     };
@@ -43,12 +46,14 @@ internal static Func<global::go.crypto.@internal.fips140.edwards25519.field_pack
         var y1 = y;
         ref var v1 = ref heap<global::go.crypto.@internal.fips140.edwards25519.field_package.Element>(out var Ꮡv1);
         v1 = new Element(nil);
+
         // Calculate a reference f(x, y) without aliasing.
         {
             var @out = f(Ꮡv, Ꮡx, Ꮡy); if (@out != Ꮡv && isInBounds(@out)) {
                 return false;
             }
         }
+
         // Test aliasing the first argument and the receiver.
         v1 = x;
         {
@@ -63,12 +68,14 @@ internal static Func<global::go.crypto.@internal.fips140.edwards25519.field_pack
                 return false;
             }
         }
+
         // Calculate a reference f(x, x) without aliasing.
         {
             var @out = f(Ꮡv, Ꮡx, Ꮡx); if (@out != Ꮡv) {
                 return false;
             }
         }
+
         // Test aliasing the first argument and the receiver.
         v1 = x;
         {
@@ -90,6 +97,7 @@ internal static Func<global::go.crypto.@internal.fips140.edwards25519.field_pack
                 return false;
             }
         }
+
         // Ensure the arguments were not modified.
         return x == x1 && y == y1;
     };
@@ -152,7 +160,6 @@ public static void TestAliasing(ж<testing.T> Ꮡt) {
             err = quick.Check((checkAliasingTwoArgs(tt.twoArgsF)).OrTypedNilFunc(), quickCheckConfig(256));
             break;
         }}
-
         if (err != default!) {
             Ꮡt.Errorf("%v: %v"u8, tt.name, err);
         }

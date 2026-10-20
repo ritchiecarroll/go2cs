@@ -7,138 +7,119 @@ using time = time_package;
 
 partial class main_package {
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object doneˢ = (@string)"done"u8;
-
 internal static void Main() {
     roundTrip();
     zeroLengthDatagram();
-    fmt.Println(doneˢ);
+    fmt.Println("done");
 }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string udp4ˢ = "udp4"u8;
-private static readonly object roundtripListenFailedˢ = (@string)"roundtrip: listen failed"u8;
-private static readonly object roundtripServerAddressIsˢ = (@string)"roundtrip: server address is not IPv4"u8;
-private static readonly object roundtripSenderSetupˢ = (@string)"roundtrip: sender setup failed"u8;
-private static readonly object roundtripGetsocknameˢ = (@string)"roundtrip: getsockname failed"u8;
-private static readonly object roundtripSenderAddressIsˢ = (@string)"roundtrip: sender address is not IPv4"u8;
-private static readonly object roundtripSendReportedNoˢ = (@string)"roundtrip: send reported no error:"u8;
-private static readonly object roundtripByteCountEqualsˢ = (@string)"roundtrip: byte count equals payload:"u8;
-private static readonly object roundtripDeadlineFailedˢ = (@string)"roundtrip: deadline failed"u8;
-private static readonly object roundtripReadfromFailedˢ = (@string)"roundtrip: readfrom failed"u8;
-private static readonly object roundtripBytesArrivedˢ = (@string)"roundtrip: bytes arrived intact:"u8;
-private static readonly object roundtripPeerAddressIsˢ = (@string)"roundtrip: peer address is not UDP"u8;
-private static readonly object roundtripPeerHostMatchesˢ = (@string)"roundtrip: peer host matches sender's own:"u8;
-private static readonly object roundtripPeerPortMatchesˢ = (@string)"roundtrip: peer port matches sender's own:"u8;
 
 internal static void roundTrip() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(roundtripListenFailedˢ);
+            fmt.Println("roundtrip: listen failed");
             return;
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         var (dst, ok) = sockaddrOf(server.LocalAddr());
         if (!ok) {
-            fmt.Println(roundtripServerAddressIsˢ);
+            fmt.Println("roundtrip: server address is not IPv4");
             return;
         }
+
         (var sender, err) = newSender();
         if (err != default!) {
-            fmt.Println(roundtripSenderSetupˢ);
+            fmt.Println("roundtrip: sender setup failed");
             return;
         }
         defer(syscall.Closesocket, sender, ref ᒐ);
+
         (var local, err) = syscall.Getsockname(sender);
         if (err != default!) {
-            fmt.Println(roundtripGetsocknameˢ);
+            fmt.Println("roundtrip: getsockname failed");
             return;
         }
         (var mine, ok) = local._<ж<syscall.SockaddrInet4>>(ᐧ);
         if (!ok) {
-            fmt.Println(roundtripSenderAddressIsˢ);
+            fmt.Println("roundtrip: sender address is not IPv4");
             return;
         }
+
         var payload = slice<byte>("wsasendto-payload"u8);
         (var sent, err) = send(sender, payload, new syscall.SockaddrInet4жΔSockaddr(dst));
-        fmt.Println(roundtripSendReportedNoˢ, err == default!);
-        fmt.Println(roundtripByteCountEqualsˢ, (nint)sent == len(payload));
+        fmt.Println("roundtrip: send reported no error:", err == default!);
+        fmt.Println("roundtrip: byte count equals payload:", (nint)sent == len(payload));
+
         {
             var errΔ1 = server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L))); if (errΔ1 != default!) {
-                fmt.Println(roundtripDeadlineFailedˢ);
+                fmt.Println("roundtrip: deadline failed");
                 return;
             }
         }
         var buf = new slice<byte>(64);
         (var n, var from, err) = server.ReadFrom(buf);
         if (err != default!) {
-            fmt.Println(roundtripReadfromFailedˢ);
+            fmt.Println("roundtrip: readfrom failed");
             return;
         }
-        fmt.Println(roundtripBytesArrivedˢ, ((sstring)(buf.slice(0, n))) == ((sstring)payload));
+        fmt.Println("roundtrip: bytes arrived intact:", ((sstring)(buf.slice(0, n))) == ((sstring)payload));
+
         (var peer, ok) = from._<ж<Δnet.UDPAddr>>(ᐧ);
         if (!ok) {
-            fmt.Println(roundtripPeerAddressIsˢ);
+            fmt.Println("roundtrip: peer address is not UDP");
             return;
         }
-        fmt.Println(roundtripPeerHostMatchesˢ, sameIPv4((~peer).IP, (~mine).Addr));
-        fmt.Println(roundtripPeerPortMatchesˢ, (~peer).Port == (~mine).Port);
+        fmt.Println("roundtrip: peer host matches sender's own:", sameIPv4((~peer).IP, (~mine).Addr));
+        fmt.Println("roundtrip: peer port matches sender's own:", (~peer).Port == (~mine).Port);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object zerolenListenFailedˢ = (@string)"zerolen: listen failed"u8;
-private static readonly object zerolenServerAddressIsˢ = (@string)"zerolen: server address is not IPv4"u8;
-private static readonly object zerolenSenderSetupFailedˢ = (@string)"zerolen: sender setup failed"u8;
-private static readonly object zerolenSendReportedNoˢ = (@string)"zerolen: send reported no error:"u8;
-private static readonly object zerolenByteCountIsZeroˢ = (@string)"zerolen: byte count is zero:"u8;
-private static readonly object zerolenDeadlineFailedˢ = (@string)"zerolen: deadline failed"u8;
-private static readonly object zerolenADatagramArrivedˢ = (@string)"zerolen: a datagram arrived:"u8;
-private static readonly object zerolenItCarriedNoBytesˢ = (@string)"zerolen: it carried no bytes:"u8;
-
 internal static void zeroLengthDatagram() {
     GoFrame ᒐ = default;
     try {
-        var (server, err) = Δnet.ListenPacket(udp4ˢ, "127.0.0.1:0"u8);
+        var (server, err) = Δnet.ListenPacket("udp4", "127.0.0.1:0");
         if (err != default!) {
-            fmt.Println(zerolenListenFailedˢ);
+            fmt.Println("zerolen: listen failed");
             return;
         }
         var serverʗ1 = server;
         defer(() => serverʗ1.Close(), ref ᒐ);
+
         var (dst, ok) = sockaddrOf(server.LocalAddr());
         if (!ok) {
-            fmt.Println(zerolenServerAddressIsˢ);
+            fmt.Println("zerolen: server address is not IPv4");
             return;
         }
+
         (var sender, err) = newSender();
         if (err != default!) {
-            fmt.Println(zerolenSenderSetupFailedˢ);
+            fmt.Println("zerolen: sender setup failed");
             return;
         }
         defer(syscall.Closesocket, sender, ref ᒐ);
+
         var one = new byte[]{0}.slice();
         ref var buf = ref heap<syscall.WSABuf>(out var Ꮡbuf);
         buf = new syscall.WSABuf(Len: 0, Buf: Ꮡ(one, 0));
         ref var sent = ref heap(new uint32(), out var Ꮡsent);
         err = syscall.WSASendto(sender, Ꮡbuf, 1, Ꮡsent, 0, new syscall.SockaddrInet4жΔSockaddr(dst), nil, nil);
-        fmt.Println(zerolenSendReportedNoˢ, err == default!);
-        fmt.Println(zerolenByteCountIsZeroˢ, sent == 0);
+        fmt.Println("zerolen: send reported no error:", err == default!);
+        fmt.Println("zerolen: byte count is zero:", sent == 0);
+
         {
             var errΔ1 = server.SetReadDeadline(time.Now().Add((time.Duration)(5000000000L))); if (errΔ1 != default!) {
-                fmt.Println(zerolenDeadlineFailedˢ);
+                fmt.Println("zerolen: deadline failed");
                 return;
             }
         }
         (var n, _, err) = server.ReadFrom(new slice<byte>(8));
-        fmt.Println(zerolenADatagramArrivedˢ, err == default!);
-        fmt.Println(zerolenItCarriedNoBytesˢ, n == 0);
+        fmt.Println("zerolen: a datagram arrived:", err == default!);
+        fmt.Println("zerolen: it carried no bytes:", n == 0);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

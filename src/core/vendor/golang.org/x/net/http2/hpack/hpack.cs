@@ -23,6 +23,8 @@ public static @string Error(this DecodingError de) {
     return fmt.Sprintf("decoding error: %v"u8, de.Err);
 }
 
+// An InvalidIndexError is returned when an encoder references a table
+// entry before the static table or after the end of the dynamic table.
 partial struct InvalidIndexError /*num:nint*/;
 
 public static @string Error(this InvalidIndexError e) {
@@ -280,6 +282,7 @@ public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) {
         d.buf = d.saveBuf.Bytes();
         d.saveBuf.Reset();
     }
+
     while (builtin.len(d.buf) > 0) {
         err = d.parseHeaderFieldRepr();
         if (AreEqual(err, errNeedMore)) {
@@ -333,36 +336,36 @@ internal static error parseHeaderFieldRepr(this ref Decoder d) {
     var b = d.buf[0];
     switch (ᐧ) {
     case {} when (byte)(b & 128) != 0: {
+        // Indexed representation.
+        // High bit set?
+        // https://httpwg.org/specs/rfc7541.html#rfc.section.6.1
         return d.parseFieldIndexed();
     }
     case {} when (byte)(b & 192) == 64: {
-        return d.parseFieldLiteral(6, // Indexed representation.
- // High bit set?
- // https://httpwg.org/specs/rfc7541.html#rfc.section.6.1
- // 6.2.1 Literal Header Field with Incremental Indexing
- // 0b10xxxxxx: top two bits are 10
- // https://httpwg.org/specs/rfc7541.html#rfc.section.6.2.1
- indexedTrue);
+        // 6.2.1 Literal Header Field with Incremental Indexing
+        // 0b10xxxxxx: top two bits are 10
+        // https://httpwg.org/specs/rfc7541.html#rfc.section.6.2.1
+        return d.parseFieldLiteral(6, indexedTrue);
     }
     case {} when (byte)(b & 240) == 0: {
-        return d.parseFieldLiteral(4, // 6.2.2 Literal Header Field without Indexing
- // 0b0000xxxx: top four bits are 0000
- // https://httpwg.org/specs/rfc7541.html#rfc.section.6.2.2
- indexedFalse);
+        // 6.2.2 Literal Header Field without Indexing
+        // 0b0000xxxx: top four bits are 0000
+        // https://httpwg.org/specs/rfc7541.html#rfc.section.6.2.2
+        return d.parseFieldLiteral(4, indexedFalse);
     }
     case {} when (byte)(b & 240) == 16: {
-        return d.parseFieldLiteral(4, // 6.2.3 Literal Header Field never Indexed
- // 0b0001xxxx: top four bits are 0001
- // https://httpwg.org/specs/rfc7541.html#rfc.section.6.2.3
- indexedNever);
+        // 6.2.3 Literal Header Field never Indexed
+        // 0b0001xxxx: top four bits are 0001
+        // https://httpwg.org/specs/rfc7541.html#rfc.section.6.2.3
+        return d.parseFieldLiteral(4, indexedNever);
     }
     case {} when (byte)(b & 224) == 32: {
+        // 6.3 Dynamic Table Size Update
+        // Top three bits are '001'.
+        // https://httpwg.org/specs/rfc7541.html#rfc.section.6.3
         return d.parseDynamicTableSizeUpdate();
     }}
 
-    // 6.3 Dynamic Table Size Update
-    // Top three bits are '001'.
-    // https://httpwg.org/specs/rfc7541.html#rfc.section.6.3
     return new DecodingError(errors.New(invalidEncodingˢ));
 }
 
@@ -375,7 +378,7 @@ internal static error parseFieldIndexed(this ref Decoder d) {
     }
     var (hf, ok) = d.at(idx);
     if (!ok) {
-        return new DecodingError(((InvalidIndexError)(nint)idx));
+        return new DecodingError((InvalidIndexError)(nint)idx);
     }
     d.buf = buf;
     return d.callEmit(new HeaderField(Name: hf.Name, Value: hf.Value));
@@ -388,13 +391,14 @@ internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType i
     if (err != default!) {
         return err;
     }
+
     HeaderField hf = default!;
     var wantStr = d.emitEnabled || it.indexed();
     undecodedString undecodedName = default!;
     if (nameIdx > 0){
         var (ihf, ok) = d.at(nameIdx);
         if (!ok) {
-            return new DecodingError(((InvalidIndexError)(nint)nameIdx));
+            return new DecodingError((InvalidIndexError)(nint)nameIdx);
         }
         hf.Name = ihf.Name;
     } else {
@@ -450,6 +454,7 @@ internal static error parseDynamicTableSizeUpdate(this ref Decoder d) {
     if (!d.firstField && d.dynTab.size > 0) {
         return new DecodingError(errors.New(dynamicTableSizeUpdateˢ));
     }
+
     var buf = d.buf;
     (var size, buf, var err) = readVarInt(5, buf);
     if (err != default!) {
@@ -489,6 +494,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
     if (i < (((uint64)1).Lsh((uint64)n)) - 1) {
         return (i, p[1..], default!);
     }
+
     var origP = p;
     p = p[1..];
     uint64 m = default!;
@@ -500,8 +506,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
             return (i, p, default!);
         }
         m += 7;
-        if (m >= 63) {
-            // TODO: proper overflow check. making this up.
+        if (m >= 63) { // TODO: proper overflow check. making this up.
             return (0, origP, errVarintOverflow);
         }
     }
@@ -547,7 +552,7 @@ partial struct undecodedString {
 
 internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
-        return (((@string)u.b), default!);
+        return ((@string)u.b, default!);
     }
     var buf = ᏑbufPool.Get()._<ж<bytes.Buffer>>();
     buf.Reset(); // don't trust others

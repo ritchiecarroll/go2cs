@@ -16,8 +16,10 @@ partial class runtime_package {
 // The version section is documented at
 // https://refspecs.linuxfoundation.org/LSB_3.2.0/LSB-Core-generic/LSB-Core-generic/symversion.html
 internal static UntypedInt _AT_SYSINFO_EHDR => 33;
+
 internal static UntypedInt _PT_LOAD => 1; /* Loadable program segment */
 internal static UntypedInt _PT_DYNAMIC => 2; /* Dynamic linking information */
+
 internal static UntypedInt _DT_NULL => 0; /* Marks end of dynamic section */
 internal static UntypedInt _DT_HASH => 4; /* Dynamic symbol hash table */
 internal static UntypedInt _DT_STRTAB => 5; /* Address of string table */
@@ -25,24 +27,37 @@ internal static UntypedInt _DT_SYMTAB => 6; /* Address of symbol table */
 internal static UntypedInt _DT_GNU_HASH => 0x6ffffef5; /* GNU-style dynamic symbol hash table */
 internal static UntypedInt _DT_VERSYM => 0x6ffffff0;
 internal static UntypedInt _DT_VERDEF => 0x6ffffffc;
+
 internal static UntypedInt _VER_FLG_BASE => 0x1; /* Version definition of file itself */
+
 internal static UntypedInt _SHN_UNDEF => 0; /* Undefined section */
+
 internal static UntypedInt _SHT_DYNSYM => 11; /* Dynamic linker symbol table */
+
 internal static UntypedInt _STT_FUNC => 2; /* Symbol is a code object */
+
 internal static UntypedInt _STT_NOTYPE => 0; /* Symbol type is not specified */
+
 internal static UntypedInt _STB_GLOBAL => 1; /* Global symbol */
 internal static UntypedInt _STB_WEAK => 2; /* Weak symbol */
+
 internal static UntypedInt _EI_NIDENT => 16;
+
+// Maximum indices for the array types used when traversing the vDSO ELF structures.
+// Computed from architecture-specific max provided by vdso_linux_*.go
 internal static uintptr vdsoSymTabSize => /* vdsoArrayMax / unsafe.Sizeof(elfSym{}) */ unchecked((uintptr)46912496118442);
 internal static uintptr vdsoDynSize => /* vdsoArrayMax / unsafe.Sizeof(elfDyn{}) */ unchecked((uintptr)70368744177663);
 internal static UntypedInt vdsoSymStringsSize => /* vdsoArrayMax */ 1125899906842623; // byte
 internal static UntypedInt vdsoVerSymSize => /* vdsoArrayMax / 2 */ 562949953421311; // uint16
 internal static UntypedInt vdsoHashSize => /* vdsoArrayMax / 4 */ 281474976710655; // uint32
+
+// vdsoBloomSizeScale is a scaling factor for gnuhash tables which are uint32 indexed,
+// but contain uintptrs
 internal static uintptr vdsoBloomSizeScale => /* unsafe.Sizeof(uintptr(0)) / 4 */ 2; // uint32
 
 /* How to extract and insert information held in the st_info field.  */
 internal static byte _ELF_ST_BIND(byte val) {
-    return (byte)((val >> (int)(4)));
+    return (byte)((val >> 4));
 }
 
 internal static byte _ELF_ST_TYPE(byte val) {
@@ -87,7 +102,9 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
 
     info.valid = false;
     info.loadAddr = (uintptr)Ꮡhdr;
+
     @unsafe.Pointer pt = (@unsafe.Pointer)(info.loadAddr + (uintptr)hdr.e_phoff);
+
     // We need two things from the segment table: the load offset
     // and the dynamic table.
     bool foundVaddr = default!;
@@ -106,12 +123,14 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         else if (exprᴛ1 == _PT_DYNAMIC) {
             dyn = (ж<array<elfDyn>>)(uintptr)((@unsafe.Pointer)(info.loadAddr + (uintptr)(~ptΔ1).p_offset));
         }
-
     }
+
     if (!foundVaddr || dyn == nil) {
         return; // Failed
     }
+
     // Fish out the useful bits of the dynamic table.
+
     ж<array<uint32>> hash = default!;
     ж<array<uint32>> gnuhash = default!;
     info.symstrings = ж<array<byte>>.NilBoxOfDims(1125899906842623L);
@@ -140,29 +159,32 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         else if (exprᴛ2 == _DT_VERDEF) {
             info.verdef = (ж<elfVerdef>)(uintptr)((@unsafe.Pointer)Δp);
         }
-
     }
+
     if (info.symstrings == nil || info.symtab == nil || (hash == nil && gnuhash == nil)) {
         return; // Failed
     }
+
     if (info.verdef == nil) {
         info.versym = ж<array<uint16>>.NilBoxOfDims(562949953421311L);
     }
+
     if (gnuhash != nil){
         // Parse the GNU hash table header.
         var nbucket = gnuhash.Value[0];
         info.symOff = gnuhash.Value[1];
         var bloomSize = gnuhash.Value[2];
-        info.bucket = (~gnuhash).slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale)).slice(0, (nint)(nbucket));
-        info.chain = (~gnuhash).slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale + nbucket));
+        info.bucket = gnuhash.slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale)).slice(0, (nint)(nbucket));
+        info.chain = gnuhash.slice((nint)(4 + bloomSize * (uint32)vdsoBloomSizeScale + nbucket));
         info.isGNUHash = true;
     } else {
         // Parse the hash table header.
         var nbucket = hash.Value[0];
         var nchain = hash.Value[1];
-        info.bucket = (~hash).slice(2, (nint)(2 + nbucket));
-        info.chain = (~hash).slice((nint)(2 + nbucket), (nint)(2 + nbucket + nchain));
+        info.bucket = hash.slice(2, (nint)(2 + nbucket));
+        info.chain = hash.slice((nint)(2 + nbucket), (nint)(2 + nbucket + nchain));
     }
+
     // That's all we need.
     info.valid = true;
 }
@@ -173,6 +195,7 @@ internal static int32 vdsoFindVersion(ж<vdsoInfo> Ꮡinfo, ref vdsoVersionKey v
     if (!info.valid) {
         return 0;
     }
+
     var def = info.verdef;
     while (ᐧ) {
         if ((uint16)((~def).vd_flags & (uint16)_VER_FLG_BASE) == 0) {
@@ -181,11 +204,13 @@ internal static int32 vdsoFindVersion(ж<vdsoInfo> Ꮡinfo, ref vdsoVersionKey v
                 return (int32)((uint16)((~def).vd_ndx & 0x7fff));
             }
         }
+
         if ((~def).vd_next == 0) {
             break;
         }
         def = (ж<elfVerdef>)(uintptr)(add(@unsafe.Pointer.FromPinnedBox(def), (uintptr)(~def).vd_next));
     }
+
     return -1; // cannot match any version
 }
 
@@ -195,6 +220,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
     if (!info.valid) {
         return;
     }
+
     bool apply(uint32 symIndex, vdsoSymbolKey k) {
         var sym = Ꮡinfo.Value.symtab.at<elfSym>((ulong)(symIndex));
         var typ = _ELF_ST_TYPE((~sym).st_info);
@@ -210,9 +236,11 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         if (Ꮡinfo.Value.versym != nil && version != 0 && (int32)((uint16)(Ꮡinfo.Value.versym.Value[symIndex] & 0x7fff)) != version) {
             return false;
         }
+
         k.ptr.Value = Ꮡinfo.Value.loadOffset + (uintptr)(~sym).st_value;
         return true;
     }
+
     if (!info.isGNUHash) {
         // Old-style DT_HASH table.
         foreach (var (_, k) in vdsoSymbolKeys) {
@@ -226,6 +254,7 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         }
         return;
     }
+
     // New-style DT_GNU_HASH table.
     foreach (var (_, k) in vdsoSymbolKeys) {
         var symIndex = info.bucket[k.gnuHash % (uint32)len(info.bucket)];
@@ -234,13 +263,13 @@ internal static void vdsoParseSymbols(ж<vdsoInfo> Ꮡinfo, int32 version) {
         }
         for (; ᐧ ; symIndex++) {
             var hash = info.chain[symIndex - info.symOff];
-            if ((uint32)(hash | 1) == (uint32)(k.gnuHash | 1)) {
+            if ((hash | 1) == (k.gnuHash | 1)) {
                 // Found a hash match.
                 if (apply(symIndex, k)) {
                     break;
                 }
             }
-            if ((uint32)(hash & 1) != 0) {
+            if ((hash & 1) != 0) {
                 // End of chain.
                 break;
             }
@@ -256,16 +285,15 @@ internal static void vdsoauxv(uintptr tag, uintptr val) {
             return;
         }
         ref var info = ref heap(new vdsoInfo(), out var Ꮡinfo);
+        // TODO(rsc): I don't understand why the compiler thinks info escapes
+        // when passed to the three functions below.
         var info1 = Ꮡinfo;
-        vdsoInitFromSysinfoEhdr(ref (info1).DerefOrNull(), // TODO(rsc): I don't understand why the compiler thinks info escapes
- // when passed to the three functions below.
- (ж<elfEhdr>)(uintptr)((@unsafe.Pointer)val));
+        vdsoInitFromSysinfoEhdr(ref (info1).DerefOrNull(), (ж<elfEhdr>)(uintptr)((@unsafe.Pointer)val));
         vdsoParseSymbols(info1, vdsoFindVersion(info1, ref vdsoLinuxVersion));
     }
-
 }
 
-// vdsoMarker reports whether PC is on the VDSO page.
+// inVDSOPage reports whether PC is on the VDSO page.
 //
 //go:nosplit
 internal static bool inVDSOPage(uintptr pc) {

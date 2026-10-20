@@ -35,6 +35,7 @@ import (
 // TestNativeBackedArrayPointerStore pins the emission of the write-barrier-dodging store, in both
 // directions: the pointer-to-array destination mints, every other destination does not.
 func TestNativeBackedArrayPointerStore(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

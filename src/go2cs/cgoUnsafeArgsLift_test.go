@@ -212,6 +212,7 @@ func liftRequireAbsent(t *testing.T, where, text, needle, why string) {
 // Go's order with pointers as uintptr, the construction line at entry, the pinned block as the
 // libcCall argument, the first parameter no longer heap-boxed, and the KeepAlive lines untouched.
 func TestCgoUnsafeArgsLiftSynthesizesTheParameterBlock(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
@@ -247,6 +248,7 @@ func TestCgoUnsafeArgsLiftSynthesizesTheParameterBlock(t *testing.T) {
 // directive (shape (b)) and the same call shape WITHOUT the directive keep today's emission —
 // no synthesized block, the first parameter's own box as the argument.
 func TestCgoUnsafeArgsLiftLeavesTheOtherShapesAlone(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}

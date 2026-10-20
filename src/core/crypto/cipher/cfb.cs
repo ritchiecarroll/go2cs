@@ -33,6 +33,7 @@ internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> s
             x.b.Encrypt(x.@out, x.next);
             x.outUsed = 0;
         }
+
         if (x.decrypt) {
             // We can precompute a larger segment of the
             // keystream on decryption. This will allow
@@ -60,7 +61,7 @@ internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> s
 // CFB is also unoptimized and not validated as part of the FIPS 140-3 module.
 // If an unauthenticated [Stream] mode is required, use [NewCTR] instead.
 public static Stream NewCFBEncrypter(Block block, slice<byte> iv) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CFB is not allowed in FIPS 140-only mode");
     }
     return newCFB(block, iv, false);
@@ -76,7 +77,7 @@ public static Stream NewCFBEncrypter(Block block, slice<byte> iv) {
 // CFB is also unoptimized and not validated as part of the FIPS 140-3 module.
 // If an unauthenticated [Stream] mode is required, use [NewCTR] instead.
 public static Stream NewCFBDecrypter(Block block, slice<byte> iv) {
-    if (fips140only.Enabled) {
+    if (fips140only.Enforced()) {
         throw panic("crypto/cipher: use of CFB is not allowed in FIPS 140-only mode");
     }
     return newCFB(block, iv, true);
@@ -86,7 +87,7 @@ internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
     ref var blockSize = ref heap<nint>(out var ᏑblockSize);
     blockSize = block.BlockSize();
     if (len(iv) != blockSize) {
-        // stack trace will indicate whether it was de or encryption
+        // Stack trace will indicate whether it was de- or en-cryption.
         throw panic("cipher.newCFB: IV length must equal block size");
     }
     var x = Ꮡ(new cfb(
@@ -97,6 +98,7 @@ internal static Stream newCFB(Block block, slice<byte> iv, bool decrypt) {
         decrypt: decrypt
     ));
     copy((~x).next, iv);
+
     return new cfbжStream(x);
 }
 

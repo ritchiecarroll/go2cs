@@ -84,6 +84,7 @@ func goImplementLines(contents string) []string {
 // produces (CS0246). Keying the comparison on the same canonicalization the emission applies is what
 // makes the two sides comparable.
 func TestImplementRecordDedupesAcrossRenamedImportSpelling(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedPackageInfoFile(t, dir, "os")
 
@@ -124,6 +125,7 @@ func TestImplementRecordDedupesAcrossRenamedImportSpelling(t *testing.T) {
 // qualified record is the ONLY record and must survive. Without this control, "emit one record"
 // could be satisfied by dropping the wrong one — or by dropping both.
 func TestImplementRecordKeepsQualifiedRecordWhenNoAliasRecordExists(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedPackageInfoFile(t, dir, "os")
 
@@ -156,6 +158,7 @@ func TestImplementRecordKeepsQualifiedRecordWhenNoAliasRecordExists(t *testing.T
 // Two GENUINELY different pairs must both survive — the dedup keys on (interface, implementation),
 // so a second implementation of the same interface is not a duplicate.
 func TestImplementRecordKeepsDistinctImplementationsOfOneInterface(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	dir := t.TempDir()
 	fileName := seedPackageInfoFile(t, dir, "os")
 

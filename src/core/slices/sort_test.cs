@@ -129,6 +129,7 @@ public static void TestStability(ж<testing.T> Ꮡt) {
         (n, m) = (1000, 100);
     }
     var data = new intPairs(n);
+
     // random distribution
     for (nint i = 0; i < len(data); i++) {
         data[i].a = rand.Intn(m);
@@ -144,6 +145,7 @@ public static void TestStability(ж<testing.T> Ꮡt) {
     if (!data.inOrder(false)) {
         Ꮡt.Errorf("Stable wasn't stable on %d ints"u8, n);
     }
+
     // already sorted
     data.initB();
     SortStableFunc<intPairs, intPair>(data, intPairCmp);
@@ -153,6 +155,7 @@ public static void TestStability(ж<testing.T> Ꮡt) {
     if (!data.inOrder(false)) {
         Ꮡt.Errorf("Stable shuffled sorted %d ints (stability)"u8, n);
     }
+
     // sorted reversed
     for (nint i = 0; i < len(data); i++) {
         data[i].a = len(data) - i;
@@ -184,6 +187,7 @@ internal partial struct TestMinMax_tests /*dyn*/ {
 
 public static void TestMinMax(ж<testing.T> Ꮡt) {
     var intCmp = (nint a, nint b) => a - b;
+
     var tests = new TestMinMax_tests[]{
         new(new nint[]{7}.slice(), 7, 7),
         new(new nint[]{1, 2}.slice(), 1, 2),
@@ -206,31 +210,37 @@ public static void TestMinMax(ж<testing.T> Ꮡt) {
             if (gotMinΔ1 != ttʗ1.wantMin) {
                 tΔ1.Errorf("Min got %v, want %v"u8, gotMinΔ1, ttʗ1.wantMin);
             }
+
             nint gotMinFunc = MinFunc(ttʗ1.data, intCmpʗ1);
             if (gotMinFunc != ttʗ1.wantMin) {
                 tΔ1.Errorf("MinFunc got %v, want %v"u8, gotMinFunc, ttʗ1.wantMin);
             }
+
             nint gotMaxΔ1 = Max<slice<nint>, nint>(ttʗ1.data);
             if (gotMaxΔ1 != ttʗ1.wantMax) {
                 tΔ1.Errorf("Max got %v, want %v"u8, gotMaxΔ1, ttʗ1.wantMax);
             }
+
             nint gotMaxFunc = MaxFunc(ttʗ1.data, intCmpʗ1);
             if (gotMaxFunc != ttʗ1.wantMax) {
                 tΔ1.Errorf("MaxFunc got %v, want %v"u8, gotMaxFunc, ttʗ1.wantMax);
             }
         });
     }
+
     var svals = new S[]{
         new(1, "a"u8),
         new(2, "a"u8),
         new(1, "b"u8),
         new(2, "b"u8)
     }.slice();
+
     var gotMin = MinFunc<slice<S>, S>(svals, cmpS);
     var wantMin = new S(1, "a"u8);
     if (gotMin != wantMin) {
         Ꮡt.Errorf("MinFunc(%v) = %v, want %v"u8, svals, gotMin, wantMin);
     }
+
     var gotMax = MaxFunc<slice<S>, S>(svals, cmpS);
     var wantMax = new S(2, "a"u8);
     if (gotMax != wantMax) {
@@ -246,15 +256,18 @@ public static void TestMinMaxNaNs(ж<testing.T> Ꮡt) {
     if (Max<slice<float64>, float64>(fs) != 999.9D) {
         Ꮡt.Errorf("got max %v, want 999.9"u8, Max<slice<float64>, float64>(fs));
     }
+
     // No matter which element of fs is replaced with a NaN, both Min and Max
     // should propagate the NaN to their output.
     for (nint i = 0; i < len(fs); i++) {
         var testfs = Clone<slice<float64>, float64>(fs);
         testfs[i] = Δmath.NaN();
+
         var fmin = Min<slice<float64>, float64>(testfs);
         if (!Δmath.IsNaN(fmin)) {
             Ꮡt.Errorf("got min %v, want NaN"u8, fmin);
         }
+
         var fmax = Max<slice<float64>, float64>(testfs);
         if (!Δmath.IsNaN(fmax)) {
             Ꮡt.Errorf("got max %v, want NaN"u8, fmax);
@@ -265,18 +278,21 @@ public static void TestMinMaxNaNs(ж<testing.T> Ꮡt) {
 public static void TestMinMaxPanics(ж<testing.T> Ꮡt) {
     var intCmp = (nint a, nint b) => a - b;
     var emptySlice = new nint[]{}.slice();
+
     var emptySliceʗ1 = emptySlice;
     if (!panics(() => {
         Min<slice<nint>, nint>(emptySliceʗ1);
     })) {
         Ꮡt.Errorf("Min([]): got no panic, want panic"u8);
     }
+
     var emptySliceʗ2 = emptySlice;
     if (!panics(() => {
         Max<slice<nint>, nint>(emptySliceʗ2);
     })) {
         Ꮡt.Errorf("Max([]): got no panic, want panic"u8);
     }
+
     var emptySliceʗ3 = emptySlice;
     var intCmpʗ1 = intCmp;
     if (!panics(() => {
@@ -284,6 +300,7 @@ public static void TestMinMaxPanics(ж<testing.T> Ꮡt) {
     })) {
         Ꮡt.Errorf("MinFunc([]): got no panic, want panic"u8);
     }
+
     var emptySliceʗ4 = emptySlice;
     var intCmpʗ2 = intCmp;
     if (!panics(() => {
@@ -305,10 +322,13 @@ public static void TestBinarySearch(ж<testing.T> Ꮡt) {
     var str2 = new @string[]{"ab"u8, "ca"u8}.slice();
     var str3 = new @string[]{"mo"u8, "qo"u8, "vo"u8}.slice();
     var str4 = new @string[]{"ab"u8, "ad"u8, "ca"u8, "xy"u8}.slice();
+
     // slice with repeating elements
     var strRepeats = new @string[]{"ba"u8, "ca"u8, "da"u8, "da"u8, "da"u8, "ka"u8, "ma"u8, "ma"u8, "ta"u8}.slice();
+
     // slice with all element equal
     var strSame = new @string[]{"xx"u8, "xx"u8, "xx"u8}.slice();
+
     var tests = new TestBinarySearch_tests[]{
         new(new @string[]{}.slice(), "foo"u8, 0, false),
         new(new @string[]{}.slice(), ""u8, 0, false),
@@ -357,6 +377,7 @@ public static void TestBinarySearch(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("BinarySearch got (%v, %v), want (%v, %v)"u8, pos, found, ttʗ1.wantPos, ttʗ1.wantFound);
                 }
             }
+
             {
                 var (pos, found) = BinarySearchFunc<slice<@string>, @string, @string>(ttʗ1.data, ttʗ1.target, strings.Compare);
                 if (pos != ttʗ1.wantPos || found != ttʗ1.wantFound) {
@@ -394,6 +415,7 @@ public static void TestBinarySearchInts(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("BinarySearch got (%v, %v), want (%v, %v)"u8, pos, found, ttʗ1.wantPos, ttʗ1.wantFound);
                 }
             }
+
             {
                 var cmp = (nint a, nint b) => a - b;
                 var (pos, found) = BinarySearchFunc(dataʗ1, ttʗ1.target, cmp);
@@ -443,7 +465,7 @@ public static void TestBinarySearchFunc(ж<testing.T> Ꮡt) {
     var cmp = (nint a, @string b) => strings.Compare(strconv.Itoa(a), b);
     var (pos, found) = BinarySearchFunc(data, (@string)"2", cmp);
     if (pos != 3 || !found) {
-        Ꮡt.Errorf("BinarySearchFunc(%v, %q, cmp) = %v, %v, want %v, %v"u8, data, (@string)"2"u8, pos, found, (nint)(3), true);
+        Ꮡt.Errorf("BinarySearchFunc(%v, %q, cmp) = %v, %v, want %v, %v"u8, data, (@string)"2"u8, pos, found, (nint)3, true);
     }
 }
 

@@ -9,17 +9,19 @@ partial struct Delim /*num:rune*/;
 partial struct Code /*num:nint*/;
 
 public static @string String(this Delim d) {
-    return ((@string)(rune)d);
+    return (@string)(rune)d;
 }
 
 internal static void Main() {
-    var d = ((Delim)(rune)'{');
+    var d = (Delim)(rune)'{';
     fmt.Println(d.String());
+
     Delim d2 = 65;
-    fmt.Println(((@string)(rune)d2));
+    fmt.Println((@string)(rune)d2);
+
     Code c = 0x4E2D;
-    fmt.Println(((@string)(nint)c));
-    fmt.Println(len(((@string)(nint)c)));
+    fmt.Println((@string)(nint)c);
+    fmt.Println(len((@string)(nint)c));
 }
 
 } // end main_package

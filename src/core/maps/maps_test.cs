@@ -21,10 +21,10 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, m1)) {
         Ꮡt.Errorf("Equal(%v, %v) = false, want true"u8, m1, m1);
     }
-    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, ((map<nint, nint>)default!))) {
+    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(m1, (map<nint, nint>)default!)) {
         Ꮡt.Errorf("Equal(%v, nil) = true, want false"u8, m1);
     }
-    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>(((map<nint, nint>)default!), m1)) {
+    if (Equal<map<nint, nint>, map<nint, nint>, nint, nint>((map<nint, nint>)default!, m1)) {
         Ꮡt.Errorf("Equal(nil, %v) = true, want false"u8, m1);
     }
     if (!Equal<map<nint, nint>, map<nint, nint>, nint, nint>(default!, default!)) {
@@ -35,6 +35,7 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Equal(%v, %v) = true, want false"u8, m1, ms);
         }
     }
+
     // Comparing NaN for equality is expected to fail.
     var mf = new map<nint, float64>{[1] = 0D, [2] = Δmath.NaN()};
     if (Equal<map<nint, float64>, map<nint, float64>, nint, float64>(mf, mf)) {
@@ -65,10 +66,10 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
     if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, m1, equal<nint>)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, equal) = false, want true"u8, m1, m1);
     }
-    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, ((map<nint, nint>)default!), equal<nint>)) {
+    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(m1, (map<nint, nint>)default!, equal<nint>)) {
         Ꮡt.Errorf("EqualFunc(%v, nil, equal) = true, want false"u8, m1);
     }
-    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(((map<nint, nint>)default!), m1, equal<nint>)) {
+    if (EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>((map<nint, nint>)default!, m1, equal<nint>)) {
         Ꮡt.Errorf("EqualFunc(nil, %v, equal) = true, want false"u8, m1);
     }
     if (!EqualFunc<map<nint, nint>, map<nint, nint>, nint, nint, nint>(default!, default!, equal<nint>)) {
@@ -79,6 +80,7 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("EqualFunc(%v, %v, equal) = true, want false"u8, m1, ms);
         }
     }
+
     // Comparing NaN for equality is expected to fail.
     var mf = new map<nint, float64>{[1] = 0D, [2] = Δmath.NaN()};
     if (EqualFunc<map<nint, float64>, map<nint, float64>, nint, float64, float64>(mf, mf, equal<float64>)) {
@@ -88,6 +90,7 @@ public static void TestEqualFunc(ж<testing.T> Ꮡt) {
     if (!EqualFunc<map<nint, float64>, map<nint, float64>, nint, float64, float64>(mf, mf, equalNaN<float64>)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, equalNaN) = false, want true"u8, mf, mf);
     }
+
     if (!EqualFunc<map<nint, nint>, map<nint, @string>, nint, nint, @string>(m1, m2, equalIntStr)) {
         Ꮡt.Errorf("EqualFunc(%v, %v, equalIntStr) = false, want true"u8, m1, m2);
     }
@@ -168,7 +171,7 @@ public static void TestCloneWithDelete(ж<testing.T> Ꮡt) {
     }
     var m2 = Clone<map<nint, nint>, nint, nint>(m);
     if (len(m2) != 8) {
-        Ꮡt.Errorf("len2(m2) = %d, want %d"u8, len(m2), (nint)(8));
+        Ꮡt.Errorf("len2(m2) = %d, want %d"u8, len(m2), (nint)8);
     }
     for (nint i = 0; i < 8; i++) {
         if (m2[i] != m[i]) {
@@ -194,6 +197,7 @@ public static void TestCloneWithMapAssign(ж<testing.T> Ꮡt) {
     }
 }
 
+// See issue 64474.
 internal partial struct TestCloneLarge_K /*[17]float64*/; // > 128 bytes
 
 internal partial struct TestCloneLarge_V /*[17]float64*/;
@@ -201,35 +205,36 @@ internal partial struct TestCloneLarge_V /*[17]float64*/;
 public static void TestCloneLarge(ж<testing.T> Ꮡt) {
     float64 zero = default!;
     var negZero = -zero;
+
     for (nint tst = 0; tst < 3; tst++) {
         // Initialize m with a key and value.
         var m = new map<TestCloneLarge_K, TestCloneLarge_V>{};
         TestCloneLarge_K k1 = default!;
         TestCloneLarge_V v1 = default!;
         m[k1] = v1.Clone();
+
         switch (tst) {
-        case 0: {
+        case 0: { // nothing, just a 1-entry map
             break;
         }
         case 1: {
+            // Add more entries to make it 2 buckets
+            // 1 entry already
+            // 7 more fill up 1 bucket
+            // 1 more to grow to 2 buckets
             for (nint i = 0; i < 7 + 1; i++) {
-                // nothing, just a 1-entry map
-                // Add more entries to make it 2 buckets
-                // 1 entry already
-                // 7 more fill up 1 bucket
-                // 1 more to grow to 2 buckets
                 m[new TestCloneLarge_K(new float64[]{(float64)i + 1D}.array(17))] = new TestCloneLarge_V(new float64[17].array());
             }
             break;
         }
         case 2: {
+            // Capture the map mid-grow
+            // 1 entry already
+            // 7 more fill up 1 bucket
+            // 5 more (13 total) fill up 2 buckets
+            // 13 more (26 total) fill up 4 buckets
+            // 1 more to start the 4->8 bucket grow
             for (nint i = 0; i < 7 + 5 + 13 + 1; i++) {
-                // Capture the map mid-grow
-                // 1 entry already
-                // 7 more fill up 1 bucket
-                // 5 more (13 total) fill up 2 buckets
-                // 13 more (26 total) fill up 4 buckets
-                // 1 more to start the 4->8 bucket grow
                 m[new TestCloneLarge_K(new float64[]{(float64)i + 1D}.array(17))] = new TestCloneLarge_V(new float64[17].array());
             }
             break;
@@ -237,11 +242,13 @@ public static void TestCloneLarge(ж<testing.T> Ꮡt) {
 
         // Clone m, which should freeze the map's contents.
         var c = Clone<map<TestCloneLarge_K, TestCloneLarge_V>, TestCloneLarge_K, TestCloneLarge_V>(m);
+
         // Update m with new key and value.
         var (k2, v2) = (k1.Clone(), v1.Clone());
         k2[0] = negZero;
         v2[0] = 1.0D;
         m[k2] = v2.Clone();
+
         // Make sure c still has its old key and value.
         foreach (var (kᴛ1, vᴛ1) in c) {
             var k = kᴛ1.Clone();

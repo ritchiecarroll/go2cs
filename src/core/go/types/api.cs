@@ -26,6 +26,11 @@
 // specification. Use the Types field of [Info] for the results of
 // type deduction.
 //
+// Applications that need to type-check one or more complete packages
+// of Go source code may find it more convenient not to invoke the
+// type checker directly but instead to use the Load function in
+// package [golang.org/x/tools/go/packages].
+//
 // For a tutorial, see https://go.dev/s/types-tutorial.
 namespace go.go;
 
@@ -34,9 +39,9 @@ using fmt = fmt_package;
 using ast = global::go.go.ast_package;
 using constant = global::go.go.constant_package;
 using token = global::go.go.token_package;
-using static @internal.types.errors_package;
+using static global::go.@internal.types.errors_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) // for linkname
-using errors = @internal.types.errors_package;
+using errors = global::go.@internal.types.errors_package;
 using global::go.go;
 
 partial class types_package {
@@ -92,6 +97,7 @@ partial interface Importer {
     (ж<Package>, error) Import(@string path);
 }
 
+// ImportMode is reserved for future use.
 partial struct ImportMode /*num:nint*/;
 
 // An ImporterFrom resolves import paths to packages; it
@@ -218,7 +224,7 @@ partial struct ΔInfo {
     // Similarly, no type is recorded for the (synthetic) FuncType
     // node in a FuncDecl.Type field, since there is no corresponding
     // syntactic function type expression in the source in this case
-    // Instead, the function type is found in the Defs.map entry for
+    // Instead, the function type is found in the Defs map entry for
     // the corresponding function declaration.
     public map<ast.Expr, TypeAndValue> Types;
     // Instances maps identifiers denoting generic types or functions to their
@@ -241,6 +247,9 @@ partial struct ΔInfo {
     // type switch headers), the corresponding objects are nil.
     //
     // For an embedded field, Defs returns the field *Var it defines.
+    //
+    // In ill-typed code, such as a duplicate declaration of the
+    // same name, Defs may lack an entry for a declaring identifier.
     //
     // Invariant: Defs[id] == nil || Defs[id].Pos() == id.Pos()
     public map<ж<ast.Ident>, Object> Defs;
@@ -403,7 +412,6 @@ public static bool IsValue(this TypeAndValue tv) {
     if (exprᴛ1 == constant_ || exprᴛ1 == variable || exprᴛ1 == mapindex || exprᴛ1 == value || exprᴛ1 == commaok || exprᴛ1 == commaerr) {
         return true;
     }
-
     return false;
 }
 

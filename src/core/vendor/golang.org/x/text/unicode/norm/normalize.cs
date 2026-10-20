@@ -17,6 +17,23 @@ using ꓸꓸꓸbyte = Span<byte>;
 
 partial class norm_package {
 
+// A Form denotes a canonical representation of Unicode code points.
+// The Unicode-defined normalization and equivalence forms are:
+//
+//	NFC   Unicode Normalization Form C
+//	NFD   Unicode Normalization Form D
+//	NFKC  Unicode Normalization Form KC
+//	NFKD  Unicode Normalization Form KD
+//
+// For a Form f, this documentation uses the notation f(x) to mean
+// the bytes or string x converted to the given form.
+// A position n in x is called a boundary if conversion to the form can
+// proceed independently on both sides:
+//
+//	f(x) == append(f(x[0:n]), f(x[n:])...)
+//
+// References: https://unicode.org/reports/tr15/ and
+// https://unicode.org/notes/tn5/.
 partial struct Form /*num:nint*/;
 
 public static Form NFC => /* iota */ 0;
@@ -51,7 +68,7 @@ public static @string String(this Form f, @string s) {
     copy(@out, s.slice(0, n));
     ref var rb = ref heap<reorderBuffer>(out var Ꮡrb);
     rb = new reorderBuffer(f: ft.Value, src: src, nsrc: len(s), @out: @out, flushF: appendFlush);
-    return ((@string)doAppendInner(Ꮡrb, n));
+    return (@string)doAppendInner(Ꮡrb, n);
 }
 
 // IsNormal returns true if b == f(b).
@@ -322,7 +339,7 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
     nint n = default!;
 
     uint8 lastCC = default!;
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     nint lastSegStart = i;
     for (n = end; i < n; ) {
         {
@@ -356,7 +373,6 @@ internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint
                 return (lastSegStart, false);
             }
         }
-
         if (f.composing){
             if (!info.isYesC()) {
                 break;
@@ -397,7 +413,7 @@ internal static nint firstBoundary(this Form f, input src, nint nsrc) {
         return -1;
     }
     var fd = formTable[f];
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     // We should call ss.first here, but we can't as the first rune is
     // skipped already. This means FirstBoundary can't really determine
     // CGJ insertion points correctly. Luckily it doesn't have to.
@@ -456,8 +472,9 @@ internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF)
         }
         return -1;
     }
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     ss.first(info);
+
     for (nint i = (nint)info.size; i < nsrc; i += (nint)info.size) {
         info = (~fd).info(src, i);
         if (info.size == 0) {
@@ -492,27 +509,23 @@ internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
     if (p == -1) {
         return -1;
     }
-    if (info.size == 0) {
-        // ends with incomplete rune
-        if (p == 0) {
-            // starts with incomplete rune
+    if (info.size == 0) { // ends with incomplete rune
+        if (p == 0) { // starts with incomplete rune
             return -1;
         }
         i = p;
         (info, p) = lastRuneStart(ref fd, b.slice(0, i));
-        if (p == -1) {
-            // incomplete UTF-8 encoding or non-starter bytes without a starter
+        if (p == -1) { // incomplete UTF-8 encoding or non-starter bytes without a starter
             return i;
         }
     }
-    if (p + (nint)info.size != i) {
-        // trailing non-starter bytes: illegal UTF-8
+    if (p + (nint)info.size != i) { // trailing non-starter bytes: illegal UTF-8
         return i;
     }
     if (info.BoundaryAfter()) {
         return i;
     }
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     ssState v = ss.backwards(info);
     for (i = p; i >= 0 && v != ssStarter; i = p) {
         (info, p) = lastRuneStart(ref fd, b.slice(0, i));
@@ -522,8 +535,7 @@ internal static nint lastBoundary(ref formInfo fd, slice<byte> b) {
             }
         }
         if (p + (nint)info.size != i) {
-            if (p == -1) {
-                // no boundary found
+            if (p == -1) { // no boundary found
                 return -1;
             }
             return i; // boundary after an illegal UTF-8 encoding
@@ -625,7 +637,7 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
     }
     array<ΔProperties> add = new(31); /* maxNonStarters + 1 */                                             // stores runeInfo in reverse order
     nint padd = 0;
-    var ss = ((streamSafe)0);
+    var ss = (streamSafe)0;
     nint p = len(rb.@out);
     while (ᐧ) {
         add[padd] = info;

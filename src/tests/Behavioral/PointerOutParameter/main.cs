@@ -7,67 +7,55 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static slice<@string> wellKnown = new @string[]{
-    "S-1-5-18"u8,
-    "S-1-5-32-544"u8,
-    "S-1-1-0"u8,
-    "S-1-0-0"u8
+    "S-1-5-18",
+    "S-1-5-32-544",
+    "S-1-1-0",
+    "S-1-0-0"
 }.slice();
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object stringToSidErrorˢ = (@string)"StringToSid error:"u8;
-private static readonly object stringToSidReturnedANilˢ = (@string)"StringToSid returned a nil SID for"u8;
-private static readonly object sidStringErrorˢ = (@string)"SID.String error:"u8;
-private static readonly object roundtripˢ = (@string)"roundtrip:"u8;
-private static readonly object len0ˢ = (@string)"len>0:"u8;
-private static readonly @string notASidˢ = "not-a-sid"u8;
-private static readonly object malformedSidRejectedˢ = (@string)"malformed SID rejected: false"u8;
-private static readonly object malformedSidRejectedTrueˢ = (@string)"malformed SID rejected: true"u8;
-private static readonly @string s1532545ˢ = "S-1-5-32-545"u8;
-private static readonly object stableˢ = (@string)"stable:"u8;
-private static readonly object netGetJoinInformationˢ = (@string)"NetGetJoinInformation error:"u8;
-private static readonly object netGetJoinInformationˢ2 = (@string)"NetGetJoinInformation left its out-parameter nil"u8;
-private static readonly object joinNameLengthInRangeˢ = (@string)"join name length in range:"u8;
-private static readonly object firstRunePrintableˢ = (@string)"first rune printable:"u8;
-private static readonly object statusInRangeˢ = (@string)"status in range:"u8;
 
 internal static void Main() {
     foreach (var (_, s) in wellKnown) {
         var (sid, err) = syscall.StringToSid(s);
         if (err != default!) {
-            fmt.Println(stringToSidErrorˢ, err);
+            fmt.Println("StringToSid error:", err);
             continue;
         }
         if (sid == nil) {
-            fmt.Println(stringToSidReturnedANilˢ, s);
+            fmt.Println("StringToSid returned a nil SID for", s);
             continue;
         }
+
         (var back, err) = sid.String();
         if (err != default!) {
-            fmt.Println(sidStringErrorˢ, err);
+            fmt.Println("SID.String error:", err);
             continue;
         }
-        fmt.Println(s, (@string)"->"u8, back, roundtripˢ, back == s, len0ˢ, sid.Len() > 0);
+
+        fmt.Println(s, "->", back, "roundtrip:", back == s, "len>0:", sid.Len() > 0);
     }
+
     {
-        var (_, err) = syscall.StringToSid(notASidˢ); if (err == default!){
-            fmt.Println(malformedSidRejectedˢ);
+        var (_, err) = syscall.StringToSid("not-a-sid"); if (err == default!){
+            fmt.Println("malformed SID rejected: false");
         } else {
-            fmt.Println(malformedSidRejectedTrueˢ);
+            fmt.Println("malformed SID rejected: true");
         }
     }
-    var (a, _) = syscall.StringToSid(s1532545ˢ);
-    var (b, _) = syscall.StringToSid(s1532545ˢ);
+
+    var (a, _) = syscall.StringToSid("S-1-5-32-545");
+    var (b, _) = syscall.StringToSid("S-1-5-32-545");
     var (@as, _) = a.String();
     var (bs, _) = b.String();
-    fmt.Println(stableˢ, @as == bs, @as == "S-1-5-32-545"u8);
+    fmt.Println("stable:", @as == bs, @as == "S-1-5-32-545"u8);
+
     ref var name = ref heap<ж<uint16>>(out var Ꮡname);
     ref var bufType = ref heap(new uint32(), out var ᏑbufType);
     {
         var err = syscall.NetGetJoinInformation(nil, Ꮡname, ᏑbufType); if (err != default!){
-            fmt.Println(netGetJoinInformationˢ, err);
+            fmt.Println("NetGetJoinInformation error:", err);
         } else 
         if (name == nil){
-            fmt.Println(netGetJoinInformationˢ2);
+            fmt.Println("NetGetJoinInformation left its out-parameter nil");
         } else {
             nint n = 0;
             var first = (uint16)0;
@@ -81,9 +69,9 @@ internal static void Main() {
                 }
                 n++;
             }
-            fmt.Println(joinNameLengthInRangeˢ, n > 0 && n < 256,
-                firstRunePrintableˢ, first >= 0x20 && first < 0x7f,
-                statusInRangeˢ, bufType <= 4);
+            fmt.Println("join name length in range:", n > 0 && n < 256,
+                "first rune printable:", first >= 0x20 && first < 0x7f,
+                "status in range:", bufType <= 4);
             syscall.NetApiBufferFree(name.Reinterpret<uint16, byte>());
         }
     }

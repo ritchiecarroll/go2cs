@@ -17,15 +17,14 @@ partial struct _C_int /*num:int32*/;
 
 // adapted from unix.Uname() at x/sys/unix/syscall_darwin.go L419
 internal static error darwinOSRelease(/*[256]*/ ж<array<byte>> Ꮡrelease) {
-    ref var release = ref Ꮡrelease.DerefOrNull();
-
     // from x/sys/unix/zerrors_openbsd_amd64.go
     UntypedInt CTL_KERN = 0x1;
-    
     UntypedInt KERN_OSRELEASE = 0x2;
+
     var mib = new _C_int[]{CTL_KERN, KERN_OSRELEASE}.slice();
     ref var n = ref heap<uintptr>(out var Ꮡn);
     n = /* unsafe.Sizeof(*release) */ (uintptr)256;
+
     return sysctl(mib, Ꮡrelease.at<byte>(0), Ꮡn, nil, 0);
 }
 
@@ -52,6 +51,7 @@ internal static error sysctl(slice<_C_int> mib, ж<byte> Ꮡold, ж<uintptr> Ꮡ
             return err;
         }
     }
+
     return default!;
 }
 
@@ -88,6 +88,7 @@ internal static error sysctlbyname(ж<byte> Ꮡname, ж<byte> Ꮡold, ж<uintptr
             return err;
         }
     }
+
     return default!;
 }
 

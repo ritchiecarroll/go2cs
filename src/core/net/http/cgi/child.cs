@@ -70,16 +70,26 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
     if ((~r).Method == ""u8) {
         return (default!, errors.New(cgiNoRequestMethodInˢ));
     }
+
     r.Value.Proto = @params[serverProtocolˢ];
     bool ok = default!;
-    (r.Value.ProtoMajor, r.Value.ProtoMinor, ok) = http.ParseHTTPVersion((~r).Proto);
-    if (!ok) {
-        return (default!, errors.New(cgiInvalidServerProtocolˢ));
+    if ((~r).Proto == "INCLUDED"u8){
+        // SSI (Server Side Include) use case
+        // CGI Specification RFC 3875 - section 4.1.16
+        (r.Value.ProtoMajor, r.Value.ProtoMinor) = (1, 0);
+    } else 
+    {
+        (r.Value.ProtoMajor, r.Value.ProtoMinor, ok) = http.ParseHTTPVersion((~r).Proto); if (!ok) {
+            return (default!, errors.New(cgiInvalidServerProtocolˢ));
+        }
     }
+
     r.Value.Close = true;
     r.Value.Trailer = new httpꓸHeader(new map<@string, slice<@string>>{});
     r.Value.Header = new httpꓸHeader(new map<@string, slice<@string>>{});
+
     r.Value.Host = @params[httpHostˢ];
+
     {
         @string lenstr = @params[contentLengthˢ]; if (lenstr != ""u8) {
             var (clen, err) = strconv.ParseInt(lenstr, 10, 64);
@@ -89,11 +99,13 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
             r.Value.ContentLength = clen;
         }
     }
+
     {
         @string ct = @params[contentTypeˢ]; if (ct != ""u8) {
             (~r).Header.Set(contentTypeˢ2, ct);
         }
     }
+
     // Copy "HTTP_FOO_BAR" variables to "Foo-Bar" Headers
     foreach (var (k, v) in @params) {
         if (k == "HTTP_HOST"u8) {
@@ -105,6 +117,7 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
             }
         }
     }
+
     @string uriStr = @params[requestUriˢ];
     if (uriStr == ""u8) {
         // Fallback to SCRIPT_NAME, PATH_INFO and QUERY_STRING.
@@ -114,6 +127,7 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
             uriStr += "?"u8 + s;
         }
     }
+
     // There's apparently a de-facto standard for this.
     // https://web.archive.org/web/20170105004655/http://docstore.mik.ua/orelly/linux/cgi/ch03_02.htm#ch03-35636
     {
@@ -121,6 +135,7 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
             r.Value.TLS = Ꮡ(new tlsꓸConnectionState(HandshakeComplete: true));
         }
     }
+
     if ((~r).Host != ""u8) {
         // Hostname is provided, so we can reasonably construct a URL.
         @string rawurl = (~r).Host + uriStr;
@@ -144,10 +159,12 @@ public static (ж<http.Request>, error) RequestFromMap(map<@string, @string> @pa
         }
         r.Value.URL = urlΔ2;
     }
+
     // Request.RemoteAddr has its port set by Go's standard http
     // server, so we do here too.
     var (remotePort, _) = strconv.Atoi(@params[remotePortˢ]); // zero if unset or invalid
     r.Value.RemoteAddr = net.JoinHostPort(@params[remoteAddrˢ], strconv.Itoa(remotePort));
+
     return (r, default!);
 }
 

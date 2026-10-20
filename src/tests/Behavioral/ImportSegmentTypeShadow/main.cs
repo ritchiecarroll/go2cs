@@ -17,10 +17,12 @@ internal static void bump(this ref sync s, ж<atomic.Int32> Ꮡc) {
 
 internal static void Main() {
     ref var c = ref heap(new atomic.Int32(), out var Ꮡc);
-    var s = new sync(label: "shadowed"u8);
+    var s = new sync(label: "shadowed");
+
     s.bump(Ꮡc);
     s.bump(Ꮡc);
     s.bump(Ꮡc);
+
     fmt.Println(s.label, s.hits, Ꮡc.Load());
 }
 

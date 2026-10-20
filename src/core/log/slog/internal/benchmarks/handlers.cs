@@ -44,11 +44,12 @@ internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
-
         ref var h = ref Ꮡh.DerefOrNull();
+
         var buf = buffer.New();
         var bufʗ1 = buf;
         defer(bufʗ1.Free, ref ᒐ);
+
         if (!r.Time.IsZero()) {
             buf.WriteString(timeˢ);
             h.appendTime(buf, r.Time);
@@ -116,7 +117,6 @@ internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> �
     else { /* default: */
         throw panic(fmt.Sprintf("bad kind: %s"u8, v.Kind()));
     }
-
 }
 
 internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {

@@ -99,7 +99,6 @@ internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) {
                 d.state = wstateBeginLine;
             }
         }
-
         {
             err = bw.WriteByte(c); if (err != default!) {
                 break;
@@ -131,7 +130,6 @@ internal static error Close(this ж<dotWriter> Ꮡd) {
     if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateBeginLine) { matchᴛ1 = true;
         bw.Write(dotcrnl);
     }
-
     return bw.Flush();
 }
 

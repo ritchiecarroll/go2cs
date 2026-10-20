@@ -88,27 +88,29 @@ internal partial struct TestReplacer_testCase /*dyn*/ {
 
 // TestReplacer tests the replacer implementations.
 public static void TestReplacer(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     slice<TestReplacer_testCase> testCases = default!;
+
     // str converts 0xff to "\xff". This isn't just string(b) since that converts to UTF-8.
-    @string str(byte b) => ((@string)new byte[]{b}.slice());
+    @string str(byte b) => (@string)new byte[]{b}.slice();
     slice<@string> s = default!;
+
     // inc maps "\x00"->"\x01", ..., "a"->"b", "b"->"c", ..., "\xff"->"\x00".
     s = default!;
     for (nint i = 0; i < 256; i++) {
         s = append(s, str((byte)i), str((byte)(i + 1)));
     }
     var inc = NewReplacer(s.ꓸꓸꓸ);
+
     // Test cases with 1-byte old strings, 1-byte new strings.
     testCases = append(testCases,
         new TestReplacer_testCase(capitalLetters, "brad"u8, "BrAd"u8),
-        new TestReplacer_testCase(capitalLetters, Repeat("a"u8, ((32 << (int)(10))) + 123), Repeat("A"u8, ((32 << (int)(10))) + 123)),
+        new TestReplacer_testCase(capitalLetters, Repeat("a"u8, (32 << 10) + 123), Repeat("A"u8, (32 << 10) + 123)),
         new TestReplacer_testCase(capitalLetters, ""u8, ""u8),
         new TestReplacer_testCase(inc, "brad"u8, "csbe"u8),
         new TestReplacer_testCase(inc, ((@string)(new byte[]{0x00, 0xff})), "\x01\x00"u8),
         new TestReplacer_testCase(inc, ""u8, ""u8),
         new TestReplacer_testCase(NewReplacer("a"u8, "1", "a", "2"), "brad"u8, "br1d"u8));
+
     // repeat maps "a"->"a", "b"->"bb", "c"->"ccc", ...
     s = default!;
     for (nint i = 0; i < 256; i++) {
@@ -119,6 +121,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         s = append(s, str((byte)i), Repeat(str((byte)i), n));
     }
     var repeat = NewReplacer(s.ꓸꓸꓸ);
+
     // Test cases with 1-byte old strings, variable length new strings.
     testCases = append(testCases,
         new TestReplacer_testCase(htmlEscaper, "No changes"u8, "No changes"u8),
@@ -129,7 +132,9 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(repeat, "abba"u8, "abbbba"u8),
         new TestReplacer_testCase(repeat, ""u8, ""u8),
         new TestReplacer_testCase(NewReplacer("a"u8, "11", "a", "22"), "brad"u8, "br11d"u8));
+
     // The remaining test cases have variable length old strings.
+
     testCases = append(testCases,
         new TestReplacer_testCase(htmlUnescaper, "&amp;amp;"u8, "&amp;"u8),
         new TestReplacer_testCase(htmlUnescaper, "&lt;b&gt;HTML&apos;s neat&lt;/b&gt;"u8, "<b>HTML's neat</b>"u8),
@@ -137,6 +142,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(NewReplacer("a"u8, "1", "a", "2", xxxˢ, xxxˢ), "brad"u8, "br1d"u8),
         new TestReplacer_testCase(NewReplacer("a"u8, "1", "aa", "2", aaaˢ, "3"), "aaaa"u8, "1111"u8),
         new TestReplacer_testCase(NewReplacer(aaaˢ, "3", "aa", "2", "a", "1"), "aaaa"u8, "31"u8));
+
     // gen1 has multiple old strings of variable length. There is no
     // overall non-empty common prefix, but some pairwise common prefixes.
     var gen1 = NewReplacer(
@@ -157,6 +163,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(gen1, "xxxxx"u8, "xxxxX"u8),
         new TestReplacer_testCase(gen1, "XiX"u8, "YiY"u8),
         new TestReplacer_testCase(gen1, ""u8, ""u8));
+
     // gen2 has multiple old strings with no pairwise common prefix.
     var gen2 = NewReplacer(
         rosesˢ, redˢ,
@@ -165,6 +172,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
     testCases = append(testCases,
         new TestReplacer_testCase(gen2, "roses are red, violets are blue..."u8, "red are red, blue are blue..."u8),
         new TestReplacer_testCase(gen2, ""u8, ""u8));
+
     // gen3 has multiple old strings with an overall common prefix.
     var gen3 = NewReplacer(
         abracadabraˢ, poofˢ,
@@ -177,6 +185,7 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(gen3, "abrasion abracad"u8, "scrape abracad"u8),
         new TestReplacer_testCase(gen3, "abba abram abrasive"u8, "abba abram abrasive"u8),
         new TestReplacer_testCase(gen3, ""u8, ""u8));
+
     // foo{1,2,3,4} have multiple old strings with an overall common prefix
     // and 1- or 2- byte extensions from the common prefix.
     var foo1 = NewReplacer(
@@ -205,12 +214,13 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(foo3, ""u8, ""u8),
         new TestReplacer_testCase(foo4, "fofoofoo12foo32oo"u8, "fofooBDoo"u8),
         new TestReplacer_testCase(foo4, ""u8, ""u8));
+
     // genAll maps "\x00\x01\x02...\xfe\xff" to "[all]", amongst other things.
     var allBytes = new slice<byte>(256);
     foreach (var (i, _) in allBytes) {
         allBytes[i] = (byte)i;
     }
-    @string allString = ((@string)allBytes);
+    @string allString = (@string)allBytes;
     var genAll = NewReplacer(
         allString, allˢ,
         ((@string)(new byte[]{0xff})), "[ff]",
@@ -219,7 +229,9 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(genAll, allString, "[all]"u8),
         new TestReplacer_testCase(genAll, ((@string)(new byte[]{0x61, 0xff})) + allString + "\x00"u8, "a[ff][all][00]"u8),
         new TestReplacer_testCase(genAll, ""u8, ""u8));
+
     // Test cases with empty old strings.
+
     var blankToX1 = NewReplacer(""u8, "X");
     var blankToX2 = NewReplacer(""u8, "X", "", "");
     var blankHighPriority = NewReplacer(""u8, "X", "o", "O");
@@ -249,27 +261,36 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         new TestReplacer_testCase(blankFoo, "foobarfoobaz"u8, "XRXZX"u8),
         new TestReplacer_testCase(blankFoo, "foobar-foobaz"u8, "XRX-XZX"u8),
         new TestReplacer_testCase(blankFoo, ""u8, "X"u8));
+
     // single string replacer
+
     var abcMatcher = NewReplacer(abcˢ, matchˢ);
+
     testCases = append(testCases,
         new TestReplacer_testCase(abcMatcher, ""u8, ""u8),
         new TestReplacer_testCase(abcMatcher, "ab"u8, "ab"u8),
         new TestReplacer_testCase(abcMatcher, "abc"u8, "[match]"u8),
         new TestReplacer_testCase(abcMatcher, "abcd"u8, "[match]d"u8),
         new TestReplacer_testCase(abcMatcher, "cabcabcdabca"u8, "c[match][match]d[match]a"u8));
+
     // Issue 6659 cases (more single string replacer)
+
     var noHello = NewReplacer(helloˢ3, "");
     testCases = append(testCases,
         new TestReplacer_testCase(noHello, "Hello"u8, ""u8),
         new TestReplacer_testCase(noHello, "Hellox"u8, "x"u8),
         new TestReplacer_testCase(noHello, "xHello"u8, "x"u8),
         new TestReplacer_testCase(noHello, "xHellox"u8, "xx"u8));
+
     // No-arg test cases.
+
     var nop = NewReplacer();
     testCases = append(testCases,
         new TestReplacer_testCase(nop, "abc"u8, "abc"u8),
         new TestReplacer_testCase(nop, ""u8, ""u8));
+
     // Run the test cases.
+
     foreach (var (i, tc) in testCases) {
         {
             @string sΔ1 = tc.r.Replace(tc.@in); if (sΔ1 != tc.@out) {
@@ -293,7 +314,6 @@ public static void TestReplacer(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct algorithmTestCasesᴛ1 /*dyn*/ {
     internal ж<strings.Replacer> r;
@@ -360,7 +380,7 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
 			.y+
 			z+
 			
-"""u8),
+"""u8.Raw()),
         new("abracadabra;abracadabrakazam;abraham;abrasion"u8, """
 -
 			a-
@@ -373,7 +393,7 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
 			....s-
 			.....ion+
 			
-"""u8),
+"""u8.Raw()),
         new("aaa;aa;a;i;longerst;longer;long;xx;x;X;Y"u8, """
 -
 			X+
@@ -389,21 +409,23 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
 			x+
 			.x+
 			
-"""u8),
+"""u8.Raw()),
         new("foo;;foo;foo1"u8, """
 +
 			f-
 			.oo+
 			...1+
 			
-"""u8)
+"""u8.Raw())
     }.slice();
+
     foreach (var (_, tc) in testCases) {
         var keys = Split(tc.@in, ";"u8);
         var args = new slice<@string>(len(keys) * 2);
         foreach (var (i, key) in keys) {
             args[i * 2] = key;
         }
+
         @string got = NewReplacer(args.ꓸꓸꓸ).PrintTrie();
         // Remove tabs from tc.out
         var wantbuf = new slice<byte>(0, len(tc.@out));
@@ -412,7 +434,8 @@ public static void TestGenericTrieBuilding(ж<testing.T> Ꮡt) {
                 wantbuf = append(wantbuf, tc.@out[i]);
             }
         }
-        @string want = ((@string)wantbuf);
+        @string want = (@string)wantbuf;
+
         if (got != want) {
             Ꮡt.Errorf("PrintTrie(%q)\ngot\n%swant\n%s"u8, tc.@in, got, want);
         }
@@ -575,14 +598,12 @@ public static void BenchmarkByteByteMap(ж<testing.B> Ꮡb) {
         case (rune)'b': {
             return (rune)'B';
         }}
-
         return r;
     };
     for (nint i = 0; i < b.N; i++) {
         Map(fn, str);
     }
 }
-
 
 partial struct mapdataᴛ1 /*dyn*/ {
     internal @string name, data;
@@ -598,6 +619,7 @@ internal static readonly @string changeˢ = "change"u8;
 
 public static void BenchmarkMap(ж<testing.B> Ꮡb) {
     var mapidentity = (rune r) => r;
+
     var mapidentityʗ1 = mapidentity;
     Ꮡb.Run(identityˢ, (ж<testing.B> bΔ1) => {
         foreach (var (_, vᴛ1) in mapdata) {
@@ -613,6 +635,7 @@ public static void BenchmarkMap(ж<testing.B> Ꮡb) {
             });
         }
     });
+
     var mapchange = (rune r) => {
         if ((rune)'a' <= r && r <= (rune)'z') {
             return r + (rune)'A' - (rune)'a';
@@ -622,6 +645,7 @@ public static void BenchmarkMap(ж<testing.B> Ꮡb) {
         }
         return r;
     };
+
     var mapchangeʗ1 = mapchange;
     Ꮡb.Run(changeˢ, (ж<testing.B> bΔ3) => {
         foreach (var (_, vᴛ2) in mapdata) {

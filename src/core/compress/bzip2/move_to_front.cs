@@ -5,6 +5,13 @@ namespace go.compress;
 
 partial class bzip2_package {
 
+// moveToFrontDecoder implements a move-to-front list. Such a list is an
+// efficient way to transform a string with repeating elements into one with
+// many small valued numbers, which is suitable for entropy encoding. It works
+// by starting with an initial list of symbols and references symbols by their
+// index into that list. When a symbol is referenced, it's moved to the front
+// of the list. Thus, a repeated symbol ends up being encoded with many zeros,
+// as the symbol will be at the front of the list after the first access.
 partial struct moveToFrontDecoder /*[]byte*/;
 
 // newMTFDecoder creates a move-to-front decoder with an explicit initial list
@@ -13,7 +20,7 @@ internal static moveToFrontDecoder newMTFDecoder(slice<byte> symbols) {
     if (len(symbols) > 256) {
         throw panic("too many symbols");
     }
-    return ((moveToFrontDecoder)symbols);
+    return (moveToFrontDecoder)symbols;
 }
 
 // newMTFDecoderWithRange creates a move-to-front decoder with an initial
@@ -22,11 +29,12 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
     if (n > 256) {
         throw panic("newMTFDecoderWithRange: cannot have > 256 symbols");
     }
+
     var m = new slice<byte>(n);
     for (nint i = 0; i < n; i++) {
         m[i] = (byte)i;
     }
-    return ((moveToFrontDecoder)m);
+    return (moveToFrontDecoder)m;
 }
 
 internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) {

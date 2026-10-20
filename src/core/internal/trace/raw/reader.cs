@@ -7,7 +7,7 @@ using bufio = bufio_package;
 using binary = encoding.binary_package;
 using fmt = fmt_package;
 using io = io_package;
-using Δevent = go.@internal.trace.event_package;
+using tracev2 = go.@internal.trace.tracev2_package;
 using version = go.@internal.trace.version_package;
 using encoding;
 using go.@internal.trace;
@@ -19,7 +19,7 @@ partial class raw_package {
 partial struct Reader {
     internal ж<bufio.Reader> r;
     internal version.Version v;
-    internal slice<Δevent.Spec> specs;
+    internal slice<tracev2.EventSpec> specs;
 }
 
 // NewReader creates a new reader for the trace wire format.
@@ -50,7 +50,7 @@ public static (Event, error) ReadEvent(this ref Reader r) {
     if ((nint)evb >= len(r.specs) || evb == 0) {
         return (new Event(nil), fmt.Errorf("invalid event type: %d"u8, evb));
     }
-    var ev = ((Δevent.Type)evb);
+    var ev = (tracev2.EventType)evb;
     var spec = r.specs[ev];
     (var args, err) = r.readArgs(len(spec.Args));
     if (err != default!) {

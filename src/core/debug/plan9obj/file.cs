@@ -38,7 +38,7 @@ partial struct FileHeader {
 
 // A File represents an open Plan 9 a.out file.
 partial struct File {
-    public partial ref FileHeader FileHeader { get; }
+    /*embed*/ public FileHeader FileHeader;
     public slice<ж<ΔSection>> Sections;
     internal io.Closer closer;
 }
@@ -54,7 +54,7 @@ partial struct SectionHeader {
 
 // A Section represents a single section in a Plan 9 a.out file.
 partial struct ΔSection {
-    public partial ref SectionHeader SectionHeader { get; }
+    /*embed*/ public SectionHeader SectionHeader;
     // Embed ReaderAt for ReadAt method.
     // Do not embed SectionReader directly
     // to avoid having Read and Seek.
@@ -136,7 +136,6 @@ internal static (uint32, error) parseMagic(slice<byte> magic) {
     if (exprᴛ1 == Magic386 || exprᴛ1 == MagicAMD64 || exprᴛ1 == MagicARM) {
         return (m, default!);
     }
-
     return (0, new formatErrorжerror(Ꮡ(new formatError(0, "bad magic number"u8, magic))));
 }
 
@@ -160,12 +159,14 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
     if (err != default!) {
         return (default!, err);
     }
+
     var ph = @new<prog>();
     {
         var errΔ2 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, ph.OrTypedNil()); if (errΔ2 != default!) {
             return (default!, errΔ2);
         }
     }
+
     var f = Ꮡ(new File(FileHeader: new FileHeader(
         Magic: (~ph).Magic,
         Bss: (~ph).Bss,
@@ -175,7 +176,8 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         HdrSize: 4 * 8
     )
     ));
-    if ((uint32)((~ph).Magic & (uint32)Magic64) != 0) {
+
+    if (((~ph).Magic & (uint32)Magic64) != 0) {
         {
             var errΔ3 = binary.Read(new io.SectionReaderжReader(sr), binary.BigEndian, f.of(File.ᏑEntry)); if (errΔ3 != default!) {
                 return (default!, errΔ3);
@@ -185,6 +187,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         f.Value.LoadAddress = 0x200000;
         f.Value.HdrSize += 8;
     }
+
     slice<NewFile_type> sects = new NewFile_type[]{
         new("text"u8, (~ph).Text),
         new("data"u8, (~ph).Data),
@@ -192,8 +195,11 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         new("spsz"u8, (~ph).Spsz),
         new("pcsz"u8, (~ph).Pcsz)
     }.slice();
+
     f.Value.Sections = new slice<ж<ΔSection>>(5);
+
     var off = (uint32)(~f).HdrSize;
+
     foreach (var (i, sect) in sects) {
         var s = @new<ΔSection>();
         s.Value.SectionHeader = new SectionHeader(
@@ -206,6 +212,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
         f.Value.Sections[i] = s;
     }
+
     return (f, default!);
 }
 
@@ -226,12 +233,14 @@ internal static error walksymtab(slice<byte> data, nint ptrsz, Func<sym, error> 
             s.value = (uint64)order.Uint32(p[0..4]);
             p = p[4..];
         }
+
         if (len(p) < 1) {
             return new formatErrorжerror(Ꮡ(new formatError(len(data), "unexpected EOF"u8, default!)));
         }
         var typ = (byte)(p[0] & 0x7F);
         s.typ = typ;
         p = p[1..];
+
         // Name.
         nint i = default!;
         nint nnul = default!;
@@ -252,13 +261,13 @@ internal static error walksymtab(slice<byte> data, nint ptrsz, Func<sym, error> 
             }
             break;
         }}
-
         if (len(p) < i + nnul) {
             return new formatErrorжerror(Ꮡ(new formatError(len(data), "unexpected EOF"u8, default!)));
         }
         s.name = p.slice(0, i);
         i += nnul;
         p = p.slice(i);
+
         fn(s);
     }
     return default!;
@@ -275,6 +284,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
     if (err != default!) {
         return (default!, err);
     }
+
     var fname = new map<uint16, @string>();
     ref var syms = ref heap<slice<Sym>>(out var Ꮡsyms);
     syms = new slice<Sym>(0, n);
@@ -287,7 +297,7 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
         ts.Value.Value = s.value;
         switch (s.typ) {
         default: {
-            ts.Value.Name = ((@string)s.name);
+            ts.Value.Name = (@string)s.name;
             break;
         }
         case (rune)'z' or (rune)'Z': {
@@ -307,18 +317,17 @@ internal static (slice<Sym>, error) newTable(slice<byte> symtab, nint ptrsz) {
             }
             break;
         }}
-
         switch (s.typ) {
         case (rune)'f': {
             fnameʗ1[(uint16)s.value] = ts.Value.Name;
             break;
         }}
-
         return default!;
     });
     if (err != default!) {
         return (default!, err);
     }
+
     return (syms, default!);
 }
 
@@ -336,10 +345,12 @@ public static (slice<Sym>, error) Symbols(this ref File f) {
     if (symtabSection == nil) {
         return (default!, ErrNoSymbols);
     }
+
     var (symtab, err) = symtabSection.Data();
     if (err != default!) {
         return (default!, errors.New(cannotLoadSymbolSectionˢ));
     }
+
     return newTable(symtab, f.PtrSize);
 }
 

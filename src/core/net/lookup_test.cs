@@ -44,7 +44,6 @@ internal static (slice<global::go.net_package.IPAddr>, error) lookupLocalhost(co
     { /* default: */
         return fn(ctx, network, host);
     }
-
 }
 
 // The Lookup APIs use various sources such as local database, DNS or
@@ -53,8 +52,6 @@ internal static (slice<global::go.net_package.IPAddr>, error) lookupLocalhost(co
 // encodings, UTF-8 encoded net name, domain name, FQDN or absolute
 // FQDN, but the result would be one of the forms and it depends on
 // the circumstances.
-// non-standard back door
-
 partial struct lookupGoogleSRVTestsᴛ1 /*dyn*/ {
     internal @string service, proto, name;
     internal @string cname, target;
@@ -68,6 +65,8 @@ internal static slice<lookupGoogleSRVTestsᴛ1> lookupGoogleSRVTests = new looku
         "ldap"u8, "tcp"u8, "google.com."u8,
         "google.com."u8, "google.com."u8
     ),
+
+    // non-standard back door
     new(
         ""u8, ""u8, "_ldap._tcp.google.com"u8,
         "google.com."u8, "google.com."u8
@@ -88,12 +87,15 @@ internal static readonly object gotNoRecordˢ = (@string)"got no record"u8;
 public static void TestLookupGoogleSRV(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     mustHaveExternalNetwork(Ꮡt);
+
     if (Δruntime.GOOS == "ios"u8) {
         Ꮡt.Skip(noResolvConfOnIOSˢ);
     }
+
     if (!supportsIPv4() || !testIPv4.Value) {
         Ꮡt.Skip(iPv4IsRequiredˢ);
     }
+
     nint attempts = 0;
     for (nint i = 0; i < len(lookupGoogleSRVTests); i++) {
         var tt = lookupGoogleSRVTests[i];
@@ -124,7 +126,6 @@ public static void TestLookupGoogleSRV(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct lookupGmailMXTestsᴛ1 /*dyn*/ {
     internal @string name, host;
 }
@@ -136,12 +137,15 @@ internal static slice<lookupGmailMXTestsᴛ1> lookupGmailMXTests = new lookupGma
 public static void TestLookupGmailMX(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     mustHaveExternalNetwork(Ꮡt);
+
     if (Δruntime.GOOS == "ios"u8) {
         Ꮡt.Skip(noResolvConfOnIOSˢ);
     }
+
     if (!supportsIPv4() || !testIPv4.Value) {
         Ꮡt.Skip(iPv4IsRequiredˢ);
     }
+
     nint attempts = 0;
     for (nint i = 0; i < len(lookupGmailMXTests); i++) {
         var tt = lookupGmailMXTests[i];
@@ -177,12 +181,15 @@ internal static slice<lookupGmailMXTestsᴛ1> lookupGmailNSTests = new lookupGma
 public static void TestLookupGmailNS(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
     mustHaveExternalNetwork(Ꮡt);
+
     if (Δruntime.GOOS == "ios"u8) {
         Ꮡt.Skip(noResolvConfOnIOSˢ);
     }
+
     if (!supportsIPv4() || !testIPv4.Value) {
         Ꮡt.Skip(iPv4IsRequiredˢ);
     }
+
     nint attempts = 0;
     for (nint i = 0; i < len(lookupGmailNSTests); i++) {
         var tt = lookupGmailNSTests[i];
@@ -210,7 +217,6 @@ public static void TestLookupGmailNS(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct lookupGmailTXTTestsᴛ1 /*dyn*/ {
     internal @string name, txt, host;
 }
@@ -228,12 +234,15 @@ public static void TestLookupGmailTXT(ж<testing.T> Ꮡt) {
     }
     Ꮡt.Parallel();
     mustHaveExternalNetwork(Ꮡt);
+
     if (Δruntime.GOOS == "ios"u8) {
         Ꮡt.Skip(noResolvConfOnIOSˢ);
     }
+
     if (!supportsIPv4() || !testIPv4.Value) {
         Ꮡt.Skip(iPv4IsRequiredˢ);
     }
+
     nint attempts = 0;
     for (nint i = 0; i < len(lookupGmailTXTTests); i++) {
         ref var tt = ref heap<lookupGmailTXTTestsᴛ1>(out var Ꮡtt);
@@ -254,6 +263,7 @@ public static void TestLookupGmailTXT(ж<testing.T> Ꮡt) {
         if (len(txts) == 0) {
             Ꮡt.Error(gotNoRecordˢ);
         }
+
         var ttʗ1 = tt;
         if (!slices.ContainsFunc(txts, (@string txt) => strings.Contains(txt, ttʗ1.txt) && (strings.HasSuffix(txt, ttʗ1.host) || strings.HasSuffix(txt, ttʗ1.host + "."u8)))) {
             Ꮡt.Errorf("got %v; want a record containing %s, %s"u8, txts, tt.txt, tt.host);
@@ -276,10 +286,13 @@ public static void TestLookupGooglePublicDNSAddr(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         mustHaveExternalNetwork(Ꮡt);
+
         if (!supportsIPv4() || !supportsIPv6() || !testIPv4.Value || !testIPv6.Value) {
             Ꮡt.Skip(bothIPv4AndIPv6Areˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         foreach (var (_, ip) in lookupGooglePublicDNSAddrTests) {
             var (names, err) = LookupAddr(ip);
             if (err != default!) {
@@ -309,7 +322,9 @@ public static void TestLookupIPv6LinkLocalAddr(ж<testing.T> Ꮡt) {
         if (!supportsIPv6() || !testIPv6.Value) {
             Ꮡt.Skip(iPv6IsRequiredˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         var (addrs, err) = LookupHost(localhostˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -334,6 +349,7 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> Ꮡt) {
     if (!supportsIPv6() || !testIPv6.Value) {
         Ꮡt.Skip(iPv6IsRequiredˢ);
     }
+
     var (ipaddrs, err) = DefaultResolver.LookupIPAddr(context.Background(), fe801Lo0ˢ);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -346,6 +362,7 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     (var addrs, err) = DefaultResolver.LookupHost(context.Background(), fe801Lo0ˢ);
     if (err != default!) {
         Ꮡt.Error(err);
@@ -359,7 +376,6 @@ public static void TestLookupIPv6LinkLocalAddrWithZone(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct lookupCNAMETestsᴛ1 /*dyn*/ {
     internal @string name, cname;
@@ -377,10 +393,13 @@ public static void TestLookupCNAME(ж<testing.T> Ꮡt) {
     try {
         mustHaveExternalNetwork(Ꮡt);
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
+
         if (!supportsIPv4() || !testIPv4.Value) {
             Ꮡt.Skip(iPv4IsRequiredˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         nint attempts = 0;
         for (nint i = 0; i < len(lookupCNAMETests); i++) {
             var tt = lookupCNAMETests[i];
@@ -406,7 +425,6 @@ public static void TestLookupCNAME(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-
 partial struct lookupGoogleHostTestsᴛ1 /*dyn*/ {
     internal @string name;
 }
@@ -420,10 +438,13 @@ public static void TestLookupGoogleHost(ж<testing.T> Ꮡt) {
     try {
         mustHaveExternalNetwork(Ꮡt);
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
+
         if (!supportsIPv4() || !testIPv4.Value) {
             Ꮡt.Skip(iPv4IsRequiredˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         foreach (var (_, tt) in lookupGoogleHostTests) {
             var (addrs, err) = LookupHost(tt.name);
             if (err != default!) {
@@ -451,7 +472,9 @@ public static void TestLookupLongTXT(ж<testing.T> Ꮡt) {
     try {
         testenv.SkipFlaky(new net_test_package.testing_TжTB(Ꮡt), 22857);
         mustHaveExternalNetwork(Ꮡt);
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         var (txts, err) = LookupTXT(golangRscIoˢ);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -479,10 +502,13 @@ public static void TestLookupGoogleIP(ж<testing.T> Ꮡt) {
     try {
         mustHaveExternalNetwork(Ꮡt);
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
+
         if (!supportsIPv4() || !testIPv4.Value) {
             Ꮡt.Skip(iPv4IsRequiredˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         foreach (var (_, tt) in lookupGoogleIPTests) {
             var (ips, err) = LookupIP(tt.name);
             if (err != default!) {
@@ -501,7 +527,6 @@ public static void TestLookupGoogleIP(ж<testing.T> Ꮡt) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct revAddrTestsᴛ1 /*dyn*/ {
     public @string Addr;
@@ -563,7 +588,9 @@ public static partial void TestDNSFlood(ж<testing.T> Ꮡt) {
         if (!testDNSFlood.Value) {
             Ꮡt.Skip(testDisabledUseDnsfloodˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         nint N = 5000;
         if (Δruntime.GOOS == "darwin"u8 || Δruntime.GOOS == "ios"u8) {
             // On Darwin this test consumes kernel threads much
@@ -575,6 +602,7 @@ public static partial void TestDNSFlood(ж<testing.T> Ꮡt) {
             // GODEBUG=netdns=go.
             N = 500;
         }
+
         time.Duration timeout = /* 3 * time.Second */ 3000000000;
         var (ctxHalfTimeout, cancel) = context.WithTimeout(context.Background(), timeout / 2);
         var cancelʗ1 = cancel;
@@ -582,6 +610,7 @@ public static partial void TestDNSFlood(ж<testing.T> Ꮡt) {
         (var ctxTimeout, cancel) = context.WithTimeout(context.Background(), timeout);
         var cancelʗ2 = cancel;
         defer(() => cancelʗ2(), ref ᒐ);
+
         var c = new channel<error>(2 * N);
         for (nint i = 0; i < N; i++) {
             @string name = fmt.Sprintf("%d.net-test.golang.org"u8, i);
@@ -636,6 +665,7 @@ public static partial void TestDNSFlood(ж<testing.T> Ꮡt) {
                 break;
             }}
         }
+
         // A high volume of DNS queries for sub-domain of golang.org
         // would be coordinated by authoritative or recursive server,
         // or stub resolver which implements query-response rate
@@ -659,8 +689,11 @@ public static void TestLookupDotsWithLocalSource(ж<testing.T> Ꮡt) {
         if (!supportsIPv4() || !testIPv4.Value) {
             Ꮡt.Skip(iPv4IsRequiredˢ);
         }
+
         mustHaveExternalNetwork(Ꮡt);
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         foreach (var (i, fn) in new Func<Action>[]{forceGoDNS, forceCgoDNS}.slice()) {
             var fixup = fn();
             if (fixup == default!) {
@@ -678,8 +711,7 @@ public static void TestLookupDotsWithLocalSource(ж<testing.T> Ꮡt) {
             }
 loop:
             foreach (var (iΔ1, name) in names) {
-                if (strings.Index(name, "."u8) == len(name) - 1){
-                    // "localhost" not "localhost."
+                if (strings.Index(name, "."u8) == len(name) - 1){ // "localhost" not "localhost."
                     foreach (var (j, _) in names) {
                         if (j == iΔ1) {
                             continue;
@@ -692,8 +724,7 @@ loop:
                     }
                     Ꮡt.Errorf("%s: got %s; want %s"u8, mode, name, name.slice(0, len(name) - 1));
                 } else 
-                if (strings.Contains(name, "."u8) && !strings.HasSuffix(name, "."u8)) {
-                    // "localhost.localdomain." not "localhost.localdomain"
+                if (strings.Contains(name, "."u8) && !strings.HasSuffix(name, "."u8)) { // "localhost.localdomain." not "localhost.localdomain"
                     Ꮡt.Errorf("%s: got %s; want name ending with trailing dot"u8, mode, name);
                 }
 continue_loop:;
@@ -716,13 +747,17 @@ public static void TestLookupDotsWithRemoteSource(ж<testing.T> Ꮡt) {
         }
         mustHaveExternalNetwork(Ꮡt);
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
+
         if (!supportsIPv4() || !testIPv4.Value) {
             Ꮡt.Skip(iPv4IsRequiredˢ);
         }
+
         if (Δruntime.GOOS == "ios"u8) {
             Ꮡt.Skip(noResolvConfOnIOSˢ);
         }
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         {
             var fixup = forceGoDNS(); if (fixup != default!) {
                 testDots(Ꮡt, "go"u8);
@@ -757,6 +792,7 @@ internal static void testDots(ж<testing.T> Ꮡt, @string mode) {
             }
         }
     }
+
     (var cname, err) = LookupCNAME(wwwMitEduˢ);
     if (err != default!){
         Ꮡt.Errorf("LookupCNAME(www.mit.edu, mode=%v): %v"u8, mode, err);
@@ -764,6 +800,7 @@ internal static void testDots(ж<testing.T> Ꮡt, @string mode) {
     if (!strings.HasSuffix(cname, "."u8)) {
         Ꮡt.Errorf("LookupCNAME(www.mit.edu) = %v, want cname ending in . with trailing dot (mode=%v)"u8, cname, mode);
     }
+
     (var mxs, err) = LookupMX(googleComˢ2);
     if (err != default!){
         Ꮡt.Errorf("LookupMX(google.com): %v (mode=%v)"u8, err, mode);
@@ -775,6 +812,7 @@ internal static void testDots(ж<testing.T> Ꮡt, @string mode) {
             }
         }
     }
+
     (var nss, err) = LookupNS(googleComˢ2);
     if (err != default!){
         Ꮡt.Errorf("LookupNS(google.com): %v (mode=%v)"u8, err, mode);
@@ -786,6 +824,7 @@ internal static void testDots(ж<testing.T> Ꮡt, @string mode) {
             }
         }
     }
+
     (cname, var srvs, err) = LookupSRV(ldapˢ, tcpˢ, googleComˢ2);
     if (err != default!){
         Ꮡt.Errorf("LookupSRV(ldap, tcp, google.com): %v (mode=%v)"u8, err, mode);
@@ -853,7 +892,6 @@ internal partial struct TestLookupPort_test /*dyn*/ {
 public static void TestLookupPort(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-// Issue 13610: LookupPort("tcp", "")
     slice<TestLookupPort_test> tests = new TestLookupPort_test[]{
         new("tcp"u8, "0"u8, 0, true),
         new("udp"u8, "0"u8, 0, true),
@@ -865,6 +903,8 @@ public static void TestLookupPort(ж<testing.T> Ꮡt) {
         new("udp"u8, "-1"u8, 0, false),
         new("udp"u8, "65536"u8, 0, false),
         new("tcp"u8, "123456789"u8, 0, false),
+
+        // Issue 13610: LookupPort("tcp", "")
         new("tcp"u8, ""u8, 0, true),
         new("tcp4"u8, ""u8, 0, true),
         new("tcp6"u8, ""u8, 0, true),
@@ -872,6 +912,7 @@ public static void TestLookupPort(ж<testing.T> Ꮡt) {
         new("udp4"u8, ""u8, 0, true),
         new("udp6"u8, ""u8, 0, true)
     }.slice();
+
     var exprᴛ1 = Δruntime.GOOS;
     if (exprᴛ1 == "android"u8) {
         if (netGoBuildTag) {
@@ -906,18 +947,16 @@ internal partial struct TestLookupPort_Minimal_test /*dyn*/ {
 // Like TestLookupPort but with minimal tests that should always pass
 // because the answers are baked-in to the net package.
 public static void TestLookupPort_Minimal(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-// case shouldn't matter
     slice<TestLookupPort_Minimal_test> tests = new TestLookupPort_Minimal_test[]{
         new("tcp"u8, "http"u8, 80),
-        new("tcp"u8, "HTTP"u8, 80),
+        new("tcp"u8, "HTTP"u8, 80), // case shouldn't matter
         new("tcp"u8, "https"u8, 443),
         new("tcp"u8, "ssh"u8, 22),
         new("tcp"u8, "gopher"u8, 70),
         new("tcp4"u8, "http"u8, 80),
         new("tcp6"u8, "http"u8, 80)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var (port, err) = LookupPort(tt.network, tt.name);
         if (port != tt.port || err != default!) {
@@ -932,17 +971,15 @@ internal partial struct TestLookupProtocol_Minimal_test /*dyn*/ {
 }
 
 public static void TestLookupProtocol_Minimal(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
-// case shouldn't matter
     slice<TestLookupProtocol_Minimal_test> tests = new TestLookupProtocol_Minimal_test[]{
         new("tcp"u8, 6),
-        new("TcP"u8, 6),
+        new("TcP"u8, 6), // case shouldn't matter
         new("icmp"u8, 1),
         new("igmp"u8, 2),
         new("udp"u8, 17),
         new("ipv6-icmp"u8, 58)
     }.slice();
+
     foreach (var (_, tt) in tests) {
         var (got, err) = lookupProtocol(context.Background(), tt.name);
         if (got != tt.want || err != default!) {
@@ -958,12 +995,14 @@ public static void TestLookupNonLDH(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         {
             var fixup = forceGoDNS(); if (fixup != default!) {
                 var fixupʗ1 = fixup;
                 defer(fixupʗ1, ref ᒐ);
             }
         }
+
         // "LDH" stands for letters, digits, and hyphens and is the usual
         // description of standard DNS names.
         // This test is checking that other kinds of names are reported
@@ -986,18 +1025,19 @@ public static void TestLookupNonLDH(ж<testing.T> Ꮡt) {
 public static void TestLookupContextCancel(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         mustHaveExternalNetwork(Ꮡt);
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
+
         var origTestHookLookupIP = testHookLookupIP;
         var origTestHookLookupIPʗ1 = origTestHookLookupIP;
         defer(() => {
             ᏑdnsWaitGroup.Wait();
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
+
         var (lookupCtx, cancelLookup) = context.WithCancel(context.Background());
         var unblockLookup = new channel<EmptyStruct>(0);
+
         // Set testHookLookupIP to start a new, concurrent call to LookupIPAddr
         // and cancel the original one, then block until the canceled call has returned
         // (ensuring that it has performed any synchronous cleanup).
@@ -1010,16 +1050,16 @@ public static void TestLookupContextCancel(ж<testing.T> Ꮡt) {
                 break;
             }
             default: {
+                // Start a concurrent LookupIPAddr for the same host while the caller is
+                // still blocked, and sleep a little to give it time to be deduplicated
+                // before we cancel (and unblock) the caller.
+                // (If the timing doesn't quite work out, we'll end up testing sequential
+                // calls instead of concurrent ones, but the test should still pass.)
                 Ꮡt.Logf("starting concurrent LookupIPAddr"u8);
                 ᏑdnsWaitGroup.Add(1);
                 goǃ(() => {
                     GoFrame ᒐ = default;
                     try {
-                        // Start a concurrent LookupIPAddr for the same host while the caller is
-                        // still blocked, and sleep a little to give it time to be deduplicated
-                        // before we cancel (and unblock) the caller.
-                        // (If the timing doesn't quite work out, we'll end up testing sequential
-                        // calls instead of concurrent ones, but the test should still pass.)
                         defer(ᏑdnsWaitGroup.Done, ref ᒐ);
                         var (_, errΔ1) = DefaultResolver.LookupIPAddr(context.Background(), host);
                         if (errΔ1 != default!) {
@@ -1032,6 +1072,7 @@ public static void TestLookupContextCancel(ж<testing.T> Ꮡt) {
                 time.Sleep(1 * time.Millisecond);
                 break;
             }}
+
             cancelLookupʗ1();
             ᐸꟷ(unblockLookupʗ1);
             // If the concurrent lookup above is deduplicated to this one
@@ -1048,6 +1089,7 @@ public static void TestLookupContextCancel(ж<testing.T> Ꮡt) {
             Ꮡt.Logf("testHookLookupIP performing lookup"u8);
             return fn(ctx, network, host);
         };
+
         var (_, err) = DefaultResolver.LookupIPAddr(lookupCtx, googleComˢ2);
         {
             var (dnsErr, ok) = err._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok || (~dnsErr).Err != errCanceled.Error()) {
@@ -1070,11 +1112,10 @@ internal static readonly @string nameˢ = "name"u8;
 // Issue 24330: treat the nil *Resolver like a zero value. Verify nothing
 // crashes if nil is used.
 public static void TestNilResolverLookup(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     mustHaveExternalNetwork(Ꮡt);
     ж<global::go.net_package.Resolver> r = default!;
     var ctx = context.Background();
+
     // Don't care about the results, just that nothing panics:
     r.LookupAddr(ctx, "8.8.8.8"u8);
     r.LookupCNAME(ctx, googleComˢ2);
@@ -1097,18 +1138,19 @@ internal static readonly @string invalidDomainᶜ = "invalid.invalid"u8;
 // TestLookupHostCancel verifies that lookup works even after many
 // canceled lookups (see golang.org/issue/24178 for details).
 public static void TestLookupHostCancel(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     mustHaveExternalNetwork(Ꮡt);
     testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
     Ꮡt.Parallel(); // Executes 600ms worth of sequential sleeps.
+
     @string google = googleᶜ;
     @string invalidDomain = invalidDomainᶜ; // RFC 2606 reserves .invalid
     const nint n = 600;      // this needs to be larger than threadLimit size
+
     var (_, err) = LookupHost(google);
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var (ctx, cancel) = context.WithCancel(context.Background());
     cancel();
     for (nint i = 0; i < n; i++) {
@@ -1116,15 +1158,18 @@ public static void TestLookupHostCancel(ж<testing.T> Ꮡt) {
         if (errΔ1 == default!) {
             Ꮡt.Fatalf("LookupHost(%q): returns %v, but should fail"u8, invalidDomain, addr);
         }
+
         // Don't verify what the actual error is.
         // We know that it must be non-nil because the domain is invalid,
         // but we don't have any guarantee that LookupHost actually bothers
         // to check for cancellation on the fast path.
         // (For example, it could use a local cache to avoid blocking entirely.)
+
         // The lookup may deduplicate in-flight requests, so give it time to settle
         // in between.
         time.Sleep(time.Millisecond * 1);
     }
+
     (_, err) = LookupHost(google);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -1153,14 +1198,16 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡ
     try {
         var exprᴛ1 = Δruntime.GOOS;
         if (exprᴛ1 == "plan9"u8) {
-            Ꮡt.Skipf("skip on %v"u8, // TODO: plan9 implementation of the resolver uses the Dial function since
- // https://go.dev/cl/409234, this test could probably be reenabled.
- Δruntime.GOOS);
+            // TODO: plan9 implementation of the resolver uses the Dial function since
+            // https://go.dev/cl/409234, this test could probably be reenabled.
+            Ꮡt.Skipf("skip on %v"u8, Δruntime.GOOS);
         }
 
         testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         var resolvers = new slice<ж<lookupCustomResolver>>(2);
         foreach (var (i, _) in resolvers) {
             ref var cs = ref heap<lookupCustomResolver>(out var Ꮡcs);
@@ -1168,6 +1215,7 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡ
             cs.Dial = Ꮡcs.dial();
             resolvers[i] = Ꮡcs;
         }
+
         ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
         Ꮡwg.Add(len(resolvers));
         foreach (var (i, resolver) in resolvers) {
@@ -1185,9 +1233,11 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡ
             }, (~resolver).Resolver, i);
         }
         Ꮡwg.Wait();
+
         if (Ꮡt.Failed()) {
             Ꮡt.FailNow();
         }
+
         foreach (var (i, resolver) in resolvers) {
             if (!(~resolver).dialed) {
                 Ꮡt.Errorf("custom resolver %d not dialed during lookup"u8, i);
@@ -1197,7 +1247,6 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡ
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
 
 partial struct ipVersionTestsᴛ1 /*dyn*/ {
     internal @string network;
@@ -1222,7 +1271,7 @@ public static void TestIPVersion(ж<testing.T> Ꮡt) {
         {
             var version = ipVersion(tt.network); if (version != tt.version) {
                 Ꮡt.Errorf("Family for: %s. Expected: %s, Got: %s"u8, tt.network,
-                    ((@string)tt.version), ((@string)version));
+                    (@string)tt.version, (@string)version);
             }
         }
     }
@@ -1245,19 +1294,22 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> Ꮡt) {
         defer(() => {
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
+
         var keyValues = new TestLookupIPAddrPreservesContextValues_keyValues[]{
-            new((@string)"key-1"u8, (nint)(12)),
-            new((nint)(384), (@string)"value2"u8),
-            new(@new<float64>(), (nint)(137))
+            new((@string)"key-1"u8, (nint)12),
+            new((nint)384, (@string)"value2"u8),
+            new(@new<float64>(), (nint)137)
         }.slice();
         var ctx = context.Background();
         foreach (var (_, kv) in keyValues) {
             ctx = context.WithValue(ctx, kv.key, kv.value);
         }
+
         var wantIPs = new global::go.net_package.IPAddr[]{
             new(IP: IPv4(127, 0, 0, 1)),
             new(IP: IPv6loopback)
         }.slice();
+
         var keyValuesʗ1 = keyValues;
         var wantIPsʗ1 = wantIPs;
         var checkCtxValues = (slice<global::go.net_package.IPAddr>, error) (context.Context ctx_, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => {
@@ -1270,10 +1322,12 @@ public static void TestLookupIPAddrPreservesContextValues(ж<testing.T> Ꮡt) {
             return (wantIPsʗ1, default!);
         };
         testHookLookupIP = checkCtxValues;
+
         var resolvers = new ж<global::go.net_package.Resolver>[]{
             default!,
             @new<global::go.net_package.Resolver>()
         }.slice();
+
         foreach (var (i, resolver) in resolvers) {
             var (gotIPs, err) = resolver.LookupIPAddr(ctx, golangOrgˢ);
             if (err != default!) {
@@ -1297,6 +1351,7 @@ public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing
         defer(() => {
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
+
         var queries = new slice<@string>[]{
             new @string[]{"udp"u8, "golang.org"u8}.slice(),
             new @string[]{"udp4"u8, "golang.org"u8}.slice(),
@@ -1336,6 +1391,7 @@ public static partial void TestLookupIPAddrConcurrentCallsForNetworks(ж<testing
             }}
             return (resultsʗ1[new @string[]{network, host}.array()], default!);
         };
+
         var (ctx, cancel) = context.WithTimeout(context.Background(), (time.Duration)(10000000000L));
         var cancelʗ1 = cancel;
         defer(() => cancelʗ1(), ref ᒐ);
@@ -1389,13 +1445,16 @@ internal static readonly @string key1ˢ = "key-1"u8;
 
 public static void TestWithUnexpiredValuesPreserved(ж<testing.T> Ꮡt) {
     var (ctx, cancel) = context.WithCancel(context.Background());
+
     // Insert a value into it.
     @string key = key1ˢ;
     nint value = 2;
     ctx = context.WithValue(ctx, key, value);
+
     // Now use the "values preserving context" like
     // we would for LookupIPAddr. See Issue 28600.
     ctx = withUnexpiredValuesPreserved(ctx);
+
     // Lookup before expiry.
     {
         var g = ctx.Value(key);
@@ -1403,8 +1462,10 @@ public static void TestWithUnexpiredValuesPreserved(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Lookup before expiry: Got %v Want %v"u8, g, w);
         }
     }
+
     // Cancel the context.
     cancel();
+
     // Lookup after expiry should return nil
     {
         var g = ctx.Value(key); if (g != default!) {
@@ -1415,8 +1476,6 @@ public static void TestWithUnexpiredValuesPreserved(ж<testing.T> Ꮡt) {
 
 // Issue 31597: don't panic on null byte in name
 public static void TestLookupNullByte(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
     testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
     LookupHost(((@string)(new byte[]{0x66, 0x6f, 0x6f, 0x00, 0x62, 0x61, 0x72}))); // check that it doesn't panic; it used to on Windows
@@ -1436,12 +1495,13 @@ internal static readonly @string hostᶜ = "google.com"u8;
 public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         testenv.MustHaveExternalNetwork(new net_test_package.testing_TжTB(Ꮡt));
+
         var v4Ok = supportsIPv4() && testIPv4.Value;
         var v6Ok = supportsIPv6() && testIPv6.Value;
+
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         foreach (var (_, vᴛ1) in new TestResolverLookupIP_type[]{
             new("go"u8, forceGoDNS),
             new("cgo"u8, forceCgoDNS)
@@ -1459,6 +1519,7 @@ public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
                     }
                     var fixupʗ1 = fixup;
                     defer(fixupʗ1, ref ᒐ);
+
                     foreach (var (_, network) in new @string[]{"ip"u8, "ip4"u8, "ip6"u8}.slice()) {
                         tΔ1.Run("network: "u8 + network, (ж<testing.T> tΔ2) => {
                             switch (ᐧ) {
@@ -1478,6 +1539,7 @@ public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
                                 testenv.SkipFlakyNet(new net_test_package.testing_TжTB(tΔ2));
                                 tΔ2.Fatalf("DefaultResolver.LookupIP(%q, %q): failed with unexpected error: %v"u8, network, host, err);
                             }
+
                             slice<netipꓸAddr> v4Addrs = default!;
                             slice<netipꓸAddr> v6Addrs = default!;
                             foreach (var (_, ip) in ips) {
@@ -1493,6 +1555,7 @@ public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
                                     }
                                 }
                             }
+
                             // Check that we got the expected addresses.
                             if (network == "ip4"u8 || network == "ip"u8 && v4Ok) {
                                 if (len(v4Addrs) == 0) {
@@ -1504,6 +1567,7 @@ public static void TestResolverLookupIP(ж<testing.T> Ꮡt) {
                                     tΔ2.Errorf("DefaultResolver.LookupIP(%q, %q): no IPv6 addresses"u8, network, host);
                                 }
                             }
+
                             // Check that we didn't get any unexpected addresses.
                             if (network == "ip6"u8 && len(v4Addrs) > 0) {
                                 tΔ2.Errorf("DefaultResolver.LookupIP(%q, %q): unexpected IPv4 addresses: %v"u8, network, host, v4Addrs);
@@ -1540,6 +1604,7 @@ public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
             testHookLookupIP = origTestHookLookupIPʗ1;
         }, ref ᒐ);
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
+
         ref var timeoutHookGo = ref heap<channel<bool>>(out var ᏑtimeoutHookGo);
         timeoutHookGo = new channel<bool>(1);
         var timeoutHook = (slice<global::go.net_package.IPAddr>, error) (context.Context ctxΔ1, Func<context.Context, @string, @string, (slice<global::go.net_package.IPAddr>, error)> fn, @string network, @string host) => {
@@ -1547,6 +1612,7 @@ public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
             return (default!, context.DeadlineExceeded);
         };
         testHookLookupIP = timeoutHook;
+
         void checkErr(error errΔ1) {
             Ꮡt.Helper();
             if (errΔ1 == default!){
@@ -1554,7 +1620,7 @@ public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
             } else 
             {
                 var (dnserr, ok) = errΔ1._<ж<global::go.net_package.DNSError>>(ᐧ); if (!ok){
-                    Ꮡt.Errorf("got error type %T, want %T"u8, errΔ1, ((ж<global::go.net_package.DNSError>)nil));
+                    Ꮡt.Errorf("got error type %T, want %T"u8, errΔ1, (ж<global::go.net_package.DNSError>)nil);
                 } else 
                 if (!(~dnserr).IsTimeout){
                     Ꮡt.Errorf("got error %#v, want IsTimeout == true"u8, dnserr.OrTypedNil());
@@ -1566,10 +1632,12 @@ public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
                 }
             }
         }
+
         // Single lookup.
         timeoutHookGo.ᐸꟷ(true);
         var (_, err) = LookupIP(golangOrgˢ);
         checkErr(err);
+
         // Double lookup.
         ref var err1 = ref heap<error>(out var Ꮡerr1);
         ref var err2 = ref heap<error>(out var Ꮡerr2);
@@ -1597,6 +1665,7 @@ public static partial void TestDNSTimeout(ж<testing.T> Ꮡt) {
         Ꮡwg.Wait();
         checkErr(err1);
         checkErr(err2);
+
         // Double lookup with context.
         timeoutHookGo = new channel<bool>(0);
         var (ctx, cancel) = context.WithTimeout(context.Background(), time.ΔNanosecond);
@@ -1642,8 +1711,11 @@ public static void TestLookupNoData(ж<testing.T> Ꮡt) {
     if (Δruntime.GOOS == "plan9"u8) {
         Ꮡt.Skip(notSupportedOnPlan9ˢ);
     }
+
     mustHaveExternalNetwork(Ꮡt);
+
     testLookupNoData(Ꮡt, defaultResolverˢ);
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -1653,6 +1725,7 @@ public static void TestLookupNoData(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }))();
+
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
@@ -1668,8 +1741,6 @@ public static void TestLookupNoData(ж<testing.T> Ꮡt) {
 internal static readonly @string golangRscIoˢ2 = "golang.rsc.io."u8;
 
 internal static void testLookupNoData(ж<testing.T> Ꮡt, @string prefix) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     nint attempts = 0;
     while (ᐧ) {
         // Domain that doesn't have any A/AAAA RRs, but has different one (in this case a TXT),
@@ -1679,6 +1750,7 @@ internal static void testLookupNoData(ж<testing.T> Ꮡt, @string prefix) {
             Ꮡt.Errorf("%v: unexpected success"u8, prefix);
             return;
         }
+
         ref var dnsErr = ref heap<ж<global::go.net_package.DNSError>>(out var ᏑdnsErr);
         if (errors.As(err, ᏑdnsErr)) {
             var succeeded = true;
@@ -1686,14 +1758,17 @@ internal static void testLookupNoData(ж<testing.T> Ꮡt, @string prefix) {
                 succeeded = false;
                 Ꮡt.Logf("%v: IsNotFound is set to false"u8, prefix);
             }
+
             if ((~dnsErr).Err != errNoSuchHost.Error()) {
                 succeeded = false;
                 Ꮡt.Logf("%v: error message is not equal to: %v"u8, prefix, errNoSuchHost.Error());
             }
+
             if (succeeded) {
                 return;
             }
         }
+
         testenv.SkipFlakyNet(new net_test_package.testing_TжTB(Ꮡt));
         if (attempts < len(backoffDuration)) {
             var dur = backoffDuration[attempts];
@@ -1702,6 +1777,7 @@ internal static void testLookupNoData(ж<testing.T> Ꮡt, @string prefix) {
             attempts++;
             continue;
         }
+
         Ꮡt.Errorf("%v: unexpected error: %v"u8, prefix, err);
         return;
     }
@@ -1720,10 +1796,10 @@ public static void TestLookupPortNotFound(ж<testing.T> Ꮡt) {
     });
 }
 
-// plan9 does not have submissions service defined in the service database.
 // submissions service is only available through a tcp network, see:
 // https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=submissions
 internal static @string tcpOnlyService = ((Func<@string>)(() => {
+    // plan9 does not have submissions service defined in the service database.
     if (Δruntime.GOOS == "plan9"u8) {
         return "https"u8;
     }
@@ -1775,8 +1851,10 @@ internal partial struct TestLookupNoSuchHost_tests /*dyn*/ {
 
 public static void TestLookupNoSuchHost(ж<testing.T> Ꮡt) {
     mustHaveExternalNetwork(Ꮡt);
+
     @string testNXDOMAIN = testNXDOMAINᶜ;
     @string testNODATA = testNODATAᶜ;
+
     var tests = new TestLookupNoSuchHost_tests[]{
         new(
             name: "LookupCNAME NXDOMAIN"u8,
@@ -1849,6 +1927,7 @@ public static void TestLookupNoSuchHost(ж<testing.T> Ꮡt) {
             }
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in tests) {
         ref var v = ref heap(new TestLookupNoSuchHost_tests(), out var Ꮡv);
         v = vᴛ1;
@@ -1902,8 +1981,6 @@ internal static readonly @string testGoDevˢ = "test.go.dev"u8;
 internal static readonly @string textGoDevˢ = "text.go.dev"u8;
 
 public static void TestDNSErrorUnwrap(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Δruntime.GOOS == "plan9"u8) {
         // The Plan 9 implementation of the resolver doesn't use the Dial function yet. See https://go.dev/cl/409234
         Ꮡt.Skip(skippingOnPlan9ˢ);
@@ -1912,14 +1989,17 @@ public static void TestDNSErrorUnwrap(ж<testing.T> Ꮡt) {
     ));
     var rCancelled = Ꮡ(new Resolver(PreferGo: true, Dial: (context.Context ctxΔ2, @string network, @string address) => (default!, context.Canceled)
     ));
+
     var (_, err) = rDeadlineExcceeded.LookupHost(context.Background(), testGoDevˢ);
     if (!errors.Is(err, context.DeadlineExceeded)) {
         Ꮡt.Errorf("errors.Is(err, context.DeadlineExceeded) = false; want = true"u8);
     }
+
     (_, err) = rCancelled.LookupHost(context.Background(), testGoDevˢ);
     if (!errors.Is(err, context.Canceled)) {
         Ꮡt.Errorf("errors.Is(err, context.Canceled) = false; want = true"u8);
     }
+
     var (ctx, cancel) = context.WithCancel(context.Background());
     cancel();
     (_, err) = ᏑgoResolver.LookupHost(ctx, textGoDevˢ);

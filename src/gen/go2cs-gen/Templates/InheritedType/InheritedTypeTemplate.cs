@@ -4,8 +4,10 @@
 // Use of this source code is governed by an MIT-style license
 // that can be found in the LICENSE file.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using static go2cs.Common;
 using static go2cs.Symbols;
 
@@ -171,7 +173,7 @@ internal class InheritedTypeTemplate : TemplateBase
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames, "Value", made => $"new {ValueFieldType}({made})") :
             IMapTypeTemplate.Generate(ObjectName, ConstructorName, TargetTypeName, TargetValueTypeName!, GoMethodNames),
         "Channel" => IChannelTypeTemplate.Generate(ObjectName, ConstructorName, TypeName, TargetTypeName, GoMethodNames),
-        "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
+        "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize, GoMethodNames),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
         _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(ObjectName, TypeName, UnderlyingArrayElementType)
@@ -670,6 +672,40 @@ internal class InheritedTypeTemplate : TemplateBase
     private string TypeOpsSourceInterface => !TypeOpsSource ? "" :
         string.IsNullOrEmpty(ImplementedInterface) && !EmitsValueClone && !ZeroConstructed ? " : global::go.IGoTypeOpsSource" : ", global::go.IGoTypeOpsSource";
 
+    // reflect's field-box table (golib's IGoFieldBoxSource; trim stage 3d, family E) on a defined type over a STRUCT, keyed
+    // by the GO field names it forwards: each answers box.of(W.Ꮡfield), the forwarded accessor above (StructTypeTemplate
+    // carries the same table for a plain struct). Exactly the wrappers that forward fields, which are the ZeroConstructed
+    // ones, so the interface follows IGoZeroConstructed in the base list.
+    private IEnumerable<string> FieldBoxNames => ForwardedStructMembers is null ? [] : ForwardedStructMembers
+        .Where(member => GetSimpleName(member.memberName) != "_" && !member.isProperty)
+        .Select(member => GetUnsanitizedIdentifier(member.memberName));
+
+    private bool FieldBoxTable => ZeroConstructed && FieldBoxNames.Any();
+
+    private string FieldBoxInterface => !FieldBoxTable ? "" : ", global::go.IGoFieldBoxSource";
+
+    private string FieldBoxTableMembers
+    {
+        get
+        {
+            if (!FieldBoxTable)
+                return "";
+
+            StringBuilder arms = new();
+            HashSet<string> keys = new(StringComparer.Ordinal);
+
+            foreach (string csName in FieldBoxNames)
+            {
+                string goName = csName.StartsWith(ShadowVarMarker, StringComparison.Ordinal) ? csName.Substring(ShadowVarMarker.Length) : csName;
+
+                if (keys.Add(goName))
+                    arms.Append($"\r\n            {Microsoft.CodeAnalysis.CSharp.SymbolDisplay.FormatLiteral(goName, true)} => ((global::go.{PointerPrefix}<{ObjectName}>)parentBox).of({AddressPrefix}{csName}),");
+            }
+
+            return $"\r\n\r\n        object? global::go.IGoFieldBoxSource.FieldBox(string field, object parentBox) => field switch\r\n        {{{arms}\r\n            _ => null\r\n        }};";
+        }
+    }
+
     private string TypeOpsSourceMembers => !TypeOpsSource ? "" :
         $"\r\n\r\n        global::go.IGoTypeOps global::go.IGoTypeOpsSource.TypeOps => global::go.GoTypeOps<{ObjectName}>.Instance;";
 
@@ -688,7 +724,7 @@ internal class InheritedTypeTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
             {{GoTypeAttributePrefix}}[{{GeneratedCodeAttribute}}, {{NonUserCodeAttribute}}]
-            {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}{{ZeroConstructionInterface}}{{TypeOpsSourceInterface}}
+            {{Scope}} partial {{ObjectKind}} {{ObjectName}}{{ImplementedInterface}}{{ValueCloneInterface}}{{ZeroConstructionInterface}}{{FieldBoxInterface}}{{TypeOpsSourceInterface}}
             {
                 // Value of the {{ObjectKind}} '{{ObjectName}}'
                 private {{ReadOnly}}{{ValueFieldType}}{{Nullable}} m_value;
@@ -696,7 +732,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 {{MemberScope}} {{ConstructorName}}({{TypeName}} value) => m_value = {{ValueConstructorArgument}};
 
-                public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};{{ParameterlessConstructor}}{{TypeOpsSourceMembers}}
+                public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};{{ParameterlessConstructor}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
 
         {{ValueProperty}}
                 public override string ToString() => {{ToStringImplementation}};

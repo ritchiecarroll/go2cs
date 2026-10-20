@@ -78,6 +78,7 @@ internal static global::go.net_package.Listener newLocalListener(testing.TB t, @
         }
         return ln;
     }
+
     var exprᴛ1 = network;
     if (exprᴛ1 == "tcp"u8) {
         if (supportsIPv4()) {
@@ -185,7 +186,6 @@ internal static error teardown(this ж<localServer> Ꮡls) {
             if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixpacket"u8) {
                 Δos.Remove(address);
             }
-
         }
         return default!;
     }
@@ -292,6 +292,7 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
         ref var ls = ref Ꮡls.DerefOrNull();
 
         defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+
         switch (ln.type()) {
         case ж<global::go.net_package.TCPListener> lnΔ1: {
             lnΔ1.SetDeadline(time.Now().Add(someTimeout));
@@ -312,6 +313,7 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
             return;
         }
         ls.cl = append(ls.cl, c);
+
         @string network = ln.Addr().Network();
         if (c.LocalAddr().Network() != network || c.RemoteAddr().Network() != network) {
             ch.ᐸꟷ(fmt.Errorf("got %v->%v; expected %v->%v"u8, c.LocalAddr().Network(), c.RemoteAddr().Network(), network, network));
@@ -320,6 +322,7 @@ internal static void transponder(this ж<localServer> Ꮡls, global::go.net_pack
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
         c.SetWriteDeadline(time.Now().Add(someTimeout));
+
         var b = new slice<byte>(256);
         (var n, err) = c.Read(b);
         if (err != default!) {
@@ -351,9 +354,11 @@ internal static void transceiver(global::go.net_package.Conn c, slice<byte> wb, 
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
         c.SetWriteDeadline(time.Now().Add(someTimeout));
+
         var (n, err) = c.Write(wb);
         if (err != default!) {
             {
@@ -418,6 +423,7 @@ internal static global::go.net_package.PacketConn newLocalPacketListener(testing
         }
         return c;
     }
+
     t.Helper();
     var exprᴛ1 = network;
     if (exprᴛ1 == "udp"u8) {
@@ -510,7 +516,6 @@ internal static error teardown(this ж<localPacketServer> Ꮡls) {
         if (exprᴛ1 == "unixgram"u8) {
             Δos.Remove(address);
         }
-
     }
     Ꮡls.of(localPacketServer.Ꮡpcmu).Unlock();
     return default!;
@@ -534,9 +539,11 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
         c.SetWriteDeadline(time.Now().Add(someTimeout));
+
         var b = new slice<byte>(256);
         var (n, peer, err) = c.ReadFrom(b);
         if (err != default!) {
@@ -548,18 +555,16 @@ internal static void packetTransponder(global::go.net_package.PacketConn c, chan
             ch.ᐸꟷ(err);
             return;
         }
-        if (peer == default!) {
-            // for connected-mode sockets
+        if (peer == default!) { // for connected-mode sockets
             var exprᴛ1 = c.LocalAddr().Network();
             if (exprᴛ1 == "udp"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, ((@string)(b.slice(0, n))));
+                var (ᴛ1, ᴛ2) = ResolveUDPAddr(udpˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UDPAddrжΔAddr(ᴛ1), ᴛ2);
             }
             else if (exprᴛ1 == "unixgram"u8) {
-                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, ((@string)(b.slice(0, n))));
+                var (ᴛ1, ᴛ2) = ResolveUnixAddr(unixgramˢ, (@string)(b.slice(0, n)));
                 (peer, err) = (new global::go.net_package.UnixAddrжΔAddr(ᴛ1), ᴛ2);
             }
-
             if (err != default!) {
                 ch.ᐸꟷ(err);
                 return;
@@ -585,9 +590,11 @@ internal static void packetTransceiver(global::go.net_package.PacketConn c, slic
     GoFrame ᒐ = default;
     try {
         defer(ᴛ1 => builtin.close(ᴛ1), ch, ref ᒐ);
+
         c.SetDeadline(time.Now().Add(someTimeout));
         c.SetReadDeadline(time.Now().Add(someTimeout));
         c.SetWriteDeadline(time.Now().Add(someTimeout));
+
         var (n, err) = c.WriteTo(wb, dst);
         if (err != default!) {
             {
@@ -626,6 +633,7 @@ internal static partial (global::go.net_package.Conn client, global::go.net_pack
     GoFrame ᒐ = default;
     try {
         t.Helper();
+
         var ln = newLocalListener(t, net);
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
@@ -667,15 +675,18 @@ internal partial interface startTestSocketPeer_type /*dyn*/ {
 
 internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.TB t, global::go.net_package.Conn conn, @string op, nint chunkSize, nint totalSize) {
     t.Helper();
+
     if (Δruntime.GOOS == "windows"u8) {
         // TODO(panjf2000): Windows has not yet implemented FileConn,
         //		remove this when it's implemented in https://go.dev/issues/9503.
         t.Fatalf("startTestSocketPeer is not supported on %s"u8, Δruntime.GOOS);
     }
+
     var (f, err) = conn._<startTestSocketPeer_type>().File();
     if (err != default!) {
         return (default!, err);
     }
+
     var cmd = testenv.Command(t, Δos.Args[0]);
     cmd.Value.Env = new @string[]{
         "GO_NET_TEST_TRANSFER=1"u8,
@@ -687,11 +698,13 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
     cmd.Value.ExtraFiles = append((~cmd).ExtraFiles, f);
     cmd.Value.Stdout = new Δos.FileжWriter(Δos.Stdout);
     cmd.Value.Stderr = new Δos.FileжWriter(Δos.Stderr);
+
     {
         var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
     }
+
     var cmdCh = new channel<error>(1);
     var cmdʗ1 = cmd;
     var cmdChʗ1 = cmdCh;
@@ -702,6 +715,7 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         fʗ1.Close();
         cmdChʗ1.ᐸꟷ(errΔ2);
     });
+
     var cmdChʗ2 = cmdCh;
     return ((testing.TB tb) => {
         var errΔ3 = ᐸꟷ(cmdChʗ2);
@@ -717,14 +731,17 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
         if (Δos.Getenv("GO_NET_TEST_TRANSFER"u8) == ""u8) {
             return;
         }
-        defer(Δos.Exit, (nint)(0), ref ᒐ);
+        defer(Δos.Exit, (nint)0, ref ᒐ);
+
         var f = Δos.NewFile((uintptr)3, "splice-test-conn"u8);
         var fʗ1 = f;
         defer(() => fʗ1.Close(), ref ᒐ);
+
         var (conn, err) = FileConn(f);
         if (err != default!) {
             Δlog.Fatal(err);
         }
+
         nint chunkSize = default!;
         {
             (chunkSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_CHUNK_SIZE"u8)); if (err != default!) {
@@ -732,12 +749,14 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
             }
         }
         var buf = new slice<byte>(chunkSize);
+
         nint totalSize = default!;
         {
             (totalSize, err) = strconv.Atoi(Δos.Getenv("GO_NET_TEST_TRANSFER_TOTAL_SIZE"u8)); if (err != default!) {
                 Δlog.Fatal(err);
             }
         }
+
         Func<slice<byte>, (nint, error)> fn = default!;
         {
             @string op = Δos.Getenv("GO_NET_TEST_TRANSFER_OP"u8);
@@ -749,6 +768,7 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
             else if (exprᴛ1 == "w"u8) {
                 var connʗ2 = conn;
                 defer(() => connʗ2.Close(), ref ᒐ);
+
                 var connʗ3 = conn;
                                 fn = connʗ3.Write;
             }
@@ -762,6 +782,7 @@ internal static partial (Action<testing.TB>, error) startTestSocketPeer(testing.
             if (count + chunkSize > totalSize) {
                 buf = buf.slice(0, totalSize - count);
             }
+
             error errΔ1 = default!;
             {
                 (n, errΔ1) = fn(buf); if (errΔ1 != default!) {

@@ -10,13 +10,16 @@ internal static void Main() {
     var m = new StrIntMap(0);
     fmt.Println(m == default!);
     fmt.Println(len(m));
-    m["a"u8] = 1;
-    fmt.Println(m["a"u8]);
+    m["a"] = 1;
+    fmt.Println(m["a"]);
+
     var m2 = new StrIntMap(0);
     fmt.Println(m2 == default!);
+
     StrIntMap z = default!;
     fmt.Println(z == default!);
     fmt.Println(len(z));
+
     var e = new StrIntMap(new map<@string, nint>{});
     fmt.Println(e == default!);
 }

@@ -82,12 +82,13 @@ public static (Value, error) ConvertValue(this boolType _, any src) {
         return (b, default!);
     }
     case slice<byte> s: {
-        var (b, err) = strconv.ParseBool(((@string)s));
+        var (b, err) = strconv.ParseBool((@string)s);
         if (err != default!) {
             return (default!, fmt.Errorf("sql/driver: couldn't convert %q into type bool"u8, s));
         }
         return (b, default!);
     }}
+
     var sv = reflect.ValueOf(src);
     var exprᴛ1 = sv.Kind();
     if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int8 || exprᴛ1 == reflect.Int16 || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
@@ -141,7 +142,6 @@ public static (Value, error) ConvertValue(this int32Type _, any v) {
         }
         return ((int64)i, default!);
     }
-
     return (default!, fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32"u8, v, v));
 }
 
@@ -160,7 +160,6 @@ public static (Value, error) ConvertValue(this stringType _, any v) {
     case slice<byte> _: {
         return (v, default!);
     }}
-
     return (fmt.Sprintf("%v"u8, v), default!);
 }
 
@@ -207,7 +206,6 @@ public static bool IsValue(any v) {
     case {} ᴛ0 when ᴛ0._<decimalDecompose>(out var _): {
         return true;
     }}
-
     return false;
 }
 
@@ -264,6 +262,7 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     if (IsValue(v)) {
         return (v, default!);
     }
+
     switch (v.type()) {
     case {} Δvr when Δvr._<Valuer>(out var vr): {
         var (sv, err) = callValuerValue(vr);
@@ -275,15 +274,16 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
         }
         return (sv, default!);
     }
+    // For now, continue to prefer the Valuer interface over the decimal decompose interface.
     case {} Δvr when Δvr._<decimalDecompose>(out var vr): {
         return (vr, default!);
     }}
-    // For now, continue to prefer the Valuer interface over the decimal decompose interface.
+
     var rv = reflect.ValueOf(v);
     var exprᴛ1 = rv.Kind();
     if (exprᴛ1 == reflect.ΔPointer) {
+        // indirect pointers
         if (rv.IsNil()){
-            // indirect pointers
             return (default!, default!);
         } else {
             return new defaultConverter(nil).ConvertValue(rv.Elem().Interface());
@@ -297,7 +297,7 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     }
     if (exprᴛ1 == reflect.Uint64) {
         var u64 = rv.Uint();
-        if (u64 >= ((uint64)1 << (int)(63))) {
+        if (u64 >= (uint64)1 << 63) {
             return (default!, fmt.Errorf("uint64 values with high bit set are not supported"u8));
         }
         return ((int64)u64, default!);
@@ -318,7 +318,6 @@ public static (Value, error) ConvertValue(this defaultConverter _, any v) {
     if (exprᴛ1 == reflect.ΔString) {
         return (rv.String(), default!);
     }
-
     return (default!, fmt.Errorf("unsupported type %T, a %s"u8, v, rv.Kind()));
 }
 

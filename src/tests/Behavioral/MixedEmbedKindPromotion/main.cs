@@ -26,7 +26,7 @@ internal static @string Greet(this hello h) {
 }
 
 partial struct mixed {
-    internal partial ref ж<counter> counter { get; }
+    /*embed*/ internal ж<counter> counter;
     /*embed*/ internal greeter greeter;
 }
 
@@ -41,7 +41,7 @@ partial struct holder {
 }
 
 partial struct outer {
-    internal partial ref holder holder { get; }
+    /*embed*/ internal holder holder;
     internal nint extra;
 }
 
@@ -56,14 +56,19 @@ partial interface greetExtra {
 
 internal static void Main() {
     var c = Ꮡ(new counter(nil));
-    var m = Ꮡ(new mixed(c, new hello("world"u8)));
+    var m = Ꮡ(new mixed(c, new hello("world")));
+
     greetBumper gb = new mixedжgreetBumper(m);
     fmt.Println(gb.Greet(), gb.Bump(), gb.Bump());
+
     fmt.Println((~c).n);
-    var o = Ꮡ(new outer(new holder(new hello("deep"u8), "t"u8), 7));
+
+    var o = Ꮡ(new outer(new holder(new hello("deep"), "t"), 7));
+
     greetExtra ge = new outerжgreetExtra(o);
     fmt.Println(ge.Greet(), ge.Extra(), (~o).tag);
-    o.Value.greeter = new hello("replaced"u8);
+
+    o.Value.greeter = new hello("replaced");
     fmt.Println(ge.Greet());
 }
 

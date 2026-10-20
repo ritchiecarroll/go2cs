@@ -25,66 +25,8 @@ public partial struct URLTest {
     internal @string roundtrip; // expected result of reserializing the URL; empty means same as "in".
 }
 
-// no path
-// path
-// path with hex escaping
-// fragment with hex escaping
-// user
-// escape sequence in username
-// empty query
-// query ending in question mark (Issue 14573)
-// query
-// query with hex escaping: NOT parsed
-// %20 outside query
-// path without leading /, so no parsing
-// path without leading /, so no parsing
-// non-authority with path; see golang.org/issue/46059
-// non-authority
-// unescaped :// in query should not create a scheme
-// leading // without scheme should create an authority
-// leading // without scheme, with userinfo, path, and query
-// Three leading slashes isn't an authority, but doesn't return an error.
-// (We can't return an error, as this code is also used via
-// ServeHTTP -> ReadRequest -> Parse, which is arguably a
-// different URL parsing context, but currently shares the
-// same codepath)
-// unescaped @ in username should not confuse host
-// unescaped @ in password should not confuse host
-// "Windows" paths are no exception to the rule.
-// See golang.org/issue/6027, especially comment #9.
-// case-insensitive scheme
-// Relative path
-// escaped '?' in username and password
-// host subcomponent; IPv4 address in RFC 3986
-// host and port subcomponents; IPv4 address in RFC 3986
-// host subcomponent; IPv6 address in RFC 3986
-// host and port subcomponents; IPv6 address in RFC 3986
-// valid IPv6 host with port and path
-// host subcomponent; IPv6 address with zone identifier in RFC 6874
-// alphanum zone identifier
-// host and port subcomponents; IPv6 address with zone identifier in RFC 6874
-// alphanum zone identifier
-// host subcomponent; IPv6 address with zone identifier in RFC 6874
-// percent-encoded+unreserved zone identifier
-// host and port subcomponents; IPv6 address with zone identifier in RFC 6874
-// percent-encoded+unreserved zone identifier
-// alternate escapings of path survive round trip
-// issue 12036
-// worst case host, still round trips
-// worst case path, still round trips
-// golang.org/issue/5684
-// golang.org/issue/12200 (colon with empty port)
-// Malformed IPv6 but still accepted.
-// Malformed IPv6 but still accepted.
-// golang.org/issue/7991 and golang.org/issue/12719 (non-ascii %-encoded in host)
-// golang.org/issue/10433 (path beginning with //)
-// test that we can reparse the host names we accept.
-// spaces in hosts are disallowed but escaped spaces in IPv6 scope IDs are grudgingly OK.
-// This happens on Windows.
-// golang.org/issue/14002
-// test we can roundtrip magnet url
-// fix issue https://golang.org/issue/20054
 internal static slice<URLTest> urltests = new URLTest[]{
+    // no path
     new(
         "http://www.google.com"u8,
         Ꮡ(new URL(
@@ -93,6 +35,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // path
     new(
         "http://www.google.com/"u8,
         Ꮡ(new URL(
@@ -102,6 +45,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // path with hex escaping
     new(
         "http://www.google.com/file%20one%26two"u8,
         Ꮡ(new URL(
@@ -112,6 +56,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // fragment with hex escaping
     new(
         "http://www.google.com/#file%20one%26two"u8,
         Ꮡ(new URL(
@@ -123,6 +68,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // user
     new(
         "ftp://webmaster@www.google.com/"u8,
         Ꮡ(new URL(
@@ -133,6 +79,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // escape sequence in username
     new(
         "ftp://john%20doe@www.google.com/"u8,
         Ꮡ(new URL(
@@ -143,6 +90,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "ftp://john%20doe@www.google.com/"u8
     ),
+    // empty query
     new(
         "http://www.google.com/?"u8,
         Ꮡ(new URL(
@@ -153,6 +101,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // query ending in question mark (Issue 14573)
     new(
         "http://www.google.com/?foo=bar?"u8,
         Ꮡ(new URL(
@@ -163,6 +112,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // query
     new(
         "http://www.google.com/?q=go+language"u8,
         Ꮡ(new URL(
@@ -173,6 +123,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // query with hex escaping: NOT parsed
     new(
         "http://www.google.com/?q=go%20language"u8,
         Ꮡ(new URL(
@@ -183,6 +134,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // %20 outside query
     new(
         "http://www.google.com/a%20b?q=c+d"u8,
         Ꮡ(new URL(
@@ -193,6 +145,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // path without leading /, so no parsing
     new(
         "http:www.google.com/?q=go+language"u8,
         Ꮡ(new URL(
@@ -202,6 +155,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "http:www.google.com/?q=go+language"u8
     ),
+    // path without leading /, so no parsing
     new(
         "http:%2f%2fwww.google.com/?q=go+language"u8,
         Ꮡ(new URL(
@@ -211,6 +165,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "http:%2f%2fwww.google.com/?q=go+language"u8
     ),
+    // non-authority with path; see golang.org/issue/46059
     new(
         "mailto:/webmaster@golang.org"u8,
         Ꮡ(new URL(
@@ -220,6 +175,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // non-authority
     new(
         "mailto:webmaster@golang.org"u8,
         Ꮡ(new URL(
@@ -228,6 +184,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // unescaped :// in query should not create a scheme
     new(
         "/foo?query=http://bad"u8,
         Ꮡ(new URL(
@@ -236,6 +193,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // leading // without scheme should create an authority
     new(
         "//foo"u8,
         Ꮡ(new URL(
@@ -243,6 +201,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // leading // without scheme, with userinfo, path, and query
     new(
         "//user@foo/path?a=b"u8,
         Ꮡ(new URL(
@@ -253,6 +212,11 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // Three leading slashes isn't an authority, but doesn't return an error.
+    // (We can't return an error, as this code is also used via
+    // ServeHTTP -> ReadRequest -> Parse, which is arguably a
+    // different URL parsing context, but currently shares the
+    // same codepath)
     new(
         "///threeslashes"u8,
         Ꮡ(new URL(
@@ -269,6 +233,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "http://user:password@google.com"u8
     ),
+    // unescaped @ in username should not confuse host
     new(
         "http://j@ne:password@google.com"u8,
         Ꮡ(new URL(
@@ -278,6 +243,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "http://j%40ne:password@google.com"u8
     ),
+    // unescaped @ in password should not confuse host
     new(
         "http://jane:p@ssword@google.com"u8,
         Ꮡ(new URL(
@@ -341,6 +307,8 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "file:///home/adg/rabbits"u8
     ),
+    // "Windows" paths are no exception to the rule.
+    // See golang.org/issue/6027, especially comment #9.
     new(
         "file:///C:/FooBar/Baz.txt"u8,
         Ꮡ(new URL(
@@ -350,6 +318,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "file:///C:/FooBar/Baz.txt"u8
     ),
+    // case-insensitive scheme
     new(
         "MaIlTo:webmaster@golang.org"u8,
         Ꮡ(new URL(
@@ -358,6 +327,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "mailto:webmaster@golang.org"u8
     ),
+    // Relative path
     new(
         "a/b/c"u8,
         Ꮡ(new URL(
@@ -365,6 +335,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "a/b/c"u8
     ),
+    // escaped '?' in username and password
     new(
         "http://%3Fam:pa%3Fsword@google.com"u8,
         Ꮡ(new URL(
@@ -374,6 +345,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host subcomponent; IPv4 address in RFC 3986
     new(
         "http://192.168.0.1/"u8,
         Ꮡ(new URL(
@@ -383,6 +355,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host and port subcomponents; IPv4 address in RFC 3986
     new(
         "http://192.168.0.1:8080/"u8,
         Ꮡ(new URL(
@@ -392,6 +365,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host subcomponent; IPv6 address in RFC 3986
     new(
         "http://[fe80::1]/"u8,
         Ꮡ(new URL(
@@ -401,6 +375,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host and port subcomponents; IPv6 address in RFC 3986
     new(
         "http://[fe80::1]:8080/"u8,
         Ꮡ(new URL(
@@ -410,6 +385,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // valid IPv6 host with port and path
     new(
         "https://[2001:db8::1]:8443/test/path"u8,
         Ꮡ(new URL(
@@ -419,8 +395,9 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host subcomponent; IPv6 address with zone identifier in RFC 6874
     new(
-        "http://[fe80::1%25en0]/"u8,
+        "http://[fe80::1%25en0]/"u8, // alphanum zone identifier
         Ꮡ(new URL(
             Scheme: "http"u8,
             Host: "[fe80::1%en0]"u8,
@@ -428,8 +405,9 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host and port subcomponents; IPv6 address with zone identifier in RFC 6874
     new(
-        "http://[fe80::1%25en0]:8080/"u8,
+        "http://[fe80::1%25en0]:8080/"u8, // alphanum zone identifier
         Ꮡ(new URL(
             Scheme: "http"u8,
             Host: "[fe80::1%en0]:8080"u8,
@@ -437,8 +415,9 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // host subcomponent; IPv6 address with zone identifier in RFC 6874
     new(
-        "http://[fe80::1%25%65%6e%301-._~]/"u8,
+        "http://[fe80::1%25%65%6e%301-._~]/"u8, // percent-encoded+unreserved zone identifier
         Ꮡ(new URL(
             Scheme: "http"u8,
             Host: "[fe80::1%en01-._~]"u8,
@@ -446,8 +425,9 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "http://[fe80::1%25en01-._~]/"u8
     ),
+    // host and port subcomponents; IPv6 address with zone identifier in RFC 6874
     new(
-        "http://[fe80::1%25%65%6e%301-._~]:8080/"u8,
+        "http://[fe80::1%25%65%6e%301-._~]:8080/"u8, // percent-encoded+unreserved zone identifier
         Ꮡ(new URL(
             Scheme: "http"u8,
             Host: "[fe80::1%en01-._~]:8080"u8,
@@ -455,6 +435,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         "http://[fe80::1%25en01-._~]:8080/"u8
     ),
+    // alternate escapings of path survive round trip
     new(
         "http://rest.rsc.io/foo%2fbar/baz%2Fquux?alt=media"u8,
         Ꮡ(new URL(
@@ -466,6 +447,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // issue 12036
     new(
         "mysql://a,b,c/bar"u8,
         Ꮡ(new URL(
@@ -475,6 +457,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // worst case host, still round trips
     new(
         "scheme://!$&'()*+,;=hello!:1/path"u8,
         Ꮡ(new URL(
@@ -484,6 +467,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // worst case path, still round trips
     new(
         "http://host/!$&'()*+,;=:@[hello]"u8,
         Ꮡ(new URL(
@@ -494,6 +478,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // golang.org/issue/5684
     new(
         "http://example.com/oid/[order_id]"u8,
         Ꮡ(new URL(
@@ -504,6 +489,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // golang.org/issue/12200 (colon with empty port)
     new(
         "http://192.168.0.2:8080/foo"u8,
         Ꮡ(new URL(
@@ -523,6 +509,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         ""u8
     ),
     new(
+        // Malformed IPv6 but still accepted.
         "http://2b01:e34:ef40:7730:8e70:5aff:fefe:edac:8080/foo"u8,
         Ꮡ(new URL(
             Scheme: "http"u8,
@@ -532,6 +519,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         ""u8
     ),
     new(
+        // Malformed IPv6 but still accepted.
         "http://2b01:e34:ef40:7730:8e70:5aff:fefe:edac:/foo"u8,
         Ꮡ(new URL(
             Scheme: "http"u8,
@@ -558,6 +546,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // golang.org/issue/7991 and golang.org/issue/12719 (non-ascii %-encoded in host)
     new(
         "http://hello.世界.com/foo"u8,
         Ꮡ(new URL(
@@ -585,6 +574,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // golang.org/issue/10433 (path beginning with //)
     new(
         "http://example.com//foo"u8,
         Ꮡ(new URL(
@@ -594,6 +584,7 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // test that we can reparse the host names we accept.
     new(
         "myscheme://authority<\"hi\">/foo"u8,
         Ꮡ(new URL(
@@ -603,6 +594,9 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // spaces in hosts are disallowed but escaped spaces in IPv6 scope IDs are grudgingly OK.
+    // This happens on Windows.
+    // golang.org/issue/14002
     new(
         "tcp://[2020::2020:20:2020:2020%25Windows%20Loves%20Spaces]:2020"u8,
         Ꮡ(new URL(
@@ -611,6 +605,8 @@ internal static slice<URLTest> urltests = new URLTest[]{
         )),
         ""u8
     ),
+    // test we can roundtrip magnet url
+    // fix issue https://golang.org/issue/20054
     new(
         "magnet:?xt=urn:btih:c12fe1c06bba254a9dc9f519b335aa7c1367a88a&dn"u8,
         Ꮡ(new URL(
@@ -694,23 +690,6 @@ public static void TestParse(ж<testing.T> Ꮡt) {
 
 internal static readonly @string pathThatLooksSchemeRelative = "//not.a.user@not.a.host/just/a/path"u8;
 
-// Tests exercising RFC 6874 compliance:
-// with alphanum zone identifier
-// with alphanum zone identifier
-// with percent-encoded+unreserved zone identifier
-// with percent-encoded+unreserved zone identifier
-// These two cases are valid as textual representations as
-// described in RFC 4007, but are not valid as address
-// literals with IPv6 zone identifiers in URIs as described in
-// RFC 6874.
-// Tests exercising RFC 3986 compliance
-// full IPv6 address
-// compressed IPv6 address
-// link-local address with zone ID (interface name)
-// link-local address with zone ID (interface index)
-// compressed IPv6 address with path
-// link-local with zone, path, and query
-
 partial struct parseRequestURLTestsᴛ1 /*dyn*/ {
     internal @string url;
     internal bool expectedValid;
@@ -727,10 +706,12 @@ internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = new parse
     new("http://192.168.0.1:8080/"u8, true),
     new("http://[fe80::1]/"u8, true),
     new("http://[fe80::1]:8080/"u8, true),
-    new("http://[fe80::1%25en0]/"u8, true),
-    new("http://[fe80::1%25en0]:8080/"u8, true),
-    new("http://[fe80::1%25%65%6e%301-._~]/"u8, true),
-    new("http://[fe80::1%25%65%6e%301-._~]:8080/"u8, true),
+
+    // Tests exercising RFC 6874 compliance:
+    new("http://[fe80::1%25en0]/"u8, true), // with alphanum zone identifier
+    new("http://[fe80::1%25en0]:8080/"u8, true), // with alphanum zone identifier
+    new("http://[fe80::1%25%65%6e%301-._~]/"u8, true), // with percent-encoded+unreserved zone identifier
+    new("http://[fe80::1%25%65%6e%301-._~]:8080/"u8, true), // with percent-encoded+unreserved zone identifier
     new("foo.html"u8, false),
     new("../dir/"u8, false),
     new(" http://foo.com"u8, false),
@@ -740,14 +721,21 @@ internal static slice<parseRequestURLTestsᴛ1> parseRequestURLTests = new parse
     new("http://[fe80::%31]:8080/"u8, false),
     new("http://[fe80::%31%25en0]/"u8, false),
     new("http://[fe80::%31%25en0]:8080/"u8, false),
+
+    // These two cases are valid as textual representations as
+    // described in RFC 4007, but are not valid as address
+    // literals with IPv6 zone identifiers in URIs as described in
+    // RFC 6874.
     new("http://[fe80::1%en0]/"u8, false),
     new("http://[fe80::1%en0]:8080/"u8, false),
-    new("https://[1:2:3:4:5:6:7:8]"u8, true),
-    new("https://[2001:db8::a:b:c:d]"u8, true),
-    new("https://[fe80::1%25eth0]"u8, true),
-    new("https://[fe80::abc:def%254]"u8, true),
-    new("https://[2001:db8::1]/path"u8, true),
-    new("https://[fe80::1%25eth0]/path?query=1"u8, true),
+
+    // Tests exercising RFC 3986 compliance
+    new("https://[1:2:3:4:5:6:7:8]"u8, true), // full IPv6 address
+    new("https://[2001:db8::a:b:c:d]"u8, true), // compressed IPv6 address
+    new("https://[fe80::1%25eth0]"u8, true), // link-local address with zone ID (interface name)
+    new("https://[fe80::abc:def%254]"u8, true), // link-local address with zone ID (interface index)
+    new("https://[2001:db8::1]/path"u8, true), // compressed IPv6 address with path
+    new("https://[fe80::1%25eth0]/path?query=1"u8, true), // link-local with zone, path, and query
     new("https://[::ffff:192.0.2.1]"u8, true),
     new("https://[:1] "u8, false),
     new("https://[1:2:3:4:5:6:7:8:9]"u8, false),
@@ -769,6 +757,7 @@ public static void TestParseRequestURI(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseRequestURI(%q) gave nil error; want some error"u8, test.url);
         }
     }
+
     var (url, err) = ParseRequestURI(pathThatLooksSchemeRelative);
     if (err != default!) {
         Ꮡt.Fatalf("Unexpected error %v"u8, err);
@@ -778,16 +767,12 @@ public static void TestParseRequestURI(ж<testing.T> Ꮡt) {
     }
 }
 
-// No leading slash on path should prepend slash on String() call
-// Relative path with first element containing ":" should be prepended with "./", golang.org/issue/17184
-// Relative path with second element containing ":" should not be prepended with "./"
-// Non-relative path with first element containing ":" should not be prepended with "./"
-
 partial struct stringURLTestsᴛ1 /*dyn*/ {
     internal global::go.net.url_package.URL url;
     internal @string want;
 }
 internal static slice<stringURLTestsᴛ1> stringURLTests = new stringURLTestsᴛ1[]{
+    // No leading slash on path should prepend slash on String() call
     new(
         url: new URL(
             Scheme: "http"u8,
@@ -796,18 +781,21 @@ internal static slice<stringURLTestsᴛ1> stringURLTests = new stringURLTestsᴛ
         ),
         want: "http://www.google.com/search"u8
     ),
+    // Relative path with first element containing ":" should be prepended with "./", golang.org/issue/17184
     new(
         url: new URL(
             Path: "this:that"u8
         ),
         want: "./this:that"u8
     ),
+    // Relative path with second element containing ":" should not be prepended with "./"
     new(
         url: new URL(
             Path: "here/this:that"u8
         ),
         want: "here/this:that"u8
     ),
+    // Non-relative path with first element containing ":" should not be prepended with "./"
     new(
         url: new URL(
             Scheme: "http"u8,
@@ -834,6 +822,7 @@ public static void TestURLString(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Parse(%q).String() == %q (expected %q)"u8, tt.@in, s, expected);
         }
     }
+
     foreach (var (_, vᴛ1) in stringURLTests) {
         var tt = vᴛ1;
 
@@ -907,6 +896,7 @@ public static void TestURLRedacted(ж<testing.T> Ꮡt) {
             want: ""u8
         )
     }.slice();
+
     foreach (var (_, vᴛ1) in cases) {
         ref var tt = ref heap(new TestURLRedacted_cases(), out var Ꮡtt);
         tt = vᴛ1;
@@ -930,11 +920,6 @@ public partial struct EscapeTest {
     internal error err;
 }
 
-// not enough characters after %
-// not enough characters after %
-// not enough characters after %
-// not enough characters after %
-// invalid hex digits
 internal static slice<EscapeTest> unescapeTests = new EscapeTest[]{
     new(
         ""u8,
@@ -967,29 +952,29 @@ internal static slice<EscapeTest> unescapeTests = new EscapeTest[]{
         default!
     ),
     new(
-        "%"u8,
+        "%"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%"u8
     ),
     new(
-        "%a"u8,
+        "%a"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%a"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%a"u8
     ),
     new(
-        "%1"u8,
+        "%1"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%1"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%1"u8
     ),
     new(
-        "123%45%6"u8,
+        "123%45%6"u8, // not enough characters after %
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%6"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%6"u8
     ),
     new(
-        "%zzzzz"u8,
+        "%zzzzz"u8, // invalid hex digits
         ""u8,
-        ((global::go.net.url_package.EscapeError)(@string)"%zz"u8)
+        (global::go.net.url_package.EscapeError)(@string)"%zz"u8
     ),
     new(
         "a+b"u8,
@@ -1012,6 +997,7 @@ public static void TestUnescape(ж<testing.T> Ꮡt) {
         if (actual != tt.@out || (err != default!) != (tt.err != default!)) {
             Ꮡt.Errorf("QueryUnescape(%q) = %q, %s; want %q, %s"u8, tt.@in, actual, err, tt.@out, tt.err);
         }
+
         @string @in = tt.@in;
         @string @out = tt.@out;
         if (strings.Contains(tt.@in, "+"u8)) {
@@ -1029,6 +1015,7 @@ public static void TestUnescape(ж<testing.T> Ꮡt) {
                 @out = strings.ReplaceAll(s, xxxˢ, "+"u8);
             }
         }
+
         (actual, err) = PathUnescape(@in);
         if (actual != @out || (err != default!) != (tt.err != default!)) {
             Ꮡt.Errorf("PathUnescape(%q) = %q, %s; want %q, %s"u8, @in, actual, err, @out, tt.err);
@@ -1073,6 +1060,7 @@ public static void TestQueryEscape(ж<testing.T> Ꮡt) {
         if (tt.@out != actual) {
             Ꮡt.Errorf("QueryEscape(%q) = %q, want %q"u8, tt.@in, actual, tt.@out);
         }
+
         // for bonus points, verify that escape:unescape is an identity.
         var (roundtrip, err) = QueryUnescape(actual);
         if (roundtrip != tt.@in || err != default!) {
@@ -1125,6 +1113,7 @@ public static void TestPathEscape(ж<testing.T> Ꮡt) {
         if (tt.@out != actual) {
             Ꮡt.Errorf("PathEscape(%q) = %q, want %q"u8, tt.@in, actual, tt.@out);
         }
+
         // for bonus points, verify that escape:unescape is an identity.
         var (roundtrip, err) = PathUnescape(actual);
         if (roundtrip != tt.@in || err != default!) {
@@ -1165,7 +1154,6 @@ public static void TestEncodeQuery(ж<testing.T> Ꮡt) {
     }
 }
 
-
 partial struct resolvePathTestsᴛ1 /*dyn*/ {
     internal @string @base, @ref, expected;
 }
@@ -1205,53 +1193,47 @@ public static void BenchmarkResolvePath(ж<testing.B> Ꮡb) {
     }
 }
 
-// Absolute URL references
-// Path-absolute references
-// Multiple slashes
-// Scheme-relative
-// Path-relative references:
-// ... current directory
-// ... going down
-// ... going up
-// ".." in the middle (issue 3560)
-// Remove any dot-segments prior to forming the target URI.
-// https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
-// Triple dot isn't special
-// Fragment
-// Paths with escaping (issue 16947).
-// RFC 3986: Normal Examples
-// https://datatracker.ietf.org/doc/html/rfc3986#section-5.4.1
-// RFC 3986: Abnormal Examples
-// https://datatracker.ietf.org/doc/html/rfc3986#section-5.4.2
-// Extras.
-// Empty path and query but with ForceQuery (issue 46033).
-// Opaque URLs (issue 66084).
-
 partial struct resolveReferenceTestsᴛ1 /*dyn*/ {
     internal @string @base, rel, expected;
 }
 internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = new resolveReferenceTestsᴛ1[]{
+    // Absolute URL references
     new("http://foo.com?a=b"u8, "https://bar.com/"u8, "https://bar.com/"u8),
     new("http://foo.com/"u8, "https://bar.com/?a=b"u8, "https://bar.com/?a=b"u8),
     new("http://foo.com/"u8, "https://bar.com/?"u8, "https://bar.com/?"u8),
     new("http://foo.com/bar"u8, "mailto:foo@example.com"u8, "mailto:foo@example.com"u8),
+
+    // Path-absolute references
     new("http://foo.com/bar"u8, "/baz"u8, "http://foo.com/baz"u8),
     new("http://foo.com/bar?a=b#f"u8, "/baz"u8, "http://foo.com/baz"u8),
     new("http://foo.com/bar?a=b"u8, "/baz?"u8, "http://foo.com/baz?"u8),
     new("http://foo.com/bar?a=b"u8, "/baz?c=d"u8, "http://foo.com/baz?c=d"u8),
+
+    // Multiple slashes
     new("http://foo.com/bar"u8, "http://foo.com//baz"u8, "http://foo.com//baz"u8),
     new("http://foo.com/bar"u8, "http://foo.com///baz/quux"u8, "http://foo.com///baz/quux"u8),
+
+    // Scheme-relative
     new("https://foo.com/bar?a=b"u8, "//bar.com/quux"u8, "https://bar.com/quux"u8),
+
+    // Path-relative references:
+
+    // ... current directory
     new("http://foo.com"u8, "."u8, "http://foo.com/"u8),
     new("http://foo.com/bar"u8, "."u8, "http://foo.com/"u8),
     new("http://foo.com/bar/"u8, "."u8, "http://foo.com/bar/"u8),
+
+    // ... going down
     new("http://foo.com"u8, "bar"u8, "http://foo.com/bar"u8),
     new("http://foo.com/"u8, "bar"u8, "http://foo.com/bar"u8),
     new("http://foo.com/bar/baz"u8, "quux"u8, "http://foo.com/bar/quux"u8),
+
+    // ... going up
     new("http://foo.com/bar/baz"u8, "../quux"u8, "http://foo.com/quux"u8),
     new("http://foo.com/bar/baz"u8, "../../../../../quux"u8, "http://foo.com/quux"u8),
     new("http://foo.com/bar"u8, ".."u8, "http://foo.com/"u8),
     new("http://foo.com/bar/baz"u8, "./.."u8, "http://foo.com/"u8),
+    // ".." in the middle (issue 3560)
     new("http://foo.com/bar/baz"u8, "quux/dotdot/../tail"u8, "http://foo.com/bar/quux/tail"u8),
     new("http://foo.com/bar/baz"u8, "quux/./dotdot/../tail"u8, "http://foo.com/bar/quux/tail"u8),
     new("http://foo.com/bar/baz"u8, "quux/./dotdot/.././tail"u8, "http://foo.com/bar/quux/tail"u8),
@@ -1260,10 +1242,19 @@ internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = new res
     new("http://foo.com/bar/baz"u8, "quux/./dotdot/dotdot/./.././../tail"u8, "http://foo.com/bar/quux/tail"u8),
     new("http://foo.com/bar/baz"u8, "quux/./dotdot/dotdot/dotdot/./../../.././././tail"u8, "http://foo.com/bar/quux/tail"u8),
     new("http://foo.com/bar/baz"u8, "quux/./dotdot/../dotdot/../dot/./tail/.."u8, "http://foo.com/bar/quux/dot/"u8),
+
+    // Remove any dot-segments prior to forming the target URI.
+    // https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
     new("http://foo.com/dot/./dotdot/../foo/bar"u8, "../baz"u8, "http://foo.com/dot/baz"u8),
+
+    // Triple dot isn't special
     new("http://foo.com/bar"u8, "..."u8, "http://foo.com/..."u8),
+
+    // Fragment
     new("http://foo.com/bar"u8, ".#frag"u8, "http://foo.com/#frag"u8),
     new("http://example.org/"u8, "#!$&%27()*+,;="u8, "http://example.org/#!$&%27()*+,;="u8),
+
+    // Paths with escaping (issue 16947).
     new("http://foo.com/foo%2fbar/"u8, "../baz"u8, "http://foo.com/baz"u8),
     new("http://foo.com/1/2%2f/3%2f4/5"u8, "../../a/b/c"u8, "http://foo.com/1/a/b/c"u8),
     new("http://foo.com/1/2/3"u8, "./a%2f../../b/..%2fc"u8, "http://foo.com/1/2/b/..%2fc"u8),
@@ -1271,6 +1262,9 @@ internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = new res
     new("http://foo.com/foo%20bar/"u8, "../baz"u8, "http://foo.com/baz"u8),
     new("http://foo.com/foo"u8, "../bar%2fbaz"u8, "http://foo.com/bar%2fbaz"u8),
     new("http://foo.com/foo%2dbar/"u8, "./baz-quux"u8, "http://foo.com/foo%2dbar/baz-quux"u8),
+
+    // RFC 3986: Normal Examples
+    // https://datatracker.ietf.org/doc/html/rfc3986#section-5.4.1
     new("http://a/b/c/d;p?q"u8, "g:h"u8, "g:h"u8),
     new("http://a/b/c/d;p?q"u8, "g"u8, "http://a/b/c/g"u8),
     new("http://a/b/c/d;p?q"u8, "./g"u8, "http://a/b/c/g"u8),
@@ -1294,6 +1288,9 @@ internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = new res
     new("http://a/b/c/d;p?q"u8, "../.."u8, "http://a/"u8),
     new("http://a/b/c/d;p?q"u8, "../../"u8, "http://a/"u8),
     new("http://a/b/c/d;p?q"u8, "../../g"u8, "http://a/g"u8),
+
+    // RFC 3986: Abnormal Examples
+    // https://datatracker.ietf.org/doc/html/rfc3986#section-5.4.2
     new("http://a/b/c/d;p?q"u8, "../../../g"u8, "http://a/g"u8),
     new("http://a/b/c/d;p?q"u8, "../../../../g"u8, "http://a/g"u8),
     new("http://a/b/c/d;p?q"u8, "/./g"u8, "http://a/g"u8),
@@ -1312,12 +1309,18 @@ internal static slice<resolveReferenceTestsᴛ1> resolveReferenceTests = new res
     new("http://a/b/c/d;p?q"u8, "g?y/../x"u8, "http://a/b/c/g?y/../x"u8),
     new("http://a/b/c/d;p?q"u8, "g#s/./x"u8, "http://a/b/c/g#s/./x"u8),
     new("http://a/b/c/d;p?q"u8, "g#s/../x"u8, "http://a/b/c/g#s/../x"u8),
+
+    // Extras.
     new("https://a/b/c/d;p?q"u8, "//g?q"u8, "https://g?q"u8),
     new("https://a/b/c/d;p?q"u8, "//g#s"u8, "https://g#s"u8),
     new("https://a/b/c/d;p?q"u8, "//g/d/e/f?y#s"u8, "https://g/d/e/f?y#s"u8),
     new("https://a/b/c/d;p#s"u8, "?y"u8, "https://a/b/c/d;p?y"u8),
     new("https://a/b/c/d;p?q#s"u8, "?y"u8, "https://a/b/c/d;p?y"u8),
+
+    // Empty path and query but with ForceQuery (issue 46033).
     new("https://a/b/c/d;p?q#s"u8, "?"u8, "https://a/b/c/d;p?"u8),
+
+    // Opaque URLs (issue 66084).
     new("https://foo.com/bar?a=b"u8, "http:opaque"u8, "http:opaque"u8),
     new("http:opaque?x=y#zzz"u8, "https:/foo?a=b#frag"u8, "https:/foo?a=b#frag"u8),
     new("http:opaque?x=y#zzz"u8, "https:foo:bar"u8, "https:foo:bar"u8),
@@ -1461,7 +1464,6 @@ internal partial struct parseTest {
     internal bool ok;
 }
 
-// hex encoding for semicolon
 internal static slice<parseTest> parseTests = new parseTest[]{
     new(
         query: "a=1"u8,
@@ -1491,7 +1493,7 @@ internal static slice<parseTest> parseTests = new parseTest[]{
     @out: new Values(new map<@string, slice<@string>>{}),
     ok: false
 ), new(
-    query: "a=%3B"u8,
+    query: "a=%3B"u8, // hex encoding for semicolon
     @out: new Values(new map<@string, slice<@string>>{["a"u8] = new @string[]{";"u8}.slice()}),
     ok: true
 ),
@@ -1655,12 +1657,6 @@ public partial struct RequestURITest {
     internal @string @out;
 }
 
-// golang.org/issue/4860 variant 1
-// golang.org/issue/4860 variant 2
-// better fix for issue 4860
-// ignored because doesn't match Path
-// ignored because invalid
-// ignored because invalid
 internal static slice<RequestURITest> requritests = new RequestURITest[]{
     new(
         Ꮡ(new URL(
@@ -1678,6 +1674,7 @@ internal static slice<RequestURITest> requritests = new RequestURITest[]{
         )),
         "/a%20b"u8
     ),
+    // golang.org/issue/4860 variant 1
     new(
         Ꮡ(new URL(
             Scheme: "http"u8,
@@ -1686,6 +1683,7 @@ internal static slice<RequestURITest> requritests = new RequestURITest[]{
         )),
         "/%2F/%2F/"u8
     ),
+    // golang.org/issue/4860 variant 2
     new(
         Ꮡ(new URL(
             Scheme: "http"u8,
@@ -1694,6 +1692,7 @@ internal static slice<RequestURITest> requritests = new RequestURITest[]{
         )),
         "http://other.example.com/%2F/%2F/"u8
     ),
+    // better fix for issue 4860
     new(
         Ꮡ(new URL(
             Scheme: "http"u8,
@@ -1708,7 +1707,7 @@ internal static slice<RequestURITest> requritests = new RequestURITest[]{
             Scheme: "http"u8,
             Host: "example.com"u8,
             Path: "/////"u8,
-            RawPath: "/WRONG/"u8
+            RawPath: "/WRONG/"u8 // ignored because doesn't match Path
         )),
         "/////"u8
     ),
@@ -1726,7 +1725,7 @@ internal static slice<RequestURITest> requritests = new RequestURITest[]{
             Scheme: "http"u8,
             Host: "example.com"u8,
             Path: "/a b"u8,
-            RawPath: "/a b"u8,
+            RawPath: "/a b"u8, // ignored because invalid
             RawQuery: "q=go+language"u8
         )),
         "/a%20b?q=go+language"u8
@@ -1736,7 +1735,7 @@ internal static slice<RequestURITest> requritests = new RequestURITest[]{
             Scheme: "http"u8,
             Host: "example.com"u8,
             Path: "/a?b"u8,
-            RawPath: "/a?b"u8,
+            RawPath: "/a?b"u8, // ignored because invalid
             RawQuery: "q=go+language"u8
         )),
         "/a%3Fb?q=go+language"u8
@@ -1807,71 +1806,42 @@ public static void TestParseErrors(ж<testing.T> Ꮡt) {
         new("http://[::1]"u8, false),
         new("http://[::1]:80"u8, false),
         new("http://[::1]:namedport"u8, true), // rfc3986 3.2.3
-
         new("http://x:namedport"u8, true), // rfc3986 3.2.3
-
         new("http://[::1]/"u8, false),
         new("http://[::1]a"u8, true),
         new("http://[::1]%23"u8, true),
         new("http://[::1%25en0]"u8, false), // valid zone id
-
         new("http://[::1]:"u8, false), // colon, but no port OK
-
         new("http://x:"u8, false), // colon, but no port OK
-
         new("http://[::1]:%38%30"u8, true), // not allowed: % encoding only for non-ASCII
-
         new("http://[::1%25%41]"u8, false), // RFC 6874 allows over-escaping in zone
-
         new("http://[%10::1]"u8, true), // no %xx escapes in IP address
-
         new("http://[::1]/%48"u8, false), // %xx in path is fine
-
         new("http://%41:8080/"u8, true), // not allowed: % encoding only for non-ASCII
-
         new("mysql://x@y(z:123)/foo"u8, true), // not well-formed per RFC 3986, golang.org/issue/33646
-
         new("mysql://x@y(1.2.3.4:123)/foo"u8, true),
         new(" http://foo.com"u8, true), // invalid character in schema
-
         new("ht tp://foo.com"u8, true), // invalid character in schema
-
         new("ahttp://foo.com"u8, false), // valid schema characters
-
         new("1http://foo.com"u8, true), // invalid character in schema
-
         new("http://[]%20%48%54%54%50%2f%31%2e%31%0a%4d%79%48%65%61%64%65%72%3a%20%31%32%33%0a%0a/"u8, true), // golang.org/issue/11208
-
         new("http://a b.com/"u8, true), // no space in host name please
-
         new("cache_object://foo"u8, true), // scheme cannot have _, relative path cannot have : in first segment
-
         new("cache_object:foo"u8, true),
         new("cache_object:foo/bar"u8, true),
         new("cache_object/:foo/bar"u8, false),
         new("http://[192.168.0.1]/"u8, true), // IPv4 in brackets
-
         new("http://[192.168.0.1]:8080/"u8, true), // IPv4 in brackets with port
-
         new("http://[::ffff:192.168.0.1]/"u8, false), // IPv4-mapped IPv6 in brackets
-
         new("http://[::ffff:192.168.0.1000]/"u8, true), // Out of range IPv4-mapped IPv6 in brackets
-
         new("http://[::ffff:192.168.0.1]:8080/"u8, false), // IPv4-mapped IPv6 in brackets with port
-
         new("http://[::ffff:c0a8:1]/"u8, false), // IPv4-mapped IPv6 in brackets (hex)
-
         new("http://[not-an-ip]/"u8, true), // invalid IP string in brackets
-
         new("http://[fe80::1%foo]/"u8, true), // invalid zone format in brackets
-
         new("http://[fe80::1"u8, true), // missing closing bracket
-
         new("http://fe80::1]/"u8, true), // missing opening bracket
-
-        new("http://[test.com]/"u8, true)
+        new("http://[test.com]/"u8, true) // domain name in brackets
     }.slice();
-    // domain name in brackets
     foreach (var (_, tt) in tests) {
         var (u, err) = Parse(tt.@in);
         if (tt.wantErr) {
@@ -1906,10 +1876,8 @@ internal partial struct shouldEscapeTest {
     internal bool escape;
 }
 
-// Unreserved characters (§2.3)
-// User information (§3.2.1)
-// Host (IP address, IPv6 address, registered name, port suffix; §3.2.2)
 internal static slice<shouldEscapeTest> shouldEscapeTests = new shouldEscapeTest[]{
+    // Unreserved characters (§2.3)
     new((rune)'a', encodePath, false),
     new((rune)'a', encodeUserPassword, false),
     new((rune)'a', encodeQueryComponent, false),
@@ -1927,6 +1895,8 @@ internal static slice<shouldEscapeTest> shouldEscapeTests = new shouldEscapeTest
     new((rune)'.', encodePath, false),
     new((rune)'_', encodePath, false),
     new((rune)'~', encodePath, false),
+
+    // User information (§3.2.1)
     new((rune)':', encodeUserPassword, true),
     new((rune)'/', encodeUserPassword, true),
     new((rune)'?', encodeUserPassword, true),
@@ -1937,6 +1907,8 @@ internal static slice<shouldEscapeTest> shouldEscapeTests = new shouldEscapeTest
     new((rune)',', encodeUserPassword, false),
     new((rune)';', encodeUserPassword, false),
     new((rune)'=', encodeUserPassword, false),
+
+    // Host (IP address, IPv6 address, registered name, port suffix; §3.2.2)
     new((rune)'!', encodeHost, false),
     new((rune)'$', encodeHost, false),
     new((rune)'&', encodeHost, false),
@@ -2009,7 +1981,6 @@ internal static readonly @string timeoutTemporaryErrorˢ = "timeout/temporary er
 internal static @string Error(this ref timeoutTemporaryError e) {
     return timeoutTemporaryErrorˢ;
 }
-
 
 partial struct netErrorTestsᴛ1 /*dyn*/ {
     internal error err;
@@ -2085,7 +2056,6 @@ public static void TestURLHostnameAndPort(ж<testing.T> Ꮡt) {
         new("foo.com"u8, "foo.com"u8, ""u8),
         new("foo.com:"u8, "foo.com"u8, ""u8),
         new("FOO.COM"u8, "FOO.COM"u8, ""u8), // no canonicalization
-
         new("1.2.3.4"u8, "1.2.3.4"u8, ""u8),
         new("1.2.3.4:80"u8, "1.2.3.4"u8, "80"u8),
         new("[1:2:3:4]"u8, "1:2:3:4"u8, ""u8),
@@ -2097,10 +2067,11 @@ public static void TestURLHostnameAndPort(ж<testing.T> Ꮡt) {
         new("localhost:443"u8, "localhost"u8, "443"u8),
         new("some.super.long.domain.example.org:8080"u8, "some.super.long.domain.example.org"u8, "8080"u8),
         new("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:17000"u8, "2001:0db8:85a3:0000:0000:8a2e:0370:7334"u8, "17000"u8),
-        new("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]"u8, "2001:0db8:85a3:0000:0000:8a2e:0370:7334"u8, ""u8), // Ensure that even when not valid, Host is one of "Hostname",
- // "Hostname:Port", "[Hostname]" or "[Hostname]:Port".
- // See https://golang.org/issue/29098.
+        new("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]"u8, "2001:0db8:85a3:0000:0000:8a2e:0370:7334"u8, ""u8),
 
+        // Ensure that even when not valid, Host is one of "Hostname",
+        // "Hostname:Port", "[Hostname]" or "[Hostname]:Port".
+        // See https://golang.org/issue/29098.
         new("[google.com]:80"u8, "google.com"u8, "80"u8),
         new("google.com]:80"u8, "google.com]"u8, "80"u8),
         new("google.com:80_invalid_port"u8, "google.com:80_invalid_port"u8, ""u8),
@@ -2130,8 +2101,6 @@ internal static encodingPkg.BinaryAppender _ᴛ3ʗ = new url_test_package.url_UR
 internal static readonly @string httpsWwwGoogleComXYZˢ = "https://www.google.com/x?y=z"u8;
 
 public static void TestJSON(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var (u, err) = Parse(httpsWwwGoogleComXYZˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -2140,12 +2109,14 @@ public static void TestJSON(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     // If only we could implement TextMarshaler/TextUnmarshaler,
     // this would work:
     //
     // if string(js) != strconv.Quote(u.String()) {
     // 	t.Errorf("json encoding: %s\nwant: %s\n", js, strconv.Quote(u.String()))
     // }
+
     var u1 = @new<global::go.net.url_package.URL>();
     err = json.Unmarshal(js, u1.OrTypedNil());
     if (err != default!) {
@@ -2166,6 +2137,7 @@ public static void TestGob(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatal(err);
     }
+
     var u1 = @new<global::go.net.url_package.URL>();
     err = gob.NewDecoder(new url_test_package.bytes_BufferжReader(Ꮡw)).Decode(u1.OrTypedNil());
     if (err != default!) {
@@ -2189,20 +2161,25 @@ public static void TestNilUser(ж<testing.T> Ꮡt) {
                 }
             }
         }, ref ᒐ);
+
         var (u, err) = Parse(httpFooComˢ);
+
         if (err != default!) {
             Ꮡt.Fatalf("parse err: %v"u8, err);
         }
+
         {
             @string v = (~u).User.Username(); if (v != ""u8) {
                 Ꮡt.Fatalf("expected empty username, got %s"u8, v);
             }
         }
+
         {
             var (v, ok) = (~u).User.Password(); if (v != ""u8 || ok) {
                 Ꮡt.Fatalf("expected empty password, got %s (%v)"u8, v, ok);
             }
         }
+
         {
             @string v = (~u).User.String(); if (v != ""u8) {
                 Ꮡt.Fatalf("expected empty string, got %s"u8, v);
@@ -2230,8 +2207,6 @@ public static void TestInvalidUserPassword(ж<testing.T> Ꮡt) {
 internal static readonly @string wantSubᶜ = "net/url: invalid control character in URL"u8;
 
 public static void TestRejectControlCharacters(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     var tests = new @string[]{
         "http://foo.com/?foo\nbar"u8,
         "http\r://foo.com/"u8,
@@ -2246,6 +2221,7 @@ public static void TestRejectControlCharacters(ж<testing.T> Ꮡt) {
             }
         }
     }
+
     // But don't reject non-ASCII CTLs, at least for now:
     {
         var (_, err) = Parse(((@string)(new byte[]{0x68, 0x74, 0x74, 0x70, 0x3a, 0x2f, 0x2f, 0x66, 0x6f, 0x6f, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x74, 0x6c, 0x80}))); if (err != default!) {
@@ -2253,7 +2229,6 @@ public static void TestRejectControlCharacters(ж<testing.T> Ꮡt) {
         }
     }
 }
-
 
 partial struct escapeBenchmarksᴛ1 /*dyn*/ {
     internal @string unescaped;

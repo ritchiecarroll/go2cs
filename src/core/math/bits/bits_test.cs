@@ -27,7 +27,7 @@ public static void TestLeadingZeros(ж<testing.T> Ꮡt) {
         nint nlz = tab[i].nlz;
         for (nint k = 0; k < 64 - 8; k++) {
             var x = ((uint64)i).Lsh((nuint)k);
-            if (x <= (1 << (int)(8)) - 1) {
+            if (x <= (1 << 8) - 1) {
                 nint got = LeadingZeros8((uint8)x);
                 nint want = nlz - k + (8 - 8);
                 if (x == 0) {
@@ -37,7 +37,8 @@ public static void TestLeadingZeros(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("LeadingZeros8(%#02x) == %d; want %d"u8, x, got, want);
                 }
             }
-            if (x <= (1 << (int)(16)) - 1) {
+
+            if (x <= (1 << 16) - 1) {
                 nint got = LeadingZeros16((uint16)x);
                 nint want = nlz - k + (16 - 8);
                 if (x == 0) {
@@ -47,6 +48,7 @@ public static void TestLeadingZeros(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("LeadingZeros16(%#04x) == %d; want %d"u8, x, got, want);
                 }
             }
+
             if (x <= (uint64)(4294967296L - 1)) {
                 nint got = LeadingZeros32((uint32)x);
                 nint want = nlz - k + (32 - 8);
@@ -63,6 +65,7 @@ public static void TestLeadingZeros(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             if (x <= 18446744073709551615UL) {
                 nint got = LeadingZeros64((uint64)x);
                 nint want = nlz - k + (64 - 8);
@@ -98,7 +101,7 @@ public static void BenchmarkLeadingZeros(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros(((nuint)Input >> (int)(((nuint)i % (nuint)UintSize))));
+        s += LeadingZeros((nuint)Input >> (int)((nuint)i % (nuint)UintSize));
     }
     Output = s;
 }
@@ -108,7 +111,7 @@ public static void BenchmarkLeadingZeros8(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros8((uint8)(((uint8)Input >> (int)(((nuint)i % 8)))));
+        s += LeadingZeros8((uint8)(((uint8)Input >> (int)((nuint)i % 8))));
     }
     Output = s;
 }
@@ -118,7 +121,7 @@ public static void BenchmarkLeadingZeros16(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros16((uint16)(((uint16)Input >> (int)(((nuint)i % 16)))));
+        s += LeadingZeros16((uint16)(((uint16)Input >> (int)((nuint)i % 16))));
     }
     Output = s;
 }
@@ -128,7 +131,7 @@ public static void BenchmarkLeadingZeros32(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros32(((uint32)Input >> (int)(((nuint)i % 32))));
+        s += LeadingZeros32((uint32)Input >> (int)((nuint)i % 32));
     }
     Output = s;
 }
@@ -138,7 +141,7 @@ public static void BenchmarkLeadingZeros64(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += LeadingZeros64(((uint64)Input >> (int)(((nuint)i % 64))));
+        s += LeadingZeros64((uint64)Input >> (int)((nuint)i % 64));
     }
     Output = s;
 }
@@ -149,7 +152,7 @@ public static void TestTrailingZeros(ж<testing.T> Ꮡt) {
         for (nint k = 0; k < 64 - 8; k++) {
             var x = ((uint64)i).Lsh((nuint)k);
             nint want = ntz + k;
-            if (x <= (1 << (int)(8)) - 1) {
+            if (x <= (1 << 8) - 1) {
                 nint got = TrailingZeros8((uint8)x);
                 if (x == 0) {
                     want = 8;
@@ -158,7 +161,8 @@ public static void TestTrailingZeros(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("TrailingZeros8(%#02x) == %d; want %d"u8, x, got, want);
                 }
             }
-            if (x <= (1 << (int)(16)) - 1) {
+
+            if (x <= (1 << 16) - 1) {
                 nint got = TrailingZeros16((uint16)x);
                 if (x == 0) {
                     want = 16;
@@ -167,6 +171,7 @@ public static void TestTrailingZeros(ж<testing.T> Ꮡt) {
                     Ꮡt.Fatalf("TrailingZeros16(%#04x) == %d; want %d"u8, x, got, want);
                 }
             }
+
             if (x <= (uint64)(4294967296L - 1)) {
                 nint got = TrailingZeros32((uint32)x);
                 if (x == 0) {
@@ -182,6 +187,7 @@ public static void TestTrailingZeros(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             if (x <= 18446744073709551615UL) {
                 nint got = TrailingZeros64((uint64)x);
                 if (x == 0) {
@@ -206,7 +212,7 @@ public static void BenchmarkTrailingZeros(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros(((nuint)Input << (int)(((nuint)i % (nuint)UintSize))));
+        s += TrailingZeros((nuint)Input << (int)((nuint)i % (nuint)UintSize));
     }
     Output = s;
 }
@@ -216,7 +222,7 @@ public static void BenchmarkTrailingZeros8(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros8((uint8)((uint8)Input << (int)(((nuint)i % 8))));
+        s += TrailingZeros8((uint8)((uint8)Input << (int)((nuint)i % 8)));
     }
     Output = s;
 }
@@ -226,7 +232,7 @@ public static void BenchmarkTrailingZeros16(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros16((uint16)((uint16)Input << (int)(((nuint)i % 16))));
+        s += TrailingZeros16((uint16)((uint16)Input << (int)((nuint)i % 16)));
     }
     Output = s;
 }
@@ -236,7 +242,7 @@ public static void BenchmarkTrailingZeros32(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros32(((uint32)Input << (int)(((nuint)i % 32))));
+        s += TrailingZeros32((uint32)Input << (int)((nuint)i % 32));
     }
     Output = s;
 }
@@ -246,7 +252,7 @@ public static void BenchmarkTrailingZeros64(ж<testing.B> Ꮡb) {
 
     nint s = default!;
     for (nint i = 0; i < b.N; i++) {
-        s += TrailingZeros64(((uint64)Input << (int)(((nuint)i % 64))));
+        s += TrailingZeros64((uint64)Input << (int)((nuint)i % 64));
     }
     Output = s;
 }
@@ -255,12 +261,14 @@ public static void TestOnesCount(ж<testing.T> Ꮡt) {
     uint64 x = default!;
     for (nint i = 0; i <= 64; i++) {
         testOnesCount(Ꮡt, x, i);
-        x = (uint64)((x << (int)(1)) | 1);
+        x = x << 1 | 1;
     }
+
     for (nint i = 64; i >= 0; i--) {
         testOnesCount(Ꮡt, x, i);
-        x = (x << (int)(1));
+        x = x << 1;
     }
+
     for (nint i = 0; i < 256; i++) {
         for (nint k = 0; k < 64 - 8; k++) {
             testOnesCount(Ꮡt, ((uint64)i).Lsh((nuint)k), tab[i].pop);
@@ -269,18 +277,20 @@ public static void TestOnesCount(ж<testing.T> Ꮡt) {
 }
 
 internal static void testOnesCount(ж<testing.T> Ꮡt, uint64 x, nint want) {
-    if (x <= (1 << (int)(8)) - 1) {
+    if (x <= (1 << 8) - 1) {
         nint got = OnesCount8((uint8)x);
         if (got != want) {
             Ꮡt.Fatalf("OnesCount8(%#02x) == %d; want %d"u8, (uint8)x, got, want);
         }
     }
-    if (x <= (1 << (int)(16)) - 1) {
+
+    if (x <= (1 << 16) - 1) {
         nint got = OnesCount16((uint16)x);
         if (got != want) {
             Ꮡt.Fatalf("OnesCount16(%#04x) == %d; want %d"u8, (uint16)x, got, want);
         }
     }
+
     if (x <= (uint64)(4294967296L - 1)) {
         nint got = OnesCount32((uint32)x);
         if (got != want) {
@@ -293,6 +303,7 @@ internal static void testOnesCount(ж<testing.T> Ꮡt, uint64 x, nint want) {
             }
         }
     }
+
     if (x <= 18446744073709551615UL) {
         nint got = OnesCount64((uint64)x);
         if (got != want) {
@@ -359,10 +370,11 @@ public static void BenchmarkOnesCount64(ж<testing.B> Ꮡb) {
 
 public static void TestRotateLeft(ж<testing.T> Ꮡt) {
     uint64 m = bits_internal_test_package.DeBruijn64;
+
     for (nuint k = (nuint)0; k < 128; k++) {
         var x8 = (uint8)m;
         var got8 = RotateLeft8(x8, (nint)k);
-        var want8 = (uint8)((uint8)(x8 << (int)(((nuint)(k & 0x7)))) | x8.Rsh((8 - (nuint)(k & 0x7))));
+        var want8 = (uint8)((uint8)(x8 << (int)(k & 0x7)) | x8.Rsh((8 - (k & 0x7))));
         if (got8 != want8) {
             Ꮡt.Fatalf("RotateLeft8(%#02x, %d) == %#02x; want %#02x"u8, x8, k, got8, want8);
         }
@@ -370,9 +382,10 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
         if (got8 != x8) {
             Ꮡt.Fatalf("RotateLeft8(%#02x, -%d) == %#02x; want %#02x"u8, want8, k, got8, x8);
         }
+
         var x16 = (uint16)m;
         var got16 = RotateLeft16(x16, (nint)k);
-        var want16 = (uint16)((uint16)(x16 << (int)(((nuint)(k & 0xf)))) | x16.Rsh((16 - (nuint)(k & 0xf))));
+        var want16 = (uint16)((uint16)(x16 << (int)(k & 0xf)) | x16.Rsh((16 - (k & 0xf))));
         if (got16 != want16) {
             Ꮡt.Fatalf("RotateLeft16(%#04x, %d) == %#04x; want %#04x"u8, x16, k, got16, want16);
         }
@@ -380,9 +393,10 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
         if (got16 != x16) {
             Ꮡt.Fatalf("RotateLeft16(%#04x, -%d) == %#04x; want %#04x"u8, want16, k, got16, x16);
         }
+
         var x32 = (uint32)m;
         var got32 = RotateLeft32(x32, (nint)k);
-        var want32 = (uint32)((x32 << (int)(((nuint)(k & 0x1f)))) | x32.Rsh((32 - (nuint)(k & 0x1f))));
+        var want32 = x32 << (int)(k & 0x1f) | x32.Rsh((32 - (k & 0x1f)));
         if (got32 != want32) {
             Ꮡt.Fatalf("RotateLeft32(%#08x, %d) == %#08x; want %#08x"u8, x32, k, got32, want32);
         }
@@ -393,7 +407,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
         if (UintSize == 32) {
             nuint x = (nuint)m;
             nuint got = RotateLeft(x, (nint)k);
-            nuint want = (nuint)((x << (int)(((nuint)(k & 0x1f)))) | x.Rsh((32 - (nuint)(k & 0x1f))));
+            nuint want = x << (int)(k & 0x1f) | x.Rsh((32 - (k & 0x1f)));
             if (got != want) {
                 Ꮡt.Fatalf("RotateLeft(%#08x, %d) == %#08x; want %#08x"u8, x, k, got, want);
             }
@@ -402,9 +416,10 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("RotateLeft(%#08x, -%d) == %#08x; want %#08x"u8, want, k, got, x);
             }
         }
+
         var x64 = (uint64)m;
         var got64 = RotateLeft64(x64, (nint)k);
-        var want64 = (uint64)((x64 << (int)(((nuint)(k & 0x3f)))) | x64.Rsh((64 - (nuint)(k & 0x3f))));
+        var want64 = x64 << (int)(k & 0x3f) | x64.Rsh((64 - (k & 0x3f)));
         if (got64 != want64) {
             Ꮡt.Fatalf("RotateLeft64(%#016x, %d) == %#016x; want %#016x"u8, x64, k, got64, want64);
         }
@@ -415,7 +430,7 @@ public static void TestRotateLeft(ж<testing.T> Ꮡt) {
         if (UintSize == 64) {
             nuint x = (nuint)m;
             nuint got = RotateLeft(x, (nint)k);
-            nuint want = (nuint)((x << (int)(((nuint)(k & 0x3f)))) | x.Rsh((64 - (nuint)(k & 0x3f))));
+            nuint want = x << (int)(k & 0x3f) | x.Rsh((64 - (k & 0x3f)));
             if (got != want) {
                 Ꮡt.Fatalf("RotateLeft(%#016x, %d) == %#016x; want %#016x"u8, x, k, got, want);
             }
@@ -486,24 +501,25 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
     for (nuint i = (nuint)0; i < 64; i++) {
         testReverse(Ꮡt, ((uint64)1).Lsh(i), ((uint64)1).Lsh((63 - i)));
     }
+
     // test a few patterns
     foreach (var (_, test) in new TestReverse_type[]{
         new(0, 0),
-        new(0x1, ((uint64)0x8 << (int)(60))),
-        new(0x2, ((uint64)0x4 << (int)(60))),
-        new(0x3, ((uint64)0xc << (int)(60))),
-        new(0x4, ((uint64)0x2 << (int)(60))),
-        new(0x5, ((uint64)0xa << (int)(60))),
-        new(0x6, ((uint64)0x6 << (int)(60))),
-        new(0x7, ((uint64)0xe << (int)(60))),
-        new(0x8, ((uint64)0x1 << (int)(60))),
-        new(0x9, ((uint64)0x9 << (int)(60))),
-        new(0xa, ((uint64)0x5 << (int)(60))),
-        new(0xb, ((uint64)0xd << (int)(60))),
-        new(0xc, ((uint64)0x3 << (int)(60))),
-        new(0xd, ((uint64)0xb << (int)(60))),
-        new(0xe, ((uint64)0x7 << (int)(60))),
-        new(0xf, ((uint64)0xf << (int)(60))),
+        new(0x1, (uint64)0x8 << 60),
+        new(0x2, (uint64)0x4 << 60),
+        new(0x3, (uint64)0xc << 60),
+        new(0x4, (uint64)0x2 << 60),
+        new(0x5, (uint64)0xa << 60),
+        new(0x6, (uint64)0x6 << 60),
+        new(0x7, (uint64)0xe << 60),
+        new(0x8, (uint64)0x1 << 60),
+        new(0x9, (uint64)0x9 << 60),
+        new(0xa, (uint64)0x5 << 60),
+        new(0xb, (uint64)0xd << 60),
+        new(0xc, (uint64)0x3 << 60),
+        new(0xd, (uint64)0xb << 60),
+        new(0xe, (uint64)0x7 << 60),
+        new(0xf, (uint64)0xf << 60),
         new(0x5686487, 0xe12616a000000000UL),
         new(0x0123456789abcdefUL, 0xf7b3d591e6a2c480UL)
     }.slice()) {
@@ -515,19 +531,21 @@ public static void TestReverse(ж<testing.T> Ꮡt) {
 internal static void testReverse(ж<testing.T> Ꮡt, uint64 x64, uint64 want64) {
     var x8 = (uint8)x64;
     var got8 = Reverse8(x8);
-    var want8 = (uint8)((want64 >> (int)((64 - 8))));
+    var want8 = (uint8)(want64 >> (int)(64 - 8));
     if (got8 != want8) {
         Ꮡt.Fatalf("Reverse8(%#02x) == %#02x; want %#02x"u8, x8, got8, want8);
     }
+
     var x16 = (uint16)x64;
     var got16 = Reverse16(x16);
-    var want16 = (uint16)((want64 >> (int)((64 - 16))));
+    var want16 = (uint16)(want64 >> (int)(64 - 16));
     if (got16 != want16) {
         Ꮡt.Fatalf("Reverse16(%#04x) == %#04x; want %#04x"u8, x16, got16, want16);
     }
+
     var x32 = (uint32)x64;
     var got32 = Reverse32(x32);
-    var want32 = (uint32)((want64 >> (int)((64 - 32))));
+    var want32 = (uint32)(want64 >> (int)(64 - 32));
     if (got32 != want32) {
         Ꮡt.Fatalf("Reverse32(%#08x) == %#08x; want %#08x"u8, x32, got32, want32);
     }
@@ -539,6 +557,7 @@ internal static void testReverse(ж<testing.T> Ꮡt, uint64 x64, uint64 want64) 
             Ꮡt.Fatalf("Reverse(%#08x) == %#08x; want %#08x"u8, x, got, want);
         }
     }
+
     var got64 = Reverse64(x64);
     if (got64 != want64) {
         Ꮡt.Fatalf("Reverse64(%#016x) == %#016x; want %#016x"u8, x64, got64, want64);
@@ -610,14 +629,14 @@ internal partial struct TestReverseBytes_type /*dyn*/ {
 public static void TestReverseBytes(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestReverseBytes_type[]{
         new(0, 0),
-        new(0x01, ((uint64)0x01 << (int)(56))),
-        new(0x0123, ((uint64)0x2301 << (int)(48))),
-        new(0x012345, ((uint64)0x452301 << (int)(40))),
-        new(0x01234567, ((uint64)0x67452301 << (int)(32))),
-        new(0x0123456789UL, ((uint64)unchecked((nint)0x8967452301L) << (int)(24))),
-        new(0x0123456789abUL, ((uint64)unchecked((nint)0xab8967452301L) << (int)(16))),
-        new(0x0123456789abcdUL, ((uint64)unchecked((nint)0xcdab8967452301L) << (int)(8))),
-        new(0x0123456789abcdefUL, ((uint64)(nuint)0xefcdab8967452301UL << (int)(0)))
+        new(0x01, (uint64)0x01 << 56),
+        new(0x0123, (uint64)0x2301 << 48),
+        new(0x012345, (uint64)0x452301 << 40),
+        new(0x01234567, (uint64)0x67452301 << 32),
+        new(0x0123456789UL, (uint64)unchecked((nint)0x8967452301L) << 24),
+        new(0x0123456789abUL, (uint64)unchecked((nint)0xab8967452301L) << 16),
+        new(0x0123456789abcdUL, (uint64)unchecked((nint)0xcdab8967452301L) << 8),
+        new(0x0123456789abcdefUL, (uint64)(nuint)0xefcdab8967452301UL << 0)
     }.slice()) {
         testReverseBytes(Ꮡt, test.x, test.r);
         testReverseBytes(Ꮡt, test.r, test.x);
@@ -627,13 +646,14 @@ public static void TestReverseBytes(ж<testing.T> Ꮡt) {
 internal static void testReverseBytes(ж<testing.T> Ꮡt, uint64 x64, uint64 want64) {
     var x16 = (uint16)x64;
     var got16 = ReverseBytes16(x16);
-    var want16 = (uint16)((want64 >> (int)((64 - 16))));
+    var want16 = (uint16)(want64 >> (int)(64 - 16));
     if (got16 != want16) {
         Ꮡt.Fatalf("ReverseBytes16(%#04x) == %#04x; want %#04x"u8, x16, got16, want16);
     }
+
     var x32 = (uint32)x64;
     var got32 = ReverseBytes32(x32);
-    var want32 = (uint32)((want64 >> (int)((64 - 32))));
+    var want32 = (uint32)(want64 >> (int)(64 - 32));
     if (got32 != want32) {
         Ꮡt.Fatalf("ReverseBytes32(%#08x) == %#08x; want %#08x"u8, x32, got32, want32);
     }
@@ -645,6 +665,7 @@ internal static void testReverseBytes(ж<testing.T> Ꮡt, uint64 x64, uint64 wan
             Ꮡt.Fatalf("ReverseBytes(%#08x) == %#08x; want %#08x"u8, x, got, want);
         }
     }
+
     var got64 = ReverseBytes64(x64);
     if (got64 != want64) {
         Ꮡt.Fatalf("ReverseBytes64(%#016x) == %#016x; want %#016x"u8, x64, got64, want64);
@@ -708,18 +729,20 @@ public static void TestLen(ж<testing.T> Ꮡt) {
             if (x != 0) {
                 want = len + k;
             }
-            if (x <= (1 << (int)(8)) - 1) {
+            if (x <= (1 << 8) - 1) {
                 nint got = Len8((uint8)x);
                 if (got != want) {
                     Ꮡt.Fatalf("Len8(%#02x) == %d; want %d"u8, x, got, want);
                 }
             }
-            if (x <= (1 << (int)(16)) - 1) {
+
+            if (x <= (1 << 16) - 1) {
                 nint got = Len16((uint16)x);
                 if (got != want) {
                     Ꮡt.Fatalf("Len16(%#04x) == %d; want %d"u8, x, got, want);
                 }
             }
+
             if (x <= (uint64)(4294967296L - 1)) {
                 nint got = Len32((uint32)x);
                 if (got != want) {
@@ -732,6 +755,7 @@ public static void TestLen(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             if (x <= 18446744073709551615UL) {
                 nint got = Len64((uint64)x);
                 if (got != want) {
@@ -767,8 +791,6 @@ internal partial struct TestAddSubUint_type /*dyn*/ {
 }
 
 public static void TestAddSubUint(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     void test(@string msg, Func<nuint, nuint, nuint, (nuint, nuint)> f, nuint x, nuint y, nuint c, nuint z, nuint cout) {
         var (z1, cout1) = f(x, y, c);
         if (z1 != z || cout1 != cout) {
@@ -853,8 +875,6 @@ internal partial struct TestAddSubUint64_type /*dyn*/ {
 }
 
 public static void TestAddSubUint64(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     void test(@string msg, Func<uint64, uint64, uint64, (uint64, uint64)> f, uint64 x, uint64 y, uint64 c, uint64 z, uint64 cout) {
         var (z1, cout1) = f(x, y, c);
         if (z1 != z || cout1 != cout) {
@@ -943,6 +963,7 @@ public static void TestAdd64OverflowPanic(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         // overflow
         var testʗ1 = test;
         shouldPanic(() => {
@@ -956,6 +977,7 @@ public static void TestAdd64OverflowPanic(ж<testing.T> Ꮡt) {
         shouldPanic(() => {
             testʗ3(_M64, _M64);
         });
+
         // no overflow
         test(_M64, 0);
         test(0, 0);
@@ -1019,6 +1041,7 @@ public static void TestSub64OverflowPanic(ж<testing.T> Ꮡt) {
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         }
+
         // overflow
         var testʗ1 = test;
         shouldPanic(() => {
@@ -1032,6 +1055,7 @@ public static void TestSub64OverflowPanic(ж<testing.T> Ꮡt) {
         shouldPanic(() => {
             testʗ3(_M64 - 1, _M64);
         });
+
         // no overflow
         test(_M64, 0);
         test(0, 0);
@@ -1055,8 +1079,6 @@ internal partial struct TestMulDiv_type /*dyn*/ {
 }
 
 public static void TestMulDiv(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     void testMul(@string msg, Func<nuint, nuint, (nuint, nuint)> f, nuint x, nuint y, nuint hi, nuint lo) {
         var (hi1, lo1) = f(x, y);
         if (hi1 != hi || lo1 != lo) {
@@ -1070,7 +1092,7 @@ public static void TestMulDiv(ж<testing.T> Ꮡt) {
         }
     }
     foreach (var (_, a) in new TestMulDiv_type[]{
-        new(((nuint)1 << (int)((UintSize - 1))), 2, 1, 0, 1),
+        new((nuint)1 << (int)(UintSize - 1), 2, 1, 0, 1),
         new(_M, _M, _M - 1, 1, 42)
     }.slice()) {
         testMul(mulˢ, Mul, a.x, a.y, a.hi, a.lo);
@@ -1111,7 +1133,7 @@ public static void TestMulDiv32(ж<testing.T> Ꮡt) {
         }
     }
     foreach (var (_, a) in new TestMulDiv32_type[]{
-        new(((uint32)1 << (int)(31)), 2, 1, 0, 1),
+        new((uint32)1 << 31, 2, 1, 0, 1),
         new(0xc47dfa8cU, 50911, 0x98a4, 0x998587f4U, 13),
         new(_M32, _M32, _M32 - 1, 1, 42)
     }.slice()) {
@@ -1138,8 +1160,6 @@ internal partial struct TestMulDiv64_type /*dyn*/ {
 }
 
 public static void TestMulDiv64(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     void testMul(@string msg, Func<uint64, uint64, (uint64, uint64)> f, uint64 x, uint64 y, uint64 hi, uint64 lo) {
         var (hi1, lo1) = f(x, y);
         if (hi1 != hi || lo1 != lo) {
@@ -1153,7 +1173,7 @@ public static void TestMulDiv64(ж<testing.T> Ꮡt) {
         }
     }
     foreach (var (_, a) in new TestMulDiv64_type[]{
-        new(((uint64)1 << (int)(63)), 2, 1, 0, 1),
+        new((uint64)1 << 63, 2, 1, 0, 1),
         new(0x3626229738a3b9UL, 0xd8988a9f1cc4a61UL, 0x2dd0712657fe8UL, 0x9dd6a3364c358319UL, 13),
         new(_M64, _M64, _M64 - 1, 1, 42)
     }.slice()) {
@@ -1348,7 +1368,7 @@ public static void TestRem32Overflow(ж<testing.T> Ꮡt) {
     var (hi, lo, y) = ((uint32)510510, (uint32)9699690, (uint32)7);
     for (nint i = 0; i < 1000; i++) {
         var r = Rem32(hi, lo, y);
-        var (_, r2) = Div64(0, (uint64)(((uint64)hi << (int)(32)) | (uint64)lo), (uint64)y);
+        var (_, r2) = Div64(0, (uint64)hi << 32 | (uint64)lo, (uint64)y);
         if (r != (uint32)r2) {
             Ꮡt.Errorf("Rem32(%v, %v, %v) returned %v, but Div64 returned rem %v"u8, hi, lo, y, r, r2);
         }
@@ -1376,10 +1396,10 @@ internal partial struct TestRem64Overflow_Rem64Tests /*dyn*/ {
 }
 
 public static void TestRem64Overflow(ж<testing.T> Ꮡt) {
-    var Rem64Tests = new TestRem64Overflow_Rem64Tests[]{ // Testcases computed using Python 3, as:
- //   >>> hi = 42; lo = 1119; y = 42
- //   >>> ((hi<<64)+lo) % y
-
+    var Rem64Tests = new TestRem64Overflow_Rem64Tests[]{
+        // Testcases computed using Python 3, as:
+        //   >>> hi = 42; lo = 1119; y = 42
+        //   >>> ((hi<<64)+lo) % y
         new(42, 1119, 42, 27),
         new(42, 1119, 38, 9),
         new(42, 1119, 26, 23),
@@ -1388,6 +1408,7 @@ public static void TestRem64Overflow(ж<testing.T> Ꮡt) {
         new(111111, 111111, 1171, 803),
         new(3968194946088682615UL, 3192705705065114702UL, 1000037, 56067)
     }.slice();
+
     foreach (var (_, rt) in Rem64Tests) {
         if (rt.hi < rt.y) {
             Ꮡt.Fatalf("Rem64(%v, %v, %v) is not a test with quo overflow"u8, rt.hi, rt.lo, rt.y);
@@ -1581,24 +1602,26 @@ internal static array<entry> tab = new(256);
         // nlz
         nint x = i; // x != 0
         nint n = 0;
-        while ((nint)(x & 0x80) == 0) {
+        while ((x & 0x80) == 0) {
             n++;
             x <<= (int)(1);
         }
         tab[i].nlz = n;
+
         // ntz
         x = i; // x != 0
         n = 0;
-        while ((nint)(x & 1) == 0) {
+        while ((x & 1) == 0) {
             n++;
             x >>= (int)(1);
         }
         tab[i].ntz = n;
+
         // pop
         x = i; // x != 0
         n = 0;
         while (x != 0) {
-            n += (nint)((nint)(x & 1));
+            n += (nint)(x & 1);
             x >>= (int)(1);
         }
         tab[i].pop = n;

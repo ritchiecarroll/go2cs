@@ -198,7 +198,6 @@ internal static bool errEndsTest(ж<Δtesting.T> Ꮡt, error err, bool wantError
     }
 }
 
-// On Windows, the path is cleaned before symlink resolution.
 internal static slice<rootTest> rootTestCases = new rootTest[]{new(
     name: "plain path"u8,
     fs: new @string[]{}.slice(),
@@ -296,6 +295,7 @@ internal static slice<rootTest> rootTestCases = new rootTest[]{new(
     open: "a/../target"u8,
     target: ((Func<@string>)(() => {
         if (Δruntime.GOOS == "windows"u8) {
+            // On Windows, the path is cleaned before symlink resolution.
             return "target"u8;
         }
         return "b/target"u8;
@@ -514,6 +514,7 @@ public static void TestRootMkdir(ж<Δtesting.T> Ꮡt) {
                     wantError = true;
                 }
             }
+
             var err = root.Mkdir(testʗ1.open, 511);
             if (errEndsTest(tΔ1, err, wantError, rootCreateQˢ, testʗ1.open)) {
                 return;
@@ -583,8 +584,6 @@ public static void TestRootOpenRoot(ж<Δtesting.T> Ꮡt) {
 internal static readonly @string rootRemoveQˢ = "root.Remove(%q)"u8;
 
 public static void TestRootRemoveFile(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, vᴛ1) in rootTestCases) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
@@ -605,6 +604,7 @@ public static void TestRootRemoveFile(ж<Δtesting.T> Ꮡt) {
                     }
                 }
             }
+
             var err = root.Remove(testʗ1.open);
             if (errEndsTest(tΔ1, err, wantError, rootRemoveQˢ, testʗ1.open)) {
                 return;
@@ -618,8 +618,6 @@ public static void TestRootRemoveFile(ж<Δtesting.T> Ꮡt) {
 }
 
 public static void TestRootRemoveDirectory(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, vᴛ1) in rootTestCases) {
         ref var test = ref heap(new rootTest(), out var Ꮡtest);
         test = vᴛ1;
@@ -640,6 +638,7 @@ public static void TestRootRemoveDirectory(ж<Δtesting.T> Ꮡt) {
                     }
                 }
             }
+
             var err = root.Remove(testʗ1.open);
             if (errEndsTest(tΔ1, err, wantError, rootRemoveQˢ, testʗ1.open)) {
                 return;
@@ -706,6 +705,7 @@ public static void TestRootStat(ж<Δtesting.T> Ꮡt) {
                     }
                 }
             }
+
             var (fi, err) = root.Stat(testʗ1.open);
             if (errEndsTest(tΔ1, err, testʗ1.wantError, rootStatQˢ, testʗ1.open)) {
                 return;
@@ -748,6 +748,7 @@ public static void TestRootLstat(ж<Δtesting.T> Ꮡt) {
                     }
                 }
             }
+
             var (fi, err) = root.Lstat(testʗ1.open);
             if (errEndsTest(tΔ1, err, wantError, rootStatQˢ, testʗ1.open)) {
                 return;
@@ -798,11 +799,6 @@ partial struct rootConsistencyTest {
     internal Func<ж<Δtesting.T>, bool> detailedErrorMismatch;
 }
 
-// FreeBSD returns EPERM in the non-Root case.
-// os.Create returns ENOTDIR or EISDIR depending on the platform.
-// os.Create returns ENOTDIR or EISDIR depending on the platform.
-// On Windows, os.Root.Open returns "The directory name is invalid."
-// and os.Open returns "The file cannot be accessed by the system.".
 internal static slice<rootConsistencyTest> rootConsistencyTestCases = new rootConsistencyTest[]{new(
     name: "file"u8,
     fs: new @string[]{
@@ -827,7 +823,10 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = new rootCo
         "target"u8
     }.slice(),
     open: "target/."u8,
-    detailedErrorMismatch: (ж<Δtesting.T> t) => Δruntime.GOOS == "freebsd"u8 && strings.HasPrefix(t.Name(), "TestRootConsistencyRemove"u8)
+    detailedErrorMismatch: (ж<Δtesting.T> t) => {
+        // FreeBSD returns EPERM in the non-Root case.
+        return Δruntime.GOOS == "freebsd"u8 && strings.HasPrefix(t.Name(), "TestRootConsistencyRemove"u8);
+    }
 ), new(
     name: "dir slash"u8,
     fs: new @string[]{
@@ -846,7 +845,10 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = new rootCo
         "target"u8
     }.slice(),
     open: "target/"u8,
-    detailedErrorMismatch: (ж<Δtesting.T> t) => Δruntime.GOOS == "js"u8
+    detailedErrorMismatch: (ж<Δtesting.T> t) => {
+        // os.Create returns ENOTDIR or EISDIR depending on the platform.
+        return Δruntime.GOOS == "js"u8;
+    }
 ), new(
     name: "file in path"u8,
     fs: new @string[]{
@@ -880,7 +882,10 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = new rootCo
         "link => target"u8
     }.slice(),
     open: "link/"u8,
-    detailedErrorMismatch: (ж<Δtesting.T> t) => Δruntime.GOOS == "js"u8
+    detailedErrorMismatch: (ж<Δtesting.T> t) => {
+        // os.Create returns ENOTDIR or EISDIR depending on the platform.
+        return Δruntime.GOOS == "js"u8;
+    }
 ), new(
     name: "unresolved symlink"u8,
     fs: new @string[]{
@@ -926,7 +931,11 @@ internal static slice<rootConsistencyTest> rootConsistencyTestCases = new rootCo
     name: "unix domain socket in path"u8,
     fsFunc: (ж<Δtesting.T> t, @string dir) => tempDirWithUnixSocket(t, "a"u8),
     open: "a/b"u8,
-    detailedErrorMismatch: (ж<Δtesting.T> t) => Δruntime.GOOS == "windows"u8
+    detailedErrorMismatch: (ж<Δtesting.T> t) => {
+        // On Windows, os.Root.Open returns "The directory name is invalid."
+        // and os.Open returns "The file cannot be accessed by the system.".
+        return Δruntime.GOOS == "windows"u8;
+    }
 ), new(
     name: "question mark"u8,
     open: "?"u8
@@ -967,14 +976,13 @@ internal static @string tempDirWithUnixSocket(ж<Δtesting.T> Ꮡt, @string name
 internal static readonly object inconsistentResultsOnˢ = (@string)"#69509: inconsistent results on wasip1"u8;
 
 internal static void run(this rootConsistencyTest test, ж<Δtesting.T> Ꮡt, Func<ж<Δtesting.T>, @string, ж<Δos.Root>, (@string, error)> f) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     if (Δruntime.GOOS == "wasip1"u8) {
         // On wasip, non-Root functions clean paths before opening them,
         // resulting in inconsistent behavior.
         // https://go.dev/issue/69509
         Ꮡt.Skip(inconsistentResultsOnˢ);
     }
+
     var testʗ1 = test;
     Ꮡt.Run(test.name, (ж<Δtesting.T> tΔ1) => {
         GoFrame ᒐ = default;
@@ -985,14 +993,17 @@ internal static void run(this rootConsistencyTest test, ж<Δtesting.T> Ꮡt, Fu
                 dir1 = testʗ1.fsFunc(tΔ1, dir1);
                 dir2 = testʗ1.fsFunc(tΔ1, dir2);
             }
+
             var (r, err) = Δos.OpenRoot(dir1);
             if (err != default!) {
                 tΔ1.Fatal(err);
             }
             var rʗ1 = r;
             defer(() => rʗ1.Close(), ref ᒐ);
+
             var (res1, err1) = f(tΔ1, testʗ1.open, r);
             var (res2, err2) = f(tΔ1, dir2 + "/"u8 + testʗ1.open, nil);
+
             if (res1 != res2 || ((err1 == default!) != (err2 == default!))) {
                 tΔ1.Errorf("with root:    res=%v"u8, res1);
                 tΔ1.Errorf("              err=%v"u8, err1);
@@ -1000,6 +1011,7 @@ internal static void run(this rootConsistencyTest test, ж<Δtesting.T> Ꮡt, Fu
                 tΔ1.Errorf("              err=%v"u8, err2);
                 tΔ1.Errorf("want consistent results, got mismatch"u8);
             }
+
             if (err1 != default! || err2 != default!) {
                 var (e1, ok) = err1._<ж<osꓸPathError>>(ᐧ);
                 if (!ok) {
@@ -1098,8 +1110,6 @@ public static void TestRootConsistencyMkdir(ж<Δtesting.T> Ꮡt) {
 }
 
 public static void TestRootConsistencyRemove(ж<Δtesting.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, test) in rootConsistencyTestCases) {
         if (test.open == "."u8 || test.open == "./"u8) {
             continue; // can't remove the root itself
@@ -1173,6 +1183,7 @@ public static void TestRootRenameAfterOpen(ж<Δtesting.T> Ꮡt) {
         }
 
         @string dir = Ꮡt.TempDir();
+
         // Create directory "a" and open it.
         {
             var errΔ1 = Δos.Mkdir(filepath.Join(dir, "a"), 511); if (errΔ1 != default!) {
@@ -1185,6 +1196,7 @@ public static void TestRootRenameAfterOpen(ж<Δtesting.T> Ꮡt) {
         }
         var dirfʗ1 = dirf;
         defer(() => dirfʗ1.Close(), ref ᒐ);
+
         // Rename "a" => "b", and create "b/f".
         {
             var errΔ2 = Δos.Rename(filepath.Join(dir, "a"), filepath.Join(dir, "b")); if (errΔ2 != default!) {
@@ -1196,6 +1208,7 @@ public static void TestRootRenameAfterOpen(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
+
         // Open "f", and confirm that we see it.
         (var f, err) = dirf.OpenFile("f"u8, Δos.O_RDONLY, 0);
         if (err != default!) {
@@ -1213,6 +1226,7 @@ public static void TestRootRenameAfterOpen(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Fatalf("file contents: %q, want %q"u8, got, want);
             }
         }
+
         // f.Name reflects the original path we opened the directory under (".../a"), not "b".
         {
             @string got = f.Name();
@@ -1361,8 +1375,6 @@ internal static readonly object publicˢ = (@string)"public"u8;
 public static partial void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        ref var t = ref Ꮡt.DerefOrNull();
-
         @string dir = Ꮡt.TempDir();
         var (r, err) = Δos.OpenRoot(dir);
         if (err != default!) {
@@ -1370,11 +1382,15 @@ public static partial void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
         }
         var rʗ1 = r;
         defer(() => rʗ1.Close(), ref ᒐ);
+
         const nint depth = 4;
+
         Δos.MkdirAll(dir + "/base/"u8 + strings.Repeat("/a"u8, depth), 511);
+
         @string path = "base/"u8 + strings.Repeat("a/"u8, depth) + strings.Repeat("../"u8, depth) + "a/f"u8;
         Δos.WriteFile(dir + "/f"u8, slice<byte>("secret"u8), 438);
         Δos.WriteFile(dir + "/base/a/f"u8, slice<byte>("public"u8), 438);
+
         // Compute how long it takes to open the path in the common case.
         UntypedInt tries = 10;
         time.Duration total = default!;
@@ -1395,6 +1411,7 @@ public static partial void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
             total += time.Since(start);
         }
         var avg = total / (int64)tries;
+
         // We're trying to exploit a race, so try this a number of times.
         foreach (var _ᴛ2 in range(100)) {
             // Start a goroutine to open the file.
@@ -1416,6 +1433,7 @@ public static partial void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
                 catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
                 finally { ᒐ.Run(); }
             });
+
             // Wait for the open operation to partially complete,
             // and then rename a directory near the root.
             time.Sleep(avg / 4);
@@ -1429,9 +1447,9 @@ public static partial void TestRootRaceRenameDir(ж<Δtesting.T> Ꮡt) {
                     else { /* default: */
                         Ꮡt.Fatal(errΔ3);
                     }
-
                 }
             }
+
             var got = ᐸꟷ(gotc);
             Δos.Rename(dir + "/b"u8, dir + "/base/a"u8);
             if (len(got) > 0 && ((sstring)got) != "public"u8) {
@@ -1523,6 +1541,7 @@ public static void TestRootName(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf("root.Name() = %q, want %q"u8, got, want);
             }
         }
+
         (var f, err) = root.Create(fileˢ2);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1535,6 +1554,7 @@ public static void TestRootName(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Errorf(@"root.Create(""file"").Name() = %q, want %q"u8, got, want);
             }
         }
+
         {
             var errΔ1 = root.Mkdir(dirˢ, 511); if (errΔ1 != default!) {
                 Ꮡt.Fatal(errΔ1);

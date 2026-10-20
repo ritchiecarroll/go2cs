@@ -5,7 +5,6 @@
 // production and external-test types stay in package_test_info.cs.
 
 // <ImportedTypeAliases>
-using bytes = go.bytes_package;
 // </ImportedTypeAliases>
 
 using go;

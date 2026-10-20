@@ -243,6 +243,7 @@ func productionClassLines(files map[string]string) (usings, inits, all []string)
 // TestTestOnlyPackageNamesNoProductionClass is the fips140test refusal: every file a `_test.go`, so
 // the production conversion emitted no class, so nothing may import or initialize one.
 func TestTestOnlyPackageNamesNoProductionClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}
@@ -259,6 +260,7 @@ func TestTestOnlyPackageNamesNoProductionClass(t *testing.T) {
 // same fixture WITH a production file must still emit both directives, so the refusal cannot be
 // satisfied by an emission that names the class nowhere under any circumstances.
 func TestPackageWithProductionFileNamesTheProductionClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}
@@ -362,6 +364,7 @@ func colocatedProjectReferences(t *testing.T, files map[string]string) (projectF
 // source sites already consult (productionClassEmitted, plumbed as Options.testProductionAbsent),
 // so all four sites now answer the same question with the same reading.
 func TestTestOnlyPackageTestProjectReferencesNoProductionProject(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}
@@ -380,6 +383,7 @@ func TestTestOnlyPackageTestProjectReferencesNoProductionProject(t *testing.T) {
 // circumstances — which would trade a dangling edge for a missing one (CS0246 on every production
 // type the tests name, instead of MSB9008).
 func TestPackageWithProductionFileTestProjectReferencesTheProductionProject(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	if testing.Short() {
 		t.Skip("integration test: loads and converts a test-variant fixture")
 	}
@@ -646,6 +650,7 @@ func bridgeAnchorOf(t *testing.T, files map[string]string) string {
 // The SUBJECT: a TEST-ONLY package with both variants. Its bridge anchor must not name a production
 // class that was never emitted.
 func TestTestOnlyMixedSuiteBridgeAnchorNamesNoProductionClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	files := convertMixedSuiteFixture(t, writeMixedSuiteFixture(t, false))
 
 	anchor := bridgeAnchorOf(t, files)
@@ -677,6 +682,7 @@ func TestTestOnlyMixedSuiteBridgeAnchorNamesNoProductionClass(t *testing.T) {
 // break every ordinary mixed suite — sort, bytes, strings, container/list — which is the shape the
 // corpus actually has.
 func TestMixedSuiteWithProductionBridgeAnchorNamesTheProductionClass(t *testing.T) {
+	isolateConverterPathGlobals(t)
 	files := convertMixedSuiteFixture(t, writeMixedSuiteFixture(t, true))
 
 	anchor := bridgeAnchorOf(t, files)

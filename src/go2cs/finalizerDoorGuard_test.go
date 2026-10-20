@@ -77,9 +77,13 @@ func TestFinalizerDoorsStayWiredToTheLiveRunner(t *testing.T) {
 			"live door. A door that starts anything else starts a runner nothing drains.", body)
 	}
 
-	if strings.Contains(body, "goǃ(runfinq)") {
-		t.Errorf("createfing has been restored to `goǃ(runfinq)`, which starts the CONVERTED runfinq -- the "+
-			"body mfinal.cs's own header declares dead. Its body is:\n%s", body)
+	// Go 1.26 renamed runfinq to runFinalizers, so a restored 1.26 auto body reads
+	// `goǃ(runFinalizers)`. Both spellings start the same dead converted runner.
+	for _, start := range []string{"goǃ(runfinq)", "goǃ(runFinalizers)"} {
+		if strings.Contains(body, start) {
+			t.Errorf("createfing has been restored to `%s`, which starts the CONVERTED runner -- the "+
+				"body mfinal.cs's own header declares dead. Its body is:\n%s", start, body)
+		}
 	}
 
 	// ---- the caller arm: AddCleanup must still ask for a runner at all -----------------------

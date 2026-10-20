@@ -27,11 +27,6 @@ public static @string String(this FindTest t) {
     return fmt.Sprintf("pat: %#q text: %#q"u8, t.pat, t.text);
 }
 
-// multiple matches
-// fixed bugs
-// RE2 tests
-// can backslash-escape any punctuation
-// long set of matches (longer than startSize)
 internal static slice<FindTest> findTests = new FindTest[]{
     new(@""u8, @""u8, build(1, 0, 0)),
     new(@"^abcdefg"u8, "abcdefg"u8, build(1, 0, 7)),
@@ -72,11 +67,15 @@ internal static slice<FindTest> findTests = new FindTest[]{
     new(@"[.]"u8, "."u8, build(1, 0, 1)),
     new(@"/$"u8, "/abc/"u8, build(1, 4, 5)),
     new(@"/$"u8, "/abc"u8, default!),
+
+    // multiple matches
     new(@"."u8, "abc"u8, build(3, 0, 1, 1, 2, 2, 3)),
     new(@"(.)"u8, "abc"u8, build(3, 0, 1, 0, 1, 1, 2, 1, 2, 2, 3, 2, 3)),
     new(@".(.)"u8, "abcd"u8, build(2, 0, 2, 1, 2, 2, 4, 3, 4)),
     new(@"ab*"u8, "abbaab"u8, build(3, 0, 3, 3, 4, 4, 6)),
     new(@"a(b*)"u8, "abbaab"u8, build(3, 0, 3, 1, 3, 3, 4, 4, 4, 4, 6, 5, 6)),
+
+    // fixed bugs
     new(@"ab$"u8, "cab"u8, build(1, 1, 3)),
     new(@"axxb$"u8, "axxcb"u8, default!),
     new(@"data"u8, "daXY data"u8, build(1, 5, 9)),
@@ -100,6 +99,8 @@ internal static slice<FindTest> findTests = new FindTest[]{
     new(@"\B"u8, "x y"u8, default!),
     new(@"\B"u8, "xx yy"u8, build(2, 1, 1, 4, 4)),
     new(@"(|a)*"u8, "aa"u8, build(3, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2)),
+
+    // RE2 tests
     new(@"[^\S\s]"u8, "abcd"u8, default!),
     new(@"[^\S[:space:]]"u8, "abcd"u8, default!),
     new(@"[^\D\d]"u8, "abcd"u8, default!),
@@ -107,6 +108,8 @@ internal static slice<FindTest> findTests = new FindTest[]{
     new(@"(?i)\W"u8, "x"u8, default!),
     new(@"(?i)\W"u8, "k"u8, default!),
     new(@"(?i)\W"u8, "s"u8, default!),
+
+    // can backslash-escape any punctuation
     new(@"\!\""\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\{\|\}\~"u8,
         @"!""#$%&'()*+,-./:;<=>?@[\]^_{|}~"u8, build(1, 0, 31)),
     new(@"[\!\""\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\\\]\^\_\{\|\}\~]+"u8,
@@ -119,6 +122,8 @@ internal static slice<FindTest> findTests = new FindTest[]{
     new(@"\x{fffd}"u8, ((@string)(new byte[]{0xc2, 0x00})), build(1, 0, 1)),
     new("[\ufffd]"u8, ((@string)(new byte[]{0xff})), build(1, 0, 1)),
     new(@"[\x{fffd}]"u8, ((@string)(new byte[]{0xc2, 0x00})), build(1, 0, 1)),
+
+    // long set of matches (longer than startSize)
     new(
         "."u8,
         "qwertyuiopasdfghjklzxcvbnm1234567890"u8,
@@ -158,11 +163,11 @@ public static void TestFind(ж<testing.T> Ꮡt) {
         var result = re.Find(slice<byte>(test.text));
         switch (ᐧ) {
         case {} when len(test.matches) == 0 && len(result) == 0: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -179,7 +184,6 @@ public static void TestFind(ж<testing.T> Ꮡt) {
             }
             break;
         }}
-
     }
 }
 
@@ -188,16 +192,16 @@ public static void TestFindString(ж<testing.T> Ꮡt) {
         @string result = MustCompile(test.pat).FindString(test.text);
         switch (ᐧ) {
         case {} when len(test.matches) == 0 && len(result) == 0: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != ""u8: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == ""u8: {
+            // Tricky because an empty result has two meanings: no match or empty match.
             if (test.matches[0][0] != test.matches[0][1]) {
-                // Tricky because an empty result has two meanings: no match or empty match.
                 Ꮡt.Errorf("expected match; got none: %s"u8, test);
             }
             break;
@@ -209,7 +213,6 @@ public static void TestFindString(ж<testing.T> Ꮡt) {
             }
             break;
         }}
-
     }
 }
 
@@ -218,11 +221,11 @@ internal static void testFindIndex(ж<FindTest> Ꮡtest, slice<nint> result, ж<
 
     switch (ᐧ) {
     case {} when len(test.matches) == 0 && len(result) == 0: {
+        // ok
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
@@ -236,7 +239,6 @@ internal static void testFindIndex(ж<FindTest> Ꮡtest, slice<nint> result, ж<
         }
         break;
     }}
-
 }
 
 public static void TestFindIndex(ж<testing.T> Ꮡt) {
@@ -272,11 +274,11 @@ public static void TestFindAll(ж<testing.T> Ꮡt) {
         var result = MustCompile(test.pat).FindAll(slice<byte>(test.text), -1);
         switch (ᐧ) {
         case {} when test.matches == default! && result == default!: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -300,7 +302,6 @@ public static void TestFindAll(ж<testing.T> Ꮡt) {
             }
             break;
         }}
-
     }
 }
 
@@ -309,11 +310,11 @@ public static void TestFindAllString(ж<testing.T> Ꮡt) {
         var result = MustCompile(test.pat).FindAllString(test.text, -1);
         switch (ᐧ) {
         case {} when test.matches == default! && result == default!: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -333,7 +334,6 @@ public static void TestFindAllString(ж<testing.T> Ꮡt) {
             }
             break;
         }}
-
     }
 }
 
@@ -342,11 +342,11 @@ internal static void testFindAllIndex(ж<FindTest> Ꮡtest, slice<slice<nint>> r
 
     switch (ᐧ) {
     case {} when test.matches == default! && result == default!: {
+        // ok
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
@@ -365,7 +365,6 @@ internal static void testFindAllIndex(ж<FindTest> Ꮡtest, slice<slice<nint>> r
         }
         break;
     }}
-
 }
 
 public static void TestFindAllIndex(ж<testing.T> Ꮡt) {
@@ -422,11 +421,11 @@ public static void TestFindSubmatch(ж<testing.T> Ꮡt) {
         var result = MustCompile(test.pat).FindSubmatch(slice<byte>(test.text));
         switch (ᐧ) {
         case {} when test.matches == default! && result == default!: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -437,7 +436,6 @@ public static void TestFindSubmatch(ж<testing.T> Ꮡt) {
             testSubmatchBytes(Ꮡtest, 0, test.matches[0], result, Ꮡt);
             break;
         }}
-
     }
 }
 
@@ -471,11 +469,11 @@ public static void TestFindStringSubmatch(ж<testing.T> Ꮡt) {
         var result = MustCompile(test.pat).FindStringSubmatch(test.text);
         switch (ᐧ) {
         case {} when test.matches == default! && result == default!: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -486,7 +484,6 @@ public static void TestFindStringSubmatch(ж<testing.T> Ꮡt) {
             testSubmatchString(Ꮡtest, 0, test.matches[0], result, Ꮡt);
             break;
         }}
-
     }
 }
 
@@ -507,11 +504,11 @@ internal static void testFindSubmatchIndex(ж<FindTest> Ꮡtest, slice<nint> res
 
     switch (ᐧ) {
     case {} when test.matches == default! && result == default!: {
+        // ok
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
@@ -522,7 +519,6 @@ internal static void testFindSubmatchIndex(ж<FindTest> Ꮡtest, slice<nint> res
         testSubmatchIndices(Ꮡtest, 0, test.matches[0], result, Ꮡt);
         break;
     }}
-
 }
 
 public static void TestFindSubmatchIndex(ж<testing.T> Ꮡt) {
@@ -561,11 +557,11 @@ public static void TestFindAllSubmatch(ж<testing.T> Ꮡt) {
         var result = MustCompile(test.pat).FindAllSubmatch(slice<byte>(test.text), -1);
         switch (ᐧ) {
         case {} when test.matches == default! && result == default!: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -582,7 +578,6 @@ public static void TestFindAllSubmatch(ж<testing.T> Ꮡt) {
             }
             break;
         }}
-
     }
 }
 
@@ -594,11 +589,11 @@ public static void TestFindAllStringSubmatch(ж<testing.T> Ꮡt) {
         var result = MustCompile(test.pat).FindAllStringSubmatch(test.text, -1);
         switch (ᐧ) {
         case {} when test.matches == default! && result == default!: {
+            // ok
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- test);
+            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
@@ -615,7 +610,6 @@ public static void TestFindAllStringSubmatch(ж<testing.T> Ꮡt) {
             }
             break;
         }}
-
     }
 }
 
@@ -624,11 +618,11 @@ internal static void testFindAllSubmatchIndex(ж<FindTest> Ꮡtest, slice<slice<
 
     switch (ᐧ) {
     case {} when test.matches == default! && result == default!: {
+        // ok
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, // ok
- Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
@@ -645,7 +639,6 @@ internal static void testFindAllSubmatchIndex(ж<FindTest> Ꮡtest, slice<slice<
         }
         break;
     }}
-
 }
 
 public static void TestFindAllSubmatchIndex(ж<testing.T> Ꮡt) {

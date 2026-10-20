@@ -77,9 +77,9 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(ΔfuncInfo f, ui
 
 internal static inlineFrame resolveInternal(this ref inlineUnwinder u, uintptr pc) {
     return new inlineFrame(
-        pc: pc, // Conveniently, this returns -1 if there's an error, which is the same
- // value we use for the outermost frame.
-
+        pc: pc,
+        // Conveniently, this returns -1 if there's an error, which is the same
+        // value we use for the outermost frame.
         index: pcdatavalue1(u.f, abi.PCDATA_InlTreeIndex, pc, false)
     );
 }

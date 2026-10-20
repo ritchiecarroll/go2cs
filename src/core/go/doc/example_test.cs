@@ -50,8 +50,9 @@ public static void TestExamples(ж<testing.T> Ꮡt) {
             }
             var golden = new map<@string, @string>{};
             foreach (var (_, f) in (~archive).Files) {
-                golden[f.Name] = strings.TrimSpace(((@string)f.Data));
+                golden[f.Name] = strings.TrimSpace((@string)f.Data);
             }
+
             // Collect the results of doc.Examples in a map keyed by example name.
             var examples = new map<@string, ж<Δdoc.Example>>{};
             foreach (var (_, e) in Δdoc.Examples(astFile)) {
@@ -66,6 +67,7 @@ public static void TestExamples(ж<testing.T> Ꮡt) {
                     }
                 }
             }
+
             // Each section in the golden file corresponds to an example we expect
             // to see.
             foreach (var (sectionName, want) in golden) {
@@ -77,6 +79,7 @@ public static void TestExamples(ж<testing.T> Ꮡt) {
                 if (ex == nil) {
                     tΔ1.Fatalf("no example named %q"u8, name);
                 }
+
                 @string got = default!;
                 var exprᴛ1 = kind;
                 if (exprᴛ1 == "Play"u8) {
@@ -133,7 +136,7 @@ func Greet(who string) {
 	fmt.Printf("Hello, %s!\n", who)
 }
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string testᶜ = """
@@ -145,7 +148,7 @@ func ExampleGreet_world() {
 	Greet("world")
 }
 
-"""u8;
+"""u8.Raw();
 
 // This example illustrates how to use NewFromFiles
 // to compute package documentation with examples.
@@ -154,20 +157,28 @@ public static void ExampleNewFromFiles() {
     // a package whose documentation will be computed.
     @string src = srcᶜ;
     @string test = testᶜ;
+
     // Create the AST by parsing src and test.
     var fset = token.NewFileSet();
     var files = new ж<ast.File>[]{
         mustParse(fset, srcGoˢ, src),
         mustParse(fset, srcTestGoˢ, test)
     }.slice();
+
     // Compute package documentation with examples.
     var (p, err) = Δdoc.NewFromFiles(fset, files, exampleComPˢ);
     if (err != default!) {
         throw panic(err);
     }
+
     fmt.Printf("package %s - %s"u8, (~p).Name, (~p).Doc);
     fmt.Printf("func %s - %s"u8, (~(~p).Funcs[0]).Name, (~(~p).Funcs[0]).Doc);
     fmt.Printf(" ⤷ example with suffix %q - %s"u8, (~(~(~p).Funcs[0]).Examples[0]).Suffix, (~(~(~p).Funcs[0]).Examples[0]).Doc);
+
+    // Output:
+    // package p - This is the package comment.
+    // func Greet - This comment is associated with the Greet function.
+    //  ⤷ example with suffix "world" - This comment is associated with the ExampleGreet_world example.
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
@@ -214,7 +225,7 @@ type GType[T any] int
 
 func (GType[T]) M() {}
 
-"""u8;
+"""u8.Raw();
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string testᶜ1 = """
@@ -283,15 +294,12 @@ func ExampleGFunc_suffix() {}
 func ExampleGType_M() {}
 func ExampleGType_M_suffix() {}
 
-"""u8;
+"""u8.Raw();
 
-// Output:
-// package p - This is the package comment.
-// func Greet - This comment is associated with the Greet function.
-//  ⤷ example with suffix "world" - This comment is associated with the ExampleGreet_world example.
 public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
     @string src = srcᶜ1;
     @string test = testᶜ1;
+
     // Parse literal source code as a *doc.Package.
     var fset = token.NewFileSet();
     var files = new ж<ast.File>[]{
@@ -302,6 +310,7 @@ public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("doc.NewFromFiles: %v"u8, err);
     }
+
     // Collect the association of examples to top-level identifiers.
     var got = new map<@string, slice<@string>>{};
     got[""u8] = exampleNames((~p).Examples);
@@ -317,9 +326,9 @@ public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
             got[(~tΔ1).Name + "."u8 + (~m).Name] = exampleNames((~m).Examples);
         }
     }
+
     var want = new map<@string, slice<@string>>{
         [""u8] = new @string[]{""u8, "suffix"u8, "suffix_xX_X_x"u8}.slice(), // Package-level examples.
-
         ["Type1"u8] = new @string[]{""u8, "foo_Suffix"u8, "func2"u8, "suffix"u8}.slice(),
         ["Type1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Type1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
@@ -329,13 +338,15 @@ public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
         ["Type1.Func1"u8] = new @string[]{""u8, "foo_Suffix"u8, "suffix"u8}.slice(),
         ["Type1.Func1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Type1.Func1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
-        ["Uembed.Func1"u8] = new @string[]{""u8, "suffix"u8}.slice(), // These are implementation dependent due to the ambiguous parsing.
+        ["Uembed.Func1"u8] = new @string[]{""u8, "suffix"u8}.slice(),
 
+        // These are implementation dependent due to the ambiguous parsing.
         ["Conflict_Conflict"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Conflict_conflict"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["GFunc"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["GType.M"u8] = new @string[]{""u8, "suffix"u8}.slice()
     };
+
     foreach (var (id, _) in got) {
         if (!reflect.DeepEqual(got[id], want[id])) {
             Ꮡt.Errorf("classification mismatch for %q:\ngot  %q\nwant %q"u8, id, got[id], want[id]);

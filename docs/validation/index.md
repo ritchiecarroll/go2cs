@@ -34,6 +34,7 @@ the roster page beside it (1.24.13.1: 232 pages, 218 validated).
 | 1.24.13.4 | [`1.24.13.4/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.24.13.4) | 239 | [`ValidatedTestPackages.md`](1.24.13.4/ValidatedTestPackages.md) |
 | 1.24.13.5 | [`1.24.13.5/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.24.13.5) | 239 | [`ValidatedTestPackages.md`](1.24.13.5/ValidatedTestPackages.md) |
 | 1.24.13.6 | [`1.24.13.6/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.24.13.6) | 239 | [`ValidatedTestPackages.md`](1.24.13.6/ValidatedTestPackages.md) |
+| 1.24.13.7 | [`1.24.13.7/`](https://github.com/ritchiecarroll/go2cs/tree/master/docs/validation/1.24.13.7) | 239 | [`ValidatedTestPackages.md`](1.24.13.7/ValidatedTestPackages.md) |
 
 A snapshot froze the per-package proofs and not the roster PAGE around them until 1.23.12.3, so for
 every release above it the campaign's own "how things stood" view lives only in the signed git tag.

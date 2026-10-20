@@ -18,8 +18,10 @@ internal static readonly @string rsa1024min0ˢ = "rsa1024min=0"u8;
 
 public static void TestEqual(ж<testing.T> Ꮡt) {
     Ꮡt.Setenv(godebugˢ, rsa1024min0ˢ);
+
     var @private = test512Key;
     var @public = @private.of(rsa.PrivateKey.ᏑPublicKey);
+
     if (!@public.Equal(@public.OrTypedNil())) {
         Ꮡt.Errorf("public key is not equal to itself: %v"u8, @public.OrTypedNil());
     }
@@ -29,6 +31,7 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     if (!@private.Equal(@private.OrTypedNil())) {
         Ꮡt.Errorf("private key is not equal to itself: %v"u8, @private.OrTypedNil());
     }
+
     var (enc, err) = Δx509.MarshalPKCS8PrivateKey(@private.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -43,6 +46,7 @@ public static void TestEqual(ж<testing.T> Ꮡt) {
     if (!@private.Equal(decoded)) {
         Ꮡt.Errorf("private key is not equal to itself after decoding: %v"u8, @private.OrTypedNil());
     }
+
     var other = test512KeyTwo;
     if (@public.Equal(other.Public())) {
         Ꮡt.Errorf("different public keys are Equal"u8);

@@ -81,7 +81,7 @@ internal static void archInitCastagnoli() {
 internal static uint32 castagnoliShift(ж<sse42Table> Ꮡtable, uint32 crc) {
     ref var table = ref Ꮡtable.DerefOrNull();
 
-    return (uint32)((uint32)((uint32)(table[3][(crc >> (int)(24))] ^ table[2][(uint32)(((crc >> (int)(16))) & 0xFF)]) ^ table[1][(uint32)(((crc >> (int)(8))) & 0xFF)]) ^ table[0][(uint32)(crc & 0xFF)]);
+    return table[3][(crc >> 24)] ^ table[2][((crc >> 16) & 0xFF)] ^ table[1][((crc >> 8) & 0xFF)] ^ table[0][(crc & 0xFF)];
 }
 
 internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
@@ -164,9 +164,9 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
             p, p[(int)(castagnoliK2)..], p[(int)(castagnoliK2 * 2)..],
             castagnoliK2 / 24);
         // CRC(I, AB) = CRC(CRC(I, A), O) xor CRC(0, B)
-        var crcAB = (uint32)(castagnoliShift(castagnoliSSE42TableK2, crcA) ^ crcB);
+        var crcAB = castagnoliShift(castagnoliSSE42TableK2, crcA) ^ crcB;
         // CRC(I, ABC) = CRC(CRC(I, AB), O) xor CRC(0, C)
-        crc = (uint32)(castagnoliShift(castagnoliSSE42TableK2, crcAB) ^ crcC);
+        crc = castagnoliShift(castagnoliSSE42TableK2, crcAB) ^ crcC;
         p = p[(int)(castagnoliK2 * 3)..];
     }
     // Process 3*K1 at a time.
@@ -177,9 +177,9 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
             p, p[(int)(castagnoliK1)..], p[(int)(castagnoliK1 * 2)..],
             castagnoliK1 / 24);
         // CRC(I, AB) = CRC(CRC(I, A), O) xor CRC(0, B)
-        var crcAB = (uint32)(castagnoliShift(castagnoliSSE42TableK1, crcA) ^ crcB);
+        var crcAB = castagnoliShift(castagnoliSSE42TableK1, crcA) ^ crcB;
         // CRC(I, ABC) = CRC(CRC(I, AB), O) xor CRC(0, C)
-        crc = (uint32)(castagnoliShift(castagnoliSSE42TableK1, crcAB) ^ crcC);
+        crc = castagnoliShift(castagnoliSSE42TableK1, crcAB) ^ crcC;
         p = p[(int)(castagnoliK1 * 3)..];
     }
     // Use the simple implementation for what's left.
@@ -206,7 +206,7 @@ internal static uint32 archUpdateIEEE(uint32 crc, slice<byte> p) {
         throw panic("not available");
     }
     if (len(p) >= 64) {
-        nint left = (nint)(len(p) & 15);
+        nint left = len(p) & 15;
         nint @do = len(p) - left;
         crc = ~ieeeCLMUL(~crc, p[..(int)(@do)]);
         p = p[(int)(@do)..];

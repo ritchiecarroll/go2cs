@@ -180,6 +180,7 @@
 
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/atomic/sync.atomic.csproj" />
     <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/syscall/syscall.csproj" />
@@ -193,15 +194,13 @@
        records that the platform takes part in this package's axis and adds nothing beyond the
        shared list above, which is what lets a single-target reconvert reproduce this file. -->
   <ItemGroup Condition="'$(GoTargetOS)'=='darwin'">
-    <ProjectReference Include="$(go2csPath)core/internal/itoa/internal.itoa.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/unix/internal.syscall.unix.csproj" />
-    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='linux'">
-    <ProjectReference Include="$(go2csPath)core/internal/itoa/internal.itoa.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/syscall/unix/internal.syscall.unix.csproj" />
-    <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(GoTargetOS)'=='windows'">

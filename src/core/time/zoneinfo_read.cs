@@ -43,9 +43,7 @@ internal static @string Error(this fileSizeError f) {
 
 // Copies of io.Seek* constants to avoid importing "io":
 internal static UntypedInt seekStart => 0;
-
 internal static UntypedInt seekCurrent => 1;
-
 internal static UntypedInt seekEnd => 2;
 
 // Simple I/O interface to binary blob of data.
@@ -71,7 +69,7 @@ internal static (uint32 n, bool ok) big4(this ref dataIO d) {
         d.error = true;
         return (0, false);
     }
-    return ((uint32)((uint32)((uint32)((uint32)p[3] | ((uint32)p[2] << (int)(8))) | ((uint32)p[1] << (int)(16))) | ((uint32)p[0] << (int)(24))), true);
+    return ((uint32)p[3] | (uint32)p[2] << 8 | (uint32)p[1] << 16 | (uint32)p[0] << 24, true);
 }
 
 internal static (uint64 n, bool ok) big8(this ref dataIO d) {
@@ -81,7 +79,7 @@ internal static (uint64 n, bool ok) big8(this ref dataIO d) {
         d.error = true;
         return (0, false);
     }
-    return ((uint64)((((uint64)n1 << (int)(32))) | (uint64)n2), true);
+    return (((uint64)n1 << 32) | (uint64)n2, true);
 }
 
 internal static (byte n, bool ok) @byte(this ref dataIO d) {
@@ -107,7 +105,7 @@ internal static @string byteString(slice<byte> p) {
             p = p.slice(0, i);
         }
     }
-    return ((@string)p);
+    return (@string)p;
 }
 
 internal static error errBadData = errors.New("malformed time zone information"u8);
@@ -118,12 +116,14 @@ internal static error errBadData = errors.New("malformed time zone information"u
 // (for example, the content of /etc/localtime on Unix systems).
 public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice<byte> data) {
     var d = new dataIO(data, false);
+
     // 4-byte magic "TZif"
     {
         var magic = d.read(4); if (((sstring)magic) != "TZif"u8) {
             return (default!, errBadData);
         }
     }
+
     // 1-byte version, then 15 bytes of padding
     nint version = default!;
     slice<byte> p = default!;
@@ -147,9 +147,9 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
             default: {
                 return (default!, errBadData);
             }}
-
         }
     }
+
     // six big-endian 32-bit integers:
     //	number of UTC/local indicators
     //	number of standard/wall indicators
@@ -158,15 +158,10 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
     //	number of local time zones
     //	number of characters of time zone abbrev strings
     const nint NUTCLocal = iota;
-    
     const nint NStdWall = 1;
-    
     const nint NLeap = 2;
-    
     const nint NTime = 3;
-    
     const nint NZone = 4;
-    
     const nint NChar = 5;
     array<nint> n = new(6);
     for (nint i = 0; i < 6; i++) {
@@ -179,10 +174,12 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         }
         n[i] = (nint)nn;
     }
+
     // If we have version 2 or 3, then the data is first written out
     // in a 32-bit format, then written out again in a 64-bit format.
     // Skip the 32-bit format and read the 64-bit one, as it can
     // describe a broader range of dates.
+
     var is64 = false;
     if (version > 1) {
         // Skip the 32-bit data.
@@ -190,7 +187,9 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
         // Skip the version 2 header that we just read.
         skip += 4 + 16;
         d.read(skip);
+
         is64 = true;
+
         // Read the counts again, they can differ.
         for (nint i = 0; i < 6; i++) {
             var (nn, ok) = d.big4();
@@ -203,35 +202,45 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
             n[i] = (nint)nn;
         }
     }
+
     nint size = 4;
     if (is64) {
         size = 8;
     }
+
     // Transition times.
     var txtimes = new dataIO(d.read(n[NTime] * size), false);
+
     // Time zone indices for transition times.
     var txzones = d.read(n[NTime]);
+
     // Zone info structures
     var zonedata = new dataIO(d.read(n[NZone] * 6), false);
+
     // Time zone abbreviations.
     var abbrev = d.read(n[NChar]);
+
     // Leap-second time pairs
     d.read(n[NLeap] * (size + 4));
+
     // Whether tx times associated with local time types
     // are specified as standard time or wall time.
     var isstd = d.read(n[NStdWall]);
+
     // Whether tx times associated with local time types
     // are specified as UTC or local time.
     var isutc = d.read(n[NUTCLocal]);
-    if (d.error) {
-        // ran out of data
+
+    if (d.error) { // ran out of data
         return (default!, errBadData);
     }
+
     ref var extend = ref heap(new @string(), out var Ꮡextend);
     var rest = d.rest();
     if (len(rest) > 2 && rest[0] == (rune)'\n' && rest[len(rest) - 1] == (rune)'\n') {
-        extend = ((@string)(rest.slice(1, len(rest) - 1)));
+        extend = (@string)(rest.slice(1, len(rest) - 1));
     }
+
     // Now we can build up a useful data structure.
     // First the zone information.
     //	utcoff[4] isdst[1] nameindex[1]
@@ -276,6 +285,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
             }
         }
     }
+
     // Now the transition time info.
     var tx = new slice<zoneTrans>(n[NTime]);
     foreach (var (i, _) in tx) {
@@ -309,13 +319,16 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
             tx[i].isutc = isutc[i] != 0;
         }
     }
+
     if (len(tx) == 0) {
         // Build fake transition to cover all time.
         // This happens in fixed locations like "Etc/GMT0".
         tx = append(tx, new zoneTrans(when: alpha, index: 0));
     }
+
     // Committed to succeed.
     var l = Ꮡ(new ΔLocation(zone: zones, tx: tx, name: name, extend: extend));
+
     // Fill in the cache with information about right now,
     // since that will be the most common lookup.
     var (sec, _, _) = runtimeNow();
@@ -355,6 +368,7 @@ public static (ж<ΔLocation>, error) LoadLocationFromTZData(@string name, slice
             break;
         }
     }
+
     return (l, default!);
 }
 
@@ -392,7 +406,7 @@ internal static nint get4(slice<byte> b) {
     if (len(b) < 4) {
         return 0;
     }
-    return (nint)((nint)((nint)((nint)b[0] | ((nint)b[1] << (int)(8))) | ((nint)b[2] << (int)(16))) | ((nint)b[3] << (int)(24)));
+    return (nint)b[0] | (nint)b[1] << 8 | (nint)b[2] << 16 | (nint)b[3] << 24;
 }
 
 // get2 returns the little-endian 16-bit value in b.
@@ -400,7 +414,7 @@ internal static nint get2(slice<byte> b) {
     if (len(b) < 2) {
         return 0;
     }
-    return (nint)((nint)b[0] | ((nint)b[1] << (int)(8)));
+    return (nint)b[0] | (nint)b[1] << 8;
 }
 
 // loadTzinfoFromZip returns the contents of the file with the given name
@@ -413,11 +427,14 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
             return (default!, err);
         }
         defer(closefd, fd, ref ᒐ);
+
         const nint zecheader = 0x06054b50;
         const nint zcheader = 0x02014b50;
         UntypedInt ztailsize = 22;
+
         const nint zheadersize = 30;
         const nint zheader = 0x04034b50;
+
         var buf = new slice<byte>(ztailsize);
         {
             var errΔ1 = preadn(fd, buf, -ztailsize); if (errΔ1 != default! || get4(buf) != zecheader) {
@@ -427,12 +444,14 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
         nint n = get2(buf[10..]);
         nint size = get4(buf[12..]);
         nint off = get4(buf[16..]);
+
         buf = new slice<byte>(size);
         {
             var errΔ2 = preadn(fd, buf, off); if (errΔ2 != default!) {
                 return (default!, errors.New("corrupt zip file "u8 + zipfile));
             }
         }
+
         for (nint i = 0; i < n; i++) {
             // zip entry layout:
             //	0	magic[4]
@@ -474,6 +493,7 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
             if (meth != 0) {
                 return (default!, errors.New("unsupported compression for "u8 + name + " in "u8 + zipfile));
             }
+
             // zip per-file header layout:
             //	0	magic[4]
             //	4	extvers[1]
@@ -497,14 +517,17 @@ internal static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string 
                 }
             }
             xlen = get2(buf[28..]);
+
             buf = new slice<byte>(sizeΔ1);
             {
                 var errΔ4 = preadn(fd, buf, offΔ1 + 30 + namelen + xlen); if (errΔ4 != default!) {
                     return (default!, errors.New("corrupt zip file "u8 + zipfile));
                 }
             }
+
             return (buf, default!);
         }
+
         return (default!, syscall.ENOENT);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }

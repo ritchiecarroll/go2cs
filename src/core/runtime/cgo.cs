@@ -14,7 +14,9 @@ partial class runtime_package {
 //go:linkname _cgo_sys_thread_create _cgo_sys_thread_create
 //go:linkname _cgo_notify_runtime_init_done _cgo_notify_runtime_init_done
 //go:linkname _cgo_callers _cgo_callers
-//go:linkname _cgo_set_context_function _cgo_set_context_function
+//go:linkname _cgo_set_traceback_functions _cgo_set_traceback_functions
+//go:linkname _cgo_call_traceback_function _cgo_call_traceback_function
+//go:linkname _cgo_call_symbolizer_function _cgo_call_symbolizer_function
 //go:linkname _cgo_yield _cgo_yield
 //go:linkname _cgo_pthread_key_created _cgo_pthread_key_created
 //go:linkname _cgo_bindm _cgo_bindm
@@ -24,7 +26,9 @@ internal static @unsafe.Pointer _cgo_thread_start;
 internal static @unsafe.Pointer _cgo_sys_thread_create;
 internal static @unsafe.Pointer _cgo_notify_runtime_init_done;
 internal static @unsafe.Pointer _cgo_callers;
-internal static @unsafe.Pointer _cgo_set_context_function;
+internal static @unsafe.Pointer _cgo_set_traceback_functions;
+internal static @unsafe.Pointer _cgo_call_traceback_function;
+internal static @unsafe.Pointer _cgo_call_symbolizer_function;
 internal static ж<@unsafe.Pointer> Ꮡ_cgo_yield = new StandardBox<@unsafe.Pointer>(default(@unsafe.Pointer));
 internal static ref @unsafe.Pointer _cgo_yield => ref Ꮡ_cgo_yield.Value;
 internal static @unsafe.Pointer _cgo_pthread_key_created;

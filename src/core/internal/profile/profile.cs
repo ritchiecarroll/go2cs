@@ -118,6 +118,7 @@ public static (ж<Profile>, error) Parse(io.Reader r) {
     if (err != default!) {
         return (default!, err);
     }
+
     if (len(orig) >= 2 && orig[0] == 0x1f && orig[1] == 0x8b) {
         var (gz, errΔ1) = gzip.NewReader(new bytes_BufferжReader(bytes.NewBuffer(orig)));
         if (errΔ1 != default!) {
@@ -129,10 +130,12 @@ public static (ж<Profile>, error) Parse(io.Reader r) {
         }
         orig = data;
     }
+
     (var p, err) = parseUncompressed(orig);
     if (err != default!) {
         return (default!, fmt.Errorf("parsing profile: %w"u8, err));
     }
+
     {
         var errΔ2 = p.CheckValid(); if (errΔ2 != default!) {
             return (default!, fmt.Errorf("malformed profile: %v"u8, errΔ2));
@@ -149,17 +152,20 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
     if (len(data) == 0) {
         return (default!, ErrNoData);
     }
+
     var p = Ꮡ(new Profile(nil));
     {
         var err = unmarshal(data, new Profileжmessage(p)); if (err != default!) {
             return (default!, err);
         }
     }
+
     {
         var err = p.postDecode(); if (err != default!) {
             return (default!, err);
         }
     }
+
     return (p, default!);
 }
 
@@ -196,6 +202,7 @@ public static error CheckValid(this ref Profile p) {
             return fmt.Errorf("mismatch: sample has: %d values vs. %d types"u8, len((~s).Value), len(p.SampleType));
         }
     }
+
     // Check that all mappings/locations/functions are in the tables
     // Check that there are no duplicate ids
     var mappings = new map<uint64, ж<Mapping>>(len(p.Mapping));
@@ -257,6 +264,7 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
         m.Value.HasFilenames = (~m).HasFilenames && filename;
         m.Value.HasLineNumbers = (~m).HasLineNumbers && linenumber;
     }
+
     // Aggregate functions
     if (!function || !filename) {
         foreach (var (_, f) in p.Function) {
@@ -269,6 +277,7 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
             }
         }
     }
+
     // Aggregate locations
     if (!inlineFrame || !address || !linenumber) {
         foreach (var (_, l) in p.Location) {
@@ -285,6 +294,7 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
             }
         }
     }
+
     return p.CheckValid();
 }
 
@@ -294,10 +304,12 @@ internal static readonly @string labelHeaderᶜ = "                "u8;
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
 public static @string String(this ref Profile p) {
+    var ssᴷ = new stackAppend<@string>();
+
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
     {
         var pt = p.PeriodType; if (pt != nil) {
-            ss = append(ss, fmt.Sprintf("PeriodType: %s %s"u8, (~pt).Type, (~pt).Unit));
+            ss = append(ssᴷ, ss, fmt.Sprintf("PeriodType: %s %s"u8, (~pt).Type, (~pt).Unit));
         }
     }
     ss = append(ss, fmt.Sprintf("Period: %d"u8, p.Period));
@@ -305,8 +317,9 @@ public static @string String(this ref Profile p) {
         ss = append(ss, fmt.Sprintf("Time: %v"u8, time.Unix(0, p.TimeNanos)));
     }
     if (p.DurationNanos != 0) {
-        ss = append(ss, fmt.Sprintf("Duration: %v"u8, ((time.Duration)p.DurationNanos)));
+        ss = append(ss, fmt.Sprintf("Duration: %v"u8, (time.Duration)p.DurationNanos));
     }
+
     ss = append(ss, "Samples:"u8);
     @string sh1 = default!;
     foreach (var (_, s) in p.SampleType) {
@@ -339,6 +352,7 @@ public static @string String(this ref Profile p) {
             ss = append(ss, ls);
         }
     }
+
     ss = append(ss, "Locations"u8);
     foreach (var (_, l) in p.Location) {
         @string locStr = fmt.Sprintf("%6d: %#x "u8, (~l).ID, (~l).Address);
@@ -369,6 +383,7 @@ public static @string String(this ref Profile p) {
             locStr = "             "u8;
         }
     }
+
     ss = append(ss, "Mappings"u8);
     foreach (var (_, m) in p.Mapping) {
         @string bits = ""u8;
@@ -391,6 +406,7 @@ public static @string String(this ref Profile p) {
             (~m).BuildID,
             bits));
     }
+
     return strings.Join(ss, "\n"u8) + "\n"u8;
 }
 
@@ -406,12 +422,16 @@ public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
             return err;
         }
     }
+
     Ꮡpb = Ꮡpb.Copy(); pb = ref Ꮡpb.DerefOrNull();
+
     // Keep the largest of the two periods.
     if (pb.Period > p.Period) {
         p.Period = pb.Period;
     }
+
     p.DurationNanos += pb.DurationNanos;
+
     p.Mapping = appendꓸꓸꓸ(p.Mapping, pb.Mapping);
     foreach (var (i, m) in p.Mapping) {
         m.Value.ID = (uint64)(i + 1);
@@ -424,6 +444,7 @@ public static error Merge(this ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     foreach (var (i, f) in p.Function) {
         f.Value.ID = (uint64)(i + 1);
     }
+
     if (r != 1.0D) {
         foreach (var (_, s) in pb.Sample) {
             foreach (var (i, v) in (~s).Value) {
@@ -444,14 +465,17 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
     if (!compatibleValueTypes(p.PeriodType, pb.PeriodType)) {
         return fmt.Errorf("incompatible period types %v and %v"u8, p.PeriodType.OrTypedNil(), pb.PeriodType.OrTypedNil());
     }
+
     if (len(p.SampleType) != len(pb.SampleType)) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
+
     foreach (var (i, _) in p.SampleType) {
         if (!compatibleValueTypes(p.SampleType[i], pb.SampleType[i])) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }
     }
+
     return default!;
 }
 
@@ -493,6 +517,7 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
 
     p.preEncode();
     var b = marshal(new Profileжmessage(Ꮡp));
+
     var pp = Ꮡ(new Profile(nil));
     {
         var err = unmarshal(b, new Profileжmessage(pp)); if (err != default!) {
@@ -504,9 +529,13 @@ public static ж<Profile> Copy(this ж<Profile> Ꮡp) {
             throw panic(err);
         }
     }
+
     return pp;
 }
 
+// Demangler maps symbol names to a human-readable form. This may
+// include C++ demangling and additional simplification. Names that
+// are not demangled may be missing from the resulting map.
 // type Demangler is a methodless func type — rendered inline as its base delegate
 
 // Demangle attempts to demangle and optionally simplify any function
@@ -518,6 +547,7 @@ public static error Demangle(this ref Profile p, Func<slice<@string>, (map<@stri
     foreach (var (_, fn) in p.Function) {
         names = append(names, (~fn).SystemName);
     }
+
     // Update profile with demangled names.
     var (demangled, err) = d(names);
     if (err != default!) {

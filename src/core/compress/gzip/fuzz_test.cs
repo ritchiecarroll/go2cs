@@ -38,6 +38,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         }
         f.Add(b.Bytes());
     }
+
     var (testdata, err) = os.ReadDir(testdataˢ);
     if (err != default!) {
         Ꮡf.Fatalf("failed to read testdata directory: %s"u8, err);
@@ -50,33 +51,40 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         if (errΔ2 != default!) {
             Ꮡf.Fatalf("failed to read testdata: %s"u8, errΔ2);
         }
+
         // decode any base64 encoded test files
         if (strings.HasPrefix(de.Name(), base64ˢ)) {
-            (b, errΔ2) = base64.StdEncoding.DecodeString(((@string)b));
+            (b, errΔ2) = base64.StdEncoding.DecodeString((@string)b);
             if (errΔ2 != default!) {
                 Ꮡf.Fatalf("failed to decode base64 testdata: %s"u8, errΔ2);
             }
         }
+
         f.Add(b);
     }
+
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
         foreach (var (_, multistream) in new bool[]{true, false}.slice()) {
             var (r, errΔ3) = NewReader(new gzip_test_package.bytes_BufferжReader(bytes.NewBuffer(b)));
             if (errΔ3 != default!) {
                 continue;
             }
+
             r.Multistream(multistream);
+
             var decompressed = bytes.NewBuffer(default!);
             {
                 var (_, errΔ4) = io.Copy(new gzip_test_package.bytes_BufferжWriter(decompressed), new gzip_test_package.gzip_ReaderжReader(r)); if (errΔ4 != default!) {
                     continue;
                 }
             }
+
             {
                 var errΔ5 = r.Close(); if (errΔ5 != default!) {
                     continue;
                 }
             }
+
             foreach (var (_, level) in new nint[]{NoCompression, BestSpeed, BestCompression, DefaultCompression, HuffmanOnly}.slice()) {
                 var (w, errΔ6) = NewWriterLevel(io.Discard, level);
                 if (errΔ6 != default!) {

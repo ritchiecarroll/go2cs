@@ -82,6 +82,7 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
     ж<transferWriter> t = default!;
 
     t = Ꮡ(new transferWriter(nil));
+
     // Extract relevant fields
     var atLeastHTTP11 = false;
     switch (r.type()) {
@@ -100,16 +101,17 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
         if ((~t).ContentLength < 0 && builtin.len((~t).TransferEncoding) == 0 && t.shouldSendChunkedRequestBody()) {
             t.Value.TransferEncoding = new @string[]{"chunked"u8}.slice();
         }
+        // If there's a body, conservatively flush the headers
+        // to any bufio.Writer we're writing to, just in case
+        // the server needs the headers early, before we copy
+        // the body and possibly block. We make an exception
+        // for the common standard library in-memory types,
+        // though, to avoid unnecessary TCP packets on the
+        // wire. (Issue 22088.)
         if ((~t).ContentLength != 0 && !isKnownInMemoryReader((~t).Body)) {
-            // If there's a body, conservatively flush the headers
-            // to any bufio.Writer we're writing to, just in case
-            // the server needs the headers early, before we copy
-            // the body and possibly block. We make an exception
-            // for the common standard library in-memory types,
-            // though, to avoid unnecessary TCP packets on the
-            // wire. (Issue 22088.)
             t.Value.FlushHeaders = true;
         }
+
         atLeastHTTP11 = true; // Transport requests are always 1.1 or 2.0
         break;
     }
@@ -129,6 +131,7 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
         t.Value.ResponseToHEAD = noResponseBodyExpected((~t).Method);
         break;
     }}
+
     // Sanitize Body,ContentLength,TransferEncoding
     if ((~t).ResponseToHEAD){
         t.Value.Body = default!;
@@ -142,15 +145,16 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
         if (chunked((~t).TransferEncoding)){
             t.Value.ContentLength = -1;
         } else 
-        if ((~t).Body == default!) {
-            // no chunking, no body
+        if ((~t).Body == default!) { // no chunking, no body
             t.Value.ContentLength = 0;
         }
     }
+
     // Sanitize Trailer
     if (!chunked((~t).TransferEncoding)) {
         t.Value.Trailer = default!;
     }
+
     return (t, default!);
 }
 
@@ -177,8 +181,7 @@ internal static bool shouldSendChunkedRequestBody(this ж<transferWriter> Ꮡt) 
 
     // Note that t.ContentLength is the corrected content length
     // from rr.outgoingLength, so 0 actually means zero, not unknown.
-    if (t.ContentLength >= 0 || t.Body == default!) {
-        // redundant checks; caller did them
+    if (t.ContentLength >= 0 || t.Body == default!) { // redundant checks; caller did them
         return false;
     }
     if (t.Method == "CONNECT"u8) {
@@ -228,10 +231,10 @@ internal static partial void probeRequestBody(this ж<transferWriter> Ꮡt) {
         builtin.close(Ꮡt.Value.ByteReadCh);
     }, Ꮡt.Value.Body);
     var timer = time.NewTimer(200 * time.Millisecond);
-    var selᴛ91 = t.ByteReadCh;
-    var selᴛ92 = (~timer).C;
-    switch (select(ᐸꟷ(selᴛ91, ꓸꓸꓸ), ᐸꟷ(selᴛ92, ꓸꓸꓸ))) {
-    case 0 when selᴛ91.ꟷᐳ(out var rres): {
+    var selᴛ96 = t.ByteReadCh;
+    var selᴛ97 = (~timer).C;
+    switch (select(ᐸꟷ(selᴛ96, ꓸꓸꓸ), ᐸꟷ(selᴛ97, ꓸꓸꓸ))) {
+    case 0 when selᴛ96.ꟷᐳ(out var rres): {
         timer.Stop();
         if (rres.n == 0 && AreEqual(rres.err, io.EOF)){
             // It was empty.
@@ -250,20 +253,20 @@ internal static partial void probeRequestBody(this ж<transferWriter> Ꮡt) {
         }
         break;
     }
-    case 1 when selᴛ92.ꟷᐳ(out _): {
-        t.Body = io.MultiReader(new finishAsyncByteRead( // Too slow. Don't wait. Read it later, and keep
- // assuming that this is ContentLength == -1
- // (unknown), which means we'll send a
- // "Transfer-Encoding: chunked" header.
-Ꮡt), t.Body);
+    case 1 when selᴛ97.ꟷᐳ(out _): {
+        // Too slow. Don't wait. Read it later, and keep
+        // assuming that this is ContentLength == -1
+        // (unknown), which means we'll send a
+        // "Transfer-Encoding: chunked" header.
+        t.Body = io.MultiReader(new finishAsyncByteRead(Ꮡt), t.Body);
+        // Request that Request.Write flush the headers to the
+        // network before writing the body, since our body may not
+        // become readable until it's seen the response headers.
         t.FlushHeaders = true;
         break;
     }}
 }
 
-// Request that Request.Write flush the headers to the
-// network before writing the body, since our body may not
-// become readable until it's seen the response headers.
 internal static bool noResponseBodyExpected(@string requestMethod) {
     return requestMethod == "HEAD"u8;
 }
@@ -288,6 +291,7 @@ internal static bool shouldSendContentLength(this ref transferWriter t) {
         }
         return true;
     }
+
     return false;
 }
 
@@ -310,6 +314,7 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             trace.WroteHeaderField(connectionˢ, new @string[]{"close"u8}.slice());
         }
     }
+
     // Write Content-Length and/or Transfer-Encoding whose values are a
     // function of the sanitized field triple (Body, ContentLength,
     // TransferEncoding)
@@ -338,6 +343,7 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             trace.WroteHeaderField(transferEncodingˢ, new @string[]{"chunked"u8}.slice());
         }
     }
+
     // Write Trailer header
     if (t.Trailer != default!) {
         var keys = new slice<@string>(0, builtin.len(t.Trailer));
@@ -349,7 +355,6 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             if (exprᴛ1 == "Transfer-Encoding"u8 || exprᴛ1 == "Trailer"u8 || exprᴛ1 == "Content-Length"u8) {
                 return badStringError(invalidTrailerKeyˢ, k);
             }
-
             keys = append(keys, k);
         }
         if (builtin.len(keys) > 0) {
@@ -366,6 +371,7 @@ internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<htt
             }
         }
     }
+
     return default!;
 }
 
@@ -388,6 +394,7 @@ internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer 
                 }
             }
         }, ref ᒐ);
+
         // Write body. We "unwrap" the body first if it was wrapped in a
         // nopCloser or readTrackingBody. This is to ensure that we can take advantage of
         // OS-level optimizations in the event that the body is an
@@ -433,10 +440,12 @@ internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer 
                 }
             }
         }
+
         if (!t.ResponseToHEAD && t.ContentLength != -1 && t.ContentLength != ncopy) {
             err = fmt.Errorf("http: ContentLength=%d with Body length %d"u8,
                 t.ContentLength, ncopy); goto ᒐdone;
         }
+
         if (!t.ResponseToHEAD && chunked(t.TransferEncoding)) {
             // Write Trailer header
             if (t.Trailer != default!) {
@@ -468,6 +477,7 @@ internal static (int64 n, error err) doBodyCopy(this ж<transferWriter> Ꮡt, io
 
         var buf = getCopyBuf();
         defer(putCopyBuf, buf, ref ᒐ);
+
         (n, err) = io.CopyBuffer(dst, src, buf);
         if (err != default! && !AreEqual(err, io.EOF)) {
             t.bodyReadError = err;
@@ -530,7 +540,6 @@ internal static bool bodyAllowedForStatus(nint status) {
     case {} when status is 304: {
         return false;
     }}
-
     return true;
 }
 
@@ -541,13 +550,12 @@ internal static map<@string, bool> excludedHeadersNoBody = new map<@string, bool
 internal static slice<@string> suppressedHeaders(nint status) {
     switch (ᐧ) {
     case {} when status is 304: {
+        // RFC 7232 section 4.1
         return suppressedHeaders304;
     }
     case {} when !bodyAllowedForStatus(status): {
         return suppressedHeadersNoBody;
     }}
-
-    // RFC 7232 section 4.1
     return default!;
 }
 
@@ -556,6 +564,7 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> Ꮡr) {
     error err = default!;
 
     var t = Ꮡ(new transferReader(RequestMethod: "GET"u8));
+
     // Unify input
     var isResponse = false;
     switch (msg.type()) {
@@ -576,6 +585,8 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> Ꮡr) {
         t.Value.RequestMethod = rr.Value.Method;
         t.Value.ProtoMajor = rr.Value.ProtoMajor;
         t.Value.ProtoMinor = rr.Value.ProtoMinor;
+        // Transfer semantics for Requests are exactly like those for
+        // Responses with status code 200, responding to a GET method
         t.Value.StatusCode = 200;
         t.Value.Close = rr.Value.Close;
         break;
@@ -585,18 +596,19 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> Ꮡr) {
         throw panic("unexpected type");
         break;
     }}
-    // Transfer semantics for Requests are exactly like those for
-    // Responses with status code 200, responding to a GET method
+
     // Default to HTTP/1.1
     if ((~t).ProtoMajor == 0 && (~t).ProtoMinor == 0) {
         (t.Value.ProtoMajor, t.Value.ProtoMinor) = (1, 1);
     }
+
     // Transfer-Encoding: chunked, and overriding Content-Length.
     {
         var errΔ1 = t.parseTransferEncoding(); if (errΔ1 != default!) {
             return errΔ1;
         }
     }
+
     (var realLength, err) = fixLength(isResponse, (~t).StatusCode, (~t).RequestMethod, (~t).Header, (~t).Chunked);
     if (err != default!) {
         return err;
@@ -612,11 +624,13 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> Ꮡr) {
     } else {
         t.Value.ContentLength = realLength;
     }
+
     // Trailer
     (t.Value.Trailer, err) = fixTrailer((~t).Header, (~t).Chunked);
     if (err != default!) {
         return err;
     }
+
     // If there is no Content-Length or chunked Transfer-Encoding on a *Response
     // and the status is not 1xx, 204 or 304, then the body is unbounded.
     // See RFC 7230, section 3.3.
@@ -649,8 +663,8 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> Ꮡr) {
         break;
     }
     default: {
+        // realLength < 0, i.e. "Content-Length" not mentioned in header
         if ((~t).Close){
-            // realLength < 0, i.e. "Content-Length" not mentioned in header
             // Close semantics (i.e. HTTP/1.0)
             t.Value.Body = new bodyжReadCloser(Ꮡ(new body(src: new bufio_ReaderжReader(Ꮡr), closing: (~t).Close)));
         } else {
@@ -682,6 +696,7 @@ internal static error /*err*/ readTransfer(any msg, ж<bufio.Reader> Ꮡr) {
         rr.Value.Trailer = t.Value.Trailer;
         break;
     }}
+
     return default!;
 }
 
@@ -718,10 +733,12 @@ internal static error parseTransferEncoding(this ref transferReader t) {
         return default!;
     }
     delete(t.Header, "Transfer-Encoding"u8);
+
     // Issue 12785; ignore Transfer-Encoding on HTTP/1.0 requests.
     if (!t.protoAtLeast(1, 1)) {
         return default!;
     }
+
     // Like nginx, we only support a single Transfer-Encoding header field, and
     // only if set to "chunked". This is one of the most security sensitive
     // surfaces in HTTP/1.1 due to the risk of request smuggling, so we keep it
@@ -732,6 +749,7 @@ internal static error parseTransferEncoding(this ref transferReader t) {
     if (!ascii.EqualFold(raw[0], chunkedˢ)) {
         return new unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(fmt.Sprintf("unsupported transfer encoding: %q"u8, raw[0]))));
     }
+
     t.Chunked = true;
     return default!;
 }
@@ -745,6 +763,7 @@ internal static (int64 n, error err) fixLength(bool isResponse, nint status, @st
 
     var isRequest = !isResponse;
     var contentLens = header[contentLengthˢ];
+
     // Hardening against HTTP request smuggling
     if (builtin.len(contentLens) > 1) {
         // Per RFC 7230 Section 3.3.2, prevent multiple
@@ -757,11 +776,14 @@ internal static (int64 n, error err) fixLength(bool isResponse, nint status, @st
                 return (0, fmt.Errorf("http: message cannot contain multiple Content-Length headers; got %q"u8, contentLens));
             }
         }
+
         // deduplicate Content-Length
         header.Del(contentLengthˢ);
         header.Add(contentLengthˢ, first);
+
         contentLens = header[contentLengthˢ];
     }
+
     // Reject requests with invalid Content-Length headers.
     if (builtin.len(contentLens) > 0) {
         (n, err) = parseContentLength(contentLens);
@@ -769,6 +791,7 @@ internal static (int64 n, error err) fixLength(bool isResponse, nint status, @st
             return (-1, err);
         }
     }
+
     // Logic based on response type or status
     if (isResponse && noResponseBodyExpected(requestMethod)) {
         return (0, default!);
@@ -798,11 +821,14 @@ internal static (int64 n, error err) fixLength(bool isResponse, nint status, @st
         header.Del(contentLengthˢ);
         return (-1, default!);
     }
+
     // Logic based on Content-Length
     if (builtin.len(contentLens) > 0) {
         return (n, default!);
     }
+
     header.Del(contentLengthˢ);
+
     if (isRequest) {
         // RFC 7230 neither explicitly permits nor forbids an
         // entity-body on a GET request so we permit one if
@@ -813,6 +839,7 @@ internal static (int64 n, error err) fixLength(bool isResponse, nint status, @st
         // Content-Length are set.
         return (0, default!);
     }
+
     // Body-EOF logic based on other methods (like closing, or chunked coding)
     return (-1, default!);
 }
@@ -824,14 +851,17 @@ internal static bool shouldClose(nint major, nint minor, ΔHeader header, bool r
     if (major < 1) {
         return true;
     }
+
     var conv = header[connectionˢ];
     var hasClose = httpguts.HeaderValuesContainsToken(conv, closeˢ);
     if (major == 1 && minor == 0) {
         return hasClose || !httpguts.HeaderValuesContainsToken(conv, keepAliveˢ);
     }
+
     if (hasClose && removeCloseHeader) {
         header.Del(connectionˢ);
     }
+
     return hasClose;
 }
 
@@ -855,6 +885,7 @@ internal static (ΔHeader, error) fixTrailer(ΔHeader header, bool chunked) {
         return (default!, default!);
     }
     header.Del(trailerˢ);
+
     var trailer = new ΔHeader(0);
     ref var err = ref heap<error>(out var Ꮡerr);
     foreach (var (_, v) in vv) {
@@ -868,7 +899,6 @@ internal static (ΔHeader, error) fixTrailer(ΔHeader header, bool chunked) {
                     return;
                 }
             }
-
             trailerʗ1[key] = default!;
         });
     }
@@ -931,6 +961,7 @@ internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
         return (0, io.EOF);
     }
     (n, err) = b.src.Read(p);
+
     if (AreEqual(err, io.EOF)) {
         b.sawEOF = true;
         // Chunked case. Read the trailer.
@@ -957,6 +988,7 @@ internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
             }
         }
     }
+
     // If we can return an EOF here along with the read data, do
     // so. This is optional per the io.Reader contract, but doing
     // so helps the HTTP transport code recycle its connection
@@ -970,9 +1002,11 @@ internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) {
             }
         }
     }
+
     if (b.sawEOF && b.onHitEOF != default!) {
         b.onHitEOF();
     }
+
     return (n, err);
 }
 
@@ -1014,6 +1048,7 @@ internal static error readTrailer(this ref body b) {
     if (err != default!) {
         return err;
     }
+
     // Make sure there's a header terminator coming up, to prevent
     // a DoS with an unbounded size Trailer. It's not easy to
     // slip in a LimitReader here, as textproto.NewReader requires
@@ -1025,6 +1060,7 @@ internal static error readTrailer(this ref body b) {
     if (!seeUpcomingDoubleCRLF(b.r)) {
         return errors.New(httpSuspiciouslyLongˢ);
     }
+
     (var hdr, err) = textproto.NewReader(b.r).ReadMIMEHeader();
     if (err != default!) {
         if (AreEqual(err, io.EOF)) {
@@ -1034,11 +1070,11 @@ internal static error readTrailer(this ref body b) {
     }
     switch (b.hdr.type()) {
     case ж<Request> rr: {
-        mergeSetHeader(ref (rr.of(Request.ᏑTrailer)).DerefOrNull(), ((ΔHeader)(map<@string, slice<@string>>)hdr));
+        mergeSetHeader(ref (rr.of(Request.ᏑTrailer)).DerefOrNull(), (ΔHeader)(map<@string, slice<@string>>)hdr);
         break;
     }
     case ж<Response> rr: {
-        mergeSetHeader(ref (rr.of(Response.ᏑTrailer)).DerefOrNull(), ((ΔHeader)(map<@string, slice<@string>>)hdr));
+        mergeSetHeader(ref (rr.of(Response.ᏑTrailer)).DerefOrNull(), (ΔHeader)(map<@string, slice<@string>>)hdr);
         break;
     }}
     return default!;
@@ -1078,19 +1114,19 @@ internal static error Close(this ж<body> Ꮡb) {
         error err = default!;
         switch (ᐧ) {
         case {} when b.sawEOF: {
+            // Already saw EOF, so no need going to look for it.
             break;
         }
         case {} when b.hdr == default! && b.closing: {
+            // no trailer and closing the connection next.
+            // no point in reading to EOF.
             break;
         }
         case {} when b.doEarlyClose: {
+            // Read up to maxPostHandlerReadBytes bytes of the body, looking
+            // for EOF (and trailers), so we can re-use this connection.
             {
                 var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok && (~lr).N > maxPostHandlerReadBytes){
-                    // Already saw EOF, so no need going to look for it.
-                    // no trailer and closing the connection next.
-                    // no point in reading to EOF.
-                    // Read up to maxPostHandlerReadBytes bytes of the body, looking
-                    // for EOF (and trailers), so we can re-use this connection.
                     // There was a declared Content-Length, and we have more bytes remaining
                     // than our maxPostHandlerReadBytes tolerance. So, give up.
                     b.earlyClose = true;
@@ -1110,12 +1146,11 @@ internal static error Close(this ж<body> Ꮡb) {
             break;
         }
         default: {
-            (_, err) = io.Copy(io.Discard, // Fully consume the body, which will also lead to us reading
- // the trailer headers after the body, if present.
- new bodyLocked(Ꮡb));
+            // Fully consume the body, which will also lead to us reading
+            // the trailer headers after the body, if present.
+            (_, err) = io.Copy(io.Discard, new bodyLocked(Ꮡb));
             break;
         }}
-
         b.closed = true;
         return err;
     }
@@ -1194,6 +1229,7 @@ internal static (int64, error) parseContentLength(slice<@string> clHeaders) {
         return (-1, default!);
     }
     @string cl = textproto.TrimString(clHeaders[0]);
+
     // The Content-Length must be a valid numeric value.
     // See: https://datatracker.ietf.org/doc/html/rfc2616/#section-14.13
     if (cl == ""u8) {
@@ -1236,7 +1272,6 @@ internal static (nint n, error err) Read(this finishAsyncByteRead fr, slice<byte
 
 internal static reflectꓸType nopCloserType = reflect.TypeOf(io.NopCloser(default!));
 
-
     partial struct rᴛ1 /*dyn*/ {
         /*embed*/ public io_package.Reader Reader;
         /*embed*/ public io_package.WriterTo WriterTo;
@@ -1253,7 +1288,6 @@ internal static (io.Reader underlyingReader, bool isNopCloser) unwrapNopCloser(i
     { /* default: */
         return (default!, false);
     }
-
 }
 
 // isKnownInMemoryReader reports whether r is a type known to not
@@ -1266,7 +1300,6 @@ internal static bool isKnownInMemoryReader(io.Reader r) {
     case ж<strings.Reader> _: {
         return true;
     }}
-
     {
         var (rΔ1, ok) = unwrapNopCloser(r); if (ok) {
             return isKnownInMemoryReader(rΔ1);

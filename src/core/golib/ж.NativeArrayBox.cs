@@ -43,7 +43,7 @@ namespace go;
 /// (the page allocator's <c>l2Size</c>). Nothing downstream can recover it from the address.
 /// </para>
 /// </remarks>
-internal sealed class NativeArrayBox<T> : ж<array<T>>
+internal sealed class NativeArrayBox<T> : ж<array<T>>, IGoReflectBox
 {
     // The base of the element block — never managed storage this box owns.
     private readonly nuint m_nativeAddr;
@@ -108,9 +108,37 @@ internal sealed class NativeArrayBox<T> : ж<array<T>>
     public override ref array<T> ValueSlot => throw noMaterializableArray();
 
     private PanicException noMaterializableArray() =>
-        new($"native-backed array at 0x{m_nativeAddr:x}: a *[N]{typeof(T).Name} over native memory " +
+        new($"go2cs: native-backed array at 0x{m_nativeAddr:x}: a *[N]{typeof(T).Name} over native memory " +
             "has no array<T> to dereference (Go's *[N]T points at bare elements, with no header); " +
             "reach the elements through the element door instead");
+
+    // reflect's read of the pointee, `*p` (Value.Elem, then Interface, Index or Len on the array): Go's by-value copy of
+    // the array, element by element from the block. The slot itself still refuses (see Value).
+    object? IGoReflectBox.ReadBoxSlot()
+    {
+        if (IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        array<T> copy = new(m_length);
+
+        for (nint i = 0; i < m_length; i++)
+            copy[i] = ElementRef(i);
+
+        return copy;
+    }
+
+    // reflect's store of the pointee, `*p = arr` (Value.Elem().Set): Go's array assignment, N element stores into the
+    // block, each through p[i]'s element door, exactly as `p[i] = arr[i]` for every i.
+    void IGoReflectBox.WriteBoxSlot(object? value)
+    {
+        if (IsNilPointer)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        array<T> source = (array<T>)value!;
+
+        for (nint i = 0; i < source.Length; i++)
+            ElementRef(i) = source[i];
+    }
 
     /// <inheritdoc/>
     public override nuint NativeAddress => m_nativeAddr;

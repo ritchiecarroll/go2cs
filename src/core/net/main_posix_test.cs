@@ -50,7 +50,6 @@ internal static void disableSocketConnect(@string network) {
                 return (default!, syscall.EHOSTUNREACH);
             }
         }
-
         return (default!, default!);
     });
 }
