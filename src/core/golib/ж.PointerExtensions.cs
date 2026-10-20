@@ -213,13 +213,15 @@ public static class PointerExtensions
             return new StandardBox<TDst>(fn);
         }
 
-        // A reinterpret OF a reinterpret view re-views the view's ROOT, so `(*T)((*U)(p))` is p itself and a chain of
-        // conversions is one view over one box. A view over the view aliased the right storage but compared unequal to
-        // the box it came from wherever that box is not itself a field view -- a standard box or an element reference --
-        // so `(*Employee)((*Person)(e)) == e` read false. The root answers null when it cannot alias as TDst, and then
-        // the view-over-view below still aliases through the intermediate view.
-        if (box is FieldRefBox<T> { ReinterpretRoot: IReinterpretRoot root } && root.AliasAs<TDst>() is { } collapsed)
-            return collapsed;
+        // A reinterpret OF a reinterpret view back to its ROOT's own type is the root itself, so `(*Employee)((*Person)(e))`
+        // is e: a view over the view aliased the right storage but compared unequal to the box it came from wherever that
+        // box is not itself a field view (a standard box, an element reference). Any other chain stays a view over the
+        // view, which aliases through the intermediate view and compares equal to a direct reinterpret of the root by
+        // FieldRefBox's different-sources arm (SameGoAddress). The test is a TYPE test on the root, never a call into it:
+        // a generic virtual method on ж<T> here (the former IReinterpretRoot.AliasAs<TDst>) needs one body per box type
+        // times every TDst under Native AOT and stalled ILC's method-body folding (GenericVirtualMethodGuardTests).
+        if (box is FieldRefBox<T> { ReinterpretRoot: ж<TDst> same })
+            return same;
 
         if (ReinterpretAliasesStorage<T, TDst>.Value)
         {
@@ -352,7 +354,7 @@ public static class PointerExtensions
         if (box is null || box.IsNilPointer)
             return ж<TDst>.NilBox;
 
-        if (box is FieldRefBox<T> { ReinterpretRoot: IReinterpretRoot root } && root is ж<TDst> same)
+        if (box is FieldRefBox<T> { ReinterpretRoot: ж<TDst> same })
             return same;
 
         return new FieldRefBox<TDst>(box, ж<T>.UnaliasedRef<TDst>);
@@ -745,28 +747,4 @@ public static class PointerExtensions
 public static class PrefixProjection<T, TDst>
 {
     public static Func<ж<T>, ж<TDst>?>? Project;
-}
-
-/// <summary>
-/// The box a reinterpret view stands over, asked to alias as another pointee type. See the round-trip collapse in
-/// <see cref="PointerExtensions.Reinterpret{T, TDst}"/>.
-/// </summary>
-internal interface IReinterpretRoot
-{
-    /// <summary>
-    /// This box itself when it already is a <c>ж&lt;TDst&gt;</c>; a reinterpret view over this box when the two pointee
-    /// types can alias; otherwise <c>null</c>.
-    /// </summary>
-    ж<TDst>? AliasAs<TDst>();
-}
-
-public abstract partial class ж<T> : IReinterpretRoot
-{
-    ж<TDst>? IReinterpretRoot.AliasAs<TDst>()
-    {
-        if (this is ж<TDst> same)
-            return same;
-
-        return PointerExtensions.ReinterpretAliasesStorage<T, TDst>.Value ? new FieldRefBox<TDst>(this, ReinterpretRef<TDst>) : null;
-    }
 }
