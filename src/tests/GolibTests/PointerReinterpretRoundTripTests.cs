@@ -59,6 +59,20 @@ public class PointerReinterpretRoundTripTests
         public Employee Inner;
     }
 
+    // Two reference-free 16-byte shapes and the 8-byte prefix between them: narrow-then-widen, `(*Wide2)(unsafe.Pointer(
+    // (*uint64)(unsafe.Pointer(w))))`, is valid Go because w's 16 bytes are still behind the narrowed pointer.
+    public struct Wide2
+    {
+        public ulong A;
+        public ulong B;
+    }
+
+    public struct Wide3
+    {
+        public ulong C;
+        public ulong D;
+    }
+
     private static ref Employee ᏑSecond(object p) => ref ((ж<Pair>)p).Value.Second;
 
     [TestMethod]
@@ -174,5 +188,58 @@ public class PointerReinterpretRoundTripTests
 
         back.Value.Age = 10;
         Assert.AreEqual((nint)10, e.Value.Age, "a write through the round trip reaches e");
+    }
+
+    // A chain of THREE conversions back to the root's own type is the root itself: the collapse walks to the ULTIMATE
+    // root, not one hop (G's review of 0605e939f: true at the tip, false there).
+    [TestMethod]
+    public void AThreeHopChainBackToAStandardBoxIsTheBox()
+    {
+        ж<Employee> e = Ꮡ(new Employee { Name = "lou", Age = 13 });
+        ж<Employee> back = e.Reinterpret<Employee, Person>().Reinterpret<Person, Staff>().Reinterpret<Staff, Employee>();
+
+        Assert.IsTrue(back == e, "(*Employee)((*Staff)((*Person)(e))) == e");
+        Assert.IsTrue(e == back, "e == (*Employee)((*Staff)((*Person)(e)))");
+    }
+
+    [TestMethod]
+    public void AThreeHopChainBackToAnElementIsTheElement()
+    {
+        slice<Employee> s = new Employee[] { new() { Name = "max", Age = 14 }, new() { Name = "ned", Age = 15 } }.slice();
+        ж<Employee> back = Ꮡ(s, 1).Reinterpret<Employee, Person>().Reinterpret<Person, Staff>().Reinterpret<Staff, Employee>();
+
+        Assert.IsTrue(back == Ꮡ(s, 1), "(*Employee)((*Staff)((*Person)(&s[1]))) == &s[1]");
+    }
+
+    // Narrow, then widen back: the widening is judged against the ROOT's storage, not the narrowed view's (the view is 8
+    // bytes; w is 16). At 0605e939f this panicked "invalid prefix downcast"; Go aliases w.
+    [TestMethod]
+    public void NarrowThenWidenBackToTheRootIsTheRoot()
+    {
+        ж<Wide2> w = Ꮡ(new Wide2 { A = 1, B = 2 });
+        ж<Wide2> back = w.Reinterpret<Wide2, ulong>().Reinterpret<ulong, Wide2>();
+
+        Assert.IsTrue(back == w, "(*Wide2)((*uint64)(w)) == w");
+
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
+        back.Value.B = 20;
+        Assert.AreEqual(20UL, w.Value.B, "a write through the widened pointer reaches w after a collection");
+    }
+
+    // Narrow, then widen to a THIRD type the root's storage can hold: a view over the ROOT (the deleted arm that judged
+    // aliasing on the root), never a view over the 8-byte narrowed view.
+    [TestMethod]
+    public void NarrowThenWidenToAThirdTypeAliasesTheRoot()
+    {
+        ж<Wide2> w = Ꮡ(new Wide2 { A = 3, B = 4 });
+        ж<Wide3> third = w.Reinterpret<Wide2, ulong>().Reinterpret<ulong, Wide3>();
+
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
+        third.Value.D = 40;
+        Assert.AreEqual(40UL, w.Value.B, "a write through (*Wide3)((*uint64)(w)) reaches w.B");
+        Assert.IsTrue(third == w.Reinterpret<Wide2, Wide3>(), "the chain equals the direct (*Wide3)(w)");
+        Assert.AreEqual(w.Reinterpret<Wide2, Wide3>().GetHashCode(), third.GetHashCode(), "equal pointers must hash alike");
     }
 }

@@ -38,9 +38,16 @@ public class GenericVirtualMethodGuardTests
         ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldRefFunc`2[T,TElem])"] = PredatesPtrconv,
     };
 
+    // Two populations, because a generic virtual method can be declared on an INTERFACE or on a CLASS (a virtual or
+    // abstract generic method a derived box overrides, e.g. ж<T>.TryPinnedReinterpret<TDst>): every interface implemented
+    // by a generic golib type, and every golib type's OWN declared virtual generic methods. An explicit interface
+    // implementation is itself virtual (and final); it is the interface's method, so it is counted once, there.
     private static IEnumerable<string> GenericVirtualMethods()
     {
-        foreach (Type type in typeof(ж<>).Assembly.GetTypes().Where(type => type.IsGenericTypeDefinition && !type.IsInterface))
+        const BindingFlags Declared = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+        Type[] types = typeof(ж<>).Assembly.GetTypes();
+
+        foreach (Type type in types.Where(type => type.IsGenericTypeDefinition && !type.IsInterface))
         {
             foreach (Type contract in type.GetInterfaces())
             {
@@ -51,6 +58,23 @@ public class GenericVirtualMethodGuardTests
                     if (method.IsGenericMethodDefinition && method.IsVirtual)
                         yield return $"{definition.FullName}: {method}";
                 }
+            }
+        }
+
+        foreach (Type type in types.Where(type => !type.IsInterface))
+        {
+            Type definition = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+
+            foreach (MethodInfo method in definition.GetMethods(Declared))
+            {
+                if (!method.IsGenericMethodDefinition || !method.IsVirtual || method.IsFinal)
+                    continue;
+
+                // An override is the declaring base's method again; count the slot where it is introduced.
+                MethodInfo introduced = method.GetBaseDefinition();
+                Type owner = introduced.DeclaringType is { IsGenericType: true } generic ? generic.GetGenericTypeDefinition() : introduced.DeclaringType!;
+
+                yield return $"{owner.FullName}: {introduced}";
             }
         }
     }
