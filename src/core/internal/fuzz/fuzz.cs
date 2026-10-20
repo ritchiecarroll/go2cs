@@ -660,6 +660,8 @@ partial struct coordinator {
 }
 
 internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts opts) {
+    var valsᴷ = new stackAppend<any>();
+
     // Make sure all the seed corpus has marshaled data.
     foreach (var (i, _) in opts.Seed) {
         if (opts.Seed[i].Data == default! && opts.Seed[i].Values != default!) {
@@ -713,7 +715,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
         fmt.Fprintf((~c).opts.Log, "warning: starting with empty corpus\n"u8);
         slice<any> vals = default!;
         foreach (var (_, t) in opts.Types) {
-            vals = append(vals, zeroValue(t));
+            vals = append(valsᴷ, vals, zeroValue(t));
         }
         var data = marshalCorpusFile(vals.ꓸꓸꓸ);
         var h = sha256.Sum256(data);
@@ -978,9 +980,11 @@ partial struct MalformedCorpusError {
 }
 
 public static @string Error(this ref MalformedCorpusError e) {
+    var msgsᴷ = new stackAppend<@string>();
+
     slice<@string> msgs = default!;
     foreach (var (_, s) in e.errs) {
-        msgs = append(msgs, s.Error());
+        msgs = append(msgsᴷ, msgs, s.Error());
     }
     return strings.Join(msgs, "\n"u8);
 }

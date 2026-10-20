@@ -76,7 +76,7 @@ using static go.runtime.pprof_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("runtime/pprof/elf.go", "elf.cs", "AA0egprCgoKClKSAgsiCpoKUpLS2gpKUpIKCgpS0goKClLaCgIKkgIKkkpSCpoKUgoKAgqSCgoKCgoKUgpSAgqSm")]
-[assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "ABgugoKClAAJGMKClJSCpoKqooKmgoKSgqaCkoKClIKkgqSCgsqClAACEgAIAoKUgoKCgpSUhoKCgpSmlKqigoKCpqqigoKC", "111-113:1")]
+[assembly: go.GoPositionMap("runtime/pprof/label.go", "label.cs", "ABgugoKClAAJGNKClJSCpoKqooKmgoKSgqaCkoKClIKkgqSCgsqClAACEgAIAoKUgoKCgpSUhoKCgpSmlKqigoKCpqqigoKC", "111-113:1")]
 [assembly: go.GoPositionMap("runtime/pprof/map.go", "map.cs", "ABw4lIKCgpSClpKCgoKUgoK4goKClNiClIKCgpSCpoKUgpSClIKCgpSClA==")]
 [assembly: go.GoPositionMap("runtime/pprof/pe.go", "pe.cs", "AAwawoKClA==")]
 [assembly: go.GoPositionMap("runtime/pprof/pprof.go", "pprof.cs", "AMEB+ALs7Ozs7OwAIj6CgpQABxCCyoIAAhIACAKCgoKUgpS4gtiygoLYsoKUgoSmhtiSqOKCgoKUAAUoABYCgpSCpoKCgpSmgoKClKKo8oKCogACIgARAoKUgriCgoKUppTKgKKAooAADB6ygoKCpoKCgqbu1IKCgoKUlIKCgoKCpoKClNqkkoKCgoKUgoKUlIKCgoKCgoKClKaUlIKCgoKUuIKCgpSCgoKmgoKCgpKCuJQACBKAooCigpKSgpTqooKCgoKCgoKSpoKUgqamgpSuwqiSgqiS2qKmgoKmggACFPKCuIKCgoLKgqaYgoKUgoKCgoKC3AAHEIKCgqbKgoKmgpSCyoKCgoKCgoKUgoKCgoKUgoKCgoKUgoKCgoKCgqaUgqiSgtjIgrqS2JKClKoACg6CuLiCuNa4goKCgoKUlJSUgqaO4oKUuIKCgoKCygAHEICigKKAAAomAA0UAAoEgoKCpoKUgoKCAAUQAAkEgoKCgpSUgoCCpIKmppSCrNKClIKUgoKippKCqJKC2JLYkuiSgoKCgoKCgriYgqaCgpSCgoKUgoKCgoKCgpSCgriClKjWpsbW1tbWxg==", "318-320:1;494-505:1;548-552:2;666-668:1;769-771:1;997-999:1", "", "784=InUseObjects/1/1/1;791=InUseObjects/1/1/1,InUseBytes/1/1/1")]

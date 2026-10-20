@@ -158,6 +158,8 @@ internal static void rsh(ref @decimal x, nuint s) {
 }
 
 internal static @string String(this ref @decimal x) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(x.mant) == 0) {
         return "0"u8;
     }
@@ -177,7 +179,7 @@ internal static @string String(this ref @decimal x) {
         // dd.ddd
         buf = new slice<byte>(0, 1 + len(x.mant));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(0, x.exp));
-        buf = append(buf, (byte)((rune)'.'));
+        buf = append(bufᴷ, buf, (byte)((rune)'.'));
         buf = appendꓸꓸꓸ(buf, x.mant.slice(x.exp));
         break;
     }

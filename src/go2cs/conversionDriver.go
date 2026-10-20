@@ -478,6 +478,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		performEscapeAnalysis(files, fset, packageTypes, info)
 
+		// Go's stack backing store for a non-escaping append: which appends take it is the compiler's own
+		// verdict, harvested per target (stackAppendHints.go).
+		collectStackAppendHints(files, fset, packageTypes, info, pkg.Dir, options)
+
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.
 		collectAddressedGlobals(files, packageTypes, info)

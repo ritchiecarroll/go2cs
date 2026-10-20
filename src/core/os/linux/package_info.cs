@@ -84,7 +84,7 @@ using static go.os_package;
 [assembly: go.GoPositionMap("os/dir_unix.go", "dir_unix.cs", "AB5ApoLIgoKCuAAIBJKCgoKUgoKCuIKSggALGIKmlIKCgoKCgpSUgoLKgoKClIKCgoLugpSCgoKUgoKCgriClIKUgpKCgqaUgpSUgqaUgpS4gpTokoKUgpSmgpSkpKSkuIKUpKSkpA==")]
 [assembly: go.GoPositionMap("os/dirent_linux.go", "dirent_linux.cs", "AAsYgqaCpoKCgpSmgoKClIKUpKSkpKSklA==")]
 [assembly: go.GoPositionMap("os/eloop_other.go", "eloop_other.cs", "AAsekpSUlIKm")]
-[assembly: go.GoPositionMap("os/env.go", "env.cs", "AAwgopSCgoKClIKCtqaUlIKmgpSssqqilJSokqyylIKmgoKClKaklpKUrLKCggACENKC2qKCgpSokqiSqqI=")]
+[assembly: go.GoPositionMap("os/env.go", "env.cs", "AAwgwpSCgoKClIKCtqaUlIKmgpSssqqilJSokqyylIKmgoKClKaklpKUrLKCggACENKC2qKCgpSokqiSqqI=")]
 [assembly: go.GoPositionMap("os/error.go", "error.cs", "ABYmlIKCgpSCloAAAhLwAAwegKSAppKCrLKClAACEuIAAhLiAAIS4gACFgAIAoKmuIKCpoKokpSkpJQ=")]
 [assembly: go.GoPositionMap("os/exec.go", "exec.cs", "ABImlJQANYQB4oKCgpSClILMsoKCgpSCgpTMkqaoktyUypSssqaCqsKCpoKClIKC7oKClKiSgpSosoKmACROkKaQAAIWAAkCAAIgAA0CgqwACQqCpriCgris0oKCgoKmgtzclKa+sgACENKqogACFgAIAqiSqJKssqqirLIAAhDS")]
 [assembly: go.GoPositionMap("os/exec_linux.go", "exec_linux.cs", "AAkWgg==")]

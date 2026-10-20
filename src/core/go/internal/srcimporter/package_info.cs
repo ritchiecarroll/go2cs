@@ -66,7 +66,7 @@ using static go.go.@internal.srcimporter_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACZOAAgCAAwakgACEgAKAoKmgIKkgoK4griCgoKUypSmgtqCuIKClIKCqJLIgtyCppSCgoKUuIK4goKUlJSmgta0goKAxoKUgoKC0oKCgoKUgqKkpoKCuAAJBtKCgpSUgoKUgoKUpKaCgoKCgoKClJSCgoKUgoKAgrbatqaCgIKkpqKAgqSo", "98-106:1;122-126:2;169-169:1;178-187:2", "", "48=SizesFor/1/1/3")]
+[assembly: global::go.GoPositionMap("go/internal/srcimporter/srcimporter.go", "srcimporter.cs", "ACZOAAgCAAwakgACEgALAoKmgIKkgoK4griCgoKUypSmgtqCuIKClIKCqJLIgtyCppSCgoKUuIK4goKUlJSmgta0goKAxoKUgoKC0oKCgoKUgqKkpoKCuAAJBuKCgpSUgoKUgoKUpKaCgoKCgoKClJSCgoKUgoKAgrbatqaCgIKkpqKAgqSo", "98-106:1;122-126:2;169-169:1;178-187:2", "", "48=SizesFor/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go.go.@internal;

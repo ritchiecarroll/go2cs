@@ -135,6 +135,9 @@ partial struct potentialParent {
 internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
+    var matchingKeyIDᴷ = new stackAppend<potentialParent>();
+    var oneKeyIDᴷ = new stackAppend<potentialParent>();
+    var mismatchKeyIDᴷ = new stackAppend<potentialParent>();
 
     if (Ꮡs == nil) {
         return default!;
@@ -157,15 +160,15 @@ internal static slice<potentialParent> findPotentialParents(this ж<CertPool> �
         var kidMatch = bytes.Equal((~candidate).SubjectKeyId, cert.AuthorityKeyId);
         switch (ᐧ) {
         case {} when kidMatch: {
-            matchingKeyID = append(matchingKeyID, new potentialParent(candidate, constraint));
+            matchingKeyID = append(matchingKeyIDᴷ, matchingKeyID, new potentialParent(candidate, constraint));
             break;
         }
         case {} when (builtin.len((~candidate).SubjectKeyId) == 0 && builtin.len(cert.AuthorityKeyId) > 0) || (builtin.len((~candidate).SubjectKeyId) > 0 && builtin.len(cert.AuthorityKeyId) == 0): {
-            oneKeyID = append(oneKeyID, new potentialParent(candidate, constraint));
+            oneKeyID = append(oneKeyIDᴷ, oneKeyID, new potentialParent(candidate, constraint));
             break;
         }
         default: {
-            mismatchKeyID = append(mismatchKeyID, new potentialParent(candidate, constraint));
+            mismatchKeyID = append(mismatchKeyIDᴷ, mismatchKeyID, new potentialParent(candidate, constraint));
             break;
         }}
     }

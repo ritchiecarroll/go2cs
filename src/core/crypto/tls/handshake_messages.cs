@@ -115,6 +115,7 @@ partial struct clientHelloMsg {
 
 internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bool echInner) {
     ref var m = ref Ꮡm.DerefOrNull();
+    var echOuterExtsᴷ = new stackAppend<uint16>();
 
     ref var exts = ref heap(new cryptobyte.Builder(), out var Ꮡexts);
     if (len(m.serverName) > 0) {
@@ -190,7 +191,7 @@ internal static (slice<byte>, error) marshalMsg(this ж<clientHelloMsg> Ꮡm, bo
     if (m.ocspStapling) {
         // RFC 4366, Section 3.6
         if (echInner){
-            echOuterExts = append(echOuterExts, extensionStatusRequest);
+            echOuterExts = append(echOuterExtsᴷ, echOuterExts, extensionStatusRequest);
         } else {
             exts.AddUint16(extensionStatusRequest);
             Ꮡexts.AddUint16LengthPrefixed((ж<cryptobyte.Builder> extsΔ11) => {

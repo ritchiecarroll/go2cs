@@ -1841,6 +1841,8 @@ internal static void initCategoryAliases() {
 // (We could have used all lowercase, but this way most package unicode
 // map keys are already canonical.)
 internal static @string canonicalName(@string name) {
+    var bᴷ = new stackAppend<byte>();
+
     slice<byte> b = default!;
     var first = true;
     foreach (var i in range(len(name))) {
@@ -1874,7 +1876,7 @@ internal static @string canonicalName(@string name) {
         if (c == (rune)' ') {
             continue;
         }
-        b = builtin.append(b, c);
+        b = builtin.append(bᴷ, b, c);
     }
     if (b == default!) {
         return name;

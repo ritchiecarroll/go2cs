@@ -204,13 +204,15 @@ internal static slice<byte> printUint8Bytes(slice<byte> buf, uint8 i) {
 }
 
 internal static @string printByteSlice(slice<byte> b) {
+    var bufᴷ = new stackAppend<byte>();
+
     if (len(b) == 0) {
         return ""u8;
     }
     var buf = new slice<byte>(0, 5 * len(b));
     buf = printUint8Bytes(buf, (uint8)b[0]);
     foreach (var (_, n) in b[1..]) {
-        buf = append(buf, (byte)((rune)','), (byte)((rune)' '));
+        buf = append(bufᴷ, buf, (byte)((rune)','), (byte)((rune)' '));
         buf = printUint8Bytes(buf, (uint8)n);
     }
     return (@string)buf;
@@ -219,11 +221,13 @@ internal static @string printByteSlice(slice<byte> b) {
 internal static readonly @string hexDigits = "0123456789abcdef"u8;
 
 internal static @string printString(slice<byte> str) {
+    var bufᴷ = new stackAppend<byte>();
+
     var buf = new slice<byte>(0, len(str));
     for (nint i = 0; i < len(str); i++) {
         var c = str[i];
         if (c == (rune)'.' || c == (rune)'-' || c == (rune)' ' || (rune)'A' <= c && c <= (rune)'Z' || (rune)'a' <= c && c <= (rune)'z' || (rune)'0' <= c && c <= (rune)'9') {
-            buf = append(buf, c);
+            buf = append(bufᴷ, buf, c);
             continue;
         }
 
@@ -2259,6 +2263,8 @@ internal static (slice<byte>, error) pack(this ref Name n, slice<byte> msg, map<
 
 // unpack unpacks a domain name.
 internal static (nint, error) unpack(this ref Name n, slice<byte> msg, nint off) {
+    var nameᴷ = new stackAppend<byte>();
+
     // currOff is the current working offset.
     nint currOff = off;
 
@@ -2300,7 +2306,7 @@ Loop:
             }
 
             name = appendꓸꓸꓸ(name, msg.slice(currOff, endOff));
-            name = append(name, (byte)((rune)'.'));
+            name = append(nameᴷ, name, (byte)((rune)'.'));
             currOff = endOff;
             break;
         }

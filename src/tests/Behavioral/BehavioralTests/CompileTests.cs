@@ -2161,6 +2161,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStackAppendBackingStore() => CheckTarget("StackAppendBackingStore");
+
+    [TestMethod]
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]

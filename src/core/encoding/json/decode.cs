@@ -261,13 +261,15 @@ internal static void saveError(this ref decodeState d, error err) {
 
 // addErrorContext returns a new error enhanced with information from d.errorContext
 internal static error addErrorContext(this ref decodeState d, error err) {
+    var fieldStackᴷ = new stackAppend<@string>();
+
     if (d.errorContext != nil && ((~d.errorContext).Struct != default! || len((~d.errorContext).FieldStack) > 0)) {
         switch (err.type()) {
         case ж<UnmarshalTypeError> errΔ1: {
             errΔ1.Value.Struct = (~d.errorContext).Struct.Name();
             var fieldStack = d.errorContext.Value.FieldStack;
             if ((~errΔ1).Field != ""u8) {
-                fieldStack = append(fieldStack, (~errΔ1).Field);
+                fieldStack = append(fieldStackᴷ, fieldStack, (~errΔ1).Field);
             }
             errΔ1.Value.Field = strings.Join(fieldStack, "."u8);
             break;

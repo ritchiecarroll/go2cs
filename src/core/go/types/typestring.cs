@@ -409,6 +409,7 @@ internal static void typ(this ж<typeWriter> Ꮡw, ΔType typ) {
 internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
+    var termHashesᴷ = new stackAppend<@string>();
 
     assert(w.ctxt != nil);
     var first = true;
@@ -438,7 +439,7 @@ internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
                 buf.WriteByte((rune)'~');
             }
             newTypeHasher(Ꮡbuf, w.ctxt).typ((~Δterm).typ);
-            termHashes = append(termHashes, Ꮡbuf.String());
+            termHashes = append(termHashesᴷ, termHashes, Ꮡbuf.String());
         }
         slices.Sort<slice<@string>, @string>(termHashes);
         if (!first) {

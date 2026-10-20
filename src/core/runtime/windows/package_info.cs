@@ -140,7 +140,7 @@ using static go.runtime_package;
 [assembly: go.GoPositionMap("runtime/debuglog_off.go", "debuglog_off.cs", "AAwagtqCpoI=")]
 [assembly: go.GoPositionMap("runtime/dit.go", "dit.cs", "AAsakoKCgqiSgoKC")]
 [assembly: go.GoPositionMap("runtime/env_posix.go", "env_posix.cs", "AAwSgoKClIKCpqqigoKCgpSUlKaCgpQAGDSSgpSSqJKClJKmgoKC")]
-[assembly: go.GoPositionMap("runtime/error.go", "error.cs", "ACtUpIKCgpSCgpSCgoKUgpSmlAACEtKCgoKClILcpIIABxCkggACENIABxCkggARJAAMGgAKFqSCgoKUgoKmgoKCuIKCgoKCgpSClLS2AAYeAAgClLS0tLS0tLS0tLS0tLS0tLS0xMqygpSUgoKkpKSkpKSkpKSkpKSkpKSkpLqSgoKClIKCgpSuwoK4goKUgoKUgoKClIKUgoI=")]
+[assembly: go.GoPositionMap("runtime/error.go", "error.cs", "ACtUpIKCgpSCgpSCgoKUgpSmlAACEtKCgoKClILcpIIABxCkggACENIABxCkggARJAAMGgAKFqSCgoKUgoKmooKCuIKCgoKCgpSClLS2AAYeAAgClLS0tLS0tLS0tLS0tLS0tLS0xMqygpSUgoKkpKSkpKSkpKSkpKSkpKSkpLqSgoKClIKCgpSuwoK4goKUgoKUgoKClIKUgoI=")]
 [assembly: go.GoPositionMap("runtime/extern.go", "extern.cs", "AK8C6gQADAKCgoKUggAJSAAIAoKClAAMILI=")]
 [assembly: go.GoPositionMap("runtime/fastlog2.go", "fastlog2.cs", "AAcc8oKUpoKClII=")]
 [assembly: go.GoPositionMap("runtime/fastlog2table.go", "fastlog2table.cs", "AAkS")]

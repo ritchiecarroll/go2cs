@@ -327,6 +327,7 @@ partial struct comparer {
 // For changes to this code the corresponding changes should be made to unifier.nify.
 internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var targsᴷ = new stackAppend<ΔType>();
 
     x = Unalias(x);
     y = Unalias(y);
@@ -450,7 +451,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
 
             slice<ΔType> targs = default!;
             foreach (var (i, _) in xtparams) {
-                targs = append(targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
+                targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);
 

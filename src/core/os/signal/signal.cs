@@ -359,6 +359,8 @@ partial interface stringer {
 }
 
 internal static @string String(this ref signalCtx c) {
+    var bufᴷ = new stackAppend<byte>();
+
     slice<byte> buf = default!;
     // We know that the type of c.Context is context.cancelCtx, and we know that the
     // String method of cancelCtx returns a string that ends with ".WithCancel".
@@ -370,7 +372,7 @@ internal static @string String(this ref signalCtx c) {
         foreach (var (i, s) in c.signals) {
             buf = append(buf, s.String().ꓸꓸꓸ);
             if (i != len(c.signals) - 1) {
-                buf = append(buf, (byte)((rune)' '));
+                buf = append(bufᴷ, buf, (byte)((rune)' '));
             }
         }
         buf = append(buf, (byte)((rune)']'));

@@ -1187,6 +1187,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
+        var typeOffsetsᴷ = new stackAppend<parseTypes_typeOffset>();
 
         nint maxp1 = p.parseInt();
         nint exportedp1 = p.parseInt();
@@ -1196,7 +1197,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
         nint total = 0;
         for (nint i = 1; i < maxp1; i++) {
             nint len = p.parseInt();
-            typeOffsets = append(typeOffsets, new parseTypes_typeOffset(total, len));
+            typeOffsets = append(typeOffsetsᴷ, typeOffsets, new parseTypes_typeOffset(total, len));
             total += len;
         }
 

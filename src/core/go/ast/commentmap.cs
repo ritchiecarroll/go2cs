@@ -128,6 +128,8 @@ internal static Node /*top*/ pop(this ref nodeStack s, tokenꓸPos pos) {
 // trailing an assignment, the comment is associated with the entire
 // assignment rather than just the last operand in the assignment.
 public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, slice<ж<CommentGroup>> comments) {
+    var nodesᴷ = new stackAppend<Node>();
+
     if (len(comments) == 0) {
         return default!; // no comments to map
     }
@@ -143,7 +145,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> Ꮡfset, Node node, sli
 
     // create node list in lexical order
     var nodes = nodeList(node);
-    nodes = append(nodes, (Node)(default!)); // append sentinel
+    nodes = append(nodesᴷ, nodes, (Node)(default!)); // append sentinel
 
     // set up iteration variables
     Node p = default!;                       // previous node
@@ -316,10 +318,12 @@ break_loop:;
 internal static readonly object commentMapˢ = (@string)"CommentMap {"u8;
 
 public static @string String(this CommentMap cmap) {
+    var nodesᴷ = new stackAppend<Node>();
+
     // print map entries in sorted order
     slice<Node> nodes = default!;
     foreach (var (node, _) in cmap) {
-        nodes = append(nodes, node);
+        nodes = append(nodesᴷ, nodes, node);
     }
     slices.SortFunc(nodes, (Node a, Node b) => {
         nint r = cmp.Compare(a.Pos(), b.Pos());

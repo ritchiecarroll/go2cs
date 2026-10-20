@@ -169,6 +169,7 @@ public static (@string dir, @string @file) Split(@string path) {
 // an empty string.
 public static @string Join(params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
+    var bufᴷ = new stackAppend<byte>();
 
     nint size = 0;
     foreach (var (_, e) in elem) {
@@ -181,7 +182,7 @@ public static @string Join(params ꓸꓸꓸstring elemʗp) {
     foreach (var (_, e) in elem) {
         if (len(buf) > 0 || e != ""u8) {
             if (len(buf) > 0) {
-                buf = builtin.append(buf, (byte)((rune)'/'));
+                buf = builtin.append(bufᴷ, buf, (byte)((rune)'/'));
             }
             buf = builtin.append(buf, e.ꓸꓸꓸ);
         }

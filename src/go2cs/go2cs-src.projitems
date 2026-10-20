@@ -510,6 +510,8 @@
     <None Include="$(MSBuildThisFileDirectory)sstringTwinOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)sstringTwin_test.go" />
     <None Include="$(MSBuildThisFileDirectory)Stack.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendHints.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendHints_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stderrTail_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stdLibConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)stdNamespaceGuard_test.go" />

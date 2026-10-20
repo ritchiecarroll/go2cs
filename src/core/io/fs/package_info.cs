@@ -60,7 +60,7 @@ using static go.io.fs_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAki4oKCgpSCgoKUgpSCgoKCgoKUgoKUgpSCgqYAAhLigriClIKCgoKU")]
+[assembly: go.GoPositionMap("io/fs/format.go", "format.cs", "AAkiAAgCgoKClIKCgpSClIKCgoKCgpSCgpSClIKCpgACEgAIAoK4gpSCgoKClA==")]
 [assembly: go.GoPositionMap("io/fs/fs.go", "fs.cs", "ADiAAQAKAoKmlLiCgoKUgoKUgpQAPoYBgoKCgpaAooCigKKAooAAM16CgoKCgoKCpoKClIKCgpSUlKqiqqKokqiSAAkUgKSA5pKC")]
 [assembly: go.GoPositionMap("io/fs/glob.go", "glob.cs", "ABNCAAwCpraigpSAgsiAgqSCgIKkpoKUgriCpoKCgpSCgoKmqJKUpAADEPKCgoKmgoKCgpSCpqqigpSm")]
 [assembly: go.GoPositionMap("io/fs/readdir.go", "readdir.cs", "ABk6AAgCgIK2goKUpIKCpoKGAAoQgqaCpoKmgqaCqqKClA==", "46-48:1")]

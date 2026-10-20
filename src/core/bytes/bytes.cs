@@ -545,6 +545,8 @@ internal partial struct FieldsFunc_span /*dyn*/ {
 // FieldsFunc makes no guarantees about the order in which it calls f(c)
 // and assumes that f always returns the same value for a given c.
 public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
+    var spansᴷ = new stackAppend<FieldsFunc_span>();
+
     var spans = new slice<FieldsFunc_span>(0, 32);
 
     // Find the field start and end indices.
@@ -556,7 +558,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<rune, bool> f) {
         var (r, size) = utf8.DecodeRune(s.slice(i));
         if (f(r)){
             if (start >= 0) {
-                spans = append(spans, new FieldsFunc_span(start, i));
+                spans = append(spansᴷ, spans, new FieldsFunc_span(start, i));
                 start = -1;
             }
         } else {

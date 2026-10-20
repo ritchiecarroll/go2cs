@@ -401,12 +401,14 @@ internal static readonly @string x509OidComponentsMustBeˢ = "x509: OID componen
 
 // OIDFromASN1OID creates a new OID using asn1OID.
 public static (ΔOID, error) OIDFromASN1OID(asn1.ObjectIdentifier asn1OID) {
+    var uint64OIDᴷ = new stackAppend<uint64>();
+
     var uint64OID = new slice<uint64>(0, builtin.len(asn1OID));
     foreach (var (_, component) in asn1OID) {
         if (component < 0) {
             return (new ΔOID(nil), errors.New(x509OidComponentsMustBeˢ));
         }
-        uint64OID = append(uint64OID, (uint64)component);
+        uint64OID = append(uint64OIDᴷ, uint64OID, (uint64)component);
     }
     return OIDFromInts(uint64OID);
 }

@@ -50,7 +50,7 @@ using static go.path_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("path/match.go", "match.cs", "AA4cAAEuABUCgoKCgoKUpriCgpSClKaCgpSClIKUgtyCgoCCtrSqwoKClIKCpoLGtLSCyKwACAiCgoKmkoKCgpSUgoKCpoKCgoKClJKAgqSCgoCCtoKUpoKCgpSmgoKUpoKClKaClKjSgoKUgoKCgqaCgpSCgpQ=")]
-[assembly: go.GoPositionMap("path/path.go", "path.cs", "AB00goKUpoKCgoKUgpSCpoKClAACLAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhDygoKUgpSCgoKClKauwoKCpq7CgqaCpoCCtoKUqJIAAhTygg==")]
+[assembly: go.GoPositionMap("path/path.go", "path.cs", "AB00goKUpoKCgoKUgpSCpoKClAACLAATAoKmgu6CkoKCpoKmxsaCpoKC2IKUgoL6gqaC7IKmAAIQ0oIAAhAACAKCgpSClIKCgoKUpq7CgoKmrsKCpoKmgIK2gpSokgACFPKC")]
 // </GoSourcePositionMaps>
 
 namespace go;

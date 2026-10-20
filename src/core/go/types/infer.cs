@@ -41,6 +41,8 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var @params = ref Ꮡparams.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
+        var untypedᴷ = new stackAppend<nint>();
+        var dirtyᴷ = new stackAppend<nint>();
 
         // Don't verify result conditions if there's no error handler installed:
         // in that case, an error leads to an exit panic and the result value may
@@ -207,7 +209,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
                         // parameter declared by the current function and use it in the same
                         // function signature; hence we don't need to Unalias before the
                         // .(*TypeParam) type assertion above.
-                        untyped = append(untyped, i);
+                        untyped = append(untypedᴷ, untyped, i);
                     }
                 }
             }
@@ -427,7 +429,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         slice<nint> dirty = default!;
         foreach (var (i, typ) in inferred) {
             if (typ != default! && (i >= len(targs) || targs[i] == default!)) {
-                dirty = append(dirty, i);
+                dirty = append(dirtyᴷ, dirty, i);
             }
         }
 

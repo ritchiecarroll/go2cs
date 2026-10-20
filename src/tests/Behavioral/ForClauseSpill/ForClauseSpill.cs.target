@@ -20,6 +20,8 @@ internal static nint must(nint v, bool ok) {
 }
 
 internal static void Main() {
+    var funcsᴷ = new stackAppend<Func<nint>>();
+
     n = 0;
     nint count = 0;
     while (ᐧ) {
@@ -89,7 +91,7 @@ break_outer:;
     var (ᴛ13, ᴛ14) = next();
     for (nint iᴛ1 = must(ᴛ13, ᴛ14); iᴛ1 < 4; ) {
         var i = iᴛ1;
-        funcs = append(funcs, () => i);
+        funcs = append(funcsᴷ, funcs, () => i);
         var (ᴛ15, ᴛ16) = next();
         iᴛ1 = must(ᴛ15, ᴛ16);
     }

@@ -126,11 +126,13 @@ internal static partial void probeF1() {
 }
 
 internal static void probeG1() {
+    var fsᴷ = new stackAppend<Action>();
+
     ref var t = ref heap<Tally>(out var Ꮡt);
     t = new Tally(5, "s");
     slice<Action> fs = default!;
     for (nint i = 0; i < 2; i++) {
-        fs = append(fs, () => {
+        fs = append(fsᴷ, fs, () => {
             Ꮡt.Value.total += 10;
         });
     }
@@ -140,9 +142,11 @@ internal static void probeG1() {
 }
 
 internal static void probeG3() {
+    var fsᴷ = new stackAppend<Func<nint>>();
+
     slice<Func<nint>> fs = default!;
     foreach (var (_, x) in new nint[]{10, 20, 30}.slice()) {
-        fs = append(fs, () => x);
+        fs = append(fsᴷ, fs, () => x);
     }
     fmt.Println("G3:", fs[0](), fs[1](), fs[2]());
 }
