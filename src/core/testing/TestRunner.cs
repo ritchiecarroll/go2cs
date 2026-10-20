@@ -89,6 +89,60 @@ public sealed class TestRunner
     // -test.v (or --json, which implies it, as `go test -json` passes -test.v): Go's chatty output.
     internal bool Verbose => m_options.Verbose;
 
+    // --json: the run emits go test -json events; otherwise each test prints Go's text output (TestExecution).
+    internal bool Json => m_reporter.Json;
+
+    // -test.fullpath: a record's call site names the whole file (TestExecution.CallSite).
+    internal bool FullPath => m_options.FullPath;
+
+    /// <summary>The printer of Go's text output on the process's stdout (Go's root <c>chattyPrinter</c>).</summary>
+    internal ChattyPrinter Chatty { get; } = new(TestReporter.WriteText);
+
+    /// <summary>
+    /// Go's <c>chattyPrinter</c> (testing.go:571-625) over one output: <see cref="Updatef"/> prints a line that names
+    /// its own test and remembers it; <see cref="Printf"/> prints a test's output, first naming the test with
+    /// <c>=== NAME</c> when the last line printed was another's. <see cref="Write"/> is a plain write to the same
+    /// output, as Go's <c>fmt.Fprintf(p.w, ...)</c> of a non-chatty report is. One lock orders all three.
+    /// </summary>
+    internal sealed class ChattyPrinter(Action<string> write)
+    {
+        private readonly object m_syncRoot = new();
+        private string? m_lastName;
+
+        internal void Updatef(string testName, string text)
+        {
+            lock (m_syncRoot)
+            {
+                m_lastName = testName;
+                write(text);
+            }
+        }
+
+        internal void Printf(string testName, string text)
+        {
+            lock (m_syncRoot)
+            {
+                if (m_lastName is null)
+                {
+                    m_lastName = testName;
+                }
+                else if (m_lastName != testName)
+                {
+                    write($"=== NAME  {testName}\n");
+                    m_lastName = testName;
+                }
+
+                write(text);
+            }
+        }
+
+        internal void Write(string text)
+        {
+            lock (m_syncRoot)
+                write(text);
+        }
+    }
+
     internal string WorkingDirectory { get; }
 
     /// <summary>
@@ -161,6 +215,10 @@ public sealed class TestRunner
             ArtifactRoot();
 
         m_reporter.ReportPackage("run", output: m_options.ShuffleSeed is int reportedSeed ? $"shuffle seed: {reportedSeed}" : null);
+
+        // Go's M.Run: `fmt.Println("-test.shuffle", n)` before the tests run (testing.go:2426), whatever -test.v says.
+        if (!Json && m_options.ShuffleSeed is int shuffleSeed)
+            Chatty.Write($"-test.shuffle {shuffleSeed.ToString(CultureInfo.InvariantCulture)}\n");
 
         // A test may lower the process's descriptor limit and leave it lowered, as Go's is free to (syscall's
         // TestPrlimitFileLimit): the next test starts from the run's own limit, because the CLR cannot start a
@@ -259,7 +317,7 @@ public sealed class TestRunner
         .ThenBy(test => test.Line)
         .ThenBy(test => test.Name, StringComparer.Ordinal);
 
-    internal bool RunChild(TestExecution parent, string requestedName, Action<ж<testing_package.T>> action)
+    internal bool RunChild(TestExecution parent, string requestedName, Action<ж<testing_package.T>> action, slice<uintptr>? creator = null)
     {
         // The watchdog already reported the parent: a subtest started by its still-running body would be a
         // verdict under a test that has none left to give.
@@ -269,7 +327,7 @@ public sealed class TestRunner
         string name = parent.NextSubtestName(requestedName);
         if (!m_options.ShouldRun(name))
             return true;
-        TestExecution child = Start(name, action, parent, parent.Source, parent.Line);
+        TestExecution child = Start(name, action, parent, parent.Source, parent.Line, creator: creator);
         WaitForSerialBoundary(child, parent.AddParallelChild);
         return !child.Failed;
     }
@@ -289,6 +347,9 @@ public sealed class TestRunner
         internal SemaphoreSlim ParallelLimiter { get; } = new(parallel);
 
         internal Action<string>? Redirected { get; } = redirected;
+
+        // This root's own chattyPrinter, over the redirected file (Go's root carries its own).
+        internal ChattyPrinter? Chatty { get; } = redirected is null ? null : new ChattyPrinter(redirected);
     }
 
     /// <summary>
@@ -339,9 +400,10 @@ public sealed class TestRunner
         return ok;
     }
 
-    private TestExecution Start(string name, Action<ж<testing_package.T>> action, TestExecution? parent, string source, int line, NestedRoot? nestedRoot = null)
+    private TestExecution Start(string name, Action<ж<testing_package.T>> action, TestExecution? parent, string source, int line, NestedRoot? nestedRoot = null, slice<uintptr>? creator = null)
     {
         TestExecution execution = new(this, name, parent, source, line, nestedRoot);
+        execution.SetCreator(creator);
         execution.Start(action);
         return execution;
     }

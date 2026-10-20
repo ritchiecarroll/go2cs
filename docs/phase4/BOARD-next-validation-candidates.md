@@ -27640,4 +27640,12 @@ never posts even the cancelled operation's completion still hangs it, as it hang
 pipe also takes an owner-only security descriptor (`D:P(A;;GA;;;OW)`) in place of the default, which lets Everyone
 read it (COORD's ruling, defense in depth). Neither is measured here: the i9's smoke run of the probe is owed.
 
+**Amended 2026-10-20 (the i9's smoke run of bac5dfbd2e).** Windows, JIT, (none), three processes: cold A1 0.5-0.6 ms
+late against Go's 0.4-0.7, so the keep rule still holds. The owner-only descriptor passes our own CreateFile (A1 did
+not fall back to 1.8-2.9 ms, nor the first FD.Init to about 21 ms) and costs about 2 ms more at the first FD.Init,
+which builds it. The planted hang read as predicted: with the write removed, so the read had nothing to complete it,
+the deadlines let the first FD.Init return about 1 s late and the run complete (3 of 3, exit 0); with the deadlines
+removed too it hung (exit 124 at a 30 s cap). Reverted, and the build's dll hash matched the seat's. ACCEPTED for
+batch 7.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
