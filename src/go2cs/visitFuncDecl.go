@@ -1231,6 +1231,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// name through this ref alias, exactly like a deref'd pointer parameter.
 		blockPrefix += namedResultAliases.String()
 
+		// Go's stack backing store for each qualifying append variable this function declares, at entry, where
+		// Go keeps the buffer and its used flag (stackAppendHints.go).
+		blockPrefix += v.stackAppendBufferPrologue(funcDecl, v.indentLevel+1)
+
 		if blockPrefix != "" {
 			blockPrefix += v.newline
 		}

@@ -897,6 +897,17 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 	}
 
+	// Go's stack backing store for each qualifying append variable the literal declares: a lambda invocation is a
+	// fresh frame, as a Go closure call is, so the buffer and its used flag reset per call (stackAppendHints.go).
+	// Spliced before the single-return collapse below, so a body that carries one keeps its block form.
+	if prologue := v.stackAppendBufferPrologue(funcLit, bodyIndent); prologue != "" {
+		trimmedBody := strings.TrimSpace(body)
+
+		if strings.HasPrefix(trimmedBody, "{") {
+			body = "{" + prologue + strings.TrimPrefix(trimmedBody, "{")
+		}
+	}
+
 	// A variadic parameter arrives as a C# `params` array named `<name>ʗp` (see getVariadicParamName);
 	// the Go body references the bare `<name>` as a slice<T>. A top-level func gets a
 	// `var <name> = <name>ʗp.slice();` prologue (visitFuncDecl); a function LITERAL emitted no such

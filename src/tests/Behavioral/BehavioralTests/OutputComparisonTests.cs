@@ -2087,6 +2087,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStackAppendBackingStore() => CheckTarget("StackAppendBackingStore");
+
+    [TestMethod]
     public void CheckStatLayoutTruth() => CheckTarget("StatLayoutTruth");
 
     [TestMethod]

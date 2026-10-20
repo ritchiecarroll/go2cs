@@ -3881,6 +3881,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if constructType == "new " && funcName == "@unsafe.Pointer" && len(callExpr.Args) == 1 {
 			result = v.unsafePointerBoxEmission(callExpr, callExpr.Args[0], expr)
 		} else {
+			// Go's stack backing store: a variable's first qualifying append passes the buffer its function declared
+			// at entry (stackAppendHints.go).
+			if buffer := packageStackAppendSites[callExpr]; buffer != nil {
+				expr = v.stackAppendBufferName(buffer) + ", " + expr
+			}
+
 			result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
 		}
 	}
