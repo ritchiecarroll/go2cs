@@ -414,6 +414,13 @@ partial class runtime_package
     // floor — Go's documented behavior only for "calls before internal/godebug registers itself".
     public static void godebugSetNewIncNonDefault(Func<@string, Action> newIncNonDefault) => godebug_setNewIncNonDefault(newIncNonDefault);
 
+    // godebugSetUpdate is internal/godebug's //go:linkname setUpdate, the same crossing: Go's godebug
+    // registers its update(def, env) from init, the runtime calls it at once with the startup
+    // $GODEBUG, and godebugNotify calls it again on every os.Setenv/Unsetenv of GODEBUG
+    // (syscall_runtimeSetenv). That is how Value sees a GODEBUG os.Setenv writes, and the only
+    // place an Immutable setting (fips140) is held at its first value.
+    public static void godebugSetUpdate(Action<@string, @string> update) => godebug_setUpdate(update);
+
     // syscallRuntimeSetenv / syscallRuntimeUnsetenv are syscall's runtimeSetenv/runtimeUnsetenv, the
     // same crossing. The environment itself needs no mirroring (syscall reads the live process
     // environment), but the runtime's HALF of the call does: when the key is GODEBUG it reparses the
