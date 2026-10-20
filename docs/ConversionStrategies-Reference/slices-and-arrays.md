@@ -1707,7 +1707,7 @@ pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
 pack = append(pack, (Animal)(new Dog(nil)));
 ```
 An already-interface-typed element stays bare. The **empty interface** (`any`) element type is affected identically and takes the same cast — `append(args[:len(args):len(args)], c.output)` with `args []any` and `c.output []byte` infers `T=[]byte` on the `ISlice` overload but `T=any` on the `slice<T>` overload (testing's `flushToParent`, CS0121), and appending a scalar (`append(anys, 5)`) is the same shape; the differing element is cast to `any` so both overloads agree, as in the `AppendUntypedConst` golden:
-<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:31 -->
+<!-- source: src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 -->
 ```csharp
 anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));
 ```
