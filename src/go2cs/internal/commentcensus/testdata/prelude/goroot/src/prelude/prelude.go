@@ -64,3 +64,12 @@ func boxed() int {
 	sink = &q
 	return q
 }
+
+func boxedVar() int {
+	p := 1
+
+	var q int
+
+	sink = &q
+	return p + q
+}

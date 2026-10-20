@@ -209,6 +209,12 @@ var attrRe = regexp.MustCompile(`^\s*\[[A-Za-z]`)
 // capture copy (`var xʗ1 = x;`) and a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`).
 var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);)$`)
 
+// walkScaffoldRe is the part of scaffoldRe that is never a statement of its own: a capture copy, and the BARE heap
+// box `ref var x = ref heap<T>(out var Ꮡx);`, which the next line's assignment completes. A box WITH an initializer
+// (`ref var buf = ref heap(new T(), out var Ꮡbuf);`, an escaping `var buf T`) is a whole Go statement, so the walk
+// that places a Go blank must stop at it: crossing it credits the previous statement's blank to the line below.
+var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);)$`)
+
 // gotoLabelRe matches the goto a labeled continue or break becomes; its label is Go's.
 var gotoLabelRe = regexp.MustCompile(`\bgoto (?:continue|break)_([\pL_][\pL\pN_]*);`)
 
@@ -701,9 +707,10 @@ func analyze(p pair, r *results, verbose bool) {
 				}
 				cur = csLine + 1
 				// The walk back crosses what the converter writes ahead of L's own translation: comments, attributes, and
-				// scaffolding (scaffoldRe), so an escaping local's heap box above its assignment is part of L.
+				// the lines that are only a prefix of L (walkScaffoldRe), so an escaping local's bare heap box above its
+				// assignment is part of L.
 				st := csLine
-				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2]) || scaffoldRe.MatchString(strings.TrimSpace(cs.codeText[st-2]))) {
+				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2]) || walkScaffoldRe.MatchString(strings.TrimSpace(cs.codeText[st-2]))) {
 					st--
 				}
 				matchedStarts[st] = true

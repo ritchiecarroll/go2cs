@@ -91,5 +91,14 @@ internal static nint boxed() {
     return q;
 }
 
+internal static nint boxedVar() {
+    nint p = 1;
+
+    ref var q = ref heap(new nint(), out var Ꮡq);
+
+    sink = Ꮡq;
+    return p + q;
+}
+
 } // end prelude_package
 
