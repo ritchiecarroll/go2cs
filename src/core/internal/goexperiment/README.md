@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/internal/goexperiment@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/internal/goexperiment) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/internal/goexperiment)
+[![Tests](https://img.shields.io/badge/Tests-none_to_validate-lightgrey?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/internal/goexperiment@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/internal/goexperiment) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/internal/goexperiment)
 
 From C#, call this package through the static class go.@internal.goexperiment_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -21,13 +21,13 @@ Experiments are exposed to the build in the following ways:
 
 In the toolchain, the set of experiments enabled for the current build should be accessed via objabi.Experiment.
 
-The set of experiments is included in the output of [runtime.Version](https://pkg.go.dev/runtime@go1.26.9#Version)() and "go version \<binary>" if it differs from the default experiments.
+The set of experiments is included in the output of [runtime.Version](https://pkg.go.dev/runtime@go1.26.10#Version)() and "go version \<binary>" if it differs from the default experiments.
 
 For the set of experiments supported by the current toolchain, see "go doc goexperiment.Flags".
 
 Note that this package defines the set of experiments (in \[Flags]) and records the experiments that were enabled when the package was compiled (as boolean and integer constants).
 
-Note especially that this package does not itself change behavior at run time based on the GOEXPERIMENT variable. The code used in builds to interpret the GOEXPERIMENT variable is in the separate package [internal/buildcfg](https://pkg.go.dev/internal/buildcfg@go1.26.9).
+Note especially that this package does not itself change behavior at run time based on the GOEXPERIMENT variable. The code used in builds to interpret the GOEXPERIMENT variable is in the separate package [internal/buildcfg](https://pkg.go.dev/internal/buildcfg@go1.26.10).
 
 ---
 

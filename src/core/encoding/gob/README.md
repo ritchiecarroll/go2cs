@@ -2,12 +2,12 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-106_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/encoding.gob.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/encoding/gob@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/encoding/gob) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/encoding/gob)
+[![Tests](https://img.shields.io/badge/Tests-106_matched_%2F_0_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/encoding.gob.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/encoding/gob@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/encoding/gob) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/encoding/gob)
 
 From C#, call this package through the static class go.encoding.gob_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
-Package gob manages streams of gobs - binary values exchanged between an \[Encoder] (transmitter) and a \[Decoder] (receiver). A typical use is transporting arguments and results of remote procedure calls (RPCs) such as those provided by [net/rpc](https://pkg.go.dev/net/rpc@go1.26.9).
+Package gob manages streams of gobs - binary values exchanged between an \[Encoder] (transmitter) and a \[Decoder] (receiver). A typical use is transporting arguments and results of remote procedure calls (RPCs) such as those provided by [net/rpc](https://pkg.go.dev/net/rpc@go1.26.10).
 
 The implementation compiles a custom codec for each data type in the stream and is most efficient when a single \[Encoder] is used to transmit a stream of values, amortizing the cost of compilation.
 
@@ -55,9 +55,9 @@ In general, if allocation is required, the decoder will allocate memory. If not,
 
 Functions and channels will not be sent in a gob. Attempting to encode such a value at the top level will fail. A struct field of chan or func type is treated exactly like an unexported field and is ignored.
 
-Gob can encode a value of any type implementing the \[GobEncoder] or [encoding.BinaryMarshaler](https://pkg.go.dev/encoding@go1.26.9#BinaryMarshaler) interfaces by calling the corresponding method, in that order of preference.
+Gob can encode a value of any type implementing the \[GobEncoder] or [encoding.BinaryMarshaler](https://pkg.go.dev/encoding@go1.26.10#BinaryMarshaler) interfaces by calling the corresponding method, in that order of preference.
 
-Gob can decode a value of any type implementing the \[GobDecoder] or [encoding.BinaryUnmarshaler](https://pkg.go.dev/encoding@go1.26.9#BinaryUnmarshaler) interfaces by calling the corresponding method, again in that order of preference.
+Gob can decode a value of any type implementing the \[GobDecoder] or [encoding.BinaryUnmarshaler](https://pkg.go.dev/encoding@go1.26.10#BinaryUnmarshaler) interfaces by calling the corresponding method, again in that order of preference.
 
 ### Encoding Details
 
@@ -79,7 +79,7 @@ A signed integer, i, is encoded within an unsigned integer, u. Within u, bits 1 
 
 The low bit is therefore analogous to a sign bit, but making it the complement bit instead guarantees that the largest negative integer is not a special case. For example, -129=^128=(^256>>1) encodes as (FE 01 01).
 
-Floating-point numbers are always sent as a representation of a float64 value. That value is converted to a uint64 using [math.Float64bits](https://pkg.go.dev/math@go1.26.9#Float64bits). The uint64 is then byte-reversed and sent as a regular unsigned integer. The byte-reversal means the exponent and high-precision part of the mantissa go first. Since the low bits are often zero, this can save encoding bytes. For instance, 17.0 is encoded in only three bytes (FE 31 40).
+Floating-point numbers are always sent as a representation of a float64 value. That value is converted to a uint64 using [math.Float64bits](https://pkg.go.dev/math@go1.26.10#Float64bits). The uint64 is then byte-reversed and sent as a regular unsigned integer. The byte-reversal means the exponent and high-precision part of the mantissa go first. Since the low bits are often zero, this can save encoding bytes. For instance, 17.0 is encoded in only three bytes (FE 31 40).
 
 Strings and slices of bytes are sent as an unsigned count followed by that many uninterpreted bytes of the value.
 

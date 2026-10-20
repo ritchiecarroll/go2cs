@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-not_yet_validated-orange?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/testing/synctest@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/testing/synctest) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/testing/synctest)
+[![Tests](https://img.shields.io/badge/Tests-not_yet_validated-orange?logo=go)](https://go2cs.net/ValidatedTestPackages.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/testing/synctest@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/testing/synctest) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/testing/synctest)
 
 From C#, call this package through the static class go.testing.synctest_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -20,7 +20,7 @@ Each test should be entirely self-contained: The following guidelines should app
 
 ### Time
 
-Within a bubble, the [time](https://pkg.go.dev/time@go1.26.9) package uses a fake clock. Each bubble has its own clock. The initial time is midnight UTC 2000-01-01.
+Within a bubble, the [time](https://pkg.go.dev/time@go1.26.10) package uses a fake clock. Each bubble has its own clock. The initial time is midnight UTC 2000-01-01.
 
 Time in a bubble only advances when every goroutine in the bubble is durably blocked. See below for the exact definition of "durably blocked".
 
@@ -70,29 +70,29 @@ The following operations durably block a goroutine:
 
   - a blocking send or receive on a channel created within the bubble
   - a blocking select statement where every case is a channel created within the bubble
-  - [sync.Cond.Wait](https://pkg.go.dev/sync@go1.26.9#Cond.Wait)
-  - [sync.WaitGroup.Wait](https://pkg.go.dev/sync@go1.26.9#WaitGroup.Wait), when [sync.WaitGroup.Add](https://pkg.go.dev/sync@go1.26.9#WaitGroup.Add) was called within the bubble
-  - [time.Sleep](https://pkg.go.dev/time@go1.26.9#Sleep)
+  - [sync.Cond.Wait](https://pkg.go.dev/sync@go1.26.10#Cond.Wait)
+  - [sync.WaitGroup.Wait](https://pkg.go.dev/sync@go1.26.10#WaitGroup.Wait), when [sync.WaitGroup.Add](https://pkg.go.dev/sync@go1.26.10#WaitGroup.Add) was called within the bubble
+  - [time.Sleep](https://pkg.go.dev/time@go1.26.10#Sleep)
 
 Operations not in the above list are not durably blocking. In particular, the following operations may block a goroutine, but are not durably blocking because the goroutine can be unblocked by an event occurring outside its bubble:
 
-  - locking a [sync.Mutex](https://pkg.go.dev/sync@go1.26.9#Mutex) or [sync.RWMutex](https://pkg.go.dev/sync@go1.26.9#RWMutex)
+  - locking a [sync.Mutex](https://pkg.go.dev/sync@go1.26.10#Mutex) or [sync.RWMutex](https://pkg.go.dev/sync@go1.26.10#RWMutex)
   - blocking on I/O, such as reading from a network socket
   - system calls
 
 ### Isolation
 
-A channel, [time.Timer](https://pkg.go.dev/time@go1.26.9#Timer), or [time.Ticker](https://pkg.go.dev/time@go1.26.9#Ticker) created within a bubble is associated with it. Operating on a bubbled channel, timer, or ticker from outside the bubble panics.
+A channel, [time.Timer](https://pkg.go.dev/time@go1.26.10#Timer), or [time.Ticker](https://pkg.go.dev/time@go1.26.10#Ticker) created within a bubble is associated with it. Operating on a bubbled channel, timer, or ticker from outside the bubble panics.
 
-A [sync.WaitGroup](https://pkg.go.dev/sync@go1.26.9#WaitGroup) becomes associated with a bubble on the first call to Add or Go. Once a WaitGroup is associated with a bubble, calling Add or Go from outside that bubble is a fatal error. (As a technical limitation, a WaitGroup defined as a package variable, such as "var wg sync.WaitGroup", cannot be associated with a bubble and operations on it may not be durably blocking. This limitation does not apply to a \*WaitGroup stored in a package variable, such as "var wg = new(sync.WaitGroup)".)
+A [sync.WaitGroup](https://pkg.go.dev/sync@go1.26.10#WaitGroup) becomes associated with a bubble on the first call to Add or Go. Once a WaitGroup is associated with a bubble, calling Add or Go from outside that bubble is a fatal error. (As a technical limitation, a WaitGroup defined as a package variable, such as "var wg sync.WaitGroup", cannot be associated with a bubble and operations on it may not be durably blocking. This limitation does not apply to a \*WaitGroup stored in a package variable, such as "var wg = new(sync.WaitGroup)".)
 
-[sync.Cond.Wait](https://pkg.go.dev/sync@go1.26.9#Cond.Wait) is durably blocking. Waking a goroutine in a bubble blocked on Cond.Wait from outside the bubble is a fatal error.
+[sync.Cond.Wait](https://pkg.go.dev/sync@go1.26.10#Cond.Wait) is durably blocking. Waking a goroutine in a bubble blocked on Cond.Wait from outside the bubble is a fatal error.
 
-Cleanup functions and finalizers registered with [runtime.AddCleanup](https://pkg.go.dev/runtime@go1.26.9#AddCleanup) and [runtime.SetFinalizer](https://pkg.go.dev/runtime@go1.26.9#SetFinalizer) run outside of any bubble.
+Cleanup functions and finalizers registered with [runtime.AddCleanup](https://pkg.go.dev/runtime@go1.26.10#AddCleanup) and [runtime.SetFinalizer](https://pkg.go.dev/runtime@go1.26.10#SetFinalizer) run outside of any bubble.
 
 ### Example: Context.AfterFunc
 
-This example demonstrates testing the [context.AfterFunc](https://pkg.go.dev/context@go1.26.9#AfterFunc) function.
+This example demonstrates testing the [context.AfterFunc](https://pkg.go.dev/context@go1.26.10#AfterFunc) function.
 
 AfterFunc registers a function to execute in a new goroutine after a context is canceled.
 
@@ -128,7 +128,7 @@ The test verifies that the function is not run before the context is canceled, a
 
 ### Example: Context.WithTimeout
 
-This example demonstrates testing the [context.WithTimeout](https://pkg.go.dev/context@go1.26.9#WithTimeout) function.
+This example demonstrates testing the [context.WithTimeout](https://pkg.go.dev/context@go1.26.10#WithTimeout) function.
 
 WithTimeout creates a context which is canceled after a timeout.
 

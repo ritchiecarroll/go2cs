@@ -2,8 +2,8 @@
 
 > C# package converted from the Go standard library by [go2cs](https://github.com/ritchiecarroll/go2cs).
 
-[![Tests](https://img.shields.io/badge/Tests-568_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/crypto.rsa.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.9-00ADD8?logo=go)](https://pkg.go.dev/crypto/rsa@go1.26.9)\
-[![Source](https://img.shields.io/badge/Source-@1.26.9-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.9/src/crypto/rsa) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/crypto/rsa)
+[![Tests](https://img.shields.io/badge/Tests-568_matched_%2F_1_disclosed-brightgreen?logo=go)](https://go2cs.net/validation/1.24.13.7/crypto.rsa.html) [![Docs](https://img.shields.io/badge/Docs-@1.26.10-00ADD8?logo=go)](https://pkg.go.dev/crypto/rsa@go1.26.10)\
+[![Source](https://img.shields.io/badge/Source-@1.26.10-00ADD8?logo=go)](https://github.com/golang/go/tree/go1.26.10/src/crypto/rsa) [![Source](https://img.shields.io/badge/Source-@1.24.13.7-512BD4?logo=dotnet)](https://github.com/ritchiecarroll/go2cs/tree/nuget-1.24.13.7/src/core/crypto/rsa)
 
 From C#, call this package through the static class go.crypto.rsa_package; see [Consuming converted Go from C#](https://go2cs.net/ConsumingGoFromCSharp.html).
 
@@ -21,7 +21,7 @@ Operations involving private keys are implemented using constant-time algorithms
 
 \[GenerateKey] returns an error if a key of less than 1024 bits is requested, and all Sign, Verify, Encrypt, and Decrypt methods return an error if used with a key smaller than 1024 bits. Such keys are insecure and should not be used.
 
-The rsa1024min=0 GODEBUG setting suppresses this error, but we recommend doing so only in tests, if necessary. Tests can set this option using [testing.T.Setenv](https://pkg.go.dev/testing@go1.26.9#T.Setenv) or by including "//go:debug rsa1024min=0" in a \*\_test.go source file.
+The rsa1024min=0 GODEBUG setting suppresses this error, but we recommend doing so only in tests, if necessary. Tests can set this option using [testing.T.Setenv](https://pkg.go.dev/testing@go1.26.10#T.Setenv) or by including "//go:debug rsa1024min=0" in a \*\_test.go source file.
 
 Alternatively, see the [GenerateKey (TestKey)](https://pkg.go.dev/crypto/rsa#example-GenerateKey-TestKey) example for a pregenerated test-only 2048-bit key.
 
