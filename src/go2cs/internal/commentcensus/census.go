@@ -785,6 +785,9 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 		return 0
 	}
 	ids := goIdents(g.idents[lb+1])
+	for name := range respelledBuiltins {
+		delete(ids, name)
+	}
 	for l := c + 1; l < cEnd && !isBlankCS(cs, l); l++ {
 		if !cs.codeOnLine[l-1] {
 			continue
@@ -807,6 +810,11 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 	}
 	return 0
 }
+
+// respelledBuiltins are the Go builtins the translation spells differently, so preludeSeparator does not require
+// them on the C# line: `x := make([]T, n)` becomes `var x = new slice<T>(n);` and `p := new(T)` becomes
+// `var p = @new<T>();`. (`new` is also a C# keyword, which goIdents already drops; it is listed for what it is.)
+var respelledBuiltins = map[string]bool{"make": true, "new": true}
 
 var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!;)$`)
 

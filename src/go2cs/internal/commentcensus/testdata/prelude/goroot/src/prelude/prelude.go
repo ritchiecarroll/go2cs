@@ -33,3 +33,9 @@ func first(a [2]int) (n int) {
 	n = a[0] + z
 	return
 }
+
+func grow(xs ...int) (n int) {
+	buf := make([]int, len(xs))
+	n = copy(buf, xs)
+	return
+}

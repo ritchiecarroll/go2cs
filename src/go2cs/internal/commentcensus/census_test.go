@@ -171,9 +171,9 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 		t.Fatalf("%s: %v", rendering, err)
 	}
 
-	// Vacuity: the four functions are read, or no class could move.
-	if n := r.r.body["functions"]; n != 4 {
-		t.Fatalf("%s: %d function bodies read, want 4", rendering, n)
+	// Vacuity: the five functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 5 {
+		t.Fatalf("%s: %d function bodies read, want 5", rendering, n)
 	}
 
 	got := map[string]int{}
@@ -189,15 +189,17 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 
 // The converter sets its prelude (named-result locals, variadic slices, array clones, heap boxes) apart from the
 // Go body by exactly one blank line: the owner's decision 2, so that blank line is not a defect. `good` is the
-// converter's emission; `bad` puts the blank line inside the prelude in three functions, as the converter did
-// before, and two blank lines after the prelude in the fourth. `first` opens with a Go statement that reads like
+// converter's emission; `bad` puts the blank line inside the prelude in four functions, as the converter did
+// before, and two blank lines after the prelude in a fifth. `first` opens with a Go statement that reads like
 // a prelude line (`var z int`), followed by Go's own blank line: only the blank line above it is the separator.
+// `grow` opens with `buf := make([]int, len(xs))`, which the translation spells `var buf = new slice<nint>(...)`:
+// Go's builtin `make` never appears on the C# line, so the identifier test must not require it.
 func TestPreludeSeparatorIsNotADefect(t *testing.T) {
-	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 4 {
-		t.Errorf("good: %v and %d separators, want no body class and 4 separators", got, separators)
+	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 5 {
+		t.Errorf("good: %v and %d separators, want no body class and 5 separators", got, separators)
 	}
 
-	want := map[string]int{"body:extra:after-named-result-locals": 3, "body:extra:after-param-prelude": 1}
+	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1}
 
 	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 0 {
 		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)

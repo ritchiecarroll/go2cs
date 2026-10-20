@@ -53,5 +53,14 @@ internal static nint /*n*/ first(/*[2]*/ array<nint> a) {
     return n;
 }
 
+internal static nint /*n*/ grow(params ꓸꓸꓸnint xsʗp) {
+    nint n = default!;
+
+    var xs = xsʗp.sslice();
+    var buf = new slice<nint>(len(xs));
+    n = copy(buf, xs);
+    return n;
+}
+
 } // end prelude_package
 
