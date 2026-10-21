@@ -1,7 +1,6 @@
-# DESIGN — the goroutine-leak profile over the managed runtime (PROPOSED)
+# DESIGN — the goroutine-leak profile over the managed runtime (RULED)
 
-> **STATUS: PROPOSED, with the owner's ruling of 2026-10-21 (relayed by COORD) folded in.** Written 2026-10-21 by
-> C1. The ruling:
+> **STATUS: RULED (owner, 2026-10-21, relayed by COORD).** Proposed 2026-10-21 by C1, and ruled the same day:
 >
 > - the leak profile is built **after** the Go 1.26 hop, by C1;
 > - it ships in its **own optional assembly**, never in golib;
@@ -167,7 +166,9 @@ does not claim it.
 
 ## The disclosure, and its retirement
 
-Filed for the re-bank (COORD, 2026-10-21):
+Filed for the re-bank (COORD, 2026-10-21) as a `runtime-capability` entry in
+`src/core/runtime/pprof/go2cs_test_disclosures.json`, whose reason carries this text, the measured mechanism and the
+retirement plan below:
 
 > `TestGoroutineLeakProfileConcurrency`, **runtime-capability**: Go finds leaked goroutines with its own
 > collector, which marks the heap with blocked goroutines' stacks withheld from the roots. The CLR's collector
