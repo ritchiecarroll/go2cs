@@ -634,6 +634,7 @@
     <Project Path="tests/Behavioral/InitOrderTupleSpecs/InitOrderTupleSpecs.csproj" />
     <Project Path="tests/Behavioral/InterfaceAssertionMapKey/InterfaceAssertionMapKey.csproj" />
     <Project Path="tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
+    <Project Path="tests/Behavioral/InterfaceEqualityTyped/InterfaceEqualityTyped.csproj" />
     <Project Path="tests/Behavioral/InterfaceFieldNamedScalar/InterfaceFieldNamedScalar.csproj" />
     <Project Path="tests/Behavioral/InterfaceImplementation/InterfaceImplementation.csproj" />
     <Project Path="tests/Behavioral/InterfaceInheritance/InterfaceInheritance.csproj" />
@@ -870,6 +871,7 @@
     <Project Path="tests/Behavioral/Phase5CoverageAPIs/Phase5CoverageAPIs.csproj" />
     <Project Path="tests/Behavioral/PkgLevelFuncLitLocals/PkgLevelFuncLitLocals.csproj" />
     <Project Path="tests/Behavioral/PipeCloseUnblocksRead/PipeCloseUnblocksRead.csproj" />
+    <Project Path="tests/Behavioral/PipeSharedFileObject/PipeSharedFileObject.csproj" />
     <Project Path="tests/Behavioral/PlainSendOperandOrder/PlainSendOperandOrder.csproj" />
     <Project Path="tests/Behavioral/PointerArraySlice/PointerArraySlice.csproj" />
     <Project Path="tests/Behavioral/PointerEmbedValueChainPromotion/PointerEmbedValueChainPromotion.csproj" />
@@ -933,6 +935,7 @@
     <Project Path="tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="tests/Behavioral/RangeVarHeapBox/RangeVarHeapBox.csproj" />
     <Project Path="tests/Behavioral/RangeVarReassign/RangeVarReassign.csproj" />
+    <Project Path="tests/Behavioral/RawConnSyncSocketIO/RawConnSyncSocketIO.csproj" />
     <Project Path="tests/Behavioral/ReceiverCapturedInClosure/ReceiverCapturedInClosure.csproj" />
     <Project Path="tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />
     <Project Path="tests/Behavioral/ReceiverFieldMethodCall/ReceiverFieldMethodCall.csproj" />

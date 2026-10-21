@@ -196,6 +196,64 @@ public static class GoAsyncIO
     }
 
     /// <summary>
+    /// Retires <paramref name="descriptor"/> only while <paramref name="sink"/> is still the sink
+    /// registered for it: the compare-and-remove form of <see cref="RemoveDescriptor(nuint)"/>.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor to retire.</param>
+    /// <param name="sink">The sink the retiring waiter registered for it.</param>
+    /// <returns><c>true</c> when the descriptor was still this sink's and was retired.</returns>
+    /// <remarks>
+    /// The kernel reissues a closed handle's number. A handle closed under its waiter (a program
+    /// closing the handle behind its File, or closing one of two Files over one handle) leaves the
+    /// waiter registered while a NEW handle takes the number, and the new handle's registration
+    /// replaces the sink. From then on the sink, the mark and the state under that number are the new
+    /// owner's, and a waiter retiring by number alone would take them. So an old waiter retires only
+    /// what is still its own.
+    /// </remarks>
+    public static bool RemoveDescriptor(nuint descriptor, Action<nint> sink)
+    {
+        ArgumentNullException.ThrowIfNull(sink);
+
+        if (!s_sinks.TryRemove(new KeyValuePair<nuint, Action<nint>>(descriptor, sink)))
+            return false;
+
+        s_unassociated.TryRemove(descriptor, out _);
+
+        if (s_descriptorState.TryRemove(descriptor, out Lazy<object>? lazy) && lazy.IsValueCreated)
+            (lazy.Value as IDisposable)?.Dispose();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Files <paramref name="state"/> as the submitting package's state for
+    /// <paramref name="descriptor"/>, replacing any state still filed under that number and
+    /// disposing it when it is disposable.
+    /// </summary>
+    /// <param name="descriptor">OS descriptor the state belongs to.</param>
+    /// <param name="state">The state, already built.</param>
+    /// <remarks>
+    /// For a package that builds the state at the moment the OS ACCEPTED the descriptor, as the
+    /// windows poller's bind at open does. That acceptance proves no live owner holds the number, so a
+    /// state still filed under it was left by a handle closed without its waiter retiring it (see
+    /// <see cref="RemoveDescriptor(nuint, Action{nint})"/>), and is replaced rather than refused: Go
+    /// keeps no such record, and opens the new handle.
+    /// </remarks>
+    public static void SetDescriptorState(nuint descriptor, object state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        Lazy<object> filed = new(() => state, LazyThreadSafetyMode.ExecutionAndPublication);
+        _ = filed.Value;
+
+        Lazy<object>? stale = null;
+        s_descriptorState.AddOrUpdate(descriptor, filed, (_, existing) => { stale = existing; return filed; });
+
+        if (stale is { IsValueCreated: true } && !ReferenceEquals(stale.Value, state))
+            (stale.Value as IDisposable)?.Dispose();
+    }
+
+    /// <summary>
     /// Records that the WAITER has taken <paramref name="descriptor"/> off the completion mechanism,
     /// so no submitting package may associate it with one again.
     /// </summary>

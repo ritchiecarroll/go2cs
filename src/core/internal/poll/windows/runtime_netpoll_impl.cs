@@ -73,6 +73,7 @@ using Goroutine = go.golib.Goroutine;
 using WaitReason = go.golib.WaitReason;
 using GoTimer = go.golib.GoTimer;
 using MonotonicClock = go.golib.MonotonicClock;
+using Δsyscall = go.syscall_package;
 
 // NOTE ON System.Threading.Timeout: internal/poll declares its own Timeout member (fd.go's
 // deadline-exceeded error predicate), and member lookup inside poll_package beats both the using
@@ -167,6 +168,11 @@ partial class poll_package
         // gets it in pollOpen, a wrapper gets it as its own first argument), so pollClose can retire
         // that state without the caller supplying the descriptor a second time.
         internal nuint Fd;
+
+        // The readiness sink this desc registered for Fd. pollClose retires the descriptor only while
+        // this is still the sink filed under it: a handle closed under this FD can have its number
+        // reused by a new handle, whose registration replaced the sink and whose state is not ours.
+        internal Action<nint> Sink = null!;
     }
 
     // ctx token -> desc. Go returns the *pollDesc itself as a uintptr and defends staleness with
@@ -203,18 +209,24 @@ partial class poll_package
 
     // ---- 2. runtime_pollOpen ---------------------------------------------------------------------
 
-    // Register fd with the poller and return an opaque nonzero ctx. The contract also allows
-    // (0, errno) -- pollDesc.init converts a nonzero errno with errnoErr(syscall.Errno(errno))
-    // (fd_poll_runtime.cs:49-52) -- but this body has nothing left that can fail: since the
-    // association moved to the first submit (below), registration is a token and a desc. The errno
-    // arm stays reachable in SIGNATURE only, which is the honest state; a bind failure now surfaces
-    // where the bind happens, as a submit error.
+    // Register fd with the poller and return an opaque nonzero ctx, or (0, errno) when the handle
+    // cannot be associated -- pollDesc.init converts a nonzero errno with
+    // errnoErr(syscall.Errno(errno)) (fd_poll_runtime.cs:49-52), and the FD stays unpollable.
     //
-    // WHAT THIS DOES NOT DO, AND WHY (design §4.2, AMENDED at S2). S1 associated the socket with the
-    // CLR's completion port here, which answered OQ1's one real risk against a real kernel --
-    // ThreadPoolBoundHandle.BindHandle accepts a Go-created socket. That question is settled, and the
-    // bind has since MOVED to the first submit, in the operation-record machinery. The reason is a
-    // guard Go has and the CLR does not:
+    // THE ASSOCIATION IS MADE HERE FOR EVERY HANDLE BUT A SOCKET, as Go's netpollopen makes it for
+    // every handle. The refusal is a real state, not a corner: under a shell's `2>&1`, stdout and
+    // stderr are two handles to ONE pipe object, the association belongs to the file object, and the
+    // kernel refuses stderr's. Go returns that errno, os.newFile ignores it, and stderr's operations
+    // wait on their own events. Deferring the bind to the first submit left the refusal nowhere to
+    // go: the submit threw ArgumentException out of ThreadPoolBoundHandle.BindHandle and ended the
+    // process. syscall.GoAssociateAtOpen (syscall/windows/zsyscall_windows_wsa_impl.cs) makes the
+    // bind and maps that refusal to Go's errno.
+    //
+    // A SOCKET IS STILL BOUND AT ITS FIRST SUBMIT (design §4.2, AMENDED at S2). S1 associated the
+    // socket with the CLR's completion port here, which answered OQ1's one real risk against a real
+    // kernel -- ThreadPoolBoundHandle.BindHandle accepts a Go-created socket. The bind then MOVED to
+    // the first submit, in the operation-record machinery, because of a guard Go has and the CLR does
+    // not:
     //
     //   Go's poller REJECTS completions it does not own. pollOperationFromOverlappedEntry
     //   (runtime/netpoll_windows.go) packs the *pollDesc into the completion KEY and compares it
@@ -230,11 +242,7 @@ partial class poll_package
     // STANDARD box, genuinely pins and genuinely reaches the kernel. Binding lazily removes that
     // structurally rather than detecting it after the fact: a socket that only ever sees foreign
     // overlapped IO is never associated at all, so its completion signals the caller's own event
-    // exactly as on an unregistered socket.
-    //
-    // So pollOpen now does exactly what its CONTRACT requires and nothing more: mint a token and
-    // create the desc. The association is the submit seam's to make, when it has an operation to
-    // make it for (S2b).
+    // exactly as on an unregistered socket. That producer is a socket's, so the lazy bind stops there.
     internal static partial (uintptr, nint) runtime_pollOpen(uintptr fd)
     {
         // internal/poll reaches pollOpen only through serverInit.Do(runtime_pollServerInit), so a
@@ -243,6 +251,17 @@ partial class poll_package
             throw new InvalidOperationException("runtime: pollOpen before pollServerInit");
 
         nuint handle = fd;
+
+        // REFUSE BEFORE PUBLISHING. A refused handle returns having touched neither the token table
+        // nor the readiness sink. The sink is the one that cannot wait: it is filed under the
+        // handle's VALUE, two FDs can share one (os.NewFile twice on one handle), and SetReadiness
+        // below REPLACES whatever is filed there, so a refused FD that went on to register would take
+        // the completions of the bound, live FD it shares the value with.
+        Δsyscall.Errno errno = Δsyscall.GoAssociateAtOpen((Δsyscall.ΔHandle)fd);
+
+        if (errno != 0)
+            return (0, (nint)(uintptr)errno);
+
         ManagedPollDesc desc = new(){ Fd = handle };
 
         // Interlocked, not the dictionary's own count: tokens must never be reused within a run.
@@ -255,7 +274,8 @@ partial class poll_package
         // sides see. Registration REPLACES any previous sink for the same descriptor, and must: the
         // kernel reissues descriptor numbers after a close, so refusing to overwrite would leave a
         // retired desc being woken for a socket it no longer owns.
-        golib.GoAsyncIO.SetReadiness(handle, readinessSink(ctx));
+        desc.Sink = readinessSink(ctx);
+        golib.GoAsyncIO.SetReadiness(handle, desc.Sink);
 
         return (ctx, 0);
     }
@@ -296,8 +316,9 @@ partial class poll_package
         // submit, together with every operation record hanging off it). This runs BEFORE
         // internal/poll closes the socket -- FD.destroy calls pd.close() ahead of CloseFunc
         // precisely so a poller can unregister first. Disposing that association never closes the
-        // descriptor; it stays internal/poll's throughout.
-        golib.GoAsyncIO.RemoveDescriptor(desc.Fd);
+        // descriptor; it stays internal/poll's throughout. It retires only what this desc still owns
+        // (see ManagedPollDesc.Sink).
+        golib.GoAsyncIO.RemoveDescriptor(desc.Fd, desc.Sink);
 
         pollTable.TryRemove(ctx, out _);
     }
