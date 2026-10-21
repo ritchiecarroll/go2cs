@@ -599,6 +599,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// <goos>/trace_impl.cs copies are byte-identical by L3's contract, so darwin takes the managed
 		// tracer and ReadTrace with it.
 		"ReadTrace": goosAny,
+		// runtime.traceClockUnitsPerSecond joins them 2026-10-21 (the flight-recorder seat): runtime/trace's
+		// flight recorder reads it through a //go:linkname PUSH to convert the managed tracer's batch
+		// timestamps, so it must answer that tracer's clock (golib ExecutionTracer.ClockUnitsPerSecond),
+		// not the converted body's nanotime/64 or cputicks/256. Principal <goos>/tracetime.cs; the body
+		// is in runtime/trace_impl.cs with the other three.
+		"traceClockUnitsPerSecond": goosAny,
 		// THE STOP-THE-WORLD CONTRACT (owner ruling 2026-09-28 00:40; COORD's Q1-Q6 at 02:10). The
 		// pair keeps worldsema and records /sched/pauses; other goroutines are not suspended. Each
 		// region the runtime row reaches is managed or refuses BEFORE the world: flushallmcaches has
