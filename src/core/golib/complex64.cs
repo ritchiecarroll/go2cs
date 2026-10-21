@@ -18,7 +18,8 @@ namespace go;
 public readonly struct complex64
     : IConvertible, 
       IEquatable<complex64>, 
-      IFormattable
+      IFormattable,
+      IGoEquatable
 // TODO: Implement new numeric interfaces / validate against System.Numerics.Complex:
 /*, 
 INumberBase<complex64>,
@@ -183,6 +184,9 @@ IUtf8SpanFormattable*/
     {
         return value.m_real == 0 && value.m_imaginary == 0 ? Zero : One / value;
     }
+
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is complex64 value && this == value;
 
     public static bool operator ==(complex64 left, complex64 right)
     {

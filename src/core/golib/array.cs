@@ -129,7 +129,7 @@ public interface IGoReflectSequence
 [Serializable]
 [System.Diagnostics.DebuggerDisplay("len = {Length}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(array<>.DebugView))]
-public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>, IGoZeroShaped, IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the array's elements. Built only when a debugger expands one.
     internal sealed class DebugView(array<T> value)
@@ -902,6 +902,9 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     // array<T> to array<T> comparisons
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is array<T> value && this == value;
+
     public static bool operator ==(array<T> a, array<T> b)
     {
         return a.Equals(b);
