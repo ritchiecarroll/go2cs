@@ -8699,7 +8699,7 @@ struct whose fields are all plain values is laid out exactly as Go lays it, and 
 memory as the struct (`(*T)(unsafe.Pointer(p))`) reads Go's bytes.
 <!-- Owner ruling (A), 2026-10-16, uniform over value and pointer embeds: the emission is
 src/go2cs/visitStructType.go:977#87d05a; the generator reads such a field as the embed
-(src/gen/go2cs-gen/StructDeclarationSyntaxExtensions.cs:26#95fa84, IsPromotingEmbedType) and declares no storage or
+(src/gen/go2cs-gen/StructDeclarationSyntaxExtensions.cs:27#95fa84, IsPromotingEmbedType) and declares no storage or
 accessor for it (src/gen/go2cs-gen/Templates/StructType/StructTypeTemplate.cs:377#0e4b57, :415#0e4b57). Before (A) the
 converter emitted `partial ref T T { get; }` and the generator stored the value in a private `ʗT` field in a
 later partial part, which the CLR laid AFTER every converter field: an embed declared first sat at the wrong
