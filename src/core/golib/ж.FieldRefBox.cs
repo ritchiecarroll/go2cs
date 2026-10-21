@@ -77,7 +77,7 @@ internal interface IFirstFieldView
     object? FirstFieldParent { get; }
 }
 
-public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView
+public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView
 {
     private readonly object m_source;
     private readonly FieldRefFunc<T> m_accessor;
@@ -216,6 +216,14 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
             return SameGoAddress(fr);
 
         if (m_token.Equals(fr.m_token))
+            return true;
+
+        // Two REINTERPRET views of one source are one Go address: each is its source's own storage at offset 0, whatever
+        // accessor spelled it -- ReinterpretRef<TDst> for a direct `(*U)(p)`, RootReinterpretRef for a chain re-viewed at
+        // its root, UnaliasedRef for a pair that cannot alias (its reads refuse; its address does not change). Go's `==` on
+        // pointers is address equality, so no field offset is needed, and SameGoAddress below would need an EXACT order
+        // token the source may not have (a field whose Go offset cannot be resolved).
+        if (IsReinterpretAccessor(m_token) && IsReinterpretAccessor(fr.m_token))
             return true;
 
         // The same field reached by the OTHER construction path: converted code's `&s.A` carries go2cs-gen's
@@ -555,8 +563,10 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
     // view, so a chain of pointer conversions stays one view over one box (PointerExtensions.Reinterpret).
     internal object? ReinterpretRoot => IsReinterpretAccessor(m_token) ? m_source : null;
 
+    object? IReinterpretView.ReinterpretRoot => ReinterpretRoot;
+
     // ReinterpretUnaliased's refusing accessor is a reinterpret view too: same address, same root.
     private static bool IsReinterpretAccessor(Delegate fieldId) =>
-        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
+        fieldId.Method is { Name: nameof(ж<byte>.ReinterpretRef) or nameof(ж<byte>.RootReinterpretRef) or nameof(ж<byte>.UnaliasedRef), DeclaringType: { IsGenericType: true } owner } &&
         owner.GetGenericTypeDefinition() == typeof(ж<>);
 }
