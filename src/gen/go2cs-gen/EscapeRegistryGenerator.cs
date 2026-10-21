@@ -153,8 +153,18 @@ public class EscapeRegistryGenerator : ISourceGenerator
     // a converted struct's fields. An interface ends the walk: what it holds is converted, and registered, where it was.
     internal static void Reach(Compilation compilation, INamedTypeSymbol package, ITypeSymbol type, HashSet<ITypeSymbol> registered, HashSet<ITypeSymbol> visited, int depth, bool walkPerOS, bool exportedOnly)
     {
-        if (depth > 16 || !visited.Add(type) || type.TypeKind is TypeKind.Interface or TypeKind.TypeParameter or TypeKind.Delegate)
+        if (depth > 16 || !visited.Add(type) || type.TypeKind is TypeKind.Interface or TypeKind.TypeParameter)
             return;
+
+        // A variadic func value: reflect calls it (and MakeFunc builds one) through a trampoline closed over its signature,
+        // which compiled code registers here (VariadicRegistration). Its parameters and results are not walked.
+        if (type.TypeKind == TypeKind.Delegate)
+        {
+            if (VariadicRegistration(compilation, package, type) is not null)
+                registered.Add(type);
+
+            return;
+        }
 
         if (type is IArrayTypeSymbol array)
         {
@@ -331,12 +341,53 @@ public class EscapeRegistryGenerator : ISourceGenerator
         source.Append("    [global::System.Runtime.CompilerServices.ModuleInitializer]\r\n");
         source.Append($"    internal static void {TempVarMarker}RegisterEscapingContainers()\r\n    {{\r\n");
 
-        foreach (string name in containers.Select(container => container.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)).Distinct().OrderBy(name => name, System.StringComparer.Ordinal))
-            source.Append($"        global::go.GoTypeOps.Register(global::go.GoTypeOps<{name}>.Instance);\r\n");
+        IEnumerable<string> lines = containers.Select(type => type.TypeKind == TypeKind.Delegate
+            ? VariadicRegistration(null, null, type)!
+            : $"global::go.GoTypeOps.Register(global::go.GoTypeOps<{type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}>.Instance);");
+
+        foreach (string line in lines.Distinct().OrderBy(line => line, System.StringComparer.Ordinal))
+            source.Append($"        {line}\r\n");
 
         source.Append("    }\r\n}\r\n");
 
         return source.ToString();
+    }
+
+    // The registration of a variadic func type's trampolines (golib's GoReflect.RegisterVariadicFunc/RegisterVariadicAction,
+    // GoReflect.VariadicRegistry.cs), or null when the delegate is not one: its Invoke must end in a Span<T> tail, take
+    // every parameter by value, and have a golib family of its arity. The family's type arguments are read from Invoke, so
+    // a C# natural delegate type (a method group or lambda converted to an interface) registers the family it rebinds onto
+    // without being named. A compilation and package check that every type it spells can be named from the package; the
+    // emitter passes neither, for a type already checked.
+    internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)
+    {
+        if (type is not INamedTypeSymbol { DelegateInvokeMethod: { } invoke } || invoke.Parameters.Length == 0 || invoke.ReturnsByRef || invoke.ReturnsByRefReadonly ||
+            invoke.Parameters[^1].Type is not INamedTypeSymbol { Name: "Span", Arity: 1, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } tail ||
+            invoke.Parameters.Any(parameter => parameter.RefKind != RefKind.None))
+        {
+            return null;
+        }
+
+        bool action = invoke.ReturnsVoid;
+        List<ITypeSymbol> arguments = [.. invoke.Parameters.Take(invoke.Parameters.Length - 1).Select(parameter => parameter.Type), tail.TypeArguments[0]];
+
+        if (!action)
+            arguments.Add(invoke.ReturnType);
+
+        if (arguments.Any(argument => ContainsTypeParameter(argument) || argument.IsRefLikeType || argument is IPointerTypeSymbol or IFunctionPointerTypeSymbol))
+            return null;
+
+        string family = action ? "Action" : "Func";
+
+        if (compilation is not null &&
+            (compilation.GetTypeByMetadataName($"go.{family}ꓸꓸꓸ`{arguments.Count}") is null ||
+             compilation.GetTypeByMetadataName("go.GoReflect") is not { } reflect || reflect.GetMembers($"RegisterVariadic{family}").IsEmpty ||
+             !arguments.All(argument => Nameable(compilation, package!, argument))))
+        {
+            return null;
+        }
+
+        return $"global::go.GoReflect.RegisterVariadic{family}<{string.Join(", ", arguments.Select(argument => argument.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)))}>();";
     }
 
     private const string TempVarMarker = "ᴛ";

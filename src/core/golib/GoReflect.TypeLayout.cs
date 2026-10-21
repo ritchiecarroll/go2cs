@@ -1784,6 +1784,10 @@ public static partial class GoReflect
 
         Type familyType = (hasResult ? s_variadicFuncFamily : s_variadicActionFamily)[fixedCount].MakeGenericType(typeArguments);
 
+        // A signature go2cs-gen registered is closed by compiled code (GoReflect.VariadicRegistry.cs).
+        if (registeredVariadic(familyType) is { } registered)
+            return new VariadicInvoker(familyType, registered.Call);
+
         MethodInfo trampoline = typeof(GoReflect)
             .GetMethod($"{(hasResult ? "callVariadicFunc" : "callVariadicAction")}{fixedCount}", BindingFlags.NonPublic | BindingFlags.Static)!
             .MakeGenericMethod(typeArguments);

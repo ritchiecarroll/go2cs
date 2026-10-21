@@ -167,6 +167,44 @@ public class GoReflectBridgeClosureTests
         Assert.AreEqual((nint)3, (nint)GoReflect.InvokeVariadic(compiled, [], new nint[] { 4, 5, 6 })!);
     }
 
+    private delegate @string SByteTail(sbyte head, params Span<ushort> rest);
+
+    [TestMethod]
+    public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()
+    {
+        // go2cs-gen registers each variadic signature that can reach reflect (GoReflect.VariadicRegistry.cs), so the call
+        // and make trampolines are closed by compiled code: Native AOT has no other route for a value-type signature. The
+        // signature here is used by no other test, so the per-type caches start empty and the registered pair is what
+        // serves the family, a natural-typed delegate rebinding onto it, and MakeFunc's factory.
+        Type family = typeof(Funcꓸꓸꓸ<sbyte, ushort, @string>);
+
+        Assert.IsFalse(GoReflect.IsVariadicRegistered(family));
+        GoReflect.RegisterVariadicFunc<sbyte, ushort, @string>();
+        GoReflect.RegisterVariadicFunc<sbyte, ushort, @string>();
+        Assert.IsTrue(GoReflect.IsVariadicRegistered(family));
+
+        Funcꓸꓸꓸ<sbyte, ushort, @string> sum = (head, rest) =>
+        {
+            int total = head;
+
+            foreach (ushort value in rest)
+                total += value;
+
+            return (@string)total.ToString();
+        };
+
+        SByteTail natural = (head, rest) => (@string)(head + ":" + rest.Length);
+
+        Assert.AreEqual((@string)"10", (@string)GoReflect.InvokeVariadic(sum, [(sbyte)1], new ushort[] { 4, 5 })!);
+        Assert.AreEqual((@string)"2:3", (@string)GoReflect.InvokeVariadic(natural, [(sbyte)2], new ushort[] { 1, 1, 1 })!);
+
+        System.Reflection.MethodInfo invoke = GoReflect.DelegateInvoke(family)!;
+        Delegate made = GoReflect.BuildVariadicMakeFactory(family, invoke, invoke.GetParameters())(args => (@string)(args[0] + "/" + ((slice<ushort>)args[1]!).Length));
+
+        Assert.AreEqual(family, made.GetType());
+        Assert.AreEqual((@string)"7/2", ((Funcꓸꓸꓸ<sbyte, ushort, @string>)made)(7, 8, 9));
+    }
+
     [TestMethod]
     public void AVariadicTailAliasesTheArrayItWasHandedRatherThanACopy()
     {
