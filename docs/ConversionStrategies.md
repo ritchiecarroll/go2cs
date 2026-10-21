@@ -11814,7 +11814,7 @@ func joinPair(s string, err error) string {
 	return "got:" + s
 }
 ```
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:167-172 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:166-171 -->
 ```csharp
 internal static @string joinPair(@string s, error err) {
     if (err != default!) {

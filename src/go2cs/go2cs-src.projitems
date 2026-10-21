@@ -463,6 +463,7 @@
     <None Include="$(MSBuildThisFileDirectory)projitemsIntegrity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizedFieldLifts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizeSiblingTestSeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)rangeIndexOnly_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncAssignedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncBinding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeScalarAssignedVar_test.go" />

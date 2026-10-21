@@ -10,7 +10,7 @@ internal static Size total => 3;
 
 internal static void Main() {
     var s = new slice<nint>((nint)(nuint)(total));
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = i * i;
     }
 

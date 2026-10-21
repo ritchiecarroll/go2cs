@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static nint sumWithinIter(slice<nint> s) {
     nint sum = 0;
-    foreach (var (iᴛ1, _) in s) {
+    foreach (var iᴛ1 in range(s)) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
 
@@ -18,7 +18,7 @@ internal static nint sumWithinIter(slice<nint> s) {
 
 internal static slice<ж<nint>> collectPointers(slice<nint> s) {
     slice<ж<nint>> ptrs = default!;
-    foreach (var (iᴛ1, _) in s) {
+    foreach (var iᴛ1 in range(s)) {
         ref var i = ref heap(new nint(), out var Ꮡi);
         i = iᴛ1;
 

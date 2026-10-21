@@ -7,7 +7,7 @@ partial class main_package {
 public static nint Index<S, E>(S s, E v)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         if (AreEqual(s[i], v)) {
             return i;
         }
