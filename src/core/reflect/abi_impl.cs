@@ -137,7 +137,7 @@ partial class reflect_package {
         return true;
     }
     else { /* default: */
-        print((@string)"t.Kind == "u8, t.Kind(), (@string)"\n"u8);
+        print((@string)"t.Kind == "u8, (uint8)(t.Kind()), (@string)"\n"u8);
         throw panic("unknown type kind");
     }
 

@@ -1122,12 +1122,14 @@ internal static class SelectRuntime
         SelectState sel = new();
         Waiter?[] waiters = AllocationCounter.NewArray<Waiter?>(ops.Length);
 
-        for (int i = 0; i < ops.Length; i++)
+        // In pollOrder, never source order: several cases on ONE channel queue their waiters there in
+        // this order, and the counterpart that arrives takes the head, so source order would hand case
+        // 0 every parked select. Go enqueues in lockorder, which for one channel's cases derives from
+        // its shuffled pollorder. pollOrder holds the live cases only.
+        foreach (int i in pollOrder)
         {
             SelectOp op = ops[i];
-
-            if (op.Core is null)
-                continue;
+            ChanCore core = op.Core!;
 
             // Waiter plus its park semaphore, once per live case — Go parks one sudog per case too.
             AllocationCounter.Count(2);
@@ -1136,11 +1138,11 @@ internal static class SelectRuntime
             if (op.IsSend)
             {
                 waiter.Elem = op.SendValue;
-                op.Core.Sendq.Enqueue(waiter);
+                core.Sendq.Enqueue(waiter);
             }
             else
             {
-                op.Core.Recvq.Enqueue(waiter);
+                core.Recvq.Enqueue(waiter);
             }
 
             waiters[i] = waiter;

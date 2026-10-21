@@ -3104,6 +3104,8 @@ public static partial class builtin
         {
             null => "(0x0,0x0)",
             bool value => value ? "true" : "false",
+            // A pointer prints its ADDRESS whatever its methods: gc's printpointer never calls String().
+            IPrintPointer pointer => pointer.PrintPointer(),
             _ => arg.ToString()
         };
     }

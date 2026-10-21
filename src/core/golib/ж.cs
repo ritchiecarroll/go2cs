@@ -85,7 +85,7 @@ public enum PointerStorage
 
 [System.Diagnostics.DebuggerDisplay("{ToString(),nq}")]
 [System.Diagnostics.DebuggerTypeProxy(typeof(ж<>.DebugView))]
-public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IGoEquatable
+public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointer, IUntypedSlotAccess, IGoReflectBox, IAllocationIdentity, IPrintPointer, IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the pointee, or null for the nil pointer -- reading a nil
     // box's Value would be Go's nil dereference, which a debugger must never trigger.
@@ -518,11 +518,21 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     public ж<TElem> at<TElem>(FieldPtrFunc<T, slice<TElem>> fieldPtrFunc, nint index) => of(fieldPtrFunc).at<TElem>(index);
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// The pointer's Go text: its <c>Error()</c>, else its <c>String()</c>, chosen by method kind across the
+    /// whole <c>*T</c> method set (value and pointer receivers alike), as fmt's <c>%v</c> chooses; otherwise
+    /// its address.
+    /// </summary>
+    /// <remarks>
+    /// See <see cref="GoMethodText"/>. Go's <c>print</c>/<c>println</c> prints the ADDRESS of a pointer
+    /// whatever its methods, so <c>builtin</c>'s printer reads <c>PrintPointer</c> directly.
+    /// </remarks>
     public override string ToString()
     {
-        return this.PrintPointer();
+        return GoMethodText.OfPointer(this) ?? this.PrintPointer();
     }
+
+    string IPrintPointer.PrintPointer() => this.PrintPointer();
 
     // ---- identity (abstract per-kind; the doctrine lives on each kind's override) ----
 
