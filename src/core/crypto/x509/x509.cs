@@ -2345,9 +2345,12 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
         RawTBSCertificateRequest: @in.TBSCSR.Raw,
         RawSubjectPublicKeyInfo: @in.TBSCSR.PublicKey.Raw,
         RawSubject: @in.TBSCSR.Subject.FullBytes,
+
         Signature: @in.SignatureValue.RightAlign(),
         SignatureAlgorithm: getSignatureAlgorithmFromAI(@in.SignatureAlgorithm),
+
         PublicKeyAlgorithm: getPublicKeyAlgorithmFromOID(@in.TBSCSR.PublicKey.Algorithm.Algorithm),
+
         Version: @in.TBSCSR.Version,
         Attributes: parseRawAttributes(@in.TBSCSR.RawAttributes)
     ));

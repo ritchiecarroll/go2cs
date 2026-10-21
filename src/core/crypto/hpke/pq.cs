@@ -27,10 +27,12 @@ internal static ж<hybridKEM> mlkem768X25519 = Ꮡ(new hybridKEM(
         /*   */ @"/^\"u8,
     /**/
     curve: ecdh.X25519(),
+
     curveSeedSize: 32,
     curvePointSize: 32,
     pqEncapsKeySize: mlkem.EncapsulationKeySize768,
     pqCiphertextSize: mlkem.CiphertextSize768,
+
     pqNewPublicKey: (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey768(data);
         return (new mlkem.EncapsulationKey768жEncapsulator(ᴛ1), ᴛ2);
@@ -51,10 +53,12 @@ internal static ж<hybridKEM> mlkem768P256 = Ꮡ(new hybridKEM(
     id: 0x0050,
     label: "MLKEM768-P256"u8,
     curve: ecdh.P256(),
+
     curveSeedSize: 32,
     curvePointSize: 65,
     pqEncapsKeySize: mlkem.EncapsulationKeySize768,
     pqCiphertextSize: mlkem.CiphertextSize768,
+
     pqNewPublicKey: (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey768(data);
         return (new mlkem.EncapsulationKey768жEncapsulator(ᴛ1), ᴛ2);
@@ -74,10 +78,12 @@ internal static ж<hybridKEM> mlkem1024P384 = Ꮡ(new hybridKEM(
     id: 0x0051,
     label: "MLKEM1024-P384"u8,
     curve: ecdh.P384(),
+
     curveSeedSize: 48,
     curvePointSize: 97,
     pqEncapsKeySize: mlkem.EncapsulationKeySize1024,
     pqCiphertextSize: mlkem.CiphertextSize1024,
+
     pqNewPublicKey: (slice<byte> data) => {
         var (ᴛ1, ᴛ2) = mlkem.NewEncapsulationKey1024(data);
         return (new mlkem.EncapsulationKey1024жEncapsulator(ᴛ1), ᴛ2);

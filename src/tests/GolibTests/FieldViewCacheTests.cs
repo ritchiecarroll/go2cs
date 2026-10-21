@@ -62,6 +62,21 @@ public class FieldViewCacheTests
         internal static ref leaf ᏑL(ref marked m) => ref m.L;
     }
 
+    // Two fields of ONE type: two accessors with the same delegate type and the same (null) target that
+    // differ only in their method, and a picker whose one instance method reads either field by its target.
+    private struct pair
+    {
+        public inner A;
+        public inner B;
+        internal static ref inner ᏑA(ref pair p) => ref p.A;
+        internal static ref inner ᏑB(ref pair p) => ref p.B;
+    }
+
+    private sealed class picker(bool second)
+    {
+        internal ref inner Pick(ref pair p) => ref second ? ref p.B : ref p.A;
+    }
+
     [TestMethod]
     public void TwoCallsWithOneAccessorReturnTheSameViewAndDifferentFieldsOrBoxesDoNot()
     {
@@ -112,6 +127,85 @@ public class FieldViewCacheTests
         Assert.IsTrue(BoxShape<late>.Slotted, "the first of() on any box of the type flips it");
         long lateAfter = BytesOfMint(() => Ꮡ(new late()));
         Assert.AreEqual(neverBytes + 8, lateAfter, "after the flip a box of the type carries the slot: +8");
+    }
+
+    [TestMethod]
+    public void DistinctDelegateInstancesOfOneAccessorShareOneViewAndDistinctAccessorsDoNot()
+    {
+        // Each `&x.f` site converts the accessor method group to its OWN delegate, so one field reaches a
+        // box as several instances. The lookup matches them by type, target and method (ж.Views.cs
+        // sameAccessor), which is Delegate.Equals' answer for a single-cast delegate.
+        FieldViewCache.Disabled = false;
+        ж<pair> box = Ꮡ(new pair());
+
+        FieldRefFunc<pair, inner> a1 = new(pair.ᏑA);
+        FieldRefFunc<pair, inner> a2 = new(pair.ᏑA);
+        Assert.IsFalse(ReferenceEquals(a1, a2), "precondition: two delegate instances");
+        ж<inner> viewA = box.of(a1);
+        Assert.IsTrue(ReferenceEquals(viewA, box.of(a2)), "two instances of one accessor must return the SAME view");
+
+        // same delegate type, same null target, a different method: a different field
+        ж<inner> viewB = box.of(new FieldRefFunc<pair, inner>(pair.ᏑB));
+        Assert.IsFalse(ReferenceEquals(viewA, viewB), "a different accessor method is a different view");
+        viewB.Value.pad = 5;
+        Assert.AreEqual(5, box.Value.B.pad);
+        Assert.AreEqual(0, box.Value.A.pad, "and it must alias its own field, not the first entry's");
+
+        // one instance method on two targets: the target decides the field, so it decides the view
+        picker first = new(false), second = new(true);
+        ж<inner> pickA = box.of(new FieldRefFunc<pair, inner>(first.Pick));
+        ж<inner> pickB = box.of(new FieldRefFunc<pair, inner>(second.Pick));
+        Assert.IsFalse(ReferenceEquals(pickA, pickB), "one method on two targets is two accessors");
+        Assert.IsTrue(ReferenceEquals(pickA, box.of(new FieldRefFunc<pair, inner>(first.Pick))), "one method on one target is one accessor");
+        pickB.Value.pad = 9;
+        Assert.AreEqual(9, box.Value.B.pad, "the second target's view aliases B");
+        pickA.Value.pad = 3;
+        Assert.AreEqual(3, box.Value.A.pad, "the first target's view aliases A");
+    }
+
+    [TestMethod]
+    public void AMulticastTokenComparesByDelegateEqualsNotByItsLastTarget()
+    {
+        // No converted site builds a multicast accessor, but should one reach the cache it must keep
+        // Delegate.Equals' answer. A multicast delegate's Target and Method name its LAST entry only, so a
+        // type/target/method match would take `ᏑA + ᏑB` for `ᏑB` and hand back the view cached for it.
+        FieldViewCache.Disabled = false;
+        ж<pair> box = Ꮡ(new pair());
+
+        ж<inner> viewB = box.of(new FieldRefFunc<pair, inner>(pair.ᏑB));
+        FieldRefFunc<pair, inner> both = new FieldRefFunc<pair, inner>(pair.ᏑA) + new FieldRefFunc<pair, inner>(pair.ᏑB);
+        Assert.AreEqual(nameof(pair.ᏑB), both.Method.Name, "precondition: the multicast's Method is its last entry's");
+        ж<inner> viewBoth = box.of(both);
+        Assert.IsFalse(ReferenceEquals(viewB, viewBoth), "a multicast token is not its last entry: Delegate.Equals says they differ");
+
+        FieldRefFunc<pair, inner> bothAgain = new FieldRefFunc<pair, inner>(pair.ᏑA) + new FieldRefFunc<pair, inner>(pair.ᏑB);
+        Assert.IsTrue(ReferenceEquals(viewBoth, box.of(bothAgain)), "an equal multicast token, by Delegate.Equals, returns the same view");
+        Assert.IsTrue(ReferenceEquals(viewB, box.of(new FieldRefFunc<pair, inner>(pair.ᏑB))), "and the single-cast entry still finds its own view");
+    }
+
+    [TestMethod]
+    public void AnElementBoxCachesItsViewsOnItsOwnSlot()
+    {
+        // `&a[i].f` asks of() of an element box, often a fresh one per expression: its views live on the
+        // box's own slot, never in the weak table, whose insert takes a lock.
+        FieldViewCache.Disabled = false;
+        array<outer> backing = new(3);
+        ElemRefBox<outer> element = new(backing, 1);
+        Assert.IsNull(element.m_views, "precondition: no view asked yet");
+
+        ж<inner> first = element.of(outer.ᏑI);
+        ж<inner> second = element.of(outer.ᏑI);
+        Assert.IsTrue(ReferenceEquals(first, second), "two of() calls on one element box return the SAME view");
+        Assert.IsNotNull(element.m_views, "the view is cached on the element box's own slot");
+
+        first.Value.pad = 11;
+        Assert.AreEqual(11, backing[1].I.pad, "the view aliases the array element");
+        Assert.AreEqual(0, backing[0].I.pad);
+
+        ElemRefBox<outer> again = new(backing, 1);
+        ж<inner> fresh = again.of(outer.ᏑI);
+        Assert.IsFalse(ReferenceEquals(first, fresh), "a fresh element box caches its own view");
+        Assert.AreEqual(11, fresh.Value.pad, "of the same element");
     }
 
     [TestMethod]

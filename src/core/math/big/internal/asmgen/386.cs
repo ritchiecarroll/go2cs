@@ -12,6 +12,7 @@ internal static void initᴛArch386() { Arch386 = Ꮡ(new Arch(
     Name: "386"u8,
     WordBits: 32,
     WordBytes: 4,
+
     regs: new @string[]{
         "BX"u8, "SI"u8, "DI"u8, "BP"u8,
         "CX"u8, "DX"u8, "AX"u8 // last, to leave available for hinted allocation
@@ -29,6 +30,7 @@ internal static void initᴛArch386() { Arch386 = Ꮡ(new Arch(
     // Perhaps some day we will decide 386 performance
     // does not matter enough to keep this code.
     memIndex: _386MemIndex,
+
     mov: "MOVL"u8,
     adds: "ADDL"u8,
     adcs: "ADCL"u8,
@@ -44,7 +46,9 @@ internal static void initᴛArch386() { Arch386 = Ꮡ(new Arch(
     neg: "NEGL"u8,
     lea: "LEAL"u8,
     mulWideF: x86MulWide,
+
     addWords: "LEAL (%[2]s)(%[1]s*4), %[3]s"u8,
+
     jmpZero: "TESTL %[1]s, %[1]s; JZ %[2]s"u8,
     jmpNonZero: "TESTL %[1]s, %[1]s; JNZ %[2]s"u8,
     loopBottom: "SUBL $1, %[1]s; JNZ %[2]s"u8,
