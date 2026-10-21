@@ -50,6 +50,10 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
 
     private readonly nint m_index;
 
+    // The field-view list (ж.Views.cs): `&a[i].f` asks of() of an element box, often a fresh one per
+    // expression, so the weak-table fallback paid an insert under its lock on every such box.
+    internal ViewEntry? m_views;
+
     // The deep funnel's run source (NativeStructMarshal.CallDeep): the fast arm's backing and absolute index.
     // The foreign arm has no contiguous backing to copy a run from, so it answers none.
     Array? IElementRun.RunBacking => m_backing;

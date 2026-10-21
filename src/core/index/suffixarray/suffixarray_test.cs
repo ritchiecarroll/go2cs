@@ -40,6 +40,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "a*"u8
         }.slice()
     ),
+
     new(
         "all a's"u8,
         "aaaaaaaaaa"u8, // 10 a's
@@ -64,6 +65,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "aaa*"u8
         }.slice()
     ),
+
     new(
         "abc"u8,
         "abc"u8,
@@ -79,6 +81,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "abc?"u8
         }.slice()
     ),
+
     new(
         "barbara*3"u8,
         "barbarabarbarabarbara"u8,
@@ -91,6 +94,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "bara?bar"u8
         }.slice()
     ),
+
     new(
         "typing drill"u8,
         "Now is the time for all good men to come to the aid of their country."u8,
@@ -102,6 +106,7 @@ internal static slice<testCase> testCases = new testCase[]{
             "to (come|the)?"u8
         }.slice()
     ),
+
     new(
         "godoc simulation"u8,
         "package main\n\nimport(\n    \"rand\"\n    "u8,

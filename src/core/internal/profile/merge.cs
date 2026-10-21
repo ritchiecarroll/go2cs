@@ -455,12 +455,15 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
 
     var p = Ꮡ(new Profile(
         SampleType: new slice<ж<ValueType>>(len((~srcs[0]).SampleType)),
+
         DropFrames: (~srcs[0]).DropFrames,
         KeepFrames: (~srcs[0]).KeepFrames,
+
         TimeNanos: timeNanos,
         DurationNanos: durationNanos,
         PeriodType: (~srcs[0]).PeriodType,
         Period: period,
+
         Comments: comments,
         DefaultSampleType: defaultSampleType
     ));

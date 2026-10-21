@@ -36,11 +36,16 @@ import (
 //
 // Rows that name no baseline path, repeat a path, or are malformed fail too, so the file stays a record.
 //
-// THE POPULATION is the MARKED set only, H6's own predicate. *_impl.cs companions are outside it (AUDIT-h6
-// OQ-1, ruled OUT 2026-10-12): a deleted companion leaves its partial declarations without bodies, so the
-// build fails loudly, and the compiler already guards that case.
+// THE POPULATION is every hand-owned file: the MARKED set (H6's own predicate) and every *_impl.cs companion.
+// Companions were left out once (AUDIT-h6 OQ-1, ruled OUT 2026-10-12) on the reading that a deleted companion
+// leaves its partial declarations without bodies, so the build fails loudly. It does not: go2cs-gen's
+// PartialStubGenerator fills a bodyless partial with a NotImplementedException stub, so the corpus compiles
+// and the first CALL fails, as an infrastructure error no disclosure can absorb. The go1.26 hop lost exactly
+// such a companion this way (runtime/internal/startlinetest/asmfunc_impl.cs, AsmFunc's by-name refusal, when
+// Go 1.26 moved the package) and no gate saw it; COORD reopened the population on that counterexample
+// (2026-10-21, claude/g-hop-lost-refusals).
 //
-// THE BASELINE (testdata/handowns-baseline.txt) is the union of the marker census at each commit named in
+// THE BASELINE (testdata/handowns-baseline.txt) is the union of the hand-own census at each commit named in
 // its header: the previous hop's outgoing commit and the commit the baseline was generated at. A census
 // at HEAD alone reads zero absent entries and proves nothing about the hop that just closed.
 // src/handown-baseline.ps1 writes it. This guard re-derives the union from the header's SHAs and fails
@@ -63,7 +68,8 @@ type retiredRow struct {
 	record  string
 }
 
-// markedAt returns the hand-own marker census at ref, as repository-relative paths.
+// markedAt returns the hand-own census at ref, as repository-relative paths: the files carrying the marker,
+// and every *_impl.cs companion (THE POPULATION, above).
 func markedAt(t *testing.T, root, ref string) []string {
 	t.Helper()
 
@@ -73,14 +79,34 @@ func markedAt(t *testing.T, root, ref string) []string {
 		t.Fatalf("the marker census at %s failed (is the commit in this clone?): %v", ref, err)
 	}
 
+	tree, err := exec.Command("git", "-C", root, "ls-tree", "-r", "--name-only", ref, "--", "src/core").Output()
+
+	if err != nil {
+		t.Fatalf("the companion census at %s failed (is the commit in this clone?): %v", ref, err)
+	}
+
+	seen := map[string]bool{}
 	var paths []string
 
+	add := func(path string) {
+		if path != "" && !seen[path] {
+			seen[path] = true
+			paths = append(paths, path)
+		}
+	}
+
 	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
-		paths = append(paths, strings.TrimPrefix(line, ref+":"))
+		add(strings.TrimPrefix(line, ref+":"))
+	}
+
+	for _, line := range strings.Split(strings.TrimSpace(string(tree)), "\n") {
+		if strings.HasSuffix(line, "_impl.cs") {
+			add(line)
+		}
 	}
 
 	if len(paths) == 0 {
-		t.Fatalf("the marker census at %s is empty: wrong clone or broken predicate", ref)
+		t.Fatalf("the hand-own census at %s is empty: wrong clone or broken predicate", ref)
 	}
 
 	return paths
