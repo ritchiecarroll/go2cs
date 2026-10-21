@@ -27884,4 +27884,31 @@ equals the committed corpus at the banked ref, or the corpus ref the row actuall
 
 — G (measured 2026-10-21)
 
+## 2026-10-21 — P1: reflect Call and MakeFunc of a variadic func under Native AOT reach compiled trampolines only for signatures go2cs-gen registers; three shapes stay outside the registry and refuse by name — STATED AOT LIMIT (claude/p1-aot-generic-closures; JIT unaffected)
+
+**What the seat does.** golib's GoReflect.VariadicRegistry.cs keeps compiled call and make trampolines per
+Actionꓸꓸꓸ/Funcꓸꓸꓸ instantiation. go2cs-gen registers each variadic signature that can reach reflect:
+- every func value a package converts to an interface, or reaches through a converted value, its fields, its
+  elements, or a func's parameters and results;
+- a func boxed by golib's typed-nil carrier (OrTypedNilFunc);
+- each variadic IGoMethodSet arm.
+
+Under Native AOT, folding ON, the promoted and varfunc probes moved from exit 2 (NotSupportedException, missing
+native code for callVariadicFunc1) to equal Go.
+
+**The limit.** Three shapes are not registered. Under Native AOT, a call or MakeFunc of one whose family has a
+value-type argument panics by name. The panic names the Go func type, the family, and GoReflect.RegisterVariadicFunc
+or RegisterVariadicAction. It replaces the runtime's NotSupportedException. A family of reference types only
+still closes through shared code.
+1. A func of a type parameter's type converted to `any` inside generic code: the signature is open at the site.
+2. A signature that names a type the converting package cannot name: an inaccessible type, or one in an
+   assembly the package does not reference directly (EscapeRegistryGenerator.Nameable, the containers' rule).
+3. `reflect.FuncOf(in, out, true)` followed by `reflect.MakeFunc`, for a signature the program never spells.
+   No compile-time mechanism can name it (census rows 3-11).
+
+Owner: none (post-hop). Fixing 1 needs the generic code's instantiations, or a registration at each closing
+site. Fixing 2 needs a registration in the assembly that can name the type. 3 stays a documented limit.
+
+— P1 (measured 2026-10-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
