@@ -124,6 +124,10 @@ internal static class PackageAncestry
             // fills testdata from the digest-tracked build output — and a junction there would put a
             // test's writes inside the real GOROOT.
             CopyOwnFiles(Path.Combine(goRootSrc, Path.Combine(segments)), workingDirectory);
+
+            // The staged ancestry IS a GOROOT for a toolchain child that starts inside it (see
+            // SetStagedGoroot); released in TestHost.Run's finally (ReleaseStagedGoroot).
+            SetStagedGoroot(goRoot, runRoot);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
@@ -947,6 +951,60 @@ internal static class PackageAncestry
     // throws.
     private static void SetToolchainGodebugComposer(string? goRoot)
     {
+        lock (s_composerFacets)
+            s_junctionGoTool = goRoot is null ? null : GoToolPath(goRoot);
+
+        InstallChildEnvironmentComposer(requireSeam: goRoot is not null,
+            $"the junction fallback cannot carry {JunctionGodebugSetting} to a toolchain child that sets its own {GodebugVariable}");
+    }
+
+    // THE STAGED ANCESTRY IS A GOROOT FOR A TOOLCHAIN CHILD THAT STARTS INSIDE IT (COORD ruling 2026-10-21,
+    // math/big's TestEscape). Go runs `go build -gcflags=-m` with cwd = GOROOT/src/math/big, so the package
+    // is std's. Here the cwd is the sandbox's copy under this view's src/go.mod (module std), while GOROOT
+    // stays REAL by design (the remarks above: a junction mirror is not walkable, and repointing the
+    // process's GOROOT regresses compress/gzip and path/filepath). The child go therefore read the copy as
+    // an ordinary module NAMED std, called the package std/math/big and refused its internal/byteorder
+    // import. Measured: the same build with GOROOT naming a junction mirror of this layout exits 0 as
+    // `# math/big`.
+    //
+    // So the composer hands THAT CHILD this view's root as its GOROOT, and nothing else: the child must be
+    // this GOROOT's own go binary, and it must START inside the staged root (attr.Dir, or the host's cwd when
+    // that is empty) -- a toolchain child with a cmd.Dir of its own (a temp module, debug/buildinfo's) keeps
+    // the real GOROOT. The converted process, runtime.GOROOT() and os.Getenv("GOROOT") all keep the real one,
+    // and a program never has a composer at all: the confinement is that only this host installs it.
+    private static void SetStagedGoroot(string goRoot, string runRoot)
+    {
+        lock (s_composerFacets)
+        {
+            s_stagedGoTool = GoToolPath(goRoot);
+            s_stagedGorootRoot = Path.GetFullPath(runRoot);
+        }
+
+        InstallChildEnvironmentComposer(requireSeam: true,
+            "a toolchain child started inside the staged GOROOT ancestry cannot be given that ancestry as its GOROOT");
+    }
+
+    /// <summary>
+    /// Ends the staged-GOROOT facet of the toolchain-child composer (see SetStagedGoroot); a no-op when
+    /// nothing was staged. Called from TestHost.Run's finally, beside RestoreJunctionGodebug.
+    /// </summary>
+    public static void ReleaseStagedGoroot()
+    {
+        lock (s_composerFacets)
+        {
+            s_stagedGoTool = null;
+            s_stagedGorootRoot = null;
+        }
+
+        InstallChildEnvironmentComposer(requireSeam: false, null);
+    }
+
+    private static string GoToolPath(string goRoot) =>
+        Path.GetFullPath(Path.Combine(goRoot, "bin", OperatingSystem.IsWindows() ? "go.exe" : "go"));
+
+    // Installs the ONE composer while either facet is active, and clears the seam when neither is.
+    private static void InstallChildEnvironmentComposer(bool requireSeam, string? purpose)
+    {
         Type? syscallPackage = Type.GetType(TestHost.SyscallPackageTypeName, throwOnError: false);
 
         if (syscallPackage is null)
@@ -956,28 +1014,82 @@ internal static class PackageAncestry
 
         if (seam is null)
         {
-            if (goRoot is null)
+            if (!requireSeam)
                 return;
 
             throw new InvalidOperationException(
-                $"the junction fallback cannot carry {JunctionGodebugSetting} to a toolchain child that sets its own " +
-                $"{GodebugVariable}: syscall has no '{ChildEnvironmentComposerField}' seam (syscall/windows/exec_windows.cs)");
+                $"{purpose}: syscall has no '{ChildEnvironmentComposerField}' seam (syscall's hand-owned spawn: " +
+                "windows/exec_windows.cs, linux/exec_unix.cs, darwin/exec_libc2_impl.cs)");
         }
 
-        string? goTool = goRoot is null
-            ? null
-            : Path.GetFullPath(Path.Combine(goRoot, "bin", OperatingSystem.IsWindows() ? "go.exe" : "go"));
+        bool active;
 
-        seam.SetValue(null, goTool is null ? null : (Func<string, string[], string[]?>)(
-            (executable, environment) => ComposeToolchainGodebug(goTool, executable, environment)));
+        lock (s_composerFacets)
+            active = s_junctionGoTool is not null || s_stagedGoTool is not null;
+
+        seam.SetValue(null, active ? (Func<string, string, string[], string[]?>)ComposeToolchainChild : null);
     }
 
-    // Returns null for "unchanged": not the toolchain, or its GODEBUG already names winsymlink.
-    private static string[]? ComposeToolchainGodebug(string goTool, string executable, string[] environment)
+    // Returns null for "unchanged": not a toolchain child, or nothing either facet owes it.
+    private static string[]? ComposeToolchainChild(string executable, string directory, string[] environment)
     {
-        if (!string.Equals(Path.GetFullPath(executable), goTool, StringComparison.OrdinalIgnoreCase))
-            return null;
+        string? junctionGoTool, stagedGoTool, stagedRoot;
 
+        lock (s_composerFacets)
+        {
+            junctionGoTool = s_junctionGoTool;
+            stagedGoTool = s_stagedGoTool;
+            stagedRoot = s_stagedGorootRoot;
+        }
+
+        string resolved = Path.GetFullPath(executable);
+        string[]? composed = null;
+
+        if (junctionGoTool is not null && string.Equals(resolved, junctionGoTool, StringComparison.OrdinalIgnoreCase))
+            composed = ComposeToolchainGodebug(environment);
+
+        if (stagedGoTool is not null && stagedRoot is not null && SamePath(resolved, stagedGoTool) && IsUnder(directory, stagedRoot))
+            composed = ComposeStagedGoroot(composed ?? environment, stagedRoot);
+
+        return composed;
+    }
+
+    // Every GOROOT entry becomes the staged root (os/exec has already kept only the last), or one is added.
+    private static string[] ComposeStagedGoroot(string[] environment, string stagedRoot)
+    {
+        StringComparison names = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        string entry = $"{GorootVariable}={stagedRoot}";
+        string[] composed = (string[])environment.Clone();
+        bool found = false;
+
+        for (int i = 0; i < composed.Length; i++)
+        {
+            if (composed[i].StartsWith(GorootVariable + "=", names))
+            {
+                composed[i] = entry;
+                found = true;
+            }
+        }
+
+        return found ? composed : [.. composed, entry];
+    }
+
+    private static bool SamePath(string a, string b) =>
+        string.Equals(a, b, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
+    private static bool IsUnder(string directory, string root)
+    {
+        string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
+        string prefix = Path.TrimEndingDirectorySeparator(root);
+
+        return SamePath(full, prefix) ||
+            full.StartsWith(prefix + Path.DirectorySeparatorChar,
+                OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    }
+
+    // The GODEBUG facet. Returns null for "unchanged": its GODEBUG already names winsymlink.
+    private static string[]? ComposeToolchainGodebug(string[] environment)
+    {
         // The LAST GODEBUG entry, the one that takes effect, matched as Windows matches names.
         int at = -1;
 
@@ -1067,6 +1179,14 @@ internal static class PackageAncestry
     private static string? s_junctionGodebugPreviousConverted;
     private static bool s_junctionGodebugConvertedPresent;
 
+    // The toolchain-child composer's two facets (see InstallChildEnvironmentComposer), under their own lock:
+    // the junction GODEBUG facet is set inside s_fixtureLinks' lock and the staged-GOROOT facet outside it.
+    private static readonly object s_composerFacets = new();
+    private static string? s_junctionGoTool;
+    private static string? s_stagedGoTool;
+    private static string? s_stagedGorootRoot;
+
+    private const string GorootVariable = "GOROOT";
     private const string GodebugVariable = "GODEBUG";
     private const string JunctionGodebugName = "winsymlink";
     private const string JunctionGodebugSetting = $"{JunctionGodebugName}=0";

@@ -517,6 +517,11 @@ public static class TestHost
                 // whose reader observes the CLR store this run would otherwise have left set. Nothing
                 // to put back is the common case and costs a bool test.
                 PackageAncestry.RestoreJunctionGodebug();
+
+                // The staged-GOROOT facet of the toolchain-child composer lives exactly as long as the
+                // staged ancestry it names: the next host in the in-process tier must not hand a toolchain
+                // child a run root that no longer exists.
+                PackageAncestry.ReleaseStagedGoroot();
             }
             catch
             {

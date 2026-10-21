@@ -441,6 +441,46 @@ internal static @string unsupportedSysProcAttrField(ref SysProcAttr sys) {
     return ""u8;
 }
 
+// go2cs HOST SEAM (not in Go): the converted-test host's child-environment composer, the same seam
+// under the same name as syscall/windows/exec_windows.cs (see there): consulted with the executable,
+// the directory the child starts in (attr.Dir, or this process's own when that is empty) and the
+// child's environment just before the environment vector is built; null means "unchanged", and a
+// program never has one. Here it carries the staged-GOROOT case: a toolchain child that starts inside
+// the host's staged GOROOT ancestry is handed that ancestry as its GOROOT (math/big's TestEscape).
+internal static Func<string, string, string[], string[]?>? childEnvironmentComposer;
+
+// composeChildEnvironment offers an explicit child environment to the host seam above. A nil
+// environment is an EMPTY one here (SlicePtrFromStrings' semantics), never an inherited one, so it is
+// passed through unchanged.
+internal static slice<@string> composeChildEnvironment(@string argv0, @string dir, slice<@string> env) {
+    Func<string, string, string[], string[]?>? composer = System.Threading.Volatile.Read(ref childEnvironmentComposer);
+
+    if (composer is null || env == nil) {
+        return env;
+    }
+
+    string[] current = new string[len(env)];
+
+    for (nint i = 0; i < len(env); i++) {
+        current[i] = env[i].ToString();
+    }
+
+    string directory = dir != ""u8 ? dir.ToString() : System.IO.Directory.GetCurrentDirectory();
+    string[]? composed = composer(argv0.ToString(), directory, current);
+
+    if (composed is null) {
+        return env;
+    }
+
+    @string[] replaced = new @string[composed.Length];
+
+    for (int i = 0; i < composed.Length; i++) {
+        replaced[i] = composed[i];
+    }
+
+    return new slice<@string>(replaced);
+}
+
 internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@string> argv, ref ProcAttr attr, ref SysProcAttr sys) {
     // glibc's opaque control blocks, driven only through their init/destroy/add functions —
     // never by layout knowledge. The allocations are generous over the real glibc sizes
@@ -457,7 +497,7 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
     try {
         pathz = MarshalStringZ(argv0);
         argvVec = MarshalStringVector(argv);
-        envVec = MarshalStringVector(attr.Env);
+        envVec = MarshalStringVector(composeChildEnvironment(argv0, attr.Dir, attr.Env));
 
         fileActions = System.Runtime.InteropServices.Marshal.AllocHGlobal(128);
         int rc = posix_spawn_file_actions_init(fileActions);

@@ -445,15 +445,17 @@ private static (IntPtr ptr, error err) allocUTF16(@string s) {
 }
 
 // go2cs HOST SEAM (not in Go): a composer the converted-test host installs, consulted with the
-// resolved executable path and the child's environment just before the environment block is built.
-// It returns null for "unchanged", and a program never has one. It exists for one measured case: a
-// host staging fixture trees as JUNCTIONS (no symbolic-link privilege) publishes
-// GODEBUG=winsymlink=0, and a test that starts the Go toolchain with its OWN GODEBUG replaces it,
-// because os/exec keeps the last duplicate key. The host's composer (testing's
-// PackageAncestry.ApplyJunctionGodebug) puts the setting back into a TOOLCHAIN child's GODEBUG only;
-// see there. Installed and cleared by reflection, since testing does not reference syscall. Plain CLR
-// types keep that reflective contract free of golib's.
-internal static Func<string, string[], string[]?>? childEnvironmentComposer;
+// resolved executable path, the directory the child starts in (attr.Dir, or this process's own when
+// that is empty) and the child's environment, just before the environment block is built. It returns
+// null for "unchanged", and a program never has one. The host's composer (testing's PackageAncestry,
+// ComposeToolchainChild) acts on a TOOLCHAIN child only, for two measured cases: a host staging
+// fixture trees as JUNCTIONS publishes GODEBUG=winsymlink=0, which a test that sets its OWN GODEBUG
+// replaces (os/exec keeps the last duplicate key); and a toolchain child that starts inside the staged
+// GOROOT ancestry must be told that ancestry IS its GOROOT, or it reads the package as an ordinary
+// module named std and refuses its internal imports (math/big's TestEscape). Installed and cleared by
+// reflection, since testing does not reference syscall. Plain CLR types keep that reflective contract
+// free of golib's. The linux and darwin spawns carry the same seam under the same name.
+internal static Func<string, string, string[], string[]?>? childEnvironmentComposer;
 
 // StartProcess is the native transcription of exec_windows.go's StartProcess — see the file header
 // for why this one declaration cannot be a literal conversion. Ordering, validation and returned
@@ -499,7 +501,7 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
     // The host seam above: a nil Env inherits the process environment, which already carries whatever
     // the host published, so only an explicit environment is offered to the composer.
     slice<@string> env = attr.Env;
-    Func<string, string[], string[]?>? composer = System.Threading.Volatile.Read(ref childEnvironmentComposer);
+    Func<string, string, string[], string[]?>? composer = System.Threading.Volatile.Read(ref childEnvironmentComposer);
 
     if (composer is not null && env != nil) {
         string[] current = new string[len(env)];
@@ -508,7 +510,8 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
             current[i] = env[i].ToString();
         }
 
-        string[]? composed = composer(argv0.ToString(), current);
+        string directory = len(attr.Dir) != 0 ? attr.Dir.ToString() : System.IO.Directory.GetCurrentDirectory();
+        string[]? composed = composer(argv0.ToString(), directory, current);
 
         if (composed is not null) {
             @string[] replaced = new @string[composed.Length];
