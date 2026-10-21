@@ -835,13 +835,16 @@ public static class ExecutionTracer
     {
         List<byte> payload = [EvStrings];
 
+        // Each key is Latin-1, one char per byte (intern), so its chars ARE the string's bytes: written straight into
+        // the payload, with no intermediate array.
         foreach ((string text, ulong id) in s_strings)
         {
-            byte[] bytes = Encoding.Latin1.GetBytes(text);
             payload.Add(EvString);
             uvarint(payload, id);
-            uvarint(payload, (ulong)bytes.Length);
-            payload.AddRange(bytes);
+            uvarint(payload, (ulong)text.Length);
+
+            foreach (char character in text)
+                payload.Add((byte)character);
         }
 
         return batchOf(NoThread, (ulong)s_lastTimestamp, payload);
