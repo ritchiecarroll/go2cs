@@ -106,21 +106,25 @@ public static void TestWriterPaletted(ж<testing.T> Ꮡt) {
             bitdepth: 8,
             datalen: (1 + width) * height
         ),
+
         new(
             plen: 128,
             bitdepth: 8,
             datalen: (1 + width) * height
         ),
+
         new(
             plen: 16,
             bitdepth: 4,
             datalen: (1 + width / 2) * height
         ),
+
         new(
             plen: 4,
             bitdepth: 2,
             datalen: (1 + width / 4) * height
         ),
+
         new(
             plen: 2,
             bitdepth: 1,
