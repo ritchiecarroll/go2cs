@@ -1214,6 +1214,7 @@
     <Project Path="tests/Performance/PerfIface/PerfIface.csproj" />
     <Project Path="tests/Performance/PerfIfaceCall/PerfIfaceCall.csproj" />
     <Project Path="tests/Performance/PerfIfaceShell/PerfIfaceShell.csproj" />
+    <Project Path="tests/Performance/PerfIfaceShellChurn/PerfIfaceShellChurn.csproj" />
     <Project Path="tests/Performance/PerfMap/PerfMap.csproj" />
     <Project Path="tests/Performance/PerfMatMul/PerfMatMul.csproj" />
     <Project Path="tests/Performance/PerfRefLower/PerfRefLower.csproj" />

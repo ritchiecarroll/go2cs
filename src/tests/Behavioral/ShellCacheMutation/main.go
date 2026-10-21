@@ -1,11 +1,13 @@
 // Guards MUTATION VISIBILITY through a duck-typed shell that golib may hand out more than once.
 //
 // An assert with no compile-time adapter resolves through a runtime shell (golib's AdapterBinder).
-// The P3 experiment (docs/phase4/DESIGN-iface-shell-caching.md, section 6.4) keeps ONE shell per Go
-// dynamic value, so a re-assert of the same value returns the shell an earlier assert built. That is
-// only sound if the shell holds the dynamic value by REFERENCE: a write through the pointer after the
-// shell exists must be seen by the old shell and by every later assert, and a second pointer of the
-// same type must never be answered by the first pointer's shell.
+// The P3 cache (docs/phase4/DESIGN-iface-shell-caching.md, sections 6.4 and 12) lets a re-assert of
+// the same dynamic value return the shell an earlier assert built. That is only sound if the shell
+// holds the dynamic value by REFERENCE: a write through the pointer after the shell exists must be
+// seen by the old shell and by every later assert, and a second pointer of the same type must never be
+// answered by the first pointer's shell. And it is only sound if a VALUE source is keyed on the
+// interface value, not on the variable: converting a struct copies it, so a write to the variable
+// after one conversion is seen by the next conversion and never by the first.
 //
 // The dynamic values sit in an `any` slice and the target is an interface literal, so no adapter can
 // be recorded at conversion time and every assert below takes the shell tier, the same construction
@@ -22,6 +24,10 @@ func (b *box) Len() int { return b.n }
 type counter int
 
 func (c counter) Len() int { return int(c) }
+
+type pair struct{ x int }
+
+func (p pair) Len() int { return p.x }
 
 func main() {
 	p := &box{n: 1}
@@ -50,6 +56,31 @@ func main() {
 		v, ok := values[i].(interface{ Len() int })
 		fmt.Println("value", i, ok, v.Len())
 	}
+
+	// A value source written AFTER a conversion: any(t) copies t, so the earlier interface value keeps
+	// the old contents and the next conversion sees the write, on first assert and on every re-assert.
+	t := pair{x: 1}
+	before := any(t)
+	t.x = 2
+	after := any(t)
+	b, okBefore := before.(interface{ Len() int })
+	a, okAfter := after.(interface{ Len() int })
+	fmt.Println("value written after conversion:", okBefore, b.Len(), okAfter, a.Len())
+
+	alternating := 0
+
+	for i := 0; i < 10; i++ {
+		src := before
+		if i%2 == 1 {
+			src = after
+		}
+
+		if v, ok := src.(interface{ Len() int }); ok {
+			alternating = alternating*10 + v.Len()
+		}
+	}
+
+	fmt.Println("alternating re-asserts:", alternating, "variable now:", t.Len())
 
 	// Many re-asserts of the same values, interleaved, with a write part way through.
 	sum := 0

@@ -1073,3 +1073,41 @@ Every process's checksum was the expected value. The steady-state delta sits ins
 prediction (−8 to +1 ns) and below that day's −6.9; the per-arm ranges overlap (base 136.2–160.6,
 cache 130.0–157.9), so on this VM the timing gain is smaller than the cross-process
 spread, as it was before. The allocation result does not depend on the VM.
+
+**Reworked 2026-10-21: the weak table is replaced by one weak last-value slot per factory.** G's
+review of the seat found the cost the measurements above never looked for: every NEW dynamic value
+paid a `ConditionalWeakTable` insert and a dependent handle, and the table grew with every value a
+program ever asserted. The same-value rows above only measure the case a cache can win. The CHURN case
+is now a performance row, `PerfIfaceShellChurn`: a new value for every assert, built from a value
+source, a pointer source and `errors.Is` over a fresh `*fs.PathError`.
+
+The slot holds an immutable (value, shell) pair through a `WeakReference`. A hit is `ReferenceEquals`
+on the value. A miss builds the shell and stores a new pair: one small object and one handle write.
+The pair is weak because the shell holds its value, and Go can observe a value kept alive (a finalizer
+or a weak pointer). `ShellCacheMutation` gained the value-source shape `t.x = 2; any(t)`: a write to
+the variable after one conversion is seen by the next conversion and never by the first, on first
+assert and on every alternating re-assert.
+
+Measured on linux (4 vCPU VM, Microsoft .NET 10.0.12, JIT, Release) at the batch-8 tip `315a93e847`.
+There were three arms whose only difference is `AdapterBinder.cs`: base (no cache, the tip), table
+(`43f51e5074`), slot (this rework). Order was rotated every round.
+
+| reading | base | table | slot |
+|---|---:|---:|---:|
+| same value, B/iter | 96 | 24 | 24 |
+| same value, ns/iter, median of 16 processes' best window | 144.9 | 139.8 | **111.0** |
+| churn, ns/iter, median per round over 6 processes (rounds 2-6) | 1263-1308 | 10165-13092 | 1343-1431 |
+| `errors.Is` alone, ns/iter (4 rounds) | 1084-1142 | 5243-6564 | 1078-1109 |
+| churn, peak working set, median MB | 126.8 | 444.2 | 126.8 |
+
+COORD ruled (2026-10-21): keep the slot. The residual churn cost of about +6..9% is accepted as stated,
+and it is bounded: `src/tests/Performance/run-shell-churn-bound.ps1` builds the churn row twice from one
+tree, once with the cache compiled out (golib's `Go2csNoShellCache`). It reds when the tree's median
+workload time exceeds 1.15x the control's or its median peak working set exceeds 1.25x, on the same
+box in one session.
+
+The gate's first readings, on the same VM at this tree: **PASS**, with time 1.075x and peak working set
+1.001x (7 processes per arm, the first of each dropped). With the table planted back in place of the slot
+(the `#else` branch only, so the control arm is unchanged), it **FAILS on both bounds by name**, with time
+2.798x and working set 1.727x (4 processes per arm). Restoring the slot left `AdapterBinder.cs`
+byte-identical to the cut.

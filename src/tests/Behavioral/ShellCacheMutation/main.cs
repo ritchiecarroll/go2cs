@@ -18,6 +18,14 @@ internal static nint Len(this counter c) {
     return (nint)c;
 }
 
+partial struct pair {
+    internal nint x;
+}
+
+internal static nint Len(this pair p) {
+    return p.x;
+}
+
 internal partial interface main_type /*dyn*/ {
     nint Len();
 }
@@ -47,6 +55,31 @@ internal static void Main() {
         fmt.Println("value", i, okΔ1, v.Len());
     }
 
+    var t = new pair(x: 1);
+    var before = (any)t;
+    t.x = 2;
+    var after = (any)t;
+    var (b, okBefore) = before._<main_type>(ᐧ);
+    var (a, okAfter) = after._<main_type>(ᐧ);
+    fmt.Println("value written after conversion:", okBefore, b.Len(), okAfter, a.Len());
+
+    nint alternating = 0;
+
+    for (nint i = 0; i < 10; i++) {
+        var src = before;
+        if (i % 2 == 1) {
+            src = after;
+        }
+
+        {
+            var (v, okΔ2) = src._<main_type>(ᐧ); if (okΔ2) {
+                alternating = alternating * 10 + v.Len();
+            }
+        }
+    }
+
+    fmt.Println("alternating re-asserts:", alternating, "variable now:", t.Len());
+
     nint sum = 0;
 
     for (nint i = 0; i < 1000; i++) {
@@ -54,9 +87,9 @@ internal static void Main() {
             p.Value.n = 3;
         }
 
-        foreach (var (_, a) in values) {
+        foreach (var (_, aΔ1) in values) {
             {
-                var (v, okΔ2) = a._<main_type>(ᐧ); if (okΔ2) {
+                var (v, okΔ3) = aΔ1._<main_type>(ᐧ); if (okΔ3) {
                     sum += v.Len();
                 }
             }

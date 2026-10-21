@@ -264,15 +264,47 @@ public static class AdapterBinder
         return factory is null ? null : CacheShellInstances(factory);
     }
 
-    // One shell instance per Go dynamic value (DESIGN-iface-shell-caching 6.4), held weakly on that
-    // value, so a re-assert of the same value returns the same shell instead of constructing a new one.
+    // The last shell this factory built, with the value it wraps (DESIGN-iface-shell-caching 12, the
+    // 2026-10-21 rework). A re-assert of that same value returns that same shell instead of building a
+    // new one; any other value is a miss that builds its shell and takes the slot. A miss costs one small
+    // pair and a handle write, so a new value per assert costs about what it cost with no cache at all.
+    // The table this replaced paid an insert and a dependent handle per new value, and kept growing.
+    //
+    // The pair is held WEAKLY, because the shell holds its value: a strong slot would keep the last value
+    // asserted through each factory alive, which Go can observe through a finalizer or a weak pointer. A
+    // collection may therefore empty the slot while the value lives; the next assert of it is a miss.
     // A null value (a typed nil func) has no identity to key on and is built fresh every time.
     private static Func<object, object> CacheShellInstances(Func<object, object> factory)
     {
-        ConditionalWeakTable<object, object> instances = new();
-        ConditionalWeakTable<object, object>.CreateValueCallback create = value => factory(value);
+#if GO2CS_NO_SHELL_CACHE
+        // The control arm of src/tests/Performance/run-shell-churn-bound.ps1 (golib.csproj's
+        // Go2csNoShellCache): every assert builds its shell, as before the cache existed.
+        return factory;
+#else
+        WeakReference<LastShell> slot = new(null!);
 
-        return value => value is null ? factory(value!) : instances.GetValue(value, create);
+        return value =>
+        {
+            if (value is null)
+                return factory(value!);
+
+            if (slot.TryGetTarget(out LastShell? last) && ReferenceEquals(last.Value, value))
+                return last.Shell;
+
+            object shell = factory(value);
+            slot.SetTarget(new LastShell(value, shell));
+
+            return shell;
+        };
+#endif
+    }
+
+    // One immutable pair, so a reader racing a writer sees an old pair or a new one, never a value from
+    // one beside a shell from the other.
+    private sealed class LastShell(object value, object shell)
+    {
+        public readonly object Value = value;
+        public readonly object Shell = shell;
     }
 
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2059", Justification = GoTypeRegistry.RegisteredGenericJustification)]
