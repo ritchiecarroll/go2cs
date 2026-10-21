@@ -970,6 +970,19 @@ public static partial class testing_package
     public static bool testingSynctestTest(ж<T> t, Action<ж<T>> f) => t.Value.RequiredExecution.RunSynctest(f);
 
     /// <summary>
+    /// Go 1.26's <c>checkParallel</c> (testing.go:1826): panics with Go's parallel-conflict text when
+    /// <paramref name="t"/> or any ancestor is parallel, and otherwise makes a later <c>t.Parallel</c>
+    /// refuse, exactly as <c>Setenv</c> and <c>Chdir</c> do.
+    /// </summary>
+    /// <remarks>
+    /// Go reaches it through a pull linkname, <c>//go:linkname testingCheckParallel
+    /// testing.checkParallel</c>, from testing/cryptotest's <c>SetGlobalRandom</c>, which mutates the
+    /// whole process's randomness and so must refuse a parallel test. The converter forwards that pull here
+    /// (linknameForwardTargets); it is public because cryptotest is another assembly.
+    /// </remarks>
+    public static void checkParallel(ж<T> t) => t.Value.RequiredExecution.CheckParallel();
+
+    /// <summary>
     /// Reports the average allocation cost per run of f — like Go's testing.AllocsPerRun, which
     /// counts MALLOCS (a <c>runtime.MemStats.Mallocs</c> delta). The CLR publishes no malloc
     /// counter, so the count comes from go2cs's OWN runtime instead of the platform's:

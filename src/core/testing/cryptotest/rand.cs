@@ -20,10 +20,14 @@ using rand = math.rand.rand_package;
 partial class cryptotest_package {
 
 //go:linkname randSetTestingReader crypto/internal/rand.SetTestingReader
-internal static partial void randSetTestingReader(io.Reader r);
+/*linkname*/ internal static partial void randSetTestingReader(io.Reader r) {
+    go.crypto.@internal.rand_package.SetTestingReader(r);
+}
 
 //go:linkname testingCheckParallel testing.checkParallel
-internal static partial void testingCheckParallel(ж<testing.T> t);
+/*linkname*/ internal static partial void testingCheckParallel(ж<testing.T> t) {
+    testing.checkParallel(t);
+}
 
 // SetGlobalRandom sets a global, deterministic cryptographic randomness source
 // for the duration of test t. It affects crypto/rand, and all implicit sources
