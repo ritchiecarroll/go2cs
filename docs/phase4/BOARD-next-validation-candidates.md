@@ -27736,4 +27736,19 @@ emitted on ONE line. claude/c2-comment-blank-parity's gap break splits them, but
 Census of the GOROOT: 3 local func types, all in tests (0 production), 1 of them a first statement with a doc.
 Fixing it changes the layout of every local marker, so it is its own small seat with its own footprint.
 
+## 2026-10-21 — G finding: an interface assertion whose (dynamic type, interface) pair has no compiled adapter still costs ~28 ns after the inline head (Go ~3 ns); a STRONG last-(box, adapter) slot prices the allocation at ~11 ns but is Go-observable — OPEN (post-hop design note, from G's perf review; COORD ruled shape B no seat)
+
+`x.(I)` on a raw `*T` or `T` (the perf review's "type assertion on a raw box", 31-35 ns) is two costs. The shared
+`TryTypeAssert<T>` body for a reference T is the first, and claude/g-assert-inline-head removes it (35 -> 28 ns).
+The second is the pair itself. With no `GoImplement` record for the pair (an assert-only pair, such as errors.Is's
+`interface{ Is(error) bool }`), it resolves through the RUNTIME SHELL tier: P2's weak last-value slot, then a shell
+whose methods forward. For a value type that shell is the object shell and forwards through its invoker binding.
+Measured on G's box (windows, Release, steady state, the probe in docs/phase4/probes/g-perf-assert-callers):
+`*T -> I` 28 ns and `V -> I` 43 ns after the head, Go 3.0 ns for both. A pricing arm with a STRONG static
+last-(box, adapter) slot read 16.5 and 32 ns, so allocation plus resolution is ~11 ns of it.
+Not shipped: a strong slot keeps the last asserted value alive, which Go can observe through a finalizer or a weak
+pointer (P2's reason for the weak slot), and P2's slot already fronts the shell tier. What remains is shell
+forwarding; only a compiled per-pair adapter is cheaper, and an assert-only pair has none. No prediction is made
+until a design names how such a pair gets a compiled adapter.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
