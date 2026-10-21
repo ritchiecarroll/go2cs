@@ -5,6 +5,7 @@ namespace go.@internal.trace;
 
 using runtime = runtime_package;
 using testing = testing_package;
+using System.Runtime.CompilerServices;
 
 partial class testtrace_package {
 
@@ -13,7 +14,7 @@ internal static readonly object currentPlatformHasNoTrueˢ = (@string)"current p
 
 // MustHaveSyscallEvents skips the current test if the current
 // platform does not support true system call events.
-public static void MustHaveSyscallEvents(ж<testing.T> Ꮡt) {
+public static partial void MustHaveSyscallEvents(ж<testing.T> Ꮡt) {
     if (HasSyscallEvents()) {
         return;
     }
