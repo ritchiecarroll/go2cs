@@ -1210,6 +1210,7 @@
   </Folder>
   <Folder Name="/tests/performance/target-projects/">
     <Project Path="tests/Performance/PerfChannel/PerfChannel.csproj" />
+    <Project Path="tests/Performance/PerfFieldView/PerfFieldView.csproj" />
     <Project Path="tests/Performance/PerfFib/PerfFib.csproj" />
     <Project Path="tests/Performance/PerfIface/PerfIface.csproj" />
     <Project Path="tests/Performance/PerfIfaceCall/PerfIfaceCall.csproj" />
