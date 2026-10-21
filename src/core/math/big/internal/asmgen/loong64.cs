@@ -10,6 +10,7 @@ public static ж<Arch> ArchLoong64 = Ꮡ(new Arch(
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
+
     regs: new @string[]{
         // R0 is set to 0.
         // R1 is LR.
@@ -27,6 +28,7 @@ public static ж<Arch> ArchLoong64 = Ꮡ(new Arch(
     regCarry: "R28"u8,
     regAltCarry: "R29"u8,
     regTmp: "R30"u8,
+
     mov: "MOVV"u8,
     add: "ADDVU"u8,
     sub: "SUBVU"u8,
@@ -38,6 +40,7 @@ public static ж<Arch> ArchLoong64 = Ꮡ(new Arch(
     and: "AND"u8,
     or: "OR"u8,
     xor: "XOR"u8,
+
     jmpZero: "BEQ %s, %s"u8,
     jmpNonZero: "BNE %s, %s"u8
 ));

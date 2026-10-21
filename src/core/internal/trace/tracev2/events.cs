@@ -436,6 +436,7 @@ internal static array<EventSpec> specs = new golib.SparseArray<EventSpec>{
     ),
 
     // Experimental events.
+
     [EvSpan] = new(
         Name: "Span"u8,
         Args: new @string[]{"dt"u8, "id"u8, "npages_value"u8, "kindclass"u8}.slice(),

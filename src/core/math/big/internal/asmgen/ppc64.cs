@@ -22,6 +22,7 @@ public static ж<Arch> ArchPPC64x = Ꮡ(new Arch(
     // to implement lshVU and rshVU, but the generated code that uses
     // ordinary integer instructions is much faster than the vector code was,
     // at least on the power10 gomote.
+
     regs: new @string[]{
         // R0 is 0 by convention.
         // R1 is SP.
@@ -37,6 +38,7 @@ public static ж<Arch> ArchPPC64x = Ꮡ(new Arch(
 
     // Note: Could write an addF and subF to use ADDZE and SUBZE,
     // but we have R0 so it doesn't seem to matter much.
+
     mov: "MOVD"u8,
     add: "ADD"u8,
     adds: "ADDC"u8,
@@ -51,6 +53,7 @@ public static ж<Arch> ArchPPC64x = Ꮡ(new Arch(
     and: "ANDCC"u8, // regular AND does not accept immediates
     or: "OR"u8,
     xor: "XOR"u8,
+
     jmpZero: "CMP %[1]s, $0; BEQ %[2]s"u8,
     jmpNonZero: "CMP %s, $0; BNE %s"u8,
 
