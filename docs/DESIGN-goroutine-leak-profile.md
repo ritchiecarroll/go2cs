@@ -1,11 +1,15 @@
 # DESIGN — the goroutine-leak profile over the managed runtime (PROPOSED)
 
-> **STATUS: PROPOSED, NOT RULED.** Written 2026-10-21 by C1 at COORD's request. The seat this note describes
-> needs an owner ruling first: it adds a third-party runtime dependency, costs about 0.6 s plus a full-process
-> dump per profile call, and has no Native AOT path. Until that ruling, `runtime/pprof`'s
-> `TestGoroutineLeakProfileConcurrency` is filed as a **disclosure** for the re-bank (the text is in
-> [The disclosure, and its retirement](#the-disclosure-and-its-retirement)). Nothing in golib lands for this note.
-> Measured at hop tip `9924b9621c`, go1.26.10, on a linux box.
+> **STATUS: PROPOSED, with the owner's ruling of 2026-10-21 (relayed by COORD) folded in.** Written 2026-10-21 by
+> C1. The ruling:
+>
+> - the leak profile is built **after** the Go 1.26 hop, by C1;
+> - it ships in its **own optional assembly**, never in golib;
+> - **Native AOT keeps the disclosure.**
+>
+> For the hop, `runtime/pprof`'s `TestGoroutineLeakProfileConcurrency` is filed as a **disclosure** (the text is
+> in [The disclosure, and its retirement](#the-disclosure-and-its-retirement)). Nothing in golib lands for this
+> note. Measured at hop tip `9924b9621c`, go1.26.10, on a linux box.
 
 ## What Go does
 
@@ -86,17 +90,56 @@ The last row is also the walk the managed goroutine profile says it cannot do to
    stands for: `Goroutine.Park` to `runtime.gopark`, the receive entry and its body to `runtime.chanrecv1` and
    `runtime.chanrecv`, and likewise for send, `select` and the `sync` waits.
 4. **Converter.** Both `linknamePushTargets` rows flip from refused to honored, against the hand-owned bodies.
-5. **Packaging.** ClrMD lives in a separate assembly that only this profile loads, not in golib, so no other
-   program carries the dependency or its load cost.
+5. **Packaging.** ClrMD and the detector live in their own optional assembly (see
+   [Packaging: the optional assembly](#packaging-the-optional-assembly)), so a program that does not opt in carries
+   neither the dependency nor its load cost.
 
-## Costs that need a ruling
+## Packaging: the optional assembly
+
+As ruled, the detector ships in its own assembly, `go2cs.LeakProfile`, which references ClrMD. golib does not
+reference that assembly and holds no ClrMD type.
+
+**Opting in.** A consumer opts in with one build property in its project:
+
+```xml
+<PropertyGroup>
+  <GoGoroutineLeakProfile>true</GoGoroutineLeakProfile>
+</PropertyGroup>
+```
+
+`go.lib.targets` reads the property and adds the reference: a `PackageReference` to `go2cs.LeakProfile`, versioned
+`$(GoStdLibVersion)`, for a NuGet consumer, or a `ProjectReference` under `$(go2csPath)` for a local-refs build. A
+consumer can also add that `PackageReference` by hand, with the same effect. The converted test host for
+`runtime/pprof` sets the property, so validation measures the profile the way a consumer who opted in would get it.
+
+**Discovery at run time.** The first leak-profile call resolves the detector by name, through
+`Type.GetType("go.LeakProfile.GoroutineLeakDetector, go2cs.LeakProfile", throwOnError: false)`. The assembly
+loads only when a program asks for the profile. golib holds the seam: one internal interface for detect, count
+and records, and nothing else.
+
+**When the assembly is absent**, the profile refuses by name, as it does today. `runtime_goroutineLeakGC` panics
+with the refusal text, and adds the remedy: set `GoGoroutineLeakProfile`. `goroutineleakcount` never reports
+a fabricated 0. The refusal happens in the caller's goroutine, at the profile call, so a program that never asks
+for the profile is unaffected.
+
+**The Native AOT arm.** ClrMD needs the runtime's DAC, and a Native AOT program ships none, so the detector cannot
+run there:
+
+- When `PublishAot` is true and the property is set, `go.lib.targets` does not add the reference. It raises a
+  build WARNING, a new `GO2CS3xxx` code registered in `docs/DiagnosticCodes.md`, saying the profile is unavailable
+  under Native AOT. A warning rather than an error, because the rest of the program is unaffected.
+- At run time an AOT program takes the absent-assembly refusal above. Its text names Native AOT as the reason
+  when `RuntimeFeature.IsDynamicCodeSupported` is false.
+- The test's disclosure stays in force for AOT runs (ruled).
+
+## Costs (accepted by the ruling, stated so the seat is measured against them)
 
 - **A third-party runtime dependency**: ClrMD and what it pulls in, in a component converted programs can load.
 - **About 0.6 s and a full-process dump on disk per profile call.** Go's cost is one GC cycle. The dump goes
   to the system temporary directory and scales with the process. The probe's was 230 MB, and a test host is
   larger. A host without room for it, or without `createdump`, cannot answer the profile.
 - **No Native AOT path.** ClrMD needs the runtime's DAC, and a Native AOT program ships none. Under AOT the
-  profile keeps its disclosure even after this seat lands.
+  profile keeps its disclosure even after this seat lands (ruled; see the AOT arm above).
 - **Windows is not measured.** There the snapshot is `PssCaptureSnapshot` rather than `createdump`. The seat
   would measure it before claiming it.
 
@@ -111,7 +154,10 @@ Three to five lane-days:
 - three hand-owns and two converter rows;
 - gates on linux and windows.
 
-It does not fit before the re-bank.
+It does not fit before the re-bank. Ruled after the hop, so it is not attempted before it.
+
+The size above also covers the packaging: the assembly, the `go.lib.targets` property and its AOT warning code, and
+the host's opt-in.
 
 ## Possible upside, not claimed
 
@@ -129,5 +175,6 @@ Filed for the re-bank (COORD, 2026-10-21):
 > goroutines are unreachable without a heap walk that golib does not have. The profile refuses by name rather
 > than reporting a fabricated zero.
 
-**Retirement plan:** the seat above, once the owner rules on its dependency and per-call cost. Native AOT keeps
-the row until a walk exists that does not need the DAC.
+**Retirement plan:** C1's post-hop seat above, which the owner ruled in on 2026-10-21. It retires the disclosure for
+JIT hosts, on windows and linux, once the converted host passes all four subtests with the assembly opted in. Native
+AOT keeps the row, by ruling, until a walk exists that does not need the DAC.
