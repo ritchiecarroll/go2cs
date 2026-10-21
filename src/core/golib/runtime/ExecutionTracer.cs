@@ -236,6 +236,32 @@ public static class ExecutionTracer
         }
     }
 
+    // RED-FIRST STUB (flight-recorder seat): the generational API runtime/trace's flight recorder
+    // needs, declared so its arms compile and fail before the generations exist.
+    public static ulong ClockUnitsPerSecond => (ulong)Stopwatch.Frequency;
+
+    public static ulong Now() => (ulong)Stopwatch.GetTimestamp();
+
+    public static void Advance(bool stop)
+    {
+    }
+
+    public static void OnUserTaskBegin(ulong id, ulong parentId, ReadOnlySpan<byte> name)
+    {
+    }
+
+    public static void OnUserTaskEnd(ulong id)
+    {
+    }
+
+    public static void OnUserRegion(ulong id, ulong mode, ReadOnlySpan<byte> name)
+    {
+    }
+
+    public static void OnUserLog(ulong id, ReadOnlySpan<byte> category, ReadOnlySpan<byte> message)
+    {
+    }
+
     // ---- the lifecycle points (golib's Goroutine calls these after reading Enabled) ----
 
     // Go's newproc: on the CREATING thread, before the new goroutine has run.
