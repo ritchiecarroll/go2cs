@@ -40,9 +40,14 @@
 //   - A nil overlapped: every synchronous read and write in the corpus.
 //   - An overlapped on a descriptor the poller does not own: Pread/Pwrite on a BLOCKING handle,
 //     which pass `&o.o` only to carry the file offset, and an FD whose Init left it unpolled (the
-//     KeepFileCompletionModes query failing). Binding such a handle would route its completions to a
-//     port nobody waits on, and the seam's header explains why a foreign overlapped arriving there is
+//     KeepFileCompletionModes query failing, or the bind at pollOpen refused, as stderr's is when it
+//     shares stdout's pipe object). Binding such a handle would route its completions to a port
+//     nobody waits on, and the seam's header explains why a foreign overlapped arriving there is
 //     misread rather than ignored.
+//
+// An unpolled FD can still reach the seam when it shares its handle VALUE with a polled one
+// (os.NewFile twice on one handle). Its operation carries its own event, and the record submits it
+// on that event rather than through the port (OverlappedOp.Rearm in the seam's file).
 //
 // THE FILE OFFSET TRAVELS IN THE OVERLAPPED, as it does for TransmitFile: execIO writes fd.offset
 // into o.o.Offset/OffsetHigh before every submit, and Rearm hands back a zeroed control block, so
