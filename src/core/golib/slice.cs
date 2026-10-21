@@ -157,6 +157,12 @@ public interface ISlice<T> : IArray<T>, ISlice, IGoReflectSlice
     // The header-slice box's rebuild (HeaderSliceBox.Rebase; trim stage 3c-2a): a slice of this slice type's element over
     // native memory, through golib's single creation door. Reached through a zero value of the slice type.
     object IGoReflectSlice.ReflectOverNativeMemory(nuint address, nint len, nint cap) => slice<T>.OverNativeMemory(address, len, cap);
+
+    // The slice-header box's commit (SliceHeaderBox.OnHeaderStore): a slice of this slice type's element over
+    // backing[low:high:max], SHARING the backing, or null when the backing is not exactly this element's array. Exactly,
+    // because array covariance would admit a string[] as an object[]. Reached through a zero value of the slice type.
+    object? IGoReflectSlice.ReflectRebase(Array backing, nint low, nint high, nint max) =>
+        backing.GetType() == typeof(T[]) ? (object)new slice<T>((T[])backing, low, high, max) : null;
 }
 
 /// <summary>
@@ -187,6 +193,9 @@ public interface IGoReflectSlice
 
     /// <summary>A slice of this slice type's element over <paramref name="len"/>/<paramref name="cap"/> elements of native memory.</summary>
     object ReflectOverNativeMemory(nuint address, nint len, nint cap);
+
+    /// <summary>A slice of this slice type's element over <paramref name="backing"/>[low:high:max], sharing it; null when the backing is not this element's array.</summary>
+    object? ReflectRebase(Array backing, nint low, nint high, nint max);
 }
 
 // A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents

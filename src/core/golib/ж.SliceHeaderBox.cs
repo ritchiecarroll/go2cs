@@ -59,24 +59,26 @@ namespace go;
 /// backing or low index moves, so a reassigned slice variable is followed through the box.
 /// </para>
 /// <para>
-/// WRITES. A <c>ref</c> cannot be intercepted, so a header written through this box lands on the
-/// materialized copy and never reaches the slice. The box compares each fresh materialization against
-/// what it last handed out and PANICS naming the class on the NEXT access if the copy was written —
-/// which makes a field-by-field header build (<c>rp.array = …; rp.len = …; rp.cap = …</c>) loud at its
-/// second access, and leaves a single whole-header assignment silent on the copy. Both are stated
-/// rather than hidden: before this box every such write corrupted the pinned managed slice struct's
-/// own bytes, so "silent on a detached copy" is strictly safer and "loud on the next access" is new.
-/// Honouring the write direction needs a commit step a <c>ref</c> cannot express: the header's LAST
-/// store (<c>ranges.array = persistentalloc(…)</c>, after <c>len</c> and <c>cap</c>) is followed by no
-/// access of the box at all, so there is no point at which a materializing box can observe the
-/// completed header and re-base the slice — and committing EARLIER is impossible, because between the
-/// <c>cap</c> store and the <c>array</c> store the header names a nil array with a non-zero capacity
-/// (read on <c>addrRanges.init</c>'s own sequence, increment 7 of the runtime row, 2026-09-05). The
-/// corpus's field-by-field writers — <c>addrRanges.init</c>/<c>add</c>/<c>cloneInto</c> — are therefore
-/// hand-owned AT the write (<c>runtime/mranges_impl.cs</c>, re-basing over
-/// <see cref="slice{T}.OverNativeMemory(nuint, nint, nint)"/>); the whole-header writers
-/// (<c>traceMap</c>, <c>mheap.allspans</c>, <c>allArenas</c>) sit behind <c>sysAlloc</c>/<c>mheap.init</c>
-/// and stay unreached. The header→slice direction is the mirror box, <see cref="HeaderSliceBox{T, TDst}"/>.
+/// WRITES (the unsafeheader write-through seat, 2026-10-21). A <c>ref</c> cannot be intercepted, and the header's LAST
+/// store (<c>hdr.Len = len(s)</c> in internal/unsafeheader's TestWriteThroughHeader) is followed by no access of the box
+/// at all, so a materializing box could never observe the finished header. go2cs-gen's FieldAccessGenerator therefore
+/// gives a HEADER-SHAPED struct's fields GET/SET accessors on <c>ж&lt;H&gt;</c> rather than <c>ref</c> ones, and the
+/// setter calls <see cref="ж{T}.OnHeaderStore"/> after the store. Here that commits the header's words into the slice
+/// variable whenever they name a slice Go could build (<see cref="OnHeaderStore"/> lists the four), so every step of a
+/// field-by-field build reaches the variable in Go's order. Three limits, stated rather than hidden:
+/// <list type="bullet">
+/// <item>(L1) A store that bypasses the setter, through <c>&amp;hdr.Len</c> or a <c>ref</c> to the field, commits
+/// nothing. The box compares each fresh materialization against what it last handed out and panics naming the class on
+/// its NEXT access, as it did before the seat.</item>
+/// <item>(L2) An INCONSISTENT header (a nil Data with a non-zero Cap, Len above Cap, a Cap past the backing) is HELD:
+/// the header reads back its own words, and the variable keeps its last consistent slice until a later store makes the
+/// header consistent. Go shows the broken words in the variable too; a read of the variable in between differs from
+/// Go. The runtime's addrRanges stores Cap before Data, and its writers stay hand-owned at the write
+/// (<c>runtime/mranges_impl.cs</c>, re-basing over <see cref="slice{T}.OverNativeMemory(nuint, nint, nint)"/>).</item>
+/// <item>(L3) A Data that names neither a run of the slice's own element type nor native memory (a heap box, a field,
+/// an array of another element type, an order token) is refused by name at the store, never approximated.</item>
+/// </list>
+/// The header→slice direction is the mirror box, <see cref="HeaderSliceBox{T, TDst}"/>.
 /// </para>
 /// <para>
 /// SCOPE. <typeparamref name="T"/> is exactly <c>slice&lt;X&gt;</c>; <typeparamref name="TDst"/> is a
@@ -86,16 +88,86 @@ namespace go;
 /// A header whose first field is a typed <c>ж&lt;…&gt;</c> (<c>notInHeapSlice</c>) is NOT admitted —
 /// every corpus site that takes that view of a managed slice is a WRITER (the field-by-field family,
 /// hand-owned; the whole-header family, unreached), so there is no reaching READ for it to serve. The STRING header
-/// (<c>@string</c> → <c>stringStruct</c>, two fields) is one predicate line away and deliberately
-/// not switched on: its live route is the <c>(uintptr)</c> token bridge, which resolves a
-/// reference-bearing box only once Q44's token registry lands.
+/// (<c>@string</c> → <c>stringStruct</c>, two fields) is its own box, <see cref="StringHeaderBox{TDst}"/>.
 /// </para>
 /// </remarks>
-// RED-FIRST STUB (the unsafeheader write-through seat): the store notification the generated header accessors call.
 public abstract partial class ж<T>
 {
+    /// <summary>
+    /// Called by go2cs-gen's generated field SETTER on a header-shaped struct (an <c>unsafe.Pointer</c> field, then one
+    /// or two <c>int</c>s) after it stores the field. A header box commits the header's words to its source here; every
+    /// other box has nothing to commit.
+    /// </summary>
     public virtual void OnHeaderStore()
     {
+    }
+}
+
+/// <summary>
+/// What a slice or string header's <c>Data</c> word names, for the header boxes' commit: the inverse of the element-0
+/// box their read side mints.
+/// </summary>
+internal static class HeaderData
+{
+    internal enum Kind
+    {
+        /// <summary>A nil pointer.</summary>
+        Nil,
+
+        /// <summary>An element of a managed array: <c>backing[index]</c>.</summary>
+        Run,
+
+        /// <summary>The zerobase, which Go gives a zero-capacity slice.</summary>
+        ZeroBase,
+
+        /// <summary>Native memory at <c>address</c>.</summary>
+        Native,
+
+        /// <summary>Anything else: a heap box, a field, an element the box cannot place, an order token.</summary>
+        Other
+    }
+
+    internal static Kind Resolve(object? data, out Array? backing, out nint index, out nuint address)
+    {
+        backing = null;
+        index = 0;
+        address = 0;
+
+        if (data is not ж<uintptr> word || word.IsNull)
+            return Kind.Nil;
+
+        nuint number = word.Value.Value;
+
+        // The box the pointer was minted from (FromPinnedBox, FromBox); else whatever the token registry recovers for
+        // a bare number, as the uintptr conversion does.
+        object? referent = ((IUnsafePointer)data).RetainedSource ?? ManagedPointerTokens.Resolve(number);
+
+        if (referent is IElementRun { RunBacking: { } run } element)
+        {
+            backing = run;
+            index = element.RunIndex;
+            return Kind.Run;
+        }
+
+        if (referent is IGoReflectBox face)
+        {
+            if (face.NativeAddress != 0)
+            {
+                address = face.NativeAddress;
+                return Kind.Native;
+            }
+
+            return face.NamesZeroBase ? Kind.ZeroBase : Kind.Other;
+        }
+
+        // A bare number nothing recovers is an address, unless it is one of golib's order tokens, which name no memory.
+        if (referent is null && !ManagedPointerTokens.IsTaggedToken(number))
+        {
+            address = number;
+            return Kind.Native;
+        }
+
+        return Kind.Other;
     }
 }
 
@@ -107,6 +179,8 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private static readonly MethodInfo? s_fromBox;      // <pointer type>.FromBoxObject(object box) → pointer object
     private static readonly Func<IArray, (object? backing, nint low, nint len, nint cap)>? s_describe;
     private static readonly Func<IArray, object>? s_elementZero;
+    private static readonly Func<Array, nint, nint, nint, object?>? s_rebase;        // backing[low:high:max], or null for another element
+    private static readonly Func<nuint, nint, nint, object>? s_overNative;
 
     /// <summary>Whether the pair (<typeparamref name="T"/>, <typeparamref name="TDst"/>) is a slice → header reinterpretation this box serves.</summary>
     internal static readonly bool Applies;
@@ -170,6 +244,10 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         // Both through the slice's own face (ISlice<T>'s default members, trim stage 3c-2a): T IS the slice type here, so
         // the face is compiled for it; the box no longer closes a generic method over its element.
         s_elementZero = static array => ((IGoReflectSlice)array).ReflectElementZero();
+
+        // The commit's two rebuilds, through a zero value of the slice type (OnHeaderStore).
+        s_rebase = static (backing, low, high, max) => ((IGoReflectSlice)(object)default(T)!).ReflectRebase(backing, low, high, max);
+        s_overNative = static (address, len, cap) => ((IGoReflectSlice)(object)default(T)!).ReflectOverNativeMemory(address, len, cap);
         Applies = true;
     }
 
@@ -188,6 +266,8 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     private object? m_pointerBacking;
     private nint m_pointerLow = -1;
     private bool m_pointerZeroCapacity;  // a cap-0 slice names the zerobase, so cap 0 is part of the key
+    private bool m_held;                 // L2: the header holds inconsistent words the slice does not show
+    private (object? backing, nint low, nint len, nint cap) m_heldOver; // the slice's words when the header was held
 
     private SliceHeaderBox(ж<T> source)
     {
@@ -232,12 +312,106 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
         return m_source.GetHashCode();
     }
 
+    /// <summary>
+    /// Commits the header's words to the slice variable when they name a slice Go could build, and holds them (L2) when
+    /// they do not yet:
+    /// <list type="bullet">
+    /// <item>a nil Data with Len and Cap 0 is the nil slice;</item>
+    /// <item>Data at element i of a backing <c>X[]</c> of the slice's own element type, with
+    /// <c>0 &lt;= Len &lt;= Cap &lt;= len(backing) - i</c>, is that backing's <c>[i:i+Len:i+Cap]</c>, SHARING it as Go's
+    /// alias does;</item>
+    /// <item>the zerobase with Len and Cap 0 is an empty non-nil slice;</item>
+    /// <item>a native Data is the slice over that memory (an unmanaged element type only, as
+    /// <see cref="slice{T}.OverNativeMemory(nuint, nint, nint)"/> requires).</item>
+    /// </list>
+    /// Any other Data is refused by name (L3).
+    /// </summary>
+    public override void OnHeaderStore()
+    {
+        object boxed = m_value!;
+        object? data = s_fields![0].GetValue(boxed);
+        nint len = (nint)s_fields[1].GetValue(boxed)!;
+        nint cap = (nint)s_fields[2].GetValue(boxed)!;
+
+        HeaderData.Kind kind = HeaderData.Resolve(data, out Array? backing, out nint index, out nuint address);
+        bool shape = 0 <= len && len <= cap;
+        object? rebuilt = null;
+
+        switch (kind)
+        {
+            case HeaderData.Kind.Nil:
+                if (len == 0 && cap == 0)
+                    rebuilt = default(T)!;
+                break;
+
+            case HeaderData.Kind.Run:
+                if (shape && cap <= backing!.Length - index)
+                    rebuilt = s_rebase!(backing, index, index + len, index + cap) ?? throw Refusal(data!, $"its Data names an element of a {backing.GetType().Name}");
+                else if (s_rebase!(backing!, 0, 0, 0) is null)
+                    throw Refusal(data!, $"its Data names an element of a {backing!.GetType().Name}");
+                break;
+
+            case HeaderData.Kind.ZeroBase:
+                if (len == 0 && cap == 0)
+                    rebuilt = s_rebase!(((IElementRun)s_elementZero!((IArray)(object)default(T)!)).RunBacking!, 0, 0, 0);
+                break;
+
+            case HeaderData.Kind.Native:
+                if (shape)
+                    rebuilt = s_overNative!(address, len, cap);
+                break;
+
+            default:
+                throw Refusal(data!, "its Data names neither an element of the slice's own element type nor native memory");
+        }
+
+        if (rebuilt is null)
+        {
+            // L2: hold the words; the variable keeps its last consistent slice.
+            m_held = true;
+            m_heldOver = s_describe!((IArray)(object)m_source.Value!);
+            m_handedOut = m_value;
+            return;
+        }
+
+        m_source.Value = (T)rebuilt;
+        m_held = false;
+
+        // The header already holds these words, and its Data object is the pointer the variable now names, so the next
+        // access reuses it rather than minting another.
+        (object? newBacking, nint newLow, _, nint newCap) = s_describe!((IArray)rebuilt);
+        m_pointer = data;
+        m_pointerBacking = newBacking;
+        m_pointerLow = newLow;
+        m_pointerZeroCapacity = newCap == 0;
+        m_handedOut = m_value;
+    }
+
+    // L3. The store is dropped rather than held: the next access re-reads the variable, which the store never reached.
+    private PanicException Refusal(object data, string reason)
+    {
+        m_materialized = false;
+        m_held = false;
+
+        return new PanicException($"slice header not committed: a {typeof(TDst).Name} stored over a {typeof(T).Name} names no slice the managed runtime can build, because {reason} ({data.GetType().Name})");
+    }
+
     private void Materialize()
     {
         if (m_materialized && !EqualityComparer<TDst>.Default.Equals(m_value, m_handedOut))
-            throw new PanicException($"slice header written through a reinterpretation: a {typeof(TDst).Name} built over a {typeof(T).Name} was assigned through the header and the managed slice cannot be rebuilt from Go's (array, len, cap) words — the write landed on a detached copy (the runtime's field-by-field writers, addrRanges.init/add/cloneInto, are hand-owned at the write for exactly this reason; its whole-header writers sit behind sysAlloc/mheap.init)");
+            throw new PanicException($"slice header written through a reinterpretation: a {typeof(TDst).Name} built over a {typeof(T).Name} was assigned through the header without its generated setter, so the write landed on a detached copy and was never committed to the managed slice (a store through &hdr.field or a ref to the field; see SliceHeaderBox, limit L1)");
 
         (object? backing, nint low, nint len, nint cap) = s_describe!((IArray)(object)m_source.Value!);
+
+        // A held header shows its own words until the variable moves under it: then the variable's words win, as a
+        // direct assignment to a Go slice overwrites its header.
+        if (m_held)
+        {
+            if (ReferenceEquals(backing, m_heldOver.backing) && (low, len, cap) == (m_heldOver.low, m_heldOver.len, m_heldOver.cap))
+                return;
+
+            m_held = false;
+        }
 
         if (m_pointer is null || !ReferenceEquals(backing, m_pointerBacking) || low != m_pointerLow || (cap == 0) != m_pointerZeroCapacity)
         {
