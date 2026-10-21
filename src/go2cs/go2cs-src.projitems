@@ -331,6 +331,7 @@
     <None Include="$(MSBuildThisFileDirectory)linkStagedFixtures_test.go" />
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold.go" />
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)localFuncTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localStringConstHoist_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localTypeLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localValueIfaceCallConversion_test.go" />
