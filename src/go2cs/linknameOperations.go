@@ -794,18 +794,15 @@ var linknamePushTargets = map[string]linknamePush{
 	// pushing definition there; the H6 os rewrite must declare net_newWindowsFile public by hand.
 	"net.newWindowsFile": {source: "os.net_newWindowsFile", bareDecl: true},
 	// runtime/trace's flight-recorder clock rate, pushed by runtime/tracetime.go into a one-arg HANDLE
-	// in runtime/trace/flightrecorder.go. UNHONORABLE, by ruling (PREREAD 6.5, H6 audit row 45): the
-	// body itself is ordinary converted Go and would answer, but its ONLY consumer is
-	// FlightRecorder.Start, whose recorder then needs runtime.traceAdvance and runtime.traceClockNow,
-	// the converted tracer's generation and clock, which never run under the managed tracer. Answering
-	// here let Start subscribe and succeed, and the first batch then died on the reader goroutine.
-	// Refusing here makes Start itself refuse, by name, in the caller's goroutine. The two pulls are
-	// refused the same way in runtime/trace/flightrecorder_impl.cs, which also bodies runtime_readTrace,
-	// a bare //go:linkname declaration that go1.26.9 neither calls nor defines.
-	"runtime/trace.runtime_traceClockUnitsPerSecond": {
-		source: "runtime.traceClockUnitsPerSecond",
-		reason: "the flight recorder reads the converted execution tracer's generations, and the managed tracer (golib ExecutionTracer, behind runtime.StartTrace) has none to advance or clock; runtime/trace.Start is supported, trace.FlightRecorder is not",
-	},
+	// in runtime/trace/flightrecorder.go. HONORABLE since 2026-10-21 (the flight-recorder seat): the
+	// managed tracer writes generations, so FlightRecorder.Start subscribes and its recorder reads real
+	// batches. The pushing definition is hand-owned (runtime/trace_impl.cs) to answer the managed
+	// tracer's clock rather than the converted nanotime/64, and the two pulls the recorder also needs,
+	// traceAdvance and traceClockNow, are bodied over the same tracer in
+	// runtime/trace/flightrecorder_impl.cs. Until then the row was UNHONORABLE by ruling (PREREAD 6.5,
+	// H6 audit row 45): the tracer kept one generation and no clock, and refusing here made Start refuse
+	// by name in the caller's goroutine rather than die on the reader goroutine at the first batch.
+	"runtime/trace.runtime_traceClockUnitsPerSecond": {source: "runtime.traceClockUnitsPerSecond"},
 	// sync's external-test twin of unique's cleanup-queue drain, pushed by runtime/mcleanup.go into a
 	// one-arg HANDLE in sync/oncefunc_test.go (package sync_test, hence the key). Its body is the same
 	// hand-written wait as unique's, in runtime/mcleanup.cs. HONORABLE.
