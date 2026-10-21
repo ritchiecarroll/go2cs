@@ -95,15 +95,11 @@ public class EscapeRegistryGenerator : ISourceGenerator
                 if (package is null || package.IsGenericType || !GeneratedPartials.CanReopen(package))
                     continue;
 
-                foreach (IConversionOperation conversion in body.Descendants().OfType<IConversionOperation>())
+                foreach (IOperation operation in body.Descendants())
                 {
-                    ITypeSymbol? target = conversion.Type;
-                    ITypeSymbol? source = conversion.Operand.Type;
+                    ITypeSymbol? source = Escaping(operation);
 
-                    if (target is null || source is null || !(target.SpecialType == SpecialType.System_Object || target.TypeKind == TypeKind.Interface))
-                        continue;
-
-                    if (source.SpecialType == SpecialType.System_Object || source.TypeKind is TypeKind.Interface or TypeKind.TypeParameter)
+                    if (source is null || source.SpecialType == SpecialType.System_Object || source.TypeKind is TypeKind.Interface or TypeKind.TypeParameter)
                         continue;
 
                     if (!byPackage.TryGetValue(package, out HashSet<ITypeSymbol>? registered))
@@ -148,6 +144,18 @@ public class EscapeRegistryGenerator : ISourceGenerator
             context.AddSource(GeneratedPartials.HintName(hintNames, ns, pair.Key, "escape-registry"), Registry(ns, pair.Key, pair.Value));
         }
     }
+
+    // The type of the value an operation hands to an interface: a conversion's operand, or the func value golib's
+    // OrTypedNilFunc boxes (the converter's typed-nil carrier at a func-into-any site, whose conversion to object happens
+    // inside golib's generic body, where no registry can name it).
+    private static ITypeSymbol? Escaping(IOperation operation) => operation switch
+    {
+        IConversionOperation { Type: { } target } conversion when target.SpecialType == SpecialType.System_Object || target.TypeKind == TypeKind.Interface =>
+            conversion.Operand.Type,
+        IInvocationOperation { TargetMethod: { Name: "OrTypedNilFunc", ContainingType.Name: "NilFuncExtensions", TypeArguments: [var func] } method } when
+            method.ContainingAssembly?.Name == "golib" => func,
+        _ => null
+    };
 
     // A closed container reachable from a value of type: the type itself, a container's elements, a pointer's target and
     // a converted struct's fields. An interface ends the walk: what it holds is converted, and registered, where it was.

@@ -119,7 +119,8 @@ public class EscapeRegistryGeneratorTests
     // at `reflect.ValueOf(join).Call`, 2026-10-21). The registry names the family of every variadic func type the package
     // converts to an interface or reaches through a converted value, spelled from the delegate's Invoke, so the C# natural
     // type of a method group or lambda registers too. The fixture's shapes: a method group, a lambda, a func field, a
-    // pointer's target (all registered); a variadic func that never escapes, a non-variadic func and an open one (absent).
+    // pointer's target, a func variable through golib's typed-nil carrier (all registered; the carrier is the varfunc
+    // probe's third line); a variadic func that never escapes, a non-variadic func and an open one (absent).
     [TestMethod]
     public void EveryEscapingVariadicFuncSignatureIsRegistered()
     {
@@ -143,6 +144,8 @@ public class EscapeRegistryGeneratorTests
                     Actionꓸꓸꓸ<short> local = static (params Span<short> xs) => { };
                     _ = local;
                     object plain = (Func<nint, nint>)(x => x);
+                    var held = (byte b, params Span<byte> bs) => b;
+                    object carried = held.OrTypedNilFunc();
                 }
 
                 internal static object Generic<T>(Actionꓸꓸꓸ<T> f) => f;
@@ -166,6 +169,7 @@ public class EscapeRegistryGeneratorTests
         string[] expected =
         [
             "RegisterVariadicAction<int, uint>",                                               // a pointer's target
+            "RegisterVariadicFunc<byte, byte, byte>",                                          // through golib's typed-nil carrier (OrTypedNilFunc)
             "RegisterVariadicFunc<bool, byte, nint>",                                          // a converted struct's func field
             "RegisterVariadicFunc<global::go.@string, global::go.@string, global::go.@string>", // a method group (natural type)
             "RegisterVariadicFunc<nint, nint, nint>",                                          // a lambda (natural type)
