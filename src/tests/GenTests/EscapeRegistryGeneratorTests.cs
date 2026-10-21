@@ -119,8 +119,9 @@ public class EscapeRegistryGeneratorTests
     // at `reflect.ValueOf(join).Call`, 2026-10-21). The registry names the family of every variadic func type the package
     // converts to an interface or reaches through a converted value, spelled from the delegate's Invoke, so the C# natural
     // type of a method group or lambda registers too. The fixture's shapes: a method group, a lambda, a func field, a
-    // pointer's target, a func variable through golib's typed-nil carrier (all registered; the carrier is the varfunc
-    // probe's third line); a variadic func that never escapes, a non-variadic func and an open one (absent).
+    // pointer's target, a func variable through golib's typed-nil carrier (the varfunc probe's third line), a variadic
+    // func in another func's parameters and in its multi-return (all registered, the last with the container beside it);
+    // a variadic func that never escapes, a non-variadic func and an open one (absent).
     [TestMethod]
     public void EveryEscapingVariadicFuncSignatureIsRegistered()
     {
@@ -146,6 +147,7 @@ public class EscapeRegistryGeneratorTests
                     object plain = (Func<nint, nint>)(x => x);
                     var held = (byte b, params Span<byte> bs) => b;
                     object carried = held.OrTypedNilFunc();
+                    object nested = default(Func<Funcꓸꓸꓸ<sbyte, sbyte, sbyte>, (Actionꓸꓸꓸ<long, ulong>, slice<short>)>);
                 }
 
                 internal static object Generic<T>(Actionꓸꓸꓸ<T> f) => f;
@@ -173,9 +175,13 @@ public class EscapeRegistryGeneratorTests
             "RegisterVariadicFunc<bool, byte, nint>",                                          // a converted struct's func field
             "RegisterVariadicFunc<global::go.@string, global::go.@string, global::go.@string>", // a method group (natural type)
             "RegisterVariadicFunc<nint, nint, nint>",                                          // a lambda (natural type)
+            "RegisterVariadicFunc<sbyte, sbyte, sbyte>",                                       // a func's parameter
+            "RegisterVariadicAction<long, ulong>",                                             // inside a func's multi-return
         ];
 
         CollectionAssert.AreEqual(expected.OrderBy(name => name, StringComparer.Ordinal).ToArray(), registered, "registered: " + string.Join(", ", registered));
+        Assert.IsTrue(output.SyntaxTrees.Any(tree => tree.ToString().Contains("global::go.GoTypeOps.Register(global::go.GoTypeOps<global::go.slice<short>>.Instance);")),
+            "a container inside a func's multi-return is walked like any other element");
 
         Diagnostic[] errors = output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
         Assert.AreEqual(0, errors.Length, "the registry binds: " + string.Join("; ", errors.Take(3)));

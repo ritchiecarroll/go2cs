@@ -20,7 +20,9 @@ namespace go2cs;
 /// CLOSED containers this compilation converts to an interface (a boxing conversion) and the closed containers reachable
 /// from any value it converts (through struct fields, container elements and pointer targets). One module initializer
 /// per package class registers them (golib's GoTypeOps.Register); it runs before any of the package's code, so the
-/// operations are registered before the value can reach reflect. Converted code is untouched.
+/// operations are registered before the value can reach reflect. Converted code is untouched. The same walk registers
+/// the variadic func signatures that escape, whose reflect Call and MakeFunc trampolines golib's GoReflect.VariadicRegistry.cs
+/// keeps (VariadicRegistration).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -164,12 +166,32 @@ public class EscapeRegistryGenerator : ISourceGenerator
         if (depth > 16 || !visited.Add(type) || type.TypeKind is TypeKind.Interface or TypeKind.TypeParameter)
             return;
 
-        // A variadic func value: reflect calls it (and MakeFunc builds one) through a trampoline closed over its signature,
-        // which compiled code registers here (VariadicRegistration). Its parameters and results are not walked.
+        // A func value: a variadic one is called (and MakeFunc builds one) through a trampoline closed over its signature,
+        // which compiled code registers here (VariadicRegistration). Every func's parameters and results are reachable as
+        // values (Call's results, a func argument's own signature), so they are walked like any other element.
         if (type.TypeKind == TypeKind.Delegate)
         {
             if (VariadicRegistration(compilation, package, type) is not null)
                 registered.Add(type);
+
+            if (type is INamedTypeSymbol { DelegateInvokeMethod: { } invoke })
+            {
+                foreach (IParameterSymbol parameter in invoke.Parameters)
+                    Reach(compilation, package, parameter.Type, registered, visited, depth + 1, walkPerOS, exportedOnly);
+
+                if (!invoke.ReturnsVoid)
+                    Reach(compilation, package, invoke.ReturnType, registered, visited, depth + 1, walkPerOS, exportedOnly);
+            }
+
+            return;
+        }
+
+        // A variadic tail (Span<T>) and a Go multi-return (ValueTuple) carry Go values as their type arguments.
+        if (type is INamedTypeSymbol { IsGenericType: true, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } carrier &&
+            (carrier.Name == "Span" || carrier.Name == "ValueTuple"))
+        {
+            foreach (ITypeSymbol argument in carrier.TypeArguments)
+                Reach(compilation, package, argument, registered, visited, depth + 1, walkPerOS, exportedOnly);
 
             return;
         }
