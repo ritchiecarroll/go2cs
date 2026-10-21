@@ -213,6 +213,6 @@ The watchers flag these for the owner and draft nothing beyond a one-line summar
 - a security report, or anything that reads like one (point the person to the private reporting route:
   https://github.com/ritchiecarroll/go2cs/security/policy, and say no more in public);
 - legal claims, trademark or license accusations, takedown language;
-- anything about the owner personally, or their work outside the project;
+- anything about the owner personally, or his work outside the project;
 - hostility, harassment, or a pile-on;
 - a question the reply bank does not cover and the docs do not answer plainly.

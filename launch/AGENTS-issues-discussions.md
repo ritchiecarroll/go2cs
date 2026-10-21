@@ -83,7 +83,7 @@ cap, and keep the timer as the fallback. The Claude GitHub Action is not recomme
 
 | Tier | What the agent may do | How it is authorized | When |
 |:--|:--|:--|:--|
-| **0** (default) | **Read, and post drafts to Slack `#gh-triage`.** Nothing on GitHub. The owner posts or applies anything they approve | the owner's yes to this design; a **read-only** fine-grained token (section 7) | **now** |
+| **0** (default) | **Read, and post drafts to Slack `#gh-triage`.** Nothing on GitHub. The owner posts or applies anything he approves | the owner's yes to this design; a **read-only** fine-grained token (section 7) | **now** |
 | **1** | Only the actions the owner has listed in `grants.json` (below), each limited by its own rule | the owner writes the grant into `grants.json`, the token is swapped for one with Issues write, and the grant is announced in `#gh-triage` | after the owner has read at least a week of tier-0 drafts and says so (plan decision D12) |
 | **2** | Answer a question in Discussions or an issue on its own, but only from a short list of reply-bank entries the owner has named, and only when it is confident | a grant per entry in `grants.json`, with an expiry | after a track record at tier 1: suggested, four weeks and 30 or more approved drafts with few edits; never before the wide stage is over |
 
@@ -100,7 +100,7 @@ cap, and keep the timer as the fallback. The Claude GitHub Action is not recomme
 Every comment the agent posts at tier 1 or 2 ends with one line: *"Posted by the project's triage
 assistant; the maintainer reads every thread."* Being plain about it is cheaper than being found out.
 
-**`grants.json`** lives in the agent's folder on the i7, is edited by the owner (or by COORD on their
+**`grants.json`** lives in the agent's folder on the i7, is edited by the owner (or by COORD on his
 explicit, written instruction), and holds one entry per grant: the grant's name, the date, an expiry date
 and a note. The agent reads it at the start of every run, acts only on unexpired grants, and lists the
 grants it ran under in the daily digest. Removing an entry, or swapping back the read-only token, drops
@@ -116,7 +116,7 @@ The agent stops, adds nothing public (at tier 1, at most the `needs-owner` label
   should be reported privately (https://github.com/ritchiecarroll/go2cs/security/policy), and the owner
   decides whether to say even that;
 - **licensing**, the CLA, commercial terms, or any license accusation;
-- **anything about the owner personally** or their work outside the project;
+- **anything about the owner personally** or his work outside the project;
 - **angry, hostile or abusive** text, or a pile-on;
 - legal, trademark or takedown language;
 - a **pull request** from an outside contributor (the agent notes the CLA check's state and nothing
@@ -247,7 +247,7 @@ EACH RUN:
    - The next step: ask for facts | link a doc | a reproduction for the maintainers | the owner's call.
 4. Needs the owner = yes, start the Slack message with <@<OWNER_SLACK_ID>>, and draft NO public reply
    (only a one-line summary) for: a security report or anything like one; licensing, the CLA or commercial
-   terms; anything about the owner personally or their work outside the project; hostile, angry or abusive
+   terms; anything about the owner personally or his work outside the project; hostile, angry or abusive
    text; legal or takedown language; spam; a pull request from an outside contributor (note its CLA check
    state); anything you cannot classify with at least medium confidence.
 5. Post ONE Slack message per item to <CH_TRIAGE> in this shape:
