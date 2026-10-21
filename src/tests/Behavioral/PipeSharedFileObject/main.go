@@ -23,7 +23,13 @@
 //  5. File.Fd still takes a BOUND FD off the poller (Go 1.26's windows Fd calls DisassociateIOCP):
 //     the bind now happens at open, so Fd has a real association to drop, and the FD's later IO
 //     waits on its own events. No step before this one calls Fd, because an Fd call before the
-//     writes moves an FD off the poller and hides the refusal this program exists to reach.
+//     writes moves an FD off the poller and hides the refusal this program exists to reach;
+//  6. a handle NUMBER reused after a close: closing one of two Files over one handle leaves the
+//     other File's FD registered under a number the kernel is free to hand out again. A new handle
+//     that gets it must open and work, as in Go, and not trip over the old FD's record.
+//
+// Files that share one handle are kept reachable until the program exits: each File's finalizer
+// closes the handle, and a second close of a reused number would close an unrelated handle.
 //
 // Every step runs under a guard, so a hang is printed by name rather than stalling the run.
 package main
@@ -51,6 +57,7 @@ var (
 	kernel32            = syscall.NewLazyDLL("kernel32.dll")
 	procCreateNamedPipe = kernel32.NewProc("CreateNamedPipeW")
 	counter             atomic.Uint64
+	keep                []*os.File
 )
 
 // pipe creates one overlapped named pipe and returns its server end, wrapped, and the raw handle of
@@ -144,6 +151,7 @@ func main() {
 		server2, client2 := pipe()
 		first := os.NewFile(uintptr(client2), "first")
 		second := os.NewFile(uintptr(client2), "second")
+		keep = append(keep, first, second)
 
 		if _, err := second.Write([]byte("second line\n")); err != nil {
 			return "second write: " + err.Error()
@@ -178,5 +186,48 @@ func main() {
 
 		return fmt.Sprintf("%q deadline before Fd err=%v after Fd ErrNoDeadline=%v",
 			readLines(server3, 2), before, errors.Is(after, os.ErrNoDeadline))
+	})
+
+	step("6 a handle number reused after a close", func() string {
+		server4, client4 := pipe()
+		first := os.NewFile(uintptr(client4), "first")
+		second := os.NewFile(uintptr(client4), "second")
+		keep = append(keep, first, second)
+
+		if _, err := first.Write([]byte("before close\n")); err != nil {
+			return "first write: " + err.Error()
+		}
+		before := readLines(server4, 1)
+
+		// The second pipe exists before the close, so its own handles cannot take the freed number.
+		server5, other := pipe()
+
+		// second's open was refused, so its Close retires nothing in the poller; it closes the
+		// handle number first's FD is still registered under.
+		second.Close()
+
+		// Duplicates of the second pipe's client until one gets the freed number.
+		var reused syscall.Handle
+		for i := 0; i < 256 && reused == 0; i++ {
+			var d syscall.Handle
+			if err := syscall.DuplicateHandle(self, other, self, &d, 0, false, syscall.DUPLICATE_SAME_ACCESS); err != nil {
+				return "DuplicateHandle: " + err.Error()
+			}
+			if d == client4 {
+				reused = d
+			}
+		}
+		if reused == 0 {
+			return "the closed number was not handed out again"
+		}
+
+		f := os.NewFile(uintptr(reused), "reused")
+		keep = append(keep, f)
+
+		if _, err := f.Write([]byte("after reuse\n")); err != nil {
+			return "write through the reused number: " + err.Error()
+		}
+
+		return fmt.Sprintf("%q %q", before, readLines(server5, 1))
 	})
 }

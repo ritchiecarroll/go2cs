@@ -168,6 +168,11 @@ partial class poll_package
         // gets it in pollOpen, a wrapper gets it as its own first argument), so pollClose can retire
         // that state without the caller supplying the descriptor a second time.
         internal nuint Fd;
+
+        // The readiness sink this desc registered for Fd. pollClose retires the descriptor only while
+        // this is still the sink filed under it: a handle closed under this FD can have its number
+        // reused by a new handle, whose registration replaced the sink and whose state is not ours.
+        internal Action<nint> Sink = null!;
     }
 
     // ctx token -> desc. Go returns the *pollDesc itself as a uintptr and defends staleness with
@@ -269,7 +274,8 @@ partial class poll_package
         // sides see. Registration REPLACES any previous sink for the same descriptor, and must: the
         // kernel reissues descriptor numbers after a close, so refusing to overwrite would leave a
         // retired desc being woken for a socket it no longer owns.
-        golib.GoAsyncIO.SetReadiness(handle, readinessSink(ctx));
+        desc.Sink = readinessSink(ctx);
+        golib.GoAsyncIO.SetReadiness(handle, desc.Sink);
 
         return (ctx, 0);
     }
@@ -310,8 +316,9 @@ partial class poll_package
         // submit, together with every operation record hanging off it). This runs BEFORE
         // internal/poll closes the socket -- FD.destroy calls pd.close() ahead of CloseFunc
         // precisely so a poller can unregister first. Disposing that association never closes the
-        // descriptor; it stays internal/poll's throughout.
-        golib.GoAsyncIO.RemoveDescriptor(desc.Fd);
+        // descriptor; it stays internal/poll's throughout. It retires only what this desc still owns
+        // (see ManagedPollDesc.Sink).
+        golib.GoAsyncIO.RemoveDescriptor(desc.Fd, desc.Sink);
 
         pollTable.TryRemove(ctx, out _);
     }

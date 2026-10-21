@@ -284,13 +284,11 @@ partial class syscall_package
             return _ERROR_INVALID_PARAMETER;
         }
 
-        // The kernel just accepted the bind, so no live association exists for this handle, and a
-        // binding still filed under its number belongs to a handle closed without pollClose. That
-        // is a sequencing fault upstream, made loud rather than left to submit on a dead binding.
-        if (!ReferenceEquals(GoAsyncIO.GetOrCreateDescriptorState(descriptor, () => binding), binding)) {
-            binding.Dispose();
-            throw new InvalidOperationException($"syscall: handle {descriptor} bound at open while an earlier binding is still filed under it");
-        }
+        // The kernel just accepted the bind, so no live handle holds this number, and a binding still
+        // filed under it was left by a handle closed without pollClose (a File whose handle was closed
+        // behind it, or one of two Files over one handle). It is replaced: Go keeps no such record and
+        // opens the new handle, and the old FD's pollClose retires only what is still its own.
+        GoAsyncIO.SetDescriptorState(descriptor, binding);
 
         return 0;
     }

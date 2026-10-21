@@ -320,6 +320,15 @@ later swap is not a redesign. **OQ1.**
 > from the caller's `HEvent`, which `execIO` sets from that FD's `pollable()`, so two FDs sharing one
 > handle VALUE (`os.NewFile` twice on one handle) each keep their own route; nothing value-keyed decides
 > it. Guarded by the windows behavioral row `PipeSharedFileObject`.
+>
+> Binding at open files a record under every pollable handle's NUMBER, and the kernel reissues a
+> closed number. A handle closed under its FD (one of two Files over one handle closed, or a handle
+> closed behind its File) therefore leaves a record that a NEW handle can meet at its open. The open
+> REPLACES that stale record (`GoAsyncIO.SetDescriptorState`); the kernel's acceptance of the bind
+> proves no live handle holds the number. `pollClose` COMPARES AND REMOVES (`GoAsyncIO.RemoveDescriptor`
+> with the desc's own sink), so an old FD retires only what is still its own. That is Go's tolerance:
+> Go keeps no per-number record and opens the new handle. (G's review note, ruled into the same seat;
+> guard arm 6 and `GoAsyncIOTests.AnOldWaiterRetiresOnlyWhatIsStillItsOwn`.)
 
 One converted behavior interacts here and is kept: `FD.Init` enables
 `SetFileCompletionNotificationModes(FILE_SKIP_COMPLETION_PORT_ON_SUCCESS)` for TCP/UDP when safe

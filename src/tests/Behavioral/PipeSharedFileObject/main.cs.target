@@ -23,6 +23,7 @@ internal static ж<syscall.LazyDLL> kernel32 = syscall.NewLazyDLL("kernel32.dll"
 internal static ж<syscall.LazyProc> procCreateNamedPipe = kernel32.NewProc("CreateNamedPipeW");
 internal static ж<atomic.Uint64> Ꮡcounter = new StandardBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 counter => ref Ꮡcounter.Value;
+internal static slice<ж<os.File>> keep;
 
 internal static (ж<os.File>, syscallꓸHandle) pipe() {
     @string name = @"\\.\pipe\go2cs-pipeshared-"u8 + strconv.Itoa(os.Getpid()) + "-"u8 + strconv.FormatUint(Ꮡcounter.Add(1), 10);
@@ -135,6 +136,7 @@ internal static void Main() {
         var (server2, client2) = pipe();
         var first = os.NewFile((uintptr)client2, "first");
         var second = os.NewFile((uintptr)client2, "second");
+        keep = append(keep, first, second);
 
         {
             var (_, err) = second.Write(slice<byte>("second line\n"u8)); if (err != default!) {
@@ -177,6 +179,51 @@ internal static void Main() {
 
         return fmt.Sprintf("%q deadline before Fd err=%v after Fd ErrNoDeadline=%v"u8,
             readLines(server3, 2), before, errors.Is(after, os.ErrNoDeadline));
+    });
+
+    step("6 a handle number reused after a close", () => {
+        var (server4, client4) = pipe();
+        var first = os.NewFile((uintptr)client4, "first");
+        var second = os.NewFile((uintptr)client4, "second");
+        keep = append(keep, first, second);
+
+        {
+            var (_, err) = first.Write(slice<byte>("before close\n"u8)); if (err != default!) {
+                return "first write: "u8 + err.Error();
+            }
+        }
+        @string before = readLines(server4, 1);
+
+        var (server5, other) = pipe();
+
+        second.Close();
+
+        syscallꓸHandle reused = default!;
+        for (nint i = 0; i < 256 && reused == 0; i++) {
+            ref var d = ref heap(new syscallꓸHandle(), out var Ꮡd);
+            {
+                var err = syscall.DuplicateHandle(self, other, self, Ꮡd, 0, false, syscall.DUPLICATE_SAME_ACCESS); if (err != default!) {
+                    return "DuplicateHandle: "u8 + err.Error();
+                }
+            }
+            if (d == client4) {
+                reused = d;
+            }
+        }
+        if (reused == 0) {
+            return "the closed number was not handed out again";
+        }
+
+        var f = os.NewFile((uintptr)reused, "reused");
+        keep = append(keep, f);
+
+        {
+            var (_, err) = f.Write(slice<byte>("after reuse\n"u8)); if (err != default!) {
+                return "write through the reused number: "u8 + err.Error();
+            }
+        }
+
+        return fmt.Sprintf("%q %q"u8, before, readLines(server5, 1));
     });
 }
 
