@@ -2207,6 +2207,16 @@ serves a read, a write, a compound assignment, a nested field and a `ref` argume
   `rec.B`); the embed's property is its `ref` accessor's. A field promoted through a POINTER embed lives in
   another allocation and keeps the dereference.
 - **`&p.f`** keeps `p.of(T.Ꮡf)`, which already answers a view at the Go offset.
+- **A header-shaped struct** gets GET/SET properties instead of `ref` ones. Such a struct is an `unsafe.Pointer`
+  field followed by one or two `int` fields: internal/unsafeheader's `Slice` and `String`, and runtime's `slice`
+  and `stringStruct`. The setter is
+  `set { ʗp.field(T.ᏑLen) = value; ʗp.OnHeaderStore(); }`. golib views a slice or string variable as such a
+  header (`(*unsafeheader.Slice)(unsafe.Pointer(&s))`), and the setter is the only point at which golib can commit
+  each store to the variable. A `ref` cannot be intercepted, and the last store of a field-by-field build is
+  followed by no access of the box. Reads, stores and compound assignments bind the property as before; a `ref`
+  to such a field does not compile. The commit and its three limits belong to golib: the header boxes in
+  `ж.SliceHeaderBox.cs` and `ж.StringHeaderBox.cs`. Guarded by GenTests' two header arms and GolibTests'
+  `HeaderWriteThroughTests`; internal/unsafeheader's `TestWriteThroughHeader` validates against Go.
 
 **Limits.** A field whose own CLR form is a managed reference (an array, a string) still cannot be read WHOLE
 over native memory: `field` refuses it by name, `runtime error: cannot read native memory as main.record: its
