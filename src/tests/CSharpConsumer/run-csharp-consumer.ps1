@@ -35,7 +35,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $WorkRoot,
-    [int] $ExpectedChecks = 65,
+    [int] $ExpectedChecks = 66,
     [switch] $SkipBuild
 )
 

@@ -156,7 +156,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 public static implicit operator {{StructName}}(NilType nil) => default({{StructName}});
 
-                public override string ToString() => string.Concat("{", string.Join(" ",
+                public override string ToString() => global::go.GoMethodText.Of(this) ?? string.Concat("{", string.Join(" ",
                 [
                     {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");

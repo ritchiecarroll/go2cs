@@ -111,6 +111,8 @@ static class Program
         Check("5 fmt prints Go values as Go does", fmt.Sprint(diskFull, " ", wait) == "disk full 1.5s");
         Console.WriteLine($"{diskFull.Error()} after {wait.String()}");    // disk full after 1.5s
         Check("5 Error() and String() give the Go text", diskFull.Error() == "disk full" && wait.String() == "1.5s");
+        Console.WriteLine($"{diskFull} after {wait}");                    // disk full after 1.5s
+        Check("5 ToString() gives the Go text too", $"{diskFull} after {wait}" == "disk full after 1.5s");
         slice<nint> scores = new nint[] { 7, 8, 9 };
         Check("5 fmt formats a slice<T> as Go does", fmt.Sprintf("%v", scores) == "[7 8 9]");
 
