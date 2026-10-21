@@ -27776,4 +27776,65 @@ go1.26.9 reading above stands for capable hosts.
 
 — P2 (re-gated 2026-10-21)
 
+## 2026-10-21 — G finding: runtime's TestGCTestIsReachable fails on windows because golib's stack-append overload, when the JIT inlined it, kept each site's first backing store reachable — FIXED ([MethodImpl(NoInlining)]); and a provenance gap: the 1.24.13.7 runtime page's stated converter rebuilds neither its corpus nor its test host
+
+**Symptom (E).** On G's windows box at 9924b9621c, eb6def6292 and the batch-12 tip ed51b5a3bd:
+`dead object in reachable set; want 101010101010101, got 1101010101011111`. Go allows one unintentionally
+retained object; we retained three (bits 1, 3 and 15). The 1.24.13.7 runtime page records a pass.
+
+**Root, read from a dump and not inferred.** At the batch-12 tip ed51b5a3bd (go1.26.10, Release, tiering off),
+and first at eb6def6292 with the same chain, the converted host was paused right after gcTestIsReachable's
+weak-reference read. That hook was local only and never committed. A full dump was then taken and SOS `gcroot`
+run on each surviving object:
+
+- bits 1 and 3: the `TestGCTestIsReachable` frame, slot rsp+0x138 -> `Pointer[4]` [p0, p1, p2, p3] -> each box.
+  That array is `all`'s FIRST backing store, outgrown at i=4. `half`'s first store, [p0, p2, p4, p6], sits the same
+  way at rsp+0xb8.
+- bit 15: the `p` local's own slots, the one object Go also tolerates (its "slop of 1").
+
+The JIT listing names the slot. 76ea31575f (C2, 2026-10-20) emits `x = append(xᴷ, x, v)` at a non-escaping
+slice's first qualifying append, Go 1.25+'s 32-byte stack backing store. The JIT inlined
+`builtin.append(in stackAppend<T>, ...)`. Its store-taking return builds the result through `slice<T>`'s
+constructor in a stack temp of its own, rsp+0x138. That temp is address-exposed, so it is reported for the WHOLE
+frame. It is written once, when the buffer is taken, and never overwritten, so the first store and every element it
+held stay reachable after the slice grows past it. Go's buffer is a stack object, scanned only while a live pointer
+reaches it, and Go passes here.
+
+**Fix (claude/g-stackappend-noinline).** `[MethodImpl(MethodImplOptions.NoInlining)]` on that one overload. Both
+returns then reach the caller through one result slot, which the site's next call overwrites, so the slot holds the
+current slice and never an outgrown one.
+
+- Row: TestGCTestIsReachable FAIL -> PASS, the same tree with and without the attribute. The direct host passed 10 of
+  10 runs; without the attribute it failed every run at both tips (rows, a direct run, the paused runs).
+- GolibTests: `StackAppendTests.TheBufferOverloadIsNeverInlined` pins the attribute with this reason. Retention in an
+  optimized frame cannot be observed from GolibTests' Debug build, so runtime's row is the behavioral guard.
+- Cost: one extra call per append at a first-qualifying site. Not measured.
+
+**Residue (named, not fixed).** An address-exposed struct temp in an optimized CLR frame can be reported for the
+whole method, as rsp+0x138 was. Such a slot, written by an earlier call, can still hold that call's slice after the
+variable is reassigned elsewhere. Not measured beyond this site. Go's precise stack maps have no such residue.
+This fix removes the slot that was written once and never overwritten; it does not make CLR frames precise.
+
+**Provenance gap, for the re-bank.** docs/validation/1.24.13.7/runtime.md says `converter 4016a2269`, Release with
+tiering off, go1.24.13 windows. On G's box neither instrument at that ref rebuilds:
+
+- (1) The converter built with its own toolchain re-emits runtime differently from the committed corpus. It puts
+  internal/runtime/maps into darwin and linux ItemGroups only, so windows fails with 83x CS0246/CS0234. It also drops
+  the NoInlining lambdas committed chan.cs carries, and changes mgcpacer, mpagealloc, stubs and the windows files.
+  The corpus at that ref came from a union converter (the commit's subject).
+- (2) The committed windows test host (`-test-action compare`, no reconvert) fails 11x in runtime.tests.csproj:
+  arena_test.cs (8), seh_windows_test.cs (2) and syscall_windows_test.cs (1).
+
+So the page's pass has no reproducible instrument, and E could not be bisected; it was rooted forward instead.
+
+A related drift in the same vein: at ed51b5a3bd the row's own reconvert rewrites 35 committed runtime files. These
+are test sources (gc_test.cs now uses the stack-append form) plus mcleanup.cs.auto, mfinal.cs.auto and
+runtime2.cs.auto; runtime.csproj and runtime.tests.csproj change too. So the committed runtime test corpus trails
+the converter there.
+
+PROPOSAL: a 1.26 page records an instrument that rebuilds. That means the converter ref whose `-tests` emission
+equals the committed corpus at the banked ref, or the corpus ref the row actually ran on, checked before banking.
+
+— G (measured 2026-10-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
