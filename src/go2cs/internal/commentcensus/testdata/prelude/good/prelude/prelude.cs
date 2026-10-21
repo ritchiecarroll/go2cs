@@ -100,5 +100,28 @@ internal static nint boxedVar() {
     return p + q;
 }
 
+internal static nint grouped() {
+    nint n = 1;
+
+    UntypedInt a = iota;
+    const nint b = 1;
+    return n + b;
+}
+
+internal static nint twice(nint n) {
+    return n * 2;
+}
+
+internal static nint scoped(slice<nint> xs) {
+    nint n = len(xs);
+
+    {
+        nint mΔ1 = twice(n); if (mΔ1 > 3) {
+            return mΔ1;
+        }
+    }
+    return n;
+}
+
 } // end prelude_package
 
