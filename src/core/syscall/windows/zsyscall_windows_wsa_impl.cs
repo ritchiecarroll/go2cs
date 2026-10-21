@@ -393,7 +393,12 @@ partial class syscall_package
                 // refused, and the second's operation arrives here on a record bound to the first's
                 // association. It carries its event, so it is submitted on that event and never
                 // through the port, where its completion would wake the first FD's waiter.
-                nint eventHandle = (nint)(nuint)(uintptr)((ж<Overlapped>)Key).Value.HEvent;
+                //
+                // A NIL overlapped has no event to read and keeps the route it had before the route
+                // was read per submit. WSASend and WSARecv never bring one here (they take their
+                // synchronous arm, as Go does); the other wrappers still can.
+                ж<Overlapped> Ꮡoverlapped = (ж<Overlapped>)Key;
+                nint eventHandle = Ꮡoverlapped == nil ? 0 : (nint)(nuint)(uintptr)Ꮡoverlapped.Value.HEvent;
 
                 if (Binding is null || eventHandle != 0)
                 {
@@ -571,6 +576,10 @@ partial class syscall_package
     }
 
     public static unsafe error /*err*/ WSARecv(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+        if (Ꮡoverlapped == nil) {
+            return wsaRecvSync(s, Ꮡbufs, bufcnt, Ꮡrecvd, Ꮡflags);
+        }
+
         OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeRead);
         NativeOverlapped* native = operation.Rearm();
         NativeWSABuf* buffers = stageBuffers(operation, Ꮡbufs, bufcnt);
@@ -596,6 +605,10 @@ partial class syscall_package
     }
 
     public static unsafe error /*err*/ WSASend(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags, ж<Overlapped> Ꮡoverlapped, ж<byte> Ꮡcroutine) {
+        if (Ꮡoverlapped == nil) {
+            return wsaSendSync(s, Ꮡbufs, bufcnt, Ꮡsent, flags);
+        }
+
         OverlappedOp operation = operationFor(s, Ꮡoverlapped, wsaModeWrite);
         NativeOverlapped* native = operation.Rearm();
         NativeWSABuf* buffers = stageBuffers(operation, Ꮡbufs, bufcnt);
@@ -603,6 +616,57 @@ partial class syscall_package
         uint32 sent = 0;
 
         var (r1, _, e1) = Syscall9(procWSASend.Addr(), 7, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt, (uintptr)(void*)(&sent), (uintptr)flags, (uintptr)(void*)native, 0, 0, 0);
+
+        if (Ꮡsent != nil) {
+            Ꮡsent.Value = sent;
+        }
+
+        return r1 == socket_error ? errnoErr(e1) : default!;
+    }
+
+    // THE SYNCHRONOUS ARMS of WSARecv and WSASend: a NIL overlapped, which Winsock's contract makes
+    // a blocking call that is done with every pointer before it returns. internal/poll always passes
+    // `&o.o`; a nil one comes from a caller issuing its own call on a socket's handle, as net's
+    // TestRawConnReadWrite does inside RawConn.Read and RawConn.Write on a socket the poller has
+    // bound. Such a call is not an operation of internal/poll's, so it takes no record: `operationFor`
+    // keys a record off the overlapped, and every nil-overlapped call on every socket would share one.
+    // The kernel gets a null overlapped, exactly as Go hands it one, and the staging is `stackalloc`
+    // by the same lifetime argument as WSASendto's synchronous arm. On an overlapped socket a
+    // synchronous call is legal, and with a null overlapped no completion is queued to the port.
+    private static unsafe error wsaRecvSync(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡrecvd, ж<uint32> Ꮡflags) {
+        NativeWSABuf* buffers = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
+
+        writeWSABufs(Ꮡbufs, bufcnt, buffers, null);
+
+        uint32 recvd = 0;
+        uint32 flags = Ꮡflags == nil ? 0 : Ꮡflags.Value;
+
+        var (r1, _, e1) = Syscall9(procWSARecv.Addr(), 7, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt, (uintptr)(void*)(&recvd), (uintptr)(void*)(&flags), 0, 0, 0, 0);
+
+        // The pins live on the `ж<byte>` boxes `Ꮡbufs` names; see WSASendto.
+        System.GC.KeepAlive(Ꮡbufs);
+
+        if (Ꮡrecvd != nil) {
+            Ꮡrecvd.Value = recvd;
+        }
+
+        if (Ꮡflags != nil) {
+            Ꮡflags.Value = flags;
+        }
+
+        return r1 == socket_error ? errnoErr(e1) : default!;
+    }
+
+    private static unsafe error wsaSendSync(ΔHandle s, ж<WSABuf> Ꮡbufs, uint32 bufcnt, ж<uint32> Ꮡsent, uint32 flags) {
+        NativeWSABuf* buffers = stackalloc NativeWSABuf[(int)(bufcnt == 0 ? 1 : bufcnt)];
+
+        writeWSABufs(Ꮡbufs, bufcnt, buffers, null);
+
+        uint32 sent = 0;
+
+        var (r1, _, e1) = Syscall9(procWSASend.Addr(), 7, (uintptr)s, (uintptr)(void*)buffers, (uintptr)bufcnt, (uintptr)(void*)(&sent), (uintptr)flags, 0, 0, 0, 0);
+
+        System.GC.KeepAlive(Ꮡbufs);
 
         if (Ꮡsent != nil) {
             Ꮡsent.Value = sent;

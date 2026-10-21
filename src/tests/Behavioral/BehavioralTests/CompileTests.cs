@@ -1828,6 +1828,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
 
     [TestMethod]
+    public void CheckRawConnSyncSocketIO() => CheckTarget("RawConnSyncSocketIO");
+
+    [TestMethod]
     public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");
 
     [TestMethod]

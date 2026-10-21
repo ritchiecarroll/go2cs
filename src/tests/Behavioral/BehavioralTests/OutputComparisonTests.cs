@@ -1766,6 +1766,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
 
     [TestMethod]
+    public void CheckRawConnSyncSocketIO() => CheckTarget("RawConnSyncSocketIO");
+
+    [TestMethod]
     public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");
 
     [TestMethod]

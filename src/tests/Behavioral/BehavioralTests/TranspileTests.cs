@@ -1828,6 +1828,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
 
     [TestMethod]
+    public void CheckRawConnSyncSocketIO() => CheckTarget("RawConnSyncSocketIO");
+
+    [TestMethod]
     public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");
 
     [TestMethod]

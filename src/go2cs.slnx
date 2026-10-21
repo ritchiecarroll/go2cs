@@ -934,6 +934,7 @@
     <Project Path="tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="tests/Behavioral/RangeVarHeapBox/RangeVarHeapBox.csproj" />
     <Project Path="tests/Behavioral/RangeVarReassign/RangeVarReassign.csproj" />
+    <Project Path="tests/Behavioral/RawConnSyncSocketIO/RawConnSyncSocketIO.csproj" />
     <Project Path="tests/Behavioral/ReceiverCapturedInClosure/ReceiverCapturedInClosure.csproj" />
     <Project Path="tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />
     <Project Path="tests/Behavioral/ReceiverFieldMethodCall/ReceiverFieldMethodCall.csproj" />

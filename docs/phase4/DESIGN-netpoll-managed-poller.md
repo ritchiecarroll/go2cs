@@ -329,6 +329,14 @@ later swap is not a redesign. **OQ1.**
 > with the desc's own sink), so an old FD retires only what is still its own. That is Go's tolerance:
 > Go keeps no per-number record and opens the new handle. (G's review note, ruled into the same seat;
 > guard arm 6 and `GoAsyncIOTests.AnOldWaiterRetiresOnlyWhatIsStillItsOwn`.)
+>
+> A NIL overlapped carries no event and is no operation of internal/poll's. net's
+> `TestRawConnReadWrite` issues `syscall.WSASend` and `syscall.WSARecv` with one inside `RawConn.Write`
+> and `RawConn.Read`, on a socket the poller has bound; reading the route from it dereferenced nil
+> (the i9's reading, deterministic, green at the base). Both wrappers now take Go's synchronous arm
+> for a nil overlapped, as `WSASendto` already did: a null overlapped to the kernel, `stackalloc`
+> staging, no record. Any other wrapper handed a nil overlapped keeps the route it had before the route
+> was read per submit. Guarded by the windows behavioral row `RawConnSyncSocketIO`.
 
 One converted behavior interacts here and is kept: `FD.Init` enables
 `SetFileCompletionNotificationModes(FILE_SKIP_COMPLETION_PORT_ON_SUCCESS)` for TCP/UDP when safe
