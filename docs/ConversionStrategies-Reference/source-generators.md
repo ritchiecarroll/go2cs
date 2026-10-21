@@ -151,7 +151,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:937 -->
+<!-- source: src/core/time/time.cs:938 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```

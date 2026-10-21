@@ -1039,6 +1039,7 @@ internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Even
         else if (exprᴛ2 == EvUserLog) {
             // e.Args 0: taskID, 1:keyID, 2: stackID, 3: messageID
             // raw.sargs 0: message
+
             {
                 var (id, ok) = p.inlineStringsMapping[raw.sargs[0], ꟷ]; if (ok){
                     ev.Args[3] = (uint64)id;
@@ -1409,6 +1410,7 @@ internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) {
             // Make sure events don't refer to stacks that don't exist or to
             // stacks with zero frames. Neither of these should be possible, but
             // better be safe than sorry.
+
             ev.Value.StkID = 0;
         }
     }

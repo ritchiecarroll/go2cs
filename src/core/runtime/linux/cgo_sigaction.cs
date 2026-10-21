@@ -42,6 +42,7 @@ internal static void sigaction(uint32 sigʗp, ж<sigactiont> Ꮡnew, ж<sigactio
         // runtime has been initialized) or in an asynchronous signal handler (with
         // the current thread in transition between goroutines, or with the g0
         // system stack already in use).
+
         int32 ret = default!;
 
         fixSigactionForCgo(Ꮡnew);

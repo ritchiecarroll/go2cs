@@ -246,6 +246,7 @@ public static ж<P384Point> Add(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж
 
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
+
     var t0 = @new<fiat.P384Element>().Mul(p1.x, p2.x); // t0 := X1 * X2
     var t1 = @new<fiat.P384Element>().Mul(p1.y, p2.y); // t1 := Y1 * Y2
     var t2 = @new<fiat.P384Element>().Mul(p1.z, p2.z); // t2 := Z1 * Z2
@@ -303,6 +304,7 @@ public static ж<P384Point> Double(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) 
 
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
+
     var t0 = @new<fiat.P384Element>().Square(p.x); // t0 := X ^ 2
     var t1 = @new<fiat.P384Element>().Square(p.y); // t1 := Y ^ 2
     var t2 = @new<fiat.P384Element>().Square(p.z); // t2 := Z ^ 2

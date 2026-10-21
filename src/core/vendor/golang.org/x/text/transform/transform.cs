@@ -643,6 +643,7 @@ public static (@string result, nint n, error err) String(Transformer t, @string 
     nint pPrefix = 0;
     while (ᐧ) {
         // Invariant: pDst == pPrefix && pSrc == pPrefix.
+
         nint nΔ1 = copy(src, s.slice(pSrc));
         (nDst, nSrc, err) = t.Transform(dst, src.slice(0, nΔ1), pSrc + nΔ1 == len(s));
         pDst += nDst;

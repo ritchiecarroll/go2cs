@@ -104,6 +104,7 @@ internal static void init(this ж<@decimal> Ꮡx, Δnat m, nint shift) {
 // rsh implements x >> s, for s <= maxShift.
 internal static void rsh(ref @decimal x, nuint s) {
     // Division by 1<<s using shift-and-subtract algorithm.
+
     // pick up enough leading digits to cover first shift
     nint r = 0; // read index
     Word n = default!;

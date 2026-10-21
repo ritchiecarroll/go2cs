@@ -240,6 +240,7 @@ public static void TestTablePutDelete(ж<testing.T> Ꮡt) {
     //
     // So first we must add to the table continuously until we happen to
     // fill a group.
+
     // Avoid small maps, they have no tables.
     var (m, typ) = maps_internal_test_package.NewTestMap<uint32, uint32>(16);
 

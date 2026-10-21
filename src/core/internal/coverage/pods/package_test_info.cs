@@ -41,7 +41,7 @@ using static global::go.@internal.coverage.pods_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/pods/pods_test.go", "pods_test.cs", "ABwkloKCgIKkpoKCgIKkppKCgoKCppKCgoKCpoKCgoKmkoKCgoKUlLiCpoKmgoKCpqaCgoLugqaCgriCpoKmABAagoKCyoKCgoI=", "21-27:1;29-35:2;37-43:3;45-51:4;53-58:5;60-70:6")]
+[assembly: go.GoPositionMap("internal/coverage/pods/pods_test.go", "pods_test.cs", "ABwkpoKCgIKkpoKCgIKkppKCgoKCppKCgoKCpoKCgoKmkoKCgoKUlLiCpoKmgoKCpqaCgoLugqaCgriCpoKmABAagoKCyoKCgoI=", "21-27:1;29-35:2;37-43:3;45-51:4;53-58:5;60-70:6")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

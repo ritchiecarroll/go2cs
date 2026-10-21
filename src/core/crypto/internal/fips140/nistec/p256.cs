@@ -247,6 +247,7 @@ internal static slice<byte> bytesCompressed(this ж<P256Point> Ꮡp, /*[33]*/ ж
 public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж<P256Point> Ꮡp2) {
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
+
     var t0 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡx), Ꮡp2.of(P256Point.Ꮡx)); // t0 := X1 * X2
     var t1 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡy), Ꮡp2.of(P256Point.Ꮡy)); // t1 := Y1 * Y2
     var t2 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡz), Ꮡp2.of(P256Point.Ꮡz)); // t2 := Z1 * Z2
@@ -301,6 +302,7 @@ public static ж<P256Point> Add(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp1, ж
 public static ж<P256Point> Double(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡp) {
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
+
     var t0 = @new<fiat.P256Element>().Square(Ꮡp.of(P256Point.Ꮡx)); // t0 := X ^ 2
     var t1 = @new<fiat.P256Element>().Square(Ꮡp.of(P256Point.Ꮡy)); // t1 := Y ^ 2
     var t2 = @new<fiat.P256Element>().Square(Ꮡp.of(P256Point.Ꮡz)); // t2 := Z ^ 2
@@ -362,6 +364,7 @@ public static ж<P256Point> AddAffine(this ж<P256Point> Ꮡq, ж<P256Point> Ꮡ
     // Complete mixed addition formula for a = -3 from "Complete addition
     // formulas for prime order elliptic curves"
     // (https://eprint.iacr.org/2015/1060), Algorithm 5.
+
     var t0 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡx), Ꮡp2.of(p256AffinePoint.Ꮡx)); // t0 ← X1 · X2
     var t1 = @new<fiat.P256Element>().Mul(Ꮡp1.of(P256Point.Ꮡy), Ꮡp2.of(p256AffinePoint.Ꮡy)); // t1 ← Y1 · Y2
     var t3 = @new<fiat.P256Element>().Add(Ꮡp2.of(p256AffinePoint.Ꮡx), Ꮡp2.of(p256AffinePoint.Ꮡy)); // t3 ← X2 + Y2
@@ -615,6 +618,7 @@ public static (ж<P256Point>, error) ScalarBaseMult(this ж<P256Point> Ꮡp, sli
     // This function works like ScalarMult above, but the table is fixed and
     // "pre-doubled" for each iteration, so instead of doubling we move to the
     // next table at each iteration.
+
     var (s, err) = @new<p256OrdElement>().SetBytes(scalar);
     if (err != default!) {
         return (default!, err);

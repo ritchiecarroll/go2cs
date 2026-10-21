@@ -682,6 +682,7 @@ internal static bool isValidNumber(@string s) {
     // This function implements the JSON numbers grammar.
     // See https://tools.ietf.org/html/rfc7159#section-6
     // and https://www.json.org/img/number.png
+
     if (s == ""u8) {
         return false;
     }

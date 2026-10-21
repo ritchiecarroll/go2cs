@@ -201,6 +201,7 @@ public static S Insert<S, E>(S s, nint i, params Span<E> vʗp)
         // Easy case - v does not overlap either the c or d regions.
         // (It might be in some of a or b, or elsewhere entirely.)
         // The data we copy up doesn't write to v at all, so just do it.
+
         copy(subslice<S, E>(s, i + m), subslice<S, E>(s, i));
 
         // Now we have

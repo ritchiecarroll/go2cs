@@ -246,6 +246,7 @@ public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж
 
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
+
     var t0 = @new<fiat.P521Element>().Mul(p1.x, p2.x); // t0 := X1 * X2
     var t1 = @new<fiat.P521Element>().Mul(p1.y, p2.y); // t1 := Y1 * Y2
     var t2 = @new<fiat.P521Element>().Mul(p1.z, p2.z); // t2 := Z1 * Z2
@@ -303,6 +304,7 @@ public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) 
 
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
+
     var t0 = @new<fiat.P521Element>().Square(p.x); // t0 := X ^ 2
     var t1 = @new<fiat.P521Element>().Square(p.y); // t1 := Y ^ 2
     var t2 = @new<fiat.P521Element>().Square(p.z); // t2 := Z ^ 2
@@ -501,6 +503,7 @@ internal static void p521SqrtCandidate(ж<fiat.P521Element> Ꮡz, ж<fiat.P521El
     //
     //	return  1 << 519
     //
+
     Ꮡz.Square(Ꮡx);
     for (nint s = 1; s < 519; s++) {
         Ꮡz.Square(Ꮡz);

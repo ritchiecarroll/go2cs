@@ -424,6 +424,7 @@ internal static void sendDirect(ж<_type> Ꮡt, ж<sudog> Ꮡsg, @unsafe.Pointer
     ref var sg = ref Ꮡsg.DerefOrNull();
 
     // src is on our stack, dst is a slot on another stack.
+
     // Once we read sg.elem out of sg, it will no longer
     // be updated if the destination's stack gets copied (shrunk).
     // So make sure that no preemption points can happen between read & use.
@@ -577,6 +578,7 @@ internal static (bool selected, bool received) chanrecv(ж<Δhchan> Ꮡc, @unsaf
 
     // raceenabled: don't need to check ep, as it is always on the stack
     // or is new memory allocated by reflect.
+
     if (debugChan) {
         print((@string)"chanrecv: chan="u8, Ꮡc.OrTypedNil(), (@string)"\n"u8);
     }

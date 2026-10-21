@@ -895,6 +895,7 @@ public static (float32, Accuracy) Float32(this ж<Float> Ꮡx) {
     var exprᴛ1 = x.form;
     if (exprᴛ1 == finite) {
         // 0 < |x| < +Inf
+
         UntypedInt fbits = 32; //        float size
         UntypedInt mbits = 23; //        mantissa size (excluding implicit msb)
         UntypedInt ebits = /* fbits - mbits - 1 */ 8; //     8  exponent size
@@ -1017,6 +1018,7 @@ public static (float64, Accuracy) Float64(this ж<Float> Ꮡx) {
     var exprᴛ1 = x.form;
     if (exprᴛ1 == finite) {
         // 0 < |x| < +Inf
+
         UntypedInt fbits = 64; //        float size
         UntypedInt mbits = 52; //        mantissa size (excluding implicit msb)
         UntypedInt ebits = /* fbits - mbits - 1 */ 11; //    11  exponent size
@@ -1294,6 +1296,7 @@ internal static void uadd(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     // Vincent Lefèvre: "The Generic Multiple-Precision Floating-
     // Point Addition With Exact Rounding (as in the MPFR Library)"
     // http://www.vinc17.net/research/papers/rnc6.pdf
+
     if (debugFloat) {
         validateBinaryOperands(ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
     }
@@ -1351,6 +1354,7 @@ internal static void usub(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     // We have not factored the common code out because
     // eventually uadd (and usub) should be optimized
     // by special-casing, and the code will diverge.
+
     if (debugFloat) {
         validateBinaryOperands(ref (Ꮡx).DerefOrNull(), ref (Ꮡy).DerefOrNull());
     }
@@ -1573,6 +1577,7 @@ public static ж<Float> Add(this ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy)
 
     if (x.form == finite && y.form == finite) {
         // x + y (common case)
+
         // Below we set z.neg = x.neg, and when z aliases y this will
         // change the y operand's sign. This is fine, because if an
         // operand aliases the receiver it'll be overwritten, but we still

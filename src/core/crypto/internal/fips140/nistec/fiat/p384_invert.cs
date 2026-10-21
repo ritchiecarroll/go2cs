@@ -32,6 +32,7 @@ public static ж<P384Element> Invert(this ж<P384Element> Ꮡe, ж<P384Element> 
     //	i397    = ((x255 << 33 + x32) << 94 + x30) << 2
     //	return    1 + i397
     //
+
     ж<P384Element> z = @new<P384Element>().Set(Ꮡe);
     ж<P384Element> t0 = @new<P384Element>();
     ж<P384Element> t1 = @new<P384Element>();

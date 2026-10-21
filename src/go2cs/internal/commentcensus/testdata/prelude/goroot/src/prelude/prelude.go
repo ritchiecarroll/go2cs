@@ -46,3 +46,51 @@ func opens(xs ...int) (n int) {
 	n = len(xs)
 	return
 }
+
+func regrow(xs ...int) (n int) {
+	n = len(xs)
+
+	more := make([]int, n)
+	n += len(more)
+	return
+}
+
+var sink *int
+
+func boxed() int {
+	p := 1
+
+	q := p + 1
+	sink = &q
+	return q
+}
+
+func boxedVar() int {
+	p := 1
+
+	var q int
+
+	sink = &q
+	return p + q
+}
+
+func grouped() int {
+	n := 1
+
+	const (
+		a = iota
+		b
+	)
+	return n + b
+}
+
+func twice(n int) int { return n * 2 }
+
+func scoped(xs []int) int {
+	n := len(xs)
+
+	if m := twice(n); m > 3 {
+		return m
+	}
+	return n
+}

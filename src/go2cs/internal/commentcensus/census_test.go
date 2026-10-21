@@ -171,9 +171,9 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 		t.Fatalf("%s: %v", rendering, err)
 	}
 
-	// Vacuity: the six functions are read, or no class could move.
-	if n := r.r.body["functions"]; n != 6 {
-		t.Fatalf("%s: %d function bodies read, want 6", rendering, n)
+	// Vacuity: the twelve functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 12 {
+		t.Fatalf("%s: %d function bodies read, want 12", rendering, n)
 	}
 
 	got := map[string]int{}
@@ -195,15 +195,25 @@ func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 // `grow` opens with `buf := make([]int, len(xs))`, which the translation spells `var buf = new slice<nint>(...)`:
 // Go's builtin `make` never appears on the C# line, so the identifier test must not require it. `opens` opens
 // with a comment and then Go's blank line; `bad` drops that blank, as the converter does, and the census must
-// report it rather than credit the prelude's separator above the comment as Go's blank.
+// report it rather than credit the prelude's separator above the comment as Go's blank. `regrow` has a Go blank
+// line before `more := make(...)`: the line that places it must not require `make` either, or the blank reads
+// unmapped in `good` and is never reported missing in `bad`. `boxed` has a Go blank line before an escaping
+// local, whose translation is a heap box and then its assignment: the blank sits above the box, so the line that
+// places it walks back over the box as it does over a comment. `boxedVar` (G's planted pair) has an escaping
+// `var q int`, a box WITH an initializer and so a whole statement: `bad` drops the blank after it, and the walk
+// must stop at the box rather than credit the blank above it to the line below. `grouped` has a Go blank before
+// a `const (` group, which holds no identifier: the group's first spec places it. `scoped` has one before
+// `if m := twice(n); …`, which the translation wraps in a scope block and whose `m` it renames `mΔ1`: the
+// initializer's other identifiers place it, and the walk crosses the scope's `{`.
 func TestPreludeSeparatorIsNotADefect(t *testing.T) {
-	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 6 {
-		t.Errorf("good: %v and %d separators, want no body class and 6 separators", got, separators)
+	if got, separators := preludeBlanks(t, "good"); len(got) != 0 || separators != 7 {
+		t.Errorf("good: %v and %d separators, want no body class and 7 separators", got, separators)
 	}
 
-	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1, "body:go-blank-cs-none": 1}
+	want := map[string]int{"body:extra:after-named-result-locals": 4, "body:extra:after-param-prelude": 1, "body:go-blank-cs-none": 6}
 
-	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 0 {
-		t.Errorf("bad: %v and %d separators, want %v and 0 separators", got, separators, want)
+	// `bad` keeps regrow's prelude separator: only the blank before its make line is dropped.
+	if got, separators := preludeBlanks(t, "bad"); !maps.Equal(got, want) || separators != 1 {
+		t.Errorf("bad: %v and %d separators, want %v and 1 separator", got, separators, want)
 	}
 }

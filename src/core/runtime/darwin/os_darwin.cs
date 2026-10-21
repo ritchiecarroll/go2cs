@@ -172,6 +172,7 @@ internal static void sigNoteSleep(ж<note> _) {
 internal static void osinit() {
     // pthread_create delayed until end of goenvs so that we
     // can look at the environment first.
+
     numCPUStartup = getCPUCount();
     physPageSize = getPageSize();
 

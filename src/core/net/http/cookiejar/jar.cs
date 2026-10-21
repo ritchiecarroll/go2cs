@@ -541,6 +541,7 @@ internal static (@string, bool, error) domainAndType(this ref Jar j, @string hos
         // RFC 6265 is not super clear here, a sensible interpretation
         // is that cookies with an IP address in the domain-attribute
         // are allowed.
+
         // RFC 6265 section 5.2.3 mandates to strip an optional leading
         // dot in the domain-attribute before processing the cookie.
         //

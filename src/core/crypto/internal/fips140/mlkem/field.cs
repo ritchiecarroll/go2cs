@@ -78,6 +78,7 @@ internal static fieldElement fieldAddMul(fieldElement a, fieldElement b, fieldEl
 internal static uint16 compress(fieldElement x, uint8 d) {
     // We want to compute (x * 2ᵈ) / q, rounded to nearest integer, with 1/2
     // rounding up (see FIPS 203, Section 2.3).
+
     // Barrett reduction produces a quotient and a remainder in the range [0, 2q),
     // such that dividend = quotient * q + remainder.
     var dividend = ((uint32)(uint16)x).Lsh((uint64)(d)); // x * 2ᵈ
@@ -109,6 +110,7 @@ internal static uint16 compress(fieldElement x, uint8 d) {
 internal static fieldElement decompress(uint16 y, uint8 d) {
     // We want to compute (y * q) / 2ᵈ, rounded to nearest integer, with 1/2
     // rounding up (see FIPS 203, Section 2.3).
+
     var dividend = (uint32)y * (uint32)q;
     var quotient = dividend.Rsh((uint64)(d)); // (y * q) / 2ᵈ
 

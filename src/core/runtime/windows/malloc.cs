@@ -577,6 +577,7 @@ internal static void mallocinit() {
         // the first available page returned by the page allocator. This results
         // in an address with at least heapAddrBits-gc.PageShift-2-(1*goarch.IsAmd64)
         // bits of entropy.
+
         uintptr randHeapBase = default!;
         byte randHeapBasePrefix = default!;
         // heapAddrBits is 48 on most platforms, but we only use 47 of those
@@ -687,6 +688,7 @@ internal static void mallocinit() {
         //
         // 3. We try to stake out a reasonably large initial
         // heap reservation.
+
         uintptr arenaMetaSize = /* (1 << arenaBits) * unsafe.Sizeof(heapArena{}) */ unchecked((uintptr)293131517952);
         var meta = (uintptr)(uintptr)sysReserve(nil, arenaMetaSize, heapReservationˢ);
         if (meta != 0) {

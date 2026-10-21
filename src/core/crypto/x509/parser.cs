@@ -107,6 +107,7 @@ internal static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<
         // treat a UCS-2 encoded string as a UTF-16 encoded string, as long as
         // we reject out the UTF-16 specific code points. This matches the
         // BoringSSL behavior.
+
         if (builtin.len(value) % 2 != 0) {
             return ("", errors.New(invalidBMPStringˢ));
         }
@@ -662,6 +663,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
     error err = default!;
 
     // RFC 5280, 4.2.1.10
+
     // NameConstraints ::= SEQUENCE {
     //      permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
     //      excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
@@ -674,6 +676,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
     //      maximum         [1]     BaseDistance OPTIONAL }
     //
     // BaseDistance ::= INTEGER (0..MAX)
+
     var outer = (cryptobyte.String)e.Value;
     ref var toplevel = ref heap<cryptobyte.String>(out var Ꮡtoplevel);
     ref var permitted = ref heap<cryptobyte.String>(out var Ꮡpermitted);
@@ -872,6 +875,7 @@ internal static error processExtensions(ж<Certificate> Ꮡout) {
             }
             case 31: {
                 // RFC 5280, 4.2.1.13
+
                 // CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
                 //
                 // DistributionPoint ::= SEQUENCE {
@@ -1524,6 +1528,7 @@ internal static bool domainNameValid(@string s, bool constraint) {
     //
     // I have left the checks we previously enabled, noted with "TODO(#75835)" so
     // that we can easily re-enable them once we unbreak everyone.
+
     // TODO(#75835): this should only be true for constraints.
     if (builtin.len(s) == 0) {
         return true;

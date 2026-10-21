@@ -71,6 +71,7 @@ internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡs
     ref var seed = ref Ꮡseed.DerefOrNull();
 
     // CTR_DRBG_Update, per Section 10.2.1.2.
+
     var temp = new slice<byte>(SeedSize);
     Ꮡc.of(Counter.Ꮡc).XORKeyStream(temp, seed[..]);
     var K = temp[..(int)(keySize)];

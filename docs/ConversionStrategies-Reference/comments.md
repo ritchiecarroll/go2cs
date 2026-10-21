@@ -401,7 +401,7 @@ statement's last emitted C# line.
 	}
 ```
 
-<!-- source: src/core/strings/strings.cs:1179-1181 -->
+<!-- source: src/core/strings/strings.cs:1180-1182 -->
 ```csharp
     if (old == @new || n == 0) {
         return s; // avoid allocation
@@ -446,7 +446,7 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:721-728 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:722-729 -->
 ```csharp
             if (t == L){
                 // no change
@@ -597,7 +597,7 @@ indented deeper than the label stay at the end of that body.
 	}
 ```
 
-<!-- source: src/core/internal/runtime/maps/table.cs:1145-1151 -->
+<!-- source: src/core/internal/runtime/maps/table.cs:1146-1152 -->
 ```csharp
             it.key = key;
             it.elem = elem;
@@ -708,7 +708,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 		clientCipher = hs.suite.cipher(clientKey, clientIV, false /* not for reading */)
 ```
 
-<!-- source: src/core/crypto/tls/handshake_client.cs:983 -->
+<!-- source: src/core/crypto/tls/handshake_client.cs:985 -->
 ```csharp
         clientCipher = (~hs.suite).cipher(clientKey, clientIV, false /* not for reading */);
 ```
@@ -734,7 +734,7 @@ own line at the next place it can. The comment is then misplaced, never lost:
 				// underflow to ±0
 ```
 
-<!-- source: src/core/math/big/float.cs:924-926 -->
+<!-- source: src/core/math/big/float.cs:925-927 -->
 ```csharp
             if (p < 0 /* m <= 0.25 */ || p == 0 && x.mant.sticky((nuint)len(x.mant) * (nuint)_W - 1) == 0) {
                 /* m == 0.5 */

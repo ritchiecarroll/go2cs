@@ -24,6 +24,7 @@ public static void SetDefaultGOMAXPROCS() {
     // SetDefaultGOMAXPROCS conceptually means "[re]do what the runtime
     // would do at startup if the GOMAXPROCS environment variable were
     // unset." It still respects GODEBUG.
+
     var procs = defaultGOMAXPROCS(0);
 
     @lock(Ꮡsched.of(schedt.Ꮡlock));

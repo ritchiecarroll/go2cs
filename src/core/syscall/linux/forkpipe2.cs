@@ -64,6 +64,7 @@ internal static void acquireForkLock() {
             // with O_CLOEXEC and SOCK_CLOEXEC. On those systems
             // the standard library should never take a read
             // lock on ForkLock.
+
             ᏑforkingLock.Unlock();
 
             ᏑForkLock.RLock();

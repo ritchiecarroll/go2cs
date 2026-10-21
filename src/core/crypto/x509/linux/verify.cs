@@ -1263,6 +1263,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
     //	* 6.1.3 (f)
     //	* 6.1.4 (b)
     //	* 6.1.5 (g)
+
     if (builtin.len(chain) == 1) {
         return true;
     }

@@ -1229,6 +1229,7 @@ internal static (ж<ΔNat> u, ж<ΔNat> A, error err) extendedGCD(ж<ΔNat> Ꮡa
     //    value.
     //
     // Note this algorithm does not handle either input being zero.
+
     if (a.IsZero() == yes || m.IsZero() == yes) {
         return (default!, default!, errors.New(extendedGCDAOrMIsZeroˢ));
     }

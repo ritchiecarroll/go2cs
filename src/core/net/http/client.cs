@@ -1132,6 +1132,7 @@ internal static error Close(this ref cancelTimerBody b) {
 internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> Ꮡinitial, ж<url.URL> Ꮡdest) {
     // Permit sending auth/cookie headers from "foo.com"
     // to "sub.foo.com".
+
     // Note that we don't send all cookies to subdomains
     // automatically. This function is only used for
     // Cookies set explicitly on the initial outgoing
@@ -1141,6 +1142,7 @@ internal static bool shouldCopyHeaderOnRedirect(ж<url.URL> Ꮡinitial, ж<url.U
     // outgoing requests with the Cookie header set
     // directly, we don't know their scope, so we assume
     // it's for *.domain.com.
+
     @string ihost = idnaASCIIFromURL(Ꮡinitial);
     @string dhost = idnaASCIIFromURL(Ꮡdest);
     return isDomainOrSubdomain(dhost, ihost);
