@@ -741,6 +741,46 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in range%s(%s%s%s))", varInit, keyType, kExpr, valType, vExpr, rangeTypeArgs, rangeExpr, ptrDeref, invokeSuffix)
 		}
+	} else if (isSlice || isArray) && valExpr == "_" {
+		// INDEX-ONLY: `for i := range x`, `for i, _ := range x` and `for range x` over a slice, an array or a pointer
+		// to an array read no element in Go, so they range golib's index enumerator, `foreach (var i in range(x))`,
+		// which reads the length once and never an element. The (index, value) enumerator the other arm binds reads
+		// every element even with the value discarded, into a stack temp: crypto/internal/fips140cache's TestCache
+		// waited forever for an element that temp kept reachable. A pointer operand is passed as the pointer
+		// (golib's range(ж<TArray>)), so no `.Value` is spelled.
+		iterExpr := keyExpr
+		decl := keyType
+
+		if v.options.preferVarDecl {
+			decl = "var "
+		}
+
+		switch {
+		case keyExpr == "_":
+			// A scalar foreach position cannot be `_` (see scalarKeyExpr).
+			iterExpr = v.getTempVarName("_")
+
+			if !v.options.preferVarDecl {
+				decl = "nint "
+			}
+		case assignVars:
+			// `for i = range x` assigns an existing variable: iterate a temp and copy it in.
+			iterExpr = v.getTempVarName("i")
+
+			if !v.options.preferVarDecl {
+				decl = "nint "
+			}
+
+			context.innerPrefix = fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, iterExpr)
+		default:
+			iterExpr = scalarIterExpr()
+
+			if !v.options.preferVarDecl {
+				decl = keyType
+			}
+		}
+
+		v.writeOutput("foreach (%s%s in range(%s))", decl, iterExpr, rangeExpr)
 	} else {
 		// Handle slice, array, and map types
 		if assignVars {

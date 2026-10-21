@@ -220,7 +220,7 @@ public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwi
     b.minwidth = minwidth;
     b.tabwidth = tabwidth;
     b.padding = padding;
-    foreach (var (i, _) in b.padbytes) {
+    foreach (var i in range(b.padbytes)) {
         b.padbytes[i] = padchar;
     }
     if (padchar == (rune)'\t') {

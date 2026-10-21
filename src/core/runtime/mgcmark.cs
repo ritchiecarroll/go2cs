@@ -442,7 +442,7 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
     // Construct slice of bitmap which we'll iterate over.
     var specialsbits = (~ha).pageSpecials.slice((nint)(arenaPage / 8));
     specialsbits = specialsbits[..(int)(pagesPerSpanRoot / 8)];
-    foreach (var (i, _) in specialsbits) {
+    foreach (var i in range(specialsbits)) {
         // Find set bits, which correspond to spans with specials.
         var specials = atomic.Load8(Ꮡ(specialsbits, i));
         if (specials == 0) {
@@ -1210,7 +1210,7 @@ internal static void scanframeworker(ж<stkframe> Ꮡframe, ж<stackScanState> �
         // varp is 0 for defers, where there are no locals.
         // In that case, there can't be a pointer to its args, either.
         // (And all args would be scanned above anyway.)
-        foreach (var (i, _) in objs) {
+        foreach (var i in range(objs)) {
             var obj = Ꮡ(objs, i);
             var off = obj.Value.off;
             var @base = frame.varp; // locals base pointer

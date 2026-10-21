@@ -421,7 +421,7 @@ internal static void encode(this ref Location p, ж<buffer> Ꮡb) {
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 2, p.mappingIDX);
     encodeUint64Opt(ref (Ꮡb).DerefOrNull(), 3, p.Address);
-    foreach (var (i, _) in p.Line) {
+    foreach (var i in range(p.Line)) {
         encodeMessage(Ꮡb, 4, new Lineжmessage(Ꮡ(p.Line, i)));
     }
 }

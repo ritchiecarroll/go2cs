@@ -291,7 +291,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         var dirFormat = r.readLNCTFormat();
         var c = buf.@uint();
         r.directories = new slice<@string>((nint)(c));
-        foreach (var (i, _) in r.directories) {
+        foreach (var i in range(r.directories)) {
             var (dir, _, _, err) = r.readLNCT(dirFormat, dwarf64);
             if (err != default!) {
                 return err;
@@ -301,7 +301,7 @@ internal static error readHeader(this ж<ΔLineReader> Ꮡr, @string compDir) {
         var fileFormat = r.readLNCTFormat();
         c = buf.@uint();
         r.fileEntries = new slice<ж<LineFile>>((nint)(c));
-        foreach (var (i, _) in r.fileEntries) {
+        foreach (var i in range(r.fileEntries)) {
             ref var name = ref heap<@string>(out var Ꮡname);
             ref var mtime = ref heap<uint64>(out var Ꮡmtime);
             (name, mtime, var size, var err) = r.readLNCT(fileFormat, dwarf64);
@@ -329,7 +329,7 @@ partial struct lnctForm {
 internal static slice<lnctForm> readLNCTFormat(this ref ΔLineReader r) {
     var c = r.buf.uint8();
     var ret = new slice<lnctForm>(c);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         ret[i].lnct = (nint)r.buf.@uint();
         ret[i].form = (format)(uint32)r.buf.@uint();
     }

@@ -951,6 +951,8 @@ internal static (@string, error) goLookupCNAME(this ж<Resolver> Ꮡr, context.C
 
 // goLookupPTR is the native Go implementation of LookupAddr.
 internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, context.Context ctx, @string addr, ΔhostLookupOrder order, ж<dnsConfig> Ꮡconf) {
+    var ptrsᴷ = new stackAppend<@string>(moves: true);
+
     if (order == hostLookupFiles || order == hostLookupFilesDNS) {
         var names = lookupStaticAddr(addr);
         if (len(names) > 0) {
@@ -1013,9 +1015,10 @@ internal static (slice<@string>, error) goLookupPTR(this ж<Resolver> Ꮡr, cont
                 Server: server
             ))));
         }
-        ptrs = append(ptrs, ptr.PTR.String());
+        ptrs = append(ptrsᴷ, ptrs, ptr.PTR.String());
     }
 
+    ptrs = move2heap(ptrsᴷ, ptrs);
     return (ptrs, default!);
 }
 

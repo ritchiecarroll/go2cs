@@ -113,7 +113,7 @@ public static void TestBasic(ж<testing.T> Ꮡt) {
             if (scenario.merr && err == default!) {
                 Ꮡt.Fatalf("case %d expected err, not received"u8, k);
             }
-            foreach (var (iΔ1, _) in scenario.dst) {
+            foreach (var iΔ1 in range(scenario.dst)) {
                 if (scenario.dst[iΔ1] != scenario.res[iΔ1]) {
                     Ꮡt.Fatalf("case %d: bad merge at %d got %d want %d"u8,
                         k, iΔ1, scenario.dst[iΔ1], scenario.res[iΔ1]);

@@ -140,7 +140,7 @@ public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) {
     if (len(priv.Primes) != len((~xx).Primes)) {
         return false;
     }
-    foreach (var (i, _) in priv.Primes) {
+    foreach (var i in range(priv.Primes)) {
         if (!bigIntEqual(priv.Primes[i], (~xx).Primes[i])) {
             return false;
         }

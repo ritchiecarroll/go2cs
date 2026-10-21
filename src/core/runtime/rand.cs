@@ -202,7 +202,7 @@ internal static void mrandinit(ж<m> Ꮡmp) {
     ref var mp = ref Ꮡmp.DerefOrNull();
 
     array<uint64> seed = new(4);
-    foreach (var (i, _) in seed) {
+    foreach (var i in range(seed)) {
         seed[i] = bootstrapRand();
     }
     bootstrapRandReseed(); // erase key we just extracted

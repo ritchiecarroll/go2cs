@@ -189,14 +189,14 @@ public static partial error /*err*/ CoordinateFuzzing(context.Context ctx, Coord
 
         var errC = new channel<error>(0);
         var workers = new slice<ж<worker>>(opts.Parallel);
-        foreach (var (i, _) in workers) {
+        foreach (var i in range(workers)) {
             error errΔ3 = default!;
             (workers[i], errΔ3) = newWorker(c, dir, binPath, args, env);
             if (errΔ3 != default!) {
                 err = errΔ3; goto ᒐdone;
             }
         }
-        foreach (var (i, _) in workers) {
+        foreach (var i in range(workers)) {
             var w = workers[i];
             var errCʗ1 = errC;
             var fuzzCtxʗ2 = fuzzCtx;
@@ -663,7 +663,7 @@ internal static (ж<coordinator>, error) newCoordinator(CoordinateFuzzingOpts op
     var valsᴷ = new stackAppend<any>();
 
     // Make sure all the seed corpus has marshaled data.
-    foreach (var (i, _) in opts.Seed) {
+    foreach (var i in range(opts.Seed)) {
         if (opts.Seed[i].Data == default! && opts.Seed[i].Values != default!) {
             opts.Seed[i].Data = marshalCorpusFile(opts.Seed[i].Values.ꓸꓸꓸ);
         }
@@ -922,7 +922,7 @@ internal static nint updateCoverage(this ref coordinator c, slice<byte> newCover
         throw panic(fmt.Sprintf("number of coverage counters changed at runtime: %d, expected %d"u8, len(newCoverage), len(c.coverageMask)));
     }
     nint newBitCount = 0;
-    foreach (var (i, _) in newCoverage) {
+    foreach (var i in range(newCoverage)) {
         var diff = (byte)(newCoverage[i] & ~c.coverageMask[i]);
         newBitCount += bits.OnesCount8(diff);
         c.coverageMask[i] |= (byte)(newCoverage[i]);
@@ -1054,7 +1054,7 @@ public static error CheckCorpus(slice<any> vals, slice<reflectꓸType> types) {
     foreach (var (valsI, v) in vals) {
         valsT[valsI] = reflect.TypeOf(v);
     }
-    foreach (var (i, _) in types) {
+    foreach (var i in range(types)) {
         if (!AreEqual(valsT[i], types[i])) {
             return fmt.Errorf("mismatched types in corpus entry: %v, want %v"u8, valsT, types);
         }

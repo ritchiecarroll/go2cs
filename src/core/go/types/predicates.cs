@@ -450,7 +450,7 @@ internal static bool identical(this ref comparer c, ΔType x, ΔType y, ж<iface
             var ytparams = yΔ7.TypeParams().list();
 
             slice<ΔType> targs = default!;
-            foreach (var (i, _) in xtparams) {
+            foreach (var i in range(xtparams)) {
                 targs = append(targsᴷ, targs, (ΔType)(new TypeParamжΔType(xΔ1.TypeParams().At(i))));
             }
             var smap = makeSubstMap(ytparams, targs);

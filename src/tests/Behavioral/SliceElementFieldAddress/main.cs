@@ -45,7 +45,7 @@ internal static void Main() {
     fmt.Println("local array:", arr[2].n, arr[0].m);
 
     var pr = Ꮡ(new prog(Inst: new slice<inst>(4, () => new(nil))));
-    foreach (var (i, _) in (~pr).Inst) {
+    foreach (var i in range((~pr).Inst)) {
         (~pr).Inst[i].Name = fmt.Sprintf("i%d"u8, i);
     }
     var a = Ꮡ((~pr).Inst, 0).of(inst.ᏑOut);

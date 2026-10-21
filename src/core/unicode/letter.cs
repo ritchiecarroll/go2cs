@@ -87,7 +87,7 @@ internal static UntypedInt linearMax => 18;
 // is16 reports whether r is in the sorted slice of 16-bit ranges.
 internal static bool is16(slice<Range16> ranges, uint16 r) {
     if (len(ranges) <= linearMax || r <= MaxLatin1) {
-        foreach (var (i, _) in ranges) {
+        foreach (var i in range(ranges)) {
             var range_ = Ꮡ(ranges, i);
             if (r < (~range_).Lo) {
                 return false;
@@ -120,7 +120,7 @@ internal static bool is16(slice<Range16> ranges, uint16 r) {
 // is32 reports whether r is in the sorted slice of 32-bit ranges.
 internal static bool is32(slice<Range32> ranges, uint32 r) {
     if (len(ranges) <= linearMax) {
-        foreach (var (i, _) in ranges) {
+        foreach (var i in range(ranges)) {
             var range_ = Ꮡ(ranges, i);
             if (r < (~range_).Lo) {
                 return false;

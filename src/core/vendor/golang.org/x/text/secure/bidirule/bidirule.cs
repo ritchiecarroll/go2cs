@@ -258,7 +258,7 @@ public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, 
 internal static array<bidi.Properties> asciiTable = new(128);
 
 [GoInit] internal static void init() {
-    foreach (var (i, _) in asciiTable) {
+    foreach (var i in range(asciiTable)) {
         var (p, _) = bidi.LookupRune((rune)i);
         asciiTable[i] = p;
     }

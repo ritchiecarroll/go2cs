@@ -116,6 +116,8 @@ internal static slice<testCase> testCases = new testCase[]{
 
 // find all occurrences of s in source; report at most n occurrences
 internal static slice<nint> find(@string src, @string s, nint n) {
+    var resᴷ = new stackAppend<nint>(moves: true);
+
     slice<nint> res = default!;
     if (s != ""u8 && n != 0) {
         // find at most n occurrences of s in src
@@ -125,9 +127,10 @@ internal static slice<nint> find(@string src, @string s, nint n) {
                 break;
             }
             i += j + 1;
-            res = append(res, i);
+            res = append(resᴷ, res, i);
         }
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
@@ -407,7 +410,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
             size = 10000;
         }
         var x = new slice<byte>(size);
-        foreach (var (i, _) in x) {
+        foreach (var i in range(x)) {
             x[i] = LiteralByteAt("ab"u8, i % 2);
         }
         testSA(tΔ1, x, build);
@@ -428,7 +431,7 @@ internal static void test(ж<testing.T> Ꮡt, Func<slice<byte>, slice<nint>> bui
         var x = new slice<byte>(100000, 100001);
         var lo = (byte)1;
         var hi = (byte)255;
-        foreach (var (i, _) in x) {
+        foreach (var i in range(x)) {
             if (i % 2 == 0){
                 x[i] = lo;
             } else {
@@ -550,7 +553,7 @@ internal static void benchmarkNew(ж<testing.B> Ꮡb, bool random) {
     if (random) {
         data = benchrand;
         if (data[0] == 0) {
-            foreach (var (i, _) in data) {
+            foreach (var i in range(data)) {
                 data[i] = (byte)rand.Intn(256);
             }
         }
@@ -595,7 +598,7 @@ internal static (slice<byte>, error) makeText(@string name) {
     }
     else if (exprᴛ1 == "rand"u8) {
         data = new slice<byte>(50000000);
-        foreach (var (i, _) in data) {
+        foreach (var i in range(data)) {
             data[i] = (byte)rand.Intn(256);
         }
     }
@@ -665,7 +668,7 @@ public static void BenchmarkNew(ж<testing.B> Ꮡb) {
 public static void BenchmarkSaveRestore(ж<testing.B> Ꮡb) {
     var r = rand.New(rand.NewSource(0x5a77a1)); // guarantee always same sequence
     var data = new slice<byte>((1 << 20)); // 1MB of data to index
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)r.Intn(256);
     }
     foreach (var (_, bits) in new nint[]{32, 64}.slice()) {

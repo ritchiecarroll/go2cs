@@ -1187,7 +1187,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
-        var typeOffsetsᴷ = new stackAppend<parseTypes_typeOffset>();
+        var typeOffsetsᴷ = new stackAppend<parseTypes_typeOffset>(moves: true);
 
         nint maxp1 = p.parseInt();
         nint exportedp1 = p.parseInt();
@@ -1220,6 +1220,7 @@ internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> Ꮡpkg) 
         @string allTypeData = sb.String();
 
         p.typeData = new @string[]{""u8}.slice(); // type 0, unused
+        typeOffsets = move2heap(typeOffsetsᴷ, typeOffsets);
         foreach (var (_, to) in typeOffsets) {
             p.typeData = append(p.typeData, allTypeData.slice(to.offset, to.offset + to.length));
         }

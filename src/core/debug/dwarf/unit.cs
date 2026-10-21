@@ -97,7 +97,7 @@ internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) {
     // Again, this time writing them down.
     b = makeBuf(Ꮡd, new unknownFormat(nil), infoˢ, 0, d.info);
     var units = new slice<unit>(nunit, () => new(nil));
-    foreach (var (i, _) in units) {
+    foreach (var i in range(units)) {
         var u = Ꮡ(units, i);
         u.Value.@base = b.off;
         Offset n = default!;

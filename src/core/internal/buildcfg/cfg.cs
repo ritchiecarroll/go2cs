@@ -470,6 +470,8 @@ internal static slice<@string> toolTags() {
 }
 
 internal static slice<@string> experimentTags() {
+    var listᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> list = default!;
     // For each experiment that has been enabled in the toolchain, define a
     // build tag with the same name but prefixed by "goexperiment." which can be
@@ -477,8 +479,9 @@ internal static slice<@string> experimentTags() {
     // changes for the experiment, like extra struct fields in the runtime,
     // without affecting the base non-experiment code at all.
     foreach (var (_, exp) in ᏑExperiment.Enabled()) {
-        list = append(list, "goexperiment."u8 + exp);
+        list = append(listᴷ, list, "goexperiment."u8 + exp);
     }
+    list = move2heap(listᴷ, list);
     return list;
 }
 
@@ -520,6 +523,10 @@ public static (@string name, @string value) GOGOARCH() {
 }
 
 internal static slice<@string> gogoarchTags() {
+    var listᴷ = new stackAppend<@string>(moves: true);
+    var listᴷΔ1 = new stackAppend<@string>(moves: true);
+    var listᴷΔ2 = new stackAppend<@string>(moves: true);
+
     var exprᴛ1 = GOARCH;
     if (exprᴛ1 == "386"u8) {
         return new @string[]{GOARCH + "."u8 + GO386}.slice();
@@ -527,15 +534,17 @@ internal static slice<@string> gogoarchTags() {
     if (exprᴛ1 == "amd64"u8) {
         slice<@string> list = default!;
         for (nint i = 1; i <= GOAMD64; i++) {
-            list = append(list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
+            list = append(listᴷ, list, fmt.Sprintf("%s.v%d"u8, GOARCH, i));
         }
+        list = move2heap(listᴷ, list);
         return list;
     }
     if (exprᴛ1 == "arm"u8) {
         slice<@string> list = default!;
         for (nint i = 5; i <= GOARM.Version; i++) {
-            list = append(list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
+            list = append(listᴷΔ1, list, fmt.Sprintf("%s.%d"u8, GOARCH, i));
         }
+        list = move2heap(listᴷΔ1, list);
         return list;
     }
     if (exprᴛ1 == "arm64"u8) {
@@ -562,8 +571,9 @@ internal static slice<@string> gogoarchTags() {
     if (exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8) {
         slice<@string> list = default!;
         for (nint i = 8; i <= GOPPC64; i++) {
-            list = append(list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
+            list = append(listᴷΔ2, list, fmt.Sprintf("%s.power%d"u8, GOARCH, i));
         }
+        list = move2heap(listᴷΔ2, list);
         return list;
     }
     if (exprᴛ1 == "riscv64"u8) {

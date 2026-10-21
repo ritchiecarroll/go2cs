@@ -180,7 +180,7 @@ internal static @string sprintKey(reflectꓸValue key) {
         var exprᴛ1 = str;
         if (exprᴛ1 == "*int"u8) {
             var ptr = key.Interface()._<ж<nint>>();
-            foreach (var (i, _) in ints) {
+            foreach (var i in range(ints)) {
                 if (ptr == Ꮡints.at<nint>(i)) {
                     return fmt.Sprintf("PTR%d"u8, i);
                 }
@@ -189,7 +189,7 @@ internal static @string sprintKey(reflectꓸValue key) {
         }
         if (exprᴛ1 == "unsafe.Pointer"u8) {
             @unsafe.Pointer ptr = key.Interface()._<@unsafe.Pointer>();
-            foreach (var (i, _) in ints) {
+            foreach (var i in range(ints)) {
                 if (ptr == @unsafe.Pointer.FromPinnedBox(Ꮡints.at<nint>(i))) {
                     return fmt.Sprintf("UNSAFEPTR%d"u8, i);
                 }
@@ -198,7 +198,7 @@ internal static @string sprintKey(reflectꓸValue key) {
         }
         if (exprᴛ1 == "chan int"u8) {
             var c = key.Interface()._<channel<nint>>();
-            foreach (var (i, _) in chans) {
+            foreach (var i in range(chans)) {
                 if (c == chans[i]) {
                     return fmt.Sprintf("CHAN%d"u8, i);
                 }
@@ -221,7 +221,7 @@ internal static ref Δruntime.Pinner pin => ref Ꮡpin.Value;
 internal static slice<channel<nint>> makeChans() {
     var cs = new channel<nint>[]{new channel<nint>(0), new channel<nint>(0), new channel<nint>(0)}.slice();
     // Order channels by address. See issue #49431.
-    foreach (var (i, _) in cs) {
+    foreach (var i in range(cs)) {
         pin.Pin(@unsafe.Pointer.OrTypedNil((uintptr)reflect.ValueOf(cs[i]).UnsafePointer()));
     }
     slices.SortFunc(cs, (channel<nint> a, channel<nint> b) => cmp.Compare(reflect.ValueOf(a).Pointer(), reflect.ValueOf(b).Pointer()));

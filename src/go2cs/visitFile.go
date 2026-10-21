@@ -311,6 +311,8 @@ func (v *Visitor) visitFile(file *ast.File) {
 		fileText = strings.ReplaceAll(fileText, TypeAliasMarker, "")
 	}
 
+	reportUnwrittenStackAppendMoves(v.fset, file)
+
 	v.outputBuilder.Reset()
 	v.outputBuilder.WriteString(fileText)
 }

@@ -231,12 +231,13 @@ public static bool SetLines(this ж<ΔFile> Ꮡf, slice<nint> lines) {
 // It ignores position-altering //line comments.
 public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content) {
     ref var f = ref Ꮡf.DerefOrNull();
+    var linesᴷ = new stackAppend<nint>(moves: true);
 
     slice<nint> lines = default!;
     nint line = 0;
     foreach (var (offset, b) in content) {
         if (line >= 0) {
-            lines = append(lines, line);
+            lines = append(linesᴷ, lines, line);
         }
         line = -1;
         if (b == (rune)'\n') {
@@ -246,6 +247,7 @@ public static void SetLinesForContent(this ж<ΔFile> Ꮡf, slice<byte> content)
 
     // set lines table
     f.mutex.Lock();
+    lines = move2heap(linesᴷ, lines);
     f.lines = lines;
     f.mutex.Unlock();
 }

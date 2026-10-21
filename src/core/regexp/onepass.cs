@@ -257,7 +257,7 @@ internal static ж<onePassProg> onePassCopy(ref syntax.Prog prog) {
     // ip A, that points to ips B & C.
     // A:BC + B:DA => A:BC + B:CD
     // A:BC + B:DC => A:DC + B:DC
-    foreach (var (pc, _) in (~p).Inst) {
+    foreach (var pc in range((~p).Inst)) {
         var exprᴛ1 = (~p).Inst[pc].Op;
         if (exprᴛ1 == syntax.InstAlt || exprᴛ1 == syntax.InstAltMatch) {
             // A:Bx + B:Ay
@@ -378,7 +378,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
             // pass matching runes back through these no-ops.
             onePassRunesʗ1[pc] = appendꓸꓸꓸ(new rune[]{}.slice(), onePassRunesʗ1[(~inst).Out]);
             inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-            foreach (var (i, _) in (~inst).Next) {
+            foreach (var i in range((~inst).Next)) {
                 inst.Value.Next[i] = inst.Value.Out;
             }
         }
@@ -387,7 +387,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
             mΔ1[pc] = mΔ1[(~inst).Out];
             onePassRunesʗ1[pc] = appendꓸꓸꓸ(new rune[]{}.slice(), onePassRunesʗ1[(~inst).Out]);
             inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-            foreach (var (i, _) in (~inst).Next) {
+            foreach (var i in range((~inst).Next)) {
                 inst.Value.Next[i] = inst.Value.Out;
             }
         }
@@ -419,7 +419,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
                 }
                 onePassRunesʗ1[pc] = runes;
                 inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-                foreach (var (i, _) in (~inst).Next) {
+                foreach (var i in range((~inst).Next)) {
                     inst.Value.Next[i] = inst.Value.Out;
                 }
                 inst.Value.Op = syntax.InstRune;
@@ -446,7 +446,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
                 }
                 onePassRunesʗ1[pc] = runes;
                 inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-                foreach (var (i, _) in (~inst).Next) {
+                foreach (var i in range((~inst).Next)) {
                     inst.Value.Next[i] = inst.Value.Out;
                 }
                 inst.Value.Op = syntax.InstRune;
@@ -472,7 +472,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
                 instQueueʗ1.insert((~inst).Out);
                 onePassRunesʗ1[pc] = appendꓸꓸꓸ(new rune[]{}.slice(), anyRuneNotNL);
                 inst.Value.Next = new slice<uint32>(len(onePassRunesʗ1[pc]) / 2 + 1);
-                foreach (var (i, _) in (~inst).Next) {
+                foreach (var i in range((~inst).Next)) {
                     inst.Value.Next[i] = inst.Value.Out;
                 }
             } while (false);
@@ -492,7 +492,7 @@ internal static ж<onePassProg> makeOnePass(ж<onePassProg> Ꮡp) {
         }
     }
     if (Ꮡp != nil) {
-        foreach (var (i, _) in p.Inst) {
+        foreach (var i in range(p.Inst)) {
             p.Inst[i].Rune = onePassRunes[i];
         }
     }

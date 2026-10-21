@@ -259,6 +259,8 @@ internal static bool isFile(this ref Context ctxt, @string path) {
 
 // gopath returns the list of Go path directories.
 internal static slice<@string> gopath(this ref Context ctxt) {
+    var allᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> all = default!;
     foreach (var (_, p) in ctxt.splitPathList(ctxt.GOPATH)) {
         if (p == ""u8 || p == ctxt.GOROOT) {
@@ -283,8 +285,9 @@ internal static slice<@string> gopath(this ref Context ctxt) {
             // for c:\program files.
             continue;
         }
-        all = append(all, p);
+        all = append(allᴷ, all, p);
     }
+    all = move2heap(allᴷ, all);
     return all;
 }
 

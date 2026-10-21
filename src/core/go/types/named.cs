@@ -674,7 +674,7 @@ public static @string String(this ж<Named> Ꮡt) {
 // any, they were broken (by setting the respective types to invalid) during
 // the directCycles check phase.
 internal static void resolveUnderlying(this ж<Named> Ꮡn) {
-    var pathᴷ = new stackAppend<ж<Named>>();
+    var pathᴷ = new stackAppend<ж<Named>>(moves: true);
 
     assert(Ꮡn.stateHas(unpacked));
 
@@ -724,6 +724,7 @@ internal static void resolveUnderlying(this ж<Named> Ꮡn) {
         }}
     }
 
+    path = move2heap(pathᴷ, path);
     foreach (var (_, t) in path) {
         var tʗ1 = t;
         var uʗ1 = u;

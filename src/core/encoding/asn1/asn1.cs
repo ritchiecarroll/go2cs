@@ -162,7 +162,7 @@ internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
     if (len(bytes) > 0 && (byte)(bytes[0] & 0x80) == 0x80) {
         // This is a negative number.
         var notBytes = new slice<byte>(len(bytes));
-        foreach (var (i, _) in notBytes) {
+        foreach (var i in range(notBytes)) {
             notBytes[i] = (byte)(((byte)(~bytes[i])));
         }
         ret.SetBytes(notBytes);

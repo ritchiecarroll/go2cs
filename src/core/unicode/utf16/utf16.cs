@@ -128,6 +128,8 @@ public static slice<rune> Decode(slice<uint16> s) {
 // decode appends to buf the Unicode code point sequence represented
 // by the UTF-16 encoding s and return the extended buffer.
 internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
+    var bufᴷ = new stackAppend<rune>(moves: true);
+
     for (nint i = 0; i < len(s); i++) {
         rune ar = default!;
         {
@@ -150,8 +152,9 @@ internal static slice<rune> decode(slice<uint16> s, slice<rune> buf) {
                 break;
             }}
         }
-        buf = append(buf, ar);
+        buf = append(bufᴷ, buf, ar);
     }
+    buf = move2heap(bufᴷ, buf);
     return buf;
 }
 

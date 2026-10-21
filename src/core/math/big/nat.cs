@@ -639,12 +639,12 @@ internal static Δnat random(this Δnat z, ж<rand.Rand> Ꮡrand, Δnat limit, n
     while (ᐧ) {
         var exprᴛ1 = _W;
         if (exprᴛ1 == 32) {
-            foreach (var (i, _) in z) {
+            foreach (var i in range(z)) {
                 z[i] = (Word)(nuint)randΔ1.Uint32();
             }
         }
         else if (exprᴛ1 == 64) {
-            foreach (var (i, _) in z) {
+            foreach (var i in range(z)) {
                 z[i] = (Word)(((Word)(nuint)randΔ1.Uint32()) | ((Word)(nuint)randΔ1.Uint32()) << 32);
             }
         }
@@ -871,7 +871,7 @@ internal static Δnat expNNWindowed(this Δnat z, ж<stack> Ꮡstk, Δnat x, Δn
         UntypedInt n = 4;
         // powers[i] contains x^i.
         ref var powers = ref heap(new array<Δnat>(16), out var Ꮡpowers);
-        foreach (var (iΔ1, _) in powers) {
+        foreach (var iΔ1 in range(powers)) {
             powers[iΔ1] = stk.nat(w);
         }
         powers[0] = powers[0].set(natOne);
@@ -1178,7 +1178,7 @@ internal static Δnat subMod2N(this Δnat z, Δnat x, Δnat y, nuint n) {
     while ((nuint)len(z) * (nuint)_W < n) {
         z = append(z, (Word)0);
     }
-    foreach (var (i, _) in z) {
+    foreach (var i in range(z)) {
         z[i] = ~z[i];
     }
     z = z.trunc(z, n);

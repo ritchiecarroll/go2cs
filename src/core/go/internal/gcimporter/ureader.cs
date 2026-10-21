@@ -377,7 +377,7 @@ internal static typesꓸType /*res*/ doTyp(this ж<reader> Ꮡr) {
 internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
     var fields = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
     slice<@string> tags = default!;
-    foreach (var (i, _) in fields) {
+    foreach (var i in range(fields)) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.selector();
         var ftyp = Ꮡr.typ();
@@ -397,7 +397,7 @@ internal static ж<types.Struct> structType(this ж<reader> Ꮡr) {
 
 internal static ж<types.Union> unionType(this ж<reader> Ꮡr) {
     var terms = new slice<ж<typesꓸTerm>>(Ꮡr.of(reader.ᏑDecoder).Len());
-    foreach (var (i, _) in terms) {
+    foreach (var i in range(terms)) {
         terms[i] = types.NewTerm(Ꮡr.of(reader.ᏑDecoder).Bool(), Ꮡr.typ());
     }
     return types.NewUnion(terms);
@@ -410,14 +410,14 @@ internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) {
     var embeddeds = new slice<typesꓸType>(Ꮡr.of(reader.ᏑDecoder).Len());
     var @implicit = len(methods) == 0 && len(embeddeds) == 1 && Ꮡr.of(reader.ᏑDecoder).Bool();
 
-    foreach (var (i, _) in methods) {
+    foreach (var i in range(methods)) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.selector();
         var mtyp = Ꮡr.signature(nil, default!, default!);
         methods[i] = types.NewFunc(pos, pkg, name, mtyp);
     }
 
-    foreach (var (i, _) in embeddeds) {
+    foreach (var i in range(embeddeds)) {
         embeddeds[i] = Ꮡr.typ();
     }
 
@@ -452,7 +452,7 @@ internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind
     Ꮡr.of(reader.ᏑDecoder).Sync(pkgbits.SyncParams);
 
     var @params = new slice<ж<types.Var>>(Ꮡr.of(reader.ᏑDecoder).Len());
-    foreach (var (i, _) in @params) {
+    foreach (var i in range(@params)) {
         @params[i] = Ꮡr.param(kind);
     }
 
@@ -485,7 +485,7 @@ internal static (types.Object, slice<typesꓸType>) obj(this ж<reader> Ꮡr) {
     var obj = pkgScope(pkg).Lookup(name);
 
     var targs = new slice<typesꓸType>(Ꮡr.of(reader.ᏑDecoder).Len());
-    foreach (var (i, _) in targs) {
+    foreach (var i in range(targs)) {
         targs[i] = Ꮡr.typ();
     }
 
@@ -570,7 +570,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
             {
                 var (iface, ok) = underlying._<ж<types.Interface>>(ᐧ); if (ok && iface.NumExplicitMethods() != 0) {
                     var methods = new slice<ж<types.Func>>(iface.NumExplicitMethods());
-                    foreach (var (i, _) in methods) {
+                    foreach (var i in range(methods)) {
                         var fn = iface.ExplicitMethod(i);
                         var sig = fn.Signature();
 
@@ -580,7 +580,7 @@ internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pk
                     }
 
                     var embeds = new slice<typesꓸType>(iface.NumEmbeddeds());
-                    foreach (var (i, _) in embeds) {
+                    foreach (var i in range(embeds)) {
                         embeds[i] = iface.EmbeddedType(i);
                     }
 
@@ -623,13 +623,13 @@ internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Inde
         }
 
         dict.bounds = new slice<typeInfo>(r.of(reader.ᏑDecoder).Len());
-        foreach (var (i, _) in dict.bounds) {
+        foreach (var i in range(dict.bounds)) {
             dict.bounds[i] = r.typInfo();
         }
 
         dict.derived = new slice<derivedInfo>(r.of(reader.ᏑDecoder).Len());
         dict.derivedTypes = new slice<typesꓸType>(len(dict.derived));
-        foreach (var (i, _) in dict.derived) {
+        foreach (var i in range(dict.derived)) {
             dict.derived[i] = new derivedInfo(idx: r.of(reader.ᏑDecoder).Reloc(pkgbits.SectionType));
             if (r.of(reader.ᏑDecoder).Version().Has(pkgbits.DerivedInfoNeeded)) {
                 assert(!r.of(reader.ᏑDecoder).Bool());
@@ -663,7 +663,7 @@ internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) 
     // set the bound type.
 
     r.dict.Value.tparams = new slice<ж<types.TypeParam>>(len((~r.dict).bounds));
-    foreach (var (i, _) in (~r.dict).bounds) {
+    foreach (var i in range((~r.dict).bounds)) {
         tokenꓸPos pos = Ꮡr.pos();
         var (pkg, name) = Ꮡr.localIdent();
 

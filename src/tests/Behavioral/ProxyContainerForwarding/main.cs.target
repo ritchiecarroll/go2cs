@@ -52,7 +52,7 @@ public static void Rename<N>(N n, Func<N, N> rename)
 {
     var kids = n.Children();
 
-    foreach (var (i, _) in kids) {
+    foreach (var i in range(kids)) {
         kids[i] = rename(kids[i]);
     }
 }

@@ -36,6 +36,8 @@ public static void NoExtraMethods(ж<testing.T> Ꮡt, any ms, params ꓸꓸꓸst
 }
 
 internal static (slice<@string>, error) extraMethods(any ip) {
+    var extraMethodsᴷ = new stackAppend<@string>(moves: true);
+
     var v = reflect.ValueOf(ip);
     if (v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.ΔInterface || v.Elem().IsNil()) {
         return (default!, fmt.Errorf("argument must be a pointer to a non-nil interface"u8));
@@ -56,10 +58,11 @@ internal static (slice<@string>, error) extraMethods(any ip) {
             continue;
         }
         if (!interfaceMethods[m.Name]) {
-            extraMethods = append(extraMethods, m.Name);
+            extraMethods = append(extraMethodsᴷ, extraMethods, m.Name);
         }
     }
 
+    extraMethods = move2heap(extraMethodsᴷ, extraMethods);
     return (extraMethods, default!);
 }
 

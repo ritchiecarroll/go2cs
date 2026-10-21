@@ -12846,10 +12846,10 @@ partial struct http2writeQueuePool /*[]ж<http2writeQueue>*/;
 internal static void put(this ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
-    foreach (var (i, _) in q.currQueue) {
+    foreach (var i in range(q.currQueue)) {
         q.currQueue[i] = new http2FrameWriteRequest(nil);
     }
-    foreach (var (i, _) in q.nextQueue) {
+    foreach (var i in range(q.nextQueue)) {
         q.nextQueue[i] = new http2FrameWriteRequest(nil);
     }
     q.currQueue = q.currQueue[..0];
@@ -13490,10 +13490,9 @@ internal static (http2FrameWriteRequest, bool) Pop(this ref http2priorityWriteSc
     ws.prioritizeIncremental = !ws.prioritizeIncremental;
 
     // Always prioritize lowest u (i.e. highest urgency level).
-    foreach (var (u, _) in ws.heads) {
-        foreach (var (iᴛ1, _) in ws.heads[u]) {
+    foreach (var u in range(ws.heads)) {
+        foreach (var iᴛ1 in range(ws.heads[u])) {
             var i = iᴛ1;
-
             // When we want to prioritize incremental, we try to pop i=true
             // first before i=false when u is the same.
             if (ws.prioritizeIncremental) {
