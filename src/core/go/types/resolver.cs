@@ -375,6 +375,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     foreach (var (nameΔ1, obj) in (~(~imp).scope).elems) {
                         // Note: Avoid eager resolve(name, obj) here, so we only
                         // resolve dot-imported objects as needed.
+
                         // A package scope may contain non-exported objects,
                         // do not import them!
                         if (token.IsExported(nameΔ1)) {
@@ -494,10 +495,12 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
                     }
                 } else {
                     // method
+
                     // TODO(rFindley) earlier versions of this code checked that methods
                     //                have no type parameters, but this is checked later
                     //                when type checking the function type. Confirm that
                     //                we don't need to check tparams here.
+
                     var (ptr, @base, _) = Ꮡcheck.unpackRecv((~(~(~dΔ1.decl).Recv).List[0]).Type, false);
                     // (Methods with invalid receiver cannot be associated to a type, and
                     // methods with blank _ names are never found; no need to collect any

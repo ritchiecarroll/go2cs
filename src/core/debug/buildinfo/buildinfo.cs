@@ -320,6 +320,7 @@ internal static bool hasPlan9Magic(slice<byte> magic) {
 
 internal static (@string, uint64, error) decodeString(exe x, uint64 addr) {
     // varint length followed by length bytes of data.
+
     // N.B. ReadData reads _up to_ size bytes from the section containing
     // addr. So we don't need to check that size doesn't overflow the
     // section.

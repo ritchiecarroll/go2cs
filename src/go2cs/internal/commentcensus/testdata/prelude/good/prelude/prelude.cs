@@ -71,5 +71,57 @@ internal static nint /*n*/ opens(params ꓸꓸꓸnint xsʗp) {
     return n;
 }
 
+internal static nint /*n*/ regrow(params ꓸꓸꓸnint xsʗp) {
+    nint n = default!;
+    var xs = xsʗp.sslice();
+
+    n = len(xs);
+
+    var more = new slice<nint>(n);
+    n += len(more);
+    return n;
+}
+
+internal static nint boxed() {
+    nint p = 1;
+
+    ref var q = ref heap<nint>(out var Ꮡq);
+    q = p + 1;
+    sink = Ꮡq;
+    return q;
+}
+
+internal static nint boxedVar() {
+    nint p = 1;
+
+    ref var q = ref heap(new nint(), out var Ꮡq);
+
+    sink = Ꮡq;
+    return p + q;
+}
+
+internal static nint grouped() {
+    nint n = 1;
+
+    UntypedInt a = iota;
+    const nint b = 1;
+    return n + b;
+}
+
+internal static nint twice(nint n) {
+    return n * 2;
+}
+
+internal static nint scoped(slice<nint> xs) {
+    nint n = len(xs);
+
+    {
+        nint mΔ1 = twice(n); if (mΔ1 > 3) {
+            return mΔ1;
+        }
+    }
+    return n;
+}
+
 } // end prelude_package
 

@@ -607,6 +607,7 @@ internal static (context, nint) tCSS(context c, slice<byte> s) {
     // In (4), we should URL escape for URL attributes, and for others we
     // have the attribute name available if our conservative assumption
     // proves problematic for real code.
+
     nint k = 0;
     while (ᐧ) {
         nint i = k + bytes.IndexAny(s.slice(k), @"(""'/"u8);

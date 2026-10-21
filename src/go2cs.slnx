@@ -1027,6 +1027,9 @@
     <Project Path="tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />
     <Project Path="tests/Behavioral/ShiftNegativeWideConst/ShiftNegativeWideConst.csproj" />
     <Project Path="tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
+    <Project Path="tests/Behavioral/ShellCacheMutation/ShellCacheMutation.csproj" />
+    <Project Path="tests/Behavioral/ShellCacheNilFunc/ShellCacheNilFunc.csproj" />
+    <Project Path="tests/Behavioral/ShellCacheReassertEquality/ShellCacheReassertEquality.csproj" />
     <Project Path="tests/Behavioral/ShellForwardArity/ShellForwardArity.csproj" />
     <Project Path="tests/Behavioral/SiblingPackageNames/SiblingPackageNames.csproj" />
     <Project Path="tests/Behavioral/SiblingPackageNames/teststructs/foo1/SiblingPackageNames.teststructs.foo1.csproj" />
@@ -1213,6 +1216,7 @@
     <Project Path="tests/Performance/PerfIface/PerfIface.csproj" />
     <Project Path="tests/Performance/PerfIfaceCall/PerfIfaceCall.csproj" />
     <Project Path="tests/Performance/PerfIfaceShell/PerfIfaceShell.csproj" />
+    <Project Path="tests/Performance/PerfIfaceShellChurn/PerfIfaceShellChurn.csproj" />
     <Project Path="tests/Performance/PerfMap/PerfMap.csproj" />
     <Project Path="tests/Performance/PerfMatMul/PerfMatMul.csproj" />
     <Project Path="tests/Performance/PerfRefLower/PerfRefLower.csproj" />

@@ -693,6 +693,7 @@ internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<opera
     ref var y = ref Ꮡy.DerefOrNull();
 
     // TODO(gri) This function seems overly complex. Revisit.
+
     constant.Value xval = default!;
     if (x.mode == constant_) {
         xval = constant.ToInt(x.val);

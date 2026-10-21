@@ -864,6 +864,7 @@ internal static readonly @string digits = "0123456789abcdef"u8;
 internal static slice<byte> appendDecimal(slice<byte> b, uint8 x) {
     // Using this function rather than strconv.AppendUint makes IPv4
     // string building 2x faster.
+
     if (x >= 100) {
         b = append(b, digits[x / 100]);
     }
@@ -877,6 +878,7 @@ internal static slice<byte> appendDecimal(slice<byte> b, uint8 x) {
 internal static slice<byte> appendHex(slice<byte> b, uint16 x) {
     // Using this function rather than strconv.AppendUint makes IPv6
     // string building 2x faster.
+
     if (x >= 0x1000) {
         b = append(b, digits[(x >> 12)]);
     }

@@ -72,6 +72,7 @@ internal static @unsafe.Pointer head(this ref listHead head) {
 // Push p onto the front of the list.
 internal static void push(this ref listHead head, @unsafe.Pointer Δp) {
     // p becomes the head of the list.
+
     // ... so p's next is the current head.
     var pNode = head.getNode(Δp);
     pNode.Value.next = head.obj;

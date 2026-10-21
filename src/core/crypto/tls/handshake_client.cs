@@ -773,10 +773,12 @@ internal static error doFullHandshake(this ж<clientHandshakeState> Ꮡhs) {
     if (ok) {
         // RFC4366 on Certificate Status Request:
         // The server MAY return a "certificate_status" message.
+
         if (!(~hs.serverHello).ocspStapling) {
             // If a server returns a "CertificateStatus" message, then the
             // server MUST have included an extension of type "status_request"
             // with empty "extension_data" in the extended server hello.
+
             c.sendAlert(alertUnexpectedMessage);
             return errors.New(tlsReceivedUnexpectedˢ);
         }

@@ -773,6 +773,7 @@ internal static void mmu(this ref MMUCurve c, time.Duration window, ж<accumulat
 internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, time.Duration window) {
     // For each band, compute the worst-possible total mutator
     // utilization for all windows that start in that band.
+
     // minBands is the minimum number of bands a window can span
     // and maxBands is the maximum number of bands a window can
     // span in any alignment.

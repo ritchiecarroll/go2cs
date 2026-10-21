@@ -722,6 +722,7 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
     // 7ffc342a2000-7ffc342c3000 rw-p 00000000 00:00 0                          [stack]
     // 7ffc34343000-7ffc34345000 r-xp 00000000 00:00 0                          [vdso]
     // ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
     ref var line = ref heap<slice<byte>>(out var Ꮡline);
     // next removes and returns the next field in the line.
     // It also removes from line any spaces following the field.

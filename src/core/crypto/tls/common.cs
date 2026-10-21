@@ -1351,6 +1351,7 @@ public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Cert
     // signature_algorithms_cert, and don't check the algorithms of the
     // signatures on the chain (which anyway are a SHOULD, see RFC 8446,
     // Section 4.4.2.2).
+
     var config = chi.config;
     if (config == nil) {
         config = Ꮡ(new Config(nil));

@@ -485,6 +485,7 @@ sign:
         // Section 5.5, we are free to leak rejected ch values, as well as which
         // check causes the rejection and which coefficient failed the check
         // (but not the value or sign of the coefficient).
+
         var y = GoReflect.WithElemDims(new slice<ringElement>(l, maxL), 256);
         foreach (var (r, _) in y) {
             var counter = new slice<byte>(2);

@@ -826,6 +826,7 @@ public static void TestSqDiff(ж<testing.T> Ꮡt) {
     // This test is similar to the one from the image/color package, but
     // sqDiff in this package accepts int32 instead of uint32, so test it
     // for appropriate input.
+
     // canonical sqDiff implementation
     var orig = (int32 x, int32 y) => {
         uint32 d = default!;

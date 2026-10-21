@@ -162,6 +162,7 @@ partial struct maskedSig {
 internal static @string match(this ref maskedSig m, slice<byte> data, nint firstNonWS) {
     // pattern matching algorithm section 6
     // https://mimesniff.spec.whatwg.org/#pattern-matching-algorithm
+
     if (m.skipWS) {
         data = data.slice(firstNonWS);
     }

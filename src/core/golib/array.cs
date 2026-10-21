@@ -37,8 +37,18 @@ public interface IArray : IEnumerable, ICloneable
     }
 }
 
-public interface IArray<T> : IArray, IEnumerable<(nint, T)>, IGoReflectSequence
+public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
 {
+    /// <summary>
+    /// Go's <c>range</c> over the sequence: its <c>(index, value)</c> pairs, which <c>foreach</c> binds by pattern.
+    /// </summary>
+    /// <remarks>
+    /// The pairs are this interface's own member, not a second <c>IEnumerable&lt;(nint, T)&gt;</c>: with two generic
+    /// sequence interfaces, LINQ could infer neither element type and every LINQ call on a slice failed. The only
+    /// generic sequence interface is <c>IEnumerable&lt;T&gt;</c>, so LINQ sees the values.
+    /// </remarks>
+    new IEnumerator<(nint, T)> GetEnumerator();
+
     new T[] Source { get; }
 
     new ref T this[nint index] { get; }
@@ -1030,11 +1040,11 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         return WindowArray.AsEnumerable().GetEnumerator();
     }
 
-    // IArray<T> derives from IEnumerable<(nint, T)>, which the public GetEnumerator() satisfied
+    // IArray<T> declares its own GetEnumerator() over (nint, T), which the public GetEnumerator() satisfied
     // implicitly while it returned the interface. Now that it returns the concrete struct — so
     // `foreach` binds the pattern and allocates nothing — the interface member becomes explicit:
     // the boxing path, taken only when a consumer asks for the interface.
-    IEnumerator<(nint, T)> IEnumerable<(nint, T)>.GetEnumerator()
+    IEnumerator<(nint, T)> IArray<T>.GetEnumerator()
     {
         return new Enumerator(this);
     }

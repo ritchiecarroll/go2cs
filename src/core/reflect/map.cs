@@ -26,6 +26,7 @@ internal static (ΔType, ΔType) groupAndSlotOf(ΔType ktyp, ΔType etyp) {
     //         elem elemType
     //     }
     // }
+
     if (ktyp.Size() > abi.MapMaxKeyBytes) {
         ktyp = PointerTo(ktyp);
     }

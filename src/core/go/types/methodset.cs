@@ -82,8 +82,10 @@ internal static ref MethodSet emptyMethodSet => ref ᏑemptyMethodSet.Value;
 public static ж<MethodSet> NewMethodSet(ΔType T) {
     // WARNING: The code in this function is extremely subtle - do not modify casually!
     //          This function and lookupFieldOrMethod should be kept in sync.
+
     // TODO(rfindley) confirm that this code is in sync with lookupFieldOrMethod
     //                with respect to type params.
+
     // Methods cannot be associated with a named pointer type.
     // (spec: "The type denoted by T is called the receiver base type;
     // it must not be a pointer or interface type and it must be declared

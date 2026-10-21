@@ -789,6 +789,7 @@ internal static void typ(this ж<cycleFinder> Ꮡw, ΔType typ) {
         switch (typ.type()) {
         case ж<Basic> t: {
             // nothing to do
+
             // *Alias:
             //      This case should not occur because of Unalias(typ) at the top.
             break;

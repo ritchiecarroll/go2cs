@@ -26,6 +26,7 @@ internal static void shiftVU(ж<Asm> Ꮡa, @string name) {
     // The different traversals at least make the two cases more consistent,
     // since we're always delaying the output by one word compared
     // to the input.
+
     var f = Ꮡa.Func("func "u8 + name + "(z, x []Word, s uint) (c Word)"u8);
 
     // Check for no input early, since we need to start by reading 1 word.

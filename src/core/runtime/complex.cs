@@ -36,6 +36,7 @@ internal static complex128 complex128div(complex128 n, complex128 m) {
     if (isNaN(e) && isNaN(f)) {
         // Correct final result to infinities and zeros if applicable.
         // Matches C99: ISO/IEC 9899:1999 - G.5.1  Multiplicative operators.
+
         var (a, b) = (real(n), imag(n));
         var (c, d) = (real(m), imag(m));
 

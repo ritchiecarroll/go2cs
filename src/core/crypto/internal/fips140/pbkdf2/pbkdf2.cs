@@ -79,6 +79,7 @@ internal static void setServiceIndicator(slice<byte> salt, nint keyLength) {
     // The HMAC construction will handle the hash function considerations for the service
     // indicator. The remaining PBKDF2 considerations outlined by SP 800-132 pertain to
     // salt and keyLength.
+
     // The length of the randomly-generated portion of the salt shall be at least 128 bits.
     if (len(salt) < 128 / 8) {
         fips140.RecordNonApproved();

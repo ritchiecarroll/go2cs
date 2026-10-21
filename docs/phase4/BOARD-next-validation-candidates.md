@@ -27683,5 +27683,57 @@ with it, both do.
 errors at the batch-7 tip; the other four rows' counts are those above.
 
 — P2 (read 2026-10-20)
+## 2026-10-20 — C2 finding: the comment census places a Go blank line by the FIRST C# line that names the next Go line's identifiers, which can be an earlier statement — OPEN (found by C2 on claude/c2-census-prelude-make and claude/c2-comment-blank-parity, census precision, unowned)
+
+The comment census (`src/go2cs/internal/commentcensus`) finds the C# translation of the Go line after a blank
+line by searching forward from the last line it placed for the first line holding all of that Go line's
+identifiers. When an earlier statement names the same identifiers, it anchors there. The blank is then read as
+missing where the C# has it, or credited where it has none. Measured instances, go1.26.10 against src/core:
+
+- read as missing where the C# keeps the blank: bytes/bytes.go:556 (`return a` anchored on `var a = new
+  slice...`), compress/bzip2/bzip2.go:393 (`if repeat > 0` on `if (repeat > 2*1024*1024)`),
+  internal/goroot/gc.go:118, go/printer/printer.go:1099 (on the `comments` local's declaration),
+  go/internal/gccgoimporter/parser.go:332. Until claude/c2-census-prelude-make, the walk back over comment lines
+  hid these, because that walk landed on an unrelated blank above the earlier line's comment.
+- exposed when the companion commit stopped requiring `make` (c3964f6fa): crypto/internal/cryptotest/aead.go:87,
+  debug/pe/file.go:639, encoding/asn1/asn1.go:194, go/parser/interface.go:159, internal/dag/alg.go:11,
+  internal/runtime/gc/internal/gen/gen.go:443, time/zoneinfo_read.go:427. All 7 read go-blank-cs-none
+  falsely at f3261431a.
+- the reverse direction exists too: crypto/tls/common.go:1846 and net/http/httputil/reverseproxy.go:872 read
+  missing while the make lines were unmapped, and correct once mapping them advanced the search.
+
+The census is the instrument, not the contract, and none of this moves a converter gate. It sizes the
+go-blank-cs-none class to within the miss count, so a converter seat scored on that class names the
+instances it relies on. A stricter anchor bounds the search by the C# line of the Go line before the blank
+(the previous statement's own translation), rather than by the last blank placed. It is a census seat with
+its own two-reading measurement.
+
+**Amended 2026-10-20 (G's review of claude/c2-comment-blank-parity).** Two more named false reports, from narrowing
+the blank-placing walk to cross only a BARE heap box (a box with an initializer is a whole Go statement, and
+crossing it masked dropped blanks): crypto/x509/x509.go:1318 and runtime/runtime1.go:224 (windows). Both anchor on a
+line below another statement's initialized box, and the C# keeps the blank. Both read go-blank-cs-none at the
+narrowing commit.
+
+**Amended 2026-10-21 (the i7 legs of claude/c2-comment-blank-parity, and bf3499a51).** The census now places a
+Go blank before a declaration group and before a scoped `if`/`switch` initializer. That makes 5 more anchor
+misses visible, each a false go-blank-cs-none: go/internal/gcimporter/ureader.go:271 and :244,
+syscall/exec_linux.go:701, internal/syscall/unix/kernel_version_linux.go:39, net/dnsclient_unix.go:348.
+Two more shapes the census cannot anchor, read on the fix's re-emission as extra:unexplained:
+- a shadowed local the translation renames ΔN (`hash` -> `hashΔ1`): crypto/internal/fips140/rsa/pkcs1v22.go x2,
+  go/types/resolver.go, vendor/golang.org/x/text/transform/transform.go. Accepting ΔN in the blank search
+  alone maps 1196 more Go blanks and moves go-blank-cs-none +351 corpus-wide. It is the largest open precision
+  item here and wants its own measured seat;
+- a Go line whose func literal declares a result type the C# lambda drops (crypto/internal/fips140/ecdsa/ecdsa.go).
+
+## 2026-10-21 — C2 finding: a local func type's marker comment is written with no leading line break and a trailing one, so its doc comment joins the line above — OPEN (found by the i7's tests leg of claude/c2-comment-blank-parity, ruled out of that seat, unowned)
+
+visitFuncType renders a methodless named func type as a marker comment (`// type X is a methodless func type —
+rendered inline as its base delegate`). Inside a function it writes the pending type doc and the marker
+with no leading line break and a trailing one, where every other statement writes a leading break.
+At runtime/mgcscavenge_test.go:581, TestScavengeIndex's opening comment and `type markFunc`'s doc comment were
+emitted on ONE line. claude/c2-comment-blank-parity's gap break splits them, but Go's blank between them
+(:578) is still not written, because the break the gap writes becomes the line end the marker never supplies.
+Census of the GOROOT: 3 local func types, all in tests (0 production), 1 of them a first statement with a doc.
+Fixing it changes the layout of every local marker, so it is its own small seat with its own footprint.
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

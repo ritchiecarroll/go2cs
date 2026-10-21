@@ -2429,6 +2429,7 @@ internal static ast.Expr parseUnaryExpr(this ж<parser> Ꮡp) {
             {
                 var (typ, ok) = x._<ж<ast.ChanType>>(ᐧ); if (ok) {
                     // (<-type)
+
                     // re-associate position info and <-
                     ast.ChanDir dir = ast.SEND;
                     while (ok && dir == ast.SEND) {

@@ -2376,6 +2376,7 @@ Loop:
         }
         case 0xC0: {
             // Pointer to somewhere else in msg.
+
             // Pointers are two bytes.
             newOff++;
 

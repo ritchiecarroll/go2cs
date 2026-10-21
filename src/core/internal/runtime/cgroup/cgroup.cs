@@ -117,6 +117,7 @@ internal static (nint, Version, error) parseCPUCgroup(nint fd, Func<nint, slice<
     // hierarchy-ID and controller-list have relatively small maximum
     // sizes, and the path can be up to _PATH_MAX, so we need a bit more
     // than 1 _PATH_MAX of scratch space.
+
     var l = newLineReader(fd, scratch, read);
 
     // Bytes written to out.
@@ -264,6 +265,7 @@ internal static (nint, error) parseCPUMount(nint fd, Func<nint, slice<byte>, (ni
     // small fixed maximum size, so 4*_PATH_MAX is plenty of scratch space.
     // Note that non-cgroup mounts may have arbitrarily long (11), but we
     // can skip those when parsing.
+
     var l = newLineReader(fd, scratch, read);
 
     while (ᐧ) {

@@ -1383,6 +1383,7 @@ internal static (Value, Value) match(Value x, Value y) {
 internal static (Value, Value) match0(Value x, Value y) {
     // Prefer to return the original x and y arguments when possible,
     // to avoid unnecessary heap allocations.
+
     switch (y.type()) {
     case intVal: {
         switch (x.type()) {

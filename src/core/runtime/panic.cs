@@ -970,6 +970,7 @@ internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp)
             var s = (ж<savedOpenDeferState>)(uintptr)((~gp).param); if (s != nil) {
                 // recovery saved some state for us, so that we can resume
                 // calling open-coded defers without unwinding the stack.
+
                 gp.Value.param = default!;
 
                 Δp.retpc = s.Value.retpc;
@@ -1519,6 +1520,7 @@ internal static void fatalpanic(ж<_panic> Ꮡmsgs) {
         if (startpanic_m() && Ꮡmsgs != nil) {
             // There were panic messages and startpanic_m
             // says it's okay to try to print them.
+
             // startpanic_m set panicking, which will
             // block main from exiting, so now OK to
             // decrement runningPanicDefers.

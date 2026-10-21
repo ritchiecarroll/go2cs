@@ -161,6 +161,11 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
             yield return (index++, item);
     }
 
+    IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
+    {
+        return ((IEnumerable<byte>)Source).GetEnumerator();
+    }
+
     IEnumerator IEnumerable.GetEnumerator()
     {
         return Source.GetEnumerator();

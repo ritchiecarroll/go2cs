@@ -3182,6 +3182,7 @@ internal static void handoffp(ж<Δp> Ꮡpp) {
 
     // handoffp must start an M in any situation where
     // findRunnable would return a G to run on pp.
+
     // if it has local work, start it straight away
     if (!runqempty(Ꮡpp) || !Ꮡsched.of(schedt.Ꮡrunq).empty()) {
         startm(Ꮡpp, false, false);
@@ -4601,6 +4602,7 @@ internal static void gdestroy(ж<g> Ꮡgp) {
         // The goroutine may have locked this thread because
         // it put it in an unusual kernel state. Kill it
         // rather than returning it to the thread pool.
+
         // Return to mstart, which will release the P and exit
         // the thread.
         if (GOOS != "plan9"u8){ // See golang.org/issue/22227.

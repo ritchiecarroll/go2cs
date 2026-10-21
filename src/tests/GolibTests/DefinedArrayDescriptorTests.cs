@@ -189,7 +189,8 @@ public readonly struct DefinedIntArray4(array<nint> value) : IArray<nint>
     public Span<nint> ToSpan() => Value.ToSpan();
     public object Clone() => new DefinedIntArray4((array<nint>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-    IEnumerator<(nint, nint)> IEnumerable<(nint, nint)>.GetEnumerator() => ((IEnumerable<(nint, nint)>)Value).GetEnumerator();
+    IEnumerator<(nint, nint)> IArray<nint>.GetEnumerator() => ((IArray<nint>)Value).GetEnumerator();
+    IEnumerator<nint> IEnumerable<nint>.GetEnumerator() => ((IEnumerable<nint>)Value).GetEnumerator();
 }
 
 [GoType("[3]nint")]
@@ -205,7 +206,8 @@ public readonly struct DefinedIntArray3(array<nint> value) : IArray<nint>
     public Span<nint> ToSpan() => Value.ToSpan();
     public object Clone() => new DefinedIntArray3((array<nint>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-    IEnumerator<(nint, nint)> IEnumerable<(nint, nint)>.GetEnumerator() => ((IEnumerable<(nint, nint)>)Value).GetEnumerator();
+    IEnumerator<(nint, nint)> IArray<nint>.GetEnumerator() => ((IArray<nint>)Value).GetEnumerator();
+    IEnumerator<nint> IEnumerable<nint>.GetEnumerator() => ((IEnumerable<nint>)Value).GetEnumerator();
 }
 
 [GoType("[2]DefinedIntArray3")]
@@ -221,7 +223,8 @@ public readonly struct DefinedNestedArray2(array<DefinedIntArray3> value) : IArr
     public Span<DefinedIntArray3> ToSpan() => Value.ToSpan();
     public object Clone() => new DefinedNestedArray2((array<DefinedIntArray3>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-    IEnumerator<(nint, DefinedIntArray3)> IEnumerable<(nint, DefinedIntArray3)>.GetEnumerator() => ((IEnumerable<(nint, DefinedIntArray3)>)Value).GetEnumerator();
+    IEnumerator<(nint, DefinedIntArray3)> IArray<DefinedIntArray3>.GetEnumerator() => ((IArray<DefinedIntArray3>)Value).GetEnumerator();
+    IEnumerator<DefinedIntArray3> IEnumerable<DefinedIntArray3>.GetEnumerator() => ((IEnumerable<DefinedIntArray3>)Value).GetEnumerator();
 }
 
 [GoType("[3]@string")]
@@ -237,7 +240,8 @@ public readonly struct DefinedStringArray3(array<@string> value) : IArray<@strin
     public Span<@string> ToSpan() => Value.ToSpan();
     public object Clone() => new DefinedStringArray3((array<@string>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-    IEnumerator<(nint, @string)> IEnumerable<(nint, @string)>.GetEnumerator() => ((IEnumerable<(nint, @string)>)Value).GetEnumerator();
+    IEnumerator<(nint, @string)> IArray<@string>.GetEnumerator() => ((IArray<@string>)Value).GetEnumerator();
+    IEnumerator<@string> IEnumerable<@string>.GetEnumerator() => ((IEnumerable<@string>)Value).GetEnumerator();
 }
 
 [GoType("[2][3]nint")]
@@ -253,7 +257,8 @@ public readonly struct DefinedIntMatrix2x3(array<array<nint>> value) : IArray<ar
     public Span<array<nint>> ToSpan() => Value.ToSpan();
     public object Clone() => new DefinedIntMatrix2x3((array<array<nint>>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-    IEnumerator<(nint, array<nint>)> IEnumerable<(nint, array<nint>)>.GetEnumerator() => ((IEnumerable<(nint, array<nint>)>)Value).GetEnumerator();
+    IEnumerator<(nint, array<nint>)> IArray<array<nint>>.GetEnumerator() => ((IArray<array<nint>>)Value).GetEnumerator();
+    IEnumerator<array<nint>> IEnumerable<array<nint>>.GetEnumerator() => ((IEnumerable<array<nint>>)Value).GetEnumerator();
 }
 
 [GoType("[2]array<nint>"), GoArrayDims(2, 3)]
@@ -269,5 +274,6 @@ public readonly struct StampedIntMatrix2x3(array<array<nint>> value) : IArray<ar
     public Span<array<nint>> ToSpan() => Value.ToSpan();
     public object Clone() => new StampedIntMatrix2x3((array<array<nint>>)Value.Clone());
     IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
-    IEnumerator<(nint, array<nint>)> IEnumerable<(nint, array<nint>)>.GetEnumerator() => ((IEnumerable<(nint, array<nint>)>)Value).GetEnumerator();
+    IEnumerator<(nint, array<nint>)> IArray<array<nint>>.GetEnumerator() => ((IArray<array<nint>>)Value).GetEnumerator();
+    IEnumerator<array<nint>> IEnumerable<array<nint>>.GetEnumerator() => ((IEnumerable<array<nint>>)Value).GetEnumerator();
 }

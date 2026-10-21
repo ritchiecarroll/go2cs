@@ -56,7 +56,7 @@ using static go.image.@internal.imageutil_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("image/internal/imageutil/impl.go", "impl.cs", "AAcgABgggoKCgpaCgpSCloKCAA4egoKUpoKClKaCgpS4goKCgsqCgpSCgqaCggAOHoKClKaCgpSmgoKUuIKCgoLKgoKUgoKmgoIADh6CgpSmgoKUpoKClLiCgoKCyoKClIKWgoIADh6CgpSmgoKUpoKClLiCgoKCypQ=")]
+[assembly: go.GoPositionMap("image/internal/imageutil/impl.go", "impl.cs", "AAcgABkggoKCgpaCgpSCloKCAA4egoKUpoKClKaCgpS4goKCgsqCgpSCgqaCggAOHoKClKaCgpSmgoKUuIKCgoLKgoKUgoKmgoIADh6CgpSmgoKUpoKClLiCgoKCyoKClIKWgoIADh6CgpSmgoKUpoKClLiCgoKCypQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.image.@internal;

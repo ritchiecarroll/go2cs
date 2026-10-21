@@ -1807,6 +1807,7 @@ internal static ж<ast.BasicLit> sanitizeImportPath(ж<ast.BasicLit> Ꮡlit) {
     // here is not needed. However, a modified or generated AST
     // may possibly contain non-canonical paths. Do the work in
     // all cases since it's not too hard and not speed-critical.
+
     // if we don't have a proper string, be conservative and return whatever we have
     if (lit.Kind != token.STRING) {
         return Ꮡlit;

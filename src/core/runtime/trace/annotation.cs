@@ -144,6 +144,7 @@ public static void WithRegion(context.Context ctx, @string regionType, Action fn
         //   longer.
         // This causes more churns in code than I hoped, and sometimes
         // makes the code less readable.
+
         var id = fromContext(ctx).Value.id;
         userRegion(id, regionStartCode, regionType);
         defer(userRegion, id, regionEndCode, regionType, ref ᒐ);

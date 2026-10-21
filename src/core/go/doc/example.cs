@@ -380,6 +380,7 @@ internal static (slice<ast.Decl>, map<@string, bool>) findDeclsAndUnresolved(ast
     // transitively by the body, populating usedDecls and usedObjs. Then it
     // trims down the declarations to include only the symbols actually
     // referenced by the body.
+
     var unresolved = new map<@string, bool>();
     ref var depDecls = ref heap<slice<ast.Decl>>(out var ᏑdepDecls);
     var usedDecls = new map<ast.Decl, bool>(); // set of top-level decls reachable from the body
