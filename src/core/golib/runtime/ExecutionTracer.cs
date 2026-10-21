@@ -13,37 +13,54 @@ using System.Threading;
 namespace go.golib;
 
 /// <summary>
-/// A minimal execution tracer: Go's v2 trace format (the version the go1.24.13 runtime writes,
-/// <c>go 1.23 trace</c>), carrying exactly the goroutine facts the managed runtime observes.
+/// A minimal execution tracer: Go's v2 trace format (the version the go1.26 runtime writes,
+/// <c>go 1.26 trace</c>), carrying exactly the goroutine facts the managed runtime observes and the
+/// annotations the program states.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Design: docs/phase4/DESIGN-managed-execution-tracer.md (Q28) and its 2026-09-27 amendment. The
-/// runtime's hand-owned <c>StartTrace</c>/<c>StopTrace</c>/<c>ReadTrace</c> (runtime/{windows,linux}/
-/// trace_impl.cs) drive it; <see cref="Goroutine"/> calls it at its five lifecycle points -- create,
-/// start, block, unblock, destroy (and resume, the wakee's half) -- behind one volatile read, which is
-/// the tracer's whole cost while no trace runs.
+/// Design: docs/phase4/DESIGN-managed-execution-tracer.md (Q28), its 2026-09-27 amendment and its
+/// 2026-10-21 amendment (generations, for runtime/trace's flight recorder). The runtime's hand-owned
+/// <c>StartTrace</c>/<c>StopTrace</c>/<c>ReadTrace</c> (runtime/trace_impl.cs) drive it, and so do
+/// runtime/trace's flight-recorder linknames (traceAdvance, traceClockNow, traceClockUnitsPerSecond)
+/// and the runtime's user-annotation bodies (trace_userTaskCreate and its siblings).
+/// <see cref="Goroutine"/> calls it at its five lifecycle points -- create, start, block, unblock,
+/// destroy (and resume, the wakee's half) -- behind one volatile read, which is the tracer's whole cost
+/// while no trace runs.
 /// </para>
 /// <para>
 /// The model, stated because a reader of the trace must know it: an M is the goroutine's OS thread (a
 /// goroutine owns its thread for life), and each M holds ONE P whose id is the M's. There is no
 /// scheduler to describe, so no P ever moves between Ms and no steal, GC, heap, syscall or CPU-sample
-/// event is ever written -- those would describe a runtime that is not running. A goroutine's status is
-/// stated lazily, before its first event in the trace, exactly as Go's runtime does per generation; the
-/// start prologue states every goroutine parked at that moment, so a goroutine that never wakes inside
-/// the window is still named. Block reasons are Go's trace vocabulary (traceBlockReasonStrings), not the
-/// traceback text. Stacks are not recorded (stack ID 0).
+/// event is ever written -- those would describe a runtime that is not running. Block reasons are Go's
+/// trace vocabulary (traceBlockReasonStrings), not the traceback text. Stacks are not recorded (stack
+/// ID 0). User tasks, regions and logs ARE written: they are facts the program states, not facts about
+/// a scheduler, and trace.Log is how a program puts them in its trace.
 /// </para>
 /// <para>
-/// One generation spans the whole trace: a header, then per-M event batches (at most 64 KiB each), then
-/// one strings batch and one frequency batch; the trace ends at EOF. Every event is written under one
-/// lock with a timestamp taken under it, so the events are globally ordered and every batch is
-/// monotonic. The data is released to the reader as batches seal and all at once at stop.
+/// GENERATIONS, as Go's runtime writes them. A trace is a header, then one generation after another.
+/// Each generation opens with a sync batch (its frequency and a clock snapshot), carries per-M event
+/// batches (at most 64 KiB each) and one strings batch, and ends with Go 1.26's in-band end-of-generation
+/// signal, a one-byte chunk the reader sees in band. <see cref="Advance"/> ends one generation and
+/// opens the next; Go's runtime does that every second (defaultTraceAdvancePeriod) and so does this
+/// tracer, and the flight recorder advances on demand. Every generation STATES every live goroutine
+/// and every P it touches before their first event in it, because a reader may start at any
+/// generation: the flight recorder keeps only the latest, and Go's parser refuses a goroutine status
+/// it has never seen after the first generation it reads. The prologue states each goroutine from what
+/// the trace last said about it (a running one in its own M's batch), and a goroutine the trace has
+/// never named is stated from the registry.
+/// </para>
+/// <para>
+/// Every event is written under one lock with a timestamp taken under it, so the events are globally
+/// ordered and every batch is monotonic. The data is released to the reader as batches seal and at the
+/// end of each generation. An advance returns only after the reader has come back for more after the
+/// generation's end signal, which is Go's doneSema contract: the flight recorder's WriteTo reads its
+/// ring right after it advances, and relies on the reader having filed the generation it just ended.
 /// </para>
 /// </remarks>
 public static class ExecutionTracer
 {
-    // ---- the wire format (go122 event numbers, internal/trace/event/go122/event.go at the pin) ----
+    // ---- the wire format (tracev2 event numbers, internal/trace/tracev2/events.go at the pin) ----
 
     private const byte EvEventBatch = 1;
     private const byte EvStrings = 4;
@@ -56,20 +73,30 @@ public static class ExecutionTracer
     private const byte EvGoBlock = 20;
     private const byte EvGoUnblock = 21;
     private const byte EvGoStatus = 25;
+    private const byte EvUserTaskBegin = 40;
+    private const byte EvUserTaskEnd = 41;
+    private const byte EvUserRegionBegin = 42;
+    private const byte EvUserRegionEnd = 43;
+    private const byte EvUserLog = 44;
+    private const byte EvSync = 50;
+    private const byte EvClockSnapshot = 51;
+    private const byte EvEndOfGeneration = 52;
 
     private const ulong ProcRunning = 1;
     private const ulong GoRunnable = 1;
     private const ulong GoRunning = 2;
     private const ulong GoWaiting = 4;
 
-    private const ulong Generation = 1;
     private const ulong NoThread = ulong.MaxValue;
     private const int MaxBatchPayload = 64 << 10;
 
-    // The largest event this tracer writes: a type byte and four uvarints.
-    private const int MaxEventSize = 1 + 4 * 10;
+    // The largest event this tracer writes: a type byte and five uvarints (dt and UserLog's four args).
+    private const int MaxEventSize = 1 + 5 * 10;
 
-    private static readonly byte[] s_header = Encoding.ASCII.GetBytes("go 1.23 trace\0\0\0");
+    private static readonly byte[] s_header = Encoding.ASCII.GetBytes("go 1.26 trace\0\0\0");
+
+    // Go's defaultTraceAdvancePeriod (runtime/trace.go): the approximate period between generations.
+    private static readonly TimeSpan s_advancePeriod = TimeSpan.FromSeconds(1);
 
     // ---- state ----
 
@@ -78,9 +105,13 @@ public static class ExecutionTracer
     /// <summary>Whether a trace is running: the one read every lifecycle hook makes first.</summary>
     public static bool Enabled => s_enabled;
 
+    // Serializes Start and every advance, the stop's included: Go's traceAdvanceSema.
+    private static readonly object s_advanceLock = new();
+
     private static readonly object s_lock = new();
 
     // Guarded by s_lock.
+    private static ulong s_generation;
     private static long s_lastTimestamp;
     private static Dictionary<int, MachineState> s_machines = new();
     private static Dictionary<long, GoroutineState> s_goroutines = new();
@@ -91,6 +122,16 @@ public static class ExecutionTracer
     private static readonly Queue<byte[]> s_chunks = new();
     private static bool s_stopping;
     private static bool s_drained = true;
+
+    // Guarded by s_readLock: the advance contract. The reader holds an end signal from the moment Read
+    // returns one until it calls Read again; that return is when its generation is DONE.
+    private static bool s_endSignalOut;
+    private static ulong s_generationsDone;
+
+    // The periodic advancer of the running trace, and the trace it belongs to (guarded by s_advanceLock).
+    private static Thread? s_advancer;
+    private static ManualResetEventSlim? s_advancerStop;
+    private static long s_epoch;
 
     private sealed class MachineState(int id)
     {
@@ -111,11 +152,15 @@ public static class ExecutionTracer
         Dead
     }
 
+    // What the trace has said about one goroutine. Status persists across generations; Stated and
+    // Seq are the current generation's.
     private sealed class GoroutineState(long id)
     {
         public readonly ulong Id = (ulong)id;
         public Status Status;
+        public bool Stated;
         public ulong Seq;
+        public MachineState? Machine;
     }
 
     // ---- the runtime's entry points ----
@@ -126,100 +171,142 @@ public static class ExecutionTracer
     /// </summary>
     public static bool Start()
     {
-        lock (s_lock)
+        lock (s_advanceLock)
         {
-            lock (s_readLock)
+            lock (s_lock)
             {
-                if (s_enabled || !s_drained)
-                    return false;
+                lock (s_readLock)
+                {
+                    if (s_enabled || !s_drained)
+                        return false;
 
-                s_chunks.Clear();
-                s_stopping = false;
-                s_drained = false;
-                s_chunks.Enqueue((byte[])s_header.Clone());
+                    s_chunks.Clear();
+                    s_stopping = false;
+                    s_drained = false;
+                    s_endSignalOut = false;
+                    s_generationsDone = 0;
+                    s_chunks.Enqueue((byte[])s_header.Clone());
+                }
+
+                s_machines = new Dictionary<int, MachineState>();
+                s_goroutines = new Dictionary<long, GoroutineState>();
+                s_strings = new Dictionary<string, ulong>(StringComparer.Ordinal);
+                s_lastTimestamp = 0;
+                s_generation = 1;
+                s_enabled = true;
+
+                beginGeneration();
             }
 
-            s_machines = new Dictionary<int, MachineState>();
-            s_goroutines = new Dictionary<long, GoroutineState>();
-            s_strings = new Dictionary<string, ulong>(StringComparer.Ordinal);
-            s_lastTimestamp = 0;
-            s_enabled = true;
-
-            // The prologue: every goroutine PARKED now is stated, so one that never wakes inside the
-            // window is still in the trace. A running goroutine is stated lazily on its own thread,
-            // the only place that can put it on an M.
-            MachineState m = machine();
-            ensureProc(m);
-
-            foreach (Goroutine g in Goroutine.Snapshot())
-            {
-                if (!g.IsParked || ReferenceEquals(g, Goroutine.Current))
-                    continue;
-
-                GoroutineState state = goroutine(g);
-                state.Status = g.IsReadied ? Status.Runnable : Status.Waiting;
-                state.Seq = 0;
-                emit(m, EvGoStatus, state.Id, NoThread, state.Status == Status.Runnable ? GoRunnable : GoWaiting);
-            }
+            startAdvancer();
         }
 
         return true;
     }
 
     /// <summary>
-    /// Stops the trace, as <c>runtime.StopTrace</c>: every batch is released to the reader, and the
-    /// call returns only after the reader has taken the last of it (Go: "only returns after all the
-    /// reads for the trace have completed"). A stop with no trace running is a no-op.
+    /// Stops the trace, as <c>runtime.StopTrace</c> (Go's <c>traceAdvance(true)</c>): the last
+    /// generation is released to the reader, and the call returns only after the reader has taken the
+    /// last of it (Go: "only returns after all the reads for the trace have completed"). A stop with no
+    /// trace running is a no-op.
     /// </summary>
-    public static void Stop()
+    public static void Stop() => Advance(stop: true);
+
+    /// <summary>
+    /// Ends the current generation and, unless <paramref name="stop"/>, opens the next, as Go's
+    /// <c>traceAdvance</c>: the generation's batches, its strings and its end-of-generation signal go
+    /// to the reader, and the call returns only after the reader has come back for more after that
+    /// signal (with <paramref name="stop"/>, after the reader has drained the trace). A call with no
+    /// trace running returns at once.
+    /// </summary>
+    public static void Advance(bool stop) => advance(stop, epoch: 0);
+
+    // The epoch is the periodic advancer's: an advance it started for one trace must not touch the next.
+    private static void advance(bool stop, long epoch)
     {
-        lock (s_lock)
+        Thread? advancer = null;
+
+        lock (s_advanceLock)
         {
-            if (!s_enabled)
-                return;
+            ulong ended;
 
-            s_enabled = false;
-
-            List<byte[]> tail = [];
-
-            foreach (MachineState m in s_machines.Values)
+            lock (s_lock)
             {
-                if (m.Payload.Count > 0)
-                    tail.Add(seal(m));
+                if (!s_enabled || epoch != 0 && epoch != s_epoch)
+                    return;
+
+                ended = s_generation;
+                List<byte[]> tail = endGeneration();
+
+                if (stop)
+                {
+                    s_enabled = false;
+                }
+                else
+                {
+                    s_generation++;
+                    resetGeneration();
+                }
+
+                lock (s_readLock)
+                {
+                    foreach (byte[] chunk in tail)
+                        s_chunks.Enqueue(chunk);
+
+                    s_stopping = stop;
+                    Monitor.PulseAll(s_readLock);
+                }
+
+                if (!stop)
+                    beginGeneration();
             }
 
-            tail.Add(stringsBatch());
-            tail.Add(frequencyBatch());
+            if (stop)
+            {
+                advancer = s_advancer;
+                s_advancer = null;
+                s_advancerStop?.Set();
+                s_epoch++;
+            }
 
             lock (s_readLock)
             {
-                foreach (byte[] chunk in tail)
-                    s_chunks.Enqueue(chunk);
-
-                s_stopping = true;
-                Monitor.PulseAll(s_readLock);
+                while (stop ? !s_drained : s_generationsDone < ended && !s_drained)
+                    Monitor.Wait(s_readLock);
             }
         }
 
-        lock (s_readLock)
-        {
-            while (!s_drained)
-                Monitor.Wait(s_readLock);
-        }
+        // Outside the advance lock: the advancer may be waiting for it, to find the trace gone.
+        if (advancer is not null && advancer != Thread.CurrentThread)
+            advancer.Join();
     }
 
     /// <summary>
     /// The next chunk of trace data, as <c>runtime.ReadTrace</c>: blocks until data is available, and
-    /// returns <c>null</c> once the trace has stopped and every byte has been read.
+    /// returns <c>null</c> once the trace has stopped and every byte has been read. Calling it again
+    /// after an end-of-generation chunk is what tells an advance that its generation was filed.
     /// </summary>
     public static byte[]? Read()
     {
         lock (s_readLock)
         {
+            if (s_endSignalOut)
+            {
+                s_endSignalOut = false;
+                s_generationsDone++;
+                Monitor.PulseAll(s_readLock);
+            }
+
             while (true)
             {
                 if (s_chunks.TryDequeue(out byte[]? chunk))
+                {
+                    // An event batch is never one byte long, so a one-byte chunk is the end signal.
+                    if (chunk is [EvEndOfGeneration])
+                        s_endSignalOut = true;
+
                     return chunk;
+                }
 
                 if (s_stopping)
                 {
@@ -236,30 +323,90 @@ public static class ExecutionTracer
         }
     }
 
-    // RED-FIRST STUB (flight-recorder seat): the generational API runtime/trace's flight recorder
-    // needs, declared so its arms compile and fail before the generations exist.
+    /// <summary>
+    /// Trace clock units per second, as <c>runtime.traceClockUnitsPerSecond</c>: the timestamps are
+    /// <see cref="Stopwatch"/> ticks.
+    /// </summary>
     public static ulong ClockUnitsPerSecond => (ulong)Stopwatch.Frequency;
 
+    /// <summary>The trace clock now, as <c>runtime.traceClockNow</c>.</summary>
     public static ulong Now() => (ulong)Stopwatch.GetTimestamp();
 
-    public static void Advance(bool stop)
-    {
-    }
+    // ---- the user annotations (runtime's trace_userTaskCreate and its siblings) ----
 
+    // Each is written on the calling goroutine, which must be running on an M holding a P, as Go's
+    // eventWriter(GoRunning, ProcRunning) states it. A thread running no goroutine has no G to carry
+    // the event, so it writes nothing (Go always has one).
+
+    /// <summary>A task begins: <c>trace.NewTask</c> (EvUserTaskBegin).</summary>
     public static void OnUserTaskBegin(ulong id, ulong parentId, ReadOnlySpan<byte> name)
     {
+        if (!s_enabled || Goroutine.Current is not { } g)
+            return;
+
+        lock (s_lock)
+        {
+            if (running(g) is { } m)
+                emit(m, EvUserTaskBegin, id, parentId, intern(name), 0);
+        }
     }
 
+    /// <summary>A task ends: <c>Task.End</c> (EvUserTaskEnd).</summary>
     public static void OnUserTaskEnd(ulong id)
     {
+        if (!s_enabled || Goroutine.Current is not { } g)
+            return;
+
+        lock (s_lock)
+        {
+            if (running(g) is { } m)
+                emit(m, EvUserTaskEnd, id, 0);
+        }
     }
 
+    /// <summary>A region begins (mode 0) or ends (mode 1): <c>trace.StartRegion</c> and <c>Region.End</c>.</summary>
     public static void OnUserRegion(ulong id, ulong mode, ReadOnlySpan<byte> name)
     {
+        byte type = mode switch
+        {
+            0 => EvUserRegionBegin,
+            1 => EvUserRegionEnd,
+            _ => 0
+        };
+
+        if (type == 0 || !s_enabled || Goroutine.Current is not { } g)
+            return;
+
+        lock (s_lock)
+        {
+            if (running(g) is { } m)
+                emit(m, type, id, intern(name), 0);
+        }
     }
 
+    /// <summary>A log message: <c>trace.Log</c> (EvUserLog).</summary>
     public static void OnUserLog(ulong id, ReadOnlySpan<byte> category, ReadOnlySpan<byte> message)
     {
+        if (!s_enabled || Goroutine.Current is not { } g)
+            return;
+
+        lock (s_lock)
+        {
+            if (running(g) is { } m)
+                emit(m, EvUserLog, id, intern(category), intern(message), 0);
+        }
+    }
+
+    // The calling thread's M with `g` running on it, or null when the trace stopped before the lock.
+    private static MachineState? running(Goroutine g)
+    {
+        if (!s_enabled)
+            return null;
+
+        MachineState m = machine();
+        ensureProc(m);
+        ensureRunning(m, goroutine(g));
+        return m;
     }
 
     // ---- the lifecycle points (golib's Goroutine calls these after reading Enabled) ----
@@ -280,6 +427,7 @@ public static class ExecutionTracer
 
             GoroutineState state = goroutine(created);
             state.Status = Status.Runnable;
+            state.Stated = true;
             state.Seq = 0;
             emit(m, EvGoCreate, state.Id, 0, 0);
         }
@@ -318,6 +466,7 @@ public static class ExecutionTracer
 
             emit(m, EvGoBlock, intern(BlockReason(reason)), 0);
             state.Status = Status.Waiting;
+            state.Machine = null;
             m.Current = null;
         }
     }
@@ -333,13 +482,27 @@ public static class ExecutionTracer
             MachineState m = machine();
             GoroutineState state = goroutine(target);
 
-            // A target parked before the trace started and missed by the prologue (it parked between
-            // the snapshot and this call) is stated where it is first named.
-            if (state.Status == Status.Unknown)
+            // A target this generation has not stated yet is stated where it is first named: Waiting
+            // when the trace last saw it park, or when the trace never saw it (it parked before the
+            // trace started, or between the prologue's snapshot and this call).
+            if (!state.Stated)
             {
-                state.Status = Status.Waiting;
+                switch (state.Status)
+                {
+                    case Status.Unknown:
+                    case Status.Waiting:
+                        state.Status = Status.Waiting;
+                        emit(m, EvGoStatus, state.Id, NoThread, GoWaiting);
+                        break;
+                    case Status.Runnable:
+                        emit(m, EvGoStatus, state.Id, NoThread, GoRunnable);
+                        break;
+                    default:
+                        return;
+                }
+
+                state.Stated = true;
                 state.Seq = 0;
-                emit(m, EvGoStatus, state.Id, NoThread, GoWaiting);
             }
 
             if (state.Status != Status.Waiting)
@@ -367,6 +530,7 @@ public static class ExecutionTracer
 
             emit(m, EvGoDestroy);
             state.Status = Status.Dead;
+            state.Machine = null;
             m.Current = null;
         }
     }
@@ -395,12 +559,139 @@ public static class ExecutionTracer
         _ => "unspecified",
     };
 
+    // ---- generations (all under s_lock) ----
+
+    // Opens the current generation: its sync batch, then its prologue. Go writes the sync batch first
+    // ("as early in the trace as possible") and then states the goroutines.
+    private static void beginGeneration()
+    {
+        release(syncBatch());
+
+        MachineState here = machine();
+        ensureProc(here);
+
+        foreach (Goroutine g in Goroutine.Snapshot())
+            stateGoroutine(here, g);
+    }
+
+    // States one goroutine in the generation now opening, from what the trace last said about it or,
+    // for a goroutine the trace has never named, from the registry: parked is Waiting (Runnable once
+    // readied), not yet on a thread is Runnable (created, not started), and anything else is Running on
+    // its own thread, stated in THAT M's batch, where Go's parser binds a running goroutine.
+    private static void stateGoroutine(MachineState here, Goroutine g)
+    {
+        GoroutineState state = goroutine(g);
+
+        if (state.Stated || state.Status == Status.Dead)
+            return;
+
+        Status status = state.Status;
+
+        if (status == Status.Unknown)
+        {
+            if (g.IsParked)
+                status = g.IsReadied ? Status.Runnable : Status.Waiting;
+            else
+                status = g.ThreadId == 0 ? Status.Runnable : Status.Running;
+        }
+
+        switch (status)
+        {
+            case Status.Running:
+                MachineState on = state.Machine ?? machine(g.ThreadId);
+                ensureProc(on);
+                emit(on, EvGoStatus, state.Id, on.Id, GoRunning);
+                on.Current = state;
+                state.Machine = on;
+                break;
+            case Status.Runnable:
+                emit(here, EvGoStatus, state.Id, NoThread, GoRunnable);
+                break;
+            case Status.Waiting:
+                emit(here, EvGoStatus, state.Id, NoThread, GoWaiting);
+                break;
+            default:
+                return;
+        }
+
+        state.Status = status;
+        state.Stated = true;
+        state.Seq = 0;
+    }
+
+    // Ends the current generation: every M's open batch, the strings batch, and the end signal.
+    private static List<byte[]> endGeneration()
+    {
+        List<byte[]> tail = [];
+
+        foreach (MachineState m in s_machines.Values)
+        {
+            if (m.Payload.Count > 0)
+                tail.Add(seal(m));
+        }
+
+        tail.Add(stringsBatch());
+        tail.Add([EvEndOfGeneration]);
+        return tail;
+    }
+
+    // What a new generation forgets: every P and goroutine statement, and the string table. What the
+    // trace last said about each live goroutine is kept, for the prologue to state it again.
+    private static void resetGeneration()
+    {
+        foreach (MachineState m in s_machines.Values)
+        {
+            m.ProcStated = false;
+            m.Current = null;
+        }
+
+        List<long> dead = [];
+
+        foreach ((long id, GoroutineState state) in s_goroutines)
+        {
+            if (state.Status == Status.Dead)
+            {
+                dead.Add(id);
+                continue;
+            }
+
+            state.Stated = false;
+            state.Seq = 0;
+        }
+
+        foreach (long id in dead)
+            s_goroutines.Remove(id);
+
+        s_strings = new Dictionary<string, ulong>(StringComparer.Ordinal);
+    }
+
+    // Go's traceAdvancer: a generation a second while the trace runs.
+    private static void startAdvancer()
+    {
+        ManualResetEventSlim stop = new();
+        long epoch = ++s_epoch;
+
+        Thread advancer = new(() =>
+        {
+            while (!stop.Wait(s_advancePeriod))
+                advance(stop: false, epoch);
+        })
+        {
+            IsBackground = true,
+            Name = "go2cs trace advancer"
+        };
+
+        s_advancerStop = stop;
+        s_advancer = advancer;
+        advancer.Start();
+    }
+
     // ---- the per-M and per-G state machine (all under s_lock) ----
 
-    private static MachineState machine()
-    {
-        int id = Environment.CurrentManagedThreadId;
+    private static MachineState machine() => machine(Environment.CurrentManagedThreadId);
 
+    private static MachineState machine(int id)
+    {
         if (!s_machines.TryGetValue(id, out MachineState? m))
             s_machines[id] = m = new MachineState(id);
 
@@ -415,7 +706,7 @@ public static class ExecutionTracer
         return state;
     }
 
-    // The M's one P, stated Running before the M's first event that needs it.
+    // The M's one P, stated Running before the M's first event of the generation that needs it.
     private static void ensureProc(MachineState m)
     {
         if (m.ProcStated)
@@ -428,16 +719,37 @@ public static class ExecutionTracer
     // Puts `state` on `m` as its running goroutine, from whatever the trace last said about it.
     private static void ensureRunning(MachineState m, GoroutineState state)
     {
-        if (m.Current == state && state.Status == Status.Running)
+        if (m.Current == state && state.Status == Status.Running && state.Stated)
             return;
+
+        if (!state.Stated)
+        {
+            switch (state.Status)
+            {
+                case Status.Unknown:
+                case Status.Running:
+                    // Never named in this generation, and running here now: stated where it runs.
+                    emit(m, EvGoStatus, state.Id, m.Id, GoRunning);
+                    state.Stated = true;
+                    state.Seq = 0;
+                    putOn(m, state);
+                    return;
+                case Status.Runnable:
+                    emit(m, EvGoStatus, state.Id, NoThread, GoRunnable);
+                    break;
+                case Status.Waiting:
+                    emit(m, EvGoStatus, state.Id, NoThread, GoWaiting);
+                    break;
+                default:
+                    return;
+            }
+
+            state.Stated = true;
+            state.Seq = 0;
+        }
 
         switch (state.Status)
         {
-            case Status.Unknown:
-                // Never named in this trace: it has been running since before the trace began.
-                emit(m, EvGoStatus, state.Id, m.Id, GoRunning);
-                state.Seq = 0;
-                break;
             case Status.Waiting:
                 // Woken without a waker naming it (a timeout, a sleep's timer): the unblock is its own.
                 state.Seq++;
@@ -456,10 +768,21 @@ public static class ExecutionTracer
                 return;
         }
 
+        putOn(m, state);
+    }
+
+    private static void putOn(MachineState m, GoroutineState state)
+    {
+        if (state.Machine is { } previous && previous != m && previous.Current == state)
+            previous.Current = null;
+
         state.Status = Status.Running;
+        state.Machine = m;
         m.Current = state;
     }
 
+    // The generation's string table. Keys are Latin-1 strings, one char per byte, so a Go string's
+    // bytes round-trip exactly, whatever their encoding.
     private static ulong intern(string text)
     {
         if (!s_strings.TryGetValue(text, out ulong id))
@@ -467,6 +790,8 @@ public static class ExecutionTracer
 
         return id;
     }
+
+    private static ulong intern(ReadOnlySpan<byte> text) => intern(Encoding.Latin1.GetString(text));
 
     // ---- encoding ----
 
@@ -512,7 +837,7 @@ public static class ExecutionTracer
 
         foreach ((string text, ulong id) in s_strings)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(text);
+            byte[] bytes = Encoding.Latin1.GetBytes(text);
             payload.Add(EvString);
             uvarint(payload, id);
             uvarint(payload, (ulong)bytes.Length);
@@ -522,17 +847,29 @@ public static class ExecutionTracer
         return batchOf(NoThread, (ulong)s_lastTimestamp, payload);
     }
 
-    private static byte[] frequencyBatch()
+    // Go's traceSyncBatch (runtime/tracetime.go): EvSync, the frequency, and a clock snapshot of the
+    // trace clock, the monotonic clock and the wall clock, in a batch of no M.
+    private static byte[] syncBatch()
     {
-        List<byte> payload = [EvFrequency];
+        DateTimeOffset wall = DateTimeOffset.UtcNow;
+        long mono = MonotonicClock.Nanoseconds();
+        long now = timestamp();
+
+        List<byte> payload = [EvSync, EvFrequency];
         uvarint(payload, (ulong)Stopwatch.Frequency);
-        return batchOf(NoThread, (ulong)s_lastTimestamp, payload);
+        payload.Add(EvClockSnapshot);
+        uvarint(payload, 0);
+        uvarint(payload, (ulong)mono);
+        uvarint(payload, (ulong)wall.ToUnixTimeSeconds());
+        uvarint(payload, (ulong)(wall.UtcTicks % TimeSpan.TicksPerSecond * 100));
+
+        return batchOf(NoThread, (ulong)now, payload);
     }
 
     private static byte[] batchOf(ulong m, ulong timestamp, List<byte> payload)
     {
         List<byte> batch = new(payload.Count + 32) { EvEventBatch };
-        uvarint(batch, Generation);
+        uvarint(batch, s_generation);
         uvarint(batch, m);
         uvarint(batch, timestamp);
         uvarint(batch, (ulong)payload.Count);
