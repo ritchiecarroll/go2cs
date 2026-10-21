@@ -40,6 +40,7 @@ public static ж<CoverageDataWriter> NewCoverageDataWriter(io.Writer w, coverage
     var r = Ꮡ(new CoverageDataWriter(
         stab: Ꮡ(new stringtab.Writer(nil)),
         w: bufio.NewWriter(w),
+
         tmp: new slice<byte>(64),
         cflavor: flav
     ));

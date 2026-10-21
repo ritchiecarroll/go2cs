@@ -193,6 +193,7 @@ internal static slice<surrogateTestsᴛ1> surrogateTests = new surrogateTestsᴛ
     new((rune)0x10000, false), // LINEAR B SYLLABLE B008 A (first non-BMP code point)
     new((rune)0x1D11E, false), // MUSICAL SYMBOL G CLEF
     new((rune)0x10FFFD, false), // PRIVATE USE CHARACTER-10FFFD (last Unicode code point)
+
     new((rune)0xd7ff, false), // surr1-1
     new((rune)0xd800, true), // surr1
     new((rune)0xdc00, true), // surr2

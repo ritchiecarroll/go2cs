@@ -11801,7 +11801,7 @@ type strategy func(score) action
 internal delegate Func<score, (score, bool)> strategy(score _);
 ```
 
-The note means that each use of `action` is written as the C# delegate type of the same shape, `Func<score, (score, bool)>`. You can see it as the result type of `strategy`. `strategy` keeps a `delegate` declaration because its signature names another func type ([Function Values and Closures](#function-values-and-closures)). Go's doc comments on both types are dropped, because this program is converted without `-comments`.
+The note means that each use of `action` is written as the C# delegate type of the same shape, `Func<score, (score, bool)>`. You can see it as the result type of `strategy`. `strategy` keeps a `delegate` declaration because its signature names another func type ([Function Values and Closures](#function-values-and-closures)). Go's doc comments on both types are dropped, because this program is converted without `-comments`. A methodless func type declared inside a function body gets the same note, on its own line where Go declares the type, and Go's blank lines before and after the declaration are kept as they are between statements.
 
 Another common note, `// Hoisted @string literals (single allocation; Go keeps these in RODATA)`, heads a group of [hoisted string literals](#strings-string-and-sstring). A hoisted literal is a string literal stored once in a `static readonly` field, whose generated name ends in `ˢ`. The standard library hoists every literal used as a value, and `-hoist-literals` does the same for any package. Elsewhere only a literal passed as `any` is hoisted, pre-boxed, and a literal in a `string` slot is a plain C# literal, as in `joinPair`:
 
@@ -11895,7 +11895,7 @@ A statement's trailing comment follows the statement's last C# line, after one s
         return ((rune)p[0] & ~mask | (rune)RuneError & mask, 1);
 ```
 
-**Blank lines follow Go, in every conversion.** Where Go leaves a blank line between two statements of a body, the C# has one; where Go has none, the C# adds none. After the converter's own lines at the top of a function, such as the locals for named results, there is exactly one blank line before the Go body. Without `-comments`, a converted `switch` is still followed by a blank line whether Go has one or not.
+**Blank lines follow Go, in every conversion.** Where Go leaves a blank line between two statements of a body, or between two elements of a multi-line composite literal or call argument list, the C# has one; where Go has none, the C# adds none. After the converter's own lines at the top of a function, such as the locals for named results, there is exactly one blank line before the Go body. Without `-comments`, a converted `switch` is still followed by a blank line whether Go has one or not.
 
 **With `-comments`, a comment inside a function lands where Go put it.** Go's parser attaches a comment only to a declaration, a struct field or a spec, and never to a statement, so the converter places each of the others itself: after a statement, after the `{` of an `if`, `else` or `for`, on or above a `case` label, above a block's closing `}`, between the elements of a multi-line literal, and between operands where Go breaks the line. Here `d.nd` is the digit count of the number being formatted; the blank line, the comment that opens the group and the one after the `{` are all where Go has them:
 

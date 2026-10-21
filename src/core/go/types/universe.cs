@@ -38,6 +38,7 @@ internal static Object universeComparable;
 // alias basic type named "byte" (and analogous for "rune").
 public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)Invalid] = Ꮡ(new Basic(Invalid, 0, "invalid type"u8)),
+
     [(int)Bool] = Ꮡ(new Basic(Bool, IsBoolean, "bool"u8)),
     [(int)Int] = Ꮡ(new Basic(Int, IsInteger, "int"u8)),
     [(int)Int8] = Ꮡ(new Basic(Int8, IsInteger, "int8"u8)),
@@ -56,6 +57,7 @@ public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)Complex128] = Ꮡ(new Basic(Complex128, IsComplex, "complex128"u8)),
     [(int)ΔString] = Ꮡ(new Basic(ΔString, IsString, "string"u8)),
     [(int)UnsafePointer] = Ꮡ(new Basic(UnsafePointer, 0, "Pointer"u8)),
+
     [(int)UntypedBool] = Ꮡ(new Basic(UntypedBool, (BasicInfo)(IsBoolean | IsUntyped), "untyped bool"u8)),
     [(int)ΔUntypedInt] = Ꮡ(new Basic(ΔUntypedInt, (BasicInfo)(IsInteger | IsUntyped), "untyped int"u8)),
     [(int)UntypedRune] = Ꮡ(new Basic(UntypedRune, (BasicInfo)(IsInteger | IsUntyped), "untyped rune"u8)),
@@ -230,6 +232,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
     [(int)_Println] = new("println"u8, 0, true, statement),
     [(int)_Real] = new("real"u8, 1, false, expression),
     [(int)_Recover] = new("recover"u8, 0, false, statement),
+
     [(int)_Add] = new("Add"u8, 2, false, expression),
     [(int)_Alignof] = new("Alignof"u8, 1, false, expression),
     [(int)_Offsetof] = new("Offsetof"u8, 1, false, expression),
@@ -238,6 +241,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
     [(int)_SliceData] = new("SliceData"u8, 1, false, expression),
     [(int)_String] = new("String"u8, 2, false, expression),
     [(int)_StringData] = new("StringData"u8, 1, false, expression),
+
     [(int)_Assert] = new("assert"u8, 1, false, statement),
     [(int)_Trace] = new("trace"u8, 0, true, statement)
 }.array();

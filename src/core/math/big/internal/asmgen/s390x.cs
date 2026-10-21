@@ -11,6 +11,7 @@ internal static void initᴛArchS390X() { ArchS390X = Ꮡ(new Arch(
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
+
     regs: new @string[]{
         // R0 is 0 by convention in this code (see setup).
         // R10 is the assembler/linker temporary.
@@ -32,6 +33,7 @@ internal static void initᴛArchS390X() { ArchS390X = Ꮡ(new Arch(
 
     // Instruction reference: chapter 7 of
     // https://www.ibm.com/docs/en/SSQ2R2_15.0.0/com.ibm.tpf.toolkit.hlasm.doc/dz9zr006.pdf
+
     mov: "MOVD"u8,
     adds: "ADDC"u8, // ADD is an alias for ADDC, sets carry
     adcs: "ADDE"u8,
@@ -45,6 +47,7 @@ internal static void initᴛArchS390X() { ArchS390X = Ꮡ(new Arch(
     xor: "XOR"u8,
     neg: "NEG"u8,
     lea: "LAY"u8, // LAY because LA only accepts positive offsets
+
     jmpZero: "CMPBEQ %s, $0, %s"u8,
     jmpNonZero: "CMPBNE %s, $0, %s"u8
 )); }
