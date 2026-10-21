@@ -861,7 +861,8 @@ token, a `range` at its `range` keyword), so the harvest reads the move from the
 qualifies even though `-m` says its append escapes, and the statement is converted with the move ahead of it:
 `r = move2heap(rᴷ, r);` and then `return r;`, and the variable's buffer is declared `new stackAppend<T>(moves: true)`. A slice that grew out of the buffer is returned as it is, and one
 still in it is copied to a counted heap array. A range over a slice that never escapes is a move too: Go copies
-the slice out of the buffer before the loop.
+the slice out of the buffer before the loop. When several such variables escape in one statement, as in
+`return a, w`, each is moved, one line per variable ahead of it.
 
 When the variable's capacity is observed, by `cap(s)`, `s = s[i:j]`, `s = []T{...}` or passing `s` to a call,
 the buffer is declared `new stackAppend<T>(moves: true, capacityUsed: true)`. Then every append passes it, and a growth that
@@ -871,7 +872,7 @@ keeps the capacity (`moveSlice`), where otherwise it is the length's size class 
 runtime's TestAppendByteInLoop, TestAppendPtrInLoop and TestAppendByteCapInLoop tables row for row, and the
 converter's `stackAppendMove2heap_test.go` holds the emission of each shape.
 GolibTests' `StackAppendTests` hold the runtime rule, and the `StackAppendBackingStore` behavioral test
-compares eleven arms with Go.
+compares nineteen arms with Go.
 
 **Conversion time.** The harvest compiles the package, so it adds to conversion time. On a box's first
 conversion, with an empty Go build cache, it compiles the package and everything it imports for all three

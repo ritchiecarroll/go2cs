@@ -209,6 +209,7 @@ internal static partial (slice<byte>, slice<nint>) capSeq(nint n) {
             seq = append(seqᴷ, seq, cap(r));
         }
     }
+    r = move2heap(rᴷ, r);
     seq = move2heap(seqᴷ, seq);
     return (r, seq);
 }
@@ -246,6 +247,21 @@ internal static partial nint movedIfInit(nint n) {
     return 0;
 }
 
+internal static partial (slice<byte>, slice<int16>) movedPair(nint n) {
+    var aᴷ = new stackAppend<byte>(moves: true);
+    var wᴷ = new stackAppend<int16>(moves: true);
+
+    slice<byte> a = default!;
+    slice<int16> w = default!;
+    foreach (var i in range(n)) {
+        a = append(aᴷ, a, (byte)i);
+        w = append(wᴷ, w, (int16)i);
+    }
+    a = move2heap(aᴷ, a);
+    w = move2heap(wᴷ, w);
+    return (a, w);
+}
+
 internal static void Main() {
     loopCaps();
     resetCaps();
@@ -265,6 +281,8 @@ internal static void Main() {
     capSeqCaps();
     fmt.Println(cap(movedNamed(3)));
     fmt.Println(movedIfInit(3));
+    var (a, w) = movedPair(3);
+    fmt.Println(cap(a), cap(w));
 }
 
 } // end main_package

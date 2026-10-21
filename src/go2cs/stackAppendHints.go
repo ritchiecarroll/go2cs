@@ -71,15 +71,17 @@ const stackAppendStoreBytes = 32
 
 // packageStackAppendSites maps each hinted append call to the variable whose buffer it passes, and
 // packageStackAppendBuffers each function (*ast.FuncDecl or *ast.FuncLit) to the buffers its entry declares, in the
-// order of their first sites, and packageStackAppendMoves each move2heap transition to the buffer it moves out of. Both are filled by collectStackAppendHints before any file emits and read during the
-// visits; resetPackageState clears them.
+// order of their first sites, and packageStackAppendMoves each move2heap transition to the buffers it moves out of,
+// one per variable that escapes there (a return of several slices moves each). All are filled by
+// collectStackAppendHints before any file emits and read during the visits; resetPackageState clears them.
 var (
 	packageStackAppendSites   map[*ast.CallExpr]*stackAppendBuffer
 	packageStackAppendBuffers map[ast.Node][]*stackAppendBuffer
-	packageStackAppendMoves   map[ast.Stmt]*stackAppendBuffer
+	packageStackAppendMoves   map[ast.Stmt][]*stackAppendBuffer
 
-	// packageStackAppendMovesWritten records each move as it is written, so a file's end can name one that was not.
-	packageStackAppendMovesWritten map[ast.Stmt]bool
+	// packageStackAppendMovesWritten records each variable's move as it is written, so a file's end can name one that
+	// was not.
+	packageStackAppendMovesWritten map[*stackAppendBuffer]bool
 )
 
 // stackAppendBuffer is one qualifying variable's buffer: the variable, the operand naming it at its first qualifying
@@ -119,10 +121,10 @@ type appendSite struct {
 type stackAppendStatus int
 
 const (
-	stackAppendAbsent  stackAppendStatus = iota // the target reports nothing there (dead code, or no build)
-	stackAppendRefused                          // the target reports it and it does not qualify
-	stackAppendQualify                          // the target reports it and it qualifies
-	stackAppendQualifyMoved                     // it qualifies because the target logged its variable's move2heap
+	stackAppendAbsent       stackAppendStatus = iota // the target reports nothing there (dead code, or no build)
+	stackAppendRefused                               // the target reports it and it does not qualify
+	stackAppendQualify                               // the target reports it and it qualifies
+	stackAppendQualifyMoved                          // it qualifies because the target logged its variable's move2heap
 )
 
 // appendVerdicts is one target's parsed -m output.
@@ -773,8 +775,8 @@ func cachedStackAppendHarvest(dir string, tests bool, target string, options Opt
 func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.Package, info *types.Info, dir string, options Options) {
 	packageStackAppendSites = map[*ast.CallExpr]*stackAppendBuffer{}
 	packageStackAppendBuffers = map[ast.Node][]*stackAppendBuffer{}
-	packageStackAppendMoves = map[ast.Stmt]*stackAppendBuffer{}
-	packageStackAppendMovesWritten = map[ast.Stmt]bool{}
+	packageStackAppendMoves = map[ast.Stmt][]*stackAppendBuffer{}
+	packageStackAppendMovesWritten = map[*stackAppendBuffer]bool{}
 
 	if pkg == nil || dir == "" {
 		return
@@ -827,7 +829,7 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 				continue
 			}
 
-			packageStackAppendMoves[site.transition] = buffer
+			packageStackAppendMoves[site.transition] = append(packageStackAppendMoves[site.transition], buffer)
 			buffer.moves = true
 
 			// Go's UseBuf: every append of a variable whose capacity is observed grows inside the buffer.
@@ -945,36 +947,46 @@ func (v *Visitor) stackAppendBufferPrologue(frame ast.Node, indent int) string {
 	return prologue.String()
 }
 
-// reportUnwrittenStackAppendMoves names, on stderr, each move of the file that was not written: its appends took the
-// buffer, but nothing copies the slice out of it where Go does, so the converted code keeps the buffer's capacity. A
-// body displaced to a hand-owned file is not visited and is named too.
+// reportUnwrittenStackAppendMoves names, on stderr, each variable's move in the file that was not written: its appends
+// took the buffer, but nothing copies the slice out of it where Go does, so the converted code keeps the buffer's
+// capacity. A body displaced to a hand-owned file is not visited and is named too.
 func reportUnwrittenStackAppendMoves(fset *token.FileSet, file *ast.File) {
 	stackAppendNamesLock.Lock()
 	defer stackAppendNamesLock.Unlock()
 
-	for stmt := range packageStackAppendMoves {
-		if stmt.Pos() >= file.Pos() && stmt.Pos() < file.End() && !packageStackAppendMovesWritten[stmt] {
-			fmt.Fprintf(os.Stderr, "WARNING: move2heap ahead of %s was not written\n", fset.Position(stmt.Pos()))
+	var unwritten []string
+
+	for stmt, buffers := range packageStackAppendMoves {
+		if stmt.Pos() < file.Pos() || stmt.Pos() >= file.End() {
+			continue
 		}
+
+		for _, buffer := range buffers {
+			if !packageStackAppendMovesWritten[buffer] {
+				unwritten = append(unwritten, fmt.Sprintf("WARNING: move2heap of %s ahead of %s was not written", buffer.variable.Name(), fset.Position(stmt.Pos())))
+			}
+		}
+	}
+
+	sort.Strings(unwritten)
+
+	for _, warning := range unwritten {
+		fmt.Fprintln(os.Stderr, warning)
 	}
 }
 
 // writeStackAppendMove writes Go's `s = move2heap(s)` ahead of the statement where a buffered variable stops being the
-// only reference to its backing store (packageStackAppendMoves), on its own line.
+// only reference to its backing store (packageStackAppendMoves), one line per variable that escapes there.
 func (v *Visitor) writeStackAppendMove(stmt ast.Stmt) {
-	buffer := packageStackAppendMoves[stmt]
+	for _, buffer := range packageStackAppendMoves[stmt] {
+		name := getSanitizedIdentifier(v.getIdentName(buffer.operand))
 
-	if buffer == nil {
-		return
+		stackAppendNamesLock.Lock()
+		packageStackAppendMovesWritten[buffer] = true
+		stackAppendNamesLock.Unlock()
+
+		v.outputBuilder.WriteString(v.newline)
+		v.outputBuilder.WriteString(v.indent(v.indentLevel))
+		fmt.Fprintf(v.outputBuilder, "%s = move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
 	}
-
-	name := getSanitizedIdentifier(v.getIdentName(buffer.operand))
-
-	stackAppendNamesLock.Lock()
-	packageStackAppendMovesWritten[stmt] = true
-	stackAppendNamesLock.Unlock()
-
-	v.outputBuilder.WriteString(v.newline)
-	v.outputBuilder.WriteString(v.indent(v.indentLevel))
-	fmt.Fprintf(v.outputBuilder, "%s = move2heap(%s, %s);", name, v.stackAppendBufferName(buffer), name)
 }

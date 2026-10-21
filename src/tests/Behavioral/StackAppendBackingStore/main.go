@@ -259,6 +259,20 @@ func movedIfInit(n int) int {
 	return 0
 }
 
+// 8 4: two slices escape in one return, and each moves to its own length's size class (3 bytes, and 3 int16s in
+// 6 bytes), not the 32 and 16 of their buffers.
+//
+//go:noinline
+func movedPair(n int) ([]byte, []int16) {
+	var a []byte
+	var w []int16
+	for i := range n {
+		a = append(a, byte(i))
+		w = append(w, int16(i))
+	}
+	return a, w
+}
+
 func main() {
 	loopCaps()
 	resetCaps()
@@ -278,4 +292,6 @@ func main() {
 	capSeqCaps()
 	fmt.Println(cap(movedNamed(3)))
 	fmt.Println(movedIfInit(3))
+	a, w := movedPair(3)
+	fmt.Println(cap(a), cap(w))
 }

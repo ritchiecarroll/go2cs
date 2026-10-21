@@ -145,6 +145,17 @@ func twoSites(n int) []byte {
 }
 
 //go:noinline
+func pair(n int) ([]byte, []int16) {
+	var a []byte
+	var w []int16
+	for i := range n {
+		a = append(a, byte(i))
+		w = append(w, int16(i))
+	}
+	return a, w
+}
+
+//go:noinline
 func define(n int) []byte {
 	d := []byte(nil)
 	for i := range n {
@@ -239,14 +250,21 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 		// a labeled range: the move goes ahead of the labeled statement
 		"    var lᴷ = new stackAppend<byte>(moves: true);\n",
 		"    l = move2heap(lᴷ, l);\n",
+		// two variables escape in one return: each is moved
+		"    a = move2heap(aᴷ, a);\n    w = move2heap(wᴷ, w);\n    return (a, w);\n",
 	} {
 		if strings.Count(emitted, want) != 1 {
 			t.Errorf("want exactly one %q in:\n%s", want, emitted)
 		}
 	}
 
-	if got := strings.Count(emitted, "move2heap("); got != 9 {
-		t.Errorf("move2heap written %d times, want 9 (ret, store, capUsed, field, named, ranged, reslice, ifInit, labeled):\n%s", got, emitted)
+	if got := strings.Count(emitted, "move2heap("); got != 11 {
+		t.Errorf("move2heap written %d times, want 11 (ret, store, capUsed, field, named, ranged, reslice, ifInit, labeled, pair's a and w):\n%s", got, emitted)
+	}
+
+	// Every move the harvest selected is written.
+	if strings.Contains(warnings, "was not written") {
+		t.Errorf("a selected move was not written:\n%s", warnings)
 	}
 
 	// The moves come ahead of the statement Go's transition belongs to.
