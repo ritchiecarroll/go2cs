@@ -17,7 +17,7 @@ namespace GolibTests;
 /// The CONCRETE-header element takes (the os want-zero residue's candidate A, coordinator ruling
 /// d0d9f36c6, 2026-09-05): <c>Ꮡ(slice, i)</c> / <c>Ꮡ(array, i)</c> bind overloads that take the
 /// header BY VALUE, so the caller's boxing temp the <c>IArray&lt;T&gt;</c> overloads cost (56 B, one
-/// counted object beside the 64 B element box) is gone, with NO emission change: overload resolution
+/// counted object beside the element box, 64 B then and 72 B since its field-view slot) is gone, with NO emission change: overload resolution
 /// prefers the identity conversion over the boxing one.
 /// </summary>
 /// <remarks>
@@ -94,7 +94,7 @@ public class ElementTakeOverloadTests
         (long objects, long bytes) = Charge(() => { ж<byte> _ = Ꮡ(s, 3); });
 
         Assert.AreEqual(1L, objects, $"Ꮡ(slice, i) must charge ONE object (the element box) — it charged {objects} ({bytes} B measured)");
-        Assert.IsTrue(bytes <= 64, $"Ꮡ(slice, i) allocated {bytes} B; the element box alone is 64 B, and a header temp would add 56");
+        Assert.IsTrue(bytes <= 72, $"Ꮡ(slice, i) allocated {bytes} B; the element box alone is 72 B, and a header temp would add 56");
     }
 
     [TestMethod]
@@ -105,7 +105,7 @@ public class ElementTakeOverloadTests
         (long objects, long bytes) = Charge(() => { ж<byte> _ = Ꮡ(a, 3); });
 
         Assert.AreEqual(1L, objects, $"Ꮡ(array, i) must charge ONE object — it charged {objects} ({bytes} B measured)");
-        Assert.IsTrue(bytes <= 64, $"Ꮡ(array, i) allocated {bytes} B; the element box alone is 64 B");
+        Assert.IsTrue(bytes <= 72, $"Ꮡ(array, i) allocated {bytes} B; the element box alone is 72 B");
     }
 
     [TestMethod]
@@ -119,7 +119,7 @@ public class ElementTakeOverloadTests
         (long objects, long bytes) = Charge(() => { ж<byte> _ = Ꮡ((IArray<byte>)s, 3); });
 
         Assert.AreEqual(2L, objects, $"Ꮡ((IArray<T>)slice, i) must still charge TWO objects — it charged {objects} ({bytes} B measured)");
-        Assert.IsTrue(bytes > 64, $"the interface take allocated {bytes} B; the header temp must show beside the 64 B box");
+        Assert.IsTrue(bytes > 72, $"the interface take allocated {bytes} B; the header temp must show beside the 72 B box");
     }
 
     [TestMethod]

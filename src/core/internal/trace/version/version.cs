@@ -28,6 +28,7 @@ internal static map<Version, slice<tracev2.EventSpec>> versions = new map<Versio
     [Go111] = default!,
     [Go119] = default!,
     [Go121] = default!,
+
     [Go122] = tracev2.Specs()[..(int)(uint8)(tracev2.EvUserLog + 1)], // All events after are Go 1.23+.
     [Go123] = tracev2.Specs()[..(int)(uint8)(tracev2.EvExperimentalBatch + 1)], // All events after are Go 1.25+.
     [Go125] = tracev2.Specs()[..(int)(uint8)(tracev2.EvClockSnapshot + 1)], // All events after are Go 1.26+.

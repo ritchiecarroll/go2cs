@@ -286,6 +286,7 @@ internal static slice<constraintTestsᴛ1> constraintTests = new constraintTests
     new("// +build x y \n "u8, default!, "not a build constraint"u8),
     new("// +build x y \nmore"u8, default!, "not a build constraint"u8),
     new(" //+build x y"u8, default!, "not a build constraint"u8),
+
     new("//go:build x && y"u8, and(tag("x"u8), tag("y"u8)), ""u8),
     new("//go:build x && y\n"u8, and(tag("x"u8), tag("y"u8)), ""u8),
     new("//go:build x && y\n "u8, default!, "not a build constraint"u8),

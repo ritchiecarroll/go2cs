@@ -29,13 +29,16 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 		packageInlineFuncTypeNames[getCoreSanitizedIdentifier(name)] = true
 		packageLock.Unlock()
 
+		// In a function body the marker is laid out as a statement: it starts its own line, and the
+		// blank line Go has before or after the declaration is the block's (writeStatementGap).
+		v.outputBuilder.WriteString(v.newline)
+		v.writePendingTypeDoc(v.outputBuilder)
+		v.writeOutput("// type %s is a methodless func type — rendered inline as its base delegate", name)
+
 		if !v.inFunction {
 			v.outputBuilder.WriteString(v.newline)
 		}
 
-		v.writePendingTypeDoc(v.outputBuilder)
-		v.writeOutput("// type %s is a methodless func type — rendered inline as its base delegate", name)
-		v.outputBuilder.WriteString(v.newline)
 		return
 	}
 

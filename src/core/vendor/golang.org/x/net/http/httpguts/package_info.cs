@@ -59,7 +59,7 @@ using static go.vendor.golang.org.x.net.http.httpguts_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/guts.go", "guts.cs", "ABEosoKClKY=")]
-[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/httplex.go", "httplex.cs", "AA4eAE+gAYKqooKCpqqgqOqClIKUrsKCgpSUqJKClKiSgpSClJSCpq7ArtKCAAIcAAsCgpSCgqaoAAwYgoKmuAAfkgEAJgKCgoKmpoKCgqaqooKmgriClIKmlIKU")]
+[assembly: go.GoPositionMap("vendor/golang.org/x/net/http/httpguts/httplex.go", "httplex.cs", "AA4eAE+gAYKqooKCpqqgqOqClIKUrsKCgpSUqJKClKiSgpSClJSCpq7ArtKCAAIcAAsCgpSCgqaoAAwYgoKmuAAikgEAJgKCgoKmpoKCgqaqooKmgriClIKmlIKU")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net.http;
