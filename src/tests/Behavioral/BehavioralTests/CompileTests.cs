@@ -1636,6 +1636,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPipeCloseUnblocksRead() => CheckTarget("PipeCloseUnblocksRead");
 
     [TestMethod]
+    public void CheckPipeSharedFileObject() => CheckTarget("PipeSharedFileObject");
+
+    [TestMethod]
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
 
     [TestMethod]

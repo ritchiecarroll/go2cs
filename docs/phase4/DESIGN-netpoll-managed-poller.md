@@ -297,6 +297,29 @@ later swap is not a redesign. **OQ1.**
 > `FD.WSAIoctl` caller (`net/windows/fd_windows.cs:177` SIO_TCP_INITIAL_RTO,
 > `net/windows/tcpsockopt_windows.cs:124` SIO_KEEPALIVE_VALS) shows both pass a **nil** overlapped, so
 > no production path issues an asynchronous foreign operation at all.
+>
+> **AMENDED 2026-10-21 (P2; root verified and shape A accepted by G, ruled by COORD): every handle
+> but a SOCKET is bound at `pollOpen` again, and a refused bind is `pollOpen`'s errno.** The S2 move
+> was right for sockets and wrong for everything else, because Go's `netpollopen` can FAIL and
+> `internal/poll` is built around that failure. The IOCP association belongs to the FILE OBJECT, so a
+> second handle to an object that is already associated is refused (`ERROR_INVALID_PARAMETER`).
+> Go returns the refusal from `pollOpen`, `os.newFile` ignores it (`os/file_windows.go:117-119`), the
+> FD's `pd.runtimeCtx` stays 0, and `execIO` gives each of its operations its own event
+> (`o.o.HEvent = h | 1`, `fd_windows.go:290-301`) which `waitIO` waits on. A shell's `2>&1` into a pipe
+> reaches that state at every start since Go 1.25, when `os.NewFile` began probing `IsNonblock`: stdout
+> and stderr are two handles to one pipe object. Bound lazily, the refusal had nowhere to go: the
+> first stderr write threw `ArgumentException` out of `ThreadPoolBoundHandle.BindHandle`
+> (`zsyscall_windows_wsa_impl.cs:183`) and ended the process with rc 2.
+>
+> So `runtime_pollOpen` now asks `syscall.GoAssociateAtOpen` for the bind BEFORE it publishes the token
+> or the readiness sink, and returns `(0, ERROR_INVALID_PARAMETER)` on refusal having touched neither.
+> Only BindHandle's `ArgumentException` is a refusal; it covers "already bound" and "not opened for
+> overlapped IO", both of which belong on the event path. A socket, told apart by
+> `getsockopt(SO_TYPE)` (GetFileType reports a socket as `FILE_TYPE_PIPE`), keeps the lazy bind
+> above: the foreign-overlapped producer is a socket's. The submit seam takes the route PER SUBMIT
+> from the caller's `HEvent`, which `execIO` sets from that FD's `pollable()`, so two FDs sharing one
+> handle VALUE (`os.NewFile` twice on one handle) each keep their own route; nothing value-keyed decides
+> it. Guarded by the windows behavioral row `PipeSharedFileObject`.
 
 One converted behavior interacts here and is kept: `FD.Init` enables
 `SetFileCompletionNotificationModes(FILE_SKIP_COMPLETION_PORT_ON_SUCCESS)` for TCP/UDP when safe
