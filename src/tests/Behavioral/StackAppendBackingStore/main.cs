@@ -159,6 +159,93 @@ internal static partial void nonEmptyCap() {
     fmt.Println(cap(x));
 }
 
+internal static partial slice<byte> movedBytes(nint n) {
+    var rᴷ = new stackAppend<byte>(moves: true);
+
+    slice<byte> r = default!;
+    foreach (var i in range(n)) {
+        r = append(rᴷ, r, (byte)i);
+    }
+    r = move2heap(rᴷ, r);
+    return r;
+}
+
+internal static void movedCaps() {
+    foreach (var (_, n) in new nint[]{1, 3, 9, 17, 25, 33}.slice()) {
+        fmt.Print(cap(movedBytes(n)), " ");
+    }
+    fmt.Println();
+}
+
+internal static partial void movedPtrs(nint n, ref slice<ж<nint>> p) {
+    var rᴷ = new stackAppend<ж<nint>>(moves: true);
+
+    slice<ж<nint>> r = default!;
+    foreach (var _ᴛ1 in range(n)) {
+        r = append(rᴷ, r, (ж<nint>)(nil));
+    }
+    r = move2heap(rᴷ, r);
+    p = r;
+}
+
+internal static void movedPtrCaps() {
+    ref var r = ref heap<slice<ж<nint>>>(out var Ꮡr);
+    foreach (var (_, n) in new nint[]{1, 2, 3, 4, 5, 9}.slice()) {
+        movedPtrs(n, ref r);
+        fmt.Print(cap(r), " ");
+    }
+    fmt.Println();
+}
+
+internal static partial (slice<byte>, slice<nint>) capSeq(nint n) {
+    var rᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);
+    var seqᴷ = new stackAppend<nint>(moves: true);
+
+    slice<byte> r = default!;
+    slice<nint> seq = default!;
+    foreach (var i in range(n)) {
+        r = append(rᴷ, r, (byte)i);
+        if (len(seq) == 0 || seq[len(seq) - 1] != cap(r)) {
+            seq = append(seqᴷ, seq, cap(r));
+        }
+    }
+    seq = move2heap(seqᴷ, seq);
+    return (r, seq);
+}
+
+internal static void capSeqCaps() {
+    var (_, seq) = capSeq(33);
+    var (r, _) = capSeq(17);
+    fmt.Println(seq, "|", cap(r));
+}
+
+internal static partial slice<byte> /*r*/ movedNamed(nint n) {
+    slice<byte> r = default!;
+    var rᴷ = new stackAppend<byte>(moves: true);
+
+    foreach (var i in range(n)) {
+        r = append(rᴷ, r, (byte)i);
+    }
+    r = move2heap(rᴷ, r);
+    return r;
+}
+
+internal static partial nint movedIfInit(nint n) {
+    var pᴷ = new stackAppend<ж<nint>>(moves: true);
+
+    slice<ж<nint>> p = default!;
+    foreach (var _ᴛ1 in range(n)) {
+        p = append(pᴷ, p, (ж<nint>)(nil));
+    }
+    p = move2heap(pᴷ, p);
+    {
+        var t = p; if (len(t) > 0) {
+            return cap(t);
+        }
+    }
+    return 0;
+}
+
 internal static void Main() {
     loopCaps();
     resetCaps();
@@ -173,6 +260,11 @@ internal static void Main() {
     closureOuterCap();
     siblingScopeCaps(0);
     literalNameCaps();
+    movedCaps();
+    movedPtrCaps();
+    capSeqCaps();
+    fmt.Println(cap(movedNamed(3)));
+    fmt.Println(movedIfInit(3));
 }
 
 } // end main_package
