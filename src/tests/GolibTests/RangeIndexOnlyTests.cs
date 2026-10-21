@@ -67,6 +67,7 @@ public class RangeIndexOnlyTests
         CollectionAssert.AreEqual(new List<nint>(), Indices(range(default(slice<long>))), "a nil slice ranges no times");
         CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(range((IArray)s)), "a sequence through IArray");
         CollectionAssert.AreEqual(new List<nint> { 0, 1, 2, 3 }, Indices(ThroughATypeParameter(s)), "a type parameter");
+        CollectionAssert.AreEqual(new List<nint> { 0, 1, 2 }, Indices(range(new sslice<long>(stackalloc long[] { 4, 5, 6 }))), "a variadic parameter's stack slice");
     }
 
     // A converted generic over a slice-shaped type parameter binds the constrained range(in TSeq), with no boxing.

@@ -38,6 +38,18 @@ public static partial class builtin
     public static RangeOverInt<nint> range<T>(slice<T> s) => range(s.Length);
 
     /// <summary>
+    /// Enumerates the indices of a variadic parameter's slice, 0..len(s)-1, reading no element.
+    /// </summary>
+    /// <typeparam name="T">Element type.</typeparam>
+    /// <param name="s">The stack slice a variadic parameter is emitted as.</param>
+    /// <returns>The indices, as Go's <c>int</c>.</returns>
+    /// <remarks>
+    /// <see cref="sslice{T}"/> is a ref struct, so no other overload can take it: without this one C# reaches the
+    /// integer <see cref="range{T}(T)"/> and refuses the ref struct as its type argument (CS9244).
+    /// </remarks>
+    public static RangeOverInt<nint> range<T>(sslice<T> s) => range(s.Length);
+
+    /// <summary>
     /// Enumerates the indices of an array, 0..len(a)-1, reading no element.
     /// </summary>
     /// <typeparam name="T">Element type.</typeparam>
