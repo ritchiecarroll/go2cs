@@ -688,7 +688,7 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         return true;
     }
     { /* default: */
-        println((@string)"runtime: impossible type kind"u8, kind);
+        println((@string)"runtime: impossible type kind"u8, (uint8)(kind));
         @throw(runtimeImpossibleTypeˢ);
         return false;
     }

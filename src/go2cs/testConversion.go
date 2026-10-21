@@ -4050,6 +4050,25 @@ func supportedTestCapabilities() []string {
 		// NOWHERE (net/http and runtime/debug only name it inside expected-traceback strings), and
 		// of the modules only testify's suite_test.go does, 8 tests admitted there.
 		"testing.RunTests",
+		// Go 1.25's Attr and Output and Go 1.26's ArtifactDir, on T and on the TB interface. The host
+		// implements all three (core/testing/testing.cs on TestExecution's ReportAttr, Output and
+		// ArtifactDir; === ATTR and === ARTIFACTS print in Go's layout), and TB's members forward to
+		// them as every TB member does. B and F carry compile-only stubs and stay unlisted.
+		//
+		// ROSTER IMPACT, measured before widening with THIS file's own analysis
+		// (analyzeTestingCapabilities + requiredFor over `std` with tests, go1.26.10, GOOS windows and
+		// linux identical): the three are called ONLY in testing's own tests (direct sites: T.Output 5,
+		// T.ArtifactDir 6, T.Attr 2; no TB spelling anywhere). 8 declarations are admitted, all in
+		// testing_test: TestArtifactDir, TestArtifactDirConsistent, TestArtifactDirExample,
+		// TestArtifactDirLongTestNameExample, TestArtifactDirSubtestExample, TestAttrExample,
+		// TestAttrInvalid and TestPanicHelper. 4 more stay gated on testing's unexported internals
+		// (package testing's TestOutput, TestOutputAfterComplete, TestOutputWriteAfterComplete, TestTRun).
+		//
+		// Most of the 8 are re-exec HELPERS, which is why the omission read as a host defect: an
+		// unregistered helper makes its parent's child process print only "PASS", so TestAttrSet,
+		// TestPanic's ten cases and the four TestArtifactDir* parents failed on output that never
+		// reached the host at all.
+		"T.Attr", "T.Output", "T.ArtifactDir", "TB.Attr", "TB.Output", "TB.ArtifactDir",
 	}
 	sort.Strings(capabilities)
 	return capabilities

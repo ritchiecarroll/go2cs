@@ -101,6 +101,14 @@ public static partial class TypeExtensions
     // move while it ran.
     private static int s_extensionMethodsGeneration;
 
+    /// <summary>
+    /// The type-cache generation: bumped by every assembly load (<see cref="ClearTypeCaches"/>), together with the
+    /// clearing of every cache derived from the extension scan. A cache kept OUTSIDE this file records the value it
+    /// was computed under and recomputes when it moves, which is how golib's GoMethodText keeps one int compare on its
+    /// hot path and still obeys the rule above.
+    /// </summary>
+    internal static int TypeCacheGeneration => Volatile.Read(ref s_extensionMethodsGeneration);
+
     // A load storm must not spin the scan forever: after this many generations moved under it, the latest
     // complete scan is returned UNCACHED, and the next caller scans again.
     private const int MaxScanAttempts = 4;

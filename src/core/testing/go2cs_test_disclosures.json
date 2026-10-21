@@ -2,66 +2,6 @@
   "schemaVersion": 1,
   "disclosures": [
     {
-      "name": "TestPanic/root_test_panics",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_cleanup",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_outer_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_middle_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/subtest_panics_with_inner_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_cleanup",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_outer_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_middle_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
-      "name": "TestPanic/parallel_subtest_panics_with_inner_cleanup_panic",
-      "class": "host-identity",
-      "signature": "--- FAIL:",
-      "reason": "re-execs the test binary and regexes the CHILD's terminal text against Go's verbose layout (`--- FAIL: <name>` with indented `file.go:NN: msg` lines). The hand-owned Phase-4 host is a structural replacement for Go's testing package, not a conversion of it, and its reporter writes `\"{ACTION,-20} {Test} - {Output}\"` - it emits no `--- FAIL:`, no `=== RUN` and no indented file:line log block anywhere. The divergence is the ONE-testing-package design being observed through its own output channel. Retires only if the host is made to impersonate Go's testing-package terminal output, which the standing host-identity ruling (2026-08-26) forecloses: the host never claims testing/testing.go."
-    },
-    {
       "name": "TestTBHelper",
       "class": "runtime-capability",
       "signature": "helperfuncs_test.go:48: 2",
@@ -77,7 +17,7 @@
       "name": "TestMorePanic",
       "class": "host-identity",
       "signature": "INFRASTRUCTURE-ERROR TestGoexitInCleanupAfterPanicHelper",
-      "reason": "re-execs the binary and matches the child's panic/Goexit report against Go's text. The child's layout is Go's (the output-format seat), but the host classifies a runtime.Goexit escaping a cleanup after a panic as an INFRASTRUCTURE-ERROR row in its own vocabulary, with the CLR stack trace, where Go prints its panic layout; and its t.Run-during-Cleanup case reads only `PASS` from the child (the helper does not run in the re-exec'd child, the same symptom as TestPanic/* and TestAttrSet, identical on the hop). Host frames never claim testing/testing.go (the 2026-08-26 ruling's letter)."
+      "reason": "re-execs the binary and matches the child's panic/Goexit report against Go's text with an unanchored regexp. Neither case reaches Go's crash: the host CONTAINS a test-body or cleanup panic (a record, the one test failed, the run continues) where Go's tRunner reaches doPanic, the runtime prints the panic chain and the binary exits 2. Case 2 (Issue 48515, t.Run during t.Cleanup) PASSES, but only on a SUBSTRING: the host refuses with Go's \"testing: t.Run called during t.Cleanup\", and the regexp finds \"panic: testing: t.Run called during t.Cleanup\" inside the host's own \"cleanup panic: ...\" record, where Go prints \"panic: testing: t.Run called during t.Cleanup [recovered, repanicked]\" and crashes. Case 1 (Issue 48502, runtime.Goexit in t.Cleanup after a panic) FAILS: the host reports the cleanup's Goexit as an INFRASTRUCTURE-ERROR row with CLR stack traces, where Go prints \"panic: die\" over a TAB-indented \"panic: test executed panic(nil) or runtime.Goexit\". Both retire with claude/r-go-exact-test-panic (Go's doPanic plus the crash-report chain, with a pipeline re-launch so the tail stays measured), ruled by COORD 2026-10-20."
     },
     {
       "name": "TestAllocsPerRun",

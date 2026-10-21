@@ -27648,4 +27648,40 @@ the deadlines let the first FD.Init return about 1 s late and the run complete (
 removed too it hung (exit 124 at a 30 s cap). Reverted, and the build's dll hash matched the seat's. ACCEPTED for
 batch 7.
 
+## 2026-10-20 — P2 reading: the godebug port (C2, batch 8) moves crypto/tls on linux from 153 errors to VALIDATED; the other four GODEBUG-setting rows are unmoved — RECORDED (for the re-bank)
+
+G asked, at the batch-8 landing, for the rows whose suites set GODEBUG with `os.Setenv` to be read on linux, so that
+a moved count is found now and not at the re-bank. Read on linux (uid 0, Microsoft .NET 10.0.12 / SDK 10.0.112,
+go1.26.10, `-test-config Release`), each row alone, two arms one after the other on one box, each from
+`git archive` of a tip into /dev/shm: B = the batch-8 hop tip `315a93e847` (the port in), A = the batch-7 hop tip
+`0195a29022` (the control). `SSL_CERT_FILE` and `GODEBUG` unset. A to B is all of batch 8, not the port alone, so
+each move below is tied to GODEBUG by its failure text.
+
+| row | B (batch 8) | A (batch 7) | moved |
+|---|---|---|---|
+| `crypto/fips140` | 2 matched of 2 (`TestWithoutEnforcement` skip/skip) | the same | 0 |
+| `internal/fuzz` | 52 of 52 | the same | 0 |
+| `os/exec` | 88 matched + 1 disclosed (`TestCredentialNoSetGroups`) of 89 | the same | 0 |
+| `crypto/x509` | 523 matched + 9 disclosed of 532 | 523 matched + 9 errors | 0 verdicts; A's 9 errors are `TestSetFallbackRoots`' leaves, disclosed by the manifest that landed beside the port, not by it |
+| `crypto/tls` | 1394 matched + 1 disclosed (`TestBogoSuite`, host-limit) of 1395, 0 errors | 1243 matched, 153 errors | 151 C# verdicts, 0 Go |
+
+On this host both arms withdraw Go's 3,526 BoGo subtests, so the crypto/tls figure is this host's and not comparable
+to the banked 4760, which a BoGo-capable host read.
+
+**What moved, and why.** All 151 moved verdicts are crypto/tls's, and every one now EQUALS Go: 150 went fail to pass
+and `TestFIPSServerSignatureAndHash` fail to skip (Go's skip). They are 54 tests: `TestHandshakeClient*` (27, with
+`TestHandshakClientSCTs`), `TestHandshakeServer*` (17), `TestClientAuth`, `TestClientKeyUpdate`,
+`TestFIPSServerSignatureAndHash`, `TestRenegotiateOnce`, `TestRenegotiateTwice`, `TestRenegotiateTwiceRejected`,
+`TestRenegotiationRejected`, `TestServerResumption`, `TestServerResumptionDisabled` and `TestSignatureSelection`.
+In A the handshake rows fail with "write mismatch: expected 1603010133...0000...": the recordings carry the all-zero
+client random that `cryptocustomrand=1` selects, which `handshake_test.go:454` sets with `os.Setenv("GODEBUG", ...)`
+before `m.Run`. `TestSignatureSelection` fails with "expected signature scheme PKCS1WithSHA1, got PKCS1WithSHA256",
+the per-case `tlssha1` that `auth_test.go:71` sets the same way. Before the port neither setting saw the variable;
+with it, both do.
+
+**For the re-bank.** No row moved away from Go. crypto/tls validates on linux at the batch-8 tip where it read 153
+errors at the batch-7 tip; the other four rows' counts are those above.
+
+— P2 (read 2026-10-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

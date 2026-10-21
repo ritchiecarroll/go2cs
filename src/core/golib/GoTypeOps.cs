@@ -150,6 +150,31 @@ public interface IGoMethodSource
     MethodInfo? GoMethod(string name, bool pointerReceiver);
 }
 
+/// <summary>
+/// A converted value type's exported Go methods as COMPILED delegates: implemented by go2cs-gen (MethodSet.cs) on the
+/// generated part of every value type with exported Go methods, so reflect's <c>Type.Method(i).Func</c> and
+/// <c>Value.Method(i)</c> hand out delegates compiled code created, where reflect would otherwise instantiate a
+/// <c>Func</c>/<c>Action</c> over the receiver's type at run time, which Native AOT cannot do for a value-type receiver.
+/// </summary>
+/// <remarks>
+/// Reached ONLY from reflect's method paths, through the type's zero value (the unbound func) or the receiver (a method
+/// value), never through a table registration fills: a program that reaches no reflect method access calls no
+/// implementation of this slot, so Native AOT compiles none of its arms (G's ruling, 2026-10-19). Read by
+/// <c>GoReflect.GeneratedMethod</c>.
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)]
+public interface IGoMethodSet
+{
+    /// <summary>
+    /// The method <paramref name="method"/> (its emitted name, as golib's method table holds it) of this type, reached
+    /// through <c>*T</c> when <paramref name="pointer"/> is set: the UNBOUND func (receiver first, a <c>ж&lt;T&gt;</c>
+    /// box for <c>*T</c>) when <paramref name="bound"/> is clear, otherwise the METHOD VALUE with
+    /// <paramref name="receiver"/> (a value of this type, or its box for <c>*T</c>, possibly a nil one) bound into it.
+    /// <c>null</c> when the type has no generated arm for it.
+    /// </summary>
+    Delegate? ᴛMethod(string method, bool pointer, bool bound, object? receiver);
+}
+
 /// <summary>Finds the <see cref="IGoTypeOps"/> of a type known only at run time (trim stage 3c-2b).</summary>
 public static class GoTypeOps
 {

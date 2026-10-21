@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
@@ -46,7 +47,7 @@ internal static class MethodSetKeep
     /// </summary>
     public static string OnToString(string generatedSource, INamedTypeSymbol? type)
     {
-        if (type is null || type.IsGenericType || Dependencies(type) is not { Count: > 0 } dependencies)
+        if (type is null || type.IsGenericType || Dependencies(type, generatedSource) is not { Count: > 0 } dependencies)
             return generatedSource;
 
         int site = generatedSource.IndexOf(ToStringDeclaration, StringComparison.Ordinal);
@@ -80,7 +81,7 @@ internal static class MethodSetKeep
     // a sealed interface's unexported marker method (go/ast's exprNode) is answered by this scan when no nominal adapter
     // exists. Keeping exported methods only measured +1.81 MB on the full-trim consumer against +5.13 MB for all; that is
     // a recorded future optimization in PLAN-golib-full-trim.md, gated on a census.
-    private static List<string> Dependencies(INamedTypeSymbol type)
+    private static List<string> Dependencies(INamedTypeSymbol type, string generatedSource)
     {
         List<string> dependencies = [];
         INamedTypeSymbol? package = type.ContainingType;
@@ -96,10 +97,48 @@ internal static class MethodSetKeep
             if (!method.IsExtensionMethod || method.IsGenericMethod || method.Parameters.Length == 0 || !IsReceiver(method.Parameters[0].Type, type))
                 continue;
 
-            dependencies.Add($"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(method.MetadataName, true)}, {GeneratedPartials.TypeOf(package)})]");
+            dependencies.Add(Dependency(method.MetadataName, package));
         }
 
+        // The methods this generator writes into the type's OWN part: the forwarders of methods promoted through an
+        // embedded field, and their box twins (StructTypeTemplate.PromotedStructReceivers). No generator sees its own
+        // output through the compilation, so package.GetMembers() above cannot list them, yet a struct whose Error or
+        // String arrives ONLY by promotion is printed through exactly one of them (golib's GoMethodText binds it from
+        // the run-time method set). A forwarder of a method promoted from ANOTHER package sits in its own top-level
+        // class (`<pkg>ᴛ<Type>ᴛxpkg`), not in the package class, so each is kept on the class that declares it: a
+        // dependency on the package class resolves nothing there (ILC IL2037), and the full-trim publish prints the
+        // structural text instead.
+        foreach ((string name, string declaringType) in GeneratedReceivers(generatedSource))
+            dependencies.Add(Dependency(name, declaringType));
+
         return dependencies.Distinct().ToList();
+    }
+
+    private static string Dependency(string metadataName, INamedTypeSymbol package) =>
+        Dependency(metadataName, GeneratedPartials.TypeOf(package));
+
+    private static string Dependency(string metadataName, string typeOf) =>
+        $"[global::System.Diagnostics.CodeAnalysis.DynamicDependency({SymbolDisplay.FormatLiteral(metadataName, true)}, {typeOf})]";
+
+    // Every extension method declared in generatedSource, as (metadata name, `typeof(...)` of its declaring class).
+    private static IEnumerable<(string name, string declaringType)> GeneratedReceivers(string generatedSource)
+    {
+        if (generatedSource.IndexOf("(this ", StringComparison.Ordinal) < 0)
+            yield break;
+
+        CompilationUnitSyntax root = CSharpSyntaxTree.ParseText(generatedSource).GetCompilationUnitRoot();
+
+        foreach (MethodDeclarationSyntax method in root.DescendantNodes().OfType<MethodDeclarationSyntax>())
+        {
+            if (method.ParameterList.Parameters.FirstOrDefault() is not { } receiver || !receiver.Modifiers.Any(SyntaxKind.ThisKeyword) ||
+                method.Parent is not ClassDeclarationSyntax declaring)
+                continue;
+
+            string namespacePath = declaring.Ancestors().OfType<BaseNamespaceDeclarationSyntax>().FirstOrDefault()?.Name.ToString() ?? "";
+            string classPath = string.Join(".", declaring.AncestorsAndSelf().OfType<ClassDeclarationSyntax>().Reverse().Select(type => type.Identifier.ValueText));
+
+            yield return (method.Identifier.ValueText, $"typeof(global::{(namespacePath.Length > 0 ? namespacePath + "." : "")}{classPath})");
+        }
     }
 
     private static bool IsReceiver(ITypeSymbol receiver, INamedTypeSymbol type) =>
