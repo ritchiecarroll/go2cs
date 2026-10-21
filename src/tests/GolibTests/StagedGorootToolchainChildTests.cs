@@ -13,26 +13,33 @@ using go.testing_runtime;
 
 namespace GolibTests;
 
-// A TOOLCHAIN CHILD THAT STARTS INSIDE THE STAGED GOROOT ANCESTRY IS GIVEN THAT ANCESTRY AS ITS GOROOT, and
-// nothing else is (COORD ruling 2026-10-21, math/big's TestEscape). Go runs `go build -gcflags=-m` with
-// cwd = GOROOT/src/math/big; the host's cwd is the sandbox's copy under the staged src/go.mod (module std),
-// and with GOROOT left real the child go named the package std/math/big and refused its internal/byteorder
-// import. Failing-first record: math/big -tests at ed51b5a3bd, TestEscape "go build -gcflags=-m: exit
-// status 1 ... use of internal package internal/byteorder not allowed".
+// A TOOLCHAIN CHILD THAT STARTS INSIDE THE STAGED GOROOT ANCESTRY STARTS IN THE REAL GOROOT DIRECTORY IT
+// STANDS FOR, and nothing else moves (COORD ruling 2026-10-21, math/big's TestEscape). Go runs
+// `go build -gcflags=-m` with cwd = GOROOT/src/math/big; the host's cwd is the sandbox's copy under the
+// staged src/go.mod (module std), and there the child go named the package std/math/big and refused its
+// internal/byteorder import. Failing-first record: math/big -tests at ed51b5a3bd, TestEscape "go build
+// -gcflags=-m: exit status 1 ... use of internal package internal/byteorder not allowed".
 //
-// Arms, all through the CONVERTED os/exec, the path the failing test takes, with the real go binary:
-//   1. a go child whose cmd.Dir is the staged package directory gets the run root as its GOROOT;
-//   2. the consequence: `go list .` there names math/big, not std/math/big;
-//   3. a go child with NO cmd.Dir, started while the host's cwd is the staged directory, gets it too;
-//   4. a go child with a cmd.Dir OUTSIDE the staged root keeps the real GOROOT;
-//   5. a non-toolchain child keeps the real GOROOT;
+// Arm 2 is the second record: handing that child the staged root as its GOROOT fixed TestEscape and broke
+// every `go list std` started there, because the toolchain's package walk does not follow the mirror's
+// links (go/internal/gcimporter TestImportStdLib "too few packages (1) were imported" and
+// internal/godebugs TestAll, measured 2026-10-21 at a705f10a04).
+//
+// Arms, all through the CONVERTED os/exec, the path the failing tests take, with the real go binary:
+//   1. a go child whose cmd.Dir is the staged package directory starts in the real one: `go list .` names
+//      math/big and its Dir is GOROOT/src/math/big, and its GOROOT is the real one;
+//   2. `go list std` started there names every package a neutral directory's does;
+//   3. a go child with NO cmd.Dir, started while the host's cwd is the staged directory, starts there too;
+//   4. a go child in a directory OUTSIDE the staged root, or in one inside it with no real counterpart,
+//      keeps its directory;
+//   5. a non-toolchain child started in the staged directory keeps it;
 //   6. once released (and in any process without the host's composer, which no program has), a go child
-//      started inside the staged directory keeps the real GOROOT.
+//      started inside the staged directory keeps it.
 [TestClass]
 public class StagedGorootToolchainChildTests
 {
     [TestMethod]
-    public void AToolchainChildStartedInsideTheStagedAncestryGetsItAsItsGoroot()
+    public void AToolchainChildStartedInsideTheStagedAncestryStartsInTheRealGorootDirectory()
     {
         string? goRoot = Environment.GetEnvironmentVariable("GOROOT");
         string goExe = goRoot is null ? "" : Path.Combine(goRoot, "bin", OperatingSystem.IsWindows() ? "go.exe" : "go");
@@ -45,8 +52,10 @@ public class StagedGorootToolchainChildTests
         }
 
         string realGoroot = Path.GetFullPath(goRoot);
+        string realPackage = Path.Combine(realGoroot, "src", "math", "big");
         string runRoot = Path.Combine(Path.GetTempPath(), "g2cs-sgoroot-" + Guid.NewGuid().ToString("N"));
         string workingDirectory = Path.Combine(runRoot, "src", "math", "big");
+        string outsideModule = Path.Combine(Path.GetTempPath(), "g2cs-sgoroot-out-" + Guid.NewGuid().ToString("N"));
         string originalCwd = Directory.GetCurrentDirectory();
 
         try
@@ -54,48 +63,76 @@ public class StagedGorootToolchainChildTests
             Directory.CreateDirectory(workingDirectory);
             Assert.IsTrue(PackageAncestry.TryStage(goRoot, "math/big", runRoot, workingDirectory), "the ancestry did not stage");
 
-            string stagedRoot = Path.GetFullPath(runRoot);
+            // 1. cmd.Dir inside the staged root: the package is std's math/big, read from the real directory,
+            // and the environment is untouched.
+            Assert.AreEqual("math/big", GoList(goExe, workingDirectory, "{{.ImportPath}}", "."),
+                "`go list .` in the staged directory did not name std's math/big");
+            AssertSamePath(realPackage, GoList(goExe, workingDirectory, "{{.Dir}}", "."),
+                "a go child started in the staged package directory did not start in the real one");
+            AssertSamePath(realGoroot, GoEnvGoroot(goExe, workingDirectory), "a go child's GOROOT was altered");
 
-            // 1. cmd.Dir inside the staged root.
-            AssertSamePath(stagedRoot, GoEnvGoroot(goExe, workingDirectory),
-                "a go child started in the staged package directory did not get the staged root as its GOROOT");
-
-            // 2. The consequence TestEscape needs: the package is std's math/big, not a module named std.
-            (string listed, bool listedOk) = Run(goExe, workingDirectory, "list", ".");
-            Assert.IsTrue(listedOk && listed == "math/big", $"`go list .` in the staged directory read: {listed}");
+            // 2. The pattern a linked GOROOT cannot serve: std, walked from the staged directory.
+            string[] neutral = GoList(goExe, Path.GetTempPath(), "{{.ImportPath}}", "std").Split('\n');
+            string[] staged = GoList(goExe, workingDirectory, "{{.ImportPath}}", "std").Split('\n');
+            Assert.IsTrue(neutral.Length > 225, $"`go list std` from a neutral directory named {neutral.Length} packages");
+            CollectionAssert.AreEqual(neutral, staged, "`go list std` from the staged directory named a different set");
 
             // 3. No cmd.Dir: the child starts in the host's cwd, which is the staged directory, as TestHost sets it.
             Directory.SetCurrentDirectory(workingDirectory);
-            AssertSamePath(stagedRoot, GoEnvGoroot(goExe, null),
-                "a go child with no cmd.Dir, started from the staged directory, did not get the staged root");
+            AssertSamePath(realPackage, GoList(goExe, null, "{{.Dir}}", "."),
+                "a go child with no cmd.Dir, started from the staged directory, did not start in the real one");
             Directory.SetCurrentDirectory(originalCwd);
 
-            // 4. A cmd.Dir of its own, outside the staged root.
-            AssertSamePath(realGoroot, GoEnvGoroot(goExe, Path.GetTempPath()),
-                "a go child with a cmd.Dir outside the staged root was given the staged root");
+            // 4. A directory of its own: outside the staged root, and inside it with no real counterpart.
+            WriteModule(outsideModule);
+            AssertSamePath(outsideModule, GoList(goExe, outsideModule, "{{.Dir}}", "."),
+                "a go child with a cmd.Dir outside the staged root was moved");
 
-            // 5. Not the toolchain.
-            (string echoed, _) = OperatingSystem.IsWindows()
-                ? Run(Path.Combine(Environment.SystemDirectory, "cmd.exe"), workingDirectory, "/c", "echo %GOROOT%")
-                : Run("/bin/sh", workingDirectory, "-c", "echo $GOROOT");
-            AssertSamePath(realGoroot, echoed, "a non-toolchain child's GOROOT was altered");
+            string madeHere = Path.Combine(workingDirectory, "zz_made_by_the_test");
+            WriteModule(madeHere);
+            AssertSamePath(madeHere, GoList(goExe, madeHere, "{{.Dir}}", "."),
+                "a go child in a staged directory with no real counterpart was moved");
+
+            // 5. Not the toolchain: it reads a file only the staged directory holds.
+            File.WriteAllText(Path.Combine(workingDirectory, "zz_staged_marker"), "staged");
+            (string marker, bool markerOk) = OperatingSystem.IsWindows()
+                ? Run(Path.Combine(Environment.SystemDirectory, "cmd.exe"), workingDirectory, "/c", "type zz_staged_marker")
+                : Run("/bin/sh", workingDirectory, "-c", "cat zz_staged_marker");
+            Assert.IsTrue(markerOk && marker == "staged", $"a non-toolchain child's directory was altered: {marker}");
         }
         finally
         {
             Directory.SetCurrentDirectory(originalCwd);
-            PackageAncestry.ReleaseStagedGoroot();
+            PackageAncestry.ReleaseStagedToolchainDirectory();
         }
 
         try
         {
             // 6. Released: the state of every process that is not this host -- a program never has a composer.
-            AssertSamePath(realGoroot, GoEnvGoroot(goExe, workingDirectory),
-                "a go child kept the staged root after the facet was released");
+            AssertSamePath(workingDirectory, GoList(goExe, workingDirectory, "{{.Dir}}", "-e", "."),
+                "a go child was still moved after the composer was released");
         }
         finally
         {
             PackageAncestry.Delete(runRoot);
+
+            if (Directory.Exists(outsideModule))
+                Directory.Delete(outsideModule, recursive: true);
         }
+    }
+
+    private static void WriteModule(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(Path.Combine(directory, "go.mod"), "module example.com/made\n\ngo 1.24\n");
+        File.WriteAllText(Path.Combine(directory, "made.go"), "package made\n");
+    }
+
+    private static string GoList(string goExe, string? directory, string format, params string[] args)
+    {
+        (string output, bool ok) = Run(goExe, directory, ["list", "-f", format, .. args]);
+        Assert.IsTrue(ok, $"`go list -f {format} {string.Join(' ', args)}` failed: {output}");
+        return output.Replace("\r\n", "\n");
     }
 
     private static string GoEnvGoroot(string goExe, string? directory)
