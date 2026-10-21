@@ -2021,6 +2021,15 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
 
     [TestMethod]
+    public void CheckShellCacheMutation() => CheckTarget("ShellCacheMutation");
+
+    [TestMethod]
+    public void CheckShellCacheNilFunc() => CheckTarget("ShellCacheNilFunc");
+
+    [TestMethod]
+    public void CheckShellCacheReassertEquality() => CheckTarget("ShellCacheReassertEquality");
+
+    [TestMethod]
     public void CheckShellForwardArity() => CheckTarget("ShellForwardArity");
 
     [TestMethod]

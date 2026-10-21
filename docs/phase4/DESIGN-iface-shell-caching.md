@@ -456,6 +456,8 @@ instantiation, which is exactly what the object tier exists to avoid.
 
 ### 6.4 P3 — `ConditionalWeakTable` per-referent shell cache — **experiment only**
 
+> **⚠ 2026-10-13: ADOPTED.** The experiment met its bar on the JIT and Native AOT legs; see §12.
+
 **Mechanism.** `ShellInstance<TInterface>` = a `ConditionalWeakTable<object, object>` keyed on the
 Go dynamic value (the `ж<T>` box, or the boxed value). On assert: probe the table, return the
 existing shell, else construct via the itab factory and add. GC-safe by construction: an entry dies
@@ -977,3 +979,135 @@ allocation — an attribute read allocates and a dictionary hit does not — so 
 to do their job (building a name string, boxing a scalar) assert a per-call ceiling set below what
 the uncached read cost. Gated on the full behavioral suite plus an operational re-validation of every
 banked package (charter §5, golib change class).
+
+---
+
+## 12. P3 — adopted 2026-10-13 (measured on both legs)
+
+§6.4 called P3 *experiment only* and set the bar: adopt only if an A/B after P0 shows a real win. The
+experiment ran on `claude/p2-iface-shell-cwt` and met that bar on the JIT leg and on the Native AOT
+leg. The coordinator adopted it (a golib-only change with no emitted change) for the first train after
+the Go 1.26 hop. §6.4 is left as written; this section is its result.
+
+**What landed.** `AdapterBinder.BuildFactory` wraps the shell factory in `CacheShellInstances`: one
+`ConditionalWeakTable<object, object>` per (dynamic type, interface) factory, keyed on the Go dynamic
+value, so a re-assert of the same value returns the shell an earlier assert built. Eligibility is the
+§6.4 rule, decided once at factory-build time:
+- the object shell is always cached (it holds the boxed value by reference);
+- a shell over a reference-typed value is cached, whichever tier built it;
+- the generic shell over a **value** type is never cached, because its constructor copies the struct;
+- a null value (a typed nil func) has no identity to key on, so it is built fresh on every assert.
+
+The experiment carried a measurement switch, `GO2CS_P3_SHELL_CACHE=0`, so that one Native AOT image
+could measure both arms. It is **removed** in the seated change: the cache is the behavior, and no
+environment variable turns it off.
+
+**JIT leg** (measured 2026-10-12, linux, 4 vCPU VM, Microsoft .NET 10.0.12, `--no-aot`):
+
+| reading | base | cache | delta |
+|---|---:|---:|---:|
+| allocation, `PerfIfaceShell`, B/iter (in-process probe, 1 M iterations, 3 identical windows) | 96 | 24 | **−72** (prediction −72, met exactly: both shells, 32 + 40 B; the 24 B boxed return remains) |
+| benchmark elapsed, median of 20 rounds (order alternated, round 0 dropped), ms | 1201.5 | 1175.7 | −25.8 (−2.1%); cache faster in 14 of 20 paired rounds |
+| steady state, ns/iter, best of 15 × 1 M windows after warmup, 16 processes per arm | 144.1 | 137.2 | **−6.9** (prediction −8 to +1, met at its favourable end) |
+| the same, on the one switch image (switch off vs on) | 147.1 | 139.3 | −7.8 |
+| controls `PerfIface` / `PerfIfaceCall`, ms | 582.3 / 477.3 | 578.2 / 484.5 | −0.7% / +1.5% (no shell on either row) |
+
+An 8-round first try on the switch image read +1.6 ns, the wrong sign. The effect is smaller than this
+VM's cross-process spread, and fewer than about 16 rounds could not resolve it.
+
+**Native AOT leg** (measured 2026-10-13 on the i9, one publish of `PerfIfaceShell` at `fe24c9a045`,
+both arms from that image by the switch; 22 rounds, order alternated, round 0 dropped): the cache won
+**21 of 21** paired rounds, median ratio cache/base **0.773** (**156.3 → 121.9 ns/iter**, −22.7%), with
+no overlap between the two arms' ranges. The benchmark's checksum was asserted equal to Go's in every
+run. The 15 GB linux box could not read this leg: its publish died in ILC's final phase after 7 h 54 min
+("Insufficient memory to continue the execution of the program"); see `DATA-hopN-perf.md`, the
+2026-10-13 row.
+
+**Size** (JIT publish, read from the PE section table): `golib.dll`'s `.text` grows by **448 bytes**
+with the cache alone (+576 with the switch, which is now removed); the file grows by one 512-byte
+block. Nothing else in the publish changes size, and no assembly or dependency is added
+(`ConditionalWeakTable` is in CoreLib).
+
+**Guards** (the §6.4 list, cut red-first):
+- `src/tests/Behavioral/ShellCacheMutation` (G1): a write through a pointer after its shell exists is
+  seen by the old shell and by every re-assert; a second pointer of the same type is never answered by
+  the first one's shell; value sources answer with their own contents.
+- `src/tests/Behavioral/ShellCacheReassertEquality` (G2): interface equality across re-asserts, for
+  pointer and value sources, and against the dynamic value in a plain `any`.
+- `src/tests/Behavioral/ShellCacheNilFunc` (G3): a typed nil func asserts ok, beside two non-nil funcs
+  of the same type.
+- `src/tests/GolibTests/ShellInstanceCacheTests`: a control that the cache is engaged and keyed on the
+  value, and a liveness arm that a cached shell does not keep its value alive.
+
+Each guard was made to fail on a fault planted in `CacheShellInstances`, then pass on the real cache:
+
+| planted fault | G1 | G2 | G3 | control | liveness |
+|---|:-:|:-:|:-:|:-:|:-:|
+| cache keyed on the type only (one shell for every value) | RED | RED | RED | RED | RED |
+| no null guard (a nil func reaches the weak table) | pass | pass | RED | pass | pass |
+| a strong `ConcurrentDictionary` in place of the weak table | pass | pass | pass | pass | RED |
+| the real cache | pass | pass | pass | pass | pass |
+
+Under the type-keyed fault, G1 printed `other box: true 2` against Go's `10` and a sum of 11000
+against 20500; G2 printed `true` for two boxes with equal contents; G3 printed 7 for the value Go
+prints as 8. G1 and G2 both catch only that fault, but on different observables (a stale value and a
+wrong equality), so both are kept.
+
+**Gates on the seated change**: the full GolibTests, the full behavioral corpus, and `go test ./...`
+in `src/go2cs`. The results are in the seat post, not here, because they are read at the seat's tip.
+
+**Re-measured 2026-10-20 against the batch-7 tip `0195a29022`** (linux, 4 vCPU VM, Microsoft .NET
+10.0.12, JIT, Release; one `/dev/shm` copy of the seat built twice, the base arm with the tip's
+`AdapterBinder.cs` and the cache arm with the seat's, which is the seat's only runtime change). Each
+process runs 5 warmup windows, 3 allocation windows and 15 timed windows of 1 M iterations; 17 rounds
+per arm, order alternated, round 0 dropped. The 2026-10-12 figures above were read at the seat's old
+base, so they describe a tree that no longer exists; these replace them for the hop.
+
+| reading | base | cache | delta |
+|---|---:|---:|---:|
+| allocation, B/iter (all 34 processes, every window) | 96 | 24 | **−72** (prediction −72, met exactly) |
+| steady state, ns/iter, median over 16 processes of each one's best window | 146.2 | 141.0 | **−5.3**; cache faster in 12 of 16 paired rounds |
+| controls `PerfIface` / `PerfIfaceCall`, median elapsed of 16 runs, ms | 601.8 / 469.4 | 620.3 / 453.8 | +3.1% / −3.3% (no shell on either row; opposite signs, read as this VM's spread) |
+
+Every process's checksum was the expected value. The steady-state delta sits inside the 2026-10-12
+prediction (−8 to +1 ns) and below that day's −6.9; the per-arm ranges overlap (base 136.2–160.6,
+cache 130.0–157.9), so on this VM the timing gain is smaller than the cross-process
+spread, as it was before. The allocation result does not depend on the VM.
+
+**Reworked 2026-10-21: the weak table is replaced by one weak last-value slot per factory.** G's
+review of the seat found the cost the measurements above never looked for: every NEW dynamic value
+paid a `ConditionalWeakTable` insert and a dependent handle, and the table grew with every value a
+program ever asserted. The same-value rows above only measure the case a cache can win. The CHURN case
+is now a performance row, `PerfIfaceShellChurn`: a new value for every assert, built from a value
+source, a pointer source and `errors.Is` over a fresh `*fs.PathError`.
+
+The slot holds an immutable (value, shell) pair through a `WeakReference`. A hit is `ReferenceEquals`
+on the value. A miss builds the shell and stores a new pair: one small object and one handle write.
+The pair is weak because the shell holds its value, and Go can observe a value kept alive (a finalizer
+or a weak pointer). `ShellCacheMutation` gained the value-source shape `t.x = 2; any(t)`: a write to
+the variable after one conversion is seen by the next conversion and never by the first, on first
+assert and on every alternating re-assert.
+
+Measured on linux (4 vCPU VM, Microsoft .NET 10.0.12, JIT, Release) at the batch-8 tip `315a93e847`.
+There were three arms whose only difference is `AdapterBinder.cs`: base (no cache, the tip), table
+(`43f51e5074`), slot (this rework). Order was rotated every round.
+
+| reading | base | table | slot |
+|---|---:|---:|---:|
+| same value, B/iter | 96 | 24 | 24 |
+| same value, ns/iter, median of 16 processes' best window | 144.9 | 139.8 | **111.0** |
+| churn, ns/iter, median per round over 6 processes (rounds 2-6) | 1263-1308 | 10165-13092 | 1343-1431 |
+| `errors.Is` alone, ns/iter (4 rounds) | 1084-1142 | 5243-6564 | 1078-1109 |
+| churn, peak working set, median MB | 126.8 | 444.2 | 126.8 |
+
+COORD ruled (2026-10-21): keep the slot. The residual churn cost of about +6..9% is accepted as stated,
+and it is bounded: `src/tests/Performance/run-shell-churn-bound.ps1` builds the churn row twice from one
+tree, once with the cache compiled out (golib's `Go2csNoShellCache`). It reds when the tree's median
+workload time exceeds 1.15x the control's or its median peak working set exceeds 1.25x, on the same
+box in one session.
+
+The gate's first readings, on the same VM at this tree: **PASS**, with time 1.075x and peak working set
+1.001x (7 processes per arm, the first of each dropped). With the table planted back in place of the slot
+(the `#else` branch only, so the control arm is unchanged), it **FAILS on both bounds by name**, with time
+2.798x and working set 1.727x (4 processes per arm). Restoring the slot left `AdapterBinder.cs`
+byte-identical to the cut.
