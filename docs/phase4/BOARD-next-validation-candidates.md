@@ -27736,4 +27736,44 @@ emitted on ONE line. claude/c2-comment-blank-parity's gap break splits them, but
 Census of the GOROOT: 3 local func types, all in tests (0 production), 1 of them a first statement with a doc.
 Fixing it changes the layout of every local marker, so it is its own small seat with its own footprint.
 
+## 2026-10-16 — P2: internal/runtime/gc/scan's three AVX512 tests skip in C# where Go runs them — FEATURE GAP, not a disclosure (owner: whoever ports the AVX512 kernels)
+
+Measured on linux, uid 0, Microsoft .NET 10.0.12 / SDK 10.0.112, go1.26.9, on a host whose CPU reports
+`avx512_bitalg` and `gfni`. `TestExpandAVX512`, `TestFilterNilAVX512` and `TestScanSpanPackedAVX512` read Go=pass
+(6,169 verdicts with their subtests) and C#=skip (3 verdicts). The rest of the row is unaffected:
+`TestScanSpanPackedGo` 3077/3077 and `TestFilterNil` 15/15 match.
+
+**Why C# skips.** All three tests open with `if !scan.CanAVX512() { t.Skip(...) }`, and `CanAVX512` returns
+`avx512ScanPackedReqsMet`, which ANDs `HasAVX512VL`, `HasAVX512BW`, `HasGFNI`, `HasAVX512BITALG`, `HasAVX512DQ`
+and `HasAVX512VBMI`. golib fills `cpu.X86` from `System.Runtime.Intrinsics.X86` in
+`internal/cpu/cpu_x86_impl.cs`, and that file lists `HasAVX512BITALG` as UNMAPPED: .NET 10 has no `Avx512Bitalg`
+surface. So the flag stays false on any host and C# always skips.
+
+**Why the false is load-bearing.** `ExpandAVX512`, `FilterNilAVX512` and `scanSpanPackedAVX512` are assembly-only
+in Go (`expand_amd64.s`, `filter_amd64.s`, `scan_amd64.s`). The converted package declares them as bodyless
+`partial` methods with no C# body. Reading BITALG from `cpuid` leaf 7 instead would turn the three skips into calls
+to throwing stubs. Mapping the flag is not the fix.
+
+**Class.** Ruling #1 (owner): a Go=pass / C#=skip whose skip reason is our own missing feature is a FEATURE GAP,
+never a disclosure. The skip here is ours: the host has the capability, and we lack managed kernels for it. The
+skip text does match Go's own source, but disclosure-manifest rule 13 says that is not a platform condition: the
+test checks a capability, and our answer to it differs from the host's. So no manifest entry is minted, and the
+three tests stay a reported mismatch on AVX512-BITALG hosts.
+
+**Host-conditional.** On a CPU without BITALG (or GFNI, VBMI), Go also skips, and the row reads skip/skip. A
+re-bank on such a host shows nothing. A reading from a capable host shows the gap.
+
+**Retirement.** Managed bodies for the three kernels (for example over `Vector512`), with `HasAVX512BITALG` mapped
+from `cpuid` once a body exists to call. Until then, the false flag is what keeps the stubs unreached.
+
+— P2 (measured 2026-10-16; COORD asked for this row)
+
+**Re-gated 2026-10-21 at the batch-9 tip bb3c751137 (go1.26.10).** Go's `internal/runtime/gc/scan` sources hash
+identically at go1.26.9 and go1.26.10, and the converted package and `internal/cpu/cpu_x86_impl.cs` are unchanged
+between the batch-7 tip and this one, where `HasAVX512BITALG` is still unmapped. Not re-read: this host reports
+no `avx512_bitalg`, `gfni` or `avx512_vbmi`, so Go skips the three tests here too and the row reads skip/skip. The
+go1.26.9 reading above stands for capable hosts.
+
+— P2 (re-gated 2026-10-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

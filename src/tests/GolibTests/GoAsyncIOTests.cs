@@ -253,6 +253,41 @@ public class GoAsyncIOTests
     }
 
     [TestMethod]
+    public void AnOldWaiterRetiresOnlyWhatIsStillItsOwn()
+    {
+        // A handle closed under its waiter, its number reused by a new handle: the new owner's
+        // registration replaced the sink and filed its own state (the windows poller's bind at open).
+        // When the OLD waiter then reaches pollClose, it must leave all of that alone.
+        nuint descriptor = nextDescriptor();
+        Action<nint> oldSink = _ => { };
+        Action<nint> newSink = _ => { };
+        disposableState oldState = new();
+        disposableState newState = new();
+
+        GoAsyncIO.SetReadiness(descriptor, oldSink);
+        GoAsyncIO.SetDescriptorState(descriptor, oldState);
+
+        GoAsyncIO.SetDescriptorState(descriptor, newState);
+        GoAsyncIO.SetReadiness(descriptor, newSink);
+        GoAsyncIO.MarkUnassociated(descriptor);
+
+        Assert.AreEqual(1, oldState.Disposals, "filing the new owner's state retires the stale one");
+        Assert.IsFalse(GoAsyncIO.RemoveDescriptor(descriptor, oldSink), "the old waiter no longer owns the number");
+
+        Assert.IsTrue(GoAsyncIO.HasReadiness(descriptor));
+        Assert.IsTrue(GoAsyncIO.IsUnassociated(descriptor));
+        Assert.IsTrue(GoAsyncIO.TryGetDescriptorState(descriptor, out object? found));
+        Assert.AreSame(newState, found);
+        Assert.AreEqual(0, newState.Disposals);
+
+        Assert.IsTrue(GoAsyncIO.RemoveDescriptor(descriptor, newSink), "the owner retires its own");
+        Assert.IsFalse(GoAsyncIO.HasReadiness(descriptor));
+        Assert.IsFalse(GoAsyncIO.IsUnassociated(descriptor));
+        Assert.IsFalse(GoAsyncIO.TryGetDescriptorState(descriptor, out _));
+        Assert.AreEqual(1, newState.Disposals);
+    }
+
+    [TestMethod]
     public void RemoveDescriptorDoesNotBuildStateItIsAboutToDiscard()
     {
         // A descriptor that never submitted has no state to retire, and retiring it must not
