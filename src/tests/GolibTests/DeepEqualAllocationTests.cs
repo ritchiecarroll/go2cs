@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using reflect = go.reflect_package;
@@ -89,6 +90,38 @@ public class DeepEqualAllocationTests
         Assert.AreEqual((nint)(-1), ((IGoReflectSequence)sliceOf(sliceOf<byte>(1))).ReflectFirstArrayLength(), "a slice element is not an array");
         Assert.AreEqual((nint)(-1), ((IGoReflectSequence)new slice<array<byte>>(new array<byte>[0])).ReflectFirstArrayLength(), "an empty slice has no element 0");
         Assert.AreEqual((nint)(-1), ((IGoReflectSequence)sliceOf(new array<array<byte>>(1))).ReflectFirstArrayLength(), "a nested array keeps the boxed walk");
+    }
+
+    // A struct element wider than a reference and holding one, the third shape the layout guard reads.
+    private struct wide
+    {
+        internal long a, b, c, d;
+        internal object? r;
+    }
+
+    // N2 reads element 0's length by viewing the array<E> in place as an array<byte>. That holds only while
+    // every array<E> has one layout (a backing reference, then its low and length, whatever E is). Pin it for a
+    // reference element, a one-byte element and a wide struct element, through a WINDOW (an Alias with a
+    // non-zero low and a length short of its backing), so a reordered or retyped field fails here by name
+    // rather than reading a wrong length.
+    [TestMethod]
+    public void ArrayLayoutIsTheSameForEveryElementType()
+    {
+        assertLayout(new object[] { "a", "b", "c", "d", "e" });
+        assertLayout(new byte[] { 1, 2, 3, 4, 5 });
+        assertLayout(new wide[5]);
+    }
+
+    private static void assertLayout<E>(E[] backing)
+    {
+        string name = typeof(E).Name;
+        Assert.AreEqual(Unsafe.SizeOf<array<byte>>(), Unsafe.SizeOf<array<E>>(), $"array<{name}> size");
+
+        array<E> window = array<E>.Alias(new slice<E>(backing).slice(2), 2);
+        Assert.AreEqual((nint)2, window.Length, $"array<{name}> window length");
+        Assert.AreEqual((nint)2, Unsafe.As<array<E>, array<byte>>(ref window).Length, $"array<{name}> length read as array<byte>");
+        Assert.IsTrue(ReferenceEquals(backing, Unsafe.As<array<E>, array<byte>>(ref window).m_array), $"array<{name}> backing read as array<byte>");
+        Assert.AreEqual((nint)2, ((IGoReflectSequence)sliceOf(window)).ReflectFirstArrayLength(), $"slice of array<{name}>: element 0's length");
     }
 
     [TestMethod]
