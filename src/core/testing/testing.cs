@@ -510,7 +510,19 @@ public static partial class testing_package
     [GoRecv] public static bool Skipped(this ref T t) =>
         t.Execution is { } execution ? execution.Skipped : t.DetachedSkipped;
 
-    [GoRecv] public static @string TempDir(this ref T t) => t.RequiredExecution.TempDir();
+    /// <summary>
+    /// Go's <c>TempDir</c> (testing.go:1422): <c>makeTempDir</c>, and <c>Fatalf("TempDir: %v", err)</c> when
+    /// it cannot make one.
+    /// </summary>
+    [GoRecv] public static @string TempDir(this ref T t)
+    {
+        (string? dir, string? error) = t.RequiredExecution.MakeTempDir();
+
+        if (error is not null)
+            t.Fatalf("TempDir: %v", (@string)error);
+
+        return dir!;
+    }
 
     [GoRecv] public static void Setenv(this ref T t, @string key, @string value) =>
         t.RequiredExecution.Setenv(key.ToString(), value.ToString());

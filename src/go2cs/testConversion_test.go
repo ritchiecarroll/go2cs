@@ -3124,6 +3124,46 @@ func TestTestingTBCapabilitiesAreSupported(t *testing.T) {
 	}
 }
 
+// Go 1.25's Attr and Output and Go 1.26's ArtifactDir are supported on T and on TB. Their absence gated
+// testing's own re-exec helpers (TestAttrExample, TestPanicHelper, the TestArtifactDir* examples), so
+// each helper's parent read a child that printed only "PASS". Pins both spellings, a direct T call and a
+// TB helper reached transitively, and that the test is included.
+func TestTestingGo126CapabilitiesAreSupported(t *testing.T) {
+	dir := t.TempDir()
+	files := map[string]string{
+		"go.mod":   "module example/go126surface\n\ngo 1.26\n",
+		"value.go": "package go126surface\n",
+		"value_test.go": "package go126surface\n" +
+			"import \"testing\"\n" +
+			"func keep(tb testing.TB) { tb.Attr(\"k\", \"v\"); _ = tb.Output(); _ = tb.ArtifactDir() }\n" +
+			"func TestGo126(t *testing.T) { t.Attr(\"k\", \"v\"); t.Output().Write(nil); _ = t.ArtifactDir(); keep(t) }\n",
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(contents), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, internal := loadTestVariantForDir(t, dir)
+
+	analysis := analyzeTestingCapabilities(internal)
+	declarations, _ := discoverTestDeclarations(internal, testFileEntries(internal), dir, analysis, hashset.NewHashSet(supportedTestCapabilities()))
+
+	if len(declarations) != 1 || declarations[0].Name != "TestGo126" {
+		t.Fatalf("declarations = %#v, want just TestGo126", declarations)
+	}
+
+	required := hashset.NewHashSet(declarations[0].RequiredCapabilities)
+	for _, capability := range []string{"T.Attr", "T.Output", "T.ArtifactDir", "TB.Attr", "TB.Output", "TB.ArtifactDir"} {
+		if !required.Contains(capability) {
+			t.Fatalf("required capabilities %v do not contain %q", declarations[0].RequiredCapabilities, capability)
+		}
+	}
+
+	if declarations[0].Status != "included" {
+		t.Fatalf("TestGo126 status = %q reason %q, want included — core/testing implements Attr, Output and ArtifactDir", declarations[0].Status, declarations[0].Reason)
+	}
+}
+
 // The unsupported-RUNTIME-capability gate maps a SYMBOL to the CAPABILITY it requires, and what the
 // report shows is the capability. Guards all three properties the mechanism turns on: the lookup
 // answers with the capability rather than the symbol, it stays package-scope only, and runtime.Goexit
