@@ -2427,6 +2427,7 @@ public static void SetIterValue(this ΔValue v, ж<MapIter> Ꮡiter) {
 // underlying System.Type so identity-equality matches Go. The cache is process-lifetime (type
 // descriptors are permanent, exactly like Go's). See docs/phase4/DESIGN-reflection-bridge.md.
 private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Type, string), ΔType> s_canonTypeCache = new();
+private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<ж<abi.Type>, ΔType> s_canonTypeByDescriptor = new();
 
 // (toRType stays AUTO: the ruled managed-box reinterpret model — FINDING-managed-box-uintptr-
 // lifetime.md — makes the converter emit `Ꮡt.Reinterpret<abi.Type, rtype>()`, a GC-safe
@@ -2608,13 +2609,23 @@ internal static ΔType canonType(ж<abi.Type> Ꮡt) {
     // type's per-parameter dims, without which `func([32]byte) bool` and `func([64]byte) bool`
     // (ONE managed delegate type, no arrayDims of their own) would share a wrapper and the first to
     // intern would answer In(0).Len() for both.
+    //
+    // A descriptor's key never changes (descriptors are immutable once synthesized), so the wrapper it
+    // resolved to is remembered on the descriptor itself and a repeat asks no key at all. Rendering the
+    // key took a string.Join enumerator on every Type() of an array Value (reflect's TestDeepEqualAllocs
+    // [6]byte rows, twice a DeepEqual).
+    if (s_canonTypeByDescriptor.TryGetValue(Ꮡt, out ΔType? known)) {
+        return known;
+    }
     string dimsKey = abi.descriptorDimsKey(Ꮡt.Value.arrayDims, Ꮡt.Value.funcParamDims, Ꮡt.Value.chanDirChain, Ꮡt.Value.keyDims,
         Ꮡt.Value.funcInChanDirs, Ꮡt.Value.funcOutChanDirs);
     // STATIC factory, captured state as GetOrAdd's TArg -- the twin of the descriptor cache at
     // abi/type_impl.cs and for the same reason: a capturing lambda allocates a display class and a
     // delegate on every call, cache HITS included. TypeOf crosses BOTH sites in sequence, which is
     // why its cache-hit cost measured 208 B rather than half that.
-    return s_canonTypeCache.GetOrAdd((st, dimsKey), static (_, box) => new rtypeжΔType(toRType(box)), Ꮡt);
+    ΔType canonical = s_canonTypeCache.GetOrAdd((st, dimsKey), static (_, box) => new rtypeжΔType(toRType(box)), Ꮡt);
+    s_canonTypeByDescriptor.TryAdd(Ꮡt, canonical);
+    return canonical;
 }
 
 // Type returns v's type. Hand-owned so the common (non-method) fast path returns the CANONICAL Type
