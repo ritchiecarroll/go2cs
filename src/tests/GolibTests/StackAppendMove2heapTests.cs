@@ -33,7 +33,7 @@ public class StackAppendMove2heapTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static slice<byte> byteSlice(nint n)
     {
-        var rᴷ = new stackAppend<byte>();
+        var rᴷ = new stackAppend<byte>(moves: true);
         slice<byte> r = default!;
         foreach (var i in range(n))
         {
@@ -46,7 +46,7 @@ public class StackAppendMove2heapTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ptrSlice(nint n, ref slice<ж<byte>> p)
     {
-        var rᴷ = new stackAppend<ж<byte>>();
+        var rᴷ = new stackAppend<ж<byte>>(moves: true);
         slice<ж<byte>> r = default!;
         foreach (var _ in range(n))
         {
@@ -59,7 +59,7 @@ public class StackAppendMove2heapTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static (slice<byte>, nint) byteCapSlice(nint n)
     {
-        var rᴷ = new stackAppend<byte>(capacityUsed: true);
+        var rᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);
         slice<byte> r = default!;
         foreach (var i in range(n))
         {
@@ -150,7 +150,7 @@ public class StackAppendMove2heapTests
     [TestMethod]
     public void Move2heapLeavesAHeapSliceAndANilAlone()
     {
-        var rᴷ = new stackAppend<byte>();
+        var rᴷ = new stackAppend<byte>(moves: true);
         slice<byte> nilSlice = default!;
 
         Assert.IsTrue(move2heap(rᴷ, nilSlice) == nil, "a nil slice stays nil");
@@ -166,7 +166,7 @@ public class StackAppendMove2heapTests
     {
         // The buffer is taken (cap 32), then moved to cap 8: a later write to the moved copy must not reach the
         // buffer, and the moved copy is zero past its length (moveSliceNoCap clears it).
-        var rᴷ = new stackAppend<byte>();
+        var rᴷ = new stackAppend<byte>(moves: true);
         slice<byte> r = default!;
         r = append(rᴷ, r, (byte)7);
         slice<byte> inBuffer = r;
@@ -189,7 +189,7 @@ public class StackAppendMove2heapTests
         // growsliceBuf: 8, 16, 24, 32 inside a 32-byte buffer with no allocation, then growslice from 32 to 64.
         AllocationCounter.Enable();
 
-        var rᴷ = new stackAppend<byte>(capacityUsed: true);
+        var rᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);
         slice<byte> r = default!;
         long before = AllocationCounter.CurrentThreadCount;
         var caps = new System.Collections.Generic.List<nint>();
@@ -204,5 +204,55 @@ public class StackAppendMove2heapTests
 
         CollectionAssert.AreEqual(new nint[] { 8, 16, 24, 32, 64 }, caps);
         Assert.AreEqual(1L, AllocationCounter.CurrentThreadCount - before, "only the growth out of the buffer allocates");
+    }
+
+    // GC reachability. The buffer local is passed by reference, so the JIT reports it for the caller's whole frame:
+    // a store it still held after the slice left it would keep the store's elements reachable where Go's dead stack
+    // buffer does not, the retention runtime's TestGCTestIsReachable reads (two odd entries of `all`'s first store).
+    // So only a moving variable's buffer keeps its store, it lets go when growth leaves the buffer, and the move lets go
+    // of it either way. Retention in an optimized frame is not observable from a Debug build, so these arms read the
+    // field the frame would report, and runtime's own row is the behavior.
+
+    [TestMethod]
+    public void ABufferThatDoesNotMoveNeverHoldsItsStore()
+    {
+        var rᴷ = new stackAppend<ж<byte>>();
+        slice<ж<byte>> r = default!;
+        r = append(rᴷ, r, (ж<byte>)(nil));
+
+        Assert.AreEqual((nint)4, cap(r), "the append took the 4-element buffer");
+        Assert.IsNull(rᴷ.store, "a non-moving buffer holds the store it handed out");
+    }
+
+    [TestMethod]
+    public void AGrowthThatLeavesTheBufferLetsGoOfTheStore()
+    {
+        var rᴷ = new stackAppend<ж<byte>>(moves: true, capacityUsed: true);
+        slice<ж<byte>> r = default!;
+
+        for (int i = 0; i < 4; i++)
+            r = append(rᴷ, r, (ж<byte>)(nil));
+
+        Assert.IsNotNull(rᴷ.store, "while the slice is in the buffer, the buffer keeps it");
+
+        r = append(rᴷ, r, (ж<byte>)(nil));
+
+        Assert.AreEqual((nint)8, cap(r));
+        Assert.IsNull(rᴷ.store, "the slice outgrew the buffer, and the buffer still holds the store");
+    }
+
+    [TestMethod]
+    public void TheMoveLetsGoOfTheStore()
+    {
+        var rᴷ = new stackAppend<ж<byte>>(moves: true);
+        slice<ж<byte>> r = default!;
+        r = append(rᴷ, r, (ж<byte>)(nil));
+
+        Assert.IsNotNull(rᴷ.store, "a moving buffer keeps the store until the move");
+
+        r = move2heap(rᴷ, r);
+
+        Assert.IsNull(rᴷ.store, "the move is the buffer's last use, and the buffer still holds the store");
+        Assert.AreEqual((nint)1, cap(r));
     }
 }

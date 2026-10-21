@@ -859,12 +859,12 @@ in runtime's slice_test.go makes one allocation with capacity 16, where growslic
 logs that statement's position under `-d=variablemakehash` (a `return` at its keyword, an assignment at its
 token, a `range` at its `range` keyword), so the harvest reads the move from the log. Such a variable's site
 qualifies even though `-m` says its append escapes, and the statement is converted with the move ahead of it:
-`r = move2heap(rᴷ, r);` and then `return r;`. A slice that grew out of the buffer is returned as it is, and one
+`r = move2heap(rᴷ, r);` and then `return r;`, and the variable's buffer is declared `new stackAppend<T>(moves: true)`. A slice that grew out of the buffer is returned as it is, and one
 still in it is copied to a counted heap array. A range over a slice that never escapes is a move too: Go copies
 the slice out of the buffer before the loop.
 
 When the variable's capacity is observed, by `cap(s)`, `s = s[i:j]`, `s = []T{...}` or passing `s` to a call,
-the buffer is declared `new stackAppend<T>(capacityUsed: true)`. Then every append passes it, and a growth that
+the buffer is declared `new stackAppend<T>(moves: true, capacityUsed: true)`. Then every append passes it, and a growth that
 fits the buffer takes the next size class of the new length instead of doubling (Go's `growsliceBuf`). The move
 keeps the capacity (`moveSlice`), where otherwise it is the length's size class (`moveSliceNoCap`). runtime's
 `byteCapSlice(17)` returns capacity 24 after one allocation. GolibTests' `StackAppendMove2heapTests` replay

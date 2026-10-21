@@ -175,20 +175,25 @@ public class StackAppendTests
         }), "growing past it");
     }
 
-    // The overload must stay out of line. Inlined, its store-taking return builds the slice in a stack temp of the
-    // caller's own that the JIT reports for the whole frame and nothing overwrites, so the first store, and every
-    // element it held, stays reachable after the slice outgrows it: runtime's TestGCTestIsReachable read two extra
-    // reachable objects (gcroot: the test's frame, that temp, the 4-element store). Retention in an optimized frame
-    // cannot be observed from this Debug build, so this arm pins the attribute and runtime's row is the behavior.
+    // Every builtin that takes the buffer must stay out of line. Inlined, the append's store-taking return builds the
+    // slice in a stack temp of the caller's own that the JIT reports for the whole frame and nothing overwrites, so the
+    // first store, and every element it held, stays reachable after the slice outgrows it: runtime's
+    // TestGCTestIsReachable read two extra reachable objects (gcroot: the test's frame, that temp, the 4-element store).
+    // move2heap's slice in and slice out would sit in such temps the same way. Retention in an optimized frame cannot be
+    // observed from this Debug build, so this arm pins the attribute and runtime's row is the behavior.
     [TestMethod]
     public void TheBufferOverloadIsNeverInlined()
     {
-        MethodInfo overload = typeof(builtin).GetMethods().Single(static m =>
-            m.Name == "append" && m.GetParameters() is [{ ParameterType: { IsByRef: true } first }, ..] &&
-            first.GetElementType() is { IsGenericType: true } buffer && buffer.GetGenericTypeDefinition() == typeof(stackAppend<>));
+        MethodInfo[] takers = typeof(builtin).GetMethods().Where(static m =>
+            m.GetParameters() is [{ ParameterType: { IsByRef: true } first }, ..] &&
+            first.GetElementType() is { IsGenericType: true } buffer && buffer.GetGenericTypeDefinition() == typeof(stackAppend<>)).ToArray();
 
-        Assert.IsTrue(overload.MethodImplementationFlags.HasFlag(MethodImplAttributes.NoInlining),
-            "append(in stackAppend<T>, ...) lost [MethodImpl(NoInlining)]");
+        CollectionAssert.AreEquivalent(new[] { "append", "move2heap" }, takers.Select(static m => m.Name).ToArray(),
+            "the builtins taking `in stackAppend<T>` changed: pin each one below");
+
+        foreach (MethodInfo taker in takers)
+            Assert.IsTrue(taker.MethodImplementationFlags.HasFlag(MethodImplAttributes.NoInlining),
+                $"{taker.Name}(in stackAppend<T>, ...) lost [MethodImpl(NoInlining)]");
     }
 
     private static long Charge(Action action)

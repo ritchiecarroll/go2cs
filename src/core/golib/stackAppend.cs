@@ -37,9 +37,10 @@ namespace go;
 /// </para>
 /// <para>
 /// Go 1.26 also gives the buffer to a variable that escapes, when its one escape is a single statement outside its
-/// loops (cmd/compile/internal/slice): the converter emits <c>x = move2heap(xᴷ, x);</c> ahead of that statement, which
-/// copies a slice still in the buffer to the heap, and a variable whose capacity is observed takes
-/// <c>new stackAppend&lt;T&gt;(capacityUsed: true)</c>, whose appends grow inside the buffer a size class at a time.
+/// loops (cmd/compile/internal/slice): its buffer is <c>new stackAppend&lt;T&gt;(moves: true)</c>, the converter emits
+/// <c>x = move2heap(xᴷ, x);</c> ahead of that statement, which copies a slice still in the buffer to the heap, and a
+/// variable whose capacity is observed takes <c>new stackAppend&lt;T&gt;(moves: true, capacityUsed: true)</c>, whose
+/// appends grow inside the buffer a size class at a time.
 /// </para>
 /// </remarks>
 public struct stackAppend<T>
@@ -49,23 +50,31 @@ public struct stackAppend<T>
 
     internal bool used;
 
-    // The buffer once taken. move2heap moves a slice out of it, and an append that grows inside it reuses it.
+    // The buffer a moving variable took, which move2heap moves its slice out of and an append that grows inside it
+    // reuses. Only a moving variable keeps it, and only while the slice can still be in it: the local is passed by
+    // reference, so the JIT reports it for the whole frame, and a store it still held after the slice outgrew it would
+    // keep that store's elements reachable where Go's dead stack buffer does not (runtime's TestGCTestIsReachable).
     internal T[]? store;
 
-    // Go's capUsed (cmd/compile/internal/slice): the variable's capacity is observed, so every append grows inside
-    // the buffer a size class at a time (UseBuf, runtime.growsliceBuf) and move2heap keeps the capacity
-    // (PreserveCapacity, runtime.moveSlice).
+    // A variable Go's slice pass moves to the heap (cmd/compile/internal/slice): its buffer keeps the store it took.
+    internal readonly bool moves;
+
+    // Go's capUsed: the moving variable's capacity is observed, so every append grows inside the buffer a size class
+    // at a time (UseBuf, runtime.growsliceBuf) and move2heap keeps the capacity (PreserveCapacity, runtime.moveSlice).
     internal readonly bool capacityUsed;
 
     /// <summary>
-    /// The buffer of a variable whose capacity Go's slice pass sees observed (<c>cap(s)</c>, <c>s = s[i:j]</c>,
-    /// <c>s = []T{...}</c>, or <c>s</c> passed to a call): its appends grow inside the buffer as
-    /// <c>runtime.growsliceBuf</c> does, and <see cref="builtin.move2heap{T}"/> keeps its capacity.
+    /// The buffer of a variable Go's slice pass moves to the heap ahead of its one escape
+    /// (<see cref="builtin.move2heap{T}"/>). When its capacity is observed (<c>cap(s)</c>, <c>s = s[i:j]</c>,
+    /// <c>s = []T{...}</c>, or <c>s</c> passed to a call), its appends grow inside the buffer as
+    /// <c>runtime.growsliceBuf</c> does, and the move keeps its capacity.
     /// </summary>
+    /// <param name="moves">Whether Go moves the variable to the heap; it must be true.</param>
     /// <param name="capacityUsed">Whether the variable's capacity is observed.</param>
-    public stackAppend(bool capacityUsed)
+    public stackAppend(bool moves, bool capacityUsed = false)
     {
-        this.capacityUsed = capacityUsed;
+        this.moves = moves;
+        this.capacityUsed = moves && capacityUsed;
     }
 
     // K for a type whose Go size is a property of the type; 0 when there is no buffer (a zero-size element, one
@@ -131,14 +140,23 @@ public static partial class builtin
                 taken.used = true;
 
                 T[] store = new T[capacity];
-                taken.store = store;
                 elems.CopyTo(store);
+
+                if (taken.moves)
+                    taken.store = store;
 
                 return new slice<T>(store, 0, newLength, capacity);
             }
         }
 
-        return go.slice<T>.Append(slice, elems);
+        slice<T> grown = go.slice<T>.Append(slice, elems);
+
+        // A moving variable's one append site: the slice left the store (a growth, or a slice reset and refilled), so
+        // let go of it, as nothing but the slice reaches Go's stack buffer.
+        if (buffer.store is not null && !ReferenceEquals(grown.m_array, buffer.store))
+            Unsafe.AsRef(in buffer).store = null;
+
+        return grown;
     }
 
     // runtime.growsliceBuf, at every append of a variable whose capacity is observed: a growth that fits the buffer
@@ -151,8 +169,13 @@ public static partial class builtin
 
         nint bufferLength = stackAppend<T>.Capacity(elems);
 
+        // Out of the buffer for good, until the slice is emptied: let go of the store, so nothing but the slice reaches
+        // it, as nothing but the slice reaches Go's stack buffer. A later growth that fits takes a fresh one.
         if (newLength > bufferLength)
+        {
+            buffer.store = null;
             return go.slice<T>.Append(slice, elems);
+        }
 
         T[] store = buffer.store ??= new T[bufferLength];
         nint oldLength = slice.Length;
@@ -183,10 +206,19 @@ public static partial class builtin
     /// When the capacity is observed, the copy keeps it (<c>runtime.moveSlice</c>); otherwise it is the size class of
     /// the length (<c>runtime.moveSliceNoCap</c>), and the elements past the length are zero. An empty slice comes back
     /// empty: nil stays nil, and a non-nil one has no capacity, as Go's zerobase result does.
+    /// <para>
+    /// Never inlined, for the reason <c>append(in stackAppend&lt;T&gt;, ...)</c> is not: inlined, the slice it takes in
+    /// and the one it builds would sit in stack temps the JIT reports for the caller's whole frame, keeping the store
+    /// reachable after the move.
+    /// </para>
     /// </remarks>
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static slice<T> move2heap<T>(in stackAppend<T> buffer, slice<T> slice)
     {
         T[]? store = buffer.store;
+
+        // The transition is the variable's last use of the buffer: let go of the store either way.
+        Unsafe.AsRef(in buffer).store = null;
 
         if (store is null || !ReferenceEquals(slice.m_array, store))
             return slice;

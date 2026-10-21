@@ -18,6 +18,8 @@ package main
 
 import (
 	"go/build"
+	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -104,6 +106,45 @@ func once(n int) []byte {
 }
 
 //go:noinline
+func ifInit(n int) int {
+	var p []*int
+	for range n {
+		p = append(p, nil)
+	}
+	if t := p; len(t) > 0 {
+		return cap(t)
+	}
+	return 0
+}
+
+//go:noinline
+func labeled(n int) int {
+	var l []byte
+	for i := range n {
+		l = append(l, byte(i))
+	}
+	t := 0
+outer:
+	for _, b := range l {
+		if b > 100 {
+			break outer
+		}
+		t += int(b)
+	}
+	return t
+}
+
+//go:noinline
+func twoSites(n int) []byte {
+	var m []byte
+	m = append(m, 1)
+	for i := range n {
+		m = append(m, byte(i))
+	}
+	return m
+}
+
+//go:noinline
 func define(n int) []byte {
 	d := []byte(nil)
 	for i := range n {
@@ -142,22 +183,43 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 	build.Default.GOROOT = options.goRoot
 	build.Default.GOPATH = options.goPath
 
-	if err := NewModuleConverter(options).ConvertModule(appDir); err != nil {
-		t.Fatalf("ConvertModule: %v", err)
+	// The converter names on stderr each transition Go logs that it does not emit.
+	stderr := os.Stderr
+	reader, writer, err := os.Pipe()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	os.Stderr = writer
+	captured := make(chan string)
+
+	go func() {
+		data, _ := io.ReadAll(reader)
+		captured <- string(data)
+	}()
+
+	convertErr := NewModuleConverter(options).ConvertModule(appDir)
+	os.Stderr = stderr
+	writer.Close()
+	warnings := <-captured
+
+	if convertErr != nil {
+		t.Fatalf("ConvertModule: %v", convertErr)
 	}
 
 	emitted := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "example.com", "m2h", "m2h.cs")), "\r\n", "\n")
 
 	for _, want := range []string{
 		// return: the buffer at the append, the move ahead of the return
-		"    var rᴷ = new stackAppend<byte>();\n",
+		"    var rᴷ = new stackAppend<byte>(moves: true);\n",
 		"r = append(rᴷ, r, (byte)i);",
 		"    r = move2heap(rᴷ, r);\n    return r;\n",
 		// an assignment through a pointer
-		"    var qᴷ = new stackAppend<ж<byte>>();\n",
+		"    var qᴷ = new stackAppend<ж<byte>>(moves: true);\n",
 		"    q = move2heap(qᴷ, q);\n",
 		// the capacity observed: every append passes the buffer, declared capacityUsed
-		"    var cᴷ = new stackAppend<byte>(capacityUsed: true);\n",
+		"    var cᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);\n",
 		"c = append(cᴷ, c, (byte)i);",
 		"c = append(cᴷ, c, (byte)1);",
 		"    c = move2heap(cᴷ, c);\n    return (c, cap(c));\n",
@@ -166,23 +228,41 @@ func TestStackAppendMove2heapEmission(t *testing.T) {
 		// a bare return of a named result
 		"    nr = move2heap(nrᴷ, nr);\n    return nr;\n",
 		// a range over a slice that never escapes
-		"    var gᴷ = new stackAppend<byte>();\n",
+		"    var gᴷ = new stackAppend<byte>(moves: true);\n",
 		"    g = move2heap(gᴷ, g);\n    foreach (var (_, b) in g) {\n",
 		// x = x[i:j] observes the capacity
-		"    var sᴷ = new stackAppend<byte>(capacityUsed: true);\n",
+		"    var sᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);\n",
 		"    s = move2heap(sᴷ, s);\n    return s;\n",
+		// an if's init: the move goes ahead of the if, as Go prepends it to the init
+		"    var pᴷ = new stackAppend<ж<nint>>(moves: true);\n",
+		"    p = move2heap(pᴷ, p);\n",
+		// a labeled range: the move goes ahead of the labeled statement
+		"    var lᴷ = new stackAppend<byte>(moves: true);\n",
+		"    l = move2heap(lᴷ, l);\n",
 	} {
 		if strings.Count(emitted, want) != 1 {
 			t.Errorf("want exactly one %q in:\n%s", want, emitted)
 		}
 	}
 
-	if got := strings.Count(emitted, "move2heap("); got != 7 {
-		t.Errorf("move2heap written %d times, want 7 (ret, store, capUsed, field, named, ranged, reslice):\n%s", got, emitted)
+	if got := strings.Count(emitted, "move2heap("); got != 9 {
+		t.Errorf("move2heap written %d times, want 9 (ret, store, capUsed, field, named, ranged, reslice, ifInit, labeled):\n%s", got, emitted)
+	}
+
+	// The moves come ahead of the statement Go's transition belongs to.
+	for _, order := range [][2]string{{"p = move2heap(pᴷ, p);", "len(t) > 0"}, {"l = move2heap(lᴷ, l);", "foreach (var (_, b) in l)"}} {
+		if move, use := strings.Index(emitted, order[0]), strings.Index(emitted, order[1]); move < 0 || use < 0 || move > use {
+			t.Errorf("%q is not ahead of %q:\n%s", order[0], order[1], emitted)
+		}
+	}
+
+	// A standard-strategy mover with two append sites is not buffered, and the converter says why.
+	if !strings.Contains(warnings, "WARNING: Go moves m to the heap at m2h.go:") || !strings.Contains(warnings, "more than one site") {
+		t.Errorf("want the not-emitted warning for twoSites's m, got:\n%s", warnings)
 	}
 
 	// Not committed by Go's pass: a variable appended once, and one declared by a conversion.
-	for _, unwanted := range []string{"oᴷ", "dᴷ"} {
+	for _, unwanted := range []string{"oᴷ", "dᴷ", "mᴷ"} {
 		if strings.Contains(emitted, unwanted) {
 			t.Errorf("unwanted %q in:\n%s", unwanted, emitted)
 		}

@@ -54,7 +54,7 @@ import (
 // qualifies whatever -m said of its appends, and that statement is emitted with `x = move2heap(xᴷ, x);` ahead of it.
 // When the variable's capacity is observed (cap(x), x = x[i:j], x = []T{...}, or x passed to a call), Go's capUsed,
 // every append passes the buffer and grows inside it a size class at a time (UseBuf), and the move keeps the
-// capacity: the buffer is declared `new stackAppend<T>(capacityUsed: true)`.
+// capacity. A moving variable's buffer is declared `new stackAppend<T>(moves: true)`, or with `capacityUsed: true`.
 //
 // THE HARVEST'S WORKING DIRECTORY AND -trimpath ARE LOAD-BEARING. cmd/go replays a cached compile's -m output
 // verbatim, with paths as they were printed by the FIRST compile, relative to THAT compile's working directory. A
@@ -91,6 +91,7 @@ type stackAppendBuffer struct {
 	element      types.Type
 	frame        ast.Node
 	name         string
+	moves        bool // Go moves the variable to the heap ahead of its one escape: the buffer keeps its store
 	capacityUsed bool // moved, and the variable's capacity is observed: Go's UseBuf and PreserveCapacity
 }
 
@@ -106,10 +107,12 @@ type appendSite struct {
 	element   types.Type
 	declKey   string // base:line:col of the variable's declaration
 
-	transition    ast.Stmt // the variable's one statement that can be a move2heap transition, or nil
-	transitionKey string   // base:line:col where -m logs that transition
-	capUsed       bool     // the variable's capacity is observed (Go's capUsed)
-	moved         bool     // selected as a move2heap variable
+	transition     ast.Stmt // the statement of a list the variable's one move2heap transition is emitted ahead of, or nil
+	transitionKey  string   // base:line:col where -m logs that transition
+	transitionKeys []string // every statement Go's pass treats as the variable's transition, where -m would log it
+	unmovedReason  string   // why the variable cannot move here although Go may move it, or ""
+	capUsed        bool     // the variable's capacity is observed (Go's capUsed)
+	moved          bool     // selected as a move2heap variable
 }
 
 // stackAppendStatus is one target's verdict on a candidate site.
@@ -262,6 +265,13 @@ func collectAppendSites(files []FileEntry, fset *token.FileSet, info *types.Info
 	}
 
 	moveFacts := map[*types.Var]stackAppendMoveFacts{}
+	appendSites := map[*types.Var]int{}
+
+	for _, site := range sites {
+		if site.candidate {
+			appendSites[site.variable]++
+		}
+	}
 
 	for _, site := range sites {
 		if !site.candidate {
@@ -276,29 +286,44 @@ func collectAppendSites(files []FileEntry, fset *token.FileSet, info *types.Info
 		}
 
 		site.capUsed = facts.capUsed
+		site.unmovedReason = facts.unmovedReason
 
-		if facts.transition != nil {
-			site.transition, site.transitionKey = facts.transition, key(facts.transitionPos)
+		for _, pos := range facts.transitionPositions {
+			site.transitionKeys = append(site.transitionKeys, key(pos))
+		}
+
+		// A moving variable of the standard strategy passes its buffer at its first append only, so with a second
+		// append site a growth there could not let go of the store (stackAppend.store): one site, or the capacity used,
+		// where every site passes it.
+		if site.unmovedReason == "" && !site.capUsed && appendSites[site.variable] > 1 {
+			site.unmovedReason = "it appends at more than one site without observing its capacity"
+		}
+
+		if facts.anchor != nil && site.unmovedReason == "" {
+			site.transition, site.transitionKey = facts.anchor, key(facts.transitionPositions[0])
 		}
 	}
 
 	return sites
 }
 
-// stackAppendMoveFacts is what Go's slice pass reads of a variable in its function: the one statement that can be its
-// exclusive->nonexclusive transition, where -m logs that transition, and whether its capacity is observed.
+// stackAppendMoveFacts is what Go's slice pass reads of a variable in its function: every statement that can be its
+// exclusive->nonexclusive transition and where -m logs it, the statement of a list the one transition is emitted ahead
+// of (anchor), why there is none when there is not, and whether its capacity is observed.
 type stackAppendMoveFacts struct {
-	transition    ast.Stmt
-	transitionPos token.Pos
-	capUsed       bool
+	transitionPositions []token.Pos
+	anchor              ast.Stmt
+	unmovedReason       string
+	capUsed             bool
 }
 
 // readStackAppendMoveFacts walks the variable's function, not its function literals (a mention there is one Go's
 // pass does not understand, so it never moves the variable), for the statements Go's pass treats as a transition: a
 // return of the variable (or a bare return of it as a named result), an assignment of it, and a range over it.
-// It keeps the one transition only when it is the only one, as Go does, and only when it is a statement of a list,
-// where a statement can be emitted ahead of it. Go logs a return at its keyword, an assignment at its token and a
-// range at its range keyword.
+// It keeps the one transition only when it is the only one, as Go does. Go logs a return at its keyword, an assignment at
+// its token and a range at its range keyword. The move is emitted ahead of the transition's statement of a list: the
+// transition itself, or the if or switch whose init it is, or the labeled statement it is, as Go prepends the move to
+// the transition's own init. One that reaches no such statement (an else-if's init) is reported, not emitted.
 func readStackAppendMoveFacts(frame ast.Node, variable *types.Var, info *types.Info) stackAppendMoveFacts {
 	var body *ast.BlockStmt
 	var results *ast.FieldList
@@ -332,6 +357,7 @@ func readStackAppendMoveFacts(frame ast.Node, variable *types.Var, info *types.I
 	}
 
 	listed := map[ast.Stmt]bool{}
+	enclosing := map[ast.Stmt]ast.Stmt{}
 	var transitions []ast.Stmt
 	var positions []token.Pos
 
@@ -351,6 +377,20 @@ func readStackAppendMoveFacts(frame ast.Node, variable *types.Var, info *types.I
 			for _, stmt := range n.Body {
 				listed[stmt] = true
 			}
+		case *ast.IfStmt:
+			if n.Init != nil {
+				enclosing[n.Init] = n
+			}
+		case *ast.SwitchStmt:
+			if n.Init != nil {
+				enclosing[n.Init] = n
+			}
+		case *ast.TypeSwitchStmt:
+			if n.Init != nil {
+				enclosing[n.Init] = n
+			}
+		case *ast.LabeledStmt:
+			enclosing[n.Stmt] = n
 		case *ast.ReturnStmt:
 			mentions := len(n.Results) == 0 && namedResult
 
@@ -407,8 +447,24 @@ func readStackAppendMoveFacts(frame ast.Node, variable *types.Var, info *types.I
 		return true
 	})
 
-	if len(transitions) == 1 && listed[transitions[0]] {
-		facts.transition, facts.transitionPos = transitions[0], positions[0]
+	facts.transitionPositions = positions
+
+	switch {
+	case len(transitions) == 0:
+	case len(transitions) > 1:
+		facts.unmovedReason = "it has more than one transition, which Go does not move"
+	default:
+		anchor := transitions[0]
+
+		for !listed[anchor] && enclosing[anchor] != nil {
+			anchor = enclosing[anchor]
+		}
+
+		if listed[anchor] {
+			facts.anchor = anchor
+		} else {
+			facts.unmovedReason = "its transition is in no statement list the move can be emitted ahead of"
+		}
 	}
 
 	return facts
@@ -746,6 +802,7 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 		}
 
 		var perTarget []map[*appendSite]stackAppendStatus
+		var verdicts []*appendVerdicts
 
 		for _, target := range stackAppendHarvestTargets {
 			output := cachedStackAppendHarvest(dir, tests, target, options)
@@ -754,8 +811,12 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 				continue
 			}
 
-			perTarget = append(perTarget, stackAppendStatuses(sites, pkg.Name(), parseAppendVerdicts(output)))
+			targetVerdicts := parseAppendVerdicts(output)
+			verdicts = append(verdicts, targetVerdicts)
+			perTarget = append(perTarget, stackAppendStatuses(sites, pkg.Name(), targetVerdicts))
 		}
+
+		defer reportUnmovedStackAppendTransitions(fset, sites, verdicts)
 
 		for _, site := range selectStackAppendSites(sites, perTarget) {
 			buffer := &stackAppendBuffer{variable: site.variable, operand: site.operand, element: site.element, frame: site.frame}
@@ -767,6 +828,7 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 			}
 
 			packageStackAppendMoves[site.transition] = buffer
+			buffer.moves = true
 
 			// Go's UseBuf: every append of a variable whose capacity is observed grows inside the buffer.
 			if site.capUsed {
@@ -778,6 +840,51 @@ func collectStackAppendHints(files []FileEntry, fset *token.FileSet, pkg *types.
 					}
 				}
 			}
+		}
+	}
+}
+
+// reportUnmovedStackAppendTransitions names, on stderr, each variable whose transition Go logged as a move2heap but the
+// converter does not emit, with the reason: its appends then keep the plain growth Go's do not.
+func reportUnmovedStackAppendTransitions(fset *token.FileSet, sites []*appendSite, verdicts []*appendVerdicts) {
+	reported := map[*types.Var]bool{}
+
+	for _, site := range sites {
+		if !site.candidate || reported[site.variable] {
+			continue
+		}
+
+		moved := false
+
+		for _, other := range sites {
+			moved = moved || other.variable == site.variable && other.moved
+		}
+
+		if moved {
+			continue
+		}
+
+		for _, key := range site.transitionKeys {
+			logged := false
+
+			for _, target := range verdicts {
+				logged = logged || target.hashCount[key] > 0 && target.hashCount[site.declKey] >= 2
+			}
+
+			if !logged {
+				continue
+			}
+
+			reason := site.unmovedReason
+
+			if reason == "" {
+				reason = "the targets or an inlined copy disagree on its appends"
+			}
+
+			reported[site.variable] = true
+			fmt.Fprintf(os.Stderr, "WARNING: Go moves %s to the heap at %s (move2heap), not emitted: %s\n", site.variable.Name(), key, reason)
+
+			break
 		}
 	}
 }
@@ -824,8 +931,12 @@ func (v *Visitor) stackAppendBufferPrologue(frame ast.Node, indent int) string {
 	for _, buffer := range packageStackAppendBuffers[frame] {
 		argument := ""
 
+		if buffer.moves {
+			argument = "moves: true"
+		}
+
 		if buffer.capacityUsed {
-			argument = "capacityUsed: true"
+			argument = "moves: true, capacityUsed: true"
 		}
 
 		fmt.Fprintf(&prologue, "%s%svar %s = new stackAppend<%s>(%s);", v.newline, v.indent(indent), v.stackAppendBufferName(buffer), v.getCSharpTypeName(buffer.element), argument)
