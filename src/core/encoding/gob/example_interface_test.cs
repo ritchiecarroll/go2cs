@@ -65,6 +65,7 @@ internal static void interfaceEncode(ж<gob.Encoder> Ꮡenc, Pythagoras pʗp) {
 
     // The encode will fail unless the concrete type has been
     // registered. We registered it in the calling function.
+
     // Pass pointer to interface so Encode sees (and hence sends) a value of
     // interface type. If we passed p directly it would see the concrete type instead.
     // See the blog post, "The Laws of Reflection" for background.

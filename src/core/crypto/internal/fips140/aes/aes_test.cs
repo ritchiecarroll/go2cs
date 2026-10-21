@@ -32,6 +32,7 @@ internal static uint32 mul(uint32 b, uint32 c) {
     var s = (uint32)0;
     for (var k = (uint32)1; k < 0x100 && j != 0; k <<= (int)(1)) {
         // Invariant: k == 1<<n, i == b * xⁿ
+
         if ((j & k) != 0) {
             // s += i in GF(2); xor in binary
             s ^= (uint32)(i);
