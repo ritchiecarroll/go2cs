@@ -39,6 +39,7 @@ public class FieldAccessGeneratorTests
         public sealed class GoFieldAccessAttribute(params System.Type[] types) : System.Attribute { }
         public interface IUnsafePointer { }
         public static partial class unsafe_package { public class Pointer : IUnsafePointer { } }
+        public struct uintptr { public nuint Value; }
         """;
 
     private const string Package = """
@@ -202,6 +203,38 @@ public class FieldAccessGeneratorTests
         StringAssert.Contains(generated, $"public nint Len {{ get => ʗp.field({Slice}.ᏑLen); set {{ ʗp.field({Slice}.ᏑLen) = value; ʗp.OnHeaderStore(); }} }}");
         StringAssert.Contains(generated, $"public nint Cap {{ get => ʗp.field({Slice}.ᏑCap); set {{ ʗp.field({Slice}.ᏑCap) = value; ʗp.OnHeaderStore(); }} }}");
         StringAssert.Contains(generated, $"public nint Len {{ get => ʗp.field({String}.ᏑLen); set {{ ʗp.field({String}.ᏑLen) = value; ʗp.OnHeaderStore(); }} }}");
+    }
+
+    // The predicate's arity and order checks (G, review of 94ec9ea487): a header is exactly two or three fields, the
+    // pointer FIRST, and every later field a native int. golib's uintptr is a struct, not nint, so a Go uintptr word
+    // does not make a header either.
+    private const string NearMisses = """
+        namespace go;
+
+        [GoFieldAccess(typeof(fourWords), typeof(pointerSecond), typeof(pointerAlone), typeof(uintptrWord))]
+        partial class nearmiss_package
+        {
+            public partial struct fourWords { public unsafe_package.Pointer Data; public nint Len; public nint Cap; public nint Extra; }
+
+            public partial struct pointerSecond { public nint Len; public unsafe_package.Pointer Data; }
+
+            public partial struct pointerAlone { public unsafe_package.Pointer Data; }
+
+            public partial struct uintptrWord { public unsafe_package.Pointer Data; public uintptr Len; }
+        }
+        """;
+
+    [TestMethod]
+    public void ANearMissOfTheHeaderShapeKeepsItsRefProperties()
+    {
+        string generated = Generate(NearMisses);
+        const string Package = "global::go.nearmiss_package";
+
+        StringAssert.Contains(generated, $"public ref nint Extra => ref ʗp.field({Package}.fourWords.ᏑExtra);", "four words: one too many");
+        StringAssert.Contains(generated, $"public ref global::go.unsafe_package.Pointer Data => ref ʗp.field({Package}.pointerSecond.ᏑData);", "the pointer second: the order is checked");
+        StringAssert.Contains(generated, $"public ref global::go.unsafe_package.Pointer Data => ref ʗp.field({Package}.pointerAlone.ᏑData);", "the pointer alone: one too few");
+        StringAssert.Contains(generated, $"public ref global::go.uintptr Len => ref ʗp.field({Package}.uintptrWord.ᏑLen);", "a uintptr word is golib's struct, not an int");
+        Assert.IsFalse(generated.Contains("OnHeaderStore"), "no near miss of the header shape commits anything");
     }
 
     [TestMethod]
