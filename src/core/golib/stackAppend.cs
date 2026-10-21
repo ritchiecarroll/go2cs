@@ -35,6 +35,12 @@ namespace go;
 /// other argument as a build error. The buffer itself is allocated when it is taken and is not charged to
 /// AllocationCounter, because Go's lives on the stack and allocates nothing.
 /// </para>
+/// <para>
+/// Go 1.26 also gives the buffer to a variable that escapes, when its one escape is a single statement outside its
+/// loops (cmd/compile/internal/slice): the converter emits <c>x = move2heap(xᴷ, x);</c> ahead of that statement, which
+/// copies a slice still in the buffer to the heap, and a variable whose capacity is observed takes
+/// <c>new stackAppend&lt;T&gt;(capacityUsed: true)</c>, whose appends grow inside the buffer a size class at a time.
+/// </para>
 /// </remarks>
 public struct stackAppend<T>
 {
@@ -42,6 +48,25 @@ public struct stackAppend<T>
     private const nuint StoreBytes = 32;
 
     internal bool used;
+
+    // The buffer once taken. move2heap moves a slice out of it, and an append that grows inside it reuses it.
+    internal T[]? store;
+
+    // Go's capUsed (cmd/compile/internal/slice): the variable's capacity is observed, so every append grows inside
+    // the buffer a size class at a time (UseBuf, runtime.growsliceBuf) and move2heap keeps the capacity
+    // (PreserveCapacity, runtime.moveSlice).
+    internal readonly bool capacityUsed;
+
+    /// <summary>
+    /// The buffer of a variable whose capacity Go's slice pass sees observed (<c>cap(s)</c>, <c>s = s[i:j]</c>,
+    /// <c>s = []T{...}</c>, or <c>s</c> passed to a call): its appends grow inside the buffer as
+    /// <c>runtime.growsliceBuf</c> does, and <see cref="builtin.move2heap{T}"/> keeps its capacity.
+    /// </summary>
+    /// <param name="capacityUsed">Whether the variable's capacity is observed.</param>
+    public stackAppend(bool capacityUsed)
+    {
+        this.capacityUsed = capacityUsed;
+    }
 
     // K for a type whose Go size is a property of the type; 0 when there is no buffer (a zero-size element, one
     // over 32 bytes, or a size the converter could not derive).
@@ -63,6 +88,10 @@ public struct stackAppend<T>
 
     private static nint CapacityFor(nuint size) =>
         size == 0 || size > StoreBytes ? 0 : (nint)(StoreBytes / size);
+
+    // The dims an unnamed array element is sized by (GoGrowthFacts.ValueDims), off the first of the elements.
+    internal static nint[]? Dims(ReadOnlySpan<T> elems) =>
+        GoGrowthFacts<T>.SizedByValue && elems.Length > 0 ? GoGrowthFacts<T>.ValueDims(elems[0]) : null;
 }
 
 public static partial class builtin
@@ -80,15 +109,20 @@ public static partial class builtin
     {
         nint newLength = slice.Length + elems.Length;
 
+        if (buffer.capacityUsed)
+            return appendInBuffer(ref Unsafe.AsRef(in buffer), slice, elems, newLength);
+
         if (newLength > slice.Capacity && slice.Length == 0 && !buffer.used)
         {
             nint capacity = stackAppend<T>.Capacity(elems);
 
             if (newLength <= capacity)
             {
-                Unsafe.AsRef(in buffer).used = true;
+                ref stackAppend<T> taken = ref Unsafe.AsRef(in buffer);
+                taken.used = true;
 
                 T[] store = new T[capacity];
+                taken.store = store;
                 elems.CopyTo(store);
 
                 return new slice<T>(store, 0, newLength, capacity);
@@ -96,5 +130,73 @@ public static partial class builtin
         }
 
         return go.slice<T>.Append(slice, elems);
+    }
+
+    // runtime.growsliceBuf, at every append of a variable whose capacity is observed: a growth that fits the buffer
+    // moves what the slice holds to the buffer's start (when it is not there already) and takes the next size class
+    // of the new length, not growslice's doubling; one that does not fit grows as growslice does.
+    private static slice<T> appendInBuffer<T>(ref stackAppend<T> buffer, slice<T> slice, ReadOnlySpan<T> elems, nint newLength)
+    {
+        if (newLength <= slice.Capacity || elems.Length == 0)
+            return go.slice<T>.Append(slice, elems);
+
+        nint bufferLength = stackAppend<T>.Capacity(elems);
+
+        if (newLength > bufferLength)
+            return go.slice<T>.Append(slice, elems);
+
+        T[] store = buffer.store ??= new T[bufferLength];
+        nint oldLength = slice.Length;
+
+        // Go: oldPtr != bufPtr && oldLen != 0. Span copies handle the overlap of a window into the buffer itself.
+        if (oldLength != 0 && !(ReferenceEquals(slice.m_array, store) && slice.Low == 0))
+            slice.ToSpan().CopyTo(store);
+
+        nint newCapacity = GoGrowthFacts<T>.RoundUpCapacity(newLength, newLength, stackAppend<T>.Dims(elems));
+
+        // Zeroed beyond the new length, as Go clears the buffer there; [oldLength:newLength) is written below.
+        store.AsSpan((int)newLength, (int)(newCapacity - newLength)).Clear();
+        elems.CopyTo(store.AsSpan((int)oldLength));
+
+        return new slice<T>(store, 0, newLength, newCapacity);
+    }
+
+    /// <summary>
+    /// Go's <c>s = move2heap(s)</c> (cmd/compile/internal/slice): ahead of the one statement where a variable whose
+    /// appends used <paramref name="buffer"/> stops being the only reference to its backing store (a return, an
+    /// assignment of it, a range over it), a slice still in the buffer is copied to the heap. A slice that grew out
+    /// of the buffer is returned as it is.
+    /// </summary>
+    /// <param name="buffer">The variable's <see cref="stackAppend{T}"/> local, passed by reference.</param>
+    /// <param name="slice">The variable's slice.</param>
+    /// <returns>The slice, on the heap.</returns>
+    /// <remarks>
+    /// When the capacity is observed, the copy keeps it (<c>runtime.moveSlice</c>); otherwise it is the size class of
+    /// the length (<c>runtime.moveSliceNoCap</c>), and the elements past the length are zero. An empty slice comes back
+    /// empty: nil stays nil, and a non-nil one has no capacity, as Go's zerobase result does.
+    /// </remarks>
+    public static slice<T> move2heap<T>(in stackAppend<T> buffer, slice<T> slice)
+    {
+        T[]? store = buffer.store;
+
+        if (store is null || !ReferenceEquals(slice.m_array, store))
+            return slice;
+
+        nint length = slice.Length;
+        nint capacity = buffer.capacityUsed ? slice.Capacity : length;
+
+        if (capacity == 0)
+            return new slice<T>(Array.Empty<T>(), 0, 0);
+
+        if (!buffer.capacityUsed)
+            capacity = GoGrowthFacts<T>.RoundUpCapacity(length, length, stackAppend<T>.Dims(slice.ToSpan()));
+
+        T[] moved = AllocationCounter.NewArray<T>(capacity);
+        GoMemProfile.Charge<T>(moved, capacity, buffer.capacityUsed ? GoAllocEntry.MoveSlice : GoAllocEntry.MoveSliceNoCap);
+
+        // moveSlice copies all of s[:cap(s)]; moveSliceNoCap copies s[:len(s)] and leaves the rest zero.
+        store.AsSpan((int)slice.Low, (int)(buffer.capacityUsed ? capacity : length)).CopyTo(moved);
+
+        return new slice<T>(moved, 0, length, capacity);
     }
 }

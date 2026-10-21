@@ -288,6 +288,8 @@ private static void memProfileAlloc(object allocation, nuint size, bool noscan, 
     stk[1] = entry switch {
         GoAllocEntry.MakeSlice => internRootFrame("runtime.makeslice", "runtime/slice.go", 117),
         GoAllocEntry.GrowSlice => internRootFrame("runtime.growslice", "runtime/slice.go", noscan ? 265 : 273),
+        GoAllocEntry.MoveSlice => noscan ? internRootFrame("runtime.moveSliceNoScan", "runtime/slice.go", 466) : internRootFrame("runtime.moveSlice", "runtime/slice.go", 450),
+        GoAllocEntry.MoveSliceNoCap => noscan ? internRootFrame("runtime.moveSliceNoCapNoScan", "runtime/slice.go", 500) : internRootFrame("runtime.moveSliceNoCap", "runtime/slice.go", 484),
         GoAllocEntry.NewArray => internRootFrame("runtime.newarray", "runtime/malloc.go", 2207),
         _ => internRootFrame("runtime.newobject", "runtime/malloc.go", 2157)
     };
