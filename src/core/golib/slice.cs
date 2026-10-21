@@ -1373,11 +1373,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new SliceEnumerator(this);
     }
 
-    // IArray<T> derives from IEnumerable<(nint, T)>, which the public GetEnumerator() satisfied
+    // IArray<T> declares its own GetEnumerator() over (nint, T), which the public GetEnumerator() satisfied
     // implicitly while it returned the interface. It now returns the concrete struct, so the
     // interface contract needs this explicit member — the boxing path, taken only by a consumer that
     // asked for the interface.
-    IEnumerator<(nint, T)> IEnumerable<(nint, T)>.GetEnumerator()
+    IEnumerator<(nint, T)> IArray<T>.GetEnumerator()
     {
         return new Enumerator(this);
     }
