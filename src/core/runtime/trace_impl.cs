@@ -15,8 +15,8 @@ using go.golib;
 // world through semacquire, whose first step is getg, and the converted ReadTrace parks the reader
 // on the tracer's own buffers -- machinery the CLR does not have. Since 2026-09-27 (Q28,
 // docs/phase4/DESIGN-managed-execution-tracer.md and its amendment) the three entry points drive
-// golib's ExecutionTracer instead: Go's v2 trace format ("go 1.23 trace", the version the go1.24.13
-// runtime writes), carrying the goroutine facts the managed runtime observes -- create, start, block
+// golib's ExecutionTracer instead: Go's v2 trace format ("go 1.26 trace", the version the go1.26
+// runtime writes, in generations since 2026-10-21), carrying the goroutine facts the managed runtime observes -- create, start, block
 // with Go's trace block reason, unblock, destroy -- on a model of one P per goroutine thread, with no
 // GC, heap, syscall, steal or CPU-sample events and no stacks. Go's own parser (`go tool trace
 // -d=parsed`) is the acceptance oracle. Until then StartTrace answered a named tracing-not-supported
@@ -24,7 +24,14 @@ using go.golib;
 // TestSignalTrace on linux, whose readings move with this change). Since 2026-09-28 (Q5) StartTrace
 // starts the tracer inside the stop-the-world pair, as Go's does, so the start is counted as a pause.
 //
-// Registration and routing. The three names are registered goosAny in manualConversionFuncs
+// traceClockUnitsPerSecond joins them 2026-10-21 (the flight-recorder seat). runtime/trace's flight
+// recorder reads it through a //go:linkname PUSH (tracetime.go into flightrecorder.go) to convert the
+// tracer's batch timestamps, so it must answer the clock the managed tracer stamps with, not the
+// converted body's nanotime/64 (or cputicks/256 on windows): ExecutionTracer.ClockUnitsPerSecond. It is
+// public because the honored push forwards to it from runtime/trace.
+//
+// Registration and routing. The three names (four with traceClockUnitsPerSecond, whose principal is
+// <goos>/tracetime.cs) are registered goosAny in manualConversionFuncs
 // (manualTypeOperations.go). StartTrace and StopTrace were scoped goosWindowsLinux from 2026-09-02 and
 // ReadTrace joined them 2026-09-27; darwin joined all three 2026-09-28, when the stop-the-world seat
 // (ruling 02:10, Q6) displaced darwin's StartTrace and StopTrace -- under the stop-the-world contract
@@ -91,5 +98,14 @@ partial class runtime_package
     public static slice<byte> ReadTrace()
     {
         return ExecutionTracer.Read() is { } chunk ? new slice<byte>(chunk) : default!;
+    }
+
+    // traceClockUnitsPerSecond estimates the number of trace clock units per
+    // second that elapse.
+    //
+    //go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond
+    public static uint64 traceClockUnitsPerSecond()
+    {
+        return ExecutionTracer.ClockUnitsPerSecond;
     }
 }

@@ -136,6 +136,14 @@ public sealed class Goroutine
     // ends. Above every WaitReason value; Reason masks it off.
     private const int ReadiedFlag = 1 << 30;
 
+    // The managed id of the thread running this goroutine now, 0 while none is: set where a thread
+    // takes the identity (Adopt, EnterAsMain, RegisterMainGoroutine) and cleared where it gives it up.
+    // The execution tracer reads it to state a running goroutine in its own M's batch.
+    private int m_threadId;
+
+    /// <summary>The managed id of the thread running this goroutine, or 0 while no thread is.</summary>
+    internal int ThreadId => Volatile.Read(ref m_threadId);
+
     // The synctest bubble this goroutine belongs to (SyncTestBubble), set by its CREATOR before its
     // thread starts -- Go's newg.syncGroup = callergp.syncGroup -- and cleared when it exits. Read by
     // other goroutines (a waker readying this one), hence volatile.
@@ -420,6 +428,7 @@ public sealed class Goroutine
     private static Scope Adopt(Goroutine goroutine)
     {
         t_current = goroutine;
+        Volatile.Write(ref goroutine.m_threadId, Environment.CurrentManagedThreadId);
 
         // A CPU sampler joins each sample to its thread's latest labels; a thread that starts a
         // goroutine starts with the inherited ones (or none), whatever the OS thread id last carried.
@@ -472,6 +481,7 @@ public sealed class Goroutine
             ?? throw new InvalidOperationException("the main goroutine has not been registered; golib's module initializer registers it before any goroutine can be entered");
 
         t_current = main;
+        Volatile.Write(ref main.m_threadId, Environment.CurrentManagedThreadId);
 
         return new Scope(main, owned: false);
     }
@@ -1151,6 +1161,7 @@ public sealed class Goroutine
             return;
 
         t_current = s_main = Register(isMain: true, creator: null, parentId: 0, entry: null, labels: null);
+        Volatile.Write(ref s_main.m_threadId, Environment.CurrentManagedThreadId);
     }
 
     // The first frame above golib's own launch machinery -- the `goǃ` rungs live on `builtin`, Start
@@ -1486,6 +1497,9 @@ public sealed class Goroutine
                 return;
 
             t_current = null;
+
+            // Only this thread's own claim: another thread may have taken the main identity since.
+            Interlocked.CompareExchange(ref m_goroutine.m_threadId, 0, Environment.CurrentManagedThreadId);
 
             if (m_owned)
             {
