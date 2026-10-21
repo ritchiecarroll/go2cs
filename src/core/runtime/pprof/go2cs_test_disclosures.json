@@ -47,6 +47,13 @@
       "reason": "SHAPE NAMES ONLY. Go names each inlined generic frame with its GC shape (nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }] and its swap); the CLR's StackFrame.GetMethod() returns the generic method DEFINITION (measured), so both managed frames read nonRecursiveGenericAllocFunction and the expected sample and location cannot match. The pin is the managed stack WITH both generic frames present: until the generic-caller NoInlining rule (claude/g-inline-locations) the JIT inlined them under TieredCompilation=0 and the stack read TestGenericsInlineLocations;storeAlloc, a fixable defect this entry must not absorb -- if either frame vanishes again the pin fails. Retires only if frame resolution can recover an instantiation's shape."
     },
     {
+      "name": "TestGoroutineLeakProfileConcurrency",
+      "class": "runtime-capability",
+      "signature": "runtime.goroutineLeakGC -> runtime/pprof.runtime_goroutineLeakGC is not honored",
+      "records": 1,
+      "reason": "Go PASS / C# FAIL, filed for the Go 1.26 re-bank by the OWNER RULING of 2026-10-21 (relayed by COORD). Go finds leaked goroutines with its own collector, which marks the heap with blocked goroutines' stacks withheld from the roots (runtime/mgc.go goroutineLeakGC, mgcmark.go, mgc.go:1318). The CLR's collector roots every thread's stack and offers no reachability query, so the managed runtime cannot tell which blocked goroutines are unreachable without a heap walk that golib does not have. The profile refuses by name rather than reporting a fabricated zero: writeGoroutineLeak's first call, the runtime_goroutineLeakGC push, panics with the converter's refusal (linknamePushTargets), so the test fails at its first leak-profile write and its four subtests never run on the C# side; they are withdrawn under this root. Retirement: C1's post-hop seat, ruled the same day, which answers the profile from a ClrMD per-thread heap walk in its own optional assembly (docs/DESIGN-goroutine-leak-profile.md); it retires this entry on JIT hosts. Native AOT keeps the entry, by ruling, until a walk exists that does not need the DAC."
+    },
+    {
       "name": "TestLabelSystemstack",
       "class": "runtime-capability",
       "signature": "runtime.systemstack;key=value has 0 samples out of 0",
