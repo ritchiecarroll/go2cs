@@ -111,7 +111,7 @@ internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡse
     ref var seq = ref Ꮡseq.DerefOrNull();
 
     var styp = Ꮡtyp.StructType();
-    foreach (var (i, _) in (~styp).Fields) {
+    foreach (var i in range((~styp).Fields)) {
         var f = Ꮡ((~styp).Fields, i);
         var exprᴛ1 = (~f).Typ.Kind();
         if (exprᴛ1 == abi.ΔString) {
