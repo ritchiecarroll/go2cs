@@ -40,7 +40,8 @@ public readonly struct @string :
     ICloneable, 
     IComparisonOperators<@string, @string, bool>,
     IAdditionOperators<@string, @string, @string>,
-    IByteSeq<@string, byte>
+    IByteSeq<@string, byte>,
+    IGoEquatable
 {
     // The debugger's view (DebuggerTypeProxy): the text, and the bytes a Go string IS on expand.
     internal sealed class DebugView(@string value)
@@ -682,6 +683,9 @@ public readonly struct @string :
     {
         return Default;
     }
+
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is @string value && this == value;
 
     public static bool operator ==(@string a, @string b)
     {
