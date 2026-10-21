@@ -20,8 +20,9 @@ public static class StructDeclarationSyntaxExtensions
     /// <summary>
     /// Whether an EMBEDDED field of <paramref name="type"/> promotes members: a converted Go type, or a pointer to
     /// one. An embedded interface (its methods are providers, not promoted members) and an embedded predeclared
-    /// type (a C# primitive, or golib's own <c>@string</c>, <c>uintptr</c>, <c>complex64</c>…) promote nothing and
-    /// stay plain marked fields, as they were before embeds were converter-declared.
+    /// type (a C# primitive, golib's own <c>@string</c>, <c>uintptr</c>, <c>complex64</c>…, or the BCL's
+    /// <c>System.Numerics.Complex</c>, which is <c>complex128</c>) promote nothing and stay plain marked fields, as they
+    /// were before embeds were converter-declared.
     /// </summary>
     public static bool IsPromotingEmbedType(ITypeSymbol? type)
     {
@@ -29,10 +30,17 @@ public static class StructDeclarationSyntaxExtensions
             type = element;
 
         // Any defined type the converter wrote (a struct, a defined numeric/slice/map wrapper, a defined func type's
-        // delegate) promotes its methods; only an interface and a predeclared type do not.
+        // delegate) promotes its methods; only an interface and a predeclared type do not. complex128 is the one
+        // predeclared type that is neither a C# special type nor golib's: taken for a converted struct, an embedded
+        // complex128 was built as `new System.Numerics.Complex(nil)` (CS7036, text/template/parse's numberTest).
         return type is INamedTypeSymbol { TypeKind: not (TypeKind.Interface or TypeKind.Error or TypeKind.TypeParameter), SpecialType: SpecialType.None } named &&
-               named.ContainingAssembly?.Name != "golib";
+               named.ContainingAssembly?.Name != "golib" &&
+               !IsPredeclaredComplex128(named);
     }
+
+    // System.Numerics.Complex, the type go2cs maps Go's predeclared complex128 to (golib's `complex128` alias).
+    private static bool IsPredeclaredComplex128(INamedTypeSymbol type) =>
+        type is { Name: "Complex", ContainingNamespace: { Name: "Numerics", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } };
 
     /// <summary>
     /// Whether <paramref name="member"/> is a converter-declared promoting embed FIELD (not the legacy
