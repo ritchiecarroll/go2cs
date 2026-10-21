@@ -110,6 +110,15 @@ public static partial class builtin
             // and reporting the wrapper instead is what made an escaped panic print a CLR dump.
             if (CrashReport.TryUnwrapPanic(ex, out PanicException? panic, out Exception? thrown))
             {
+                // Go's gopanic, once the defers have run out: "If we're tracing, flush the current
+                // generation to make the trace more readable" (runtime/panic.go), before anything is
+                // printed. The advance returns once the trace's reader has taken the generation, so a
+                // program tracing to stdout (runtime's TestCrashWhileTracing child) gets a complete
+                // generation out before it dies. Like Go's, it would wait forever for a reader that is
+                // itself the panicking goroutine.
+                if (go.golib.ExecutionTracer.Enabled)
+                    go.golib.ExecutionTracer.Advance(stop: false);
+
                 // Go's crash report, in Go's own format: the panic value, a blank line, the
                 // goroutine header, and the Go-spelled traceback — plus a copy to the descriptor
                 // debug.SetCrashOutput configured, if any. See CrashReport and
