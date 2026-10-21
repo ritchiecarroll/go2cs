@@ -752,7 +752,7 @@ internal static void init(this ж<mheap> Ꮡh) {
 
     // h->mapcache needs no init
 
-    foreach (var (i, _) in h.central) {
+    foreach (var i in range(h.central)) {
         h.central[i].mcentral.init((spanClass)(uint8)i);
     }
 
@@ -882,7 +882,7 @@ internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas
 
         // Scan this bitmap chunk for spans that are in-use
         // but have no marked objects on them.
-        foreach (var (i, _) in inUse) {
+        foreach (var i in range(inUse)) {
             var inUseUnmarked = (uint8)(atomic.Load8(Ꮡ(inUse, i)) & ~marked[i]);
             if (inUseUnmarked == 0) {
                 continue;

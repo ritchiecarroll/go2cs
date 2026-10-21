@@ -581,7 +581,7 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
         var bo = f.ByteOrder;
 
         sh.Relocs = new slice<Reloc>((nint)(sh.Nreloc));
-        foreach (var (i, _) in sh.Relocs) {
+        foreach (var i in range(sh.Relocs)) {
             var rel = Ꮡ(sh.Relocs, i);
 
             ref var ri = ref heap(new relocInfo(), out var Ꮡri);

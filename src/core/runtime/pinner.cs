@@ -55,7 +55,7 @@ internal static void unpin(this ж<pinner> Ꮡp) {
     if (Ꮡp == nil || Δp.refs == default!) {
         return;
     }
-    foreach (var (i, _) in Δp.refs) {
+    foreach (var i in range(Δp.refs)) {
         setPinned(Δp.refs[i], false);
     }
     // The following two lines make all pointers to references

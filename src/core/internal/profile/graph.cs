@@ -392,7 +392,7 @@ public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> 
             lines = new Line[]{new()}.slice(); // Create empty line to include location info.
         }
         var nodes = new Nodes(len(lines));
-        foreach (var (ln, _) in lines) {
+        foreach (var ln in range(lines)) {
             nodes[ln] = nm.findOrInsertLine(l, lines[ln], Ꮡo);
         }
         locations.add((~l).ID, nodes);

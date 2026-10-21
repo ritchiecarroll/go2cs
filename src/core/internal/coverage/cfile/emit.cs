@@ -508,7 +508,7 @@ internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slic
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
         ctrs = ctrs[..0];
-        foreach (var (i, _) in actrs) {
+        foreach (var i in range(actrs)) {
             ctrs = append(ctrs, Ꮡ(actrs, i).Load());
         }
         return ctrs;

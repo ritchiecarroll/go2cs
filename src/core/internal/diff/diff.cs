@@ -245,7 +245,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     nint n = len(xi);
     var T = new slice<nint>(n);
     var L = new slice<nint>(n);
-    foreach (var (i, _) in T) {
+    foreach (var i in range(T)) {
         T[i] = n + 1;
     }
     for (nint iᴛ1 = 0; iᴛ1 < n; iᴛ1++) {

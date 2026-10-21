@@ -559,7 +559,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     }
 
     check.methods = new map<ж<TypeName>, slice<ж<Func>>>();
-    foreach (var (i, _) in methods) {
+    foreach (var i in range(methods)) {
         var m = Ꮡ(methods, i);
         // Determine the receiver base type and associate m with it.
         var (ptr, @base) = check.resolveBaseTypeName((~m).ptr, (~m).recv);

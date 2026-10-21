@@ -134,7 +134,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = fieldAdd(a[i], b[i]);
     }
     return s;
@@ -146,7 +146,7 @@ internal static T /*s*/ polySub<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = fieldSub(a[i], b[i]);
     }
     return s;
@@ -234,7 +234,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 
     (s, var b) = sliceForAppend(s, encodingSize1);
     clear(b);
-    foreach (var (i, _) in f) {
+    foreach (var i in range(f)) {
         b[i / 8] |= (uint8)((uint8)(compress(f[i], 1).Lsh((int64)(i % 8))));
     }
     return s;
@@ -247,7 +247,7 @@ internal static slice<byte> ringCompressAndEncode1(slice<byte> s, ringElement f)
 // followed by Decompress₁, according to FIPS 203, Definition 4.8.
 internal static ringElement ringDecodeAndDecompress1(ref array<byte> b) {
     ringElement f = default!;
-    foreach (var (i, _) in f) {
+    foreach (var i in range(f)) {
         var b_i = (byte)(b[i / 8].Rsh((int64)(i % 8)) & 1);
         UntypedInt halfQ = /* (q + 1) / 2 */ 1665; // ⌈q/2⌋, rounded up per FIPS 203, Section 2.3
         f[i] = (fieldElement)(((fieldElement)(uint16)b_i) * (uint16)halfQ); // 0 decompresses to 0, and 1 to ⌈q/2⌋
@@ -535,7 +535,7 @@ internal static ringElement inverseNTT(nttElement f) {
             }
         }
     }
-    foreach (var (i, _) in f) {
+    foreach (var i in range(f)) {
         f[i] = fieldMul(f[i], 3303); // 3303 = 128⁻¹ mod q
     }
     return (ringElement)(array<fieldElement>)f;

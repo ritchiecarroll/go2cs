@@ -317,7 +317,7 @@ internal static void bw(ж<strings.Builder> Ꮡb, params ꓸꓸꓸstring argsʗp
 internal static void dumpProg(ж<strings.Builder> Ꮡb, ж<Prog> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
-    foreach (var (j, _) in p.Inst) {
+    foreach (var j in range(p.Inst)) {
         var i = Ꮡ(p.Inst, j);
         @string pc = strconv.Itoa(j);
         if (len(pc) < 3) {

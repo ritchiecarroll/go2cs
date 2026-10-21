@@ -1487,7 +1487,7 @@ public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
         return (default!, err);
     }
     if (hasVersions) {
-        foreach (var (i, _) in sym) {
+        foreach (var i in range(sym)) {
             (sym[i].HasVersion, sym[i].VersionIndex, sym[i].Version, sym[i].Library) = f.gnuVersion(i);
         }
     }

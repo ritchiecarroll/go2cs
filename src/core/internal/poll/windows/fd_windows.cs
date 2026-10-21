@@ -130,7 +130,7 @@ internal static void freeWSABufs(ж<slice<Δsyscall.WSABuf>> ᏑbufsPtr) {
 
     // Clear pointers to buffers so they can be released by garbage collector.
     var bufs = bufsPtr;
-    foreach (var (i, _) in bufs) {
+    foreach (var i in range(bufs)) {
         bufs[i].Buf = default!;
     }
     // Proper usage of a sync.Pool requires each entry to have approximately

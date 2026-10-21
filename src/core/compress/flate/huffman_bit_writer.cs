@@ -212,12 +212,12 @@ internal static void generateCodegen(this ref huffmanBitWriter w, nint numLitera
     var codegen = w.codegen; // cache
     // Copy the concatenated code sizes to codegen. Put a marker at the end.
     var cgnl = codegen.slice(0, numLiterals);
-    foreach (var (i, _) in cgnl) {
+    foreach (var i in range(cgnl)) {
         cgnl[i] = (uint8)litEnc.codes[i].len;
     }
 
     cgnl = codegen.slice(numLiterals, numLiterals + numOffsets);
-    foreach (var (i, _) in cgnl) {
+    foreach (var i in range(cgnl)) {
         cgnl[i] = (uint8)offEnc.codes[i].len;
     }
     codegen[numLiterals + numOffsets] = badCode;

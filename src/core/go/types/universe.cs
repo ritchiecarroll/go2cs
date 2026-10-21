@@ -247,7 +247,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
 }.array();
 
 internal static void defPredeclaredFuncs() {
-    foreach (var (i, _) in predeclaredFuncs) {
+    foreach (var i in range(predeclaredFuncs)) {
         builtinId id = (builtinId)i;
         if (id == _Assert || id == _Trace) {
             continue; // only define these in testing environment

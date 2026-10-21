@@ -91,7 +91,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
         a.tag = (Tag)(uint32)b.@uint();
         a.children = b.uint8() != 0;
         a.field = new slice<afield>(n);
-        foreach (var (i, _) in a.field) {
+        foreach (var i in range(a.field)) {
             a.field[i].attr = (Attr)(uint32)b.@uint();
             a.field[i].fmt = (format)(uint32)b.@uint();
             a.field[i].@class = formToClass(a.field[i].fmt, a.field[i].attr, vers, Ꮡb);
@@ -526,7 +526,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, ж<unit> Ꮡ
         return rnglistsBase + offΔ2;
     }
 
-    foreach (var (i, _) in (~e).Field) {
+    foreach (var i in range((~e).Field)) {
         (~e).Field[i].Attr = a.field[i].attr;
         (~e).Field[i].Class = a.field[i].@class;
         var fmt = a.field[i].fmt;

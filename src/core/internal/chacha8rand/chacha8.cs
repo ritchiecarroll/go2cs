@@ -118,7 +118,7 @@ public static void Reseed(this ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     array<uint64> seed = new(4);
-    foreach (var (i, _) in seed) {
+    foreach (var i in range(seed)) {
         while (ᐧ) {
             var (x, ok) = s.Next();
             if (ok) {
@@ -170,7 +170,7 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
     if (used > (uint64)((ctrMax / ctrInc) * chunk - reseed)) {
         return new errUnmarshalChaCha8жerror(@new<errUnmarshalChaCha8>());
     }
-    foreach (var (i, _) in s.seed) {
+    foreach (var i in range(s.seed)) {
         s.seed[i] = byteorder.LEUint64(data.slice((2 + i) * 8));
     }
     s.c = (uint32)ctrInc * ((uint32)used / (uint32)chunk);

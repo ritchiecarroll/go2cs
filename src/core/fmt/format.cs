@@ -77,7 +77,7 @@ internal static void writePadding(this ref fmt f, nint n) {
     }
     // Fill padding with padByte.
     var padding = buf.slice(oldLen, newLen);
-    foreach (var (i, _) in padding) {
+    foreach (var i in range(padding)) {
         padding[i] = padByte;
     }
     f.buf.ValueSlot = buf.slice(0, newLen);

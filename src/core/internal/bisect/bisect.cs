@@ -453,7 +453,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
 
     var @base = stk[0];
     // normalize PCs
-    foreach (var (i, _) in stk.slice(0, n)) {
+    foreach (var i in range(stk.slice(0, n))) {
         stk[i] -= @base;
     }
 
@@ -478,7 +478,7 @@ internal static partial bool stack(this ж<Matcher> Ꮡm, Writer w) {
         } else {
             if (!d.seen(h)) {
                 // Restore PCs in stack for printing
-                foreach (var (i, _) in stk.slice(0, n)) {
+                foreach (var i in range(stk.slice(0, n))) {
                     stk[i] += @base;
                 }
                 printStack(w, h, stk.slice(1, n));

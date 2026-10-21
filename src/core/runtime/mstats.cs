@@ -360,7 +360,7 @@ internal static void readmemstats_m(ref MemStats stats) {
 
     // Collect per-sizeclass stats.
     array<MemStats_BySize> bySize = new(68); /* gc.NumSizeClasses */
-    foreach (var (i, _) in bySize) {
+    foreach (var i in range(bySize)) {
         bySize[i].Size = (uint32)gc.SizeClassToSize[i];
 
         // Malloc stats.
@@ -651,12 +651,12 @@ internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     a.tinyAllocCount += b.tinyAllocCount;
     a.largeAlloc += b.largeAlloc;
     a.largeAllocCount += b.largeAllocCount;
-    foreach (var (i, _) in b.smallAllocCount) {
+    foreach (var i in range(b.smallAllocCount)) {
         a.smallAllocCount[i] += b.smallAllocCount[i];
     }
     a.largeFree += b.largeFree;
     a.largeFreeCount += b.largeFreeCount;
-    foreach (var (i, _) in b.smallFreeCount) {
+    foreach (var i in range(b.smallFreeCount)) {
         a.smallFreeCount[i] += b.smallFreeCount[i];
     }
 }
@@ -781,7 +781,7 @@ internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelt
 
     assertWorldStopped();
 
-    foreach (var (i, _) in m.stats) {
+    foreach (var i in range(m.stats)) {
         @out.merge(Ꮡ(m.stats, i));
     }
 }

@@ -116,7 +116,7 @@ internal static error incHi(this ж<Writer> Ꮡw) {
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
         w.overflow = clear << 1;
-        foreach (var (i, _) in w.table) {
+        foreach (var i in range(w.table)) {
             w.table[i] = invalidEntry;
         }
         return errOutOfCodes;

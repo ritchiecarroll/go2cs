@@ -172,11 +172,11 @@ internal static void stackinit() {
     if ((UntypedInt)(_StackCacheSize & pageMask) != 0) {
         @throw(cacheSizeMustBeAMultipleˢ);
     }
-    foreach (var (i, _) in stackpool) {
+    foreach (var i in range(stackpool)) {
         stackpool[i].item.span.init();
         lockInit(ref stackpool[i].item.mu, lockRankStackpool);
     }
-    foreach (var (i, _) in stackLarge.free) {
+    foreach (var i in range(stackLarge.free)) {
         stackLarge.free[i].init();
         lockInit(ref stackLarge.@lock, lockRankStackLarge);
     }
@@ -809,7 +809,7 @@ internal static void adjustframe(ж<stkframe> Ꮡframe, ref adjustinfo adjinfo) 
     // Adjust pointers in all stack objects (whether they are live or not).
     // See comments in mgcmark.go:scanframeworker.
     if (frame.varp != 0) {
-        foreach (var (i, _) in objs) {
+        foreach (var i in range(objs)) {
             var obj = Ꮡ(objs, i);
             var off = obj.Value.off;
             var @base = frame.varp; // locals base pointer
@@ -1347,7 +1347,7 @@ internal static bool isShrinkStackSafe(ж<g> Ꮡgp) {
 // freeStackSpans frees unused stack spans at the end of GC.
 internal static void freeStackSpans() {
     // Scan stack pools for empty stack spans.
-    foreach (var (order, _) in stackpool) {
+    foreach (var order in range(stackpool)) {
         @lock(Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡmu));
         var list = Ꮡstackpool.at<stackpoolᴛ1>(order).of(stackpoolᴛ1.Ꮡitem).of(stackpoolItem.Ꮡspan);
         for (var s = list.Value.first; s != nil; ) {
@@ -1365,7 +1365,7 @@ internal static void freeStackSpans() {
 
     // Free large stack spans.
     @lock(ᏑstackLarge.of(stackLargeᴛ1.Ꮡlock));
-    foreach (var (i, _) in stackLarge.free) {
+    foreach (var i in range(stackLarge.free)) {
         for (var s = stackLarge.free[i].first; s != nil; ) {
             var next = s.Value.next;
             ᏑstackLarge.at(stackLargeᴛ1.Ꮡfree, i).remove(s);

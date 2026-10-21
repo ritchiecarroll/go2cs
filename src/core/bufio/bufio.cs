@@ -512,7 +512,7 @@ public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var buf = new slice<byte>(n);
     n = 0;
     // Copy full pieces and fragment in.
-    foreach (var (i, _) in full) {
+    foreach (var i in range(full)) {
         n += copy(buf.slice(n), full[i]);
     }
     copy(buf.slice(n), frag);

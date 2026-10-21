@@ -105,7 +105,7 @@ internal static void init(this ref hexdumper h) {
     }
 
     // Construct position mapping.
-    foreach (var (i, _) in h.toPos) {
+    foreach (var i in range(h.toPos)) {
         // First, calculate the "field" within the line, applying byte swizzling.
         nint field = 0;
         if (goarch.BigEndian){
@@ -152,7 +152,7 @@ internal static void flushLine(this ref hexdumper h, slice<byte> data) {
 
     ref var lineBuf = ref heap(new array<byte>(73), out var ᏑlineBuf);
     void clear() {
-        foreach (var (i, _) in ᏑlineBuf.Value) {
+        foreach (var i in range(ᏑlineBuf.Value)) {
             ᏑlineBuf.Value[i] = (rune)' ';
         }
     }
@@ -239,7 +239,7 @@ internal static void fmtHex(this ref hexdumper h, slice<byte> buf, uint64 v) {
 
 internal static void start(this hexdumpMarker m) {
     array<byte> spaces = new(64);
-    foreach (var (i, _) in spaces) {
+    foreach (var i in range(spaces)) {
         spaces[i] = (rune)' ';
     }
     while (m.chars > len(spaces)) {

@@ -1141,7 +1141,7 @@ internal static byte reverseBitsInAByte(byte @in) {
 internal static nint asn1BitLength(slice<byte> bitString) {
     nint bitLen = builtin.len(bitString) * 8;
 
-    foreach (var (i, _) in bitString) {
+    foreach (var i in range(bitString)) {
         var b = bitString[builtin.len(bitString) - i - 1];
 
         for (nuint bit = (nuint)0; bit < 8; bit++) {
