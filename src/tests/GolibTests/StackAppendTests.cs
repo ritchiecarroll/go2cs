@@ -6,8 +6,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using static go.builtin;
@@ -175,26 +177,146 @@ public class StackAppendTests
         }), "growing past it");
     }
 
-    // Every builtin that takes the buffer must stay out of line. Inlined, the append's store-taking return builds the
-    // slice in a stack temp of the caller's own that the JIT reports for the whole frame and nothing overwrites, so the
-    // first store, and every element it held, stays reachable after the slice outgrows it: runtime's
-    // TestGCTestIsReachable read two extra reachable objects (gcroot: the test's frame, that temp, the 4-element store).
-    // move2heap's slice in and slice out would sit in such temps the same way. Retention in an optimized frame cannot be
-    // observed from this Debug build, so this arm pins the attribute and runtime's row is the behavior.
+    // Every builtin that can take the buffer or hold its store must stay out of line. Inlined, the append's
+    // store-taking return builds the slice in a stack temp of the caller's own that the JIT reports for the whole frame
+    // and nothing overwrites, so the first store, and every element it held, stays reachable after the slice outgrows
+    // it: runtime's TestGCTestIsReachable read two extra reachable objects (gcroot: the test's frame, that temp, the
+    // 4-element store). move2heap's slice in and slice out would sit in such temps the same way. The public append is
+    // only an inlined check in front of appendBuffered, whose return is the one the inlined head returns: the head is
+    // pinned as inlinable and every method behind it as never inlined. AnOutgrownStoreIsNotRetainedByTheFrame below
+    // observes the retention in Release, and runtime's row is the behavior.
     [TestMethod]
     public void TheBufferOverloadIsNeverInlined()
     {
-        MethodInfo[] takers = typeof(builtin).GetMethods().Where(static m =>
-            m.GetParameters() is [{ ParameterType: { IsByRef: true } first }, ..] &&
+        const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
+        MethodInfo[] takers = typeof(builtin).GetMethods(all).Where(static m =>
+            m.GetParameters() is [{ IsIn: true, ParameterType: { IsByRef: true } first }, ..] &&
             first.GetElementType() is { IsGenericType: true } buffer && buffer.GetGenericTypeDefinition() == typeof(stackAppend<>)).ToArray();
 
-        CollectionAssert.AreEquivalent(new[] { "append", "move2heap" }, takers.Select(static m => m.Name).ToArray(),
+        CollectionAssert.AreEquivalent(new[] { "append", "appendBuffered", "move2heap" }, takers.Select(static m => m.Name).ToArray(),
             "the builtins taking `in stackAppend<T>` changed: pin each one below");
 
         foreach (MethodInfo taker in takers)
-            Assert.IsTrue(taker.MethodImplementationFlags.HasFlag(MethodImplAttributes.NoInlining),
-                $"{taker.Name}(in stackAppend<T>, ...) lost [MethodImpl(NoInlining)]");
+        {
+            if (taker.Name == "append")
+                Assert.IsTrue(taker.MethodImplementationFlags.HasFlag(MethodImplAttributes.AggressiveInlining),
+                    "append(in stackAppend<T>, ...) is the inlined head in front of appendBuffered");
+            else
+                Assert.IsTrue(taker.MethodImplementationFlags.HasFlag(MethodImplAttributes.NoInlining),
+                    $"{taker.Name}(in stackAppend<T>, ...) lost [MethodImpl(NoInlining)]");
+        }
     }
+
+    // TestGCTestIsReachable's shape, converted, in an optimized frame: sixteen fresh objects appended through a
+    // buffered site (an interface is 16 bytes in Go, so K = 2), the two the first store held cleared from the heap
+    // array the slice outgrew to, and the slice dropped. Only the outgrown store can still reach those two. The
+    // control is the same site through LeakingAppend, the take inlined into the frame: it must retain them, or the
+    // probe cannot see what it guards. Debug frames keep every local alive, so both arms are meaningful in Release only.
+    [TestMethod]
+    public void AnOutgrownStoreIsNotRetainedByTheFrame()
+    {
+        if (JitOptimizerDisabled(typeof(stackAppend<>).Assembly) || JitOptimizerDisabled(typeof(StackAppendTests).Assembly))
+        {
+            Assert.Inconclusive("a JIT-optimizer-disabled (Debug) build keeps every local of the frame alive, so this guard " +
+                "measures nothing: run GolibTests -c Release");
+            return;
+        }
+
+        const int rounds = 20;
+
+        int leaked = Rounds(rounds, RunLeaking);
+
+        if (leaked == 0)
+        {
+            Assert.Inconclusive($"the inlined take retained its outgrown store in 0/{rounds} rounds: this JIT reports no " +
+                "frame temp for it, so the probe cannot see the retention it guards");
+            return;
+        }
+
+        Assert.AreEqual(0, Rounds(rounds, RunBuffered),
+            $"append(in stackAppend<T>, ...) retained its outgrown store in an optimized frame (the inlined take: {leaked}/{rounds})");
+    }
+
+    private static int Rounds(int rounds, Func<WeakReference[], int> run)
+    {
+        int retained = 0;
+
+        for (int round = 0; round < rounds; round++)
+            retained += run(new WeakReference[16]) > 0 ? 1 : 0;
+
+        return retained;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    private static int RunBuffered(WeakReference[] weaks)
+    {
+        var allᴷ = new stackAppend<object>();
+        slice<object> all = default!;
+
+        for (int i = 0; i < weaks.Length; i++)
+            all = append(allᴷ, all, Fresh(weaks, i));
+
+        all[0] = null!;
+        all[1] = null!;
+        all = default!;
+
+        return Alive(weaks);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
+    private static int RunLeaking(WeakReference[] weaks)
+    {
+        bool used = false;
+        slice<object> all = default!;
+
+        for (int i = 0; i < weaks.Length; i++)
+            all = LeakingAppend(ref used, all, Fresh(weaks, i));
+
+        all[0] = null!;
+        all[1] = null!;
+        all = default!;
+
+        return Alive(weaks);
+    }
+
+    // The take as it read before the head split: inlined, so its slice is built in a temp of the caller's frame.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static slice<object> LeakingAppend(ref bool used, slice<object> slice, object elem)
+    {
+        if (slice.Length == 0 && slice.Capacity == 0 && !used)
+        {
+            used = true;
+            object[] store = new object[2];
+            store[0] = elem;
+
+            return new slice<object>(store, 0, 1);
+        }
+
+        return go.slice<object>.Append(slice, elem);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static object Fresh(WeakReference[] weaks, int i)
+    {
+        object o = new();
+        weaks[i] = new WeakReference(o);
+        return o;
+    }
+
+    // The first two objects are alive only if the first store is.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static int Alive(WeakReference[] weaks)
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        return (weaks[0].IsAlive ? 1 : 0) + (weaks[1].IsAlive ? 1 : 0);
+    }
+
+    private static bool JitOptimizerDisabled(Assembly assembly) =>
+        assembly.GetCustomAttribute<DebuggableAttribute>()?.IsJITOptimizerDisabled == true;
 
     private static long Charge(Action action)
     {

@@ -115,15 +115,27 @@ public static partial class builtin
     /// <param name="elems">Elements to append.</param>
     /// <returns>New slice with specified values appended.</returns>
     /// <remarks>
-    /// Never inlined, so that both returns reach the caller through ONE result slot, which the site's next call
-    /// overwrites. Inlined, the store-taking return builds its slice in a stack temp of its own: the JIT reports that
-    /// temp for the caller's whole frame, and nothing overwrites it, so the first store stays reachable after the slice
+    /// Inlined, this is only the check whether the append may take the buffer, or has a moving buffer to track; any
+    /// other append is <see cref="go.slice{T}.Append(in slice{T}, ReadOnlySpan{T})"/>. The take itself is never
+    /// inlined, so that both returns reach the caller through ONE result slot, which the site's next call overwrites.
+    /// Inlined, the store-taking return builds its slice in a stack temp of its own: the JIT reports that temp for
+    /// the caller's whole frame, and nothing overwrites it, so the first store stays reachable after the slice
     /// outgrows it. Go scans its stack buffer only while a live pointer reaches it, and runtime's
     /// TestGCTestIsReachable reads the difference: the outgrown store's elements answer reachable (gcroot: the
     /// test's frame, the temp, the 4-element store).
     /// </remarks>
-    [MethodImpl(MethodImplOptions.NoInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> append<T>(in stackAppend<T> buffer, slice<T> slice, params ReadOnlySpan<T> elems)
+    {
+        if (buffer.moves || !buffer.used && slice.Length == 0)
+            return appendBuffered(in buffer, slice, elems);
+
+        return go.slice<T>.Append(slice, elems);
+    }
+
+    // The append that may take the buffer, or that tracks a moving buffer's store; never inlined (see append).
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static slice<T> appendBuffered<T>(in stackAppend<T> buffer, slice<T> slice, ReadOnlySpan<T> elems)
     {
         nint newLength = slice.Length + elems.Length;
 
