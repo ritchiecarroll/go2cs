@@ -3144,6 +3144,9 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target)
     {
+        if (AssertHit(target, out T hit))
+            return hit;
+
         if (TryTypeAssert(target, out T value))
             return value;
 
@@ -3151,6 +3154,49 @@ public static partial class builtin
             target = interfaceAdapter.Value!;
 
         throw RuntimeErrorPanic.TypeAssertion(typeof(object), target, typeof(T));
+    }
+
+    // The head of every `x.(T)`: a HIT it can prove cheaply, or false to send the assertion to TryTypeAssert's
+    // body. Inlined, it is specialized for the call site's T. TryTypeAssert<T> runs as ONE shared body for every
+    // reference T (every pointer and every interface), where each `is T`, typeof(T) and per-T static is a runtime
+    // lookup, so a pointer assert cost ~14 ns where Go's is one compare (~1 ns). Here T is exact.
+    //
+    // It answers only what the body would answer, and only where that is cheap to prove:
+    //  - a concrete T other than object: `target is T`. No adapter is ever a concrete Go type, so this is the body's
+    //    own `case T`; a raw string asserted to @string, a typed nil func and every miss fall through.
+    //  - an interface T on a RAW value (not an adapter, not a typed nil func): `target is T`, then the itab slot.
+    //    An adapter falls through because the body unwraps it first: the Go dynamic value is the one it wraps,
+    //    even when the adapter implements T itself.
+    // `any` (object) is neither, so it always takes the body, which unwraps an interface adapter to its value.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AssertHit<T>(object? target, out T value)
+    {
+        if (!typeof(T).IsInterface)
+        {
+            if (typeof(T) != typeof(object) && target is T typed)
+            {
+                value = typed;
+                return true;
+            }
+        }
+        else if (target is not null and not IGoAdapter and not NilFuncValue)
+        {
+            if (target is T direct)
+            {
+                value = direct;
+                return true;
+            }
+
+            if (Itab<T>.TryGetResolver(target.GetType(), AdapterRegistry.Epoch, out Func<object, object>? resolve) &&
+                resolve is not null && resolve(target) is T resolved)
+            {
+                value = resolved;
+                return true;
+            }
+        }
+
+        value = default!;
+        return false;
     }
 
     /// <summary>
@@ -3531,6 +3577,9 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target, bool _)
     {
+        if (AssertHit(target, out T hit))
+            return (hit, true);
+
         return TryTypeAssert(target, out T? value) ? (value, true) : (GoZero<T>(), false);
     }
 
@@ -3548,7 +3597,7 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this object target, out T? value)
     {
-        if (TryTypeAssert(target, out value))
+        if (AssertHit(target, out value) || TryTypeAssert(target, out value))
             return true;
 
         value = GoZero<T>();
@@ -4291,6 +4340,9 @@ public static partial class builtin
         DynamicallyAccessedMemberTypes.NonPublicFields
     )] T>(this TSource target)
     {
+        if (AssertHit((object?)target, out T hit))
+            return hit;
+
         if (TryTypeAssert((object?)target, out T value))
             return value;
 
