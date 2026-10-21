@@ -37,6 +37,8 @@ public class FieldAccessGeneratorTests
         public class ж<T> { public ref TF field<TF>(FieldRefFunc<T, TF> f) => throw null!; }
         public struct array<T> { }
         public sealed class GoFieldAccessAttribute(params System.Type[] types) : System.Attribute { }
+        public interface IUnsafePointer { }
+        public static partial class unsafe_package { public class Pointer : IUnsafePointer { } }
         """;
 
     private const string Package = """
@@ -165,6 +167,54 @@ public class FieldAccessGeneratorTests
 
         StringAssert.Contains(generated, "extension<T>(global::go.ж<global::go.main_package.pair<T>> ʗp) where T : struct");
         StringAssert.Contains(generated, "public ref T First => ref ʗp.field(global::go.main_package.pair<T>.ᏑFirst);");
+    }
+
+    // HEADER-SHAPED structs: an unsafe.Pointer field, then one or two ints, in declaration order. Go's slice and string
+    // headers (internal/unsafeheader's Slice and String, runtime's slice and stringStruct, internal/runtime/maps'
+    // stringStruct), which golib's header boxes serve over a slice or string variable. Beside them, a struct that only
+    // resembles one (a third field that is not an int) and one whose first field is a typed pointer.
+    private const string Headers = """
+        namespace go;
+
+        [GoFieldAccess(typeof(Slice), typeof(String), typeof(notHeader), typeof(typedHeader))]
+        partial class unsafeheader_package
+        {
+            public partial struct Slice { public unsafe_package.Pointer Data; public nint Len; public nint Cap; }
+
+            public partial struct String { public unsafe_package.Pointer Data; public nint Len; }
+
+            public partial struct notHeader { public unsafe_package.Pointer Data; public nint Len; public uint Cap; }
+
+            public partial struct typedHeader { public ж<byte> Data; public nint Len; public nint Cap; }
+        }
+        """;
+
+    [TestMethod]
+    public void AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader()
+    {
+        // A ref cannot be intercepted, and the header's last store is followed by no access of the box, so the setter is
+        // the one point at which golib's header box sees the finished header (ж<T>.OnHeaderStore).
+        string generated = Generate(Headers);
+        const string Slice = "global::go.unsafeheader_package.Slice";
+        const string String = "global::go.unsafeheader_package.String";
+
+        StringAssert.Contains(generated, $"public global::go.unsafe_package.Pointer Data {{ get => ʗp.field({Slice}.ᏑData); set {{ ʗp.field({Slice}.ᏑData) = value; ʗp.OnHeaderStore(); }} }}");
+        StringAssert.Contains(generated, $"public nint Len {{ get => ʗp.field({Slice}.ᏑLen); set {{ ʗp.field({Slice}.ᏑLen) = value; ʗp.OnHeaderStore(); }} }}");
+        StringAssert.Contains(generated, $"public nint Cap {{ get => ʗp.field({Slice}.ᏑCap); set {{ ʗp.field({Slice}.ᏑCap) = value; ʗp.OnHeaderStore(); }} }}");
+        StringAssert.Contains(generated, $"public nint Len {{ get => ʗp.field({String}.ᏑLen); set {{ ʗp.field({String}.ᏑLen) = value; ʗp.OnHeaderStore(); }} }}");
+    }
+
+    [TestMethod]
+    public void AStructThatIsNotHeaderShapedKeepsItsRefProperties()
+    {
+        string generated = Generate(Headers);
+
+        StringAssert.Contains(generated, "public ref uint Cap => ref ʗp.field(global::go.unsafeheader_package.notHeader.ᏑCap);");
+        StringAssert.Contains(generated, "public ref nint Len => ref ʗp.field(global::go.unsafeheader_package.notHeader.ᏑLen);");
+        StringAssert.Contains(generated, "public ref global::go.ж<byte> Data => ref ʗp.field(global::go.unsafeheader_package.typedHeader.ᏑData);");
+
+        // And every property of an ordinary record is still a ref.
+        Assert.IsFalse(Generate(Package).Contains("OnHeaderStore"), "no ordinary struct's property commits anything");
     }
 
     [TestMethod]
