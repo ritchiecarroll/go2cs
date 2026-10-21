@@ -101,7 +101,7 @@ Before, `src/core/time/time.cs`:
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:937 -->
+<!-- source: src/core/time/time.cs:938 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```
@@ -240,7 +240,7 @@ internal static nint format(this Duration d, [GoArrayDims(32)] ж<array<byte>> �
 
 After, the same file:
 
-<!-- source: src/core/time/time.cs:975 -->
+<!-- source: src/core/time/time.cs:976 -->
 ```csharp
 internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
 ```
