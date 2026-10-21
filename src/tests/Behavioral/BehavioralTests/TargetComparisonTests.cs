@@ -970,6 +970,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
+    public void CheckInterfaceEqualityTyped() => CheckTarget("InterfaceEqualityTyped");
+
+    [TestMethod]
     public void CheckInterfaceFieldNamedScalar() => CheckTarget("InterfaceFieldNamedScalar");
 
     [TestMethod]

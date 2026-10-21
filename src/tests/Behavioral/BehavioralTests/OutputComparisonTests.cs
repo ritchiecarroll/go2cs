@@ -923,6 +923,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckInterfaceAssertionMapKey() => CheckTarget("InterfaceAssertionMapKey");
 
     [TestMethod]
+    public void CheckInterfaceEqualityTyped() => CheckTarget("InterfaceEqualityTyped");
+
+    [TestMethod]
     public void CheckInterfaceFieldNamedScalar() => CheckTarget("InterfaceFieldNamedScalar");
 
     [TestMethod]
