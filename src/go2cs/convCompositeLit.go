@@ -1197,7 +1197,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 			lastEnd = compositeLit.Elts[len(compositeLit.Elts)-1].End()
 		}
 
-		if v.writeListComments(result, compositeLit.Lbrace, lastEnd, compositeLit.Rbrace, v.indentLevel+1) && rbracePrefix == "" {
+		if endsInLineComment, _ := v.writeListComments(result, compositeLit.Lbrace, lastEnd, compositeLit.Rbrace, v.indentLevel+1); endsInLineComment && rbracePrefix == "" {
 			rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 		}
 	}

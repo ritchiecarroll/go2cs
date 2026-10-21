@@ -45,10 +45,15 @@ func isSimpleIdentifierName(s string) bool {
 // item ends and limit where the next one starts. Only comments after open are the list's: a list can be
 // rendered before the code ahead of it is written (a lowered switch renders its next case's condition
 // before the body above it), and a comment there belongs to that code. It reports whether what it wrote
-// ends in a line comment, after which the next item must start a new line.
-func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, limit token.Pos, indentLevel int) bool {
+// ends in a line comment, after which the next item must start a new line, and the last Go line it wrote
+// (prevEnd's line when it wrote nothing), which is where a blank line above the next item is measured from.
+func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, limit token.Pos, indentLevel int) (bool, int) {
 	if !v.options.includeComments || !prevEnd.IsValid() || !limit.IsValid() {
-		return false
+		if !prevEnd.IsValid() {
+			return false, 0
+		}
+
+		return false, v.fset.Position(prevEnd).Line
 	}
 
 	prevLine := v.fset.Position(prevEnd).Line
@@ -94,7 +99,16 @@ func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, lim
 		v.sortedCommentPos = removeCommentPos(v.sortedCommentPos, pos)
 	}
 
-	return endsInLineComment
+	return endsInLineComment, lastLine
+}
+
+// lineStartPos returns the position where Go line `line` of the file holding at begins, for goBlankLineBetween.
+func (v *Visitor) lineStartPos(line int, at token.Pos) token.Pos {
+	if v.file == nil {
+		v.file = v.fset.File(at)
+	}
+
+	return v.file.LineStart(line)
 }
 
 func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callContext *CallExprContext) string {
@@ -134,15 +148,25 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			if i == 0 && prevEndPos.IsValid() {
 				exprOnNewLine = v.isLineFeedBetween(prevEndPos, expr.Pos())
 
-				if v.writeListComments(result, prevEndPos, prevEndPos, expr.Pos(), v.indentLevel+1) {
+				if endsInLineComment, _ := v.writeListComments(result, prevEndPos, prevEndPos, expr.Pos(), v.indentLevel+1); endsInLineComment {
 					exprOnNewLine = true
 				}
 			} else {
 				result.WriteRune(',')
 				exprOnNewLine = v.isLineFeedBetween(exprs[i-1].End(), expr.Pos())
 
-				if v.writeListComments(result, prevEndPos, exprs[i-1].End(), expr.Pos(), v.indentLevel+1) {
+				endsInLineComment, lastLine := v.writeListComments(result, prevEndPos, exprs[i-1].End(), expr.Pos(), v.indentLevel+1)
+
+				if endsInLineComment {
 					exprOnNewLine = true
+				}
+
+				// Go's blank line between two items, or between a comment and the item it leads, in every
+				// conversion as between statements (writeStatementGap). It is measured from the last line written,
+				// so the blank above a comment, which writeListComments writes, is not written twice; a line an
+				// omitted comment covers is not blank.
+				if exprOnNewLine && v.goBlankLineBetween(v.lineStartPos(lastLine, expr.Pos()), expr.Pos()) {
+					result.WriteString(v.newline)
 				}
 			}
 
@@ -618,7 +642,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 	if callContext != nil && callContext.callArgs == nil && !forceMultiLine && len(v.callParens) > 0 &&
 		v.callParens[len(v.callParens)-1][0] == prevEndPos && v.callParens[len(v.callParens)-1][2] == exprs[0].Pos() {
 		if rparen := v.callParens[len(v.callParens)-1][1]; rparen > exprs[len(exprs)-1].End() {
-			if v.writeListComments(result, prevEndPos, exprs[len(exprs)-1].End(), rparen, v.indentLevel+1) {
+			if endsInLineComment, _ := v.writeListComments(result, prevEndPos, exprs[len(exprs)-1].End(), rparen, v.indentLevel+1); endsInLineComment {
 				result.WriteString(v.newline)
 				result.WriteString(v.indent(v.indentLevel))
 			}
