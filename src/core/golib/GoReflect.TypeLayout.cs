@@ -1745,8 +1745,6 @@ public static partial class GoReflect
         return invoker.Call(bound, fixedArgs, tail);
     }
 
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     private static VariadicInvoker buildVariadicInvoker(Type delegateType)
     {
         MethodInfo? invoke = DelegateInvoke(delegateType);
@@ -1782,17 +1780,15 @@ public static partial class GoReflect
         if (hasResult)
             typeArguments[^1] = invoke.ReturnType;
 
-        Type familyType = (hasResult ? s_variadicFuncFamily : s_variadicActionFamily)[fixedCount].MakeGenericType(typeArguments);
+        Type familyDefinition = (hasResult ? s_variadicFuncFamily : s_variadicActionFamily)[fixedCount];
+        Type familyType = variadicFamilyType(delegateType, familyDefinition, typeArguments);
 
         // A signature go2cs-gen registered is closed by compiled code (GoReflect.VariadicRegistry.cs).
         if (registeredVariadic(familyType) is { } registered)
             return new VariadicInvoker(familyType, registered.Call);
 
-        MethodInfo trampoline = typeof(GoReflect)
-            .GetMethod($"{(hasResult ? "callVariadicFunc" : "callVariadicAction")}{fixedCount}", BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(typeArguments);
-
-        return new VariadicInvoker(familyType, trampoline.CreateDelegate<Func<Delegate, object?[], Array, object?>>());
+        return new VariadicInvoker(familyType, closeVariadicTrampoline<Func<Delegate, object?[], Array, object?>>(
+            delegateType, familyDefinition, $"{(hasResult ? "callVariadicFunc" : "callVariadicAction")}{fixedCount}", typeArguments));
     }
 
     /// <summary>

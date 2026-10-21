@@ -206,6 +206,46 @@ public class GoReflectBridgeClosureTests
     }
 
     [TestMethod]
+    public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()
+    {
+        // Native AOT has no code for a value-type trampoline compiled code never named, and the runtime's own answer is a
+        // NotSupportedException ("missing native code"). Without dynamic code (this hook stands in for Native AOT under
+        // the JIT) such a family is refused by name instead, as a Go panic naming the family and the registry, for both
+        // the call and MakeFunc's factory. A registered value-type family and a reference-type one (shared code exists
+        // under Native AOT) are still served. Each signature is used by no other test.
+        Funcꓸꓸꓸ<short, short, short> unregistered = (head, rest) => (short)(head + rest.Length);
+        Actionꓸꓸꓸ<object, object> shared = (head, rest) => s_sharedLog = rest.Length;
+        Funcꓸꓸꓸ<ushort, sbyte, @string> registered = (head, rest) => (@string)(head + "+" + rest.Length);
+        GoReflect.RegisterVariadicFunc<ushort, sbyte, @string>();
+
+        go.golib.TypeExtensions.DynamicCodeSupportedOverride = false;
+
+        try
+        {
+            PanicException call = Assert.ThrowsException<PanicException>(() => GoReflect.InvokeVariadic(unregistered, [(short)1], new short[] { 2 }));
+            StringAssert.Contains(call.Message, "Funcꓸꓸꓸ<int16, int16, int16>");
+            StringAssert.Contains(call.Message, "GoReflect.RegisterVariadicFunc");
+
+            System.Reflection.MethodInfo invoke = GoReflect.DelegateInvoke(typeof(Funcꓸꓸꓸ<short, short, short>))!;
+            PanicException make = Assert.ThrowsException<PanicException>(() => GoReflect.BuildVariadicMakeFactory(typeof(Funcꓸꓸꓸ<short, short, short>), invoke, invoke.GetParameters()));
+            StringAssert.Contains(make.Message, "Funcꓸꓸꓸ<int16, int16, int16>");
+
+            Assert.IsNull(GoReflect.InvokeVariadic(shared, [new object()], new object[] { 1, 2, 3 }));
+            Assert.AreEqual(3, s_sharedLog);
+            Assert.AreEqual((@string)"4+2", (@string)GoReflect.InvokeVariadic(registered, [(ushort)4], new sbyte[] { 1, 1 })!);
+        }
+        finally
+        {
+            go.golib.TypeExtensions.DynamicCodeSupportedOverride = null;
+        }
+
+        // With dynamic code, as under the JIT, the same unregistered family closes.
+        Assert.AreEqual((short)3, (short)GoReflect.InvokeVariadic(unregistered, [(short)1], new short[] { 2, 2 })!);
+    }
+
+    private static int s_sharedLog;
+
+    [TestMethod]
     public void AVariadicTailAliasesTheArrayItWasHandedRatherThanACopy()
     {
         // The tail is a Span OVER the array, so the callee sees the caller's storage. Asserting it

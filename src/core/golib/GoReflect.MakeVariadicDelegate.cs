@@ -27,8 +27,6 @@ public static partial class GoReflect
     // The per-delegate-type factory for a variadic func delegate -- the reverse of
     // buildVariadicInvoker. Mirrors its type-argument extraction exactly (the family's type
     // arguments ARE the delegate's own parameter types), then closes the matching make-trampoline.
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
     internal static Func<Func<object?[], object?>, Delegate> BuildVariadicMakeFactory(
         Type delegateType, MethodInfo invoke, ParameterInfo[] parameters)
     {
@@ -57,18 +55,15 @@ public static partial class GoReflect
         if (hasResult)
             typeArguments[^1] = invoke.ReturnType;
 
-        // A signature go2cs-gen registered is closed by compiled code (GoReflect.VariadicRegistry.cs).
-        Type familyType = (hasResult ? s_variadicFuncFamily : s_variadicActionFamily)[fixedCount].MakeGenericType(typeArguments);
+        Type familyDefinition = (hasResult ? s_variadicFuncFamily : s_variadicActionFamily)[fixedCount];
+        Type familyType = variadicFamilyType(delegateType, familyDefinition, typeArguments);
 
+        // A signature go2cs-gen registered is closed by compiled code (GoReflect.VariadicRegistry.cs).
         if (registeredVariadic(familyType) is { } registered)
             return registered.Make;
 
-        MethodInfo trampoline = typeof(GoReflect)
-            .GetMethod($"{(hasResult ? "makeVariadicFunc" : "makeVariadicAction")}{fixedCount}",
-                BindingFlags.NonPublic | BindingFlags.Static)!
-            .MakeGenericMethod(typeArguments);
-
-        return trampoline.CreateDelegate<Func<Func<object?[], object?>, Delegate>>();
+        return closeVariadicTrampoline<Func<Func<object?[], object?>, Delegate>>(
+            delegateType, familyDefinition, $"{(hasResult ? "makeVariadicFunc" : "makeVariadicAction")}{fixedCount}", typeArguments);
     }
 
     // The make family: a lambda per (arity, Action/Func) that carries the Span<TArg> tail a

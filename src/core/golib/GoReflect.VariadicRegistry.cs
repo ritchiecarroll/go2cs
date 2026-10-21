@@ -9,6 +9,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace go;
 
@@ -48,6 +50,51 @@ public static partial class GoReflect
 
     // Whether compiled code registered the family instantiation; GolibTests reads it.
     internal static bool IsVariadicRegistered(Type familyType) => s_variadicTrampolines.ContainsKey(familyType);
+
+    // The family instantiation of a variadic signature. Under Native AOT a value-type instantiation exists only when some
+    // compiled code constructed it (a registration does); one that does not is refused by name.
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    private static Type variadicFamilyType(Type delegateType, Type familyDefinition, Type[] typeArguments)
+    {
+        try
+        {
+            return familyDefinition.MakeGenericType(typeArguments);
+        }
+        catch (NotSupportedException)
+        {
+            throw refuseVariadic(delegateType, familyDefinition, typeArguments);
+        }
+    }
+
+    // An unregistered signature's trampoline, closed by MakeGenericMethod: always under the JIT, and under Native AOT
+    // only over reference types, whose shared code exists. A value-type family is refused by name there, as a Go panic
+    // naming the family and the registry, never the runtime's missing-native-code exception.
+    [UnconditionalSuppressMessage("Trimming", "IL2060", Justification = GoTypeRegistry.RegisteredGenericJustification)]
+    private static TDelegate closeVariadicTrampoline<TDelegate>(Type delegateType, Type familyDefinition, string trampoline, Type[] typeArguments)
+        where TDelegate : Delegate
+    {
+        if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))
+            throw refuseVariadic(delegateType, familyDefinition, typeArguments);
+
+        try
+        {
+            return typeof(GoReflect).GetMethod(trampoline, BindingFlags.NonPublic | BindingFlags.Static)!.MakeGenericMethod(typeArguments).CreateDelegate<TDelegate>();
+        }
+        catch (NotSupportedException)
+        {
+            throw refuseVariadic(delegateType, familyDefinition, typeArguments);
+        }
+    }
+
+    private static PanicException refuseVariadic(Type delegateType, Type familyDefinition, Type[] typeArguments)
+    {
+        string family = familyDefinition.Name[..familyDefinition.Name.IndexOf('`')];
+        string kind = family.StartsWith("Func", StringComparison.Ordinal) ? "Func" : "Action";
+
+        return builtin.panic($"go2cs: reflect cannot call or make the variadic func {GoTypeName(delegateType)}: its family " +
+            $"{family}<{string.Join(", ", System.Array.ConvertAll(typeArguments, GoTypeName))}> has no compiled trampoline (no " +
+            $"GoReflect.RegisterVariadic{kind} registration from go2cs-gen's variadic registry) and this runtime cannot generate code");
+    }
 
     // Called by go2cs-gen's generated code only: each names one Actionꓸꓸꓸ/Funcꓸꓸꓸ instantiation, the
     // type arguments in the family's own order (fixed parameters, the tail's element, the result).
