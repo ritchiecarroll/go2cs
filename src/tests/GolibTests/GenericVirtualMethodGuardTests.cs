@@ -30,12 +30,10 @@ public class GenericVirtualMethodGuardTests
     private const string PredatesPtrconv =
         "predates ptrconv: every box implements or inherits it, and it is inside the measured 22-28 min folding baseline (ruled 2026-10-20)";
 
+    // IPointer<T>.of<TElem> x3 and at<TElem> left the baseline on 2026-10-21: they are ж<T>'s own members now (about 3
+    // min of ILC with folding on, two A/B pairs).
     private static readonly Dictionary<string, string> s_baseline = new()
     {
-        ["go.IPointer`1: go.ж`1[TElem] at[TElem](IntPtr)"] = PredatesPtrconv,
-        ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldPtrFunc`2[T,TElem])"] = PredatesPtrconv,
-        ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldRefFunc`1[TElem])"] = PredatesPtrconv,
-        ["go.IPointer`1: go.ж`1[TElem] of[TElem](go.FieldRefFunc`2[T,TElem])"] = PredatesPtrconv,
         ["go.ж`1: go.ж`1[TDst] TryPinnedReinterpret[TDst]()"] = PredatesPtrconv,
     };
 

@@ -81,6 +81,7 @@
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerIntrinsic_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compilerPropertyClass_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)compositeLitBlankLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compositeLitComments_test.go" />
     <None Include="$(MSBuildThisFileDirectory)compoundShiftGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)commandLineOptions.go" />
@@ -330,6 +331,7 @@
     <None Include="$(MSBuildThisFileDirectory)linkStagedFixtures_test.go" />
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold.go" />
     <None Include="$(MSBuildThisFileDirectory)literalFloatConstFold_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)localFuncTypeMarker_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localStringConstHoist_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localTypeLift_test.go" />
     <None Include="$(MSBuildThisFileDirectory)localValueIfaceCallConversion_test.go" />

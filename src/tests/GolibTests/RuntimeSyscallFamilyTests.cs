@@ -86,9 +86,11 @@ public class RuntimeSyscallFamilyTests
     public void GetCallerPCStaysThrowingByName()
     {
         // The ruling's other half: the intrinsic's contract cannot be met, so it is NOT given a value.
+        // internal/runtime/sys's hand-owned companion refuses it as a Go panic naming the intrinsic,
+        // where the bodyless partial's stub used to throw NotImplementedException.
         Exception? thrown = OnGoroutine(runtime_package.GoGetCallerPC);
 
-        Assert.IsInstanceOfType(thrown, typeof(NotImplementedException));
+        Assert.IsInstanceOfType(thrown, typeof(PanicException), $"got {thrown?.GetType().Name}: {thrown?.Message}");
         StringAssert.Contains(thrown!.Message, "GetCallerPC");
     }
 }

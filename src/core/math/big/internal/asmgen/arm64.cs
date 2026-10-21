@@ -11,6 +11,7 @@ internal static void initᴛArchARM64() { ArchARM64 = Ꮡ(new Arch(
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
+
     regs: new @string[]{
         // R18 is the platform register.
         // R27 is the assembler/linker temporary (which we could potentially use but don't).
@@ -22,6 +23,7 @@ internal static void initᴛArchARM64() { ArchARM64 = Ꮡ(new Arch(
         "R20"u8, "R21"u8, "R22"u8, "R23"u8, "R24"u8, "R25"u8, "R26"u8
     }.slice(),
     reg0: "ZR"u8,
+
     mov: "MOVD"u8,
     add: "ADD"u8,
     adds: "ADDS"u8,
@@ -38,9 +40,12 @@ internal static void initᴛArchARM64() { ArchARM64 = Ꮡ(new Arch(
     and: "AND"u8,
     or: "ORR"u8,
     xor: "EOR"u8,
+
     addWords: "ADD %[1]s<<3, %[2]s, %[3]s"u8,
+
     jmpZero: "CBZ %s, %s"u8,
     jmpNonZero: "CBNZ %s, %s"u8,
+
     loadIncN: arm64LoadIncN,
     loadDecN: arm64LoadDecN,
     storeIncN: arm64StoreIncN,

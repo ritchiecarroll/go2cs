@@ -446,7 +446,7 @@ tree:
 			}
 ```
 
-<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:722-729 -->
+<!-- source: src/core/vendor/golang.org/x/text/unicode/bidi/core.cs:724-731 -->
 ```csharp
             if (t == L){
                 // no change
@@ -655,7 +655,7 @@ After the last element, above the closing bracket:
 			}
 ```
 
-<!-- source: src/core/database/sql/sql.cs:3190-3194 -->
+<!-- source: src/core/database/sql/sql.cs:3192-3196 -->
 ```csharp
                 Ꮡrows.ValueSlot = Ꮡ(new Rows(
                     dc: dc,
