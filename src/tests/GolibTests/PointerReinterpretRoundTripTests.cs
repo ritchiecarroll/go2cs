@@ -19,9 +19,10 @@ namespace GolibTests;
 /// <c>Reinterpret</c> returns a reinterpret VIEW over its source. Before the round-trip collapse a reinterpret of such a view
 /// built a view over the VIEW, which no equality rule tied back to the original box, so the round trip read false while
 /// writes through it still aliased (the PointerConversionAliasing probe, claude/c1-ptrconv-probe, at hop 5f774114a5). The
-/// collapse answers the ROOT itself when the target is the root's own type, by a type test on the root (no generic virtual
-/// method: GenericVirtualMethodGuardTests); any other chain stays a view over the view, equal to a direct reinterpret of
-/// the root through FieldRefBox's different-sources equality.
+/// collapse walks the chain to its ROOT (the first box that is not a reinterpret view) and answers the root itself when the
+/// target is the root's own type, or a fresh view over the root when the root's storage can hold the target; only a chain
+/// the root cannot alias stays a view over the view. Nothing in it is generic in the root's type
+/// (GenericVirtualMethodGuardTests).
 /// </remarks>
 [TestClass]
 public class PointerReinterpretRoundTripTests

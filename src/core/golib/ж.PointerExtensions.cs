@@ -775,58 +775,58 @@ internal static class ReinterpretAliasing
         return root;
     }
 
-        // Layout compatibility, limited to the correspondences the converter actually generates —
-        // it is never a general claim about two arbitrary C# structs.
-        private static bool LayoutCompatible(Type src, Type dst)
+    // Layout compatibility, limited to the correspondences the converter actually generates —
+    // it is never a general claim about two arbitrary C# structs.
+    private static bool LayoutCompatible(Type src, Type dst)
+    {
+        if (src == dst)
+            return true;
+
+        // Go's struct-embedding idiom and the generated named-type wrappers: one side is a
+        // (possibly nested) single-field wrapper over the other, so the wrapped field starts at
+        // offset 0 and carries the whole layout.
+        if (UnwrapSingleField(src) == dst || UnwrapSingleField(dst) == src)
+            return true;
+
+        // Otherwise require the same fields in the same order, all the way down — two spellings
+        // of one shape (the `(*view)(unsafe.Pointer(h))` struct-pun).
+        Type[] srcFields = FieldTypes(src), dstFields = FieldTypes(dst);
+
+        if (srcFields.Length != dstFields.Length)
+            return false;
+
+        for (int i = 0; i < srcFields.Length; i++)
         {
-            if (src == dst)
-                return true;
-
-            // Go's struct-embedding idiom and the generated named-type wrappers: one side is a
-            // (possibly nested) single-field wrapper over the other, so the wrapped field starts at
-            // offset 0 and carries the whole layout.
-            if (UnwrapSingleField(src) == dst || UnwrapSingleField(dst) == src)
-                return true;
-
-            // Otherwise require the same fields in the same order, all the way down — two spellings
-            // of one shape (the `(*view)(unsafe.Pointer(h))` struct-pun).
-            Type[] srcFields = FieldTypes(src), dstFields = FieldTypes(dst);
-
-            if (srcFields.Length != dstFields.Length)
+            if (srcFields[i] != dstFields[i] && !LayoutCompatible(srcFields[i], dstFields[i]))
                 return false;
-
-            for (int i = 0; i < srcFields.Length; i++)
-            {
-                if (srcFields[i] != dstFields[i] && !LayoutCompatible(srcFields[i], dstFields[i]))
-                    return false;
-            }
-
-            return srcFields.Length > 0;
         }
 
-        private static Type UnwrapSingleField(Type type)
-        {
-            // Bounded: each hop strictly descends into a field's type, and a struct cannot contain
-            // itself, so the chain terminates.
-            for (Type[] fields = FieldTypes(type); fields.Length == 1; fields = FieldTypes(type))
-                type = fields[0];
+        return srcFields.Length > 0;
+    }
 
-            return type;
-        }
+    private static Type UnwrapSingleField(Type type)
+    {
+        // Bounded: each hop strictly descends into a field's type, and a struct cannot contain
+        // itself, so the chain terminates.
+        for (Type[] fields = FieldTypes(type); fields.Length == 1; fields = FieldTypes(type))
+            type = fields[0];
 
-        [UnconditionalSuppressMessage("Trimming", "IL2070",
-            Justification = "Reinterpreted Go struct surrogates are referenced by the converted code that reinterprets them.")]
-        private static Type[] FieldTypes(Type type)
-        {
-            if (!type.IsValueType || type.IsPrimitive || type.IsEnum)
-                return [];
+        return type;
+    }
 
-            FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            Type[] fieldTypes = new Type[fields.Length];
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Reinterpreted Go struct surrogates are referenced by the converted code that reinterprets them.")]
+    private static Type[] FieldTypes(Type type)
+    {
+        if (!type.IsValueType || type.IsPrimitive || type.IsEnum)
+            return [];
 
-            for (int i = 0; i < fields.Length; i++)
-                fieldTypes[i] = fields[i].FieldType;
+        FieldInfo[] fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        Type[] fieldTypes = new Type[fields.Length];
 
-            return fieldTypes;
-        }
+        for (int i = 0; i < fields.Length; i++)
+            fieldTypes[i] = fields[i].FieldType;
+
+        return fieldTypes;
+    }
 }

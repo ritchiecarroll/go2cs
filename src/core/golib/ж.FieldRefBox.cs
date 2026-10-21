@@ -218,6 +218,14 @@ public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IEx
         if (m_token.Equals(fr.m_token))
             return true;
 
+        // Two REINTERPRET views of one source are one Go address: each is its source's own storage at offset 0, whatever
+        // accessor spelled it -- ReinterpretRef<TDst> for a direct `(*U)(p)`, RootReinterpretRef for a chain re-viewed at
+        // its root, UnaliasedRef for a pair that cannot alias (its reads refuse; its address does not change). Go's `==` on
+        // pointers is address equality, so no field offset is needed, and SameGoAddress below would need an EXACT order
+        // token the source may not have (a field whose Go offset cannot be resolved).
+        if (IsReinterpretAccessor(m_token) && IsReinterpretAccessor(fr.m_token))
+            return true;
+
         // The same field reached by the OTHER construction path: converted code's `&s.A` carries go2cs-gen's
         // generated `ᏑA` accessor, reflect's `Field(i).Addr()` carries GoReflect's `goref_A`. Over the same
         // source they are one Go pointer, so compare by the Go field NAME each token spells -- the key
