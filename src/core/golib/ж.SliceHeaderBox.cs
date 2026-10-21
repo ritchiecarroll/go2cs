@@ -91,6 +91,14 @@ namespace go;
 /// reference-bearing box only once Q44's token registry lands.
 /// </para>
 /// </remarks>
+// RED-FIRST STUB (the unsafeheader write-through seat): the store notification the generated header accessors call.
+public abstract partial class ж<T>
+{
+    public virtual void OnHeaderStore()
+    {
+    }
+}
+
 internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
 {
     // ---- the shape, resolved once per (T, TDst) ----
