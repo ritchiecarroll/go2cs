@@ -745,6 +745,11 @@ internal class StructTypeTemplate : TemplateBase
         }
     }
 
+    // The mark on a promoted method's by-value or `this ref` forwarder (golib's GoPromotedAttribute). A method the
+    // type declares looks the same otherwise, and reflect's binder reads the mark to raise Go's nil-pointer fault, not
+    // panicwrap, when a nil *T calls a promoted value method.
+    private const string PromotedMark = "[global::go.GoPromoted] ";
+
     private string PromotedStructReceivers()
     {
         (string typeName, string memberName, bool isReferenceType, bool isPromotedStruct, bool isPublic)[] promotedStructs = StructMembers.Where(item => item.isPromotedStruct).ToArray();
@@ -1230,7 +1235,7 @@ internal class StructTypeTemplate : TemplateBase
                 string goRecv = !method.IsRefRecv ? "" : method.PathHasPointer ? "[global::go.GoCopyBound] " : "[global::go.GoRecv] ";
                 string receiver = ReceiverName(method.Parameters);
 
-                result.Append($"\r\n    {goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
+                result.Append($"\r\n    {PromotedMark}{goRecv}{methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} {receiver}");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -1883,7 +1888,7 @@ internal class StructTypeTemplate : TemplateBase
         string recvMod = pointerSetOnly ? "ref " : "";
         string goRecv = pointerSetOnly ? "[global::go.GoRecv] " : "";
 
-        m_xpkg.Append($"\r\n    {goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
+        m_xpkg.Append($"\r\n    {PromotedMark}{goRecv}{scope} static {method.ReturnType} {method.Name}(this {recvMod}{qualified} {receiver}{sep}{typedParams}) => {receiver}.{embedAccess}.{method.Name}({args});");
         m_xpkg.Append($"\r\n    {scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{qualified}> {AddressPrefix}{receiver}{sep}{typedParams})");
         m_xpkg.Append($"\r\n    {{\r\n        ref var {receiver} = ref {AddressPrefix}{receiver}.Value;\r\n        {ret}{receiver}.{embedAccess}.{method.Name}({args});\r\n    }}");
     }
