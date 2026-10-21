@@ -73,3 +73,24 @@ func boxedVar() int {
 	sink = &q
 	return p + q
 }
+
+func grouped() int {
+	n := 1
+
+	const (
+		a = iota
+		b
+	)
+	return n + b
+}
+
+func twice(n int) int { return n * 2 }
+
+func scoped(xs []int) int {
+	n := len(xs)
+
+	if m := twice(n); m > 3 {
+		return m
+	}
+	return n
+}
