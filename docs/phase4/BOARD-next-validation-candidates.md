@@ -27679,4 +27679,26 @@ crossing it masked dropped blanks): crypto/x509/x509.go:1318 and runtime/runtime
 line below another statement's initialized box, and the C# keeps the blank. Both read go-blank-cs-none at the
 narrowing commit.
 
+**Amended 2026-10-21 (the i7 legs of claude/c2-comment-blank-parity, and bf3499a51).** The census now places a
+Go blank before a declaration group and before a scoped `if`/`switch` initializer. That makes 5 more anchor
+misses visible, each a false go-blank-cs-none: go/internal/gcimporter/ureader.go:271 and :244,
+syscall/exec_linux.go:701, internal/syscall/unix/kernel_version_linux.go:39, net/dnsclient_unix.go:348.
+Two more shapes the census cannot anchor, read on the fix's re-emission as extra:unexplained:
+- a shadowed local the translation renames ΔN (`hash` -> `hashΔ1`): crypto/internal/fips140/rsa/pkcs1v22.go x2,
+  go/types/resolver.go, vendor/golang.org/x/text/transform/transform.go. Accepting ΔN in the blank search
+  alone maps 1196 more Go blanks and moves go-blank-cs-none +351 corpus-wide. It is the largest open precision
+  item here and wants its own measured seat;
+- a Go line whose func literal declares a result type the C# lambda drops (crypto/internal/fips140/ecdsa/ecdsa.go).
+
+## 2026-10-21 — C2 finding: a local func type's marker comment is written with no leading line break and a trailing one, so its doc comment joins the line above — OPEN (found by the i7's tests leg of claude/c2-comment-blank-parity, ruled out of that seat, unowned)
+
+visitFuncType renders a methodless named func type as a marker comment (`// type X is a methodless func type —
+rendered inline as its base delegate`). Inside a function it writes the pending type doc and the marker
+with no leading line break and a trailing one, where every other statement writes a leading break.
+At runtime/mgcscavenge_test.go:581, TestScavengeIndex's opening comment and `type markFunc`'s doc comment were
+emitted on ONE line. claude/c2-comment-blank-parity's gap break splits them, but Go's blank between them
+(:578) is still not written, because the break the gap writes becomes the line end the marker never supplies.
+Census of the GOROOT: 3 local func types, all in tests (0 production), 1 of them a first statement with a doc.
+Fixing it changes the layout of every local marker, so it is its own small seat with its own footprint.
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
