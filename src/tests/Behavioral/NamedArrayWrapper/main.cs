@@ -161,13 +161,13 @@ partial struct scal {
 }
 
 internal static void fromBytes(ref array<uint64> @out, uint64 seed) {
-    foreach (var (i, _) in @out) {
+    foreach (var i in range(@out)) {
         @out[i] = seed + (uint64)i;
     }
 }
 
 internal static void @double(ref mont @out, ref nonMont arg) {
-    foreach (var (i, _) in @out) {
+    foreach (var i in range(@out)) {
         @out[i] = arg[i] * 2;
     }
 }

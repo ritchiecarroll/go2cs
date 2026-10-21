@@ -27,7 +27,7 @@ internal static void Main() {
     touch(ref x.c[2]);
 
     slice<ж<atomic.Int32>> ptrs = default!;
-    foreach (var (i, _) in x.c) {
+    foreach (var i in range(x.c)) {
         ptrs = append(ptrsᴷ, ptrs, Ꮡx.at(counters.Ꮡc, i));
     }
     last(ptrs).Store(7);

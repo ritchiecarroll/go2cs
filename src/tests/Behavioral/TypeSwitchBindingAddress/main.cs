@@ -45,7 +45,7 @@ internal static any process(any tok, ж<resolver> Ꮡr) {
     case start t1ᴛ1: {
         ref var t1 = ref heap(t1ᴛ1, out var Ꮡt1);
         r.fix(Ꮡt1.of(start.Ꮡn));
-        foreach (var (i, _) in t1.attr) {
+        foreach (var i in range(t1.attr)) {
             r.fix(Ꮡ(t1.attr, i));
         }
         return t1;

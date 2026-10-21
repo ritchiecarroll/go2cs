@@ -17,7 +17,7 @@ internal static partial ж<holder> makeHolder(@string name) {
         tail: new slice<nint>(2)
     ));
 
-    foreach (var (i, _) in (~h).tbl) {
+    foreach (var i in range((~h).tbl)) {
         h.Value.tbl[i] = len(name);
     }
 

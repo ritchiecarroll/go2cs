@@ -98,7 +98,7 @@ internal static void Main() {
     arm("widening", () => fmt.Sprint((nint)((uint8)(u + u)), " ", (int64)((int8)(a + a)), " ", (float64)((int8)(a + a)), " ", (nint)((byte)(c - (rune)'0')), " ", (uint32)((uint16)(z + z)), " ", (int32)((int16)(w + w))));
 
     var tbl = new slice<nint>(256);
-    foreach (var (k, _) in tbl) {
+    foreach (var k in range(tbl)) {
         tbl[k] = k;
     }
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
