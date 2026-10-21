@@ -10,7 +10,8 @@
 // arguments, which share the element list). The converted literal keeps each one where Go has it: between two
 // elements, inside a nested literal, and after a comment that leads an element. It adds none: no blank line where
 // Go has none, none after the opening brace. As between statements, the blank lines are kept in every conversion;
-// without `-comments` a line a comment covers is not blank, so a blank above an omitted comment is still kept.
+// without `-comments` a line a comment covers is not blank, so a blank above an omitted comment is still kept. A
+// comment trailing a nested literal's last element is written by the enclosing list, and adds no blank line there.
 
 package main
 
@@ -63,8 +64,18 @@ func commented() map[string]int {
 	}
 }
 
+func trailing() [][]int {
+	return [][]int{
+		{
+			7,
+			8, // ends the first row
+		},
+		{9},
+	}
+}
+
 func main() {
-	println(len(flat()), keyed().name, len(commented()))
+	println(len(flat()), keyed().name, len(commented()), len(trailing()))
 }
 `
 
@@ -91,6 +102,8 @@ func TestCompositeLitBlankLinesKeptUnderComments(t *testing.T) {
 		{"// two follows", false, "no blank line in Go"},
 		{`["two"] = 2,`, true, "a blank line between a comment and the element after it"},
 		{`["three"] = 3`, false, "no blank line in Go"},
+		{"// ends the first row", false, "no blank line in Go"},
+		{"new nint[]{9}.slice()", false, "a comment trailing a nested literal's last element adds no blank line"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)
@@ -114,6 +127,7 @@ func TestCompositeLitBlankLinesKeptWithoutComments(t *testing.T) {
 		{"list: new nint[]{5, 6}", true, "a blank line above an omitted comment is still a blank line"},
 		{`["two"] = 2,`, true, "a blank line after an omitted comment"},
 		{`["three"] = 3`, false, "no blank line in Go"},
+		{"new nint[]{9}.slice()", false, "no blank line in Go"},
 	} {
 		if got := blankAbove(t, lines, c.line); got != c.blank {
 			t.Errorf("%s: blank line above %q = %v, want %v", c.why, c.line, got, c.blank)

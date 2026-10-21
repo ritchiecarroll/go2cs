@@ -88,7 +88,9 @@ func (v *Visitor) writeListComments(builder *strings.Builder, open, prevEnd, lim
 		}
 
 		builder.WriteString(strings.ReplaceAll(comment, "\n", v.newline))
-		lastLine = line + strings.Count(comment, "\n")
+		// A comment from before prevEnd, such as one trailing the last element of a nested literal that the
+		// nested list left unwritten, does not move the line a blank above the next item is measured from.
+		lastLine = max(lastLine, line+strings.Count(comment, "\n"))
 		endsInLineComment = strings.HasPrefix(comment, "//")
 
 		delete(v.standAloneComments, pos)
