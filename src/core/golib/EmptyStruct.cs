@@ -9,7 +9,7 @@ namespace go;
 /// <summary>
 /// Represents an empty struct.
 /// </summary>
-public struct EmptyStruct
+public struct EmptyStruct : IGoEquatable
 {
     public EmptyStruct(NilType _)
     {
@@ -20,6 +20,9 @@ public struct EmptyStruct
     public override bool Equals(object? obj) => obj is EmptyStruct other && Equals(other);
 
     public override int GetHashCode() => base.GetHashCode();
+
+    // Go's == through an interface (builtin.AreEqual): this type's own operator, explicitly, so no member is added.
+    bool IGoEquatable.GoEquals(object? other) => other is EmptyStruct value && this == value;
 
     public static bool operator ==(EmptyStruct left, EmptyStruct right) => left.Equals(right);
 
