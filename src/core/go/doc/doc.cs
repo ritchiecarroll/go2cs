@@ -132,6 +132,7 @@ public static ж<Package> New(ж<ast.Package> Ꮡpkg, @string importPath, Mode m
         Types: sortedTypes(r.types, (Mode)(mode & AllMethods) != 0),
         Vars: sortedValues(r.values, token.VAR),
         Funcs: sortedFuncs(r.funcs, true),
+
         importByName: r.importByName,
         syms: new map<@string, bool>()
     ));

@@ -227,6 +227,14 @@ public static (T, bool) TypeAssert<T>(ΔValue v) {
 internal static any /*i*/ packInterfaceValue(ΔValue v) {
     object? cur = v.live;
     if (cur is not null) {
+        if (v.addrBox is not null && copiesAddressableValue(v.kind()) && cur.GetType().IsValueType) {
+            // Go's packEface copies an ADDRESSABLE value of an indirect type into a fresh allocation, so a later
+            // Set cannot reach the interface value it returned: one malloc, which reflect's TestTypeAssertAllocs
+            // asserts (TypeAssert[any](ValueOf(&val).Elem()) wants exactly 1). The read above made that same one
+            // copy, a fresh box of the slot's value, outside golib's allocation sites, so the counter never saw
+            // it and testing.AllocsPerRun reported 24 BYTES against Go's count of 1. It is charged here, once.
+            AllocationCounter.Count();
+        }
         return cur;
     }
     ΔKind k = v.kind();
@@ -244,6 +252,12 @@ internal static any /*i*/ packInterfaceValue(ΔValue v) {
     System.Type? st = v.typ_ == nil ? null : v.typ_.Value.sysType;
     return (st is null ? null : GoReflect.CanonicalNilPointer(st))!;
 }
+
+// Whether Go's Interface() of an ADDRESSABLE Value of kind k copies the datum (packEface's IfaceIndir arm). A
+// pointer-shaped kind is stored in the interface word itself, and an Interface-kind slot is returned as the
+// interface it holds (valueInterface's special case, before packEface), so neither allocates in Go.
+private static bool copiesAddressableValue(ΔKind k) =>
+    k != Ptr && k != Map && k != Chan && k != Func && k != ΔUnsafePointer && k != ΔInterface;
 
 // storedDatum is what a reflect WRITE path stores for x into a slot of kind slotKind. An INTERFACE
 // slot takes the interface packing of x -- packInterfaceValue, the same re-encoding Interface()

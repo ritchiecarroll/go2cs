@@ -12,6 +12,7 @@ internal static void initᴛArchMIPS64x() { ArchMIPS64x = Ꮡ(new Arch(
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
+
     regs: new @string[]{
         // R0 is 0
         // R23 is the assembler/linker temporary (which we use too).
@@ -28,6 +29,7 @@ internal static void initᴛArchMIPS64x() { ArchMIPS64x = Ꮡ(new Arch(
     regTmp: "R23"u8,
     regCarry: "R24"u8,
     regAltCarry: "R25"u8,
+
     mov: "MOVV"u8,
     add: "ADDVU"u8,
     sltu: "SGTU"u8, // SGTU args are swapped, so it's really SLTU
@@ -38,6 +40,7 @@ internal static void initᴛArchMIPS64x() { ArchMIPS64x = Ꮡ(new Arch(
     and: "AND"u8,
     or: "OR"u8,
     xor: "XOR"u8,
+
     jmpZero: "BEQ %s, %s"u8,
     jmpNonZero: "BNE %s, %s"u8
 )); }

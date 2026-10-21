@@ -50,12 +50,15 @@ internal static ж<types.Package> readUnifiedPackage(ж<token.FileSet> Ꮡfset, 
         ref var pr = ref heap<pkgReader>(out var Ꮡpr);
         pr = new pkgReader(
             PkgDecoder: input.ΔClone(),
+
             fake: new fakeFileSet(
                 fset: Ꮡfset,
                 files: new map<@string, ж<fileInfo>>()
             ),
+
             ctxt: Ꮡctxt,
             imports: imports,
+
             posBases: new slice<@string>(input.NumElems(pkgbits.SectionPosBase)),
             pkgs: new slice<ж<types.Package>>(input.NumElems(pkgbits.SectionPkg)),
             typs: new slice<typesꓸType>(input.NumElems(pkgbits.SectionType))

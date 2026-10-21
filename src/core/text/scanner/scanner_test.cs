@@ -82,6 +82,7 @@ internal static slice<token> tokenList = new token[]{
     new(Comment, "// /* comment */"u8),
     new(Comment, "// // comment //"u8),
     new(Comment, "//"u8 + f100),
+
     new(Comment, "// general comments"u8),
     new(Comment, "/**/"u8),
     new(Comment, "/***/"u8),
@@ -90,6 +91,7 @@ internal static slice<token> tokenList = new token[]{
     new(Comment, "/* /* comment */"u8),
     new(Comment, "/*\n comment\n*/"u8),
     new(Comment, "/*"u8 + f100 + "*/"u8),
+
     new(Comment, "// identifiers"u8),
     new(Ident, "a"u8),
     new(Ident, "a0"u8),
@@ -108,18 +110,21 @@ internal static slice<token> tokenList = new token[]{
     new(Ident, "foo६४"u8),
     new(Ident, "bar９８７６"u8),
     new(Ident, f100),
+
     new(Comment, "// decimal ints"u8),
     new(Int, "0"u8),
     new(Int, "1"u8),
     new(Int, "9"u8),
     new(Int, "42"u8),
     new(Int, "1234567890"u8),
+
     new(Comment, "// octal ints"u8),
     new(Int, "00"u8),
     new(Int, "01"u8),
     new(Int, "07"u8),
     new(Int, "042"u8),
     new(Int, "01234567"u8),
+
     new(Comment, "// hexadecimal ints"u8),
     new(Int, "0x0"u8),
     new(Int, "0x1"u8),
@@ -133,6 +138,7 @@ internal static slice<token> tokenList = new token[]{
     new(Int, "0X42"u8),
     new(Int, "0X123456789abcDEF"u8),
     new(Int, "0X"u8 + f100),
+
     new(Comment, "// floats"u8),
     new(Float, "0."u8),
     new(Float, "1."u8),
@@ -162,6 +168,7 @@ internal static slice<token> tokenList = new token[]{
     new(Float, "1E-10"u8),
     new(Float, "42E+10"u8),
     new(Float, "01234567890E-10"u8),
+
     new(Comment, "// chars"u8),
     new(Char, @"' '"u8),
     new(Char, @"'a'"u8),
@@ -182,6 +189,7 @@ internal static slice<token> tokenList = new token[]{
     new(Char, @"'\ufA16'"u8),
     new(Char, @"'\U00000000'"u8),
     new(Char, @"'\U0000ffAB'"u8),
+
     new(Comment, "// strings"u8),
     new(ΔString, @""" """u8),
     new(ΔString, @"""a"""u8),
@@ -203,11 +211,13 @@ internal static slice<token> tokenList = new token[]{
     new(ΔString, @"""\U00000000"""u8),
     new(ΔString, @"""\U0000ffAB"""u8),
     new(ΔString, @""""u8 + f100 + @""""u8),
+
     new(Comment, "// raw strings"u8),
     new(RawString, "``"u8),
     new(RawString, "`\\`"u8),
     new(RawString, "`"u8 + "\n\n/* foobar */\n\n"u8 + "`"u8),
     new(RawString, "`"u8 + f100 + "`"u8),
+
     new(Comment, "// individual characters"u8),
     // NUL character is not allowed
     new((rune)'\x01', "\x01"u8),
@@ -774,6 +784,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Int, "0b0"u8, "0b0"u8, ""u8),
         new(Int, "0b1010"u8, "0b1010"u8, ""u8),
         new(Int, "0B1110"u8, "0B1110"u8, ""u8),
+
         new(Int, "0b"u8, "0b"u8, "binary literal has no digits"u8),
         new(Int, "0b0190"u8, "0b0190"u8, "invalid digit '9' in binary literal"u8),
         new(Int, "0b01a0"u8, "0b01 a0"u8, ""u8), // only accept 0-9
@@ -789,6 +800,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Int, "0o0"u8, "0o0"u8, ""u8),
         new(Int, "0o1234"u8, "0o1234"u8, ""u8),
         new(Int, "0O1234"u8, "0O1234"u8, ""u8),
+
         new(Int, "0o"u8, "0o"u8, "octal literal has no digits"u8),
         new(Int, "0o8123"u8, "0o8123"u8, "invalid digit '8' in octal literal"u8),
         new(Int, "0o1293"u8, "0o1293"u8, "invalid digit '9' in octal literal"u8),
@@ -804,6 +816,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         // 0-octals
         new(Int, "0"u8, "0"u8, ""u8),
         new(Int, "0123"u8, "0123"u8, ""u8),
+
         new(Int, "08123"u8, "08123"u8, "invalid digit '8' in octal literal"u8),
         new(Int, "01293"u8, "01293"u8, "invalid digit '9' in octal literal"u8),
         new(Int, "0F."u8, "0 F ."u8, ""u8), // only accept 0-9
@@ -813,30 +826,38 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         // decimals
         new(Int, "1"u8, "1"u8, ""u8),
         new(Int, "1234"u8, "1234"u8, ""u8),
+
         new(Int, "1f"u8, "1 f"u8, ""u8), // only accept 0-9
 
         // decimal floats
         new(Float, "0."u8, "0."u8, ""u8),
         new(Float, "123."u8, "123."u8, ""u8),
         new(Float, "0123."u8, "0123."u8, ""u8),
+
         new(Float, ".0"u8, ".0"u8, ""u8),
         new(Float, ".123"u8, ".123"u8, ""u8),
         new(Float, ".0123"u8, ".0123"u8, ""u8),
+
         new(Float, "0.0"u8, "0.0"u8, ""u8),
         new(Float, "123.123"u8, "123.123"u8, ""u8),
         new(Float, "0123.0123"u8, "0123.0123"u8, ""u8),
+
         new(Float, "0e0"u8, "0e0"u8, ""u8),
         new(Float, "123e+0"u8, "123e+0"u8, ""u8),
         new(Float, "0123E-1"u8, "0123E-1"u8, ""u8),
+
         new(Float, "0.e+1"u8, "0.e+1"u8, ""u8),
         new(Float, "123.E-10"u8, "123.E-10"u8, ""u8),
         new(Float, "0123.e123"u8, "0123.e123"u8, ""u8),
+
         new(Float, ".0e-1"u8, ".0e-1"u8, ""u8),
         new(Float, ".123E+10"u8, ".123E+10"u8, ""u8),
         new(Float, ".0123E123"u8, ".0123E123"u8, ""u8),
+
         new(Float, "0.0e1"u8, "0.0e1"u8, ""u8),
         new(Float, "123.123E-10"u8, "123.123E-10"u8, ""u8),
         new(Float, "0123.0123e+456"u8, "0123.0123e+456"u8, ""u8),
+
         new(Float, "0e"u8, "0e"u8, "exponent has no digits"u8),
         new(Float, "0E+"u8, "0E+"u8, "exponent has no digits"u8),
         new(Float, "1e+f"u8, "1e+ f"u8, "exponent has no digits"u8),
@@ -848,6 +869,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Int, "0x1234"u8, "0x1234"u8, ""u8),
         new(Int, "0xcafef00d"u8, "0xcafef00d"u8, ""u8),
         new(Int, "0XCAFEF00D"u8, "0XCAFEF00D"u8, ""u8),
+
         new(Int, "0x"u8, "0x"u8, "hexadecimal literal has no digits"u8),
         new(Int, "0x1g"u8, "0x1 g"u8, ""u8),
 
@@ -857,6 +879,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Float, "0xABCD.p+0"u8, "0xABCD.p+0"u8, ""u8),
         new(Float, "0x.0189P-0"u8, "0x.0189P-0"u8, ""u8),
         new(Float, "0x1.ffffp+1023"u8, "0x1.ffffp+1023"u8, ""u8),
+
         new(Float, "0x."u8, "0x."u8, "hexadecimal literal has no digits"u8),
         new(Float, "0x0."u8, "0x0."u8, "hexadecimal mantissa requires a 'p' exponent"u8),
         new(Float, "0x.0"u8, "0x.0"u8, "hexadecimal mantissa requires a 'p' exponent"u8),
@@ -876,6 +899,7 @@ public static void TestNumbers(ж<testing.T> Ꮡt) {
         new(Float, "1_000.000_1"u8, "1_000.000_1"u8, ""u8),
         new(Int, "0x_f00d"u8, "0x_f00d"u8, ""u8),
         new(Float, "0x_f00d.0p1_2"u8, "0x_f00d.0p1_2"u8, ""u8),
+
         new(Int, "0b__1000"u8, "0b__1000"u8, "'_' must separate successive digits"u8),
         new(Int, "0o60___0"u8, "0o60___0"u8, "'_' must separate successive digits"u8),
         new(Int, "0466_"u8, "0466_"u8, "'_' must separate successive digits"u8),

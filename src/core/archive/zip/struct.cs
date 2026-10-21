@@ -258,6 +258,7 @@ internal static time.Time msDosTimeToTime(uint16 dosDate, uint16 dosTime) {
         (nint)((uint16)(dosTime >> 5 & 0x3f)),
         (nint)((uint16)((uint16)(dosTime & 0x1f) * 2)),
         0, // nanoseconds
+
         time.ΔUTC);
 }
 

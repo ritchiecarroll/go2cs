@@ -750,14 +750,12 @@ public static partial class builtin
     /// <c>for i := range n</c>) so a <c>var i</c> loop variable infers <c>nint</c> rather than a C#
     /// <c>int</c> — the latter subtly diverges from Go's index type and makes downstream generic calls
     /// like <c>append(s, i)</c> ambiguous. Producing values 0..n-1 (and no iterations when n &lt;= 0)
-    /// matches Go's integer-range semantics exactly.
+    /// matches Go's integer-range semantics exactly. The result is a struct (<see cref="RangeOverInt{T}"/>), so the
+    /// loop allocates nothing, as Go's does.
     /// </remarks>
-    public static IEnumerable<nint> range(nint n)
+    public static RangeOverInt<nint> range(nint n)
     {
-        for (nint i = 0; i < n; i++)
-        {
-            yield return i;
-        }
+        return new RangeOverInt<nint>(n);
     }
 
     /// <summary>
@@ -777,7 +775,7 @@ public static partial class builtin
     /// width made <c>append(s, i)</c> ambiguous, CS0121). Measured, not reasoned: the generic really
     /// does take the literal, so the tie-break that prefers a non-generic candidate never applies.
     /// </remarks>
-    public static IEnumerable<nint> range(int n)
+    public static RangeOverInt<nint> range(int n)
     {
         return range((nint)n);
     }
@@ -805,12 +803,9 @@ public static partial class builtin
     /// integer type, so no <c>T.Zero</c> — and therefore no <c>INumberBase</c> — is needed.
     /// </para>
     /// </remarks>
-    public static IEnumerable<T> range<T>(T n) where T : struct, System.Numerics.IComparisonOperators<T, T, bool>, System.Numerics.IIncrementOperators<T>
+    public static RangeOverInt<T> range<T>(T n) where T : struct, System.Numerics.IComparisonOperators<T, T, bool>, System.Numerics.IIncrementOperators<T>
     {
-        for (T i = default; i < n; i++)
-        {
-            yield return i;
-        }
+        return new RangeOverInt<T>(n);
     }
 
     /// <summary>

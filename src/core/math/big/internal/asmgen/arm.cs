@@ -11,6 +11,7 @@ internal static void initᴛArchARM() { ArchARM = Ꮡ(new Arch(
     WordBits: 32,
     WordBytes: 4,
     CarrySafeLoop: true,
+
     regs: new @string[]{
         // R10 is g.
         // R11 is the assembler/linker temporary (but we use it as a regular register).
@@ -20,6 +21,7 @@ internal static void initᴛArchARM() { ArchARM = Ꮡ(new Arch(
         "R0"u8, "R1"u8, "R2"u8, "R3"u8, "R4"u8, "R5"u8, "R6"u8, "R7"u8, "R8"u8, "R9"u8, "R11"u8, "R12"u8
     }.slice(),
     regShift: true,
+
     mov: "MOVW"u8,
     add: "ADD"u8,
     adds: "ADD.S"u8,
@@ -33,10 +35,14 @@ internal static void initᴛArchARM() { ArchARM = Ꮡ(new Arch(
     and: "AND"u8,
     or: "ORR"u8,
     xor: "EOR"u8,
+
     mulWideF: armMulWide,
+
     addWords: "ADD %s<<2, %s, %s"u8,
+
     jmpZero: "TEQ $0, %s; BEQ %s"u8,
     jmpNonZero: "TEQ $0, %s; BNE %s"u8,
+
     loadIncN: armLoadIncN,
     loadDecN: armLoadDecN,
     storeIncN: armStoreIncN,

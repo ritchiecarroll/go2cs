@@ -10,6 +10,7 @@ internal static void initᴛArchAMD64() { ArchAMD64 = Ꮡ(new Arch(
     Name: "amd64"u8,
     WordBits: 64,
     WordBytes: 8,
+
     regs: new @string[]{
         "BX"u8, "SI"u8, "DI"u8,
         "R8"u8, "R9"u8, "R10"u8, "R11"u8, "R12"u8, "R13"u8, "R14"u8, "R15"u8,
@@ -23,9 +24,11 @@ internal static void initᴛArchAMD64() { ArchAMD64 = Ꮡ(new Arch(
     // Note: Not setting memIndex, because code generally runs faster
     // if we avoid the use of scaled-index memory references,
     // particularly in ADX instructions.
+
     options: new map<Option, Action<ж<Asm>, @string>>{
         [OptionAltCarry] = amd64JmpADX
     },
+
     mov: "MOVQ"u8,
     adds: "ADDQ"u8,
     adcs: "ADCQ"u8,
@@ -42,7 +45,9 @@ internal static void initᴛArchAMD64() { ArchAMD64 = Ꮡ(new Arch(
     lea: "LEAQ"u8,
     addF: amd64Add,
     mulWideF: x86MulWide,
+
     addWords: "LEAQ (%[2]s)(%[1]s*8), %[3]s"u8,
+
     jmpZero: "TESTQ %[1]s, %[1]s; JZ %[2]s"u8,
     jmpNonZero: "TESTQ %[1]s, %[1]s; JNZ %[2]s"u8,
     loopBottom: "SUBQ $1, %[1]s; JNZ %[2]s"u8,
