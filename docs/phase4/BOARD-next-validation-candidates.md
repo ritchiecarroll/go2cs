@@ -27776,4 +27776,112 @@ go1.26.9 reading above stands for capable hosts.
 
 — P2 (re-gated 2026-10-21)
 
+## 2026-10-21 — G finding: an interface assertion whose (dynamic type, interface) pair has no compiled adapter still costs ~28 ns after the inline head (Go ~3 ns); a STRONG last-(box, adapter) slot prices the allocation at ~11 ns but is Go-observable — OPEN (post-hop design note, from G's perf review; COORD ruled shape B no seat)
+
+`x.(I)` on a raw `*T` or `T` (the perf review's "type assertion on a raw box", 31-35 ns) is two costs. The shared
+`TryTypeAssert<T>` body for a reference T is the first, and claude/g-assert-inline-head removes it (35 -> 28 ns).
+The second is the pair itself. With no `GoImplement` record for the pair (an assert-only pair, such as errors.Is's
+`interface{ Is(error) bool }`), it resolves through the RUNTIME SHELL tier: P2's weak last-value slot, then a shell
+whose methods forward. For a value type that shell is the object shell and forwards through its invoker binding.
+Measured on G's box (windows, Release, steady state, the probe in docs/phase4/probes/g-perf-assert-callers):
+`*T -> I` 28 ns and `V -> I` 43 ns after the head, Go 3.0 ns for both. A pricing arm with a STRONG static
+last-(box, adapter) slot read 16.5 and 32 ns, so allocation plus resolution is ~11 ns of it.
+Not shipped: a strong slot keeps the last asserted value alive, which Go can observe through a finalizer or a weak
+pointer (P2's reason for the weak slot), and P2's slot already fronts the shell tier. What remains is shell
+forwarding; only a compiled per-pair adapter is cheaper, and an assert-only pair has none. No prediction is made
+until a design names how such a pair gets a compiled adapter.
+
+## 2026-10-21 — G finding: runtime.Callers' cost is the CLR's full-stack walk (~90% at 14 frames, more deeper); go2cs' own share is ~0.4-0.5 us and a built trim of it saved <=~3% — OPEN as a floor (post-hop research: an internal frame-data path), trim NOT shipped
+
+The perf review's probe (docs/phase4/probes/g-perf-assert-callers) reads `runtime.Callers(1, pcs[:8])` at 4.3 us
+against Go's 263 ns. Measured at the SAME leaf depth on G's box (windows, Release, steady state, the converted probe
+plus a scratch harness padding each arm to the capture's own depth, best of 7 x 50,000):
+
+| 14 managed frames at the leaf | base 9924b9621c | trim |
+|---|---|---|
+| `new StackTrace(0, false).GetFrames()` alone | 3.94-3.96 us | 3.94-3.95 us |
+| + `GetMethod()` every frame | 3.96-4.05 | 3.95-3.98 |
+| + classify frames until 9 Go frames | 4.08-4.17 | 4.07-4.13 |
+| `runtime.Callers` (8 captured) | 4.42-4.48 | 4.29-4.36 |
+
+At 46 frames the walk alone is 9.6-10.0 us and Callers 9.9-10.4 us; the build-to-build noise there (the
+StackTrace-only arm is identical code in both builds and differs by ~300 ns) is larger than any trim. A second
+harness (Callers alone, three alternating rounds) read no difference at either depth.
+
+**The floor.** `StackTrace` walks the WHOLE stack whatever `len(pc)` is (~178 ns per frame of total depth), and
+`new StackFrame(n)` does too. `RtlCaptureStackBackTrace` returns one frame here (the OS unwinder does not see JIT
+frames), so a raw-IP capture is not available through public APIs. Go's cost scales with `len(pc)`; ours with host
+depth, so a deep test host pays more than the probe shows.
+
+**The trim, measured and not proposed.** It keyed `isGoSourceFrame` and the observed-site memo on
+`RuntimeMethodHandle` and read the memo lock-free (a DynamicMethod frame or callee, which has no handle, kept the
+MethodBase path). It saved ~130 ns (~3%) at 14 frames in this harness, nothing in the other, and nothing
+measurable at 46, against a predicted -15%. The prediction came from a split whose StackTrace arm stood ~4 frames
+shallower than the capture's real leaf, which doubled the apparent go2cs share. Not worth a second keying path and
+its test.
+
+**Retirement.** Only a capture that does not build `StackFrame` objects for the whole stack moves this: an
+internal frame-data path (for example `UnsafeAccessor` into the runtime's stack-frame iterator). Unmeasured; probe
+it before any prediction.
+## 2026-10-21 — G finding: runtime's TestGCTestIsReachable fails on windows because golib's stack-append overload, when the JIT inlined it, kept each site's first backing store reachable — FIXED ([MethodImpl(NoInlining)]); and a provenance gap: the 1.24.13.7 runtime page's stated converter rebuilds neither its corpus nor its test host
+
+**Symptom (E).** On G's windows box at 9924b9621c, eb6def6292 and the batch-12 tip ed51b5a3bd:
+`dead object in reachable set; want 101010101010101, got 1101010101011111`. Go allows one unintentionally
+retained object; we retained three (bits 1, 3 and 15). The 1.24.13.7 runtime page records a pass.
+
+**Root, read from a dump and not inferred.** At the batch-12 tip ed51b5a3bd (go1.26.10, Release, tiering off),
+and first at eb6def6292 with the same chain, the converted host was paused right after gcTestIsReachable's
+weak-reference read. That hook was local only and never committed. A full dump was then taken and SOS `gcroot`
+run on each surviving object:
+
+- bits 1 and 3: the `TestGCTestIsReachable` frame, slot rsp+0x138 -> `Pointer[4]` [p0, p1, p2, p3] -> each box.
+  That array is `all`'s FIRST backing store, outgrown at i=4. `half`'s first store, [p0, p2, p4, p6], sits the same
+  way at rsp+0xb8.
+- bit 15: the `p` local's own slots, the one object Go also tolerates (its "slop of 1").
+
+The JIT listing names the slot. 76ea31575f (C2, 2026-10-20) emits `x = append(xᴷ, x, v)` at a non-escaping
+slice's first qualifying append, Go 1.25+'s 32-byte stack backing store. The JIT inlined
+`builtin.append(in stackAppend<T>, ...)`. Its store-taking return builds the result through `slice<T>`'s
+constructor in a stack temp of its own, rsp+0x138. That temp is address-exposed, so it is reported for the WHOLE
+frame. It is written once, when the buffer is taken, and never overwritten, so the first store and every element it
+held stay reachable after the slice grows past it. Go's buffer is a stack object, scanned only while a live pointer
+reaches it, and Go passes here.
+
+**Fix (claude/g-stackappend-noinline).** `[MethodImpl(MethodImplOptions.NoInlining)]` on that one overload. Both
+returns then reach the caller through one result slot, which the site's next call overwrites, so the slot holds the
+current slice and never an outgrown one.
+
+- Row: TestGCTestIsReachable FAIL -> PASS, the same tree with and without the attribute. The direct host passed 10 of
+  10 runs; without the attribute it failed every run at both tips (rows, a direct run, the paused runs).
+- GolibTests: `StackAppendTests.TheBufferOverloadIsNeverInlined` pins the attribute with this reason. Retention in an
+  optimized frame cannot be observed from GolibTests' Debug build, so runtime's row is the behavioral guard.
+- Cost: one extra call per append at a first-qualifying site. Not measured.
+
+**Residue (named, not fixed).** An address-exposed struct temp in an optimized CLR frame can be reported for the
+whole method, as rsp+0x138 was. Such a slot, written by an earlier call, can still hold that call's slice after the
+variable is reassigned elsewhere. Not measured beyond this site. Go's precise stack maps have no such residue.
+This fix removes the slot that was written once and never overwritten; it does not make CLR frames precise.
+
+**Provenance gap, for the re-bank.** docs/validation/1.24.13.7/runtime.md says `converter 4016a2269`, Release with
+tiering off, go1.24.13 windows. On G's box neither instrument at that ref rebuilds:
+
+- (1) The converter built with its own toolchain re-emits runtime differently from the committed corpus. It puts
+  internal/runtime/maps into darwin and linux ItemGroups only, so windows fails with 83x CS0246/CS0234. It also drops
+  the NoInlining lambdas committed chan.cs carries, and changes mgcpacer, mpagealloc, stubs and the windows files.
+  The corpus at that ref came from a union converter (the commit's subject).
+- (2) The committed windows test host (`-test-action compare`, no reconvert) fails 11x in runtime.tests.csproj:
+  arena_test.cs (8), seh_windows_test.cs (2) and syscall_windows_test.cs (1).
+
+So the page's pass has no reproducible instrument, and E could not be bisected; it was rooted forward instead.
+
+A related drift in the same vein: at ed51b5a3bd the row's own reconvert rewrites 35 committed runtime files. These
+are test sources (gc_test.cs now uses the stack-append form) plus mcleanup.cs.auto, mfinal.cs.auto and
+runtime2.cs.auto; runtime.csproj and runtime.tests.csproj change too. So the committed runtime test corpus trails
+the converter there.
+
+PROPOSAL: a 1.26 page records an instrument that rebuilds. That means the converter ref whose `-tests` emission
+equals the committed corpus at the banked ref, or the corpus ref the row actually ran on, checked before banking.
+
+— G (measured 2026-10-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
