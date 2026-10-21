@@ -967,6 +967,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
+    public void CheckInterfaceEqualityTyped() => CheckTarget("InterfaceEqualityTyped");
+
+    [TestMethod]
     public void CheckInterfaceFieldNamedScalar() => CheckTarget("InterfaceFieldNamedScalar");
 
     [TestMethod]
@@ -1636,6 +1639,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPipeCloseUnblocksRead() => CheckTarget("PipeCloseUnblocksRead");
 
     [TestMethod]
+    public void CheckPipeSharedFileObject() => CheckTarget("PipeSharedFileObject");
+
+    [TestMethod]
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
 
     [TestMethod]
@@ -1823,6 +1829,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
+
+    [TestMethod]
+    public void CheckRawConnSyncSocketIO() => CheckTarget("RawConnSyncSocketIO");
 
     [TestMethod]
     public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");

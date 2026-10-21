@@ -184,7 +184,7 @@ public class WindowsOverlappedRecordRetireTests
 
         internal object NewRecord(char mode)
         {
-            object record = Activator.CreateInstance(m_recordType, Members, null, [m_binding, (nint)mode, new object()], null)!;
+            object record = Activator.CreateInstance(m_recordType, Members, null, [m_binding, (nint)mode, newKey()], null)!;
             m_binding.GetType().GetMethod("Track", Members)!.Invoke(m_binding, [record]);
 
             return record;
@@ -227,6 +227,24 @@ public class WindowsOverlappedRecordRetireTests
             m_closed = true;
             ((IDisposable)m_binding).Dispose();
             closesocket(m_socket);
+        }
+
+        // A record's key is the caller's *syscall.Overlapped, as every wrapper passes it: Rearm reads
+        // the key's HEvent to route the submit, so a stand-in object fails the cast before the arm
+        // under test is reached. A zero Overlapped has no event, so the submit routes through the
+        // port, as a pollable socket's operation does.
+        private static object newKey()
+        {
+            Type overlapped = s_package.GetNestedType("Overlapped", BindingFlags.Public | BindingFlags.NonPublic)
+                ?? throw new AssertFailedException("syscall_package.Overlapped is not in this build (the windows flavour carries it)");
+
+            foreach (MethodInfo method in typeof(builtin).GetMethods(BindingFlags.Public | BindingFlags.Static))
+            {
+                if (method.Name == "Ꮡ" && method.IsGenericMethodDefinition && method.GetParameters() is [{ ParameterType.IsByRef: true }])
+                    return method.MakeGenericMethod(overlapped).Invoke(null, [Activator.CreateInstance(overlapped)])!;
+            }
+
+            throw new AssertFailedException("builtin.Ꮡ<T>(in T) is not in this build");
         }
 
         private static Type nested(string name) =>
