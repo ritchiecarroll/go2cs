@@ -113,6 +113,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	// and hoisted-declaration splices below move it with the statement (positionMapOperations).
 	v.writePositionSentinelCalls(stmt.Pos(), sentinelCallRoots(stmt)...)
 	v.writeTestAliasShadowComment(stmt, contexts)
+	v.writeStackAppendMove(stmt)
 
 	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
