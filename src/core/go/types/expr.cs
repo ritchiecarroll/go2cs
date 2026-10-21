@@ -846,10 +846,12 @@ internal static opPredicates binaryOpPredicates;
         [token.MUL] = allNumeric,
         [token.QUO] = allNumeric,
         [token.REM] = allInteger,
+
         [token.AND] = allInteger,
         [token.OR] = allInteger,
         [token.XOR] = allInteger,
         [token.AND_NOT] = allInteger,
+
         [token.LAND] = allBoolean,
         [token.LOR] = allBoolean
     });

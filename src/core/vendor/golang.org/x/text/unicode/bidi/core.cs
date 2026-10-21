@@ -123,8 +123,10 @@ internal static (ж<paragraph>, error) newParagraph(slice<ΔClass> types, slice<
     var p = Ꮡ(new paragraph(
         initialTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types),
         embeddingLevel: levels,
+
         pairTypes: pairTypes,
         pairValues: pairValues,
+
         resultTypes: appendꓸꓸꓸ(slice<ΔClass>(default!), types)
     ));
     p.run();

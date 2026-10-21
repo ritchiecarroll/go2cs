@@ -1396,9 +1396,11 @@ public static DBStats Stats(this ж<DB> Ꮡdb) {
 
         var stats = new DBStats(
             MaxOpenConnections: db.maxOpen,
+
             Idle: len(db.freeConn),
             OpenConnections: db.numOpen,
             InUse: db.numOpen - len(db.freeConn),
+
             WaitCount: db.waitCount,
             WaitDuration: ((time.Duration)wait),
             MaxIdleClosed: db.maxIdleClosed,

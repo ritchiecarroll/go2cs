@@ -10,6 +10,7 @@ public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
     WordBits: 64,
     WordBytes: 8,
     CarrySafeLoop: true,
+
     regs: new @string[]{
         // X0 is zero.
         // X1 is LR.
@@ -24,10 +25,12 @@ public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
         "X20"u8, "X21"u8, "X22"u8, "X23"u8, "X24"u8, "X25"u8, "X26"u8,
         "X30"u8
     }.slice(),
+
     reg0: "X0"u8,
     regCarry: "X28"u8,
     regAltCarry: "X29"u8,
     regTmp: "X31"u8,
+
     mov: "MOV"u8,
     add: "ADD"u8,
     sub: "SUB"u8,
@@ -39,6 +42,7 @@ public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
     or: "OR"u8,
     xor: "XOR"u8,
     sltu: "SLTU"u8,
+
     jmpZero: "BEQZ %s, %s"u8,
     jmpNonZero: "BNEZ %s, %s"u8
 ));

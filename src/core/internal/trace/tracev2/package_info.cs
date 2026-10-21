@@ -55,7 +55,7 @@ using static go.@internal.trace.tracev2_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/trace/tracev2/events.go", "events.cs", "AF/CAYIACBaCpgAfRIKmAO4C1AWClKSkpJQAGjSClKSklA==")]
+[assembly: go.GoPositionMap("internal/trace/tracev2/events.go", "events.cs", "AF/CAYIACBaCpgAfRIKmAO8C1AWClKSkpJQAGjSClKSklA==")]
 [assembly: go.GoPositionMap("internal/trace/tracev2/spec.go", "spec.cs", "AEmiAQAMHJKCgpQ=")]
 // </GoSourcePositionMaps>
 

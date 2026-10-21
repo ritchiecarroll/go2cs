@@ -44,6 +44,7 @@ internal static slice<ж<deflateTest>> deflateTests = new ж<deflateTest>[]{
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), -1, new byte[]{18, 4, 4, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), DefaultCompression, new byte[]{18, 4, 4, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), 4, new byte[]{18, 4, 4, 0, 0, 255, 255}.slice())),
+
     Ꮡ(new deflateTest(new byte[]{0x11}.slice(), 0, new byte[]{0, 1, 0, 254, 255, 17, 1, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11, 0x12}.slice(), 0, new byte[]{0, 2, 0, 253, 255, 17, 18, 1, 0, 0, 255, 255}.slice())),
     Ꮡ(new deflateTest(new byte[]{0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11}.slice(), 0,

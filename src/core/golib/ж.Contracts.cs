@@ -451,42 +451,11 @@ public interface IPointer<T> : IGoReflectPointer
     /// </summary>
     bool IsNull { get; }
 
-    /// <summary>
-    /// Gets a pointer to the field of a struct.
-    /// </summary>
-    /// <typeparam name="TElem">Type of field.</typeparam>
-    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
-    /// <returns>Pointer to field of struct.</returns>
-    ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc);
-
-    /// <summary>
-    /// Gets a pointer to the field of a struct.
-    /// </summary>
-    /// <typeparam name="TElem">Type of field.</typeparam>
-    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
-    /// <returns>Pointer to field of struct.</returns>
-    ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc);
-
-    /// <summary>
-    /// Gets a pointer to a field of a struct whose storage lives in another allocation — a field
-    /// promoted through an EMBEDDED POINTER (see <see cref="FieldPtrFunc{T,TElem}"/>).
-    /// </summary>
-    /// <typeparam name="TElem">Type of field.</typeparam>
-    /// <param name="fieldPtrFunc">Struct field pointer delegate.</param>
-    /// <returns>Pointer to field of struct, rooted at the allocation that contains it.</returns>
-    /// <remarks>
-    /// The accessor has already taken the hop, so this is a plain forward: whatever pointer it
-    /// returns IS the answer, and its identity is the pointed-to allocation's, exactly as Go's.
-    /// </remarks>
-    ж<TElem> of<TElem>(FieldPtrFunc<T, TElem> fieldPtrFunc) => fieldPtrFunc(ref Value);
-
-    /// <summary>
-    /// Gets a pointer to element at the specified index for <see cref="array{T}"/> or <see cref="slice{T}"/> types.
-    /// </summary>
-    /// <typeparam name="TElem">Element type of array or slice.</typeparam>
-    /// <param name="index">Index of element to get pointer for.</param>
-    /// <returns>Pointer to element at specified index.</returns>
-    ж<TElem> at<TElem>(nint index);
+    // The field and element pointer doors, of<TElem> and at<TElem>, are members of ж<T> itself, not of this interface.
+    // A generic method on an interface every box implements is a generic VIRTUAL method, and Native AOT compiles one
+    // body per box type times every type argument that reaches a call; the four of them cost about 3 of the ~22 min
+    // ILC took with folding on (P1, two A/B pairs, 2026-10-21) and 372,736 B of the nocall probe. Nothing reaches them
+    // through IPointer<T>, so the converter's `p.of(...)`/`p.at<E>(i)` on a ж<T> bind the class members directly.
 
     /// <summary>
     /// Dereferences the heap allocated reference to the value of type <typeparamref name="T"/>.
