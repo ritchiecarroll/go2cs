@@ -1639,6 +1639,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPipeCloseUnblocksRead() => CheckTarget("PipeCloseUnblocksRead");
 
     [TestMethod]
+    public void CheckPipeSharedFileObject() => CheckTarget("PipeSharedFileObject");
+
+    [TestMethod]
     public void CheckPkgLevelFuncLitLocals() => CheckTarget("PkgLevelFuncLitLocals");
 
     [TestMethod]
@@ -1826,6 +1829,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
+
+    [TestMethod]
+    public void CheckRawConnSyncSocketIO() => CheckTarget("RawConnSyncSocketIO");
 
     [TestMethod]
     public void CheckRawStringLineEndings() => CheckTarget("RawStringLineEndings");
