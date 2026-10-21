@@ -61,6 +61,7 @@ public class NoUncountedBackingAllocationsTests
         ("channel.cs|int[] pollOrder = new int[liveCount];", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("map.cs|KeyValuePair<TKey, TValue>[] entries = count == 0 ? [] : new KeyValuePair<TKey, TValue>[count];", "the range snapshot: Go's range over a map keeps its iterator in a compiler stack temp (cmd/compile/internal/walk/order.go, Prealloc newTemp)"),
         ("stackAppend.cs|T[] store = new T[capacity];", "the stack backing store: Go 1.25+ gives a non-escaping append's first growth a 32-byte buffer in the function's own frame (cmd/compile/internal/ssagen/ssa.go, getBackingStoreInfo and the append lowering), so the buffer allocates nothing"),
+        ("stackAppend.cs|T[] store = buffer.store ??= new T[bufferLength];", "the same stack backing store, taken by a variable whose capacity is observed: Go 1.26's growsliceBuf (runtime/slice.go) grows inside the 32-byte buffer in the function's own frame, and move2heap's copy out of it is the counted allocation, so the buffer allocates nothing"),
     ];
 
     // (c) INFRASTRUCTURE: not a Go-visible backing; the reason names what the array is.
