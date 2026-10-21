@@ -116,6 +116,8 @@ internal static slice<testCase> testCases = new testCase[]{
 
 // find all occurrences of s in source; report at most n occurrences
 internal static slice<nint> find(@string src, @string s, nint n) {
+    var resᴷ = new stackAppend<nint>(moves: true);
+
     slice<nint> res = default!;
     if (s != ""u8 && n != 0) {
         // find at most n occurrences of s in src
@@ -125,9 +127,10 @@ internal static slice<nint> find(@string src, @string s, nint n) {
                 break;
             }
             i += j + 1;
-            res = append(res, i);
+            res = append(resᴷ, res, i);
         }
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
