@@ -5,8 +5,8 @@ blank2:member-boundary	15
 body:extra:after-lowered-switch	50
 body:extra:after-named-result-locals	49
 body:extra:after-param-prelude	173
-body:extra:unexplained	2385
-body:go-blank-cs-none	1794
+body:extra:unexplained	2386
+body:go-blank-cs-none	1777
 body:go-blank-unmapped	2042
 eol:cs-ragged-run	957
 eol:misaligned	941
