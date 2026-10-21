@@ -98,12 +98,15 @@ public static Object Lookup(this ref ΔScope s, @string name) {
 // the given name ignoring case. If exported is set, only exported names
 // are returned.
 internal static slice<Object> lookupIgnoringCase(this ref ΔScope s, @string name, bool exported) {
+    var matchesᴷ = new stackAppend<Object>(moves: true);
+
     slice<Object> matches = default!;
     foreach (var (_, n) in s.Names()) {
         if ((!exported || isExported(n)) && strings.EqualFold(n, name)) {
-            matches = append(matches, s.Lookup(n));
+            matches = append(matchesᴷ, matches, s.Lookup(n));
         }
     }
+    matches = move2heap(matchesᴷ, matches);
     return matches;
 }
 

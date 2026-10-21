@@ -1464,6 +1464,8 @@ internal static ж<abi.Type> rtypeOff(@unsafe.Pointer section, int32 off) {
 //
 //go:linkname typesByString
 internal static slice<ж<abi.Type>> typesByString(@string s) {
+    var retᴷ = new stackAppend<ж<abi.Type>>(moves: true);
+
     var (sections, offset) = typelinks();
     slice<ж<abi.Type>> ret = default!;
 
@@ -1493,9 +1495,10 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
             if (stringFor(typ) != s) {
                 break;
             }
-            ret = builtin.append(ret, typ);
+            ret = builtin.append(retᴷ, ret, typ);
         }
     }
+    ret = move2heap(retᴷ, ret);
     return ret;
 }
 

@@ -819,14 +819,17 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
 public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+    var allᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> all = default!;
     foreach (var (_, l) in f.Loads) {
         {
             var (lib, ok) = l._<ж<Dylib>>(ᐧ); if (ok) {
-                all = append(all, (~lib).Name);
+                all = append(allᴷ, all, (~lib).Name);
             }
         }
     }
+    all = move2heap(allᴷ, all);
     return (all, default!);
 }
 

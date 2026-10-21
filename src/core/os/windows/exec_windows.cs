@@ -191,6 +191,8 @@ internal static (slice<byte> arg, @string rest) readNextArg(@string cmd) {
 // strings, following the Windows conventions documented
 // at http://daviddeley.com/autohotkey/parameters/parameters.htm#WINARGV
 internal static slice<@string> commandLineToArgv(@string cmd) {
+    var argsᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> args = default!;
     while (len(cmd) > 0) {
         if (cmd[0] == (rune)' ' || cmd[0] == (rune)'\t') {
@@ -199,8 +201,9 @@ internal static slice<@string> commandLineToArgv(@string cmd) {
         }
         slice<byte> arg = default!;
         (arg, cmd) = readNextArg(cmd);
-        args = append(args, (@string)arg);
+        args = append(argsᴷ, args, (@string)arg);
     }
+    args = move2heap(argsᴷ, args);
     return args;
 }
 

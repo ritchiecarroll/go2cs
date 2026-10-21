@@ -825,6 +825,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
 // Definition BD13. Determine isolating run sequences.
 internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences(this ж<paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var sequencesᴷ = new stackAppend<ж<ΔisolatingRunSequence>>(moves: true);
 
     var levelRuns = p.determineLevelRuns();
 
@@ -859,9 +860,10 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
                     break;
                 }
             }
-            sequences = append(sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
+            sequences = append(sequencesᴷ, sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
         }
     }
+    sequences = move2heap(sequencesᴷ, sequences);
     return sequences;
 }
 

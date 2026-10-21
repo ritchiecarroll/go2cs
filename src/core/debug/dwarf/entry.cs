@@ -1167,6 +1167,7 @@ internal static readonly @string rangesˢ = "ranges"u8;
 internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, ж<unit> Ꮡu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
+    var retᴷ = new stackAppend<array<uint64>>(moves: true);
 
     if (ranges < 0 || ranges > (int64)len(d.ranges)) {
         return (default!, fmt.Errorf("invalid range offset %d (max %d)"u8, ranges, len(d.ranges)));
@@ -1183,10 +1184,11 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
         if (low == (~(uint64)0).Rsh((nuint)((8 - u.addrsize()) * 8))){
             @base = high;
         } else {
-            ret = append(ret, new uint64[]{@base + low, @base + high}.array());
+            ret = append(retᴷ, ret, new uint64[]{@base + low, @base + high}.array());
         }
     }
 
+    ret = move2heap(retᴷ, ret);
     return (ret, default!);
 }
 

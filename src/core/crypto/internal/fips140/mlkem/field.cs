@@ -337,6 +337,7 @@ internal static ringElement ringDecodeAndDecompress10(/*[320]*/ ж<array<byte>> 
 // followed by ByteEncode, according to FIPS 203, Algorithm 5.
 internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, uint8 d) {
     f = f.Clone();
+    var sᴷ = new stackAppend<byte>(moves: true);
 
     byte b = default!;
     uint8 bIdx = default!;
@@ -349,7 +350,7 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
             bIdx += bits;
             cIdx += bits;
             if (bIdx == 8) {
-                s = append(s, b);
+                s = append(sᴷ, s, b);
                 b = 0;
                 bIdx = 0;
             }
@@ -358,6 +359,7 @@ internal static slice<byte> ringCompressAndEncode(slice<byte> s, ringElement f, 
     if (bIdx != 0) {
         throw panic("mlkem: internal error: bitsFilled != 0");
     }
+    s = move2heap(sᴷ, s);
     return s;
 }
 

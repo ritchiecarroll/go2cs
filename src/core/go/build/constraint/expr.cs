@@ -538,6 +538,7 @@ internal static readonly @string buildˢ2 = "// +build"u8;
 // If the expression is too complex to convert directly to “// +build” lines, PlusBuildLines returns an error.
 public static (slice<@string>, error) PlusBuildLines(Expr x) {
     var splitᴷ = new stackAppend<slice<slice<Expr>>>();
+    var linesᴷ = new stackAppend<@string>(moves: true);
 
     // Push all NOTs to the expression leaves, so that //go:build !(x && y) can be treated as !x || !y.
     // This rewrite is both efficient and commonly needed, so it's worth doing.
@@ -597,9 +598,10 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
                 Ꮡline.WriteString(lit.String());
             }
         }
-        lines = append(lines, line.String());
+        lines = append(linesᴷ, lines, line.String());
     }
 
+    lines = move2heap(linesᴷ, lines);
     return (lines, default!);
 }
 

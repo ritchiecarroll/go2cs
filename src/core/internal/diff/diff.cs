@@ -190,7 +190,7 @@ internal static slice<@string> lines(slice<byte> x) {
 internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     var yiᴷ = new stackAppend<nint>();
     var xiᴷ = new stackAppend<nint>();
-    var invᴷ = new stackAppend<nint>();
+    var invᴷ = new stackAppend<nint>(moves: true);
 
     // Count the number of times each string appears in a and b.
     // We only care about 0, 1, many, counted as 0, -1, -2
@@ -240,6 +240,7 @@ internal static slice<pair> tgs(slice<@string> x, slice<@string> y) {
     // In those terms, A = J = inv and B = [0, n).
     // We add sentinel pairs {0,0}, and {len(x),len(y)}
     // to the returned sequence, to help the processing loop.
+    inv = move2heap(invᴷ, inv);
     var J = inv;
     nint n = len(xi);
     var T = new slice<nint>(n);

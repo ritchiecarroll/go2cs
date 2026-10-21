@@ -131,6 +131,8 @@ internal static slice<byte> marshalCorpusFile(params ꓸꓸꓸany valsʗp) {
 
 // unmarshalCorpusFile decodes corpus bytes into their respective values.
 internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
+    var valsᴷ = new stackAppend<any>(moves: true);
+
     if (len(b) == 0) {
         return (default!, fmt.Errorf("cannot unmarshal empty string"u8));
     }
@@ -154,8 +156,9 @@ internal static (slice<any>, error) unmarshalCorpusFile(slice<byte> b) {
         if (err != default!) {
             return (default!, fmt.Errorf("malformed line %q: %v"u8, line, err));
         }
-        vals = append(vals, v);
+        vals = append(valsᴷ, vals, v);
     }
+    vals = move2heap(valsᴷ, vals);
     return (vals, default!);
 }
 

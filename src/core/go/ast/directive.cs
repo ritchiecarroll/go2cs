@@ -118,6 +118,8 @@ partial struct DirectiveArg {
 //
 // If the arguments do not conform to this syntax, it returns an error.
 public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
+    var listᴷ = new stackAppend<DirectiveArg>(moves: true);
+
     var args = new directiveScanner(d.Args, d.ArgsPos);
 
     var list = new DirectiveArg[]{}.slice();
@@ -148,8 +150,9 @@ public static (slice<DirectiveArg>, error) ParseArgs(this ref Directive d) {
             break;
         }}
 
-        list = append(list, new DirectiveArg(arg, argPos));
+        list = append(listᴷ, list, new DirectiveArg(arg, argPos));
     }
+    list = move2heap(listᴷ, list);
     return (list, default!);
 }
 

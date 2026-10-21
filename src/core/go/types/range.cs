@@ -34,7 +34,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var rangeStmt = ref ᏑrangeStmt.DerefOrNull();
-        var varsᴷ = new stackAppend<ж<Var>>();
+        var varsᴷ = new stackAppend<ж<Var>>(moves: true);
 
         // check expression to iterate over
         ref var x = ref heap(new operand(), out var Ꮡx);
@@ -171,6 +171,7 @@ internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<
             // declare variables
             if (len(vars) > 0){
                 tokenꓸPos scopePos = rangeStmt.Body.Pos();
+                vars = move2heap(varsᴷ, vars);
                 foreach (var (_, obj) in vars) {
                     Ꮡcheck.declare(check.scope, nil, /* recordDef already called */ new VarжObject(obj), scopePos);
                 }
