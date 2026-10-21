@@ -76,6 +76,15 @@ public static partial class builtin
     /// <param name="slice">Destination slice.</param>
     /// <param name="elems">Elements to append.</param>
     /// <returns>New slice with specified values appended.</returns>
+    /// <remarks>
+    /// Never inlined, so that both returns reach the caller through ONE result slot, which the site's next call
+    /// overwrites. Inlined, the store-taking return builds its slice in a stack temp of its own: the JIT reports that
+    /// temp for the caller's whole frame, and nothing overwrites it, so the first store stays reachable after the slice
+    /// outgrows it. Go scans its stack buffer only while a live pointer reaches it, and runtime's
+    /// TestGCTestIsReachable reads the difference: the outgrown store's elements answer reachable (gcroot: the
+    /// test's frame, the temp, the 4-element store).
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static slice<T> append<T>(in stackAppend<T> buffer, slice<T> slice, params ReadOnlySpan<T> elems)
     {
         nint newLength = slice.Length + elems.Length;
