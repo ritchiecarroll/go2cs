@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using go.testing_runtime;
 using any = System.Object;
 using ꓸꓸꓸany = System.Span<System.Object>;
@@ -329,7 +330,14 @@ public static partial class testing_package
         internal bool DetachedSkipped;
     }
 
-    [GoRecv] public static void Error(this ref T t, params ꓸꓸꓸany args)
+    // THE API FRAMES THE HOST'S WALKS COUNT carry [MethodImpl(NoInlining)]: Log, Logf, Error, Errorf, Fatal,
+    // Fatalf, Skip, Skipf, Helper, Attr, Cleanup and Run. TestExecution.FramesPastHost skips exactly ONE API
+    // function and names the frame after it -- Go's callSite(3), Helper's caller, Cleanup's pc, Run's creator --
+    // so a JIT that inlines the API method into the test's frame removes the frame the skip counts. Measured under
+    // Release with TieredCompilation=0 (the banks' configuration of record): Attr's refusal read "???:1", and a
+    // helper in a cleanup was attributed to its own line instead of the Cleanup call. Tiered, the methods were
+    // never inlined, which is why the default run stayed green.
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -341,7 +349,7 @@ public static partial class testing_package
         execution.Fail();
     }
 
-    [GoRecv] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -419,7 +427,7 @@ public static partial class testing_package
     [GoRecv] public static bool Failed(this ref T t) =>
         t.Execution is { } execution ? execution.Failed : t.DetachedFailed;
 
-    [GoRecv] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -431,7 +439,7 @@ public static partial class testing_package
         execution.FailNow();
     }
 
-    [GoRecv] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -443,14 +451,14 @@ public static partial class testing_package
         execution.FailNow();
     }
 
-    [GoRecv] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
         t.Execution?.LogFromCaller(Sprintln(args));
 
-    [GoRecv] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
         t.Execution?.LogFromCaller(Sprintf(format, args));
 
     // Go's Helper (testing.go:1272) records the CALLER of t.Helper: the first Go frame past this API.
-    [GoRecv] public static void Helper(this ref T t)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Helper(this ref T t)
     {
         if (t.Execution is not { } execution)
             return;
@@ -465,13 +473,13 @@ public static partial class testing_package
     [GoRecv] public static @string Name(this ref T t) =>
         t.Execution is { } execution ? execution.Name : (@string)"";
 
-    [GoRecv] public static void Cleanup(this ref T t, Action cleanup) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Cleanup(this ref T t, Action cleanup) =>
         t.Execution?.Cleanup(cleanup);
 
-    [GoRecv] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
         t.RequiredExecution.Run(name.ToString(), test);
 
-    [GoRecv] public static void Skip(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Skip(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -483,7 +491,7 @@ public static partial class testing_package
         execution.SkipNow();
     }
 
-    [GoRecv] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -539,7 +547,7 @@ public static partial class testing_package
     /// holding a carriage return or newline, each in Go's text; otherwise an <c>attr</c> event under
     /// chatty output.
     /// </summary>
-    [GoRecv] public static void Attr(this ref T t, @string key, @string value)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Attr(this ref T t, @string key, @string value)
     {
         string k = key.ToString();
         string v = value.ToString();
