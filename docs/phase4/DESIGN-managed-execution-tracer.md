@@ -225,3 +225,61 @@ tracer). Darwin keeps its converted StartTrace (it has no hand-own); out of scop
 > start before the stop, as Go does. `StopTrace` takes no pair, since Go's `traceAdvance` stops no
 > world. The design above is otherwise unchanged; darwin's tracer runs untested until the darwin run
 > layer exists.
+
+---
+
+## AMENDED 2026-10-21 (C1, the flight-recorder seat) — generations, the advance contract, and user annotations
+
+COORD ruled the seat in on 2026-10-21, red first, after Go 1.26's runtime/trace was measured at hop tip
+`9924b9621c`. Its `FlightRecorder` tests (11 verdicts) panicked on the `traceClockUnitsPerSecond` refusal.
+Its `TestSubscribers` (5) and `TestTraceStartStop`/`TestTraceDoubleStart` (2) skipped in C#, a cascade:
+`TestTraceAndFlightRecorder`'s `trace.Start` was never stopped once `fr.Start` panicked. Three lines of the
+design above change.
+
+**1. One generation is replaced by Go's generations** ("The format at the pin" above described go1.24.13).
+Go 1.26 writes `go 1.26 trace`:
+
+- Each generation opens with a SYNC batch (`EvSync`, then `EvFrequency` and an `EvClockSnapshot` of the trace,
+  monotonic and wall clocks; runtime/tracetime.go `traceSyncBatch`). The frequency is no longer a lone batch.
+- Each generation ends with the in-band `EvEndOfGeneration` signal (runtime/trace.go:985). Go 1.26's parser
+  refuses a generation that reaches EOF without it ("incomplete generation found; trace likely truncated").
+- The runtime advances once a second (`defaultTraceAdvancePeriod`), and the flight recorder advances on demand.
+- Because a reader may begin at any generation (the flight recorder keeps only the latest), every generation
+  STATES every live goroutine and every P it touches, as Go's `traceAdvance` does for the goroutines a
+  generation did not trace. Go's parser refuses a status for a goroutine it has never seen after its first
+  generation.
+
+The tracer states a goroutine from what the trace last said about it. A goroutine the trace has never named is
+stated from the registry: a running one in its own M's batch, through `Goroutine.ThreadId`. Lazy statement within
+a generation is unchanged.
+
+**2. The advance contract.** `ExecutionTracer.Advance(stop)` ends a generation and returns only after the reader
+has come back to `ReadTrace` after its end signal. That is Go's `doneSema` (trace.go:786, released at :1005), and
+WriteTo reads its ring on that guarantee (flightrecorder.go:127, "traceAdvance blocks until the tracer goroutine
+has actually written everything out"). `StopTrace` is `Advance(true)`. Advances, including the periodic one, are
+serialized as Go's `traceAdvanceSema` serializes them.
+
+**3. User tasks, regions and logs ARE emitted.** This reverses "NEVER emitted: ... and the user API's tasks,
+regions and logs" in the amendment of 2026-09-27, on COORD's approval of 2026-10-21. The reason:
+- they are facts the PROGRAM states, not facts about a scheduler, so emitting them invents nothing. The test this
+  design applies to every event class ("emitting them would be fabrication") does not exclude them;
+- `trace.Log` is how a program puts them in its trace, and `TestFlightRecorderLog` reads one back from a snapshot.
+
+runtime/trace's hand-owned `annotation_impl.cs` now writes `EvUserTaskBegin/End`, `EvUserRegionBegin/End` and
+`EvUserLog` on the calling goroutine, with the Go strings' bytes.
+
+**What still holds.** One P per M; no GC, heap, syscall, steal or CPU-sample events; stacks 0; Go's own parser as
+the oracle.
+
+**Wiring.**
+- runtime/trace's pulls `traceAdvance` and `traceClockNow` answer from the tracer
+  (runtime/trace/flightrecorder_impl.cs).
+- The push of `traceClockUnitsPerSecond` is honored (converter `linknamePushTargets`). Its runtime definition is
+  hand-owned in runtime/trace_impl.cs so that it answers the tracer's clock, Stopwatch ticks, not nanotime/64.
+- `runtime_readTrace` keeps its refusal: go1.26 declares it and neither calls nor defines it.
+
+**Acceptance, red first.** GolibTests' parser oracle reads a three-generation managed trace, and snapshots that
+start at generation 2 and at 3. Its two controls are refused on the parser's own errors: the last end signal
+withheld, and generation 1's clock snapshot withheld. An arm pins the advance contract against a reader that
+dawdles after the signal. runtime/trace's 18 are re-read on linux, with runtime's `TestCrashWhileTracing`,
+os/signal's `TestSignalTrace` and net/http/pprof's trace subtest.
