@@ -33,6 +33,7 @@ internal static void initLocal() {
     // $TZ="foo" or $TZ=":foo" if foo is an absolute path, then the file pointed
     // by foo will be used to initialize timezone; otherwise, file
     // /usr/share/zoneinfo/foo will be used.
+
     var (tz, ok) = syscall.Getenv("TZ"u8);
     switch (ᐧ) {
     case {} when !ok: {

@@ -209,6 +209,12 @@ var attrRe = regexp.MustCompile(`^\s*\[[A-Za-z]`)
 // capture copy (`var xʗ1 = x;`) and a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`).
 var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);)$`)
 
+// walkScaffoldRe is the part of scaffoldRe that is never a statement of its own: a capture copy, and the BARE heap
+// box `ref var x = ref heap<T>(out var Ꮡx);`, which the next line's assignment completes. A box WITH an initializer
+// (`ref var buf = ref heap(new T(), out var Ꮡbuf);`, an escaping `var buf T`) is a whole Go statement, so the walk
+// that places a Go blank must stop at it: crossing it credits the previous statement's blank to the line below.
+var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);)$`)
+
 // gotoLabelRe matches the goto a labeled continue or break becomes; its label is Go's.
 var gotoLabelRe = regexp.MustCompile(`\bgoto (?:continue|break)_([\pL_][\pL\pN_]*);`)
 
@@ -675,7 +681,7 @@ func analyze(p pair, r *results, verbose bool) {
 				csLine := 0
 				if ci, ok := lineCS[L]; ok && cs.comments[ci].line > cOpen && cs.comments[ci].line < cEnd {
 					csLine = cs.comments[ci].line
-				} else if ids := goIdents(g.idents[L]); len(ids) > 0 {
+				} else if ids := goBlankAnchorIdents(g, L); len(ids) > 0 {
 					for c := cur; c < cEnd; c++ {
 						if !cs.codeOnLine[c-1] {
 							continue
@@ -700,8 +706,14 @@ func analyze(p pair, r *results, verbose bool) {
 					continue
 				}
 				cur = csLine + 1
+				// The walk back crosses what the converter writes ahead of L's own translation: comments, attributes, and
+				// the lines that are only a prefix of L (walkScaffoldRe), so an escaping local's bare heap box above its
+				// assignment is part of L. For an `if` or `switch` with an initializer it also crosses the lone `{` of
+				// the scope block the translation opens around it.
+				scoped := scopedInitRe.MatchString(strings.TrimSpace(g.src[L-1]))
 				st := csLine
-				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2])) {
+				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2]) || walkScaffoldRe.MatchString(strings.TrimSpace(cs.codeText[st-2])) ||
+					scoped && strings.TrimSpace(cs.codeText[st-2]) == "{") {
 					st--
 				}
 				matchedStarts[st] = true
@@ -792,10 +804,7 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 		}
 		return 0
 	}
-	ids := goIdents(g.idents[lb+1])
-	for name := range respelledBuiltins {
-		delete(ids, name)
-	}
+	ids := goAnchorIdents(g.idents[lb+1])
 	for l := c + 1; l < cEnd && !isBlankCS(cs, l); l++ {
 		if !cs.codeOnLine[l-1] {
 			continue
@@ -819,10 +828,48 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 	return 0
 }
 
-// respelledBuiltins are the Go builtins the translation spells differently, so preludeSeparator does not require
-// them on the C# line: `x := make([]T, n)` becomes `var x = new slice<T>(n);` and `p := new(T)` becomes
+// respelledBuiltins are the Go builtins the translation spells differently, so an anchor never requires them on
+// the C# line: `x := make([]T, n)` becomes `var x = new slice<T>(n);` and `p := new(T)` becomes
 // `var p = @new<T>();`. (`new` is also a C# keyword, which goIdents already drops; it is listed for what it is.)
 var respelledBuiltins = map[string]bool{"make": true, "new": true}
+
+// groupOpenerRe matches a Go declaration group's opening line, `const (`, `var (` or `type (`, which holds no
+// identifier of its own.
+var groupOpenerRe = regexp.MustCompile(`^(const|var|type)\s*\($`)
+
+// goBlankAnchorIdents returns the identifiers that place the Go blank line above line L: L's own, or, when L opens
+// a declaration group, those of the group's first spec. The converter lowers such a group into one C# declaration
+// per spec, so the first of them is where the group begins.
+//
+// When L is an `if` or `switch` with an initializer that declares names (`if err := f(x); err != nil {`), the
+// translation opens a scope block and renames them (`{` then `var errΔ7 = f(x); if (errΔ7 != default!) {`), so
+// the declared names are left out: the initializer's other identifiers place the line.
+func goBlankAnchorIdents(g *goFile, L int) map[string]bool {
+	text := strings.TrimSpace(g.src[L-1])
+	if groupOpenerRe.MatchString(text) && L < len(g.src) {
+		return goAnchorIdents(g.idents[L+1])
+	}
+	ids := goAnchorIdents(g.idents[L])
+	if m := scopedInitRe.FindStringSubmatch(text); m != nil {
+		for _, name := range strings.Split(m[2], ",") {
+			delete(ids, strings.TrimSpace(name))
+		}
+	}
+	return ids
+}
+
+// scopedInitRe matches an `if` or `switch` whose initializer declares names, capturing them.
+var scopedInitRe = regexp.MustCompile(`^(if|switch) ([\pL\pN_, ]+) :=[^;]*;`)
+
+// goAnchorIdents returns the identifiers a C# line must hold to be the translation of a Go line: goIdents less
+// respelledBuiltins. preludeSeparator and the placement of a Go blank line both anchor through it.
+func goAnchorIdents(ids []string) map[string]bool {
+	m := goIdents(ids)
+	for name := range respelledBuiltins {
+		delete(m, name)
+	}
+	return m
+}
 
 var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!;)$`)
 

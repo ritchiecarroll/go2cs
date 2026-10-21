@@ -321,5 +321,15 @@ internal sealed class NativePointerWords<E> : IArray<ж<E>>, INativeWordArray<ж
             yield return (i, mint(readWord(i)));
     }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    // IArray<T> is an IEnumerable<T> of the VALUES, so LINQ sees the elements; Go's (index, value) pairs are IArray's
+    // own GetEnumerator above (array<T> and slice<T> do the same).
+    IEnumerator<ж<E>> IEnumerable<ж<E>>.GetEnumerator()
+    {
+        using IEnumerator<(nint, ж<E>)> pairs = GetEnumerator();
+
+        while (pairs.MoveNext())
+            yield return pairs.Current.Item2;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<ж<E>>)this).GetEnumerator();
 }

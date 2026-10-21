@@ -29,6 +29,7 @@ public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> 
     //	x127    = x96 << 31 + x31
     //	return    x127 << 97 + x96
     //
+
     ж<P224Element> z = @new<P224Element>().Set(Ꮡe);
     ж<P224Element> t0 = @new<P224Element>();
     ж<P224Element> t1 = @new<P224Element>();

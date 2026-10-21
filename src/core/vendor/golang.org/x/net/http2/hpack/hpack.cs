@@ -68,6 +68,7 @@ public static uint32 Size(this HeaderField hf) {
     // length in octets (see Section 5.2), plus 32.  The size of
     // an entry is calculated using the length of the name and
     // value without any Huffman encoding applied."
+
     // This can overflow if somebody makes a large HeaderField
     // Name and/or Value by hand, but we don't care, because that
     // won't happen on the wire because the encoding doesn't allow

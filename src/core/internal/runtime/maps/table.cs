@@ -989,6 +989,7 @@ public static void Next(this ref Iter it) {
 
         if (((ctrl)(it.group.ctrls().get(slotIdx) & ctrlEmpty)) == 0) {
             // Slot full.
+
             @unsafe.Pointer key = (uintptr)it.group.key(it.typ, slotIdx);
             if (it.typ.IndirectKey()) {
                 key = ((ж<@unsafe.Pointer>)(uintptr)(key)).Value;
@@ -1175,6 +1176,7 @@ internal static void rehash(this ж<table> Ꮡt, ж<abiꓸMapType> Ꮡtyp, ж<Δ
     // of the same size. This would eliminate the tombstones, but using a
     // new allocation, so the existing grow support in iteration would
     // continue to work.
+
     var newCapacity = (uint16)(2 * t.capacity);
     if (newCapacity <= maxTableCapacity) {
         t.grow(Ꮡtyp, Ꮡm, newCapacity);

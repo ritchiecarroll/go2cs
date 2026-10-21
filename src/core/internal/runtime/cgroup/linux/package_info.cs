@@ -57,9 +57,9 @@ using static go.@internal.runtime.cgroup_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAUJKaUgoLckoKSgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpu4AJ0qUgoL+gpKCpqaCgoKUuIKClIKUlKaCgpSCpoKCgpSClIKCgpS4goKUgpSUgqaCgqamgraCtoLcgoKUgoK4gpSUAAkUyoKClIKCgpSClLimgoKClIKUAAUQggACHgAMApKCuJSCgoKCgu6CpoKCgoKmgqaClIKUpg==")]
+[assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup.go", "cgroup.cs", "ADFwlIKClJSCgqamgoKCpoKUppSCgpSUgoKmgoKmrgAVJKaUgoLckoKSgqYABxCCgqaClIKCpoKUgpSUpqaUyqbKlLiokoKClKaClIKmpu4AKEqUgoL+gpKCpqaCgoKUuIKClIKUlKaCgpSCpoKCgpSClIKCgpS4goKUgpSUgqaCgqamgraCtoLcgoKUgoK4gpSUAAkUyoKClIKCgpSClLimgoKClIKUAAUQggACHgAMApKCuJSCgoKCgu6CpoKCgoKmgqaClIKUpg==")]
 [assembly: go.GoPositionMap("internal/runtime/cgroup/cgroup_linux.go", "cgroup_linux.cs", "ABo+gpSCpKTogoKCAAMQwpSClIKCppSCgoK4poKCgrimyqSCgoK4psqkgryilIKCppSmgoKmtqSCugABEgAIAoKClIKmgqgAASQAEQKCgpSCpoIAAhYACAKCyoKCpoIAAhYACAKCgoKSgsqCgoKmggACGgAKAoKUgoKCkoKmgoKClJQ=")]
-[assembly: go.GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgATEoKUgpSClIKU3LimgoKUlNymgpamuLqUlJTcAAQaAAgClKY=")]
+[assembly: go.GoPositionMap("internal/runtime/cgroup/line_reader.go", "line_reader.cs", "AA4eggAcWAALAgAIKgAUEoKUgpSClIKU3LimgoKUlNymgqamuMqUlJTcAAQaAAgClKY=")]
 [assembly: go.GoPositionMap("internal/runtime/cgroup/runtime.go", "runtime.cs", "AAkc")]
 // </GoSourcePositionMaps>
 

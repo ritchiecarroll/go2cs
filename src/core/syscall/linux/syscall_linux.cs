@@ -705,8 +705,10 @@ internal static (nint count, error err) ptracePeek(nint req, nint pid, uintptr a
 
     // The peek requests are machine-size oriented, so we wrap it
     // to retrieve arbitrary-length data.
+
     // The ptrace syscall differs from glibc's ptrace.
     // Peeks returns the word in *data, not as the return value.
+
     ref var buf = ref heap(new array<byte>(8), out var Ꮡbuf);
 
     // Leading edge. PEEKTEXT/PEEKDATA don't require aligned
@@ -753,6 +755,7 @@ internal static (nint count, error err) ptracePoke(nint pokeReq, nint peekReq, n
 
     // As for ptracePeek, we need to align our accesses to deal
     // with the possibility of straddling an invalid page.
+
     // Leading edge.
     nint n = 0;
     if (addr % (uintptr)sizeofPtr != 0) {

@@ -18,6 +18,7 @@ internal static int32 defaultGOMAXPROCS(int32 ncpu) {
     //
     // TODO(prattmic): On some GOOS getCPUCount can never change. Don't
     // bother calling over and over.
+
     var procs = ncpu;
     if (procs <= 0) {
         procs = getCPUCount();

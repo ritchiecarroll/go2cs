@@ -550,6 +550,7 @@ internal static (@string, error) parseBMPString(slice<byte> bmpString) {
     // treat a UCS-2 encoded string as a UTF-16 encoded string, as long as
     // we reject out the UTF-16 specific code points. This matches the
     // BoringSSL behavior.
+
     if (len(bmpString) % 2 != 0) {
         return ("", errors.New(invalidBMPStringˢ));
     }

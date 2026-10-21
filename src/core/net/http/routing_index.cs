@@ -65,6 +65,7 @@ internal static error /*err*/ possiblyConflictingPatterns(this ref routingIndex 
     //   dollar pattern: one ending in "{$}"
     //   multi pattern: one ending in a trailing slash or "{x...}" wildcard
     //   ordinary pattern: neither of the above
+
     // apply f to all the pats, stopping on error.
     error apply(slice<ж<pattern>> pats) {
         if (err != default!) {

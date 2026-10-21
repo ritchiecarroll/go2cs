@@ -37,6 +37,7 @@ internal static (uint64 g, gState init, gState next) stateTransition(ref Event e
     gState next = default!;
 
     // Note that we have an explicit return in each case, as that produces slightly better code (tested on Go 1.19).
+
     var exprᴛ1 = ev.Type;
     if (exprᴛ1 == EvGoCreate) {
         g = ev.Args[0];

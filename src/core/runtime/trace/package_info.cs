@@ -59,7 +59,7 @@ using static go.runtime.trace_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgpKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAXIIKCgqIAAhQACAKClJKCAAgSlrKClKyyAAIQ5qam")]
+[assembly: go.GoPositionMap("runtime/trace/annotation.go", "annotation.cs", "ABFMABYCgpKCggAVLIKAgqQABxSy2pSmqrKCqLKmggAGIAAYIIKCgqIAAhQACAKClJKCAAgSlrKClKyyAAIQ5qam")]
 [assembly: go.GoPositionMap("runtime/trace/batch.go", "batch.cs", "ABQuooKUgqaAgoKUpICCpIKmgoKUgqaCgpSCpoKClIKmgoKUgpSCgoKUpg==")]
 [assembly: go.GoPositionMap("runtime/trace/encoding.go", "encoding.cs", "AAwegpiSgoKCgoKCgpSUgpSssoKCgoKUgg==")]
 [assembly: go.GoPositionMap("runtime/trace/flightrecorder.go", "flightrecorder.cs", "AClgkoKClKaClJSu4oKUgoKCuICCtoKokoKUgqaCrLAAAhAADAKClKaUpgAHEIKCpoKClKaClIKCgrgAGzTG")]

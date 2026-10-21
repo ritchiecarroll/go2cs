@@ -83,6 +83,7 @@ internal static error next(this ref lineReader r) {
     //    of the next line.
     // 3. Previous call had an incomplete line. Find the end of that line
     //    (start of the next line), and the end of the next line.
+
     var prevComplete = r.newline >= 0;
     var firstCall = r.n == 0;
 
@@ -126,6 +127,7 @@ internal static error next(this ref lineReader r) {
         r.newline = bytealg.IndexByte(r.scratch.slice(0, r.n), (rune)'\n');
         if (prevComplete || firstCall){
             // Already have the start of the line, just need to find the end.
+
             if (r.newline < 0) {
                 // We filled the entire buffer or hit EOF, but
                 // still no newline.
@@ -137,6 +139,7 @@ internal static error next(this ref lineReader r) {
         } else {
             // Don't have the start of the line. We are currently
             // looking for the end of the previous line.
+
             if (r.newline < 0) {
                 // Not there yet.
                 if (n == 0) {

@@ -90,6 +90,7 @@ internal static (huffmanTree, error) newHuffmanTree(slice<uint8> lengths) {
     // order to minimize the amount of information needed to build a tree
     // bzip2 uses a canonical tree so that it can be reconstructed given
     // only the code length assignments.
+
     if (len(lengths) < 2) {
         throw panic("newHuffmanTree: too few symbols");
     }
@@ -185,6 +186,7 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(Ð¶<huffmanTree> á
         // There is a superfluous level in the Huffman tree indicating
         // a bug in the encoder. However, this bug has been observed in
         // the wild so we handle it.
+
         // If this function was called recursively then we know that
         // len(codes) >= 2 because, otherwise, we would have hit the
         // "leaf node" case, below, and not recurred.

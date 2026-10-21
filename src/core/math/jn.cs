@@ -104,6 +104,7 @@ public static float64 Jn(nint n, float64 x) {
             //                 1    -s-c            -c+s
             //                 2    -s+c            -c-s
             //                 3     s+c             c-s
+
             float64 temp = default!;
             {
                 var (s, c) = Sincos(x);
@@ -136,6 +137,7 @@ public static float64 Jn(nint n, float64 x) {
         if (x < TwoM29){ // x < 2**-29
             // x is tiny, return the first Taylor expansion of J(n,x)
             // J(n,x) = 1/n!*(x/2)**n  - ...
+
             if (n > 33){ // underflow
                 b = 0D;
             } else {
@@ -176,6 +178,7 @@ public static float64 Jn(nint n, float64 x) {
             // When Q(k) > 1e4	good for single
             // When Q(k) > 1e9	good for double
             // When Q(k) > 1e17	good for quadruple
+
             // determine k
             var w = (float64)(n + n) / x;
             var h = 2D / x;
@@ -292,6 +295,7 @@ public static float64 Yn(nint n, float64 x) {
         //		   1	-s-c 		-c+s
         //		   2	-s+c		-c-s
         //		   3	 s+c		 c-s
+
         float64 temp = default!;
         {
             var (s, c) = Sincos(x);

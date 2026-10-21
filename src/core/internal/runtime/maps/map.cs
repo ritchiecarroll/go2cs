@@ -277,9 +277,11 @@ public static ж<ΔMap> NewMap(ж<abiꓸMapType> Ꮡmt, uintptr hint, ж<ΔMap> 
         //
         // Thus we just return without allocating. (We'll save the
         // allocation completely if no assignment comes.)
+
         // Note that the compiler may have initialized m.dirPtr with a
         // pointer to a stack-allocated group, in which case we already
         // have a group. The control word is already initialized.
+
         return Ꮡm;
     }
 

@@ -116,6 +116,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             // As a special case, append also accepts a first argument assignable
             // to type []byte with a second argument of string type followed by ... .
             // This form appends the bytes of the string."
+
             // In either case, the first argument must be a slice; in particular it
             // cannot be the predeclared nil value. Note that nil is not excluded by
             // the assignability requirement alone for the special case (go.dev/issue/76220).
@@ -424,6 +425,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
             // As a special case, copy also accepts a destination argument assignable to type
             // []byte with a source argument of a string type.
             // This form copies the bytes from the string into the byte slice."
+
             // get special case out of the way
             var y = args[1];
             bool special = default!;
@@ -512,6 +514,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
         else if (exprᴛ2 == _Imag || exprᴛ2 == _Real) {
             // imag(complexT) floatT
             // real(complexT) floatT
+
             // convert or check untyped argument
             if (isUntyped(x.typ)) {
                 if (x.mode == constant_){

@@ -996,6 +996,7 @@ internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuin
         // over a huge page boundary. If the range [start, start+size) overlaps with
         // a free-and-unscavenged huge page, we want to grow the region we scavenge
         // to include that huge page.
+
         // Compute the huge page boundary above our candidate.
         var pagesPerHugePage = physHugePageSize / (uintptr)pageSize;
         nuint hugePageAbove = (nuint)alignUp((uintptr)start, pagesPerHugePage);

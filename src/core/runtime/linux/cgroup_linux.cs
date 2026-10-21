@@ -90,6 +90,7 @@ internal static int32 defaultGOMAXPROCS(int32 ncpu) {
     // fractional component is rounded up.
     //
     // TODO: add rationale.
+
     var procs = ncpu;
     if (procs <= 0) {
         procs = getCPUCount();

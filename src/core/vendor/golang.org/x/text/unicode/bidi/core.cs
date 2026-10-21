@@ -433,6 +433,7 @@ internal static void determineExplicitEmbeddingLevels(this ref paragraph p) {
         }
         else if (exprᴛ1 == B) { // paragraph separator.
             // Rule X8.
+
             // These values are reset for clarity, in this implementation B
             // can only occur as the last code in the array.
             stack.empty();
@@ -910,6 +911,7 @@ internal static slice<level> getLevels(this ref paragraph p, slice<nint> linebre
     // initial text. Their final placement is not normative.
     // These codes are treated like WS in this implementation,
     // so they don't interrupt sequences of WS.
+
     validateLineBreaks(linebreaks, p.Len());
 
     var result = appendꓸꓸꓸ(slice<level>(default!), p.resultLevels);

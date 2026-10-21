@@ -844,6 +844,7 @@ internal static void divRecursiveStep(this Δnat z, ж<stack> Ꮡstk, Δnat u, �
             // we use a (2B+1)-by-(B+1) digit, which handles the possibility that
             // the result has an extra leading 1 digit as well as guaranteeing
             // that the computed q̂ will be off by at most 1 instead of 2.
+
             // s is the number of digits to drop from the 3B- and 2B-digit chunks.
             // We drop B-1 to be left with 2B+1 and B+1.
             nint sΔ1 = (B - 1);

@@ -2092,6 +2092,15 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
 
     [TestMethod]
+    public void CheckShellCacheMutation() => CheckTarget("ShellCacheMutation");
+
+    [TestMethod]
+    public void CheckShellCacheNilFunc() => CheckTarget("ShellCacheNilFunc");
+
+    [TestMethod]
+    public void CheckShellCacheReassertEquality() => CheckTarget("ShellCacheReassertEquality");
+
+    [TestMethod]
     public void CheckShellForwardArity() => CheckTarget("ShellForwardArity");
 
     [TestMethod]

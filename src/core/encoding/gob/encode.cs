@@ -490,6 +490,7 @@ internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡ
     ref var ut = ref Ꮡut.DerefOrNull();
 
     // TODO: should we catch panics from the called method?
+
     slice<byte> data = default!;
     error err = default!;
     // We know it's one of these.

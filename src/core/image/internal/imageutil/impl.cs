@@ -30,6 +30,7 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
     //
     // in the spirit of the built-in copy function for 1-dimensional slices,
     // that also allowed a CopyFromRGBA method if needed.
+
     nint x0 = (r.Min.X - dst.Rect.Min.X) * 4;
     nint x1 = (r.Max.X - dst.Rect.Min.X) * 4;
     nint y0 = r.Min.Y - dst.Rect.Min.Y;

@@ -53,6 +53,7 @@ internal static (@string, error) walkSymlinks(@string path) {
         if (path.slice(start, end) == "..") {
             // Back up to previous component if possible.
             // Note that volLen includes any leading slash.
+
             // Set r to the index of the last slash in dest,
             // after the volume.
             nint r = default!;

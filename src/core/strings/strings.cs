@@ -557,6 +557,7 @@ public static @string Map(Func<rune, rune> mapping, @string s) {
     // In the worst case, the string can grow when mapped, making
     // things unpleasant. But it's so rare we barge in assuming it's
     // fine. It could also shrink but that falls out naturally.
+
     // The output buffer b is initialized on demand, the first
     // time a character differs.
     ref var b = ref heap(new Builder(), out var Ꮡb);

@@ -273,6 +273,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
     // if v.flag&flagMethod != 0 {
     // 	v = makeMethodValue(context, v)
     // }
+
     switch (ᐧ) {
     case {} when directlyAssignable(Ꮡdst, v.typ()): {
         // Overwrite type so that they match.

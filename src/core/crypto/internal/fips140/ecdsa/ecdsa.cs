@@ -396,6 +396,7 @@ internal static (ж<Signature>, error) signGeneric<P>(ref Curve<P> c, ref Privat
     where P : Point<P>
 {
     // FIPS 186-5, Section 6.4.1
+
     var (k, R, err) = randomPoint(ref c, (slice<byte> b) => {
         Ꮡdrbg.Value.Generate(b);
         return default!;
@@ -543,6 +544,7 @@ internal static error verifyGeneric<P>(ref Curve<P> c, ref ΔPublicKey pub, slic
     where P : Point<P>
 {
     // FIPS 186-5, Section 6.4.2
+
     var (Q, err) = c.newPoint().SetBytes(pub.q);
     if (err != default!) {
         return err;

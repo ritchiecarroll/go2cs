@@ -131,12 +131,14 @@ internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) {
     nint n = 0;
     while ((bz2.repeats > 0 || bz2.preRLEUsed < len(bz2.preRLE)) && n < len(buf)) {
         // We have RLE data pending.
+
         // The run-length encoding works like this:
         // Any sequence of four equal bytes is followed by a length
         // byte which contains the number of repeats of that byte to
         // include. (The number of repeats can be zero.) Because we are
         // decompressing on-demand our state is kept in the reader
         // object.
+
         if (bz2.repeats > 0) {
             buf[n] = (byte)bz2.lastByte;
             n++;

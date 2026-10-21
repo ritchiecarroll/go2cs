@@ -77,6 +77,7 @@ internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, par
 
     // N.B. Everything in this call must be nosplit to maintain
     // the stack growth related invariants for writing events.
+
     // Make sure we have room.
     (w, _) = w.ensure(1 + (len(args) + 1) * (nint)traceBytesPerNumber);
 

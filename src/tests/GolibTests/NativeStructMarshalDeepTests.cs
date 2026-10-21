@@ -487,6 +487,9 @@ public unsafe class NativeStructMarshalDeepTests
                 yield return (i, m_items[i]);
         }
 
+        System.Collections.Generic.IEnumerator<T> System.Collections.Generic.IEnumerable<T>.GetEnumerator() =>
+            ((System.Collections.Generic.IEnumerable<T>)m_items).GetEnumerator();
+
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
 
         public object Clone() => new ForeignArray<T>(m_items.Length);

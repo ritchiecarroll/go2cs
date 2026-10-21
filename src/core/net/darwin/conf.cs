@@ -303,6 +303,7 @@ internal static (ΔhostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder(this 
     } else {
         // Neither resolver was explicitly requested
         // and we have no preference.
+
         if (bytealg.IndexByteString(hostname, (rune)'\\') != -1 || bytealg.IndexByteString(hostname, (rune)'%') != -1) {
             // Don't deal with special form hostnames
             // with backslashes or '%'.

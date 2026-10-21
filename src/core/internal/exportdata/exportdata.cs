@@ -140,6 +140,7 @@ public static (nint size, error err) FindPackageDefinition(ж<bufio.Reader> Ꮡr
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Uses ReadSlice to limit risk of malformed inputs.
+
     // Read first line to make sure this is an object file.
     (var line, err) = r.ReadSlice((rune)'\n');
     if (err != default!) {

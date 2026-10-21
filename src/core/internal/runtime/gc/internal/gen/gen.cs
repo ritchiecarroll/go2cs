@@ -187,6 +187,7 @@ public static void Compile(this ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // TODO: CSE constants across the whole file
+
     fmt.Fprintf(f.w, """
 #include "go_asm.h"
 #include "textflag.h"
@@ -457,6 +458,7 @@ internal static void schedule(this ref Func fn) {
     // concept of rematerialization and CSE can make rematerializable values
     // live for a very long time. It some sense it doesn't matter because we
     // don't run out of registers for anything we need.
+
     var missing = new map<ж<op>, nint>();
     var uses = new map<ж<op>, slice<ж<op>>>();
     ref var h = ref heap<opHeap>(out var Ꮡh);

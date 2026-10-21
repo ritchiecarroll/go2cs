@@ -989,6 +989,7 @@ public static @string Get(this StructTag tag, @string key) {
 public static (@string value, bool ok) Lookup(this StructTag tag, @string key) {
     // When modifying this code, also update the validateStructTag code
     // in cmd/vet/structtag.go.
+
     while (tag != ""u8) {
         // Skip leading space.
         nint i = 0;
@@ -1127,6 +1128,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
     // of the match at a given depth level. If there are multiple instances of a match at the
     // same depth, they annihilate each other and inhibit any possible match at a lower level.
     // The algorithm is breadth first search, one depth level at a time.
+
     // The current and next slices are work queues:
     // current lists the fields to visit on this depth level,
     // and next lists the fields on the next lower level.

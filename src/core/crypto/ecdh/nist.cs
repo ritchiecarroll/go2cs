@@ -170,6 +170,7 @@ internal static (slice<byte>, error) ecdh(this ref nistCurve c, Ð¶<PrivateKey> á
     // at infinity, but in a prime order group such as the NIST curves that can
     // only be the result of a scalar multiplication if one of the inputs is the
     // zero scalar or the point at infinity.
+
     if (boring.Enabled) {
         return boring.ECDH(local.boring, remote.boring);
     }

@@ -16,7 +16,7 @@ surface, so the body's `t[i]` (CS0021), `for i := range t` (CS8130 on the index 
 `constraintOperations.go`, a new branch in `getGenericDefinition`) detects a single-array-core type set,
 extracts the element type, and emits `where T : /* ~[N]E */ IArray<E>, new()`. The array wrapper already
 declares `IArray<E>, ISupportMake<wrapper>` (the go2cs-gen `Array` inherited-type template), whose
-`ref E this[nint]` indexer and `IEnumerable<(nint, E)>` enumeration supply exactly the indexing/ranging
+`ref E this[nint]` indexer and `(index, value)` enumeration (`IArray<E>.GetEnumerator`) supply exactly the indexing/ranging
 surface the body needs, and the `new()` (appended by the same path) covers `var f T`/`T{}` construction.
 Greened `crypto/internal/mlkem768` (census 254 → 255); the reconvert A/B changed only `mlkem768.cs`'s
 four constraint lines. (Guarded by `GenericArrayConstraint` — two array-wrapper types over a shared

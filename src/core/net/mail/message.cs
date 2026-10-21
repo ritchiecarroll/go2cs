@@ -128,6 +128,7 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
 // These are tried in order.
 internal static Func<slice<@string>> dateLayouts = sync.OnceValue(slice<@string> () => {
     // Generate layouts based on RFC 5322, section 3.3.
+
     var dows = new @string[]{""u8, "Mon, "u8}.array(); // day-of-week
     var days = new @string[]{"2"u8, "02"u8}.array(); // day = 1*2DIGIT
     var years = new @string[]{"2006"u8, "06"u8}.array(); // year = 4*DIGIT / 2*DIGIT
@@ -730,6 +731,7 @@ Loop:
         }
         case {} when escaped: {
             //  quoted-pair = ("\" (VCHAR / WSP))
+
             if (!isVchar(r) && !isWSP(r)) {
                 return ("", fmt.Errorf("mail: bad character in quoted-string: %q"u8, r));
             }

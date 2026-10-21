@@ -1012,6 +1012,7 @@ internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcCont
         } else {
             // We're not limited by the memory limit goal, so perform a series of
             // adjustments that might move the goal forward in a variety of circumstances.
+
             var sweepDistTrigger = Ꮡc.of(gcControllerState.ᏑsweepDistMinTrigger).Load();
             if (sweepDistTrigger > goal) {
                 // Set the goal to maintain a minimum sweep distance since

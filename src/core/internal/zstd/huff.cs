@@ -126,6 +126,7 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
         off += (nint)hdr;
     } else {
         // The table is not compressed. Each weight is 4 bits.
+
         count = (nint)hdr - 127;
         if (off + ((count + 1) / 2) >= builtin.len(data)) {
             return (0, 0, io.ErrUnexpectedEOF);

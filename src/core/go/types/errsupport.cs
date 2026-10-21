@@ -44,6 +44,7 @@ internal static @string lookupError(this ж<Checker> Ꮡcheck, ΔType typ, @stri
     // missing        x.foo   !=    FoO    type X has no field or method foo
     // inaccessible   x.foo   !=    foo    cannot refer to unexported field foo
     // missing        x.foo   !=    foO    type X has no field or method foo
+
     UntypedInt ok = iota;
     const nint missing = 1; // no object found
     const nint misspelled = 2; // found object with different spelling
