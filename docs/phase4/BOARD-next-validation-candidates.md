@@ -27791,4 +27791,39 @@ pointer (P2's reason for the weak slot), and P2's slot already fronts the shell 
 forwarding; only a compiled per-pair adapter is cheaper, and an assert-only pair has none. No prediction is made
 until a design names how such a pair gets a compiled adapter.
 
+## 2026-10-21 — G finding: runtime.Callers' cost is the CLR's full-stack walk (~90% at 14 frames, more deeper); go2cs' own share is ~0.4-0.5 us and a built trim of it saved <=~3% — OPEN as a floor (post-hop research: an internal frame-data path), trim NOT shipped
+
+The perf review's probe (docs/phase4/probes/g-perf-assert-callers) reads `runtime.Callers(1, pcs[:8])` at 4.3 us
+against Go's 263 ns. Measured at the SAME leaf depth on G's box (windows, Release, steady state, the converted probe
+plus a scratch harness padding each arm to the capture's own depth, best of 7 x 50,000):
+
+| 14 managed frames at the leaf | base 9924b9621c | trim |
+|---|---|---|
+| `new StackTrace(0, false).GetFrames()` alone | 3.94-3.96 us | 3.94-3.95 us |
+| + `GetMethod()` every frame | 3.96-4.05 | 3.95-3.98 |
+| + classify frames until 9 Go frames | 4.08-4.17 | 4.07-4.13 |
+| `runtime.Callers` (8 captured) | 4.42-4.48 | 4.29-4.36 |
+
+At 46 frames the walk alone is 9.6-10.0 us and Callers 9.9-10.4 us; the build-to-build noise there (the
+StackTrace-only arm is identical code in both builds and differs by ~300 ns) is larger than any trim. A second
+harness (Callers alone, three alternating rounds) read no difference at either depth.
+
+**The floor.** `StackTrace` walks the WHOLE stack whatever `len(pc)` is (~178 ns per frame of total depth), and
+`new StackFrame(n)` does too. `RtlCaptureStackBackTrace` returns one frame here (the OS unwinder does not see JIT
+frames), so a raw-IP capture is not available through public APIs. Go's cost scales with `len(pc)`; ours with host
+depth, so a deep test host pays more than the probe shows.
+
+**The trim, measured and not proposed.** It keyed `isGoSourceFrame` and the observed-site memo on
+`RuntimeMethodHandle` and read the memo lock-free (a DynamicMethod frame or callee, which has no handle, kept the
+MethodBase path). It saved ~130 ns (~3%) at 14 frames in this harness, nothing in the other, and nothing
+measurable at 46, against a predicted -15%. The prediction came from a split whose StackTrace arm stood ~4 frames
+shallower than the capture's real leaf, which doubled the apparent go2cs share. Not worth a second keying path and
+its test.
+
+**Retirement.** Only a capture that does not build `StackFrame` objects for the whole stack moves this: an
+internal frame-data path (for example `UnsafeAccessor` into the runtime's stack-frame iterator). Unmeasured; probe
+it before any prediction.
+
+— G (measured 2026-10-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
