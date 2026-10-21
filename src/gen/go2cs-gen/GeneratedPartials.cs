@@ -199,6 +199,7 @@ public static class GeneratedPartials
             reference.GetSyntax() is TypeDeclarationSyntax declaration &&
             declaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword)));
 
+    // A contextual keyword is escaped too: `file` cannot name a type (CS9056), and the converter emits Go's `file` as `@file`.
     private static string EscapeIdentifier(string name) =>
-        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
+        SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None || SyntaxFacts.GetContextualKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 }

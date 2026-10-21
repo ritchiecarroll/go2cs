@@ -154,6 +154,10 @@ internal sealed class InterfaceShellEmitter
                   // value-backed shell unwraps to the VALUE, exposing only its value method set).
                   // Explicit implementation: the wrapped interface may itself declare a member named Value.
                   object? IInterfaceAdapter.Value => m_target{{TempVarMarker}}_is_ptr ? m_target{{TempVarMarker}}_ptr : (object?)m_target{{TempVarMarker}};
+
+                  // The dynamic value's Go text (its Error(), else its String()), which the value and the ж box
+                  // each answer through golib's GoMethodText; a shell adds nothing of its own to print.
+                  public override string ToString() => (m_target{{TempVarMarker}}_is_ptr ? m_target{{TempVarMarker}}_ptr?.ToString() : m_target{{TempVarMarker}}?.ToString()) ?? "<nil>";
           {{GenericForwarders}}{{GenericBinder}}
               }
           """;
@@ -277,6 +281,9 @@ internal sealed class InterfaceShellEmitter
                   // otherwise. See the delegate shell's remarks: the unwrap protocol is what keeps the
                   // shell invisible to equality, type switches, %T and re-asserts.
                   object? IInterfaceAdapter.Value => m_target{{TempVarMarker}};
+
+                  // The dynamic value's Go text, as the delegate shell's ToString answers it.
+                  public override string ToString() => m_target{{TempVarMarker}}?.ToString() ?? "<nil>";
           {{ObjectForwarders}}
               }
           """;

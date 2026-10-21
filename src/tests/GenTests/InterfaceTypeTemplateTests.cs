@@ -156,6 +156,19 @@ public class InterfaceTypeTemplateTests
     }
 
     [TestMethod]
+    public void BothShellsPrintTheDynamicValuesGoText()
+    {
+        // A shell stands in for a Go dynamic value, so its ToString is that value's: the value or its ж box,
+        // each of which answers its Go Error()/String() text through golib's GoMethodText.
+        string generated = GenerateShells("probe_type", Method("Reset", "void"));
+
+        AssertParses(generated);
+        Assert.AreEqual(2, generated.Split("public override string ToString()").Length - 1, "one ToString per shell (delegate and object)");
+        StringAssert.Contains(generated, "_ptr?.ToString() : m_target");
+        StringAssert.Contains(generated, "?.ToString() ?? \"<nil>\";");
+    }
+
+    [TestMethod]
     public void AnInterfaceWithNoShellsEmitsOnlyTheDeclaration()
     {
         // EmitShells is off for a constraint, generic, empty or ref-parameter-carrying interface.

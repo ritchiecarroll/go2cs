@@ -136,6 +136,49 @@ internal sealed class TestOptions
     public string? UnrecognizedFlag { get; private set; }
 
     /// <summary>
+    /// Go's <c>-test.*</c> flags that this host DEFINES but that <see cref="Parse"/> does not act on,
+    /// each with whether it takes a value.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="TestFlagBridge.Register"/> defines them on the converted <c>flag.CommandLine</c>, flag
+    /// for flag with Go's <c>testing.Init</c>, <c>initBenchmarkFlags</c> and <c>initFuzzFlags</c>, so
+    /// <c>flag.Parse()</c> records each value exactly as before. What the host's own parse needs is
+    /// only the ARITY, to step past one and keep reading. Go's binary never stops here, because its one
+    /// flag set defines them all. Stopping at one lost every host flag after it: testing's
+    /// <c>runTest</c> re-execs the binary as <c>-test.run=^X$ -test.bench=X -test.v ...</c>, the
+    /// parse stopped at <c>-test.bench</c>, <c>-test.v</c> never took effect, and a passing child
+    /// printed only "PASS" where TestAttrSet and the TestArtifactDir* parents read its
+    /// <c>=== ATTR</c> and <c>=== ARTIFACTS</c> lines. A bool flag takes no separate value, as in Go.
+    /// </remarks>
+    internal static readonly IReadOnlyDictionary<string, bool> GoTestFlagsNotReadHere = new Dictionary<string, bool>
+    {
+        // testing.Init
+        ["test.failfast"] = false,
+        ["test.coverprofile"] = true,
+        ["test.gocoverdir"] = true,
+        ["test.memprofile"] = true,
+        ["test.memprofilerate"] = true,
+        ["test.cpuprofile"] = true,
+        ["test.blockprofile"] = true,
+        ["test.blockprofilerate"] = true,
+        ["test.mutexprofile"] = true,
+        ["test.mutexprofilefraction"] = true,
+        ["test.paniconexit0"] = false,
+        ["test.trace"] = true,
+        ["test.cpu"] = true,
+        // initBenchmarkFlags
+        ["test.bench"] = true,
+        ["test.benchmem"] = false,
+        ["test.benchtime"] = true,
+        // initFuzzFlags
+        ["test.fuzz"] = true,
+        ["test.fuzztime"] = true,
+        ["test.fuzzminimizetime"] = true,
+        ["test.fuzzcachedir"] = true,
+        ["test.fuzzworker"] = false,
+    };
+
+    /// <summary>
     /// Parses the host's command line with Go's <c>flag</c> package semantics.
     /// </summary>
     /// <remarks>
@@ -341,6 +384,16 @@ internal sealed class TestOptions
                     options.JUnitFile = value;
                     break;
                 default:
+                    // One of Go's own -test.* flags that this parse does not act on: step past it and its
+                    // value, as Go's one flag set does. See GoTestFlagsNotReadHere.
+                    if (GoTestFlagsNotReadHere.TryGetValue(name, out bool takesValue))
+                    {
+                        if (takesValue && value is null)
+                            NextValue(args, ref index, name);
+
+                        break;
+                    }
+
                     // Not this host's flag — and not yet knowably nobody's. Record it and stop; the
                     // package's own flag set does not exist until it initializes, and TestHost asks
                     // the question there. See the remarks.

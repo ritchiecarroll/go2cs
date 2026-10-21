@@ -44,6 +44,12 @@ public class MethodSetKeepTests
 
             public partial struct Plain { public nint n; }
 
+            public partial struct Inner { public nint n; }
+
+            public partial struct Outer { public partial ref Inner Inner { get; } }
+
+            public static @string Error(this Inner e) => "inner"u8;
+
             public static @string String(this Kind k) => "kind"u8;
 
             public static @string String(this S s) => "ess"u8;
@@ -151,5 +157,40 @@ public class MethodSetKeepTests
 
         CollectionAssert.AreEqual(new[] { "go.mtest_package.Kind", "go.mtest_package.P", "go.mtest_package.S", "go.ж<go.mtest_package.P>" }, stringReceivers,
             "the kept name covers every receiver form, the twin included: " + string.Join(", ", stringReceivers));
+    }
+
+    [TestMethod]
+    public void APromotionOnlyMethodIsKeptOnTheEmbeddingTypesToString()
+    {
+        // Outer's Error() exists ONLY as the forwarder the generator writes for the method promoted from its embedded
+        // Inner, which nothing in the package declares on Outer. golib's GoMethodText prints an Outer through that
+        // forwarder, so under a full trim its metadata must be kept exactly like a declared method's.
+        (Dictionary<string, string> generated, _, _) = Run();
+
+        string outer = generated.Single(pair => pair.Key.EndsWith(".Outer.g.cs", StringComparison.Ordinal)).Value;
+
+        StringAssert.Contains(outer, "Error(this Outer", "the fixture: the generator writes Outer's promoted Error forwarder");
+        CollectionAssert.Contains(KeptOnToString(generated, "Outer"), "Error", "the promoted forwarder is kept on Outer's ToString");
+        CollectionAssert.AreEqual(new[] { "Error" }, KeptOnToString(generated, "Inner"), "the declaring type keeps its own method");
+    }
+
+    [TestMethod]
+    public void EachGoTypesToStringForwardsToItsGoText()
+    {
+        // The ONE generated ToString is a Go value's %v text: golib's GoMethodText answers its Error(), else its String(),
+        // from the method set at run time (which includes the generator's own promoted forwarders), and the structural
+        // text is the fallback. The dependency lines MethodSetKeep anchors on that same line still precede it.
+        (Dictionary<string, string> generated, _, _) = Run();
+
+        foreach (string name in (string[])["Kind", "S", "P", "Plain"])
+        {
+            string source = generated.Single(pair => pair.Key.EndsWith($".{name}.g.cs", StringComparison.Ordinal)).Value;
+            string[] toStrings = source.Split('\n').Where(line => line.Contains("public override string ToString()")).ToArray();
+
+            Assert.AreEqual(1, toStrings.Length, $"{name} has exactly one generated ToString");
+            StringAssert.Contains(toStrings[0], "=> global::go.GoMethodText.Of(this) ?? ", $"{name}'s ToString forwards to its Go text: {toStrings[0].Trim()}");
+        }
+
+        CollectionAssert.AreEqual(new[] { "String", "size" }, KeptOnToString(generated, "S"), "the keep still sits on the forwarding ToString");
     }
 }

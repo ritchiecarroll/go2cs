@@ -9,9 +9,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using go.golib;
 using static go2cs.Symbols;
 
@@ -71,15 +73,18 @@ namespace go;
 //   a compile — the same memoization rule the bridge's ValueSlot accessors already follow.
 //
 // CACHES
-//   s_boundFactories / s_methodFuncs / s_methodFuncTypes are keyed by MethodInfo and are NOT on
-//   ClearTypeCaches' list, correctly so: a MethodInfo's signature is fixed when its type loads, and
-//   a late-loading assembly cannot change it. Only the TABLES (which methods belong to a set) are
-//   derived from the extension-method scan, and those are cleared in golib beside the scan itself.
+//   s_boundFactories / s_pointeeBoundFactories / s_methodFuncs / s_methodFuncTypes / s_methodValueTypes
+//   are keyed by MethodInfo and are NOT on ClearTypeCaches' list, correctly so: a MethodInfo's
+//   signature is fixed when its type loads, and a late-loading assembly cannot change it. Only the
+//   TABLES (which methods belong to a set) are derived from the extension-method scan, and those are
+//   cleared in golib beside the scan itself.
 // ---------------------------------------------------------------------------------------------
 public static partial class GoReflect
 {
     private static readonly ConcurrentDictionary<MethodInfo, Func<object?, Delegate>> s_boundFactories = [];
+    private static readonly ConcurrentDictionary<MethodInfo, Func<object?, Delegate>> s_pointeeBoundFactories = [];
     private static readonly ConcurrentDictionary<MethodInfo, Type> s_methodFuncTypes = [];
+    private static readonly ConcurrentDictionary<MethodInfo, Type> s_methodValueTypes = [];
 
     // The pointer-lookup form of s_methodFuncTypes, and the reason it needs its OWN cache: the same
     // MethodInfo yields a DIFFERENT Go func type depending on whether it was reached through T or
@@ -308,6 +313,26 @@ public static partial class GoReflect
         public override int GetHashCode() => System.HashCode.Combine(m_type, m_index);
     }
 
+    private static readonly ConcurrentDictionary<Type, IGoMethodSet?> s_generatedMethodSets = [];
+
+    // The method's delegate from the generated method set of the type it is reached through (go2cs-gen's IGoMethodSet),
+    // or null when the type has none or no arm for it. The set is the element type's zero value, read only here: a
+    // table that registration filled would root every arm in every program, and this way only a program that reaches
+    // reflect's method paths compiles one.
+    private static Delegate? GeneratedMethod(Type? t, MethodInfo method, bool bound, object? receiver)
+    {
+        if (t is null)
+            return null;
+
+        bool pointer = KindOf(t) == Pointer;
+
+        if ((pointer ? ElementType(t) : t) is not { IsValueType: true } element)
+            return null;
+
+        return s_generatedMethodSets.GetOrAdd(element, static type => GoTypeOps.Uninitialized(type) as IGoMethodSet)?
+            .ᴛMethod(method.Name, pointer, bound, receiver);
+    }
+
     private static Delegate? BindMethodFunc(Type? t, int index)
     {
         GoMethodSetEntry entry = MethodAt(t, index);
@@ -316,6 +341,12 @@ public static partial class GoReflect
             return null;
 
         Type funcType = GoMethodFuncType(t, index);
+
+        // The type's generated method set (IGoMethodSet) answers with a delegate compiled code created, which Native AOT
+        // can always hand out; the binders below remain the route for a method it has no arm for.
+        if (GeneratedMethod(t, entry.Method, false, null) is { } generated && generated.GetType() == funcType)
+            return generated;
+
         ParameterInfo[] parameters = entry.Method.GetParameters();
 
         // When GoMethodFuncType retyped the receiver to the POINTER it was looked up through (see
@@ -343,15 +374,10 @@ public static partial class GoReflect
                 for (int i = 1; i < ps.Length; i++)
                     args[i] = Expression.Parameter(ps[i].ParameterType, ps[i].Name);
 
-                MethodInfo read = typeof(GoReflect).GetMethod(nameof(ReadPointerSlot),
-                    BindingFlags.Public | BindingFlags.Static)!;
-
                 Expression[] call = new Expression[ps.Length];
-                // ReadPointerSlot handles every box shape the bridge mints, so the adapter does not
-                // need to know which one it was handed.
-                call[0] = Expression.Convert(
-                    Expression.Call(read, Expression.Convert(args[0], typeof(object))),
-                    receiverType);
+                // ValueMethodPointee reads every box shape the bridge mints, so the adapter does not need to know
+                // which one it was handed, and raises Go's panic for a nil one.
+                call[0] = Pointee(args[0], key.Method, receiverType);
 
                 for (int i = 1; i < ps.Length; i++)
                     call[i] = args[i];
@@ -376,6 +402,114 @@ public static partial class GoReflect
 
         return s_methodFuncs.GetOrAdd(entry.Method, m => Delegate.CreateDelegate(funcType, m));
     }
+
+    /// <summary>
+    /// The receiver of a generated method-set arm (go2cs-gen's <c>IGoMethodSet</c>) for a value method the type
+    /// DECLARES, reached through <c>*T</c>: read at each call, a nil <c>*T</c> is Go's panicwrap, raised with Go's
+    /// message ("value method pkg.T.M called using nil *T pointer"), as reflect's call through Go's autogenerated
+    /// <c>(*T).M</c> wrapper raises it. A non-nil box passes through.
+    /// </summary>
+    /// <param name="recv">The pointer the method value holds.</param>
+    /// <param name="method">The method's emitted name, as golib's method table holds it.</param>
+    /// <returns><paramref name="recv"/>, when it is not nil.</returns>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static ж<T> ValueMethodRecv<T>(ж<T>? recv, string method) =>
+        recv is null || recv.IsNilPointer ? throw RuntimeErrorPanic.Panicwrap(PanicwrapText(typeof(T), method)) : recv;
+
+    // The binder's form of ValueMethodRecv, for a box of any shape: the pointee a value method reached through a pointer
+    // is called on, read at the call. A nil pointer is Go's panicwrap for a method the type declares and the
+    // nil-pointer fault for one it promotes from an embedded field (Go's wrapper dereferences the embed there), which
+    // go2cs-gen's forwarder says with [GoPromoted]: a declared method shadows an embedded one of the same name.
+    private static object? ValueMethodPointee(object? box, MethodInfo method)
+    {
+        if (box is null || box is INilPointer { IsNilPointer: true })
+        {
+            golib.TypeExtensions.IsCopyBoundReceiver(method, out Type receiverType);
+
+            throw method.IsDefined(typeof(GoPromotedAttribute), inherit: false)
+                ? RuntimeErrorPanic.WrapperNilReceiver()
+                : RuntimeErrorPanic.Panicwrap(PanicwrapText(receiverType, method.Name));
+        }
+
+        return ReadPointerSlot(box);
+    }
+
+    private static readonly MethodInfo s_valueMethodPointee =
+        typeof(GoReflect).GetMethod(nameof(ValueMethodPointee), BindingFlags.NonPublic | BindingFlags.Static)!;
+
+    private static Expression Pointee(Expression box, MethodInfo method, Type receiverType) =>
+        Expression.Convert(Expression.Call(s_valueMethodPointee, Expression.Convert(box, typeof(object)), Expression.Constant(method)), receiverType);
+
+    // Go's panicwrap text for a value method of `element` called through a nil pointer: the package path, the type's
+    // name (a generic type's arguments elided, "T[...]", as Go's wrapper names it) and the method's Go name.
+    private static string PanicwrapText(Type element, string method)
+    {
+        string name = GoTypeName(element);
+
+        if (name.IndexOf('.') is var dot and >= 0)
+            name = name[(dot + 1)..];
+
+        if (name.IndexOf('[') is var bracket and >= 0)
+            name = name[..bracket] + "[...]";
+
+        string goMethod = method;
+
+        foreach (GoMethodSetEntry entry in golib.TypeExtensions.GetGoMethodSetEntries(element, valueIsPointer: true))
+        {
+            if (entry.Method.Name == method)
+            {
+                goMethod = entry.GoName;
+                break;
+            }
+        }
+
+        return $"value method {SymbolPackagePath(GoPackagePath(element))}.{name}.{goMethod} called using nil *{name} pointer";
+    }
+
+    // A package path as Go's symbol names spell it (cmd/internal/objabi.PathToPrefix), the form panicwrap reads back
+    // from the wrapper's name: a byte that is a control, a space, '%', '"' or non-ASCII, or a '.' after the last '/',
+    // is written %xx ("example.com/probe/v%2ex").
+    private static string SymbolPackagePath(string path)
+    {
+        const string Hex = "0123456789abcdef";
+        int slash = path.LastIndexOf('/');
+        StringBuilder result = new(path.Length);
+        Span<byte> bytes = stackalloc byte[4];
+
+        for (int i = 0; i < path.Length; i++)
+        {
+            char c = path[i];
+
+            if (c < 0x7F && !(c <= ' ' || c == '.' && i > slash || c == '%' || c == '"'))
+            {
+                result.Append(c);
+                continue;
+            }
+
+            // A non-ASCII rune's UTF-8 bytes are each escaped, as Go escapes the path's bytes.
+            Rune rune = Rune.GetRuneAt(path, i);
+            int count = rune.EncodeToUtf8(bytes);
+
+            foreach (byte b in bytes[..count])
+                result.Append('%').Append(Hex[b >> 4]).Append(Hex[b & 0xF]);
+
+            i += rune.Utf16SequenceLength - 1;
+        }
+
+        return result.ToString();
+    }
+
+    /// <summary>
+    /// Delegate type of the <paramref name="index"/>'th method's METHOD VALUE: its Go signature with the receiver
+    /// removed, the type <see cref="GoMethodValue"/> hands back whichever route binds it.
+    /// </summary>
+    /// <param name="t">Managed type standing for the Go type.</param>
+    /// <param name="index">Method index.</param>
+    /// <returns>Delegate type describing the method value's Go signature.</returns>
+    public static Type GoMethodValueType(Type? t, int index) => MethodValueType(MethodAt(t, index).Method);
+
+    private static Type MethodValueType(MethodInfo method) =>
+        s_methodValueTypes.GetOrAdd(method, static m => MakeDelegateType([.. m.GetParameters().Skip(1).Select(static p => p.ParameterType)], m.ReturnType));
 
     /// <summary>
     /// Binds <paramref name="receiver"/> to the <paramref name="index"/>'th method of
@@ -458,18 +592,31 @@ public static partial class GoReflect
         // The receiver GO sees: a copy-bound `this ref X` method is a value-receiver method of X.
         golib.TypeExtensions.IsCopyBoundReceiver(entry.Method, out Type receiverType);
 
-        // A value-receiver method reached through *X receives a COPY of the pointee (Go's rule).
-        // Fix W: the box test walks the base chain, so a per-kind subclass instance still takes
-        // the pointee-copy read (@unsafe.Pointer is inert here — it has no methods to reach).
-        if (bindTarget is not null && !receiverType.IsInstanceOfType(bindTarget) &&
-            TryBoxPointee(bindTarget.GetType(), out _))
-            bindTarget = ReadPointerSlot(bindTarget);
+        // The type's generated method set binds the receiver in compiled code (IGoMethodSet), as it is. Taken only when it
+        // is of the type the binder below builds, as the unbound func is, so a method value's type does not depend on
+        // which route answered.
+        if (GeneratedMethod(methodOwner, entry.Method, true, bindTarget) is { } generatedValue &&
+            generatedValue.GetType() == MethodValueType(entry.Method))
+        {
+            return generatedValue;
+        }
+
+        // A value-receiver method reached through *X keeps the POINTER and reads the pointee at each call, as Go's
+        // reflect does (its method value holds the receiver word, and the autogenerated (*X).M wrapper dereferences it
+        // when called): a write after the bind is seen, and a nil *X binds and panics only when called. Fix W: the box
+        // test walks the base chain, so a per-kind subclass instance is still read through (@unsafe.Pointer is inert
+        // here — it has no methods to reach).
+        bool throughPointer =
+            methodOwner is not null && KindOf(methodOwner) == Pointer && ElementType(methodOwner) == receiverType ||
+            bindTarget is not null && !receiverType.IsInstanceOfType(bindTarget) && TryBoxPointee(bindTarget.GetType(), out _);
 
         // A bind failure is a Go panic naming the type and the method, as in GoMethodFunc: under Native AOT the
         // compiled binder can lack code for the method's delegate type, and its NotSupportedException ended the process.
         try
         {
-            return s_boundFactories.GetOrAdd(entry.Method, static m => CompileBoundFactory(m))(bindTarget);
+            return throughPointer
+                ? s_pointeeBoundFactories.GetOrAdd(entry.Method, static m => CompileBoundFactory(m, throughPointer: true))(bindTarget)
+                : s_boundFactories.GetOrAdd(entry.Method, static m => CompileBoundFactory(m, throughPointer: false))(bindTarget);
         }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or NotImplementedException or InvalidOperationException or MemberAccessException)
         {
@@ -622,8 +769,9 @@ public static partial class GoReflect
 
     // Compiles the ONE-per-method receiver binder: an outer lambda taking the receiver as `object`,
     // whose body IS the bound Go-signature delegate. Compiling once and closing per bind keeps a
-    // method value cheap; see this file's header for why CreateDelegate cannot serve here.
-    private static Func<object?, Delegate> CompileBoundFactory(MethodInfo method)
+    // method value cheap; see this file's header for why CreateDelegate cannot serve here. Bound
+    // through a pointer, the receiver is the box and the delegate reads its pointee at each call.
+    private static Func<object?, Delegate> CompileBoundFactory(MethodInfo method, bool throughPointer)
     {
         ParameterInfo[] parameters = method.GetParameters();
 
@@ -645,9 +793,10 @@ public static partial class GoReflect
 
         ParameterExpression receiver = Expression.Parameter(typeof(object), "receiver");
         ParameterExpression[] arguments = [.. parameters.Skip(1).Select(static (p, i) => Expression.Parameter(p.ParameterType, p.Name ?? $"arg{i}"))];
-        Type delegateType = MakeDelegateType([.. arguments.Select(static a => a.Type)], method.ReturnType);
+        Type delegateType = MethodValueType(method);
 
-        Expression body = Expression.Call(method, [Expression.Convert(receiver, receiverType), .. arguments]);
+        Expression self = throughPointer ? Pointee(receiver, method, receiverType) : Expression.Convert(receiver, receiverType);
+        Expression body = Expression.Call(method, [self, .. arguments]);
         LambdaExpression bound = Expression.Lambda(delegateType, body, arguments);
 
         return Expression.Lambda<Func<object?, Delegate>>(Expression.Convert(bound, typeof(Delegate)), receiver).Compile();

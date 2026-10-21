@@ -568,6 +568,10 @@ public class TypeGenerator : ISourceGenerator
                     // A generic value type's Go methods, closed over its own type parameters for golib (MethodSource).
                     if (MethodSource.Source(packageNamespace, generatedType as INamedTypeSymbol) is { } methodSource)
                         context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSource.g.cs")), methodSource);
+
+                    // A value type's exported Go methods as compiled delegates, reached only through reflect's method paths (MethodSet).
+                    if (MethodSet.Source(packageNamespace, generatedType as INamedTypeSymbol, context.Compilation, generatedSource) is { } methodSet)
+                        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.MethodSet.g.cs")), methodSet);
                 }
             }
         }

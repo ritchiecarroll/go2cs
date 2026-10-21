@@ -735,7 +735,7 @@ internal class InheritedTypeTemplate : TemplateBase
                 public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};{{ParameterlessConstructor}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
 
         {{ValueProperty}}
-                public override string ToString() => {{ToStringImplementation}};
+                public override string ToString() => global::go.GoMethodText.Of(this) ?? {{ToStringImplementation}};
         {{EqualityOverrides}}
                 public static bool operator ==({{ObjectName}} left, {{ObjectName}} right) => {{EqualityExpression}};
         
