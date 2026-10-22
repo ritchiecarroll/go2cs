@@ -21,7 +21,7 @@ Go structs use "[type embedding](https://go101.org/article/type-embedding.html)"
 
 **A C#-keyword-named embed composes generated names from the unescaped member name.** A Go struct named for a C# keyword (`type base struct{…}`) is emitted with the `@` escape (`@base`), and embedding it makes `@base` the member name. Standalone identifier positions keep the escape (the `partial ref @base @base` accessor, the constructor parameter, member accesses like `instance.@base.id`), but every *composed* generated name must strip it, because `@` is only valid leading an identifier: the promoted-struct inline field and its constructor assignments emit `ʗbase` (`ʗ@base` is CS1002), matching the already-stripped `Ꮡ`-prefixed field-reference statics and the converter's `structFieldBoxName`. (Guarded by the `NamedTypeOverStruct` extension — a keyword-named embed with promoted field/method access, a keyword-keyed composite literal, and a write through `&p.id` promoted through the embed, all vs Go.)
 
-**Cross-package embeds resolve through the semantic model.** The member-collection above resolves the embedded struct's *syntax* (`GetStructDeclaration`) — same-package or via `CompilationReference`s. In a real [MSBuild](../Glossary.md#msbuild) build, project references arrive as **metadata** references (never `CompilationReference`), so a cross-package embed — `type rtype struct { *abi.Type }` (runtime `type.go`) or a user package embedding a library struct — silently promoted **nothing**: the generated "Promoted Struct Field Accessors" section was empty and every `t.TFlag`/`t.Str`/`t.Kind_` was CS1061. The field collection now falls back to the **type's metadata symbol** (`GetTypeByMetadataName` on the normalized nested name, e.g. `go.internal.abi_package+Type`) and enumerates its public instance fields; the emitted accessors are unchanged in form — true refs through the embed (`public ref abi.TFlag TFlag => ref Type.Value.TFlag;` for a pointer embed), so writes through a promoted name reach the embedded target. Transitive promotion through a *metadata* type's own embeds is not chased (no corpus site needs it). **Promoted POINTER-RECEIVER method calls through a cross-package *pointer* embed are routed at the call site**: the generator emits no method forwarder for a metadata embed (method promotion is syntax-resolved), so `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime `type.go`) was CS1929; the converter now emits the explicit hop through the embed field's box — `t.Type.Value.Uncommon()` — where the deref'd `.Value` is a ref return, binding the `ref` extension addressably. A *same-package* pointer embed keeps its generated forwarder (no churn), and a promoted **value-receiver** method call (`p.Hot()`) remains a documented open gap — call through the embed explicitly. (Guarded by the `CrossPkgUser` Phase-4b extension — a promoted pointer-receiver `Calibrate` through the cross-assembly pointer embed, write-through observed via the target.) (Guarded by the `CrossPkgUser` Phase-4 extension — pointer-embed and value-embed field promotion across the assembly boundary, write-through observed via the embedded target, vs Go; cleared runtime `type.go`'s 4 CS1061, 68 → 64.)
+**Cross-package embeds resolve through the semantic model.** The member-collection above resolves the embedded struct's *syntax* (`GetStructDeclaration`) — same-package or via `CompilationReference`s. In a real [MSBuild](../Glossary.md#msbuild) build, project references arrive as **metadata** references (never `CompilationReference`), so a cross-package embed — `type rtype struct { *abi.Type }` (runtime `type.go`) or a user package embedding a library struct — silently promoted **nothing**: the generated "Promoted Struct Field Accessors" section was empty and every `t.TFlag`/`t.Str`/`t.Kind_` was CS1061. The field collection now falls back to the **type's metadata symbol** (`GetTypeByMetadataName` on the normalized nested name, e.g. `go.internal.abi_package+Type`) and enumerates its public instance fields; the emitted accessors are unchanged in form — true refs through the embed (`public ref abi.TFlag TFlag => ref Type.Value.TFlag;` for a pointer embed), so writes through a promoted name reach the embedded target. Transitive promotion through a *metadata* type's own embeds is not chased (no corpus site needs it). **Promoted POINTER-RECEIVER method calls through a cross-package *pointer* embed are routed at the call site**: the generator emits no method forwarder for a metadata embed (method promotion is syntax-resolved), so `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime `type.go`) was CS1929; the converter now emits the explicit hop through the embed field's box — `t.Type.Value.Kind()` (runtime `type.go`), where the deref'd `.Value` is a ref return, binding the `ref` extension addressably; a method the converter emits with a box receiver binds the held `ж<T>` directly (`t.Type.Uncommon()`, since `abi.Type.Uncommon` is `this ж<Type>`). A *same-package* pointer embed keeps its generated forwarder (no churn), and a promoted **value-receiver** method call (`p.Hot()`) remains a documented open gap — call through the embed explicitly. (Guarded by the `CrossPkgUser` Phase-4b extension — a promoted pointer-receiver `Calibrate` through the cross-assembly pointer embed, write-through observed via the target.) (Guarded by the `CrossPkgUser` Phase-4 extension — pointer-embed and value-embed field promotion across the assembly boundary, write-through observed via the embedded target, vs Go; cleared runtime `type.go`'s 4 CS1061, 68 → 64.)
 
 Two refinements complete the cross-package pointer-embed story (2026-07-03, internal/reflectlite's last 4): **(a) the hop names the FIELD, which is struct-scoped** — an embed field named like a Δ-renamed package type (rtype's embedded `Type` vs reflectlite's `Type` interface, Δ-renamed `ΔType` by its type-vs-method collision) is *declared* unrenamed, so the hop emission must not apply the package-level rename (`t.ΔType.Value.Uncommon()` was CS1061); both hop arms now route through `structFieldBoxName`, the same struct-scoped naming the box accessors use. **(b) A generated interface implementation forwards through the hop too**: when an interface member has NO direct struct method and is satisfied purely by Go promotion through a single embedded-pointer field (`GoImplement<rtype, ΔType>` — `Size`/`Kind` live on `*abi.Type`), the `InterfaceImplTemplate` emits `this.Type.Value.Size()` instead of the unbindable `this.Size()` (CS1929); the `IжAdapter` template forwards the same members `m_box.Value.Type.Value.M()`. Detection is syntax-level — the converter's embed marker is the `public partial ref ж<X> F {{ get; }}` property (`GetEmbeddedPointerHopNames`) — and originally gated to a SINGLE hop, on the reasoning that multi-embed interface satisfaction was rare. The corpus surfaced one (jsonrpc's `pipe`), and the gate is gone: several embeds now route each member to the unique embed declaring it (see [*With SEVERAL embedded pointers the hop is chosen per member, not per struct*](interfaces.md#with-several-embedded-pointers-the-hop-is-chosen-per-member-not-per-struct)). (Guarded by the `CrossPkgUser` Phase-5 extension — a local Δ-renamed `Meter` interface colliding with the embed field name, satisfied purely by promotion through `*CrossPkgLib.Meter`, with all bump paths aliasing one shared object, vs Go.)
 
@@ -33,7 +33,7 @@ Two refinements complete the cross-package pointer-embed story (2026-07-03, inte
 
 The **exception is the enclosing method's own `ref` receiver**: a non-direct-ж pointer-receiver method renders `this ref T recv` with **no box** (`Ꮡrecv` exists only for direct-ж), so the box descent referenced a nonexistent name (CS0103 — runtime `mgcscavenge.go`, `(*scavChunkData).alloc/free` calling the promoted `sc.setEmpty()`/`setNonEmpty()` from the embedded `scavChunkFlags`). No box is needed either: the embedded field of a `ref` receiver is *addressable*, so the promoted method's `ref` overload binds on the **explicit field call** — `sc.scavChunkFlags.setEmpty()` — with faithful write-through. (A *direct-ж* target on the bare receiver would have promoted the enclosing method via the capture-mode fixpoint, so this arm's target always has the `ref` overload.) The receiver name-match is guarded **rendered==raw**: an inner binding that shadows the receiver name is Δ-renamed by the shadow pass, declines the arm, and keeps the descent — the same hardening applied in `convUnaryExpr`'s `&recv.field` branch, where a pointer *local* shadowing the receiver name previously took the receiver arm and emitted `Ꮡ`+raw (a nonexistent box) instead of falling to the pointer-variable arm (`cΔ1.of(chunk.Ꮡflags)`). The fix also pre-cleared the same latent shape in `archive/zip` (`f.FileHeader.hasDataDescriptor()`), `go/internal/gcimporter`, `go/types`, and `image` (whole-stdlib reconvert diff: exactly those sites changed, nothing else). (Guarded by the `EmbeddedValuePointerMethod` behavioral test — value embed + mutating pointer-receiver methods called via a pointer local, a deref'd param, AND the enclosing `ref` receiver, plus a shadowing-pointer-local control, all with write-through verified against Go; runtime relies on it for `timeTimer`'s `modify`/`stop`/`reset` and `scavChunkData`'s `setEmpty`/`setNonEmpty`.)
 
-**A POINTER embed's BOX-receiver primary promotes through the box hop, not the deref'd value.** The promoted-receiver harvest (`GetExtensionMethods` → `IsExtensionMethodForStruct`) matched only VALUE-receiver forms (`T`/`ref T`/…), so a **direct-ж** primary (`this ж<T>`, emitted when a method takes the address of a receiver field) on an embedded type had no promoted forwarder — sha3's `cshakeState` embeds `*state`, whose `Write` is `this ж<state>`, so `Ꮡc.Write(…)` was CS1929. Such a method IS promotable through a **pointer** embed: the converter renders the hop `target.<embed>` as a `ж<T>`, so the forwarder `target.<embed>.Write(…)` binds the box receiver directly (no box construction). The `TypeGenerator` now collects those box primaries separately (`GetBoxReceiverExtensionMethods`, keyed off `GetEmbeddedPointerHopNames` so it fires ONLY for pointer embeds — a value embed's `target.<embed>` is a value that cannot bind a ж-receiver, which would need the box-hop form the sibling `GoImplement` adapter uses above) and marks each `MethodInfo.IsBoxRecv`, so the emission drops the `.Value` a value-receiver forwarder appends (`target.<embed>.M(…)` for a box primary vs `target.<embed>.Value.M(…)` for a value method). The pointer-receiver forwarder delegates to the value form unchanged, and the shared box means write-through reaches the real embedded storage. (Guarded by the `PointerEmbedBoxReceiver` behavioral test — `Outer` embedding `*Inner` whose `Add` takes `&n.total` (a box primary), the promoted `o.Add(…)` mutating through the shared box, output-compared vs Go. Full behavioral suite green; a whole-corpus confirmation on the real sha3 is deferred to the next census, as with the sibling foreign-embed fix.)
+**A POINTER embed's BOX-receiver primary promotes through the box hop, not the deref'd value.** The promoted-receiver harvest (`GetExtensionMethods` → `IsExtensionMethodForStruct`) matched only VALUE-receiver forms (`T`/`ref T`/…), so a **direct-ж** primary (`this ж<T>`, emitted when a method takes the address of a receiver field) on an embedded type had no promoted forwarder — Go 1.23's sha3 `cshakeState` embeds `*state`, whose `Write` is `this ж<state>`, so `Ꮡc.Write(…)` was CS1929. Such a method IS promotable through a **pointer** embed: the converter renders the hop `target.<embed>` as a `ж<T>`, so the forwarder `target.<embed>.Write(…)` binds the box receiver directly (no box construction). The `TypeGenerator` now collects those box primaries separately (`GetBoxReceiverExtensionMethods`, keyed off `GetEmbeddedPointerHopNames` so it fires ONLY for pointer embeds — a value embed's `target.<embed>` is a value that cannot bind a ж-receiver, which would need the box-hop form the sibling `GoImplement` adapter uses above) and marks each `MethodInfo.IsBoxRecv`, so the emission drops the `.Value` a value-receiver forwarder appends (`target.<embed>.M(…)` for a box primary vs `target.<embed>.Value.M(…)` for a value method). The pointer-receiver forwarder delegates to the value form unchanged, and the shared box means write-through reaches the real embedded storage. (Guarded by the `PointerEmbedBoxReceiver` behavioral test — `Outer` embedding `*Inner` whose `Add` takes `&n.total` (a box primary), the promoted `o.Add(…)` mutating through the shared box, output-compared vs Go.)
 
 **Same-Go-package promotion survives the `-tests` reference model's assembly seam.** The metadata
 fallbacks above implement Go's CROSS-package rule — public members only — which was also their
@@ -138,6 +138,11 @@ public partial struct Var
     internal static ref @object Ꮡobject(ref Var instance) => ref instance.@object;   // unchanged
 }
 ```
+
+That is the generator-owned form, still read for hand-owned files that spell it. Since the 2026-10-16 ruling
+at the top of this page a converted embed is the converter-declared field itself
+(`/*embed*/ internal @object @object;`), so the generator declares neither the `ʗ` field nor the accessor;
+the inline value semantics are the same.
 
 Everything downstream is unchanged in form: `&v.embed` still goes through the static `Ꮡ`-accessor
 (`Ꮡv.of(Var.Ꮡobject)`), which builds a struct-field-reference box rooted at the *enclosing* box, so
@@ -263,9 +268,12 @@ the orphan. Because the wrapper is several words wide, the half-done copy-back c
 *observed*, surfacing as a spurious `IndexOutOfRangeException` out of `at`'s bounds check rather
 than as a lost write.
 
-`crypto/internal/boring/bcache`'s concurrent section is the measured victim: entries lost in ~28% of
-runs, and always in the first ~15 of 102,100 — the fingerprint of a bounded start-up window rather
-than of a broken CAS or a GC interaction (both A/B-eliminated).
+`crypto/internal/boring/bcache`'s concurrent section is the measured victim (on windows/amd64, .NET 10,
+[`phase4/INVESTIGATION-element-aliasing.md`](../phase4/INVESTIGATION-element-aliasing.md)): entries lost in a
+large share of runs, and always among the first few of the section's 102,100 — the fingerprint of a bounded
+start-up window rather than of a broken CAS or a GC interaction (both A/B-eliminated). <!-- as first written:
+"entries lost in ~28% of runs, and always in the first ~15 of 102,100"; the investigation record's own batch
+reads 72.2 % of runs and the first ~15 entries -->
 
 The publish is now gated per **box**, which is the only durable unit available: the by-value copy
 cannot be one, and constraining `T` is not on the table — the constrained-CALL route was torn out in
@@ -280,10 +288,11 @@ The publish path is also narrowed to the shapes that actually *are* lazy, which 
 separate defect the old unconditional probe carried. golib's own `array<T>`/`slice<T>` and every
 named-slice wrapper hold their backing in a field, so there is nothing to publish — and
 **`slice<T>.Source` is defined to return a DETACHED COPY**, so the old code allocated and threw away
-a full copy of the backing on *every* element take through a `ж<slice<T>>`. Measured (isolated
-processes, median of three): slice `.at()` **215.09 → 29.00 ns/op**, array `23.66 → 21.84`, named
-wrapper `28.51 → 26.22`. Every shape got faster; the fix removes an allocation from the hot path
-rather than adding a lock to it.
+a full copy of the backing on *every* element take through a `ж<slice<T>>`. Measured in isolated
+processes, every shape got faster — the slice `.at()` path by several times; the fix removes an
+allocation from the hot path rather than adding a lock to it. <!-- measured (isolated processes, median of
+three; platform not recorded): slice .at() 215.09 -> 29.00 ns/op, array 23.66 -> 21.84, named wrapper
+28.51 -> 26.22 -->
 
 > **Doctrine: a lazy-initialization fix is not finished until the publish is atomic.** `47ddd5a50`
 > correctly diagnosed "the allocation landed on the copy and the real storage stayed virgin" and
@@ -293,8 +302,8 @@ rather than adding a lock to it.
 **Not closed by this**, because no golib-side gate can be: the generated `Value => m_value ??= …`
 getter is itself a read-modify-write, so two threads first-touching the *same struct instance* by
 ref still race (`ref semTable semtable => ref Ꮡsemtable.Value; semtable[i] = x`). Closing that needs
-an atomic publish inside the generated getter (go2cs-gen). Measured unchanged at ~95% of trials
-(ElemAliasProbe `arm7`) — closed separately, see *The named-array wrapper publishes its lazy backing
+an atomic publish inside the generated getter (go2cs-gen). Measured unchanged at ~95% of trials on
+windows/amd64 (ElemAliasProbe `arm7`) — closed separately, see *The named-array wrapper publishes its lazy backing
 atomically* below.
 
 ## The element address of a VIRGIN named array must materialize through the receiver
@@ -303,8 +312,10 @@ The arm above hands `&t[i]` to golib's by-value `Ꮡ<T>(IArray<T> target, int in
 reasoned sound because "a named fixed-array type is generated as `IArray<E>` over a shared backing
 `E[]`". That is true of golib's own `array<E>` — an eagerly-allocated readonly struct, where a copy
 shares the storage — and **false of the go2cs-gen wrapper**, whose backing is allocated on first
-touch:
+touch (the getter as it stood before [the atomic
+publish](#the-named-array-wrapper-publishes-its-lazy-backing-atomically) below):
 
+<!-- illustration: not converter output -->
 ```csharp
 private array<E>? m_value;
 public  array<E>  Value => m_value ??= new array<E>(N);
@@ -363,8 +374,8 @@ never sees it either (there is no `Ꮡ`). What it meets is `m_value ??= new arra
 read-modify-write of shared mutable state: two threads that first-touch the same zero-valued wrapper
 each allocate a backing and the second store **orphans the first**, together with every element
 pointer already derived from it. Silent — no fault, no exception — and confined to a start-up window
-measured in microseconds. Measured at **872 of 900** concurrent first-touch trials (ElemAliasProbe
-`arm7`, 24 threads × 300 trials × 3 batches).
+measured in microseconds. Measured at **872 of 900** concurrent first-touch trials on windows/amd64,
+.NET 10 (ElemAliasProbe `arm7`, 24 threads × 300 trials × 3 batches; 0 of 900 after the change).
 
 The publish becomes an interlocked CAS. Every racing thread allocates, exactly one wins the slot, and
 the losers discard their allocation *before* anything can derive an element address from it — which is
@@ -381,7 +392,7 @@ public array<uint64> Value
 
         if (value is null)
         {
-            var created = new global::System.Runtime.CompilerServices.StrongBox<array<uint64>>(new array<uint64>(256));
+            global::System.Runtime.CompilerServices.StrongBox<array<uint64>> created = new global::System.Runtime.CompilerServices.StrongBox<array<uint64>>(new array<uint64>(256));
             value = global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created;
         }
 
@@ -398,11 +409,12 @@ constructor-supplied array may be an alias **window** (`array<E>.Alias`, Go's `(
 `Source` is wider than the array, and flattening it to its backing would silently widen the named
 array and shift its origin. The holder carries the whole `array<E>`, so nothing is lost. It is
 `StrongBox<array<E>>` and not plain `object` because an `object` slot makes every warm read an
-`unbox.any` — a type-check helper *call* in the hot loop; measured on the element-address path over 64
-cold tables, `1.97 → 4.13 ns/op` for `object` against `1.97 → 2.45` for the typed holder.
+`unbox.any` — a type-check helper *call* in the hot loop; measured on windows/amd64 on the
+element-address path over 64 cold tables, `1.97 → 4.13 ns/op` for `object` against `1.97 → 2.45` for the
+typed holder.
 
 The residual cost is one dependent load and the probe reports it honestly (`arm9`, both emissions in
-one process): the raw `Value` getter gets **faster** (`1.03 → 0.87 ns/op` — the wrapper struct shrank
+one process, windows/amd64): the raw `Value` getter gets **faster** (`1.03 → 0.87 ns/op` — the wrapper struct shrank
 from 24 bytes to 8, so every Go by-value array copy moved with it), the element path over ONE
 long-lived table — what the corpus's named arrays actually are, and where the JIT hoists the
 loop-invariant getter — sits between `−1%` and `+12%` run to run, and the pathological shape of 64
@@ -528,10 +540,11 @@ whose pointee is not `Named`. Go reports every one of them `Anonymous`, so the s
 whole set; the census that sized the cut is keyed on exactly that predicate (positive control:
 `TypeConversionReturnType` reads 8 sites, four per textual occurrence of its struct).
 
-Blast radius, measured before the cut: **zero** embedded-builtin fields in production std (positive
-control: 269 embedded struct fields, not counted), 39 sites in six TEST packages (`reflect_test` 22,
-`internal/reflectlite_test` 7, `text/template/parse` 4, `sync/atomic_test` 3, `math/big_test` 2,
-`runtime_test` 1) — so the `-stdlib` two-seeded diff is empty on all three targets, the four banked
+Blast radius, measured before the cut: **no** embedded-builtin fields in production std, and a few dozen
+sites in six TEST packages (`reflect_test` most of them) — so the `-stdlib` two-seeded diff <!-- measured
+before the cut: zero in production std (positive control: 269 embedded struct fields, not counted); 39 test
+sites: reflect_test 22, internal/reflectlite_test 7, text/template/parse 4, sync/atomic_test 3, math/big_test 2,
+runtime_test 1 --> is empty on all three targets, the four banked
 rows' test sources take their attribute hunks with the cut, and CNR moves exactly one behavioral
 golden (`TypeConversionReturnType`, whose structs embed `string` and `*int` — four sites). Guarded by
 `ReflectFieldMetadata`'s root-4 rows: `struct{ int }` and `struct{ *int }` report Go's `Name`,
@@ -586,11 +599,12 @@ the promoted fields plus value- and pointer-receiver methods reached through it 
 literal keyed by the embedded field and a `new(T)` zero value, values vs Go).
 
 ## Promoted pointer methods descend multi-hop value-embed chains
-A pointer-receiver method promoted through two or more embedded VALUE structs descends hop by hop: the first hop through the `&`-machinery (box-vs-parameter distinction), then one `.of(<Owner>.<field-box>)` view per additional hop -- the `ж<T>` field views compose onto the method's receiver box (reflect's `sliceType` embeds `abi.SliceType` embeds `abi.Type`, whose `Common()` extension binds `ж<abi.Type>` -- CS1929):
+A pointer-receiver method promoted through two or more embedded VALUE structs descends hop by hop. Reached through a pointer, the first hop goes through the `&`-machinery (box-vs-parameter distinction), then one `.of(<Owner>.<field-box>)` view per additional hop -- the `ж<T>` field views compose onto the method's receiver box (reflect's `sliceType` embeds `abi.SliceType` embeds `abi.Type`, whose `Common()` extension binds `ж<abi.Type>` -- CS1929): `Ꮡp.of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(…)`. An addressable value (the enclosing `ref` receiver, or a local) takes the bare field path instead, which binds the `ref` overload directly -- `CrossPkgUser`'s local `rg`:
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs.target:235 -->
 ```csharp
-Ꮡ(rg).of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(3);
+rg.Device.Sensor.Calibrate(3D);
 ```
-The own-receiver bare form joins the hop path (`recv.E1.E2.method(...)`); a chain broken by a pointer embed falls through unchanged. Guarded by `CrossPkgUser`.
+A chain broken by a pointer embed falls through unchanged. Guarded by `CrossPkgUser`.
 
 ## A promotion forwarder's receiver never shares a name with the method's parameters
 go2cs-gen writes a forwarder for every method promoted through an embedded field, and names its receiver `target` (its box form `Ꮡtarget`). A promoted method can have a parameter of that very name: testify's `suite.Suite` promotes `ErrorAs(err error, target any, ...)` from `assert.Assertions`. Sharing the name declares it twice (CS0100), and inside the forwarder it could bind the parameter where the receiver was meant. The receiver therefore takes the converter's `Δ` prefix whenever a parameter already uses the name:
@@ -608,12 +622,13 @@ only *dereferencing through* the nil embed panics. The generator's promoted-poin
 (a `ж<ж<T>>` box behind a ref accessor) previously conflated the two: the accessor resolved the box
 with `.Value`, which treats a null held value as a nil-pointer dereference — so the *first touch* of
 an unpopulated embed (even the legal `== nil` comparison, or the assignment that would populate it)
-panicked from the accessor. Two generator changes separate holding from dereferencing
-(`StructTypeTemplate`):
+panicked from the accessor. Two rules now separate holding from dereferencing:
 
-1. **The promoted-struct accessor resolves through `ValueSlot`** — golib's nil-check-free real slot.
-   The `Ꮡʗ` box is a real constructor allocation, so resolving the accessor is a read of the *held*
-   value, never a dereference *of* the box; reads and writes of the held `ж<T>` must not panic.
+1. **Reading or assigning the embed never dereferences.** The pointer embed is a field the converter
+   declares (`/*embed*/ internal ж<setting> setting;`), so `s.setting`, `s.setting == nil` and
+   `s.setting = …` are plain field accesses on the held `ж<T>`. (While the generator owned the storage,
+   the same rule was its `partial ref` accessor resolving the box through golib's nil-check-free
+   `ValueSlot` instead of `.Value`.)
 2. **The parameterized constructors box a nil pointer for an omitted POINTER embed** (`arg ?? new
    ж<T>(nil)`), matching what the NilType/parameterless constructors already emitted. The held value
    is then a *nil box* rather than a raw null, so a genuine deref of the nil embed panics with Go's
@@ -622,20 +637,24 @@ panicked from the accessor. Two generator changes separate holding from derefere
    which constructor produced it (`ж.Equals`: nil == nil). Value embeds are untouched (their member
    type is a value type — never null).
 
+<!-- illustration: the declaration is EmbeddedPointerNilAssign's golden; the constructor is composed from
+     StructTypeTemplate's field-wise constructor arm (memberValue / PointerConstructedTypeName), not a committed file -->
 ```csharp
-// Promoted Struct Accessors
-internal partial ref ж<setting> setting => ref Ꮡʗsetting.ValueSlot;   // was .Value — panicked on first touch
+partial struct Setting {
+    internal @string tag;
+    /*embed*/ internal ж<setting> setting;
+}
 
-// internal ctor: an omitted pointer embed holds a nil BOX, not a raw null
+// generated field-wise ctor: an omitted pointer embed holds a nil BOX, not a raw null
 internal Setting(@string tag = default!, ж<setting> setting = default!)
 {
     this.tag = tag;
-    Ꮡʗsetting = new ж<ж<setting>>(setting ?? new ж<setting>(nil));
+    this.setting = setting ?? new StandardBox<setting>(nil);
 }
 ```
 
 Go's nil-deref panic is preserved *downstream*, where the actual dereference happens: the promoted
-field/method accessors descend `setting.Value.name` / `target.setting.Value.bump()`, and that inner
+field/method accessors descend `setting.Value.name` / `target.setting.Value.bump()`, and that
 `.Value` — on the held nil `ж<T>` itself — still routes through the strict panic path. (Guarded by
 the `EmbeddedPointerNilAssign` behavioral test — compare-nil on a fresh instance, a recovered deref
 panic through the nil embed, assignment of a nil pointer variable, post-construction population, and
