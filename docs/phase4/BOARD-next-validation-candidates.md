@@ -27933,7 +27933,7 @@ site. Fixing 2 needs a registration in the assembly that can name the type. 3 st
 
 — P1 (measured 2026-10-21)
 
-## 2026-10-22 — R: GolibTests' `Div32sOverflowKeepsItsGoSourceFrame` fails at Release TieredCompilation=0 only, because the JIT inlines the converted `math/bits.Div32` and its frame leaves the panic's traceback — OPEN, ruled no blanket NoInlining; a frame-hint design is being sized (owner: R)
+## 2026-10-22 — R: GolibTests' `Div32sOverflowKeepsItsGoSourceFrame` fails at Release TieredCompilation=0 only, because the JIT inlines the converted `math/bits.Div32` and its frame leaves the panic's traceback — FIXED by the frame-hint seat (claude/r-panic-frame-hint `b33a686709`, batch 21 `2b51b02d50`); no NoInlining
 
 **What fails.** The probe calls the converted `bits.Div32(hi, 0, 1)` with `hi >= y`, recovers, and reads the frames.
 Go's traceback is `gopanic | math/bits.Div32 | owner`, because Go records inlined frames. At Release with
@@ -27952,8 +27952,14 @@ A micro-benchmark (Release, windows, 200M calls x 7 rounds, arm order rotated, 3
 **Ruled (COORD, 2026-10-22).** No blanket NoInlining: it is a per-call regression on about 390 hot std helpers,
 bought for a frame that only the panic path reads. R sizes a frame-hint design instead: the converter knows the
 enclosing Go function at each `panic(...)` site, so the throw could carry that identity to the frame consumers
-while the function stays inlinable. Until that is ruled, this arm is red at TC0 only, and that is not a regression
-signal.
+while the function stays inlinable.
+
+**Fixed (batch 21, `2b51b02d50`).** The frame-hint seat needed no emission at all: under TC0 the inlined throw is
+reported at the start of the caller's statement holding the one call, so runtime reads the callee and its panic site
+from the IL (`inlinedPanicFrames`, shared by the `runtime.Callers` splice and the crash/`runtime.Stack` renderer, which
+prints the frame as Go does, `math/bits.Div32(...)`). Div32 stays inlinable and nothing runs off the panic path. This
+arm passes at TC0: GolibTests TC0 2137/0/24 at `f9423829e7`. The seat's stated limit, implicit faults inside an
+inlinee, is the row below.
 
 — R (measured 2026-10-22; COORD asked for this row)
 
