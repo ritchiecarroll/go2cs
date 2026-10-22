@@ -5913,7 +5913,7 @@ A box method such as `initSelf` takes the box directly. A `this ref` method such
 	c := &ring{data: 3}
 	b.linkTo(c)
 ```
-<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:45-54 -->
+<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:48-57 -->
 ```csharp
     var a = Ꮡ(new ring(data: 1));
     a.initSelf();
@@ -6637,7 +6637,7 @@ foreach (var (iᴛ1, vᴛ1) in nums) {
 
 <!-- A defer or go call that references i also selects the per-iteration form (src/go2cs/visitForStmt.go:413#c54fd4);
 the copy-back fires when the body writes i or the variable is heap-boxed (visitForStmt.go:429#8ec6f5; golden
-src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:55-58#b74efc, where the body only takes &i). -->
+src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:56-59#b74efc, where the body only takes &i). -->
 **Loop variables are per-iteration.** Go gives each iteration of `for i := …` its own `i`. A C# `for`
 shares one variable across all iterations, so closures made in the loop would all see its last value.
 When a closure captures `i`, the converted loop counts with a hidden `iᴛ1` and declares a fresh `i`
@@ -6671,7 +6671,7 @@ becomes the lambda `() => i` ([Function Values and Closures](#function-values-an
 ([Strings](#strings-string-and-sstring)).
 
 <!-- The copy-back example: src/tests/Behavioral/ForLoopPerIterationVars/main.go:27#749ae0 (g2, a body that writes i and
-continues) -> main.cs.target:30-48#94aecb, where `iᴛ1 = i;` appears before the `continue` and at the end of the body.
+continues) -> main.cs.target:30-49#b4bdc4, where `iᴛ1 = i;` appears before the `continue` and at the end of the body.
 Output: g2: 3, then g2v: 2, 4, 6. -->
 **A body that changes `i` copies it back.** If the body writes `i`, the change must also advance the
 loop. So the C# adds `iᴛ1 = i;` at the end of the body and before each `continue`. This Go prints
@@ -10419,7 +10419,7 @@ func main() {
 …
 }
 ```
-<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-66 -->
+<!-- source: src/tests/Behavioral/ReceiverPointerValue/main.cs.target:7-69 -->
 ```csharp
 partial struct ring {
     internal nint data;
@@ -10451,7 +10451,7 @@ internal static void Main() {
 Each pointer in a chain gets its own `~`. Go's `b.next.data` passes through two pointers, `b` and
 `b.next`. So `(~b).next` reads `b`'s value and takes its `next` box, and the outer `~` reads that box's
 value: `(~(~b).next).data`.
-<!-- generator overload shape: src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:100-105#1c2d4b (ref var r = ref Ꮡr.DerefOrNull(); r.linkTo(...)); chain read also at src/tests/Behavioral/ReceiverPointerValue/main.go:64#fc25d0 -> main.cs.target:49#3e66ab ((~(~a).next).data). initSelf/advance/chain/pair are direct-ж receivers (this ж<ring> Ꮡr, no [GoRecv]) at main.cs.target:12, 22, 30, 40#6706ab. -->
+<!-- generator overload shape: src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:100-105#1c2d4b (ref var r = ref Ꮡr.DerefOrNull(); r.linkTo(...)); chain read also at src/tests/Behavioral/ReceiverPointerValue/main.go:64#fc25d0 -> main.cs.target:52#3e66ab ((~(~a).next).data). initSelf/advance/chain/pair are direct-ж receivers (this ж<ring> Ꮡr, no [GoRecv]) at main.cs.target:12, 22, 30, 43#6706ab. -->
 
 **Full detail:** [Reference → Implicit Pointer Dereferencing](ConversionStrategies-Reference/implicit-dereferencing.md#implicit-pointer-dereferencing) — how the converter decides that a selector base needs a dereference, promoted fields through a pointer local, nested and indexed write targets, and `*p.field` through parameters and receivers.
 
