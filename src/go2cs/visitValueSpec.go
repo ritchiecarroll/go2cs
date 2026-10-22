@@ -424,10 +424,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 								// array (NRE on first element write).
 								v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, v.arrayZeroValueArgs(strconv.FormatInt(arrayType.Len(), 10), arrayType))
 							} else if v.structHasPromotedEmbeds(def.Type()) {
-								// A struct with a promoted embed stores it in a readonly `ж<T>`
-								// box only the constructors initialize — `default!` leaves the
-								// box null and the first promoted-member access NREs, so the
-								// zero value must construct through the NilType ctor.
+								// A struct with a promoted embed must construct through the NilType
+								// ctor, which builds each embed field (a value embed by its own
+								// `new T(nil)`, a pointer embed as a nil `ж<T>` box): `default!` leaves
+								// a pointer embed a raw null, so a promoted access NREs where Go panics.
 								v.writeOutput("%s %s = new(nil);", csTypeName, csIDName)
 							} else if v.structZeroValueNeedsConstruction(def.Type()) {
 								// A struct whose default(T) is broken by a fixed-size array
@@ -488,10 +488,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							arrayLenValue = v.arrayZeroValueArgs(arrayLenValue, def.Type())
 						}
 
-						// A promoted-embed struct global has the same null-box hazard as the
-						// local branch above: the readonly `ж<T>` embed boxes only exist when
-						// a constructor runs, so the zero value must be `new(nil)`, not the
-						// field's implicit default.
+						// A promoted-embed struct global has the same hazard as the local
+						// branch above: its embed fields (a pointer embed's nil box) are built
+						// only when a constructor runs, so the zero value must be `new(nil)`,
+						// not the field's implicit default.
 						hasPromotedEmbeds := v.structHasPromotedEmbeds(def.Type())
 
 						// A struct global whose default(T) is broken by a fixed-size array field

@@ -27957,4 +27957,23 @@ signal.
 
 — R (measured 2026-10-22; COORD asked for this row)
 
+## 2026-10-22 — R: an IMPLICIT fault (an integer divide, a nil dereference) raised inside a Go function the JIT inlined keeps today's frames, without the function's — STATED LIMIT of the frame-hint seat (claude/r-panic-frame-hint)
+
+**What the seat does.** Go records inlined frames, so its traceback always shows the function a panic was raised in.
+Under Release with `TieredCompilation=0` the JIT inlines small Go functions, and a panic raised in one leaves a trace
+that holds only its caller. For an EXPLICIT `panic(...)`, runtime's `inlinedPanicFrames` restores the function's frame
+from the IL alone. It applies in both `runtime.Callers` during the panic (splicePanic) and the crash report
+(appendGoFrames). The faulting frame's statement holds exactly one call, and that callee reaches exactly one
+`builtin.panic` site. Nothing is emitted, and nothing runs off the panic path.
+
+**The limit.** A fault the hardware or the divide raises inside an inlinee (`panicmem`/`sigpanic`, `panicdivide`) is
+not covered. The faulting statement names the call, but not which instruction in the inlined body faulted: the
+caller's own code in that statement can fault the same way. So the trace keeps the frames it has (gopanic, the fault
+frames, then the caller), one frame short of Go's. Tier-0 and Debug inline nothing and show the real frame.
+
+Owner: none (post-hop). Closing it needs the JIT's inline tree for the faulting native offset: rich debug info, which
+`StackFrame` does not expose.
+
+— R (measured 2026-10-22; COORD asked for this row)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

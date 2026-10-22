@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Guards Go-style complex rendering in the golib fmt stub: complex128 (System.Numerics.Complex)
+// Guards Go-style complex rendering through the converted fmt: complex128 (System.Numerics.Complex)
 // and complex64 (go.complex64) must print as "(2+3i)" — imaginary part always signed — not the
 // .NET ToString() forms "<2; 3>" / "(2, 3)".
 //
