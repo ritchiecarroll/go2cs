@@ -187,7 +187,7 @@ partial class runtime_package
         StringBuilder trace = new();
 
         trace.Append("goroutine 1 [running]:\n");
-        appendGoFrames(trace, stack);
+        appendGoFrames(trace, stack, panic);
 
         return trace.ToString();
     }
@@ -1488,7 +1488,7 @@ partial class runtime_package
             // that way is Go's preprintpanics rule (an error prints its Error(), a Stringer its
             // String()). Reading the state directly here printed an address for every error panic.
             trace.Append("panic: ").Append(inFlight.Message).Append('\n');
-            appendGoFrames(trace, panicSite);
+            appendGoFrames(trace, panicSite, inFlight);
         }
 
         // Go ends the calling goroutine's block, like every other, with the `go` statement that started
@@ -1724,8 +1724,8 @@ partial class runtime_package
             yield return frames[i];
     }
 
-    private static void appendGoFrames(StringBuilder trace, StackTrace stack) =>
-        appendGoFrames(trace, stack.GetFrames());
+    private static void appendGoFrames(StringBuilder trace, StackTrace stack, PanicException? site = null) =>
+        appendGoFrames(trace, stack.GetFrames(), site);
 
     // The frames printed are the frames runtime.Callers counts (captureCallers' rule): Go frames, and
     // a GoStackRoot host method as the Go frame it stands in for. Everything else on the CLR stack —
@@ -1733,14 +1733,32 @@ partial class runtime_package
     // traceback readers: runtime's parseTraceback requires a tab-indented source line under every
     // function line, and `System.Threading.ExecutionContext.RunInternal()` has none. runtime.goexit
     // is not printed: Go's showframe hides runtime frames, and the walk's goexit tail is Callers-only.
-    private static void appendGoFrames(StringBuilder trace, IEnumerable<StackFrame> frames)
+    // `site` is the panic whose trace `frames` is, when it is one: an explicit panic raised inside Go functions the JIT
+    // inlined into the faulting frame (the trace's first frame) prints their frames above it, as Go records them
+    // (inlinedPanicFrames, shared with splicePanic so a crash report and runtime.Callers agree).
+    private static void appendGoFrames(StringBuilder trace, IEnumerable<StackFrame> frames, PanicException? site = null)
     {
         List<(string name, string file, int line)> printed = [];
         bool calledGo = false;
+        bool first = true;
 
         foreach (StackFrame frame in frames)
         {
             System.Reflection.MethodBase? method = frame.GetMethod();
+            bool faulting = first;
+            first = false;
+
+            if (faulting && site?.FaultKind == PanicFaultKind.Explicit && method is not null && isGoSourceFrame(method) &&
+                inlinedPanicFrames(method, frame.GetILOffset()) is { } inlined)
+            {
+                foreach ((System.Reflection.MethodBase inlinedMethod, int ilOffset) in inlined)
+                {
+                    (string inlinedFile, int inlinedLine) = goILPosition(inlinedMethod, ilOffset);
+                    printed.Add((goFrameName(inlinedMethod, ilOffset, out _), inlinedFile, inlinedLine));
+                }
+
+                calledGo = true;
+            }
 
             // A [StackTraceHidden] linkname forwarder has no Go frame (isGoSourceFrame skips it for
             // Callers by the same predicate), and StackTrace.GetFrames() still returns it.
@@ -4011,6 +4029,15 @@ partial class runtime_package
                     break;
             }
 
+            // An explicit panic raised inside Go functions the JIT inlined into the faulting frame: their frames, as Go
+            // records them (inlinedPanicFrames).
+            if (link.FaultKind == PanicFaultKind.Explicit && site.Count > 0 && isFaultingFrame(site[0], raw) &&
+                inlinedPanicFrames(site[0].GetMethod()!, site[0].GetILOffset()) is { } inlined)
+            {
+                foreach ((System.Reflection.MethodBase method, int ilOffset) in inlined)
+                    spliced.Add(internInlinedFrame(method, ilOffset));
+            }
+
             if (!link.SiteEndsAtRun)
             {
                 // The site ends at the deferring function, and the chain ends with it.
@@ -4436,6 +4463,162 @@ partial class runtime_package
         }
 
         return found;
+    }
+
+    // INLINED PANIC SITES (COORD's frame-hint ruling, 2026-10-22). Go records inlined frames, so its traceback always
+    // shows the function an explicit panic was raised in. The optimized JIT -- the Release TieredCompilation=0 default --
+    // inlines a small Go function into its caller, the panic's trace then holds only the caller, and the function's
+    // frame is gone (math/bits.Div32 is the measured case: its `throw panic(overflowError)` inlined into the probe left
+    // ONE frame, the caller, reported at the start of the statement holding the call). The IL restores it, so nothing
+    // is emitted and nothing runs off the panic path: the faulting frame's statement names the call the panic came
+    // from, and that callee's own IL names its panic site.
+    //
+    // NEVER A GUESS. A frame is added only when the IL proves which one: from the reported offset to the end of its
+    // statement (read as returnSiteILOffset reads a boundary or a previous call's record) there is exactly ONE call, and
+    // it reaches exactly ONE explicit panic site (panicChain). Anything else keeps the frames the trace has. A statement
+    // that panics itself needs no rule of its own: its builtin.panic call is one of its calls, so the window holds two
+    // (refused) or, past the callee, only that call, which is not Go source. Implicit faults (an integer divide, a nil dereference) inside an
+    // inlinee are not covered: a statement cannot say which instruction faulted, so they keep today's frames.
+    //
+    // Returns the chain innermost first -- the function that panicked, then each inlined caller above it -- as Go's
+    // traceback lists them between gopanic and the faulting frame, or null.
+    private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)
+    {
+        if (ilOffset < 0 || callSiteOffsets(faulting) is not { } calls || sequencePointOffsets(faulting) is not { Length: > 0 } statements)
+            return null;
+
+        int index = Array.BinarySearch(statements, ilOffset);
+        bool boundary = index >= 0;
+
+        if (index < 0)
+            index = ~index - 1;
+
+        int end = index >= 0 && index + 1 < statements.Length ? statements[index + 1] : int.MaxValue;
+        int from = boundary ? ilOffset : ilOffset + 1;
+        int candidate = -1;
+
+        foreach (int call in calls)
+        {
+            if (call < from || call >= end)
+                continue;
+
+            if (candidate >= 0)
+                return null;
+
+            candidate = call;
+        }
+
+        if (candidate < 0 || callTarget(faulting, candidate) is not { } callee || !isGoSourceFrame(callee))
+            return null;
+
+        return panicChain(callee, 1) is { Kind: PanicReach.One } reach ? reach.Chain : null;
+    }
+
+    private enum PanicReach { None, One, Unknown }
+
+    private readonly record struct PanicChain(PanicReach Kind, (System.Reflection.MethodBase method, int ilOffset)[]? Chain);
+
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, PanicChain> s_panicChains = new();
+
+    private const int PanicChainDepth = 4;
+
+    // The explicit panic sites `method` reaches through calls the JIT could have inlined: its own builtin.panic calls and
+    // the Go functions it calls that reach one. One site is a chain; none is None; two or more, a call the IL cannot
+    // follow (calli, or a virtual or interface dispatch, which could hide a panic), or a depth past the cap is Unknown.
+    private static PanicChain panicChain(System.Reflection.MethodBase method, int depth)
+    {
+        if (s_panicChains.TryGetValue(method, out PanicChain known))
+            return known;
+
+        PanicChain reach = panicChainOf(method, depth, out bool capped);
+
+        // An answer that met the depth cap belongs to THIS walk, not to the method, so only an uncapped one is cached.
+        if (!capped)
+            s_panicChains.TryAdd(method, reach);
+
+        return reach;
+    }
+
+    private static PanicChain panicChainOf(System.Reflection.MethodBase method, int depth, out bool capped)
+    {
+        capped = false;
+
+        if (depth > PanicChainDepth)
+        {
+            capped = true;
+            return new(PanicReach.Unknown, null);
+        }
+
+        if (callSiteOffsets(method) is not { } calls || sequencePointOffsets(method) is not { Length: > 0 } statements)
+            return new(PanicReach.Unknown, null);
+
+        (System.Reflection.MethodBase method, int ilOffset)[]? chain = null;
+
+        foreach (int call in calls)
+        {
+            System.Reflection.MethodBase? target = callTarget(method, call);
+            (System.Reflection.MethodBase method, int ilOffset)[] found;
+
+            if (target is null || target.IsVirtual && !target.IsFinal)
+                return new(PanicReach.Unknown, null);
+
+            if (isBuiltinPanic(target))
+            {
+                found = [(method, statementOf(statements, call))];
+            }
+            else if (isGoSourceFrame(target))
+            {
+                PanicChain inner = panicChainOf(target, depth + 1, out bool innerCapped);
+                capped |= innerCapped;
+
+                if (inner.Kind == PanicReach.Unknown)
+                    return inner;
+
+                if (inner.Kind == PanicReach.None)
+                    continue;
+
+                found = [.. inner.Chain!, (method, statementOf(statements, call))];
+            }
+            else
+            {
+                continue;
+            }
+
+            if (chain is not null)
+                return new(PanicReach.Unknown, null);
+
+            chain = found;
+        }
+
+        return chain is null ? new(PanicReach.None, null) : new(PanicReach.One, chain);
+    }
+
+    // The sequence point a call belongs to: the position tier-0 reports for a frame raised at that call.
+    private static int statementOf(int[] statements, int ilOffset)
+    {
+        int index = Array.BinarySearch(statements, ilOffset);
+        return index >= 0 ? ilOffset : statements[Math.Max(0, ~index - 1)];
+    }
+
+    private static bool isBuiltinPanic(System.Reflection.MethodBase? target) =>
+        target is not null && target.Name == "panic" && target.DeclaringType == typeof(builtin);
+
+    // A frame record for an inlined function at an IL offset of its own: no StackFrame exists for it, so it is keyed on
+    // the method and the offset, and resolved as a faulting frame (no return-site adjustment).
+    private static uintptr internInlinedFrame(System.Reflection.MethodBase method, int ilOffset)
+    {
+        string key = $"inlined:{method.Module.ModuleVersionId}:{method.MetadataToken}:{ilOffset}";
+
+        lock (s_callerTableLock)
+        {
+            if (s_callerTokens.TryGetValue(key, out nuint token))
+                return token;
+
+            s_callerRecords.Add(new CallerFrameRecord { Method = method, ILOffset = ilOffset, ReturnAddress = false });
+            token = callerSpanStart(s_callerRecords.Count - 1) + ((nuint)1 << (CallerSpanShift - 1));
+            s_callerTokens[key] = token;
+            return token;
+        }
     }
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Reflection.MethodBase, int), System.Reflection.MethodBase?> s_callTargets = new();
