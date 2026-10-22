@@ -1691,6 +1691,22 @@ func (a *refLoweringAnalysis) censusFuncLocals(funcDecl *ast.FuncDecl, funcName 
 		}
 	}
 
+	// The VALUE RECEIVER, the third signature-declared category: declared on Recv, so the params walk above never
+	// reached it, and an address-taken receiver kept its entry box even when every address use fed a lowered
+	// position. It is the method's own by-value copy, so it reverts exactly as a value parameter does
+	// (markAddressTakenBoxedReceiver reads the verdict). A pointer receiver IS a box already.
+	if funcDecl.Recv != nil {
+		for _, field := range funcDecl.Recv.List {
+			for _, name := range field.Names {
+				if obj, ok := a.info.Defs[name].(*types.Var); ok {
+					if _, isPtr := types.Unalias(obj.Type()).(*types.Pointer); !isPtr {
+						origins[obj] = "recv"
+					}
+				}
+			}
+		}
+	}
+
 	// Named results.
 	if funcDecl.Type.Results != nil {
 		for _, field := range funcDecl.Type.Results.List {
