@@ -110,6 +110,8 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/TypeExtensions.GoMethodSets.cs|Type[] typeArguments = new Type[open.GetGenericArguments().Length];", "reflection metadata: the type arguments that close a generic type's method"),
         ("runtime/WaitReason.cs|WaitReason[] parked = new WaitReason[all.Length - 1];", "runtime metadata: the static table of wait reasons"),
         ("ж.PointerExtensions.cs|Type[] fieldTypes = new Type[fields.Length];", "reflection metadata: the field types of a reinterpreted struct"),
+        ("ж.ElemRefBox.cs|ElemRefBox<T>?[]?[] chunks = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]);", "runtime bookkeeping: the persistent element-box table of an array backing whose element type has field views (ElemRefBox<T>.OfArrayElement); Go's &a[i] computes an address and allocates nothing"),
+        ("ж.ElemRefBox.cs|ElemRefBox<T>?[] chunk = chunks[chunkIndex] ?? Interlocked.CompareExchange(ref chunks[chunkIndex], new ElemRefBox<T>?[Math.Min(ElementBoxChunk, backing.Length - chunkIndex * ElementBoxChunk)], null) ?? chunks[chunkIndex]!;", "runtime bookkeeping: the persistent element-box table of an array backing whose element type has field views (ElemRefBox<T>.OfArrayElement); Go's &a[i] computes an address and allocates nothing"),
     ];
 
     private static readonly Regex[] s_rawForms =

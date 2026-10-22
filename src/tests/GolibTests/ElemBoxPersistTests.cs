@@ -13,7 +13,8 @@ namespace GolibTests;
 /// expressions (all three index overloads, and a window over the same backing), the view cache hitting
 /// with no allocation, Go's semantics on <c>&amp;table[i]</c> (aliasing both ways, equality, distinct
 /// elements and backings), the scoping (a type with no field view keeps a fresh box per expression), and
-/// the GC (a persistent box does not keep a dropped backing alive).
+/// the GC (a persistent box does not keep a dropped backing alive). One more bounds the cost: the slot
+/// table grows by chunk, so one address of a big array is not O(N).
 /// </summary>
 [TestClass]
 public class ElemBoxPersistTests
@@ -85,6 +86,23 @@ public class ElemBoxPersistTests
         long after = GC.GetAllocatedBytesForCurrentThread();
         GC.KeepAlive(again);
         Assert.AreEqual(0L, after - before, "a repeated &table[0].X allocates nothing: neither the element box nor the view is re-minted");
+    }
+
+    [TestMethod]
+    public void OneAddressOfABigArrayCostsAChunkNotTheArraysLength()
+    {
+        // warm the generic instantiation, the table and the JIT on another array
+        array<cell> warm = new(4096);
+        GC.KeepAlive(Ꮡ(warm, 7));
+
+        array<cell> table = new(4096);
+        long before = GC.GetAllocatedBytesForCurrentThread();
+        ж<cell> p = Ꮡ(table, 7);
+        long after = GC.GetAllocatedBytesForCurrentThread();
+        GC.KeepAlive(p);
+
+        // 64 chunk references, one 64-slot chunk and the box: about 1.1 KB. A slot per element would be 32 KB.
+        Assert.IsTrue(after - before <= 2048, $"the first &a[i] of a [4096] array allocated {after - before} B: the slot table must grow by chunk, not by the array's length");
     }
 
     [TestMethod]

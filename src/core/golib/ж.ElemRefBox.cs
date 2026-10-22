@@ -149,10 +149,15 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
     // SCOPED to an element type that has had a field view (BoxShape<T>.Slotted): only there does a
     // persistent box have views to keep. Every other T keeps a fresh box per expression and pays
     // nothing. The table is weak on the backing, so a backing nobody references is collected with its
-    // slots (the box -> backing reference sits inside the value, which a ConditionalWeakTable does not
-    // count as a root). The cost is one reference per element of a backing that ever had an element of
-    // a Slotted type addressed, for that backing's life.
-    private static readonly ConditionalWeakTable<T[], ElemRefBox<T>?[]> s_arrayElementBoxes = new();
+    // boxes (the box -> backing reference sits inside the value, which a ConditionalWeakTable does not
+    // count as a root).
+    //
+    // The slots come in chunks of ElementBoxChunk, each allocated on the first address taken inside it,
+    // so a big array addressed once pays one reference per chunk plus one chunk, not one reference per
+    // element: a [4096] array costs 64 chunk references and one 64-slot chunk on its first `&a[i]`.
+    private const int ElementBoxChunk = 64;
+
+    private static readonly ConditionalWeakTable<T[], ElemRefBox<T>?[]?[]> s_arrayElementBoxes = new();
 
     /// <summary>
     /// Go's <c>&amp;a[i]</c> for an array element, index already checked: the persistent box of
@@ -166,11 +171,15 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
         if (!BoxShape<T>.Slotted || backing is null)
             return new ElemRefBox<T>(array, index);
 
-        ElemRefBox<T>?[] slots = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[b.Length]);
-        nint slot = array.Low + index;
+        ElemRefBox<T>?[]?[] chunks = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]);
+        int slot = (int)array.Low + index;
+        int chunkIndex = slot / ElementBoxChunk;
 
-        // one box per slot: a racing mint loses the exchange and returns the winner
-        return slots[slot] ?? Interlocked.CompareExchange(ref slots[slot], new ElemRefBox<T>(array, index), null) ?? slots[slot]!;
+        // one chunk per range and one box per slot: a racing mint loses the exchange and takes the winner
+        ElemRefBox<T>?[] chunk = chunks[chunkIndex] ?? Interlocked.CompareExchange(ref chunks[chunkIndex], new ElemRefBox<T>?[Math.Min(ElementBoxChunk, backing.Length - chunkIndex * ElementBoxChunk)], null) ?? chunks[chunkIndex]!;
+        ref ElemRefBox<T>? box = ref chunk[slot % ElementBoxChunk];
+
+        return box ?? Interlocked.CompareExchange(ref box, new ElemRefBox<T>(array, index), null) ?? box!;
     }
 
     internal ElemRefBox(array<T> array, int index)
