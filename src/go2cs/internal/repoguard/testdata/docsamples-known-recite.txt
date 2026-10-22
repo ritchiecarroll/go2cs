@@ -7,4 +7,3 @@
 # 2026-10-19 (C2, interceptors seat): the 89 golden rows, re-cited by docsamples -recite when the any-slot
 # literals went plain and the goldens were regenerated, and deleted here; the 5 GOROOT rows remain.
 # page<TAB>citation (the comment's text after "source:"), one row per comment
-docs/ConversionStrategies.md	GOROOT/src/cmp/cmp.go:28

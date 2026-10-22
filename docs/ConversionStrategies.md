@@ -5309,7 +5309,10 @@ Converted code imports golib's built-in functions with `using static`, so calls 
 and `AreEqual` need no class name ([Built-in Functions](#built-in-functions)).
 
 **A method-set interface constraint becomes a plain `where` clause** that names the converted interface.
-Calling the constraint's methods on the type parameter works as in Go:
+Calling the constraint's methods on the type parameter works as in Go. A generic function keeps the clause
+only where its body uses the parameter as that interface, as `totalArea` does; otherwise the clause is left
+out, because it would refuse a pointer type argument (see the next rule):
+<!-- clause dropped when unneeded: src/go2cs/methodSetConstraintNeed.go:17-41 `So the clause is emitted only where the body NEEDS it`, read at src/go2cs/constraintOperations.go:1515 `!v.methodSetConstraintNeeded(fn, i)` -->
 
 <!-- source: src/tests/Behavioral/GenericInterfaceConstraint/GenericInterfaceConstraint.go:12-59 -->
 ```go
@@ -5405,7 +5408,7 @@ the type parameter. A Go type set lists its allowed types with `|`. `~int` means
 type is `int`, such as `type MyInt int`. `cmp.Ordered` is Go's standard type set for types that support
 `<`: the integer and floating-point types, and `string`.
 
-<!-- source: GOROOT/src/cmp/cmp.go:28 -->
+<!-- source: GOROOT/src/cmp/cmp.go:28-65 -->
 ```go
 func Less[T Ordered](x, y T) bool {
 	return (isNaN(x) && !isNaN(y)) || x < y
@@ -5517,9 +5520,12 @@ The three `where` clauses are identical. The set `~int | ~string` includes `stri
 generator completes `Stack<T>`, including its zero-value constructor used below.
 
 `Pop`'s two results become a C# tuple ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
-`var zero T` becomes `T zero = default!`, the zero value of `T`. The sub-slice `s.elements[:index]` becomes
-a C# range, which takes an `int` index. golib's range indexer shares the backing array as Go's `s[:i]`
-does, and does not copy ([Slices and Arrays](#slices-and-arrays)).
+`var zero T` becomes `T zero = GoZero<T>()`. golib's `GoZero<T>()` is `default` for most type arguments
+and builds the zero value of a struct whose `default` is not Go's zero value. The sub-slice
+`s.elements[:index]` becomes `s.elements.slice(0, index)`: a C# range takes only an `int`, so a bound that is
+not a small constant goes to golib's `slice` method. It shares the backing array as Go's `s[:i]` does, and does
+not copy ([Slices and Arrays](#slices-and-arrays)).
+<!-- GoZero<T>() for a type parameter: src/go2cs/visitArrayType.go:347-364 `func (v *Visitor) typeParamZero(t types.Type) string`; golib: src/core/golib/builtin.cs:1585 `public static T GoZero<T>() =>`. Range vs slice method: src/go2cs/convSliceExpr.go:371-389 `func (v *Visitor) sliceBoundsNeedMethod(sliceExpr *ast.SliceExpr) bool` -->
 
 Using the type reads as in Go. Go's `int` is C# `nint`
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `Stack[int]{}` calls the constructor that
@@ -5793,7 +5799,8 @@ internal static void Main() {
 - `Stringer` itself becomes a C# interface ([Interfaces](#interfaces)). The `point` struct satisfies it through its
   `String` method, which becomes a static extension method ([Functions and Methods](#functions-and-methods)).
 - `new point(3, 4)` is the Go composite literal `point{3, 4}` ([Struct Types](#struct-types)).
-- `@string` is golib's Go-style byte string, and `"(%d,%d)"u8` is a UTF-8 literal that becomes one
+- `@string` is the Go-style byte string of [golib](#the-golib-runtime-library), the go2cs runtime library, and
+  `"(%d,%d)"u8` is a UTF-8 literal that becomes one
   ([Strings](#strings-string-and-sstring)). `nint` is Go's `int` ([Integer Types](#integer-types-and-arithmetic)).
 
 **An alias target is written out in full.** Ordinary converted code relies on two things: `namespace go`, and
@@ -5993,7 +6000,8 @@ The receiver's C# form shows how the method uses it:
 | `(c *cat)` | `this ref cat c` | A pointer receiver that only reads and writes through the pointer |
 | `(r *ring)` | `this ж<ring> Ꮡr` | A pointer receiver that needs the pointer itself: it stores, returns or compares it, takes a field's address, or passes it to a method that needs the box |
 
-`ж<T>` (read "zhe") is golib's heap box, the C# form of Go's pointer `*T`. By convention, a name with the
+`ж<T>` (read "zhe") is the heap box of [golib](#the-golib-runtime-library), the go2cs runtime library: the
+C# form of Go's pointer `*T`. By convention, a name with the
 `Ꮡ` prefix, such as `Ꮡr`, holds such a box. [Pointers](#pointers) explains both, and
 [Names and Glyphs](#reading-converted-code-names-and-glyphs) lists every glyph.
 
@@ -6077,7 +6085,7 @@ partial struct digest {
 }
 
 internal static void bump(this ref digest d) {
-    foreach (var (i, _) in d.h) {
+    foreach (var i in range(d.h)) {
         d.h[i]++;
     }
     d.x[0]++;
@@ -6091,9 +6099,55 @@ internal static @string show(this digest d) {
 }
 ```
 
-Go's `int` is C# `nint` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)), and `range` becomes
-`foreach` ([Loops, Range and Labels](#loops-range-and-labels)). The pointer receiver `bump` needs no clone,
+Go's `int` is C# `nint` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). The index-only
+`range d.h` becomes `foreach` over golib's `range(d.h)`, which yields each index and reads no element
+([Loops, Range and Labels](#loops-range-and-labels)). The pointer receiver `bump` needs no clone,
 because it works on the caller's own value.
+
+**A value receiver whose address is taken is still the method's own copy.** In Go, `&b` on a value receiver
+points at that copy. When every such address only feeds a pointer parameter that the converter turns into a
+C# `ref`, as `bumpBox` here, the receiver stays a plain parameter and the call passes `ref b`, as it does for
+a value parameter. When the address is kept as a pointer, as `p := &b`, the receiver arrives as `bʗp` and the
+body moves it into a heap box at entry with golib's `heap`, so that `Ꮡb` is the pointer and `b` a `ref` to
+the boxed value. `~p` is Go's `*p` ([Pointers](#pointers)):
+
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:85-119 -->
+```go
+func bumpBox(b *Box) {
+	b.Tag += 10
+}
+…
+func (b Box) BumpedRecv() int {
+	bumpBox(&b)
+	return b.Tag
+}
+…
+func (b Box) ReadOnlyRecv() (int, int) {
+	p := &b
+	return p.R.Min, p.Tag
+}
+```
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:67-98 -->
+```csharp
+internal static void bumpBox(ref Box b) {
+    b.Tag += 10;
+}
+
+public static nint BumpedRecv(this Box b) {
+    bumpBox(ref b);
+    return b.Tag;
+}
+…
+public static (nint, nint) ReadOnlyRecv(this Box bʗp) {
+    ref var b = ref heap(bʗp, out var Ꮡb);
+
+    var p = Ꮡb;
+    return ((~p).R.Min, (~p).Tag);
+}
+```
+<!-- receiver reversion: commit 468ee62c6; censusFuncLocals origin "recv", src/go2cs/captureModeOperations.go:1774-1789 `A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason`; pinned by src/go2cs/recvRefLowering_test.go -->
+
+Either way the caller's value is untouched: `rb.BumpedRecv()` returns 16 and `rb.Tag` stays 6.
 
 **A method that needs the pointer itself takes the box, `this ж<T>`.** This happens when the body stores,
 returns or compares the receiver, takes the address of one of its fields, or passes the receiver to a
@@ -6258,8 +6312,10 @@ Reading the C# piece by piece:
   when formed, so golib's `nonnil` checks first and raises Go's nil-pointer panic.
   `initSelf` needs no such check, because its plain field write fails at once.
 - The string literals passed to `fmt.Println` stay plain C# literals. Each is an `any` argument, so
-  go2cs-gen intercepts the call and passes the literal as a boxed Go `@string`, boxed once for the program
-  rather than on every call ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
+  go2cs-gen, the go2cs [source generator](#source-generators), intercepts the call and passes the literal as a
+  boxed Go `@string`, boxed once per file rather than on every call
+  ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
+<!-- box allocated once per literal per file: src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file` -->
 
 <!-- nonnil rationale: src/core/golib/builtin.cs:2863-2871#dd25ab (Go panics eagerly at &e.x; an interior reference over a null base faults nowhere at formation) -->
 
@@ -6270,7 +6326,7 @@ The entry point `func main` becomes `internal static void Main()`.
 A method is `public` only when its type is emitted `public` too. That is an exported type, or an unexported
 type that an exported signature exposes. C# forbids a public member from exposing an internal type, so such
 a type is emitted `public` itself.
-<!-- source: src/tests/Behavioral/PublicizedFieldType/main.go:52-55 (type tally int; func (cr CaseRange) Tally() tally) -> main.cs.target:29 ([GoType("num:nint")] public partial struct tally;) and :33 (public static tally Tally(this CaseRange cr)); receiver clamp with the publicized exception: src/go2cs/visitFuncDecl.go:1678-1684 -->
+<!-- source: src/tests/Behavioral/PublicizedFieldType/main.go:52-55 (type tally int; func (cr CaseRange) Tally() tally) -> main.cs.target:29 (public partial struct tally /*num:nint*/;) and :33 (public static tally Tally(this CaseRange cr)); receiver clamp with the publicized exception: src/go2cs/visitFuncDecl.go:1255-1263 -->
 
 **A single named result stays on the signature as a comment.** The body declares it as a local, set to its
 zero value, and a bare `return` returns it. `default!` is C#'s zero value
@@ -6335,7 +6391,7 @@ slice view, a C# `ref struct`, that allocates nothing. When the pack escapes the
 
 A call such as `sum(5)` stays `sum(5)`. Spreading a slice, `sum(a...)`, becomes `sum(a.ꓸꓸꓸ)`. The golib
 property `.ꓸꓸꓸ` returns a `Span` over the slice's own storage, so nothing is copied.
-<!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:66 (fmt.Println("sum:", sum(a...), sum(), sum(5))) -> VariadicPackPassThrough.cs.target:108 (fmt.Println(sumˢ, sum(a.ꓸꓸꓸ), sum(), sum(5));); property: src/core/golib/slice.cs:490 (public Span<T> ꓸꓸꓸ => ToSpan()); sslice is a ref struct: src/core/golib/sslice.cs:19 -->
+<!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:66 (fmt.Println("sum:", sum(a...), sum(), sum(5))) -> VariadicPackPassThrough.cs.target:95 (fmt.Println("sum:", sum(a.ꓸꓸꓸ), sum(), sum(5));); property: src/core/golib/slice.cs:654 (public Span<T> ꓸꓸꓸ => ToSpan()); sslice is a ref struct: src/core/golib/sslice.cs:19 -->
 
 **An unnamed parameter gets a made-up name**, because C# requires one. A lone one is `_`. Otherwise they
 become `_Δp0`, `_Δp1` and so on, and an unnamed variadic pack is just `ʗp`:
@@ -6351,7 +6407,7 @@ internal static void variadic(@string _Δp0, params ꓸꓸꓸnint ʗp) {
 }
 ```
 
-**Each `init` becomes a `[GoInit]` method.** `[GoInit]` is golib's name for .NET's `[ModuleInitializer]`
+**Each `init` becomes a `[GoInit]` method.** `[GoInit]` is the project's alias for .NET's `[ModuleInitializer]`
 attribute, so .NET runs the method once, when the package's assembly loads. [Package Conversion](#package-conversion)
 explains how imported packages are made to initialize first. C# cannot declare two methods with the same
 name and signature, so the first `init` keeps its name and the rest take a `Δ` suffix and a number, counted across the whole package:
@@ -6382,7 +6438,7 @@ internal static slice<@string> order;
 ```
 
 A `u8` literal converts to `@string` implicitly, so `append` accepts it ([Strings](#strings-string-and-sstring)).
-<!-- source: src/tests/Behavioral/MultiFileInitOrder/b_second.cs.target:5 and :9 (initΔ2, initΔ3); main.cs.target:7 (initΔ4). [GoInit] is ModuleInitializerAttribute: src/core/golib/builtin.cs:231. implicit operator @string(ReadOnlySpan<byte>): src/core/golib/string.cs:506 -->
+<!-- source: src/tests/Behavioral/MultiFileInitOrder/b_second.cs.target:5 and :9 (initΔ2, initΔ3); main.cs.target:7 (initΔ4). [GoInit] is ModuleInitializerAttribute, aliased by each project's <Using ... Alias="GoInitAttribute" />: src/core/golib/golib.csproj:105, src/tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj:131. implicit operator @string(ReadOnlySpan<byte>): src/core/golib/string.cs:541 -->
 
 Using a method as a value, such as `f := c.String`, is covered in
 [Function Values and Closures](#function-values-and-closures). Methods on generic types are covered in [Generics](#generics).
@@ -6535,9 +6591,10 @@ internal static void p2() {
 ```
 
 `base` is a C# keyword, so the local is written `@base`
-([Names and Glyphs](#reading-converted-code-names-and-glyphs)). `fmt.Println` takes `any` arguments, so the
-literal needs an explicit cast, `(@string)"P2:"u8`, to become a boxable `@string`. A literal this short stays
-inline; a longer one becomes a hoisted field ([Strings](#strings-string-and-sstring)).
+([Names and Glyphs](#reading-converted-code-names-and-glyphs)). `fmt.Println` takes `any` arguments. The
+literal `"P2:"` stays a plain C# literal, and go2cs-gen, the go2cs [source generator](#source-generators),
+intercepts the call to pass it as a Go `@string` boxed once per file ([Strings](#strings-string-and-sstring)).
+<!-- src/gen/go2cs-gen/LiteralInterceptorGenerator.cs:25-36 `the box the interceptor substitutes is allocated once per … literal per file`; plain literals outside the standard library unless -hoist-literals: src/go2cs/hoistedLiteralOperations.go:42-54 `PLAIN LITERALS … opt-in for everything else (-hoist-literals)` -->
 
 **A literal whose name is also used as a value stays a lambda.** A local function has no value form. Here
 `f := next` copies the function value, so `next` is a lambda. Both names share one `c`, and this prints
