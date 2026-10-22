@@ -1036,7 +1036,7 @@ namespace BehavioralRunner
                 if (s_goBuildTimedOut.Contains(p))
                 {
                     results[p].Phases[Phase.Output] = Status.Timeout;
-                    results[p].Messages.Add("no current Go oracle: go build timed out");
+                    results[p].Messages.Add($"run NOT MEASURED: no current Go oracle -- go build timed out after {Seconds(s_buildOneTimeoutMs)} (Go side); raise --build-one-timeout");
                     timeouts++;
                     continue;
                 }
@@ -1105,7 +1105,7 @@ namespace BehavioralRunner
                     string side = TimedOut(cs) && TimedOut(go) ? "both" : TimedOut(cs) ? "C#" : "Go";
 
                     results[p].Phases[Phase.Output] = Status.Timeout;
-                    results[p].Messages.Add($"run TIMED OUT after {Seconds(s_runTimeoutMs)} ({side} side); raise --run-timeout");
+                    results[p].Messages.Add($"run NOT MEASURED: timed out after {Seconds(s_runTimeoutMs)} ({side} side); raise --run-timeout");
                     timeouts++;
                     continue;
                 }
@@ -1478,10 +1478,12 @@ namespace BehavioralRunner
 
                     Console.WriteLine($"  {r.Name} [{phs}]");
 
-                    // The converter's own words, for the best-effort rows only: the roster is capped and
-                    // the failure roster above already prints its messages, but a best-effort project has
-                    // no other account anywhere of WHAT did not type-check.
-                    if (r.HasBestEffort)
+                    // The project's own NOT MEASURED lines: the roster is capped and the failure roster
+                    // above already prints its messages, but an unmeasured project has no other account
+                    // anywhere -- for a best-effort row, WHAT did not type-check; for an Output timeout,
+                    // WHICH side ran long and against what budget, without which "raise --run-timeout"
+                    // cannot tell a slow converted program from a slow oracle.
+                    if (r.HasUnmeasured)
                     {
                         foreach (string m in r.Messages.Where(m => m.Contains("NOT MEASURED", StringComparison.Ordinal)))
                             Console.WriteLine($"      {m}");
