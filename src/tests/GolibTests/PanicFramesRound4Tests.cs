@@ -54,7 +54,7 @@ public class PanicFramesRound4Tests
     {
         List<string> names = Run(panicframesprobe_package.atomicOnNil);
 
-        if (!OptimizedFromFirstCall())
+        if (!JitMode.OptimizedFromFirstCall())
         {
             AssertNoSplice(names, "atomicOnNil");
             return;
@@ -63,21 +63,6 @@ public class PanicFramesRound4Tests
         List<string> below = Below(names, "atomicOnNil");
         CollectionAssert.AreEqual(new[] { "runtime.gopanic", "runtime.panicmem", "runtime.sigpanic", Pkg + "atomicOnNil" }, below,
             $"expected Go's intrinsic frames; got {string.Join(" | ", below)}");
-    }
-
-    // Whether this process JITs every method fully optimized from its first call: tiered compilation off, or its
-    // quick JIT off, by environment (DOTNET_ or the legacy COMPlus_ prefix) or by runtimeconfig switch.
-    private static bool OptimizedFromFirstCall()
-    {
-        static bool Off(string name) =>
-            System.Environment.GetEnvironmentVariable("DOTNET_" + name) == "0" ||
-            System.Environment.GetEnvironmentVariable("COMPlus_" + name) == "0";
-
-        if (Off("TieredCompilation") || Off("TC_QuickJit"))
-            return true;
-
-        return (System.AppContext.TryGetSwitch("System.Runtime.TieredCompilation", out bool tiered) && !tiered) ||
-            (System.AppContext.TryGetSwitch("System.Runtime.TieredCompilation.QuickJit", out bool quick) && !quick);
     }
 
     // A panic in a range-over-func loop body, recovered by the ranger's deferred call.
