@@ -46,8 +46,11 @@ public sealed class GoDeferredRegistrations
     /// <summary>The adapters of <see cref="AdapterRegistry"/>, run on a (box, interface) pair no adapter is found for.</summary>
     public static readonly GoDeferredRegistrations Adapters = new();
 
-    /// <summary>The escaping containers' operations of <see cref="go.GoTypeOps"/>, run on a type no operations are found for.</summary>
-    public static readonly GoDeferredRegistrations TypeOps = new();
+    /// <summary>
+    /// The escape registries: the escaping containers' operations of <see cref="go.GoTypeOps"/> and the variadic trampolines
+    /// of GoReflect.VariadicRegistry.cs, run on a type no operations are found for or a variadic family none are found for.
+    /// </summary>
+    public static readonly GoDeferredRegistrations EscapeRegistry = new();
 
     private readonly object m_lock = new();
     private readonly List<Action> m_pending = [];

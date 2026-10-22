@@ -648,10 +648,10 @@ var linknamePushTargets = map[string]linknamePush{
 	// and cannot re-derive an object from an address, so a forwarder here would either fault or, far
 	// worse, hand back a plausible-looking pointer derived from garbage.
 	//
-	// The remedy these two announced has since LANDED: src/core/internal/weak/pointer.cs is a
-	// hand-owned managed weak reference over the ж<T> box under [module: go.GoManualConversion] —
+	// The remedy these two announced has since LANDED: src/core/weak/pointer.cs is a hand-owned
+	// managed weak reference over the ж<T> box under [module: go.GoManualConversion] —
 	// System.WeakReference plus a ConditionalWeakTable canonical index (see
-	// ConversionStrategies-Reference, "internal/weak.Pointer"). These rows therefore no longer
+	// ConversionStrategies-Reference, "weak.Pointer"). These rows therefore no longer
 	// describe the deployed corpus, where the marked file is never regenerated; they describe what a
 	// conversion into a root that does NOT already carry the hand-own emits, and that must still be
 	// the loud pair rather than a fabricated body. Keep them, with the reason naming the file the
@@ -671,9 +671,8 @@ var linknamePushTargets = map[string]linknamePush{
 	// program that touches fmt. The failure mode of retiring a live row is SILENT: the row gone,
 	// the guard green, and the corpus fabricating a body or throwing.
 	//
-	// The reason strings name `weak/pointer.cs`, the POST-HOP location of the hand-own; relocating
-	// it from `internal/weak/pointer.cs` is H6/H9 work and these rows depend on it. This cut is
-	// RED at 1.23.12 by construction (no `weak` package there) and lands with H2.
+	// The reason strings name `weak/pointer.cs`, where the hand-own lives since it moved from
+	// `internal/weak/pointer.cs` with the package.
 	"weak.runtime_registerWeakPointer": {
 		source: "runtime.internal_weak_runtime_registerWeakPointer",
 		reason: "the pushed body walks mheap_ span metadata the managed model does not populate; use the hand-owned managed weak reference in weak/pointer.cs",

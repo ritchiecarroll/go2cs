@@ -153,7 +153,7 @@ public unsafe class DeferredRegistrationTests
         bool ran = false;
         IGoTypeOps registered = GoTypeOps<array<DeferredOpsElement>>.Instance;
 
-        GoDeferredRegistrations.TypeOps.Defer(() =>
+        GoDeferredRegistrations.EscapeRegistry.Defer(() =>
         {
             ran = true;
             GoTypeOps.Register(registered);
@@ -167,6 +167,45 @@ public unsafe class DeferredRegistrationTests
         // before the fallback could cache over it (under Native AOT the fallback has no code for this value type).
         Assert.IsTrue(ran, "the operations miss ran the queue before the fallback");
         Assert.AreSame(registered, ops);
+    }
+
+    public struct DeferredVariadicElement
+    {
+        public int Value;
+    }
+
+    [TestMethod]
+    public void TheFirstVariadicMissRunsTheQueuedEscapeRegistry()
+    {
+        // The escape registry's other half: a variadic func that escapes registers its reflect trampolines in the same
+        // queued method (GoReflect.VariadicRegistry.cs), so a family not found there runs the queue before the fallback.
+        bool ran = false;
+        Type family = typeof(Funcꓸꓸꓸ<int, DeferredVariadicElement, @string>);
+
+        GoDeferredRegistrations.EscapeRegistry.Defer(() =>
+        {
+            ran = true;
+            GoReflect.RegisterVariadicFunc<int, DeferredVariadicElement, @string>();
+        });
+
+        Assert.IsFalse(ran, "queueing runs nothing");
+        Assert.IsFalse(GoReflect.IsVariadicRegistered(family), "control: the family is not registered before the miss");
+
+        Funcꓸꓸꓸ<int, DeferredVariadicElement, @string> sum = (head, rest) =>
+        {
+            int total = head;
+
+            foreach (DeferredVariadicElement element in rest)
+                total += element.Value;
+
+            return (@string)total.ToString();
+        };
+
+        object? result = GoReflect.InvokeVariadic(sum, [1], new DeferredVariadicElement[] { new() { Value = 2 }, new() { Value = 3 } });
+
+        Assert.IsTrue(ran, "the variadic invoker's miss ran the queue");
+        Assert.IsTrue(GoReflect.IsVariadicRegistered(family), "and the family is now served by the trampolines it registered");
+        Assert.AreEqual((@string)"6", (@string)result!);
     }
 
     [TestMethod]

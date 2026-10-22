@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -245,6 +246,31 @@ public class GoMethodSetTests
         // tail unbound (1+2) and bound to the box (5+0); 16 parameters unbound (200+1+16) and bound (300+1+16); Outer's
         // promoted Twice through T (10), Bump through *T then Twice through *T (5*2), Inner.i now 5, and no Bump through T.
         Assert.AreEqual("1 3 5 5 z=26 26 7 True True True 3 5 217 317 10 10 5 True", probe.Invoke(null, null));
+    }
+
+    // A variadic arm registers both of its signatures (receiver first, and the method value's) with golib before handing
+    // a delegate out, so reflect's Call closes its trampoline through compiled code (golib's GoReflect.VariadicRegistry.cs;
+    // the promoted probe's v.MethodByName("Join").Call threw NotSupportedException under Native AOT, 2026-10-21). The
+    // compile and the Probe run in the pin above prove the registrations bind and execute.
+    [TestMethod]
+    public void AVariadicArmRegistersItsSignatures()
+    {
+        (Dictionary<string, string> sources, Diagnostic[] errors, _) = Run();
+
+        Assert.AreEqual(0, errors.Length, "the package compiles: " + string.Join("; ", errors.Take(3)));
+        string plain = sources.Single(source => source.Key.Contains("Plain")).Value;
+
+        foreach (string line in (string[])
+                 [
+                     "global::go.GoReflect.RegisterVariadicFunc<global::go.mtest_package.Plain, nint, nint>();",
+                     "global::go.GoReflect.RegisterVariadicFunc<global::go.ж<global::go.mtest_package.Plain>, nint, nint>();",
+                     "global::go.GoReflect.RegisterVariadicFunc<nint, nint>();"
+                 ])
+        {
+            StringAssert.Contains(plain, line);
+        }
+
+        Assert.AreEqual(4, Regex.Matches(plain, @"RegisterVariadic").Count, "Sum's two arms register two signatures each; no other method is variadic");
     }
 
     // golib takes a bound arm only when its delegate is of the type golib's binder builds (GoReflect.GoMethodValueType), so

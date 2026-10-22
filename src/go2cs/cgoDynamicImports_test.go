@@ -119,7 +119,7 @@ func libc_excluded_empty_trampoline()
 	}
 
 	if lib := records["libc_included_framework_trampoline"].library; !strings.HasSuffix(lib, "/CoreFoundation") {
-		t.Errorf("framework record carries library %q — the 28 crypto/x509/internal/macos records have no .dylib suffix, so a suffix-keyed gate drops exactly them", lib)
+		t.Errorf("framework record carries library %q — the crypto/x509/internal/macos framework records have no .dylib suffix, so a suffix-keyed gate drops exactly them", lib)
 	}
 }
 
