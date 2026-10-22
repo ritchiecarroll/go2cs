@@ -54,4 +54,29 @@ func main() {
 	// Receiver and parameter forms: sliced directly (no `~`).
 	g := grid{2, 4, 6, 8}
 	fmt.Println(g.firstTwo(), sumParam(&g))
+
+	rangeIndexOnly()
+}
+
+// rangeIndexOnly ranges a `*[N]T` for its indices only. The length of a `*[N]T` is the constant N and an index-only range
+// never dereferences the pointer, so a NIL pointer still ranges N times in Go: `range(nilp, 3)`, not a read of `.Value`.
+func rangeIndexOnly() {
+	var nilp *[3]int
+	for i := range nilp {
+		fmt.Print(i, " ")
+	}
+	fmt.Println()
+
+	var nilg *grid
+	count := 0
+	for range nilg {
+		count++
+	}
+	fmt.Println("nil *grid ranges", count)
+
+	p := &[2]string{"a", "b"}
+	for i := range p {
+		p[i] += "!"
+	}
+	fmt.Println(p[0], p[1])
 }

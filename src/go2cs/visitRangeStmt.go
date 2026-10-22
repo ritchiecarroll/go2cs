@@ -746,8 +746,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		// to an array read no element in Go, so they range golib's index enumerator, `foreach (var i in range(x))`,
 		// which reads the length once and never an element. The (index, value) enumerator the other arm binds reads
 		// every element even with the value discarded, into a stack temp: crypto/internal/fips140cache's TestCache
-		// waited forever for an element that temp kept reachable. A pointer operand is passed as the pointer
-		// (golib's range(ж<TArray>)), so no `.Value` is spelled.
+		// waited forever for an element that temp kept reachable. A pointer operand is passed as the pointer, with its
+		// type's length (golib's range(ж<TArray>, nint)), so no `.Value` is spelled and a nil one ranges as Go's does.
 		iterExpr := keyExpr
 		decl := keyType
 
@@ -780,7 +780,15 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			}
 		}
 
-		v.writeOutput("foreach (%s%s in range(%s))", decl, iterExpr, rangeExpr)
+		// A pointer to an array ranges its type's length, N, passed beside the pointer: `range(p, 3)`. Go's length of a
+		// `*[N]T` is the constant N, and an index-only range never dereferences the pointer, so a NIL one ranges N times;
+		// golib's array keeps its length in the value, so only the converter knows N. The pointer is still evaluated once,
+		// as Go evaluates a range operand holding a call. (A pointer PARAMETER is already the dereferenced value local.)
+		if arrayType, ok := rangeType.Underlying().(*types.Array); ok && rangedThroughPointer && ptrDeref != "" {
+			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
+		} else {
+			v.writeOutput("foreach (%s%s in range(%s))", decl, iterExpr, rangeExpr)
+		}
 	} else {
 		// Handle slice, array, and map types
 		if assignVars {

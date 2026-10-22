@@ -64,11 +64,22 @@ public static partial class builtin
     /// <param name="p">Pointer to the array.</param>
     /// <returns>The indices, as Go's <c>int</c>.</returns>
     /// <remarks>
-    /// The length is read through the pointer. Go's length of a <c>*[N]T</c> is the constant N, so Go ranges a nil
-    /// one N times; golib's array carries its length in the value, not the type, so a nil pointer panics here, as
-    /// the <c>p.Value</c> the converter emitted before did.
+    /// The length is read through the pointer, so a nil pointer panics here. Go's length of a <c>*[N]T</c> is the
+    /// constant N, and Go ranges a nil one N times; golib's array carries its length in the value, not the type, so
+    /// only the caller knows N. The converter therefore passes it, <see cref="range{TArray}(ж{TArray}, nint)"/>, and
+    /// hand-written code ranging a pointer that may be nil should too.
     /// </remarks>
     public static RangeOverInt<nint> range<TArray>(ж<TArray> p) where TArray : IArray => range(p.Value.Length);
+
+    /// <summary>
+    /// Enumerates the indices of a <c>*[N]T</c>, 0..N-1, from its type's length: the pointer is neither dereferenced nor
+    /// read, so a nil one ranges N times, as Go's does.
+    /// </summary>
+    /// <typeparam name="TArray">The array type, an <see cref="array{T}"/> or a named array.</typeparam>
+    /// <param name="p">Pointer to the array, evaluated once as Go evaluates the range operand; possibly nil.</param>
+    /// <param name="length">N, the array type's length, which the converter knows statically.</param>
+    /// <returns>The indices, as Go's <c>int</c>.</returns>
+    public static RangeOverInt<nint> range<TArray>(ж<TArray> p, nint length) where TArray : IArray => range(length);
 
     /// <summary>
     /// Enumerates the indices of a named slice or array type, or of a type parameter whose core type is one,

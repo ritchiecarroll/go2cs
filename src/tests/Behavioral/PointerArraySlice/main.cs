@@ -47,6 +47,29 @@ internal static void Main() {
     ref var g = ref heap<grid>(out var Ꮡg);
     g = new grid(new nint[]{2, 4, 6, 8}.array());
     fmt.Println(g.firstTwo(), sumParam(Ꮡg));
+
+    rangeIndexOnly();
+}
+
+internal static void rangeIndexOnly() {
+    ж<array<nint>> nilp = default!;
+    foreach (var i in range(nilp, 3)) {
+        fmt.Print(i, " ");
+    }
+    fmt.Println();
+
+    ж<grid> nilg = default!;
+    nint count = 0;
+    foreach (var _ᴛ1 in range(nilg, 4)) {
+        count++;
+    }
+    fmt.Println("nil *grid ranges", count);
+
+    var p = Ꮡ(new @string[]{"a", "b"}.array());
+    foreach (var i in range(p, 2)) {
+        p.Value[i] += "!"u8;
+    }
+    fmt.Println(p.Value[0], p.Value[1]);
 }
 
 } // end main_package
