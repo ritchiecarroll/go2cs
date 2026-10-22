@@ -124,6 +124,10 @@ internal static class PackageAncestry
             // fills testdata from the digest-tracked build output — and a junction there would put a
             // test's writes inside the real GOROOT.
             CopyOwnFiles(Path.Combine(goRootSrc, Path.Combine(segments)), workingDirectory);
+
+            // A toolchain child that starts inside this view starts in the GOROOT directory it stands for
+            // (see SetStagedToolchainDirectory); released in TestHost.Run's finally.
+            SetStagedToolchainDirectory(goRoot, runRoot);
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
@@ -1026,6 +1030,87 @@ internal static class PackageAncestry
         return false;
     }
 
+    // A GO TOOLCHAIN CHILD THAT STARTS INSIDE THE STAGED ANCESTRY STARTS IN THE GOROOT DIRECTORY IT STANDS
+    // FOR (COORD ruling 2026-10-21, math/big's TestEscape). Go runs `go build -gcflags=-m` with cwd =
+    // GOROOT/src/math/big, so the package is std's. Here the cwd is the sandbox's copy under this view's
+    // src/go.mod (module std) while GOROOT stays REAL by design (the remarks above), so the child go read
+    // the copy as an ordinary module NAMED std, called the package std/math/big and refused its
+    // internal/byteorder import.
+    //
+    // Handing that child the view as its GOROOT is NOT the fix, measured 2026-10-21: the toolchain's
+    // package walk does not follow a link, so in a linked mirror `go list std` names one package, and
+    // go/internal/gcimporter's TestImportStdLib ("too few packages (1) were imported") and
+    // internal/godebugs' TestAll (every IncNonDefault "missing") then failed. So the composer starts that
+    // child where Go's starts: the real GOROOT directory the staged one mirrors, environment untouched.
+    // That is the Go side's own cwd for the same test, so the child reads and writes nothing the Go side
+    // of the same run does not. Only this GOROOT's own go binary qualifies, only when it starts inside the
+    // staged root (cmd.Dir, or the host's cwd when that is empty), and only when the real counterpart
+    // exists: a toolchain child with a cmd.Dir of its own (a temp module, debug/buildinfo's), or in a
+    // directory the test made, keeps its directory, and so does every other child. A program never has a
+    // composer at all: the confinement is that only this host installs it.
+    //
+    // Installed by reflection like the GODEBUG composer above, and for the same reason. A syscall WITHOUT
+    // the seam is a stale pairing that would silently bring TestEscape's refusal back, so it throws.
+    private static void SetStagedToolchainDirectory(string goRoot, string runRoot)
+    {
+        FieldInfo? seam = ChildDirectoryComposerSeam();
+
+        if (seam is null)
+            return;
+
+        string goTool = Path.GetFullPath(Path.Combine(goRoot, "bin", OperatingSystem.IsWindows() ? "go.exe" : "go"));
+        string stagedRoot = Path.GetFullPath(runRoot);
+        string realRoot = Path.GetFullPath(goRoot);
+
+        seam.SetValue(null, (Func<string, string, string?>)(
+            (executable, directory) => ComposeStagedToolchainDirectory(goTool, stagedRoot, realRoot, executable, directory)));
+    }
+
+    /// <summary>
+    /// Clears the staged-toolchain directory composer (see SetStagedToolchainDirectory): the next host in
+    /// the in-process tier must not start a toolchain child against a run root that no longer exists. A
+    /// no-op when nothing was staged. Called from TestHost.Run's finally, beside RestoreJunctionGodebug.
+    /// </summary>
+    public static void ReleaseStagedToolchainDirectory()
+    {
+        Type? syscallPackage = Type.GetType(TestHost.SyscallPackageTypeName, throwOnError: false);
+
+        syscallPackage?.GetField(ChildDirectoryComposerField, BindingFlags.NonPublic | BindingFlags.Static)?.SetValue(null, null);
+    }
+
+    // No syscall assembly means no converted child can start, so there is nothing to compose: null.
+    private static FieldInfo? ChildDirectoryComposerSeam()
+    {
+        Type? syscallPackage = Type.GetType(TestHost.SyscallPackageTypeName, throwOnError: false);
+
+        if (syscallPackage is null)
+            return null;
+
+        return syscallPackage.GetField(ChildDirectoryComposerField, BindingFlags.NonPublic | BindingFlags.Static) ??
+            throw new InvalidOperationException(
+                $"a toolchain child started inside the staged GOROOT ancestry cannot be started in the GOROOT directory it " +
+                $"stands for: syscall has no '{ChildDirectoryComposerField}' seam (syscall's hand-owned spawn: " +
+                "windows/exec_windows.cs, linux/exec_unix.cs, darwin/exec_libc2_impl.cs)");
+    }
+
+    // Returns null for "unchanged": not the toolchain, not inside the staged root, or no real counterpart.
+    private static string? ComposeStagedToolchainDirectory(string goTool, string stagedRoot, string realRoot, string executable, string directory)
+    {
+        StringComparison paths = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        if (!string.Equals(Path.GetFullPath(executable), goTool, paths))
+            return null;
+
+        string relative = Path.GetRelativePath(stagedRoot, Path.GetFullPath(directory));
+
+        if (relative == ".." || relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal) || Path.IsPathRooted(relative))
+            return null;
+
+        string real = relative == "." ? realRoot : Path.Combine(realRoot, relative);
+
+        return Directory.Exists(real) ? real : null;
+    }
+
     // The GODEBUG this run displaced, captured once on the first apply and owed back at teardown.
     // Static because the setting it guards is process-wide, and one host run executes per test
     // process — which is Go's model, and the same reason s_fixtureLinks above is static.
@@ -1071,6 +1156,7 @@ internal static class PackageAncestry
     private const string JunctionGodebugName = "winsymlink";
     private const string JunctionGodebugSetting = $"{JunctionGodebugName}=0";
     private const string ChildEnvironmentComposerField = "childEnvironmentComposer";
+    private const string ChildDirectoryComposerField = "childDirectoryComposer";
 
     // Generous, because it is a safety net against a wedged child rather than a performance
     // assumption: a cold `go list` on a slow host pays for the module load before it answers.
