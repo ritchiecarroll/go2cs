@@ -46,7 +46,7 @@ internal static nint renumber(Node root, nint i) {
     walk(root, (Node n) => {
         switch (n.type()) {
         case ж<ValueSpec> nΔ1: {
-            foreach (var (iΔ1, _) in (~nΔ1).Values) {
+            foreach (var iΔ1 in range((~nΔ1).Values)) {
                 (~nΔ1).Values[iΔ1]._<ж<Lit>>().Value.Len = (iΔ1 + 1) * 10;
             }
             break;
@@ -118,7 +118,7 @@ internal static void Main() {
     nint outer = renumber(new ValueSpecжNode(multi), 7);
     fmt.Println("renumber outer:", outer);
 
-    foreach (var (k, _) in (~multi).Values) {
+    foreach (var k in range((~multi).Values)) {
         fmt.Println("renumber:", k, (~(~multi).Values[k]._<ж<Lit>>()).Len);
     }
 

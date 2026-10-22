@@ -205,7 +205,7 @@ public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, Re
     r.Data.Reset(pr.DataIdx(k, idx));
     Ꮡr.Sync(SyncRelocs);
     r.Relocs = new slice<RefTableEntry>(Ꮡr.Len());
-    foreach (var (i, _) in r.Relocs) {
+    foreach (var i in range(r.Relocs)) {
         Ꮡr.Sync(SyncReloc);
         r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
@@ -232,7 +232,7 @@ public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, R
     } else {
         r.Relocs = new slice<RefTableEntry>(l);
     }
-    foreach (var (i, _) in r.Relocs) {
+    foreach (var i in range(r.Relocs)) {
         Ꮡr.Sync(SyncReloc);
         r.Relocs[i] = new RefTableEntry((SectionKind)(int32)Ꮡr.Len(), (RelElemIdx)(int32)Ꮡr.Len());
     }
@@ -325,7 +325,7 @@ public static partial void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) {
     var (pos, _) = r.Data.Seek(0, io.SeekCurrent);
     SyncMarker mHave = (SyncMarker)(nint)Ꮡr.rawUvarint();
     var writerPCs = new slice<nint>((nint)(Ꮡr.rawUvarint()));
-    foreach (var (i, _) in writerPCs) {
+    foreach (var i in range(writerPCs)) {
         writerPCs[i] = (nint)Ꮡr.rawUvarint();
     }
 
@@ -453,7 +453,7 @@ public static @string String(this ж<Decoder> Ꮡr) {
 // the element bitstream.
 public static slice<@string> Strings(this ж<Decoder> Ꮡr) {
     var res = new slice<@string>(Ꮡr.Len());
-    foreach (var (i, _) in res) {
+    foreach (var i in range(res)) {
         res[i] = Ꮡr.String();
     }
     return res;

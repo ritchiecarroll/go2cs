@@ -214,11 +214,11 @@ internal static void determineMatchingIsolates(this ref paragraph p) {
     p.matchingPDI = new slice<nint>(p.Len());
     p.matchingIsolateInitiator = new slice<nint>(p.Len());
 
-    foreach (var (i, _) in p.matchingIsolateInitiator) {
+    foreach (var i in range(p.matchingIsolateInitiator)) {
         p.matchingIsolateInitiator[i] = -1;
     }
 
-    foreach (var (i, _) in p.matchingPDI) {
+    foreach (var i in range(p.matchingPDI)) {
         p.matchingPDI[i] = -1;
 
         {
@@ -699,13 +699,13 @@ internal static void resolveNeutralTypes(this ref ΔisolatingRunSequence s) {
 }
 
 internal static void setLevels(slice<level> levels, level newLevel) {
-    foreach (var (i, _) in levels) {
+    foreach (var i in range(levels)) {
         levels[i] = newLevel;
     }
 }
 
 internal static void setTypes(slice<ΔClass> types, ΔClass newType) {
-    foreach (var (i, _) in types) {
+    foreach (var i in range(types)) {
         types[i] = newType;
     }
 }
@@ -801,7 +801,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
     var allRuns = new slice<nint>[]{}.slice();
     var currentLevel = implicitLevel;
 
-    foreach (var (i, _) in p.initialTypes) {
+    foreach (var i in range(p.initialTypes)) {
         if (!isRemovedByX9(p.initialTypes[i])) {
             if (p.resultLevels[i] != currentLevel) {
                 // we just encountered a new run; wrap up last run
@@ -825,6 +825,7 @@ internal static slice<slice<nint>> determineLevelRuns(this ref paragraph p) {
 // Definition BD13. Determine isolating run sequences.
 internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences(this ж<paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var sequencesᴷ = new stackAppend<ж<ΔisolatingRunSequence>>(moves: true);
 
     var levelRuns = p.determineLevelRuns();
 
@@ -859,9 +860,10 @@ internal static slice<ж<ΔisolatingRunSequence>> determineIsolatingRunSequences
                     break;
                 }
             }
-            sequences = append(sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
+            sequences = append(sequencesᴷ, sequences, Ꮡp.isolatingRunSequence(currentRunSequence));
         }
     }
+    sequences = move2heap(sequencesᴷ, sequences);
     return sequences;
 }
 
@@ -998,7 +1000,7 @@ internal static slice<nint> computeMultilineReordering(slice<level> levels, slic
 internal static slice<nint> computeReordering(slice<level> levels) {
     var result = new slice<nint>(len(levels));
     // initialize order
-    foreach (var (i, _) in result) {
+    foreach (var i in range(result)) {
         result[i] = i;
     }
 

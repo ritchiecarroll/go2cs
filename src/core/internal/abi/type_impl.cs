@@ -408,6 +408,8 @@ private static ж<Type> synthesizeDescriptor(System.Type st, nint[]? arrayDims, 
     return Ꮡt;
 }
 
+private static readonly System.Collections.Concurrent.ConcurrentDictionary<(System.Type type, nint length), ж<Type>> s_oneDimDescriptors = new();
+
 // TypeOf returns the abi.Type of some value. The descriptor stands for the value's GO dynamic
 // type: an interface-carrier wrapper (IжAdapter / IInterfaceAdapter chain) unwraps to the *T box
 // / original value it stands for (GoReflect.GoDynamicTypeOf, R10), so adapter-held and raw-box
@@ -421,6 +423,13 @@ public static ж<Type> TypeOf(any a) {
     }
     System.Type dyn = GoReflect.GoDynamicTypeOf(a);
     nint kind = GoReflect.KindOf(dyn);
+    // A one-dimension array (its element is not itself an array) is the common case, and its descriptor
+    // depends on its type and length alone, so it is interned on that pair: a hit measures nothing. The
+    // general route below allocates the dims array and renders the intern key for every call, 64 B for a
+    // [6]byte (reflect's TestDeepEqualAllocs, twice a DeepEqual).
+    if (kind == GoReflect.Array && a is IArray array && a is not ISlice && GoReflect.KindOf(GoReflect.ElementType(dyn)) != GoReflect.Array) {
+        return s_oneDimDescriptors.GetOrAdd((dyn, array.Length), static key => synthType(key.type, [key.length], null, null, null, null, null));
+    }
     // A POINTER carries its POINTEE's dims unshifted, which is the rule Elem() already applies when
     // it hands the cargo down — so `*[3]int` must be measured here or `Elem()` describes a
     // dimension-less array and reflect.New allocates a zero-length one. See PointeeArrayDims.
@@ -429,6 +438,11 @@ public static ж<Type> TypeOf(any a) {
                  : kind == GoReflect.Slice ? GoReflect.SliceElemArrayDims(a)
                  : kind == GoReflect.Map ? GoReflect.MapElemArrayDims(a)
                  : null;
+    // A slice's descriptor carries nothing but its element's dims, so one dimension interns on the same
+    // pair ([][6]byte rendered the key on every TypeOf).
+    if (kind == GoReflect.Slice && dims is [nint elemLength]) {
+        return s_oneDimDescriptors.GetOrAdd((dyn, elemLength), static key => synthType(key.type, [key.length], null, null, null, null, null));
+    }
     nint[]? keyDims = kind == GoReflect.Map ? GoReflect.MapKeyArrayDims(a) : null;
     nint[]?[]? paramDims = kind == GoReflect.Func ? GoReflect.FuncParamDims(a) : null;
     // A CHANNEL value carries the direction of the type it was made with, and a POINTER carries its

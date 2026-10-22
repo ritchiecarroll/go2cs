@@ -197,9 +197,12 @@ internal static @string String(this ref @decimal x) {
 
 // appendZeros appends n 0 digits to buf and returns buf.
 internal static slice<byte> appendZeros(slice<byte> buf, nint n) {
+    var bufᴷ = new stackAppend<byte>(moves: true);
+
     for (; n > 0; n--) {
-        buf = append(buf, (byte)((rune)'0'));
+        buf = append(bufᴷ, buf, (byte)((rune)'0'));
     }
+    buf = move2heap(bufᴷ, buf);
     return buf;
 }
 

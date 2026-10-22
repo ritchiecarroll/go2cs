@@ -18,6 +18,7 @@ namespace go;
 public readonly struct complex64
     : IConvertible, 
       IEquatable<complex64>, 
+      IEqualityOperators<complex64, complex64, bool>,
       IFormattable,
       IGoEquatable
 // TODO: Implement new numeric interfaces / validate against System.Numerics.Complex:

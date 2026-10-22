@@ -621,7 +621,7 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         if (len(it.Methods) != len(iv.Methods)) {
             return false;
         }
-        foreach (var (i, _) in it.Methods) {
+        foreach (var i in range(it.Methods)) {
             var tm = Ꮡ(it.Methods, i);
             var vm = Ꮡ(iv.Methods, i);
             // Note the mhdr array can be relocated from
@@ -666,7 +666,7 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
         if (st.PkgPath.Name() != sv.PkgPath.Name()) {
             return false;
         }
-        foreach (var (i, _) in st.Fields) {
+        foreach (var i in range(st.Fields)) {
             var tf = Ꮡ(st.Fields, i);
             var vf = Ꮡ(sv.Fields, i);
             if ((~tf).Name.Name() != (~vf).Name.Name()) {

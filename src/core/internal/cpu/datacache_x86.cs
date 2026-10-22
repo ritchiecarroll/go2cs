@@ -38,6 +38,8 @@ internal static uint32 extractBits(uint32 arg, nint l, nint r) {
 }
 
 internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
+    var cachesᴷ = new stackAppend<uintptr>(moves: true);
+
     // Constants for cache types
     UntypedInt noCache = 0;
     const uint32 dataCache = 1;
@@ -71,7 +73,7 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
         var sets = (uint64)ecx + 1; // Number of sets - 1
         var size = (uint64)(ways * partitions * lineSize) * sets; // Calculate cache size in bytes
 
-        caches = append(caches, (uintptr)size);
+        caches = append(cachesᴷ, caches, (uintptr)size);
 
         // If we see more than one cache described per level, or they appear
         // out of order, crash.
@@ -82,6 +84,7 @@ internal static slice<uintptr> getDataCacheSizesIntel(uint32 maxID) {
             throw panic("expected levels to be in order and for there to be one data/unified cache per level");
         }
     }
+    caches = move2heap(cachesᴷ, caches);
     return caches;
 }
 

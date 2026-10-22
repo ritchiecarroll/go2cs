@@ -473,6 +473,7 @@ internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint
     slice<slice<byte>> fullBuffers = default!;
     nint totalLen = default!;
     error err = default!;
+    var fullBuffersᴷ = new stackAppend<slice<byte>>(moves: true);
 
     slice<byte> frag = default!;
     // Use ReadSlice to look for delim, accumulating full buffers.
@@ -489,11 +490,12 @@ internal static (slice<slice<byte>> fullBuffers, slice<byte> finalFragment, nint
 
         // Make a copy of the buffer.
         var buf = bytes.Clone(frag);
-        fullBuffers = append(fullBuffers, buf);
+        fullBuffers = append(fullBuffersᴷ, fullBuffers, buf);
         totalLen += len(buf);
     }
 
     totalLen += len(frag);
+    fullBuffers = move2heap(fullBuffersᴷ, fullBuffers);
     return (fullBuffers, frag, totalLen, err);
 }
 
@@ -510,7 +512,7 @@ public static (slice<byte>, error) ReadBytes(this ref Reader b, byte delim) {
     var buf = new slice<byte>(n);
     n = 0;
     // Copy full pieces and fragment in.
-    foreach (var (i, _) in full) {
+    foreach (var i in range(full)) {
         n += copy(buf.slice(n), full[i]);
     }
     copy(buf.slice(n), frag);

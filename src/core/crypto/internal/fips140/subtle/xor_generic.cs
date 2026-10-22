@@ -94,7 +94,7 @@ internal static void xorLoop<T>(slice<T> dst, slice<T> x, slice<T> y)
     // remove bounds check in loop
     y = y[..(int)(len(dst))];
     // remove bounds check in loop
-    foreach (var (i, _) in dst) {
+    foreach (var i in range(dst)) {
         dst[i] = (T)(x[i] ^ y[i]);
     }
 }

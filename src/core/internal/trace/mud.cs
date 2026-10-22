@@ -176,7 +176,7 @@ internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) {
         var newSorted = new slice<edge>(len(oldSorted) + len(edges));
         nint i = 0;
         nint j = 0;
-        foreach (var (o, _) in newSorted) {
+        foreach (var o in range(newSorted)) {
             if (i >= len(oldSorted)){
                 copy(newSorted.slice(o), edges.slice(j));
                 break;

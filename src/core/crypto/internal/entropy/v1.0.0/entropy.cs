@@ -93,7 +93,7 @@ public static error Samples(slice<uint8> samples, ж<ScratchBuffer> Ꮡmemory) {
         // Warm up the source to avoid any initial bias.
         _ = s.Sample();
     }
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         samples[i] = s.Sample();
     }
     {

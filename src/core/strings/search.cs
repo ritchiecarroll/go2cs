@@ -54,7 +54,7 @@ internal static ж<stringFinder> makeStringFinder(@string pattern) {
 
     // Build bad character table.
     // Bytes not in the pattern can skip one pattern's length.
-    foreach (var (i, _) in (~f).badCharSkip) {
+    foreach (var i in range((~f).badCharSkip)) {
         f.Value.badCharSkip[i] = len(pattern);
     }
     // The loop condition is < instead of <= so that the last byte does not

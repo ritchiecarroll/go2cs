@@ -135,7 +135,7 @@ internal static bool equalStringSlice(slice<@string> a, slice<@string> b) {
     if (a == default!) {
         return true;
     }
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (a[i] != b[i]) {
             return false;
         }

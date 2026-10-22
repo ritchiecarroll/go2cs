@@ -83,6 +83,11 @@ public interface IArray<T> : IArray, IEnumerable<T>, IGoReflectSequence
 
     object? IGoReflectSequence.ReflectFirstElement() => this[0];
 
+    // Element 0's length, read in place: every array<E> has the same layout whatever E is (the backing
+    // reference, then its low and length), so the element is read as an array<byte> and never boxed.
+    nint IGoReflectSequence.ReflectFirstArrayLength() =>
+        GoArrayElement<T>.IsOneDimArray && Length > 0 ? Unsafe.As<T, array<byte>>(ref this[0]).Length : -1;
+
     // A nested sized array's fill (GoReflect.MakeSizedArray; trim stage 3c-2a): every element built by `element`, in index
     // order, into this sequence's own backing store. The outer array's member, so it names nothing but its own element
     // type: a member that built a container of its declaring type would be an unbounded generic expansion.
@@ -122,8 +127,23 @@ public interface IGoReflectSequence
     /// <summary>Element 0, as <see cref="object"/>.</summary>
     object? ReflectFirstElement();
 
+    /// <summary>
+    /// Element 0's length when the element type is an unnamed one-dimension array (<c>array&lt;E&gt;</c>, E not itself an
+    /// array), without boxing it; -1 for any other element type or an empty sequence.
+    /// </summary>
+    nint ReflectFirstArrayLength();
+
     /// <summary>Stores <paramref name="element"/>'s result into every element, in index order.</summary>
     void ReflectFill(Func<object> element);
+}
+
+// Whether T is an unnamed one-dimension array, array<E> with E not itself an array<>: the one element type whose Go
+// type needs its VALUE's length (array<byte> is the C# type of every [N]byte).
+internal static class GoArrayElement<T>
+{
+    internal static readonly bool IsOneDimArray =
+        typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(array<>) &&
+        !(typeof(T).GetGenericArguments()[0] is { IsGenericType: true } inner && inner.GetGenericTypeDefinition() == typeof(array<>));
 }
 
 [Serializable]

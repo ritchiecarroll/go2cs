@@ -49,7 +49,7 @@ public static @string GoString(this ref ΔHTTPSResource r) {
 
 // GetParam returns a parameter value by key.
 public static (slice<byte> value, bool ok) GetParam(this ref ΔSVCBResource r, SVCParamKey key) {
-    foreach (var (i, _) in r.Params) {
+    foreach (var i in range(r.Params)) {
         if (r.Params[i].Key == key) {
             return (r.Params[i].Value, true);
         }
@@ -82,7 +82,7 @@ public static void SetParam(this ref ΔSVCBResource r, SVCParamKey key, slice<by
 // DeleteParam deletes a parameter by key.
 // It returns true if the parameter was present.
 public static bool DeleteParam(this ref ΔSVCBResource r, SVCParamKey key) {
-    foreach (var (i, _) in r.Params) {
+    foreach (var i in range(r.Params)) {
         if (r.Params[i].Key == key) {
             r.Params = slices.Delete<slice<SVCParam>, SVCParam>(r.Params, i, i + 1);
             return true;

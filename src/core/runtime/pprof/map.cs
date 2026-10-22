@@ -43,7 +43,7 @@ Search:
         if (len((~eΔ1).stk) != len(stk) || (~eΔ1).tag != tag) {
             continue;
         }
-        foreach (var (j, _) in stk) {
+        foreach (var j in range(stk)) {
             if ((~eΔ1).stk[j] != (uintptr)stk[j]) {
                 goto continue_Search;
             }
@@ -75,7 +75,7 @@ break_Search:;
     e.Value.stk = m.freeStk.slice(0, len(stk), len(stk));
     m.freeStk = m.freeStk.slice(len(stk));
 
-    foreach (var (j, _) in stk) {
+    foreach (var j in range(stk)) {
         e.Value.stk[j] = (uintptr)stk[j];
     }
     if (m.hash == default!) {

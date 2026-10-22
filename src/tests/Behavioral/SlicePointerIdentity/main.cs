@@ -10,7 +10,7 @@ partial struct node {
 
 internal static void Main() {
     var s = new slice<nint>(4, 8);
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = i * 10;
     }
 

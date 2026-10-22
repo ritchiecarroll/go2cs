@@ -9,9 +9,10 @@ A defined type over the empty interface holds every Go value, so it is emitted a
 `object`, the same route as a defined type over any other named interface. That holds for both spellings,
 `type I any` and the inline `type I interface{}`: the empty interface is `any`'s type set, whatever the RHS
 syntax. The declaration keeps its Go name wherever the converted code uses it, and an uninhabited
-descriptor carrier stamped `[GoLocalName]` keeps that name for reflection.
+descriptor carrier stamped `[GoLocalName]`, declared on the package's accessibility record in
+`package_info.cs`, keeps that name for reflection.
 
-<!-- source: src/tests/Behavioral/NamedEmptyInterface/main.go:9 + :13 + :17 -->
+<!-- source: src/tests/Behavioral/NamedEmptyInterface/main.go:9, 13, 17 -->
 ```go
 type I interface{}
 
@@ -19,16 +20,17 @@ func show(v I) { fmt.Printf("I: %T %v\n", v, v) }
 …
 func back(n int8) I { return n }
 ```
-<!-- source: src/tests/Behavioral/NamedEmptyInterface/main.cs.target:1 + :8-9 + :16 + :24 -->
+<!-- source: src/tests/Behavioral/NamedEmptyInterface/main.cs.target:1, 13, 21 -->
 ```csharp
 global using I = object;
-…
-// Descriptor carrier for `I` — uninhabited; see GoDescriptorTypeAttribute.
-[GoLocalName("I")] public interface Iᴅ { }
 …
 internal static void show(I v) {
 …
 internal static I back(int8 n) {
+```
+<!-- source: src/tests/Behavioral/NamedEmptyInterface/package_info.cs:70 -->
+```csharp
+    [GoLocalName("I")] public partial interface Iᴅ {}
 ```
 
 Emitted as a nested C# interface instead, it holds nothing, because no primitive or converted struct
@@ -55,11 +57,21 @@ internal static any Get(this ref chattyFlag f) {
 }
 ```
 
+That inline form is the emitter's rendering; most `any` positions in converted code do not show it,
+because the literal pre-pass decides first (see [Strings](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string)).
+A `return`, assignment, send or map lookup reads a hoisted pre-boxed field
+(`private static readonly object seedˢ = (@string)"seed"u8;`); outside the standard library an
+argument of a call go2cs-gen can intercept renders as a bare C# literal that its
+`LiteralInterceptorGenerator` boxes as a Go string at the call; and a composite element keeps the inline
+`(@string)"…"u8`. Every route delivers an
+`@string` box, which is the rule this section states.
+
 **The cast and the `u8` suffix are independent decisions.** The cast is what the slot requires — it turns
 the span into an `@string`, which boxes with Go's `string` dynamic type. The suffix then just decides where
 the literal's *bytes* come from: `u8` makes them a compile-time constant in the assembly's data section,
 while a bare C# `"…"` is a UTF-16 constant that `Encoding.UTF8.GetBytes` has to transcode **on every
-evaluation** of the site (measured 2.1–2.4× for ASCII, 4.2× for non-ASCII). The two were coupled for a
+evaluation** of the site (measured at more than twice the cost, and more again for non-ASCII text<!-- 2.1–2.4× ASCII /
+4.2× non-ASCII, docs/phase4/DESIGN-string-literal-allocation.md; platform not recorded -->). The two were coupled for a
 while — the emitter derived "no `u8`" from "needs the cast" — and every `any` position paid the transcode.
 They are now separate flags (`castToGoString`, `u8StringOK`), and every `any` slot takes the combined form.
 
@@ -100,18 +112,19 @@ s  := []any{"a", "b"}             // slice/array element
 sp := [3]any{1: "sp"}             // sparse-array element
 ```
 
+<!-- source: src/tests/Behavioral/AnyStringLitComposite/main.cs.target:30-34, 40 -->
 ```csharp
-var p  = new pair("tag"u8, (@string)"val"u8);        // NOT bare "val" (wrong boxed identity)
-var n  = Ꮡ(new node(inner: (@string)"hi"u8));        // NOT a BARE "hi"u8 (CS1503)
-var m  = new map<@string, any>{["k"u8] = (@string)"mv"u8};
-var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
-var s  = new any[]{(@string)"a", (@string)"b"}.slice();
-var sp = new array<any>(3){[1] = (@string)"sp"u8};
+    var n = Ꮡ(new node(inner: (@string)"hi"u8));
+    var p = new pair("tag", (@string)"val"u8);
+    var m = new map<@string, any>{["k"] = (@string)"mv"u8};
+    var mk = new map<any, nint>{[(@string)"ky"u8] = 7};
+    var s = new any[]{(@string)"a"u8, (@string)"b"u8}.slice();
+    var sp = new array<any>(3){[1] = (@string)"sp"u8};
 ```
 
-(`p`'s FIRST element is the plain `string` field — a positional struct element in a `string` slot now
-renders `u8` too, matching what the keyed and elided forms already emitted; the slice/array `any`
-ELEMENT form is the one position still on the bare-cast rendering.)
+Every `any` slot takes the combined `(@string)"…"u8` form, where a bare `"hi"u8` is CS1503 and a bare
+`"val"` boxes the wrong dynamic type. `p`'s FIRST element and the map's key are plain `string` slots,
+which take a [plain](strings.md#a-literal-in-a-string-slot-is-a-plain-c-literal) C# literal.
 
 Keyed elements resolve their target slot in `convKeyValueExpr` (struct field via `info.Uses`; map/sparse
 element and map key via the threaded composite type) and take the same `castToGoString`-on literal
@@ -127,15 +140,28 @@ statement form and the select-case registration form. The send value previously 
 target-type context at all, so the literal's default `"…"u8` span failed against the channel's
 `in object` send parameter (CS1503):
 
+<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.go:38-39, 45-47 -->
 ```go
-ch := make(chan any, 1)
-ch <- "text"                    // statement send
-select { case ch <- "sel": … }  // select-case send (registration form)
+	ch := make(chan any, 2)
+	ch <- "text"
+…
+	sel := make(chan any, 1)
+	select {
+	case sel <- "sel":
 ```
 
+In converted code both sends then read the literal's hoisted pre-boxed field (see above), never a bare
+`"text"u8`:
+
+<!-- source: src/tests/Behavioral/AnyStringLitChanSend/main.cs.target:49-50, 55, 61-62 -->
 ```csharp
-ch.ᐸꟷ((@string)"text");                              // NOT "text"u8 (CS1503)
-switch (select(ch.ᐸꟷ((@string)"sel", ꓸꓸꓸ))) { … }    // registration form takes the same box
+private static readonly object textˢ = (@string)"text"u8;
+private static readonly object selˢ = (@string)"sel"u8;
+…
+    ch.ᐸꟷ(textˢ);
+…
+    var selᴛ1 = sel.ᐸꟷ(selˢ, ꓸꓸꓸ);
+    switch (select(selᴛ1)) {
 ```
 
 Both send positions route through a shared `convSendValueExpr` (`visitSendStmt.go`), which resolves
@@ -199,19 +225,22 @@ _ = any(7).(int)             // explicit conversion to any
 ```
 
 ```csharp
-fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)(8), i);
+fmt.Sprintf("%s.v%d.%d"u8, GOARCH, (nint)8, i);
 fmt.Sprintf("%s%c%03d"u8, d, (int32)(os.PathSeparator), seq);
-Ꮡv.Store((nint)(42));
-any a = (nint)(7);
-b = (nint)(8);
-internal static any r() { return (nint)(42); }
-ch.ᐸꟷ((nint)(3));
-_ = new any[]{(nint)(5)}.slice();
-_ = new map<@string, any>{["k"u8] = (nint)(9)};
-_ = new map<any, @string>{[(nint)(12)] = "x"u8};   // and m[(nint)(12)]
-_ = new holder(v: (nint)(3));
-_ = ((any)(nint)(7))._<nint>();
+Ꮡv.Store((nint)42);
+any a = (nint)7;
+b = (nint)8;
+internal static any r() { return (nint)42; }
+ch.ᐸꟷ((nint)3);
+_ = new any[]{(nint)5}.slice();
+_ = new map<@string, any>{["k"] = (nint)9};
+_ = new map<any, @string>{[(nint)12] = "x"};   // and m[(nint)12]
+_ = new holder(v: (nint)3);
+_ = ((any)(nint)7)._<nint>();
 ```
+
+A literal takes the bare cast (`(nint)8`); a compound operand or a named constant is parenthesized
+(`(nint)(-5)`, `(int32)(os.PathSeparator)`).
 
 `untypedConstBoxCast` (`convCallExpr.go`) drives the decision and returns the C# cast type (or none).
 The constant's **kind** comes from `info.Types[arg]` — the type go/types has already DEFAULTED for the
@@ -250,10 +279,12 @@ pattern. That is wrong wherever the boxed value is **compared** rather than prin
 as `Int32`, `AreEqual` compared the dynamic types first, and the assert fired with a message that reads
 as an equality (`n = 0, expected 0`). It is also wrong for the `%!`-verb path, where the full-conversion
 `fmt` names the argument via `reflect.TypeOf(arg).String()` and a boxed `Int32` reports `"int32"`
-instead of Go's `"int"`. The carve-out is gone; the corpus-wide footprint of removing it is **two
-lines in two files** (`go/token/position.cs`, `internal/buildcfg/cfg.cs` — Go's own stdlib almost never
-passes a bare int literal into a `...any` slot), plus two `(int32)(os.PathSeparator)` lines in
-`testing/testing.cs` from the rune-kind arm, which is a genuine `%c` fix for the Phase-4 test host.
+instead of Go's `"int"`. The carve-out is gone; removing it moved only a few standard-library lines (in
+`go/token/position.cs`
+and `internal/buildcfg/cfg.cs` — Go's own stdlib almost never passes a bare int literal into a `...any`
+slot), plus the rune-kind arm's `(int32)(os.PathSeparator)`, a genuine `%c` fix for the Phase-4 test
+host.<!-- measured at the time: two lines in two files, plus two `(int32)(os.PathSeparator)` lines in testing/testing.cs
+(testing is hand-owned since) -->
 
 **The `any` map KEY used to be excluded too**, because golib's `map` uses the default `Dictionary`
 comparer (no numeric normalization — `nint(6) != Int32(6)`) and leaving *both* the composite key and a
@@ -298,27 +329,47 @@ a `BasicLit`, and where the `u8` form survived (`new box(v: "se"u8 + "ed"u8)`) t
 compile.
 
 Both mechanisms are kept, each doing what it is good at. The literal context still produces the tighter
-`(@string)"seed"` at the positions that carry it, and the four missing positions were given it
+`(@string)"seed"u8` at the positions that carry it, and the four missing positions were given it
 (`convExprList` via a new `isStringBasicLit` branch beside `markAnyFieldLits`' identical either/or,
 `visitValueSpec`'s `isAnyType` context, and `convIndexExpr`'s `any`-key context). `untypedConstBoxCast`
 is the general net underneath — it catches the concatenations and any position that lacks the flag — and
 all its application sites now route through `applyUntypedConstBoxCast`, which skips a rendering that
 already leads with the cast so the two can never double up:
 
+<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.go:147-148, 152, 156, 162, 167 -->
 ```go
-box{v: "seed"}; eq(b.v, "seed")   // Go: true      var v any = "x"      m[any] lookup by "seed"
+	fmt.Println("str var lit   :", variadicEq(s, "seed"))
+	fmt.Println("str var cat   :", variadicEq(s, "se"+"ed"))
+…
+	var sv any = "seed"
+…
+	ssl := []any{"seed", "se" + "ed"}
+…
+	fmt.Println("str mapkey    :", smk["seed"], smk[any(s)])
+…
+	shk := holder{v: "seed"}
 ```
+<!-- source: src/tests/Behavioral/AnyBoxedUntypedConst/main.cs.target:152-153, 157, 161, 165, 170 -->
 ```csharp
-new box(v: (@string)"seed");  eq(b.v, (@string)"seed");   // now true
-any v = (@string)"x";         m[(@string)"seed"];
-new any[]{(@string)("se" + "ed")};                        // the concat shape, previously bare
+    fmt.Println("str var lit   :", variadicEq(s, "seed"));
+    fmt.Println("str var cat   :", variadicEq(s, (@string)("se" + "ed")));
+…
+    any sv = seedˢ;
+…
+    var ssl = new any[]{(@string)"seed"u8, (@string)("se" + "ed")}.slice();
+…
+    fmt.Println("str mapkey    :", smk[seedˢ], smk[((any)s)]);
+…
+    var shk = new holder(v: (@string)"seed"u8);
 ```
 
-The cost is real and accepted, on the same reasoning that removed the variadic int carve-out: **every
-string literal in a `...any` slot now carries the cast**, so `fmt.Println("x")` emits
-`fmt.Println((@string)"x")`. That is 866 lines across 150 behavioral projects — uniform, mechanical, and
-individually inspected. The alternative is a carve-out that leaves `x.(string)`, `case string:`, `==`,
-and `%T` silently wrong on exactly the values a Go program is most likely to compare.
+The literal pre-pass then picks the final spelling of a bare literal (see
+[Strings](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string)):
+the call argument `variadicEq(s, "seed")` stays a bare C# literal, which go2cs-gen's
+`LiteralInterceptorGenerator` boxes as a Go string at the call, and the var-spec and map lookup read the
+hoisted pre-boxed field `seedˢ`. The concatenation shape always carries the cast. So a `...any` call
+argument such as `fmt.Println("x")` reads as it does in Go, and `x.(string)`, `case string:`, `==` and
+`%T` still see Go's `string` dynamic type on every route.<!-- An earlier form cast every string literal in a `...any` slot, `fmt.Println((@string)"x")`: 866 lines across 150 behavioral projects at the time; the plain-literal + interceptor route (owner ruling 2026-10-17) replaced it. -->
 
 (Guarded by the `AnyBoxedUntypedConst` extension — literal, concatenation, named-untyped and named-typed
 string constants at the variadic, non-variadic, var-spec, `[]any`, `map[any]` key store *and* lookup,
@@ -336,7 +387,7 @@ a stored-then-asserted value's does. A bare C# int literal boxes as `System.Int3
 against an `any` field holding a boxed Go `int` (`nint`/`IntPtr`) — container/list's
 `TestIssue6349`, emitted `!AreEqual((~e).Value, 1)` — saw `IntPtr != Int32`, reported the values
 UNEQUAL, and fired the test's error even though the value round-tripped as `1`. The interface-comparison
-branch now casts the concrete constant operand to its default type (`!AreEqual((~e).Value, (nint)(1))`),
+branch now casts the concrete constant operand to its default type (`!AreEqual((~e).Value, (nint)1)`),
 reusing the same `untypedConstBoxCast` predicate the boxing positions above key off — so the literal
 boxes as Go's `int` dynamic type and the runtime-type guard passes. The cast is confined to the
 `AreEqual` lowering (interface-vs-concrete / interface / pointer), so a bare int compared against a
@@ -357,14 +408,16 @@ conversion to `object` (CS0029, BurntSushi/toml's encode test), and an untyped c
 `x.(int)` read false where Go reads true. `elidedElemContext` now gives such a literal the typed path's element
 marking (`markEmptyInterfaceElems`, shared by both renderers), so the two spellings of one Go type emit alike:
 
+<!-- source: src/tests/Behavioral/ElidedAnyCompositeElems/ElidedAnyCompositeElems.cs.target:9 -->
 ```csharp
-var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)(1), (nint)(2)}.array(), new any[]{(@string)"a"u8, (@string)"b"u8}.array()}.slice(), 2);
+    var a = GoReflect.WithElemDims(new array<any>[]{new any[]{(nint)1, (nint)2}.array(), new any[]{(@string)"a"u8, (@string)"b"u8}.array()}.slice(), 2);
 ```
 
 A pointer, func or `unsafe.Pointer` element takes its box the same way. An elided literal of any other element type,
-and an elided literal with nothing to mark, keep their exact rendering. The type-aware census of the shape read 0
-sites in the converted standard library (production on three targets, tests on two) and 0 across 757 behavioral
-modules. Guarded by `elidedAnyCompositeElems_test.go` and the `ElidedAnyCompositeElems` behavioral test, which fails
+and an elided literal with nothing to mark, keep their exact rendering. A type-aware census of the shape found no
+site in the converted standard library or the behavioral corpus when the change landed.<!-- read 0 sites in the
+converted standard library (production on three targets, tests on two) and 0 across 757 behavioral modules --> Guarded
+by `elidedAnyCompositeElems_test.go` and the `ElidedAnyCompositeElems` behavioral test, which fails
 on the pre-change converter with CS0029 x4.
 
 ## Comparing two interfaces of one UNCOMPARABLE dynamic type panics, as Go does
@@ -385,7 +438,8 @@ nil named-func delegate — was a special case of exactly this rule, and now rou
 mint (`RuntimeErrorPanic.ComparingUncomparableType`) rather than restating the message.
 
 The gate sits **after** both nil legs and the dynamic-type check, which is what makes it safe against
-the ~1,300 emitted `AreEqual` call sites: it is reached only where Go itself would have run the equal
+the emitted `AreEqual` call sites<!-- ~1,300 at the time -->: it is reached only where Go itself would have run the
+equal
 algorithm and found none, and the converter emits `AreEqual` only for a comparison Go's own type
 checker admitted. The panic is a recoverable runtime error, so `recover()` observes it exactly as in
 Go.

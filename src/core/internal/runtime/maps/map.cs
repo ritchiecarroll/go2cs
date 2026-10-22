@@ -316,7 +316,7 @@ public static ж<ΔMap> NewMap(ж<abiꓸMapType> Ꮡmt, uintptr hint, ж<ΔMap> 
 
     var directory = new slice<ж<table>>((nint)(dirSize));
 
-    foreach (var (i, _) in directory) {
+    foreach (var i in range(directory)) {
         // TODO: Think more about initial table capacity.
         directory[i] = newTable(Ꮡmt, (uint64)targetCapacity / dirSize, i, m.globalDepth);
     }

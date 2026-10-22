@@ -898,7 +898,7 @@ public static slice<slice<byte>> FindSubmatch(this ж<Regexp> Ꮡre, slice<byte>
         return default!;
     }
     var ret = new slice<slice<byte>>(1 + re.numSubexp);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         if (2 * i < len(a) && a[2 * i] >= 0) {
             ret[i] = b.slice(a[2 * i], a[2 * i + 1], a[2 * i + 1]);
         }
@@ -1062,7 +1062,7 @@ public static slice<@string> FindStringSubmatch(this ж<Regexp> Ꮡre, @string s
         return default!;
     }
     var ret = new slice<@string>(1 + re.numSubexp);
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         if (2 * i < len(a) && a[2 * i] >= 0) {
             ret[i] = s.slice(a[2 * i], a[2 * i + 1]);
         }
@@ -1182,7 +1182,7 @@ public static slice<slice<slice<byte>>> FindAllSubmatch(this ж<Regexp> Ꮡre, s
             Ꮡresult.ValueSlot = new slice<slice<slice<byte>>>(0, startSize);
         }
         var Δslice = new slice<slice<byte>>(len(match) / 2);
-        foreach (var (j, _) in Δslice) {
+        foreach (var j in range(Δslice)) {
             if (match[2 * j] >= 0) {
                 Δslice[j] = bʗ1.slice(match[2 * j], match[2 * j + 1], match[2 * j + 1]);
             }
@@ -1224,7 +1224,7 @@ public static slice<slice<@string>> FindAllStringSubmatch(this ж<Regexp> Ꮡre,
             Ꮡresult.ValueSlot = new slice<slice<@string>>(0, startSize);
         }
         var Δslice = new slice<@string>(len(match) / 2);
-        foreach (var (j, _) in Δslice) {
+        foreach (var j in range(Δslice)) {
             if (match[2 * j] >= 0) {
                 Δslice[j] = s.slice(match[2 * j], match[2 * j + 1]);
             }

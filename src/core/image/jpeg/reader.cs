@@ -490,7 +490,7 @@ loop:
                     return errΔ3;
                 }
             }
-            foreach (var (i, _) in d.quant[tq]) {
+            foreach (var i in range(d.quant[tq])) {
                 d.quant[tq][i] = (int32)d.tmp[i];
             }
             break;
@@ -505,7 +505,7 @@ loop:
                     return errΔ4;
                 }
             }
-            foreach (var (i, _) in d.quant[tq]) {
+            foreach (var i in range(d.quant[tq])) {
                 d.quant[tq][i] = (int32)d.tmp[2 * i] << 8 | (int32)d.tmp[2 * i + 1];
             }
             break;

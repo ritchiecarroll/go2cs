@@ -11,7 +11,7 @@ partial struct digest {
 }
 
 internal static void bump(this ref digest d) {
-    foreach (var (i, _) in d.h) {
+    foreach (var i in range(d.h)) {
         d.h[i]++;
     }
     d.x[0]++;

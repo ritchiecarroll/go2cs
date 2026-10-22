@@ -61,7 +61,7 @@ the two groups is dropped and leaves no extra blank behind:
 	fmt.Println(r.h(21)) // 42
 ```
 
-<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:112-122 -->
+<!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.cs.target:111-121 -->
 ```csharp
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
@@ -372,17 +372,15 @@ line sets it apart from the file's header comments or from a previous `using` li
 type PathError = fs.PathError
 ```
 
-<!-- source: src/core/os/error.cs:1-8 -->
+<!-- source: src/core/os/error.cs:5-8 -->
 ```csharp
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 // PathError records an error and the operation and file path that caused it.
 global using PathError = go.io.fs_package.PathError;
 
 namespace go;
 ```
+
+In the file, the Go source's header comment sits above these lines, one blank line away.
 
 **Limits.** An alias of an anonymous struct or interface is converted as a lifted type, which takes the doc;
 its `global using` line then has none.

@@ -125,7 +125,7 @@ internal static T /*s*/ polyAdd<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = fieldAdd(a[i], b[i]);
     }
     return s;
@@ -137,7 +137,7 @@ internal static T /*s*/ polySub<T>(T a, T b)
 {
     T s = GoZero<T>();
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         s[i] = fieldSub(a[i], b[i]);
     }
     return s;
@@ -295,7 +295,7 @@ internal static ringElement inverseNTT(nttElement f) {
         }
     }
 
-    foreach (var (i, _) in f) {
+    foreach (var i in range(f)) {
         f[i] = fieldMontgomeryMul(f[i], 16382); // 16382 = 256⁻¹ * R mod q
     }
     return (ringElement)(array<fieldElement>)f;
@@ -307,7 +307,7 @@ internal static nttElement /*p*/ nttMul(nttElement a, nttElement b) {
     a = a.Clone();
     b = b.Clone();
 
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = fieldMontgomeryMul(a[i], b[i]);
     }
     return p.Clone();

@@ -143,7 +143,7 @@ internal static (nint, error) Read(this ref byteRepeat b, slice<byte> p) {
         return (0, Δio.EOF);
     }
     nint n = 0;
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         if (b.left == 0) {
             break;
         }

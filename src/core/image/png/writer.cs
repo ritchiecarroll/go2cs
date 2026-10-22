@@ -375,7 +375,7 @@ internal static error writeImage(this ж<encoder> Ꮡe, io.Writer w, image.Image
         // The +1 is for the per-row filter type, which is at cr[*][0].
         var b = m.Bounds();
         nint sz = 1 + (bitsPerPixel * b.Dx() + 7) / 8;
-        foreach (var (i, _) in e.cr) {
+        foreach (var i in range(e.cr)) {
             if (cap(e.cr[i]) < sz){
                 e.cr[i] = new slice<uint8>(sz);
             } else {

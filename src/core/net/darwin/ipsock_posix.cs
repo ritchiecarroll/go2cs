@@ -65,7 +65,7 @@ internal static void probe(this ж<ipStackCapabilities> Ꮡp) {
             // and we don't need to probe the capability.
             probes = probes[..1];
         }
-        foreach (var (i, _) in probes) {
+        foreach (var i in range(probes)) {
             var (sΔ1, errΔ1) = sysSocket(syscall.AF_INET6, syscall.SOCK_STREAM, syscall.IPPROTO_TCP);
             if (errΔ1 != default!) {
                 continue;

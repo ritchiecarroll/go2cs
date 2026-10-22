@@ -24,7 +24,7 @@ public static bool Equal<S, E>(S s1, S s2)
     if (len(s1) != len(s2)) {
         return false;
     }
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (!AreEqual(s1[i], s2[i])) {
             return false;
         }
@@ -112,7 +112,7 @@ public static nint CompareFunc<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, nint> 
 public static nint Index<S, E>(S s, E v)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         if (AreEqual(v, s[i])) {
             return i;
         }
@@ -125,7 +125,7 @@ public static nint Index<S, E>(S s, E v)
 public static nint IndexFunc<S, E>(S s, Func<E, bool> f)
     where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
 {
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         if (f(s[i])) {
             return i;
         }
@@ -506,7 +506,7 @@ internal static void rotateRight<E>(slice<E> s, nint r) {
 // prerequisite: the needle must be aliased entirely inside the haystack.
 internal static nint startIdx<E>(slice<E> haystack, slice<E> needle) {
     var p = Ꮡ(needle, 0);
-    foreach (var (i, _) in haystack) {
+    foreach (var i in range(haystack)) {
         if (p == Ꮡ(haystack, i)) {
             return i;
         }

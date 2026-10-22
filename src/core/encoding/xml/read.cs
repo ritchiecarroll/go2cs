@@ -522,7 +522,7 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
                 foreach (var (_, a) in start.Attr) {
                     var handled = false;
                     nint any = -1;
-                    foreach (var (i, _) in (~tinfo).fields) {
+                    foreach (var i in range((~tinfo).fields)) {
                         var finfo = Ꮡ((~tinfo).fields, i);
                         var exprᴛ2 = (fieldFlags)((~finfo).flags & fMode);
                         if (exprᴛ2 == fAttr) {
@@ -554,7 +554,7 @@ internal static error unmarshal(this ж<Decoder> Ꮡd, reflectꓸValue val, ж<S
                 }
 
                 // Determine whether we need to save character data or comments.
-                foreach (var (i, _) in (~tinfo).fields) {
+                foreach (var i in range((~tinfo).fields)) {
                     var finfo = Ꮡ((~tinfo).fields, i);
                     var exprᴛ3 = (fieldFlags)((~finfo).flags & fMode);
                     if (exprᴛ3 == fCDATA || exprᴛ3 == fCharData) {
@@ -806,12 +806,12 @@ internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, 
 
     var recurse = false;
 Loop:
-    foreach (var (i, _) in tinfo.fields) {
+    foreach (var i in range(tinfo.fields)) {
         var finfo = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)((~finfo).flags & fElement) == 0 || len((~finfo).parents) < len(parents) || (~finfo).xmlns != ""u8 && (~finfo).xmlns != start.Name.Space) {
             continue;
         }
-        foreach (var (j, _) in parents) {
+        foreach (var j in range(parents)) {
             if (parents[j] != (~finfo).parents[j]) {
                 goto continue_Loop;
             }

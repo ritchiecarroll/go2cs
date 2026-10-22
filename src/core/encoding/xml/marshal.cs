@@ -589,7 +589,7 @@ internal static error marshalValue(this ж<printer> Ꮡp, reflectꓸValue val, �
     }
 
     // Attributes
-    foreach (var (i, _) in (~tinfo).fields) {
+    foreach (var i in range((~tinfo).fields)) {
         var finfoΔ1 = Ꮡ((~tinfo).fields, i);
         if ((fieldFlags)((~finfoΔ1).flags & fAttr) == 0) {
             continue;
@@ -955,7 +955,7 @@ internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
 
     var s = new parentStack(p: Ꮡp);
-    foreach (var (i, _) in tinfo.fields) {
+    foreach (var i in range(tinfo.fields)) {
         var finfo = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)((~finfo).flags & fAttr) != 0) {
             continue;

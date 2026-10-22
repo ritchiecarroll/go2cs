@@ -129,11 +129,13 @@ internal static @string names(reflectꓸType t) {
 
 internal static slice<reflectꓸValue> args(params ꓸꓸꓸany valuesʗp) {
     var values = valuesʗp.sslice();
+    var inᴷ = new stackAppend<reflectꓸValue>(moves: true);
 
     slice<reflectꓸValue> @in = default!;
     foreach (var (_, a) in values) {
-        @in = append(@in, reflect.ValueOf(a));
+        @in = append(inᴷ, @in, reflect.ValueOf(a));
     }
+    @in = move2heap(inᴷ, @in);
     return @in;
 }
 

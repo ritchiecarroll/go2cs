@@ -79,7 +79,7 @@ public static void AddASN1BigInt(this ж<Builder> Ꮡb, ж<bigꓸInt> Ꮡn) {
             var nMinus1 = @new<bigꓸInt>().Neg(Ꮡn);
             nMinus1.Sub(nMinus1, bigOne);
             var bytes = nMinus1.Bytes();
-            foreach (var (i, _) in bytes) {
+            foreach (var i in range(bytes)) {
                 bytes[i] ^= (byte)(0xff);
             }
             if (len(bytes) == 0 || (byte)(bytes[0] & 0x80) == 0) {

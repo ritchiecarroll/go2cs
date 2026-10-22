@@ -1117,7 +1117,7 @@ internal static void printValue(this ж<pp> Ꮡp, reflectꓸValue value, rune ve
                         // so we build a slice by hand. This is a rare case but it would be nice
                         // if reflection could help a little more.
                         bytes = new slice<byte>(f.Len());
-                        foreach (var (i, _) in bytes) {
+                        foreach (var i in range(bytes)) {
                             bytes[i] = (byte)f.Index(i).Uint();
                         }
                     }

@@ -525,7 +525,7 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
 internal static void initHeapBits(this ref mspan s) {
     if (goarch.PtrSize == 8 && !s.spanclass.noscan() && s.spanclass.sizeclass() == 1){
         var b = s.heapBits();
-        foreach (var (i, _) in b) {
+        foreach (var i in range(b)) {
             b[i] = ~(uintptr)0;
         }
     } else 

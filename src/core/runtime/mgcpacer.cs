@@ -642,7 +642,7 @@ internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint p
     // earlier).
     var oldConsMark = c.consMark;
     c.consMark = currentConsMark;
-    foreach (var (i, _) in c.lastConsMark) {
+    foreach (var i in range(c.lastConsMark)) {
         if (c.lastConsMark[i] > c.consMark) {
             c.consMark = c.lastConsMark[i];
         }

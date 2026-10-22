@@ -14,6 +14,8 @@ partial interface Message {
 // parseRIB parses b as a routing information base and returns a list
 // of routing messages.
 internal static (slice<Message>, error) parseRIB(slice<byte> b) {
+    var msgsᴷ = new stackAppend<Message>(moves: true);
+
     slice<Message> msgs = default!;
     nint nmsgs = 0;
     nint nskips = 0;
@@ -41,7 +43,7 @@ internal static (slice<Message>, error) parseRIB(slice<byte> b) {
                 if (m == default!){
                     nskips++;
                 } else {
-                    msgs = append(msgs, m);
+                    msgs = append(msgsᴷ, msgs, m);
                 }
             }
         }
@@ -52,6 +54,7 @@ internal static (slice<Message>, error) parseRIB(slice<byte> b) {
     if (nmsgs != len(msgs) + nskips) {
         return (default!, errMessageMismatch);
     }
+    msgs = move2heap(msgsᴷ, msgs);
     return (msgs, default!);
 }
 
