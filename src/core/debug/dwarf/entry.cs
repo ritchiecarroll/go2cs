@@ -91,7 +91,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
         a.tag = (Tag)(uint32)b.@uint();
         a.children = b.uint8() != 0;
         a.field = new slice<afield>(n);
-        foreach (var (i, _) in a.field) {
+        foreach (var i in range(a.field)) {
             a.field[i].attr = (Attr)(uint32)b.@uint();
             a.field[i].fmt = (format)(uint32)b.@uint();
             a.field[i].@class = formToClass(a.field[i].fmt, a.field[i].attr, vers, Ꮡb);
@@ -526,7 +526,7 @@ internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> Ꮡcu, ж<unit> Ꮡ
         return rnglistsBase + offΔ2;
     }
 
-    foreach (var (i, _) in (~e).Field) {
+    foreach (var i in range((~e).Field)) {
         (~e).Field[i].Attr = a.field[i].attr;
         (~e).Field[i].Class = a.field[i].@class;
         var fmt = a.field[i].fmt;
@@ -1167,6 +1167,7 @@ internal static readonly @string rangesˢ = "ranges"u8;
 internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, ж<unit> Ꮡu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
+    var retᴷ = new stackAppend<array<uint64>>(moves: true);
 
     if (ranges < 0 || ranges > (int64)len(d.ranges)) {
         return (default!, fmt.Errorf("invalid range offset %d (max %d)"u8, ranges, len(d.ranges)));
@@ -1183,10 +1184,11 @@ internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, �
         if (low == (~(uint64)0).Rsh((nuint)((8 - u.addrsize()) * 8))){
             @base = high;
         } else {
-            ret = append(ret, new uint64[]{@base + low, @base + high}.array());
+            ret = append(retᴷ, ret, new uint64[]{@base + low, @base + high}.array());
         }
     }
 
+    ret = move2heap(retᴷ, ret);
     return (ret, default!);
 }
 

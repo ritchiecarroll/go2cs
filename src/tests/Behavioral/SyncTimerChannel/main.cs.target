@@ -90,7 +90,7 @@ internal static void Main() {
     (nint, nint) stopRound(bool reset) {
         var start = time.Now();
         var timers = new slice<ж<time.Timer>>(batch);
-        foreach (var (n, _) in timers) {
+        foreach (var n in range(timers)) {
             timers[n] = time.NewTimer(armAt - time.Since(start));
         }
         time.Sleep(armAt - time.Since(start));

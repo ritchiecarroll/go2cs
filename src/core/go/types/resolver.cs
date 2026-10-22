@@ -559,7 +559,7 @@ internal static void collectObjects(this ж<Checker> Ꮡcheck) {
     }
 
     check.methods = new map<ж<TypeName>, slice<ж<Func>>>();
-    foreach (var (i, _) in methods) {
+    foreach (var i in range(methods)) {
         var m = Ꮡ(methods, i);
         // Determine the receiver base type and associate m with it.
         var (ptr, @base) = check.resolveBaseTypeName((~m).ptr, (~m).recv);
@@ -597,6 +597,7 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
     bool ptr = default!;
     ast.Expr @base = default!;
     slice<ж<ast.Ident>> tparams = default!;
+    var tparamsᴷ = new stackAppend<ж<ast.Ident>>(moves: true);
 
     // unpack receiver type
     @base = ast.Unparen(rtyp);
@@ -637,12 +638,13 @@ internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackR
                 if (par == nil) {
                     par = Ꮡ(new ast.Ident(NamePos: arg.Pos(), Name: "_"u8));
                 }
-                tparams = append(tparams, par);
+                tparams = append(tparamsᴷ, tparams, par);
             }
         }
         break;
     }}
 
+    tparams = move2heap(tparamsᴷ, tparams);
     return (ptr, @base, tparams);
 }
 
@@ -727,8 +729,8 @@ internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName(this ref Che
 // packageObjects typechecks all package objects, but not function bodies.
 internal static void packageObjects(this ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
-    var aliasListᴷ = new stackAppend<ж<TypeName>>();
-    var othersListᴷ = new stackAppend<Object>();
+    var aliasListᴷ = new stackAppend<ж<TypeName>>(moves: true);
+    var othersListᴷ = new stackAppend<Object>(moves: true);
 
     // add new methods to already type-checked types (from a prior Checker.Files call)
     foreach (var (_, obj) in check.objList) {
@@ -782,10 +784,12 @@ internal static void packageObjects(this ж<Checker> Ꮡcheck) {
             }
         }
         // phase 2: alias type declarations
+        aliasList = move2heap(aliasListᴷ, aliasList);
         foreach (var (_, obj) in aliasList) {
             Ꮡcheck.objDecl(new TypeNameжObject(obj));
         }
         // phase 3: all other declarations
+        othersList = move2heap(othersListᴷ, othersList);
         foreach (var (_, obj) in othersList) {
             Ꮡcheck.objDecl(obj);
         }

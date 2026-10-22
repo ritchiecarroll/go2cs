@@ -664,7 +664,7 @@ internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) {
             }
             b.pbLine(tagLocation_Line, funcID, (int64)frame.Line);
         }
-        foreach (var (i, _) in b.mem) {
+        foreach (var i in range(b.mem)) {
             if (b.mem[i].start <= addr && addr < b.mem[i].end || b.mem[i].fake) {
                 b.pb.uint64Opt(tagLocation_MappingID, (uint64)(i + 1));
 

@@ -285,7 +285,7 @@ internal static error addFieldInfo(reflectꓸType typ, ж<typeInfo> Ꮡtinfo, re
 
     slice<nint> conflicts = default!;
 Loop:
-    foreach (var (i, _) in tinfo.fields) {
+    foreach (var i in range(tinfo.fields)) {
         // First, figure all conflicts. Most working code will have none.
         var oldf = Ꮡ(tinfo.fields, i);
         if ((fieldFlags)((~oldf).flags & fMode) != (fieldFlags)(newf.flags & fMode)) {

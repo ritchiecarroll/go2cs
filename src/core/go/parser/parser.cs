@@ -1167,7 +1167,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
         // distribute parameter types (len(list) > 0)
         if (named == 0){
             // all unnamed => found names are type names
-            foreach (var (i, _) in list) {
+            foreach (var i in range(list)) {
                 var par = Ꮡ(list, i);
                 {
                     var typΔ1 = par.Value.name; if (typΔ1 != nil) {
@@ -1199,7 +1199,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
             // some named or we're in a type parameter list => all must be named
             ref var errPos = ref heap(new tokenꓸPos(), out var ᏑerrPos);              // left-most error position (or invalid)
             ast.Expr typΔ2 = default!;                // current type (from right to left)
-            foreach (var (i, _) in list) {
+            foreach (var i in range(list)) {
                 {
                     var par = Ꮡ(list, len(list) - i - 1); if ((~par).typ != default!){
                         typΔ2 = par.Value.typ;
@@ -1251,7 +1251,7 @@ internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parse
 
         // check use of ...
         var first = true; // only report first occurrence
-        foreach (var (i, _) in list) {
+        foreach (var i in range(list)) {
             var f = Ꮡ(list, i);
             {
                 var (t, _) = (~f).typ._<ж<ast.Ellipsis>>(ᐧ); if (t != nil && (!dddok || i + 1 < len(list))) {

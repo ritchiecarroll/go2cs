@@ -31,12 +31,12 @@ internal static void Main() {
         fmt.Println("num:", numΔ2);
     }
 
-    foreach (var (iΔ2, _) in nums) {
+    foreach (var iΔ2 in range(nums)) {
         fmt.Println("index:", iΔ2);
     }
 
     total = 0;
-    foreach ((_, _) in nums) {
+    foreach (var _ᴛ1 in range(nums)) {
         total++;
     }
     fmt.Println("Total:", total);
@@ -163,7 +163,7 @@ internal static void Main() {
     }
 
     total = 0;
-    foreach (var _ᴛ1 in range(3)) {
+    foreach (var _ᴛ2 in range(3)) {
         _ = len(kvs);
         total++;
     }
@@ -173,7 +173,7 @@ internal static void Main() {
     ch.ᐸꟷ(7);
     ch.ᐸꟷ(8);
     close(ch);
-    foreach (var _ᴛ2 in ch) {
+    foreach (var _ᴛ3 in ch) {
         _ = len(kvs);
         total++;
     }

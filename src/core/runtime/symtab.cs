@@ -861,7 +861,7 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
         // even if we get signaled in the middle of it.
         cache.Value.inUse++;
         if ((~cache).inUse == 1){
-            foreach (var (i, _) in (~cache).entries[ck]) {
+            foreach (var i in range((~cache).entries[ck])) {
                 // We check off first because we're more
                 // likely to have multiple entries with
                 // different offsets for the same targetpc

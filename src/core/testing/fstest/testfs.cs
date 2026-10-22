@@ -647,7 +647,7 @@ internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) {
 
                 // Modify the data and check it again. Modifying the
                 // returned byte slice should not affect the next call.
-                foreach (var (i, _) in data2Δ1) {
+                foreach (var i in range(data2Δ1)) {
                     data2Δ1[i]++;
                 }
                 (data2Δ1, errΔ2) = fsys.ReadFile(@file);

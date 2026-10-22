@@ -3756,7 +3756,7 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
     var names = rowsi.Columns();
 
     var list = new slice<ж<ColumnType>>(len(names));
-    foreach (var (i, _) in list) {
+    foreach (var i in range(list)) {
         var ci = Ꮡ(new ColumnType(
             name: names[i]
         ));

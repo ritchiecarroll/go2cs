@@ -154,7 +154,7 @@ internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr lim
     nint inUseIndex = Δp.inUse.findSucc(@base);
 
     // Walk up the radix tree and map summaries in as needed.
-    foreach (var (l, _) in Δp.summary) {
+    foreach (var l in range(Δp.summary)) {
         // Figure out what part of the summary array this new address space needs.
         var (needIdxBase, needIdxLimit) = addrRangeToSummaryRange(l, makeAddrRange(@base, limit));
 

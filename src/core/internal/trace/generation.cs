@@ -653,7 +653,7 @@ internal static error addExperimentalBatch(map<tracev2.Experiment, slice<Experim
 
 internal static void fixUpCPUSamples(slice<cpuSample> samples, frequency freq) {
     // Fix up the CPU sample timestamps.
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         var s = Ꮡ(samples, i);
         s.Value.time = freq.mul((timestamp)(uint64)(int64)(~s).time);
     }

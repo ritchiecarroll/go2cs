@@ -530,7 +530,7 @@ internal static void update(this ref pageAlloc Δp, uintptr @base, uintptr npage
         if (alloc){
             builtin.clear(whole);
         } else {
-            foreach (var (i, _) in whole) {
+            foreach (var i in range(whole)) {
                 whole[i] = freeChunkSum;
             }
         }

@@ -9,7 +9,7 @@ partial class main_package {
 internal static void bump(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.sslice();
 
-    foreach (var (i, _) in xs) {
+    foreach (var i in range(xs)) {
         xs[i] += 10;
     }
 }

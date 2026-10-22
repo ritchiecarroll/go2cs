@@ -94,7 +94,7 @@ public static error Normalize(this ref Profile p, ж<Profile> Ꮡpb) {
     }
 
     var normScale = new slice<float64>(len(baseVals));
-    foreach (var (i, _) in baseVals) {
+    foreach (var i in range(baseVals)) {
         if (srcVals[i] == 0){
             normScale[i] = 0.0D;
         } else {
@@ -485,7 +485,7 @@ internal static error compatible(this ref Profile p, ж<Profile> Ꮡpb) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
 
-    foreach (var (i, _) in p.SampleType) {
+    foreach (var i in range(p.SampleType)) {
         if (!equalValueType(ref (p.SampleType[i]).DerefOrNull(), ref (pb.SampleType[i]).DerefOrNull())) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }

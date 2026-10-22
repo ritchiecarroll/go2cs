@@ -879,6 +879,8 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
 
 // goLookupNS returns the NS records for name.
 internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+    var nssᴷ = new stackAppend<ж<NS>>(moves: true);
+
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeNS, nil);
     if (err != default!) {
@@ -917,8 +919,9 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
                 Server: server
             ))));
         }
-        nss = append(nss, Ꮡ(new NS(Host: ns.NS.String())));
+        nss = append(nssᴷ, nss, Ꮡ(new NS(Host: ns.NS.String())));
     }
+    nss = move2heap(nssᴷ, nss);
     return (nss, default!);
 }
 

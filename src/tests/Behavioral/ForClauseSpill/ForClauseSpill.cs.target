@@ -20,7 +20,7 @@ internal static nint must(nint v, bool ok) {
 }
 
 internal static void Main() {
-    var funcsᴷ = new stackAppend<Func<nint>>();
+    var funcsᴷ = new stackAppend<Func<nint>>(moves: true);
 
     n = 0;
     nint count = 0;
@@ -95,6 +95,7 @@ break_outer:;
         var (ᴛ15, ᴛ16) = next();
         iᴛ1 = must(ᴛ15, ᴛ16);
     }
+    funcs = move2heap(funcsᴷ, funcs);
     foreach (var (_, f) in funcs) {
         fmt.Print(f(), " ");
     }

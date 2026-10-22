@@ -155,7 +155,7 @@ internal static void bench(ж<testing.B> Ꮡb, color.Model dcm, color.Model scm,
         var yy = new slice<uint8>(srcw * srch);
         var cb = new slice<uint8>(srcw * srch);
         var cr = new slice<uint8>(srcw * srch);
-        foreach (var (i, _) in yy) {
+        foreach (var i in range(yy)) {
             yy[i] = (uint8)(3 * i % 0x100);
             cb[i] = (uint8)(5 * i % 0x100);
             cr[i] = (uint8)(7 * i % 0x100);

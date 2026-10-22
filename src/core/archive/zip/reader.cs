@@ -1107,7 +1107,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint cou
         return (default!, io.EOF);
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var (i, _) in list) {
+    foreach (var i in range(list)) {
         var (s, err) = Ꮡ(d.files, d.offset + i).stat();
         if (err != default!){
             return (default!, err);

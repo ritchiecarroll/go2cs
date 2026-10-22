@@ -702,13 +702,18 @@ internal static void releasem(ref m mp) {
 //
 //go:linkname reflect_typelinks reflect.typelinks
 internal static (slice<@unsafe.Pointer>, slice<slice<int32>>) reflect_typelinks() {
+    var sectionsᴷ = new stackAppend<@unsafe.Pointer>(moves: true);
+    var retᴷ = new stackAppend<slice<int32>>(moves: true);
+
     var modules = activeModules();
     var sections = new @unsafe.Pointer[]{(@unsafe.Pointer)(~modules[0]).types}.slice();
     var ret = new slice<int32>[]{(~modules[0]).typelinks}.slice();
     foreach (var (_, md) in modules[1..]) {
-        sections = append(sections, (@unsafe.Pointer)(~md).types);
-        ret = append(ret, (~md).typelinks);
+        sections = append(sectionsᴷ, sections, (@unsafe.Pointer)(~md).types);
+        ret = append(retᴷ, ret, (~md).typelinks);
     }
+    sections = move2heap(sectionsᴷ, sections);
+    ret = move2heap(retᴷ, ret);
     return (sections, ret);
 }
 

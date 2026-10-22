@@ -40,7 +40,7 @@ internal static void initᴛarchTest() { archTest = new archiveTest[]{
 }.slice(); }
 
 public static void TestOpenArchive(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in archTest) {
+    foreach (var i in range(archTest)) {
         var tt = Ꮡ(archTest, i);
         var (arch, err) = OpenArchive((~tt).@file);
         if (err != default!) {

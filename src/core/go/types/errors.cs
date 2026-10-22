@@ -105,7 +105,7 @@ internal static @string msg(this ref error_ err) {
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    foreach (var (i, _) in err.desc) {
+    foreach (var i in range(err.desc)) {
         var p = Ꮡ(err.desc, i);
         if (i > 0) {
             fmt.Fprint(new strings_BuilderжWriter(Ꮡbuf), (@string)"\n\t"u8);
@@ -161,7 +161,7 @@ internal static void report(this ref error_ err) {
     }
 
     if (multiError){
-        foreach (var (i, _) in err.desc) {
+        foreach (var i in range(err.desc)) {
             var p = Ꮡ(err.desc, i);
             check.handleError(i, (~p).posn, err.code, (~p).msg, err.soft);
         }

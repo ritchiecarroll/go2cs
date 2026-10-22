@@ -188,7 +188,7 @@ internal static bool match(this ж<machine> Ꮡm, input i, nint pos) {
         return false;
     }
     m.matched = false;
-    foreach (var (iΔ1, _) in m.matchcap) {
+    foreach (var iΔ1 in range(m.matchcap)) {
         m.matchcap[iΔ1] = -1;
     }
     var (runq, nextq) = (Ꮡm.of(machine.Ꮡq0), Ꮡm.of(machine.Ꮡq1));
@@ -443,7 +443,7 @@ internal static slice<nint> doOnePass(this ж<Regexp> Ꮡre, io.RuneReader ir, s
     }
 
     var matched = false;
-    foreach (var (iΔ1, _) in (~m).matchcap) {
+    foreach (var iΔ1 in range((~m).matchcap)) {
         m.Value.matchcap[iΔ1] = -1;
     }
 

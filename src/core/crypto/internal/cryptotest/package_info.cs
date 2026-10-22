@@ -82,7 +82,7 @@ using static go.crypto.@internal.cryptotest_package;
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/fips140.go", "fips140.cs", "AAsYgoKAgg==")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/hash.go", "hash.cs", "ABYsooKClKaCgoI=")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/implementations.go", "implementations.cs", "ABYoxIKCpoKCgqaApIKAgpSmgpT+gtaCgoKUlLa2", "33-33:1;39-47:2")]
-[assembly: go.GoPositionMap("crypto/internal/cryptotest/methods.go", "methods.cs", "AA0sAAoCgoKClIKClLiCgoKmgpSCgqaCgoKClIK4")]
+[assembly: go.GoPositionMap("crypto/internal/cryptotest/methods.go", "methods.cs", "AA0sAAoCgoKClIKClLiigoKmgpSCgqaCgoKClIK4")]
 [assembly: go.GoPositionMap("crypto/internal/cryptotest/stream.go", "stream.cs", "ABEkAA4YpIKmuISCgpSClIKUgoKCAAcQhIKClIKmgpSmgoKC7oKUgoKUgoK4goKClISylIKC3IKUlJSCuIKCyoKUgoKUgpSioKSC3IKUgpSCgqakkpKAtoKCgLaCgoDagpSCgqaUgoKUlKaCgoKClJSCAAkUxIKUgoKCkLaCgoKUyIKUgpQ=", "32-87:1;40-59:1.1;43-57:1.1.1;63-86:1.2;66-84:1.2.1;89-100:2;102-118:3;109-116:3.1;120-137:4;139-157:5;149-155:5.1;150-150:5.1.1;159-187:6;170-185:6.1;174-174:6.1.1;179-179:6.1.2;184-184:6.1.3;189-220:7;229-236:1;235-235:1.1;238-244:2;243-243:2.1")]
 // </GoSourcePositionMaps>
 

@@ -144,6 +144,8 @@ internal static (@string, error) nextLine(this ref TextReader r) {
 internal static slice<@string> frameFields = new @string[]{"pc"u8, "func"u8, "file"u8, "line"u8}.slice();
 
 internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names) {
+    var argsᴷ = new stackAppend<uint64>(moves: true);
+
     slice<uint64> args = default!;
     foreach (var (_, name) in names) {
         var (arg, value, rest, err) = readArg(s);
@@ -153,7 +155,7 @@ internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names)
         if (arg != name) {
             return (default!, fmt.Errorf("expected argument %q, but got %q"u8, name, arg));
         }
-        args = append(args, value);
+        args = append(argsᴷ, args, value);
         s = rest;
     }
     foreach (var (_, r) in s) {
@@ -161,6 +163,7 @@ internal static (slice<uint64>, error) readArgs(@string s, slice<@string> names)
             return (default!, fmt.Errorf("encountered unexpected non-space at the end of an event: %q"u8, s));
         }
     }
+    args = move2heap(argsᴷ, args);
     return (args, default!);
 }
 

@@ -219,10 +219,10 @@ public static ж<HMAC> New<H>(Func<H> h, slice<byte> key)
     }
     copy((~hm).ipad, key);
     copy((~hm).opad, key);
-    foreach (var (i, _) in (~hm).ipad) {
+    foreach (var i in range((~hm).ipad)) {
         hm.Value.ipad[i] ^= (byte)(0x36);
     }
-    foreach (var (i, _) in (~hm).opad) {
+    foreach (var i in range((~hm).opad)) {
         hm.Value.opad[i] ^= (byte)(0x5c);
     }
     (~hm).inner.Write((~hm).ipad);

@@ -11,7 +11,7 @@ internal static nint readInto(ж<uint16> Ꮡbuf, nint toread, slice<uint16> src)
 
 internal static void bumpAll(ж<byte> Ꮡp) {
     var a = array<byte>.AliasPointer(Ꮡp, 4);
-    foreach (var (i, _) in a.Value) {
+    foreach (var i in range(a)) {
         a.Value[i]++;
     }
 }
@@ -49,7 +49,7 @@ internal static void Main() {
     fmt.Println("array length:", 4, len(p.Value));
 
     ref var raw = ref heap(new array<byte>(8), out var Ꮡraw);
-    foreach (var (i, _) in raw) {
+    foreach (var i in range(raw)) {
         raw[i] = (byte)i;
     }
     bumpAll(Ꮡraw.at<byte>(3));

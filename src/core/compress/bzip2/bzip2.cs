@@ -322,7 +322,7 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
     // The tree indexes are move-to-front transformed and stored as unary
     // numbers.
     var mtfTreeDecoder = newMTFDecoderWithRange(numHuffmanTrees);
-    foreach (var (i, _) in treeIndexes) {
+    foreach (var i in range(treeIndexes)) {
         nint c = 0;
         while (ᐧ) {
             nint inc = br.ReadBits(1);
@@ -354,10 +354,10 @@ internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) {
 
     // Now we decode the arrays of code-lengths for each tree.
     var lengths = new slice<uint8>(numSymbols);
-    foreach (var (i, _) in huffmanTrees) {
+    foreach (var i in range(huffmanTrees)) {
         // The code lengths are delta encoded from a 5-bit base value.
         nint length = br.ReadBits(5);
-        foreach (var (j, _) in lengths) {
+        foreach (var j in range(lengths)) {
             while (ᐧ) {
                 if (length < 1 || length > 20) {
                     return ((StructuralError)(@string)huffmanLengthOutOfRangeˢ);
@@ -501,7 +501,7 @@ internal static uint32 inverseBWT(slice<uint32> tt, nuint origPtr, slice<nuint> 
         c[i] = sum - c[i];
     }
 
-    foreach (var (i, _) in tt) {
+    foreach (var i in range(tt)) {
         var b = tt[i] & 0xff;
         tt[c[b]] |= (uint32)(((uint32)i << 8));
         c[b]++;
@@ -516,7 +516,7 @@ internal static array<uint32> crctab = new(256);
 
 [GoInit] internal static void init() {
     const uint32 poly = 0x04C11DB7;
-    foreach (var (i, _) in crctab) {
+    foreach (var i in range(crctab)) {
         var crc = (uint32)i << 24;
         for (nint j = 0; j < 8; j++) {
             if ((crc & 0x80000000U) != 0){

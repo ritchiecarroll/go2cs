@@ -331,7 +331,7 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
         throw panic("crypto/ecdh: internal error: isLess input too large");
     }
     var (bufA, bufB) = (new slice<byte>(72), new slice<byte>(72));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         (bufA[i], bufB[i]) = (a[len(a) - i - 1], b[len(b) - i - 1]);
     }
 

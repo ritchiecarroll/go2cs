@@ -93,12 +93,12 @@ internal static void testEncrypt(ж<testing.T> Ꮡt, @string desc, ж<global::go
 public static void TestGolden(ж<testing.T> Ꮡt) {
     foreach (var (gi, g) in golden) {
         var data = new slice<byte>(len(g.keystream));
-        foreach (var (i, _) in data) {
+        foreach (var i in range(data)) {
             data[i] = (byte)i;
         }
 
         var expect = new slice<byte>(len(g.keystream));
-        foreach (var (i, _) in expect) {
+        foreach (var i in range(expect)) {
             expect[i] = (byte)((byte)i ^ g.keystream[i]);
         }
 
@@ -126,7 +126,7 @@ public static void TestBlock(ж<testing.T> Ꮡt) {
     var (c1a, _) = NewCipher(golden[0].key);
     var (c1b, _) = NewCipher(golden[1].key);
     var data1 = new slice<byte>((1 << 20));
-    foreach (var (i, _) in data1) {
+    foreach (var i in range(data1)) {
         c1a.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
         c1b.XORKeyStream(data1.slice(i, i + 1), data1.slice(i, i + 1));
     }

@@ -155,6 +155,57 @@ func TestAnchorReadsPastConverterScaffolding(t *testing.T) {
 	}
 }
 
+// move2heapFindings reads testdata/move2heap's rendering: the classes a move line could move.
+func move2heapFindings(t *testing.T, rendering string) map[string]int {
+	t.Helper()
+
+	pairs := FindPairs("testdata/move2heap/"+rendering, "testdata/move2heap/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%s: %d pairs found, want 1 (m2h/m2h.cs against m2h/m2h.go)", rendering, len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatalf("%s: %v", rendering, err)
+	}
+
+	// Vacuity: both functions are read, or no class could move.
+	if n := r.r.body["functions"]; n != 2 {
+		t.Fatalf("%s: %d function bodies read, want 2", rendering, n)
+	}
+
+	got := map[string]int{}
+
+	for k, n := range r.Counts() {
+		if n > 0 && (k == "body:extra:unexplained" || k == "body:go-blank-cs-none" || strings.HasPrefix(k, "misplaced:")) {
+			got[k] = n
+		}
+	}
+
+	return got
+}
+
+// Go 1.26's `s = move2heap(s)` is part of the statement it precedes (cmd/compile/internal/slice inserts it there),
+// and the converter writes it as its own line, `x = move2heap(xᴷ, x);`, ahead of that statement's translation:
+// one per variable that escapes there. Like a capture copy or a bare heap box, it is never a statement of Go's, so
+// a Go blank line above the statement sits above the move lines, and a comment above the statement sits above
+// them too. `good` is the converter's emission: a blank before a two-slice return, and a comment before a range
+// over a moved slice whose first identifier the move line does not carry. `bad` drops that blank and puts the
+// comment above the wrong statement, which must still read as a missing blank and a misplaced comment.
+func TestMove2heapLinesAreTheStatementsLowering(t *testing.T) {
+	if got := move2heapFindings(t, "good"); len(got) != 0 {
+		t.Errorf("good: %v, want no defect", got)
+	}
+
+	want := map[string]int{"body:go-blank-cs-none": 1, "misplaced:free-stmt/anchor-differs": 1}
+
+	if got := move2heapFindings(t, "bad"); !maps.Equal(got, want) {
+		t.Errorf("bad: %v, want %v", got, want)
+	}
+}
+
 // preludeBlanks reads testdata/prelude's rendering: its body blank-line classes, and the separators read.
 func preludeBlanks(t *testing.T, rendering string) (map[string]int, int) {
 	t.Helper()

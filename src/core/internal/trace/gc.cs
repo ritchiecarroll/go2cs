@@ -68,6 +68,7 @@ internal partial struct MutatorUtilizationV2_procsCount /*dyn*/ {
 // If the UtilPerProc flag is not given, this always returns a single
 // utilization function. Otherwise, it returns one function per P.
 public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> events, UtilFlags flags) {
+    var outᴷ = new stackAppend<slice<MutatorUtil>>(moves: true);
     var psᴷ = new stackAppend<MutatorUtilizationV2_perP>();
     var procsᴷ = new stackAppend<MutatorUtilizationV2_procsCount>();
 
@@ -87,7 +88,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
 
     // Iterate through the trace, tracking mutator utilization.
     ж<ΔEvent> lastEv = default!;
-    foreach (var (i, _) in events) {
+    foreach (var i in range(events)) {
         var ev = Ꮡ(events, i);
         lastEv = ev;
 
@@ -117,7 +118,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
                     nint series = 0;
                     if ((UtilFlags)(flags & UtilPerProc) != 0 || len(@out) == 0) {
                         series = len(@out);
-                        @out = builtin.append(@out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
+                        @out = builtin.append(outᴷ, @out, new MutatorUtil[]{new((int64)(~ev).Time(), 1D)}.slice());
                     }
                     ps = builtin.append(psᴷ, ps, new MutatorUtilizationV2_perP(series: series));
                 }
@@ -277,7 +278,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             if (stw > 0){
                 gcPs = len(ps);
             } else {
-                foreach (var (iΔ1, _) in ps) {
+                foreach (var iΔ1 in range(ps)) {
                     if (ps[iΔ1].gc > 0) {
                         gcPs++;
                     }
@@ -290,7 +291,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             @out[0] = addUtil(@out[0], muΔ1);
         } else {
             // Check for per-P utilization changes.
-            foreach (var (iΔ2, _) in ps) {
+            foreach (var iΔ2 in range(ps)) {
                 var p = Ꮡ(ps, iΔ2);
                 var util = 1.0D;
                 if (stw > 0 || (~p).gc > 0) {
@@ -311,9 +312,10 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
     // shouldn't matter since no window should extend beyond this,
     // but using 0 is symmetric with the start of the trace.
     var mu = new MutatorUtil((int64)(~lastEv).Time(), 0D);
-    foreach (var (i, _) in ps) {
+    foreach (var i in range(ps)) {
         @out[ps[i].series] = addUtil(@out[ps[i].series], mu);
     }
+    @out = move2heap(outᴷ, @out);
     return @out;
 }
 
@@ -424,7 +426,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
     ref var s = ref heap<mmuSeries>(out var Ꮡs);
     s = new mmuSeries(util, sums, bands, bandDur);
     var leftSum = new integrator(Ꮡs, 0);
-    foreach (var (i, _) in bands) {
+    foreach (var i in range(bands)) {
         var (startTime, endTime) = s.bandTime(i);
         var cumUtil = leftSum.advance(startTime);
         nint predIdx = leftSum.pos;
@@ -706,7 +708,7 @@ public static slice<float64> MUD(this ref MMUCurve c, time.Duration window, slic
 
     // Evaluate the quantiles on the accumulated MUD.
     var @out = new slice<float64>(len(quantiles));
-    foreach (var (i, _) in @out) {
+    foreach (var i in range(@out)) {
         var (mu, _) = acc.mud.invCumulativeSum((float64)duration * quantiles[i]);
         if (math.IsNaN(mu)) {
             // There are a few legitimate ways this can
@@ -788,7 +790,7 @@ internal static slice<bandUtil> mkBandUtil(this ref mmuSeries c, nint series, ti
         nUtil = 0;
     }
     var bandU = new slice<bandUtil>(nUtil);
-    foreach (var (i, _) in bandU) {
+    foreach (var i in range(bandU)) {
         // To compute the worst-case MU, we assume the minimum
         // for any bands that are only partially overlapped by
         // some window and the mean for any bands that are

@@ -249,7 +249,7 @@ public static (ж<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string blo
 }
 
 internal static ж<rfc1423Algo> cipherByName(@string name) {
-    foreach (var (i, _) in rfc1423Algos) {
+    foreach (var i in range(rfc1423Algos)) {
         var alg = Ꮡ(rfc1423Algos, i);
         if ((~alg).name == name) {
             return alg;
@@ -259,7 +259,7 @@ internal static ж<rfc1423Algo> cipherByName(@string name) {
 }
 
 internal static ж<rfc1423Algo> cipherByKey(PEMCipher key) {
-    foreach (var (i, _) in rfc1423Algos) {
+    foreach (var i in range(rfc1423Algos)) {
         var alg = Ꮡ(rfc1423Algos, i);
         if ((~alg).cipher == key) {
             return alg;

@@ -286,11 +286,11 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
         if (n > 0) {
             result = new slice<nint>(n);
             if (matches.int32 != default!){
-                foreach (var (i, _) in result) {
+                foreach (var i in range(result)) {
                     result[i] = (nint)matches.int32[i];
                 }
             } else {
-                foreach (var (i, _) in result) {
+                foreach (var i in range(result)) {
                     result[i] = (nint)matches.int64[i];
                 }
             }
