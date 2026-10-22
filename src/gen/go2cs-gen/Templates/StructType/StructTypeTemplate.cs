@@ -182,7 +182,7 @@ internal class StructTypeTemplate : TemplateBase
             : $"\r\n{TypeElemIndent}public override int GetHashCode() => {HashCode};\r\n{TypeElemIndent}";
 
     // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless
-    // constructor, which runs the field initializers and builds the embed boxes, as golib's
+    // constructor, which runs the field initializers and builds the embed fields, as golib's
     // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
     // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
     // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. The
@@ -195,7 +195,7 @@ internal class StructTypeTemplate : TemplateBase
         StructName.Contains('<') || !IsNeedy ? null : StructName;
 
     // The rule NeedsConstruction applies to a FIELD of this type, asked of this struct's own members:
-    // a promoted embed (its box is constructor-built), a fixed-size array field (`default` skips its
+    // a promoted embed (each is constructor-built), a fixed-size array field (`default` skips its
     // `= new(N)` initializer), or a value field whose own type needs construction.
     private bool IsNeedy => StructMembers.Any(member =>
         GetSimpleName(member.memberName) != "_" &&
@@ -2136,8 +2136,8 @@ internal class StructTypeTemplate : TemplateBase
             // PLAIN scalar/reference/slice/map members need no assignment — re-assigning `default!` would
             // NULL an array field's `= new(N)` backing (a `[N]T` field of `S{}` NREd on first index).
             // AppendZeroValueInitializers assigns only what `default` leaves broken: the promoted-embed
-            // boxes (readonly `ж<T>` fields with no initializer) and any plain struct-typed field whose
-            // own type needs construction (see AppendZeroValueInitializers).
+            // fields (a value embed by its own NilType ctor, a pointer embed as a nil box) and any plain
+            // struct-typed field whose own type needs construction (see AppendZeroValueInitializers).
             result.AppendLine($"public {NonGenericStructName}(NilType _)");
             result.AppendLine($"{TypeElemIndent}{{");
             AppendZeroValueInitializers(result);
@@ -2149,7 +2149,7 @@ internal class StructTypeTemplate : TemplateBase
             // constructor, which zeroes every field and SKIPS field initializers — leaving an array field's
             // backing null, so indexing/`len` on it throws NullReferenceException. (C# 11 auto-defaults any
             // field lacking an initializer; a slice/map/etc. field — which has no `= new(N)` initializer —
-            // stays its nil zero value, matching Go.) The promoted-embed boxes are allocated here too, so
+            // stays its nil zero value, matching Go.) The promoted-embed fields are built here too, so
             // `new S()` — the zero value golib's `@new<T>()`/`heap()` materialize — is fully usable.
             result.AppendLine();
             result.AppendLine($"{TypeElemIndent}public {NonGenericStructName}()");
@@ -2181,13 +2181,13 @@ internal class StructTypeTemplate : TemplateBase
     // Builds the zero value that golib's `@new<T>()`/`heap()` materialize into a FULLY USABLE
     // instance — shared by the NilType and parameterless constructors (the parameterized
     // constructors box/assign their incoming member values instead). Two things need it:
-    //   (1) every promoted-embed box — a readonly `ж<T>` field with no initializer, so it exists
-    //       only when a constructor allocates it; and
+    //   (1) every promoted-embed field — a value embed by its own NilType constructor, a pointer
+    //       embed as a nil `ж<T>` box rather than `default`'s raw null, so a deref panics as Go does; and
     //   (2) every plain (non-embed) struct-typed FIELD whose type itself needs construction — its
-    //       own promoted-embed box or fixed-array (`[N]T`) backing, at any depth. C# implicitly
+    //       own promoted embeds or fixed-array (`[N]T`) backing, at any depth. C# implicitly
     //       zeroes such a field to `default(FieldType)`, whose nested box/backing is null, so the
     //       first touch NREs (`@new<pp>()` — pp has a field `fmt`, and `fmt` embeds `fmtFlags`
-    //       whose box is null → clearflags). Constructing it via its own NilType constructor
+    //       when the embed was still a box → clearflags). Constructing it via its own NilType constructor
     //       recursively initializes its needy members, so a single-level `new FieldType(nil)` here
     //       fixes every depth. Reference fields (pointers/interfaces/delegates) keep their nil zero
     //       value (correct — a nil `*T` matches Go); a fixed-array FIELD self-initializes via its
@@ -2207,7 +2207,7 @@ internal class StructTypeTemplate : TemplateBase
             if (isPromotedStruct)
             {
                 result.Append($"{TypeElemIndent}    ");
-                // A keyword-named embed composes the box field from the UNESCAPED member name
+                // A keyword-named embed composes a legacy backing field from the UNESCAPED member name
                 // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
                 result.AppendLine($"{EmbedStorage(memberName)} = new {PointerConstructedTypeName(typeName)}(nil);");
                 continue;
@@ -2244,7 +2244,7 @@ internal class StructTypeTemplate : TemplateBase
     private readonly Dictionary<string, bool> m_needsConstructionCache = new(StringComparer.Ordinal);
 
     // Reports whether a value struct's zero value (`default(T)`) is broken — i.e. it has a
-    // promoted-embed box (constructor-allocated) or a fixed-array field (`= new(N)` initializer
+    // promoted embed (constructor-built) or a fixed-array field (`= new(N)` initializer
     // that `default` skips), directly or through a nested value-struct field — so a field of this
     // type must be constructed rather than left `default`. Only CONVERTER-GENERATED structs
     // (resolvable by syntax in this compilation) qualify: a `true` result guarantees the type has
