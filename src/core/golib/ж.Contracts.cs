@@ -309,9 +309,16 @@ public interface INilPointer
 /// subsumption test without this guard would admit it
 /// (<see cref="GoReflect"/>'s marshalling sites).
 /// </para>
+/// <para>
+/// Its one member is the box a pointer was minted from, which golib's header boxes read to resolve a stored
+/// <c>Data</c> word back to the storage it names (<see cref="SliceHeaderBox{T, TDst}"/>, <see cref="StringHeaderBox{TDst}"/>).
+/// </para>
 /// </remarks>
 public interface IUnsafePointer
 {
+    /// <summary>The managed box this pointer was minted from, when there is one; null for numeric and native mints.</summary>
+    /// <remarks>unsafe.Pointer's own public property implements it; the default serves a probe type that carries none.</remarks>
+    object? RetainedSource => null;
 }
 
 /// <summary>

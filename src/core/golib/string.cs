@@ -336,6 +336,13 @@ public readonly struct @string :
         return new slice<byte>(m_value ?? [], m_offset, m_offset + m_length);
     }
 
+    // Whether two strings are the same (backing, offset, length) window: Go's two header words compared as words, which
+    // the string header box (StringHeaderBox) uses to notice that the variable under a held header has moved.
+    internal bool SameWindowAs(in @string other)
+    {
+        return ReferenceEquals(m_value, other.m_value) && m_offset == other.m_offset && m_length == other.m_length;
+    }
+
     // No bound is a sentinel (S-c R1-A): the callers pass every bound explicitly.
     internal ReadOnlySpan<byte> SliceBounds(nint low, nint high, nint max)
     {
