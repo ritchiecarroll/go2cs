@@ -411,6 +411,15 @@ func TestLazyPackageVarRefusesByName(t *testing.T) {
 			"its address is taken"},
 		{"exported constant dep", map[string]string{"table.go": "package main\n\nvar Max = 10\n\nvar table = [1]int{Max}\n"},
 			"it reads the exported var Max, which an importer can assign"},
+		// A pointer-receiver method called on the var takes its address implicitly (io's blackHolePool.Get()): the call
+		// needs the var's box, and the method can change it.
+		{"pointer method called", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() { table.Bump() }\n"},
+			"its address is taken"},
+		{"pointer method value", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() func() { return table.Bump }\n"},
+			"its address is taken"},
+		// Slicing an array var aliases its storage, so a write through the slice changes what a reader copies.
+		{"dep sliced", map[string]string{"table.go": "package main\n\nvar base = [2]int{1, 2}\n\nfunc g() []int { return base[:] }\n\nvar table = [1][2]int{base}\n"},
+			"it copies the var base, whose storage a slice aliases"},
 	}
 
 	for _, c := range cases {

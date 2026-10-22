@@ -84,6 +84,7 @@ type lazyCandidate struct {
 	constant bool   // a constant-valued initializer: eligible to READ, never worth a holder (its emission arm is the constant one)
 	reason   string // why it is ineligible; "" while eligible
 	deps     []*types.Var
+	copied   map[*types.Var]bool // the deps it reads by value, not as a slice operand
 	resolved bool
 	visiting bool
 }
@@ -101,7 +102,7 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 	}
 
 	scope := pkg.Scope()
-	mutated, addressed := packageVarMutations(fset, pkg, info, syntax)
+	mutated, addressed, aliased := packageVarMutations(fset, pkg, info, syntax)
 	candidates := map[*types.Var]*lazyCandidate{}
 
 	for _, initializer := range info.InitOrder {
@@ -120,11 +121,21 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 			continue
 		}
 
-		candidate := &lazyCandidate{obj: obj}
+		candidate := &lazyCandidate{obj: obj, copied: map[*types.Var]bool{}}
+		sliced := map[ast.Expr]bool{}
 
 		ast.Inspect(initializer.Rhs, func(n ast.Node) bool {
 			if n != nil {
 				candidate.nodes++
+			}
+
+			switch node := n.(type) {
+			case *ast.SliceExpr:
+				sliced[ast.Unparen(node.X)] = true
+			case *ast.Ident:
+				if v, ok := info.Uses[node].(*types.Var); ok && v.Parent() == scope && !sliced[node] {
+					candidate.copied[v] = true
+				}
 			}
 
 			return true
@@ -142,7 +153,9 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 			candidate.reason = "its declaration is hand-owned"
 		}
 
-		if candidate.reason == "" && addressed[obj] {
+		// The converter's own box set (collectAddressedGlobals) also holds the vars a pointer-receiver or capture-mode call
+		// addresses implicitly (io's blackHolePool.Get()); its use sites name the box.
+		if candidate.reason == "" && (addressed[obj] || packageAddressedGlobals[obj]) {
 			candidate.reason = "its address is taken, and the holder does not carry an addressable box yet"
 		}
 
@@ -168,8 +181,13 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 				break
 			}
 
-			if mutated[dep] {
+			if mutated[dep] || packageAddressedGlobals[dep] {
 				candidate.reason = fmt.Sprintf("it reads the var %s, which the package or its tests assign or take the address of", dep.Name())
+				break
+			}
+
+			if aliased[dep] && candidate.copied[dep] {
+				candidate.reason = fmt.Sprintf("it copies the var %s, whose storage a slice aliases", dep.Name())
 				break
 			}
 
@@ -383,9 +401,10 @@ func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr,
 // packageVarMutations finds the package vars the package ASSIGNS (assignment, increment, range assignment) or takes the
 // address of, over its typed syntax and over its internal _test.go files, which -stdlib does not load: those are parsed
 // here and matched by NAME, which can only refuse more (a local shadowing a package var's name reads as the var).
-func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) (mutated, addressed map[*types.Var]bool) {
+func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) (mutated, addressed, aliased map[*types.Var]bool) {
 	mutated = map[*types.Var]bool{}
 	addressed = map[*types.Var]bool{}
+	aliased = map[*types.Var]bool{}
 	scope := pkg.Scope()
 
 	byName := func(ident *ast.Ident) *types.Var {
@@ -403,7 +422,8 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 		return v
 	}
 
-	visit := func(file *ast.File, resolve func(*ast.Ident) *types.Var) {
+	// typeOf is the typed pass's info.TypeOf; nil for a test file parsed untyped, where only a bare var name has a type.
+	visit := func(file *ast.File, resolve func(*ast.Ident) *types.Var, typeOf func(ast.Expr) types.Type) {
 		root := func(expr ast.Expr) *types.Var {
 			for {
 				switch node := expr.(type) {
@@ -435,6 +455,20 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 			}
 		}
 
+		operandType := func(expr ast.Expr) types.Type {
+			if typeOf != nil {
+				return typeOf(expr)
+			}
+
+			if ident, ok := expr.(*ast.Ident); ok {
+				if v := resolve(ident); v != nil {
+					return v.Type()
+				}
+			}
+
+			return nil
+		}
+
 		ast.Inspect(file, func(n ast.Node) bool {
 			switch node := n.(type) {
 			case *ast.AssignStmt:
@@ -457,6 +491,33 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 				if node.Op == token.AND {
 					mark(node.X, true)
 				}
+			case *ast.SliceExpr:
+				// Slicing an array aliases its storage: a write through the slice changes the array, so a reader that copies it
+				// copies whatever the slice has written by then.
+				if t := operandType(node.X); t != nil {
+					if _, isArray := t.Underlying().(*types.Array); isArray {
+						if v := root(node.X); v != nil {
+							aliased[v] = true
+						}
+					}
+				}
+			case *ast.SelectorExpr:
+				// A pointer-receiver method called or taken as a value on an addressable operand takes its address.
+				if typeOf == nil {
+					break
+				}
+
+				if selection := info.Selections[node]; selection != nil && selection.Kind() == types.MethodVal {
+					if signature, ok := selection.Obj().Type().(*types.Signature); ok && signature.Recv() != nil {
+						_, pointerMethod := signature.Recv().Type().(*types.Pointer)
+
+						if t := typeOf(node.X); pointerMethod && t != nil {
+							if _, viaPointer := t.Underlying().(*types.Pointer); !viaPointer {
+								mark(node.X, true)
+							}
+						}
+					}
+				}
 			}
 
 			return true
@@ -470,7 +531,7 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 		name := fset.Position(file.Pos()).Filename
 		seen[filepath.Clean(name)] = true
 		dirs[filepath.Dir(name)] = true
-		visit(file, typed)
+		visit(file, typed, info.TypeOf)
 	}
 
 	for dir := range dirs {
@@ -495,11 +556,11 @@ func packageVarMutations(fset *token.FileSet, pkg *types.Package, info *types.In
 				continue
 			}
 
-			visit(file, byName)
+			visit(file, byName, nil)
 		}
 	}
 
-	return mutated, addressed
+	return mutated, addressed, aliased
 }
 
 // writeLazyPackageVar writes a lazy var as ONE line: today's exact eager declaration inside its marked holder,
