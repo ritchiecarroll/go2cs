@@ -318,6 +318,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\psQuestionMarkVariable_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\publishedCounterReset_test.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\repoguard\retiredHandOwns_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)lazyPackageVarOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)lazyPackageVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeNames.go" />
     <None Include="$(MSBuildThisFileDirectory)liftedTypeParams.go" />
     <None Include="$(MSBuildThisFileDirectory)lineEndingSeams_test.go" />

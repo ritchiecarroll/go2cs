@@ -9,8 +9,6 @@ namespace go;
 partial class runtime_package {
     static runtime_package() {
         initᴛitabTable();
-        initᴛmallocScanTable();
-        initᴛmallocNoScanTable();
         initᴛchansendpc();
         initᴛchanrecvpc();
     }
