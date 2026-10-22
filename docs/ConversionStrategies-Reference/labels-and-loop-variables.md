@@ -279,7 +279,8 @@ Guarded by the `RangeOverIntegerTypes` behavioral test (blank-key `uintptr`, `ui
 ## An index-only range over a slice or array reads no element
 <!-- src/go2cs/visitRangeStmt.go:744 `} else if (isSlice || isArray) && valExpr == "_" {`;
 src/core/golib/RangeIndexOnly.cs:38 `range<T>(slice<T> s) => range(s.Length)`, :50 `range<T>(sslice<T> s)`,
-:58 `range<T>(array<T> a)`, :71 `range<TArray>(ж<TArray> p)`, :86 `range<TSeq>(in TSeq x) where TSeq : IArray`. -->
+:58 `range<T>(array<T> a)`, :72 `range<TArray>(ж<TArray> p)`, :82 `range<TArray>(ж<TArray> p, nint length)`,
+:97 `range<TSeq>(in TSeq x) where TSeq : IArray`. -->
 Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
 loads no element. The converter emits golib's index enumerator for it, `foreach (var i in range(s))`, when the
 operand is a slice, an array, a pointer to an array, a named slice or array type, a type parameter whose core type
@@ -300,7 +301,7 @@ Each `range` overload in golib's `RangeIndexOnly.cs` reads the operand's length 
 sequence or a type parameter binds the constrained `range<TSeq>(in TSeq)`, which reads a struct operand without
 boxing it. The `sslice<T>` overload has to exist because `sslice<T>` is a ref struct: without it C# reaches the
 integer `range<T>(T)` and refuses the ref struct as its type argument (CS9244). A pointer to an array is passed as
-the pointer, with no `.Value` spelled, and its length is read through it.
+the pointer, with no `.Value` spelled, beside its type's length: `range(p, N)`.
 
 The (index, value) enumerator would not do here even with the value discarded: it reads every element into a stack
 temp. An element the body waits to see collected stays reachable from the loop's own frame
@@ -318,16 +319,25 @@ What keeps the pair form:
 - a **map**, `foreach (var (k, _) in m)`;
 - a range with a **value variable**, `foreach (var (i, v) in s)`.
 
-Known divergence: Go's length of a `*[N]T` is the constant `N`, so Go ranges a nil array pointer `N` times without
-dereferencing it. golib's array carries its length in the value, not the type, so `range(p)` panics on a nil
-pointer.
-<!-- src/core/golib/RangeIndexOnly.cs:67-69 `Go's length of a <c>*[N]T</c> is the constant N, so Go ranges a nil … a nil pointer panics here` -->
+Go's length of a `*[N]T` is the constant `N`, so Go ranges a nil array pointer `N` times without dereferencing it.
+golib's array carries its length in the value, not the type, so only the converter knows `N`, and it passes it:
+`range(p, N)` reads neither the pointer nor an element, and a nil `p` ranges `N` times. The pointer is still
+evaluated once, as Go evaluates a range operand that holds a call. A pointer parameter is already the dereferenced
+array local, so it keeps `range(p)` and binds the array overload.
+<!-- src/go2cs/visitRangeStmt.go:787-788 `if arrayType, ok := rangeType.Underlying().(*types.Array); ok && rangedThroughPointer && ptrDeref != "" {`
+then `foreach (%s%s in range(%s, %d))`; src/core/golib/RangeIndexOnly.cs:82
+`range<TArray>(ж<TArray> p, nint length) where TArray : IArray => range(length)`; its one-argument sibling, kept for
+hand-written callers, :72 `range(p.Value.Length)`. -->
 
 Guarded by the converter's `TestIndexOnlyRangeEmitsTheIndexEnumerator`, which pins every operand kind above, the
-scalar escapes and the string, map and value-variable controls, and by the behavioral goldens `ArrayRangeSnapshot`,
-`SlicePointerIdentity` and `VariadicPackPassThrough`.
-<!-- src/go2cs/rangeIndexOnly_test.go:189 `func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {`;
-:237 `expect("overString", "foreach (var (i, _) in str)")`; :238 `expect("overMap", "foreach (var (k, _) in m)")`.
+scalar escapes and the string, map and value-variable controls, and a pointer to an array, a nil one and a pointer
+parameter; and by the behavioral goldens `ArrayRangeSnapshot`, `SlicePointerIdentity`, `VariadicPackPassThrough` and
+`PointerArraySlice`, whose `rangeIndexOnly` ranges a nil `*[3]int` and a nil `*grid` and prints Go's counts.
+<!-- src/go2cs/rangeIndexOnly_test.go:207 `func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {`;
+:246 `expect("overArray", "foreach (var i in range(a))", "foreach (var i in range(p, 3))")`;
+:248 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`; :250 `expect("overPointerParam", "foreach (var i in range(p))")`;
+:260 `expect("overString", "foreach (var (i, _) in str)")`; :261 `expect("overMap", "foreach (var (k, _) in m)")`.
+src/tests/Behavioral/PointerArraySlice/main.go:63 `func rangeIndexOnly() {`.
 src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:106 `foreach (var i in range(a)) {`;
 src/tests/Behavioral/SlicePointerIdentity/main.go:16 `for i := range s {` -> main.cs.target:13 `foreach (var i in range(s)) {`;
 src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`

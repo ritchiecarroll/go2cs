@@ -281,8 +281,8 @@ func collectMovedInitVars(fset *token.FileSet, pkg *types.Package, info *types.I
 	movedVars := map[*types.Var]bool{}
 
 	for ordinal, initializer := range info.InitOrder {
-		// A var built on its first read (lazyPackageVars) has no place in the ordered ctor: its value cannot depend on
-		// when it is built (lazyPackageVarRefusal), and a reader that runs earlier simply builds it then.
+		// A var built on its first read (collectLazyPackageVars) has no place in the ordered ctor: its value cannot depend
+		// on when it is built, and a reader that runs earlier simply builds it then.
 		if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {
 			continue
 		}
