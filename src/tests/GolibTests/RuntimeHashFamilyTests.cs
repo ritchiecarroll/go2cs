@@ -182,11 +182,16 @@ public class RuntimeHashFamilyTests
         // dereference is the row-level fault the design chose, never a number), and the STRING HALF of
         // the seam is admitted through the token: the string box's own number resolves to the box, memhash
         // over it is refused as a HEADER by name, strhash over it hashes the content.
+        //
+        // AMENDED 2026-10-21 (the unsafeheader write-through seat): the string-header reinterpret is no longer the
+        // native box over the token. StringHeaderBox serves it as SliceHeaderBox serves the slice header, so its
+        // case is now a positive property, as case (f) is for the slice: the header's `str` retains the string's
+        // element-0 box, and memhash over (str, len) hashes the content, the runtime's own strhash shape.
         @string text = "hello, header"u8;
         ref @string sv = ref heap(text, out ж<@string> Ꮡtext);
         ж<StringHeaderShape> stringHeader = Ꮡtext.Reinterpret<@string, StringHeaderShape>();
-        Assert.IsTrue(stringHeader.IsNative, "the string-header reinterpret is the loud form: a native box over the token, never a pun through the pinned string");
-        Assert.AreEqual(Ꮡtext.PointerOrderToken, stringHeader.NativeAddress, "whose address IS the string box's order token");
+        Assert.IsFalse(stringHeader.IsNative, "the string-header reinterpret is the string header box, not a native box over the token");
+        Assert.AreEqual(GoMemhash("hello, header"u8, 0), GoMemhashPointer((~stringHeader).str, 0, (ulong)(~stringHeader).len), "memhash over the string header's (str, len) hashes the content");
 
         @unsafe.Pointer stringBox = new @unsafe.Pointer((uintptr)Ꮡtext);
         PanicException headerPanic = Assert.ThrowsException<PanicException>(() => GoMemhashPointer(stringBox, 0, 8));

@@ -493,6 +493,19 @@ public static partial class builtin
     }
 
     /// <summary>
+    /// The exact twin of the spread above for a <see cref="slice{T}"/> operand, which takes the operand as
+    /// the slice it is. Without it a slice operand binds the <see cref="ISlice{T}"/> form, whose interface
+    /// parameter BOXES the struct: 56 B per call that AllocationCounter never sees, on every converted
+    /// <c>append(s, t...)</c>. Go 1.26's bytes TestReplace read it as 56 objects per run for
+    /// <c>append([]byte(nil), s...)</c>, which allocates nothing in Go. A named slice (a go2cs-gen wrapper)
+    /// binds here too, through its implicit conversion to <see cref="slice{T}"/> (a view of the same window).
+    /// </summary>
+    public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)
+    {
+        return go.slice<T>.AppendWindow(slice, elems);
+    }
+
+    /// <summary>
     /// The stack-view twin of the spread above: <c>append(s, v...)</c> where <c>v</c> is a variadic
     /// pack the converter kept as an <see cref="sslice{T}"/> (REC-C §A, pass-through). The pack's
     /// elements go across as the span they already are, so nothing is copied to reach here; the
