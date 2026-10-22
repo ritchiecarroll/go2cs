@@ -11,8 +11,10 @@ namespace go;
 /// <summary>
 /// The Go zero value of <typeparamref name="T"/> where it must be CONSTRUCTED rather than taken as
 /// <c>default(T)</c>: a converted struct holding a fixed-size array or a promoted-embed box, directly or through a
-/// nested field. go2cs-gen registers <see cref="Create"/> for each such struct in a module initializer of the
-/// struct's own assembly; it stays null for every type whose <c>default</c> is already its Go zero value.
+/// nested field. go2cs-gen registers <see cref="Create"/> for each such struct from a module initializer of the
+/// struct's own assembly, deferred to the first constructed zero that finds no factory
+/// (<see cref="GoDeferredRegistrations.ZeroFactories"/>); it stays null for every type whose <c>default</c> is
+/// already its Go zero value.
 /// </summary>
 /// <typeparam name="T">The struct type.</typeparam>
 /// <remarks>

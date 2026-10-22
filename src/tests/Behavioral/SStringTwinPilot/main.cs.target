@@ -18,6 +18,7 @@ internal static @string apply(Funcꓸꓸꓸ<@string, any, @string> f, @string fo
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string hLloˢ = "héllo, 世界"u8;
+private static readonly object deferredCountˢ = (@string)"deferred count"u8;
 private static readonly object printfˢ = (@string)"printf"u8;
 
 internal static void Main() {
@@ -50,6 +51,13 @@ internal static void Main() {
         fmt.Println(utf8.RuneCountInString(hLloˢ));
         var (r, size) = utf8.DecodeRuneInString("é!"u8);
         fmt.Println(r, size);
+        var raw = slice<byte>("héllo, 世界"u8);
+        fmt.Println(utf8.RuneCountInString((sstring)raw), utf8.RuneCount(raw[1..]));
+        var (r2, size2) = utf8.DecodeRuneInString((sstring)(raw[1..]));
+        fmt.Println(r2, size2);
+        defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), deferredCountˢ, utf8.RuneCountInString((@string)raw), ref ᒐ);
+        raw[1] = (rune)'e';
+        fmt.Println(utf8.RuneCountInString((sstring)raw));
         fmt.Printf("%x %X %08b %5.2f|%-6s|%6s|\n"u8, (nint)255, "hi", (nint)5, 3.14159D, "left", "right");
 
         defer((ᴛ1, ᴛ2) => fmt.Printf(ᴛ1, ᴛ2), (@string)"deferred %s\n", printfˢ, ref ᒐ);

@@ -6,8 +6,8 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable;
-internal static void initᴛmallocScanTable() { mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.value;
+private static class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> value = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
     mallocPanic,
     mallocgcSmallScanNoHeaderSC1,
     mallocgcSmallScanNoHeaderSC1,
@@ -523,8 +523,8 @@ internal static void initᴛmallocScanTable() { mallocScanTable = new Func<uintp
     mallocgcSmallScanNoHeaderSC26
 }.array(); }
 
-internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocNoScanTable;
-internal static void initᴛmallocNoScanTable() { mallocNoScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocNoScanTable => ref lazyᴛmallocNoScanTable.value;
+private static class lazyᴛmallocNoScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> value = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
     mallocPanic,
     mallocgcTinySize1,
     mallocgcTinySize2,

@@ -720,6 +720,29 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						access := v.testDeclaredValueAccess(packageVarAccess(goIDName, v.getIdentType(ident)), ident.Pos(), v.getIdentType(ident))
 						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
 
+						// A var listed in lazyPackageVars is built on its first read: a ref property over a
+						// holder class, never relocated into package_init.cs (collectMovedInitVars skips it).
+						if isLazyPackageVar(def) {
+							if refusal := v.lazyPackageVarRefusal(valueSpec, ident); refusal != "" {
+								panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))
+							}
+
+							globalHoist := &strings.Builder{}
+							savedGlobalHoist := v.globalDeclHoist
+							v.globalDeclHoist = globalHoist
+							valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, emptyIfaceDeclType, context)
+							v.globalDeclHoist = savedGlobalHoist
+
+							if globalHoist.Len() > 0 {
+								panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: its initializer spills a hoisted holder", goIDName))
+							}
+
+							v.writePositionSentinelCalls(ident.Pos(), specValueCallRoots(valueSpec, i)...)
+							v.writeLazyPackageVar(access, csTypeName, csIDName, valExpr)
+							v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
+							continue
+						}
+
 						// A package var whose initializer's Go init-order dependencies C#'s
 						// static-field-initializer order cannot reproduce (cross-file / same-file
 						// forward reference / dependency on another relocated var — see

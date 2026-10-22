@@ -347,14 +347,15 @@ Performance: `src/tests/Performance/PerfStringView` measures the view on keyword
 
 ## A non-escaping `string([]byte)` local emits the stack-string `sstring`
 
-Go skips the copy in `string(b)` when the string is only read while `b` cannot change. The converter recovers that for four shapes (`markSStringEligible` and the `markSString…` passes in the escape analysis):
+Go skips the copy in `string(b)` when the string is only read while `b` cannot change. The converter recovers that for five shapes (`markSStringEligible` and the `markSString…` passes in the escape analysis):
 
 - **A local** `s := string(b)`, where `b` is an unnamed `[]byte` that the function never writes, and every use of `s` is `len`, an index, a comparison, a `switch` tag or a concatenation operand. It is never passed on, stored, ranged, returned or reassigned.
 - **A comparison operand**: `string(b) == other`.
 - **A `switch` tag**: `switch string(b) { … }`. A string switch lowers to a temp and `==` comparisons.
 - **A concatenation operand**: `string(b) + other`. The result is a new `@string`; only the operand's copy is skipped.
+- **An argument to a `unicode/utf8` twin**: `utf8.RuneCountInString(string(b))`. The call binds the [twin](#an-sstring-twin-a-registered-function-gains-an-sstring-overload-that-calls-bind)'s `sstring` member with the view, so `utf8.RuneCount`'s own `RuneCountInString(string(p[n:]))` no longer copies the tail. The view is passed only to the utf8 twins, which only read the parameter, so no callee retains it past the call (and an `sstring` is a `ref struct`, which C# will not let a callee store).
 
-In the last three, `other` (or every `case` label) must be unable to change `b` before the view is read: a literal, a plain read of a variable or field, or another `string([]byte)`. A function call or a named string type keeps the `@string` copy.
+In the comparison, `switch` and concatenation shapes, `other` (or every `case` label) must be unable to change `b` before the view is read: a literal, a plain read of a variable or field, or another `string([]byte)`. A function call or a named string type keeps the `@string` copy. A utf8 twin's other arguments must likewise contain no call. Two cases keep the copy there: a call inside a `defer` or `go` statement, whose arguments are evaluated at the statement while the lowering decides when each part runs, and a `fmt` twin, whose body runs caller code (`String`, `Format`) that could change `b`. `SStringTwinPilot` covers the views and the deferred copy.
 
 ```go
 if string(hdr[:4]) == "ZLIB" { … }

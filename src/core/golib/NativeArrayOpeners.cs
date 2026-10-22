@@ -24,7 +24,7 @@ namespace go;
 /// MakeGenericMethod has no code under Native AOT for a value type, and building it through every type's compiled
 /// operations (<see cref="IGoTypeOps"/>) put the box's code into every such type: +17.4% on the probe binary for a
 /// door few programs reach. So each opener exists only for an element some compilation SPELLS: go2cs-gen registers
-/// it in the package's module initializer wherever a closed <c>array&lt;ж&lt;E&gt;&gt;</c>, a closed
+/// it from the package's module initializer, deferred to the first miss (<see cref="GoDeferredRegistrations"/>), wherever a closed <c>array&lt;ж&lt;E&gt;&gt;</c>, a closed
 /// <c>unsafe.Slice&lt;ж&lt;E&gt;&gt;</c> or a struct field <c>array&lt;X&gt;</c> is written.
 /// </para>
 /// <para>
@@ -52,13 +52,15 @@ public static class NativeArrayOpeners
 
     /// <summary>A <c>*[length]*E</c> over the foreign words at <paramref name="address"/>.</summary>
     internal static object OpenPointerArray(Type element, nuint address, nint length) =>
-        s_pointerArrays.TryGetValue(element, out Func<nuint, nint, object>? open)
+        s_pointerArrays.TryGetValue(element, out Func<nuint, nint, object>? open) ||
+        GoDeferredRegistrations.NativeArrayOpeners.Run() && s_pointerArrays.TryGetValue(element, out open)
             ? open(address, length)
             : throw new PanicException($"go2cs: native pointer array: *[{length}]*{GoTypeName(element)} over memory the Go runtime did not allocate: this build never spells *[N]*{GoTypeName(element)}, so no reader for it was compiled");
 
     /// <summary>A <c>*[length]X</c> over the native memory at <paramref name="address"/>.</summary>
     internal static object OpenArray(Type element, nuint address, nint length) =>
-        s_arrays.TryGetValue(element, out Func<nuint, nint, object>? open)
+        s_arrays.TryGetValue(element, out Func<nuint, nint, object>? open) ||
+        GoDeferredRegistrations.NativeArrayOpeners.Run() && s_arrays.TryGetValue(element, out open)
             ? open(address, length)
             : throw new PanicException($"go2cs: native array field: a [{length}]{GoTypeName(element)} field of a struct in native memory: this build declares no [N]{GoTypeName(element)} field, so no window for it was compiled");
 

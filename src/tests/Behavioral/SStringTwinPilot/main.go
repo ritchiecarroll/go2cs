@@ -46,6 +46,15 @@ func main() {
 	fmt.Println(utf8.RuneCountInString("héllo, 世界"))
 	r, size := utf8.DecodeRuneInString("é!")
 	fmt.Println(r, size)
+	// a string(b) argument at a utf8 twin reads the bytes in place (utf8.RuneCount's own non-ASCII path)
+	raw := []byte("héllo, 世界")
+	fmt.Println(utf8.RuneCountInString(string(raw)), utf8.RuneCount(raw[1:]))
+	r2, size2 := utf8.DecodeRuneInString(string(raw[1:]))
+	fmt.Println(r2, size2)
+	// a deferred call's argument is evaluated now: the later write to raw must not reach it
+	defer fmt.Println("deferred count", utf8.RuneCountInString(string(raw)))
+	raw[1] = 'e'
+	fmt.Println(utf8.RuneCountInString(string(raw)))
 	fmt.Printf("%x %X %08b %5.2f|%-6s|%6s|\n", 255, "hi", 5, 3.14159, "left", "right")
 
 	defer fmt.Printf("deferred %s\n", "printf")

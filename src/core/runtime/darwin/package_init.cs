@@ -10,8 +10,6 @@ partial class runtime_package {
     static runtime_package() {
         initᴛitabTable();
         initᴛsigsetAllExiting();
-        initᴛmallocScanTable();
-        initᴛmallocNoScanTable();
         initᴛchansendpc();
         initᴛchanrecvpc();
         initᴛadjustSignalStack2Indirect();
