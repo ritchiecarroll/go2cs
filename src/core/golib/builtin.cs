@@ -1571,8 +1571,14 @@ public static partial class builtin
     /// </remarks>
     public static T GoZero<T>() =>
         GoZeroFactory<T>.Create is { } create ? create() :
-        ZeroFacts<T>.IsConstructed ? (T)((IGoZeroConstructed)(object)default(T)!).GoZeroNew() :
+        ZeroFacts<T>.IsConstructed ? ConstructedZero<T>() :
         default!;
+
+    // A constructed zero with no factory yet: the package's factories are registered on the first such ask
+    // (GoDeferredRegistrations.ZeroFactories), and a generic struct, which has none, is built through its hook.
+    private static T ConstructedZero<T>() =>
+        GoDeferredRegistrations.ZeroFactories.Run() && GoZeroFactory<T>.Create is { } create ? create() :
+        (T)((IGoZeroConstructed)(object)default(T)!).GoZeroNew();
 
     /// <summary>
     /// Determines whether <c>default(T)</c> is already the Go zero value for <typeparamref name="T"/>

@@ -216,15 +216,21 @@ public static class GoTypeOps
     /// In order: a builtin's (and a pointer to one); a value type's own source, reached through a zero value of it (its
     /// members read nothing of the value); and otherwise the fallback, which closes the operations over the type at run
     /// time: a pointer, an interface, a func type -- reference types, whose instantiation Native AOT loads (measured). That
-    /// is the one dynamic-code site left on these paths, the boundary trim stage 3d annotates.
+    /// is the one dynamic-code site left on these paths, the boundary trim stage 3d annotates. A type found in none of
+    /// these first runs the escape registries loaded assemblies deferred (<see cref="GoDeferredRegistrations.TypeOps"/>),
+    /// so the fallback never caches over a registered container.
     /// </remarks>
-    public static IGoTypeOps Of(Type type) => s_ops.GetOrAdd(type, static t => FromSource(t) ?? dynamicOps(t));
+    public static IGoTypeOps Of(Type type) =>
+        s_ops.TryGetValue(type, out IGoTypeOps? ops) || GoDeferredRegistrations.TypeOps.Run() && s_ops.TryGetValue(type, out ops)
+            ? ops
+            : s_ops.GetOrAdd(type, static t => FromSource(t) ?? dynamicOps(t));
 
     /// <summary>
     /// Registers operations a converted package's generated escape registry names: a closed container (array, slice,
     /// map, chan) the package converts to an interface, or reaches through such a value's fields (trim stage 3c-2b(iii),
     /// go2cs-gen's EscapeRegistryGenerator). Only an interface value reaches reflect, and the registering package's module
-    /// initializer runs before any of its code, so the operations are here before the value is.
+    /// initializer queues its registry before any of its code runs (<see cref="GoDeferredRegistrations.TypeOps"/>), so
+    /// <see cref="Of"/> finds the operations on its first miss for the value's type.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static void Register(IGoTypeOps ops) => s_ops.TryAdd(ops.Type, ops);

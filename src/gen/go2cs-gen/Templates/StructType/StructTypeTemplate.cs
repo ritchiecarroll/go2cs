@@ -141,7 +141,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Constructors
                 {{Constructors}}
-                {{ValueCloneImplementation}}{{GoZeroRegistration}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
+                {{ValueCloneImplementation}}{{GoZeroConstructionHook}}{{TypeOpsSourceMembers}}{{FieldBoxTableMembers}}
                 // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 {{EqualsMember}}
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
@@ -168,13 +168,6 @@ internal class StructTypeTemplate : TemplateBase
             }{{GoEquatablePart}}{{PromotedStructReceivers()}}
         """;
 
-    // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless
-    // constructor, which runs the field initializers and builds the embed boxes, as golib's
-    // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
-    // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
-    // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. A GENERIC
-    // struct cannot host a module initializer and has no closed type to register; the residual option B
-    // stated is closed by its construction hook instead (GoZeroConstructionHook; GolibTests' GoZeroResidualTests).
     // The memberwise `Equals(T)` and `GetHashCode`, omitted when a hand-owned partial declares the
     // struct's own equality (HandWrittenEquality). Each carries the blank line that follows it in the
     // template, so the generated form is byte-identical to the unconditional one it replaced.
@@ -188,12 +181,18 @@ internal class StructTypeTemplate : TemplateBase
             ? string.Empty
             : $"\r\n{TypeElemIndent}public override int GetHashCode() => {HashCode};\r\n{TypeElemIndent}";
 
-    private string GoZeroRegistration =>
-        StructName.Contains('<') || !IsNeedy
-            ? string.Empty
-            : $"\r\n{TypeElemIndent}[global::System.Runtime.CompilerServices.ModuleInitializer]\r\n" +
-              $"{TypeElemIndent}internal static void {TempVarMarker}RegisterGoZero() =>\r\n" +
-              $"{TypeElemIndent}    global::go.GoZeroFactory<{StructName}>.Create = static () => new {StructName}();\r\n";
+    // A struct whose `default` is NOT its Go zero value (see IsNeedy) registers its parameterless
+    // constructor, which runs the field initializers and builds the embed boxes, as golib's
+    // GoZeroFactory<T>. Generic code reads that registration through builtin.GoZero<T>() wherever
+    // Go produces a zero of a type parameter (`var z T`, a named result, a map miss, a closed-channel
+    // receive, a failed comma-ok assertion), where `default` is wrong only for a needy T. The
+    // TypeGenerator writes the registrations of a package's structs into ONE method that its module
+    // initializer defers to golib's first constructed zero (EmitGoTypeRegistrations), where a module
+    // initializer per struct compiled each one at startup. A GENERIC struct has no closed type to
+    // register; the residual option B stated is closed by its construction hook instead
+    // (GoZeroConstructionHook; GolibTests' GoZeroResidualTests). Null when nothing registers.
+    public string? GoZeroFactoryType =>
+        StructName.Contains('<') || !IsNeedy ? null : StructName;
 
     // The rule NeedsConstruction applies to a FIELD of this type, asked of this struct's own members:
     // a promoted embed (its box is constructor-built), a fixed-size array field (`default` skips its
@@ -298,7 +297,7 @@ internal class StructTypeTemplate : TemplateBase
     // golib's construction hook (IGoZeroConstructed; trim stage 3b, docs/PLAN-golib-full-trim.md section 9.6): a struct
     // whose constructor builds what `default` skips -- a needy member (IsNeedy) or a directional channel's stamp
     // (ChanDirInitializerMembers) -- names its own zero here, generic or not, so golib never asks a type parameter for its
-    // constructor. A generic struct gains what the GoZero factory registration cannot give it (see GoZeroRegistration).
+    // constructor. A generic struct gains what the GoZero factory registration cannot give it (see GoZeroFactoryType).
     // The rule is what the constructor BUILDS, so it also counts a blank `_` fixed array, whose `= new(N)` initializer
     // the constructor runs although IsNeedy (the factory's rule) leaves an unobservable blank field out: golib built
     // every such struct through Activator before, and GolibTests' GoZeroConstructionGuardTests holds the two equal.

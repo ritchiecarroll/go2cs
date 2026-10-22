@@ -109,7 +109,11 @@ public static class AdapterRegistry
     /// </remarks>
     internal static bool TryGetAdapterFactory(Type valueType, Type interfaceType, [NotNullWhen(true)] out Func<object, object>? factory)
     {
-        return s_factories.TryGetValue((AdapterKey(valueType), interfaceType), out factory);
+        (Type, Type) key = (AdapterKey(valueType), interfaceType);
+
+        // A miss runs the adapters loaded assemblies deferred (GoDeferredRegistrations.Adapters), then looks again.
+        return s_factories.TryGetValue(key, out factory) ||
+               GoDeferredRegistrations.Adapters.Run() && s_factories.TryGetValue(key, out factory);
     }
 
     // The registration key of a Go dynamic value's runtime type. A generated pointer adapter registers

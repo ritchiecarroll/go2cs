@@ -83,6 +83,12 @@ public class AdapterCollisionKeyTests
                 public static void Register(System.Type boxType, System.Type interfaceType, System.Func<object, object> factory) { }
             }
 
+            public sealed class GoDeferredRegistrations
+            {
+                public static readonly GoDeferredRegistrations Adapters = new();
+                public void Defer(System.Action register) { }
+            }
+
             [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
             public class GoImplementAttribute<TStruct, TInterface> : System.Attribute
             {
