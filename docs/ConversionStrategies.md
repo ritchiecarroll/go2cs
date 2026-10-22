@@ -2851,7 +2851,8 @@ prints `*int`. A C# `null` carries no type, so the converter stores the shared n
 ```
 
 Go and C# both print `*int`, then `x==nil false`. `"x==nil"` is a plain C# literal: it is an `any`
-argument to `fmt.Println`, so go2cs-gen intercepts the call and passes it as a boxed Go string
+argument to `fmt.Println`, so go2cs-gen, the go2cs [source generator](#source-generators), intercepts the
+call and passes it as a boxed Go string
 ([Empty Interface](#empty-interface-any)). The `"%T\n"u8` format string is a C# UTF-8 literal
 ([Strings](#strings-string-and-sstring)).
 
@@ -2882,7 +2883,7 @@ compares type and value as Go does ([Interfaces](#interfaces)).
 
 <!-- A nil pointer to an array also keeps the array's length, because reflection can read N from a nil
 *[N]T: `var a any = (*[3]byte)(nil)` becomes `any a = ж<array<byte>>.NilBoxOfDims(3L);`
-(src/tests/Behavioral/TypedNilPtrArrayDims/main.cs.target:14#29ef8e). Removed from the summary body as
+(src/tests/Behavioral/TypedNilPtrArrayDims/main.cs.target:22#1d2c92). Removed from the summary body as
 first-read detail; it belongs on the reference page. -->
 
 **A fixed-size array is constructed, and so is a struct that holds one.** Go's `[N]T` becomes golib's
@@ -3031,8 +3032,8 @@ built-in and where it is explained in more depth:
 | Go | C# | More in |
 |---|---|---|
 | `len(x)`, `cap(x)` | `len(x)`, `cap(x)`. Both return `nint`, which is how go2cs writes Go's `int`. The `len` of a string counts bytes, as in Go | [Slices and Arrays](#slices-and-arrays), [Strings](#strings-string-and-sstring) |
-| `append(s, a, b)` | `append(s, a, b)` | [Slices and Arrays](#slices-and-arrays) |
-| `append(s, t...)`, with `t` a slice | `appendꓸꓸꓸ(s, t)`. The `ꓸꓸꓸ` glyph stands for Go's `...` | [Reading Converted Code](#reading-converted-code-names-and-glyphs) |
+| `append(s, a, b)` | `append(s, a, b)`. Past capacity it grows the backing array by Go's own growth rule. An append that Go keeps on the stack passes a 32-byte stack buffer first, `append(xᴷ, x, v)` | [Slices and Arrays](#slices-and-arrays), [`ᴷ` buffer](ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer) |
+| `append(s, t...)`, with `t` a slice | `appendꓸꓸꓸ(s, t)`. The `ꓸꓸꓸ` glyph stands for Go's `...`. golib takes a `slice<T>` operand as the slice it is, with no box | [Reading Converted Code](#reading-converted-code-names-and-glyphs), [Slices and Arrays](#slices-and-arrays) |
 | `copy(dst, src)` | `copy(dst, src)` | [Slices and Arrays](#slices-and-arrays) |
 | `clear(x)` | `clear(x)`. It zeroes a slice's elements and empties a map | [Slices and Arrays](#slices-and-arrays), [Maps](#maps) |
 | `make(T, …)` | a constructor: `new slice<T>(…)`, `new map<K, V>()` or `new channel<T>(…)` | [Slices and Arrays](#slices-and-arrays), [Maps](#maps), [Channels and `select`](#channels-and-select) |
@@ -3070,7 +3071,7 @@ fmt.Println(n);
 `map<K, V>` or `channel<T>`. So `make` becomes `new` on that type, and its size arguments pass
 through unchanged. An unbuffered channel gets an explicit capacity of `0`:
 
-<!-- source: src/tests/Behavioral/AppendOfMake/AppendOfMake.go:40 + AppendOfMake.cs.target:55 · src/tests/Behavioral/AnyKeyMap/AnyKeyMap.go:8 + AnyKeyMap.cs.target:9 · src/tests/Behavioral/ChannelCapLen/main.go:11,24 + main.cs.target:8,20 -->
+<!-- source: src/tests/Behavioral/AppendOfMake/AppendOfMake.go:40 + AppendOfMake.cs.target:44 · src/tests/Behavioral/AnyKeyMap/AnyKeyMap.go:8 + AnyKeyMap.cs.target:10 · src/tests/Behavioral/ChannelCapLen/main.go:11,24 + main.cs.target:8,21 -->
 
 | Go | C# |
 |---|---|
@@ -3118,7 +3119,9 @@ The `for … range` loop becomes a C# `foreach` over index and value
 **Spreading a slice into `append` uses `appendꓸꓸꓸ`.** In Go, `append(s, m...)` adds every element of
 `m`. In C#, the call is named `appendꓸꓸꓸ`, and the whole slice `m` passes as one argument. The `ꓸꓸꓸ`
 glyph in a name stands for Go's `...` ([Reading Converted Code](#reading-converted-code-names-and-glyphs)).
-This complete function shows `make` and the spread together:
+golib has an `appendꓸꓸꓸ` overload for each operand kind, and the one for a `slice<T>` takes `m` as the
+slice it is, so the call boxes nothing. This complete function shows `make` and the spread together:
+<!-- src/core/golib/builtin.cs:503 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)` -->
 
 <!-- source: src/tests/Behavioral/AppendOfMake/AppendOfMake.go:32-35 -->
 ```go
@@ -3244,14 +3247,15 @@ fmt.Println(a._<nint>());
 ```
 
 **An untyped constant boxes at its Go default type.** In Go, the `7` stored in an `any` is an `int`, so
-the converter writes `(nint)(7)`. A bare C# `7` would box as a 32-bit `Int32`, and the later `.(int)`
+the converter writes `(nint)7`. A bare C# `7` would box as a 32-bit `Int32`, and the later `.(int)`
 would panic. The same rule lets a [type switch](#type-switch-statements) pick `case int:` rather than
 `case int32:`.
 
 **A string literal boxes as a Go `string`.** Go's `string` is golib's
 [`@string`](#strings-string-and-sstring), a byte string; the `@` only escapes the C# keyword. A literal
-stored in an `any` is cast to `@string`, so `x.(string)` and `case string:` match it. `"hello"u8` is a C#
-UTF-8 literal, and `(@string)` turns it into a Go string.
+stored in an `any` holds an `@string`, never a C# `string`, so `x.(string)` and `case string:` match it.
+Where the converter writes that value out, it is `(@string)"hello"u8`: `"hello"u8` is a C# UTF-8 literal,
+and the cast turns it into a Go string. The next two paragraphs say where that form appears.
 
 **A literal stored in an `any` is also created only once.** The converter [hoists](#strings-string-and-sstring)
 it into one `static readonly` field, as the standard library does for every literal used as a value. The
@@ -3263,7 +3267,8 @@ literals in read-only memory (RODATA) at no run-time cost, so the C# allocates e
 **A hoisted literal whose every use in the package is an `any` is stored already boxed.** Its field has
 type `object`. If any use needs a plain `string`, the field is a `@string` instead
 ([Strings](#strings-string-and-sstring)). Here `"hello"` feeds only `var i interface{}`, so `helloˢ` is an
-`object`. The literals passed to `fmt.Println`, whose parameter is `...any`, are not hoisted: go2cs-gen
+`object`. Outside the standard library, the literals passed to `fmt.Println`, whose parameter is `...any`,
+are not hoisted. They stay plain C# literals, and go2cs-gen, the go2cs [source generator](#source-generators),
 intercepts each of those calls at compile time and passes the literal as a boxed `@string`:
 
 <!-- source: src/tests/Behavioral/TypeAssert/TypeAssert.go:34-50 -->
@@ -3286,8 +3291,9 @@ func safeAssertions() {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:35-55 -->
+<!-- source: src/tests/Behavioral/TypeAssert/TypeAssert.cs.target:34-55 -->
 ```csharp
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object helloˢ = (@string)"hello"u8;
 
 internal static void safeAssertions() {
@@ -3335,7 +3341,7 @@ fmt.Println(!AreEqual(x, (nint)42));
 ```
 
 The right-hand `42` is also an untyped constant compared with an `any`. Go gives it its default type
-`int`, so it becomes `(nint)(42)`. As a bare `Int32`, it would never equal the `nint` inside `x`.
+`int`, so it becomes `(nint)42`. As a bare `Int32`, it would never equal the `nint` inside `x`.
 
 Like Go, comparing two interfaces that hold the same uncomparable type, such as two slices or two maps,
 panics at run time. A test against `nil` stays a plain `x == default!`. `default!` is C#'s null for
@@ -3531,7 +3537,7 @@ internal static nint redeclareLocal() {
 
 A Go function with several results returns a C# tuple, so its call deconstructs directly ([Multi-Result Values and Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)). A `:=` in an inner block that reuses an outer name makes a new variable instead; that case is covered in [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing).
 
-**A `:=` becomes a tuple when a later value re-reads an earlier target.** In `x, frac := x>>3, x&7`, Go computes `frac` from the old `x`. Two separate C# statements would compute it from the new `x`. So the converter keeps the statement as one tuple. When no value re-reads a target, as with `m, n` here, the converter writes plain separate statements, which is what most `:=` lines look like.
+**A `:=` becomes a tuple when a later value re-reads an earlier target.** In `x, frac := x>>3, x&7`, Go computes `frac` from the old `x`. Two separate C# statements would compute it from the new `x`. So the converter keeps the statement as one tuple. When no later value re-reads an earlier target, as with `m, n` here, the converter writes plain separate statements, which is what most `:=` lines look like.
 
 <!-- source: src/tests/Behavioral/ParallelAssignmentHazard/main.go:13-30 -->
 ```go
@@ -3555,7 +3561,7 @@ A Go function with several results returns a C# tuple, so its call deconstructs 
     fmt.Println(m, n);
 ```
 
-`uint64` is the go2cs alias for C#'s `ulong`, so `(uint64)` is an ordinary C# cast. The cast on `x & 7` states Go's result type; for a `ulong` it changes nothing. The `(int)` is there because a C# shift count must be an `int`, while Go accepts any integer type ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
+`uint64` is the go2cs alias for C#'s `ulong`, so `(uint64)` is an ordinary C# cast. The constant shift count `3` stays a bare literal, as in Go ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 
 **In a tuple of separate values, a new Go `int` is declared as `nint`, not `var`.** In a mixed tuple, `var` would infer a 32-bit C# `int` from a plain literal such as `100`, not Go's native-sized `nint`. So the converter always writes the explicit type for a new `int` (or `uint`) element there. When the right side is one call, as in `(c, var d) = two(c)` above, the call's result type already fixes each element, so `var` is safe there. This example also re-reads `a` and `b` on the right, so it stays one tuple for the same reason as `x, frac`.
 
@@ -3793,7 +3799,7 @@ internal static nint forwardOk() {
 
 A few other things in this example have their own sections:
 
-- `map<@string, nint>` is golib's Go map, and `"a"` is a Go string literal, a plain C# literal (see [Maps](#maps) and [Strings](#strings-string-and-sstring)).
+- `map<@string, nint>` is golib's Go map, `map[string]int`, where `@string` is golib's Go `string`. `"a"` is a Go string literal, a plain C# literal (see [Maps](#maps) and [Strings](#strings-string-and-sstring)).
 - `m["b", ꟷ]` is the comma-ok lookup `v, ok := m["b"]`; `ꟷ` selects the form that also returns `ok` (see [Multi-Result Values and Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)).
 - The extra braces around the C# `if` keep `vΔ1` and `okΔ1` scoped to that `if`, as they are in Go.
 
@@ -3853,8 +3859,10 @@ internal static partial nint plainGlobalShadow() {
 
 The read of the global is written `main_package.plainCounter`, which no local can hide. The converter
 also renames the local to `plainCounterΔ1`, so the global and the local never share a C# name inside
-the function. The function returns 205, as in Go. The Go comment's "collision rename" is a different
-rule, for a package-level name that clashes with a method name; it does not apply here.
+the function. The function returns 205, as in Go. The method is `partial` because the Go source, elided
+here, marks it `//go:noinline`; that mark has nothing to do with shadowing
+([Source Generators](#a-partial-method-with-a-body-keeps-its-own-frame)). The Go comment's "collision rename"
+is a different rule, for a package-level name that clashes with a method name; it does not apply here.
 
 **Full detail:** [Reference → Short Variable Redeclaration (Shadowing)](ConversionStrategies-Reference/shadowing.md#short-variable-redeclaration-shadowing) — more shadowing cases, including package names, constants, closures and names that clash with methods.
 
