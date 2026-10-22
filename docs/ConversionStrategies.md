@@ -24,7 +24,7 @@ the members C# cannot spell directly.
 
 - **Start here:** [At a glance](#at-a-glance) · [Reading Converted Code: Names and Glyphs](#reading-converted-code-names-and-glyphs) · [The golib Runtime Library](#the-golib-runtime-library)
 - **Packages & projects:** [Package Conversion](#package-conversion) · [Package-Level Variable Initialization Order](#package-level-variable-initialization-order) · [Converted Tests](#converted-tests) · [Compiled Library versus Source Code](#compiled-library-versus-source-code)
-- **Numbers, constants & nil:** [Constant Values](#constant-values) · [Integer Types and Arithmetic](#integer-types-and-arithmetic) · [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts) · [Nil and Zero Values](#nil-and-zero-values) · [Built-in Functions](#built-in-functions) · [Empty Interface (`any`)](#empty-interface-any)
+- **Numbers, constants & nil:** [Constant Values](#constant-values) · [Integer Types and Arithmetic](#integer-types-and-arithmetic) · [Named Numeric Types and Constant Contexts](#named-numeric-types-and-constant-contexts) · [Floating-Point Values](#floating-point-values) · [Nil and Zero Values](#nil-and-zero-values) · [Built-in Functions](#built-in-functions) · [Empty Interface (`any`)](#empty-interface-any)
 - **Assignment & scope:** [Multi-Assignment and Evaluation Order](#multi-assignment-and-evaluation-order) · [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing) · [Multi-Result Values and Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)
 - **Composite types:** [Slices and Arrays](#slices-and-arrays) · [Strings (`@string` and `sstring`)](#strings-string-and-sstring) · [Maps](#maps) · [Generics](#generics) · [Type Aliasing](#type-aliasing)
 - **Functions & control flow:** [Functions and Methods](#functions-and-methods) · [Function Values and Closures](#function-values-and-closures) · [Loops, Range and Labels](#loops-range-and-labels) · [Expression Switch Statements](#expression-switch-statements) · [Type Switch Statements](#type-switch-statements) · [Defer / Panic / Recover](#defer--panic--recover)
@@ -266,6 +266,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
 | [Integers](#integer-types-and-arithmetic) | `uintptr` | golib's `uintptr` struct | golib |
 | [Integers](#integer-types-and-arithmetic) | `int32` · `rune` · `float64` · … | same-named C# aliases declared in each project file, such as `rune` for `System.Int32` | converter |
 | [Named numbers](#named-numeric-types-and-constant-contexts) | `type Float float64` | `public partial struct Float /*num:float64*/;` | TypeGenerator |
+| [Floating point](#floating-point-values) | `float64` · `complex128` · `complex64` | `double` · .NET's `Complex`, each under its Go name as an alias · golib's `complex64` struct | converter · golib |
 | [Nil and zero](#nil-and-zero-values) | `nil` | `default!`, or golib's `nil` in a pointer comparison or pointer argument | golib |
 | [Built-ins](#built-in-functions) | `len(s)` · `append(s, x)` · `make([]uint32, 6)` | `len(s)` · `append(s, x)` · `new slice<uint32>(6)`, the first two from golib's `builtin` class | golib |
 | [`any`](#empty-interface-any) | `any` · `interface{}` | `any`, an alias for `object` declared in each project file | converter |
@@ -1344,7 +1345,7 @@ The [glyph table](#reading-converted-code-names-and-glyphs) lists every glyph.
 `func TestX(t *testing.T)` becomes a `public static void` method that takes `ж<testing.T> Ꮡt`. This is a
 complete table-driven test from Go's `path` package:
 
-<!-- source: GOROOT/src/path/path_test.go:5 -->
+<!-- source: GOROOT/src/path/path_test.go:5-166 -->
 ```go
 package path_test
 
@@ -1440,7 +1441,7 @@ So the internal test class reaches them, as Go's same-package tests do.
 wraps unexported code in exported names. The external tests then call those wrappers. In go2cs the wrapper
 lands in the internal test class:
 
-<!-- source: GOROOT/src/strings/export_test.go:5 -->
+<!-- source: GOROOT/src/strings/export_test.go:5-42 -->
 ```go
 package strings
 …
@@ -1469,7 +1470,7 @@ An external test file imports both the production class and the internal test cl
 A call to a wrapper still names its class. That spelling binds the call to the wrapper exactly, and never
 to a same-named member of another imported class:
 
-<!-- source: GOROOT/src/strings/search_test.go:5 -->
+<!-- source: GOROOT/src/strings/search_test.go:5-36 -->
 ```go
 package strings_test
 …
@@ -1498,7 +1499,7 @@ import path `container/list` gives the namespace `go.container` ([Package Conver
 `list_test.go` is a same-package test file (`package list`), so its tests live in
 `list_internal_test_package`:
 
-<!-- source: GOROOT/src/container/list/list_test.go:5 -->
+<!-- source: GOROOT/src/container/list/list_test.go:5-159 -->
 ```go
 package list
 …
@@ -1540,7 +1541,7 @@ How to read the host:
 **The host takes `go test`'s flags.** It accepts the usual ones, such as `-run`, `-v` and `-count`. If the
 package has a `TestMain`, the host registers it and calls it, as `go test` does.
 
-**Examples, benchmarks and fuzz targets convert but do not run.** The host currently runs only tests and
+**Examples, benchmarks and fuzz targets convert but do not run.** The host runs only tests and
 `TestMain`. The other functions stay in any converted test file that also holds tests, as `BenchmarkClone`
 does in [`clone_test.cs`](../src/core/strings/clone_test.cs). A file that holds only examples or benchmarks
 gets no `.cs` at all.
@@ -1707,7 +1708,7 @@ also gets `go.lib`, the [golib runtime](#the-golib-runtime-library), and `go.gen
 that imports `fmt` gets these lines in its `.csproj`:
 
 <!-- expected app .csproj lines; emitted by src/go2cs/projectFileWriter.go:405,408,516#a5a0d6 -->
-<!-- source: src/go2cs/moduleConverter_integration_test.go:262-264 -->
+<!-- source: src/go2cs/moduleConverter_integration_test.go:264-266 -->
 ```xml
 <PackageReference Include="go.fmt" Version="$(GoStdLibVersion)" />
 <PackageReference Include="go.lib" Version="$(GoStdLibVersion)" />
@@ -1739,9 +1740,14 @@ A converted constant takes one of three C# forms:
 - a C# `const`, for a constant of a basic numeric type such as `int` or `float64`, and for any
   boolean constant, typed or untyped;
 - a get-only static property, `static T name => value;`, for a constant C# cannot declare `const`:
-  an untyped number, a named type, a `uintptr` (a golib struct), a complex number, or an `int` value
-  too wide for 32 bits;
-- a `static readonly` field, for any string constant, typed or untyped.
+  an untyped number, a named type, a `uintptr` (a golib struct), a complex number, or an `int` or
+  `uint` value too wide for 32 bits;
+- a `static readonly` field, for any string constant, typed or untyped, and for an integer constant
+  too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`).
+<!-- forms: src/go2cs/visitValueSpec.go:1431 `else if constExpr == "const"`, :1454 `static %s %s =>%s %s;`,
+     :1249 `static readonly %s %s = %s;`; the GoBigConst field, for an int-kind value that fits neither int64 nor
+     uint64: :1174-1181 `writeUntypedConst(true)`, e.g. src/core/math/big/arith.cs:23
+     `internal static readonly GoBigConst _B`; the alias: src/go2cs/csproj-template.xml:129 `Alias="GoBigConst"`. -->
 
 When the value is computed, a `/* … */` comment beside it keeps the Go expression.
 
@@ -1930,6 +1936,18 @@ partial struct Order /*num:nint*/;
 public static Order LSB => /* iota */ 0;
 public static Order MSB => 1;
 ```
+
+**A constant expression of a named type keeps that type.** Where its value fits 32 bits, the C# keeps the Go
+expression: `a := 2 * time.Second` becomes `var a = 2 * time.ΔSecond;`, and the wrapper's own `*` returns a
+`Duration` (`Δ` marks a renamed name, [Names and Glyphs](#reading-converted-code-names-and-glyphs)). A wider
+value is written folded, with the named type as a cast: `b := 8 * time.Hour` becomes
+`var b = (time.Duration)(28800000000000L);`. Either way the value is a `Duration`, so `fmt` prints `8h0m0s`
+through `Duration`'s `String` method, not a count of nanoseconds
+([example](#named-numeric-types-and-constant-contexts),
+[detail](ConversionStrategies-Reference/floating-point-formatting.md#a-folded-constant-of-a-named-type-carries-its-type-in-the-fold)).
+<!-- probe, go2cs at 8c091fc3aa: `a := 2 * time.Second` -> `var a = 2 * time.ΔSecond;`,
+     `b := 8 * time.Hour` -> `var b = (time.Duration)(28800000000000L);`. Golden for the fold:
+     src/tests/Behavioral/PackageNameShadowing/main.cs.target:26 `var d = (Δtime.Duration)(28800000000000L);`. -->
 
 **A constant declared inside a function takes its type from its uses.** Every use of a local
 constant is in view inside its function. When every use needs the same type, the constant is
@@ -2295,6 +2313,11 @@ foreach (var (_, k) in c) {
 }
 ```
 
+A compound shift by a count not provably below the width calls the matching assigning helper: Go's `y <<= s`
+becomes `y.LshAssign(s);`, which evaluates `y` once and stores the result back into it.
+<!-- src/core/golib/GoShift.cs:120-129 (`ref this` LshAssign/RshAssign); golden
+     src/tests/Behavioral/ShiftPrecedenceUnsigned/main.cs.target:30 `y.LshAssign(s);` for main.go:44 `y <<= s`. -->
+
 **A count provably below the width keeps C#'s own operator.** That covers a constant in range, such as
 `x >> 4`, and a count masked or reduced below the width, such as `k & 63` or `k % 64`. These are most shifts
 in real code. Continuing the same example:
@@ -2306,12 +2329,12 @@ fmt.Println(u >> (c[4] % 64)) // 65 % 64 = 1 -> u >> 1
 ```
 <!-- source: src/tests/Behavioral/GoShiftSemantics/main.cs.target:30-31 -->
 ```csharp
-fmt.Println(u >> (int)((c[3] & 63)));
-fmt.Println(u >> (int)((c[4] % 64)));
+fmt.Println(u >> (int)(c[3] & 63));
+fmt.Println(u >> (int)(c[4] % 64));
 ```
 
-Each count is a variable expression, so it is cast to `int`. The inner parentheses are Go's own around the
-count, kept inside the cast; they change nothing.
+Each count is a variable expression, so it is cast to `int`. Go's own parentheses around the count become the
+cast's parentheses.
 
 A named integer type, such as `type Word uint`, becomes a C# struct whose operators are generated at compile
 time ([Named Numeric Types](#named-numeric-types-and-constant-contexts),
@@ -2440,7 +2463,7 @@ Reading the C#, piece by piece:
 **Operators keep the named type.** The wrapper has Go's arithmetic and comparison operators, `++` and `--`.
 Over an integer it also has the bitwise and shift operators. Each operator that computes a value returns the
 named type, as in Go, so `d / ΔSecond` is still a `Duration`. Shifts follow Go's rules: a shift by the full
-bit width or more gives 0, where C# would wrap the count
+bit width or more gives 0, or -1 when a negative value is shifted right, where C# would mask the count
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). A C# shift count must be an `int`, so the
 count gets an `(int)` cast:
 
@@ -2588,8 +2611,8 @@ computed. So `8 * time.Hour` stays a `Duration`, and `fmt.Println` prints it thr
 method as `8h0m0s`, not as a count of nanoseconds
 ([detail](ConversionStrategies-Reference/floating-point-formatting.md#a-folded-constant-of-a-named-type-carries-its-type-in-the-fold)).
 In this program the C# alias for the `time` package is `Δtime`. The `Δ` marks a rename: the program's blank
-import of `time/tzdata` also brings a C# namespace named `time` into scope. `"4:"u8` is a Go string literal
-([Strings](#strings-string-and-sstring)).
+import of `time/tzdata` also brings a C# namespace named `time` into scope. `"4:"` stays a plain C# literal,
+which go2cs-gen passes to `fmt.Println` as golib's Go string `@string` ([Strings](#strings-string-and-sstring)).
 
 <!-- source: src/tests/Behavioral/PackageNameShadowing/main.go:42-67 -->
 ```go
@@ -2617,6 +2640,61 @@ internal static (Δtime.Duration, float64, nint) foldedConstant() {
 Both programs print `4: 8h0m0s 28800 28800`.
 
 **Full detail:** [Reference → Named Numeric Types and Constant Contexts](ConversionStrategies-Reference/named-numeric-types.md#named-numeric-types-and-constant-contexts) — the less common operators and casts, conversions between assemblies, constants too large for 64 bits, and named boolean and complex types.
+
+---
+
+## Floating-Point Values
+
+Go's `float32` and `float64` are C#'s `float` and `double`. Each converted project declares the Go names as
+aliases, as it does for the fixed-width integers ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
+`complex128` is an alias of .NET's `System.Numerics.Complex`, and `complex64` is a struct of two `float32`
+halves from golib, go2cs's [runtime library](#the-golib-runtime-library). Both C# floating-point types follow
+IEEE 754, as Go's do, so infinities, NaN and negative zero behave as in Go: a float divided by zero gives
+`+Inf` or `-Inf`, with no panic.
+<!-- aliases: src/go2cs/csproj-template.xml:125-127 `Alias="float32" … Alias="complex128"`; complex64:
+     src/core/golib/complex64.cs:18 `public readonly struct complex64`, :34-35 `float m_real; … float m_imaginary;`.
+     Divide by zero: probe, go2cs at 8c091fc3aa, `fmt.Println(1/z, -1/z)` -> `fmt.Println(1D / z, -1D / z);`,
+     Go prints `+Inf -Inf`. -->
+
+**A float literal keeps its Go spelling.** It gains C#'s type suffix, `D` for `float64` and `F` for `float32`.
+A Go-only form that C# cannot read, such as the hex float `0x1p-2` or the trailing-dot `2.`, is written as its
+decimal value instead (`0.25D`, `2D`). A float constant follows the rules in [Constant Values](#constant-values):
+a `float32` or `float64` one is a C# `const`, and an untyped one is a property of golib's `UntypedFloat`.
+<!-- golden: src/tests/Behavioral/GoOnlyFloatLiteralForms/main.cs.target:8 `var a = 0.25D;` and :13 `var d = 2D;`
+     for main.go:25 `a := 0x1p-2` and :31 `d := 2.`. -->
+
+**A float prints as Go prints it.** go2cs converts `fmt` and `strconv` from Go's own source, so `fmt.Println`
+formats a float with Go's own `strconv` code, never with .NET's `ToString`. Go's default form is the shortest
+decimal that reads back as the same value. It switches to exponent form when the decimal exponent is below -4
+or 6 or more, and writes the exponent signed and with at least two digits. .NET's `ToString` would print `1e6`
+as `1000000`:
+
+<!-- source: src/tests/Behavioral/FloatFormatExponent/main.go:12-18 -->
+```go
+var e5 float64 = 1e5
+var e6 float64 = 1e6
+var million float64 = 1000000.0
+var justUnder float64 = 999999.0
+…
+fmt.Println(e5, e6, million, justUnder)
+```
+<!-- source: src/tests/Behavioral/FloatFormatExponent/main.cs.target:8-14 -->
+```csharp
+float64 e5 = 1e5D;
+float64 e6 = 1e6D;
+float64 million = 1000000.0D;
+float64 justUnder = 999999.0D;
+…
+fmt.Println(e5, e6, million, justUnder);
+```
+
+Both programs print `100000 1e+06 1e+06 999999`. A `float32` value formats at single precision, so
+`float32(1.0/3.0)` prints `0.33333334`, and a complex value prints in Go's `(1+2i)` form.
+<!-- fmt's float path: src/core/fmt/format.cs:515 `strconv.AppendFloat`; the threshold is
+     src/core/internal/strconv/ftoa.cs:275-277 (`if (shortest) { eprec = 6; }`). Output: `go run` of
+     FloatFormatExponent (Go 1.26.10, linux/amd64), lines 1 and 11; complex form guarded by ComplexFormat. -->
+
+**Full detail:** [Reference → Floating-Point Formatting](ConversionStrategies-Reference/floating-point-formatting.md#floating-point-formatting) — how Go's default float form differs from .NET's, and the behavioral tests that guard it.
 
 ---
 

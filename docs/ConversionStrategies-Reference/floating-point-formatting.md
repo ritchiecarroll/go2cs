@@ -1,6 +1,6 @@
 # Floating-Point Formatting
 
-[Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md)
+[Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#floating-point-values)
 
 Go's default rendering of a float — `%v`, `%g`, and the bare `Println`/`Print`/`Sprint` paths — is
 `strconv.FormatFloat(f, 'g', -1, bitSize)`: the shortest decimal digits that round-trip back to the same

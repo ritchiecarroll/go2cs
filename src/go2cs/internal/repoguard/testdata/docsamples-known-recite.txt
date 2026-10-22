@@ -8,7 +8,3 @@
 # literals went plain and the goldens were regenerated, and deleted here; the 5 GOROOT rows remain.
 # page<TAB>citation (the comment's text after "source:"), one row per comment
 docs/ConversionStrategies.md	GOROOT/src/cmp/cmp.go:28
-docs/ConversionStrategies.md	GOROOT/src/container/list/list_test.go:5
-docs/ConversionStrategies.md	GOROOT/src/path/path_test.go:5
-docs/ConversionStrategies.md	GOROOT/src/strings/export_test.go:5
-docs/ConversionStrategies.md	GOROOT/src/strings/search_test.go:5
