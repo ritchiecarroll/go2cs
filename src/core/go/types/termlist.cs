@@ -66,6 +66,8 @@ internal static bool isAll(this termlist xl) {
 
 // norm returns the normal form of xl.
 internal static termlist norm(this termlist xl) {
+    var rlᴷ = new stackAppend<ж<Δterm>>(moves: true);
+
     // Quadratic algorithm, but good enough for now.
     // TODO(gri) fix asymptotic performance
     var used = new slice<bool>(len(xl));
@@ -97,8 +99,9 @@ internal static termlist norm(this termlist xl) {
                 }
             }
         }
-        rl = append(rl, xi);
+        rl = append(rlᴷ, rl, xi);
     }
+    rl = move2heap(rlᴷ, rl);
     return rl;
 }
 

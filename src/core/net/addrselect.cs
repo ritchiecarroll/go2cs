@@ -32,7 +32,7 @@ internal static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<netipꓸAd
         );
     }
     slices.SortStableFunc<slice<byRFC6724Info>, byRFC6724Info>(addrInfos, compareByRFC6724);
-    foreach (var (i, _) in addrInfos) {
+    foreach (var i in range(addrInfos)) {
         addrs[i] = addrInfos[i].addr;
     }
 }
@@ -47,7 +47,7 @@ internal static slice<netipꓸAddr> srcAddrs(slice<IPAddr> addrs) {
     var srcs = new slice<netipꓸAddr>(len(addrs));
     ref var dst = ref heap<UDPAddr>(out var Ꮡdst);
     dst = new UDPAddr(Port: 53);
-    foreach (var (i, _) in addrs) {
+    foreach (var i in range(addrs)) {
         dst.IP = addrs[i].IP;
         dst.Zone = addrs[i].Zone;
         var (c, err) = DialUDP(udpˢ, nil, Ꮡdst);

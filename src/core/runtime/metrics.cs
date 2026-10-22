@@ -602,7 +602,7 @@ internal static statDepSet difference(this statDepSet s, statDepSet b) {
     b = b.Clone();
 
     statDepSet c = default!;
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         c[i] = s[i] & ~b[i];
     }
     return c.Clone();
@@ -614,7 +614,7 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
     b = b.Clone();
 
     statDepSet c = default!;
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         c[i] = s[i] | b[i];
     }
     return c.Clone();
@@ -673,7 +673,7 @@ internal static void compute(this ж<heapStatsAggregate> Ꮡa) {
     a.totalFrees = a.largeFreeCount;
     a.totalAllocated = a.largeAlloc;
     a.totalFreed = a.largeFree;
-    foreach (var (i, _) in a.smallAllocCount) {
+    foreach (var i in range(a.smallAllocCount)) {
         var na = a.smallAllocCount[i];
         var nf = a.smallFreeCount[i];
         a.totalAllocs += na;

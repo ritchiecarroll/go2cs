@@ -103,7 +103,7 @@ internal static void sliceValue() {
 internal static void indexOnly() {
     var a = new nint[]{1, 2, 3, 4}.array();
 
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (i == 0) {
             (a[1], a[2], a[3]) = (91, 92, 93);
         }

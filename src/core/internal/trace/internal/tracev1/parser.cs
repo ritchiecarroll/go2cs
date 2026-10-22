@@ -419,7 +419,7 @@ internal static (Events, error) parseEventBatches(this ref parser p) {
     ref var frontier = ref heap<orderEventList>(out var Ꮡfrontier);
 
     var availableProcs = new slice<ж<proc>>(len(allProcs));
-    foreach (var (i, _) in allProcs) {
+    foreach (var i in range(allProcs)) {
         availableProcs[i] = Ꮡ(allProcs, i);
     }
     while (ᐧ) {
@@ -477,7 +477,7 @@ continue_pidLoop:;
 break_pidLoop:;
 
         if (len(frontier) == 0) {
-            foreach (var (i, _) in allProcs) {
+            foreach (var i in range(allProcs)) {
                 if (!allProcs[i].done) {
                     return (new Events(nil), fmt.Errorf("no consistent ordering of events possible"u8));
                 }

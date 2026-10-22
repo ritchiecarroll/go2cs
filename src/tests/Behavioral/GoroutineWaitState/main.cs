@@ -120,7 +120,7 @@ internal static partial void Main() {
     close(selA);
     Ꮡwg.Done();
 
-    foreach ((_, _) in parked) {
+    foreach (var _ᴛ1 in range(parked)) {
         ᐸꟷ(done);
     }
 

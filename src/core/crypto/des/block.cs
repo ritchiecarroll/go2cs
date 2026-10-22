@@ -74,7 +74,7 @@ internal static uint64 /*block*/ permuteBlock(uint64 src, slice<uint8> permutati
 }
 
 internal static void initFeistelBox() {
-    foreach (var (s, _) in sBoxes) {
+    foreach (var s in range(sBoxes)) {
         for (nint i = 0; i < 4; i++) {
             for (nint j = 0; j < 16; j++) {
                 var f = ((uint64)sBoxes[s][i][j]).Lsh((4 * (7 - (nuint)s)));

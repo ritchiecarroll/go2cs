@@ -711,7 +711,7 @@ internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx
 
             if (check.recordTypes() && x.mode != constant_) {
                 var types = new slice<ΔType>(nargs);
-                foreach (var (i, _) in types) {
+                foreach (var i in range(types)) {
                     types[i] = x.typ;
                 }
                 check.recordBuiltinType(call.Fun, makeSig(x.typ, types.ꓸꓸꓸ));

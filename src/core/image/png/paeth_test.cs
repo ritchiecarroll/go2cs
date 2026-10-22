@@ -76,7 +76,7 @@ public static void TestPaethDecode(ж<testing.T> Ꮡt) {
     var r = rand.New(rand.NewSource(1));
     for (nint bytesPerPixel = 1; bytesPerPixel <= 8; bytesPerPixel++) {
         for (nint i = 0; i < 100; i++) {
-            foreach (var (j, _) in pdat0) {
+            foreach (var j in range(pdat0)) {
                 pdat0[j] = (uint8)r.Uint32();
                 cdat0[j] = (uint8)r.Uint32();
             }

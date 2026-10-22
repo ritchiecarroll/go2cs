@@ -253,6 +253,9 @@
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\good\anchor\anchor.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\goroot\src\anchor\anchor.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\corpus_baseline.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\move2heap\bad\m2h\m2h.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\move2heap\good\m2h\m2h.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\move2heap\goroot\src\m2h\m2h.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad\plant\plant.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\bad2\plant\plant.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\planted\good\plant\plant.cs" />
@@ -463,6 +466,7 @@
     <None Include="$(MSBuildThisFileDirectory)projitemsIntegrity_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizedFieldLifts_test.go" />
     <None Include="$(MSBuildThisFileDirectory)publicizeSiblingTestSeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)rangeIndexOnly_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncAssignedVar_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeOverFuncBinding_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeScalarAssignedVar_test.go" />
@@ -517,6 +521,7 @@
     <None Include="$(MSBuildThisFileDirectory)Stack.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints.go" />
     <None Include="$(MSBuildThisFileDirectory)stackAppendHints_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)stackAppendMove2heap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stderrTail_test.go" />
     <None Include="$(MSBuildThisFileDirectory)stdLibConverter.go" />
     <None Include="$(MSBuildThisFileDirectory)stdNamespaceGuard_test.go" />

@@ -472,7 +472,7 @@ public static ж<ΔNat> ShiftRightVarTime(this ж<ΔNat> Ꮡx, nuint n) {
         shiftedLimbs = xLimbs.slice(shiftLimbs);
     }
 
-    foreach (var (i, _) in xLimbs) {
+    foreach (var i in range(xLimbs)) {
         if (i >= len(shiftedLimbs)) {
             xLimbs[i] = 0;
             continue;
@@ -620,7 +620,7 @@ public static (ж<Modulus>, error) NewModulusProduct(slice<byte> a, slice<byte> 
     var x = NewNat().resetToBytes(a);
     var y = NewNat().resetToBytes(b);
     var n = NewNat().reset(len((~x).limbs) + len((~y).limbs));
-    foreach (var (i, _) in (~y).limbs) {
+    foreach (var i in range((~y).limbs)) {
         n.Value.limbs[i + len((~x).limbs)] = addMulVVW((~n).limbs.slice(i, i + len((~x).limbs)), (~x).limbs, (~y).limbs[i]);
     }
     return newModulus(n.trim());
@@ -989,7 +989,7 @@ internal static nuint /*carry*/ addMulVVW(slice<nuint> z, slice<nuint> x, nuint 
     nuint carry = default!;
 
     _ = x[len(z) - 1]; // bounds check elimination hint
-    foreach (var (i, _) in z) {
+    foreach (var i in range(z)) {
         var (hi, lo) = bits.Mul(x[i], y);
         (lo, var c) = bits.Add(lo, z[i], 0);
         // We use bits.Add with zero to get an add-with-carry instruction that
@@ -1117,7 +1117,7 @@ public static ж<ΔNat> Exp(this ж<ΔNat> Ꮡout, ж<ΔNat> Ꮡx, slice<byte> e
 
             // Select x^k in constant time from the table.
             nuint k = (nuint)((byte)((b.Rsh((int64)(j))) & 0b1111));
-            foreach (var (i, _) in table) {
+            foreach (var i in range(table)) {
                 tmp.assign(ctEq(k, (nuint)(i + 1)), table[i]);
             }
 

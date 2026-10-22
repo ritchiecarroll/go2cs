@@ -55,7 +55,7 @@ using static go.unicode.utf16_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/utf16/utf16.go", "utf16.cs", "ABg8oqyygpSssoKUgqqilKSkupKCgoK4goKClIK0goKCtIK2rMSmtoKUqsaCqqKCgoC2yILGtJQ=")]
+[assembly: go.GoPositionMap("unicode/utf16/utf16.go", "utf16.cs", "ABg8oqyygpSssoKUgqqilKSkupKCgoK4goKClIK0goKCtIK2rMSmtoKUqsaCqsKCgoC2yILGtJQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.unicode;

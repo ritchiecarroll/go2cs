@@ -107,6 +107,7 @@ internal static partial (T, error) doBlockingWithCtx<T>(context.Context ctx, @st
 internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context ctx, @string name) {
     slice<@string> hosts = default!;
     error err = default!;
+    var hostsᴷ = new stackAppend<@string>(moves: true);
 
     (var addrs, err) = cgoLookupIP(ctx, "ip"u8, name);
     if (err != default!) {
@@ -116,8 +117,9 @@ internal static (slice<@string> hosts, error err) cgoLookupHost(context.Context 
         ref var addr = ref heap(new IPAddr(), out var Ꮡaddr);
         addr = vᴛ1;
 
-        hosts = append(hosts, Ꮡaddr.String());
+        hosts = append(hostsᴷ, hosts, Ꮡaddr.String());
     }
+    hosts = move2heap(hostsᴷ, hosts);
     return (hosts, default!);
 }
 

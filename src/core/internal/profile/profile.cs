@@ -285,7 +285,7 @@ public static error Aggregate(this ref Profile p, bool inlineFrame, bool functio
                 l.Value.Line = (~l).Line.slice(len((~l).Line) - 1);
             }
             if (!linenumber) {
-                foreach (var (i, _) in (~l).Line) {
+                foreach (var i in range((~l).Line)) {
                     (~l).Line[i].ΔLine = 0;
                 }
             }
@@ -364,7 +364,7 @@ public static @string String(this ref Profile p) {
         if (len((~l).Line) == 0) {
             ss = append(ss, locStr);
         }
-        foreach (var (li, _) in (~l).Line) {
+        foreach (var li in range((~l).Line)) {
             @string lnStr = "??"u8;
             {
                 var fn = (~l).Line[li].Function; if (fn != nil) {
@@ -470,7 +470,7 @@ public static error Compatible(this ref Profile p, ж<Profile> Ꮡpb) {
         return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
     }
 
-    foreach (var (i, _) in p.SampleType) {
+    foreach (var i in range(p.SampleType)) {
         if (!compatibleValueTypes(p.SampleType[i], pb.SampleType[i])) {
             return fmt.Errorf("incompatible sample types %v and %v"u8, p.SampleType, pb.SampleType);
         }
@@ -574,7 +574,7 @@ public static void Scale(this ref Profile p, float64 ratio) {
         return;
     }
     var ratios = new slice<float64>(len(p.SampleType));
-    foreach (var (i, _) in p.SampleType) {
+    foreach (var i in range(p.SampleType)) {
         ratios[i] = ratio;
     }
     p.ScaleN(ratios);

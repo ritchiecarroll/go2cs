@@ -26,7 +26,7 @@ partial struct MultiHandler {
 }
 
 public static bool Enabled(this ref MultiHandler h, context.Context ctx, ΔLevel l) {
-    foreach (var (i, _) in h.multi) {
+    foreach (var i in range(h.multi)) {
         if (h.multi[i].Enabled(ctx, l)) {
             return true;
         }
@@ -39,7 +39,7 @@ public static error Handle(this ref MultiHandler h, context.Context ctx, Record 
     var errsᴷ = new stackAppend<error>();
 
     slice<error> errs = default!;
-    foreach (var (i, _) in h.multi) {
+    foreach (var i in range(h.multi)) {
         if (h.multi[i].Enabled(ctx, r.Level)) {
             {
                 var err = h.multi[i].Handle(ctx, r.Clone()); if (err != default!) {
@@ -53,7 +53,7 @@ public static error Handle(this ref MultiHandler h, context.Context ctx, Record 
 
 public static ΔHandler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
     var handlers = new slice<ΔHandler>(0, len(h.multi));
-    foreach (var (i, _) in h.multi) {
+    foreach (var i in range(h.multi)) {
         handlers = builtin.append(handlers, h.multi[i].WithAttrs(attrs));
     }
     return new MultiHandlerжΔHandler(Ꮡ(new MultiHandler(multi: handlers)));
@@ -61,7 +61,7 @@ public static ΔHandler WithAttrs(this ref MultiHandler h, slice<Attr> attrs) {
 
 public static ΔHandler WithGroup(this ref MultiHandler h, @string name) {
     var handlers = new slice<ΔHandler>(0, len(h.multi));
-    foreach (var (i, _) in h.multi) {
+    foreach (var i in range(h.multi)) {
         handlers = builtin.append(handlers, h.multi[i].WithGroup(name));
     }
     return new MultiHandlerжΔHandler(Ꮡ(new MultiHandler(multi: handlers)));

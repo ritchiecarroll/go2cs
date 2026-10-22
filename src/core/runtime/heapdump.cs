@@ -536,7 +536,7 @@ internal static void dumpparams() {
     dumpint(goarch.PtrSize);
     uintptr arenaStart = default!;
     uintptr arenaEnd = default!;
-    foreach (var (i1, _) in mheap_.arenas) {
+    foreach (var i1 in range(mheap_.arenas)) {
         if (mheap_.arenas[i1] == nil) {
             continue;
         }

@@ -448,7 +448,7 @@ internal static void alginit() {
         initAlgAES();
         return;
     }
-    foreach (var (i, _) in hashkey) {
+    foreach (var i in range(hashkey)) {
         hashkey[i] = (uintptr)bootstrapRand();
     }
 }
@@ -457,7 +457,7 @@ internal static void initAlgAES() {
     useAeshash = true;
     // Initialize with random data so hash collisions will be hard to engineer.
     var key = (ж<array<uint64>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡaeskeysched));
-    foreach (var (i, _) in key.Value) {
+    foreach (var i in range(key)) {
         key.Value[i] = bootstrapRand();
     }
 }

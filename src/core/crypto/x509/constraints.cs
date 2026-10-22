@@ -137,7 +137,7 @@ internal static bool ipNetworkSubset(ж<net.IPNet> Ꮡa, ж<net.IPNet> Ꮡb) {
         return false;
     }
     var broadcast = new net.IP(builtin.len(b.IP));
-    foreach (var (i, _) in b.IP) {
+    foreach (var i in range(b.IP)) {
         broadcast[i] = (byte)(b.IP[i] | (((byte)(~b.Mask[i]))));
     }
     return Ꮡa.Contains(broadcast);

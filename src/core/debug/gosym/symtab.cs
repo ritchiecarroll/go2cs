@@ -477,7 +477,7 @@ public static (ж<Table>, error) NewTable(slice<byte> symtab, ж<LineTable> Ꮡp
 
             // Record file names
             nint depth = 0;
-            foreach (var (j, _) in (~obj).Paths) {
+            foreach (var j in range((~obj).Paths)) {
                 var s = Ꮡ((~obj).Paths, j);
                 if ((~s).Name == ""u8){
                     depth--;
@@ -646,7 +646,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
     if (err != default!) {
         return (pc, fn, err);
     }
-    foreach (var (i, _) in (~obj).Funcs) {
+    foreach (var i in range((~obj).Funcs)) {
         var f = Ꮡ((~obj).Funcs, i);
         var pcΔ2 = (~f).LineTable.LineToPC(abs, (~f).End);
         if (pcΔ2 != 0) {
@@ -660,7 +660,7 @@ public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @st
 // or nil if no such symbol is found.
 public static ж<Sym> LookupSym(this ref Table t, @string name) {
     // TODO(austin) Maybe make a map
-    foreach (var (i, _) in t.Syms) {
+    foreach (var i in range(t.Syms)) {
         var s = Ꮡ(t.Syms, i);
         switch ((~s).Type) {
         case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'D' or (rune)'d' or (rune)'B' or (rune)'b': {
@@ -676,7 +676,7 @@ public static ж<Sym> LookupSym(this ref Table t, @string name) {
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
 public static ж<Func> LookupFunc(this ref Table t, @string name) {
-    foreach (var (i, _) in t.Funcs) {
+    foreach (var i in range(t.Funcs)) {
         var f = Ꮡ(t.Funcs, i);
         if ((~(~f).Sym).Name == name) {
             return f;
@@ -687,7 +687,7 @@ public static ж<Func> LookupFunc(this ref Table t, @string name) {
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
 public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) {
-    foreach (var (i, _) in t.Syms) {
+    foreach (var i in range(t.Syms)) {
         var s = Ꮡ(t.Syms, i);
         switch ((~s).Type) {
         case (rune)'T' or (rune)'t' or (rune)'L' or (rune)'l' or (rune)'D' or (rune)'d' or (rune)'B' or (rune)'b': {

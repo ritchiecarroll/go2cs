@@ -55,7 +55,7 @@ using static go.crypto.@internal.impl_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/internal/impl/impl.go", "impl.cs", "ABU6AAsCgpQABxSigoKCgoKmrLKCgoKmpoKCgqassoKCgqaUgpSCgqamgoKCgg==")]
+[assembly: go.GoPositionMap("crypto/internal/impl/impl.go", "impl.cs", "ABU6AAsCgpQABxTCgoKCgoKmvNKCgoKmtoKCgqassoKCgqaUgpSCgqamgoKCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal;

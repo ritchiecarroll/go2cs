@@ -20,7 +20,7 @@ partial class chacha8rand_test_package {
 public static void TestOutput(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
-    foreach (var (i, _) in output) {
+    foreach (var i in range(output)) {
         while (ᐧ) {
             var (x, ok) = s.Next();
             if (ok) {
@@ -37,7 +37,7 @@ public static void TestOutput(ж<testing.T> Ꮡt) {
 public static void TestMarshal(ж<testing.T> Ꮡt) {
     ref var s = ref heap(new chacha8rand.State(), out var Ꮡs);
     Ꮡs.Init(seed);
-    foreach (var (i, _) in output) {
+    foreach (var i in range(output)) {
         while (ᐧ) {
             var b = Marshal(Ꮡs);
             s = new State(nil);
@@ -101,7 +101,7 @@ public static void TestBlockGeneric(ж<testing.T> Ꮡt) {
     if (!slices.Equal<slice<uint64>, uint64>(b1[..], b2[..])) {
         ref var @out = ref heap(new bytes.Buffer(), out var Ꮡout);
         fmt.Fprintf(new chacha8rand_test_package.bytes_BufferжWriter(Ꮡout), "%-18s %-18s\n"u8, blockˢ, blockGenericˢ);
-        foreach (var (i, _) in b1) {
+        foreach (var i in range(b1)) {
             @string suffix = ""u8;
             if (b1[i] != b2[i]) {
                 suffix = mismatchˢ;

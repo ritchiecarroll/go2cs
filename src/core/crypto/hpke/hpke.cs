@@ -267,7 +267,7 @@ public static (slice<byte>, error) Export(this ref Recipient r, @string exporter
 internal static slice<byte> nextNonce(this ref context ctx) {
     var nonce = new slice<byte>(ctx.aead.NonceSize());
     byteorder.BEPutUint64(nonce.slice(len(nonce) - 8), ctx.seqNum);
-    foreach (var (i, _) in ctx.baseNonce) {
+    foreach (var i in range(ctx.baseNonce)) {
         nonce[i] ^= (byte)(ctx.baseNonce[i]);
     }
     return nonce;

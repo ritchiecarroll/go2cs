@@ -2301,6 +2301,15 @@ var linknameForwardTargets = map[string]bool{
 	// adds a `time` project reference to time/tzdata, which is acyclic: time imports no subpackage
 	// of itself.
 	"time.registerLoadFromEmbeddedTZData": true,
+	// testing/cryptotest's two pulls, both Go 1.26 (rand.go's SetGlobalRandom calls them in order):
+	// `//go:linkname testingCheckParallel testing.checkParallel` reaches the HAND-OWNED testing host's
+	// public checkParallel (testing.cs, Go's parallel-conflict refusal), and `//go:linkname
+	// randSetTestingReader crypto/internal/rand.SetTestingReader` reaches ORDINARY CONVERTED Go, authorized
+	// by the matching one-arg handle in crypto/internal/rand/rand.go. Without them both stayed throwing
+	// stubs, and TestSetGlobalRandom's seven leaves read as infrastructure errors (NotImplementedException).
+	// Neither target imports testing/cryptotest, so the project references they add are acyclic.
+	"testing.checkParallel":                 true,
+	"crypto/internal/rand.SetTestingReader": true,
 	// runtime's fcntl, pulled by internal/syscall/unix's fcntl_unix.go
 	// (`//go:linkname fcntl runtime.fcntl` over a bodyless `func fcntl(fd, cmd, arg int32) (int32,
 	// int32)`), and authorized by the matching one-arg handle in runtime/linkname_unix.go. Like the

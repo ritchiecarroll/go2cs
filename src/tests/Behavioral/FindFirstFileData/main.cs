@@ -94,7 +94,7 @@ internal static void build(@string root) {
 
     foreach (var (_, f) in files) {
         var body = new slice<byte>(f.size);
-        foreach (var (i, _) in body) {
+        foreach (var i in range(body)) {
             body[i] = (byte)((rune)'a' + i % 26);
         }
         {

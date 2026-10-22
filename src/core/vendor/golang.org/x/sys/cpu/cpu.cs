@@ -317,14 +317,14 @@ field:
         }
 
         if (key == "all"u8) {
-            foreach (var (iΔ1, _) in options) {
+            foreach (var iΔ1 in range(options)) {
                 options[iΔ1].Specified = true;
                 options[iΔ1].Enable = enable || options[iΔ1].Required;
             }
             goto continue_field;
         }
 
-        foreach (var (iΔ2, _) in options) {
+        foreach (var iΔ2 in range(options)) {
             if (options[iΔ2].Name == key) {
                 options[iΔ2].Specified = true;
                 options[iΔ2].Enable = enable;

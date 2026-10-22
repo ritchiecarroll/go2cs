@@ -107,7 +107,7 @@ internal static frag compile(this ref compiler c, ж<Regexp> Ꮡre) {
             return c.nop();
         }
         frag f = default!;
-        foreach (var (j, _) in re.Rune) {
+        foreach (var j in range(re.Rune)) {
             var f1 = c.rune(re.Rune.slice(j, j + 1), re.Flags);
             if (j == 0){
                 f = f1;

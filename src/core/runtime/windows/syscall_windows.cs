@@ -198,7 +198,7 @@ internal static bool tryRegAssignArg(this ref abiDesc Δp, ж<_type> Ꮡt, uintp
         }
         else if (exprᴛ1 == abi.Struct) {
             var st = Ꮡt.Reinterpret<_type, structtype>();
-            foreach (var (i, _) in st.Fields) {
+            foreach (var i in range(st.Fields)) {
                 var f = Ꮡ(st.Fields, i);
                 if (!Δp.tryRegAssignArg((~f).Typ, offset + (~f).Offset)) {
                     return false;
