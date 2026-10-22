@@ -21,8 +21,8 @@ namespace go;
 /// semantics: a raw receiver box <c>ж&lt;T&gt;</c> held in an interface matches
 /// <c>case Iface:</c> whenever <c>*T</c> implements the interface. The box cannot nominally
 /// implement the C# interface — the generated pointer adapter (<c>TжIface</c>) does — so each
-/// generated adapter registers a wrapping factory here from a module initializer, and the golib
-/// type-assert machinery re-wraps the box on demand. This stays reflection-free and
+/// generated adapter registers a wrapping factory here (queued by its package's module initializer and
+/// run on a lookup's first miss), and the golib type-assert machinery re-wraps the box on demand. This stays reflection-free and
 /// Native-AOT-safe: factories are compiled lambdas over closed generic types, and the module
 /// initializer itself roots the adapter class against trimming.
 /// </para>

@@ -1,8 +1,8 @@
-// Guards Go-style float rendering in the golib fmt stub: the %v/Println default is %g at the
+// Guards Go-style float rendering through the converted fmt: the %v/Println default is %g at the
 // shortest precision that round-trips, which selects exponent form from the decimal exponent
 // alone and writes that exponent in lower case padded to a minimum of two digits.
 //
-// The stub used to hand floats to .NET's ToString(), whose thresholds and casing differ: it
+// A former golib fmt stub handed floats to .NET's ToString(), whose thresholds and casing differ: it
 // printed 1e+10 as "10000000000", 1.610612736e+09 as "1610612736" and, where it did reach
 // exponent form, spelled it "9.223372036854776E+18". Precision was honored for %f only, so a
 // bare %f dropped Go's six-digit default and %e/%g were left to .NET entirely.

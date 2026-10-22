@@ -3655,9 +3655,9 @@ public static partial class builtin
             // so a `case *T:` label (emitted `case ж<T> t:`) must match the box. One created from
             // a VALUE this assembly cannot partial is a generated IValueAdapter wrapping a copy,
             // whose Go dynamic type is the struct — so `case color.NRGBA:` must match that copy.
-            // A null Box (interface holding a nil *T) stays wrapped: Go would still match
-            // `case *T:` there, but no C# type pattern can bind null — the adapter at least keeps
-            // `case null:` (Go `case nil:`) a non-match, since such an interface value is NOT nil.
+            // A nil *T held in an interface unwraps to the shared ж<T>.NilBox, which the adapter's ctor
+            // puts in place of a null box: `case *T:` matches it with a nil t, as in Go (TypeSwitchNilPointer),
+            // and `case null:` (Go `case nil:`) does not, since such an interface value is NOT nil.
             target = UnwrapAdapter(target);
         }
 

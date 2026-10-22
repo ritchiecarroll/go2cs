@@ -1095,10 +1095,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 }
 
 // structHasPromotedEmbeds reports whether the type's underlying struct carries at least one
-// embedded field that the generated C# stores in a constructor-initialized readonly `ж<T>` box
-// (the StructTypeTemplate "Promoted Struct References"). A `default`-valued instance of such a
-// struct has null boxes, so the first promoted-member access throws NullReferenceException —
-// an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
+// embedded field that go2cs-gen's constructors build (StructTypeTemplate's AppendZeroValueInitializers:
+// a value embed by its own `new T(nil)`, a pointer embed as a nil `ж<T>` box). A `default`-valued
+// instance leaves a pointer embed a raw null, so a promoted access throws NullReferenceException where
+// Go panics — an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
 // follows the embedded-field emission above: an embed is a PROMOTING declared field (go2cs-gen
 // keeps the constructor route for it) unless it is an interface, a builtin non-named embed
 // (`int`), or a pointer to a non-named type. A CROSS-PACKAGE named embed answers true here even
@@ -1178,7 +1178,7 @@ func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
 }
 
 // structZeroValueNeedsConstruction reports whether a struct type's zero value default(T) is
-// BROKEN — it has a promoted-embed box (constructor-allocated) or a fixed-size array field
+// BROKEN — it has a promoted embed (constructor-built) or a fixed-size array field
 // (`= new(N)` field initializer that default(T) skips), directly or through a nested value-struct
 // field — so `var z T` must run the generated parameterless constructor (`new()`) rather than
 // emit `default!`. Mirrors go2cs-gen StructTypeTemplate.NeedsConstruction; a false result keeps the
