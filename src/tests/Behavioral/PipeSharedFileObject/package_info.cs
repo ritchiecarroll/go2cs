@@ -60,7 +60,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABVygs6CgpSUgqaUgqaogoKUgoKCgrimgoKQpLS0AAkIgpSCgoCCtoKUsoiAgramooKCgqaigIKkpoKCgoKUgIKkgoCCpJSClMqCgpSAgqSCgoKAgra4goKCgpSAgqSWmJaCgoKAgqSCpoKmgpSAgrY=", "102-102:1;124-134:1;136-141:2;143-148:3;150-171:4;173-189:5;191-232:6", "", "157=Is/1/2/1,Now/1/1/2,Add/1/1/2,SetDeadline/1/1/2,Is/2/2/2;180=readLines/1/1/1,Is/1/1/1")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ABWEAYIABhCCgpSUgqaUgqaogoKUgoKCgrimgoKCkKS0tAAJCIKUgoKAgraClLKIgIK2pqKCgoKmooCCpKaCgoKClICCpIKAgqSUgpTKgoKUgIKkgoKCgIK2uIKCgoKUgIKklpiWgoKCgIKkgqaCpoKUgIK2poIAAhCCgoKAgraUgoCCpJSUkoKikoKCgoKCpqaCgIKkpg==", "113-113:1;135-145:1;147-152:2;154-159:3;161-182:4;184-200:5;202-243:6;245-245:7;246-246:8;273-284:1", "", "160=Is/1/2/1,Now/1/1/2,Add/1/1/2,SetDeadline/1/1/2,Is/2/2/2;183=readLines/1/1/1,Is/1/1/1;285=Count/1/1/1,LastIndex/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
