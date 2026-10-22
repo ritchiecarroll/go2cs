@@ -145,7 +145,7 @@ What to notice:
 - **`default!` is the zero value.** `var w int` becomes `nint w = default!;`. The `!` is C#'s
   null-forgiving operator; it only silences a nullable warning ([Nil and Zero Values](#nil-and-zero-values)).
 - **Go comments are dropped by default.** This conversion ran without the `-comments` option, which keeps
-  them ([Comments](#comments)). The `// Hoisted @string literals` line is a note the converter always writes.
+  them ([Comments](#comments)).
 
 **A type and a method.** A struct, a function that returns a pointer to it, and a method with a pointer
 receiver:
@@ -331,7 +331,8 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 _ΔpN: src/go2cs/visitFuncDecl.go:1362-1376#03b3c7 and :2823-2831#701c82; :56-64#c625cd and :1914#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); interface methods and function types name every unnamed parameter: AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (Go AnonymousInterfaces.go:28 `interface{ Read([]byte) (int, error) }`), BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);`; a lone `_` that stays: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (a named `_`); several: GenericTypeInstantiation.cs.target:45#f1c413.
 Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:502#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:367-375#853c51).
-The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:72-76#b0ed6c and :121#941a6a. -->
+The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:72-76#b0ed6c and :121#941a6a.
+Set‿ example: NamedMapMethodShadow/main.cs.target:100#7fd7fe (a user package, so plain literals). -->
 
 **A first example.** This Go program declares a struct type, a method with a pointer receiver, and a
 function that takes a pointer and binds the method to a variable:
@@ -435,8 +436,8 @@ code, and the section that explains it in full.
 | `/*<-*/` | A channel's direction, kept as a comment: `/*<-*/channel<T>` is `<-chan T`, `channel/*<-*/<T>` is `chan<- T` | `/*<-*/channel<nint> src` | [Channels and `select`](#channels-and-select) |
 | `goǃ` | The `go` statement | `goǃ(ᴛ1 => fmt.Println(ᴛ1), firstˢ)` | [Goroutines](#goroutines) |
 | `ꟷ` | golib's `const bool ꟷ = false`. As an extra argument it picks the overload that returns `(value, ok)`, for a comma-ok receive or map lookup; its value is not used | `var (v, ok) = ᐸꟷ(d, ꟷ);`, `var (_, before) = seen[memo, ꟷ];` | [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
-| `ᐧ` | golib's `const bool ᐧ = true`. It is the `true` of a tagless switch or endless loop, and the extra argument of a comma-ok type assertion | `switch (ᐧ)`, `while (ᐧ)`, `err._<ж<NumError>>(ᐧ)` | [Expression Switch](#expression-switch-statements); [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
-| `._<T>()` | Type assertion `x.(T)`; with `ᐧ`, its comma-ok form | `i._<@string>()`, `err._<ж<NumError>>(ᐧ)` | [Empty Interface (`any`)](#empty-interface-any) |
+| `ᐧ` | golib's `const bool ᐧ = true`. It is the `true` of a tagless switch or endless loop, and the extra argument of a comma-ok type assertion | `switch (ᐧ)`, `while (ᐧ)`, `err._<ж<PathError>>(ᐧ)` | [Expression Switch](#expression-switch-statements); [Comma-Ok Forms](#multi-result-values-and-comma-ok-forms) |
+| `._<T>()` | Type assertion `x.(T)`; with `ᐧ`, its comma-ok form | `i._<@string>()`, `err._<ж<PathError>>(ᐧ)` | [Empty Interface (`any`)](#empty-interface-any) |
 | `ᒐ` | The `GoFrame` local that runs a function's deferred calls; names that start with `ᒐ`, such as the label `ᒐdone`, belong to the same frame | `GoFrame ᒐ = default;`, `ᒐdone: return (@out, label);` | [Defer / Panic / Recover](#defer--panic--recover) |
 | `break_L`, `continue_L` | `goto` targets for Go's labeled `break L` and `continue L` | `goto break_scan;`, `continue_scan:;` | [Loops, Range and Labels](#loops-range-and-labels) |
 | `XжI`, `XᴠI` | An adapter class: pointer `*X` (`ж`) or value `X` (`ᴠ`) as interface `I` | `new joinErrorжerror(e)`, `new HandlerᴠIface(…)` | [Interfaces](#interfaces) |
@@ -454,9 +455,9 @@ code, and the section that explains it in full.
 | `ᐧᐧ` | A `true` that C# does not treat as a constant (a `static readonly` field). It marks a leading `case true:` in a tagless switch, so C# still accepts the cases after it | `case {} when ᐧᐧ:` | [Reference → Expression Switch](ConversionStrategies-Reference/expression-switch.md#a-leading-constant-true-case-stays-opaque-to-the-compiler) |
 | `ᴋ` | A temporary that keeps a pointer passed to a system call alive until the call returns | `var ᴋ0 = @unsafe.SliceData(p);` | [`unsafe.Pointer` and `uintptr`](#unsafepointer-and-uintptr) |
 | `ᴷ` suffix | Go's 32-byte stack buffer for a slice variable whose append does not escape, or whose one escape Go moves to the heap (`x = move2heap(xᴷ, x);` ahead of that statement). The function declares one per variable at its entry, and the variable's first qualifying append passes it | `var xᴷ = new stackAppend<int64>();`, then `x = append(xᴷ, x, (int64)i);` | [Reference → Slices and Arrays](ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer) |
-| `ᴅ`, `ᴺ` suffix | Keep a Go type name. `ᴅ` is an empty C# marker interface, never implemented, whose `[GoLocalName]` attribute holds the Go name of a type converted to a `using` alias. `ᴺ` is an extra type parameter for a type argument's name | `[GoLocalName("Token")] public interface Tokenᴅ { }`, `nameOf<T, Tᴺ>` | [Reflection](#reflection-reflect) |
+| `ᴅ`, `ᴺ` suffix | Keep a Go type name. `ᴅ` is an empty C# marker interface, never implemented, whose `[GoLocalName]` attribute holds the Go name of a type converted to a `using` alias. `ᴺ` is an extra type parameter for a type argument's name | `[GoLocalName("Token")] public partial interface Tokenᴅ {}`, `nameOf<T, Tᴺ>` | [Reflection](#reflection-reflect) |
 | `_Δp0` | A made-up name for an unnamed or `_` parameter where a plain `_` would not work: C# forbids two parameters with the same name, and a parameter named `_` would capture the body's own discards (a `_ = …`, or a select case that receives and drops the value, `case <-ch:`). Interface methods and function types name every unnamed parameter this way. Otherwise a lone blank parameter stays `_` | `Read(slice<byte> _Δp0)`, `Seq2Like<K, V>(K _Δp0, V _Δp1)` | The naming rules in this section |
-| `Set‿` | The map write that a nested assignment `m[k1][k2] = v` calls on the element `m[k1]`, used only when the element's Go type declares a method named `Set` or is itself named `Set`. A Go method becomes an extension method, and C# runs a same-named member of the generated wrapper in its place, so the wrapper gives up that name: `Set` is dropped, and `Add`, `Remove`, `Clear`, `ContainsKey`, `TryGetValue` and a channel's `Send` and `Sent` become explicit interface implementations. `‿` (U+203F) is connector punctuation, legal in a C# name and impossible in a Go one | `envs["x"u8].Set‿(mixedˢ, "m"u8);` | [Source Generators](#source-generators) |
+| `Set‿` | The map write that a nested assignment `m[k1][k2] = v` calls on the element `m[k1]`, used only when the element's Go type declares a method named `Set` or is itself named `Set`. A Go method becomes an extension method, and C# runs a same-named member of the generated wrapper in its place, so the wrapper gives up that name: `Set` is dropped, and `Add`, `Remove`, `Clear`, `ContainsKey`, `TryGetValue` and a channel's `Send` and `Sent` become explicit interface implementations. `‿` (U+203F) is connector punctuation, legal in a C# name and impossible in a Go one | `envs["x"].Set‿("Mixed", "m");` | [Source Generators](#source-generators) |
 | `<func>_<type>` | A type declared inside a function, lifted to package scope | `main_point` | [Struct Types](#struct-types) |
 | `<pkg>_internal_test_package`, `<pkg>_test_package` | The classes for in-package test files and for the external `_test` package | `strings_internal_test_package` | [Converted Tests](#converted-tests) |
 
@@ -956,6 +957,12 @@ initialized before `main`'s `init` runs, and the program prints `count at init: 
 `builtin.initPackage` does not run the imported package's variable initializers; those still run the
 first time the package class is used.
 
+The [source generators](#source-generators) add module initializers of their own, for the lookup tables
+golib keeps, such as each package's pointer adapters and zero-value factories. Each one only queues the
+package's registrations; golib runs a table's queue the first time a lookup in it misses, so none of that
+work runs at startup.
+<!-- src/gen/go2cs-gen/DeferredRegistration.cs:22-25#3390c7 (the queueing initializer, ᴛDefer<Name> => GoDeferredRegistrations.<Q>.Defer(ᴛRegister<Name>)); queues: src/core/golib/GoDeferredRegistrations.cs:41-53#f24eed (NativeArrayOpeners, ZeroFactories, Adapters, EscapeRegistry), Defer :65#2fc92d, Run :83#9577db. -->
+
 Each hook name reads as "init, import, path". `ᴛ` marks a name the converter makes up, doubled here to
 keep these hooks apart from its other init helpers, and `ꓸ` stands in for the `/` of the import path
 ([Names and Glyphs](#reading-converted-code-names-and-glyphs)). `[GoTestMatchingConsoleOutput]` appears
@@ -996,7 +1003,7 @@ constraints and file-name suffixes, as `go build` does. The standard library is 
 Linux and macOS, each on amd64. Files whose C# differs between them go into `windows/`, `linux/` and
 `darwin/` subfolders. For example, `os` keeps `dir_windows.cs` in `os/windows/` and `dirent_linux.cs` in
 `os/linux/`.
-<!-- source: docs/ConversionStrategies-Reference/package-conversion.md:373 (-platforms windows/amd64,linux/amd64,darwin/amd64) -->
+<!-- source: docs/ConversionStrategies-Reference/package-conversion.md:431 (-platforms windows/amd64,linux/amd64,darwin/amd64) -->
 
 The project compiles its flat files plus the one folder named by the `GoTargetOS` build property. It
 defaults to `windows`; a build sets another target with, for example, `-p:GoTargetOS=linux`. A package
@@ -1033,6 +1040,7 @@ section, and deletes the file when none is left. The file is the converter's onl
 the go2cs marker; a package's own `.editorconfig` is never touched (the conversion prints a warning naming
 the entries it would have written).
 
+<!-- the entry below: src/core/runtime/.editorconfig:1-3,9-11#b39a8b (its darwin section, lines 5-7, omitted); the marker line: src/go2cs/warningEntries.go:57#cdb354 -->
 ```ini
 # go2cs: per-file warning entries, written by every conversion of this package -- do not edit
 # Each section turns off one C# warning in one converted file, for a reason the converter
@@ -1051,7 +1059,8 @@ dotnet_diagnostic.CS0219.severity = none
 
 Go initializes package-level vars in dependency order: a var is set only after every var it reads. C# sets
 static fields in a different order. So go2cs moves the few vars where the two orders differ into a
-generated static constructor. Every other package var keeps its plain, readable field initializer.
+generated static constructor. Every other package var keeps its plain, readable field initializer, except
+a few listed tables that are [built on their first read](#a-listed-var-is-built-on-its-first-read).
 
 **The problem: C# runs static field initializers in file order.** A Go package becomes one C#
 `partial class` named `<name>_package`, with one C# file per Go file ([Package Conversion](#package-conversion)).
@@ -1261,6 +1270,41 @@ for `registry` and `names`, in the last file.
 **This order is safe because of how C# initializes a class.** C# runs every static field initializer, in
 every file, before the static constructor body. So each moved var finds its unmoved dependencies already
 set. The constructor then sets the moved vars in Go's order.
+
+<a id="a-listed-var-is-built-on-its-first-read"></a>
+**A listed var is built on its first read.** Go's linker writes a table of constants and function values
+into the binary as static data, so it costs a Go program nothing at startup. As a C# field initializer, the
+same table is built, and its code compiled, every time the program starts. So the converter keeps a short
+list of such vars, and the list holds runtime's two malloc dispatch tables, `mallocScanTable` and
+`mallocNoScanTable`. A listed var becomes a `ref` property over a small nested class, named with the
+converter's `ᴛ` mark, whose field initializer .NET runs on the first read. Code reads and writes the var by
+its Go name, as it would a field, and `package_init.cs` never calls it:
+
+<!-- source: GOROOT/src/runtime/malloc_tables_generated.go:8-522 -->
+```go
+var mallocScanTable = [513]func(size uintptr, typ *_type, needzero bool) unsafe.Pointer{
+	mallocPanic,
+	mallocgcSmallScanNoHeaderSC1,
+…
+}
+```
+<!-- source: src/core/runtime/malloc_tables_generated.cs:9-524 -->
+```csharp
+internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.value;
+private static class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> value = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+    mallocPanic,
+    mallocgcSmallScanNoHeaderSC1,
+…
+}.array(); }
+```
+
+`array<T>` is golib's form of Go's `[N]T`, `ж<_type>` its pointer `*_type`, and `Func<…>` the C# delegate for
+a Go `func` type. Building the value later must not change it, so the converter accepts a listed var only
+when it is declared alone, its address is never taken, and its initializer holds only constants, types,
+conversions and package function values: no call, no func literal, no `&` or `<-`, and no read of a package
+var. It refuses a listed var that breaks this rule and names it.
+
+<!-- the list: src/go2cs/lazyPackageVarOperations.go:31-36#a0c95b; the rule: lazyPackageVarRefusal, :54-96#ac6671; the shape: writeLazyPackageVar, :98-104#6e516e; kept out of the ordered ctor: src/go2cs/initOrderOperations.go:282-284#3bf2e5. Guards: TestLazyPackageVarIsBuiltOnFirstRead and TestLazyPackageVarRefusesAnInitializerThatCallsOrReads (src/go2cs/lazyPackageVar_test.go), GolibTests MallocDispatchTablesTests (src/tests/GolibTests/MallocDispatchTablesTests.cs). Why these two: their one reader, mallocgc's size-specialized branch, is gated by a const false (goexperiment.SizeSpecializedMalloc is off), so no path reads them; built eagerly they were 2 x 17.1K IL JIT-compiled at every startup (PerfStartup, commit 0c8c1a1ca). -->
 
 **A var that reads another package's var needs no ordering.** Each Go package is its own C# class.
 .NET initializes a class before its static fields are first read, so the imported package is always ready.
