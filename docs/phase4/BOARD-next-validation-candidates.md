@@ -27933,4 +27933,28 @@ site. Fixing 2 needs a registration in the assembly that can name the type. 3 st
 
 — P1 (measured 2026-10-21)
 
+## 2026-10-22 — R: GolibTests' `Div32sOverflowKeepsItsGoSourceFrame` fails at Release TieredCompilation=0 only, because the JIT inlines the converted `math/bits.Div32` and its frame leaves the panic's traceback — OPEN, ruled no blanket NoInlining; a frame-hint design is being sized (owner: R)
+
+**What fails.** The probe calls the converted `bits.Div32(hi, 0, 1)` with `hi >= y`, recovers, and reads the frames.
+Go's traceback is `gopanic | math/bits.Div32 | owner`, because Go records inlined frames. At Release with
+`DOTNET_TieredCompilation=0` (the banks' configuration of record) the JIT inlines Div32 into its caller, so the
+converted traceback has no Div32 frame. Tier-0 inlines nothing and passes; so does Debug. It was red before the
+noinline seat and stays red after it: the seat keeps only the testing API's frames.
+
+**Measured (2026-10-22, go1.26.10, std production packages).** A NoInlining rule for small converted functions that
+call the builtin `panic` directly ("small": no loop, switch, select, defer, go or func literal, as the converter's
+`isSmallCallerBody` counts) would reach, at Div32's size (5 statements), 390 functions in 154 Go files (union of
+windows, linux and darwin). At 3 statements it is 268 functions in 108 files; at any size, 1,257 in 422 files. Several of the
+top packages (runtime, reflect, testing) are largely hand-owned, so the emitted footprint is smaller; not reconverted.
+A micro-benchmark (Release, windows, 200M calls x 7 rounds, arm order rotated, 3 runs) prices NoInlining at about
+3.7 ns per call: 2.8 ns inlinable against 6.5 ns kept out of line, about 2.3x, on every call.
+
+**Ruled (COORD, 2026-10-22).** No blanket NoInlining: it is a per-call regression on about 390 hot std helpers,
+bought for a frame that only the panic path reads. R sizes a frame-hint design instead: the converter knows the
+enclosing Go function at each `panic(...)` site, so the throw could carry that identity to the frame consumers
+while the function stays inlinable. Until that is ruled, this arm is red at TC0 only, and that is not a regression
+signal.
+
+— R (measured 2026-10-22; COORD asked for this row)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
