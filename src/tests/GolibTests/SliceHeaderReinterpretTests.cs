@@ -219,9 +219,10 @@ public class SliceHeaderReinterpretTests
         // A header over an ARRAY box, not a slice: Go has no such reinterpretation and the adapter declines.
         Assert.IsFalse(SliceHeaderBox<array<byte>, SliceHeaderShape>.Applies, "the source must be slice<X>");
 
-        // The STRING header is the other half of the seam and is deliberately NOT switched on here: its
-        // live route is the (uintptr) token bridge, which resolves a reference-bearing @string box only once
-        // Q44's token registry lands. EXPECTED TODAY; this arm flips when the string half is admitted.
-        Assert.IsFalse(SliceHeaderBox<@string, StringHeaderShape>.Applies, "the string half is not admitted (Q44 first)");
+        // The STRING header is the other half of the seam. It stayed off this box until the unsafeheader write-through
+        // seat (2026-10-21) admitted it as its own box, StringHeaderBox, which this arm now pins: the slice box still
+        // declines the pair, and the string box serves it.
+        Assert.IsFalse(SliceHeaderBox<@string, StringHeaderShape>.Applies, "the slice header box declines a string source");
+        Assert.IsTrue(StringHeaderBox<StringHeaderShape>.Applies, "the string half is admitted, by its own box");
     }
 }
