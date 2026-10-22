@@ -284,9 +284,14 @@ public static class PointerExtensions
         // PINNED managed struct whose first field read back the backing array's reference AS a pointer
         // (measured 2026-09-04: a type-confused System.Byte[], a native SIGSEGV on the first dereference).
         // The header box materializes Go's (array, len, cap) from the live slice instead; see its remarks
-        // for the write limit and the string half it deliberately leaves to Q44.
+        // for the write direction and its limits.
         if (SliceHeaderBox<T, TDst>.Applies)
             return SliceHeaderBox<T, TDst>.Mint(box);
+
+        // Its string half, `(*unsafeheader.String)(unsafe.Pointer(&s))`: Go's (Data, Len) over a @string window, which the
+        // address route below refused by name. Gated on the static source type, so the JIT folds it out of every other pair.
+        if (typeof(T) == typeof(@string) && StringHeaderBox<TDst>.Applies)
+            return StringHeaderBox<TDst>.Mint((ж<@string>)(object)box);
 
         // The MIRROR: a Go slice built FROM a header — `*(*[]T)(unsafe.Pointer(&sl))` over a
         // notInHeapSlice the runtime has just filled with a NATIVE base and (len, cap), emitted as
