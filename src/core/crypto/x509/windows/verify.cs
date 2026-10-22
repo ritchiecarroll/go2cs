@@ -1207,6 +1207,8 @@ internal static void deleteLeaf(this ref policyGraph pg, ΔOID policy) {
 }
 
 internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) {
+    var validNodesᴷ = new stackAppend<ж<policyGraphNode>>(moves: true);
+
     slice<ж<policyGraphNode>> validNodes = default!;
     for (nint i = pg.depth; i >= 0; i--) {
         foreach (var (_, n) in pg.strata[i]) {
@@ -1217,12 +1219,13 @@ internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph
             if (builtin.len((~n).parents) == 1) {
                 foreach (var (p, _) in (~n).parents) {
                     if ((~p).validPolicy.Equal(anyPolicyOID)) {
-                        validNodes = append(validNodes, n);
+                        validNodes = append(validNodesᴷ, validNodes, n);
                     }
                 }
             }
         }
     }
+    validNodes = move2heap(validNodesᴷ, validNodes);
     return validNodes;
 }
 

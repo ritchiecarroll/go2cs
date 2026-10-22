@@ -339,7 +339,7 @@ public static void BenchmarkUnsafeStrings(ж<testing.B> Ꮡb) {
     var dst = new slice<global::go.log.slog_package.Value>(100);
     var src = new slice<global::go.log.slog_package.Value>(len(dst));
     Ꮡb.Logf("Value size = %d"u8, /* unsafe.Sizeof(Value{}) */ (uintptr)24);
-    foreach (var (i, _) in src) {
+    foreach (var i in range(src)) {
         src[i] = StringValue(fmt.Sprintf("string#%d"u8, i));
     }
     b.ResetTimer();

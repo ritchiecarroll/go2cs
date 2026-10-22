@@ -21,7 +21,7 @@ internal const bool purego = true;
 internal static array<uint64> hashkey = new(4);
 
 [GoInit] internal static void init() {
-    foreach (var (i, _) in hashkey) {
+    foreach (var i in range(hashkey)) {
         hashkey[i] = randUint64();
     }
 }

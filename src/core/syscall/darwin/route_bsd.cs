@@ -342,6 +342,7 @@ internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage 
 // Deprecated: Use golang.org/x/net/route instead.
 public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<byte> b) {
     slice<RoutingMessage> msgs = default!;
+    var msgsᴷ = new stackAppend<RoutingMessage>(moves: true);
 
     nint nmsgs = 0;
     nint nskips = 0;
@@ -356,7 +357,7 @@ public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<
             var m = any.toRoutingMessage(b); if (m == default!){
                 nskips++;
             } else {
-                msgs = append(msgs, m);
+                msgs = append(msgsᴷ, msgs, m);
             }
         }
         b = b.slice((~any).Msglen);
@@ -365,6 +366,7 @@ public static (slice<RoutingMessage> msgs, error err) ParseRoutingMessage(slice<
     if (nmsgs != len(msgs) + nskips) {
         return (default!, EINVAL);
     }
+    msgs = move2heap(msgsᴷ, msgs);
     return (msgs, default!);
 }
 

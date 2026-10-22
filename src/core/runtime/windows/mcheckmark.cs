@@ -322,7 +322,7 @@ internal static void forEachSpecial(Func<uintptr, ж<mspan>, ж<special>, bool> 
         var ha = mheap_.arenas[ai.l1()].Value[ai.l2()];
 
         // Construct slice of bitmap which we'll iterate over.
-        foreach (var (i, _) in (~ha).pageSpecials[..]) {
+        foreach (var i in range((~ha).pageSpecials[..])) {
             // Find set bits, which correspond to spans with specials.
             var specials = atomic.Load8(ha.at(heapArena.ᏑpageSpecials, i));
             if (specials == 0) {

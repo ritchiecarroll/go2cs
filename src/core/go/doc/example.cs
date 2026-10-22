@@ -581,6 +581,8 @@ internal static slice<tokenꓸPos> findImportGroupStarts(slice<ж<ast.ImportSpec
 
 // Helper for findImportGroupStarts to ease testing.
 internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.ImportSpec>> origImps) {
+    var groupStartsᴷ = new stackAppend<ж<ast.ImportSpec>>(moves: true);
+
     // Copy to avoid mutation.
     var imps = new slice<ж<ast.ImportSpec>>(len(origImps));
     copy(imps, origImps);
@@ -592,7 +594,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
     tokenꓸPos prevEnd = (tokenꓸPos)(-2);
     foreach (var (_, imp) in imps) {
         if (imp.Pos() - prevEnd > 2) {
-            groupStarts = append(groupStarts, imp);
+            groupStarts = append(groupStartsᴷ, groupStarts, imp);
         }
         prevEnd = imp.End();
         // Account for end-of-line comments.
@@ -600,6 +602,7 @@ internal static slice<ж<ast.ImportSpec>> findImportGroupStarts1(slice<ж<ast.Im
             prevEnd = (~imp).Comment.End();
         }
     }
+    groupStarts = move2heap(groupStartsᴷ, groupStarts);
     return groupStarts;
 }
 
@@ -609,6 +612,8 @@ internal static readonly @string copyrightˢ = "Copyright"u8;
 // playExampleFile takes a whole file example and synthesizes a new *ast.File
 // such that the example is function main in package main.
 internal static ж<ast.File> playExampleFile(ref ast.File @file) {
+    var declsᴷ = new stackAppend<ast.Decl>(moves: true);
+
     // Strip copyright comment if present.
     var comments = @file.Comments;
     if (len(comments) > 0 && strings.HasPrefix(comments[0].Text(), copyrightˢ)) {
@@ -630,13 +635,14 @@ internal static ж<ast.File> playExampleFile(ref ast.File @file) {
                 d = new ast.FuncDeclжDecl(ᏑnewF);
             }
         }
-        decls = append(decls, d);
+        decls = append(declsᴷ, decls, d);
     }
 
     // Copy the File, as it may be used elsewhere.
     ref var f = ref heap<ast.File>(out var Ꮡf);
     f = @file;
     f.Name = ast.NewIdent(mainˢ);
+    decls = move2heap(declsᴷ, decls);
     f.Decls = decls;
     f.Comments = comments;
     return Ꮡf;

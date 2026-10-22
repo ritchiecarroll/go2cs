@@ -851,8 +851,22 @@ public static partial class GoReflect
             s_sliceElemDims.TryGetValue(innerBacking, out nint[]? innerRecorded))
             return innerRecorded;
 
+        // Observation reads element 0, so ask the slice's TYPE first whether its element can carry dims:
+        // only an array or a pointer can. A scalar, string or slice element is then never read, which
+        // boxed it and probed its type for a pointer shape on every TypeOf of a []int8 (reflect's
+        // TestDeepEqualAllocs, 280 B a call).
+        if (KindOf(ElementType(box?.GetType())) is not (Array or Pointer))
+            return null;
+
+        // A one-dimension array element answers in place and shares one dims array per length, as a
+        // recorded answer is shared: [][6]byte read element 0 as a boxed array and built [6] on every TypeOf.
+        if (box is IGoReflectSequence sequence && sequence.ReflectFirstArrayLength() is var length and >= 0)
+            return s_oneDimArrayDims.GetOrAdd(length, static n => [n]);
+
         return box is ISlice { Length: > 0 } s ? elemArrayDims(((IArray)s)[0]) : null;
     }
+
+    private static readonly ConcurrentDictionary<nint, nint[]> s_oneDimArrayDims = new();
 
     private static readonly ConcurrentDictionary<Type, FieldInfo?> s_namedSliceValueFields = new();
 

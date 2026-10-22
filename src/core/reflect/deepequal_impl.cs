@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 // Hand-finished conversion (the reflection bridge — Phase 4, DeepEqual). Go's deepValueEqual keys its
 // cycle-detection `visited` map on the values' internal data words (v.ptr / v.pointer()) — raw eface
@@ -83,7 +84,7 @@ partial class reflect_package {
 //
 // HAND-OWNED, and the reason is an ALLOCATION rather than a semantic. Go's body ends
 // `deepValueEqual(v1, v2, make(map[visit]bool))`, and the hand-owned deepValueEqual below never
-// reads that map — it carries a HashSet<visitPair> instead, because Go keys cycle detection on the
+// reads that map — it carries a visitSet instead, because Go keys cycle detection on the
 // values’ internal data words (unsafe.Pointer) and the managed bridge has none. The auto conversion
 // therefore minted a golib map nothing could read, on EVERY DeepEqual call in the corpus: measured
 // at exactly 88 B and exactly ONE golib object, flat across every shape.
@@ -109,7 +110,8 @@ public static bool DeepEqual(any x, any y) {
     if (!AreEqual(v1.Type(), v2.Type())) {
         return false;
     }
-    return deepValueEqualBoxed(v1, v2, new HashSet<visitPair>());
+    visitSet visited = default;
+    return deepValueEqualBoxed(v1, v2, ref visited);
 }
 
 // Tests for deep equality using reflected types. Mirrors Go's deepValueEqual over the bridge's boxed
@@ -121,10 +123,11 @@ public static bool DeepEqual(any x, any y) {
 // Retained although DeepEqual above no longer routes through it: it is the displaced form of a Go
 // function that still exists, and reflectlite's mirror and any future in-package caller reach it.
 internal static bool deepValueEqual(ΔValue v1, ΔValue v2, map<visit, bool> visited) {
-    return deepValueEqualBoxed(v1, v2, new HashSet<visitPair>());
+    visitSet inProgress = default;
+    return deepValueEqualBoxed(v1, v2, ref inProgress);
 }
 
-private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPair> visited) {
+private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, ref visitSet visited) {
     if (!v1.IsValid() || !v2.IsValid()) {
         return v1.IsValid() == v2.IsValid();
     }
@@ -179,8 +182,11 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPai
         if (live1 is IArray<byte> byteArr1 && live2 is IArray<byte> byteArr2) {
             return byteArr1.ToSpan().SequenceEqual(byteArr2.ToSpan());
         }
+        if (tryNestedSequenceEqual(live1, live2, elementTypeOf(v1), out bool nestedEqual)) {
+            return nestedEqual;
+        }
         for (nint i = 0; i < v1.Len(); i++) {
-            if (!deepValueEqualBoxed(v1.Index(i), v2.Index(i), visited)) {
+            if (!deepValueEqualBoxed(v1.Index(i), v2.Index(i), ref visited)) {
                 return false;
             }
         }
@@ -221,17 +227,24 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPai
         // nil/length/same-backing cases are already settled, so all that remains is content -- and for
         // these kinds a span compare answers it without materialising a Value per element.
         //
-        // ⚠ The admitted set is DELIBERATELY NARROW and float/complex are NOT in it. SequenceEqual
+        // ⚠ The bitwise set is DELIBERATELY NARROW and float/complex are NOT in it. SequenceEqual
         // dispatches to IEquatable<T>.Equals, and Double.Equals(NaN, NaN) is TRUE where Go's `==` is
-        // false -- measured on both sides. A []float64{NaN} pair would compare EQUAL here and NOT equal
+        // false -- measured on both sides. A []float64{NaN} pair would compare EQUAL there and NOT equal
         // in Go, and NONE of TestDeepEqualAllocs' 39 subtests could catch it because deepEqualPerfTests
-        // uses 1.414. Those kinds keep the elementwise walk. Guarded by arm5's NaN rows, which go RED
-        // when float32/float64 are added to the admitted set (measured: exactly 3 rows invert).
-        if (tryBitwiseSliceEqual(live1, live2, elementTypeOf(v1), out bool bitwiseEqual)) {
-            return bitwiseEqual;
+        // uses 1.414. Floats, complex and strings take the second set instead, compared element by
+        // element with the type's own `==` operator, which is Go's. Guarded by arm5's NaN rows, which go
+        // RED when float32/float64 join the bitwise set (measured: exactly 3 rows invert).
+        if (tryScalarSliceEqual(live1, live2, elementTypeOf(v1), out bool scalarEqual)) {
+            return scalarEqual;
+        }
+        // One level further: a sequence whose ELEMENT is a slice or array of those same scalar kinds
+        // ([][]byte, [][6]byte, [2][]float64). The walk paid an ElemRefBox and a boxed element struct per
+        // element per side, plus a descriptor key render per Index for an array element.
+        if (tryNestedSequenceEqual(live1, live2, elementTypeOf(v1), out bool nestedEqual)) {
+            return nestedEqual;
         }
         for (nint i = 0; i < v1.Len(); i++) {
-            if (!deepValueEqualBoxed(v1.Index(i), v2.Index(i), visited)) {
+            if (!deepValueEqualBoxed(v1.Index(i), v2.Index(i), ref visited)) {
                 return false;
             }
         }
@@ -241,7 +254,7 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPai
         if (v1.IsNil() || v2.IsNil()) {
             return v1.IsNil() == v2.IsNil();
         }
-        return deepValueEqualBoxed(v1.Elem(), v2.Elem(), visited);
+        return deepValueEqualBoxed(v1.Elem(), v2.Elem(), ref visited);
     }
     if (kind == ΔPointer) {
         if (live1 is not null && ReferenceEquals(live1, live2)) {
@@ -250,11 +263,11 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPai
         }
         // Elem maps a nil box to the invalid Value, so two distinct nil pointers compare equal
         // through the invalid==invalid rule, and nil-vs-non-nil compares false — matching Go.
-        return deepValueEqualBoxed(v1.Elem(), v2.Elem(), visited);
+        return deepValueEqualBoxed(v1.Elem(), v2.Elem(), ref visited);
     }
     if (kind == Struct) {
         for ((nint i, nint n) = (0, v1.NumField()); i < n; i++) {
-            if (!deepValueEqualBoxed(v1.Field(i), v2.Field(i), visited)) {
+            if (!deepValueEqualBoxed(v1.Field(i), v2.Field(i), ref visited)) {
                 return false;
             }
         }
@@ -296,7 +309,7 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPai
             return false;
         }
         if (nilPresent1 && !deepValueEqualBoxed(mapElemValue(nilValue1, elemType1, v1.flag),
-                                                mapElemValue(nilValue2, elemType2, v2.flag), visited)) {
+                                                mapElemValue(nilValue2, elemType2, v2.flag), ref visited)) {
             return false;
         }
         foreach (DictionaryEntry entry in m1) {
@@ -309,7 +322,7 @@ private static bool deepValueEqualBoxed(ΔValue v1, ΔValue v2, HashSet<visitPai
             // IsNil), rather than through the invalid==invalid rule that only held when BOTH sides
             // happened to spell nil the same way.
             if (!deepValueEqualBoxed(mapElemValue(entry.Value, elemType1, v1.flag),
-                                     mapElemValue(m2[entry.Key], elemType2, v2.flag), visited)) {
+                                     mapElemValue(m2[entry.Key], elemType2, v2.flag), ref visited)) {
                 return false;
             }
         }
@@ -383,21 +396,29 @@ private static bool isGoBitwiseEqualElement(System.Type t) =>
     // reaches it. It is the only golib scalar struct, so no sibling is left inconsistent.
     t == typeof(uintptr);
 
+// The element kinds whose own `==` operator is Go's `==` while their bitwise equality is not: floats and
+// complex, under which NaN is unequal to itself (complex64 is golib's struct, complex128 the BCL's
+// Complex; both compare part by part with float `==`), and strings, whose `==` compares the bytes. A
+// slice of them compares element by element with that operator, still without a Value per element:
+// the walk minted an ElemRefBox and a boxed element per element per side, which is all a
+// []float64{1.414} cost in reflect's TestDeepEqualAllocs.
+private static bool isGoOperatorEqualElement(System.Type t) =>
+    t == typeof(float) || t == typeof(double) ||
+    t == typeof(complex64) || t == typeof(System.Numerics.Complex) ||
+    t == typeof(@string);
+
 // One cached delegate per element type; a null memoises a REFUSAL so an inadmissible kind is rejected
 // without re-deciding. The factory is STATIC -- the key IS the state -- so a cache hit allocates no
 // display-class closure, which is the cost the descriptor caches were carrying until train 33.
-private static readonly ConcurrentDictionary<System.Type, Func<object, object, bool>?> s_bitwiseSliceEq = new();
+private static readonly ConcurrentDictionary<System.Type, Func<object, object, bool>?> s_scalarSliceEq = new();
 
-private static bool tryBitwiseSliceEqual(object? a, object? b, System.Type? elemType, out bool equal) {
+private static bool tryScalarSliceEqual(object? a, object? b, System.Type? elemType, out bool equal) {
     equal = false;
     if (a is null || b is null || elemType is null) {
         return false;
     }
-    Func<object, object, bool>? cmp = s_bitwiseSliceEq.GetOrAdd(elemType, static et =>
-        isGoBitwiseEqualElement(et)
-            ? typeof(reflect_package).GetMethod(nameof(bitwiseSliceEqualOf), BindingFlags.NonPublic | BindingFlags.Static)!
-                  .MakeGenericMethod(et).CreateDelegate<Func<object, object, bool>>()
-            : null);
+    Func<object, object, bool>? cmp = s_scalarSliceEq.GetOrAdd(elemType, static et =>
+        spanEqualityOf(et) is System.Type spanEq ? genericComparer(nameof(scalarSliceEqualOf), et, spanEq) : null);
     if (cmp is null) {
         return false;
     }
@@ -405,12 +426,111 @@ private static bool tryBitwiseSliceEqual(object? a, object? b, System.Type? elem
     return true;
 }
 
+// The comparer for an element kind whose content compare is Go's `==`, or null for any other kind.
+private static System.Type? spanEqualityOf(System.Type elemType) =>
+    isGoBitwiseEqualElement(elemType) ? typeof(bitwiseSpanEquality<>).MakeGenericType(elemType)
+    : isGoOperatorEqualElement(elemType) ? typeof(operatorSpanEquality<>).MakeGenericType(elemType)
+    : null;
+
+private static Func<object, object, bool> genericComparer(string method, System.Type elemType, System.Type spanEquality) =>
+    typeof(reflect_package).GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static)!
+        .MakeGenericMethod(elemType, spanEquality).CreateDelegate<Func<object, object, bool>>();
+
 // A raw slice<E> unboxes; a DEFINED slice type over E reaches its window through the same shared
 // backing view ctor GoReflect.byteSliceViewOf uses, so both shapes alias rather than copy.
-private static bool bitwiseSliceEqualOf<E>(object a, object b) where E : IEquatable<E> {
+private static bool scalarSliceEqualOf<E, C>(object a, object b) where C : ISpanEquality<E> {
     slice<E> x = a is slice<E> rawA ? rawA : new slice<E>((ISlice<E>)a);
     slice<E> y = b is slice<E> rawB ? rawB : new slice<E>((ISlice<E>)b);
-    return x.ToSpan().SequenceEqual(y.ToSpan());
+    return C.Equal(x.ToSpan(), y.ToSpan());
+}
+
+// Content equality over two equal-length spans of one element kind, as Go's `==` decides it.
+private interface ISpanEquality<E> {
+    static abstract bool Equal(ReadOnlySpan<E> x, ReadOnlySpan<E> y);
+}
+
+// The bitwise kinds: one vectorised span compare.
+private readonly struct bitwiseSpanEquality<E> : ISpanEquality<E> where E : IEquatable<E> {
+    public static bool Equal(ReadOnlySpan<E> x, ReadOnlySpan<E> y) => x.SequenceEqual(y);
+}
+
+// The operator kinds, compared with E's `==`: NaN != NaN, as in Go.
+private readonly struct operatorSpanEquality<E> : ISpanEquality<E> where E : System.Numerics.IEqualityOperators<E, E, bool> {
+    public static bool Equal(ReadOnlySpan<E> x, ReadOnlySpan<E> y) {
+        for (int i = 0; i < x.Length; i++) {
+            if (x[i] != y[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+// A sequence (slice or array, raw or defined) whose element is a RAW slice<E> or array<E> of a kind
+// spanEqualityOf admits. Keyed by the outer sequence's element type; a null memoises a refusal.
+private static readonly ConcurrentDictionary<System.Type, Func<object, object, bool>?> s_nestedSequenceEq = new();
+
+// Both sides are the same Go type (the caller's AreEqual check) and the outer lengths are equal (the
+// Slice arm checked them; an array's length is its type), so only the elements remain.
+private static bool tryNestedSequenceEqual(object? a, object? b, System.Type? elemType, out bool equal) {
+    equal = false;
+    if (a is null || b is null || elemType is null) {
+        return false;
+    }
+    Func<object, object, bool>? cmp = s_nestedSequenceEq.GetOrAdd(elemType, static et => nestedSequenceComparer(et));
+    if (cmp is null) {
+        return false;
+    }
+    equal = cmp(a, b);
+    return true;
+}
+
+private static Func<object, object, bool>? nestedSequenceComparer(System.Type elemType) {
+    if (!elemType.IsGenericType) {
+        return null;
+    }
+    System.Type definition = elemType.GetGenericTypeDefinition();
+    string? method = definition == typeof(slice<>) ? nameof(sliceElementsEqualOf)
+        : definition == typeof(array<>) ? nameof(arrayElementsEqualOf)
+        : null;
+    System.Type inner = elemType.GetGenericArguments()[0];
+    return method is not null && spanEqualityOf(inner) is System.Type spanEq ? genericComparer(method, inner, spanEq) : null;
+}
+
+// Each element pair is decided as deepValueEqual decides two slices: nil-ness, then length, then the
+// same initial entry of the same backing (&x[0] == &y[0], which Go takes before reading any content,
+// so a shared []float64{NaN} is equal to itself), then content. Go also marks each inner pair visited;
+// that changes no answer here, because an element of a scalar kind cannot lead back to the pair, and a
+// later re-encounter of a pair only short-circuits a comparison that already returned true.
+private static bool sliceElementsEqualOf<E, C>(object a, object b) where C : ISpanEquality<E> {
+    ReadOnlySpan<slice<E>> x = ((IArray<slice<E>>)a).ToSpan();
+    ReadOnlySpan<slice<E>> y = ((IArray<slice<E>>)b).ToSpan();
+    for (int i = 0; i < x.Length; i++) {
+        if (x[i].IsNil != y[i].IsNil || x[i].Length != y[i].Length) {
+            return false;
+        }
+        ReadOnlySpan<E> xs = x[i].ToSpan();
+        ReadOnlySpan<E> ys = y[i].ToSpan();
+        if (xs.IsEmpty || Unsafe.AreSame(ref MemoryMarshal.GetReference(xs), ref MemoryMarshal.GetReference(ys))) {
+            continue;
+        }
+        if (!C.Equal(xs, ys)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// An array element has no nil and no identity shortcut in Go's Array arm: content only.
+private static bool arrayElementsEqualOf<E, C>(object a, object b) where C : ISpanEquality<E> {
+    ReadOnlySpan<array<E>> x = ((IArray<array<E>>)a).ToSpan();
+    ReadOnlySpan<array<E>> y = ((IArray<array<E>>)b).ToSpan();
+    for (int i = 0; i < x.Length; i++) {
+        if (!C.Equal(x[i].ToSpan(), y[i].ToSpan())) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // mapElemValue builds the Value for one map entry, typed by the map's declared element type — the
@@ -443,6 +563,44 @@ private readonly struct visitPair(object a1, nint off1, object a2, nint off2) : 
     }
 }
 
+// The visited set, held where Go holds its map: on the stack while it is small. Go's
+// `make(map[visit]bool)` does not escape deepValueEqual, so since Go 1.26 a map of up to one group (8
+// entries) lives in DeepEqual's frame and the call allocates nothing for the shapes reflect's
+// TestDeepEqualAllocs measures. Here the first eight entries sit inline in a struct passed by ref,
+// and a HashSet is made only for a ninth. Entries persist for the whole DeepEqual call, as Go's do.
+private struct visitSet {
+    private visitEntries m_inline;
+    private int m_count;
+    private HashSet<visitPair>? m_spill;
+
+    // Adds the pair, reporting false when it was already present (Go's `if visited[v] { return true }`).
+    public bool Add(visitPair pair) {
+        if (m_spill is not null) {
+            return m_spill.Add(pair);
+        }
+        for (int i = 0; i < m_count; i++) {
+            if (m_inline[i].Equals(pair)) {
+                return false;
+            }
+        }
+        if (m_count < visitEntries.Length) {
+            m_inline[m_count++] = pair;
+            return true;
+        }
+        m_spill = new HashSet<visitPair>(2 * visitEntries.Length);
+        for (int i = 0; i < m_count; i++) {
+            m_spill.Add(m_inline[i]);
+        }
+        return m_spill.Add(pair);
+    }
+}
+
+[InlineArray(Length)]
+private struct visitEntries {
+    public const int Length = 8;
+    private visitPair m_first;
+}
+
 // identityRoot returns the managed object that stands for a value's Go data address, for cycle
 // detection: a pointer's ж<T> box, a map's backing Dictionary, a slice's backing array + Low. A nil
 // value (null box, nil pointer, null backing) has no root — Go never puts nil in the visited map.
@@ -467,9 +625,10 @@ private static (object? root, nint offset) identityRoot(object? boxed) {
 
 // Per-closed-generic-type accessors for the REAL backing store of a boxed golib container. slice<T>'s
 // public Source materializes a detached copy, so identity (and nil-ness — a nil slice is the golib
-// `default`, null m_array) must come from the actual m_array/m_low fields; map<K,V> likewise only
-// exposes its Dictionary internally. Field reads are cached per type.
-private static readonly ConcurrentDictionary<System.Type, (FieldInfo? array, FieldInfo? low, FieldInfo? nested)> s_sliceFields = new();
+// `default`, null m_array) must come from the actual m_array/m_low fields, which slice<T> reports
+// through IGoReflectSlice; map<K,V> likewise only exposes its Dictionary internally. Field lookups are
+// cached per type.
+private static readonly ConcurrentDictionary<System.Type, (FieldInfo? array, FieldInfo? nested)> s_sliceFields = new();
 private static readonly ConcurrentDictionary<System.Type, FieldInfo?> s_mapField = new();
 
 // sliceData returns a boxed slice's backing array and window offset — (null, 0) for the nil slice.
@@ -491,25 +650,27 @@ private static (object? data, nint low) sliceData(object? boxed) {
     if (boxed is null) {
         return (null, 0);
     }
-    (FieldInfo? array, FieldInfo? low, FieldInfo? nested) = s_sliceFields.GetOrAdd(boxed.GetType(), static t => {
+    (FieldInfo? array, FieldInfo? nested) = s_sliceFields.GetOrAdd(boxed.GetType(), static t => {
         FieldInfo? array = t.GetField("m_array", BindingFlags.Instance | BindingFlags.NonPublic);
         if (array is not null) {
-            return (array, t.GetField("m_low", BindingFlags.Instance | BindingFlags.NonPublic), null);
+            return (array, null);
         }
         if (typeof(ISlice).IsAssignableFrom(t)) {
             foreach (FieldInfo f in t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)) {
                 if (typeof(ISlice).IsAssignableFrom(f.FieldType)) {
-                    return (null, null, f);
+                    return (null, f);
                 }
             }
         }
-        return (null, null, null);
+        return (null, null);
     });
     if (array is null) {
         return nested is null ? (null, 0) : sliceData(nested.GetValue(boxed));
     }
-    object? data = array.GetValue(boxed);
-    return data is null ? (null, 0) : (data, low is null ? 0 : (nint)low.GetValue(boxed)!);
+    // A slice<E> answers its own window through golib's reflect door. Reading m_low by
+    // FieldInfo.GetValue boxed the nint on every call, twice in a DeepEqual of two slices.
+    (object? data, nint dataLow, _, _) = ((IGoReflectSlice)boxed).ReflectDescribe();
+    return data is null ? (null, 0) : (data, dataLow);
 }
 
 // mapBacking returns a boxed map's backing Dictionary — null for the nil map (no backing store).

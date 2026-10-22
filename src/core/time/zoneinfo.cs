@@ -260,7 +260,7 @@ internal static nint lookupFirstZone(this ref ΔLocation l) {
     }
 
     // Case 3.
-    foreach (var (zi, _) in l.zone) {
+    foreach (var zi in range(l.zone)) {
         if (!l.zone[zi].isDST) {
             return zi;
         }
@@ -645,7 +645,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     // offset helps us pick the right one for the given time.
     // It's not perfect: during the backward transition we might pick
     // either one.)
-    foreach (var (i, _) in l.zone) {
+    foreach (var i in range(l.zone)) {
         var zone = Ꮡ(l.zone, i);
         if ((~zone).name == name) {
             var (nam, offsetΔ1, _, _, _) = Ꮡl.lookup(unix - (int64)(~zone).offset);
@@ -656,7 +656,7 @@ internal static (nint offset, bool ok) lookupName(this ж<ΔLocation> Ꮡl, @str
     }
 
     // Otherwise fall back to an ordinary name match.
-    foreach (var (i, _) in l.zone) {
+    foreach (var i in range(l.zone)) {
         var zone = Ꮡ(l.zone, i);
         if ((~zone).name == name) {
             return ((~zone).offset, true);

@@ -53,7 +53,7 @@ internal static void setRange(this ref pageBits b, nuint i, nuint n) {
 
 // setAll sets all the bits of b.
 internal static void setAll(this ref pageBits b) {
-    foreach (var (i, _) in b.Value) {
+    foreach (var i in range(b)) {
         b.Value[i] = ~(uint64)0;
     }
 }

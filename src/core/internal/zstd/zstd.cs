@@ -456,7 +456,7 @@ internal static error readBlock(this ж<Reader> Ꮡr) {
         }
         relativeOffset++;
         var v = r.scratch[0];
-        foreach (var (i, _) in r.buffer) {
+        foreach (var i in range(r.buffer)) {
             r.buffer[i] = v;
         }
         r.blockOffset += (int64)relativeOffset;

@@ -23,7 +23,7 @@ internal static void Main() {
     holder z = new();
     fmt.Println(len(z.name), len(z.tbl), len(z.tail));
 
-    foreach (var (i, _) in z.tbl) {
+    foreach (var i in range(z.tbl)) {
         z.tbl[i] = i * i;
     }
     nint sum = 0;

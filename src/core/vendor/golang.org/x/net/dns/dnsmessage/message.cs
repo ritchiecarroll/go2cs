@@ -1201,7 +1201,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
     // compression will help ensure compliance.
     var compression = new map<@string, uint16>{};
 
-    foreach (var (i, _) in m.Questions) {
+    foreach (var i in range(m.Questions)) {
         error err = default!;
         {
             (msg, err) = m.Questions[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1209,7 +1209,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
-    foreach (var (i, _) in m.Answers) {
+    foreach (var i in range(m.Answers)) {
         error err = default!;
         {
             (msg, err) = m.Answers[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1217,7 +1217,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
-    foreach (var (i, _) in m.Authorities) {
+    foreach (var i in range(m.Authorities)) {
         error err = default!;
         {
             (msg, err) = m.Authorities[i].pack(msg, compression, compressionOff); if (err != default!) {
@@ -1225,7 +1225,7 @@ public static (slice<byte>, error) AppendPack(this ref Message m, slice<byte> b)
             }
         }
     }
-    foreach (var (i, _) in m.Additionals) {
+    foreach (var i in range(m.Additionals)) {
         error err = default!;
         {
             (msg, err) = m.Additionals[i].pack(msg, compression, compressionOff); if (err != default!) {

@@ -7054,7 +7054,7 @@ internal static void clear(this pMask Δp, int32 id) {
 
 // any returns true if any bit in p is set.
 internal static bool any(this pMask Δp) {
-    foreach (var (i, _) in Δp) {
+    foreach (var i in range(Δp)) {
         if (atomic.Load(Ꮡ(Δp, i)) != 0) {
             return true;
         }

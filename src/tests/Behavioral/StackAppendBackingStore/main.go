@@ -173,6 +173,106 @@ func nonEmptyCap() {
 	fmt.Println(cap(x))
 }
 
+// Go 1.26 also gives the buffer to a slice whose one escape is a single statement outside its loops, and copies it
+// to the heap there (move2heap): a slice still in the buffer moves to its length's size class, so these read
+// 8 8 16 24 32 64, where growslice alone gives 8 8 16 32 32 64.
+//
+//go:noinline
+func movedBytes(n int) []byte {
+	var r []byte
+	for i := range n {
+		r = append(r, byte(i))
+	}
+	return r
+}
+
+func movedCaps() {
+	for _, n := range []int{1, 3, 9, 17, 25, 33} {
+		fmt.Print(cap(movedBytes(n)), " ")
+	}
+	fmt.Println()
+}
+
+// 1 2 3 4 8 16: an escape through a pointer, with 8-byte elements (K = 4); three pointers move to 24 bytes.
+//
+//go:noinline
+func movedPtrs(n int, p *[]*int) {
+	var r []*int
+	for range n {
+		r = append(r, nil)
+	}
+	*p = r
+}
+
+func movedPtrCaps() {
+	var r []*int
+	for _, n := range []int{1, 2, 3, 4, 5, 9} {
+		movedPtrs(n, &r)
+		fmt.Print(cap(r), " ")
+	}
+	fmt.Println()
+}
+
+// 8 16 24 32 64 | 24: the capacity is observed, so the appends climb the size classes inside the buffer and the
+// move keeps the capacity.
+//
+//go:noinline
+func capSeq(n int) ([]byte, []int) {
+	var r []byte
+	var seq []int
+	for i := range n {
+		r = append(r, byte(i))
+		if len(seq) == 0 || seq[len(seq)-1] != cap(r) {
+			seq = append(seq, cap(r))
+		}
+	}
+	return r, seq
+}
+
+func capSeqCaps() {
+	_, seq := capSeq(33)
+	r, _ := capSeq(17)
+	fmt.Println(seq, "|", cap(r))
+}
+
+// 8: a named result returned bare.
+//
+//go:noinline
+func movedNamed(n int) (r []byte) {
+	for i := range n {
+		r = append(r, byte(i))
+	}
+	return
+}
+
+// 3: a move ahead of an if's init.
+//
+//go:noinline
+func movedIfInit(n int) int {
+	var p []*int
+	for range n {
+		p = append(p, nil)
+	}
+	if t := p; len(t) > 0 {
+		return cap(t)
+	}
+	return 0
+}
+
+// 8 4: two slices escape in one return, and each moves to its own length's size class (3 bytes, and 3 int16s in
+// 6 bytes), not the 32 and 16 of their buffers.
+//
+//go:noinline
+func movedPair(n int) ([]byte, []int16) {
+	var a []byte
+	var w []int16
+	for i := range n {
+		a = append(a, byte(i))
+		w = append(w, int16(i))
+	}
+	return a, w
+}
+
 func main() {
 	loopCaps()
 	resetCaps()
@@ -187,4 +287,11 @@ func main() {
 	closureOuterCap()
 	siblingScopeCaps(0)
 	literalNameCaps()
+	movedCaps()
+	movedPtrCaps()
+	capSeqCaps()
+	fmt.Println(cap(movedNamed(3)))
+	fmt.Println(movedIfInit(3))
+	a, w := movedPair(3)
+	fmt.Println(cap(a), cap(w))
 }

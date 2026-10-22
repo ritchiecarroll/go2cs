@@ -12,7 +12,7 @@ internal static UntypedInt payloadSize => /* 64 * 1024 */ 65536;
 
 internal static slice<byte> makePayload() {
     var buf = new slice<byte>(payloadSize);
-    foreach (var (i, _) in buf) {
+    foreach (var i in range(buf)) {
         buf[i] = (byte)(i * 7 + 11);
     }
     return buf;

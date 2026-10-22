@@ -193,7 +193,7 @@ public static void TestDecoderErr(ж<testing.T> Ꮡt) {
 
 public static void TestDumper(ж<testing.T> Ꮡt) {
     array<byte> @in = new(40);
-    foreach (var (i, _) in @in) {
+    foreach (var i in range(@in)) {
         @in[i] = (byte)(i + 30);
     }
 
@@ -251,7 +251,7 @@ public static void TestDumper_earlyclose(ж<testing.T> Ꮡt) {
 
 public static void TestDump(ж<testing.T> Ꮡt) {
     array<byte> @in = new(40);
-    foreach (var (i, _) in @in) {
+    foreach (var i in range(@in)) {
         @in[i] = (byte)(i + 30);
     }
 

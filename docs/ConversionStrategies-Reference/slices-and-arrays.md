@@ -811,7 +811,7 @@ reads it from the compiler instead of re-deriving it (`src/go2cs/stackAppendHint
 it runs `go build`, or `go test -c` for test files, with `-gcflags='-m -d=variablemakehash=vy'` for
 windows/amd64, linux/amd64 and darwin/amd64, whatever the conversion's own target. It hints a site when:
 
-- the site's own copy does not escape;
+- the site's own copy does not escape, or the variable is one whose escape Go moves to the heap (below);
 - the backing-store check logged the variable's declaration, which it does not for a variable whose
   address is taken;
 - every copy inlined elsewhere in the package that can be attributed to the site agrees, and none that
@@ -849,8 +849,30 @@ lambda's body, one per call as in Go. An outer variable appended inside a functi
 the literal captures it by reference, so Go lowers that append in place.
 
 Taking the buffer charges no allocation to golib's allocation counter, because Go's buffer is on the stack.
+
+**A variable that escapes once is moved to the heap there.** Go 1.26 also gives the buffer to a variable that
+escapes, when its only escape is one statement outside its loops: a `return` of it (or a bare `return` of it as a
+named result), an assignment of it (`*p = s`, `h.s = s`), or a `range` over it (cmd/compile/internal/slice). The
+compiler inserts `s = move2heap(s)` ahead of that statement, so `var r []byte; for ... { r = append(r, b) };
+return r` appends into the buffer and allocates once, at the return, for the length's size class: `byteSlice(9)`
+in runtime's slice_test.go makes one allocation with capacity 16, where growslice alone makes two. The same pass
+logs that statement's position under `-d=variablemakehash` (a `return` at its keyword, an assignment at its
+token, a `range` at its `range` keyword), so the harvest reads the move from the log. Such a variable's site
+qualifies even though `-m` says its append escapes, and the statement is converted with the move ahead of it:
+`r = move2heap(rᴷ, r);` and then `return r;`, and the variable's buffer is declared `new stackAppend<T>(moves: true)`. A slice that grew out of the buffer is returned as it is, and one
+still in it is copied to a counted heap array. A range over a slice that never escapes is a move too: Go copies
+the slice out of the buffer before the loop. When several such variables escape in one statement, as in
+`return a, w`, each is moved, one line per variable ahead of it.
+
+When the variable's capacity is observed, by `cap(s)`, `s = s[i:j]`, `s = []T{...}` or passing `s` to a call,
+the buffer is declared `new stackAppend<T>(moves: true, capacityUsed: true)`. Then every append passes it, and a growth that
+fits the buffer takes the next size class of the new length instead of doubling (Go's `growsliceBuf`). The move
+keeps the capacity (`moveSlice`), where otherwise it is the length's size class (`moveSliceNoCap`). runtime's
+`byteCapSlice(17)` returns capacity 24 after one allocation. GolibTests' `StackAppendMove2heapTests` replay
+runtime's TestAppendByteInLoop, TestAppendPtrInLoop and TestAppendByteCapInLoop tables row for row, and the
+converter's `stackAppendMove2heap_test.go` holds the emission of each shape.
 GolibTests' `StackAppendTests` hold the runtime rule, and the `StackAppendBackingStore` behavioral test
-compares eleven arms with Go.
+compares nineteen arms with Go.
 
 **Conversion time.** The harvest compiles the package, so it adds to conversion time. On a box's first
 conversion, with an empty Go build cache, it compiles the package and everything it imports for all three

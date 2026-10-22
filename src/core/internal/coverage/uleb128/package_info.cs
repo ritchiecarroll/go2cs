@@ -55,7 +55,7 @@ using static go.@internal.coverage.uleb128_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("internal/coverage/uleb128/uleb128.go", "uleb128.cs", "/oKCgoKClIKCpg==")]
+[assembly: go.GoPositionMap("internal/coverage/uleb128/uleb128.go", "uleb128.cs", "/qKCgoKClIKCpg==")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;

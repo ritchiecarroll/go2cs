@@ -32,7 +32,7 @@ public static slice<StructField> VisibleFields(ΔType t) {
     // Use an in-place removal that avoids copying in
     // the common case that there are no hidden fields.
     nint j = 0;
-    foreach (var (i, _) in (~w).fields) {
+    foreach (var i in range((~w).fields)) {
         var f = Ꮡ((~w).fields, i);
         if ((~f).Name == ""u8) {
             continue;

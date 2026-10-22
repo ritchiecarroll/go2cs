@@ -855,7 +855,7 @@ internal static partial (nint n, bool ok) memProfileInternal(nint size, bool inu
         n = 0;
         for (var b = head; b != nil; b = b.Value.allnext) {
             var mp = b.mp();
-            foreach (var (c, _) in (~mp).future) {
+            foreach (var c in range((~mp).future)) {
                 @lock(ᏑprofMemFutureLock.at<mutex>(c));
                 mp.of(memRecord.Ꮡactive).add(mp.at(memRecord.Ꮡfuture, c));
                 mp.Value.future[c] = new memRecordCycle(nil);
@@ -957,7 +957,7 @@ public static (nint n, bool ok) BlockProfile(slice<BlockProfileRecord> Δp) {
 
 internal static partial void expandFrames(slice<BlockProfileRecord> Δp) {
     var expandedStack = makeProfStack();
-    foreach (var (i, _) in Δp) {
+    foreach (var i in range(Δp)) {
         var cf = CallersFrames(Δp[i].StackRecord.Stack());
         nint j = 0;
         while (j < len(expandedStack)) {

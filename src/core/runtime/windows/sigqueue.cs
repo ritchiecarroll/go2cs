@@ -176,7 +176,7 @@ continue_Receive:;
 break_Receive:;
 
         // Incorporate updates from sender into local copy.
-        foreach (var (i, _) in sig.mask) {
+        foreach (var i in range(sig.mask)) {
             sig.recv[i] = atomic.Xchg(Ꮡsig.at(sigᴛ1.Ꮡmask, i), 0);
         }
     }

@@ -84,7 +84,7 @@ internal static void Main() {
     fmt.Println(len(a), a[0], a[7], a[8], a[15]);
 
     array<byte> raw = new(32);
-    foreach (var (i, _) in raw) {
+    foreach (var i in range(raw)) {
         raw[i] = (byte)(i + 1);
     }
     var k = ticketFromBytes(raw);

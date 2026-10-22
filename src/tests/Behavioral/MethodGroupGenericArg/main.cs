@@ -30,7 +30,7 @@ internal static bool pairEqual<S1, S2, E1, E2>(S1 s1, S2 s2, Func<E1, E2, bool> 
         return false;
     }
 
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (!eq(s1[i], s2[i])) {
             return false;
         }
@@ -73,7 +73,7 @@ internal static bool sliceEq<S, E>(S a, S b)
         return false;
     }
 
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (!AreEqual(a[i], b[i])) {
             return false;
         }

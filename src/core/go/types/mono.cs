@@ -117,7 +117,7 @@ internal static void monomorph(this ж<Checker> Ꮡcheck) {
 
 internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     ref var check = ref Ꮡcheck.DerefOrNull();
-    var stackᴷ = new stackAppend<nint>();
+    var stackᴷ = new stackAppend<nint>(moves: true, capacityUsed: true);
 
     slice<nint> stack = default!;
     var seen = new slice<bool>(len(check.mono.vertices));
@@ -146,6 +146,7 @@ internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) {
     err.addf(new TypeNameжpositioner(obj0), "instantiation cycle:"u8);
 
     var qf = RelativeTo(check.pkg);
+    stack = move2heap(stackᴷ, stack);
     foreach (var (_, vΔ1) in stack) {
         var edge = check.mono.edges[check.mono.vertices[vΔ1].pre];
         var obj = check.mono.vertices[edge.dst].obj;

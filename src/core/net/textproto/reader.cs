@@ -478,6 +478,8 @@ public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) {
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
 public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
+    var vᴷ = new stackAppend<@string>(moves: true);
+
     // We could use ReadDotBytes and then Split it,
     // but reading a line at a time avoids needing a
     // large contiguous block of memory and is simpler.
@@ -500,8 +502,9 @@ public static (slice<@string>, error) ReadDotLines(this ref Reader r) {
             }
             line = line[1..];
         }
-        v = append(v, line);
+        v = append(vᴷ, v, line);
     }
+    v = move2heap(vᴷ, v);
     return (v, err);
 }
 

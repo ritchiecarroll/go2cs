@@ -1572,7 +1572,7 @@ public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<
 // compatible chain from Certificates.
 public static void BuildNameToCertificate(this ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
-    foreach (var (i, _) in c.Certificates) {
+    foreach (var i in range(c.Certificates)) {
         var cert = Ꮡ(c.Certificates, i);
         var (x509Cert, err) = cert.leaf();
         if (err != default!) {

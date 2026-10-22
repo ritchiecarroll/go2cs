@@ -206,14 +206,20 @@ func commentOnly(cs *csFile, ln int) bool {
 var attrRe = regexp.MustCompile(`^\s*\[[A-Za-z]`)
 
 // scaffoldRe matches the lines the converter writes ahead of a statement's own translation: a func literal's
-// capture copy (`var xʗ1 = x;`) and a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`).
-var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);)$`)
+// capture copy (`var xʗ1 = x;`), a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`), and Go
+// 1.26's move of a buffered slice to the heap (`x = move2heap(xᴷ, x);`), which Go inserts ahead of the statement.
+var scaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap(<.*>)?\(.*out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `)$`)
 
-// walkScaffoldRe is the part of scaffoldRe that is never a statement of its own: a capture copy, and the BARE heap
-// box `ref var x = ref heap<T>(out var Ꮡx);`, which the next line's assignment completes. A box WITH an initializer
-// (`ref var buf = ref heap(new T(), out var Ꮡbuf);`, an escaping `var buf T`) is a whole Go statement, so the walk
-// that places a Go blank must stop at it: crossing it credits the previous statement's blank to the line below.
-var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);)$`)
+// walkScaffoldRe is the part of scaffoldRe that is never a statement of its own: a capture copy, the BARE heap box
+// `ref var x = ref heap<T>(out var Ꮡx);`, which the next line's assignment completes, and a move to the heap. A box
+// WITH an initializer (`ref var buf = ref heap(new T(), out var Ꮡbuf);`, an escaping `var buf T`) is a whole Go
+// statement, so the walk that places a Go blank must stop at it: crossing it credits the previous statement's
+// blank to the line below.
+var walkScaffoldRe = regexp.MustCompile(`^(var [\pL\pN_@]+ʗ\d+ = [\pL\pN_@Ꮡ.]+;|ref var [\pL\pN_@]+ = ref heap<.*>\(out var Ꮡ[\pL\pN_@]+\);|` + move2heapLine + `)$`)
+
+// move2heapLine is one line of the moves the converter writes ahead of a statement where buffered slices escape:
+// `x = move2heap(xᴷ, x);`, one per variable.
+const move2heapLine = `[\pL\pN_@]+ = move2heap\([\pL\pN_@]+ᴷ, [\pL\pN_@]+\);`
 
 // gotoLabelRe matches the goto a labeled continue or break becomes; its label is Go's.
 var gotoLabelRe = regexp.MustCompile(`\bgoto (?:continue|break)_([\pL_][\pL\pN_]*);`)

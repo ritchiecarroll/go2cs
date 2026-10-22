@@ -380,7 +380,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint coun
         n = count;
     }
     var list = new slice<fs.DirEntry>(n);
-    foreach (var (i, _) in list) {
+    foreach (var i in range(list)) {
         list[i] = new mapFileInfoжDirEntry(Ꮡ(d.entry, d.offset + i));
     }
     d.offset += n;

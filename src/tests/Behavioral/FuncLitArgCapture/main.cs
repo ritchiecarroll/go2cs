@@ -84,7 +84,7 @@ internal static nint nestedArgLiteralCapture() {
     run([MethodImpl(MethodImplOptions.NoInlining)] () => {
         var items = new nint[]{1, 2, 3}.slice();
         var done = new channel<nint>(len(items));
-        foreach (var (i, _) in items) {
+        foreach (var i in range(items)) {
             nint iΔ1 = i;
             var doneʗ1 = done;
             var itemsʗ1 = items;
@@ -93,7 +93,7 @@ internal static nint nestedArgLiteralCapture() {
             });
         }
         nint sum = 0;
-        foreach ((_, _) in items) {
+        foreach (var _ᴛ1 in range(items)) {
             sum += ᐸꟷ(done);
         }
         totalʗ1.ᐸꟷ(sum);

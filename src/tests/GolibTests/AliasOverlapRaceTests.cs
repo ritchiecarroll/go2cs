@@ -59,24 +59,47 @@ public class AliasOverlapRaceTests
     private static bool JitOptimizerDisabled(Assembly assembly) =>
         assembly.GetCustomAttribute<DebuggableAttribute>()?.IsJITOptimizerDisabled == true;
 
-    // The takes live in their own NON-INLINED frames so no slot of the calling frame can keep a box
-    // alive — the first cut of this probe took the address inline and read NOT MOVED at Debug for that
-    // reason alone.
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static nuint Take(slice<byte> x, int i) => (nuint)(uintptr)Ꮡ(x, i);
+    // The pin an address-take holds (ж<T>.m_pin), read so the arm can watch it die without holding it.
+    private static readonly FieldInfo s_pinField =
+        typeof(ж<byte>).GetField("m_pin", BindingFlags.NonPublic | BindingFlags.Instance)!;
 
+    // The take lives in its own NON-INLINED frame so no slot of the calling frame can keep its box alive —
+    // the first cut of this probe took the address inline and read NOT MOVED at Debug for that reason
+    // alone. It returns the address and a resurrection-tracking weak reference to the box's pin, which
+    // dies only once the pin has been finalized (its handle freed) and then collected.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static (nuint Address, WeakReference Pin) Take(slice<byte> x, int i)
+    {
+        ж<byte> box = Ꮡ(x, i);
+        nuint address = (nuint)(uintptr)box;
+        object? pin = s_pinField.GetValue(box);
+        Assert.IsNotNull(pin, "the take pinned the array, which is what the arm is about");
+        return (address, new WeakReference(pin, trackResurrection: true));
+    }
+
+    // The array's address now, under a pin that ends with the statement.
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static unsafe nuint Raw(byte[] array) { fixed (byte* p = array) return (nuint)p; }
+
+    // Finalize-and-compact rounds the arm offers the runtime before it calls the relocation unobserved.
+    private const int RelocationRounds = 8;
 
     [TestMethod]
     public void TakenElementAddressIsNotStableOnceItsPinIsFinalized()
     {
         // THE MECHANISM, kept live: an address taken through the uintptr operator is the array's address
-        // only while the take's own pin holds — and that pin is released by the holder's FINALIZER. A
-        // never-pinned control array shows the construction relocates at all; the taken array stays put
-        // through the first compacting collection (pinned by an unfinalized holder) and moves once the
-        // pin is gone. Measured 3/3 fresh processes at Release; the same shape at Debug with non-inlined
-        // takes.
+        // only while the take's own pin holds, and that pin is released by its FINALIZER. Two halves:
+        //
+        //   - The pin's lifetime is golib's, and it is asserted: through the first compacting collection the
+        //     array stays where take 1 read it, and once the take's box is gone its pin is finalized and
+        //     collected.
+        //   - Relocation afterwards is the CLR's choice, never a guarantee: a compacting collection moves the
+        //     array only if free space opens below it. Under a full GolibTests run (heap layout, pinned
+        //     neighbours) it can stay put, which failed this arm once in a batch battery while it passed in
+        //     isolation. So the arm offers RelocationRounds finalize-and-compact rounds and reports
+        //     Inconclusive, not failure, when the array never moves.
+        //
+        // A never-pinned control array shows the construction can relocate at all.
         byte[][] below = new byte[40000][];
         for (int i = 0; i < below.Length; i++) below[i] = new byte[16];
         byte[] control = new byte[16];
@@ -86,40 +109,58 @@ public class AliasOverlapRaceTests
         slice<byte> x = backing.slice();
 
         nuint control0 = Raw(control);
-        nuint take1 = Take(x, 0);
+        (nuint take1, WeakReference pin1) = Take(x, 0);
         below = null!; above = null!;                   // the gaps a compacting collection closes
 
         GC.Collect(2, GCCollectionMode.Forced, true, true);
         nuint control1 = Raw(control);
-        nuint takeWhilePinned = Take(x, 0);
-        GC.WaitForPendingFinalizers();                  // take 1's holder finalizes: its pin is freed
-        GC.Collect(2, GCCollectionMode.Forced, true, true);
-        GC.WaitForPendingFinalizers();                  // the second take's holder finalizes
-        GC.Collect(2, GCCollectionMode.Forced, true, true);
-        GC.Collect(2, GCCollectionMode.Forced, true, true);
-        nuint control2 = Raw(control);
-        nuint takeAfterPinsFreed = Take(x, 0);
+        nuint whilePinned = Raw(backing);
 
+        nuint current = whilePinned;
+        int rounds = 0;
+
+        while (rounds < RelocationRounds && (pin1.IsAlive || current == take1))
+        {
+            rounds++;
+            GC.WaitForPendingFinalizers();              // an unreachable take's pin finalizes: its handle is freed
+            GC.Collect(2, GCCollectionMode.Forced, true, true);
+            current = Raw(backing);
+        }
+
+        nuint control2 = Raw(control);
         GC.KeepAlive(backing);
         GC.KeepAlive(control);
 
         if (control2 == control0 && control1 == control0)
         {
             // Not a silent pass: a runtime that did not relocate even the unpinned control cannot stage
-            // the demonstration (no gap closed), and the assertion below would be vacuous.
+            // the demonstration (no gap closed), and the assertions below would be vacuous.
             Assert.Inconclusive(
                 $"the never-pinned control array did not relocate (0x{control0:X}) — this runtime closed no " +
                 "gap below it, so the pin-lifetime demonstration cannot be staged here");
             return;
         }
 
-        Assert.AreEqual(take1, takeWhilePinned,
+        Assert.AreEqual(take1, whilePinned,
             "through the first compacting collection the array is still pinned by take 1's unfinalized " +
-            "holder, so a second take reads the same address");
-        Assert.AreNotEqual(take1, takeAfterPinsFreed,
-            "once every holder over the array has been finalized, a compacting collection relocates it: the " +
-            "address from take 1 is not the array's address any more — two takes are only comparable while " +
-            "the first one's pin holds, which is exactly what the four-take predicate assumed and never had");
+            "box, so it is still where take 1 read it");
+        Assert.IsFalse(pin1.IsAlive,
+            $"take 1's pin must be finalized and collected once its box is unreachable; it was still alive after " +
+            $"{rounds} finalize-and-compact rounds");
+
+        if (current == take1)
+        {
+            Assert.Inconclusive(
+                $"take 1's pin was released, but the array stayed at 0x{take1:X} through {rounds} compacting " +
+                $"collections (control 0x{control0:X} -> 0x{control1:X} -> 0x{control2:X}): relocation is the " +
+                "runtime's choice, so this run did not observe the address going stale");
+            return;
+        }
+
+        Assert.AreNotEqual(take1, current,
+            "once take 1's pin has been finalized, a compacting collection relocated the array: the address from " +
+            "take 1 is not the array's address any more — two takes are only comparable while the first one's " +
+            "pin holds, which is exactly what the four-take predicate assumed and never had");
     }
 
     [TestMethod]
