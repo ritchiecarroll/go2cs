@@ -1477,15 +1477,17 @@ long-standing arms; this is the remaining value-rooted case.) Guarded by
 
 ## Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:
+<!-- source: src/tests/Behavioral/CollisionRenamedLocalBox/main.cs.target:55, 59 -->
 ```csharp
-ref var Δp = ref heap<box>(out var Ꮡp);   // local `p` collides with type `p`
+    ref var Δp = ref heap<box>(out var Ꮡp);
 …
-Bump(Ꮡp.of(box.Ꮡn));                     // &p.n — the RAW-name box Ꮡp, never ᏑΔp
+    bump(Ꮡp.of(box.Ꮡn));
 ```
-<!-- probe at 1b101a3de: the CollisionRenamedLocalBox shape with exported SetN/Bump callees (so neither is ref-lowered). -->
-Guarded by `CollisionRenamedLocalBox` (`bump(&p.n)` on the renamed local `p`). Its golden no longer
-shows the box: `bump`'s parameter is ref-lowered, so the call site is `bump(ref Δp.n)` and the local is
-a plain `var Δp`; the box form above appears when the callee keeps its box, e.g. an exported one.
+
+The local `p` collides with the type `p`, so its value alias is `Δp`, and `&p.n` goes through the RAW-name
+box `Ꮡp`, never `ᏑΔp`. Guarded by `CollisionRenamedLocalBox` (`bump(&p.n)` on the renamed local `p`).
+Its callees keep the pointer they are given, so neither is ref-lowered and the box stays; a callee that
+only writes through its pointer is ref-lowered, and its caller passes `ref Δp.n` with no box at all.
 
 ## A capture-mode method on a shadow-renamed heap-boxed local uses the rendered box name
 A capture-mode method — one that escapes its receiver's address, e.g. `cryptobyte.Builder.AddASN1`, which hands `&b` to a callback — called on a heap-boxed VALUE local routes through the receiver box: `var b Builder; b.AddASN1(…)` → `Ꮡb.AddASN1(…)`. Unlike a deref-aliased pointer *parameter* (whose box keeps the RAW name, `Ꮡp`), a heap-boxed value LOCAL keeps its box under the RENDERED name — an escaping local is `ref var b = ref heap(new T(), out var Ꮡb)`, so when the local is SHADOW-renamed its box takes the renamed name. crypto/x509 `marshalCertificate`'s inner `serialiseConstraints` closure declares `var b cryptobyte.Builder`, renamed `bΔ1` to dodge the enclosing method's own `var b` declared LATER (a C# lambda cannot re-declare an enclosing-scope local, CS0136); its box is `ᏑbΔ1`. Emitting the raw-name box `Ꮡb` there both mis-references the outer `b`'s box (declared later in the method → CS0841/CS0103) and, where a same-named outer box does resolve, calls the method on the wrong operand — go/types `conversions.go` called `x.convertibleTo` on the receiver box `Ꮡx` instead of the inner operand box `ᏑxΔ2`:

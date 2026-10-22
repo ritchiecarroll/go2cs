@@ -2297,6 +2297,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeSwitchNamedInterfaceCase() => CheckTarget("TypeSwitchNamedInterfaceCase");
 
     [TestMethod]
+    public void CheckTypeSwitchNilPointer() => CheckTarget("TypeSwitchNilPointer");
+
+    [TestMethod]
     public void CheckTypeSwitchPointerAdapter() => CheckTarget("TypeSwitchPointerAdapter");
 
     [TestMethod]

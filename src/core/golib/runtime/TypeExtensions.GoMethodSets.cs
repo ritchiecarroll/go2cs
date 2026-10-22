@@ -348,12 +348,13 @@ public static partial class TypeExtensions
         s_handOwnedPackages.GetOrAdd(method.Module.Assembly, static assembly => assembly.IsDefined(typeof(GoHandOwnedPackageAttribute), false));
 
     /// <summary>
-    /// Test hook: overrides <see cref="RuntimeFeature.IsDynamicCodeSupported"/> for <see cref="CloseGoMethod"/>, so the
-    /// refusal a Native AOT program takes can be reached under the JIT. <c>null</c> reads the runtime's own answer.
+    /// Test hook: overrides <see cref="RuntimeFeature.IsDynamicCodeSupported"/> for <see cref="CloseGoMethod"/> and the
+    /// variadic trampolines (GoReflect.VariadicRegistry.cs), so the refusal a Native AOT program takes can be reached under
+    /// the JIT. <c>null</c> reads the runtime's own answer.
     /// </summary>
     internal static bool? DynamicCodeSupportedOverride { get; set; }
 
-    private static bool IsDynamicCodeSupported => DynamicCodeSupportedOverride ?? RuntimeFeature.IsDynamicCodeSupported;
+    internal static bool IsDynamicCodeSupported => DynamicCodeSupportedOverride ?? RuntimeFeature.IsDynamicCodeSupported;
 
     // Closes the OPEN Go method `open` of a generic type over the type arguments of `valueElement`, a constructed
     // instance of the same definition (G's design, 2026-10-19). Three routes, in order:

@@ -1123,6 +1123,7 @@
     <Project Path="tests/Behavioral/TypeSwitchImpureTag/TypeSwitchImpureTag.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchMultiCase/TypeSwitchMultiCase.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchNamedInterfaceCase/TypeSwitchNamedInterfaceCase.csproj" />
+    <Project Path="tests/Behavioral/TypeSwitchNilPointer/TypeSwitchNilPointer.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchTagShadowRename/TypeSwitchTagShadowRename.csproj" />
     <Project Path="tests/Behavioral/TypeSwitchPointerAdapter/TypeSwitchPointerAdapter.csproj" />
     <Project Path="tests/Behavioral/TypedErrorAssertThroughAdapter/TypedErrorAssertThroughAdapter.csproj" />
