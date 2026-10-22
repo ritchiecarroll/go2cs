@@ -181,14 +181,14 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
     @try(name + " after pointer calls"u8, () => fmt.Sprint(pvʗ4.Elem().Interface()));
 }
 
-internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
+[GoLazy] partial class lazyᴛgoSets { internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
     ["Plain"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
     ["Box[int]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
     ["Box[string]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
     ["Box[[]int]"] = new slice<@string>[]{new @string[]{"Describe", "Get"}.slice(), new @string[]{"Describe", "Get", "Set"}.slice()}.array(),
     ["Pair[string,int]"] = new slice<@string>[]{new @string[]{"Key", "String"}.slice(), new @string[]{"Key", "String", "Swap"}.slice()}.array(),
     ["Ord2[age]"] = new slice<@string>[]{new @string[]{"Less"}.slice(), new @string[]{"Less"}.slice()}.array()
-};
+}; }
 
 internal static void Main() {
     probe("Plain", new Plain(v: 7), Ꮡ(new Plain(v: 1)), new map<@string, slice<any>>{["Describe"] = new any[]{(@string)"p="u8}.slice(), ["Set"] = new any[]{(nint)9}.slice()});

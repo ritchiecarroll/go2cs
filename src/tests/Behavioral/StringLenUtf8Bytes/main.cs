@@ -9,12 +9,12 @@ partial struct testsᴛ1 /*dyn*/ {
     internal @string name;
     internal nint n;
 }
-internal static slice<testsᴛ1> tests = new testsᴛ1[]{
+[GoLazy] partial class lazyᴛtests { internal static slice<testsᴛ1> tests = new testsᴛ1[]{
     new("ascii", len("abc")),
     new("bmp2", len("aΩb")),
     new("bmp3", len("a☺b☻c")),
     new("astral", len("z\U0001d56b"))
-}.slice();
+}.slice(); }
 
 internal static void Main() {
     foreach (var (_, t) in tests) {

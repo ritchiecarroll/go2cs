@@ -78,7 +78,7 @@ public static @string String(this ΔKind k) {
     return kindNames[0];
 }
 
-internal static slice<@string> kindNames = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid",
     [Bool] = "bool",
     [Int] = "int",
@@ -106,7 +106,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [ΔString] = "string",
     [Struct] = "struct",
     [UnsafePointer] = "unsafe.Pointer"
-}.slice();
+}.slice(); }
 
 public static ж<Type> TypeOf(any aʗp) {
     ref var a = ref heap(aʗp, out var Ꮡa);
