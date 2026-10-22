@@ -517,6 +517,11 @@ public static class TestHost
                 // whose reader observes the CLR store this run would otherwise have left set. Nothing
                 // to put back is the common case and costs a bool test.
                 PackageAncestry.RestoreJunctionGodebug();
+
+                // The staged-toolchain directory composer lives exactly as long as the staged ancestry it
+                // names: the next host in the in-process tier must not start a toolchain child against a
+                // run root that no longer exists.
+                PackageAncestry.ReleaseStagedToolchainDirectory();
             }
             catch
             {

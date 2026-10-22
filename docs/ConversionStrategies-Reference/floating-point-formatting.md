@@ -25,6 +25,20 @@ digits were the shortest round-trip** (`if shortest { eprec = 6 }`) rather than 
 The threshold is *not* 21 — that figure appears in an older reading of the rule and matches JavaScript's
 `Number.toString`, not Go's.
 
+**The conversion:** `fmt` and `strconv` are converted from Go's own source (`src/core/fmt`,
+`src/core/strconv`, `src/core/internal/strconv`), so a converted program formats a float through Go's
+`FormatFloat` itself — its shortest-digit search, `formatDigits`' threshold, and the `fmtE`/`fmtF`
+layout — and .NET's presentation never applies. Verb defaults, `float32` digits (`float32(1.0/3.0)`
+prints `0.33333334`), `%g`'s promotion of a zero precision (`%.0g` of `0.7` is `0.7`), and the `±Inf`
+and `NaN` flag handling all come from the same Go code. (Guarded by the `FloatFormatExponent`
+behavioral test — both thresholds from either side, `1e20`/`1e21`, `1000000.0`, the
+`math.MaxFloat64`/`SmallestNonzeroFloat64` values, float32 counterparts, negative zero, and every verb
+with and without precision, byte-compared against `go run`; ±Inf/NaN flag interactions live in
+`PrintfWidthFlags`.)
+
+<!-- Retired text, moved here on 2026-10-22 (docs review). It described the hand-written baseline stub
+     `fmt` that the behavioral corpus once built against; the stub is gone and `fmt` is converted.
+
 **The conversion:** the baseline stub `fmt` (`src/core/fmt/format.cs`) reproduces strconv's layout rather
 than delegating to .NET's presentation. It leans on an empirical equivalence, verified by differential
 fuzzing (below): **.NET and Go produce the same digits**. .NET's `"R"` is the same shortest round-trip, and
@@ -64,6 +78,7 @@ every verb with and without precision, byte-compared against `go run`; ±Inf/NaN
 `PrintfWidthFlags`. The extreme values are spelled as literals because the converted `math` package's
 constants are themselves rendered lossily — `MaxFloat64` as `1.79769e+308` — which is a separate converter
 defect, deliberately not conflated with this one.)
+-->
 
 ## A folded constant of a NAMED type carries its type in the fold
 

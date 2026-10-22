@@ -41,9 +41,9 @@ applies only when ALL of:
    `regexp/syntax`'s `Range16` keeps its source form; only a bare `long` has nothing to rescue it.
 
 **How the conditions were found — the method, not just the result.** Each was exposed by a
-three-target corpus regeneration, never by the two packages the fix was aimed at: the local darwin
-build was green at every step. The site count fell **754 → 46 → 12 → 10 → 2** across six
-regenerations, and the two survivors are exactly the expressions that cannot compile otherwise.
+three-target corpus regeneration, never by the two packages the fix was aimed at. Each condition
+removed sites the fold had no business touching, until only the expressions that cannot compile
+otherwise were left.
 The lesson generalizes past this arm: *a converter change is measured against the corpus, not
 against the file that motivated it* — a fold that looks obviously correct at its motivating site
 can rewrite hundreds of unrelated ones, and only a full regeneration shows it.
@@ -82,7 +82,7 @@ a callee it merely hands the pointer to — a deref Go says must panic instead r
 Unifying every pointer entry alias on `.DerefOrNull()` made the analysis unnecessary in the first
 place, so the accessor, the three analyses that fed it (`collectNilSafePtrParams`,
 `reassignedBeforeDerefParamName`, and the package-wide nil-argument pre-pass) and their vestigial
-receiver arms were deleted together — 382 net lines of converter. The golib method survives with
+receiver arms were deleted together. The golib method survives with
 its own unit coverage, but converted code no longer emits it.
 
 ## Canonical typed-nil pointer boxing
@@ -98,7 +98,7 @@ var errorType = reflectlite.TypeOf((*error)(nil)).Elem()
 var x any = (*int)(nil)   // x != nil; %T prints *int
 ```
 ```csharp
-internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)nil)).Elem();
+internal static reflectliteꓸType errorType = reflectlite.TypeOf((ж<error>)nil).Elem();
 any x = ((ж<nint>)nil);
 ```
 
@@ -182,7 +182,7 @@ explicitly, and the ordinary conversion renderer emits the cast:
 fmt.Println(reflect.TypeOf(map[string]int(nil)))
 ```
 ```csharp
-fmt.Println(reflect.TypeOf(((map<@string, nint>)default!)));
+fmt.Println(reflect.TypeOf((map<@string, nint>)default!));
 ```
 
 The NAMED twin `myMap(nil)` was always correct — `types.ConvertibleTo` holds for it, so the general
@@ -191,11 +191,11 @@ sibling nil-able type literals are deliberately left on the routes they are alre
 defect: `[]byte(nil)` emits `slice<byte>(default!)`, which is not an invocation of a type but a call
 to golib's real `builtin.slice<T>(T[])` conversion helper — the same helper `[]byte("…")` is emitted
 against — and yields the nil slice; and `(chan T)(nil)` already renders as a cast. Claiming either
-alongside the map would rewrite roughly twenty-five corpus sites to no effect.
+alongside the map would rewrite corpus sites to no effect.
 
 The spelling matters, and it is why the corpus never showed this. The BARE `map[K]V(nil)` — the
-broken one — appears in **no** standard-library production source; all thirteen of its GOROOT sites
-are in `_test.go` files, and Go's own suites lean on it heavily (`fmt`'s
+broken one — appears in **no** standard-library production source; its GOROOT sites are all in
+`_test.go` files, and Go's own suites lean on it heavily (`fmt`'s
 `{"%#v", map[int]byte(nil), …}` table row, one of that package's censused conversion roots;
 `reflect`'s TypeOf/DeepEqual tables; `encoding/json`'s encode table; `internal/reflectlite`). The
 PARENTHESIZED `(map[K]V)(nil)` reaches the conversion fork through `convParenExpr` instead and was
@@ -212,7 +212,7 @@ converted nil IS nil rather than merely typed, and the named-map, named-slice, `
 ## A HAND-OWN's pointer parameter sees `NilBox`, never `null` — and the doctrine alone did not hold it
 
 The rule above — *"every consumer that asks 'is this THE nil pointer' must ask the structural
-predicate"* — was written, correct, and violated **24 times** on one platform before anything
+predicate"* — was written, correct, and violated at every such site on one platform before anything
 measured it. That is worth recording, because the reason is a gap between two true sentences in this
 same section rather than an author ignoring either of them.
 
@@ -227,7 +227,7 @@ Neither half of the predicate is sufficient alone, which is why the corpus form 
 
 ```csharp
 if (Ꮡrusage is not null && !Ꮡrusage.IsNilPointer) { ... }   // and its inverse
-uintptr addr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&native);
+uintptr rusageAddr = Ꮡrusage is null || Ꮡrusage.IsNilPointer ? (uintptr)0 : (uintptr)(nint)(&nativeRusage);
 ```
 
 A C# `null` is reachable at the same sites (an uninitialised `ж<T>?`) and `.IsNilPointer` on a
@@ -236,11 +236,11 @@ only the deref fixed, a syscall wrapper hands the kernel a non-zero pointer wher
 nil — a quietly wrong call rather than a crash.
 
 Measured 2026-09-02, corpus-wide over every tracked `.cs` under `src/core`, and the split was total:
-`syscall/linux/structclass_linux_impl.cs` 17 sites and
-`syscall/linux/zsyscall_linux_amd64_impl.cs` 7 sites carried the one-sided form with **zero** using
-the predicate, while all **four** `syscall/windows/*` sites used it — one hand-own family written
+every site in `syscall/linux/structclass_linux_impl.cs` and
+`syscall/linux/zsyscall_linux_amd64_impl.cs` carried the one-sided form, while every
+`syscall/windows/*` site used the predicate — one hand-own family written
 twice with the check correct on one platform only, invisible on Windows because those functions do
-not exist there. Every one of the 24 was a PARAMETER (`Select`, `seedNativeFdSet`, `copyNativeFdSet`,
+not exist there. Every one of them was a PARAMETER (`Select`, `seedNativeFdSet`, `copyNativeFdSet`,
 `FcntlFlock`, `Statfs`, `Fstatfs`, `Sysinfo`, `Adjtimex`, `Fstat`, `fstatat`, `wait4`, `Uname`). The
 crash that surfaced it was `syscall.Wait4(pid, &status, 0, nil)` — Go's own `os/exec` wait shape.
 
@@ -358,8 +358,8 @@ boundary at its own emission arm rather than through the parameter loop: `panic`
 recovered typed nil must still answer `r.(*T)`), an `[]any` `append` element (the existing
 element-to-`any` cast then wraps the result), and an `any`-keyed map's `delete` key — which has to
 box to the same value the store did, or it matches no entry. None of the three has a corpus site
-today (every `panic` argument in the standard library is an address-of composite, so the census is
-zero), but they are the same boundary and the guard exercises all three.
+today (every `panic` argument in the standard library is an address-of composite), but they are the same boundary and
+the guard exercises all three.
 
 A **FORWARDED multi-value return** is one more slot in that enumeration, and it was the one the
 enumeration missed. `return f()` where `f` returns `(*T, error)` and the function's own results are
@@ -396,7 +396,7 @@ reference, so neither has anything to carry. An address-of (`&x`), a `new(T)`, a
 pointer CONVERSION of any of those (`(*Buffer)(&b)`, log/slog's buffer pool) render non-null by
 construction and are left bare.
 
-Corpus footprint: **465 sites across 145 files** (A/B of two seeded whole-stdlib reconverts), plus
+In the standard library the boundary treatment reaches many call and assignment sites, plus
 one site where the deref-alias preamble became dead because the pointer now renders as its box —
 `net/http`'s `http2h1ServerKeepAlivesDisabled(hs *Server)`, whose `var x any = hs` had been boxing a
 `Server` VALUE and then interface-asserting it, so its `doKeepAlives` probe could never match the
@@ -423,6 +423,18 @@ internal static void assignDescriber(ж<holder> Ꮡh, ж<Setting> Ꮡs) {
 ```
 
 This is intentionally keyed on selector/index expression type instead of the root identifier, so struct fields such as `go/types`' `operand.expr ast.Expr` and ordinary behavioral fields both take the same path. Guarded by `PointerInterfaceStructField`, including the assignment case after the struct-literal cases.
+
+<!-- Docs review 2026-10-22: point-in-time figures moved out of the prose (not re-measured by any guard).
+     Narrow-unsigned fold: site count 754 -> 46 -> 12 -> 10 -> 2 across six three-target regenerations;
+     the local darwin build was green at every step.
+     DerefOrNil retirement (2026-08-02): 382 net lines of converter deleted.
+     Map nil conversion: roughly twenty-five corpus sites for the slice/chan siblings; thirteen GOROOT
+     sites of the bare map[K]V(nil), all in _test.go files.
+     Hand-own nil predicate (measured 2026-09-02): 24 one-sided sites (structclass_linux_impl.cs 17,
+     zsyscall_linux_amd64_impl.cs 7) against four correct syscall/windows sites.
+     Any-boundary panic/append/delete arms: census zero.
+     Typed-nil boundary: corpus footprint 465 sites across 145 files (A/B of two seeded whole-stdlib
+     reconverts). -->
 
 ---
 
