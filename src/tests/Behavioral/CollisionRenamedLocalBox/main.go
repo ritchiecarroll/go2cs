@@ -20,9 +20,16 @@ func (tagger) p() {}
 
 type box struct{ n int }
 
-func setN(b *box, v int) { b.n = v }
+// Both callees RETAIN the pointer they are given, so neither pointer parameter can be ref-lowered
+// (a ref cannot outlive the call): the caller's &p, &p.n and &counter.n must stay real boxes, which is
+// the only way the box-naming rules below are reached at all. A callee that only writes through its
+// pointer is lowered to a `ref` parameter, and its caller then passes `ref Δp` with no box.
+var lastBox *box
+var lastInt *int
 
-func bump(np *int) { *np += 100 }
+func setN(b *box, v int) { lastBox = b; b.n = v }
+
+func bump(np *int) { lastInt = np; *np += 100 }
 
 // counter (the GLOBAL var) collides with the method counter below - the var is Δ-renamed
 // AND, being addressed, its static box companion is declared with the RENAMED identifier
@@ -51,5 +58,6 @@ func main() {
 	bump(&p.n)
 	bump(&counter.n)
 	fmt.Println(counter.n)
-	fmt.Println(p.n, usesTypeP()) // 110 1
+	fmt.Println(p.n, usesTypeP())    // 110 1
+	fmt.Println(lastBox.n, *lastInt) // 110 100: the retained pointers alias p and counter.n
 }

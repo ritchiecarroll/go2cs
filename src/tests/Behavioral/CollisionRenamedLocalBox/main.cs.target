@@ -18,11 +18,21 @@ partial struct box {
     internal nint n;
 }
 
-internal static void setN(ref box b, nint v) {
+internal static ж<box> lastBox;
+
+internal static ж<nint> lastInt;
+
+internal static void setN(ж<box> Ꮡb, nint v) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    lastBox = Ꮡb;
     b.n = v;
 }
 
-internal static void bump(ref nint np) {
+internal static void bump(ж<nint> Ꮡnp) {
+    ref var np = ref Ꮡnp.DerefOrNull();
+
+    lastInt = Ꮡnp;
     np += 100;
 }
 
@@ -42,13 +52,15 @@ internal static nint usesTypeP() {
 }
 
 internal static void Main() {
-    var Δp = new box(n: 0);
-    setN(ref Δp, 7);
-    setN(ref Δp, Δp.n + 3);
-    bump(ref Δp.n);
-    bump(ref Δcounter.n);
+    ref var Δp = ref heap<box>(out var Ꮡp);
+    Δp = new box(n: 0);
+    setN(Ꮡp, 7);
+    setN(Ꮡp, Δp.n + 3);
+    bump(Ꮡp.of(box.Ꮡn));
+    bump(ᏑΔcounter.of(box.Ꮡn));
     fmt.Println(Δcounter.n);
     fmt.Println(Δp.n, usesTypeP());
+    fmt.Println((~lastBox).n, lastInt.Value);
 }
 
 } // end main_package
