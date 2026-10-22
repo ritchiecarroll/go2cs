@@ -1041,7 +1041,9 @@ compilation item order and then declaration order within a file, and every gener
 `package_info.cs` as its FIRST item (its `package_info.cs` `<Compile Include>` items come ahead of the
 `*.cs` glob), so all of a package's import hooks run before any of its own `init` functions,
 deterministically and across files. When the hooks lived in each importing file this held only within
-that file.
+that file. The module initializers go2cs-gen writes for its run-time registries only queue each registration
+for golib to run later, so where they fall in this order changes nothing
+([Run-time registrations wait for the first lookup that misses](source-generators.md#run-time-registrations-wait-for-the-first-lookup-that-misses)).
 
 **Exactly one hook per (assembly, imported package).** Go initializes a package once per program
 however many files import it, and a .NET module constructor likewise runs once per assembly, so the

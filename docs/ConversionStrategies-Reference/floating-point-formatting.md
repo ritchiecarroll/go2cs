@@ -1,6 +1,6 @@
 # Floating-Point Formatting
 
-[Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md)
+[Reference index](README.md) · [Summary of this topic](../ConversionStrategies.md#floating-point-values)
 
 Go's default rendering of a float — `%v`, `%g`, and the bare `Println`/`Print`/`Sprint` paths — is
 `strconv.FormatFloat(f, 'g', -1, bitSize)`: the shortest decimal digits that round-trip back to the same
@@ -84,8 +84,8 @@ defect, deliberately not conflated with this one.)
 
 `overflowingConstLiteral` materializes a compile-time integer constant whose value falls outside the C#
 `int32` range, because C# would otherwise evaluate the operator expression in `int32` and overflow
-(CS0220). It read the constant's type through `Underlying()`, so a constant of a *defined* type folded
-to a bare basic literal and the Go type was simply lost:
+(CS0220). When the constant has a *defined* type, the fold carries that type in the same parenthesized
+`(T)(…)` shape the native-int arm uses:
 
 ```go
 d := 8 * time.Hour
@@ -93,19 +93,21 @@ secondsEastOfUTC := int((8 * time.Hour).Seconds())
 ```
 
 ```csharp
-var d = 28800000000000L;                            // a C# long, not a Duration
-nint secondsEastOfUTC = (nint)(28800000000000L).Seconds();   // CS1929 — long has no Seconds
+var d = (time.Duration)(28800000000000L);
+nint secondsEastOfUTC = (nint)((time.Duration)(28800000000000L)).Seconds();
 ```
+<!-- src/tests/Behavioral/PackageNameShadowing/main.go:43 `d := 8 * time.Hour` -> main.cs.target:26 `var d = (Δtime.Duration)(28800000000000L);` and :27 `(nint)((Δtime.Duration)(28800000000000L)).Seconds()`; the golden spells `Δtime` because that test shadows the package name. -->
 
-The compile error is the loud half; the silent half is `d`, which is now a `long` and prints as its
-digit count where a `Duration` prints `8h0m0s`. The fold now carries the named type in the same
-parenthesized `(T)(…)` shape the native-int arm uses — `(time.Duration)(28800000000000L)` — which
-`wholeExprIsCastOfType` already recognizes, so enclosing paths do not re-wrap it. The generated wrapper
+`wholeExprIsCastOfType` recognizes that shape, so enclosing paths do not re-wrap it. The generated wrapper
 converts implicitly from its underlying, so the cast is always legal, and Go's own parentheses around a
-method-call receiver keep the postfix `.M()` binding to the cast rather than to the literal. Only
-constants outside `int32` reach this arm at all, so the corpus footprint is the handful of computed
-`time.Duration`-class constants above that magnitude. (Guarded by the `PackageNameShadowing` behavioral
-test, case 4.)
+method-call receiver keep the postfix `.M()` binding to the cast rather than to the literal.
+
+The type matters twice. A fold read through `Underlying()` would be a bare basic literal: `d` would be a
+C# `long`, which prints as its digits where a `Duration` prints `8h0m0s`, and `(28800000000000L).Seconds()`
+does not compile (CS1929, `long` has no `Seconds`). Only constants outside `int32` reach this arm at all,
+so it touches only the few computed `time.Duration`-class constants above that magnitude. (Guarded by the
+`PackageNameShadowing` behavioral test, case 4.)
+<!-- An earlier fold read the constant's type through Underlying() and lost the Go type: `var d = 28800000000000L;` and `(nint)(28800000000000L).Seconds()` (CS1929). -->
 
 ---
 
