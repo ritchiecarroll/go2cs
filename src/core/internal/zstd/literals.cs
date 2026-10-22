@@ -37,6 +37,8 @@ internal static readonly @string rleLiteralMissingˢ = "RLE literal missing"u8;
 // readRawRLELiterals reads and decompresses a Raw_Literals_Block or
 // a RLE_Literals_Block. RFC 3.1.1.3.1.1.
 internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r, block data, nint off, byte hdr, slice<byte> outbuf) {
+    var outbufᴷ = new stackAppend<byte>(moves: true);
+
     var raw = ((byte)(hdr & 3)) == 0;
 
     nint regeneratedSize = default!;
@@ -84,10 +86,11 @@ internal static (nint, slice<byte>, error) readRawRLELiterals(this ref Reader r,
         var rle = data[off];
         off++;
         for (nint i = 0; i < regeneratedSize; i++) {
-            outbuf = append(outbuf, rle);
+            outbuf = append(outbufᴷ, outbuf, rle);
         }
     }
 
+    outbuf = move2heap(outbufᴷ, outbuf);
     return (off, outbuf, default!);
 }
 
@@ -202,6 +205,7 @@ internal static readonly @string literalsHuffmanStreamOutˢ = "literals Huffman 
 // readLiteralsOneStream reads a single stream of compressed literals.
 internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr, block data, nint off, nint compressedSize, nint regeneratedSize, slice<byte> outbuf) {
     ref var r = ref Ꮡr.DerefOrNull();
+    var outbufᴷ = new stackAppend<byte>(moves: true);
 
     // We let the reverse bit reader read earlier bytes,
     // because the Huffman table ignores bits that it doesn't need.
@@ -222,10 +226,11 @@ internal static (slice<byte>, error) readLiteralsOneStream(this ж<Reader> Ꮡr,
         uint16 t = default!;
         var idx = (rbr.bits.Rsh((uint64)(rbr.cnt - huffBits))) & huffMask;
         t = huffTable[idx];
-        outbuf = append(outbuf, (byte)(t >> 8));
+        outbuf = append(outbufᴷ, outbuf, (byte)(t >> 8));
         rbr.cnt -= (uint32)((uint16)(t & 0xff));
     }
 
+    outbuf = move2heap(outbufᴷ, outbuf);
     return (outbuf, default!);
 }
 

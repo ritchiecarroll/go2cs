@@ -931,7 +931,7 @@ internal static (ΔMethod m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, 
         return (m, ok);
     }
     ж<abi.Imethod> p = default!;
-    foreach (var (i, _) in t.Methods) {
+    foreach (var i in range(t.Methods)) {
         p = Ꮡ(t.Methods, i);
         if (Ꮡt.nameOff((~p).Name).Name() == name) {
             return (Ꮡt.Method(i), true);
@@ -1168,7 +1168,7 @@ internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType
                 continue;
             }
             visited[tΔ1] = true;
-            foreach (var (i, _) in (~tΔ1).Fields) {
+            foreach (var i in range((~tΔ1).Fields)) {
                 var f = Ꮡ((~tΔ1).Fields, i);
                 // Find name and (for embedded field) type for field f.
                 @string fname = (~f).Name.Name();
@@ -1237,7 +1237,7 @@ internal static (StructField f, bool present) FieldByName(this ж<structType> �
     // Quick check for top-level name, or struct without embedded fields.
     var hasEmbeds = false;
     if (name != ""u8) {
-        foreach (var (i, _) in t.Fields) {
+        foreach (var i in range(t.Fields)) {
             var tf = Ꮡ(t.Fields, i);
             if ((~tf).Name.Name() == name) {
                 return (t.Field(i), true);
@@ -1464,6 +1464,8 @@ internal static ж<abi.Type> rtypeOff(@unsafe.Pointer section, int32 off) {
 //
 //go:linkname typesByString
 internal static slice<ж<abi.Type>> typesByString(@string s) {
+    var retᴷ = new stackAppend<ж<abi.Type>>(moves: true);
+
     var (sections, offset) = typelinks();
     slice<ж<abi.Type>> ret = default!;
 
@@ -1493,9 +1495,10 @@ internal static slice<ж<abi.Type>> typesByString(@string s) {
             if (stringFor(typ) != s) {
                 break;
             }
-            ret = builtin.append(ret, typ);
+            ret = builtin.append(retᴷ, ret, typ);
         }
     }
+    ret = move2heap(retᴷ, ret);
     return ret;
 }
 
@@ -1844,7 +1847,7 @@ internal static uintptr typeptrdata(ж<abi.Type> Ꮡt) {
         var st = Ꮡt.Reinterpret<abi.Type, structType>();
         // find the last field that has pointers.
         nint field = -1;
-        foreach (var (i, _) in (~st).Fields) {
+        foreach (var i in range((~st).Fields)) {
             var ft = (~st).Fields[i].Typ;
             if (ft.Pointers()) {
                 field = i;

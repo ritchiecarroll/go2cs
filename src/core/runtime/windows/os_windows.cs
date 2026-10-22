@@ -521,7 +521,7 @@ internal static void goenvs() {
     }
     envs = new slice<@string>(n);
 
-    foreach (var (i, _) in envs) {
+    foreach (var i in range(envs)) {
         envs[i] = gostringw(Ꮡ(Δp, 0));
         while (Δp[0] != 0) {
             Δp = Δp[1..];

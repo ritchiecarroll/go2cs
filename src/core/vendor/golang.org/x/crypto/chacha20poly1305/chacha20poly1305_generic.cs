@@ -79,7 +79,7 @@ internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, sl
         throw panic("chacha20poly1305: invalid buffer overlap of output and additional data");
     }
     if (!p.Verify(tag)) {
-        foreach (var (i, _) in @out) {
+        foreach (var i in range(@out)) {
             @out[i] = 0;
         }
         return (default!, errOpen);

@@ -301,7 +301,7 @@ internal static void @byte(this ref traceBuf buf, byte v) {
 internal static void varint(this ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
     var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
-    foreach (var (i, _) in arr) {
+    foreach (var i in range(arr)) {
         if (v < 0x80) {
             pos += i + 1;
             arr[i] = (byte)v;

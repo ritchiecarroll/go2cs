@@ -501,7 +501,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
-        var lhsVarsᴷ = new stackAppend<ж<Var>>();
+        var lhsVarsᴷ = new stackAppend<ж<Var>>(moves: true);
 
         // statements must end with the same top scope as they started with
         if (debug) {
@@ -913,6 +913,7 @@ internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt 
             // variable type underfoot.)
             if (lhs != nil) {
                 bool used = default!;
+                lhsVars = move2heap(lhsVarsᴷ, lhsVars);
                 foreach (var (_, v) in lhsVars) {
                     if (check.usedVars[v]) {
                         used = true;

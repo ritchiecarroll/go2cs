@@ -581,7 +581,7 @@ internal static error pushSection(this ref File f, ж<ΔSection> Ꮡsh, io.Reade
         var bo = f.ByteOrder;
 
         sh.Relocs = new slice<Reloc>((nint)(sh.Nreloc));
-        foreach (var (i, _) in sh.Relocs) {
+        foreach (var i in range(sh.Relocs)) {
             var rel = Ꮡ(sh.Relocs, i);
 
             ref var ri = ref heap(new relocInfo(), out var Ꮡri);
@@ -819,14 +819,17 @@ public static (slice<@string>, error) ImportedSymbols(this ref File f) {
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
 public static (slice<@string>, error) ImportedLibraries(this ref File f) {
+    var allᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> all = default!;
     foreach (var (_, l) in f.Loads) {
         {
             var (lib, ok) = l._<ж<Dylib>>(ᐧ); if (ok) {
-                all = append(all, (~lib).Name);
+                all = append(allᴷ, all, (~lib).Name);
             }
         }
     }
+    all = move2heap(allᴷ, all);
     return (all, default!);
 }
 

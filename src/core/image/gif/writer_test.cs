@@ -222,7 +222,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
     }
     if (go1Dot5Fields) {
         g0.Value.Disposal = new slice<byte>(len((~g0).Image));
-        foreach (var (i, _) in (~g0).Disposal) {
+        foreach (var i in range((~g0).Disposal)) {
             g0.Value.Disposal[i] = DisposalNone;
         }
         g0.Value.Config = new image.Config(
@@ -278,7 +278,7 @@ internal static void testEncodeAll(ж<testing.T> Ꮡt, bool go1Dot5Fields, bool 
         Ꮡt.Fatalf("image and disposal lengths differ: %d and %d"u8, len((~g1).Image), len((~g1).Disposal));
     }
 
-    foreach (var (i, _) in (~g0).Image) {
+    foreach (var i in range((~g0).Image)) {
         var (m0, m1) = ((~g0).Image[i], (~g1).Image[i]);
         if (m0.Bounds() != m1.Bounds()) {
             Ꮡt.Errorf("frame %d: bounds differ: %v and %v"u8, i, m0.Bounds(), m1.Bounds());
@@ -316,7 +316,7 @@ internal static readonly object expectedErrorFromˢ2 = (@string)"expected error 
 
 public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
     var images = new slice<ж<image.Paletted>>(2);
-    foreach (var (i, _) in images) {
+    foreach (var i in range(images)) {
         images[i] = image.NewPaletted(image.Rect(0, 0, 5, 5), palette.Plan9);
     }
 
@@ -335,7 +335,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
         Delay: new slice<nint>(len(images)),
         Disposal: new slice<byte>(1)
     ));
-    foreach (var (i, _) in (~g1).Disposal) {
+    foreach (var i in range((~g1).Disposal)) {
         g1.Value.Disposal[i] = DisposalNone;
     }
     {
@@ -570,7 +570,7 @@ public static void TestEncodeBadPalettes(ж<testing.T> Ꮡt) {
         foreach (var (_, nilColors) in new bool[]{false, true}.slice()) {
             var pal = new Δcolor.Palette(n);
             if (!nilColors) {
-                foreach (var (i, _) in pal) {
+                foreach (var i in range(pal)) {
                     pal[i] = Δcolor.Black;
                 }
             }
@@ -742,7 +742,7 @@ public static void BenchmarkEncodeRandomPaletted(ж<testing.B> Ꮡb) {
 
     var paletted = image.NewPaletted(image.Rect(0, 0, 640, 480), palette.Plan9);
     var rnd = rand.New(rand.NewSource(123));
-    foreach (var (i, _) in (~paletted).Pix) {
+    foreach (var i in range((~paletted).Pix)) {
         paletted.Value.Pix[i] = (uint8)rnd.Intn(256);
     }
 

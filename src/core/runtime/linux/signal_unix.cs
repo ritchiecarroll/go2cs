@@ -1020,7 +1020,7 @@ internal static partial void ensureSigM() {
             // mask accordingly.
             ref var sigBlocked = ref heap<sigset>(out var ᏑsigBlocked);
             sigBlocked = sigset_all.Clone();
-            foreach (var (i, _) in sigtable) {
+            foreach (var i in range(sigtable)) {
                 if (!blockableSig((uint32)i)) {
                     sigdelset(ref (ᏑsigBlocked).DerefOrNull(), i);
                 }
@@ -1318,7 +1318,7 @@ internal static void minitSignalStack() {
 internal static void minitSignalMask() {
     ref var nmask = ref heap<sigset>(out var Ꮡnmask);
     nmask = getg().Value.m.Value.sigmask.Clone();
-    foreach (var (i, _) in sigtable) {
+    foreach (var i in range(sigtable)) {
         if (!blockableSig((uint32)i)) {
             sigdelset(ref nmask, i);
         }

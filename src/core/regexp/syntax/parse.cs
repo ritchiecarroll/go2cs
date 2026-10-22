@@ -772,7 +772,7 @@ internal static slice<ж<Regexp>> factor(this ref parser p, slice<ж<Regexp>> su
     // Round 4: Collapse runs of empty matches into a single empty match.
     start = 0;
     @out = sub[..0];
-    foreach (var (i, _) in sub) {
+    foreach (var i in range(sub)) {
         if (i + 1 < len(sub) && (~sub[i]).Op == OpEmptyMatch && (~sub[i + 1]).Op == OpEmptyMatch) {
             continue;
         }

@@ -336,7 +336,7 @@ public static (ΔToken, error) Token(this ref Decoder d) {
 
         d.pushElement(t1.Name);
         d.translate(Ꮡt1.of(StartElement.ᏑName), true);
-        foreach (var (i, _) in t1.Attr) {
+        foreach (var i in range(t1.Attr)) {
             d.translate(Ꮡ(t1.Attr, i).of(Attr.ᏑName), false);
         }
         t = t1;

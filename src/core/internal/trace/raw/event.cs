@@ -38,7 +38,7 @@ public static @string String(this ref Event e) {
 
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.WriteString(spec.Name);
-    foreach (var (i, _) in spec.Args) {
+    foreach (var i in range(spec.Args)) {
         Ꮡs.WriteString(" "u8);
         Ꮡs.WriteString(spec.Args[i]);
         Ꮡs.WriteString("="u8);

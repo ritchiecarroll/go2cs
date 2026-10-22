@@ -56,7 +56,7 @@ internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTes
 internal static ref slice<fileTest> fileTests => ref ᏑfileTests.ValueSlot;
 
 public static void TestOpen(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in fileTests) {
+    foreach (var i in range(fileTests)) {
         var tt = Ꮡ(fileTests, i);
 
         var (f, err) = Open((~tt).@file);

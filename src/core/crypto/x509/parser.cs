@@ -573,6 +573,8 @@ internal static readonly @string x509InvalidExtendedKeyˢ = "x509: invalid exten
 
 internal static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseExtKeyUsageExtension(cryptobyte.String derʗp) {
     ref var der = ref heap(derʗp, out var Ꮡder);
+    var extKeyUsagesᴷ = new stackAppend<ExtKeyUsage>(moves: true);
+    var unknownUsagesᴷ = new stackAppend<asn1.ObjectIdentifier>(moves: true);
 
     slice<ExtKeyUsage> extKeyUsages = default!;
     slice<asn1.ObjectIdentifier> unknownUsages = default!;
@@ -586,12 +588,14 @@ internal static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseE
         }
         {
             var (extKeyUsage, ok) = extKeyUsageFromOID(eku); if (ok){
-                extKeyUsages = append(extKeyUsages, extKeyUsage);
+                extKeyUsages = append(extKeyUsagesᴷ, extKeyUsages, extKeyUsage);
             } else {
-                unknownUsages = append(unknownUsages, eku);
+                unknownUsages = append(unknownUsagesᴷ, unknownUsages, eku);
             }
         }
     }
+    extKeyUsages = move2heap(extKeyUsagesᴷ, extKeyUsages);
+    unknownUsages = move2heap(unknownUsagesᴷ, unknownUsages);
     return (extKeyUsages, unknownUsages, default!);
 }
 
@@ -600,6 +604,7 @@ internal static readonly @string x509InvalidCertificateˢ = "x509: invalid certi
 
 internal static (slice<ΔOID>, error) parseCertificatePoliciesExtension(cryptobyte.String derʗp) {
     ref var der = ref heap(derʗp, out var Ꮡder);
+    var oidsᴷ = new stackAppend<ΔOID>(moves: true);
 
     slice<ΔOID> oids = default!;
     var seenOIDs = new map<@string, bool>{};
@@ -620,8 +625,9 @@ internal static (slice<ΔOID>, error) parseCertificatePoliciesExtension(cryptoby
         if (!ok) {
             return (default!, errors.New(x509InvalidCertificateˢ));
         }
-        oids = append(oids, oid);
+        oids = append(oidsᴷ, oids, oid);
     }
+    oids = move2heap(oidsᴷ, oids);
     return (oids, default!);
 }
 
@@ -700,6 +706,10 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
         slice<ж<net.IPNet>> ips = default!;
         slice<@string> emails = default!;
         slice<@string> uriDomains = default!;
+        var dnsNamesᴷ = new stackAppend<@string>(moves: true);
+        var ipsᴷ = new stackAppend<ж<net.IPNet>>(moves: true);
+        var emailsᴷ = new stackAppend<@string>(moves: true);
+        var uriDomainsᴷ = new stackAppend<@string>(moves: true);
         while (!subtrees.Empty()) {
             ref var seq = ref heap<cryptobyte.String>(out var Ꮡseq);
             ref var value = ref heap<cryptobyte.String>(out var Ꮡvalue);
@@ -725,7 +735,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
                 if (!domainNameValid(domain, true)) {
                     return (default!, default!, default!, default!, fmt.Errorf("x509: failed to parse dnsName constraint %q"u8, domain));
                 }
-                dnsNames = append(dnsNames, domain);
+                dnsNames = append(dnsNamesᴷ, dnsNames, domain);
             }
             else if (exprᴛ1 == ipTag) {
                 nint l = builtin.len(value);
@@ -751,7 +761,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
                     return (default!, default!, default!, default!, fmt.Errorf("x509: IP constraint contained invalid mask %x"u8, mask));
                 }
 
-                ips = append(ips, Ꮡ(new net.IPNet(IP: ((net.IP)ip), Mask: ((net.IPMask)mask))));
+                ips = append(ipsᴷ, ips, Ꮡ(new net.IPNet(IP: ((net.IP)ip), Mask: ((net.IPMask)mask))));
             }
             else if (exprᴛ1 == emailTag) {
                 @string constraint = (@string)(slice<byte>)value;
@@ -774,7 +784,7 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
                         return (default!, default!, default!, default!, fmt.Errorf("x509: failed to parse rfc822Name constraint %q"u8, constraint));
                     }
                 }
-                emails = append(emails, constraint);
+                emails = append(emailsᴷ, emails, constraint);
             }
             else if (exprᴛ1 == uriTag) {
                 @string domain = (@string)(slice<byte>)value;
@@ -791,13 +801,17 @@ internal static (bool unhandled, error err) parseNameConstraintsExtension(ref Ce
                 if (!domainNameValid(domain, true)) {
                     return (default!, default!, default!, default!, fmt.Errorf("x509: failed to parse URI constraint %q"u8, domain));
                 }
-                uriDomains = append(uriDomains, domain);
+                uriDomains = append(uriDomainsᴷ, uriDomains, domain);
             }
             else { /* default: */
                 unhandled = true;
             }
         }
 
+        dnsNames = move2heap(dnsNamesᴷ, dnsNames);
+        ips = move2heap(ipsᴷ, ips);
+        emails = move2heap(emailsᴷ, emails);
+        uriDomains = move2heap(uriDomainsᴷ, uriDomains);
         return (dnsNames, ips, emails, uriDomains, default!);
     }
 
@@ -1307,15 +1321,18 @@ public static (ж<Certificate>, error) ParseCertificate(slice<byte> der) {
 // ParseCertificates parses one or more certificates from the given ASN.1 DER
 // data. The certificates must be concatenated with no intermediate padding.
 public static (slice<ж<Certificate>>, error) ParseCertificates(slice<byte> der) {
+    var certsᴷ = new stackAppend<ж<Certificate>>(moves: true);
+
     slice<ж<Certificate>> certs = default!;
     while (builtin.len(der) > 0) {
         var (cert, err) = parseCertificate(der);
         if (err != default!) {
             return (default!, err);
         }
-        certs = append(certs, cert);
+        certs = append(certsᴷ, certs, cert);
         der = der.slice(builtin.len((~cert).Raw));
     }
+    certs = move2heap(certsᴷ, certs);
     return (certs, default!);
 }
 

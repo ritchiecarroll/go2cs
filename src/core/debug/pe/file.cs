@@ -171,7 +171,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
         s.Value.ReaderAt = new io.SectionReaderжReaderAt(s.Value.sr);
         f.Value.Sections[i] = s;
     }
-    foreach (var (i, _) in (~f).Sections) {
+    foreach (var i in range((~f).Sections)) {
         error errΔ5 = default!;
         ((~f).Sections[i].Value.Relocs, errΔ5) = readRelocs((~f).Sections[i].of(pe_package.ΔSection.ᏑSectionHeader), new io.SectionReaderжReadSeeker(sr));
         if (errΔ5 != default!) {

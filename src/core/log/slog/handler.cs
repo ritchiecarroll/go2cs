@@ -386,7 +386,7 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     }
     if ((~s.h).json) {
         // Close all open groups.
-        foreach ((_, _) in (~s.h).groups.slice(0, nOpenGroups)) {
+        foreach (var _ᴛ1 in range((~s.h).groups.slice(0, nOpenGroups))) {
             s.buf.WriteByte((rune)'}');
         }
         // Close the top-level object.

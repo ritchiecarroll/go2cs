@@ -96,15 +96,14 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
 
 internal static void Main() {
     var strategies = new slice<strategy>(win);
-    foreach (var (kΔ1, _) in strategies) {
+    foreach (var kΔ1 in range(strategies)) {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);
     }
     var (wins, games) = roundRobin(strategies);
 
     nint k = default!;
-    foreach (var (iᴛ1, _) in strategies) {
+    foreach (var iᴛ1 in range(strategies)) {
         k = iᴛ1;
-
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
             k + 1, ratioString(wins[k], games - wins[k]));
     }

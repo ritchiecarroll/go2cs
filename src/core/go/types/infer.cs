@@ -41,7 +41,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var @params = ref Ꮡparams.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
-        var untypedᴷ = new stackAppend<nint>();
+        var untypedᴷ = new stackAppend<nint>(moves: true, capacityUsed: true);
         var dirtyᴷ = new stackAppend<nint>();
 
         // Don't verify result conditions if there's no error handler installed:
@@ -353,6 +353,7 @@ internal static slice<ΔType> /*inferred*/ infer(this ж<Checker> Ꮡcheck, posi
         // Collect all remaining parameters that don't have a type yet and determine the
         // maximum untyped type for each of those parameters, if possible.
         map<ж<TypeParam>, ΔType> maxUntyped = default!;                                // lazily allocated (we may not need it)
+        untyped = move2heap(untypedᴷ, untyped);
         foreach (var (_, index) in untyped) {
             var tpar = (~@params.At(index)).typ._<ж<TypeParam>>(); // is type parameter (no alias) by construction of untyped
             if (u.at(tpar) == default!) {

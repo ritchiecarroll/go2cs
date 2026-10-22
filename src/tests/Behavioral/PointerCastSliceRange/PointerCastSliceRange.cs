@@ -11,7 +11,7 @@ internal static void Main() {
     var s = Ꮡarr.slice(0, 4);
 
     nint sum = 0;
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         sum += i;
     }
 
@@ -20,7 +20,7 @@ internal static void Main() {
         total += v;
     }
 
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         var ps = Ꮡ(s, i);
         ps.Value += 1;
     }

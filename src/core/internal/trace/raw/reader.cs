@@ -83,18 +83,23 @@ public static (Event, error) ReadEvent(this ref Reader r) {
 }
 
 internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) {
+    var argsᴷ = new stackAppend<uint64>(moves: true);
+
     slice<uint64> args = default!;
     for (nint i = 0; i < n; i++) {
         var (val, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));
         if (err != default!) {
             return (default!, err);
         }
-        args = append(args, val);
+        args = append(argsᴷ, args, val);
     }
+    args = move2heap(argsᴷ, args);
     return (args, default!);
 }
 
 internal static (slice<byte>, error) readData(this ref Reader r) {
+    var dataᴷ = new stackAppend<byte>(moves: true);
+
     var (len, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));
     if (err != default!) {
         return (default!, err);
@@ -105,8 +110,9 @@ internal static (slice<byte>, error) readData(this ref Reader r) {
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        data = append(data, b);
+        data = append(dataᴷ, data, b);
     }
+    data = move2heap(dataᴷ, data);
     return (data, default!);
 }
 

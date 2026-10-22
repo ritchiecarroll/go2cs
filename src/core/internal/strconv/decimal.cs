@@ -62,7 +62,7 @@ public static @string String(this ref @decimal a) {
 }
 
 internal static nint digitZero(slice<byte> dst) {
-    foreach (var (i, _) in dst) {
+    foreach (var i in range(dst)) {
         dst[i] = (rune)'0';
     }
     return len(dst);

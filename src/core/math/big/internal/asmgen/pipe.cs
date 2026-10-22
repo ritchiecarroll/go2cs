@@ -220,7 +220,7 @@ public static slice<slice<ΔReg>> LoadN(this ref ΔPipe p, nint n) {
         switch (ᐧ) {
         case {} when (~(~a).Arch).loadIncN != default!: {
             // Load from memory and advance pointers at the same time.
-            foreach (var (j, _) in regs[i]) {
+            foreach (var j in range(regs[i])) {
                 regs[i][j] = (~p.f).Asm.Reg();
             }
             if (p.backward){
@@ -577,7 +577,7 @@ internal static void unroll(this ref ΔPipe p, ΔReg n, nint factor, Action<slic
         nint batch = min(factor - done, p.maxColumns);
         var regs = a.RegsUsed();
         var @out = new slice<slice<ΔReg>>(len(p.outPtr));
-        foreach (var (i, _) in @out) {
+        foreach (var i in range(@out)) {
             @out[i] = new slice<ΔReg>(batch);
         }
         var @in = p.LoadN(batch);

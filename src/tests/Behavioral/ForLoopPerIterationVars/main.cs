@@ -28,7 +28,7 @@ internal static void g1() {
 }
 
 internal static void g2() {
-    var fsᴷ = new stackAppend<Func<nint>>();
+    var fsᴷ = new stackAppend<Func<nint>>(moves: true);
 
     slice<Func<nint>> fs = default!;
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
@@ -42,6 +42,7 @@ internal static void g2() {
         iᴛ1 = i;
     }
     fmt.Println("g2:", len(fs));
+    fs = move2heap(fsᴷ, fs);
     foreach (var (_, f) in fs) {
         fmt.Println("g2v:", f());
     }
@@ -61,7 +62,7 @@ internal static void g3() {
 }
 
 internal static void g4() {
-    var fsᴷ = new stackAppend<Action>();
+    var fsᴷ = new stackAppend<Action>(moves: true);
 
     slice<Action> fs = default!;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
@@ -75,13 +76,14 @@ internal static void g4() {
         });
         iᴛ1 = i;
     }
+    fs = move2heap(fsᴷ, fs);
     foreach (var (_, f) in fs) {
         f();
     }
 }
 
 internal static void g5() {
-    var fsᴷ = new stackAppend<Func<nint>>();
+    var fsᴷ = new stackAppend<Func<nint>>(moves: true);
 
     slice<Func<nint>> fs = default!;
 outer:
@@ -99,6 +101,7 @@ continue_outer:;
         iᴛ1 = i;
     }
 break_outer:;
+    fs = move2heap(fsᴷ, fs);
     foreach (var (_, f) in fs) {
         fmt.Println("g5:", f());
     }

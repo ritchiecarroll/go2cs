@@ -384,7 +384,7 @@ internal static void cycleError(this ж<Checker> Ꮡcheck, slice<Object> cycle, 
         err.addf(new Objectᴠpositioner(obj), "invalid cycle in declaration of %s"u8, name(obj));
     }
     // "cycle[i] refers to cycle[j]" for (i,j) = (s,s+1), (s+1,s+2), ..., (n-1,0), (0,1), ..., (s-1,s) for len(cycle) = n, s = start.
-    foreach (var (i, _) in cycle) {
+    foreach (var i in range(cycle)) {
         var next = cycle[(start + i + 1) % len(cycle)];
         err.addf(new Objectᴠpositioner(obj), "%s refers to %s"u8, name(obj), name(next));
         obj = next;
@@ -844,7 +844,7 @@ internal static void collectTypeParams(this ж<Checker> Ꮡcheck, ж<ж<TypePara
             } else {
                 bound = new BasicжΔType(Typ[Invalid]);
             }
-            foreach (var (i, _) in (~f).Names) {
+            foreach (var i in range((~f).Names)) {
                 tparams[index + i].Value.bound = bound;
             }
             index += len((~f).Names);

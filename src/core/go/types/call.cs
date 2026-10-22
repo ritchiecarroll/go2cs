@@ -534,7 +534,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
     ref var sig = ref Ꮡsig.DerefOrNull();
-    var genericArgsᴷ = new stackAppend<nint>();
+    var genericArgsᴷ = new stackAppend<nint>(moves: true);
 
     rsig = Ꮡsig;
 
@@ -720,6 +720,7 @@ internal static ж<ΔSignature> /*rsig*/ arguments(this ж<Checker> Ꮡcheck, ж
 
         // compute argument signatures: instantiate if needed
         nint j = n;
+        genericArgs = move2heap(genericArgsᴷ, genericArgs);
         foreach (var (_, i) in genericArgs) {
             var arg = args[i];
             var asig = (~arg).typ._<ж<ΔSignature>>();

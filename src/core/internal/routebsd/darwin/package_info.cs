@@ -72,7 +72,7 @@ using static go.@internal.routebsd_package;
 [assembly: go.GoPositionMap("internal/routebsd/interface.go", "interface.cs", "AClesqI=")]
 [assembly: go.GoPositionMap("internal/routebsd/interface_classic.go", "interface_classic.cs", "AAscgoKUgoKUlAAMGoKCgpSCuIK4poKClIKClNyClJSCgoKU", "", "", "22=Uint32/1/1/4,Uint16/1/1/5;61=Uint32/1/1/3")]
 [assembly: go.GoPositionMap("internal/routebsd/interface_multicast.go", "interface_multicast.cs", "AAgSgoKUgoKU7oKCgpQ=", "", "", "17=Uint32/1/1/3,Uint16/1/1/4")]
-[assembly: go.GoPositionMap("internal/routebsd/message.go", "message.cs", "AA0gooKSgoKCgpSClIKClICClIKClIKUtriClA==")]
+[assembly: go.GoPositionMap("internal/routebsd/message.go", "message.cs", "AA0gwoKSgoKCgpSClIKClICClIKClIKUtriClA==")]
 [assembly: go.GoPositionMap("internal/routebsd/route.go", "route.cs", "AA8kgoKCnsKCgoKasoKmvrKCgpSCgpQ=")]
 [assembly: go.GoPositionMap("internal/routebsd/sys.go", "sys.cs", "ABJEgoKU")]
 [assembly: go.GoPositionMap("internal/routebsd/sys_darwin.go", "sys_darwin.cs", "AAkUktyCgpKCkoKSgpKCpA==")]

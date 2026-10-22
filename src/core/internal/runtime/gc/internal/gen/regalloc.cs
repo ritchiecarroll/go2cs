@@ -208,7 +208,7 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
 
     // Prepare for assignments
     var regUsed = new slice<regSet>(len(fn.ops), () => new()); // In-use registers at each op
-    foreach (var (i, _) in regUsed) {
+    foreach (var i in range(regUsed)) {
         // X15/Y15/Z15 is reserved by the Go ABI
         regUsed[i].inUse[regClassZ] |= (uint32)(((uint32)1 << 15));
         // K0 is contextual (if used as an opmask, it means no mask). Too

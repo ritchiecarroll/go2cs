@@ -99,7 +99,7 @@ internal static ж<huffmanEncoder> generateFixedLiteralEncoding() {
 internal static ж<huffmanEncoder> generateFixedOffsetEncoding() {
     var h = newHuffmanEncoder(30);
     var codes = h.Value.codes;
-    foreach (var (ch, _) in codes) {
+    foreach (var ch in range(codes)) {
         codes[ch] = new hcode(code: reverseBits((uint16)ch, 5), len: 5);
     }
     return h;

@@ -250,6 +250,8 @@ internal static readonly @string tlsMalformedOuterClientˢ = "tls: malformed out
 internal static readonly @string tlsInvalidInnerClientˢ = "tls: invalid inner client hello"u8;
 
 internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHelloMsg hello) {
+    var rawExtensionsᴷ = new stackAppend<rawExtension>(moves: true);
+
     ref var s = ref heap<cryptobyte.String>(out var Ꮡs);
     s = (cryptobyte.String)hello.original;
     if (!s.Skip(4 + 2 + 32) || // header, version, random
@@ -270,8 +272,9 @@ internal static (slice<rawExtension>, error) extractRawExtensions(ref clientHell
         if (!extensions.ReadUint16(Ꮡextension) || !extensions.ReadUint16LengthPrefixed(ᏑextData)) {
             return (default!, errors.New(tlsInvalidInnerClientˢ));
         }
-        rawExtensions = append(rawExtensions, new rawExtension(extension, extData));
+        rawExtensions = append(rawExtensionsᴷ, rawExtensions, new rawExtension(extension, extData));
     }
+    rawExtensions = move2heap(rawExtensionsᴷ, rawExtensions);
     return (rawExtensions, default!);
 }
 

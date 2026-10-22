@@ -410,7 +410,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
     }
     // Allocate intermediate buffers.
     var b = GoReflect.WithElemDims(new slice<array<byte>>(len(t) - 1, () => new(4096)), 4096);
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         (~c).link[i + 1].b = b[i][..];
     }
     return new chainжTransformer(c);

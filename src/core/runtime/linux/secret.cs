@@ -98,17 +98,20 @@ internal static (uintptr, uintptr) secret_getStack() {
 //
 //go:linkname secret_appendSignalStacks runtime/secret.appendSignalStacks
 internal static slice<Δstack> secret_appendSignalStacks(slice<Δstack> sigstacks) {
+    var sigstacksᴷ = new stackAppend<Δstack>(moves: true);
+
     // This is probably overkill, but it's what
     // doAllThreadsSyscall does
     var stw = stopTheWorld(stwAllThreadsSyscall);
     ᏑallocmLock.@lock();
     acquirem();
     for (var mp = allm; mp != nil; mp = mp.Value.alllink) {
-        sigstacks = append(sigstacks, (~(~mp).gsignal).stack);
+        sigstacks = append(sigstacksᴷ, sigstacks, (~(~mp).gsignal).stack);
     }
     releasem(ref ((~getg()).m).DerefOrNull());
     ᏑallocmLock.unlock();
     startTheWorld(stw);
+    sigstacks = move2heap(sigstacksᴷ, sigstacks);
     return sigstacks;
 }
 

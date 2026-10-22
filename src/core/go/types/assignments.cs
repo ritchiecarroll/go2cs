@@ -322,20 +322,24 @@ internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr
 // operandTypes returns the list of types for the given operands.
 internal static slice<ΔType> /*res*/ operandTypes(slice<ж<operand>> list) {
     slice<ΔType> res = default!;
+    var resᴷ = new stackAppend<ΔType>(moves: true);
 
     foreach (var (_, x) in list) {
-        res = append(res, (~x).typ);
+        res = append(resᴷ, res, (~x).typ);
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
 // varTypes returns the list of types for the given variables.
 internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
     slice<ΔType> res = default!;
+    var resᴷ = new stackAppend<ΔType>(moves: true);
 
     foreach (var (_, x) in list) {
-        res = append(res, (~x).typ);
+        res = append(resᴷ, res, (~x).typ);
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 

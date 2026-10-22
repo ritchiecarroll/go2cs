@@ -71,7 +71,7 @@ using static go.syscall_package;
 [assembly: go.GoPositionMap("syscall/exec_linux.go", "exec_linux.cs", "AG/oAZLcopIAARoAEAaCgpSCuIKCpoKCpoKAgraipgAUKpCmkAAROAARBAADJgAjIpSUgoKmgoKUgpSUuILcgoKCgpSUuIKAgoLIgoKUgqaCuIKClILcgoKCpoKUlKbu3IKCgsqCgIKkooKUgoKUgoLKgoKCypSCgriCgoKUuKKC3KaCgoKmgoKAoqSigpSAgraAoqSigpSAgsiCgoCipKKClICCAAsWgsKC3IKigsqAgoKCgpSCgoKmgoKUgoLIppSAwrbGgqaAwraigoLcgqKCyoKCgtyCgoKCgu6CgoKUgpSCgoKUgoKUgsqCgoKUpoKClLiCggAHEIK4goKCyoKCgsoAChaiggAIDoKCgsr6hLKCuIKCgpSokoKCpoCCgraAgrauwoKCgqaCgpSmgIKCtqqigoKAgsiUgIKkgoCCyKiSgoIAGBDikoKCpriCgsqCgoKmgqbK7oIAACSCgoKigqaCpgAFFgALAoKUlJTupoI=")]
 [assembly: go.GoPositionMap("syscall/forkpipe2.go", "forkpipe2.cs", "AAoaogAKHAAFFgALAoKUlIKCygAMGpSClLiCuKKowoKUgqaUlLQ=")]
 [assembly: go.GoPositionMap("syscall/lsf_linux.go", "lsf_linux.cs", "AAockqiSqJKmgoKUgoKCgoKCgpQABxKygoKUgoKCooKUgpSUooKU2JKCgoKokoI=")]
-[assembly: go.GoPositionMap("syscall/netlink_linux.go", "netlink_linux.cs", "AAsekqqiAAkUgoKCgoKCgoKmgoKCgoKCgqaCgrrCgoKUgoKAgqSCgIKkgoKUgoKUlIKCgoKCgoKUgpSCgoKClIKClIKUgtgACxaigoKCgpSCgpSmgoKCgpQACBjSgpSkpKSUgoKCgpSCgpSmgoKClA==")]
+[assembly: go.GoPositionMap("syscall/netlink_linux.go", "netlink_linux.cs", "AAsekqqiAAkUgoKCgoKCgoKmgoKCgoKCgqaCgrrCgoKUgoKAgqSCgIKkgoKUgoKUlIKCgoKCgoKUgpSCgoKClIKClIKUgtgACxaigoKCgpSCgpSmgoKCgpQACBjigpSkpKSUgoKCgpSCgpS2goKClA==")]
 [assembly: go.GoPositionMap("syscall/rlimit.go", "rlimit.cs", "AA88AA4CgoCCggAIEJSCyIKmlA==")]
 [assembly: go.GoPositionMap("syscall/rlimit_stub.go", "rlimit_stub.cs", "AAgU")]
 [assembly: go.GoPositionMap("syscall/sockcmsg_linux.go", "sockcmsg_linux.cs", "AAoc0oKCgoKCgqzSgpSClIKUkg==")]

@@ -58,7 +58,7 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
     }
 
     var parts = strings.Split(name, (@string)sep);
-    foreach (var (i, _) in parts) {
+    foreach (var i in range(parts)) {
         if (parts[i] == "") {
             continue;
         }

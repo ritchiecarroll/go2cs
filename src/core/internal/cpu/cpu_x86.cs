@@ -270,14 +270,16 @@ public static @string Name() {
 
 internal static slice<byte> appendBytes(slice<byte> b, params ꓸꓸꓸuint32 argsʗp) {
     var args = argsʗp.sslice();
+    var bᴷ = new stackAppend<byte>(moves: true);
 
     foreach (var (_, arg) in args) {
-        b = append(b,
+        b = append(bᴷ, b,
             (byte)(arg >> 0),
             (byte)(arg >> 8),
             (byte)(arg >> 16),
             (byte)(arg >> 24));
     }
+    b = move2heap(bᴷ, b);
     return b;
 }
 

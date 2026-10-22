@@ -1231,7 +1231,7 @@ internal static void dumpScanStats() {
 internal static void flushScanStats(this ref gcWork w, /*[68]*/ ж<array<sizeClassScanStats>> Ꮡdst) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
-    foreach (var (i, _) in w.stats) {
+    foreach (var i in range(w.stats)) {
         dst[i].spansDenseScanned += w.stats[i].spansDenseScanned;
         dst[i].spanObjsDenseScanned += w.stats[i].spanObjsDenseScanned;
         dst[i].spansSparseScanned += w.stats[i].spansSparseScanned;

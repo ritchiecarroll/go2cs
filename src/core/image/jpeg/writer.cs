@@ -306,7 +306,7 @@ internal static void writeMarkerHeader(this ref encoder e, uint8 marker, nint ma
 internal static void writeDQT(this ref encoder e) {
     const nint markerlen = /* 2 + int(nQuantIndex)*(1+blockSize) */ 132;
     e.writeMarkerHeader(dqtMarker, markerlen);
-    foreach (var (i, _) in e.quant) {
+    foreach (var i in range(e.quant)) {
         e.writeByte((uint8)i);
         e.write(e.quant[i][..]);
     }
@@ -632,8 +632,8 @@ public static error Encode(io.Writer w, image.Image m, ж<Options> Ꮡo) {
         scale = 200 - quality * 2;
     }
     // Initialize the quantization tables.
-    foreach (var (i, _) in e.quant) {
-        foreach (var (j, _) in e.quant[i]) {
+    foreach (var i in range(e.quant)) {
+        foreach (var j in range(e.quant[i])) {
             nint x = (nint)unscaledQuant[i][j];
             x = (x * scale + 50) / 100;
             if (x < 1){
