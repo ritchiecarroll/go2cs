@@ -594,21 +594,29 @@ public static partial class testing_package
     // RecvGenerator intentionally handles ordinary receiver signatures. C# params
     // collections use Span<T>, which is ref-like and needs explicit pointer receiver
     // overloads for converted closures that retain *testing.T rather than a ref local.
-    public static void Error(this ж<T> t, params ꓸꓸꓸany args) => Error(ref t.Value, args);
+    //
+    // They carry [MethodImpl(NoInlining)] as RecvGenerator's own overloads of the marked members do
+    // (HasNoInliningMark), for the same reason as the members above, seen from the test's side: inlined into
+    // the test, the call the test's frame is suspended in targets THIS overload while the frame inside is the
+    // ref one, so runtime's resolver no longer recognises the call (suspendedAtReportedCall) and names the line
+    // of the next call instead. Measured under Release with TieredCompilation=0: TestTBHelper's record 8
+    // (`t.Error("8")` at helper_test.go:22, just before a `return`) read helper_test.go:26, the t.Parallel()
+    // after the block; tier-0, which inlines nothing, read :22.
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Error(this ж<T> t, params ꓸꓸꓸany args) => Error(ref t.Value, args);
 
-    public static void Errorf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Errorf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Errorf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Errorf(ref t.Value, format, args);
 
-    public static void Fatal(this ж<T> t, params ꓸꓸꓸany args) => Fatal(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Fatal(this ж<T> t, params ꓸꓸꓸany args) => Fatal(ref t.Value, args);
 
-    public static void Fatalf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Fatalf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Fatalf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Fatalf(ref t.Value, format, args);
 
-    public static void Log(this ж<T> t, params ꓸꓸꓸany args) => Log(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Log(this ж<T> t, params ꓸꓸꓸany args) => Log(ref t.Value, args);
 
-    public static void Logf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Logf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Logf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Logf(ref t.Value, format, args);
 
-    public static void Skip(this ж<T> t, params ꓸꓸꓸany args) => Skip(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Skip(this ж<T> t, params ꓸꓸꓸany args) => Skip(ref t.Value, args);
 
-    public static void Skipf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Skipf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining)] public static void Skipf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Skipf(ref t.Value, format, args);
 
     [GoRecv] public static nint Run(this ref M m)
     {

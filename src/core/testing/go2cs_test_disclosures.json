@@ -2,18 +2,6 @@
   "schemaVersion": 1,
   "disclosures": [
     {
-      "name": "TestTBHelper",
-      "class": "runtime-capability",
-      "signature": "helperfuncs_test.go:48: 2",
-      "reason": "re-execs the test binary and requires the child's output to match Go's `--- FAIL:` layout with Go's own call sites (`helperfuncs_test.go:24: 2`): the host's records now carry Go's layout and Go's call sites (the output-format seat), and the remaining divergence is frame attribution under the Release JIT: a thin Go forwarder (one statement, a call) that reaches t.Error or t.Helper only THROUGH the testing host is not in the converter's NoInlining closure (computeNoInliningClosure seeds on Go source that reaches runtime.Caller/Callers itself, and the host's callSite walk is invisible to it), so the JIT inlines it and its frame is gone from runtime.Callers. An inlined function that calls t.Helper also marks its CALLER as the helper, which moves every later record. Measured 2026-10-20 at go1.26.10 (testing -tests): -test-config Debug PASSES this test outright, Release does not. Retires when the NoInlining closure covers the testing API's callers."
-    },
-    {
-      "name": "TestTBHelperParallel",
-      "class": "runtime-capability",
-      "signature": "got second output line \"helperfuncs_test.go:95: parallel\"; want \"helperfuncs_test.go:24: parallel\"",
-      "reason": "re-execs the test binary and requires the child's five parallel records to name notHelperCallingHelper's line (`helperfuncs_test.go:24`); the layout now matches Go's seven lines: the host's records now carry Go's layout and Go's call sites (the output-format seat), and the remaining divergence is frame attribution under the Release JIT: a thin Go forwarder (one statement, a call) that reaches t.Error or t.Helper only THROUGH the testing host is not in the converter's NoInlining closure (computeNoInliningClosure seeds on Go source that reaches runtime.Caller/Callers itself, and the host's callSite walk is invisible to it), so the JIT inlines it and its frame is gone from runtime.Callers. An inlined function that calls t.Helper also marks its CALLER as the helper, which moves every later record. Measured 2026-10-20 at go1.26.10 (testing -tests): -test-config Debug PASSES this test outright, Release does not. Retires when the NoInlining closure covers the testing API's callers."
-    },
-    {
       "name": "TestMorePanic",
       "class": "host-identity",
       "signature": "INFRASTRUCTURE-ERROR TestGoexitInCleanupAfterPanicHelper",
