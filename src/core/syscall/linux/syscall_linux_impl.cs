@@ -39,12 +39,12 @@
 // managed model already satisfying the contract by a different mechanism, which is the same
 // judgment syscall_impl.cs records for runtimeSetenv/runtimeUnsetenv one folder up.
 //
-// SCOPE. This file covers the pair the ordinary syscall path needs, and — since 2026-08-22 — the
-// one further raw bottom that something genuinely needed: rawSyscallNoError (below). The remaining
-// bodyless declarations in syscall_linux.cs — rawVforkSyscall, runtime_doAllThreadsSyscall,
-// cgocaller — are still separate questions with separate answers (a fork-time raw bottom, a
-// whole-process operation, the cgo boundary) and stay announcing stubs until something genuinely
-// needs them. Catalogued in docs/phase4/FINDING-linux-run-layer.md §5.
+// SCOPE. This file covers the pair the ordinary syscall path needs, the raw bottom
+// rawSyscallNoError (since 2026-08-22), and runtime_doAllThreadsSyscall's kernel half, which
+// answers ENOTSUP as a cgo-enabled Go binary does (below). Of the other bodyless declarations in
+// syscall_linux.cs, cgocaller has its body in cgocaller_linux_impl.cs (the cgo boundary), and
+// rawVforkSyscall, a fork-time raw bottom, stays an announcing stub until something needs it.
+// Catalogued in docs/phase4/FINDING-linux-run-layer.md §5.
 //
 // rawSyscallNoError — WHY NOW. Go declares it in syscall_linux.go and implements it in
 // asm_linux_amd64.s as a bare SYSCALL that returns AX and DX with NO errno handling, for the

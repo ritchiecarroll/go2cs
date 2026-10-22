@@ -91,7 +91,7 @@ internal static class MethodSet
             return null;
 
         string self = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        List<(string name, bool pointer, string? unbound, string? bound)> arms = [];
+        List<(string name, bool pointer, string? unbound, string? bound, string? register)> arms = [];
         HashSet<(string, bool)> seen = [];
 
         // The type's own methods first: a method it declares hides every promotion of that name (Go's rule), and the
@@ -103,7 +103,7 @@ internal static class MethodSet
 
         foreach (Shape shape in shapes)
         {
-            foreach ((string name, bool pointer, string? unbound, string? bound) arm in Arms(shape, self, compilation))
+            foreach ((string name, bool pointer, string? unbound, string? bound, string? register) arm in Arms(shape, self, compilation))
             {
                 if ((arm.unbound is not null || arm.bound is not null) && seen.Add((arm.name, arm.pointer)))
                     arms.Add(arm);
@@ -120,9 +120,13 @@ internal static class MethodSet
         body.Append("        switch ((method, pointer))\r\n");
         body.Append("        {\r\n");
 
-        foreach ((string name, bool pointer, string? unbound, string? bound) in arms)
+        foreach ((string name, bool pointer, string? unbound, string? bound, string? register) in arms)
         {
             body.Append($"            case ({SymbolDisplay.FormatLiteral(name, true)}, {(pointer ? "true" : "false")}):\r\n");
+
+            if (register is not null)
+                body.Append(register);
+
             body.Append($"                if (!bound)\r\n");
             body.Append($"                    return {unbound ?? "null"};\r\n");
 
@@ -339,7 +343,7 @@ internal static class MethodSet
     // The arms of one method: the *T arm for a pointer method and both for a value method. Each is the unbound func's
     // expression and the binder's statements, which read `receiver`; either is null when its signature has no delegate
     // family.
-    private static IEnumerable<(string name, bool pointer, string? unbound, string? bound)> Arms(Shape shape, string self, Compilation compilation)
+    private static IEnumerable<(string name, bool pointer, string? unbound, string? bound, string? register)> Arms(Shape shape, string self, Compilation compilation)
     {
         string box = $"global::go.ж<{self}>";
         List<string> names = [.. shape.Parameters.Select((_, i) => $"{TempVarMarker}arg{i + 1}")];
@@ -370,11 +374,18 @@ internal static class MethodSet
                 ? $"{unboundDelegate}({shape.Target})"
                 : null;
 
+        // A variadic arm's delegates are called (Value.Call) through a trampoline closed over their signatures, which the arm
+        // registers before handing one out, so compiled code closes it (golib's GoReflect.VariadicRegistry.cs).
+        string? Register(string receiverType) => shape.Variadic is null ? null : string.Concat(
+            new[] { Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns), Registration(compilation, shape.Parameters, shape.Variadic, shape.Returns) }
+                .OfType<string>().Select(line => $"                {line}\r\n"));
+
         if (shape.Receiver == Receiver.Pointer)
         {
             yield return (shape.Name, true,
                 Method(box),
-                Bound($"{box} {TempVarMarker}p = ({box})receiver!;", $"{shape.Target}({TempVarMarker}p{arguments})"));
+                Bound($"{box} {TempVarMarker}p = ({box})receiver!;", $"{shape.Target}({TempVarMarker}p{arguments})"),
+                Register(box));
 
             yield break;
         }
@@ -394,11 +405,33 @@ internal static class MethodSet
 
         yield return (shape.Name, false,
             shape.Receiver == Receiver.Value ? Method(self) : Unbound(self, valueCall($"{TempVarMarker}recv")),
-            Bound($"{self} {TempVarMarker}r = ({self})receiver!;", valueCall($"{TempVarMarker}r")));
+            Bound($"{self} {TempVarMarker}r = ({self})receiver!;", valueCall($"{TempVarMarker}r")),
+            Register(self));
 
         yield return (shape.Name, true,
             Unbound(box, valueCall(pointee($"{TempVarMarker}recv"))),
-            Bound($"{box} {TempVarMarker}p = ({box})receiver!;", valueCall(pointee($"{TempVarMarker}p"))));
+            Bound($"{box} {TempVarMarker}p = ({box})receiver!;", valueCall(pointee($"{TempVarMarker}p"))),
+            Register(box));
+    }
+
+    // The registration of a variadic signature's trampolines, the statement golib's GoReflect.RegisterVariadicFunc or
+    // RegisterVariadicAction takes with the type arguments Delegate casts to; null when golib declares no such family.
+    private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)
+    {
+        string family = returns.Length == 0 ? "Action" : "Func";
+
+        if (Delegate(compilation, parameters, variadic, returns) is null ||
+            compilation.GetTypeByMetadataName("go.GoReflect") is not { } reflect || reflect.GetMembers($"RegisterVariadic{family}").IsEmpty)
+        {
+            return null;
+        }
+
+        List<string> arguments = [.. parameters, variadic];
+
+        if (returns.Length > 0)
+            arguments.Add(returns);
+
+        return $"global::go.GoReflect.RegisterVariadic{family}<{string.Join(", ", arguments)}>();";
     }
 
     // A cast to the delegate type golib's reflect builds for the signature (GoReflect.MakeDelegateType): the BCL

@@ -108,7 +108,9 @@ typed-nil box `ж<T>.NilBox`, never a null, so `.type()` unwraps it, `case *T:` 
 pointee, and `case null:` does not.<!-- Earlier, a nil *T stayed wrapped (a null Box) and fell to `default`; AdapterImplTemplate's constructor now substitutes ж<T>.NilBox. --> (Guarded by
 the `TypeSwitchPointerAdapter` behavioral test — pointer-receiver implementations of a non-empty
 interface dispatched through single-type, multi-type, no-bind, and write-through cases, plus
-value-receiver, `nil`, and raw-box-in-`any` controls.)
+value-receiver, `nil`, and raw-box-in-`any` controls; and the `TypeSwitchNilPointer` behavioral test — a nil
+`*T` in a non-empty interface and in `any`, a binding and a multi-type case, and a pointer-receiver call on the
+nil pointee.)
 
 **Both unwrap tiers sit behind ONE `IGoAdapter` probe (2026-07-26).** `.type()` is evaluated once
 per type switch, and it used to test `IInterfaceAdapter` and then `IжAdapter` separately — two
