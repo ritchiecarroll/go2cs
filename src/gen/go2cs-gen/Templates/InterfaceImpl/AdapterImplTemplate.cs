@@ -106,15 +106,18 @@ internal class AdapterImplTemplate : TemplateBase
              }
          """;
 
-    // Registers the box→adapter factory at module load so golib's type-assert machinery
-    // (builtin._<T>) can re-wrap a raw receiver box matched against a NAMED interface case
-    // label by Go method-set semantics. A GENERIC adapter cannot host a module initializer
-    // and its open registration key is unrepresentable — generic instantiations stay on the
-    // nominal-match path.
+    // Registers the box→adapter factory so golib's type-assert machinery (builtin._<T>) can
+    // re-wrap a raw receiver box matched against a NAMED interface case label by Go method-set
+    // semantics. Called from the package's adapter registrations, which its module initializer
+    // defers to golib's first adapter lookup that misses (ImplementGenerator.EmitAdapterRegistrations).
+    // A GENERIC adapter's open registration key is unrepresentable — generic instantiations stay
+    // on the nominal-match path.
+    public bool Registers => TypeParameters.Length == 0;
+
     private string RegistryInitialization =>
-        TypeParameters.Length > 0
+        !Registers
             ? string.Empty
-            : "\r\n\r\n        [global::System.Runtime.CompilerServices.ModuleInitializer]\r\n" +
+            : "\r\n\r\n" +
               $"        internal static void {TempVarMarker}RegisterAdapter() =>\r\n" +
               $"            global::go.AdapterRegistry.Register(typeof({PointerPrefix}<{StructName}>), typeof({InterfaceName}), static box => new {AdapterName}(({PointerPrefix}<{StructName}>)box));";
 

@@ -54,7 +54,7 @@ public class GoZeroResidualTests
         object IGoZeroConstructed.GoZeroNew() => new HookedGenericNeedy<T>();
     }
 
-    // The registration a type's module initializer made, read through the same reflection for every arm
+    // The registration a type's module initializer queued, read through the same reflection for every arm
     // so the positive arm shows the instrument can report one.
     private static object RegisteredFactory(Type type) =>
         typeof(GoZeroFactory<>).MakeGenericType(type).GetField(nameof(GoZeroFactory<int>.Create))!.GetValue(null);
@@ -79,8 +79,11 @@ public class GoZeroResidualTests
     {
         RunPackageInit(typeof(sha3.SHA3));
 
-        Assert.IsNotNull(RegisteredFactory(typeof(sha3.SHA3)), "go2cs-gen registers a non-generic needy struct");
         Assert.AreEqual((nint)200, DigestStateLength(GoZero<sha3.SHA3>()), "GoZero constructs the fixed array at its Go length");
+
+        // The package's module initializer only QUEUES its factories (GoDeferredRegistrations); a constructed zero
+        // with no factory runs the queue, so by now the generated registration has run.
+        Assert.IsNotNull(RegisteredFactory(typeof(sha3.SHA3)), "go2cs-gen registers a non-generic needy struct");
 
         // Control: the instrument can read the broken zero it exists to replace.
         Assert.AreEqual((nint)0, DigestStateLength(default), "default(SHA3) leaves the array at length 0");

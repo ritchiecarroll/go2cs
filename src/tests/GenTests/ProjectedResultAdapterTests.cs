@@ -81,6 +81,12 @@ public class ProjectedResultAdapterTests
                 public static void Register(System.Type boxType, System.Type interfaceType, System.Func<object, object> factory) { }
             }
 
+            public sealed class GoDeferredRegistrations
+            {
+                public static readonly GoDeferredRegistrations Adapters = new();
+                public void Defer(System.Action register) { }
+            }
+
             [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
             public class GoImplementAttribute<TStruct, TInterface> : System.Attribute
             {
@@ -253,7 +259,8 @@ public class ProjectedResultAdapterTests
             $"the generated adapters must compile; saw: {string.Join("; ", errors.Select(diagnostic => $"{diagnostic.Id} {diagnostic.GetMessage()}"))}" +
             $"{System.Environment.NewLine}generated: {string.Join(" | ", adapters.Keys)}");
 
-        Assert.AreEqual(4, adapters.Count, $"one adapter per record was expected, saw: {string.Join(" | ", adapters.Keys)}");
+        // Beside the adapters, the package's one deferred adapter registration (AdapterRegistry.g.cs).
+        Assert.AreEqual(4, adapters.Keys.Count(name => !name.EndsWith(".AdapterRegistry.g.cs")), $"one adapter per record was expected, saw: {string.Join(" | ", adapters.Keys)}");
     }
 
     /// <summary>

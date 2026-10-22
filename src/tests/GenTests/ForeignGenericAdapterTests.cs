@@ -105,6 +105,12 @@ public class ForeignGenericAdapterTests
                 public static void Register(System.Type boxType, System.Type interfaceType, System.Func<object, object> factory) { }
             }
 
+            public sealed class GoDeferredRegistrations
+            {
+                public static readonly GoDeferredRegistrations Adapters = new();
+                public void Defer(System.Action register) { }
+            }
+
             [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = true)]
             public class GoImplementAttribute<TStruct, TInterface> : System.Attribute
             {
@@ -301,10 +307,17 @@ public class ForeignGenericAdapterTests
         // No '<' may reach the identifier — that is the CS0692 cascade's entire cause.
         Assert.IsFalse(adapter.Contains("class pkg_G<"), "the adapter identifier must carry no type-argument list");
 
-        // A NON-generic adapter can host the module initializer, so the closed instantiation is
-        // reachable from golib's type-assert machinery rather than stranded on the nominal path.
-        StringAssert.Contains(adapter, "[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        // A NON-generic adapter registers, so the closed instantiation is reachable from golib's
+        // type-assert machinery rather than stranded on the nominal path: its own registration,
+        // called from the package's one registration that the module initializer defers.
+        StringAssert.Contains(adapter, "internal static void ᴛRegisterAdapter() =>");
         StringAssert.Contains(adapter, "global::go.AdapterRegistry.Register(typeof(ж<global::go.@internal.pkg_package.G<object, object>>)");
+
+        string registry = adapters.Single(pair => pair.Key.EndsWith(".AdapterRegistry.g.cs")).Value;
+
+        StringAssert.Contains(registry, "[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        StringAssert.Contains(registry, "global::go.GoDeferredRegistrations.Adapters.Defer(ᴛRegisterAdapters);");
+        StringAssert.Contains(registry, "pkg_GжmapLike.ᴛRegisterAdapter();");
     }
 
     /// <summary>
