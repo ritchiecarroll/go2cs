@@ -184,7 +184,7 @@ internal static void queuefinalizer(@unsafe.Pointer Δp, ж<funcval> Ꮡfn, uint
                 if ((@unsafe.Sizeof(new finalizer(nil)) != 5 * goarch.PtrSize || @unsafe.Offsetof(new finalizer(nil).GetType(), "fn") != 0 || @unsafe.Offsetof(new finalizer(nil).GetType(), "arg") != goarch.PtrSize || @unsafe.Offsetof(new finalizer(nil).GetType(), "nret") != 2 * goarch.PtrSize || @unsafe.Offsetof(new finalizer(nil).GetType(), "fint") != 3 * goarch.PtrSize || @unsafe.Offsetof(new finalizer(nil).GetType(), "ot") != 4 * goarch.PtrSize)) {
                     @throw("finalizer out of sync"u8);
                 }
-                foreach (var (i, _) in finptrmask) {
+                foreach (var i in range(finptrmask)) {
                     finptrmask[i] = finalizer1[i % len(finalizer1)];
                 }
             }

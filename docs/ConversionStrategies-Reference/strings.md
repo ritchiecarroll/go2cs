@@ -68,7 +68,7 @@ var names = []string{"stdin", "stdout"}
 internal static slice<@string> names = new @string[]{"stdin", "stdout"}.slice();
 ```
 
-golib's `implicit operator @string(string)` makes the conversion. For a C# **literal** it goes through `StringLiteralCache` (golib [`StringLiteralCache.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/StringLiteralCache.cs)): the first evaluation transcodes the UTF-16 literal to UTF-8 and stores the result, and every later evaluation returns the stored `@string`. A literal is a frozen object that never moves or dies, so the cache keys on its address and holds it without a leak. A run-time C# string is converted as before and never stored. So a plain literal costs one conversion per program run, and the emitted code needs no field and no name. `""` is plain too, and it equals the zero `@string` in every Go operation (`==`, `len`, hashing, and `[]byte("")` is non-nil); the golib test `PlainEmptyLiteralTests` checks this.
+golib's `implicit operator @string(string)` makes the conversion. For a C# **literal** it goes through `StringLiteralCache` (golib [`StringLiteralCache.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/StringLiteralCache.cs)): the first evaluation transcodes the UTF-16 literal to UTF-8 and stores the result, and every later evaluation returns the stored `@string`. A literal is a frozen object that never moves or dies, so the cache keys on its address and holds it without a leak. A run-time C# string is converted as before and never stored. So a plain literal costs one conversion per program run, and the emitted code needs no field and no name. `""` is plain too, and it equals the zero `@string` in every Go operation (`==`, `len`, hashing, and `[]byte("")` is non-nil).
 
 The plain form covers returns, assignments, `string` and `...string` arguments, struct fields (keyed or positional), typed slice, array and map elements and keys, package-level `var` initializers, and function-local string constants. A plain literal claims no field, so it adds no initialization-order dependency, and `func init()` bodies and init-reachable functions take it too.
 
@@ -86,7 +86,7 @@ A slot where a bare C# string would bind the wrong C# type keeps the form it had
 
 Comparisons, concatenation operands and `[]byte("…")` sources keep the `u8` span, as they always have. A package `var` initialized by an inferred generic call follows the call's argument rule.
 
-**The standard library opts out.** A package whose source is under `GOROOT/src` keeps [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use), under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). `-hoist-literals` gives any other package the same form, and it is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation (about 0.5 ns, measured).
+**The standard library opts out.** A package whose source is under `GOROOT/src` keeps [hoisted literals](#a-value-materializing-string-literal-is-hoisted-to-a-static-readonly-field-beside-its-first-use), under `-stdlib` and under `-tests` alike, so a package's production and test passes always agree (`literalsHoistedFor`). `-hoist-literals` gives any other package the same form, and it is the recommended opt-out for performance-critical code: a hoisted field is a plain static read, where a plain literal makes a cache lookup on every evaluation.
 
 **A wrong binding is a build error.** The analyzer `StringLiteralBindingAnalyzer` (`go2cs-gen`) reports [`GO2CS0004`](../DiagnosticCodes.md), an error, on a C# string literal in converted code that binds where Go's string would not: an `object` or interface parameter, a method type parameter inferred as `string`, or a `System.String` parameter beside an `@string` overload. A parameter marked `[GoTakesCSharpString]` (golib) accepts a C# string by design and is exempt; golib marks `panic`'s state and `len(string)`. Hand-owned assemblies, attribute arguments, `nameof` and parameter defaults are not checked.
 
@@ -231,8 +231,8 @@ func FormatBool(b bool) string {
 ```
 ```csharp
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string trueˢ = "true"u8;
-private static readonly @string falseˢ = "false"u8;
+internal static readonly @string trueˢ = "true"u8;
+internal static readonly @string falseˢ = "false"u8;
 
 public static @string FormatBool(bool b) {
     if (b) {
