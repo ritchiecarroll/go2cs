@@ -892,6 +892,11 @@ var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|=
 var csDeclRe = regexp.MustCompile(`^(\[[^\]]*\]\s*)*(public|internal|private|protected|partial|static|readonly|unsafe|const|ref|file|new)\b`)
 
 func isCSDecl(cs *csFile, ln int) bool {
+	// A lazy var's holder line declares the var, whatever `_package` class its initializer names.
+	if lazyHolderRe.MatchString(cs.codeText[ln-1]) {
+		return true
+	}
+
 	return csDeclRe.MatchString(cs.codeText[ln-1]) && !strings.HasPrefix(cs.codeText[ln-1], "partial class ") && !strings.Contains(cs.codeText[ln-1], "_package")
 }
 
