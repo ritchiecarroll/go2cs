@@ -68,22 +68,18 @@ internal static void bumpBox(ref Box b) {
     b.Tag += 10;
 }
 
-public static nint BumpedRecv(this Box bʗp) {
-    ref var b = ref heap(bʗp, out var Ꮡb);
-
+public static nint BumpedRecv(this Box b) {
     bumpBox(ref b);
     return b.Tag;
 }
 
-public static (nint, nint) ClippedRecv(this Box bʗp) {
-    ref var b = ref heap(bʗp, out var Ꮡb);
-
+public static (nint, nint) ClippedRecv(this Box b) {
     clip(ref b.R, 5, 5);
     return (b.R.Min, b.R.Max);
 }
 
-public static (nint, nint, nint) BumpedElemRecv(this Trio aʗp) {
-    ref var a = ref heap(aʗp.Clone(), out var Ꮡa);
+public static (nint, nint, nint) BumpedElemRecv(this Trio a) {
+    a = a.Clone();
 
     bump(ref a[1]);
     return (a[0], a[1], a[2]);

@@ -654,6 +654,12 @@ func (v *Visitor) markAddressTakenBoxedReceiver(recv *ast.FieldList, body *ast.B
 				continue
 			}
 
+			// ж-box A2 (§3.3's reversion), as the parameter arm: a receiver address-taken ONLY into ref-lowered
+			// positions stays a plain parameter, unrenamed — `ref r` at those sites aliases its own storage.
+			if refLoweringLocalReverts(obj) {
+				continue
+			}
+
 			if v.paramAddressTakenNeedsBox(obj, body) {
 				v.identEscapesHeap[obj] = true
 			}
