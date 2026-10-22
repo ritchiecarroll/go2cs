@@ -9940,8 +9940,9 @@ internal static void Main() {
 A few names in that C# need a word:
 
 - The string literals are plain C# literals. golib converts one passed to a `string` parameter, such as
-  `"json"`, to an `@string`; go2cs-gen boxes one passed to `fmt.Println`, whose arguments are Go `any`, as
-  a Go string ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
+  `"json"`, to an `@string`; go2cs-gen, go2cs's [source generators](#source-generators), boxes one passed to
+  `fmt.Println`, whose arguments are Go `any`, as a Go string ([Strings](#strings-string-and-sstring),
+  [Empty Interface](#empty-interface-any)).
 - `"…"u8` is a C# UTF-8 literal, which golib reads as a Go string.
 - `new record(nil)` is Go's empty literal `record{}`. It calls the constructor the generator adds to every
   struct for the zero value ([Struct Types](#struct-types)).
@@ -10036,9 +10037,11 @@ internal static void Main() {
 ```
 
 So, as in Go, the program reports field `E`'s type name as `eface` and field `N`'s as `namedIface`.
-"Uninhabited" in the generated comment means no value ever has the carrier type. The other two fields
-need no carrier. `realIface` is a real C# interface with its own name. `aliasIface` is a true Go alias
-(`=`), and Go itself reports the target's name, `Stringer` ([Type Aliasing](#type-aliasing)).
+The carrier is uninhabited: no value ever has its type.
+The other two fields need no carrier. `realIface` is a real C# interface with its own name.
+`aliasIface` is a true Go alias (`=`), and Go itself reports the target's name, `Stringer`
+([Type Aliasing](#type-aliasing)).
+<!-- where no accessibility record is written (a hand-owned file, the -tests bridge unit) the carrier stays in the converted file under the comment "Descriptor carrier for `X` — uninhabited; see GoDescriptorTypeAttribute.": src/go2cs/visitTypeSpec.go:229#bb3d7b -->
 
 **A generic function that passes its type parameter to `reflect.TypeFor` gains a companion, marked `ᴺ`.**
 A generic type argument cannot carry an attribute, and `eface` and `any` are both `object` to the CLR. So
@@ -10118,7 +10121,19 @@ parameters ([Generics](#generics)).
 
 **Types built at run time are real CLR types.** `SliceOf`, `MapOf`, `ChanOf` and `PointerTo` return the
 matching golib generic type, such as `slice<T>`, and `StructOf` emits a new .NET value type. So code that
-receives such a type treats it like a converted one.
+receives such a type treats it like a converted one. Emitting a type needs the JIT: a Native AOT program cannot
+generate code at run time ([FAQ: Native AOT](FAQ.md#does-it-work-with-native-aot)).
+<!-- StructOf: src/core/golib/GoStructSynthesis.cs:335#d2751c (module.DefineType ... typeof(ValueType)). The AOT boundary for StructOf and FuncOf: docs/PLAN-golib-full-trim.md:183#a8550b, :407#f87543 (class E). -->
+
+**`Call` and `MakeFunc` on a variadic func also work under Native AOT.** A converted Go variadic takes its
+tail as a C# `Span<T>`, so `reflect` reaches it through a typed trampoline closed over the func's signature.
+Native AOT compiles such a trampoline only for a signature some compiled code names, so go2cs-gen, go2cs's
+[source generators](#source-generators), registers one for every variadic signature that can reach `reflect`:
+a func value converted to an interface, a func nested in such a value's parameters or results, and a variadic
+method. Most registrations are queued when the package loads and run on the registry's first miss. Under
+Native AOT a variadic signature over value types that nothing registered is refused by name, as a Go panic
+that `recover` can catch.
+<!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:17-32#3ea1de (header), :78-91#5475b8 (closeVariadicTrampoline refuses a value-type family without dynamic code), :93-101#5336d5 (refuseVariadic, builtin.panic naming the family and the registry). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:388-423#15e775 (VariadicRegistration), src/gen/go2cs-gen/MethodSet.cs:417-434#01c819 (a variadic method's arms). Lazy queue: src/core/golib/GoDeferredRegistrations.cs (EscapeRegistry; "Native AOT is unchanged"), src/gen/go2cs-gen/DeferredRegistration.cs. Guards: src/tests/Behavioral/ReflectVariadicCall; GolibTests GoReflectBridgeClosureTests ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines, AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode; GenTests EveryEscapingVariadicFuncSignatureIsRegistered, AVariadicArmRegistersItsSignatures; GolibTests DeferredRegistrationTests. -->
 
 **Full detail:** [Reference → Manually-Converted Declarations: the reflection bridge](ConversionStrategies-Reference/manual-conversions.md#structfieldtag-is-a-real-read--the-converter-has-always-emitted-the-tag-nothing-had-ever-read-it) — the bridge's rules one by one, from tag reads and type names to assignability, the array-length and channel-direction attributes, and the run-time type constructors.
 
@@ -10291,8 +10306,9 @@ pointer-to-pointer program, `fmt.Printf(…, *ptr)` becomes `fmt.Printf(…u8, p
 ```
 
 Both `s[1]` and `t[0]` print 42. `slice<T>` is golib's Go slice ([Slices and Arrays](#slices-and-arrays)).
-`"write thru :"` stays a plain C# literal: `fmt.Println` takes `any` arguments, so go2cs-gen boxes it as
-golib's Go string, `@string` ([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
+`"write thru :"` stays a plain C# literal: `fmt.Println` takes `any` arguments, so go2cs-gen, go2cs's
+[source generators](#source-generators), boxes it as golib's Go string, `@string`
+([Strings](#strings-string-and-sstring), [Empty Interface](#empty-interface-any)).
 
 An array element's address, `&a[i]`, uses `.at<T>(i)` on the array's pointer. Here `g` is a pointer to an
 array, made by `new(grid)`, and `&g[j]` points into it:
@@ -10686,7 +10702,7 @@ prefix, and `get` returns `Ꮡc` unchanged. `get` never reads the value, so it b
 
 A value-receiver method called through a pointer local is called on the copy `~p`. So the method gets
 its own copy of the value, exactly as in Go.
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:190-191; src/tests/Behavioral/AddressOfParamWrite/main.cs.target:169 (rq := &Box{...}; rq.BumpedRecv() becomes (~rq).BumpedRecv(), where BumpedRecv is a value method, main.go:90). The worked example is left out here because its golden uses unrelated glyphs; the reference covers it. -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.go:190-191; src/tests/Behavioral/AddressOfParamWrite/main.cs.target:159-160 (rq := &Box{...}; rq.BumpedRecv() becomes (~rq).BumpedRecv(), where BumpedRecv is a value method, main.go:90). The worked example is left out here because its golden uses unrelated glyphs; the reference covers it. -->
 
 **A pointer method on a variable takes the variable's address for you.** A pointer-receiver method
 usually becomes a C# extension method whose receiver is `this ref T`
@@ -10743,7 +10759,7 @@ internal static void Main() {
 
 `iter u = default!;` is Go's zero value for `var u iter` ([Nil and Zero Values](#nil-and-zero-values)).
 The `!` only silences C# nullable warnings.
-<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:90-91 and main.cs.target:77-78 (c := chunk{}; c.alloc(5) stays c.alloc(5)); src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:51; main.cs.target:47 ([GoRecv] internal static void alloc(this ref chunk c, uint16 n) {) -->
+<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:90-91 and main.cs.target:80-81 (c := chunk{}; c.alloc(5) stays c.alloc(5)); src/tests/Behavioral/EmbeddedValuePointerMethod/main.go:51; main.cs.target:48 (internal static void alloc(this ref chunk c, uint16 n) {) -->
 <!-- Moved to the reference (pointers.md): a method that keeps its receiver as a pointer takes this ж<T>, and a variable used as its receiver lives in a heap box, so b.Grow(n) becomes Ꮡb.Grow(n) (src/core/strings/strings.cs:533-534#aa42c9; src/core/strings/builder.cs:82#4f777e). -->
 
 **A pointer method on a pointer local is called the same way.** For a `this ref` method the
@@ -10822,12 +10838,13 @@ value: `(~(~b).next).data`.
 ---
 
 ## `unsafe.Pointer` and `uintptr`
-<!-- length: longer than the usual summary section by design: eight rules a reader meets in converted runtime and syscall code, each written to stand alone with a complete example and its names explained; seven carry an example (the syscall keep-alive shows its C# only, because its Go lives in GOROOT and is quoted inline), order tokens have no emitted form and are described in words; unsafe.Slice/String aliasing and their copy cases live in the reference -->
+<!-- length: longer than the usual summary section by design: nine rules a reader meets in converted runtime and syscall code, each written to stand alone with a complete example and its names explained; seven carry an example (the syscall keep-alive shows its C# only, because its Go lives in GOROOT and is quoted inline), order tokens have no emitted form and are described in words, and the header write-through rule names its emission inline; unsafe.Slice/String aliasing and their copy cases live in the reference -->
 
 Go's `unsafe.Pointer` becomes [`@unsafe.Pointer`](../src/core/unsafe/unsafe.cs), a class from go2cs's
 hand-written `unsafe` package. It holds an address as a number. It can also hold the Go pointer it was
-made from, so the object stays alive and the pointer can be recovered later. Go's `uintptr` becomes
-golib's [`uintptr`](../src/core/golib/uintptr.cs) struct, an unsigned integer the size of an address.
+made from, so the object stays alive and the pointer can be recovered later. Go's `uintptr` becomes the
+[`uintptr`](../src/core/golib/uintptr.cs) struct of golib, go2cs's [runtime library](#the-golib-runtime-library):
+an unsigned integer the size of an address.
 
 A few names recur in this section. A Go pointer `*T` is a golib [`ж<T>`](#pointers) box (read "zhe"),
 and a name starting with `Ꮡ` holds such a box. The package alias is `@unsafe` because `unsafe` is a C#
@@ -10861,7 +10878,9 @@ layout rules and writes the number into the C#. The Go expression stays beside i
 
 `main_x` is the C# struct declared for the anonymous `struct { … }` type
 ([Struct Types](#struct-types)), and `default!` is its zero value
-([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go.
+([Nil and Zero Values](#nil-and-zero-values)). The operand is never evaluated, as in Go. The numbers are
+Go's for the target architecture, here amd64.
+<!-- the fold reads go/types' constant (src/go2cs/convCallExpr.go:3812-3833#015084); packages load with the target platform's GOARCH, src/go2cs/conversionDriver.go:142#22dcf6, and the emitted layout uses the same sizes, src/go2cs/zeroSizeFieldLayout.go:70-83#03aa04 (types.SizesFor("gc", arch), amd64 by default). UnsafeOperations' golden is converted for amd64. -->
 
 `Alignof` and `Offsetof` fold the same way: `unsafe.Offsetof(x.c)` becomes
 `/* unsafe.Offsetof(x.c) */ (uintptr)16`.
@@ -10938,13 +10957,13 @@ This prints `2`, the second element, under both Go and C#. In the C#:
 - `~` reads through a pointer, like Go's `*p`
   ([Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)).
 - `"Value of the next element:"` stays a plain C# literal. `fmt.Println` takes `any` values, so
-  go2cs-gen intercepts the call and passes it as a boxed Go string ([Strings](#strings-string-and-sstring),
-  [Empty Interface (`any`)](#empty-interface-any)).
+  go2cs-gen, go2cs's [source generators](#source-generators), intercepts the call and passes it as a
+  boxed Go string ([Strings](#strings-string-and-sstring), [Empty Interface (`any`)](#empty-interface-any)).
 
 `nextPtr` is built from a bare number, so it carries no box. The conversion back finds the element's
 storage from its address. As in Go, a number alone does not keep its object alive: this works while
 `arr` is still in use.
-<!-- expected output: src/tests/Behavioral/UnsafeOperations (Go's `go run` output is the behavioral oracle; the second element of [4]int{1, 2, 3, 4}). The reverse conversion `explicit operator ж<T>(uintptr)` at src/core/golib/ж.cs:925#2e8f0c resolves a pinned address through its provenance record, a weak entry that dies with its box (ж.cs comment "the WEAK-ENTRY bound", around lines 895-900): a program that drops every reference and converts back later is one Go itself declares invalid. -->
+<!-- expected output: src/tests/Behavioral/UnsafeOperations (Go's `go run` output is the behavioral oracle; the second element of [4]int{1, 2, 3, 4}). The reverse conversion `explicit operator ж<T>(uintptr)` at src/core/golib/ж.cs:925#2e8f0c resolves a pinned address through its provenance record, a weak entry that dies with its box (ж.cs:1095#7dae18 comment "the WEAK-ENTRY bound"): a program that drops every reference and converts back later is one Go itself declares invalid. -->
 
 **A pointer to a value that holds strings, slices or pointers gets an order token, not an address.**
 The CLR cannot pin such a value, so golib hands out a unique stand-in number instead. A token compares
@@ -11091,6 +11110,29 @@ go2cs generates on the pointer, and the code reads as Go's does:
 `rec` is a `ж<record>`, and `rec.Kind` writes the four bytes at Go's offset 0 of `blob`. An element of an
 array field reads through the field's view, `rec.of(record.ᏑPath).ElementRef(1)`.
 
+**A slice or string header stored through its fields commits to the variable it views.** Go code can view
+a slice variable as its header, `hdr := (*sliceHeader)(unsafe.Pointer(&alias))`, where `sliceHeader` is an
+`unsafe.Pointer` field `Data` and two `int` fields `Len` and `Cap`, and then build a slice by storing those
+fields one at a time. The converter emits `Ꮡalias.Reinterpret<slice<byte>, sliceHeader>()`, and golib serves
+it with a header box over the slice variable. For a struct of that shape, go2cs-gen, go2cs's
+[source generators](#source-generators), gives each field a get/set property instead of a `ref` one, and the
+setter commits the header to the variable after each store. So once `hdr.Data`, `hdr.Cap` and `hdr.Len` are
+stored, `alias` is the slice they describe and shares its storage, as in Go. A string header, an
+`unsafe.Pointer` and one `int`, is served by its own box in the same way.
+
+The commit has three limits, each stated by golib rather than hidden:
+
+- A store that bypasses the setter, such as one through `&hdr.Len`, commits nothing, and the next access
+  panics naming it. A `ref` to such a field does not compile.
+- A header that does not yet describe a valid slice, such as `Len` above `Cap`, is held, and the variable
+  keeps its last valid value until a later store makes the header valid.
+- A `Data` that names neither an element of the slice's own element type nor native memory is refused by
+  name, as a Go panic, at the store.
+
+internal/unsafeheader's own tests, which build a slice and a string this way, pass under go2cs on linux and
+windows.
+<!-- emission: a probe at 8c091fc3a (the field-by-field build of internal/unsafeheader's TestWriteThroughHeader over a local `type sliceHeader struct { Data unsafe.Pointer; Len, Cap int }`) converts to `var hdr = Ꮡalias.Reinterpret<slice<byte>, sliceHeader>();` then `hdr.Data = @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)); hdr.Cap = cap(s); hdr.Len = len(s);`. Dispatch: src/core/golib/ж.PointerExtensions.cs:288-294#fe0797 (SliceHeaderBox, StringHeaderBox). The setter: src/gen/go2cs-gen/FieldAccessGenerator.cs:49-55#0b034b (remarks), :229 (`{ReceiverName}.OnHeaderStore();`, the setter, ReceiverName being ʗp), :265-281#f10245 (IsHeaderShaped). The commit and limits L1-L3: src/core/golib/ж.SliceHeaderBox.cs:62-80#63bcd1 (remarks), :329#9f58e1 (OnHeaderStore); the string half: src/core/golib/ж.StringHeaderBox.cs:32-58#c14bfc. Guards: GolibTests HeaderWriteThroughTests; GenTests AHeaderShapedStructGetsGetSetPropertiesWhoseSetterCommitsTheHeader, ANearMissOfTheHeaderShapeKeepsItsRefProperties. Reference: docs/ConversionStrategies-Reference/pointers.md:2246-2255#cc40fb. Platforms per the hop's validation of internal/unsafeheader (linux and windows). -->
+
 **A pointer passed to a system call stays alive until the call returns, as in Go.** Go guarantees this
 for `uintptr(unsafe.Pointer(p))` written directly in a `syscall.Syscall` argument list. The converter
 moves the pointer into a temporary whose name starts with `ᴋ`, casts it for the call, then calls
@@ -11100,7 +11142,7 @@ kernel writes into storage that cannot move.
 In `internal/syscall/unix`, Go's `GetRandom` calls
 `syscall.Syscall(getrandomTrap, uintptr(unsafe.Pointer(unsafe.SliceData(p))), uintptr(len(p)), uintptr(flags))`.
 It becomes:
-<!-- Go side: Go 1.24.13 GOROOT/src/internal/syscall/unix/getrandom.go:36-39 (not in this repo): `syscall.Syscall(getrandomTrap, uintptr(unsafe.Pointer(unsafe.SliceData(p))), uintptr(len(p)), uintptr(flags))` -->
+<!-- Go side: Go 1.26.10 GOROOT/src/internal/syscall/unix/getrandom.go:36-39 (not in this repo): `syscall.Syscall(getrandomTrap, uintptr(unsafe.Pointer(unsafe.SliceData(p))), uintptr(len(p)), uintptr(flags))` -->
 <!-- source: src/core/internal/syscall/unix/linux/getrandom.cs:27-28, 39-41, 48-49 -->
 ```csharp
 // GetRandom calls the getrandom system call.
@@ -11124,7 +11166,7 @@ In the C#:
 - `getrandomTrap` is the package's system-call number. The first omitted lines try a faster path, and
   the later ones turn a failure number into a Go error.
 - The tuple result is Go's multiple return ([Multi-Result Values](#multi-result-values-and-comma-ok-forms)).
-<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:1087#fa1cf5. The omitted lines: getrandom.cs:29-38#9c8951 (the vgetrandom fast path and the getrandomUnsupported check) and 41-46 (errno handling). The indent of line 39 is an emission layout artifact; lines 38-40 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
+<!-- SliceData returns ж<T>: src/core/unsafe/unsafe.cs:1087#fa1cf5. The omitted lines: getrandom.cs:29-38#9c8951 (the vgetrandom fast path and the getrandomUnsupported check) and 42-47 (errno handling). The indent of line 40 is an emission layout artifact; lines 39-41 sit in the same block of GetRandom's body. The keep-alive temp appears across the converted syscall surface, e.g. src/core/internal/syscall/unix/linux/at.cs, src/core/syscall/darwin/syscall_darwin.cs, src/core/internal/syscall/windows/windows/zsyscall_windows.cs. No behavioral test emits this shape (src/tests/Behavioral has no `GC.KeepAlive(ᴋ` in any .cs.target). -->
 
 **Full detail:** [Reference → Converting a Go pointer to `unsafe.Pointer`](ConversionStrategies-Reference/pointers.md#converting-a-go-pointer-to-unsafepointer) — every conversion form and when each factory is used, address arithmetic, pinning, order tokens, layout folding, value puns, the cases where `unsafe.Slice` or `unsafe.String` copies instead of aliasing, fields read through a reinterpreted pointer, and the syscall keep-alive rule.
 
