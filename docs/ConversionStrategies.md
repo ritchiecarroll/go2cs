@@ -11175,7 +11175,8 @@ In the C#:
 ## Source Generators
 
 Some Go behavior cannot be written directly in C#, or would need a lot of boilerplate code to write out. The
-converter therefore emits a short declaration marked with an attribute. Roslyn source generators
+converter therefore emits a short declaration with a marker: an attribute, a `partial` keyword or a short
+comment. Roslyn source generators
 ([`src/gen/go2cs-gen`](../src/gen/go2cs-gen/)) write the rest while the project compiles. This keeps the
 converted code short and close to the Go original.
 
@@ -11206,7 +11207,8 @@ string. See [Strings](#strings-string-and-sstring), [Slices and Arrays](#slices-
 | `ImplicitConvGenerator` | `[assembly: GoImplicitConv<S, T>]` | a conversion operator between two types C# cannot convert directly, such as two named numeric types or two structs with the same underlying type; the C# still writes the conversion where Go does, and the operator lets it compile |
 | `StrGenerator` | a method with an `sstring` parameter | for a function that takes its string as an `sstring` (golib's stack-only string view, a `ref struct`), the matching `@string` overload ([Strings](#strings-string-and-sstring)) |
 | `PartialStubGenerator` | a `partial` method with no body | a stub that throws, when no hand-written body exists ([Functions Without a Go Body](#functions-without-a-go-body)) |
-| `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]`, so the JIT never inlines the method and `runtime.Caller` still sees its frame ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)) |
+| `NoInliningPartialGenerator` | a `partial` method with a body and no other declaration | the method's declaring part, carrying `[MethodImpl(MethodImplOptions.NoInlining)]`, so the JIT never inlines the method and `runtime.Caller` still sees its frame ([A `partial` method with a body keeps its own frame](#a-partial-method-with-a-body-keeps-its-own-frame)); for a forwarder marked `/*linkname*/`, `[StackTraceHidden]` instead ([Functions Without a Go Body](#functions-without-a-go-body)) |
+| `LiteralInterceptorGenerator` | a plain C# string literal passed to an `any` parameter | an interceptor for that one call that passes a cached, boxed `@string` in the literal's place, so the callee sees a Go string rather than a .NET `string` ([Strings](#strings-string-and-sstring)) |
 
 ### A converted struct lists only its fields
 
@@ -11484,6 +11486,28 @@ The two pointer parameters take different shapes, depending on how the body uses
   made by `h := &holder{…}`. The call passes `ref (h).DerefOrNull()`, a `ref` to the value inside that
   box, so the write to `h.d` lands in the caller's `holder` ([Pointers](#pointers)).
 
+### Run-time registrations wait for the first lookup that misses
+
+Some generated code must also be found at run time, through a lookup in a [golib](#the-golib-runtime-library)
+registry. A pointer adapter such as `SettingжDescriber` is one: a type assertion or type switch that finds a
+box uses it to wrap the box. The others are factories that build a struct's Go zero value, and two
+registries that golib's native-memory and reflection support read.
+
+The generators do not fill these registries while the program starts. For each registry it fills, a
+package gets one generated module initializer, code that .NET runs when the assembly loads, and that
+initializer only queues the package's registration method on golib's `GoDeferredRegistrations`. When a
+lookup in a registry finds nothing, the registry runs every registration queued so far, then looks again.
+A program whose lookups never miss runs none of them, so under the JIT less code is compiled at startup.
+<!-- The queueing initializer:
+     src/gen/go2cs-gen/DeferredRegistration.cs:22 (`public static string Initializer(string registry, string name)`).
+     The four queues: src/core/golib/GoDeferredRegistrations.cs:41
+     (`NativeArrayOpeners = new()`), :44 (`ZeroFactories = new()`), :47 (`Adapters = new()`), :53
+     (`EscapeRegistry = new()`). Each consumer runs its queue on a miss, then looks again:
+     src/core/golib/AdapterRegistry.cs:116 (`GoDeferredRegistrations.Adapters.Run()`),
+     src/core/golib/builtin.cs:1593 (`GoDeferredRegistrations.ZeroFactories.Run()`),
+     src/core/golib/GoTypeOps.cs:224 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
+     src/core/golib/NativeArrayOpeners.cs:56 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`). -->
+
 **Full detail:** [Reference → Source Generators](ConversionStrategies-Reference/source-generators.md#source-generators) — what each generator emits in depth, which attributes the converter emits and where they land, and each generator's edge cases.
 
 ---
@@ -11502,7 +11526,7 @@ these ways:
 - a hand-written companion file supplies it;
 - the converter writes a one-line forwarder that calls the real function, when a `//go:linkname`
   directive names a function known to have a C# body, or, outside the standard library, when a
-  one-instruction assembly jump (a trampoline) names a Go function with the same signature;
+  one-instruction assembly jump (a trampoline) names a Go function with a matching signature;
 - in the standard library, Go's portable Go file is converted in place of the assembly declaration;
 - for a `//go:linkname` push that go2cs cannot support, the converter writes a body that raises a Go
   panic explaining why;
@@ -11634,6 +11658,12 @@ Reading the C#:
 The converter cannot tell from the directive alone whether the target has a C# body: in Go, many linkname
 targets are themselves assembly. So it forwards only to targets on a list, kept inside the converter, of
 functions known to have one. Any other pull keeps the throwing stub described at the end of this section.
+A target on the list can be converted Go, as here, or hand-written C#: `testing/cryptotest` pulls
+`testing.checkParallel`, which the hand-written `testing` package provides, and its forwarder calls that.
+<!-- linknameForwardTargets: src/go2cs/visitFuncDecl.go:2303 (`"time.registerLoadFromEmbeddedTZData": true`),
+     :2311 (`"testing.checkParallel": true`); the forwarder src/core/testing/cryptotest/rand.cs:27-30
+     (`testing.checkParallel(t);`); the hand-owned target src/core/testing/testing.cs:999
+     (`public static void checkParallel(ж<T> t)`). -->
 
 The target in `time` is ordinary Go, marked with the one-argument directive. Each converted package is its
 own .NET assembly, and a lower-case Go name is normally `internal`. A function that carries that marker
@@ -11686,7 +11716,7 @@ package class it names in full. Go's unnamed `string` parameter is written `_`:
 ```
 
 The converter reads one package at a time, so it cannot see `runtime`'s directive while converting
-`unique`. A curated list inside the converter records each push pair instead, and a pair not on the list
+`sysrand`. A curated list inside the converter records each push pair instead, and a pair not on the list
 keeps the throwing stub. Some pushed bodies need runtime machinery go2cs does not model. For those, the
 declaration raises a Go panic (see [Defer / Panic / Recover](#defer--panic--recover)) whose message names
 both halves of the pair and the reason.
@@ -11694,8 +11724,14 @@ both halves of the pair and the reason.
 **An assembly trampoline forwards the same way, outside the standard library.** Some Go assembly only
 jumps to another Go function, in one instruction. `golang.org/x/sys/unix` does this with
 `JMP syscall·Syscall(SB)`. That says the two names are one function, so the converter writes a forwarder
-like the linkname one. It does so only when the two signatures match, and only in packages outside Go's
-standard library. Inside the standard library, hand-written files cover that assembly.
+like the linkname one. It does so only in packages outside Go's standard library, and only when the two
+signatures match or differ only in pointer parameters to structs with the same field layout, which the
+forwarder copies across. Inside the standard library, hand-written files cover that assembly. `x/sys/unix`'s
+`SyscallNoError` and `RawSyscallNoError` are not jumps, since they make the system call themselves, but
+when their assembly matches the known instruction sequence exactly they forward to `syscall`'s `Syscall`
+or `RawSyscall` too, dropping its error result: they serve calls that cannot fail, such as `Getpid`.
+<!-- src/go2cs/asmTrampolines.go:41 (`differ ONLY in pointer parameters`),
+     :62-68 (`RAW-SYSCALL NoError BLOCKS`). -->
 
 **In the standard library, `purego` removes many bodyless declarations.** Go often ships a portable Go file
 beside an assembly one, and chooses between them with the `purego` build tag. go2cs converts the library
@@ -11805,7 +11841,7 @@ partial class atomic_package {
 The file uses the same shapes the converter emits, so callers see no difference:
 - `atomic_package` is the `static partial class` that holds the Go package's members, so a Go method
   becomes a C# extension method. See [Package Conversion](#package-conversion).
-- A hand-written file keeps the two attributes converted code no longer needs: `[GoType]` marks a Go
+- A hand-written file keeps two attributes that converted code does not carry: `[GoType]` marks a Go
   type, and `[GoRecv]` a method with a Go pointer receiver, written `this ref Value v`. A source
   generator adds the overload that takes a pointer. See
   [Functions and Methods](#functions-and-methods) and [Source Generators](#source-generators).
@@ -11918,10 +11954,20 @@ converter's list can likewise name the operating systems it covers.
 - `runtime.SetFinalizer`, `runtime.AddCleanup` and `weak.Pointer`, on .NET object lifetime.
 - `runtime.GOMAXPROCS`, `Gosched`, `LockOSThread` and `Goexit`, on .NET threads; see [Goroutines](#goroutines).
 - `runtime.GC` and `runtime.ReadMemStats`, on the .NET garbage collector.
-- `time`'s timers.
+- `time`'s timers, on golib's `GoTimer` timer service.
+- `internal/sync.HashTrieMap`, the map under `sync.Map` and `unique`, on .NET's `ConcurrentDictionary`.
+- `runtime`'s execution tracer (`StartTrace`, `StopTrace`, `ReadTrace`) and `runtime/trace`'s flight
+  recorder, on golib's managed tracer. A hand-owned `flightrecorder_impl.cs` bodies the recorder's two
+  `//go:linkname` pulls. Its third link, a push from `runtime`, is a converter-written forwarder in
+  `flightrecorder.cs`: `runtime_traceClockUnitsPerSecond` calls the hand-owned `runtime.traceClockUnitsPerSecond`.
 - `hash/crc32`, on .NET hardware intrinsics.
 - `reflect` and `internal/reflectlite`; see [Reflection](#reflection-reflect).
 - The network poller's runtime hooks and Linux's `Syscall6`, at the operating-system boundary.
+<!-- src/core/runtime/trace_impl.cs:59 (`public static error StartTrace()`), :106
+     (`//go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond`);
+     src/core/runtime/trace/flightrecorder_impl.cs:34 (`runtime_traceAdvance`), :36 (`runtime_traceClockNow`);
+     src/core/runtime/trace/flightrecorder.cs:188-191 (`go.runtime_package.traceClockUnitsPerSecond()`);
+     the push row src/go2cs/linknameOperations.go:804 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference/manual-conversions.md#manually-converted-declarations) — every hand-owned surface and why, `//go:linkname` forwarders in both directions, the poller and system call internals on each OS, native bindings, how hand-owned files and list entries are scoped per platform, and the reflection bridge.
 
@@ -12013,8 +12059,11 @@ conversion ([Converted Tests](#converted-tests)) applies `purego,math_big_pure_g
 names its portable fallback `math_big_pure_go` rather than `purego`, so both tags are needed.
 
 **Your own tags always win.** Passing go2cs's `-tags` option replaces the default, and `-tags=` clears it.
-Other conversions, such as `go2cs -recurse` on your own program, apply exactly the tags you pass and nothing
-else.
+A `go2cs -recurse` conversion of your own module adds only `safe`, for the reason given at the end of this
+section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
+pass and nothing else.
+<!-- src/go2cs/commandLineOptions.go:279 (`var defaultModuleBuildTags = []string{"safe"}`),
+     :292-305 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
 
 <!-- The math_big_pure_go member: arith_decl.go (`!math_big_pure_go`) declares eight bodyless
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
@@ -12082,12 +12131,9 @@ public static (slice<byte>, error) P256OrdInverse(slice<byte> k) {
 } // end nistec_package
 ```
 
-**At Go 1.24, `crypto/elliptic` then panicked, just as Go did.** The P-256 curve's `Inverse` method in
-`crypto/elliptic` treated that error as impossible and panicked. Real Go built with `-tags purego` panicked
-there too, so the converted code did the same. `crypto/ecdsa` handles the same error with a fallback, so
-ECDSA was unaffected. Go 1.25 removed `Inverse` with `nistec_p256.go`. The stub's only caller is now
-ECDSA's `inverse`, where `c.ordInverse` is `P256OrdInverse` on P-256: it takes the stub's error as "not
-implemented here" and computes the inverse by Fermat's method, so the gap no longer reaches a panic:
+**The gap reaches no panic.** The stub's only caller is ECDSA's `inverse`, where `c.ordInverse` is
+`P256OrdInverse` on P-256. It takes the stub's error as "not implemented here" and computes the inverse by
+Fermat's method:
 
 <!-- source: GOROOT/src/crypto/internal/fips140/ecdsa/ecdsa.go:383-399 -->
 ```go
@@ -12105,8 +12151,7 @@ func inverse[P Point[P]](c *Curve[P], kInv, k *bigmod.Nat) {
 
 A Go `panic` becomes `throw panic(...)` ([Defer / Panic / Recover](#defer--panic--recover)). A literal passed
 straight to `panic` stays inline as a plain C# string instead of becoming a hoisted `ˢ` field. The tuple
-result is unpacked with `var (p, err) = …`. The text the removed `Inverse` panicked with survives in
-`crypto/elliptic`'s `ScalarBaseMult`, which shows both:
+result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMult` shows both:
 
 <!-- source: src/core/crypto/elliptic/nistec.cs:240-243 -->
 ```csharp
@@ -12120,7 +12165,7 @@ result is unpacked with `var (p, err) = …`. The text the removed `Inverse` pan
      crypto/internal/fips140/nistec/p256_ordinv.go is `(amd64 || arm64) && !purego`; under purego
      p256_ordinv_noasm.go returns errors.New("unimplemented") and Inverse panics with
      `crypto/elliptic: nistec rejected normalized scalar`. Checked against the Go 1.24.13 tree; go1.25
-     removed nistec_p256.go, and at go1.26.9 P256OrdInverse's one caller is
+     removed nistec_p256.go, and at go1.26.9 (re-read at go1.26.10) P256OrdInverse's one caller is
      crypto/internal/fips140/ecdsa/ecdsa.go:384-386, which falls back on the error. The same panic literal
      stands at ../src/core/crypto/elliptic/nistec.cs:242#98b070. The default (-tags=) build binds the
      asm ordinv and returns a valid inverse; crypto/ecdsa handles the same error with a fallback, so
@@ -12209,7 +12254,7 @@ internal delegate Func<score, (score, bool)> strategy(score _);
 
 The note means that each use of `action` is written as the C# delegate type of the same shape, `Func<score, (score, bool)>`. You can see it as the result type of `strategy`. `strategy` keeps a `delegate` declaration because its signature names another func type ([Function Values and Closures](#function-values-and-closures)). Go's doc comments on both types are dropped, because this program is converted without `-comments`. A methodless func type declared inside a function body gets the same note, on its own line where Go declares the type, and Go's blank lines before and after the declaration are kept as they are between statements.
 
-Another common note, `// Hoisted @string literals (single allocation; Go keeps these in RODATA)`, heads a group of [hoisted string literals](#strings-string-and-sstring). A hoisted literal is a string literal stored once in a `static readonly` field, whose generated name ends in `ˢ`. The standard library hoists every literal used as a value, and `-hoist-literals` does the same for any package. Elsewhere only a literal passed as `any` is hoisted, pre-boxed, and a literal in a `string` slot is a plain C# literal, as in `joinPair`:
+Another common note, `// Hoisted @string literals (single allocation; Go keeps these in RODATA)`, heads a group of [hoisted string literals](#strings-string-and-sstring). A hoisted literal is a string literal stored once in a `static readonly` field, whose generated name ends in `ˢ`. The standard library hoists every literal used as a value, and `-hoist-literals` does the same for any package. Elsewhere a literal in a `string` slot is a plain C# literal, as in `joinPair`, and so is one in an `any` slot, where go2cs-gen's `LiteralInterceptorGenerator` passes a boxed Go string in its place ([Source Generators](#source-generators)). Only an `any` slot that generator cannot reach keeps a hoisted, pre-boxed field. Here is `joinPair`:
 
 <!-- source: src/tests/Behavioral/FirstClassFunctions/FirstClassFunctions.go:189-194 -->
 ```go
@@ -12333,7 +12378,7 @@ A statement's trailing comment follows the statement's last C# line, after one s
 
 A comment on a `case` line trails the converted case's header, and no blank line follows the switch's `}}` because Go has none there:
 
-<!-- source: Go toolchain src/unicode/utf16/utf16.go:68-95 (Go 1.24.13; the Go source of src/core/unicode/utf16/utf16.cs, which the repository does not hold) -->
+<!-- source: GOROOT/src/unicode/utf16/utf16.go:68-95 -->
 ```go
 // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
 func Encode(s []rune) []uint16 {
@@ -12402,11 +12447,11 @@ public static slice<uint16> Encode(slice<rune> s) {
 }
 ```
 
-`RuneLen`, `EncodeRune`, `surrSelf` and `replacementChar` are functions and constants of the same package. `rune` and `uint16` are aliases for C# `int` and `ushort` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `foreach` is Go's `range` loop ([Loops, Range and Labels](#loops-range-and-labels)), and `new slice<uint16>(n)` and `a[..(int)(n)]` are Go's `make` and `a[:n]` ([Slices and Arrays](#slices-and-arrays)). Each case body gets its own braces and a `break`, and the `}}` plus the blank line after it is how the converter lays out every switch ([Expression Switch Statements](#expression-switch-statements)).
+`RuneLen`, `EncodeRune`, `surrSelf` and `replacementChar` are functions and constants of the same package. `rune` and `uint16` are aliases for C# `int` and `ushort` ([Integer Types and Arithmetic](#integer-types-and-arithmetic)). `foreach` is Go's `range` loop ([Loops, Range and Labels](#loops-range-and-labels)), and `new slice<uint16>(n)` and `a.slice(0, n)` are Go's `make` and `a[:n]` ([Slices and Arrays](#slices-and-arrays)). Each case body gets its own braces and a `break`, and the closing `}}` is how the converter ends every switch ([Expression Switch Statements](#expression-switch-statements)).
 
 Comments inside a `const ( … )` or `var ( … )` group keep their places too, and so do the blank lines between the group's specs. A doc comment directly above `const (` is written above the first constant:
 
-<!-- source: Go toolchain src/unicode/utf16/utf16.go:17-26 (Go 1.24.13; the Go source of src/core/unicode/utf16/utf16.cs, which the repository does not hold) -->
+<!-- source: GOROOT/src/unicode/utf16/utf16.go:17-26 -->
 ```go
 const (
 	// 0xd800-0xdc00 encodes the high 10 bits of a pair.
@@ -12483,14 +12528,18 @@ func healthy() {
 The converter prints one warning for the package, then converts every function in it. This is the
 line that prints the warning:
 
-<!-- source: src/go2cs/conversionDriver.go:224 -->
-```text
-WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v
+<!-- source: src/go2cs/conversionDriver.go:231 -->
+```go
+log.Printf("WARNING: %s did not fully type-check; converting best-effort — code depending on the following is emitted untyped: %v", pkg.PkgPath, pkg.Errors)
 ```
 
 On the console, `%s` becomes the package's import path, such as `example.com/app`. `%v` becomes the
 list of errors Go reported. Each error names a file, a line and the name that did not resolve.
 "Emitted untyped" means Go recorded no type for that code, so the converter writes it without one.
+Each error is then printed again on a line of its own, in the error format compilers and IDEs read, with
+the code `GO2CS1003` for a type error ([diagnostic codes](DiagnosticCodes.md)).
+<!-- src/go2cs/conversionDriver.go:233-235 (`reportDiagnostic(loadError.Pos, loadErrorCode(loadError.Kind)`);
+     src/go2cs/diagnosticOutput.go:128 (`diagnosticTypeError = "GO2CS1003"`). -->
 
 **Healthy code converts in full.** `healthy` becomes an ordinary static method of the package class,
 the same as in a package with no errors ([Functions and Methods](#functions-and-methods)).
