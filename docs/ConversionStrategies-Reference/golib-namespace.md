@@ -7,7 +7,7 @@ golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `TypeExten
 
 The general form of this collision — a REAL parent/child package pair — is handled by **Δ-renaming the import alias**. A C# using alias declared inside a namespace conflicts with a same-named child namespace visible from ANY transitively referenced assembly (CS0576 at every use), and transitivity makes this common: `runtime.csproj` itself references `runtime/internal/math|sys` (namespace `go.runtime.@internal`), so *every* package importing `runtime` sees a `go.runtime` child namespace — `iter` and `internal/weak` surfaced it in wave 1 (`weak`, in namespace `go.@internal`, collides with `go.@internal.runtime` from `internal/runtime/*` instead). A pre-pass computes the package's transitive Go import closure (exactly mirroring MSBuild's transitive ProjectReference visibility), derives every child-namespace chain it contributes, and Δ-renames any import alias the current package's namespace would capture: `using Δruntime = runtime_package;` with uses `Δruntime.Goexit()` — the established collision marker. The rename propagates through one lookup to the using emission, package-qualifier identifiers, and cross-package type-name prefixes; a package with no collision emits byte-identically. (The behavioral corpus sees this on `io` — the real Go closure contains `os → io/fs`, hence `go.io` — captured in the `AnonymousInterfaces` golden as `Δio`.)
 
-Three properties of the rename, established empirically (2026-07-16 review of the `Δmath` emissions; ruled working-as-designed): **(1) The trigger is per-file and, for a top-level parent package, fires only in packages emitting into `namespace go`.** The collision key is `<packageNS>.<alias>`, and usings are per-file — so `math` (whose own closure always contains `math/bits`, hence `go.math`) renders as `Δmath` in exactly the `namespace go` importers' math-importing files (strconv's ftoa/atof/eisel_lemire, fmt's scan, reflect's value, expvar, testing's benchmark), while every nested-namespace importer (`go.compress`, `go.crypto`, …) keeps the clean `using math = math_package;`: an alias declared inside the file-scoped nested namespace wins simple-name lookup before the outer `go.math` is consulted. That inner-scope exemption is why the clean form dominates the corpus. **(2) The baseline stub is lenient only by omission.** The clean alias compiles against `src/core` solely because the hand-owned stub csprojs omit the Go closure (`core/math` references just golib); in the design-target consumption — full conversion, NuGet packages, `-recurse` apps, all with transitive reference visibility — the clean alias is CS0576 at every use, and hoisting it to compilation-unit scope merely trades that for CS0234 (inside `namespace go` the child namespace shadows the alias). Output must be context-independent, so the conservative rename stands. **(3) The marker cannot be swapped onto "the colliding item".** That item is the child namespace itself — the import-path-mirroring namespace of `math/bits` et al., baked into separately-compiled referenced assemblies — so there is nothing local to rename, and renaming the namespace would break the path-mirroring invariant corpus-wide (the mechanism covers `Δruntime` ×48 files, `Δsync` ×38, `Δio` ×23, `Δsyscall`, `Δunicode`, …). The `MathFloatBits` and `GoNamespaceShadow` goldens pin the `Δmath` form.
+Three properties of the rename, established empirically (2026-07-16 review of the `Δmath` emissions; ruled working-as-designed): **(1) The trigger is per-file and, for a top-level parent package, fires only in packages emitting into `namespace go`.** The collision key is `<packageNS>.<alias>`, and usings are per-file — so `math` (whose own closure always contains `math/bits`, hence `go.math`) renders as `Δmath` in exactly the `namespace go` importers' math-importing files (fmt's scan, reflect's value, expvar, …), while every nested-namespace importer (`go.compress`, `go.crypto`, …) keeps the clean `using math = math_package;`: an alias declared inside the file-scoped nested namespace wins simple-name lookup before the outer `go.math` is consulted. That inner-scope exemption is why the clean form dominates the corpus. **(2) The rename is required wherever the closure is visible.** Every consumption has transitive reference visibility — `src/core` itself, NuGet packages, `-recurse` apps — and there the clean alias is CS0576 at every use, and hoisting it to compilation-unit scope merely trades that for CS0234 (inside `namespace go` the child namespace shadows the alias). Output must be context-independent, so the conservative rename stands.<!-- When this was written the clean alias still compiled against the hand-owned stub baseline, whose csprojs omitted the Go closure (core/math referenced just golib); that baseline retired 2026-08-01 (commit 2e8066da6). --> **(3) The marker cannot be swapped onto "the colliding item".** That item is the child namespace itself — the import-path-mirroring namespace of `math/bits` et al., baked into separately-compiled referenced assemblies — so there is nothing local to rename, and renaming the namespace would break the path-mirroring invariant corpus-wide (the mechanism covers `Δruntime`, `Δsync`, `Δio`, `Δsyscall`, `Δunicode`, …)<!-- ×48, ×38, ×23 files at the time -->. The `MathFloatBits` and `GoNamespaceShadow` goldens pin the `Δmath` form.
 
 ## Foreign renamed types reference the recorded imported-type alias
 A cross-package type that is renamed (or Go-aliased) inside its own package -- `syscall` declares `ΔHandle` for its type-vs-method-colliding `Handle` -- must be referenced through the recorded imported-type alias (`global using syscallꓸHandle = go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 x26, internal/poll). The substitution lives at the C#-NAME layers -- `getCSharpTypeName` (delegate elements, parameters, results) and `getScopeCheckedTypeName` (named struct fields) -- and deliberately NOT in `getAliasQualifiedTypeName`: the Go-shaped name layer also feeds promoted-embed MEMBER naming, where the substitution renamed and rescoped the generated accessors (reflect CS8799 regression on the first cut). The GoImplicitConv assembly attributes record type names under the file-local import qualifier, so the resolving `using` in package_info.cs declares that same qualifier (`using Δsyscall = go.syscall_package;`).
@@ -96,14 +96,15 @@ Two shapes are deliberately **not** derived, because publishing a wrong target i
 none: a methodless named func type (rendered inline as its base delegate, so no `<pkg>_package.Δname` type
 exists to alias — `go/doc`'s `ast.Filter`, the same skip `writePackageInfoFile` applies), and a defined type
 over a **non-empty named interface**, whose alias target is a `visitTypeSpec`-only rendering of the RHS (no
-instance exists in the 302-package corpus). Both keep the pre-existing emission.
+instance exists in the corpus<!-- the 302-package corpus at the time -->). Both keep the pre-existing emission.
 
 A derived alias's `global using` is emitted into the consumer's `package_info.cs` **only when an emitted
 reference resolved through it**. A parsed alias set describes an assembly that provably declares every
 target; a derived set describes what go2cs *would* emit for that dependency's Go source — true of any real
-conversion, but not of a hand-written proxy such as the baseline `core/time` stub, which declares no
-`ΔLocation`/`ΔMonth`/`ΔWeekday` at all (an unused `global using` to one is CS0426 in every behavioral test
-that imports `time`). Gating on use keeps the derived metadata's reach to the code that actually names the
+conversion, but not of a hand-written proxy such as the since-retired baseline `core/time` stub, which
+declared no `ΔLocation`/`ΔMonth`/`ΔWeekday` at all (an unused `global using` to one was CS0426 in every
+behavioral test that imported `time`). Gating on use keeps the derived metadata's reach to the code that actually names
+the
 renamed member — where the rename is required for the reference to bind at all — at the cost of a
 single-package conversion omitting the *unused* alias declarations a full run emits. Every emitted
 **reference** is identical either way: a single-package `-stdlib archive/tar` reconvert is byte-identical to
@@ -270,7 +271,7 @@ terminal, a pipe, or a file. .NET does not. `Console.Out` is constructed with `C
 which on Windows defaults to the **console output code page** (`GetConsoleOutputCP()` — the OEM page, 437
 on a stock US install), and to the ANSI default (1252) when the process has no console at all — the case for a
 program launched by the behavioral runner (`CreateNoWindow = true`) or by the tour's `.NET Run` pane
-(`src/tour/pipeline.go` `runStage`, whose `command.Stdout` is a `bytes.Buffer`). Encoding a rune that code
+(`src/tour/pipeline.go` `runStage`, whose `command.Stdout` is an in-process writer). Encoding a rune that code
 page cannot represent is not an error in .NET; the encoder substitutes `?`, so the Tour of Go's first
 lesson would render `Hello, ??` with no diagnostic anywhere.
 
@@ -278,23 +279,23 @@ golib forecloses this in its `[ModuleInitializer]` (`src/core/golib/builtin.cs`)
 converted code: `Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8`. The setter also discards
 any already-created `Console.Out`, so the writer is rebuilt on the UTF-8 encoding, and .NET strips the
 encoding's preamble for console writers — no BOM is prepended. A failing `SetConsoleOutputCP` (no console
-attached) is tolerated, so the redirected case is covered as fully as the interactive one. The **full**
-conversion reaches the same place by a different route and needs nothing added: real `fmt` writes through
-`os.Stdout` → `internal/poll` → `syscall.WriteFile`, which hands the `[]byte` to Win32 verbatim and is
-byte-transparent by construction. Only the baseline `core/fmt` stub — a proxy over
-`Console.Write`/`Console.WriteLine` — depends on the encoding above.
+attached) is tolerated, so the redirected case is covered as fully as the interactive one. `fmt` itself
+reaches the same place by a different route and needs nothing added: it writes through `os.Stdout` →
+`internal/poll` → the platform write (`syscall.WriteFile` on Windows), which hands the `[]byte` over
+verbatim and is byte-transparent by construction. What depends on the encoding above is output written
+through `System.Console`, such as golib's `print`/`println` and its unhandled-exception report on
+`Console.Error`.<!-- When this was written the baseline core/fmt stub, a proxy over Console.Write/Console.WriteLine,
+also depended on it; the stub baseline retired 2026-08-01 (commit 2e8066da6). -->
 
 Guarded by the `UnicodeConsoleOutput` behavioral test, which prints CJK, Greek, Cyrillic, a math symbol and
 an astral-plane emoji, and is stdout-compared against the Go binary. The guard is differential, so it holds
 even under a lossy capture: the runner decodes both children's bytes with the same encoding, and mojibake
-never equals `?`. Neutering the golib line and running under `chcp 437` fails it with
-`stdout mismatch C# vs Go`; restoring the line passes in the same console.
+never equals `?`. Neutering the golib line and running under `chcp 437` failed it with
+`stdout mismatch C# vs Go` when `fmt` was the stub; restoring the line passed in the same console.
 
-One divergence remains, and it is stub-only: `Console.WriteLine` terminates with `Environment.NewLine`
-(CRLF on Windows) where Go always writes `\n`, so baseline-stub output is mixed CRLF/LF — a `\n` inside a
-`Printf` format string stays LF. The behavioral comparison reads both children line-by-line and so
-normalizes this away; the full conversion does not have it at all, since `WriteFile` passes Go's `\n`
-through unchanged.
+The stub's one divergence retired with it: `Console.WriteLine` terminated with `Environment.NewLine`
+(CRLF on Windows) where Go always writes `\n`. The converted `fmt` does not have it, since the platform
+write passes Go's `\n` through unchanged.
 
 ---
 
