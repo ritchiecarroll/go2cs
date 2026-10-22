@@ -128,7 +128,7 @@ partial class reflect_package {
                 "carries no field list, so any register assignment for it would be vacuous. See " +
                 "docs/phase4/DESIGN-descriptor-cargo.md.");
         }
-        foreach (var (i, _) in (~st).Fields) {
+        foreach (var i in range((~st).Fields)) {
             var f = Ꮡ((~st).Fields, i);
             if (!a.regAssign((~f).Typ, offset + (~f).Offset)) {
                 return false;
@@ -194,7 +194,7 @@ internal static void addTypeBits(ж<bitVector> Ꮡbv, uintptr offset, ж<abi.Typ
         if (st == nil) {
             throw panic("reflect: addTypeBits cannot read the fields of struct descriptor " + stringFor(Ꮡt));
         }
-        foreach (var (i, _) in (~st).Fields) {
+        foreach (var i in range((~st).Fields)) {
             // apply fields
             var f = Ꮡ((~st).Fields, i);
             addTypeBits(Ꮡbv, offset + (~f).Offset, (~f).Typ);
