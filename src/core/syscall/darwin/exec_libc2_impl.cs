@@ -151,6 +151,28 @@ internal static @string unsupportedSysProcAttrField(ref SysProcAttr sys) {
     return ""u8;
 }
 
+// go2cs HOST SEAM (not in Go): the directory a child starts in, as the converted-test host would have
+// it -- the same seam under the same name as syscall/windows/exec_windows.cs (see there). Consulted
+// with the executable and the directory the child would start in (attr.Dir, or this process's own when
+// that is empty); null means "unchanged", and a program never has one.
+internal static Func<string, string, string?>? childDirectoryComposer;
+
+internal static @string composeChildDirectory(@string argv0, @string dir) {
+    Func<string, string, string?>? composer = System.Threading.Volatile.Read(ref childDirectoryComposer);
+
+    if (composer is null) {
+        return dir;
+    }
+
+    string? composed = composer(argv0.ToString(), dir != ""u8 ? dir.ToString() : System.IO.Directory.GetCurrentDirectory());
+
+    if (composed is null) {
+        return dir;
+    }
+
+    return composed;
+}
+
 internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@string> argv, ref ProcAttr attr, ref SysProcAttr sys) {
     // libSystem's opaque handles, driven only through their init/destroy/add functions -- never by
     // layout knowledge. On darwin each block holds a pointer the init call allocates behind; the
@@ -186,8 +208,10 @@ internal static (nint pid, error err) posixSpawnForkExec(@string argv0, slice<@s
 
         // The child's working directory rides an action so it happens child-side, in order, before
         // exec -- macOS 10.15+; probed by call, never by version string, the miss a NAMED error.
-        if (attr.Dir != ""u8) {
-            dirz = MarshalStringZ(attr.Dir);
+        @string dir = composeChildDirectory(argv0, attr.Dir);
+
+        if (dir != ""u8) {
+            dirz = MarshalStringZ(dir);
             try {
                 rc = posix_spawn_file_actions_addchdir_np(fileActions, dirz);
             }

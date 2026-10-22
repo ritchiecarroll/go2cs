@@ -13,9 +13,9 @@ holds this call's defer list and nothing else:
 internal static void Main() {
     GoFrame ᒐ = default;
     try {
-        fmt.Println(openFileˢ);
+        fmt.Println("Open file");
         defer(ᴛ1 => fmt.Println(ᴛ1), closeFileˢ, ref ᒐ);
-        fmt.Println(writeDataToFileˢ);
+        fmt.Println("Write data to file");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
@@ -60,12 +60,13 @@ machinery:
   through the wrapper, because a lambda cannot capture one. An inline body has no parameters to
   thread, so it simply uses the one it has (`GenericVariadicFunc`, `VariadicPointerParam`).
 
-Measured with `GC.GetAllocatedBytesForCurrentThread` over 5,000 Release calls, the frame costs
-**0 B** with no defers, **0 B** with one or two whose targets are cached static method groups, and
-**192 B** for the two-capturing-defer shape of `internal/poll.FD.Write` — the residue being the
+Measured with `GC.GetAllocatedBytesForCurrentThread` over 5,000 Release calls, the frame allocates
+**nothing** with no defers and **nothing** with one or two whose targets are cached static method groups;
+for the two-capturing-defer shape of `internal/poll.FD.Write` the only allocation is the
 display class and delegate of each defer that genuinely closes over something. The body-owning
-alternative measures **160 B**, **248 B** and **440 B** for the same three. The full as-built record
+alternative allocates in all three shapes. The full as-built record
 of the frame's design lives in [`phase4/DESIGN-closure-emission.md`](../phase4/DESIGN-closure-emission.md).
+<!-- measured at the design (platform not recorded): frame 0 B / 0 B / 192 B; body-owning alternative 160 B / 248 B / 440 B. -->
 
 ## The named-result form: results outside the try, exits through a label
 
@@ -85,7 +86,7 @@ internal static (nint @out, @string label) compute(nint x) {
             @out += 1000;
         }, ref ᒐ);
         if (x < 0) {
-            (@out, label) = (-1, negˢ);
+            (@out, label) = (-1, "neg");
             goto ᒐdone;
         }
         (@out, label) = (@double(x), fmt.Sprintf("v=%d"u8, x));
@@ -114,8 +115,9 @@ the method's endpoint unreachable, so nothing is needed after the `try` statemen
 
 ## `recover()` is a static call, not a parameter
 
-`recover()` resolves to `builtin.recover()`, which reads the one thread-local slot the emitted
-`catch` parked the panic in (`GoFrame.Capture`). That it resolves **statically** is not an
+`recover()` resolves to `builtin.recover()`, which reads a thread-local slot: the panic the deferred
+sequence now running on the thread is handling, which `GoFrame.Run` sets from the panic the emitted
+`catch` parked (`GoFrame.Capture`). That it resolves **statically** is not an
 optimization — it is the load-bearing fact of the whole design: a deferred closure can therefore
 recover without holding any handle on the frame that registered it, which is what allows the frame to
 be a `ref struct` in the first place.
@@ -196,11 +198,12 @@ A fourth gate has no counterpart in the emission and exists purely because the m
 evaluates `c.mu` AT the defer, so a nil `c` panics there and registers nothing; a lowered `finally`
 evaluates it at exit, so the body would run to completion first and the panic would surface late with
 the body's effects already committed. The dominant `c.mu.Lock(); defer c.mu.Unlock()` idiom satisfies
-it trivially — but **three** sites in Go 1.23.12's standard library have no earlier dereference at all,
-and **four** more have one only inside an `if`, a loop or a func literal, which witnesses nothing
+it trivially — but a few sites in Go 1.23.12's standard library have no earlier dereference at all,
+and a few more have one only inside an `if`, a loop or a func literal, which witnesses nothing
 because that branch may not have run. Both are refused. The conditional half is the sharper of the two:
 the first form of this gate scanned preceding statements without asking whether they execute, and
-accepted all four.
+accepted every one of them.
+<!-- census at the time: three sites with no earlier dereference, four with one only inside a branch. -->
 
 Everything else keeps the registration form, including any function that mixes a qualifying defer with
 a non-qualifying one: the lowering is all-or-nothing per function, because interleaving a lowered LIFO
@@ -228,15 +231,16 @@ different gate so that all-or-nothing rejected the pair.
   field defer. One sub-class the census cannot see is an emission property: a *promoted* method on an
   embedded field (`onceError` embedding `sync.Mutex`, `defer a.Unlock()`) is reached through
   `Ꮡa.of(onceError.ᏑMutex)`, so lowering moves that box into the `finally` rather than removing it and
-  saves only the delegate. Correct, and measured at ten of sixty-five lowered calls on the windows
+  saves only the delegate. Correct, and measured as a minority of the lowered calls on the windows
   corpus; removing the box there is Phase C's aliasing field pointer, a different capability.
 
-Of 332 such sites in Go 1.23.12's standard library, 225 qualify (10 conditional, 60 receiver-method).
+Most such sites in Go 1.23.12's standard library qualify, including conditional and receiver-method ones.
 The census runs the converter's own `provablyBefore` verbatim, so the two predicates cannot drift.
 Guarded by `tests/Behavioral/DeferFinallyLowering`, whose refusal rows are asserted by the golden (a
 refusal is invisible in stdout), whose `rebound` row fails loudly if the receiver-stability gate is
 removed, and whose `writeShape` row — `FD.Write`'s exact shape — prints a spurious `done b` for the
 untaken branch if the reached-flag is removed.
+<!-- census at the time: 332 sites, 225 qualifying (10 conditional, 60 receiver-method); promoted-method lowerings were ten of sixty-five lowered calls on the windows corpus. -->
 
 ## A VARIADIC deferred/spawned func literal is cast to its golib family delegate
 
@@ -257,7 +261,7 @@ IIFE already uses, and the registration takes the temp-parameter form so there i
 ```csharp
 //  Go: defer func(dirs ...string) { for _, dir := range dirs { os.RemoveAll(dir) } }(dir1, dir2)
 defer((ᴛ1, ᴛ2) => ((Actionꓸꓸꓸ<@string>)((params ꓸꓸꓸstring dirsʗp) => {
-    var dirs = dirsʗp.slice();
+    var dirs = dirsʗp.sslice();
     foreach (var (_, dir) in dirs) {
         os.RemoveAll(dir);
     }
@@ -273,7 +277,7 @@ back to the cast delegate hands the `Action` rung a family delegate (**CS1503**)
 kept and wrapped — `defer(() => ((Actionꓸꓸꓸ<nint>)(<literal>))(), ref ᒐ)`. `go` takes all of the same
 arms for the same reasons.
 
-**Reach.** ONE site in the entire Go 1.23 tree — `html/template`'s `examplefiles_test.go:90` — and it
+**Reach.** In the Go 1.23 tree the shape is `html/template`'s `examplefiles_test.go:90`, and it
 was that package's SOLE remaining build wall, standing in front of **243** verdicts. The same cast
 also closes the immediately-invoked variadic literal (`func(parts ...int) int { … }(1, 2, 3)`), which
 `convCallExpr`'s IIFE interception had explicitly excluded on the stale reasoning that "delegate type
@@ -366,7 +370,7 @@ every other defer/go callee (CS0149 without it):
 defer(ᴛ1 => ((Action<nint, @string>)((nint n, @string s) => { … }))(ᴛ1.Item1, ᴛ1.Item2), two(), ref ᒐ);
 ```
 
-**Reach.** Zero sites in the production corpus — the idiom is a TEST one, which is where it was
+**Reach.** No production source used it when this was measured — the idiom is a TEST one, which is where it was
 found: Go's own save-and-restore hook `defer reflect.SetArgRegs(reflect.SetArgRegs(a, b, c))`
 (three results into three parameters, the callee returning values so the thunk binds the
 result-discarding `Func` rung) accounts for **four** of the reflect test host's errors, at
@@ -426,7 +430,7 @@ deferred panics in one frame (Go keeps the LAST one to run, i.e. the FIRST regis
 ## The re-raise of an unrecovered panic belongs to the frame that CAUGHT it, not to the thread
 
 `GoFrame.Run` ends by re-raising a panic no deferred call recovered. The panic itself is parked in a
-thread slot (`GoFuncRoot.CapturedPanic`, where `recover()` reads it), so the obvious tail — *if the
+thread slot (`GoThreadState.CapturedPanic`, reached as `GoFuncRoot.CapturedPanicValue`), so the obvious tail — *if the
 slot is non-empty, throw it* — reads correctly and is wrong, because the slot is the THREAD's and
 `Run` is a FRAME's. It stays non-empty for the whole of the panicking frame's deferred sequence, and
 every ordinary function that sequence calls runs its own `Run` from its own `finally`. Each of those
@@ -448,10 +452,12 @@ emission is unchanged: this is entirely inside golib.
 ```csharp
 public void Run()
 {
-    PanicException? owned = GoFuncRoot.ClaimPanic();   // null unless MY catch just captured
-    …                                                  // deferred calls, LIFO
-    if (owned is not null && GoFuncRoot.CapturedPanicValue is not null)
-        throw GoFuncRoot.CapturedPanicValue;
+    GoThreadState state = GoThreadState.Current;
+    PanicException? owned = GoFuncRoot.ClaimPanic(state);   // null unless MY catch just captured
+    …                                                       // deferred calls, LIFO
+    if (owned is { Recovered: false })
+        throw owned;
+    …                                                       // a foreign exception's own rethrow
 }
 ```
 
@@ -465,9 +471,10 @@ Measured on `database/sql`'s `TestConnRaw`. `Conn.Raw`'s deferred cleanup calls 
 `dc.releaseConn` → `db.putConn` → `dc.Close` → `finalClose` → `withLock` — a two-line helper holding
 one `defer` and panicking nothing, whose `Run` threw the callback's panic on the way out. The
 connection was left open, and the test's five-second `waitCondition` poll (which sizes itself from
-`t.Deadline()`) burned the package's ENTIRE deadline: 3,418 s against Go's 0.005 s, which read as a
+`t.Deadline()`) burned the package's ENTIRE deadline, which read as a
 hang rather than as the assertion failure it was. The package validates at 137 of 139 with the rule
-in place, and its suite runs in about three seconds.
+in place, and its suite finishes in seconds.
+<!-- measured at the fix (platform not recorded): 3,418 s against Go's 0.005 s before, about three seconds after. -->
 
 Guarded twice, both neuter-verified. `PanicDeferCalleeFrame` output-compares the shape against
 `go run` — the reduced acquire/cleanup/release chain, three deferring callees stacked below one
@@ -478,14 +485,14 @@ the sequence entirely and reaches the tail directly),
 `APanicRaisedByADeferredCallStillEscapesAFrameThatCaughtNothing` and
 `APanicRaisedInsideADeferredCleanupReplacesTheOneUnwinding`.
 
-**Adjacent and still open, deliberately unfixed:** the parked panic is one slot per thread, so a
-`recover()` reached during a nested frame's OWN deferred sequence clears the outer frame's panic too,
-and the outer `Run` then finds nothing to re-raise. That is a second consequence of the shared slot
-rather than of the ownership rule — it predates this change and is unaffected by it — and no measured
-consumer asks for it today, so it is recorded here rather than repaired speculatively. Closing it
-means giving the slot the same save/restore discipline `HandledPanic` already has, which also has to
-decide what go2cs's deliberately looser `recover()` (Go answers nil unless recover is called
-*directly* by a deferred function of the panicking frame) should mean at a nested call.
+**The adjacent shared-slot case is closed too.** The tail re-raises the OWNED panic unless that panic
+itself was recovered (`owned is { Recovered: false }`), rather than reading the thread's captured-panic
+slot, which a nested panic overwrites and a nested `recover()` clears (runtime's `TestIssue43920` and
+`TestIssue43921`). And what a `recover()` may stop is the panic of the deferred sequence running on the
+thread: `GoFrame.Run` sets a per-thread `RecoverablePanic` to the panic it is handling (null for a
+normal-return sequence) and restores the outer value on exit, so a `recover()` in the defers of a
+deferred function's own normal return answers nil, as Go's does (runtime's `TestRecoverMatching`).
+<!-- earlier text recorded this case as open and go2cs's recover() as looser than Go's direct-call rule; GoFrame.cs and GoFuncRoot.cs now cite these runtime tests. -->
 
 ## A nested defer scope gets a frame of its own
 
@@ -678,7 +685,7 @@ go q.conn.HandshakeContext(ctx) -> goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), c
 go c.Close()                    -> goǃ(() => c.Close());                             // nullary callee
 ```
 
-This parallels the **defer** case. Both `defer` and `goǃ` carry seventeen `Func<…, TResult>` twins
+This parallels the **defer** case. Both `defer` and `goǃ` carry sixteen `Func<…, TResult>` twins (arities 1 through 16)
 alongside their `Action` rungs, so a value-returning method group *with arguments* binds either
 directly; neither has a nullary `Func<TResult>` rung, so a nullary value-returning callee takes the
 `() => call()` discard on both sides (see *Deferred calls whose callee returns a value* below). The
@@ -747,12 +754,21 @@ literal's capture copies were then written inside the call (`goǃ((` `var doneʗ
 CS1002/CS1003/CS1026/CS1513, with `doneʗ1` never declared). All three now unwrap the parentheses, so
 the copy is a statement before the call and the deferred literal reads its variables by reference:
 
+<!-- source: src/tests/Behavioral/ParenFuncLitGoDefer/ParenFuncLitGoDefer.cs.target:16-28 -->
 ```csharp
-var doneʗ1 = done;
-goǃ(() => {
-    fmt.Println((@string)"go"u8, c);
-    doneʗ1.ᐸꟷ(true);
-});
+    var doneʗ1 = done;
+    goǃ(() => {
+        GoFrame ᒐ = default;
+        try {
+            var doneʗ2 = doneʗ1;
+            defer(() => {
+                doneʗ2.ᐸꟷ(true);
+            }, ref ᒐ);
+            dispatch(c);
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
 ```
 
 (Guarded by `parenFuncLitGoDeferCallee_test.go` and the `ParenFuncLitGoDefer` behavioral test, which
@@ -778,7 +794,7 @@ var baseʗ1 = @base;
     GoFrame ᒐ = default;
     try {
         defer((Tally t) => {
-            report(deferredˢ, t, 4);
+            report("deferred:", t, 4);
         }, baseʗ1, ref ᒐ);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -788,7 +804,7 @@ var baseʗ1 = @base;
 
 `prepareStmtCaptures` still OVERRIDES the statement's own captured-callee entries afterward (their
 defer-time snapshots), and a function-level defer/go — no enclosing lambda — is untouched (the seed
-set is empty). Whole-stdlib footprint: exactly one file, net/http `transport.cs`, where the deferred
+set is empty). Whole-stdlib footprint at landing: net/http `transport.cs` alone, where the deferred
 `close` argument becomes the goroutine lambda's `didReadResponseʗ1` (semantically neutral there — both
 names alias one channel object; the fix matters for ref-local-boxed value locals). (Guarded by the
 `DeferArgEnclosingCapture` behavioral test — a heap-boxed struct local passed eagerly to a deferred
@@ -807,21 +823,20 @@ CS1003/CS1026/CS1002/CS1022/CS1513, ~63 errors across `go/types` alone). Both st
 convert the condition into a hoist buffer and write any collected decls on their own lines **before**
 the `if`/`for`, mirroring `visitExprStmt`:
 
+<!-- source: src/tests/Behavioral/FuncLitCaptureInCondition/main.cs.target:20-23 -->
 ```csharp
-ΔType su = default!;
-var suʗ1 = su;
-if (tpar.underIs((ΔType u) => {
-    …
-    if (suʗ1 != default!) { u = match(suʗ1, u); … }
-})) { … }
+    var lookupʗ1 = lookup;
+    if (anyMatch(vals, (nint u) => lookupʗ1[u])) {
+        fmt.Println("if:", true);
+    }
 ```
 
 The condition is converted **after** an `if`/`for` init clause (preserving capture-counter ordering),
 and the `if`-with-init sub-block hoists between the init and the `if`. The traditional `for` reuses the
 existing `ForVarInitMarker` slot — the hoisted condition decls are emitted at the same pre-`for` position
 as the for-init heap allocations. The hoist buffer is empty for a condition with no capturing func-literal
-argument, so the behavioral corpus is byte-identical; the only stdlib deltas are five `go/types` files
-(`under.cs`, `builtins.cs`, `expr.cs`, `index.cs`, `instantiate.cs`) and one `crypto/tls`
+argument, so the behavioral corpus is byte-identical; the stdlib deltas at landing were `go/types` files
+(`under.cs`, `builtins.cs`, `expr.cs`, `index.cs`, `instantiate.cs`) and a `crypto/tls`
 `slices.ContainsFunc` call. This clears the **syntax-error layer** in those files (`go/types` had ~63
 `CS100x`/`CS1026` from this one construct); it does not by itself green `go/types`, which compiles far
 enough afterward to surface a deeper layer of latent semantic defects (a `map[token.Token]func()`
@@ -845,11 +860,12 @@ a 4-error cascade in traceviewer). `visitReturnStmt` now provides the same hoist
 `visitExprStmt`/`visitIfStmt`/`visitForStmt` and splices it before the `return` through its existing
 `DeferredDeclsMarker` slot (ahead of any deferred tuple-deconstruction temps):
 
+<!-- source: src/tests/Behavioral/ReturnTupleFuncLitArg/main.cs.target:19-22 -->
 ```csharp
-var allowedʗ1 = allowed;
-return (wrap((@string msg) => {
-    fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
-}), "label", default!);
+    var allowedʗ1 = allowed;
+    return (new handler((@string msg) => {
+        fmt.Println(allowedʗ1[0] + ":" + msg, len(allowedʗ1));
+    }), "label", default!);
 ```
 
 The buffer is empty for a return with no capturing-literal argument, so the behavioral corpus is
@@ -883,12 +899,27 @@ afterwards (`spliceOutput`, the positional twin of `replaceMarker`), because the
 emitted much further down through a dozen different arms:
 
 ```csharp
-    var bgʗ1 = bg;
-foreach (var (_, test) in new TestAllocs_type[]{
-    new(desc: "WithCancel(bg)"u8, f: () => { var (c, cancel) = WithCancel(bgʗ1); … }),
-    …
-}.slice()) {
+    var bg = Background();
+            var bgʗ1 = bg;
+            …
+            var bgʗ3 = bg;
+            …
+    foreach (var (_, test) in new TestAllocs_type[]{
+        …
+        new(
+            desc: "WithCancel(bg)"u8,
+            f: () => {
+                var (c, cancel) = WithCancel(bgʗ3);
+                cancel();
+                ᐸꟷ(c.Done());
+            },
+            limit: 5D,
+            gccgoLimit: 8D
+        ),
+        …
+    }.slice()) {
 ```
+<!-- excerpt of src/core/context/x_test.cs (TestAllocs); the hoisted snapshots keep the splice's own indentation. -->
 
 The buffer is empty for a range expression with no capturing func literal, so the behavioral corpus is
 byte-identical. (Guarded by `RangeExprFuncLitCapture` — slice- and map-capturing literals as struct
@@ -896,9 +927,11 @@ fields of a ranged composite literal, plus a bare `[]func(string)` element list,
 its A/B reproduces the cascade exactly.)
 
 **The class, stated once:** `visitExprStmt`, `visitAssignStmt`, `visitIfStmt`, `visitForStmt`,
-`visitReturnStmt`, `visitValueSpec` and now `visitRangeStmt` each provide the pre-statement sink. The
-statement kinds that still do not — a `switch` tag, a `select` comm-clause, a bare send — have no
-demonstrated corpus site, and each would repeat this failure exactly. They are deliberately not widened
+`visitReturnStmt`, `visitValueSpec`, `visitRangeStmt`, `visitSendStmt` and the `select` comm-clause
+operands each provide the pre-statement sink (the send and `select` sinks are described in
+[Shadowing](shadowing.md#the-capture-snapshot-is-a-statement-so-every-position-that-can-hold-a-func-literal-owes-it-a-hoist-target)).
+The statement kind that still does not — a `switch` tag — has no
+demonstrated corpus site, and would repeat this failure exactly. It is deliberately not widened
 speculatively: the tell that one has been reached is a syntax cascade whose first error sits on the line
 after a `<name>:` argument label.
 ## The enclosing statement's hoist buffer does NOT extend into a literal's BODY
@@ -930,7 +963,7 @@ by `FuncLitArgCapture` case 15.)
 Handling Go `defer` / `panic` / `recover` is what the FRAME above is for: the body is emitted inline in `try`/`catch`/`finally` beside a [`GoFrame`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/GoFrame.cs) local that holds this call's defer list. `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in and `recover` the global [`recover`](https://golang.org/pkg/builtin/#recover) (both a `using static go.builtin`). A function that neither directly nor indirectly (through a deferred lambda) uses `defer`/`recover` gets no frame at all -- the scope is per function, so a `main` that merely calls `f()` is emitted as a plain method body.
 
 * **Named results + defer.** See *The named-result form* above: the results are declared before the `try` and read back after the `finally`, and every exit inside leaves through a `goto`.
-* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own delegate-cast invocation (`((Action)(() => { GoFrame ... }))()`), so its defers are its own -- while its `recover()`, being a static call, still reads the one panic slot.
+* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover carries its own frame inside its own delegate-cast invocation (`((Action)(() => { GoFrame ... }))()`), so its defers are its own -- while its `recover()`, being a static call, still reads the thread's panic state rather than any handle on a frame.
 * **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature -- otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { ...; return; ... })` -- the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter -- an outer parameter -- correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test -- a void closure with bare returns nested in a named-results function, output verified vs Go; cleared runtime's 4 CS8030.)
 * **Return-type INFERENCE is not a concern.** An inline body returns against the METHOD's own declared result type, so no inference runs over the return statements and the two shapes that would defeat one cannot arise: every return carrying an untyped `default!` (Go `nil` -- syscall's `getProcessEntry`), and returns of two unrelated concrete types sharing only the declared interface (go/parser's `parseTypeName` returning `&ast.SelectorExpr{...}` beside a plain `*ast.Ident`). Both are pinned as guards: `DeferTypelessReturns` (unnamed results, a defer, and every return carrying nil) and `DeferInterfaceReturn` (a defer/recover func returning `Shape` via `Circle` vs `Square`, plus a heterogeneous `(Shape, bool)` tuple return).
 
@@ -974,9 +1007,9 @@ Guarded by `DeferTypelessReturns`.
 ## Deferred pointer-receiver nullary calls bind the box method group
 `defer conf.releaseSema()` with `conf *resolverConfig` (net nss.go / dnsclient_unix.go) trimmed to the deref-alias method group `Ꮡconf.Value.releaseSema` — a struct VALUE against the `this ref` extension, which cannot create a delegate (CS1113). The emission binds the BOX method group instead:
 ```csharp
-defer(Ꮡconf.releaseSema, ref ᒐ);
+defer(Ꮡs.release, ref ᒐ);                 // DeferCallOrder's acquireAndWork: defer s.release()
 ```
-The `ж<T>` overload is class-typed and delegate-legal, and the method-group conversion captures the receiver when the delegate is created — exactly Go's binding time. Mirrored in the go-statement arm. Gated to methods declared DIRECTLY on the pointee — a PROMOTED method (net interface.go's `defer zc.Unlock()`, declared on the embedded `sync.RWMutex`) has no extension on the outer box (CS1061) and keeps the lambda emission — and to void results (a `Func<>` group binds neither `defer(Action)` nor `go(Action)`). (Guarded by `DeferCallOrder`'s `acquireAndWork`, output-compared.)
+(net's own `defer conf.releaseSema()` sites now take the receiver-call lowering into the `finally`, described above, when its gates pass.) The `ж<T>` overload is class-typed and delegate-legal, and the method-group conversion captures the receiver when the delegate is created — exactly Go's binding time. Mirrored in the go-statement arm. Gated to methods declared DIRECTLY on the pointee — a PROMOTED method (net interface.go's `defer zc.Unlock()`, declared on the embedded `sync.RWMutex`) has no extension on the outer box (CS1061) and keeps the lambda emission — and to void results (a `Func<>` group binds neither `defer(Action)` nor `go(Action)`). (Guarded by `DeferCallOrder`'s `acquireAndWork`, output-compared.)
 
 The same box-method-group emission also covers a **value receiver** whose type is exactly the pointer-receiver's pointee — `defer b.deck.reset()` (runtime/pprof; also database/sql, log/slog), where `deck pcDeck` is a value FIELD reached through a nested selector and `reset` has a `*pcDeck` receiver, so Go auto-takes `&b.deck`. The original arm required the receiver be an already-pointer *ident*; the value case renders `&receiver` through the shared address machinery (the same `&ast.UnaryExpr{AND}` → `convUnaryExpr` synthesis used elsewhere) — a boxed base gives the aliasing field-ref `Ꮡb.of(profileBuilder.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the `Ꮡ(value)` copy — then binds the method: `defer(Ꮡb.of(profileBuilder.Ꮡdeck).reset, ref ᒐ)`, the ж<pcDeck> overload captured at defer time and mutating the real field. Gated the same way (void result, a NAMED value type whose RecvGenerator box overload exists, matching the pointee exactly so a promoted/embedded method is excluded). (Guarded by the `DeferValueFieldPtrReceiver` behavioral test — a pointer receiver deferring `b.c.reset()` on a value field, and a pointer local deferring the same in a closure, with the reset observed through the same box after return, output-compared vs Go.)
 
@@ -1001,15 +1034,16 @@ where the LAMBDA was already the form — a RESULT-returning nullary callee (`de
 — over a FIELD or DEREFERENCED receiver. Those had read the receiver at unwind and compiled, silently wrong (`close
 replaced` where Go prints `close orig`); they now take `defer(ᴛ0 => ᴛ0.Close(), Ꮡs.Value.cur, ref ᒐ)`. An
 IDENTIFIER receiver keeps the capture hoist that already copies it at the defer (`var kʗ1 = k; defer(() =>
-kʗ1.Close(), ref ᒐ)`), which is every one of the 24 lambda-form sites in the standard library and the behavioral
+kʗ1.Close(), ref ᒐ)`), which covered every lambda-form site measured in the standard library and the behavioral
 corpus. An interface receiver keeps its method group, and a pointer receiver keeps the box group above.
-Census before the change: 0 sites in the converted standard library (production on three targets, tests on two)
-and 0 across 757 behavioral modules, because every site failed to compile. (Guarded by
+The census before the change found no site in the converted standard library (production on three targets, tests on two)
+or in the behavioral modules, because every site failed to compile. (Guarded by
 `deferValueReceiverSnapshot_test.go` and the `DeferValueReceiverSnapshot` behavioral test: a field of a pointer, a
 field of a value, a nullary call, a local and a dereferenced pointer, each reassigned after the defer, output-compared
 vs Go; CS1113 on the pre-change converter. The lambda-form half is guarded by `deferLambdaReceiverCopy_test.go` and
 the `DeferLambdaReceiverCopy` behavioral test, which COMPILES on the pre-change converter and fails its output
 comparison: `log replaced`, `close replaced` and `close replaced` against Go's `orig`, `orig` and `pointee`.)
+<!-- census at the change: 24 lambda-form sites with an identifier receiver; 757 behavioral modules. -->
 
 ## A deferred pointer-receiver method on an escaping value local captures by-box, not by-copy
 The emission above binds the box (`Ꮡstate.free`) for a `defer state.free()` on a value local — but the CAPTURE analysis must cooperate. `defer`/`go`/closure bodies are lambda-conversion scopes: a variable used inside them that escapes to the heap is normally snapshot-copied into a `var stateʗ1 = state;` declaration so the C# closure captures a value, not an uncapturable ref-local. For an escaping value local used **only** as the receiver of a pointer-receiver method call (`state` a `handleState` value, `free` a `*handleState` method — log/slog handler.go's `defer state.free()`), that snapshot is doubly wrong: the address-taking is *implicit* (Go auto-takes `&state`), so the emission still binds the box — but of the *snapshot name* `Ꮡstateʗ1`, which is a plain value with no `Ꮡ` companion:
@@ -1030,23 +1064,23 @@ This is not merely a compile fix — a value snapshot is taken at defer time, so
 The same box-ref treatment covers a **promoted** pointer-receiver method reached through **value embeds** — `lazyCert.Do(…)` on `var lazyCert struct { sync.Once; v *Certificate }` (crypto/x509 `AppendCertsFromPEM`): Go takes `&lazyCert.Once`, an address into the variable's own storage, so the closure must share the original variable. The detection resolves the call through `info.Selections` and walks the selection's embedded-field index path — only **value** embeds along the path root the address at the variable (a **pointer** embed re-roots it at that pointer's target, where the snapshot, which copies the pointer, stays sound). Emission then renders the promoted call through the box's field projection and field uses through the box read; the snapshot form had referenced a never-declared snapshot box (`ᏑlazyCertʗ1`, CS0103) *and* divorced the closure's writes from the original:
 ```csharp
 ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
-    (ᏑlazyCert.Value.v, _) = ParseCertificate(certBytesʗ2);
-    …
+    (ᏑlazyCert.Value.v, _) = ParseCertificate(ᏑcertBytes.ValueSlot);
+    ᏑcertBytes.ValueSlot = default!;
 });
 return (ᏑlazyCert.Value.v, default!);
 ```
 A variable marked box-ref is also never snapshot-copied by a **nested** literal — the box is a plain reference local that closures at any nesting depth capture directly, so the per-layer `var lazyCertʗ2 = lazyCertʗ1;` chains disappear with it. (Guarded by the `ClosureEmbeddedPromotedPtrMethod` behavioral test — an anonymous-struct local with a value embed whose pointer-receiver method is called from sibling and nested closures interleaved with field writes, cumulative counts observed vs Go.)
 
-The same box-ref treatment covers a pointer-receiver method on a **value-struct FIELD projection** of the escaping local — `defer p.fake.setLines()` (go/internal/gcimporter iimport.go/ureader.go), where `p` is an escaping `iimporter` value local and `setLines` a `*fakeFileSet` method on the value field `p.fake`: Go takes `&p.fake`, an address INTO `p`'s own storage, and the emission renders it through the box's field view — but the snapshot path renamed the base first, referencing a never-declared snapshot box:
+The same box-ref treatment covers a pointer-receiver method on a **value-struct FIELD projection** of the escaping local — `defer pr.fake.setLines()` (go/internal/gcimporter ureader.go), where `pr` is an escaping `pkgReader` value local and `setLines` a `*fakeFileSet` method on the value field `pr.fake`: Go takes `&pr.fake`, an address INTO `pr`'s own storage, and the emission renders it through the box's field view — but the snapshot path renamed the base first, referencing a never-declared snapshot box:
 ```csharp
-var pʗ1 = p;                                  // snapshot copy — WRONG
-defer(Ꮡpʗ1.of(iimporter.Ꮡfake).setLines, ref ᒐ);     // Ꮡpʗ1 never declared → CS0103
+var prʗ1 = pr;                                 // snapshot copy — WRONG
+defer(Ꮡprʗ1.of(pkgReader.Ꮡfake).setLines, ref ᒐ);    // Ꮡprʗ1 never declared → CS0103
 ```
 The capture analysis now matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
 ```csharp
-defer(Ꮡp.of(iimporter.Ꮡfake).setLines, ref ᒐ);
+defer(Ꮡpr.of(pkgReader.Ꮡfake).setLines, ref ᒐ);
 ```
-As with the direct case this is a write-visibility fix, not merely a compile fix: gcimporter registers the defer *before* importing (which populates `p.fake.files`), so a snapshot would flush an empty file set. The same generalization corrects deferred **closures** that read such a variable — go/parser's `defer func(){ …; err = p.errors.Err() }()` snapshot-copied `p` at defer time, so the closure read the parser state from *before* parsing (errors always empty); box-ref renders those reads `Ꮡp.Value.errors…` against the live variable. A deeper chain (`p.a.b.m()`), a pointer field hop, or a method promoted through the field's own embeds keeps the existing snapshot handling. (Guarded by the `DeferHeapFieldPtrMethod` behavioral test — a heap-boxed value local deferring a pointer-receiver method on its value field, with lines appended after the defer observed by the deferred flush, output-compared vs Go.)
+As with the direct case this is a write-visibility fix, not merely a compile fix: gcimporter registers the defer *before* importing (which populates `pr.fake.files`), so a snapshot would flush an empty file set. The same generalization corrects deferred **closures** that read such a variable — go/parser's `defer func(){ …; err = p.errors.Err() }()` snapshot-copied `p` at defer time, so the closure read the parser state from *before* parsing (errors always empty); box-ref renders those reads `Ꮡp.Value.errors…` against the live variable. A deeper chain (`p.a.b.m()`), a pointer field hop, or a method promoted through the field's own embeds keeps the existing snapshot handling. (Guarded by the `DeferHeapFieldPtrMethod` behavioral test — a heap-boxed value local deferring a pointer-receiver method on its value field, with lines appended after the defer observed by the deferred flush, output-compared vs Go.)
 
 ---
 

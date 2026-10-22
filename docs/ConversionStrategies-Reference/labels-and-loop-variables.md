@@ -16,19 +16,24 @@ OuterLoop:
         }
     }
 ```
-becomes (the label is emitted as `break_OuterLoop:`):
+becomes (with `a` a `[][]*int`; the Go label stays in place, and the `break` target is emitted as `break_OuterLoop:;` after the loop):
 ```csharp
+OuterLoop:
     for (i = 0; i < n; i++) {
         for (j = 0; j < m; j++) {
-            switch (a[i][j].type()) {
-            case nil:
+            var exprᴛ1 = a[i][j];
+            if (exprᴛ1 == default!) {
                 state = Error;
                 goto break_OuterLoop;
             }
+
         }
+continue_OuterLoop:;
     }
 break_OuterLoop:;
 ```
+<!-- probe 2026-10-22 at 1b101a3def: the one-case switch on a pointer lowers to the if-chain form (see expression-switch.md); both synthesized targets are emitted even when only one is used. -->
+
 
 ## Continue Label
 ```go
@@ -42,8 +47,9 @@ RowLoop:
         }
     }
 ```
-becomes (`continue_RowLoop:` placed at the end of the *labeled* loop's body — so `goto continue_RowLoop` from the inner loop lands there and the **outer** loop proceeds to its next iteration; `break_RowLoop:` would go after the outer loop):
+becomes (`continue_RowLoop:` placed at the end of the *labeled* loop's body — so `goto continue_RowLoop` from the inner loop lands there and the **outer** loop proceeds to its next iteration; `break_RowLoop:;` follows the outer loop):
 ```csharp
+RowLoop:
     foreach (var (y, row) in rows) {
         foreach (var (x, data) in row) {
             if (data == endOfRow) {
@@ -53,6 +59,7 @@ becomes (`continue_RowLoop:` placed at the end of the *labeled* loop's body — 
         }
 continue_RowLoop:;
     }
+break_RowLoop:;
 ```
 Both the `break_<label>`/`continue_<label>` labels are emitted for a labeled `for` **and** a labeled `range`/`foreach` loop (the label target is placed regardless of loop kind; a missing one is CS0159 "no such label"). Guarded by the `ForVariants` behavioral test (labeled `range` with nested `continue`/`break`).
 
@@ -82,8 +89,9 @@ for _, r := range s {  // r is a rune
 ```csharp
 foreach (var (_, rᴛ1) in s) {
     var r = rᴛ1;       // mutable local copy
-    if (r >= 65536) {
-        r -= 65536;
+
+    if (r >= 0x10000) {
+        r -= 0x10000;
         …
     }
 }
@@ -106,6 +114,7 @@ for _, test := range tests {
 ```csharp
 foreach (var (_, vᴛ1) in tests) {
     var test = vᴛ1;                // mutable, addressable per-iteration copy
+
     fmt.Println(test.x.String());
 }
 ```
@@ -121,9 +130,10 @@ its own addressability root. The copy is per-iteration, matching Go 1.22+ loop-v
 
 Scoping the trigger to the root this way *removes* work as well as adding it: the previous
 field-write arm never checked whether the base was a POINTER, so a write like `s.Name = x` through a
-pointer-typed range variable emitted a needless per-iteration copy. Across the 302-package
-converted-stdlib corpus the net effect is **54 spurious copies eliminated and none added** — the
+pointer-typed range variable emitted a needless per-iteration copy. Across the converted-stdlib
+corpus the net effect was **spurious copies eliminated and none added** — the
 addressability additions show up in *test* code (the table-driven idiom), not in production sources.
+<!-- measured when the root walk landed: 302-package corpus, 54 copies eliminated, none added; not re-measured by any guard. -->
 
 ## For-clause variables are per-iteration (Go 1.22 loop-variable semantics)
 
@@ -139,9 +149,11 @@ fmt.Println(fs[0](), fs[1](), fs[2]())   // Go 1.22+: 0 1 2
 ```csharp
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     var i = iᴛ1;               // fresh per-iteration variable — each closure captures its own
-    fs = append(fs, () => i);
+    fs = append(fsᴷ, fs, () => i);
 }
 ```
+
+(`fsᴷ` is the function's stack buffer for the non-escaping `fs`, declared at its entry; see [A non-escaping append can take Go's 32-byte stack buffer](slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer).)
 
 A variable the body (or a closure in it) *writes* adds the copy-backs:
 
@@ -153,7 +165,7 @@ for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         continue;
     }
     i++;
-    fs = append(fs, () => i);
+    fs = append(fsᴷ, fs, () => i);
     iᴛ1 = i;                   // end-of-body copy-back feeds the post clause
 }
 ```
@@ -164,12 +176,12 @@ A **heap-boxed** clause variable allocates a *fresh box* each pass — the same 
 for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
     ref var i = ref heap<nint>(out var Ꮡi);
     i = iᴛ1;
-    ps = append(ps, Ꮡi);       // three DISTINCT pointers: 0 1 2
+    ps = append(psᴷ, ps, Ꮡi);  // three DISTINCT pointers: 0 1 2
     iᴛ1 = i;
 }
 ```
 
-Loops whose clause variables are neither captured nor boxed emit exactly as before — the shared clause variable is then unobservable, so there is no churn. A read-only captured variable skips the copy-backs. Every clause reference (init/cond/post) renders the carrier, so the body keeps the variable's Go name — nested same-name loops compose with shadow renames (`iΔ1` gets carrier `iΔ1ᴛ1`), and a multi-variable clause transforms only the variables that need it. One legacy fallback: a heap-boxed variable that a **clause** func literal references keeps the old hoisted whole-loop box, since the body-scoped box would not be in scope at the clause. (Guarded by the `ForLoopPerIterationVars` behavioral test — read-only capture, body write + unlabeled `continue`, stored `&i` distinctness, boxed + captured closures, labeled continue with a write, nested same-name loops, a multi-variable clause, a struct-typed clause variable, and an immediately-invoked writing closure — values vs Go. `EscapedLoopVarSiblingIndex`, `ForVariants`, and `RingPointerMethods` re-baselined to the per-iteration shape.)
+Loops whose clause variables are neither captured nor boxed keep the plain C# clause — the shared clause variable is then unobservable, so there is no churn. A read-only captured variable skips the copy-backs. Every clause reference (init/cond/post) renders the carrier, so the body keeps the variable's Go name — nested same-name loops compose with shadow renames (`iΔ1` gets carrier `iΔ1ᴛ1`), and a multi-variable clause transforms only the variables that need it. One legacy fallback: a heap-boxed variable that a **clause** func literal references keeps the old hoisted whole-loop box, since the body-scoped box would not be in scope at the clause. (Guarded by the `ForLoopPerIterationVars` behavioral test — read-only capture, body write + unlabeled `continue`, stored `&i` distinctness, boxed + captured closures, labeled continue with a write, nested same-name loops, a multi-variable clause, a struct-typed clause variable, and an immediately-invoked writing closure — values vs Go. `EscapedLoopVarSiblingIndex`, `ForVariants`, and `RingPointerMethods` re-baselined to the per-iteration shape.)
 
 
 ### The capture that has no func literal: `defer`/`go` on an indexed receiver
@@ -203,14 +215,15 @@ ordinary per-iteration shape above. Only the **callee** is consulted: a deferred
 are already evaluated at the defer statement exactly as Go requires
 (`defer((ᴛ1, ᴛ2) => f(ᴛ1, ᴛ2), a, i, ref ᒐ)`), so a clause variable appearing only in an
 argument needs no per-iteration copy -- and minting one would move emission at every such site for
-no behavioral gain. That restriction is why the corpus census measured **zero** moved files across
-307 projects: the sole production site with the shape (`net/http/h2_bundle.go`'s
+no behavioral gain. That restriction is why the corpus census measured **no** moved files:
+the sole production site with the shape (`net/http/h2_bundle.go`'s
 `defer http2bufPools[index].Put(bp)`) indexes a plain local outside any loop. The shape occurs in
 `net/dial_test.go` and `net/timeout_test.go`, so the fix's reach is TEST conversions -- which is
 where the defect was found. (Guarded by the `DeferLoopCapture` behavioral test: the defer witness
 and the `go` equivalent as red shapes, plus four controls -- a receiver reassigned after the defer,
 3-clause and range closure capture, and deferred plain arguments -- that were already correct and
 must stay green.)
+<!-- census at landing: zero moved files across 307 projects; not re-measured by a guard. -->
 
 ## A range-over-int index is `nint` (golib's `range` helper yields Go's `int`)
 Go 1.22's `for i := range n` (range over an integer) produces `i` of type `int`, which go2cs maps to `nint`. The converter lowers it to a `foreach` over golib's `range` helper, and — with `-var` (the default) — leaves the index as the idiomatic `var`:
@@ -228,7 +241,7 @@ foreach (var i in range(size)) {
     s = append(s, i);
 }
 ```
-For `var i` to infer `nint` — matching Go's index type — golib's `range(nint)` must *yield* `nint`, not a C# `int`. It originally returned `Enumerable.Range(0, (int)n)` (element type `int`), so `var i` inferred `int`. That is invisible until the index feeds a generic builtin: `append(s, i)` with `s` a `slice<nint>` and `i` an `int` matches **two** `builtin.append` overloads with **different** inferred `T` — `append<T>(slice<T>, params Span<T>)` infers `T=nint` (from `s`; the `int→nint` element conversion is implicit), while `append<T>(ISlice, params T[])` infers `T=int` (from `i`). Neither wins the argument-by-argument betterness tie (each is better on one argument), so the call is ambiguous — **CS0121**. An explicit `nint i` always resolved (both overloads then infer `T=nint`, and `slice<T>` beats `ISlice` on the first argument), which is the tell that the defect was the *element type* the index inferred, not the converter's `var` (correct and idiomatic) nor the `append` overload set (unambiguous for a correctly-typed `nint`). The root fix is therefore in golib: `range(nint)` yields `nint`. As a hand-written iterator (`for (nint i = 0; i < n; i++) yield return i;`) it also matches Go's integer-range semantics for `n <= 0` exactly (zero iterations), where the old `Enumerable.Range` threw on a negative count. Because the converter emission is unchanged, this is a pure golib change — byte-identical `check-no-regression` — that silently corrects the index type for *every* range-over-int loop in the corpus, and unblocked the `maps` and `slices` Phase-4 test suites (whose `want = append(want, i)` over a `range(size)` index hit exactly this CS0121). Guarded by the `RangeIntIndexAppend` behavioral test (the minimal `append(s, i)`-over-`range(size)` shape, output-compared vs Go; neutering golib's `range` back to `IEnumerable<int>` reproduces the CS0121).
+For `var i` to infer `nint` — matching Go's index type — golib's `range(nint)` must *yield* `nint`, not a C# `int`. It originally returned `Enumerable.Range(0, (int)n)` (element type `int`), so `var i` inferred `int`. That is invisible until the index feeds a generic builtin: `append(s, i)` with `s` a `slice<nint>` and `i` an `int` matches **two** `builtin.append` overloads with **different** inferred `T` — `append<T>(slice<T>, params Span<T>)` infers `T=nint` (from `s`; the `int→nint` element conversion is implicit), while `append<T>(ISlice, params T[])` infers `T=int` (from `i`). Neither wins the argument-by-argument betterness tie (each is better on one argument), so the call is ambiguous — **CS0121**. An explicit `nint i` always resolved (both overloads then infer `T=nint`, and `slice<T>` beats `ISlice` on the first argument), which is the tell that the defect was the *element type* the index inferred, not the converter's `var` (correct and idiomatic) nor the `append` overload set (unambiguous for a correctly-typed `nint`). The root fix is therefore in golib: `range(nint)` yields `nint`. It returns golib's `RangeOverInt<nint>` struct, whose struct enumerator yields `0..n-1` without allocating, and it matches Go's integer-range semantics for `n <= 0` exactly (zero iterations), where the old `Enumerable.Range` threw on a negative count. Because the converter emission was unchanged, this was a pure golib change — byte-identical `check-no-regression` — that corrected the index type for *every* range-over-int loop in the corpus, and unblocked the `maps` and `slices` Phase-4 test suites (whose `want = append(want, i)` over a `range(size)` index hit exactly this CS0121). Guarded by the `RangeIntIndexAppend` behavioral test (the minimal `append(s, i)`-over-`range(size)` shape, output-compared vs Go; neutering golib's `range` back to `IEnumerable<int>` reproduces the CS0121).
 
 ## Range-over-integer covers EVERY integer type, and the iteration variable keeps the operand's width
 Go 1.22's range-over-integer accepts **any** integer type, not just `int`, and gives the iteration variable *that* type. The converter recognized only `types.Int` and untyped-int, so every other integer kind — `uintptr`, `int64`, `uint8`, `rune`, a named integer type — fell through `visitRangeStmt`'s `unexpected 'ast.RangeStmt' expression` arm, which prints the statement as a **C# comment**. The loop did not fail to convert loudly; it silently *vanished*, and the program quietly computed a different answer.
@@ -256,14 +269,15 @@ foreach (var _ᴛ1 in range<uintptr>((~atyp).Len)) {
 ```
 The whole body had been a `/* … */` block, so `unique`'s `cloneSeq` for any array-of-string type came back **empty** instead of carrying one offset per element. It was the only such comment in the entire converted standard library — a one-site defect precisely because non-`int` range operands are rare, and invisible for exactly the same reason.
 
-Two pieces carry the fix. golib gains a generic `range<T>(T n)`, constrained to the **operator pair the loop actually uses** (`IComparisonOperators<T,T,bool>` + `IIncrementOperators<T>`, with `default(T)` for the zero) rather than `IBinaryInteger<T>` — golib's own `uintptr` is a hand-written struct that implements the generic-math *operator* interfaces but not the `INumberBase` hierarchy, and `uintptr` is exactly the type this site ranges over. The converter then names `T` **explicitly** at every non-`int` site (`range<uintptr>(…)`, `range<rune>(…)`), because Go's `rune` and C#'s `int` are one CLR type and an inferred call could not tell `for i := range r` (yields `rune`) from `for i := range 3` (yields Go's `int`); a NAMED integer type additionally has its operand cast down to the underlying width, since a converted `/*num:…*/` struct satisfies no generic-math interface at all.
+Two pieces carry the fix. golib gains a generic `range<T>(T n)`, constrained to the **operator pair the loop actually uses** (`IComparisonOperators<T,T,bool>` + `IIncrementOperators<T>`, with `default(T)` for the zero) rather than `IBinaryInteger<T>` — golib's own `uintptr` is a hand-written struct that implements the generic-math *operator* interfaces but not the `INumberBase` hierarchy, and `uintptr` is exactly the type this site ranges over. The converter then names `T` **explicitly** at every non-`int` site (`range<uintptr>(…)`, `range<rune>(…)`), because Go's `rune` and C#'s `int` are one CLR type and an inferred call could not tell `for i := range r` (yields `rune`) from `for i := range 3` (yields Go's `int`); a NAMED integer type is its own type argument with the operand passed through unchanged (`range<myLen>(((myLen)3))`), so the loop variable has the named type as in Go, and the converted `/*num:…*/` struct binds because it declares the same operator interfaces.
 
-The `int` case is emitted byte-identically — bare `range(expr)` — but it needed one guard of its own. A literal operand hands the overload set a C# `int`, where the new generic is an **identity** match and `range(nint)` needs an implicit numeric conversion; the generic therefore wins outright and C#'s "a non-generic method is better than a generic method" tie-break never applies (measured, not reasoned — the first attempt did regress `range(3)` to `System.Int32`). golib carries a third overload, `range(int n) → IEnumerable<nint>`, meaning "a C# `int` operand is Go's `int`": an `int`-typed operand in emitted code can only be an untyped Go constant, since a Go `int` expression already renders as `nint` and every other width is emitted with an explicit type argument. With it, `for i := range 3` stays on `nint` and the CS0121 above cannot come back.
+The `int` case is emitted byte-identically — bare `range(expr)` — but it needed one guard of its own. A literal operand hands the overload set a C# `int`, where the new generic is an **identity** match and `range(nint)` needs an implicit numeric conversion; the generic therefore wins outright and C#'s "a non-generic method is better than a generic method" tie-break never applies (measured, not reasoned — the first attempt did regress `range(3)` to `System.Int32`). golib carries a third overload, `range(int n) → RangeOverInt<nint>`, meaning "a C# `int` operand is Go's `int`": an `int`-typed operand in emitted code can only be an untyped Go constant, since a Go `int` expression already renders as `nint` and every other width is emitted with an explicit type argument. With it, `for i := range 3` stays on `nint` and the CS0121 above cannot come back.
 
-Guarded by the `RangeOverIntegerTypes` behavioral test (blank-key `uintptr`, `uint8`/`int64`/`uint64`/`rune`, a named `uintptr` type, non-positive operands, and the unchanged `int`/untyped cases, output-compared vs Go — reverting the `isInt` widening reproduces `FAIL [Target,Output]`) and by `GolibTests.GoStructLayoutTests` (the `range<T>` widths and the literal-operand overload binding). Behavioral `check-no-regression` is byte-identical across all 570 packages apart from the new project, which is the expected shape: the corpus contained exactly one non-`int` range operand.
+Guarded by the `RangeOverIntegerTypes` behavioral test (blank-key `uintptr`, `uint8`/`int64`/`uint64`/`rune`, a named `uintptr` type, non-positive operands, and the unchanged `int`/untyped cases, output-compared vs Go — reverting the `isInt` widening reproduces `FAIL [Target,Output]`) and by `GolibTests.GoStructLayoutTests` (the `range<T>` widths and the literal-operand overload binding). Behavioral `check-no-regression` was byte-identical apart from the new project when this landed, the expected shape for a construct the corpus barely uses.
+<!-- at landing: 570 behavioral packages, and exactly one non-`int` range operand in the converted stdlib; neither figure is re-measured by a guard. -->
 
 ## A blank scalar range variable never emits as `_`
-A `range` with no iteration variable (or an explicit blank) over a **scalar-yield** source — a channel, an integer (Go 1.22 `for range n`), or a single-value yield function — needs a C# `foreach` iteration variable, and that variable must **not** be named `_`: in a scalar `foreach` position C# declares a genuine read-only variable *named* `_` (only tuple-deconstruction `_` is a discard), which shadows the discard idiom for the entire loop body. Any Go blank assignment inside the body (`_ = f(x)` — evaluate and discard) then resolves to that variable and becomes an illegal write to a `foreach` iteration variable (**CS1656**; first hit: `encoding/binary`'s `BenchmarkSize`, `for range b.N { _ = Size(data) }`). The converter emits a marked temp instead:
+A `range` with no iteration variable (or an explicit blank) over a **scalar-yield** source — a channel, an integer (Go 1.22 `for range n`), a single-value yield function, or a slice or array (whose index-only range also lowers to `range(x)`) — needs a C# `foreach` iteration variable, and that variable must **not** be named `_`: in a scalar `foreach` position C# declares a genuine read-only variable *named* `_` (only tuple-deconstruction `_` is a discard), which shadows the discard idiom for the entire loop body. Any Go blank assignment inside the body (`_ = f(x)` — evaluate and discard) then resolves to that variable and becomes an illegal write to a `foreach` iteration variable (**CS1656**; first hit: `encoding/binary`'s `BenchmarkSize`, `for range b.N { _ = Size(data) }`). The converter emits a marked temp instead:
 ```go
 for range b.N {
     _ = Size(data)
@@ -280,7 +294,7 @@ Tuple positions are unaffected — `foreach (var (_, data) in …)` keeps the tr
 
 `for i, v := range s` emits `foreach (var (i, v) in s)`, and Go's range over a slice allocates nothing at all. C# matches that only if the enumerator stays off the heap, which is entirely a question of what `GetEnumerator` **returns**: `foreach` binds `GetEnumerator` by **pattern** — the concrete return type, ahead of and independently of any interface — so a struct return is enumerated in place, while an interface return is a heap object per loop *entry*.
 
-`slice<T>.GetEnumerator()` returned `IEnumerator<(nint, T)>` from an ITERATOR method (`yield return`), which is the worst of both: the compiler-generated state machine is one allocation and the inner `SliceEnumerator` class it drove is a second. Measured at **136 bytes per loop entry**, corpus-wide — every ranged loop in every converted package, paid whether the loop body allocated or not. It is invisible in output and in timings at small scale, and unmissable in a Go test that asserts an allocation count: `time.TestUnmarshalTextAllocations` runs `parseRFC3339`, whose `parseUint` closure ranges its argument once per field.
+`slice<T>.GetEnumerator()` returned `IEnumerator<(nint, T)>` from an ITERATOR method (`yield return`), which is the worst of both: the compiler-generated state machine is one allocation and the inner `SliceEnumerator` class it drove is a second. Two heap objects per loop entry, corpus-wide — every ranged loop in every converted package, paid whether the loop body allocated or not. It is invisible in output and in timings at small scale, and unmissable in a Go test that asserts an allocation count: `time.TestUnmarshalTextAllocations` runs `parseRFC3339`, whose `parseUint` closure ranges its argument once per field.
 
 The return type is now the concrete nested `slice<T>.Enumerator` struct (the shape `List<T>.Enumerator` uses, and the one golib's own `sslice<T>` already had). Two contracts had to move with it:
 
@@ -289,7 +303,8 @@ The return type is now the concrete nested `slice<T>.Enumerator` struct (the sha
 
 `array<T>.GetEnumerator()` was the identical shape and was deliberately left alone here, because the copy Go's array range takes had to be placed first; it is settled in the section below.
 
-Guarded by `SliceRangeAllocationTests` in `GolibTests`, which asserts **zero** bytes via `GC.GetAllocatedBytesForCurrentThread` across 1,000 loops (whole slice, sub-window with window-relative indices, and the nil slice), plus the interface-path equivalence. It is a measured guard on purpose: restoring the interface return type still compiles and still produces correct output — it just allocates again — so only bytes can catch the regression. Neutering to the interface return reports 48 B/loop; restoring the original iterator body reports exactly 136 B/loop.
+Guarded by `SliceRangeAllocationTests` in `GolibTests`, which asserts **zero** bytes via `GC.GetAllocatedBytesForCurrentThread` across 1,000 loops (whole slice, sub-window with window-relative indices, and the nil slice), plus the interface-path equivalence. It is a measured guard on purpose: restoring the interface return type still compiles and still produces correct output — it just allocates again — so only bytes can catch the regression. Neutering to the interface return, or restoring the original iterator body, makes it report a nonzero per-loop byte count.
+<!-- measured when the guard landed (platform not recorded): 48 B/loop for the interface return, 136 B/loop for the original iterator body; SliceRangeAllocationTests.cs still cites ~136 B. -->
 
 ## `range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `.Clone()`
 
@@ -343,13 +358,14 @@ guard pins both halves — replacing a whole element through the original is inv
 
 Scoped exactly as gc's own rule is (`cmd/compile/internal/walk/order.go`'s `rangeStmt`), so three shapes stay UNCOPIED because Go copies nothing there either — and each is a control in the guard:
 
-* **No value iteration variable.** With at most one iteration variable and a constant length, Go does not evaluate the range expression at all, so `for i := range a` reads the LIVE array through the index. A blank value (`for i, _ := range a`) is the same case.
+* **No value iteration variable.** With at most one iteration variable and a constant length, Go does not evaluate the range expression at all, so `for i := range a` reads the LIVE array through the index. It emits `foreach (var i in range(a))`, whose golib overload reads `len(a)` once and never an element. A blank value (`for i, _ := range a`) is the same case.
 * **A POINTER to an array.** `for i, v := range p` shares the pointee; the emission keeps the bare `p.Value`.
 * **A slice.** Its copy is the header, which the struct assignment already is.
 
 `exprReadsValueNeedingClone` narrows the rest: only a read out of EXISTING storage (ident, selector, index, deref) can alias — a composite literal, call result, or conversion is freshly constructed and reachable by no other name, and a return already clones on its own way out.
 
-With the operand snapshotted, `array<T>`'s enumerator reads LIVE storage and needs no capture point of its own, which is what finally let it shed the iterator method: `GetEnumerator()` returns the nested `array<T>.Enumerator` STRUCT, and go2cs-gen's `IArrayTypeTemplate` / `IArrayViewTypeTemplate` forward that struct (with the explicit `IEnumerable<(nint, T)>` member beside it) so named array types range as cheaply. Measured with `GC.GetAllocatedBytesForCurrentThread` over 1,000 loops: **72 B/loop → 0 B/loop** on the pattern path, and 103 → 79 B/loop on the boxing interface path, which now boxes a struct instead of driving a state machine. Snapshotting inside the enumerator instead would have been wrong in both directions — it would allocate on every loop AND copy for the two shapes above where Go shares.
+With the operand snapshotted, `array<T>`'s enumerator reads LIVE storage and needs no capture point of its own, which is what finally let it shed the iterator method: `GetEnumerator()` returns the nested `array<T>.Enumerator` STRUCT, and go2cs-gen's `IArrayTypeTemplate` / `IArrayViewTypeTemplate` forward that struct (with the explicit `IArray<T>.GetEnumerator()` member beside it) so named array types range as cheaply. Measured with `GC.GetAllocatedBytesForCurrentThread` over 1,000 loops, the pattern path drops to **zero** bytes, and the boxing interface path costs less, because it now boxes a struct instead of driving a state machine. Snapshotting inside the enumerator instead would have been wrong in both directions — it would allocate on every loop AND copy for the two shapes above where Go shares.
+<!-- measured at landing (platform not recorded): pattern path 72 -> 0 B/loop, interface path 103 -> 79 B/loop. -->
 
 Guarded two ways: `ArrayRangeSnapshot` (behavioral, output-compared against `go run`) mutates the container mid-loop across the array value, named-array, struct-field, nested-array, array-of-named-slices, `=`-form, mutable-range-var and aliased-element shapes, with the pointer, slice and index-only arms as controls that must NOT copy; `ArrayRangeAllocationTests` (`GolibTests`) asserts the enumerator's zero bytes with the boxing interface path as its nonzero control, the snapshot's zero on BOTH meters (object count and CLR bytes) with `Clone()` as the counted control that makes those zeros mean something, and the array-of-slices copy that must share its backing rather than throw.
 

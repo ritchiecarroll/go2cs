@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using static go.builtin;
@@ -125,18 +126,28 @@ public class FieldAccessTests
         native.field(Buffer.ᏑLength) = 0;
         managed.field(Buffer.ᏑLength) = 0;
 
+        long allocated = BytesOverFieldCalls(native, managed, Calls);
+
+        Assert.AreEqual(0L, allocated, $"{allocated} bytes over {Calls} calls on each root");
+        Assert.AreEqual((ushort)Calls, native.field(Buffer.ᏑLength));
+        Assert.AreEqual((ushort)Calls, managed.field(Buffer.ᏑLength));
+    }
+
+    // The measuring loop is compiled fully optimized from its first call. Under tiered compilation it starts at tier 0
+    // and moves to an on-stack-replacement method partway through the window, and on Windows (.NET 10.0.11) that
+    // transition allocated 24 B on the test thread: the JIT's bytes, not field's (R, 2026-10-21; each of
+    // TC_OnStackReplacement=0, TieredCompilation=0, TieredPGO=0 and TC_QuickJitForLoops=0 removed it).
+    [MethodImpl(MethodImplOptions.AggressiveOptimization | MethodImplOptions.NoInlining)]
+    private static long BytesOverFieldCalls(ж<Buffer> native, ж<Buffer> managed, int calls)
+    {
         long before = GC.GetAllocatedBytesForCurrentThread();
 
-        for (int i = 0; i < Calls; i++)
+        for (int i = 0; i < calls; i++)
         {
             native.field(Buffer.ᏑLength)++;
             managed.field(Buffer.ᏑLength)++;
         }
 
-        long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-
-        Assert.AreEqual(0L, allocated, $"{allocated} bytes over {Calls} calls on each root");
-        Assert.AreEqual((ushort)Calls, native.field(Buffer.ᏑLength));
-        Assert.AreEqual((ushort)Calls, managed.field(Buffer.ᏑLength));
+        return GC.GetAllocatedBytesForCurrentThread() - before;
     }
 }
