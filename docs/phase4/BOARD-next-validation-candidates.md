@@ -21560,6 +21560,17 @@ goroutines get dedicated threads). ⚠ And the ~21% non-signature remainder is *
 1.3's default key share is **X25519** (`handshake_client.go:153`), so that segment is
 `crypto/ecdh` → `crypto/internal/edwards25519/field` plus the record layer and parsing.
 
+> **AMENDED 2026-10-22 (P2, P-256 R1, `claude/p2-bits-intrinsics`):** "do not re-walk" holds for RSA. It
+> does not hold for a caller that makes dozens of leaf calls in one method. Fiat's `p256Mul` makes 84
+> (51 `Add64`, 28 `Mul64`, 5 `Sub64`), which exhausts the JIT's inlining budget for the caller, so every
+> leaf stays a call. What the cut above lacked was `[MethodImpl(AggressiveInlining)]`, not faster
+> arithmetic: its `Add64` used `UInt128` and carried no attribute. With `Mul64` as one `Math.BigMul`
+> and the attribute on all three leaves (linux, Release, floor over 7 processes, base and cut
+> alternated twice): fiat `Mul` 122.4 / 127.1 → 102.8 / 83.9 ns; `ScalarMult` 1,490 / 1,434 →
+> 1,239 / 1,342 µs; `ScalarBaseMult` 419 / 422 → 449 / 428 µs, inside its spread. Neither change alone
+> moved the measurement. Go reads fiat `Mul` 23 ns and `ScalarMult` 112–139 µs, so the remaining 9–12×
+> is the element plumbing this row predicted (P2's R2 and R3 seats), not the arithmetic.
+
 ---
 
 ## `addMulVVW` as emitted is 13.1× a raw loop — the seam is CALL GRANULARITY, apportioned (G, 2026-09-02)
