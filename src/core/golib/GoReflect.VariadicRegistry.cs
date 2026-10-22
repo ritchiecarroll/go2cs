@@ -44,9 +44,13 @@ public static partial class GoReflect
             s_variadicTrampolines.TryAdd(familyType, new VariadicTrampolines(call, make));
     }
 
-    // The registered trampolines of a family instantiation, or null when none was registered.
+    // The registered trampolines of a family instantiation, or null when none was registered. A miss first runs the escape
+    // registries loaded assemblies deferred (GoDeferredRegistrations.EscapeRegistry), which hold the registrations.
     private static VariadicTrampolines? registeredVariadic(Type familyType) =>
-        s_variadicTrampolines.TryGetValue(familyType, out VariadicTrampolines? trampolines) ? trampolines : null;
+        s_variadicTrampolines.TryGetValue(familyType, out VariadicTrampolines? trampolines) ||
+        GoDeferredRegistrations.EscapeRegistry.Run() && s_variadicTrampolines.TryGetValue(familyType, out trampolines)
+            ? trampolines
+            : null;
 
     // Whether compiled code registered the family instantiation; GolibTests reads it.
     internal static bool IsVariadicRegistered(Type familyType) => s_variadicTrampolines.ContainsKey(familyType);
