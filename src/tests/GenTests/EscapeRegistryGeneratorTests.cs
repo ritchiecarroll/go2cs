@@ -114,6 +114,79 @@ public class EscapeRegistryGeneratorTests
         Assert.AreEqual(0, errors.Length, "the registry binds: " + string.Join("; ", errors.Take(3)));
     }
 
+    // A variadic func value reflect can hold is called through a trampoline closed over its signature, which Native AOT has
+    // only when compiled code names it (golib's GoReflect.VariadicRegistry.cs; the varfunc probe threw NotSupportedException
+    // at `reflect.ValueOf(join).Call`, 2026-10-21). The registry names the family of every variadic func type the package
+    // converts to an interface or reaches through a converted value, spelled from the delegate's Invoke, so the C# natural
+    // type of a method group or lambda registers too. The fixture's shapes: a method group, a lambda, a func field, a
+    // pointer's target, a func variable through golib's typed-nil carrier (the varfunc probe's third line), a variadic
+    // func in another func's parameters and in its multi-return (all registered, the last with the container beside it);
+    // a variadic func that never escapes, a non-variadic func and an open one (absent).
+    [TestMethod]
+    public void EveryEscapingVariadicFuncSignatureIsRegistered()
+    {
+        const string package =
+            """
+            namespace go;
+
+            [GoPackage("vtest")]
+            public static partial class vtest_package
+            {
+                partial struct Holder { internal Funcꓸꓸꓸ<bool, byte, nint> f; }
+
+                internal static @string join(@string sep, params Span<@string> parts) => sep;
+
+                internal static void Use()
+                {
+                    object declared = join;
+                    any literal = (nint n, params Span<nint> xs) => n + xs.Length;
+                    object viaField = default(Holder);
+                    object viaPointer = default(ж<Actionꓸꓸꓸ<int, uint>>);
+                    Actionꓸꓸꓸ<short> local = static (params Span<short> xs) => { };
+                    _ = local;
+                    object plain = (Func<nint, nint>)(x => x);
+                    var held = (byte b, params Span<byte> bs) => b;
+                    object carried = held.OrTypedNilFunc();
+                    object nested = default(Func<Funcꓸꓸꓸ<sbyte, sbyte, sbyte>, (Actionꓸꓸꓸ<long, ulong>, slice<short>)>);
+                }
+
+                internal static object Generic<T>(Actionꓸꓸꓸ<T> f) => f;
+            }
+            """;
+
+        CSharpParseOptions options = new(LanguageVersion.Preview);
+
+        CSharpCompilation compilation = CSharpCompilation.Create("vtest",
+            [CSharpSyntaxTree.ParseText(package, options, path: @"C:\go2cs\src\core\vtest\vtest.cs"), CSharpSyntaxTree.ParseText(TemplateUsings, options, path: @"C:\go2cs\src\core\vtest\obj\vtest.GlobalUsings.g.cs")],
+            References(),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        CSharpGeneratorDriver.Create(new EscapeRegistryGenerator()).WithUpdatedParseOptions(options)
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string[] registered = output.SyntaxTrees.Select(tree => tree.ToString())
+            .SelectMany(source => Regex.Matches(source, @"global::go\.GoReflect\.(RegisterVariadic\w+<.+>)\(\);").Select(match => match.Groups[1].Value))
+            .OrderBy(name => name, StringComparer.Ordinal).ToArray();
+
+        string[] expected =
+        [
+            "RegisterVariadicAction<int, uint>",                                               // a pointer's target
+            "RegisterVariadicFunc<byte, byte, byte>",                                          // through golib's typed-nil carrier (OrTypedNilFunc)
+            "RegisterVariadicFunc<bool, byte, nint>",                                          // a converted struct's func field
+            "RegisterVariadicFunc<global::go.@string, global::go.@string, global::go.@string>", // a method group (natural type)
+            "RegisterVariadicFunc<nint, nint, nint>",                                          // a lambda (natural type)
+            "RegisterVariadicFunc<sbyte, sbyte, sbyte>",                                       // a func's parameter
+            "RegisterVariadicAction<long, ulong>",                                             // inside a func's multi-return
+        ];
+
+        CollectionAssert.AreEqual(expected.OrderBy(name => name, StringComparer.Ordinal).ToArray(), registered, "registered: " + string.Join(", ", registered));
+        Assert.IsTrue(output.SyntaxTrees.Any(tree => tree.ToString().Contains("global::go.GoTypeOps.Register(global::go.GoTypeOps<global::go.slice<short>>.Instance);")),
+            "a container inside a func's multi-return is walked like any other element");
+
+        Diagnostic[] errors = output.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+        Assert.AreEqual(0, errors.Length, "the registry binds: " + string.Join("; ", errors.Take(3)));
+    }
+
     // TRAIN T3 (2026-10-10): a *.tests.csproj sets DisableTransitiveProjectReferences, so a type the compilation reaches
     // only through a referenced assembly's field signature can live in an assembly it does not reference -- and a
     // registry line naming it fails to compile (CS0234: go/internal/srcimporter naming go.ast_package, internal/testenv
