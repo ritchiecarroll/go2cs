@@ -48,6 +48,15 @@
 // ⚠ `Sub` IS NOT EXERCISED BY THAT LOOP. `addMulVVW` never calls it; it is rewritten here for
 // consistency with its two siblings and is measured by nothing above. Its correctness rides on
 // `math/bits`'s own banked row, which is what that row is for.
+//
+// THE 64-BIT LEAVES, FOR THEIR OWN CALLERS. Fiat field arithmetic (crypto/internal/fips140/nistec/
+// fiat, edwards25519, poly1305) calls Add64, Mul64 and Sub64 directly, dozens of times per method:
+// one P-256 field multiply makes 84 such calls. The JIT's inlining budget for a body that large runs
+// out, so each one stayed a call returning a tuple, and the converted Mul64 was Go's portable
+// four-multiply body. Go intrinsifies all three. Here Mul64 is one Math.BigMul and all three carry
+// AggressiveInlining, which an over-budget caller still honors; Add64 and Sub64 keep Go's own carry
+// and borrow expressions. Neither change helped alone. MEASURED (linux/amd64, min over seven
+// processes): the P-256 field multiply 122 -> 95 ns, nistec's P-256 ScalarMult 1470 -> 1295 us.
 
 using System;
 
@@ -97,5 +106,47 @@ partial class bits_package
     {
         UInt128 diff = (UInt128)(uint64)x - (uint64)y - (uint64)borrow;
         return ((nuint)(uint64)diff, (nuint)((uint64)(diff >> 64) & 1));
+    }
+
+    // Add64 returns the sum with carry of x, y and carry: sum = x + y + carry.
+    // The carry input must be 0 or 1; otherwise the behavior is undefined.
+    // The carryOut output is guaranteed to be 0 or 1.
+    //
+    // This function's execution time does not depend on the inputs.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)
+    {
+        uint64 sum = x + y + carry;
+        // The sum will overflow if both top bits are set (x & y) or if one of them
+        // is (x | y), and a carry from the lower place happened. If such a carry
+        // happens, the top bit will be 1 + 0 + 1 = 0 (&^ sum).
+        uint64 carryOut = ((x & y) | ((x | y) & ~sum)) >> 63;
+        return (sum, carryOut);
+    }
+
+    // Sub64 returns the difference of x, y and borrow: diff = x - y - borrow.
+    // The borrow input must be 0 or 1; otherwise the behavior is undefined.
+    // The borrowOut output is guaranteed to be 0 or 1.
+    //
+    // This function's execution time does not depend on the inputs.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow)
+    {
+        uint64 diff = x - y - borrow;
+        // See Sub32 for the bit logic.
+        uint64 borrowOut = ((~x & y) | (~(x ^ y) & diff)) >> 63;
+        return (diff, borrowOut);
+    }
+
+    // Mul64 returns the 128-bit product of x and y: (hi, lo) = x * y
+    // with the product bits' upper half returned in hi and the lower
+    // half returned in lo.
+    //
+    // This function's execution time does not depend on the inputs.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)
+    {
+        uint64 hi = Math.BigMul(x, y, out uint64 lo);
+        return (hi, lo);
     }
 }

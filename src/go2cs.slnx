@@ -701,6 +701,7 @@
     <Project Path="tests/Behavioral/MapMutateDuringRange/MapMutateDuringRange.csproj" />
     <Project Path="tests/Behavioral/MapPointerElementLiteral/MapPointerElementLiteral.csproj" />
     <Project Path="tests/Behavioral/MapStringBytesLookup/MapStringBytesLookup.csproj" />
+    <Project Path="tests/Behavioral/MathBitsLeaves/MathBitsLeaves.csproj" />
     <Project Path="tests/Behavioral/MathFloatBits/MathFloatBits.csproj" />
     <Project Path="tests/Behavioral/MathHugeArgReduction/MathHugeArgReduction.csproj" />
     <Project Path="tests/Behavioral/MemProfileAllocFrames/MemProfileAllocFrames.csproj" />

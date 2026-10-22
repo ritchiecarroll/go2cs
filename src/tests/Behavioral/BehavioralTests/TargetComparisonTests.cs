@@ -1159,6 +1159,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMapStringBytesLookup() => CheckTarget("MapStringBytesLookup");
 
     [TestMethod]
+    public void CheckMathBitsLeaves() => CheckTarget("MathBitsLeaves");
+
+    [TestMethod]
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
 
     [TestMethod]

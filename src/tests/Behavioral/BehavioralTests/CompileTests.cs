@@ -1156,6 +1156,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMapStringBytesLookup() => CheckTarget("MapStringBytesLookup");
 
     [TestMethod]
+    public void CheckMathBitsLeaves() => CheckTarget("MathBitsLeaves");
+
+    [TestMethod]
     public void CheckMathFloatBits() => CheckTarget("MathFloatBits");
 
     [TestMethod]

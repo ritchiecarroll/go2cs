@@ -388,22 +388,7 @@ public static (uint32 sum, uint32 carryOut) Add32(uint32 x, uint32 y, uint32 car
     return (sum, carryOut);
 }
 
-// Add64 returns the sum with carry of x, y and carry: sum = x + y + carry.
-// The carry input must be 0 or 1; otherwise the behavior is undefined.
-// The carryOut output is guaranteed to be 0 or 1.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry) {
-    uint64 sum = default!;
-    uint64 carryOut = default!;
-
-    sum = x + y + carry;
-    // The sum will overflow if both top bits are set (x & y) or if one of them
-    // is (x | y), and a carry from the lower place happened. If such a carry
-    // happens, the top bit will be 1 + 0 + 1 = 0 (&^ sum).
-    carryOut = ((x & y) | ((x | y) & ~sum)) >> 63;
-    return (sum, carryOut);
-}
+// go2cs generated this placeholder — func Add64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Subtract with borrow ---
 // go2cs generated this placeholder — func Sub is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -426,20 +411,7 @@ public static (uint32 diff, uint32 borrowOut) Sub32(uint32 x, uint32 y, uint32 b
     return (diff, borrowOut);
 }
 
-// Sub64 returns the difference of x, y and borrow: diff = x - y - borrow.
-// The borrow input must be 0 or 1; otherwise the behavior is undefined.
-// The borrowOut output is guaranteed to be 0 or 1.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow) {
-    uint64 diff = default!;
-    uint64 borrowOut = default!;
-
-    diff = x - y - borrow;
-    // See Sub32 for the bit logic.
-    borrowOut = ((~x & y) | (~(x ^ y) & diff)) >> 63;
-    return (diff, borrowOut);
-}
+// go2cs generated this placeholder — func Sub64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Full-width multiply ---
 // go2cs generated this placeholder — func Mul is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -458,29 +430,7 @@ public static (uint32 hi, uint32 lo) Mul32(uint32 x, uint32 y) {
     return (hi, lo);
 }
 
-// Mul64 returns the 128-bit product of x and y: (hi, lo) = x * y
-// with the product bits' upper half returned in hi and the lower
-// half returned in lo.
-//
-// This function's execution time does not depend on the inputs.
-public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y) {
-    uint64 hi = default!;
-    uint64 lo = default!;
-
-    const uint64 mask32 = /* 1<<32 - 1 */ 4294967295;
-    var x0 = (uint64)(x & mask32);
-    var x1 = x >> 32;
-    var y0 = (uint64)(y & mask32);
-    var y1 = y >> 32;
-    var w0 = x0 * y0;
-    var t = x1 * y0 + (w0 >> 32);
-    var w1 = (uint64)(t & mask32);
-    var w2 = t >> 32;
-    w1 += x0 * y1;
-    hi = x1 * y1 + w2 + (w1 >> 32);
-    lo = x * y;
-    return (hi, lo);
-}
+// go2cs generated this placeholder — func Mul64 is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // --- Full-width divide ---
 
