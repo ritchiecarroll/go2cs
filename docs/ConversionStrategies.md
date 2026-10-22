@@ -3961,8 +3961,9 @@ public static (nint n, error err) ReadAtLeast(Reader r, slice<byte> buf, nint mi
 `(nn, err) = …` has no `var`. The converter writes `else if` across two lines; it is an ordinary
 `else if`.
 
-The other names come from other sections. `slice<byte>` is Go's `[]byte`, and `buf[(int)(n)..]` is Go's
-`buf[n:]` ([Slices and Arrays](#slices-and-arrays)). `err == default!` is Go's `err == nil`. Comparing two
+The other names come from other sections. `slice<byte>` is Go's `[]byte`, and `buf.slice(n)` is Go's
+`buf[n:]`: a bound that is not a constant goes to golib's `.slice` method ([Slices and Arrays](#slices-and-arrays)).
+`err == default!` is Go's `err == nil`. Comparing two
 interface values, as in `err == EOF`, goes through golib's `AreEqual`, which follows Go's `==` rules
 ([Interfaces](#interfaces)).
 
@@ -4258,7 +4259,8 @@ capacity. An array has a fixed length.
 
 Indexing, `len`, `cap`, `append` and `copy` keep their Go names and read as they do in Go
 ([Built-in Functions](#built-in-functions)). A `range` loop becomes a `foreach` over `(index, value)`
-pairs ([Loops, Range and Labels](#loops-range-and-labels)).
+pairs; an index-only `for i := range s` becomes `foreach (var i in range(s))`, which counts the indexes
+and reads no element ([Loops, Range and Labels](#loops-range-and-labels)).
 
 Go's type names stay readable too. Go's `int` appears as C# `nint`, a native-sized integer. Sized names
 such as `uint32` and `int64` keep their Go spelling: each converted project declares them as aliases
@@ -4270,7 +4272,7 @@ of the C# types. `uintptr` is golib's own `uintptr` struct
 `.slice()` or `.array()`. `make` calls a constructor. So `[]uint32{7, 8, 9}` becomes
 `new uint32[]{7, 8, 9}.slice()`, `[6]int{0, 10, 20, 30, 40, 50}` becomes
 `new nint[]{0, 10, 20, 30, 40, 50}.array()`, and `make([]int, 3, 10)` becomes `new slice<nint>(3, 10)`.
-<!-- source: src/tests/Behavioral/SliceAliasing/main.go:20, :34 and :44; src/tests/Behavioral/SliceAliasing/main.cs.target:10, :18 and :24 -->
+<!-- source: src/tests/Behavioral/SliceAliasing/main.go:20, :34 and :44; src/tests/Behavioral/SliceAliasing/main.cs.target:15, :26 and :34 -->
 
 `.slice(…)` is one golib method with optional bounds. With no arguments it turns a C# array into a
 `slice<T>`. With bounds it is a Go slice expression, shown in the bound rules below.
@@ -4326,54 +4328,120 @@ y := append(x, 1, 2, 3)
 y[0] = 999
 fmt.Println(base[2], y[0], len(y), cap(y))
 ```
-<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:40-47 -->
+<!-- source: src/tests/Behavioral/SliceAliasing/main.cs.target:8-10 and :44-51 -->
 ```csharp
-var w = @base[2..4];
-var x = append(w, (uint32)500);
-x[0] = 501;
-fmt.Println(@base, len(x), cap(x));
-var y = append(x, (uint32)1, (uint32)2, (uint32)3);
-y[0] = 999;
-fmt.Println(@base[2], y[0], len(y), cap(y));
+internal static partial void run() {
+    var wᴷ = new stackAppend<uint32>();
+    var xᴷ = new stackAppend<uint32>();
+…
+    var w = @base[2..4];
+    var x = append(wᴷ, w, (uint32)500);
+    x[0] = 501;
+    fmt.Println(@base, len(x), cap(x));
+
+    var y = append(xᴷ, x, (uint32)1, (uint32)2, (uint32)3);
+    y[0] = 999;
+    fmt.Println(@base[2], y[0], len(y), cap(y));
 ```
 
 `w` has length 2 and room for two more, so `x` still shares `base`, and `x[0] = 501` changes `base[2]`.
-`y` needs more room than `x` has, so `y[0] = 999` leaves `base[2]` at `501`.
+`y` needs more room than `x` has, so `y[0] = 999` leaves `base[2]` at `501`. `wᴷ` and `xᴷ` are stack
+buffers (see *An append Go keeps on the stack gets a stack buffer* below). Neither is taken here,
+because `w` and `x` are not empty, so both calls are ordinary appends.
 
 The untyped constants passed to `append` are cast to the element type, here `uint32`
 ([Constant Values](#constant-values)). `append` is a generic C# method, and a bare `500` would read as a
 C# `int` there. A plain assignment such as `x[0] = 501` needs no cast, because C# converts the constant.
 <!-- append is generic over T (src/core/golib/builtin.cs:430#6cb0da, :452#87e0f5), so T is inferred from every argument. -->
 
+**A grown slice gets Go's capacity.** `cap()` after an append is observable, so when an append must grow
+the slice, golib computes the new capacity as Go 1.26's `runtime.growslice` does: the same growth step
+and the same rounding up to the allocator's size classes, for every element type
+([`append` grows a slice exactly as Go's `growslice` does](ConversionStrategies-Reference/slices-and-arrays.md#append-grows-a-slice-exactly-as-gos-growslice-does)).
+
+**An append Go keeps on the stack gets a stack buffer.** Go gives an append whose result does not escape
+a 32-byte backing store in the frame of the function that appends. At the variable's first such append, an
+empty slice that must grow, and whose new length fits in 32 bytes, takes that buffer as its backing array. Which appends
+qualify is the Go compiler's decision, so the converter reads it from the compiler's own escape-analysis
+output. The function then declares one golib `stackAppend<T>` per such variable at its entry, named after
+the variable with the suffix `ᴷ`, and passes it as `append`'s first argument, as `wᴷ` and `xᴷ` above.
+golib's `append` for this form is a small inlined head that only checks whether the append may take the
+buffer; the take itself, `appendBuffered`, is never inlined, so the first buffer does not stay reachable
+after the slice outgrows it. Any other append goes on as an ordinary append.
+<!-- The head and the take: src/core/golib/stackAppend.cs:128 `public static slice<T> append<T>(in stackAppend<T> buffer, slice<T> slice, params ReadOnlySpan<T> elems)` (marked AggressiveInlining on the line before) and :138 `private static slice<T> appendBuffered<T>(in stackAppend<T> buffer, slice<T> slice, ReadOnlySpan<T> elems)` (marked NoInlining on the line before). Harvest: src/go2cs/stackAppendHints.go. -->
+
+**A buffered slice that escapes in one statement moves to the heap there.** Go 1.26 also gives the buffer
+to a variable whose only escape is one statement outside its loops: a `return` of it, an assignment of
+it, or a `range` over it. The compiler inserts `s = move2heap(s)` ahead of that statement, and the
+converter mirrors it with `s = move2heap(sᴷ, s);`, the buffer declared `new stackAppend<T>(moves: true)`.
+golib's `move2heap` copies a slice still in the buffer to the heap, and returns a slice that already grew
+out of it as it is. Every variable that escapes in the statement is moved, one line each:
+
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.go:266-274 -->
+```go
+func movedPair(n int) ([]byte, []int16) {
+	var a []byte
+	var w []int16
+	for i := range n {
+		a = append(a, byte(i))
+		w = append(w, int16(i))
+	}
+	return a, w
+}
+```
+<!-- source: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:250-263 -->
+```csharp
+internal static partial (slice<byte>, slice<int16>) movedPair(nint n) {
+    var aᴷ = new stackAppend<byte>(moves: true);
+    var wᴷ = new stackAppend<int16>(moves: true);
+
+    slice<byte> a = default!;
+    slice<int16> w = default!;
+    foreach (var i in range(n)) {
+        a = append(aᴷ, a, (byte)i);
+        w = append(wᴷ, w, (int16)i);
+    }
+    a = move2heap(aᴷ, a);
+    w = move2heap(wᴷ, w);
+    return (a, w);
+}
+```
+
+`for i := range n` over an `int` becomes `foreach (var i in range(n))`. Each slice moves to the size
+class of its own length, so Go and C# both print the capacities `8 4` for `movedPair(3)`. The method is
+`partial` because the Go function is marked `//go:noinline`, and a generator adds the never-inline attribute
+([Reference → Slices and Arrays](ConversionStrategies-Reference/slices-and-arrays.md#a-non-escaping-append-can-take-gos-32-byte-stack-buffer)
+covers which appends qualify, the observed-capacity form and the conversion-time cost).
+
 **A bound that is not a constant calls `.slice`.** A C# range takes an `int`, which would narrow a Go `int`
 (`nint`) bound before Go's bounds check could see it. So a range is kept only when every bound is a constant
 that fits in an `int`, as in `@base[2..5]`. Any other bound goes to golib's `.slice` method as a `nint`:
 `trim = trim[:len(trim)-1]` becomes `trim = trim.slice(0, len(trim) - 1);`. An omitted low bound is written
 as the `0` it means.
-<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:53 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:69 -->
+<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:53 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:48 -->
 
 **A three-index slice calls `.slice(low, high, max)`.** A C# range has no capacity bound, so
 `h := base[1:3:4]` becomes `var h = @base.slice(1, 3, 4);`. Go requires the high and max bounds, and an
 omitted low bound is written as the `0` it means, so `arr[:n:n]` starts at 0. `.slice` takes Go's `int`
 (`nint`), so an `int` bound passes as is. Here `n` is a `uintptr`, so it is cast to `nint`:
 `arr.slice(0, (nint)(n), (nint)(n))`.
-<!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:36; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
+<!-- source: src/tests/Behavioral/SliceAliasing/main.go:51 and src/tests/Behavioral/SliceAliasing/main.cs.target:40; src/tests/Behavioral/Slice3IndexWideBound/main.go:19 and src/tests/Behavioral/Slice3IndexWideBound/main.cs.target:13 -->
 <!-- A three-index bound is cast only when it is wide or unsigned (uint, uint32, uint64, uintptr, int64): src/go2cs/convSliceExpr.go:449 `func (v *Visitor) castWideIntegerToNint(expr ast.Expr) string {`. `arr[:n:n]` over a `uintptr` n: Slice3IndexWideBound/main.cs.target:13 `var a = arr.slice(0, (nint)(n), (nint)(n));`; a `nint` bound passes uncast, main.cs.target:21 `var e = arr.slice(0, k, k);`, and so does `len(anys)`, src/tests/Behavioral/AppendUntypedConst/main.cs.target:36 `anys = append(anys.slice(0, len(anys), len(anys)), (any)(data));`. The method: src/core/golib/slice.cs:1810 `public static slice<T> slice<T>(this in slice<T> slice, nint low, nint high, nint max)`. -->
 
 **A nil slice is the default value.** `var zero []byte` becomes `slice<byte> zero = default!;`, and
 `zero == nil` becomes `zero == default!`. `default!` is C#'s default value for the type. For `slice<T>`
 that is a slice with no backing array, which is Go's nil. The `!` only silences C#'s nullable warning.
-<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:15-16 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:34-35 -->
+<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:15-16 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:13-14 -->
 <!-- slice<T> is a struct (src/core/golib/slice.cs:213#09652a); IsNil is `m_array is null` (slice.cs:237#4db499). -->
 
 An empty literal such as `[]byte{}` becomes `new byte[]{}.slice()`. It has a backing array, so it is not
 nil, as in Go. See [Nil and Zero Values](#nil-and-zero-values).
-<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:18 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:36 -->
+<!-- source: src/tests/Behavioral/SliceNilVsEmpty/main.go:18 and src/tests/Behavioral/SliceNilVsEmpty/main.cs.target:16 -->
 
 **Arrays are values.** `array<T>` is a struct over a shared `T[]`, so a plain C# copy would share the
 elements. The converter adds `.Clone()` wherever Go copies an array: assignment, parameters, results and
 the other places Go copies a value. So `d := garr` becomes `var d = garr.Clone();`.
-<!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.go:53 and src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:47 -->
+<!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.go:53 and src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:52 -->
 <!-- The array-copy claim is scoped to "Go's array copy sites": a fixed array reached only through an embedded (promoted) struct field is not seen by the value-clone stamping, so a by-value copy of such a struct leaves the array backing shared (src/go2cs/arrayCloneOperations.go:44-52#9c92a3, :80-83#a7773d). -->
 
 An array parameter is cloned on entry, so the callee's writes stay local, as in Go:
@@ -4404,18 +4472,18 @@ The comment `/*[2]*/` records the Go array length, which `array<T>` does not car
 
 Slicing an array does not copy it. `test3(a[:])` becomes `test3(a[..])`, and a write through that slice
 reaches `a`, as in Go.
-<!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.go:23 and src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:24 -->
+<!-- source: src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.go:23 and src/tests/Behavioral/ArrayPassByValue/ArrayPassByValue.cs.target:25 -->
 
 A `range` over an array with a value variable iterates a copy, as in Go: `for i, v := range a` becomes
 `foreach (var (i, v) in a.ΔRangeSnapshot())`, so a write to `a` inside the loop does not change later
 values of `v` ([Loops, Range and Labels](#loops-range-and-labels)).
-<!-- source: src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:18 and src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:21 -->
+<!-- source: src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:18 and src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.cs.target:18 -->
 
 **A struct with array fields copies them too.** In Go, copying a struct copies its array fields. Such a
 struct gets a `ΔClone()` method, and a struct copy calls it: `c := d` becomes `var c = d.ΔClone();`.
 A [source generator](#source-generators) writes it. The `Δ` prefix avoids a clash with a `Clone` method
 the Go type may declare ([Struct Types](#struct-types)).
-<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.go:60 and src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:66 -->
+<!-- source: src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.go:60 and src/tests/Behavioral/StructArrayFieldValueCopy/StructArrayFieldValueCopy.cs.target:60 -->
 
 **Converting a slice to an array copies; converting it to an array pointer shares.** Go has both forms,
 and go2cs keeps the difference:
@@ -4492,7 +4560,7 @@ partial class main_package {
 internal static void bump(params ꓸꓸꓸnint xsʗp) {
     var xs = xsʗp.sslice();
 
-    foreach (var (i, _) in xs) {
+    foreach (var i in range(xs)) {
         xs[i] += 10;
     }
 }
@@ -4506,7 +4574,8 @@ internal static void forward(params ꓸꓸꓸnint xsʗp) {
 
 `xsʗp.sslice()` gives golib's [`sslice<T>`](../src/core/golib/sslice.cs): a stack-only view of the span
 that allocates nothing. The converter uses it when the function only reads the pack, copies from it, or
-passes it on to another call, as `forward` does. Passing it on keeps it inside the call chain.
+passes it on to another call, as `forward` does. Passing it on keeps it inside the call chain. `bump`'s
+index-only `for i := range xs` becomes `foreach (var i in range(xs))`, which reads no element.
 
 **A spread passes the slice itself.** `bump(xs...)` becomes `bump(xs.ꓸꓸꓸ)`. `.ꓸꓸꓸ` is a property on
 both `slice<T>` and `sslice<T>` that returns the slice's own storage as a `Span<T>`. So the writes in
@@ -4528,7 +4597,11 @@ internal static void Main() {
 ```
 
 Both languages print `forward wrote through: [11 12 13]`. Spreading into `append` has its own name:
-`append(dst, xs...)` becomes `appendꓸꓸꓸ(dst, xs)`.
+`append(dst, xs...)` becomes `appendꓸꓸꓸ(dst, xs)`. golib's `appendꓸꓸꓸ` has an overload for each kind of
+operand: a `slice<T>` operand is taken by reference (`in`) as the slice it is, never boxed to an interface,
+and an `sslice<T>` pack is read as the span it already is, so the spread itself copies nothing but the
+appended elements.
+<!-- The overloads: src/core/golib/builtin.cs:503 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)` and :516 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; the ISlice<T> form, :490 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`, remains for other operands. -->
 <!-- source: src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:31 and src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.cs.target:36 -->
 <!-- .ꓸꓸꓸ: src/core/golib/slice.cs:654#e07a2f and src/core/golib/sslice.cs:52#6c6c7d. -->
 
@@ -4857,6 +4930,41 @@ The `sstring` parameter is what asks the generators for the twin. `params ꓸꓸ
 and the first line of the body turns it into the slice `a` that the Go code uses.
 [Functions and Methods](#functions-and-methods) covers variadic parameters.
 
+**A `string(b)` argument to a `unicode/utf8` twin passes a view of the bytes.** `utf8.RuneCountInString` and
+`utf8.DecodeRuneInString` are twinned too. When the argument is `string(b)` of a plain `[]byte`, the converter
+writes `(sstring)b`, so the call binds the `sstring` overload over `b`'s own bytes instead of copying them:
+
+<!-- source: src/tests/Behavioral/SStringTwinPilot/main.go:50-57 -->
+```go
+raw := []byte("héllo, 世界")
+fmt.Println(utf8.RuneCountInString(string(raw)), utf8.RuneCount(raw[1:]))
+r2, size2 := utf8.DecodeRuneInString(string(raw[1:]))
+fmt.Println(r2, size2)
+// a deferred call's argument is evaluated now: the later write to raw must not reach it
+defer fmt.Println("deferred count", utf8.RuneCountInString(string(raw)))
+raw[1] = 'e'
+fmt.Println(utf8.RuneCountInString(string(raw)))
+```
+<!-- source: src/tests/Behavioral/SStringTwinPilot/main.cs.target:54-60 -->
+```csharp
+var raw = slice<byte>("héllo, 世界"u8);
+fmt.Println(utf8.RuneCountInString((sstring)raw), utf8.RuneCount(raw[1..]));
+var (r2, size2) = utf8.DecodeRuneInString((sstring)(raw[1..]));
+fmt.Println(r2, size2);
+defer((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), deferredCountˢ, utf8.RuneCountInString((@string)raw), ref ᒐ);
+raw[1] = (rune)'e';
+fmt.Println(utf8.RuneCountInString((sstring)raw));
+```
+
+The view cannot be retained. It is passed only to the utf8 twins, which only read the parameter, and an
+`sstring` is a `ref struct`, which C# will not let a callee store, so the view ends with the call. Nothing
+may change `b` before the twin reads it, so every other argument of the call must be free of calls. A call
+inside a `defer` or `go` statement keeps the copying `(@string)` cast, as the deferred line shows, and so
+does a `fmt` twin, whose body runs caller code (`String`, `Format`) that could change `b`. In the deferred
+line, `defer(…, ref ᒐ)` is golib's form of Go's `defer`
+([Defer / Panic / Recover](#defer--panic--recover)), and `deferredCountˢ` is the literal
+`"deferred count"` stored once in a field, the form a `defer` argument takes.
+
 **A twinned function used as a value is named with `ᶠ`.** With two overloads, C# has no single method to
 turn into a delegate. So the generators also declare one shared delegate field, `Sprintfᶠ`, and the
 converter uses it wherever Go uses the function as a value:
@@ -4973,8 +5081,12 @@ internal static void Main() {
 ```
 
 The visit order is unspecified in both languages. Go also leaves open whether an entry added during the
-walk is visited, so code must not rely on it. [Loops, Range and Labels](#loops-range-and-labels) covers
-`range` over other types.
+walk is visited, so code must not rely on it. golib's map range iterates a snapshot of the entries, taken
+when the loop starts, and re-reads each value as it arrives: an entry deleted before it is reached is
+skipped, an overwritten value is seen at its current value, and an entry added during the walk is not
+visited. Each range starts its walk at a random entry, as Go's does.
+[Loops, Range and Labels](#loops-range-and-labels) covers `range` over other types.
+<!-- The snapshot: src/core/golib/map.cs:1057 `private static IEnumerator<KeyValuePair<TKey, TValue>> enumerateStore(NilKeyDictionary store)`. -->
 
 Go's package functions become static methods of a class for the package, so `main` becomes `Main`
 ([Package Conversion](#package-conversion)). `"insert visited:"` stays a plain C# literal: it is passed to
