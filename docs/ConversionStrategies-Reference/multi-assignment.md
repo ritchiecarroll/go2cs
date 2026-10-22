@@ -25,9 +25,9 @@ internal static void Swap(this ref myHeap h, nint i, nint j) {
 }
 ```
 
-Such a paren-deref index LHS is now counted as a reassignment directly (a single-element `(*h)[i] = v` write emits identically on either path, so nothing else drifts). The bug was invisible to compilation — the broken form compiled cleanly — and only surfaced when a converted test *ran*: it silently miscompiled `container/heap`'s test heap and the `internal/trace/internal/oldtrace` order heap (three swap sites). (Guarded by the `PointerReceiverSliceSwap` behavioral test — a pointer-receiver `swap` and a full slice reversal by repeated swaps, output-compared vs `go run`; the pre-fix converter loses elements and diverges. It is also what makes `container/heap`'s Go test suite validate — see [Phase 4](../RoadmapHistory.md#phase-4--convert-and-run-go-package-tests).)
+Such a paren-deref index LHS is now counted as a reassignment directly (a single-element `(*h)[i] = v` write emits identically on either path, so nothing else drifts). The bug was invisible to compilation — the broken form compiled cleanly — and only surfaced when a converted test *ran*: it silently miscompiled `container/heap`'s test heap and the old-trace parser's order heap (`internal/trace/internal/oldtrace`, now `tracev1`). (Guarded by the `PointerReceiverSliceSwap` behavioral test — a pointer-receiver `swap` and a full slice reversal by repeated swaps, output-compared vs `go run`; the pre-fix converter loses elements and diverges. It is also what makes `container/heap`'s Go test suite validate — see [Phase 4](../RoadmapHistory.md#phase-4--convert-and-run-go-package-tests).)
 
-The swap recognition above routes a *pure*-reassignment parallel assignment (every target already exists) to the deconstruction form. A **mixed** parallel `:=` — some targets reassigned, some newly declared, with `rhsLen == lhsLen` — was not covered: it satisfies neither `lhsLen == reassignedCount` nor the all-declared arm, and (unlike the call-deconstruction mixed cases below) has no single-call RHS to trigger `tupleResult`, so it fell through to **sequential** statements. When a reassigned target is *read by a later right-hand expression*, that read must see the target's ORIGINAL value (Go evaluates every RHS before any store); sequential emission reads the already-updated value. strconv's Ryū shortest-float rounding does exactly this — `dc, fracc := dc>>extra, dc&extraMask`, where `fracc` must read the pre-shift `dc`:
+The swap recognition above routes a *pure*-reassignment parallel assignment (every target already exists) to the deconstruction form. A **mixed** parallel `:=` — some targets reassigned, some newly declared, with `rhsLen == lhsLen` — was not covered: it satisfies neither `lhsLen == reassignedCount` nor the all-declared arm, and (unlike the call-deconstruction mixed cases below) has no single-call RHS to trigger `tupleResult`, so it fell through to **sequential** statements. When a reassigned target is *read by a later right-hand expression*, that read must see the target's ORIGINAL value (Go evaluates every RHS before any store); sequential emission reads the already-updated value. strconv's Ryū shortest-float rounding (`ftoaryu.go`, through Go 1.25) did exactly this — `dc, fracc := dc>>extra, dc&extraMask`, where `fracc` must read the pre-shift `dc`:
 
 ```go
 dc, fracc := dc>>extra, dc&extraMask   // fracc must read the ORIGINAL dc
@@ -95,7 +95,7 @@ var t = triple;
 The split loses nothing: an all-new target is not in scope on the right-hand side in Go, so no later right-hand
 expression can read an earlier target, and the right-hand sides still evaluate left to right. A tuple-returning call
 (`f, one := pair()`) and a parallel define of ordinary values keep the tuple. No standard-library or behavioral site had
-this shape (a type-aware census over Go 1.24.13's std, its tests, and the behavioral corpus read 0); the hashset
+this shape<!-- a type-aware census over Go 1.24.13's std, its tests, and the behavioral corpus read 0 -->; the hashset
 module's tests were the first. (Guarded by `MultiValueFuncLiteralDefine` — func literals, method groups, method
 values through a pointer receiver, a func literal beside a pointer, and generic instantiations, output vs Go — and by
 `multiValueFuncDefine_test.go`.)
@@ -112,13 +112,16 @@ func ParseOID(oid string) (OID, error) {
     return o, o.unmarshalOIDText(oid)   // gc: the call runs, THEN o is read
 }
 ```
+<!-- source: src/core/crypto/x509/oid.cs:27-31 -->
 ```csharp
-public static (OID, error) ParseOID(@string oid) {
-    OID o = default!;
-    var ᴛ1 = o.unmarshalOIDText(oid);   // gc's own rewrite, emitted
+public static (ΔOID, error) ParseOID(@string oid) {
+    ΔOID o = default!;
+    var ᴛ1 = o.unmarshalOIDText(oid);
     return (o, ᴛ1);
 }
 ```
+
+(`ᴛ1 = o.unmarshalOIDText(oid)` is gc's own rewrite, emitted; the type renders as `ΔOID`, the converter's `Δ` collision rename of Go's `OID`.)
 
 Without the spill this emits `return (o, o.unmarshalOIDText(oid));`, which copies the **empty** `o` and only then fills the original — so `crypto/x509`'s `ParseOID` returned a zero-length OID beside a nil error, and every parse "succeeded" with no bytes. Nothing about it is visible at compile time: both sides compile, both return two values, and only the *content* of the first differs.
 
@@ -138,7 +141,7 @@ Every call-bearing operand at or **below** the hazardous index spills, not merel
 
 The scope is as much of the rule as the spill is: a rule that spilled every call-bearing operand would also be correct, and would rewrite most of the corpus for no correctness gain. Four controls therefore keep the call *in* the tuple — an operand that **is** the pointer (`return c, c.bump()`; both orders yield the same pointer, and the emitted pointer is the box rather than a copy), a call on unrelated storage (`return a.n, b.bump()`), a **value**-receiver method (`return c.n, c.peek()`; the receiver is a copy, so the caller can observe nothing), and the net/http pointer-field shape above. Deliberately *not* covered, each because deciding it needs more than the statement itself: an operand that contains a call of its own (`return o.f + g(), o.mutate()` — gc spills `g()` too and reads `o.f` last, so spilling the whole operand would re-create the problem rather than fix it; no corpus site), a pointer whose **pointee no path can name** (`f(getPtr())` — the interprocedural question one step removed), aliasing through a slice or map's **backing store** (`return s[0], fill(s)`, where no address is taken at the call site at all), and a call that reaches the operand through a package-level or captured variable, which is interprocedural outright.
 
-**Corpus footprint: 2 production files** (A/B of two seeded whole-stdlib reconverts, control binary versus fixed, 10,260 files emitted per side) — `crypto/x509/oid.cs`, where the spill is the bug fix, and `runtime/symtabinl.cs`'s `return u, u.resolveInternal(pc)`, where it is emission-only (the method reads its receiver and writes nothing, so gc's order and C#'s agree on the value; the spill simply stops relying on that). Their two `package_info.cs` position maps move with them, and nothing else in the corpus does.
+**Corpus footprint at the landing** (A/B of two seeded whole-stdlib reconverts, control binary versus fixed)<!-- 2 production files; 10,260 files emitted per side --> — `crypto/x509/oid.cs`, where the spill is the bug fix, and `runtime/symtabinl.cs`'s `return u, u.resolveInternal(pc)`, where it is emission-only (the method reads its receiver and writes nothing, so gc's order and C#'s agree on the value; the spill simply stops relying on that). Their two `package_info.cs` position maps move with them, and nothing else in the corpus does.
 
 (Guarded by the `MultiValueReturnOrder` behavioral test — all five hazard shapes, a three-operand call-order case, and the four controls, output-compared vs `go run`; before the fix every hazard reports the pre-mutation value. `returnOperandOrder.go` owns the analysis and `returnOperandOrder_test.go` pins the emission against three neuters: the rule forced off, the rule forced on everywhere, and `pathsConflict` reduced to the root-plus-indirect model — the last reporting exactly the two controls the access path exists to separate.)
 
@@ -172,7 +175,7 @@ the selector arm nor the index arm of the `ident == nil` branch, and the plain-i
 reassigned nor declared, no tuple-path gate was satisfied, and the parallel assignment shattered:
 
 ```go
-// internal/trace/internal/oldtrace/parser.go — Events.Swap, the only mutator sort.Stable calls
+// internal/trace/internal/tracev1/parser.go (oldtrace before Go 1.26) — Events.Swap, the only mutator sort.Stable calls
 func (l *Events) Swap(i, j int) { *l.Ptr(i), *l.Ptr(j) = *l.Ptr(j), *l.Ptr(i) }
 ```
 ```csharp
@@ -198,8 +201,9 @@ before the sort. Only traces with enough syscall traffic to reorder anything eve
 
 Counting such a deref as a reassignment is scoped to **multi-target** assignments: simultaneity is the only
 property at stake, and a single-element `*(*T)(p) = v` has no hazard to fix. That single-element form is also
-the overwhelmingly common one — 213 sites in the converted corpus at Go 1.23.12, 60 in `reflect/value.go`
-alone, nearly all the `*(*T)(p) = v` unsafe-write idiom — so leaving them on their existing path holds the
+the overwhelmingly common one — nearly all the `*(*T)(p) = v` unsafe-write idiom, much of it in `reflect/value.go`<!--
+213 sites in the converted corpus at Go 1.23.12, 60 in reflect/value.go alone --> — so leaving them on their existing
+path holds the
 change's emission footprint to the one site in the Go tree that is genuinely a parallel deref assignment.
 (The single-element form was measured to emit identically on either path, so the scoping buys footprint,
 not correctness.)
@@ -222,11 +226,17 @@ capturing closure (the pre-existing box-ref-var case) or anywhere in the current
 var swapped Animal = Dog{}
 replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:167-170 -->
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
+
 swapped = new Dog(nil);
-replaceAnimal(Ꮡswapped);     // callee writes through the SAME box — "Meow!"
+replaceAnimal(ref swapped);
 ```
+
+The callee writes through the SAME storage ("Meow!"). Here `replaceAnimal`'s pointer parameter is
+ref-lowered (`ref Animal a`), so the call passes the box's slot by `ref`; a callee that keeps a
+`ж<Animal>` parameter receives `Ꮡswapped` itself.
 
 Details: the box declaration always uses the parameterless `heap<T>(out …)` form for these
 (`new Animal()` on an interface is CS0144, and the reference-like zero value is exactly what
@@ -302,15 +312,26 @@ that it serves both signature-declared categories). The existing entry-time box 
 the parameter at entry, exactly as the capture-mode trigger does:
 
 ```go
-func clipParam(r Rect) Rect { clip(&r, 5, 5); return r }
-```
-```csharp
-internal static Rect clipParam(Rect rʗp) {
-    ref var r = ref heap(rʗp, out var Ꮡr);   // ENTRY-time box, never a call-site copy
-    clip(Ꮡr, 5, 5);                          // the callee writes THIS storage…
-    return r;                                // …and the body reads it back
+func readOnlyParam(r Rect) (int, int) {
+	p := &r
+	return p.Min, p.Max
 }
 ```
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:50-55 -->
+```csharp
+internal static (nint, nint) readOnlyParam(Rect rʗp) {
+    ref var r = ref heap(rʗp, out var Ꮡr);
+
+    var p = Ꮡr;
+    return ((~p).Min, (~p).Max);
+}
+```
+
+The box is an ENTRY-time box, never a call-site copy. When every address-connected use of the
+parameter instead feeds a callee whose pointer parameter is ref-lowered, the parameter needs no box
+at all and the call passes it by `ref`: `func clipParam(r Rect) Rect { clip(&r, 5, 5); return r }`
+emits `clip(ref r, 5, 5);` over a plain `Rect r` parameter, and the callee still writes the storage
+the body reads back.
 
 Entry-time boxing is what preserves Go's semantics on both sides: the callee's writes are visible to
 the rest of the body, and the **caller's** argument stays untouched (the parameter is still by-value —
@@ -329,7 +350,8 @@ correctly, and Go likewise does not heap-promote a slice header for an element a
 `identHasHeapBox`'s own box gate, which is what makes the restriction load-bearing rather than an
 optimization: marking a verdict that gate then refuses would leave `identEscapesHeap` set with **no**
 box, and that map is read raw by the capture analysis and several emitters. Measured on the first cut
-(which did not restrict), 48 of 149 newly-boxed parameters were `&s[i]`-only slices — including
+(which did not restrict), about a third of the newly-boxed parameters were `&s[i]`-only slices<!-- 48 of 149 --> —
+including
 `unicode.is16`/`is32`, `slices.Equal`/`Index`, `subtle.XORBytes`, `crypto/internal/alias`, and the
 Windows syscall buffer paths — every one allocating a box per call for no semantic gain.
 
@@ -389,21 +411,29 @@ The convention is the parameter's, reused verbatim rather than invented: the inc
 receiver folding its Go by-value clone into the box init exactly as an array parameter does.
 
 ```go
-func (b Box) Bumped() int { bumpBox(&b); return b.Tag }
-func (a Trio) Elem() int  { bump(&a[1]); return a[1] }
+func (b Box) BumpedRecv() int { bumpBox(&b); return b.Tag }
+func (a Trio) BumpedElemRecv() (int, int, int) { bump(&a[1]); return a[0], a[1], a[2] }
 ```
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:71-76, 85-90 -->
 ```csharp
-public static nint Bumped(this Box bʗp) {
+public static nint BumpedRecv(this Box bʗp) {
     ref var b = ref heap(bʗp, out var Ꮡb);
-    bumpBox(Ꮡb);
+
+    bumpBox(ref b);
     return b.Tag;
 }
-public static nint Elem(this Trio aʗp) {
-    ref var a = ref heap(aʗp.Clone(), out var Ꮡa);   // the by-value clone folds into the box init
-    bump(Ꮡa.at<nint>(1));
-    return a[1];
+…
+public static (nint, nint, nint) BumpedElemRecv(this Trio aʗp) {
+    ref var a = ref heap(aʗp.Clone(), out var Ꮡa);
+
+    bump(ref a[1]);
+    return (a[0], a[1], a[2]);
 }
 ```
+
+The by-value clone folds into the box init. `bumpBox` and `bump` take ref-lowered pointer parameters
+here, so the calls pass `ref b` and `ref a[1]`; a callee that keeps its `ж<T>` parameter receives
+`Ꮡb` and `Ꮡa.at<nint>(1)`.
 
 **The public surface is unchanged**, which is what makes the rename safe: only the receiver's *name*
 moves, never its C# type, so the method stays the value-receiver extension Go's method set requires —
@@ -422,8 +452,8 @@ receiver the capture analysis routed to box-ref storage must never take the `ʗp
 neither `bodyCallsCaptureModeMethodOn` nor `isLambdaBoxRefVar` joins the receiver gate.
 
 The receiver reuses `paramAddressTakenNeedsBox`, so an inherently-heap receiver still boxes only for
-the bare `&r`. **Measured, that restriction rejects zero corpus sites today** — unlike the parameter
-arm's 48 of 149 — and the reason is worth recording: the parameter over-boxings came from the first
+the bare `&r`. **Measured, that restriction rejected no corpus site at the landing** — unlike the parameter
+arm's — and the reason is worth recording: the parameter over-boxings came from the first
 cut *also* recording `packageCaptureModeBoxIdents`, which forces `identHasHeapBox` to grant a box. The
 receiver arm never records it, so for a `&r[i]`-only slice receiver `identHasHeapBox`'s own gate
 refuses the box independently and the emission is byte-identical either way. The restriction is kept
@@ -432,7 +462,8 @@ refuses leaves `identEscapesHeap` set with no box, and that map is read raw by t
 several emitters.
 
 Corpus footprint of the fix, from a two-seeded-root A/B (master converter vs fixed, both reconverting
-all 305 projects into their own temp root): **3 receiver sites across 2 files** — `encoding/base64`'s
+every project into their own temp root)<!-- 305 projects; 3 receiver sites across 2 files -->: the receiver sites
+`encoding/base64`'s
 `WithPadding` and `Strict` and `encoding/base32`'s `WithPadding`, each `func (enc Encoding) … *Encoding`
 returning `&enc`. All three are *correct-by-luck* under the old emission: `&enc` is the last operation,
 after every mutation, so the `Ꮡ(enc)` copy carried the mutated value out. They are now one storage
@@ -501,21 +532,29 @@ on `x.i` itself, a genuine ref into the local. A **capture-mode** (direct-ж) me
 instead, so the call site must materialize a real pointer — and the escape trigger that boxes the
 local recognized only the method called on the var ITSELF (`i.Store(10)`), never on a field chain
 rooted at it. Unboxed, emission fell to the `Ꮡ(x).of(…)` copy-box: every atomic write landed in a
-fresh copy per occurrence, and every read minted another (sync/atomic's entire 43-divergence
+fresh copy per occurrence, and every read minted another (sync/atomic's entire<!-- 43-divergence -->
 Phase-4 residual — `x.i.Add(delta)` returned the right value while `x.i` read back zero).
 `bodyCallsCaptureModeMethodOnObject` now accepts a value-field chain rooted at the target
-(`selectorChainRootsAtIdent`, the same root walk the explicit-`&` arm uses, whose
+(`storageChainRootsAtIdent`, the same root walk the explicit-`&` arm uses, whose
 `Selection.Indirect()` gate keeps a pointer-crossing chain excluded), so the local heap-boxes and
 the call routes through its identity box:
 
+<!-- source: src/tests/Behavioral/CaptureModeFieldAddress/main.go:57-61 -->
 ```go
-var x struct{ i atomic.Int32 }
-v := x.i.Add(5)                    // Go: v=5, and x.i reads 5
+	var x struct {
+		i atomic.Int32
+	}
+	x.i.Store(7)
+	fmt.Println("anon:", x.i.Add(1))
 ```
+<!-- source: src/tests/Behavioral/CaptureModeFieldAddress/main.cs.target:57-59 -->
 ```csharp
-ref var x = ref heap(new struct_x(), out var Ꮡx);
-var v = Ꮡx.of(struct_x.Ꮡi).Add(5); // aliases x's box — x.i reads the write back
+    ref var x = ref heap(new anonStruct_x(), out var Ꮡx);
+    Ꮡx.of(anonStruct_x.Ꮡi).Store(7);
+    fmt.Println("anon:", Ꮡx.of(anonStruct_x.Ꮡi).Add(1));
 ```
+
+Each call aliases `x`'s box, so `x.i` reads the write back.
 
 The analysis trigger and the emission-side re-verification (`paramBoxReasonHolds`) read the SAME
 predicate, so value parameters take the widening in the same motion (`func f(x holder)` calling
@@ -558,8 +597,9 @@ count = Ꮡb.of(Builder.Ꮡheader).of(dnsmessage_package.Δheader.Ꮡquestions);
 Consequence in the corpus: the DNS message Builder's header counts stayed at zero, so every message
 it produced carried a question section with `QDCOUNT=0`. Any conformant parser answers
 `ErrSectionDone` to that, which is why the symptom surfaced three levels away as an unexplained
-resolver timeout rather than as anything resembling a lost write. The census over all 5,565
-address-of sites found the hazard at exactly **four write-context sites, all in that one function**.
+resolver timeout rather than as anything resembling a lost write. The census over every
+address-of site found the hazard only at write-context sites in that one function.<!-- 5,565 address-of sites; four
+write-context sites -->
 
 Both halves moved together, and that is the part worth remembering:
 
@@ -600,9 +640,10 @@ rather than a golden.
 Every `recv.field.Method()` whose callee takes a `ж<FieldT>` receiver is emitted as
 `Ꮡrecv.of(T.Ꮡfield).Method()`, and until 2026-09-05 `of()` minted a fresh `FieldRefBox` on EVERY call:
 64 B and one counted object per call, plus the accessor-wrapper weak-table lookup the typed overload
-paid. The seg-3 sizing censused 965 receiver-base and 218 parameter-base call sites in 52 stdlib
-packages paying that box after the ref-primary machinery had freed 1,023 of the 2,036 shape sites
-(`os`'s want-zero row carried exactly one per op).
+paid, at receiver-base and parameter-base call sites across many stdlib packages
+(`os`'s want-zero row carried exactly one per op).<!-- The seg-3 sizing censused 965 receiver-base and 218
+parameter-base call sites in 52 stdlib packages paying that box after the ref-primary machinery had freed 1,023 of the
+2,036 shape sites. -->
 
 Since the field-view cache (`golib/ж.Views.cs`, design `docs/phase4/DESIGN-field-view-cache.md`),
 `of()` returns the SAME `FieldRefBox` for the same (box, accessor token) for the box's life — minted

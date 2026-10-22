@@ -455,6 +455,32 @@ private static (IntPtr ptr, error err) allocUTF16(@string s) {
 // types keep that reflective contract free of golib's.
 internal static Func<string, string[], string[]?>? childEnvironmentComposer;
 
+// go2cs HOST SEAM (not in Go): the directory a child starts in, as the converted-test host would have
+// it. Consulted with the executable (already joined to attr.Dir when that is set, as below) and the
+// directory the child would start in (attr.Dir, or this process's own when that is empty); it returns
+// null for "unchanged", and a program never has one. It exists for one measured case: the host runs a converted test inside a
+// STAGED copy of its GOROOT ancestry where Go runs it in GOROOT itself, so a Go TOOLCHAIN child started
+// there is started in the real GOROOT directory the copy stands for (testing's PackageAncestry,
+// SetStagedToolchainDirectory; math/big's TestEscape). Installed and cleared by reflection, as the
+// composer above. The linux and darwin spawns carry the same seam under the same name.
+internal static Func<string, string, string?>? childDirectoryComposer;
+
+internal static @string composeChildDirectory(@string argv0, @string dir) {
+    Func<string, string, string?>? composer = System.Threading.Volatile.Read(ref childDirectoryComposer);
+
+    if (composer is null) {
+        return dir;
+    }
+
+    string? composed = composer(argv0.ToString(), len(dir) != 0 ? dir.ToString() : System.IO.Directory.GetCurrentDirectory());
+
+    if (composed is null) {
+        return dir;
+    }
+
+    return composed;
+}
+
 // StartProcess is the native transcription of exec_windows.go's StartProcess — see the file header
 // for why this one declaration cannot be a literal conversion. Ordering, validation and returned
 // errors follow the Go original exactly.
@@ -490,6 +516,9 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
             return (0, 0, dirErr);
         }
     }
+
+    // The host seam above, after argv0 is made absolute against the caller's own attr.Dir.
+    @string dir = composeChildDirectory(argv0, attr.Dir);
 
     // Windows CreateProcess takes the command line as a single string:
     // use attr.CmdLine if set, else build the command line by escaping
@@ -556,8 +585,8 @@ public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, 
                 return (0, 0, lineErr);
             }
         }
-        if (len(attr.Dir) != 0) {
-            (dirp, var dErr) = allocUTF16(attr.Dir);
+        if (len(dir) != 0) {
+            (dirp, var dErr) = allocUTF16(dir);
             if (dErr != default!) {
                 return (0, 0, dErr);
             }
