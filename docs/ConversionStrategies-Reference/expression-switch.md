@@ -55,18 +55,20 @@ named-string consts). Two converter pieces:
 ```csharp
 var exprᴛ1 = code;
 if (exprᴛ1 == socksStatusSucceeded) {     // named-const label — no cast
-    return "succeeded"u8;
+    return succeededˢ;
 }
 if (exprᴛ1 == (socksReply)(0x01)) {       // literal label — cast to the tag type
-    return "general SOCKS server failure"u8;
+    return generalSocksServerˢ;
 }
 ```
+<!-- from src/core/net/http/socks_bundle.cs (`socksReply.String`); the `ˢ` names are the hoisted string literals. -->
 
 This also repairs the ALL-literal switch over a named type, which previously emitted the ambiguous
-bare `==` form. Full-stdlib footprint: 12 files (socks_bundle, archive/zip, encoding/xml,
-go/printer, go/types, internal/poll, syscall zsyscall shims). (Guarded by `NamedNumericSwitchLiteral`
+bare `==` form. Full-stdlib footprint at landing: socks_bundle, archive/zip, encoding/xml,
+go/printer, go/types, internal/poll and the syscall zsyscall shims. (Guarded by `NamedNumericSwitchLiteral`
 — a mixed named-const + literal switch including a multi-label clause, and an all-literal switch,
 output-compared vs Go.)
+<!-- at landing: 12 files. -->
 
 ## A trailing `default` in a switch WITH `fallthrough` is guarded on `!match`
 A Go `switch` with no fallthroughs lowers to a plain `if / else if / … / else { default }` chain, where
@@ -100,7 +102,7 @@ Go allows `default` in **any** clause position and still picks it only when no c
 is presentation, not semantics. The if-chain lowering emits clauses in **source order**, so a default
 that is not last is guarded by a predicate that has only seen the arms emitted *before* it. Every clause
 after such a default is then dead code, and the default body runs for values those clauses own. Two
-shapes reach the chain, and the corpus held one live instance of each:
+shapes reach the chain, and the corpus held a live instance of each:
 
 **Fallen into.** `encoding/json`'s `decode.go` `array` is the witness:
 
@@ -130,12 +132,12 @@ of the chain — so it fires only when nothing matches:
 
 ```csharp
 var exprᴛ1 = v.Kind();
-var matchᴛ1 = false;
 var matchᴛ2 = exprᴛ1 == reflect.ΔInterface || (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice);
-if (exprᴛ1 == reflect.ΔInterface) { matchᴛ1 = true; … fallthrough = true; }
+if (exprᴛ1 == reflect.ΔInterface) { … fallthrough = true; }
 if (fallthrough || !matchᴛ2) { /* default: */ … }
-if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { matchᴛ1 = true; … }
+if (exprᴛ1 == reflect.Array || exprᴛ1 == reflect.ΔSlice) { … }
 ```
+<!-- condensed from src/core/encoding/json/decode.cs (`array`). -->
 
 **Participating in no fallthrough at all.** For a non-constant-label tagged switch the converter
 already normalized this shape by *moving* the default clause to the end. A **constant**-label switch
@@ -262,18 +264,18 @@ for (nint i = 0; i < len(words); i++) {
     if (exprᴛ1 == "skip"u8) {
         do {
             if (i == 0) {
-                fmt.Println(aBreakingAtˢ, i);
+                fmt.Println("a: breaking at", i);
                 break;                     // Go break-of-switch — exits the wrapper (its purpose)
             }
-            fmt.Println(aContinuingAtˢ, i);
+            fmt.Println("a: continuing at", i);
             goto continueᴛ1;               // Go continue-of-loop — a bare C# continue would bind the wrapper
         } while (false);
     }
     else if (exprᴛ1 == "stop"u8) {
-        fmt.Println(aStopAtˢ, i);
+        fmt.Println("a: stop at", i);
     }
 
-    fmt.Println(aAfterSwitchˢ, i);
+    fmt.Println("a: after switch", i);
 continueᴛ1:;
 }
 ```

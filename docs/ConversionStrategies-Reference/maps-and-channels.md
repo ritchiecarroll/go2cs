@@ -45,7 +45,9 @@ entries** and re-reads each value at the moment it is visited
   re-entered for a key it has already handled.
 
 The nil-key entry (see [The NIL map key](#the-nil-map-key)) is produced first; Go's range order is
-unspecified and deliberately randomized, so the position is free.
+unspecified and deliberately randomized, so the position is free. The snapshot walk itself starts at
+a random entry and wraps, as Go's iterator starts at a random slot, so two ranges over one map can
+differ in order.
 
 **One key shape makes the visit-time lookup the wrong instrument, and it is a real Go shape rather
 than a curiosity.** A [NaN key is equal to nothing, itself included](manual-conversions.md#a-nan-map-key-is-never-equal-to-anything-itself-included),
@@ -151,7 +153,7 @@ lit := map[any]int{nil: 1, "b": 2}
 ```
 ```csharp
 var m = new map<any, @string>();
-m[default!] = nilKeyˢ;
+m[default!] = "nil-key";
 var (v, ok) = m[default!, ꟷ];
 delete(m, default!);
 var lit = new map<any, nint>{[default!] = 1, [(@string)"b"u8] = 2};
@@ -163,9 +165,8 @@ the nil entry gets a slot of its own: the backing store is a private `Dictionary
 **subclass** carrying `HasNilKey` + `NilKeyValue`, and every member of the map surface routes a null
 key to that slot (indexer get/set, `Set`, comma-ok, `TryGetValue`, `ContainsKey`, `Add`, `Remove`,
 `Clear`, `Count`, both enumerators, `Keys`/`Values`, the copy constructor behind `CloneMap`, and
-`ToString`). `range` yields the nil entry ahead of the buckets — Go's range order is unspecified and
-deliberately randomized, so the position is free, and every map *without* a nil key stays on the
-dictionary's own enumerator unwrapped.
+`ToString`). `range` yields the nil entry ahead of the snapshot walk (see the range section above) —
+Go's range order is unspecified and deliberately randomized, so the position is free.
 
 Two design points are load-bearing. First, the slot lives on the **store, not on the struct**: a Go
 map is a reference type, so every copy of a `map<K,V>` value must observe the same nil entry, and a
@@ -179,9 +180,9 @@ constant**, so for a value-type key — `map[string]V`, `map[int]V`, the overwhe
 the test and every branch it guards fold away and those instantiations compile to exactly the code
 they had before nil keys existed. Only a reference-typed key pays a null check, and the slot
 operations themselves sit behind `[MethodImpl(MethodImplOptions.NoInlining)]` so the hot members stay
-small. Measured: `PerfMap` (`map[int]int`) is flat — 276.4 ms with the slot vs 271.8 ms without
-(median of three 9-run sessions each), inside the 260–310 ms run-to-run band the *unchanged* build
-spans on the same machine.
+small. Measured: `PerfMap` (`map[int]int`) is flat — the difference with the slot sat inside the
+run-to-run band of the *unchanged* build.<!-- Measured at the time (machine and platform not recorded): 276.4 ms with
+the slot vs 271.8 ms without, median of three 9-run sessions each, inside a 260–310 ms run-to-run band. -->
 
 One consumer cannot see the slot and had to be threaded explicitly: `reflect.DeepEqual` walks the
 backing `IDictionary` through a reflected field probe, which never yields a nil key, and a lone nil
@@ -251,7 +252,7 @@ foreach (var (obj, n) in M) {
 
 This is `go/types`' own `initorder.dependencyGraph`, and it is why the converted type checker could not
 type-check **any** source: the missed lookup returned a nil `ж<declInfo>`, and `~` on it nil-panicked
-one frame later — surfacing through `check.cs:430`, `handleBailout`'s faithful re-panic of Go's own
+one frame later — surfacing through `check.cs`'s `handleBailout`, a faithful re-panic of Go's own
 `default: panic(p)` arm, which is a bailout frame and not the fault site.
 
 The fix is in golib and centralizes on the relation that already existed:
@@ -284,7 +285,7 @@ pointer-identity flavor, and the protocol membership itself.)
 
 ## Named map types and constrained map access
 
-A defined map type — `type Grades map[string]int` — emits the `partial struct … /*map[K, V]*/` forward declaration (completing the long-standing `visitMapType` stub), implemented by go2cs-gen's Map template: full forwarding of `IMap<K, V>` (including the two-value comma-ok indexer), `IDictionary<K, V>`, enumeration, and the `ISupportMake` factory through the wrapped `map<K, V>`. Its composite literal wraps the concrete map literal in the named constructor — `new Grades(new map<@string, nint>{["a"u8] = 1})` — mirroring named arrays/slices (a direct indexer-initializer would target a default wrapper with no backing dictionary; the old emission produced Go-style `key: value` inside C# braces — CS1513). Comma-ok indexing works through a **constrained map type parameter** too: `v, ok := m[k]` where `M ~map[K]V` detects the map CORE of the constraint (both at the assignment's tuple gate and in the index emission) and routes the same `m[k, ꟷ]` two-value indexer, which lives on `IMap<K, V>` itself. The **nil comparison** `m == nil` — Go's only legal map comparison, maps.Clone's nil-preserve guard — emits the `IMap.IsNil` property (`if (m.IsNil)`; backing-store null, distinct from an allocated empty map — no operator exists on a type parameter, CS8761), and `delete(m, k)` on a constrained map binds a golib `delete(IMap<K, V>, K)` overload (key/value types infer from the interface conversion). (Guarded by the `GenericTypeInference` extension `EqualMaps` — a maps.Equal clone over a named map type through the constraint, comma-ok + comparable-erased equality, values vs Go.)
+A defined map type — `type Grades map[string]int` — emits the `partial struct … /*map[K, V]*/` forward declaration (completing the long-standing `visitMapType` stub), implemented by go2cs-gen's Map template: full forwarding of `IMap<K, V>` (including the two-value comma-ok indexer), `IDictionary<K, V>`, enumeration, and the `ISupportMake` factory through the wrapped `map<K, V>`. Its composite literal wraps the concrete map literal in the named constructor — `new Grades(new map<@string, nint>{["a"] = 1})` — mirroring named arrays/slices (a direct indexer-initializer would target a default wrapper with no backing dictionary; the old emission produced Go-style `key: value` inside C# braces — CS1513). Comma-ok indexing works through a **constrained map type parameter** too: `v, ok := m[k]` where `M ~map[K]V` detects the map CORE of the constraint (both at the assignment's tuple gate and in the index emission) and routes the same `m[k, ꟷ]` two-value indexer, which lives on `IMap<K, V>` itself. The **nil comparison** `m == nil` — Go's only legal map comparison, maps.Clone's nil-preserve guard — emits the `IMap.IsNil` property (`if (m.IsNil)`; backing-store null, distinct from an allocated empty map — no operator exists on a type parameter, CS8761), and `delete(m, k)` on a constrained map binds a golib `delete(IMap<K, V>, K)` overload (key/value types infer from the interface conversion). (Guarded by the `GenericTypeInference` extension `EqualMaps` — a maps.Equal clone over a named map type through the constraint, comma-ok + comparable-erased equality, values vs Go.)
 For source-generated named-map wrappers, the generator parses the `/*map[K, V]*/` payload at the top-level comma, not every comma in the string. This matters for function-valued maps: `type opTable map[CrossPkgLib.Ticks]func(int, int) int` emits `map<global::go.CrossPkgLib_package.Ticks, Func<nint, nint, nint>>`, preserving the full delegate as the value type. Any source-file alias used inside the definition comment is resolved through Roslyn and rewritten to its fully-qualified target before the template emits `IMap<K, V>`, `IDictionary<K, V>`, and `ICollection<KeyValuePair<K, V>>`; generated files therefore do not depend on file-local package aliases such as `using token = ...`. (Guarded by `NamedMapCrossPkgKey`.)
 
 The named arm must also **carry the map type into the key/value slot emission**, exactly as the
@@ -299,7 +300,7 @@ with `namedAny{nil: 1, "b": 2}` emitted `["b"u8] = 2` and failed to compile whil
 the `DeepEqual` behavioral test's named-map block, which is written over `map[any]int` precisely so
 the `any`-slot rule is exercised through a named type.)
 
-A bare **`make(Grades)` with no size argument** defaults the size to 0 — emitting `new Grades(0)` — so the wrapper's allocating `(nint size)` constructor runs and the backing dictionary is created. The generated wrapper struct has that `(nint size)` constructor but no *parameterless* one, so a plain `new Grades()` would be `default(Grades)` — a **nil** map (null backing store, so `m == nil` is true and a write panics), whereas Go's `make` returns a **non-nil empty** map (`m == nil` false, writes succeed). The default is applied only to `*types.Named` defined types: the unnamed `map<K, V>` builtin already allocates in its own parameterless constructor and stays `new map<K, V>()`, and a type *alias* (`type M = map[int]int`) resolves to that builtin rather than a wrapper — so neither drifts (`make` emission in `convCallExpr.go`, right beside the named-channel default below). This mirrors the named-channel unbuffered default (`make(closeWaiter)` → `new closeWaiter(1)`); a sized `make(Grades, n)` (already `new Grades(n)`) and the `Grades{}` composite literal are non-nil already. (Guarded by `NamedMapMakeNonNil` — `make` with and without a size, a plain nil `var`, and a composite literal, each `== nil`-compared and output-compared vs Go.)
+A bare **`make(Grades)` with no size argument** defaults the size to 0 — emitting `new Grades(0)` — so the wrapper's allocating `(nint size)` constructor runs and the backing dictionary is created. The generated wrapper struct has that `(nint size)` constructor but no *parameterless* one, so a plain `new Grades()` would be `default(Grades)` — a **nil** map (null backing store, so `m == nil` is true and a write panics), whereas Go's `make` returns a **non-nil empty** map (`m == nil` false, writes succeed). The default is applied only to `*types.Named` defined types: the unnamed `map<K, V>` builtin already allocates in its own parameterless constructor and stays `new map<K, V>()`, and a type *alias* (`type M = map[int]int`) resolves to that builtin rather than a wrapper — so neither drifts (`make` emission in `convCallExpr.go`, right beside the named-channel default below). This mirrors the named-channel unbuffered default (`make(closeWaiter)` → `new closeWaiter(0)`); a sized `make(Grades, n)` (already `new Grades(n)`) and the `Grades{}` composite literal are non-nil already. (Guarded by `NamedMapMakeNonNil` — `make` with and without a size, a plain nil `var`, and a composite literal, each `== nil`-compared and output-compared vs Go.)
 
 Two conventions for the definition comment's text coexist, and the generator's alias substitution must tell them
 apart. The map/channel emitters write dotted types in **source-alias form** (`CrossPkgLib.Ticks`,
@@ -423,9 +424,9 @@ every member go2cs-gen generated for it was CS0246, every use (`Set<nint>`) was 
 accessibility line declared a second, empty public type. The generator side had the twin defect: the
 Slice, Map and Channel templates spelled their capacity/length constructor with the type's full name
 (`public Set<T>(nint size)`), which does not parse; they now take the base template's
-`ConstructorName`, so a non-generic shell's constructor is byte-identical. Neither Go 1.24.13's
-standard library nor the behavioral corpus declares a generic defined map or channel type, which is
-why nothing exercised either half until a third-party module did. (Guarded by
+`ConstructorName`, so a non-generic shell's constructor is byte-identical. Go's standard library
+declares no generic defined map or channel type, and the behavioral corpus declared none before this
+guard, which is why nothing exercised either half until a third-party module did. (Guarded by
 `GenericDefinedMapChan` — a generic map over an unexported named empty struct and over `struct{}`,
 a two-parameter map, a channel and a slice, each with value and pointer receivers and two
 instantiations from `main`, output vs Go — plus `genericDefinedMapChan_test.go` on the declarations
@@ -472,7 +473,7 @@ Two completions of the same rule, both demonstrated by `encoding/gob`'s test sui
   inside the generated slice/map partial. Each emitter now re-resolves its element through
   `liftedTypeMap` **when the hoist actually renamed the declaration**; a package-level declaration
   never renames, so its emission is untouched (verified byte-identical across the whole behavioral
-  corpus and the 302-package stdlib).
+  corpus and the whole stdlib).
 
 **The ALIAS kind takes the lift too — and for a different reason.** A local declaration that emits a
 `using` ALIAS rather than a nested type — a real `type X = Y`, or a defined type over a *named*
@@ -483,8 +484,9 @@ the file, let alone the function. Two functions declaring `type testFnc any` the
 alias name — `CS1537 the using alias 'testFnc' appeared previously in this namespace` — whether they
 sat in one file or in two of the same compilation. `archive/tar`'s suite is the shape: `testFnc` is
 declared in `writer_test.go`'s `TestWriter` **and** `TestFileWriter`, and again in `reader_test.go`'s
-`TestFileReader`, with `fileMaker` alongside it; three diagnostics held all **97** of that package's
-verdicts. The naming half of `liftLocalTypeDecl` is now the shared `liftLocalTypeDeclName`, and the
+`TestFileReader`, with `fileMaker` alongside it; three diagnostics held every one of that package's
+verdicts.<!-- 97 verdicts at the time. --> The naming half of `liftLocalTypeDecl` is now the shared
+`liftLocalTypeDeclName`, and the
 alias branch calls it when `v.inFunction`, emitting `global using TestWriter_testFnc = object;`.
 
 The reference mapping is registered under a **guard**, `liftedTypeDeclaredBy`: only a `*types.Named`
@@ -496,9 +498,10 @@ Anything that does not qualify registers nothing and renders exactly as before. 
 declaration is also no longer published in `exportedTypeAliases`: it is not part of the package's
 exported surface whatever its Go name looks like, and after the lift the name a consumer would
 import does not exist. **Zero production-corpus impact by construction** — an AST scan of the Go
-1.23.1 sources finds *no* function-local alias-or-defined-over-interface declaration in any compiled
-stdlib file (all 50 hits are `internal/types/testdata`, which is never built), which is why only two
-test suites ever met it. (Guarded by the `LocalTypeAliasScope` behavioral test — the same local
+1.23.1 sources found *no* function-local alias-or-defined-over-interface declaration in any compiled
+production stdlib file (every hit was in `internal/types/testdata`, which is never built), which is why only
+test suites met it.<!-- The Go 1.23.1 scan: 50 hits, all internal/types/testdata; two test suites met the shape. -->
+(Guarded by the `LocalTypeAliasScope` behavioral test — the same local
 names declared in two functions of one file and again in a second file of the same package, plus a
 real `type hdr = Header` alias whose target is used bare alongside it; the unfixed converter emits
 five duplicate `global using` lines.)
@@ -594,8 +597,10 @@ default:   // send but do not block for it
 }
 ```
 
+<!-- source: src/core/os/signal/signal.cs:268-275 -->
 ```csharp
-switch (trySelect(c.ᐸꟷ(sig, ꓸꓸꓸ))) {
+var selᴛ1 = c.ᐸꟷ(sig, ꓸꓸꓸ);
+switch (trySelect(selᴛ1)) {
 case 0: {
     break;
 }
@@ -833,8 +838,9 @@ cleared). The `when` guard's `out var` slot cannot declare a ref local, so `sele
 (`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
 entry-time box pattern proven by the escaping-parameter preamble:
 
+<!-- source: src/core/internal/fuzz/fuzz.cs:268-269 -->
 ```csharp
-case 2 when (~c).resultC.ꟷᐳ(out var resultᴛ1): {
+case 2 when selᴛ3.ꟷᐳ(out var resultᴛ1): {
     ref var result = ref heap(resultᴛ1, out var Ꮡresult);
 ```
 
