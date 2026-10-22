@@ -11,10 +11,187 @@
 > usage). **Location to remember:** branch `claude/coord-handover`, `docs/phase4/RESUME-SESSIONS.md`;
 > folded into master at each landing's docs commit.
 >
-> **Status of this revision:** 2026-10-17 save-state at 90% weekly: section **1l** is START HERE for EVERY lane (a full fleet roll from GitHub). Earlier: 2026-10-06 22:50 section **1j** is START HERE for COORD (the session roll to the fleet's shared account, direct messaging back, the first task a comms test with the P threads' coordinator; TRAIN Q's union 13c0800c21 is in its battery, a fixup-2 follows for one finding; no release after Q by the owner's ruling). Earlier: 2026-10-06 15:50 section **1i** was START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
+> **Status of this revision:** 2026-10-22: section **1m** is START HERE for lane H (its own roll; folded from claude/h-resume-state). 2026-10-17 save-state at 90% weekly: section **1l** is START HERE for EVERY lane (a full fleet roll from GitHub). Earlier: 2026-10-06 22:50 section **1j** is START HERE for COORD (the session roll to the fleet's shared account, direct messaging back, the first task a comms test with the P threads' coordinator; TRAIN Q's union 13c0800c21 is in its battery, a fixup-2 follows for one finding; no release after Q by the owner's ruling). Earlier: 2026-10-06 15:50 section **1i** was START HERE for COORD (go.* 1.24.13.4 published, master 7098b8d3f9; TRAIN Q rehearsed green and not yet assembled; the face lift is the train after it; written at 76% of the week's usage, ahead of the 90% save-state). Earlier: 2026-10-02 02:30 go.* 1.24.13.3 PUBLISHED (the record and the tag are on origin: master 5f3a16943f, tag nuget-1.24.13.3; the freeze is lifted; TRAIN L lands next; R has a NEW session prompt in 1e.5). Earlier: 2026-10-01 17:05 RELEASE DAY (master 172d437e66 = the 1.24.13.3 release tip, pre-stage green, freeze on; TRAIN L battery green, lands after the release; see the 1e.0 bullets). Earlier: 2026-10-01 02:40 TRAIN K LANDED (master 75648a022b, 225/225). Earlier: 2026-09-30 03:15 TRAIN J LANDED (master f819887fa3, 223/225). Earlier: 2026-09-28 19:10 TRANSITION (owner order 18:40): section **1e** is START HERE for R, C1, C2, P1 and P2, who run the MAILBOX-ONLY protocol (1e.1) with the models in 1e.2; G, the i9 and COORD continue from 1d.00 and the ledger. Earlier: 2026-09-27 17:09 FLEET SHUT DOWN (owner order; credits reset 2026-09-28 16:00 Central; the remaining credit is held for emergencies). FINAL for this credit window; earlier stamp 14:59 (first cut 14:29) -- SAVE-STATE; every lane's own block is folded at 91% weekly usage: section 1d (START HERE) holds COORD's new-session prompt and every lane's STATE BLOCK; COORD's tools are on this branch under .claude/coord-scripts/
 > is its FINAL block of the 2026-09-13 22:40 shutdown with NEXT / READ-FIRST / BLOCKED-ON re-derived from the resume rulings R1-R5;
 > every lane section now carries a PASTE PROMPT fence (the shared preamble + YOUR FIRST ITEM), drafted from the record and
 > adversarially verified before this refresh. R's STATE BLOCK is a COORD-written minimum until R posts its own.
+
+---
+
+## 1m. LANE H ROLL 2026-10-22 (owner request; START HERE for lane H only; every other lane stays on 1l plus the ledger)
+
+**Point-in-time resume record, 2026-10-22, lane H.** One lane's section in the shape the `save-state` skill
+orders for `docs/phase4/RESUME-SESSIONS.md`: a STATE BLOCK, a WAKE paragraph, and a PASTE PROMPT. COORD folds it
+into the fleet file. It needs no memory file, scratchpad or untracked file to exist: everything a new H session
+needs is here or on origin. Read this file's own tip with `git ls-remote origin claude/h-resume-state`, never from
+a SHA written in it.
+
+
+### STATE BLOCK
+
+```
+LANE: H   MODEL: opus/high   HOST: H-LAPTOP
+BRANCH: claude/hop-go126 774f609be809f73d0ecc66c9dfc8c59a8839b4eb yes landed -- the hop line at batch 22, the base the next seat is cut from
+LOCAL-ONLY: claude/h-buildinfo-stamp 774f609be809f73d0ecc66c9dfc8c59a8839b4eb empty -- zero commits on the batch 22 tip, nothing to preserve; recut it from the current hop tip if it moves
+WORKTREE: C:\go2cs-h\wt-buildinfo claude/h-buildinfo-stamp 0 uncommitted -- nothing to preserve
+WORKTREE: C:\go2cs-h\wt-resume claude/h-resume-state 0 uncommitted after this record's commit -- remove plainly once COORD has folded it
+NEXT: cut the build-info stamp seat on claude/h-buildinfo-stamp from the current claude/hop-go126 tip (774f609be8 or later), per the RULED design in the paste prompt
+READ-FIRST: CLAUDE.md; docs/phase4/DATA-hop126-deferred-allocs.md; src/go2cs/godebugDefault.go; src/core/golib/GoDefaultGodebugAttribute.cs; src/core/runtime/debug/stubs_impl.cs; src/core/testing/TestRegistry.cs
+BLOCKED-ON: none -- the seat is ruled and may be cut now; it LANDS after G's lazy seat, which COORD sequences
+TOOLS: GOROOT=%USERPROFILE%\sdk\go1.26.10 (go1.24.13 beside it); GOTOOLCHAIN=local; DOTNET_ROOT=%USERPROFILE%\dotnet10 (SDK 10.0.402); pwsh 7.6.7; python 3.13.15; GOCACHE/GOMODCACHE/NUGET_PACKAGES/NUGET_HTTP_CACHE_PATH under C:\go2cs-h\cache
+```
+
+NOTE: lane H's landed work, for the record. The runner timeout-side seat is in batch 19 (`claude/h-runner-timeout-side`, head
+`b2297f3f1b`). The deferred-alloc DATA record is in batch 20 (`claude/h-deferred-allocs-data`, `4abaa294d8`). Both branches are gone
+from origin since landing, and both SHAs are reachable from `claude/hop-go126`.
+
+### WAKE
+
+COORD and H talk by direct session message, both ways, over Remote Control. COORD is the session titled
+`coord -- fleet coordination`. H's session title starts with `h -- `, set by the owner. H runs no mailbox
+watcher. COORD carries the Slack duty: it pings the owner on Slack for anything that needs him, including an
+app restart, which the owner wants timed BETWEEN tasks. H tells COORD when it is idle. H keeps exactly ONE
+keep-alive running while idle, so the Remote Control session does not go offline.
+
+### PASTE PROMPT
+
+```
+You are lane H of the go2cs fleet: a permanent, dedicated go2cs development machine, resuming from a
+previous H session. go2cs is a Go-to-C# transpiler, repo https://github.com/ritchiecarroll/go2cs. The fleet
+coordinator is the session "coord -- fleet coordination"; you talk to it directly both ways with
+SendMessage. On anything you push or post (commits, branch names, posts) call this machine only "H" or
+"H-LAPTOP", never its real hostname, user name, or user-profile paths.
+
+FIRST, in this order:
+1. Confirm this session's Remote Control is ON (get_session self; set_remote_control if not). The owner
+   titles H sessions starting "h -- ".
+2. Start exactly ONE keep-alive with the Bash tool's run_in_background: `while true; do sleep 300; done`.
+   Never stop it to clean up; if a restart drops it, start it again. Make sure no other H session is still
+   running one.
+3. Read this record's own tip: `git ls-remote origin claude/h-resume-state`, then send COORD ONE line: "H
+   resumed in a new session", that tip, the keep-alive task id, and the current claude/hop-go126 tip.
+4. Then do NEXT below, unless COORD's reply redirects you.
+
+STANDING PERMISSIONS FROM THE OWNER, so you can work unattended:
+- Download and install, without asking, from official sources only: Go toolchains (go.dev/dl, verify every
+  archive's SHA-256 against go.dev's release JSON), the .NET SDK (dotnet-install or winget), PowerShell 7,
+  Python 3, and the global tools dotnet-trace, dotnet-stack, dotnet-counters and dotnet-dump.
+- Download the Go modules and NuGet packages any go2cs task needs.
+- Set user-level environment variables, PATH entries and git config for these tools.
+- Create, build, test and delete files under the work root C:\go2cs-h. Clone, make local branches, and push
+  branches named claude/h-* to origin.
+- NOT covered, so ask first by posting one OWNER-HAND line to COORD and waiting: WSL or anything needing a
+  reboot; Defender or other security settings; GPG keys, or entering any credential, token or password;
+  changing a fleet toolchain pin. Never handle tokens. GitHub push auth already works through Git
+  Credential Manager, from the owner's one-time browser sign-in. If a push ever prompts, run it in the
+  user's terminal panel so the sign-in reaches the owner.
+
+MACHINE, measured: HP EliteBook laptop, i7-8665U (4 cores / 8 threads, 15 W), 16 GB RAM, one 512 GB NVMe,
+C: NTFS. Windows 11 Pro 25H2. Developer Mode ON, so the GolibTests symlink arms pass. The owner keeps the lid
+open. Git identity is set to the owner's.
+
+LAYOUT:
+- Work root C:\go2cs-h, excluded from the antivirus. Keep EVERY worktree and scratch folder under it, and
+  delete each one when its task is done.
+- The clone is C:\go2cs-h\go2cs. Worktrees are C:\go2cs-h\wt-<name>; scratch is C:\go2cs-h\scratch\<name>.
+- Caches: C:\go2cs-h\cache\{go-build,gomod,nuget\packages,nuget\v3-cache}, via user env GOCACHE, GOMODCACHE,
+  NUGET_PACKAGES and NUGET_HTTP_CACHE_PATH.
+- Toolchains: %USERPROFILE%\sdk\go1.26.10 (the hop pin) and \go1.24.13; %USERPROFILE%\dotnet10 (SDK 10.0.402).
+- In every shell: GOROOT spelled exactly as `go env GOROOT` prints it, with backslashes; its bin FIRST on PATH;
+  GOTOOLCHAIN=local; DOTNET_ROOT set, ahead of any other dotnet. Assert the two-part pin before a run:
+  bare `go version` reports go1.26.10, AND the resolved go.exe lives under GOROOT.
+
+ROLE, as ruled by COORD from the qualification numbers. `go test ./...` commits ~17 GB on this 16 GB box and
+pages hard, so full gate batteries stay on the i7 and i9. H does:
+- single-package windows -tests reads and their re-reads;
+- behavioral fixtures and probes;
+- bisect points;
+- docs and review passes;
+- small code seats of its own.
+
+BOX NOTES, each measured:
+- Pass --run-timeout 120 to src/tests/Behavioral/run-behavioral.ps1. A freshly built binary's first launch costs
+  12-18 s here (later launches 0.9 s), so a fresh tree's first Output phase overruns the 30 s default.
+- Windows PowerShell 5.1 mangles multi-line and quoted native arguments, and lacks .NET Core APIs. Write commit
+  messages to a file and use `git commit -F`; run scripts under pwsh 7 with -File; for dotted flags like
+  -test.run, use Bash.
+- run-validated-sweep.ps1 writes INTO the tree it runs in (src/core/<pkg>: test files, re-converted sources,
+  proof pages). Use a dedicated detached worktree, save what you need, `git checkout -- .`, delete the generated
+  untracked files, then remove the worktree.
+- The banked roster counts are still the go1.24.13 record, so the sweep's normal mode reports COUNT on any row
+  whose go1.26 test set moved. The formal hop record is the re-bank's, not H's.
+
+FLEET SAFETY RULES:
+- Never run two go2cs conversions into one output directory, or two at once. For a single-package conversion,
+  pass the output directory as the second positional.
+- While a battery runs, do not edit converter, golib or generator sources in that tree.
+- Never kill processes by name. Kill only by exact PID or PID tree.
+- Never `git add -A` on a tree that ran tests or conversions; add files by name. Never force-push.
+- Remove a worktree with a plain `git worktree remove`, never --force: restore it, check porcelain is empty,
+  remove, prune.
+- Preflight 25 GB free before a battery. Never run `dotnet build-server shutdown`.
+- Guard every recursive delete with a literal path under the work root.
+- Believe a gate only from its captured exit code. A gate that has never been made to fail proves nothing.
+- Before every push, run `.claude/coord-scripts/coord-identifier-census.sh`: `entry` on content and on the
+  commit message, `subject` on the subject line and the ref name. Each runs as its own command, BEFORE the push.
+  Positive-control it once with a planted foreign-name profile path (it must refuse), and run repoguard
+  (`go test ./internal/repoguard/ -count=1` in src/go2cs) on the committed tree.
+
+REPORTING: post each result to COORD as you finish it: what you did, the measured numbers, any failure
+verbatim, and a "cleanup:" line. Then wait for the next assignment. Tell COORD when you are between tasks.
+
+NEXT, the in-flight seat: claude/h-buildinfo-stamp. RULED by COORD, who has the final say; G reviews the cut.
+WHY: crypto/internal/fips140test TestVersion skips in C# ("no build info") where Go passes. Go's test binary
+carries linker-stamped build info (path crypto/internal/fips140test.test plus build settings, no GOFIPS140),
+so Go asserts fips140.Version() == "latest". The converted Version() returns "latest" too, but the hand-owned
+src/core/runtime/debug/stubs_impl.cs modinfo() returns "", so ReadBuildInfo is never ok.
+RULING:
+1. Hybrid placement, accepted as written.
+   - RUN-TIME HALF: a golib GoModInfoAttribute(string), assembly-targeted, with an EntryValue reader copied from
+     GoDefaultGodebugAttribute, plus a golib registration point.
+   - modinfo() composes, at run time: `path`, `mod` and `dep` lines from the entry stamp or the test-host
+     registration; `build GOOS=`, `build GOARCH=` and `build CGO_ENABLED=` from the binary itself; and
+     `build DefaultGODEBUG=` from GoDefaultGodebugAttribute's entry value when one is stamped.
+   - It returns the 16-byte-sentinel-wrapped form ReadBuildInfo strips (data[16:len-16]), or "" when there is
+     no stamp and no registration. Amend the stub comment to say "" holds only while nothing true is stamped.
+   - NEVER emit -compiler, -buildmode, GOAMD64 or vcs.*. GOFIPS140 only when set, which the converter never does.
+2. TEST HOSTS: zero emission. writeTestHost already passes the import path, and the module path when there is
+   one, to TestRegistry (src/core/testing/TestRegistry.cs). Register `path <importPath>.test`, plus
+   `mod <module> (devel)` for a module package. The 224 tracked go2cs_test_host.cs stay unchanged.
+3. PROGRAMS: a csproj AssemblyAttribute item, GoDefaultGodebug's project route
+   (src/go2cs/godebugDefault.go stampDefaultGodebugProject), on EVERY main package, single-package and
+   -recurse alike.
+   - Content: `path <main import path>` and `mod <module path> (devel)`.
+   - `dep` lines for -recurse programs come from moduleConverter's existing thirdPartyModules (path and
+     version), with no new machinery.
+   - Not package_info.cs: a -tests run seeds it into the test assembly.
+4. Footprint prediction, which COORD scores its two-seeded A/B against. Identical on windows/linux/darwin:
+   - src/core: 0 files.
+   - tests/Behavioral: the 847 Exe fixture csproj each gain ONE ItemGroup (+5 lines, CRLF); 0 .cs, 0 .cs.target,
+     0 package_info.cs.
+   - Re-transpile the tests/Performance and tests/PackageTests mains too, so every tracked main carries the
+     stamp, and COUNT them in the prediction.
+5. The seat lands AFTER G's lazy seat. Cut from the current hop tip; COORD merges whatever tip is current and
+   re-runs the A/B.
+SEAT BAR:
+- Three red-first arms, each made to fail and then restored byte-identical:
+  (i) the fips140test row: TestVersion C# skip → pass;
+  (ii) a new behavioral fixture BuildInfoSettings that prints ok, bi.Path, bi.Main.Path, bi.Main.Version and
+      the GOOS and GOARCH setting values ONLY (not CGO_ENABLED, not DefaultGODEBUG);
+  (iii) a converter unit test that the program stamp's line set is exactly {path, mod[, dep]}, with a
+      negative control that -compiler, -buildmode, GOAMD64 and vcs never appear. Plus a GolibTests unit on
+      modinfo composition: sentinels, a ParseBuildInfo round-trip, absent → "".
+- Extra gate: a -tests run's test host carries exactly ONE path line (the registration only, no stamp from the
+  seeded package).
+- Gates: go test ./... (in src/go2cs), repoguard, census.
+- Post the head to COORD with the footprint prediction, and ping G ("g -- design and review") for a short
+  review.
+```
+
+<!-- Provenance. Lane H's session started 2026-10-22 on H-LAPTOP: qualification battery at 2660f83b2b, then
+     P2's pipe guard (arms A, B and B'), the runner timeout-side seat (batch 19), the six-row and the
+     deferred-alloc reads (DATA record in batch 20), the TestVersion root and its ruled design. The owner then
+     restarted the desktop app, and asked for this rollover so the work can start in a new session. -->
 
 ---
 
