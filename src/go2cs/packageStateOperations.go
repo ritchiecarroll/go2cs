@@ -103,6 +103,9 @@ func resetPackageState(pkg *packages.Package) {
 	metadataAnchorLocalTypes = false
 	packageManualTypeNames = make(map[string]bool)
 	packageAddressedGlobals = make(map[types.Object]bool)
+	packageRecoverForms = make(map[*ast.CallExpr]recoverCallSite)
+	packageRecovererFlagNames = make(map[*ast.FuncDecl]string)
+	packageDeferRecoverMarks = make(map[*ast.DeferStmt]bool)
 	packageMovedInitVars = make(map[types.Object]int)
 	packageMovedInitMethods = make(map[int]string)
 	packageHoistedLits = make(map[*ast.BasicLit]*hoistedLiteral)

@@ -1790,6 +1790,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
+
+    [TestMethod]
     public void CheckRecvArrayFieldElementAddress() => CheckTarget("RecvArrayFieldElementAddress");
 
     [TestMethod]

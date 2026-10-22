@@ -2996,6 +2996,9 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// protection production code does — see callerInliningAnalysis.go.
 	needsNoInlining := computeNoInliningClosure(allEntries, pkg.Types, pkg.TypesInfo, fixedSkipClosureApplies(pkg.Dir, options.goRoot))
 
+	// Go's direct-call rule for recover, over the test files as well (recoverForms.go).
+	collectRecoverForms(allEntries, pkg.Types, pkg.TypesInfo)
+
 	collectCaptureModeMethods(pkg)
 	collectTypeSpecRHS(pkg)
 

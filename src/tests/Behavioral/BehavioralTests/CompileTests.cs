@@ -1852,6 +1852,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
+
+    [TestMethod]
     public void CheckRecvArrayFieldElementAddress() => CheckTarget("RecvArrayFieldElementAddress");
 
     [TestMethod]

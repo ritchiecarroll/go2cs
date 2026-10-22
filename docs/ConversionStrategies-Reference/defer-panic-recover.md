@@ -125,7 +125,9 @@ be a `ref struct` in the first place.
 One consequence: `recover` is a Go *predeclared identifier*, not a keyword, so a package may declare
 its own — `text/template/parse` has `func (t *Tree) recover(errp *error)`. Inside that package's
 class the extension method wins over the `using static go.builtin` import, so such a package emits
-its built-in calls qualified as `builtin.recover()`, exactly like every other shadowed built-in.
+its built-in calls qualified as `builtin.recover()`, exactly like every other shadowed built-in, and the
+[direct-call forms](#only-the-function-the-defer-calls-directly-recovers) the same way
+(`builtin.recover(calledByDefer)`).
 
 ## `defer` registration: the arity ladder, and no bang
 
@@ -493,11 +495,56 @@ thread: `GoFrame.Run` sets a per-thread `RecoverablePanic` to the panic it is ha
 normal-return sequence) and restores the outer value on exit, so a `recover()` in the defers of a
 deferred function's own normal return answers nil, as Go's does (runtime's `TestRecoverMatching`).
 
-**One divergence is accepted: a `recover()` in a helper.** Go's `recover()` stops a panic only when the deferred
-function calls it directly. Called from a helper that the deferred function calls, Go's returns nil, and the panic
-goes on to an outer recover or crashes the program. golib's `recover()` reads the per-thread `RecoverablePanic`
-without regard to call depth, so in that helper it still returns the value and stops the panic early.
-<!-- The shared-slot case above is closed: GoFrame.cs and GoFuncRoot.cs cite runtime's TestIssue43920, TestIssue43921 and TestRecoverMatching. The direct-call rule is NOT closed: src/core/golib/builtin.cs:334 `Known divergence, accepted: a recover() in a HELPER`. An earlier comment here implied both were resolved. Probe 2026-10-22, Go 1.26.10 on linux/amd64: `func helper() any { return recover() }` called from `defer func() { … helper() … }()` in a panicking function, under an outer deferred recover, printed `outer: boom` in Go (the helper read nil). -->
+## Only the function the defer calls DIRECTLY recovers
+
+Go's `recover()` stops a panic only when it is called directly by the deferred function. Called from a helper
+that the deferred function calls, it returns nil and the panic goes on. Whether a function IS the deferred
+function depends on how it was called, not where it was written: `defer catchError(&err)` recovers, while
+`defer func() { catchError(&err) }()` reads nil in `catchError` and the panic continues. So the decision is made at
+run time, and the converter marks its two ends:
+
+```csharp
+internal static void catchError(ref error err) {
+    GoFrame ᒐ = default;
+    try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
+        {
+            var e = recover(calledByDefer); if (e != default!) {
+```
+
+```csharp
+        defer(catchError, Ꮡerr, ref ᒐ, recovers: true);
+```
+
+- A named function whose body calls `recover()` takes golib's mark as its first line, and its recover calls pass
+  what it took. `recover(false)` returns nil and leaves the panic running.
+- A defer whose callee may be such a function registers with `recovers: true`. golib then sets the mark on the
+  thread just before the call (`GoFrame.Recovering`) and clears it after. A converter thunk between the
+  registration and the function (`ᴛ1 => catchError(ref ᴛ1.DerefOrNull())`) is transparent, because the
+  function's own first line is where the mark is taken. A frame with such a defer is never
+  [lowered into its `finally`](#a-deferred-receiver-field-call-with-no-arguments-is-lowered-into-the-frames-finally),
+  where nothing would set the mark.
+- The deferred literal itself (`defer func() { … recover() … }()`) is direct by construction and keeps
+  `recover()`.
+- A literal that is NOT the deferred literal (it reaches a defer through a func value) calls `recoverChecked()`.
+  That reads the calling frame from the stack, and only while a panic is waiting to be recovered.
+- `defer recover()` defers recover itself, which no deferred function calls, so it reads
+  `recover(calledByDefer: false)` and the panic continues, as in Go.
+
+**Stated limits.**
+- **Exported functions keep `recover()`.** An EXPORTED function that calls `recover()` emits it as before. Another
+  package may defer it, and that defer site cannot know to set the mark, so the function cannot tell a deferred
+  call from a helper call. It recovers in both, a false true where Go would read nil. Package `main` exports
+  nothing and is exempt.
+- **Dynamic callees are matched by signature.** A defer whose callee is a func value, a func-typed field or an
+  interface method is marked only when its signature matches a recovering function of the package (for an
+  interface method, a recovering method of the same name). A matched callee that does not itself recover leaves
+  the mark for the first recovering function it calls, which reads it only while a panic is waiting.
+- **Unexported recoverers that escape their package are not marked.** An unexported recovering function handed
+  to another package as a func value and deferred there is not marked at that defer, so it reads nil.
+<!-- The shared-slot case above is closed: GoFrame.cs and GoFuncRoot.cs cite runtime's TestIssue43920, TestIssue43921 and TestRecoverMatching. The direct-call rule was NOT closed then: builtin.cs at 2b51b02d50 said `Known divergence, accepted: a recover() in a HELPER`. An earlier comment here implied both were resolved. Probe 2026-10-22, Go 1.26.10 on linux/amd64: `func helper() any { return recover() }` called from `defer func() { … helper() … }()` in a panicking function, under an outer deferred recover, printed `outer: boom` in Go (the helper read nil).
+     CLOSED 2026-10-22 by the recover-in-helper seat (COORD ruling, Option B): the "One divergence is accepted" paragraph that stood here is replaced by the section above. Guard: src/tests/Behavioral/RecoverInHelper, Go-compared, arms 1-7 (helper reads nil; direct; defer f(&err) and the gob ref-lowered thunk; method value with and without args; defer recover(); a named recoverer called normally from the deferred literal; a func value). Red at hop tip 2b51b02d50 on arms 1, 5 and 6; green under Release, Release TC0 and Debug. Plants, each restored byte-identical: no mark (arm 3 onward panics), TakeDeferredCall always true (arms 1 and 6), recover(bool) ignoring its argument (arms 1, 5 and 6). -->
 
 ## A nested defer scope gets a frame of its own
 

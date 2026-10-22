@@ -331,9 +331,11 @@ public static partial class builtin
     /// nil too, so its sequence's tail knows not to re-raise it (docs/phase4/DESIGN-recover-model.md).
     /// It used to read and clear the one captured-panic slot, which a nested panic overwrote.
     /// <para>
-    /// Known divergence, accepted: a recover() in a HELPER the deferred function calls still
-    /// recovers here, where Go's returns nil. The panic stops early instead of reaching an outer
-    /// recover or crashing.
+    /// This form is the one a function literal that IS the deferred function calls (`defer func() { recover() }()`),
+    /// which is direct by construction. A named function that calls recover passes whether its running call is the
+    /// deferred one (<see cref="recover(bool)"/>), and a literal that is not the deferred literal is checked by its
+    /// caller (<see cref="recoverChecked"/>): Go's rule that only a function called DIRECTLY by the deferred call
+    /// recovers (GoFrame.TakeDeferredCall).
     /// </para>
     /// </remarks>
     public static object? recover()
@@ -356,6 +358,43 @@ public static partial class builtin
             state.CapturedPanic = null;
 
         return panic.State;
+    }
+
+    /// <summary>
+    /// Go's <c>recover</c> in a named function: recovers only when the running call of that function is the
+    /// deferred call itself, and returns nil otherwise (a helper call reads nil, and the panic continues).
+    /// </summary>
+    /// <param name="calledByDefer">The function's own <c>GoFrame.TakeDeferredCall()</c>, taken on entry.</param>
+    /// <returns>Recovered panic state, or <c>null</c>.</returns>
+    public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;
+
+    /// <summary>
+    /// Go's <c>recover</c> in a function literal that is not itself the deferred literal (it reaches its deferred
+    /// call through a func value): recovers only when the literal's caller is the deferred-call machinery.
+    /// </summary>
+    /// <returns>Recovered panic state, or <c>null</c>.</returns>
+    /// <remarks>
+    /// The rare form: a literal deferred directly needs no check (<see cref="recover()"/>), and a named function
+    /// passes its own flag (<see cref="recover(bool)"/>). Here the caller is read from the stack, and only while a
+    /// panic is waiting to be recovered, so a call with nothing to recover pays nothing. NoInlining keeps this frame,
+    /// so the caller and the caller's caller are frames 1 and 2.
+    /// </remarks>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "A frame whose method cannot be read (trimmed or Native AOT metadata) recovers, as every recover " +
+                        "did before the direct-call rule: the answer degrades to the old one, never to a lost recover.")]
+    public static object? recoverChecked()
+    {
+        PanicException? panic = GoThreadState.Current.RecoverablePanic;
+
+        if (panic is null || panic.Recovered)
+            return null;
+
+        // The literal's caller is golib's when the defer machinery invoked it: GoFrame.Run, a registration rung's
+        // argument closure or RecoveringCall. Any Go function in that place makes the literal a helper.
+        System.Reflection.MethodBase? caller = new System.Diagnostics.StackFrame(2, false).GetMethod();
+
+        return caller is null || caller.DeclaringType?.Assembly == typeof(builtin).Assembly ? recover() : null;
     }
 
     /// <summary>
