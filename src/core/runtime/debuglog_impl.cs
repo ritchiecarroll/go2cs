@@ -151,7 +151,7 @@ partial class runtime_package
         var state = new slice<printDebugLogImpl_readState>(n);
         {
             var l = all;
-            foreach (var (i, _) in state) {
+            foreach (var i in range(state)) {
                 var s = Ꮡ(state, i);
                 s.Value.debugLogReader = l.Value.w.r;
                 s.Value.first = true;
@@ -165,7 +165,7 @@ partial class runtime_package
             // Find the next record.
             printDebugLogImpl_best best = default!;
             best.tick = ~(uint64)0;
-            foreach (var (i, _) in state) {
+            foreach (var i in range(state)) {
                 if (state[i].nextTick < best.tick) {
                     best.tick = state[i].nextTick;
                     best.i = i;
