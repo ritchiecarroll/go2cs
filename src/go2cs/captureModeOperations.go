@@ -1784,8 +1784,11 @@ func (v *Visitor) paramBoxReasonHolds(ident *ast.Ident, param types.Object, body
 // receiver is served by packageDirectBoxReceiverMethods (which emits the box AS the receiver rather
 // than renaming it), and a receiver the capture analysis routed to box-ref storage must not take the
 // `ʗp` form at all — so neither bodyCallsCaptureModeMethodOn nor isLambdaBoxRefVar joins here.
+//
+// A receiver ж-box A2 reverted (every address use feeds a ref-lowered position) has no box reason,
+// as markAddressTakenBoxedReceiver decides.
 func (v *Visitor) recvBoxReasonHolds(recv types.Object, body ast.Node) bool {
-	return v.paramAddressTakenNeedsBox(recv, body)
+	return !refLoweringLocalReverts(recv) && v.paramAddressTakenNeedsBox(recv, body)
 }
 
 // bodyCallsCaptureModeMethodOn reports whether the body calls a capture-mode method with
