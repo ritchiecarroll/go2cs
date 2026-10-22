@@ -45,6 +45,15 @@ namespace go2cs;
 /// as Go spells the path, <c>p.E.f</c>: in source, the embed is the converter's <c>partial ref E E</c> declaration; in
 /// metadata, any <c>ref</c> property the type pairs with a <c>Ꮡ</c> accessor (a promoted field's too).
 /// </para>
+/// <para>
+/// A HEADER-SHAPED struct is the one exception to <c>ref</c>: an <c>unsafe.Pointer</c> field and then one or two
+/// <c>int</c> fields, Go's slice and string headers (<see cref="IsHeaderShaped"/>). Its fields get GET/SET properties,
+/// and the setter calls <c>ж&lt;T&gt;.OnHeaderStore()</c> after the store. golib's header boxes view a slice or string
+/// variable as such a header and must commit each store to the variable, which a <c>ref</c> cannot be intercepted to
+/// do: the header's last store is followed by no access of the box at all. A read, a store and a compound assignment
+/// bind the property as before; a <c>ref</c> to such a field does not compile, by design, since its stores would bypass
+/// the commit.
+/// </para>
 /// </remarks>
 [Generator]
 public class FieldAccessGenerator : ISourceGenerator
@@ -191,6 +200,7 @@ public class FieldAccessGenerator : ISourceGenerator
         List<string> properties = [];
         string typeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         bool foreign = !type.Locations.Any(location => location.IsInSource);
+        bool header = IsHeaderShaped(type);
 
         foreach (IFieldSymbol field in type.GetMembers().OfType<IFieldSymbol>())
         {
@@ -213,8 +223,11 @@ public class FieldAccessGenerator : ISourceGenerator
             }
 
             string fieldType = field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string slot = $"{ReceiverName}.field({typeName}.{accessor})";
 
-            properties.Add($"public ref {fieldType} {PropertyName(name)} => ref {ReceiverName}.field({typeName}.{accessor});");
+            properties.Add(header
+                ? $"public {fieldType} {PropertyName(name)} {{ get => {slot}; set {{ {slot} = value; {ReceiverName}.OnHeaderStore(); }} }}"
+                : $"public ref {fieldType} {PropertyName(name)} => ref {slot};");
         }
 
         // Embedded structs, by their ref accessors (see the remarks).
@@ -242,6 +255,29 @@ public class FieldAccessGenerator : ISourceGenerator
         }
 
         return properties;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="type"/> is shaped as a Go slice or string header: exactly an <c>unsafe.Pointer</c> field
+    /// (the one class implementing golib's <c>IUnsafePointer</c>) and then one or two <c>int</c> fields, in declaration
+    /// order, as golib's SliceHeaderBox and StringHeaderBox require.
+    /// </summary>
+    internal static bool IsHeaderShaped(INamedTypeSymbol type)
+    {
+        IFieldSymbol[] fields = type.GetMembers().OfType<IFieldSymbol>()
+            .Where(field => !field.IsStatic && !field.IsConst && !field.IsImplicitlyDeclared)
+            .ToArray();
+
+        if (fields.Length is not (2 or 3))
+            return false;
+
+        if (fields[0].Type is not INamedTypeSymbol { TypeKind: TypeKind.Class } pointer ||
+            !pointer.AllInterfaces.Any(face => face.ToDisplayString() == "go.IUnsafePointer"))
+        {
+            return false;
+        }
+
+        return fields.Skip(1).All(field => field.Type.SpecialType == SpecialType.System_IntPtr);
     }
 
     // A reserved word takes its `@`, and so do the two contextual words that mean something inside an extension
