@@ -2751,15 +2751,23 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 	// 68.5 -> 22.8 ms (3.0x, -67%), taking it from 82x Go to 27x. The loop figure sits on the
 	// slice-bound floor, so what remains is golib's slice<T>, not the call.
 	//
-	// Mul64/Add64/Sub64 are deliberately NOT registered: they are not on this path, and a withdrawn
-	// earlier cut registered exactly those (and not these three) for a measured ZERO -- it made the
-	// inner body faster behind an outer wrapper the JIT still would not inline. Bodies in
-	// core/math/bits/bits_impl.cs, where Add carries the one AggressiveInlining the measurement
-	// showed it needs and Mul deliberately does not.
+	// The 64-bit leaves Add64, Mul64 and Sub64 are displaced too, for their own callers. On the
+	// word-size path above they bought a measured ZERO (a withdrawn earlier cut registered them alone,
+	// behind an outer wrapper the JIT still would not inline). Fiat field arithmetic calls them
+	// directly instead: 84 calls in one P-256 field multiply (crypto/internal/fips140/nistec/fiat), a
+	// body large enough that the JIT's inlining budget runs out and leaves each one a call returning
+	// a tuple. Go intrinsifies all three. Mul64 becomes Math.BigMul and all three carry
+	// AggressiveInlining; neither change helped alone. Measured on that multiply: 122 -> 95 ns, and
+	// nistec's P-256 ScalarMult 1470 -> 1295 us (min over seven processes, linux/amd64).
+	// Bodies in core/math/bits/bits_impl.cs, where Add carries the one AggressiveInlining the
+	// measurement showed it needs and Mul deliberately does not.
 	"math/bits": {
-		"Add": goosAny,
-		"Mul": goosAny,
-		"Sub": goosAny,
+		"Add":   goosAny,
+		"Add64": goosAny,
+		"Mul":   goosAny,
+		"Mul64": goosAny,
+		"Sub":   goosAny,
+		"Sub64": goosAny,
 	},
 	"time": {
 		// syncTimer -- Go 1.23's `*(*unsafe.Pointer)(unsafe.Pointer(&c))`, the channel handed to the
