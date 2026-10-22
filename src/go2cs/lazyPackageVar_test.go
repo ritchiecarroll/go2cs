@@ -51,9 +51,21 @@ func withLazyPackageVars(t *testing.T, names ...string) {
 // (a file the converter refused is absent).
 func convertLazyVarModule(t *testing.T, sources map[string]string) (map[string]string, error) {
 	t.Helper()
+	return convertLazyVarModuleOver(t, sources, nil)
+}
+
+// convertLazyVarModuleOver converts over destination files seeded by name (a hand-owned `.cs`), also returning a
+// hand-owned file's `.cs.auto` review sibling under its own name.
+func convertLazyVarModuleOver(t *testing.T, sources, seeds map[string]string) (map[string]string, error) {
+	t.Helper()
 
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
+	dir := filepath.Join(root, "out", "src", "example.com", "lazyvar")
+
+	for name, seed := range seeds {
+		writeModuleFile(t, filepath.Join(dir, name), seed)
+	}
 
 	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module "+lazyVarFixturePkg+"\n\ngo 1.23\n")
 
@@ -85,7 +97,6 @@ func convertLazyVarModule(t *testing.T, sources map[string]string) (map[string]s
 		return nil, err
 	}
 
-	dir := filepath.Join(options.go2csPath, "src", "example.com", "lazyvar")
 	files := map[string]string{}
 
 	for name := range sources {
@@ -97,6 +108,10 @@ func convertLazyVarModule(t *testing.T, sources map[string]string) (map[string]s
 
 		if data, err := os.ReadFile(filepath.Join(dir, emitted)); err == nil {
 			files[emitted] = string(data)
+		}
+
+		if data, err := os.ReadFile(filepath.Join(dir, emitted+".auto")); err == nil {
+			files[emitted+".auto"] = string(data)
 		}
 	}
 
@@ -251,6 +266,113 @@ func TestLazyPackageVarPredicateChoosesAndShapes(t *testing.T) {
 		t.Errorf("control: small must keep its field initializer:\n%s", tables)
 	}
 }
+
+// The hand-owned file declares a table over the floor; reader, in a converted file, would be lazy by closure.
+const lazyVarHandOwnedSource = `package main
+
+var owned = [...]entry{{"a", 1}, {"b", 2}, {"c", 3}, {"d", 4}, {"e", 5}, {"f", 6}, {"g", 7}}
+`
+
+const lazyVarHandOwnedReader = `package main
+
+var reader = owned[:]
+
+var control = [...]entry{{"a", 1}, {"b", 2}, {"c", 3}, {"d", 4}, {"e", 5}, {"f", 6}, {"g", 7}}
+`
+
+// TestLazyPackageVarLeavesHandOwnedEager pins that a var whose declaration is hand-owned ([module: GoManualConversion]) is
+// never lazy, nor is a reader of it: the hand-owned `.cs` keeps its own declaration, which the converter does not shape,
+// so its `.cs.auto` review sibling shows the eager field and the converted reader stays eager. control, the same table
+// in a converted file, is lazy.
+func TestLazyPackageVarLeavesHandOwnedEager(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	files, err := convertLazyVarModuleOver(t,
+		map[string]string{"main.go": lazyVarPredicateMainOwned, "owned.go": lazyVarHandOwnedSource, "reader.go": lazyVarHandOwnedReader},
+		map[string]string{"owned.cs": "[module: GoManualConversion]\r\nnamespace go;\r\n"})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	owned, ok := files["owned.cs.auto"]
+
+	if !ok {
+		t.Fatalf("the hand-owned file's review sibling owned.cs.auto was not emitted; read %d files", len(files))
+	}
+
+	if strings.Contains(owned, "lazyᴛowned") || !strings.Contains(owned, "static array<entry> owned = ") {
+		t.Errorf("owned.cs.auto must keep the eager field:\n%s", owned)
+	}
+
+	reader := files["reader.cs"]
+
+	if strings.Contains(reader, "lazyᴛreader") {
+		t.Errorf("reader reads a hand-owned var and must stay eager:\n%s", reader)
+	}
+
+	if !strings.Contains(reader, "[GoLazy] partial class lazyᴛcontrol { internal static array<entry> control = ") {
+		t.Errorf("control: the same table in a converted file must be lazy:\n%s", reader)
+	}
+}
+
+// TestLazyPackageVarLeavesManualVarEager is the same pin for a var whose storage a hand-owned member supplies
+// (manualConversionVars): its declaration is displaced, so nothing reads a holder for it and its reader stays eager.
+func TestLazyPackageVarLeavesManualVarEager(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	saved := manualConversionVars
+	registered := make(map[string]map[string]goosScope, len(saved)+1)
+
+	for pkg, vars := range saved {
+		registered[pkg] = vars
+	}
+
+	registered[lazyVarFixturePkg] = map[string]goosScope{"owned": goosAny}
+	manualConversionVars = registered
+	t.Cleanup(func() { manualConversionVars = saved })
+
+	files, err := convertLazyVarModule(t,
+		map[string]string{"main.go": lazyVarPredicateMainOwned, "owned.go": lazyVarHandOwnedSource, "reader.go": lazyVarHandOwnedReader})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	if owned := files["owned.cs"]; strings.Contains(owned, "lazyᴛowned") {
+		t.Errorf("the displaced var must not be given a holder:\n%s", owned)
+	}
+
+	reader := files["reader.cs"]
+
+	if strings.Contains(reader, "lazyᴛreader") {
+		t.Errorf("reader reads a displaced var and must stay eager:\n%s", reader)
+	}
+
+	if !strings.Contains(reader, "[GoLazy] partial class lazyᴛcontrol { internal static array<entry> control = ") {
+		t.Errorf("control: the same table in a converted file must be lazy:\n%s", reader)
+	}
+}
+
+const lazyVarPredicateMainOwned = `package main
+
+type entry struct {
+	name   string
+	weight int
+}
+
+func main() {
+	println(len(owned), len(reader), len(control))
+}
+`
 
 // TestLazyPackageVarRefusesByName pins every refusal at the emission: each case LISTS `table`, whose initializer breaks
 // one rule; the converter reports the entry by name with the reason and emits nothing for the file.

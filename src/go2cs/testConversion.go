@@ -3027,7 +3027,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// an empty result. Runs BEFORE escape analysis, which consults the reversion verdicts; the
 	// signature/call-site emission reads the lowered sets during the visits.
 	performRefLoweringAnalysis(prodEntries, pkg.Types, pkg.TypesInfo, options)
-	collectHandOwnedTypes(prodEntries, pkg.TypesInfo)
+	collectHandOwnedDecls(prodEntries, pkg.Types, pkg.TypesInfo, goosOfTarget(options.targetPlatform))
 
 	performEscapeAnalysis(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo)
 	collectStackAppendHints(allEntries, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, options)

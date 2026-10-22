@@ -136,6 +136,12 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 			candidate.reason = lazyInitializerRefusal(info, scope, initializer.Rhs, &candidate.deps)
 		}
 
+		// A hand-owned declaration (collectHandOwnedDecls) is not the converter's to shape, and what it holds when is not
+		// the Go initializer's to say, so neither it nor a reader of it is built on first read.
+		if packageHandOwnedVars[obj] {
+			candidate.reason = "its declaration is hand-owned"
+		}
+
 		if candidate.reason == "" && addressed[obj] {
 			candidate.reason = "its address is taken, and the holder does not carry an addressable box yet"
 		}
