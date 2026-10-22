@@ -82,3 +82,68 @@ func TestMergeRetiresAPackageInitNoTargetEmitted(t *testing.T) {
 		}
 	}
 }
+
+// TestMergePlatformEmissionsRetiresAnAllLazyPackageInit drives the merge itself (mergePlatformEmissions, the step a
+// -platforms run ends with) over a seeded root and two staged targets. allLazy is the shape the lazy seat produced: its
+// every relocation went lazy, so no target emitted package_init.cs and the root's generated copy calls methods the new
+// sources no longer declare. kept still relocates on both targets and keeps its file.
+func TestMergePlatformEmissionsRetiresAnAllLazyPackageInit(t *testing.T) {
+	root := t.TempDir()
+	targets := []string{"windows/amd64", "linux/amd64"}
+	generated := packageInitGeneratedHeader + "\r\nnamespace go;\r\n"
+
+	write := func(base, rel, content string) {
+		t.Helper()
+		path := filepath.Join(base, "core", filepath.FromSlash(rel))
+
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	read := func(rel string) (string, bool) {
+		data, err := os.ReadFile(filepath.Join(root, "core", filepath.FromSlash(rel)))
+		return string(data), err == nil
+	}
+
+	// the seeded corpus: the previous conversion relocated in both packages
+	write(root, "allLazy/a.cs", "// relocated\r\n")
+	write(root, "allLazy/package_init.cs", generated+"// initᴛtable();\r\n")
+	write(root, "kept/a.cs", "// relocated\r\n")
+	write(root, "kept/package_init.cs", generated+"// initᴛother();\r\n")
+
+	var emissions []*platformEmission
+
+	for _, target := range targets {
+		stage := t.TempDir()
+		write(stage, "allLazy/a.cs", "// lazy\r\n")
+		write(stage, "kept/a.cs", "// still relocated\r\n")
+		write(stage, "kept/package_init.cs", generated+"// initᴛother();\r\n")
+
+		emissions = append(emissions, &platformEmission{target: target, goos: goosOfTarget(target), root: stage, artifacts: map[string]artifactState{
+			"allLazy/a.cs":         {hash: "lazy", emitted: true},
+			"kept/a.cs":            {hash: "kept", emitted: true},
+			"kept/package_init.cs": {hash: "init", emitted: true},
+		}})
+	}
+
+	if err := mergePlatformEmissions(root, targets, emissions); err != nil {
+		t.Fatalf("merge: %v", err)
+	}
+
+	if content, ok := read("allLazy/package_init.cs"); ok {
+		t.Errorf("allLazy/package_init.cs must be retired; the corpus still holds:\n%s", content)
+	}
+
+	if content, _ := read("allLazy/a.cs"); content != "// lazy\r\n" {
+		t.Errorf("control: allLazy/a.cs must carry the merged source, got %q", content)
+	}
+
+	if _, ok := read("kept/package_init.cs"); !ok {
+		t.Error("kept/package_init.cs, emitted on both targets, must stay")
+	}
+}

@@ -320,6 +320,60 @@ func TestLazyPackageVarLeavesHandOwnedEager(t *testing.T) {
 	}
 }
 
+// io's blackHolePool, reduced: a sync.Pool over the floor, eligible by every rule, whose Get and Put are pointer-receiver
+// methods, so each use takes its address implicitly and the emission names its box (CS0103 ᏑblackHolePool when it was
+// built lazily). control, a table of the same file, is lazy.
+const lazyVarPoolSource = `package main
+
+import "sync"
+
+var pool = sync.Pool{
+	New: func() any {
+		b := new([64]byte)
+		for i := range b {
+			b[i] = byte(i)
+		}
+		return b
+	},
+}
+
+func use() int {
+	b := pool.Get().(*[64]byte)
+	defer pool.Put(b)
+	return int(b[3])
+}
+
+var control = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+`
+
+// TestLazyPackageVarLeavesAPointerAddressedPoolEager pins that a var a pointer-receiver call addresses stays eager.
+func TestLazyPackageVarLeavesAPointerAddressedPoolEager(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	files, err := convertLazyVarModule(t, map[string]string{
+		"main.go": "package main\n\nfunc main() { println(use(), len(control)) }\n",
+		"pool.go": lazyVarPoolSource,
+	})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	pool := files["pool.cs"]
+
+	if strings.Contains(pool, "lazyᴛpool") {
+		t.Errorf("pool is addressed by Get and Put and must stay eager:\n%s", pool)
+	}
+
+	if !strings.Contains(pool, "[GoLazy] partial class lazyᴛcontrol { internal static array<nint> control = ") {
+		t.Errorf("control: the table beside it must be lazy:\n%s", pool)
+	}
+}
+
 // TestLazyPackageVarLeavesManualVarEager is the same pin for a var whose storage a hand-owned member supplies
 // (manualConversionVars): its declaration is displaced, so nothing reads a holder for it and its reader stays eager.
 func TestLazyPackageVarLeavesManualVarEager(t *testing.T) {
