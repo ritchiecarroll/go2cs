@@ -97,6 +97,10 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	// the walk because a path's callers can be declared in any file.
 	fixedSkipUsers := map[types.Object]bool{}
 	smallBodies := map[types.Object]bool{}
+	// decorators collects the SMALL declarations that call testing's decorating API directly (see
+	// callsTestingDecorator). They join after the opaque-forwarder gate, so a test package's helpers do not
+	// switch that gate on, and before the fixed point, so a thin forwarder to a helper chains as usual.
+	var decorators []types.Object
 
 	for _, entry := range files {
 		if entry.file == nil {
@@ -145,6 +149,11 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 
 			if callsSkipCountedRuntimeCaller(info, fn.Body) || callsSkipCountedWalker(info, fn.Body) {
 				seed[obj] = true
+				continue
+			}
+
+			if callsTestingDecorator(info, fn.Body) && isSmallCallerBody(fn.Body) {
+				decorators = append(decorators, obj)
 				continue
 			}
 
@@ -253,6 +262,10 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		for _, obj := range opaqueForwarders {
 			seed[obj] = true
 		}
+	}
+
+	for _, obj := range decorators {
+		seed[obj] = true
 	}
 
 	// Fixed point: a forwarder whose target just joined the set joins it too, which can chain
@@ -409,6 +422,86 @@ func callsSkipCountedWalker(info *types.Info, body *ast.BlockStmt) bool {
 	})
 
 	return found
+}
+
+// testingDecorators are the methods of Go's testing API (on T, B, F, common and the TB interface) whose record
+// names its CALLER's file:line, or that mark their caller as a helper: Go's (*common).log decorates every record
+// with callSite(3) -- skipping callSite, log and the public method -- so the frame it names is the one that
+// called Log, Error, Fatal or Skip; and Helper records its caller's function, which frameSkip then steps over.
+// The hand-owned host walks the same frames (TestExecution.LogFromCaller, Helper), so a JIT that inlines that
+// caller moves the attribution to ITS caller. testing's own TestTBHelper is the measured case: its
+// notHelperCallingHelper is one statement forwarding to helper, which calls t.Helper and t.Error, and under the
+// Release TieredCompilation=0 configuration of record the record read helperfuncs_test.go:48 where Go reads :24
+// (Debug passes outright). Cleanup and Run join for the same reason: Cleanup records its caller as the frame its
+// cleanup's records name (Go's cleanupPc), and Run records its caller's stack as the subtest's creator. Seeded
+// only on a SMALL body (isSmallCallerBody): a large Test function is not an inlining candidate, and seeding every
+// caller measured 6,294 std test functions against the few helpers that carry the risk.
+var testingDecorators = map[string]bool{
+	"Log": true, "Logf": true, "Error": true, "Errorf": true, "Fatal": true, "Fatalf": true,
+	"Skip": true, "Skipf": true, "Helper": true, "Cleanup": true, "Run": true,
+}
+
+// callsTestingDecorator reports whether body itself (a nested *ast.FuncLit is a frame of its own) calls one of
+// testingDecorators as a METHOD of package testing.
+func callsTestingDecorator(info *types.Info, body *ast.BlockStmt) bool {
+	if body == nil || info == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		callee, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || callee.Pkg() == nil || callee.Pkg().Path() != "testing" || !testingDecorators[callee.Name()] {
+			return true
+		}
+
+		if sig, ok := callee.Type().(*types.Signature); ok && sig.Recv() != nil && testingDecoratorReceivers[testingReceiverName(sig.Recv().Type())] {
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
+}
+
+// testingDecoratorReceivers are the testing types whose methods decorate: M.Run (every TestMain's m.Run) runs the
+// tests and records nothing about its caller.
+var testingDecoratorReceivers = map[string]bool{"T": true, "B": true, "F": true, "common": true, "TB": true}
+
+// testingReceiverName is the name of a testing method's receiver type, through a pointer.
+func testingReceiverName(recv types.Type) string {
+	if pointer, ok := recv.(*types.Pointer); ok {
+		recv = pointer.Elem()
+	}
+
+	if named, ok := recv.(*types.Named); ok {
+		return named.Obj().Name()
+	}
+
+	return ""
 }
 
 // isThinAllocator reports whether body is a single statement whose whole work is ONE heap allocation

@@ -11,6 +11,7 @@ using io = io_package;
 using rand = math.rand_package;
 using testing = testing_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using go.@internal;
 using go.crypto.@internal;
 using math;
@@ -29,7 +30,7 @@ public static void TestHash(ж<testing.T> Ꮡt, Func<hash.Hash> mh) {
     testhash.TestHash(Ꮡt, NilSafeDelegateConversion<Func<hash.Hash>, Func<hash.Hash>>(mh));
 }
 
-internal static io.Reader newRandReader(ж<testing.T> Ꮡt) {
+internal static partial io.Reader newRandReader(ж<testing.T> Ꮡt) {
     var seed = time.Now().UnixNano();
     Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));

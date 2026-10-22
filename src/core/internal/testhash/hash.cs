@@ -9,6 +9,7 @@ using io = io_package;
 using rand = math.rand_package;
 using testing = testing_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using math;
 
 partial class testhash_package {
@@ -240,7 +241,7 @@ internal static slice<byte> getSum(ж<testing.T> Ꮡt, hash.Hash h, slice<byte> 
     return sum;
 }
 
-internal static io.Reader newRandReader(ж<testing.T> Ꮡt) {
+internal static partial io.Reader newRandReader(ж<testing.T> Ꮡt) {
     var seed = time.Now().UnixNano();
     Ꮡt.Logf("Deterministic RNG seed: 0x%x"u8, seed);
     return new rand_RandжReader(rand.New(rand.NewSource(seed)));
