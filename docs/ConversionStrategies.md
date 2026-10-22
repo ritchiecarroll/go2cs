@@ -1272,6 +1272,7 @@ for `registry` and `names`, in the last file.
 every file, before the static constructor body. So each moved var finds its unmoved dependencies already
 set. The constructor then sets the moved vars in Go's order.
 
+<!-- PLACEHOLDER (lazy static data, 2026-10-22): the owner moved G's lazy static data into the Go 1.26 hop (design: docs/DESIGN-lazy-static-data.md on claude/g-lazy-static-data-note). Pure-data package vars become a ref property over a per-var holder class, built on first read, across many files. When that seat LANDS, rewrite this rule and the sentence above that limits it to "a few listed tables" (and "the list holds runtime's two malloc dispatch tables") from the landed emission and its guards; do not document the prototype. -->
 <a id="a-listed-var-is-built-on-its-first-read"></a>
 **A listed var is built on its first read.** Go's linker writes a table of constants and function values
 into the binary as static data, so it costs a Go program nothing at startup. As a C# field initializer, the

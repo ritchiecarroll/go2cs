@@ -111,6 +111,8 @@ Guarded by the `PackageVarInitOrder` behavioral test, which carries both halves:
 
 ## A listed var is built on its first read, never in the static constructor
 
+<!-- PLACEHOLDER (lazy static data, 2026-10-22): the owner moved G's lazy static data into the Go 1.26 hop (design: docs/DESIGN-lazy-static-data.md on claude/g-lazy-static-data-note). Pure-data package vars become a ref property over a per-var holder class, built on first read, across many files. When that seat LANDS, rewrite this section, whose list holds only runtime's two malloc dispatch tables, from the landed emission and its guards; do not document the prototype. -->
+
 Go's linker writes a table of constants and function values into the binary as static data, so a Go program pays
 nothing for it at startup. As a C# field initializer, or as an `initᴛ` method that `package_init.cs` calls, the same
 table is built, and the code that builds it compiled, every time the program starts. So the converter keeps a short
