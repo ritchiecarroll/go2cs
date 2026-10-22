@@ -6813,7 +6813,7 @@ first example in this section.
 Go has one loop keyword, `for`. The converter turns each Go loop into a C# `for`, `while` or `foreach`,
 chosen by the loop's shape, so a converted loop reads much like the original. Two things look new to a
 reader: a loop variable is sometimes copied so that each iteration gets its own, and a labeled `break` or
-`continue` becomes a `goto`. The small glyphs in these names (`ᐧ`, `Δ`, `ᴛ`, `Ꮡ`) are explained where
+`continue` becomes a `goto`. The small glyphs in these names (`ᐧ`, `Δ`, `ᴛ`, `ᴷ`, `Ꮡ`) are explained where
 they first appear here, and all of them are listed in [Reading Converted Code](#reading-converted-code-names-and-glyphs).
 
 <!-- Inline forms from src/tests/Behavioral/ForVariants/ForVariants.go:12#bc28dc, :22#cd38ed, :78#c027f4 -> ForVariants.cs.target:16#ca4701, :24#baeefa, :80#3e658c -->
@@ -6872,7 +6872,7 @@ Go's `int` becomes `nint` ([Integer Types](#integer-types-and-arithmetic)). The 
 rename the two loop variables. C# does not let an inner scope reuse a name that its enclosing block
 also declares, as `off` is here ([Shadowing](#short-variable-redeclaration-shadowing)).
 
-<!-- sources by row (Go -> C#; GOROOT is Go 1.24.13; short paths are under src/tests/Behavioral/):
+<!-- sources by row (Go -> C#; GOROOT is Go 1.26.10; short paths are under src/tests/Behavioral/):
 GOROOT/src/slices/iter.go:16 -> src/core/slices/iter.cs:17#2e9aa9; ArrayRangeSnapshot/ArrayRangeSnapshot.go:18#369a4d -> .cs.target:18#5ec860;
 StringByteSemantics/main.go:12#090d9f -> main.cs.target:9#6128a5; GenericTypeInference/GenericTypeInference.go:138#39c6b8 -> .cs.target:142#39492d;
 ChannelSendToClosed/ChannelSendToClosed.go:15#5e475c -> .cs.target:19#6aa335 (the source names the received value `i`; the table names it `v` so a reader does not take it for an index); RangeOverIntegerTypes/main.go:98#97be49 -> main.cs.target:77#07ce5b
@@ -6889,10 +6889,25 @@ variables become a C# tuple, `var (i, v)`, and a blank `_` in the pair stays `_`
 | `for i, r := range s` | `foreach (var (i, r) in s)` | string: byte offset and rune ([Strings](#strings-string-and-sstring)) |
 | `for k, v := range m` | `foreach (var (k, v) in m)` | map ([Maps](#maps)) |
 | `for v := range c` | `foreach (var v in c)` | channel: each received value; ends when closed and drained ([Channels](#channels-and-select)) |
-| `for i := range size` | `foreach (var i in range(size))` | integer: golib's `range` helper counts 0 to `size - 1` |
+| `for i := range size` | `foreach (var i in range(size))` | integer: golib's `range` helper returns a `RangeOverInt<T>`, an allocation-free struct that counts 0 to `size - 1` |
+| `for i := range s` | `foreach (var i in range(s))` | slice or array, index only: counts 0 to `len(s) - 1` and reads no element |
 
 `ΔRangeSnapshot()` is a golib method that gives the loop its own copy of the array. The `Δ` prefix marks a
 name chosen so it cannot clash with a Go name ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
+
+<!-- Index-only range: src/core/golib/RangeIndexOnly.cs:38 `range<T>(slice<T> s) => range(s.Length)`,
+:50 `range<T>(sslice<T> s)`, :58 `range<T>(array<T> a)`, :71 `range<TArray>(ж<TArray> p)`.
+ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:106 `foreach (var i in range(a)) {`;
+SlicePointerIdentity/main.go:16 `for i := range s {` -> main.cs.target:13 `foreach (var i in range(s)) {`;
+VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
+-> .cs.target:12 `foreach (var i in range(xs)) {`.
+The string control: src/go2cs/rangeIndexOnly_test.go:237 `expect("overString", "foreach (var (i, _) in str)")`. -->
+**An index-only range reads no element.** When a range over a slice, an array or a pointer to an array
+names only the index (`for i := range s`, `for i, _ := range s`, or `for range s`), golib's `range(s)`
+reads the length once and counts the indexes, as Go does. The same holds for a variadic parameter that the
+converter emits as golib's stack-only `sslice<T>` ([Slices and Arrays](#slices-and-arrays)). A string
+keeps the pair form, `foreach (var (i, _) in s)`, because its indexes are the byte offsets where each rune
+starts.
 
 <!-- Moved to the reference ("Reassigned or ref-bound range variable"): a range variable the body reassigns
 iterates a temporary and the body declares a writable copy, foreach (var (_, rᴛ1) in s) { var r = rᴛ1; … }
@@ -6952,13 +6967,15 @@ func g1() {
 	fmt.Println("g1:", fs[0](), fs[1](), fs[2]())
 }
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:19-26 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:19-28 -->
 ```csharp
 internal static void g1() {
+    var fsᴷ = new stackAppend<Func<nint>>();
+
     slice<Func<nint>> fs = default!;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         var i = iᴛ1;
-        fs = append(fs, () => i);
+        fs = append(fsᴷ, fs, () => i);
     }
     fmt.Println("g1:", fs[0](), fs[1](), fs[2]());
 }
@@ -6967,7 +6984,9 @@ internal static void g1() {
 `slice<Func<nint>>` is a golib [slice](#slices-and-arrays) of C# delegates. The Go function literal
 becomes the lambda `() => i` ([Function Values and Closures](#function-values-and-closures)). The literal
 `"g1:"` stays a plain C# literal; go2cs-gen boxes it as a Go string for `fmt.Println`
-([Strings](#strings-string-and-sstring)).
+([Strings](#strings-string-and-sstring)). `fsᴷ` stands for the 32-byte stack buffer Go gives a slice
+whose appends do not escape the function: `append(fsᴷ, fs, …)` lets the slice's first append use that
+buffer, as Go's compiled code does ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 
 <!-- The copy-back example: src/tests/Behavioral/ForLoopPerIterationVars/main.go:27#749ae0 (g2, a body that writes i and
 continues) -> main.cs.target:30-49#b4bdc4, where `iᴛ1 = i;` appears before the `continue` and at the end of the body.
@@ -6993,9 +7012,11 @@ func g2() {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:28-44 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:30-49 -->
 ```csharp
 internal static void g2() {
+    var fsᴷ = new stackAppend<Func<nint>>(moves: true);
+
     slice<Func<nint>> fs = default!;
     for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
         var i = iᴛ1;
@@ -7004,17 +7025,20 @@ internal static void g2() {
             continue;
         }
         i++;
-        fs = append(fs, () => i);
+        fs = append(fsᴷ, fs, () => i);
         iᴛ1 = i;
     }
     fmt.Println("g2:", len(fs));
+    fs = move2heap(fsᴷ, fs);
     foreach (var (_, f) in fs) {
         fmt.Println("g2v:", f());
     }
 }
 ```
 
->>>
+`fsᴷ` is the stack buffer described under `g1`. Go copies a slice out of that buffer before a `range`
+over it, and `fs = move2heap(fsᴷ, fs);` is that copy; `moves: true` declares the buffer for it
+([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 
 **A body that takes `&i` gets a fresh heap box each iteration.** Go's `&i` needs `i` to live on the heap,
 so each iteration's `i` is stored in a golib heap box. This Go prints `g3: 0 1 2`, and so does the C#:
@@ -7029,14 +7053,16 @@ func g3() {
 	fmt.Println("g3:", *ps[0], *ps[1], *ps[2])
 }
 ```
-<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:46-55 -->
+<!-- source: src/tests/Behavioral/ForLoopPerIterationVars/main.cs.target:51-62 -->
 ```csharp
 internal static void g3() {
+    var psᴷ = new stackAppend<ж<nint>>();
+
     slice<ж<nint>> ps = default!;
     for (nint iᴛ1 = 0; iᴛ1 < 3; iᴛ1++) {
         ref var i = ref heap<nint>(out var Ꮡi);
         i = iᴛ1;
-        ps = append(ps, Ꮡi);
+        ps = append(psᴷ, ps, Ꮡi);
         iᴛ1 = i;
     }
     fmt.Println("g3:", ps[0].Value, ps[1].Value, ps[2].Value);
@@ -7046,7 +7072,7 @@ internal static void g3() {
 `ж<nint>` is golib's heap box, the C# form of Go's `*int`. `heap<nint>(out var Ꮡi)` makes a new box:
 `Ꮡi` is the box itself, Go's `&i`, and `i` is a C# `ref` to the value inside it. `.Value` reads through
 the box like Go's `*p`. A boxed `i` is always copied back, since code holding the pointer can change it
-([Pointers](#pointers)).
+([Pointers](#pointers)). `psᴷ` is the stack buffer described under `g1`.
 
 <!-- Reference gap: range over a function is covered only in generic-constraints.md (the named/generic Seq rule: .Invoke, spelled-out type arguments, yield false on break). No page states the Coro handoff or the panic rethrow into the ranging function (golib runtime/YieldFunctionEnumerator.cs). Move or add the rule in labels-and-loop-variables.md with its guard tests, and extend the Full detail line. -->
 **Range over a function becomes a `foreach` over golib's `range` helper.** In Go, an iterator is a
@@ -7608,7 +7634,7 @@ type names, so a C# `nint` prints as `int`. A few names in the C# need a word of
   standard library every other literal that becomes a string value moves into a `ˢ` field, but a format
   string stays inline: a field name made from it would not read well, and the formatting itself costs far
   more than the literal.
-- `(nint)(1)` boxes the untyped constant `1` at Go's default type `int`, which is C#
+- `(nint)1` boxes the untyped constant `1` at Go's default type `int`, which is C#
   [`nint`](#integer-types-and-arithmetic). A bare C# `1` would box as a 32-bit `int` instead
   ([Empty Interface](#empty-interface-any)).
 - `default!` is Go's `nil`. It is C#'s default value, here `null`; the `!` only silences a nullable
@@ -7689,6 +7715,14 @@ internal static void scanInto(any v) {
 }
 ```
 
+<!-- src/tests/Behavioral/TypeSwitchNilPointer/main.go:31 `case *T:` -> main.cs.target:36 `case ж<T> v: {`, with
+main.cs.target:74 `fmt.Println(classify(new TжNamer(p)));` and :78 `fmt.Println(classifyAny(p.OrTypedNil()));`;
+src/core/golib/builtin.cs:3640 `public static object type(this object target)`. -->
+An interface that holds a nil `*T` is not a nil interface in Go, and it matches `case *T:` with a nil
+`t`. The converted code does the same: such an interface carries golib's shared nil box, not a C# `null`,
+so `type()` returns that box and the `ж<T>` pattern matches it. The `TypeSwitchNilPointer` behavioral test
+checks this against Go.
+
 **`case int:` also catches a C# `int`.** Go's `int` becomes the native-sized `nint`
 ([Integer Types](#integer-types-and-arithmetic)). A value can still reach an interface as a plain C#
 `int`, for example from hand-written C# code, and its dynamic type is then `int32`. So the converter adds
@@ -7757,6 +7791,12 @@ that the same label binds ([Names and Glyphs](#reading-converted-code-names-and-
 guard calls `_<T>`, golib's type assertion, in a form that returns `false` instead of panicking. On
 success, `v` holds the value as an `error`.
 
+<!-- src/core/golib/builtin.cs:3374 `if (AdapterRegistry.TryGetAdapterFactory(subjectType, typeOfT,`
+and :3390 `AdapterBinder.TryCreate(subject, typeOfT, out object? shell)`;
+reference: type-switch.md, "Named-interface case labels". -->
+`_<T>` decides at run time, from the methods of the value's Go type: it uses the adapter generated for
+that type and interface when one exists, and otherwise builds one with golib's `AdapterBinder`.
+
 The other names in this example:
 
 - `@out` is Go's `out`, escaped with `@` because `out` is a C# keyword.
@@ -7765,7 +7805,7 @@ The other names in this example:
 - `case string:` becomes `case @string v:`, since Go's `string` is golib's `@string`. An `@string`
   compares and concatenates directly with `"…"u8` literals, so `v == "x"u8` and `"error("u8 + …` read
   like the Go.
-- `case int:` gets its repeated `case int32 v:` arm, as described earlier in this section.
+- `case int:` gets a repeated `case int32 v:` arm, which catches a plain C# `int` held in the interface.
 
 **Full detail:** [Reference → Type Switch Statements](ConversionStrategies-Reference/type-switch.md#type-switch-statements) — switches with no case variable, how cases that share one C# type merge, anonymous interface labels, and how interface cases find methods declared on a pointer.
 
@@ -7773,13 +7813,14 @@ The other names in this example:
 
 ## Defer / Panic / Recover
 
-Go's `defer`, `panic` and `recover` become a C# `try`/`catch`/`finally` plus three golib calls. The
-function body stays inline, so it still reads like the Go. You will notice a local named `ᒐ`,
-`defer(…, ref ᒐ)` calls, and `throw panic(x)`.
+Go's `defer`, `panic` and `recover` become a C# `try`/`catch`/`finally` plus three calls into
+[golib](#the-golib-runtime-library), go2cs's runtime library. The function body stays inline, so it still
+reads like the Go. You will notice a local named `ᒐ`, `defer(…, ref ᒐ)` calls, and `throw panic(x)`.
 
+<!-- src/tests/Behavioral/DeferSimple/DeferSimple.csproj:113 `<Using Include="go.builtin" Static="True" />` -->
 `defer`, `panic` and `recover` are static methods of golib's [`builtin`](../src/core/golib/builtin.cs)
-class. Every converted file imports that class with `using static`, so the calls need no class name, as
-in Go ([Built-in Functions](#built-in-functions)).
+class. Every converted project imports that class with a project-wide `using static`, so the calls need
+no class name, as in Go ([Built-in Functions](#built-in-functions)).
 
 <!-- Condensed to the forms a reader meets: the inline body with its frame, eager defer arguments, named
 results with an early return, unnamed results, a panic crossing a call, and which runtime errors recover()
@@ -7935,6 +7976,17 @@ internal static (nint code, @string msg) guarded(bool boom) {
 With `boom` true, the `throw` jumps to the `catch`, which parks the panic. The `finally` runs the deferred
 closure, whose `recover()` returns "kaboom". The panic stops there, and `guarded` returns `-1, "recovered"`.
 With `boom` false, `recover()` returns `nil`, and `guarded` returns `0, "ok"`.
+
+<!-- src/core/golib/builtin.cs:342 `PanicException? panic = state.RecoverablePanic;`;
+src/core/golib/GoFrame.cs:180 `frame is itself a deferred call that panic is running (Go's direct-call rule`;
+the accepted divergence: src/core/golib/builtin.cs:334 `Known divergence, accepted: a recover() in a HELPER`.
+Probe (converted, not run): `func helper() any { return recover() }` called from `defer func() { r = helper() }()`
+emits a plain `return recover();` inside helper's own frame; Go 1.26.10 on linux/amd64 lets the panic reach an outer
+recover. -->
+As in Go, `recover()` can stop only the panic whose deferred calls are running. In the deferred calls of a
+function that is returning normally it returns `nil`, even while an outer panic unwinds. One difference
+is accepted: Go's `recover()` stops a panic only when the deferred function calls it directly, while
+golib's also stops it when called from a helper that the deferred function calls.
 
 `recover()` returns Go's `any`, a C# `object?` that is `null` when no panic is in flight. Converted code
 spells Go's `nil` and zero values as `default!`, so `r != default!` is Go's `r != nil`
