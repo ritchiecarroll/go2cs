@@ -164,13 +164,20 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
     /// (backing, absolute index) when <typeparamref name="T"/> is <see cref="BoxShape{T}.Slotted"/>,
     /// a fresh box otherwise.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ж<T> OfArrayElement(array<T> array, int index)
     {
         T[]? backing = array.Source;
 
+        // outside the scope the call site keeps the inlined fresh box it had before the table existed
         if (!BoxShape<T>.Slotted || backing is null)
             return new ElemRefBox<T>(array, index);
 
+        return persistentArrayElement(array, backing, index);
+    }
+
+    private static ж<T> persistentArrayElement(array<T> array, T[] backing, int index)
+    {
         ElemRefBox<T>?[]?[] chunks = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]);
         int slot = (int)array.Low + index;
         int chunkIndex = slot / ElementBoxChunk;
