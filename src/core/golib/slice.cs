@@ -1581,6 +1581,39 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return new slice<T>(newArray, 0, slice.Length + elems.Length);
     }
 
+    // A slice-typed spread operand's elements appended to slice: the window arm of the ISlice<T> form below, and
+    // the whole of builtin.appendꓸꓸꓸ's exact slice<T> overload, which reaches it with no box.
+    internal static slice<T> AppendWindow(in slice<T> slice, in slice<T> window)
+    {
+        // Zero-size elements move no bytes, and their windows are the one place a LENGTH can
+        // legitimately exceed every span (`make([]struct{}, math.MaxInt)` is legal Go —
+        // slices' own TestConcat_too_large drives exactly these through Concat's Grow): route
+        // by arithmetic before any span form, mirroring the span core's own zero-size arm.
+        if (GoZeroSizeFacts<T>.IsZeroSize)
+        {
+            nint zeroAdded = window.m_length;
+
+            if (zeroAdded == 0)
+                return slice;
+
+            nint zeroLength = slice.m_length + zeroAdded;
+
+            if (slice != nil && zeroAdded <= slice.Available)
+                return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
+
+            // Go's zero-size growslice: cap = len, which also holds for the giant lengths only
+            // zero-size elements can reach.
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroLength);
+        }
+
+        if (window.m_nativeBase == 0 || window.m_length <= int.MaxValue)
+            return Append(slice, window.ToSpan());
+
+        // A native window past the span ceiling cannot land in any managed backing either —
+        // Go's growslice answers the same impossible request with this panic.
+        throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
+    }
+
     // The SLICE-SHAPED SPREAD route (the Span int32-ceiling arc): `append(s, t...)` arrives with
     // the operand AS THE SLICE IT IS instead of projected through `.ꓸꓸꓸ` to a Span at the call
     // boundary. The window's own span still serves the copy wherever a span can express it — a
@@ -1597,35 +1630,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             return slice;
 
         if (elems is slice<T> window)
-        {
-            // Zero-size elements move no bytes, and their windows are the one place a LENGTH can
-            // legitimately exceed every span (`make([]struct{}, math.MaxInt)` is legal Go —
-            // slices' own TestConcat_too_large drives exactly these through Concat's Grow): route
-            // by arithmetic before any span form, mirroring the span core's own zero-size arm.
-            if (GoZeroSizeFacts<T>.IsZeroSize)
-            {
-                nint zeroAdded = window.m_length;
-
-                if (zeroAdded == 0)
-                    return slice;
-
-                nint zeroLength = slice.m_length + zeroAdded;
-
-                if (slice != nil && zeroAdded <= slice.Available)
-                    return new slice<T>(GoZeroSizeFacts<T>.Storage, slice.m_low, slice.m_low + zeroLength, slice.m_low + slice.m_capacity);
-
-                // Go's zero-size growslice: cap = len, which also holds for the giant lengths only
-                // zero-size elements can reach.
-                return new slice<T>(GoZeroSizeFacts<T>.Storage, 0, zeroLength, zeroLength);
-            }
-
-            if (window.m_nativeBase == 0 || window.m_length <= int.MaxValue)
-                return Append(slice, window.ToSpan());
-
-            // A native window past the span ceiling cannot land in any managed backing either —
-            // Go's growslice answers the same impossible request with this panic.
-            throw RuntimeErrorPanic.GrowSliceLenOutOfRange();
-        }
+            return AppendWindow(slice, window);
 
         // A named-slice wrapper (or any foreign ISlice<T>): its own spread property is the same
         // zero-copy window projection the call boundary used to make — one interface call, now
