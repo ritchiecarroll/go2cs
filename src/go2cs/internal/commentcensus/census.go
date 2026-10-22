@@ -205,6 +205,16 @@ func commentOnly(cs *csFile, ln int) bool {
 
 var attrRe = regexp.MustCompile(`^\s*\[[A-Za-z]`)
 
+// lazyHolderRe matches the one line a lazily built package var is declared on (docs/DESIGN-lazy-static-data.md):
+// `[GoLazy] partial class lazyᴛX { internal static T X = ...`. It opens with an attribute but carries the var's own
+// declaration, so it is the var's code line, never an attribute line to step over.
+var lazyHolderRe = regexp.MustCompile(`^\s*\[GoLazy(\([^)]*\))?\]\s+partial class `)
+
+// isAttrLine reports whether a line is an attribute ahead of the code it marks.
+func isAttrLine(line string) bool {
+	return attrRe.MatchString(line) && !lazyHolderRe.MatchString(line)
+}
+
 // scaffoldRe matches the lines the converter writes ahead of a statement's own translation: a func literal's
 // capture copy (`var xʗ1 = x;`), a heap box for an escaping local (`ref var x = ref heap<T>(out var Ꮡx);`), and Go
 // 1.26's move of a buffered slice to the heap (`x = move2heap(xᴷ, x);`), which Go inserts ahead of the statement.
@@ -237,7 +247,7 @@ func anchorIdents(code string) map[string]bool {
 
 func nextCodeLineCS(cs *csFile, ln int) int {
 	for l := ln + 1; l <= len(cs.lines); l++ {
-		if cs.codeOnLine[l-1] && !attrRe.MatchString(cs.codeText[l-1]) {
+		if cs.codeOnLine[l-1] && !isAttrLine(cs.codeText[l-1]) {
 			return l
 		}
 	}
@@ -549,7 +559,7 @@ func analyze(p pair, r *results, verbose bool) {
 	findDecl := func(name string) int { return findDeclKind(name, "value") }
 	csStart := func(ln int) int { // walk up over comments and attributes
 		s := ln
-		for s-1 >= 1 && (commentOnly(cs, s-1) || attrRe.MatchString(cs.lines[s-2])) {
+		for s-1 >= 1 && (commentOnly(cs, s-1) || isAttrLine(cs.lines[s-2])) {
 			s--
 		}
 		return s
@@ -718,7 +728,7 @@ func analyze(p pair, r *results, verbose bool) {
 				// the scope block the translation opens around it.
 				scoped := scopedInitRe.MatchString(strings.TrimSpace(g.src[L-1]))
 				st := csLine
-				for st-1 > cOpen && (commentOnly(cs, st-1) || attrRe.MatchString(cs.lines[st-2]) || walkScaffoldRe.MatchString(strings.TrimSpace(cs.codeText[st-2])) ||
+				for st-1 > cOpen && (commentOnly(cs, st-1) || isAttrLine(cs.lines[st-2]) || walkScaffoldRe.MatchString(strings.TrimSpace(cs.codeText[st-2])) ||
 					scoped && strings.TrimSpace(cs.codeText[st-2]) == "{") {
 					st--
 				}
@@ -827,7 +837,7 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 			return c
 		}
 		code := strings.TrimSpace(cs.codeText[l-1])
-		if code != "{" && !scaffoldRe.MatchString(code) && !attrRe.MatchString(cs.codeText[l-1]) {
+		if code != "{" && !scaffoldRe.MatchString(code) && !isAttrLine(cs.codeText[l-1]) {
 			return 0
 		}
 	}
