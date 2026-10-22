@@ -276,6 +276,63 @@ The `int` case is emitted byte-identically — bare `range(expr)` — but it nee
 Guarded by the `RangeOverIntegerTypes` behavioral test (blank-key `uintptr`, `uint8`/`int64`/`uint64`/`rune`, a named `uintptr` type, non-positive operands, and the unchanged `int`/untyped cases, output-compared vs Go — reverting the `isInt` widening reproduces `FAIL [Target,Output]`) and by `GolibTests.GoStructLayoutTests` (the `range<T>` widths and the literal-operand overload binding). Behavioral `check-no-regression` was byte-identical apart from the new project when this landed, the expected shape for a construct the corpus barely uses.
 <!-- at landing: 570 behavioral packages, and exactly one non-`int` range operand in the converted stdlib; neither figure is re-measured by a guard. -->
 
+## An index-only range over a slice or array reads no element
+<!-- src/go2cs/visitRangeStmt.go:744 `} else if (isSlice || isArray) && valExpr == "_" {`;
+src/core/golib/RangeIndexOnly.cs:38 `range<T>(slice<T> s) => range(s.Length)`, :50 `range<T>(sslice<T> s)`,
+:58 `range<T>(array<T> a)`, :71 `range<TArray>(ж<TArray> p)`, :86 `range<TSeq>(in TSeq x) where TSeq : IArray`. -->
+Go's index-only range (`for i := range s`, `for i, _ := range s`, or `for range s`) reads the length once and
+loads no element. The converter emits golib's index enumerator for it, `foreach (var i in range(s))`, when the
+operand is a slice, an array, a pointer to an array, a named slice or array type, a type parameter whose core type
+is one, or a variadic parameter that the converter emits as golib's stack-only `sslice<T>`:
+
+```go
+for i := range s { … }
+for range s { … }
+```
+```csharp
+foreach (var i in range(s)) { … }
+foreach (var _ᴛ1 in range(s)) { … }
+```
+
+Each `range` overload in golib's `RangeIndexOnly.cs` reads the operand's length once and returns
+`RangeOverInt<nint>`, the allocation-free enumerator of range-over-int, so `i` is Go's `int` and the loop yields
+`0` to `len(s) - 1`. A slice, an `sslice<T>`, an array and a pointer to an array bind their own overloads. A named
+sequence or a type parameter binds the constrained `range<TSeq>(in TSeq)`, which reads a struct operand without
+boxing it. The `sslice<T>` overload has to exist because `sslice<T>` is a ref struct: without it C# reaches the
+integer `range<T>(T)` and refuses the ref struct as its type argument (CS9244). A pointer to an array is passed as
+the pointer, with no `.Value` spelled, and its length is read through it.
+
+The (index, value) enumerator would not do here even with the value discarded: it reads every element into a stack
+temp. An element the body waits to see collected stays reachable from the loop's own frame
+(crypto/internal/fips140cache's TestCache never finished that way), and an element of a native-backed slice over
+memory that refuses a read panics where Go touches nothing.
+
+The scalar escapes of range-over-int apply unchanged: a blank or absent key iterates a marked temp (see the next
+section), an assigned key (`for i = range s`) iterates a temp and copies it into the existing variable, a key the
+body writes iterates a temp and declares the variable from it, and an address-taken key gets a fresh box per
+iteration.
+
+What keeps the pair form:
+- a **string**, `foreach (var (i, _) in s)`, because its indexes are the byte offsets where each rune starts, which
+  its length alone cannot produce;
+- a **map**, `foreach (var (k, _) in m)`;
+- a range with a **value variable**, `foreach (var (i, v) in s)`.
+
+Known divergence: Go's length of a `*[N]T` is the constant `N`, so Go ranges a nil array pointer `N` times without
+dereferencing it. golib's array carries its length in the value, not the type, so `range(p)` panics on a nil
+pointer.
+<!-- src/core/golib/RangeIndexOnly.cs:67-69 `Go's length of a <c>*[N]T</c> is the constant N, so Go ranges a nil … a nil pointer panics here` -->
+
+Guarded by the converter's `TestIndexOnlyRangeEmitsTheIndexEnumerator`, which pins every operand kind above, the
+scalar escapes and the string, map and value-variable controls, and by the behavioral goldens `ArrayRangeSnapshot`,
+`SlicePointerIdentity` and `VariadicPackPassThrough`.
+<!-- src/go2cs/rangeIndexOnly_test.go:189 `func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {`;
+:237 `expect("overString", "foreach (var (i, _) in str)")`; :238 `expect("overMap", "foreach (var (k, _) in m)")`.
+src/tests/Behavioral/ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:106 `foreach (var i in range(a)) {`;
+src/tests/Behavioral/SlicePointerIdentity/main.go:16 `for i := range s {` -> main.cs.target:13 `foreach (var i in range(s)) {`;
+src/tests/Behavioral/VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
+-> .cs.target:12 `foreach (var i in range(xs)) {`. -->
+
 ## A blank scalar range variable never emits as `_`
 A `range` with no iteration variable (or an explicit blank) over a **scalar-yield** source — a channel, an integer (Go 1.22 `for range n`), a single-value yield function, or a slice or array (whose index-only range also lowers to `range(x)`) — needs a C# `foreach` iteration variable, and that variable must **not** be named `_`: in a scalar `foreach` position C# declares a genuine read-only variable *named* `_` (only tuple-deconstruction `_` is a discard), which shadows the discard idiom for the entire loop body. Any Go blank assignment inside the body (`_ = f(x)` — evaluate and discard) then resolves to that variable and becomes an illegal write to a `foreach` iteration variable (**CS1656**; first hit: `encoding/binary`'s `BenchmarkSize`, `for range b.N { _ = Size(data) }`). The converter emits a marked temp instead:
 ```go

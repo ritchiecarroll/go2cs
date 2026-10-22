@@ -492,7 +492,12 @@ slot, which a nested panic overwrites and a nested `recover()` clears (runtime's
 thread: `GoFrame.Run` sets a per-thread `RecoverablePanic` to the panic it is handling (null for a
 normal-return sequence) and restores the outer value on exit, so a `recover()` in the defers of a
 deferred function's own normal return answers nil, as Go's does (runtime's `TestRecoverMatching`).
-<!-- earlier text recorded this case as open and go2cs's recover() as looser than Go's direct-call rule; GoFrame.cs and GoFuncRoot.cs now cite these runtime tests. -->
+
+**One divergence is accepted: a `recover()` in a helper.** Go's `recover()` stops a panic only when the deferred
+function calls it directly. Called from a helper that the deferred function calls, Go's returns nil, and the panic
+goes on to an outer recover or crashes the program. golib's `recover()` reads the per-thread `RecoverablePanic`
+without regard to call depth, so in that helper it still returns the value and stops the panic early.
+<!-- The shared-slot case above is closed: GoFrame.cs and GoFuncRoot.cs cite runtime's TestIssue43920, TestIssue43921 and TestRecoverMatching. The direct-call rule is NOT closed: src/core/golib/builtin.cs:334 `Known divergence, accepted: a recover() in a HELPER`. An earlier comment here implied both were resolved. Probe 2026-10-22, Go 1.26.10 on linux/amd64: `func helper() any { return recover() }` called from `defer func() { … helper() … }()` in a panicking function, under an outer deferred recover, printed `outer: boom` in Go (the helper read nil). -->
 
 ## A nested defer scope gets a frame of its own
 

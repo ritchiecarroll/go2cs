@@ -576,6 +576,50 @@ pass of 159 as the two increment-6 JSON rows re-land. The next gaps this recorde
 variadic `Call`/`CallSlice`, and `reflectlite`'s `rtype.Name` — have since been hand-owned too
 (`manualConversionFuncs["reflect"]`; `rtype.Name` through the `TFlagNamed` stamp below).
 
+<a id="variadic-call-and-makefunc-under-native-aot"></a>
+**A variadic `Call` and `MakeFunc` work under Native AOT through compiled trampolines that go2cs-gen
+registers.** A converted Go variadic takes its tail as a C# `Span<T>`, so it is a golib `Funcꓸꓸꓸ<…>` or
+`Actionꓸꓸꓸ<…>` delegate, and `reflect` calls or makes one through a generic trampoline closed over that
+delegate's own type arguments (`GoReflect.VariadicRegistry.cs`). The JIT closes such a trampoline for any types.
+Native AOT has code for it only when compiled code named the instantiation, and a value type such as `@string`, a
+converted struct or `uintptr` gets no shared code. So go2cs-gen registers the trampolines, through
+`GoReflect.RegisterVariadicFunc` or `RegisterVariadicAction`, for every variadic signature that can reach
+`reflect` from its compilation:
+
+* a func value converted to an interface, and a func type nested in the parameters or results of such a value
+  (`EscapeRegistryGenerator`'s `VariadicRegistration`, on the same walk that registers the escaping containers);
+* a variadic method, whose arms in the type's generated `IGoMethodSet` part register both its method-func and its
+  method-value signature before `reflect` takes either (`MethodSet.cs`).
+
+The escape registry's registrations are queued when the package loads and run on the registry's first miss
+([Run-time registrations wait for the first lookup that misses](source-generators.md#run-time-registrations-wait-for-the-first-lookup-that-misses)),
+so a lookup that finds no trampoline first runs the queue, then looks again. A signature still unregistered after
+that is closed by `MakeGenericMethod`: always under the JIT, and under Native AOT when every type argument is a
+reference type. Under Native AOT a family with a value-type argument is refused by name, as a Go panic that
+`recover` can catch (`go2cs: reflect cannot call or make the variadic func …`), naming the family and the missing
+registration, never the runtime's missing-native-code exception. No Native AOT measurement of this path records its
+platform, so none is quoted here.
+
+Guards: the behavioral test `ReflectVariadicCall`; GolibTests' `GoReflectBridgeClosureTests`
+(`ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines`,
+`AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode`); GenTests'
+`EveryEscapingVariadicFuncSignatureIsRegistered` (`EscapeRegistryGeneratorTests`) and
+`AVariadicArmRegistersItsSignatures` (`GoMethodSetTests`); and GolibTests' `DeferredRegistrationTests`
+(`TheFirstVariadicMissRunsTheQueuedEscapeRegistry`).
+<!-- golib: src/core/golib/GoReflect.VariadicRegistry.cs:26-28 (`go2cs-gen calls one of these for every variadic signature that can`),
+     :49-53 (`GoDeferredRegistrations.EscapeRegistry.Run()`), :80-81
+     (`if (!golib.TypeExtensions.IsDynamicCodeSupported && System.Array.Exists(typeArguments, static argument => argument.IsValueType))`),
+     :98 (`go2cs: reflect cannot call or make the variadic func`). go2cs-gen: src/gen/go2cs-gen/EscapeRegistryGenerator.cs:394
+     (`internal static string? VariadicRegistration(Compilation? compilation, INamedTypeSymbol? package, ITypeSymbol type)`),
+     src/gen/go2cs-gen/MethodSet.cs:419 (`private static string? Registration(Compilation compilation, IReadOnlyList<string> parameters, string variadic, string returns)`),
+     :380 (`Registration(compilation, [receiverType, .. shape.Parameters], shape.Variadic, shape.Returns)`), :127-128
+     (`body.Append(register);`). Guards: src/tests/GolibTests/GoReflectBridgeClosureTests.cs:173
+     (`public void ARegisteredVariadicSignatureIsServedByItsCompiledTrampolines()`), :209
+     (`public void AnUnregisteredValueTypeVariadicIsRefusedByNameWithoutDynamicCode()`);
+     src/tests/GenTests/EscapeRegistryGeneratorTests.cs:126 (`public void EveryEscapingVariadicFuncSignatureIsRegistered()`);
+     src/tests/GenTests/GoMethodSetTests.cs:256 (`public void AVariadicArmRegistersItsSignatures()`);
+     src/tests/GolibTests/DeferredRegistrationTests.cs:178 (`public void TheFirstVariadicMissRunsTheQueuedEscapeRegistry()`). -->
+
 **A ZERO test is a descriptor read too, and this one had degraded to a CONSTANT — `Value.IsZero`,
 `Value.Grow`, and the named-string `Len` (2026-08-03).** Go's `IsZero` is three reads over flat
 memory: an `Equal` function pointer compared against the shared `zeroVal` buffer, a

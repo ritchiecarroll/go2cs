@@ -29,8 +29,8 @@ adjacent mutations do *not* throw, which is exactly what made this so easy to mi
 3.0 an **overwrite** of an existing key and a **`Remove`** are both version-free. Only the insert
 bites — and only when the inserted key is genuinely new.
 
-golib's `map<K,V>` used to hand out that enumerator directly, so every legal Go range-with-insert
-became a runtime fault. It now implements Go's contract itself: the range takes a **snapshot of the
+Handing out that enumerator directly would make every legal Go range-with-insert a runtime fault,
+so golib's `map<K,V>` implements Go's contract itself: the range takes a **snapshot of the
 entries** and re-reads each value at the moment it is visited
 ([`map.cs`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/golib/map.cs),
 `enumerateStore`). That lands every clause of the spec —
