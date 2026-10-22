@@ -188,7 +188,7 @@ internal static void gcinit() {
     ᏑgcController.init(readGOGC(), readGOMEMLIMIT());
 
     // Set up the cleanup block ptr mask.
-    foreach (var (i, _) in cleanupBlockPtrMask) {
+    foreach (var i in range(cleanupBlockPtrMask)) {
         cleanupBlockPtrMask[i] = 0xff;
     }
 

@@ -62,19 +62,7 @@ internal static traceTime traceClockNow() {
     return (traceTime)(uint64)(nanotime() / (int64)traceTimeDiv);
 }
 
-// traceClockUnitsPerSecond estimates the number of trace clock units per
-// second that elapse.
-//
-//go:linkname traceClockUnitsPerSecond runtime/trace.runtime_traceClockUnitsPerSecond
-internal static uint64 traceClockUnitsPerSecond() {
-    if (osHasLowResClock) {
-        // We're using cputicks as our clock, so we need a real estimate.
-        return (uint64)(ticksPerSecond() / (int64)traceTimeDiv);
-    }
-    // Our clock is nanotime, so it's just the constant time division.
-    // (trace clock units / nanoseconds) * (1e9 nanoseconds / 1 second)
-    return (uint64)(/* 1.0 / float64(traceTimeDiv) */ 0.00390625D * 1e9D);
-}
+// go2cs generated this placeholder — func traceClockUnitsPerSecond is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static void traceSyncBatch(uintptr gen, uint64 frequency) {
     var w = unsafeTraceWriter(gen, nil);

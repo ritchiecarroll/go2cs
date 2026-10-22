@@ -1487,7 +1487,7 @@ public static (slice<Symbol>, error) DynamicSymbols(this ref File f) {
         return (default!, err);
     }
     if (hasVersions) {
-        foreach (var (i, _) in sym) {
+        foreach (var i in range(sym)) {
             (sym[i].HasVersion, sym[i].VersionIndex, sym[i].Version, sym[i].Library) = f.gnuVersion(i);
         }
     }
@@ -1845,6 +1845,8 @@ internal static readonly @string lengthOfDynamicSectionIsˢ = "length of dynamic
 // The tag must be one that takes string values: [DT_NEEDED], [DT_SONAME], [DT_RPATH], or
 // [DT_RUNPATH].
 public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
+    var allᴷ = new stackAppend<@string>(moves: true);
+
     var exprᴛ1 = tag;
     if (exprᴛ1 == DT_NEEDED || exprᴛ1 == DT_SONAME || exprᴛ1 == DT_RPATH || exprᴛ1 == DT_RUNPATH) {
     }
@@ -1891,16 +1893,19 @@ public static (slice<@string>, error) DynString(this ref File f, DynTag tag) {
         if (t == tag) {
             var (s, ok) = getString(str, (nint)v);
             if (ok) {
-                all = append(all, s);
+                all = append(allᴷ, all, s);
             }
         }
     }
+    all = move2heap(allᴷ, all);
     return (all, default!);
 }
 
 // DynValue returns the values listed for the given tag in the file's dynamic
 // section.
 public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
+    var valsᴷ = new stackAppend<uint64>(moves: true);
+
     var ds = f.SectionByType(SHT_DYNAMIC);
     if (ds == nil) {
         return (default!, default!);
@@ -1935,9 +1940,10 @@ public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) {
             d = d[16..];
         }
         if (t == tag) {
-            vals = append(vals, v);
+            vals = append(valsᴷ, vals, v);
         }
     }
+    vals = move2heap(valsᴷ, vals);
     return (vals, default!);
 }
 

@@ -15,7 +15,7 @@ public static void TestSliceWriter(ж<testing.T> Ꮡt) {
         if (len(got) != len(want)) {
             tΔ1.Fatalf("bad length got %d want %d"u8, len(got), len(want));
         }
-        foreach (var (i, _) in got) {
+        foreach (var i in range(got)) {
             if (got[i] != want[i]) {
                 tΔ1.Fatalf("bad read at %d got %d want %d"u8, i, got[i], want[i]);
             }

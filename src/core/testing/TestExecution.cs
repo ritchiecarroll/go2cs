@@ -1384,7 +1384,7 @@ public sealed class TestExecution
     /// "an environment variable was set", which is why the field is no longer named for one.
     /// </para>
     /// </remarks>
-    private void CheckParallel()
+    internal void CheckParallel()
     {
         for (TestExecution? execution = this; execution is not null; execution = execution.m_parent)
         {
@@ -1413,10 +1413,13 @@ public sealed class TestExecution
     // ⚠ The "called multiple times" text below is NOT part of that replacement. It is UNCHANGED at
     // 1.24.13 (testing.go:1538) and must stay spelled exactly as it is: modernising all three texts
     // together is a wrong change that compiles.
+    //
+    // ⚠ Go 1.26 renamed the conflict a third time (testing.go:1752): cryptotest.SetGlobalRandom joined the
+    // contract through the checkParallel push (testing.cs), so the text names it beside Setenv and Chdir.
     private const string ParallelCalledMultipleTimesText =
         "testing: t.Parallel called multiple times";
     internal const string ParallelConflictText =
-        "testing: test using t.Setenv or t.Chdir can not use t.Parallel";
+        "testing: test using t.Setenv, t.Chdir, or cryptotest.SetGlobalRandom can not use t.Parallel";
 
     public void Parallel()
     {

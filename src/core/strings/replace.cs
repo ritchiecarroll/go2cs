@@ -62,7 +62,7 @@ internal static replacer build(this ref Replacer b) {
     if (allNewBytes) {
         ref var rΔ1 = ref heap<byteReplacer>(out var ᏑrΔ1);
         rΔ1 = new byteReplacer(new byte[256].array());
-        foreach (var (i, _) in rΔ1) {
+        foreach (var i in range(rΔ1)) {
             rΔ1[i] = (byte)i;
         }
         // The first occurrence of old->new map takes precedence

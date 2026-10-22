@@ -66,7 +66,7 @@ internal static tokenꓸPos pos(this ref fakeFileSet s, @string @file, nint line
 internal static void setLines(this ref fakeFileSet s) {
     ᏑfakeLinesOnce.Do(() => {
         fakeLines = new slice<nint>(maxlines);
-        foreach (var (i, _) in fakeLines) {
+        foreach (var i in range(fakeLines)) {
             fakeLines[i] = i;
         }
     });

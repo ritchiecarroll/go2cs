@@ -439,7 +439,7 @@ internal static error updateBinders(this ref clientHelloMsg m, slice<slice<byte>
     if (len(pskBinders) != len(m.pskBinders)) {
         return errors.New(tlsInternalErrorˢ5);
     }
-    foreach (var (i, _) in m.pskBinders) {
+    foreach (var i in range(m.pskBinders)) {
         if (len(pskBinders[i]) != len(m.pskBinders[i])) {
             return errors.New(tlsInternalErrorˢ5);
         }
@@ -1932,7 +1932,7 @@ internal static bool unmarshal(this ref certificateRequestMsg m, slice<byte> dat
         }
         var numSigAlgos = (uint16)(sigAndHashLen / 2);
         m.supportedSignatureAlgorithms = new slice<SignatureScheme>(numSigAlgos);
-        foreach (var (i, _) in m.supportedSignatureAlgorithms) {
+        foreach (var i in range(m.supportedSignatureAlgorithms)) {
             m.supportedSignatureAlgorithms[i] = (SignatureScheme)((SignatureScheme)(uint16)(((SignatureScheme)(uint16)data[0]) << 8) | ((SignatureScheme)(uint16)data[1]));
             data = data[2..];
         }

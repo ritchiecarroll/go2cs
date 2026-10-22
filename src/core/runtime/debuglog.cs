@@ -553,7 +553,7 @@ internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) {
 //go:nosplit
 internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) {
     array<byte> b = new(8);
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         b[i] = (~r.data).b[pos % (uint64)len((~r.data).b)];
         pos++;
     }

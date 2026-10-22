@@ -313,7 +313,7 @@ internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles,
     // "regular" meta-data file, then we can skip the package,
     // otherwise construct a dummy pod with the single meta-data file
     // (no counters) and invoke processPod on it.
-    foreach (var (i, _) in mfc.ImportPaths) {
+    foreach (var i in range(mfc.ImportPaths)) {
         @string p = mfc.ImportPaths[i];
         {
             var (_, ok) = importpaths[p, ꟷ]; if (ok) {
@@ -362,7 +362,7 @@ public static float64 Snapshot() {
                 break;
             }
             var counters = sd.slice(cst, cst + (nint)nCtrs);
-            foreach (var (iΔ1, _) in counters) {
+            foreach (var iΔ1 in range(counters)) {
                 if (Ꮡ(counters, iΔ1).Load() != 0) {
                     totExec++;
                 }

@@ -67,7 +67,7 @@ public static (slice<byte>, error) Key<Hash>(Func<Hash> h, @string password, sli
             prf.Write(U);
             U = U[..0];
             U = prf.Sum(U);
-            foreach (var (x, _) in U) {
+            foreach (var x in range(U)) {
                 T[x] ^= (byte)(U[x]);
             }
         }

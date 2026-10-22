@@ -61,6 +61,7 @@ public class NoUncountedBackingAllocationsTests
         ("channel.cs|int[] pollOrder = new int[liveCount];", "select scratch: Go's select statement keeps its lock/poll order in a compiler stack temp (cmd/compile/internal/walk/select.go, order TempAt)"),
         ("map.cs|KeyValuePair<TKey, TValue>[] entries = count == 0 ? [] : new KeyValuePair<TKey, TValue>[count];", "the range snapshot: Go's range over a map keeps its iterator in a compiler stack temp (cmd/compile/internal/walk/order.go, Prealloc newTemp)"),
         ("stackAppend.cs|T[] store = new T[capacity];", "the stack backing store: Go 1.25+ gives a non-escaping append's first growth a 32-byte buffer in the function's own frame (cmd/compile/internal/ssagen/ssa.go, getBackingStoreInfo and the append lowering), so the buffer allocates nothing"),
+        ("stackAppend.cs|T[] store = buffer.store ??= new T[bufferLength];", "the same stack backing store, taken by a variable whose capacity is observed: Go 1.26's growsliceBuf (runtime/slice.go) grows inside the 32-byte buffer in the function's own frame, and move2heap's copy out of it is the counted allocation, so the buffer allocates nothing"),
     ];
 
     // (c) INFRASTRUCTURE: not a Go-visible backing; the reason names what the array is.
@@ -101,7 +102,6 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/GoTimer.cs|GoTimer[] due = new GoTimer[16];", "runtime bookkeeping: the timer service thread's batch of due timers, allocated once when the thread starts and reused; Go runs due timers straight off ts.heap"),
         ("runtime/BoringCaches.cs|Action[] updated = new Action[s_caches.Length + 1];", "runtime bookkeeping: the registered cache-cleanup callbacks (copy-on-register)"),
         ("runtime/CrashReport.cs|byte[] bytes = Encoding.UTF8.GetBytes(report);", "crash-report output: the UTF-8 text of a fatal report, written once as the process dies"),
-        ("runtime/ExecutionTracer.cs|byte[] bytes = Encoding.UTF8.GetBytes(text);", "execution-trace output: a strings-table entry of the trace stream, written once per trace at stop; Go's tracer buffers are off-heap and never reach MemStats.Mallocs, so counting them would perturb AllocsPerRun under a running trace"),
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseEndUnixNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return Delegate.CreateDelegate(getMethodType(types.ToArray()), methodInfo);", "runtime metadata: the extension-method registry and delegate signature types"),

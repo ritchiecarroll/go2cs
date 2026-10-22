@@ -369,6 +369,8 @@ internal static spanKind spanOldHeading => 4;
 internal static spanKind spanPara => 5;
 
 internal static slice<span> parseSpans(slice<@string> lines) {
+    var spansᴷ = new stackAppend<span>(moves: true);
+
     slice<span> spans = default!;
 
     // The loop may process a line twice: once as unindented
@@ -502,12 +504,13 @@ Spans:
             }
         }
 
-        spans = append(spans, new span(start, end, kind));
+        spans = append(spansᴷ, spans, new span(start, end, kind));
         i = end;
 continue_Spans:;
     }
 break_Spans:;
 
+    spans = move2heap(spansᴷ, spans);
     return spans;
 }
 
@@ -665,7 +668,7 @@ internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) {
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
 internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
-    var defsᴷ = new stackAppend<ж<LinkDef>>();
+    var defsᴷ = new stackAppend<ж<LinkDef>>(moves: true);
 
     // Is this a block of known links? Handle.
     slice<ж<LinkDef>> defs = default!;
@@ -676,6 +679,7 @@ internal static Block paragraph(this ref parseDoc d, slice<@string> lines) {
         }
         defs = append(defsᴷ, defs, def);
     }
+    defs = move2heap(defsᴷ, defs);
     foreach (var (_, def) in defs) {
         d.Links = append(d.Links, def);
         if (d.links[(~def).Text] == nil) {

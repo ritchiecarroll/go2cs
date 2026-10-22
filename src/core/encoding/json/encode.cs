@@ -766,7 +766,7 @@ partial struct structFields {
 internal static void encode(this structEncoder se, ж<encodeState> Ꮡe, reflectꓸValue v, encOpts opts) {
     var next = (byte)(rune)'{';
 FieldLoop:
-    foreach (var (i, _) in se.fields.list) {
+    foreach (var i in range(se.fields.list)) {
         var f = Ꮡ(se.fields.list, i);
 
         // Find the nested struct field by following f.index.
@@ -1413,7 +1413,7 @@ internal static structFields typeFields(reflectꓸType t) {
     fields = @out;
     slices.SortFunc(fields, (field i, field j) => slices.Compare<slice<nint>, nint>(i.index, j.index));
 
-    foreach (var (i, _) in fields) {
+    foreach (var i in range(fields)) {
         var f = Ꮡ(fields, i);
         f.Value.encoder = typeEncoder(typeByIndex(t, (~f).index));
     }

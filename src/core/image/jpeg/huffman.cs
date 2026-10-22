@@ -122,7 +122,7 @@ internal static error processDHT(this ref decoder d, nint n) {
         // h.nCodes is the total number of codes.
         h.Value.nCodes = 0;
         array<int32> nCodes = new(16); /* maxCodeLength */
-        foreach (var (i, _) in nCodes) {
+        foreach (var i in range(nCodes)) {
             nCodes[i] = (int32)d.tmp[i + 1];
             h.Value.nCodes += nCodes[i];
         }

@@ -736,32 +736,32 @@ internal static bool illegalClientHelloChange(ref clientHelloMsg ch, ref clientH
     if (len(ch.supportedVersions) != len(ch1.supportedVersions) || len(ch.cipherSuites) != len(ch1.cipherSuites) || len(ch.supportedCurves) != len(ch1.supportedCurves) || len(ch.supportedSignatureAlgorithms) != len(ch1.supportedSignatureAlgorithms) || len(ch.supportedSignatureAlgorithmsCert) != len(ch1.supportedSignatureAlgorithmsCert) || len(ch.alpnProtocols) != len(ch1.alpnProtocols)) {
         return true;
     }
-    foreach (var (i, _) in ch.supportedVersions) {
+    foreach (var i in range(ch.supportedVersions)) {
         if (ch.supportedVersions[i] != ch1.supportedVersions[i]) {
             return true;
         }
     }
-    foreach (var (i, _) in ch.cipherSuites) {
+    foreach (var i in range(ch.cipherSuites)) {
         if (ch.cipherSuites[i] != ch1.cipherSuites[i]) {
             return true;
         }
     }
-    foreach (var (i, _) in ch.supportedCurves) {
+    foreach (var i in range(ch.supportedCurves)) {
         if (ch.supportedCurves[i] != ch1.supportedCurves[i]) {
             return true;
         }
     }
-    foreach (var (i, _) in ch.supportedSignatureAlgorithms) {
+    foreach (var i in range(ch.supportedSignatureAlgorithms)) {
         if (ch.supportedSignatureAlgorithms[i] != ch1.supportedSignatureAlgorithms[i]) {
             return true;
         }
     }
-    foreach (var (i, _) in ch.supportedSignatureAlgorithmsCert) {
+    foreach (var i in range(ch.supportedSignatureAlgorithmsCert)) {
         if (ch.supportedSignatureAlgorithmsCert[i] != ch1.supportedSignatureAlgorithmsCert[i]) {
             return true;
         }
     }
-    foreach (var (i, _) in ch.alpnProtocols) {
+    foreach (var i in range(ch.alpnProtocols)) {
         if (ch.alpnProtocols[i] != ch1.alpnProtocols[i]) {
             return true;
         }

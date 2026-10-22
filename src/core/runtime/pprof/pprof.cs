@@ -756,7 +756,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
     w = new tabwriter_WriterжWriter(tw);
 
     runtime.MemProfileRecord total = new();
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         var r = Ꮡ(p, i);
         total.AllocBytes += r.Value.AllocBytes;
         total.AllocObjects += r.Value.AllocObjects;
@@ -786,7 +786,7 @@ internal static error writeHeapInternal(io.Writer w, nint debug, @string default
         total.AllocObjects, allocBytes,
         rate);
 
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%d: %d [%d: %d] @"u8,
             r.InUseObjects(), r.InUseBytes(),
@@ -1140,7 +1140,7 @@ internal static error writeProfileInternal(io.Writer w, nint debug, @string name
         fmt.Fprintf(w, "sampling period=%d\n"u8, runtime.SetMutexProfileFraction(-1));
     }
     var expandedStack = pprof_makeProfStack();
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         var r = Ꮡ(p, i);
         fmt.Fprintf(w, "%v %v @"u8, (~r).Cycles, (~r).Count);
         nint nΔ1 = expandInlinedFrames(expandedStack, (~r).Stack);

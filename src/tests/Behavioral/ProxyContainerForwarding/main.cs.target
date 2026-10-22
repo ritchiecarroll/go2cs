@@ -100,11 +100,13 @@ public static @string Label(this ref Node n) {
 public static slice<@string> Walk<N>(N n)
     where N : Stepper<N>
 {
+    var outᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> @out = default!;
 
     while (ᐧ) {
         var triple = n.Triple();
-        @out = append(@out, n.Label() + "/"u8 + triple[2].Label());
+        @out = append(outᴷ, @out, n.Label() + "/"u8 + triple[2].Label());
 
         var next = n.Next();
 
@@ -115,6 +117,7 @@ public static slice<@string> Walk<N>(N n)
         n = next();
     }
 
+    @out = move2heap(outᴷ, @out);
     return @out;
 }
 

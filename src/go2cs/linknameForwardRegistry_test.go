@@ -103,10 +103,46 @@ func TestLinknameForwardTargetsMatchGoSource(t *testing.T) {
 			continue
 		}
 
+		// A HAND-OWNED package (isNonConvertedStdLibPackage: testing) is never emitted by the converter, so
+		// packageFuncAccess and its handle play no part: the target's accessibility is the hand-written
+		// file's. What must hold instead is that the hand-owned source declares it public static under the
+		// symbol's own name (testing.checkParallel, the push cryptotest's SetGlobalRandom pulls).
+		if isNonConvertedStdLibPackage(pkgPath) {
+			verifyHandOwnedForwardTarget(t, pkgPath, symbol)
+			continue
+		}
+
 		if !pkgHasLinknameHandle(t, goRoot, pkgPath, symbol) {
 			t.Errorf("whitelist entry %q: %s has a Go body but %s carries no one-arg `//go:linkname %s` handle — packageFuncAccess widens a forward target to `public` only on that handle, so the emitted forwarder would call an `internal` symbol across an assembly boundary (CS0122)", target, symbol, pkgPath, symbol)
 		}
 	}
+}
+
+// verifyHandOwnedForwardTarget checks a forward row whose target lives in a HAND-OWNED package: the package's
+// hand-written C# (src/core/<pkgPath>) declares the symbol public static, so the forwarder emitted in another
+// assembly can call it. A hand-owned package with no .cs at that path fails loudly rather than passing empty.
+func verifyHandOwnedForwardTarget(t *testing.T, pkgPath, symbol string) {
+	t.Helper()
+
+	dir := filepath.Join(repoRootFromPackageDir(t), "src", "core", filepath.FromSlash(pkgPath))
+	files, err := filepath.Glob(filepath.Join(dir, "*.cs"))
+
+	if err != nil || len(files) == 0 {
+		t.Errorf("forward row %s.%s: the hand-owned package has no .cs files at %s", pkgPath, symbol, dir)
+		return
+	}
+
+	declaration := regexp.MustCompile(`public static [^(\n]*\b` + regexp.QuoteMeta(symbol) + `\(`)
+
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+
+		if err == nil && declaration.Match(content) {
+			return
+		}
+	}
+
+	t.Errorf("forward row %s.%s: no hand-owned file in %s declares `public static ... %s(`, so the forwarder emitted in the pulling package would not compile", pkgPath, symbol, dir, symbol)
 }
 
 // verifyLinknameForwardDefinition checks a forward row whose symbol Go defines under another name: the
@@ -468,7 +504,9 @@ func TestLinknameForwardHandlesCoverEveryPullingTarget(t *testing.T) {
 
 		pkgPath, symbol, ok := splitLastDot(target)
 
-		if !ok || token.IsExported(symbol) || !anyDeclHasBody(findGoFuncDecls(t, goRoot, pkgPath, symbol)) {
+		// A hand-owned package's target is never converter-emitted, so no handle widens it (its public
+		// declaration is checked by TestLinknameForwardTargetsMatchGoSource instead).
+		if !ok || token.IsExported(symbol) || isNonConvertedStdLibPackage(pkgPath) || !anyDeclHasBody(findGoFuncDecls(t, goRoot, pkgPath, symbol)) {
 			continue
 		}
 

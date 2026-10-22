@@ -255,7 +255,7 @@ internal static void finishsweep_m() {
     // so that we can catch unswept spans and reclaim blocks as
     // soon as possible.
     var sg = mheap_.sweepgen;
-    foreach (var (i, _) in mheap_.central) {
+    foreach (var i in range(mheap_.central)) {
         var c = Ꮡmheap_.at(mheap.Ꮡcentral, i).of(mheap_central.Ꮡmcentral);
         c.partialUnswept(sg).reset();
         c.fullUnswept(sg).reset();

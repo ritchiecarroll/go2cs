@@ -166,6 +166,7 @@ partial struct NetlinkRouteAttr {
 // NetlinkRouteAttr structures.
 public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ж<NetlinkMessage> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
+    var attrsᴷ = new stackAppend<NetlinkRouteAttr>(moves: true);
 
     slice<byte> b = default!;
     var exprᴛ1 = m.Header.Type;
@@ -188,9 +189,10 @@ public static (slice<NetlinkRouteAttr>, error) ParseNetlinkRouteAttr(ж<NetlinkM
             return (default!, err);
         }
         var ra = new NetlinkRouteAttr(Attr: a.Value, Value: vbuf.slice(0, (nint)(~a).Len - (nint)SizeofRtAttr));
-        attrs = append(attrs, ra);
+        attrs = append(attrsᴷ, attrs, ra);
         b = b.slice(alen);
     }
+    attrs = move2heap(attrsᴷ, attrs);
     return (attrs, default!);
 }
 

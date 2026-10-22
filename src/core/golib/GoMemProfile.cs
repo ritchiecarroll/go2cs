@@ -30,6 +30,12 @@ public enum GoAllocEntry : byte
 
     /// <summary><c>runtime.growslice</c>: an <c>append</c> that allocates.</summary>
     GrowSlice,
+
+    /// <summary><c>runtime.moveSlice</c>: <c>move2heap</c> of a slice whose capacity is observed.</summary>
+    MoveSlice,
+
+    /// <summary><c>runtime.moveSliceNoCap</c>: <c>move2heap</c> of a slice whose capacity is not observed.</summary>
+    MoveSliceNoCap,
 }
 
 /// <summary>

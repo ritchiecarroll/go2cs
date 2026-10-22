@@ -194,7 +194,7 @@ internal static void shuffleByWeight(this byPriorityWeight addrs) {
     while (sum > 0 && len(addrs) > 1) {
         nint s = 0;
         nint n = randIntn(sum);
-        foreach (var (i, _) in addrs) {
+        foreach (var i in range(addrs)) {
             s += (nint)(~addrs[i]).Weight;
             if (s > n) {
                 if (i > 0) {
@@ -239,7 +239,7 @@ partial struct byPref /*[]ж<MX>*/;
 
 // sort reorders MX records as specified in RFC 5321.
 internal static void sort(this byPref s) {
-    foreach (var (i, _) in s) {
+    foreach (var i in range(s)) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }

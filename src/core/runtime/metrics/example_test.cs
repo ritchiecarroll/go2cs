@@ -45,7 +45,7 @@ public static void ExampleRead_readingAllMetrics() {
 
     // Create a sample for each metric.
     var samples = new slice<metrics.Sample>(len(descs));
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         samples[i].Name = descs[i].Name;
     }
 

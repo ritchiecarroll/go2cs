@@ -300,7 +300,7 @@ internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte
     }
     nint j = 0;
     var p = new Δcolor.Palette(n);
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = new colorꓸRGBA(d.tmp[j + 0], d.tmp[j + 1], d.tmp[j + 2], 0xFF);
         j += 3;
     }

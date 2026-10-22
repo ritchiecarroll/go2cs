@@ -186,8 +186,8 @@ partial struct FlightRecorderConfig {
 }
 
 //go:linkname runtime_traceClockUnitsPerSecond
-internal static uint64 runtime_traceClockUnitsPerSecond() {
-    throw panic("go2cs: //go:linkname push runtime.traceClockUnitsPerSecond -> runtime/trace.runtime_traceClockUnitsPerSecond is not honored: the flight recorder reads the converted execution tracer's generations, and the managed tracer (golib ExecutionTracer, behind runtime.StartTrace) has none to advance or clock; runtime/trace.Start is supported, trace.FlightRecorder is not");
+/*linkname*/ internal static partial uint64 runtime_traceClockUnitsPerSecond() {
+    return go.runtime_package.traceClockUnitsPerSecond();
 }
 
 //go:linkname runtime_traceAdvance runtime.traceAdvance

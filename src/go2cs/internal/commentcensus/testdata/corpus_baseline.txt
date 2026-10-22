@@ -3,10 +3,10 @@
 # Lower a count only in the commit whose corpus re-emission lowers it (see corpus_test.go).
 blank2:member-boundary	15
 body:extra:after-lowered-switch	50
-body:extra:after-named-result-locals	49
+body:extra:after-named-result-locals	48
 body:extra:after-param-prelude	173
 body:extra:unexplained	2386
-body:go-blank-cs-none	1777
+body:go-blank-cs-none	1776
 body:go-blank-unmapped	2042
 eol:cs-ragged-run	957
 eol:misaligned	941
@@ -42,7 +42,7 @@ missed:trailing-spec	91
 partial:field-doc	1
 top:go-blank-cs-none	59
 top:go-none-cs-blank	1071
-top:unmapped:func	45
+top:unmapped:func	46
 top:unmapped:type-alias	29
 top:unmapped:type-other	70
 top:unmapped:type-struct	1

@@ -28,12 +28,15 @@ internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
 }
 
 internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
+    var nodesᴷ = new stackAppend<ж<ring>>(moves: true);
+
     var nodes = new ж<ring>[]{Ꮡr}.slice();
     var p = Ꮡr;
     for (nint i = 0; i < n; i++) {
         p = p.Value.next;
-        nodes = append(nodes, p);
+        nodes = append(nodesᴷ, nodes, p);
     }
+    nodes = move2heap(nodesᴷ, nodes);
     return nodes;
 }
 

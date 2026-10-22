@@ -215,7 +215,7 @@ internal static int32 matchLen(this ref deflateFast e, int32 s, int32 t, slice<b
         var aΔ1 = src.slice(s, s1);
         bΔ1 = bΔ1.slice(0, len(aΔ1));
         // Extend the match to be as long as possible.
-        foreach (var (i, _) in aΔ1) {
+        foreach (var i in range(aΔ1)) {
             if (aΔ1[i] != bΔ1[i]) {
                 return (int32)i;
             }
@@ -236,7 +236,7 @@ internal static int32 matchLen(this ref deflateFast e, int32 s, int32 t, slice<b
         b = b.slice(0, len(a));
     }
     a = a.slice(0, len(b));
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         if (a[i] != b[i]) {
             return (int32)i;
         }
@@ -252,7 +252,7 @@ internal static int32 matchLen(this ref deflateFast e, int32 s, int32 t, slice<b
     // Continue looking for more matches in the current block.
     a = src.slice(s + n, s1);
     b = src.slice(0, len(a));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         if (a[i] != b[i]) {
             return (int32)i + n;
         }
@@ -287,7 +287,7 @@ internal static void shiftOffsets(this ref deflateFast e) {
     }
 
     // Shift down everything in the table that isn't already too far away.
-    foreach (var (i, _) in e.table[..]) {
+    foreach (var i in range(e.table[..])) {
         var v = e.table[i].offset - e.cur + (int32)maxMatchOffset + 1;
         if (v < 0) {
             // We want to reset e.cur to maxMatchOffset + 1, so we need to shift

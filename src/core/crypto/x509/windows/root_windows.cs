@@ -79,6 +79,7 @@ internal static readonly @string x509InvalidSimpleChainˢ = "x509: invalid simpl
 // extractSimpleChain extracts the final certificate chain from a CertSimpleChain.
 internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<ж<syscall.CertSimpleChain>> ᏑsimpleChain, nint count) {
     slice<ж<Certificate>> chain = default!;
+    var chainᴷ = new stackAppend<ж<Certificate>>(moves: true);
 
     if (ᏑsimpleChain == nil || count == 0) {
         return (default!, errors.New(x509InvalidSimpleChainˢ));
@@ -96,9 +97,10 @@ internal static (slice<ж<Certificate>> chain, error err) extractSimpleChain(ж<
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        chain = append(chain, parsedCert);
+        chain = append(chainᴷ, chain, parsedCert);
     }
 
+    chain = move2heap(chainᴷ, chain);
     return (chain, default!);
 }
 
