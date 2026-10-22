@@ -27,6 +27,13 @@
 //  6. a handle NUMBER reused after a close: closing one of two Files over one handle leaves the
 //     other File's FD registered under a number the kernel is free to hand out again. A new handle
 //     that gets it must open and work, as in Go, and not trip over the old FD's record.
+//  7. CONSECUTIVE writes on one bound FD: eight small writes back to back, each completing at once
+//     inside the pipe's buffer, then four writes larger than the buffer, each pending until the
+//     server end drains it. Every write is an execIO submit that waits for its own completion, so a
+//     completion that does not reach the poller hangs the write after it. A converted program
+//     writing stdout to a shell-made overlapped pipe once printed its first line and never returned
+//     from the second write (fixed by the named-pipe completion delivery); no step above writes twice
+//     in a row through one bound FD.
 //
 // Files that share one handle are kept reachable until the program exits: each File's finalizer
 // closes the handle, and a second close of a reused number would close an unrelated handle.
@@ -229,5 +236,41 @@ func main() {
 		}
 
 		return fmt.Sprintf("%q %q", before, readLines(server5, 1))
+	})
+
+	step("7 consecutive writes on one bound FD", func() string {
+		server7, client7 := pipe()
+		f := os.NewFile(uintptr(client7), "f")
+
+		for i := 1; i <= 8; i++ {
+			if _, err := f.Write([]byte("write " + strconv.Itoa(i) + "\n")); err != nil {
+				return fmt.Sprintf("small write %d: %v", i, err)
+			}
+		}
+		small := readLines(server7, 8)
+
+		const large, chunk = 4, 16 << 10
+		drained := make(chan string, 1)
+		go func() {
+			total, buf := 0, make([]byte, 4096)
+			for total < large*chunk {
+				k, err := server7.Read(buf)
+				total += k
+				if err != nil {
+					drained <- fmt.Sprintf("%d bytes <%v>", total, err)
+					return
+				}
+			}
+			drained <- fmt.Sprintf("%d bytes", total)
+		}()
+
+		for i := 1; i <= large; i++ {
+			if n, err := f.Write([]byte(strings.Repeat(strconv.Itoa(i), chunk))); err != nil || n != chunk {
+				return fmt.Sprintf("large write %d: n=%d err=%v", i, n, err)
+			}
+		}
+
+		return fmt.Sprintf("%d small lines, last %q; %d large writes, %s drained",
+			strings.Count(small, "\n"), small[strings.LastIndex(small[:len(small)-1], "\n")+1:], large, <-drained)
 	})
 }

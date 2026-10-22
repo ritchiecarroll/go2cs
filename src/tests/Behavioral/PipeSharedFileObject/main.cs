@@ -225,6 +225,50 @@ internal static void Main() {
 
         return fmt.Sprintf("%q %q"u8, before, readLines(server5, 1));
     });
+
+    step("7 consecutive writes on one bound FD", [MethodImpl(MethodImplOptions.NoInlining)] () => {
+        var (server7, client7) = pipe();
+        var f = os.NewFile((uintptr)client7, "f");
+
+        for (nint i = 1; i <= 8; i++) {
+            {
+                var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != default!) {
+                    return fmt.Sprintf("small write %d: %v"u8, i, err);
+                }
+            }
+        }
+        @string small = readLines(server7, 8);
+
+        UntypedInt large = 4;
+        UntypedInt chunk = /* 16 << 10 */ 16384;
+        var drained = new channel<@string>(1);
+        var drainedʗ1 = drained;
+        var server7ʗ1 = server7;
+        goǃ(() => {
+            nint total = 0;
+            var buf = new slice<byte>(4096);
+            while (total < (nint)(large * chunk)) {
+                var (k, err) = server7ʗ1.Read(buf);
+                total += k;
+                if (err != default!) {
+                    drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes <%v>"u8, total, err));
+                    return;
+                }
+            }
+            drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes"u8, total));
+        });
+
+        for (nint i = 1; i <= large; i++) {
+            {
+                var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != default! || n != chunk) {
+                    return fmt.Sprintf("large write %d: n=%d err=%v"u8, i, n, err);
+                }
+            }
+        }
+
+        return fmt.Sprintf("%d small lines, last %q; %d large writes, %s drained"u8,
+            strings.Count(small, "\n"), small.slice(strings.LastIndex(small.slice(0, len(small) - 1), "\n") + 1), (nint)(large), ᐸꟷ(drained));
+    });
 }
 
 } // end main_package
