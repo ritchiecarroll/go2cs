@@ -25,6 +25,7 @@ using strconv = go.strconv_package;
 using strings = strings_package;
 using sync = go.sync_package;
 using testing = testing_package;
+using System.Runtime.CompilerServices;
 using fs = io.fs_package;
 using go;
 using go.@internal;
@@ -151,7 +152,7 @@ public static bool HasGoRun() {
 
 // MustHaveGoRun checks that the current system can run programs with “go run”.
 // If not, MustHaveGoRun calls t.Skip with an explanation.
-public static void MustHaveGoRun(testing.TB t) {
+public static partial void MustHaveGoRun(testing.TB t) {
     if (!HasGoRun()) {
         t.Helper();
         t.Skipf("skipping test: 'go run' not available on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -171,7 +172,7 @@ public static bool HasParallelism() {
 
 // MustHaveParallelism checks that the current system can execute multiple
 // threads in parallel. If not, MustHaveParallelism calls t.Skip with an explanation.
-public static void MustHaveParallelism(testing.TB t) {
+public static partial void MustHaveParallelism(testing.TB t) {
     if (!HasParallelism()) {
         t.Helper();
         t.Skipf("skipping test: no parallelism available on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -350,7 +351,7 @@ internal static Func<bool> hasCgo = sync.OnceValue(bool () => {
 });
 
 // MustHaveCGO calls t.Skip if cgo is not available.
-public static void MustHaveCGO(testing.TB t) {
+public static partial void MustHaveCGO(testing.TB t) {
     if (!HasCGO()) {
         t.Helper();
         t.Skipf("skipping test: no cgo"u8);
@@ -393,7 +394,7 @@ public static void MustInternalLink(testing.TB t, SpecialBuildTypes with) {
 // MustInternalLinkPIE checks whether the current system can link PIE binary using
 // internal linking.
 // If not, MustInternalLinkPIE calls t.Skip with an explanation.
-public static void MustInternalLinkPIE(testing.TB t) {
+public static partial void MustInternalLinkPIE(testing.TB t) {
     if (!platform.InternalLinkPIESupported(Δruntime.GOOS, Δruntime.GOARCH)) {
         t.Helper();
         t.Skipf("skipping test: internal linking for buildmode=pie on %s/%s is not supported"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -403,7 +404,7 @@ public static void MustInternalLinkPIE(testing.TB t) {
 // MustHaveBuildMode reports whether the current system can build programs in
 // the given build mode.
 // If not, MustHaveBuildMode calls t.Skip with an explanation.
-public static void MustHaveBuildMode(testing.TB t, @string buildmode) {
+public static partial void MustHaveBuildMode(testing.TB t, @string buildmode) {
     if (!platform.BuildModeSupported(Δruntime.Compiler, buildmode, Δruntime.GOOS, Δruntime.GOARCH)) {
         t.Helper();
         t.Skipf("skipping test: build mode %s on %s/%s is not supported by the %s compiler"u8, buildmode, Δruntime.GOOS, Δruntime.GOARCH, Δruntime.Compiler);
@@ -436,7 +437,7 @@ public static bool HasLink() {
 
 // MustHaveLink reports whether the current system can use os.Link.
 // If not, MustHaveLink calls t.Skip with an explanation.
-public static void MustHaveLink(testing.TB t) {
+public static partial void MustHaveLink(testing.TB t) {
     if (!HasLink()) {
         t.Helper();
         t.Skipf("skipping test: hardlinks are not supported on %s/%s"u8, Δruntime.GOOS, Δruntime.GOARCH);
@@ -445,7 +446,7 @@ public static void MustHaveLink(testing.TB t) {
 
 internal static ж<bool> flaky = flag.Bool("flaky"u8, false, "run known-flaky tests too"u8);
 
-public static void SkipFlaky(testing.TB t, nint issue) {
+public static partial void SkipFlaky(testing.TB t, nint issue) {
     if (!flaky.Value) {
         t.Helper();
         t.Skipf("skipping known flaky test without the -flaky flag; see golang.org/issue/%d"u8, issue);
@@ -478,7 +479,7 @@ public static bool CPUIsSlow() {
 // suspected to be slow.
 //
 // (This is useful for CPU-intensive tests that otherwise complete quickly.)
-public static void SkipIfShortAndSlow(testing.TB t) {
+public static partial void SkipIfShortAndSlow(testing.TB t) {
     if (testing.Short() && CPUIsSlow()) {
         t.Helper();
         t.Skipf("skipping test in -short mode on %s"u8, Δruntime.GOARCH);
@@ -489,7 +490,7 @@ public static void SkipIfShortAndSlow(testing.TB t) {
 private static readonly object skippingTestWithˢ = (@string)"skipping test with optimization disabled"u8;
 
 // SkipIfOptimizationOff skips t if optimization is disabled.
-public static void SkipIfOptimizationOff(testing.TB t) {
+public static partial void SkipIfOptimizationOff(testing.TB t) {
     if (OptimizationOff()) {
         t.Helper();
         t.Skip(skippingTestWithˢ);

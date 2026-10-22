@@ -23,6 +23,7 @@ IsOrderTokenAt
 IsPinnedAt
 NativeAddress
 of
+OnHeaderStore
 OrTypedNil
 PinnableStorage
 PointerOrderToken
