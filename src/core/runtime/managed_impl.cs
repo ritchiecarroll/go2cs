@@ -1738,7 +1738,7 @@ partial class runtime_package
     // (inlinedPanicFrames, shared with splicePanic so a crash report and runtime.Callers agree).
     private static void appendGoFrames(StringBuilder trace, IEnumerable<StackFrame> frames, PanicException? site = null)
     {
-        List<(string name, string file, int line)> printed = [];
+        List<(string name, string file, int line, bool inlined)> printed = [];
         bool calledGo = false;
         bool first = true;
 
@@ -1754,7 +1754,7 @@ partial class runtime_package
                 foreach ((System.Reflection.MethodBase inlinedMethod, int ilOffset) in inlined)
                 {
                     (string inlinedFile, int inlinedLine) = goILPosition(inlinedMethod, ilOffset);
-                    printed.Add((goFrameName(inlinedMethod, ilOffset, out _), inlinedFile, inlinedLine));
+                    printed.Add((goFrameName(inlinedMethod, ilOffset, out _), inlinedFile, inlinedLine, true));
                 }
 
                 calledGo = true;
@@ -1783,7 +1783,7 @@ partial class runtime_package
             else
             {
                 if (stackRootOf(method) is GoStackRootAttribute root)
-                    printed.Add((root.Function, rootFrameFile(root.File), root.Line));
+                    printed.Add((root.Function, rootFrameFile(root.File), root.Line, false));
 
                 continue;
             }
@@ -1796,7 +1796,7 @@ partial class runtime_package
                 continue;
 
             (string file, int line) = goFramePosition(method, frame);
-            printed.Add((frameName, file, line));
+            printed.Add((frameName, file, line, false));
         }
 
         // Go's elision (traceback1): a stack deeper than tracebackInnerFrames + tracebackOuterFrames
@@ -1813,8 +1813,9 @@ partial class runtime_package
                 continue;
             }
 
-            (string name, string file, int line) = printed[i];
-            trace.Append(name).Append("()\n");
+            // Go prints an inlined frame's call as `(...)`: its arguments are not on the stack.
+            (string name, string file, int line, bool inlined) = printed[i];
+            trace.Append(name).Append(inlined ? "(...)\n" : "()\n");
 
             if (!string.IsNullOrEmpty(file))
                 trace.Append('\t').Append(file).Append(':').Append(line).Append('\n');

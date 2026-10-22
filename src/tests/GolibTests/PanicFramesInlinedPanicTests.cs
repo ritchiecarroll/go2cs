@@ -82,7 +82,10 @@ public class PanicFramesInlinedPanicTests
         int panicLine = stack.IndexOf("panic: ", System.StringComparison.Ordinal);
         Assert.IsTrue(panicLine >= 0, $"no panic section:\n{stack}");
 
-        int callee = stack.IndexOf("\nmath/bits.Div32(", panicLine, System.StringComparison.Ordinal);
+        // Go inlines Div32 and prints an inlined frame as `name(...)`; so does the optimized JIT's restored frame. Tier-0
+        // keeps Div32 as a real frame, printed as a call.
+        string calleeLine = JitMode.OptimizedFromFirstCall() ? "\nmath/bits.Div32(...)\n" : "\nmath/bits.Div32()\n";
+        int callee = stack.IndexOf(calleeLine, panicLine, System.StringComparison.Ordinal);
         int owner = stack.IndexOf("\n" + Pkg + "stackInDiv32Panic(", panicLine, System.StringComparison.Ordinal);
 
         Assert.IsTrue(owner > panicLine, $"the owner is not in the panic section:\n{stack}");
