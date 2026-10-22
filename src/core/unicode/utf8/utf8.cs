@@ -463,7 +463,7 @@ public static nint RuneCount(slice<byte> p) {
         {
             var c = p[n]; if (c >= RuneSelf) {
                 // non-ASCII slow path
-                return n + RuneCountInString((@string)(p.slice(n)));
+                return n + RuneCountInString((sstring)(p.slice(n)));
             }
         }
     }

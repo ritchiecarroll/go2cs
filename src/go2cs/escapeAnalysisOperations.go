@@ -109,6 +109,10 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 			// a zero-copy sstring view when every case label is a mutation-safe comparison operand.
 			visitor.markSStringSwitchConversions(fileEntry.file)
 
+			// A `string(x)` argument at a registered unicode/utf8 twin parameter (`utf8.RuneCountInString(
+			// string(p))`) is read by the twin's sstring overload within the call, so it too is a view.
+			visitor.markSStringTwinArgumentConversions(fileEntry.file)
+
 			ast.Inspect(fileEntry.file, func(n ast.Node) bool {
 				switch node := n.(type) {
 				case *ast.FuncDecl:
@@ -1696,6 +1700,115 @@ func (v *Visitor) markSStringSwitchConversions(file *ast.File) {
 
 		return true
 	})
+}
+
+// markSStringTwinArgumentConversions flags a `string(x)` conversion passed at a registered parameter of
+// a unicode/utf8 twin (`utf8.RuneCountInString(string(p))`), so the call binds the twin's sstring
+// overload with a zero-copy view instead of copying x into a fresh @string. The twin only reads the
+// parameter, and an sstring cannot be stored, so the view ends with the call; what remains is that
+// nothing evaluated before the twin's body reads the view can write x, so every OTHER argument must be
+// call-free. A deferred or `go` call is excluded: its arguments are evaluated at the statement and read
+// later, by which time x may have changed (and the lowering would capture the ref struct); every call
+// inside such a statement is left alone, since its lowering decides when each part runs. Only utf8
+// twins qualify: a fmt twin's body runs caller code (Stringer, Formatter) that could write x.
+//
+// The twin is read from the registry, not through isSStringTwin: escape analysis runs before the
+// imported packages' published twin records are loaded, and the registry covers every utf8 twin.
+func (v *Visitor) markSStringTwinArgumentConversions(file *ast.File) {
+	deferredCalls := map[*ast.CallExpr]bool{}
+
+	markDeferred := func(n ast.Node) bool {
+		if call, ok := n.(*ast.CallExpr); ok {
+			deferredCalls[call] = true
+		}
+
+		return true
+	}
+
+	ast.Inspect(file, func(n ast.Node) bool {
+		switch stmt := n.(type) {
+		case *ast.DeferStmt:
+			ast.Inspect(stmt.Call, markDeferred)
+		case *ast.GoStmt:
+			ast.Inspect(stmt.Call, markDeferred)
+		}
+
+		return true
+	})
+
+	ast.Inspect(file, func(n ast.Node) bool {
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || deferredCalls[call] {
+			return true
+		}
+
+		fn := v.callRegisteredTwin(call)
+
+		if fn == nil || !strings.HasPrefix(sstringTwinKey(fn), "unicode/utf8.") {
+			return true
+		}
+
+		for _, index := range sstringTwinIndices(fn) {
+			if index >= len(call.Args) {
+				continue
+			}
+
+			if conv := v.unnamedByteSliceStringConv(call.Args[index]); conv != nil && otherArgumentsCallFree(call.Args, index) {
+				v.sstringConvExprs[conv] = true
+			}
+		}
+
+		return true
+	})
+}
+
+// callRegisteredTwin returns the function a call names directly when the twin registry lists it, else nil.
+func (v *Visitor) callRegisteredTwin(call *ast.CallExpr) *types.Func {
+	var ident *ast.Ident
+
+	switch fun := ast.Unparen(call.Fun).(type) {
+	case *ast.Ident:
+		ident = fun
+	case *ast.SelectorExpr:
+		ident = fun.Sel
+	default:
+		return nil
+	}
+
+	fn, ok := v.info.Uses[ident].(*types.Func)
+
+	if !ok || len(sstringTwinIndices(fn)) == 0 {
+		return nil
+	}
+
+	return originFunc(fn)
+}
+
+// otherArgumentsCallFree reports whether every argument but args[index] executes no call, so none can
+// write the source of a view passed at args[index] before the callee reads it.
+func otherArgumentsCallFree(args []ast.Expr, index int) bool {
+	for i, arg := range args {
+		if i == index {
+			continue
+		}
+
+		hasCall := false
+
+		ast.Inspect(arg, func(n ast.Node) bool {
+			if _, ok := n.(*ast.CallExpr); ok {
+				hasCall = true
+			}
+
+			return !hasCall
+		})
+
+		if hasCall {
+			return false
+		}
+	}
+
+	return true
 }
 
 // allCaseLabelsSafe reports whether every case label in a switch body is a mutation-safe comparison
