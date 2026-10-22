@@ -8185,15 +8185,17 @@ delegate that returns nothing, followed by the argument values. A matching set o
 `Func`, a delegate that returns a value, and throws the result away, as Go does. Each overload stores
 the values and calls the delegate with them on the new goroutine:
 
-<!-- source: src/core/golib/builtin.GoroutineLaunchers.cs:74-77 -->
+<!-- source: src/core/golib/builtin.GoroutineLaunchers.cs:81-84 -->
 ```csharp
-    public static void goǃ<T>(Action<T> action, T arg)
+    public static void goǃ<T>(Action<T> action, T arg, [CallerFilePath] string ᴛcallerFile = "", [CallerLineNumber] int ᴛcallerLine = 0)
     {
-        Goroutine.Start(() => action(arg), action);
+        Goroutine.Start(() => action(arg), action, ᴛcallerFile, ᴛcallerLine);
     }
 ```
 
-Overloads like this one exist for up to sixteen arguments.
+Overloads like this one exist for up to sixteen arguments. The C# compiler fills in the last two
+parameters with the file and line of the `go` statement, so converted code never passes them; golib uses
+them to record which function started the goroutine.
 
 **Arguments are evaluated at the `go` statement.** Because the arguments are passed to `goǃ`, they
 are computed before the goroutine starts, as in Go:
@@ -8390,10 +8392,12 @@ it is.
 ends the process. Each goroutine thread therefore reserves 256 MB of address space; memory is
 committed only as it is used. The `GO2CS_GOROUTINE_STACK` environment variable sets a different size.
 
-**Operating-system threads bound live goroutines at roughly ten thousand.** Go's goroutines reach
+**Operating-system threads bound live goroutines far below Go's limit.** Go's goroutines reach
 about a million. The limit comes from how many threads the operating system can run at once, not from
 the stack reservation. A Go program that starts hundreds of thousands of goroutines at once does not
 run the same way after conversion.
+<!-- figure: the Goroutine.cs type remarks put the bound at "roughly 10⁴ concurrent goroutines rather than Go's 10⁶";
+no platform is named there, so the figure is kept here rather than in the text. -->
 
 **`runtime` keeps Go's goroutine contracts on top of threads.** `runtime.Goexit` runs the goroutine's
 deferred calls and ends only that goroutine. Calling it from `main` itself is not supported and throws
@@ -8523,7 +8527,8 @@ goǃ(sendOnly, mychanl.WithDirection(GoChanDir.Send));
 
 **`range` over a channel becomes `foreach`.** The loop receives each value and ends when the channel
 is closed and drained, as Go's does ([Loops, Range and Labels](#loops-range-and-labels)). Again, the
-Go comments are dropped by default ([Comments](#comments)):
+Go comments are dropped by default ([Comments](#comments)). `rem(i, prime)` is Go's `i % prime`: golib's
+`rem` gives Go's result when the divisor is -1 ([Integer Types](#integer-types-and-arithmetic)):
 
 <!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:62-68 -->
 ```go
@@ -8606,7 +8611,7 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
 **A receive case that names a variable declares it in the `when` guard.** `case m := <-a:` becomes
 `case 0 when selᴛ12.ꟷᐳ(out var m):`, as in the example that follows.
 
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:117 (case v1, ok := <-ch3:) -> SelectStatement.cs.target:137 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:117 (case v1, ok := <-ch3:) -> SelectStatement.cs.target:127 -->
 A comma-ok case adds a second `out` variable: `case v1, ok := <-ch3:` becomes
 `case 2 when selᴛ5.ꟷᐳ(out var v1, out var okΔ1):`. The `Δ1` suffix renames a variable whose name
 is used again in the same function ([Shadowing](#short-variable-redeclaration-shadowing)).
@@ -8673,7 +8678,7 @@ internal static @string poll(channel<EmptyStruct> done) {
 }
 ```
 
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:126-140 (ch1 = nil; close(ch2); the select picks the closed ch2) -> SelectStatement.cs.target:146-173; poll(done) before and after close(done): SelectStatement.go:177-180. Buffered-first on a closed channel: golib channel.cs is a port of Go's hchan/selectgo, and a select receive reads the same buffer (ChannelCapLen/main.go:30-39 shows it for plain receives). -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.go:126-140 (ch1 = nil; close(ch2); the select picks the closed ch2) -> SelectStatement.cs.target:137-162; poll(done) before and after close(done): SelectStatement.go:177-180. Buffered-first on a closed channel: golib channel.cs is a port of Go's hchan/selectgo, and a select receive reads the same buffer (ChannelCapLen/main.go:30-39 shows it for plain receives). -->
 **Nil and closed channels inside a `select` also match Go.** A nil channel's case is never chosen.
 A closed channel's receive case is always ready: it yields any values still buffered, then the zero
 value with `ok` false.
@@ -8726,7 +8731,8 @@ internal static void Main() {
 
 Go's `int` is C# `nint`, a native-size integer ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
 Go's `string` is golib's `@string`, a byte string. `"tag"` is a plain C# literal that golib converts to an
-`@string` once ([Strings](#strings-string-and-sstring)).
+`@string` once, and a literal written `"…"u8`, such as a `Printf` format, is a C# UTF-8 literal
+([Strings](#strings-string-and-sstring)).
 
 **The generator completes each struct.** For every converted struct it adds:
 
@@ -8880,8 +8886,9 @@ internal static void Main() {
 }
 ```
 
-A struct that [embeds](#struct-type-embedding) another type is built with `new(nil)`, because its
-embedded field lives in a box that `default` would leave empty.
+A struct that [embeds](#struct-type-embedding) another type is built with `new(nil)`. That generated
+constructor builds each embedded field, so an embedded type that itself needs construction (one with an array field)
+is usable, and an embedded pointer holds a nil `ж<T>` box rather than a C# `null`.
 <!-- embedded: src/tests/Behavioral/UnsafeOperations/UnsafeOperations.go:44-48,141 `var e Embedded` -> UnsafeOperations.cs.target:38-42,121 `Embedded e = new(nil);` -->
 
 **A struct is copied by value, as in Go.** A C# struct assignment copies the fields. But golib's
@@ -8932,7 +8939,7 @@ partial struct digest {
 }
 
 internal static void bump(this ref digest d) {
-    foreach (var (i, _) in d.h) {
+    foreach (var i in range(d.h)) {
         d.h[i]++;
     }
     d.x[0]++;
@@ -8959,7 +8966,8 @@ internal static void identCopy() {
 
 `c := d` becomes `d.ΔClone()`. A value receiver or value parameter of such a struct is cloned at the top
 of the function, as `show` does with `d = d.ΔClone();`. Methods become C# extension methods, and
-`this ref` is a pointer receiver ([Functions and Methods](#functions-and-methods)).
+`this ref` is a pointer receiver ([Functions and Methods](#functions-and-methods)). `range(d.h)` is the
+index-only `range d.h`, which reads no element ([Loops](#loops-range-and-labels)).
 <!-- parameter clone: StructArrayFieldValueCopy.go:35#e7823a takeValue(c digest) -> StructArrayFieldValueCopy.cs.target:32-33 `c = c.ΔClone();` -->
 
 The literals `"ident:      "` and `"|"` stay plain C# literals. Both are `any` arguments to `fmt.Println`,
@@ -9042,7 +9050,8 @@ in converted code. Each is shown with a complete example, and each glyph and gol
 it appears, so the section stands on its own for a reader who lands here first. -->
 
 **An embedded struct becomes a field named for its type, where Go declares it.** The converter emits
-`/*embed*/ public T T;` in the embed's own position, and `/*embed*/ public ж<T> T;` for a pointer embed. The
+`/*embed*/ public T T;` in the embed's own position, and `/*embed*/ public ж<T> T;` for a pointer embed, where
+`ж<T>` is the box that [golib](#the-golib-runtime-library), go2cs's runtime library, uses for a Go pointer. The
 `/*embed*/` comment is what tells the generator and reflection that the field is embedded, as Go's
 `reflect.StructField.Anonymous` does. `record.Person` is the field itself, so, as in Go, it can be
 assigned, have its address taken, or receive a method call. Because every field sits where Go puts it, a
@@ -9235,7 +9244,7 @@ literal: `"a"` and `"b"` fill `string` fields, and the two labels are `any` argu
 [Empty Interface](#empty-interface-any)). Go's `int` is C# `nint`
 ([Integer Types](#integer-types-and-arithmetic)).
 
-**An embedded pointer becomes a `ref` property that holds a `ж<T>`.** `ж<T>` (read "zhe") is golib's
+**An embedded pointer becomes a field that holds a `ж<T>`.** `ж<T>` (read "zhe") is golib's
 heap box for a Go pointer. `Ꮡ(…)` takes an address, like Go's `&`, so `&leaf{n: 0}` becomes
 `Ꮡ(new leaf(n: 0))` ([Pointers](#pointers)). Promoted fields and methods reach through the pointer.
 
@@ -9384,9 +9393,9 @@ EmbeddedValuePointerMethod/main.go:51-56#cd17df; main.cs.target:48-53#f87b03). P
 main.cs.target:29-31#410481 (Ꮡo.of(outer.Ꮡinner).bump(100)). The [Implicit Pointer Dereferencing] section shows
 `c.alloc(5)` from the same test. -->
 
-**An embedded interface is a plain field.** An interface value is already a reference, so it needs no
-`ref` property. A call through it reads as in Go: `r.Interface.Less(j, i)`. When the outer type is used
-as that interface, the generator forwards each method the type does not declare itself to that field.
+**An embedded interface is a plain field.** A call through it reads as in Go: `r.Interface.Less(j, i)`.
+When the outer type is used as that interface, the generator forwards each method the type does not declare
+itself to that field.
 
 This is Go's `sort.Reverse` pattern. `Interface` is the program's own copy of `sort.Interface`. `reverse`
 declares its own `Less`, which swaps the arguments. `Len` and `Swap` are not declared on `reverse`, so
@@ -9460,7 +9469,8 @@ interface is an ordinary C# interface call.
 The examples in this section use these names and glyphs
 ([Reading Converted Code](#reading-converted-code-names-and-glyphs) lists them all):
 
-- `ж<T>` is Go's pointer `*T`: golib's heap box that holds one `T` (read "zhe"). `Ꮡ(…)` takes an address
+- `ж<T>` is Go's pointer `*T`: the heap box of [golib](#the-golib-runtime-library), go2cs's runtime library,
+  that holds one `T` (read "zhe"). `Ꮡ(…)` takes an address
   and yields that box ([Pointers](#pointers)).
 - `XжI` and `XᴠI` are generated adapter classes: pointer `*X` (`ж`) or value `X` (`ᴠ`) as interface `I`.
 - A string literal passed to `fmt.Println` stays a plain C# literal, which go2cs-gen boxes as a Go string
@@ -9539,7 +9549,7 @@ internal static error f() {
 }
 ```
 
-`"foo"u8` is a C# UTF-8 literal that becomes an `@string` ([Strings](#strings-string-and-sstring)).
+`"foo"` is a plain C# literal that golib converts to an `@string` once ([Strings](#strings-string-and-sstring)).
 Converting a struct to an interface copies it in C#, just as Go copies a value into an interface.
 
 **A named function type goes in through a value adapter; a named number goes in directly.** The generator
@@ -9721,8 +9731,11 @@ Reading the C#, line by line:
 **Calls, nil and assertions read as ordinary C#.** A call through an interface is a plain C# interface
 call, such as `inc.Inc()`. A nil interface is `default!`, a null reference, so `return nil` becomes
 `return default!;` ([Nil and Zero Values](#nil-and-zero-values)). The assertion `x.(T)` becomes golib's
-[`x._<T>()`](../src/core/golib/builtin.cs), which panics if the dynamic type is not `T`. Adding the
-argument `ᐧ`, golib's constant `true`, selects the comma-ok form that returns `(value, ok)` instead
+[`x._<T>()`](../src/core/golib/builtin.cs), which panics if the dynamic type is not `T`. When `T` is a
+named interface, the check runs at run time against the dynamic type's Go methods, and golib's
+`AdapterBinder` builds the adapter, so a type from a package compiled later still matches
+([Reference → runtime shells](ConversionStrategies-Reference/interfaces.md#every-eligible-interface-carries-runtime-duck-typing-shells--the-sole-resolver-of-a-structural-assert)).
+Adding the argument `ᐧ`, golib's constant `true`, selects the comma-ok form that returns `(value, ok)` instead
 ([Comma-Ok Forms](#multi-result-values-and-comma-ok-forms)). A `switch x.(type)` is covered in
 [Type Switch Statements](#type-switch-statements).
 
