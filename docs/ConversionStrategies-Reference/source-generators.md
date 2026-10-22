@@ -11,6 +11,37 @@ Several Go semantics cannot be written directly in C#, so the converter emits co
 * **`PartialStubGenerator`** — emits a throwing `partial` implementation for any bodyless `partial` method that has no other implementing part (e.g. assembly/cgo functions with no convertible body), while leaving real hand-written companion implementations untouched.
 * **`LiteralInterceptorGenerator`** — boxes a bare C# string literal the converter passes to an `any` slot as the Go string it is. For each such call it emits a file-local [interceptor](strings.md#a-literal-in-an-any-slot-is-a-plain-c-literal-too-and-go2cs-gen-boxes-it-as-a-go-string) that writes a cached, pre-boxed `@string` into the slot and calls the original method; a call it cannot intercept is `GO2CS0005`, and an overload that captured the literal is `GO2CS0006`. It runs on the same input compilation as the other generators, so it cannot see their output: it resolves a call whose other arguments use generated members from its one-member method group, and the converter keeps the pre-boxed field where the receiver or the bound overload is itself generated.
 * **`NoInliningPartialGenerator`** — the other direction: for a `partial` method that HAS a body and no declaring part, emits the declaring part carrying `[MethodImpl(MethodImplOptions.NoInlining)]`. This is how the converter's no-inline mark reaches a declared method; see [The no-inline mark rides a generated declaring part](#the-no-inline-mark-rides-a-generated-declaring-part).
+* **`MemberRecordGenerator`** — reads the comments converted code writes for a Go fact about a member (an
+  embedded field, a struct tag, an array length; see
+  [Marker comments](#marker-comments-what-converted-code-carries-instead-of-an-attribute)) and writes each as a
+  `[GoMemberRecord]` on a generated partial of the member's type, which golib's reflection bridge reads back.
+* **`ChanDirSigGenerator`** — for every method whose signature carries a directional channel, writes a
+  `[GoSigChanDir]` on a generated partial of the method's type, so `reflect` recovers the direction the C#
+  signature drops. A pointer-receiver method gets a second entry keyed on `ж<T>`, the receiver of the overload
+  `RecvGenerator` adds.
+* **`ConstraintProxyGenerator`** — publishes the generic constraint proxy (`жLesser<E>`) of every
+  self-referential constraint interface a package declares (`where T : Lesser<T>`), driven by the constraint
+  clauses alone; see [Generic Constraints](generic-constraints.md#a-self-referential-generic-method-set-constraint-uses-a-box-wrapping-proxy-as-the-type-argument).
+* **`FieldAccessGenerator`** — for every struct type a `[GoFieldAccess(…)]` record lists, emits a field property on
+  `ж<T>`, so a field reached through a pointer reinterpreted from `unsafe.Pointer` reads at its Go offset; see
+  [Pointers](pointers.md#a-field-reached-through-a-pointer-reinterpreted-from-unsafepointer-reads-at-its-go-offset--the-field-property).
+* **`EscapeRegistryGenerator`** — registers, per package class, golib's operations for every closed container the
+  compilation converts to an interface or reaches from a value it converts, so `reflect` reaches a container's
+  operations through a registry rather than through code on the generic container. The same walk registers the
+  variadic func signatures that can reach `reflect`, whose `Call` and `MakeFunc` trampolines golib keeps
+  ([Manually-Converted Declarations](manual-conversions.md#variadic-call-and-makefunc-under-native-aot)).
+* **`NativeArrayOpenerGenerator`** — registers golib's native array openers for exactly the element types the
+  compilation spells where code reaches a native array by an element type it holds only at run time: a foreign
+  `*[N]*E` and the window over a native struct's `[N]X` field. An element nothing registered is a Go panic that
+  names it, under the JIT as under Native AOT.
+
+`TypeGenerator`, `ImplementGenerator`, `EscapeRegistryGenerator` and `NativeArrayOpenerGenerator` also fill golib
+registries that code finds at run time, and none of them fills its registry at startup; see
+[Run-time registrations wait for the first lookup that misses](#run-time-registrations-wait-for-the-first-lookup-that-misses).
+The same assembly ships two analyzers, which report and generate nothing: `StringLiteralBindingAnalyzer`
+([`GO2CS0004`](../DiagnosticCodes.md)) and `StackAppendBufferAnalyzer` ([`GO2CS0007`](../DiagnosticCodes.md)).
+<!-- The list is every class under src/gen/go2cs-gen declared `[Generator]`, fourteen at b335356d6 (grep for
+     `^\[Generator`); the two analyzers are declared `[DiagnosticAnalyzer(LanguageNames.CSharp)]`. -->
 
 What the generators read is, for the most part, the code itself: where a type is declared, a receiver's `ref`, a parameter's type, and a few short comments written in Go's own spelling. [Marker comments: what converted code carries instead of an attribute](#marker-comments-what-converted-code-carries-instead-of-an-attribute) lists each of them and the attributes that remain. The records a package keeps out of view are classified in [Extended attributes: what stays on the declaration and what moves](#extended-attributes-what-stays-on-the-declaration-and-what-moves).
 
@@ -353,6 +384,66 @@ attribute in its compiled metadata.
 * The converter's frame tests (`noinlineDirective_test.go`, `callerSkipWindowFrames_test.go` and the
   others) read the mark through `keepsOwnFrame` (a ` static partial ` declaration line that ends in a
   body), and `goCreatorFrame_test.go` reads a literal's attribute directly.
+
+## Run-time registrations wait for the first lookup that misses
+
+Some generated code must also be found at run time, through a lookup in a golib registry. Four generators fill one:
+
+| Generator | Registers | Read by | Queue on `GoDeferredRegistrations` |
+|---|---|---|---|
+| `ImplementGenerator` | the pointer adapters a type assertion or type switch uses to wrap a box | `AdapterRegistry` | `Adapters` |
+| `TypeGenerator` | the factories that build a struct's Go zero value | `GoZeroFactory<T>` | `ZeroFactories` |
+| `EscapeRegistryGenerator` | the escaping containers' operations, and the variadic trampolines | `GoTypeOps`, `GoReflect` | `EscapeRegistry` |
+| `NativeArrayOpenerGenerator` | the native array openers | `NativeArrayOpeners` | `NativeArrayOpeners` |
+
+None of them fills its registry while the program starts. For each registry it fills, a package class gets one
+generated module initializer, code .NET runs when the assembly loads, and that initializer only queues the
+package's registration method on golib's `GoDeferredRegistrations`. This is the shape `DeferredRegistration`
+writes, here for the adapters:
+
+```csharp
+[global::System.Runtime.CompilerServices.ModuleInitializer]
+internal static void ᴛDeferAdapters() =>
+    global::go.GoDeferredRegistrations.Adapters.Defer(ᴛRegisterAdapters);
+```
+
+When a lookup in a registry finds nothing, the registry runs every registration queued so far, each once, and
+looks again. A program whose lookups never miss runs none of them, so under the JIT less code is compiled at
+startup. An assembly loaded after a run queues its own
+registrations, and the next miss runs them. A caller that finds another thread running the queue waits for it.
+Under Native AOT nothing is lost: the queued method is a delegate the module initializer creates, so it, and
+every generic instantiation it names, is compiled ahead of time as before.
+
+The queues live on `GoDeferredRegistrations` rather than on their registries, so queueing does not run a
+registry's static constructor (`GoTypeOps` registers the builtin types in its own). These module initializers
+also take no part in Go's initialization order: they read nothing and queue a method that runs later, so where
+they fall among a package's
+[import hooks and `init` functions](package-conversion.md#an-import-forces-the-imported-packages-init-to-run)
+changes nothing.
+
+Guarded by GolibTests' `DeferredRegistrationTests`: the first miss of each registry (a native array, a constructed
+zero, an adapter, a container's operations, a variadic family) runs its queued registration, and a registration
+queued after a run is run by the next miss.
+<!-- The queueing initializer: src/gen/go2cs-gen/DeferredRegistration.cs:22
+     (`public static string Initializer(string registry, string name)`). Its callers:
+     src/gen/go2cs-gen/ImplementGenerator.cs:1532 (`DeferredRegistration.Initializer("Adapters", "Adapters")`),
+     src/gen/go2cs-gen/TypeGenerator.cs:644 (`DeferredRegistration.Initializer("ZeroFactories", "GoZeroFactories")`),
+     src/gen/go2cs-gen/EscapeRegistryGenerator.cs:373 (`DeferredRegistration.Initializer("EscapeRegistry", "EscapingContainers")`),
+     src/gen/go2cs-gen/NativeArrayOpenerGenerator.cs:220
+     (`DeferredRegistration.Initializer("NativeArrayOpeners", "NativeArrayOpeners")`).
+     The four queues: src/core/golib/GoDeferredRegistrations.cs:41 (`NativeArrayOpeners = new()`), :44
+     (`ZeroFactories = new()`), :47 (`Adapters = new()`), :53 (`EscapeRegistry = new()`); Defer :65
+     (`public void Defer(Action register)`); Run :83 (`internal bool Run()`); Native AOT :28
+     (`Native AOT is unchanged`). Each consumer runs its queue on a miss, then looks again:
+     src/core/golib/AdapterRegistry.cs:116 (`GoDeferredRegistrations.Adapters.Run()`),
+     src/core/golib/builtin.cs:1593 (`GoDeferredRegistrations.ZeroFactories.Run()`),
+     src/core/golib/GoTypeOps.cs:224 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
+     src/core/golib/GoReflect.VariadicRegistry.cs:51 (`GoDeferredRegistrations.EscapeRegistry.Run()`),
+     src/core/golib/NativeArrayOpeners.cs:56 (`GoDeferredRegistrations.NativeArrayOpeners.Run()`), :63
+     (`GoDeferredRegistrations.NativeArrayOpeners.Run()`). Guard: src/tests/GolibTests/DeferredRegistrationTests.cs:212
+     (`public void ARegistrationQueuedAfterARunIsRunByTheNextMiss()`). The startup measurement is in the comment of
+     GoDeferredRegistrations.cs (PerfStartup, 2026-10-22, win-x64 JIT, median of 9 interleaved runs: 4,402 -> 3,188
+     methods compiled at startup, 706 -> 627 ms wall); not re-measured by any guard. -->
 
 <!-- Docs review 2026-10-22: point-in-time figures moved out of the prose (not re-measured by any guard).
      Provisional accessibility (2026-07-25): ~490 behavioral goldens; gated by 490/490 and the 302-package

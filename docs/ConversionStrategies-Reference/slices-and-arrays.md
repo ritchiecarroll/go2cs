@@ -935,13 +935,12 @@ and moves nothing (Go's `memmove` of `n * 0` bytes), `clear` is complete before 
 answers the ONE shared element (Go computes `&s[i]` as `data + i*0`, so every index names the same
 address), and `range` is a counted loop.
 
-**One honest ceiling remained, and the slice-shaped-spread arc retired it (2026-08-27, ruled
-post-B2):** `Span<T>.Length` is `int32` while a Go slice length is `int`, and a VARIADIC SPREAD used
-to cross exactly that boundary — `append(dst, src...)` emitted `append(dst, src.ꓸꓸꓸ)`, and `ꓸꓸꓸ` is a
-`Span<T>`, so `slices.Grow`'s `append(s[:cap(s)], make([]E, n)...)` could not reach `n == MaxInt`.
-The priced remedy landed as priced: a slice-typed spread operand now travels **AS THE SLICE IT IS** —
-the emission routes it to golib's `ISlice<T>`-taking forms, whose name carries the spread the way the
-operand property did:
+**A slice-typed spread operand travels AS THE SLICE IT IS.** `Span<T>.Length` is `int32` while a Go
+slice length is `int`. An earlier emission projected every spread to a span (`append(dst, src...)` became
+`append(dst, src.ꓸꓸꓸ)`, and `ꓸꓸꓸ` is a `Span<T>`), so `slices.Grow`'s `append(s[:cap(s)], make([]E, n)...)`
+could not reach `n == MaxInt`; that is why the operand is no longer projected. The emission passes it
+whole to golib's `appendꓸꓸꓸ`, whose name carries the spread the way the operand property does:
+<!-- The span-projected form was retired by the slice-shaped-spread arc (2026-08-27, ruled post-B2); the remedy landed as priced. -->
 
 ```go
 hello.cipherSuites = append(hello.cipherSuites, defaultCipherSuitesTLS13...)
@@ -952,12 +951,22 @@ hello.Value.cipherSuites = appendꓸꓸꓸ((~hello).cipherSuites, defaultCipherS
 var s2 = appendꓸꓸꓸ<S, E>(subslice<S, E>(s, 0, i), v);
 ```
 
-Inside golib the window's own span still serves every copy a span can express (managed backings are
+golib has an `appendꓸꓸꓸ` overload for each kind of operand. A `slice<T>` operand binds the exact
+`appendꓸꓸꓸ<T>(slice<T>, in slice<T>)` and is not boxed; a named slice binds it too, through its
+implicit conversion to `slice<T>`, which is a view of the same window. An `sslice<T>` variadic pack
+binds `appendꓸꓸꓸ<T>(slice<T>, in sslice<T>)` and is read as the span it already is, with no copy to
+reach the call. The `ISlice<T>` overload remains for other operands. Its interface parameter boxes a
+struct operand, which is why a `slice<T>` has its own exact overload. The constrained form,
+`appendꓸꓸꓸ<S, E>`, takes `ISlice<E>`, with an `sslice<E>` twin.
+<!-- src/core/golib/builtin.cs:503 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :516 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :490 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1407 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1415 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
+<!-- The exact slice<T> overload landed in golib 17785ec85 (2026-10-22). Before it a slice<T> operand bound the ISlice<T> overload and was boxed: 56 B per call that AllocationCounter never sees; Go 1.26's bytes TestReplace read it as 56 objects per run for `append([]byte(nil), s...)`, which allocates nothing in Go (builtin.cs's doc comment on that overload). -->
+
+Inside golib the window's own span serves every copy a span can express (managed backings are
 int-bounded by `T[]`, so allocation counts and in-place/grow behavior are byte-identical to the span
 core), zero-size windows route by pure length arithmetic BEFORE any span form (which is what lets
 `TestConcat_too_large`'s `make([]struct{}, math.MaxInt)` fakes flow through `Concat`'s Grow chain
-allocation-free, a grown capacity being exactly the new length), and a
-named-slice wrapper arriving through the boxed interface lends its own `ꓸꓸꓸ` projection — one
+allocation-free, a grown capacity being exactly the new length), and an `ISlice<T>` operand that is
+not a `slice<T>` (a named-slice wrapper in a constrained body) lends its own `ꓸꓸꓸ` projection — one
 interface call, inside the core. Two shapes are deliberate: the constrained form takes BOTH type
 arguments explicitly (`appendꓸꓸꓸ<S, E>`), because a constraint surface does not participate in C#
 inference; and the name is DISTINCT from `append` by design — sharing the overload set re-entered
@@ -965,8 +974,9 @@ the C#14 params/betterness thicket (measured CS0121 against the constrained span
 converter alone mints these calls.<!-- Census at the landing: 401 corpus sites across 151 files routed. --> String
 spreads keep the span route (their spread is a byte projection, not a slice). Emission:
 `convCallExpr`'s append classification (`spreadArgAsSlice`/`appendTypeArgs`) + `convExprList`'s
-spread arm; golib: `builtin.appendꓸꓸꓸ` ×2 over `slice<T>.Append(in slice<T>, ISlice<T>)`. It is what
-unlocked the `slices` package's validation row.<!-- At the landing: slices validated 119 matched · 3 disclosed. -->
+spread arm; golib: `builtin.appendꓸꓸꓸ` over `slice<T>.AppendWindow` (the exact `slice<T>` form) and
+`slice<T>.Append(in slice<T>, ISlice<T>)` (the interface form, which sends a `slice<T>` to the same window
+arm). The `slices` package's validation row depends on it.<!-- At the landing: slices validated 119 matched · 3 disclosed. -->
 
 **Append-of-make grows in place without the make (2026-09-24, REC-C §B).** Go's compiler recognises
 `append(x, make([]T, n)...)` (walk's `isAppendOfMake`, "extendslice") and extends `x` by `n` zeroed elements

@@ -60,6 +60,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A TUPLE-deconstructing package var relocates as ONE unit](variable-initialization-order.md#a-tuple-deconstructing-package-var-relocates-as-one-unit)
   - [Test-variant (`-tests`) initializers relocate too — through the erasable static-ctor hook](variable-initialization-order.md#test-variant--tests-initializers-relocate-too--through-the-erasable-static-ctor-hook)
   - [A CONSTANT emitted as an initialized FIELD is an initialization dependency too](variable-initialization-order.md#a-constant-emitted-as-an-initialized-field-is-an-initialization-dependency-too)
+  - [A listed var is built on its first read, never in the static constructor](variable-initialization-order.md#a-listed-var-is-built-on-its-first-read-never-in-the-static-constructor)
 - **[Compiled Library versus Source Code](compiled-library-vs-source.md)**
 - **[Constant Values](constants.md)**
   - [A constant C# cannot declare `const` is a get-only PROPERTY, not a `static readonly` field](constants.md#a-constant-c-cannot-declare-const-is-a-get-only-property-not-a-static-readonly-field)
@@ -430,6 +431,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [For-clause variables are per-iteration (Go 1.22 loop-variable semantics)](labels-and-loop-variables.md#for-clause-variables-are-per-iteration-go-122-loop-variable-semantics)
   - [A range-over-int index is `nint` (golib's `range` helper yields Go's `int`)](labels-and-loop-variables.md#a-range-over-int-index-is-nint-golibs-range-helper-yields-gos-int)
   - [Range-over-integer covers EVERY integer type, and the iteration variable keeps the operand's width](labels-and-loop-variables.md#range-over-integer-covers-every-integer-type-and-the-iteration-variable-keeps-the-operands-width)
+  - [An index-only range over a slice or array reads no element](labels-and-loop-variables.md#an-index-only-range-over-a-slice-or-array-reads-no-element)
   - [A blank scalar range variable never emits as `_`](labels-and-loop-variables.md#a-blank-scalar-range-variable-never-emits-as-_)
   - [`for range` over a slice allocates NOTHING — `slice<T>.GetEnumerator()` returns a struct](labels-and-loop-variables.md#for-range-over-a-slice-allocates-nothing--slicetgetenumerator-returns-a-struct)
   - [`range` over an ARRAY VALUE iterates a COPY — the snapshot is the range EXPRESSION's `.Clone()`](labels-and-loop-variables.md#range-over-an-array-value-iterates-a-copy--the-snapshot-is-the-range-expressions-clone)
@@ -446,8 +448,9 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Extended attributes: what stays on the declaration and what moves](source-generators.md#extended-attributes-what-stays-on-the-declaration-and-what-moves)
   - [Marker comments: what converted code carries instead of an attribute](source-generators.md#marker-comments-what-converted-code-carries-instead-of-an-attribute)
   - [The no-inline mark rides a generated declaring part](source-generators.md#the-no-inline-mark-rides-a-generated-declaring-part)
+  - [Run-time registrations wait for the first lookup that misses](source-generators.md#run-time-registrations-wait-for-the-first-lookup-that-misses)
 - **[The standard-library conversion applies `-tags purego`](purego.md)**
-  - [Known accepted divergence — `crypto/elliptic` P256 `Inverse` panics under purego](purego.md#known-accepted-divergence--cryptoelliptic-p256-inverse-panics-under-purego)
+  - [Under purego the P256 scalar inverse is a stub, and its one caller steps around it](purego.md#under-purego-the-p256-scalar-inverse-is-a-stub-and-its-one-caller-steps-around-it)
 - **[Manually-Converted Declarations](manual-conversions.md)**
   - [The managed netpoller — the ten `runtime_poll*` contracts on .NET's completion machinery](manual-conversions.md#the-managed-netpoller--the-ten-runtime_poll-contracts-on-nets-completion-machinery)
   - [The overlapped SUBMIT seam — a per-operation record owning native lifetime, and a golib rendezvous](manual-conversions.md#the-overlapped-submit-seam--a-per-operation-record-owning-native-lifetime-and-a-golib-rendezvous)

@@ -109,6 +109,69 @@ internal static void initᴛpipeLabel() { pipeLabel = ((@string)labelPipe) + "!"
 
 Guarded by the `PackageVarInitOrder` behavioral test, which carries both halves: neutering the predicate collapses `pipeLabel` onto an empty `@string` (stdout mismatch), and neutering the property rule allocates a fixed-array field at length 0 and panics on the first indexed write (exit code 2). Neither is redundant.
 
+## A listed var is built on its first read, never in the static constructor
+
+Go's linker writes a table of constants and function values into the binary as static data, so a Go program pays
+nothing for it at startup. As a C# field initializer, or as an `initᴛ` method that `package_init.cs` calls, the same
+table is built, and the code that builds it compiled, every time the program starts. So the converter keeps a short
+list of such vars, `lazyPackageVars` (`lazyPackageVarOperations.go`), keyed by package path and then Go name. The list
+holds runtime's two malloc dispatch tables, `mallocScanTable` and `mallocNoScanTable`. Their only reader is
+`mallocgc`'s size-specialized branch, behind the constant `sizeSpecializedMallocEnabled`, which is false because
+the `SizeSpecializedMalloc` experiment is off, so no path reads them at all.
+
+A listed var becomes a `ref` property over a nested holder class named `lazyᴛ<name>`, whose static field initializer
+.NET runs on the first read. Code reads and writes the var by its Go name, as it would the field.
+`collectMovedInitVars` skips it, so it gets no `initᴛ` method and `package_init.cs` never calls it:
+
+<!-- source: GOROOT/src/runtime/malloc_tables_generated.go:8-522 -->
+```go
+var mallocScanTable = [513]func(size uintptr, typ *_type, needzero bool) unsafe.Pointer{
+	mallocPanic,
+	mallocgcSmallScanNoHeaderSC1,
+…
+}
+```
+<!-- source: src/core/runtime/malloc_tables_generated.cs:9-524 -->
+```csharp
+internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.value;
+private static class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> value = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+    mallocPanic,
+    mallocgcSmallScanNoHeaderSC1,
+…
+}.array(); }
+```
+
+Building the value later must not change it, so `lazyPackageVarRefusal` accepts a listed var only when:
+
+* it is declared alone, one name with one initializer in its spec;
+* its address is never taken, since a value built on its first read has no field for a pointer to name;
+* its initializer holds only constants, types, conversions and package function values, composed by literals:
+  no call (a conversion applies a type, so it is not a call), no func literal, no `&` or `<-`, and no read of a
+  package var (a struct literal's field key names a field and is not a read).
+
+A listed var that breaks the rule is refused by name: the converter stops on that file with
+`lazyPackageVars entry <name> cannot be built on its first read:` and the reason, reports it, and emits nothing for
+the file. An initializer whose conversion would spill a hoisted holder beside the var is refused the same way.
+
+Guarded by the converter tests `TestLazyPackageVarIsBuiltOnFirstRead` (the listed table is a `ref` property over its
+holder and is absent from `package_init.cs`, while an unlisted twin of the same shape still relocates) and
+`TestLazyPackageVarRefusesAnInitializerThatCallsOrReads` (a call, and a read of a package var, each refused naming
+the var), both in `lazyPackageVar_test.go`; and by GolibTests' `MallocDispatchTablesTests`, which checks that the
+runtime has no `initᴛ` method for either table and that a first read finds each one populated, entry for entry, as
+Go's `mkmalloc` writes it.
+<!-- The list: src/go2cs/lazyPackageVarOperations.go:31 (`var lazyPackageVars = map[string]map[string]bool{`); the rule:
+     :54 (`func (v *Visitor) lazyPackageVarRefusal(valueSpec *ast.ValueSpec, ident *ast.Ident) string {`); the shape:
+     :99 (`holder := "lazy" + TempVarMarker + csIDName`). Kept out of the ordered ctor:
+     src/go2cs/initOrderOperations.go:282 (`if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`).
+     The refusals: src/go2cs/visitValueSpec.go:727 (`cannot be built on its first read: %s`), :737
+     (`its initializer spills a hoisted holder`). The reader's gate, at go1.26.10: GOROOT/src/runtime/malloc.go:1039
+     (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`). Guards:
+     src/go2cs/lazyPackageVar_test.go:123 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :161
+     (`func TestLazyPackageVarRefusesAnInitializerThatCallsOrReads(t *testing.T) {`);
+     src/tests/GolibTests/MallocDispatchTablesTests.cs:77 (`public void TheRuntimeStaticConstructorNoLongerBuildsThem()`).
+     Why these two (COORD's ruling (A), 2026-10-22, per the list's own comment): built eagerly they were 2 x 17.1K IL
+     JIT-compiled at every startup; no platform is recorded for that figure, so it stays here. -->
+
 ---
 
 [← Package Conversion](package-conversion.md) · [Index](README.md) · [Compiled Library versus Source Code →](compiled-library-vs-source.md)
