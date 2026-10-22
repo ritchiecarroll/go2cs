@@ -23,6 +23,8 @@ internal static ж<syscall.LazyDLL> kernel32 = syscall.NewLazyDLL("kernel32.dll"
 internal static ж<syscall.LazyProc> procCreateNamedPipe = kernel32.NewProc("CreateNamedPipeW");
 internal static ж<atomic.Uint64> Ꮡcounter = new StandardBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 counter => ref Ꮡcounter.Value;
+internal static ж<atomic.Int64> Ꮡwritten = new StandardBox<atomic.Int64>(default(atomic.Int64));
+internal static ref atomic.Int64 written => ref Ꮡwritten.Value;
 internal static slice<ж<os.File>> keep;
 
 internal static (ж<os.File>, syscallꓸHandle) pipe() {
@@ -60,6 +62,7 @@ internal static @string readLines(ж<os.File> Ꮡr, nint n) {
 }
 
 internal static partial void step(@string name, Func<@string> body) {
+    Ꮡwritten.Store(0);
     var done = new channel<@string>(1);
     var doneʗ1 = done;
     goǃ(() => {
@@ -74,7 +77,7 @@ internal static partial void step(@string name, Func<@string> body) {
         break;
     }
     case 1 when selᴛ2.ꟷᐳ(out _): {
-        fmt.Printf("%s: HANG (no return in 10s)\n"u8, name);
+        fmt.Printf("%s: HANG (no return in 10s, %d writes returned)\n"u8, name, Ꮡwritten.Load());
         break;
     }}
 }
@@ -226,49 +229,61 @@ internal static void Main() {
         return fmt.Sprintf("%q %q"u8, before, readLines(server5, 1));
     });
 
-    step("7 consecutive writes on one bound FD", [MethodImpl(MethodImplOptions.NoInlining)] () => {
-        var (server7, client7) = pipe();
-        var f = os.NewFile((uintptr)client7, "f");
+    step("7 consecutive writes on one bound FD", [MethodImpl(MethodImplOptions.NoInlining)] () => consecutiveWrites(false));
+    step("7 the same, with skip-on-success set", [MethodImpl(MethodImplOptions.NoInlining)] () => consecutiveWrites(true));
+}
 
-        for (nint i = 1; i <= 8; i++) {
-            {
-                var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != default!) {
-                    return fmt.Sprintf("small write %d: %v"u8, i, err);
-                }
+internal static partial @string consecutiveWrites(bool skipOnSuccess) {
+    var (server7, client7) = pipe();
+    if (skipOnSuccess) {
+        {
+            var err = syscall.SetFileCompletionNotificationModes(client7, syscall.FILE_SKIP_COMPLETION_PORT_ON_SUCCESS); if (err != default!) {
+                return "SetFileCompletionNotificationModes: "u8 + err.Error();
             }
         }
-        @string small = readLines(server7, 8);
+    }
+    var f = os.NewFile((uintptr)client7, "f");
 
-        UntypedInt large = 4;
-        UntypedInt chunk = /* 16 << 10 */ 16384;
-        var drained = new channel<@string>(1);
-        var drainedʗ1 = drained;
-        var server7ʗ1 = server7;
-        goǃ(() => {
-            nint total = 0;
-            var buf = new slice<byte>(4096);
-            while (total < (nint)(large * chunk)) {
-                var (k, err) = server7ʗ1.Read(buf);
-                total += k;
-                if (err != default!) {
-                    drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes <%v>"u8, total, err));
-                    return;
-                }
-            }
-            drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes"u8, total));
-        });
-
-        for (nint i = 1; i <= large; i++) {
-            {
-                var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != default! || n != chunk) {
-                    return fmt.Sprintf("large write %d: n=%d err=%v"u8, i, n, err);
-                }
+    for (nint i = 1; i <= 8; i++) {
+        {
+            var (_, err) = f.Write(slice<byte>("write " + strconv.Itoa(i) + "\n")); if (err != default!) {
+                return fmt.Sprintf("small write %d: %v"u8, i, err);
             }
         }
+        Ꮡwritten.Add(1);
+    }
+    @string small = readLines(server7, 8);
 
-        return fmt.Sprintf("%d small lines, last %q; %d large writes, %s drained"u8,
-            strings.Count(small, "\n"), small.slice(strings.LastIndex(small.slice(0, len(small) - 1), "\n") + 1), (nint)(large), ᐸꟷ(drained));
+    UntypedInt large = 4;
+    UntypedInt chunk = /* 16 << 10 */ 16384;
+    var drained = new channel<@string>(1);
+    var drainedʗ1 = drained;
+    var server7ʗ1 = server7;
+    goǃ(() => {
+        nint total = 0;
+        var buf = new slice<byte>(4096);
+        while (total < (nint)(large * chunk)) {
+            var (k, err) = server7ʗ1.Read(buf);
+            total += k;
+            if (err != default!) {
+                drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes <%v>"u8, total, err));
+                return;
+            }
+        }
+        drainedʗ1.ᐸꟷ(fmt.Sprintf("%d bytes"u8, total));
     });
+
+    for (nint i = 1; i <= large; i++) {
+        {
+            var (n, err) = f.Write(slice<byte>(strings.Repeat(strconv.Itoa(i), chunk))); if (err != default! || n != chunk) {
+                return fmt.Sprintf("large write %d: n=%d err=%v"u8, i, n, err);
+            }
+        }
+        Ꮡwritten.Add(1);
+    }
+
+    return fmt.Sprintf("%d small lines, last %q; %d large writes, %s drained"u8,
+        strings.Count(small, "\n"), small.slice(strings.LastIndex(small.slice(0, len(small) - 1), "\n") + 1), (nint)(large), ᐸꟷ(drained));
 }
 
 } // end main_package
