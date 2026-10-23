@@ -167,4 +167,10 @@
     <ProjectReference Include="dotted/example.com.dotted.v2.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;go2cs/DottedModulePath&#10;mod&#9;go2cs/DottedModulePath&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

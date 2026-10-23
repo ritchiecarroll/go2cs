@@ -163,4 +163,10 @@
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;NilFuncIfaceMethodValue&#10;mod&#9;NilFuncIfaceMethodValue&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

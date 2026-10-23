@@ -164,4 +164,10 @@
     <ProjectReference Include="addrlib/ForeignIfaceFieldPointer.addrlib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;ForeignIfaceFieldPointer&#10;mod&#9;ForeignIfaceFieldPointer&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

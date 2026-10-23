@@ -110,6 +110,8 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/TypeExtensions.GoMethodSets.cs|Type[] typeArguments = new Type[open.GetGenericArguments().Length];", "reflection metadata: the type arguments that close a generic type's method"),
         ("runtime/WaitReason.cs|WaitReason[] parked = new WaitReason[all.Length - 1];", "runtime metadata: the static table of wait reasons"),
         ("ж.PointerExtensions.cs|Type[] fieldTypes = new Type[fields.Length];", "reflection metadata: the field types of a reinterpreted struct"),
+        ("GoModInfoAttribute.cs|byte[] text = Encoding.UTF8.GetBytes(info.ToString());", "the program's build info: Go's runtime.modinfo is a static string the linker writes; it is composed once, on the first ReadBuildInfo, and every later read returns that same string"),
+        ("GoModInfoAttribute.cs|byte[] data = new byte[s_infoStart.Length + text.Length + s_infoEnd.Length];", "the program's build info: Go's runtime.modinfo is a static string the linker writes; it is composed once, on the first ReadBuildInfo, and every later read returns that same string"),
     ];
 
     private static readonly Regex[] s_rawForms =

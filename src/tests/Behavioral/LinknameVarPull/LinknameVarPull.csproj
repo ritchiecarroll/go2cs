@@ -164,4 +164,10 @@
     <ProjectReference Include="../LinknameVarPullLib/LinknameVarPullLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;LinknameVarPull&#10;mod&#9;LinknameVarPull&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

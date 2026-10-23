@@ -163,4 +163,10 @@
     <ProjectReference Include="hue/ForeignValueImplementSuppression.hue.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;ForeignValueImplementSuppression&#10;mod&#9;ForeignValueImplementSuppression&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

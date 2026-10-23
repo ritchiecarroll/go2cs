@@ -284,6 +284,18 @@ func stampDefaultGodebugProject(projectFileName string, value string) error {
 		return nil
 	}
 
+	item := "  <ItemGroup>\r\n" +
+		"    <!-- The module's DefaultGODEBUG (cmd/go's runtime.godebugDefault), read by the runtime at start-up. -->\r\n" +
+		"    <AssemblyAttribute Include=\"go.GoDefaultGodebugAttribute\">\r\n" +
+		"      <_Parameter1>" + escapeXMLAttributeValue(value) + "</_Parameter1>\r\n" +
+		"    </AssemblyAttribute>\r\n" +
+		"  </ItemGroup>\r\n\r\n"
+
+	return insertProjectItem(projectFileName, item)
+}
+
+// insertProjectItem writes an item group into a program's project file just before its </Project>.
+func insertProjectItem(projectFileName string, item string) error {
 	data, err := os.ReadFile(projectFileName)
 
 	if err != nil {
@@ -294,15 +306,8 @@ func stampDefaultGodebugProject(projectFileName string, value string) error {
 	end := strings.LastIndex(project, "</Project>")
 
 	if end < 0 {
-		return fmt.Errorf("DefaultGODEBUG: no </Project> in %s", projectFileName)
+		return fmt.Errorf("no </Project> in %s", projectFileName)
 	}
-
-	item := "  <ItemGroup>\r\n" +
-		"    <!-- The module's DefaultGODEBUG (cmd/go's runtime.godebugDefault), read by the runtime at start-up. -->\r\n" +
-		"    <AssemblyAttribute Include=\"go.GoDefaultGodebugAttribute\">\r\n" +
-		"      <_Parameter1>" + escapeXMLAttributeValue(value) + "</_Parameter1>\r\n" +
-		"    </AssemblyAttribute>\r\n" +
-		"  </ItemGroup>\r\n\r\n"
 
 	return os.WriteFile(projectFileName, []byte(project[:end]+item+project[end:]), 0o644)
 }

@@ -164,4 +164,10 @@
     <ProjectReference Include="fieldlib/ReflectFieldMetadata.fieldlib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;ReflectFieldMetadata&#10;mod&#9;ReflectFieldMetadata&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

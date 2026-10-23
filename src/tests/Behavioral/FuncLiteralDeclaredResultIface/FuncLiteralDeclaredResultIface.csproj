@@ -164,4 +164,10 @@
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;go2cs/FuncLiteralDeclaredResultIface&#10;mod&#9;go2cs/FuncLiteralDeclaredResultIface&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

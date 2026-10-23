@@ -165,4 +165,10 @@
     <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;go2cs/PerfIfaceShellChurn&#10;mod&#9;go2cs/PerfIfaceShellChurn&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

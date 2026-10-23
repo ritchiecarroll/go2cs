@@ -1721,7 +1721,7 @@ that imports `fmt` gets these lines in its `.csproj`:
 **`$(GoStdLibVersion)` follows the Go release doing the conversion.** go2cs writes a
 `Directory.Build.props` beside the converted projects that sets it with a floating NuGet revision. For
 example, Go 1.N.P gives `1.N.P.*`, and restore takes the newest published `1.N.P.x` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:833-837#c30ed6; version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:296-308#c68571 -->
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:834-838#c30ed6; version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:296-308#c68571 -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
@@ -12067,15 +12067,15 @@ names its portable fallback `math_big_pure_go` rather than `purego`, so both tag
 A `go2cs -recurse` conversion of your own module adds only `safe`, for the reason given at the end of this
 section, unless you pass `-tags` or `-module-safe-tag=false`. Other conversions apply exactly the tags you
 pass and nothing else.
-<!-- src/go2cs/commandLineOptions.go:279 (`var defaultModuleBuildTags = []string{"safe"}`),
+<!-- src/go2cs/commandLineOptions.go:283 (`var defaultModuleBuildTags = []string{"safe"}`),
      :292-305 (`if tagsExplicit {` … `if recurse && moduleSafeTag {`). -->
 
 <!-- The math_big_pure_go member: arith_decl.go (`!math_big_pure_go`) declares eight bodyless
      functions whose bodies are arith_$GOARCH.s; arith_decl_pure.go (`math_big_pure_go`) forwards each
      to the `_g` pure-Go implementation in arith.go. With purego alone, every big.Int/Float/Rat
      arithmetic path compiled and threw on first use (surfaced as time.TestTruncateRound -> big.Int.Mul
-     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:268#3fe3c3 (defaultStdLibBuildTags);
-     resolveBuildTags (commandLineOptions.go:292#0885a6) keys the default on the -stdlib and -tests flags, not on
+     -> mulAddVWW). Default set: ../src/go2cs/commandLineOptions.go:272#3fe3c3 (defaultStdLibBuildTags);
+     resolveBuildTags (commandLineOptions.go:296#0885a6) keys the default on the -stdlib and -tests flags, not on
      the package being standard library, so a -tests run on any package gets it. `-tags=` clears the
      default. A -stdlib run prints the tags it applies, e.g.
      `Applying build tags: purego,math_big_pure_go (default; pass -tags to override)`

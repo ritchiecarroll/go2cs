@@ -163,4 +163,10 @@
     <ProjectReference Include="pmslib/NamedInterfacePointerMethodSet.pmslib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;NamedInterfacePointerMethodSet&#10;mod&#9;NamedInterfacePointerMethodSet&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

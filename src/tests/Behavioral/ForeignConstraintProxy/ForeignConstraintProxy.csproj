@@ -166,4 +166,10 @@
     <ProjectReference Include="lib/ForeignConstraintProxy.lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;ForeignConstraintProxy&#10;mod&#9;ForeignConstraintProxy&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>
