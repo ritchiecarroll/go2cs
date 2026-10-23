@@ -6904,8 +6904,8 @@ ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:
 SlicePointerIdentity/main.go:16 `for i := range s {` -> main.cs.target:13 `foreach (var i in range(s)) {`;
 VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 -> .cs.target:12 `foreach (var i in range(xs)) {`.
-The string control: src/go2cs/rangeIndexOnly_test.go:260 `expect("overString", "foreach (var (i, _) in str)")`;
-the nil pointer: :248 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
+The string control: src/go2cs/rangeIndexOnly_test.go:276 `expect("overString", "foreach (var (i, _) in str)")`;
+the nil pointer: :260 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
 **An index-only range reads no element.** When a range over a slice, an array or a pointer to an array
 names only the index (`for i := range s`, `for i, _ := range s`, or `for range s`), golib's `range(s)`
 reads the length once and counts the indexes, as Go does. A pointer to an array passes its type's length,
