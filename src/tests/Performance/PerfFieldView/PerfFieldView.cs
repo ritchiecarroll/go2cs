@@ -55,18 +55,18 @@ internal static void Main() {
     }
 
     var pts = new slice<point>(64, () => new());
-    foreach (var (i, _) in pts) {
+    foreach (var i in range(pts)) {
         pts[i].x.v[0] = (uint64)i;
         pts[i].y.v[1] = (uint64)i * 3;
     }
     for (nint r = 0; r < 30000; r++) {
-        foreach (var (i, _) in pts) {
+        foreach (var i in range(pts)) {
             Ꮡ(pts, i).step();
         }
     }
 
     var sum = p.x.v[0] ^ p.y.v[1] ^ p.z.v[2] ^ p.z.v[3];
-    foreach (var (i, _) in pts) {
+    foreach (var i in range(pts)) {
         sum ^= (uint64)(pts[i].z.v[(i & 3)]);
     }
 
