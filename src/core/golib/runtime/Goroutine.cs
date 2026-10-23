@@ -24,6 +24,16 @@ namespace go.golib;
 /// dedicated thread, so a parked goroutine can never delay a not-yet-started one.
 /// </para>
 /// <para>
+/// <b>Reused once finished.</b> The thread is dedicated for the goroutine's whole life, and REUSED after
+/// it (<see cref="GoroutineThreadPool"/>), the way Go reuses an M: a finished goroutine's thread waits
+/// briefly for the next one instead of exiting, because creating a thread costs ~100 µs and does not get
+/// faster with more creators. A goroutine that finds no idle thread gets a new one, exactly as before, so
+/// reuse changes the cost of a <c>go</c> statement and never its capacity. Nothing of a goroutine survives
+/// on its thread into the next (GoroutineThreadState, whose census GolibTests' ThreadStateCensusTests keeps
+/// complete), and a goroutine that exits locked to its thread (<c>runtime.LockOSThread</c>) takes the
+/// thread with it, as Go's does.
+/// </para>
+/// <para>
 /// <b>Why not the ThreadPool.</b> Goroutines used to be <c>ThreadPool.QueueUserWorkItem</c> work
 /// items. A goroutine that parks — an unbuffered rendezvous, a full buffer, a blocked select, a
 /// <c>WaitGroup</c>, a sleep — blocks its thread for as long as it is parked, so on a SHARED pool
@@ -962,12 +972,13 @@ public sealed class Goroutine
     /// Starts <paramref name="body"/> as a goroutine.
     /// </summary>
     /// <remarks>
-    /// One dedicated background thread per goroutine — see the type remarks for why this is not a
-    /// pool work item. <c>IsBackground</c> is Go's exit semantics: when <c>main</c> returns the
-    /// process exits regardless of how many goroutines are still live or parked, which a foreground
-    /// thread would prevent. The <see cref="ExecutionContext"/> flows into the new thread exactly as
-    /// it did through <c>QueueUserWorkItem</c> — <c>Thread.Start</c> captures it the same way — which
-    /// is what keeps a failure inside a goroutine attributable to the test that spawned it.
+    /// One dedicated background thread per goroutine, reused once that goroutine has finished with it
+    /// (<see cref="GoroutineThreadPool"/>) -- see the type remarks for why this is not a .NET thread pool
+    /// work item. <c>IsBackground</c> is Go's exit semantics: when <c>main</c> returns the process exits
+    /// regardless of how many goroutines are still live or parked, which a foreground thread would
+    /// prevent. The creator's <see cref="ExecutionContext"/> is captured here and the body runs under it,
+    /// exactly as a new thread's start would have flowed it -- which is what keeps a failure inside a
+    /// goroutine attributable to the test that spawned it.
     /// </remarks>
     public static void Start(Action body) => Start(body, "", 0);
 
@@ -1077,14 +1088,16 @@ public sealed class Goroutine
         if (ExecutionTracer.Enabled)
             ExecutionTracer.OnCreate(goroutine);
 
-        Thread thread = new(() => Run(body, goroutine, bubble), s_stackReserve)
-        {
-            IsBackground = true
-        };
-
+        // On a REUSED goroutine-sized thread (GoroutineThreadPool), not a new one. Creating a thread costs
+        // ~100 µs and does not get faster with more creators (measured on a 16-thread laptop: 6-9.5k threads
+        // a second from 1 creator or 100), so a program that starts goroutines by the million spent its life
+        // creating threads: runtime's TestChanSendBarrier starts 10M and did not finish inside an hour, and
+        // TestConcurrentReadsAfterGrowth starved beside it (2026-10-23). The body runs under this creator's
+        // ExecutionContext, as a new thread's start would have flowed it, and the thread is reset before
+        // the next goroutine; one that exits locked to its thread takes the thread with it, as in Go.
         try
         {
-            thread.Start();
+            GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));
         }
         catch
         {

@@ -169,6 +169,14 @@ partial class runtime_package
     private static readonly bool s_getgReset = GoroutineThreadState.Register(static () => t_getg = null);
     private static readonly bool s_getgOwnerReset = GoroutineThreadState.Register(static () => t_getgOwner = null);
 
+    // Go's goexit0: a goroutine that exits still locked to its thread (LockOSThread, or the runtime's own
+    // lockOSThread, without the matching unlock) takes the thread with it -- "If the calling goroutine exits
+    // without unlocking the thread, the thread will be terminated." golib reuses a finished goroutine's
+    // thread (GoroutineThreadPool), so it asks this first. Read before the reset, while t_getg still holds
+    // the finished goroutine's g and its m's lock counts.
+    private static readonly bool s_lockedExitRetires = GoroutineThreadState.RegisterRetire(static () =>
+        t_getg is { } gp && gp.Value.m is { IsNilPointer: false } mp && (mp.Value.lockedExt != 0 || mp.Value.lockedInt != 0));
+
     internal static partial ж<g> getg()
     {
         ж<g>? gp = t_getg;

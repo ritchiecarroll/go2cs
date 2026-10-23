@@ -38,6 +38,16 @@
 > Option-A registry this design supplies), and `DESIGN-netpoll-managed-poller.md` (branch
 > `claude/netpoll-design`, `0cfed1364`) §3.2/§8 — the adjacent arc whose shared boundary §7
 > settles. Written against the corpus at `0133b6aa7` (2026-08-12), Go 1.23.1.
+>
+> **M1 THREAD CACHE (dated amendment 2026-10-23, COORD ruling; seat `claude/r-goroutine-pool`).** §4's
+> M2 verdict named the remedy for measured thread-churn cost, "a small thread cache on M1", and runtime's
+> rows measured it: TestChanSendBarrier starts 10M goroutines, thread creation runs at 6-9.5k a second
+> on a 16-thread laptop whether 1 creator asks or 100, and the row abandoned it and two map tests at a
+> 60-minute deadline (5 of 5 runs). Goroutines now start through `GoroutineThreadPool`, the cache the
+> Coro arc already ran: each goroutine still gets a thread for its whole life, and a finished one's
+> thread is reused; a goroutine exiting locked to its thread retires it, as Go's does. Capacity is
+> unchanged (no idle thread means a new one), so nothing in §1's ladder returns. Guards:
+> `GolibTests.GoroutinePoolTests`, `GolibTests.ThreadStateCensusTests`.
 
 ---
 
