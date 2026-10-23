@@ -165,4 +165,10 @@
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;UnixAbstractAddrName&#10;mod&#9;UnixAbstractAddrName&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

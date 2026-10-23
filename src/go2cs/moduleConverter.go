@@ -584,6 +584,7 @@ func (m *ModuleConverter) convertAll() {
 			// from the main module rather than by directory from inside the cache (processConversion).
 			packageOptions := m.options
 			packageOptions.packageImportPath = pkgPath
+			packageOptions.programDependencies = m.sortedThirdPartyModules()
 
 			return processConversion(pkg.Dir, true, outputDir, packageOptions)
 		}()

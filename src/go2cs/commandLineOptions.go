@@ -109,6 +109,10 @@ type Options struct {
 	// inputDigest is the GoInputDigest the package being converted records in its project (packageInputDigest.go): set
 	// per package before its project file is written, and "" for every project that records none.
 	inputDigest string
+
+	// programDependencies is the -recurse closure's third-party modules, in path order: a main package's
+	// build-info `dep` lines (buildInfoStamp.go). Set per package by the -recurse drivers; nil otherwise.
+	programDependencies []thirdPartyModule
 }
 
 // packageUnderTestPath returns the import path of the package under test, whichever field the

@@ -15,8 +15,10 @@ internal static void addOne(ref nint n) {
 internal static void handlePanic(ref error err) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 err = fmt.Errorf("recovered: %v"u8, e);
             }
         }
@@ -62,7 +64,7 @@ internal static error /*err*/ recoverResult() {
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => handlePanic(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => handlePanic(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         throw panic("boom");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

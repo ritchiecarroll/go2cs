@@ -333,6 +333,7 @@
     <Project Path="tests/Behavioral/BlankMultiResult/BlankMultiResult.csproj" />
     <Project Path="tests/Behavioral/BlankNamedReturn/BlankNamedReturn.csproj" />
     <Project Path="tests/Behavioral/BoxedMapFieldWrite/BoxedMapFieldWrite.csproj" />
+    <Project Path="tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj" />
     <Project Path="tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="tests/Behavioral/ByteSliceStringVerbs/ByteSliceStringVerbs.csproj" />
     <Project Path="tests/Behavioral/ByteTableStringConst/ByteTableStringConst.csproj" />
@@ -944,6 +945,7 @@
     <Project Path="tests/Behavioral/ReceiverFieldMethodCall/ReceiverFieldMethodCall.csproj" />
     <Project Path="tests/Behavioral/ReceiverNestedFieldAddress/ReceiverNestedFieldAddress.csproj" />
     <Project Path="tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
+    <Project Path="tests/Behavioral/RecoverInHelper/RecoverInHelper.csproj" />
     <Project Path="tests/Behavioral/ReexecArgv0Token/ReexecArgv0Token.csproj" />
     <Project Path="tests/Behavioral/RefLoweredDeferChain/RefLoweredDeferChain.csproj" />
     <Project Path="tests/Behavioral/RefPrimaryFieldReceiver/RefPrimaryFieldReceiver.csproj" />

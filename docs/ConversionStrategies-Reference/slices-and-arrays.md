@@ -958,7 +958,7 @@ binds `appendꓸꓸꓸ<T>(slice<T>, in sslice<T>)` and is read as the span it al
 reach the call. The `ISlice<T>` overload remains for other operands. Its interface parameter boxes a
 struct operand, which is why a `slice<T>` has its own exact overload. The constrained form,
 `appendꓸꓸꓸ<S, E>`, takes `ISlice<E>`, with an `sslice<E>` twin.
-<!-- src/core/golib/builtin.cs:503 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :516 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :490 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1407 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1415 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
+<!-- src/core/golib/builtin.cs:542 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in slice<T> elems)`; :555 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, in sslice<T> elems)`; :529 `public static slice<T> appendꓸꓸꓸ<T>(slice<T> slice, ISlice<T> elems)`; :1446 `public static S appendꓸꓸꓸ<S, T>(S s, ISlice<T> items)`; :1454 `public static S appendꓸꓸꓸ<S, T>(S s, in sslice<T> items)`. -->
 <!-- The exact slice<T> overload landed in golib 17785ec85 (2026-10-22). Before it a slice<T> operand bound the ISlice<T> overload and was boxed: 56 B per call that AllocationCounter never sees; Go 1.26's bytes TestReplace read it as 56 objects per run for `append([]byte(nil), s...)`, which allocates nothing in Go (builtin.cs's doc comment on that overload). -->
 
 Inside golib the window's own span serves every copy a span can express (managed backings are

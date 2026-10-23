@@ -1159,7 +1159,7 @@ internal static error tryPutIdleConn(this ж<Transport> Ꮡt, ж<persistConn> �
         Ꮡpconn.markReused();
         if (pconn.isClientConn) {
             // internalStateHook is always set for conns created by NewClientConn.
-            defer(Ꮡpconn.Value.internalStateHook, ref ᒐ);
+            defer(Ꮡpconn.Value.internalStateHook, ref ᒐ, recovers: true);
             pconn.mu.Lock();
             defer(Ꮡpconn.of(persistConn.Ꮡmu).Unlock, ref ᒐ);
             if (!pconn.inFlight) {
@@ -1845,7 +1845,7 @@ internal static void dialConnFor(this ж<Transport> Ꮡt, ж<wantConn> Ꮡw) {
     try {
         ref var w = ref Ꮡw.DerefOrNull();
 
-        defer(Ꮡw.Value.afterDial, ref ᒐ);
+        defer(Ꮡw.Value.afterDial, ref ᒐ, recovers: true);
         var ctx = Ꮡw.getCtxForDial();
         if (ctx == default!) {
             Ꮡt.decConnsPerHost(w.key);
@@ -2159,7 +2159,7 @@ internal static partial (ж<persistConn> pconn, error err) dialConn(this ж<Tran
             // the TCP connect.
             var (connectCtx, cancel) = testHookProxyConnectTimeout(ctx, (time.Duration)(60000000000L));
             var cancelʗ1 = cancel;
-            defer(() => cancelʗ1(), ref ᒐ);
+            defer(() => cancelʗ1(), ref ᒐ, recovers: true);
 
             var didReadResponse = new channel<EmptyStruct>(0); // closed after CONNECT write+read is done or fails
             ref var resp = ref heap<ж<Response>>(out var Ꮡresp);

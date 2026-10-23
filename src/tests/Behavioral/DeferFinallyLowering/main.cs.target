@@ -119,7 +119,7 @@ internal static void withLit(this ж<box> Ꮡx) {
             GoFrame ᒐ = default;
             try {
                 {
-                    var r = recover(); if (r != default!) {
+                    var r = recoverChecked(); if (r != default!) {
                         fmt.Println("inner recovered", r);
                     }
                 }

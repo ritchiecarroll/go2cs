@@ -46,6 +46,8 @@
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bodyBlankLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)buildInfoStamp.go" />
+    <None Include="$(MSBuildThisFileDirectory)buildInfoStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)byRefReceiverGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />
@@ -483,6 +485,7 @@
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge.go" />
     <None Include="$(MSBuildThisFileDirectory)readmeValidationBadge_test.go" />
     <None Include="$(MSBuildThisFileDirectory)reconvertDeletionsSkipList_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)recoverForms.go" />
     <None Include="$(MSBuildThisFileDirectory)recvRefLowering_test.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)refLoweringAnalysis_test.go" />

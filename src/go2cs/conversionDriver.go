@@ -459,6 +459,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// file's declarations) but has no other ordering dependency on the analyses above/below it.
 		needsNoInlining := computeNoInliningClosure(files, packageTypes, info, fixedSkipClosureApplies(packageInputPath, options.goRoot))
 
+		// Go's direct-call rule for recover: which recover() calls take the deferred-call mark and which defers
+		// set it (recoverForms.go). Package-wide, before any file is visited.
+		collectRecoverForms(files, packageTypes, info)
+
 		// Perform escape analysis for each file
 		// Identify capture-mode methods (those taking &recv.field) — across the package
 		// and its imports — before escape analysis, so a value var on which one is
@@ -652,6 +656,18 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			}
 
 			if err := stampDefaultGodebugProject(projectFileName, godebug); err != nil {
+				return err
+			}
+		}
+
+		// EVERY main package, single-package and -recurse alike, carries its module build info -- the `path`,
+		// `mod` and (under -recurse) `dep` lines runtime/debug.ReadBuildInfo reads (buildInfoStamp.go), each dep's
+		// sum from the main module's go.sum. Same project route as the DefaultGODEBUG above, for the same reason.
+		if pkg.Name == "main" {
+			moduleDir := moduleRootDir(pkg.Dir)
+			modInfo := programModInfo(pkg.PkgPath, directoryModulePath(pkg.Dir), options.programDependencies, goSumHashes(moduleDir))
+
+			if err := stampModInfoProject(projectFileName, modInfo); err != nil {
 				return err
 			}
 		}

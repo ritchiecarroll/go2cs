@@ -1212,6 +1212,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 		// The prelude's parts are written line after line, and one blank line sets the whole prelude
 		// apart from the Go body (the owner's decision 2, docs/PLAN-comment-and-spacing-parity.md E2).
+		//
+		// A function that calls recover() takes golib's deferred-call mark FIRST, before anything it calls could
+		// take it: Go's direct-call rule (recoverForms.go).
+		if local, ok := packageRecovererFlagNames[funcDecl]; ok {
+			blockPrefix += fmt.Sprintf("%s%svar %s = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?", v.newline, v.indent(v.indentLevel+1), local)
+		}
+
 		blockPrefix += resultParameters.String()
 		blockPrefix += arrayClones.String()
 		blockPrefix += implicitPointers.String()

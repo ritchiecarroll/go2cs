@@ -4533,7 +4533,7 @@ internal static void serveConn(this ж<http2Server> Ꮡs, net.Conn c, ж<http2Se
 
         var (baseCtx, cancel) = http2serverConnBaseContext(c, Ꮡopts);
         var cancelʗ1 = cancel;
-        defer(cancelʗ1, ref ᒐ);
+        defer(cancelʗ1, ref ᒐ, recovers: true);
 
         var http1srv = Ꮡopts.baseConfig();
         var conf = http2configFromServer(ref (http1srv).DerefOrNull(), ref (Ꮡs).DerefOrNull());
@@ -5067,6 +5067,8 @@ internal static void stopShutdownTimer(this ref http2serverConn sc) {
 internal static void notePanic(this ж<http2serverConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         // Note: this is for serverConn.serve panicking, not http.Handler code.
         if (http2testHookOnPanicMu != nil) {
             http2testHookOnPanicMu.Lock();
@@ -5074,7 +5076,7 @@ internal static void notePanic(this ж<http2serverConn> Ꮡsc) {
         }
         if (http2testHookOnPanic != default!) {
             {
-                var e = recover(); if (e != default!) {
+                var e = recover(calledByDefer); if (e != default!) {
                     if (http2testHookOnPanic(Ꮡsc, e)) {
                         throw panic(e);
                     }
@@ -5092,7 +5094,7 @@ internal static partial void serve(this ж<http2serverConn> Ꮡsc, http2http2Con
         ref var sc = ref Ꮡsc.DerefOrNull();
 
         sc.serveG.check();
-        defer(Ꮡsc.notePanic, ref ᒐ);
+        defer(Ꮡsc.notePanic, ref ᒐ, recovers: true);
         defer(() => Ꮡsc.Value.conn.Close(), ref ᒐ);
         defer(Ꮡsc.closeAllStreamsOnConnClose, ref ᒐ);
         defer(Ꮡsc.stopShutdownTimer, ref ᒐ);
@@ -8880,7 +8882,7 @@ internal static void healthCheck(this ж<http2ClientConn> Ꮡcc) {
         // trigger the healthCheck again if there is no frame received.
         var (ctx, cancel) = context_package.WithTimeout(context_package.Background(), pingTimeout);
         var cancelʗ1 = cancel;
-        defer(() => cancelʗ1(), ref ᒐ);
+        defer(() => cancelʗ1(), ref ᒐ, recovers: true);
         cc.vlogf("http2: Transport sending health check"u8);
         var err = Ꮡcc.Ping(ctx);
         if (err != default!){

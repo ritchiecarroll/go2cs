@@ -162,4 +162,10 @@
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;EmptyIfaceImplementRecord&#10;mod&#9;EmptyIfaceImplementRecord&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

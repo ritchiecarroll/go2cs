@@ -477,10 +477,11 @@ internal static readonly object theFollowingPanicˢ = (@string)"The following pa
 internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var check = ref Ꮡcheck.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
 
-        var switchᴛ5 = recover();
+        var switchᴛ5 = recover(calledByDefer);
         switch (switchᴛ5.type()) {
         case null:
         case bailout _: {
@@ -537,7 +538,7 @@ public static error /*err*/ Files(this ж<Checker> Ꮡcheck, slice<ж<ast.File>>
         // localized to a piece of syntax and needn't prevent
         // type-checking of the rest of the package.
 
-        defer(Ꮡcheck.handleBailout, Ꮡerr, ref ᒐ);
+        defer(Ꮡcheck.handleBailout, Ꮡerr, ref ᒐ, recovers: true);
         Ꮡcheck.checkFiles(files);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

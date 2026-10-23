@@ -38,8 +38,10 @@ internal static void error_(error err) {
 internal static void catchError(ref error err) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 var (ge, ok) = e._<gobError>(ᐧ);
                 if (!ok) {
                     throw panic(e);

@@ -233,10 +233,11 @@ internal static void unexpected(this ref Tree t, item token, @string context) {
 internal static void recover(this ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var t = ref Ꮡt.DerefOrNull();
         ref var errp = ref Ꮡerrp.DerefOrNull();
 
-        var e = builtin.recover();
+        var e = builtin.recover(calledByDefer);
         if (e != default!) {
             {
                 var (_, ok) = e._<runtimeꓸError>(ᐧ); if (ok) {
@@ -295,7 +296,7 @@ public static (ж<Tree> tree, error err) Parse(this ж<Tree> Ꮡt, @string text,
         ref var t = ref Ꮡt.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡt.recover, Ꮡerr, ref ᒐ);
+        defer(Ꮡt.recover, Ꮡerr, ref ᒐ, recovers: true);
         t.ParseName = t.Name;
         var lexer = lex(t.Name, text, leftDelim, rightDelim);
         t.startParse(funcs, lexer, treeSet);

@@ -163,4 +163,10 @@
     <ProjectReference Include="tables/LazyPackageVars.tables.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;LazyPackageVars&#10;mod&#9;LazyPackageVars&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

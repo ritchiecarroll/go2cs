@@ -723,10 +723,11 @@ internal static readonly @string methodˢ = " method: "u8;
 internal static void catchPanic(this ж<pp> Ꮡp, any arg, rune verb, @string method) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var p = ref Ꮡp.DerefOrNull();
 
         {
-            var err = recover(); if (err != default!) {
+            var err = recover(calledByDefer); if (err != default!) {
                 // If it's a nil pointer, just say "<nil>". The likeliest causes are a
                 // Stringer that fails to guard against nil or a nil pointer for a
                 // value receiver, and in either case, "<nil>" is a nice result.
@@ -795,7 +796,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
         {
             var (formatter, ok) = p.arg._<Formatter>(ᐧ); if (ok) {
                 handled = true;
-                defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, formatˢ, ref ᒐ);
+                defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, formatˢ, ref ᒐ, recovers: true);
                 formatter.Format(new ppжState(Ꮡp), verb);
                 goto ᒐdone;
             }
@@ -806,7 +807,7 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
             {
                 var (stringer, ok) = p.arg._<GoStringer>(ᐧ); if (ok) {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, goStringˢ, ref ᒐ);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, goStringˢ, ref ᒐ, recovers: true);
                     // Print the result of GoString unadorned.
                     p.fmt.fmtS(stringer.GoString());
                     goto ᒐdone;
@@ -825,13 +826,13 @@ internal static bool /*handled*/ handleMethods(this ж<pp> Ꮡp, rune verb) {
                 switch (p.arg.type()) {
                 case {} Δv when Δv._<error>(out var v): {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, errorˢ, ref ᒐ);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, errorˢ, ref ᒐ, recovers: true);
                     Ꮡp.fmtString(v.Error(), verb);
                     goto ᒐdone;
                 }
                 case {} Δv when Δv._<Stringer>(out var v): {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, stringˢ, ref ᒐ);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, stringˢ, ref ᒐ, recovers: true);
                     Ꮡp.fmtString(v.String(), verb);
                     goto ᒐdone;
                 }}

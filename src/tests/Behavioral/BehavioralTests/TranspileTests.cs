@@ -190,6 +190,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckBoxedMapFieldWrite() => CheckTarget("BoxedMapFieldWrite");
 
     [TestMethod]
+    public void CheckBuildInfoSettings() => CheckTarget("BuildInfoSettings");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
@@ -1856,6 +1859,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
+    public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
 
     [TestMethod]
     public void CheckRecvArrayFieldElementAddress() => CheckTarget("RecvArrayFieldElementAddress");

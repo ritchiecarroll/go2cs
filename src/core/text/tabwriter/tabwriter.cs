@@ -484,11 +484,12 @@ internal static nint terminateCell(this ref Writer b, bool htab) {
 internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.DerefOrNull();
 
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 if (op == "Flush"u8) {
                     // If Flush ran into a panic, we still need to reset.
                     b.reset();
@@ -527,7 +528,7 @@ internal static error /*err*/ flush(this ж<Writer> Ꮡb) {
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡb.handlePanic, Ꮡerr, flushˢ, ref ᒐ);
+        defer(Ꮡb.handlePanic, Ꮡerr, flushˢ, ref ᒐ, recovers: true);
         b.flushNoDefers();
         err = default!;
     }
@@ -570,7 +571,7 @@ public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) {
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡb.handlePanic, Ꮡerr, writeˢ, ref ᒐ);
+        defer(Ꮡb.handlePanic, Ꮡerr, writeˢ, ref ᒐ, recovers: true);
 
         // split text into cells
         n = 0;

@@ -228,6 +228,12 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	// no longer a `defer`-named delegate parameter to disambiguate from.
 	deferTarget := fmt.Sprintf(", ref %s);", v.goFrameName())
 
+	// A callee that calls recover() must know this call is the deferred one (Go's direct-call rule, recoverForms.go):
+	// the registration asks golib to mark the thread just before it runs.
+	if packageDeferRecoverMarks[deferStmt] {
+		deferTarget = fmt.Sprintf(", ref %s, recovers: true);", v.goFrameName())
+	}
+
 	if paramCount == 0 {
 		result.WriteString("defer(")
 

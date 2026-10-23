@@ -188,6 +188,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckBoxedMapFieldWrite() => CheckTarget("BoxedMapFieldWrite");
 
     [TestMethod]
+    public void CheckBuildInfoSettings() => CheckTarget("BuildInfoSettings");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
@@ -1794,6 +1797,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
+    public void CheckRecoverInHelper() => CheckTarget("RecoverInHelper");
 
     [TestMethod]
     public void CheckRecvArrayFieldElementAddress() => CheckTarget("RecvArrayFieldElementAddress");

@@ -1256,8 +1256,10 @@ internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) {
 internal static void errorHandler(ref error errp) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 {
                     var (se, ok) = e._<scanError>(ᐧ); if (ok){ // catch local error
                         errp = se.err;
@@ -1289,7 +1291,7 @@ internal static (nint numProcessed, error err) doScan(this ж<ss> Ꮡs, slice<an
         ref var s = ref Ꮡs.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         foreach (var (_, arg) in a) {
             Ꮡs.scanOne((rune)'v', arg);
             numProcessed++;
@@ -1422,7 +1424,7 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
         ref var s = ref Ꮡs.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ);
+        defer(ᴛ1 => errorHandler(ref ᴛ1.DerefOrNull()), Ꮡerr, ref ᒐ, recovers: true);
         nint end = len(format) - 1;
         // We process one item per non-trivial format
         for (nint i = 0; i <= end; ) {

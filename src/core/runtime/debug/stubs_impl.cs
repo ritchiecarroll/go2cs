@@ -47,8 +47,13 @@
 //     laundering the assert, which is why NumGC is still the real gen2 count and not zeroed to make
 //     two lengths agree. The packed layout ReadGCStats expects (n pauses, n ends, lastGC, numGC,
 //     totalPause) is honored exactly, most-recent-first, at length 2n+3.
-//   - modinfo / WriteHeapDump / SetTraceback have no managed form; they are inert, matching what a
-//     binary built without module info or heap-dump support reports.
+//   - WriteHeapDump / SetTraceback have no managed form; they are inert, matching what a binary
+//     built without heap-dump support reports.
+//   - modinfo is REAL as of 2026-10-22: the module lines the converter stamps on a program
+//     ([assembly: GoModInfo]) or a test host registers, plus GOOS, GOARCH, CGO_ENABLED and
+//     DefaultGODEBUG read from this binary, sentinel-wrapped as cmd/go embeds them. It returns ""
+//     only while nothing true is stamped or registered, which is what ReadBuildInfo's ok == false
+//     honestly reports. -compiler, -buildmode, GOAMD64 and vcs.* are never reported.
 //   - runtime_setCrashFD is a REAL operation as of 2026-08-21, and it no longer owns the slot: the
 //     descriptor lives in golib (go.golib.CrashReport), which is where Go keeps it —
 //     runtime.crashFD, the very symbol this func's //go:linkname names — and where the printer
@@ -187,8 +192,11 @@ partial class debug_package
     internal static partial @string modinfo()
     {
         // Go returns the module info the linker embedded; a binary built without it returns "",
-        // and ReadBuildInfo then reports ok == false. That is the honest answer here.
-        return ""u8;
+        // and ReadBuildInfo then reports ok == false. Here the module half is the program's
+        // [assembly: GoModInfo] stamp or the test host's registration, and the build settings are
+        // this binary's own (golib GoModInfoAttribute.Compose). "" is the answer only while nothing
+        // true is stamped or registered.
+        return GoModInfoAttribute.Compose(global::go.runtime_package.GOOS.ToString(), global::go.runtime_package.GOARCH.ToString(), global::go.runtime_package.iscgo);
     }
 
     // Go's WriteHeapDump is a //go:linkname push into runtime (heapdump.go), which has no
