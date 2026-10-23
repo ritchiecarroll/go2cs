@@ -11395,6 +11395,17 @@ small methods into their callers (inlining), and an inlined method has no frame,
 would name the wrong function. The converter therefore marks every function whose frame a Go stack walk
 counts, and the mark tells the JIT not to inline it.
 
+A function without the mark can still be inlined, and its frame is then missing from a stack walk. One case is
+restored: when an inlined function raises an explicit `panic`, golib reads the call back from its caller's IL and
+puts the frame back into `runtime.Callers` and the crash report, printed `name(...)` as Go prints an inlined call.
+It does so only when the statement's IL holds exactly one call and that call reaches exactly one `panic`. A fault
+the CLR raises itself inside an inlined function, such as an integer divide by zero or a nil dereference, keeps
+the frames the CLR reports.
+<!-- src/core/runtime/managed_impl.cs:4486 `private static (System.Reflection.MethodBase method, int ilOffset)[]? inlinedPanicFrames(System.Reflection.MethodBase faulting, int ilOffset)`;
+     the printed form :1818 `trace.Append(name).Append(inlined ? "(...)\n" : "()\n");`. Guards: GolibTests
+     PanicFramesInlinedPanicTests (src/tests/GolibTests/PanicFramesInlinedPanicTests.cs). The limit is recorded as a BOARD row
+     (docs/phase4/BOARD-next-validation-candidates.md, the frame-hint seat's stated limit). -->
+
 The mark is the word `partial`. A converted method with a body that is written `partial` is one half of
 a C# partial method. `NoInliningPartialGenerator` writes the other half, the declaration, with the
 attribute `[MethodImpl(MethodImplOptions.NoInlining)]`, and C# compiles the two halves into one method
@@ -12010,6 +12021,8 @@ converter's list can likewise name the operating systems it covers.
   `//go:linkname` pulls. Its third link, a push from `runtime`, is a converter-written forwarder in
   `flightrecorder.cs`: `runtime_traceClockUnitsPerSecond` calls the hand-owned `runtime.traceClockUnitsPerSecond`.
 - `hash/crc32`, on .NET hardware intrinsics.
+- `math/bits`'s `Add64`, `Sub64` and `Mul64`, as small functions the JIT inlines into their callers, with `Mul64`
+  on .NET's `Math.BigMul`.
 - `reflect` and `internal/reflectlite`; see [Reflection](#reflection-reflect).
 - The network poller's runtime hooks and Linux's `Syscall6`, at the operating-system boundary.
 <!-- src/core/runtime/trace_impl.cs:59 (`public static error StartTrace()`), :106
@@ -12017,6 +12030,10 @@ converter's list can likewise name the operating systems it covers.
      src/core/runtime/trace/flightrecorder_impl.cs:34 (`runtime_traceAdvance`), :36 (`runtime_traceClockNow`);
      src/core/runtime/trace/flightrecorder.cs:188-191 (`go.runtime_package.traceClockUnitsPerSecond()`);
      the push row src/go2cs/linknameOperations.go:804 (`"runtime/trace.runtime_traceClockUnitsPerSecond"`). -->
+<!-- math/bits: src/core/math/bits/bits_impl.cs:147 `public static (uint64 hi, uint64 lo) Mul64(uint64 x, uint64 y)`, with
+     AggressiveInlining on the line before it, as on Add64, :117 `public static (uint64 sum, uint64 carryOut) Add64(uint64 x, uint64 y, uint64 carry)`,
+     and Sub64, :133 `public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 borrow)`; the reason and its linux/amd64
+     measurement are in that file's header comment. -->
 
 **Full detail:** [Reference → Manually-Converted Declarations](ConversionStrategies-Reference/manual-conversions.md#manually-converted-declarations) — every hand-owned surface and why, `//go:linkname` forwarders in both directions, the poller and system call internals on each OS, native bindings, how hand-owned files and list entries are scoped per platform, and the reflection bridge.
 
