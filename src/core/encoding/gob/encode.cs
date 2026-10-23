@@ -747,7 +747,7 @@ internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect
     try {
         ref var ut = ref Ꮡut.DerefOrNull();
 
-        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡenc.of(Encoder.Ꮡerr), ref ᒐ);
+        defer(ᴛ1 => catchError(ref ᴛ1.DerefOrNull()), Ꮡenc.of(Encoder.Ꮡerr), ref ᒐ, recovers: true);
         var engine = getEncEngine(ref (Ꮡut).DerefOrNull(), default!);
         nint indir = ut.indir;
         if (ut.externalEnc != 0) {

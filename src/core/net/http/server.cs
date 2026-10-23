@@ -2157,7 +2157,7 @@ internal static void serve(this ж<conn> Ꮡc, context.Context ctx) {
         (ctx, var cancelCtx) = context_package.WithCancel(ctx);
         c.cancelCtx = cancelCtx;
         var cancelCtxʗ1 = cancelCtx;
-        defer(() => cancelCtxʗ1(), ref ᒐ);
+        defer(() => cancelCtxʗ1(), ref ᒐ, recovers: true);
 
         c.r = Ꮡ(new connReader(conn: Ꮡc, rwc: c.rwc));
         c.bufr = newBufioReader(new connReaderжReader(c.r));
@@ -4230,7 +4230,7 @@ internal static partial void ServeHTTP(this ж<timeoutHandler> Ꮡh, ResponseWri
             Action cancelCtx = default!;
             (ctx, cancelCtx) = context_package.WithTimeout(r.Context(), h.dt);
             var cancelCtxʗ1 = cancelCtx;
-            defer(() => cancelCtxʗ1(), ref ᒐ);
+            defer(() => cancelCtxʗ1(), ref ᒐ, recovers: true);
         }
         Ꮡr = r.WithContext(ctx); r = ref Ꮡr.DerefOrNull();
         var done = new channel<EmptyStruct>(0);
