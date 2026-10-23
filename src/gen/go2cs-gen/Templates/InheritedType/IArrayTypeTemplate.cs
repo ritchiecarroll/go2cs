@@ -52,9 +52,19 @@ internal static class IArrayTypeTemplate
                     set => ((IArray)Value)[index] = value;
                 }
                     
-                public ref {{targetTypeName}} this[nint index] => ref Value[index];
+                // These element accessors and the Value getter they call both inline, so an element read is
+                // golib's bounds check and a load, as array<T>'s own indexers are.
+                public ref {{targetTypeName}} this[nint index]
+                {
+                    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+                    get => ref Value[index];
+                }
             
-                public ref {{targetTypeName}} this[int index] => ref Value[(nint)index];
+                public ref {{targetTypeName}} this[int index]
+                {
+                    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+                    get => ref Value[(nint)index];
+                }
             
                 // An unsigned index forwards UNNARROWED: array<T>'s ulong indexer checks it first.
                 public ref {{targetTypeName}} this[ulong index] => ref Value[index];
