@@ -145,13 +145,13 @@ Go name, with the field's accessibility, so every use site reads and writes the 
 internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.mallocScanTable;
 ```
 
-A holder must hold exactly one static field, named for the holder. The generator refuses any other holder by name
-(GO2CS0009) and generates nothing for it. `collectMovedInitVars` skips a lazy var, so it gets no `initᴛ` method and
+A holder must hold exactly one static field, named for the holder, or for a var whose address is taken its box,
+`Ꮡ<name>` (below). The generator refuses any other holder by name (GO2CS0009) and generates nothing for it. `collectMovedInitVars` skips a lazy var, so it gets no `initᴛ` method and
 the package's static constructor never builds it.
-<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:571 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
-     its name :584 (`return "lazy" + TempVarMarker + csIDName`). The accessor is generated, so it is shown uncited:
-     src/gen/go2cs-gen/LazyHolderGenerator.cs:118 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {name} => ref {holderName}.{name};\r\n");`),
-     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:133 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`).
+<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:574 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
+     its name :604 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :591 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
+     src/gen/go2cs-gen/LazyHolderGenerator.cs:129 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`),
+     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:164 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`).
      The marker: src/core/golib/GoLazyAttribute.cs. Kept out of the ordered ctor:
      src/go2cs/initOrderOperations.go:286 (`if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`). -->
 
@@ -172,8 +172,8 @@ receiver when it runs), `&` of storage, a channel receive and a type assertion.
 **Which vars stay eager whatever their initializer.** `collectLazyPackageVars` also keeps eager:
 
 * a var declared with other names from one value;
-* a var whose address is taken, explicitly or by a pointer-receiver or capture-mode call, since a holder carries
-  no box for a pointer to name;
+* a var whose address is taken where the converter keeps no heap box for it (a pointer-receiver method value), since
+  the holder would carry no box for the pointer to name;
 * a var whose declaration is hand-owned, and every var that reads it: the converter does not shape a declaration it
   does not emit;
 * a var that reads a var the package or its internal tests assign or take the address of;
@@ -185,6 +185,17 @@ least 20 syntax nodes (a bool or a short string costs less built eagerly than a 
 var that has one (an eager reader would build that var at startup anyway), or when it is exported and an initializer
 built on a first read reads it. The decision is a fixpoint, since a var can gain a holder through a dep or a reader
 that only just gained one. `unicode`'s `Upper = _Lu` is one short line, and it has a holder because `_Lu` has one.
+
+**A var whose address is taken carries its box.** go2cs backs such a var (`&X`, or a pointer-receiver or capture-mode
+call on it) with a heap box, `ᏑX`, and a `ref` property `X` over it. Built on its first read, the var keeps both: the
+holder holds the box field exactly as the eager declaration writes it, `[GoLazy] partial class lazyᴛX { internal
+static ж<T> ᏑX = new StandardBox<T>(…); }`, the `ref` property `internal static ref T X => ref ᏑX.Value;` follows it
+unchanged, and the generator adds the box accessor `ref ж<T> ᏑX => ref lazyᴛX.ᏑX`. A use site does not change: `&X`
+reads `ᏑX` and `X` reads through it, the first of either builds the box, and the address is the same before and after
+the first read. Such a var is never read by another initializer built on a first read, so its holder never needs an
+initial value (the generator refuses `[GoLazy(Initial = true)]` on a box holder). `io`'s `blackHolePool` and the
+`sync.Pool`s of `encoding/gob`, `go/printer`, `log/slog` and `net/http`, `nistec`'s precomputed table and the `idna`
+and `norm` sparse tries are built this way.
 
 **An exported var keeps its initial value for the vars built from it.** Go builds every initializer when the program
 starts, so an importer that later assigns `unicode.Lu` does not change `unicode.Categories`. The converted
@@ -203,8 +214,8 @@ field instead of the var:
 
 An exported var such an initializer reads always has a holder of its own, so the snapshot has somewhere to live; a
 reader of an exported var with a constant initializer, which has no holder, stays eager.
-<!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:121 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
-     the marker argument: src/go2cs/lazyPackageVarOperations.go:575 (`marker = "GoLazy(Initial = true)"`). The importer's
+<!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:132 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
+     the marker argument: src/go2cs/lazyPackageVarOperations.go:578 (`marker = "GoLazy(Initial = true)"`). The importer's
      assignment is the LazyPackageVars behavioral test's case: tables.Heavy, assigned before tables.ByName is first read. -->
 
 **runtime's malloc tables are always built on their first read.** The converter lists runtime's two malloc dispatch
@@ -220,25 +231,26 @@ an earlier conversion wrote. Under `-platforms`, the merge removes a package's g
 target emitted. A hand-written `package_init.cs` is never removed.
 
 Guarded by the converter tests `TestLazyPackageVarIsBuiltOnFirstRead`, `TestLazyPackageVarPredicateChoosesAndShapes`,
-`TestLazyPackageVarLeavesHandOwnedEager`, `TestLazyPackageVarLeavesAPointerAddressedPoolEager`,
-`TestLazyPackageVarLeavesManualVarEager` and `TestLazyPackageVarRefusesByName`, all in `lazyPackageVar_test.go`, and
+`TestLazyPackageVarLeavesHandOwnedEager`, `TestLazyPackageVarBuildsAPointerAddressedPoolInItsBox`,
+`TestLazyPackageVarCarriesItsBox`, `TestLazyPackageVarLeavesManualVarEager` and `TestLazyPackageVarRefusesByName`,
+all in `lazyPackageVar_test.go`, and
 `TestMergeRetiresAPackageInitNoTargetEmitted`; by GenTests' `LazyHolderGeneratorTests`; by GolibTests'
 `MallocDispatchTablesTests`, which checks that the runtime's static constructor does not build either table and that
 a first read finds each one populated, entry for entry, as Go's `mkmalloc` writes it; and by the `LazyPackageVars`
 behavioral test, whose output matches Go's: init order, an importer's assignment before a first read, one pointer
-per allocation, and func literal values.
-<!-- The predicate: src/go2cs/lazyPackageVarOperations.go:96 (`func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`),
-     :292 (`func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`),
-     the floor :47 (`const lazyPackageVarNodeFloor = 20`), the eager cases :153 (`candidate.reason = "its declaration is hand-owned"`),
-     :159 (`candidate.reason = "its address is taken, and the holder does not carry an addressable box yet"`),
-     :190 (`candidate.reason = fmt.Sprintf("it copies the var %s, whose storage a slice aliases", dep.Name())`);
-     the list :37 (`var lazyPackageVars = map[string]map[string]bool{`). The refusals: src/go2cs/visitValueSpec.go:727
+per allocation, func literal values, and an address taken before a var's first read that is its address after it.
+<!-- The predicate: src/go2cs/lazyPackageVarOperations.go:97 (`func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`),
+     :295 (`func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`),
+     the floor :48 (`const lazyPackageVarNodeFloor = 20`), the eager cases :154 (`candidate.reason = "its declaration is hand-owned"`),
+     :162 (`candidate.reason = "its address is taken where the converter keeps no box for it"`),
+     :193 (`candidate.reason = fmt.Sprintf("it copies the var %s, whose storage a slice aliases", dep.Name())`);
+     the list :38 (`var lazyPackageVars = map[string]map[string]bool{`). The refusals: src/go2cs/visitValueSpec.go:727
      (`cannot be built on its first read: %s`), :740 (`its initializer spills a hoisted holder`). The reader's gate, at
      go1.26.10: GOROOT/src/runtime/malloc.go:1039 (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`).
      package_init.cs: src/go2cs/initOrderOperations.go:504 (`func retireStalePackageInitFile(outputDir string) error {`),
      src/go2cs/platformEmit.go:1197 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
-     Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :433
-     (`func TestLazyPackageVarRefusesByName(t *testing.T) {`);
+     Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :494
+     (`func TestLazyPackageVarRefusesByName(t *testing.T) {`), :407 (`func TestLazyPackageVarCarriesItsBox(t *testing.T) {`);
      src/tests/GolibTests/MallocDispatchTablesTests.cs:82 (`public void TheRuntimeStaticConstructorNoLongerBuildsThem()`).
      Why the two malloc tables are listed (COORD's ruling (A), 2026-10-22, per the list's own comment): built eagerly they
      were 2 x 17.1K IL JIT-compiled at every startup; no platform is recorded for that figure, so it stays here. The node

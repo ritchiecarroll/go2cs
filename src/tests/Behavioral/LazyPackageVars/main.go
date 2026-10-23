@@ -35,4 +35,12 @@ func main() {
 	// Writes to a lazy var go through to it.
 	tables.Roots[0] = &tables.Entry{Name: "swapped"}
 	fmt.Println("swapped:", tables.Roots[0].Name)
+
+	// A lazy var whose address is taken: the address taken BEFORE its first read is the address after it, from the owner
+	// and from this importer alike, and a write through either reaches the other.
+	before := tables.GridAddr()
+	before[0] = 100
+	fmt.Println("grid:", tables.Grid[0], &tables.Grid == before, tables.Grid[19])
+	tables.Grid[1] = 200
+	fmt.Println("grid via pointer:", before[1])
 }

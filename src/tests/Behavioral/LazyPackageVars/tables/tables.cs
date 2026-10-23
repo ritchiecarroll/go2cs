@@ -37,6 +37,13 @@ internal static nint second = record("second");
     new("negate", (nint n) => -n)
 }.array(); }
 
+[GoLazy] partial class lazyᴛGrid { public static ж<array<nint>> ᏑGrid = new StandardBox<array<nint>>(new nint[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}.array()); }
+public static ref array<nint> Grid => ref ᏑGrid.Value;
+
+public static ж<array<nint>> GridAddr() {
+    return ᏑGrid;
+}
+
 [GoInit] internal static void init() {
     record("init");
 }

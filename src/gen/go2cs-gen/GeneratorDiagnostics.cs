@@ -128,7 +128,7 @@ internal static class GeneratorDiagnostics
     public static readonly DiagnosticDescriptor MalformedLazyHolder = new(
         id: "GO2CS0009",
         title: "A [GoLazy] holder does not hold exactly one static field named for it",
-        messageFormat: "The [GoLazy] holder '{0}' must hold exactly one static field named '{1}': {2}; no accessor is generated for it",
+        messageFormat: "The [GoLazy] holder '{0}' must hold exactly one static field named '{1}' (or its box, 'Ꮡ{1}'): {2}; no accessor is generated for it",
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

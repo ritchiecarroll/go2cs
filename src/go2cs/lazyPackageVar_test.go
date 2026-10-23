@@ -322,7 +322,7 @@ func TestLazyPackageVarLeavesHandOwnedEager(t *testing.T) {
 
 // io's blackHolePool, reduced: a sync.Pool over the floor, eligible by every rule, whose Get and Put are pointer-receiver
 // methods, so each use takes its address implicitly and the emission names its box (CS0103 ᏑblackHolePool when it was
-// built lazily). control, a table of the same file, is lazy.
+// built lazily WITHOUT its box). control, a table of the same file, is lazy.
 const lazyVarPoolSource = `package main
 
 import "sync"
@@ -346,8 +346,9 @@ func use() int {
 var control = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 `
 
-// TestLazyPackageVarLeavesAPointerAddressedPoolEager pins that a var a pointer-receiver call addresses stays eager.
-func TestLazyPackageVarLeavesAPointerAddressedPoolEager(t *testing.T) {
+// TestLazyPackageVarBuildsAPointerAddressedPoolInItsBox pins that a var a pointer-receiver call addresses is built lazily
+// WITH its box: the holder holds `Ꮡpool`, the var's ref property reads through it, and the calls keep naming the box.
+func TestLazyPackageVarBuildsAPointerAddressedPoolInItsBox(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
 	if testing.Short() {
@@ -365,12 +366,72 @@ func TestLazyPackageVarLeavesAPointerAddressedPoolEager(t *testing.T) {
 
 	pool := files["pool.cs"]
 
-	if strings.Contains(pool, "lazyᴛpool") {
-		t.Errorf("pool is addressed by Get and Put and must stay eager:\n%s", pool)
+	for _, want := range []string{
+		"[GoLazy] partial class lazyᴛpool { internal static ж<sync.Pool> Ꮡpool = new StandardBox<sync.Pool>(",
+		"internal static ref sync.Pool pool => ref Ꮡpool.Value;",
+		"Ꮡpool.Get()",
+		"defer(Ꮡpool.Put,",
+	} {
+		if !strings.Contains(pool, want) {
+			t.Errorf("pool is addressed by Get and Put: its holder must carry its box (%q):\n%s", want, pool)
+		}
+	}
+
+	if strings.Contains(pool, "[GoLazy] partial class lazyᴛpool { internal static sync.Pool pool") {
+		t.Errorf("pool must not be built lazily WITHOUT its box (CS0103 at every Get and Put):\n%s", pool)
 	}
 
 	if !strings.Contains(pool, "[GoLazy] partial class lazyᴛcontrol { internal static array<nint> control = ") {
 		t.Errorf("control: the table beside it must be lazy:\n%s", pool)
+	}
+}
+
+// Two vars whose address is taken: `&table` returned by a function, and a pointer-receiver call on an element of counters.
+const lazyVarAddressedSource = `package main
+
+type P struct{ n, m int }
+
+func (p *P) Bump() { p.n++ }
+
+var table = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+
+var counters = [...]P{{1, 2}, {3, 4}, {5, 6}, {7, 8}, {9, 10}, {11, 12}, {13, 14}, {15, 16}}
+
+func addr() *[20]int { return &table }
+
+func bump() { counters[0].Bump() }
+`
+
+// TestLazyPackageVarCarriesItsBox pins the address-of increment's shape: a lazy var the converter boxes is written as its
+// box inside the holder and its unchanged ref property beside it, and `&X` keeps reading the box.
+func TestLazyPackageVarCarriesItsBox(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	files, err := convertLazyVarModule(t, map[string]string{
+		"main.go":  "package main\n\nfunc main() { bump(); println(addr()[0], table[1], counters[0].n) }\n",
+		"table.go": lazyVarAddressedSource,
+	})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	table := files["table.cs"]
+
+	for _, want := range []string{
+		"[GoLazy] partial class lazyᴛtable { internal static ж<array<nint>> Ꮡtable = new StandardBox<array<nint>>(",
+		"internal static ref array<nint> table => ref Ꮡtable.Value;",
+		"return Ꮡtable;",
+		"[GoLazy] partial class lazyᴛcounters { internal static ж<array<P>> Ꮡcounters = new StandardBox<array<P>>(",
+		"internal static ref array<P> counters => ref Ꮡcounters.Value;",
+	} {
+		if !strings.Contains(table, want) {
+			t.Errorf("table.cs lacks %q:\n%s", want, table)
+		}
 	}
 }
 
@@ -461,16 +522,12 @@ func TestLazyPackageVarRefusesByName(t *testing.T) {
 		{"dep mutated by a test file", map[string]string{"table.go": "package main\n\nvar base = 1\n\nvar table = [1]int{base}\n",
 			"table_test.go": "package main\n\nimport \"testing\"\n\nfunc TestBase(t *testing.T) { base = 3 }\n"},
 			"it reads the var base, which the package or its tests assign or take the address of"},
-		{"address taken", map[string]string{"table.go": "package main\n\nvar table = [2]int{1, 2}\n\nvar p = &table\n"},
-			"its address is taken"},
 		{"exported constant dep", map[string]string{"table.go": "package main\n\nvar Max = 10\n\nvar table = [1]int{Max}\n"},
 			"it reads the exported var Max, which an importer can assign"},
-		// A pointer-receiver method called on the var takes its address implicitly (io's blackHolePool.Get()): the call
-		// needs the var's box, and the method can change it.
-		{"pointer method called", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() { table.Bump() }\n"},
-			"its address is taken"},
+		// A pointer-receiver method VALUE binds the var's address where the converter keeps no box for it, so there is no
+		// box for the holder to carry (`&table` and a pointer-receiver CALL are boxed: TestLazyPackageVarCarriesItsBox).
 		{"pointer method value", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() func() { return table.Bump }\n"},
-			"its address is taken"},
+			"its address is taken where the converter keeps no box for it"},
 		// Slicing an array var aliases its storage, so a write through the slice changes what a reader copies.
 		{"dep sliced", map[string]string{"table.go": "package main\n\nvar base = [2]int{1, 2}\n\nfunc g() []int { return base[:] }\n\nvar table = [1][2]int{base}\n"},
 			"it copies the var base, whose storage a slice aliases"},

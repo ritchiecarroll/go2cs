@@ -41,7 +41,38 @@ public class LazyHolderGeneratorTests
             public sealed class OtherAttribute : Attribute { }
 
             public sealed class Box(string name) { public string Name = name; }
+
+            // ж<T>'s stand-in: a heap cell whose Value is the var's storage.
+            public sealed class Cell<T>(T value) { public T Value = value; }
         }
+        """;
+
+    // The converter's rendering of a var whose address is taken: the box inside the holder, the var's ref property beside it.
+    private const string AddressedPackage = """
+        using System.Collections.Generic;
+
+        namespace go;
+
+        public static partial class addr_package {
+
+        public static List<string> built = new();
+
+        private static int[] make() { built.Add("table"); return new[] { 1, 2, 3 }; }
+
+        [GoLazy] partial class lazyᴛtable { internal static Cell<int[]> Ꮡtable = new Cell<int[]>(make()); }
+        internal static ref int[] table => ref Ꮡtable.Value;
+
+        // `&table` before the first read builds it; a write through `table` lands in that box; the address is unchanged.
+        public static string Run() {
+            var touched = string.Join(",", built);
+            var before = Ꮡtable;
+            var builtByAddress = string.Join(",", built);
+            table[0] = 9;
+            var after = Ꮡtable;
+            return $"touched:[{touched}] built:[{builtByAddress}] same:{ReferenceEquals(before, after)} seen:{before.Value[0]}";
+        }
+
+        } // end addr_package
         """;
 
     private const string Package = """
@@ -159,12 +190,21 @@ public class LazyHolderGeneratorTests
     }
 
     [TestMethod]
-    public void AnAddressedVarGetsBothAccessors()
+    public void AnAddressedVarsHolderCarriesItsBoxAndTheAddressIsOneBeforeAndAfterTheFirstRead()
     {
-        // The address-of increment (docs/DESIGN-lazy-static-data.md, "Use sites and address-of") gives a holder the var's
-        // box and the generator both accessors, `ref T X => ref lazyᴛX.ᏑX.Value` and `ж<T> ᏑX => lazyᴛX.ᏑX`. Ruled for
-        // the seat after this one; the arm is held until it lands.
-        Assert.Inconclusive("the address-of increment is the next seat");
+        // The address-of increment (docs/DESIGN-lazy-static-data.md, "Use sites and address-of"): the holder holds the box,
+        // the converter keeps `ref T X => ref ᏑX.Value`, and the generator writes the box accessor under the box's name.
+        Run run = Generate(Stubs, AddressedPackage);
+        string generated = string.Join("\r\n", run.Generated.Values);
+
+        Assert.IsNotNull(run.Image, Describe(run));
+        StringAssert.Contains(generated, "internal static ref Cell<int[]> Ꮡtable => ref lazyᴛtable.Ꮡtable;", Describe(run));
+        Assert.AreEqual(0, run.GeneratorDiagnostics.Length, Describe(run));
+
+        Assembly assembly = Assembly.Load(run.Image!);
+        string result = (string)assembly.GetType("go.addr_package")!.GetMethod("Run")!.Invoke(null, null)!;
+
+        Assert.AreEqual("touched:[] built:[table] same:True seen:9", result);
     }
 
     [TestMethod]
@@ -197,6 +237,8 @@ public class LazyHolderGeneratorTests
 
             [GoLazy] class lazyᴛnotPartial { internal static int notPartial = 1; }
 
+            [GoLazy(Initial = true)] partial class lazyᴛboxedInitial { internal static Cell<int> ᏑboxedInitial = new Cell<int>(1); }
+
             [GoLazy] partial class lazyᴛfine { internal static int fine = 1; }
 
             } // end bad_package
@@ -206,7 +248,7 @@ public class LazyHolderGeneratorTests
         Diagnostic[] refusals = [.. run.GeneratorDiagnostics.Where(diagnostic => diagnostic.Id == "GO2CS0009")];
         string messages = string.Join("\r\n", refusals.Select(diagnostic => diagnostic.GetMessage()));
 
-        Assert.AreEqual(5, refusals.Length, messages);
+        Assert.AreEqual(6, refusals.Length, messages);
         Assert.IsTrue(refusals.All(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error), "GO2CS0009 is an error");
 
         foreach ((string holder, string reason) in new[]
@@ -215,7 +257,8 @@ public class LazyHolderGeneratorTests
                      ("lazyᴛmisnamed", "its field is named 'other'"),
                      ("lazyᴛinstance", "its field is not static"),
                      ("unprefixed", "its name does not start with 'lazyᴛ'"),
-                     ("lazyᴛnotPartial", "it is not partial")
+                     ("lazyᴛnotPartial", "it is not partial"),
+                     ("lazyᴛboxedInitial", "it holds the var's box, which keeps no initial snapshot")
                  })
         {
             StringAssert.Contains(messages, $"The [GoLazy] holder '{holder}'", messages);

@@ -741,9 +741,18 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 							}
 
 							v.writePositionSentinelCalls(ident.Pos(), specValueCallRoots(valueSpec, i)...)
-							v.writeLazyPackageVar(access, csTypeName, csIDName, valExpr, lazyPackageVarSnapshot(def), func() {
+
+							writeTrailing := func() {
 								v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
-							})
+							}
+
+							// An addressed var keeps its box: the holder holds it, so `&X` and `X` read one storage.
+							if v.isAddressedGlobal(ident) {
+								v.writeLazyAddressedPackageVar(access, csTypeName, csIDName, valExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)), writeTrailing)
+							} else {
+								v.writeLazyPackageVar(access, csTypeName, csIDName, valExpr, lazyPackageVarSnapshot(def), writeTrailing)
+							}
+
 							continue
 						}
 
