@@ -26,10 +26,11 @@ partial struct guard {
 internal static void recover(this ж<guard> Ꮡg) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
         ref var g = ref Ꮡg.DerefOrNull();
 
         {
-            var e = builtin.recover(); if (e != default!) {
+            var e = builtin.recover(calledByDefer); if (e != default!) {
                 g.err = fmt.Errorf("recovered: %v"u8, e);
             }
         }
@@ -41,7 +42,7 @@ internal static void recover(this ж<guard> Ꮡg) {
 internal static void run(this ж<guard> Ꮡg) {
     GoFrame ᒐ = default;
     try {
-        defer(Ꮡg.recover, ref ᒐ);
+        defer(Ꮡg.recover, ref ᒐ, recovers: true);
         throw panic("boom");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

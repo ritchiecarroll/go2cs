@@ -7,8 +7,10 @@ partial class main_package {
 internal static void handle(@string label, ref error err) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 var prev = err;
                 throw panic(fmt.Sprintf("wrapped %s: %v (prev=%v)"u8, label, e, prev));
             }
@@ -27,7 +29,7 @@ internal static error /*err*/ doit() {
     try {
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer((ᴛ1, ᴛ2) => handle(ᴛ1, ref ᴛ2.DerefOrNull()), doitˢ, Ꮡerr, ref ᒐ);
+        defer((ᴛ1, ᴛ2) => handle(ᴛ1, ref ᴛ2.DerefOrNull()), doitˢ, Ꮡerr, ref ᒐ, recovers: true);
         throw panic("boom");
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

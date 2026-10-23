@@ -103,6 +103,12 @@ func (v *Visitor) planDeferFinallyLowering(funcDecl *ast.FuncDecl) {
 		return
 	}
 
+	// A defer whose callee calls recover() is registered with `recovers: true`, so golib marks the thread just
+	// before the call (recoverForms.go); a lowered call runs from the finally, where nothing would set the mark.
+	if v.hasRecoverMarkedDefer(funcDecl.Body) {
+		return
+	}
+
 	recvName := funcDeclReceiverName(funcDecl)
 
 	if recvName == "" {

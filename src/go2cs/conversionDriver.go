@@ -459,6 +459,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// file's declarations) but has no other ordering dependency on the analyses above/below it.
 		needsNoInlining := computeNoInliningClosure(files, packageTypes, info, fixedSkipClosureApplies(packageInputPath, options.goRoot))
 
+		// Go's direct-call rule for recover: which recover() calls take the deferred-call mark and which defers
+		// set it (recoverForms.go). Package-wide, before any file is visited.
+		collectRecoverForms(files, packageTypes, info)
+
 		// Perform escape analysis for each file
 		// Identify capture-mode methods (those taking &recv.field) — across the package
 		// and its imports — before escape analysis, so a value var on which one is

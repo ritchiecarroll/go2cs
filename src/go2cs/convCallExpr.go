@@ -3242,6 +3242,29 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// Go's direct-call rule for recover (recoverForms.go): a named function's recover passes the deferred-call
+		// mark it took on entry, a literal that is not the deferred literal is checked by its caller, and
+		// `defer recover()` is never called by a deferred function. Every other recover() is direct and stays as is.
+		if ident.Name == "recover" {
+			if site, ok := packageRecoverForms[callExpr]; ok {
+				// A package that declares its own `recover` method qualifies the built-in (Phase 7a below).
+				qualifier := ""
+
+				if packageBuiltinShadows[ident.Name] {
+					qualifier = "builtin."
+				}
+
+				switch site.form {
+				case recoverFormFlagged:
+					return fmt.Sprintf("%srecover(%s)", qualifier, site.local)
+				case recoverFormChecked:
+					return qualifier + "recoverChecked()"
+				case recoverFormNeverDeferred:
+					return fmt.Sprintf("%srecover(%s: false)", qualifier, recoverFlagLocalName)
+				}
+			}
+		}
+
 		// Handle panic call as a special case
 		if ident.Name == "panic" {
 			// The deferred/spawned argument slot belongs to the ENCLOSING LambdaContext, which

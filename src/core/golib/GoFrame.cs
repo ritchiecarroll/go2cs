@@ -442,7 +442,62 @@ public ref struct GoFrame
 
         System.Reflection.MethodBase? catcher = site[^1].GetMethod();
 
+        // A deferred call that recovers is registered through RecoveringCall; the call it stands for is the one compared.
+        if (deferred.Target is RecoveringCall recovering)
+            deferred = recovering.Call;
+
         return catcher is not null && catcher != RunMethod && deferred.Method == catcher;
+    }
+
+    // GO'S DIRECT-CALL RULE FOR recover (COORD ruling 2026-10-22, Option B). recover returns nil unless it is called
+    // directly by the deferred function, and whether a function IS the deferred function depends on how it was called:
+    // `defer catchError(&err)` recovers, `defer func() { catchError(&err) }()` does not. A function whose body calls
+    // recover() opens with `var calledByDefer = GoFrame.TakeDeferredCall();` and hands that to its recover calls, and
+    // every defer of such a function registers with `recovers: true`, which wraps the call in RecoveringCall: it marks
+    // the thread just before the call and clears the mark after. The callee's first line takes the mark, so a
+    // converter thunk in between (`ᴛ1 => catchError(ref ᴛ1.DerefOrNull())`) changes nothing, and any other call of
+    // the function, a helper call included, finds it clear. Nothing is read from frames, and an unflagged defer and
+    // every other call pay nothing.
+
+    /// <summary>
+    /// Whether the running call of the calling function is the deferred call Go's <c>recover</c> rule asks about:
+    /// reads and clears the mark a <c>recovers: true</c> registration sets just before its call.
+    /// </summary>
+    /// <returns><c>true</c> when the caller was invoked as a deferred call; otherwise, <c>false</c>.</returns>
+    public static bool TakeDeferredCall()
+    {
+        GoThreadState state = GoThreadState.Current;
+        bool pending = state.DeferredCallPending;
+        state.DeferredCallPending = false;
+        return pending;
+    }
+
+    /// <summary>
+    /// Wraps a deferred call whose callee calls <c>recover</c>, so the callee can tell it was the deferred call
+    /// (see <see cref="TakeDeferredCall"/>); a nil call stays nil, to fault as Go's nil deferred func does.
+    /// </summary>
+    internal static Action? Recovering(Action? call, bool recovers) =>
+        recovers && call is not null ? new RecoveringCall(call).Invoke : call;
+
+    // A class rather than a lambda so ReRaisedByTheDeferredDelegate can see through it to the call it stands for.
+    internal sealed class RecoveringCall(Action call)
+    {
+        internal Action Call { get; } = call;
+
+        internal void Invoke()
+        {
+            GoThreadState state = GoThreadState.Current;
+            state.DeferredCallPending = true;
+
+            try
+            {
+                Call();
+            }
+            finally
+            {
+                state.DeferredCallPending = false;
+            }
+        }
     }
 
     // Identifies this thread for SiteOwnerThread: an object, so no two threads ever share one (a managed
