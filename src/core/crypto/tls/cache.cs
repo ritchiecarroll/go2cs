@@ -42,7 +42,7 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
             var entryʗ1 = entry;
             runtime.AddCleanup(cert, (any _) => {
                 Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ1, entryʗ1);
-            }, (any)((@string)der));
+            }, (any)((@string)der), new object?[] { Ꮡwcc, entry });
         } else 
         {
             var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil){
@@ -53,7 +53,7 @@ internal static (ж<Δx509.Certificate>, error) newCert(this ж<weakCertCache> �
                     var wpʗ1 = wp;
                     runtime.AddCleanup(cert, (any _) => {
                         Ꮡwcc.of(weakCertCache.ᏑMap).CompareAndDelete((@string)derʗ2, wpʗ1);
-                    }, (any)((@string)der));
+                    }, (any)((@string)der), new object?[] { Ꮡwcc }, new object?[] { wp });
                 }
             }
         }

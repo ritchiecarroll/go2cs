@@ -45,7 +45,7 @@ public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, Fu
     }
     {
         var (_, present) = Ꮡc.of(Cache<K, V>.Ꮡm).Swap(p, v.OrTypedNil()); if (!present) {
-            runtime.AddCleanup<K, weak.Pointer<K>>(Ꮡk, Ꮡc.evict, p);
+            runtime.AddCleanup<K, weak.Pointer<K>>(Ꮡk, Ꮡc.evict, p, new object?[] { Ꮡc });
         }
     }
     return (v, default!);
