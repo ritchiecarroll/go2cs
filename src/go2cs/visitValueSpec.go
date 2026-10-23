@@ -720,26 +720,30 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc, declDoc *ast.Com
 						access := v.testDeclaredValueAccess(packageVarAccess(goIDName, v.getIdentType(ident)), ident.Pos(), v.getIdentType(ident))
 						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
 
-						// A var listed in lazyPackageVars is built on its first read: a ref property over a
-						// holder class, never relocated into package_init.cs (collectMovedInitVars skips it).
-						if isLazyPackageVar(def) {
-							if refusal := v.lazyPackageVarRefusal(valueSpec, ident); refusal != "" {
-								panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))
-							}
+						// A var built on its first read (lazyPackageVarOperations.go): a ref property over a holder
+						// class, never relocated into package_init.cs (collectMovedInitVars skips it). A var
+						// lazyPackageVars LISTS but the predicate refuses is refused here by name.
+						if refusal, listed := packageLazyVarRefusals[def]; listed {
+							panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))
+						}
 
+						if isLazyPackageVar(def) {
 							globalHoist := &strings.Builder{}
 							savedGlobalHoist := v.globalDeclHoist
 							v.globalDeclHoist = globalHoist
+							v.inLazyInitializer = true
 							valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, emptyIfaceDeclType, context)
+							v.inLazyInitializer = false
 							v.globalDeclHoist = savedGlobalHoist
 
 							if globalHoist.Len() > 0 {
-								panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: its initializer spills a hoisted holder", goIDName))
+								panic(fmt.Sprintf("@visitValueSpec - lazy package var %s cannot be built on its first read: its initializer spills a hoisted holder", goIDName))
 							}
 
 							v.writePositionSentinelCalls(ident.Pos(), specValueCallRoots(valueSpec, i)...)
-							v.writeLazyPackageVar(access, csTypeName, csIDName, valExpr)
-							v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
+							v.writeLazyPackageVar(access, csTypeName, csIDName, valExpr, lazyPackageVarSnapshot(def), func() {
+								v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
+							})
 							continue
 						}
 

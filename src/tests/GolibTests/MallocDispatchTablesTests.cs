@@ -34,15 +34,20 @@ public class MallocDispatchTablesTests
     // The class of a small size, as Go's runtime takes it: size_to_class8[divRoundUp(size, smallSizeDiv)].
     private static int SizeClass(int size) => gc.SizeToSizeClass8[(size + 7) / 8];
 
-    // The first read: the holder's static field, which the generated `ref` property returns.
+    // The first read: the holder's static field, named for the var ([GoLazy] holder, docs/DESIGN-lazy-static-data.md), which
+    // the generated `ref` accessor returns.
     private static Delegate[] Read(string table)
     {
         Type? holder = typeof(runtime_package).GetNestedType("lazyᴛ" + table, BindingFlags.NonPublic);
 
         Assert.IsNotNull(holder, $"{table} is built on its first read through a holder class (lazyᴛ{table})");
 
+        FieldInfo? field = holder!.GetField(table, BindingFlags.NonPublic | BindingFlags.Static);
+
+        Assert.IsNotNull(field, $"the holder's field is named for the var ({table})");
+
         // array<T> over Func<uintptr, ж<_type>, bool, unsafe.Pointer>, whose _type this assembly cannot name.
-        object value = holder!.GetField("value", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
+        object value = field!.GetValue(null)!;
 
         return [.. ((System.Collections.IEnumerable)value).Cast<Delegate>()];
     }

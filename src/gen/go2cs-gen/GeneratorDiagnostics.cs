@@ -121,5 +121,16 @@ internal static class GeneratorDiagnostics
         category: "go2cs-gen",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    // LazyHolderGenerator writes a lazy var's accessor from its [GoLazy] holder, so the holder must say unambiguously
+    // which field is the var: exactly one static field, named for the holder (lazyᴛX holds X). Anything else would leave
+    // the var without its accessor, and a use site would fail far from the cause, or an unused var would vanish silently.
+    public static readonly DiagnosticDescriptor MalformedLazyHolder = new(
+        id: "GO2CS0009",
+        title: "A [GoLazy] holder does not hold exactly one static field named for it",
+        messageFormat: "The [GoLazy] holder '{0}' must hold exactly one static field named '{1}': {2}; no accessor is generated for it",
+        category: "go2cs-gen",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 #pragma warning restore RS2008
 }

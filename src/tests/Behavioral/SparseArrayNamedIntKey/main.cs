@@ -57,6 +57,6 @@ internal static void Main() {
     fmt.Println(kindNames[((kindT)3)], len(kindNames));
 }
 
-internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1};
+[GoLazy] partial class lazyᴛasciiSpace { internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1}; }
 
 } // end main_package

@@ -282,12 +282,18 @@ func (v *Visitor) fieldAccessSelector(selectorExpr *ast.SelectorExpr, pointee ty
 	return fmt.Sprintf("%s.%s", expr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))), true
 }
 
-// packageHandOwnedTypes holds the types the package's hand-owned files ([module: GoManualConversion]) declare;
-// reset per package and filled by collectHandOwnedTypes in each conversion driver.
-var packageHandOwnedTypes = map[*types.TypeName]bool{}
+// packageHandOwnedTypes holds the types the package's hand-owned files ([module: GoManualConversion]) declare, and
+// packageHandOwnedVars their package-level vars plus the vars manualConversionVars displaces for this target; reset per
+// package and filled by collectHandOwnedDecls in each conversion driver.
+var (
+	packageHandOwnedTypes = map[*types.TypeName]bool{}
+	packageHandOwnedVars  = map[*types.Var]bool{}
+)
 
-// collectHandOwnedTypes records the types declared by the files whose destination is a hand-owned `.cs`.
-func collectHandOwnedTypes(files []FileEntry, info *types.Info) {
+// collectHandOwnedDecls records the types and vars declared by the files whose destination is a hand-owned `.cs`, and
+// the vars a hand-owned member supplies (manualConversionVars). The converter emits none of their declarations, so
+// nothing may assume the shape it would have emitted (lazyPackageVarOperations.go keeps such a var eager).
+func collectHandOwnedDecls(files []FileEntry, pkg *types.Package, info *types.Info, goos string) {
 	for _, entry := range files {
 		if !entry.manualConversion {
 			continue
@@ -296,15 +302,38 @@ func collectHandOwnedTypes(files []FileEntry, info *types.Info) {
 		for _, decl := range entry.file.Decls {
 			genDecl, ok := decl.(*ast.GenDecl)
 
-			if !ok || genDecl.Tok != token.TYPE {
+			if !ok {
 				continue
 			}
 
 			for _, spec := range genDecl.Specs {
-				if typeName, ok := info.Defs[spec.(*ast.TypeSpec).Name].(*types.TypeName); ok {
-					packageHandOwnedTypes[typeName] = true
+				switch spec := spec.(type) {
+				case *ast.TypeSpec:
+					if typeName, ok := info.Defs[spec.Name].(*types.TypeName); ok {
+						packageHandOwnedTypes[typeName] = true
+					}
+				case *ast.ValueSpec:
+					if genDecl.Tok != token.VAR {
+						continue
+					}
+
+					for _, name := range spec.Names {
+						if obj, ok := info.Defs[name].(*types.Var); ok {
+							packageHandOwnedVars[obj] = true
+						}
+					}
 				}
 			}
+		}
+	}
+
+	if pkg == nil {
+		return
+	}
+
+	for _, name := range pkg.Scope().Names() {
+		if obj, ok := pkg.Scope().Lookup(name).(*types.Var); ok && isManualVarInPackage(pkg.Path(), goos, name) {
+			packageHandOwnedVars[obj] = true
 		}
 	}
 }

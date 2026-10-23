@@ -10,12 +10,12 @@ partial struct request {
     internal nint depth;
 }
 
-internal static Func<ж<request>, @string, @string> describe = (ж<request> r, @string tag) => fmt.Sprint(tag, ":", (~r).path, "/", (~r).closed, "/", (~r).depth, r.label());
+[GoLazy] partial class lazyᴛdescribe { internal static Func<ж<request>, @string, @string> describe = (ж<request> r, @string tag) => fmt.Sprint(tag, ":", (~r).path, "/", (~r).closed, "/", (~r).depth, r.label()); }
 
-internal static Action<ж<request>> deepen = (ж<request> r) => {
+[GoLazy] partial class lazyᴛdeepen { internal static Action<ж<request>> deepen = (ж<request> r) => {
     r.Value.depth = (~r).depth + 2;
     r.Value.closed = !(~r).closed;
-};
+}; }
 
 internal static Func<ж<request>, @string> pathOf = (ж<request> r) => (~r).path;
 

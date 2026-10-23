@@ -155,6 +155,42 @@ func TestAnchorReadsPastConverterScaffolding(t *testing.T) {
 	}
 }
 
+// A lazily built package var is declared on one line, `[GoLazy] partial class lazyᴛX { internal static T X = ...`
+// (docs/DESIGN-lazy-static-data.md). That line opens with an attribute and its initializer can name a `_package`
+// class (`new text.template_package.FuncMap(...)`), yet it is the var's declaration: its doc comment anchors on it,
+// it is the declaration the top-level walk maps, and the blank line above it is the var's separation.
+func TestLazyHolderLineIsTheDeclaration(t *testing.T) {
+	pairs := FindPairs("testdata/lazyholder/good", "testdata/lazyholder/goroot")
+
+	if len(pairs) != 1 {
+		t.Fatalf("%d pairs found, want 1 (lh/lh.cs against lh/lh.go)", len(pairs))
+	}
+
+	r := NewResults()
+
+	if err := r.Analyze(pairs[0]); err != nil {
+		t.Fatal(err)
+	}
+
+	// Vacuity: both var docs are read, and all three declarations after the import are mapped and separated as Go
+	// separates them.
+	if r.Groups() < 2 || r.r.topLevel["same"] != 3 {
+		t.Errorf("%d comment groups, %d top-level separations alike; want at least 2 and exactly 3", r.Groups(), r.r.topLevel["same"])
+	}
+
+	for k, n := range r.Counts() {
+		if n > 0 && (strings.HasPrefix(k, "misplaced:") || strings.HasPrefix(k, "missed:") || strings.HasPrefix(k, "top:")) {
+			t.Errorf("%s = %d, want 0", k, n)
+		}
+	}
+
+	if t.Failed() {
+		for _, f := range r.Findings("") {
+			t.Logf("%s at %s: %s", f.Class, f.Where, f.Detail)
+		}
+	}
+}
+
 // move2heapFindings reads testdata/move2heap's rendering: the classes a move line could move.
 func move2heapFindings(t *testing.T, rendering string) map[string]int {
 	t.Helper()

@@ -253,6 +253,8 @@
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\good\anchor\anchor.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\anchor\goroot\src\anchor\anchor.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\corpus_baseline.txt" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\lazyholder\good\lh\lh.cs" />
+    <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\lazyholder\goroot\src\lh\lh.go" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\move2heap\bad\m2h\m2h.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\move2heap\good\m2h\m2h.cs" />
     <None Include="$(MSBuildThisFileDirectory)internal\commentcensus\testdata\move2heap\goroot\src\m2h\m2h.go" />
@@ -437,6 +439,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformLayout.go" />
     <None Include="$(MSBuildThisFileDirectory)platformLayout_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformManifest.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformPackageInitRetire_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />

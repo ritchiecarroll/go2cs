@@ -6,11 +6,12 @@
 // version 3 only, which can be found in the LICENSE file.
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
-// Guards lazyPackageVars (COORD's ruling (A), 2026-10-22): a listed var is declared as a ref property over a holder
-// class built on its first read, and package_init.cs does not call it; a listed var whose value could depend on when it
-// is built is refused by name. The fixture's table has runtime's malloc-table shape (function values the ordered ctor
-// would otherwise relocate, since the functions read a package var), and an unlisted twin of the same shape is the
-// control that still relocates.
+// Guards lazy package vars (docs/DESIGN-lazy-static-data.md, ruled 2026-10-22) at the emission: which vars the predicate
+// makes lazy (eligible, the 20-node floor, closure, the exported var a lazy initializer reads), the holder shape (a ref
+// property over a holder whose field takes the var's name; an exported var a lazy initializer reads keeps its initial
+// value apart, and that initializer reads it), the vars that stay eager (below the floor, ineligible), and every refusal
+// a LISTED var is refused with by name. The first fixture is shaped like the malloc tables of COORD's ruling (A): function
+// values the ordered ctor would otherwise relocate, since the functions read a package var declared in another file.
 package main
 
 import (
@@ -46,16 +47,31 @@ func withLazyPackageVars(t *testing.T, names ...string) {
 	t.Cleanup(func() { lazyPackageVars = saved })
 }
 
-// convertLazyVarFixture converts a fixture whose main.go and table.go are given, returning the emitted files by name.
-func convertLazyVarFixture(t *testing.T, mainGo, tableGo string) (map[string]string, error) {
+// convertLazyVarModule converts a fixture module whose files are given by name, returning the emitted files that exist
+// (a file the converter refused is absent).
+func convertLazyVarModule(t *testing.T, sources map[string]string) (map[string]string, error) {
+	t.Helper()
+	return convertLazyVarModuleOver(t, sources, nil)
+}
+
+// convertLazyVarModuleOver converts over destination files seeded by name (a hand-owned `.cs`), also returning a
+// hand-owned file's `.cs.auto` review sibling under its own name.
+func convertLazyVarModuleOver(t *testing.T, sources, seeds map[string]string) (map[string]string, error) {
 	t.Helper()
 
 	root := t.TempDir()
 	appDir := filepath.Join(root, "app")
+	dir := filepath.Join(root, "out", "src", "example.com", "lazyvar")
+
+	for name, seed := range seeds {
+		writeModuleFile(t, filepath.Join(dir, name), seed)
+	}
 
 	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module "+lazyVarFixturePkg+"\n\ngo 1.23\n")
-	writeModuleFile(t, filepath.Join(appDir, "main.go"), mainGo)
-	writeModuleFile(t, filepath.Join(appDir, "table.go"), tableGo)
+
+	for name, source := range sources {
+		writeModuleFile(t, filepath.Join(appDir, name), source)
+	}
 
 	goRoot := build.Default.GOROOT
 
@@ -81,17 +97,35 @@ func convertLazyVarFixture(t *testing.T, mainGo, tableGo string) (map[string]str
 		return nil, err
 	}
 
-	dir := filepath.Join(options.go2csPath, "src", "example.com", "lazyvar")
 	files := map[string]string{}
 
-	// A file the converter refused is absent, so only the files that exist are read.
-	for _, name := range []string{"main.cs", "table.cs", PackageInitFileName} {
-		if data, err := os.ReadFile(filepath.Join(dir, name)); err == nil {
-			files[name] = string(data)
+	for name := range sources {
+		if strings.HasSuffix(name, "_test.go") {
+			continue
+		}
+
+		emitted := strings.TrimSuffix(name, ".go") + ".cs"
+
+		if data, err := os.ReadFile(filepath.Join(dir, emitted)); err == nil {
+			files[emitted] = string(data)
+		}
+
+		if data, err := os.ReadFile(filepath.Join(dir, emitted+".auto")); err == nil {
+			files[emitted+".auto"] = string(data)
 		}
 	}
 
+	if data, err := os.ReadFile(filepath.Join(dir, PackageInitFileName)); err == nil {
+		files[PackageInitFileName] = string(data)
+	}
+
 	return files, nil
+}
+
+// convertLazyVarFixture is the two-file form: main.go and table.go.
+func convertLazyVarFixture(t *testing.T, mainGo, tableGo string) (map[string]string, error) {
+	t.Helper()
+	return convertLazyVarModule(t, map[string]string{"main.go": mainGo, "table.go": tableGo})
 }
 
 const lazyVarFixtureMain = `package main
@@ -106,7 +140,7 @@ func main() {
 }
 `
 
-// Both tables read 'calls' through their functions and are declared in another file, which relocates an unlisted one.
+// Both tables read 'calls' through their functions and are declared in another file, which relocates an eager one.
 const lazyVarFixtureTable = `package main
 
 var table = [3]func(int) int{
@@ -118,8 +152,9 @@ var table = [3]func(int) int{
 var twin = [3]func(int) int{small, large, large}
 `
 
-// TestLazyPackageVarIsBuiltOnFirstRead pins the emission: the listed table is a ref property over its holder and is
-// absent from package_init.cs; the unlisted twin keeps the relocated field and its initᴛ call.
+// TestLazyPackageVarIsBuiltOnFirstRead pins the LISTED form (COORD's ruling (A)): the listed table is a ref property over
+// its holder, the field named for the var, and is absent from package_init.cs although it is below the floor; the
+// unlisted twin of the same shape stays below the floor, relocated, with its initᴛ call.
 func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
@@ -138,8 +173,8 @@ func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {
 	table, packageInit := files["table.cs"], files[PackageInitFileName]
 
 	for _, want := range []string{
-		"static ref array<Func<nint, nint>> table => ref lazyᴛtable.value;",
-		"private static class lazyᴛtable { internal static array<Func<nint, nint>> value = ",
+		// one line: today's declaration in its marked holder (go2cs-gen writes the accessor)
+		"[GoLazy] partial class lazyᴛtable { internal static array<Func<nint, nint>> table = ",
 	} {
 		if !strings.Contains(table, want) {
 			t.Errorf("table.cs lacks %q:\n%s", want, table)
@@ -150,45 +185,311 @@ func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {
 		t.Errorf("the listed table must not be relocated into the ordered ctor:\ntable.cs:\n%s\npackage_init.cs:\n%s", table, packageInit)
 	}
 
-	// Control: the unlisted twin of the same shape still relocates, so the fixture does exercise the relocation.
+	// Control: the unlisted twin of the same shape is below the floor and still relocates.
 	if !strings.Contains(table, "initᴛtwin()") || !strings.Contains(packageInit, "initᴛtwin();") {
 		t.Errorf("control: the unlisted twin must still relocate:\ntable.cs:\n%s\npackage_init.cs:\n%s", table, packageInit)
 	}
 }
 
-// TestLazyPackageVarRefusesAnInitializerThatCallsOrReads pins the refusal by name: a listed var whose initializer makes
-// a call, or reads a package var, would be built at a different value on its first read.
-func TestLazyPackageVarRefusesAnInitializerThatCallsOrReads(t *testing.T) {
+const lazyVarPredicateMain = `package main
+
+type entry struct {
+	name   string
+	weight int
+}
+
+func weigh() int { return 7 }
+
+func main() {
+	println(len(big), len(small), len(view), len(Weights), len(byName), len(computed))
+}
+`
+
+// The predicate's own choices, with no list: big is eligible and over the floor; small is eligible and under it; view
+// (a slice of big) and byName (a map over Weights) are under it but read a lazy var (closure); Weights is exported and a
+// lazy initializer reads it, so it keeps its initial value apart; computed makes a call and stays eager.
+const lazyVarPredicateTables = `package main
+
+var big = [...]entry{{"a", 1}, {"b", 2}, {"c", 3}, {"d", 4}, {"e", 5}, {"f", 6}, {"g", 7}}
+
+var small = [2]int{1, 2}
+
+var view = big[:]
+
+var Weights = big[2:5]
+
+var byName = map[string][]entry{"weights": Weights}
+
+var computed = [1]int{weigh()}
+`
+
+// TestLazyPackageVarPredicateChoosesAndShapes pins the predicate's selection and the holder shapes at the emission.
+func TestLazyPackageVarPredicateChoosesAndShapes(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
 	if testing.Short() {
 		t.Skip("integration test: runs the real converter over a module fixture")
 	}
 
+	files, err := convertLazyVarModule(t, map[string]string{"main.go": lazyVarPredicateMain, "tables.go": lazyVarPredicateTables})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	tables := files["tables.cs"]
+
+	for _, want := range []string{
+		// eligible and over the floor
+		"[GoLazy] partial class lazyᴛbig { internal static array<entry> big = ",
+		// closure: under the floor, but reads a lazy var
+		"[GoLazy] partial class lazyᴛview { internal static slice<entry> view = ",
+		// exported and read by a lazy initializer: marked for its initial value, which go2cs-gen keeps apart
+		"[GoLazy(Initial = true)] partial class lazyᴛWeights { public static slice<entry> Weights = ",
+		// the lazy map reads that initial value, never the property
+		"[GoLazy] partial class lazyᴛbyName { internal static map<@string, slice<entry>> byName = ",
+		"lazyᴛWeights.initial",
+	} {
+		if !strings.Contains(tables, want) {
+			t.Errorf("tables.cs lacks %q:\n%s", want, tables)
+		}
+	}
+
+	// Eager: small is under the floor and reads nothing lazy; computed makes a call.
+	for _, eager := range []string{"small", "computed"} {
+		if strings.Contains(tables, "lazyᴛ"+eager) {
+			t.Errorf("%s must stay eager:\n%s", eager, tables)
+		}
+	}
+
+	if !strings.Contains(tables, "static array<nint> small = ") {
+		t.Errorf("control: small must keep its field initializer:\n%s", tables)
+	}
+}
+
+// The hand-owned file declares a table over the floor; reader, in a converted file, would be lazy by closure.
+const lazyVarHandOwnedSource = `package main
+
+var owned = [...]entry{{"a", 1}, {"b", 2}, {"c", 3}, {"d", 4}, {"e", 5}, {"f", 6}, {"g", 7}}
+`
+
+const lazyVarHandOwnedReader = `package main
+
+var reader = owned[:]
+
+var control = [...]entry{{"a", 1}, {"b", 2}, {"c", 3}, {"d", 4}, {"e", 5}, {"f", 6}, {"g", 7}}
+`
+
+// TestLazyPackageVarLeavesHandOwnedEager pins that a var whose declaration is hand-owned ([module: GoManualConversion]) is
+// never lazy, nor is a reader of it: the hand-owned `.cs` keeps its own declaration, which the converter does not shape,
+// so its `.cs.auto` review sibling shows the eager field and the converted reader stays eager. control, the same table
+// in a converted file, is lazy.
+func TestLazyPackageVarLeavesHandOwnedEager(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	files, err := convertLazyVarModuleOver(t,
+		map[string]string{"main.go": lazyVarPredicateMainOwned, "owned.go": lazyVarHandOwnedSource, "reader.go": lazyVarHandOwnedReader},
+		map[string]string{"owned.cs": "[module: GoManualConversion]\r\nnamespace go;\r\n"})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	owned, ok := files["owned.cs.auto"]
+
+	if !ok {
+		t.Fatalf("the hand-owned file's review sibling owned.cs.auto was not emitted; read %d files", len(files))
+	}
+
+	if strings.Contains(owned, "lazyᴛowned") || !strings.Contains(owned, "static array<entry> owned = ") {
+		t.Errorf("owned.cs.auto must keep the eager field:\n%s", owned)
+	}
+
+	reader := files["reader.cs"]
+
+	if strings.Contains(reader, "lazyᴛreader") {
+		t.Errorf("reader reads a hand-owned var and must stay eager:\n%s", reader)
+	}
+
+	if !strings.Contains(reader, "[GoLazy] partial class lazyᴛcontrol { internal static array<entry> control = ") {
+		t.Errorf("control: the same table in a converted file must be lazy:\n%s", reader)
+	}
+}
+
+// io's blackHolePool, reduced: a sync.Pool over the floor, eligible by every rule, whose Get and Put are pointer-receiver
+// methods, so each use takes its address implicitly and the emission names its box (CS0103 ᏑblackHolePool when it was
+// built lazily). control, a table of the same file, is lazy.
+const lazyVarPoolSource = `package main
+
+import "sync"
+
+var pool = sync.Pool{
+	New: func() any {
+		b := new([64]byte)
+		for i := range b {
+			b[i] = byte(i)
+		}
+		return b
+	},
+}
+
+func use() int {
+	b := pool.Get().(*[64]byte)
+	defer pool.Put(b)
+	return int(b[3])
+}
+
+var control = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+`
+
+// TestLazyPackageVarLeavesAPointerAddressedPoolEager pins that a var a pointer-receiver call addresses stays eager.
+func TestLazyPackageVarLeavesAPointerAddressedPoolEager(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	files, err := convertLazyVarModule(t, map[string]string{
+		"main.go": "package main\n\nfunc main() { println(use(), len(control)) }\n",
+		"pool.go": lazyVarPoolSource,
+	})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	pool := files["pool.cs"]
+
+	if strings.Contains(pool, "lazyᴛpool") {
+		t.Errorf("pool is addressed by Get and Put and must stay eager:\n%s", pool)
+	}
+
+	if !strings.Contains(pool, "[GoLazy] partial class lazyᴛcontrol { internal static array<nint> control = ") {
+		t.Errorf("control: the table beside it must be lazy:\n%s", pool)
+	}
+}
+
+// TestLazyPackageVarLeavesManualVarEager is the same pin for a var whose storage a hand-owned member supplies
+// (manualConversionVars): its declaration is displaced, so nothing reads a holder for it and its reader stays eager.
+func TestLazyPackageVarLeavesManualVarEager(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	saved := manualConversionVars
+	registered := make(map[string]map[string]goosScope, len(saved)+1)
+
+	for pkg, vars := range saved {
+		registered[pkg] = vars
+	}
+
+	registered[lazyVarFixturePkg] = map[string]goosScope{"owned": goosAny}
+	manualConversionVars = registered
+	t.Cleanup(func() { manualConversionVars = saved })
+
+	files, err := convertLazyVarModule(t,
+		map[string]string{"main.go": lazyVarPredicateMainOwned, "owned.go": lazyVarHandOwnedSource, "reader.go": lazyVarHandOwnedReader})
+
+	if err != nil {
+		t.Fatalf("ConvertModule: %v", err)
+	}
+
+	if owned := files["owned.cs"]; strings.Contains(owned, "lazyᴛowned") {
+		t.Errorf("the displaced var must not be given a holder:\n%s", owned)
+	}
+
+	reader := files["reader.cs"]
+
+	if strings.Contains(reader, "lazyᴛreader") {
+		t.Errorf("reader reads a displaced var and must stay eager:\n%s", reader)
+	}
+
+	if !strings.Contains(reader, "[GoLazy] partial class lazyᴛcontrol { internal static array<entry> control = ") {
+		t.Errorf("control: the same table in a converted file must be lazy:\n%s", reader)
+	}
+}
+
+const lazyVarPredicateMainOwned = `package main
+
+type entry struct {
+	name   string
+	weight int
+}
+
+func main() {
+	println(len(owned), len(reader), len(control))
+}
+`
+
+// TestLazyPackageVarRefusesByName pins every refusal at the emission: each case LISTS `table`, whose initializer breaks
+// one rule; the converter reports the entry by name with the reason and emits nothing for the file.
+func TestLazyPackageVarRefusesByName(t *testing.T) {
+	isolateConverterPathGlobals(t)
+
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	const main = "package main\n\nfunc f() int { return 1 }\n\nfunc main() { println(len(table)) }\n"
+
 	cases := []struct {
-		name, table, refusal string
+		name    string
+		sources map[string]string
+		refusal string
 	}{
-		{"call", "package main\n\nvar table = [3]func(int) int{small, small, pick()}\n\nvar twin = [3]func(int) int{small, large, large}\n\nfunc pick() func(int) int { return large }\n",
+		{"call", map[string]string{"table.go": "package main\n\nvar table = [2]int{f(), 2}\n"},
 			"its initializer makes a call"},
-		{"var read", "package main\n\nvar base = 1\n\nvar table = [3]int{base, 2, 3}\n\nvar twin = [3]func(int) int{small, large, large}\n",
-			"its initializer reads the var base"},
+		{"imported var", map[string]string{"table.go": "package main\n\nimport \"os\"\n\nvar table = [1][]string{os.Args}\n"},
+			"its initializer reads the imported var os.Args"},
+		{"index", map[string]string{"table.go": "package main\n\nvar src = [2]int{1, 2}\n\nvar table = [1]int{src[0]}\n"},
+			"its initializer indexes or dereferences storage"},
+		{"method value", map[string]string{"table.go": "package main\n\ntype T int\n\nfunc (T) M() {}\n\nvar t T\n\nvar table = [1]func(){t.M}\n"},
+			"its initializer takes a method value"},
+		{"receive", map[string]string{"table.go": "package main\n\nvar ch = make(chan int, 1)\n\nvar table = [1]int{<-ch}\n"},
+			"its initializer receives from a channel"},
+		{"type assertion", map[string]string{"table.go": "package main\n\nvar x any = f()\n\nvar table = [1]int{x.(int)}\n"},
+			"its initializer makes a type assertion"},
+		{"mutated dep", map[string]string{"table.go": "package main\n\nvar base = 1\n\nfunc init() { base = 2 }\n\nvar table = [1]int{base}\n"},
+			"it reads the var base, which the package or its tests assign or take the address of"},
+		{"dep mutated by a test file", map[string]string{"table.go": "package main\n\nvar base = 1\n\nvar table = [1]int{base}\n",
+			"table_test.go": "package main\n\nimport \"testing\"\n\nfunc TestBase(t *testing.T) { base = 3 }\n"},
+			"it reads the var base, which the package or its tests assign or take the address of"},
+		{"address taken", map[string]string{"table.go": "package main\n\nvar table = [2]int{1, 2}\n\nvar p = &table\n"},
+			"its address is taken"},
+		{"exported constant dep", map[string]string{"table.go": "package main\n\nvar Max = 10\n\nvar table = [1]int{Max}\n"},
+			"it reads the exported var Max, which an importer can assign"},
+		// A pointer-receiver method called on the var takes its address implicitly (io's blackHolePool.Get()): the call
+		// needs the var's box, and the method can change it.
+		{"pointer method called", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() { table.Bump() }\n"},
+			"its address is taken"},
+		{"pointer method value", map[string]string{"table.go": "package main\n\ntype P struct{ n int }\n\nfunc (p *P) Bump() { p.n++ }\n\nvar table = P{1}\n\nfunc g() func() { return table.Bump }\n"},
+			"its address is taken"},
+		// Slicing an array var aliases its storage, so a write through the slice changes what a reader copies.
+		{"dep sliced", map[string]string{"table.go": "package main\n\nvar base = [2]int{1, 2}\n\nfunc g() []int { return base[:] }\n\nvar table = [1][2]int{base}\n"},
+			"it copies the var base, whose storage a slice aliases"},
 	}
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			withLazyPackageVars(t, "table")
 
-			main := lazyVarFixtureMain
+			sources := map[string]string{"main.go": main}
 
-			if c.name == "var read" {
-				main = strings.Replace(main, "table[1](3), table[2](3)", "table[1], table[2]", 1)
+			for name, source := range c.sources {
+				sources[name] = source
 			}
 
-			// The converter reports a refused file on stderr and does not emit it.
 			var files map[string]string
 			var err error
 
-			stderr := captureStderr(t, func() { files, err = convertLazyVarFixture(t, main, c.table) })
+			stderr := captureStderr(t, func() { files, err = convertLazyVarModule(t, sources) })
 
 			if err != nil {
 				t.Fatalf("ConvertModule: %v", err)

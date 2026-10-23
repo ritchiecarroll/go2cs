@@ -17,16 +17,16 @@ public partial struct cfg {
     internal bool verbose;
 }
 
-public static map<uint16, Func<ж<hkdfState>>> SupportedStates = new map<uint16, Func<ж<hkdfState>>>{
+[GoLazy] partial class lazyᴛSupportedStates { public static map<uint16, Func<ж<hkdfState>>> SupportedStates = new map<uint16, Func<ж<hkdfState>>>{
     [0x0001] = () => Ꮡ(new hkdfState("sha256", 32)),
     [0x0002] = () => Ꮡ(new hkdfState("sha512", 64))
-};
+}; }
 
-public static slice<Action<ж<cfg>>> Appliers = new Action<ж<cfg>>[]{
+[GoLazy] partial class lazyᴛAppliers { public static slice<Action<ж<cfg>>> Appliers = new Action<ж<cfg>>[]{
     (ж<cfg> c) => {
         c.Value.verbose = true;
     }
-}.slice();
+}.slice(); }
 
 internal static void Main() {
     foreach (var (_, id) in new uint16[]{0x0001, 0x0002}.slice()) {
