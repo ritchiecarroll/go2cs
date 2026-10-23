@@ -1214,7 +1214,7 @@ FORWARDED — the pushed body is ordinary converted Go, so call it (`crypto/inte
 
 UNHONORABLE — announce the pair, never fabricate a body (`weak/pointer.cs`'s `.cs.auto` review sibling):
 
-<!-- source: src/core/weak/pointer.cs.auto:99-102 -->
+<!-- source: src/core/weak/pointer.cs.auto:102-105 -->
 ```csharp
 //go:linkname runtime_registerWeakPointer
 internal static @unsafe.Pointer runtime_registerWeakPointer(@unsafe.Pointer _) {

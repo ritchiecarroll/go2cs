@@ -43,7 +43,7 @@ partial class sync_package {
 // the n+1'th call to Lock.
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] partial struct RWMutex {
+partial struct RWMutex {
     internal Mutex w;        // held if there are pending writers
     internal uint32 writerSem;       // semaphore for writers to wait for completing readers
     internal uint32 readerSem;       // semaphore for readers to wait for completing writers
@@ -219,6 +219,7 @@ public static void Unlock(this ж<RWMutex> Ꮡrw) {
         race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡrw.of(RWMutex.ᏑreaderSem)));
         race.Disable();
     }
+
     // Announce to readers there is no active writer.
     var r = Ꮡrw.of(RWMutex.ᏑreaderCount).Add(rwmutexMaxReaders);
     if (r >= rwmutexMaxReaders) {
@@ -255,7 +256,7 @@ public static Locker RLocker(this ж<RWMutex> Ꮡrw) {
     return new rlockerжLocker(Ꮡrw.Reinterpret<RWMutex, rlocker>());
 }
 
-[GoType("RWMutex")] partial struct rlocker;
+partial struct rlocker /*RWMutex*/;
 
 internal static void Lock(this ж<rlocker> Ꮡr) {
     (Ꮡr.Reinterpret<rlocker, RWMutex>()).RLock();

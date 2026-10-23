@@ -29,16 +29,16 @@ partial class bcache_package {
 // This means that clients need to be able to cope with cache entries
 // disappearing, but it also means that clients don't need to worry about
 // cache entries keeping the keys from being collected.
-[GoType] partial struct Cache<K, V> {
+partial struct Cache<K, V> {
     // The runtime atomically stores nil to ptable at the start of each GC.
     internal atomic.Pointer<cacheTable<K, V>> ptable;
 }
 
-[GoType("[1021]global::go.sync.atomic_package.Pointer<cacheEntry<K, V>>")] /* [cacheSize]sync.atomic_package.Pointer<cacheEntry<K, V>> */
-partial struct cacheTable<K, V>;
+/* [cacheSize]sync.atomic_package.Pointer<cacheEntry<K, V>> */
+partial struct cacheTable<K, V> /*[1021]global::go.sync.atomic_package.Pointer<cacheEntry<K, V>>*/;
 
 // A cacheEntry is a single entry in the linked list for a given hash table entry.
-[GoType] partial struct cacheEntry<K, V> {
+partial struct cacheEntry<K, V> {
     internal ж<K> k;             // immutable once created
     internal atomic.Pointer<V> v; // read and written atomically to allow updates
     internal ж<cacheEntry<K, V>> next; // immutable once linked into table
@@ -103,9 +103,9 @@ public static ж<V> Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk) {
 // Put sets the cached value associated with k to v.
 public static void Put<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> Ꮡk, ж<V> Ꮡv) {
     ref var k = ref Ꮡk.DerefOrNull();
-    ref var v = ref Ꮡv.DerefOrNull();
 
     var head = Ꮡc.table().at<atomic.Pointer<cacheEntry<K, V>>>((ulong)((uintptr)Ꮡk % (uintptr)cacheSize));
+
     // Strategy is to walk the linked list at head,
     // same as in Get, to look for existing entry.
     // If we find one, we update v atomically in place.

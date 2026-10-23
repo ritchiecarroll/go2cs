@@ -16,7 +16,9 @@ partial class atomic_package {
 
 // A Bool is an atomic boolean value.
 // The zero value is false.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Bool {
+//
+// Bool must not be copied after first use.
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Bool {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uint32 v;
 }
@@ -54,7 +56,9 @@ internal static uint32 b32(bool b) {
 internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 
 // A Pointer is an atomic pointer of type *T. The zero value is a nil *T.
-[GoType] partial struct Pointer<T> {
+//
+// Pointer must not be copied after first use.
+partial struct Pointer<T> {
     // Mention *T in a field to disallow conversion between Pointer types.
     // See go.dev/issue/56603 for more details.
     // Use *T, not T, to avoid spurious recursive type definition errors.
@@ -84,7 +88,9 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
 }
 
 // An Int32 is an atomic int32. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Int32 {
+//
+// Int32 must not be copied after first use.
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Int32 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal int32 v;
 }
@@ -127,7 +133,9 @@ public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) {
 }
 
 // An Int64 is an atomic int64. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Int64 {
+//
+// Int64 must not be copied after first use.
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Int64 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal readonly align64 __;
     [FieldOffset(0)] internal int64 v;
@@ -171,7 +179,9 @@ public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) {
 }
 
 // A Uint32 is an atomic uint32. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Uint32 {
+//
+// Uint32 must not be copied after first use.
+[StructLayout(LayoutKind.Explicit, Size = 4)] partial struct Uint32 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uint32 v;
 }
@@ -214,7 +224,9 @@ public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) {
 }
 
 // A Uint64 is an atomic uint64. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uint64 {
+//
+// Uint64 must not be copied after first use.
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uint64 {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal readonly align64 __;
     [FieldOffset(0)] internal uint64 v;
@@ -258,7 +270,9 @@ public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) {
 }
 
 // A Uintptr is an atomic uintptr. The zero value is zero.
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uintptr {
+//
+// Uintptr must not be copied after first use.
+[StructLayout(LayoutKind.Explicit, Size = 8)] partial struct Uintptr {
     [FieldOffset(0)] internal readonly noCopy _;
     [FieldOffset(0)] internal uintptr v;
 }
@@ -307,20 +321,20 @@ public static uintptr /*old*/ Or(this ж<Uintptr> Ꮡx, uintptr mask) {
 // for details.
 //
 // Note that it must not be embedded, due to the Lock and Unlock methods.
-[GoType] partial struct noCopy {
+partial struct noCopy {
 }
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-[GoRecv] internal static void Lock(this ref noCopy _) {
+internal static void Lock(this ref noCopy _) {
 }
 
-[GoRecv] internal static void Unlock(this ref noCopy _) {
+internal static void Unlock(this ref noCopy _) {
 }
 
 // align64 may be added to structs that must be 64-bit aligned.
 // This struct is recognized by a special case in the compiler
 // and will not work if copied to any other package.
-[GoType] partial struct align64 {
+partial struct align64 {
 }
 
 } // end atomic_package
