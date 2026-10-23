@@ -9,6 +9,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using go.golib;
 
 namespace go;
@@ -136,6 +137,56 @@ public sealed class ElemRefBox<T> : ж<T>, IInteriorPointer, IElementRun
     private static nint FastIndex(T[] backing, nint absoluteIndex)
     {
         return GoZeroSizeFacts<T>.IsZeroSize && ReferenceEquals(backing, GoZeroSizeFacts<T>.Storage) ? 0 : absoluteIndex;
+    }
+
+    // The PERSISTENT element boxes of array backings (P-256 R3, COORD ruling 2026-10-22): one box per
+    // (backing, absolute index), kept for the backing's life, so `&a[i]` asked by two expressions answers
+    // the SAME box and the field views cached on it (m_views) are found again. Fiat's p256Table.Select
+    // reads `&table[i]` sixteen times a lookup and then three field views of each, and a fresh box per
+    // expression re-minted all of them every time. Equality was already (backing, index), so Go's
+    // `&a[i] == &a[i]` holds either way; this changes only how many objects answer it.
+    //
+    // SCOPED to an element type that has had a field view (BoxShape<T>.Slotted): only there does a
+    // persistent box have views to keep. Every other T keeps a fresh box per expression and pays
+    // nothing. The table is weak on the backing, so a backing nobody references is collected with its
+    // boxes (the box -> backing reference sits inside the value, which a ConditionalWeakTable does not
+    // count as a root).
+    //
+    // The slots come in chunks of ElementBoxChunk, each allocated on the first address taken inside it,
+    // so a big array addressed once pays one reference per chunk plus one chunk, not one reference per
+    // element: a [4096] array costs 64 chunk references and one 64-slot chunk on its first `&a[i]`.
+    private const int ElementBoxChunk = 64;
+
+    private static readonly ConditionalWeakTable<T[], ElemRefBox<T>?[]?[]> s_arrayElementBoxes = new();
+
+    /// <summary>
+    /// Go's <c>&amp;a[i]</c> for an array element, index already checked: the persistent box of
+    /// (backing, absolute index) when <typeparamref name="T"/> is <see cref="BoxShape{T}.Slotted"/>,
+    /// a fresh box otherwise.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static ж<T> OfArrayElement(array<T> array, int index)
+    {
+        T[]? backing = array.Source;
+
+        // outside the scope the call site keeps the inlined fresh box it had before the table existed
+        if (!BoxShape<T>.Slotted || backing is null)
+            return new ElemRefBox<T>(array, index);
+
+        return persistentArrayElement(array, backing, index);
+    }
+
+    private static ж<T> persistentArrayElement(array<T> array, T[] backing, int index)
+    {
+        ElemRefBox<T>?[]?[] chunks = s_arrayElementBoxes.GetValue(backing, static b => new ElemRefBox<T>?[(b.Length + ElementBoxChunk - 1) / ElementBoxChunk][]);
+        int slot = (int)array.Low + index;
+        int chunkIndex = slot / ElementBoxChunk;
+
+        // one chunk per range and one box per slot: a racing mint loses the exchange and takes the winner
+        ElemRefBox<T>?[] chunk = chunks[chunkIndex] ?? Interlocked.CompareExchange(ref chunks[chunkIndex], new ElemRefBox<T>?[Math.Min(ElementBoxChunk, backing.Length - chunkIndex * ElementBoxChunk)], null) ?? chunks[chunkIndex]!;
+        ref ElemRefBox<T>? box = ref chunk[slot % ElementBoxChunk];
+
+        return box ?? Interlocked.CompareExchange(ref box, new ElemRefBox<T>(array, index), null) ?? box!;
     }
 
     internal ElemRefBox(array<T> array, int index)
