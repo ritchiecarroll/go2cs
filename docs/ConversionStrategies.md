@@ -999,6 +999,27 @@ imported package is its own project, and the importer references it. The project
 standard library live. The standard library can also come from NuGet
 ([Compiled Library versus Source Code](#compiled-library-versus-source-code)).
 
+**A `main` package's project also carries the program's build info.** Go links a program's module lines into
+the binary for `runtime/debug.ReadBuildInfo`. The converter writes the same lines into the `main` project as a
+`GoModInfo` assembly attribute: `path`, `mod <module> (devel)`, and under `-recurse` one `dep` line per
+third-party module with its `go.sum` hash. golib adds the build settings the program itself knows, its
+`DefaultGODEBUG` when one is set, `CGO_ENABLED`, `GOARCH` and `GOOS`, so `ReadBuildInfo` reports the program's
+build info as Go's does. A converted test program registers its own `path` and `mod` lines when it starts.
+Settings with no managed value (`-compiler`, `-buildmode`, `GOAMD64`, `vcs.*`) are never reported, a program
+converted outside a module carries no stamp, and a replaced dependency is reported without its replacement,
+which can be a local path:
+
+<!-- source: src/tests/Behavioral/BuildInfoSettings/BuildInfoSettings.csproj:167-169 -->
+```xml
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;go2cs/BuildInfoSettings&#10;mod&#9;go2cs/BuildInfoSettings&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+```
+<!-- the lines: src/go2cs/buildInfoStamp.go:39 `func programModInfo(importPath, modulePath string, dependencies []thirdPartyModule, sums map[string]string) string {`;
+     the run-time half: src/core/golib/GoModInfoAttribute.cs:103 `public static @string Compose(string goos, string goarch, bool cgoEnabled)`.
+     Guards: src/go2cs/buildInfoStamp_test.go, GolibTests GoModInfoComposeTests, and the BuildInfoSettings behavioral
+     test (ok, Path, Main.Path, Main.Version, GOOS and GOARCH, compared with Go's). -->
+
 **Build constraints pick each target's Go files.** The converter selects Go files by their build
 constraints and file-name suffixes, as `go build` does. The standard library is converted for Windows,
 Linux and macOS, each on amd64. Files whose C# differs between them go into `windows/`, `linux/` and
@@ -3091,7 +3112,7 @@ built-in and where it is explained in more depth:
 | `complex(r, i)`, `real(c)`, `imag(c)` | the same calls, over `complex64` or `complex128` | [Constant Values](#constant-values) |
 | `print(…)`, `println(…)` | the same calls. They write to standard error, as Go's do | — |
 | `panic(v)` | `throw panic(v)`. `panic` builds the exception, and `throw` tells C# that the code path ends here | [Defer / Panic / Recover](#defer--panic--recover) |
-| `recover()` | `recover()` | [Defer / Panic / Recover](#defer--panic--recover) |
+| `recover()` | `recover()`, or `recover(calledByDefer)` in a named function that no other package can call | [Defer / Panic / Recover](#defer--panic--recover) |
 
 **Most calls do not change.** The arguments and their order stay as Go wrote them. Here a Go `[]byte`
 literal becomes a C# array wrapped as a golib `slice<byte>` by `.slice()`
@@ -8026,16 +8047,63 @@ With `boom` true, the `throw` jumps to the `catch`, which parks the panic. The `
 closure, whose `recover()` returns "kaboom". The panic stops there, and `guarded` returns `-1, "recovered"`.
 With `boom` false, `recover()` returns `nil`, and `guarded` returns `0, "ok"`.
 
-<!-- src/core/golib/builtin.cs:344 `PanicException? panic = state.RecoverablePanic;`;
-src/core/golib/GoFrame.cs:180 `frame is itself a deferred call that panic is running (Go's direct-call rule`;
-the divergence once accepted here, as builtin.cs at 2b51b02d50 stated it (`Known divergence, accepted: a recover() in a HELPER`), is closed by the recover-in-helper seat (the Reference page's direct-call section).
-Probe (converted, not run): `func helper() any { return recover() }` called from `defer func() { r = helper() }()`
-emits a plain `return recover();` inside helper's own frame; Go 1.26.10 on linux/amd64 lets the panic reach an outer
-recover. -->
-As in Go, `recover()` can stop only the panic whose deferred calls are running. In the deferred calls of a
-function that is returning normally it returns `nil`, even while an outer panic unwinds. One difference
-is accepted: Go's `recover()` stops a panic only when the deferred function calls it directly, while
-golib's also stops it when called from a helper that the deferred function calls.
+**`recover()` stops a panic only when the deferred function calls it directly.** As in Go, it stops only the
+panic whose deferred calls are running, and in the deferred calls of a function that is returning normally it
+returns `nil`, even while an outer panic unwinds. A deferred literal, as in `guarded`, is the deferred function
+itself, so its `recover()` is a plain call. A named function can be deferred too, and then Go asks how it was
+called: deferred, its `recover()` stops the panic; called by a deferred function, it returns `nil` and the
+panic goes on. The converter marks both ends of that question. A named function whose body calls `recover()`
+takes golib's mark as its first line and passes it to each `recover`, and a `defer` whose callee may be such a
+function registers with `recovers: true`, which tells golib to set the mark just before that call:
+
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.go:48-57 -->
+```go
+func catchError(err *error) {
+	if e := recover(); e != nil {
+		*err = fmt.Errorf("caught: %v", e)
+	}
+}
+
+func deferNamedWithPointer() (err error) {
+	defer catchError(&err)
+	panic("three")
+}
+```
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:76-99 -->
+```csharp
+internal static void catchError(ж<error> Ꮡerr) {
+    GoFrame ᒐ = default;
+    try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+        ref var err = ref Ꮡerr.DerefOrNull();
+
+        {
+            var e = recover(calledByDefer); if (e != default!) {
+                err = fmt.Errorf("caught: %v"u8, e);
+            }
+        }
+    }
+…
+internal static error /*err*/ deferNamedWithPointer() {
+…
+        defer(catchError, Ꮡerr, ref ᒐ, recovers: true);
+        throw panic("three");
+```
+
+`recover(calledByDefer)` returns `nil` when the mark was not set, so `catchError` called from inside a
+deferred literal leaves the panic running, as Go's does. `ж<error>` is golib's form of Go's pointer `*error`
+([Pointers](#pointers)). Three cases are not decided this way. An exported function that calls `recover()`
+keeps a plain `recover()`, because another package can defer it and that package's `defer` cannot set the
+mark; such a function also stops a panic when a deferred function calls it, where Go's would return `nil`.
+Package `main` exports nothing, so a program's own functions follow Go. A `defer` through a func value, a
+func-typed field or an interface method is marked when its signature matches a recovering function of the
+package. An unexported recovering function that another package receives as a func value and defers is not
+marked there, so its `recover` returns `nil`.
+<!-- the mark: src/core/golib/GoFrame.cs:467 `public static bool TakeDeferredCall()`; the read:
+     src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`;
+     a literal reached through a func value: :386 `public static object? recoverChecked()`; the converter's forms:
+     src/go2cs/recoverForms.go. Guard: src/tests/Behavioral/RecoverInHelper, compared with Go's output (the
+     Reference page's direct-call section lists its arms and the stated limits). -->
 
 `recover()` returns Go's `any`, a C# `object?` that is `null` when no panic is in flight. Converted code
 spells Go's `nil` and zero values as `default!`, so `r != default!` is Go's `r != nil`
