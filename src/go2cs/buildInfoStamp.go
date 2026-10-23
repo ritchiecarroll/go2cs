@@ -27,9 +27,16 @@ import (
 
 // programModInfo is a main package's stamp in Go's own line form: `path <import path>`, then `mod <module>
 // (devel)` -- the version cmd/go reports for a main module built outside version control -- then one
-// `dep <path> <version>` per third-party module. "" outside a module: a GOPATH-mode Go binary embeds no
-// module info, and its import path can be a machine path, which must never reach an emitted project.
-func programModInfo(importPath, modulePath string, dependencies []thirdPartyModule) string {
+// `dep <path> <version> <sum>` per third-party module, its sum the main module's go.sum `h1:` hash (read by
+// modulesLock.go's goSumHashes, the same reading go2cs.modules.lock records). "" outside a
+// module: a GOPATH-mode Go binary embeds no module info, and its import path can be a machine path, which must
+// never reach an emitted project.
+//
+// A REPLACED dependency is written as cmd/go writes its dep line -- path and version, no sum column, since Go puts
+// the sum on the `=>` line that follows -- and that `=>` line is NOT stamped: a replacement can be a local
+// directory, an absolute machine path, and no machine path is emitted. ReadBuildInfo therefore reports such a dep
+// with no Replace (a BOARD-recorded divergence, 2026-10-22).
+func programModInfo(importPath, modulePath string, dependencies []thirdPartyModule, sums map[string]string) string {
 	if modulePath == "" {
 		return ""
 	}
@@ -39,10 +46,13 @@ func programModInfo(importPath, modulePath string, dependencies []thirdPartyModu
 	lines.WriteString("path\t" + importPath + "\n")
 	lines.WriteString("mod\t" + modulePath + "\t(devel)\t\n")
 
-	// No checksum column: go.sum is the build's business, not the converter's, and ParseBuildInfo reads the
-	// empty third field as an empty Sum.
 	for _, dependency := range dependencies {
-		lines.WriteString("dep\t" + dependency.path + "\t" + dependency.version + "\t\n")
+		if dependency.replaced {
+			lines.WriteString("dep\t" + dependency.path + "\t" + dependency.version + "\n")
+			continue
+		}
+
+		lines.WriteString("dep\t" + dependency.path + "\t" + dependency.version + "\t" + sums[dependency.path+" "+dependency.version] + "\n")
 	}
 
 	return lines.String()

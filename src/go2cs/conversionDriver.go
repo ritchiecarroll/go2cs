@@ -657,10 +657,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		}
 
 		// EVERY main package, single-package and -recurse alike, carries its module build info -- the `path`,
-		// `mod` and (under -recurse) `dep` lines runtime/debug.ReadBuildInfo reads (buildInfoStamp.go). Same
-		// project route as the DefaultGODEBUG above, for the same reason.
+		// `mod` and (under -recurse) `dep` lines runtime/debug.ReadBuildInfo reads (buildInfoStamp.go), each dep's
+		// sum from the main module's go.sum. Same project route as the DefaultGODEBUG above, for the same reason.
 		if pkg.Name == "main" {
-			modInfo := programModInfo(pkg.PkgPath, directoryModulePath(pkg.Dir), options.programDependencies)
+			moduleDir := moduleRootDir(pkg.Dir)
+			modInfo := programModInfo(pkg.PkgPath, directoryModulePath(pkg.Dir), options.programDependencies, goSumHashes(moduleDir))
 
 			if err := stampModInfoProject(projectFileName, modInfo); err != nil {
 				return err

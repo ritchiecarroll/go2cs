@@ -27994,8 +27994,10 @@ Owner: none (post-hop). Closing it needs the JIT's inline tree for the faulting 
 cmd/go (`cmd/go/internal/load/test.go`, the `pmain` construction): a test of a NON-main package reports
 `<import path>.test`; a test of a MAIN package inherits the package's own build info and reports the bare import path.
 Measured at go1.26.10 on a scratch module: `example.test/prog/lib` reads `example.test/prog/lib.test`, and the main
-package `example.test/prog` reads `example.test/prog`. The host detects a main package under test by the converted
-`go.main_package` class its entry assembly carries.
+package `example.test/prog` reads `example.test/prog`. The host detects a main package under test by a converted
+`main_package` class in its entry assembly, in ANY namespace: a module-root main converts into its module path's
+namespace (G's probe: `example.com/app` → `namespace go.example.com;`), so the first cut's literal `go.main_package`
+match would have registered `<path>.test` there (found in G's review, fixed in-seat).
 
 **The divergence.** cmd/go re-runs `setBuildInfo` for a main package's test binary, and so reports `<path>.test`, when
 the test main's DefaultGODEBUG differs from the package's. That happens when the `_test.go` files carry `//go:debug`
@@ -28005,7 +28007,8 @@ would be an emission. Neither path is reachable today: `-tests` refuses a main p
 both the bare path and this divergence wait for that gap to close. When it does, the divergence is reached only by a
 module main package whose test files carry such `//go:debug` lines. No standard-library row reaches it, since the
 standard library has no main package. The main-package half is guarded at unit level until then (GolibTests
-`HostDetectsAMainPackageUnderTest`, over a Roslyn-compiled assembly carrying `go.main_package`).
+`HostDetectsAMainPackageUnderTest`, over Roslyn-compiled assemblies carrying `go.main_package` and
+`go.example.com.main_package`).
 
 Owner: none. Closing it needs the package's own DefaultGODEBUG in the test assembly, one more host or project
 emission, and no row asks for it.
@@ -28050,5 +28053,26 @@ both G's lazy seat and the stamp seat, since lazy moves those emissions too. Dis
 `package_info.cs` ride with whichever CNR re-baseline owns them.
 
 — H (measured 2026-10-22)
+
+## 2026-10-22 — H: build info carries no `dep` lines in a converted TEST host, and no `=>` replacement lines anywhere — KNOWN DIVERGENCES of the build-info stamp seat (post-hop; unowned)
+
+**Measured against Go (go1.26.10; G's probe and H's).**
+
+- **Test hosts carry no `dep` lines.** A Go test binary in a module carries the module's dependency lines with their
+  `go.sum` hashes. G's probe of a module requiring `golang.org/x/mod` read `deps=1` with its `h1:` sum, the same in the
+  program and in its test binary. A converted test host's registration (`TestHost.Run` → `GoModInfoAttribute.Register`)
+  carries `path` and `mod` only, because the host's inputs are the import path and module path its `TestRegistry`
+  already receives. Carrying the dependency list would be a host emission, which the seat's zero-emission ruling
+  excludes.
+- **No `=>` replacement lines.** For a `replace`d dependency cmd/go writes `dep <path> <version>` and then
+  `=> <replacement> <version> <sum>` (measured: `=>	../dep	(devel)`). The program stamp writes the `dep` line in
+  Go's own form (no sum column) but not the `=>` line: a replacement can be a local directory, so an absolute machine
+  path, and no machine path is emitted into a project. `ReadBuildInfo().Deps[i].Replace` is therefore nil where Go's
+  is set. An ordinary dependency carries its `go.sum` `h1:` hash, as Go's does.
+
+Owner: none. The first needs an emission-carrying host design; the second needs a rule for which replacement paths
+may be stamped (a module path replacement could be; a directory replacement could not).
+
+— H (measured 2026-10-22; COORD ruled the first a BOARD row)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

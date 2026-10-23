@@ -59,8 +59,9 @@ func assertModInfoCarriesNoBuildSettings(t *testing.T, stamp string) {
 // TestProgramModInfoLineSet: a program's stamp is exactly {path, mod[, dep]}, in Go's own line form.
 func TestProgramModInfoLineSet(t *testing.T) {
 	dependencies := []thirdPartyModule{{path: "example.test/a", version: "v1.2.3"}, {path: "example.test/b", version: "v0.4.0", replaced: true}}
+	sums := map[string]string{"example.test/a v1.2.3": "h1:aaaa=", "example.test/b v0.4.0": "h1:bbbb="}
 
-	single := programModInfo("example.test/prog/cmd/tool", "example.test/prog", nil)
+	single := programModInfo("example.test/prog/cmd/tool", "example.test/prog", nil, sums)
 
 	if want := "path\texample.test/prog/cmd/tool\nmod\texample.test/prog\t(devel)\t\n"; single != want {
 		t.Errorf("single-package stamp = %q, want %q", single, want)
@@ -70,14 +71,20 @@ func TestProgramModInfoLineSet(t *testing.T) {
 		t.Errorf("single-package line set = {%s}, want {mod,path}", got)
 	}
 
-	recursed := programModInfo("example.test/prog", "example.test/prog", dependencies)
+	recursed := programModInfo("example.test/prog", "example.test/prog", dependencies, sums)
 
 	if got := strings.Join(modInfoLineKeys(t, recursed), ","); got != "dep,mod,path" {
 		t.Errorf("-recurse line set = {%s}, want {dep,mod,path}", got)
 	}
 
-	if !strings.HasSuffix(recursed, "dep\texample.test/a\tv1.2.3\t\ndep\texample.test/b\tv0.4.0\t\n") {
-		t.Errorf("-recurse stamp does not end in the dep lines, in path order:\n%q", recursed)
+	// Go's own dep lines (cmd/go, measured at go1.26.10): an ordinary dependency carries its go.sum hash; a replaced
+	// one carries no sum column, since Go writes the sum on its `=>` line -- which the stamp does not carry.
+	if !strings.HasSuffix(recursed, "dep\texample.test/a\tv1.2.3\th1:aaaa=\ndep\texample.test/b\tv0.4.0\n") {
+		t.Errorf("-recurse stamp does not end in Go's dep lines, in path order:\n%q", recursed)
+	}
+
+	if strings.Contains(recursed, "=>") {
+		t.Errorf("-recurse stamp carries a replacement line, which can name a machine path:\n%q", recursed)
 	}
 
 	assertModInfoCarriesNoBuildSettings(t, single)
@@ -85,8 +92,39 @@ func TestProgramModInfoLineSet(t *testing.T) {
 
 	// Outside a module there is nothing to stamp: a GOPATH-mode Go binary embeds no module info, and its import
 	// path can be a machine path.
-	if got := programModInfo("_/C_/somewhere/prog", "", dependencies); got != "" {
+	if got := programModInfo("_/C_/somewhere/prog", "", dependencies, sums); got != "" {
 		t.Errorf("a package outside any module was stamped: %q", got)
+	}
+}
+
+// TestGoSumHashesReadsModuleLinesOnly: a dep's sum is its module-content `h1:` line from go.sum, never the
+// `/go.mod` line beside it, and a module with no go.sum reads as no sums.
+func TestGoSumHashesReadsModuleLinesOnly(t *testing.T) {
+	moduleDir := t.TempDir()
+
+	if got := goSumHashes(moduleDir); len(got) != 0 {
+		t.Errorf("a module with no go.sum read %v", got)
+	}
+
+	goSum := "golang.org/x/mod v0.42.0 h1:ICeL3t2L30ljSPHHxDnR4fqVcBt/zR2zJAb9juavmQg=\r\n" +
+		"golang.org/x/mod v0.42.0/go.mod h1:gomodlinehash=\r\n" +
+		"golang.org/x/sync v0.1.0/go.mod h1:onlygomod=\r\n"
+
+	if err := os.WriteFile(filepath.Join(moduleDir, "go.sum"), []byte(goSum), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got := goSumHashes(moduleDir)
+	want := map[string]string{"golang.org/x/mod v0.42.0": "h1:ICeL3t2L30ljSPHHxDnR4fqVcBt/zR2zJAb9juavmQg="}
+
+	if len(got) != len(want) || got["golang.org/x/mod v0.42.0"] != want["golang.org/x/mod v0.42.0"] {
+		t.Errorf("goSumHashes = %v, want %v", got, want)
+	}
+
+	stamp := programModInfo("example.test/prog", "example.test/prog", []thirdPartyModule{{path: "golang.org/x/mod", version: "v0.42.0"}}, got)
+
+	if !strings.HasSuffix(stamp, "dep\tgolang.org/x/mod\tv0.42.0\th1:ICeL3t2L30ljSPHHxDnR4fqVcBt/zR2zJAb9juavmQg=\n") {
+		t.Errorf("the stamp does not carry the go.sum hash Go embeds:\n%q", stamp)
 	}
 }
 
@@ -128,7 +166,7 @@ func TestStampModInfoProjectIsOneItemGroup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stamp := programModInfo("example.test/prog", "example.test/prog", []thirdPartyModule{{path: "example.test/a&b", version: "v1.0.0"}})
+	stamp := programModInfo("example.test/prog", "example.test/prog", []thirdPartyModule{{path: "example.test/a&b", version: "v1.0.0"}}, map[string]string{"example.test/a&b v1.0.0": "h1:x="})
 
 	if err := stampModInfoProject(projectFileName, stamp); err != nil {
 		t.Fatalf("stampModInfoProject: %v", err)
@@ -207,7 +245,8 @@ func TestMainProgramsCarryTheirModInfo(t *testing.T) {
 
 	stamp, ok := stampedModInfo(t, readGenerated(t, projects[0]))
 
-	if want := "path\texample.test/prog\nmod\texample.test/prog\t(devel)\t\ndep\texample.test/dep\tv0.1.0\t\n"; !ok || stamp != want {
+	// The replaced dependency, as cmd/go writes its dep line (measured at go1.26.10): no sum column.
+	if want := "path\texample.test/prog\nmod\texample.test/prog\t(devel)\t\ndep\texample.test/dep\tv0.1.0\n"; !ok || stamp != want {
 		t.Errorf("-recurse program stamp = %q (found %v), want %q", stamp, ok, want)
 	}
 

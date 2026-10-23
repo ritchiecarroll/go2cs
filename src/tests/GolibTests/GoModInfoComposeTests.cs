@@ -83,11 +83,11 @@ public class GoModInfoComposeTests
 
     // An assembly holding exactly one converted package class, the way a test host's entry assembly holds the
     // package under test.
-    private static Assembly CompilePackageAssembly(string assemblyName, string packageClass)
+    private static Assembly CompilePackageAssembly(string assemblyName, string packageClass, string packageNamespace = "go")
     {
         CSharpCompilation compilation = CSharpCompilation.Create(
             assemblyName,
-            [CSharpSyntaxTree.ParseText($"namespace go {{ public static partial class {packageClass} {{ }} }}")],
+            [CSharpSyntaxTree.ParseText($"namespace {packageNamespace} {{ public static partial class {packageClass} {{ }} }}")],
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -100,7 +100,7 @@ public class GoModInfoComposeTests
 
     /// <summary>
     /// The host's main-package detection (<c>TestHost.HostsMainPackage</c>), which picks the bare path over
-    /// <c>&lt;path&gt;.test</c>: true for an entry assembly carrying the converted <c>go.main_package</c> class, false
+    /// <c>&lt;path&gt;.test</c>: true for an entry assembly carrying a converted <c>main_package</c> class in any namespace, false
     /// for one carrying any other package's class, and false for no entry assembly at all.
     /// </summary>
     [TestMethod]
@@ -108,6 +108,10 @@ public class GoModInfoComposeTests
     {
         Assert.IsTrue(TestHost.HostsMainPackage(CompilePackageAssembly("BuildInfoMainProbe", "main_package")),
             "an entry assembly carrying go.main_package was not read as a main package under test");
+
+        // A MODULE-ROOT main converts into its module path's namespace (example.com/app -> go.example.com).
+        Assert.IsTrue(TestHost.HostsMainPackage(CompilePackageAssembly("BuildInfoRootMainProbe", "main_package", "go.example.com")),
+            "an entry assembly carrying go.example.com.main_package (a module-root main) was not read as a main package under test");
 
         Assert.IsFalse(TestHost.HostsMainPackage(CompilePackageAssembly("BuildInfoLibProbe", "lib_package")),
             "an entry assembly carrying only go.lib_package was read as a main package under test");

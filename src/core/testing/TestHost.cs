@@ -125,10 +125,31 @@ public static class TestHost
 
     /// <summary>
     /// Whether a test binary's entry assembly tests a MAIN package: the package's production sources compile into the
-    /// test assembly, so a main package under test is the one whose converted <c>go.main_package</c> class is there.
+    /// test assembly, so a main package under test is the one whose converted <c>main_package</c> class is there.
     /// </summary>
-    public static bool HostsMainPackage(Assembly? entryAssembly) =>
-        entryAssembly?.GetType("go.main_package") is not null;
+    /// <remarks>
+    /// Matched by NAME, in any namespace: a module-root main converts into a namespace of its own module path
+    /// (<c>go.example.com</c> for <c>example.com/app</c>), not into <c>go</c>. A main package cannot be imported, so the
+    /// only <c>main_package</c> a test assembly can hold is the package under test.
+    /// </remarks>
+    public static bool HostsMainPackage(Assembly? entryAssembly)
+    {
+        if (entryAssembly is null)
+            return false;
+
+        Type?[] types;
+
+        try
+        {
+            types = entryAssembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            types = ex.Types;
+        }
+
+        return types.Any(static type => type?.Name == "main_package");
+    }
 
     public static int Run(TestRegistry registry, string[] args)
     {
