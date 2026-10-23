@@ -3145,7 +3145,8 @@ public static partial class builtin
     // Console.Error is a TextWriter.Synchronized wrapper; its private _out is the writer it guards. The dependency keeps
     // that BCL field in a trimmed publish (trim stage 1, docs/PLAN-golib-full-trim.md); were it missing, the answer is
     // the conservative one, "not the process's stderr", which writes through the TextWriter as before this existed.
-    [DynamicDependency("_out", "System.IO.TextWriter+SyncTextWriter", "System.Private.CoreLib")]
+    // The trimmer reads the type name as a documentation ID, so the nested type is TextWriter.SyncTextWriter.
+    [DynamicDependency("_out", "System.IO.TextWriter.SyncTextWriter", "System.Private.CoreLib")]
     [UnconditionalSuppressMessage("Trimming", "IL2075",
         Justification = "The writer is the BCL's SyncTextWriter, whose _out the DynamicDependency on this method keeps.")]
     private static bool IsProcessStandardError(System.IO.TextWriter error)

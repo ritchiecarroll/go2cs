@@ -64,7 +64,7 @@ internal sealed class StringHeaderBox<TDst> : ж<TDst>
     internal static readonly bool Applies;
 
     // The pointer type is unsafe.Pointer, found by name as SliceHeaderBox finds it; see there.
-    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBoxObject", "go.unsafe_package+Pointer", "unsafe")]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBoxObject", "go.unsafe_package.Pointer", "unsafe")]
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075",
         Justification = "pointerType is unsafe.Pointer, whose FromBoxObject the DynamicDependency on this constructor keeps.")]
     static StringHeaderBox()

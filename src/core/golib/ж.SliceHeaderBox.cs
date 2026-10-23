@@ -186,13 +186,12 @@ internal sealed class SliceHeaderBox<T, TDst> : ж<TDst>
     internal static readonly bool Applies;
 
     // The header's pointer type is unsafe.Pointer, the one IUnsafePointer (no generated type implements it), in an
-    // assembly golib cannot reference; its FromBox is found by name. The dependency keeps that method in a trimmed
-    // publish, and FromBox<T> declares no annotation on T (trim stage 1, docs/PLAN-golib-full-trim.md).
-    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBox", "go.unsafe_package+Pointer", "unsafe")]
+    // assembly golib cannot reference; its FromBoxObject is found by name. The dependency keeps that method in a
+    // trimmed publish (trim stage 1, docs/PLAN-golib-full-trim.md). The trimmer reads its type name as a
+    // documentation ID, so the nested type is unsafe_package.Pointer, not unsafe_package+Pointer.
+    [System.Diagnostics.CodeAnalysis.DynamicDependency("FromBoxObject", "go.unsafe_package.Pointer", "unsafe")]
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2075",
-        Justification = "pointerType is unsafe.Pointer, whose FromBox the DynamicDependency on this constructor keeps.")]
-    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2060",
-        Justification = "unsafe.Pointer.FromBox<T> declares no DynamicallyAccessedMembers on T, so its instantiation asks nothing of the element type.")]
+        Justification = "pointerType is unsafe.Pointer, whose FromBoxObject the DynamicDependency on this constructor keeps.")]
     static SliceHeaderBox()
     {
         Type source = typeof(T);
