@@ -1,6 +1,7 @@
 # PLAN — the post-hop performance re-baseline (Go 1.26 packages)
 
-> **STATUS: DRAFT (G, 2026-10-23), for COORD's ruling.** Document type: an [instance plan](Glossary.md#plan). The
+> **STATUS: DRAFT (G, 2026-10-23). RULED by COORD on 2026-10-23: accepted as a draft, and it stays DRAFT until
+> S0 lands. The rulings on its open questions are in section 9.** Document type: an [instance plan](Glossary.md#plan). The
 > owner ruled the run itself: after the 1.26 NuGet publish, re-run the [performance suite](Performance.md) (Go against
 > converted C#, JIT and Native AOT), with every timed run on G-LAPTOP for comparability with the original baselines.
 > The i9 only builds the Native AOT apps and ships them to G-LAPTOP. The procedure for a re-measurement is
@@ -44,11 +45,24 @@ Eight binaries per program, in two release legs of four arms each:
   and divides out of that leg's ratio. Both pins are installed on G-LAPTOP.
 - **JIT** is the published table's JIT column: framework-dependent, dynamic code enabled. The runner's
   configuration guard refuses any other shape.
-- **R2R** is new. It is the publish a consumer gets from the converter-written project with no extra properties:
-  `dotnet publish -c Release -r win-x64`, which the template makes ReadyToRun, trimmed (partial) and therefore
-  self-contained. It sits between the other two columns: precompiled code like AOT, but still tiering up under the
-  JIT. It costs a small fraction of an AOT publish, so G-LAPTOP builds it. (Open question O1 confirms that this is the arm P1
-  means.)
+- **R2R** is new, and it is the TEMPLATE-DEFAULT publish (ruled O1): what a consumer gets from the
+  converter-written project with no property of their own, `dotnet publish -c Release -r win-x64`. The release's
+  `csproj-template.xml` sets, for an executable:
+  - `PublishReadyToRun` = `true`
+  - `PublishTrimmed` = `True`
+  - `TrimMode` = `partial`, unless the project already sets one
+  - `IncludeNativeLibrariesForSelfExtract` and `EnableCompressionInSingleFile` = `true`. Both act only on a
+    single-file publish, which the template does not request.
+  - `TieredCompilationQuickJitForLoops`: left commented out, so at the runtime default.
+
+  It sets no `SelfContained` and no `PublishSingleFile`. The SDK makes a trimmed publish self-contained, and the arm
+  records the published `runtimeconfig.json` to show it. The list is read from the template at hop tip
+  `05b7c851c3`; S2 records the release's own and stops if they differ. The arm sits between the other two
+  columns: precompiled code like AOT, but still tiering up under the JIT. It costs a small fraction of an AOT
+  publish, so G-LAPTOP builds it.
+- **A fifth, diagnostic arm, only if P1's DATA calls for it.** P1 is measuring consumer-side `PublishReadyToRun`
+  (Startup and Fib: JIT, R2R and AOT). If that DATA recommends a different recipe (composite, or framework-dependent
+  R2R), it runs as a fifth arm, recorded but not published. Whether the template changes is a separate ruling.
 - **AOT** is `PublishAot`, self-contained, partial trim, `-r win-x64`, at the SDK's default instruction set: no
   `IlcInstructionSet`, nothing host-specific. The i9 builds both legs (34 publishes). Section 4 covers the handoff.
 
@@ -127,26 +141,35 @@ without one is re-published) nor build from package references or publish R2R. S
 
 ### The PERF-REVIEW list
 
-Three rows get extra treatment, because their number can move without their program changing:
+These rows moved during the hop on the windows JIT, read 2026-10-21/22 by the i9's regression read and bisect and by
+G's profile. Their durable record is the BOARD row of 2026-10-23, "the hop's windows JIT perf readings"
+([`BOARD`](phase4/BOARD-next-validation-candidates.md)), with each row's mechanism and status. Each gets extra
+treatment here:
 
-- **RefLower and Iface: the layout lottery.** These rows can shift with code placement, which moves with unrelated
-  changes elsewhere in the image. For the AOT arm, the i9 publishes each of these programs **twice per leg**. The
-  pair's spread is that row's own A/A, and a leg delta smaller than it is reported as no change. For the JIT and
-  R2R arms, these rows take 11 runs, and their spread is reported beside the median.
+- **Startup: confirm the fix.** Its rise was real: 794 more methods jitted at start-up, since taken back out by lazy
+  registries and lazy static data. The re-baseline is where that shows or does not. The R2R column and the TC0
+  column (below) separate start-up JIT work from start-up code.
 - **Sort: tiering.** Its workload is a few hundred milliseconds, so tier-up (call counting, OSR, dynamic PGO)
-  lands inside it, and a shift in when tier-up fires moves the number. The published Sort number stays the default
-  configuration, which is what a consumer runs. A diagnostic arm attributes any Sort leg delta to code rather than to
-  tier-up timing: JIT and R2R under `DOTNET_TieredCompilation=0`, and again under `DOTNET_TieredPGO=0`. Diagnostic
-  readings go to the record, never to the table.
+  lands inside it, and its medians were identical under `TieredCompilation=0`. The published Sort number stays the
+  default configuration, which is what a consumer runs. A diagnostic arm also runs it under `DOTNET_TieredPGO=0`.
+- **RefLower and Iface: the layout lottery.** Both read bimodal across builds of unchanged source, so their number
+  moves with code placement. For the AOT arm, the i9 publishes each of these programs **twice per leg**. The pair's
+  spread is that row's own A/A, and a leg delta smaller than it is reported as no change. For the JIT and R2R arms,
+  these rows take 11 runs, and their spread is reported beside the median.
+- **IfaceCall: creep.** It rose across the hop with no single step. It takes 11 runs, and the leg delta is read
+  against its spread. If it holds, section 8's cause brackets apply.
+- **Channel: unconfirmed.** It read +11.7 % once and did not confirm in the bisect. It takes 11 runs, and either the
+  re-baseline confirms it or the BOARD row closes it as noise.
 
-(Open question O4: the findings behind these two items are not in the repository. If COORD's sources name other
-rows or a different mechanism, this list is amended before S4.)
+**The TC0 column.** The runner gains a JIT column run under `DOTNET_TieredCompilation=0` (G's proposal of
+2026-10-22) for every program. It is diagnostic: it goes to the DATA record, never to the published table. A leg
+delta that appears at default tiering and not at TC0 is tier-up timing, not code.
 
 ## 7. Steps
 
 | step | what | where | gate |
 |:--|:--|:--|:--|
-| **S0** | Instrument seat: the runner gains a package-reference leg (convert with a named converter and `-recurse=nuget` at a named version), the R2R column, a hash-verified adopt-AOT path with a manifest, two-leg interleaved measurement, and the four-column table. Red-first: a planted hash mismatch refuses by name, a planted self-contained JIT binary is refused, and an unadopted foreign AOT binary is never timed. | G, a seat in a batch | lands before S2 |
+| **S0** | Instrument seat: the runner gains a package-reference leg (convert with a named converter and `-recurse=nuget` at a named version), the R2R column, the diagnostic TC0 column, a hash-verified adopt-AOT path with a manifest, two-leg interleaved measurement, and the four-column table. Red-first: a planted hash mismatch refuses by name, a planted self-contained JIT binary is refused, and an unadopted foreign AOT binary is never timed. | G, a seat in a batch | lands before S2 |
 | **S1** | The 1.26 publish lands. The i9 converts and publishes 34 AOT images, plus a second RefLower and a second Iface publish per leg (4 more), and ships them. | the i9 | manifests complete |
 | **S2** | G-LAPTOP converts both legs, checks the source hashes against the i9's manifest, and builds Go x2, JIT and R2R. If ILC moved, it re-licenses on one row. | G-LAPTOP | hashes equal; licence holds |
 | **S3** | Verify all 17 programs x 8 binaries. | G-LAPTOP | identical output |
@@ -173,14 +196,14 @@ the same rule.
 6. **An AOT build failure on the i9** (ILC or link) is a deployment defect with the same treatment as 5: that cell
    reads "n/a" with its reason. It is never filled from another build.
 
-## 9. Open questions for COORD
+## 9. Rulings (COORD, 2026-10-23)
 
-- **O1.** "P1's ReadyToRun" is read here as the converter template's default publish (section 2). If P1's arm is a
-  different recipe (composite R2R, framework-dependent R2R, a pack-time R2R of the packages), name it and section 2
-  changes.
-- **O2.** The 1.24.13.7 comparand is re-measured in the same session (section 1). That doubles the i9's AOT work
-  (34 publishes instead of 17, plus the 4 PERF-REVIEW repeats). The alternative is a 1.26-only AOT leg compared with no same-session 1.24.13.7 AOT
-  figure, which the runbook does not admit as evidence.
-- **O3.** The published table gains a fourth column (ReadyToRun), and the History section gains this session's
-  1.24.13.7 table.
-- **O4.** The PERF-REVIEW items' source findings (section 6).
+- **O1: the R2R arm is the TEMPLATE-DEFAULT publish**, with its exact properties named in section 2. If P1's
+  consumer-side ReadyToRun DATA recommends a different recipe (composite or framework-dependent), that recipe
+  becomes a fifth, diagnostic arm, and the template question becomes a separate ruling.
+- **O2: YES.** The i9's AOT publishes double for the same-session 1.24.13.7 comparand: 34 publishes instead of 17,
+  plus the 4 PERF-REVIEW repeats.
+- **O3: YES, both.** The published table gains a fourth column (ReadyToRun), and History gains this session's
+  1.24.13.7 leg.
+- **O4: the source findings are recorded** in the BOARD row of 2026-10-23 (section 6 cites it). IfaceCall creep and
+  Channel join the review rows.
