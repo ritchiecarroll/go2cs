@@ -6,10 +6,10 @@ using math;
 
 partial class main_package {
 
-internal static slice<uint64> edges = new uint64[]{
+[GoLazy] partial class lazyᴛedges { internal static slice<uint64> edges = new uint64[]{
     0, 1, 2, 9223372036854775807UL, (uint64)1 << 63, 9223372036854775809UL, 18446744073709551614UL, 18446744073709551615UL,
     (uint64)(4294967296L - 1), 18446744069414584320UL, 0x5555555555555555UL, 0xAAAAAAAAAAAAAAAAUL
-}.slice();
+}.slice(); }
 
 internal static void Main() {
     foreach (var (_, x) in edges) {
