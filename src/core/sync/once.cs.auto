@@ -24,14 +24,14 @@ partial class sync_package {
 // the return from any call of once.Do(f).
 //
 // [the Go memory model]: https://go.dev/ref/mem
-[GoType] [StructLayout(LayoutKind.Explicit, Size = 12)] partial struct Once {
+[StructLayout(LayoutKind.Explicit, Size = 12)] partial struct Once {
     [FieldOffset(0)] internal readonly noCopy _;
     // done indicates whether the action has been performed.
     // It is first in the struct because it is used in the hot path.
     // The hot path is inlined at every call site.
     // Placing done first allows more compact instructions on some architectures (amd64/386),
     // and fewer instructions (to calculate offset) on other architectures.
-    [FieldOffset(0)] internal atomic.Uint32 done;
+    [FieldOffset(0)] internal atomic.Bool done;
     [FieldOffset(4)] internal Mutex m;
 }
 
@@ -56,11 +56,9 @@ partial class sync_package {
 // If f panics, Do considers it to have returned; future calls of Do return
 // without calling f.
 public static void Do(this ж<Once> Ꮡo, Action f) {
-    ref var o = ref Ꮡo.DerefOrNull();
-
     // Note: Here is an incorrect implementation of Do:
     //
-    //	if o.done.CompareAndSwap(0, 1) {
+    //	if o.done.CompareAndSwap(false, true) {
     //		f()
     //	}
     //
@@ -71,7 +69,8 @@ public static void Do(this ж<Once> Ꮡo, Action f) {
     // waiting for the first's call to f to complete.
     // This is why the slow path falls back to a mutex, and why
     // the o.done.Store must be delayed until after f returns.
-    if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {
+
+    if (!Ꮡo.of(Once.Ꮡdone).Load()) {
         // Outlined slow-path to allow inlining of the fast-path.
         Ꮡo.doSlow(f);
     }
@@ -84,8 +83,8 @@ internal static void doSlow(this ж<Once> Ꮡo, Action f) {
 
         o.m.Lock();
         defer(Ꮡo.of(Once.Ꮡm).Unlock, ref ᒐ);
-        if (Ꮡo.of(Once.Ꮡdone).Load() == 0) {
-            defer(Ꮡo.of(Once.Ꮡdone).Store, (uint32)(1), ref ᒐ);
+        if (!Ꮡo.of(Once.Ꮡdone).Load()) {
+            defer(Ꮡo.of(Once.Ꮡdone).Store, (bool)true, ref ᒐ);
             f();
         }
     }

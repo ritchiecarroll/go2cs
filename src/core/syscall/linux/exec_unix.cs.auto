@@ -288,11 +288,7 @@ internal static partial void runtime_AfterExec();
 
 // execveLibc is non-nil on OS using libc syscall, set to execve in exec_libc.go; this
 // avoids a build dependency for other platforms.
-internal static Func<uintptr, uintptr, uintptr, Errno> execveLibc;
-
-internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveDarwin;
-
-internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveOpenBSD;
+internal static Func<ж<byte>, ж<ж<byte>>, ж<ж<byte>>, error> execveLibc;
 
 // Exec invokes the execve(2) system call.
 public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@string> envv) {
@@ -318,21 +314,12 @@ public static error /*err*/ Exec(@string argv0, slice<@string> argv, slice<@stri
     }
 
     error err1 = default!;
-    if (runtime.GOOS == "solaris"u8 || runtime.GOOS == "illumos"u8 || runtime.GOOS == "aix"u8){
-        // RawSyscall should never be used on Solaris, illumos, or AIX.
-        err1 = execveLibc(
-            (uintptr)argv0p,
-            (uintptr)@unsafe.Pointer.FromBox(Ꮡ(argvp, 0)),
-            (uintptr)@unsafe.Pointer.FromBox(Ꮡ(envvp, 0)));
-    } else 
-    if (runtime.GOOS == "darwin"u8 || runtime.GOOS == "ios"u8){
-        // Similarly on Darwin.
-        err1 = execveDarwin(argv0p, Ꮡ(argvp, 0), Ꮡ(envvp, 0));
-    } else 
-    if (runtime.GOOS == "openbsd"u8 && runtime.GOARCH != "mips64"u8){
-        // Similarly on OpenBSD.
-        err1 = execveOpenBSD(argv0p, Ꮡ(argvp, 0), Ꮡ(envvp, 0));
-    } else {
+    var exprᴛ1 = runtime.GOOS;
+    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "solaris"u8) {
+        // RawSyscall should never be used on these platforms.
+        err1 = execveLibc(argv0p, Ꮡ(argvp, 0), Ꮡ(envvp, 0));
+    }
+    else { /* default: */
         var ᴋ0 = argv0p;
         var ᴋ1 = @unsafe.Pointer.FromBox(Ꮡ(argvp, 0));
         var ᴋ2 = @unsafe.Pointer.FromBox(Ꮡ(envvp, 0));

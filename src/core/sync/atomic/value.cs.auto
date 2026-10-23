@@ -18,12 +18,12 @@ partial class atomic_package {
 // Once [Value.Store] has been called, a Value must not be copied.
 //
 // A Value must not be copied after first use.
-[GoType] partial struct Value {
+partial struct Value {
     internal any v;
 }
 
 // efaceWords is interface{} internal representation.
-[GoType] partial struct efaceWords {
+partial struct efaceWords {
     internal @unsafe.Pointer typ;
     internal @unsafe.Pointer data;
 }
@@ -41,8 +41,8 @@ public static any /*val*/ Load(this ж<Value> Ꮡv) {
     }
     @unsafe.Pointer data = (uintptr)LoadPointer(vp.of(efaceWords.Ꮡdata));
     var vlp = Ꮡval.Reinterpret<any, efaceWords>();
-    vlp.Value.typ = typ;
-    vlp.Value.data = data;
+    vlp.of(efaceWords.Ꮡtyp).Value = typ;
+    vlp.of(efaceWords.Ꮡdata).Value = data;
     return val;
 }
 
@@ -72,8 +72,8 @@ public static void Store(this ж<Value> Ꮡv, any valʗp) {
                 continue;
             }
             // Complete first store.
-            StorePointer(vp.of(efaceWords.Ꮡdata), (~vlp).data);
-            StorePointer(vp.of(efaceWords.Ꮡtyp), (~vlp).typ);
+            StorePointer(vp.of(efaceWords.Ꮡdata), vlp.of(efaceWords.Ꮡdata).Value);
+            StorePointer(vp.of(efaceWords.Ꮡtyp), vlp.of(efaceWords.Ꮡtyp).Value);
             runtime_procUnpin();
             return;
         }
@@ -84,10 +84,10 @@ public static void Store(this ж<Value> Ꮡv, any valʗp) {
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ != (~vlp).typ) {
+        if (typ != vlp.of(efaceWords.Ꮡtyp).Value) {
             throw panic("sync/atomic: store of inconsistently typed value into Value");
         }
-        StorePointer(vp.of(efaceWords.Ꮡdata), (~vlp).data);
+        StorePointer(vp.of(efaceWords.Ꮡdata), vlp.of(efaceWords.Ꮡdata).Value);
         return;
     }
 }
@@ -99,8 +99,8 @@ public static void Store(this ж<Value> Ꮡv, any valʗp) {
 // type. Swap of an inconsistent type panics, as does Swap(nil).
 public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
     ref var old = ref heap<any>(out var Ꮡold);
-
     ref var @new = ref heap(@newʗp, out var Ꮡnew);
+
     if (@new == default!) {
         throw panic("sync/atomic: swap of nil value into Value");
     }
@@ -111,16 +111,15 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
         if (typ == nil) {
             // Attempt to start first store.
             // Disable preemption so that other goroutines can use
-            // active spin wait to wait for completion; and so that
-            // GC does not see the fake type accidentally.
+            // active spin wait to wait for completion.
             runtime_procPin();
             if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, @unsafe.Pointer.FromPinnedBox(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
             // Complete first store.
-            StorePointer(vp.of(efaceWords.Ꮡdata), (~np).data);
-            StorePointer(vp.of(efaceWords.Ꮡtyp), (~np).typ);
+            StorePointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value);
+            StorePointer(vp.of(efaceWords.Ꮡtyp), np.of(efaceWords.Ꮡtyp).Value);
             runtime_procUnpin();
             return default!;
         }
@@ -131,11 +130,11 @@ public static any /*old*/ Swap(this ж<Value> Ꮡv, any @newʗp) {
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ != (~np).typ) {
+        if (typ != np.of(efaceWords.Ꮡtyp).Value) {
             throw panic("sync/atomic: swap of inconsistently typed value into Value");
         }
         var op = Ꮡold.Reinterpret<any, efaceWords>();
-        (op.Value.typ, op.Value.data) = (np.Value.typ, (uintptr)SwapPointer(vp.of(efaceWords.Ꮡdata), (~np).data));
+        (op.of(efaceWords.Ꮡtyp).Value, op.of(efaceWords.Ꮡdata).Value) = (np.of(efaceWords.Ꮡtyp).Value, (uintptr)SwapPointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value));
         return old;
     }
 }
@@ -155,7 +154,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
     var vp = Ꮡv.Reinterpret<Value, efaceWords>();
     var np = Ꮡnew.Reinterpret<any, efaceWords>();
     var op = Ꮡold.Reinterpret<any, efaceWords>();
-    if ((~op).typ != nil && (~np).typ != (~op).typ) {
+    if (op.of(efaceWords.Ꮡtyp).Value != nil && np.of(efaceWords.Ꮡtyp).Value != op.of(efaceWords.Ꮡtyp).Value) {
         throw panic("sync/atomic: compare and swap of inconsistently typed values");
     }
     while (ᐧ) {
@@ -166,16 +165,15 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
             }
             // Attempt to start first store.
             // Disable preemption so that other goroutines can use
-            // active spin wait to wait for completion; and so that
-            // GC does not see the fake type accidentally.
+            // active spin wait to wait for completion.
             runtime_procPin();
             if (!CompareAndSwapPointer(vp.of(efaceWords.Ꮡtyp), nil, @unsafe.Pointer.FromPinnedBox(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
             // Complete first store.
-            StorePointer(vp.of(efaceWords.Ꮡdata), (~np).data);
-            StorePointer(vp.of(efaceWords.Ꮡtyp), (~np).typ);
+            StorePointer(vp.of(efaceWords.Ꮡdata), np.of(efaceWords.Ꮡdata).Value);
+            StorePointer(vp.of(efaceWords.Ꮡtyp), np.of(efaceWords.Ꮡtyp).Value);
             runtime_procUnpin();
             return true;
         }
@@ -186,7 +184,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ != (~np).typ) {
+        if (typ != np.of(efaceWords.Ꮡtyp).Value) {
             throw panic("sync/atomic: compare and swap of inconsistently typed value into Value");
         }
         // Compare old and current via runtime equality check.
@@ -201,7 +199,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Value> Ꮡv, any oldʗp, a
         if (!AreEqual(i, old)) {
             return false;
         }
-        return CompareAndSwapPointer(vp.of(efaceWords.Ꮡdata), data, (~np).data);
+        return CompareAndSwapPointer(vp.of(efaceWords.Ꮡdata), data, np.of(efaceWords.Ꮡdata).Value);
     }
 }
 

@@ -26,20 +26,20 @@ partial class unique_package {
 // indirection).
 internal static T clone<T>(T valueʗp, ж<cloneSeq> Ꮡseq) {
     ref var seq = ref Ꮡseq.DerefOrNull();
-
     ref var value = ref heap(valueʗp, out var Ꮡvalue);
+
     foreach (var (_, offset) in seq.stringOffsets) {
         var ps = (ж<@string>)(uintptr)((@unsafe.Pointer)((uintptr)Ꮡvalue + offset));
         ps.Value = stringslite.Clone(ps.Value);
     }
-    return value;
+    return abi.EscapeToResultNonString(value);
 }
 
 // singleStringClone describes how to clone a single string.
 internal static cloneSeq singleStringClone = new cloneSeq(stringOffsets: new uintptr[]{0}.slice());
 
 // cloneSeq describes how to clone a value of a particular type.
-[GoType] partial struct cloneSeq {
+partial struct cloneSeq {
     internal slice<uintptr> stringOffsets;
 }
 
@@ -61,7 +61,6 @@ internal static cloneSeq makeCloneSeq(ж<abi.Type> Ꮡtyp) {
     else if (exprᴛ1 == abi.Array) {
         buildArrayCloneSeq(Ꮡtyp, Ꮡseq, 0);
     }
-
     return seq;
 }
 
@@ -70,7 +69,7 @@ internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡse
     ref var seq = ref Ꮡseq.DerefOrNull();
 
     var styp = Ꮡtyp.StructType();
-    foreach (var (i, _) in (~styp).Fields) {
+    foreach (var i in range((~styp).Fields)) {
         var f = Ꮡ((~styp).Fields, i);
         var exprᴛ1 = (~f).Typ.Kind();
         if (exprᴛ1 == abi.ΔString) {
@@ -82,7 +81,6 @@ internal static void buildStructCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡse
         else if (exprᴛ1 == abi.Array) {
             buildArrayCloneSeq((~f).Typ, Ꮡseq, baseOffset + (~f).Offset);
         }
-
     }
 }
 
@@ -104,7 +102,6 @@ internal static void buildArrayCloneSeq(ж<abi.Type> Ꮡtyp, ж<cloneSeq> Ꮡseq
         else if (exprᴛ1 == abi.Array) {
             buildArrayCloneSeq(etyp, Ꮡseq, offset);
         }
-
         offset += etyp.Size();
         var align = (uintptr)etyp.FieldAlign();
         offset = (uintptr)((offset + align - 1) & ~(align - 1));

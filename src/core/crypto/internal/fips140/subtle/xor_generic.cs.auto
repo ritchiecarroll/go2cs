@@ -7,7 +7,7 @@
 // Copyright 2013 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build (!amd64 && !arm64 && !loong64 && !ppc64 && !ppc64le) || purego
+//go:build (!amd64 && !arm64 && !loong64 && !ppc64 && !ppc64le && !riscv64) || purego
 namespace go.crypto.@internal.fips140;
 
 using runtime = runtime_package;
@@ -28,15 +28,16 @@ internal static void xorBytes(ж<byte> Ꮡdstb, ж<byte> Ꮡxb, ж<byte> Ꮡyb, 
     var dst = @unsafe.Slice(Ꮡdstb, n);
     var x = @unsafe.Slice(Ꮡxb, n);
     var y = @unsafe.Slice(Ꮡyb, n);
+
     if (supportsUnaligned || aligned(Ꮡdstb, Ꮡxb, Ꮡyb)) {
         xorLoop(words(dst), words(x), words(y));
         if ((uintptr)n % wordSize == 0) {
             return;
         }
         nint done = (nint)(n & ~(nint)(nint)(wordSize - 1));
-        dst = dst[(int)(done)..];
-        x = x[(int)(done)..];
-        y = y[(int)(done)..];
+        dst = dst.slice(done);
+        x = x.slice(done);
+        y = y.slice(done);
     }
     xorLoop(dst, x, y);
 }
@@ -61,9 +62,9 @@ internal static slice<uintptr> words(slice<byte> x) {
 internal static void xorLoop<T>(slice<T> dst, slice<T> x, slice<T> y)
     where T : /* byte | uintptr */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    x = x[..(int)(len(dst))]; // remove bounds check in loop
-    y = y[..(int)(len(dst))]; // remove bounds check in loop
-    foreach (var (i, _) in dst) {
+    x = x.slice(0, len(dst)); // remove bounds check in loop
+    y = y.slice(0, len(dst)); // remove bounds check in loop
+    foreach (var i in range(dst)) {
         dst[i] = (T)(x[i] ^ y[i]);
     }
 }

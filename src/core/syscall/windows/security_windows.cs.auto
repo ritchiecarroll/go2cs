@@ -48,7 +48,7 @@ public static (@string, error) TranslateAccountName(@string username, uint32 fro
         var b = new slice<uint16>((nint)(n));
         e = TranslateName(u, from, to, Ꮡ(b, 0), Ꮡn);
         if (e == default!) {
-            return (UTF16ToString(b[..(int)(n)]), default!);
+            return (UTF16ToString(b.slice(0, (nint)(n))), default!);
         }
         if (!AreEqual(e, ERROR_INSUFFICIENT_BUFFER)) {
             return ("", e);
@@ -59,12 +59,13 @@ public static (@string, error) TranslateAccountName(@string username, uint32 fro
     }
 }
 
+// do not reorder
 public static UntypedInt NetSetupUnknownStatus => iota;
 public static UntypedInt NetSetupUnjoined => 1;
 public static UntypedInt NetSetupWorkgroupName => 2;
 public static UntypedInt NetSetupDomainName => 3;
 
-[GoType] partial struct UserInfo10 {
+partial struct UserInfo10 {
     public ж<uint16> Name;
     public ж<uint16> Comment;
     public ж<uint16> UsrComment;
@@ -74,6 +75,8 @@ public static UntypedInt NetSetupDomainName => 3;
 //sys	NetUserGetInfo(serverName *uint16, userName *uint16, level uint32, buf **byte) (neterr error) = netapi32.NetUserGetInfo
 //sys	NetGetJoinInformation(server *uint16, name **uint16, bufType *uint32) (neterr error) = netapi32.NetGetJoinInformation
 //sys	NetApiBufferFree(buf *byte) (neterr error) = netapi32.NetApiBufferFree
+
+// do not reorder
 public static UntypedInt SidTypeUser => /* 1 + iota */ 1;
 public static UntypedInt SidTypeGroup => 2;
 public static UntypedInt SidTypeDomain => 3;
@@ -94,7 +97,7 @@ public static UntypedInt SidTypeLabel => 10;
 
 // The security identifier (SID) structure is a variable-length
 // structure used to uniquely identify users or groups.
-[GoType] partial struct SID {
+partial struct SID {
 }
 
 // StringToSid converts a string-format security identifier
@@ -227,6 +230,7 @@ public static (@string account, @string domain, uint32 accType, error err) Looku
     }
 }
 
+// do not reorder
 public static UntypedInt TOKEN_ASSIGN_PRIMARY => /* 1 << iota */ 1;
 public static UntypedInt TOKEN_DUPLICATE => 2;
 public static UntypedInt TOKEN_IMPERSONATE => 4;
@@ -236,6 +240,7 @@ public static UntypedInt TOKEN_ADJUST_PRIVILEGES => 32;
 public static UntypedInt TOKEN_ADJUST_GROUPS => 64;
 public static UntypedInt TOKEN_ADJUST_DEFAULT => 128;
 public static UntypedInt TOKEN_ADJUST_SESSIONID => 256;
+
 public static UntypedInt TOKEN_ALL_ACCESS => /* STANDARD_RIGHTS_REQUIRED |
 	TOKEN_ASSIGN_PRIMARY |
 	TOKEN_DUPLICATE |
@@ -253,6 +258,7 @@ public static UntypedInt TOKEN_WRITE => /* STANDARD_RIGHTS_WRITE |
 	TOKEN_ADJUST_DEFAULT */ 131296;
 public static UntypedInt TOKEN_EXECUTE => /* STANDARD_RIGHTS_EXECUTE */ 131072;
 
+// do not reorder
 public static UntypedInt TokenUser => /* 1 + iota */ 1;
 public static UntypedInt TokenGroups => 2;
 public static UntypedInt TokenPrivileges => 3;
@@ -283,24 +289,31 @@ public static UntypedInt TokenMandatoryPolicy => 27;
 public static UntypedInt TokenLogonSid => 28;
 public static UntypedInt MaxTokenInfoClass => 29;
 
-[GoType] partial struct SIDAndAttributes {
+partial struct SIDAndAttributes {
     public ж<SID> Sid;
     public uint32 Attributes;
 }
 
-[GoType] partial struct Tokenuser {
+partial struct Tokenuser {
     public SIDAndAttributes User;
 }
 
-[GoType] partial struct Tokenprimarygroup {
+partial struct Tokenprimarygroup {
     public ж<SID> PrimaryGroup;
 }
-
-[GoType("num:uintptr")] partial struct Token;
 
 //sys	OpenProcessToken(h Handle, access uint32, token *Token) (err error) = advapi32.OpenProcessToken
 //sys	GetTokenInformation(t Token, infoClass uint32, info *byte, infoLen uint32, returnedLen *uint32) (err error) = advapi32.GetTokenInformation
 //sys	GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) = userenv.GetUserProfileDirectoryW
+
+// An access token contains the security information for a logon session.
+// The system creates an access token when a user logs on, and every
+// process executed on behalf of the user has a copy of the token.
+// The token identifies the user, the user's groups, and the user's
+// privileges. The system uses the token to control access to securable
+// objects and to control the ability of the user to perform various
+// system-related operations on the local computer.
+partial struct Token /*num:uintptr*/;
 
 // OpenCurrentProcessToken opens the access token
 // associated with current process.

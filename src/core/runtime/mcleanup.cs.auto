@@ -10,8 +10,15 @@
 namespace go;
 
 using abi = @internal.abi_package;
+using cpu = @internal.cpu_package;
+using goarch = @internal.goarch_package;
+using atomic = @internal.runtime.atomic_package;
+using Δmath = @internal.runtime.math_package;
+using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
+using System.Runtime.CompilerServices;
 
 partial class runtime_package {
 
@@ -72,23 +79,34 @@ partial class runtime_package {
 // mentions it. To ensure a cleanup does not get called prematurely,
 // pass the object to the [KeepAlive] function after the last point
 // where the object must remain reachable.
-public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp) {
+//
+//go:nocheckptr
+public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanupʗp, S argʗp) {
     ref var ptr = ref Ꮡptr.DerefOrNull();
-
+    ref var cleanup = ref heap(cleanupʗp, out var Ꮡcleanup);
     ref var arg = ref heap(argʗp, out var Ꮡarg);
-    // Explicitly force ptr to escape to the heap.
+
+    // This is marked nocheckptr because checkptr doesn't understand the
+    // pointer manipulation done when looking at closure pointers.
+    // Similar code in mbitmap.go works because the functions are
+    // go:nosplit, which implies go:nocheckptr (CL 202158).
+
+    // Explicitly force ptr and cleanup to escape to the heap.
     Ꮡptr = abi.Escape(Ꮡptr); ptr = ref Ꮡptr.DerefOrNull();
+    cleanup = abi.Escape((cleanup).OrTypedNilFunc());
+
     // The pointer to the object must be valid.
     if (Ꮡptr == nil) {
         throw panic("runtime.AddCleanup: ptr is nil");
     }
     var usptr = (uintptr)Ꮡptr;
+
     // Check that arg is not equal to ptr.
-    {
-        var kind = abi.TypeOf(arg).Kind(); if (kind == abi.Pointer || kind == abi.UnsafePointer) {
-            if (@unsafe.Pointer.FromPinnedBox(Ꮡptr) == (Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg))).Value) {
-                throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
-            }
+    var argType = abi.TypeOf((arg).OrTypedNilOf());
+    var kind = argType.Kind();
+    if (kind == abi.Pointer || kind == abi.UnsafePointer) {
+        if (@unsafe.Pointer.FromPinnedBox(Ꮡptr) == (Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg))).Value) {
+            throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
         }
     }
     if (inUserArenaChunk(usptr)) {
@@ -101,15 +119,29 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
         // Return a noop cleanup.
         return new Cleanup(nil);
     }
-    ref var fn = ref heap<Action>(out var Ꮡfn);
-    fn = () => {
-        cleanup(Ꮡarg.ValueSlot);
-    };
-    // Closure must escape.
-    var fv = ~Ꮡfn.Reinterpret<Action, ж<funcval>>();
-    fv = abi.Escape(fv);
+
+    // Create new storage for the argument.
+    ж<S> argv = default!;
+    {
+        var size = @unsafe.Sizeof(arg); if (size < maxTinySize && (~argType).PtrBytes == 0){
+            // Side-step the tiny allocator to avoid liveness issues, since this box
+            // will be treated like a root by the GC. We model the box as an array of
+            // uintptrs to guarantee maximum allocator alignment.
+            //
+            // TODO(mknyszek): Consider just making space in cleanupFn for this. The
+            // unfortunate part of this is it would grow specialCleanup by 16 bytes, so
+            // while there wouldn't be an allocation, *every* cleanup would take the
+            // memory overhead hit.
+            var box = Ꮡ(new array<uintptr>(2));
+            argv = box.Reinterpret<array<uintptr>, S>();
+        } else {
+            argv = @new<S>();
+        }
+    }
+    argv.ValueSlot = arg;
+
     // Find the containing object.
-    var (@base, _, _) = findObject(usptr, 0, 0);
+    var (@base, span, _) = findObject(usptr, 0, 0);
     if (@base == 0) {
         if (isGoPointerWithoutSpan(@unsafe.Pointer.FromPinnedBox(Ꮡptr))) {
             // Cleanup is a noop.
@@ -117,17 +149,81 @@ public static Cleanup AddCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗp
         }
         throw panic("runtime.AddCleanup: ptr not in allocated block");
     }
-    // Ensure we have a finalizer processing goroutine running.
-    createfing();
-    var id = addCleanup(@unsafe.Pointer.FromPinnedBox(Ꮡptr), fv);
+
+    // Check that arg is not within ptr.
+    if (kind == abi.Pointer || kind == abi.UnsafePointer) {
+        var argPtr = (uintptr)(~Ꮡ(new @unsafe.Pointer((uintptr)Ꮡarg)));
+        if (argPtr >= @base && argPtr < @base + (~span).elemsize) {
+            // It's possible that both pointers are separate
+            // parts of a tiny allocation, which is OK.
+            // We side-stepped the tiny allocator above for
+            // the allocation for the cleanup,
+            // but the argument itself can still overlap
+            // with the value to which the cleanup is attached.
+            if ((~span).spanclass != tinySpanClass) {
+                throw panic("runtime.AddCleanup: ptr is within arg, cleanup will never run");
+            }
+        }
+    }
+
+    // Check that the cleanup function doesn't close over the pointer.
+    @unsafe.Pointer cleanupFV = @unsafe.Pointer.FromPinnedBox(~Ꮡcleanup.Reinterpret<Action<S>, ж<funcval>>());
+    var (cBase, cSpan, _) = findObject((uintptr)cleanupFV, 0, 0);
+    if (cBase != 0) {
+        var tp = cSpan.typePointersOfUnchecked(cBase);
+        while (ᐧ) {
+            uintptr addr = default!;
+            {
+                (tp, addr) = tp.next(cBase + (~cSpan).elemsize); if (addr == 0) {
+                    break;
+                }
+            }
+            var ptrΔ1 = ~(ж<uintptr>)(uintptr)((@unsafe.Pointer)addr);
+            if (ptrΔ1 >= @base && ptrΔ1 < @base + (~span).elemsize) {
+                throw panic("runtime.AddCleanup: cleanup function closes over ptr, cleanup will never run");
+            }
+        }
+    }
+
+    // Create another G if necessary.
+    if (ᏑgcCleanups.needG()) {
+        ᏑgcCleanups.createGs();
+    }
+
+    var id = addCleanup(@unsafe.Pointer.FromPinnedBox(Ꮡptr), new cleanupFn(
+        // Instantiate a caller function to call the cleanup, that is cleanup(*argv).
+        //
+        // TODO(mknyszek): This allocates because the generic dictionary argument
+        // gets closed over, but callCleanup doesn't even use the dictionary argument,
+        // so theoretically that could be removed, eliminating an allocation.
+        call: callCleanup<S>,
+        fn: ~Ꮡcleanup.Reinterpret<Action<S>, ж<funcval>>(),
+        arg: @unsafe.Pointer.FromPinnedBox(argv)
+    ));
+    if (debug.checkfinalizers != 0) {
+        var cleanupFn = ~Ꮡcleanup.Reinterpret<Action<S>, ж<funcval>>();
+        setCleanupContext(@unsafe.Pointer.FromPinnedBox(Ꮡptr), abi.TypeFor<T>(), sys.GetCallerPC(), (~cleanupFn).fn, id);
+    }
     return new Cleanup(
         id: id,
         ptr: usptr
     );
 }
 
+// callCleanup is a helper for calling cleanups in a polymorphic way.
+//
+// In practice, all it does is call fn(*arg). arg must be a *T.
+//
+//go:noinline
+internal static partial void callCleanup<T>(ж<funcval> Ꮡfn, @unsafe.Pointer arg) {
+    ref var fn = ref Ꮡfn.DerefOrNull();
+
+    var cleanup = (Ꮡ(fn).Reinterpret<ж<funcval>, Action<T>>()).ValueSlot;
+    cleanup(~(ж<T>)(uintptr)(arg));
+}
+
 // Cleanup is a handle to a cleanup call for a specific object.
-[GoType] partial struct Cleanup {
+partial struct Cleanup {
     // id is the unique identifier for the cleanup within the arena.
     internal uint64 id;
     // ptr contains the pointer to the object.
@@ -143,8 +239,9 @@ public static void Stop(this Cleanup c) {
         // id is set to zero when the cleanup is a noop.
         return;
     }
+
     // The following block removes the Special record of type cleanup for the object c.ptr.
-    var span = spanOfHeap((uintptr)(@unsafe.Pointer)c.ptr);
+    var span = spanOfHeap(c.ptr);
     if (span == nil) {
         return;
     }
@@ -153,9 +250,12 @@ public static void Stop(this Cleanup c) {
     // to synchronize with it. And it's just much safer.
     var mp = acquirem();
     span.ensureSwept();
-    var offset = (uintptr)(@unsafe.Pointer)c.ptr - span.@base();
+
+    var offset = c.ptr - span.@base();
+
     ж<special> found = default!;
     @lock(span.of(mspan.Ꮡspeciallock));
+
     var (iter, exists) = span.specialFindSplicePoint(offset, _KindSpecialCleanup);
     if (exists) {
         while (ᐧ) {
@@ -164,13 +264,13 @@ public static void Stop(this Cleanup c) {
                 // Reached the end of the linked list. Stop searching at this point.
                 break;
             }
-            if (offset == (uintptr)(~s).offset && _KindSpecialCleanup == (~s).kind && (s.Reinterpret<special, specialCleanup>()).Value.id == c.id) {
+            if (offset == (~s).offset && _KindSpecialCleanup == (~s).kind && (s.Reinterpret<special, specialCleanup>()).Value.id == c.id) {
                 // The special is a cleanup and contains a matching cleanup id.
                 iter.ValueSlot = s.Value.next;
                 found = s;
                 break;
             }
-            if (offset < (uintptr)(~s).offset || (offset == (uintptr)(~s).offset && _KindSpecialCleanup < (~s).kind)) {
+            if (offset < (~s).offset || (offset == (~s).offset && _KindSpecialCleanup < (~s).kind)) {
                 // The special is outside the region specified for that kind of
                 // special. The specials are sorted by kind.
                 break;
@@ -184,12 +284,579 @@ public static void Stop(this Cleanup c) {
     }
     unlock(span.of(mspan.Ꮡspeciallock));
     releasem(ref (mp).DerefOrNull());
+
     if (found == nil) {
         return;
     }
     @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
     Ꮡmheap_.of(mheap.ᏑspecialCleanupAlloc).free(@unsafe.Pointer.FromPinnedBox(found));
     unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
+
+    if (debug.checkfinalizers != 0) {
+        clearCleanupContext(c.ptr, c.id);
+    }
+}
+
+internal static UntypedInt cleanupBlockSize => 512;
+
+// cleanupBlock is an block of cleanups to be executed.
+//
+// cleanupBlock is allocated from non-GC'd memory, so any heap pointers
+// must be specially handled. The GC and cleanup queue currently assume
+// that the cleanup queue does not grow during marking (but it can shrink).
+[GoValueClone("cleanups")] partial struct cleanupBlock {
+    /*embed*/ internal cleanupBlockHeader cleanupBlockHeader;
+    internal array<cleanupFn> cleanups = new((uintptr)((uintptr)cleanupBlockSize - /* unsafe.Sizeof(cleanupBlockHeader{}) */ (uintptr)32) / /* unsafe.Sizeof(cleanupFn{}) */ (uintptr)24);
+}
+
+internal static ж<array<uint8>> ᏑcleanupFnPtrMask = new StandardBox<array<uint8>>(new uint8[]{0b111}.array());
+internal static ref array<uint8> cleanupFnPtrMask => ref ᏑcleanupFnPtrMask.Value;
+
+// cleanupFn represents a cleanup function with it's argument, yet to be called.
+partial struct cleanupFn {
+    // call is an adapter function that understands how to safely call fn(*arg).
+    internal Action<ж<funcval>, @unsafe.Pointer> call;
+    internal ж<funcval> fn;    // cleanup function passed to AddCleanup.
+    internal @unsafe.Pointer arg; // pointer to argument to pass to cleanup function.
+}
+
+internal static ж<array<byte>> ᏑcleanupBlockPtrMask = new StandardBox<array<byte>>(new array<byte>(8));
+internal static ref array<byte> cleanupBlockPtrMask => ref ᏑcleanupBlockPtrMask.Value;
+
+partial struct cleanupBlockHeader {
+    internal sys.NotInHeap _;
+    /*embed*/ internal lfnode lfnode;
+    internal ж<cleanupBlock> alllink;
+    // n is sometimes accessed atomically.
+    //
+    // The invariant depends on what phase the garbage collector is in.
+    // During the sweep phase (gcphase == _GCoff), each block has exactly
+    // one owner, so it's always safe to update this without atomics.
+    // But if this *could* be updated during the mark phase, it must be
+    // updated atomically to synchronize with the garbage collector
+    // scanning the block as a root.
+    internal uint32 n;
+}
+
+// enqueue pushes a single cleanup function into the block.
+//
+// Returns if this enqueue call filled the block. This is odd,
+// but we want to flush full blocks eagerly to get cleanups
+// running as soon as possible.
+//
+// Must only be called if the GC is in the sweep phase (gcphase == _GCoff),
+// because it does not synchronize with the garbage collector.
+internal static bool enqueue(this ref cleanupBlock b, cleanupFn c) {
+    b.cleanups[b.n] = c;
+    b.n++;
+    return b.full();
+}
+
+// full returns true if the cleanup block is full.
+internal static bool full(this ref cleanupBlock b) {
+    return b.n == (uint32)len(b.cleanups);
+}
+
+// empty returns true if the cleanup block is empty.
+internal static bool empty(this ref cleanupBlock b) {
+    return b.n == 0;
+}
+
+// take moves as many cleanups as possible from b into a.
+internal static void take(this ref cleanupBlock a, ж<cleanupBlock> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var dst = a.cleanups.slice((nint)(a.n));
+    if ((uint32)len(dst) >= b.n){
+        // Take all.
+        copy(dst, b.cleanups[..]);
+        a.n += b.n;
+        b.n = 0;
+    } else {
+        // Partial take. Copy from the tail to avoid having
+        // to move more memory around.
+        copy(dst, b.cleanups.slice((nint)(b.n - (uint32)len(dst)), (nint)(b.n)));
+        a.n = (uint32)len(a.cleanups);
+        b.n -= (uint32)len(dst);
+    }
+}
+
+// cleanupQueue is a queue of ready-to-run cleanup functions.
+partial struct cleanupQueue {
+    // Stack of full cleanup blocks.
+    internal lfstack full;
+    internal atomic.Uint64 workUnits; // length of full; decrement before pop from full, increment after push to full
+    internal array<byte> _ = new((uintptr)((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(lfstack(0)) */ (uintptr)8) - /* unsafe.Sizeof(atomic.Uint64{}) */ (uintptr)8);
+    // Stack of free cleanup blocks.
+    internal lfstack free;
+    // flushed indicates whether all local cleanupBlocks have been
+    // flushed, and we're in a period of time where this condition is
+    // stable (after the last sweeper, before the next sweep phase
+    // begins).
+    internal atomic.Bool flushed; // Next to free because frequently accessed together.
+    internal array<byte> __ = new((uintptr)((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(lfstack(0)) */ (uintptr)8) - 1);
+    // Linked list of all cleanup blocks.
+    internal atomic.UnsafePointer all; // *cleanupBlock
+    internal array<byte> ___ = new((uintptr)cpu.CacheLinePadSize - /* unsafe.Sizeof(atomic.UnsafePointer{}) */ (uintptr)8);
+    // Goroutine block state.
+    internal mutex @lock;
+    // sleeping is the list of sleeping cleanup goroutines.
+    //
+    // Protected by lock.
+    internal gList sleeping;
+    // asleep is the number of cleanup goroutines sleeping.
+    //
+    // Read without lock, written only with the lock held.
+    // When the lock is held, the lock holder may only observe
+    // asleep.Load() == sleeping.n.
+    //
+    // To make reading without the lock safe as a signal to wake up
+    // a goroutine and handle new work, it must always be greater
+    // than or equal to sleeping.n. In the periods of time that it
+    // is strictly greater, it may cause spurious calls to wake.
+    internal atomic.Uint32 asleep;
+    // running indicates the number of cleanup goroutines actively
+    // executing user cleanup functions at any point in time.
+    //
+    // Read and written to without lock.
+    internal atomic.Uint32 running;
+    // ng is the number of cleanup goroutines.
+    //
+    // Read without lock, written only with lock held.
+    internal atomic.Uint32 ng;
+    // needg is the number of new cleanup goroutines that
+    // need to be created.
+    //
+    // Read without lock, written only with lock held.
+    internal atomic.Uint32 needg;
+// Cleanup queue stats.
+
+    // queued represents a monotonic count of queued cleanups. This is sharded across
+    // Ps via the field cleanupsQueued in each p, so reading just this value is insufficient.
+    // In practice, this value only includes the queued count of dead Ps.
+    //
+    // Writes are protected by STW.
+    internal uint64 queued;
+    // executed is a monotonic count of executed cleanups.
+    //
+    // Read and updated atomically.
+    internal atomic.Uint64 executed;
+}
+
+// addWork indicates that n units of parallelizable work have been added to the queue.
+internal static void addWork(this ж<cleanupQueue> Ꮡq, nint n) {
+    Ꮡq.of(cleanupQueue.ᏑworkUnits).Add((int64)n);
+}
+
+// tryTakeWork is an attempt to dequeue some work by a cleanup goroutine.
+// This might fail if there's no work to do.
+internal static bool tryTakeWork(this ж<cleanupQueue> Ꮡq) {
+    while (ᐧ) {
+        var wu = Ꮡq.of(cleanupQueue.ᏑworkUnits).Load();
+        if (wu == 0) {
+            return false;
+        }
+        // CAS to prevent us from going negative.
+        if (Ꮡq.of(cleanupQueue.ᏑworkUnits).CompareAndSwap(wu, wu - 1)) {
+            return true;
+        }
+    }
+}
+
+// enqueue queues a single cleanup for execution.
+//
+// Called by the sweeper, and only the sweeper.
+internal static void enqueue(this ж<cleanupQueue> Ꮡq, cleanupFn c) {
+    var mp = acquirem();
+    var pp = (~mp).p.ptr();
+    var b = pp.Value.cleanups;
+    if (b == nil) {
+        if (Ꮡq.of(cleanupQueue.Ꮡflushed).Load()) {
+            Ꮡq.of(cleanupQueue.Ꮡflushed).Store(false);
+        }
+        b = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfree).pop());
+        if (b == nil) {
+            b = (ж<cleanupBlock>)(uintptr)(persistentalloc(cleanupBlockSize, tagAlign, Ꮡmemstats.of(mstats.ᏑgcMiscSys)));
+            while (ᐧ) {
+                var next = (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡall).Load());
+                b.Value.alllink = next;
+                if (Ꮡq.of(cleanupQueue.Ꮡall).CompareAndSwap(@unsafe.Pointer.FromPinnedBox(next), @unsafe.Pointer.FromPinnedBox(b))) {
+                    break;
+                }
+            }
+        }
+        pp.Value.cleanups = b;
+    }
+    {
+        var full = b.enqueue(c); if (full) {
+            Ꮡq.of(cleanupQueue.Ꮡfull).push(b.of(cleanupBlock.Ꮡlfnode));
+            pp.Value.cleanups = default!;
+            Ꮡq.addWork(1);
+        }
+    }
+    pp.Value.cleanupsQueued++;
+    releasem(ref (mp).DerefOrNull());
+}
+
+// dequeue pops a block of cleanups from the queue. Blocks until one is available
+// and never returns nil.
+internal static ж<cleanupBlock> dequeue(this ж<cleanupQueue> Ꮡq) {
+    ref var q = ref Ꮡq.DerefOrNull();
+
+    while (ᐧ) {
+        if (Ꮡq.tryTakeWork()) {
+            // Guaranteed to be non-nil.
+            return (ж<cleanupBlock>)(uintptr)(Ꮡq.of(cleanupQueue.Ꮡfull).pop());
+        }
+        @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
+        // Increment asleep first. We may have to undo this if we abort the sleep.
+        // We must update asleep first because the scheduler might not try to wake
+        // us up when work comes in between the last check of workUnits and when we
+        // go to sleep. (It may see asleep as 0.) By incrementing it here, we guarantee
+        // after this point that if new work comes in, someone will try to grab the
+        // lock and wake us. However, this also means that if we back out, we may cause
+        // someone to spuriously grab the lock and try to wake us up, only to fail.
+        // This should be very rare because the window here is incredibly small: the
+        // window between now and when we decrement q.asleep below.
+        Ꮡq.of(cleanupQueue.Ꮡasleep).Add(1);
+
+        // Re-check workUnits under the lock and with asleep updated. If it's still zero,
+        // then no new work came in, and it's safe for us to go to sleep. If new work
+        // comes in after this point, then the scheduler will notice that we're sleeping
+        // and wake us up.
+        if (Ꮡq.of(cleanupQueue.ᏑworkUnits).Load() > 0) {
+            // Undo the q.asleep update and try to take work again.
+            Ꮡq.of(cleanupQueue.Ꮡasleep).Add(-1);
+            unlock(Ꮡq.of(cleanupQueue.Ꮡlock));
+            continue;
+        }
+        q.sleeping.push(getg());
+        goparkunlock(Ꮡq.of(cleanupQueue.Ꮡlock), waitReasonCleanupWait, traceBlockSystemGoroutine, 1);
+    }
+}
+
+// flush pushes all active cleanup blocks to the full list and wakes up cleanup
+// goroutines to handle them.
+//
+// Must only be called at a point when we can guarantee that no more cleanups
+// are being queued, such as after the final sweeper for the cycle is done
+// but before the next mark phase.
+internal static void flush(this ж<cleanupQueue> Ꮡq) {
+    var mp = acquirem();
+    nint flushed = 0;
+    nint emptied = 0;
+    nint missing = 0;
+
+    // Coalesce the partially-filled blocks to present a more accurate picture of demand.
+    // We use the number of coalesced blocks to process as a signal for demand to create
+    // new cleanup goroutines.
+    ж<cleanupBlock> cb = default!;
+    foreach (var (_, pp) in allp) {
+        if (pp == nil) {
+            // This function is reachable via mallocgc in the
+            // middle of procresize, when allp has been resized,
+            // but the new Ps not allocated yet.
+            missing++;
+            continue;
+        }
+        var b = pp.Value.cleanups;
+        if (b == nil) {
+            missing++;
+            continue;
+        }
+        pp.Value.cleanups = default!;
+        if (cb == nil) {
+            cb = b;
+            continue;
+        }
+        // N.B. After take, either cb is full, b is empty, or both.
+        cb.take(b);
+        if (cb.full()) {
+            Ꮡq.of(cleanupQueue.Ꮡfull).push(cb.of(cleanupBlock.Ꮡlfnode));
+            flushed++;
+            cb = b;
+            b = default!;
+        }
+        if (b != nil && b.empty()) {
+            Ꮡq.of(cleanupQueue.Ꮡfree).push(b.of(cleanupBlock.Ꮡlfnode));
+            emptied++;
+        }
+    }
+    if (cb != nil) {
+        Ꮡq.of(cleanupQueue.Ꮡfull).push(cb.of(cleanupBlock.Ꮡlfnode));
+        flushed++;
+    }
+    if (flushed != 0) {
+        Ꮡq.addWork(flushed);
+    }
+    if (flushed + emptied + missing != len(allp)) {
+        @throw("failed to correctly flush all P-owned cleanup blocks"u8);
+    }
+    Ꮡq.of(cleanupQueue.Ꮡflushed).Store(true);
+    releasem(ref (mp).DerefOrNull());
+}
+
+// needsWake returns true if cleanup goroutines may need to be awoken or created to handle cleanup load.
+internal static bool needsWake(this ж<cleanupQueue> Ꮡq) {
+    return Ꮡq.of(cleanupQueue.ᏑworkUnits).Load() > 0 && (Ꮡq.of(cleanupQueue.Ꮡasleep).Load() > 0 || Ꮡq.of(cleanupQueue.Ꮡng).Load() < maxCleanupGs());
+}
+
+// wake wakes up one or more goroutines to process the cleanup queue. If there aren't
+// enough sleeping goroutines to handle the demand, wake will arrange for new goroutines
+// to be created.
+internal static void wake(this ж<cleanupQueue> Ꮡq) {
+    ref var q = ref Ꮡq.DerefOrNull();
+
+    @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
+
+    // Figure out how many goroutines to wake, and how many extra goroutines to create.
+    // Wake one goroutine for each work unit.
+    uint32 wake = default!;
+    uint32 extra = default!;
+    var work = Ꮡq.of(cleanupQueue.ᏑworkUnits).Load();
+    var asleep = (uint64)Ꮡq.of(cleanupQueue.Ꮡasleep).Load();
+    if (work > asleep){
+        wake = (uint32)asleep;
+        if (work > (uint64)Δmath.MaxUint32){
+            // Protect against overflow.
+            extra = Δmath.MaxUint32;
+        } else {
+            extra = (uint32)(work - asleep);
+        }
+    } else {
+        wake = (uint32)work;
+        extra = 0;
+    }
+    if (extra != 0) {
+        // Signal that we should create new goroutines, one for each extra work unit,
+        // up to maxCleanupGs.
+        var newg = min(extra, maxCleanupGs() - Ꮡq.of(cleanupQueue.Ꮡng).Load());
+        if (newg > 0) {
+            Ꮡq.of(cleanupQueue.Ꮡneedg).Add((int32)newg);
+        }
+    }
+    if (wake == 0) {
+        // Nothing to do.
+        unlock(Ꮡq.of(cleanupQueue.Ꮡlock));
+        return;
+    }
+
+    // Take ownership of waking 'wake' goroutines.
+    //
+    // Nobody else will wake up these goroutines, so they're guaranteed
+    // to be sitting on q.sleeping, waiting for us to wake them.
+    Ꮡq.of(cleanupQueue.Ꮡasleep).Add(-(int32)wake);
+
+    // Collect them and schedule them.
+    ref var list = ref heap(new gList(), out var Ꮡlist);
+    foreach (var _ᴛ1 in range<uint32>(wake)) {
+        list.push(q.sleeping.pop());
+    }
+    unlock(Ꮡq.of(cleanupQueue.Ꮡlock));
+
+    injectglist(Ꮡlist);
+    return;
+}
+
+internal static bool needG(this ж<cleanupQueue> Ꮡq) {
+    var have = Ꮡq.of(cleanupQueue.Ꮡng).Load();
+    if (have >= maxCleanupGs()) {
+        return false;
+    }
+    if (have == 0) {
+        // Make sure we have at least one.
+        return true;
+    }
+    return Ꮡq.of(cleanupQueue.Ꮡneedg).Load() > 0;
+}
+
+internal static partial void createGs(this ж<cleanupQueue> Ꮡq) {
+    @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
+    var have = Ꮡq.of(cleanupQueue.Ꮡng).Load();
+    var need = min(Ꮡq.of(cleanupQueue.Ꮡneedg).Swap(0), maxCleanupGs() - have);
+    if (have == 0 && need == 0) {
+        // Make sure we have at least one.
+        need = 1;
+    }
+    if (need > 0) {
+        Ꮡq.of(cleanupQueue.Ꮡng).Add((int32)need);
+    }
+    unlock(Ꮡq.of(cleanupQueue.Ꮡlock));
+
+    foreach (var _ᴛ1 in range<uint32>(need)) {
+        goǃ(runCleanups);
+    }
+}
+
+internal static void beginRunningCleanups(this ж<cleanupQueue> Ꮡq) {
+    // Update runningCleanups and running atomically with respect
+    // to goroutine profiles by disabling preemption.
+    var mp = acquirem();
+    getg().of(g.ᏑrunningCleanups).Store(true);
+    Ꮡq.of(cleanupQueue.Ꮡrunning).Add(1);
+    releasem(ref (mp).DerefOrNull());
+}
+
+internal static void endRunningCleanups(this ж<cleanupQueue> Ꮡq) {
+    // Update runningCleanups and running atomically with respect
+    // to goroutine profiles by disabling preemption.
+    var mp = acquirem();
+    getg().of(g.ᏑrunningCleanups).Store(false);
+    Ꮡq.of(cleanupQueue.Ꮡrunning).Add(-1);
+    releasem(ref (mp).DerefOrNull());
+}
+
+internal static (uint64 queued, uint64 executed) readQueueStats(this ж<cleanupQueue> Ꮡq) {
+    uint64 queued = default!;
+    uint64 executed = default!;
+    ref var q = ref Ꮡq.DerefOrNull();
+
+    executed = Ꮡq.of(cleanupQueue.Ꮡexecuted).Load();
+    queued = q.queued;
+
+    // N.B. This is inconsistent, but that's intentional. It's just an estimate.
+    // Read this _after_ reading executed to decrease the chance that we observe
+    // an inconsistency in the statistics (executed > queued).
+    foreach (var (_, pp) in allp) {
+        queued += pp.Value.cleanupsQueued;
+    }
+    return (queued, executed);
+}
+
+internal static uint32 maxCleanupGs() {
+    // N.B. Left as a function to make changing the policy easier.
+    return (uint32)builtin.max(gomaxprocs / 4, 1);
+}
+
+// gcCleanups is the global cleanup queue.
+internal static ж<cleanupQueue> ᏑgcCleanups = new StandardBox<cleanupQueue>(new cleanupQueue());
+internal static ref cleanupQueue gcCleanups => ref ᏑgcCleanups.Value;
+
+// runCleanups is the entrypoint for all cleanup-running goroutines.
+internal static void runCleanups() {
+    while (ᐧ) {
+        var b = ᏑgcCleanups.dequeue();
+        if (raceenabled) {
+            // Approximately: adds a happens-before edge between the cleanup
+            // argument being mutated and the call to the cleanup below.
+            racefingo();
+        }
+
+        ᏑgcCleanups.beginRunningCleanups();
+        for (nint i = 0; i < (nint)(~b).n; i++) {
+            var c = (~b).cleanups[i];
+            b.Value.cleanups[i] = new cleanupFn(nil);
+
+            uintptr racectx = default!;
+            if (raceenabled) {
+                // Enter a new race context so the race detector can catch
+                // potential races between cleanups, even if they execute on
+                // the same goroutine.
+                //
+                // Synchronize on fn. This would fail to find races on the
+                // closed-over values in fn (suppose arg is passed to multiple
+                // AddCleanup calls) if arg was not unique, but it is.
+                racerelease((@unsafe.Pointer)c.arg);
+                racectx = raceEnterNewCtx();
+                raceacquire((@unsafe.Pointer)c.arg);
+            }
+
+            // Execute the next cleanup.
+            c.call(c.fn, c.arg);
+
+            if (raceenabled) {
+                // Restore the old context.
+                raceRestoreCtx(racectx);
+            }
+        }
+        ᏑgcCleanups.endRunningCleanups();
+        ᏑgcCleanups.of(cleanupQueue.Ꮡexecuted).Add((int64)(~b).n);
+
+        atomic.Store(b.of(cleanupBlock.Ꮡn), 0); // Synchronize with markroot. See comment in cleanupBlockHeader.
+        ᏑgcCleanups.of(cleanupQueue.Ꮡfree).push(b.of(cleanupBlock.Ꮡlfnode));
+    }
+}
+
+// blockUntilEmpty blocks until either the cleanup queue is emptied
+// and the cleanups have been executed, or the timeout is reached.
+// Returns true if the cleanup queue was emptied.
+// This is used by the sync and unique tests.
+internal static bool blockUntilEmpty(this ж<cleanupQueue> Ꮡq, int64 timeout) {
+    ref var q = ref Ꮡq.DerefOrNull();
+
+    var start = nanotime();
+    while (nanotime() - start < timeout) {
+        @lock(Ꮡq.of(cleanupQueue.Ꮡlock));
+        // The queue is empty when there's no work left to do *and* all the cleanup goroutines
+        // are asleep. If they're not asleep, they may be actively working on a block.
+        if (Ꮡq.of(cleanupQueue.Ꮡflushed).Load() && Ꮡq.of(cleanupQueue.Ꮡfull).empty() && (uint32)q.sleeping.size == Ꮡq.of(cleanupQueue.Ꮡng).Load()) {
+            unlock(Ꮡq.of(cleanupQueue.Ꮡlock));
+            return true;
+        }
+        unlock(Ꮡq.of(cleanupQueue.Ꮡlock));
+        Gosched();
+    }
+    return false;
+}
+
+//go:linkname unique_runtime_blockUntilEmptyCleanupQueue unique.runtime_blockUntilEmptyCleanupQueue
+public static bool unique_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
+    return ᏑgcCleanups.blockUntilEmpty(timeout);
+}
+
+//go:linkname sync_test_runtime_blockUntilEmptyCleanupQueue sync_test.runtime_blockUntilEmptyCleanupQueue
+public static bool sync_test_runtime_blockUntilEmptyCleanupQueue(int64 timeout) {
+    return ᏑgcCleanups.blockUntilEmpty(timeout);
+}
+
+// raceEnterNewCtx creates a new racectx and switches the current
+// goroutine to it. Returns the old racectx.
+//
+// Must be running on a user goroutine. nosplit to match other race
+// instrumentation.
+//
+//go:nosplit
+internal static uintptr raceEnterNewCtx() {
+    // We use the existing ctx as the spawn context, but gp.gopc
+    // as the spawn PC to make the error output a little nicer
+    // (pointing to AddCleanup, where the goroutines are created).
+    //
+    // We also need to carefully indicate to the race detector
+    // that the goroutine stack will only be accessed by the new
+    // race context, to avoid false positives on stack locations.
+    // We do this by marking the stack as free in the first context
+    // and then re-marking it as allocated in the second. Crucially,
+    // there must be (1) no race operations and (2) no stack changes
+    // in between. (1) is easy to avoid because we're in the runtime
+    // so there's no implicit race instrumentation. To avoid (2) we
+    // defensively become non-preemptible so the GC can't stop us,
+    // and rely on the fact that racemalloc, racefreem, and racectx
+    // are nosplit.
+    var mp = acquirem();
+    var gp = getg();
+    var ctx = getg().Value.racectx;
+    racefree((@unsafe.Pointer)(~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
+    getg().Value.racectx = racectxstart((~gp).gopc, ctx);
+    racemalloc((@unsafe.Pointer)(~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
+    releasem(ref (mp).DerefOrNull());
+    return ctx;
+}
+
+// raceRestoreCtx restores ctx on the goroutine. It is the inverse of
+// raceenternewctx and must be called with its result.
+//
+// Must be running on a user goroutine. nosplit to match other race
+// instrumentation.
+//
+//go:nosplit
+internal static void raceRestoreCtx(uintptr ctx) {
+    var mp = acquirem();
+    var gp = getg();
+    racefree((@unsafe.Pointer)(~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
+    racectxend((~getg()).racectx);
+    racemalloc((@unsafe.Pointer)(~gp).stack.lo, (~gp).stack.hi - (~gp).stack.lo);
+    getg().Value.racectx = ctx;
+    releasem(ref (mp).DerefOrNull());
 }
 
 } // end runtime_package
