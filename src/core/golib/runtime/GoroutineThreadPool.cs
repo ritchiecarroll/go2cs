@@ -71,13 +71,17 @@ internal static class GoroutineThreadPool
     {
         ExecutionContext? context = ExecutionContext.Capture();
 
-        // LIFO: the most recently idled worker is the warmest.
+        // LIFO: the most recently idled worker is the warmest. The count is given back only for a worker
+        // actually claimed: a worker that idled out left its entry here and gave its own count back as it
+        // retired, so decrementing for that entry too drove the count below zero and let the cap admit twice
+        // MaxIdle (G's review, 2026-10-23).
         while (s_idle.TryPop(out Worker? worker))
         {
-            Interlocked.Decrement(ref s_idleCount);
-
             if (worker.TryAssign(work, context))
+            {
+                Interlocked.Decrement(ref s_idleCount);
                 return;
+            }
         }
 
         Worker created = new();
@@ -104,7 +108,12 @@ internal static class GoroutineThreadPool
                 IsBackground = true
             };
 
-            thread.Start();
+            // UnsafeStart: the worker's own loop takes no ExecutionContext. Start would capture the context of
+            // whichever goroutine happened to need a new worker and keep it for the worker's whole life -- its
+            // AsyncLocals (pprof labels, the test host's current test) on every later body, and the context a
+            // flow-suppressed body would run under instead of an empty one. Each body gets its creator's context
+            // from Run (G's review, 2026-10-23).
+            thread.UnsafeStart();
         }
 
         // Claims an idle worker. Fails when the worker retired on its idle timeout in the meantime.

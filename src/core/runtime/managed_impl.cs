@@ -813,19 +813,29 @@ partial class runtime_package
     // readMetricsLocked threw while holding it and the next reader waited for ever. Lock and unlock
     // therefore run on one goroutine, which every Go caller does (each is a single function body).
     private static readonly SemaphoreSlim s_metricsSema = new(1, 1);
-    private static int s_metricsSemaHolder;
+    private static long s_metricsSemaHolder;
+
+    // The holder of worldsema or metricsSema is a GOROUTINE, keyed by its id. It was the managed thread id,
+    // exact while every goroutine had a thread of its own; goroutine threads are now reused (golib's
+    // GoroutineThreadPool), and a thread id would let the thread's NEXT goroutine match a holder that never
+    // released (G's review, 2026-10-23). A thread running no goroutine (a host's own) keys by its managed
+    // thread id, negated so the two spaces cannot meet; 0 is "not held".
+    private static long semaHolderKey() =>
+        Goroutine.Current is { } goroutine ? goroutine.Id : -(long)Environment.CurrentManagedThreadId;
 
     internal static void metricsLock()
     {
         s_metricsSema.Wait();
-        Volatile.Write(ref s_metricsSemaHolder, Environment.CurrentManagedThreadId);
+        Volatile.Write(ref s_metricsSemaHolder, semaHolderKey());
     }
 
     // Releases only what the calling goroutine still holds: after a panic released it, a later
     // unlock on the unwinding path is a no-op rather than a second release.
     internal static void metricsUnlock()
     {
-        if (Interlocked.CompareExchange(ref s_metricsSemaHolder, 0, Environment.CurrentManagedThreadId) == Environment.CurrentManagedThreadId)
+        long me = semaHolderKey();
+
+        if (Interlocked.CompareExchange(ref s_metricsSemaHolder, 0, me) == me)
             s_metricsSema.Release();
     }
 
@@ -853,7 +863,7 @@ partial class runtime_package
     // exception on the goroutine that holds worldsema (or metricsSema), the permit is released.
     // startTheWorld releases only by CAS on the recorded holder, so there is never a double release.
     // stopTheWorldGC/startTheWorldGC stay converted: gcsema around this pair.
-    private static int s_worldsemaHolder;
+    private static long s_worldsemaHolder;
 
     [ModuleInitializer]
     internal static void ᴛRegisterStoppedWorldRelease()
@@ -863,7 +873,7 @@ partial class runtime_package
 
     private static void releaseStoppedWorldOnPanic()
     {
-        int me = Environment.CurrentManagedThreadId;
+        long me = semaHolderKey();
 
         // Reverse acquisition order: a region that holds both took worldsema first (ReadMetricsSlow).
         if (Volatile.Read(ref s_metricsSemaHolder) == me && Interlocked.CompareExchange(ref s_metricsSemaHolder, 0, me) == me)
@@ -876,7 +886,7 @@ partial class runtime_package
     internal static worldStop stopTheWorld(stwReason reason)
     {
         semacquire(Ꮡworldsema);
-        Volatile.Write(ref s_worldsemaHolder, Environment.CurrentManagedThreadId);
+        Volatile.Write(ref s_worldsemaHolder, semaHolderKey());
 
         int64 start = nanotime();
         int64 finished = nanotime();
@@ -898,7 +908,7 @@ partial class runtime_package
         else
             StwPauses.TotalOther.record(total);
 
-        int me = Environment.CurrentManagedThreadId;
+        long me = semaHolderKey();
 
         if (Interlocked.CompareExchange(ref s_worldsemaHolder, 0, me) == me)
             semrelease1(Ꮡworldsema, true, 0);
@@ -5411,6 +5421,69 @@ partial class runtime_package
 
         // The event is not disposed: on a leak the parked goroutine still holds it.
         return (firstFailure, second.Wait(timeoutMs));
+    }
+
+    /// <summary>
+    /// worldsema's and metricsSema's holders across a REUSED thread (golib's GoroutineThreadPool): goroutine A
+    /// takes both and ends without releasing either -- the stale-holder shape -- and goroutine B, run until it
+    /// lands on A's thread, calls the releases a holder makes. Returns whether B landed on A's thread and whether
+    /// both locks were still A's afterwards, then releases what A still holds.
+    /// </summary>
+    public static (bool sameThread, bool worldsemaStillHeld, bool metricsSemaStillHeld) GoSemaHolderReuseProbe(int timeoutMs)
+    {
+        worldStop stw = default;
+        int threadA = 0;
+        long worldKey = 0, metricsKey = 0;
+
+        using (ManualResetEventSlim taken = new(false))
+        {
+            Goroutine.Start(() =>
+            {
+                stw = stopTheWorld(stwUnknown);
+                metricsLock();
+                worldKey = Volatile.Read(ref s_worldsemaHolder);
+                metricsKey = Volatile.Read(ref s_metricsSemaHolder);
+                threadA = Environment.CurrentManagedThreadId;
+                taken.Set();
+            });
+
+            if (!taken.Wait(timeoutMs))
+                return (false, false, false);
+        }
+
+        bool sameThread = false;
+
+        // A's worker goes back to the idle set after A's body; B is retried until it lands there.
+        for (int attempt = 0; attempt < 20 && !sameThread; attempt++)
+        {
+            using ManualResetEventSlim done = new(false);
+
+            Goroutine.Start(() =>
+            {
+                if (Environment.CurrentManagedThreadId == threadA)
+                {
+                    sameThread = true;
+                    startTheWorld(stw);
+                    metricsUnlock();
+                }
+
+                done.Set();
+            });
+
+            done.Wait(timeoutMs);
+        }
+
+        bool worldHeld = Volatile.Read(ref s_worldsemaHolder) == worldKey;
+        bool metricsHeld = Volatile.Read(ref s_metricsSemaHolder) == metricsKey;
+
+        // Release what A still holds, so no later caller parks on it.
+        if (Interlocked.CompareExchange(ref s_metricsSemaHolder, 0, metricsKey) == metricsKey)
+            s_metricsSema.Release();
+
+        if (Interlocked.CompareExchange(ref s_worldsemaHolder, 0, worldKey) == worldKey)
+            semrelease1(Ꮡworldsema, true, 0);
+
+        return (sameThread, worldHeld, metricsHeld);
     }
 
     /// <summary>

@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -197,6 +198,174 @@ public class GoroutinePoolTests
             Assert.Inconclusive("the second goroutine did not land on a reused thread; nothing to assert");
 
         Assert.AreEqual("creator-2", seenBySecond, "a goroutine on a reused thread saw the previous goroutine's AsyncLocal");
+    }
+
+    // ---- IDLE ACCOUNTING (G's review) ----
+
+    // A worker that idles out leaves its entry on the idle stack (it cannot remove itself) and gives its count
+    // back as it retires. The next start pops that entry and must not give the count back a second time:
+    // done twice, one idle-out burst of MaxIdle drove the count to -MaxIdle, and the cap then admitted 2 x MaxIdle.
+    [TestMethod]
+    public void IdleCount_StaysTrueAcrossAnIdleOutBurst()
+    {
+        const int burst = GoroutineThreadPool.MaxIdle + 16;
+
+        RunBurst(burst, whileRunning: null);
+        DrainIdleWorkers();
+        Assert.AreEqual(0, GoroutineThreadPool.IdleCount, "every idle worker retired, so none is counted");
+
+        int lowest = int.MaxValue;
+        RunBurst(burst, whileRunning: () => lowest = Math.Min(lowest, GoroutineThreadPool.IdleCount));
+        Assert.IsTrue(lowest >= 0, $"the idle count read {lowest} while a burst ran over retired workers' entries");
+
+        int idle = SettledIdleWorkers();
+        Assert.IsTrue(idle <= GoroutineThreadPool.MaxIdle, $"{idle} workers idle after a burst of {burst}; the cap is {GoroutineThreadPool.MaxIdle}");
+        Assert.AreEqual(idle, GoroutineThreadPool.IdleCount, "the idle count disagrees with the workers actually idle");
+    }
+
+    // Starts n goroutines that are all live at once, calls whileRunning while they are, then lets them finish.
+    private static void RunBurst(int n, Action? whileRunning)
+    {
+        using CountdownEvent started = new(n);
+        using CountdownEvent finished = new(n);
+        using ManualResetEventSlim release = new(false);
+
+        for (int i = 0; i < n; i++)
+        {
+            Goroutine.Start(() =>
+            {
+                started.Signal();
+                release.Wait();
+                finished.Signal();
+            });
+        }
+
+        Assert.IsTrue(started.Wait(30_000), "the burst never got all its goroutines running");
+        whileRunning?.Invoke();
+        release.Set();
+        Assert.IsTrue(finished.Wait(30_000), "the burst never finished");
+    }
+
+    // Waits for every idle worker to idle out, so the next goroutine gets a NEW worker.
+    private static void DrainIdleWorkers()
+    {
+        DateTime deadline = DateTime.UtcNow + GoroutineThreadPool.IdleTimeout + TimeSpan.FromSeconds(10);
+
+        while (LiveIdleWorkers() > 0 && DateTime.UtcNow < deadline)
+            Thread.Sleep(100);
+
+        Assert.AreEqual(0, LiveIdleWorkers(), "idle workers outlived the idle timeout");
+    }
+
+    // The idle workers once the burst's workers have all gone back (or retired at the cap).
+    private static int SettledIdleWorkers()
+    {
+        int last = -1;
+
+        for (int spin = 0; spin < 60; spin++)
+        {
+            Thread.Sleep(50);
+            int now = LiveIdleWorkers();
+
+            if (now == last)
+                return now;
+
+            last = now;
+        }
+
+        return last;
+    }
+
+    // The workers actually waiting for a body: the idle stack's entries whose state is Idle. A retired worker's
+    // entry stays on the stack and is not one.
+    private static int LiveIdleWorkers()
+    {
+        object stack = typeof(GoroutineThreadPool).GetField("s_idle", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+        int idle = 0;
+
+        foreach (object worker in (System.Collections.IEnumerable)stack)
+        {
+            if ((int)worker.GetType().GetField("m_state", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(worker)! == 0)
+                idle++;
+        }
+
+        return idle;
+    }
+
+    // ---- A WORKER'S OWN CONTEXT (G's review) ----
+
+    // A worker thread is created by whichever goroutine needed one; its loop must not run under that creator's
+    // ExecutionContext, or the creator's AsyncLocals (pprof labels, the test host's current test) ride the worker
+    // for its whole life.
+    [TestMethod]
+    public void NewWorker_DoesNotKeepItsCreatorsContext()
+    {
+        DrainIdleWorkers();
+
+        object? seenByLoop = "unset";
+        int target = 0;
+        using ManualResetEventSlim seen = new(false);
+
+        GoroutineThreadPool.AfterBodyForTest = () =>
+        {
+            if (Environment.CurrentManagedThreadId != Volatile.Read(ref target) || seen.IsSet)
+                return;
+
+            seenByLoop = s_flowed.Value;
+            seen.Set();
+        };
+
+        try
+        {
+            s_flowed.Value = "creator-1";
+            RunGoroutine(() => Volatile.Write(ref target, Environment.CurrentManagedThreadId));
+            Assert.IsTrue(seen.Wait(10_000), "the new worker never reached the post-body seam");
+        }
+        finally
+        {
+            GoroutineThreadPool.AfterBodyForTest = null;
+            s_flowed.Value = null;
+        }
+
+        Assert.IsNull(seenByLoop, "a worker's own loop runs under the context of the goroutine that created it");
+    }
+
+    // A creator that suppressed flow captures no context, so its goroutine runs under an EMPTY one -- not the
+    // context of whichever creator made the worker it lands on.
+    [TestMethod]
+    public void SuppressedFlow_RunsUnderAnEmptyContext()
+    {
+        DrainIdleWorkers();
+
+        string? seen = "unset";
+        bool reused = false;
+
+        try
+        {
+            s_flowed.Value = "creator-1";
+            RunGoroutine(static () => t_marker ??= new object());
+            WaitForIdleWorker();
+
+            s_flowed.Value = "creator-2";
+
+            using (ExecutionContext.SuppressFlow())
+            {
+                RunGoroutine(() =>
+                {
+                    reused = t_marker is not null;
+                    seen = s_flowed.Value;
+                });
+            }
+        }
+        finally
+        {
+            s_flowed.Value = null;
+        }
+
+        if (!reused)
+            Assert.Inconclusive("the suppressed goroutine did not land on the worker creator-1 made; nothing to assert");
+
+        Assert.IsNull(seen, "a goroutine started with flow suppressed saw the context of the creator that made its worker");
     }
 
     // ---- helpers ----
