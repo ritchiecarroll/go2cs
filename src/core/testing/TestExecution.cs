@@ -2307,27 +2307,36 @@ public sealed class TestExecution
             // so one that hangs still meets the deadline, even in a parallel subtest whose slot is already back.
             ChargeClock(+1);
 
-            // Go cancels the test's context immediately before the cleanup phase (testing.go:1429),
-            // and the ORDER is the contract, not an implementation detail: Context()'s documented
-            // purpose is to let a cleanup wait on resources that shut down on Done(). Cancel after
-            // RunCleanups and every such cleanup blocks until its own deadline.
-            CancelContext();
+            // The slot and the clock are given back in a finally: CancelContext runs the converted context
+            // package's cancel outside any catch, and if it threw, a queued parallel test would wait for the slot
+            // with its clock stopped and no deadline. (Start contains the exception itself.)
+            try
+            {
+                // Go cancels the test's context immediately before the cleanup phase (testing.go:1429),
+                // and the ORDER is the contract, not an implementation detail: Context()'s documented
+                // purpose is to let a cleanup wait on resources that shut down on Done(). Cancel after
+                // RunCleanups and every such cleanup blocks until its own deadline.
+                CancelContext();
 
-            RunCleanups();
-            timer.Stop();
+                RunCleanups();
+            }
+            finally
+            {
+                timer.Stop();
 
-            ChargeClock(-1);
+                ChargeClock(-1);
 
-            // Go runs a test's cleanups before it gives the count back when the test has no parallel subtests
-            // (tRunner's last defer runs runCleanup, then the first one's release), so under -parallel=1 no sibling
-            // starts while they run.
-            if (parallelChildren.Length == 0)
-                ReleaseParallelSlotOnce();
+                // Go runs a test's cleanups before it gives the count back when the test has no parallel subtests
+                // (tRunner's last defer runs runCleanup, then the first one's release), so under -parallel=1 no
+                // sibling starts while they run.
+                if (parallelChildren.Length == 0)
+                    ReleaseParallelSlotOnce();
 
-            // Go takes the lent count back only after the cleanups (tRunner: runCleanup, then waitParallel), so a
-            // sibling queued for the slot can run while they do.
-            if (lent)
-                lender!.TakeBackParallelSlot();
+                // Go takes the lent count back only after the cleanups (tRunner: runCleanup, then waitParallel), so
+                // a sibling queued for the slot can run while they do.
+                if (lent)
+                    lender!.TakeBackParallelSlot();
+            }
 
             // Go's "Output buffered logs" (testing.go:2015-2018): after the subtests, before the report,
             // this test's buffered partial Output line and each ancestor's become records.

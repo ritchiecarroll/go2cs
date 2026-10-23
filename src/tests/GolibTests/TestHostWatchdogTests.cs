@@ -439,6 +439,53 @@ public class TestHostWatchdogTests
             Assert.IsTrue(reporter.Events.Any(e => e.Test == name && e.Action == "pass"), name + " did not pass: " + Verdicts(reporter));
     }
 
+    // A leaf parallel test gives its slot back after its context is canceled and its cleanups run. The cancel is the
+    // converted context package's, called outside any catch; if it throws, the slot and the clock must still be given
+    // back, or under -parallel=1 the next parallel test waits for the slot forever with its clock stopped. The plant
+    // replaces the leaf's cancel with one that throws; the seam holds TestZ until the plant is in.
+    [TestMethod]
+    public void AThrowingContextCancelStillGivesALeafsSlotBack()
+    {
+        using ManualResetEventSlim planted = new(false);
+        bool zRan = false;
+
+        TestRegistry registry = new("watchdog", []);
+        registry.Add("TestLeaf", t =>
+        {
+            t.Value.Parallel();
+            typeof(TestExecution).GetField("m_cancelCtx", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+                .SetValue(t.Value.Execution, (Action)(() => throw new InvalidOperationException("planted context cancel failure")));
+            planted.Set();
+        }, "a_test.go", 1);
+        registry.Add("TestZ", t =>
+        {
+            t.Value.Parallel();
+            zRan = true;
+        }, "a_test.go", 2);
+
+        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "0");
+        TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
+
+        TestExecution.BeforeParallelSlotForGuard = execution =>
+        {
+            if (execution.Name == "TestZ")
+                planted.Wait(TimeSpan.FromSeconds(10));
+        };
+
+        try
+        {
+            Assert.IsTrue(Task.Run(runner.RunAll).Wait(TimeSpan.FromSeconds(30)), "RunAll did not return within 30 s: TestLeaf's slot was never given back");
+        }
+        finally
+        {
+            TestExecution.BeforeParallelSlotForGuard = null;
+        }
+
+        Assert.IsTrue(zRan, "TestZ never ran: " + Verdicts(reporter));
+        Assert.IsTrue(reporter.Events.Any(e => e.Test == "TestZ" && e.Action == "pass"), "TestZ did not pass: " + Verdicts(reporter));
+    }
+
     // Go's tRunner runs a sequential test's cleanups BEFORE it takes back the running count its parallel subtests used
     // (runCleanup, then waitParallel), so under -parallel=1 a parallel sibling can run while those cleanups do. Here
     // TestP/S's cleanup waits for TestZ, which the seam holds until that cleanup has started: taking the slot back
