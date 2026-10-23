@@ -28123,4 +28123,43 @@ section 8.
 
 — G (recorded 2026-10-23 at COORD's request)
 
+## 2026-10-23 — G finding: the three-target merge composed a platform-exclusive package's `.csproj` from stages that never converted it, so 4 linux- or darwin-only packages kept a seeded template and internal/syscall/windows kept a seeded reference split — FIXED in claude/g-platform-csproj-merge
+
+**What was wrong.** `mergePlatformProjectFile` (`src/go2cs/platformEmit.go`) took its BASE from the first target
+that HAD a package's `.csproj`, and read every holder's reference list as that target's import set. Every
+`-platform-stage` is a whole-tree copy of the seed, so a target that never converts a package still holds its
+project file, as the seed's bytes. Two effects:
+
+- **A stale template.** For a package only darwin or linux converts, the base was the windows stage's seeded copy,
+  so the converting target's template change was dropped. At the hop's fixed-point regen (1ffa0f708f) four packages
+  missed the interceptor opt-in their own stage emitted: `crypto/x509/internal/macos` and `internal/routebsd`
+  (darwin-only), `internal/runtime/syscall/linux` and `internal/cgrouptest` (linux-only).
+- **A seeded reference split.** A seed copy's list taken for an import set conditions references by a GOOS that
+  never builds the package. `internal/syscall/windows` (0 Go files on linux and darwin, by `go list` under the
+  converter's tags) kept a per-GOOS split that each merge re-rendered from its own seed.
+
+The windows-only packages kept the template line only because windows is first in `-platforms`. The run printed
+the symptom in its own note, "9 package(s) emitted project files that differ OUTSIDE their <ProjectReference>
+lists … windows's remainder was kept". The companion merge already had the fix: since the H5 README finding
+(2026-10-15) it takes companions from the first target that CONVERTED the package. The project-file branch did not.
+
+**How it was found.** The freeze fixed-point regen at 1ffa0f708f diffed a seeded three-target `-stdlib` reconvert
+against the committed corpus. In the merged root 354 of 362 project files took the +7 opt-in. Of the 8 that did
+not, 4 are hand-owned and never converted (golib, testing, unsafe, go2cs.CpuProfiler). The other 4 (two
+darwin-only, two linux-only) had the line in their converting stage and lost it in the merge. Patch M carried those
+4 by hand from the stages; COORD declined it and ruled the converter fix.
+
+**The fix.** `claude/g-platform-csproj-merge` (`c39da0c113`, with `d327716628` the projitems line). The project
+merge reads only the targets that converted the package (`convertedPackages`), for its base and its reference
+union, and falls back to every holder only when none did (a hand-owned package). Red first:
+`TestMergeTakesProjectFilesFromTargetsThatConvertedThePackage`, on real staging roots. Two-seeded three-target A/B
+against 1ffa0f708f: exactly 5 `.csproj` move. Patch M's 4 are byte-equal to the converting stages' files. The 5th
+is `internal/syscall/windows`, +4/−16, its split folded into the flat list. The 5 projects build on their own
+platforms (7 builds, 0 errors).
+
+**Standing lesson.** Every merge input that a seeded stage can hold must be filtered by "this target converted
+the package". "This target has the file" is true of every stage by construction.
+
+— G (measured 2026-10-23)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
