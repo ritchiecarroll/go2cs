@@ -436,7 +436,7 @@ func TestPlatformMergeKeepsASharedNonReferenceGroup(t *testing.T) {
 		emissions = append(emissions, &platformEmission{target: target, root: root, artifacts: map[string]artifactState{rawPath: {}}})
 	}
 
-	merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions)
+	merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions, nil)
 
 	if err != nil {
 		t.Fatalf("mergePlatformProjectFile: %v", err)

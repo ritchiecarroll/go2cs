@@ -826,7 +826,7 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))
 
 		if strings.EqualFold(filepath.Ext(rawPath), ".csproj") && companionDiffersAcrossTargets(rawPath, emissions) {
-			merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions)
+			merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions, converted)
 
 			if err != nil {
 				return nil, nil, written, err
@@ -979,17 +979,42 @@ func perGOOSReviewSiblingOwner(rawPath string, emissions []*platformEmission) st
 //
 // The second result is a note (empty when there is nothing to say) describing a difference the
 // merge could NOT express — two targets' project files disagreeing outside their reference lists.
-func mergePlatformProjectFile(rawPath string, targets []string, emissions []*platformEmission) (string, string, error) {
+//
+// Only the targets that CONVERTED the package are read (converted, per target, from
+// convertedPackages), as mergeCompanionArtifacts reads its companions. Every stage is a whole-tree
+// copy of the seed, so a target that does not build the package still HAS its project file, as the
+// seed's bytes: reading that copy kept the seeded template as the base of a package only darwin or
+// linux converts, and took its reference list for an import set, conditioning references by a GOOS
+// that never builds the package. Measured at the hop's fixed-point regen (2026-10-23): 4 such packages
+// missed the interceptor opt-in, and internal/syscall/windows kept a seeded split. Only when no target
+// converted the package (a hand-owned one) are all the targets that hold it read.
+func mergePlatformProjectFile(rawPath string, targets []string, emissions []*platformEmission, converted []map[string]bool) (string, string, error) {
 	sets := map[string][]string{}
 
 	base, baseTarget, baseRemainder, note := "", "", "", ""
 	needsUnsafe := false
+
+	pkg := companionPackage(rawPath, emissions)
+	converts := func(i int) bool { return i < len(converted) && converted[i][pkg] }
+	anyConverts := false
+
+	for i := range targets {
+		if _, ok := emissions[i].artifacts[rawPath]; ok && converts(i) {
+			anyConverts = true
+			break
+		}
+	}
 
 	for i, target := range targets {
 		if _, ok := emissions[i].artifacts[rawPath]; !ok {
 			// This target has no such package at all (a platform-exclusive one). Nothing to read,
 			// and nothing to condition — its absence is expressed by the exclusive package's own
 			// sources living in a per-GOOS folder, not by this file.
+			continue
+		}
+
+		if anyConverts && !converts(i) {
+			// The seed's copy, in a stage that never converted the package: not this target's emission.
 			continue
 		}
 
