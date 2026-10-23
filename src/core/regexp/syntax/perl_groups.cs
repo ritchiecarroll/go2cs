@@ -23,14 +23,14 @@ internal static slice<rune> code3 = new rune[]{ /* \w */
     0x61, 0x7a
 }.slice();
 
-internal static map<@string, charGroup> perlGroup = new map<@string, charGroup>{
+[GoLazy] partial class lazyᴛperlGroup { internal static map<@string, charGroup> perlGroup = new map<@string, charGroup>{
     [@"\d"u8] = new(+1, code1),
     [@"\D"u8] = new(-1, code1),
     [@"\s"u8] = new(+1, code2),
     [@"\S"u8] = new(-1, code2),
     [@"\w"u8] = new(+1, code3),
     [@"\W"u8] = new(-1, code3)
-};
+}; }
 
 internal static slice<rune> code4 = new rune[]{ /* [:alnum:] */
     0x30, 0x39,
@@ -102,7 +102,7 @@ internal static slice<rune> code17 = new rune[]{ /* [:xdigit:] */
     0x61, 0x66
 }.slice();
 
-internal static map<@string, charGroup> posixGroup = new map<@string, charGroup>{
+[GoLazy] partial class lazyᴛposixGroup { internal static map<@string, charGroup> posixGroup = new map<@string, charGroup>{
     [@"[:alnum:]"u8] = new(+1, code4),
     [@"[:^alnum:]"u8] = new(-1, code4),
     [@"[:alpha:]"u8] = new(+1, code5),
@@ -131,6 +131,6 @@ internal static map<@string, charGroup> posixGroup = new map<@string, charGroup>
     [@"[:^word:]"u8] = new(-1, code16),
     [@"[:xdigit:]"u8] = new(+1, code17),
     [@"[:^xdigit:]"u8] = new(-1, code17)
-};
+}; }
 
 } // end syntax_package

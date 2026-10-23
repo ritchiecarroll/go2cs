@@ -40,7 +40,7 @@ internal static map<@string, nint> protocols = new map<@string, nint>{
 // See https://www.iana.org/assignments/service-names-port-numbers
 //
 // On Unix, this map is augmented by readServices via goLookupPort.
-internal static map<@string, map<@string, nint>> services = new map<@string, map<@string, nint>>{
+[GoLazy] partial class lazyᴛservices { internal static map<@string, map<@string, nint>> services = new map<@string, map<@string, nint>>{
     ["udp"u8] = new map<@string, nint>{
         ["domain"u8] = 53},
     ["tcp"u8] = new map<@string, nint>{
@@ -58,7 +58,7 @@ internal static map<@string, map<@string, nint>> services = new map<@string, map
         ["submissions"u8] = 465,
         ["ssh"u8] = 22,
         ["telnet"u8] = 23}
-};
+}; }
 
 // dnsWaitGroup can be used by tests to wait for all DNS goroutines to
 // complete. This avoids races on the test hooks.

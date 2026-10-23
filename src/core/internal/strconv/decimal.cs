@@ -181,7 +181,7 @@ partial struct leftCheat {
     internal @string cutoff; // minus one digit if original < a.
 }
 
-internal static slice<leftCheat> leftcheats = new leftCheat[]{
+[GoLazy] partial class lazyᴛleftcheats { internal static slice<leftCheat> leftcheats = new leftCheat[]{
     // Leading digits of 1/2^i = 5^i.
     // 5^23 is not an exact 64-bit floating point number,
     // so have to use bc for the math.
@@ -256,7 +256,7 @@ internal static slice<leftCheat> leftcheats = new leftCheat[]{
     new(18, "34694469519536141888238489627838134765625"u8), // * 288230376151711744
     new(18, "173472347597680709441192448139190673828125"u8), // * 576460752303423488
     new(19, "867361737988403547205962240695953369140625"u8) // * 1152921504606846976
-}.slice();
+}.slice(); }
 
 // Is the leading prefix of b lexicographically less than s?
 internal static bool prefixIsLessThan(slice<byte> b, @string s) {

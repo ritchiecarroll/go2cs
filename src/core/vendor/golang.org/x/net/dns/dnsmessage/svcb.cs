@@ -120,7 +120,7 @@ public static SVCParamKey SVCParamDOHPath => 7;
 public static SVCParamKey SVCParamOHTTP => 8;
 public static SVCParamKey SVCParamTLSSupportedGroups => 9;
 
-internal static map<SVCParamKey, @string> svcParamKeyNames = new map<SVCParamKey, @string>{
+[GoLazy] partial class lazyᴛsvcParamKeyNames { internal static map<SVCParamKey, @string> svcParamKeyNames = new map<SVCParamKey, @string>{
     [SVCParamMandatory] = "Mandatory"u8,
     [SVCParamALPN] = "ALPN"u8,
     [SVCParamNoDefaultALPN] = "NoDefaultALPN"u8,
@@ -131,7 +131,7 @@ internal static map<SVCParamKey, @string> svcParamKeyNames = new map<SVCParamKey
     [SVCParamDOHPath] = "DOHPath"u8,
     [SVCParamOHTTP] = "OHTTP"u8,
     [SVCParamTLSSupportedGroups] = "TLSSupportedGroups"u8
-};
+}; }
 
 // String implements fmt.Stringer.String.
 public static @string String(this SVCParamKey k) {

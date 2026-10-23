@@ -317,7 +317,7 @@ Go types such as `slice<T>`, `@string` (Go's `string`) and `ж<T>` (Go's pointer
 runtime library every converted project uses: see [The golib Runtime Library](#the-golib-runtime-library).
 
 <!-- sources, in row order (behavioral paths under src/tests/Behavioral/): GoCallVariations/GoCallVariations.cs.target:61#24ebf1; UnsafeOperations/UnsafeOperations.cs.target:26#e1fd61; GoCallVariations.cs.target:45#b0efbe and UnsafeOperations.cs.target:26#e1fd61; GoCallVariations.cs.target:47#19ac53; ReservedNameShadows/main.cs.target:39#2637bd, src/core/time/time.cs:329#a7ea25, src/core/bufio/bufio_test.cs:11#7868e5; ExprSwitch/ExprSwitch.cs.target:104#61b3ba, MultiFileInitOrder/a_first.cs.target:11#c9c2fd; GoCallVariations.cs.target:23#4eac1e; src/core/errors/join.cs:20#a521f0 (heap-moved value parameter: AddressOfParamWrite/main.cs.target:50-51#2aa7b7); GoCallVariations.cs.target:18#1adf9e, ChannelRendezvous/main.cs.target:23#e0b499, InitOrderTupleSpecs/main.cs.target:9#8f2783; GoCallVariations.cs.target:10#7f1902, src/core/internal/strconv/atoi.cs:255#b8f818; SStringTwinPilot/main.cs.target:35#034d50; src/core/encoding/json/package_info.cs:17#3f709d;
-src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1187#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:55#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
+src/core/errors/join.cs:7#5074eb, ExprSwitch.cs.target:27#81f5dd (also src/core/flag/flag.cs:1186#a8d8ac), ChannelRendezvous/main.cs.target:24#b87223; AnyStringLitChanSend/main.cs.target:55#b6232f, GoCallVariations.cs.target:43#6193c1, ChannelRendezvous/main.cs.target:25#e54771; GoCallVariations.cs.target:18#1adf9e; ChannelCapLen/main.cs.target:31#2585d6, AnonymousStructs/AnonymousStructs.cs.target:41#af46cf; src/core/io/fs/sub.cs:86#6201ad, ExprSwitch.cs.target:88#7667f8, src/core/strings/iter.cs:50#3e658c; ExprSwitch.cs.target:250#743672; AppendOfMake/AppendOfMake.cs.target:72#6ff834; src/core/errors/join.cs:40#46725d, CaptureHoistThroughConversion/main.cs.target:42#4d807a;
 DefinedTypeOverInterface/package_info.cs:75#e1993c; GenericTypeNameCompanion/main.cs.target:18#6071b4; GenericTypeInstantiation/GenericTypeInstantiation.cs.target:45#f1c413 and AnonymousInterfaces/AnonymousInterfaces.cs.target:40#eed889; AdapterNameInterfaceCollision/main.cs.target:25#4614b9; GoCallVariations.cs.target:52#1baedb; GoCallVariations.cs.target:53#f6bd07; UnsafeOperations.cs.target:4#8d3d6c and 23; src/core/strings/strings.cs:19#4df4b0; src/core/strings/export_test.cs:8#4db4a3 and strings_test.cs:24#ee31f6.
 Box kinds: src/core/golib/ж.ElemRefBox.cs:41#9f1df3, ж.FieldRefBox.cs:80#1ccbf1, ж.NativeBox.cs:41#eb5250, ж.NativeArrayBox.cs:46#294a9e, ж.SliceHeaderBox.cs:174#4ae53d, ж.HeaderSliceBox.cs:75#126a5e, ж.StringHeaderBox.cs:58#f81a05 all derive from ж<T>.
 appendꓸꓸꓸ: InterfaceCasting/InterfaceCasting.cs.target:305#b7f5f6 (Funcꓸꓸꓸ: BlankIdentifierCollision/main.cs.target:82#c69f13).
@@ -1302,11 +1302,13 @@ private static class lazyᴛmallocScanTable { internal static array<Func<uintptr
 
 `array<T>` is golib's form of Go's `[N]T`, `ж<_type>` its pointer `*_type`, and `Func<…>` the C# delegate for
 a Go `func` type. Building the value later must not change it, so the converter accepts a listed var only
-when it is declared alone, its address is never taken, and its initializer holds only constants, types,
-conversions and package function values: no call, no func literal, no `&` or `<-`, and no read of a package
-var. It refuses a listed var that breaks this rule and names it.
+when it is declared alone, its address is never taken, and its initializer cannot depend on when it runs:
+constants, types, package functions and func literals, composite literals and `&T{…}` allocations,
+conversions and operators, and reads of same-package vars that are themselves eligible and never assigned.
+No call, no imported var, no index or dereference, no method value, no `<-`, no type assertion. It refuses
+a listed var that breaks this rule and names it.
 
-<!-- the list: src/go2cs/lazyPackageVarOperations.go:31-36#a0c95b; the rule: lazyPackageVarRefusal, :54-96#ac6671; the shape: writeLazyPackageVar, :98-104#6e516e; kept out of the ordered ctor: src/go2cs/initOrderOperations.go:282-284#3bf2e5. Guards: TestLazyPackageVarIsBuiltOnFirstRead and TestLazyPackageVarRefusesAnInitializerThatCallsOrReads (src/go2cs/lazyPackageVar_test.go), GolibTests MallocDispatchTablesTests (src/tests/GolibTests/MallocDispatchTablesTests.cs). Why these two: their one reader, mallocgc's size-specialized branch, is gated by a const false (goexperiment.SizeSpecializedMalloc is off), so no path reads them; built eagerly they were 2 x 17.1K IL JIT-compiled at every startup (PerfStartup, commit 0c8c1a1ca). -->
+<!-- the list: src/go2cs/lazyPackageVarOperations.go:37-42#a0c95b; the rule: collectLazyPackageVars, :96#aaf099, and lazyInitializerRefusal, :292#8a3696; the shape: writeLazyPackageVar, :571-579#f56e3b; kept out of the ordered ctor: src/go2cs/initOrderOperations.go:286-288#3bf2e5. Guards: TestLazyPackageVarIsBuiltOnFirstRead and TestLazyPackageVarRefusesByName (src/go2cs/lazyPackageVar_test.go), GolibTests MallocDispatchTablesTests (src/tests/GolibTests/MallocDispatchTablesTests.cs). Why these two: their one reader, mallocgc's size-specialized branch, is gated by a const false (goexperiment.SizeSpecializedMalloc is off), so no path reads them; built eagerly they were 2 x 17.1K IL JIT-compiled at every startup (PerfStartup, commit 0c8c1a1ca). -->
 
 **A var that reads another package's var needs no ordering.** Each Go package is its own C# class.
 .NET initializes a class before its static fields are first read, so the imported package is always ready.
@@ -1745,9 +1747,9 @@ A converted constant takes one of three C# forms:
   `uint` value too wide for 32 bits;
 - a `static readonly` field, for any string constant, typed or untyped, and for an integer constant
   too wide for 64 bits, which is golib's `GoBigConst` (C#'s `BigInteger`).
-<!-- forms: src/go2cs/visitValueSpec.go:1431 `else if constExpr == "const"`, :1454 `static %s %s =>%s %s;`,
-     :1249 `static readonly %s %s = %s;`; the GoBigConst field, for an int-kind value that fits neither int64 nor
-     uint64: :1174-1181 `writeUntypedConst(true)`, e.g. src/core/math/big/arith.cs:23
+<!-- forms: src/go2cs/visitValueSpec.go:1435 `else if constExpr == "const"`, :1458 `static %s %s =>%s %s;`,
+     :1253 `static readonly %s %s = %s;`; the GoBigConst field, for an int-kind value that fits neither int64 nor
+     uint64: :1178-1185 `writeUntypedConst(true)`, e.g. src/core/math/big/arith.cs:23
      `internal static readonly GoBigConst _B`; the alias: src/go2cs/csproj-template.xml:129 `Alias="GoBigConst"`. -->
 
 When the value is computed, a `/* … */` comment beside it keeps the Go expression.
@@ -6897,16 +6899,18 @@ variables become a C# tuple, `var (i, v)`, and a blank `_` in the pair stays `_`
 name chosen so it cannot clash with a Go name ([Names and Glyphs](#reading-converted-code-names-and-glyphs)).
 
 <!-- Index-only range: src/core/golib/RangeIndexOnly.cs:38 `range<T>(slice<T> s) => range(s.Length)`,
-:50 `range<T>(sslice<T> s)`, :58 `range<T>(array<T> a)`, :71 `range<TArray>(ж<TArray> p)`.
+:50 `range<T>(sslice<T> s)`, :58 `range<T>(array<T> a)`, :82 `range<TArray>(ж<TArray> p, nint length)`.
 ArrayRangeSnapshot/ArrayRangeSnapshot.go:113 `for i := range a {` -> .cs.target:106 `foreach (var i in range(a)) {`;
 SlicePointerIdentity/main.go:16 `for i := range s {` -> main.cs.target:13 `foreach (var i in range(s)) {`;
 VariadicPackPassThrough/VariadicPackPassThrough.go:11 `for i := range xs {`
 -> .cs.target:12 `foreach (var i in range(xs)) {`.
-The string control: src/go2cs/rangeIndexOnly_test.go:237 `expect("overString", "foreach (var (i, _) in str)")`. -->
+The string control: src/go2cs/rangeIndexOnly_test.go:276 `expect("overString", "foreach (var (i, _) in str)")`;
+the nil pointer: :260 `expect("overNilPointer", "foreach (var i in range(nilp, 4))")`. -->
 **An index-only range reads no element.** When a range over a slice, an array or a pointer to an array
 names only the index (`for i := range s`, `for i, _ := range s`, or `for range s`), golib's `range(s)`
-reads the length once and counts the indexes, as Go does. The same holds for a variadic parameter that the
-converter emits as golib's stack-only `sslice<T>` ([Slices and Arrays](#slices-and-arrays)). A string
+reads the length once and counts the indexes, as Go does. A pointer to an array passes its type's length,
+`range(p, N)`, so a nil one ranges `N` times without being read, as in Go. The same holds for a variadic parameter
+that the converter emits as golib's stack-only `sslice<T>` ([Slices and Arrays](#slices-and-arrays)). A string
 keeps the pair form, `foreach (var (i, _) in s)`, because its indexes are the byte offsets where each rune
 starts.
 

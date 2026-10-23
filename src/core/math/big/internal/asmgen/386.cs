@@ -7,8 +7,7 @@ using fmt = fmt_package;
 
 partial class asmgen_package {
 
-public static ж<Arch> Arch386;
-internal static void initᴛArch386() { Arch386 = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArch386 { public static ж<Arch> Arch386 = Ꮡ(new Arch(
     Name: "386"u8,
     WordBits: 32,
     WordBytes: 4,

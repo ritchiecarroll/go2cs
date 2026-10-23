@@ -1,4 +1,4 @@
-# Comment and spacing census of src/core against GOROOT go1.26.10: 1730 files, 46780 Go comment groups.
+# Comment and spacing census of src/core against GOROOT go1.26.10: 1729 files, 46765 Go comment groups.
 # Written by TestCommentParityCensus with GO2CS_COMMENT_CENSUS_UPDATE=1; one defect class per line.
 # Lower a count only in the commit whose corpus re-emission lowers it (see corpus_test.go).
 blank2:member-boundary	15
@@ -40,8 +40,8 @@ missed:in-expression	1
 missed:spec-doc-in-group	2
 missed:trailing-spec	91
 partial:field-doc	1
-top:go-blank-cs-none	59
-top:go-none-cs-blank	1071
+top:go-blank-cs-none	58
+top:go-none-cs-blank	1073
 top:unmapped:func	46
 top:unmapped:type-alias	29
 top:unmapped:type-other	70

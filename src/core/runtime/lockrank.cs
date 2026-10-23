@@ -90,7 +90,7 @@ internal static lockRank lockRankTestRInternal => 66;
 internal static lockRank lockRankLeafRank => 1000;
 
 // lockNames gives the names associated with each of the above ranks.
-internal static slice<@string> lockNames = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛlockNames { internal static slice<@string> lockNames = new golib.SparseArray<@string>{
     [(int)lockRankSysmon] = "sysmon"u8,
     [(int)lockRankScavenge] = "scavenge"u8,
     [(int)lockRankForcegc] = "forcegc"u8,
@@ -157,7 +157,7 @@ internal static slice<@string> lockNames = new golib.SparseArray<@string>{
     [(int)lockRankAllocmRInternal] = "allocmRInternal"u8,
     [(int)lockRankExecRInternal] = "execRInternal"u8,
     [(int)lockRankTestRInternal] = "testRInternal"u8
-}.slice();
+}.slice(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string unknownˢ2 = "UNKNOWN"u8;
@@ -182,7 +182,7 @@ internal static @string String(this lockRank rank) {
 // when rank X is acquired.
 //
 // Lock ranks that allow self-cycles list themselves.
-internal static slice<slice<lockRank>> lockPartialOrder = new golib.SparseArray<slice<lockRank>>{
+[GoLazy] partial class lazyᴛlockPartialOrder { internal static slice<slice<lockRank>> lockPartialOrder = new golib.SparseArray<slice<lockRank>>{
     [(int)lockRankSysmon] = new lockRank[]{}.slice(),
     [(int)lockRankScavenge] = new lockRank[]{lockRankSysmon}.slice(),
     [(int)lockRankForcegc] = new lockRank[]{lockRankSysmon}.slice(),
@@ -249,6 +249,6 @@ internal static slice<slice<lockRank>> lockPartialOrder = new golib.SparseArray<
     [(int)lockRankAllocmRInternal] = new lockRank[]{lockRankSysmon, lockRankScavenge, lockRankForcegc, lockRankComputeMaxProcs, lockRankUpdateMaxProcsG, lockRankSweepWaiters, lockRankAssistQueue, lockRankStrongFromWeakQueue, lockRankCleanupQueue, lockRankSweep, lockRankTestR, lockRankTimerSend, lockRankAllocmW, lockRankCpuprof, lockRankPollDesc, lockRankWakeableSleep, lockRankHchan, lockRankAllocmR}.slice(),
     [(int)lockRankExecRInternal] = new lockRank[]{lockRankSysmon, lockRankScavenge, lockRankForcegc, lockRankComputeMaxProcs, lockRankUpdateMaxProcsG, lockRankSweepWaiters, lockRankAssistQueue, lockRankStrongFromWeakQueue, lockRankCleanupQueue, lockRankSweep, lockRankTestR, lockRankTimerSend, lockRankExecW, lockRankCpuprof, lockRankPollDesc, lockRankWakeableSleep, lockRankHchan, lockRankExecR}.slice(),
     [(int)lockRankTestRInternal] = new lockRank[]{lockRankTestR, lockRankTestW}.slice()
-}.slice();
+}.slice(); }
 
 } // end runtime_package

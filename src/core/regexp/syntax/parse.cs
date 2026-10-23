@@ -1801,22 +1801,22 @@ internal static slice<rune> appendGroup(this ж<parser> Ꮡp, slice<rune> r, cha
     return r;
 }
 
-internal static ж<unicode.RangeTable> anyTable = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛanyTable { internal static ж<unicode.RangeTable> anyTable = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{new(Lo: 0, Hi: (uint16)((1 << 16) - 1), Stride: 1)}.slice(),
     R32: new unicode.Range32[]{new(Lo: ((uint32)1 << 16), Hi: unicode.MaxRune, Stride: 1)}.slice()
-));
+)); }
 
-internal static ж<unicode.RangeTable> asciiTable = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛasciiTable { internal static ж<unicode.RangeTable> asciiTable = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{new(Lo: 0, Hi: 0x7F, Stride: 1)}.slice()
-));
+)); }
 
-internal static ж<unicode.RangeTable> asciiFoldTable = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛasciiFoldTable { internal static ж<unicode.RangeTable> asciiFoldTable = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
         new(Lo: 0, Hi: 0x7F, Stride: 1),
         new(Lo: 0x017F, Hi: 0x017F, Stride: 1), // Old English long s (ſ), folds to S/s.
         new(Lo: 0x212A, Hi: 0x212A, Stride: 1) // Kelvin K, folds to K/k.
     }.slice()
-));
+)); }
 
 // categoryAliases is a lazily constructed copy of unicode.CategoryAliases
 // but with the keys passed through canonicalName, to support inexact matches.

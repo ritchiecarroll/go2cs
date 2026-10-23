@@ -10,10 +10,10 @@ partial struct ptrElemsᴛ1 /*dyn*/ {
     internal @string str;
     /*embed*/ internal error error;
 }
-internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
+[GoLazy] partial class lazyᴛptrElems { internal static slice<ж<ptrElemsᴛ1>> ptrElems = new ж<ptrElemsᴛ1>[]{
     Ꮡ(new ptrElemsᴛ1(1, "one"u8, default!)),
     Ꮡ(new ptrElemsᴛ1(2, "two"u8, default!))
-}.slice();
+}.slice(); }
 
 
 partial struct mapPtrValuesᴛ1 /*dyn*/ {

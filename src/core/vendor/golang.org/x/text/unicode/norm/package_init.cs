@@ -10,6 +10,5 @@ partial class norm_package {
     static norm_package() {
         initᴛnfcSparse();
         initᴛnfkcSparse();
-        initᴛformTable();
     }
 } // end norm_package

@@ -1051,6 +1051,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
 
     [TestMethod]
+    public void CheckLazyPackageVars() => CheckTarget("LazyPackageVars");
+
+    [TestMethod]
     public void CheckLibraryImportPartial() => CheckTarget("LibraryImportPartial");
 
     [TestMethod]

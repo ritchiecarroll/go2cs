@@ -16,7 +16,7 @@ internal static UntypedInt matchType => /* 1 << 30 */ 1073741824;
 
 // The length code for length X (MIN_MATCH_LENGTH <= X <= MAX_MATCH_LENGTH)
 // is lengthCodes[length - MIN_MATCH_LENGTH]
-internal static array<uint32> lengthCodes = new uint32[]{
+[GoLazy] partial class lazyᴛlengthCodes { internal static array<uint32> lengthCodes = new uint32[]{
     0, 1, 2, 3, 4, 5, 6, 7, 8, 8,
     9, 9, 10, 10, 11, 11, 12, 12, 12, 12,
     13, 13, 13, 13, 14, 14, 14, 14, 15, 15,
@@ -43,9 +43,9 @@ internal static array<uint32> lengthCodes = new uint32[]{
     27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
     27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
     27, 27, 27, 27, 27, 28
-}.array();
+}.array(); }
 
-internal static array<uint32> offsetCodes = new uint32[]{
+[GoLazy] partial class lazyᴛoffsetCodes { internal static array<uint32> offsetCodes = new uint32[]{
     0, 1, 2, 3, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7,
     8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9,
     10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
@@ -62,7 +62,7 @@ internal static array<uint32> offsetCodes = new uint32[]{
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15
-}.array();
+}.array(); }
 
 partial struct token /*num:uint32*/;
 

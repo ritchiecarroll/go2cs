@@ -22,7 +22,7 @@ partial struct entry {
     internal Func<nint> f;
 }
 
-internal static slice<entry> table = new entry[]{
+[GoLazy] partial class lazyᴛtable { internal static slice<entry> table = new entry[]{
     new("var-decl", () => {
         ref var c = ref heap(new counter(), out var Ꮡc);
         Ꮡc.inc(3);
@@ -88,14 +88,14 @@ internal static slice<entry> table = new entry[]{
         inner();
         return Ꮡc.Value.get();
     })
-}.slice();
+}.slice(); }
 
-internal static Func<nint> single = () => {
+[GoLazy] partial class lazyᴛsingle { internal static Func<nint> single = () => {
     ref var c = ref heap(new counter(), out var Ꮡc);
     Ꮡc.inc(21);
     Ꮡc.inc(21);
     return c.get();
-};
+}; }
 
 internal static slice<nint> inDecl() {
     slice<nint> @out = default!;

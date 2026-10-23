@@ -130,7 +130,7 @@ internal static Token additional_beg => 87;
 public static Token TILDE => 88;
 internal static Token additional_end => 89;
 
-internal static array<@string> tokens = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛtokens { internal static array<@string> tokens = new golib.SparseArray<@string>{
     [(int)ILLEGAL] = "ILLEGAL"u8,
 
     [(int)EOF] = "EOF"u8,
@@ -230,7 +230,7 @@ internal static array<@string> tokens = new golib.SparseArray<@string>{
     [(int)VAR] = "var"u8,
 
     [(int)TILDE] = "~"u8
-}.array(89);
+}.array(89); }
 
 // String returns the string corresponding to the token tok.
 // For operators, delimiters, and keywords the string is the actual

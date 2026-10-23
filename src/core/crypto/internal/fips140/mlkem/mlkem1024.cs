@@ -239,7 +239,7 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
 
     byte N = default!;
     var s = Ꮡdk.of(DecapsulationKey1024.Ꮡs);
-    foreach (var i in range(s)) {
+    foreach (var i in range(s, 4)) {
         s.Value[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
@@ -250,9 +250,9 @@ internal static void kemKeyGen1024(ж<DecapsulationKey1024> Ꮡdk, /*[32]*/ ж<a
     }
 
     var t = Ꮡdk.of(DecapsulationKey1024.Ꮡt);
-    foreach (var i in range(t)) { // t = A ◦ s + e
+    foreach (var i in range(t, 4)) { // t = A ◦ s + e
         t.Value[i] = e[i].Clone();
-        foreach (var j in range(s)) {
+        foreach (var j in range(s, 4)) {
             t.Value[i] = polyAdd<nttElement>(t.Value[i], nttMul(A.Value[i * (nint)k1024 + j], s.Value[j]));
         }
     }

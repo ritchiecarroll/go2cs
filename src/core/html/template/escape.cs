@@ -76,8 +76,7 @@ internal static @string evalArgs(params ꓸꓸꓸany argsʗp) {
 }
 
 // funcMap maps command names to functions that render their inputs safe.
-internal static template.FuncMap funcMap;
-internal static void initᴛfuncMap() { funcMap = new text.template_package.FuncMap(new map<@string, any>{
+[GoLazy] partial class lazyᴛfuncMap { internal static template.FuncMap funcMap = new text.template_package.FuncMap(new map<@string, any>{
     ["_html_template_attrescaper"u8] = ((Funcꓸꓸꓸ<any, @string>)(attrEscaper)),
     ["_html_template_commentescaper"u8] = ((Funcꓸꓸꓸ<any, @string>)(commentEscaper)),
     ["_html_template_cssescaper"u8] = ((Funcꓸꓸꓸ<any, @string>)(cssEscaper)),
@@ -455,7 +454,7 @@ internal static @string normalizeEscFn(@string e) {
 
 // redundantFuncs[a][b] implies that funcMap[b](funcMap[a](x)) == funcMap[a](x)
 // for all x.
-internal static map<@string, map<@string, bool>> redundantFuncs = new map<@string, map<@string, bool>>{
+[GoLazy] partial class lazyᴛredundantFuncs { internal static map<@string, map<@string, bool>> redundantFuncs = new map<@string, map<@string, bool>>{
     ["_html_template_commentescaper"u8] = new map<@string, bool>{
         ["_html_template_attrescaper"u8] = true,
         ["_html_template_htmlescaper"u8] = true},
@@ -469,7 +468,7 @@ internal static map<@string, map<@string, bool>> redundantFuncs = new map<@strin
         ["_html_template_attrescaper"u8] = true},
     ["_html_template_urlescaper"u8] = new map<@string, bool>{
         ["_html_template_urlnormalizer"u8] = true}
-};
+}; }
 
 // appendCmd appends the given command to the end of the command pipeline
 // unless it is redundant with the last command.

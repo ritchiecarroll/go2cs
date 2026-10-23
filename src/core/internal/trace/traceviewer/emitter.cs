@@ -812,7 +812,7 @@ internal static readonly @string colorManzGreen = "cq_build_attempt_runnig"u8; /
 internal static readonly @string colorKellyGreen = "cq_build_attempt_passed"u8; // 108, 218, 35
 internal static readonly @string colorAnotherGrey = "cq_build_attempt_failed"u8; // 187, 187, 187
 
-internal static slice<@string> colorForTask = new @string[]{
+[GoLazy] partial class lazyᴛcolorForTask { internal static slice<@string> colorForTask = new @string[]{
     colorLightMauve,
     colorOrange,
     colorSeafoamGreen,
@@ -836,7 +836,7 @@ internal static slice<@string> colorForTask = new @string[]{
     colorSilver,
     colorManzGreen,
     colorKellyGreen
-}.slice();
+}.slice(); }
 
 internal static @string pickTaskColor(uint64 id) {
     var idx = id % (uint64)len(colorForTask);

@@ -9,8 +9,7 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decArrayHelper;
-internal static void initᴛdecArrayHelper() { decArrayHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
+[GoLazy] partial class lazyᴛdecArrayHelper { internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decArrayHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
     [reflect.ΔBool] = decBoolArray,
     [reflect.Complex64] = decComplex64Array,
     [reflect.Complex128] = decComplex128Array,
@@ -29,8 +28,7 @@ internal static void initᴛdecArrayHelper() { decArrayHelper = new map<reflect�
     [reflect.Uintptr] = decUintptrArray
 }; }
 
-internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decSliceHelper;
-internal static void initᴛdecSliceHelper() { decSliceHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
+[GoLazy] partial class lazyᴛdecSliceHelper { internal static map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>> decSliceHelper = new map<reflectꓸKind, Func<ж<decoderState>, reflectꓸValue, nint, error, bool>>{
     [reflect.ΔBool] = decBoolSlice,
     [reflect.Complex64] = decComplex64Slice,
     [reflect.Complex128] = decComplex128Slice,

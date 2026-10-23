@@ -13,8 +13,7 @@ partial class template_package {
 // A transition function takes a context and template text input, and returns
 // the updated context and the number of bytes consumed from the front of the
 // input.
-internal static array<Func<context, slice<byte>, (context, nint)>> transitionFunc;
-internal static void initᴛtransitionFunc() { transitionFunc = new golib.SparseArray<Func<context, slice<byte>, (context, nint)>>{
+[GoLazy] partial class lazyᴛtransitionFunc { internal static array<Func<context, slice<byte>, (context, nint)>> transitionFunc = new golib.SparseArray<Func<context, slice<byte>, (context, nint)>>{
     [stateText] = tText,
     [stateTag] = tTag,
     [stateAttrName] = tAttrName,
@@ -82,14 +81,14 @@ internal static (context, nint) tText(context c, slice<byte> s) {
     }
 }
 
-internal static array<state> elementContentType = new golib.SparseArray<state>{
+[GoLazy] partial class lazyᴛelementContentType { internal static array<state> elementContentType = new golib.SparseArray<state>{
     [elementNone] = stateText,
     [elementScript] = stateJS,
     [elementStyle] = stateCSS,
     [elementTextarea] = stateRCDATA,
     [elementTitle] = stateRCDATA,
     [elementMeta] = stateText
-}.array();
+}.array(); }
 
 // tTag is the context transition function for the tag state.
 internal static (context, nint) tTag(context c, slice<byte> s) {
@@ -180,7 +179,7 @@ internal static (context, nint) tAfterName(context c, slice<byte> s) {
     return (c, i + 1);
 }
 
-internal static array<state> attrStartStates = new golib.SparseArray<state>{
+[GoLazy] partial class lazyᴛattrStartStates { internal static array<state> attrStartStates = new golib.SparseArray<state>{
     [attrNone] = stateAttr,
     [attrScript] = stateJS,
     [attrScriptType] = stateAttr,
@@ -188,7 +187,7 @@ internal static array<state> attrStartStates = new golib.SparseArray<state>{
     [attrURL] = stateURL,
     [attrSrcset] = stateSrcset,
     [attrMetaContent] = stateMetaContent
-}.array();
+}.array(); }
 
 // tBeforeValue is the context transition function for stateBeforeValue.
 internal static (context, nint) tBeforeValue(context c, slice<byte> s) {
@@ -223,13 +222,13 @@ internal static (context, nint) tHTMLCmt(context c, slice<byte> s) {
 
 // specialTagEndMarkers maps element types to the character sequence that
 // case-insensitively signals the end of the special tag body.
-internal static array<slice<byte>> specialTagEndMarkers = new golib.SparseArray<slice<byte>>{
+[GoLazy] partial class lazyᴛspecialTagEndMarkers { internal static array<slice<byte>> specialTagEndMarkers = new golib.SparseArray<slice<byte>>{
     [elementScript] = slice<byte>("script"u8),
     [elementStyle] = slice<byte>("style"u8),
     [elementTextarea] = slice<byte>("textarea"u8),
     [elementTitle] = slice<byte>("title"u8),
     [elementMeta] = slice<byte>(""u8)
-}.array(6);
+}.array(6); }
 
 internal static slice<byte> specialTagEndPrefix = slice<byte>("</"u8);
 internal static slice<byte> tagEndSeparators = slice<byte>("> \t\n\f/"u8);

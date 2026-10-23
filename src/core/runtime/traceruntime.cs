@@ -101,7 +101,7 @@ internal static traceBlockReason traceBlockSleep => 14;
 internal static traceBlockReason traceBlockGCWeakToStrongWait => 15;
 internal static traceBlockReason traceBlockSynctest => 16;
 
-internal static array<@string> traceBlockReasonStrings = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛtraceBlockReasonStrings { internal static array<@string> traceBlockReasonStrings = new golib.SparseArray<@string>{
     [traceBlockGeneric] = "unspecified"u8,
     [traceBlockForever] = "forever"u8,
     [traceBlockNet] = "network"u8,
@@ -119,7 +119,7 @@ internal static array<@string> traceBlockReasonStrings = new golib.SparseArray<@
     [traceBlockSleep] = "sleep"u8,
     [traceBlockGCWeakToStrongWait] = "GC weak to strong wait"u8,
     [traceBlockSynctest] = "synctest"u8
-}.array();
+}.array(); }
 
 // traceGoStopReason is an enumeration of reasons a goroutine might yield.
 //

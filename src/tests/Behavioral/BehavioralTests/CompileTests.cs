@@ -1048,6 +1048,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
 
     [TestMethod]
+    public void CheckLazyPackageVars() => CheckTarget("LazyPackageVars");
+
+    [TestMethod]
     public void CheckLibraryImportPartial() => CheckTarget("LibraryImportPartial");
 
     [TestMethod]

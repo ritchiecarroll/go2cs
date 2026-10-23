@@ -90,7 +90,7 @@ public static UntypedInt Comment => -8;
 // internal use only
 internal static UntypedInt skipComment => -9;
 
-internal static map<rune, @string> tokenString = new map<rune, @string>{
+[GoLazy] partial class lazyᴛtokenString { internal static map<rune, @string> tokenString = new map<rune, @string>{
     [EOF] = "EOF"u8,
     [Ident] = "Ident"u8,
     [Int] = "Int"u8,
@@ -99,7 +99,7 @@ internal static map<rune, @string> tokenString = new map<rune, @string>{
     [ΔString] = "String"u8,
     [RawString] = "RawString"u8,
     [Comment] = "Comment"u8
-};
+}; }
 
 // TokenString returns a printable string for a token or Unicode character.
 public static @string TokenString(rune tok) {

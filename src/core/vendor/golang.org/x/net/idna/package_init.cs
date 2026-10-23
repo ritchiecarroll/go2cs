@@ -10,11 +10,5 @@ partial class idna_package {
     static idna_package() {
         initᴛPunycode();
         initᴛidnaSparse();
-        initᴛΔlookup();
-        initᴛLookup();
-        initᴛdisplay();
-        initᴛDisplay();
-        initᴛregistration();
-        initᴛRegistration();
     }
 } // end idna_package

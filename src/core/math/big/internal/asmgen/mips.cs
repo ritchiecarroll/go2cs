@@ -5,8 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchMIPS;
-internal static void initᴛArchMIPS() { ArchMIPS = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchMIPS { public static ж<Arch> ArchMIPS = Ꮡ(new Arch(
     Name: "mipsx"u8,
     Build: "mips || mipsle"u8,
     WordBits: 32,

@@ -414,7 +414,7 @@ internal static (ж<profile.Profile>, error) collectProfile(ж<pprof.Profile> �
     return (p0, default!);
 }
 
-internal static map<handler, bool> profileSupportsDelta = new map<handler, bool>{
+[GoLazy] partial class lazyᴛprofileSupportsDelta { internal static map<handler, bool> profileSupportsDelta = new map<handler, bool>{
     ["allocs"u8] = true,
     ["block"u8] = true,
     ["goroutineleak"u8] = true,
@@ -422,9 +422,9 @@ internal static map<handler, bool> profileSupportsDelta = new map<handler, bool>
     ["heap"u8] = true,
     ["mutex"u8] = true,
     ["threadcreate"u8] = true
-};
+}; }
 
-internal static map<@string, @string> profileDescriptions = new map<@string, @string>{
+[GoLazy] partial class lazyᴛprofileDescriptions { internal static map<@string, @string> profileDescriptions = new map<@string, @string>{
     ["allocs"u8] = "A sampling of all past memory allocations"u8,
     ["block"u8] = "Stack traces that led to blocking on synchronization primitives"u8,
     ["cmdline"u8] = "The command line invocation of the current program"u8,
@@ -435,7 +435,7 @@ internal static map<@string, @string> profileDescriptions = new map<@string, @st
     ["symbol"u8] = "Maps given program counters to function names. Counters can be specified in a GET raw query or POST body, multiple counters are separated by '+'."u8,
     ["threadcreate"u8] = "Stack traces that led to the creation of new OS threads"u8,
     ["trace"u8] = "A trace of execution of the current program. You can specify the duration in the seconds GET parameter. After you get the trace file, use the go tool trace command to investigate the trace."u8
-};
+}; }
 
 [GoInit] internal static void initΔ1() {
     if (goexperiment.GoroutineLeakProfile) {

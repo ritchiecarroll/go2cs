@@ -5,8 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchARM;
-internal static void initᴛArchARM() { ArchARM = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchARM { public static ж<Arch> ArchARM = Ꮡ(new Arch(
     Name: "arm"u8,
     WordBits: 32,
     WordBytes: 4,

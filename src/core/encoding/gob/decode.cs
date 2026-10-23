@@ -917,7 +917,7 @@ internal static void ignoreGobDecoder(this ref Decoder dec, ж<decoderState> Ꮡ
 }
 
 // Index by Go types.
-internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decOpTable = new golib.SparseArray<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
+[GoLazy] partial class lazyᴛdecOpTable { internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decOpTable = new golib.SparseArray<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>>{
     [1] = decBool,
     [3] = decInt8,
     [4] = decInt16,
@@ -932,7 +932,7 @@ internal static array<Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> d
     [15] = decComplex64,
     [16] = decComplex128,
     [24] = decString
-}.array(25);
+}.array(25); }
 
 // Indexed by gob types.  tComplex will be added during type.init().
 internal static map<typeId, Action<ж<decInstr>, ж<decoderState>, reflectꓸValue>> decIgnoreOpMap;

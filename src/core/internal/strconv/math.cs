@@ -110,7 +110,7 @@ internal static bool divisiblePow5(uint64 x, nint p) {
 internal static UntypedInt maxUint64 => /* 1<<64 - 1 */ 18446744073709551615;
 
 // div5Tab[p-1] is the multiplicative inverse of 5^p and maxUint64/5^p.
-internal static array<array<uint64>> div5Tab = new array<uint64>[]{
+[GoLazy] partial class lazyᴛdiv5Tab { internal static array<array<uint64>> div5Tab = new array<uint64>[]{
     new uint64[]{0xcccccccccccccccdUL, /* maxUint64 / 5 */ 3689348814741910323UL}.array(),
     new uint64[]{0x8f5c28f5c28f5c29UL, /* maxUint64 / 5 / 5 */ 737869762948382064UL}.array(),
     new uint64[]{0x1cac083126e978d5UL, /* maxUint64 / 5 / 5 / 5 */ 147573952589676412UL}.array(),
@@ -133,7 +133,7 @@ internal static array<array<uint64>> div5Tab = new array<uint64>[]{
     new uint64[]{0xd489e3a9addec2d1UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 193428UL}.array(),
     new uint64[]{0x90e860bb892c8d5dUL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 38685UL}.array(),
     new uint64[]{0x502e79bf1b6f4f79UL, /* maxUint64 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 / 5 */ 7737UL}.array()
-}.array();
+}.array(); }
 
 // trimZeros trims trailing zeros from x.
 // It finds the largest p such that x % 10^p == 0

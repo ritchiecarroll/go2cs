@@ -226,6 +226,10 @@ type Visitor struct {
 	// the relocation exists to wait for.
 	globalDeclHoistStatements bool
 
+	// inLazyInitializer is set while a lazy package var's initializer converts (visitValueSpec): a read of an exported
+	// lazy var there renders its holder's initial-value snapshot (convIdent), the value Go's init-time build saw.
+	inLazyInitializer bool
+
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder

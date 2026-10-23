@@ -7,7 +7,7 @@ partial class platform_package {
 
 // List is the list of all valid GOOS/GOARCH combinations,
 // including known-broken ports.
-public static slice<OSArch> List = new OSArch[]{
+[GoLazy] partial class lazyᴛList { public static slice<OSArch> List = new OSArch[]{
     new("aix"u8, "ppc64"u8),
     new("android"u8, "386"u8),
     new("android"u8, "amd64"u8),
@@ -58,9 +58,9 @@ public static slice<OSArch> List = new OSArch[]{
     new("windows"u8, "386"u8),
     new("windows"u8, "amd64"u8),
     new("windows"u8, "arm64"u8)
-}.slice();
+}.slice(); }
 
-internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
+[GoLazy] partial class lazyᴛdistInfo { internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
     [new("aix"u8, "ppc64"u8)] = new(CgoSupported: true),
     [new("android"u8, "386"u8)] = new(CgoSupported: true),
     [new("android"u8, "amd64"u8)] = new(CgoSupported: true),
@@ -111,6 +111,6 @@ internal static map<OSArch, osArchInfo> distInfo = new map<OSArch, osArchInfo>{
     [new("windows"u8, "386"u8)] = new(CgoSupported: true, FirstClass: true),
     [new("windows"u8, "amd64"u8)] = new(CgoSupported: true, FirstClass: true),
     [new("windows"u8, "arm64"u8)] = new(CgoSupported: true)
-};
+}; }
 
 } // end platform_package

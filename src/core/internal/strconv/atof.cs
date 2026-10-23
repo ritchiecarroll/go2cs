@@ -456,11 +456,11 @@ overflow:
 }
 
 // Exact powers of 10.
-internal static slice<float64> float64pow10 = new float64[]{
+[GoLazy] partial class lazyᴛfloat64pow10 { internal static slice<float64> float64pow10 = new float64[]{
     1e0D, 1e1D, 1e2D, 1e3D, 1e4D, 1e5D, 1e6D, 1e7D, 1e8D, 1e9D,
     1e10D, 1e11D, 1e12D, 1e13D, 1e14D, 1e15D, 1e16D, 1e17D, 1e18D, 1e19D,
     1e20D, 1e21D, 1e22D
-}.slice();
+}.slice(); }
 
 internal static slice<float32> float32pow10 = new float32[]{1e0F, 1e1F, 1e2F, 1e3F, 1e4F, 1e5F, 1e6F, 1e7F, 1e8F, 1e9F, 1e10F}.slice();
 

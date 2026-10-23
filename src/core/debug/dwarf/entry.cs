@@ -114,7 +114,7 @@ internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off,
 // attrIsExprloc indicates attributes that allow exprloc values that
 // are encoded as block values in DWARF 2 and 3. See DWARF 4, Figure
 // 20.
-internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
+[GoLazy] partial class lazyᴛattrIsExprloc { internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
     [AttrLocation] = true,
     [AttrByteSize] = true,
     [AttrBitOffset] = true,
@@ -135,11 +135,11 @@ internal static map<Attr, bool> attrIsExprloc = new map<Attr, bool>{
     [AttrAssociated] = true,
     [AttrDataLocation] = true,
     [AttrStride] = true
-};
+}; }
 
 // attrPtrClass indicates the *ptr class of attributes that have
 // encoding formSecOffset in DWARF 4 or formData* in DWARF 2 and 3.
-internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
+[GoLazy] partial class lazyᴛattrPtrClass { internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
     [AttrLocation] = ClassLocListPtr,
     [AttrStmtList] = ClassLinePtr,
     [AttrStringLength] = ClassLocListPtr,
@@ -158,7 +158,7 @@ internal static map<Attr, Class> attrPtrClass = new map<Attr, Class>{
     [AttrAddrBase] = ClassAddrPtr,
     [AttrRnglistsBase] = ClassRngListsPtr,
     [AttrLoclistsBase] = ClassLocListPtr
-};
+}; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cannotDetermineClassOfˢ = "cannot determine class of unknown attribute form"u8;

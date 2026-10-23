@@ -96,7 +96,7 @@ public static @string String(this EventKind e) {
     return eventKindStrings[e];
 }
 
-internal static array<@string> eventKindStrings = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛeventKindStrings { internal static array<@string> eventKindStrings = new golib.SparseArray<@string>{
     [EventBad] = "Bad"u8,
     [EventSync] = "Sync"u8,
     [EventMetric] = "Metric"u8,
@@ -112,7 +112,7 @@ internal static array<@string> eventKindStrings = new golib.SparseArray<@string>
     [EventLog] = "Log"u8,
     [EventStateTransition] = "StateTransition"u8,
     [EventExperimental] = "Experimental"u8
-}.array();
+}.array(); }
 
 internal static ΔTime maxTime => /* Time(math.MaxInt64) */ 9223372036854775807;
 
@@ -1334,7 +1334,7 @@ public static ExperimentalEvent Experimental(this ΔEvent e) {
 
 internal static tracev2.EventType evSync => /* ^tracev2.EventType(0) */ 255;
 
-internal static array<EventKind> tracev2Type2Kind = new golib.SparseArray<EventKind>{
+[GoLazy] partial class lazyᴛtracev2Type2Kind { internal static array<EventKind> tracev2Type2Kind = new golib.SparseArray<EventKind>{
     [tracev2.EvCPUSample] = EventStackSample,
     [tracev2.EvProcsChange] = EventMetric,
     [tracev2.EvProcStart] = EventStateTransition,
@@ -1386,28 +1386,28 @@ internal static array<EventKind> tracev2Type2Kind = new golib.SparseArray<EventK
     [tracev2.EvGoroutineStackAlloc] = EventExperimental,
     [tracev2.EvGoroutineStackFree] = EventExperimental,
     [evSync] = EventSync
-}.array(256);
+}.array(256); }
 
-internal static array<GoState> tracev2GoStatus2GoState = new golib.SparseArray<GoState>{
+[GoLazy] partial class lazyᴛtracev2GoStatus2GoState { internal static array<GoState> tracev2GoStatus2GoState = new golib.SparseArray<GoState>{
     [tracev2.GoRunnable] = GoRunnable,
     [tracev2.GoRunning] = GoRunning,
     [tracev2.GoWaiting] = GoWaiting,
     [tracev2.GoSyscall] = GoSyscall
-}.array(5);
+}.array(5); }
 
-internal static array<tracev2.GoStatus> goState2Tracev2GoStatus = new golib.SparseArray<tracev2.GoStatus>{
+[GoLazy] partial class lazyᴛgoState2Tracev2GoStatus { internal static array<tracev2.GoStatus> goState2Tracev2GoStatus = new golib.SparseArray<tracev2.GoStatus>{
     [GoRunnable] = tracev2.GoRunnable,
     [GoRunning] = tracev2.GoRunning,
     [GoWaiting] = tracev2.GoWaiting,
     [GoSyscall] = tracev2.GoSyscall
-}.array(6);
+}.array(6); }
 
-internal static array<ProcState> tracev2ProcStatus2ProcState = new golib.SparseArray<ProcState>{
+[GoLazy] partial class lazyᴛtracev2ProcStatus2ProcState { internal static array<ProcState> tracev2ProcStatus2ProcState = new golib.SparseArray<ProcState>{
     [tracev2.ProcRunning] = ProcRunning,
     [tracev2.ProcIdle] = ProcIdle,
     [tracev2.ProcSyscall] = ProcRunning,
     [tracev2.ProcSyscallAbandoned] = ProcIdle
-}.array(5);
+}.array(5); }
 
 internal static array<tracev2.ProcStatus> procState2Tracev2ProcStatus = new golib.SparseArray<tracev2.ProcStatus>{
     [ProcRunning] = tracev2.ProcRunning,

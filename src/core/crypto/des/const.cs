@@ -13,7 +13,7 @@ namespace go.crypto;
 partial class des_package {
 
 // Used to perform an initial permutation of a 64-bit input block.
-internal static array<byte> initialPermutation = new byte[]{
+[GoLazy] partial class lazyᴛinitialPermutation { internal static array<byte> initialPermutation = new byte[]{
     6, 14, 22, 30, 38, 46, 54, 62,
     4, 12, 20, 28, 36, 44, 52, 60,
     2, 10, 18, 26, 34, 42, 50, 58,
@@ -22,11 +22,11 @@ internal static array<byte> initialPermutation = new byte[]{
     5, 13, 21, 29, 37, 45, 53, 61,
     3, 11, 19, 27, 35, 43, 51, 59,
     1, 9, 17, 25, 33, 41, 49, 57
-}.array();
+}.array(); }
 
 // Used to perform a final permutation of a 4-bit preoutput block. This is the
 // inverse of initialPermutation
-internal static array<byte> finalPermutation = new byte[]{
+[GoLazy] partial class lazyᴛfinalPermutation { internal static array<byte> finalPermutation = new byte[]{
     24, 56, 16, 48, 8, 40, 0, 32,
     25, 57, 17, 49, 9, 41, 1, 33,
     26, 58, 18, 50, 10, 42, 2, 34,
@@ -35,30 +35,30 @@ internal static array<byte> finalPermutation = new byte[]{
     29, 61, 21, 53, 13, 45, 5, 37,
     30, 62, 22, 54, 14, 46, 6, 38,
     31, 63, 23, 55, 15, 47, 7, 39
-}.array();
+}.array(); }
 
 // Used to expand an input block of 32 bits, producing an output block of 48
 // bits.
-internal static array<byte> expansionFunction = new byte[]{
+[GoLazy] partial class lazyᴛexpansionFunction { internal static array<byte> expansionFunction = new byte[]{
     0, 31, 30, 29, 28, 27, 28, 27,
     26, 25, 24, 23, 24, 23, 22, 21,
     20, 19, 20, 19, 18, 17, 16, 15,
     16, 15, 14, 13, 12, 11, 12, 11,
     10, 9, 8, 7, 8, 7, 6, 5,
     4, 3, 4, 3, 2, 1, 0, 31
-}.array();
+}.array(); }
 
 // Yields a 32-bit output from a 32-bit input
-internal static array<byte> permutationFunction = new byte[]{
+[GoLazy] partial class lazyᴛpermutationFunction { internal static array<byte> permutationFunction = new byte[]{
     16, 25, 12, 11, 3, 20, 4, 15,
     31, 17, 9, 6, 27, 14, 1, 22,
     30, 24, 8, 18, 0, 5, 29, 23,
     13, 19, 2, 26, 10, 21, 28, 7
-}.array();
+}.array(); }
 
 // Used in the key schedule to select 56 bits
 // from a 64-bit input.
-internal static array<byte> permutedChoice1 = new byte[]{
+[GoLazy] partial class lazyᴛpermutedChoice1 { internal static array<byte> permutedChoice1 = new byte[]{
     7, 15, 23, 31, 39, 47, 55, 63,
     6, 14, 22, 30, 38, 46, 54, 62,
     5, 13, 21, 29, 37, 45, 53, 61,
@@ -66,22 +66,22 @@ internal static array<byte> permutedChoice1 = new byte[]{
     33, 41, 49, 57, 2, 10, 18, 26,
     34, 42, 50, 58, 3, 11, 19, 27,
     35, 43, 51, 59, 36, 44, 52, 60
-}.array();
+}.array(); }
 
 // Used in the key schedule to produce each subkey by selecting 48 bits from
 // the 56-bit input
-internal static array<byte> permutedChoice2 = new byte[]{
+[GoLazy] partial class lazyᴛpermutedChoice2 { internal static array<byte> permutedChoice2 = new byte[]{
     42, 39, 45, 32, 55, 51, 53, 28,
     41, 50, 35, 46, 33, 37, 44, 52,
     30, 48, 40, 49, 29, 36, 43, 54,
     15, 4, 25, 19, 9, 1, 26, 16,
     5, 11, 23, 8, 12, 7, 17, 0,
     22, 3, 10, 14, 6, 20, 27, 24
-}.array();
+}.array(); }
 
 // 8 S-boxes composed of 4 rows and 16 columns
 // Used in the DES cipher function
-internal static array<array<array<uint8>>> sBoxes = new array<array<uint8>>[]{
+[GoLazy] partial class lazyᴛsBoxes { internal static array<array<array<uint8>>> sBoxes = new array<array<uint8>>[]{
     // S-box 1
     new array<uint8>[]{
         new uint8[]{14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7}.array(),
@@ -130,9 +130,9 @@ internal static array<array<array<uint8>>> sBoxes = new array<array<uint8>>[]{
         new uint8[]{1, 15, 13, 8, 10, 3, 7, 4, 12, 5, 6, 11, 0, 14, 9, 2}.array(),
         new uint8[]{7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8}.array(),
         new uint8[]{2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11}.array()}.array()
-}.array();
+}.array(); }
 
 // Size of left rotation per round in each half of the key schedule
-internal static array<uint8> ksRotations = new uint8[]{1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1}.array();
+[GoLazy] partial class lazyᴛksRotations { internal static array<uint8> ksRotations = new uint8[]{1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1}.array(); }
 
 } // end des_package

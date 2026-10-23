@@ -11,7 +11,7 @@ using math;
 
 partial class sha256_package {
 
-internal static array<uint32> _K = new uint32[]{
+[GoLazy] partial class lazyᴛ_K { internal static array<uint32> _K = new uint32[]{
     0x428a2f98,
     0x71374491,
     0xb5c0fbcfU,
@@ -76,7 +76,7 @@ internal static array<uint32> _K = new uint32[]{
     0xa4506cebU,
     0xbef9a3f7U,
     0xc67178f2U
-}.array();
+}.array(); }
 
 internal static void blockGeneric(ref Digest dig, slice<byte> p) {
     array<uint32> w = new(64);

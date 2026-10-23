@@ -821,8 +821,7 @@ internal static void defaultUsage(this ж<FlagSet> Ꮡf) {
 // Custom usage functions may choose to exit the program; by default exiting
 // happens anyway as the command line's error handling strategy is set to
 // [ExitOnError].
-public static Action Usage;
-internal static void initᴛUsage() { Usage = () => {
+[GoLazy] partial class lazyᴛUsage { public static Action Usage = () => {
     fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n"u8, os.Args[0]);
     PrintDefaults();
 }; }

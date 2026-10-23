@@ -154,7 +154,7 @@ public static Hash BLAKE2b_384 => 18;      // import golang.org/x/crypto/blake2b
 public static Hash BLAKE2b_512 => 19;      // import golang.org/x/crypto/blake2b
 internal static Hash maxHash => 20;
 
-internal static slice<uint8> digestSizes = new golib.SparseArray<uint8>{
+[GoLazy] partial class lazyᴛdigestSizes { internal static slice<uint8> digestSizes = new golib.SparseArray<uint8>{
     [(int)((nuint)MD4)] = 16,
     [(int)((nuint)MD5)] = 16,
     [(int)((nuint)SHA1)] = 20,
@@ -174,7 +174,7 @@ internal static slice<uint8> digestSizes = new golib.SparseArray<uint8>{
     [(int)((nuint)BLAKE2b_256)] = 32,
     [(int)((nuint)BLAKE2b_384)] = 48,
     [(int)((nuint)BLAKE2b_512)] = 64
-}.slice();
+}.slice(); }
 
 // Size returns the length, in bytes, of a digest resulting from the given hash
 // function. It doesn't require that the hash function in question be linked

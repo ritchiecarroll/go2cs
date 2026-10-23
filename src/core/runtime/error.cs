@@ -143,7 +143,7 @@ partial struct boundsError {
 // boundsErrorFmts provide error text for various out-of-bounds panics.
 // Note: if you change these strings, you should adjust the size of the buffer
 // in boundsError.Error below as well.
-internal static array<@string> boundsErrorFmts = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛboundsErrorFmts { internal static array<@string> boundsErrorFmts = new golib.SparseArray<@string>{
     [abi.BoundsIndex] = "index out of range [%x] with length %y"u8,
     [abi.BoundsSliceAlen] = "slice bounds out of range [:%x] with length %y"u8,
     [abi.BoundsSliceAcap] = "slice bounds out of range [:%x] with capacity %y"u8,
@@ -153,10 +153,10 @@ internal static array<@string> boundsErrorFmts = new golib.SparseArray<@string>{
     [abi.BoundsSlice3B] = "slice bounds out of range [:%x:%y]"u8,
     [abi.BoundsSlice3C] = "slice bounds out of range [%x:%y:]"u8,
     [abi.BoundsConvert] = "cannot convert slice with length %y to array or pointer to array with length %x"u8
-}.array();
+}.array(); }
 
 // boundsNegErrorFmts are overriding formats if x is negative. In this case there's no need to report y.
-internal static array<@string> boundsNegErrorFmts = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛboundsNegErrorFmts { internal static array<@string> boundsNegErrorFmts = new golib.SparseArray<@string>{
     [abi.BoundsIndex] = "index out of range [%x]"u8,
     [abi.BoundsSliceAlen] = "slice bounds out of range [:%x]"u8,
     [abi.BoundsSliceAcap] = "slice bounds out of range [:%x]"u8,
@@ -165,7 +165,7 @@ internal static array<@string> boundsNegErrorFmts = new golib.SparseArray<@strin
     [abi.BoundsSlice3Acap] = "slice bounds out of range [::%x]"u8,
     [abi.BoundsSlice3B] = "slice bounds out of range [:%x:]"u8,
     [abi.BoundsSlice3C] = "slice bounds out of range [%x::]"u8
-}.array();
+}.array(); }
 
 internal static void RuntimeError(this boundsError e) {
 }

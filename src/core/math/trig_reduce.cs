@@ -82,7 +82,7 @@ internal static (uint64 j, float64 z) trigReduce(float64 x) {
 // that is, 4/pi = Sum mPi4[i]*2^(-64*i)
 // 19 64-bit digits and the leading one bit give 1217 bits
 // of precision to handle the largest possible float64 exponent.
-internal static array<uint64> mPi4 = new uint64[]{
+[GoLazy] partial class lazyᴛmPi4 { internal static array<uint64> mPi4 = new uint64[]{
     0x0000000000000001,
     0x45f306dc9c882a53UL,
     0xf84eafa3ea69bb81UL,
@@ -103,6 +103,6 @@ internal static array<uint64> mPi4 = new uint64[]{
     0x7a0e73ef14a525d4UL,
     0xd7f6bf623f1aba10UL,
     0xac06608df8f6d757UL
-}.array();
+}.array(); }
 
 } // end math_package

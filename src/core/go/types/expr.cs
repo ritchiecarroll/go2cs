@@ -126,13 +126,13 @@ internal static array<@string> op2str1 = new golib.SparseArray<@string>{
 }.array(20);
 
 // This is only used for operations that may cause overflow.
-internal static array<@string> op2str2 = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛop2str2 { internal static array<@string> op2str2 = new golib.SparseArray<@string>{
     [12] = "addition"u8,
     [13] = "subtraction"u8,
     [19] = "bitwise XOR"u8,
     [14] = "multiplication"u8,
     [20] = "shift"u8
-}.array(21);
+}.array(21); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string cannotUseOutsideOfˢ = "cannot use ~ outside of interface or type constraint"u8;

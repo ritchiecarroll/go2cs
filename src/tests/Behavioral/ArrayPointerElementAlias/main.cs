@@ -11,7 +11,7 @@ internal static nint readInto(ж<uint16> Ꮡbuf, nint toread, slice<uint16> src)
 
 internal static void bumpAll(ж<byte> Ꮡp) {
     var a = array<byte>.AliasPointer(Ꮡp, 4);
-    foreach (var i in range(a)) {
+    foreach (var i in range(a, 4)) {
         a.Value[i]++;
     }
 }

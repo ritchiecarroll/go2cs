@@ -67,7 +67,7 @@ public static ΔSignal SIGPIPE => /* Signal(0xd) */ 13;
 public static ΔSignal SIGALRM => /* Signal(0xe) */ 14;
 public static ΔSignal SIGTERM => /* Signal(0xf) */ 15;
 
-internal static array<@string> signals = new array<@string>(16){
+[GoLazy] partial class lazyᴛsignals { internal static array<@string> signals = new array<@string>(16){
     [1] = "hangup"u8,
     [2] = "interrupt"u8,
     [3] = "quit"u8,
@@ -83,7 +83,7 @@ internal static array<@string> signals = new array<@string>(16){
     [13] = "broken pipe"u8,
     [14] = "alarm clock"u8,
     [15] = "terminated"u8
-};
+}; }
 
 internal static UntypedInt fileFlagsMask => 0xFFF00000;
 

@@ -8,7 +8,6 @@ namespace go.net;
 
 partial class http_package {
     static http_package() {
-        initᴛhttp2frameParsers();
         initᴛtimeFormats();
         initᴛDefaultServeMux();
         initᴛDefaultTransport();

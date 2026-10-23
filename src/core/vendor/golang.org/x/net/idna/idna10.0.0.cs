@@ -287,22 +287,18 @@ internal static void initᴛPunycode() { Punycode = punycode; }
 // Lookup is the recommended profile for looking up domain names, according
 // to Section 5 of RFC 5891. The exact configuration of this profile may
 // change over time.
-public static ж<Profile> Lookup;
-internal static void initᴛLookup() { Lookup = Δlookup; }
+[GoLazy] partial class lazyᴛLookup { public static ж<Profile> Lookup = Δlookup; }
 
 // Display is the recommended profile for displaying domain names.
 // The configuration of this profile may change over time.
-public static ж<Profile> Display;
-internal static void initᴛDisplay() { Display = display; }
+[GoLazy] partial class lazyᴛDisplay { public static ж<Profile> Display = display; }
 
 // Registration is the recommended profile for checking whether a given
 // IDN is valid for registration, according to Section 4 of RFC 5891.
-public static ж<Profile> Registration;
-internal static void initᴛRegistration() { Registration = registration; }
+[GoLazy] partial class lazyᴛRegistration { public static ж<Profile> Registration = registration; }
 
 internal static ж<Profile> punycode = Ꮡ(new Profile(nil));
-internal static ж<Profile> Δlookup;
-internal static void initᴛΔlookup() { Δlookup = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛΔlookup { internal static ж<Profile> Δlookup = Ꮡ(new Profile(new options(
     transitional: transitionalLookup,
     useSTD3Rules: true,
     checkHyphens: true,
@@ -313,8 +309,7 @@ internal static void initᴛΔlookup() { Δlookup = Ꮡ(new Profile(new options(
     bidirule: bidirule.ValidString
 )
 )); }
-internal static ж<Profile> display;
-internal static void initᴛdisplay() { display = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛdisplay { internal static ж<Profile> display = Ꮡ(new Profile(new options(
     useSTD3Rules: true,
     checkHyphens: true,
     checkJoiners: true,
@@ -324,8 +319,7 @@ internal static void initᴛdisplay() { display = Ꮡ(new Profile(new options(
     bidirule: bidirule.ValidString
 )
 )); }
-internal static ж<Profile> registration;
-internal static void initᴛregistration() { registration = Ꮡ(new Profile(new options(
+[GoLazy] partial class lazyᴛregistration { internal static ж<Profile> registration = Ꮡ(new Profile(new options(
     useSTD3Rules: true,
     verifyDNSLength: true,
     checkHyphens: true,
@@ -722,7 +716,7 @@ internal static joinState stateBeforeVirama => 3;
 internal static joinState stateAfter => 4;
 internal static joinState stateFAIL => 5;
 
-internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new golib.SparseArray<array<joinState>>{
+[GoLazy] partial class lazyᴛjoinStates { internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new golib.SparseArray<array<joinState>>{
     [stateStart] = new golib.SparseArray<joinState>{
         [joiningL] = stateBefore,
         [joiningD] = stateBefore,
@@ -761,7 +755,7 @@ internal static slice<array<joinState>> joinStates = GoReflect.WithElemDims(new 
         [joinZWNJ] = stateFAIL,
         [joinZWJ] = stateFAIL,
         [joinVirama] = stateFAIL}.array(8)
-}.slice(), 8);
+}.slice(), 8); }
 
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.

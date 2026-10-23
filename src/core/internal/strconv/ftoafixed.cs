@@ -8,10 +8,10 @@ using math;
 
 partial class strconv_package {
 
-internal static array<uint64> uint64pow10 = new uint64[]{
+[GoLazy] partial class lazyᴛuint64pow10 { internal static array<uint64> uint64pow10 = new uint64[]{
     1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000,
     10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000, 1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000, 10000000000000000000
-}.array();
+}.array(); }
 
 // fixedFtoa formats a number of decimal digits of mant*(2^exp) into d,
 // where mant > 0 and 1 ≤ digits ≤ 18.

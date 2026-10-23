@@ -57,7 +57,7 @@ partial struct compressionLevel {
     internal nint level, good, lazy, nice, chain, fastSkipHashing;
 }
 
-internal static slice<compressionLevel> levels = new compressionLevel[]{
+[GoLazy] partial class lazyᴛlevels { internal static slice<compressionLevel> levels = new compressionLevel[]{
     new(0, 0, 0, 0, 0, 0), // NoCompression.
     new(1, 0, 0, 0, 0, 0), // BestSpeed uses a custom algorithm; see deflatefast.go.
     // For levels 2-3 we don't bother trying with lazy matches.
@@ -71,7 +71,7 @@ internal static slice<compressionLevel> levels = new compressionLevel[]{
     new(7, 8, 32, 128, 256, skipNever),
     new(8, 32, 128, 258, 1024, skipNever),
     new(9, 32, 258, 258, 4096, skipNever)
-}.slice();
+}.slice(); }
 
 partial struct compressor {
     /*embed*/ internal compressionLevel compressionLevel;

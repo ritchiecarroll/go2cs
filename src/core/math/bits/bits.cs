@@ -52,19 +52,19 @@ public static nint LeadingZeros64(uint64 x) {
 // See http://keithandkatie.com/keith/papers/debruijn.html
 internal static UntypedInt deBruijn32 => 0x077CB531;
 
-internal static array<byte> deBruijn32tab = new byte[]{
+[GoLazy] partial class lazyᴛdeBruijn32tab { internal static array<byte> deBruijn32tab = new byte[]{
     0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
     31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-}.array();
+}.array(); }
 
 internal static UntypedInt deBruijn64 => 0x03f79d71b4ca8b09;
 
-internal static array<byte> deBruijn64tab = new byte[]{
+[GoLazy] partial class lazyᴛdeBruijn64tab { internal static array<byte> deBruijn64tab = new byte[]{
     0, 1, 56, 2, 57, 49, 28, 3, 61, 58, 42, 50, 38, 29, 17, 4,
     62, 47, 59, 36, 45, 43, 51, 22, 53, 39, 33, 30, 24, 18, 12, 5,
     63, 55, 48, 27, 60, 41, 37, 16, 46, 35, 44, 21, 52, 32, 23, 11,
     54, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9, 13, 8, 7, 6
-}.array();
+}.array(); }
 
 // TrailingZeros returns the number of trailing zero bits in x; the result is [UintSize] for x == 0.
 public static nint TrailingZeros(nuint x) {

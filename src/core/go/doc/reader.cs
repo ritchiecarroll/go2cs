@@ -1031,7 +1031,7 @@ public static bool IsPredeclared(@string s) {
     return predeclaredTypes[s] || predeclaredFuncs[s] || predeclaredConstants[s];
 }
 
-internal static map<@string, bool> predeclaredTypes = new map<@string, bool>{
+[GoLazy] partial class lazyᴛpredeclaredTypes { internal static map<@string, bool> predeclaredTypes = new map<@string, bool>{
     ["any"u8] = true,
     ["bool"u8] = true,
     ["byte"u8] = true,
@@ -1054,9 +1054,9 @@ internal static map<@string, bool> predeclaredTypes = new map<@string, bool>{
     ["uint32"u8] = true,
     ["uint64"u8] = true,
     ["uintptr"u8] = true
-};
+}; }
 
-internal static map<@string, bool> predeclaredFuncs = new map<@string, bool>{
+[GoLazy] partial class lazyᴛpredeclaredFuncs { internal static map<@string, bool> predeclaredFuncs = new map<@string, bool>{
     ["append"u8] = true,
     ["cap"u8] = true,
     ["clear"u8] = true,
@@ -1075,7 +1075,7 @@ internal static map<@string, bool> predeclaredFuncs = new map<@string, bool>{
     ["println"u8] = true,
     ["real"u8] = true,
     ["recover"u8] = true
-};
+}; }
 
 internal static map<@string, bool> predeclaredConstants = new map<@string, bool>{
     ["false"u8] = true,

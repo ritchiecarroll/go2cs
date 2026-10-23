@@ -5,7 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchLoong64 = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchLoong64 { public static ж<Arch> ArchLoong64 = Ꮡ(new Arch(
     Name: "loong64"u8,
     WordBits: 64,
     WordBytes: 8,
@@ -43,6 +43,6 @@ public static ж<Arch> ArchLoong64 = Ꮡ(new Arch(
 
     jmpZero: "BEQ %s, %s"u8,
     jmpNonZero: "BNE %s, %s"u8
-));
+)); }
 
 } // end asmgen_package

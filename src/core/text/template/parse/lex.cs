@@ -80,7 +80,7 @@ internal static itemType itemRange => 32; // range keyword
 internal static itemType itemTemplate => 33; // template keyword
 internal static itemType itemWith => 34; // with keyword
 
-internal static map<@string, itemType> key = new map<@string, itemType>{
+[GoLazy] partial class lazyᴛkey { internal static map<@string, itemType> key = new map<@string, itemType>{
     ["."u8] = itemDot,
     ["block"u8] = itemBlock,
     ["break"u8] = itemBreak,
@@ -93,7 +93,7 @@ internal static map<@string, itemType> key = new map<@string, itemType>{
     ["nil"u8] = itemNil,
     ["template"u8] = itemTemplate,
     ["with"u8] = itemWith
-};
+}; }
 
 internal static UntypedInt eof => -1;
 

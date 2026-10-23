@@ -142,7 +142,7 @@ public static @string String(this ΔKind k) {
     return kindNames[0];
 }
 
-internal static slice<@string> kindNames = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid"u8,
     [Bool] = "bool"u8,
     [Int] = "int"u8,
@@ -170,7 +170,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [ΔString] = "string"u8,
     [Struct] = "struct"u8,
     [UnsafePointer] = "unsafe.Pointer"u8
-}.slice();
+}.slice(); }
 
 // go2cs generated this placeholder — func TypeOf is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
