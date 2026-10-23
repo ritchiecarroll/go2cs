@@ -770,7 +770,11 @@ legacy `Sending` path):
   (the make default in `convCallExpr.go` covers plain and named channels; the gen Channel template's
   wrapper constructor no longer clamps `size < 1` to 1). A parked operation blocks its goroutine's
   own dedicated thread (`Goroutine.Start`), so parking costs nobody else's capacity and a program
-  can park thousands of goroutines at once — the shape `GoroutineParkStorm` guards. golib used to
+  can park thousands of goroutines at once — the shape `GoroutineParkStorm` guards. The thread is
+  dedicated for the goroutine's life and reused after it (`GoroutineThreadPool`, as Go reuses an M),
+  because creating one costs ~100 µs and does not get faster with more creators; a goroutine that
+  finds no idle thread still gets a new one, so reuse changes what a `go` statement costs, never
+  how many can run. golib used to
   queue goroutines on the shared ThreadPool and raise its min-thread floor to
   `max(256, 4 × processor count)` to compensate; both the floor and its premise retired with the
   dedicated-thread executor (`docs/phase4/DESIGN-cooperative-scheduler.md`).

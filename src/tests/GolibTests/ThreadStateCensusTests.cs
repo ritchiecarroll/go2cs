@@ -181,6 +181,61 @@ public class ThreadStateCensusTests
     [TestMethod]
     public void PooledThread_CarriesNothingFromItsPreviousGoroutine()
     {
+        using CoroDriver driver = new();
+        RunReuseScenario(driver.Run);
+    }
+
+    // ONE long-lived goroutine drives every coro of the scenario. Goroutines share GoroutineThreadPool with
+    // coros, so a fresh driving goroutine per coro would itself take the worker coro A just returned (the
+    // most recently idled, LIFO), and coro B would never land on A's thread.
+    private sealed class CoroDriver : IDisposable
+    {
+        private readonly System.Collections.Concurrent.BlockingCollection<Action> m_work = new();
+
+        public CoroDriver() => Goroutine.Start(() =>
+        {
+            foreach (Action item in m_work.GetConsumingEnumerable())
+                item();
+        });
+
+        // Runs work as a coro body, driven from the driver goroutine, and waits for it.
+        public void Run(Action work)
+        {
+            Exception? error = null;
+            using ManualResetEventSlim done = new(false);
+
+            m_work.Add(() =>
+            {
+                try
+                {
+                    Coro.Start(work).Switch();
+                }
+                catch (Exception ex)
+                {
+                    error = ex;
+                }
+                finally
+                {
+                    done.Set();
+                }
+            });
+
+            Assert.IsTrue(done.Wait(30_000), "the coro never finished");
+
+            if (error is not null)
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+        }
+
+        public void Dispose() => m_work.CompleteAdding();
+    }
+
+    /// <summary>
+    /// Runs goroutine A, then goroutine B, each through <paramref name="runOnPooledThread"/> (which runs its
+    /// argument on a pooled thread and waits for it), and asserts B sees none of what A left behind.
+    /// GoroutinePoolTests drives the same scenario with plain goroutines.
+    /// </summary>
+    internal static void RunReuseScenario(Action<Action> runOnPooledThread)
+    {
         Assert.IsTrue(s_probeRegistered);
 
         int threadA = 0, threadB = 0;
@@ -217,11 +272,11 @@ public class ThreadStateCensusTests
 
         try
         {
-            OnGoroutine(() => Coro.Start(() =>
+            runOnPooledThread(() =>
             {
                 Volatile.Write(ref threadA, Environment.CurrentManagedThreadId);
                 goroutineA = Goroutine.Current!.Id;
-            }).Switch());
+            });
 
             Assert.IsTrue(planted.Wait(10_000), "the worker never reached the post-body seam");
 
@@ -237,27 +292,36 @@ public class ThreadStateCensusTests
         if (failure is not null)
             throw new AssertFailedException("planting goroutine A's leftovers failed", failure);
 
-        OnGoroutine(() => Coro.Start(() =>
+        // B is retried until it lands on A's thread. Goroutines share the pool with coros, so the coro runner's
+        // own driving goroutine takes an idle worker too, and which one B gets is not fixed. A retry on another
+        // thread proves nothing either way and harms nothing: A's leftovers were planted before A's thread was
+        // reset, so whatever runs on that thread next sees the reset or (reset planted out) the leftovers.
+        for (int attempt = 0; attempt < 20 && threadB != threadA; attempt++)
         {
-            try
-            {
-                threadB = Environment.CurrentManagedThreadId;
-                goroutineB = Goroutine.Current!.Id;
+            seenByB.Clear();
 
-                foreach ((string name, Func<object?> read, object? _) in Slots())
-                    seenByB[name] = read();
-            }
-            catch (Exception ex)
+            runOnPooledThread(() =>
             {
-                failure = ex;
-            }
-        }).Switch());
+                try
+                {
+                    threadB = Environment.CurrentManagedThreadId;
+                    goroutineB = Goroutine.Current!.Id;
 
-        if (failure is not null)
-            throw new AssertFailedException("goroutine B failed", failure);
+                    foreach ((string name, Func<object?> read, object? _) in Slots())
+                        seenByB[name] = read();
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                }
+            });
+
+            if (failure is not null)
+                throw new AssertFailedException("goroutine B failed", failure);
+        }
 
         if (threadA != threadB)
-            Assert.Inconclusive($"the pool did not reuse A's thread ({threadA} then {threadB}); nothing to assert");
+            Assert.Inconclusive($"the pool did not reuse A's thread in 20 tries ({threadA}, last {threadB}); nothing to assert");
 
         Assert.AreNotEqual(goroutineA, goroutineB, "B runs as a goroutine of its own, not A's identity");
 

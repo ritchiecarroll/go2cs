@@ -12,15 +12,18 @@ using System.Threading;
 namespace go.golib;
 
 /// <summary>
-/// Reuses goroutine-sized threads for <see cref="Coro"/> bodies, so a coro costs a hand-off rather
-/// than a thread creation.
+/// Reuses goroutine-sized threads for goroutines (<see cref="Goroutine.Start(Action)"/>) and
+/// <see cref="Coro"/> bodies, so starting one costs a hand-off rather than a thread creation.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Why.</b> A coro needs a stack of its own, and a fresh thread with the goroutine stack reserve
-/// (<see cref="Goroutine.StackReserve"/>) costs on the order of 100 µs to create and hand-shake -- once
-/// per <c>iter.Pull</c> and once per range-over-func loop, measured at ~110 µs a loop against ~1 µs for
-/// the thread-pool hand-off it replaced. An idle worker waits for its next body instead.
+/// <b>Why.</b> A goroutine needs a stack of its own, and a fresh thread with the goroutine stack reserve
+/// (<see cref="Goroutine.StackReserve"/>) costs on the order of 100 µs to create and hand-shake -- for a
+/// coro, once per <c>iter.Pull</c> and once per range-over-func loop, measured at ~110 µs a loop against
+/// ~1 µs for the thread-pool hand-off it replaced. Thread creation also does not scale: 6-9.5k threads a
+/// second on a 16-thread laptop whether 1 creator asks or 100, so a program starting goroutines by the
+/// million (runtime's TestChanSendBarrier, 10M) spent its life there and starved every other test beside
+/// it (2026-10-23). An idle worker waits for its next body instead.
 /// </para>
 /// <para>
 /// <b>What a worker carries between bodies: NOTHING.</b> Each body mints its own goroutine identity
@@ -136,8 +139,16 @@ internal static class GoroutineThreadPool
                 // goroutine would hand it to golib's own goroutine-exit machinery instead.
                 AfterBodyForTest?.Invoke();
 
-                // Nothing of that goroutine survives into the next one.
+                // A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling
+                // goroutine exits without unlocking the thread, the thread will be terminated"). Asked before
+                // the reset, which clears what the checks read.
+                if (GoroutineThreadState.MustRetire())
+                    return;
+
+                // Nothing of that goroutine survives into the next one -- its name included, so the next
+                // goroutine's Adopt names the thread for itself.
                 GoroutineThreadState.ResetForReuse();
+                Thread.CurrentThread.Name = null;
 
                 if (Interlocked.Increment(ref s_idleCount) > MaxIdle)
                 {
@@ -198,6 +209,43 @@ public static class GoroutineThreadState
         }
 
         return true;
+    }
+
+    private static readonly List<Func<bool>> s_retires = [];
+    private static Func<bool>[] s_retireSnapshot = [];
+
+    /// <summary>
+    /// Registers a check, asked on a pooled thread after each goroutine ends and before its state is reset,
+    /// that the thread must not be reused; returns true so it can initialize a static field.
+    /// </summary>
+    /// <param name="mustRetire">True when the goroutine that just ended leaves its thread unfit for another.</param>
+    /// <remarks>
+    /// <c>runtime</c> registers Go's one such rule: a goroutine that exits locked to its thread
+    /// (<c>LockOSThread</c> without its <c>UnlockOSThread</c>) takes the thread with it.
+    /// </remarks>
+    public static bool RegisterRetire(Func<bool> mustRetire)
+    {
+        lock (s_lock)
+        {
+            s_retires.Add(mustRetire);
+            s_retireSnapshot = [.. s_retires];
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// True when a registered check says the goroutine that just ended on this thread leaves it unfit for reuse.
+    /// </summary>
+    internal static bool MustRetire()
+    {
+        foreach (Func<bool> mustRetire in Volatile.Read(ref s_retireSnapshot))
+        {
+            if (mustRetire())
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
