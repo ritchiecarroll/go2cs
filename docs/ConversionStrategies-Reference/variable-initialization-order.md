@@ -109,21 +109,17 @@ internal static void initᴛpipeLabel() { pipeLabel = ((@string)labelPipe) + "!"
 
 Guarded by the `PackageVarInitOrder` behavioral test, which carries both halves: neutering the predicate collapses `pipeLabel` onto an empty `@string` (stdout mismatch), and neutering the property rule allocates a fixed-array field at length 0 and panics on the first indexed write (exit code 2). Neither is redundant.
 
-## A listed var is built on its first read, never in the static constructor
-
-<!-- PLACEHOLDER (lazy static data, 2026-10-22): the owner moved G's lazy static data into the Go 1.26 hop (design: docs/DESIGN-lazy-static-data.md on claude/g-lazy-static-data-note). Pure-data package vars become a ref property over a per-var holder class, built on first read, across many files. When that seat LANDS, rewrite this section, whose list holds only runtime's two malloc dispatch tables, from the landed emission and its guards; do not document the prototype. -->
+<a id="a-listed-var-is-built-on-its-first-read-never-in-the-static-constructor"></a>
+## A pure-data var is built on its first read, never in the static constructor
 
 Go's linker writes a table of constants and function values into the binary as static data, so a Go program pays
 nothing for it at startup. As a C# field initializer, or as an `initᴛ` method that `package_init.cs` calls, the same
-table is built, and the code that builds it compiled, every time the program starts. So the converter keeps a short
-list of such vars, `lazyPackageVars` (`lazyPackageVarOperations.go`), keyed by package path and then Go name. The list
-holds runtime's two malloc dispatch tables, `mallocScanTable` and `mallocNoScanTable`. Their only reader is
-`mallocgc`'s size-specialized branch, behind the constant `sizeSpecializedMallocEnabled`, which is false because
-the `SizeSpecializedMalloc` experiment is off, so no path reads them at all.
+table would be built, and the code that builds it compiled, the first time any member of its package is used. So a
+var whose value is pure data is built on its first read instead.
 
-A listed var becomes a `ref` property over a nested holder class named `lazyᴛ<name>`, whose static field initializer
-.NET runs on the first read. Code reads and writes the var by its Go name, as it would the field.
-`collectMovedInitVars` skips it, so it gets no `initᴛ` method and `package_init.cs` never calls it:
+**The shape.** The converter writes the var's declaration exactly as it would write an eager one, on one line, inside
+a holder class named `lazyᴛ<name>` and marked `[GoLazy]`, with the var's Go comment after it. .NET runs the holder's
+static field initializer the first time the holder is used, which is the var's first read, and runs it once:
 
 <!-- source: GOROOT/src/runtime/malloc_tables_generated.go:8-522 -->
 ```go
@@ -133,51 +129,121 @@ var mallocScanTable = [513]func(size uintptr, typ *_type, needzero bool) unsafe.
 …
 }
 ```
-<!-- source: src/core/runtime/malloc_tables_generated.cs:9-524 -->
+<!-- source: src/core/runtime/malloc_tables_generated.cs:9-523 -->
 ```csharp
-internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.value;
-private static class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> value = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
     mallocPanic,
     mallocgcSmallScanNoHeaderSC1,
 …
 }.array(); }
 ```
 
-Building the value later must not change it, so the predicate (`collectLazyPackageVars`, with
-`lazyInitializerRefusal` for the initializer) accepts a listed var only when:
+go2cs-gen's `LazyHolderGenerator` completes each holder. It gives the package class a `ref` accessor under the var's
+Go name, with the field's accessibility, so every use site reads and writes the var as it would the field:
 
-* it is declared alone, one name with one initializer in its spec;
-* its address is never taken, explicitly or by a pointer-receiver call, since a value built on its first read has
+```csharp
+internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable => ref lazyᴛmallocScanTable.mallocScanTable;
+```
+
+A holder must hold exactly one static field, named for the holder. The generator refuses any other holder by name
+(GO2CS0009) and generates nothing for it. `collectMovedInitVars` skips a lazy var, so it gets no `initᴛ` method and
+the package's static constructor never builds it.
+<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:571 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
+     its name :584 (`return "lazy" + TempVarMarker + csIDName`). The accessor is generated, so it is shown uncited:
+     src/gen/go2cs-gen/LazyHolderGenerator.cs:118 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {name} => ref {holderName}.{name};\r\n");`),
+     pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:133 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`).
+     The marker: src/core/golib/GoLazyAttribute.cs. Kept out of the ordered ctor:
+     src/go2cs/initOrderOperations.go:286 (`if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`). -->
+
+**Which initializers are eligible.** Building the value later must not change it, and building it must do nothing
+anyone could see. `lazyInitializerRefusal` accepts:
+
+* constants, types, package functions and func literals (a func value's body does not run when it is made);
+* composite literals and `&T{…}` allocations of eligible parts (a struct literal's field key names a field and is
+  not a read);
+* conversions and operators over eligible operands (a conversion applies a type, so it is not a call);
+* reads of same-package vars that are themselves eligible and never assigned, and slices of such a var with constant
+  bounds (slicing aliases, so the slice is the same whenever it is taken).
+
+Everything else keeps the var eager: a call, a read of an imported var (its package may change it first) or of a
+field, an index or a dereference (each copies a value as it is at that moment), a method value (it binds its
+receiver when it runs), `&` of storage, a channel receive and a type assertion.
+
+**Which vars stay eager whatever their initializer.** `collectLazyPackageVars` also keeps eager:
+
+* a var declared with other names from one value;
+* a var whose address is taken, explicitly or by a pointer-receiver or capture-mode call, since a holder carries
   no box for a pointer to name;
-* its initializer cannot depend on when it runs: constants, types, package functions and func literals (a func
-  value's body does not run when it is made), composite literals and `&T{…}` allocations, conversions and operators
-  (a conversion applies a type, so it is not a call), reads of same-package vars that are themselves eligible and
-  never assigned, and constant-bound slices of them. No call, no imported var, no index or dereference, no method
-  value, no `<-`, no type assertion (a struct literal's field key names a field and is not a read).
+* a var whose declaration is hand-owned, and every var that reads it: the converter does not shape a declaration it
+  does not emit;
+* a var that reads a var the package or its internal tests assign or take the address of;
+* a var that copies another whose storage a slice aliases, since a write through the slice would change the copy;
+* a var in a test file.
 
-A listed var that breaks the rule is refused by name: the converter stops on that file with
-`lazyPackageVars entry <name> cannot be built on its first read:` and the reason, reports it, and emits nothing for
-the file. An initializer whose conversion would spill a hoisted holder beside the var is refused the same way.
+**Which eligible vars are built on their first read.** An eligible var gets a holder when its initializer has at
+least 20 syntax nodes (a bool or a short string costs less built eagerly than a class of its own), when it reads a
+var that has one (an eager reader would build that var at startup anyway), or when it is exported and an initializer
+built on a first read reads it. The decision is a fixpoint, since a var can gain a holder through a dep or a reader
+that only just gained one. `unicode`'s `Upper = _Lu` is one short line, and it has a holder because `_Lu` has one.
 
-Guarded by the converter tests `TestLazyPackageVarIsBuiltOnFirstRead` (the listed table is a `ref` property over its
-holder and is absent from `package_init.cs`, while an unlisted twin of the same shape still relocates) and
-`TestLazyPackageVarRefusesByName` (each rule broken in turn, each refused naming the var), both in
-`lazyPackageVar_test.go`; and by GolibTests' `MallocDispatchTablesTests`, which checks that the
-runtime has no `initᴛ` method for either table and that a first read finds each one populated, entry for entry, as
-Go's `mkmalloc` writes it.
-<!-- The list: src/go2cs/lazyPackageVarOperations.go:37 (`var lazyPackageVars = map[string]map[string]bool{`); the rule:
-     :96 (`func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`),
-     :292 (`func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`);
-     the holder name: :584 (`return "lazy" + TempVarMarker + csIDName`). Kept out of the ordered ctor:
-     src/go2cs/initOrderOperations.go:286 (`if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`).
-     The refusals: src/go2cs/visitValueSpec.go:727 (`cannot be built on its first read: %s`), :740
-     (`its initializer spills a hoisted holder`). The reader's gate, at go1.26.10: GOROOT/src/runtime/malloc.go:1039
-     (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`). Guards:
-     src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :433
+**An exported var keeps its initial value for the vars built from it.** Go builds every initializer when the program
+starts, so an importer that later assigns `unicode.Lu` does not change `unicode.Categories`. The converted
+`Categories` is built on its first read, which may come after such an assignment. So `Lu`'s holder is marked
+`[GoLazy(Initial = true)]`, and the generator adds `internal static readonly T initial;` to it, set in the holder's
+static constructor, which C# runs after the field initializer. Every initializer built on a first read reads that
+field instead of the var:
+
+<!-- source: src/core/unicode/tables.cs:10-23 -->
+```csharp
+[GoLazy] partial class lazyᴛCategories { public static map<@string, ж<RangeTable>> Categories = new map<@string, ж<RangeTable>>{
+    ["C"u8] = lazyᴛC.initial,
+…
+    ["Lu"u8] = lazyᴛLu.initial,
+```
+
+An exported var such an initializer reads always has a holder of its own, so the snapshot has somewhere to live; a
+reader of an exported var with a constant initializer, which has no holder, stays eager.
+<!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:121 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
+     the marker argument: src/go2cs/lazyPackageVarOperations.go:575 (`marker = "GoLazy(Initial = true)"`). The importer's
+     assignment is the LazyPackageVars behavioral test's case: tables.Heavy, assigned before tables.ByName is first read. -->
+
+**runtime's malloc tables are always built on their first read.** The converter lists runtime's two malloc dispatch
+tables, `mallocScanTable` and `mallocNoScanTable`, as vars that get a holder whatever their size. Their only reader is
+`mallocgc`'s size-specialized branch, behind the constant `sizeSpecializedMallocEnabled`, which is false because the
+`SizeSpecializedMalloc` experiment is off, so no path reads them at all. A listed var that breaks a rule is refused
+by name: the converter stops on that file with `lazyPackageVars entry <name> cannot be built on its first read:` and
+the reason. An initializer whose conversion would spill a hoisted holder beside the var is refused the same way.
+
+**A package with nothing left to order has no `package_init.cs`.** When every var a package would move to the ordered
+static constructor has a holder instead, the conversion writes no `package_init.cs` for it and removes a generated one
+an earlier conversion wrote. Under `-platforms`, the merge removes a package's generated `package_init.cs` that no
+target emitted. A hand-written `package_init.cs` is never removed.
+
+Guarded by the converter tests `TestLazyPackageVarIsBuiltOnFirstRead`, `TestLazyPackageVarPredicateChoosesAndShapes`,
+`TestLazyPackageVarLeavesHandOwnedEager`, `TestLazyPackageVarLeavesAPointerAddressedPoolEager`,
+`TestLazyPackageVarLeavesManualVarEager` and `TestLazyPackageVarRefusesByName`, all in `lazyPackageVar_test.go`, and
+`TestMergeRetiresAPackageInitNoTargetEmitted`; by GenTests' `LazyHolderGeneratorTests`; by GolibTests'
+`MallocDispatchTablesTests`, which checks that the runtime's static constructor does not build either table and that
+a first read finds each one populated, entry for entry, as Go's `mkmalloc` writes it; and by the `LazyPackageVars`
+behavioral test, whose output matches Go's: init order, an importer's assignment before a first read, one pointer
+per allocation, and func literal values.
+<!-- The predicate: src/go2cs/lazyPackageVarOperations.go:96 (`func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`),
+     :292 (`func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`),
+     the floor :47 (`const lazyPackageVarNodeFloor = 20`), the eager cases :153 (`candidate.reason = "its declaration is hand-owned"`),
+     :159 (`candidate.reason = "its address is taken, and the holder does not carry an addressable box yet"`),
+     :190 (`candidate.reason = fmt.Sprintf("it copies the var %s, whose storage a slice aliases", dep.Name())`);
+     the list :37 (`var lazyPackageVars = map[string]map[string]bool{`). The refusals: src/go2cs/visitValueSpec.go:727
+     (`cannot be built on its first read: %s`), :740 (`its initializer spills a hoisted holder`). The reader's gate, at
+     go1.26.10: GOROOT/src/runtime/malloc.go:1039 (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`).
+     package_init.cs: src/go2cs/initOrderOperations.go:504 (`func retireStalePackageInitFile(outputDir string) error {`),
+     src/go2cs/platformEmit.go:1197 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
+     Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :433
      (`func TestLazyPackageVarRefusesByName(t *testing.T) {`);
      src/tests/GolibTests/MallocDispatchTablesTests.cs:82 (`public void TheRuntimeStaticConstructorNoLongerBuildsThem()`).
-     Why these two (COORD's ruling (A), 2026-10-22, per the list's own comment): built eagerly they were 2 x 17.1K IL
-     JIT-compiled at every startup; no platform is recorded for that figure, so it stays here. -->
+     Why the two malloc tables are listed (COORD's ruling (A), 2026-10-22, per the list's own comment): built eagerly they
+     were 2 x 17.1K IL JIT-compiled at every startup; no platform is recorded for that figure, so it stays here. The node
+     floor's derivation (97.5% of the eligible initializer mass in std at a third of the vars) is the design note's census,
+     per the constant's own comment. -->
 
 ---
 

@@ -60,7 +60,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [A TUPLE-deconstructing package var relocates as ONE unit](variable-initialization-order.md#a-tuple-deconstructing-package-var-relocates-as-one-unit)
   - [Test-variant (`-tests`) initializers relocate too — through the erasable static-ctor hook](variable-initialization-order.md#test-variant--tests-initializers-relocate-too--through-the-erasable-static-ctor-hook)
   - [A CONSTANT emitted as an initialized FIELD is an initialization dependency too](variable-initialization-order.md#a-constant-emitted-as-an-initialized-field-is-an-initialization-dependency-too)
-  - [A listed var is built on its first read, never in the static constructor](variable-initialization-order.md#a-listed-var-is-built-on-its-first-read-never-in-the-static-constructor)
+  - [A pure-data var is built on its first read, never in the static constructor](variable-initialization-order.md#a-pure-data-var-is-built-on-its-first-read-never-in-the-static-constructor)
 - **[Compiled Library versus Source Code](compiled-library-vs-source.md)**
 - **[Constant Values](constants.md)**
   - [A constant C# cannot declare `const` is a get-only PROPERTY, not a `static readonly` field](constants.md#a-constant-c-cannot-declare-const-is-a-get-only-property-not-a-static-readonly-field)
