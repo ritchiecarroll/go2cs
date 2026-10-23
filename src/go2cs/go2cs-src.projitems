@@ -46,6 +46,8 @@
     <None Include="$(MSBuildThisFileDirectory)blockEventFrames_test.go" />
     <None Include="$(MSBuildThisFileDirectory)bodyBlankLines_test.go" />
     <None Include="$(MSBuildThisFileDirectory)buildConstraints_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)buildInfoStamp.go" />
+    <None Include="$(MSBuildThisFileDirectory)buildInfoStamp_test.go" />
     <None Include="$(MSBuildThisFileDirectory)byRefReceiverGuard_test.go" />
     <None Include="$(MSBuildThisFileDirectory)callerInliningAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)callerSkipWindowFrames_test.go" />

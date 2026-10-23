@@ -163,4 +163,10 @@
     <ProjectReference Include="ptlike/DefinedTypeOverForeignStruct.ptlike.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;DefinedTypeOverForeignStruct&#10;mod&#9;DefinedTypeOverForeignStruct&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

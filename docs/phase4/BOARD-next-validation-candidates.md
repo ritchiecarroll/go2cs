@@ -27987,4 +27987,68 @@ Owner: none (post-hop). Closing it needs the JIT's inline tree for the faulting 
 
 — R (measured 2026-10-22; COORD asked for this row)
 
+## 2026-10-22 — H: a converted test of a MAIN package reports its build-info path bare, as Go does, except where the test files' `//go:debug` lines change DefaultGODEBUG — KNOWN DIVERGENCE of the build-info stamp seat (claude/h-buildinfo-stamp)
+
+**What the seat does.** `runtime/debug.ReadBuildInfo` answers in a converted test host from a run-time registration
+(golib `GoModInfoAttribute.Register`, called by `TestHost.Run`), with no host emission. The path it registers follows
+cmd/go (`cmd/go/internal/load/test.go`, the `pmain` construction): a test of a NON-main package reports
+`<import path>.test`; a test of a MAIN package inherits the package's own build info and reports the bare import path.
+Measured at go1.26.10 on a scratch module: `example.test/prog/lib` reads `example.test/prog/lib.test`, and the main
+package `example.test/prog` reads `example.test/prog`. The host detects a main package under test by the converted
+`go.main_package` class its entry assembly carries.
+
+**The divergence.** cmd/go re-runs `setBuildInfo` for a main package's test binary, and so reports `<path>.test`, when
+the test main's DefaultGODEBUG differs from the package's. That happens when the `_test.go` files carry `//go:debug`
+lines that change it. The converted host reads the bare path there too. It knows the test binary's DefaultGODEBUG
+(its `[assembly: GoDefaultGodebug]`), but the package's own value is not in the test assembly, and carrying it there
+would be an emission. Neither path is reachable today: `-tests` refuses a main package outright (the row below), so
+both the bare path and this divergence wait for that gap to close. When it does, the divergence is reached only by a
+module main package whose test files carry such `//go:debug` lines. No standard-library row reaches it, since the
+standard library has no main package. The main-package half is guarded at unit level until then (GolibTests
+`HostDetectsAMainPackageUnderTest`, over a Roslyn-compiled assembly carrying `go.main_package`).
+
+Owner: none. Closing it needs the package's own DefaultGODEBUG in the test assembly, one more host or project
+emission, and no row asks for it.
+
+— H (measured 2026-10-22; COORD ruled (b) and asked for this row)
+
+## 2026-10-22 — H: `-tests` refuses a MAIN package that Go's `go test` accepts — OPEN (post-hop unless a roster or nugetgo row needs it; unowned)
+
+**Measured.** On a scratch module, `go test` passes on the main package `example.test/prog` (a `main.go` plus a
+`main_test.go`). `go2cs -tests -test-action all` on the same directory exits 1 with `go/packages did not return a
+production package for "<dir>"`, before converting anything. The non-main package beside it (`example.test/prog/lib`)
+converts and validates (`Validated 1 tests`).
+
+**Root.** `findProductionPackage` (`src/go2cs/testConversion.go:1812`) skips every loaded package whose `Name` is
+`main`, there to pass over go/packages' synthesized test-main package. A main package under test is skipped with it,
+so no production package is found.
+
+**What closing it unlocks.** The build-info stamp seat already registers a main package's test binary with the bare
+path, as cmd/go does (the row above), but no `-tests` host can reach that path until this closes.
+
+— H (measured 2026-10-22; COORD asked for this row)
+
+## 2026-10-22 — H: the committed Performance outputs and three behavioral `package_info.cs` are stale against the hop-tip converter — RECORDED (Performance re-transpile queued for H after G's lazy seat and the build-info stamp seat land)
+
+**Measured** at `claude/hop-go126` `774f609be8`, with that commit's own converter on a base worktree (no seat change in
+it), converting in place:
+
+- `src/tests/Performance`: the 17 `Perf*` mains re-transpile to 47 changed files. 16 of the 17 main `.cs` move, as do
+  15 of 17 `package_info.cs` and 15 of 17 `.csproj`, and `PerfTlsHandshake/package_init.cs` is deleted, because the
+  converter no longer writes it. Each of the 15 moved `.csproj` gains the `InterceptorsNamespaces`/`WarningsAsErrors`
+  opt-in and the `TrimMode partial` default the behavioral csproj template already carries.
+- `src/tests/Behavioral`: `FieldAccessReinterpret`, `SystemCertVerify` and `X509SystemVerify` each re-emit
+  `package_info.cs` with `ImportedTypeAliases` lines the committed file lacks (+2, +1, +1): `syscallꓸHandle` and
+  `syscallꓸSockaddr`, then `x509ꓸOID` twice.
+
+The build-info stamp seat's converter reproduces all of it byte-identically (CR-stripped), so none of it is that seat's.
+The seat keeps only its own hunks, isolated by a three-way merge against the base emission: one `GoModInfo` ItemGroup,
++6/−0 on each of the 17 Performance csproj.
+
+**Ruled (COORD, 2026-10-22).** Not fixed in the stamp seat. The Performance re-transpile lands as its own change AFTER
+both G's lazy seat and the stamp seat, since lazy moves those emissions too. Dispatched to H then. The three behavioral
+`package_info.cs` ride with whichever CNR re-baseline owns them.
+
+— H (measured 2026-10-22)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

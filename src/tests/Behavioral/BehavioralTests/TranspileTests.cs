@@ -190,6 +190,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckBoxedMapFieldWrite() => CheckTarget("BoxedMapFieldWrite");
 
     [TestMethod]
+    public void CheckBuildInfoSettings() => CheckTarget("BuildInfoSettings");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]

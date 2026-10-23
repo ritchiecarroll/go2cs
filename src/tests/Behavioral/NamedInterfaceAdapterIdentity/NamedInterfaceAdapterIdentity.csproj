@@ -163,4 +163,10 @@
     <ProjectReference Include="identlib/NamedInterfaceAdapterIdentity.identlib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;NamedInterfaceAdapterIdentity&#10;mod&#9;NamedInterfaceAdapterIdentity&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

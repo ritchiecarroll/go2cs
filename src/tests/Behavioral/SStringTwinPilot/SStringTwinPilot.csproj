@@ -166,4 +166,10 @@
     <ProjectReference Include="$(go2csPath)core/unicode/utf8/unicode.utf8.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;go2cs/SStringTwinPilot&#10;mod&#9;go2cs/SStringTwinPilot&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

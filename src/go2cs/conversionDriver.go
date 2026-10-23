@@ -656,6 +656,17 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			}
 		}
 
+		// EVERY main package, single-package and -recurse alike, carries its module build info -- the `path`,
+		// `mod` and (under -recurse) `dep` lines runtime/debug.ReadBuildInfo reads (buildInfoStamp.go). Same
+		// project route as the DefaultGODEBUG above, for the same reason.
+		if pkg.Name == "main" {
+			modInfo := programModInfo(pkg.PkgPath, directoryModulePath(pkg.Dir), options.programDependencies)
+
+			if err := stampModInfoProject(projectFileName, modInfo); err != nil {
+				return err
+			}
+		}
+
 		// The cross-package lowering contract: compute the `ref`-primary records this package
 		// publishes (its selected exported primaries plus any registered hand-own declaration,
 		// which must be on disk) before the info file is written. A registered hand-own primary

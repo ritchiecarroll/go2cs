@@ -165,4 +165,10 @@
     <ProjectReference Include="rec/DefinedForeignStructConvert.rec.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;DefinedForeignStructConvert&#10;mod&#9;DefinedForeignStructConvert&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

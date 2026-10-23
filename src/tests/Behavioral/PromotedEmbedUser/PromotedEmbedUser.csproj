@@ -163,4 +163,10 @@
     <ProjectReference Include="../PromotedEmbedLib/PromotedEmbedLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;PromotedEmbedUser&#10;mod&#9;PromotedEmbedUser&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

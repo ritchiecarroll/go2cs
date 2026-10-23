@@ -123,6 +123,13 @@ public static class TestHost
         return loaded;
     }
 
+    /// <summary>
+    /// Whether a test binary's entry assembly tests a MAIN package: the package's production sources compile into the
+    /// test assembly, so a main package under test is the one whose converted <c>go.main_package</c> class is there.
+    /// </summary>
+    public static bool HostsMainPackage(Assembly? entryAssembly) =>
+        entryAssembly?.GetType("go.main_package") is not null;
+
     public static int Run(TestRegistry registry, string[] args)
     {
         // Before anything else, so no test -- on any thread, under any token -- is the first to bind an
@@ -134,6 +141,12 @@ public static class TestHost
         // never runs a test must not pay for it. Enabled at the very top of the run rather than
         // lazily, so that everything a test can observe is inside the counting window.
         AllocationCounter.Enable();
+
+        // The test binary's build info, as `go test` links it in: `path <package>.test` -- bare for a main
+        // package, whose own build info cmd/go's test main copies -- plus `mod <module> (devel)` outside the
+        // standard library. Registered from the two values every host already passes its registry, so
+        // runtime/debug.ReadBuildInfo answers and no emitted host changes.
+        GoModInfoAttribute.Register(registry.Package, registry.ModulePath, HostsMainPackage(Assembly.GetEntryAssembly()));
 
         // The run's own command line, announced once so nothing downstream has to ask the PROCESS
         // for it. See TestFlagBridge.HostCommandLine: in a real converted test binary this array

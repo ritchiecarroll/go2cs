@@ -164,4 +164,10 @@
     <ProjectReference Include="b/foo/SameNameImportAlias.b.foo.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="go.GoModInfoAttribute">
+      <_Parameter1>path&#9;SameNameImportAlias&#10;mod&#9;SameNameImportAlias&#9;(devel)&#9;&#10;</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>
