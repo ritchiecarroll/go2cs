@@ -248,7 +248,7 @@ per allocation, func literal values, and an address taken before a var's first r
      (`cannot be built on its first read: %s`), :740 (`its initializer spills a hoisted holder`). The reader's gate, at
      go1.26.10: GOROOT/src/runtime/malloc.go:1039 (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`).
      package_init.cs: src/go2cs/initOrderOperations.go:504 (`func retireStalePackageInitFile(outputDir string) error {`),
-     src/go2cs/platformEmit.go:1222 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
+     src/go2cs/platformEmit.go:1254 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
      Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :494
      (`func TestLazyPackageVarRefusesByName(t *testing.T) {`), :407 (`func TestLazyPackageVarCarriesItsBox(t *testing.T) {`);
      src/tests/GolibTests/MallocDispatchTablesTests.cs:82 (`public void TheRuntimeStaticConstructorNoLongerBuildsThem()`).

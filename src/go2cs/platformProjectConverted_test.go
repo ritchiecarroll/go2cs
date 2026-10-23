@@ -116,3 +116,99 @@ func TestMergeTakesProjectFilesFromTargetsThatConvertedThePackage(t *testing.T) 
 		}
 	}
 }
+
+// conditionedProjectFile renders a project file carrying a per-GOOS reference block, as the merge and the
+// single-target writer both render it.
+func conditionedProjectFile(t *testing.T, sets map[string][]string) string {
+	t.Helper()
+
+	shared, deltas, _ := splitPlatformReferenceSets(sets)
+	rendered, err := renderPlatformReferences(flatProjectFile(sets["windows"]), shared, deltas)
+
+	if err != nil {
+		t.Fatalf("test setup: renderPlatformReferences: %v", err)
+	}
+
+	if !strings.Contains(rendered, platformReferenceBlockHeader) {
+		t.Fatalf("test setup: the rendered file carries no per-GOOS block:\n%s", rendered)
+	}
+
+	return rendered
+}
+
+// TestMergeDropsAPerGOOSAxisNoConvertingTargetConfirms is the second half of the project-file finding (the hop's
+// freeze regen, 2026-10-23). internal/syscall/windows selects Go files on Windows alone, yet its committed .csproj
+// carries a per-GOOS block recording darwin and linux as taking part (empty groups). The single-target writer
+// keeps it, because it recovers the other platforms' sets from the file it overwrites, and when all three stage
+// copies are byte-identical the merge only copies the file, so the axis survived every run and went only when an
+// unrelated change made the copies differ. The emission had two fixed points for the file, split and flat, chosen
+// by history. A project file that carries a per-GOOS block now always goes through the converted-only merge.
+//
+// log/syslog is the idempotence control: all three targets convert it and their import sets really differ, so
+// re-rendering from the three converting stages gives back exactly the file they hold.
+func TestMergeDropsAPerGOOSAxisNoConvertingTargetConfirms(t *testing.T) {
+	targets := []string{"windows/amd64", "linux/amd64", "darwin/amd64"}
+
+	const (
+		windowsProject = "internal/syscall/windows/internal.syscall.windows.csproj"
+		windowsSource  = "internal/syscall/windows/syscall_windows.cs"
+		syslogProject  = "log/syslog/log.syslog.csproj"
+		syslogSource   = "log/syslog/syslog.cs"
+	)
+
+	staleSplit := conditionedProjectFile(t, map[string][]string{
+		"windows": {refErrors, refIO},
+		"linux":   {refErrors},
+		"darwin":  {refErrors},
+	})
+
+	syslogSplit := conditionedProjectFile(t, map[string][]string{
+		"windows": {refErrors},
+		"linux":   {refErrors, refIO},
+		"darwin":  {refErrors, refIO},
+	})
+
+	seed := map[string]string{
+		windowsProject: staleSplit,
+		windowsSource:  "seed windows source",
+		syslogProject:  syslogSplit,
+		syslogSource:   "seed syslog source",
+	}
+
+	coreDir, stages := newCompanionStages(t, targets, seed)
+
+	// Windows alone converts internal/syscall/windows and, adopting the axis from the seed, writes the seed's
+	// bytes back: every stage now holds the same project file.
+	writeTestFile(t, filepath.Join(stages[0], "core", filepath.FromSlash(windowsSource)), "windows source")
+	writeTestFile(t, filepath.Join(stages[0], "core", filepath.FromSlash(windowsProject)), staleSplit)
+
+	// All three convert log/syslog, and each writes back the same conditioned file.
+	for i := range targets {
+		writeTestFile(t, filepath.Join(stages[i], "core", filepath.FromSlash(syslogSource)), "syslog source")
+		writeTestFile(t, filepath.Join(stages[i], "core", filepath.FromSlash(syslogProject)), syslogSplit)
+	}
+
+	emissions := snapshotCompanionStages(t, targets, stages)
+
+	if _, _, _, err := mergeCompanionArtifacts(coreDir, targets, emissions); err != nil {
+		t.Fatalf("mergeCompanionArtifacts failed: %v", err)
+	}
+
+	got := readCompanionFile(t, filepath.Join(coreDir, filepath.FromSlash(windowsProject)))
+
+	if strings.Contains(got, platformReferenceBlockHeader) {
+		t.Errorf("%s: the per-GOOS block survived although only windows converts the package; the stages' identical copies were copied instead of merged", windowsProject)
+	}
+
+	if !strings.Contains(got, refIO) {
+		t.Errorf("%s: a reference windows imports (%s) is missing from the flat list", windowsProject, refIO)
+	}
+
+	if want := flatProjectFile([]string{refErrors, refIO}); got != want {
+		t.Errorf("%s: want windows's flat project file\n--- want ---\n%s\n--- got ---\n%s", windowsProject, want, got)
+	}
+
+	if got := readCompanionFile(t, filepath.Join(coreDir, filepath.FromSlash(syslogProject))); got != syslogSplit {
+		t.Errorf("%s: a genuinely multi-platform project file changed under the re-merge\n--- want ---\n%s\n--- got ---\n%s", syslogProject, syslogSplit, got)
+	}
+}

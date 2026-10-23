@@ -825,7 +825,8 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 	for _, rawPath := range sortedKeys(names) {
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))
 
-		if strings.EqualFold(filepath.Ext(rawPath), ".csproj") && companionDiffersAcrossTargets(rawPath, emissions) {
+		if strings.EqualFold(filepath.Ext(rawPath), ".csproj") &&
+			(companionDiffersAcrossTargets(rawPath, emissions) || carriesConvertedPlatformAxis(rawPath, emissions, converted)) {
 			merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions, converted)
 
 			if err != nil {
@@ -1146,6 +1147,37 @@ func companionDiffersAcrossTargets(rawPath string, emissions []*platformEmission
 	}
 
 	return false
+}
+
+// carriesConvertedPlatformAxis reports whether a project file that every target holds identically must still
+// go through mergePlatformProjectFile: it carries a per-GOOS reference block, and at least one target converted
+// its package. Identical copies prove nothing about the block, because the single-target writer recovers the
+// other platforms' sets from the file it overwrites (adoptPlatformReferences): a GOOS that never converts the
+// package keeps its recorded group forever. Measured at the hop's freeze regen (2026-10-23):
+// internal/syscall/windows selects Go files on Windows alone, yet kept darwin and linux groups, and the emission
+// had two fixed points for the file, split or flat, depending on whether an unrelated change made the stage
+// copies differ. Re-rendering from the converting stages is idempotent for a genuinely multi-platform package.
+func carriesConvertedPlatformAxis(rawPath string, emissions []*platformEmission, converted []map[string]bool) bool {
+	pkg := companionPackage(rawPath, emissions)
+	contents := ""
+
+	for i, emission := range emissions {
+		if _, ok := emission.artifacts[rawPath]; !ok {
+			continue
+		}
+
+		if i < len(converted) && converted[i][pkg] && len(contents) == 0 {
+			data, err := os.ReadFile(filepath.Join(emission.root, "core", filepath.FromSlash(rawPath)))
+
+			if err != nil {
+				return false
+			}
+
+			contents = string(data)
+		}
+	}
+
+	return strings.Contains(contents, platformReferenceBlockHeader)
 }
 
 // applyLayoutBlockToProjectFile adds the L3 blocks to a package's project file when the package now
