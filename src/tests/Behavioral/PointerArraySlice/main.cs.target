@@ -70,6 +70,16 @@ internal static void rangeIndexOnly() {
         p.Value[i] += "!"u8;
     }
     fmt.Println(p.Value[0], p.Value[1]);
+
+    grid g = default!;
+    g.fill();
+    fmt.Println("receiver ranges", g);
+}
+
+internal static void fill(this ref grid b) {
+    foreach (var i in range(b)) {
+        b.Value[i] = i * 10;
+    }
 }
 
 } // end main_package

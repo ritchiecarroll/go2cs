@@ -79,4 +79,16 @@ func rangeIndexOnly() {
 		p[i] += "!"
 	}
 	fmt.Println(p[0], p[1])
+
+	var g grid
+	g.fill()
+	fmt.Println("receiver ranges", g)
+}
+
+// fill ranges its pointer receiver for indices only: runtime's pageBits.setAll. The receiver is emitted as the value it
+// addresses (`ref grid b`), never a box, so it ranges as the array, `range(b)`.
+func (b *grid) fill() {
+	for i := range b {
+		b[i] = i * 10
+	}
 }

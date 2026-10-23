@@ -783,8 +783,16 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		// A pointer to an array ranges its type's length, N, passed beside the pointer: `range(p, 3)`. Go's length of a
 		// `*[N]T` is the constant N, and an index-only range never dereferences the pointer, so a NIL one ranges N times;
 		// golib's array keeps its length in the value, so only the converter knows N. The pointer is still evaluated once,
-		// as Go evaluates a range operand holding a call. (A pointer PARAMETER is already the dereferenced value local.)
-		if arrayType, ok := rangeType.Underlying().(*types.Array); ok && rangedThroughPointer && ptrDeref != "" {
+		// as Go evaluates a range operand holding a call. A pointer PARAMETER is already the dereferenced value local, and
+		// a pointer RECEIVER is the value it addresses too (`this ref T b`, or the deref alias over its box), so each
+		// ranges as the array it denotes: the box overload cannot bind a ref (CS0411, runtime's pageBits.setAll).
+		receiver := false
+
+		if ident, ok := rangeStmt.X.(*ast.Ident); ok {
+			receiver = v.isDerefdPointerReceiverIdent(ident)
+		}
+
+		if arrayType, ok := rangeType.Underlying().(*types.Array); ok && rangedThroughPointer && ptrDeref != "" && !receiver {
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
 		} else {
 			v.writeOutput("foreach (%s%s in range(%s))", decl, iterExpr, rangeExpr)
