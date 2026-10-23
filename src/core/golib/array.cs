@@ -400,8 +400,11 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     // Returning by-ref value allows array to be a struct instead of a class and still allow read and write
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
+    // The int and nint indexers inline (P-256 R2): the check and the load are what Go compiles an array
+    // index to, and a call per element was what fiat's limb loops paid.
     public ref T this[int index]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)
@@ -413,6 +416,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public ref T this[nint index]
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)

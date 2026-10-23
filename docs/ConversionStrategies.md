@@ -6944,7 +6944,7 @@ also declares, as `off` is here ([Shadowing](#short-variable-redeclaration-shado
 GOROOT/src/slices/iter.go:16 -> src/core/slices/iter.cs:17#2e9aa9; ArrayRangeSnapshot/ArrayRangeSnapshot.go:18#369a4d -> .cs.target:18#5ec860;
 StringByteSemantics/main.go:12#090d9f -> main.cs.target:9#6128a5; GenericTypeInference/GenericTypeInference.go:138#39c6b8 -> .cs.target:142#39492d;
 ChannelSendToClosed/ChannelSendToClosed.go:15#5e475c -> .cs.target:19#6aa335 (the source names the received value `i`; the table names it `v` so a reader does not take it for an index); RangeOverIntegerTypes/main.go:98#97be49 -> main.cs.target:77#07ce5b
-ΔRangeSnapshot: src/core/golib/array.cs:715#0365c4 (an allocation-free copy of the array for the loop).
+ΔRangeSnapshot: src/core/golib/array.cs:719#0365c4 (an allocation-free copy of the array for the loop).
 Moved to the reference (range over every integer type): the row `for i := range b` -> `foreach (var i in range<uint8>(b))`,
 RangeOverIntegerTypes/main.go:46#c9c2ff -> main.cs.target:28#ceff36 -->
 **Every `range` becomes a `foreach`.** Each golib collection type enumerates in Go's own terms. Two range
@@ -8266,7 +8266,7 @@ pointer's deref alias, golden DirectBoxReceiverPassedWhole/main.cs.target:22#8f4
 RuntimeErrorPanic.NilPointerDereference(). No divide check is emitted anywhere in src/go2cs.
 The catch filter maps DivideByZeroException and NullReferenceException:
 src/core/golib/runtime/RuntimeErrorPanic.cs:564#351d17 (TryAsPanic). Bounds checks throw
-RuntimeErrorPanic.IndexOutOfRange directly: src/core/golib/slice.cs:265#ae078f, array.cs:408#ae078f.
+RuntimeErrorPanic.IndexOutOfRange directly: src/core/golib/slice.cs:265#ae078f, array.cs:411#ae078f.
 2026-09-27 accuracy pass: `divide` has no frame, so the mapping happens in outerGuard's catch filter. -->
 **Runtime errors are panics too.** In `divide`, `a / b` with `b` zero raises .NET's `DivideByZeroException`.
 `outerGuard`'s `catch`, the nearest frame up the stack, turns it into Go's panic,

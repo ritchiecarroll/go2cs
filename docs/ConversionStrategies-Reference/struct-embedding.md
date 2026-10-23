@@ -409,20 +409,24 @@ private global::System.Runtime.CompilerServices.StrongBox<array<uint64>>? m_valu
 
 public array<uint64> Value
 {
-    get
-    {
-        global::System.Runtime.CompilerServices.StrongBox<array<uint64>>? value = m_value;
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    get => m_value is { } value ? value.Value : materializeValue();
+}
 
-        if (value is null)
-        {
-            global::System.Runtime.CompilerServices.StrongBox<array<uint64>> created = new global::System.Runtime.CompilerServices.StrongBox<array<uint64>>(new array<uint64>(256));
-            value = global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created;
-        }
-
-        return value.Value;
-    }
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+private array<uint64> materializeValue()
+{
+    global::System.Runtime.CompilerServices.StrongBox<array<uint64>> created = new global::System.Runtime.CompilerServices.StrongBox<array<uint64>>(new array<uint64>(256));
+    return (global::System.Threading.Interlocked.CompareExchange(ref m_value, created, null) ?? created).Value;
 }
 ```
+
+This is what the generator emits for `hash/crc64`'s `Table` (`[256]uint64`), copied from that
+package's `Generated/go2cs-gen/go2cs.TypeGenerator/go.hash.crc64_package.Table.g.cs` after a stdlib
+build. The getter holds only the warm path, a null test and a load, and is marked to inline; the first
+touch, which allocates and publishes, is the out-of-line `materializeValue()` (split 2026-10-22, so
+that an element loop over a named array inlines its reads as it does over `array<E>`). The CAS publish
+is unchanged by the split: `materializeValue()` publishes into the same `m_value` of the same wrapper.
 
 **Why the slot had to change shape at all.** An interlocked publish needs ONE machine word. `array<E>`
 is a 3-field readonly struct (backing plus the `Alias` window's low/length), so `array<E>?` is 24
