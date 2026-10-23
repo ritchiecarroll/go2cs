@@ -145,7 +145,7 @@ public static Errno EXFULL => 536871041;
 public static Errno EWINDOWS => 536871042;
 
 // Error strings for invented errors
-internal static array<@string> errors = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛerrors { internal static array<@string> errors = new golib.SparseArray<@string>{
     [0] = "argument list too long"u8,
     [1] = "permission denied"u8,
     [2] = "address already in use"u8,
@@ -277,6 +277,6 @@ internal static array<@string> errors = new golib.SparseArray<@string>{
     [128] = "invalid cross-device link"u8,
     [129] = "exchange full"u8,
     [130] = "not supported by windows"u8
-}.array();
+}.array(); }
 
 } // end syscall_package

@@ -56,8 +56,7 @@ partial struct formInfo {
     internal Func<ж<Iter>, slice<byte>> nextMain;
 }
 
-internal static slice<ж<formInfo>> formTable;
-internal static void initᴛformTable() { formTable = new ж<formInfo>[]{Ꮡ(new formInfo(
+[GoLazy] partial class lazyᴛformTable { internal static slice<ж<formInfo>> formTable = new ж<formInfo>[]{Ꮡ(new formInfo(
     form: NFC,
     composing: true,
     compatibility: false,

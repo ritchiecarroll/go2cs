@@ -13,7 +13,7 @@ internal static UntypedInt pow10Max => 347;
 
 // pow10Tab holds 128-bit mantissas of powers of 10.
 // The values are scaled so the high bit is always set; there is no "implicit leading 1 bit".
-internal static array<uint128> pow10Tab = new uint128[]{
+[GoLazy] partial class lazyᴛpow10Tab { internal static array<uint128> pow10Tab = new uint128[]{
     new(0xfa8fd5a0081c0288UL, 0x1732c869cd60e453UL), // 1e-348 * 2**1284
     new(0x9c99e58405118195UL, 0x0e7fbd42205c8eb4UL), // 1e-347 * 2**1280
     new(0xc3c05ee50655e1faUL, 0x521fac92a873b261UL), // 1e-346 * 2**1277
@@ -710,6 +710,6 @@ internal static array<uint128> pow10Tab = new uint128[]{
     new(0x85eab0e41a6940e5UL, 0xf2d80e0c0c0b4e11UL), // 1e345 * 2**-1019
     new(0xa7655d1d2103911fUL, 0x6f8e118f0f0e2195UL), // 1e346 * 2**-1022
     new(0xd13eb46469447567UL, 0x4b7195f2d2d1a9fbUL) // 1e347 * 2**-1025
-}.array();
+}.array(); }
 
 } // end strconv_package

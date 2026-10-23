@@ -208,7 +208,7 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
 }
 
 // scalarMinusOneBytes is l - 1 in little endian.
-internal static array<byte> scalarMinusOneBytes = new byte[]{236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16}.array();
+[GoLazy] partial class lazyᴛscalarMinusOneBytes { internal static array<byte> scalarMinusOneBytes = new byte[]{236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16}.array(); }
 
 // isReduced returns whether the given scalar in 32-byte little endian encoded
 // form is reduced modulo l.

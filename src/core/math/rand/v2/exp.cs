@@ -41,7 +41,7 @@ public static float64 ExpFloat64(this ref Rand r) {
     }
 }
 
-internal static array<uint32> ke = new uint32[]{
+[GoLazy] partial class lazyᴛke { internal static array<uint32> ke = new uint32[]{
     0xe290a139U, 0x0, 0x9beadebcU, 0xc377ac71U, 0xd4ddb990U,
     0xde893fb8U, 0xe4a8e87cU, 0xe8dff16aU, 0xebf2deabU, 0xee49a6e8U,
     0xf0204efdU, 0xf19bdb8eU, 0xf2d458bbU, 0xf3da104bU, 0xf4b86d78U,
@@ -94,9 +94,9 @@ internal static array<uint32> ke = new uint32[]{
     0xfa839276U, 0xfa263b32U, 0xf9b72d1cU, 0xf930a1a2U, 0xf889f023U,
     0xf7b577d2U, 0xf69c650cU, 0xf51530f0U, 0xf2cb0e3cU, 0xeeefb15dU,
     0xe6da6ecfU
-}.array();
+}.array(); }
 
-internal static array<float32> we = new float32[]{
+[GoLazy] partial class lazyᴛwe { internal static array<float32> we = new float32[]{
     2.0249555e-09F, 1.486674e-11F, 2.4409617e-11F, 3.1968806e-11F,
     3.844677e-11F, 4.4228204e-11F, 4.9516443e-11F, 5.443359e-11F,
     5.905944e-11F, 6.344942e-11F, 6.7643814e-11F, 7.1672945e-11F,
@@ -161,9 +161,9 @@ internal static array<float32> we = new float32[]{
     1.1252564e-09F, 1.1498986e-09F, 1.1767932e-09F, 1.206409e-09F,
     1.2393786e-09F, 1.276585e-09F, 1.3193139e-09F, 1.3695435e-09F,
     1.4305498e-09F, 1.508365e-09F, 1.6160854e-09F, 1.7921248e-09F
-}.array();
+}.array(); }
 
-internal static array<float32> fe = new float32[]{
+[GoLazy] partial class lazyᴛfe { internal static array<float32> fe = new float32[]{
     1F, 0.9381437F, 0.90046996F, 0.87170434F, 0.8477855F, 0.8269933F,
     0.8084217F, 0.7915276F, 0.77595687F, 0.7614634F, 0.7478686F,
     0.7350381F, 0.72286767F, 0.71127474F, 0.70019263F, 0.6895665F,
@@ -217,6 +217,6 @@ internal static array<float32> fe = new float32[]{
     0.0056196423F, 0.0048776558F, 0.004157295F, 0.0034602648F,
     0.0027887989F, 0.0021459677F, 0.0015362998F, 0.0009672693F,
     0.00045413437F
-}.array();
+}.array(); }
 
 } // end rand_package

@@ -5,7 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchRISCV64 { public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
     Name: "riscv64"u8,
     WordBits: 64,
     WordBytes: 8,
@@ -45,6 +45,6 @@ public static ж<Arch> ArchRISCV64 = Ꮡ(new Arch(
 
     jmpZero: "BEQZ %s, %s"u8,
     jmpNonZero: "BNEZ %s, %s"u8
-));
+)); }
 
 } // end asmgen_package

@@ -527,7 +527,7 @@ public static error Next(this ref ΔLineReader r, ж<LineEntry> Ꮡentry) {
 
 // knownOpcodeLengths gives the opcode lengths (in varint arguments)
 // of known standard opcodes.
-internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
+[GoLazy] partial class lazyᴛknownOpcodeLengths { internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
     [lnsCopy] = 0,
     [lnsAdvancePC] = 1,
     [lnsAdvanceLine] = 1,
@@ -541,7 +541,7 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
     // lnsFixedAdvancePC takes a uint8 rather than a varint; it's
     // unclear what length the header is supposed to claim, so
     // ignore it.
-};
+}; }
 
 // step processes the next opcode and updates r.state. If the opcode
 // emits a row in the line table, this updates *entry and returns

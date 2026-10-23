@@ -51,7 +51,7 @@ partial struct Description {
 
 // The English language descriptions below must be kept in sync with the
 // descriptions of each metric in doc.go by running 'go generate'.
-internal static slice<Description> allDesc = new Description[]{
+[GoLazy] partial class lazyᴛallDesc { internal static slice<Description> allDesc = new Description[]{
     new(
         Name: "/cgo/go-to-c-calls:calls"u8,
         ΔDescription: "Count of calls made from Go to C by the current process."u8,
@@ -417,7 +417,7 @@ internal static slice<Description> allDesc = new Description[]{
         Kind: KindFloat64,
         Cumulative: true
     )
-}.slice();
+}.slice(); }
 
 [GoInit] internal static void init() {
     // Insert all the non-default-reporting GODEBUGs into the table,

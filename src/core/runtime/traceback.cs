@@ -1235,7 +1235,7 @@ internal static bool elideWrapperCalling(abi.FuncID id) {
     return !(id == abi.FuncID_gopanic || id == abi.FuncID_sigpanic || id == abi.FuncID_panicwrap);
 }
 
-internal static array<@string> gStatusStrings = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛgStatusStrings { internal static array<@string> gStatusStrings = new golib.SparseArray<@string>{
     [_Gidle] = "idle"u8,
     [_Grunnable] = "runnable"u8,
     [_Grunning] = "running"u8,
@@ -1246,7 +1246,7 @@ internal static array<@string> gStatusStrings = new golib.SparseArray<@string>{
     [_Gleaked] = "leaked"u8,
     [_Gpreempted] = "preempted"u8,
     [_Gdeadextra] = "waiting for cgo callback"u8
-}.array(12);
+}.array(12); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string durableˢ = "(durable)"u8;

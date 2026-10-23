@@ -8,7 +8,7 @@ using reflect = reflect_package;
 
 partial class gob_package {
 
-internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encArrayHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
+[GoLazy] partial class lazyᴛencArrayHelper { internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encArrayHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
     [reflect.ΔBool] = encBoolArray,
     [reflect.Complex64] = encComplex64Array,
     [reflect.Complex128] = encComplex128Array,
@@ -25,9 +25,9 @@ internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool
     [reflect.Uint32] = encUint32Array,
     [reflect.Uint64] = encUint64Array,
     [reflect.Uintptr] = encUintptrArray
-};
+}; }
 
-internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encSliceHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
+[GoLazy] partial class lazyᴛencSliceHelper { internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>> encSliceHelper = new map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool>>{
     [reflect.ΔBool] = encBoolSlice,
     [reflect.Complex64] = encComplex64Slice,
     [reflect.Complex128] = encComplex128Slice,
@@ -44,7 +44,7 @@ internal static map<reflectꓸKind, Func<ж<encoderState>, reflectꓸValue, bool
     [reflect.Uint32] = encUint32Slice,
     [reflect.Uint64] = encUint64Slice,
     [reflect.Uintptr] = encUintptrSlice
-};
+}; }
 
 internal static bool encBoolArray(ж<encoderState> Ꮡstate, reflectꓸValue v) {
     // Can only slice if it is addressable.

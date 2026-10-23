@@ -21,7 +21,7 @@ internal static int32 div(int32 a, int32 b) {
 }
 
 // bitCount counts the number of bits needed to hold an integer.
-internal static array<byte> bitCount = new byte[]{
+[GoLazy] partial class lazyᴛbitCount { internal static array<byte> bitCount = new byte[]{
     0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
@@ -38,7 +38,7 @@ internal static array<byte> bitCount = new byte[]{
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8
-}.array();
+}.array(); }
 
 partial struct quantIndex /*num:nint*/;
 
@@ -50,7 +50,7 @@ internal static quantIndex nQuantIndex => 2;
 // encoder copies and scales the tables according to its quality parameter.
 // The values are derived from section K.1 of the spec, after converting from
 // natural to zig-zag order.
-internal static array<array<byte>> unscaledQuant = new array<byte>[]{
+[GoLazy] partial class lazyᴛunscaledQuant { internal static array<array<byte>> unscaledQuant = new array<byte>[]{
     // Luminance.
     new byte[]{
         16, 11, 12, 14, 12, 10, 16, 14,
@@ -71,7 +71,7 @@ internal static array<array<byte>> unscaledQuant = new array<byte>[]{
         99, 99, 99, 99, 99, 99, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99,
         99, 99, 99, 99, 99, 99, 99, 99}.array()
-}.array();
+}.array(); }
 
 partial struct huffIndex /*num:nint*/;
 
@@ -99,7 +99,7 @@ partial struct huffmanSpec {
 // The AC tables have 162 decoded values: bytes that pack a 4-bit Run and a
 // 4-bit Size. There are 16 valid Runs and 10 valid Sizes, plus two special R|S
 // cases: 0|0 (meaning EOB) and F|0 (meaning ZRL).
-internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
+[GoLazy] partial class lazyᴛtheHuffmanSpec { internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
     // Luminance DC.
     new(
         new byte[]{0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0}.array(),
@@ -164,7 +164,7 @@ internal static array<huffmanSpec> theHuffmanSpec = new huffmanSpec[]{
             0xf9, 0xfa
         }.slice()
     )
-}.array();
+}.array(); }
 
 // huffmanLUT is a compiled look-up table representation of a huffmanSpec.
 // Each value maps to a uint32 of which the 8 most significant bits hold the

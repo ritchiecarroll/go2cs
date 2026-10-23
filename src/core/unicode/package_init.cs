@@ -8,14 +8,6 @@ namespace go;
 
 partial class unicode_package {
     static unicode_package() {
-        initᴛTurkishCase();
-        initᴛPrintRanges();
-        initᴛGraphicRanges();
-        initᴛCategories();
-        initᴛScripts();
-        initᴛProperties();
-        initᴛCaseRanges();
-        initᴛFoldCategory();
         initᴛFoldScript();
     }
 } // end unicode_package

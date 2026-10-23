@@ -1271,7 +1271,7 @@ public static ΔSignal SIGXCPU => /* Signal(0x18) */ 24;
 public static ΔSignal SIGXFSZ => /* Signal(0x19) */ 25;
 
 // Error table
-internal static array<@string> errors = new array<@string>(106){
+[GoLazy] partial class lazyᴛerrors { internal static array<@string> errors = new array<@string>(106){
     [1] = "operation not permitted"u8,
     [2] = "no such file or directory"u8,
     [3] = "no such process"u8,
@@ -1377,10 +1377,10 @@ internal static array<@string> errors = new array<@string>(106){
     [103] = "policy not found"u8,
     [104] = "state not recoverable"u8,
     [105] = "previous owner died"u8
-};
+}; }
 
 // Signal table
-internal static array<@string> signals = new array<@string>(32){
+[GoLazy] partial class lazyᴛsignals { internal static array<@string> signals = new array<@string>(32){
     [1] = "hangup"u8,
     [2] = "interrupt"u8,
     [3] = "quit"u8,
@@ -1412,6 +1412,6 @@ internal static array<@string> signals = new array<@string>(32){
     [29] = "information request"u8,
     [30] = "user defined signal 1"u8,
     [31] = "user defined signal 2"u8
-};
+}; }
 
 } // end syscall_package

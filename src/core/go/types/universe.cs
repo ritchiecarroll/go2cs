@@ -36,7 +36,7 @@ internal static Object universeComparable;
 // The *Basic type for Typ[Byte] will have the name "uint8".
 // Use Universe.Lookup("byte").Type() to obtain the specific
 // alias basic type named "byte" (and analogous for "rune").
-public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
+[GoLazy] partial class lazyᴛTyp { public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)Invalid] = Ꮡ(new Basic(Invalid, 0, "invalid type"u8)),
 
     [(int)Bool] = Ꮡ(new Basic(Bool, IsBoolean, "bool"u8)),
@@ -65,7 +65,7 @@ public static slice<ж<Basic>> Typ = new golib.SparseArray<ж<Basic>>{
     [(int)ΔUntypedComplex] = Ꮡ(new Basic(ΔUntypedComplex, (BasicInfo)(IsComplex | IsUntyped), "untyped complex"u8)),
     [(int)UntypedString] = Ꮡ(new Basic(UntypedString, (BasicInfo)(IsString | IsUntyped), "untyped string"u8)),
     [(int)UntypedNil] = Ꮡ(new Basic(UntypedNil, IsUntyped, "untyped nil"u8))
-}.slice();
+}.slice(); }
 
 internal static array<ж<Basic>> basicAliases = new ж<Basic>[]{
     Ꮡ(new Basic(Byte, (BasicInfo)(IsInteger | IsUnsigned), "byte"u8)),
@@ -212,7 +212,7 @@ partial struct predeclaredFuncsᴛ1 /*dyn*/ {
     internal bool variadic;
     internal exprKind kind;
 }
-internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseArray<predeclaredFuncsᴛ1>{
+[GoLazy] partial class lazyᴛpredeclaredFuncs { internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseArray<predeclaredFuncsᴛ1>{
     [(int)_Append] = new("append"u8, 1, true, expression),
     [(int)_Cap] = new("cap"u8, 1, false, expression),
     [(int)_Clear] = new("clear"u8, 1, false, statement),
@@ -244,7 +244,7 @@ internal static array<predeclaredFuncsᴛ1> predeclaredFuncs = new golib.SparseA
 
     [(int)_Assert] = new("assert"u8, 1, false, statement),
     [(int)_Trace] = new("trace"u8, 0, true, statement)
-}.array();
+}.array(); }
 
 internal static void defPredeclaredFuncs() {
     foreach (var i in range(predeclaredFuncs)) {

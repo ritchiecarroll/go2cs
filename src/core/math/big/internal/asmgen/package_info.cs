@@ -64,23 +64,23 @@ using static go.math.big.@internal.asmgen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/big/internal/asmgen/386.go", "386.cs", "AAoSAC5eog==")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/386.go", "386.cs", "AAkSAC5eog==")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/add.go", "add.cs", "AAsU0pSCgoKCpoKCgoKCpoKCgoCAkoCAyJSigoKUlKaClIKUgoI=", "31-31:1;32-32:2;38-44:3")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/amd64.go", "amd64.cs", "AAgOAC9gguai3IKClJSUlIKUgqaqtqailKSClKSClJSmlIKUpqKUgoKUlIKmgoKUlIKUgpQ=")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/amd64.go", "amd64.cs", "/gAvYILmotyCgpSUlJSClIKmqramopSkgpSkgpSUppSClKailIKClJSCpoKClJSClIKU")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIcBvAKiABUukKaQppCmkAAJEJCmkKaQ")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/arm.go", "arm.cs", "AAgOACpWgqaigriigriigriigg==")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/arm64.go", "arm64.cs", "AAgOAC1cooKClIKCgpSCuKKCgpSCgoKUgriigoKUgoKClIK4ooKClIKCgpSC")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/arm.go", "arm.cs", "/gAqVoKmooK4ooK4ooK4ooI=")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/arm64.go", "arm64.cs", "/gAtXKKCgpSCgoKUgriigoKUgoKClIK4ooKClIKCgpSCuKKCgpSCgoKUgg==")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB08woKCgpSCABcu4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKAgoKClIKUgqSqwoKClIKUAAIQ8oKClIKUAAcUoqyyqJKowoKClKiyqMKCgpSqwoKClIKqoqqirNKClJSSlIKUgqa6soK8wqaCgoKClKrCqsKqwqrCgoKClIKClJSClLqSqsKClKrCgIKkgoKUqsKClICCpKrCgpSqwoCCpIKClKrCgpSAgqSospS0tAANCrKU+LS0tLSClJSClAANGoKCgoKUlIKClLqUgoKUgoKCxpSClIKUtNiCgoKClIKCgsamgoKCgpqylLSkgoKCgriCgoKmgoKClIIAA58BAAysAbKU+LS0tOqClJQADBiCgpSCgpS6lIKClIKCgsaUgqaCgoLGlO6CgoKCgoKUgoLKgoKCgoKCgoKCAAN3AAiIAdKCmKSnnNwACAiAgoKUlKTawoCCgpSSgtyk6sKClJSClJSkguzCmIKCgukAARSCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "ABw2soKClJKClMq4goKmgpKCgoKUlJS4goKCmIKkgpSUgoKCAAIZAAMigoKCgpSqoqiSgoKUgoKUgoKokqiSgoKUgoKCgoKCgpQ=")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/loong64.go", "loong64.cs", "/g==")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/main.go", "main.cs", "ABMiABIcwoKCgoKCgoKC")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/mips.go", "mips.cs", "AAgOACZOgg==")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/mips64.go", "mips64.cs", "AAgOACZOgg==")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/main.go", "main.cs", "ABIiABIcwoKCgoKCgoKC")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/mips.go", "mips.cs", "/gAmToI=")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/mips64.go", "mips64.cs", "/gAmToI=")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/mul.go", "mul.cs", "AAoQspSCgpTqwqaCgriCgoKCgoKCgrgABowCAIUBAoKCgpSSkpSCgpSCgpSkpMqCwoKCgoKCgoKCgpSClIKCgoKCgpSUpoLmooKSkqaSgoKmgoKCgoKqopKCkoKCgpSygoKUsoKCgoKUgoKCgpSmgtaigpKSuIKCwoKCgoKCgpSCgpSUgg==", "204-230:1;262-267:1;268-272:2;273-287:3;303-317:1")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/pipe.go", "pipe.cs", "AC5esoLKgIKkqqKClK7CgpSqoqqiAAIS4oKUgoKUgpSClAAHFgAIAoKCuIKClIK43IKCAAoUgoKCgpSClAAQIIKClIIACRaygoKygqaClIKU7IKCgpSCgpSUgoKUgpSCgtqCqJKCgoKUgrKmgpTsgoKClIKClJTIrLKC7IKUlIKUgpSCAAYSsoKClIKCgoKCAAMwABYCgoKUgpSCgoKU7oCClJSUpoLI2sKCgpSCgoLcgpSUyIKigpSClIKCgoKClMiCgpSClIKCgpTKkoKUgoKUggACLgAUAoKUgoKCgqaqoqqi6JKCpoKClJSmgpSUgpSCgoKCgpSCgoKClIKUgpSmlLaCtrak")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/ppc64.go", "ppc64.cs", "/g==")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/riscv64.go", "riscv64.cs", "/g==")]
-[assembly: go.GoPositionMap("math/big/internal/asmgen/s390x.go", "s390x.cs", "AAgOAC1cooLKgoKClKaCgpTmgpSklKaCgpSClIKUgoKU")]
+[assembly: go.GoPositionMap("math/big/internal/asmgen/s390x.go", "s390x.cs", "/gAtXKKCyoKCgpSmgoKU5oKUpJSmgoKUgpSClIKClA==")]
 [assembly: go.GoPositionMap("math/big/internal/asmgen/shift.go", "shift.cs", "AA0SAA8YpoKmkoKClIKCgpSCgsiCgoKCgoKCgpTKgoKCgoKC+IKCgoKUgpSC7pKCgoKCgoKCgoLy3IKCgoKClKaCgoKCgoKClJSUgoKCpoKC", "65-77:1;96-123:2")]
 // </GoSourcePositionMaps>
 

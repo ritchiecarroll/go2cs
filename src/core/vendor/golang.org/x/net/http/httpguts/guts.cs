@@ -26,7 +26,7 @@ public static bool ValidTrailerHeader(@string name) {
     return true;
 }
 
-internal static map<@string, bool> badTrailer = new map<@string, bool>{
+[GoLazy] partial class lazyᴛbadTrailer { internal static map<@string, bool> badTrailer = new map<@string, bool>{
     ["Authorization"u8] = true,
     ["Cache-Control"u8] = true,
     ["Connection"u8] = true,
@@ -48,6 +48,6 @@ internal static map<@string, bool> badTrailer = new map<@string, bool>{
     ["Trailer"u8] = true,
     ["Transfer-Encoding"u8] = true,
     ["Www-Authenticate"u8] = true
-};
+}; }
 
 } // end httpguts_package

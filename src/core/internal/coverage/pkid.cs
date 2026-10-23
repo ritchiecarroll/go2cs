@@ -44,7 +44,7 @@ partial class coverage_package {
 // package runtime is fixed, and doesn't vary depending on OS/arch. If
 // this were to be the case, we would need a table of some sort below
 // as opposed to a fixed list.
-internal static array<@string> rtPkgs = new @string[]{
+[GoLazy] partial class lazyᴛrtPkgs { internal static array<@string> rtPkgs = new @string[]{
     "internal/asan"u8,
     "internal/byteorder"u8,
     "internal/coverage/rtcov"u8,
@@ -71,7 +71,7 @@ internal static array<@string> rtPkgs = new @string[]{
     "internal/strconv"u8,
     "internal/stringslite"u8,
     "runtime"u8
-}.array();
+}.array(); }
 
 // Scoping note: the constants and apis in this file are internal
 // only, not expected to ever be exposed outside of the runtime (unlike

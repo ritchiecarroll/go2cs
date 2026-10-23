@@ -8,8 +8,6 @@ namespace go.encoding;
 
 partial class gob_package {
     static gob_package() {
-        initᴛdecArrayHelper();
-        initᴛdecSliceHelper();
         initᴛdecIgnoreOpMap();
         initᴛtWireType();
     }

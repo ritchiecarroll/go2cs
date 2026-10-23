@@ -5,7 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchPPC64x = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchPPC64x { public static ж<Arch> ArchPPC64x = Ꮡ(new Arch(
     Name: "ppc64x"u8,
     Build: "ppc64 || ppc64le"u8,
     WordBits: 64,
@@ -62,6 +62,6 @@ public static ж<Arch> ArchPPC64x = Ꮡ(new Arch(
     // and we're not hurting for registers.
     loopTop: "CMP %[1]s, $0; BEQ %[2]s; MOVD %[1]s, CTR"u8,
     loopBottom: "BDNZ %[2]s"u8
-));
+)); }
 
 } // end asmgen_package

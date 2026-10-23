@@ -359,7 +359,7 @@ public static VarKind ParamVar => 4;    // a function parameter variable
 public static VarKind ResultVar => 5;   // a function result variable
 public static VarKind FieldVar => 6;    // a struct field
 
-internal static array<@string> varKindNames = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛvarKindNames { internal static array<@string> varKindNames = new golib.SparseArray<@string>{
     [0] = "VarKind(0)"u8,
     [PackageVar] = "PackageVar"u8,
     [LocalVar] = "LocalVar"u8,
@@ -367,7 +367,7 @@ internal static array<@string> varKindNames = new golib.SparseArray<@string>{
     [ParamVar] = "ParamVar"u8,
     [ResultVar] = "ResultVar"u8,
     [FieldVar] = "FieldVar"u8
-}.array();
+}.array(); }
 
 public static @string String(this VarKind kind) {
     if (0 <= kind && (nint)(uint8)kind < len(varKindNames)) {

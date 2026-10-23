@@ -26,9 +26,9 @@ public partial struct parameters {
     internal nint ω; // max number of hints in MakeHint
 }
 
-internal static parameters params44 = new parameters(k: 4, l: 4, η: 2, γ1: 17, γ2: 88, λ: 128, τ: 39, ω: 80);
-internal static parameters params65 = new parameters(k: 6, l: 5, η: 4, γ1: 19, γ2: 32, λ: 192, τ: 49, ω: 55);
-internal static parameters params87 = new parameters(k: 8, l: 7, η: 2, γ1: 19, γ2: 32, λ: 256, τ: 60, ω: 75);
+[GoLazy] partial class lazyᴛparams44 { internal static parameters params44 = new parameters(k: 4, l: 4, η: 2, γ1: 17, γ2: 88, λ: 128, τ: 39, ω: 80); }
+[GoLazy] partial class lazyᴛparams65 { internal static parameters params65 = new parameters(k: 6, l: 5, η: 4, γ1: 19, γ2: 32, λ: 192, τ: 49, ω: 55); }
+[GoLazy] partial class lazyᴛparams87 { internal static parameters params87 = new parameters(k: 8, l: 7, η: 2, γ1: 19, γ2: 32, λ: 256, τ: 60, ω: 75); }
 
 internal static nint pubKeySize(parameters p) {
     // ρ + k × n × 10-bit coefficients of t₁

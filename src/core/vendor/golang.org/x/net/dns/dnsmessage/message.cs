@@ -55,7 +55,7 @@ public static Type TypeMINFO => 14;
 public static Type TypeAXFR => 252;
 public static Type TypeALL => 255;
 
-internal static map<Type, @string> typeNames = new map<Type, @string>{
+[GoLazy] partial class lazyᴛtypeNames { internal static map<Type, @string> typeNames = new map<Type, @string>{
     [TypeA] = "TypeA"u8,
     [TypeNS] = "TypeNS"u8,
     [TypeCNAME] = "TypeCNAME"u8,
@@ -73,7 +73,7 @@ internal static map<Type, @string> typeNames = new map<Type, @string>{
     [TypeMINFO] = "TypeMINFO"u8,
     [TypeAXFR] = "TypeAXFR"u8,
     [TypeALL] = "TypeALL"u8
-};
+}; }
 
 // String implements fmt.Stringer.String.
 public static @string String(this Type t) {
@@ -154,14 +154,14 @@ public static RCode RCodeNameError => 3;    // NXDomain
 public static RCode RCodeNotImplemented => 4; // NotImp
 public static RCode RCodeRefused => 5;      // Refused
 
-internal static map<RCode, @string> rCodeNames = new map<RCode, @string>{
+[GoLazy] partial class lazyᴛrCodeNames { internal static map<RCode, @string> rCodeNames = new map<RCode, @string>{
     [RCodeSuccess] = "RCodeSuccess"u8,
     [RCodeFormatError] = "RCodeFormatError"u8,
     [RCodeServerFailure] = "RCodeServerFailure"u8,
     [RCodeNameError] = "RCodeNameError"u8,
     [RCodeNotImplemented] = "RCodeNotImplemented"u8,
     [RCodeRefused] = "RCodeRefused"u8
-};
+}; }
 
 // String implements fmt.Stringer.String.
 public static @string String(this RCode r) {

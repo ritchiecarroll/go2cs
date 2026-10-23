@@ -457,7 +457,7 @@ internal static void initAlgAES() {
     useAeshash = true;
     // Initialize with random data so hash collisions will be hard to engineer.
     var key = (ж<array<uint64>>)(uintptr)(@unsafe.Pointer.FromPinnedBox(Ꮡaeskeysched));
-    foreach (var i in range(key)) {
+    foreach (var i in range(key, 16)) {
         key.Value[i] = bootstrapRand();
     }
 }

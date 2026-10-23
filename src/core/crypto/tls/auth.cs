@@ -118,7 +118,7 @@ internal static error verifyLegacyHandshakeSignature(uint8 sigType, cryptoꓸPub
 internal static readonly @string serverSignatureContext = "TLS 1.3, server CertificateVerify\x00"u8;
 internal static readonly @string clientSignatureContext = "TLS 1.3, client CertificateVerify\x00"u8;
 
-internal static slice<byte> signaturePadding = new byte[]{
+[GoLazy] partial class lazyᴛsignaturePadding { internal static slice<byte> signaturePadding = new byte[]{
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -127,7 +127,7 @@ internal static slice<byte> signaturePadding = new byte[]{
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
     0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20
-}.slice();
+}.slice(); }
 
 // signedMessage returns the (unhashed) message to be signed by certificate keys
 // in TLS 1.3. See RFC 8446, Section 4.4.3.

@@ -144,7 +144,7 @@ internal static stdFunction _timeBeginPeriod;
 internal static stdFunction _timeEndPeriod;
 internal static stdFunction _ᴛ2ʗ;
 
-internal static array<uint16> bcryptprimitivesdll = new uint16[]{(rune)'b', (rune)'c', (rune)'r', (rune)'y', (rune)'p', (rune)'t', (rune)'p', (rune)'r', (rune)'i', (rune)'m', (rune)'i', (rune)'t', (rune)'i', (rune)'v', (rune)'e', (rune)'s', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array();
+[GoLazy] partial class lazyᴛbcryptprimitivesdll { internal static array<uint16> bcryptprimitivesdll = new uint16[]{(rune)'b', (rune)'c', (rune)'r', (rune)'y', (rune)'p', (rune)'t', (rune)'p', (rune)'r', (rune)'i', (rune)'m', (rune)'i', (rune)'t', (rune)'i', (rune)'v', (rune)'e', (rune)'s', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array(); }
 internal static array<uint16> ntdlldll = new uint16[]{(rune)'n', (rune)'t', (rune)'d', (rune)'l', (rune)'l', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array();
 internal static array<uint16> powrprofdll = new uint16[]{(rune)'p', (rune)'o', (rune)'w', (rune)'r', (rune)'p', (rune)'r', (rune)'o', (rune)'f', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array();
 internal static array<uint16> winmmdll = new uint16[]{(rune)'w', (rune)'i', (rune)'n', (rune)'m', (rune)'m', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array();

@@ -40,12 +40,12 @@ public static Type TypeExec => 2;
 public static Type TypeDylib => 6;
 public static Type TypeBundle => 8;
 
-internal static slice<intName> typeStrings = new intName[]{
+[GoLazy] partial class lazyᴛtypeStrings { internal static slice<intName> typeStrings = new intName[]{
     new((uint32)TypeObj, "Obj"u8),
     new((uint32)TypeExec, "Exec"u8),
     new((uint32)TypeDylib, "Dylib"u8),
     new((uint32)TypeBundle, "Bundle"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this Type t) {
     return stringName((uint32)t, typeStrings, false);
@@ -67,14 +67,14 @@ public static Cpu CpuArm64 => /* CpuArm | cpuArch64 */ 16777228;
 public static Cpu CpuPpc => 18;
 public static Cpu CpuPpc64 => /* CpuPpc | cpuArch64 */ 16777234;
 
-internal static slice<intName> cpuStrings = new intName[]{
+[GoLazy] partial class lazyᴛcpuStrings { internal static slice<intName> cpuStrings = new intName[]{
     new((uint32)Cpu386, "Cpu386"u8),
     new((uint32)CpuAmd64, "CpuAmd64"u8),
     new((uint32)CpuArm, "CpuArm"u8),
     new((uint32)CpuArm64, "CpuArm64"u8),
     new((uint32)CpuPpc, "CpuPpc"u8),
     new((uint32)CpuPpc64, "CpuPpc64"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this Cpu i) {
     return stringName((uint32)i, cpuStrings, false);
@@ -97,14 +97,14 @@ public static LoadCmd LoadCmdDylinker => 0xf;   // id dylinker command (not load
 public static LoadCmd LoadCmdSegment64 => 0x19;
 public static LoadCmd LoadCmdRpath => 0x8000001c;
 
-internal static slice<intName> cmdStrings = new intName[]{
+[GoLazy] partial class lazyᴛcmdStrings { internal static slice<intName> cmdStrings = new intName[]{
     new((uint32)LoadCmdSegment, "LoadCmdSegment"u8),
     new((uint32)LoadCmdThread, "LoadCmdThread"u8),
     new((uint32)LoadCmdUnixThread, "LoadCmdUnixThread"u8),
     new((uint32)LoadCmdDylib, "LoadCmdDylib"u8),
     new((uint32)LoadCmdSegment64, "LoadCmdSegment64"u8),
     new((uint32)LoadCmdRpath, "LoadCmdRpath"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this LoadCmd i) {
     return stringName((uint32)i, cmdStrings, false);

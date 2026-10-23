@@ -136,10 +136,10 @@ internal static readonly @string paxGNUSparseRealSize = "GNU.sparse.realsize"u8;
 // This does not contain "charset" or "comment", which are both PAX-specific,
 // so adding them as first-class features of Header is unlikely.
 // Users can use the PAXRecords field to set it themselves.
-internal static map<@string, bool> basicKeys = new map<@string, bool>{
+[GoLazy] partial class lazyᴛbasicKeys { internal static map<@string, bool> basicKeys = new map<@string, bool>{
     [paxPath] = true, [paxLinkpath] = true, [paxSize] = true, [paxUid] = true, [paxGid] = true,
     [paxUname] = true, [paxGname] = true, [paxMtime] = true, [paxAtime] = true, [paxCtime] = true
-};
+}; }
 
 // A Header represents a single header in a tar archive.
 // Some fields may not be populated.

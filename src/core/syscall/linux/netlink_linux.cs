@@ -48,11 +48,11 @@ internal static slice<byte> newNetlinkRouteRequest(nint proto, nint seq, nint fa
     return rr.toWireFormat();
 }
 
-internal static ж<Δsync.Pool> pageBufPool = Ꮡ(new Δsync.Pool(New: () => {
+[GoLazy] partial class lazyᴛpageBufPool { internal static ж<Δsync.Pool> pageBufPool = Ꮡ(new Δsync.Pool(New: () => {
     var b = new slice<byte>(Getpagesize());
     return Ꮡ(b);
 }
-));
+)); }
 
 // NetlinkRIB returns routing information base, as known as RIB, which
 // consists of network facility information, states and parameters.

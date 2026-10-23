@@ -22,7 +22,7 @@ internal static encoding encodeFragment => 64;
 // hexadecimal.
 internal static encoding hexChar => 128;
 
-internal static array<encoding> table = new array<encoding>(256){
+[GoLazy] partial class lazyᴛtable { internal static array<encoding> table = new array<encoding>(256){
     [(rune)'!'] = (encoding)((encoding)(encodeFragment | encodeZone) | encodeHost),
     [(rune)'"'] = (encoding)(encodeZone | encodeHost),
     [(rune)'$'] = (encoding)((encoding)((encoding)((encoding)((encoding)(encodeFragment | encodeUserPassword) | encodeZone) | encodeHost) | encodePathSegment) | encodePath),
@@ -109,6 +109,6 @@ internal static array<encoding> table = new array<encoding>(256){
     [(rune)'y'] = (encoding)((encoding)((encoding)((encoding)((encoding)((encoding)(encodeFragment | encodeQueryComponent) | encodeUserPassword) | encodeZone) | encodeHost) | encodePathSegment) | encodePath),
     [(rune)'z'] = (encoding)((encoding)((encoding)((encoding)((encoding)((encoding)(encodeFragment | encodeQueryComponent) | encodeUserPassword) | encodeZone) | encodeHost) | encodePathSegment) | encodePath),
     [(rune)'~'] = (encoding)((encoding)((encoding)((encoding)((encoding)((encoding)(encodeFragment | encodeQueryComponent) | encodeUserPassword) | encodeZone) | encodeHost) | encodePathSegment) | encodePath)
-};
+}; }
 
 } // end url_package

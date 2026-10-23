@@ -1410,7 +1410,7 @@ internal static bool isNameString(@string s) {
 // the XML spec at https://www.xml.com/axml/testaxml.htm
 // and then reformatting. First corresponds to (Letter | '_' | ':')
 // and second corresponds to NameChar.
-internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛfirst { internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
         new(0x003A, 0x003A, 1),
         new(0x0041, 0x005A, 1),
@@ -1603,9 +1603,9 @@ internal static ж<unicode.RangeTable> first = Ꮡ(new unicode.RangeTable(
         new(0x4E00, 0x9FA5, 1),
         new(0xAC00, 0xD7A3, 1)
     }.slice()
-));
+)); }
 
-internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
+[GoLazy] partial class lazyᴛsecond { internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
     R16: new unicode.Range16[]{
         new(0x002D, 0x002E, 1),
         new(0x0030, 0x0039, 1),
@@ -1720,16 +1720,15 @@ internal static ж<unicode.RangeTable> second = Ꮡ(new unicode.RangeTable(
         new(0x309D, 0x309E, 1),
         new(0x30FC, 0x30FE, 1)
     }.slice()
-));
+)); }
 
 // HTMLEntity is an entity map containing translations for the
 // standard HTML entity characters.
 //
 // See the [Decoder.Strict] and [Decoder.Entity] fields' documentation.
-public static map<@string, @string> HTMLEntity;
-internal static void initᴛHTMLEntity() { HTMLEntity = htmlEntity; }
+[GoLazy] partial class lazyᴛHTMLEntity { public static map<@string, @string> HTMLEntity = htmlEntity; }
 
-internal static map<@string, @string> htmlEntity = new map<@string, @string>{
+[GoLazy] partial class lazyᴛhtmlEntity { internal static map<@string, @string> htmlEntity = new map<@string, @string>{
     /*
 		hget http://www.w3.org/TR/html4/sgml/entities.html |
 		ssam '
@@ -1990,7 +1989,7 @@ internal static map<@string, @string> htmlEntity = new map<@string, @string>{
     ["lsaquo"u8] = "\u2039"u8,
     ["rsaquo"u8] = "\u203A"u8,
     ["euro"u8] = "\u20AC"u8
-};
+}; }
 
 // HTMLAutoClose is the set of HTML elements that
 // should be considered to close automatically.

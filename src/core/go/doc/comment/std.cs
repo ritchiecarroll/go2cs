@@ -7,7 +7,7 @@ namespace go.go.doc;
 
 partial class comment_package {
 
-internal static slice<@string> stdPkgs = new @string[]{
+[GoLazy] partial class lazyᴛstdPkgs { internal static slice<@string> stdPkgs = new @string[]{
     "bufio"u8,
     "bytes"u8,
     "cmp"u8,
@@ -48,6 +48,6 @@ internal static slice<@string> stdPkgs = new @string[]{
     "unique"u8,
     "unsafe"u8,
     "weak"u8
-}.slice();
+}.slice(); }
 
 } // end comment_package

@@ -517,7 +517,7 @@ internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡ
     enc.freeEncoderState(state);
 }
 
-internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> encOpTable = new golib.SparseArray<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>{
+[GoLazy] partial class lazyᴛencOpTable { internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> encOpTable = new golib.SparseArray<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>>{
     [1] = encBool,
     [2] = encInt,
     [3] = encInt,
@@ -535,7 +535,7 @@ internal static array<Action<ж<encInstr>, ж<encoderState>, reflectꓸValue>> e
     [15] = encComplex,
     [16] = encComplex,
     [24] = encString
-}.array(25);
+}.array(25); }
 
 // encOpFor returns (a pointer to) the encoding op for the base type under rt and
 // the indirection count to reach it.

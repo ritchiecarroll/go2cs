@@ -51,7 +51,7 @@ internal static rune reverseBracket(this Properties p, rune r) {
     return xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r;
 }
 
-internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
+[GoLazy] partial class lazyᴛcontrolByteToClass { internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
     [0xD] = LRO, // U+202D LeftToRightOverride,
     [0xE] = RLO, // U+202E RightToLeftOverride,
     [0xA] = LRE, // U+202A LeftToRightEmbedding,
@@ -61,7 +61,7 @@ internal static array<ΔClass> controlByteToClass = new array<ΔClass>(16){
     [0x7] = RLI, // U+2067 RightToLeftIsolate,
     [0x8] = FSI, // U+2068 FirstStrongIsolate,
     [0x9] = PDI // U+2069 PopDirectionalIsolate,
-};
+}; }
 
 // LookupRune returns properties for r.
 public static (Properties p, nint size) LookupRune(rune r) {
