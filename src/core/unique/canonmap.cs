@@ -153,7 +153,7 @@ internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) {
         var wpʗ1 = wp;
         runtime.AddCleanup(canon, (EmptyStruct _Δp0) => {
             Ꮡm.cleanup(hash, wpʗ1);
-        }, new EmptyStruct());
+        }, new EmptyStruct(), new object?[] { Ꮡm }, new object?[] { wp });
         return canon;
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
