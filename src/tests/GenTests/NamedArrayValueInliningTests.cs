@@ -197,6 +197,10 @@ public class NamedArrayValueInliningTests
         System.Reflection.MethodInfo race = Assembly.Load(image.ToArray()).GetType("go.atest_package", throwOnError: true)!.GetMethod("LostPublishes")!;
 
         // the `??=` emission lost 872 of 900 such trials (arm7); a CAS publish loses none
+        // Scope: this compilation takes Roslyn's default OptimizationLevel.Debug, so the JIT runs it
+        // unoptimized and nothing inlines. The arm proves the split kept the CAS publish (door 2); it does
+        // not prove the inlined warm read under the optimizing JIT. The perf canary is the only optimized
+        // execution of that read.
         Assert.AreEqual(0, (int)race.Invoke(null, [16, 300])!, "a racing first touch kept a backing other than the published one");
     }
 }
