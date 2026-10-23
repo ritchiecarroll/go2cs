@@ -442,6 +442,11 @@ public sealed class TestRunner
     // in the instant the deadline passed completes a moment later, and is not polled for in a hot loop.
     private static readonly TimeSpan s_minimumDeadlineWait = TimeSpan.FromMilliseconds(50.0D);
 
+    // The longest wait between two checks while a test's clock is stopped (queued for a slot, or a parent whose
+    // subtests all queue). Its clock can start again at any moment, and waiting a whole deadline before reading it
+    // again could abandon it up to a deadline late.
+    private static readonly TimeSpan s_stoppedClockPoll = TimeSpan.FromSeconds(1.0D);
+
     /// <summary>
     /// The per-test watchdog (DESIGN-object-lifetime-disclosure.md OQ-L3(b)) at a TOP-LEVEL test's serial
     /// boundary: <see cref="WaitForSerialBoundary"/>, bounded by <see cref="TestOptions.TestDeadline"/>. A test
@@ -553,7 +558,12 @@ public sealed class TestRunner
                 long since = execution.RunningSince;
 
                 if (since == 0)
+                {
+                    if (s_stoppedClockPoll < nextCheck)
+                        nextCheck = s_stoppedClockPoll;
+
                     continue;
+                }
 
                 TimeSpan remaining = deadline - Stopwatch.GetElapsedTime(since);
 

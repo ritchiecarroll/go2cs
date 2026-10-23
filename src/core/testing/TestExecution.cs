@@ -161,7 +161,25 @@ public sealed class TestExecution
     // When the test body last started RUNNING, as a Stopwatch timestamp: in Execute, and again when a
     // parallel test resumes holding its -parallel slot. Zero until then. The per-test deadline counts from
     // here, so a parallel test queued behind -parallel is never charged for its wait.
+    //
+    // On a TOP-LEVEL test, the one the watchdog reads (its clock root), ChargeClock keeps it instead, and the same
+    // rule reaches its subtests: the clock runs while the test's tree is RUNNING (its own body, any test's
+    // cleanups, or a -parallel slot held anywhere in it). A PARALLEL top-level test's clock pauses while all that is
+    // left is subtests queued for a slot; a sequential one's body holds its clock until it finishes, so that clock
+    // runs through its whole tree. Until
+    // 2026-10-23 a parallel parent whose body only starts parallel subtests was charged for their whole queue,
+    // and with 4 slots TestCheckPtr was abandoned at the 60m deadline with every subtest queued behind other
+    // tests. A resume adds to what was charged before the pause, so a body that hangs holding a slot still meets
+    // the deadline.
     private long m_runningSince;
+
+    // The top-level test this test's running counts toward (itself for a top-level test), and, on that test, how
+    // many activities of its tree hold the clock now and the Stopwatch ticks charged before it last paused. The
+    // count and the clock move together under m_clockLock.
+    private readonly TestExecution m_clockRoot;
+    private readonly object m_clockLock = new();
+    private int m_clockHolds;
+    private long m_chargedTicks;
 
     // Every subtest started under this test, for Abandon: a child still in flight is abandoned with it.
     private readonly List<TestExecution> m_children = [];
@@ -170,6 +188,7 @@ public sealed class TestExecution
     {
         m_runner = runner;
         m_parent = parent;
+        m_clockRoot = parent?.m_clockRoot ?? this;
         Name = name;
         Source = source;
         Line = line;
@@ -239,10 +258,12 @@ public sealed class TestExecution
         if (abandonedWith is null)
             m_runner.MarkAbandoned(Name);
 
-        ReleaseParallelSlotOnce();
-
+        // Read before the slot goes back: giving it back can pause the clock this reads, and the verdict would
+        // then report 0 s for a test abandoned at the deadline.
         long since = RunningSince;
         elapsed = since == 0 ? 0.0D : Stopwatch.GetElapsedTime(since).TotalSeconds;
+
+        ReleaseParallelSlotOnce();
 
         // Go reports a subtest's verdict before its parent's.
         foreach (TestExecution child in children)
@@ -556,11 +577,85 @@ public sealed class TestExecution
     }
 
     // Gives this test's -parallel slot back if it still holds one. An abandoned parallel test's thread may never
-    // finish, so Abandon returns its slot; without that, the parallel tests queued behind it never run.
-    private void ReleaseParallelSlotOnce()
+    // finish, so Abandon returns its slot; without that, the parallel tests queued behind it never run. True when
+    // this call gave it back.
+    private bool ReleaseParallelSlotOnce()
     {
-        if (Interlocked.Exchange(ref m_holdsParallelSlot, 0) == 1)
-            m_runner.ReleaseParallelSlot(NestedRoot);
+        if (Interlocked.Exchange(ref m_holdsParallelSlot, 0) != 1)
+            return false;
+
+        m_runner.ReleaseParallelSlot(NestedRoot);
+        ChargeClock(-1);
+        return true;
+    }
+
+    // Marks the -parallel slot just taken as this test's. Its clock root runs while the slot is held.
+    private void TookParallelSlot()
+    {
+        Volatile.Write(ref m_holdsParallelSlot, 1);
+        ChargeClock(+1);
+    }
+
+    // One activity of this test's tree starts (+1) or stops (-1) holding its clock root's per-test clock. The first
+    // to start resumes the clock where it paused; the last to stop pauses it.
+    private void ChargeClock(int delta)
+    {
+        TestExecution root = m_clockRoot;
+
+        lock (root.m_clockLock)
+        {
+            int before = root.m_clockHolds;
+            root.m_clockHolds = before + delta;
+            long now = Stopwatch.GetTimestamp();
+
+            if (before == 0 && root.m_clockHolds > 0)
+            {
+                Interlocked.Exchange(ref root.m_runningSince, now - root.m_chargedTicks);
+            }
+            else if (before > 0 && root.m_clockHolds == 0)
+            {
+                root.m_chargedTicks = now - Interlocked.Read(ref root.m_runningSince);
+                Interlocked.Exchange(ref root.m_runningSince, 0);
+            }
+        }
+    }
+
+    // A top-level test parks at the serial-phase gate (t.Parallel): its clock stops, and what its body ran before
+    // t.Parallel is not carried into the parallel phase, where the deadline starts again when it holds its slot.
+    private void ParkClock()
+    {
+        lock (m_clockLock)
+        {
+            m_clockHolds--;
+            m_chargedTicks = 0;
+            Interlocked.Exchange(ref m_runningSince, 0);
+        }
+    }
+
+    // The test whose -parallel slot a SEQUENTIAL subtest's chain runs in: its nearest parallel ancestor under the
+    // same runner, whose body is blocked in this chain's t.Run. Null when no ancestor is parallel (the serial
+    // phase, where Go's count is the main test's, which this host does not keep).
+    private TestExecution? SlotLender()
+    {
+        for (TestExecution? ancestor = m_parent; ancestor is not null && ancestor.NestedRoot == NestedRoot; ancestor = ancestor.m_parent)
+        {
+            if (ancestor.IsParallel)
+                return ancestor;
+        }
+
+        return null;
+    }
+
+    // Takes back the slot this test lent to a sequential subtest's parallel subtests, once they are done (Go's
+    // waitParallel). If the watchdog abandoned this test meanwhile, the slot goes straight back, as Parallel gives
+    // back one taken by a test abandoned while it queued.
+    private void TakeBackParallelSlot()
+    {
+        m_runner.AcquireParallelSlot(NestedRoot);
+        TookParallelSlot();
+
+        if (Abandoned)
+            ReleaseParallelSlotOnce();
     }
 
     internal void Wait() => Completion.GetAwaiter().GetResult();
@@ -1446,7 +1541,10 @@ public sealed class TestExecution
 
         // Parked at the serial-phase gate the test is not running, so its per-test deadline stops until it
         // resumes below. Without this the parked time, which is every later serial test's, would count.
-        Interlocked.Exchange(ref m_runningSince, 0);
+        if (m_clockRoot == this)
+            ParkClock();
+        else
+            Interlocked.Exchange(ref m_runningSince, 0);
         ParallelSource.TrySetResult();
         m_parallelGate.Wait();
 
@@ -1454,10 +1552,12 @@ public sealed class TestExecution
         // Options.Parallel parallel tests RUN simultaneously (Go's -parallel semantics).
         BeforeParallelSlotForGuard?.Invoke(this);
         m_runner.AcquireParallelSlot(NestedRoot);
-        Volatile.Write(ref m_holdsParallelSlot, 1);
+        TookParallelSlot();
 
         // The per-test deadline restarts here: the time parked at the gate and queued for a slot is not the test's.
-        Interlocked.Exchange(ref m_runningSince, Stopwatch.GetTimestamp());
+        // A top-level test's clock restarted in TookParallelSlot; a subtest's own is the elapsed time an abandon reports.
+        if (m_clockRoot != this)
+            Interlocked.Exchange(ref m_runningSince, Stopwatch.GetTimestamp());
 
         // Go's parallelStart.Add(1): counted here, once the test is released and holds its slot
         // (testing.go:1805, right after t.tstate.waitParallel()), not when Parallel is called.
@@ -2130,7 +2230,11 @@ public sealed class TestExecution
         m_ownerThread = Environment.CurrentManagedThreadId;
         m_ownerGoroutine = Goroutine.Current;
         s_current.Value = this;
-        Interlocked.Exchange(ref m_runningSince, Stopwatch.GetTimestamp());
+
+        if (m_clockRoot == this)
+            ChargeClock(+1);
+        else
+            Interlocked.Exchange(ref m_runningSince, Stopwatch.GetTimestamp());
 
         // A synctest child is not a subtest: Go's t.Run prints === RUN, and testingSynctestTest does not.
         if (!m_isSynctest)
@@ -2176,28 +2280,65 @@ public sealed class TestExecution
         }
         finally
         {
-            // Give the -parallel slot back BEFORE waiting on parallel children (Go's ordering):
-            // a parallel parent that held its slot while waiting would deadlock its own children
-            // under a small -parallel cap.
-            ReleaseParallelSlotOnce();
-
             // ONE snapshot for both passes: a child added between them would be released and
             // never waited for, which is the lost-child half of the race above.
             TestExecution[] parallelChildren = ParallelChildrenSnapshot();
+
+            // Give the -parallel slot back BEFORE waiting on parallel children (Go's ordering):
+            // a parallel parent that held its slot while waiting would deadlock its own children
+            // under a small -parallel cap. A test with no parallel children keeps it through its
+            // cleanups, below.
+            if (parallelChildren.Length > 0)
+                ReleaseParallelSlotOnce();
+
+            // Go's tRunner gives a running count back before it waits on parallel subtests, and a SEQUENTIAL test
+            // takes one again after them (testing.go, tRunner: t.context.release(), then waitParallel when
+            // !t.isParallel). A sequential subtest holds no slot of its own here: its chain runs in its nearest
+            // parallel ancestor's, so that one is lent to the subtests. Without it, under a small -parallel cap
+            // they wait for the slot their own grandparent holds (-parallel=1 hung where Go 1.26 passes), and the
+            // grandparent's clock runs through their whole queue (TestFinalizerOrCleanupDeadlock's shape).
+            TestExecution? lender = parallelChildren.Length > 0 && !IsParallel ? SlotLender() : null;
+            bool lent = lender?.ReleaseParallelSlotOnce() == true;
 
             foreach (TestExecution child in parallelChildren)
                 child.ReleaseParallel();
             foreach (TestExecution child in parallelChildren)
                 child.Wait();
 
-            // Go cancels the test's context immediately before the cleanup phase (testing.go:1429),
-            // and the ORDER is the contract, not an implementation detail: Context()'s documented
-            // purpose is to let a cleanup wait on resources that shut down on Done(). Cancel after
-            // RunCleanups and every such cleanup blocks until its own deadline.
-            CancelContext();
+            // Every test's cleanups run on its top-level test's clock, as Go marks the test running while they run,
+            // so one that hangs still meets the deadline, even in a parallel subtest whose slot is already back.
+            ChargeClock(+1);
 
-            RunCleanups();
-            timer.Stop();
+            // The slot and the clock are given back in a finally: CancelContext runs the converted context
+            // package's cancel outside any catch, and if it threw, a queued parallel test would wait for the slot
+            // with its clock stopped and no deadline. (Start contains the exception itself.)
+            try
+            {
+                // Go cancels the test's context immediately before the cleanup phase (testing.go:1429),
+                // and the ORDER is the contract, not an implementation detail: Context()'s documented
+                // purpose is to let a cleanup wait on resources that shut down on Done(). Cancel after
+                // RunCleanups and every such cleanup blocks until its own deadline.
+                CancelContext();
+
+                RunCleanups();
+            }
+            finally
+            {
+                timer.Stop();
+
+                ChargeClock(-1);
+
+                // Go runs a test's cleanups before it gives the count back when the test has no parallel subtests
+                // (tRunner's last defer runs runCleanup, then the first one's release), so under -parallel=1 no
+                // sibling starts while they run.
+                if (parallelChildren.Length == 0)
+                    ReleaseParallelSlotOnce();
+
+                // Go takes the lent count back only after the cleanups (tRunner: runCleanup, then waitParallel), so
+                // a sibling queued for the slot can run while they do.
+                if (lent)
+                    lender!.TakeBackParallelSlot();
+            }
 
             // Go's "Output buffered logs" (testing.go:2015-2018): after the subtests, before the report,
             // this test's buffered partial Output line and each ancestor's become records.
