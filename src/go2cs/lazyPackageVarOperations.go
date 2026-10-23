@@ -30,7 +30,8 @@ import (
 // a computation nothing can observe (lazyInitializerRefusal states the five rules), and of the eligible vars a var is
 // lazy when its initializer has at least lazyPackageVarNodeFloor nodes, or it reads a lazy var (closure: an eager reader
 // would build the lazy var at class init and undo it), or it is an EXPORTED var a lazy initializer reads (it then needs
-// its initial-value snapshot, below). A var whose address is taken stays eager until the holder carries the box.
+// its initial-value snapshot, below). A var whose address is taken is built lazily with its box in the holder, so `&X`
+// before and after the first read is one address; a var whose address is taken is never READ by a lazy initializer.
 //
 // lazyPackageVars lists vars that MUST be lazy whatever their size (COORD's ruling (A): runtime's malloc dispatch
 // tables, read only behind a const-false gate); a listed var the predicate refuses is refused by name at its declaration.
@@ -153,10 +154,12 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 			candidate.reason = "its declaration is hand-owned"
 		}
 
-		// The converter's own box set (collectAddressedGlobals) also holds the vars a pointer-receiver or capture-mode call
-		// addresses implicitly (io's blackHolePool.Get()); its use sites name the box.
-		if candidate.reason == "" && (addressed[obj] || packageAddressedGlobals[obj]) {
-			candidate.reason = "its address is taken, and the holder does not carry an addressable box yet"
+		// A var in the converter's own box set (collectAddressedGlobals: `&X`, and the pointer-receiver or capture-mode
+		// calls that address it implicitly, io's blackHolePool.Get()) is built lazily WITH its box: the holder holds the
+		// box, and `&X` and `X` read through it (writeLazyAddressedPackageVar). An address the scan sees and the converter
+		// does not box (a pointer-receiver method value) has no box to carry, so that var stays eager.
+		if candidate.reason == "" && addressed[obj] && !packageAddressedGlobals[obj] {
+			candidate.reason = "its address is taken where the converter keeps no box for it"
 		}
 
 		candidates[obj] = candidate
@@ -579,7 +582,24 @@ func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr stri
 	writeTrailing()
 }
 
-// lazyPackageVarHolder names a lazy var's holder class: lazyᴛ<name>, beside the initᴛ<name> it replaces.
+// writeLazyAddressedPackageVar writes a lazy var whose address is taken: today's two eager lines (writeAddressedGlobalDecl),
+// the box field inside the var's marked holder, `[GoLazy] partial class lazyᴛX { internal static ж<T> ᏑX = new …(…); }`,
+// then the var's `ref` property over the box, unchanged: `internal static ref T X => ref ᏑX.Value;`. go2cs-gen writes the
+// box accessor, `ref ж<T> ᏑX => ref lazyᴛX.ᏑX`, so `&X` (ᏑX) and `X` read one box: the first of either builds it, and
+// the address is the same before and after. A boxed holder never needs the initial snapshot: a var whose address is
+// taken is refused as the dep of a lazy initializer.
+func (v *Visitor) writeLazyAddressedPackageVar(access, csTypeName, csIDName, valExpr string, valueIsRefLike bool, writeTrailing func()) {
+	boxDecl, refProperty := addressedGlobalDecl(access, csTypeName, csIDName, valExpr, valueIsRefLike)
+
+	v.writeOutput("[GoLazy] partial class %s { %s }", lazyPackageVarHolder(csIDName), boxDecl)
+	v.outputBuilder.WriteString(v.newline)
+	v.writeOutput("%s", refProperty)
+	writeTrailing()
+}
+
+// lazyPackageVarHolder names a lazy var's holder class: lazyᴛ<name>, beside the initᴛ<name> it replaces. A keyword-named
+// var arrives escaped (`@null`); the glyph already de-keywords the composed name, so the escape is dropped, as the box
+// name drops it (addressedGlobalDecl).
 func lazyPackageVarHolder(csIDName string) string {
-	return "lazy" + TempVarMarker + csIDName
+	return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")
 }

@@ -25,6 +25,12 @@ internal static void Main() {
 
     tables.Roots[0] = Ꮡ(new tables.Entry(Name: "swapped"));
     fmt.Println("swapped:", (~tables.Roots[0]).Name);
+
+    var before = tables.GridAddr();
+    before.Value[0] = 100;
+    fmt.Println("grid:", tables.Grid[0], tables.ᏑGrid == before, tables.Grid[19]);
+    tables.Grid[1] = 200;
+    fmt.Println("grid via pointer:", before.Value[1]);
 }
 
 } // end main_package

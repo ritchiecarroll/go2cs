@@ -268,6 +268,16 @@ func importedGlobalIsBoxed(varObj *types.Var) bool {
 // box holds the value; the var name becomes a ref-returning property over the box, so
 // reads/writes of the global are unchanged. An empty initExpr defaults the value.
 func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr string, valueIsRefLike bool) {
+	boxDecl, refProperty := addressedGlobalDecl(access, csTypeName, csIDName, initExpr, valueIsRefLike)
+
+	v.writeOutput("%s", boxDecl)
+	v.outputBuilder.WriteString(v.newline)
+	v.writeOutput("%s", refProperty)
+}
+
+// addressedGlobalDecl is writeAddressedGlobalDecl's two lines: the box field and the var's `ref` property over it. A lazy
+// addressed var (writeLazyAddressedPackageVar) writes the same two, the box field inside its holder.
+func addressedGlobalDecl(access, csTypeName, csIDName, initExpr string, valueIsRefLike bool) (boxDecl, refProperty string) {
 	// A KEYWORD-named global (`var null = …`, net/rpc/jsonrpc) arrives keyword-escaped
 	// (`@null`); composed after the marker glyph the escape is INTERIOR (`Ꮡ@null`), which
 	// lexes as two tokens. The glyph prefix already de-keywords the identifier, so strip
@@ -295,9 +305,10 @@ func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExp
 	// `new(...)` constructs the box, and B2-I3 rewrites it to name the concrete standard-kind
 	// class — `new BoxConstructPrefix<T>(...)` — when the base goes abstract. This line is the
 	// 754-site class of the design's emission-priced radius.
-	v.writeOutput("%s static %s<%s> %s = new %s<%s>(%s);", access, PointerPrefix, csTypeName, box, BoxConstructPrefix, csTypeName, initExpr)
-	v.outputBuilder.WriteString(v.newline)
-	v.writeOutput("%s static ref %s %s => ref %s.%s;", access, csTypeName, csIDName, box, accessor)
+	boxDecl = fmt.Sprintf("%s static %s<%s> %s = new %s<%s>(%s);", access, PointerPrefix, csTypeName, box, BoxConstructPrefix, csTypeName, initExpr)
+	refProperty = fmt.Sprintf("%s static ref %s %s => ref %s.%s;", access, csTypeName, csIDName, box, accessor)
+
+	return boxDecl, refProperty
 }
 
 // isAddressedGlobal reports whether the identifier resolves to a package-level var

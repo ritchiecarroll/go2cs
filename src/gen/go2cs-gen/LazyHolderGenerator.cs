@@ -31,14 +31,23 @@ namespace go2cs;
 /// <c>lazyᴛX.initial</c>.
 /// </para>
 /// <para>
-/// A holder that does not hold exactly one static field named for it is refused by name (GO2CS0009), and nothing is
-/// generated for it.
+/// A var whose address is taken keeps its heap box: the holder holds the box,
+/// <c>[GoLazy] partial class lazyᴛX { internal static ж&lt;T&gt; ᏑX = new StandardBox&lt;T&gt;(…); }</c>, the converter keeps
+/// the var's <c>ref T X => ref ᏑX.Value</c> property beside it, and the generator writes the box accessor,
+/// <c>ref ж&lt;T&gt; ᏑX => ref lazyᴛX.ᏑX</c>. <c>&amp;X</c> and <c>X</c> then read one box, built by the first of either.
+/// </para>
+/// <para>
+/// A holder that does not hold exactly one static field named for it (or for its box) is refused by name (GO2CS0009), and
+/// nothing is generated for it.
 /// </para>
 /// </remarks>
 [Generator]
 public class LazyHolderGenerator : ISourceGenerator
 {
     internal const string HolderPrefix = "lazyᴛ";
+
+    // The box of a var whose address is taken, as the converter names it (AddressPrefix): `&X` reads ᏑX.
+    internal const string BoxPrefix = "Ꮡ";
 
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -114,8 +123,10 @@ public class LazyHolderGenerator : ISourceGenerator
                 {
                     string type = field.Declaration.Type.WithoutTrivia().ToFullString();
                     string holderName = holder.Identifier.ValueText;
+                    string fieldName = field.Declaration.Variables[0].Identifier.ValueText;
 
-                    source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {name} => ref {holderName}.{name};\r\n");
+                    // The var's field, or its box (ᏑX) for a var whose address is taken: the accessor takes the field's name.
+                    source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");
 
                     if (initial)
                         source.Append($"{memberIndent}partial class {holderName} {{ internal static readonly {type} initial; static {holderName}() {{ initial = {name}; }} }}\r\n");
@@ -135,7 +146,7 @@ public class LazyHolderGenerator : ISourceGenerator
     }
 
     // Why the holder cannot be completed, or null when it can: a nested partial class named lazyᴛX holding exactly one
-    // static field, X. `name` is X, as far as the holder's name says.
+    // static field, X, or X's box ᏑX for a var whose address is taken. `name` is X, as far as the holder's name says.
     private static string? Refusal(ClassDeclarationSyntax holder, out FieldDeclarationSyntax? field, out string name)
     {
         field = null;
@@ -163,8 +174,15 @@ public class LazyHolderGenerator : ISourceGenerator
         if (only.Declaration.Variables.Count != 1)
             return "its field declares more than one variable";
 
-        if (only.Declaration.Variables[0].Identifier.ValueText != name)
-            return $"its field is named '{only.Declaration.Variables[0].Identifier.ValueText}'";
+        string fieldName = only.Declaration.Variables[0].Identifier.ValueText;
+        bool box = fieldName == BoxPrefix + name;
+
+        if (fieldName != name && !box)
+            return $"its field is named '{fieldName}'";
+
+        // A var whose address is taken is never read by a lazy initializer, so nothing reads a snapshot of it.
+        if (box && IsInitial(holder))
+            return "it holds the var's box, which keeps no initial snapshot";
 
         field = only;
         return null;

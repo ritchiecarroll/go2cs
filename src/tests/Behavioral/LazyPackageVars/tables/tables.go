@@ -46,6 +46,13 @@ var Rules = [...]Rule{
 	{"negate", func(n int) int { return -n }},
 }
 
+// Lazy WITH its box: its address is taken (here and by the importer), so the holder carries the box and &Grid is one
+// address before and after the first read.
+var Grid = [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+
+// GridAddr returns Grid's address.
+func GridAddr() *[20]int { return &Grid }
+
 func init() {
 	record("init")
 }
