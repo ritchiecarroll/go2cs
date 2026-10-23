@@ -2278,14 +2278,16 @@ public sealed class TestExecution
         }
         finally
         {
-            // Give the -parallel slot back BEFORE waiting on parallel children (Go's ordering):
-            // a parallel parent that held its slot while waiting would deadlock its own children
-            // under a small -parallel cap.
-            ReleaseParallelSlotOnce();
-
             // ONE snapshot for both passes: a child added between them would be released and
             // never waited for, which is the lost-child half of the race above.
             TestExecution[] parallelChildren = ParallelChildrenSnapshot();
+
+            // Give the -parallel slot back BEFORE waiting on parallel children (Go's ordering):
+            // a parallel parent that held its slot while waiting would deadlock its own children
+            // under a small -parallel cap. A test with no parallel children keeps it through its
+            // cleanups, below.
+            if (parallelChildren.Length > 0)
+                ReleaseParallelSlotOnce();
 
             // Go's tRunner gives a running count back before it waits on parallel subtests, and a SEQUENTIAL test
             // takes one again after them (testing.go, tRunner: t.context.release(), then waitParallel when
@@ -2315,6 +2317,12 @@ public sealed class TestExecution
             timer.Stop();
 
             ChargeClock(-1);
+
+            // Go runs a test's cleanups before it gives the count back when the test has no parallel subtests
+            // (tRunner's last defer runs runCleanup, then the first one's release), so under -parallel=1 no sibling
+            // starts while they run.
+            if (parallelChildren.Length == 0)
+                ReleaseParallelSlotOnce();
 
             // Go takes the lent count back only after the cleanups (tRunner: runCleanup, then waitParallel), so a
             // sibling queued for the slot can run while they do.

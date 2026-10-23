@@ -337,8 +337,9 @@ public class TestHostWatchdogTests
     }
 
     // Cleanups run on the top-level test's clock for EVERY test, as Go marks a test running while its cleanups run. A
-    // parallel subtest gives its slot back before its cleanups, so with the clock charged only by slots and the top-level
-    // test's own cleanups, a hung subtest cleanup left the clock stopped and the run never returned.
+    // parallel subtest gave its slot back before its cleanups, so with the clock charged only by slots and the top-level
+    // test's own cleanups, a hung subtest cleanup left the clock stopped and the run never returned. (A leaf parallel
+    // test now keeps its slot through its cleanups, as Go's does; the next arm is the shape only the charge bounds.)
     [TestMethod]
     public void AHungCleanupInAParallelSubtestStillMeetsTheDeadline()
     {
@@ -357,6 +358,85 @@ public class TestHostWatchdogTests
         registry.Add("TestZParallel", t => t.Value.Parallel(), "a_test.go", 2);
 
         AssertAbandonedAndRunGoesOn(registry, release, "TestParent");
+    }
+
+    // A parallel subtest WITH parallel subtests gives its slot back before it waits on them, and its cleanups run
+    // after, holding no slot. Only the per-test cleanup charge keeps a hung one bounded there: a leaf parallel test
+    // keeps its slot through its cleanups (below), so the arm above is bounded by that slot as well.
+    [TestMethod]
+    public void AHungCleanupInAParallelSubtestWithParallelSubtestsStillMeetsTheDeadline()
+    {
+        using ManualResetEventSlim release = new(false);
+
+        TestRegistry registry = new("watchdog", []);
+        registry.Add("TestParent", t =>
+        {
+            t.Value.Parallel();
+            t.Value.Execution!.Run("1", c =>
+            {
+                c.Value.Parallel();
+                c.Value.Execution!.Cleanup(() => release.Wait());
+                c.Value.Execution!.Run("a", a => a.Value.Parallel());
+            });
+        }, "a_test.go", 1);
+        registry.Add("TestZParallel", t => t.Value.Parallel(), "a_test.go", 2);
+
+        AssertAbandonedAndRunGoesOn(registry, release, "TestParent");
+    }
+
+    // Go's tRunner runs the cleanups of a test with NO parallel subtests before it gives its running count back (its
+    // last defer runs runCleanup, then the first defer's release), so under -parallel=1 a sibling parallel test does
+    // not start until they end. Here TestA's cleanup waits up to 1 s for TestB, which the seam holds until that cleanup
+    // has started: giving the slot back first let TestB start inside the cleanup.
+    [TestMethod]
+    public void AParallelTestWithoutParallelSubtestsKeepsItsSlotThroughItsCleanups()
+    {
+        using ManualResetEventSlim cleanupStarted = new(false);
+        using ManualResetEventSlim cleanupEnded = new(false);
+        using ManualResetEventSlim bStarted = new(false);
+        bool bStartedAfterCleanup = false;
+
+        TestRegistry registry = new("watchdog", []);
+        registry.Add("TestA", t =>
+        {
+            t.Value.Parallel();
+            t.Value.Execution!.Cleanup(() =>
+            {
+                cleanupStarted.Set();
+                bStarted.Wait(TimeSpan.FromSeconds(1));
+                cleanupEnded.Set();
+            });
+        }, "a_test.go", 1);
+        registry.Add("TestB", t =>
+        {
+            t.Value.Parallel();
+            bStartedAfterCleanup = cleanupEnded.IsSet;
+            bStarted.Set();
+        }, "a_test.go", 2);
+
+        TestReporter reporter = new("watchdog", json: false, verbose: false);
+        Environment.SetEnvironmentVariable("GO2CS_TEST_DEADLINE", "0");
+        TestRunner runner = new(registry, TestOptions.Parse(["-test.parallel=1"]), reporter, ".", ".");
+
+        TestExecution.BeforeParallelSlotForGuard = execution =>
+        {
+            if (execution.Name == "TestB")
+                cleanupStarted.Wait(TimeSpan.FromSeconds(10));
+        };
+
+        try
+        {
+            Assert.IsTrue(Task.Run(runner.RunAll).Wait(TimeSpan.FromSeconds(30)), "RunAll did not return within 30 s");
+        }
+        finally
+        {
+            TestExecution.BeforeParallelSlotForGuard = null;
+        }
+
+        Assert.IsTrue(bStartedAfterCleanup, "TestB started while TestA's cleanup ran: TestA gave its slot back first: " + Verdicts(reporter));
+
+        foreach (string name in new[] { "TestA", "TestB" })
+            Assert.IsTrue(reporter.Events.Any(e => e.Test == name && e.Action == "pass"), name + " did not pass: " + Verdicts(reporter));
     }
 
     // Go's tRunner runs a sequential test's cleanups BEFORE it takes back the running count its parallel subtests used
