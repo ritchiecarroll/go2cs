@@ -28081,4 +28081,46 @@ may be stamped (a module path replacement could be; a directory replacement coul
 
 — H (measured 2026-10-22; COORD ruled the first a BOARD row)
 
+## 2026-10-23 — G record: the hop's windows JIT perf readings (2026-10-21/22) — six rows moved; Startup ADDRESSED (lazy registries + lazy static data); Sort a tiering/OSR variance; RefLower and Iface a layout lottery; IfaceCall creep and Channel UNCONFIRMED — OPEN as PERF-REVIEW rows for the post-hop re-baseline
+
+This row gathers readings that were posted as direct messages to COORD and so live in no committed file. The
+re-baseline ([`PLAN-perf-rebaseline.md`](../PLAN-perf-rebaseline.md), section 6) cites this row as their
+durable record. Figures are as COORD relayed them on 2026-10-23.
+
+**(a) The i9's regression read, 2026-10-21** (windows, JIT, the Performance suite, `ed51b5a3bd` against master
+`ae0c4c6e43`, ABBA twice):
+
+| row | hop vs master |
+|---|---:|
+| Startup | +19.4 % |
+| IfaceCall | +16.9 % |
+| Channel | +11.7 % |
+| RefLower | +11.5 % |
+| Sort | +8.2 % |
+| Iface | +7.9 % |
+
+**(b) The i9's bisect, 2026-10-22 (about 00:58).** Sort (+13 %) and Startup (+12.6 %) step at the 1.26 corpus
+regeneration, which building alone cannot split. RefLower and Iface read bimodal across builds of unchanged
+source. IfaceCall creeps across the range with no single step. Channel was not confirmed.
+
+**(c) G's profile, 2026-10-22 (about 01:31).** Sort is tiering/OSR variance: its medians are identical under
+`TieredCompilation=0`. G proposed a PERF-REVIEW entry for it and a TC0 column in the runner. Startup is real:
++794 methods jitted at start-up. Lazy registries (`87f76a49b1`) and lazy static data (batch 23, `7714e4dea0`)
+took them back out.
+
+**Status, per row:**
+
+| row | mechanism | status |
+|---|---|---|
+| Startup | more start-up JIT work in the 1.26 corpus | ADDRESSED by lazy registries and lazy static data; the re-baseline confirms it |
+| Sort | tier-up (call counting, OSR, PGO) lands inside a few-hundred-ms workload | MEASUREMENT: published at default tiering, with the TC0 column beside it |
+| RefLower, Iface | code placement (bimodal across builds of unchanged source) | MEASUREMENT: each row's own A/A pair is its noise floor |
+| IfaceCall | creep, no single step | OPEN: a review row |
+| Channel | unconfirmed in the bisect | OPEN: a review row |
+
+The re-baseline measures every row against its own floor. Any that still read worse there follow the plan's
+section 8.
+
+— G (recorded 2026-10-23 at COORD's request)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
