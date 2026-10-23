@@ -23,7 +23,7 @@
 **Point-in-time resume record, 2026-10-22, lane H.** One lane's section in the shape the `save-state` skill
 orders for `docs/phase4/RESUME-SESSIONS.md`: a STATE BLOCK, a WAKE paragraph, and a PASTE PROMPT. COORD folds it
 into the fleet file. It needs no memory file, scratchpad or untracked file to exist: everything a new H session
-needs is here or on origin. Read this file's own tip with `git ls-remote origin claude/h-resume-state`, never from
+needs is here or on origin. Read this file's own tip with `git ls-remote origin claude/coord-handover`, never from
 a SHA written in it.
 
 
@@ -34,8 +34,8 @@ LANE: H   MODEL: opus/high   HOST: H-LAPTOP
 BRANCH: claude/hop-go126 774f609be809f73d0ecc66c9dfc8c59a8839b4eb yes landed -- the hop line at batch 22, the base the next seat is cut from
 LOCAL-ONLY: claude/h-buildinfo-stamp 774f609be809f73d0ecc66c9dfc8c59a8839b4eb empty -- zero commits on the batch 22 tip, nothing to preserve; recut it from the current hop tip if it moves
 WORKTREE: C:\go2cs-h\wt-buildinfo claude/h-buildinfo-stamp 0 uncommitted -- nothing to preserve
-WORKTREE: C:\go2cs-h\wt-resume claude/h-resume-state 0 uncommitted after this record's commit -- remove plainly once COORD has folded it
-NEXT: cut the build-info stamp seat on claude/h-buildinfo-stamp from the current claude/hop-go126 tip (774f609be8 or later), per the RULED design in the paste prompt
+WORKTREE: (wt-resume removed 2026-10-22 after the fold; claude/h-resume-state retired)
+NEXT: (amended 2026-10-22 by COORD) the build-info seat is PUSHED (claude/h-buildinfo-stamp 9995f33d99, accepted; it lands after G's lazy seat). Take COORD's next order; the queued one is the Performance-tree re-transpile after the lazy and build-info seats land
 READ-FIRST: CLAUDE.md; docs/phase4/DATA-hop126-deferred-allocs.md; src/go2cs/godebugDefault.go; src/core/golib/GoDefaultGodebugAttribute.cs; src/core/runtime/debug/stubs_impl.cs; src/core/testing/TestRegistry.cs
 BLOCKED-ON: none -- the seat is ruled and may be cut now; it LANDS after G's lazy seat, which COORD sequences
 TOOLS: GOROOT=%USERPROFILE%\sdk\go1.26.10 (go1.24.13 beside it); GOTOOLCHAIN=local; DOTNET_ROOT=%USERPROFILE%\dotnet10 (SDK 10.0.402); pwsh 7.6.7; python 3.13.15; GOCACHE/GOMODCACHE/NUGET_PACKAGES/NUGET_HTTP_CACHE_PATH under C:\go2cs-h\cache
@@ -68,7 +68,7 @@ FIRST, in this order:
 2. Start exactly ONE keep-alive with the Bash tool's run_in_background: `while true; do sleep 300; done`.
    Never stop it to clean up; if a restart drops it, start it again. Make sure no other H session is still
    running one.
-3. Read this record's own tip: `git ls-remote origin claude/h-resume-state`, then send COORD ONE line: "H
+3. Read this record's own tip: `git ls-remote origin claude/coord-handover`, then send COORD ONE line: "H
    resumed in a new session", that tip, the keep-alive task id, and the current claude/hop-go126 tip.
 4. Then do NEXT below, unless COORD's reply redirects you.
 
