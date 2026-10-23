@@ -163,8 +163,10 @@ public sealed class TestExecution
     // here, so a parallel test queued behind -parallel is never charged for its wait.
     //
     // On a TOP-LEVEL test, the one the watchdog reads (its clock root), ChargeClock keeps it instead, and the same
-    // rule reaches its subtests: the clock runs while the test's tree is RUNNING (its own body or cleanups, or a
-    // -parallel slot held anywhere in it) and pauses while all that is left is subtests queued for a slot. Until
+    // rule reaches its subtests: the clock runs while the test's tree is RUNNING (its own body, any test's
+    // cleanups, or a -parallel slot held anywhere in it). A PARALLEL top-level test's clock pauses while all that is
+    // left is subtests queued for a slot; a sequential one's body holds its clock until it finishes, so that clock
+    // runs through its whole tree. Until
     // 2026-10-23 a parallel parent whose body only starts parallel subtests was charged for their whole queue,
     // and with 4 slots TestCheckPtr was abandoned at the 60m deadline with every subtest queued behind other
     // tests. A resume adds to what was charged before the pause, so a body that hangs holding a slot still meets
@@ -2299,12 +2301,9 @@ public sealed class TestExecution
             foreach (TestExecution child in parallelChildren)
                 child.Wait();
 
-            if (lent)
-                lender!.TakeBackParallelSlot();
-
-            // A top-level test runs its cleanups on its own clock, so one that hangs still meets the deadline.
-            if (m_clockRoot == this)
-                ChargeClock(+1);
+            // Every test's cleanups run on its top-level test's clock, as Go marks the test running while they run,
+            // so one that hangs still meets the deadline, even in a parallel subtest whose slot is already back.
+            ChargeClock(+1);
 
             // Go cancels the test's context immediately before the cleanup phase (testing.go:1429),
             // and the ORDER is the contract, not an implementation detail: Context()'s documented
@@ -2315,8 +2314,12 @@ public sealed class TestExecution
             RunCleanups();
             timer.Stop();
 
-            if (m_clockRoot == this)
-                ChargeClock(-1);
+            ChargeClock(-1);
+
+            // Go takes the lent count back only after the cleanups (tRunner: runCleanup, then waitParallel), so a
+            // sibling queued for the slot can run while they do.
+            if (lent)
+                lender!.TakeBackParallelSlot();
 
             // Go's "Output buffered logs" (testing.go:2015-2018): after the subtests, before the report,
             // this test's buffered partial Output line and each ancestor's become records.
