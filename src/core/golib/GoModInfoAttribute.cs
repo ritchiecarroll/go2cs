@@ -70,6 +70,9 @@ public sealed class GoModInfoAttribute(string value) : Attribute
             lines += $"mod\t{modulePath}\t(devel)\t\n";
 
         s_registered = lines;
+
+        // The composed value describes the registration; the next read composes it afresh.
+        s_composed = null;
     }
 
     // cmd/go's modinfo sentinels (cmd/go/internal/modload/build.go infoStart / infoEnd), which
@@ -77,15 +80,38 @@ public sealed class GoModInfoAttribute(string value) : Attribute
     private static readonly byte[] s_infoStart = Convert.FromHexString("3077af0c9274080241e1c107e6d618e6");
     private static readonly byte[] s_infoEnd = Convert.FromHexString("f932433186182072008242104116d8f2");
 
+    // The composed runtime.modinfo, held in a class so a reader sees the whole value or none of it.
+    private sealed class ComposedModInfo(@string value)
+    {
+        public readonly @string Value = value;
+    }
+
+    private static ComposedModInfo? s_composed;
+
     /// <summary>
     /// The running binary's <c>runtime.modinfo</c>: the registered test-host lines when there are any, else the
     /// entry stamp, followed by its build settings. "" when neither exists.
     /// </summary>
+    /// <remarks>
+    /// In Go, <c>modinfo</c> is a static string the linker writes, so reading it allocates nothing. It is composed here
+    /// ONCE, on the first read, and every later read returns that same string; <see cref="Register"/> resets it. Two
+    /// racing first reads may both compose, and both compose the same value.
+    /// </remarks>
     /// <param name="goos">The converted runtime's <c>GOOS</c>.</param>
     /// <param name="goarch">The converted runtime's <c>GOARCH</c>.</param>
     /// <param name="cgoEnabled">The converted runtime's <c>iscgo</c>.</param>
-    public static @string Compose(string goos, string goarch, bool cgoEnabled) =>
-        Compose(Registered != "" ? Registered : EntryValue, goos, goarch, cgoEnabled, GoDefaultGodebugAttribute.EntryValue);
+    public static @string Compose(string goos, string goarch, bool cgoEnabled)
+    {
+        ComposedModInfo? composed = s_composed;
+
+        if (composed is null)
+        {
+            composed = new ComposedModInfo(Compose(Registered != "" ? Registered : EntryValue, goos, goarch, cgoEnabled, GoDefaultGodebugAttribute.EntryValue));
+            s_composed = composed;
+        }
+
+        return composed.Value;
+    }
 
     /// <summary>
     /// Composes a <c>runtime.modinfo</c> value from its parts, sentinel-wrapped; "" when <paramref name="modules"/>

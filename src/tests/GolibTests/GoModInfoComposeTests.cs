@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -117,6 +119,38 @@ public class GoModInfoComposeTests
             "an entry assembly carrying only go.lib_package was read as a main package under test");
 
         Assert.IsFalse(TestHost.HostsMainPackage(null));
+    }
+
+    /// <summary>
+    /// Go's <c>runtime.modinfo</c> is a static string, so reading it allocates nothing: the converted value is composed
+    /// once and every later read returns the SAME bytes -- one backing, so the second read composed nothing. A
+    /// registration composes the next read afresh, since the value describes it.
+    /// </summary>
+    [TestMethod]
+    public void SecondReadComposesNothing()
+    {
+        GoModInfoAttribute.Register("example.test/once", "example.test/once", mainPackage: false);
+
+        @string first = GoModInfoAttribute.Compose("windows", "amd64", false);
+        @string second = GoModInfoAttribute.Compose("windows", "amd64", false);
+
+        Assert.IsTrue(len(first) >= 32, "the registration composed no build info");
+        Assert.IsTrue(Unsafe.AreSame(ref MemoryMarshal.GetReference(first.ToSpan()), ref MemoryMarshal.GetReference(second.ToSpan())),
+            "the second read composed its own bytes; Go's modinfo is one static string");
+
+        var (bi1, ok1) = Δdebug.ReadBuildInfo();
+        var (bi2, ok2) = Δdebug.ReadBuildInfo();
+
+        Assert.IsTrue(ok1 && ok2);
+        Assert.AreEqual(bi1.Value.Path.ToString(), bi2.Value.Path.ToString());
+
+        GoModInfoAttribute.Register("example.test/twice", "example.test/twice", mainPackage: false);
+
+        @string third = GoModInfoAttribute.Compose("windows", "amd64", false);
+
+        Assert.IsFalse(Unsafe.AreSame(ref MemoryMarshal.GetReference(first.ToSpan()), ref MemoryMarshal.GetReference(third.ToSpan())),
+            "a registration did not reset the composed value");
+        StringAssert.Contains(System.Text.Encoding.UTF8.GetString(third.ToSpan()), "path\texample.test/twice.test\n");
     }
 
     /// <summary>No stamp and no registration is no build info: "", so <c>ReadBuildInfo</c> reports <c>ok == false</c>.</summary>
