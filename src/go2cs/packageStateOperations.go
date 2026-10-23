@@ -129,6 +129,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageImportInits = map[string]string{}
 	packageRefLoweringResult = nil
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
+	packageHandOwnedVars = map[*types.Var]bool{}
 
 	// Capture the package-level Go doc (rendered to Markdown) for the NuGet README
 	packageDoc = extractPackageDoc(pkg.Syntax)

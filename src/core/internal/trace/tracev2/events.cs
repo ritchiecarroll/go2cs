@@ -143,7 +143,7 @@ public static slice<EventSpec> Specs() {
     return specs[..];
 }
 
-internal static array<EventSpec> specs = new golib.SparseArray<EventSpec>{
+[GoLazy] partial class lazyᴛspecs { internal static array<EventSpec> specs = new golib.SparseArray<EventSpec>{
     // "Structural" Events.
     [EvEventBatch] = new(
         Name: "EventBatch"u8,
@@ -491,7 +491,7 @@ internal static array<EventSpec> specs = new golib.SparseArray<EventSpec>{
         IsTimedEvent: true,
         Experiment: AllocFree
     )
-}.array(137);
+}.array(137); }
 
 // GoStatus is the status of a goroutine.
 //

@@ -21,16 +21,14 @@ internal static UntypedInt pLo => /* pLl | pLu */ 96; // a letter that is neithe
 internal static UntypedInt pLmask => /* pLo */ 96;
 
 // GraphicRanges defines the set of graphic characters according to Unicode.
-public static slice<ж<RangeTable>> GraphicRanges;
-internal static void initᴛGraphicRanges() { GraphicRanges = new ж<RangeTable>[]{
-    L, M, N, P, S, Zs
+[GoLazy] partial class lazyᴛGraphicRanges { public static slice<ж<RangeTable>> GraphicRanges = new ж<RangeTable>[]{
+    lazyᴛL.initial, lazyᴛM.initial, lazyᴛN.initial, lazyᴛP.initial, lazyᴛS.initial, lazyᴛZs.initial
 }.slice(); }
 
 // PrintRanges defines the set of printable characters according to Go.
 // ASCII space, U+0020, is handled separately.
-public static slice<ж<RangeTable>> PrintRanges;
-internal static void initᴛPrintRanges() { PrintRanges = new ж<RangeTable>[]{
-    L, M, N, P, S
+[GoLazy] partial class lazyᴛPrintRanges { public static slice<ж<RangeTable>> PrintRanges = new ж<RangeTable>[]{
+    lazyᴛL.initial, lazyᴛM.initial, lazyᴛN.initial, lazyᴛP.initial, lazyᴛS.initial
 }.slice(); }
 
 // IsGraphic reports whether the rune is defined as a Graphic by Unicode.

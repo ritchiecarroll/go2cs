@@ -168,7 +168,7 @@ public static slice<int64> Offsetsof(this ж<StdSizes> Ꮡs, slice<ж<Var>> fiel
     return offsets;
 }
 
-internal static array<byte> basicSizes = new golib.SparseArray<byte>{
+[GoLazy] partial class lazyᴛbasicSizes { internal static array<byte> basicSizes = new golib.SparseArray<byte>{
     [(int)Bool] = 1,
     [(int)Int8] = 1,
     [(int)Int16] = 2,
@@ -182,7 +182,7 @@ internal static array<byte> basicSizes = new golib.SparseArray<byte>{
     [(int)Float64] = 8,
     [(int)Complex64] = 8,
     [(int)Complex128] = 16
-}.array(17);
+}.array(17); }
 
 public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
     ref var s = ref Ꮡs.DerefOrNull();
@@ -264,7 +264,7 @@ public static int64 Sizeof(this ж<StdSizes> Ꮡs, ΔType T) {
 }
 
 // common architecture word sizes and alignments
-internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSizes>>{
+[GoLazy] partial class lazyᴛgcArchSizes { internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSizes>>{
     ["386"u8] = Ꮡ(new gcSizes(4, 4)),
     ["amd64"u8] = Ꮡ(new gcSizes(8, 8)),
     ["amd64p32"u8] = Ꮡ(new gcSizes(4, 8)),
@@ -283,7 +283,7 @@ internal static map<@string, ж<gcSizes>> gcArchSizes = new map<@string, ж<gcSi
     ["wasm"u8] = Ꮡ(new gcSizes(8, 8))
     // When adding more architectures here,
     // update the doc string of SizesFor below.
-};
+}; }
 
 // SizesFor returns the Sizes used by a compiler for an architecture.
 // The result is nil if a compiler/architecture pair is not known.

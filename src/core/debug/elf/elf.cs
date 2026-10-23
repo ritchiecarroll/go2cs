@@ -148,7 +148,7 @@ public static OSABI ELFOSABI_CLOUDABI => 17;   /* Nuxi CloudABI */
 public static OSABI ELFOSABI_ARM => 97;        /* ARM */
 public static OSABI ELFOSABI_STANDALONE => 255; /* Standalone (embedded) application */
 
-internal static slice<intName> osabiStrings = new intName[]{
+[GoLazy] partial class lazyᴛosabiStrings { internal static slice<intName> osabiStrings = new intName[]{
     new(0, "ELFOSABI_NONE"u8),
     new(1, "ELFOSABI_HPUX"u8),
     new(2, "ELFOSABI_NETBSD"u8),
@@ -169,7 +169,7 @@ internal static slice<intName> osabiStrings = new intName[]{
     new(17, "ELFOSABI_CLOUDABI"u8),
     new(97, "ELFOSABI_ARM"u8),
     new(255, "ELFOSABI_STANDALONE"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this OSABI i) {
     return stringName((uint32)(byte)i, osabiStrings, false);
@@ -192,7 +192,7 @@ public static Type ET_HIOS => 0xfeff;      /* Last operating system-specific. */
 public static Type ET_LOPROC => 0xff00;    /* First processor-specific. */
 public static Type ET_HIPROC => 0xffff;    /* Last processor-specific. */
 
-internal static slice<intName> typeStrings = new intName[]{
+[GoLazy] partial class lazyᴛtypeStrings { internal static slice<intName> typeStrings = new intName[]{
     new(0, "ET_NONE"u8),
     new(1, "ET_REL"u8),
     new(2, "ET_EXEC"u8),
@@ -202,7 +202,7 @@ internal static slice<intName> typeStrings = new intName[]{
     new(0xfeff, "ET_HIOS"u8),
     new(0xff00, "ET_LOPROC"u8),
     new(0xffff, "ET_HIPROC"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this Type i) {
     return stringName((uint32)(uint16)i, typeStrings, false);
@@ -405,7 +405,7 @@ public static Machine EM_MIPS_RS4_BE => 10;    /* MIPS R4000 Big-Endian */
 public static Machine EM_ALPHA_STD => 41;      /* Digital Alpha (standard value). */
 public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the absence of an ABI) */
 
-internal static slice<intName> machineStrings = new intName[]{
+[GoLazy] partial class lazyᴛmachineStrings { internal static slice<intName> machineStrings = new intName[]{
     new(0, "EM_NONE"u8),
     new(1, "EM_M32"u8),
     new(2, "EM_SPARC"u8),
@@ -595,7 +595,7 @@ internal static slice<intName> machineStrings = new intName[]{
     new(10, "EM_MIPS_RS4_BE"u8),
     new(41, "EM_ALPHA_STD"u8),
     new(0x9026, "EM_ALPHA"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this Machine i) {
     return stringName((uint32)(uint16)i, machineStrings, false);
@@ -619,14 +619,14 @@ public static SectionIndex SHN_COMMON => 0xfff2;       /* Common data. */
 public static SectionIndex SHN_XINDEX => 0xffff;       /* Escape; index stored elsewhere. */
 public static SectionIndex SHN_HIRESERVE => 0xffff;    /* Last of reserved range. */
 
-internal static slice<intName> shnStrings = new intName[]{
+[GoLazy] partial class lazyᴛshnStrings { internal static slice<intName> shnStrings = new intName[]{
     new(0, "SHN_UNDEF"u8),
     new(0xff00, "SHN_LOPROC"u8),
     new(0xff20, "SHN_LOOS"u8),
     new(0xfff1, "SHN_ABS"u8),
     new(0xfff2, "SHN_COMMON"u8),
     new(0xffff, "SHN_XINDEX"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this SectionIndex i) {
     return stringName((uint32)(nint)i, shnStrings, false);
@@ -671,7 +671,7 @@ public static SectionType SHT_HIPROC => 0x7fffffff;                  /* specific
 public static SectionType SHT_LOUSER => 0x80000000;                  /* reserved range for application */
 public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific indexes */
 
-internal static slice<intName> shtStrings = new intName[]{
+[GoLazy] partial class lazyᴛshtStrings { internal static slice<intName> shtStrings = new intName[]{
     new(0, "SHT_NULL"u8),
     new(1, "SHT_PROGBITS"u8),
     new(2, "SHT_SYMTAB"u8),
@@ -703,7 +703,7 @@ internal static slice<intName> shtStrings = new intName[]{
     new(0x7fffffff, "SHT_HIPROC"u8),
     new(0x80000000U, "SHT_LOUSER"u8),
     new(0xffffffffU, "SHT_HIUSER"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this SectionType i) {
     return stringName((uint32)i, shtStrings, false);
@@ -730,7 +730,7 @@ public static SectionFlag SHF_COMPRESSED => 0x800;              /* Section is co
 public static SectionFlag SHF_MASKOS => 0x0ff00000;                  /* OS-specific semantics. */
 public static SectionFlag SHF_MASKPROC => 0xf0000000;                /* Processor-specific semantics. */
 
-internal static slice<intName> shfStrings = new intName[]{
+[GoLazy] partial class lazyᴛshfStrings { internal static slice<intName> shfStrings = new intName[]{
     new(0x1, "SHF_WRITE"u8),
     new(0x2, "SHF_ALLOC"u8),
     new(0x4, "SHF_EXECINSTR"u8),
@@ -742,7 +742,7 @@ internal static slice<intName> shfStrings = new intName[]{
     new(0x200, "SHF_GROUP"u8),
     new(0x400, "SHF_TLS"u8),
     new(0x800, "SHF_COMPRESSED"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this SectionFlag i) {
     return flagName((uint32)i, shfStrings, false);
@@ -762,14 +762,14 @@ public static CompressionType COMPRESS_HIOS => 0x6fffffff;          /* Last OS-s
 public static CompressionType COMPRESS_LOPROC => 0x70000000;        /* First processor-specific type. */
 public static CompressionType COMPRESS_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-internal static slice<intName> compressionStrings = new intName[]{
+[GoLazy] partial class lazyᴛcompressionStrings { internal static slice<intName> compressionStrings = new intName[]{
     new(1, "COMPRESS_ZLIB"u8),
     new(2, "COMPRESS_ZSTD"u8),
     new(0x60000000, "COMPRESS_LOOS"u8),
     new(0x6fffffff, "COMPRESS_HIOS"u8),
     new(0x70000000, "COMPRESS_LOPROC"u8),
     new(0x7fffffff, "COMPRESS_HIPROC"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this CompressionType i) {
     return stringName((uint32)(nint)i, compressionStrings, false);
@@ -831,7 +831,7 @@ public static ProgType PT_S390_PGSTE => 0x70000000;        /* 4k page table size
 
 public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-internal static slice<intName> ptStrings = new intName[]{
+[GoLazy] partial class lazyᴛptStrings { internal static slice<intName> ptStrings = new intName[]{
     new(0, "PT_NULL"u8),
     new(1, "PT_LOAD"u8),
     new(2, "PT_DYNAMIC"u8),
@@ -855,7 +855,7 @@ internal static slice<intName> ptStrings = new intName[]{
     // We don't list the processor-dependent ProgTypes,
     // as the values overlap.
     new(0x7fffffff, "PT_HIPROC"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this ProgType i) {
     return stringName((uint32)(nint)i, ptStrings, false);
@@ -1036,7 +1036,7 @@ public static DynTag DT_FILTER => 0x7fffffff;
 
 public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific type. */
 
-internal static slice<intName> dtStrings = new intName[]{
+[GoLazy] partial class lazyᴛdtStrings { internal static slice<intName> dtStrings = new intName[]{
     new(0, "DT_NULL"u8),
     new(1, "DT_NEEDED"u8),
     new(2, "DT_PLTRELSZ"u8),
@@ -1114,7 +1114,7 @@ internal static slice<intName> dtStrings = new intName[]{
     new(0x7ffffffd, "DT_AUXILIARY"u8),
     new(0x7ffffffe, "DT_USED"u8),
     new(0x7fffffff, "DT_FILTER"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this DynTag i) {
     return stringName((uint32)(nint)i, dtStrings, false);
@@ -1235,7 +1235,7 @@ public static DynFlag1 DF_1_WEAKFILTER => 0x20000000;
 // Unused.
 public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
 
-internal static slice<intName> dflag1Strings = new intName[]{
+[GoLazy] partial class lazyᴛdflag1Strings { internal static slice<intName> dflag1Strings = new intName[]{
     new(0x00000001, "DF_1_NOW"u8),
     new(0x00000002, "DF_1_GLOBAL"u8),
     new(0x00000004, "DF_1_GROUP"u8),
@@ -1267,7 +1267,7 @@ internal static slice<intName> dflag1Strings = new intName[]{
     new(0x10000000, "DF_1_KMOD"u8),
     new(0x20000000, "DF_1_WEAKFILTER"u8),
     new(0x40000000, "DF_1_NOCOMMON"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this DynFlag1 i) {
     return flagName((uint32)i, dflag1Strings, false);
@@ -1309,7 +1309,7 @@ public static SymBind STB_HIOS => 12;  /*   specific semantics. */
 public static SymBind STB_LOPROC => 13; /* reserved range for processor */
 public static SymBind STB_HIPROC => 15; /*   specific semantics. */
 
-internal static slice<intName> stbStrings = new intName[]{
+[GoLazy] partial class lazyᴛstbStrings { internal static slice<intName> stbStrings = new intName[]{
     new(0, "STB_LOCAL"u8),
     new(1, "STB_GLOBAL"u8),
     new(2, "STB_WEAK"u8),
@@ -1317,7 +1317,7 @@ internal static slice<intName> stbStrings = new intName[]{
     new(12, "STB_HIOS"u8),
     new(13, "STB_LOPROC"u8),
     new(15, "STB_HIPROC"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this SymBind i) {
     return stringName((uint32)(nint)i, stbStrings, false);
@@ -1347,7 +1347,7 @@ public static SymType STT_RELC => 8;     /* Complex relocation expression. */
 public static SymType STT_SRELC => 9;    /* Signed complex relocation expression. */
 public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
 
-internal static slice<intName> sttStrings = new intName[]{
+[GoLazy] partial class lazyᴛsttStrings { internal static slice<intName> sttStrings = new intName[]{
     new(0, "STT_NOTYPE"u8),
     new(1, "STT_OBJECT"u8),
     new(2, "STT_FUNC"u8),
@@ -1361,7 +1361,7 @@ internal static slice<intName> sttStrings = new intName[]{
     new(12, "STT_HIOS"u8),
     new(13, "STT_LOPROC"u8),
     new(15, "STT_HIPROC"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this SymType i) {
     return stringName((uint32)(nint)i, sttStrings, false);
@@ -1445,7 +1445,7 @@ public static R_X86_64 R_X86_64_PLT32_BND => 40;
 public static R_X86_64 R_X86_64_GOTPCRELX => 41;
 public static R_X86_64 R_X86_64_REX_GOTPCRELX => 42;
 
-internal static slice<intName> rx86_64Strings = new intName[]{
+[GoLazy] partial class lazyᴛrx86_64Strings { internal static slice<intName> rx86_64Strings = new intName[]{
     new(0, "R_X86_64_NONE"u8),
     new(1, "R_X86_64_64"u8),
     new(2, "R_X86_64_PC32"u8),
@@ -1489,7 +1489,7 @@ internal static slice<intName> rx86_64Strings = new intName[]{
     new(40, "R_X86_64_PLT32_BND"u8),
     new(41, "R_X86_64_GOTPCRELX"u8),
     new(42, "R_X86_64_REX_GOTPCRELX"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_X86_64 i) {
     return stringName((uint32)(nint)i, rx86_64Strings, false);
@@ -1633,7 +1633,7 @@ public static R_AARCH64 R_AARCH64_TLS_TPREL64 => 1030;
 public static R_AARCH64 R_AARCH64_TLSDESC => 1031;
 public static R_AARCH64 R_AARCH64_IRELATIVE => 1032;
 
-internal static slice<intName> raarch64Strings = new intName[]{
+[GoLazy] partial class lazyᴛraarch64Strings { internal static slice<intName> raarch64Strings = new intName[]{
     new(0, "R_AARCH64_NONE"u8),
     new(1, "R_AARCH64_P32_ABS32"u8),
     new(2, "R_AARCH64_P32_ABS16"u8),
@@ -1764,7 +1764,7 @@ internal static slice<intName> raarch64Strings = new intName[]{
     new(1030, "R_AARCH64_TLS_TPREL64"u8),
     new(1031, "R_AARCH64_TLSDESC"u8),
     new(1032, "R_AARCH64_IRELATIVE"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_AARCH64 i) {
     return stringName((uint32)(nint)i, raarch64Strings, false);
@@ -1806,7 +1806,7 @@ public static R_ALPHA R_ALPHA_GLOB_DAT => 25;      /* Create GOT entry */
 public static R_ALPHA R_ALPHA_JMP_SLOT => 26;      /* Create PLT entry */
 public static R_ALPHA R_ALPHA_RELATIVE => 27;      /* Adjust by program base */
 
-internal static slice<intName> ralphaStrings = new intName[]{
+[GoLazy] partial class lazyᴛralphaStrings { internal static slice<intName> ralphaStrings = new intName[]{
     new(0, "R_ALPHA_NONE"u8),
     new(1, "R_ALPHA_REFLONG"u8),
     new(2, "R_ALPHA_REFQUAD"u8),
@@ -1835,7 +1835,7 @@ internal static slice<intName> ralphaStrings = new intName[]{
     new(25, "R_ALPHA_GLOB_DAT"u8),
     new(26, "R_ALPHA_JMP_SLOT"u8),
     new(27, "R_ALPHA_RELATIVE"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_ALPHA i) {
     return stringName((uint32)(nint)i, ralphaStrings, false);
@@ -1993,7 +1993,7 @@ public static R_ARM R_ARM_RABS32 => 253;
 public static R_ARM R_ARM_RPC24 => 254;
 public static R_ARM R_ARM_RBASE => 255;
 
-internal static slice<intName> rarmStrings = new intName[]{
+[GoLazy] partial class lazyᴛrarmStrings { internal static slice<intName> rarmStrings = new intName[]{
     new(0, "R_ARM_NONE"u8),
     new(1, "R_ARM_PC24"u8),
     new(2, "R_ARM_ABS32"u8),
@@ -2138,7 +2138,7 @@ internal static slice<intName> rarmStrings = new intName[]{
     new(253, "R_ARM_RABS32"u8),
     new(254, "R_ARM_RPC24"u8),
     new(255, "R_ARM_RBASE"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_ARM i) {
     return stringName((uint32)(nint)i, rarmStrings, false);
@@ -2194,7 +2194,7 @@ public static R_386 R_386_TLS_DESC => 41;
 public static R_386 R_386_IRELATIVE => 42;
 public static R_386 R_386_GOT32X => 43;
 
-internal static slice<intName> r386Strings = new intName[]{
+[GoLazy] partial class lazyᴛr386Strings { internal static slice<intName> r386Strings = new intName[]{
     new(0, "R_386_NONE"u8),
     new(1, "R_386_32"u8),
     new(2, "R_386_PC32"u8),
@@ -2237,7 +2237,7 @@ internal static slice<intName> r386Strings = new intName[]{
     new(41, "R_386_TLS_DESC"u8),
     new(42, "R_386_IRELATIVE"u8),
     new(43, "R_386_GOT32X"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_386 i) {
     return stringName((uint32)(nint)i, r386Strings, false);
@@ -2302,7 +2302,7 @@ public static R_MIPS R_MIPS_TLS_TPREL_LO16 => 50; /* TP-relative offset, low 16 
 
 public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
 
-internal static slice<intName> rmipsStrings = new intName[]{
+[GoLazy] partial class lazyᴛrmipsStrings { internal static slice<intName> rmipsStrings = new intName[]{
     new(0, "R_MIPS_NONE"u8),
     new(1, "R_MIPS_16"u8),
     new(2, "R_MIPS_32"u8),
@@ -2352,7 +2352,7 @@ internal static slice<intName> rmipsStrings = new intName[]{
     new(49, "R_MIPS_TLS_TPREL_HI16"u8),
     new(50, "R_MIPS_TLS_TPREL_LO16"u8),
     new(248, "R_MIPS_PC32"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_MIPS i) {
     return stringName((uint32)(nint)i, rmipsStrings, false);
@@ -2483,7 +2483,7 @@ public static R_LARCH R_LARCH_TLS_LD_PCREL20_S2 => 124;
 public static R_LARCH R_LARCH_TLS_GD_PCREL20_S2 => 125;
 public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
 
-internal static slice<intName> rlarchStrings = new intName[]{
+[GoLazy] partial class lazyᴛrlarchStrings { internal static slice<intName> rlarchStrings = new intName[]{
     new(0, "R_LARCH_NONE"u8),
     new(1, "R_LARCH_32"u8),
     new(2, "R_LARCH_64"u8),
@@ -2601,7 +2601,7 @@ internal static slice<intName> rlarchStrings = new intName[]{
     new(124, "R_LARCH_TLS_LD_PCREL20_S2"u8),
     new(125, "R_LARCH_TLS_GD_PCREL20_S2"u8),
     new(126, "R_LARCH_TLS_DESC_PCREL20_S2"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_LARCH i) {
     return stringName((uint32)(nint)i, rlarchStrings, false);
@@ -2697,7 +2697,7 @@ public static R_PPC R_PPC_EMB_RELST_HA => 114;
 public static R_PPC R_PPC_EMB_BIT_FLD => 115;
 public static R_PPC R_PPC_EMB_RELSDA => 116;
 
-internal static slice<intName> rppcStrings = new intName[]{
+[GoLazy] partial class lazyᴛrppcStrings { internal static slice<intName> rppcStrings = new intName[]{
     new(0, "R_PPC_NONE"u8),
     new(1, "R_PPC_ADDR32"u8),
     new(2, "R_PPC_ADDR24"u8),
@@ -2775,7 +2775,7 @@ internal static slice<intName> rppcStrings = new intName[]{
     new(114, "R_PPC_EMB_RELST_HA"u8),
     new(115, "R_PPC_EMB_BIT_FLD"u8),
     new(116, "R_PPC_EMB_RELSDA"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_PPC i) {
     return stringName((uint32)(nint)i, rppcStrings, false);
@@ -2955,7 +2955,7 @@ public static R_PPC64 R_PPC64_REL16_HA => 252;           // R_POWERPC_REL16_HA
 public static R_PPC64 R_PPC64_GNU_VTINHERIT => 253;
 public static R_PPC64 R_PPC64_GNU_VTENTRY => 254;
 
-internal static slice<intName> rppc64Strings = new intName[]{
+[GoLazy] partial class lazyᴛrppc64Strings { internal static slice<intName> rppc64Strings = new intName[]{
     new(0, "R_PPC64_NONE"u8),
     new(1, "R_PPC64_ADDR32"u8),
     new(2, "R_PPC64_ADDR24"u8),
@@ -3117,7 +3117,7 @@ internal static slice<intName> rppc64Strings = new intName[]{
     new(252, "R_PPC64_REL16_HA"u8),
     new(253, "R_PPC64_GNU_VTINHERIT"u8),
     new(254, "R_PPC64_GNU_VTENTRY"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_PPC64 i) {
     return stringName((uint32)(nint)i, rppc64Strings, false);
@@ -3185,7 +3185,7 @@ public static R_RISCV R_RISCV_SET16 => 55;        /* Local label subtraction */
 public static R_RISCV R_RISCV_SET32 => 56;        /* Local label subtraction */
 public static R_RISCV R_RISCV_32_PCREL => 57;     /* 32-bit PC relative */
 
-internal static slice<intName> rriscvStrings = new intName[]{
+[GoLazy] partial class lazyᴛrriscvStrings { internal static slice<intName> rriscvStrings = new intName[]{
     new(0, "R_RISCV_NONE"u8),
     new(1, "R_RISCV_32"u8),
     new(2, "R_RISCV_64"u8),
@@ -3240,7 +3240,7 @@ internal static slice<intName> rriscvStrings = new intName[]{
     new(55, "R_RISCV_SET16"u8),
     new(56, "R_RISCV_SET32"u8),
     new(57, "R_RISCV_32_PCREL"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_RISCV i) {
     return stringName((uint32)(nint)i, rriscvStrings, false);
@@ -3315,7 +3315,7 @@ public static R_390 R_390_GOT20 => 58;
 public static R_390 R_390_GOTPLT20 => 59;
 public static R_390 R_390_TLS_GOTIE20 => 60;
 
-internal static slice<intName> r390Strings = new intName[]{
+[GoLazy] partial class lazyᴛr390Strings { internal static slice<intName> r390Strings = new intName[]{
     new(0, "R_390_NONE"u8),
     new(1, "R_390_8"u8),
     new(2, "R_390_12"u8),
@@ -3377,7 +3377,7 @@ internal static slice<intName> r390Strings = new intName[]{
     new(58, "R_390_GOT20"u8),
     new(59, "R_390_GOTPLT20"u8),
     new(60, "R_390_TLS_GOTIE20"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_390 i) {
     return stringName((uint32)(nint)i, r390Strings, false);
@@ -3447,7 +3447,7 @@ public static R_SPARC R_SPARC_REGISTER => 53;
 public static R_SPARC R_SPARC_UA64 => 54;
 public static R_SPARC R_SPARC_UA16 => 55;
 
-internal static slice<intName> rsparcStrings = new intName[]{
+[GoLazy] partial class lazyᴛrsparcStrings { internal static slice<intName> rsparcStrings = new intName[]{
     new(0, "R_SPARC_NONE"u8),
     new(1, "R_SPARC_8"u8),
     new(2, "R_SPARC_16"u8),
@@ -3504,7 +3504,7 @@ internal static slice<intName> rsparcStrings = new intName[]{
     new(53, "R_SPARC_REGISTER"u8),
     new(54, "R_SPARC_UA64"u8),
     new(55, "R_SPARC_UA16"u8)
-}.slice();
+}.slice(); }
 
 public static @string String(this R_SPARC i) {
     return stringName((uint32)(nint)i, rsparcStrings, false);

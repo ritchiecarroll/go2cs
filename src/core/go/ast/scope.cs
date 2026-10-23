@@ -179,7 +179,7 @@ public static ObjKind Var => 4;  // variable
 public static ObjKind Fun => 5;  // function or method
 public static ObjKind Lbl => 6;  // label
 
-internal static array<@string> objKindStrings = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛobjKindStrings { internal static array<@string> objKindStrings = new golib.SparseArray<@string>{
     [(int)Bad] = "bad"u8,
     [(int)Pkg] = "package"u8,
     [(int)Con] = "const"u8,
@@ -187,7 +187,7 @@ internal static array<@string> objKindStrings = new golib.SparseArray<@string>{
     [(int)Var] = "var"u8,
     [(int)Fun] = "func"u8,
     [(int)Lbl] = "label"u8
-}.array();
+}.array(); }
 
 public static @string String(this ObjKind kind) {
     return objKindStrings[kind];

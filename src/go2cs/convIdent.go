@@ -36,6 +36,14 @@ func (v *Visitor) identIsUniverseNil(ident *ast.Ident) bool {
 }
 
 func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
+	// Inside a lazy package var's initializer, an exported lazy var reads its holder's INITIAL value: an importer may have
+	// assigned the var before this initializer runs, where Go's init-time build saw the initial one (lazyVarFacts).
+	if v.inLazyInitializer {
+		if obj, ok := v.info.Uses[ident].(*types.Var); ok && lazyPackageVarSnapshot(obj) {
+			return lazyPackageVarHolder(getSanitizedIdentifier(v.getIdentName(ident))) + ".initial"
+		}
+	}
+
 	// A selected method remains an extension-method member name. External white-box files import
 	// the bridge statically; inserting the class between receiver and method would form
 	// `recv.bridge.Method`, which is not a C# extension invocation.

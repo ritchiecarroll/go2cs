@@ -134,7 +134,7 @@ internal static void _ᴛ1() {
 
 internal static readonly @string _Attr_name = "SiblingLocationNameOrderingByteSizeBitOffsetBitSizeStmtListLowpcHighpcLanguageDiscrDiscrValueVisibilityImportStringLengthCommonRefCompDirConstValueContainingTypeDefaultValueInlineIsOptionalLowerBoundProducerPrototypedReturnAddrStartScopeStrideSizeUpperBoundAbstractOriginAccessibilityAddrClassArtificialBaseTypesCallingCountDataMemberLocDeclColumnDeclFileDeclLineDeclarationDiscrListEncodingExternalFrameBaseFriendIdentifierCaseMacroInfoNamelistItemPrioritySegmentSpecificationStaticLinkTypeUseLocationVarParamVirtualityVtableElemLocAllocatedAssociatedDataLocationStrideEntrypcUseUTF8ExtensionRangesTrampolineCallColumnCallFileCallLineDescriptionBinaryScaleDecimalScaleSmallDecimalSignDigitCountPictureStringMutableThreadsScaledExplicitObjectPointerEndianityElementalPureRecursiveSignatureMainSubprogramDataBitOffsetConstExprEnumClassLinkageNameStringLengthBitSizeStringLengthByteSizeRankStrOffsetsBaseAddrBaseRnglistsBaseDwoNameReferenceRvalueReferenceMacrosCallAllCallsCallAllSourceCallsCallAllTailCallsCallReturnPCCallValueCallOriginCallParameterCallPCCallTailCallCallTargetCallTargetClobberedCallDataLocationCallDataValueNoreturnAlignmentExportSymbolsDeletedDefaultedLoclistsBase"u8;
 
-internal static map<Attr, @string> _Attr_map = new map<Attr, @string>{
+[GoLazy] partial class lazyᴛ_Attr_map { internal static map<Attr, @string> _Attr_map = new map<Attr, @string>{
     [1] = _Attr_name[0..7],
     [2] = _Attr_name[7..15],
     [3] = _Attr_name[15..19],
@@ -256,7 +256,7 @@ internal static map<Attr, @string> _Attr_map = new map<Attr, @string>{
     [138] = _Attr_name[1155..1162],
     [139] = _Attr_name[1162..1171],
     [140] = _Attr_name[1171..1183]
-};
+}; }
 
 public static @string String(this Attr i) {
     {

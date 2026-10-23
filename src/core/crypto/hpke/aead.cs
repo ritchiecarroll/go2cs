@@ -88,12 +88,12 @@ internal static ж<Δaead> aes256GCM = Ꮡ(new Δaead(
     id: 0x0002
 ));
 
-internal static ж<Δaead> chacha20poly1305AEAD = Ꮡ(new Δaead(
+[GoLazy] partial class lazyᴛchacha20poly1305AEAD { internal static ж<Δaead> chacha20poly1305AEAD = Ꮡ(new Δaead(
     nK: chacha20poly1305.KeySize,
     nN: chacha20poly1305.ΔNonceSize,
     @new: chacha20poly1305.New,
     id: 0x0003
-));
+)); }
 
 internal static uint16 ID(this ref Δaead a) {
     return a.id;

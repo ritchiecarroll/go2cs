@@ -62,7 +62,7 @@ internal static UntypedInt runeErrorByte1 => /* tx | (RuneError>>6)&maskx */ 191
 internal static UntypedInt runeErrorByte2 => /* tx | RuneError&maskx */ 189;
 
 // first is information about the first byte in a UTF-8 sequence.
-internal static array<uint8> first = new uint8[]{
+[GoLazy] partial class lazyᴛfirst { internal static array<uint8> first = new uint8[]{
     //   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
     @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x00-0x0F
     @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, @as, // 0x10-0x1F
@@ -81,7 +81,7 @@ internal static array<uint8> first = new uint8[]{
     s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, s1, // 0xD0-0xDF
     s2, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s4, s3, s3, // 0xE0-0xEF
     s5, s6, s6, s6, s7, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx, xx // 0xF0-0xFF
-}.array();
+}.array(); }
 
 // acceptRange gives the range of valid values for the second byte in a UTF-8
 // sequence.
@@ -91,13 +91,13 @@ partial struct acceptRange {
 }
 
 // acceptRanges has size 16 to avoid bounds checks in the code that uses it.
-internal static array<acceptRange> acceptRanges = new array<acceptRange>(16){
+[GoLazy] partial class lazyᴛacceptRanges { internal static array<acceptRange> acceptRanges = new array<acceptRange>(16){
     [0] = new(locb, hicb),
     [1] = new(0xA0, hicb),
     [2] = new(locb, 0x9F),
     [3] = new(0x90, hicb),
     [4] = new(locb, 0x8F)
-};
+}; }
 
 // FullRune reports whether the bytes in p begin with a full UTF-8 encoding of a rune.
 // An invalid encoding is considered a full Rune since it will convert as a width-1 error rune.

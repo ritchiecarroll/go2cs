@@ -16,18 +16,17 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-internal static slice<ж<Arch>> arches;
-internal static void initᴛarches() { arches = new ж<Arch>[]{
-    Arch386,
-    ArchAMD64,
-    ArchARM,
-    ArchARM64,
-    ArchLoong64,
-    ArchMIPS,
-    ArchMIPS64x,
-    ArchPPC64x,
-    ArchRISCV64,
-    ArchS390X
+[GoLazy] partial class lazyᴛarches { internal static slice<ж<Arch>> arches = new ж<Arch>[]{
+    lazyᴛArch386.initial,
+    lazyᴛArchAMD64.initial,
+    lazyᴛArchARM.initial,
+    lazyᴛArchARM64.initial,
+    lazyᴛArchLoong64.initial,
+    lazyᴛArchMIPS.initial,
+    lazyᴛArchMIPS64x.initial,
+    lazyᴛArchPPC64x.initial,
+    lazyᴛArchRISCV64.initial,
+    lazyᴛArchS390X.initial
 }.slice(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

@@ -67,13 +67,13 @@ public static http.HandlerFunc MMUHandlerFunc(slice<Range> ranges, Func<trace.Ut
     };
 }
 
-internal static map<@string, trace.UtilFlags> utilFlagNames = new map<@string, trace.UtilFlags>{
+[GoLazy] partial class lazyᴛutilFlagNames { internal static map<@string, trace.UtilFlags> utilFlagNames = new map<@string, trace.UtilFlags>{
     ["perProc"u8] = trace.UtilPerProc,
     ["stw"u8] = trace.UtilSTW,
     ["background"u8] = trace.UtilBackground,
     ["assist"u8] = trace.UtilAssist,
     ["sweep"u8] = trace.UtilSweep
-};
+}; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string flagsˢ = "flags"u8;

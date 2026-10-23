@@ -500,7 +500,7 @@ internal static void advance(this ж<parser> Ꮡp, map<token.Token, bool> to) {
     }
 }
 
-internal static map<token.Token, bool> stmtStart = new map<token.Token, bool>{
+[GoLazy] partial class lazyᴛstmtStart { internal static map<token.Token, bool> stmtStart = new map<token.Token, bool>{
     [token.BREAK] = true,
     [token.CONST] = true,
     [token.CONTINUE] = true,
@@ -515,23 +515,23 @@ internal static map<token.Token, bool> stmtStart = new map<token.Token, bool>{
     [token.SWITCH] = true,
     [token.TYPE] = true,
     [token.VAR] = true
-};
+}; }
 
-internal static map<token.Token, bool> declStart = new map<token.Token, bool>{
+[GoLazy] partial class lazyᴛdeclStart { internal static map<token.Token, bool> declStart = new map<token.Token, bool>{
     [token.IMPORT] = true,
     [token.CONST] = true,
     [token.TYPE] = true,
     [token.VAR] = true
-};
+}; }
 
-internal static map<token.Token, bool> exprEnd = new map<token.Token, bool>{
+[GoLazy] partial class lazyᴛexprEnd { internal static map<token.Token, bool> exprEnd = new map<token.Token, bool>{
     [token.COMMA] = true,
     [token.COLON] = true,
     [token.SEMICOLON] = true,
     [token.RPAREN] = true,
     [token.RBRACK] = true,
     [token.RBRACE] = true
-};
+}; }
 
 // ----------------------------------------------------------------------------
 // Identifiers

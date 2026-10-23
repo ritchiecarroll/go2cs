@@ -170,7 +170,7 @@ partial struct jsonEncoder {
     internal ж<json.Encoder> json;
 }
 
-internal static ж<sync.Pool> jsonEncoderPool = Ꮡ(new sync.Pool(
+[GoLazy] partial class lazyᴛjsonEncoderPool { internal static ж<sync.Pool> jsonEncoderPool = Ꮡ(new sync.Pool(
     New: () => {
         var enc = Ꮡ(new jsonEncoder(
             buf: @new<bytes.Buffer>()
@@ -179,7 +179,7 @@ internal static ж<sync.Pool> jsonEncoderPool = Ꮡ(new sync.Pool(
         (~enc).json.SetEscapeHTML(false);
         return enc.OrTypedNil();
     }
-));
+)); }
 
 internal static error appendJSONMarshal(ж<buffer.Buffer> Ꮡbuf, any v) {
     GoFrame ᒐ = default;
@@ -316,7 +316,7 @@ internal static readonly @string hex = "0123456789abcdef"u8;
 //
 // All values are true except for the ASCII control characters (0-31), the
 // double quote ("), and the backslash character ("\").
-internal static array<bool> safeSet = new array<bool>(128){
+[GoLazy] partial class lazyᴛsafeSet { internal static array<bool> safeSet = new array<bool>(128){
     [(rune)' '] = true,
     [(rune)'!'] = true,
     [(rune)'"'] = false,
@@ -413,6 +413,6 @@ internal static array<bool> safeSet = new array<bool>(128){
     [(rune)'}'] = true,
     [(rune)'~'] = true,
     [(rune)'\x7f'] = true
-};
+}; }
 
 } // end slog_package

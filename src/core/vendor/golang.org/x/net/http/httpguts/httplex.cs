@@ -12,7 +12,7 @@ using unicode;
 
 partial class httpguts_package {
 
-internal static array<bool> isTokenTable = new array<bool>(256){
+[GoLazy] partial class lazyᴛisTokenTable { internal static array<bool> isTokenTable = new array<bool>(256){
     [(rune)'!'] = true,
     [(rune)'#'] = true,
     [(rune)'$'] = true,
@@ -90,7 +90,7 @@ internal static array<bool> isTokenTable = new array<bool>(256){
     [(rune)'z'] = true,
     [(rune)'|'] = true,
     [(rune)'~'] = true
-};
+}; }
 
 public static bool IsTokenRune(rune r) {
     return r < utf8.RuneSelf && isTokenTable[(byte)r];
@@ -231,7 +231,7 @@ public static bool ValidHostHeader(@string h) {
 }
 
 // See the validHostHeader comment.
-internal static array<bool> validHostByte = new array<bool>(256){
+[GoLazy] partial class lazyᴛvalidHostByte { internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)'0'] = true, [(rune)'1'] = true, [(rune)'2'] = true, [(rune)'3'] = true, [(rune)'4'] = true, [(rune)'5'] = true, [(rune)'6'] = true, [(rune)'7'] = true,
     [(rune)'8'] = true, [(rune)'9'] = true,
 
@@ -264,7 +264,7 @@ internal static array<bool> validHostByte = new array<bool>(256){
     [(rune)']'] = true,
     [(rune)'_'] = true, // unreserved
     [(rune)'~'] = true // unreserved
-};
+}; }
 
 // ValidHeaderFieldValue reports whether v is a valid "field-value" according to
 // http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2 :

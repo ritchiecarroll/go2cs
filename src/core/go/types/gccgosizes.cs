@@ -9,7 +9,7 @@ namespace go.go;
 
 partial class types_package {
 
-internal static map<@string, ж<StdSizes>> gccgoArchSizes = new map<@string, ж<StdSizes>>{
+[GoLazy] partial class lazyᴛgccgoArchSizes { internal static map<@string, ж<StdSizes>> gccgoArchSizes = new map<@string, ж<StdSizes>>{
     ["386"u8] = Ꮡ(new StdSizes(4, 4)),
     ["alpha"u8] = Ꮡ(new StdSizes(8, 8)),
     ["amd64"u8] = Ꮡ(new StdSizes(8, 8)),
@@ -40,6 +40,6 @@ internal static map<@string, ж<StdSizes>> gccgoArchSizes = new map<@string, ж<
     ["sparc"u8] = Ꮡ(new StdSizes(4, 8)),
     ["sparc64"u8] = Ꮡ(new StdSizes(8, 8)),
     ["wasm"u8] = Ꮡ(new StdSizes(8, 8))
-};
+}; }
 
 } // end types_package

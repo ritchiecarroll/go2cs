@@ -1768,7 +1768,7 @@ internal static @string Error(this ref parseDurationError e) {
     return "time: "u8 + e.message + " "u8 + quote(e.value);
 }
 
-internal static map<@string, uint64> unitMap = new map<@string, uint64>{
+[GoLazy] partial class lazyᴛunitMap { internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["ns"u8] = (uint64)(int64)ΔNanosecond,
     ["us"u8] = (uint64)(int64)Microsecond,
     ["µs"u8] = (uint64)(int64)Microsecond, // U+00B5 = micro symbol
@@ -1777,7 +1777,7 @@ internal static map<@string, uint64> unitMap = new map<@string, uint64>{
     ["s"u8] = (uint64)(int64)ΔSecond,
     ["m"u8] = (uint64)(int64)ΔMinute,
     ["h"u8] = (uint64)(int64)ΔHour
-};
+}; }
 
 // ParseDuration parses a duration string.
 // A duration string is a possibly signed sequence of

@@ -25,7 +25,7 @@ partial struct AlgorithmIdentifier {
 
 partial struct RDNSequence /*[]RelativeDistinguishedNameSET*/;
 
-internal static map<@string, @string> attributeTypeNames = new map<@string, @string>{
+[GoLazy] partial class lazyᴛattributeTypeNames { internal static map<@string, @string> attributeTypeNames = new map<@string, @string>{
     ["2.5.4.6"u8] = "C"u8,
     ["2.5.4.10"u8] = "O"u8,
     ["2.5.4.11"u8] = "OU"u8,
@@ -35,7 +35,7 @@ internal static map<@string, @string> attributeTypeNames = new map<@string, @str
     ["2.5.4.8"u8] = "ST"u8,
     ["2.5.4.9"u8] = "STREET"u8,
     ["2.5.4.17"u8] = "POSTALCODE"u8
-};
+}; }
 
 // String returns a string representation of the sequence r,
 // roughly following the RFC 2253 Distinguished Names syntax.

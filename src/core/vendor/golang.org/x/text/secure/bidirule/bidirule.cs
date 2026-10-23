@@ -61,7 +61,7 @@ partial struct ruleTransition {
     internal uint16 mask;
 }
 
-internal static array<array<ruleTransition>> transitions = new golib.SparseArray<array<ruleTransition>>{
+[GoLazy] partial class lazyᴛtransitions { internal static array<array<ruleTransition>> transitions = new golib.SparseArray<array<ruleTransition>>{
     // [2.1] The first character must be a character with Bidi property L, R, or
     // AL. If it has the R or AL property, it is an RTL label; if it has the L
     // property, it is an LTR label.
@@ -111,7 +111,7 @@ internal static array<array<ruleTransition>> transitions = new golib.SparseArray
     [ruleInvalid] = new ruleTransition[]{
         new(ruleInvalid, 0),
         new(ruleInvalid, 0)}.array()
-}.array();
+}.array(); }
 
 // [2.4] In an RTL label, if an EN is present, no AN may be present, and
 // vice versa.

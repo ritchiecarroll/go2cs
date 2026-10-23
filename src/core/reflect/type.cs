@@ -457,7 +457,7 @@ public static @string String(this ΔKind k) {
     return "kind"u8 + strconv.Itoa((nint)(nuint)k);
 }
 
-internal static slice<@string> kindNames = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [(int)((nuint)Invalid)] = "invalid"u8,
     [(int)((nuint)ΔBool)] = "bool"u8,
     [(int)((nuint)ΔInt)] = "int"u8,
@@ -485,7 +485,7 @@ internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [(int)((nuint)ΔString)] = "string"u8,
     [(int)((nuint)Struct)] = "struct"u8,
     [(int)((nuint)ΔUnsafePointer)] = "unsafe.Pointer"u8
-}.slice();
+}.slice(); }
 
 // resolveNameOff resolves a name offset from a base pointer.
 // The (*rtype).nameOff method is a convenience wrapper for this function.

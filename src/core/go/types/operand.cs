@@ -34,7 +34,7 @@ internal static operandMode commaok => 9;  // like value, but operand may be use
 internal static operandMode commaerr => 10; // like commaok, but second value is error, not boolean
 internal static operandMode cgofunc => 11;  // operand is a cgo function
 
-internal static array<@string> operandModeString = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛoperandModeString { internal static array<@string> operandModeString = new golib.SparseArray<@string>{
     [invalid] = "invalid operand"u8,
     [novalue] = "no value"u8,
     [Δbuiltinᴛ] = "built-in"u8,
@@ -47,7 +47,7 @@ internal static array<@string> operandModeString = new golib.SparseArray<@string
     [commaok] = "comma, ok expression"u8,
     [commaerr] = "comma, error expression"u8,
     [cgofunc] = "cgo function"u8
-}.array();
+}.array(); }
 
 // An operand represents an intermediate value during type checking.
 // Operands have an (addressing) mode, the expression evaluating to

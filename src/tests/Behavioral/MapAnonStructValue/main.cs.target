@@ -10,10 +10,10 @@ partial struct kindsᴛ1 /*dyn*/ {
     internal nint size;
     internal Func<nint, nint> scale;
 }
-internal static map<uint16, kindsᴛ1> kinds = new map<uint16, kindsᴛ1>{
+[GoLazy] partial class lazyᴛkinds { internal static map<uint16, kindsᴛ1> kinds = new map<uint16, kindsᴛ1>{
     [0x0001] = new(name: "alpha", size: 16, scale: (nint n) => n * 2),
     [0x0002] = new(name: "beta", size: 32, scale: triple)
-};
+}; }
 
 internal static nint triple(nint n) {
     return n * 3;

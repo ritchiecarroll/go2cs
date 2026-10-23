@@ -15,7 +15,7 @@ partial class template_package {
 // https://www.w3.org/TR/html5/Overview.html#attributes-1
 // as well as "%URI"-typed attributes from
 // https://www.w3.org/TR/html4/index/attributes.html
-internal static map<@string, contentType> attrTypeMap = new map<@string, contentType>{
+[GoLazy] partial class lazyᴛattrTypeMap { internal static map<@string, contentType> attrTypeMap = new map<@string, contentType>{
     ["accept"u8] = contentTypePlain,
     ["accept-charset"u8] = contentTypeUnsafe,
     ["action"u8] = contentTypeURL,
@@ -132,7 +132,7 @@ internal static map<@string, contentType> attrTypeMap = new map<@string, content
     ["width"u8] = contentTypePlain,
     ["wrap"u8] = contentTypePlain,
     ["xmlns"u8] = contentTypeURL
-};
+}; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string dataˢ = "data-"u8;

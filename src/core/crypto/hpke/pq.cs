@@ -424,7 +424,7 @@ internal static (slice<byte>, error) decap(this ж<hybridPrivateKey> Ꮡk, slice
     return (ss, default!);
 }
 
-internal static ж<mlkemKEM> mlkem768 = Ꮡ(new mlkemKEM(
+[GoLazy] partial class lazyᴛmlkem768 { internal static ж<mlkemKEM> mlkem768 = Ꮡ(new mlkemKEM(
     id: 0x0041,
     ciphertextSize: mlkem.CiphertextSize768,
     newPublicKey: (slice<byte> data) => {
@@ -439,14 +439,14 @@ internal static ж<mlkemKEM> mlkem768 = Ꮡ(new mlkemKEM(
         var (ᴛ1, ᴛ2) = mlkem.GenerateKey768();
         return (new mlkem.DecapsulationKey768жDecapsulator(ᴛ1), ᴛ2);
     }
-));
+)); }
 
 // MLKEM768 returns a KEM implementing ML-KEM-768 from draft-ietf-hpke-pq.
 public static ΔKEM MLKEM768() {
     return new mlkemKEMжΔKEM(mlkem768);
 }
 
-internal static ж<mlkemKEM> mlkem1024 = Ꮡ(new mlkemKEM(
+[GoLazy] partial class lazyᴛmlkem1024 { internal static ж<mlkemKEM> mlkem1024 = Ꮡ(new mlkemKEM(
     id: 0x0042,
     ciphertextSize: mlkem.CiphertextSize1024,
     newPublicKey: (slice<byte> data) => {
@@ -461,7 +461,7 @@ internal static ж<mlkemKEM> mlkem1024 = Ꮡ(new mlkemKEM(
         var (ᴛ1, ᴛ2) = mlkem.GenerateKey1024();
         return (new mlkem.DecapsulationKey1024жDecapsulator(ᴛ1), ᴛ2);
     }
-));
+)); }
 
 // MLKEM1024 returns a KEM implementing ML-KEM-1024 from draft-ietf-hpke-pq.
 public static ΔKEM MLKEM1024() {

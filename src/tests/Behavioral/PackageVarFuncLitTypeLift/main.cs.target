@@ -25,10 +25,10 @@ partial struct makersᴛ1 /*dyn*/ {
 internal partial struct makers_type /*dyn*/ {
     /*embed*/ public Greeter Greeter;
 }
-internal static slice<makersᴛ1> makers = new makersᴛ1[]{
+[GoLazy] partial class lazyᴛmakers { internal static slice<makersᴛ1> makers = new makersᴛ1[]{
     new("direct", (@string s) => new namedGreeter(s)),
     new("embedded", (@string s) => new makers_type(new namedGreeter(s)))
-}.slice();
+}.slice(); }
 
 internal static void Main() {
     foreach (var (_, m) in makers) {

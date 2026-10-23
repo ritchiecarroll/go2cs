@@ -9,16 +9,15 @@ namespace go;
 
 partial class unicode_package {
 
-public static SpecialCase TurkishCase;
-internal static void initᴛTurkishCase() { TurkishCase = _TurkishCase; }
+[GoLazy] partial class lazyᴛTurkishCase { public static SpecialCase TurkishCase = _TurkishCase; }
 
-internal static SpecialCase _TurkishCase = new SpecialCase(new CaseRange[]{
+[GoLazy] partial class lazyᴛ_TurkishCase { internal static SpecialCase _TurkishCase = new SpecialCase(new CaseRange[]{
     new CaseRange(0x0049, 0x0049, new d(new rune[]{0, 0x131 - 0x49, 0}.array())),
     new CaseRange(0x0069, 0x0069, new d(new rune[]{0x130 - 0x69, 0, 0x130 - 0x69}.array())),
     new CaseRange(0x0130, 0x0130, new d(new rune[]{0, 0x69 - 0x130, 0}.array())),
     new CaseRange(0x0131, 0x0131, new d(new rune[]{0x49 - 0x131, 0, 0x49 - 0x131}.array()))
-}.slice());
+}.slice()); }
 
-public static SpecialCase AzeriCase = _TurkishCase;
+[GoLazy] partial class lazyᴛAzeriCase { public static SpecialCase AzeriCase = _TurkishCase; }
 
 } // end unicode_package

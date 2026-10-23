@@ -322,7 +322,7 @@ internal static bool deadcode(this ref Func fn) {
 
 // canMem is a map from operation to a bitmap of which arguments can use a
 // direct memory reference.
-internal static map<@string, uint64> canMem = new map<@string, uint64>{
+[GoLazy] partial class lazyᴛcanMem { internal static map<@string, uint64> canMem = new map<@string, uint64>{
     ["VPERMB"u8] = ((uint64)1 << 0),
     ["VPERMI2B"u8] = ((uint64)1 << 0),
     ["VPERMT2B"u8] = ((uint64)1 << 0),
@@ -330,7 +330,7 @@ internal static map<@string, uint64> canMem = new map<@string, uint64>{
     ["VPORQ"u8] = ((uint64)1 << 0),
     ["VPSUBQ"u8] = ((uint64)1 << 0),
     ["VPSHUFBITQMB"u8] = ((uint64)1 << 0)
-};
+}; }
 
 // addLoads inserts load ops for ops that can't take memory inputs directly.
 internal static void addLoads(this ж<Func> Ꮡfn) {

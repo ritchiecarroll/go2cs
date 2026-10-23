@@ -1491,7 +1491,7 @@ internal static bool policiesValid(slice<ж<Certificate>> chain, VerifyOptions o
 // distrustedSPKIHashes contains hashes of SPKIs from certificates which
 // we don't consider to be trustworthy. We use these hashes to filter out
 // chains returned by Verify
-internal static map<@string, EmptyStruct> distrustedSPKIHashes = new map<@string, EmptyStruct>{
+[GoLazy] partial class lazyᴛdistrustedSPKIHashes { internal static map<@string, EmptyStruct> distrustedSPKIHashes = new map<@string, EmptyStruct>{
     ["ebed6475c2c2d80fcb199f3fe8dd6e6b3ce60b77eb15d4e42c3dec0c6f5b5105"u8] = new(),
     ["49dd353dc2b919a3770645117d0e60c16115e7d1bc259eefe734b00ea434fe5f"u8] = new(),
     ["e0254c7fcdc265e2f0f8a428dabb75ab4ae039b4872d62f5ee57f0877d5a8a41"u8] = new(),
@@ -1500,7 +1500,7 @@ internal static map<@string, EmptyStruct> distrustedSPKIHashes = new map<@string
     ["63ecefee431d49523bc1136c4e72d0206a477086caf606cd5cf025686c109cf8"u8] = new(),
     ["ec4ffa1ad0ac88081314b7aaffef6a91f97cd57291bb5ba686c5415f5eb4f6b6"u8] = new(),
     ["92c063d67e8f14db71d288e11266ffdaf69cbf115f7bab14f3bc2f68d25e0e30"u8] = new()
-};
+}; }
 
 // containsDistrustedSPKIHash checks if any of the certificates in the chain
 // have an SPKI whose hash is present in the distrustedSPKIHashes map.

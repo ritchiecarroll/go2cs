@@ -58,7 +58,7 @@ internal static alert alertCertificateRequired => 116;
 internal static alert alertNoApplicationProtocol => 120;
 internal static alert alertECHRequired => 121;
 
-internal static map<alert, @string> alertText = new map<alert, @string>{
+[GoLazy] partial class lazyᴛalertText { internal static map<alert, @string> alertText = new map<alert, @string>{
     [alertCloseNotify] = "close notify"u8,
     [alertUnexpectedMessage] = "unexpected message"u8,
     [alertBadRecordMAC] = "bad record MAC"u8,
@@ -93,7 +93,7 @@ internal static map<alert, @string> alertText = new map<alert, @string>{
     [alertCertificateRequired] = "certificate required"u8,
     [alertNoApplicationProtocol] = "no application protocol"u8,
     [alertECHRequired] = "encrypted client hello required"u8
-};
+}; }
 
 internal static @string String(this alert e) {
     var (s, ok) = alertText[e, ꟷ];

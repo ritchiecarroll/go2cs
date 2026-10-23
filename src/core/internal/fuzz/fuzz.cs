@@ -1098,7 +1098,7 @@ internal static any zeroValue(reflectꓸType t) {
     throw panic(fmt.Sprintf("unsupported type: %v"u8, t));
 }
 
-internal static slice<any> zeroVals = new any[]{
+[GoLazy] partial class lazyᴛzeroVals { internal static slice<any> zeroVals = new any[]{
     slice<byte>(""u8),
     (@string)""u8,
     false,
@@ -1116,7 +1116,7 @@ internal static slice<any> zeroVals = new any[]{
     (uint16)0,
     (uint32)0,
     (uint64)0
-}.slice();
+}.slice(); }
 
 internal static bool debugInfo = godebug.New("#fuzzdebug"u8).Value() == "1"u8;
 

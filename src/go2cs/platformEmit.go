@@ -487,6 +487,20 @@ func mergePlatformEmissions(rootPath string, targets []string, emissions []*plat
 		}
 	}
 
+	emittedLogical := make(map[string]bool, len(plans))
+
+	for logical := range plans {
+		emittedLogical[logical] = true
+	}
+
+	initsRetired, err := retireUnemittedPackageInitFiles(coreDir, targets, emissions, emittedLogical)
+
+	if err != nil {
+		return err
+	}
+
+	removed += initsRetired
+
 	conditioned, residual, companionWritten, err := mergeCompanionArtifacts(coreDir, targets, emissions)
 
 	if err != nil {
@@ -1173,6 +1187,54 @@ func copyMergedFile(source string, destination string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// retireUnemittedPackageInitFiles removes the corpus's generated package_init.cs, flat and per-GOOS, of every package a
+// target converted when NO target emitted one. A conversion that relocates nothing retires its stale package_init.cs
+// (retireStalePackageInitFile), but in its own staging root: a file no target emitted is in no merge plan, so the corpus
+// kept a static constructor calling init methods the package no longer declares (CS0103). Only a file carrying the
+// generated header goes; a package no target converted is left alone. emitted holds the merge plans' logical paths.
+func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {
+	converted := map[string]bool{}
+
+	for _, emission := range emissions {
+		for pkg := range convertedPackages(emission) {
+			converted[pkg] = true
+		}
+	}
+
+	removed := 0
+
+	for _, pkg := range sortedKeys(converted) {
+		if emitted[path.Join(pkg, PackageInitFileName)] {
+			continue
+		}
+
+		packageDir := filepath.Join(coreDir, filepath.FromSlash(pkg))
+		dirs := []string{packageDir}
+
+		for _, target := range targets {
+			dirs = append(dirs, filepath.Join(packageDir, goosOfTarget(target)))
+		}
+
+		for _, dir := range dirs {
+			initPath := filepath.Join(dir, PackageInitFileName)
+
+			if _, err := os.Stat(initPath); err != nil {
+				continue
+			}
+
+			if err := retireStalePackageInitFile(dir); err != nil {
+				return removed, err
+			}
+
+			if _, err := os.Stat(initPath); errors.Is(err, os.ErrNotExist) {
+				removed++
+			}
+		}
+	}
+
+	return removed, nil
 }
 
 // removeIfPresent deletes a stale copy of an artifact that moved between the flat and per-GOOS

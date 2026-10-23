@@ -5,8 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchS390X;
-internal static void initᴛArchS390X() { ArchS390X = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchS390X { public static ж<Arch> ArchS390X = Ꮡ(new Arch(
     Name: "s390x"u8,
     WordBits: 64,
     WordBytes: 8,

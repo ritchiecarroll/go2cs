@@ -29,7 +29,7 @@ internal static void p224SqrtCandidate(ж<fiat.P224Element> Ꮡr, ж<fiat.P224El
 
     Ꮡp224GGOnce.Do(() => {
         p224GG = Ꮡ(new array<fiat.P224Element>(96, () => new()));
-        foreach (var i in range(p224GG)) {
+        foreach (var i in range(p224GG, 96)) {
             if (i == 0){
                 p224GG.at<fiat.P224Element>(i).SetBytes(new byte[]{0x6a, 0x0f, 0xec, 0x67,
                     0x85, 0x98, 0xa7, 0x92, 0x0c, 0x55, 0xb2, 0xd4,

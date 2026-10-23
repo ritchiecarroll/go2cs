@@ -90,7 +90,7 @@ internal static readonly @string _Tag_name_5 = "SubroutineTypeTypedefUnionTypeUn
 internal static array<uint8> _Tag_index_0 = new uint8[]{0, 9, 18, 28, 43, 58}.array();
 internal static array<uint8> _Tag_index_2 = new uint8[]{0, 5, 18}.array();
 internal static array<uint8> _Tag_index_4 = new uint8[]{0, 11, 24, 35, 45, 55}.array();
-internal static array<uint16> _Tag_index_5 = new uint16[]{0, 14, 21, 30, 51, 58, 74, 89, 100, 117, 123, 138, 145, 157, 165, 182, 190, 205, 214, 222, 232, 240, 246, 254, 266, 276, 286, 307, 329, 339, 352, 363, 371, 383, 397, 409, 422, 431, 445, 460, 471, 483, 494, 503, 513, 521, 540, 553, 564, 579, 590, 600, 608, 625, 637, 650}.array();
+[GoLazy] partial class lazyᴛ_Tag_index_5 { internal static array<uint16> _Tag_index_5 = new uint16[]{0, 14, 21, 30, 51, 58, 74, 89, 100, 117, 123, 138, 145, 157, 165, 182, 190, 205, 214, 222, 232, 240, 246, 254, 266, 276, 286, 307, 329, 339, 352, 363, 371, 383, 397, 409, 422, 431, 445, 460, 471, 483, 494, 503, 513, 521, 540, 553, 564, 579, 590, 600, 608, 625, 637, 650}.array(); }
 
 public static @string String(this Tag i) {
     switch (ᐧ) {

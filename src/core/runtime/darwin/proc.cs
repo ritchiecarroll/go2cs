@@ -1512,7 +1512,7 @@ internal static bool isGC(this stwReason r) {
 // If you add to this list, also add it to src/internal/trace/parser.go.
 // If you change the values of any of the stw* constants, bump the trace
 // version number and make a copy of this.
-internal static array<@string> stwReasonStrings = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛstwReasonStrings { internal static array<@string> stwReasonStrings = new golib.SparseArray<@string>{
     [stwUnknown] = "unknown"u8,
     [stwGCMarkTerm] = "GC mark termination"u8,
     [stwGCSweepTerm] = "GC sweep termination"u8,
@@ -1530,7 +1530,7 @@ internal static array<@string> stwReasonStrings = new golib.SparseArray<@string>
     [stwForTestReadMemStatsSlow] = "ReadMemStatsSlow (test)"u8,
     [stwForTestPageCachePagesLeaked] = "PageCachePagesLeaked (test)"u8,
     [stwForTestResetDebugLog] = "ResetDebugLog (test)"u8
-}.array();
+}.array(); }
 
 // worldStop provides context from the stop-the-world required by the
 // start-the-world.

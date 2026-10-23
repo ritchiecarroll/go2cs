@@ -84,7 +84,7 @@ internal static array<byte> digestBytes(ref array<uint64> h) {
     return digest.Clone();
 }
 
-internal static array<uint64> _K = new uint64[]{
+[GoLazy] partial class lazyᴛ_K { internal static array<uint64> _K = new uint64[]{
     0x428a2f98d728ae22UL,
     0x7137449123ef65cdUL,
     0xb5c0fbcfec4d3b2fUL,
@@ -165,7 +165,7 @@ internal static array<uint64> _K = new uint64[]{
     0x597f299cfc657e2aUL,
     0x5fcb6fab3ad6faecUL,
     0x6c44198c4a475817UL
-}.array();
+}.array(); }
 
 internal static void sha384Block(ref array<uint64> dh, /*[128]*/ ж<array<byte>> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();

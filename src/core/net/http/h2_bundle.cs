@@ -1127,7 +1127,7 @@ internal static http2ErrCode http2ErrCodeEnhanceYourCalm => 0xb;
 internal static http2ErrCode http2ErrCodeInadequateSecurity => 0xc;
 internal static http2ErrCode http2ErrCodeHTTP11Required => 0xd;
 
-internal static map<http2ErrCode, @string> http2errCodeName = new map<http2ErrCode, @string>{
+[GoLazy] partial class lazyᴛhttp2errCodeName { internal static map<http2ErrCode, @string> http2errCodeName = new map<http2ErrCode, @string>{
     [http2ErrCodeNo] = "NO_ERROR"u8,
     [http2ErrCodeProtocol] = "PROTOCOL_ERROR"u8,
     [http2ErrCodeInternal] = "INTERNAL_ERROR"u8,
@@ -1142,7 +1142,7 @@ internal static map<http2ErrCode, @string> http2errCodeName = new map<http2ErrCo
     [http2ErrCodeEnhanceYourCalm] = "ENHANCE_YOUR_CALM"u8,
     [http2ErrCodeInadequateSecurity] = "INADEQUATE_SECURITY"u8,
     [http2ErrCodeHTTP11Required] = "HTTP_1_1_REQUIRED"u8
-};
+}; }
 
 public static @string String(this http2ErrCode e) {
     {
@@ -1437,7 +1437,7 @@ internal static http2FrameType http2FrameGoAway => 0x7;
 internal static http2FrameType http2FrameWindowUpdate => 0x8;
 internal static http2FrameType http2FrameContinuation => 0x9;
 
-internal static array<@string> http2frameNames = new golib.SparseArray<@string>{
+[GoLazy] partial class lazyᴛhttp2frameNames { internal static array<@string> http2frameNames = new golib.SparseArray<@string>{
     [http2FrameData] = "DATA"u8,
     [http2FrameHeaders] = "HEADERS"u8,
     [http2FramePriority] = "PRIORITY"u8,
@@ -1448,7 +1448,7 @@ internal static array<@string> http2frameNames = new golib.SparseArray<@string>{
     [http2FrameGoAway] = "GOAWAY"u8,
     [http2FrameWindowUpdate] = "WINDOW_UPDATE"u8,
     [http2FrameContinuation] = "CONTINUATION"u8
-}.array();
+}.array(); }
 
 public static @string String(this http2FrameType t) {
     if ((nint)(uint8)t < builtin.len(http2frameNames)) {
@@ -1489,7 +1489,7 @@ internal static http2Flags http2FlagContinuationEndHeaders => 0x4;
 internal static http2Flags http2FlagPushPromiseEndHeaders => 0x4;
 internal static http2Flags http2FlagPushPromisePadded => 0x8;
 
-internal static map<http2FrameType, map<http2Flags, @string>> http2flagName = new map<http2FrameType, map<http2Flags, @string>>{
+[GoLazy] partial class lazyᴛhttp2flagName { internal static map<http2FrameType, map<http2Flags, @string>> http2flagName = new map<http2FrameType, map<http2Flags, @string>>{
     [http2FrameData] = new map<http2Flags, @string>{
         [http2FlagDataEndStream] = "END_STREAM"u8,
         [http2FlagDataPadded] = "PADDED"u8},
@@ -1507,15 +1507,14 @@ internal static map<http2FrameType, map<http2Flags, @string>> http2flagName = ne
     [http2FramePushPromise] = new map<http2Flags, @string>{
         [http2FlagPushPromiseEndHeaders] = "END_HEADERS"u8,
         [http2FlagPushPromisePadded] = "PADDED"u8}
-};
+}; }
 
 // a frameParser parses a frame given its FrameHeader and payload
 // bytes. The length of payload will always equal fh.Length (which
 // might be 0).
 // type http2frameParser is a methodless func type — rendered inline as its base delegate
 
-internal static array<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>> http2frameParsers;
-internal static void initᴛhttp2frameParsers() { http2frameParsers = new golib.SparseArray<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>>{
+[GoLazy] partial class lazyᴛhttp2frameParsers { internal static array<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>> http2frameParsers = new golib.SparseArray<Func<ж<http2frameCache>, http2FrameHeader, Action<@string>, slice<byte>, (http2Frame, error)>>{
     [http2FrameData] = http2parseDataFrame,
     [http2FrameHeaders] = http2parseHeadersFrame,
     [http2FramePriority] = http2parsePriorityFrame,
@@ -3634,7 +3633,7 @@ internal static http2SettingID http2SettingMaxFrameSize => 0x5;
 internal static http2SettingID http2SettingMaxHeaderListSize => 0x6;
 internal static http2SettingID http2SettingEnableConnectProtocol => 0x8;
 
-internal static map<http2SettingID, @string> http2settingName = new map<http2SettingID, @string>{
+[GoLazy] partial class lazyᴛhttp2settingName { internal static map<http2SettingID, @string> http2settingName = new map<http2SettingID, @string>{
     [http2SettingHeaderTableSize] = "HEADER_TABLE_SIZE"u8,
     [http2SettingEnablePush] = "ENABLE_PUSH"u8,
     [http2SettingMaxConcurrentStreams] = "MAX_CONCURRENT_STREAMS"u8,
@@ -3642,7 +3641,7 @@ internal static map<http2SettingID, @string> http2settingName = new map<http2Set
     [http2SettingMaxFrameSize] = "MAX_FRAME_SIZE"u8,
     [http2SettingMaxHeaderListSize] = "MAX_HEADER_LIST_SIZE"u8,
     [http2SettingEnableConnectProtocol] = "ENABLE_CONNECT_PROTOCOL"u8
-};
+}; }
 
 public static @string String(this http2SettingID s) {
     {

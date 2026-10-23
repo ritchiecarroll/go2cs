@@ -80,6 +80,32 @@ func overArray() int {
 	return n
 }
 
+func overNilPointer() int {
+	var nilp *[4]int
+	n := 0
+	for i := range nilp {
+		n += i
+	}
+	return n
+}
+
+func overPointerParam(p *[2]int) int {
+	n := 0
+	for i := range p {
+		n += i
+	}
+	return n
+}
+
+type bits [4]uint64
+
+// runtime's pageBits.setAll: the pointer receiver is emitted as the value it addresses, never a box.
+func (b *bits) setAll() {
+	for i := range b {
+		b[i] = ^uint64(0)
+	}
+}
+
 // ASSIGNED KEY.
 func assigned(s []int) int {
 	var i int
@@ -153,6 +179,10 @@ func main() {
 	s := []int{1, 2, 3}
 	println(keyOnly(s), blankValue(s), noVars(s), overArray(), assigned(s), written(s), len(addressed(s)))
 	println(named(ints(s)), generic(s), withValue(s), overString("ab"), overMap(map[int]int{1: 1}))
+	println(overNilPointer(), overPointerParam(&[2]int{}))
+	var bb bits
+	bb.setAll()
+	println(bb[3] != 0)
 }
 `)
 
@@ -223,8 +253,17 @@ func TestIndexOnlyRangeEmitsTheIndexEnumerator(t *testing.T) {
 	expect("blankValue", "foreach (var i in range(s))")
 	refuse("blankValue", "(i, _)")
 	expect("noVars", "foreach (var _"+marker+"1 in range(s))")
-	expect("overArray", "foreach (var i in range(a))", "foreach (var i in range(p))")
+	// A *[N]T ranges its type's length beside the pointer, so a nil one ranges N times, as Go's does; a pointer
+	// PARAMETER is already the dereferenced value local and ranges as an array.
+	expect("overArray", "foreach (var i in range(a))", "foreach (var i in range(p, 3))")
 	refuse("overArray", ".Value", "(i, _)")
+	expect("overNilPointer", "foreach (var i in range(nilp, 4))")
+	refuse("overNilPointer", ".Value", "(i, _)")
+	expect("overPointerParam", "foreach (var i in range(p))")
+	// A pointer RECEIVER is the value it addresses too (`this ref bits b`), so it ranges as an array: the box overload
+	// range(ж<TArray>, nint) cannot bind a ref (CS0411 at runtime's pageBits.setAll).
+	expect("setAll", "foreach (var i in range(b))")
+	refuse("setAll", "range(b, 4)")
 	expect("assigned", "foreach (var i"+marker+"1 in range(s))", "i = i"+marker+"1;")
 	expect("written", "foreach (var i"+marker+"1 in range(s))", "var i = i"+marker+"1;")
 	expect("addressed", "in range(s))", "heap(")

@@ -5,8 +5,7 @@ namespace go.math.big.@internal;
 
 partial class asmgen_package {
 
-public static ж<Arch> ArchAMD64;
-internal static void initᴛArchAMD64() { ArchAMD64 = Ꮡ(new Arch(
+[GoLazy(Initial = true)] partial class lazyᴛArchAMD64 { public static ж<Arch> ArchAMD64 = Ꮡ(new Arch(
     Name: "amd64"u8,
     WordBits: 64,
     WordBytes: 8,

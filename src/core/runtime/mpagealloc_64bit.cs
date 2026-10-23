@@ -42,25 +42,25 @@ internal static array<nuint> levelBits = new nuint[]{
 // pointer p by doing:
 //
 //	p >> levelShift[l]
-internal static array<nuint> levelShift = new nuint[]{
+[GoLazy] partial class lazyᴛlevelShift { internal static array<nuint> levelShift = new nuint[]{
     heapAddrBits - summaryL0Bits,
     heapAddrBits - summaryL0Bits - 1 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 2 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 3 * summaryLevelBits,
     heapAddrBits - summaryL0Bits - 4 * summaryLevelBits
-}.array();
+}.array(); }
 
 // levelLogPages is log2 the maximum number of runtime pages in the address space
 // a summary in the given level represents.
 //
 // The leaf level always represents exactly log2 of 1 chunk's worth of pages.
-internal static array<nuint> levelLogPages = new nuint[]{
+[GoLazy] partial class lazyᴛlevelLogPages { internal static array<nuint> levelLogPages = new nuint[]{
     logPallocChunkPages + 4 * summaryLevelBits,
     logPallocChunkPages + 3 * summaryLevelBits,
     logPallocChunkPages + 2 * summaryLevelBits,
     logPallocChunkPages + 1 * summaryLevelBits,
     logPallocChunkPages
-}.array();
+}.array(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string pageSummaryˢ = "page summary"u8;

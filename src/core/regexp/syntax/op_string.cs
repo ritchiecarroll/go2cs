@@ -34,7 +34,7 @@ internal static void _ᴛ1() {
 internal static readonly @string _Op_name_0 = "NoMatchEmptyMatchLiteralCharClassAnyCharNotNLAnyCharBeginLineEndLineBeginTextEndTextWordBoundaryNoWordBoundaryCaptureStarPlusQuestRepeatConcatAlternate"u8;
 internal static readonly @string _Op_name_1 = "opPseudo"u8;
 
-internal static array<uint8> _Op_index_0 = new uint8[]{0, 7, 17, 24, 33, 45, 52, 61, 68, 77, 84, 96, 110, 117, 121, 125, 130, 136, 142, 151}.array();
+[GoLazy] partial class lazyᴛ_Op_index_0 { internal static array<uint8> _Op_index_0 = new uint8[]{0, 7, 17, 24, 33, 45, 52, 61, 68, 77, 84, 96, 110, 117, 121, 125, 130, 136, 142, 151}.array(); }
 
 public static @string String(this Op i) {
     switch (ᐧ) {

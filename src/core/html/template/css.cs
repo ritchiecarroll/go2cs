@@ -196,7 +196,7 @@ internal static @string cssEscaper(params ꓸꓸꓸany argsʗp) {
     return b.String();
 }
 
-internal static slice<@string> cssReplacementTable = new slice<@string>(126){
+[GoLazy] partial class lazyᴛcssReplacementTable { internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [0] = @"\0"u8,
     [(rune)'\t'] = @"\9"u8,
     [(rune)'\n'] = @"\a"u8,
@@ -218,7 +218,7 @@ internal static slice<@string> cssReplacementTable = new slice<@string>(126){
     [(rune)'\\'] = @"\\"u8,
     [(rune)'{'] = @"\7b"u8,
     [(rune)'}'] = @"\7d"u8
-};
+}; }
 
 internal static slice<byte> expressionBytes = slice<byte>("expression"u8);
 

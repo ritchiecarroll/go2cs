@@ -12,10 +12,10 @@ partial struct info {
     internal bool supported;
 }
 
-internal static map<OSArch, info> table = new map<OSArch, info>{
+[GoLazy] partial class lazyᴛtable { internal static map<OSArch, info> table = new map<OSArch, info>{
     [new("linux", "amd64")] = new(supported: true),
     [new("windows", "386")] = new(supported: false)
-};
+}; }
 
 partial struct Description {
     public @string Name;

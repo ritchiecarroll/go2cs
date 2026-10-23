@@ -10,7 +10,7 @@ partial class net_package {
 // if non-nil, overrides dialTCP.
 internal static Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 
-internal static Func<context.Context, Func<context.Context, @string, @string, (slice<IPAddr>, error)>, @string, @string, (slice<IPAddr>, error)> testHookLookupIP = (context.Context ctx, Func<context.Context, @string, @string, (slice<IPAddr>, error)> fn, @string network, @string host) => fn(ctx, network, host);
+[GoLazy] partial class lazyᴛtestHookLookupIP { internal static Func<context.Context, Func<context.Context, @string, @string, (slice<IPAddr>, error)>, @string, @string, (slice<IPAddr>, error)> testHookLookupIP = (context.Context ctx, Func<context.Context, @string, @string, (slice<IPAddr>, error)> fn, @string network, @string host) => fn(ctx, network, host); }
 internal static Action<ж<netFD>> testPreHookSetKeepAlive = (ж<netFD> _) => {
 };
 internal static Action<KeepAliveConfig> testHookSetKeepAlive = (KeepAliveConfig _) => {

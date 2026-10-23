@@ -70,7 +70,7 @@ internal static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @
 // https://github.com/mozilla-firefox/firefox/blob/main/netwerk/mime/nsMimeTypes.h
 // and the mappings to file extensions at
 // https://github.com/mozilla-firefox/firefox/blob/main/uriloader/exthandler/nsExternalHelperAppService.cpp
-internal static map<@string, @string> builtinTypesLower = new map<@string, @string>{
+[GoLazy] partial class lazyᴛbuiltinTypesLower { internal static map<@string, @string> builtinTypesLower = new map<@string, @string>{
     [".ai"u8] = "application/postscript"u8,
     [".apk"u8] = "application/vnd.android.package-archive"u8,
     [".apng"u8] = "image/apng"u8,
@@ -135,7 +135,7 @@ internal static map<@string, @string> builtinTypesLower = new map<@string, @stri
     [".xml"u8] = "text/xml; charset=utf-8"u8,
     [".xsl"u8] = "text/xml; charset=utf-8"u8,
     [".zip"u8] = "application/zip"u8
-};
+}; }
 
 internal static ж<Δsync.Once> Ꮡonce = new StandardBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once once => ref Ꮡonce.Value;    // guards initMime

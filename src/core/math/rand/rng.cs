@@ -18,7 +18,7 @@ internal static UntypedInt rngMask => /* rngMax - 1 */ 9223372036854775807;
 internal static UntypedInt int32max => /* (1 << 31) - 1 */ 2147483647;
 
 // rngCooked used for seeding. See gen_cooked.go for details.
-internal static array<int64> rngCooked = new int64[]{
+[GoLazy] partial class lazyᴛrngCooked { internal static array<int64> rngCooked = new int64[]{
     -4181792142133755926L, -4576982950128230565L, 1395769623340756751L, 5333664234075297259L,
     -6347679516498800754L, 9033628115061424579L, 7143218595135194537L, 4812947590706362721L,
     7937252194349799378L, 5307299880338848416L, 8209348851763925077L, -7107630437535961764L,
@@ -171,7 +171,7 @@ internal static array<int64> rngCooked = new int64[]{
     -4300543082831323144L, -6344160503358350167L, 5896236396443472108L, -758328221503023383L,
     -1894351639983151068L, -307900319840287220L, -6278469401177312761L, -2171292963361310674L,
     8382142935188824023L, 9103922860780351547L, 4152330101494654406L
-}.array();
+}.array(); }
 
 partial struct rngSource {
     internal nint tap;          // index into vec
