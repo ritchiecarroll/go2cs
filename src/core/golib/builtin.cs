@@ -2676,7 +2676,7 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(array<T> target, int index)
     {
         CheckElementIndex(index, target.Length);
-        return new ElemRefBox<T>(target, index);
+        return ElemRefBox<T>.OfArrayElement(target, index);
     }
 
     /// <summary>
@@ -2689,7 +2689,7 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(array<T> target, nint index)
     {
         CheckElementIndex(index, target.Length);
-        return new ElemRefBox<T>(target, (int)index);
+        return ElemRefBox<T>.OfArrayElement(target, (int)index);
     }
 
     /// <summary>
@@ -2703,7 +2703,7 @@ public static partial class builtin
     public static ж<T> Ꮡ<T>(array<T> target, ulong index)
     {
         CheckElementIndex(index, target.Length);
-        return new ElemRefBox<T>(target, (int)index);
+        return ElemRefBox<T>.OfArrayElement(target, (int)index);
     }
 
     /// <summary>
