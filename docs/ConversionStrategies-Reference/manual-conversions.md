@@ -3056,8 +3056,13 @@ contracts: the tuning knobs keep Go's documented GET/SET semantics (remember, re
 value, negative = query where Go says so) and have no effect on collection; `freeOSMemory` is a real
 compacting collect; `setPanicOnFault` is `[ThreadStatic]` because it is per-goroutine in Go;
 `readGCStats` reports a **real** per-pause history in the exact packed layout `ReadGCStats` unpacks.
-`modinfo`/`WriteHeapDump`/`SetTraceback`/`runtime_setCrashFD` are inert, matching a binary built
-without module or heap-dump support.
+`WriteHeapDump`/`SetTraceback`/`runtime_setCrashFD` are inert, matching a binary built without
+heap-dump support. `modinfo` returns the program's build info, composed by golib's `GoModInfoAttribute` from
+the module lines the converter stamps on a `main` project (or a test host registers when it starts) and the
+build settings the program knows, so `ReadBuildInfo` reports it as Go's does
+([summary](../ConversionStrategies.md#package-conversion)).
+<!-- src/core/golib/GoModInfoAttribute.cs:103 `public static @string Compose(string goos, string goarch, bool cgoEnabled)`;
+     the converter's stamp: src/go2cs/buildInfoStamp.go:39 `func programModInfo(importPath, modulePath string, dependencies []thirdPartyModule, sums map[string]string) string {`. -->
 
 **Two of those knobs later moved back to runtime (2026-09-28, M1).** `setGCPercent` and
 `setMemoryLimit` forward to runtime's own bodies through two public crossings

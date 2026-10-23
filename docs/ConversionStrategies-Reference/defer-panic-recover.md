@@ -503,16 +503,19 @@ function depends on how it was called, not where it was written: `defer catchErr
 `defer func() { catchError(&err) }()` reads nil in `catchError` and the panic continues. So the decision is made at
 run time, and the converter marks its two ends:
 
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:76-83 -->
 ```csharp
-internal static void catchError(ref error err) {
+internal static void catchError(ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+        ref var err = ref Ꮡerr.DerefOrNull();
 
         {
             var e = recover(calledByDefer); if (e != default!) {
 ```
 
+<!-- source: src/tests/Behavioral/RecoverInHelper/RecoverInHelper.cs.target:98 -->
 ```csharp
         defer(catchError, Ꮡerr, ref ᒐ, recovers: true);
 ```
