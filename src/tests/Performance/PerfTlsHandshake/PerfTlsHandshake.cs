@@ -6,6 +6,7 @@ using Δio = io_package;
 using Δnet = net_package;
 using strings = strings_package;
 using time = time_package;
+using System.Runtime.CompilerServices;
 using crypto;
 
 partial class main_package {
@@ -33,10 +34,9 @@ Y/dEpa0D0EHhDxxVg6UzKOXB355n0IetGE/aWvyTV9SiDs6QsaC57Q9qq1/mitx5
 rF7r4gUnKeC7mYIH1zypY7laskopiLFAfe96Kg==
 -----END CERTIFICATE-----
 
-"""u8);
+"""u8.Raw());
 
-internal static slice<byte> localhostKey;
-internal static void initᴛlocalhostKey() { localhostKey = slice<byte>(testingKey("""
+internal static slice<byte> localhostKey = slice<byte>(testingKey("""
 
 -----BEGIN RSA TESTING KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDFyXr1E4l3GM34
@@ -67,20 +67,13 @@ supU6Eea21esIxIub2zv/Np0ojUb6rlqTPS4Ox1E27D787EJ3VOXpriSD10vyNnZ
 jel6uj2FOP9g54s+GzlSVg/T
 -----END RSA TESTING KEY-----
 
-"""u8)); }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string testingKeyˢ = "TESTING KEY"u8;
-private static readonly @string privateKeyˢ = "PRIVATE KEY"u8;
+"""u8.Raw()));
 
 internal static @string testingKey(@string s) {
-    return strings.ReplaceAll(s, testingKeyˢ, privateKeyˢ);
+    return strings.ReplaceAll(s, "TESTING KEY", "PRIVATE KEY");
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly @string tcpˢ = "tcp"u8;
-
-internal static (nint, uint16, uint16) handshakes(nint n, tls.Certificate cert) {
+internal static partial (nint, uint16, uint16) handshakes(nint n, tls.Certificate cert) {
     GoFrame ᒐ = default;
     try {
         var serverConf = Ꮡ(new tls.Config(
@@ -93,12 +86,14 @@ internal static (nint, uint16, uint16) handshakes(nint n, tls.Certificate cert) 
             MinVersion: tls.VersionTLS13,
             MaxVersion: tls.VersionTLS13
         ));
-        var (ln, err) = Δnet.Listen(tcpˢ, "127.0.0.1:0"u8);
+
+        var (ln, err) = Δnet.Listen("tcp", "127.0.0.1:0");
         if (err != default!) {
             throw panic(err);
         }
         var lnʗ1 = ln;
         defer(() => lnʗ1.Close(), ref ᒐ);
+
         var done = new channel<EmptyStruct>(0);
         var doneʗ1 = done;
         var lnʗ2 = ln;
@@ -124,11 +119,12 @@ internal static (nint, uint16, uint16) handshakes(nint n, tls.Certificate cert) 
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
         });
+
         nint count = 0;
         uint16 version = default!;
         uint16 suite = default!;
         for (nint i = 0; i < n; i++) {
-            var (c, errΔ3) = Δnet.Dial(tcpˢ, ln.Addr().String());
+            var (c, errΔ3) = Δnet.Dial("tcp", ln.Addr().String());
             if (errΔ3 != default!) {
                 throw panic(errΔ3);
             }
@@ -151,21 +147,20 @@ internal static (nint, uint16, uint16) handshakes(nint n, tls.Certificate cert) 
     finally { ᒐ.Run(); }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object checksumˢ = (@string)"checksum:"u8;
-private static readonly object elapsedNsˢ = (@string)"elapsed_ns:"u8;
-
 internal static void Main() {
     var (cert, err) = tls.X509KeyPair(localhostCert, localhostKey);
     if (err != default!) {
         throw panic(err);
     }
+
     handshakes(1, cert);
+
     var start = time.Now().UnixNano();
     var (count, version, suite) = handshakes(64, cert);
     var elapsed = time.Now().UnixNano() - start;
-    fmt.Println(checksumˢ, count, version, suite);
-    fmt.Println(elapsedNsˢ, elapsed);
+
+    fmt.Println("checksum:", count, version, suite);
+    fmt.Println("elapsed_ns:", elapsed);
 }
 
 } // end main_package
