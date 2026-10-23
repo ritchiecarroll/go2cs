@@ -177,15 +177,14 @@ func TestMergeDropsAPerGOOSAxisNoConvertingTargetConfirms(t *testing.T) {
 
 	coreDir, stages := newCompanionStages(t, targets, seed)
 
-	// Windows alone converts internal/syscall/windows and, adopting the axis from the seed, writes the seed's
-	// bytes back: every stage now holds the same project file.
+	// Windows alone converts internal/syscall/windows. Adopting the axis from the seed, its writer composes the
+	// seed's bytes, so needToWriteFile skips the write: the project file keeps its SEED modification time in every
+	// stage, and no stage reads as having emitted it. That is the production shape (the pair's A/B on 7b6d24d6a4).
 	writeTestFile(t, filepath.Join(stages[0], "core", filepath.FromSlash(windowsSource)), "windows source")
-	writeTestFile(t, filepath.Join(stages[0], "core", filepath.FromSlash(windowsProject)), staleSplit)
 
-	// All three convert log/syslog, and each writes back the same conditioned file.
+	// All three convert log/syslog, and none rewrites its project file either.
 	for i := range targets {
 		writeTestFile(t, filepath.Join(stages[i], "core", filepath.FromSlash(syslogSource)), "syslog source")
-		writeTestFile(t, filepath.Join(stages[i], "core", filepath.FromSlash(syslogProject)), syslogSplit)
 	}
 
 	emissions := snapshotCompanionStages(t, targets, stages)

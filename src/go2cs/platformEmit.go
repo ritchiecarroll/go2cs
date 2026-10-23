@@ -803,12 +803,24 @@ func countWrite(changed bool, written *int, unchanged *int) {
 func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*platformEmission) ([]string, map[string]string, int, error) {
 	names := map[string]bool{}
 	written := 0
+	converted := make([]map[string]bool, len(emissions))
+
+	for i, emission := range emissions {
+		converted[i] = convertedPackages(emission)
+	}
 
 	for _, emission := range emissions {
 		for rawPath, state := range emission.artifacts {
 			// The warning entries are composed from every target by mergeWarningEntries, never
 			// copied from one.
-			if state.emitted && filepath.Ext(rawPath) != ".cs" && artifactPackage(rawPath) != "." && path.Base(rawPath) != warningEntriesFileName {
+			if filepath.Ext(rawPath) == ".cs" || artifactPackage(rawPath) == "." || path.Base(rawPath) == warningEntriesFileName {
+				continue
+			}
+
+			// A project file that carries a per-GOOS block is merged even when no target REWROTE it: the
+			// writer that recomposes the seed's bytes skips the write (needToWriteFile), so "emitted" is false
+			// in every stage exactly when the stale-axis case arises (carriesConvertedPlatformAxis).
+			if state.emitted || (!names[rawPath] && strings.EqualFold(filepath.Ext(rawPath), ".csproj") && carriesConvertedPlatformAxis(rawPath, emissions, converted)) {
 				names[rawPath] = true
 			}
 		}
@@ -816,11 +828,6 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 
 	conditioned := map[string]bool{}
 	residual := map[string]string{}
-	converted := make([]map[string]bool, len(emissions))
-
-	for i, emission := range emissions {
-		converted[i] = convertedPackages(emission)
-	}
 
 	for _, rawPath := range sortedKeys(names) {
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))

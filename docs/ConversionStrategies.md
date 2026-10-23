@@ -1376,7 +1376,7 @@ such an initializer reads is always built on its first read too, so it has a hol
 the ordered static constructor. When every var a package would move there is built on its first read instead,
 the conversion writes no `package_init.cs` for the package, and removes one that an earlier conversion wrote.
 <!-- src/go2cs/initOrderOperations.go:504 `func retireStalePackageInitFile(outputDir string) error {`; across
-     -platforms targets: src/go2cs/platformEmit.go:1254 `func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`,
+     -platforms targets: src/go2cs/platformEmit.go:1261 `func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`,
      guarded by TestMergeRetiresAPackageInitNoTargetEmitted (src/go2cs/platformPackageInitRetire_test.go). -->
 
 **A var that reads another package's var needs no ordering.** Each Go package is its own C# class.
