@@ -414,11 +414,11 @@ partial struct handleState {
     internal ж<slice<@string>> groups; // pool-allocated slice of active groups, for ReplaceAttr
 }
 
-internal static ж<sync.Pool> ᏑgroupPool = new StandardBox<sync.Pool>(new sync.Pool(New: () => {
+[GoLazy] partial class lazyᴛgroupPool { internal static ж<sync.Pool> ᏑgroupPool = new StandardBox<sync.Pool>(new sync.Pool(New: () => {
     var s = new slice<@string>(0, 10);
     return Ꮡ(s);
 }
-));
+)); }
 internal static ref sync.Pool groupPool => ref ᏑgroupPool.Value;
 
 internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> Ꮡbuf, bool freeBuf, @string sep) {

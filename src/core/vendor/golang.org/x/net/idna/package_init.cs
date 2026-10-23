@@ -9,6 +9,5 @@ namespace go.vendor.golang.org.x.net;
 partial class idna_package {
     static idna_package() {
         initᴛPunycode();
-        initᴛidnaSparse();
     }
 } // end idna_package

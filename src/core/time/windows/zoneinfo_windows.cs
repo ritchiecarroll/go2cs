@@ -236,7 +236,7 @@ internal static void initLocalFromTZI(ж<syscall.Timezoneinformation> Ꮡi) {
     }
 }
 
-internal static ж<syscall.Timezoneinformation> ᏑusPacific = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
+[GoLazy] partial class lazyᴛusPacific { internal static ж<syscall.Timezoneinformation> ᏑusPacific = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: 8 * 60,
     StandardName: new uint16[]{
         (rune)'P', (rune)'a', (rune)'c', (rune)'i', (rune)'f', (rune)'i', (rune)'c', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
@@ -247,10 +247,10 @@ internal static ж<syscall.Timezoneinformation> ᏑusPacific = new StandardBox<s
     }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 3, Day: 2, Hour: 2),
     DaylightBias: -60
-));
+)); }
 internal static ref syscall.Timezoneinformation usPacific => ref ᏑusPacific.Value;
 
-internal static ж<syscall.Timezoneinformation> Ꮡaus = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
+[GoLazy] partial class lazyᴛaus { internal static ж<syscall.Timezoneinformation> Ꮡaus = new StandardBox<syscall.Timezoneinformation>(new syscall.Timezoneinformation(
     Bias: -10 * 60,
     StandardName: new uint16[]{
         (rune)'A', (rune)'U', (rune)'S', (rune)' ', (rune)'E', (rune)'a', (rune)'s', (rune)'t', (rune)'e', (rune)'r', (rune)'n', (rune)' ', (rune)'S', (rune)'t', (rune)'a', (rune)'n', (rune)'d', (rune)'a', (rune)'r', (rune)'d', (rune)' ', (rune)'T', (rune)'i', (rune)'m', (rune)'e'
@@ -261,7 +261,7 @@ internal static ж<syscall.Timezoneinformation> Ꮡaus = new StandardBox<syscall
     }.array(32),
     DaylightDate: new syscall.Systemtime(Month: 10, Day: 1, Hour: 2),
     DaylightBias: -60
-));
+)); }
 internal static ref syscall.Timezoneinformation aus => ref Ꮡaus.Value;
 
 internal static void initLocal() {

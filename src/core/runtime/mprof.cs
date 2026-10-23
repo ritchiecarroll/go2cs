@@ -1170,9 +1170,9 @@ partial struct goroutineProfileᴛ1 /*dyn*/ {
     internal slice<profilerecord.StackRecord> records;
     internal slice<@unsafe.Pointer> labels;
 }
-internal static ж<goroutineProfileᴛ1> ᏑgoroutineProfile = new StandardBox<goroutineProfileᴛ1>(new goroutineProfileᴛ1(
+[GoLazy] partial class lazyᴛgoroutineProfile { internal static ж<goroutineProfileᴛ1> ᏑgoroutineProfile = new StandardBox<goroutineProfileᴛ1>(new goroutineProfileᴛ1(
     sema: 1
-));
+)); }
 internal static ref goroutineProfileᴛ1 goroutineProfile => ref ᏑgoroutineProfile.Value;
 
 // goroutineProfileState indicates the status of a goroutine's stack for the

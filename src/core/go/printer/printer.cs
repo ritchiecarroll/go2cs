@@ -1448,7 +1448,7 @@ partial struct Config {
     public nint Indent; // default: 0 (all code is indented at least by this much)
 }
 
-internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛprinterPool { internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new printer(
             // Whitespace sequences are short.
             wsbuf: new slice<whiteSpace>(0, 16),
@@ -1456,7 +1456,7 @@ internal static ж<sync.Pool> ᏑprinterPool = new StandardBox<sync.Pool>(new sy
             // larger than about 80% of Go files in the standard library.
             output: new slice<byte>(0, (16 << 10))
         ))
-));
+)); }
 internal static ref sync.Pool printerPool => ref ᏑprinterPool.Value;
 
 internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> Ꮡfset, map<ast.Node, nint> nodeSizes) {

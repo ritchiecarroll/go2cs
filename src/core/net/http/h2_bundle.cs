@@ -971,13 +971,13 @@ internal static bool http2http2ConfigStrictMaxConcurrentRequests(ref HTTP2Config
 // TODO: Benchmark to determine if the pools are necessary. The GC may have
 // improved enough that we can instead allocate chunks like this:
 // make([]byte, max(16<<10, expectedBytesRemaining))
-internal static ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StandardBox<array<sync.Pool>>(new sync.Pool[]{
+[GoLazy] partial class lazyᴛhttp2dataChunkPools { internal static ж<array<sync.Pool>> Ꮡhttp2dataChunkPools = new StandardBox<array<sync.Pool>>(new sync.Pool[]{
     new(New: () => Ꮡ(new array<byte>(1024))),
     new(New: () => Ꮡ(new array<byte>(2048))),
     new(New: () => Ꮡ(new array<byte>(4096))),
     new(New: () => Ꮡ(new array<byte>(8192))),
     new(New: () => Ꮡ(new array<byte>(16384)))
-}.array());
+}.array()); }
 internal static ref array<sync.Pool> http2dataChunkPools => ref Ꮡhttp2dataChunkPools.Value;
 
 internal static slice<byte> http2getDataBufferChunk(int64 size) {
@@ -1616,12 +1616,12 @@ internal static void invalidate(this ref http2FrameHeader h) {
 
 // frame header bytes.
 // Used only by ReadFrameHeader.
-internal static ж<sync.Pool> Ꮡhttp2fhBytes = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2fhBytes { internal static ж<sync.Pool> Ꮡhttp2fhBytes = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<byte>(http2frameHeaderLen);
         return Ꮡ(buf);
     }
-));
+)); }
 internal static ref sync.Pool http2fhBytes => ref Ꮡhttp2fhBytes.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -3377,12 +3377,12 @@ internal static partial uint64 http2curGoroutineID() {
     finally { ᒐ.Run(); }
 }
 
-internal static ж<sync.Pool> Ꮡhttp2littleBuf = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2littleBuf { internal static ж<sync.Pool> Ꮡhttp2littleBuf = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<byte>(64);
         return Ꮡ(buf);
     }
-));
+)); }
 internal static ref sync.Pool http2littleBuf => ref Ꮡhttp2littleBuf.Value;
 
 // parseUintBytes is like strconv.ParseUint, but using a []byte.
@@ -3738,9 +3738,9 @@ internal static ж<http2bufferedWriter> http2newBufferedWriter(net.Conn conn, ti
 // not much thought went into it.
 internal static UntypedInt http2bufWriterPoolBufferSize => /* 4 << 10 */ 4096;
 
-internal static ж<sync.Pool> Ꮡhttp2bufWriterPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2bufWriterPool { internal static ж<sync.Pool> Ꮡhttp2bufWriterPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => bufio.NewWriterSize(default!, http2bufWriterPoolBufferSize).OrTypedNil()
-));
+)); }
 internal static ref sync.Pool http2bufWriterPool => ref Ꮡhttp2bufWriterPool.Value;
 
 internal static nint Available(this ref http2bufferedWriter w) {
@@ -4159,13 +4159,13 @@ internal static error http2errClosedBody = errors.New("body closed by handler"u8
 internal static error http2errHandlerComplete = errors.New("http2: request body closed due to handler exiting"u8);
 internal static error http2errStreamClosed = errors.New("http2: stream closed"u8);
 
-internal static ж<sync.Pool> Ꮡhttp2responseWriterStatePool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛhttp2responseWriterStatePool { internal static ж<sync.Pool> Ꮡhttp2responseWriterStatePool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => {
         var rws = Ꮡ(new http2responseWriterState(nil));
         rws.Value.bw = bufio.NewWriterSize(new http2chunkWriter(rws), http2handlerChunkWriteSize);
         return rws.OrTypedNil();
     }
-));
+)); }
 internal static ref sync.Pool http2responseWriterStatePool => ref Ꮡhttp2responseWriterStatePool.Value;
 
 // Test hooks.

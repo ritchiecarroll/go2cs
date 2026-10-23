@@ -225,20 +225,20 @@ public static UntypedInt MSG_CTRUNC => 0x0200;
 
 internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uintptr)4294967295);
 
-public static ж<syscall.GUID> ᏑWSAID_WSASENDMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
+[GoLazy] partial class lazyᴛWSAID_WSASENDMSG { public static ж<syscall.GUID> ᏑWSAID_WSASENDMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
     Data1: 0xa441e712U,
     Data2: 0x754f,
     Data3: 0x43ca,
     Data4: new byte[]{0x84, 0xa7, 0x0d, 0xee, 0x44, 0xcf, 0x60, 0x6d}.array()
-));
+)); }
 public static ref syscall.GUID WSAID_WSASENDMSG => ref ᏑWSAID_WSASENDMSG.Value;
 
-public static ж<syscall.GUID> ᏑWSAID_WSARECVMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
+[GoLazy] partial class lazyᴛWSAID_WSARECVMSG { public static ж<syscall.GUID> ᏑWSAID_WSARECVMSG = new StandardBox<syscall.GUID>(new syscall.GUID(
     Data1: 0xf689d7c8U,
     Data2: 0x6f1f,
     Data3: 0x436b,
     Data4: new byte[]{0x8a, 0x53, 0xe5, 0x4f, 0xe3, 0x51, 0xc3, 0x22}.array()
-));
+)); }
 public static ref syscall.GUID WSAID_WSARECVMSG => ref ᏑWSAID_WSARECVMSG.Value;
 
 partial struct sendRecvMsgFuncᴛ1 /*dyn*/ {

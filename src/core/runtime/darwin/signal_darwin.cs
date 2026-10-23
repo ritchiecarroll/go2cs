@@ -5,7 +5,7 @@ namespace go;
 
 partial class runtime_package {
 
-internal static ж<array<sigTabT>> Ꮡsigtable = new StandardBox<array<sigTabT>>(new sigTabT[]{
+[GoLazy] partial class lazyᴛsigtable { internal static ж<array<sigTabT>> Ꮡsigtable = new StandardBox<array<sigTabT>>(new sigTabT[]{
     /* 0 */
     new(0, "SIGNONE: no trap"u8),
     /* 1 */
@@ -70,7 +70,7 @@ internal static ж<array<sigTabT>> Ꮡsigtable = new StandardBox<array<sigTabT>>
     new(_SigNotify, "SIGUSR1: user-defined signal 1"u8),
     /* 31 */
     new(_SigNotify, "SIGUSR2: user-defined signal 2"u8)
-}.array());
+}.array()); }
 internal static ref array<sigTabT> sigtable => ref Ꮡsigtable.Value;
 
 } // end runtime_package

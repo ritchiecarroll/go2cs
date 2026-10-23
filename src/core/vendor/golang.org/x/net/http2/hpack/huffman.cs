@@ -10,9 +10,9 @@ using sync = sync_package;
 
 partial class hpack_package {
 
-internal static ж<sync.Pool> ᏑbufPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛbufPool { internal static ж<sync.Pool> ᏑbufPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => @new<bytes.Buffer>()
-));
+)); }
 internal static ref sync.Pool bufPool => ref ᏑbufPool.Value;
 
 // HuffmanDecode decodes the string in v and writes the expanded

@@ -710,12 +710,12 @@ internal static (nint, error) WriteString(this discard _, @string s) {
     return (len(s), default!);
 }
 
-internal static ж<Δsync.Pool> ᏑblackHolePool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛblackHolePool { internal static ж<Δsync.Pool> ᏑblackHolePool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         var b = new slice<byte>(8192);
         return Ꮡ(b);
     }
-));
+)); }
 internal static ref Δsync.Pool blackHolePool => ref ᏑblackHolePool.Value;
 
 internal static (int64 n, error err) ReadFrom(this discard _, Reader r) {

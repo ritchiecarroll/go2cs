@@ -27,7 +27,7 @@ partial struct Info {
 //
 // Note: After adding entries to this table, update the list in doc/godebug.md as well.
 // (Otherwise the test in this package will fail.)
-public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
+[GoLazy] partial class lazyᴛAll { public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
     new(Name: "allowmultiplevcs"u8, Package: "cmd/go"u8),
     new(Name: "asynctimerchan"u8, Package: "time"u8, Changed: 23, Old: "1"u8),
     new(Name: "containermaxprocs"u8, Package: "runtime"u8, Changed: 25, Old: "0"u8),
@@ -85,7 +85,7 @@ public static ж<slice<Info>> ᏑAll = new StandardBox<slice<Info>>(new Info[]{
     new(Name: "x509usefallbackroots"u8, Package: "crypto/x509"u8),
     new(Name: "x509usepolicies"u8, Package: "crypto/x509"u8, Changed: 24, Old: "0"u8),
     new(Name: "zipinsecurepath"u8, Package: "archive/zip"u8)
-}.slice());
+}.slice()); }
 public static ref slice<Info> All => ref ᏑAll.ValueSlot;
 
 partial struct RemovedInfo {

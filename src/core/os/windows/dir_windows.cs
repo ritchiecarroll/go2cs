@@ -37,13 +37,13 @@ partial struct dirInfo {
 // Windows 8.1 and earlier only works with buffer sizes up to 64 kB.
 internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 
-internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
+[GoLazy] partial class lazyᴛdirBufPool { internal static ж<Δsync.Pool> ᏑdirBufPool = new StandardBox<Δsync.Pool>(new Δsync.Pool(
     New: () => {
         // The buffer must be at least a block long.
         var buf = new slice<byte>(dirBufSize);
         return Ꮡ(buf);
     }
-));
+)); }
 internal static ref Δsync.Pool dirBufPool => ref ᏑdirBufPool.Value;
 
 internal static void close(this ref dirInfo d) {

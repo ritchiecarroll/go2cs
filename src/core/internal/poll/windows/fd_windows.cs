@@ -96,12 +96,12 @@ internal static ж<Δsyscall.WSABuf> newWsaBuf(slice<byte> b) {
     return Ꮡ(new Δsyscall.WSABuf(Buf: @unsafe.SliceData(b), Len: (uint32)len(b)));
 }
 
-internal static ж<sync.Pool> ᏑwsaBufsPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛwsaBufsPool { internal static ж<sync.Pool> ᏑwsaBufsPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => {
         var buf = new slice<Δsyscall.WSABuf>(0, 16);
         return Ꮡ(buf);
     }
-));
+)); }
 internal static ref sync.Pool wsaBufsPool => ref ᏑwsaBufsPool.Value;
 
 internal static ж<slice<Δsyscall.WSABuf>> newWSABufs(ref slice<slice<byte>> buf) {
@@ -146,12 +146,12 @@ internal static void freeWSABufs(ж<slice<Δsyscall.WSABuf>> ᏑbufsPtr) {
 }
 
 // wsaMsgPool is a pool of WSAMsg structures that can only hold a single WSABuf.
-internal static ж<sync.Pool> ᏑwsaMsgPool = new StandardBox<sync.Pool>(new sync.Pool(
+[GoLazy] partial class lazyᴛwsaMsgPool { internal static ж<sync.Pool> ᏑwsaMsgPool = new StandardBox<sync.Pool>(new sync.Pool(
     New: () => Ꮡ(new windows.WSAMsg(
             Buffers: Ꮡ(new Δsyscall.WSABuf(nil)),
             BufferCount: 1
         ))
-));
+)); }
 internal static ref sync.Pool wsaMsgPool => ref ᏑwsaMsgPool.Value;
 
 // newWSAMsg creates a new WSAMsg with the provided parameters.
