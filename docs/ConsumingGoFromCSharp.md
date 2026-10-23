@@ -597,6 +597,18 @@ Each item is a first surprise, and what to write instead.
   wants an exception, or call `Must()` ([Errors](#errors)).
 - **A channel call blocks its thread.** Keep `Send`, `Receive` and `Wait` off a UI thread: await `ReceiveAsync`
   or `SendAsync`, or wrap them in `Task.Run`.
+- **Startup is faster from `dotnet publish`.** The converted packages are IL that the JIT compiles the first time
+  each method runs. ReadyToRun compiles it ahead of time, and the .NET SDK applies ReadyToRun only when it
+  publishes: `dotnet run` and `dotnet build` never do. A program that go2cs converts sets
+  `<PublishReadyToRun>true</PublishReadyToRun>` in its project. In your own project that references `go.*`
+  packages, add that property and run the output of `dotnet publish -c Release`. On linux-x64, ReadyToRun cut a
+  converted program's median startup by about a third.
+  <!-- The converter's Exe template: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`
+       (with PublishTrimmed, scoped off Library projects). The figure: P1's measurement of PerfStartup
+       (src/tests/Performance/PerfStartup) at a5aa6a23f7 on linux-x64, median 488 ms under the JIT and 329 ms with
+       ReadyToRun (-33%). Checked with .NET SDK 10.0.112 on linux-x64: `dotnet publish -c Release` with the
+       property infers the runtime identifier and writes a ReadyToRun image; `dotnet build` of the same project
+       does not. -->
 - **Glyphs.** Consumer code rarely types one: `var` hides `ж<T>`, `@new<T>()` stands in for `Ꮡ`, channels have
   `Send` and `Receive`, and aliases keep call sites Go-shaped. What remains is `goǃ`, which completion lists when
   you type `go`, `ꟷ` in a map's comma-ok read, and the occasional `Δ` name such as `time.ΔSecond`. Every glyph
