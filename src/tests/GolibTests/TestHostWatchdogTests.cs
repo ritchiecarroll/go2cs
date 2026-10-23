@@ -586,7 +586,9 @@ public class TestHostWatchdogTests
         }
 
         Assert.IsTrue(returned, "RunAll did not return within 30 s: the hung test held the run");
-        Assert.IsTrue(reporter.Events.Any(e => e.Test == hung && e.Action == "fail" && e.Abandoned), hung + " was not abandoned: " + Verdicts(reporter));
+        TestEvent verdict = reporter.Events.FirstOrDefault(e => e.Test == hung && e.Action == "fail" && e.Abandoned);
+        Assert.IsNotNull(verdict, hung + " was not abandoned: " + Verdicts(reporter));
+        Assert.IsTrue(verdict.Elapsed >= 0.3D, $"{hung} was abandoned at the 300ms deadline but reported {verdict.Elapsed} s");
         Assert.IsTrue(reporter.Events.Any(e => e.Test == "TestZParallel" && e.Action == "pass"), "the later parallel test did not run: " + Verdicts(reporter));
     }
 

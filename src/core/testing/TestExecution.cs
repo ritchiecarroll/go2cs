@@ -258,10 +258,12 @@ public sealed class TestExecution
         if (abandonedWith is null)
             m_runner.MarkAbandoned(Name);
 
-        ReleaseParallelSlotOnce();
-
+        // Read before the slot goes back: giving it back can pause the clock this reads, and the verdict would
+        // then report 0 s for a test abandoned at the deadline.
         long since = RunningSince;
         elapsed = since == 0 ? 0.0D : Stopwatch.GetElapsedTime(since).TotalSeconds;
+
+        ReleaseParallelSlotOnce();
 
         // Go reports a subtest's verdict before its parent's.
         foreach (TestExecution child in children)
