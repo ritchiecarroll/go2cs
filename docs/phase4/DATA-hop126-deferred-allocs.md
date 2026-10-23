@@ -102,6 +102,11 @@ committed manifest already discloses is not listed.
   record drafts those three entries, and one for `TestMLDSAAllocations`, whose reading rose from 4,081 to 4,642
   per run between batch 19 and batch 24.
 
+**Amended again 2026-10-23 (lane H):** that "rose" is withdrawn. `TestMLDSAAllocations` does not repeat at a fixed
+tip: it read 4,081 to 4,432 per run at batch 19 and 4,071 to 4,642 at batch 24, because ML-DSA's rejection-sampling
+loops run a random number of times and the converted side allocates on every iteration. The successor record's
+amendment has the six readings.
+
 <!-- Provenance. Lane H, 2026-10-22. Worktree detached at 8c091fc3aa; the six rows' walls on windows/amd64 were
      crypto/sha256 249 s, strings 90 s, bytes 76 s, log/slog 272 s, math/big 156 s, crypto/internal/fips140test
      356 s. Each sweep exited 1 because the banked counts are still the go1.24.13 record, which this record does

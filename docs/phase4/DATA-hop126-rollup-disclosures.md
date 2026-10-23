@@ -140,6 +140,32 @@ batches 20 through 24 changed. It is not rooted here, and is not a seat of this 
 A two-tip bisect over the converter and golib, with this one test as the probe, is the next step if the re-bank wants
 the entry's reading to be explained rather than restated.
 
+**Amended 2026-10-23 (lane H): the finding above is WITHDRAWN. There is no rise; the count is not reproducible.**
+
+The bisect's control read the probe twice at each end, on windows/amd64 at the same config, `-tests -test-action all
+-test-filter '^TestMLDSAAllocations$'`, with each tip's converter built from its own tree:
+
+| Tip | Readings, allocations per run |
+|---|---|
+| `8c091fc3aa` (batch 19) | 4,081 (this record's earlier read), 4,151, 4,432 |
+| `ddebd3bed1` (batch 24) | 4,642 (this record's read above), 4,071, 4,072 |
+
+The two sets overlap: b19 spans 4,081–4,432 and b24 spans 4,071–4,642, so the 4,081 → 4,642 pair was two draws
+from one spread, not a change between the tips. The bisect was not run, since a probe that does not repeat at a
+fixed tip cannot order the tips between.
+
+**Why the count varies.** The test builds a fresh random key and signs with fresh randomness on each of its 100 runs.
+ML-DSA's `Sign` is a rejection-sampling loop (`mldsa.go`, the "Main rejection sampling loop"), and key expansion
+samples by rejection too (`field.go`), so the number of iterations varies with the randomness. Go allocates nothing
+per iteration, so its count is fixed at 5; the converted side allocates on every iteration, so its count follows the
+random iteration count.
+
+**What changes in the drafted `TestMLDSAAllocations` entry.** Its `reading` should state the spread rather than one
+draw, for example "4,071 to 4,642 per run over six readings at batch 19 and batch 24, windows/amd64, Release with
+tiering off; unit COUNT, a LOWER BOUND; the per-run count varies with ML-DSA's rejection-sampling iterations". The
+"rose from 4,081" clause is dropped. Its signature, `expected 5 allocations, got `, is unaffected, since every
+reading fails the same assertion. The `plan`'s probe should count allocations per Sign iteration, not per run.
+
 <!-- Provenance. Lane H, 2026-10-23. Two worktrees at ddebd3bed1: claude/h-rollup-disclosures for this record, and a
      detached one for the row reads, so no pipeline output reached the record's branch. Rows read in sequence, never
      two conversions at once: log/slog 333 s (exit 1), crypto/internal/fips140/nistec 37 s (exit 0, validated 44),
