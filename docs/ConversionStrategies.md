@@ -227,7 +227,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:162#df9083 (ProjectReference; NuGet via -recurse=nuget) ·
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17#ee46fb + src/core/internal/strconv/atoi.cs:130#4606f0 ·
-  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:136#07f377 (from src/go2cs/csproj-template.xml:128#07f377) ·
+  src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:143#07f377 (from src/go2cs/csproj-template.xml:128#07f377) ·
   src/core/encoding/gob/codec_test.cs:1197#1265b9 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:52#e494b0 ·
   src/tests/Behavioral/SliceAliasing/main.cs.target:13#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:116#9a82dc ·
@@ -1032,7 +1032,7 @@ defaults to `windows`; a build sets another target with, for example, `-p:GoTarg
 with OS subfolders keeps a `package_info.cs` in each one, and the project compiles the chosen target's
 copy first. The `Exists` conditions let one project file serve both layouts:
 
-<!-- source: src/core/os/os.csproj:145-169 -->
+<!-- source: src/core/os/os.csproj:152-176 -->
 ```xml
   <PropertyGroup Condition="'$(GoTargetOS)'==''">
     <GoTargetOS>windows</GoTargetOS>
@@ -2169,7 +2169,7 @@ case has its own paragraph in this section.
 Each converted project declares them. So `uint8` is C#'s `byte`, `int64` is `long`, and `rune` is `int`.
 Go's `byte` stays C#'s own `byte`, the same type as `uint8`.
 <!-- each project file carries lines such as `<Using Include="System.Int32" Alias="rune" />`:
-     src/core/bufio/bufio.csproj:136#07f377, from src/go2cs/csproj-template.xml:117-128#9dcfa6 -->
+     src/core/bufio/bufio.csproj:143#07f377, from src/go2cs/csproj-template.xml:117-128#9dcfa6 -->
 
 **`uintptr` is its own type.** It becomes golib's [`uintptr`](../src/core/golib/uintptr.cs), a small struct
 that holds one `nuint`. It is not an alias, because Go treats `uint` and `uintptr` as different types, and
@@ -4338,7 +4338,7 @@ Go's type names stay readable too. Go's `int` appears as C# `nint`, a native-siz
 such as `uint32` and `int64` keep their Go spelling: each converted project declares them as aliases
 of the C# types. `uintptr` is golib's own `uintptr` struct
 ([Integer Types and Arithmetic](#integer-types-and-arithmetic)).
-<!-- uintptr is a golib struct, not a project alias: src/core/golib/uintptr.cs:39#d446ed; project aliases such as `<Using Include="System.UInt32" Alias="uint32" />` (src/core/bufio/bufio.csproj:127#1a4b9a). -->
+<!-- uintptr is a golib struct, not a project alias: src/core/golib/uintptr.cs:39#d446ed; project aliases such as `<Using Include="System.UInt32" Alias="uint32" />` (src/core/bufio/bufio.csproj:134#1a4b9a). -->
 
 **Literals and `make`.** A composite literal builds a plain C# array and turns it into a Go value with
 `.slice()` or `.array()`. `make` calls a constructor. So `[]uint32{7, 8, 9}` becomes
