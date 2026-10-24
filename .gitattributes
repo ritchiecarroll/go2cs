@@ -118,6 +118,9 @@ docs/phase4/hopA-inputs/recon-lists/*.txt text eol=lf
 docs/phase4/data/*.txt text eol=lf
 docs/phase4/data/*.tsv text eol=lf
 docs/phase4/hopA-inputs/*.tsv text eol=lf
+# 2026-10-24, the go1.26.10 re-bank plan: its shard deal and eligibility lists sit one directory down, where the two
+# lines above do not reach (a `*` never crosses `/`). The deal's sha256 is taken over these LF bytes.
+docs/phase4/data/rebank-go1.26.10/* text eol=lf
 
 # ---------------------------------------------------------------------------
 # LF pin for the converter's embedded stdlib metadata asset
