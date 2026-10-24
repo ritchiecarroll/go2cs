@@ -98,9 +98,9 @@ another way. This section lists what that touches. The counts are from the hop t
    retaking a P from a long call). golib would need the same: mark the worker blocked and start or wake another, so
    other goroutines keep running.
 8. **Timers and netpoll.** These map well. .NET's own timers and async sockets already complete without holding a
-   thread, so under M:N a sleep or an idle socket would cost nothing. The netpoll seam ([§7 of the cooperative
-   scheduler](phase4/DESIGN-cooperative-scheduler.md#7-the-netpoll-boundary--which-side-owns-what)) is where that is
-   wired.
+   thread, so under M:N a sleep or an idle socket would cost nothing. The netpoll seam
+   ([§7 of the cooperative scheduler](phase4/DESIGN-cooperative-scheduler.md#7-the-netpoll-boundary--which-side-owns-what))
+   is where that is wired.
 
 **What the cooperative scheduler arc already provides.** It provides goroutine identity and a registry that does not
 depend on threads (`Goroutine`, `Goroutine.Current`, ids by creation), park accounting at every site, the thread
