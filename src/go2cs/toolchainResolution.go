@@ -239,7 +239,7 @@ func publishedStdLibRelease() string {
 // written, so this is the honest place to stop.
 //
 // Only the language release is compared: 1.23.1 versus 1.23.5 is the same standard library and the
-// floating revision in $(GoStdLibVersion) already covers it. A converting release that cannot be
+// minor-level float in $(GoStdLibVersion) already covers it. A converting release that cannot be
 // parsed is not grounds to refuse — it means the toolchain could not be interrogated, which is a
 // legitimate standalone-conversion state.
 func checkNuGetStdLibCompatibility(convertingRelease string, publishedRelease string) error {
@@ -462,7 +462,7 @@ func convertingRelease(goRoot string) string {
 //
 // The comparison is the FULL release, PATCH INCLUDED — which is exactly where this parts company with
 // checkNuGetStdLibCompatibility above. That guard compares version.Lang on purpose, because 1.23.1 and
-// 1.23.5 publish the same set of go.<pkg> package IDs and the floating revision in $(GoStdLibVersion)
+// 1.23.5 publish the same set of go.<pkg> package IDs and the minor-level float in $(GoStdLibVersion)
 // already spans them. Here the patch is the entire point: 1.23.1 and 1.23.2 are different SOURCES, and
 // converting one against goldens captured from the other is the drift this exists to stop. Equality is
 // exact rather than ordered for the same reason — a pin is not a floor, and a corpus converted by a
@@ -506,4 +506,21 @@ func checkCorpusToolchainPin(mode string, convertingVersion string, pinnedReleas
 			"toolchain — and GOROOT is the tree that actually gets converted.)",
 		mode, versionPropsFileName, pinnedBare, pinnedBare, converting, mode, consequence,
 		pinned, converting, strings.TrimPrefix(converting, "go"))
+}
+
+// goStdLibVersionFloat is the $(GoStdLibVersion) default -recurse=nuget writes for a converting Go release:
+// its minor, floating on the patch and the NuGet revision (1.26.5 -> 1.26.*). NuGet resolves a float to
+// the NEWEST package it matches, so a project restores the latest release of its minor, later patch hops
+// and rebuilds included. A patch-level float (1.26.5.*) matching nothing published instead resolves to
+// the OLDEST package above it and stays there. The minor is derived exactly as
+// checkNuGetStdLibCompatibility derives it, so the float spans the releases that guard accepts and no
+// others. Returns "" when release is not a Go version.
+func goStdLibVersionFloat(release string) string {
+	minor := version.Lang(normalizeGoVersion(release))
+
+	if minor == "" {
+		return ""
+	}
+
+	return strings.TrimPrefix(minor, "go") + ".*"
 }

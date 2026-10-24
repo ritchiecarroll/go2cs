@@ -31,11 +31,11 @@ func versionReport() string {
 	}
 
 	// The go.* NuGet version -recurse=nuget defaults $(GoStdLibVersion) to (see moduleConverter.go): the
-	// active toolchain's release, floating on the NuGet revision.
+	// active toolchain's Go minor, floating on the patch and revision.
 	packages, toolchain := "", ""
 
 	if version := goVersion(); version != "" {
-		packages, toolchain = version+".*", "go"+version
+		packages, toolchain = goStdLibVersionFloat(version), "go"+version
 	}
 
 	revision, modified := "", ""
