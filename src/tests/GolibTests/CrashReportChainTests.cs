@@ -184,6 +184,75 @@ public class CrashReportChainTests
         Assert.AreEqual("panic: first\n\tpanic: second\n", report);
     }
 
+    // A Goexit on the chain (Go's goexit _panic) prints nothing and takes no TAB after it, so the panic it was
+    // running beneath still leads the next line. Each arm runs on its own thread: a Goexit marks its goroutine's
+    // thread as exiting for good.
+    private static string OnOwnThread(Func<string> arm)
+    {
+        string? result = null;
+        Exception? failure = null;
+        System.Threading.Thread thread = new(() =>
+        {
+            try
+            {
+                result = arm();
+            }
+            catch (Exception ex)
+            {
+                failure = ex;
+            }
+        });
+
+        thread.Start();
+        thread.Join();
+
+        if (failure is not null)
+            throw new AssertFailedException($"the arm threw {failure.GetType().Name}: {failure.Message}", failure);
+
+        return result!;
+    }
+
+    [TestMethod]
+    public void AGoexitBetweenTwoPanicsPrintsNothingAndTheOlderPanicIsNotRecovered()
+    {
+        // go func() { defer func() { panic("B") }(); defer func() { runtime.Goexit() }(); panic("A") }()
+        string report = OnOwnThread(static () => Report((ref GoFrame frame) =>
+        {
+            frame.Push(() => throw panic("B"));
+            frame.Push(() => throw new GoexitException());
+            throw panic("A");
+        }));
+
+        Assert.AreEqual("panic: A\n\tpanic: B\n", report);
+    }
+
+    [TestMethod]
+    public void AGoexitAfterARecoveryLeavesTheRecoveredPanicOnTheChain()
+    {
+        // go func() { defer func() { panic("B") }(); defer func() { recover(); runtime.Goexit() }(); panic("A") }()
+        string report = OnOwnThread(static () => Report((ref GoFrame frame) =>
+        {
+            frame.Push(() => throw panic("B"));
+            frame.Push(() => { recover(); throw new GoexitException(); });
+            throw panic("A");
+        }));
+
+        Assert.AreEqual("panic: A [recovered]\n\tpanic: B\n", report);
+    }
+
+    [TestMethod]
+    public void APanicRaisedByAGoexitsDeferredCallPrintsAlone()
+    {
+        // go func() { defer func() { panic("B") }(); runtime.Goexit() }()
+        string report = OnOwnThread(static () => Report((ref GoFrame frame) =>
+        {
+            frame.Push(() => throw panic("B"));
+            throw new GoexitException();
+        }));
+
+        Assert.AreEqual("panic: B\n", report);
+    }
+
     // preprintpanics compares INTERFACE WORDS, not values: the runtime's static data makes some separately
     // converted values identical words, and an allocation never is.
 
@@ -221,8 +290,7 @@ public class CrashReportChainTests
     [TestMethod]
     public void ABoolOrSingleByteIsTheSameStaticWord()
     {
-        // Go prints `true`; the value's own text is PanicText's (it prints `True`), so only the chain is pinned here.
-        AssertOneRepanickedLine(RecoverThenPanic(static () => true, static () => true));
+        Assert.AreEqual("panic: true [recovered, repanicked]\n", RecoverThenPanic(static () => true, static () => true));
         Assert.AreEqual("panic: 200 [recovered, repanicked]\n", RecoverThenPanic(static () => (byte)200, static () => (byte)200));
     }
 

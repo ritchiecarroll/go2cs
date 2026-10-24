@@ -93,33 +93,75 @@ public class PanicException(object? state, Exception? innerException = null) :
         {
             case null:
                 return "nil";
-            // Ahead of the method probes: this is the commonest panic value by far, and its own
-            // ToString is already the Go rendering.
+            // Ahead of the method probes: this is the commonest panic value by far. Go prints a string
+            // panic value, and the Error()/String() text below, through printindented.
             case @string text:
-                return text.ToString();
+                return Indented(text.ToString());
         }
 
         try
         {
             if (state is error goError)
-                return goError.Error().ToString();
+                return Indented(goError.Error().ToString());
 
             // The `error` arm above catches only what golib's own carrier holds. A CONVERTED Go
             // error implements no managed interface at all — the converter emits a Go method as an
             // extension method over its receiver — so the question has to be asked of the Go method
             // set, exactly as Go's `case error:` asks it of the dynamic type's.
             if (TryGoMethod(state, nameof(error.Error), out string errorText))
-                return errorText;
+                return Indented(errorText);
 
             if (TryGoMethod(state, "String", out string stringer))
-                return stringer;
+                return Indented(stringer);
         }
         catch (Exception ex) when (ex is not GoexitException)
         {
             return "panic while printing panic value";
         }
 
+        // printpanicval's basic arms, then printanycustomtype's: a named basic type prints as T(v).
+        if (BasicText(state) is { } basic)
+            return basic;
+
+        if (GoReflect.TryUnwrapWrapperValue(state, out object? underlying))
+        {
+            while (GoReflect.TryUnwrapWrapperValue(underlying, out object? inner))
+                underlying = inner;
+
+            string type = GoReflect.GoTypeName(state.GetType());
+
+            if (underlying is @string named)
+                return $"{type}(\"{Indented(named.ToString())}\")";
+
+            // printcomplex writes its own parentheses.
+            if (BasicText(underlying) is { } value)
+                return underlying is System.Numerics.Complex or complex64 ? type + value : $"{type}({value})";
+        }
+
         return state.ToString() ?? "nil";
+    }
+
+    // runtime/print.go's text for a value of a basic kind, or null for any other.
+    private static string? BasicText(object value)
+    {
+        return value switch
+        {
+            bool flag => flag ? "true" : "false",
+            sbyte or short or int or long or nint or byte or ushort or uint or ulong or nuint => ((IFormattable)value).ToString(null, System.Globalization.CultureInfo.InvariantCulture),
+            uintptr address => address.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            float single => GoFloatText.Format(single, 32),
+            double number => GoFloatText.Format(number, 64),
+            complex64 pair => GoFloatText.Complex(pair.Real, pair.Imaginary, 64),
+            System.Numerics.Complex pair => GoFloatText.Complex(pair.Real, pair.Imaginary, 128),
+            _ => null
+        };
+    }
+
+    // runtime/error.go's printindented: every "\n" is followed by a TAB, so a multi-line value stays inside its
+    // report line's indentation.
+    private static string Indented(string text)
+    {
+        return text.Contains('\n') ? text.Replace("\n", "\n\t") : text;
     }
 
     // Go's `error`/`stringer` are the structural `interface{ Error() string }` and
