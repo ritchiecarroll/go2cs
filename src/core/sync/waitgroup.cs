@@ -54,9 +54,10 @@ partial class sync_package {
 // internal/synctest pulls cannot keep it: a pointer there is a box, and two pointers to one field are
 // two boxes; see synctest_impl.cs.) Guarded by Gate.
 //
-// A stated difference: Go answers Unbubbled for a WaitGroup that is not in a heap span, such as a
-// package-level variable (runtime/synctest.go:383-386). A converted global is boxed exactly as a heap
-// value is, so here a global WaitGroup used inside a bubble IS associated with it.
+// Go answers Unbubbled for a WaitGroup that is not in a heap span, such as a package-level variable
+// (runtime/synctest.go:383-386, "This is probably a package var"): no association, no flag, and a Wait
+// that is never durable. A converted global's box is a StaticBox (the converter's package-level
+// declaration), so wgBubbleOf answers the same; a field of a global reads through its view's source.
 internal sealed class WaitGroupState {
     internal int Counter;
     internal readonly ManualResetEventSlim Idle = new(true);
@@ -79,6 +80,13 @@ private static WaitGroupState wgStateOf(ж<WaitGroup> Ꮡwg) {
     return Interlocked.CompareExchange(ref wg.st, created, null) ?? created;
 }
 
+// wgBubbleOf is the calling goroutine's bubble as synctest.Associate and synctest.IsAssociated see it for
+// this WaitGroup: none for a package-level WaitGroup, which Go leaves Unbubbled, so Add records no
+// association and sets no flag, and Wait is never durable -- exactly the path of a caller outside every
+// bubble (waitgroup.go: `case synctest.Unbubbled:` does nothing).
+private static SyncTestBubble? wgBubbleOf(ж<WaitGroup> Ꮡwg) =>
+    PackageLevelStorage.Holds(Ꮡwg) ? null : SyncTestBubble.Current;
+
 // Add adds delta, which may be negative, to the WaitGroup counter.
 // If the counter becomes zero, all goroutines blocked on Wait are released.
 // If the counter goes negative, Add panics.
@@ -90,7 +98,7 @@ public static void Add(this ж<WaitGroup> Ꮡwg, nint delta) {
     string? fault;
 
     lock (s.Gate) {
-        fault = wgAddBubble(SyncTestBubble.Current, ref s.Bubble, ref s.Bubbled, s.Counter != 0 || s.Parked.Count != 0, out bool bubbled);
+        fault = wgAddBubble(wgBubbleOf(Ꮡwg), ref s.Bubble, ref s.Bubbled, s.Counter != 0 || s.Parked.Count != 0, out bool bubbled);
 
         if (fault is null) {
             int c = s.Counter + ((int)delta);
@@ -193,8 +201,9 @@ public static void Wait(this ж<WaitGroup> Ꮡwg) {
     try {
         Monitor.Enter(s.Gate, ref locked);
 
-        // synctest.IsAssociated(wg): associated with the caller's bubble, so never outside one.
-        SyncTestBubble? caller = SyncTestBubble.Current;
+        // synctest.IsAssociated(wg): associated with the caller's bubble, so never outside one, and never
+        // for a package-level WaitGroup.
+        SyncTestBubble? caller = wgBubbleOf(Ꮡwg);
         bool associated = caller is not null && ReferenceEquals(s.Bubble, caller);
 
         if (s.Counter == 0) {

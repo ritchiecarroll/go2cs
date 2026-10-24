@@ -60,6 +60,15 @@ const PointerPrefix = "\u0436" // Variants: ж Ж ǂ
 // positions (declared role, unchanged forever) and ~40 golib/hand-own/generator
 // constructions edited by hand at I3.
 const BoxConstructPrefix = "StandardBox"
+
+// PackageBoxConstructPrefix is the spelling of the box class a PACKAGE-LEVEL variable's box is
+// constructed as: golib's StaticBox<T>, a StandardBox<T> that also answers Go's non-heap question.
+// Go treats a package-level variable as outside every heap span (runtime/synctest.go's
+// getOrSetBubbleSpecial answers Unbubbled for it), and converted code boxes a global exactly as a
+// heap value, so golib can only tell them apart by this class. The ONE emitter is
+// globalAddressOperations.go's addressedGlobalDecl (the package-level box declaration, eager or
+// inside a [GoLazy] holder); every other construction keeps BoxConstructPrefix.
+const PackageBoxConstructPrefix = "StaticBox"
 const AddressPrefix = "\u13D1"                   // Variants: Ꮡ ꝸ
 const ShadowVarMarker = "\u0394"                 // Variants: Δ Ʌ ꞥ
 const TypeAliasDot = "\uA4F8"                    // Variants: ꓸ

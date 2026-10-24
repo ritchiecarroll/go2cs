@@ -225,3 +225,63 @@ internal sealed class HandleBox<T> : StandardBox<T>
 
     internal override bool NamesZeroBase => false;
 }
+
+/// <summary>
+/// The box of a PACKAGE-LEVEL variable: a <see cref="StandardBox{T}"/> in every respect, which also
+/// answers Go's non-heap question.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Go keeps a package-level variable outside every heap span, and a few runtime answers turn on that.
+/// Converted code boxes a global exactly as it boxes a heap value (the converter's package-level
+/// declaration, <c>internal static ж&lt;T&gt; ᏑX = new StaticBox&lt;T&gt;(…)</c>, eager or inside a
+/// <c>[GoLazy]</c> holder), so this class is the only way golib can tell them apart.
+/// </para>
+/// <para>
+/// Measured against Go 1.26's runtime, five questions branch on heap-ness. Only one is observable here:
+/// synctest's association (<c>getOrSetBubbleSpecial</c>, runtime/synctest.go, answers Unbubbled for a
+/// package variable), which <c>sync.WaitGroup</c> reads. The other four come out as Go's without asking,
+/// because a static box is rooted for the life of the process: a cleanup (<c>AddCleanup</c>) or finalizer
+/// (<c>SetFinalizer</c>) on a global never runs, a weak pointer to one never clears (<c>weak.Make</c>'s
+/// immortal handle), and pinning one has nothing to hold (<c>Pinner</c>).
+/// </para>
+/// <para>
+/// A field view of a package-level box answers through its source (<see cref="FieldRefBox{T}"/>), as Go's
+/// field of a global is outside the heap too. An array ELEMENT view does not: it holds the array's backing,
+/// not the box it came from, so an element of a global array reads as heap storage (a stated limit).
+/// </para>
+/// </remarks>
+/// <typeparam name="T">Pointee type.</typeparam>
+public sealed class StaticBox<T> : StandardBox<T>, IPackageLevelStorage
+{
+    /// <summary>
+    /// Creates the box of a package-level variable of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="value">The variable's initial value.</param>
+    public StaticBox(in T value) : base(value)
+    {
+    }
+
+    bool IPackageLevelStorage.IsPackageLevel => true;
+}
+
+/// <summary>
+/// A pointer that can say whether it addresses package-level storage: a <see cref="StaticBox{T}"/>, or a
+/// view whose source is one.
+/// </summary>
+internal interface IPackageLevelStorage
+{
+    bool IsPackageLevel { get; }
+}
+
+/// <summary>
+/// Go's non-heap question for a converted pointer.
+/// </summary>
+public static class PackageLevelStorage
+{
+    /// <summary>
+    /// True when <paramref name="pointer"/> addresses a package-level variable, or a field of one: the
+    /// storage Go keeps outside every heap span.
+    /// </summary>
+    public static bool Holds(object? pointer) => pointer is IPackageLevelStorage { IsPackageLevel: true };
+}

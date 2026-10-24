@@ -251,21 +251,40 @@ public class BubbledWaitGroupTests
         AssertNoFailure(InBubble(() => { released.Add(1); released.Done(); }));
     }
 
-    // Exactly a converted package-level variable's shape: `internal static ж<T> ᏑX = new StandardBox<T>(...)`.
-    private static readonly ж<sync.WaitGroup> ᏑpackageLevelWaitGroup = new StandardBox<sync.WaitGroup>(default(sync.WaitGroup));
+    // Exactly a converted package-level variable's shape: `internal static ж<T> ᏑX = new StaticBox<T>(...)`.
+    private static readonly ж<sync.WaitGroup> ᏑpackageLevelWaitGroup = new StaticBox<sync.WaitGroup>(default(sync.WaitGroup));
 
-    // EXPECTED DIFFERENCE (G-W1 ruling (a)). Go answers Unbubbled for a package-level WaitGroup, because
-    // it is outside a heap span (runtime/synctest.go:383-386): Go records no association, its Wait is
-    // NOT durable, and synctest.Wait would not return while a member waits on it. A converted global is
-    // boxed as a heap value is, so here it IS associated: the Wait is durable and synctest.Wait returns.
-    // The other observable effect, Go's two fatals firing for a global, ends the process and is not
-    // run here. Retired by the post-hop package-level box marker (BOARD row, G's).
-    [TestMethod]
-    public void GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated()
+    // A package-level struct holding a WaitGroup: `&holder.WG` is a field view whose source is the static box.
+    private struct WaitGroupHolder
     {
-        ж<sync.WaitGroup> wg = ᏑpackageLevelWaitGroup;
+        public nint Before;
+        public sync.WaitGroup WG;
+    }
+
+    private static readonly ж<WaitGroupHolder> ᏑpackageLevelHolder = new StaticBox<WaitGroupHolder>(default(WaitGroupHolder));
+
+    private static readonly FieldRefFunc<sync.WaitGroup> s_holderWaitGroup = static p => ref ((ж<WaitGroupHolder>)p).Value.WG;
+
+    // Go answers Unbubbled for a package-level WaitGroup, because it is outside every heap span
+    // (runtime/synctest.go:383-386): Go records no association, and its Wait is NOT durable, so synctest.Wait
+    // would not return while a member waits on it. The converted global's box is a StaticBox, so golib answers
+    // the same. Until the package-level box marker (BOARD 2026-10-15), a global was boxed as heap storage and
+    // this test stated the opposite (GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated). Go's two
+    // fatals cannot fire for a global either, since it never carries the bubble flag.
+    [TestMethod]
+    public void APackageLevelWaitGroupIsUnbubbled_AsInGo() =>
+        AssertUnbubbled(ᏑpackageLevelWaitGroup, "a package-level WaitGroup");
+
+    // A field of a package-level variable is outside the heap too, and its view answers through its source.
+    [TestMethod]
+    public void AFieldOfAPackageLevelVariableIsUnbubbled_AsInGo() =>
+        AssertUnbubbled(ᏑpackageLevelHolder.of(s_holderWaitGroup), "a WaitGroup field of a package-level variable");
+
+    private static void AssertUnbubbled(ж<sync.WaitGroup> wg, string what)
+    {
         WaitReason parkedWith = default;
         SyncTestBubble? recorded = null;
+        bool parked = false;
 
         AssertNoFailure(InBubble(() =>
         {
@@ -279,16 +298,20 @@ public class BubbledWaitGroupTests
                 wg.Wait();
             });
 
-            // Go: this would not return (the waiter's Wait is not durable for a global).
-            SyncTestBubble.Wait();
+            // Not SyncTestBubble.Wait: Go's would not return, because the waiter's Wait is not durable for a
+            // package-level WaitGroup. The waiter's park reason is read directly instead.
+            parked = SpinWait.SpinUntil(() =>
+                Volatile.Read(ref waiter)?.Reason is WaitReason.SyncWaitGroupWait or WaitReason.SynctestWaitGroupWait, TimeoutMs);
+
             parkedWith = Volatile.Read(ref waiter)!.Reason;
 
-            wg.Done();   // releases the waiter and disassociates, leaving the global reusable
+            wg.Done();   // releases the waiter
         }));
 
-        Assert.IsNotNull(recorded, "the difference this test states is gone: a global was left unbubbled, as Go does");
-        Assert.AreEqual(WaitReason.SynctestWaitGroupWait, parkedWith);
-        Assert.IsNull(BubbleRecordOf(wg), "the Add that released a waiter left the global associated");
+        Assert.IsTrue(parked, $"{what}: the waiter never parked");
+        Assert.IsNull(recorded, $"{what} was associated with the bubble; Go leaves it Unbubbled");
+        Assert.AreEqual(WaitReason.SyncWaitGroupWait, parkedWith, $"{what}: its Wait parked as durable inside the bubble; Go's is not");
+        Assert.IsNull(BubbleRecordOf(wg), $"{what} is associated after its count drained");
     }
 
     [TestMethod]
