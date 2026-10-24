@@ -172,6 +172,35 @@ public class ReleaseLegRefusalTests
         StringAssert.Contains(ConsumerProject.Refusals("PerfFib", other, s_leg).Single(), "does not cover");
     }
 
+    // What a release's converter writes: every go.* version is $(GoStdLibVersion), set in Directory.Build.props.
+    private static readonly string s_propertyProject = Project(
+        "    <PackageReference Include=\"go.gen\" Version=\"$(GoStdLibVersion)\" PrivateAssets=\"all\" />\r\n" +
+        "    <PackageReference Include=\"go.lib\" Version=\"$(GoStdLibVersion)\" />\r\n" +
+        "    <PackageReference Include=\"go.fmt\" Version=\"$(GoStdLibVersion)\" />\r\n");
+
+    [TestMethod]
+    public void TheVersionPropertyIsNamedOnce() =>
+        CollectionAssert.AreEqual(new[] { "GoStdLibVersion" }, ConsumerProject.VersionProperties(s_propertyProject).ToArray());
+
+    [TestMethod]
+    public void APropertyVersionIsJudgedByItsEvaluatedValue()
+    {
+        Dictionary<string, string> covering = new() { ["GoStdLibVersion"] = "1.26.10.*" };
+        Dictionary<string, string> other = new() { ["GoStdLibVersion"] = "1.24.13.*" };
+
+        Assert.AreEqual(0, ConsumerProject.Refusals("PerfFib", s_propertyProject, s_leg, covering).Count);
+        Assert.AreEqual(3, ConsumerProject.Refusals("PerfFib", s_propertyProject, s_leg, other).Count(r => r.Contains("does not cover")));
+    }
+
+    [TestMethod]
+    public void APropertyTheEvaluationDidNotAnswerIsRefusedByName()
+    {
+        IReadOnlyList<string> refusals = ConsumerProject.Refusals("PerfFib", s_propertyProject, s_leg, new Dictionary<string, string>());
+
+        Assert.AreEqual(3, refusals.Count, string.Join("; ", refusals));
+        StringAssert.Contains(refusals[0], "gave GoStdLibVersion no value");
+    }
+
     private static string Assets(params string[] libraries) =>
         "{ \"version\": 3, \"libraries\": { " + string.Join(", ", libraries.Select(l => $"\"{l}\": {{ \"type\": \"package\" }}")) + " } }";
 

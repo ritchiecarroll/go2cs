@@ -121,6 +121,18 @@ namespace PerformanceRunner
                 refusals.Add(why);
             }
 
+            // A refusal of the program's C# as a whole: every C# arm carries it, but the refused list reads it once.
+            void RefuseCSharp(string why)
+            {
+                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot, ReleaseArm.Tc0 })
+                {
+                    lp.Slots[arm].Admitted = false;
+                    lp.Slots[arm].Why = why;
+                }
+
+                refusals.Add(why);
+            }
+
             Console.Write($"           {leg.Name}/{program}: convert... ");
 
             // The program's Go module alone, never its committed C#: the leg's converter writes the whole consumer tree.
@@ -134,8 +146,7 @@ namespace PerformanceRunner
 
             if (convert.ExitCode != 0)
             {
-                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot, ReleaseArm.Tc0 })
-                    Refuse(arm, $"{leg.Name}/{program}: conversion exit {convert.ExitCode}: {Runner.Truncate(convert.StdOut + convert.StdErr)}");
+                RefuseCSharp($"{leg.Name}/{program}: conversion exit {convert.ExitCode}: {Runner.Truncate(convert.StdOut + convert.StdErr)}");
 
                 Console.WriteLine("FAILED");
                 BuildGo(program, leg, source, legRoot, lp, Refuse);
@@ -146,8 +157,7 @@ namespace PerformanceRunner
 
             if (csproj is null)
             {
-                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot, ReleaseArm.Tc0 })
-                    Refuse(arm, $"{leg.Name}/{program}: the conversion wrote no project for the program under {output}");
+                RefuseCSharp($"{leg.Name}/{program}: the conversion wrote no project for the program under {output}");
 
                 Console.WriteLine("no project");
                 BuildGo(program, leg, source, legRoot, lp, Refuse);
@@ -155,7 +165,11 @@ namespace PerformanceRunner
             }
 
             string projectDir = Path.GetDirectoryName(csproj)!;
-            IReadOnlyList<string> consumer = ConsumerProject.Refusals(program, File.ReadAllText(csproj), leg);
+            // Versions are read as MSBuild evaluates them: the converter writes $(GoStdLibVersion), set in the
+            // Directory.Build.props beside the program, and only an evaluation sees its conditions and imports.
+            string csprojText = File.ReadAllText(csproj);
+            IReadOnlyList<string> consumer = ConsumerProject.Refusals(program, csprojText, leg,
+                EvaluatedProperties(csproj, projectDir, ConsumerProject.VersionProperties(csprojText)));
 
             lp.SourceHash = ConsumerProject.SourceHash(Directory.GetFiles(projectDir, "*", SearchOption.AllDirectories)
                 .Select(f => Path.GetRelativePath(projectDir, f))
@@ -169,8 +183,7 @@ namespace PerformanceRunner
             if (consumer.Count > 0)
             {
                 // Not the published release as a consumer gets it: no C# arm of this program is timed.
-                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot, ReleaseArm.Tc0 })
-                    Refuse(arm, string.Join("; ", consumer));
+                RefuseCSharp(string.Join("; ", consumer));
 
                 return lp;
             }
@@ -178,21 +191,21 @@ namespace PerformanceRunner
             BuildJit(program, leg, projectDir, csproj, legRoot, lp, options.Tc0, Refuse);
 
             // The build restored the packages: a floating reference is the leg's release only if it RESOLVED to it.
-            string assets = Path.Combine(projectDir, "obj", "project.assets.json");
+            // Where the restore wrote it, as MSBuild evaluates it: the release template redirects obj out of the
+            // project tree (Directory.Build.props, BaseIntermediateOutputPath under .artifacts), so obj\ is a guess.
+            string assets = EvaluatedProperties(csproj, projectDir, ["ProjectAssetsFile"]).TryGetValue("ProjectAssetsFile", out string? evaluated)
+                ? evaluated
+                : Path.Combine(projectDir, "obj", "project.assets.json");
             IReadOnlyList<string> resolved = ConsumerProject.ResolvedRefusals(program, File.Exists(assets) ? File.ReadAllText(assets) : null, leg);
 
             if (resolved.Count > 0)
             {
-                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot, ReleaseArm.Tc0 })
-                {
-                    lp.Slots[arm].Admitted = false;
-                    Refuse(arm, string.Join("; ", resolved));
-                }
+                RefuseCSharp(string.Join("; ", resolved));
 
                 return lp;
             }
 
-            PublishReadyToRun(program, leg, projectDir, csproj, legRoot, lp, Refuse);
+            PublishReadyToRun(program, leg, output, csproj, legRoot, lp, Refuse);
             AdmitAot(program, leg, options, manifest, lp, Refuse);
             return lp;
         }
@@ -252,15 +265,16 @@ namespace PerformanceRunner
         }
 
         // The template-default publish, nothing added: what a consumer gets from `dotnet publish -c Release -r
-        // win-x64` on the converter-written project. Published from its own copy of the project, because a RID-specific
-        // self-contained restore and the framework-dependent build cross-pollute one obj\ (Directory.Build.props).
-        private static void PublishReadyToRun(string program, ReleaseLeg leg, string projectDir, string csproj, string legRoot, LegProgram lp, Action<ReleaseArm, string> refuse)
+        // win-x64` on the converter-written project. Published from its own copy, because a RID-specific self-contained
+        // restore and the framework-dependent build cross-pollute one obj\. The copy is the whole converted tree, not
+        // the project folder: the Directory.Build.props above the project sets $(GoStdLibVersion) and redirects obj.
+        private static void PublishReadyToRun(string program, ReleaseLeg leg, string output, string csproj, string legRoot, LegProgram lp, Action<ReleaseArm, string> refuse)
         {
             string copy = Path.Combine(legRoot, "r2r-src", program);
             RecreateDirectory(copy);
-            CopyProgram(projectDir, copy);
+            CopyProgram(output, copy);
 
-            string copiedProject = Path.Combine(copy, Path.GetFileName(csproj));
+            string copiedProject = Path.Combine(copy, Path.GetRelativePath(output, csproj));
             string outDir = Path.Combine(legRoot, "bin", "r2r", program);
             Runner.ProcResult r = Runner.Exec("dotnet", $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release -r win-x64 -o \"{outDir}\"", copy, BuildTimeoutMs);
 
@@ -489,12 +503,34 @@ namespace PerformanceRunner
 
         private static string Name(string program) => program.StartsWith("Perf", StringComparison.Ordinal) ? program[4..] : program;
 
+        // The named properties as MSBuild evaluates the project (`dotnet msbuild -getProperty`); a property the
+        // evaluation does not answer is left out, so the refusal names it.
+        private static Dictionary<string, string> EvaluatedProperties(string csproj, string projectDir, IReadOnlyList<string> names)
+        {
+            Dictionary<string, string> properties = new(StringComparer.OrdinalIgnoreCase);
+
+            foreach (string name in names)
+            {
+                Runner.ProcResult r = Runner.Exec("dotnet", $"msbuild \"{csproj}\" -nologo -getProperty:{name}", projectDir, BuildTimeoutMs);
+                string value = r.StdOut.Trim();
+
+                if (r.ExitCode == 0 && value.Length > 0)
+                    properties[name] = value;
+            }
+
+            return properties;
+        }
+
         private static Dictionary<string, string> GoEnvironment(ReleaseLeg leg)
         {
-            // The leg's own toolchain and nothing else: GOROOT from the go.exe it names, no toolchain switch, and
-            // CGO_ENABLED=0 as the corpus is emitted.
-            string goRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(leg.Go)!, ".."));
-            return new() { ["GOROOT"] = goRoot, ["GOTOOLCHAIN"] = "local", ["CGO_ENABLED"] = "0" };
+            // The leg's own toolchain and nothing else: GOROOT from the go.exe it names, that go.exe first on PATH, no
+            // toolchain switch, and CGO_ENABLED=0 as the corpus is emitted. PATH matters as much as GOROOT: the converter
+            // asks the `go` on PATH which release it converts for (`go env GOVERSION`), and a newer go there makes a
+            // release converter refuse -recurse=nuget for a release it was never asked about.
+            string goBin = Path.GetDirectoryName(Path.GetFullPath(leg.Go))!;
+            string goRoot = Path.GetFullPath(Path.Combine(goBin, ".."));
+            string path = goBin + Path.PathSeparator + Environment.GetEnvironmentVariable("PATH");
+            return new() { ["GOROOT"] = goRoot, ["PATH"] = path, ["GOTOOLCHAIN"] = "local", ["CGO_ENABLED"] = "0" };
         }
 
         private static string? FindProgramProject(string output, string program) =>
@@ -521,9 +557,9 @@ namespace PerformanceRunner
             foreach (string file in Directory.GetFiles(from, "*", SearchOption.AllDirectories))
             {
                 string rel = Path.GetRelativePath(from, file);
-                string first = rel.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)[0];
 
-                if (first is "bin" or "obj")
+                // Build output at any depth, and the template's redirected .artifacts root, stay behind.
+                if (rel.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(s => s is "bin" or "obj" or ".artifacts"))
                     continue;
 
                 string target = Path.Combine(to, rel);
