@@ -1219,6 +1219,7 @@
     <File Path="tests/Performance/README.md" />
     <File Path="tests/Performance/run-performance.ps1" />
     <Project Path="tests/Performance/PerformanceRunner/PerformanceRunner.csproj" />
+    <Project Path="tests/Performance/PerformanceRunnerTests/PerformanceRunnerTests.csproj" />
   </Folder>
   <Folder Name="/tests/performance/target-projects/">
     <Project Path="tests/Performance/PerfChannel/PerfChannel.csproj" />
