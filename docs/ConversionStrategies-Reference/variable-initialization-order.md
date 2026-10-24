@@ -189,7 +189,7 @@ that only just gained one. `unicode`'s `Upper = _Lu` is one short line, and it h
 **A var whose address is taken carries its box.** go2cs backs such a var (`&X`, or a pointer-receiver or capture-mode
 call on it) with a heap box, `ᏑX`, and a `ref` property `X` over it. Built on its first read, the var keeps both: the
 holder holds the box field exactly as the eager declaration writes it, `[GoLazy] partial class lazyᴛX { internal
-static ж<T> ᏑX = new StandardBox<T>(…); }`, the `ref` property `internal static ref T X => ref ᏑX.Value;` follows it
+static ж<T> ᏑX = new StaticBox<T>(…); }`, the `ref` property `internal static ref T X => ref ᏑX.Value;` follows it
 unchanged, and the generator adds the box accessor `ref ж<T> ᏑX => ref lazyᴛX.ᏑX`. A use site does not change: `&X`
 reads `ᏑX` and `X` reads through it, the first of either builds the box, and the address is the same before and after
 the first read. Such a var is never read by another initializer built on a first read, so its holder never needs an

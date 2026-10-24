@@ -28162,4 +28162,52 @@ the package". "This target has the file" is true of every stage by construction.
 
 — G (measured 2026-10-23)
 
+## 2026-10-24 — G: a package-level `sync.WaitGroup` reads Unbubbled, as in Go — CLOSES R's row of 2026-10-15 (the package-level box marker, claude/g-waitgroup-bubble)
+
+R's row of 2026-10-15 owed option (b): a marker on a package-level variable's box, so golib can answer Go's
+non-heap questions. Owner, 2026-10-15: "as long as we don't forget".
+
+**Measured first.** Go 1.26's runtime asks whether a pointer is in the heap in five user-visible places:
+- synctest's association (`getOrSetBubbleSpecial`, `synctest.go`), which `sync.WaitGroup` reads;
+- `AddCleanup`, a no-op for a non-heap pointer;
+- `SetFinalizer`, which ignores one;
+- `weak.Make`, an immortal handle;
+- `Pinner`, which ignores one.
+
+Only the first is observable in converted code. A package-level box lives in a static field, rooted for the life of
+the process, so a converted global already never runs a cleanup or finalizer, never clears a weak pointer, and
+needs no pin.
+
+**The change.**
+- **golib:** `StaticBox<T>`, a sealed `StandardBox<T>` that answers the non-heap question
+  (`IPackageLevelStorage`, read through `PackageLevelStorage.Holds`). A `FieldRefBox` forwards it from its source,
+  so a field of a global answers too.
+- **Converter:** `addressedGlobalDecl`, the one package-level box emitter (eager and `[GoLazy]` holder), constructs
+  `PackageBoxConstructPrefix` (`StaticBox`, new in `symbols.json`).
+- **Hand-owned `sync/waitgroup.cs`:** asks for no bubble when the WaitGroup is package-level, the path Go's
+  `case synctest.Unbubbled:` takes.
+- The expected-difference test `GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated` is replaced by
+  `APackageLevelWaitGroupIsUnbubbled_AsInGo` and `AFieldOfAPackageLevelVariableIsUnbubbled_AsInGo`.
+
+**Footprint.** Every changed line is one token, `new StandardBox<` → `new StaticBox<`, on a package-level box
+declaration.
+- Corpus: 310 files.
+- Behavioral: 59 committed outputs and goldens.
+- Hand-owned files keep `StandardBox`: 23 sites in src/core and `ManualConversionSiblingState`. None holds a
+  WaitGroup.
+
+**Stated limit.** An `ElemRefBox` holds the array's backing, not its box, so an element of a global array
+(`var wgs [4]sync.WaitGroup`) still reads as heap storage here, where Go leaves it Unbubbled.
+
+**Found in passing (pre-existing, not this seat's).** The regen left 15 package-level `StandardBox` sites in
+committed test files that today's converter no longer writes. Each is a test file the 1.26 hop left stale:
+- `strconv/atof_test.cs`, `atoi_test.cs`, `decimal_test.cs` and `ftoa_test.cs`: Go 1.26 moved strconv's tests to
+  `internal/strconv`;
+- `internal/poll/fd_windows_test.cs`: its 1.26 emission has no `logMu` box;
+- `strconv/number_test.cs`: emitted but never committed.
+
+They belong to the test-file staleness of the hop and C1's re-derive, not to this seat.
+
+— G (measured 2026-10-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

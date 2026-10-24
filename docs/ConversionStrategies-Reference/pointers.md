@@ -98,6 +98,8 @@ The `at<E>(i)` **element type `E` is rendered fully-qualified** — `at<sync.ato
 Using `ж<T>` rather than the C# `ref` keyword avoids the escape-analysis complications of passing a `ref` into code that expects a heap-allocated pointer. This is a simplification that can cost an unnecessary heap allocation when an address is taken; a future escape-analysis pass could keep such values on the stack when it is provably safe, similar to how [Go does this](https://golang.org/doc/faq#stack_or_heap) at compile time. The ref-lowering below is the first such pass: an unexported function's dereference-only pointer parameter takes a C# `ref`, and an address-taken local that feeds only such parameters stays a plain local.
 
 > Note: a package-level global whose address is taken is backed by a real heap box so that writes through `&global` (and `&global.field`) are observed, rather than mutating a copy.
+>
+> That box is golib's `StaticBox<T>` (`internal static ж<T> ᏑX = new StaticBox<T>(…);`), a `StandardBox<T>` that also says it is package-level storage, as Go keeps a global outside every heap span. One Go answer turns on that: synctest leaves a package-level `sync.WaitGroup` Unbubbled, so a global WaitGroup used in a bubble records no association and its `Wait` is never durable. A field of a global answers the same through its view; an element of a global array does not, since its view holds the array's backing rather than the box.
 
 ## Pointer equality canonicalizes the STORAGE, not the referent — slice/array element identity
 
@@ -290,7 +292,7 @@ A package-level global of **pointer type** whose address is taken — `var head 
 The full emitted walk:
 
 ```csharp
-internal static ж<ж<node>> Ꮡhead = new StandardBox<ж<node>>(default(ж<node>));
+internal static ж<ж<node>> Ꮡhead = new StaticBox<ж<node>>(default(ж<node>));
 internal static ref ж<node> head => ref Ꮡhead.ValueSlot;
 
 for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).of(node.Ꮡnext)) {

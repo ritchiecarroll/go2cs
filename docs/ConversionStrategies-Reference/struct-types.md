@@ -237,7 +237,7 @@ the box:
 
 <!-- source: src/core/path/filepath/linux/path.cs:315-316 -->
 ```csharp
-internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StandardBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
+internal static ж<Func<@string, (fs.FileInfo, error)>> Ꮡlstat = new StaticBox<Func<@string, (fs.FileInfo, error)>>(os.Lstat);
 internal static ref Func<@string, (fs.FileInfo, error)> lstat => ref Ꮡlstat.ValueSlot;                   // for testing
 ```
 
