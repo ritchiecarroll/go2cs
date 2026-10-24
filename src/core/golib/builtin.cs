@@ -3158,9 +3158,9 @@ public static partial class builtin
     }
 
     // Formats a single print/println argument the way gc's runtime printer does where the BCL
-    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False), and
-    // a nil interface prints its two zero words, "(0x0,0x0)", where arg.ToString() threw a
-    // NullReferenceException that surfaced as a Go nil dereference out of the println itself.
+    // rendering diverges: a bool prints lowercase true/false (bool.ToString() yields True/False), a
+    // basic value prints its runtime-printer text (GoPrintText), and a nil interface prints its
+    // two zero words, "(0x0,0x0)", where arg.ToString() threw a Go nil dereference out of println.
     private static string? printArg(object? arg)
     {
         return arg switch
@@ -3169,7 +3169,7 @@ public static partial class builtin
             bool value => value ? "true" : "false",
             // A pointer prints its ADDRESS whatever its methods: gc's printpointer never calls String().
             IPrintPointer pointer => pointer.PrintPointer(),
-            _ => arg.ToString()
+            _ => GoPrintText.Text(arg) ?? arg.ToString()
         };
     }
 

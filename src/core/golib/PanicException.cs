@@ -149,11 +149,7 @@ public class PanicException(object? state, Exception? innerException = null) :
             bool flag => flag ? "true" : "false",
             sbyte or short or int or long or nint or byte or ushort or uint or ulong or nuint => ((IFormattable)value).ToString(null, System.Globalization.CultureInfo.InvariantCulture),
             uintptr address => address.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
-            float single => GoFloatText.Format(single, 32),
-            double number => GoFloatText.Format(number, 64),
-            complex64 pair => GoFloatText.Complex(pair.Real, pair.Imaginary, 64),
-            System.Numerics.Complex pair => GoFloatText.Complex(pair.Real, pair.Imaginary, 128),
-            _ => null
+            _ => GoPrintText.FloatText(value)
         };
     }
 

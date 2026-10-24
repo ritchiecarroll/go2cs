@@ -1,4 +1,4 @@
-// GoFloatText.cs - Gbtc
+// GoPrintText.cs - Gbtc
 // Copyright © 2026 The go2cs Authors. All rights reserved.
 //
 // Use of this source code is governed by an MIT-style license
@@ -11,17 +11,52 @@ using System.Text;
 namespace go;
 
 /// <summary>
-/// Go's runtime text for a float or complex value: <c>strconv.AppendFloat(v, 'g', -1, bitSize)</c> and
-/// <c>strconv.AppendComplex(c, 'g', -1, bitSize)</c>, which runtime/print.go's printfloat and printcomplex write
-/// (and so printpanicval for a panic value).
+/// Go's runtime printer text for a basic value (runtime/print.go): what <c>print</c>/<c>println</c> write, and
+/// printpanicval for a panic value. A float or complex is <c>strconv.AppendFloat(v, 'g', -1, bitSize)</c> or
+/// <c>strconv.AppendComplex(c, 'g', -1, bitSize)</c>.
 /// </summary>
 /// <remarks>
 /// golib sits below the converted <c>strconv</c>, so the 'g' decision is ported here (internal/strconv's
 /// formatDigits, fmtE and fmtF). The DIGITS are .NET's round-trip text, which since .NET Core 3.0 is the shortest
 /// that parses back at the value's own width: the digits Go's roundShortest picks.
 /// </remarks>
-internal static class GoFloatText
+internal static class GoPrintText
 {
+    /// <summary>
+    /// The runtime printer's text for a value of a basic kind, or null for any other. A named basic type prints as its
+    /// underlying value: the runtime printer never calls String().
+    /// </summary>
+    internal static string? Text(object? value)
+    {
+        while (value is not null && GoReflect.TryUnwrapWrapperValue(value, out object? underlying))
+            value = underlying;
+
+        return value switch
+        {
+            bool flag => flag ? "true" : "false",
+            sbyte or short or int or long or nint or byte or ushort or uint or ulong or nuint => ((IFormattable)value).ToString(null, CultureInfo.InvariantCulture),
+            uintptr address => address.Value.ToString(CultureInfo.InvariantCulture),
+            @string text => text.ToString(),
+            _ => FloatText(value)
+        };
+    }
+
+    /// <summary>The runtime printer's text for a float or complex value (printfloat, printcomplex), or null for any other.</summary>
+    internal static string? FloatText(object? value)
+    {
+        return value switch
+        {
+            float single => Format(single, 32),
+            double number => Format(number, 64),
+            complex64 pair => Complex(pair.Real, pair.Imaginary, 64),
+            System.Numerics.Complex pair => Complex(pair.Real, pair.Imaginary, 128),
+            // An untyped constant prints as its default type, float64 or complex128.
+            UntypedFloat untyped => Format(untyped, 64),
+            UntypedComplex untyped => Complex(((complex128)untyped).Real, ((complex128)untyped).Imaginary, 128),
+            _ => null
+        };
+    }
+
     /// <summary>Formats <paramref name="value"/> as Go's <c>FormatFloat(value, 'g', -1, bitSize)</c>.</summary>
     internal static string Format(double value, int bitSize)
     {
