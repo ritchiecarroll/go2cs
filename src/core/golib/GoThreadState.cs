@@ -60,6 +60,11 @@ internal sealed class GoThreadState
     internal int SequenceDepth;
     internal GoFrame.Sequence[]? Sequences;
 
+    // Whether this goroutine counts in Go's runningPanicDefers (golib.MainExit): set when a panic starts running
+    // its deferred calls, cleared once no panic is in flight on the thread, when the goroutine ends, or when its
+    // fatal report begins.
+    internal bool RunningPanicDefers;
+
     /// <summary>Clears this thread's state before a pooled thread runs its next goroutine; a thread with no holder has nothing to clear.</summary>
     internal static void ResetThread() { if (t_current is { } state) state.Reset(); }
 

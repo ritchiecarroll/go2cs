@@ -1353,7 +1353,7 @@ public static class TestHost
             // Reporting the death must never be what prevents it.
         }
 
-        (exit ?? Environment.Exit)(2);
+        (exit ?? global::go.golib.MainExit.Exit)(2);
     }
 
     /// <summary>

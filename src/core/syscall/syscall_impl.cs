@@ -27,10 +27,11 @@ partial class syscall_package
     // Go's runtime exits the process immediately with the given status. Environment.Exit is the
     // managed equivalent (it is what golib's unrecovered-panic handler already uses to report
     // exit code 2) and flushes the console writers on the way out, which Go's buffered stdout
-    // does as well.
+    // does as well. It goes through golib's MainExit.Exit, so the exit owns its status: like Go's
+    // exit, it never waits on a goroutine that is panicking.
     public static partial void Exit(nint code)
     {
-        Environment.Exit((int)code);
+        global::go.golib.MainExit.Exit((int)code);
     }
 
     // Go's runtime provides this (runtime.syscall_Getpagesize): it returns physPageSize, the page size

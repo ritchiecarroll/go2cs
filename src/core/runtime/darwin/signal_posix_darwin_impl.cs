@@ -269,7 +269,7 @@ partial class runtime_package
             // Nothing further can be said; the exit below is the part that must happen.
         }
 
-        Environment.Exit(2);
+        global::go.golib.MainExit.Exit(2);
     }
 
     // installPosixSignal (called under s_sigPosixLock) creates the PERSISTENT registration for sig

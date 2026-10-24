@@ -359,6 +359,9 @@ public ref struct GoFrame
                         // continue, whether or not the frame was already panicking — so the tail
                         // re-raises it even when nothing was claimed on entry.
                         owned = raised;
+
+                        // A panic raised in a normal return's deferred call starts running deferred calls too.
+                        MainExit.PanicDefersStarted(state);
                     }
                     catch (GoexitException goexit)
                     {
@@ -411,6 +414,12 @@ public ref struct GoFrame
         // of them raised a panic that is still unrecovered (thrown above).
         if (exiting is not null)
             throw exiting;
+
+        // This frame returns normally. With no outer sequence handling a panic, nothing is in flight on the
+        // goroutine any more (a recovery completed here, or a C# catch stopped the panic): it leaves Go's
+        // runningPanicDefers. One field read on the normal return.
+        if (state.RunningPanicDefers && state.HandledPanic is null)
+            MainExit.PanicDefersEnded(state);
     }
 
     // THE PANIC SEQUENCES (docs/phase4/DESIGN-panic-stack-frames.md §3.B). Go runs a panic's deferred
@@ -697,5 +706,9 @@ public ref struct GoFrame
         panic.Recovered = false; // a panic arriving at a catch is in flight: unrecovered by definition
         GoFuncRoot.CapturedPanicValue = panic;
         GoFuncRoot.ArmPanicClaim(panic);
+
+        // The panic is about to run this frame's deferred calls: Go's runningPanicDefers, which keeps a
+        // returning main from exiting before this goroutine's report (MainExit).
+        MainExit.PanicDefersStarted(GoThreadState.Current);
     }
 }

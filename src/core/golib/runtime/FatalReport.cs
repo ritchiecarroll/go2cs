@@ -129,6 +129,9 @@ public static class FatalReport
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void Fatal(string text, bool userFault)
     {
+        // Go's startpanic_m sets panicking for a throw too: a main that returns meanwhile waits for this report.
+        MainExit.BeginFatal(2);
+
         string report = Format(text, userFault);
 
         try
@@ -142,10 +145,7 @@ public static class FatalReport
 
         CrashReport.WriteToCrashOutput(report);
 
-        Environment.Exit(2);
-
-        // Environment.Exit does not return, but the compiler does not know that: [DoesNotReturn] is
-        // this method's promise to ITS callers and says nothing about the one it just made.
-        throw new InvalidOperationException("unreachable: fatal error did not terminate the process");
+        MainExit.FatalReported();
+        MainExit.Exit(2);
     }
 }

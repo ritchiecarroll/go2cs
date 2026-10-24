@@ -28190,6 +28190,81 @@ no change.
 
 — C2 (read at hop tip 9dcf0bafe1, 2026-10-24)
 
+## 2026-10-24 — P1 finding: a goroutine that panicked after its deferred `wg.Done()` let `main` exit 0 with an empty stderr; Go exits 2 with the report — FIXED (claude/g-goroutine-panic-exit)
+
+**The defect.** `wg.Add(1); go func(){ defer wg.Done(); panic("x") }(); wg.Wait()` exits 2 with the panic report in
+Go (3 of 3, P1). Converted, it exited 0 with nothing on stderr (P1, 5 of 5, untrimmed and trimmed; G, 5 of 5 at
+017dafb1f2). `wg.Done()` runs inside the panicking goroutine's deferred calls, so `main` returns while that goroutine
+has not reported yet. Go guarantees the report: after `main.main` returns, `runtime.main` waits while
+`runningPanicDefers` is non-zero and parks once `panicking` is set (runtime/proc.go, issues 3934 and 20018). A
+converted `main` is the CLR entry point and goroutines are background threads, so .NET shut down first and the panic
+never reached golib's unhandled-exception backstop.
+
+**The fix (golib `MainExit`).** Go's tail runs from `AppDomain.ProcessExit`, which the CLR raises when `Main` returns.
+- **The count.** A goroutine counts from `GoFrame.Capture`, or from a panic raised in a deferred call. It stops
+  counting when its frame returns with no panic in flight, or when the goroutine ends. The main goroutine is never
+  counted.
+- **The fatal start** (Go's `panicking`) is marked where an escape becomes certain: in the goroutine root's last
+  exception filter, on the first pass, before any `finally` runs. A fatal error marks it at `FatalReport`'s start, and
+  the backstop marks it again on its way out (`FatalExit`), for a panic escaping main or a thread golib did not start.
+- **The wait.** `main`'s return waits while the count is non-zero, for at most 20 ms. It spins and yields, because
+  `Thread.Sleep(1)` lasts a 15.6 ms timer tick on Windows. Once a report has begun, it waits for the report and sets
+  the exit code to 2. The bound covers the goroutine's rethrow to its root, 1.2 to 1.8 ms from `GoFrame.Capture`
+  (Release, 30 runs on G-LAPTOP). Like Go's 1000 yields, it does not wait out a recovering call that sleeps, or a
+  deferred call that blocks.
+- **Which report** (Go's `paniclk`, decided at `startpanic_m`). The first fatal start claims the report.
+  `MainExit.InstallBackstop` wraps golib's backstop so that a thread that did not claim it waits for the owner's
+  report OUTSIDE the backstop's own lock, and the owner's exit ends the process. Once the owner has reported, the
+  waiting thread parks for good (`paniclk` is never released) and prints only if the owner never reports (60 s).
+- **Exits taken on purpose** go through `MainExit.Exit` and keep their status: `os.Exit` (syscall.Exit), `fatal`,
+  `FatalReport`, the backstop, the signal reports and the test host's fatal path.
+
+Two departures from Go, both measured on net10.0:
+- **No parking forever.** Shutdown is serialized, so a parked main deadlocks the backstop's own `Environment.Exit(2)`.
+  Instead the handler waits for the report and sets `Environment.ExitCode`, which decides the status for a `void` or
+  `int` `Main`, on JIT and Native AOT.
+- **No clear in the goroutine scope's `Dispose`.** A panic escaping a goroutine disposes that scope BEFORE the
+  backstop starts its report, and clearing there let `main` exit 0 in between.
+
+**C1's review (mailbox `09000f9bd0`, ACCEPT). COORD ruled two parity findings in-seat:**
+- **M1:** `main`'s own panic racing the goroutine's printed `panic: m` 3 of 3, where Go prints the goroutine's. The
+  report ownership above fixes it. The converted probe (`wg.Wait(); panic("m")`) now prints the goroutine's 20 of 20.
+  Go itself is racy here: go1.26.10 printed the goroutine's 9 of 10 and main's 1 of 10. So this is a measured probe,
+  not a behavioral test.
+- **L1:** the first cut's one-second wait printed a recovering goroutine's deferred output after `main` returned,
+  where Go exits before it, and kept a blocked one for 1.47 s. The 20 ms bound fixes both.
+- **F1** (C1's re-read of `2cdc0ae14d`, ACCEPT; ruled in-seat). A non-owner woken by the owner's report went on to
+  print a SECOND report beside it. That happens beside a Go throw, because `FatalReport` prints without the backstop's
+  lock, or when the owner had already reported before the non-owner arrived. Go never prints one, because the throw's
+  `paniclk` is never released. A woken non-owner now parks; only a timeout (an owner that never reported) prints.
+  - GolibTests `MainExitReportOwnerTests`: a non-owner arriving after the owner's report never comes back to print.
+    The old wake-and-print fails it; a control shows the first fatal path still returns to print.
+  - As a process race, a second report almost never shows. A goroutine's `sync: unlock of unlocked mutex` racing
+    main's panic printed one report 30 of 30 both before and after the change (go1.26.10: one report, 6 of 6).
+
+**Guards.**
+- `GoroutinePanicAfterDeferredDone` (behavioral): exit 2 and Go's first stderr line, 10 of 10. It exited 0 before.
+- `GoroutineRecoveringWhenMainReturns` (behavioral): `defer func(){ recover(); time.Sleep(500ms); fmt.Println("recovered") }()`
+  behind `defer wg.Done()`. Exit 0 with nothing printed after `main` returns: Go 10 of 10, converted 5 of 5.
+- `GoroutinePanicExitCode`: the control, a goroutine panic with `main` blocked.
+- GolibTests `MainExitPanicDefersTests` (6 arms): the count rises while a panic runs a goroutine's deferred calls; a
+  nested recovery keeps the outer panic counted; a Goexit and a swallowed panic end it with the goroutine; main is
+  never counted; and the wait ends at its bound for a deferred call that blocks.
+- Plants, each restored byte-identical:
+  - no tail installed: exit 0, 5 of 5;
+  - the first-pass fatal mark removed: exit 0, 5 of 5;
+  - the wait back at one second: the bound arm fails, and "recovered" is printed 5 of 5;
+  - no `paniclk` wait: `panic: m` 17 of 20.
+
+**Stated limits.**
+- Go yields 1000 times. Here the wait is bounded by time, 20 ms, so a goroutine that needs longer than that to
+  reach its root after the `Done` lets `main` exit 0.
+- The count clear moved back into the goroutine scope's `Dispose` stays green alone, because the first-pass mark
+  sets `panicking` before that `Dispose` runs. The mark is what keeps a scope-end clear harmless.
+- A panic escaping a thread golib did not start is never counted, so a returning `main` does not wait for it.
+
+— G (measured 2026-10-24)
+
 ## 2026-10-24 — R: a panic raised by a deferred Go CLOSURE loses its frames in runtime.Callers and in the crash traceback, because splicePanic cannot tell a closure from a converter defer wrapper — OPEN, post-hop (option B: the converter marks deferred Go closures)
 
 **What diverges.** Go's crash traceback for a deferred closure that recovers and panics again is the closure's

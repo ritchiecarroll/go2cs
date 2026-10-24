@@ -1170,6 +1170,10 @@ public sealed class Goroutine
     /// </remarks>
     internal static void RegisterMainGoroutine()
     {
+        // The main goroutine's exit is Go's runtime.main tail: a main that returns while another goroutine is
+        // panicking does not exit 0 before that goroutine's report (MainExit; the `defer wg.Done(); panic(v)` race).
+        MainExit.Install();
+
         if (t_current is not null)
             return;
 
@@ -1381,6 +1385,12 @@ public sealed class Goroutine
             // give the filter — which runs while the panicking stack is still standing — a place to
             // be attached.
         }
+
+        // The goroutine ended here (a return, a Goexit, a contained host failure), so no panic of its runs
+        // deferred calls any more and it must not keep a returning main waiting (MainExit). Deliberately NOT in
+        // the scope's Dispose: a panic escaping to the backstop disposes the scope on its way out, BEFORE the
+        // backstop starts its report (measured on net10.0), and clearing there let main exit 0 in between.
+        MainExit.PanicDefersEnded(GoThreadState.Current);
     }
 
     private static bool CanContain(Exception ex) =>
@@ -1390,6 +1400,12 @@ public sealed class Goroutine
     // CanContain has said no, which for a panic is unconditional.
     private static bool Observed(Exception ex)
     {
+        // Nothing catches this exception now: it escapes the goroutine to golib's backstop, which reports it and
+        // exits 2. That is Go's startpanic_m, marked HERE, in the first pass, because the second pass runs this
+        // goroutine's scope Dispose before the backstop starts, and a returning main must not exit 0 between
+        // them (MainExit).
+        MainExit.BeginFatal(2);
+
         if (Volatile.Read(ref s_panicObserver) is not { } observer)
             return false;
 

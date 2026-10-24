@@ -605,8 +605,10 @@
     <Project Path="tests/Behavioral/GoNamespaceShadow/GoNamespaceShadow.csproj" />
     <Project Path="tests/Behavioral/GoNamespaceShadow/nsshadowlib/go.nsshadow.csproj" />
     <Project Path="tests/Behavioral/GoOnlyFloatLiteralForms/GoOnlyFloatLiteralForms.csproj" />
+    <Project Path="tests/Behavioral/GoroutinePanicAfterDeferredDone/GoroutinePanicAfterDeferredDone.csproj" />
     <Project Path="tests/Behavioral/GoroutinePanicExitCode/GoroutinePanicExitCode.csproj" />
     <Project Path="tests/Behavioral/GoroutineParkStorm/GoroutineParkStorm.csproj" />
+    <Project Path="tests/Behavioral/GoroutineRecoveringWhenMainReturns/GoroutineRecoveringWhenMainReturns.csproj" />
     <Project Path="tests/Behavioral/GoroutineWaitState/GoroutineWaitState.csproj" />
     <Project Path="tests/Behavioral/GoShiftSemantics/GoShiftSemantics.csproj" />
     <Project Path="tests/Behavioral/GoStmtReceiverBoxGroup/GoStmtReceiverBoxGroup.csproj" />
