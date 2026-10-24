@@ -605,7 +605,8 @@ down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainEx
   neither does Go wait for one. If a report has begun, `main` waits for the report and exits with its status.
 - **Which report** (Go's `paniclk`): the first fatal start owns it. When `main` panics while a goroutine's crash
   is already under way, `main`'s backstop waits for the goroutine's report, which then ends the process, so the
-  first line is the goroutine's, as in Go.
+  first line is the goroutine's, as in Go. Once the owner has reported, the waiting thread parks for good and never
+  prints a second report; only an owner that never reports (60 s) lets it print its own.
 - **An exit taken on purpose** (`os.Exit`, a fatal error, the backstop) goes through `MainExit.Exit` and owns its
   status, as Go's `exit` never consults the count.
 

@@ -113,15 +113,19 @@ public static class MainExit
             backstop(sender, e);
         };
 
-    // The first fatal start on another thread owns the report: wait for it (its exit ends the process). This thread
-    // claims the report when nothing has, and goes on to print when it owns it.
-    private static void AwaitReportOwner()
+    // The first fatal start on another thread owns the report: wait for it, and never print a second one. paniclk is
+    // never released, so once the owner HAS reported, its exit is already ending the process and this thread parks
+    // for good, as Go's fatal paths park on the lock. Waking to print would put a second report beside a fatal
+    // error's (FatalReport prints without the backstop's lock), or beside one written before this thread arrived
+    // (C1's F1). Only an owner that never reported (ReportWait expired) lets this thread print its own report.
+    // This thread claims the report when nothing has, and goes on to print when it owns it.
+    internal static void AwaitReportOwner()
     {
         int self = Environment.CurrentManagedThreadId;
         int owner = Interlocked.CompareExchange(ref s_reportOwner, self, 0);
 
-        if (owner != 0 && owner != self)
-            s_reported.Wait(ReportWait);
+        if (owner != 0 && owner != self && s_reported.Wait(ReportWait))
+            Thread.Sleep(Timeout.Infinite);
     }
 
     /// <summary>

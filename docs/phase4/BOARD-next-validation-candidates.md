@@ -28214,7 +28214,8 @@ never reached golib's unhandled-exception backstop.
   deferred call that blocks.
 - **Which report** (Go's `paniclk`, decided at `startpanic_m`). The first fatal start claims the report.
   `MainExit.InstallBackstop` wraps golib's backstop so that a thread that did not claim it waits for the owner's
-  report OUTSIDE the backstop's own lock, and the owner's exit ends the process.
+  report OUTSIDE the backstop's own lock, and the owner's exit ends the process. Once the owner has reported, the
+  waiting thread parks for good (`paniclk` is never released) and prints only if the owner never reports (60 s).
 - **Exits taken on purpose** go through `MainExit.Exit` and keep their status: `os.Exit` (syscall.Exit), `fatal`,
   `FatalReport`, the backstop, the signal reports and the test host's fatal path.
 
@@ -28232,6 +28233,14 @@ Two departures from Go, both measured on net10.0:
   not a behavioral test.
 - **L1:** the first cut's one-second wait printed a recovering goroutine's deferred output after `main` returned,
   where Go exits before it, and kept a blocked one for 1.47 s. The 20 ms bound fixes both.
+- **F1** (C1's re-read of `2cdc0ae14d`, ACCEPT; ruled in-seat). A non-owner woken by the owner's report went on to
+  print a SECOND report beside it. That happens beside a Go throw, because `FatalReport` prints without the backstop's
+  lock, or when the owner had already reported before the non-owner arrived. Go never prints one, because the throw's
+  `paniclk` is never released. A woken non-owner now parks; only a timeout (an owner that never reported) prints.
+  - GolibTests `MainExitReportOwnerTests`: a non-owner arriving after the owner's report never comes back to print.
+    The old wake-and-print fails it; a control shows the first fatal path still returns to print.
+  - As a process race, a second report almost never shows. A goroutine's `sync: unlock of unlocked mutex` racing
+    main's panic printed one report 30 of 30 both before and after the change (go1.26.10: one report, 6 of 6).
 
 **Guards.**
 - `GoroutinePanicAfterDeferredDone` (behavioral): exit 2 and Go's first stderr line, 10 of 10. It exited 0 before.
