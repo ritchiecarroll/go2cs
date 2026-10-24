@@ -5,8 +5,10 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
@@ -154,21 +156,16 @@ public static class CrashReport
     /// <c>"panic while printing panic value"</c> when the substitution faults, and a report about
     /// the reporter is worse than the divergence it would describe.
     /// </para>
+    /// <para>
+    /// The first lines are the panic CHAIN (Go's <c>printpanics</c>): every panic still linked beneath this one
+    /// (<see cref="PanicException.Link"/>), oldest first, each after the first on a TAB, with <c> [recovered]</c> on a
+    /// panic a recover() stopped. A panic re-raised with the same interface words as the panic directly beneath it is
+    /// printed once, on the older line, as <c> [recovered, repanicked]</c> when that one was recovered.
+    /// </para>
     /// </remarks>
     public static string Format(PanicException panic, Exception thrown)
     {
-        string value;
-
-        try
-        {
-            value = panic.Message;
-        }
-        catch (Exception)
-        {
-            value = "panic while printing panic value";
-        }
-
-        string report = $"panic: {value}\n";
+        string report = PanicChain(panic);
         Func<PanicException, Exception, string>? renderer = TracebackRenderer;
 
         if (renderer is null)
@@ -188,6 +185,141 @@ public static class CrashReport
         }
 
         return report;
+    }
+
+    // Go's preprintpanics, then printpanics (runtime/panic.go).
+    private static string PanicChain(PanicException panic)
+    {
+        // Newest first, as the links run. A link is only ever set to an older panic, so the walk ends; the
+        // set is a guard for a report that must be written whatever state it finds.
+        List<PanicException> chain = [];
+        HashSet<PanicException> seen = new(ReferenceEqualityComparer.Instance);
+
+        for (PanicException? link = panic; link is not null && seen.Add(link); link = link.Link)
+            chain.Add(link);
+
+        // preprintpanics, newest first: a panic holding the same interface words as the one beneath it marks that
+        // one repanicked and is not rendered; every other value is rendered now, Error() or String() included.
+        bool[] repanicked = new bool[chain.Count];
+        string?[] values = new string?[chain.Count];
+
+        for (int i = 0; i < chain.Count; i++)
+        {
+            if (i + 1 < chain.Count && SameInterfaceWords(chain[i], chain[i + 1]))
+            {
+                repanicked[i + 1] = true;
+                continue;
+            }
+
+            try
+            {
+                values[i] = chain[i].Message;
+            }
+            catch (Exception)
+            {
+                values[i] = "panic while printing panic value";
+            }
+        }
+
+        // printpanics, oldest first: a panic whose older neighbour it re-raised is not printed again.
+        StringBuilder text = new();
+
+        for (int i = chain.Count - 1; i >= 0; i--)
+        {
+            if (i + 1 < chain.Count)
+            {
+                if (repanicked[i + 1])
+                    continue;
+
+                text.Append('\t');
+            }
+
+            text.Append("panic: ").Append(values[i]);
+
+            if (chain[i].Recovered)
+                text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");
+
+            text.Append('\n');
+        }
+
+        return text.ToString();
+    }
+
+    // Go compares the two panic values' interface WORDS (`*efaceOf(&p.link.arg) == *efaceOf(&p.arg)`), not the
+    // values. The same interface value re-raised is one word pair (recover()'s result, a variable holding it), and so
+    // is any value the runtime answers from static data instead of an allocation.
+    private static bool SameInterfaceWords(PanicException newer, PanicException older)
+    {
+        if (ReferenceEquals(newer.State, older.State))
+            return true;
+
+        // A Go string constant is one deduplicated read-only symbol; the C# string literal it was emitted as is interned.
+        if (newer.StringSource is { } newerText && older.StringSource is { } olderText && ReferenceEquals(newerText, olderText))
+            return true;
+
+        return newer.State is { } left && older.State is { } right && left.GetType() == right.GetType() && SameDataWord(left, right);
+    }
+
+    // Whether two values of one dynamic type convert to the same interface data word (walk/convert.go's dataWord and
+    // runtime/iface.go's convT*): a pointer-shaped value is its own word; a zero-size value is &zerobase; a bool or
+    // one-byte integer, and a 2-, 4- or 8-byte scalar below 256, are staticuint64s; "" and a nil slice are &zeroVal;
+    // a struct or array of one element converts as that element. Anything else is a fresh allocation every time.
+    [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "A Go struct's fields are kept by the generated metadata GoFieldMetadata reads.")]
+    private static bool SameDataWord(object left, object right)
+    {
+        switch (left)
+        {
+            case bool or byte or sbyte:
+                return left.Equals(right);
+            case short value:
+                return SmallScalar((ushort)value, (ushort)(short)right);
+            case ushort value:
+                return SmallScalar(value, (ushort)right);
+            case int value:
+                return SmallScalar((uint)value, (uint)(int)right);
+            case uint value:
+                return SmallScalar(value, (uint)right);
+            case long value:
+                return SmallScalar((ulong)value, (ulong)(long)right);
+            case ulong value:
+                return SmallScalar(value, (ulong)right);
+            case nint value:
+                return SmallScalar((ulong)value, (ulong)(nint)right);
+            case nuint value:
+                return SmallScalar(value, (nuint)right);
+            case float value:
+                return SmallScalar(BitConverter.SingleToUInt32Bits(value), BitConverter.SingleToUInt32Bits((float)right));
+            case double value:
+                return SmallScalar(BitConverter.DoubleToUInt64Bits(value), BitConverter.DoubleToUInt64Bits((double)right));
+            case @string value:
+                return value.Length == 0 && ((@string)right).Length == 0;
+            case ISlice value:
+                return value.IsNil && ((ISlice)right).IsNil;
+            case IMap or Delegate:
+                return left.Equals(right);
+            case INilPointer or IChannel when left is IGoEquatable pointer:
+                return pointer.GoEquals(right);
+            case IArray value:
+                return value.Length == 0 || value.Length == 1 && SameElement(value[0], ((IArray)right)[0]);
+        }
+
+        Type type = left.GetType();
+
+        if (!type.IsValueType || type.IsPrimitive || type.IsEnum)
+            return false;
+
+        if (GoZeroSizeFacts.Classify(type))
+            return true;
+
+        FieldInfo[] fields = GoFieldMetadata.InstanceFields(type);
+
+        // An interface field is two words, so its struct is allocated like any other.
+        return fields.Length == 1 && !fields[0].FieldType.IsInterface && SameElement(fields[0].GetValue(left), fields[0].GetValue(right));
+
+        static bool SmallScalar(ulong left, ulong right) => left == right && left < 256;
+
+        static bool SameElement(object? left, object? right) =>
+            left is null ? right is null : right is not null && left.GetType() == right.GetType() && SameDataWord(left, right);
     }
 
     /// <summary>

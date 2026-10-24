@@ -30,6 +30,7 @@ using os = os_package;
 using exec = go.os.exec_package;
 using syscall = syscall_package;
 using testing = testing_package;
+using testenv = go.@internal.testenv_package;
 using @unsafe = unsafe_package;
 using go.@internal.syscall;
 using go.os;
@@ -55,7 +56,7 @@ public static void TestRunAtLowIntegrity(ж<testing.T> Ꮡt) {
             os.Exit(0);
             return;
         }
-        var cmd = exec.Command(os.Args[0], testRunˢ, "--");
+        var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)), testRunˢ, "--");
         cmd.Value.Env = new @string[]{"GO_WANT_HELPER_PROCESS=1"u8}.slice();
         ref var token = ref heap<syscall.Token>(out var Ꮡtoken);
         (token, var err) = getIntegrityLevelToken(sidWilLow);

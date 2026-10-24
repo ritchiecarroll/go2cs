@@ -38,11 +38,13 @@
 //     (managed_impl.cs), so when nothing keeps the finalized object alive its cleanup can come due
 //     inside the SAME runtime.GC() call, where Go needs a second cycle. It still runs after the
 //     finalizer, never before; runtime's TestCleanupAfterFinalizer reads the order, not the cycle.
-//  3. THE ptr == arg GUARD IS WIDER THAN GO'S. Go compares the two pointer VALUES. We compare
-//     referents, so we also panic when arg is a pointer to a DIFFERENT field of the same
-//     allocation. That direction is safe: such an arg keeps the allocation alive, so the cleanup
-//     could never run, which is precisely what the guard exists to say. No case is refused whose
-//     cleanup would otherwise have run.
+//  3. THE ARG GUARDS READ ORDER TOKENS AND REFERENTS, NOT A SPAN. Go 1.26 panics "ptr is equal to
+//     arg" when the two ADDRESSES are equal, and "ptr is within arg" when arg points elsewhere in
+//     ptr's object, outside the tiny-allocator span. We compare order tokens for the first (equal
+//     pointers have equal tokens, so &obj.a with a at offset 0 is EQUAL to &obj, as in Go) and
+//     referents for the second, and stand in for tinySpanClass by Go's own rule for it: a
+//     pointer-free object of at most 16 bytes (inTinySpan). Before Go 1.26 there was one message,
+//     and this guard compared referents for it.
 //  4. Arena and span checks are GONE, not ported: inUserArenaChunk, findObject and
 //     isGoPointerWithoutSpan ask about a heap layout that does not exist here. Their panics
 //     ("ptr is arena-allocated", "ptr not in allocated block") are therefore unreachable and the
@@ -174,10 +176,14 @@ private static Cleanup addCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗ
     object referent = ReferentOf(Ꮡptr);
     // Check that arg is not equal to ptr. Go tests this only for a pointer-kinded arg, which is
     // `arg is INilPointer` here -- @unsafe.Pointer is a ж<uintptr> and so answers it too, covering
-    // Go's abi.Pointer and abi.UnsafePointer arms in one predicate. See divergence 3 in the header:
-    // ours compares referents, so it is the wider guard and safely so.
-    if (argʗp is INilPointer && ReferenceEquals(ReferentOf(argʗp!), referent)) {
-        throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
+    // Go's abi.Pointer and abi.UnsafePointer arms in one predicate. Equal ADDRESSES, as Go compares:
+    // equal pointers always have equal order tokens (see pointerFacts).
+    object? argAllocation = null;
+    if (argʗp is INilPointer argPointer && !argPointer.IsNilPointer) {
+        (nuint argAddress, argAllocation) = pointerFacts(argPointer);
+        if (argAddress == Ꮡptr.PointerOrderToken) {
+            throw panic("runtime.AddCleanup: ptr is equal to arg, cleanup will never run");
+        }
     }
     if (debug.sbrk != 0) {
         // debug.sbrk never frees memory, so no cleanup will ever run
@@ -190,6 +196,12 @@ private static Cleanup addCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗ
     // so registering against it would tie the cleanup to a referent that never dies.
     if (GoZeroBase.Is(referent)) {
         return new Cleanup(nil);
+    }
+    // Check that arg is not within ptr. Another address in ptr's object keeps the object alive just
+    // as ptr itself would. Go exempts the tiny-allocator span, where two separate small objects can
+    // share one block; see inTinySpan.
+    if (argAllocation is not null && ReferenceEquals(argAllocation, referent) && !inTinySpan(referent)) {
+        throw panic("runtime.AddCleanup: ptr is within arg, cleanup will never run");
     }
     // Check that the cleanup function doesn't close over the pointer.
     if (captured is not null) {
@@ -247,9 +259,40 @@ private static Cleanup addCleanup<T, S>(ж<T> Ꮡptr, Action<S> cleanup, S argʗ
 // NOT taken apart: Go's slot scan sees the interface's data word, which addresses a copy.
 private static bool holdsPointerInto(object? value, object referent) => value switch {
     null => false,
-    INilPointer pointer => !pointer.IsNilPointer && ReferenceEquals(pointer.ReferentObject, referent),
+    INilPointer pointer => !pointer.IsNilPointer && ReferenceEquals(pointerFacts(pointer).allocation, referent),
     _ => ReferenceEquals(value, referent)
 };
+
+// A non-nil pointer-kinded value's Go address (its order token) and the allocation it points into.
+// An unsafe.Pointer answers through the box it names, since its own token is the number it was
+// minted as; one with no recoverable managed referent (a bare number, native memory) is in no Go
+// allocation.
+private static (nuint address, object? allocation) pointerFacts(INilPointer pointer) {
+    if (pointer is @unsafe.Pointer up) {
+        return up.Referent is INilPointer box ? (box.PointerOrderToken, box.ReferentObject) : (up.PointerOrderToken, up.Referent);
+    }
+    return (pointer.PointerOrderToken, pointer.ReferentObject);
+}
+
+// Whether Go would allocate the referent in the tiny-allocator span, which the within check
+// exempts: tinySpanClass is size class 2 (16 bytes) noscan, so it holds every pointer-free object
+// of at most maxTinySize bytes, whether the tiny allocator or the small-object path placed it.
+// A referent whose Go type is not known answers false, and the guard stands.
+private static bool inTinySpan(object referent) {
+    Type? type;
+    nint count = 1;
+    if (referent is Array backing && backing.Rank == 1) {
+        type = backing.GetType().GetElementType();
+        count = backing.Length;
+    } else if (!GoReflect.TryPointerBoxElement(referent.GetType(), out type)) {
+        return false;
+    }
+    if (type is null) {
+        return false;
+    }
+    nint size = GoReflect.GoSizeOf(type);
+    return size > 0 && size * count <= (nint)maxTinySize && GoReflect.GoPtrBytesOf(type) == 0;
+}
 
 // Go's funcval holds a by-value struct or array capture inline, so its slot scan reaches every
 // pointer field and element. This walks the same slots: a struct through GoReflect.GoFields (the
