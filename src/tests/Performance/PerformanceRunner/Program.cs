@@ -15,7 +15,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
 using PerformanceRunner;
 
 return Runner.Main(args);
@@ -131,6 +130,12 @@ namespace PerformanceRunner
             int runs = 5;
             HashSet<Phase> phases = new() { Phase.Transpile, Phase.Build, Phase.Verify, Phase.Measure };
 
+            // Release legs (ReleaseRun.cs): set by --leg, and then the in-tree phases do not run.
+            List<ReleaseLeg> legs = new();
+            string? workRoot = null, aotManifest = null, aotDrop = null;
+            int reviewRuns = 11;
+            bool tc0 = false;
+
             for (int i = 0; i < args.Length; i++)
             {
                 string a = args[i];
@@ -138,6 +143,36 @@ namespace PerformanceRunner
                 {
                     case "--filter" when i + 1 < args.Length:
                         filter = args[++i];
+                        break;
+                    case "--leg" when i + 1 < args.Length:
+                        try
+                        {
+                            legs.Add(ReleaseLeg.Parse(args[++i]));
+                        }
+                        catch (FormatException ex)
+                        {
+                            Console.Error.WriteLine(ex.Message);
+                            return 2;
+                        }
+                        break;
+                    case "--work" when i + 1 < args.Length:
+                        workRoot = Path.GetFullPath(args[++i]);
+                        break;
+                    case "--aot-manifest" when i + 1 < args.Length:
+                        aotManifest = Path.GetFullPath(args[++i]);
+                        break;
+                    case "--aot-drop" when i + 1 < args.Length:
+                        aotDrop = Path.GetFullPath(args[++i]);
+                        break;
+                    case "--review-runs" when i + 1 < args.Length:
+                        if (!int.TryParse(args[++i], out reviewRuns) || reviewRuns < 1)
+                        {
+                            Console.Error.WriteLine("--review-runs requires a positive integer");
+                            return 2;
+                        }
+                        break;
+                    case "--tc0":
+                        tc0 = true;
                         break;
                     case "--phase" when i + 1 < args.Length:
                         phases = ParsePhases(args[++i]);
@@ -201,6 +236,29 @@ namespace PerformanceRunner
             {
                 Console.Error.WriteLine("No benchmark projects matched.");
                 return 2;
+            }
+
+            if (legs.Count > 0)
+            {
+                if (workRoot is null)
+                {
+                    Console.Error.WriteLine("--leg needs --work <dir>: a release leg converts into a scratch tree, never into this suite's projects");
+                    return 2;
+                }
+
+                if (legs.Select(l => l.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() != legs.Count)
+                {
+                    Console.Error.WriteLine("two --leg values share a name");
+                    return 2;
+                }
+
+                if ((aotManifest is null) != (aotDrop is null))
+                {
+                    Console.Error.WriteLine("--aot-manifest and --aot-drop go together: a shipped binary is admitted only by its manifest");
+                    return 2;
+                }
+
+                return ReleaseRun.Run(s_perfDir, projects, new ReleaseRun.Options(legs, workRoot, aotManifest, aotDrop, runs, reviewRuns, tc0));
             }
 
             Console.WriteLine($"go2cs performance runner: {projects.Count} project(s), phases [{string.Join(", ", phases)}], {runs} measured run(s){(noAot ? ", AOT disabled" : "")}");
@@ -607,8 +665,6 @@ namespace PerformanceRunner
 
         // ---- Measurement configuration guard ----
 
-        private const string DynamicCodeSwitch = "System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported";
-
         // The published JIT row must come from a framework-dependent, JIT-hosted binary with dynamic
         // code enabled -- what README.md says it is. Building one is not enough to have one: the Native
         // AOT publish's BUILD step copies through $(OutDir), which the converter csproj template pinned
@@ -654,37 +710,10 @@ namespace PerformanceRunner
             Console.WriteLine(rejected == 0 ? "ok" : $"{rejected} REJECTED");
         }
 
-        private static string? InspectJitRuntimeConfig(string path)
-        {
-            if (!File.Exists(path))
-                return "runtimeconfig.json not found";
-
-            JsonElement options;
-
-            try
-            {
-                using JsonDocument doc = JsonDocument.Parse(File.ReadAllText(path));
-
-                if (!doc.RootElement.TryGetProperty("runtimeOptions", out JsonElement raw))
-                    return "no runtimeOptions section";
-
-                options = raw.Clone();
-            }
-            catch (JsonException ex)
-            {
-                return $"unreadable runtimeconfig.json ({ex.Message})";
-            }
-
-            if (options.TryGetProperty("includedFrameworks", out _))
-                return "self-contained (includedFrameworks present), but the JIT row is documented as framework-dependent -- the output tree has been overwritten by a publish";
-
-            if (options.TryGetProperty("configProperties", out JsonElement props) &&
-                props.TryGetProperty(DynamicCodeSwitch, out JsonElement dynamicCode) &&
-                dynamicCode.ValueKind == JsonValueKind.False)
-                return $"{DynamicCodeSwitch} is false -- every reflective invoker would run its non-emitting fallback";
-
-            return null;
-        }
+        // The decision is BinaryShape.JitProblem (ReleaseLegs.cs), shared with the release legs and guarded by
+        // PerformanceRunnerTests; this reads the file beside the binary.
+        internal static string? InspectJitRuntimeConfig(string path) =>
+            BinaryShape.JitProblem(File.Exists(path) ? File.ReadAllText(path) : null);
 
         // ---- Phase: Verify ----
 
@@ -758,7 +787,7 @@ namespace PerformanceRunner
             Console.WriteLine(failed == 0 ? "ok" : $"{failed} failed");
         }
 
-        private static string FilterTimingLines(string output)
+        internal static string FilterTimingLines(string output)
         {
             return string.Join('\n', output
                 .Replace("\r", "")
@@ -813,7 +842,7 @@ namespace PerformanceRunner
             }
         }
 
-        private static double ParseInnerMs(string stdOut)
+        internal static double ParseInnerMs(string stdOut)
         {
             foreach (string line in stdOut.Split('\n'))
             {
@@ -827,7 +856,8 @@ namespace PerformanceRunner
             return 0.0;
         }
 
-        private static (int exitCode, string stdOut, double wallMs, long peakBytes) RunMeasured(string exe, string workDir)
+        internal static (int exitCode, string stdOut, double wallMs, long peakBytes) RunMeasured(string exe, string workDir,
+            Dictionary<string, string>? environment = null)
         {
             ProcessStartInfo startInfo = new()
             {
@@ -839,6 +869,12 @@ namespace PerformanceRunner
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
+
+            if (environment is not null)
+            {
+                foreach ((string key, string value) in environment)
+                    startInfo.EnvironmentVariables[key] = value;
+            }
 
             StringBuilder outBuf = new();
 
@@ -899,7 +935,7 @@ namespace PerformanceRunner
 
         // ---- Report ----
 
-        private static double Median(IEnumerable<double> values)
+        internal static double Median(IEnumerable<double> values)
         {
             List<double> sorted = values.OrderBy(v => v).ToList();
 
@@ -1008,6 +1044,8 @@ namespace PerformanceRunner
                 sb.AppendLine("|");
             }
         }
+
+        internal static string CpuName() => GetCpuName();
 
         private static string GetCpuName()
         {
@@ -1215,15 +1253,28 @@ namespace PerformanceRunner
                   --list                List matched projects and exit.
                   -h, --help            Show this help.
 
+                Release legs (docs/PLAN-perf-rebaseline.md; the in-tree phases do not run):
+                  PerformanceRunner --leg <spec> [--leg <spec>] --work <dir> [--aot-manifest <file> --aot-drop <dir>]
+                                    [--runs <n>] [--review-runs <n>] [--tc0] [--filter <substr>]
+
+                  --leg <spec>          name=<leg>;go2cs=<converter exe>;version=<go.* version>;go=<go exe>.
+                                        Each program is converted by that converter with -recurse=nuget.
+                  --work <dir>          Scratch root for the legs' conversions, builds and report.md.
+                  --aot-manifest <file> Tab-separated: leg program sha256 sourceHash size ilc sdk.
+                  --aot-drop <dir>      Shipped binaries at <dir>/<leg>/<program>.exe; one is timed only
+                                        if its manifest line matches it and this box's converted source.
+                  --review-runs <n>     Runs for the PERF-REVIEW rows (default 11).
+                  --tc0                 Add the diagnostic TC0 arm (the JIT binary, DOTNET_TieredCompilation=0).
+
                 Exit code 0 = pass, 1 = failure, 2 = usage error.
                 """);
         }
 
         // ---- process execution with timeout + whole-tree kill ----
 
-        private readonly record struct ProcResult(int ExitCode, string StdOut, string StdErr);
+        internal readonly record struct ProcResult(int ExitCode, string StdOut, string StdErr);
 
-        private static ProcResult Exec(string application, string? arguments, string workingDir, int timeoutMs,
+        internal static ProcResult Exec(string application, string? arguments, string workingDir, int timeoutMs,
             Dictionary<string, string>? environment = null)
         {
             ProcessStartInfo startInfo = new()
@@ -1272,7 +1323,7 @@ namespace PerformanceRunner
             return new ProcResult(process.ExitCode, outBuf.ToString(), errBuf.ToString());
         }
 
-        private static string Truncate(string s, int max = 300)
+        internal static string Truncate(string s, int max = 300)
         {
             s = s.Replace("\r", "").Replace("\n", " ").Trim();
             return s.Length <= max ? s : s[..max] + " ...";
