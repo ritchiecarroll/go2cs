@@ -28837,4 +28837,51 @@ nuget-1.24.13.7 contains, so the published 1.24.13.7 has it too.
 
 — P2 (2026-10-26)
 
+## 2026-10-26 — G: a package-level `sync.WaitGroup` reads Unbubbled, as in Go — CLOSES R's row of 2026-10-15 (the package-level box marker, claude/g-staticbox-r2, re-based from claude/g-waitgroup-bubble)
+
+R's row of 2026-10-15 owed option (b): a marker on a package-level variable's box, so golib can answer Go's
+non-heap questions. Owner, 2026-10-15: "as long as we don't forget". First cut 2026-10-24 at `9dcf0bafe1`
+(`a07906ae84`); re-based and re-measured 2026-10-26 at `7c71410f1a`, which this row records.
+
+**Measured first.** Go 1.26's runtime asks whether a pointer is in the heap in five user-visible places:
+- synctest's association (`getOrSetBubbleSpecial`, `synctest.go`), which `sync.WaitGroup` reads;
+- `AddCleanup`, a no-op for a non-heap pointer;
+- `SetFinalizer`, which ignores one;
+- `weak.Make`, an immortal handle;
+- `Pinner`, which ignores one.
+
+Only the first is observable in converted code. A package-level box lives in a static field, rooted for the life of
+the process, so a converted global already never runs a cleanup or finalizer, never clears a weak pointer, and
+needs no pin.
+
+**The change.**
+- **golib:** `StaticBox<T>`, a sealed `StandardBox<T>` that answers the non-heap question
+  (`IPackageLevelStorage`, read through `PackageLevelStorage.Holds`). A `FieldRefBox` forwards it from its source,
+  so a field of a global answers too.
+- **Converter:** `addressedGlobalDecl`, the one package-level box emitter (eager and `[GoLazy]` holder), constructs
+  `PackageBoxConstructPrefix` (`StaticBox`, new in `symbols.json`).
+- **Hand-owned `sync/waitgroup.cs`:** asks for no bubble when the WaitGroup is package-level, the path Go's
+  `case synctest.Unbubbled:` takes.
+- The expected-difference test `GoLeavesAPackageLevelWaitGroupUnbubbled_HereItIsAssociated` is replaced by
+  `APackageLevelWaitGroupIsUnbubbled_AsInGo` and `AFieldOfAPackageLevelVariableIsUnbubbled_AsInGo`.
+
+**Footprint at `7c71410f1a`.** Every changed line is one token, `new StandardBox<` → `new StaticBox<`, on a
+package-level box declaration. Predicted before each run by a committed-bytes census, then measured:
+- Corpus: two-seeded, three-target A/B plus a 45-package `-tests` leg. The base arm wrote 0 files. 320 files and
+  794 lines, as predicted, with the file sets equal both ways. Plus `sync/waitgroup.cs`'s own position-map record.
+- Behavioral: 32 projects, 61 committed outputs and goldens, 96 lines. The prediction read 62 and 97: it counted the
+  hand-owned `ManualConversionSiblingState/state.cs`'s golden, which UTT copies from the hand-own and so stays.
+- Hand-owned files keep `StandardBox`: 23 sites in src/core, and `ManualConversionSiblingState`. None holds a
+  WaitGroup.
+
+**Stated limit.** An `ElemRefBox` holds the array's backing, not its box, so an element of a global array
+(`var wgs [4]sync.WaitGroup`) still reads as heap storage here, where Go leaves it Unbubbled.
+
+**The first cut's found-in-passing.** It named 15 package-level `StandardBox` sites in committed test files the 1.26
+hop had left stale (strconv's tests that moved to `internal/strconv`, `internal/poll/fd_windows_test.cs`, the
+uncommitted `strconv/number_test.cs`). None is left at `7c71410f1a`: the re-bank refreshed those files.
+
+— G (measured 2026-10-24; re-measured 2026-10-26 at `7c71410f1a`)
+
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
