@@ -104,7 +104,7 @@ re-baselined at batch 35 (the goroutine-panic seat's two tests) are part of the 
 | Lane | Box | Shards (rows) | Capacity, as COORD measured it | Constraint |
 |:--|:--|:--|:--|:--|
 | **i9** | windows | `i9-1` (11) | the fastest worker | the owner's hardware order: one heavy task at a time, `-m:4`, WHEA counted; no off-i9 row |
-| **R-LAPTOP** | windows | `RLAP-1` (2: `net/http`, `crypto/tls`) | the proven box for these rows | `crypto/tls`'s BoGo host is qualified by measurement before its row (§7 lesson 40) |
+| **R-LAPTOP** | windows | `RLAP-1` (2: `net/http`, `crypto/tls`) | the proven box for these rows | BoGo host measured at the freeze: Go 40.9 / 36.8 s, C# 605.5 s (fails at BoGo's child deadline). RULED: `crypto/tls` reads at the standard wall with its pinned host-limit disclosure, as banked; the raised wall is the fallback |
 | **H** | windows | `H-1` (77), `H-2` (77), `H-3` (75) | ~40 rows/h at `-m:4`; peak commit ~13.3 GB of 19 GB | every non-reserved row, the six non-reserved off-i9 rows included (Q5) |
 | **R's WSL** | linux | `RWSL-1` (13, the reserved set) | the proven box for `runtime` and the TLS rows | SERIAL after `RLAP-1` on the same box (Q2): one battery per box |
 | **P1** | linux, cloud | `P1-1`, `P1-2`, `P1-3` (38 each) | ~4 vCPU, 16 GB, 30 GB disk | tmpfs and OOM restarts are measured history: short shards, the resume ledger, evidence pushed per shard; no reserved row |
@@ -255,13 +255,22 @@ pwsh -NoProfile -File <SCRATCH>/run-h10-recon.ps1 -NameList <SCRATCH>/<shard>.tx
 
 **Before row 1, on every windows lane:**
 - run `run-h10-recon.ps1 -SelfTest -Tree <TREE> -NameList x -GoRoot x -Out x -ExpectTip x -Scratch x` under every
-  shell the launcher uses, and require `SELF-TEST PASSED` (lesson 61);
+  shell the launcher uses, and require `SELF-TEST PASSED` (lesson 61). The per-run copy carries
+  `src/run-validated-sweep.ps1` and `src/_roster.ps1` from `<FREEZE>` beside it. The self-test reads both from
+  `-Tree`, and with a dummy `-Tree` it falls back to the copy's own directory, where a bare copy refuses rc 2 (P2,
+  at the freeze);
 - take the residue census, `git status --ignored=matching` with a never-built control, and record it;
 - assert 25 GB free;
 - grep a `DRIVER_EXIT=` marker rather than trusting `$LASTEXITCODE`.
 
-**Linux lanes (R's WSL, P1, P2)** run the same act from a bash loop shaped like
-`.claude/coord-scripts/templates/linux-legs.sh`:
+**Linux lanes (R's WSL, P1, P2)** run the same act WITHOUT the wrapper. Its 25 GB disk floor reads `Get-PSDrive` of the
+tree's first character, which on linux is the root disk, so a box with 16 GB of tmpfs refuses. Each row's argv is
+DERIVED by AST at `<FREEZE>` from the wrapper's own functions and the sweep's floor tables:
+- `$longTimeouts` and `$testDeadlineFloors` in `src/run-validated-sweep.ps1`;
+- `Get-SweepTestDeadlineFloors`, `Resolve-RowDeadline`, `Get-RowExecutionArgs` and `Get-RowConverterArgs` in
+  `src/run-h10-recon.ps1`, with the roster reader in `src/_roster.ps1`.
+Nothing is copied by hand. P2's form, accepted by COORD on 2026-10-24, is the linux act of record. The loop is shaped
+like `.claude/coord-scripts/templates/linux-legs.sh`:
 - the clone checked clean (tracked AND untracked under tracked paths), then detached at `<FREEZE>`;
 - `export GOROOT GOTOOLCHAIN=local CGO_ENABLED=0 GOFLAGS=` with `<GOROOT>/bin` first on PATH, and `GoTargetOS` NOT
   exported (the converter passes `-p:GoTargetOS` itself for a `-tests` row);
@@ -492,8 +501,12 @@ BEFORE ROW 1:
   - a throwaway linked worktree DETACHED at <FREEZE>; build the converter in it; 25 GB free;
   - residue census: git status --ignored=matching, with a never-built control, recorded;
   - toolchain asserted three ways: PATH go version = go1.26.10, the resolved go.exe, GOROOT's VERSION;
-  - a per-run copy of src/run-h10-recon.ps1 at <FREEZE>, and its -SelfTest passing under every shell you launch
-    with (lesson 61).
+  - a per-run copy of src/run-h10-recon.ps1 at <FREEZE>, WITH src/run-validated-sweep.ps1 and src/_roster.ps1 from
+    <FREEZE> copied beside it; then its -SelfTest passing under every shell you launch with (lesson 61):
+      pwsh -NoProfile -File <SCRATCH>\run-h10-recon.ps1 -SelfTest -Tree <TREE> -NameList x -GoRoot x -Out x
+           -ExpectTip x -Scratch x      -> rc 0 and "SELF-TEST PASSED"
+    The self-test reads both scripts from -Tree; with a dummy -Tree it falls back to the copy's own directory, and a
+    bare copy then refuses rc 2 ("no src/run-validated-sweep.ps1 under -Tree"). Found by P2 at the freeze.
 ENV: GOROOT=<GOROOT>  GOTOOLCHAIN=local  CGO_ENABLED=0  PATH=<GOROOT>\bin first, then .NET 10.
   DOTNET_ROOT is set inside the child pwsh only.
 RUN: pwsh -NoProfile -File <SCRATCH>\run-h10-recon.ps1 -NameList <SCRATCH>\i9-1.txt -Tree <TREE> -GoRoot <GOROOT>
@@ -517,7 +530,9 @@ POST (one, <=40 lines):
 ```
 LANE R -- H10 pass 1, go1.26.10 re-bank. Plan: docs/PLAN-rebank-go126.md at <FREEZE>.
 FIRST, windows SHARD RLAP-1 (2 rows, in this order): net/http crypto/tls
-  - qualify crypto/tls's BoGo host by measurement first (lesson 40);
+  - crypto/tls's BoGo host (lesson 40), MEASURED on R-LAPTOP at the freeze: Go 40.9 s and 36.8 s; C# TestBogoSuite
+    605.5 s, failing at BoGo's child deadline. RULED (COORD, 2026-10-24): crypto/tls reads at the STANDARD wall,
+    with its pinned host-limit disclosure, as banked. The raised wall stays the fallback;
   - then follow the i9 block's BEFORE / ENV / RUN / AFTER / POST, with RLAP-1 in place of i9-1
     (lane ref claude/r-rebank-p1-rlap-1). -TestBuildMaxCpu as the box takes it.
   - No row carries a roster pin (the reader returns 0 of 225), so net/http runs UNTIERED in pass 1, as the roster
@@ -534,7 +549,10 @@ LINUX ACT, per row, in a clone detached at <FREEZE> whose src/core is the seed:
         -test-deadline <max(15m, floor)> -go2cspath <TREE>/src <GOROOT>/src/<row> <TREE>/src/core/<row>  2>&1
   - rc on the next line;
   - restore the row's dirt BY STATUS, purge build output, check free space at each row boundary;
-  - floors from $longTimeouts and $testDeadlineFloors in src/run-validated-sweep.ps1 at <FREEZE>.
+  - the argv DERIVED by AST from the wrapper's functions and the sweep's tables at <FREEZE> ($longTimeouts,
+    $testDeadlineFloors, Get-SweepTestDeadlineFloors, Resolve-RowDeadline, Get-RowExecutionArgs,
+    Get-RowConverterArgs), never typed. The wrapper itself refuses on a box whose root disk is under its 25 GB floor
+    (P2's form, accepted by COORD 2026-10-24).
 LINUX EVIDENCE: a per-row TSV (row, word, verdicts, matched, disclosed, sweep_s, wall_s, rc) to
   docs/phase4/h10-evidence/go1.26.10/linux/RWSL-1.tsv on lane ref claude/r-rebank-p1-rwsl-1; raw JSON kept
   outside the clone.
