@@ -229,8 +229,14 @@ go2cs -tests -test-action all -test-config Release [-test-tiered] -test-timeout 
 - **The output directory is the second positional** (floor 3), and it is the worktree whose `src/core` is the seed.
 - **`<T>` and `<D>` are DERIVED, never copied.** `<T>` is `max(asked, $longTimeouts[row])` and `<D>` is
   `max(asked, $testDeadlineFloors[row])`, with asked = `30m` and `15m` (lesson 61).
-- **`-test-tiered` exactly when the roster pins the row `release-tiered`.** At `5ee4bbbabd` those rows are
-  `internal/godebug` and `net/http`, read from the roster rather than from lesson 68's list.
+- **`-test-tiered` exactly when the roster's READER returns a `release-tiered` pin for the row.** At `5ee4bbbabd` and at
+  the freeze `f8fe15c97e` it returns **none: 0 pinned rows of 225** (`Get-ValidatedRosterRows`). Pass 1 therefore
+  runs every row untiered, as the roster reads (COORD's ruling of 2026-10-24: pass 1 is a reading).
+  *(Corrected 2026-10-24, found by H before H-1. This bullet read: "At `5ee4bbbabd` those rows are `internal/godebug`
+  and `net/http`". That came from a text search, and every `execution: release-tiered` hit it found is prose:
+  internal/godebug's and net/http's rows in the past tense ("It carried"), net/http's demotion table and two quoted
+  rulings. The reader anchors the annotation on the row's segment separators, so prose cannot read as a pin.
+  Whether either row needs a REAL pin at go1.26 is a roster-seat question, §4 step 1.)*
 - **No `-tags`, no `-test-filter`, no `-test-allow-handown`.**
 - **The rc is captured on the very next line**, with `2>&1` kept for the classifier.
 
@@ -314,7 +320,21 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
    - the 4 relocation sources retire;
    - each successor takes its principal by VERDICT majority (H10, the 1.24.13 recon readings);
    - the new rows join as candidates;
-   - `internal/unsafeheader` and `strconv`/`internal/strconv` are handled as §6 states.
+   - `internal/unsafeheader` and `strconv`/`internal/strconv` are handled as §6 states;
+   - **each row's EXECUTION PIN is decided from its pass-1 reading**, because the roster's reader returns none at the
+     freeze (§3.2), and pass 1 ran every row untiered. The candidates are the rows that carried `release-tiered`
+     before: `internal/godebug`, whose TC0 signature was TestCmdBisect reading bisect's source lines one low, and
+     `net/http`, whose TC0 signature was `TestRegisterErr//a` losing its registration site (H10, the re-bank
+     amendment's pass-3 rulings). Also `log/slog`, whose `TestPanics` and `TestSetDefault` failed at TC0 on one box
+     (lesson 73).
+     - **The test is an A/B on the same tree:** the pass-1 (untiered) red, and the same row re-run with
+       `-test-tiered`.
+     - **A pin is restored only when the red reproduces untiered and clears tiered.** Lesson 73's drop rule, read
+       in reverse.
+     - **A restored pin is written as the reader parses it**: the segment ` · execution: release-tiered` in the
+       row's last cell, beside its `linux:` and `darwin:` segments, never as prose. It is proven by
+       `Get-ValidatedRosterRows` returning it.
+     - **Pass 2 then banks the row under its pin**, and the driver applies it.
    A demoted row gets a COSTED basis row, or shardmap refuses (close lesson 1).
 2. **The plan**: `shardmap.py --timings <pass-1 TSVs, concatenated by column name> --emit-plan <plan.tsv>`, read
    against `population-go1.26.10.txt` (shardmap derives the file from `src/version.props`). It must close as
@@ -426,8 +446,10 @@ readings this hop found stale, and the darwin leg*, which also adds the darwin l
 
 1. **H10 step 1:** "Until NOTES A3 lands it does NOT apply execution pins". A3 has landed, and `-Hop` rows now carry
    their pins (`Get-HopPopulationRows` in `src/_roster.ps1`).
-2. **Lesson 68** names `log/slog` as the one pinned row. At `5ee4bbbabd` the pinned rows are `internal/godebug` and
-   `net/http` (`release-tiered`), and `log/slog` carries none. A firing control must use a row that is pinned NOW.
+2. **Lesson 68** names `log/slog` as the one pinned row. At `5ee4bbbabd` the roster's reader returns NO pinned row
+   (0 of 225). A firing control must use a row the reader pins NOW, or a planted annotation.
+   *(Corrected 2026-10-24: this item first named `internal/godebug` and `net/http` as pinned, from a text search over
+   prose. See §3.2.)*
 3. **H10's re-bank amendment, "THE SHARD SIZE IS W=4 … W=3 is the fallback"**, and **§3.2's "reserved set … pinned to
    the fastest worker"** describe the 1.24.13 fleet. This hop's windows fleet is three lanes, and the owner's off-i9
    list splits the reserved set across two of them. That is a recorded deviation by ruling, not a fallback.
@@ -498,14 +520,17 @@ FIRST, windows SHARD RLAP-1 (2 rows, in this order): net/http crypto/tls
   - qualify crypto/tls's BoGo host by measurement first (lesson 40);
   - then follow the i9 block's BEFORE / ENV / RUN / AFTER / POST, with RLAP-1 in place of i9-1
     (lane ref claude/r-rebank-p1-rlap-1). -TestBuildMaxCpu as the box takes it.
-  - The rows carry their roster pin: net/http is release-tiered; the wrapper applies it.
+  - No row carries a roster pin (the reader returns 0 of 225), so net/http runs UNTIERED in pass 1, as the roster
+    reads (COORD 2026-10-24). Report any red that looks tiering-sensitive (a source line one low, a lost
+    registration site) by name: it decides net/http's pin at the roster seat. (Corrected 2026-10-24; this line read
+    "net/http is release-tiered".)
 THEN, ONLY after RLAP-1's post: linux SHARD RWSL-1 (13 rows, in this order):
   archive/zip crypto/tls go/parser time index/suffixarray sync/atomic hash/maphash crypto/dsa
   crypto/internal/fips140/mlkem crypto/mlkem net net/http runtime
 LINUX ENV: export GOROOT=<linux GOROOT> GOTOOLCHAIN=local CGO_ENABLED=0 GOFLAGS= ; <GOROOT>/bin first on PATH;
   GoTargetOS NOT exported (the converter passes -p:GoTargetOS for a -tests row); the uid recorded.
 LINUX ACT, per row, in a clone detached at <FREEZE> whose src/core is the seed:
-  go2cs -tests -test-action all -test-config Release [-test-tiered for net/http] -test-timeout <max(30m, floor)>
+  go2cs -tests -test-action all -test-config Release -test-timeout <max(30m, floor)>
         -test-deadline <max(15m, floor)> -go2cspath <TREE>/src <GOROOT>/src/<row> <TREE>/src/core/<row>  2>&1
   - rc on the next line;
   - restore the row's dirt BY STATUS, purge build output, check free space at each row boundary;

@@ -3840,10 +3840,15 @@ this date.
 1. **H10 step 1, "Until NOTES A3 lands it does NOT apply execution pins".** A3 has landed: `Get-HopPopulationRows`
    (`src/_roster.ps1`) builds each row with its roster pin, so `run-validated-sweep.ps1 -Hop` reads a pinned row WITH
    its pin. The recon leg still runs through the recon wrapper, as step 1 says, and for the reason it gives.
-2. **§7 lesson 68's pinned-row list.** The rows that carry an `execution:` pin move between hops: at the go1.26
-   hop tip `5ee4bbbabd` they are `internal/godebug` and `net/http` (`release-tiered`), and `log/slog` carries none.
-   **A firing control is taken on a row the roster pins at the tree it runs on, read from the roster, never from a
-   lesson's list.**
+2. **§7 lesson 68's pinned-row list.** The rows that carry an `execution:` pin move between hops. At the go1.26 hop
+   tip `5ee4bbbabd`, and at its freeze `f8fe15c97e`, the roster's reader (`Get-ValidatedRosterRows`) returns **no
+   pinned row: 0 of 225**. `log/slog`, `internal/godebug` and `net/http` all carry none. **A pin is what the READER
+   returns, never what a text search finds.** The roster's prose mentions `execution: release-tiered` in the past
+   tense, in a demotion table and in quoted rulings, and the reader anchors the annotation on the row's segment
+   separators precisely so that prose cannot read as one. **A firing control is taken on a row the reader pins at
+   the tree it runs on**; with none pinned, the control is a planted annotation, restored afterward.
+   *(Corrected 2026-10-24, the same day. As first written, this item named `internal/godebug` and `net/http` as
+   pinned, from a text search. H found the mismatch before its first shard.)*
 3. **H10's re-bank amendment, "THE SHARD SIZE IS W=4 … W=3 is the fallback", and §3.2's "Reserve the known giants
    and pin them to the fastest worker".** Both describe the 1.24.13 fleet. **`W` is the fleet as engaged at the
    hop, and the reserved set is pinned by ruling.** At go1.26 the windows fleet is three lanes, and an owner's
