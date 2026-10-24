@@ -28190,4 +28190,51 @@ no change.
 
 — C2 (read at hop tip 9dcf0bafe1, 2026-10-24)
 
+## 2026-10-24 — P1 finding: a goroutine that panicked after its deferred `wg.Done()` let `main` exit 0 with an empty stderr; Go exits 2 with the report — FIXED (claude/g-goroutine-panic-exit)
+
+**The defect.** `wg.Add(1); go func(){ defer wg.Done(); panic("x") }(); wg.Wait()` exits 2 with the panic report in
+Go (3 of 3, P1). Converted, it exited 0 with nothing on stderr (P1, 5 of 5, untrimmed and trimmed; G, 5 of 5 at
+017dafb1f2). `wg.Done()` runs inside the panicking goroutine's deferred calls, so `main` returns while that goroutine
+has not reported yet. Go guarantees the report: after `main.main` returns, `runtime.main` waits while
+`runningPanicDefers` is non-zero and parks once `panicking` is set (runtime/proc.go, issues 3934 and 20018). A
+converted `main` is the CLR entry point and goroutines are background threads, so .NET shut down first and the panic
+never reached golib's unhandled-exception backstop.
+
+**The fix (golib `MainExit`).** Go's tail runs from `AppDomain.ProcessExit`, which the CLR raises when `Main` returns.
+- **The count.** A goroutine counts from `GoFrame.Capture`, or from a panic raised in a deferred call. It stops
+  counting when its frame returns with no panic in flight, or when the goroutine ends. The main goroutine is never
+  counted.
+- **The fatal start** (Go's `panicking`) is marked where an escape becomes certain: in the goroutine root's last
+  exception filter, on the first pass, before any `finally` runs. A fatal error marks it at `FatalReport`'s start, and
+  the backstop marks it again on its way out (`FatalExit`), for a panic escaping main or a thread golib did not start.
+- **The wait.** `main`'s return waits up to one second while the count is non-zero. Once a report has begun, it waits
+  for the report and sets the exit code to 2.
+- **Exits taken on purpose** go through `MainExit.Exit` and keep their status: `os.Exit` (syscall.Exit), `fatal`,
+  `FatalReport`, the backstop, the signal reports and the test host's fatal path.
+
+Two departures from Go, both measured on net10.0:
+- **No parking forever.** Shutdown is serialized, so a parked main deadlocks the backstop's own `Environment.Exit(2)`.
+  Instead the handler waits for the report and sets `Environment.ExitCode`, which decides the status for a `void` or
+  `int` `Main`, on JIT and Native AOT.
+- **No clear in the goroutine scope's `Dispose`.** A panic escaping a goroutine disposes that scope BEFORE the
+  backstop starts its report, and clearing there let `main` exit 0 in between.
+
+**Guards.**
+- `GoroutinePanicAfterDeferredDone` (behavioral): exit 2 and Go's first stderr line, 10 of 10. It exited 0 before.
+- `GoroutinePanicExitCode`: the control, a goroutine panic with `main` blocked.
+- GolibTests `MainExitPanicDefersTests` (5 arms): the count rises while a panic runs a goroutine's deferred calls; a
+  nested recovery keeps the outer panic counted; a Goexit and a swallowed panic end it with the goroutine; main is
+  never counted.
+
+**Stated limits.**
+- Go yields 1000 times. Here the wait is bounded by time, one second, so a deferred call that blocks for longer after
+  the `Done` still lets `main` exit 0, where Go's bound is shorter still.
+- The first-pass fatal mark is red-provable only as a pair with the scope clear. Removing it ALONE stays green: the
+  report finishes inside the one-second wait while the goroutine is still counted. Removing it with the clear moved
+  back into the scope's `Dispose` reads exit 0 with an empty stderr, 5 of 5. Either change alone stays green, so the
+  mark is what keeps a scope-end clear harmless, and it also guards a report slower than the wait.
+- A panic escaping a thread golib did not start is never counted, so a returning `main` does not wait for it.
+
+— G (measured 2026-10-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

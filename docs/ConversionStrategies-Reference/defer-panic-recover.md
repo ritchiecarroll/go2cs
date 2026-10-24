@@ -587,6 +587,26 @@ machine-specific goroutine stack trace, so only the first line is compared. (Gua
 channel receive; both binaries must exit 2 with `panic: goroutine boom` as the first stderr line and a
 clean stdout.)
 
+**A `main` that returns while a goroutine is panicking still gets the report.** `defer wg.Done(); panic(v)`
+wakes `wg.Wait()` from inside the panicking goroutine's deferred calls, so `main` returns while that
+goroutine has not reported yet. Go's `runtime.main` does not exit then. It waits while any goroutine runs a
+panic's deferred calls (`runningPanicDefers`), and once a report has begun (`panicking`) it waits for the
+report, so the program exits 2 with it (runtime/proc.go, issues 3934 and 20018).
+
+A converted `main` is the CLR entry point and goroutines run on background threads, so the runtime used to shut
+down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainExit` runs Go's tail from
+`AppDomain.ProcessExit`, which the CLR raises when `Main` returns:
+- **The count.** A goroutine counts from the moment a panic starts running its deferred calls
+  (`GoFrame.Capture`). It stops counting when its frame returns with no panic in flight (a recovery), when
+  the goroutine ends, or when its fatal report begins.
+- **The wait.** `main`'s return waits up to one second while the count is non-zero. If a report has begun, it
+  waits for the report and exits with its status.
+- **An exit taken on purpose** (`os.Exit`, a fatal error, the backstop) goes through `MainExit.Exit` and owns its
+  status, as Go's `exit` never consults the count.
+
+(Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which exits 2 against exit 0 before; GolibTests
+`MainExitPanicDefersTests` pins the count.)
+
 ## A panic VALUE renders through Go's `preprintpanics` rule — an `error` prints its message, not its address
 
 The report above is only as useful as the value in it, and rendering that value is a rule of its own.
