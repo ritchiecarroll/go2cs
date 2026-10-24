@@ -28190,4 +28190,169 @@ no change.
 
 — C2 (read at hop tip 9dcf0bafe1, 2026-10-24)
 
+## 2026-10-24 — P1 finding: a goroutine that panicked after its deferred `wg.Done()` let `main` exit 0 with an empty stderr; Go exits 2 with the report — FIXED (claude/g-goroutine-panic-exit)
+
+**The defect.** `wg.Add(1); go func(){ defer wg.Done(); panic("x") }(); wg.Wait()` exits 2 with the panic report in
+Go (3 of 3, P1). Converted, it exited 0 with nothing on stderr (P1, 5 of 5, untrimmed and trimmed; G, 5 of 5 at
+017dafb1f2). `wg.Done()` runs inside the panicking goroutine's deferred calls, so `main` returns while that goroutine
+has not reported yet. Go guarantees the report: after `main.main` returns, `runtime.main` waits while
+`runningPanicDefers` is non-zero and parks once `panicking` is set (runtime/proc.go, issues 3934 and 20018). A
+converted `main` is the CLR entry point and goroutines are background threads, so .NET shut down first and the panic
+never reached golib's unhandled-exception backstop.
+
+**The fix (golib `MainExit`).** Go's tail runs from `AppDomain.ProcessExit`, which the CLR raises when `Main` returns.
+- **The count.** A goroutine counts from `GoFrame.Capture`, or from a panic raised in a deferred call. It stops
+  counting when its frame returns with no panic in flight, or when the goroutine ends. The main goroutine is never
+  counted.
+- **The fatal start** (Go's `panicking`) is marked where an escape becomes certain: in the goroutine root's last
+  exception filter, on the first pass, before any `finally` runs. A fatal error marks it at `FatalReport`'s start, and
+  the backstop marks it again on its way out (`FatalExit`), for a panic escaping main or a thread golib did not start.
+- **The wait.** `main`'s return waits while the count is non-zero, for at most 20 ms. It spins and yields, because
+  `Thread.Sleep(1)` lasts a 15.6 ms timer tick on Windows. Once a report has begun, it waits for the report and sets
+  the exit code to 2. The bound covers the goroutine's rethrow to its root, 1.2 to 1.8 ms from `GoFrame.Capture`
+  (Release, 30 runs on G-LAPTOP). Like Go's 1000 yields, it does not wait out a recovering call that sleeps, or a
+  deferred call that blocks.
+- **Which report** (Go's `paniclk`, decided at `startpanic_m`). The first fatal start claims the report.
+  `MainExit.InstallBackstop` wraps golib's backstop so that a thread that did not claim it waits for the owner's
+  report OUTSIDE the backstop's own lock, and the owner's exit ends the process. Once the owner has reported, the
+  waiting thread parks for good (`paniclk` is never released) and prints only if the owner never reports (60 s).
+- **Exits taken on purpose** go through `MainExit.Exit` and keep their status: `os.Exit` (syscall.Exit), `fatal`,
+  `FatalReport`, the backstop, the signal reports and the test host's fatal path.
+
+Two departures from Go, both measured on net10.0:
+- **No parking forever.** Shutdown is serialized, so a parked main deadlocks the backstop's own `Environment.Exit(2)`.
+  Instead the handler waits for the report and sets `Environment.ExitCode`, which decides the status for a `void` or
+  `int` `Main`, on JIT and Native AOT.
+- **No clear in the goroutine scope's `Dispose`.** A panic escaping a goroutine disposes that scope BEFORE the
+  backstop starts its report, and clearing there let `main` exit 0 in between.
+
+**C1's review (mailbox `09000f9bd0`, ACCEPT). COORD ruled two parity findings in-seat:**
+- **M1:** `main`'s own panic racing the goroutine's printed `panic: m` 3 of 3, where Go prints the goroutine's. The
+  report ownership above fixes it. The converted probe (`wg.Wait(); panic("m")`) now prints the goroutine's 20 of 20.
+  Go itself is racy here: go1.26.10 printed the goroutine's 9 of 10 and main's 1 of 10. So this is a measured probe,
+  not a behavioral test.
+- **L1:** the first cut's one-second wait printed a recovering goroutine's deferred output after `main` returned,
+  where Go exits before it, and kept a blocked one for 1.47 s. The 20 ms bound fixes both.
+- **F1** (C1's re-read of `2cdc0ae14d`, ACCEPT; ruled in-seat). A non-owner woken by the owner's report went on to
+  print a SECOND report beside it. That happens beside a Go throw, because `FatalReport` prints without the backstop's
+  lock, or when the owner had already reported before the non-owner arrived. Go never prints one, because the throw's
+  `paniclk` is never released. A woken non-owner now parks; only a timeout (an owner that never reported) prints.
+  - GolibTests `MainExitReportOwnerTests`: a non-owner arriving after the owner's report never comes back to print.
+    The old wake-and-print fails it; a control shows the first fatal path still returns to print.
+  - As a process race, a second report almost never shows. A goroutine's `sync: unlock of unlocked mutex` racing
+    main's panic printed one report 30 of 30 both before and after the change (go1.26.10: one report, 6 of 6).
+
+**Guards.**
+- `GoroutinePanicAfterDeferredDone` (behavioral): exit 2 and Go's first stderr line, 10 of 10. It exited 0 before.
+- `GoroutineRecoveringWhenMainReturns` (behavioral): `defer func(){ recover(); time.Sleep(500ms); fmt.Println("recovered") }()`
+  behind `defer wg.Done()`. Exit 0 with nothing printed after `main` returns: Go 10 of 10, converted 5 of 5.
+- `GoroutinePanicExitCode`: the control, a goroutine panic with `main` blocked.
+- GolibTests `MainExitPanicDefersTests` (6 arms): the count rises while a panic runs a goroutine's deferred calls; a
+  nested recovery keeps the outer panic counted; a Goexit and a swallowed panic end it with the goroutine; main is
+  never counted; and the wait ends at its bound for a deferred call that blocks.
+- Plants, each restored byte-identical:
+  - no tail installed: exit 0, 5 of 5;
+  - the first-pass fatal mark removed: exit 0, 5 of 5;
+  - the wait back at one second: the bound arm fails, and "recovered" is printed 5 of 5;
+  - no `paniclk` wait: `panic: m` 17 of 20.
+
+**Stated limits.**
+- Go yields 1000 times. Here the wait is bounded by time, 20 ms, so a goroutine that needs longer than that to
+  reach its root after the `Done` lets `main` exit 0.
+- The count clear moved back into the goroutine scope's `Dispose` stays green alone, because the first-pass mark
+  sets `panicking` before that `Dispose` runs. The mark is what keeps a scope-end clear harmless.
+- A panic escaping a thread golib did not start is never counted, so a returning `main` does not wait for it.
+
+— G (measured 2026-10-24)
+
+## 2026-10-24 — R: a panic raised by a deferred Go CLOSURE loses its frames in runtime.Callers and in the crash traceback, because splicePanic cannot tell a closure from a converter defer wrapper — OPEN, post-hop (option B: the converter marks deferred Go closures)
+
+**What diverges.** Go's crash traceback for a deferred closure that recovers and panics again is the closure's
+frame, then `panic(...)`, then the deferring function (`main.main.func1() :9`, `panic(...)`, `main.main() :11`).
+The converted program prints `main.main() :11` alone, and `runtime.Callers` from inside that sequence splices nothing.
+
+**Why.** The closure is handed straight to `defer` and has no defer frame of its own (its `recover()` is a static
+call), so `GoFrame.Run`'s own catch is its panic's first catch: the site ends at the Run, and it is not the deferred
+delegate that caught first. `splicePanic` refuses that shape on purpose. At run time a Go closure handed to `defer` is
+indistinguishable from the converter's own defer wrappers (`() => f()`, the lambda for a call whose results are
+dropped, `defer panic(v)`'s thunk), and Go ELIDES its deferwrap, so accepting one would print a frame Go does not show.
+Its own comment calls this "a stated missing splice until the converter marks its defer wrappers".
+
+**What the crash-traceback seat (claude/r-crash-traceback, COORD option A) covers.** The ACCEPTED shapes only: a
+deferred named function that defers and panics itself, and the nil-func thunk. Their crash traceback now prints Go's
+chain. The closure shape is pinned at TODAY's output by GolibTests'
+`CrashReportTests.ARefusedChainPrintsExactlyWhatItAlwaysHas` and by the Repanic probe, so this row's fix moves both
+visibly.
+
+**Option B, sized.** The converter marks a deferred Go closure (the marker splicePanic anticipates); `GoFrame.Run`
+stamps the mark on the panic it catches; `spliceableSite` then accepts an ends-at-Run site whose deferred delegate is
+a marked closure, which both `runtime.Callers` and the crash traceback read. Population at hop tip 017dafb1f2: 515
+block-bodied `defer(() => { ... })` closures and 42 that take arguments in the corpus, and 142 in the behavioral goldens,
+against 1,073 expression-bodied wrapper and call lambdas, which stay unmarked. It is an emission change, so an i7 A/B
+and a golden re-baseline: about 2-3 days. Red first: the pinned arm above, flipped to Go's chain.
+
+— R (read at hop tip 017dafb1f2, 2026-10-24)
+
+## 2026-10-24 — R: a crash traceback loses every frame between a panic's first deferring frame and its last re-raise, so a panic that crosses two or more deferring frames prints only the top of Go's traceback — OPEN, post-hop (fix F: golib records each re-catch's stretch of the trace)
+
+**What diverges.** Go prints the whole goroutine stack. The converted program, for a panic that crosses deferring
+frames, prints from the throw down to the FIRST deferring frame and stops (`f, g, main` in Go reads `f`; recursion
+`r, r, r, main` reads `r`). It is a missing tail, never a wrong frame.
+
+**Why** (measured 2026-10-24 by instrumenting crashTraceback, then restored). `PanicTrace` is the trace from the throw
+to the panic's first catching frame (`CaptureThrowSite`, once only). That frame's `Run` re-raises the stored instance,
+which restarts its trace, and every later catcher does the same. At the crash, the exception carries only the LAST
+stretch, from the last re-raise down to the root. Every stretch in between survives nowhere.
+
+**What the crash-traceback seat (claude/r-crash-traceback) covers: fix N.** `crashTail` adds the last stretch below
+the first deferring frame. It does so only when the panic was caught by nothing below that frame (`Catches` = the catches above it, plus that
+frame's own, plus the crash's adoption) and the re-raised trace's first Go frame is that frame's method. That is one
+deferring frame on the path with any number of plain frames below it, under a chain prefix too. Every other shape
+prints exactly what it printed before. GolibTests' `CrashReportTests.ACrashPastTwoDeferringFramesPrintsExactlyWhatItAlwaysHas`
+and `...RecursiveDeferringFrames...` pin today's output for the two shapes this row fixes, and the S1Two and S1Rec
+probes do the same.
+
+**Fix F, sized.** In `CaptureThrowSite`, a catch after the first appends `new StackTrace(thrown)`, the stretch from
+the previous re-raise to this catcher, to the panic. `crashTail` then joins every stretch under the same boundary check
+(each stretch's first Go frame is the previous catcher's method; a mismatch keeps today's output). The cost is the
+reason it is not in the seat: a StackTrace capture each time a propagating panic crosses a deferring frame, on every
+panic and not only on crashes, including panics a later frame recovers.
+That needs a measured A/B on a panic-through-N-deferring-frames microbenchmark, and the runtime row. About 1 to 1.5
+days. Red first: the two pinned arms above, flipped to Go's frames.
+
+— R (read at claude/r-crash-traceback, 2026-10-24)
+
+## 2026-10-24 — R (C1's review, finding P1, token 2): outside the `-tests` pipeline a crash traceback prints runtime frames GOROOT-relative (`runtime/panic.go:860`) where a default Go build prints the absolute GOROOT path — STANDING convention, recorded
+
+**What diverges.** A default Go build prints `$GOROOT/src/runtime/panic.go:860 +0x..`. A converted program run on its
+own prints `runtime/panic.go:860`, while its own frames keep their absolute paths.
+
+**Why.** Root frames resolve through `rootFrameFile` -> `defaultGOROOT`, Go's link-time root. There is no linker
+here: the `-tests` pipeline passes the converting GOROOT in `GO2CS_DEFAULT_GOROOT` (goenvs_impl.cs), and anywhere else
+`defaultGOROOT` stays empty. That is what Go's `-trimpath` does, and a `-trimpath` Go build prints exactly
+`runtime/panic.go:860` (measured on the DeferPanic probe, go1.26.10). The difference is that ours trims only the GOROOT
+side, while `-trimpath` also trims the program's own paths.
+
+**Options, not ruled.** (a) Leave it, as consistent with every other root frame. (b) Have go2cs-gen bake the
+converting GOROOT into an executable as its link-time root, which is Go's default build. That reaches into the
+reproducibility and privacy of shipped binaries, which is why `-trimpath` exists, so it is an owner question.
+
+— R (2026-10-24)
+
+## 2026-10-24 — R (C1's review, finding P1, token 3): golib prints a frame's arguments as `()`, so the crash traceback's gopanic line reads `panic()` where Go prints `panic({0x..?, 0x..?})` — OPEN, LOW
+
+**What diverges.** Go's traceback prints each frame's argument words: gopanic always takes one `any`, so it reads
+`panic({0x7ff7a284c540?, 0x7ff7a2876018?})`. golib prints no argument words for any frame. A frame with none
+(`main.main()`) matches by accident, and every other frame differs.
+
+**Why.** The words are raw stack and register contents with no managed counterpart. Even Go marks them as
+best-effort (`?`), and their values differ per run and per build, so no test can compare them.
+
+**Options.** (a) Leave it: every frame with arguments already differs, and no comparison reads the words. (b) Print
+the SHAPE Go prints: `{...}` for gopanic's interface (`panic({...})`), and `...` for the elided words of other frames.
+That needs each frame's Go signature at print time. For gopanic, which is a root frame we compose ourselves, it is a
+literal. LOW: a reader sees the argument is there; no comparison changes.
+
+— R (2026-10-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

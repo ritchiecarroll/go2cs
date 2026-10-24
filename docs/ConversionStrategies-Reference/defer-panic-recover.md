@@ -587,6 +587,33 @@ machine-specific goroutine stack trace, so only the first line is compared. (Gua
 channel receive; both binaries must exit 2 with `panic: goroutine boom` as the first stderr line and a
 clean stdout.)
 
+**A `main` that returns while a goroutine is panicking still gets the report.** `defer wg.Done(); panic(v)`
+wakes `wg.Wait()` from inside the panicking goroutine's deferred calls, so `main` returns while that
+goroutine has not reported yet. Go's `runtime.main` does not exit then. It waits while any goroutine runs a
+panic's deferred calls (`runningPanicDefers`), and once a report has begun (`panicking`) it waits for the
+report, so the program exits 2 with it (runtime/proc.go, issues 3934 and 20018).
+
+A converted `main` is the CLR entry point and goroutines run on background threads, so the runtime used to shut
+down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainExit` runs Go's tail from
+`AppDomain.ProcessExit`, which the CLR raises when `Main` returns:
+- **The count.** A goroutine counts from the moment a panic starts running its deferred calls
+  (`GoFrame.Capture`). It stops counting when its frame returns with no panic in flight (a recovery), when
+  the goroutine ends, or when its fatal report begins.
+- **The wait.** `main`'s return waits while the count is non-zero, for at most 20 ms. That is as short as Go's
+  1000 yields in spirit: it covers the goroutine's rethrow to its root (1.2 to 1.8 ms measured) and no more.
+  A goroutine that is still running a slow recovering call, or blocks in a deferred call, is not waited for, and
+  neither does Go wait for one. If a report has begun, `main` waits for the report and exits with its status.
+- **Which report** (Go's `paniclk`): the first fatal start owns it. When `main` panics while a goroutine's crash
+  is already under way, `main`'s backstop waits for the goroutine's report, which then ends the process, so the
+  first line is the goroutine's, as in Go. Once the owner has reported, the waiting thread parks for good and never
+  prints a second report; only an owner that never reports (60 s) lets it print its own.
+- **An exit taken on purpose** (`os.Exit`, a fatal error, the backstop) goes through `MainExit.Exit` and owns its
+  status, as Go's `exit` never consults the count.
+
+(Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which exits 2 against exit 0 before, and by
+`GoroutineRecoveringWhenMainReturns`, which prints nothing after `main` returns. GolibTests `MainExitPanicDefersTests`
+pins the count and the bounded wait.)
+
 ## A panic VALUE renders through Go's `preprintpanics` rule — an `error` prints its message, not its address
 
 The report above is only as useful as the value in it, and rendering that value is a rule of its own.

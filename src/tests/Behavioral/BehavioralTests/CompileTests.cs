@@ -883,10 +883,16 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
+    public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
+
+    [TestMethod]
     public void CheckGoroutinePanicExitCode() => CheckTarget("GoroutinePanicExitCode");
 
     [TestMethod]
     public void CheckGoroutineParkStorm() => CheckTarget("GoroutineParkStorm");
+
+    [TestMethod]
+    public void CheckGoroutineRecoveringWhenMainReturns() => CheckTarget("GoroutineRecoveringWhenMainReturns");
 
     [TestMethod]
     public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
