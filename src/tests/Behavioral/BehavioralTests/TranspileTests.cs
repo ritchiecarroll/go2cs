@@ -883,6 +883,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoexitDefers() => CheckTarget("GoexitDefers");
 
     [TestMethod]
+    public void CheckGoroutinePanicAfterDeferredDone() => CheckTarget("GoroutinePanicAfterDeferredDone");
+
+    [TestMethod]
     public void CheckGoroutinePanicExitCode() => CheckTarget("GoroutinePanicExitCode");
 
     [TestMethod]
