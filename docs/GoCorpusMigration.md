@@ -2506,6 +2506,7 @@ budgets are independent of the caller's, and a budget that expires reports `NOT 
 the run and must **never** be read as a corpus regression.
 
 #### Amendment 2026-09-13 — the 1.23 → 1.24 rebank: the pin after the window, CNR first, the expected set by name
+*(Amended 2026-10-24: this block is the 1.23 → 1.24 hop's record. H9's gate line is the procedure; see the go1.26.10 re-bank amendment at the end of H10, item 7.)*
 
 - **Pin.** The rebank runs on the version branch after H5's overlay, where the tree carries one release: the
   H2→H5 window's pairing no longer applies. Each battery is launched from inside a Git Bash script that first
@@ -2789,6 +2790,7 @@ Per banked package:
    apply execution pins, so a pinned row is read outside `-Hop`. The recon leg stays the recon wrapper's.
    *(Edited in place 2026-10-01, §7 lesson 68: this read "A wrapper `-Hop` mode is open instrument debt". `-Hop`
    landed with TRAIN K, and its rows still carry no execution pin.)*
+   *(Amended 2026-10-24: NOTES A3 has landed, so `-Hop` rows now carry their pin. See the go1.26.10 re-bank amendment at the end of H10, item 1.)*
 2. **Re-derive the verdict count.** The denominator moves — tests are added and removed.
 3. **Re-derive the disclosure manifest.** Disclosures are pinned by **exact failure signature**, so a
    renamed or reworded test invalidates its pin and the manifest is **re-signed, never edited** (§4,
@@ -3010,6 +3012,7 @@ plan.
   re-pointing rows whose cost is keyed by the old name orphans them, and its own arithmetic
   (`costed + unscheduled == roster rows`) stops closing. Measured at the 1.24 hop:
   `162 costed + 48 unscheduled != 204 roster rows`, naming the six orphans.
+  *(Amended 2026-10-24: since NOTES A9 the generator's population is the population FILE; see the go1.26.10 re-bank amendment at the end of H10, item 4.)*
 
 **THE DISPATCH MECHANISM.** The campaign is not a loop over the roster. The map generator
 (`docs/phase4/hopA-inputs/shardmap.py`) reads the roster for its POPULATION and a banked per-row TSV
@@ -3453,6 +3456,7 @@ fallback.** W=3 drops that worker, moves its rows onto the three remaining, adds
 second cooldown gap per worker, and costs about a quarter-hour of makespan. ⚠ **The makespan figures
 are LOWER BOUNDS and the plan file says so by carrying no makespan line at all** — the numbers live in
 the generator's stdout, and a reader who finds them in the plan is reading something else.
+*(Amended 2026-10-24: `W` is the fleet as engaged at the hop; see the go1.26.10 re-bank amendment at the end of H10, item 3.)*
 
 ⚠ **THE RESERVED SET IS DERIVED, PINNED TO THE FASTEST WORKER, AND NOT SILENTLY ABSORBED.** It comes
 from the sweep's own long-timeout table rather than a typed list, and where a declared-reserved row has
@@ -3687,6 +3691,7 @@ leads:** where a brief and this block disagree, the brief stops and quotes both.
     - every numeric linux annotation equals a new-release linux reading, so the residual set is EMPTY
       (a planted wrong annotation is named);
     - the linux-annotated set equals the eligible set by name;
+    - *(Amended 2026-10-24: the darwin leg adds the same two checks for `darwin:` annotations; see the go1.26.10 re-bank amendment at the end of H10, item 5.)*
     - every cited SHA resolves on origin;
     - no accepted seat is unlanded without a named disposition;
     - tracked `testdata` equals the pinned GOROOT (repoguard's `TestTrackedFixturesMatchPinnedGoRoot`, landed with
@@ -3825,6 +3830,65 @@ FROM THE CLOSE SEAT ITSELF.** The seat stopped three times and each stop was rul
      only -text pin under src/core; git check-attr reads the three payloads text: unspecified). The one-production-embed claim was re-read for this block by a grep of
      go1.24.13's std sources, outside cmd/, for //go:embed in non-test files. The close's own figures
      are not written here: step 11 reads them, and the close STAMP records them. -->
+
+#### Amendment 2026-10-24 (G) — the go1.26.10 re-bank: seven readings this hop found stale, and the darwin leg
+
+Ruled by COORD on 2026-10-24, on the instance plan [`PLAN-rebank-go126.md`](PLAN-rebank-go126.md) (§10 and §11). Each
+item names the sentence it qualifies, which stays as written. Where the two disagree, this block is the procedure from
+this date.
+
+1. **H10 step 1, "Until NOTES A3 lands it does NOT apply execution pins".** A3 has landed: `Get-HopPopulationRows`
+   (`src/_roster.ps1`) builds each row with its roster pin, so `run-validated-sweep.ps1 -Hop` reads a pinned row WITH
+   its pin. The recon leg still runs through the recon wrapper, as step 1 says, and for the reason it gives.
+2. **§7 lesson 68's pinned-row list.** The rows that carry an `execution:` pin move between hops: at the go1.26
+   hop tip `5ee4bbbabd` they are `internal/godebug` and `net/http` (`release-tiered`), and `log/slog` carries none.
+   **A firing control is taken on a row the roster pins at the tree it runs on, read from the roster, never from a
+   lesson's list.**
+3. **H10's re-bank amendment, "THE SHARD SIZE IS W=4 … W=3 is the fallback", and §3.2's "Reserve the known giants
+   and pin them to the fastest worker".** Both describe the 1.24.13 fleet. **`W` is the fleet as engaged at the
+   hop, and the reserved set is pinned by ruling.** At go1.26 the windows fleet is three lanes, and an owner's
+   box rule split the reserved set across two of them: the off-i9 list keeps `crypto/tls` and `net/http` off the
+   fastest box, while the rest stays on it. A rule about a BOX moves rows only off that box; the rows' class does not
+   change (COORD, Q5). The reserved set is still derived from the long-timeout table, never typed.
+4. **The launch amendment's "its population is the roster file" and the two refusal sentences beside it.** Since
+   NOTES A9 (`841fc39322`), `shardmap.py` reads `docs/phase4/data/population-go<GoStdLibVersion>.txt`, as the
+   2026-10-14 note above records. The seat-before-recon refusal is now a refusal against the POPULATION file's
+   membership, not the roster's. The order it protects is unchanged: recon, then seat, then plan, then driver.
+5. **H10 had NO darwin leg.** The close checks read linux annotations only, while darwin annotations have been
+   banked since 2026-10-03 (C1's waves; 198 rows at go1.24.13). **The DARWIN LEG, from this hop on:**
+   - **When.** It runs after the windows train that banks its rows has landed. The leg reads through the os-matrix
+     workflow's `sweep-shard` stage, which runs `run-validated-sweep.ps1 -Filter <rows> -Exact`. The sweep selects
+     among BANKED rows only, so it cannot reach an unbanked row, and before the bank it would score against the
+     outgoing release's counts.
+   - **The unit** is a hosted wave of at most 20 rows on BOTH mac runners (`osx-arm64`, `osx-x64`).
+   - **A row banks a `darwin:` annotation only when the two RIDs agree verdict for verdict.** The annotation is the
+     measured count read from the row's own artifacts. The sweep's count red against the windows bank is the
+     reading's signal, never a stop and never the reading.
+   - **Every darwin-eligible row is re-read at the new release.** An annotation from the outgoing release is
+     re-derived, never carried. Platform parity is a standing owner goal, so removal is not the default (COORD, Q4).
+   - **The closing checks gain two darwin terms**, beside the linux ones in close step 11: every numeric `darwin:`
+     annotation equals a new-release reading on both RIDs, and the annotated set equals the darwin-eligible set by
+     name.
+   - **Eligibility per GOOS is an enumeration**, taken with `go list -e` at the corpus tags under each GOOS with a
+     fabricated-package control. At go1.26.10 it reads windows 242, linux 240 and darwin 240.
+6. **`PLAN-hop-go126.md` §7's H10 lane assignment** is superseded by COORD's of 2026-10-24, recorded in the re-bank
+   plan §3.1. A hop plan's lane table is a proposal, and the re-bank plan is where the dispatched fleet is
+   recorded.
+7. **H9's 2026-09-13 amendment** spells the 1.23 → 1.24 rebank: the go1.24.13 pin and the eight goldens by name. It
+   is that hop's record, kept as written. **H9's gate line is the procedure**, read against the hop's own H0
+   base. At go1.26 that base is EMPTY in every phase (`phase4/H0-go126-baseline.md` §6.1), so the step is
+   a confirmation: CNR first, then the four phases, with any CHANGED project classified before any `--only` copy.
+
+<!-- Provenance, 2026-10-24 (G, docs only; no H9 or H10 instrument was run to write it). Each item was read at the hop
+     tip 5ee4bbbabd: (1) src/_roster.ps1 Get-HopPopulationRows builds a per-row pin map from the roster's Execution
+     column; (2) the roster table's `execution:` keys (internal/godebug, net/http) read from
+     docs/ValidatedTestPackages.md; (3) the fleet and the off-i9 list are COORD's assignment of 2026-10-24, and the
+     reserved set is derived from $longTimeouts in src/run-validated-sweep.ps1 by
+     docs/phase4/data/rebank-go1.26.10/shards.py; (4) shardmap.py derives POPULATION_OF_RECORD from src/version.props;
+     (5) the darwin waves' provenance blocks in docs/ValidatedTestPackages.md (2026-10-03 to 2026-10-09), the os-matrix
+     sweep-shard stage in .github/workflows/os-matrix.yml, and the per-GOOS eligibility from
+     docs/phase4/data/rebank-go1.26.10/eligible.sh; (6) PLAN-hop-go126.md §7; (7) phase4/H0-go126-baseline.md §6.1.
+     COORD's rulings Q1-Q5 and the in-stage order for these seven are its message of 2026-10-24, relayed to G. -->
 
 ### H11 — Publication and compatibility guards **GATE**
 
@@ -4032,6 +4096,7 @@ the packages that carry per-package deadline **floors**; those plus any row with
 suite are the reserved set. ⚠ **The floors are floors, not overrides** — a larger timeout raises them
 for a slower box; a smaller one still loses. Under-budgeting exactly those rows is the false red the
 table exists to prevent.
+*(Amended 2026-10-24: a box rule can split the reserved set across lanes, by ruling; see the go1.26.10 re-bank amendment at the end of H10, item 3.)*
 
 ⚠ **DERIVE the reserved set at generation time; never carry a copy.** The long-timeout table is
 *edited* — floors get raised, packages get added — so a reserved set typed into a plan is stale by
@@ -4881,6 +4946,7 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     H10, firing-controlled on log/slog, with a relocated row taking its predecessor's pin.** Why:
     `Get-HopPopulationRows` still builds every row with `Execution = $null`, the class c8c77eadff fixed in the recon
     wrapper. **Step text:** Readiness, Instruments; H10 step 1 and its launch amendment.
+    *(Amended 2026-10-24: A3 has landed, and the pinned rows move between hops; see the go1.26.10 re-bank amendment at the end of H10, items 1 and 2.)*
     <!-- src/_roster.ps1:578 at 172d437e66 (:585 at e2008427b1); 172d437e66:docs/GoCorpusMigration.md:2292, :2377;
     NOTES-next-hop.md A3 and §6.
     Corrected at the apply, 2026-10-02. The draft, derived at 172d437e66, read "firing-controlled on internal/godebug,

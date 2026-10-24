@@ -28,6 +28,9 @@ assert reserved <= set(pop), reserved - set(pop)
 off_i9 = {'crypto/tls', 'net/http', 'net/http/httptest', 'net/smtp', 'crypto/x509', 'net/http/cgi',
           'net/http/httptrace', 'os/exec'}                 # the owner's list, by name (COORD 2026-10-24)
 assert off_i9 <= set(pop), off_i9 - set(pop)
+# COORD's ruling Q5 (2026-10-24): the list is about the i9's BOX, not the rows. So R-LAPTOP's windows shard keeps only
+# the off-i9 rows that are RESERVED, and the other off-i9 rows deal into H like any non-reserved row.
+rlap_rows = reserved & off_i9
 
 # Windows costs at go1.24.13 (recon basis) and linux costs (go1.23-era WSL section). Ordering only.
 wcost = {}
@@ -70,17 +73,18 @@ def split(names, n):
 # ---- windows: every population row (the recon leg is the membership authority)
 win = set(pop)
 i9 = order(sorted((reserved - off_i9) & win), wcost)
-rlap = order(sorted(off_i9 & win), wcost)
-h = order(sorted(win - reserved - off_i9), wcost)
+rlap = order(sorted(rlap_rows & win), wcost)
+h = order(sorted(win - reserved), wcost)
 emit('windows', 'i9', [i9], wcost)
 emit('windows', 'RLAP', [rlap], wcost)
 emit('windows', 'H', split(h, 3), wcost)
 
-# ---- linux: every linux-eligible row; the reserved and off-i9 rows to R's WSL, the rest to P1/P2 dealt round-robin
+# ---- linux: every linux-eligible row; the RESERVED set to R's WSL (Q2: no cloud OOM risk on it), the rest to P1/P2
+# dealt round-robin. The off-i9 list says nothing about linux (Q5), so it plays no part here.
 lin = set(rows(os.path.join(here, 'eligible-linux.txt')))
 assert lin <= set(pop)
-heavy = order(sorted((reserved | off_i9) & lin), lcost if lcost else wcost)
-rest = order(sorted(lin - reserved - off_i9), {r: lcost.get(r, wcost.get(r, UNKNOWN)) for r in lin})
+heavy = order(sorted(reserved & lin), lcost if lcost else wcost)
+rest = order(sorted(lin - reserved), {r: lcost.get(r, wcost.get(r, UNKNOWN)) for r in lin})
 p1 = [r for i, r in enumerate(rest) if i % 2 == 0]
 p2 = [r for i, r in enumerate(rest) if i % 2 == 1]
 emit('linux', 'RWSL', [heavy], lcost)

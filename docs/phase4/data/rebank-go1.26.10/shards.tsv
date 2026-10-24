@@ -10,14 +10,8 @@ windows	i9	i9-1	8	index/suffixarray	96
 windows	i9	i9-1	9	go/parser	139
 windows	i9	i9-1	10	runtime	265
 windows	i9	i9-1	11	net	3792
-windows	RLAP	RLAP-1	1	net/http/httptrace	35
-windows	RLAP	RLAP-1	2	net/smtp	48
-windows	RLAP	RLAP-1	3	net/http/httptest	55
-windows	RLAP	RLAP-1	4	net/http/cgi	106
-windows	RLAP	RLAP-1	5	crypto/x509	200
-windows	RLAP	RLAP-1	6	os/exec	223
-windows	RLAP	RLAP-1	7	net/http	376
-windows	RLAP	RLAP-1	8	crypto/tls	
+windows	RLAP	RLAP-1	1	net/http	376
+windows	RLAP	RLAP-1	2	crypto/tls	
 windows	H	H-1	1	internal/syscall/windows	15
 windows	H	H-1	2	internal/syscall/windows/registry	15
 windows	H	H-1	3	internal/synctest	18
@@ -93,113 +87,117 @@ windows	H	H-1	72	net/url	26
 windows	H	H-1	73	crypto/elliptic	27
 windows	H	H-1	74	crypto/internal/fips140/nistec	27
 windows	H	H-1	75	debug/macho	27
-windows	H	H-2	1	encoding/csv	27
-windows	H	H-2	2	hash	27
-windows	H	H-2	3	hash/adler32	27
-windows	H	H-2	4	internal/coverage/cmerge	27
-windows	H	H-2	5	internal/coverage/test	27
-windows	H	H-2	6	internal/dag	27
-windows	H	H-2	7	internal/saferio	27
-windows	H	H-2	8	internal/sysinfo	27
-windows	H	H-2	9	sort	27
-windows	H	H-2	10	testing/slogtest	27
-windows	H	H-2	11	embed/internal/embedtest	28
-windows	H	H-2	12	encoding/base32	28
-windows	H	H-2	13	internal/buildcfg	28
-windows	H	H-2	14	internal/coverage/slicereader	28
-windows	H	H-2	15	internal/fmtsort	28
-windows	H	H-2	16	internal/zstd	28
-windows	H	H-2	17	io	28
-windows	H	H-2	18	bytes	29
-windows	H	H-2	19	crypto/internal/fips140/aes	29
-windows	H	H-2	20	go/constant	29
-windows	H	H-2	21	internal/singleflight	29
-windows	H	H-2	22	internal/sync	29
-windows	H	H-2	23	io/ioutil	29
-windows	H	H-2	24	net/textproto	29
-windows	H	H-2	25	path/filepath	29
-windows	H	H-2	26	sync	29
-windows	H	H-2	27	text/scanner	29
-windows	H	H-2	28	crypto/internal/boring/bcache	30
-windows	H	H-2	29	crypto/internal/fips140/ecdh	30
-windows	H	H-2	30	crypto/pbkdf2	30
-windows	H	H-2	31	debug/dwarf	30
-windows	H	H-2	32	go/internal/gccgoimporter	30
-windows	H	H-2	33	go/scanner	30
-windows	H	H-2	34	runtime/debug	30
-windows	H	H-2	35	runtime/metrics	30
-windows	H	H-2	36	compress/zlib	31
-windows	H	H-2	37	crypto/hmac	31
-windows	H	H-2	38	crypto/rc4	31
-windows	H	H-2	39	internal/chacha8rand	31
-windows	H	H-2	40	log/slog/internal/buffer	31
-windows	H	H-2	41	math/cmplx	31
-windows	H	H-2	42	regexp/syntax	31
-windows	H	H-2	43	crypto/des	32
-windows	H	H-2	44	crypto/hkdf	32
-windows	H	H-2	45	image	32
-windows	H	H-2	46	internal/xcoff	32
-windows	H	H-2	47	io/fs	32
-windows	H	H-2	48	os/signal	32
-windows	H	H-2	49	log/slog/internal/benchmarks	33
-windows	H	H-2	50	mime/quotedprintable	33
-windows	H	H-2	51	text/template/parse	33
-windows	H	H-2	52	crypto/ed25519	34
-windows	H	H-2	53	crypto/internal/fips140/rsa	34
-windows	H	H-2	54	crypto/md5	34
-windows	H	H-2	55	crypto/sha512	34
-windows	H	H-2	56	go/internal/srcimporter	34
-windows	H	H-2	57	go/printer	34
-windows	H	H-2	58	strconv	34
-windows	H	H-2	59	image/draw	35
-windows	H	H-2	60	internal/platform	35
-windows	H	H-2	61	flag	36
-windows	H	H-2	62	internal/poll	36
-windows	H	H-2	63	internal/reflectlite	36
-windows	H	H-2	64	debug/pe	37
-windows	H	H-2	65	image/png	37
-windows	H	H-2	66	net/netip	37
-windows	H	H-2	67	crypto/internal/sysrand	38
-windows	H	H-2	68	go/build	39
-windows	H	H-2	69	image/gif	40
-windows	H	H-2	70	compress/gzip	41
-windows	H	H-2	71	context	41
-windows	H	H-2	72	debug/elf	42
-windows	H	H-2	73	go/ast	42
-windows	H	H-2	74	strings	43
-windows	H	H-2	75	crypto/ecdh	44
-windows	H	H-3	1	go/doc	44
-windows	H	H-3	2	internal/fuzz	45
-windows	H	H-3	3	crypto/rand	46
-windows	H	H-3	4	crypto/aes	47
-windows	H	H-3	5	crypto/internal/fips140/edwards25519/field	47
-windows	H	H-3	6	net/rpc/jsonrpc	47
-windows	H	H-3	7	debug/buildinfo	48
-windows	H	H-3	8	html/template	50
-windows	H	H-3	9	crypto/subtle	51
-windows	H	H-3	10	expvar	51
-windows	H	H-3	11	math/rand/v2	52
-windows	H	H-3	12	crypto	53
-windows	H	H-3	13	encoding/xml	53
-windows	H	H-3	14	net/rpc	53
-windows	H	H-3	15	encoding/gob	56
-windows	H	H-3	16	crypto/ecdsa	57
-windows	H	H-3	17	math/big	58
-windows	H	H-3	18	net/http/fcgi	58
-windows	H	H-3	19	compress/flate	60
-windows	H	H-3	20	crypto/cipher	62
-windows	H	H-3	21	go/importer	62
-windows	H	H-3	22	net/http/httputil	62
-windows	H	H-3	23	text/template	63
-windows	H	H-3	24	net/http/pprof	68
-windows	H	H-3	25	crypto/internal/fips140test	73
-windows	H	H-3	26	os	78
-windows	H	H-3	27	internal/types/errors	84
-windows	H	H-3	28	crypto/rsa	86
-windows	H	H-3	29	reflect	86
-windows	H	H-3	30	net/http/cookiejar	94
-windows	H	H-3	31	internal/runtime/maps	100
-windows	H	H-3	32	encoding/json	102
+windows	H	H-1	76	encoding/csv	27
+windows	H	H-1	77	hash	27
+windows	H	H-2	1	hash/adler32	27
+windows	H	H-2	2	internal/coverage/cmerge	27
+windows	H	H-2	3	internal/coverage/test	27
+windows	H	H-2	4	internal/dag	27
+windows	H	H-2	5	internal/saferio	27
+windows	H	H-2	6	internal/sysinfo	27
+windows	H	H-2	7	sort	27
+windows	H	H-2	8	testing/slogtest	27
+windows	H	H-2	9	embed/internal/embedtest	28
+windows	H	H-2	10	encoding/base32	28
+windows	H	H-2	11	internal/buildcfg	28
+windows	H	H-2	12	internal/coverage/slicereader	28
+windows	H	H-2	13	internal/fmtsort	28
+windows	H	H-2	14	internal/zstd	28
+windows	H	H-2	15	io	28
+windows	H	H-2	16	bytes	29
+windows	H	H-2	17	crypto/internal/fips140/aes	29
+windows	H	H-2	18	go/constant	29
+windows	H	H-2	19	internal/singleflight	29
+windows	H	H-2	20	internal/sync	29
+windows	H	H-2	21	io/ioutil	29
+windows	H	H-2	22	net/textproto	29
+windows	H	H-2	23	path/filepath	29
+windows	H	H-2	24	sync	29
+windows	H	H-2	25	text/scanner	29
+windows	H	H-2	26	crypto/internal/boring/bcache	30
+windows	H	H-2	27	crypto/internal/fips140/ecdh	30
+windows	H	H-2	28	crypto/pbkdf2	30
+windows	H	H-2	29	debug/dwarf	30
+windows	H	H-2	30	go/internal/gccgoimporter	30
+windows	H	H-2	31	go/scanner	30
+windows	H	H-2	32	runtime/debug	30
+windows	H	H-2	33	runtime/metrics	30
+windows	H	H-2	34	compress/zlib	31
+windows	H	H-2	35	crypto/hmac	31
+windows	H	H-2	36	crypto/rc4	31
+windows	H	H-2	37	internal/chacha8rand	31
+windows	H	H-2	38	log/slog/internal/buffer	31
+windows	H	H-2	39	math/cmplx	31
+windows	H	H-2	40	regexp/syntax	31
+windows	H	H-2	41	crypto/des	32
+windows	H	H-2	42	crypto/hkdf	32
+windows	H	H-2	43	image	32
+windows	H	H-2	44	internal/xcoff	32
+windows	H	H-2	45	io/fs	32
+windows	H	H-2	46	os/signal	32
+windows	H	H-2	47	log/slog/internal/benchmarks	33
+windows	H	H-2	48	mime/quotedprintable	33
+windows	H	H-2	49	text/template/parse	33
+windows	H	H-2	50	crypto/ed25519	34
+windows	H	H-2	51	crypto/internal/fips140/rsa	34
+windows	H	H-2	52	crypto/md5	34
+windows	H	H-2	53	crypto/sha512	34
+windows	H	H-2	54	go/internal/srcimporter	34
+windows	H	H-2	55	go/printer	34
+windows	H	H-2	56	strconv	34
+windows	H	H-2	57	image/draw	35
+windows	H	H-2	58	internal/platform	35
+windows	H	H-2	59	net/http/httptrace	35
+windows	H	H-2	60	flag	36
+windows	H	H-2	61	internal/poll	36
+windows	H	H-2	62	internal/reflectlite	36
+windows	H	H-2	63	debug/pe	37
+windows	H	H-2	64	image/png	37
+windows	H	H-2	65	net/netip	37
+windows	H	H-2	66	crypto/internal/sysrand	38
+windows	H	H-2	67	go/build	39
+windows	H	H-2	68	image/gif	40
+windows	H	H-2	69	compress/gzip	41
+windows	H	H-2	70	context	41
+windows	H	H-2	71	debug/elf	42
+windows	H	H-2	72	go/ast	42
+windows	H	H-2	73	strings	43
+windows	H	H-2	74	crypto/ecdh	44
+windows	H	H-2	75	go/doc	44
+windows	H	H-2	76	internal/fuzz	45
+windows	H	H-2	77	crypto/rand	46
+windows	H	H-3	1	crypto/aes	47
+windows	H	H-3	2	crypto/internal/fips140/edwards25519/field	47
+windows	H	H-3	3	net/rpc/jsonrpc	47
+windows	H	H-3	4	debug/buildinfo	48
+windows	H	H-3	5	net/smtp	48
+windows	H	H-3	6	html/template	50
+windows	H	H-3	7	crypto/subtle	51
+windows	H	H-3	8	expvar	51
+windows	H	H-3	9	math/rand/v2	52
+windows	H	H-3	10	crypto	53
+windows	H	H-3	11	encoding/xml	53
+windows	H	H-3	12	net/rpc	53
+windows	H	H-3	13	net/http/httptest	55
+windows	H	H-3	14	encoding/gob	56
+windows	H	H-3	15	crypto/ecdsa	57
+windows	H	H-3	16	math/big	58
+windows	H	H-3	17	net/http/fcgi	58
+windows	H	H-3	18	compress/flate	60
+windows	H	H-3	19	crypto/cipher	62
+windows	H	H-3	20	go/importer	62
+windows	H	H-3	21	net/http/httputil	62
+windows	H	H-3	22	text/template	63
+windows	H	H-3	23	net/http/pprof	68
+windows	H	H-3	24	crypto/internal/fips140test	73
+windows	H	H-3	25	os	78
+windows	H	H-3	26	internal/types/errors	84
+windows	H	H-3	27	crypto/rsa	86
+windows	H	H-3	28	reflect	86
+windows	H	H-3	29	net/http/cookiejar	94
+windows	H	H-3	30	internal/runtime/maps	100
+windows	H	H-3	31	encoding/json	102
+windows	H	H-3	32	net/http/cgi	106
 windows	H	H-3	33	database/sql	117
 windows	H	H-3	34	log/slog	119
 windows	H	H-3	35	archive/tar	128
@@ -208,58 +206,54 @@ windows	H	H-3	37	compress/bzip2	129
 windows	H	H-3	38	testing/iotest	136
 windows	H	H-3	39	internal/godebugs	140
 windows	H	H-3	40	runtime/pprof	175
-windows	H	H-3	41	crypto/internal/fips140/edwards25519	325
-windows	H	H-3	42	go/internal/gcimporter	337
-windows	H	H-3	43	regexp	384
-windows	H	H-3	44	crypto/fips140	
-windows	H	H-3	45	crypto/hpke	
-windows	H	H-3	46	crypto/internal/fips140/mldsa	
-windows	H	H-3	47	crypto/internal/fips140/subtle	
-windows	H	H-3	48	crypto/internal/fips140cache	
-windows	H	H-3	49	crypto/internal/fips140only	
-windows	H	H-3	50	fmt	
-windows	H	H-3	51	internal/coverage/cfile	
-windows	H	H-3	52	internal/godebug	
-windows	H	H-3	53	internal/runtime/atomic	
-windows	H	H-3	54	internal/runtime/cgroup	
-windows	H	H-3	55	internal/runtime/gc/scan	
-windows	H	H-3	56	internal/runtime/wasitest	
-windows	H	H-3	57	internal/strconv	
-windows	H	H-3	58	internal/syscall/unix	
-windows	H	H-3	59	internal/trace	
-windows	H	H-3	60	internal/trace/internal/tracev1	
-windows	H	H-3	61	internal/trace/testtrace	
-windows	H	H-3	62	internal/trace/tracev2	
-windows	H	H-3	63	internal/unsafeheader	
-windows	H	H-3	64	math/big/internal/asmgen	
-windows	H	H-3	65	math/rand	
-windows	H	H-3	66	mime/multipart	
-windows	H	H-3	67	os/user	
-windows	H	H-3	68	runtime/trace	
-windows	H	H-3	69	syscall	
-windows	H	H-3	70	testing/cryptotest	
-windows	H	H-3	71	testing/synctest	
-windows	H	H-3	72	unicode/utf8	
-windows	H	H-3	73	testing	
+windows	H	H-3	41	crypto/x509	200
+windows	H	H-3	42	os/exec	223
+windows	H	H-3	43	crypto/internal/fips140/edwards25519	325
+windows	H	H-3	44	go/internal/gcimporter	337
+windows	H	H-3	45	regexp	384
+windows	H	H-3	46	crypto/fips140	
+windows	H	H-3	47	crypto/hpke	
+windows	H	H-3	48	crypto/internal/fips140/mldsa	
+windows	H	H-3	49	crypto/internal/fips140/subtle	
+windows	H	H-3	50	crypto/internal/fips140cache	
+windows	H	H-3	51	crypto/internal/fips140only	
+windows	H	H-3	52	fmt	
+windows	H	H-3	53	internal/coverage/cfile	
+windows	H	H-3	54	internal/godebug	
+windows	H	H-3	55	internal/runtime/atomic	
+windows	H	H-3	56	internal/runtime/cgroup	
+windows	H	H-3	57	internal/runtime/gc/scan	
+windows	H	H-3	58	internal/runtime/wasitest	
+windows	H	H-3	59	internal/strconv	
+windows	H	H-3	60	internal/syscall/unix	
+windows	H	H-3	61	internal/trace	
+windows	H	H-3	62	internal/trace/internal/tracev1	
+windows	H	H-3	63	internal/trace/testtrace	
+windows	H	H-3	64	internal/trace/tracev2	
+windows	H	H-3	65	internal/unsafeheader	
+windows	H	H-3	66	math/big/internal/asmgen	
+windows	H	H-3	67	math/rand	
+windows	H	H-3	68	mime/multipart	
+windows	H	H-3	69	os/user	
+windows	H	H-3	70	runtime/trace	
+windows	H	H-3	71	syscall	
+windows	H	H-3	72	testing/cryptotest	
+windows	H	H-3	73	testing/synctest	
+windows	H	H-3	74	unicode/utf8	
+windows	H	H-3	75	testing	
 linux	RWSL	RWSL-1	1	archive/zip	649
 linux	RWSL	RWSL-1	2	crypto/tls	711
-linux	RWSL	RWSL-1	3	os/exec	740
-linux	RWSL	RWSL-1	4	go/parser	777
-linux	RWSL	RWSL-1	5	time	857
-linux	RWSL	RWSL-1	6	index/suffixarray	1056
-linux	RWSL	RWSL-1	7	sync/atomic	1258
-linux	RWSL	RWSL-1	8	hash/maphash	1994
-linux	RWSL	RWSL-1	9	crypto/dsa	4366
-linux	RWSL	RWSL-1	10	crypto/internal/fips140/mlkem	
-linux	RWSL	RWSL-1	11	crypto/mlkem	
-linux	RWSL	RWSL-1	12	crypto/x509	
-linux	RWSL	RWSL-1	13	net	
-linux	RWSL	RWSL-1	14	net/http	
-linux	RWSL	RWSL-1	15	net/http/cgi	
-linux	RWSL	RWSL-1	16	net/http/httptest	
-linux	RWSL	RWSL-1	17	net/http/httptrace	
-linux	RWSL	RWSL-1	18	net/smtp	
-linux	RWSL	RWSL-1	19	runtime	
+linux	RWSL	RWSL-1	3	go/parser	777
+linux	RWSL	RWSL-1	4	time	857
+linux	RWSL	RWSL-1	5	index/suffixarray	1056
+linux	RWSL	RWSL-1	6	sync/atomic	1258
+linux	RWSL	RWSL-1	7	hash/maphash	1994
+linux	RWSL	RWSL-1	8	crypto/dsa	4366
+linux	RWSL	RWSL-1	9	crypto/internal/fips140/mlkem	
+linux	RWSL	RWSL-1	10	crypto/mlkem	
+linux	RWSL	RWSL-1	11	net	
+linux	RWSL	RWSL-1	12	net/http	
+linux	RWSL	RWSL-1	13	runtime	
 linux	P1	P1-1	1	plugin	6
 linux	P1	P1-1	2	unicode/utf8	14
 linux	P1	P1-1	3	crypto/internal/boring	16
@@ -297,80 +291,83 @@ linux	P1	P1-1	34	go/format	20
 linux	P1	P1-1	35	internal/reflectlite	20
 linux	P1	P1-1	36	net/url	20
 linux	P1	P1-1	37	crypto/aes	21
-linux	P1	P1-2	1	encoding/ascii85	21
-linux	P1	P1-2	2	html	
-linux	P1	P1-2	3	internal/fuzz	21
-linux	P1	P1-2	4	log/slog/internal/benchmarks	21
-linux	P1	P1-2	5	bufio	22
-linux	P1	P1-2	6	go/ast	22
-linux	P1	P1-2	7	hash	22
-linux	P1	P1-2	8	math	22
-linux	P1	P1-2	9	runtime/metrics	22
-linux	P1	P1-2	10	container/heap	23
-linux	P1	P1-2	11	encoding/base32	23
-linux	P1	P1-2	12	internal/abi	23
-linux	P1	P1-2	13	debug/plan9obj	24
-linux	P1	P1-2	14	go/token	24
-linux	P1	P1-2	15	image/jpeg	24
-linux	P1	P1-2	16	crypto/internal/fips140/ecdsa	
-linux	P1	P1-2	17	internal/pkgbits	
-linux	P1	P1-2	18	slices	
-linux	P1	P1-2	19	crypto/sha1	26
-linux	P1	P1-2	20	expvar	26
-linux	P1	P1-2	21	internal/cpu	26
-linux	P1	P1-2	22	iter	
-linux	P1	P1-2	23	debug/gosym	27
-linux	P1	P1-2	24	internal/coverage/test	
-linux	P1	P1-2	25	image/gif	28
-linux	P1	P1-2	26	crypto/ed25519	29
-linux	P1	P1-2	27	go/doc/comment	29
-linux	P1	P1-2	28	net/http/fcgi	29
-linux	P1	P1-2	29	crypto/internal/boring/bcache	
-linux	P1	P1-2	30	crypto/pbkdf2	
-linux	P1	P1-2	31	log/slog/internal/buffer	
-linux	P1	P1-2	32	crypto/elliptic	32
-linux	P1	P1-2	33	debug/elf	32
-linux	P1	P1-2	34	crypto/rand	33
-linux	P1	P1-2	35	compress/zlib	34
-linux	P1	P1-2	36	internal/platform	
-linux	P1	P1-2	37	crypto/subtle	36
-linux	P1	P1-3	1	os/signal	36
-linux	P1	P1-3	2	net/netip	
-linux	P1	P1-3	3	crypto/internal/sysrand	
-linux	P1	P1-3	4	sync	38
-linux	P1	P1-3	5	archive/tar	40
-linux	P1	P1-3	6	crypto	41
-linux	P1	P1-3	7	go/doc	
-linux	P1	P1-3	8	debug/buildinfo	46
-linux	P1	P1-3	9	net/rpc	
-linux	P1	P1-3	10	encoding/gob	
-linux	P1	P1-3	11	text/template	59
-linux	P1	P1-3	12	net/http/httputil	
-linux	P1	P1-3	13	html/template	66
-linux	P1	P1-3	14	database/sql	72
-linux	P1	P1-3	15	encoding/json	78
-linux	P1	P1-3	16	math/rand/v2	78
-linux	P1	P1-3	17	reflect	
-linux	P1	P1-3	18	internal/runtime/maps	
+linux	P1	P1-1	38	encoding/ascii85	21
+linux	P1	P1-2	1	html	
+linux	P1	P1-2	2	internal/fuzz	21
+linux	P1	P1-2	3	log/slog/internal/benchmarks	21
+linux	P1	P1-2	4	bufio	22
+linux	P1	P1-2	5	go/ast	22
+linux	P1	P1-2	6	hash	22
+linux	P1	P1-2	7	math	22
+linux	P1	P1-2	8	runtime/metrics	22
+linux	P1	P1-2	9	container/heap	23
+linux	P1	P1-2	10	encoding/base32	23
+linux	P1	P1-2	11	internal/abi	23
+linux	P1	P1-2	12	debug/plan9obj	24
+linux	P1	P1-2	13	go/token	24
+linux	P1	P1-2	14	image/jpeg	24
+linux	P1	P1-2	15	crypto/internal/fips140/ecdsa	
+linux	P1	P1-2	16	internal/pkgbits	
+linux	P1	P1-2	17	slices	
+linux	P1	P1-2	18	crypto/sha1	26
+linux	P1	P1-2	19	expvar	26
+linux	P1	P1-2	20	internal/cpu	26
+linux	P1	P1-2	21	iter	
+linux	P1	P1-2	22	debug/gosym	27
+linux	P1	P1-2	23	internal/coverage/test	
+linux	P1	P1-2	24	image/gif	28
+linux	P1	P1-2	25	crypto/ed25519	29
+linux	P1	P1-2	26	go/doc/comment	29
+linux	P1	P1-2	27	net/http/fcgi	29
+linux	P1	P1-2	28	crypto/internal/boring/bcache	
+linux	P1	P1-2	29	crypto/pbkdf2	
+linux	P1	P1-2	30	log/slog/internal/buffer	
+linux	P1	P1-2	31	crypto/elliptic	32
+linux	P1	P1-2	32	debug/elf	32
+linux	P1	P1-2	33	crypto/rand	33
+linux	P1	P1-2	34	compress/zlib	34
+linux	P1	P1-2	35	internal/platform	
+linux	P1	P1-2	36	syscall	35
+linux	P1	P1-2	37	internal/poll	
+linux	P1	P1-2	38	debug/pe	
+linux	P1	P1-3	1	bytes	38
+linux	P1	P1-3	2	sort	38
+linux	P1	P1-3	3	go/build	
+linux	P1	P1-3	4	regexp/syntax	40
+linux	P1	P1-3	5	compress/gzip	42
+linux	P1	P1-3	6	internal/types/errors	45
+linux	P1	P1-3	7	crypto/internal/fips140/edwards25519/field	
+linux	P1	P1-3	8	net/rpc	
+linux	P1	P1-3	9	net/http/httptest	
+linux	P1	P1-3	10	math/big	
+linux	P1	P1-3	11	crypto/cipher	
+linux	P1	P1-3	12	crypto/ecdsa	63
+linux	P1	P1-3	13	net/http/pprof	
+linux	P1	P1-3	14	crypto/internal/fips140test	
+linux	P1	P1-3	15	math/rand	78
+linux	P1	P1-3	16	os	
+linux	P1	P1-3	17	net/http/cookiejar	
+linux	P1	P1-3	18	net/http/cgi	
 linux	P1	P1-3	19	log/slog	
 linux	P1	P1-3	20	runtime/pprof	
 linux	P1	P1-3	21	go/types	181
-linux	P1	P1-3	22	mime/multipart	251
-linux	P1	P1-3	23	internal/godebugs	350
-linux	P1	P1-3	24	go/internal/gcimporter	423
-linux	P1	P1-3	25	crypto/fips140	
-linux	P1	P1-3	26	crypto/internal/fips140/mldsa	
-linux	P1	P1-3	27	crypto/internal/fips140cache	
-linux	P1	P1-3	28	internal/coverage/cfile	
-linux	P1	P1-3	29	internal/runtime/atomic	
-linux	P1	P1-3	30	internal/runtime/gc/scan	
-linux	P1	P1-3	31	internal/strconv	
-linux	P1	P1-3	32	internal/trace	
-linux	P1	P1-3	33	internal/trace/testtrace	
-linux	P1	P1-3	34	internal/unsafeheader	
-linux	P1	P1-3	35	os/user	
-linux	P1	P1-3	36	testing/cryptotest	
-linux	P1	P1-3	37	testing	
+linux	P1	P1-3	22	compress/flate	214
+linux	P1	P1-3	23	crypto/internal/fips140/edwards25519	
+linux	P1	P1-3	24	crypto/rsa	383
+linux	P1	P1-3	25	regexp	465
+linux	P1	P1-3	26	crypto/fips140	
+linux	P1	P1-3	27	crypto/internal/fips140/mldsa	
+linux	P1	P1-3	28	crypto/internal/fips140cache	
+linux	P1	P1-3	29	internal/coverage/cfile	
+linux	P1	P1-3	30	internal/runtime/atomic	
+linux	P1	P1-3	31	internal/runtime/gc/scan	
+linux	P1	P1-3	32	internal/strconv	
+linux	P1	P1-3	33	internal/trace	
+linux	P1	P1-3	34	internal/trace/testtrace	
+linux	P1	P1-3	35	internal/unsafeheader	
+linux	P1	P1-3	36	os/user	
+linux	P1	P1-3	37	testing/cryptotest	
+linux	P1	P1-3	38	testing	
 linux	P2	P2-1	1	internal/gover	14
 linux	P2	P2-1	2	cmp	15
 linux	P2	P2-1	3	hash/crc64	16
@@ -408,79 +405,82 @@ linux	P2	P2-1	34	hash/crc32	20
 linux	P2	P2-1	35	internal/zstd	20
 linux	P2	P2-1	36	unique	
 linux	P2	P2-1	37	crypto/des	21
-linux	P2	P2-2	1	fmt	21
-linux	P2	P2-2	2	image/draw	21
-linux	P2	P2-2	3	io/fs	21
-linux	P2	P2-2	4	weak	
-linux	P2	P2-2	5	crypto/internal/fips140deps	
-linux	P2	P2-2	6	go/internal/gccgoimporter	22
-linux	P2	P2-2	7	internal/runtime/sys	
-linux	P2	P2-2	8	net/http/internal	
-linux	P2	P2-2	9	testing/fstest	
-linux	P2	P2-2	10	context	23
-linux	P2	P2-2	11	flag	23
-linux	P2	P2-2	12	debug/dwarf	24
-linux	P2	P2-2	13	go/printer	24
-linux	P2	P2-2	14	image	24
-linux	P2	P2-2	15	internal/copyright	
-linux	P2	P2-2	16	crypto/sha3	
-linux	P2	P2-2	17	mime	25
-linux	P2	P2-2	18	crypto/internal/fips140/bigmod	
-linux	P2	P2-2	19	encoding/asn1	26
-linux	P2	P2-2	20	go/importer	26
-linux	P2	P2-2	21	internal/runtime/math	
-linux	P2	P2-2	22	crypto/internal/fips140/nistec	
-linux	P2	P2-2	23	debug/macho	27
-linux	P2	P2-2	24	embed/internal/embedtest	
-linux	P2	P2-2	25	image/png	28
-linux	P2	P2-2	26	crypto/internal/fips140/aes	
-linux	P2	P2-2	27	internal/sync	
-linux	P2	P2-2	28	net/rpc/jsonrpc	29
-linux	P2	P2-2	29	crypto/internal/fips140/ecdh	
-linux	P2	P2-2	30	internal/chacha8rand	
-linux	P2	P2-2	31	crypto/ecdh	32
-linux	P2	P2-2	32	crypto/hkdf	
-linux	P2	P2-2	33	runtime/debug	32
-linux	P2	P2-2	34	strconv	33
-linux	P2	P2-2	35	crypto/internal/fips140/rsa	
-linux	P2	P2-2	36	syscall	35
-linux	P2	P2-2	37	internal/poll	
-linux	P2	P2-3	1	debug/pe	
-linux	P2	P2-3	2	bytes	38
-linux	P2	P2-3	3	sort	38
-linux	P2	P2-3	4	go/build	
-linux	P2	P2-3	5	regexp/syntax	40
-linux	P2	P2-3	6	compress/gzip	42
-linux	P2	P2-3	7	internal/types/errors	45
-linux	P2	P2-3	8	crypto/internal/fips140/edwards25519/field	
-linux	P2	P2-3	9	go/internal/srcimporter	55
-linux	P2	P2-3	10	math/big	
-linux	P2	P2-3	11	crypto/cipher	
-linux	P2	P2-3	12	crypto/ecdsa	63
-linux	P2	P2-3	13	net/http/pprof	
-linux	P2	P2-3	14	crypto/internal/fips140test	
-linux	P2	P2-3	15	math/rand	78
-linux	P2	P2-3	16	os	
-linux	P2	P2-3	17	net/http/cookiejar	
+linux	P2	P2-1	38	fmt	21
+linux	P2	P2-2	1	image/draw	21
+linux	P2	P2-2	2	io/fs	21
+linux	P2	P2-2	3	weak	
+linux	P2	P2-2	4	crypto/internal/fips140deps	
+linux	P2	P2-2	5	go/internal/gccgoimporter	22
+linux	P2	P2-2	6	internal/runtime/sys	
+linux	P2	P2-2	7	net/http/internal	
+linux	P2	P2-2	8	testing/fstest	
+linux	P2	P2-2	9	context	23
+linux	P2	P2-2	10	flag	23
+linux	P2	P2-2	11	debug/dwarf	24
+linux	P2	P2-2	12	go/printer	24
+linux	P2	P2-2	13	image	24
+linux	P2	P2-2	14	internal/copyright	
+linux	P2	P2-2	15	crypto/sha3	
+linux	P2	P2-2	16	mime	25
+linux	P2	P2-2	17	crypto/internal/fips140/bigmod	
+linux	P2	P2-2	18	encoding/asn1	26
+linux	P2	P2-2	19	go/importer	26
+linux	P2	P2-2	20	internal/runtime/math	
+linux	P2	P2-2	21	crypto/internal/fips140/nistec	
+linux	P2	P2-2	22	debug/macho	27
+linux	P2	P2-2	23	embed/internal/embedtest	
+linux	P2	P2-2	24	image/png	28
+linux	P2	P2-2	25	crypto/internal/fips140/aes	
+linux	P2	P2-2	26	internal/sync	
+linux	P2	P2-2	27	net/rpc/jsonrpc	29
+linux	P2	P2-2	28	crypto/internal/fips140/ecdh	
+linux	P2	P2-2	29	internal/chacha8rand	
+linux	P2	P2-2	30	crypto/ecdh	32
+linux	P2	P2-2	31	crypto/hkdf	
+linux	P2	P2-2	32	runtime/debug	32
+linux	P2	P2-2	33	strconv	33
+linux	P2	P2-2	34	crypto/internal/fips140/rsa	
+linux	P2	P2-2	35	net/http/httptrace	
+linux	P2	P2-2	36	crypto/subtle	36
+linux	P2	P2-2	37	os/signal	36
+linux	P2	P2-2	38	net/netip	
+linux	P2	P2-3	1	crypto/internal/sysrand	
+linux	P2	P2-3	2	sync	38
+linux	P2	P2-3	3	archive/tar	40
+linux	P2	P2-3	4	crypto	41
+linux	P2	P2-3	5	go/doc	
+linux	P2	P2-3	6	debug/buildinfo	46
+linux	P2	P2-3	7	net/smtp	
+linux	P2	P2-3	8	go/internal/srcimporter	55
+linux	P2	P2-3	9	encoding/gob	
+linux	P2	P2-3	10	text/template	59
+linux	P2	P2-3	11	net/http/httputil	
+linux	P2	P2-3	12	html/template	66
+linux	P2	P2-3	13	database/sql	72
+linux	P2	P2-3	14	encoding/json	78
+linux	P2	P2-3	15	math/rand/v2	78
+linux	P2	P2-3	16	reflect	
+linux	P2	P2-3	17	internal/runtime/maps	
 linux	P2	P2-3	18	encoding/xml	116
 linux	P2	P2-3	19	strings	120
 linux	P2	P2-3	20	encoding/pem	177
-linux	P2	P2-3	21	compress/flate	214
-linux	P2	P2-3	22	crypto/internal/fips140/edwards25519	
-linux	P2	P2-3	23	crypto/rsa	383
-linux	P2	P2-3	24	regexp	465
-linux	P2	P2-3	25	crypto/hpke	
-linux	P2	P2-3	26	crypto/internal/fips140/subtle	
-linux	P2	P2-3	27	crypto/internal/fips140only	
-linux	P2	P2-3	28	internal/godebug	
-linux	P2	P2-3	29	internal/runtime/cgroup	
-linux	P2	P2-3	30	internal/runtime/wasitest	
-linux	P2	P2-3	31	internal/syscall/unix	
-linux	P2	P2-3	32	internal/trace/internal/tracev1	
-linux	P2	P2-3	33	internal/trace/tracev2	
-linux	P2	P2-3	34	math/big/internal/asmgen	
-linux	P2	P2-3	35	runtime/trace	
-linux	P2	P2-3	36	testing/synctest	
+linux	P2	P2-3	21	crypto/x509	
+linux	P2	P2-3	22	mime/multipart	251
+linux	P2	P2-3	23	internal/godebugs	350
+linux	P2	P2-3	24	go/internal/gcimporter	423
+linux	P2	P2-3	25	os/exec	740
+linux	P2	P2-3	26	crypto/hpke	
+linux	P2	P2-3	27	crypto/internal/fips140/subtle	
+linux	P2	P2-3	28	crypto/internal/fips140only	
+linux	P2	P2-3	29	internal/godebug	
+linux	P2	P2-3	30	internal/runtime/cgroup	
+linux	P2	P2-3	31	internal/runtime/wasitest	
+linux	P2	P2-3	32	internal/syscall/unix	
+linux	P2	P2-3	33	internal/trace/internal/tracev1	
+linux	P2	P2-3	34	internal/trace/tracev2	
+linux	P2	P2-3	35	math/big/internal/asmgen	
+linux	P2	P2-3	36	runtime/trace	
+linux	P2	P2-3	37	testing/synctest	
 darwin	C1	C1-1	1	archive/tar	
 darwin	C1	C1-1	2	archive/zip	
 darwin	C1	C1-1	3	bufio	

@@ -1,11 +1,13 @@
 # PLAN — the go1.26.10 re-bank: H9 and H10, executed
 
-> **STATUS: DRAFT for COORD's review (G, 2026-10-24), cut from the hop tip `5ee4bbbabd`.** Document type: an
+> **STATUS: ACCEPTED by COORD on 2026-10-24, with the rulings in §11 folded in (G), cut from the hop tip
+> `5ee4bbbabd`.** COORD dispatches it at the freeze, from the lane briefs in §12. Document type: an
 > instance plan ([`Glossary.md`](Glossary.md), *Document types*). **The runbook leads**:
 > [`GoCorpusMigration.md`](GoCorpusMigration.md) H9, H10 (its launch, re-bank and close amendments) and §3 are the
 > procedure, and this plan supplies only what an instance owes them: the fleet, the shards, the commands as this hop
 > spells them, and the rulings it needs. Where this plan and the runbook disagree, this plan is wrong; §10 lists
-> the runbook sentences this hop finds stale. Every figure below is re-measured at the freeze tip, never carried.
+> the runbook sentences this hop found stale, now amended in stage. Every figure below is re-measured at the freeze
+> tip, never carried.
 
 **Placeholders.** `<FREEZE>` is the tip COORD names when it calls the freeze. `<GOROOT>` is the go1.26.10 root, spelled
 exactly as `go env GOROOT` prints it on that box (floor 6). `<TREE>` is a lane's worktree; `<SCRATCH>` is a directory
@@ -21,8 +23,8 @@ exactly as `go env GOROOT` prints it on that box (floor 6). `<TREE>` is a lane's
 
 | Axis | Rows | Lanes |
 |:--|--:|:--|
-| windows (the banking platform) | **242** = the population of record | i9 (the reserved set), R-LAPTOP (the owner's off-i9 list), H (everything else) |
-| linux (annotations) | **240** eligible | R's WSL (the reserved and off-i9 rows), P1, P2 |
+| windows (the banking platform) | **242** = the population of record | i9 (the reserved set minus the off-i9 list), R-LAPTOP (`crypto/tls` and `net/http`), H (everything else) |
+| linux (annotations) | **240** eligible | R's WSL (the reserved set), P1, P2 |
 | darwin (annotations) | **240** eligible | C1, by hosted os-matrix waves, after the windows bank lands |
 
 The two rows `n/a` on linux and darwin are `internal/syscall/windows` and its child `internal/syscall/windows/registry`:
@@ -42,9 +44,11 @@ its inputs in the commit that claims them (§3.4):
   `archive/zip`, `crypto/dsa`, `crypto/internal/fips140/mlkem`, `crypto/mlkem`, `crypto/tls`, `go/parser`,
   `hash/maphash`, `index/suffixarray`, `net`, `net/http`, `runtime`, `sync/atomic` and `time` (13 at `5ee4bbbabd`).
 - **The owner's off-i9 list** is taken by name from COORD's assignment of 2026-10-24: `crypto/tls`, `net/http`,
-  `net/http/httptest`, `net/smtp`, `crypto/x509`, `net/http/cgi`, `net/http/httptrace` and `os/exec`.
+  `net/http/httptest`, `net/smtp`, `crypto/x509`, `net/http/cgi`, `net/http/httptrace` and `os/exec`. By COORD's
+  ruling Q5 the list is about the i9's BOX, not the rows: it keeps those rows off the i9, R-LAPTOP's windows shard
+  takes only the two that are reserved (`crypto/tls` and `net/http`), and the other six deal into H's shards.
 - **The shard deal is `shards.tsv`**, written by `shards.py` with sha256
-  `cbbe46fa7bba8d54011ed7e1f22aadd28c6387367c9e564c618c084542751024`. It holds one line per (OS, row), with the
+  `0745350fb023c88c44da7ae4ceb4e42894686b470793c4553c590d230e757fc6`. It holds one line per (OS, row), with the
   lane, the shard, the sequence and the projected cost. It asserts every eligible row exactly once per OS and
   `testing` LAST in its list on every OS, and both scripts reproduce the committed files byte-identically.
 - **The costs are PROJECTIONS, not a deal** (§3.2). Windows orders by the go1.24.13 recon basis
@@ -100,11 +104,11 @@ re-baselined at batch 35 (the goroutine-panic seat's two tests) are part of the 
 | Lane | Box | Shards (rows) | Capacity, as COORD measured it | Constraint |
 |:--|:--|:--|:--|:--|
 | **i9** | windows | `i9-1` (11) | the fastest worker | the owner's hardware order: one heavy task at a time, `-m:4`, WHEA counted; no off-i9 row |
-| **R-LAPTOP** | windows | `RLAP-1` (8) | — | `crypto/tls`'s BoGo host must be qualified by measurement before its row (§7 lesson 40) |
-| **H** | windows | `H-1` (75), `H-2` (75), `H-3` (73) | ~40 rows/h at `-m:4`; peak commit ~13.3 GB of 19 GB | non-reserved rows only |
-| **R's WSL** | linux | `RWSL-1` (19) | — | the box also holds `RLAP-1`; one battery per box (Q2) |
-| **P1** | linux, cloud | `P1-1`, `P1-2`, `P1-3` (37 each) | ~4 vCPU, 16 GB, 30 GB disk | tmpfs and OOM restarts are measured history: short shards, the resume ledger, evidence pushed per shard |
-| **P2** | linux, cloud | `P2-1`, `P2-2` (37), `P2-3` (36) | as P1 | as P1 |
+| **R-LAPTOP** | windows | `RLAP-1` (2: `net/http`, `crypto/tls`) | the proven box for these rows | `crypto/tls`'s BoGo host is qualified by measurement before its row (§7 lesson 40) |
+| **H** | windows | `H-1` (77), `H-2` (77), `H-3` (75) | ~40 rows/h at `-m:4`; peak commit ~13.3 GB of 19 GB | every non-reserved row, the six non-reserved off-i9 rows included (Q5) |
+| **R's WSL** | linux | `RWSL-1` (13, the reserved set) | the proven box for `runtime` and the TLS rows | SERIAL after `RLAP-1` on the same box (Q2): one battery per box |
+| **P1** | linux, cloud | `P1-1`, `P1-2`, `P1-3` (38 each) | ~4 vCPU, 16 GB, 30 GB disk | tmpfs and OOM restarts are measured history: short shards, the resume ledger, evidence pushed per shard; no reserved row |
+| **P2** | linux, cloud | `P2-1`, `P2-2` (38), `P2-3` (37) | as P1 | as P1 |
 | **C1** | darwin, hosted runners | `C1-1` … `C1-12` (20 each) | one hosted run per wave, both mac RIDs | after the windows bank (§5.2) |
 
 **Ordering:**
@@ -118,9 +122,9 @@ The deal by name, exactly as `shards.tsv` holds it:
 windows i9-1 (11):
   time crypto/internal/fips140/mlkem crypto/mlkem hash/maphash archive/zip crypto/dsa sync/atomic index/suffixarray
   go/parser runtime net
-windows RLAP-1 (8):
-  net/http/httptrace net/smtp net/http/httptest net/http/cgi crypto/x509 os/exec net/http crypto/tls
-windows H-1 (75):
+windows RLAP-1 (2):
+  net/http crypto/tls
+windows H-1 (77):
   internal/syscall/windows internal/syscall/windows/registry internal/synctest net/internal/cgotest encoding/ascii85
   image/color internal/gover maps encoding/base64 go/build/constraint hash/crc64 internal/coverage/slicewriter path
   text/tabwriter unique database/sql/driver errors html internal/coverage/cformat log math/bits
@@ -131,76 +135,75 @@ windows H-1 (75):
   crypto/sha3 debug/gosym debug/plan9obj go/version image/jpeg internal/abi internal/pkgbits internal/profile
   net/mail slices unicode container/list crypto/internal/fips140/bigmod crypto/sha1 encoding/hex go/format hash/crc32
   hash/fnv internal/runtime/math internal/testenv iter net/url crypto/elliptic crypto/internal/fips140/nistec
-  debug/macho
-windows H-2 (75):
-  encoding/csv hash hash/adler32 internal/coverage/cmerge internal/coverage/test internal/dag internal/saferio
-  internal/sysinfo sort testing/slogtest embed/internal/embedtest encoding/base32 internal/buildcfg
-  internal/coverage/slicereader internal/fmtsort internal/zstd io bytes crypto/internal/fips140/aes go/constant
-  internal/singleflight internal/sync io/ioutil net/textproto path/filepath sync text/scanner
-  crypto/internal/boring/bcache crypto/internal/fips140/ecdh crypto/pbkdf2 debug/dwarf go/internal/gccgoimporter
-  go/scanner runtime/debug runtime/metrics compress/zlib crypto/hmac crypto/rc4 internal/chacha8rand
-  log/slog/internal/buffer math/cmplx regexp/syntax crypto/des crypto/hkdf image internal/xcoff io/fs os/signal
-  log/slog/internal/benchmarks mime/quotedprintable text/template/parse crypto/ed25519 crypto/internal/fips140/rsa
-  crypto/md5 crypto/sha512 go/internal/srcimporter go/printer strconv image/draw internal/platform flag internal/poll
-  internal/reflectlite debug/pe image/png net/netip crypto/internal/sysrand go/build image/gif compress/gzip context
-  debug/elf go/ast strings crypto/ecdh
-windows H-3 (73):
-  go/doc internal/fuzz crypto/rand crypto/aes crypto/internal/fips140/edwards25519/field net/rpc/jsonrpc
-  debug/buildinfo html/template crypto/subtle expvar math/rand/v2 crypto encoding/xml net/rpc encoding/gob
-  crypto/ecdsa math/big net/http/fcgi compress/flate crypto/cipher go/importer net/http/httputil text/template
-  net/http/pprof crypto/internal/fips140test os internal/types/errors crypto/rsa reflect net/http/cookiejar
-  internal/runtime/maps encoding/json database/sql log/slog archive/tar go/types compress/bzip2 testing/iotest
-  internal/godebugs runtime/pprof crypto/internal/fips140/edwards25519 go/internal/gcimporter regexp crypto/fips140
-  crypto/hpke crypto/internal/fips140/mldsa crypto/internal/fips140/subtle crypto/internal/fips140cache
-  crypto/internal/fips140only fmt internal/coverage/cfile internal/godebug internal/runtime/atomic
-  internal/runtime/cgroup internal/runtime/gc/scan internal/runtime/wasitest internal/strconv internal/syscall/unix
-  internal/trace internal/trace/internal/tracev1 internal/trace/testtrace internal/trace/tracev2
-  internal/unsafeheader math/big/internal/asmgen math/rand mime/multipart os/user runtime/trace syscall
-  testing/cryptotest testing/synctest unicode/utf8 testing
-linux RWSL-1 (19):
-  archive/zip crypto/tls os/exec go/parser time index/suffixarray sync/atomic hash/maphash crypto/dsa
-  crypto/internal/fips140/mlkem crypto/mlkem crypto/x509 net net/http net/http/cgi net/http/httptest
-  net/http/httptrace net/smtp runtime
-linux P1-1 (37):
+  debug/macho encoding/csv hash
+windows H-2 (77):
+  hash/adler32 internal/coverage/cmerge internal/coverage/test internal/dag internal/saferio internal/sysinfo sort
+  testing/slogtest embed/internal/embedtest encoding/base32 internal/buildcfg internal/coverage/slicereader
+  internal/fmtsort internal/zstd io bytes crypto/internal/fips140/aes go/constant internal/singleflight internal/sync
+  io/ioutil net/textproto path/filepath sync text/scanner crypto/internal/boring/bcache crypto/internal/fips140/ecdh
+  crypto/pbkdf2 debug/dwarf go/internal/gccgoimporter go/scanner runtime/debug runtime/metrics compress/zlib
+  crypto/hmac crypto/rc4 internal/chacha8rand log/slog/internal/buffer math/cmplx regexp/syntax crypto/des
+  crypto/hkdf image internal/xcoff io/fs os/signal log/slog/internal/benchmarks mime/quotedprintable
+  text/template/parse crypto/ed25519 crypto/internal/fips140/rsa crypto/md5 crypto/sha512 go/internal/srcimporter
+  go/printer strconv image/draw internal/platform net/http/httptrace flag internal/poll internal/reflectlite debug/pe
+  image/png net/netip crypto/internal/sysrand go/build image/gif compress/gzip context debug/elf go/ast strings
+  crypto/ecdh go/doc internal/fuzz crypto/rand
+windows H-3 (75):
+  crypto/aes crypto/internal/fips140/edwards25519/field net/rpc/jsonrpc debug/buildinfo net/smtp html/template
+  crypto/subtle expvar math/rand/v2 crypto encoding/xml net/rpc net/http/httptest encoding/gob crypto/ecdsa math/big
+  net/http/fcgi compress/flate crypto/cipher go/importer net/http/httputil text/template net/http/pprof
+  crypto/internal/fips140test os internal/types/errors crypto/rsa reflect net/http/cookiejar internal/runtime/maps
+  encoding/json net/http/cgi database/sql log/slog archive/tar go/types compress/bzip2 testing/iotest
+  internal/godebugs runtime/pprof crypto/x509 os/exec crypto/internal/fips140/edwards25519 go/internal/gcimporter
+  regexp crypto/fips140 crypto/hpke crypto/internal/fips140/mldsa crypto/internal/fips140/subtle
+  crypto/internal/fips140cache crypto/internal/fips140only fmt internal/coverage/cfile internal/godebug
+  internal/runtime/atomic internal/runtime/cgroup internal/runtime/gc/scan internal/runtime/wasitest internal/strconv
+  internal/syscall/unix internal/trace internal/trace/internal/tracev1 internal/trace/testtrace
+  internal/trace/tracev2 internal/unsafeheader math/big/internal/asmgen math/rand mime/multipart os/user
+  runtime/trace syscall testing/cryptotest testing/synctest unicode/utf8 testing
+linux RWSL-1 (13):
+  archive/zip crypto/tls go/parser time index/suffixarray sync/atomic hash/maphash crypto/dsa
+  crypto/internal/fips140/mlkem crypto/mlkem net net/http runtime
+linux P1-1 (38):
   plugin unicode/utf8 crypto/internal/boring internal/coverage/cmerge net/http/internal/ascii path crypto/sha256
   go/version internal/coverage/pods internal/coverage/slicewriter internal/diff internal/sysinfo crypto/md5
   crypto/sha512 encoding/hex go/constant internal/synctest log text/scanner compress/bzip2 container/list go/scanner
   internal/buildcfg internal/profile internal/testenv io math/bits mime/quotedprintable net/textproto testing/iotest
   testing/slogtest text/template/parse database/sql/driver go/format internal/reflectlite net/url crypto/aes
-linux P1-2 (37):
-  encoding/ascii85 html internal/fuzz log/slog/internal/benchmarks bufio go/ast hash math runtime/metrics
-  container/heap encoding/base32 internal/abi debug/plan9obj go/token image/jpeg crypto/internal/fips140/ecdsa
-  internal/pkgbits slices crypto/sha1 expvar internal/cpu iter debug/gosym internal/coverage/test image/gif
-  crypto/ed25519 go/doc/comment net/http/fcgi crypto/internal/boring/bcache crypto/pbkdf2 log/slog/internal/buffer
-  crypto/elliptic debug/elf crypto/rand compress/zlib internal/platform crypto/subtle
-linux P1-3 (37):
-  os/signal net/netip crypto/internal/sysrand sync archive/tar crypto go/doc debug/buildinfo net/rpc encoding/gob
-  text/template net/http/httputil html/template database/sql encoding/json math/rand/v2 reflect internal/runtime/maps
-  log/slog runtime/pprof go/types mime/multipart internal/godebugs go/internal/gcimporter crypto/fips140
-  crypto/internal/fips140/mldsa crypto/internal/fips140cache internal/coverage/cfile internal/runtime/atomic
-  internal/runtime/gc/scan internal/strconv internal/trace internal/trace/testtrace internal/unsafeheader os/user
-  testing/cryptotest testing
-linux P2-1 (37):
+  encoding/ascii85
+linux P1-2 (38):
+  html internal/fuzz log/slog/internal/benchmarks bufio go/ast hash math runtime/metrics container/heap
+  encoding/base32 internal/abi debug/plan9obj go/token image/jpeg crypto/internal/fips140/ecdsa internal/pkgbits
+  slices crypto/sha1 expvar internal/cpu iter debug/gosym internal/coverage/test image/gif crypto/ed25519
+  go/doc/comment net/http/fcgi crypto/internal/boring/bcache crypto/pbkdf2 log/slog/internal/buffer crypto/elliptic
+  debug/elf crypto/rand compress/zlib internal/platform syscall internal/poll debug/pe
+linux P1-3 (38):
+  bytes sort go/build regexp/syntax compress/gzip internal/types/errors crypto/internal/fips140/edwards25519/field
+  net/rpc net/http/httptest math/big crypto/cipher crypto/ecdsa net/http/pprof crypto/internal/fips140test math/rand
+  os net/http/cookiejar net/http/cgi log/slog runtime/pprof go/types compress/flate
+  crypto/internal/fips140/edwards25519 crypto/rsa regexp crypto/fips140 crypto/internal/fips140/mldsa
+  crypto/internal/fips140cache internal/coverage/cfile internal/runtime/atomic internal/runtime/gc/scan
+  internal/strconv internal/trace internal/trace/testtrace internal/unsafeheader os/user testing/cryptotest testing
+linux P2-1 (38):
   internal/gover cmp hash/crc64 internal/saferio os/exec/internal/fdtest crypto/hmac go/build/constraint hash/adler32
   internal/coverage/slicereader internal/dag internal/fmtsort unicode crypto/rc4 encoding/binary errors hash/fnv
   io/ioutil net/internal/cgotest unicode/utf16 compress/lzw encoding/csv image/color internal/coverage/cformat
   internal/singleflight internal/xcoff maps math/cmplx net/mail path/filepath testing/quick text/tabwriter
-  container/ring encoding/base64 hash/crc32 internal/zstd unique crypto/des
-linux P2-2 (37):
-  fmt image/draw io/fs weak crypto/internal/fips140deps go/internal/gccgoimporter internal/runtime/sys
-  net/http/internal testing/fstest context flag debug/dwarf go/printer image internal/copyright crypto/sha3 mime
+  container/ring encoding/base64 hash/crc32 internal/zstd unique crypto/des fmt
+linux P2-2 (38):
+  image/draw io/fs weak crypto/internal/fips140deps go/internal/gccgoimporter internal/runtime/sys net/http/internal
+  testing/fstest context flag debug/dwarf go/printer image internal/copyright crypto/sha3 mime
   crypto/internal/fips140/bigmod encoding/asn1 go/importer internal/runtime/math crypto/internal/fips140/nistec
   debug/macho embed/internal/embedtest image/png crypto/internal/fips140/aes internal/sync net/rpc/jsonrpc
   crypto/internal/fips140/ecdh internal/chacha8rand crypto/ecdh crypto/hkdf runtime/debug strconv
-  crypto/internal/fips140/rsa syscall internal/poll
-linux P2-3 (36):
-  debug/pe bytes sort go/build regexp/syntax compress/gzip internal/types/errors
-  crypto/internal/fips140/edwards25519/field go/internal/srcimporter math/big crypto/cipher crypto/ecdsa
-  net/http/pprof crypto/internal/fips140test math/rand os net/http/cookiejar encoding/xml strings encoding/pem
-  compress/flate crypto/internal/fips140/edwards25519 crypto/rsa regexp crypto/hpke crypto/internal/fips140/subtle
-  crypto/internal/fips140only internal/godebug internal/runtime/cgroup internal/runtime/wasitest
-  internal/syscall/unix internal/trace/internal/tracev1 internal/trace/tracev2 math/big/internal/asmgen runtime/trace
-  testing/synctest
+  crypto/internal/fips140/rsa net/http/httptrace crypto/subtle os/signal net/netip
+linux P2-3 (37):
+  crypto/internal/sysrand sync archive/tar crypto go/doc debug/buildinfo net/smtp go/internal/srcimporter
+  encoding/gob text/template net/http/httputil html/template database/sql encoding/json math/rand/v2 reflect
+  internal/runtime/maps encoding/xml strings encoding/pem crypto/x509 mime/multipart internal/godebugs
+  go/internal/gcimporter os/exec crypto/hpke crypto/internal/fips140/subtle crypto/internal/fips140only
+  internal/godebug internal/runtime/cgroup internal/runtime/wasitest internal/syscall/unix
+  internal/trace/internal/tracev1 internal/trace/tracev2 math/big/internal/asmgen runtime/trace testing/synctest
 darwin C1-1 .. C1-12: the 240 darwin-eligible rows in alphabetical waves of 20, `testing` last in C1-12 (shards.tsv)
 ```
 
@@ -351,8 +354,11 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
   the rest against go1.24.13 counts.
 - **A row banks a `darwin:` annotation only when arm64 and x64 agree**, verdict for verdict (the darwin waves' own
   rule).
-- **The 198 rows carrying a go1.24.13 `darwin:` annotation are re-read, or the annotation is removed by name at the
-  close** (Q4).
+- **Every darwin-eligible row is re-read at go1.26.10**, the 198 rows carrying a go1.24.13 `darwin:` annotation
+  included: they are re-derived, never removed (Q4; platform parity is a standing owner goal). The runbook's darwin
+  leg (H10, the 2026-10-24 amendment) is the procedure.
+- **The sweep's count gate reds a row whose darwin count differs from the windows bank.** That red is the reading's
+  signal, not a stop. The annotation is the measured count from the row's own artifacts, read on both RIDs.
 
 ## 6. Disclosures: the re-sign rules, and the drafted entries
 
@@ -406,12 +412,17 @@ H10's close checklist runs as the runbook writes it (the 2026-09-23 close amendm
 
 ## 9. Timing, as a projection
 
-- **H:** 223 rows at about 40 rows/h is about 5.6 h of pass 1, and H-3 is the heaviest third.
+- **H:** 229 rows at about 40 rows/h is about 5.7 h of pass 1, and H-3 is the heaviest third.
 - **i9:** the reserved shard projects to about 4,500 s on go1.24.13's costs, before go1.26's growth.
-- **R-LAPTOP:** the probable critical path, holding `RLAP-1` and `RWSL-1` on one box (Q2).
+- **R-LAPTOP:** the probable critical path. `RLAP-1`'s two rows are the two heaviest TLS-and-HTTP rows, and
+  `RWSL-1` follows them on the same box (Q2), projecting to about 11,700 s on the go1.23-era WSL walls.
 - **Pass 2's plan** is cut from pass 1's measured costs, so pass 2 has no projection here.
 
-## 10. Runbook sentences that are stale for this hop (flags, not edits)
+## 10. Runbook sentences that were stale for this hop, now amended in stage
+
+COORD ruled all seven amended IN STAGE on this branch (runbooks lead), as dated blocks and never rewrites. They are in
+[`GoCorpusMigration.md`](GoCorpusMigration.md) H10, *Amendment 2026-10-24 (G) — the go1.26.10 re-bank: seven
+readings this hop found stale, and the darwin leg*, which also adds the darwin leg. The items, as found:
 
 1. **H10 step 1:** "Until NOTES A3 lands it does NOT apply execution pins". A3 has landed, and `-Hop` rows now carry
    their pins (`Get-HopPopulationRows` in `src/_roster.ps1`).
@@ -430,21 +441,134 @@ H10's close checklist runs as the runbook writes it (the 2026-09-23 close amendm
 7. **H9's 2026-09-13 amendment** spells the go1.24.13 pin and the 1.24 eight goldens. It is history, and the gate
    line above it is the procedure.
 
-## 11. Asks for COORD
+## 11. COORD's rulings (2026-10-24)
 
-- **Q1, pass 1 on branch trees?** The runbook's order is two passes: the recon leg on detached throwaway trees, then
-  the driver on branch trees. A one-pass variant would run pass 1 on the shard's BRANCH tree with `-AllowBranch`
-  reported, and bank every PASS row's pipeline output directly, as H10 step 1 calls the re-emitted sources "the
-  bank-in-waiting". That saves roughly one windows pass, but it is a deviation from the launch amendment's
-  detached-tree rule, so it needs a ruling. G's recommendation is the runbook's two passes, unless the freeze-to-
-  release calendar cannot take them.
-- **Q2, R-LAPTOP's two lists:** `RLAP-1` first, then `RWSL-1`, one battery per box? Or `RWSL-1`'s 19 rows to P2,
-  whose box reads the full runtime row today?
-- **Q3, the driver:** a `-DryRun` per lane, or a full one-shard rehearsal as the 1.24.13 hop owed?
-- **Q4, the darwin annotations:** re-read all 198 (12 waves after the bank), or remove the go1.24.13 annotations by
-  name at the close?
-- **Q5, the off-i9 rows that are not reserved:** do all six (`crypto/x509`, `os/exec`, `net/http/cgi`,
-  `net/http/httptest`, `net/http/httptrace` and `net/smtp`) go to R-LAPTOP, as dealt, or may they run on H?
+- **Q1: TWO passes**, the recon leg and then the bank, as the runbook says.
+- **Q2: R-LAPTOP runs SERIALLY**, `RLAP-1` and then `RWSL-1`. It is the proven box for `runtime` and the TLS rows, and
+  the reserved set carries no cloud OOM risk there.
+- **Q3: a `-DryRun` per lane**, with no full rehearsal.
+- **Q4: RE-READ.** The darwin leg runs (C1, after the windows bank), so the 198 annotations are re-derived at 1.26,
+  not removed. Platform parity is a standing owner goal.
+- **Q5: YES.** The six non-reserved off-i9 rows run on H. The off-i9 list is about the i9's box, not the rows, so they
+  fold into H's shards, and `RLAP-1` keeps `crypto/tls` and `net/http`.
+- **The stale items are amended in stage on this branch**, all seven, the darwin leg included (§10).
+
+## 12. The lane briefs (one block per lane, ready to paste)
+
+Each block is self-contained: a lane reads only its own, the runbook sections it names, and this plan. The common
+steps are spelled out in every block, so no lane reads another lane's brief. `<FREEZE>`, `<GOROOT>`, `<TREE>` and
+`<SCRATCH>` are the placeholders defined at the top of this plan.
+
+### i9 (windows, the reserved shard)
+
+```
+LANE i9 -- H10 pass 1 (the recon leg), go1.26.10 re-bank. Plan: docs/PLAN-rebank-go126.md at <FREEZE>.
+SHARD i9-1 (11 rows, in this order, smallest-first):
+  time crypto/internal/fips140/mlkem crypto/mlkem hash/maphash archive/zip crypto/dsa sync/atomic index/suffixarray
+  go/parser runtime net
+BEFORE ROW 1:
+  - a throwaway linked worktree DETACHED at <FREEZE>; build the converter in it; 25 GB free;
+  - residue census: git status --ignored=matching, with a never-built control, recorded;
+  - toolchain asserted three ways: PATH go version = go1.26.10, the resolved go.exe, GOROOT's VERSION;
+  - a per-run copy of src/run-h10-recon.ps1 at <FREEZE>, and its -SelfTest passing under every shell you launch
+    with (lesson 61).
+ENV: GOROOT=<GOROOT>  GOTOOLCHAIN=local  CGO_ENABLED=0  PATH=<GOROOT>\bin first, then .NET 10.
+  DOTNET_ROOT is set inside the child pwsh only.
+RUN: pwsh -NoProfile -File <SCRATCH>\run-h10-recon.ps1 -NameList <SCRATCH>\i9-1.txt -Tree <TREE> -GoRoot <GOROOT>
+     -Out <SCRATCH>\i9-1\i9-1.tsv -ExpectTip <FREEZE> -Scratch <SCRATCH>\i9-1 -TestBuildMaxCpu 4
+  The owner's hardware order holds: one heavy task at a time, -m:4, WHEA counted.
+  Capture the rc on the next line, and grep DRIVER_EXIT=.
+AFTER:
+  - commit <shard>.tsv and its ledger to docs/phase4/h10-evidence/go1.26.10/windows/i9-1.tsv on lane ref
+    claude/i9-rebank-p1-i9-1, and read the SHA back with ls-remote;
+  - keep the raw JSON in <SCRATCH> until COORD reads the post;
+  - discard the tree only after the tracked-count assert.
+POST (one, <=40 lines):
+  - WHAT: lane, shard, <FREEZE>, ref@SHA;
+  - EVIDENCE: the toolchain triple; rows run against listed; the word tally; every non-PASS row by name with its
+    cause; each TIMEOUT with its results-tail line; residue before and after; the largest post_s;
+  - NEXT.
+```
+
+### R-LAPTOP (windows, then its WSL; SERIAL, one battery at a time)
+
+```
+LANE R -- H10 pass 1, go1.26.10 re-bank. Plan: docs/PLAN-rebank-go126.md at <FREEZE>.
+FIRST, windows SHARD RLAP-1 (2 rows, in this order): net/http crypto/tls
+  - qualify crypto/tls's BoGo host by measurement first (lesson 40);
+  - then follow the i9 block's BEFORE / ENV / RUN / AFTER / POST, with RLAP-1 in place of i9-1
+    (lane ref claude/r-rebank-p1-rlap-1). -TestBuildMaxCpu as the box takes it.
+  - The rows carry their roster pin: net/http is release-tiered; the wrapper applies it.
+THEN, ONLY after RLAP-1's post: linux SHARD RWSL-1 (13 rows, in this order):
+  archive/zip crypto/tls go/parser time index/suffixarray sync/atomic hash/maphash crypto/dsa
+  crypto/internal/fips140/mlkem crypto/mlkem net net/http runtime
+LINUX ENV: export GOROOT=<linux GOROOT> GOTOOLCHAIN=local CGO_ENABLED=0 GOFLAGS= ; <GOROOT>/bin first on PATH;
+  GoTargetOS NOT exported (the converter passes -p:GoTargetOS for a -tests row); the uid recorded.
+LINUX ACT, per row, in a clone detached at <FREEZE> whose src/core is the seed:
+  go2cs -tests -test-action all -test-config Release [-test-tiered for net/http] -test-timeout <max(30m, floor)>
+        -test-deadline <max(15m, floor)> -go2cspath <TREE>/src <GOROOT>/src/<row> <TREE>/src/core/<row>  2>&1
+  - rc on the next line;
+  - restore the row's dirt BY STATUS, purge build output, check free space at each row boundary;
+  - floors from $longTimeouts and $testDeadlineFloors in src/run-validated-sweep.ps1 at <FREEZE>.
+LINUX EVIDENCE: a per-row TSV (row, word, verdicts, matched, disclosed, sweep_s, wall_s, rc) to
+  docs/phase4/h10-evidence/go1.26.10/linux/RWSL-1.tsv on lane ref claude/r-rebank-p1-rwsl-1; raw JSON kept
+  outside the clone.
+POST: one per shard, as the i9 block's POST.
+```
+
+### H (windows, the non-reserved rows, three shards)
+
+```
+LANE H -- H10 pass 1, go1.26.10 re-bank. Plan: docs/PLAN-rebank-go126.md at <FREEZE>.
+SHARDS H-1, H-2, H-3 (77, 77, 75 rows), each in shards.tsv order, `testing` LAST in H-3:
+  docs/phase4/data/rebank-go1.26.10/shards.tsv, rows with lane H. Write each NameList from it. Never retype a list.
+  H holds every non-reserved row, the six non-reserved off-i9 rows included (COORD ruling Q5).
+FOR EACH SHARD: follow the i9 block's BEFORE / ENV / RUN / AFTER / POST, with H-n in place of i9-1:
+  - a FRESH throwaway detached tree per shard;
+  - -TestBuildMaxCpu 4 (the measured ~40 rows/h; peak commit ~13.3 GB of 19 GB);
+  - lane ref claude/h-rebank-p1-h-n;
+  - ONE post per shard.
+```
+
+### P1 and P2 (linux, cloud containers, three shards each)
+
+```
+LANE P1 (P2 the same, with its own shards) -- H10 pass 1 LINUX READING, go1.26.10 re-bank.
+  Plan: docs/PLAN-rebank-go126.md at <FREEZE>.
+SHARDS P1-1, P1-2, P1-3 (38 each); P2-1, P2-2 (38), P2-3 (37):
+  in docs/phase4/data/rebank-go1.26.10/shards.tsv order, `testing` LAST in P1-3. No reserved row is yours.
+LINUX ENV and ACT: exactly as R-LAPTOP's LINUX ENV and LINUX ACT, in a clone detached at <FREEZE>, checked clean
+  (tracked AND untracked under tracked paths) before row 1.
+CONTAINER RULES (measured history: tmpfs wiped on restart, OOM):
+  - keep the resume ledger on PERSISTENT disk, one line per row, keyed on the corpus commit, the converter commit
+    and the binary's mtime;
+  - after a restart, re-enter at the first unrecorded row, and re-run a killed row at a RAISED budget;
+  - commit and push each shard's TSV and ledger the moment the shard ends, to
+    docs/phase4/h10-evidence/go1.26.10/linux/<shard>.tsv on lane ref claude/p1-rebank-p1-<shard>
+    (P2: claude/p2-...);
+  - purge build output between rows.
+POST: one per shard, as the i9 block's POST, plus the container's restarts during the shard and the uid.
+```
+
+### C1 (darwin, after the windows bank)
+
+```
+LANE C1 -- the DARWIN LEG of the go1.26.10 re-bank (GoCorpusMigration.md H10, Amendment 2026-10-24).
+  Plan: docs/PLAN-rebank-go126.md.
+WHEN: a wave starts only after the windows train that banks ALL of its rows has landed: os-matrix sweep-shard reads
+  BANKED rows only, and scores them against the roster.
+WAVES C1-1 .. C1-12 (20 rows each, shards.tsv order, `testing` last in C1-12): os-matrix.yml, stage sweep-shard,
+  goos darwin (both mac runners), filter = the wave's rows comma-separated EXACT, at the landed train's tip.
+A ROW BANKS a darwin: annotation only when osx-arm64 and osx-x64 agree verdict for verdict:
+  - the annotation is the measured MATCHED (+ disclosed) count read from the row's own artifacts on both RIDs;
+  - the sweep's count red against the windows bank is the reading's signal, not a stop.
+  Every one of the 198 existing darwin: annotations is re-derived, never kept and never removed (COORD ruling Q4).
+POST: one per wave:
+  - WHAT: the wave, the run id, the tip;
+  - EVIDENCE: rows agreeing on both RIDs with their counts; rows disagreeing, by name and with both counts;
+    rows the sweep could not reach;
+  - NEXT.
+```
 
 <!-- Provenance. Read at 5ee4bbbabd: GoCorpusMigration.md H9 (and its 2026-09-13 amendment, 2026-09-19/20 correction and
      2026-09-20 closure), H10 (step text, the 2026-09-20 launch and re-bank amendments, the 2026-09-22 amendments, the
