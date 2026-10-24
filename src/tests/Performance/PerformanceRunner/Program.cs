@@ -134,7 +134,7 @@ namespace PerformanceRunner
             List<ReleaseLeg> legs = new();
             string? workRoot = null, aotManifest = null, aotDrop = null;
             int reviewRuns = 11;
-            bool tc0 = false;
+            bool tc0 = false, fd1 = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -173,6 +173,9 @@ namespace PerformanceRunner
                         break;
                     case "--tc0":
                         tc0 = true;
+                        break;
+                    case "--fd1":
+                        fd1 = true;
                         break;
                     case "--phase" when i + 1 < args.Length:
                         phases = ParsePhases(args[++i]);
@@ -258,7 +261,7 @@ namespace PerformanceRunner
                     return 2;
                 }
 
-                return ReleaseRun.Run(s_perfDir, projects, new ReleaseRun.Options(legs, workRoot, aotManifest, aotDrop, runs, reviewRuns, tc0));
+                return ReleaseRun.Run(s_perfDir, projects, new ReleaseRun.Options(legs, workRoot, aotManifest, aotDrop, runs, reviewRuns, tc0, fd1));
             }
 
             Console.WriteLine($"go2cs performance runner: {projects.Count} project(s), phases [{string.Join(", ", phases)}], {runs} measured run(s){(noAot ? ", AOT disabled" : "")}");
@@ -1255,7 +1258,7 @@ namespace PerformanceRunner
 
                 Release legs (docs/PLAN-perf-rebaseline.md; the in-tree phases do not run):
                   PerformanceRunner --leg <spec> [--leg <spec>] --work <dir> [--aot-manifest <file> --aot-drop <dir>]
-                                    [--runs <n>] [--review-runs <n>] [--tc0] [--filter <substr>]
+                                    [--runs <n>] [--review-runs <n>] [--tc0] [--fd1] [--filter <substr>]
 
                   --leg <spec>          name=<leg>;go2cs=<converter exe>;version=<go.* version>;go=<go exe>.
                                         Each program is converted by that converter with -recurse=nuget.
@@ -1265,6 +1268,7 @@ namespace PerformanceRunner
                                         if its manifest line matches it and this box's converted source.
                   --review-runs <n>     Runs for the PERF-REVIEW rows (default 11).
                   --tc0                 Add the diagnostic TC0 arm (the JIT binary, DOTNET_TieredCompilation=0).
+                  --fd1                 Add the diagnostic Fd1 arm (framework-dependent, untrimmed ReadyToRun).
 
                 Exit code 0 = pass, 1 = failure, 2 = usage error.
                 """);

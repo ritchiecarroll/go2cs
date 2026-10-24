@@ -7,8 +7,10 @@
 // The decisions behind the post-hop re-baseline's release legs (docs/PLAN-perf-rebaseline.md, S0): what a leg is,
 // what a consumer-view project must reference, how a converted program is identified across two boxes, whether a
 // shipped Native AOT binary may be timed, and whether a JIT or ReadyToRun binary has the shape its column claims.
-// Pure functions over text, so PerformanceRunnerTests links this file and refuses each by name without a build.
+// Pure functions over text (and one PE header read), so PerformanceRunnerTests links this file and refuses each by
+// name without a build.
 
+using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -323,6 +325,28 @@ namespace PerformanceRunner
                 return $"{DynamicCodeSwitch} is false -- that is a Native AOT shape, not ReadyToRun";
 
             return null;
+        }
+
+        /// <summary>
+        /// Both ReadyToRun arms: the program's own assembly carries precompiled code (a CLI header whose
+        /// ManagedNativeHeader directory is non-empty). A runtimeconfig cannot say this, and a self-contained publish
+        /// without ReadyToRun has the same one. Null when it does.
+        /// </summary>
+        internal static string? ReadyToRunCodeProblem(string assemblyPath)
+        {
+            if (!File.Exists(assemblyPath))
+                return $"{Path.GetFileName(assemblyPath)} not found";
+
+            using FileStream stream = File.OpenRead(assemblyPath);
+            using PEReader reader = new(stream);
+            CorHeader? cor = reader.PEHeaders.CorHeader;
+
+            if (cor is null)
+                return $"{Path.GetFileName(assemblyPath)} is not a managed assembly";
+
+            return cor.ManagedNativeHeaderDirectory.Size > 0
+                ? null
+                : $"{Path.GetFileName(assemblyPath)} carries no ReadyToRun code (empty ManagedNativeHeader) -- every method would be jitted";
         }
 
         private static bool TryOptions(string? runtimeConfig, out JsonElement options, out string? problem)
