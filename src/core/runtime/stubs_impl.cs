@@ -137,7 +137,7 @@ partial class runtime_package
         Console.Out.Flush();
         Console.Error.Write(GOOS == "windows"u8 ? "fatal error: fault\n" : "SIGTRAP: trace trap\n");
         Console.Error.Flush();
-        Environment.Exit(2);
+        global::go.golib.MainExit.Exit(2);
     }
 
     // The ready-seam guards' view (GoroutineReadyTests): ANOTHER goroutine's g status, read through the
