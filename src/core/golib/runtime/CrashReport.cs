@@ -75,8 +75,10 @@ public static class CrashReport
     /// <remarks>
     /// runtime installs its renderers from its own module initializer, and a module initializer runs only when its module
     /// is first touched. A program with no imports never touches runtime, so its crash printed the panic value alone
-    /// (C2, 2026-10-24). The hook is LAZY: only a report that finds no renderer invokes it, so a program that never
-    /// crashes never loads runtime for it.
+    /// (C2, 2026-10-24). Under the JIT the hook is LAZY: only a report that finds no renderer invokes it, so a program
+    /// that never crashes never loads runtime for it. Under Native AOT the hook's <c>typeof</c> keeps runtime in the
+    /// image, and ILC runs its module initializer at startup, so runtime is kept and initialized for programs that did
+    /// not otherwise load it (C1's review, measured).
     /// </remarks>
     public static Action? RuntimeInitializer { get; set; }
 

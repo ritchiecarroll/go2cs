@@ -20,9 +20,11 @@ namespace go2cs;
 /// always prints one (C2, 2026-10-24).
 /// </para>
 /// <para>
-/// The hook is installed eagerly and RUN lazily: golib invokes it only from a report that finds no renderer, so a
-/// program that never crashes never loads runtime for it. The <c>typeof</c> in its body keeps runtime's type rooted
-/// for trimming and Native AOT.
+/// The hook is installed eagerly and, under the JIT, RUN lazily: golib invokes it only from a report that finds no
+/// renderer, so a program that never crashes never loads runtime for it. The <c>typeof</c> in its body keeps runtime's
+/// type rooted for trimming and Native AOT; under Native AOT that keeps runtime in the image and ILC runs its module
+/// initializer at startup, so runtime is kept and initialized for programs that did not otherwise load it (C1's
+/// review, measured). Go's runtime is always present, so this costs size, never behavior.
 /// </para>
 /// </remarks>
 [Generator]

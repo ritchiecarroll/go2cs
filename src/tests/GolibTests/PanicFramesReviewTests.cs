@@ -125,8 +125,9 @@ public class PanicFramesReviewTests
     {
         (string file, long line) = panicframesprobe_package.onGoroutine(panicframesprobe_package.callerOneInDefer);
 
+        // Go 1.26.10's gopanic calls the deferred function at panic.go:860, the line Go itself reports here.
         StringAssert.EndsWith(file, "runtime/panic.go");
-        Assert.AreEqual(792L, line);
+        Assert.AreEqual(860L, line);
     }
 
     [TestMethod]

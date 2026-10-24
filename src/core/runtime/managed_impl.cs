@@ -3984,8 +3984,8 @@ partial class runtime_package
     // panicdivide for an integer divide), then the frames the panic was raised in, then the deferring
     // function. The CLR has unwound those frames before the emitted finally runs the deferred call.
     // They survive as the panic's SiteTrace, the raised exception's trace from its throw site to its
-    // first catching frame, and this splices them back. Go's lines are go1.24.13's: gopanic calls the
-    // deferred func at panic.go:792.
+    // first catching frame, and this splices them back. gopanic calls the deferred func at
+    // GopanicCallsDeferredLine, the pinned release's panic.go line.
     //
     // OWNERSHIP IS CHECKED BY ACTIVATION, NOT BY METHOD ([P2-2], amended by COORD's review of the cut).
     // Every link of a splice must be a panic whose SiteOwner is the ACTIVATION of the Run being walked:
@@ -4022,10 +4022,10 @@ partial class runtime_package
     //
     // Named, not folded ([P2-4]): runtime.gopanic is also a real converted method, and a live walk
     // through it (Go code calling it directly) interns a second record for the function.
-    // The line at which go1.24.13's gopanic calls a deferred function (runtime/panic.go), shared by the Callers splice and
-    // the crash traceback's `panic(...)` frame. Go 1.26.10's is 860: like every root line in rootFunctionStartLine, it
-    // is pinned to go1.24.13 until those lines are re-pinned together.
-    private const int GopanicCallsDeferredLine = 792;
+    // The line at which gopanic calls a deferred function (runtime/panic.go), shared by the Callers splice and the crash
+    // traceback's `panic(...)` frame: the `fn()` in gopanic's defer loop at the Go release src/version.props pins
+    // (go1.26.10). repoguard's TestRootFrameLinesMatchThePinnedGoRoot derives it from that GOROOT and fails when it moves.
+    private const int GopanicCallsDeferredLine = 860;
 
     private static List<uintptr> splicePanic(PanicException panic, long activation, StackFrame[] live, int runIndex)
     {
@@ -4228,7 +4228,7 @@ partial class runtime_package
     // "Frame.Func unchanged"): Go leaves Func nil ONLY for an inlined frame, and go2cs keeps Go's function
     // boundaries one-for-one, so no frame is inlined and every Go frame carries its function's interned
     // *Func (frameFunc). startLine is the function's `func` keyword line (goFunctionStartLine), or a root
-    // frame's go1.24.13 declaration line (rootFunctionStartLine).
+    // frame's declaration line at its pinned release (rootFunctionStartLine).
     [GoRecv] public static (Frame frame, bool more) Next(this ref Frames ci)
     {
         while (len(ci.callers) > 0)
@@ -5151,13 +5151,14 @@ partial class runtime_package
     }
 
     // The start lines of the ROOT frames no live method backs (internRootFrame's records: the goroutine
-    // root, the test-host root, and the panic machinery splicePanic splices), as go1.24.13 declares them,
-    // the same release the frames' own lines are pinned to. Keyed by the Go function name the root is
-    // interned under; sigpanic is declared per OS, as splicePanic names its file.
+    // root, the test-host root, and the panic machinery splicePanic splices), as the same release declares them
+    // that the frames' own lines are pinned to. Keyed by the Go function name the root is interned under; sigpanic
+    // is declared per OS, as splicePanic names its file. repoguard's TestRootFrameLinesMatchThePinnedGoRoot holds
+    // each to the GOROOT src/version.props pins: gopanic's is go1.26.10's, and the rest it lists as still go1.24.13's.
     private static nint rootFunctionStartLine(string function) => function switch
     {
         "runtime.goexit" => 1699,       // runtime/asm_amd64.s: TEXT runtime·goexit
-        "runtime.gopanic" => 742,       // runtime/panic.go
+        "runtime.gopanic" => 809,       // runtime/panic.go
         "runtime.panicmem" => 260,      // runtime/panic.go
         "runtime.panicdivide" => 239,   // runtime/panic.go
         "runtime.panicwrap" => 332,     // runtime/error.go
