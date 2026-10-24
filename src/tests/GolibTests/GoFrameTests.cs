@@ -322,6 +322,72 @@ public class GoFrameTests
         Assert.IsInstanceOfType(escaped, typeof(GoexitException), "the panic is abandoned and the goroutine exits quietly");
     }
 
+    [TestMethod]
+    public void ARecoveredPanicDoesNotEndAGoexitThatIsRunningTheDeferredCalls()
+    {
+        // func f() { defer func() { earliest = true }(); defer func() { r = recover() }(); defer func() { panic("B") }(); defer runtime.Goexit() }
+        // go func() { defer func() { callerDeferRan = true }(); f(); returnedNormally = true }()
+        // go1.26.10: recover reads B, the earliest deferred call runs, the Goexit RESUMES, f never returns normally,
+        // and the caller's deferred call runs as the goroutine exits.
+        object? recovered = "unset";
+        bool earliest = false, returnedNormally = false, callerDeferRan = false;
+        Exception? escaped = null;
+
+        System.Threading.Thread thread = new(() =>
+        {
+            try
+            {
+                GoFrame caller = default;
+
+                try
+                {
+                    caller.Push(() => callerDeferRan = true);
+
+                    GoFrame frame = default;
+
+                    try
+                    {
+                        frame.Push(() => earliest = true);
+                        frame.Push(() => recovered = recover());
+                        frame.Push(() => throw panic("B"));
+                        frame.Push(() => throw new GoexitException());
+                    }
+                    catch (Exception ex) when (GoFrame.IsPanic(ex, out PanicException? p))
+                    {
+                        GoFrame.Capture(p);
+                    }
+                    finally
+                    {
+                        frame.Run();
+                    }
+
+                    returnedNormally = true;
+                }
+                catch (Exception ex) when (GoFrame.IsPanic(ex, out PanicException? p))
+                {
+                    GoFrame.Capture(p);
+                }
+                finally
+                {
+                    caller.Run();
+                }
+            }
+            catch (Exception ex)
+            {
+                escaped = ex;
+            }
+        });
+
+        thread.Start();
+        thread.Join();
+
+        Assert.AreEqual((@string)"B", recovered, "recover() reads the panic a later deferred call raised");
+        Assert.IsTrue(earliest, "the remaining deferred calls run after the recovery");
+        Assert.IsFalse(returnedNormally, "the Goexit resumes: the frame never returns normally");
+        Assert.IsTrue(callerDeferRan, "the caller's deferred calls run as the goroutine exits");
+        Assert.IsInstanceOfType(escaped, typeof(GoexitException), "the goroutine exits on the Goexit, not on B");
+    }
+
     // --- panic bookkeeping ---------------------------------------------------------------------
 
     [TestMethod]
