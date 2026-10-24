@@ -277,6 +277,23 @@ public class PanicException(object? state, Exception? innerException = null) :
     internal PanicException? Beneath { get; set; }
 
     /// <summary>
+    /// Gets the panic this one was raised beneath — Go's <c>_panic.link</c>: the panic whose deferred call was running
+    /// when this one was raised, recovered or not, until that recovery completes. Unlike <see cref="Beneath"/> it does not
+    /// depend on which frame owns the site. Set once, by the innermost <see cref="GoFrame.Run"/> catch with a panic
+    /// running; <see cref="golib.CrashReport"/> prints the chain (Go's <c>printpanics</c>).
+    /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal PanicException? Link { get; set; }
+
+    /// <summary>
+    /// Gets the C# string a Go string panic value arrived as, or <see langword="null"/>. A string LITERAL is interned, so
+    /// two panics of one constant hold the same reference here, as Go's two interface words share the constant's
+    /// deduplicated read-only data. The crash report compares it (Go's <c>preprintpanics</c>).
+    /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal string? StringSource { get; init; }
+
+    /// <summary>
     /// Gets how many catches have adopted this panic (each <c>IsPanic</c> filter that caught it). One
     /// means the catch now running is the FIRST, so <see cref="SiteTrace"/> ends at it.
     /// </summary>

@@ -306,6 +306,12 @@ public ref struct GoFrame
                         // called by its gopanic. A recovery that already completed nulled the entry.
                         PanicException? running = recorded ? state.Sequences![sequence].Panic : null;
 
+                        // Go's _panic.link, which the crash report prints: the first catch with a panic running is
+                        // the innermost panicking sequence, the panic gopanic found on the goroutine. A catch further
+                        // out sees the same panic re-raised and keeps the link it has.
+                        if (running is not null && !ReferenceEquals(running, raised))
+                            raised.Link ??= running;
+
                         // The entry (and its activation) exists from here on.
                         SetSequence(state, sequence, running);
                         recorded = true;

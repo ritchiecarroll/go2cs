@@ -308,7 +308,9 @@ public static partial class builtin
             state = nilPanicValue();
 
         // An explicit panic: runtime.Callers splices gopanic straight over its site (PanicFaultKind).
-        return new PanicException(state is string s ? (@string)s : state) { FaultKind = PanicFaultKind.Explicit };
+        return state is string s ?
+            new PanicException((@string)s) { FaultKind = PanicFaultKind.Explicit, StringSource = s } :
+            new PanicException(state) { FaultKind = PanicFaultKind.Explicit };
     }
 
     /// <summary>
