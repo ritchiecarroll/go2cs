@@ -35,7 +35,7 @@ internal partial struct fileTest {
     internal bool hasNoDwarfInfo;
 }
 
-internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
+internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
     new(
         @file: "testdata/gcc-386-mingw-obj"u8,
         hdr: new FileHeader(0x014c, 0x000c, 0x0, 0x64a, 0x1e, 0x0, 0x104),

@@ -510,11 +510,11 @@ internal static ж<rsa.PrivateKey> parseKey(@string s) {
     return k;
 }
 
-internal static ж<ж<rsa.PrivateKey>> ᏑrsaPrivateKey = new StandardBox<ж<rsa.PrivateKey>>(default(ж<rsa.PrivateKey>));
+internal static ж<ж<rsa.PrivateKey>> ᏑrsaPrivateKey = new StaticBox<ж<rsa.PrivateKey>>(default(ж<rsa.PrivateKey>));
 internal static ref ж<rsa.PrivateKey> rsaPrivateKey => ref ᏑrsaPrivateKey.ValueSlot;
 internal static void initᴛrsaPrivateKey() { rsaPrivateKey = test1024Key; }
 
-internal static ж<ж<rsa.PrivateKey>> Ꮡtest512Key = new StandardBox<ж<rsa.PrivateKey>>(parseKey(testingKey("""
+internal static ж<ж<rsa.PrivateKey>> Ꮡtest512Key = new StaticBox<ж<rsa.PrivateKey>>(parseKey(testingKey("""
 -----BEGIN RSA TESTING KEY-----
 MIIBOgIBAAJBALKZD0nEffqM1ACuak0bijtqE2QrI/KLADv7l3kK3ppMyCuLKoF0
 fd7Ai2KW5ToIwzFofvJcS/STa6HA5gQenRUCAwEAAQJBAIq9amn00aS0h/CrjXqu
@@ -589,7 +589,7 @@ fLVGuFoTVIu2bF0cWAjNNMg=
 -----END TESTING KEY-----
 """u8.Raw());
 
-internal static ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StandardBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
+internal static ж<ж<rsa.PrivateKey>> Ꮡtest2048Key = new StaticBox<ж<rsa.PrivateKey>>(parseKey(test2048KeyPEM));
 internal static ref ж<rsa.PrivateKey> test2048Key => ref Ꮡtest2048Key.ValueSlot;
 
 internal static ж<rsa.PrivateKey> test3072Key = parseKey(testingKey("""

@@ -45,7 +45,7 @@ public partial struct codeNode {
 
 internal static slice<byte> codeJSON;
 
-internal static ж<codeResponse> ᏑcodeStruct = new StandardBox<codeResponse>(default(codeResponse));
+internal static ж<codeResponse> ᏑcodeStruct = new StaticBox<codeResponse>(default(codeResponse));
 internal static ref codeResponse codeStruct => ref ᏑcodeStruct.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

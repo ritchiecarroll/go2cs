@@ -1037,7 +1037,7 @@ public static void CancelRequest(this ж<Transport> Ꮡt, ж<Request> Ꮡreq) {
 //
 // Private implementation past this point.
 //
-internal static ж<sync.Once> ᏑenvProxyOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> ᏑenvProxyOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once envProxyOnce => ref ᏑenvProxyOnce.Value;
 internal static Func<ж<url.URL>, (ж<url.URL>, error)> envProxyFuncValue;
 
@@ -1428,7 +1428,7 @@ internal static bool removeIdleConnLocked(this ref Transport t, ж<persistConn> 
     return removed;
 }
 
-internal static ж<net.Dialer> ᏑzeroDialer = new StandardBox<net.Dialer>(default(net.Dialer));
+internal static ж<net.Dialer> ᏑzeroDialer = new StaticBox<net.Dialer>(default(net.Dialer));
 internal static ref net.Dialer zeroDialer => ref ᏑzeroDialer.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -3116,7 +3116,7 @@ internal static void writeLoop(this ж<persistConn> Ꮡpc) {
 //
 // In tests, we set this to a large value to avoid flakiness from inconsistent
 // recycling of connections.
-internal static ж<time.Duration> ᏑmaxWriteWaitBeforeConnReuse = new StandardBox<time.Duration>(50 * time.Millisecond);
+internal static ж<time.Duration> ᏑmaxWriteWaitBeforeConnReuse = new StaticBox<time.Duration>(50 * time.Millisecond);
 internal static ref time.Duration maxWriteWaitBeforeConnReuse => ref ᏑmaxWriteWaitBeforeConnReuse.Value;
 
 // wroteRequest is a check before recycling a connection that the previous write
@@ -3240,10 +3240,10 @@ internal static void nop() {
 }
 
 // testHooks. Always non-nil.
-internal static ж<Action> ᏑtestHookEnterRoundTrip = new StandardBox<Action>(nop);
+internal static ж<Action> ᏑtestHookEnterRoundTrip = new StaticBox<Action>(nop);
 internal static ref Action testHookEnterRoundTrip => ref ᏑtestHookEnterRoundTrip.ValueSlot;
 internal static Action testHookWaitResLoop = nop;
-internal static ж<Action> ᏑtestHookRoundTripRetried = new StandardBox<Action>(nop);
+internal static ж<Action> ᏑtestHookRoundTripRetried = new StaticBox<Action>(nop);
 internal static ref Action testHookRoundTripRetried => ref ᏑtestHookRoundTripRetried.ValueSlot;
 internal static Action testHookPrePendingDial = nop;
 internal static Action testHookPostPendingDial = nop;
@@ -3662,7 +3662,7 @@ internal static (byte, error) ReadByte(this eofReader _) {
     return (0, io.EOF);
 }
 
-internal static ж<sync.Pool> ᏑgzipPool = new StandardBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
+internal static ж<sync.Pool> ᏑgzipPool = new StaticBox<sync.Pool>(new sync.Pool(New: () => @new<gzip.Reader>()));
 internal static ref sync.Pool gzipPool => ref ᏑgzipPool.Value;
 
 // gzipPoolGet gets a gzip.Reader from the pool and resets it to read from r.

@@ -22,7 +22,7 @@ using unicode;
 partial class syscall_package {
 
 // ForkLock is not used on Windows.
-public static ж<Δsync.RWMutex> ᏑForkLock = new StandardBox<Δsync.RWMutex>(default(Δsync.RWMutex));
+public static ж<Δsync.RWMutex> ᏑForkLock = new StaticBox<Δsync.RWMutex>(default(Δsync.RWMutex));
 public static ref Δsync.RWMutex ForkLock => ref ᏑForkLock.Value;
 
 // EscapeArg rewrites command line argument s as prescribed
@@ -322,10 +322,10 @@ partial struct SysProcAttr {
     public ΔHandle ParentProcess;              // if non-zero, the new process regards the process given by this handle as its parent process, and AdditionalInheritedHandles, if set, should exist in this parent process
 }
 
-internal static ж<ProcAttr> ᏑzeroProcAttr = new StandardBox<ProcAttr>(default(ProcAttr));
+internal static ж<ProcAttr> ᏑzeroProcAttr = new StaticBox<ProcAttr>(default(ProcAttr));
 internal static ref ProcAttr zeroProcAttr => ref ᏑzeroProcAttr.Value;
 
-internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new StandardBox<SysProcAttr>(default(SysProcAttr));
+internal static ж<SysProcAttr> ᏑzeroSysProcAttr = new StaticBox<SysProcAttr>(default(SysProcAttr));
 internal static ref SysProcAttr zeroSysProcAttr => ref ᏑzeroSysProcAttr.Value;
 
 public static (nint pid, uintptr handle, error err) StartProcess(@string argv0, slice<@string> argv, ж<ProcAttr> Ꮡattr) {

@@ -2275,7 +2275,7 @@ public static void TestQueryRowClosingStmt(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static ж<atomic.Value> ᏑatomicRowsCloseHook = new StandardBox<atomic.Value>(default(atomic.Value));
+internal static ж<atomic.Value> ᏑatomicRowsCloseHook = new StaticBox<atomic.Value>(default(atomic.Value));
 internal static ref atomic.Value atomicRowsCloseHook => ref ᏑatomicRowsCloseHook.Value; // of func(*Rows, *error)
 
 [GoInit] internal static void initΔ2() {

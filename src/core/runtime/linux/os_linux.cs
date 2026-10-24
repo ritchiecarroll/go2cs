@@ -234,15 +234,15 @@ internal static UntypedInt _AT_SECURE => 23; // secure mode boolean
 internal static UntypedInt _AT_RANDOM => 25; // introduced in 2.6.29
 internal static UntypedInt _AT_HWCAP2 => 26; // hardware capability bit vector 2
 
-internal static ж<slice<byte>> ᏑprocAuxv = new StandardBox<slice<byte>>(slice<byte>("/proc/self/auxv\x00"u8));
+internal static ж<slice<byte>> ᏑprocAuxv = new StaticBox<slice<byte>>(slice<byte>("/proc/self/auxv\x00"u8));
 internal static ref slice<byte> procAuxv => ref ᏑprocAuxv.ValueSlot;
 
-internal static ж<array<byte>> Ꮡaddrspace_vec = new StandardBox<array<byte>>(new array<byte>(1));
+internal static ж<array<byte>> Ꮡaddrspace_vec = new StaticBox<array<byte>>(new array<byte>(1));
 internal static ref array<byte> addrspace_vec => ref Ꮡaddrspace_vec.Value;
 
 internal static partial int32 mincore(@unsafe.Pointer addr, uintptr n, ж<byte> dst);
 
-internal static ж<array<uintptr>> Ꮡauxvreadbuf = new StandardBox<array<uintptr>>(new array<uintptr>(128));
+internal static ж<array<uintptr>> Ꮡauxvreadbuf = new StaticBox<array<uintptr>>(new array<uintptr>(128));
 internal static ref array<uintptr> auxvreadbuf => ref Ꮡauxvreadbuf.Value;
 
 internal static void sysargs(int32 argc, ж<ж<byte>> Ꮡargv) {
@@ -337,7 +337,7 @@ internal static nint /*pairs*/ sysauxv(slice<uintptr> auxv) {
     return i / 2;
 }
 
-internal static ж<slice<byte>> ᏑsysTHPSizePath = new StandardBox<slice<byte>>(slice<byte>("/sys/kernel/mm/transparent_hugepage/hpage_pmd_size\x00"u8));
+internal static ж<slice<byte>> ᏑsysTHPSizePath = new StaticBox<slice<byte>>(slice<byte>("/sys/kernel/mm/transparent_hugepage/hpage_pmd_size\x00"u8));
 internal static ref slice<byte> sysTHPSizePath => ref ᏑsysTHPSizePath.ValueSlot;
 
 internal static uintptr getHugePageSize() {
@@ -371,7 +371,7 @@ internal static void osinit() {
     configure64bitsTimeOn32BitsArchitectures();
 }
 
-internal static ж<slice<byte>> Ꮡurandom_dev = new StandardBox<slice<byte>>(slice<byte>("/dev/urandom\x00"u8));
+internal static ж<slice<byte>> Ꮡurandom_dev = new StaticBox<slice<byte>>(slice<byte>("/dev/urandom\x00"u8));
 internal static ref slice<byte> urandom_dev => ref Ꮡurandom_dev.ValueSlot;
 
 internal static nint readRandom(slice<byte> r) {

@@ -168,7 +168,7 @@ internal static bool @is(this ref _TypeSet s, Func<ж<Δterm>, bool> f) {
 }
 
 // topTypeSet may be used as type set for the empty interface.
-internal static ж<_TypeSet> ᏑtopTypeSet = new StandardBox<_TypeSet>(default(_TypeSet));
+internal static ж<_TypeSet> ᏑtopTypeSet = new StaticBox<_TypeSet>(default(_TypeSet));
 internal static ref _TypeSet topTypeSet => ref ᏑtopTypeSet.Value;
 internal static void initᴛtopTypeSet() { topTypeSet = new _TypeSet(terms: allTermlist); }
 
@@ -418,7 +418,7 @@ internal static void assertSortedMethods(slice<ж<Func>> list) {
 // invalidTypeSet is a singleton type set to signal an invalid type set
 // due to an error. It's also a valid empty type set, so consumers of
 // type sets may choose to ignore it.
-internal static ж<_TypeSet> ᏑinvalidTypeSet = new StandardBox<_TypeSet>(default(_TypeSet));
+internal static ж<_TypeSet> ᏑinvalidTypeSet = new StaticBox<_TypeSet>(default(_TypeSet));
 internal static ref _TypeSet invalidTypeSet => ref ᏑinvalidTypeSet.Value;
 
 // computeUnionTypeSet may be called with check == nil.

@@ -307,7 +307,7 @@ internal static void gcwaitfin() {
 internal static Action onceFunc = Δsync.OnceFunc(() => {
 });
 
-internal static ж<Δsync.Once> ᏑonceFuncOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
+internal static ж<Δsync.Once> ᏑonceFuncOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceFuncOnce => ref ᏑonceFuncOnce.Value;
 
 internal static void doOnceFunc() {
@@ -352,7 +352,7 @@ public static void BenchmarkOnceFunc(ж<Δtesting.B> Ꮡb) {
 
 internal static Func<nint> onceValue = Δsync.OnceValue(nint () => 42);
 
-internal static ж<Δsync.Once> ᏑonceValueOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
+internal static ж<Δsync.Once> ᏑonceValueOnce = new StaticBox<Δsync.Once>(default(Δsync.Once));
 internal static ref Δsync.Once onceValueOnce => ref ᏑonceValueOnce.Value;
 internal static nint onceValueValue;
 

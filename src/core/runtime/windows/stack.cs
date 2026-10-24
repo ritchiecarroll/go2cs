@@ -148,7 +148,7 @@ partial struct stackpoolᴛ1 /*dyn*/ {
     internal stackpoolItem item;
     internal array<byte> _ = new(40);
 }
-internal static ж<array<stackpoolᴛ1>> Ꮡstackpool = new StandardBox<array<stackpoolᴛ1>>(new array<stackpoolᴛ1>(2, () => new()));
+internal static ж<array<stackpoolᴛ1>> Ꮡstackpool = new StaticBox<array<stackpoolᴛ1>>(new array<stackpoolᴛ1>(2, () => new()));
 internal static ref array<stackpoolᴛ1> stackpool => ref Ꮡstackpool.Value;
 
 partial struct stackpoolItem {
@@ -162,7 +162,7 @@ partial struct stackLargeᴛ1 /*dyn*/ {
     internal mutex @lock;
     internal array<mSpanList> free = new(35); // free lists by log_2(s.npages)
 }
-internal static ж<stackLargeᴛ1> ᏑstackLarge = new StandardBox<stackLargeᴛ1>(new stackLargeᴛ1());
+internal static ж<stackLargeᴛ1> ᏑstackLarge = new StaticBox<stackLargeᴛ1>(new stackLargeᴛ1());
 internal static ref stackLargeᴛ1 stackLarge => ref ᏑstackLarge.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

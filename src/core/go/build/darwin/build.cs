@@ -317,7 +317,7 @@ public static slice<@string> SrcDirs(this ref Context ctxt) {
 // Default is the default Context for builds.
 // It uses the GOARCH, GOOS, GOROOT, and GOPATH environment variables
 // if set, or else the compiled code's GOARCH, GOOS, and GOROOT.
-public static ж<Context> ᏑDefault = new StandardBox<Context>(default(Context));
+public static ж<Context> ᏑDefault = new StaticBox<Context>(default(Context));
 public static ref Context Default => ref ᏑDefault.Value;
 internal static void initᴛDefault() { Default = defaultContext(); }
 
@@ -1548,7 +1548,7 @@ public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @strin
     return (info != nil, err);
 }
 
-internal static ж<Package> ᏑdummyPkg = new StandardBox<Package>(default(Package));
+internal static ж<Package> ᏑdummyPkg = new StaticBox<Package>(default(Package));
 internal static ref Package dummyPkg => ref ᏑdummyPkg.Value;
 
 // fileInfo records information learned about a file included in a build.

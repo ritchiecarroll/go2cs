@@ -893,7 +893,7 @@ public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> Ꮡs) {
 }
 
 // dupCloexecUnsupported indicates whether F_DUPFD_CLOEXEC is supported by the kernel.
-internal static ж<atomic.Bool> ᏑdupCloexecUnsupported = new StandardBox<atomic.Bool>(default(atomic.Bool));
+internal static ж<atomic.Bool> ᏑdupCloexecUnsupported = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool dupCloexecUnsupported => ref ᏑdupCloexecUnsupported.Value;
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

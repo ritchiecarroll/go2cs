@@ -288,13 +288,13 @@ partial struct Δtraceᴛ1 /*dyn*/ {
     // debugMalloc is the value of debug.malloc before tracing began.
     internal bool debugMalloc;
 }
-internal static ж<Δtraceᴛ1> ᏑΔtrace = new StandardBox<Δtraceᴛ1>(new Δtraceᴛ1());
+internal static ж<Δtraceᴛ1> ᏑΔtrace = new StaticBox<Δtraceᴛ1>(new Δtraceᴛ1());
 internal static ref Δtraceᴛ1 Δtrace => ref ᏑΔtrace.Value;
 
 // Trace public API.
-internal static ж<uint32> ᏑtraceAdvanceSema = new StandardBox<uint32>(1);
+internal static ж<uint32> ᏑtraceAdvanceSema = new StaticBox<uint32>(1);
 internal static ref uint32 traceAdvanceSema => ref ᏑtraceAdvanceSema.Value;
-internal static ж<uint32> ᏑtraceShutdownSema = new StandardBox<uint32>(1);
+internal static ж<uint32> ᏑtraceShutdownSema = new StaticBox<uint32>(1);
 internal static ref uint32 traceShutdownSema => ref ᏑtraceShutdownSema.Value;
 
 // go2cs generated this placeholder — func StartTrace is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -917,7 +917,7 @@ internal static ж<g> traceReaderAvailable() {
 }
 
 // Trace advancer goroutine.
-internal static ж<traceAdvancerState> ᏑtraceAdvancer = new StandardBox<traceAdvancerState>(default(traceAdvancerState));
+internal static ж<traceAdvancerState> ᏑtraceAdvancer = new StaticBox<traceAdvancerState>(default(traceAdvancerState));
 internal static ref traceAdvancerState traceAdvancer => ref ᏑtraceAdvancer.Value;
 
 partial struct traceAdvancerState {

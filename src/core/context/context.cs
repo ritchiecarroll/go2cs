@@ -405,11 +405,11 @@ partial struct stopCtx {
 }
 
 // goroutines counts the number of goroutines ever created; for testing.
-internal static ж<atomic.Int32> Ꮡgoroutines = new StandardBox<atomic.Int32>(default(atomic.Int32));
+internal static ж<atomic.Int32> Ꮡgoroutines = new StaticBox<atomic.Int32>(default(atomic.Int32));
 internal static ref atomic.Int32 goroutines => ref Ꮡgoroutines.Value;
 
 // &cancelCtxKey is the key that a cancelCtx returns itself for.
-internal static ж<nint> ᏑcancelCtxKey = new StandardBox<nint>(default(nint));
+internal static ж<nint> ᏑcancelCtxKey = new StaticBox<nint>(default(nint));
 internal static ref nint cancelCtxKey => ref ᏑcancelCtxKey.Value;
 
 // parentCancelCtx returns the underlying *cancelCtx for parent.

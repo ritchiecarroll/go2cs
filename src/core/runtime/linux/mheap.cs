@@ -240,7 +240,7 @@ partial struct mheap {
     internal ж<specialfinalizer> unused; // never set, just here to force the specialfinalizer type into DWARF
 }
 
-internal static ж<mheap> Ꮡmheap_ = new StandardBox<mheap>(new mheap());
+internal static ж<mheap> Ꮡmheap_ = new StaticBox<mheap>(new mheap());
 internal static ref mheap mheap_ => ref Ꮡmheap_.Value;
 
 // A heapArena stores metadata for a heap arena. heapArenas are stored
@@ -2964,7 +2964,7 @@ partial struct gcBitsArenasᴛ1 /*dyn*/ {
     internal ж<gcBitsArena> current;
     internal ж<gcBitsArena> previous;
 }
-internal static ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new StandardBox<gcBitsArenasᴛ1>(new gcBitsArenasᴛ1());
+internal static ж<gcBitsArenasᴛ1> ᏑgcBitsArenas = new StaticBox<gcBitsArenasᴛ1>(new gcBitsArenasᴛ1());
 internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ᏑgcBitsArenas.Value;
 
 // tryAlloc allocates from b or returns nil if b does not have enough room.

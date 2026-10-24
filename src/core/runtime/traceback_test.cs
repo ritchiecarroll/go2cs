@@ -794,7 +794,7 @@ internal static partial nint testTracebackArgsSlice(slice<nint> a) {
     return a[1] + n;
 }
 
-internal static ж<array<nint>> ᏑtestTracebackArgsSliceBackingStore = new StandardBox<array<nint>>(new array<nint>(2));
+internal static ж<array<nint>> ᏑtestTracebackArgsSliceBackingStore = new StaticBox<array<nint>>(new array<nint>(2));
 internal static ref array<nint> testTracebackArgsSliceBackingStore => ref ᏑtestTracebackArgsSliceBackingStore.Value;
 
 // Poison the arg area with deterministic values.

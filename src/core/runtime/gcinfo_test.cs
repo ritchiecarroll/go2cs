@@ -222,39 +222,39 @@ internal static void f(this IfaceImpl _) {
 }
 
 // BSS
-internal static ж<Ptr> ᏑbssPtr = new StandardBox<Ptr>(default(Ptr));
+internal static ж<Ptr> ᏑbssPtr = new StaticBox<Ptr>(default(Ptr));
 internal static ref Ptr bssPtr => ref ᏑbssPtr.Value;
-internal static ж<ScalarPtr> ᏑbssScalarPtr = new StandardBox<ScalarPtr>(default(ScalarPtr));
+internal static ж<ScalarPtr> ᏑbssScalarPtr = new StaticBox<ScalarPtr>(default(ScalarPtr));
 internal static ref ScalarPtr bssScalarPtr => ref ᏑbssScalarPtr.Value;
-internal static ж<PtrScalar> ᏑbssPtrScalar = new StandardBox<PtrScalar>(default(PtrScalar));
+internal static ж<PtrScalar> ᏑbssPtrScalar = new StaticBox<PtrScalar>(default(PtrScalar));
 internal static ref PtrScalar bssPtrScalar => ref ᏑbssPtrScalar.Value;
-internal static ж<BigStruct> ᏑbssBigStruct = new StandardBox<BigStruct>(new BigStruct());
+internal static ж<BigStruct> ᏑbssBigStruct = new StaticBox<BigStruct>(new BigStruct());
 internal static ref BigStruct bssBigStruct => ref ᏑbssBigStruct.Value;
-internal static ж<@string> ᏑbssString = new StandardBox<@string>(default(@string));
+internal static ж<@string> ᏑbssString = new StaticBox<@string>(default(@string));
 internal static ref @string bssString => ref ᏑbssString.Value;
-internal static ж<slice<@string>> ᏑbssSlice = new StandardBox<slice<@string>>(default(slice<@string>));
+internal static ж<slice<@string>> ᏑbssSlice = new StaticBox<slice<@string>>(default(slice<@string>));
 internal static ref slice<@string> bssSlice => ref ᏑbssSlice.ValueSlot;
-internal static ж<any> ᏑbssEface = new StandardBox<any>(default(any));
+internal static ж<any> ᏑbssEface = new StaticBox<any>(default(any));
 internal static ref any bssEface => ref ᏑbssEface.ValueSlot;
-internal static ж<Iface> ᏑbssIface = new StandardBox<Iface>(default(Iface));
+internal static ж<Iface> ᏑbssIface = new StaticBox<Iface>(default(Iface));
 internal static ref Iface bssIface => ref ᏑbssIface.ValueSlot;
 
 // DATA
-internal static ж<Ptr> ᏑdataPtr = new StandardBox<Ptr>(new Ptr(@new<byte>()));
+internal static ж<Ptr> ᏑdataPtr = new StaticBox<Ptr>(new Ptr(@new<byte>()));
 internal static ref Ptr dataPtr => ref ᏑdataPtr.Value;
-internal static ж<ScalarPtr> ᏑdataScalarPtr = new StandardBox<ScalarPtr>(new ScalarPtr(q: 1));
+internal static ж<ScalarPtr> ᏑdataScalarPtr = new StaticBox<ScalarPtr>(new ScalarPtr(q: 1));
 internal static ref ScalarPtr dataScalarPtr => ref ᏑdataScalarPtr.Value;
-internal static ж<PtrScalar> ᏑdataPtrScalar = new StandardBox<PtrScalar>(new PtrScalar(w: 1));
+internal static ж<PtrScalar> ᏑdataPtrScalar = new StaticBox<PtrScalar>(new PtrScalar(w: 1));
 internal static ref PtrScalar dataPtrScalar => ref ᏑdataPtrScalar.Value;
-internal static ж<BigStruct> ᏑdataBigStruct = new StandardBox<BigStruct>(new BigStruct(w: 1));
+internal static ж<BigStruct> ᏑdataBigStruct = new StaticBox<BigStruct>(new BigStruct(w: 1));
 internal static ref BigStruct dataBigStruct => ref ᏑdataBigStruct.Value;
-internal static ж<@string> ᏑdataString = new StandardBox<@string>("foo"u8);
+internal static ж<@string> ᏑdataString = new StaticBox<@string>("foo"u8);
 internal static ref @string dataString => ref ᏑdataString.Value;
-internal static ж<slice<@string>> ᏑdataSlice = new StandardBox<slice<@string>>(new @string[]{"foo"u8}.slice());
+internal static ж<slice<@string>> ᏑdataSlice = new StaticBox<slice<@string>>(new @string[]{"foo"u8}.slice());
 internal static ref slice<@string> dataSlice => ref ᏑdataSlice.ValueSlot;
-internal static ж<any> ᏑdataEface = new StandardBox<any>((nint)42);
+internal static ж<any> ᏑdataEface = new StaticBox<any>((nint)42);
 internal static ref any dataEface => ref ᏑdataEface.ValueSlot;
-internal static ж<Iface> ᏑdataIface = new StandardBox<Iface>(((IfaceImpl)42));
+internal static ж<Iface> ᏑdataIface = new StaticBox<Iface>(((IfaceImpl)42));
 internal static ref Iface dataIface => ref ᏑdataIface.ValueSlot;
 
 internal static slice<byte> infoString = new byte[]{typePointer, typeScalar}.slice();

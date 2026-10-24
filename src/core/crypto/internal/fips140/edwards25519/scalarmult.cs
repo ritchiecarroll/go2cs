@@ -26,7 +26,7 @@ partial struct basepointTablePrecompᴛ1 /*dyn*/ {
     internal array<affineLookupTable> table = new(32, () => new());
     internal sync.Once initOnce;
 }
-internal static ж<basepointTablePrecompᴛ1> ᏑbasepointTablePrecomp = new StandardBox<basepointTablePrecompᴛ1>(new basepointTablePrecompᴛ1());
+internal static ж<basepointTablePrecompᴛ1> ᏑbasepointTablePrecomp = new StaticBox<basepointTablePrecompᴛ1>(new basepointTablePrecompᴛ1());
 internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ᏑbasepointTablePrecomp.Value;
 
 // ScalarBaseMult sets v = x * B, where B is the canonical generator, and
@@ -138,7 +138,7 @@ partial struct basepointNafTablePrecompᴛ1 /*dyn*/ {
     internal nafLookupTable8 table;
     internal sync.Once initOnce;
 }
-internal static ж<basepointNafTablePrecompᴛ1> ᏑbasepointNafTablePrecomp = new StandardBox<basepointNafTablePrecompᴛ1>(new basepointNafTablePrecompᴛ1());
+internal static ж<basepointNafTablePrecompᴛ1> ᏑbasepointNafTablePrecomp = new StaticBox<basepointNafTablePrecompᴛ1>(new basepointNafTablePrecompᴛ1());
 internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref ᏑbasepointNafTablePrecomp.Value;
 
 // VarTimeDoubleScalarBaseMult sets v = a * A + b * B, where B is the canonical

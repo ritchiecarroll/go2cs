@@ -23,7 +23,7 @@ internal static UntypedInt tracebackCrash => /* 1 << iota */ 1;
 internal static UntypedInt tracebackAll => 2;
 internal static UntypedInt tracebackShift => /* iota */ 2;
 
-internal static ж<uint32> Ꮡtraceback_cache = new StandardBox<uint32>(((uint32)2 << (int)(tracebackShift)));
+internal static ж<uint32> Ꮡtraceback_cache = new StaticBox<uint32>(((uint32)2 << (int)(tracebackShift)));
 internal static ref uint32 traceback_cache => ref Ꮡtraceback_cache.Value;
 
 internal static uint32 traceback_env;
@@ -106,7 +106,7 @@ internal static slice<@string> environ() {
 
 // TODO: These should be locals in testAtomic64, but we don't 8-byte
 // align stack variables on 386.
-internal static ж<uint64> Ꮡtest_z64 = new StandardBox<uint64>(default(uint64));
+internal static ж<uint64> Ꮡtest_z64 = new StaticBox<uint64>(default(uint64));
 internal static ref uint64 test_z64 => ref Ꮡtest_z64.Value;
 internal static uint64 test_x64;
 
@@ -412,7 +412,7 @@ partial struct debugᴛ1 /*dyn*/ {
     // goroutine status header line.
     internal atomic.Int32 tracebacklabels;
 }
-internal static ж<debugᴛ1> Ꮡdebug = new StandardBox<debugᴛ1>(default(debugᴛ1));
+internal static ж<debugᴛ1> Ꮡdebug = new StaticBox<debugᴛ1>(default(debugᴛ1));
 internal static ref debugᴛ1 debug => ref Ꮡdebug.Value;
 
 internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{

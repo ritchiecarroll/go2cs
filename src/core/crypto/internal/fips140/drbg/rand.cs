@@ -22,10 +22,10 @@ partial class drbg_package {
 // We keep both a persistent DRBG instance and a pool of additional instances.
 // Occasional uses will use drbgInstance, even if the pool was emptied since the
 // last use. Frequent concurrent uses will fill the pool and use it.
-internal static ж<atomic.Pointer<Counter>> ᏑdrbgInstance = new StandardBox<atomic.Pointer<Counter>>(default(atomic.Pointer<Counter>));
+internal static ж<atomic.Pointer<Counter>> ᏑdrbgInstance = new StaticBox<atomic.Pointer<Counter>>(default(atomic.Pointer<Counter>));
 internal static ref atomic.Pointer<Counter> drbgInstance => ref ᏑdrbgInstance.Value;
 
-internal static ж<sync.Pool> ᏑdrbgPool = new StandardBox<sync.Pool>(default(sync.Pool));
+internal static ж<sync.Pool> ᏑdrbgPool = new StaticBox<sync.Pool>(default(sync.Pool));
 internal static ref sync.Pool drbgPool => ref ᏑdrbgPool.Value;
 internal static void initᴛdrbgPool() { drbgPool = new sync.Pool(
     New: () => NewCounter(getEntropy()).OrTypedNil()

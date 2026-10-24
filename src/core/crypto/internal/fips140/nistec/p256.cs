@@ -125,7 +125,7 @@ public static (ж<P256Point>, error) SetBytes(this ж<P256Point> Ꮡp, slice<byt
 
 internal static ж<fiat.P256Element> _p256B;
 
-internal static ж<sync.Once> Ꮡ_p256BOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ж<sync.Once> Ꮡ_p256BOnce = new StaticBox<sync.Once>(default(sync.Once));
 internal static ref sync.Once _p256BOnce => ref Ꮡ_p256BOnce.Value;
 
 internal static ж<fiat.P256Element> p256B() {
@@ -598,7 +598,7 @@ internal static void Select(this ref p256AffineTable table, ж<p256AffinePoint> 
 // sliding window used in ScalarBaseMult, and having each table already
 // pre-doubled lets us avoid the doublings between windows entirely. This table
 // aliases into p256PrecomputedEmbed.
-internal static ж<ж<array<p256AffineTable>>> Ꮡp256GeneratorTables = new StandardBox<ж<array<p256AffineTable>>>(default(ж<array<p256AffineTable>>));
+internal static ж<ж<array<p256AffineTable>>> Ꮡp256GeneratorTables = new StaticBox<ж<array<p256AffineTable>>>(default(ж<array<p256AffineTable>>));
 internal static ref ж<array<p256AffineTable>> p256GeneratorTables => ref Ꮡp256GeneratorTables.ValueSlot;
 
 // go2cs generated this placeholder — func init is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])

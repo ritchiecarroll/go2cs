@@ -12,7 +12,7 @@ using sync;
 
 partial class fips140tls_package {
 
-internal static ж<atomic.Bool> Ꮡrequired = new StandardBox<atomic.Bool>(default(atomic.Bool));
+internal static ж<atomic.Bool> Ꮡrequired = new StaticBox<atomic.Bool>(default(atomic.Bool));
 internal static ref atomic.Bool @required => ref Ꮡrequired.Value;
 
 [GoInit] internal static void init() {

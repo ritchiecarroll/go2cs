@@ -26,9 +26,9 @@ internal static UntypedInt float64MantBits => 52;
 internal static UntypedInt float64ExpBits => 11;
 internal static UntypedInt float64Bias => -1023;
 
-internal static ж<floatInfo> Ꮡfloat32info = new StandardBox<floatInfo>(new floatInfo(float32MantBits, float32ExpBits, float32Bias));
+internal static ж<floatInfo> Ꮡfloat32info = new StaticBox<floatInfo>(new floatInfo(float32MantBits, float32ExpBits, float32Bias));
 internal static ref floatInfo float32info => ref Ꮡfloat32info.Value;
-internal static ж<floatInfo> Ꮡfloat64info = new StandardBox<floatInfo>(new floatInfo(float64MantBits, float64ExpBits, float64Bias));
+internal static ж<floatInfo> Ꮡfloat64info = new StaticBox<floatInfo>(new floatInfo(float64MantBits, float64ExpBits, float64Bias));
 internal static ref floatInfo float64info => ref Ꮡfloat64info.Value;
 
 // FormatFloat converts the floating-point number f to a string,

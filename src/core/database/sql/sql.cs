@@ -39,7 +39,7 @@ using ꓸꓸꓸany = Span<any>;
 
 partial class sql_package {
 
-internal static ж<sync.RWMutex> ᏑdriversMu = new StandardBox<sync.RWMutex>(default(sync.RWMutex));
+internal static ж<sync.RWMutex> ᏑdriversMu = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
 internal static ref sync.RWMutex driversMu => ref ᏑdriversMu.Value;
 
 // drivers should be an internal detail,

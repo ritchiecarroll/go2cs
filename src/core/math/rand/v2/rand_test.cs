@@ -520,7 +520,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
 }
 
 // Benchmarks
-public static ж<uint64> ᏑSink = new StandardBox<uint64>(default(uint64));
+public static ж<uint64> ᏑSink = new StaticBox<uint64>(default(uint64));
 public static ref uint64 Sink => ref ᏑSink.Value;
 
 internal static ж<rand.Rand> testRand() {

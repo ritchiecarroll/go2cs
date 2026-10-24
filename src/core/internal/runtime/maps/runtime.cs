@@ -45,7 +45,7 @@ public static error errNilAssign;
 // TODO: move zeroVal to internal/abi?
 //
 //go:linkname zeroVal runtime.zeroVal
-internal static ж<array<byte>> ᏑzeroVal = new StandardBox<array<byte>>(new array<byte>(1024));
+internal static ж<array<byte>> ᏑzeroVal = new StaticBox<array<byte>>(new array<byte>(1024));
 internal static ref array<byte> zeroVal => ref ᏑzeroVal.Value;
 
 // mapaccess1 returns a pointer to h[key].  Never returns nil, instead

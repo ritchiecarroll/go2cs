@@ -43,7 +43,7 @@ partial struct semaRoot {
     internal atomic.Uint32 nwait; // Number of waiters. Read w/o the lock.
 }
 
-internal static ж<semTable> Ꮡsemtable = new StandardBox<semTable>(default(semTable));
+internal static ж<semTable> Ꮡsemtable = new StaticBox<semTable>(default(semTable));
 internal static ref semTable semtable => ref Ꮡsemtable.Value;
 
 // Prime to not correlate with any user patterns.

@@ -69,7 +69,7 @@ public static ж<Selection> Lookup(this ж<MethodSet> Ꮡs, ж<Package> Ꮡpkg, 
 }
 
 // Shared empty method set.
-internal static ж<MethodSet> ᏑemptyMethodSet = new StandardBox<MethodSet>(default(MethodSet));
+internal static ж<MethodSet> ᏑemptyMethodSet = new StaticBox<MethodSet>(default(MethodSet));
 internal static ref MethodSet emptyMethodSet => ref ᏑemptyMethodSet.Value;
 
 // Note: NewMethodSet is intended for external use only as it

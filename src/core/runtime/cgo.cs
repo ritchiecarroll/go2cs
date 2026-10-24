@@ -29,7 +29,7 @@ internal static @unsafe.Pointer _cgo_callers;
 internal static @unsafe.Pointer _cgo_set_traceback_functions;
 internal static @unsafe.Pointer _cgo_call_traceback_function;
 internal static @unsafe.Pointer _cgo_call_symbolizer_function;
-internal static ж<@unsafe.Pointer> Ꮡ_cgo_yield = new StandardBox<@unsafe.Pointer>(default(@unsafe.Pointer));
+internal static ж<@unsafe.Pointer> Ꮡ_cgo_yield = new StaticBox<@unsafe.Pointer>(default(@unsafe.Pointer));
 internal static ref @unsafe.Pointer _cgo_yield => ref Ꮡ_cgo_yield.Value;
 internal static @unsafe.Pointer _cgo_pthread_key_created;
 internal static @unsafe.Pointer _cgo_bindm;

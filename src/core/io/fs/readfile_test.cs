@@ -27,7 +27,7 @@ internal static void initᴛtestFsys() { testFsys = new fstest.MapFS(new map<@st
         Sys: ᏑsysValue))
 }); }
 
-internal static ж<nint> ᏑsysValue = new StandardBox<nint>(default(nint));
+internal static ж<nint> ᏑsysValue = new StaticBox<nint>(default(nint));
 internal static ref nint sysValue => ref ᏑsysValue.Value;
 
 partial struct readFileOnly {

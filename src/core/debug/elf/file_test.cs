@@ -37,7 +37,7 @@ internal partial struct fileTest {
     internal slice<global::go.debug.elf_package.Symbol> symbols;
 }
 
-internal static ж<slice<fileTest>> ᏑfileTests = new StandardBox<slice<fileTest>>(new fileTest[]{
+internal static ж<slice<fileTest>> ᏑfileTests = new StaticBox<slice<fileTest>>(new fileTest[]{
     new(
         "testdata/gcc-386-freebsd-exec"u8,
         new FileHeader(ELFCLASS32, ELFDATA2LSB, EV_CURRENT, ELFOSABI_FREEBSD, 0, binary.LittleEndian, ET_EXEC, EM_386, 0x80483cc),

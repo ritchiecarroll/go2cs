@@ -538,13 +538,13 @@ public partial struct Generic<T> {
     public T X;
 }
 
-internal static ж<@string> ᏑnameAttr = new StandardBox<@string>("Sarah"u8);
+internal static ж<@string> ᏑnameAttr = new StaticBox<@string>("Sarah"u8);
 internal static ref @string nameAttr => ref ᏑnameAttr.Value;
-internal static ж<nuint> ᏑageAttr = new StandardBox<nuint>((nuint)12);
+internal static ж<nuint> ᏑageAttr = new StaticBox<nuint>((nuint)12);
 internal static ref nuint ageAttr => ref ᏑageAttr.Value;
-internal static ж<@string> ᏑcontentsAttr = new StandardBox<@string>("lorem ipsum"u8);
+internal static ж<@string> ᏑcontentsAttr = new StaticBox<@string>("lorem ipsum"u8);
 internal static ref @string contentsAttr => ref ᏑcontentsAttr.Value;
-internal static ж<@string> Ꮡempty = new StandardBox<@string>(""u8);
+internal static ж<@string> Ꮡempty = new StaticBox<@string>(""u8);
 internal static ref @string empty => ref Ꮡempty.Value;
 
 // Unless explicitly stated as such (or *Plain), all of the

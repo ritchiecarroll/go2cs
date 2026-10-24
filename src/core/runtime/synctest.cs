@@ -187,7 +187,7 @@ internal static @unsafe.Pointer raceaddr(this ж<synctestBubble> Ꮡbubble) {
     return (uintptr)@unsafe.Pointer.FromRef(ref bubble);
 }
 
-internal static ж<atomic.Uint64> ᏑbubbleGen = new StandardBox<atomic.Uint64>(default(atomic.Uint64));
+internal static ж<atomic.Uint64> ᏑbubbleGen = new StaticBox<atomic.Uint64>(default(atomic.Uint64));
 internal static ref atomic.Uint64 bubbleGen => ref ᏑbubbleGen.Value;     // bubble ID counter
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)

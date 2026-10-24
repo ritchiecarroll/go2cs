@@ -22,7 +22,7 @@ using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
 
-internal static ж<atomic.Int32> ᏑregConfirmRun = new StandardBox<atomic.Int32>(default(atomic.Int32));
+internal static ж<atomic.Int32> ᏑregConfirmRun = new StaticBox<atomic.Int32>(default(atomic.Int32));
 internal static ref atomic.Int32 regConfirmRun => ref ᏑregConfirmRun.Value;
 
 //go:registerparams
