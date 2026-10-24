@@ -158,6 +158,20 @@ public static class MainExit
     }
 
     /// <summary>
+    /// The guard seam: forgets a fatal start that did not end the process. In production every fatal start ends it,
+    /// because the goroutine root runs at its thread's base (the pool, a coroutine). A test that drives the root on its
+    /// own thread catches the escape, and must not leave <c>panicking</c> set for the rest of the run, or for the test
+    /// host's own exit, which would then wait for a report that never comes.
+    /// </summary>
+    internal static void ResetFatalStartForTest()
+    {
+        Volatile.Write(ref s_reportOwner, 0);
+        Volatile.Write(ref s_fatalCode, 0);
+        Volatile.Write(ref s_panicking, 0);
+        s_reported.Reset();
+    }
+
+    /// <summary>
     /// <c>startpanic_m</c>: a fatal report begins on this thread and the process will exit with
     /// <paramref name="code"/>. <c>panicking</c> is set BEFORE this goroutine leaves the count, so a returning
     /// <c>main</c> never sees neither. A goroutine's escaping panic marks it in the goroutine root's first-pass

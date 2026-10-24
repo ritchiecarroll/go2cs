@@ -158,6 +158,10 @@ public class MainExitPanicDefersTests
     [TestMethod]
     public void AMainReturnDoesNotWaitLongOnADeferredCallThatBlocks()
     {
+        // The wait stops at once when a report has begun, so no earlier test's fatal start may be left set (the full
+        // run failed this arm in 0.1 ms before GoroutineRootPanicTests forgot theirs).
+        MainExit.ResetFatalStartForTest();
+
         int baseline = MainExit.RunningPanicDefers;
         using ManualResetEventSlim inDeferred = new(false), release = new(false);
 

@@ -47,6 +47,11 @@ public class GoroutineRootPanicTests
         s_contained = null;
     }
 
+    // The root marks Go's `panicking` as a panic escapes it (MainExit). Here the escape is caught on the test's own
+    // thread and the process lives on, so the mark is forgotten after each test.
+    [TestCleanup]
+    public void ForgetFatalStart() => MainExit.ResetFatalStartForTest();
+
     // Kept out of the inliner's reach: the frame being asserted on has to exist to be found.
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void raiseExplicitPanic()
