@@ -151,17 +151,24 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   cut a converted program's median startup by about a third. `dotnet run` and `dotnet build` never get
   ReadyToRun ([how](ConsumingGoFromCSharp.md#rough-edges)). The trim mode is set for you: a converted
   project carries `partial` in its project file, and a C# project you write yourself gets the same
-  default from the packages. A trimmed publish of a project built from source runs, and reports trim
-  warnings from golib and the converted `runtime`, `reflect` and `time` packages (measured on linux-x64).
-  A Native AOT publish is slow either way
+  default from the packages. A trimmed publish runs, and its output matches the untrimmed build's. It
+  warns, measured on linux-x64: a project that uses the `go.*` packages gets one IL2104 for each package
+  with trim warnings, eight for a program that uses `fmt`, and `-p:TrimmerSingleWarn=false` lists the
+  hundred or so behind them, most of them golib's, `runtime`'s and `reflect`'s use of reflection. A
+  project built from the converted source lists them all. A single-file publish needs ReadyToRun turned
+  off ([Known issues](KnownIssues.md#a-single-file-publish-with-readytorun-runs-out-of-memory)), and a
+  Native AOT publish is slow either way
   ([Known issues](KnownIssues.md)).
   <!-- ReadyToRun: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`; the startup figure is
        P1's PerfStartup reading cited in docs/ConsumingGoFromCSharp.md (linux-x64, median 488 ms JIT, 329 ms ReadyToRun).
        Lazy tables: docs/ConversionStrategies.md, the [GoLazy] holder paragraphs (a package var whose initializer
-       depends on nothing that changes is built on its first read). Trim warnings: measured 2026-10-24 by C2, linux-x64,
-       .NET SDK 10.0.112, `dotnet publish -c Release -r linux-x64` of a converted fmt program built with project
-       references at a8821c781a: rc 0, 110 ILLink trim-analysis warnings (runtime 40, golib 41, reflect 14, time 6,
-       unsafe 5, three others), none of them IL2036. A NuGet consumer's publish was not measured. -->
+       depends on nothing that changes is built on its first read). Trim warnings: P1's reconciliation, linux-x64,
+       go1.26.10, .NET SDK 10.0.112, at a8821c781a (claude/p1-trim-recon ddf7c054d7,
+       docs/phase4/DATA-trim-recon-p1-2026-10-24.md §2-§4). A fmt program converted with -recurse=nuget against a local
+       feed of the closure's packages: rc 0 and 8 IL2104, one each for errors, internal.reflectlite, internal.sync, golib,
+       reflect, runtime, time and unsafe; with -p:TrimmerSingleWarn=false, 110 (golib 41, runtime 40, reflect 14, time 6,
+       unsafe 5, three others). The same program built with project references logs the 110 directly, which is C2's
+       reading of the same day. In every arm the trimmed stderr equals the untrimmed build's. -->
 * **Allocation.** Converted code allocates where Go's compiler doesn't, so expect more garbage and
   failing `testing.AllocsPerRun` assertions.
 * **Crypto, most hashing and `math/big` run Go's portable code**, the way Go builds with `-tags purego`:
@@ -251,7 +258,10 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
 ## Reading and debugging the output
 
 * **You debug the C#.** Breakpoints, stepping and compiler errors are on the generated `.cs`. A Go
-  panic's own traceback does name the Go file and line.
+  panic's own traceback does name the Go file and line, read from the program's `.pdb` files: a publish
+  with `-p:DebugType=none` keeps the frames and loses every file and line.
+  <!-- P1's reconciliation, linux-x64 (claude/p1-trim-recon ddf7c054d7, docs/phase4/DATA-trim-recon-p1-2026-10-24.md §5
+       finding 2): "With -p:DebugType=none the traceback keeps its frames but loses every file:line line." -->
 * **Some of the letters aren't on your keyboard.** `ж<T>`, `Ꮡx`, `goǃ(...)`, `ᐸꟷ(ch)`: several look like
   punctuation and are letters, so an ASCII search finds nothing. Keep the
   [glyph table](ConversionStrategies.md#reading-converted-code-names-and-glyphs) open.

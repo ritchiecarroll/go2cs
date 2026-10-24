@@ -98,3 +98,22 @@ and a publish without Native AOT are not affected.
      hours. Two such publishes run side by side on the same machine (ILC 8.7 and 10.3 GB, 1.3 GB left free) were
      both still compiling at the four-hour ceiling. The ~250 MB consumer above measured 243,136,000 bytes on the same
      machine and tree. -->
+
+## A single-file publish with ReadyToRun runs out of memory
+
+A converted program's project turns ReadyToRun on for `dotnet publish`. Adding `-p:PublishSingleFile=true`
+to that publish ran the ReadyToRun compiler, crossgen2, to about 10 GB of memory on a linux-x64 machine,
+where it failed with `Insufficient memory` and left the build hanging. A single-file publish with
+ReadyToRun turned off succeeds:
+
+```
+dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=false
+```
+
+The program then starts without ReadyToRun's head start, as it does under `dotnet run`.
+
+<!-- P1's reconciliation, linux-x64, go1.26.10, .NET SDK 10.0.112, at a8821c781a (claude/p1-trim-recon ddf7c054d7,
+     docs/phase4/DATA-trim-recon-p1-2026-10-24.md §5 finding 3): "-p:PublishSingleFile=true with the csproj's ReadyToRun
+     on ran crossgen2 to 10 GB RSS and failed with "Insufficient memory". MSBuild then hung, and it was stopped by PID.
+     With ReadyToRun off, the single-file publish succeeded." The template's switch:
+     src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`. -->
