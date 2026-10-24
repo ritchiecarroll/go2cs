@@ -52,7 +52,9 @@ public class CallerLineMultiLineDebugTests
         string project = Path.Combine(src!, "tests", "Behavioral", "CallerLineMultiLine");
         string go2csPath = src!.Replace('\\', '/').TrimEnd('/') + "/";
 
-        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineMultiLine.csproj"), "-c", "Debug", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath], project, 1_800_000);
+        // The program runs on this host, so it is built for this host's GOOS. Without it the corpus builds its default
+        // flavour, windows, and on linux syscall/windows' dll loader throws at package init (every linux run since 10-20).
+        (int buildCode, string buildOut) = Run(dotnet!, ["build", Path.Combine(project, "CallerLineMultiLine.csproj"), "-c", "Debug", "-nologo", "-nodeReuse:false", "-p:go2csPath=" + go2csPath, "-p:GoTargetOS=" + HostGoos()], project, 1_800_000);
         Assert.AreEqual(0, buildCode, $"the Debug build failed:{Environment.NewLine}{Tail(buildOut)}");
 
         (int csCode, string csOut) = Run(dotnet!, [Path.Combine(project, "bin", "Debug", "net10.0", "CallerLineMultiLine.dll")], project, 120_000);
@@ -81,6 +83,10 @@ public class CallerLineMultiLineDebugTests
 
         Assert.AreEqual(0, differ.Count, $"in a Debug build these shapes do not report their calls' own lines:{Environment.NewLine}{string.Join(Environment.NewLine, differ)}");
     }
+
+    // This host's GOOS in Go's spelling: the flavour a program built here must be to run here.
+    private static string HostGoos() =>
+        OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsMacOS() ? "darwin" : "linux";
 
     private static string[] Lines(string output) =>
         output.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);

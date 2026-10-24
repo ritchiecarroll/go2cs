@@ -102,6 +102,8 @@ public class NoUncountedBackingAllocationsTests
         ("runtime/GoTimer.cs|GoTimer[] due = new GoTimer[16];", "runtime bookkeeping: the timer service thread's batch of due timers, allocated once when the thread starts and reused; Go runs due timers straight off ts.heap"),
         ("runtime/BoringCaches.cs|Action[] updated = new Action[s_caches.Length + 1];", "runtime bookkeeping: the registered cache-cleanup callbacks (copy-on-register)"),
         ("runtime/CrashReport.cs|byte[] bytes = Encoding.UTF8.GetBytes(report);", "crash-report output: the UTF-8 text of a fatal report, written once as the process dies"),
+        ("runtime/CrashReport.cs|bool[] repanicked = new bool[chain.Count];", "crash-report output: printpanics' per-link repanicked marks, computed once as the process dies"),
+        ("runtime/CrashReport.cs|string?[] values = new string?[chain.Count];", "crash-report output: preprintpanics' per-link value texts, computed once as the process dies"),
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseEndUnixNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/GcPauseRecorder.cs|private static readonly ulong[] s_pauseNs = new ulong[RingLength];", "runtime bookkeeping: the static GC pause ring buffers behind ReadMemStats"),
         ("runtime/TypeExtensions.ExtensionMethodRegistry.cs|return Delegate.CreateDelegate(getMethodType(types.ToArray()), methodInfo);", "runtime metadata: the extension-method registry and delegate signature types"),
