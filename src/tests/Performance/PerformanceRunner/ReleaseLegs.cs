@@ -71,7 +71,19 @@ namespace PerformanceRunner
         /// empty when it is. The subject of the re-baseline is the published release, so a project reference into a
         /// local standard library, a go2cs package at another version, or no go2cs package at all is refused by name.
         /// </summary>
-        internal static IReadOnlyList<string> Refusals(string program, string csproj, ReleaseLeg leg)
+        private static readonly Regex s_property = new("^\\$\\((?<name>[A-Za-z_][A-Za-z0-9_.-]*)\\)$", RegexOptions.Compiled);
+
+        /// <summary>
+        /// The MSBuild properties the go2cs package references take their version from: a release's converter writes
+        /// <c>Version="$(GoStdLibVersion)"</c> and sets the property in the Directory.Build.props beside the program.
+        /// </summary>
+        internal static IReadOnlyList<string> VersionProperties(string csproj) =>
+            PackageReferences(csproj).Where(p => IsGo2csPackage(p.Id))
+                .Select(p => s_property.Match(p.Version)).Where(m => m.Success)
+                .Select(m => m.Groups["name"].Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+        internal static IReadOnlyList<string> Refusals(string program, string csproj, ReleaseLeg leg,
+            IReadOnlyDictionary<string, string>? properties = null)
         {
             List<string> refusals = new();
 
@@ -83,8 +95,25 @@ namespace PerformanceRunner
             if (packages.Count == 0)
                 refusals.Add($"{leg.Name}/{program}: no go.* package reference; this is not a -recurse=nuget conversion");
 
-            foreach ((string id, string version) in packages)
+            foreach ((string id, string spec) in packages)
             {
+                // A property-valued version is judged by what the evaluation gave it; one it did not answer is refused.
+                string version = spec;
+                Match property = s_property.Match(spec);
+
+                if (property.Success)
+                {
+                    string name = property.Groups["name"].Value;
+
+                    if (properties is null || !properties.TryGetValue(name, out string? value))
+                    {
+                        refusals.Add($"{leg.Name}/{program}: references {id} {spec}, and the evaluation gave {name} no value");
+                        continue;
+                    }
+
+                    version = value;
+                }
+
                 if (!VersionCovers(version, leg.PackageVersion))
                     refusals.Add($"{leg.Name}/{program}: references {id} {version}, which does not cover the leg's {leg.PackageVersion}");
             }
