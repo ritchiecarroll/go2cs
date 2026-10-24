@@ -1787,15 +1787,15 @@ that imports `fmt` gets these lines in its `.csproj`:
 <PackageReference Include="go.gen" Version="$(GoStdLibVersion)" PrivateAssets="all" />
 ```
 
-**`$(GoStdLibVersion)` follows the Go release doing the conversion.** go2cs writes a
-`Directory.Build.props` beside the converted projects that sets it with a floating NuGet revision. For
-example, Go 1.N.P gives `1.N.P.*`, and restore takes the newest published `1.N.P.x` package. Set
-the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:834-838#c30ed6; version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:296-308#c68571 -->
+**`$(GoStdLibVersion)` follows the Go minor doing the conversion.** go2cs writes a
+`Directory.Build.props` beside the converted projects that sets it to that minor with a float. For
+example, Go 1.N.P gives `1.N.*`, and restore takes the newest published `1.N.x.y` package. Set
+the property yourself, for example with `-p:GoStdLibVersion=…`, to pin one exact version. <!-- default + override: src/go2cs/moduleConverter.go:835-836 (`to the converter's Go minor, floating on the patch and revision (e.g.…1.26.*), so a freshly converted project restores the newest release of that minor`); the float: src/go2cs/toolchainResolution.go:525 (`return strings.TrimPrefix(minor, "go") + ".*"`); version = the converting toolchain's GOVERSION (src/go2cs/readme.go:93-101#813dcf); test: src/go2cs/moduleConverter_integration_test.go:310 (`if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"`). Why the minor and not the patch: NuGet resolves a float that matches nothing published to the OLDEST package above it, so a 1.N.P.* default left a consumer on an old patch below every published base pinned to that minor's first release (measured 2026-10-24, linux-x64, .NET SDK 10.0.112; docs/PLAN-version-lines.md §4). -->
 
 **`-recurse=nuget` refuses a mismatched Go release.** The published packages match one Go release, by
 major and minor version. When the converting Go toolchain is a different release, the conversion stops
 with an error, because its standard library would not match the packages and the project could not
-restore. Only the major and minor numbers are compared, so a different patch number is accepted. <!-- src/go2cs/toolchainResolution.go:227-245#fd118a (version.Lang comparison: 1.23.1 vs 1.23.5 is accepted) -->
+restore. Only the major and minor numbers are compared, so a different patch number is accepted. <!-- src/go2cs/toolchainResolution.go:241 (`Only the language release is compared: 1.23.1 versus 1.23.5 is the same standard library`) -->
 
 **Full detail:** [Reference → Compiled Library versus Source Code](ConversionStrategies-Reference/compiled-library-vs-source.md#compiled-library-versus-source-code) — why source availability shapes Go's escape analysis, and how the converter chooses between NuGet and source references.
 

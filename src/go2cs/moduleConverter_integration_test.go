@@ -305,8 +305,14 @@ func TestRecurseNuGetReferences(t *testing.T) {
 			t.Errorf("Directory.Build.props missing the conditional GoStdLibVersion default:\n%s", props)
 		}
 
-		if want := "<GoStdLibVersion>" + base + ".*</GoStdLibVersion>"; !strings.Contains(props, want) {
+		// The float is the Go MINOR, so restore takes the newest published release of that minor. A
+		// patch-level float resolves to the OLDEST published package above the patch it names.
+		if want := "<GoStdLibVersion>" + minorFloatOf(base) + "</GoStdLibVersion>"; !strings.Contains(props, want) {
 			t.Errorf("Directory.Build.props missing floating version default %q:\n%s", want, props)
+		}
+
+		if patch := "<GoStdLibVersion>" + base + ".*</GoStdLibVersion>"; strings.Count(base, ".") == 2 && strings.Contains(props, patch) {
+			t.Errorf("Directory.Build.props floats on the patch (%q), which restores the oldest package above it:\n%s", patch, props)
 		}
 	}
 
