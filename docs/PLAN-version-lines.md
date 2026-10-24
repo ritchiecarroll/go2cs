@@ -1,9 +1,10 @@
 # PLAN — version lines: which Go release each branch carries, and how a fix reaches each line
 
-> **STATUS: PROPOSED.** The owner approved the frame in §0 on 2026-10-16. This plan states that frame,
-> derives what it requires of the branches, the package numbers and the release tooling, and leaves three
-> questions open for ruling (§7). It is a **strategy plan**: it holds the rules and their rulings. The
-> procedure for a patch hop and for a maintenance release lives in the runbook,
+> **STATUS: ACCEPTED AS PROPOSED (COORD, 2026-10-24).** The owner approved the frame in §0 on 2026-10-16.
+> This plan states that frame and derives what it requires of the branches, the package numbers and the
+> release tooling. Of its three questions (§7), OQ-2 and OQ-3 are ruled and OQ-1 is open. It is a
+> **strategy plan**: it holds the rules and their rulings. The procedure for a patch hop and for a
+> maintenance release lives in the runbook,
 > [`GoCorpusMigration.md`](GoCorpusMigration.md) §1.3 and §1.4, and is referenced here, never restated.
 <!-- The 2026-10-16 approval as COORD recorded it (claude/coord-handover, docs/phase4/RESUME-SESSIONS.md, the
      "2026-10-16, version lines (owner OK)" entry): "master carries the current Go line, with patch hops on master;
@@ -82,16 +83,16 @@ git ls-remote --heads origin release/go1.24     # must read the full SHA of b0ef
 The push is an announced act, the same as any other push to origin. It creates a branch and moves no
 tag.
 
-**`release/go1.23` is not on origin.** A record from 2026-09-24 says it was fast-forwarded to
-`nuget-1.23.12.3`'s commit and read back. On 2026-10-24, `git ls-remote --heads origin` lists no
-`release/*` branch. When and how it left cannot be read from here. Re-creating it is OQ-3.
+**`release/go1.23` names the 1.23.12.3 record, `6c03b2c80f`.** It was found missing from origin on
+2026-10-24 and re-created there the same day (OQ-3), so both closed lines follow the same convention.
 <!-- The 2026-09-24 record: claude/coord-handover, docs/phase4/RESUME-SESSIONS.md ("DONE 2026-09-24 (owner-approved;
      ledger "ANNOUNCE · b6746ab185"): the BRANCH release/go1.23 was FAST-FORWARDED from 10c78227a7 ... to b6746ab185,
      the commit of nuget-1.23.12.3, and read back by ls-remote"). It is also on the never-prune list in
      docs/phase4/KICKOFF-fleet.md §1d. The 2026-10-24 reading: `git ls-remote --heads origin` returned master,
      proj/rt-measure and claude/* rows only. The repository events API covers only the newest 300 events (back to
-     2026-10-22 at the reading), so it cannot date a deletion. Note also that b6746ab185 is the TAG commit, whose
-     counter reads 2; the 1.23.12.3 record is its child 6c03b2c80f. -->
+     2026-10-22 at the reading), so it cannot date a deletion. b6746ab185 is the TAG commit, whose counter reads 2;
+     the 1.23.12.3 record is its child 6c03b2c80f. Re-created by COORD on the owner's OK (2026-10-24) at 6c03b2c80f,
+     a fast-forward of b6746ab185; `git ls-remote --heads origin release/go1.23` read 6c03b2c80f4941cbedc25d39e78c72d6948b6fda. -->
 
 This supersedes the earlier record that `release/go1.24` would be minted at a 1.25 cutover. There is
 no 1.25 cutover.
@@ -135,15 +136,18 @@ This is tooling item T1 in §6.
 ## 4. What a consumer restores
 
 A `-recurse=nuget` conversion writes a `Directory.Build.props` that defaults `GoStdLibVersion` to the
-converting toolchain's Go release followed by `.*`, at `src/go2cs/moduleConverter.go:912`
-`fmt.Sprintf("    <GoStdLibVersion>%s.*</GoStdLibVersion>", base),`. The compatibility guard compares
-only the Go minor, at `src/go2cs/toolchainResolution.go:241`
+converting toolchain's Go **minor** with a float, for example `1.26.*`, so every restore takes the newest
+published release of that minor. The compatibility guard compares the same minor, at
+`src/go2cs/toolchainResolution.go:241`
 `// Only the language release is compared: 1.23.1 versus 1.23.5 is the same standard library and the`.
-So a project converted with Go 1.26.5 asks for `1.26.5.*`.
+So the float matches exactly the releases the guard accepts.
+<!-- Ruled by the owner 2026-10-24 (OQ-2, "fix in-hop"), relayed by COORD; the seat is claude/c2-nuget-minor-float.
+     Before it, the default was the converting toolchain's full release followed by .* (a Go 1.26.5 toolchain wrote
+     1.26.5.*). -->
 
-**That float resolves to the oldest published package above the requested patch, not the newest.**
-Measured on linux-x64 with .NET SDK 10.0.112, against a local feed holding one package at
-`1.26.10.1`, `1.26.10.2` and `1.26.11.1`:
+**Why the minor and not the patch.** A float that matches nothing published resolves to the oldest
+package above it, not the newest. Measured on linux-x64 with .NET SDK 10.0.112, against a local feed
+holding one package at `1.26.10.1`, `1.26.10.2` and `1.26.11.1`:
 
 | Requested | Resolved |
 |:--|:--|
@@ -156,18 +160,18 @@ Measured on linux-x64 with .NET SDK 10.0.112, against a local feed holding one p
      NUGET_PACKAGES pointed at an empty per-probe directory; each arm restored after deleting obj/; the resolved
      version read from obj/project.assets.json. A first probe with only 1.26.10.1 on the feed resolved 1.26.5.* to
      1.26.10.1, restore rc 0. Not measured: a windows or darwin SDK, nuget.org itself (a remote feed), or
-     PackageReference transitive pins between go.* packages. -->
+     PackageReference transitive pins between go.* packages. Through the converter's own emission, same day and
+     platform: a no-import module converted by -recurse=nuget, with fake go.lib and go.gen packed at the three versions,
+     restored go.lib/go.gen 1.26.10.2 from the hop tip's props (1.26.10.*) and 1.26.11.1 from the seat's (1.26.*). -->
 
-Two consequences follow, and both concern security fixes:
+A patch-level float would leave two kinds of project without security fixes:
 
-- A project converted with a Go patch older than every published base restores that minor's
-  **oldest** published release and stays there. Later builds and later patch hops never reach it.
-- A project converted with a Go patch that equals a published base receives that base's later builds,
-  but not a later patch hop.
+- one converted with a Go patch older than every published base would restore that minor's **oldest**
+  published release and stay there;
+- one converted with a Go patch equal to a published base would receive that base's later builds, but
+  not a later patch hop.
 
-Either project reaches a fix only when it is reconverted with a newer toolchain or sets
-`GoStdLibVersion` itself. Emitting a minor-level float (`1.26.*`) instead would make every restore take
-the line's newest release. That is OQ-2.
+The minor-level float reaches both. A consumer who wants one exact version sets `GoStdLibVersion`.
 
 ## 5. How a security fix reaches each line
 
@@ -197,7 +201,8 @@ lengthens only when go2cs hops sooner after each upstream release. Rule 4 sets t
 ## 6. Tooling owed before the first maintenance release
 
 None of these blocks the 1.26 publish, and none is needed while every maintenance line is closed. The
-first maintenance release on `release/go1.26` needs T1 to T3.
+first maintenance release on `release/go1.26` needs T1 to T3. All four are post-hop work, and each is a
+row on the [BOARD](phase4/BOARD-next-validation-candidates.md) (2026-10-24, C2).
 
 | # | What | Where it fails today |
 |:--|:--|:--|
@@ -220,21 +225,21 @@ converted package changes nothing a user restores except the version constant in
 (b) costs one delta reading per upstream patch release; (a) spends a full release cycle on a patch that
 changes nothing converted.
 
-**OQ-2 — should `-recurse=nuget` emit a minor-level float (`1.26.*`)?**
+**OQ-2 — should `-recurse=nuget` emit a minor-level float (`1.26.*`)? RULED: yes, in the hop.**
 
-*Recommendation: yes, as a converter seat after the 1.26 publish.*
-- It is the only one of the four measured forms that resolves to the line's newest release (§4).
+The owner ruled it on 2026-10-24, and it is a converter seat inside the 1.26 hop, so the first 1.26
+release already ships it (§4). The reasons:
+- It is the only one of the four measured forms that resolves to the line's newest release.
 - The compatibility guard already treats every patch of a minor as one standard library, so the
   minor-level float claims nothing the guard does not already accept.
-- The cost: a project converted with an older patch restores packages converted from a newer one,
-  which is what happens today whenever the requested patch was never published.
+- The cost: a project converted with an older patch restores packages converted from a newer one.
+  A patch-level float did the same whenever the requested patch was never published.
 
-**OQ-3 — re-create `release/go1.23`?**
+**OQ-3 — re-create `release/go1.23`? DONE.**
 
-*Recommendation: yes, at the 1.23.12.3 record `6c03b2c80f`, in the same announced act as
-`release/go1.24`.* That puts both closed lines on one convention: each branch names its line's last
-record. It also makes `release/go1.23` a fast-forward of the commit it held on 2026-09-24, so no
-commit the earlier branch named is lost.
+Re-created on 2026-10-24 at the 1.23.12.3 record `6c03b2c80f` (§2), on the owner's OK. That puts both
+closed lines on one convention: each branch names its line's last record. It is a fast-forward of the
+commit the branch held on 2026-09-24, so no commit the earlier branch named is lost.
 
 ## 8. What this plan changes elsewhere, at its ruling
 

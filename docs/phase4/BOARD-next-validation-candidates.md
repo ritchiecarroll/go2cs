@@ -28162,4 +28162,32 @@ the package". "This target has the file" is true of every stage by construction.
 
 — G (measured 2026-10-23)
 
+## 2026-10-24 — C2: four release-tooling items a maintenance-line release needs — OPEN, post-hop (from docs/PLAN-version-lines.md §6; unowned)
+
+**Why.** `docs/PLAN-version-lines.md` gives each landed Go minor a `release/go1.N` maintenance branch for
+security releases while Go supports that minor. The release tooling assumes every release is cut from
+master and is newer than every release before it. Nothing needs these items while every maintenance line
+is closed. The first maintenance release on `release/go1.26` needs T1 to T3.
+
+- **T1, the pre-flight's monotonicity is global.** `Get-GoNextReleaseVerification` (`src/push-nuget.ps1`)
+  refuses a next version that is not newer than EVERY recorded release, origin's tags included. Once a newer
+  line's first release is tagged, it refuses every later release on an older line (`1.26.11.4` after
+  `1.27.x.1`). The fix: compare for monotonicity only within the same Go minor, and keep the exact-version
+  existence check across every line.
+- **T2, the binaries workflow looks for the record on master only.** `.github/workflows/release-binaries.yml`
+  searches `$tag_commit..origin/master` for the commit whose `corpus-release.txt` reads the tag's version.
+  For a maintenance tag no such commit exists on master, so it waits two hours and fails. The fix: search the
+  branch that holds the tag.
+- **T3, the GitHub Release's latest mark.** Asset names carry no version, so `releases/latest/download/<name>`
+  serves whichever Release is marked latest. A maintenance Release must be published with *Set as the
+  latest release* cleared. That is a manual step today. The workflow could mark it when the tag is not on
+  master.
+- **T4, cosmetic.** `release-nuget.ps1` warns "not master -- intentional?" on any other branch. It should
+  accept `release/go1.N` silently.
+
+The repoguard counter guard (`TestPublishedCounterMatchesTheRecordedReleases`) is already per-base and needs
+no change.
+
+— C2 (read at hop tip 9dcf0bafe1, 2026-10-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
