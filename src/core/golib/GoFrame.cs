@@ -163,6 +163,7 @@ public ref struct GoFrame
         // defer-cost cut; see GoThreadState).
         GoThreadState state = GoThreadState.Current;
         PanicException? owned = GoFuncRoot.ClaimPanic(state);
+        GoexitException? exiting = null;
 
         if (m_count > 0)
         {
@@ -359,6 +360,19 @@ public ref struct GoFrame
                         // re-raises it even when nothing was claimed on entry.
                         owned = raised;
                     }
+                    catch (GoexitException goexit)
+                    {
+                        // A deferred call ran runtime.Goexit. Go's Goexit still runs this frame's
+                        // remaining deferred calls, a recover() in them reads nil, and the goroutine
+                        // exits after them. The panic this sequence was running is abandoned, but it
+                        // stays on the sequence, so a panic a later call raises still links to it.
+                        if (handling is null)
+                            ClearSlot(m_count);
+
+                        exiting = goexit;
+                        owned = null;
+                        state.RecoverablePanic = null;
+                    }
                 }
             }
             finally
@@ -392,6 +406,11 @@ public ref struct GoFrame
             m_foreignRethrow = null;
             foreignRethrow.Throw();
         }
+
+        // A Goexit from a deferred call resumes once the remaining deferred calls have run, unless one
+        // of them raised a panic that is still unrecovered (thrown above).
+        if (exiting is not null)
+            throw exiting;
     }
 
     // THE PANIC SEQUENCES (docs/phase4/DESIGN-panic-stack-frames.md §3.B). Go runs a panic's deferred
