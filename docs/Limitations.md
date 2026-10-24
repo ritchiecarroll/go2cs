@@ -85,19 +85,24 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   through a func value returns nil.
   <!-- docs/ConversionStrategies.md, the recover-in-helper paragraph below the catchError sample; the read:
        src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`. -->
-* **An unrecovered panic reports only the last panic.** Go prints the whole chain: `panic: message
-  [recovered, repanicked]` for a panic that was recovered and raised again, and the first panic above a
-  second one raised by a deferred call. Converted code prints the last value alone, `panic: message`.
-  Its traceback starts where the panic began rather than where it was raised again, and a program that
-  never loads the converted `runtime` package prints no traceback at all.
-  <!-- Measured 2026-10-24 by C2 on linux-x64, .NET SDK 10.0.112, converter and corpus at a8821c781a, three
-       one-file programs converted with -recurse and built with -p:GoTargetOS=linux. recover-then-panic, with fmt:
-       Go 1.26.10 `panic: message [recovered, repanicked]` and a traceback from main.main.func1, converted `panic: message`
-       and a traceback from main.main. The same with no imports: converted `panic: message` and nothing after it.
-       A panic inside a deferred call while panicking: Go `panic: first` then `panic: second`, converted
-       `panic: second`. The report is composed at src/core/golib/runtime/CrashReport.cs:171
-       `string report = $"panic: {value}\n";`, and its traceback renderer is registered by the converted runtime's
-       module initializer (src/core/runtime/managed_impl.cs:171 `CrashReport.TracebackRenderer = crashTraceback;`). -->
+* **A crash's traceback is shorter than Go's.** An unrecovered panic prints Go's panic lines, the whole
+  chain included (`panic: message [recovered, repanicked]`, and one TAB-indented line per earlier panic).
+  The traceback under them differs in two ways. A panic raised again inside a deferred closure shows one
+  frame, the function where the first panic began, where Go shows the closure and the frames above it;
+  that stays until a later converter change. A program that never loads the converted `runtime`
+  package prints no traceback at all.
+  <!-- Measured 2026-10-24 by C2 on linux-x64, .NET SDK 10.0.112, converter and corpus at 017dafb1f2 (batch 34), four
+       one-file programs converted with -recurse and built with -p:GoTargetOS=linux. The panic lines match Go 1.26.10
+       byte for byte in all four: recover-then-panic `panic: message [recovered, repanicked]`; a deferred panic while
+       panicking `panic: first` then a TAB line `panic: second`; three deferred calls `panic: inner [recovered]`,
+       `panic: middle [recovered, repanicked]`, `panic: outer`. Traceback: Go's top frame is main.main.func1 (the
+       closure) followed by runtime's panic frame; converted, one main.main frame at the line of the first panic. With
+       no imports the converted program prints the panic line and nothing after it. The chain is rendered by
+       src/core/golib/runtime/CrashReport.cs:224 `// printpanics, oldest first: a panic whose older neighbour it re-raised is not printed again.`
+       and :240 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`; the traceback renderer is
+       registered by the converted runtime's module initializer (src/core/runtime/managed_impl.cs:171
+       `CrashReport.TracebackRenderer = crashTraceback;`). The closure frame is COORD's ruling 2026-10-24: one frame by
+       design until a post-hop converter change; the no-import case is lane R's seat claude/r-crash-traceback. -->
 * **`unsafe` works over plain numbers and stops at anything .NET's garbage collector tracks**
   ([the rules](ConversionStrategies.md#unsafepointer-and-uintptr)). A pointer to anything holding a
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
