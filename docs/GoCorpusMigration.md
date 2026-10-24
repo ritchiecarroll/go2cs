@@ -96,6 +96,65 @@ landed in one place rather than three. Full statement:
 substitutes another release at conversion time, while the stamp truthfully names the toolchain that
 built the exe. That one is H1 step 1's, and it is verified by running, never by reading.
 
+### 1.3 A patch hop
+
+A **patch hop** moves a line to a newer patch release of the same Go minor. On the current line it runs
+on master. On a maintenance line it runs on that line's `release/go1.N` branch. Which lines hop, and when, is
+ruled in [`PLAN-version-lines.md`](PLAN-version-lines.md).
+
+**Where it runs.** A short-lived branch cut from the line's branch, in its own worktree, landing back on that
+branch as one merge after its gates. It is not a hop branch. The line's branch stays releasable throughout.
+
+**Predict the footprint before H5.** Read the upstream delta between the two patch releases first. The
+prediction is three sets:
+
+- the converted packages whose Go sources the delta touches;
+- `internal/buildcfg`'s version constant;
+- the toolchain-sourced README text.
+
+A hunk outside that prediction is a finding, attributed before anything lands.
+<!-- The 1.26.9 -> 1.26.10 re-pin is the measured instance: docs/PLAN-hop-go126.md §0, "RULED 2026-10-20", lists the
+     converted delta as crypto/x509's verify.cs per target, root_windows.cs, root_darwin.cs, internal/buildcfg's
+     zbootstrap.cs and the toolchain-sourced README text, with the vendored x/net bump changing no vendored std source. -->
+
+**The ladder, step by step.** A patch hop owes every **GATE** in §2. Most of them are expected to be quiet, and
+the table says what quiet means for each:
+
+| Step | What a patch hop expects |
+|:--|:--|
+| Readiness, H0 | As written, at the line's branch tip. |
+| H1 | The new patch toolchain, verified by H1 step 1. |
+| H2 | `migrate-gorelease.ps1 -Apply` moves the pin and resets the build counter to 0. |
+| H3 | A package census identical in membership to the outgoing one. Any difference is a finding. |
+| H4, H4a | Nothing. A patch release changes no language, and the release-tag set is minor-keyed (§1.1); confirm both against the source rather than assume them. H4a is owed only if H3 or H4 finds work. |
+| H5 | The seeded reconvert, scored against the prediction above. |
+| H6 | The hand-own re-audit for each hand-owned file whose upstream source the delta touches. The `.cs.auto` differential names them. |
+| H7 | Compile parity in full, every flavour. |
+| H7a | Merge the line's branch tip into the patch branch and re-read the gates at the merged tip. |
+| H8 | H5 already emits every target. The manifest diff against the outgoing one is expected empty, and any entry is a finding. |
+| H9 | `check-no-regression.ps1` green, with no golden changed. A changed golden is a finding. |
+| H10 | Re-derive the rows of the packages the delta touches. Every other row's reading stands; release day's §6 full sweep re-reads every row at the tree that ships. |
+| H11, H12, release day | As written. |
+
+### 1.4 A maintenance release
+
+A **maintenance release** publishes a security fix on a `release/go1.N` branch.
+[`PLAN-version-lines.md`](PLAN-version-lines.md) rules which lines are open and which fixes qualify. Its §6
+names the tooling that must land before the first maintenance release.
+
+1. **The fix lands on master first**, then is cherry-picked onto a branch cut from `release/go1.N` with
+   `git cherry-pick -x`, so the commit names its source. The one exception is a fix whose code master no longer
+   has: it is written against the maintenance branch, and its commit message says why. Never merge master into a
+   maintenance branch, and never merge a maintenance branch into master.
+2. **The toolchain is the line's own Go release**, read from that branch's `src/version.props`. The pin guards
+   refuse any other.
+3. **The gates are the release day gates, at the maintenance branch's tree.** If the fix touches golib, GolibTests
+   runs at Debug and Release.
+4. **The version** keeps the line's base and takes the next build counter, which `push-nuget.ps1 -Push` assigns.
+5. **The record commit and the tag land on `release/go1.N`.** The line's NEWS entry lands on master. The GitHub
+   Release is published with *Set as the latest release* cleared, because `releases/latest/download/` must keep
+   serving the current line's converter.
+
 ---
 
 ## 2. The step ladder
@@ -3884,8 +3943,10 @@ release published nothing: §2, AMENDED
 *(Edited in place 2026-09-26, §7 lesson 39: the 1.24.13.1 and 1.24.13.2 releases, both on 2026-09-24.)*
 
 1. **Order.** Master moves first, after §6's full sweep, and the release is cut from master. Nothing that moves
-   golib or runtime lands between the sweep and the release. `release/go1.<old>` fast-forwards to the outgoing
-   line's final release tag; `release/go1.<new>` is minted only at the next cutover.
+   golib or runtime lands between the sweep and the release. After the new line's first release record lands,
+   mint `release/go1.<old>` at the outgoing line's final release **record**: the commit after its tag, which writes
+   that release's counter, snapshot and `corpus-release.txt`. Read it back with `git ls-remote`. Rules and the
+   current instance: [`PLAN-version-lines.md`](PLAN-version-lines.md) §1 and §2.
 2. **The owner's gate** is the README walkthrough on linux AND windows, from packages repacked at the tree that
    ships (it caught a windows-only compile surface); GolibTests is gated at Debug AND Release.
    **And the CI half, every release** *(added 2026-10-03: the 1.24.13.4 macOS seat, widened the same day to every
