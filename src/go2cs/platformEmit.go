@@ -803,12 +803,24 @@ func countWrite(changed bool, written *int, unchanged *int) {
 func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*platformEmission) ([]string, map[string]string, int, error) {
 	names := map[string]bool{}
 	written := 0
+	converted := make([]map[string]bool, len(emissions))
+
+	for i, emission := range emissions {
+		converted[i] = convertedPackages(emission)
+	}
 
 	for _, emission := range emissions {
 		for rawPath, state := range emission.artifacts {
 			// The warning entries are composed from every target by mergeWarningEntries, never
 			// copied from one.
-			if state.emitted && filepath.Ext(rawPath) != ".cs" && artifactPackage(rawPath) != "." && path.Base(rawPath) != warningEntriesFileName {
+			if filepath.Ext(rawPath) == ".cs" || artifactPackage(rawPath) == "." || path.Base(rawPath) == warningEntriesFileName {
+				continue
+			}
+
+			// A project file that carries a per-GOOS block is merged even when no target REWROTE it: the
+			// writer that recomposes the seed's bytes skips the write (needToWriteFile), so "emitted" is false
+			// in every stage exactly when the stale-axis case arises (carriesConvertedPlatformAxis).
+			if state.emitted || (!names[rawPath] && strings.EqualFold(filepath.Ext(rawPath), ".csproj") && carriesConvertedPlatformAxis(rawPath, emissions, converted)) {
 				names[rawPath] = true
 			}
 		}
@@ -816,17 +828,13 @@ func mergeCompanionArtifacts(coreDir string, targets []string, emissions []*plat
 
 	conditioned := map[string]bool{}
 	residual := map[string]string{}
-	converted := make([]map[string]bool, len(emissions))
-
-	for i, emission := range emissions {
-		converted[i] = convertedPackages(emission)
-	}
 
 	for _, rawPath := range sortedKeys(names) {
 		destination := filepath.Join(coreDir, filepath.FromSlash(rawPath))
 
-		if strings.EqualFold(filepath.Ext(rawPath), ".csproj") && companionDiffersAcrossTargets(rawPath, emissions) {
-			merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions)
+		if strings.EqualFold(filepath.Ext(rawPath), ".csproj") &&
+			(companionDiffersAcrossTargets(rawPath, emissions) || carriesConvertedPlatformAxis(rawPath, emissions, converted)) {
+			merged, note, err := mergePlatformProjectFile(rawPath, targets, emissions, converted)
 
 			if err != nil {
 				return nil, nil, written, err
@@ -979,17 +987,42 @@ func perGOOSReviewSiblingOwner(rawPath string, emissions []*platformEmission) st
 //
 // The second result is a note (empty when there is nothing to say) describing a difference the
 // merge could NOT express — two targets' project files disagreeing outside their reference lists.
-func mergePlatformProjectFile(rawPath string, targets []string, emissions []*platformEmission) (string, string, error) {
+//
+// Only the targets that CONVERTED the package are read (converted, per target, from
+// convertedPackages), as mergeCompanionArtifacts reads its companions. Every stage is a whole-tree
+// copy of the seed, so a target that does not build the package still HAS its project file, as the
+// seed's bytes: reading that copy kept the seeded template as the base of a package only darwin or
+// linux converts, and took its reference list for an import set, conditioning references by a GOOS
+// that never builds the package. Measured at the hop's fixed-point regen (2026-10-23): 4 such packages
+// missed the interceptor opt-in, and internal/syscall/windows kept a seeded split. Only when no target
+// converted the package (a hand-owned one) are all the targets that hold it read.
+func mergePlatformProjectFile(rawPath string, targets []string, emissions []*platformEmission, converted []map[string]bool) (string, string, error) {
 	sets := map[string][]string{}
 
 	base, baseTarget, baseRemainder, note := "", "", "", ""
 	needsUnsafe := false
+
+	pkg := companionPackage(rawPath, emissions)
+	converts := func(i int) bool { return i < len(converted) && converted[i][pkg] }
+	anyConverts := false
+
+	for i := range targets {
+		if _, ok := emissions[i].artifacts[rawPath]; ok && converts(i) {
+			anyConverts = true
+			break
+		}
+	}
 
 	for i, target := range targets {
 		if _, ok := emissions[i].artifacts[rawPath]; !ok {
 			// This target has no such package at all (a platform-exclusive one). Nothing to read,
 			// and nothing to condition — its absence is expressed by the exclusive package's own
 			// sources living in a per-GOOS folder, not by this file.
+			continue
+		}
+
+		if anyConverts && !converts(i) {
+			// The seed's copy, in a stage that never converted the package: not this target's emission.
 			continue
 		}
 
@@ -1121,6 +1154,37 @@ func companionDiffersAcrossTargets(rawPath string, emissions []*platformEmission
 	}
 
 	return false
+}
+
+// carriesConvertedPlatformAxis reports whether a project file that every target holds identically must still
+// go through mergePlatformProjectFile: it carries a per-GOOS reference block, and at least one target converted
+// its package. Identical copies prove nothing about the block, because the single-target writer recovers the
+// other platforms' sets from the file it overwrites (adoptPlatformReferences): a GOOS that never converts the
+// package keeps its recorded group forever. Measured at the hop's freeze regen (2026-10-23):
+// internal/syscall/windows selects Go files on Windows alone, yet kept darwin and linux groups, and the emission
+// had two fixed points for the file, split or flat, depending on whether an unrelated change made the stage
+// copies differ. Re-rendering from the converting stages is idempotent for a genuinely multi-platform package.
+func carriesConvertedPlatformAxis(rawPath string, emissions []*platformEmission, converted []map[string]bool) bool {
+	pkg := companionPackage(rawPath, emissions)
+	contents := ""
+
+	for i, emission := range emissions {
+		if _, ok := emission.artifacts[rawPath]; !ok {
+			continue
+		}
+
+		if i < len(converted) && converted[i][pkg] && len(contents) == 0 {
+			data, err := os.ReadFile(filepath.Join(emission.root, "core", filepath.FromSlash(rawPath)))
+
+			if err != nil {
+				return false
+			}
+
+			contents = string(data)
+		}
+	}
+
+	return strings.Contains(contents, platformReferenceBlockHeader)
 }
 
 // applyLayoutBlockToProjectFile adds the L3 blocks to a package's project file when the package now

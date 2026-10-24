@@ -444,6 +444,7 @@
     <None Include="$(MSBuildThisFileDirectory)platformPackageInitRetire_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject.go" />
     <None Include="$(MSBuildThisFileDirectory)platformProject_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)platformProjectConverted_test.go" />
     <None Include="$(MSBuildThisFileDirectory)platformScopedDisclosures_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerNamedArraySlice_test.go" />
     <None Include="$(MSBuildThisFileDirectory)pointerReceiverMark_test.go" />
