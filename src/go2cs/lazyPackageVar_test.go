@@ -367,7 +367,7 @@ func TestLazyPackageVarBuildsAPointerAddressedPoolInItsBox(t *testing.T) {
 	pool := files["pool.cs"]
 
 	for _, want := range []string{
-		"[GoLazy] partial class lazyᴛpool { internal static ж<sync.Pool> Ꮡpool = new StandardBox<sync.Pool>(",
+		"[GoLazy] partial class lazyᴛpool { internal static ж<sync.Pool> Ꮡpool = new StaticBox<sync.Pool>(",
 		"internal static ref sync.Pool pool => ref Ꮡpool.Value;",
 		"Ꮡpool.Get()",
 		"defer(Ꮡpool.Put,",
@@ -423,10 +423,10 @@ func TestLazyPackageVarCarriesItsBox(t *testing.T) {
 	table := files["table.cs"]
 
 	for _, want := range []string{
-		"[GoLazy] partial class lazyᴛtable { internal static ж<array<nint>> Ꮡtable = new StandardBox<array<nint>>(",
+		"[GoLazy] partial class lazyᴛtable { internal static ж<array<nint>> Ꮡtable = new StaticBox<array<nint>>(",
 		"internal static ref array<nint> table => ref Ꮡtable.Value;",
 		"return Ꮡtable;",
-		"[GoLazy] partial class lazyᴛcounters { internal static ж<array<P>> Ꮡcounters = new StandardBox<array<P>>(",
+		"[GoLazy] partial class lazyᴛcounters { internal static ж<array<P>> Ꮡcounters = new StaticBox<array<P>>(",
 		"internal static ref array<P> counters => ref Ꮡcounters.Value;",
 	} {
 		if !strings.Contains(table, want) {

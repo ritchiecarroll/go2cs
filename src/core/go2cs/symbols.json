@@ -101,6 +101,20 @@
       "note": "B2-I2's role split: the construction-position spelling, = PointerPrefix until the I3 kind split lands the concrete standard-kind class name here."
     },
     {
+      "name": "PackageBoxConstructPrefix",
+      "value": "StaticBox",
+      "comment": [
+        "PackageBoxConstructPrefix is the spelling of the box class a PACKAGE-LEVEL variable's box is",
+        "constructed as: golib's StaticBox<T>, a StandardBox<T> that also answers Go's non-heap question.",
+        "Go treats a package-level variable as outside every heap span (runtime/synctest.go's",
+        "getOrSetBubbleSpecial answers Unbubbled for it), and converted code boxes a global exactly as a",
+        "heap value, so golib can only tell them apart by this class. The ONE emitter is",
+        "globalAddressOperations.go's addressedGlobalDecl (the package-level box declaration, eager or",
+        "inside a [GoLazy] holder); every other construction keeps BoxConstructPrefix."
+      ],
+      "note": "The WaitGroup bubble sync (BOARD 2026-10-15): a package-level sync.WaitGroup reads Unbubbled, as in Go."
+    },
+    {
       "name": "AddressPrefix",
       "value": "\u13D1",
       "csharp": true,
