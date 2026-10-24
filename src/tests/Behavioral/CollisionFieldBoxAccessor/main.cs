@@ -20,10 +20,10 @@ partial struct holder {
     internal nint extra;
 }
 
-internal static ж<holder> Ꮡh = new StandardBox<holder>(default(holder));
+internal static ж<holder> Ꮡh = new StaticBox<holder>(default(holder));
 internal static ref holder h => ref Ꮡh.Value;
 
-internal static ж<Δmark> Ꮡgm = new StandardBox<Δmark>(default(Δmark));
+internal static ж<Δmark> Ꮡgm = new StaticBox<Δmark>(default(Δmark));
 internal static ref Δmark gm => ref Ꮡgm.Value;
 
 internal static partial nint localShadowsCollisionType() {

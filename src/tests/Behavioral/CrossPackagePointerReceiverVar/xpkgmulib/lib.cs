@@ -4,10 +4,10 @@ using sync = sync_package;
 
 partial class xpkgmu_package {
 
-public static ж<sync.RWMutex> ᏑBoxed = new StandardBox<sync.RWMutex>(default(sync.RWMutex));
+public static ж<sync.RWMutex> ᏑBoxed = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
 public static ref sync.RWMutex Boxed => ref ᏑBoxed.Value;
 
-public static ж<sync.RWMutex> ᏑPlain = new StandardBox<sync.RWMutex>(default(sync.RWMutex));
+public static ж<sync.RWMutex> ᏑPlain = new StaticBox<sync.RWMutex>(default(sync.RWMutex));
 public static ref sync.RWMutex Plain => ref ᏑPlain.Value;
 
 partial struct Counter {

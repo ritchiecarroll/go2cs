@@ -17,7 +17,7 @@ internal static nint sum(this ж<node> Ꮡn) {
     return total;
 }
 
-internal static ж<ж<node>> Ꮡhead = new StandardBox<ж<node>>(default(ж<node>));
+internal static ж<ж<node>> Ꮡhead = new StaticBox<ж<node>>(default(ж<node>));
 internal static ref ж<node> head => ref Ꮡhead.ValueSlot;
 
 internal static void insert(nint v) {
