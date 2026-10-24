@@ -363,7 +363,16 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
    - staged GOROOT fixtures committed;
    - Tests = the page's MATCHED count;
    - any host capability a count depends on registered as host-conditional (lesson 72);
-   - every cited SHA on origin.
+   - every cited SHA on origin;
+   - **the row's NEW test sources committed BY EXPLICIT PATH, never `git add -A`** (safety floor 8). The 1.26
+     reconvert emits test sources the tree does not carry; net at the freeze, for example, emits
+     `platform_windows_test.cs` and `unixsock_test.cs` as `??` (G, 2026-10-24);
+   - **the external-test anchor change, when there is one.** `package_info_external_test.cs` exists only under
+     the recompile model, and the converter removes it under a reference model. At the freeze, `crypto/ecdh`
+     deletes its anchor (`D`), `crypto/sha3` rewrites 2 import-init lines (`M`), and `net/netip` and
+     `text/tabwriter` re-emit byte-identical (G's census, 2026-10-24).
+   **Each pass-2 row's post lists its `??` test sources and its anchor status by path**, the way pass 1 reported
+   the anchors, so a row that ships without a file it now needs is caught (COORD, 2026-10-24).
    It **never** carries `docs/validation/index.md` or the roster header.
 
 ## 5. The annotation legs
