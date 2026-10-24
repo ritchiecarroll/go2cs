@@ -85,24 +85,30 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   through a func value returns nil.
   <!-- docs/ConversionStrategies.md, the recover-in-helper paragraph below the catchError sample; the read:
        src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`. -->
-* **A crash's traceback is shorter than Go's.** An unrecovered panic prints Go's panic lines, the whole
-  chain included (`panic: message [recovered, repanicked]`, and one TAB-indented line per earlier panic).
-  The traceback under them differs in two ways. A panic raised again inside a deferred closure shows one
-  frame, the function where the first panic began, where Go shows the closure and the frames above it;
-  that stays until a later converter change. A program that never loads the converted `runtime`
-  package prints no traceback at all.
-  <!-- Measured 2026-10-24 by C2 on linux-x64, .NET SDK 10.0.112, converter and corpus at 017dafb1f2 (batch 34), four
-       one-file programs converted with -recurse and built with -p:GoTargetOS=linux. The panic lines match Go 1.26.10
-       byte for byte in all four: recover-then-panic `panic: message [recovered, repanicked]`; a deferred panic while
-       panicking `panic: first` then a TAB line `panic: second`; three deferred calls `panic: inner [recovered]`,
-       `panic: middle [recovered, repanicked]`, `panic: outer`. Traceback: Go's top frame is main.main.func1 (the
-       closure) followed by runtime's panic frame; converted, one main.main frame at the line of the first panic. With
-       no imports the converted program prints the panic line and nothing after it. The chain is rendered by
-       src/core/golib/runtime/CrashReport.cs:224 `// printpanics, oldest first: a panic whose older neighbour it re-raised is not printed again.`
-       and :240 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`; the traceback renderer is
-       registered by the converted runtime's module initializer (src/core/runtime/managed_impl.cs:171
-       `CrashReport.TracebackRenderer = crashTraceback;`). The closure frame is COORD's ruling 2026-10-24: one frame by
-       design until a post-hop converter change; the no-import case is lane R's seat claude/r-crash-traceback. -->
+* **A crash's traceback is sometimes shorter than Go's.** An unrecovered panic prints Go's panic lines,
+  the whole chain included (`panic: message [recovered, repanicked]`, and one TAB-indented line per
+  earlier panic), and exits with status 2. A goroutine that panics while `main` returns still gets its
+  report, as in Go. The traceback below the panic lines shows Go's frames for a panic in a function with
+  one deferred call, and for a panic raised again by a named deferred function. The named function's
+  frame shows the line it is declared on rather than the line that panics. It is shorter than Go's in
+  three cases:
+  * A panic raised again inside a deferred closure shows one frame, the function the first panic left,
+    where Go shows the closure and the frames above it.
+  * When several functions on the stack each defer a call, only the function that panicked is shown.
+  * A goroutine's crash is labelled `goroutine 1`, and Go's `created by` line is missing.
+  <!-- Measured 2026-10-24 by C2 on linux-x64, .NET SDK 10.0.112, converter and corpus at f8fe15c97e (batch 36), seven
+       one-file programs converted with -recurse and built with -p:GoTargetOS=linux, each compared with go run under
+       Go 1.26.10. Identical frames and lines: a no-import `panic("message")`; a panic in work() with one deferred call,
+       called from main (work, then main). A named deferred handler that recovers and panics again: the same three
+       frames (handler, panic, main.main), with handler at its declaration line 3 where Go prints line 5, and `panic()`
+       where Go prints its argument words. A deferred closure that does the same: converted main.main:8 alone; Go
+       main.main.func1, panic, main.main. Three functions each deferring a call, panicking in the innermost: converted
+       main.c alone; Go c, b, a, main. A goroutine panic, with main sleeping or waiting on a WaitGroup the goroutine's
+       deferred Done releases: exit 2 and the report in both, converted `goroutine 1 [running]` with no `created by`
+       line where Go prints `goroutine 18` and `created by main.main in goroutine 1`. The chain is rendered by
+       src/core/golib/runtime/CrashReport.cs:259 `// printpanics, oldest first: a panic whose older neighbour it re-raised is not printed again.`
+       and :275 `text.Append(repanicked[i] ? " [recovered, repanicked]" : " [recovered]");`. The closure frame stays
+       until a post-hop converter change (COORD, 2026-10-24); the goroutine report on main's return is batch 35's. -->
 * **`unsafe` works over plain numbers and stops at anything .NET's garbage collector tracks**
   ([the rules](ConversionStrategies.md#unsafepointer-and-uintptr)). A pointer to anything holding a
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
@@ -112,7 +118,7 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1167 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1268 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists every goroutine and
   what it waits on, but has frames for the calling goroutine only. `pprof.StartCPUProfile` gives a
