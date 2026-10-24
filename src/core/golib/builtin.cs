@@ -69,7 +69,7 @@ public static partial class builtin
         InitializeLinuxStdDescriptorHygiene();
         InitializeDarwinStdDescriptorHygiene();
 
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        go.golib.MainExit.InstallBackstop(CurrentDomain_UnhandledException);
         Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
 
         // Go's runtime.osinit opts every Windows process into long-path handling before any user

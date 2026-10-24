@@ -154,4 +154,38 @@ public class MainExitPanicDefersTests
 
         Assert.AreEqual(baseline, during);
     }
+
+    [TestMethod]
+    public void AMainReturnDoesNotWaitLongOnADeferredCallThatBlocks()
+    {
+        int baseline = MainExit.RunningPanicDefers;
+        using ManualResetEventSlim inDeferred = new(false), release = new(false);
+
+        // The panicking goroutine blocks in a deferred call, as C1's "blocked" probe does (`select {}`). Go's
+        // runtime.main yields briefly and exits 0. The wait here must end at its short bound, not at a second.
+        Goroutine.Start(() => PanickingFrame("A", () => recover(), () =>
+        {
+            inDeferred.Set();
+            release.Wait();
+        }));
+
+        try
+        {
+            Assert.IsTrue(inDeferred.Wait(Settle), "the goroutine did not reach its deferred call");
+            Assert.AreEqual(baseline + 1, MainExit.RunningPanicDefers, "the blocked goroutine is still counted");
+
+            System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+            MainExit.AwaitPanickingGoroutines();
+            watch.Stop();
+
+            Assert.IsTrue(watch.Elapsed >= MainExit.PanicDefersWait, $"returned after {watch.Elapsed.TotalMilliseconds:F1} ms, before its bound");
+            Assert.IsTrue(watch.Elapsed < TimeSpan.FromMilliseconds(200), $"waited {watch.Elapsed.TotalMilliseconds:F1} ms for a blocked deferred call");
+        }
+        finally
+        {
+            release.Set();
+        }
+
+        Assert.IsTrue(SpinWait.SpinUntil(() => MainExit.RunningPanicDefers == baseline, Settle), "the released goroutine recovered and ended");
+    }
 }

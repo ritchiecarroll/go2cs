@@ -854,6 +854,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGoroutineParkStorm() => CheckTarget("GoroutineParkStorm");
 
     [TestMethod]
+    public void CheckGoroutineRecoveringWhenMainReturns() => CheckTarget("GoroutineRecoveringWhenMainReturns");
+
+    [TestMethod]
     public void CheckGoroutineWaitState() => CheckTarget("GoroutineWaitState");
 
     [TestMethod]

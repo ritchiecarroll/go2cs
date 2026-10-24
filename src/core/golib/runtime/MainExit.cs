@@ -40,8 +40,18 @@ namespace go.golib;
 /// report instead, sets <see cref="Environment.ExitCode"/>, and returns. Setting it there decides the
 /// status for a <c>void</c> or <c>int</c> <c>Main</c>, on JIT and Native AOT (measured on net10.0).</item>
 /// <item>The yield loop is bounded by time (<see cref="PanicDefersWait"/>), not by Go's 1000
-/// <c>Gosched</c> calls: here the window also covers the CLR's first pass to the backstop.</item>
+/// <c>Gosched</c> calls. It is as short as Go's in spirit: it covers the goroutine's rethrow and the CLR's first
+/// pass to its root, which takes 1.2 to 1.8 ms from <c>GoFrame.Capture</c> (Release, 30 runs on G-LAPTOP,
+/// 2026-10-24), and no more. A goroutine still running user code in a deferred call (a recovery that sleeps, a
+/// deferred call that blocks) is not waited for, and neither does Go wait for one.</item>
 /// </list>
+/// </para>
+/// <para>
+/// Go's <c>paniclk</c> decides which report a crash prints: the first <c>startpanic_m</c> owns it, and any other
+/// thread's fatal path waits behind it. Here the first <see cref="BeginFatal"/> claims the report, and the backstop
+/// installed by <see cref="InstallBackstop"/> makes a later thread wait for the owner's report, whose exit then ends
+/// the process. Without it, <c>main</c>'s own panic racing a goroutine's took the backstop's lock first and printed
+/// <c>panic: m</c> every time, where Go prints the goroutine's (C1's review of this seat, 3 of 3 runs each way).
 /// </para>
 /// <para>
 /// ProcessExit is ALSO raised by every <c>Environment.Exit</c>. An exit golib takes on purpose (os.Exit,
@@ -59,7 +69,7 @@ namespace go.golib;
 public static class MainExit
 {
     /// <summary>The longest <c>main</c>'s return waits for goroutines that are running a panic's deferred calls.</summary>
-    internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromSeconds(1);
+    internal static readonly TimeSpan PanicDefersWait = TimeSpan.FromMilliseconds(20);
 
     // How long the return waits, once a report has begun, for it to be written. The report always ends in an exit,
     // so this bounds only a report that itself hangs.
@@ -72,6 +82,9 @@ public static class MainExit
     private static int s_panicking;
     private static int s_fatalCode;
     private static readonly ManualResetEventSlim s_reported = new(false);
+
+    // Go's paniclk: the managed thread id of the first fatal start, which owns the report (0: none yet).
+    private static int s_reportOwner;
 
     // An exit golib took on purpose: it owns the status, and the main-return tail does not run.
     private static int s_exitRequested;
@@ -86,6 +99,29 @@ public static class MainExit
     {
         if (Interlocked.Exchange(ref s_installed, 1) == 0)
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+    }
+
+    /// <summary>
+    /// Subscribes golib's panic <paramref name="backstop"/> behind Go's <c>paniclk</c>: a thread whose crash did not
+    /// claim the report first waits for the owner's report, OUTSIDE the backstop's own lock, so the owner can take
+    /// that lock, print, and exit.
+    /// </summary>
+    internal static void InstallBackstop(UnhandledExceptionEventHandler backstop) =>
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+        {
+            AwaitReportOwner();
+            backstop(sender, e);
+        };
+
+    // The first fatal start on another thread owns the report: wait for it (its exit ends the process). This thread
+    // claims the report when nothing has, and goes on to print when it owns it.
+    private static void AwaitReportOwner()
+    {
+        int self = Environment.CurrentManagedThreadId;
+        int owner = Interlocked.CompareExchange(ref s_reportOwner, self, 0);
+
+        if (owner != 0 && owner != self)
+            s_reported.Wait(ReportWait);
     }
 
     /// <summary>
@@ -129,6 +165,8 @@ public static class MainExit
     /// </summary>
     internal static void BeginFatal(int code)
     {
+        // paniclk: the first fatal start owns the report.
+        Interlocked.CompareExchange(ref s_reportOwner, Environment.CurrentManagedThreadId, 0);
         Volatile.Write(ref s_fatalCode, code);
         Interlocked.Exchange(ref s_panicking, 1);
         PanicDefersEnded(GoThreadState.Current);
@@ -163,6 +201,27 @@ public static class MainExit
         throw new InvalidOperationException("unreachable: Environment.Exit returned");
     }
 
+    /// <summary>
+    /// runtime.main's yield loop: waits while a goroutine runs a panic's deferred calls and no report has begun,
+    /// stopping the moment either changes, for at most <see cref="PanicDefersWait"/>.
+    /// </summary>
+    /// <remarks>
+    /// Spins and yields rather than sleeping: <c>Thread.Sleep(1)</c> lasts a whole timer tick (15.6 ms) on Windows,
+    /// which is most of the bound.
+    /// </remarks>
+    internal static void AwaitPanickingGoroutines()
+    {
+        if (Volatile.Read(ref s_runningPanicDefers) == 0)
+            return;
+
+        long start = System.Diagnostics.Stopwatch.GetTimestamp();
+        SpinWait spin = default;
+
+        while (Volatile.Read(ref s_runningPanicDefers) != 0 && Volatile.Read(ref s_panicking) == 0 &&
+               System.Diagnostics.Stopwatch.GetElapsedTime(start) < PanicDefersWait)
+            spin.SpinOnce(sleep1Threshold: -1);
+    }
+
     // runtime.main after main.main returns. ProcessExit runs here for main's return and for every exit; only the
     // return waits.
     private static void OnProcessExit(object? sender, EventArgs e)
@@ -170,13 +229,7 @@ public static class MainExit
         if (Volatile.Read(ref s_exitRequested) != 0)
             return;
 
-        if (Volatile.Read(ref s_runningPanicDefers) != 0)
-        {
-            long deadline = Environment.TickCount64 + (long)PanicDefersWait.TotalMilliseconds;
-
-            while (Volatile.Read(ref s_runningPanicDefers) != 0 && Volatile.Read(ref s_panicking) == 0 && Environment.TickCount64 < deadline)
-                Thread.Sleep(1);
-        }
+        AwaitPanickingGoroutines();
 
         if (Volatile.Read(ref s_panicking) == 0)
             return;
