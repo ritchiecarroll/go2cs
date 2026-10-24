@@ -599,13 +599,19 @@ down under the panicking goroutine: exit 0 with an empty stderr. golib's `MainEx
 - **The count.** A goroutine counts from the moment a panic starts running its deferred calls
   (`GoFrame.Capture`). It stops counting when its frame returns with no panic in flight (a recovery), when
   the goroutine ends, or when its fatal report begins.
-- **The wait.** `main`'s return waits up to one second while the count is non-zero. If a report has begun, it
-  waits for the report and exits with its status.
+- **The wait.** `main`'s return waits while the count is non-zero, for at most 20 ms. That is as short as Go's
+  1000 yields in spirit: it covers the goroutine's rethrow to its root (1.2 to 1.8 ms measured) and no more.
+  A goroutine that is still running a slow recovering call, or blocks in a deferred call, is not waited for, and
+  neither does Go wait for one. If a report has begun, `main` waits for the report and exits with its status.
+- **Which report** (Go's `paniclk`): the first fatal start owns it. When `main` panics while a goroutine's crash
+  is already under way, `main`'s backstop waits for the goroutine's report, which then ends the process, so the
+  first line is the goroutine's, as in Go.
 - **An exit taken on purpose** (`os.Exit`, a fatal error, the backstop) goes through `MainExit.Exit` and owns its
   status, as Go's `exit` never consults the count.
 
-(Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which exits 2 against exit 0 before; GolibTests
-`MainExitPanicDefersTests` pins the count.)
+(Guarded by the `GoroutinePanicAfterDeferredDone` behavioral test, which exits 2 against exit 0 before, and by
+`GoroutineRecoveringWhenMainReturns`, which prints nothing after `main` returns. GolibTests `MainExitPanicDefersTests`
+pins the count and the bounded wait.)
 
 ## A panic VALUE renders through Go's `preprintpanics` rule — an `error` prints its message, not its address
 
