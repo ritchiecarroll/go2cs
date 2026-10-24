@@ -8497,9 +8497,21 @@ the receive `<-done`, which waits until the panic ends the process
 ([Channels](#channels-and-select)).
 
 **A goroutine keeps its own thread from start to finish.** golib's
-[`Goroutine`](../src/core/golib/runtime/Goroutine.cs) class starts a new background thread for every
-`goǃ`. A goroutine that blocks on a channel, a lock or a sleep blocks only its own thread. As in Go,
-the process exits when `main` returns, even while goroutines are still running.
+[`Goroutine`](../src/core/golib/runtime/Goroutine.cs) class runs every `goǃ` on a background thread that
+belongs to that goroutine until it ends. A goroutine that blocks on a channel, a lock or a sleep blocks only its
+own thread. When a goroutine ends, its thread waits for the next `goǃ` instead of exiting, so a `go` statement
+usually hands its goroutine a waiting thread rather than creating one; with none waiting, it creates one. At most
+64 threads wait at once, and a thread that waits 10 seconds with no goroutine to run exits. A reused thread
+carries nothing over: golib resets its thread state between goroutines, and each goroutine runs under the
+`ExecutionContext` of the code that started it. A goroutine that ends while locked to its thread by
+`runtime.LockOSThread` takes the thread with it, as Go's does. As in Go, the process exits when `main` returns,
+even while goroutines are still running.
+<!-- src/core/golib/runtime/Goroutine.cs:1100 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));`;
+     src/core/golib/runtime/GoroutineThreadPool.cs:45 `internal const int MaxIdle = 64;`, :48
+     `internal static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(10);`, and the locked-exit retirement :151
+     `// A goroutine that exited locked to its thread takes the thread with it (Go: "If the calling`.
+     Guards: GolibTests GoroutinePoolTests (reuse, the locked exit, the goroutine stack on a reused thread, no
+     thread state carried over, the creator's ExecutionContext, the idle count) and ThreadStateCensusTests. -->
 
 **Converted code is ordinary blocking code, not `async` code.** A goroutine pauses by blocking its
 thread, so each goroutine needs a thread of its own. `goǃ` does not use the .NET thread pool, because

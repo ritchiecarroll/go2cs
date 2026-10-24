@@ -513,7 +513,8 @@ goǃ(() => replies.Send(99));
 
 A few things behave as Go's runtime does, so they are worth knowing from the C# side:
 
-- Each goroutine runs on its own thread.
+- Each goroutine runs on its own thread for as long as it runs. golib reuses the thread for a later goroutine
+  once it ends, so starting one usually costs a hand-off rather than a new thread.
 - `Send`, `Receive` and `WaitGroup.Wait` block the calling thread until they can complete. Keep them off a UI
   thread: await `ReceiveAsync` or `SendAsync` instead, or run them inside `Task.Run`.
 - A panic that a goroutine does not recover ends the process, as it does in Go. The goroutine runs on its own
