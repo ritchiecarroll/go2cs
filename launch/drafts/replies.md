@@ -150,12 +150,19 @@ command: https://go2cs.net/ValidatedTestPackages.html
 
 ## "Goroutines as threads? That defeats the point of Go."
 
-*Matches:* goroutines, threads, scheduler, M:N, million goroutines, async.
+*Matches:* goroutines, threads, scheduler, M:N, million goroutines, async, runtime async, .NET 11.
 
-For a server holding a million connections, yes, and I would not convert that. Each goroutine is an OS
-thread, so the practical ceiling is in the thousands. For a library that uses a handful of goroutines it
+For a server holding a million connections, yes, and I would not convert that. Each running goroutine owns
+an OS thread (threads are reused once a goroutine ends), so a program with tens of thousands of goroutines
+parked at once is where it stops being practical. For a library that uses a handful of goroutines it
 behaves the same. I chose matching Go's behavior over rewriting everything into `async`.
 https://go2cs.net/Limitations.html#what-converts-but-doesnt-behave-exactly-like-go
+
+*If they want to go further (what would real M:N take?):* there is a design note that measures the gap
+against Go and walks through what M:N would need on .NET, including a possible spike on .NET 11's opt-in
+runtime async. It's a thought exercise for discussion, not a plan or a schedule.
+[https://github.com/ritchiecarroll/go2cs/blob/master/docs/DESIGN-mn-scheduler-sizing.md: check the link is live
+on master at the 1.26 release]
 
 ## "Is it production-ready?"
 
