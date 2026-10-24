@@ -24,9 +24,14 @@
 //     the bind now happens at open, so Fd has a real association to drop, and the FD's later IO
 //     waits on its own events. No step before this one calls Fd, because an Fd call before the
 //     writes moves an FD off the poller and hides the refusal this program exists to reach;
-//  6. a handle NUMBER reused after a close: closing one of two Files over one handle leaves the
-//     other File's FD registered under a number the kernel is free to hand out again. A new handle
-//     that gets it must open and work, as in Go, and not trip over the old FD's record.
+//  6. a handle opened after a close: closing one of two Files over one handle leaves the other
+//     File's FD registered under a number the kernel is free to hand out again. A new handle that
+//     gets it must open and work, as in Go, and not trip over the old FD's record. The kernel does
+//     not promise the number back: in a converted program another thread can take it first. So the
+//     step tries up to eight close-and-duplicate rounds, stops at the first that gets the freed
+//     number, and opens whichever handle it has. The output is the same either way, so it never
+//     depends on reuse; the stale record itself is pinned by GolibTests'
+//     AnOldWaiterRetiresOnlyWhatIsStillItsOwn.
 //  7. CONSECUTIVE writes on one bound FD: eight small writes back to back, each completing at once
 //     inside the pipe's buffer, then four writes larger than the buffer, each pending until the
 //     server end drains it. Every write is an execIO submit that waits for its own completion, so a
@@ -199,44 +204,44 @@ func main() {
 			readLines(server3, 2), before, errors.Is(after, os.ErrNoDeadline))
 	})
 
-	step("6 a handle number reused after a close", func() string {
-		server4, client4 := pipe()
-		first := os.NewFile(uintptr(client4), "first")
-		second := os.NewFile(uintptr(client4), "second")
-		keep = append(keep, first, second)
-
-		if _, err := first.Write([]byte("before close\n")); err != nil {
-			return "first write: " + err.Error()
-		}
-		before := readLines(server4, 1)
-
-		// The second pipe exists before the close, so its own handles cannot take the freed number.
+	step("6 a handle opened after a close", func() string {
+		// The second pipe exists before any close, so its own handles cannot take a freed number.
 		server5, other := pipe()
 
-		// second's open was refused, so its Close retires nothing in the poller; it closes the
-		// handle number first's FD is still registered under.
-		second.Close()
+		var before string
+		var h syscall.Handle
+		for round := 0; round < 8; round++ {
+			server4, client4 := pipe()
+			first := os.NewFile(uintptr(client4), "first")
+			second := os.NewFile(uintptr(client4), "second")
+			keep = append(keep, first, second)
 
-		// Duplicates of the second pipe's client until one gets the freed number.
-		var reused syscall.Handle
-		for i := 0; i < 256 && reused == 0; i++ {
-			var d syscall.Handle
-			if err := syscall.DuplicateHandle(self, other, self, &d, 0, false, syscall.DUPLICATE_SAME_ACCESS); err != nil {
+			if round == 0 {
+				if _, err := first.Write([]byte("before close\n")); err != nil {
+					return "first write: " + err.Error()
+				}
+				before = readLines(server4, 1)
+			}
+
+			// second's open was refused, so its Close retires nothing in the poller; it closes the
+			// handle number first's FD is still registered under.
+			second.Close()
+
+			// A duplicate of the second pipe's client usually gets the freed number at once. When
+			// another thread took it, this round's duplicate stays open and the next round tries again.
+			if err := syscall.DuplicateHandle(self, other, self, &h, 0, false, syscall.DUPLICATE_SAME_ACCESS); err != nil {
 				return "DuplicateHandle: " + err.Error()
 			}
-			if d == client4 {
-				reused = d
+			if h == client4 {
+				break
 			}
 		}
-		if reused == 0 {
-			return "the closed number was not handed out again"
-		}
 
-		f := os.NewFile(uintptr(reused), "reused")
+		f := os.NewFile(uintptr(h), "new")
 		keep = append(keep, f)
 
-		if _, err := f.Write([]byte("after reuse\n")); err != nil {
-			return "write through the reused number: " + err.Error()
+		if _, err := f.Write([]byte("after close\n")); err != nil {
+			return "write through the new handle: " + err.Error()
 		}
 
 		return fmt.Sprintf("%q %q", before, readLines(server5, 1))
