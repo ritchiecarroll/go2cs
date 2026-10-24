@@ -10,13 +10,14 @@ spots real code hits today.
 
 **Good odds tonight:** pure Go that builds with the Go release go2cs tracks and `CGO_ENABLED=0`, leans mostly on the
 standard library, and runs on x64 Windows or Linux. **A longer evening:** lots of third-party modules,
-`unsafe`, assembly fast paths, or tests that pull in testify or read `os.Args`.
+`unsafe`, assembly fast paths, or tests that pull in testify.
 
 * **You need the Go release go2cs tracks on your PATH**, exactly the one in
   [Requirements](README.md#requirements), and **cgo is refused**.
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
   libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
-* **Goroutines are real threads.** Thousands are fine. Hundreds of thousands are not.
+* **Each live goroutine holds an operating-system thread.** Thousands alive at once are fine. A hundred
+  thousand are impractical, and Go's million is out of reach.
 * **It's usually slower than Go**, starts slower and uses more memory.
 * **One conversion targets one operating system.** The standard library is validated on x64
   Windows and Linux, and its macOS validation is in progress.
@@ -34,7 +35,9 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   a `[]N`, `map[K]N`, `chan N` or `*N` the proxy passed along would be a copy, not Go's shared value.
   The same function over a value element converts, and so does a constraint whose methods pass only
   `N`, funcs and arrays ([how](ConversionStrategies-Reference/generic-constraints.md#what-a-proxy-forwards-and-the-instantiations-go2cs-refuses)).
-  No Go 1.24 standard-library package reaches it.
+  No Go 1.26 standard-library package reaches it.
+  <!-- The refusal exits non-zero (docs/DiagnosticCodes.md, GO2CS2002), and the converted standard library is
+       a complete -stdlib conversion of Go 1.26.10, so no package in it reaches the refusal. -->
 * **Go newer than the library tracks.** A newer `go` line in your `go.mod`, or any dependency's, gets
   `package requires newer Go version` or a refusal naming both releases. Set `GOTOOLCHAIN=local` and pin
   older versions until `go build ./...` passes, as the
@@ -51,18 +54,50 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
 
 ## What converts, but doesn't behave exactly like Go
 
-* **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). Each holds a
-  thread for as long as it lives, the ceiling is roughly ten thousand live goroutines where Go manages a
-  million, and `runtime.GOMAXPROCS(1)` does not make anything run one at a time. Bound your fan-out with
-  a worker pool, and remember that a `net/http` server spends one on every open connection.
-* **A deadlock usually hangs** where Go prints `all goroutines are asleep - deadlock!`. Break in with a
-  debugger: each goroutine is a thread named `goroutine-N`.
+* **Goroutines are operating-system threads** ([why](ConversionStrategies.md#goroutines)). A goroutine
+  holds its thread for as long as it lives. When it ends, the thread waits to run the next `go` statement,
+  so starting goroutines one after another is cheap; holding many alive at once is not. Measured on one
+  Windows x64 machine (16 hardware threads, 31 GB), 10,000 goroutines parked at once took about 600 MB and
+  four seconds to start, where Go took 100 MB and under a tenth of a second. 100,000 took minutes and about
+  6 GB, and a million had not finished starting after ten minutes. `runtime.GOMAXPROCS(1)` does not make anything run one at a time.
+  Bound your fan-out with a worker pool, and remember that a `net/http` server spends one on every open
+  connection. [Sizing M:N scheduling](DESIGN-mn-scheduler-sizing.md) has the measurements and what removing
+  the limit would take.
+  <!-- Thread reuse: src/core/golib/runtime/Goroutine.cs:1100 `GoroutineThreadPool.Run(() => Run(body, goroutine, bubble));`.
+       The figures are lane R's ParkStorm reading in docs/DESIGN-mn-scheduler-sizing.md §1 (Windows x64, 16 hardware
+       threads, 31 GB RAM, Go 1.26.10, Release, today's 256 MiB stack reserve): 10,000 parked at 622 MB and 4.4 s against
+       Go's 99 MB and 0.07 s; 100,000 at 5,904 MB and 302 s; 1,000,000 never parked within 600 s. -->
+* **A deadlock usually hangs** where Go prints `all goroutines are asleep - deadlock!`. The message
+  appears only when every goroutine, `main` included, waits on a nil channel or an empty `select {}`. A
+  deadlock on an ordinary channel or lock blocks forever. Break in with a debugger: each goroutine is a
+  thread named `goroutine-N`.
+  <!-- src/core/golib/runtime/Goroutine.cs:883 `internal static bool IsForeverWait(WaitReason reason) =>`
+       and :937 `internal static bool IsProvableDeadlock(IEnumerable<(WaitReason Reason, bool Readied, bool IsMain)> users)`. -->
 * **Stacks don't grow.** A goroutine's thread reserves 256 MB (`GO2CS_GOROUTINE_STACK` changes it), and
   `main` gets the first thread's stack, usually far less. Recursion past that ends the process with no
   panic and no deferred calls, so run deep recursion in a goroutine.
 * **`recover()` catches Go panics, not every .NET exception.** Nil dereference, divide by zero and index
   out of range recover as in Go. Any other .NET exception, that `NotImplementedException` included, runs
-  your deferred calls and keeps unwinding; `recover()` returns nil.
+  your deferred calls and keeps unwinding; `recover()` returns nil. As in Go, `recover()` stops a panic
+  only when the deferred function calls it directly, with two exceptions
+  ([how](ConversionStrategies.md#defer--panic--recover)). An exported function that calls `recover()`
+  stops the panic even when a deferred function calls it. An unexported one that another package defers
+  through a func value returns nil.
+  <!-- docs/ConversionStrategies.md, the recover-in-helper paragraph below the catchError sample; the read:
+       src/core/golib/builtin.cs:369 `public static object? recover(bool calledByDefer) => calledByDefer ? recover() : null;`. -->
+* **An unrecovered panic reports only the last panic.** Go prints the whole chain: `panic: message
+  [recovered, repanicked]` for a panic that was recovered and raised again, and the first panic above a
+  second one raised by a deferred call. Converted code prints the last value alone, `panic: message`.
+  Its traceback starts where the panic began rather than where it was raised again, and a program that
+  never loads the converted `runtime` package prints no traceback at all.
+  <!-- Measured 2026-10-24 by C2 on linux-x64, .NET SDK 10.0.112, converter and corpus at a8821c781a, three
+       one-file programs converted with -recurse and built with -p:GoTargetOS=linux. recover-then-panic, with fmt:
+       Go 1.26.10 `panic: message [recovered, repanicked]` and a traceback from main.main.func1, converted `panic: message`
+       and a traceback from main.main. The same with no imports: converted `panic: message` and nothing after it.
+       A panic inside a deferred call while panicking: Go `panic: first` then `panic: second`, converted
+       `panic: second`. The report is composed at src/core/golib/runtime/CrashReport.cs:171
+       `string report = $"panic: {value}\n";`, and its traceback renderer is registered by the converted runtime's
+       module initializer (src/core/runtime/managed_impl.cs:171 `CrashReport.TracebackRenderer = crashTraceback;`). -->
 * **`unsafe` works over plain numbers and stops at anything .NET's garbage collector tracks**
   ([the rules](ConversionStrategies.md#unsafepointer-and-uintptr)). A pointer to anything holding a
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
@@ -70,11 +105,24 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   mechanically.
 * **Garbage collection is .NET's.** An object your function just stopped using may not be collectible
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
-  wait forever. `GOGC` and `GOMEMLIMIT` change nothing.
-* **Runtime introspection is thinner than Go's.** A dump of all goroutines has frames for the calling
-  goroutine only, `pprof.StartCPUProfile` gives a profile with no samples (profile with .NET's tools),
-  and `debug.ReadBuildInfo()` answers `ok == false`. On Windows, `time.LoadLocation("Europe/Berlin")`
-  fails until you import `time/tzdata` (or set `ZONEINFO`).
+  wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
+  .NET's collector does not follow them.
+  <!-- src/core/runtime/managed_impl.cs:1167 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+       nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
+* **Runtime introspection is thinner than Go's.** A dump of all goroutines lists every goroutine and
+  what it waits on, but has frames for the calling goroutine only. `pprof.StartCPUProfile` gives a
+  profile with no samples (profile with .NET's tools). `debug.ReadBuildInfo()` reports the program's
+  module, its dependencies and its `GOOS`, `GOARCH`, `CGO_ENABLED` and `DefaultGODEBUG`, but no
+  `-compiler`, `-buildmode`, `GOAMD64` or `vcs.*` settings. A replaced dependency shows without its
+  replacement, a converted test program lists no dependencies, and a program converted outside a module
+  reports nothing ([how](ConversionStrategies.md#package-conversion)). On Windows,
+  `time.LoadLocation("Europe/Berlin")` fails until you import `time/tzdata` (or set `ZONEINFO`).
+  <!-- Goroutine dump: docs/ConversionStrategies-Reference/manual-conversions.md, "runtime.Stack(all: true) enumerates
+       every goroutine" (another goroutine prints `[stack unavailable: ...]`). CPU samples need the opt-in companion
+       src/core/go2cs.CpuProfiler, which only generated test projects set and which is not packaged
+       (src/core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj:31 `<IsPackable>false</IsPackable>`). Build info:
+       docs/ConversionStrategies.md, "A main package's project also carries the program's build info"; the test host's
+       missing dep lines and the missing => lines are BOARD rows of 2026-10-22 (H). -->
 * **A few quiet ones**, each rare, where converted code gives a different answer and says nothing:
   * A variadic function that keeps, returns or captures its `...T` parameter, or `append`s or `copy`s
     into it, works on a private copy: after `f(s...)`, its writes are not the caller's `s`.
@@ -91,11 +139,24 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   interface (`v.(fmt.Stringer)`) is the slowest thing converted code does. The
   [performance comparison](Performance.md) has the numbers. Measure your own hot path, in Release.
 * **Startup, memory and shipping.** A converted program loads .NET and one DLL per converted Go package
-  it uses. You ship a .NET app, not Go's small static binary: `dotnet build` output needs the .NET 10
-  runtime, and `dotnet publish -r <runtime>` gives a self-contained folder. The trim mode is set for
-  you: a converted project carries `partial` in its project file, and a C# project you write yourself gets
-  the same default from the packages. A Native AOT publish is slow either way
+  it uses, and the JIT compiles each method the first time it runs. Package-level tables are built the
+  first time they are read rather than at startup. You ship a .NET app, not Go's small static binary:
+  `dotnet build` output needs the .NET 10 runtime, and `dotnet publish -r <runtime>` gives a
+  self-contained folder, compiled ahead of time with ReadyToRun, which starts faster: on linux-x64 it
+  cut a converted program's median startup by about a third. `dotnet run` and `dotnet build` never get
+  ReadyToRun ([how](ConsumingGoFromCSharp.md#rough-edges)). The trim mode is set for you: a converted
+  project carries `partial` in its project file, and a C# project you write yourself gets the same
+  default from the packages. A trimmed publish of a project built from source runs, and reports trim
+  warnings from golib and the converted `runtime`, `reflect` and `time` packages (measured on linux-x64).
+  A Native AOT publish is slow either way
   ([Known issues](KnownIssues.md)).
+  <!-- ReadyToRun: src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`; the startup figure is
+       P1's PerfStartup reading cited in docs/ConsumingGoFromCSharp.md (linux-x64, median 488 ms JIT, 329 ms ReadyToRun).
+       Lazy tables: docs/ConversionStrategies.md, the [GoLazy] holder paragraphs (a package var whose initializer
+       depends on nothing that changes is built on its first read). Trim warnings: measured 2026-10-24 by C2, linux-x64,
+       .NET SDK 10.0.112, `dotnet publish -c Release -r linux-x64` of a converted fmt program built with project
+       references at a8821c781a: rc 0, 110 ILLink trim-analysis warnings (runtime 40, golib 41, reflect 14, time 6,
+       unsafe 5, three others), none of them IL2036. A NuGet consumer's publish was not measured. -->
 * **Allocation.** Converted code allocates where Go's compiler doesn't, so expect more garbage and
   failing `testing.AllocsPerRun` assertions.
 * **Crypto, most hashing and `math/big` run Go's portable code**, the way Go builds with `-tags purego`:
@@ -121,8 +182,14 @@ The [validated modules](ValidatedModules.md) page is still short.
   ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). Drop it, with
   `-module-safe-tag=false` or an explicit `-tags` that leaves it out, and the converted test program
   dies at startup.
-* **Tests that read `os.Args`** see the flags of the C# program that runs them. `flag.Parse()` is fine;
-  a CLI framework that walks `os.Args[1:]` itself, as cobra and pflag do, diverges from `go test`.
+* **A hung test is stopped, where `go test` waits.** A converted test still running 15 minutes after it
+  started is reported as a failure and marked abandoned, and the run moves on to the next test
+  (`-test-deadline` changes the limit, [Command line](CommandLine.md)). Its goroutines keep running, so
+  every later result says it ran after the abandoned test.
+  <!-- docs/CommandLine.md, the -test-deadline row (default 15m; 0 turns it off). A converted test's argv has the
+       shape go test gives a test binary:
+       src/core/testing/TestOptions.cs:236-238 `keeps argv exactly the shape…gives a…test binary`. pflag's suite
+       reads identical to its published proof at 9dcf0bafe1 (docs/phase4/DATA-p2-nugetgo-trial-2026-10-24.md §3). -->
 * **Converter bugs that surface as C# compile errors**, usually in corners of the type system. In your
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
   `.cs` and mark the file `[module: go.GoManualConversion]` so the next conversion leaves it alone. New
@@ -138,7 +205,10 @@ The [validated modules](ValidatedModules.md) page is still short.
 A package's own Go `Test` functions were converted, run, and compared with `go test` verdict for
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
-* **Tests only.** Examples, benchmarks and fuzz targets convert but never run. No race detector either.
+* **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
+  <!-- src/go2cs/testConversion.go:3916 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+       Example- and Benchmark-only test files are left out of the compile set, :792
+       `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
 * **Disclosed differences are real differences.** Where a Go test asserts something a managed runtime
   can't satisfy, or doesn't yet, its exact failure is pinned and listed on the package's proof page,
@@ -150,12 +220,20 @@ verdict, by full test name. That's a real bar, and narrower than the word sounds
 
 ## Platforms and toolchain
 
-* **The Go release it tracks is out of upstream support.** The converted standard library carries none
-  of the Go security fixes issued since ([Roadmap](Roadmap.md#go-releases)).
-* **One Go release, one .NET release, and you build the converter yourself.** `go version` has to print
-  exactly the release in [Requirements](README.md#requirements) when you `go install` the converter and
-  when you convert; `go2cs -version` should show that one release throughout. Rebuild after every pull.
-  Converted projects and the `go.*` packages target `net10.0`.
+* **Go's security fixes arrive with go2cs releases.** The converted standard library is a conversion of
+  the Go release in [Requirements](README.md#requirements). A fix Go issues later reaches you when go2cs
+  converts and publishes that patch. A project converted with `-recurse=nuget` takes it on its next
+  restore, because its `GoStdLibVersion` is the Go minor with a float, such as `1.26.*`
+  ([Roadmap](Roadmap.md#go-releases)).
+  <!-- The float: src/go2cs/toolchainResolution.go:525 `return strings.TrimPrefix(minor, "go") + ".*"`; the release
+       lines: docs/PLAN-version-lines.md (master carries the current Go line with patch hops). -->
+* **One Go release, one .NET release.** `go version` has to print exactly the release in
+  [Requirements](README.md#requirements) when you convert, and when you `go install` the converter from a
+  clone; `go2cs -version` should show that one release throughout. Rebuild after every pull. Each
+  [GitHub release](https://github.com/ritchiecarroll/go2cs/releases) also carries the converter prebuilt
+  for six platforms. Converted projects and the `go.*` packages target `net10.0`.
+  <!-- .github/workflows/release-binaries.yml: a nuget-N.N.N.N tag builds the converter for six platforms and drafts a
+       GitHub Release with the archives, SHA256SUMS and the attestation bundle. -->
 * **Where it runs.** The standard library is validated on x64 Windows and x64 Linux (glibc, on
   Microsoft's build of .NET: Ubuntu's own package has an entry in [Known issues](KnownIssues.md)).
   macOS, Intel and Apple silicon, has packages and runs the README walkthrough, and is being validated
