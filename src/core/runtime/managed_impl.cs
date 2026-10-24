@@ -187,10 +187,111 @@ partial class runtime_package
         StringBuilder trace = new();
 
         trace.Append("goroutine 1 [running]:\n");
-        appendGoFrames(trace, stack, panic);
+
+        // A panic a deferred call raised while an older one was handled: its own frames, then Go's `panic(...)`, above
+        // the older panic's, which PanicTrace already holds (crashChainPrefix). Any other panic prints as it always has.
+        List<(string name, string file, int line, bool inlined)>? prefix = crashChainPrefix(panic);
+
+        // The origin's frames, and under them the frames below its first deferring frame, where the crash can still see
+        // them (crashTail). Above that frame a chain's panic was caught once more, when its deferred function caught its
+        // own panic first; the nil-func thunk, like a panic the frame raised itself, was not.
+        int caughtAbove = prefix is not null && panic.SiteIsTheDeferredCall ? 1 : 0;
+        StackFrame[] frames = crashTail(panic, thrown, stack, caughtAbove) is { } below ? [.. stack.GetFrames(), .. below] : stack.GetFrames();
+
+        if (prefix is not null)
+        {
+            prefix.AddRange(collectGoFrames(frames, panic));
+            printGoFrames(trace, prefix);
+        }
+        else
+        {
+            appendGoFrames(trace, frames, panic);
+        }
 
         return trace.ToString();
     }
+
+    // THE FRAMES BELOW THE FIRST DEFERRING FRAME (COORD 2026-10-24, S1). PanicTrace runs from the throw to the panic's
+    // FIRST catching frame, and that frame's Run re-raises the stored instance, which restarts its trace; so a crash
+    // stopped at the first deferring frame, where Go goes on down to the goroutine's root. The exception that reached the
+    // crash still carries the LAST stretch, from its last re-raise down. When that re-raise was the first catcher's own,
+    // the two stretches meet at that frame and together are Go's whole traceback: this returns the frames below it, or
+    // null. It is the first catcher's only when nothing below that frame caught the panic before the crash adopted it
+    // (Catches: the caughtAbove catches above the frame, then the frame's own and the crash's), and the re-raised trace's
+    // first Go frame is that frame's method. The re-raised trace names the catcher twice, its finally and then the frame
+    // itself at IL offset 0, so the frame is matched by method: no other activation of that method can sit below it
+    // uncounted, because an emitted function that defers catches in every activation. A panic that crossed a second
+    // deferring frame lost the stretch between the two, so it keeps the report it always had: the top of Go's, a frame
+    // missing but none wrong.
+    private static StackFrame[]? crashTail(PanicException panic, Exception thrown, StackTrace origin, int caughtAbove)
+    {
+        if (!ReferenceEquals(panic, thrown) || panic.Catches != caughtAbove + 2 || panic.PanicTrace is null || origin.FrameCount == 0)
+            return null;
+
+        if (origin.GetFrame(origin.FrameCount - 1)?.GetMethod() is not { } catcher || !isGoSourceFrame(catcher))
+            return null;
+
+        StackFrame[] reRaised = new StackTrace(thrown, fNeedFileInfo: false).GetFrames();
+        int below = 0;
+
+        // The re-raise's own golib frames (GoFrame.Run), then the catcher's frames.
+        while (below < reRaised.Length && reRaised[below].GetMethod() is { } raiser && !isGoSourceFrame(raiser))
+            below++;
+
+        if (below == reRaised.Length || reRaised[below].GetMethod() != catcher)
+            return null;
+
+        while (below < reRaised.Length && reRaised[below].GetMethod() == catcher)
+            below++;
+
+        return reRaised[below..];
+    }
+
+    // GO'S CHAIN IN A CRASH (C2, 2026-10-24). A panic raised by a deferred call while an older panic was being handled
+    // inherits the older one's PanicTrace (InheritThrowSite, which runtime.Stack reads), so a crash printed the older
+    // panic's frames alone and lost the deferred call's. Go prints the newer panic's frames, then the gopanic that ran
+    // the deferred call as `panic(...)`, then the older panic's. This returns the lines to put above the older panic's
+    // frames, or null. Every newer link must pass splicePanic's own rules (spliceableSite: it ends at the Run, and only
+    // the deferred delegate that caught first, or the nil-func thunk), and the whole chain must be owned by ONE Run
+    // activation on one thread, the ownership splicePanic checks against the Run it walks. Any link that fails leaves the
+    // report exactly as it was: a frame may still be missing, but none is wrong. Go's printer hides the runtime fault
+    // frames (panicmem, sigpanic, panicdivide, panicwrap) in a crash, so only the `panic` lines are added.
+    private static List<(string name, string file, int line, bool inlined)>? crashChainPrefix(PanicException panic)
+    {
+        if (panic.Beneath is null || panic.SiteOwner == 0 || panic.SiteOwnerThread is null)
+            return null;
+
+        long owner = panic.SiteOwner;
+        object thread = panic.SiteOwnerThread;
+        List<(string name, string file, int line, bool inlined)> prefix = [];
+        HashSet<PanicException> visited = new(ReferenceEqualityComparer.Instance);
+        PanicException link = panic;
+
+        while (link.Beneath is { } beneath)
+        {
+            if (!visited.Add(link) || link.SiteOwner != owner || !ReferenceEquals(link.SiteOwnerThread, thread) || !link.SiteEndsAtRun)
+                return null;
+
+            if (spliceableSite(link) is not { } accepted)
+                return null;
+
+            prefix.AddRange(collectGoFrames(accepted.site, link));
+            prefix.Add(("panic", rootFrameFile("runtime/panic.go"), GopanicCallsDeferredLine, false));
+            link = beneath;
+        }
+
+        // The bottom link is the panic whose frames PanicTrace holds: owned by the same activation, or nothing is added.
+        if (!visited.Add(link) || link.SiteOwner != owner || !ReferenceEquals(link.SiteOwnerThread, thread))
+            return null;
+
+        return prefix;
+    }
+
+    /// <summary>
+    /// The crash traceback runtime installs into golib's CrashReport, for GolibTests' CrashReportTests: a guard cannot
+    /// rely on which renderer another test left installed.
+    /// </summary>
+    public static string GoCrashTraceback(PanicException panic, Exception thrown) => crashTraceback(panic, thrown);
 
     // The traceback half of Go's report for a FATAL error — runtime.throw and runtime.fatal, the
     // path no recover() can see. Registered into golib for the same inverted-dependency reason the
@@ -1746,7 +1847,12 @@ partial class runtime_package
     // `site` is the panic whose trace `frames` is, when it is one: an explicit panic raised inside Go functions the JIT
     // inlined into the faulting frame (the trace's first frame) prints their frames above it, as Go records them
     // (inlinedPanicFrames, shared with splicePanic so a crash report and runtime.Callers agree).
-    private static void appendGoFrames(StringBuilder trace, IEnumerable<StackFrame> frames, PanicException? site = null)
+    private static void appendGoFrames(StringBuilder trace, IEnumerable<StackFrame> frames, PanicException? site = null) =>
+        printGoFrames(trace, collectGoFrames(frames, site));
+
+    // appendGoFrames' first half: one trace's Go frames as the lines it prints. The crash traceback joins several
+    // (crashChainPrefix) and prints them once, so Go's elision counts the whole traceback, as Go's does.
+    private static List<(string name, string file, int line, bool inlined)> collectGoFrames(IEnumerable<StackFrame> frames, PanicException? site)
     {
         List<(string name, string file, int line, bool inlined)> printed = [];
         bool calledGo = false;
@@ -1809,6 +1915,12 @@ partial class runtime_package
             printed.Add((frameName, file, line, false));
         }
 
+        return printed;
+    }
+
+    // appendGoFrames' second half: prints the lines, with Go's elision.
+    private static void printGoFrames(StringBuilder trace, List<(string name, string file, int line, bool inlined)> printed)
+    {
         // Go's elision (traceback1): a stack deeper than tracebackInnerFrames + tracebackOuterFrames
         // prints its innermost and outermost frames and one line counting the ones between.
         int inner = (int)tracebackInnerFrames, outer = (int)tracebackOuterFrames;
@@ -3868,7 +3980,7 @@ partial class runtime_package
         // carries GoStackRoot. The main goroutine's runtime.main root is not modeled, and a thread a
         // host entered without a root gets none: nothing on it stands where a Go frame is.
         if ((sawRoot || Goroutine.Current?.Creator is not null) && remainingSkip == 0 && count < len(pc))
-            pc[count++] = internRootFrame("runtime.goexit", "runtime/asm_amd64.s", 1700);
+            pc[count++] = internRootFrame("runtime.goexit", "runtime/asm_amd64.s", 1771);
 
         return count;
     }
@@ -3916,8 +4028,8 @@ partial class runtime_package
     // panicdivide for an integer divide), then the frames the panic was raised in, then the deferring
     // function. The CLR has unwound those frames before the emitted finally runs the deferred call.
     // They survive as the panic's SiteTrace, the raised exception's trace from its throw site to its
-    // first catching frame, and this splices them back. Go's lines are go1.24.13's: gopanic calls the
-    // deferred func at panic.go:792.
+    // first catching frame, and this splices them back. gopanic calls the deferred func at
+    // GopanicCallsDeferredLine, the pinned release's panic.go line.
     //
     // OWNERSHIP IS CHECKED BY ACTIVATION, NOT BY METHOD ([P2-2], amended by COORD's review of the cut).
     // Every link of a splice must be a panic whose SiteOwner is the ACTIVATION of the Run being walked:
@@ -3954,6 +4066,11 @@ partial class runtime_package
     //
     // Named, not folded ([P2-4]): runtime.gopanic is also a real converted method, and a live walk
     // through it (Go code calling it directly) interns a second record for the function.
+    // The line at which gopanic calls a deferred function (runtime/panic.go), shared by the Callers splice and the crash
+    // traceback's `panic(...)` frame: the `fn()` in gopanic's defer loop at the Go release src/version.props pins
+    // (go1.26.10). repoguard's TestRootFrameLinesMatchThePinnedGoRoot derives it from that GOROOT and fails when it moves.
+    private const int GopanicCallsDeferredLine = 860;
+
     private static List<uintptr> splicePanic(PanicException panic, long activation, StackFrame[] live, int runIndex)
     {
         System.Reflection.MethodBase? owner = null;
@@ -3972,71 +4089,28 @@ partial class runtime_package
             if (!visited.Add(link) || link.SiteOwner != activation || !ReferenceEquals(link.SiteOwnerThread, GoFrame.ThreadToken))
                 return [];
 
-            if (link.FaultKind == PanicFaultKind.Unmodelled || link.CrossedRangeFunc)
+            if (spliceableSite(link) is not { } accepted)
                 return [];
 
-            StackFrame[] raw = link.SiteTrace?.GetFrames() ?? [];
-            List<StackFrame> site = [];
+            (List<StackFrame> site, StackFrame[] raw) = accepted;
 
-            foreach (StackFrame siteFrame in raw)
-            {
-                System.Reflection.MethodBase? siteMethod = siteFrame.GetMethod();
-
-                if (siteMethod is not null && (isGoSourceFrame(siteMethod) || site.Count == 0 && isGoSourceFrame(siteMethod, keepWrapper: true)))
-                    site.Add(siteFrame);
-            }
-
-            // The second guard: an explicit panic that golib code, not Go source, threw.
-            if (link.FaultKind == PanicFaultKind.Explicit && firstMethodOf(raw) is { } thrower && !isGoSourceFrame(thrower, keepWrapper: true))
-                return [];
-
-            // THE WRAPPER FRAME, keyed on the EMITTER'S marker, never on names or frame shapes (COORD's check of
-            // round 3). A method-expression wrapper as the site's first Go frame is kept only when the wrapper
-            // raised the panic itself (RaisedByWrapper: builtin.wrapperRecv/panicwrapRecv on a nil receiver),
-            // because Go keeps a wrapper only when its callee is the panic machinery. Any other panic with a
-            // wrapper there (a callee the JIT inlined into it, a promoted method's embedded deref) is refused.
-            if (site.Count > 0 && isWrapperFrame(site[0].GetMethod()) != link.RaisedByWrapper)
-                return [];
-
-            // An INTRINSIFIED atomic on a nil address: Go's intrinsic faults with no frame of its own, while a
-            // call through a func value keeps the frame, and a run cannot tell the two apart (COORD's check of
-            // round 3), so a fault whose first site frame is one of them is refused.
-            if (link.FaultKind == PanicFaultKind.Memory && site.Count > 0 && isIntrinsifiedAtomic(site[0].GetMethod()))
-                return [];
-
-            // An explicit panic from a function Go replaces with an INTRINSIC on amd64: Go's frames are the
-            // intrinsic's runtime frames (panicdivide, panicoverflow), not the Go source's, so it is refused.
-            if (link.FaultKind == PanicFaultKind.Explicit && site.Count > 0 && isPanickingIntrinsic(site[0].GetMethod()))
-                return [];
-
-            // A nil receiver box dereferenced inside a go2cs-gen interface ADAPTER: Go answers panicwrap when the
-            // call is dispatched and panicmem/sigpanic when its compiler devirtualizes it, which a run cannot
-            // know, so it is refused.
-            if (link.FaultKind == PanicFaultKind.Memory && adapterBeforeFirstGoFrame(raw))
-                return [];
-
-            // An ends-at-Run site: only the nil-func thunk, or the deferred delegate that caught first.
-            if (link.SiteEndsAtRun && !link.SiteIsTheDeferredCall &&
-                !(site.Count == 0 && link.FaultKind == PanicFaultKind.Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod))
-                return [];
-
-            spliced.Add(internRootFrame("runtime.gopanic", "runtime/panic.go", 792));
+            spliced.Add(internRootFrame("runtime.gopanic", "runtime/panic.go", GopanicCallsDeferredLine));
 
             switch (link.FaultKind)
             {
                 case PanicFaultKind.Panicwrap:
                     // Go's `(*T).M` wrapper called with a nil *T (builtin.panicwrapRecv raised it, the
                     // emitter's marker): gopanic | runtime.panicwrap | (*T).M | owner.
-                    spliced.Add(internRootFrame("runtime.panicwrap", "runtime/error.go", 356));
+                    spliced.Add(internRootFrame("runtime.panicwrap", "runtime/error.go", 348));
                     break;
                 case PanicFaultKind.Memory:
-                    spliced.Add(internRootFrame("runtime.panicmem", "runtime/panic.go", 262));
+                    spliced.Add(internRootFrame("runtime.panicmem", "runtime/panic.go", 336));
                     spliced.Add(GOOS == "windows"u8
-                        ? internRootFrame("runtime.sigpanic", "runtime/signal_windows.go", 401)
-                        : internRootFrame("runtime.sigpanic", "runtime/signal_unix.go", 925));
+                        ? internRootFrame("runtime.sigpanic", "runtime/signal_windows.go", 385)
+                        : internRootFrame("runtime.sigpanic", "runtime/signal_unix.go", 931));
                     break;
                 case PanicFaultKind.Divide:
-                    spliced.Add(internRootFrame("runtime.panicdivide", "runtime/panic.go", 241));
+                    spliced.Add(internRootFrame("runtime.panicdivide", "runtime/panic.go", 315));
                     break;
             }
 
@@ -4068,6 +4142,62 @@ partial class runtime_package
         }
 
         return spliced;
+    }
+
+    // One link of a panic chain judged by the rules splicePanic and the crash traceback share: the link's Go site
+    // frames (the faulting frame first) and the raw trace they came from, or null when it is a link a splice refuses.
+    // Ownership by activation stays the caller's: splicePanic checks the Run it walks, the crash traceback the chain's.
+    private static (List<StackFrame> site, StackFrame[] raw)? spliceableSite(PanicException link)
+    {
+        if (link.FaultKind == PanicFaultKind.Unmodelled || link.CrossedRangeFunc)
+            return null;
+
+        StackFrame[] raw = link.SiteTrace?.GetFrames() ?? [];
+        List<StackFrame> site = [];
+
+        foreach (StackFrame siteFrame in raw)
+        {
+            System.Reflection.MethodBase? siteMethod = siteFrame.GetMethod();
+
+            if (siteMethod is not null && (isGoSourceFrame(siteMethod) || site.Count == 0 && isGoSourceFrame(siteMethod, keepWrapper: true)))
+                site.Add(siteFrame);
+        }
+
+        // The second guard: an explicit panic that golib code, not Go source, threw.
+        if (link.FaultKind == PanicFaultKind.Explicit && firstMethodOf(raw) is { } thrower && !isGoSourceFrame(thrower, keepWrapper: true))
+            return null;
+
+        // THE WRAPPER FRAME, keyed on the EMITTER'S marker, never on names or frame shapes (COORD's check of
+        // round 3). A method-expression wrapper as the site's first Go frame is kept only when the wrapper
+        // raised the panic itself (RaisedByWrapper: builtin.wrapperRecv/panicwrapRecv on a nil receiver),
+        // because Go keeps a wrapper only when its callee is the panic machinery. Any other panic with a
+        // wrapper there (a callee the JIT inlined into it, a promoted method's embedded deref) is refused.
+        if (site.Count > 0 && isWrapperFrame(site[0].GetMethod()) != link.RaisedByWrapper)
+            return null;
+
+        // An INTRINSIFIED atomic on a nil address: Go's intrinsic faults with no frame of its own, while a
+        // call through a func value keeps the frame, and a run cannot tell the two apart (COORD's check of
+        // round 3), so a fault whose first site frame is one of them is refused.
+        if (link.FaultKind == PanicFaultKind.Memory && site.Count > 0 && isIntrinsifiedAtomic(site[0].GetMethod()))
+            return null;
+
+        // An explicit panic from a function Go replaces with an INTRINSIC on amd64: Go's frames are the
+        // intrinsic's runtime frames (panicdivide, panicoverflow), not the Go source's, so it is refused.
+        if (link.FaultKind == PanicFaultKind.Explicit && site.Count > 0 && isPanickingIntrinsic(site[0].GetMethod()))
+            return null;
+
+        // A nil receiver box dereferenced inside a go2cs-gen interface ADAPTER: Go answers panicwrap when the
+        // call is dispatched and panicmem/sigpanic when its compiler devirtualizes it, which a run cannot
+        // know, so it is refused.
+        if (link.FaultKind == PanicFaultKind.Memory && adapterBeforeFirstGoFrame(raw))
+            return null;
+
+        // An ends-at-Run site: only the nil-func thunk, or the deferred delegate that caught first.
+        if (link.SiteEndsAtRun && !link.SiteIsTheDeferredCall &&
+            !(site.Count == 0 && link.FaultKind == PanicFaultKind.Memory && firstMethodOf(raw) == GoFrame.NilDeferredCallMethod))
+            return null;
+
+        return (site, raw);
     }
 
     // Go's amd64 intrinsics whose Go source panics (cmd/compile/internal/ssagen/intrinsics.go, go1.24.13):
@@ -4142,7 +4272,7 @@ partial class runtime_package
     // "Frame.Func unchanged"): Go leaves Func nil ONLY for an inlined frame, and go2cs keeps Go's function
     // boundaries one-for-one, so no frame is inlined and every Go frame carries its function's interned
     // *Func (frameFunc). startLine is the function's `func` keyword line (goFunctionStartLine), or a root
-    // frame's go1.24.13 declaration line (rootFunctionStartLine).
+    // frame's declaration line at its pinned release (rootFunctionStartLine).
     [GoRecv] public static (Frame frame, bool more) Next(this ref Frames ci)
     {
         while (len(ci.callers) > 0)
@@ -5065,20 +5195,22 @@ partial class runtime_package
     }
 
     // The start lines of the ROOT frames no live method backs (internRootFrame's records: the goroutine
-    // root, the test-host root, and the panic machinery splicePanic splices), as go1.24.13 declares them,
-    // the same release the frames' own lines are pinned to. Keyed by the Go function name the root is
-    // interned under; sigpanic is declared per OS, as splicePanic names its file.
+    // root, the test-host root, and the panic machinery splicePanic splices), as the same release declares them
+    // that the frames' own lines are pinned to. Keyed by the Go function name the root is interned under; sigpanic
+    // is declared per OS, as splicePanic names its file. Every line here, and every root frame line beside its
+    // internRootFrame, is the release src/version.props pins (go1.26.10): repoguard's
+    // TestRootFrameLinesMatchThePinnedGoRoot derives each from that GOROOT and fails when one moves.
     private static nint rootFunctionStartLine(string function) => function switch
     {
-        "runtime.goexit" => 1699,       // runtime/asm_amd64.s: TEXT runtime·goexit
-        "runtime.gopanic" => 742,       // runtime/panic.go
-        "runtime.panicmem" => 260,      // runtime/panic.go
-        "runtime.panicdivide" => 239,   // runtime/panic.go
-        "runtime.panicwrap" => 332,     // runtime/error.go
-        "runtime.sigpanic" => GOOS == "windows"u8 ? 392 : 906, // runtime/signal_windows.go : signal_unix.go
-        "testing.tRunner" => 1642,      // testing/testing.go
+        "runtime.goexit" => 1770,       // runtime/asm_amd64.s: TEXT runtime·goexit
+        "runtime.gopanic" => 809,       // runtime/panic.go
+        "runtime.panicmem" => 334,      // runtime/panic.go
+        "runtime.panicdivide" => 313,   // runtime/panic.go
+        "runtime.panicwrap" => 324,     // runtime/error.go
+        "runtime.sigpanic" => GOOS == "windows"u8 ? 376 : 912, // runtime/signal_windows.go : signal_unix.go
+        "testing.tRunner" => 1876,      // testing/testing.go
         // The allocator frames a heap-profile record starts with (memProfileAlloc). Go 1.26 records them
-        // and Go 1.24 did not, so their lines are go1.26.9's.
+        // and Go 1.24 did not.
         "runtime.mallocgc" => 1067,     // runtime/malloc.go
         "runtime.newobject" => 2156,    // runtime/malloc.go
         "runtime.newarray" => 2199,     // runtime/malloc.go

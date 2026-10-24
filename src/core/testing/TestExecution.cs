@@ -2220,9 +2220,9 @@ public sealed class TestExecution
     private (IReadOnlyList<string>? records, int? dropped) LogRecords(string terminal) =>
         terminal is "fail" or "skip" ? (m_logs.ToArray(), m_logsDropped > 0 ? m_logsDropped : null) : (null, null);
 
-    // Go runs every test body from testing.tRunner (testing.go:1792 is its `fn(t)`), and a Callers walk
+    // Go runs every test body from testing.tRunner (testing.go:2036 is its `fn(t)`), and a Callers walk
     // reports that frame here, where the host stands in for it, above runtime.goexit (GoStackRoot).
-    [GoStackRoot("testing.tRunner", "testing/testing.go", 1792)]
+    [GoStackRoot("testing.tRunner", "testing/testing.go", 2036)]
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private void Execute(Action<ж<testing_package.T>> action)
     {
