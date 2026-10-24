@@ -30,11 +30,8 @@ import (
 //
 // A converted program has no GOROOT to read at run time, so the lines stay literals and this guard derives each
 // one from the GOROOT src/version.props pins (pinnedGoRoot): a declaration line, or a statement found by
-// walking forward from it, and fails naming the derived line when a literal differs.
-//
-// STILL STALE. The rows in rootFrameLinesStillGo124 carry go1.24.13's lines and are listed with that value until
-// their re-pin is ruled; the guard fails if one changes without leaving the list, or comes to match the pinned
-// release while still listed, so the list can only shrink.
+// walking forward from it, and fails naming the derived line when a literal differs. There is no allow-list: every
+// root line derives, so a hop that moves any of them fails here in full.
 //
 // POSITIVE CONTROL: TestRootFrameLineScannerFires drives the same scanner over planted sources, one per refusal,
 // plus a clean control that must read empty.
@@ -135,25 +132,6 @@ var rootFramePins = []rootFramePin{
 		`^func moveSliceNoCapNoScan\(`, `mallocgc\(`),
 }
 
-// rootFrameLinesStillGo124 lists the rows that still carry go1.24.13's line, with that line, until their re-pin
-// to the pinned release is ruled (R's crash-traceback seat re-pinned gopanic alone, as ruled).
-var rootFrameLinesStillGo124 = map[string]int{
-	"runtime.goexit start":             1699,
-	"runtime.goexit frame":             1700,
-	"testing.tRunner start":            1642,
-	"testing.tRunner frame":            1792,
-	"runtime.panicmem start":           260,
-	"runtime.panicmem frame":           262,
-	"runtime.panicdivide start":        239,
-	"runtime.panicdivide frame":        241,
-	"runtime.panicwrap start":          332,
-	"runtime.panicwrap frame":          356,
-	"runtime.sigpanic start (windows)": 392,
-	"runtime.sigpanic frame (windows)": 401,
-	"runtime.sigpanic start (unix)":    906,
-	"runtime.sigpanic frame (unix)":    925,
-}
-
 // goTopLevelDecl ends the function a derivation walks: no step may match past the next top-level declaration.
 var goTopLevelDecl = regexp.MustCompile(`^(func |TEXT |type |var |const )`)
 
@@ -215,13 +193,9 @@ func pinnedLiteral(content string, cs *regexp.Regexp) (int, error) {
 }
 
 // scanRootFrameLines checks every pin against the Go sources readGo returns. It returns one finding per
-// violation, and one note per still-stale row.
-func scanRootFrameLines(pins []rootFramePin, stale map[string]int, readCS func(string) (string, error),
-	readGo func(string) ([]string, error)) (findings, notes []string) {
-	named := map[string]bool{}
-
+// violation.
+func scanRootFrameLines(pins []rootFramePin, readCS func(string) (string, error), readGo func(string) ([]string, error)) (findings []string) {
 	for _, pin := range pins {
-		named[pin.name] = true
 		content, err := readCS(pin.csFile)
 
 		if err != nil {
@@ -250,32 +224,14 @@ func scanRootFrameLines(pins []rootFramePin, stale map[string]int, readCS func(s
 			continue
 		}
 
-		was, listed := stale[pin.name]
-
-		switch {
-		case listed && pinned == derived:
-			findings = append(findings, fmt.Sprintf("%s: %s now holds the pinned release's %s:%d; remove it from rootFrameLinesStillGo124",
-				pin.name, pin.csFile, pin.goFile, derived))
-		case listed && pinned != was:
-			findings = append(findings, fmt.Sprintf("%s: %s holds %d, neither its listed go1.24.13 line %d nor the pinned release's %s:%d",
-				pin.name, pin.csFile, pinned, was, pin.goFile, derived))
-		case listed:
-			notes = append(notes, fmt.Sprintf("%s: still go1.24.13's %d; the pinned release's is %s:%d", pin.name, was, pin.goFile, derived))
-		case pinned != derived:
+		if pinned != derived {
 			findings = append(findings, fmt.Sprintf("%s: %s pins %s:%d, but the pinned GOROOT has it at %s:%d; re-pin the literal",
 				pin.name, pin.csFile, pin.goFile, pinned, pin.goFile, derived))
 		}
 	}
 
-	for name := range stale {
-		if !named[name] {
-			findings = append(findings, fmt.Sprintf("%s: listed in rootFrameLinesStillGo124 but no pin has that name", name))
-		}
-	}
-
 	sort.Strings(findings)
-	sort.Strings(notes)
-	return findings, notes
+	return findings
 }
 
 // TestRootFrameLinesMatchThePinnedGoRoot is the guard.
@@ -298,17 +254,11 @@ func TestRootFrameLinesMatchThePinnedGoRoot(t *testing.T) {
 		return strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n"), nil
 	}
 
-	findings, notes := scanRootFrameLines(rootFramePins, rootFrameLinesStillGo124, readCS, readGo)
-
-	for _, finding := range findings {
+	for _, finding := range scanRootFrameLines(rootFramePins, readCS, readGo) {
 		t.Error(finding)
 	}
 
-	for _, note := range notes {
-		t.Log(note)
-	}
-
-	t.Logf("%d root frame lines checked against GOROOT %s, %d still go1.24.13's", len(rootFramePins), goRoot, len(notes))
+	t.Logf("%d root frame lines checked against GOROOT %s", len(rootFramePins), goRoot)
 }
 
 // TestRootFrameLineScannerFires plants one violation per rule and a clean control.
@@ -338,28 +288,23 @@ func TestRootFrameLineScannerFires(t *testing.T) {
 	}
 
 	cases := []struct {
-		name  string
-		pins  []rootFramePin
-		stale map[string]int
-		cs    string
-		want  string
+		name string
+		pins []rootFramePin
+		cs   string
+		want string
 	}{
-		{"clean", pinF, nil, `"f" => 3, frame("f", 5) frame("f", 5)`, ""},
-		{"clean, a listed row still stale", pinF, map[string]int{"f frame": 4}, `"f" => 3, frame("f", 4)`, ""},
-		{"a line moved", pinF, nil, `"f" => 3, frame("f", 4)`, "re-pin the literal"},
-		{"a start line moved", pinF, nil, `"f" => 2, frame("f", 5)`, "re-pin the literal"},
-		{"two different literals", pinF, nil, `"f" => 3, frame("f", 5) frame("f", 6)`, "captures both"},
-		{"no literal", pinF, nil, `"f" => 3`, "no literal matches"},
-		{"a listed row now current", pinF, map[string]int{"f frame": 4}, `"f" => 3, frame("f", 5)`, "remove it from rootFrameLinesStillGo124"},
-		{"a listed row moved elsewhere", pinF, map[string]int{"f frame": 4}, `"f" => 3, frame("f", 6)`, "neither its listed go1.24.13 line"},
-		{"a listed name with no pin", pinF, map[string]int{"h frame": 4}, `"f" => 3, frame("f", 5)`, "no pin has that name"},
+		{"clean", pinF, `"f" => 3, frame("f", 5) frame("f", 5)`, ""},
+		{"a line moved", pinF, `"f" => 3, frame("f", 4)`, "re-pin the literal"},
+		{"a start line moved", pinF, `"f" => 2, frame("f", 5)`, "re-pin the literal"},
+		{"two different literals", pinF, `"f" => 3, frame("f", 5) frame("f", 6)`, "captures both"},
+		{"no literal", pinF, `"f" => 3`, "no literal matches"},
 		{"a step that runs past its function", []rootFramePin{rootPin("f frame", "x.cs", `frame\("f", (\d+)\)`, "p/p.go", `^func f\(`, `^\s*gone\(\)`)},
-			nil, `frame("f", 5)`, "before the declaration ends"},
-		{"no declaration", []rootFramePin{rootPin("h start", "x.cs", `"h" => (\d+),`, "p/p.go", `^func h\(`)}, nil, `"h" => 1,`, "no line matches the declaration"},
+			`frame("f", 5)`, "before the declaration ends"},
+		{"no declaration", []rootFramePin{rootPin("h start", "x.cs", `"h" => (\d+),`, "p/p.go", `^func h\(`)}, `"h" => 1,`, "no line matches the declaration"},
 	}
 
 	for _, c := range cases {
-		findings, _ := scanRootFrameLines(c.pins, c.stale, pins(c.cs), readGo)
+		findings := scanRootFrameLines(c.pins, pins(c.cs), readGo)
 
 		if c.want == "" {
 			if len(findings) != 0 {

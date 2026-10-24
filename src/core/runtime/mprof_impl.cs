@@ -305,7 +305,8 @@ private static void memProfileAlloc(object allocation, nuint size, bool noscan, 
     memProfileTrack(allocation, b, fullSize);
 }
 
-// The line of go1.26.9's mallocgc that dispatches an allocation of `size` bytes, by the allocator its size
+// The line of the pinned release's mallocgc (go1.26.10; repoguard's TestRootFrameLinesMatchThePinnedGoRoot derives
+// each) that dispatches an allocation of `size` bytes, by the allocator its size
 // class takes: mallocgcTiny (noscan, under maxTinySize 16), mallocgcSmallNoscan, mallocgcSmallScanNoHeader
 // (heap bits in the span, up to 512 bytes), mallocgcSmallScanHeader, and mallocgcLarge above maxSmallSize
 // less the 8-byte malloc header. Measured against Go's own records, MemProfileAllocFrames' oracle.

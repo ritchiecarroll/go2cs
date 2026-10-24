@@ -190,17 +190,61 @@ partial class runtime_package
 
         // A panic a deferred call raised while an older one was handled: its own frames, then Go's `panic(...)`, above
         // the older panic's, which PanicTrace already holds (crashChainPrefix). Any other panic prints as it always has.
-        if (crashChainPrefix(panic) is { } prefix)
+        List<(string name, string file, int line, bool inlined)>? prefix = crashChainPrefix(panic);
+
+        // The origin's frames, and under them the frames below its first deferring frame, where the crash can still see
+        // them (crashTail). Above that frame a chain's panic was caught once more, when its deferred function caught its
+        // own panic first; the nil-func thunk, like a panic the frame raised itself, was not.
+        int caughtAbove = prefix is not null && panic.SiteIsTheDeferredCall ? 1 : 0;
+        StackFrame[] frames = crashTail(panic, thrown, stack, caughtAbove) is { } below ? [.. stack.GetFrames(), .. below] : stack.GetFrames();
+
+        if (prefix is not null)
         {
-            prefix.AddRange(collectGoFrames(stack.GetFrames(), panic));
+            prefix.AddRange(collectGoFrames(frames, panic));
             printGoFrames(trace, prefix);
         }
         else
         {
-            appendGoFrames(trace, stack, panic);
+            appendGoFrames(trace, frames, panic);
         }
 
         return trace.ToString();
+    }
+
+    // THE FRAMES BELOW THE FIRST DEFERRING FRAME (COORD 2026-10-24, S1). PanicTrace runs from the throw to the panic's
+    // FIRST catching frame, and that frame's Run re-raises the stored instance, which restarts its trace; so a crash
+    // stopped at the first deferring frame, where Go goes on down to the goroutine's root. The exception that reached the
+    // crash still carries the LAST stretch, from its last re-raise down. When that re-raise was the first catcher's own,
+    // the two stretches meet at that frame and together are Go's whole traceback: this returns the frames below it, or
+    // null. It is the first catcher's only when nothing below that frame caught the panic before the crash adopted it
+    // (Catches: the caughtAbove catches above the frame, then the frame's own and the crash's), and the re-raised trace's
+    // first Go frame is that frame's method. The re-raised trace names the catcher twice, its finally and then the frame
+    // itself at IL offset 0, so the frame is matched by method: no other activation of that method can sit below it
+    // uncounted, because an emitted function that defers catches in every activation. A panic that crossed a second
+    // deferring frame lost the stretch between the two, so it keeps the report it always had: the top of Go's, a frame
+    // missing but none wrong.
+    private static StackFrame[]? crashTail(PanicException panic, Exception thrown, StackTrace origin, int caughtAbove)
+    {
+        if (!ReferenceEquals(panic, thrown) || panic.Catches != caughtAbove + 2 || panic.PanicTrace is null || origin.FrameCount == 0)
+            return null;
+
+        if (origin.GetFrame(origin.FrameCount - 1)?.GetMethod() is not { } catcher || !isGoSourceFrame(catcher))
+            return null;
+
+        StackFrame[] reRaised = new StackTrace(thrown, fNeedFileInfo: false).GetFrames();
+        int below = 0;
+
+        // The re-raise's own golib frames (GoFrame.Run), then the catcher's frames.
+        while (below < reRaised.Length && reRaised[below].GetMethod() is { } raiser && !isGoSourceFrame(raiser))
+            below++;
+
+        if (below == reRaised.Length || reRaised[below].GetMethod() != catcher)
+            return null;
+
+        while (below < reRaised.Length && reRaised[below].GetMethod() == catcher)
+            below++;
+
+        return reRaised[below..];
     }
 
     // GO'S CHAIN IN A CRASH (C2, 2026-10-24). A panic raised by a deferred call while an older panic was being handled
@@ -3936,7 +3980,7 @@ partial class runtime_package
         // carries GoStackRoot. The main goroutine's runtime.main root is not modeled, and a thread a
         // host entered without a root gets none: nothing on it stands where a Go frame is.
         if ((sawRoot || Goroutine.Current?.Creator is not null) && remainingSkip == 0 && count < len(pc))
-            pc[count++] = internRootFrame("runtime.goexit", "runtime/asm_amd64.s", 1700);
+            pc[count++] = internRootFrame("runtime.goexit", "runtime/asm_amd64.s", 1771);
 
         return count;
     }
@@ -4057,16 +4101,16 @@ partial class runtime_package
                 case PanicFaultKind.Panicwrap:
                     // Go's `(*T).M` wrapper called with a nil *T (builtin.panicwrapRecv raised it, the
                     // emitter's marker): gopanic | runtime.panicwrap | (*T).M | owner.
-                    spliced.Add(internRootFrame("runtime.panicwrap", "runtime/error.go", 356));
+                    spliced.Add(internRootFrame("runtime.panicwrap", "runtime/error.go", 348));
                     break;
                 case PanicFaultKind.Memory:
-                    spliced.Add(internRootFrame("runtime.panicmem", "runtime/panic.go", 262));
+                    spliced.Add(internRootFrame("runtime.panicmem", "runtime/panic.go", 336));
                     spliced.Add(GOOS == "windows"u8
-                        ? internRootFrame("runtime.sigpanic", "runtime/signal_windows.go", 401)
-                        : internRootFrame("runtime.sigpanic", "runtime/signal_unix.go", 925));
+                        ? internRootFrame("runtime.sigpanic", "runtime/signal_windows.go", 385)
+                        : internRootFrame("runtime.sigpanic", "runtime/signal_unix.go", 931));
                     break;
                 case PanicFaultKind.Divide:
-                    spliced.Add(internRootFrame("runtime.panicdivide", "runtime/panic.go", 241));
+                    spliced.Add(internRootFrame("runtime.panicdivide", "runtime/panic.go", 315));
                     break;
             }
 
@@ -5153,19 +5197,20 @@ partial class runtime_package
     // The start lines of the ROOT frames no live method backs (internRootFrame's records: the goroutine
     // root, the test-host root, and the panic machinery splicePanic splices), as the same release declares them
     // that the frames' own lines are pinned to. Keyed by the Go function name the root is interned under; sigpanic
-    // is declared per OS, as splicePanic names its file. repoguard's TestRootFrameLinesMatchThePinnedGoRoot holds
-    // each to the GOROOT src/version.props pins: gopanic's is go1.26.10's, and the rest it lists as still go1.24.13's.
+    // is declared per OS, as splicePanic names its file. Every line here, and every root frame line beside its
+    // internRootFrame, is the release src/version.props pins (go1.26.10): repoguard's
+    // TestRootFrameLinesMatchThePinnedGoRoot derives each from that GOROOT and fails when one moves.
     private static nint rootFunctionStartLine(string function) => function switch
     {
-        "runtime.goexit" => 1699,       // runtime/asm_amd64.s: TEXT runtime·goexit
+        "runtime.goexit" => 1770,       // runtime/asm_amd64.s: TEXT runtime·goexit
         "runtime.gopanic" => 809,       // runtime/panic.go
-        "runtime.panicmem" => 260,      // runtime/panic.go
-        "runtime.panicdivide" => 239,   // runtime/panic.go
-        "runtime.panicwrap" => 332,     // runtime/error.go
-        "runtime.sigpanic" => GOOS == "windows"u8 ? 392 : 906, // runtime/signal_windows.go : signal_unix.go
-        "testing.tRunner" => 1642,      // testing/testing.go
+        "runtime.panicmem" => 334,      // runtime/panic.go
+        "runtime.panicdivide" => 313,   // runtime/panic.go
+        "runtime.panicwrap" => 324,     // runtime/error.go
+        "runtime.sigpanic" => GOOS == "windows"u8 ? 376 : 912, // runtime/signal_windows.go : signal_unix.go
+        "testing.tRunner" => 1876,      // testing/testing.go
         // The allocator frames a heap-profile record starts with (memProfileAlloc). Go 1.26 records them
-        // and Go 1.24 did not, so their lines are go1.26.9's.
+        // and Go 1.24 did not.
         "runtime.mallocgc" => 1067,     // runtime/malloc.go
         "runtime.newobject" => 2156,    // runtime/malloc.go
         "runtime.newarray" => 2199,     // runtime/malloc.go

@@ -49,7 +49,7 @@ public class RootFramePathTests
         return result;
     }
 
-    [GoStackRoot("testing.tRunner", "testing/testing.go", 1792)]
+    [GoStackRoot("testing.tRunner", "testing/testing.go", 2036)]
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     private static T TestRoot<T>(Func<T> body) => body();
 
@@ -69,7 +69,7 @@ public class RootFramePathTests
     {
         string traceback = WithDefaultGoroot(Root, () => RunUnderRoot(tracebackprobe_package.StackText));
 
-        StringAssert.Contains(traceback, "testing.tRunner()\n\t" + Root + "/src/testing/testing.go:1792\n");
+        StringAssert.Contains(traceback, "testing.tRunner()\n\t" + Root + "/src/testing/testing.go:2036\n");
     }
 
     // R's spliced panicking frames (runtime.gopanic and the fault frames) are interned root frames too:
@@ -94,6 +94,6 @@ public class RootFramePathTests
 
         Assert.AreEqual("testing/testing.go", frames[^2].file);
         Assert.AreEqual("runtime/asm_amd64.s", frames[^1].file);
-        StringAssert.Contains(traceback, "testing.tRunner()\n\ttesting/testing.go:1792\n");
+        StringAssert.Contains(traceback, "testing.tRunner()\n\ttesting/testing.go:2036\n");
     }
 }

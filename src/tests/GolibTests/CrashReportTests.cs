@@ -393,6 +393,55 @@ public class CrashReportTests
             "a chain the guard refuses must print exactly what it printed before the chain composition -- read: " + string.Join(" | ", frames));
     }
 
+    // S1 (COORD 2026-10-24): a crash traceback stopped at the first deferring frame. Go prints s1f, then s1One.
+    [TestMethod]
+    public void ACrashShowsTheFramesBelowItsOneDeferringFrame()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.s1One);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.s1f", "crashchainprobe.s1One" }, frames,
+            "expected the deferring frame, then its caller -- read: " + string.Join(" | ", frames));
+    }
+
+    [TestMethod]
+    public void AChainShowsTheFramesBelowItsDeferringFrame()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.s1Chain);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.cleanup", "panic", "crashchainprobe.deferNamed", "crashchainprobe.s1Chain" }, frames,
+            "expected Go's chain, then the deferring function's caller -- read: " + string.Join(" | ", frames));
+    }
+
+    [TestMethod]
+    public void ACrashShowsEveryPlainFrameBelowItsOneDeferringFrame()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.s1Deep);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.s1f", "crashchainprobe.s1Mid", "crashchainprobe.s1Deep" }, frames,
+            "expected the deferring frame, then every frame below it -- read: " + string.Join(" | ", frames));
+    }
+
+    // Two deferring frames (Go: s1f, s1g, s1Two) and three deferring activations (Go: s1r, s1r, s1r, s1Rec): the frames
+    // between the first catch and the last re-raise were never recorded, so the crash prints exactly what it always has,
+    // the top of Go's. These pin TODAY's output; recording every re-catch (S1's full fix, post-hop) moves them, visibly.
+    [TestMethod]
+    public void ACrashPastTwoDeferringFramesPrintsExactlyWhatItAlwaysHas()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.s1Two);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.s1f" }, frames,
+            "two deferring frames must print exactly what they printed before -- read: " + string.Join(" | ", frames));
+    }
+
+    [TestMethod]
+    public void ACrashPastRecursiveDeferringFramesPrintsExactlyWhatItAlwaysHas()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.s1Rec);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.s1r" }, frames,
+            "recursive deferring frames must print exactly what they printed before -- read: " + string.Join(" | ", frames));
+    }
+
     // Runs body, which must end in an escaping panic, and returns the function names of runtime's crash traceback for it
     // (Go's `name()` lines; the tab-indented position lines are dropped, since this assembly has no Go position map).
     private static string[] CrashFramesOf(Action body)

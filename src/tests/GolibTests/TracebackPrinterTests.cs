@@ -36,7 +36,7 @@ public class TracebackPrinterTests
         CollectionAssert.AreEqual(
             new[] { "tracebackprobe.StackText()", "tracebackprobe.Deep()", "tracebackprobe.Deep()", "testing.tRunner()" },
             frames.ConvertAll(frame => frame.function), Describe(frames));
-        Assert.AreEqual("\ttesting/testing.go:1792", frames[^1].position);
+        Assert.AreEqual("\ttesting/testing.go:2036", frames[^1].position);
     }
 
     // Go prints tracebackInnerFrames + tracebackOuterFrames frames whole ...
@@ -74,7 +74,7 @@ public class TracebackPrinterTests
         return result;
     }
 
-    [GoStackRoot("testing.tRunner", "testing/testing.go", 1792)]
+    [GoStackRoot("testing.tRunner", "testing/testing.go", 2036)]
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
     private static string TestRoot(System.Func<string> body) => body();
 
