@@ -28,7 +28,8 @@ using System.Text;
 
 namespace PerformanceRunner
 {
-    internal enum ReleaseArm { Go, Jit, ReadyToRun, Aot, Tc0 }
+    // Tc0 and Fd1 are diagnostic arms (the plan's section 2): recorded, never in the published table.
+    internal enum ReleaseArm { Go, Jit, ReadyToRun, Aot, Tc0, Fd1 }
 
     internal static class ReleaseRun
     {
@@ -60,7 +61,7 @@ namespace PerformanceRunner
 
         internal sealed record Options(
             IReadOnlyList<ReleaseLeg> Legs, string WorkRoot, string? AotManifestPath, string? AotDropRoot,
-            int Runs, int ReviewRuns, bool Tc0);
+            int Runs, int ReviewRuns, bool Tc0, bool Fd1);
 
         internal static int Run(string perfDir, IReadOnlyList<string> programs, Options options)
         {
@@ -124,7 +125,7 @@ namespace PerformanceRunner
             // A refusal of the program's C# as a whole: every C# arm carries it, but the refused list reads it once.
             void RefuseCSharp(string why)
             {
-                foreach (ReleaseArm arm in new[] { ReleaseArm.Jit, ReleaseArm.ReadyToRun, ReleaseArm.Aot, ReleaseArm.Tc0 })
+                foreach (ReleaseArm arm in Enum.GetValues<ReleaseArm>().Where(a => a != ReleaseArm.Go))
                 {
                     lp.Slots[arm].Admitted = false;
                     lp.Slots[arm].Why = why;
@@ -206,6 +207,7 @@ namespace PerformanceRunner
             }
 
             PublishReadyToRun(program, leg, output, csproj, legRoot, lp, Refuse);
+            PublishFrameworkDependentReadyToRun(program, leg, output, csproj, legRoot, lp, options.Fd1, Refuse);
             AdmitAot(program, leg, options, manifest, lp, Refuse);
             return lp;
         }
@@ -286,7 +288,8 @@ namespace PerformanceRunner
 
             string exe = Path.Combine(outDir, AssemblyName(csproj, program) + ".exe");
             string configPath = Path.ChangeExtension(exe, ".runtimeconfig.json");
-            string? problem = BinaryShape.ReadyToRunProblem(File.Exists(configPath) ? File.ReadAllText(configPath) : null);
+            string? problem = BinaryShape.ReadyToRunProblem(File.Exists(configPath) ? File.ReadAllText(configPath) : null)
+                ?? BinaryShape.ReadyToRunCodeProblem(Path.ChangeExtension(exe, ".dll"));
 
             if (problem is not null || !File.Exists(exe))
             {
@@ -296,6 +299,49 @@ namespace PerformanceRunner
 
             lp.Slots[ReleaseArm.ReadyToRun].Exe = exe;
             lp.Slots[ReleaseArm.ReadyToRun].Admitted = true;
+        }
+
+        // The diagnostic fifth arm (P1's consumer-side ReadyToRun DATA, the plan's section 2): ReadyToRun without the
+        // template's trim, so framework-dependent, the recipe P1 measured as fd1. Recorded, never published; whether
+        // the template changes is a separate ruling. Its own copy of the tree, as for the ReadyToRun column.
+        private static void PublishFrameworkDependentReadyToRun(string program, ReleaseLeg leg, string output, string csproj, string legRoot,
+            LegProgram lp, bool requested, Action<ReleaseArm, string> refuse)
+        {
+            if (!requested)
+            {
+                lp.Slots[ReleaseArm.Fd1].Why = "not requested (--fd1)";
+                return;
+            }
+
+            string copy = Path.Combine(legRoot, "fd1-src", program);
+            RecreateDirectory(copy);
+            CopyProgram(output, copy);
+
+            string copiedProject = Path.Combine(copy, Path.GetRelativePath(output, csproj));
+            string outDir = Path.Combine(legRoot, "bin", "fd1", program);
+            Runner.ProcResult r = Runner.Exec("dotnet",
+                $"publish \"{copiedProject}\" -nologo -clp:ErrorsOnly -c Release -r win-x64 --self-contained false -p:PublishTrimmed=false -p:PublishReadyToRun=true -o \"{outDir}\"",
+                copy, BuildTimeoutMs);
+
+            if (r.ExitCode != 0)
+            {
+                refuse(ReleaseArm.Fd1, $"{leg.Name}/{program}: framework-dependent ReadyToRun publish exit {r.ExitCode}: {Runner.Truncate(r.StdOut + r.StdErr)}");
+                return;
+            }
+
+            string exe = Path.Combine(outDir, AssemblyName(csproj, program) + ".exe");
+            string configPath = Path.ChangeExtension(exe, ".runtimeconfig.json");
+            string? problem = BinaryShape.JitProblem(File.Exists(configPath) ? File.ReadAllText(configPath) : null)
+                ?? BinaryShape.ReadyToRunCodeProblem(Path.ChangeExtension(exe, ".dll"));
+
+            if (problem is not null || !File.Exists(exe))
+            {
+                refuse(ReleaseArm.Fd1, $"{leg.Name}/{program}: framework-dependent ReadyToRun binary rejected: {problem ?? "exe missing"} [{exe}]");
+                return;
+            }
+
+            lp.Slots[ReleaseArm.Fd1].Exe = exe;
+            lp.Slots[ReleaseArm.Fd1].Admitted = true;
         }
 
         private static void AdmitAot(string program, ReleaseLeg leg, Options options, IReadOnlyList<AotManifestEntry> manifest, LegProgram lp, Action<ReleaseArm, string> refuse)
@@ -427,6 +473,7 @@ namespace PerformanceRunner
             sb.AppendLine("Columns (RID and shape): Go = `windows/amd64`, default `GOAMD64`; C# (JIT) = framework-dependent, `win-x64` apphost; " +
                 "C# (ReadyToRun) = `win-x64`, self-contained, partial trim, ReadyToRun (the converter template's own `dotnet publish -c Release -r win-x64`); " +
                 "C# (Native AOT) = `win-x64`, self-contained, partial trim, default instruction set, published on another box and admitted by its manifest. " +
+                "Diagnostic arms: Tc0 = the JIT binary with `DOTNET_TieredCompilation=0`; Fd1 = `win-x64`, framework-dependent, untrimmed, ReadyToRun. " +
                 $"Median of {options.Runs} runs ({options.ReviewRuns} for the review rows), 1 discarded warmup, legs interleaved. Workload time is in-program; the Startup row is process wall time.");
 
             foreach (ReleaseLeg leg in options.Legs)

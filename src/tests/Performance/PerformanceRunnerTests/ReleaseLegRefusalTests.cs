@@ -136,6 +136,14 @@ public class ReleaseLegRefusalTests
     [TestMethod]
     public void TheTemplatesSelfContainedReadyToRunPublishIsAdmitted() => Assert.IsNull(BinaryShape.ReadyToRunProblem(SelfContained));
 
+    // This test assembly is a plain Debug build, so it carries no ReadyToRun code; the smoke is the positive control.
+    [TestMethod]
+    public void AnAssemblyWithoutReadyToRunCodeIsNotEitherReadyToRunArm()
+    {
+        StringAssert.Contains(BinaryShape.ReadyToRunCodeProblem(typeof(ReleaseLegRefusalTests).Assembly.Location) ?? "", "carries no ReadyToRun code");
+        StringAssert.Contains(BinaryShape.ReadyToRunCodeProblem(Path.Combine(Path.GetTempPath(), "no-such-program.dll")) ?? "", "not found");
+    }
+
     // ---- the consumer project ----
 
     private static string Project(string references) =>
