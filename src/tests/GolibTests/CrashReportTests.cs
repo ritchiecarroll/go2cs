@@ -365,4 +365,59 @@ public class CrashReportTests
             Assert.IsFalse(report.Contains(nameof(TheConvertedRuntimeRegistersTheTracebackRenderer)), report);
         }
     }
+
+    // ---- the chain: a panic a deferred call raises while an older panic is handled (C2, 2026-10-24) ----
+
+    // Go prints the deferred call's frame, the gopanic that ran it as `panic(...)`, then the deferring function:
+    //     main.cleanup() ... panic({...}) runtime/panic.go ... main.main()
+    // The accepted shape (the deferred function defers and panics itself) must read the same order here.
+    [TestMethod]
+    public void ADeferredFunctionsPanicPrintsItsFramesThenPanicThenTheDeferringFunction()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.deferNamed);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.cleanup", "panic", "crashchainprobe.deferNamed" }, frames,
+            "expected Go's chain: the deferred function, panic, the deferring function -- read: " + string.Join(" | ", frames));
+    }
+
+    // C2's shape: a deferred CLOSURE that recovers and re-panics. Go prints main.main.func1, panic, main.main; splicePanic
+    // refuses this chain (a closure and a converter defer wrapper are indistinguishable at run time), so the crash keeps
+    // its old single frame, exactly. This pins TODAY's output: the converter-marked-closure seat (option B, post-hop)
+    // moves it, and must move it here, visibly.
+    [TestMethod]
+    public void ARefusedChainPrintsExactlyWhatItAlwaysHas()
+    {
+        string[] frames = CrashFramesOf(crashchainprobe_package.deferClosure);
+
+        CollectionAssert.AreEqual(new[] { "crashchainprobe.deferClosure" }, frames,
+            "a chain the guard refuses must print exactly what it printed before the chain composition -- read: " + string.Join(" | ", frames));
+    }
+
+    // Runs body, which must end in an escaping panic, and returns the function names of runtime's crash traceback for it
+    // (Go's `name()` lines; the tab-indented position lines are dropped, since this assembly has no Go position map).
+    private static string[] CrashFramesOf(Action body)
+    {
+        Exception escaped = null;
+
+        try
+        {
+            body();
+        }
+        catch (Exception ex)
+        {
+            escaped = ex;
+        }
+
+        Assert.IsNotNull(escaped, "the probe's panic must escape");
+        Assert.IsTrue(CrashReport.TryUnwrapPanic(escaped, out PanicException panic, out Exception thrown), "the escape must be a panic");
+
+        string traceback = runtime_package.GoCrashTraceback(panic, thrown);
+        string[] lines = traceback.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        Assert.AreEqual("goroutine 1 [running]:", lines[0], traceback);
+
+        return Array.ConvertAll(
+            Array.FindAll(lines[1..], line => !line.StartsWith('\t')),
+            line => line[..line.IndexOf('(')]);
+    }
 }

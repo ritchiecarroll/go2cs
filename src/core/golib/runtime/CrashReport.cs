@@ -68,6 +68,35 @@ public static class CrashReport
     public static Func<PanicException, Exception, string>? TracebackRenderer { get; set; }
 
     /// <summary>
+    /// Initializes the converted <c>runtime</c> package, which installs <see cref="TracebackRenderer"/> and
+    /// <see cref="FatalReport.TracebackRenderer"/>. Installed by go2cs-gen into every converted executable that references
+    /// <c>runtime</c>; <see langword="null"/> otherwise.
+    /// </summary>
+    /// <remarks>
+    /// runtime installs its renderers from its own module initializer, and a module initializer runs only when its module
+    /// is first touched. A program with no imports never touches runtime, so its crash printed the panic value alone
+    /// (C2, 2026-10-24). The hook is LAZY: only a report that finds no renderer invokes it, so a program that never
+    /// crashes never loads runtime for it.
+    /// </remarks>
+    public static Action? RuntimeInitializer { get; set; }
+
+    // Gives a report that found no renderer its one chance to install one: the program's runtime package has not
+    // initialized yet. It never throws: a hook that fails costs the traceback, as a missing renderer always has.
+    internal static void EnsureRuntimeInitialized()
+    {
+        if (RuntimeInitializer is not { } initialize)
+            return;
+
+        try
+        {
+            initialize();
+        }
+        catch (Exception)
+        {
+        }
+    }
+
+    /// <summary>
     /// The additional file descriptor a crash report is copied to, or <see cref="NoCrashOutput"/>.
     /// </summary>
     public static nuint CrashOutputFd
@@ -166,6 +195,10 @@ public static class CrashReport
     public static string Format(PanicException panic, Exception thrown)
     {
         string report = PanicChain(panic);
+
+        if (TracebackRenderer is null)
+            EnsureRuntimeInitialized();
+
         Func<PanicException, Exception, string>? renderer = TracebackRenderer;
 
         if (renderer is null)

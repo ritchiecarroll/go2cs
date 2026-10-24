@@ -82,6 +82,10 @@ public static class FatalReport
     public static string Format(string text, bool userFault)
     {
         string report = $"fatal error: {text}\n";
+
+        if (TracebackRenderer is null)
+            CrashReport.EnsureRuntimeInitialized();
+
         Func<bool, string>? renderer = TracebackRenderer;
 
         if (renderer is null)

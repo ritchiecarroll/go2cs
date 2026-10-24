@@ -28190,4 +28190,32 @@ no change.
 
 — C2 (read at hop tip 9dcf0bafe1, 2026-10-24)
 
+## 2026-10-24 — R: a panic raised by a deferred Go CLOSURE loses its frames in runtime.Callers and in the crash traceback, because splicePanic cannot tell a closure from a converter defer wrapper — OPEN, post-hop (option B: the converter marks deferred Go closures)
+
+**What diverges.** Go's crash traceback for a deferred closure that recovers and panics again is the closure's
+frame, then `panic(...)`, then the deferring function (`main.main.func1() :9`, `panic(...)`, `main.main() :11`).
+The converted program prints `main.main() :11` alone, and `runtime.Callers` from inside that sequence splices nothing.
+
+**Why.** The closure is handed straight to `defer` and has no defer frame of its own (its `recover()` is a static
+call), so `GoFrame.Run`'s own catch is its panic's first catch: the site ends at the Run, and it is not the deferred
+delegate that caught first. `splicePanic` refuses that shape on purpose. At run time a Go closure handed to `defer` is
+indistinguishable from the converter's own defer wrappers (`() => f()`, the lambda for a call whose results are
+dropped, `defer panic(v)`'s thunk), and Go ELIDES its deferwrap, so accepting one would print a frame Go does not show.
+Its own comment calls this "a stated missing splice until the converter marks its defer wrappers".
+
+**What the crash-traceback seat (claude/r-crash-traceback, COORD option A) covers.** The ACCEPTED shapes only: a
+deferred named function that defers and panics itself, and the nil-func thunk. Their crash traceback now prints Go's
+chain. The closure shape is pinned at TODAY's output by GolibTests'
+`CrashReportTests.ARefusedChainPrintsExactlyWhatItAlwaysHas` and by the Repanic probe, so this row's fix moves both
+visibly.
+
+**Option B, sized.** The converter marks a deferred Go closure (the marker splicePanic anticipates); `GoFrame.Run`
+stamps the mark on the panic it catches; `spliceableSite` then accepts an ends-at-Run site whose deferred delegate is
+a marked closure, which both `runtime.Callers` and the crash traceback read. Population at hop tip 017dafb1f2: 515
+block-bodied `defer(() => { ... })` closures and 42 that take arguments in the corpus, and 142 in the behavioral goldens,
+against 1,073 expression-bodied wrapper and call lambdas, which stay unmarked. It is an emission change, so an i7 A/B
+and a golden re-baseline: about 2-3 days. Red first: the pinned arm above, flipped to Go's chain.
+
+— R (read at hop tip 017dafb1f2, 2026-10-24)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
