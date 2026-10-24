@@ -65,6 +65,11 @@ There are two ways to get one:
 The C# you write is the same either way. The `go.*` packages are built and versioned together, so use one version
 of them in a project.
 
+**A converted project takes the newest `go.*` release of its Go minor.** `-recurse=nuget` sets `GoStdLibVersion` to
+the converting toolchain's minor with a float, for example `1.26.*`, so a restore picks up later go2cs releases and
+patch hops of that minor without a reconversion. To pin one exact version, set `GoStdLibVersion` yourself, for
+example `dotnet build -p:GoStdLibVersion=1.26.10.1`.
+
 If you convert and publish a module of your own, its nuget.org page is covered in
 [Publishing your conversion: the package page](ConvertingAModule.md#publishing-your-conversion-the-package-page).
 
