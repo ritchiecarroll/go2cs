@@ -370,7 +370,12 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
    - **the external-test anchor change, when there is one.** `package_info_external_test.cs` exists only under
      the recompile model, and the converter removes it under a reference model. At the freeze, `crypto/ecdh`
      deletes its anchor (`D`), `crypto/sha3` rewrites 2 import-init lines (`M`), and `net/netip` and
-     `text/tabwriter` re-emit byte-identical (G's census, 2026-10-24).
+     `text/tabwriter` re-emit byte-identical (G's census, 2026-10-24);
+   - **`crypto/x509` on any linux host runs with `SSL_CERT_FILE` and `NIX_SSL_CERT_FILE` UNSET, on both sides,
+     and the ledger line names it.** Go's `root_unix.go` honours `SSL_CERT_FILE`, so on a box that exports it (a
+     cloud box pointing at its proxy CA bundle) TestSetFallbackRoots' mount-namespace masking cannot hide the
+     system pool, and 4 subtests fail on the GO side. P2 measured go1.26.10: FAIL as run, ok with both unset
+     (COORD, 2026-10-24).
    **Each pass-2 row's post lists its `??` test sources and its anchor status by path**, the way pass 1 reported
    the anchors, so a row that ships without a file it now needs is caught (COORD, 2026-10-24).
    It **never** carries `docs/validation/index.md` or the roster header.
