@@ -125,15 +125,16 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   profile with no samples (profile with .NET's tools). `debug.ReadBuildInfo()` reports the program's
   module, its dependencies and its `GOOS`, `GOARCH`, `CGO_ENABLED` and `DefaultGODEBUG`, but no
   `-compiler`, `-buildmode`, `GOAMD64` or `vcs.*` settings. A replaced dependency shows without its
-  replacement, a converted test program lists no dependencies, and a program converted outside a module
+  replacement, and a program converted outside a module
   reports nothing ([how](ConversionStrategies.md#package-conversion)). On Windows,
   `time.LoadLocation("Europe/Berlin")` fails until you import `time/tzdata` (or set `ZONEINFO`).
   <!-- Goroutine dump: docs/ConversionStrategies-Reference/manual-conversions.md, "runtime.Stack(all: true) enumerates
        every goroutine" (another goroutine prints `[stack unavailable: ...]`). CPU samples need the opt-in companion
        src/core/go2cs.CpuProfiler, which only generated test projects set and which is not packaged
        (src/core/go2cs.CpuProfiler/go2cs.CpuProfiler.csproj:31 `<IsPackable>false</IsPackable>`). Build info:
-       docs/ConversionStrategies.md, "A main package's project also carries the program's build info"; the test host's
-       missing dep lines and the missing => lines are BOARD rows of 2026-10-22 (H). -->
+       docs/ConversionStrategies.md, "A main package's project also carries the program's build info"; the missing => lines
+       are a BOARD row of 2026-10-22 (H); a test host lists a main package's dep lines and none for any other package,
+       as Go's test binary does. -->
 * **A few quiet ones**, each rare, where converted code gives a different answer and says nothing:
   * A variadic function that keeps, returns or captures its `...T` parameter, or `append`s or `copy`s
     into it, works on a private copy: after `f(s...)`, its writes are not the caller's `s`.
@@ -224,7 +225,7 @@ A package's own Go `Test` functions were converted, run, and compared with `go t
 verdict, by full test name. That's a real bar, and narrower than the word sounds:
 
 * **Tests only.** Examples, benchmarks and fuzz targets never run. No race detector either.
-  <!-- src/go2cs/testConversion.go:3916 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
+  <!-- src/go2cs/testConversion.go:3926 `entry.Kind, entry.Status, entry.Reason = "fuzz", "unsupported", "fuzz execution is deferred to Phase 4D"`;
        Example- and Benchmark-only test files are left out of the compile set, :792
        `// Phase-4D file exclusion (option-a ruling): drop Example/Benchmark-only test files from the`. -->
 * **Matched is not passed.** A test that skips on both sides counts as a match and measures nothing.
