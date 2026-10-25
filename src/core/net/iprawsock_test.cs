@@ -29,18 +29,24 @@ internal static void initᴛresolveIPAddrTests() { resolveIPAddrTests = new reso
     new("ip"u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!),
     new("ip4"u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!),
     new("ip4:icmp"u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!),
+
     new("ip"u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!),
     new("ip6"u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!),
     new("ip6:ipv6-icmp"u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!),
     new("ip6:IPv6-ICMP"u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!),
+
     new("ip"u8, "::1%en0"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8), Zone: "en0"u8)), default!),
     new("ip6"u8, "::1%911"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8), Zone: "911"u8)), default!),
+
     new(""u8, "127.0.0.1"u8, Ꮡ(new IPAddr(IP: IPv4(127, 0, 0, 1))), default!), // Go 1.0 behavior
     new(""u8, "::1"u8, Ꮡ(new IPAddr(IP: ParseIP("::1"u8))), default!), // Go 1.0 behavior
+
     new("ip4:icmp"u8, ""u8, Ꮡ(new IPAddr(nil)), default!),
+
     new("l2tp"u8, "127.0.0.1"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"l2tp"u8))),
     new("l2tp:gre"u8, "127.0.0.1"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"l2tp:gre"u8))),
     new("tcp"u8, "1.2.3.4:123"u8, nil, new net_test_package.net_UnknownNetworkErrorᴠerror(((global::go.net_package.UnknownNetworkError)(@string)"tcp"u8))),
+
     new("ip4"u8, "2001:db8::1"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "2001:db8::1"u8)))),
     new("ip4:icmp"u8, "2001:db8::1"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "2001:db8::1"u8)))),
     new("ip6"u8, "127.0.0.1"u8, nil, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: errNoSuitableAddress.Error(), Addr: "127.0.0.1"u8)))),
@@ -171,6 +177,7 @@ internal partial struct TestDialListenIPArgs_type /*dyn*/ {
 
 public static void TestDialListenIPArgs(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var testsᴷ = new stackAppend<TestDialListenIPArgs_test>();
 
     var tests = new TestDialListenIPArgs_test[]{
         new(
@@ -207,7 +214,7 @@ public static void TestDialListenIPArgs(ж<testing.T> Ꮡt) {
             priv.argLists = append(priv.argLists, tt.args.Clone());
         }
         if (len(priv.argLists) > 0) {
-            tests = append(tests, priv);
+            tests = append(testsᴷ, tests, priv);
         }
     }
 

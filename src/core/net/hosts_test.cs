@@ -152,7 +152,7 @@ public static void TestLookupStaticAddr(ж<testing.T> Ꮡt) {
 
 internal static void testStaticAddr(ж<testing.T> Ꮡt, @string hostsPath, staticHostEntry ent) {
     var hosts = lookupStaticAddr(ent.@in);
-    foreach (var (i, _) in ent.@out) {
+    foreach (var i in range(ent.@out)) {
         ent.@out[i] = absDomainName(ent.@out[i]);
     }
     if (!slices.Equal<slice<@string>, @string>(hosts, ent.@out)) {
@@ -178,7 +178,7 @@ public static void TestHostCacheModification(ж<testing.T> Ꮡt) {
         testStaticHost(Ꮡt, hostsFilePath, ent);
         // Modify the addresses return by lookupStaticHost.
         var (addrs, _) = lookupStaticHost(ent.@in);
-        foreach (var (i, _) in addrs) {
+        foreach (var i in range(addrs)) {
             addrs[i] += "junk"u8;
         }
         testStaticHost(Ꮡt, hostsFilePath, ent);
@@ -188,7 +188,7 @@ public static void TestHostCacheModification(ж<testing.T> Ꮡt) {
         testStaticAddr(Ꮡt, hostsFilePath, ent);
         // Modify the hosts return by lookupStaticAddr.
         var hosts = lookupStaticAddr(ent.@in);
-        foreach (var (i, _) in hosts) {
+        foreach (var i in range(hosts)) {
             hosts[i] += "junk"u8;
         }
         testStaticAddr(Ꮡt, hostsFilePath, ent);
