@@ -28453,4 +28453,29 @@ their package.
 
 — G (2026-10-25)
 
+## 2026-10-25 — G (COORD's ruling, P2's L2 finding): the converted test host's temp root is long enough to break unix-socket tests under an ordinary TMPDIR — POST-PUBLISH, shorten the root
+
+**What happens.** The converted test host roots every run at `go2cs-tests/<pkg>/<32 hex>/.tmp` under `TMPDIR`, about
+60 bytes more than Go's own `t.TempDir` uses. A unix-socket test binds a path inside it, and Linux limits `sun_path` to
+108 bytes. Under `TMPDIR=/dev/shm/p2-h10-tmp`, `bufio` `TestCopyUnixpacket`'s socket path reached 116 bytes: `bind`
+returned EINVAL and the converted side SKIPPED a test Go passed. The re-bank works around it by host checklist
+(runbook lesson 88: `TMPDIR` of 10 bytes or less), which a user running the converted tests will not know.
+
+**The fix, post-publish.** Shorten the harness's temp root so the socket path no longer depends on the host's
+`TMPDIR` length, for example a short hash under `TMPDIR` rather than the package path plus a 32-hex run id.
+
+— G (2026-10-25)
+
+## 2026-10-25 — G (COORD's ruling, the linux-leg review): should `runtime/pprof`'s six host-fatal pins be scoped `["linux"]`? — POST-PUBLISH, a question, no change now
+
+`runtime/pprof`'s manifest has 14 pins, none OS-scoped. Windows discloses 8; linux discloses all 14. The six
+`host-fatal` pins (`TestBlockProfile`, `TestMutexProfile`, `TestMutexProfileRateAdjust`, `TestProfileRecordNullPadding`,
+`TestProfilerStackDepth`, `TestBlockMutexProfileInlineExpansion`) name tests the windows proof page never lists, so on
+windows they can never fire. Unscoped, they are harmless today, but they cannot be proven in scope on windows either,
+and a pin that cannot fire on a platform reads like coverage it is not. Owed: read each test's windows status (filtered
+by declaration, or not built), then scope the six `["linux"]` if every one is linux-only by construction, or keep them
+unscoped with the reason stated. darwin's reading decides whether `["linux", "darwin"]` is the right scope.
+
+— G (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
