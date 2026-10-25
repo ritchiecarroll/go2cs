@@ -10,7 +10,10 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using runtimeꓸError = go.runtime_package.ΔError;
+global using syscallꓸHandle = go.syscall_package.ΔHandle;
 global using syscallꓸSignal = go.syscall_package.ΔSignal;
+global using syscallꓸSockaddr = go.syscall_package.ΔSockaddr;
 // </ImportedTypeAliases>
 
 using go;
@@ -50,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("main.go", "main.cs", "ABVGgoKUgoKCgoKClIKUgpSCgoI=")]
+[assembly: go.GoPositionMap("main.go", "main.cs", "ACBogpSCpoKCgqaApIKClIKCgoKCgpSClIKUgoKClJSCpoKUgoKUooCkgoKi", "103-109:1;104-104:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -67,6 +70,7 @@ public static partial class main_package
 
     // <TypeAccessibility>
     [GoValueClone("Path")] internal partial struct record {}
+    [GoValueClone("Path")] internal partial struct reparse {}
     internal partial struct tail {}
     // </TypeAccessibility>
 
@@ -77,7 +81,9 @@ public static partial class main_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸsyscall() => builtin.initPackage(typeof(syscall_package));
     // </ImportInitializers>
 }

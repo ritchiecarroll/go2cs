@@ -15,6 +15,8 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // FIELD ACCESS THROUGH A REINTERPRETED POINTER (COORD rulings 2026-10-16: G's rule, the owner's
@@ -37,6 +39,21 @@ import (
 // assignment in its function is `(*T)(x)` with x an unsafe.Pointer, and T holds a managed reference
 // (csManagedField). A bare `var p *T` is the nil zero value and counts neither way; `&p`, a range
 // variable or a multi-value assignment disqualifies. Everything else keeps its emission.
+//
+// ONE STEP ACROSS A RETURN (COORD rulings 2026-10-24, G's amendments, the tight cut): an assignment
+// from a call also qualifies, single- or multi-value (the local at Lhs[i] takes result i), when the
+// callee is a static, non-generic function or concrete method of the same package with UNNAMED results,
+// and every return in its body gives that position nil or NATIVE BYTES: `(*T)(unsafe.Pointer(&b[i]))`
+// with b a byte array or byte slice, or a callee local whose every assignment is that form -- os's test
+// helper readSymlinkReparseData, called as `osRDB, err := readSymlinkReparseData(…)`. The step carries
+// only the native-bytes provenance because that is the one class where a box over a CLR!=Go-layout T
+// refuses its whole-value read; a callee reinterpreting any other pointer (runtime's *uintptr.ptr()
+// getters, efaceOf, sync's indexLocal, reflect's toRType: about 320 production sites the as-first-ruled
+// predicate admitted) keeps today's emission. A return of another call disqualifies: there is no
+// transitive summary. Named results are excluded rather than modeled, since a bare return or a deferred
+// write reaches them. The provenance now crosses a frame, which is sound because the box owns its pin:
+// ж.ElemRefBox.TryPinnedReinterpret pins the backing and hands that PinnedBuffer to the NativeBox it
+// returns, with retainedSource: this, so a returned box keeps the byte storage still and alive.
 //
 // Each site's struct type is listed in its FILE's `[GoFieldAccess(typeof(T), …)]` record, on the
 // package class, and go2cs-gen emits one extension block per listed type. A file carries its own
@@ -98,7 +115,7 @@ func (v *Visitor) fieldAccessLocal(x ast.Expr) types.Type {
 		return pointee
 	}
 
-	pointee := v.fieldAccessLocalPointee(obj)
+	pointee := v.fieldAccessLocalPointee(obj, v.currentFuncDecl.Body, false)
 
 	if v.fieldAccessLocalCache == nil {
 		v.fieldAccessLocalCache = make(map[types.Object]types.Type)
@@ -108,7 +125,10 @@ func (v *Visitor) fieldAccessLocal(x ast.Expr) types.Type {
 	return pointee
 }
 
-func (v *Visitor) fieldAccessLocalPointee(obj *types.Var) types.Type {
+// fieldAccessLocalPointee applies the provenance rule to obj over body, its function's body. A caller's local
+// (callee false) takes the one step across a return; a callee's own local (callee true) takes no step and admits
+// only the native-bytes reinterpret.
+func (v *Visitor) fieldAccessLocalPointee(obj *types.Var, body *ast.BlockStmt, callee bool) types.Type {
 	ptr, ok := types.Unalias(obj.Type()).(*types.Pointer)
 
 	if !ok {
@@ -124,7 +144,17 @@ func (v *Visitor) fieldAccessLocalPointee(obj *types.Var) types.Type {
 	assign := func(value ast.Expr) {
 		assigns++
 
-		if !isUnsafePointerReinterpret(v.info, value) {
+		if callee && !isNativeBytesReinterpret(v.info, value) ||
+			!callee && !isUnsafePointerReinterpret(v.info, value) && !v.fieldAccessCallResult(value, 0, obj) {
+			disqualified = true
+		}
+	}
+
+	// A multi-value assignment from one call: the local takes the callee's result index.
+	assignResult := func(values []ast.Expr, index int) {
+		assigns++
+
+		if len(values) != 1 || callee || !v.fieldAccessCallResult(values[0], index, obj) {
 			disqualified = true
 		}
 	}
@@ -134,7 +164,7 @@ func (v *Visitor) fieldAccessLocalPointee(obj *types.Var) types.Type {
 		return ok && (v.info.Defs[ident] == obj || v.info.Uses[ident] == obj)
 	}
 
-	ast.Inspect(v.currentFuncDecl.Body, func(n ast.Node) bool {
+	ast.Inspect(body, func(n ast.Node) bool {
 		switch node := n.(type) {
 		case *ast.ValueSpec:
 			for i, name := range node.Names {
@@ -147,7 +177,7 @@ func (v *Visitor) fieldAccessLocalPointee(obj *types.Var) types.Type {
 				switch {
 				case len(node.Values) == 0:
 				case len(node.Values) != len(node.Names):
-					disqualified = true
+					assignResult(node.Values, i)
 				default:
 					assign(node.Values[i])
 				}
@@ -163,7 +193,7 @@ func (v *Visitor) fieldAccessLocalPointee(obj *types.Var) types.Type {
 				}
 
 				if len(node.Rhs) != len(node.Lhs) {
-					disqualified = true
+					assignResult(node.Rhs, i)
 				} else {
 					assign(node.Rhs[i])
 				}
@@ -205,6 +235,228 @@ func isUnsafePointerReinterpret(info *types.Info, expr ast.Expr) bool {
 	basic, ok := info.TypeOf(call.Args[0]).(*types.Basic)
 
 	return ok && basic.Kind() == types.UnsafePointer
+}
+
+// isNativeBytesReinterpret reports whether expr is `(*T)(unsafe.Pointer(&b[i]))` with b a byte array or byte slice:
+// a struct laid over the element address of byte storage.
+func isNativeBytesReinterpret(info *types.Info, expr ast.Expr) bool {
+	if !isUnsafePointerReinterpret(info, expr) {
+		return false
+	}
+
+	conversion, ok := ast.Unparen(ast.Unparen(expr).(*ast.CallExpr).Args[0]).(*ast.CallExpr)
+
+	if !ok || len(conversion.Args) != 1 {
+		return false
+	}
+
+	if tv, ok := info.Types[conversion.Fun]; !ok || !tv.IsType() {
+		return false
+	}
+
+	address, ok := ast.Unparen(conversion.Args[0]).(*ast.UnaryExpr)
+
+	if !ok || address.Op != token.AND {
+		return false
+	}
+
+	element, ok := ast.Unparen(address.X).(*ast.IndexExpr)
+
+	if !ok {
+		return false
+	}
+
+	var elem types.Type
+
+	switch storage := info.TypeOf(element.X).Underlying().(type) {
+	case *types.Slice:
+		elem = storage.Elem()
+	case *types.Array:
+		elem = storage.Elem()
+	default:
+		return false
+	}
+
+	basic, ok := elem.Underlying().(*types.Basic)
+
+	return ok && basic.Kind() == types.Uint8
+}
+
+// fieldAccessResult names one result position of a callee.
+type fieldAccessResult struct {
+	fn    *types.Func
+	index int
+}
+
+// fieldAccessCallResult reports whether value is a call whose result index the one step across a return admits
+// for local: a static same-package callee (fieldAccessCallee) whose result there has local's own type and is a
+// reinterpret on every return (fieldAccessReturnsReinterpret).
+func (v *Visitor) fieldAccessCallResult(value ast.Expr, index int, local *types.Var) bool {
+	call, ok := ast.Unparen(value).(*ast.CallExpr)
+
+	if !ok {
+		return false
+	}
+
+	fn := v.fieldAccessCallee(call, local.Pkg())
+
+	if fn == nil {
+		return false
+	}
+
+	results := fn.Type().(*types.Signature).Results()
+
+	if index >= results.Len() || !types.Identical(results.At(index).Type(), local.Type()) {
+		return false
+	}
+
+	key := fieldAccessResult{fn, index}
+
+	if admitted, found := v.fieldAccessResultCache[key]; found {
+		return admitted
+	}
+
+	admitted := v.fieldAccessReturnsReinterpret(fn, index)
+
+	if v.fieldAccessResultCache == nil {
+		v.fieldAccessResultCache = make(map[fieldAccessResult]bool)
+	}
+
+	v.fieldAccessResultCache[key] = admitted
+	return admitted
+}
+
+// fieldAccessCallee answers the function a call statically names when it is a non-generic function or concrete
+// method of pkg with unnamed results, else nil: a func value, a method value, an interface method, a generic or
+// instantiated callee, a callee of another package and a named-result callee all answer nil.
+func (v *Visitor) fieldAccessCallee(call *ast.CallExpr, pkg *types.Package) *types.Func {
+	var fn *types.Func
+
+	switch fun := ast.Unparen(call.Fun).(type) {
+	case *ast.Ident:
+		fn, _ = v.info.Uses[fun].(*types.Func)
+	case *ast.SelectorExpr:
+		if selection := v.info.Selections[fun]; selection == nil {
+			fn, _ = v.info.Uses[fun.Sel].(*types.Func)
+		} else if selection.Kind() == types.MethodVal {
+			fn, _ = selection.Obj().(*types.Func)
+		}
+	}
+
+	if fn == nil || pkg == nil || fn.Pkg() != pkg || fn.Origin() != fn {
+		return nil
+	}
+
+	signature := fn.Type().(*types.Signature)
+
+	if signature.TypeParams().Len() > 0 || signature.RecvTypeParams().Len() > 0 {
+		return nil
+	}
+
+	if recv := signature.Recv(); recv != nil && types.IsInterface(recv.Type()) {
+		return nil
+	}
+
+	for i := 0; i < signature.Results().Len(); i++ {
+		if signature.Results().At(i).Name() != "" {
+			return nil
+		}
+	}
+
+	return fn
+}
+
+// fieldAccessReturnsReinterpret reports whether every return in fn's body gives result index nil, a native-bytes
+// reinterpret, or a local of fn's own whose every assignment is one, and at least one return is not nil. A return
+// inside a func literal belongs to the literal and is not fn's.
+func (v *Visitor) fieldAccessReturnsReinterpret(fn *types.Func, index int) bool {
+	decl := fieldAccessFuncDecl(fn, v.info)
+
+	if decl == nil || decl.Body == nil {
+		return false
+	}
+
+	results, reinterprets, disqualified := fn.Type().(*types.Signature).Results().Len(), 0, false
+
+	ast.Inspect(decl.Body, func(n ast.Node) bool {
+		if disqualified {
+			return false
+		}
+
+		switch node := n.(type) {
+		case *ast.FuncLit:
+			return false
+		case *ast.ReturnStmt:
+			if len(node.Results) != results {
+				disqualified = true
+				return false
+			}
+
+			result := ast.Unparen(node.Results[index])
+
+			if tv, ok := v.info.Types[result]; ok && tv.IsNil() {
+				return false
+			}
+
+			if isNativeBytesReinterpret(v.info, result) {
+				reinterprets++
+				return false
+			}
+
+			if ident, ok := result.(*ast.Ident); ok {
+				if local, ok := v.info.Uses[ident].(*types.Var); ok && !local.IsField() && local.Parent() != nil &&
+					local.Parent() != local.Pkg().Scope() && v.fieldAccessLocalPointee(local, decl.Body, true) != nil {
+					reinterprets++
+					return false
+				}
+			}
+
+			disqualified = true
+			return false
+		}
+
+		return true
+	})
+
+	return !disqualified && reinterprets > 0
+}
+
+// The function declarations of the package being converted, by object, built once per loaded package from the
+// syntax its driver handed collectCaptureModeMethods (currentLoadedPackage) -- every driver's package, test
+// variants included, so a callee in another file of the package is found.
+var (
+	fieldAccessFuncDeclsOf *packages.Package
+	fieldAccessFuncDecls   map[*types.Func]*ast.FuncDecl
+)
+
+// fieldAccessFuncDecl answers fn's declaration in the package being converted, or nil when info does not type that
+// package's syntax.
+func fieldAccessFuncDecl(fn *types.Func, info *types.Info) *ast.FuncDecl {
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	loaded := currentLoadedPackage
+
+	if loaded == nil || loaded.TypesInfo != info {
+		return nil
+	}
+
+	if fieldAccessFuncDeclsOf != loaded {
+		fieldAccessFuncDeclsOf = loaded
+		fieldAccessFuncDecls = map[*types.Func]*ast.FuncDecl{}
+
+		for _, file := range loaded.Syntax {
+			for _, decl := range file.Decls {
+				if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+					if object, ok := info.Defs[funcDecl.Name].(*types.Func); ok {
+						fieldAccessFuncDecls[object] = funcDecl
+					}
+				}
+			}
+		}
+	}
+
+	return fieldAccessFuncDecls[fn]
 }
 
 // fieldAccessSelector renders a field selection `p.f` (or a promoted `p.f` through value embeds) whose base is a
