@@ -330,7 +330,7 @@ Lookalike code points (python unicodedata): ꓸ U+A4F8 LISU LETTER TONE MYA TI; 
 ᴷ is StackBufferMarker (src/core/go2cs/symbols.json); its declaration and site: src/tests/Behavioral/StackAppendBackingStore/main.cs.target:9 `var xᴷ = new stackAppend<int64>();` and :13 `x = append(xᴷ, x, (int64)i);`, for Go main.go:16 `x = append(x, int64(i))`.
 ᶠ is FuncValueMarker (symbols.json:179-190#c870aa): only an sstring-twinned function has it, because a twinned function has no single method group; an ordinary function value stays a plain method group (GoCallVariations.cs.target:22#ee6601).
 _ΔpN: src/go2cs/visitFuncDecl.go:1369-1383#03b3c7 and :2830-2838#701c82; :56-64#c625cd and :1921#dbca80 (a lone blank parameter stays `_` unless the body uses a `_ =` discard or a select receive-and-discard, `case <-ch:`, because a parameter named `_` captures C#'s discards); interface methods and function types name every unnamed parameter: AnonymousInterfaces.cs.target:40 `(nint, error) Read(slice<byte> _Δp0);` (Go AnonymousInterfaces.go:28 `interface{ Read([]byte) (int, error) }`), BlankIdentifierCollision/main.cs.target:36 `internal delegate stateFn stateFn(nint _Δp0);`; a lone `_` that stays: CaptureHoistThroughConversion/main.cs.target:8 `public delegate void Handler(nint _);` (a named `_`); several: GenericTypeInstantiation.cs.target:45#f1c413.
-Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:506#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
+Δio: the import alias `io` collides with the child namespace `go.io` (from io/fs) inside `namespace go`: src/go2cs/conversionDriver.go:507#df2c73, src/go2cs/perUnitAliasRenames_test.go:57#b26865.
 Other renames beyond `main` -> `Main`: a Go function named `Main` becomes `ΔMain` (src/go2cs/identifierNaming.go:367-375#853c51).
 The ʗp box-forwarder: the [GoRecv] generator's ж-forwarder, src/gen/go2cs-gen/Templates/ReceiverMethod/ReceiverMethodTemplate.cs:72-76#b0ed6c and :121#941a6a.
 Set‿ example: NamedMapMethodShadow/main.cs.target:100#7fd7fe (a user package, so plain literals). -->
@@ -1330,7 +1330,7 @@ does ([Pointers](#pointers)). Inside each holder is the declaration the var woul
 the go2cs [source generator](#source-generators), gives the package class an accessor under the var's Go
 name, `internal static ref ж<RangeTable> _Lu => ref lazyᴛ_Lu._Lu;`, so code reads and writes `_Lu` as it
 would a field, and neither the package's static constructor nor `package_init.cs` builds it.
-<!-- the holder line: src/go2cs/lazyPackageVarOperations.go:574 `func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`;
+<!-- the holder line: src/go2cs/lazyPackageVarOperations.go:576 `func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`;
      the accessor: src/gen/go2cs-gen/LazyHolderGenerator.cs:129 `source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`,
      pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:164 `"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`;
      left out of the ordered static constructor: src/go2cs/initOrderOperations.go:286 `if len(initializer.Lhs) == 1 && isLazyPackageVar(initializer.Lhs[0]) {`. -->
@@ -1350,7 +1350,7 @@ reader would build that var at startup anyway: `Upper` is one short line, but it
 malloc dispatch tables, `mallocScanTable` and `mallocNoScanTable`, are always built this way; if either broke
 a rule, the conversion would stop and name it.
 <!-- the predicate: src/go2cs/lazyPackageVarOperations.go:97 `func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`,
-     the initializer rules :295 `func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`,
+     the initializer rules :297 `func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`,
      the floor :48 `const lazyPackageVarNodeFloor = 20`, the listed tables :38 `var lazyPackageVars = map[string]map[string]bool{`;
      the refusal of a listed var: src/go2cs/visitValueSpec.go:727 `panic(fmt.Sprintf("@visitValueSpec - lazyPackageVars entry %s cannot be built on its first read: %s", goIDName, refusal))`.
      A malloc table's holder: src/core/runtime/malloc_tables_generated.cs:9 `[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{`.

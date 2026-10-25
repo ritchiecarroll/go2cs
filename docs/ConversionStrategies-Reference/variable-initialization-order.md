@@ -148,8 +148,8 @@ internal static ref array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallo
 A holder must hold exactly one static field, named for the holder, or for a var whose address is taken its box,
 `Ꮡ<name>` (below). The generator refuses any other holder by name (GO2CS0009) and generates nothing for it. `collectMovedInitVars` skips a lazy var, so it gets no `initᴛ` method and
 the package's static constructor never builds it.
-<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:574 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
-     its name :604 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :591 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
+<!-- The holder line: src/go2cs/lazyPackageVarOperations.go:576 (`func (v *Visitor) writeLazyPackageVar(access, csTypeName, csIDName, valExpr string, snapshot bool, writeTrailing func()) {`),
+     its name :606 (`return "lazy" + TempVarMarker + strings.TrimPrefix(csIDName, "@")`), and for a var whose address is taken :593 (`func (v *Visitor) writeLazyAddressedPackageVar(`). The accessor is generated, so it is shown uncited:
      src/gen/go2cs-gen/LazyHolderGenerator.cs:129 (`source.Append($"{memberIndent}{Accessibility(field)} static ref {type} {fieldName} => ref {holderName}.{fieldName};\r\n");`),
      pinned by src/tests/GenTests/LazyHolderGeneratorTests.cs:164 (`"internal static ref Box _Lu => ref lazyᴛ_Lu._Lu;",`).
      The marker: src/core/golib/GoLazyAttribute.cs. Kept out of the ordered ctor:
@@ -215,7 +215,7 @@ field instead of the var:
 An exported var such an initializer reads always has a holder of its own, so the snapshot has somewhere to live; a
 reader of an exported var with a constant initializer, which has no holder, stays eager.
 <!-- the snapshot: src/gen/go2cs-gen/LazyHolderGenerator.cs:132 (`source.Append($"{memberIndent}partial class {holderName} `, which adds `internal static readonly T initial` and sets it in the holder's static constructor);
-     the marker argument: src/go2cs/lazyPackageVarOperations.go:578 (`marker = "GoLazy(Initial = true)"`). The importer's
+     the marker argument: src/go2cs/lazyPackageVarOperations.go:580 (`marker = "GoLazy(Initial = true)"`). The importer's
      assignment is the LazyPackageVars behavioral test's case: tables.Heavy, assigned before tables.ByName is first read. -->
 
 **runtime's malloc tables are always built on their first read.** The converter lists runtime's two malloc dispatch
@@ -240,17 +240,17 @@ a first read finds each one populated, entry for entry, as Go's `mkmalloc` write
 behavioral test, whose output matches Go's: init order, an importer's assignment before a first read, one pointer
 per allocation, func literal values, and an address taken before a var's first read that is its address after it.
 <!-- The predicate: src/go2cs/lazyPackageVarOperations.go:97 (`func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types.Info, syntax []*ast.File) {`),
-     :295 (`func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`),
+     :297 (`func lazyInitializerRefusal(info *types.Info, scope *types.Scope, expr ast.Expr, deps *[]*types.Var) string {`),
      the floor :48 (`const lazyPackageVarNodeFloor = 20`), the eager cases :154 (`candidate.reason = "its declaration is hand-owned"`),
-     :162 (`candidate.reason = "its address is taken where the converter keeps no box for it"`),
-     :193 (`candidate.reason = fmt.Sprintf("it copies the var %s, whose storage a slice aliases", dep.Name())`);
+     :164 (`candidate.reason = "its address is taken where the converter keeps no box for it"`),
+     :195 (`candidate.reason = fmt.Sprintf("it copies the var %s, whose storage a slice aliases", dep.Name())`);
      the list :38 (`var lazyPackageVars = map[string]map[string]bool{`). The refusals: src/go2cs/visitValueSpec.go:727
      (`cannot be built on its first read: %s`), :740 (`its initializer spills a hoisted holder`). The reader's gate, at
      go1.26.10: GOROOT/src/runtime/malloc.go:1039 (`const sizeSpecializedMallocEnabled = goexperiment.SizeSpecializedMalloc`).
      package_init.cs: src/go2cs/initOrderOperations.go:504 (`func retireStalePackageInitFile(outputDir string) error {`),
      src/go2cs/platformEmit.go:1261 (`func retireUnemittedPackageInitFiles(coreDir string, targets []string, emissions []*platformEmission, emitted map[string]bool) (int, error) {`).
-     Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :494
-     (`func TestLazyPackageVarRefusesByName(t *testing.T) {`), :407 (`func TestLazyPackageVarCarriesItsBox(t *testing.T) {`);
+     Guards: src/go2cs/lazyPackageVar_test.go:158 (`func TestLazyPackageVarIsBuiltOnFirstRead(t *testing.T) {`), :502
+     (`func TestLazyPackageVarRefusesByName(t *testing.T) {`), :412 (`func TestLazyPackageVarCarriesItsBox(t *testing.T) {`);
      src/tests/GolibTests/MallocDispatchTablesTests.cs:82 (`public void TheRuntimeStaticConstructorNoLongerBuildsThem()`).
      Why the two malloc tables are listed (COORD's ruling (A), 2026-10-22, per the list's own comment): built eagerly they
      were 2 x 17.1K IL JIT-compiled at every startup; no platform is recorded for that figure, so it stays here. The node
