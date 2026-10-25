@@ -2644,10 +2644,14 @@ func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContex
 // error of snapshotting a value and binding ITS address, which silently redirects every write
 // through the method value into the copy.
 //
-// A bare IDENT receiver is returned untouched, and that is not an exception to the once-rule: a
-// local read has no side effect and nothing to alias, and the ident paths have already produced a
+// A bare LOCAL ident receiver is returned untouched, and that is not an exception to the once-rule:
+// a local read has no side effect and nothing to alias, and the ident paths have already produced a
 // once-evaluated temp of their own (the capture machinery's snapshot, or the box-ref arm above).
-// Hoisting it again would emit a second copy of a single evaluation, not a second evaluation.
+// Hoisting it again would emit a second copy of a single evaluation, not a second evaluation. A
+// PACKAGE-LEVEL var is never a capture, so no snapshot exists for it: left bare, `peek := g.peek`
+// emitted `() => g.peek()` and `fp := gp.inc` (gp a pointer var) `() => gp.inc()`, each reading the
+// static field at CALL time, so a write to g, or repointing gp, after the method value was taken
+// reached the call (Go 0 and 1, the conversion 7 and 0). It takes the temp like any other receiver.
 //
 // Where there is no statement-level sink, the previous rendering stands and the site is left as it
 // was -- never apply a rename you cannot also declare.
@@ -2686,8 +2690,10 @@ func (v *Visitor) hoistReceiverEvaluation(selectorExpr *ast.SelectorExpr, render
 		return rendered
 	}
 
-	if _, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
-		return rendered
+	if ident, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
+		if packageVar, ok := v.info.ObjectOf(ident).(*types.Var); !ok || packageVar.Parent() != v.pkg.Scope() {
+			return rendered
+		}
 	}
 
 	if tempName := v.hoistReceiverTemp(selectorExpr.X, false); tempName != "" {
