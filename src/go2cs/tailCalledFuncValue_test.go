@@ -102,6 +102,15 @@ func viaParameter(f func()) {
 	f()
 }
 
+// CONTROL 4 -- a local closure that logs but is not a helper, called last: its t.Log names its OWN line.
+func viaLocalLogger(t *testing.T) {
+	println("eight")
+	logIt := func() {
+		t.Log("logged")
+	}
+	logIt()
+}
+
 func main() {
 	viaPackageValue()
 	_, _ = returnsViaPackageValue()
@@ -110,6 +119,7 @@ func main() {
 	_ = notLast()
 	_ = viaPlainValue()
 	viaParameter(func() {})
+	viaLocalLogger(nil)
 }
 `)
 
@@ -149,7 +159,7 @@ func TestTailCalledFuncValueKeepsTheCallersFrame(t *testing.T) {
 		}
 	}
 
-	for _, name := range []string{"notLast", "viaPlainValue", "viaParameter"} {
+	for _, name := range []string{"notLast", "viaPlainValue", "viaParameter", "viaLocalLogger"} {
 		if line := declarationLine(t, mainCs, name); keepsOwnFrame(line) {
 			t.Errorf("%s is marked, but its tail call is not through a caller-observing function value: %s", name, line)
 		}

@@ -355,10 +355,54 @@ type declBody struct {
 }
 
 // observesCaller reports whether a body, as a frame of its own, makes its CALLER's frame part of what Go reports: it
-// calls runtime.Caller/Callers with a counted skip, a skip-counted walker, or a testing method that names or skips its
-// caller (testingDecorators).
+// calls runtime.Caller/Callers with a counted skip, a skip-counted walker, or testing's Helper, which makes every record
+// it writes name its caller. A body that only calls t.Errorf, t.Log or t.Run is not one: those name the body's OWN line,
+// so its caller's frame is not reported (measured, 2026-10-25: the decorator set would have marked 139 test sites where
+// Helper and the runtime walkers mark the census's 60).
 func observesCaller(info *types.Info, body *ast.BlockStmt) bool {
-	return body != nil && (callsSkipCountedRuntimeCaller(info, body) || callsSkipCountedWalker(info, body) || callsTestingDecorator(info, body))
+	return body != nil && (callsSkipCountedRuntimeCaller(info, body) || callsSkipCountedWalker(info, body) || callsTestingHelper(info, body))
+}
+
+// callsTestingHelper reports whether body itself (a nested *ast.FuncLit is a frame of its own) calls testing's Helper on
+// one of the decorating receivers (callsTestingDecorator's scope, narrowed to the one method that names the CALLER).
+func callsTestingHelper(info *types.Info, body *ast.BlockStmt) bool {
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := ast.Unparen(call.Fun).(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		callee, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || callee.Pkg() == nil || callee.Pkg().Path() != "testing" || callee.Name() != "Helper" {
+			return true
+		}
+
+		if sig, ok := callee.Type().(*types.Signature); ok && sig.Recv() != nil && testingDecoratorReceivers[testingReceiverName(sig.Recv().Type())] {
+			found = true
+		}
+
+		return !found
+	})
+
+	return found
 }
 
 // tailCall is the call a body ends with: its last statement is the call, or returns exactly that call's result.
