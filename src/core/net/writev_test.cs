@@ -136,7 +136,7 @@ internal static void testBuffer_writeTo(ж<testing.T> Ꮡt, nint chunks, bool us
         withTCPConnPair(Ꮡt, error (ж<global::go.net_package.TCPConn> c) => {
             ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
             buffers = new global::go.net_package.Buffers(chunks);
-            foreach (var (i, _) in buffers) {
+            foreach (var i in range(buffers)) {
                 buffers[i] = Ꮡwant.Value.Bytes().slice(i, i + 1);
             }
             int64 n = default!;
@@ -259,7 +259,7 @@ public static partial void TestWritevError(ж<testing.T> Ꮡt) {
         var buf = new slice<byte>((1 << 20));
         ref var buffers = ref heap<global::go.net_package.Buffers>(out var Ꮡbuffers);
         buffers = new global::go.net_package.Buffers((1 << 10));
-        foreach (var (i, _) in buffers) {
+        foreach (var i in range(buffers)) {
             buffers[i] = buf;
         }
         {

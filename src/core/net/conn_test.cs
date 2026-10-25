@@ -18,16 +18,14 @@ internal static time.Duration someTimeout => /* 1 * time.Hour */ 3600000000000;
 
 public static void TestConnAndListener(ж<testing.T> Ꮡt) {
     foreach (var (i, network) in new @string[]{"tcp"u8, "unix"u8, "unixpacket"u8}.slice()) {
-        nint iΔ1 = i;
-        @string networkΔ1 = network;
-        Ꮡt.Run(networkΔ1, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(network, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                if (!testableNetwork(networkΔ1)) {
-                    tΔ1.Skipf("skipping %s test"u8, networkΔ1);
+                if (!testableNetwork(network)) {
+                    tΔ1.Skipf("skipping %s test"u8, network);
                 }
 
-                var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), networkΔ1);
+                var ls = newLocalServer(new net_test_package.testing_TжTB(tΔ1), network);
                 var lsʗ1 = ls;
                 defer(() => lsʗ1.teardown(), ref ᒐ);
                 var ch = new channel<error>(1);
@@ -40,8 +38,8 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                         tΔ1.Fatal(errΔ1);
                     }
                 }
-                if ((~ls).Listener.Addr().Network() != networkΔ1) {
-                    tΔ1.Fatalf("got %s; want %s"u8, (~ls).Listener.Addr().Network(), networkΔ1);
+                if ((~ls).Listener.Addr().Network() != network) {
+                    tΔ1.Fatalf("got %s; want %s"u8, (~ls).Listener.Addr().Network(), network);
                 }
 
                 var (c, err) = Dial((~ls).Listener.Addr().Network(), (~ls).Listener.Addr().String());
@@ -50,8 +48,8 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                 }
                 var cʗ1 = c;
                 defer(() => cʗ1.Close(), ref ᒐ);
-                if (c.LocalAddr().Network() != networkΔ1 || c.RemoteAddr().Network() != networkΔ1) {
-                    tΔ1.Fatalf("got %s->%s; want %s->%s"u8, c.LocalAddr().Network(), c.RemoteAddr().Network(), networkΔ1, networkΔ1);
+                if (c.LocalAddr().Network() != network || c.RemoteAddr().Network() != network) {
+                    tΔ1.Fatalf("got %s->%s; want %s->%s"u8, c.LocalAddr().Network(), c.RemoteAddr().Network(), network, network);
                 }
                 c.SetDeadline(time.Now().Add(someTimeout));
                 c.SetReadDeadline(time.Now().Add(someTimeout));
@@ -70,7 +68,7 @@ public static void TestConnAndListener(ж<testing.T> Ꮡt) {
                 }
 
                 foreach (var errΔ3 in ch) {
-                    tΔ1.Errorf("#%d: %v"u8, iΔ1, errΔ3);
+                    tΔ1.Errorf("#%d: %v"u8, i, errΔ3);
                 }
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

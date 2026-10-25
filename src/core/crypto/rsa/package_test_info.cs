@@ -21,6 +21,7 @@ global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
 global using rsaꓸPublicKey = go.crypto.@internal.fips140.rsa_package.ΔPublicKey;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -35,10 +36,17 @@ using static global::go.crypto.rsa_test_package;
 [assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
 [assembly: GoImplement<go.crypto.rsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<testPrimeReader, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -48,10 +56,10 @@ using static global::go.crypto.rsa_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/rsa/equal_test.go", "equal_test.cs", "ABIcgpSClIKUgpSCpoKClIKClIKUgqaCgpSC")]
+[assembly: go.GoPositionMap("crypto/rsa/equal_test.go", "equal_test.cs", "ABIcgpSClIKUgpSCpoKClIKClIKUgqaCgpSCppKCgg==")]
 [assembly: go.GoPositionMap("crypto/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABwugoKCgpQABxAAEiaClJSmuIKCgoKUgoLcgoKUkoKmgoKCpoKClJSCgoKmgoKUpoKClLgAEiaCgoKCgoKUgoLKgoKCgoKUgqaCyoKUgoKClIKCggALGLiCgoKCgpSCgqaCgsqCgoKCgpSUgoL6goKCgoK4gpTulIKClIKUgIL4poKCpoKAgraCgsqCgoKClAALBoKIgoKmgoKC", "60-62:1;63-65:2;86-114:1")]
 [assembly: go.GoPositionMap("crypto/rsa/pss_test.go", "pss_test.cs", "ACo0woKClKzClJTCgoKClIKClIKCgpS0grSCtLS2gILEpIKCgoK4gpSCgoKUgpSCtoKClIKClICCxsaoopSCgoKmAAkUgILIgoKCgpT2ogAOJIKCgoKUgoKCgoKmgoKCgpSCyriCgoKUgriClIKCuIKCgpSmgoKClKaCgoKU5oKCgoKmgoC42oCmyIKUgoK4gII=", "42-73:1")]
-[assembly: go.GoPositionMap("crypto/rsa/rsa_test.go", "rsa_test.cs", "ACE2goKClIKCgoKClJSCgpSAgqTKgoKCgqaCgpSmgoKCgqaCgpSmgoKCgoKCpoKCgpTKpoKCgoKC6JSClIKCgoKUgIIADgqCuIqmooCCpIKmgoKCgqaCgoKUgriClIKCgqaAooKClIKmyJSClIKSgqamgoKCgpSCgoKCgoKUgIKkAA4KooCCtoKCgpKClIKCgpSCgpSCuIKCgpKClIKCgpSCuIKCgqaCgoKSgpSCgoKUgoKClIKCgoKUpoKCgpKClIKCgpSCgoKUgoKCgpSmgoKCkoKUgoKClIKCgpSCgoKClMqCgoKUgoKUgoKClIKCpoKClIKClIKmgoKUgoKUgviCgoKClIKmkoKmgpKSkpKCgpKSkpKSkqaApIKCgoKClJSCgpTGlAAMFAAMFgARIAAeOqQAKlIANmqCgJKAkoC2opSCgoKmgoKCgoKUgpS4goKClIKCgoKUyoKClIKCgqaCgoKCgpSClMqCgoKUgoKCgpTKgoKUgoKCgoKUyoKCgoKCpoKCgoLcgoKUgoKCgoKUyoKCgoKCpoKCgoLcgoKCgILsgoKCgoKAggATJoKCgoKCpIKCgoKUgtyClIKCgoKCgoKClIKCgpKCuIKCkoKmgsqClIKUgoKCgoKCgpKklIKSgriCgoKCgoKCgoKUgoKCgoKUgoKClILuAJ8BpAKUAAASgoKU", "33-49:1;176-184:1;195-198:1;211-221:2;399-407:1;408-411:2;612-612:1;613-613:2;614-614:3;641-653:1;657-678:1;682-694:1;698-710:1;714-728:1;732-744:1;748-762:1;766-772:1;776-784:1")]
+[assembly: go.GoPositionMap("crypto/rsa/rsa_test.go", "rsa_test.cs", "ACVAgoKClIKCgoKClJSCgpSAgqTKgoKCgqaCgpSmgoKCgqaCgpSmgoKCgoKCpoKCgpTKpoKCgoKC6JSClIKCgoKUgIIADgqCuIqmwoKCuICCpIKmgoKCgqaCgoKUgrSkgpSCgoKmgKKCgpSCpsiUgpSCkoKmpoKCgoKUkoKCgoKUgIKkAA4KsoKCpoKCgpKClIKCgpSCgpSCuIKCgpKClIKCgpSCuIKCgqaCgoKSgpSCgoKUgoKClIKCgoKUpoKCgpKClIKCgpSCgoKUgoKCgpSmgoKCkoKUgoKClIKCgpSCgoKClMqCgoKUgoKUgoKClIKCpoKCgpSCgpSCuIKClIKClIL4goKCgpSCppKCpoKSkpKSgoKSkpKSkpKmgKSCgoKCgpSUgoKUxpQADBQADBYAESAAHjqkygAHEAAKFgAqUgA2aoKAkoCSgLailIKCgqaCgoKCgpSClLiCgoKUgoKCgpTKgoKUgoKCpoKCgoKClIKUyoKCgpSCgoKClAAJCoKAkoKUgriCuKKUgoKCgoKUuIKCgoKCpoKCgoLcgoKUgoKCgoKUyoKCgoKCpoKCgoLcgoKCgoKAggAJDIKCgoKUgoKAggAMGAAJEIKmgoKCgoKmgoKUgpSCAA8ggoKCgoKkgoKCgpSC3IKUgoKCgoKCgoKUgoKCkoK4goKSgqaCyoKUgpSCgoKCgoKCkqSUgpKCuIKCgoKCgoKCgpSCgoKCgpSCgoKUgriCgoKUgoKClIK4goKClIKCgpSC7gCfAaQClAAAEoKClAAnBpQAAiQAASCClIIACAaCgoKSgpSCgpKCgpSUgoKSgoKUAA0IgoKmgoKmgoK4goKUgqaCgqaCgriCgqaCgqaCgriCgqaCgqaCgriCgqaCgqaCgriCgqaCggAICoKCgoKCgIKkgoCC", "38-54:1;148-152:1;187-195:1;206-209:1;221-231:2;412-420:1;421-424:2;649-649:1;650-650:2;651-651:3;678-690:1;694-715:1;719-731:1;735-735:1;736-738:2;739-741:3;744-746:4;764-778:1;782-794:1;798-812:1;816-824:1;828-839:1;1241-1246:1;1247-1255:2;1256-1264:3;1272-1276:1;1273-1275:1.1;1277-1281:2;1278-1280:2.1;1283-1290:3;1287-1289:3.1;1291-1295:4;1292-1294:4.1;1296-1300:5;1297-1299:5.1;1302-1306:6;1303-1305:6.1;1307-1311:7;1308-1310:7.1;1312-1316:8;1313-1315:8.1;1318-1322:9;1319-1321:9.1;1323-1327:10;1324-1326:10.1;1328-1332:11;1329-1331:11.1;1334-1338:12;1335-1337:12.1;1339-1343:13;1340-1342:13.1;1344-1348:14;1345-1347:14.1;1350-1354:15;1351-1353:15.1;1355-1359:16;1356-1358:16.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -70,6 +78,7 @@ public static partial class rsa_test_package
     internal partial struct signPKCS1v15Test {}
     internal partial struct testEncryptOAEPMessage {}
     internal partial struct testEncryptOAEPStruct {}
+    internal partial struct testPrimeReader {}
     public partial struct DecryptPKCS1v15Test {}
     // </TypeAccessibility>
 
@@ -101,6 +110,7 @@ public static partial class rsa_test_package
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(math.big_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));

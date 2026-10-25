@@ -26,6 +26,7 @@ using exec = global::go.os.exec_package;
 using global::go.os;
 using static global::go.runtime_internal_test_package;
 
+[GoFieldAccess(typeof(abiꓸMapType))]
 partial class runtime_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1336,8 +1337,8 @@ public static void TestGroupSizeZero(ж<testing.T> Ꮡt) {
     // are size 0. The compiler should have reserved an extra word to
     // ensure that pointers to the zero-size type at the end of group are
     // valid.
-    if ((~mt).Group.Size() <= 8) {
-        Ꮡt.Errorf("Group size got %d want >8"u8, (~mt).Group.Size());
+    if (mt.Group.Size() <= 8) {
+        Ꮡt.Errorf("Group size got %d want >8"u8, mt.Group.Size());
     }
 }
 

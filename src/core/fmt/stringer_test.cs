@@ -5,6 +5,8 @@ namespace go;
 
 using static fmt_package;
 using Δtesting = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.fmt_internal_test_package;
 
 partial class fmt_test_package {
@@ -105,7 +107,7 @@ public static @string String(this TS v) {
     return Sprintf("S: %q"u8, (@string)v);
 }
 
-internal static void check(ж<Δtesting.T> Ꮡt, @string got, @string want) {
+internal static partial void check(ж<Δtesting.T> Ꮡt, @string got, @string want) {
     if (got != want) {
         Ꮡt.Error(got, (@string)"!="u8, want);
     }

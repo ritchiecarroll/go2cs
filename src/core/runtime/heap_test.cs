@@ -5,6 +5,8 @@ namespace go;
 
 using testing = testing_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -14,7 +16,7 @@ partial class runtime_test_package {
     return global::go.runtime_package.heapObjectsCanMove();
 }
 
-public static void TestHeapObjectsCanMove(ж<testing.T> Ꮡt) {
+public static partial void TestHeapObjectsCanMove(ж<testing.T> Ꮡt) {
     if (heapObjectsCanMove()) {
         // If this happens (or this test stops building),
         // it will break go4.org/unsafe/assume-no-moving-gc.

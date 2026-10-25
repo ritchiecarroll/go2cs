@@ -17,6 +17,7 @@ internal static slice<@string> primes = new @string[]{
     "5"u8,
     "7"u8,
     "11"u8,
+
     "13756265695458089029"u8,
     "13496181268022124907"u8,
     "10953742525620032441"u8,
@@ -24,6 +25,7 @@ internal static slice<@string> primes = new @string[]{
 
     // https://golang.org/issue/638
     "18699199384836356663"u8,
+
     "98920366548084643601728869055592650835572950932266967461790948584315647051443"u8,
     "94560208308847015747498523884063394671606671904944666360068158221458669711639"u8,
 
@@ -98,6 +100,7 @@ internal static slice<@string> composites = new @string[]{
     "621781"u8,
     "632249"u8,
     "635627"u8,
+
     "3673744903"u8,
     "3281593591"u8,
     "2385076987"u8,
@@ -107,6 +110,7 @@ internal static slice<@string> composites = new @string[]{
     "255866131"u8,
     "117987841"u8,
     "587861"u8,
+
     "6368689"u8,
     "8725753"u8,
     "80579735209"u8,
@@ -169,52 +173,83 @@ internal static readonly @string lucasˢ = "Lucas"u8;
 internal static readonly @string millerRabinBase2ˢ = "MillerRabinBase2"u8;
 
 public static void BenchmarkProbablyPrime(ж<testing.B> Ꮡb) {
-    var (p, _) = @new<global::go.math.big_package.ΔInt>().SetString("203956878356401977405765866929034577280193993314348263094772646453283062722701277632936616063144088173312372882677123879538709400158306567338328279154499698366071906766440037074217117805690872792848149112022286332144876183376326512083574821647933992961249917319836219304274280243803104015000563790123"u8, 10);
-    foreach (var (_, n) in new nint[]{0, 1, 5, 10, 20}.slice()) {
-        var pʗ1 = p;
-        Ꮡb.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
-            for (nint i = 0; i < (~bΔ1).N; i++) {
-                pʗ1.ProbablyPrime(n);
+    GoFrame ᒐ = default;
+    try {
+        var stk = getStack();
+        var stkʗ1 = stk;
+        defer(stkʗ1.free, ref ᒐ);
+
+        var (p, _) = @new<global::go.math.big_package.ΔInt>().SetString("203956878356401977405765866929034577280193993314348263094772646453283062722701277632936616063144088173312372882677123879538709400158306567338328279154499698366071906766440037074217117805690872792848149112022286332144876183376326512083574821647933992961249917319836219304274280243803104015000563790123"u8, 10);
+        foreach (var (_, n) in new nint[]{0, 1, 5, 10, 20}.slice()) {
+            var pʗ1 = p;
+            Ꮡb.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
+                for (nint i = 0; i < (~bΔ1).N; i++) {
+                    pʗ1.ProbablyPrime(n);
+                }
+            });
+        }
+
+        var pʗ2 = p;
+        var stkʗ2 = stk;
+        Ꮡb.Run(lucasˢ, (ж<testing.B> bΔ2) => {
+            for (nint i = 0; i < (~bΔ2).N; i++) {
+                (~pʗ2).abs.probablyPrimeLucas(stkʗ2);
+            }
+        });
+        var pʗ3 = p;
+        var stkʗ3 = stk;
+        Ꮡb.Run(millerRabinBase2ˢ, (ж<testing.B> bΔ3) => {
+            for (nint i = 0; i < (~bΔ3).N; i++) {
+                (~pʗ3).abs.probablyPrimeMillerRabin(stkʗ3, 1, true);
             }
         });
     }
-
-    var pʗ2 = p;
-    Ꮡb.Run(lucasˢ, (ж<testing.B> bΔ2) => {
-        for (nint i = 0; i < (~bΔ2).N; i++) {
-            (~pʗ2).abs.probablyPrimeLucas();
-        }
-    });
-    var pʗ3 = p;
-    Ꮡb.Run(millerRabinBase2ˢ, (ж<testing.B> bΔ3) => {
-        for (nint i = 0; i < (~bΔ3).N; i++) {
-            (~pʗ3).abs.probablyPrimeMillerRabin(1, true);
-        }
-    });
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string probablyPrimeMillerRabinˢ = "probablyPrimeMillerRabin"u8;
 
 public static void TestMillerRabinPseudoprimes(ж<testing.T> Ꮡt) {
-    testPseudoprimes(Ꮡt, probablyPrimeMillerRabinˢ,
-        (global::go.math.big_package.nat n) => n.probablyPrimeMillerRabin(1, true) && !n.probablyPrimeLucas(),
-        // https://oeis.org/A001262
-        new nint[]{2047, 3277, 4033, 4681, 8321, 15841, 29341, 42799, 49141, 52633, 65281, 74665, 80581, 85489, 88357, 90751}.slice());
+    GoFrame ᒐ = default;
+    try {
+        var stk = getStack();
+        var stkʗ1 = stk;
+        defer(stkʗ1.free, ref ᒐ);
+
+            var stkʗ2 = stk;
+        testPseudoprimes(Ꮡt, probablyPrimeMillerRabinˢ,
+            (global::go.math.big_package.Δnat n) => n.probablyPrimeMillerRabin(stkʗ2, 1, true) && !n.probablyPrimeLucas(stkʗ2),
+            // https://oeis.org/A001262
+            new nint[]{2047, 3277, 4033, 4681, 8321, 15841, 29341, 42799, 49141, 52633, 65281, 74665, 80581, 85489, 88357, 90751}.slice());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string probablyPrimeLucasˢ = "probablyPrimeLucas"u8;
 
 public static void TestLucasPseudoprimes(ж<testing.T> Ꮡt) {
-    testPseudoprimes(Ꮡt, probablyPrimeLucasˢ,
-        (global::go.math.big_package.nat n) => n.probablyPrimeLucas() && !n.probablyPrimeMillerRabin(1, true),
-        // https://oeis.org/A217719
-        new nint[]{989, 3239, 5777, 10877, 27971, 29681, 30739, 31631, 39059, 72389, 73919, 75077}.slice());
+    GoFrame ᒐ = default;
+    try {
+        var stk = getStack();
+        var stkʗ1 = stk;
+        defer(stkʗ1.free, ref ᒐ);
+
+            var stkʗ2 = stk;
+        testPseudoprimes(Ꮡt, probablyPrimeLucasˢ,
+            (global::go.math.big_package.Δnat n) => n.probablyPrimeLucas(stkʗ2) && !n.probablyPrimeMillerRabin(stkʗ2, 1, true),
+            // https://oeis.org/A217719
+            new nint[]{989, 3239, 5777, 10877, 27971, 29681, 30739, 31631, 39059, 72389, 73919, 75077}.slice());
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
 }
 
-internal static void testPseudoprimes(ж<testing.T> Ꮡt, @string name, Func<global::go.math.big_package.nat, bool> cond, slice<nint> want) {
-    var n = new nat(new global::go.math.big_package.Word[]{1}.slice());
+internal static void testPseudoprimes(ж<testing.T> Ꮡt, @string name, Func<global::go.math.big_package.Δnat, bool> cond, slice<nint> want) {
+    var n = new Δnat(new global::go.math.big_package.Word[]{1}.slice());
     for (nint i = 3; i < 100000; i += 2) {
         if (testing.Short()) {
             if (len(want) == 0) {

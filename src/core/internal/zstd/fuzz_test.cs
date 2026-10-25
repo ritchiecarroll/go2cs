@@ -138,6 +138,7 @@ public static void FuzzReverse(ж<testing.F> Ꮡf) {
                 // byte sequences using rules that are difficult
                 // to determine.
                 // So we just check the prefix.
+
                 nint c = builtin.len(goExp);
                 if (c > builtin.len(zstdExp)) {
                     c = builtin.len(zstdExp);

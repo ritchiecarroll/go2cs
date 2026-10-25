@@ -5,6 +5,7 @@ namespace go;
 
 using static bytes_package;
 using fmt = fmt_package;
+using asan = @internal.asan_package;
 using testenv = @internal.testenv_package;
 using iter = iter_package;
 using Δmath = math_package;
@@ -26,7 +27,7 @@ partial class bytes_test_package {
 internal static slice<@string> sliceOfString(slice<slice<byte>> s) {
     var result = new slice<@string>(len(s));
     foreach (var (i, v) in s) {
-        result[i] = ((@string)v);
+        result[i] = (@string)v;
     }
     return result;
 }
@@ -459,7 +460,7 @@ public static void TestIndexByteSmall(ж<testing.T> Ꮡt) {
         for (nint j = 0; j < 15; j++) {
             nint p = IndexByte(b.slice(i, i + 15), (byte)0);
             if (p != -1) {
-                Ꮡt.Errorf("IndexByte(%q, %d) = %d"u8, b.slice(i, i + 15), (nint)(0), p);
+                Ꮡt.Errorf("IndexByte(%q, %d) = %d"u8, b.slice(i, i + 15), (nint)0, p);
             }
         }
         for (nint j = 0; j < 15; j++) {
@@ -635,12 +636,12 @@ internal static slice<byte> bmbuf;
 
 internal static @string valName(nint x) {
     {
-        nint s = (x >> (int)(20)); if ((s << (int)(20)) == x) {
+        nint s = x >> 20; if (s << 20 == x) {
             return fmt.Sprintf("%dM"u8, s);
         }
     }
     {
-        nint s = (x >> (int)(10)); if ((s << (int)(10)) == x) {
+        nint s = x >> 10; if (s << 10 == x) {
             return fmt.Sprintf("%dK"u8, s);
         }
     }
@@ -649,7 +650,7 @@ internal static @string valName(nint x) {
 
 internal static void benchBytes(ж<testing.B> Ꮡb, slice<nint> sizes, Action<ж<testing.B>, nint> f) {
     foreach (var (_, n) in sizes) {
-        if (isRaceBuilder && n > (4 << (int)(10))) {
+        if (isRaceBuilder && n > 4 << 10) {
             continue;
         }
         Ꮡb.Run(valName(n), (ж<testing.B> bΔ1) => {
@@ -662,7 +663,7 @@ internal static void benchBytes(ж<testing.B> Ꮡb, slice<nint> sizes, Action<ж
     }
 }
 
-internal static slice<nint> indexSizes = new nint[]{10, 32, (4 << (int)(10)), (4 << (int)(20)), (64 << (int)(20))}.slice();
+internal static slice<nint> indexSizes = new nint[]{10, 32, 4 << 10, 4 << 20, 64 << 20}.slice();
 
 internal static bool isRaceBuilder = strings.HasSuffix(testenv.Builder(), "-race"u8);
 
@@ -751,19 +752,20 @@ internal static Action<ж<testing.B>, nint> bmIndexRune(Func<slice<byte>, rune, 
 
 internal static Action<ж<testing.B>, nint> bmIndexRuneUnicode(ж<Δunicode.RangeTable> Ꮡrt, rune needle) {
     ref var rt = ref Ꮡrt.DerefOrNull();
+    var rsᴷ = new stackAppend<rune>();
 
     slice<rune> rs = default!;
     foreach (var (_, r16) in rt.R16) {
         for (var r = (rune)r16.Lo; r <= (rune)r16.Hi; r += (rune)r16.Stride) {
             if (r != needle) {
-                rs = append(rs, (rune)r);
+                rs = append(rsᴷ, rs, r);
             }
         }
     }
     foreach (var (_, r32) in rt.R32) {
         for (var r = (rune)r32.Lo; r <= (rune)r32.Hi; r += (rune)r32.Stride) {
             if (r != needle) {
-                rs = append(rs, (rune)r);
+                rs = append(rs, r);
             }
         }
     }
@@ -775,7 +777,7 @@ internal static Action<ж<testing.B>, nint> bmIndexRuneUnicode(ж<Δunicode.Rang
     rr.Shuffle(len(rs), (nint i, nint j) => {
         (rsʗ1[i], rsʗ1[j]) = (rsʗ1[j], rsʗ1[i]);
     });
-    @string uchars = ((@string)rs);
+    @string uchars = (@string)rs;
 
     return (ж<testing.B> b, nint n) => {
         var buf = bmbuf.slice(0, n);
@@ -801,7 +803,7 @@ internal static Action<ж<testing.B>, nint> bmIndexRuneUnicode(ж<Δunicode.Rang
                 b.Fatal(badIndexˢ, j);
             }
         }
-        foreach (var (i, _) in buf) {
+        foreach (var i in range(buf)) {
             buf[i] = (rune)'\x00';
         }
     };
@@ -824,7 +826,7 @@ public static void BenchmarkEqual(ж<testing.B> Ꮡb) {
         }
     });
 
-    var sizes = new nint[]{1, 6, 9, 15, 16, 20, 32, (4 << (int)(10)), (4 << (int)(20)), (64 << (int)(20))}.slice();
+    var sizes = new nint[]{1, 6, 9, 15, 16, 20, 32, 4 << 10, 4 << 20, 64 << 20}.slice();
 
     var sizesʗ1 = sizes;
     Ꮡb.Run(sameˢ, (ж<testing.B> bΔ2) => {
@@ -855,9 +857,9 @@ internal static Action<ж<testing.B>, nint> bmEqual(Func<slice<byte>, slice<byte
 }
 
 public static void BenchmarkEqualBothUnaligned(ж<testing.B> Ꮡb) {
-    var sizes = new nint[]{64, (4 << (int)(10))}.slice();
+    var sizes = new nint[]{64, 4 << 10}.slice();
     if (!isRaceBuilder) {
-        sizes = appendꓸꓸꓸ(sizes, new nint[]{(4 << (int)(20)), (64 << (int)(20))}.slice());
+        sizes = appendꓸꓸꓸ(sizes, new nint[]{4 << 20, 64 << 20}.slice());
     }
     nint maxSize = 2 * (sizes[len(sizes) - 1] + 8);
     if (len(bmbuf) < maxSize) {
@@ -965,9 +967,7 @@ public static void BenchmarkCountSingle(ж<testing.B> Ꮡb) {
                 bΔ1.Fatal(badCountˢ, j, expect);
             }
         }
-        for (nint i = 0; i < len(buf); i++) {
-            buf[i] = 0;
-        }
+        clear(buf);
     });
 }
 
@@ -1041,7 +1041,7 @@ public static void TestSplit(ж<testing.T> Ꮡt) {
         if (tt.n < 0) {
             var b = sliceOfString(Split(slice<byte>(tt.s), slice<byte>(tt.sep)));
             if (!slices.Equal<slice<@string>, @string>(result, b)) {
-                Ꮡt.Errorf("Split disagrees withSplitN(%q, %q, %d) = %v; want %v"u8, tt.s, tt.sep, tt.n, b, a);
+                Ꮡt.Errorf("Split disagrees with SplitN(%q, %q, %d) = %v; want %v"u8, tt.s, tt.sep, tt.n, b, a);
             }
         }
         if (len(a) > 0) {
@@ -1105,7 +1105,7 @@ public static void TestSplitAfter(ж<testing.T> Ꮡt) {
         if (tt.n < 0) {
             var b = sliceOfString(SplitAfter(slice<byte>(tt.s), slice<byte>(tt.sep)));
             if (!slices.Equal<slice<@string>, @string>(result, b)) {
-                Ꮡt.Errorf("SplitAfter disagrees withSplitAfterN(%q, %q, %d) = %v; want %v"u8, tt.s, tt.sep, tt.n, b, a);
+                Ꮡt.Errorf("SplitAfter disagrees with SplitAfterN(%q, %q, %d) = %v; want %v"u8, tt.s, tt.sep, tt.n, b, a);
             }
         }
     }
@@ -1153,7 +1153,7 @@ public static void TestFields(ж<testing.T> Ꮡt) {
         }
 
         if (((sstring)b) != tt.s) {
-            Ꮡt.Errorf("slice changed to %s; want %s"u8, ((@string)b), tt.s);
+            Ꮡt.Errorf("slice changed to %s; want %s"u8, (@string)b, tt.s);
         }
         if (len(tt.a) > 0) {
             {
@@ -1288,10 +1288,10 @@ internal static void runStringTests(ж<testing.T> Ꮡt, Func<slice<byte>, slice<
 
 internal static @string tenRunes(rune r) {
     var runes = new slice<rune>(10);
-    foreach (var (i, _) in runes) {
+    foreach (var i in range(runes)) {
         runes[i] = r;
     }
-    return ((@string)runes);
+    return (@string)runes;
 }
 
 // User-defined self-inverse mapping function
@@ -1315,7 +1315,7 @@ public static void TestMap(ж<testing.T> Ꮡt) {
     // Run a couple of awful growth/shrinkage tests
     @string a = tenRunes((rune)'a');
 
-    // 1.  Grow. This triggers two reallocations in Map.
+    // 1. Grow. This triggers two reallocations in Map.
     var maxRune = rune (rune r) => Δunicode.MaxRune;
     var m = Map(maxRune, slice<byte>(a));
     @string expect = tenRunes(Δunicode.MaxRune);
@@ -1462,7 +1462,7 @@ partial struct RepeatTest {
     internal nint count;
 }
 
-internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << (int)(16)))) + "z"u8;
+internal static @string longString = "a"u8 + ((sstring)new slice<byte>((1 << 16))) + "z"u8;
 
 public static slice<RepeatTest> RepeatTests = new RepeatTest[]{
     new(""u8, ""u8, 0),
@@ -1473,7 +1473,7 @@ public static slice<RepeatTest> RepeatTests = new RepeatTest[]{
     new("-"u8, "----------"u8, 10),
     new("abc "u8, "abc abc abc "u8, 3),
     // Tests for results over the chunkLimit
-    new(((@string)(rune)0), ((@string)new slice<byte>((1 << (int)(16)))), (1 << (int)(16))),
+    new((@string)(rune)0, (@string)new slice<byte>((1 << 16)), 1 << 16),
     new(longString, longString + longString, 2)
 }.slice();
 
@@ -1553,7 +1553,7 @@ public static void TestRepeatCatchesOverflow(ж<testing.T> Ꮡt) {
         [3] = new("gopher"u8, 0, ""u8),
         [4] = new("-"u8, -1, "negative"u8),
         [5] = new("--"u8, -102, "negative"u8),
-        [6] = new(((@string)new slice<byte>(255)), (nint)((~(nuint)0) / 255 + 1), "overflow"u8)
+        [6] = new((@string)new slice<byte>(255), (nint)((~(nuint)0) / 255 + 1), "overflow"u8)
     });
 
     const bool is64Bit = /* 1<<(^uintptr(0)>>63)/2 != 0 */ true;
@@ -1592,7 +1592,7 @@ public static void TestRunes(ж<testing.T> Ꮡt) {
         }
         if (!tt.lossy) {
             // can only test reassembly if we didn't lose information
-            @string s = ((@string)a);
+            @string s = (@string)a;
             if (s != tt.@in) {
                 Ꮡt.Errorf("string(Runes(%q)) = %x; want %x"u8, tin, s, tin);
             }
@@ -1714,9 +1714,9 @@ public static void TestTrim(ж<testing.T> Ꮡt) {
         }
         @string actual = default!;
         if (f != default!){
-            actual = ((@string)f(slice<byte>(tc.@in), tc.arg));
+            actual = (@string)f(slice<byte>(tc.@in), tc.arg);
         } else {
-            actual = ((@string)fb(slice<byte>(tc.@in), slice<byte>(tc.arg)));
+            actual = (@string)fb(slice<byte>(tc.@in), slice<byte>(tc.arg));
         }
         if (actual != tc.@out) {
             Ꮡt.Errorf("%s(%q, %q) = %q; want %q"u8, name, tc.@in, tc.arg, actual, tc.@out);
@@ -1927,12 +1927,31 @@ public static slice<ReplaceTest> ReplaceTests = new ReplaceTest[]{
 public static void TestReplace(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    foreach (var (_, tt) in ReplaceTests) {
-        var @in = append(slice<byte>(tt.@in), ((@string)"<spare>"u8).ꓸꓸꓸ);
+    foreach (var (_, vᴛ1) in ReplaceTests) {
+        ref var tt = ref heap(new ReplaceTest(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        ref var @in = ref heap<slice<byte>>(out var Ꮡin);
+
+        @in = slice<byte>(tt.@in);
+        slice<byte> old = slice<byte>(tt.old);
+        slice<byte> @new = slice<byte>(tt.@new);
+        if (!asan.Enabled) {
+            var newʗ1 = @new;
+            var oldʗ1 = old;
+            var ttʗ1 = tt;
+            var allocs = testing.AllocsPerRun(10, () => {
+                Replace(Ꮡin.ValueSlot, oldʗ1, newʗ1, ttʗ1.n);
+            });
+            if (allocs > 1D) {
+                Ꮡt.Errorf("Replace(%q, %q, %q, %d) allocates %.2f objects"u8, tt.@in, tt.old, tt.@new, tt.n, allocs);
+            }
+        }
+        @in = append(@in, ((@string)"<spare>"u8).ꓸꓸꓸ);
         @in = @in.slice(0, len(tt.@in));
-        var @out = Replace(@in, slice<byte>(tt.old), slice<byte>(tt.@new), tt.n);
+        var @out = Replace(@in, old, @new, tt.n);
         {
-            @string s = ((@string)@out); if (s != tt.@out) {
+            @string s = (@string)@out; if (s != tt.@out) {
                 Ꮡt.Errorf("Replace(%q, %q, %q, %d) = %q, want %q"u8, tt.@in, tt.old, tt.@new, tt.n, s, tt.@out);
             }
         }
@@ -1940,13 +1959,85 @@ public static void TestReplace(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("Replace(%q, %q, %q, %d) didn't copy"u8, tt.@in, tt.old, tt.@new, tt.n);
         }
         if (tt.n == -1) {
-            var outΔ1 = ReplaceAll(@in, slice<byte>(tt.old), slice<byte>(tt.@new));
+            var outΔ1 = ReplaceAll(@in, old, @new);
             {
-                @string s = ((@string)outΔ1); if (s != tt.@out) {
+                @string s = (@string)outΔ1; if (s != tt.@out) {
                     Ꮡt.Errorf("ReplaceAll(%q, %q, %q) = %q, want %q"u8, tt.@in, tt.old, tt.@new, s, tt.@out);
                 }
             }
         }
+    }
+}
+
+public static void FuzzReplace(ж<testing.F> Ꮡf) {
+    ref var f = ref Ꮡf.DerefOrNull();
+
+    foreach (var (_, tt) in ReplaceTests) {
+        f.Add(slice<byte>(tt.@in), slice<byte>(tt.old), slice<byte>(tt.@new), tt.n);
+    }
+    Ꮡf.Fuzz((ж<testing.T> t, slice<byte> @in, slice<byte> old, slice<byte> @new, nint n) => {
+        slice<byte> differentImpl(slice<byte> inΔ1, slice<byte> oldΔ1, slice<byte> newΔ1, nint nΔ1) {
+            bytes.Buffer @out = default!;
+            if (nΔ1 < 0) {
+                nΔ1 = Δmath.MaxInt;
+            }
+            for (nint i = 0; i < len(inΔ1); ) {
+                if (nΔ1 == 0) {
+                    @out.Write(inΔ1.slice(i));
+                    break;
+                }
+                if (HasPrefix(inΔ1.slice(i), oldΔ1)) {
+                    @out.Write(newΔ1);
+                    i += len(oldΔ1);
+                    nΔ1--;
+                    if (len(oldΔ1) != 0) {
+                        continue;
+                    }
+                    if (i == len(inΔ1)) {
+                        break;
+                    }
+                }
+                if (len(oldΔ1) == 0){
+                    var (_, length) = utf8.DecodeRune(inΔ1.slice(i));
+                    @out.Write(inΔ1.slice(i, i + length));
+                    i += length;
+                } else {
+                    @out.WriteByte(inΔ1[i]);
+                    i++;
+                }
+            }
+            if (len(oldΔ1) == 0 && nΔ1 != 0) {
+                @out.Write(newΔ1);
+            }
+            return @out.Bytes();
+        }
+        {
+            var (simple, replace) = (differentImpl(@in, old, @new, n), Replace(@in, old, @new, n)); if (!slices.Equal<slice<byte>, byte>(simple, replace)) {
+                t.Errorf("The two implementations do not match %q != %q for Replace(%q, %q, %q, %d)"u8, simple, replace, @in, old, @new, n);
+            }
+        }
+    });
+}
+
+public static void BenchmarkReplace(ж<testing.B> Ꮡb) {
+    foreach (var (_, vᴛ1) in ReplaceTests) {
+        ref var tt = ref heap(new ReplaceTest(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        @string desc = fmt.Sprintf("%q %q %q %d"u8, tt.@in, tt.old, tt.@new, tt.n);
+        slice<byte> @in = slice<byte>(tt.@in);
+        slice<byte> old = slice<byte>(tt.old);
+        slice<byte> @new = slice<byte>(tt.@new);
+        var inʗ1 = @in;
+        var newʗ1 = @new;
+        var oldʗ1 = old;
+        var ttʗ1 = tt;
+        Ꮡb.Run(desc, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            while (bΔ1.Loop()) {
+                Replace(inʗ1, oldʗ1, newʗ1, ttʗ1.n);
+            }
+        });
     }
 }
 
@@ -1969,7 +2060,7 @@ public static slice<TitleTest> TitleTests = new TitleTest[]{
 public static void TestTitle(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in TitleTests) {
         {
-            @string s = ((@string)Title(slice<byte>(tt.@in))); if (s != tt.@out) {
+            @string s = (@string)Title(slice<byte>(tt.@in)); if (s != tt.@out) {
                 Ꮡt.Errorf("Title(%q) = %q, want %q"u8, tt.@in, s, tt.@out);
             }
         }
@@ -1989,7 +2080,7 @@ public static slice<TitleTest> ToTitleTests = new TitleTest[]{
 public static void TestToTitle(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in ToTitleTests) {
         {
-            @string s = ((@string)ToTitle(slice<byte>(tt.@in))); if (s != tt.@out) {
+            @string s = (@string)ToTitle(slice<byte>(tt.@in)); if (s != tt.@out) {
                 Ꮡt.Errorf("ToTitle(%q) = %q, want %q"u8, tt.@in, s, tt.@out);
             }
         }
@@ -2254,10 +2345,11 @@ public static void TestContainsFunc(ж<testing.T> Ꮡt) {
 }
 
 internal static Func<slice<byte>> makeFieldsInput = () => {
-    var x = new slice<byte>((1 << (int)(20)));
+    var x = new slice<byte>((1 << 20));
     // Input is ~10% space, ~10% 2-byte UTF-8, rest ASCII non-space.
-    foreach (var (i, _) in x) {
-        var exprᴛ1 = rand.Intn(10);
+    var r = rand.New(rand.NewSource(99));
+    foreach (var i in range(x)) {
+        var exprᴛ1 = r.Intn(10);
         var matchᴛ1 = false;
         if (exprᴛ1 is 0) { matchᴛ1 = true;
             x[i] = (rune)' ';
@@ -2279,10 +2371,11 @@ internal static Func<slice<byte>> makeFieldsInput = () => {
 };
 
 internal static Func<slice<byte>> makeFieldsInputASCII = () => {
-    var x = new slice<byte>((1 << (int)(20)));
+    var x = new slice<byte>((1 << 20));
     // Input is ~10% space, rest ASCII non-space.
-    foreach (var (i, _) in x) {
-        if (rand.Intn(10) == 0){
+    var r = rand.New(rand.NewSource(99));
+    foreach (var i in range(x)) {
+        if (r.Intn(10) == 0){
             x[i] = (rune)' ';
         } else {
             x[i] = (rune)'x';
@@ -2307,7 +2400,7 @@ public static void BenchmarkFields(ж<testing.B> Ꮡb) {
 
         var sdʗ1 = sd;
         Ꮡb.Run(sd.name, (ж<testing.B> bΔ1) => {
-            for (nint jᴛ1 = (1 << (int)(4)); jᴛ1 <= (1 << (int)(20)); jᴛ1 <<= (int)(4)) {
+            for (nint jᴛ1 = 1 << 4; jᴛ1 <= 1 << 20; jᴛ1 <<= (int)(4)) {
                 var j = jᴛ1;
                 var sdʗ2 = sdʗ1;
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
@@ -2330,7 +2423,7 @@ public static void BenchmarkFieldsFunc(ж<testing.B> Ꮡb) {
 
         var sdʗ1 = sd;
         Ꮡb.Run(sd.name, (ж<testing.B> bΔ1) => {
-            for (nint jᴛ1 = (1 << (int)(4)); jᴛ1 <= (1 << (int)(20)); jᴛ1 <<= (int)(4)) {
+            for (nint jᴛ1 = 1 << 4; jᴛ1 <= 1 << 20; jᴛ1 <<= (int)(4)) {
                 var j = jᴛ1;
                 var sdʗ2 = sdʗ1;
                 bΔ1.Run(fmt.Sprintf("%d"u8, j), (ж<testing.B> bΔ2) => {
@@ -2406,10 +2499,11 @@ internal static slice<byte> makeBenchInputHard() {
         "</a>"u8, "</p>"u8, "</b>"u8, "</strong>"u8,
         "hello"u8, "world"u8
     }.array();
-    var x = new slice<byte>(0, (1 << (int)(20)));
+    var x = new slice<byte>(0, (1 << 20));
+    var r = rand.New(rand.NewSource(99));
     while (ᐧ) {
-        nint i = rand.Intn(len(tokens));
-        if (len(x) + len(tokens[i]) >= (1 << (int)(20))) {
+        nint i = r.Intn(len(tokens));
+        if (len(x) + len(tokens[i]) >= 1 << 20) {
             break;
         }
         x = append(x, tokens[i].ꓸꓸꓸ);
@@ -2692,7 +2786,7 @@ public static void BenchmarkIndexPeriodic(ж<testing.B> Ꮡb) {
     foreach (var (_, skip) in new nint[]{2, 4, 8, 16, 32, 64}.array()) {
         var keyʗ1 = key;
         Ꮡb.Run(fmt.Sprintf("IndexPeriodic%d"u8, skip), (ж<testing.B> bΔ1) => {
-            var buf = new slice<byte>((1 << (int)(16)));
+            var buf = new slice<byte>((1 << 16));
             for (nint i = 0; i < len(buf); i += skip) {
                 buf[i] = 1;
             }

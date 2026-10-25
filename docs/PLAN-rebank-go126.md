@@ -400,6 +400,10 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
 - **The bank is a separate leg after the windows train it annotates.** It edits only `linux:` annotations, and the
   guard re-derives the header's Linux line.
 - **Closing check:** the annotated set equals the eligible set, 240 by name.
+- **Host checklist, before any linux row** (runbook lessons 88 and 89, 2026-10-25): `TMPDIR` is 10 bytes or less
+  (`/tmp`), so the converted host's temp root keeps unix-socket paths under the 108-byte `sun_path` limit; and the
+  pinned GOROOT carries `test/`, which distribution toolchains strip and which `go/internal/gcimporter`'s
+  `TestImportTypeparamTests` reads.
 
 ### 5.2 darwin (C1)
 

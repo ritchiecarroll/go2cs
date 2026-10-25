@@ -140,16 +140,17 @@ public static void TestGoldenMarshal(ж<testing.T> Ꮡt) {
 }
 
 public static void TestLarge(ж<testing.T> Ꮡt) {
-    const nint N = 10000;
+    UntypedInt N = 10000;
+    UntypedInt offsets = 4;
     @string ok = "2bb571599a4180e1d542f76904adc3df"u8; // md5sum of "0123456789" * 1000
-    var block = new slice<byte>(10004);
+    var block = new slice<byte>(N + offsets);
     var c = New();
-    for (nint offset = 0; offset < 4; offset++) {
+    for (nint offset = 0; offset < offsets; offset++) {
         for (nint i = 0; i < N; i++) {
             block[offset + i] = (byte)((rune)'0' + (byte)(i % 10));
         }
         for (nint blockSize = 10; blockSize <= N; blockSize *= 10) {
-            nint blocks = N / blockSize;
+            nint blocks = (nint)N / blockSize;
             var b = block.slice(offset, offset + blockSize);
             c.Reset();
             for (nint i = 0; i < blocks; i++) {
@@ -158,6 +159,31 @@ public static void TestLarge(ж<testing.T> Ꮡt) {
             @string s = fmt.Sprintf("%x"u8, c.Sum(default!));
             if (s != ok) {
                 Ꮡt.Fatalf("md5 TestLarge offset=%d, blockSize=%d = %s want %s"u8, offset, blockSize, s, ok);
+            }
+        }
+    }
+}
+
+public static void TestExtraLarge(ж<testing.T> Ꮡt) {
+    UntypedInt N = 100000;
+    UntypedInt offsets = 4;
+    @string ok = "13572e9e296cff52b79c52148313c3a5"u8; // md5sum of "0123456789" * 10000
+    var block = new slice<byte>(N + offsets);
+    var c = New();
+    for (nint offset = 0; offset < offsets; offset++) {
+        for (nint i = 0; i < N; i++) {
+            block[offset + i] = (byte)((rune)'0' + (byte)(i % 10));
+        }
+        for (nint blockSize = 10; blockSize <= N; blockSize *= 10) {
+            nint blocks = (nint)N / blockSize;
+            var b = block.slice(offset, offset + blockSize);
+            c.Reset();
+            for (nint i = 0; i < blocks; i++) {
+                c.Write(b);
+            }
+            @string s = fmt.Sprintf("%x"u8, c.Sum(default!));
+            if (s != ok) {
+                Ꮡt.Fatalf("md5 TestExtraLarge offset=%d, blockSize=%d = %s want %s"u8, offset, blockSize, s, ok);
             }
         }
     }
@@ -266,6 +292,29 @@ public static void TestAllocations(ж<testing.T> Ꮡt) {
 
 public static void TestMD5Hash(ж<testing.T> Ꮡt) {
     cryptotest.TestHash(Ꮡt, new Func<hash.Hash>(New));
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string marshalBinaryˢ = "MarshalBinary"u8;
+internal static readonly @string unmarshalBinaryˢ = "UnmarshalBinary"u8;
+internal static readonly @string appendBinaryˢ = "AppendBinary"u8;
+
+public static void TestExtraMethods(ж<testing.T> Ꮡt) {
+    ref var h = ref heap<any>(out var Ꮡh);
+    h = maybeCloner(New());
+    cryptotest.NoExtraMethods(Ꮡt, Ꮡh, marshalBinaryˢ, unmarshalBinaryˢ, appendBinaryˢ);
+}
+
+internal static any maybeCloner(hash.Hash hʗp) {
+    ref var h = ref heap(hʗp, out var Ꮡh);
+
+    {
+        ref var c = ref heap<hash.Cloner>(out var Ꮡc);
+        (c, var ok) = h._<hash.Cloner>(ᐧ); if (ok) {
+            return Ꮡc;
+        }
+    }
+    return Ꮡh;
 }
 
 internal static hash.Hash bench = New();

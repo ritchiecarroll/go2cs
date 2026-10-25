@@ -628,9 +628,14 @@ internal partial struct TestScavengeIndex_testCase /*dyn*/ {
 }
 
 public static void TestScavengeIndex(ж<testing.T> Ꮡt) {
-    // This test suite tests the scavengeIndex data structure.    // markFunc is a function that makes the address range [base, limit)
+    var testsᴷ = new stackAppend<TestScavengeIndex_testCase>();
+
+    // This test suite tests the scavengeIndex data structure.
+
+    // markFunc is a function that makes the address range [base, limit)
     // available for scavenging in a test index.
     // type markFunc is a methodless func type — rendered inline as its base delegate
+
     // findFunc is a function that searches for the next available page
     // to scavenge in the index. It asserts that the page is found in
     // chunk "ci" at page "offset."
@@ -865,7 +870,7 @@ public static void TestScavengeIndex(ж<testing.T> Ꮡt) {
 
 
 
-        tests = append(tests,
+        tests = append(testsᴷ, tests,
             new TestScavengeIndex_testCase(
                 name: "TwoChunks"u8,
                 mark: (Action<uintptr, uintptr> mark) => {

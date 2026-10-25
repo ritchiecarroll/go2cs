@@ -306,6 +306,7 @@ internal static slice<ScanfTest> scanfTests = new ScanfTest[]{
     new("%x"u8, "A7_5\n"u8, ᏑuintVal, (nuint)0xa7), // only %v takes underscores
     new("%U"u8, "U+1234\n"u8, ᏑintVal, (nint)0x1234),
     new("%U"u8, "U+4567\n"u8, ᏑuintVal, (nuint)0x4567),
+
     new("%e"u8, "2.3\n"u8, Ꮡfloat64Val, 2.3D),
     new("%E"u8, "2.3e1\n"u8, Ꮡfloat32Val, (float32)2.3e1F),
     new("%f"u8, "2.3e2\n"u8, Ꮡfloat64Val, 2.3e2D),
@@ -382,72 +383,89 @@ internal static slice<ScanfTest> scanfTests = new ScanfTest[]{
     new("%d"u8, "27 "u8, ᏑintVal, (nint)27),
     new("%d"u8, " 27"u8, ᏑintVal, (nint)27),
     new("%d"u8, " 27 "u8, ᏑintVal, (nint)27),
+
     new("X%d"u8, "X27"u8, ᏑintVal, (nint)27),
     new("X%d"u8, "X27 "u8, ᏑintVal, (nint)27),
     new("X%d"u8, "X 27"u8, ᏑintVal, (nint)27),
     new("X%d"u8, "X 27 "u8, ᏑintVal, (nint)27),
+
     new("X %d"u8, "X27"u8, ᏑintVal, default!), // expected space in input to match format
     new("X %d"u8, "X27 "u8, ᏑintVal, default!), // expected space in input to match format
     new("X %d"u8, "X 27"u8, ᏑintVal, (nint)27),
     new("X %d"u8, "X 27 "u8, ᏑintVal, (nint)27),
+
     new("%dX"u8, "27X"u8, ᏑintVal, (nint)27),
     new("%dX"u8, "27 X"u8, ᏑintVal, default!), // input does not match format
     new("%dX"u8, " 27X"u8, ᏑintVal, (nint)27),
     new("%dX"u8, " 27 X"u8, ᏑintVal, default!), // input does not match format
+
     new("%d X"u8, "27X"u8, ᏑintVal, default!), // expected space in input to match format
     new("%d X"u8, "27 X"u8, ᏑintVal, (nint)27),
     new("%d X"u8, " 27X"u8, ᏑintVal, default!), // expected space in input to match format
     new("%d X"u8, " 27 X"u8, ᏑintVal, (nint)27),
+
     new("X %d X"u8, "X27X"u8, ᏑintVal, default!), // expected space in input to match format
     new("X %d X"u8, "X27 X"u8, ᏑintVal, default!), // expected space in input to match format
     new("X %d X"u8, "X 27X"u8, ᏑintVal, default!), // expected space in input to match format
     new("X %d X"u8, "X 27 X"u8, ᏑintVal, (nint)27),
+
     new("X %s X"u8, "X27X"u8, ᏑstringVal, default!), // expected space in input to match format
     new("X %s X"u8, "X27 X"u8, ᏑstringVal, default!), // expected space in input to match format
     new("X %s X"u8, "X 27X"u8, ᏑstringVal, default!), // unexpected EOF
     new("X %s X"u8, "X 27 X"u8, ᏑstringVal, (@string)"27"u8),
+
     new("X%sX"u8, "X27X"u8, ᏑstringVal, default!), // unexpected EOF
     new("X%sX"u8, "X27 X"u8, ᏑstringVal, default!), // input does not match format
     new("X%sX"u8, "X 27X"u8, ᏑstringVal, default!), // unexpected EOF
     new("X%sX"u8, "X 27 X"u8, ᏑstringVal, default!), // input does not match format
+
     new("X%s"u8, "X27"u8, ᏑstringVal, (@string)"27"u8),
     new("X%s"u8, "X27 "u8, ᏑstringVal, (@string)"27"u8),
     new("X%s"u8, "X 27"u8, ᏑstringVal, (@string)"27"u8),
     new("X%s"u8, "X 27 "u8, ᏑstringVal, (@string)"27"u8),
+
     new("X%dX"u8, "X27X"u8, ᏑintVal, (nint)27),
     new("X%dX"u8, "X27 X"u8, ᏑintVal, default!), // input does not match format
     new("X%dX"u8, "X 27X"u8, ᏑintVal, (nint)27),
     new("X%dX"u8, "X 27 X"u8, ᏑintVal, default!), // input does not match format
+
     new("X%dX"u8, "X27X"u8, ᏑintVal, (nint)27),
     new("X%dX"u8, "X27X "u8, ᏑintVal, (nint)27),
     new("X%dX"u8, " X27X"u8, ᏑintVal, default!), // input does not match format
     new("X%dX"u8, " X27X "u8, ᏑintVal, default!), // input does not match format
+
     new("X%dX\n"u8, "X27X"u8, ᏑintVal, (nint)27),
     new("X%dX \n"u8, "X27X "u8, ᏑintVal, (nint)27),
     new("X%dX\n"u8, "X27X\n"u8, ᏑintVal, (nint)27),
     new("X%dX\n"u8, "X27X \n"u8, ᏑintVal, (nint)27),
+
     new("X%dX \n"u8, "X27X"u8, ᏑintVal, (nint)27),
     new("X%dX \n"u8, "X27X "u8, ᏑintVal, (nint)27),
     new("X%dX \n"u8, "X27X\n"u8, ᏑintVal, (nint)27),
     new("X%dX \n"u8, "X27X \n"u8, ᏑintVal, (nint)27),
+
     new("X%c"u8, "X\n"u8, ᏑruneVal, (rune)'\n'),
     new("X%c"u8, "X \n"u8, ᏑruneVal, (rune)' '),
     new("X %c"u8, "X!"u8, ᏑruneVal, default!), // expected space in input to match format
     new("X %c"u8, "X\n"u8, ᏑruneVal, default!), // newline in input does not match format
     new("X %c"u8, "X !"u8, ᏑruneVal, (rune)'!'),
     new("X %c"u8, "X \n"u8, ᏑruneVal, (rune)'\n'),
+
     new(" X%dX"u8, "X27X"u8, ᏑintVal, default!), // expected space in input to match format
     new(" X%dX"u8, "X27X "u8, ᏑintVal, default!), // expected space in input to match format
     new(" X%dX"u8, " X27X"u8, ᏑintVal, (nint)27),
     new(" X%dX"u8, " X27X "u8, ᏑintVal, (nint)27),
+
     new("X%dX "u8, "X27X"u8, ᏑintVal, (nint)27),
     new("X%dX "u8, "X27X "u8, ᏑintVal, (nint)27),
     new("X%dX "u8, " X27X"u8, ᏑintVal, default!), // input does not match format
     new("X%dX "u8, " X27X "u8, ᏑintVal, default!), // input does not match format
+
     new(" X%dX "u8, "X27X"u8, ᏑintVal, default!), // expected space in input to match format
     new(" X%dX "u8, "X27X "u8, ᏑintVal, default!), // expected space in input to match format
     new(" X%dX "u8, " X27X"u8, ᏑintVal, (nint)27),
     new(" X%dX "u8, " X27X "u8, ᏑintVal, (nint)27),
+
     new("%d\nX"u8, "27\nX"u8, ᏑintVal, (nint)27),
     new("%dX\n X"u8, "27X\n X"u8, ᏑintVal, (nint)27)
 }.slice();
@@ -1015,13 +1033,15 @@ partial struct TwoLines /*@string*/;
 // Scan attempts to read two lines into the object. Scanln should prevent this
 // because it stops at newline; Scan and Scanf should be fine.
 public static error Scan(this ref TwoLines t, fmt.ScanState state, rune verb) {
+    var charsᴷ = new stackAppend<rune>();
+
     var chars = new slice<rune>(0, 100);
     for (nint nlCount = 0; nlCount < 2; ) {
         var (c, _, err) = state.ReadRune();
         if (err != default!) {
             return err;
         }
-        chars = append(chars, c);
+        chars = append(charsᴷ, chars, c);
         if (c == (rune)'\n') {
             nlCount++;
         }
@@ -1127,7 +1147,7 @@ public static void TestScanStateCount(ж<Δtesting.T> Ꮡt) {
         Ꮡt.Errorf("bad scan rune: %q %q %q should be '1' '2' '➂'"u8, a.rune, b.rune, c.rune);
     }
     if (a.size != 1 || b.size != 1 || c.size != 3) {
-        Ꮡt.Errorf("bad scan size: %q %q %q should be 1 1 3"u8, a.size, b.size, c.size);
+        Ꮡt.Errorf("bad scan size: %d %d %d should be 1 1 3"u8, a.size, b.size, c.size);
     }
 }
 

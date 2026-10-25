@@ -3,11 +3,18 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
+using bytes = bytes_package;
+using testenv = @internal.testenv_package;
+using Δos = os_package;
+using exec = go.os.exec_package;
+using strings = strings_package;
 using static sync_package;
 using atomic = go.sync.atomic_package;
 using Δtesting = testing_package;
+using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using go.os;
 using go.sync;
 using static go.sync_internal_test_package;
 using Δsync = sync_package;
@@ -126,8 +133,51 @@ public static partial void TestWaitGroupAlign(ж<Δtesting.T> Ꮡt) {
     Ꮡx.of(TestWaitGroupAlign_X.Ꮡwg).Wait();
 }
 
+public static void TestWaitGroupGo(ж<Δtesting.T> Ꮡt) {
+    var wg = Ꮡ(new WaitGroup(nil));
+    nint i = default!;
+    wg.Go(() => {
+        i++;
+    });
+    wg.Wait();
+    if (i != 1) {
+        Ꮡt.Fatalf("got %d, want 1"u8, i);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string syncTestChildˢ = "SYNC_TEST_CHILD"u8;
+internal static readonly @string testRunTestIssue76126ˢ = "-test.run=^TestIssue76126$"u8;
+internal static readonly @string panicTestˢ = "panic: test"u8;
+
+// This test ensures that an unhandled panic in a Go goroutine terminates
+// the process without causing Wait to unblock; previously there was a race.
+public static void TestIssue76126(ж<Δtesting.T> Ꮡt) {
+    testenv.MustHaveExec(new sync_test_package.testing_TжTB(Ꮡt));
+    if (Δos.Getenv(syncTestChildˢ) != "1"u8) {
+        // Call child in a child process
+        // and inspect its failure message.
+        var cmd = exec.Command(Δos.Args[0], testRunTestIssue76126ˢ);
+        cmd.Value.Env = append(Δos.Environ(), "SYNC_TEST_CHILD=1"u8);
+        var buf = @new<bytes.Buffer>();
+        cmd.Value.Stderr = new sync_test_package.bytes_BufferжWriter(buf);
+        cmd.Run(); // ignore error
+        @string got = buf.String();
+        if (!strings.Contains(got, panicTestˢ)) {
+            Ꮡt.Errorf("missing panic: test\n%s"u8, got);
+        }
+        return;
+    }
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    Ꮡwg.Go(() => {
+        throw panic("test");
+    });
+    Ꮡwg.Wait(); // process should terminate here
+    throw panic("Wait returned"); // must not be reached
+}
+
 internal partial struct BenchmarkWaitGroupUncontended_PaddedWaitGroup /*dyn*/ {
-    public partial ref sync_package.WaitGroup WaitGroup { get; }
+    /*embed*/ public sync_package.WaitGroup WaitGroup;
     internal array<uint8> pad = new(128);
 }
 

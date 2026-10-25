@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `log/slog/internal/buffer` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**1 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**1 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/log/slog/internal/buffer`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/log/slog/internal/buffer).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -29,4 +29,4 @@ a disclosed test that fails any *other* way is still a hard mismatch.
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAlloc` | `alloc-count-semantics` | exact-zero AllocsPerRun assert over the pooled New/WriteString/deferred-Free round-trip: Go's sync.Pool reuse plus escape analysis keeps the warm path allocation-free, while the converted path must heap-allocate what Go stack-allocates - the display class and delegate the C# compiler emits for the defer closure and the per-run test closure itself - measured 344 bytes per run by the byte-derived shim with NONE of it charged at golib sites (every object on the path is compiler-emitted or BCL-internal, so no malloc count exists and zero can never come back). Same shape as strings' TestIndexRune and log's TestDiscard. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off; claude/coord-h10-readings ac9f8251ee): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES -- 176 B/run, 880 bytes over 5 runs, golib's counter charging none of it (the test printed `got 176 allocs, want 0`) -- so no object count exists to compare with the want: the ladder's incomparable-unit arm, which this reason already describes (344 bytes per run at r58a, 176 at this tree). Nothing to retire and no plan. |
+| `TestAlloc` | `alloc-count-semantics` | exact-zero AllocsPerRun assert over the pooled New/WriteString/deferred-Free round-trip: Go's sync.Pool reuse plus escape analysis keeps the warm path allocation-free, while the converted path must heap-allocate what Go stack-allocates - the display class and delegate the C# compiler emits for the defer closure and the per-run test closure itself - measured 344 bytes per run by the byte-derived shim with NONE of it charged at golib sites (every object on the path is compiler-emitted or BCL-internal, so no malloc count exists and zero can never come back). Same shape as strings' TestIndexRune and log's TestDiscard. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off; claude/coord-h10-readings ac9f8251ee): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES -- 176 B/run, 880 bytes over 5 runs, golib's counter charging none of it (the test printed `got 176 allocs, want 0`) -- so no object count exists to compare with the want: the ladder's incomparable-unit arm, which this reason already describes (344 bytes per run at r58a, 176 at this tree). Nothing to retire and no plan. READ AT go1.26.10 (2026-10-25, G): 176 bytes per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 880 bytes over 5 runs, no object charged to golib's counter, alloc-units-windows.tsv line 70 (claude/g-pass2-plan 966562828d); linux: 880 bytes over 5 runs, no object charged to golib's counter, alloc-units-linux.tsv line 56 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit BYTES: golib's counter charged no object on this path, so bytes is the measurable figure. |

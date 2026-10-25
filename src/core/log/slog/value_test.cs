@@ -10,6 +10,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using static go.log.slog_package;
 
@@ -18,7 +20,7 @@ partial class slog_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string groupˢ = "Group"u8;
 
-public static void TestKindString(ж<testing.T> Ꮡt) {
+public static partial void TestKindString(ж<testing.T> Ꮡt) {
     {
         @string got = KindGroup.String();
         @string want = groupˢ; if (got != want) {

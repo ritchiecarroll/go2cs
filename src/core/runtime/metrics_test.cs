@@ -37,7 +37,7 @@ internal static (map<@string, metrics.Description>, slice<metrics.Sample>) prepa
     var all = metrics.All();
     var samples = new slice<metrics.Sample>(len(all));
     var descs = new map<@string, metrics.Description>();
-    foreach (var (i, _) in all) {
+    foreach (var i in range(all)) {
         samples[i].Name = all[i].Name;
         descs[all[i].Name] = all[i];
     }
@@ -86,7 +86,7 @@ public static void TestReadMetrics(ж<testing.T> Ꮡt) {
         uint64 tinyAllocs = default!;
         uint64 mallocs = default!;
         uint64 frees = default!;
-        foreach (var (i, _) in samples) {
+        foreach (var i in range(samples)) {
             {
                 @string name = samples[i].Name;
                 var exprᴛ1 = name;
@@ -316,6 +316,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
     // The values are read concurrently with the runtime doing other
     // things (e.g. allocating) so what we read can't reasonably compared
     // to other runtime values (e.g. MemStats).
+
     // Run a few GC cycles to get some of the stats to be non-zero.
     Δruntime.GC();
     Δruntime.GC();
@@ -337,7 +338,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
     TestReadMetricsConsistency_gc gc = default!;
     TestReadMetricsConsistency_totalVirtual totalScan = default!;
     TestReadMetricsConsistency_cpu cpu = default!;
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         metrics.ValueKind kind = samples[i].Value.Kind();
         {
             metrics.ValueKind want = descs[samples[i].Name].Kind; if (kind != want) {
@@ -423,7 +424,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
         else if (exprᴛ1 == "/gc/pauses:seconds"u8) {
             var h = samples[i].Value.Float64Histogram();
             gc.pauses = 0;
-            foreach (var (iΔ2, _) in (~h).Counts) {
+            foreach (var iΔ2 in range((~h).Counts)) {
                 gc.pauses += (~h).Counts[iΔ2];
             }
         }
@@ -516,7 +517,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
     if (len((~objects.alloc).Counts) != len((~objects.free).Counts)){
         Ꮡt.Error(allocsBySizeAndFreesByˢ2);
     } else {
-        foreach (var (i, _) in (~objects.alloc).Buckets) {
+        foreach (var i in range((~objects.alloc).Buckets)) {
             var ba = (~objects.alloc).Buckets[i];
             var bf = (~objects.free).Buckets[i];
             if (ba != bf) {
@@ -527,7 +528,7 @@ public static void TestReadMetricsConsistency(ж<testing.T> Ꮡt) {
             uint64 gotAlloc = default!;
             uint64 gotFree = default!;
             var want = objects.total;
-            foreach (var (i, _) in (~objects.alloc).Counts) {
+            foreach (var i in range((~objects.alloc).Counts)) {
                 if ((~objects.alloc).Counts[i] < (~objects.free).Counts[i]) {
                     Ꮡt.Errorf("found more allocs than frees in object dist bucket %d"u8, i);
                     continue;
@@ -607,7 +608,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
     samples[0] = new slice<metrics.Sample>(len(descs));
     samples[1] = new slice<metrics.Sample>(len(descs));
     nint total = 0;
-    foreach (var (i, _) in samples[0]) {
+    foreach (var i in range(samples[0])) {
         if (!descs[i].Cumulative) {
             continue;
         }
@@ -630,9 +631,9 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
             while (ᐧ) {
                 // Add more things here that could influence metrics.
                 for (nint i = 0; i < 10; i++) {
-                    Δruntime.AddCleanup(@new<ж<nint>>(), (EmptyStruct _) => {
+                    Δruntime.AddCleanup(@new<ж<nint>>(), (EmptyStruct _Δp0) => {
                     }, new EmptyStruct());
-                    Δruntime.SetFinalizer(@new<ж<nint>>(), (ж<ж<nint>> _) => {
+                    Δruntime.SetFinalizer(@new<ж<nint>>(), (ж<ж<nint>> _Δp0) => {
                     });
                 }
                 for (nint i = 0; i < len(readMetricsSink); i++) {
@@ -667,7 +668,7 @@ public static partial void TestReadMetricsCumulative(ж<testing.T> Ꮡt) {
     // Check to make sure that these metrics only grow monotonically.
     for (nint gen = 1; gen < 10; gen++) {
         metrics.Read(samples[gen % 2]);
-        foreach (var (i, _) in samples[gen % 2]) {
+        foreach (var i in range(samples[gen % 2])) {
             @string name = samples[gen % 2][i].Name;
             var (vNew, vOld) = (samples[gen % 2][i].Value, samples[1 - (gen % 2)][i].Value);
 
@@ -891,6 +892,7 @@ internal static readonly object wasip1CurrentlyBusyWaitsˢ = (@string)"wasip1 cu
 // See issue #60276.
 public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var failureIdleTimesᴷ = new stackAppend<float64>();
 
     if (Δruntime.GOOS == "wasip1"u8) {
         // Since wasip1 busy-waits in the scheduler, there's no meaningful idle
@@ -901,6 +903,7 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
 
     var names = new @string[]{
         "/cpu/classes/idle:cpu-seconds"u8,
+
         "/cpu/classes/gc/mark/assist:cpu-seconds"u8,
         "/cpu/classes/gc/mark/dedicated:cpu-seconds"u8,
         "/cpu/classes/gc/mark/idle:cpu-seconds"u8,
@@ -915,7 +918,7 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
     var namesʗ1 = names;
     slice<metrics.Sample> prep() {
         var mm = new slice<metrics.Sample>(len(namesʗ1));
-        foreach (var (i, _) in namesʗ1) {
+        foreach (var i in range(namesʗ1)) {
             mm[i].Name = namesʗ1[i];
         }
         return mm;
@@ -970,7 +973,7 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
             // All is well. Test passed.
             return;
         }
-        failureIdleTimes = append(failureIdleTimes, dt);
+        failureIdleTimes = append(failureIdleTimesᴷ, failureIdleTimes, dt);
         // Try again.
     }
 
@@ -979,7 +982,7 @@ public static void TestCPUMetricsSleep(ж<testing.T> Ꮡt) {
         Ꮡt.Logf("try %2d: idle time = %.5fs\n"u8, i + 1, dt);
     }
     Ꮡt.Logf("try %d breakdown:\n"u8, len(failureIdleTimes));
-    foreach (var (i, _) in names) {
+    foreach (var i in range(names)) {
         if (m1[i].Value.Kind() == metrics.KindBad) {
             continue;
         }
@@ -1294,6 +1297,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 slice<int64> profileGrowth = default!;
                 int64 n = default!;
                 int64 value = default!;
+                var stksᴷ = new stackAppend<slice<@string>>(moves: true);
                 (metricGrowth, var totalProfileGrowth, var p) = measureDeltaʗ2(tΔ3, [MethodImpl(MethodImplOptions.NoInlining)] () => {
                     ref var started = ref heap(new Δsync.WaitGroup(), out var Ꮡstarted);
                     ref var stopped = ref heap(new Δsync.WaitGroup(), out var Ꮡstopped);
@@ -1365,7 +1369,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                             have = append(have, (~line.Function).Name);
                         }
                     }
-                    stks = append(stks, have);
+                    stks = append(stksᴷ, stks, have);
                     var found = false;
                     foreach (var (i, stk) in acceptStacks) {
                         if (slices.Equal<slice<@string>, @string>(have, stk)) {
@@ -1390,6 +1394,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 }
                 if (n == 0 && value == 0) {
                     tΔ3.Logf("profile:\n%s"u8, p.OrTypedNil());
+                    stks = move2heap(stksᴷ, stks);
                     foreach (var (_, have) in stks) {
                         tΔ3.Logf("have stack %v"u8, have);
                     }
@@ -1436,7 +1441,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
 
                 var minTicks = new slice<slice<int64>>(workerCount); // lower bound, known-contended time, measured by cputicks
                 var maxTicks = new slice<slice<int64>>(workerCount); // upper bound, total lock() duration, measured by cputicks
-                foreach (var (i, _) in minTicks) {
+                foreach (var i in range(minTicks)) {
                     minTicks[i] = new slice<int64>(len(mus));
                     maxTicks[i] = new slice<int64>(len(mus));
                 }
@@ -1505,7 +1510,7 @@ public static void TestRuntimeLockMetricsAndProfile(ж<testing.T> Ꮡt) {
                 };
 
                 var stks = new slice<slice<@string>>(2);
-                foreach (var (i, _) in stks) {
+                foreach (var i in range(stks)) {
                     @string marker = runtimeTestˢ;
                     if (i == slowRole) {
                         marker = runtimeTestˢ2;

@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `strconv` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**55 matched · 11 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**39 matched · 11 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/strconv`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/strconv).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -32,36 +32,22 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestAllocationsFromBytes/ParseUint` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAppendBool` | pass | pass |
 | `TestAtof` | pass | pass |
-| `TestAtofRandom` | pass | pass |
-| `TestAtofSlow` | pass | pass |
 | `TestAtoi` | pass | pass |
 | `TestCanBackquote` | pass | pass |
 | `TestCountMallocs` | skip | skip |
-| `TestDecimalRound` | pass | pass |
-| `TestDecimalRoundedInteger` | pass | pass |
-| `TestDecimalShift` | pass | pass |
 | `TestErrorPrefixes` | pass | pass |
 | `TestFormatBool` | pass | pass |
 | `TestFormatComplex` | pass | pass |
 | `TestFormatComplexInvalidBitSize` | pass | pass |
-| `TestFormatFloatInvalidBitSize` | pass | pass |
 | `TestFormatUintVarlen` | pass | pass |
-| `TestFp` | pass | pass |
-| `TestFtoa` | pass | pass |
-| `TestFtoaPowersOfTwo` | pass | pass |
-| `TestFtoaRandom` | pass | pass |
 | `TestIsGraphic` | pass | pass |
 | `TestIsPrint` | pass | pass |
 | `TestItoa` | pass | pass |
-| `TestMulByLog10Log2` | pass | pass |
-| `TestMulByLog2Log10` | pass | pass |
 | `TestNumError` | pass | pass |
 | `TestNumErrorUnwrap` | pass | pass |
 | `TestParseBool` | pass | pass |
 | `TestParseComplex` | pass | pass |
 | `TestParseComplexIncorrectBitSize` | pass | pass |
-| `TestParseFloatIncorrectBitSize` | pass | pass |
-| `TestParseFloatPrefix` | pass | pass |
 | `TestParseInt` | pass | pass |
 | `TestParseInt32` | pass | pass |
 | `TestParseInt64` | pass | pass |
@@ -80,8 +66,6 @@ Both runtimes skip 1 of the matched tests identically.
 | `TestQuoteRuneToGraphic` | pass | pass |
 | `TestQuoteToASCII` | pass | pass |
 | `TestQuoteToGraphic` | pass | pass |
-| `TestRoundTrip` | pass | pass |
-| `TestRoundTrip32` | pass | pass |
 | `TestUitoa` | pass | pass |
 | `TestUnquote` | pass | pass |
 | `TestUnquoteInvalidUTF8` | pass | pass |
@@ -103,13 +87,13 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 | `TestAllocationsFromBytes/AppendQuote` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run before the pre-sized append. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
 | `TestAllocationsFromBytes/AppendQuoteToASCII` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run before the pre-sized append. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
 | `TestAllocationsFromBytes/AppendQuoteToGraphic` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run before the pre-sized append. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
-| `TestAllocationsFromBytes/Atoi` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
+| `TestAllocationsFromBytes/Atoi` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 3 per run at go1.24.13 to 2 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 | `TestAllocationsFromBytes/CanBackquote` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
 | `TestAllocationsFromBytes/ParseBool` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
 | `TestAllocationsFromBytes/ParseComplex` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
 | `TestAllocationsFromBytes/ParseFloat` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
-| `TestAllocationsFromBytes/ParseInt` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
-| `TestAllocationsFromBytes/ParseUint` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. |
+| `TestAllocationsFromBytes/ParseInt` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 4 per run at go1.24.13 to 2 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
+| `TestAllocationsFromBytes/ParseUint` | `deferred` | want-zero AllocsPerRun assert: the closure's string([]byte) argument is proven non-escaping by Go's compiler and stays on the stack; the managed model must materialize an @string per run. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string-conversion intermediates. Read at Atoi (src/core/strconv/atoi.cs:255-267): the test's string(bytes.Number) argument, the function-local `"Atoi"u8` constant materialised per call, and `range []byte(s)` copied through slice<byte>(s) -- three conversions Go performs without a heap object, which is Atoi's reading of 3. Only Atoi was decomposed; the other nine share the argument site. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 3 per run at go1.24.13 to 2 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 
@@ -119,31 +103,8 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
-- BenchmarkAppendFloat (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAppendInt (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAppendIntSmall (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendQuote (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendQuoteRune (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAppendUint (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAppendUintVarlen (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof32Decimal (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof32Float (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof32FloatExp (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof32Random (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof32RandomLong (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64Big (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64Decimal (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64Float (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64FloatExp (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64RandomBits (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64RandomFloats (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtof64RandomLongFloats (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkAtoi (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkFormatFloat (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkFormatInt (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkFormatIntSmall (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkFormatUint (benchmark): benchmark execution is deferred to Phase 4D
-- BenchmarkParseInt (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkQuote (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkQuoteRune (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkUnquoteEasy (benchmark): benchmark execution is deferred to Phase 4D

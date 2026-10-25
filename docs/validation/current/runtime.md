@@ -6,20 +6,20 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `runtime` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-01 · converter `4016a2269`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**10819 matched · 71 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**11080 matched · 66 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/runtime`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 33 of the matched tests identically.
+Both runtimes skip 58 of the matched tests identically.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
-| `Test64BitReturnStdCall` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `Test64BitReturnStdCall` | pass | pass |
 | `TestAbort` | pass | pass |
 | `TestAbortedPanic` | pass | pass |
 | `TestAddrRangesAdd` | pass | pass |
@@ -43,14 +43,18 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestAddrRangesFindSucc/ThreeWithin` | pass | pass |
 | `TestAddrRangesFindSucc/Zero` | pass | pass |
 | `TestAlias` | pass | pass |
-| `TestAppendGrowth` | pass | pass |
+| `TestAppendByteCapInLoop` | pass | pass |
+| `TestAppendByteInLoop` | pass | pass |
+| `TestAppendGeneric` | pass | pass |
+| `TestAppendGrowthHeap` | pass | pass |
+| `TestAppendGrowthStack` | pass | pass |
+| `TestAppendOfArg` | pass | pass |
 | `TestAppendOverlap` | pass | pass |
+| `TestAppendPtrInLoop` | pass | pass |
 | `TestAppendSliceGrowth` | pass | pass |
 | `TestArenaCollision` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestArrayHash` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAsyncPreempt` | pass | pass |
-| `TestAtoi` | pass | pass |
-| `TestAtoi32` | pass | pass |
 | `TestAtomicAlignment` | pass | pass |
 | `TestBadTraceback` | pass | pass |
 | `TestBigGOMAXPROCS` | pass | pass |
@@ -82,6 +86,9 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestCallersFromWrapper` | pass | pass |
 | `TestCallersNilPointerPanic` | pass | pass |
 | `TestCallersPanic` | pass | pass |
+| `TestCgroupGOMAXPROCSDontUpdate` | pass | pass |
+| `TestCgroupGOMAXPROCSDontUpdate/GODEBUG=updatemaxprocs=0` | pass | pass |
+| `TestCgroupGOMAXPROCSDontUpdate/GOMAXPROCS=4` | pass | pass |
 | `TestChan` | pass | pass |
 | `TestChanSendBarrier` | pass | pass |
 | `TestChanSendInterface` | pass | pass |
@@ -92,6 +99,7 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestCheckPtr/CheckPtrAlignmentPtr` | pass | pass |
 | `TestCheckPtr/CheckPtrArithmetic` | pass | pass |
 | `TestCheckPtr/CheckPtrArithmetic2` | pass | pass |
+| `TestCheckPtr/CheckPtrArithmeticUnsafeAdd` | pass | pass |
 | `TestCheckPtr/CheckPtrSize` | pass | pass |
 | `TestCheckPtr/CheckPtrSliceFail` | pass | pass |
 | `TestCheckPtr/CheckPtrSliceOK` | pass | pass |
@@ -103,12 +111,15 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestCleanup` | pass | pass |
 | `TestCleanupAfterFinalizer` | pass | pass |
 | `TestCleanupInteriorPointer` | pass | pass |
+| `TestCleanupLost` | pass | pass |
 | `TestCleanupMultiple` | pass | pass |
 | `TestCleanupPointerEqualsArg` | pass | pass |
 | `TestCleanupStop` | pass | pass |
 | `TestCleanupStopAfterCleanupRuns` | pass | pass |
 | `TestCleanupStopMultiple` | pass | pass |
 | `TestCleanupStopinterleavedMultiple` | pass | pass |
+| `TestCleanupUnreachableClosure` | pass | pass |
+| `TestCleanupUnreachablePointer` | pass | pass |
 | `TestCleanupZeroSizedStruct` | pass | pass |
 | `TestCmpIfaceConcreteAlloc` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestCollisions` | pass | pass |
@@ -134,6 +145,7 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestCoroLockOSThread/CoroLockOSThreadStopLocked` | pass | pass |
 | `TestCoroLockOSThread/CoroLockOSThreadStopLockedIterNested` | pass | pass |
 | `TestCrashHandler` | pass | pass |
+| `TestCrashWhileTracing` | pass | pass |
 | `TestCtrlHandler` | pass | pass |
 | `TestDLLPreloadMitigation` | skip | skip |
 | `TestDebugLog` | pass | pass |
@@ -142,6 +154,7 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestDebugLogSym` | pass | pass |
 | `TestDebugLogTypes` | pass | pass |
 | `TestDebugLogWraparound` | pass | pass |
+| `TestDecorateMappings` | skip | skip |
 | `TestDeferDeleteSlow` | pass | pass |
 | `TestDeferForFuncWithNoExit` | pass | pass |
 | `TestDeferHeapAndStack` | pass | pass |
@@ -152,19 +165,35 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestDeferPtrsGoexit` | pass | pass |
 | `TestDeferPtrsPanic` | pass | pass |
 | `TestDeferWithRepeatedRepanics` | pass | pass |
+| `TestDetectFinalizerAndCleanupLeaks` | pass | pass |
 | `TestDisappearingDefer` | pass | pass |
 | `TestDoublePanic` | pass | pass |
+| `TestDoublePanicWithSameValue` | pass | pass |
 | `TestEmptyKeyAndValue` | pass | pass |
 | `TestEmptyMapWithInterfaceKey` | pass | pass |
 | `TestEnumWindows` | pass | pass |
 | `TestEqString` | pass | pass |
 | `TestExitHooks` | pass | pass |
 | `TestFPUnwindAfterRecovery` | pass | pass |
+| `TestFPUnwindStackGrowthAfterRecovery` | pass | pass |
 | `TestFakeTime` | skip | skip |
 | `TestFastLog2` | pass | pass |
 | `TestFillAligned` | pass | pass |
 | `TestFinalizerInterfaceBig` | pass | pass |
 | `TestFinalizerOnGlobal` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Cleanup` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Cleanup/Panic` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Cleanup/PprofDebug1` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Cleanup/PprofDebug2` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Cleanup/PprofProto` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Cleanup/Stack` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Finalizer` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Finalizer/Panic` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Finalizer/PprofDebug1` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Finalizer/PprofDebug2` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Finalizer/PprofProto` | pass | pass |
+| `TestFinalizerOrCleanupDeadlock/Finalizer/Stack` | pass | pass |
 | `TestFinalizerRegisterABI` | pass | pass |
 | `TestFinalizerType` | pass | pass |
 | `TestFinalizerZeroSizedStruct` | pass | pass |
@@ -174,6 +203,95 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestFloatArgs` | skip | skip |
 | `TestFloatReturn` | skip | skip |
 | `TestFramePointerAdjust` | pass | pass |
+| `TestFreegc` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=16/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=16/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=16/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=16/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=17/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=17/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=17/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=17/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=20000/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=32KiB-8/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=4096/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=500/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=500/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=500/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=500/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=512/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=512/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=512/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=512/stack-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/allocs-baseline` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/allocs-with-free` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=64/assist-credit` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=64/basic-free` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/duplicate-check` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/free-many` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/free-multiple` | skip | skip |
+| `TestFreegc/gc=yes/ptrs=false/size=64/free-other-goroutine` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/many-goroutines` | pass | pass |
+| `TestFreegc/gc=yes/ptrs=false/size=64/stack-free` | pass | pass |
 | `TestFunctionAlignmentTraceback` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestG0StackOverflow` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestGCCPULimiter` | pass | pass |
@@ -184,6 +302,7 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestGCTestMoveStackOnNextCall` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestGCTestMoveStackRepeatedly` | pass | pass |
 | `TestGCTestPointerClass` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestGOMAXPROCSUpdate` | fail | fail |
 | `TestGcArraySlice` | pass | pass |
 | `TestGcDeepNesting` | pass | pass |
 | `TestGcLastTime` | pass | pass |
@@ -224,13 +343,101 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestGoexitDeadlock` | pass | pass |
 | `TestGoexitDefer` | pass | pass |
 | `TestGoexitInPanic` | pass | pass |
+| `TestGoroutineLeakProfile` | pass | pass |
+| `TestGoroutineLeakProfile/ChanRecv` | pass | pass |
+| `TestGoroutineLeakProfile/ChanSend` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach10214` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach1055` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach10790` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach13197` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach13755` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach1462` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach16167` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach18101` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach2448` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach24808` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach25456` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach35073` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach35931` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach3710` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach584` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach6181` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach7504` | pass | pass |
+| `TestGoroutineLeakProfile/Cockroach9935` | pass | pass |
+| `TestGoroutineLeakProfile/Cond` | pass | pass |
+| `TestGoroutineLeakProfile/DaisyChain` | pass | pass |
+| `TestGoroutineLeakProfile/DoubleSend` | pass | pass |
+| `TestGoroutineLeakProfile/EarlyReturn` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd10492` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd5509` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd6708` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd6857` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd6873` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd7492` | pass | pass |
+| `TestGoroutineLeakProfile/Etcd7902` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc1275` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc1424` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc1460` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc3017` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc660` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc795` | pass | pass |
+| `TestGoroutineLeakProfile/Grpc862` | pass | pass |
+| `TestGoroutineLeakProfile/Hugo3251` | pass | pass |
+| `TestGoroutineLeakProfile/Hugo5379` | pass | pass |
+| `TestGoroutineLeakProfile/Istio16224` | pass | pass |
+| `TestGoroutineLeakProfile/Istio17860` | pass | pass |
+| `TestGoroutineLeakProfile/Istio18454` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes10182` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes11298` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes13135` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes25331` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes26980` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes30872` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes38669` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes5316` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes58107` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes62464` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes6632` | pass | pass |
+| `TestGoroutineLeakProfile/Kubernetes70277` | pass | pass |
+| `TestGoroutineLeakProfile/MethodContractViolation` | pass | pass |
+| `TestGoroutineLeakProfile/Mixed` | pass | pass |
+| `TestGoroutineLeakProfile/Moby17176` | pass | pass |
+| `TestGoroutineLeakProfile/Moby21233` | pass | pass |
+| `TestGoroutineLeakProfile/Moby25348` | pass | pass |
+| `TestGoroutineLeakProfile/Moby27782` | pass | pass |
+| `TestGoroutineLeakProfile/Moby28462` | pass | pass |
+| `TestGoroutineLeakProfile/Moby30408` | pass | pass |
+| `TestGoroutineLeakProfile/Moby33781` | pass | pass |
+| `TestGoroutineLeakProfile/Moby36114` | pass | pass |
+| `TestGoroutineLeakProfile/Moby4951` | pass | pass |
+| `TestGoroutineLeakProfile/Moby7559` | pass | pass |
+| `TestGoroutineLeakProfile/MutexHeap` | pass | pass |
+| `TestGoroutineLeakProfile/MutexStack` | pass | pass |
+| `TestGoroutineLeakProfile/NCastLeak` | pass | pass |
+| `TestGoroutineLeakProfile/NilRecv` | pass | pass |
+| `TestGoroutineLeakProfile/NilSend` | pass | pass |
+| `TestGoroutineLeakProfile/NoCloseRange` | pass | pass |
+| `TestGoroutineLeakProfile/NoLeakGlobal` | pass | pass |
+| `TestGoroutineLeakProfile/RWMutexLock` | pass | pass |
+| `TestGoroutineLeakProfile/RWMutexRLock` | pass | pass |
+| `TestGoroutineLeakProfile/Select` | pass | pass |
+| `TestGoroutineLeakProfile/SelectNoCases` | pass | pass |
+| `TestGoroutineLeakProfile/Serving2137` | pass | pass |
+| `TestGoroutineLeakProfile/SpawnGC` | pass | pass |
+| `TestGoroutineLeakProfile/Syncthing4829` | pass | pass |
+| `TestGoroutineLeakProfile/Syncthing5795` | pass | pass |
+| `TestGoroutineLeakProfile/Timeout` | pass | pass |
+| `TestGoroutineLeakProfile/WaitGroup` | pass | pass |
 | `TestGoroutineParallelism` | pass | pass |
 | `TestGoroutineParallelism2` | pass | pass |
 | `TestGoroutineProfileTrivial` | pass | pass |
 | `TestGroupSizeZero` | pass | pass |
 | `TestGrowWithNaN` | pass | pass |
 | `TestGrowWithNegativeZero` | pass | pass |
+| `TestHasAVX` | pass | pass |
 | `TestHeapObjectsCanMove` | pass | pass |
+| `TestHexdumpWords` | pass | pass |
+| `TestHexdumper` | pass | pass |
 | `TestHmapSize` | pass | pass |
 | `TestHugeGCInfo` | pass | pass |
 | `TestIdleMarkWorkerCount` | pass | pass |
@@ -254,18 +461,34 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestIssue66841` | pass | pass |
 | `TestIterGrowAndDelete` | pass | pass |
 | `TestIterGrowWithGC` | pass | pass |
-| `TestLFStack` | pass | fail ([disclosed](#disclosed-divergences)) |
-| `TestLFStackStress` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestLFStack` | pass | pass |
+| `TestLFStackStress` | pass | pass |
 | `TestLargeStringConcat` | pass | pass |
 | `TestLegacyFastrand` | pass | pass |
 | `TestLibraryCtrlHandler` | skip | skip |
 | `TestLineNumber` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestListManualPush` | pass | pass |
+| `TestListManualRemoveAll` | pass | pass |
+| `TestListManualRemoveHead` | pass | pass |
+| `TestListManualRemoveMiddle` | pass | pass |
+| `TestListManualRemoveTail` | pass | pass |
+| `TestListNIHPush` | pass | pass |
+| `TestListNIHRemoveAll` | pass | pass |
+| `TestListNIHRemoveHead` | pass | pass |
+| `TestListNIHRemoveMiddle` | pass | pass |
+| `TestListNIHRemoveTail` | pass | pass |
+| `TestListPush` | pass | pass |
+| `TestListRemoveAll` | pass | pass |
+| `TestListRemoveHead` | pass | pass |
+| `TestListRemoveMiddle` | pass | pass |
+| `TestListRemoveTail` | pass | pass |
 | `TestLldbPython` | skip | skip |
 | `TestLockOSThreadAvoidsStatePropagation` | pass | pass |
 | `TestLockOSThreadExit` | pass | pass |
 | `TestLockOSThreadNesting` | pass | pass |
 | `TestLockOSThreadTemplateThreadRace` | pass | pass |
-| `TestLockRankGenerated` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestLockOSThreadVgetrandom` | skip | skip |
+| `TestLockRankGenerated` | pass | pass |
 | `TestLockedDeadlock` | pass | pass |
 | `TestLockedDeadlock2` | pass | pass |
 | `TestMainGoroutineID` | pass | pass |
@@ -10282,7 +10505,6 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestMapIterDeleteReplace/9999` | pass | pass |
 | `TestMapIterDuplicate` | pass | pass |
 | `TestMapIterOrder` | pass | pass |
-| `TestMapKeys` | skip | skip |
 | `TestMapLargeKeyNoPointer` | pass | pass |
 | `TestMapLargeValNoPointer` | pass | pass |
 | `TestMapNanGrowIterator` | pass | pass |
@@ -10290,8 +10512,6 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestMapOperatorAssignmentNan` | pass | pass |
 | `TestMapSparseIterOrder` | pass | pass |
 | `TestMapStringBytesLookup` | pass | pass |
-| `TestMapTombstones` | pass | pass |
-| `TestMapValues` | skip | skip |
 | `TestMaxFloat` | pass | pass |
 | `TestMemHash32Equality` | skip | skip |
 | `TestMemHash64Equality` | skip | skip |
@@ -10331,11 +10551,17 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestMemoryLimit` | pass | pass |
 | `TestMemoryLimitNoGCPercent` | pass | pass |
 | `TestMetricHeapUnusedLargeObjectOverflow` | pass | pass |
+| `TestMexitSTW` | pass | pass |
 | `TestMinFloat` | pass | pass |
 | `TestMinMaxInt` | pass | pass |
 | `TestMinMaxString` | pass | pass |
 | `TestMinMaxStringTies` | pass | pass |
 | `TestMinMaxUint8` | pass | pass |
+| `TestMoveToHeapCap` | pass | pass |
+| `TestMoveToHeapClosure1` | pass | pass |
+| `TestMoveToHeapClosure2` | pass | pass |
+| `TestMoveToHeapClosure3` | pass | pass |
+| `TestMoveToHeapEarly` | pass | pass |
 | `TestMultiConsumer` | pass | pass |
 | `TestMutexWaitTimeMetric` | pass | pass |
 | `TestMutexWaitTimeMetric/mutex` | pass | pass |
@@ -10618,6 +10844,8 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestPanicWithDirectlyPrintableCustomTypes/panicCustomUint64` | pass | pass |
 | `TestPanicWithDirectlyPrintableCustomTypes/panicCustomUint8` | pass | pass |
 | `TestPanicWithDirectlyPrintableCustomTypes/panicCustomUintptr` | pass | pass |
+| `TestPanicWithDirectlyPrintableCustomTypes/panicDeferFatal` | pass | pass |
+| `TestPanicWithDirectlyPrintableCustomTypes/panicDoublieDeferFatal` | pass | pass |
 | `TestParallelRWMutexReaders` | pass | pass |
 | `TestParseByteCount` | pass | pass |
 | `TestPeriodicGC` | pass | pass |
@@ -10652,6 +10880,16 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestPreemptionAfterSyscall/1ms` | pass | pass |
 | `TestPreemptionGC` | pass | pass |
 | `TestPrintGC` | pass | pass |
+| `TestPrintQuoted` | pass | pass |
+| `TestPrintQuoted/\U00045678boop` | pass | pass |
+| `TestPrintQuoted/b\x00ar` | pass | pass |
+| `TestPrintQuoted/b\x1bit` | pass | pass |
+| `TestPrintQuoted/baz` | pass | pass |
+| `TestPrintQuoted/baz_` | pass | pass |
+| `TestPrintQuoted/fiz\zl_e` | pass | pass |
+| `TestPrintQuoted/fizz_le` | pass | pass |
+| `TestPrintQuoted/foobar` | pass | pass |
+| `TestPrintQuoted/ሴΣ` | pass | pass |
 | `TestProfBuf` | pass | pass |
 | `TestProfBuf/BasicWriteRead` | pass | pass |
 | `TestProfBuf/BlockingWriteRead` | pass | pass |
@@ -10664,14 +10902,18 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestProfBuf/ReadManyShortData` | pass | pass |
 | `TestProfBuf/ReadManyShortTags` | pass | pass |
 | `TestProfBuf/TagWraparound` | pass | pass |
+| `TestProfBufDoubleWakeup` | pass | pass |
 | `TestPseudoRandomSend` | pass | pass |
 | `TestRWMutex` | pass | pass |
 | `TestRaiseException` | pass | pass |
 | `TestRangeStringCast` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestReadMemStats` | pass | pass |
 | `TestReadMetrics` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestReadMetricsCleanups` | pass | pass |
 | `TestReadMetricsConsistency` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestReadMetricsCumulative` | pass | pass |
+| `TestReadMetricsFinalizers` | pass | pass |
+| `TestReadMetricsSched` | pass | pass |
 | `TestReadRandom` | pass | pass |
 | `TestRecoverBeforePanicAfterGoexit` | pass | pass |
 | `TestRecoverBeforePanicAfterGoexit2` | pass | pass |
@@ -10682,7 +10924,10 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestRecursivePanic3` | pass | pass |
 | `TestRecursivePanic4` | pass | pass |
 | `TestRecursivePanic5` | pass | pass |
-| `TestRegisterClass` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestRegisterClass` | pass | pass |
+| `TestRepanickedMiddlePanic` | pass | pass |
+| `TestRepanickedPanic` | pass | pass |
+| `TestRepanickedPanicSandwich` | pass | pass |
 | `TestReturnAfterStackGrowInCallback` | skip | skip |
 | `TestRuntimeLockMetricsAndProfile` | pass | pass |
 | `TestRuntimeLockMetricsAndProfile/runtime.lock` | pass | pass |
@@ -10754,6 +10999,7 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestSemaHandoff` | pass | pass |
 | `TestSemaHandoff1` | pass | pass |
 | `TestSemaHandoff2` | pass | pass |
+| `TestSetCgoTracebackNoCgo` | pass | pass |
 | `TestShrinkStackDuringBlockedSend` | pass | pass |
 | `TestSideEffectOrder` | pass | pass |
 | `TestSimpleDeadlock` | pass | pass |
@@ -10812,6 +11058,13 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestStringW` | pass | pass |
 | `TestStructHash` | pass | pass |
 | `TestSynctest` | pass | pass |
+| `TestSynctestAssocConsts` | pass | pass |
+| `TestSynctestCondSignalFromNoBubble` | pass | pass |
+| `TestSynctestCondSignalFromNoBubble/SynctestCond/broadcast/no_bubble` | pass | pass |
+| `TestSynctestCondSignalFromNoBubble/SynctestCond/broadcast/other_bubble` | pass | pass |
+| `TestSynctestCondSignalFromNoBubble/SynctestCond/signal/no_bubble` | pass | pass |
+| `TestSynctestCondSignalFromNoBubble/SynctestCond/signal/other_bubble` | pass | pass |
+| `TestSyscallArgs` | skip | skip |
 | `TestSyscallN` | skip | skip |
 | `TestSyscallStackUsage` | pass | pass |
 | `TestSystemstackFramePointerAdjust` | pass | fail ([disclosed](#disclosed-divergences)) |
@@ -10821,20 +11074,14 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestTimeHistogramMetricsBuckets` | pass | pass |
 | `TestTimePprof` | pass | pass |
 | `TestTimeTimerType` | pass | pass |
-| `TestTimediv` | pass | pass |
-| `TestTimediv/1099511627776_div_2` | pass | pass |
-| `TestTimediv/1099511627777_div_1024` | pass | pass |
-| `TestTimediv/12345000054321_div_1000000000` | pass | pass |
-| `TestTimediv/4294967295_div_2` | pass | pass |
-| `TestTimediv/4294967296_div_2` | pass | pass |
-| `TestTimediv/8_div_2` | pass | pass |
-| `TestTimediv/9_div_2` | pass | pass |
 | `TestTimerFairness` | pass | pass |
 | `TestTimerFairness2` | pass | pass |
 | `TestTinyAlloc` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTinyAllocIssue37262` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestTraceGCSTW` | pass | pass |
 | `TestTraceMap` | pass | pass |
 | `TestTraceMapConcurrent` | pass | pass |
+| `TestTraceSTW` | pass | pass |
 | `TestTracebackAncestors` | pass | pass |
 | `TestTracebackArgs` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTracebackElision` | pass | pass |
@@ -10842,6 +11089,15 @@ Both runtimes skip 33 of the matched tests identically.
 | `TestTracebackElision/elided=1` | pass | pass |
 | `TestTracebackElision/elided=10` | pass | pass |
 | `TestTracebackGeneric` | pass | pass |
+| `TestTracebackGoroutineLabels` | pass | pass |
+| `TestTracebackGoroutineLabels/{"fiz\\zl\re":_"\U00045678boop",_"fooba\x00r":_"baz\n"}` | pass | pass |
+| `TestTracebackGoroutineLabels/{"fizz\tle":_"\U00045678boop",_"fooba\x00r":_"baz\n"}` | pass | pass |
+| `TestTracebackGoroutineLabels/{"fizzle":_"\u1234\u03a3",_"fooba\x00r":_"baz\n"}` | pass | pass |
+| `TestTracebackGoroutineLabels/{"fizzle":_"b\x1bit",_"foo\"ba\x00r":_"baz\n"}` | pass | pass |
+| `TestTracebackGoroutineLabels/{"fizzle":_"bit",_"foobar":_"baz"}` | pass | pass |
+| `TestTracebackGoroutineLabels/{"fizzle":_"bit",_"foobar":_"baz\n"}` | pass | pass |
+| `TestTracebackGoroutineLabels/{"foobar":_"baz"}` | pass | pass |
+| `TestTracebackGoroutineLabelsDisabledGODEBUG` | pass | pass |
 | `TestTracebackInlined` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTracebackInlined/excluded` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTracebackInlined/sigpanic` | pass | fail ([disclosed](#disclosed-divergences)) |
@@ -10923,7 +11179,6 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `Test64BitReturnStdCall` | `runtime-capability` | runtime-capability (census W1's layout half; ruling 2026-09-28 15:03 (4), assigned to this seat by COORD 2026-09-29): the test passes a TEST-LOCAL reference-bearing struct by address through the GENERIC syscall.Proc.Call -- Test64BitReturnStdCall an OSVersionInfoEx with its inline [128]uint16, TestRegisterClass a Wndclassex with *uint16 fields -- and the native callee reads Go's memory layout at those offsets. Under go2cs the struct is a managed object whose pointer is a managed pointer token, not an address, and the generic door (syscall/windows/dll_windows.cs refuseManagedPointerTokens) REFUSES it BY NAME, correctly: passing it would let native code read or write memory that is not the caller's. Pinned to the refusal's argument-0 words with ONE record, so the argument-3 callback rows (R's func-cookie seat) can never match it, and any other failure here is a defect. Windows only (syscall_windows_test.go). Named retirement plan (the ruling's design question (a)): a golib generic Go-layout marshal at the door -- encode at Go offsets into a pinned native buffer, arrays inline, pointer fields pinned, copy back -- which needs a design and a ruling, not a seat. |
 | `TestArenaCollision` | `runtime-capability` | runtime-capability: the test drives Go's heap-arena address hints (KeepNArenaHints, then a mmap over the hinted address) to check that the allocator survives a collision when it grows. The managed model never builds Go heap arenas, so there are no arena hints to keep; the converted helper walked a nil hint list and died on an anonymous nil dereference. It now REFUSES BY NAME (export_impl_test.cs, this seat). The test has three assertions; the refusal fires at the first statement that touches the hints, before any of them. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if the host ever allocates Go heap arenas. |
 | `TestArrayHash` | `deferred` | AllocsPerRun-derived assertion in runtime's hash test over fixed arrays: the test hashes [8]string keys through a map and requires at most 6 allocations per run (`too many allocs 326 - hash not balanced`). Go keeps each `var k [8]string` local in the frame and copies a map key by value into the bucket; the converted code allocates the array backing of each local (256 locals per run) and a fresh backing for each of the map-key copies (about 70), which is the 326 objects the counter sees. The unit note is COUNT (`counted 3,260 go2cs-runtime object allocations (977,680 bytes) over 10 runs`): golib's counter SAW the objects, the COUNT arm of the 2026-09-05 ladder. Two named plans remove the two mechanisms and BOTH are needed to reach the threshold. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. |
 | `TestCallersDeferNilFuncPanicWithLoop` | `structural` | structural: the test puts a nil deferred call in a LOOP, which Go compiles as a non-open-coded defer, and requires runtime.Callers from the recovering deferred function to list Go's frames `func1, gopanic, panicmem, sigpanic, deferreturn, test`. The deferreturn frame is the frame of the runtime routine that runs a non-open-coded defer at function exit; the emission's defer model has no such frame, since every defer runs from the one GoFrame.Run in a finally block, so nothing exists to list between sigpanic and the test. R's panic-frames design (ruling a7dc4570d3, 2026-09-27 12:03) splices gopanic, panicmem and sigpanic and KEEPS a disclosure for deferreturn alone ('Disclosure is kept only for deferreturn (the WithLoop form)'); the reading agrees: got `runtime.Callers ...func1 runtime.gopanic runtime.panicmem runtime.sigpanic <test> testing.tRunner`, want the same list with runtime.deferreturn after sigpanic. The pin is the GOT half's adjacency `runtime.sigpanic runtime_test.TestCallersDeferNilFuncPanicWithLoop`, which is the absence of the deferreturn frame and nothing else: the wanted half is the test's own constant and would keep matching, and a run where deferreturn appeared would stop matching here. WINDOWS: the i9's census reads the same wanted list at 9e1594dcd2 (first 200 characters only); P1 did not read windows. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. RETIRES if the emission ever prints a deferreturn frame for a non-open-coded defer. |
@@ -10936,30 +11191,26 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 | `TestGCTestPointerClass` | `runtime-capability` | runtime-capability: the test asks runtime.GCTestPointerClass to classify pointers to a stack local, a heap object, a bss variable and a data variable as `stack`, `heap`, `bss` and `data`. The classes are Go's memory map: heap spans, goroutine stacks and the module's data and bss sections. With spanOf answering nil (this seat, ruling 1), findObject reports no heap object and every pointer classifies `other`. All four records have the shape `for 0x<addr>, want class <c>, got other`; the address varies per run and per record, so the pin is the HEAP record's fixed text, want and got, and the records pin is 4. A class that starts matching would drop its record and fail the count. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if the host classifies addresses against a Go memory map. |
 | `TestInlineUnwinder` | `runtime-capability` | runtime-capability: the test resolves tiuTest's entry PC through findfunc and then walks the INLINE TREE at each PC of that function, wanting inlined frames at lines 10-12 of symtabinl_test.go. Two facts are absent for every function here: a pclntab findfunc can read (the PC is an opaque synthetic token, printed as 0xffff800000022000 in this run and not read on a second build, so the pin stops before the digits) and an inline tree (go2cs keeps Go's function boundaries one-for-one and inlines nothing). Go itself skips this test when inlining is off. The pinned line is the test's first Fatalf and the test has no assertion before it. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if the host gains a function table and inline trees, which it will not while function boundaries stay one-for-one. |
 | `TestIntStringAllocs` | `deferred` | want-zero AllocsPerRun assert: `s1 := string(r)` and `s2 := string(r+1)` each convert a rune to a fresh @string, and the test then compares the two with `==` and keeps neither. Go's compiler converts a rune consumed only by a comparison through its stack tmpBuf without a heap allocation. The unit note is COUNT (`counted 2,000 go2cs-runtime object allocations (64,000 bytes) over 1,000 runs`): golib's counter SAW the objects, the COUNT arm of the 2026-09-05 ladder, and a named plan removes the site. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. |
-| `TestLFStack` | `structural` | structural: two pushes then two pops of PersistentAlloc'd nodes; the FIRST pop's `node.data != 43` fires (`no lifo`). LAYOUT. lfstack_test.go builds `MyNode{ LFNode; data int }` in raw memory from PersistentAlloc, hands the same address to the runtime as an *LFNode (LFStackPush and LFStackPop write `next` at offset 0) and reads `data` back through a *MyNode, which relies on Go's rule that an embedded field sits where it is declared: LFNode at offset 0, data at 16. go2cs emits MyNode with the CLR field order `data, ʗLFNode` (read from the runtime.tests.dll metadata, SequentialLayout): the test's own part declares `data`, and the source generator adds the embedded field's storage in a LATER partial part, which the CLR orders after. `next` at offset 0 of the LFNode view therefore overwrites `data`, and a popped node's data reads back a packed pointer. The lock-free stack itself is correct: a probe over three persistentalloc'd lfnodes pushes and pops in LIFO order with correct packing (SIZING-p1-runtime-fixables-2026-09-29.md section 2). PROOF that no golib routine can meet it: the ordering is decided by the CLR's partial-part field order, and the assertion reads the reinterpreted bytes, so nothing the runtime package implements sits between the layout and the read. RETIREMENT CANDIDATE, named and NOT planned (coordinator ruling 2026-09-29 02:57): emit an embedded field's storage in declaration order (converter plus the struct source generator). Its footprint is every struct that embeds a type and declares another field, UNMEASURED, and no seat owns it; an entry that stops matching because the layout changed is the retirement signal, and the entry then leaves the manifest. WINDOWS: the i9's windows census (CENSUS-runtime-endgame-windows-2026-09-29.md, TRAIN I union 9e1594dcd2, rows 2 of section 2) reads the same two texts, `no lifo` and `Wrong sum -4314593837846761957/4950`, so ONE entry with these pins covers both flavours; on windows the packed-pointer round trip already fails without the spanOf answer, and the emission is the same. Windows was read by the i9, not by P1. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. |
-| `TestLFStackStress` | `structural` | structural: 100 nodes pushed then popped by 4*GOMAXPROCS goroutines, and the final sum of `data` over the popped nodes is compared with the pushed sum (`Wrong sum %d/%d`; the first number differs per run, so the pin stops before it). The node count check before it passes, which is the same evidence as TestLFStack's probe: the stack keeps every node and only the `data` read is wrong. LAYOUT. lfstack_test.go builds `MyNode{ LFNode; data int }` in raw memory from PersistentAlloc, hands the same address to the runtime as an *LFNode (LFStackPush and LFStackPop write `next` at offset 0) and reads `data` back through a *MyNode, which relies on Go's rule that an embedded field sits where it is declared: LFNode at offset 0, data at 16. go2cs emits MyNode with the CLR field order `data, ʗLFNode` (read from the runtime.tests.dll metadata, SequentialLayout): the test's own part declares `data`, and the source generator adds the embedded field's storage in a LATER partial part, which the CLR orders after. `next` at offset 0 of the LFNode view therefore overwrites `data`, and a popped node's data reads back a packed pointer. The lock-free stack itself is correct: a probe over three persistentalloc'd lfnodes pushes and pops in LIFO order with correct packing (SIZING-p1-runtime-fixables-2026-09-29.md section 2). PROOF that no golib routine can meet it: the ordering is decided by the CLR's partial-part field order, and the assertion reads the reinterpreted bytes, so nothing the runtime package implements sits between the layout and the read. RETIREMENT CANDIDATE, named and NOT planned (coordinator ruling 2026-09-29 02:57): emit an embedded field's storage in declaration order (converter plus the struct source generator). Its footprint is every struct that embeds a type and declares another field, UNMEASURED, and no seat owns it; an entry that stops matching because the layout changed is the retirement signal, and the entry then leaves the manifest. WINDOWS: the i9's windows census (CENSUS-runtime-endgame-windows-2026-09-29.md, TRAIN I union 9e1594dcd2, rows 2 of section 2) reads the same two texts, `no lifo` and `Wrong sum -4314593837846761957/4950`, so ONE entry with these pins covers both flavours; on windows the packed-pointer round trip already fails without the spanOf answer, and the emission is the same. Windows was read by the i9, not by P1. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. |
-| `TestLineNumber` | `structural` | structural (census A2 D1b, OWNER RULING 2026-09-28 via COORD: disclose, no emission change). The test reads runtime.Caller's line for calls placed on DIFFERENT lines of ONE statement or one package var spec: composite-literal elements (compLit, arrayLit, sliceLit), map keys and values (mapLit), the operands of a multi-line sum (intLit) and the arguments of a multi-line call (l39, l40). The proof, for the C# the converter emits: .NET line data is a SEQUENCE POINT per statement or field initializer, and a frame's line is the sequence point at or before its IL offset, so every call inside one statement reports that statement's first line; no marker the converter writes can put two lines inside one sequence point. The single-line half (firstLine, lineVar1, lineVar2a, lineVar2b, arrayLit[0], sliceLit[0], l38) is D1a's and passes where D1a's package-var position markers are present (claude/i9-line-markers 6d69f68782); this entry is PINNED TO THAT POST-D1a TEXT, whose first failing line is compLit[0].lineA at firstLine+5 (the spec's own line), so it admits the row only where D1a holds and a D1a regression reads as a mismatch, never as this disclosure. Named, unscheduled retirement plan (the owner's): extra PDB sequence points written in the BUILD at each such call, never in the emitted C#. |
-| `TestLockRankGenerated` | `host-identity` | the assert requires the program the test compiles to sit under the GOROOT the process REPORTS: it runs `go run mklockrank.go` in its working directory and compares the output with lockrank.go. Go's own `go test` runs the binary in GOROOT/src/runtime, so cmd/go's internal-import rule (disallowInternal: the source directory, after EvalSymlinks, must sit under $GOROOT/src) admits mklockrank.go's `internal/dag` import. The converted host runs every suite in a sandbox run-directory whose PACKAGE directory holds real copies, because tests write there, and the toolchain refuses the import: `mklockrank.go:16:2: use of internal package internal/dag not allowed`. Measured on linux (go1.24.13, 2026-09-29): a symlinked mklockrank.go FILE is refused the same way, and only a symlinked DIRECTORY passes (its output equals lockrank.go byte for byte), which would send every cwd write by runtime's tests into the real GOROOT, the thing the sandbox exists to prevent. FixtureLinks, the landed remedy for this internal-import root (BRIEF-staging-root-internal-imports.md), link-stages only testdata program trees, never the package's own directory.  Same class and cause as go/build's TestLocalDirectory and internal/coverage/cfile's TestIssue59563TruncatedCoverPkgAll: the cwd-versus-reported-GOROOT identity. The signature pins the toolchain's refusal line, which only the `go run` failure path prints; the test's other Fatal paths (lockrank.go unreadable, or out of date) print different text.  Retires only if the host can compile a program from under the reported GOROOT without making the package directory a link into it, e.g. a per-test opt-in that runs a READ-ONLY test in the real package directory; 'this test only reads' is not something the host can detect, so it is not proposed here. |
+| `TestLineNumber` | `structural` | structural (census A2 D1b; OWNER RULING 2026-09-28 via COORD, AMENDED by the owner's ruling (A) of 2026-10-07: RETIRED for a -test-config Debug row, KEPT for the default Release configuration). The test reads runtime.Caller's line for calls placed on DIFFERENT lines of ONE statement or one package var spec: composite-literal elements (compLit, arrayLit, sliceLit), map keys and values (mapLit), the operands of a multi-line sum (intLit) and the arguments of a multi-line call (l39, l40). Go answers the line of each call's own `(`. Since the per-call table (claude/g-caller-line-per-call; GoPositionMapAttribute.Calls, read by the runtime's goCallLineDelta) a converted frame answers its call's own line wherever the JIT's native-to-IL map is per call. A Debug build's is: measured 2026-10-07, a -test-config Debug row reads C# PASS, this entry reported as orphaned, the row validated. The OPTIMIZED map of the default configuration is not: calls that share an expression report ONE IL offset, so they intern to one call site and no IL-based reader can tell them apart (the PDB sequence points the 2026-09-28 plan named share that limit, because the JIT does not read them). Measured at that seat (Release, tiered off): 12 of the 19 failing asserts remain (compLit[1].lineB, compLit[2].lineA, arrayLit[1..3], sliceLit[1..3], mapLit[32], intLit, l39, l40), every one reading a line inside its own spec and none moved away from Go; 7 now read Go's line. This entry is PINNED to that text, whose first failing assert is compLit[1].lineB, so a regression of the table reads as a signature mismatch, never as this disclosure. The single-line half (firstLine, lineVar1, lineVar2a, lineVar2b, arrayLit[0], sliceLit[0], l38) is D1a's (package-var position markers, claude/i9-line-markers 6d69f68782). RETIRES for the default configuration when an optimized frame's reported IL offset is per call. |
 | `TestMemStats` | `runtime-capability` | runtime-capability: ruled DISCLOSED at ledger 2026-09-28 00:32 (C6). The test asserts ALL twelve MemStats fields it names are non-zero, including MSpanInuse, MSpanSys, MCacheInuse, MCacheSys, BuckHashSys, GCSys and OtherSys, which have no managed counterpart (they measure Go's span, cache, profile-bucket and metadata memory). Partial synthesis still fails the row and fabricated values would be a silent lie. The 12 records read Mallocs, Frees, HeapObjects, StackInuse, StackSys and those seven as zero; Mallocs, Frees and HeapObjects could be fed from golib's allocation counter for other readers. The pin is MSpanInuse, a representational field, and the records pin is 12, so feeding the synthesizable fields later drops the count and fails SAFE (a mismatch naming the moved records) while the representational field still anchors the entry. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if the host reports Go's span and cache memory, which it has none of. |
 | `TestNetpollBreak` | `runtime-capability` | runtime-capability (census B6, COORD routing 2026-09-29; the linux row is P1's sizing bucket D): the test starts a runtime.Netpoll wait on a goroutine and breaks it with runtime.NetpollBreak. The managed host has no runtime poller: netpollGenericInit is a no-op (runtime/netpoll_impl.cs), because Go's poller is drained by the Go scheduler itself (findRunnable, sysmon), which the host does not run. With no eventfd (linux) or I/O completion port (windows) there is nothing for a break to interrupt, so netpollBreak REFUSES BY NAME before any write or post (runtime/linux/netpoll_epoll_impl.cs, runtime/windows/netpoll_windows_impl.cs), with the same leading words on both targets. Before it, linux's write to the absent eventfd took Go's fatal throw and windows' post reached asmcgocall's stub, an infrastructure error. ONE entry covers both targets because the loader admits one entry per test name; the signature is the prefix both refusals share, with ONE record. darwin is unmeasured (wakeNetpoll over kq) and out of scope. Retires if the host ever runs Go's poller (never, by design: internal/poll has its own managed poller, DESIGN-netpoll-managed-poller.md). |
 | `TestNonEscapingConvT2E` | `deferred` | want-zero AllocsPerRun assert: the test probes a map with an interface key that Go builds without allocating (the zero value converts through zeroVal, and the key does not escape). The converted lookup boxes the boxed key `0` of `m[0]` on a map[any]bool through a C# boxing conversion outside golib. The unit note is BYTES (`24,000 bytes ... charged none of it`), the BYTES arm of the 2026-09-05 ladder. A named plan removes the mechanism (REC-F stage F1). MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. |
 | `TestNonEscapingConvT2I` | `deferred` | want-zero AllocsPerRun assert: the test probes a map with an interface key that Go builds without allocating (the zero value converts through zeroVal, and the key does not escape). The converted lookup boxes the boxed key `TM(0)` of `m[TM(0)]` on a map[I1]bool through a C# boxing conversion outside golib. The unit note is BYTES (`24,000 bytes ... charged none of it`), the BYTES arm of the 2026-09-05 ladder. A named plan removes the mechanism (REC-F stage F1). MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. |
-| `TestNonEscapingMap` | `structural` | structural: want-zero AllocsPerRun asserts over four shapes of a map that does not escape (a literal, `make` with no hint, with the constant hint 8, with a variable hint), each followed by `m[0] = 0`. WANT: 0 allocations per run in each. READING: 1 counted object per run in each shape, unit COUNT (1,000 go2cs-runtime object allocations, 232,000 bytes, over 1,000 runs) at the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13; the first pin is the map-literal arm and the records pin of 5 carries the other three arms and the unit note. PROOF, with the objects Go keeps off the heap NAMED: for a non-escaping map Go's compiler (walkMakeMap) puts the map header (runtime maps.Map) in the caller's frame and, when the hint is at most 8, also the first group of eight slots, so `m[0] = 0` writes into frame memory and mallocs nothing. golib's `map<K,V>` is a readonly struct over a CLR Dictionary, and the store's insert needs that Dictionary's bucket and entry arrays, which are CLR objects. A frame-local form is unavailable because a Go map is a REFERENCE: `m2 := m` and a callee's `m[k] = v` must be visible through every copy, and an inline first group inside a copied struct would fork on the copy. Keeping it off the heap needs the escape fact (no alias outlives the frame) that go2cs does not compute. RETIREMENT CANDIDATE, named and NOT planned (coordinator ruling 2026-09-29 02:57): a non-escaping-map form in DESIGN-nonescaping-locals.md (REC-B) whose first group lives inline in the frame, with the falsifier stated: a golib small-map representation that keeps its first group inline without forking on a copy would read 0 here and retire the entry. Its feasibility and footprint are UNMEASURED. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. |
+| `TestNonEscapingMap` | `structural` | structural: want-zero AllocsPerRun asserts over four shapes of a map that does not escape (a literal, `make` with no hint, with the constant hint 8, with a variable hint), each followed by `m[0] = 0`. WANT: 0 allocations per run in each. READING: 1 counted object per run in each shape, unit COUNT (1,000 go2cs-runtime object allocations, 232,000 bytes, over 1,000 runs) at the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13; the first pin is the map-literal arm and the records pin of 5 carries the other three arms and the unit note. PROOF, with the objects Go keeps off the heap NAMED: for a non-escaping map Go's compiler (walkMakeMap) puts the map header (runtime maps.Map) in the caller's frame and, when the hint is at most 8, also the first group of eight slots, so `m[0] = 0` writes into frame memory and mallocs nothing. golib's `map<K,V>` is a readonly struct over a CLR Dictionary, and the store's insert needs that Dictionary's bucket and entry arrays, which are CLR objects. A frame-local form is unavailable because a Go map is a REFERENCE: `m2 := m` and a callee's `m[k] = v` must be visible through every copy, and an inline first group inside a copied struct would fork on the copy. Keeping it off the heap needs the escape fact (no alias outlives the frame) that go2cs does not compute. RETIREMENT CANDIDATE, named and NOT planned (coordinator ruling 2026-09-29 02:57): a non-escaping-map form in DESIGN-nonescaping-locals.md (REC-B) whose first group lives inline in the frame, with the falsifier stated: a golib small-map representation that keeps its first group inline without forking on a copy would read 0 here and retire the entry. Its feasibility and footprint are UNMEASURED. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. READ AT go1.26.10 (2026-10-25, G): 1 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 1,000 go2cs-runtime object allocations (240,000 bytes) over 1,000 runs, alloc-units-windows.tsv line 147 (claude/g-pass2-plan 966562828d); linux: 1,000 go2cs-runtime object allocations (240,000 bytes) over 1,000 runs, alloc-units-linux.tsv line 134 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND. |
 | `TestPinnerConstStringData` | `runtime-capability` | runtime-capability: the test's own comment states its subject -- 'const string data is not in span'. It asserts that unsafe.StringData of a string LITERAL reads runtime.isPinned == true before, during and after a Pinner.Pin/Unpin, which is true in Go because RODATA is not a heap span: spanOfHeap answers nil and the non-Go-pointer arm answers pinned. golib has no RODATA -- a literal's bytes are a heap byte[] (rooted for the process's life but movable) and unsafe.StringData returns an element reference into it -- so the truthful managed answer for that storage is 'a Go heap object, not pinned', and that is what the row reads on its FIRST assertion, before Pin is ever called. Answering true for storage nothing pinned would be fabrication (this class's anti-laundering clause). A truthful form exists in principle -- literal storage on the Pinned Object Heap plus a registry of literal-backed arrays so isPinned can recognise them -- and is REFUSED as one row's consumer paying a corpus-wide, unpriced allocation-policy change; that form is this entry's rejoin clause. Only the first-assertion arm is pinned: Pin and Unpin on that pointer must still not panic, so a regression in the non-Go-pointer no-op reads as a defect, not as this disclosure. Design and prediction: docs/phase4/DESIGN-runtime-pinner.md section 6.1. |
 | `TestRangeStringCast` | `deferred` | want-zero AllocsPerRun assert: `for i, c := range []byte(s)` copies the string into a byte slice (string_test.cs, `foreach (var (i, c) in slice<byte>(s))`). Go's compiler (slicebytetostringtmp, stringtoslicebytetmp, and the range rewrite) allocates nothing for a conversion whose result is not retained. The unit note is COUNT (`counted 1,000 go2cs-runtime object allocations (128,000 bytes) over 1,000 runs`): golib's counter SAW the object, the COUNT arm of the 2026-09-05 ladder, and a named plan removes the site. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. |
 | `TestReadMetrics` | `deferred` | deferred (OQ-4, ruled 2026-09-28): /gc/heap/live:bytes reads gcController.heapMarked, which Go writes at mark termination (gcMarkTermination -> gcController.resetLive); the managed host runs no Go mark phase, so it reads 0. The line is NOT separable from Go's heap accounting: the test bounds live <= MemStats.HeapSys, and ReadMetricsSlow's MemStats come from Go's own readmemstats_m, whose HeapSys = gcController.heapInUse + heapFree + heapReleased, also 0 here, so writing heapMarked alone turns this line into 'live bytes: N > heap sys: 0'. Feeding HeapSys means feeding the heap accounting COHERENTLY: runtime's test binary enables doubleCheckReadMemStats (gc_test.go's init), and readmemstats_m then throws inside the stopped world -- host-fatal -- unless heapInUse, heapReleased, the retained heap, totalAlloc, totalFree and mappedReady all agree with consistentHeapStats.read, whose hand-own returns the zero delta. TestReadMetrics' gogc and gomemlimit lines match Go since M1 (claude/c1-gcpacer-knobs 5dd6bce97b); a failure without this line is a mismatch. |
 | `TestReadMetricsConsistency` | `structural` | structural (ruled 2026-09-28, ledger 96edeb700a): /gc/scan/{heap,stack,globals}:bytes read gcController.heapScan, lastStackScan and globalsScan, which Go writes at mark termination from its own pointer bitmaps. The CLR does not separate scannable bytes from pointer-free ones, so no managed measurement means the same quantity, and the honest reading is 0 (DESIGN-readmemstats-surface's rule: a field is answered only when a managed measurement means what the Go field means). Every target: the check is unconditional. |
-| `TestRegisterClass` | `runtime-capability` | runtime-capability (census W1's layout half; ruling 2026-09-28 15:03 (4), assigned to this seat by COORD 2026-09-29): the test passes a TEST-LOCAL reference-bearing struct by address through the GENERIC syscall.Proc.Call -- Test64BitReturnStdCall an OSVersionInfoEx with its inline [128]uint16, TestRegisterClass a Wndclassex with *uint16 fields -- and the native callee reads Go's memory layout at those offsets. Under go2cs the struct is a managed object whose pointer is a managed pointer token, not an address, and the generic door (syscall/windows/dll_windows.cs refuseManagedPointerTokens) REFUSES it BY NAME, correctly: passing it would let native code read or write memory that is not the caller's. Pinned to the refusal's argument-0 words with ONE record, so the argument-3 callback rows (R's func-cookie seat) can never match it, and any other failure here is a defect. Windows only (syscall_windows_test.go). Named retirement plan (the ruling's design question (a)): a golib generic Go-layout marshal at the door -- encode at Go offsets into a pinned native buffer, arrays inline, pointer fields pinned, copy back -- which needs a design and a ruling, not a seat. |
-| `TestSehLookupFunctionEntry` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). |
-| `TestSehUnwind` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). |
-| `TestSehUnwindDoublePanic` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). |
-| `TestSehUnwindNilPointerPanic` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). |
-| `TestSehUnwindPanic` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). |
+| `TestSehLookupFunctionEntry` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). RE-SIGNED at the go1.26 hop (claude/g-hop-lost-refusals): Go 1.26's test builds its context through sys.GetCallerPC/GetCallerSP itself (newCtx, runtime-seh_windows_test.go:69; TestSehLookupFunctionEntry calls sys.GetCallerPC in its table), not through runtime.NewContextStub, so the refusal it reaches is internal/runtime/sys/intrinsics_impl.cs (GetCallerPC first). |
+| `TestSehUnwind` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). RE-SIGNED at the go1.26 hop (claude/g-hop-lost-refusals): Go 1.26's test builds its context through sys.GetCallerPC/GetCallerSP itself (newCtx, runtime-seh_windows_test.go:69; TestSehLookupFunctionEntry calls sys.GetCallerPC in its table), not through runtime.NewContextStub, so the refusal it reaches is internal/runtime/sys/intrinsics_impl.cs (GetCallerPC first). |
+| `TestSehUnwindDoublePanic` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). RE-SIGNED at the go1.26 hop (claude/g-hop-lost-refusals): Go 1.26's test builds its context through sys.GetCallerPC/GetCallerSP itself (newCtx, runtime-seh_windows_test.go:69; TestSehLookupFunctionEntry calls sys.GetCallerPC in its table), not through runtime.NewContextStub, so the refusal it reaches is internal/runtime/sys/intrinsics_impl.cs (GetCallerPC first). |
+| `TestSehUnwindNilPointerPanic` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). RE-SIGNED at the go1.26 hop (claude/g-hop-lost-refusals): Go 1.26's test builds its context through sys.GetCallerPC/GetCallerSP itself (newCtx, runtime-seh_windows_test.go:69; TestSehLookupFunctionEntry calls sys.GetCallerPC in its table), not through runtime.NewContextStub, so the refusal it reaches is internal/runtime/sys/intrinsics_impl.cs (GetCallerPC first). |
+| `TestSehUnwindPanic` | `runtime-capability` | runtime-capability (census W2, COORD routing 2026-09-29): runtime-seh_windows_test.go walks GO frames through Windows structured exception handling. runtime.NewContextStub (export_windows_test.go) fills a machine CONTEXT with its caller's PC, SP and frame pointer, and the tests hand it to RtlLookupFunctionEntry and RtlVirtualUnwind, which read the .pdata function table the Go linker emits for Go machine code. go2cs emits no Go machine code: there is no Go PC, SP or frame to put in a context and no function table that describes one, so the question the test asks has no subject here. The export REFUSES BY NAME at that point (runtime/export_windows_impl_test.cs); before it, the auto body reached sys.GetCallerPC's throwing stub, an infrastructure error. Pinned to the refusal's leading words with ONE record, so any other failure in this test is a defect, not this disclosure. Windows only (the test file is). Retires if go2cs ever emits machine code with SEH unwind data (never, by design). RE-SIGNED at the go1.26 hop (claude/g-hop-lost-refusals): Go 1.26's test builds its context through sys.GetCallerPC/GetCallerSP itself (newCtx, runtime-seh_windows_test.go:69; TestSehLookupFunctionEntry calls sys.GetCallerPC in its table), not through runtime.NewContextStub, so the refusal it reaches is internal/runtime/sys/intrinsics_impl.cs (GetCallerPC first). |
 | `TestStackWrapperStackInlinePanic` | `runtime-capability` | runtime-capability: the test panics through a method wrapper, checks that `<autogenerated>` does not appear in runtime.Stack's output (that arm passes here) and then runs its SELF-CHECK that Go's compiler inlined `inlinablePanic`: the stack must contain `inlinablePanic(...)`, skipped when optimization is off. Which functions Go's inliner folds is the compiler's decision and not recoverable from the CLR; go2cs never inlines Go functions. The single Fatalf is the only text the row prints. Diagnostic-only (the owner's 2026-09-28 principle). WINDOWS: the i9's census reads the same text at 9e1594dcd2; P1 did not read windows. MEASURED on linux (P1, the P1 union tree (claude/p1-runtime-fixable bdfbd2244f + the refusal cuts + the disclosure seat 7c27acb6c5 + TRAIN I 61cf81290c, P1's measurement merge), linux, Release with tiering off, .NET 10.0.12, go1.24.13, the full 120 m runtime row of that tree, 10,883 verdicts; the six allocation and layout rows read the same counts in the full row of claude/p1-runtime-fixable bdfbd2244f alone). Windows and darwin are NOT read by P1. RETIRES if the host prints Go's inline-frame marker; by design it does not. |
 | `TestStartLine` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
 | `TestStartLine/inline` | `runtime-capability` | runtime-capability (census A2, COORD ruling 2026-09-28, B2's class): the subtest asserts that Go's COMPILER inlined inlineFunc1 into inlineFunc, reading it as runtime.Frame.Func == nil (Go leaves Func nil only for an inlined frame), before it reads the start line. go2cs keeps Go's function boundaries one-for-one, the project's chosen design, so no function is ever inlined and every Go frame carries its function's interned *Func (runtime Frames.Next, D3). The frame is therefore reported NOT inlined, which is true of this host, and the subtest panics at its own inlining check. Faking a nil Func for functions Go would have inlined would report a compiler decision this host never made. Pinned to that panic text alone: the same subtest's start-line half is measured by its non-inlined siblings (normal, multiline-declaration, blank-lines, normal-closure), which pass, so any other failure here is a real defect, not this disclosure. Retires only if go2cs ever inlines a Go function. |
 | `TestStartLine/inline-closure` | `runtime-capability` | runtime-capability (census A2, COORD ruling 2026-09-28, B2's class): the same assertion as TestStartLine/inline, for a function literal Go's compiler inlines into inlineClosure. go2cs emits every literal as its own method and never inlines one, so its frame carries a non-nil *Func and the subtest panics at its own inlining check. Pinned to that panic text alone; the literal's start-line half is measured by TestStartLine/normal-closure, which passes. The parent TestStartLine rides the disclosed-parent aggregation (its only failing descendants are these two). Retires only if go2cs ever inlines a Go function. |
-| `TestStartLineAsm` | `runtime-capability` | runtime-capability: the test asks for the start line of AsmFunc, a trivial ASSEMBLY function (func_amd64.s) that calls back into the test. No assembly converts, so the generator stubbed AsmFunc with a NotImplementedException, which the host classifies as an infrastructure-error, a verdict no disclosure can absorb. AsmFunc now REFUSES BY NAME (runtime/internal/startlinetest/asmfunc_impl.cs, this seat), so the row reads a Go panic with a text to pin. One assertion; the pin is the refusal. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if assembly functions ever have managed bodies; by design they do not. |
+| `TestStartLineAsm` | `runtime-capability` | runtime-capability: the test asks for the start line of AsmFunc, a trivial ASSEMBLY function (func_amd64.s) that calls back into the test. No assembly converts, so the generator stubbed AsmFunc with a NotImplementedException, which the host classifies as an infrastructure-error, a verdict no disclosure can absorb. AsmFunc now REFUSES BY NAME (runtime/internal/startlinetest/asmfunc_impl.cs, this seat), so the row reads a Go panic with a text to pin. One assertion; the pin is the refusal. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. RETIRES if assembly functions ever have managed bodies; by design they do not. RE-SIGNED at the go1.26 hop (claude/g-hop-lost-refusals): Go 1.26 moved the package to internal/runtime/startlinetest and the hop dropped this refusal with the old directory; it is ported verbatim to internal/runtime/startlinetest/asmfunc_impl.cs, its panic text naming the new package path. |
 | `TestStringConcatenationAllocs` | `deferred` | AllocsPerRun asserts EXACTLY ONE allocation for `b := make([]byte, 10)` filled in a loop and then `s := "foo" + string(b)`. Go keeps `b` on the stack (a non-escaping constant-capacity make) and concatenates with one allocation, the concat result. The converted body allocates the slice backing of `new slice<byte>(10)` too (string_test.cs emits `"foo"u8 + ((sstring)b)`, so the concat itself is one object and the string(b) view is already the non-allocating sstring). The two objects per run are therefore the make and the concat; the attribution is read from the emission and the counter's total, not measured per object. The unit note is COUNT (`counted 2,000 go2cs-runtime object allocations (80,000 bytes) over 1,000 runs`), the COUNT arm of the 2026-09-05 ladder. Want ONE, so the plan must take the make to zero and leave the concat: the want is not zero. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. |
 | `TestStringIndexHaystack` | `deferred` | want-zero AllocsPerRun assert: `strings.Index(string(haystack), needle)` copies the byte slice into a fresh @string for a callee that only reads it (string_test.cs, `((@string)haystackʗ1)`). Go's compiler (slicebytetostringtmp, stringtoslicebytetmp, and the range rewrite) allocates nothing for a conversion whose result is not retained. The unit note is COUNT (`counted 1,000 go2cs-runtime object allocations (32,000 bytes) over 1,000 runs`): golib's counter SAW the object, the COUNT arm of the 2026-09-05 ladder, and a named plan removes the site. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. |
 | `TestStringIndexNeedle` | `deferred` | want-zero AllocsPerRun assert: `strings.Index(haystack, string(needle))` copies the needle for a callee that only reads it (string_test.cs, `((@string)needleʗ1)`). Go's compiler (slicebytetostringtmp, stringtoslicebytetmp, and the range rewrite) allocates nothing for a conversion whose result is not retained. The unit note is COUNT (`counted 1,000 go2cs-runtime object allocations (32,000 bytes) over 1,000 runs`): golib's counter SAW the object, the COUNT arm of the 2026-09-05 ladder, and a named plan removes the site. MEASURED on linux (P1, master 2ff42f7a16 plus the P1 disclosure seat, Release, tiered off, .NET 10.0.12, go1.24.13, the full runtime row of 10,883 verdicts). Windows and darwin are NOT read. |
@@ -11003,11 +11254,13 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkAddCleanupAndStop (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAlignedLoad (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAllocation (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppend (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendGrowByte (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendGrowString (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkAppendInLoop (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendInPlace (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendSlice (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendSliceLarge (benchmark): benchmark execution is deferred to Phase 4D
@@ -11051,6 +11304,7 @@ the capability it needs.
 - BenchmarkChanToChanPing (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkChanToSyscallPing (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkChanUncontended (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat10 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat1024 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat1032 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat1040 (benchmark): benchmark execution is deferred to Phase 4D
@@ -11061,17 +11315,24 @@ the capability it needs.
 - BenchmarkClearFat14 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat15 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat16 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat18 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat20 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat24 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat256 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat3 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat32 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat4 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat40 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat48 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat5 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat512 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat56 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat6 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat64 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat7 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat72 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClearFat8 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClearFat9 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClosureCall (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCompareStringBig (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCompareStringBigUnaligned (benchmark): benchmark execution is deferred to Phase 4D
@@ -11097,6 +11358,7 @@ the capability it needs.
 - BenchmarkConvT2ISmall (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkConvT2IUintptr (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopy (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat10 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat1024 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat1032 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat1040 (benchmark): benchmark execution is deferred to Phase 4D
@@ -11107,15 +11369,22 @@ the capability it needs.
 - BenchmarkCopyFat14 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat15 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat16 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat18 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat20 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat24 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat256 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat3 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat32 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat4 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat5 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat512 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat520 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat6 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat64 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat7 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat72 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCopyFat8 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkCopyFat9 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCreateGoroutines (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCreateGoroutinesCapture (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCreateGoroutinesParallel (benchmark): benchmark execution is deferred to Phase 4D
@@ -11159,18 +11428,23 @@ the capability it needs.
 - BenchmarkIfaceCmpNil100 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkIssue18138 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkIssue18740 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkListPushPop (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMSpanCountAlloc (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMakeChan (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMakeMap (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMakeSlice (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMakeSliceCopy (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMalloc16 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMalloc32 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMalloc8 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMallocLargeStruct (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMallocTypeInfo16 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMallocTypeInfo32 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMallocTypeInfo8 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMapAccessEmpty (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMapAccessHit (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMapAccessMiss (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMapAccessZero (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMapAssignAddition (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMapAssignAppend (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMapAssignExists (benchmark): benchmark execution is deferred to Phase 4D
@@ -11226,6 +11500,13 @@ the capability it needs.
 - BenchmarkMemclrRange (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMemclrUnaligned (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMemmove (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize1024 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize112 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize128 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize192 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize248 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize256 (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMemmoveKnownSize512 (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMemmoveOverlap (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMemmoveUnalignedDst (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkMemmoveUnalignedDstOverlap (benchmark): benchmark execution is deferred to Phase 4D
@@ -11298,6 +11579,7 @@ the capability it needs.
 - BenchmarkSyscallExcessWork (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSyscallToSyscallPing (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSyscallWork (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkTraceStack (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkUnalignedLoad (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkWakeupParallelSpinning (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkWakeupParallelSyscall (benchmark): benchmark execution is deferred to Phase 4D
@@ -11305,3 +11587,7 @@ the capability it needs.
 - ExampleAddCleanup (example): example execution is deferred to Phase 4D
 - ExampleFrames (example): example execution is deferred to Phase 4D
 - FuzzPIController (fuzz): fuzz execution is deferred to Phase 4D
+- FuzzPrintComplex128 (fuzz): fuzz execution is deferred to Phase 4D
+- FuzzPrintComplex64 (fuzz): fuzz execution is deferred to Phase 4D
+- FuzzPrintFloat32 (fuzz): fuzz execution is deferred to Phase 4D
+- FuzzPrintFloat64 (fuzz): fuzz execution is deferred to Phase 4D

@@ -271,6 +271,7 @@ public static void BenchmarkExtendSlice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkAppend(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var xᴷ = new stackAppend<nint>();
 
     b.StopTimer();
     var x = new slice<nint>(0, N);
@@ -278,30 +279,32 @@ public static void BenchmarkAppend(ж<testing.B> Ꮡb) {
     for (nint i = 0; i < b.N; i++) {
         x = x[0..0];
         for (nint j = 0; j < N; j++) {
-            x = append(x, j);
+            x = append(xᴷ, x, j);
         }
     }
 }
 
 public static void BenchmarkAppendGrowByte(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var xᴷ = new stackAppend<byte>();
 
     for (nint i = 0; i < b.N; i++) {
         slice<byte> x = default!;
         for (nint j = 0; j < 1 << 20; j++) {
-            x = append(x, (byte)j);
+            x = append(xᴷ, x, (byte)j);
         }
     }
 }
 
 public static void BenchmarkAppendGrowString(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var xᴷ = new stackAppend<@string>();
 
     @string s = default!;
     for (nint i = 0; i < b.N; i++) {
         slice<@string> x = default!;
         for (nint j = 0; j < 1 << 20; j++) {
-            x = append(x, s);
+            x = append(xᴷ, x, s);
         }
     }
 }
@@ -357,6 +360,7 @@ public static void BenchmarkAppendStr(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkAppendSpecialCase(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var xᴷ = new stackAppend<nint>();
 
     b.StopTimer();
     var x = new slice<nint>(0, N);
@@ -368,7 +372,7 @@ public static void BenchmarkAppendSpecialCase(ж<testing.B> Ꮡb) {
                 x = x.slice(0, len(x) + 1);
                 x[len(x) - 1] = j;
             } else {
-                x = append(x, j);
+                x = append(xᴷ, x, j);
             }
         }
     }
@@ -559,10 +563,13 @@ public static void BenchmarkAppendInPlace(ж<testing.B> Ꮡb) {
 
 //go:noinline
 internal static partial slice<byte> byteSlice(nint n) {
+    var rᴷ = new stackAppend<byte>(moves: true);
+
     slice<byte> r = default!;
     foreach (var i in range(n)) {
-        r = append(r, (byte)i);
+        r = append(rᴷ, r, (byte)i);
     }
+    r = move2heap(rᴷ, r);
     return r;
 }
 
@@ -627,11 +634,13 @@ public static void TestAppendByteInLoop(ж<testing.T> Ꮡt) {
 //go:noinline
 internal static partial void ptrSlice(nint n, ж<slice<ж<byte>>> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
+    var rᴷ = new stackAppend<ж<byte>>(moves: true);
 
     slice<ж<byte>> r = default!;
     foreach (var _ᴛ1 in range(n)) {
-        r = append(r, (ж<byte>)(nil));
+        r = append(rᴷ, r, (ж<byte>)(nil));
     }
+    r = move2heap(rᴷ, r);
     p = r;
 }
 
@@ -700,10 +709,13 @@ public static void TestAppendPtrInLoop(ж<testing.T> Ꮡt) {
 
 //go:noinline
 internal static partial (slice<byte>, nint) byteCapSlice(nint n) {
+    var rᴷ = new stackAppend<byte>(moves: true, capacityUsed: true);
+
     slice<byte> r = default!;
     foreach (var i in range(n)) {
-        r = append(r, (byte)i);
+        r = append(rᴷ, r, (byte)i);
     }
+    r = move2heap(rᴷ, r);
     return (r, cap(r));
 }
 
@@ -776,9 +788,12 @@ internal static partial slice<E> testAppendGeneric<E>(nint n) {
 }
 
 internal static slice<byte> appendSomeBytes(slice<byte> r, slice<byte> s) {
+    var rᴷ = new stackAppend<byte>(moves: true);
+
     foreach (var (_, b) in s) {
-        r = append(r, b);
+        r = append(rᴷ, r, b);
     }
+    r = move2heap(rᴷ, r);
     return r;
 }
 
@@ -816,11 +831,14 @@ public static void BenchmarkAppendInLoop(ж<testing.B> Ꮡb) {
 }
 
 public static void TestMoveToHeapEarly(ж<testing.T> Ꮡt) {
+    var xᴷ = new stackAppend<nint>(moves: true);
+
     // Just checking that this compiles.
     slice<nint> x = default!;
+    x = move2heap(xᴷ, x);
     var y = x; // causes a move2heap in the entry block
     foreach (var _ᴛ1 in range(5)) {
-        x = append(x, (nint)5);
+        x = append(xᴷ, x, (nint)5);
     }
     _ = y;
 }
@@ -908,7 +926,7 @@ public static void TestMoveToHeapClosure3(ж<testing.T> Ꮡt) {
 //go:noinline
 internal static partial uint64 overwriteStack(nint n) {
     array<uint64> x = new(100);
-    foreach (var (i, _) in x) {
+    foreach (var i in range(x)) {
         x[i] = 0xabcdabcdabcdabcdUL;
     }
     return x[n];

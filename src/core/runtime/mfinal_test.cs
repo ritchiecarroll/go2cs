@@ -199,6 +199,8 @@ internal static UntypedInt objsize => 320;
 partial struct objtype /*[320]byte*/;
 
 internal static (ж<objtype>, ж<objtype>) adjChunks() {
+    var sᴷ = new stackAppend<ж<objtype>>();
+
     slice<ж<objtype>> s = default!;
 
     while (ᐧ) {
@@ -211,7 +213,7 @@ internal static (ж<objtype>, ж<objtype>) adjChunks() {
                 return (d, c);
             }
         }
-        s = append(s, c);
+        s = append(sᴷ, s, c);
     }
 }
 

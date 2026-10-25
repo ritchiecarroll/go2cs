@@ -22,7 +22,27 @@ internal static httpPkg http;
 
 // This example fetches several URLs concurrently,
 // using a WaitGroup to block until all the fetches are complete.
-public static partial void ExampleWaitGroup() {
+public static void ExampleWaitGroup() {
+    ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
+    slice<@string> urls = new @string[]{
+        "http://www.golang.org/"u8,
+        "http://www.google.com/"u8,
+        "http://www.example.com/"u8
+    }.slice();
+    foreach (var (_, url) in urls) {
+        // Launch a goroutine to fetch the URL.
+        Ꮡwg.Go(() => {
+            // Fetch the URL.
+            http.Get(url);
+        });
+    }
+    // Wait for all HTTP fetches to complete.
+    Ꮡwg.Wait();
+}
+
+// This example is equivalent to the main example, but uses Add/Done
+// instead of Go.
+public static partial void ExampleWaitGroup_addAndDone() {
     ref var wg = ref heap(new Δsync.WaitGroup(), out var Ꮡwg);
     slice<@string> urls = new @string[]{
         "http://www.golang.org/"u8,

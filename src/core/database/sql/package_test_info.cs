@@ -70,7 +70,7 @@ using static global::go.database.sql_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("database/sql/example_cli_test.go", "example_cli_test.cs", "ACAmooKClIKUgpSmgqaUlIKClIKkgpSigqaUoqjCgqSAgsT4woKkgoKClKI=", "51-54:1")]
-[assembly: go.GoPositionMap("database/sql/example_test.go", "example_test.cs", "ABYqooKCgpSSlIKCgKakyoKCuICCpKLUgoKCgoKUtLT4goKCgpSCgpSCABwIooIAACqCgpSkgpiAgqSUgpTKgpiAgqSUgILE1AAKFIKkgoCCpKIACwSiAAYUgoKUpIKAgtb0ogAGFIKClKSCgpSkgoCCtoCCxOSCgoKUgoKCgpSAgvjGgoKUkoKCgpSCgpSCtNSCgoKUgoKCgIKklICCAAkIgoKClIKCgoCCpJSCgoCCpJSAgvi0goKUtoKCgpS0tMSktIKClLaCgoKUtLTEpKKCgoKUpIKCgoCCpKaAgqSi")]
+[assembly: go.GoPositionMap("database/sql/example_test.go", "example_test.cs", "ABYqwoKCgpSSlIKCgKakyoKCuICCpKLUgoKCgoKUtLT4goKCgpSCgpSCABwIooIAACqCgpSkgpiAgqSUgpTKgpiAgqSUgILE1AALFIKkgoCCpKIACwSiAAYUgoKUpIKAgtb0ogAGFIKClKSCgpSkgoCCtoCCxOSCgoKUgoKCgpSAgvjGgoKUkoKCgpSCgpSCtNSCgoKUgoKCgIKklICCAAkIgoKClIKCgoCCpJSCgoCCpJSAgvi0goKUtoKCgpS0tMSktIKClLaCgoKUtLTEpMKCgoKUpIKCgoCCpKaAgqSi")]
 // </GoSourcePositionMaps>
 
 namespace go.database;

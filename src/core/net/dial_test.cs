@@ -9,6 +9,7 @@ using errors = errors_package;
 using fmt = fmt_package;
 using testenv = @internal.testenv_package;
 using Δio = io_package;
+using netip = net.netip_package;
 using Δos = os_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
@@ -19,6 +20,7 @@ using time = time_package;
 using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using net;
 using net.@internal;
 using socktest = net.@internal.socktest_package;
 using static go.net_package;
@@ -200,6 +202,7 @@ internal static time.Duration /*dialLatency*/ dialClosedPort(ж<testing.T> Ꮡt)
     // less than a few hundred milliseconds. However, on some platforms it may be
     // much slower: on Windows and OpenBSD, it has been observed to take up to a
     // few seconds.
+
     var (l, err) = Listen(tcpˢ, "127.0.0.1:0"u8);
     if (err != default!) {
         Ꮡt.Fatalf("dialClosedPort: Listen failed: %v"u8, err);
@@ -268,24 +271,26 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
 
     // Convert a list of IP strings into TCPAddrs.
     global::go.net_package.addrList makeAddrs(slice<@string> ips, @string port) {
+        var outᴷ = new stackAppend<global::go.net_package.ΔAddr>(moves: true);
         global::go.net_package.addrList @out = default!;
         foreach (var (_, ip) in ips) {
             var (addr, err) = ResolveTCPAddr(tcpˢ, JoinHostPort(ip, port));
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
-            @out = append(@out, (global::go.net_package.ΔAddr)(new global::go.net_package.TCPAddrжΔAddr(addr)));
+            @out = append(outᴷ, @out, (global::go.net_package.ΔAddr)(new global::go.net_package.TCPAddrжΔAddr(addr)));
         }
+        @out = move2heap(outᴷ, @out);
         return @out;
     }
 
-    foreach (var (i, tt) in testCases) {
-        nint iΔ1 = i;
-        ref var ttΔ1 = ref heap<TestDialParallel_type>(out var ᏑttΔ1);
-        ttΔ1 = tt;
+    foreach (var (i, vᴛ1) in testCases) {
+        ref var tt = ref heap(new TestDialParallel_type(), out var Ꮡtt);
+        tt = vᴛ1;
+
         var makeAddrsʗ1 = makeAddrs;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(fmt.Sprint(iΔ1), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
+        var ttʗ1 = tt;
+        Ꮡt.Run(fmt.Sprint(i), [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var ttʗ2 = ttʗ1;
             var dialTCP = (ж<global::go.net_package.TCPConn>, error) (context.Context ctxΔ1, @string network, ж<global::go.net_package.TCPAddr> laddr, ж<global::go.net_package.TCPAddr> raddr) => {
                 @string n = tcp6ˢ;
@@ -329,14 +334,14 @@ public static void TestDialParallel(ж<testing.T> Ꮡt) {
             }
 
             if (ttʗ1.expectOk && err != default!){
-                tΔ1.Errorf("#%d: got %v; want nil"u8, iΔ1, err);
+                tΔ1.Errorf("#%d: got %v; want nil"u8, i, err);
             } else 
             if (!ttʗ1.expectOk && err == default!) {
-                tΔ1.Errorf("#%d: got nil; want non-nil"u8, iΔ1);
+                tΔ1.Errorf("#%d: got nil; want non-nil"u8, i);
             }
 
             if (elapsed < ttʗ1.expectElapsed || elapsed >= forever) {
-                tΔ1.Errorf("#%d: got %v; want >= %v, < forever"u8, iΔ1, elapsed, ttʗ1.expectElapsed);
+                tΔ1.Errorf("#%d: got %v; want >= %v, < forever"u8, i, elapsed, ttʗ1.expectElapsed);
             }
 
             // Repeat each case, ensuring that it can be canceled.
@@ -643,6 +648,7 @@ public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
             new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
             new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
             new("tcp4"u8, "127.0.0.1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
+
             new("tcp6"u8, "::1"u8, default!, default!),
             new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
             new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
@@ -653,6 +659,7 @@ public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
             new("tcp6"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), default!),
             new("tcp6"u8, "::1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
             new("tcp6"u8, "::1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
+
             new("tcp"u8, "127.0.0.1"u8, default!, default!),
             new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
             new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
@@ -662,6 +669,7 @@ public static void TestDialerLocalAddr(ж<testing.T> Ꮡt) {
             new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: IPv6loopback))), errNoSuitableAddress),
             new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.UDPAddrжΔAddr(Ꮡ(new UDPAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
             new("tcp"u8, "127.0.0.1"u8, new global::go.net_package.UnixAddrжΔAddr(Ꮡ(new UnixAddr(nil))), new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(Err: "some error"u8)))),
+
             new("tcp"u8, "::1"u8, default!, default!),
             new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(nil))), default!),
             new("tcp"u8, "::1"u8, new global::go.net_package.TCPAddrжΔAddr(Ꮡ(new TCPAddr(IP: ParseIP("0.0.0.0"u8)))), default!),
@@ -797,7 +805,7 @@ public static void TestDialerDualStack(ж<testing.T> Ꮡt) {
             }
 
             var d = Ꮡ(new Dialer(DualStack: dualstack, Timeout: timeout));
-            foreach ((_, _) in (~dss).lns) {
+            foreach (var _ᴛ1 in range((~dss).lns)) {
                 var (c, errΔ2) = d.Dial(tcpˢ, JoinHostPort(localhostˢ, (~dss).port));
                 if (errΔ2 != default!) {
                     Ꮡt.Error(errΔ2);
@@ -1311,6 +1319,122 @@ public static void TestDialerControlContext(ж<testing.T> Ꮡt) {
                 finally { ᒐ.Run(); }
             });
         }
+    });
+}
+
+public static void TestDialContext(ж<testing.T> Ꮡt) {
+    var exprᴛ1 = Δruntime.GOOS;
+    if (exprᴛ1 == "plan9"u8) {
+        Ꮡt.Skipf("not supported on %s"u8, Δruntime.GOOS);
+    }
+    else if (exprᴛ1 == "js"u8 || exprᴛ1 == "wasip1"u8) {
+        Ꮡt.Skipf("skipping: fake net does not support Dialer.ControlContext"u8);
+    }
+
+    Ꮡt.Run(streamDialˢ, (ж<testing.T> tΔ1) => {
+        GoFrame ᒐ = default;
+        try {
+            error err = default!;
+            foreach (var (i, network) in new @string[]{"tcp"u8, "tcp4"u8, "tcp6"u8, "unix"u8, "unixpacket"u8}.slice()) {
+                if (!testableNetwork(network)) {
+                    continue;
+                }
+                var ln = newLocalListener(new net_test_package.testing_TжTB(tΔ1), network);
+                var lnʗ1 = ln;
+                defer(() => lnʗ1.Close(), ref ᒐ);
+                nint id = default!;
+                ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
+                d = new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn cΔ1) => {
+                    id = ctx.Value((@string)"id"u8)._<nint>();
+                    return controlOnConnSetup(networkΔ1, address, cΔ1);
+                }
+                );
+                global::go.net_package.Conn c = default!;
+                var exprᴛ2 = network;
+                if (exprᴛ2 == "tcp"u8 || exprᴛ2 == "tcp4"u8 || exprᴛ2 == "tcp6"u8) {
+                    var (raddr, errΔ2) = netip.ParseAddrPort(ln.Addr().String());
+                    if (errΔ2 != default!) {
+                        tΔ1.Error(errΔ2);
+                        continue;
+                    }
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialTCP(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, (((ж<global::go.net_package.TCPAddr>)nil)).AddrPort(), raddr);
+                    (c, errΔ2) = (new global::go.net_package.TCPConnжConn(ᴛ1), ᴛ2);
+                }
+                else if (exprᴛ2 == "unix"u8 || exprᴛ2 == "unixpacket"u8) {
+                    var (raddr, errΔ3) = ResolveUnixAddr(network, ln.Addr().String());
+                    if (errΔ3 != default!) {
+                        tΔ1.Error(errΔ3);
+                        continue;
+                    }
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialUnix(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, nil, raddr);
+                    (c, errΔ3) = (new global::go.net_package.UnixConnжConn(ᴛ1), ᴛ2);
+                }
+                if (err != default!) {
+                    tΔ1.Error(err);
+                    continue;
+                }
+                if (id != i + 1) {
+                    tΔ1.Errorf("%s: got id %d, want %d"u8, network, id, i + 1);
+                }
+                c.Close();
+            }
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
+    Ꮡt.Run(packetDialˢ, (ж<testing.T> tΔ2) => {
+        GoFrame ᒐ = default;
+        try {
+            error err = default!;
+            foreach (var (i, network) in new @string[]{"udp"u8, "udp4"u8, "udp6"u8, "unixgram"u8}.slice()) {
+                if (!testableNetwork(network)) {
+                    continue;
+                }
+                var c1 = newLocalPacketListener(new net_test_package.testing_TжTB(tΔ2), network);
+                if (network == "unixgram"u8) {
+                    defer(Δos.Remove, c1.LocalAddr().String(), ref ᒐ);
+                }
+                var c1ʗ1 = c1;
+                defer(() => c1ʗ1.Close(), ref ᒐ);
+                nint id = default!;
+                ref var d = ref heap<global::go.net_package.Dialer>(out var Ꮡd);
+                d = new Dialer(ControlContext: (context.Context ctx, @string networkΔ1, @string address, syscall.RawConn c) => {
+                    id = ctx.Value((@string)"id"u8)._<nint>();
+                    return controlOnConnSetup(networkΔ1, address, c);
+                }
+                );
+                global::go.net_package.Conn c2 = default!;
+                var exprᴛ3 = network;
+                if (exprᴛ3 == "udp"u8 || exprᴛ3 == "udp4"u8 || exprᴛ3 == "udp6"u8) {
+                    var (raddr, errΔ2) = netip.ParseAddrPort(c1.LocalAddr().String());
+                    if (errΔ2 != default!) {
+                        tΔ2.Error(errΔ2);
+                        continue;
+                    }
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialUDP(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, (((ж<global::go.net_package.UDPAddr>)nil)).AddrPort(), raddr);
+                    (c2, errΔ2) = (new global::go.net_package.UDPConnжConn(ᴛ1), ᴛ2);
+                }
+                else if (exprᴛ3 == "unixgram"u8) {
+                    var (raddr, errΔ3) = ResolveUnixAddr(network, c1.LocalAddr().String());
+                    if (errΔ3 != default!) {
+                        tΔ2.Error(errΔ3);
+                        continue;
+                    }
+                    var (ᴛ1, ᴛ2) = Ꮡd.DialUnix(context.WithValue(context.Background(), (@string)"id"u8, i + 1), network, nil, raddr);
+                    (c2, errΔ3) = (new global::go.net_package.UnixConnжConn(ᴛ1), ᴛ2);
+                }
+                if (err != default!) {
+                    tΔ2.Error(err);
+                    continue;
+                }
+                if (id != i + 1) {
+                    tΔ2.Errorf("%s: got id %d, want %d"u8, network, id, i + 1);
+                }
+                c2.Close();
+            }
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
     });
 }
 

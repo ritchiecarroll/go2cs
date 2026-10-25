@@ -20,6 +20,7 @@ using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
+using iter = iter_package;
 using static go.net_package;
 using ꓸꓸꓸstring = Span<@string>;
 
@@ -43,7 +44,7 @@ internal static (syscall.Errno, bool) toErrno(error err) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gotestDialAddrˢ = "GOTEST_DIAL_ADDR"u8;
-internal static readonly @string testRunˢ = "-test.run=TestAcceptIgnoreSomeErrors"u8;
+internal static readonly @string testRunˢ = "-test.run=^TestAcceptIgnoreSomeErrors$"u8;
 internal static readonly @string abcˢ = "abc"u8;
 
 // TestAcceptIgnoreSomeErrors tests that windows TCPListener.AcceptTCP
@@ -127,7 +128,7 @@ public static partial void TestAcceptIgnoreSomeErrors(ж<testing.T> Ꮡt) {
         defer(() => lnʗ1.Close(), ref ᒐ);
 
         // Start child process that connects to our listener.
-        var cmd = exec.Command(Δos.Args[0], testRunˢ);
+        var cmd = exec.Command(testenv.Executable(new net_test_package.testing_TжTB(Ꮡt)), testRunˢ);
         cmd.Value.Env = append(Δos.Environ(), "GOTEST_DIAL_ADDR="u8 + ln.Addr().String());
         (var stdout, err) = cmd.StdoutPipe();
         if (err != default!) {
@@ -298,8 +299,7 @@ internal static error netshInterfaceIPShowInterface(@string ipver, map<@string, 
     //Metric                             : 10
     //...
     @string name = default!;
-    var lines = bytes.Split(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (bytes.HasPrefix(line, slice<byte>("Interface "u8)) && bytes.HasSuffix(line, slice<byte>(" Parameters"u8))) {
             var f = line[(int)(len("Interface "))..];
             f = f.slice(0, len(f) - len(" Parameters"));
@@ -369,7 +369,7 @@ public static void TestInterfacesWithNetsh(ж<testing.T> Ꮡt) {
     }
     slices.Sort<slice<@string>, @string>(want);
 
-    if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
+    if (!slices.Equal<slice<@string>, @string>(want, have)) {
         Ꮡt.Fatalf("unexpected interface list %q, want %q"u8, have, want);
     }
 }
@@ -397,8 +397,7 @@ internal static slice<@string> netshInterfaceIPv4ShowAddress(@string name, slice
     @string addr = default!;
     @string subnetprefix = default!;
     bool processingOurInterface = default!;
-    var lines = bytes.Split(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (!processingOurInterface) {
             if (!bytes.HasPrefix(line, slice<byte>("Configuration for interface"u8))) {
                 continue;
@@ -464,11 +463,11 @@ internal static slice<@string> netshInterfaceIPv6ShowAddress(@string name, slice
     //Address Type       : Other
     //Skip as Source     : false
     //
+
     // TODO: need to test ipv6 netmask too, but netsh does not outputs it
     @string addr = default!;
     var addrs = new slice<@string>(0);
-    var lines = bytes.Split(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(netshOutput, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (addr != ""u8) {
             if (len(line) == 0) {
                 addr = ""u8;
@@ -568,7 +567,7 @@ public static void TestInterfaceAddrsWithNetsh(ж<testing.T> Ꮡt) {
         want = appendꓸꓸꓸ(want, wantIPv6);
         slices.Sort<slice<@string>, @string>(want);
 
-        if (strings.Join(want, "/"u8) != strings.Join(have, "/"u8)) {
+        if (!slices.Equal<slice<@string>, @string>(want, have)) {
             Ꮡt.Errorf("%s: unexpected addresses list %q, want %q"u8, ifi.Name, have, want);
         }
     }
@@ -675,8 +674,7 @@ public static void TestInterfaceHardwareAddrWithGetmac(ж<testing.T> Ꮡt) {
         wantʗ1[cname] = addr;
         Ꮡgroup.ValueSlot = new map<@string, @string>();
     }
-    var lines = bytes.Split(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice());
-    foreach (var (_, line) in lines) {
+    foreach (var line in range<slice<byte>>(bytes.SplitSeq(@out, new byte[]{(rune)'\r', (rune)'\n'}.slice()).Invoke)) {
         if (len(line) == 0) {
             processGroup();
             continue;

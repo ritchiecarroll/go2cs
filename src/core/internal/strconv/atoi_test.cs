@@ -1,15 +1,13 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
-using errors = errors_package;
 using fmt = fmt_package;
+using static go.@internal.strconv_package;
 using reflect = reflect_package;
-using static strconv_package;
 using testing = testing_package;
-using static go.strconv_internal_test_package;
-using strconv = strconv_package;
+using static go.@internal.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
@@ -69,7 +67,7 @@ internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new Sta
     new("01777777777777777777777"u8, 0, 18446744073709551615UL, default!),
     new("01777777777777777777778"u8, 0, 0, ErrSyntax),
     new("02000000000000000000000"u8, 0, 18446744073709551615UL, ErrRange),
-    new("0200000000000000000000"u8, 0, ((uint64)1 << (int)(61)), default!),
+    new("0200000000000000000000"u8, 0, (uint64)1 << 61, default!),
     new("0b"u8, 0, 0, ErrSyntax),
     new("0B"u8, 0, 0, ErrSyntax),
     new("0b101"u8, 0, 5, default!),
@@ -84,42 +82,50 @@ internal static ж<slice<parseUint64BaseTest>> ᏑparseUint64BaseTests = new Sta
     new("_12345"u8, 0, 0, ErrSyntax),
     new("1__2345"u8, 0, 0, ErrSyntax),
     new("12345_"u8, 0, 0, ErrSyntax),
+
     new("1_2_3_4_5"u8, 10, 0, ErrSyntax), // base 10
     new("_12345"u8, 10, 0, ErrSyntax),
     new("1__2345"u8, 10, 0, ErrSyntax),
     new("12345_"u8, 10, 0, ErrSyntax),
+
     new("0x_1_2_3_4_5"u8, 0, 0x12345, default!), // base 0 => 16
     new("_0x12345"u8, 0, 0, ErrSyntax),
     new("0x__12345"u8, 0, 0, ErrSyntax),
     new("0x1__2345"u8, 0, 0, ErrSyntax),
     new("0x1234__5"u8, 0, 0, ErrSyntax),
     new("0x12345_"u8, 0, 0, ErrSyntax),
+
     new("1_2_3_4_5"u8, 16, 0, ErrSyntax), // base 16
     new("_12345"u8, 16, 0, ErrSyntax),
     new("1__2345"u8, 16, 0, ErrSyntax),
     new("1234__5"u8, 16, 0, ErrSyntax),
     new("12345_"u8, 16, 0, ErrSyntax),
+
     new("0_1_2_3_4_5"u8, 0, 5349, default!), // base 0 => 8 (0377)
     new("_012345"u8, 0, 0, ErrSyntax),
     new("0__12345"u8, 0, 0, ErrSyntax),
     new("01234__5"u8, 0, 0, ErrSyntax),
     new("012345_"u8, 0, 0, ErrSyntax),
+
     new("0o_1_2_3_4_5"u8, 0, 5349, default!), // base 0 => 8 (0o377)
     new("_0o12345"u8, 0, 0, ErrSyntax),
     new("0o__12345"u8, 0, 0, ErrSyntax),
     new("0o1234__5"u8, 0, 0, ErrSyntax),
     new("0o12345_"u8, 0, 0, ErrSyntax),
+
     new("0_1_2_3_4_5"u8, 8, 0, ErrSyntax), // base 8
     new("_012345"u8, 8, 0, ErrSyntax),
     new("0__12345"u8, 8, 0, ErrSyntax),
     new("01234__5"u8, 8, 0, ErrSyntax),
     new("012345_"u8, 8, 0, ErrSyntax),
+
     new("0b_1_0_1"u8, 0, 5, default!), // base 0 => 2 (0b101)
     new("_0b101"u8, 0, 0, ErrSyntax),
     new("0b__101"u8, 0, 0, ErrSyntax),
     new("0b1__01"u8, 0, 0, ErrSyntax),
     new("0b10__1"u8, 0, 0, ErrSyntax),
     new("0b101_"u8, 0, 0, ErrSyntax),
+
     new("1_0_1"u8, 2, 0, ErrSyntax), // base 2
     new("_101"u8, 2, 0, ErrSyntax),
     new("1_01"u8, 2, 0, ErrSyntax),
@@ -203,7 +209,7 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     new("0"u8, 2, 0, default!),
     new("-1"u8, 2, -1, default!),
     new("1010"u8, 2, 10, default!),
-    new("1000000000000000"u8, 2, ((int64)1 << (int)(15)), default!),
+    new("1000000000000000"u8, 2, (int64)1 << 15, default!),
     new("111111111111111111111111111111111111111111111111111111111111111"u8, 2, 9223372036854775807L, default!),
     new("1000000000000000000000000000000000000000000000000000000000000000"u8, 2, 9223372036854775807L, ErrRange),
     new("-1000000000000000000000000000000000000000000000000000000000000000"u8, 2, -9223372036854775808L, default!),
@@ -212,7 +218,7 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     // base 8
     new("-10"u8, 8, -8, default!),
     new("57635436545"u8, 8, 6416645477L, default!),
-    new("100000000"u8, 8, ((int64)1 << (int)(24)), default!),
+    new("100000000"u8, 8, (int64)1 << 24, default!),
 
     // base 16
     new("10"u8, 16, 16, default!),
@@ -229,6 +235,7 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     new("0x1__2345"u8, 0, 0, ErrSyntax),
     new("0x1234__5"u8, 0, 0, ErrSyntax),
     new("0x12345_"u8, 0, 0, ErrSyntax),
+
     new("-0_1_2_3_4_5"u8, 0, -5349, default!), // octal
     new("0_1_2_3_4_5"u8, 0, 5349, default!), // octal
     new("-_012345"u8, 0, 0, ErrSyntax),
@@ -237,6 +244,7 @@ internal static ж<slice<parseInt64BaseTest>> ᏑparseInt64BaseTests = new Stand
     new("0__12345"u8, 0, 0, ErrSyntax),
     new("01234__5"u8, 0, 0, ErrSyntax),
     new("012345_"u8, 0, 0, ErrSyntax),
+
     new("+0xf"u8, 0, 0xf, default!),
     new("-0xf"u8, 0, -0xf, default!),
     new("0x+f"u8, 0, 0, ErrSyntax),
@@ -291,9 +299,9 @@ internal static ж<slice<parseInt32Test>> ᏑparseInt32Tests = new StandardBox<s
     new("2147483647"u8, (int32)(2147483648L - 1), default!),
     new("-2147483647"u8, (int32)(-(2147483648L - 1)), default!),
     new("2147483648"u8, (int32)(2147483648L - 1), ErrRange),
-    new("-2147483648"u8, (int32)(-1 << (int)(31)), default!),
+    new("-2147483648"u8, (int32)(-1 << 31), default!),
     new("2147483649"u8, (int32)(2147483648L - 1), ErrRange),
-    new("-2147483649"u8, (int32)(-1 << (int)(31)), ErrRange),
+    new("-2147483649"u8, (int32)(-1 << 31), ErrRange),
     new("-1_2_3_4_5"u8, 0, ErrSyntax), // base=10 so no underscores allowed
     new("-_12345"u8, 0, ErrSyntax),
     new("_12345"u8, 0, ErrSyntax),
@@ -313,49 +321,8 @@ internal static slice<numErrorTest> numErrorTests = new numErrorTest[]{
     new("1\x00.2"u8, @"strconv.ParseFloat: parsing ""1\x00.2"": failed"u8)
 }.slice();
 
-[GoInit] internal static void init() {
-    // The parse routines return NumErrors wrapping
-    // the error and the string. Convert the tables above.
-    foreach (var (i, _) in parseUint64Tests) {
-        var test = Ꮡ(parseUint64Tests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseUint"u8, (~test).@in, (~test).err)));
-        }
-    }
-    foreach (var (i, _) in parseUint64BaseTests) {
-        var test = Ꮡ(parseUint64BaseTests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseUint"u8, (~test).@in, (~test).err)));
-        }
-    }
-    foreach (var (i, _) in parseInt64Tests) {
-        var test = Ꮡ(parseInt64Tests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseInt"u8, (~test).@in, (~test).err)));
-        }
-    }
-    foreach (var (i, _) in parseInt64BaseTests) {
-        var test = Ꮡ(parseInt64BaseTests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseInt"u8, (~test).@in, (~test).err)));
-        }
-    }
-    foreach (var (i, _) in parseUint32Tests) {
-        var test = Ꮡ(parseUint32Tests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseUint"u8, (~test).@in, (~test).err)));
-        }
-    }
-    foreach (var (i, _) in parseInt32Tests) {
-        var test = Ꮡ(parseInt32Tests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseInt"u8, (~test).@in, (~test).err)));
-        }
-    }
-}
-
 public static void TestParseUint32(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseUint32Tests) {
+    foreach (var i in range(parseUint32Tests)) {
         var test = Ꮡ(parseUint32Tests, i);
         var (@out, err) = ParseUint((~test).@in, 10, 32);
         if ((uint64)(~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -366,7 +333,7 @@ public static void TestParseUint32(ж<testing.T> Ꮡt) {
 }
 
 public static void TestParseUint64(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseUint64Tests) {
+    foreach (var i in range(parseUint64Tests)) {
         var test = Ꮡ(parseUint64Tests, i);
         var (@out, err) = ParseUint((~test).@in, 10, 64);
         if ((~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -377,7 +344,7 @@ public static void TestParseUint64(ж<testing.T> Ꮡt) {
 }
 
 public static void TestParseUint64Base(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseUint64BaseTests) {
+    foreach (var i in range(parseUint64BaseTests)) {
         var test = Ꮡ(parseUint64BaseTests, i);
         var (@out, err) = ParseUint((~test).@in, (~test).@base, 64);
         if ((~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -388,7 +355,7 @@ public static void TestParseUint64Base(ж<testing.T> Ꮡt) {
 }
 
 public static void TestParseInt32(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseInt32Tests) {
+    foreach (var i in range(parseInt32Tests)) {
         var test = Ꮡ(parseInt32Tests, i);
         var (@out, err) = ParseInt((~test).@in, 10, 32);
         if ((int64)(~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -399,7 +366,7 @@ public static void TestParseInt32(ж<testing.T> Ꮡt) {
 }
 
 public static void TestParseInt64(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseInt64Tests) {
+    foreach (var i in range(parseInt64Tests)) {
         var test = Ꮡ(parseInt64Tests, i);
         var (@out, err) = ParseInt((~test).@in, 10, 64);
         if ((~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -410,7 +377,7 @@ public static void TestParseInt64(ж<testing.T> Ꮡt) {
 }
 
 public static void TestParseInt64Base(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseInt64BaseTests) {
+    foreach (var i in range(parseInt64BaseTests)) {
         var test = Ꮡ(parseInt64BaseTests, i);
         var (@out, err) = ParseInt((~test).@in, (~test).@base, 64);
         if ((~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -423,7 +390,7 @@ public static void TestParseInt64Base(ж<testing.T> Ꮡt) {
 public static void TestParseUint(ж<testing.T> Ꮡt) {
     var exprᴛ1 = IntSize;
     if (exprᴛ1 == 32) {
-        foreach (var (i, _) in parseUint32Tests) {
+        foreach (var i in range(parseUint32Tests)) {
             var test = Ꮡ(parseUint32Tests, i);
             var (@out, err) = ParseUint((~test).@in, 10, 0);
             if ((uint64)(~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -433,7 +400,7 @@ public static void TestParseUint(ж<testing.T> Ꮡt) {
         }
     }
     else if (exprᴛ1 == 64) {
-        foreach (var (i, _) in parseUint64Tests) {
+        foreach (var i in range(parseUint64Tests)) {
             var test = Ꮡ(parseUint64Tests, i);
             var (@out, err) = ParseUint((~test).@in, 10, 0);
             if ((~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -447,7 +414,7 @@ public static void TestParseUint(ж<testing.T> Ꮡt) {
 public static void TestParseInt(ж<testing.T> Ꮡt) {
     var exprᴛ1 = IntSize;
     if (exprᴛ1 == 32) {
-        foreach (var (i, _) in parseInt32Tests) {
+        foreach (var i in range(parseInt32Tests)) {
             var test = Ꮡ(parseInt32Tests, i);
             var (@out, err) = ParseInt((~test).@in, 10, 0);
             if ((int64)(~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -457,7 +424,7 @@ public static void TestParseInt(ж<testing.T> Ꮡt) {
         }
     }
     else if (exprᴛ1 == 64) {
-        foreach (var (i, _) in parseInt64Tests) {
+        foreach (var i in range(parseInt64Tests)) {
             var test = Ꮡ(parseInt64Tests, i);
             var (@out, err) = ParseInt((~test).@in, 10, 0);
             if ((~test).@out != @out || !reflect.DeepEqual((~test).err, err)) {
@@ -471,67 +438,45 @@ public static void TestParseInt(ж<testing.T> Ꮡt) {
 public static void TestAtoi(ж<testing.T> Ꮡt) {
     var exprᴛ1 = IntSize;
     if (exprᴛ1 == 32) {
-        foreach (var (i, _) in parseInt32Tests) {
+        foreach (var i in range(parseInt32Tests)) {
             var test = Ꮡ(parseInt32Tests, i);
             var (@out, err) = Atoi((~test).@in);
-            error testErr = default!;
-            if ((~test).err != default!) {
-                testErr = new strconv.NumErrorжerror(Ꮡ(new NumError("Atoi"u8, (~test).@in, (~(~test).err._<ж<strconv.NumError>>()).Err)));
-            }
-            if ((nint)(~test).@out != @out || !reflect.DeepEqual(testErr, err)) {
-                Ꮡt.Errorf("Atoi(%q) = %v, %v want %v, %v"u8,
-                    (~test).@in, @out, err, (~test).@out, testErr);
+            if (@out != (nint)(~test).@out || !AreEqual(err, (~test).err)) {
+                Ꮡt.Errorf("Atoi(%q) = %v, %v, want %v, %v"u8, (~test).@in, @out, err, (~test).@out, (~test).err);
             }
         }
     }
     else if (exprᴛ1 == 64) {
-        foreach (var (i, _) in parseInt64Tests) {
+        foreach (var i in range(parseInt64Tests)) {
             var test = Ꮡ(parseInt64Tests, i);
             var (@out, err) = Atoi((~test).@in);
-            error testErr = default!;
-            if ((~test).err != default!) {
-                testErr = new strconv.NumErrorжerror(Ꮡ(new NumError("Atoi"u8, (~test).@in, (~(~test).err._<ж<strconv.NumError>>()).Err)));
-            }
-            if ((~test).@out != (int64)@out || !reflect.DeepEqual(testErr, err)) {
-                Ꮡt.Errorf("Atoi(%q) = %v, %v want %v, %v"u8,
-                    (~test).@in, @out, err, (~test).@out, testErr);
+            if ((int64)@out != (~test).@out || !AreEqual(err, (~test).err)) {
+                Ꮡt.Errorf("Atoi(%q) = %v, %v, want %v, %v"u8, (~test).@in, @out, err, (~test).@out, (~test).err);
             }
         }
     }
 }
 
-internal static error bitSizeErrStub(@string name, nint bitSize) {
-    return new strconv.NumErrorжerror(strconv_internal_test_package.BitSizeError(name, "0"u8, bitSize));
-}
-
-internal static error baseErrStub(@string name, nint @base) {
-    return new strconv.NumErrorжerror(strconv_internal_test_package.BaseError(name, "0"u8, @base));
-}
-
-internal static error noErrStub(@string name, nint arg) {
-    return default!;
-}
-
 partial struct parseErrorTest {
     internal nint arg;
-    internal Func<@string, nint, error> errStub;
+    internal error err;
 }
 
 internal static ж<slice<parseErrorTest>> ᏑparseBitSizeTests = new StandardBox<slice<parseErrorTest>>(new parseErrorTest[]{
-    new(-1, bitSizeErrStub),
-    new(0, noErrStub),
-    new(64, noErrStub),
-    new(65, bitSizeErrStub)
+    new(-1, ErrBitSize),
+    new(0, default!),
+    new(64, default!),
+    new(65, ErrBitSize)
 }.slice());
 internal static ref slice<parseErrorTest> parseBitSizeTests => ref ᏑparseBitSizeTests.ValueSlot;
 
 internal static ж<slice<parseErrorTest>> ᏑparseBaseTests = new StandardBox<slice<parseErrorTest>>(new parseErrorTest[]{
-    new(-1, baseErrStub),
-    new(0, noErrStub),
-    new(1, baseErrStub),
-    new(2, noErrStub),
-    new(36, noErrStub),
-    new(37, baseErrStub)
+    new(-1, ErrBase),
+    new(0, default!),
+    new(1, ErrBase),
+    new(2, default!),
+    new(36, default!),
+    new(37, ErrBase)
 }.slice());
 internal static ref slice<parseErrorTest> parseBaseTests => ref ᏑparseBaseTests.ValueSlot;
 
@@ -545,85 +490,47 @@ internal static bool equalError(error a, error b) {
     return a.Error() == b.Error();
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string parseIntˢ = "ParseInt"u8;
-
 public static void TestParseIntBitSize(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseBitSizeTests) {
+    foreach (var i in range(parseBitSizeTests)) {
         var test = Ꮡ(parseBitSizeTests, i);
-        var testErr = (~test).errStub(parseIntˢ, (~test).arg);
         var (_, err) = ParseInt("0"u8, 0, (~test).arg);
-        if (!equalError(testErr, err)) {
+        if (!AreEqual(err, (~test).err)) {
             Ꮡt.Errorf("ParseInt(\"0\", 0, %v) = 0, %v want 0, %v"u8,
-                (~test).arg, err, testErr);
+                (~test).arg, err, (~test).err);
         }
     }
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string parseUintˢ = "ParseUint"u8;
-
 public static void TestParseUintBitSize(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseBitSizeTests) {
+    foreach (var i in range(parseBitSizeTests)) {
         var test = Ꮡ(parseBitSizeTests, i);
-        var testErr = (~test).errStub(parseUintˢ, (~test).arg);
         var (_, err) = ParseUint("0"u8, 0, (~test).arg);
-        if (!equalError(testErr, err)) {
+        if (!AreEqual(err, (~test).err)) {
             Ꮡt.Errorf("ParseUint(\"0\", 0, %v) = 0, %v want 0, %v"u8,
-                (~test).arg, err, testErr);
+                (~test).arg, err, (~test).err);
         }
     }
 }
 
 public static void TestParseIntBase(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseBaseTests) {
+    foreach (var i in range(parseBaseTests)) {
         var test = Ꮡ(parseBaseTests, i);
-        var testErr = (~test).errStub(parseIntˢ, (~test).arg);
         var (_, err) = ParseInt("0"u8, (~test).arg, 0);
-        if (!equalError(testErr, err)) {
+        if (!AreEqual(err, (~test).err)) {
             Ꮡt.Errorf("ParseInt(\"0\", %v, 0) = 0, %v want 0, %v"u8,
-                (~test).arg, err, testErr);
+                (~test).arg, err, (~test).err);
         }
     }
 }
 
 public static void TestParseUintBase(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in parseBaseTests) {
+    foreach (var i in range(parseBaseTests)) {
         var test = Ꮡ(parseBaseTests, i);
-        var testErr = (~test).errStub(parseUintˢ, (~test).arg);
         var (_, err) = ParseUint("0"u8, (~test).arg, 0);
-        if (!equalError(testErr, err)) {
+        if (!AreEqual(err, (~test).err)) {
             Ꮡt.Errorf("ParseUint(\"0\", %v, 0) = 0, %v want 0, %v"u8,
-                (~test).arg, err, testErr);
+                (~test).arg, err, (~test).err);
         }
-    }
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string failedˢ = "failed"u8;
-
-public static void TestNumError(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in numErrorTests) {
-        var err = Ꮡ(new NumError(
-            Func: "ParseFloat"u8,
-            Num: test.num,
-            Err: errors.New(failedˢ)
-        ));
-        {
-            @string got = err.Error(); if (got != test.want) {
-                Ꮡt.Errorf(@"(&NumError{""ParseFloat"", %q, ""failed""}).Error() = %v, want %v"u8, test.num, got, test.want);
-            }
-        }
-    }
-}
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object errorsIsFailedWantedˢ = (@string)"errors.Is failed, wanted success"u8;
-
-public static void TestNumErrorUnwrap(ж<testing.T> Ꮡt) {
-    var err = Ꮡ(new NumError(Err: ErrSyntax));
-    if (!errors.Is(new strconv.NumErrorжerror(err), ErrSyntax)) {
-        Ꮡt.Error(errorsIsFailedWantedˢ);
     }
 }
 
@@ -647,8 +554,8 @@ partial struct benchCase {
 
 internal static void benchmarkParseInt(ж<testing.B> Ꮡb, nint neg) {
     var cases = new benchCase[]{
-        new("7bit"u8, (1 << (int)(7)) - 1),
-        new("26bit"u8, (1 << (int)(26)) - 1),
+        new("7bit"u8, (1 << 7) - 1),
+        new("26bit"u8, (1 << 26) - 1),
         new("31bit"u8, 2147483648L - 1),
         new("56bit"u8, 72057594037927935L),
         new("63bit"u8, 9223372036854775807L)
@@ -679,8 +586,8 @@ public static void BenchmarkAtoi(ж<testing.B> Ꮡb) {
 
 internal static void benchmarkAtoi(ж<testing.B> Ꮡb, nint neg) {
     var cases = new benchCase[]{
-        new("7bit"u8, (1 << (int)(7)) - 1),
-        new("26bit"u8, (1 << (int)(26)) - 1),
+        new("7bit"u8, (1 << 7) - 1),
+        new("26bit"u8, (1 << 26) - 1),
         new("31bit"u8, 2147483648L - 1)
     }.slice();
     if (IntSize == 64) {
