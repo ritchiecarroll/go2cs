@@ -40,7 +40,7 @@ internal class ReceiverMethodTemplate : TemplateBase
         get
         {
             string attributes = NoInlining
-                ? $"{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)"
+                ? $"{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), {NoInliningPartials.CallerFrameAttribute}"
                 : GeneratedCodeAttribute;
 
             if (OverloadResolutionPriority is not null)

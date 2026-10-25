@@ -95,7 +95,7 @@ internal class StrTemplate : TemplateBase
         : "";
 
     private string ForwarderAttributes => NoInlining
-        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]"
+        ? $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), {NoInliningPartials.CallerFrameAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]"
         : $"[{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1), {NonUserCodeAttribute}{GoRecvMark}]";
 
     // A delegate TYPE ARGUMENT: a tuple loses its element names, which delegate identity ignores, so

@@ -1548,7 +1548,9 @@ partial class runtime_package
     // method HAS a frame, and callerFrames locates that frame by IDENTITY (the frame whose method is
     // this one) and starts the walk one above it — so the boundary is where this method's frame is,
     // never where a count assumed it to be.
-    [MethodImpl(MethodImplOptions.NoInlining)]
+    // DynamicSecurityMethod: the CLR never implicitly tail-calls this method, so its caller keeps the frame the
+    // walk starts from (golib's DynamicSecurityMethodAttribute).
+    [MethodImpl(MethodImplOptions.NoInlining), global::System.Security.DynamicSecurityMethod]
     public static nint Stack(slice<byte> buf, bool all)
     {
         // GOTRACEBACK decides the system-goroutine axis here; the FATAL path decides it from Go's
@@ -3858,7 +3860,9 @@ partial class runtime_package
     // The auto body enters the raw-metal unwinder on its first step (callers → getcallersp, an
     // assembly stub); the CLR answers the API CONTRACT natively — walk the managed stack and
     // project it to GO-LOGICAL frames (captureCallers below).
-    [MethodImpl(MethodImplOptions.NoInlining)]
+    // DynamicSecurityMethod: the CLR never implicitly tail-calls this method, so its caller keeps the frame the
+    // walk starts from (golib's DynamicSecurityMethodAttribute).
+    [MethodImpl(MethodImplOptions.NoInlining), global::System.Security.DynamicSecurityMethod]
     public static nint Callers(nint skip, slice<uintptr> pc)
     {
         // Go picks off a 0-length pc before touching the walker (a nil pc array is the

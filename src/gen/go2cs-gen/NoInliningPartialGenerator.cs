@@ -31,7 +31,15 @@ namespace go2cs;
 public static class NoInliningPartials
 {
     public const string Attribute =
-        "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]";
+        "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), " + CallerFrameAttribute + "]";
+
+    /// <summary>
+    /// The mark that keeps a method's CALLER on the stack: the C# compiler writes <c>MethodAttributes.RequireSecObject</c>
+    /// for an attribute of this name, and the CLR then never implicitly tail-calls the method, from any caller in any
+    /// assembly. A no-inline method is one whose frame chain Go code counts, so its caller's frame is part of that chain
+    /// too (golib's DynamicSecurityMethodAttribute says why; GolibTests' TailCallFrameGuardTests guards it).
+    /// </summary>
+    public const string CallerFrameAttribute = "global::System.Security.DynamicSecurityMethod";
 
     /// <summary>What a FORWARDER's declaring part carries instead: it is not a Go frame, so stack walks skip it.</summary>
     public const string ForwarderAttribute = "[global::System.Diagnostics.StackTraceHidden]";
