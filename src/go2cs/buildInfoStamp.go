@@ -118,28 +118,7 @@ func testBinaryDependencies(production *packages.Package, mainModulePath string,
 		return nil
 	}
 
-	visited := map[*packages.Package]bool{}
-	modules := map[module.Version]*packages.Module{}
-	queue := []*packages.Package{production}
-
-	for len(queue) > 0 {
-		pkg := queue[0]
-		queue = queue[1:]
-
-		if visited[pkg] {
-			continue
-		}
-
-		visited[pkg] = true
-
-		if pkg.Module != nil && pkg.Module.Path != mainModulePath {
-			modules[module.Version{Path: pkg.Module.Path, Version: pkg.Module.Version}] = pkg.Module
-		}
-
-		for _, imported := range pkg.Imports {
-			queue = append(queue, imported)
-		}
-	}
+	modules := linkedModules(production, mainModulePath)
 
 	sorted := make([]module.Version, 0, len(modules))
 
@@ -167,4 +146,85 @@ func testBinaryDependencies(production *packages.Package, mainModulePath string,
 	}
 
 	return lines
+}
+
+// linkedModules is the set of modules a program links, as cmd/go's setBuildInfo collects it: walk the package's import
+// closure and record each package's module once, keyed by path and version, skipping the main module and the standard
+// library (whose packages carry no module).
+func linkedModules(production *packages.Package, mainModulePath string) map[module.Version]*packages.Module {
+	visited := map[*packages.Package]bool{}
+	modules := map[module.Version]*packages.Module{}
+	queue := []*packages.Package{production}
+
+	for len(queue) > 0 {
+		pkg := queue[0]
+		queue = queue[1:]
+
+		if visited[pkg] {
+			continue
+		}
+
+		visited[pkg] = true
+
+		if pkg.Module != nil && pkg.Module.Path != mainModulePath {
+			modules[module.Version{Path: pkg.Module.Path, Version: pkg.Module.Version}] = pkg.Module
+		}
+
+		for _, imported := range pkg.Imports {
+			queue = append(queue, imported)
+		}
+	}
+
+	return modules
+}
+
+// linkedProgramDependencies narrows a -recurse closure's third-party modules to the ones the program links: Go's build
+// info lists only those (setBuildInfo walks the program's imports), so a module's second program that imports fewer
+// dependencies carries fewer dep lines. A conversion loads no module data, so each package of the program's import
+// closure is matched to the closure module whose path is the longest prefix of its import path. The closure keeps
+// supplying each module's version and replacement; nil stays nil.
+func linkedProgramDependencies(program *packages.Package, closure []thirdPartyModule) []thirdPartyModule {
+	if closure == nil || program == nil {
+		return closure
+	}
+
+	linked := map[string]bool{}
+	visited := map[*packages.Package]bool{}
+	queue := []*packages.Package{program}
+
+	for len(queue) > 0 {
+		pkg := queue[0]
+		queue = queue[1:]
+
+		if visited[pkg] {
+			continue
+		}
+
+		visited[pkg] = true
+		owner := ""
+
+		for _, dependency := range closure {
+			if (pkg.PkgPath == dependency.path || strings.HasPrefix(pkg.PkgPath, dependency.path+"/")) && len(dependency.path) > len(owner) {
+				owner = dependency.path
+			}
+		}
+
+		if owner != "" {
+			linked[owner] = true
+		}
+
+		for _, imported := range pkg.Imports {
+			queue = append(queue, imported)
+		}
+	}
+
+	dependencies := make([]thirdPartyModule, 0, len(closure))
+
+	for _, dependency := range closure {
+		if linked[dependency.path] {
+			dependencies = append(dependencies, dependency)
+		}
+	}
+
+	return dependencies
 }

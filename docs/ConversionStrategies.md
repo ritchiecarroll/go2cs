@@ -1002,7 +1002,7 @@ standard library live. The standard library can also come from NuGet
 **A `main` package's project also carries the program's build info.** Go links a program's module lines into
 the binary for `runtime/debug.ReadBuildInfo`. The converter writes the same lines into the `main` project as a
 `GoModInfo` assembly attribute: `path`, `mod <module> (devel)`, and under `-recurse` one `dep` line per
-third-party module with its `go.sum` hash. golib adds the build settings the program itself knows, its
+third-party module the program links, with its `go.sum` hash. golib adds the build settings the program itself knows, its
 `DefaultGODEBUG` when one is set, `CGO_ENABLED`, `GOARCH` and `GOOS`, so `ReadBuildInfo` reports the program's
 build info as Go's does. A converted test program registers its own `path` and `mod` lines when it starts, as a Go
 test binary carries them. A test of a `main` package also lists that package's `dep` lines, because Go's test binary

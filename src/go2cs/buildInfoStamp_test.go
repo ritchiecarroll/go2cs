@@ -221,6 +221,9 @@ func TestMainProgramsCarryTheirModInfo(t *testing.T) {
 	writeModuleFile(t, filepath.Join(dependencyDir, "dep.go"), "package dep\n\nfunc Answer() int { return 42 }\n")
 	writeModuleFile(t, filepath.Join(moduleDir, "go.mod"), "module example.test/prog\n\ngo 1.24\n\nrequire example.test/dep v0.1.0\n\nreplace example.test/dep => ../dep\n")
 	writeModuleFile(t, filepath.Join(moduleDir, "main.go"), "package main\n\nimport \"example.test/dep\"\n\nfunc main() { println(dep.Answer()) }\n")
+	// A second program of the same module that links no dependency: Go lists only the modules a program links, so its
+	// build info carries no dep line even though the -recurse closure holds example.test/dep.
+	writeModuleFile(t, filepath.Join(moduleDir, "cmd", "bare", "main.go"), "package main\n\nfunc main() { println(1) }\n")
 
 	options := godebugTestOptions()
 	options.goPath = build.Default.GOPATH
@@ -253,6 +256,16 @@ func TestMainProgramsCarryTheirModInfo(t *testing.T) {
 	}
 
 	assertModInfoCarriesNoBuildSettings(t, stamp)
+
+	bareProjects, _ := filepath.Glob(filepath.Join(options.recurseOutputRoot, "src", "example.test", "prog", "cmd", "bare", "*.csproj"))
+
+	if len(bareProjects) != 1 {
+		t.Fatalf("want one project for the second program, got %v", bareProjects)
+	}
+
+	if bare, ok := stampedModInfo(t, readGenerated(t, bareProjects[0])); !ok || bare != "path\texample.test/prog/cmd/bare\nmod\texample.test/prog\t(devel)\t\n" {
+		t.Errorf("a program that links no dependency was stamped %q (found %v); Go lists only the modules it links", bare, ok)
+	}
 
 	libraries, _ := filepath.Glob(filepath.Join(options.recurseOutputRoot, "pkg", "*", "*.csproj"))
 	libraries2, _ := filepath.Glob(filepath.Join(options.recurseOutputRoot, "pkg", "*", "*", "*.csproj"))
@@ -382,5 +395,37 @@ func TestFindProductionPackageKeepsAMainPackage(t *testing.T) {
 
 	if got := findProductionPackage(loaded, dir); got != production {
 		t.Fatalf("production package = %v, want the bare main package %q", got, production.ID)
+	}
+}
+
+// A program's dep lines are the closure modules its import closure reaches. A package belongs to the closure module whose
+// path is the LONGEST prefix of its import path at a path boundary: `example.test/ab` is not inside `example.test/a`, and
+// a package of a nested module belongs to the nested one. A module the program never imports is not listed.
+func TestLinkedProgramDependenciesMatchByModulePath(t *testing.T) {
+	closure := []thirdPartyModule{
+		{path: "example.test/a", version: "v1.0.0"},
+		{path: "example.test/a/nested", version: "v0.2.0"},
+		{path: "example.test/ab", version: "v0.3.0"},
+		{path: "example.test/unused", version: "v9.0.0"},
+	}
+
+	nested := &packages.Package{PkgPath: "example.test/a/nested/x"}
+	ab := &packages.Package{PkgPath: "example.test/ab"}
+	program := &packages.Package{Name: "main", PkgPath: "example.test/prog", Imports: map[string]*packages.Package{
+		"example.test/a/nested/x": nested, "example.test/ab": ab, "fmt": {PkgPath: "fmt"},
+	}}
+
+	var got []string
+
+	for _, dependency := range linkedProgramDependencies(program, closure) {
+		got = append(got, dependency.path)
+	}
+
+	if want := "example.test/a/nested,example.test/ab"; strings.Join(got, ",") != want {
+		t.Fatalf("linked = %q, want %q", got, want)
+	}
+
+	if linkedProgramDependencies(program, nil) != nil {
+		t.Fatalf("no closure (a single-package conversion) must stay nil")
 	}
 }
