@@ -28421,8 +28421,8 @@ changed), P256 16,149 -> 7,331 (likely P2's P-256 R3 persistent element boxes, b
 
 ## 2026-10-25 — G (COORD's ruling, H's measurement): crypto/tls TestBogoSuite's fan-out is lost to the converted shim's PER-PROCESS cost, not to a go1.26.10 regression — .2 CANDIDATE (owner, 2026-10-25): the shim's per-process cost is the lever
 
-**Measured (H, 2026-10-25, one desktop box, the standard 600 s wall).** The converted runner had started about 331 of
-BoringSSL's 6,473 tests when the wall hit, at 603 s; Go's own TestBogoSuite passes standalone in 43.8 s on the same box.
+**Measured (H, 2026-10-25, one desktop box, the standard 600 s wall).** The converted runner's counter stood at about 331 of
+6,473 when the wall hit, at 603 s (that total includes the tests bogo_config.json disables; the suite RUNS 3,526, with about one shim launch each, 3,527 measured, against 3,418 and 3,419 at go1.24.13); Go's own TestBogoSuite passes standalone in 43.8 s on the same box.
 A same-box A/B against the 1.24.13.7 tree read the same, so this is not a go1.26.10 regression, and per-test timing
 shows uniform slowness, not a stall. Each converted shim launch costs about **10 s** against Go's **85 ms**:
 
@@ -28430,7 +28430,7 @@ shows uniform slowness, not a stall. Each converted shim launch costs about **10
 |:--|--:|:--|
 | process start + package init | about 3 to 3.7 s | 2.4 to 2.5 s with tiered JIT |
 | cold JIT of the handshake path | about 6.5 s | repeated in every process, since tiering-off re-JITs every method |
-| whole suite, projected | about 77 min | so a 40 m runner wall does not clear on a desktop host either |
+| whole suite, projected | about 77 min | 3,527 launches x 10.4 s over about 7.9 concurrent; a 40 m runner wall does not clear on a desktop host either |
 
 **What it costs the roster.** `crypto/tls` banks 1,393 + 2 at go1.26.10: the root reads Go pass / converted fail under
 its `host-limit` pin, and its 3,526 fan-out rows are withdrawn with it. The go1.24.13 bank claimed them only with the
