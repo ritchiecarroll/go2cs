@@ -20,6 +20,8 @@ internal static class Go2CsTestHost
             "readdir_test.go",
             "readfile.go",
             "readfile_test.go",
+            "readlink.go",
+            "readlink_test.go",
             "stat.go",
             "stat_test.go",
             "sub.go",
@@ -34,15 +36,18 @@ internal static class Go2CsTestHost
         registry.Add("TestGlob", fs_test_package.TestGlob, "glob_test.go", 27);
         registry.Add("TestGlobError", fs_test_package.TestGlobError, "glob_test.go", 50);
         registry.Add("TestGlobMethod", fs_test_package.TestGlobMethod, "glob_test.go", 73);
-        registry.Add("TestIssue51617", fs_test_package.TestIssue51617, "walk_test.go", 113);
+        registry.Add("TestIssue51617", fs_test_package.TestIssue51617, "walk_test.go", 154);
+        registry.Add("TestLstat", fs_test_package.TestLstat, "readlink_test.go", 60);
         registry.Add("TestReadDir", fs_test_package.TestReadDir, "readdir_test.go", 20);
-        registry.Add("TestReadDirPath", fs_test_package.TestReadDirPath, "readdir_test.go", 104);
+        registry.Add("TestReadDirPath", fs_test_package.TestReadDirPath, "readdir_test.go", 103);
         registry.Add("TestReadFile", fs_test_package.TestReadFile, "readfile_test.go", 38);
         registry.Add("TestReadFilePath", fs_test_package.TestReadFilePath, "readfile_test.go", 62);
+        registry.Add("TestReadLink", fs_test_package.TestReadLink, "readlink_test.go", 13);
         registry.Add("TestStat", fs_test_package.TestStat, "stat_test.go", 17);
         registry.Add("TestSub", fs_test_package.TestSub, "sub_test.go", 17);
         registry.Add("TestValidPath", fs_test_package.TestValidPath, "fs_test.go", 42);
         registry.Add("TestWalkDir", fs_test_package.TestWalkDir, "walk_test.go", 88);
+        registry.Add("TestWalkDirSymlink", fs_test_package.TestWalkDirSymlink, "walk_test.go", 113);
         return TestHost.Run(registry, args);
     }
 }

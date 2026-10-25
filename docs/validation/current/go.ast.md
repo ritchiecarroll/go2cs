@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `go/ast` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**9 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**36 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/go/ast`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/ast).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -24,8 +24,35 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestIsDirective` | pass | pass |
 | `TestIssue28089` | pass | pass |
 | `TestIssue33649` | pass | pass |
-| `TestPreorderBreak` | pass | pass |
+| `TestIssue69183` | pass | pass |
+| `TestParseArgs` | pass | pass |
+| `TestParseArgs/empty_args` | pass | pass |
+| `TestParseArgs/escapes` | pass | pass |
+| `TestParseArgs/no_space_after_quote` | pass | pass |
+| `TestParseArgs/quoted` | pass | pass |
+| `TestParseArgs/raw_quoted` | pass | pass |
+| `TestParseArgs/simple` | pass | pass |
+| `TestParseArgs/spaces` | pass | pass |
+| `TestParseArgs/unterminated_quote` | pass | pass |
+| `TestParseDirective` | pass | pass |
+| `TestParseDirective/empty` | pass | pass |
+| `TestParseDirective/just_slashes` | pass | pass |
+| `TestParseDirective/multiple_spaces` | pass | pass |
+| `TestParseDirective/no_args` | pass | pass |
+| `TestParseDirective/no_name` | pass | pass |
+| `TestParseDirective/no_tool` | pass | pass |
+| `TestParseDirective/not_a_comment` | pass | pass |
+| `TestParseDirective/not_a_directive` | pass | pass |
+| `TestParseDirective/trailing_space` | pass | pass |
+| `TestParseDirective/valid` | pass | pass |
+| `TestParseDirectiveMatchesIsDirective` | pass | pass |
+| `TestPreorderStack` | pass | pass |
+| `TestPreorder_Break` | pass | pass |
 | `TestPrint` | pass | pass |
+| `TestSortImportsSameLastLine` | pass | pass |
+| `TestSortImportsUpdatesFileImportsField` | pass | pass |
+| `TestSortImportsUpdatesFileImportsField/multiple_import_statements` | pass | pass |
+| `TestSortImportsUpdatesFileImportsField/one_import_statement` | pass | pass |
 
 ## Excluded declarations
 

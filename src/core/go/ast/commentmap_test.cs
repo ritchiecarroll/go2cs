@@ -114,7 +114,7 @@ public static void TestCommentMap(ж<testing.T> Ꮡt) {
     }
     var cmap = NewCommentMap(fset, new ast.FileжNode(f), (~f).Comments);
 
-    // very correct association of comments
+    // verify correct association of comments
     foreach (var (n, list) in cmap) {
         @string key = fmt.Sprintf("%2d: %T"u8, fset.Position(n.Pos()).Line, n);
         @string got = ctext(list);

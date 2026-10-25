@@ -930,7 +930,7 @@ public static void TestExitCode(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in tests) {
         var test = vᴛ1;
 
-        var cmd = exec.Command(Δos.Args[0], testRunTestExitCodeˢ);
+        var cmd = exec.Command(testenv.Executable(new flag_test_package.testing_TжTB(Ꮡt)), testRunTestExitCodeˢ);
         cmd.Value.Env = append(
             Δos.Environ(),
             "GO_CHILD_FLAG="u8 + test.flag,

@@ -22,6 +22,12 @@ using static global::go.@internal.runtime.atomic_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -31,9 +37,9 @@ using static global::go.@internal.runtime.atomic_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("internal/runtime/atomic/atomic_andor_test.go", "atomic_andor_test.cs", "ABAclJKCgoKAgtqCgriCgoKigpSmgriCgsqUkoKCgoKAgtqCgriCgoKigpSmgriCgsqUkoKCgoCC2qaCgoKigpSmgriCgsqUkoKCgoKAgtqmgoKCooKUpoK4goLKooKCgriCgoKCgoKCyqKCgoK4goKCgoKCgsqigoKCuIKCgoKCgoLKooKCgriCgoKCgoKC", "35-40:1;76-81:1;113-118:1;151-156:1;181-187:1;201-207:1;221-227:1;241-247:1")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/atomic_test.go", "atomic_test.cs", "ABEeooKCgpKClKaCtKSCgoKCgpSCkoKUgIKkgoKClILsosqUgpKCguiilJSCgoKSgIK2ogALBsqCpoKUgpSQkpCSkJKQkpCSkLaUkoKCgILagoK4goKCooKUpoK4goLKlJKCgoCC2oKCuIKCgqKClKaCuIKCypSSgoKAgtqmgoKCooKUpoK4goLKlJKCgoCC2qaCgoKigpSmgriCgsqUpoKCuIKCgqKCgoKClIKCuKaCuIKCypSmgoK4goKCooKCgoKUgoK4poK4goIADAqCggABEIKCgoKCgoKmgqaC+oKCgpSC", "19-24:1;40-42:1;47-50:2;75-86:1;106-106:1;107-107:2;108-108:3;109-109:4;110-110:5;111-111:6;134-139:1;173-178:1;209-214:1;245-250:1;278-292:1;320-334:1")]
+[assembly: go.GoPositionMap("internal/runtime/atomic/atomic_test.go", "atomic_test.cs", "ABEeooKCgpKClKaCtKSCgoKCgpSCkoKUgIKkgoKClILsosqUgpKCguiilJSCgoKSgIK2ogALBtqCpoKUgpSQkpCSkJKQkpCSkLaUkoKCgILagoK4goKCooKUpoK4goLKlJKCgoCC2oKCuIKCgqKClKaCuIKCypSSgoKAgtqmgoKCooKUpoK4goLKlJKCgoCC2qaCgoKigpSmgriCgsqUpoKCuIKCgqKCgoKClIKCuKaCuIKCypSmgoK4goKCooKCgoKUgoK4poK4goIADAqCggABEIKCgoKCgoKmgqaC+oKCgpSC", "19-24:1;40-42:1;47-50:2;75-86:1;106-106:1;107-107:2;108-108:3;109-109:4;110-110:5;111-111:6;134-139:1;173-178:1;209-214:1;245-250:1;278-292:1;320-334:1")]
 [assembly: go.GoPositionMap("internal/runtime/atomic/bench_test.go", "bench_test.cs", "AA0cooKCgriigoKCuKKCgoK4ooKCgriigoKCuKKCgoK4ooKCgriigoKCuIKCgoKCgoLKgoKCgoKCgsqigoKCuKKCgoK4goKCgoKCgsqCgoKCgoKCyoKCgpKCyoKCgpKCyoKCgoKSgoLKgoKCgpKCgsiCgoKCkoKCgoLKgoKCgpKCgoKC", "81-87:1;93-99:1;121-127:1;133-139:1;145-149:1;155-159:1;166-171:1;178-183:1;189-196:1;203-210:1")]
-[assembly: go.GoPositionMap("internal/runtime/atomic/xchg8_test.go", "xchg8_test.cs", "AAwcgoKCgpS4goKCgoKClIKUgsqigoKCuIKCgoKCgoI=", "52-58:1")]
+[assembly: go.GoPositionMap("internal/runtime/atomic/xchg8_test.go", "xchg8_test.cs", "AAsYgoKCgpS4goKCgoKClIKUgsqigoKCuIKCgoKCgoI=", "50-56:1")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime;

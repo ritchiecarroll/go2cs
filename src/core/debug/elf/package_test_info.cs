@@ -43,6 +43,12 @@ using static global::go.debug.elf_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -51,8 +57,8 @@ using static global::go.debug.elf_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("debug/elf/elf_test.go", "elf_test.cs", "ABAiABo2goKCgg==")]
-[assembly: go.GoPositionMap("debug/elf/file_test.go", "file_test.cs", "ACdIAKADwAaigpSCgoKCgIK2lIKClJKCgpSCgpSCgqaCgpSCgqaCgoKUgoKClIKCgpSClIKCgpSCpoKUgtiowoKClJKCgpSCggAQHAC0A+oGgoKSkoKCgpSCgpSCgoKClIKCgqaCgoKUgpSCgpSCAAkOpoKClIKClIKCgoKClIKUlIL4poKClIIADyCCgpSCuKKCgIKkgIKkgpSCgoKUpKSUgoKUgriCgpSCgpSCgoKUpoK4tJSUgoKCgpSCgoKmgoKClILKgriCgoSUggAMDqKCgoKUpIKUgoKmgoKCgrSoADZolIKUAAoWpriCgriCgpSCgriCgoKCgoKClIKClIKCuJQABxAABxAABxCCAAcQpgAJFO4AChYACRQABxAACBKUgoKUpAAIEoKmgoKmAAgSgrSkgoiCguiigoKClKSCgqaCtAAIBISSgoKUlIKCpoKClIKClIKUgoKUgpSCgqaCgoLowoKCgpSSgoKCgpSCxtTCgoKClJKCgoKClILG", "998-1036:1")]
+[assembly: go.GoPositionMap("debug/elf/elf_test.go", "elf_test.cs", "ABAiABs4goKCgg==")]
+[assembly: go.GoPositionMap("debug/elf/file_test.go", "file_test.cs", "ACdIAM4DnAeigpSCgoKCgIK2lIKClJKCgpSCgpSCgqaCgpSCgqaCgoKUgoKClIKCgpSClIKCgpSCpoKUgtiowoKClJKCgpSCggAQHADMA5oHgrKSgoKClIKClIKCgoKUgoKCpoKCgpSClIKClIIACQ6mgoKUgoKUgoKCgoKUgpSUgvimgoKUggAPIIKClIK4ooKAgqSAgqSClIKCgpSkpJSCgpSCuIKClIKClIKCgpSmgri0lJSCgoKClIKCgqaCgoKUgsqCuIKChJSCAAwOooKCgpSkgpSCgqaCgoKCtKgAN2iUgpQAChamuIKCuIKClIKCuIKCgoKCgoKUgoKUgoK4lAAHEAAHEAAHEIIABxCmAAkU7gAKFgAJFAAHEAAIEpSCgpSkAAgSgqaCgqYACBKCtKSCiIKC6KKCgoKUpIKCpoK0AAgEhJKCgpSUgoKmgoKUgoKUgpSCgpSClIKCpoKCgujCgoKClJKCgoKClILG1MKCgoKUkoKCgoKUgsY=", "1067-1105:1")]
 [assembly: go.GoPositionMap("debug/elf/symbols_test.go", "symbols_test.cs", "AA0ekqKCgoKCgIK2lIKClJKCgoKSgpSCpoKUgpSAguqSgpSCzACnB9QO", "16-55:1")]
 // </GoSourcePositionMaps>
 
@@ -85,7 +91,7 @@ public static partial class elf_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
-    [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(math.rand_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(go.math.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpath() => builtin.initPackage(typeof(path_package));

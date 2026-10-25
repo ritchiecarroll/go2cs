@@ -12,6 +12,7 @@ partial class buildcfg_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string rva20u64ˢ = "rva20u64"u8;
 internal static readonly @string rva22u64ˢ = "rva22u64"u8;
+internal static readonly @string rva23u64ˢ = "rva23u64"u8;
 internal static readonly @string rva22ˢ = "rva22"u8;
 internal static readonly @string v70ˢ = "v7.0"u8;
 internal static readonly @string v80Lsbˢ = "v8.0,lsb"u8;
@@ -45,6 +46,10 @@ public static void TestConfigFlags(ж<testing.T> Ꮡt) {
     os.Setenv(goriscv64ˢ, rva22u64ˢ);
     if (goriscv64() != 22) {
         Ꮡt.Errorf("Wrong parsing of RISCV64=rva22u64"u8);
+    }
+    os.Setenv(goriscv64ˢ, rva23u64ˢ);
+    if (goriscv64() != 23) {
+        Ꮡt.Errorf("Wrong parsing of RISCV64=rva23u64"u8);
     }
     Error = default!;
     os.Setenv(goriscv64ˢ, rva22ˢ);

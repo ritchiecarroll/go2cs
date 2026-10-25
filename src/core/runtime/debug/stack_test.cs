@@ -20,7 +20,6 @@ using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAt
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.os;
 using go.runtime;
-using io = io_package;
 using path;
 
 partial class debug_test_package {
@@ -114,14 +113,9 @@ public static void TestStack(ж<testing.T> Ꮡt) {
             // initial (not current) environment. Spawn a subprocess to determine the
             // real baked-in GOROOT.
             Ꮡt.Logf("found GOROOT %q from environment; checking embedded GOROOT value"u8, envGoroot);
-            testenv.MustHaveExec(new testing_TжTB(Ꮡt));
-            var (exe, err) = os.Executable();
-            if (err != default!) {
-                Ꮡt.Fatal(err);
-            }
-            var cmd = exec.Command(exe);
+            var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)));
             cmd.Value.Env = append(os.Environ(), "GOROOT="u8, "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=dumpgoroot");
-            (var @out, err) = cmd.Output();
+            var (@out, err) = cmd.Output();
             if (err != default!) {
                 Ꮡt.Fatal(err);
             }
@@ -170,18 +164,12 @@ private static readonly @string crashOutˢ = "crash.out"u8;
 private static readonly @string helloˢ = "hello"u8;
 
 public static void TestSetCrashOutput(ж<testing.T> Ꮡt) {
-    testenv.MustHaveExec(new testing_TжTB(Ꮡt));
-    var (exe, err) = os.Executable();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
-    }
-
     @string crashOutput = filepath.Join(Ꮡt.TempDir(), crashOutˢ);
 
-    var cmd = exec.Command(exe);
+    var cmd = exec.Command(testenv.Executable(new testing_TжTB(Ꮡt)));
     cmd.Value.Stderr = new strings_BuilderжWriter(@new<strings.Builder>());
     cmd.Value.Env = append(os.Environ(), "GO_RUNTIME_DEBUG_TEST_ENTRYPOINT=setcrashoutput"u8, "CRASHOUTPUT=" + crashOutput);
-    err = cmd.Run();
+    var err = cmd.Run();
     @string stderr = fmt.Sprint((~cmd).Stderr);
     if (err == default!) {
         Ꮡt.Fatalf("child process succeeded unexpectedly (stderr: %s)"u8, stderr);

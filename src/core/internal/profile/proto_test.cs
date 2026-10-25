@@ -68,8 +68,8 @@ internal partial struct packedInts {
 internal static slice<Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>> decoder(this ref packedInts u) {
     return new Func<ж<global::go.@internal.profile_package.buffer>, global::go.@internal.profile_package.message, error>[]{
         default!,
-        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeUint64s(ref (b).DerefOrNull(), m._<ж<packedInts>>().of(packedInts.Ꮡuint64s)),
-        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeInt64s(ref (b).DerefOrNull(), m._<ж<packedInts>>().of(packedInts.Ꮡint64s))
+        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeUint64s(ref (b).DerefOrNull(), m._<global::go.@internal.profile_package.message, ж<packedInts>>().of(packedInts.Ꮡuint64s)),
+        (ж<global::go.@internal.profile_package.buffer> b, global::go.@internal.profile_package.message m) => decodeInt64s(ref (b).DerefOrNull(), m._<global::go.@internal.profile_package.message, ж<packedInts>>().of(packedInts.Ꮡint64s))
     }.slice();
 }
 

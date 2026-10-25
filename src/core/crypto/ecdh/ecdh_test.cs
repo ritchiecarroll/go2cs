@@ -14,13 +14,13 @@ using fmt = fmt_package;
 using testenv = go.@internal.testenv_package;
 using io = io_package;
 using os = os_package;
-using exec = go.os.exec_package;
 using filepath = path.filepath_package;
 using regexp = regexp_package;
 using strings = strings_package;
 using testing = testing_package;
 using chacha20 = vendor.golang.org.x.crypto.chacha20_package;
 using encoding;
+using exec = go.os.exec_package;
 using fs = go.io.fs_package;
 using go.@internal;
 using go.crypto;
@@ -37,14 +37,14 @@ partial class ecdh_test_package {
 partial interface _ᴛ1 /*dyn*/ {
     bool Equal(cryptoꓸPublicKey x);
 }
-internal static _ᴛ1 _ᴛ1ʗ = new go.crypto.ecdh_package.ΔPublicKeyж_ᴛ1(Ꮡ(new go.crypto.ecdh_package.ΔPublicKey(nil)));
+internal static _ᴛ1 _ᴛ1ʗ = new ecdh_ΔPublicKeyж_ᴛ1(Ꮡ(new ecdhꓸPublicKey(nil)));
 
 
 partial interface _ᴛ2 /*dyn*/ {
     cryptoꓸPublicKey Public();
     bool Equal(cryptoꓸPrivateKey x);
 }
-internal static _ᴛ2 _ᴛ2ʗ = new ecdh.PrivateKeyж_ᴛ2(Ꮡ(new ecdh.PrivateKey(nil)));
+internal static _ᴛ2 _ᴛ2ʗ = new ecdh_PrivateKeyж_ᴛ2(Ꮡ(new ecdh.PrivateKey(nil)));
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object encodedAndDecodedPublicˢ = (@string)"encoded and decoded public keys are different"u8;
@@ -344,7 +344,9 @@ internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ec
         "02e2534a3532d08fbba02dde659ee62bd0031fe2db785596ef509302446b030852"u8,
         // Points not on the curve.
         "046b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c2964fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f6"u8,
-        "0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8}.slice(),
+        "0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8,
+        // Non-canonical encoding.
+        "04ffffffff00000001000000000000000000000001000000000000000000000004ba6dbc4555a7e7fa016ec431667e8521ee35afc49b265c3accbea3f7cdb70433"u8}.slice(),
     [ecdh.P384()] = new @string[]{
         // Bad lengths.
         ""u8,
@@ -357,7 +359,9 @@ internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ec
         "0208d999057ba3d2d969260045c55b97f089025959a6f434d651d207d19fb96e9e4fe0e86ebe0e64f85b96a9c75295df61"u8,
         // Points not on the curve.
         "04aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab73617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e60"u8,
-        "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8}.slice(),
+        "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8,
+        // Non-canonical encoding.
+        "04fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff000000000000000100000001732152442fb6ee5c3e6ce1d920c059bc623563814d79042b903ce60f1d4487fccd450a86da03f3e6ed525d02017bfdb3"u8}.slice(),
     [ecdh.P521()] = new @string[]{
         // Bad lengths.
         ""u8,
@@ -370,7 +374,9 @@ internal static map<ecdhꓸCurve, slice<@string>> invalidPublicKeys = new map<ec
         "0200c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66"u8,
         // Points not on the curve.
         "0400c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66011839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16651"u8,
-        "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8}.slice(),
+        "04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"u8,
+        // Non-canonical encoding.
+        "0402000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100d9254fdf800496acb33790b103c5ee9fac12832fe546c632225b0f7fce3da4574b1a879b623d722fa8fc34d5fc2a8731aad691a9a8bb8b554c95a051d6aa505acf"u8}.slice(),
     [ecdh.X25519()] = new @string[]{}.slice()
 };
 
@@ -523,7 +529,6 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(testRequiresRunningGoˢ);
     }
-    testenv.MustHaveGoBuild(new testing_TжTB(Ꮡt));
 
     @string dir = Ꮡt.TempDir();
     @string hello = filepath.Join(dir, helloGoˢ);
@@ -534,17 +539,16 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
 
     @string run(params ꓸꓸꓸstring argsʗp) {
         var args = argsʗp.slice();
-        var cmd = exec.Command(args[0], args[1..].ꓸꓸꓸ);
+        var cmd = testenv.Command(new testing_TжTB(Ꮡt), args[0], args[1..].ꓸꓸꓸ);
         cmd.Value.Dir = dir;
-        var (@out, errΔ1) = cmd.CombinedOutput();
+        var (@out, errΔ1) = testenv.CleanCmdEnv(cmd).CombinedOutput();
         if (errΔ1 != default!) {
             Ꮡt.Fatalf("%v: %v\n%s"u8, args, errΔ1, (@string)@out);
         }
         return (@string)@out;
     }
 
-    @string goBin = testenv.GoToolPath(new testing_TжTB(Ꮡt));
-    run(goBin, buildˢ, "-o", helloExeˢ, helloGoˢ);
+    run(testenv.GoToolPath(new testing_TжTB(Ꮡt)), buildˢ, "-o", helloExeˢ, helloGoˢ);
     {
         @string @out = run(helloExeˢ2); if (@out != "OK\n"u8) {
             Ꮡt.Error(unexpectedOutputˢ, @out);
@@ -554,7 +558,7 @@ public static void TestLinker(ж<testing.T> Ꮡt) {
     // List all text symbols under crypto/... and make sure there are some for
     // P256, but none for the other curves.
     bool consistent = default!;
-    @string nm = run(goBin, toolˢ, "nm", helloExeˢ);
+    @string nm = run(testenv.GoToolPath(new testing_TжTB(Ꮡt)), toolˢ, "nm", helloExeˢ);
     foreach (var (_, match) in regexp.MustCompile(mTCryptoˢ).FindAllStringSubmatch(nm, -1)) {
         @string symbol = strings.ToLower(match[1]);
         if (strings.Contains(symbol, p256ˢ2)) {

@@ -13,6 +13,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.math;
 using io = io_package;
 using static go.encoding.gob_package;
@@ -47,11 +49,13 @@ internal static slice<EncodeT> encodeT = new EncodeT[]{
 
 // testError is meant to be used as a deferred function to turn a panic(gobError) into a
 // plain test.Error call.
-internal static void testError(ж<testing.T> Ꮡt) {
+internal static partial void testError(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 Ꮡt.Error(e._<gobError>().err); // Will re-panic if not one of our errors, such as a runtime error.
             }
         }
@@ -70,7 +74,7 @@ internal static ж<global::go.encoding.gob_package.decBuffer> newDecBuffer(slice
 public static void TestUintCodec(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        defer(testError, Ꮡt, ref ᒐ);
+        defer(testError, Ꮡt, ref ᒐ, recovers: true);
         var b = @new<global::go.encoding.gob_package.encBuffer>();
         var encState = newEncoderState(b);
         foreach (var (_, tt) in encodeT) {
@@ -100,7 +104,7 @@ public static void TestUintCodec(ж<testing.T> Ꮡt) {
 internal static void verifyInt(int64 i, ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        defer(testError, Ꮡt, ref ᒐ);
+        defer(testError, Ꮡt, ref ᒐ, recovers: true);
         ж<global::go.encoding.gob_package.encBuffer> b = @new<global::go.encoding.gob_package.encBuffer>();
         var encState = newEncoderState(b);
         encState.encodeInt(i);
@@ -354,7 +358,7 @@ internal static void execDec(ж<global::go.encoding.gob_package.decInstr> Ꮡins
         ref var instr = ref Ꮡinstr.DerefOrNull();
         ref var state = ref Ꮡstate.DerefOrNull();
 
-        defer(testError, Ꮡt, ref ᒐ);
+        defer(testError, Ꮡt, ref ᒐ, recovers: true);
         nint v = (nint)state.decodeUint();
         if (v + state.fieldnum != 6) {
             Ꮡt.Fatalf("decoding field number %d, got %d"u8, (nint)6, v + state.fieldnum);
@@ -1620,6 +1624,8 @@ internal static void testFuzz(ж<testing.T> Ꮡt, int64 seed, nint n, params ꓸ
 // TestFuzzOneByte tries to decode corrupted input sequences
 // and checks that no panic occurs.
 public static void TestFuzzOneByte(ж<testing.T> Ꮡt) {
+    var indicesᴷ = new stackAppend<nint>();
+
     if (!doFuzzTests.Value) {
         Ꮡt.Skipf("disabled; run with -gob.fuzz to enable"u8);
     }
@@ -1647,7 +1653,7 @@ public static void TestFuzzOneByte(ж<testing.T> Ꮡt) {
             continue;
             break;
         }}
-        indices = append(indices, i);
+        indices = append(indicesᴷ, indices, i);
     }
     if (testing.Short()) {
         indices = new nint[]{1, 111, 178}.slice(); // known fixed panics
@@ -1747,7 +1753,7 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
             tΔ1.Parallel(); // Only run in parallel in a large address space
         }
         var s = new slice<byte>((10 << 21));
-        foreach (var (i, _) in s) {
+        foreach (var i in range(s)) {
             s[i] = (byte)i;
         }
         var st = Ꮡ(new LargeSliceByte(S: s));
@@ -1759,7 +1765,7 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
             tΔ2.Parallel();
         }
         var s = new slice<int8>((10 << 21));
-        foreach (var (i, _) in s) {
+        foreach (var i in range(s)) {
             s[i] = (int8)i;
         }
         var st = Ꮡ(new LargeSliceInt8(S: s));
@@ -1771,7 +1777,7 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
             tΔ3.Parallel();
         }
         var s = new slice<StringPair>((1 << 21));
-        foreach (var (i, _) in s) {
+        foreach (var i in range(s)) {
             s[i].A = (@string)(rune)i;
             s[i].B = s[i].A;
         }
@@ -1784,7 +1790,7 @@ public static void TestLargeSlice(ж<testing.T> Ꮡt) {
             tΔ4.Parallel();
         }
         var s = new slice<@string>((1 << 21));
-        foreach (var (i, _) in s) {
+        foreach (var i in range(s)) {
             s[i] = (@string)(rune)i;
         }
         var st = Ꮡ(new LargeSliceString(S: s));

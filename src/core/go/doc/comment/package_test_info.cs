@@ -32,6 +32,12 @@ using static global::go.go.doc.comment_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -42,7 +48,7 @@ using static global::go.go.doc.comment_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/doc/comment/old_test.go", "old_test.cs", "AA8WABMugoKC+gAcPoKCgoI=")]
 [assembly: global::go.GoPositionMap("go/doc/comment/parse_test.go", "parse_test.cs", "AAoUkg==")]
-[assembly: global::go.GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABcegoKCpoKCgqaUgoKC")]
+[assembly: global::go.GoPositionMap("go/doc/comment/std_test.go", "std_test.cs", "ABceooKCgoKmgoKCppSCgoI=")]
 [assembly: global::go.GoPositionMap("go/doc/comment/testdata_test.go", "testdata_test.cs", "ABskgoKClIK4goKUlIKGlKbKlIKSgoKClIKCgqaClIKCgoKUgpikpKSkAAITAAEYgu6CgoKmgqS2goKCgoKUtoKCyLaCgsiCtoK2goLIgraCtoK2goLIgpSCyIKUgsiCgoLagraCyKKCgg==", "28-33:1;34-41:2;43-49:3;51-91:4")]
 [assembly: global::go.GoPositionMap("go/doc/comment/wrap_test.go", "wrap_test.cs", "ABEg1IKClIKmgoKCgoKClIKUppKSgoKSkqaCgoKUgpSCgpSClIKClKSCkoKUlIK4goIABxgACgqCgoKClIKUgoKCgoKClIKClIKCgtyCgpSCgoKU", "41-88:1;45-86:1.1")]
 // </GoSourcePositionMaps>

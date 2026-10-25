@@ -12,9 +12,10 @@ using io = io_package;
 using os = os_package;
 using signal = global::go.os.signal_package;
 using reflect = reflect_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using testing = testing_package;
 using time = time_package;
+using global::go;
 using global::go.@internal;
 using global::go.os;
 using static global::go.@internal.fuzz_package;
@@ -231,16 +232,16 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
 
         var bytes = new slice<byte>(1024);
         var ctx = context.Background();
-        for (nint sz = 1; sz <= len(bytes); sz <<= (int)(1)) {
-            nint szΔ1 = sz;
-            var input = new any[]{bytes.slice(0, szΔ1)}.slice();
+        for (nint szᴛ1 = 1; szᴛ1 <= len(bytes); szᴛ1 <<= (int)(1)) {
+            var sz = szᴛ1;
+            var input = new any[]{bytes.slice(0, sz)}.slice();
             var encodedVals = marshalCorpusFile(input.ꓸꓸꓸ);
             mem = ᐸꟷ((~ws).memMu);
             mem.setValue(encodedVals);
             (~ws).memMu.ᐸꟷ(mem);
             var ctxʗ1 = ctx;
             var wsʗ1 = ws;
-            Ꮡb.Run(strconv.Itoa(szΔ1), (ж<testing.B> bΔ1) => {
+            Ꮡb.Run(strconv.Itoa(sz), (ж<testing.B> bΔ1) => {
                 nint i = 0;
                 wsʗ1.Value.fuzzFn = (CorpusEntry _) => {
                     if (i == 0) {
@@ -250,7 +251,7 @@ public static void BenchmarkWorkerMinimize(ж<testing.B> Ꮡb) {
                     return (time.ΔSecond, default!);
                 };
                 for (nint iΔ1 = 0; iΔ1 < (~bΔ1).N; iΔ1++) {
-                    bΔ1.SetBytes((int64)szΔ1);
+                    bΔ1.SetBytes((int64)sz);
                     wsʗ1.minimize(ctxʗ1, new minimizeArgs(nil));
                 }
             });

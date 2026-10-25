@@ -28,7 +28,7 @@ internal static void benchmarkHashTrieMapLoad(ж<testing.B> Ꮡb, slice<@string>
 
     b.ReportAllocs();
     ref var m = ref heap(new isync.HashTrieMap<@string, nint>(), out var Ꮡm);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         Ꮡm.LoadOrStore(data[i], i);
     }
     b.ResetTimer();

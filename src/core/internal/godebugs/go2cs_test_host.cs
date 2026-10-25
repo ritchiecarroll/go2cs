@@ -13,6 +13,7 @@ internal static class Go2CsTestHost
             "table.go",
         });
         registry.Add("TestAll", godebugs_test_package.TestAll, "godebugs_test.go", 19);
+        registry.Add("TestRemoved", godebugs_test_package.TestRemoved, "godebugs_test.go", 97);
         return TestHost.Run(registry, args);
     }
 }

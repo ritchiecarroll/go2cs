@@ -167,7 +167,7 @@ internal static void maySkipHelperCommand(@string name) {
 }
 
 // helperCommand returns an exec.Cmd that will run the named helper command.
-internal static ж<Δexec.Cmd> helperCommand(ж<testing.T> Ꮡt, @string name, params ꓸꓸꓸstring argsʗp) {
+internal static partial ж<Δexec.Cmd> helperCommand(ж<testing.T> Ꮡt, @string name, params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
 
     Ꮡt.Helper();
@@ -212,10 +212,11 @@ internal static void initᴛhelperCommands() { helperCommands = new map<@string,
 
 internal static void cmdEcho(params ꓸꓸꓸstring argsʗp) {
     var args = argsʗp.sslice();
+    var iargsᴷ = new stackAppend<any>();
 
     var iargs = new any[]{}.slice();
     foreach (var (_, s) in args) {
-        iargs = append(iargs, (any)(s));
+        iargs = append(iargsᴷ, iargs, (any)(s));
     }
     fmt.Println(iargs.ꓸꓸꓸ);
 }
@@ -802,12 +803,14 @@ public static void TestPipeLookPathLeak(ж<testing.T> Ꮡt) {
     // Not parallel: checks for leaked file descriptors
 
     slice<uintptr> openFDs() {
+        var fdsᴷ = new stackAppend<uintptr>(moves: true);
         slice<uintptr> fds = default!;
         for (var i = (uintptr)0; i < 100; i++) {
             if (fdtest.Exists(i)) {
-                fds = append(fds, i);
+                fds = append(fdsᴷ, fds, i);
             }
         }
+        fds = move2heap(fdsᴷ, fds);
         return fds;
     }
 
@@ -881,7 +884,10 @@ public static void TestExtraFiles(ж<testing.T> Ꮡt) {
 
         // This test runs with cgo disabled. External linking needs cgo, so
         // it doesn't work if external linking is required.
-        testenv.MustInternalLink(new exec_test_package.testing_TжTB(Ꮡt), false);
+        //
+        // N.B. go build below explictly doesn't pass through
+        // -asan/-msan/-race, so we don't care about those.
+        testenv.MustInternalLink(new exec_test_package.testing_TжTB(Ꮡt), testenv.NoSpecialBuildTypes);
 
         if (runtime.GOOS == "windows"u8) {
             Ꮡt.Skipf("skipping test on %q"u8, runtime.GOOS);
@@ -1079,7 +1085,7 @@ partial struct delayedInfiniteReader {
 
 internal static (nint, error) Read(this delayedInfiniteReader _, slice<byte> b) {
     time.Sleep(100 * time.Millisecond);
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         b[i] = (rune)'x';
     }
     return (len(b), default!);
@@ -1730,8 +1736,8 @@ public static void TestWaitInterrupt(ж<testing.T> Ꮡt) {
         // and the grandchild will exit (or die by SIGPIPE) once the
         // stderr pipe is closed.
         {
-            var ee = @new<ж<Δexec.ExitError>>(); if (!errors.As(err, ee.OrTypedNil())) {
-                tΔ3.Errorf("Wait error = %v; want %T"u8, err, ee.ValueSlot.OrTypedNil());
+            var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+                tΔ3.Errorf("Wait error = %v; want %T"u8, err, ee.OrTypedNil());
             }
         }
     });
@@ -1777,8 +1783,8 @@ public static void TestWaitInterrupt(ж<testing.T> Ꮡt) {
         // This command ignores SIGINT, sleeping until it is killed.
         // Wait should return the usual error for a killed process.
         {
-            var ee = @new<ж<Δexec.ExitError>>(); if (!errors.As(err, ee.OrTypedNil())) {
-                tΔ5.Errorf("Wait error = %v; want %T"u8, err, ee.ValueSlot.OrTypedNil());
+            var (ee, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
+                tΔ5.Errorf("Wait error = %v; want %T"u8, err, ee.OrTypedNil());
             }
         }
     });
@@ -1832,7 +1838,7 @@ public static void TestWaitInterrupt(ж<testing.T> Ꮡt) {
         tΔ7.Logf("[%d] %v"u8, (~(~cmd).Process).Pid, err);
 
         {
-            var ee = @new<ж<Δexec.ExitError>>(); if (!errors.As(err, ee.OrTypedNil())) {
+            var (_, ok) = errors.AsType<ж<Δexec.ExitError>>(err); if (!ok) {
                 tΔ7.Errorf("Wait error = %v; want %v"u8, err, ctx.Err());
             }
         }
@@ -2294,6 +2300,28 @@ public static void TestAbsPathExec(ж<testing.T> Ꮡt) {
             tΔ1.Error(ranWrongBinaryˢ);
         }
     });
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string binNonesuchˢ = "/bin/nonesuch"u8;
+internal static readonly @string execAlreadyStartedˢ = "exec: already started"u8;
+
+// Calling Start twice is an error, regardless of outcome.
+public static void TestStart_twice(ж<testing.T> Ꮡt) {
+    testenv.MustHaveExec(new exec_test_package.testing_TжTB(Ꮡt));
+
+    var cmd = Δexec.Command(binNonesuchˢ);
+    {
+        var errΔ1 = cmd.Start(); if (errΔ1 == default!) {
+            Ꮡt.Fatalf("running invalid command succeeded"u8);
+        }
+    }
+    var err = cmd.Start();
+    @string got = fmt.Sprint(err);
+    @string want = execAlreadyStartedˢ;
+    if (got != want) {
+        Ꮡt.Fatalf("Start call returned err %q, want %q"u8, got, want);
+    }
 }
 
 } // end exec_test_package

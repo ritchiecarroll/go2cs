@@ -28,7 +28,7 @@ internal static class Go2CsTestHost
         });
         registry.Add("TestFreeOSMemory", debug_test_package.TestFreeOSMemory, "garbage_test.go", 93);
         registry.Add("TestReadGCStats", debug_test_package.TestReadGCStats, "garbage_test.go", 16);
-        registry.Add("TestSetCrashOutput", debug_test_package.TestSetCrashOutput, "stack_test.go", 139);
+        registry.Add("TestSetCrashOutput", debug_test_package.TestSetCrashOutput, "stack_test.go", 134);
         registry.Add("TestSetGCPercent", debug_test_package.TestSetGCPercent, "garbage_test.go", 158);
         registry.Add("TestSetMaxThreadsOvf", debug_test_package.TestSetMaxThreadsOvf, "garbage_test.go", 227);
         registry.Add("TestStack", debug_test_package.TestStack, "stack_test.go", 71);

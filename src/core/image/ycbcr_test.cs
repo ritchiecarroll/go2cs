@@ -94,8 +94,8 @@ internal static void testYCbCr(ж<testing.T> Ꮡt, global::go.image_package.Rect
                     // For each point in the sub-image's bounds, check that m.At(x, y) equals sub.At(x, y).
                     for (nint y = sub.Value.Rect.Min.Y; y < (~sub).Rect.Max.Y; y++) {
                         for (nint x = sub.Value.Rect.Min.X; x < (~sub).Rect.Max.X; x++) {
-                            var color0 = m.At(x, y)._<color.YCbCr>();
-                            var color1 = sub.At(x, y)._<color.YCbCr>();
+                            var color0 = m.At(x, y)._<color.Color, color.YCbCr>();
+                            var color1 = sub.At(x, y)._<color.Color, color.YCbCr>();
                             if (color0 != color1) {
                                 Ꮡt.Errorf("r=%v, subsampleRatio=%v, delta=%v, x=%d, y=%d, color0=%v, color1=%v"u8,
                                     r, subsampleRatio, delta, x, y, color0, color1);
@@ -119,7 +119,7 @@ public static void TestYCbCrSlicesDontOverlap(ж<testing.T> Ꮡt) {
     }.slice();
     foreach (var (i, Δslice) in slices) {
         var want = (uint8)(10 + i);
-        foreach (var (j, _) in Δslice) {
+        foreach (var j in range(Δslice)) {
             Δslice[j] = want;
         }
     }

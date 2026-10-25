@@ -54,7 +54,7 @@ public static void TestSub(ж<testing.T> Ꮡt) {
     check(subOnlyˢ, sub, err);
 
     // Test that Sub uses Open when the method is not present.
-    (sub, err) = Sub(new openOnly(testFsys), subˢ2);
+    (sub, err) = Sub(new openOnly(new fstest_MapFSᴠFS(testFsys)), subˢ2);
     check(openOnlyˢ, sub, err);
 
     (_, err) = sub.Open(nonexistˢ);

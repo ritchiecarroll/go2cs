@@ -6,6 +6,8 @@ namespace go.crypto;
 using cpu = go.@internal.cpu_package;
 using sys = go.@internal.runtime.sys_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using go.@internal.runtime;
 using static go.crypto.subtle_package;
@@ -80,6 +82,33 @@ public static void TestDITPanic(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object ditNotEnabledInNewˢ = (@string)"DIT not enabled in new goroutine"u8;
+internal static readonly object ditUnsetAfterReturningˢ = (@string)"dit unset after returning from goroutine started in WithDataIndependentTiming closure"u8;
+
+public static void TestDITGoroutineInheritance(ж<testing.T> Ꮡt) {
+    if (!cpu.ARM64.HasDIT) {
+        Ꮡt.Skip(cpuDoesNotSupportDitˢ);
+    }
+
+    var ditAlreadyEnabled = sys.DITEnabled();
+
+    WithDataIndependentTiming([MethodImpl(MethodImplOptions.NoInlining)] () => {
+        var done = new channel<EmptyStruct>(0);
+        var doneʗ1 = done;
+        goǃ(() => {
+            if (!sys.DITEnabled()) {
+                Ꮡt.Error(ditNotEnabledInNewˢ);
+            }
+            close(doneʗ1);
+        });
+        ᐸꟷ(done);
+        if (!ditAlreadyEnabled && !sys.DITEnabled()) {
+            Ꮡt.Fatal(ditUnsetAfterReturningˢ);
+        }
+    });
 }
 
 } // end subtle_internal_test_package

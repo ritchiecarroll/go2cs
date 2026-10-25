@@ -14,13 +14,14 @@ internal static class Go2CsTestHost
             "testfs.go",
             "testfs_test.go",
         });
-        registry.Add("TestDash", fstest_internal_test_package.TestDash, "testfs_test.go", 37);
+        registry.Add("TestDash", fstest_internal_test_package.TestDash, "testfs_test.go", 40);
         registry.Add("TestMapFS", fstest_internal_test_package.TestMapFS, "mapfs_test.go", 14);
         registry.Add("TestMapFSChmodDot", fstest_internal_test_package.TestMapFSChmodDot, "mapfs_test.go", 24);
         registry.Add("TestMapFSFileInfoName", fstest_internal_test_package.TestMapFSFileInfoName, "mapfs_test.go", 49);
-        registry.Add("TestShuffledFS", fstest_internal_test_package.TestShuffledFS, "testfs_test.go", 71);
+        registry.Add("TestMapFSSymlink", fstest_internal_test_package.TestMapFSSymlink, "mapfs_test.go", 61);
+        registry.Add("TestShuffledFS", fstest_internal_test_package.TestShuffledFS, "testfs_test.go", 74);
         registry.Add("TestSymlink", fstest_internal_test_package.TestSymlink, "testfs_test.go", 18);
-        registry.Add("TestTestFSWrappedErrors", fstest_internal_test_package.TestTestFSWrappedErrors, "testfs_test.go", 92);
+        registry.Add("TestTestFSWrappedErrors", fstest_internal_test_package.TestTestFSWrappedErrors, "testfs_test.go", 95);
         return TestHost.Run(registry, args);
     }
 }

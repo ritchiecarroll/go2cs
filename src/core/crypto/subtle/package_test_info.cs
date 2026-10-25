@@ -8,7 +8,6 @@ global using static global::go.crypto.subtle_package;
 global using static global::go.crypto.subtle_internal_test_package;
 
 // <ImportedTypeAliases>
-global using runtimeꓸError = go.runtime_package.ΔError;
 // </ImportedTypeAliases>
 
 using go;
@@ -24,6 +23,12 @@ using static global::go.crypto.subtle_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -32,7 +37,7 @@ using static global::go.crypto.subtle_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/subtle/xor_test.go", "xor_test.cs", "AA8egoKClIKCgoKCgpSUgpSClIKCpoCCkoKkgoCCkoKkgIKSgraAgpKCpICCkoIADBCCgpSClIKClIKCuIKCgoKCgrKCgoKC3KKCgoKktILWtqI=", "75-77:1;78-80:2;81-84:3;85-88:4;97-104:1;110-122:1")]
+[assembly: go.GoPositionMap("crypto/subtle/xor_test.go", "xor_test.cs", "AA8egoKClIKCgoKCgpSUgpSClIKCpoCCkoKkgoCCkoKkgIKSgraAgpKCpICCkoIADBCCgpSClIKClIKCuIKCgoKCgrKCgoKC3IKCgoKCgpKygoKCgoLuooKCgqS0gta2og==", "75-77:1;78-80:2;81-84:3;85-88:4;97-104:1;115-123:1;130-142:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;

@@ -33,10 +33,10 @@ public static void TestIssue33649(ж<testing.T> Ꮡt) {
             Ꮡtf.ValueSlot = fΔ1;
             return true;
         });
-        nint tfEnd = tf.Base() + tf.Size();
+        tokenꓸPos tfEnd = tf.End();
 
         var fd = (~f).Decls[len((~f).Decls) - 1]._<ж<ast.FuncDecl>>();
-        nint fdEnd = (nint)fd.End();
+        tokenꓸPos fdEnd = fd.End();
 
         if (fdEnd != tfEnd) {
             Ꮡt.Errorf("%q: got fdEnd = %d; want %d (base = %d, size = %d)"u8, src, fdEnd, tfEnd, tf.Base(), tf.Size());

@@ -22,7 +22,11 @@ internal static readonly @string stdPkgsˢ = "stdPkgs"u8;
 internal static readonly @string wantˢ = "want"u8;
 
 public static void TestStd(ж<testing.T> Ꮡt) {
-    var (@out, err) = testenv.Command(new comment_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new comment_internal_test_package.testing_TжTB(Ꮡt)), listˢ, stdˢ).CombinedOutput();
+    var listᴷ = new stackAppend<@string>();
+
+    var cmd = testenv.Command(new comment_internal_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new comment_internal_test_package.testing_TжTB(Ꮡt)), listˢ, stdˢ);
+    cmd.Value.Env = append(cmd.Environ(), "GOEXPERIMENT=none"u8);
+    var (@out, err) = cmd.CombinedOutput();
     if (err != default!) {
         Ꮡt.Fatalf("%v\n%s"u8, err, @out);
     }
@@ -30,7 +34,7 @@ public static void TestStd(ж<testing.T> Ꮡt) {
     slice<@string> list = default!;
     foreach (var (_, pkg) in strings.Fields((@string)@out)) {
         if (!strings.Contains(pkg, "/"u8)) {
-            list = append(list, pkg);
+            list = append(listᴷ, list, pkg);
         }
     }
     slices.Sort<slice<@string>, @string>(list);

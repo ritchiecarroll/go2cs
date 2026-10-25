@@ -6,8 +6,9 @@ namespace go.@internal;
 using bytes = bytes_package;
 using fmt = fmt_package;
 using os = os_package;
-using strconv = strconv_package;
+using strconv = global::go.strconv_package;
 using testing = testing_package;
+using global::go;
 using static global::go.@internal.fuzz_package;
 
 partial class fuzz_internal_test_package {

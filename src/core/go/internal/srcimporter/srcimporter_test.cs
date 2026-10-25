@@ -181,7 +181,7 @@ internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Nam
     // check explicitly declared methods
     for (nint i = 0; i < iface.NumExplicitMethods(); i++) {
         var m = iface.ExplicitMethod(i);
-        var recv = m.Type()._<ж<typesꓸSignature>>().Recv();
+        var recv = m.Signature().Recv();
         if (recv == nil) {
             Ꮡt.Errorf("%s: missing receiver type"u8, m.OrTypedNil());
             continue;
@@ -218,14 +218,14 @@ public static void TestReimport(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goInternalSrcimporterˢ = "go/internal/srcimporter/testdata/issue20855"u8;
-internal static readonly @string missingFunctionBodyˢ = "missing function body"u8;
+internal static readonly @string funcInitMustHaveABodyˢ = "func init must have a body"u8;
 internal static readonly object gotNoPackageDespiteNoˢ = (@string)"got no package despite no hard errors"u8;
 
 public static void TestIssue20855(ж<testing.T> Ꮡt) {
     testenv.MustHaveSource(new srcimporter_internal_test_package.testing_TжTB(Ꮡt));
 
     var (pkg, err) = importer.ImportFrom(goInternalSrcimporterˢ, "."u8, 0);
-    if (err == default! || !strings.Contains(err.Error(), missingFunctionBodyˢ)) {
+    if (err == default! || !strings.Contains(err.Error(), funcInitMustHaveABodyˢ)) {
         Ꮡt.Fatalf("got unexpected or no error: %v"u8, err);
     }
     if (pkg == nil) {

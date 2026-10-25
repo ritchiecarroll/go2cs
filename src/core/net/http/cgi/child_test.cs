@@ -212,6 +212,32 @@ public static void TestRequestWithoutRemotePort(ж<testing.T> Ꮡt) {
     }
 }
 
+// CGI Specification RFC 3875 - section 4.1.16
+// INCLUDED value for SERVER_PROTOCOL must be treated as an HTTP/1.0 request
+public static void TestIncludedServerProtocol(ж<testing.T> Ꮡt) {
+    var env = new map<@string, @string>{
+        ["REQUEST_METHOD"u8] = "GET"u8,
+        ["SERVER_PROTOCOL"u8] = "INCLUDED"u8
+    };
+    var (req, err) = RequestFromMap(env);
+    if ((~req).Proto != "INCLUDED"u8) {
+        Ꮡt.Errorf("unexpected change to SERVER_PROTOCOL"u8);
+    }
+    {
+        nint major = req.Value.ProtoMajor; if (major != 1) {
+            Ꮡt.Errorf("ProtoMajor: got %d, want %d"u8, major, (nint)1);
+        }
+    }
+    {
+        nint minor = req.Value.ProtoMinor; if (minor != 0) {
+            Ꮡt.Errorf("ProtoMinor: got %d, want %d"u8, minor, (nint)0);
+        }
+    }
+    if (err != default!) {
+        Ꮡt.Fatalf("expected INCLUDED to be treated as HTTP/1.0 request"u8);
+    }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string gopherˢ = "gopher"u8;
 

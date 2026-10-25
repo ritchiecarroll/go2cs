@@ -4,12 +4,15 @@
 namespace go;
 
 using fmt = fmt_package;
+using testenv = @internal.testenv_package;
 using Δos = os_package;
 using exec = go.os.exec_package;
 using filepath = path.filepath_package;
+using slices = slices_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using time = time_package;
+using @internal;
 using fs = io.fs_package;
 using go.os;
 using path;
@@ -55,6 +58,39 @@ public static void TestEscapeArg(ж<testing.T> Ꮡt) {
     }
 }
 
+internal partial struct TestEnvBlockSorted_tests /*dyn*/ {
+    internal slice<@string> env;
+    internal slice<@string> want;
+}
+
+public static void TestEnvBlockSorted(ж<testing.T> Ꮡt) {
+    var tests = new TestEnvBlockSorted_tests[]{
+        new(),
+        new(
+            env: new @string[]{"A=1"u8}.slice(),
+            want: new @string[]{"A=1"u8}.slice()
+        ),
+        new(
+            env: new @string[]{"A=1"u8, "B=2"u8, "C=3"u8}.slice(),
+            want: new @string[]{"A=1"u8, "B=2"u8, "C=3"u8}.slice()
+        ),
+        new(
+            env: new @string[]{"C=3"u8, "B=2"u8, "A=1"u8}.slice(),
+            want: new @string[]{"A=1"u8, "B=2"u8, "C=3"u8}.slice()
+        ),
+        new(
+            env: new @string[]{"c=3"u8, "B=2"u8, "a=1"u8}.slice(),
+            want: new @string[]{"a=1"u8, "B=2"u8, "c=3"u8}.slice()
+        )
+    }.slice();
+    foreach (var (_, tt) in tests) {
+        var got = syscall_internal_test_package.EnvSorted(tt.env);
+        if (!slices.Equal<slice<@string>, @string>(got, tt.want)) {
+            Ꮡt.Errorf("EnvSorted(%q) = %q, want %q"u8, tt.env, got, tt.want);
+        }
+    }
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goWantHelperProcessˢ = "GO_WANT_HELPER_PROCESS"u8;
 internal static readonly @string goWantHelperProcessFileˢ = "GO_WANT_HELPER_PROCESS_FILE"u8;
@@ -66,6 +102,7 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
     try {
         if (Δos.Getenv(goWantHelperProcessˢ) == "parent"u8) {
             // in parent process
+
             // Parent does nothing. It is just used as a parent of a child process.
             time.Sleep(time.ΔMinute);
             Δos.Exit(0);
@@ -88,7 +125,7 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
 
         // run parent process
 
-        var parent = exec.Command(Δos.Args[0], testRunˢ);
+        var parent = exec.Command(testenv.Executable(new syscall_test_package.testing_TжTB(Ꮡt)), testRunˢ);
         parent.Value.Env = append(Δos.Environ(), "GO_WANT_HELPER_PROCESS=parent"u8);
         var err = parent.Start();
         if (err != default!) {
@@ -113,7 +150,7 @@ public static void TestChangingProcessParent(ж<testing.T> Ꮡt) {
         }
         defer(syscall.CloseHandle, ph, ref ᒐ);
 
-        var child = exec.Command(Δos.Args[0], testRunˢ);
+        var child = exec.Command(testenv.Executable(new syscall_test_package.testing_TжTB(Ꮡt)), testRunˢ);
         child.Value.Env = append(Δos.Environ(),
             "GO_WANT_HELPER_PROCESS=child"u8,
             "GO_WANT_HELPER_PROCESS_FILE=" + childDumpPath);

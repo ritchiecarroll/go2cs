@@ -21,7 +21,8 @@ using go;
 using static global::go.testing.fstest_internal_test_package;
 
 // <ExportedTypeAliases>
-[assembly: GoDynamicTypeLift("696e746572666163657b556e777261702829205b5d6572726f727d", "TestTestFSWrappedErrors_errs")]
+[assembly: GoDynamicTypeLift("696e746572666163657b556e777261702829205b5d6572726f723b206572726f727d", "TestTestFSWrappedErrors_wrapper")]
+[assembly: GoDynamicTypeLift("74657374696e672f6673746573742e77726170706572", "TestTestFSWrappedErrors_wrapper")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
@@ -37,6 +38,12 @@ using static global::go.testing.fstest_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -45,8 +52,8 @@ using static global::go.testing.fstest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("testing/fstest/mapfs_test.go", "mapfs_test.cs", "ABUcgriAgsiCuIKSgoKUgpTqgoL4gqaCgoKC", "30-37:1")]
-[assembly: go.GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABckgpSClICCtoCCtoCC+IKmgILsgoKClOqC3Ib2gsqAggAIDoKClAAJBoKCgpSUgqqigpSmgg==", "65-67:1")]
+[assembly: go.GoPositionMap("testing/fstest/mapfs_test.go", "mapfs_test.cs", "ABUcgriAgsiCuIKSgoKUgpTqgoL4gqaCgoKCAAsIgoLcgIK2goKUgoCCpIKClICSpICCtoKClICSpICCtoKClICSpICCtoKClICSpICC", "30-37:1")]
+[assembly: go.GoPositionMap("testing/fstest/testfs_test.go", "testfs_test.cs", "ABgkgpSClICCtoCCpICCtoCC+IKmgILsgoKClOqC3Ib2gsqAggAIDoKClAANBoKCgpSUgpqKgpSmgg==", "68-70:1")]
 // </GoSourcePositionMaps>
 
 namespace go.testing;
@@ -61,6 +68,7 @@ public static partial class fstest_internal_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    [GoLocalName("wrapper")] partial interface TestTestFSWrappedErrors_wrapper {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

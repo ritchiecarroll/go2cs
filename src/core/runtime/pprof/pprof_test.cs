@@ -9,6 +9,7 @@ using context = context_package;
 using fmt = fmt_package;
 using abi = @internal.abi_package;
 using profile = @internal.profile_package;
+using label = @internal.runtime.pprof.label_package;
 using unix = @internal.syscall.unix_package;
 using testenv = @internal.testenv_package;
 using io = io_package;
@@ -28,6 +29,7 @@ using testing = testing_package;
 using time = time_package;
 // blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
 using @internal;
+using @internal.runtime.pprof;
 using @internal.syscall;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
@@ -145,10 +147,6 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
             Ꮡt.Skip(issue35057IsOnlyˢ);
         }
 
-        // Linux [5.9,5.16) has a kernel bug that can break CPU timers on newly
-        // created threads, breaking our CPU accounting.
-        var (major, minor) = unix.KernelVersion();
-        Ꮡt.Logf("Running on Linux %d.%d"u8, major, minor);
         defer(() => {
             if (Ꮡt.Failed()) {
                 Ꮡt.Logf("Failure of this test may indicate that your system suffers from a known Linux kernel bug fixed on newer kernels. See https://golang.org/issue/49065."u8);
@@ -159,9 +157,9 @@ public static void TestCPUProfileMultithreadMagnitude(ж<testing.T> Ꮡt) {
         // it enabled to potentially warn users that they are on a broken
         // kernel.
         if (testenv.Builder() != ""u8 && (runtime.GOARCH == "386"u8 || runtime.GOARCH == "amd64"u8)) {
-            var have59 = major > 5 || (major == 5 && minor >= 9);
-            var have516 = major > 5 || (major == 5 && minor >= 16);
-            if (have59 && !have516) {
+            // Linux [5.9,5.16) has a kernel bug that can break CPU timers on newly
+            // created threads, breaking our CPU accounting.
+            if (unix.KernelVersionGE(5, 9) && !unix.KernelVersionGE(5, 16)) {
                 testenv.SkipFlaky(new pprof_internal_test_package.testing_TжTB(Ꮡt), 49065);
             }
         }
@@ -401,7 +399,12 @@ internal static partial void dump(this inlineWrapper h, slice<uintptr> pcs) {
 }
 
 internal static void inlinedWrapperCallerDump(slice<uintptr> pcs) {
-    inlineWrapperInterface h = default!;
+    ref var h = ref heap<inlineWrapperInterface>(out var Ꮡh);
+
+    // Take the address of h, such that h.dump() call (below)
+    // does not get devirtualized by the compiler.
+    _ = Ꮡh;
+
     h = new pprof_internal_test_package.inlineWrapperжinlineWrapperInterface(Ꮡ(new inlineWrapper(nil)));
     h.dump(pcs);
 }
@@ -535,7 +538,7 @@ internal static ж<profile.Profile> testCPUProfile(ж<testing.T> Ꮡt, Func<ж<t
         StopCPUProfile();
 
         {
-            var (p, okΔ1) = profileOk(Ꮡt, matches, prof, duration); if (okΔ1) {
+            var (p, okΔ1) = profileOk(Ꮡt, matches, Ꮡprof, duration); if (okΔ1) {
                 return p;
             }
         }
@@ -591,8 +594,9 @@ internal static bool stackContains(@string spec, uintptr count, slice<ж<profile
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object tooFewSamplesOnWindowsˢ = (@string)"too few samples on Windows (golang.org/issue/10842)"u8;
 
-internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> Ꮡt, Func<ж<testing.T>, ж<profile.Profile>, bool> matches, bytes.Buffer prof, time.Duration duration) {
+internal static (ж<profile.Profile>, bool ok) profileOk(ж<testing.T> Ꮡt, Func<ж<testing.T>, ж<profile.Profile>, bool> matches, ж<bytes.Buffer> Ꮡprof, time.Duration duration) {
     bool ok = default!;
+    ref var prof = ref Ꮡprof.DerefOrNull();
 
     ok = true;
 
@@ -720,10 +724,6 @@ public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
             // Use smaller size for Android to avoid crash.
             heap = 100 << 20;
         }
-        if (runtime.GOOS == "windows"u8 && runtime.GOARCH == "arm"u8) {
-            // Use smaller heap for Windows/ARM to avoid crash.
-            heap = (100 << (int)(20));
-        }
         if (testing.Short()) {
             heap = 100 << 20;
         }
@@ -734,7 +734,7 @@ public static partial void TestCPUProfileWithFork(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         var garbageʗ1 = garbage;
         goǃ(() => {
-            foreach (var (i, _) in garbageʗ1) {
+            foreach (var i in range(garbageʗ1)) {
                 garbageʗ1[i] = 42;
             }
             doneʗ1.ᐸꟷ(true);
@@ -878,15 +878,24 @@ public static void TestMorestack(ж<testing.T> Ꮡt) {
             var cʗ1 = c;
             goǃ(() => {
                 growstack1();
-                cʗ1.ᐸꟷ(true);
+                // NOTE(vsaioc): This goroutine may leak without this select.
+                var selᴛ2 = cʗ1.ᐸꟷ(true, ꓸꓸꓸ);
+                var selᴛ3 = time.After(duration);
+                switch (select(selᴛ2, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
+                case 0: {
+                    break;
+                }
+                case 1 when selᴛ3.ꟷᐳ(out _): {
+                    break;
+                }}
             });
-            var selᴛ2 = tΔ1;
-            var selᴛ3 = c;
-            switch (select(ᐸꟷ(selᴛ2, ꓸꓸꓸ), ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
-            case 0 when selᴛ2.ꟷᐳ(out _): {
+            var selᴛ4 = tΔ1;
+            var selᴛ5 = c;
+            switch (select(ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
+            case 0 when selᴛ4.ꟷᐳ(out _): {
                 return;
             }
-            case 1 when selᴛ3.ꟷᐳ(out _): {
+            case 1 when selᴛ5.ꟷᐳ(out _): {
                 break;
             }}
         }
@@ -1119,6 +1128,7 @@ internal static slice<slice<@string>> /*res*/ profileStacks(ж<profile.Profile> 
 
 internal static partial slice<slice<@string>> /*res*/ blockRecordStacks(slice<runtime.BlockProfileRecord> records) {
     slice<slice<@string>> res = default!;
+    var resᴷ = new stackAppend<slice<@string>>(moves: true);
 
     foreach (var (_, vᴛ1) in records) {
         var record = vᴛ1;
@@ -1132,8 +1142,9 @@ internal static partial slice<slice<@string>> /*res*/ blockRecordStacks(slice<ru
                 break;
             }
         }
-        res = append(res, stk);
+        res = append(resᴷ, res, stk);
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 
@@ -1259,13 +1270,13 @@ internal static partial void blockSelectRecvAsync(ж<testing.T> Ꮡt) {
         }
     });
     for (nint i = 0; i < numTries; i++) {
-        var selᴛ4 = c;
-        var selᴛ5 = c2;
-        switch (select(ᐸꟷ(selᴛ4, ꓸꓸꓸ), ᐸꟷ(selᴛ5, ꓸꓸꓸ))) {
-        case 0 when selᴛ4.ꟷᐳ(out _): {
+        var selᴛ6 = c;
+        var selᴛ7 = c2;
+        switch (select(ᐸꟷ(selᴛ6, ꓸꓸꓸ), ᐸꟷ(selᴛ7, ꓸꓸꓸ))) {
+        case 0 when selᴛ6.ꟷᐳ(out _): {
             break;
         }
-        case 1 when selᴛ5.ꟷᐳ(out _): {
+        case 1 when selᴛ7.ꟷᐳ(out _): {
             break;
         }}
     }
@@ -1282,9 +1293,9 @@ internal static partial void blockSelectSendSync(ж<testing.T> Ꮡt) {
         awaitBlockedGoroutine(Ꮡt, selectˢ, blockSelectSendSyncˢ, 1);
         ᐸꟷ(cʗ1);
     });
-    var selᴛ6 = c.ᐸꟷ(true, ꓸꓸꓸ);
-    var selᴛ7 = c2.ᐸꟷ(true, ꓸꓸꓸ);
-    switch (select(selᴛ6, selᴛ7)) {
+    var selᴛ8 = c.ᐸꟷ(true, ꓸꓸꓸ);
+    var selᴛ9 = c2.ᐸꟷ(true, ꓸꓸꓸ);
+    switch (select(selᴛ8, selᴛ9)) {
     case 0: {
         break;
     }
@@ -1454,6 +1465,7 @@ public static void TestMutexProfile(ж<testing.T> Ꮡt) {
         ref var t = ref Ꮡt.DerefOrNull();
 
         // Generate mutex profile
+
         nint old = runtime.SetMutexProfileFraction(1);
         defer(runtime.SetMutexProfileFraction, old, ref ᒐ);
         if (old != 0) {
@@ -1667,6 +1679,8 @@ internal static readonly @string fingValueˢ = "fing-value"u8;
 public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var orderedPrefixᴷ = new stackAppend<@string>();
+
         // Setting GOMAXPROCS to 1 ensures we can force all goroutines to the
         // desired blocking point.
         defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(1), ref ᒐ);
@@ -1747,13 +1761,13 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
         @string prof = Ꮡw.String();
 
         ref var labels = ref heap<global::go.runtime.pprof_package.labelMap>(out var Ꮡlabels);
-        labels = new labelMap(Labels(labelˢ, valueˢ));
+        labels = new labelMap(label.NewSet(Labels(labelˢ, valueˢ).list));
         @string labelStr = "\n# labels: "u8 + Ꮡlabels.String();
         ref var selfLabel = ref heap<global::go.runtime.pprof_package.labelMap>(out var ᏑselfLabel);
-        selfLabel = new labelMap(Labels(selfLabelˢ, selfValueˢ));
+        selfLabel = new labelMap(label.NewSet(Labels(selfLabelˢ, selfValueˢ).list));
         @string selfLabelStr = "\n# labels: "u8 + ᏑselfLabel.String();
         ref var fingLabel = ref heap<global::go.runtime.pprof_package.labelMap>(out var ᏑfingLabel);
-        fingLabel = new labelMap(Labels(fingLabelˢ, fingValueˢ));
+        fingLabel = new labelMap(label.NewSet(Labels(fingLabelˢ, fingValueˢ).list));
         @string fingLabelStr = "\n# labels: "u8 + ᏑfingLabel.String();
         var orderedPrefix = new @string[]{
             "\n50 @ "u8,
@@ -1763,7 +1777,7 @@ public static partial void TestGoroutineCounts(ж<testing.T> Ꮡt) {
             "\n10 @"u8,
             "\n9 @"u8, labelStr,
             "\n1 @"u8}.slice();
-        if (!containsInOrder(prof, append(orderedPrefix, selfLabelStr).ꓸꓸꓸ)) {
+        if (!containsInOrder(prof, append(orderedPrefixᴷ, orderedPrefix, selfLabelStr).ꓸꓸꓸ)) {
             Ꮡt.Errorf("expected sorted goroutine counts with Labels:\n%s"u8, prof);
         }
         if (!containsInOrder(prof, append(orderedPrefix, fingLabelStr).ꓸꓸꓸ)) {
@@ -1867,10 +1881,300 @@ internal static bool containsCountsLabels(ж<profile.Profile> Ꮡprof, map<int64
     return true;
 }
 
+// Inlining disabled to make identification simpler.
+//
+//go:noinline
+internal static partial void goroutineLeakExample() {
+    ᐸꟷ(new channel<EmptyStruct>(0));
+    throw panic("unreachable");
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string goroutineleakProfileˢ = "goroutineleak profile: total "u8;
+internal static readonly @string runtimeGoparkˢ = "runtime.gopark"u8;
+internal static readonly @string runtimeChanrecvˢ = "runtime.chanrecv"u8;
+internal static readonly @string runtimeChanrecv1ˢ = "runtime.chanrecv1"u8;
+internal static readonly @string runtimePprofˢ = "runtime/pprof.goroutineLeakExample"u8;
+internal static readonly @string runtimePprofˢ2 = "runtime/pprof.TestGoroutineLeakProfileConcurrency.func4"u8;
+internal static readonly @string profileContainsLeakˢ = "profile contains leak"u8;
+internal static readonly @string leakPersistsBetweenˢ = "leak persists between sequential profiling runs"u8;
+internal static readonly @string overlappingProfileˢ = "overlapping profile requests"u8;
+internal static readonly @string overlappingGoroutineAndˢ = "overlapping goroutine and goroutine leak profile requests"u8;
+
+public static partial void TestGoroutineLeakProfileConcurrency(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    UntypedInt leakCount = 3;
+
+    testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
+    var regexLeakCount = regexp.MustCompile(goroutineleakProfileˢ);
+    var whiteSpace = regexp.MustCompile("\\s+"u8);
+
+    // Regular goroutine profile. Used to check that there is no interference between
+    // the two profile types.
+    var goroutineProf = Lookup(goroutineˢ);
+    var goroutineLeakProf = goroutineLeakProfile;
+
+    // We use this helper to count the total number of leaked goroutines in a text profile.
+    var regexLeakCountʗ1 = regexLeakCount;
+    var whiteSpaceʗ1 = whiteSpace;
+    int64 countLeaks(ж<testing.T> tΔ1, @string profText) {
+        tΔ1.Helper();
+
+        // Strip the profile header
+        var parts = regexLeakCountʗ1.Split(profText, -1);
+        if (len(parts) < 2) {
+            tΔ1.Fatalf("goroutineleak profile does not contain 'goroutineleak profile: total ': %s\nparts: %v"u8, profText, parts);
+        }
+
+        parts = whiteSpaceʗ1.Split(parts[1], -1);
+
+        var (count, err) = strconv.ParseInt(parts[0], 10, 64);
+        if (err != default!) {
+            tΔ1.Fatalf("goroutineleak profile count is not a number: %s\nerror: %v"u8, profText, err);
+        }
+        return count;
+    }
+
+    // checkFrame looks for a specific frame in the stack.
+    //
+    // i is the location index in the profile and j is the location line index for the location.
+    // (Inlining may cause aliasing to the same location.)
+    void checkFrame(ж<testing.T> tΔ2, nint i, nint j, slice<ж<profile.Location>> locations, @string funcName) {
+        if (len(locations) <= i) {
+            tΔ2.Errorf("leaked goroutine stack locations: out of range index %d, length %d"u8, i, len(locations));
+            return;
+        }
+        var location = locations[i];
+        if (len((~location).Line) <= j) {
+            tΔ2.Errorf("leaked goroutine stack location lines: out of range index %d, length %d"u8, j, len((~location).Line));
+            return;
+        }
+        if ((~(~location).Line[j].Function).Name != funcName) {
+            tΔ2.Errorf("leaked goroutine stack expected %s as location[%d].Line[%d] but found %s (%s:%d)"u8, funcName, i, j, (~(~location).Line[j].Function).Name, (~(~location).Line[j].Function).Filename, (~location).Line[j].ΔLine);
+        }
+    }
+
+    // checkLeakStack hooks into profile parsing and performs validation, looking for specific stacks for
+    // the goroutines we'll leak in this test.
+    var checkFrameʗ1 = checkFrame;
+    Action<uintptr, slice<ж<profile.Location>>, map<@string, slice<@string>>> checkLeakStack(ж<testing.T> tΔ3) {
+        var checkFrameʗ2 = checkFrameʗ1;
+        return (uintptr pc, slice<ж<profile.Location>> locations, map<@string, slice<@string>> _) => {
+            if (pc != leakCount) {
+                tΔ3.Errorf("expected %d leaked goroutines with specific stack configurations, but found %d"u8, (nint)(leakCount), pc);
+                return;
+            }
+            if (len(locations) < 4 || len(locations) > 5) {
+                @string message = fmt.Sprintf("leaked goroutine stack expected 4 or 5 locations but found %d"u8, len(locations));
+                foreach (var (_, location) in locations) {
+                    foreach (var (_, line) in (~location).Line) {
+                        message += fmt.Sprintf("\n%s:%d"u8, (~line.Function).Name, line.ΔLine);
+                    }
+                }
+                tΔ3.Errorf("%s"u8, message);
+                return;
+            }
+            // We expect a receive operation. This is the typical stack.
+            checkFrameʗ2(tΔ3, 0, 0, locations, runtimeGoparkˢ);
+            checkFrameʗ2(tΔ3, 1, 0, locations, runtimeChanrecvˢ);
+            checkFrameʗ2(tΔ3, 2, 0, locations, runtimeChanrecv1ˢ);
+            checkFrameʗ2(tΔ3, 3, 0, locations, runtimePprofˢ);
+            if (len(locations) == 5) {
+                checkFrameʗ2(tΔ3, 4, 0, locations, runtimePprofˢ2);
+            }
+        };
+    }
+
+    // Leak some goroutines that will feature in the goroutine leak profile
+    UntypedInt totalLeaked = /* leakCount * 2 */ 6;
+    for (nint i = 0; i < leakCount; i++) {
+        goǃ(goroutineLeakExample);
+        goǃ(() => {
+            // Leak another goroutine that will feature a slightly different stack.
+            // This includes the frame runtime/pprof.TestGoroutineLeakProfileConcurrency.func1.
+            goroutineLeakExample();
+            throw panic("unreachable");
+        });
+    }
+
+    // Wait for the goroutines to leak. We might wait here until the timeout,
+    // but this is better than intermittent flakes because we didn't wait long
+    // enough. If we actually time out, then there's likely a bug.
+    nint attempts = 0;
+    var startTime = time.Now();
+    var waitFor = 10 * time.Millisecond;
+    while (ᐧ) {
+        //
+        // If they never get detected, we'll get a timeout.
+        time.Sleep(waitFor);
+
+        ref var w = ref heap(new strings.Builder(), out var Ꮡw);
+        goroutineLeakProf.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
+        var n = countLeaks(Ꮡt, w.String());
+        if (n >= totalLeaked) {
+            break;
+        }
+
+        // Log some messages so if a timeout is seen
+        attempts++;
+        Ꮡt.Logf("waiting for leak: attempt %d (t=%s): found %d leaked goroutines"u8, attempts, time.Since(startTime), n);
+
+        // Wait a little longer to avoid spamming the log.
+        waitFor *= 2;
+        if (waitFor > time.ΔSecond) {
+            waitFor = time.ΔSecond;
+        }
+    }
+
+    var checkLeakStackʗ1 = checkLeakStack;
+    var goroutineLeakProfʗ1 = goroutineLeakProf;
+    Ꮡt.Run(profileContainsLeakˢ, (ж<testing.T> tΔ4) => {
+        ref var w = ref heap(new strings.Builder(), out var Ꮡw);
+        goroutineLeakProfʗ1.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 0);
+        parseProfile(tΔ4, slice<byte>(w.String()), checkLeakStackʗ1(tΔ4));
+    });
+
+    var checkLeakStackʗ2 = checkLeakStack;
+    var goroutineLeakProfʗ2 = goroutineLeakProf;
+    Ꮡt.Run(leakPersistsBetweenˢ, (ж<testing.T> tΔ5) => {
+        for (nint i = 0; i < 2; i++) {
+            ref var w = ref heap(new strings.Builder(), out var Ꮡw);
+            goroutineLeakProfʗ2.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 0);
+            parseProfile(tΔ5, slice<byte>(w.String()), checkLeakStackʗ2(tΔ5));
+        }
+    });
+
+    // Concurrent calls to the goroutine leak profiler should not trigger data races
+    // or corruption.
+    void quickCheckForGoroutine(ж<testing.T> tΔ6, @string profType, @string leak, @string profText) {
+        if (!strings_package.Contains(profText, leak)) {
+            tΔ6.Errorf("%s profile does not contain expected leaked goroutine %s: %s"u8, profType, leak, profText);
+        }
+    }
+    var countLeaksʗ1 = countLeaks;
+    var goroutineLeakProfʗ3 = goroutineLeakProf;
+    var quickCheckForGoroutineʗ1 = quickCheckForGoroutine;
+    Ꮡt.Run(overlappingProfileˢ, (ж<testing.T> tΔ7) => {
+        GoFrame ᒐ = default;
+        try {
+            ref var ctx = ref heap<context.Context>(out var Ꮡctx);
+            Ꮡctx.ValueSlot = context.Background();
+            (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, time.ΔSecond);
+            var cancelʗ1 = cancel;
+            defer(() => cancelʗ1(), ref ᒐ);
+
+            ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+            for (nint i = 0; i < 2; i++) {
+                Ꮡwg.Add(1);
+                var countLeaksʗ2 = countLeaksʗ1;
+                var goroutineLeakProfʗ4 = goroutineLeakProfʗ3;
+                var quickCheckForGoroutineʗ2 = quickCheckForGoroutineʗ1;
+                Do(Ꮡctx.ValueSlot, Labels("i"u8, fmt.Sprint(i)), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context _) => {
+                    var countLeaksʗ3 = countLeaksʗ2;
+                    var goroutineLeakProfʗ5 = goroutineLeakProfʗ4;
+                    var quickCheckForGoroutineʗ3 = quickCheckForGoroutineʗ2;
+                    goǃ(() => {
+                        GoFrame ᒐ = default;
+                        try {
+                            defer(Ꮡwg.Done, ref ᒐ);
+                            while (Ꮡctx.ValueSlot.Err() == default!) {
+                                ref var w = ref heap(new strings.Builder(), out var Ꮡw);
+                                goroutineLeakProfʗ5.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
+                                {
+                                    var n = countLeaksʗ3(tΔ7, w.String()); if (n != totalLeaked) {
+                                        tΔ7.Errorf("expected %d goroutines leaked, got %d: %s"u8, (nint)(totalLeaked), n, w.String());
+                                    }
+                                }
+                                quickCheckForGoroutineʗ3(tΔ7, goroutineleakˢ, runtimePprofˢ, w.String());
+                            }
+                        }
+                        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+                        finally { ᒐ.Run(); }
+                    });
+                });
+            }
+            Ꮡwg.Wait();
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
+
+    // Concurrent calls to the goroutine leak profiler should not trigger data races
+    // or corruption, or interfere with regular goroutine profiles.
+    var countLeaksʗ4 = countLeaks;
+    var goroutineLeakProfʗ6 = goroutineLeakProf;
+    var goroutineProfʗ1 = goroutineProf;
+    var quickCheckForGoroutineʗ4 = quickCheckForGoroutine;
+    Ꮡt.Run(overlappingGoroutineAndˢ, (ж<testing.T> tΔ8) => {
+        GoFrame ᒐ = default;
+        try {
+            ref var ctx = ref heap<context.Context>(out var Ꮡctx);
+            Ꮡctx.ValueSlot = context.Background();
+            (Ꮡctx.ValueSlot, var cancel) = context.WithTimeout(Ꮡctx.ValueSlot, time.ΔSecond);
+            var cancelʗ2 = cancel;
+            defer(() => cancelʗ2(), ref ᒐ);
+
+            ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+            for (nint i = 0; i < 2; i++) {
+                Ꮡwg.Add(2);
+                var countLeaksʗ5 = countLeaksʗ4;
+                var goroutineLeakProfʗ7 = goroutineLeakProfʗ6;
+                var goroutineProfʗ2 = goroutineProfʗ1;
+                var quickCheckForGoroutineʗ5 = quickCheckForGoroutineʗ4;
+                Do(Ꮡctx.ValueSlot, Labels("i"u8, fmt.Sprint(i)), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context _) => {
+                    var countLeaksʗ6 = countLeaksʗ5;
+                    var goroutineLeakProfʗ8 = goroutineLeakProfʗ7;
+                    var quickCheckForGoroutineʗ6 = quickCheckForGoroutineʗ5;
+                    goǃ(() => {
+                        GoFrame ᒐ = default;
+                        try {
+                            defer(Ꮡwg.Done, ref ᒐ);
+                            while (Ꮡctx.ValueSlot.Err() == default!) {
+                                ref var w = ref heap(new strings.Builder(), out var Ꮡw);
+                                goroutineLeakProfʗ8.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
+                                {
+                                    var n = countLeaksʗ6(tΔ8, w.String()); if (n != totalLeaked) {
+                                        tΔ8.Errorf("expected %d goroutines leaked, got %d: %s"u8, (nint)(totalLeaked), n, w.String());
+                                    }
+                                }
+                                quickCheckForGoroutineʗ6(tΔ8, goroutineleakˢ, runtimePprofˢ, w.String());
+                            }
+                        }
+                        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+                        finally { ᒐ.Run(); }
+                    });
+                    var goroutineProfʗ3 = goroutineProfʗ2;
+                    var quickCheckForGoroutineʗ7 = quickCheckForGoroutineʗ5;
+                    goǃ(() => {
+                        GoFrame ᒐ = default;
+                        try {
+                            defer(Ꮡwg.Done, ref ᒐ);
+                            while (Ꮡctx.ValueSlot.Err() == default!) {
+                                ref var w = ref heap(new strings.Builder(), out var Ꮡw);
+                                goroutineProfʗ3.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
+                                // The regular goroutine profile should see the leaked
+                                // goroutines. We simply check that the goroutine leak
+                                // profile does not corrupt the goroutine profile state.
+                                quickCheckForGoroutineʗ7(tΔ8, goroutineˢ, runtimePprofˢ, w.String());
+                            }
+                        }
+                        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+                        finally { ᒐ.Run(); }
+                    });
+                });
+            }
+            Ꮡwg.Wait();
+        }
+        catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+        finally { ᒐ.Run(); }
+    });
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string runtimePprofRuntimeˢ = "\truntime/pprof.runtime_goroutineProfileWithLabels+"u8;
-internal static readonly @string runtimeRunfinqˢ = "runtime.runfinq"u8;
-internal static readonly @string overlappingProfileˢ = "overlapping profile requests"u8;
+internal static readonly @string runtimeRunFinalizersˢ = "runtime.runFinalizers"u8;
+internal static readonly @string runtimeRunCleanupsˢ = "runtime.runCleanups"u8;
 internal static readonly @string finalizerNotPresentˢ = "finalizer not present"u8;
 internal static readonly @string finalizerPresentˢ = "finalizer present"u8;
 internal static readonly @string goroutineLaunchesˢ = "goroutine launches"u8;
@@ -1887,7 +2191,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
 
     nint profilerCalls(@string s) => strings_package.Count(s, runtimePprofRuntimeˢ);
 
-    bool includesFinalizer(@string s) => strings_package.Contains(s, runtimeRunfinqˢ);
+    bool includesFinalizerOrCleanup(@string s) => strings_package.Contains(s, runtimeRunFinalizersˢ) || strings_package.Contains(s, runtimeRunCleanupsˢ);
 
     // Concurrent calls to the goroutine profiler should not trigger data races
     // or corruption.
@@ -1908,7 +2212,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
                 var cancelʗ2 = cancel;
                 var goroutineProfʗ2 = goroutineProfʗ1;
                 var profilerCallsʗ2 = profilerCallsʗ1;
-                Do(Ꮡctx.ValueSlot, Labels("i"u8, fmt.Sprint(i)), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context _) => {
+                Do(Ꮡctx.ValueSlot, Labels("i"u8, fmt.Sprint(i)), [MethodImpl(MethodImplOptions.NoInlining)] (context.Context _Δp0) => {
                     var cancelʗ3 = cancelʗ2;
                     var goroutineProfʗ3 = goroutineProfʗ2;
                     var profilerCallsʗ3 = profilerCallsʗ2;
@@ -1941,19 +2245,19 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
     // The finalizer goroutine should not show up in most profiles, since it's
     // marked as a system goroutine when idle.
     var goroutineProfʗ4 = goroutineProf;
-    var includesFinalizerʗ1 = includesFinalizer;
+    var includesFinalizerOrCleanupʗ1 = includesFinalizerOrCleanup;
     Ꮡt.Run(finalizerNotPresentˢ, (ж<testing.T> tΔ2) => {
         ref var w = ref heap(new strings.Builder(), out var Ꮡw);
         goroutineProfʗ4.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
         @string prof = w.String();
-        if (includesFinalizerʗ1(prof)) {
-            tΔ2.Errorf("profile includes finalizer (but finalizer should be marked as system):\n%s"u8, prof);
+        if (includesFinalizerOrCleanupʗ1(prof)) {
+            tΔ2.Errorf("profile includes finalizer or cleanup (but should be marked as system):\n%s"u8, prof);
         }
     });
 
     // The finalizer goroutine should show up when it's running user code.
     var goroutineProfʗ5 = goroutineProf;
-    var includesFinalizerʗ2 = includesFinalizer;
+    var includesFinalizerOrCleanupʗ2 = includesFinalizerOrCleanup;
     Ꮡt.Run(finalizerPresentˢ, (ж<testing.T> tΔ3) => {
         GoFrame ᒐ = default;
         try {
@@ -1962,15 +2266,15 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             defer(ᴛ1 => close(ᴛ1), ch2, ref ᒐ);
             var ch1ʗ1 = ch1;
             var ch2ʗ1 = ch2;
-            runtime.SetFinalizer(obj.OrTypedNil(), (any _) => {
+            runtime.SetFinalizer(obj.OrTypedNil(), (any _Δp0) => {
                 close(ch1ʗ1);
                 ᐸꟷ(ch2ʗ1);
             });
             obj = default!;
             for (nint i = 10; i >= 0; i--) {
-                var selᴛ8 = ch1;
-                switch (trySelect(ᐸꟷ(selᴛ8, ꓸꓸꓸ))) {
-                case 0 when selᴛ8.ꟷᐳ(out _): {
+                var selᴛ10 = ch1;
+                switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
+                case 0 when selᴛ10.ꟷᐳ(out _): {
                     break;
                 }
                 default: {
@@ -1984,7 +2288,7 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             ref var w = ref heap(new strings.Builder(), out var Ꮡw);
             goroutineProfʗ5.WriteTo(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡw), 1);
             @string prof = w.String();
-            if (!includesFinalizerʗ2(prof)) {
+            if (!includesFinalizerOrCleanupʗ2(prof)) {
                 tΔ3.Errorf("profile does not include finalizer (and it should be marked as user):\n%s"u8, prof);
             }
         }
@@ -2075,10 +2379,10 @@ public static void TestGoroutineProfileConcurrency(ж<testing.T> Ꮡt) {
             Ꮡready.Wait();
 
             ref var w = ref heap(new array<bytes.Buffer>(3), out var Ꮡw);
-            foreach (var (i, _) in w) {
+            foreach (var i in range(w)) {
                 goroutineProfʗ6.WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡw.at<bytes.Buffer>(i)), 0);
             }
-            foreach (var (i, _) in w) {
+            foreach (var i in range(w)) {
                 var (p, err) = profile.Parse(new pprof_internal_test_package.bytes_ReaderжReader(bytes.NewReader(w[i].Bytes())));
                 if (err != default!) {
                     tΔ4.Errorf("error parsing protobuf profile: %v"u8, err);
@@ -2160,9 +2464,9 @@ public static partial void TestGoroutineProfileCoro(ж<testing.T> Ꮡt) {
             defer(Ꮡwg.Done, ref ᒐ);
             while (ᐧ) {
                 iterFuncʗ1();
-                var selᴛ9 = doneʗ1;
-                switch (trySelect(ᐸꟷ(selᴛ9, ꓸꓸꓸ))) {
-                case 0 when selᴛ9.ꟷᐳ(out _): {
+                var selᴛ11 = doneʗ1;
+                switch (trySelect(ᐸꟷ(selᴛ11, ꓸꓸꓸ))) {
+                case 0 when selᴛ11.ꟷᐳ(out _): {
                     break;
                 }
                 default: {
@@ -2188,6 +2492,8 @@ internal partial class TestGoroutineProfileIssue74090_T /*ж<byte>*/;
 // erroneously inspected by the goroutine profiler in such a way that could
 // cause a crash. See go.dev/issue/74090.
 public static void TestGoroutineProfileIssue74090(ж<testing.T> Ꮡt) {
+    var objsᴷ = new stackAppend<ж<TestGoroutineProfileIssue74090_T>>();
+
     testenv.MustHaveParallelism(new pprof_internal_test_package.testing_TжTB(Ꮡt));
 
     var goroutineProf = Lookup(goroutineˢ);
@@ -2205,7 +2511,7 @@ public static void TestGoroutineProfileIssue74090(ж<testing.T> Ꮡt) {
             var obj = @new<TestGoroutineProfileIssue74090_T>();
             runtime.SetFinalizer(obj.OrTypedNil(), (any _) => {
             });
-            objs = append(objs, obj);
+            objs = append(objsᴷ, objs, obj);
         }
         objs = default!;
 
@@ -2521,7 +2827,7 @@ public static void TestLabelSystemstack(ж<testing.T> Ꮡt) {
                     // at.
                     mayBeLabeled = true;
                 }
-                else if (exprᴛ1 == "runtime.bgsweep"u8 || exprᴛ1 == "runtime.bgscavenge"u8 || exprᴛ1 == "runtime.forcegchelper"u8 || exprᴛ1 == "runtime.gcBgMarkWorker"u8 || exprᴛ1 == "runtime.runfinq"u8 || exprᴛ1 == "runtime.sysmon"u8) {
+                else if (exprᴛ1 == "runtime.bgsweep"u8 || exprᴛ1 == "runtime.bgscavenge"u8 || exprᴛ1 == "runtime.forcegchelper"u8 || exprᴛ1 == "runtime.gcBgMarkWorker"u8 || exprᴛ1 == "runtime.runFinalizers"u8 || exprᴛ1 == "runtime.runCleanups"u8 || exprᴛ1 == "runtime.sysmon"u8) {
                     // Runtime system goroutines or threads
                     // (such as those identified by
                     // runtime.isSystemGoroutine). These
@@ -2585,9 +2891,9 @@ internal static void labelHog(channel<EmptyStruct> stop, nint gogc) {
     runtime.GC();
 
     for (nint i = 0; ᐧ ; i++) {
-        var selᴛ10 = stop;
-        switch (trySelect(ᐸꟷ(selᴛ10, ꓸꓸꓸ))) {
-        case 0 when selᴛ10.ꟷᐳ(out _): {
+        var selᴛ12 = stop;
+        switch (trySelect(ᐸꟷ(selᴛ12, ꓸꓸꓸ))) {
+        case 0 when selᴛ12.ꟷᐳ(out _): {
             return;
         }
         default: {
@@ -2738,7 +3044,7 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
     var pcs = new slice<uintptr>(2);
     inlinedCallerDump(pcs);
     var inlinedCallerStack = new slice<uint64>(2);
-    foreach (var (i, _) in pcs) {
+    foreach (var i in range(pcs)) {
         inlinedCallerStack[i] = (uint64)pcs[i];
     }
     var wrapperPCs = new slice<uintptr>(1);
@@ -2759,7 +3065,7 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
     pcs = new slice<uintptr>(6);
     recursionChainTop(1, pcs);
     var recursionStack = new slice<uint64>(len(pcs));
-    foreach (var (i, _) in pcs) {
+    foreach (var i in range(pcs)) {
         recursionStack[i] = (uint64)pcs[i];
     }
 
@@ -2973,6 +3279,7 @@ public static void TestTryAdd(ж<testing.T> Ꮡt) {
 public static void TestTimeVDSO(ж<testing.T> Ꮡt) {
     // Test that time functions have the right stack trace. In particular,
     // it shouldn't be recursive.
+
     if (runtime.GOOS == "android"u8) {
         // Flaky on Android, issue 48655. VDSO may not be enabled.
         testenv.SkipFlaky(new pprof_internal_test_package.testing_TжTB(Ꮡt), 48655);
@@ -3007,7 +3314,8 @@ public static void TestTimeVDSO(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string goroutineDeepˢ = "goroutineDeep"u8;
-internal static readonly @string runtimePprofˢ = "runtime/pprof.produceProfileEvents"u8;
+internal static readonly @string runtimePprofˢ3 = "runtime/pprof.produceProfileEvents"u8;
+internal static readonly @string runtimePprofAllocDeepˢ = "runtime/pprof.allocDeep"u8;
 
 internal partial struct TestProfilerStackDepth_tests /*dyn*/ {
     internal @string profiler;
@@ -3034,6 +3342,7 @@ public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
 
         var testʗ1 = test;
         Ꮡt.Run(test.profiler, (ж<testing.T> tΔ1) => {
+            var matchedStacksᴷ = new stackAppend<slice<@string>>(moves: true);
             ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
             {
                 var errΔ1 = Lookup(testʗ1.profiler).WriteTo(new pprof_internal_test_package.bytes_BufferжWriter(Ꮡbuf), 0); if (errΔ1 != default!) {
@@ -3056,28 +3365,30 @@ public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
                 // which might not have enough frames, e.g. if the profiler hides
                 // some leaf frames that would count against the stack depth limit.
                 // Check for at least one match
-                matchedStacks = append(matchedStacks, stk);
+                matchedStacks = append(matchedStacksᴷ, matchedStacks, stk);
                 if (len(stk) != depth) {
                     continue;
                 }
                 {
                     @string rootFn = stk[depth - 1];
-                    @string wantFn = runtimePprofˢ; if (rootFn != wantFn) {
+                    @string wantFn = runtimePprofˢ3; if (rootFn != wantFn) {
                         continue;
                     }
                 }
                 // Found what we wanted
                 return;
             }
+            matchedStacks = move2heap(matchedStacksᴷ, matchedStacks);
             foreach (var (_, stk) in matchedStacks) {
                 tΔ1.Logf("matched stack=%s"u8, stk);
                 if (len(stk) != depth) {
                     tΔ1.Errorf("want stack depth = %d, got %d"u8, (nint)(depth), len(stk));
+                    continue;
                 }
 
                 {
                     @string rootFn = stk[depth - 1];
-                    @string wantFn = runtimePprofˢ; if (rootFn != wantFn) {
+                    @string wantFn = runtimePprofAllocDeepˢ; if (rootFn != wantFn) {
                         tΔ1.Errorf("want stack stack root %s, got %v"u8, wantFn, rootFn);
                     }
                 }
@@ -3087,15 +3398,7 @@ public static partial void TestProfilerStackDepth(ж<testing.T> Ꮡt) {
 }
 
 internal static bool hasPrefix(slice<@string> stk, slice<@string> prefix) {
-    if (len(prefix) > len(stk)) {
-        return false;
-    }
-    foreach (var (i, _) in prefix) {
-        if (stk[i] != prefix[i]) {
-            return false;
-        }
-    }
-    return true;
+    return len(prefix) <= len(stk) && slices.Equal<slice<@string>, @string>(stk.slice(0, len(prefix)), prefix);
 }
 
 // ensure that stack records are valid map keys (comparable)
@@ -3178,7 +3481,9 @@ internal static void produceProfileEvents(ж<testing.T> Ꮡt, nint depth) {
     goroutineDeep(Ꮡt, depth - 4); // -4 for produceProfileEvents, **, chanrecv1, chanrev, gopark
 }
 
-internal static partial slice<@string> getProfileStacks(Func<slice<runtime.BlockProfileRecord>, (nint, bool)> collect, bool fileLine) {
+internal static partial slice<@string> getProfileStacks(Func<slice<runtime.BlockProfileRecord>, (nint, bool)> collect, bool fileLine, bool pcs) {
+    var stacksᴷ = new stackAppend<@string>(moves: true);
+
     nint n = default!;
     bool ok = default!;
     slice<runtime.BlockProfileRecord> p = default!;
@@ -3199,6 +3504,9 @@ internal static partial slice<@string> getProfileStacks(Func<slice<runtime.Block
             if (i > 0) {
                 Ꮡstack.WriteByte((rune)'\n');
             }
+            if (pcs) {
+                fmt.Fprintf(new pprof_internal_test_package.strings_BuilderжWriter(Ꮡstack), "%x "u8, pc);
+            }
             // Use FuncForPC instead of CallersFrames,
             // because we want to see the info for exactly
             // the PCs returned by the mutex profile to
@@ -3214,8 +3522,9 @@ internal static partial slice<@string> getProfileStacks(Func<slice<runtime.Block
                 Ꮡstack.WriteString(strconv.Itoa(line));
             }
         }
-        stacks = append(stacks, stack.String());
+        stacks = append(stacksᴷ, stacks, stack.String());
     }
+    stacks = move2heap(stacksᴷ, stacks);
     return stacks;
 }
 
@@ -3225,6 +3534,7 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
         // This regression test is adapted from
         // https://github.com/grafana/pyroscope-go/issues/103,
         // authored by Tolya Korniltsev
+
         ref var m = ref heap(new sync.Mutex(), out var Ꮡm);
 
         nint prev = runtime.SetMutexProfileFraction(-1);
@@ -3241,9 +3551,9 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
         ref var wg = ref heap<sync.WaitGroup>(out var Ꮡwg);
         wg = new sync.WaitGroup(nil);
         Ꮡwg.Add(workers);
-        for (nint j = 0; j < workers; j++) {
+        foreach (var _ᴛ1 in range(workers)) {
             goǃ(() => {
-                for (nint i = 0; i < iters; i++) {
+                foreach (var _ᴛ2 in range(iters)) {
                     Ꮡm.Lock();
                     // Wait at least 1 millisecond to pass the
                     // starvation threshold for the mutex
@@ -3256,7 +3566,7 @@ public static partial void TestMutexBlockFullAggregation(ж<testing.T> Ꮡt) {
         Ꮡwg.Wait();
 
         void assertNoDuplicates(@string name, Func<slice<runtime.BlockProfileRecord>, (nint, bool)> collect) {
-            var stacks = getProfileStacks(collect, true);
+            var stacks = getProfileStacks(collect, true, true);
             var seen = new map<@string, EmptyStruct>();
             foreach (var (_, s) in stacks) {
                 {
@@ -3377,7 +3687,7 @@ runtime/pprof.inlineA
 
             var tcʗ1 = tc;
             Ꮡt.Run(tc.Name, (ж<testing.T> tΔ1) => {
-                var stacks = getProfileStacks(tcʗ1.Collect, false);
+                var stacks = getProfileStacks(tcʗ1.Collect, false, false);
                 foreach (var (_, s) in stacks) {
                     if (strings_package.Contains(s, tcʗ1.SubStack)) {
                         return;
@@ -3452,9 +3762,9 @@ internal static void testProfileRecordNullPadding<T>(ж<testing.T> Ꮡt, @string
                 break;
             }
             p = new slice<T>(n * 2);
-            foreach (var (i, _) in p) {
+            foreach (var i in range(p)) {
                 var s0 = stack0ʗ1(Ꮡ(p, i));
-                foreach (var (j, _) in s0.Value) {
+                foreach (var j in range(s0, 32)) {
                     // Poison the Stack0 array to identify lack of zero padding
                     s0.Value[j] = ~(uintptr)0;
                 }

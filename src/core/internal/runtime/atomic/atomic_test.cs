@@ -128,6 +128,7 @@ public static void TestUnaligned64(ж<testing.T> Ꮡt) {
     // Unaligned 64-bit atomics on 32-bit systems are
     // a continual source of pain. Test that on 32-bit systems they crash
     // instead of failing silently.
+
     if (/* unsafe.Sizeof(int(0)) */ (uintptr)8 != 4) {
         Ꮡt.Skip(testOnlyRunsOn32Bitˢ);
     }
@@ -179,7 +180,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
 
     // Set every bit in array to 1.
     var a = new slice<uint8>((1 << 12));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 0xff;
     }
 
@@ -190,7 +191,7 @@ public static partial void TestAnd8(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.And8(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -223,7 +224,7 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
 
     // Set every bit in array to 1.
     var a = new slice<uint32>((1 << 12));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 0xffffffffU;
     }
 
@@ -234,7 +235,7 @@ public static partial void TestAnd(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.And(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -275,7 +276,7 @@ public static partial void TestOr8(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.Or8(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -316,7 +317,7 @@ public static partial void TestOr(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.Or(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -352,7 +353,7 @@ public static partial void TestBitwiseContended8(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         goǃ(() => {
             for (nint n = 0; n < N; n++) {
-                foreach (var (iΔ1, _) in aʗ1) {
+                foreach (var iΔ1 in range(aʗ1)) {
                     atomic.Or8(Ꮡ(aʗ1, iΔ1), m);
                     if ((uint8)(atomic.Load8(Ꮡ(aʗ1, iΔ1)) & m) != m) {
                         Ꮡt.Errorf("a[%v] bit %#x not set"u8, iΔ1, m);
@@ -396,7 +397,7 @@ public static partial void TestBitwiseContended(ж<testing.T> Ꮡt) {
         var doneʗ1 = done;
         goǃ(() => {
             for (nint n = 0; n < N; n++) {
-                foreach (var (iΔ1, _) in aʗ1) {
+                foreach (var iΔ1 in range(aʗ1)) {
                     atomic.Or(Ꮡ(aʗ1, iΔ1), m);
                     if ((atomic.Load(Ꮡ(aʗ1, iΔ1)) & m) != m) {
                         Ꮡt.Errorf("a[%v] bit %#x not set"u8, iΔ1, m);
@@ -459,7 +460,7 @@ private static readonly object badEscapeAnalysisOfˢ = (@string)"Bad escape anal
 
 public static void TestStorepNoWB(ж<testing.T> Ꮡt) {
     ref var p = ref heap(new array<ж<nint>>(2), out var Ꮡp);
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         atomic.StorepNoWB(@unsafe.Pointer.FromBox(Ꮡp.at<ж<nint>>(i)), @unsafe.Pointer.FromPinnedBox(@new<nint>()));
     }
     if (p[0] == p[1]) {

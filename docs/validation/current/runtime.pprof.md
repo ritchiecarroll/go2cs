@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `runtime/pprof` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-01 · converter `8289d30c9`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**145 matched · 7 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**146 matched · 8 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/runtime/pprof`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/pprof).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 2 of the matched tests identically.
 
@@ -53,6 +53,7 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestGenericsHashKeyInPprofBuilder` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestGenericsInlineLocations` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestGoroutineCounts` | pass | pass |
+| `TestGoroutineLeakProfileConcurrency` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestGoroutineProfileConcurrency` | pass | pass |
 | `TestGoroutineProfileConcurrency/finalizer_not_present` | pass | pass |
 | `TestGoroutineProfileConcurrency/finalizer_present` | pass | pass |
@@ -183,6 +184,7 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestTimeVDSO` | pass | pass |
 | `TestTracebackAll` | pass | pass |
 | `TestTryAdd` | pass | skip ([disclosed](#disclosed-divergences)) |
+| `TestWriteToErr` | pass | pass |
 
 ## Disclosed divergences
 
@@ -196,8 +198,9 @@ a disclosed test that fails any *other* way is still a hard mismatch.
 | `TestCPUProfileInlining` | `compiler-property` | containsInlinedCall(inlinedCaller, 4<<10) at pprof_test.go:284. Go's own compiler-inlining self-check, the first statement of the test, and the OWNER ruled the family STRUCTURAL on 2026-09-26 (ledger 4a122cd994, class I of docs/phase4/DESIGN-managed-profiling.md). The check scans the named function's PC range with runtime.FuncForPC for a PC that resolves to a DIFFERENT function, which exists only where the Go compiler inlined a callee. The converted program carries no inlining decisions: each function owns a synthetic-PC span that resolves to that function by construction (golib/GoSyntheticPC.cs), so the check can never succeed and the test skips at the line Go's source writes. |
 | `TestCPUProfileRecursion` | `runtime-capability` | Go PASS / C# SKIP, admitted by the OWNER RULING of 2026-09-28 03:17 (ledger 435557647c). The test demands CPU samples attributed to runtime/pprof.inlinedCallee, a frame that exists only in the Go compiler's inline tree; the managed sampler resolves physical frames and no inlined callee is ever sampled (bank rehearsal, union cd2fc7dba1: 0 of 137 on windows, 0 of 72 on linux, recursionCallee and recursionCaller sampled). testenv.CPUProfilingBroken() stays true, so the test is bounded at Go's own 10 s and takes Go's issue-13841 skip path; Go's per-OS false is unusable here (G's reading, ledger 2026-09-28 03:14: 2,606 s for one test, lostProfileEvent-dominated, no clean bound). Re-read every sweep; retires when the managed profiler can attribute a sample to an inlined Go callee. |
 | `TestGenericsHashKeyInPprofBuilder` | `runtime-capability` | SHAPE-NAME half. Go names each generic instantiation's frame with its GC shape (genericAllocFunc[go.shape.uint32]); the CLR's StackFrame.GetMethod() returns the generic method DEFINITION (measured), so every instantiation's managed frame is genericAllocFunc and the test's want lines -- printed only while the names differ -- cannot match. Retires only if frame resolution can recover an instantiation's shape. The signature is this half's own evidence line in the printed profile: the uint32 sample with Go's values [1 128 0 0] under the shape-less name, one of the test's newest samples near each record's top. It is never Go's `want =` text, which is each record's LAST line and is cut once the cumulative heap profile (Go's test order, D4) passes the 64K record cap (TestExecution.MaxRecordCharacters). |
-| `TestGenericsHashKeyInPprofBuilder` | `codegen-liveness` | IN-USE half. Go reads the 64 B and 256 B allocations as freed after the test's GC (in-use 0 0); the managed profile still reports them in use ([1 64 1 64], [1 256 1 256]) because the discarded temporaries stay rooted for the frame's lifetime: the CLR reports a frame's slots live throughout, where Go's liveness maps drop them at their last use. Retires with that liveness gap. |
+| `TestGenericsHashKeyInPprofBuilder` | `codegen-liveness` | IN-USE half. Go reads every one of the test's allocations as freed after its GC (in-use 0 0). The managed profile reports the LAST allocation of each loop still in use -- [1 256 1 256] from the uint32 loop (sizes 128, 256) and [1 128 1 128] from the uint64 loop (sizes 64, 128) -- because the discarded result of each loop's last call stays rooted in a frame slot for the frame's lifetime, where Go's liveness maps drop it at its last use. The earlier allocation of each loop is freed on both sides, which is what places the pin on the last call rather than on the profiler. The signature is the uint32 loop's 256-byte line, which no other sample of the test produces. Retires with that liveness gap. |
 | `TestGenericsInlineLocations` | `runtime-capability` | SHAPE NAMES ONLY. Go names each inlined generic frame with its GC shape (nonRecursiveGenericAllocFunction[go.shape.struct {},go.shape.struct { runtime/pprof.buf [128]uint8 }] and its swap); the CLR's StackFrame.GetMethod() returns the generic method DEFINITION (measured), so both managed frames read nonRecursiveGenericAllocFunction and the expected sample and location cannot match. The pin is the managed stack WITH both generic frames present: until the generic-caller NoInlining rule (claude/g-inline-locations) the JIT inlined them under TieredCompilation=0 and the stack read TestGenericsInlineLocations;storeAlloc, a fixable defect this entry must not absorb -- if either frame vanishes again the pin fails. Retires only if frame resolution can recover an instantiation's shape. |
+| `TestGoroutineLeakProfileConcurrency` | `runtime-capability` | Go PASS / C# FAIL, filed for the Go 1.26 re-bank by the OWNER RULING of 2026-10-21 (relayed by COORD). Go finds leaked goroutines with its own collector, which marks the heap with blocked goroutines' stacks withheld from the roots (runtime/mgc.go goroutineLeakGC, mgcmark.go, mgc.go:1318). The CLR's collector roots every thread's stack and offers no reachability query, so the managed runtime cannot tell which blocked goroutines are unreachable without a heap walk that golib does not have. The profile refuses by name rather than reporting a fabricated zero: writeGoroutineLeak's first call, the runtime_goroutineLeakGC push, panics with the converter's refusal (linknamePushTargets), so the test fails at its first leak-profile write and its four subtests never run on the C# side; they are withdrawn under this root. Retirement: C1's post-hop seat, ruled the same day, which answers the profile from a ClrMD per-thread heap walk in its own optional assembly (docs/DESIGN-goroutine-leak-profile.md); it retires this entry on JIT hosts. Native AOT keeps the entry, by ruling, until a walk exists that does not need the DAC. |
 | `TestLabelSystemstack` | `runtime-capability` | Go PASS / C# SKIP, admitted by the OWNER RULING of 2026-09-28 03:17 (ledger 435557647c). The test requires CPU samples taken on runtime.systemstack carrying the goroutine's labels; the managed runtime has no system stack, so no systemstack frame is ever sampled (the labelHog samples themselves carry key=value: 2,934 windows / 2,202 linux in the bank rehearsal). CPUProfilingBroken() stays true and the test takes Go's issue-13841 skip path (G's reading, ledger 2026-09-28 03:14, is why Go's per-OS false is unusable). Re-read every sweep; retires only if the runtime gains a systemstack frame the sampler can see. |
 | `TestMorestack` | `runtime-capability` | Go PASS / C# SKIP, admitted by the OWNER RULING of 2026-09-28 03:17 (ledger 435557647c). The test requires samples in runtime.newstack beneath growstack; CLR thread stacks do not grow by copying, so there is no newstack frame to sample (growstack's own recursion IS sampled). CPUProfilingBroken() stays true and the test takes Go's issue-13841 skip path (G's reading, ledger 2026-09-28 03:14, is why Go's per-OS false is unusable). Re-read every sweep; permanent while CLR stacks are fixed-size. |
 | `TestTryAdd` | `compiler-property` | findInlinedCall(inlinedCallerDump, 4<<10) at pprof_test.go:2265. Go's own compiler-inlining self-check, the first statement of the test, and the OWNER ruled the family STRUCTURAL on 2026-09-26 (ledger 4a122cd994, class I of docs/phase4/DESIGN-managed-profiling.md). The check scans the named function's PC range with runtime.FuncForPC for a PC that resolves to a DIFFERENT function, which exists only where the Go compiler inlined a callee. The converted program carries no inlining decisions: each function owns a synthetic-PC span that resolves to that function by construction (golib/GoSyntheticPC.cs), so the check can never succeed and the test skips at the line Go's source writes. Its ten t.Run subtests are Go-only rows by construction (the skip precedes the fan-out), and the class withdraws them by name under this signature-matched root; a subtest that ever reaches the C# side compares strictly. |
@@ -232,6 +235,7 @@ subtest verdict rows `go test` reports underneath it have no converted counterpa
 compare. Those rows are withdrawn with their disclosed root — none is claimed by the
 matched count above:
 
+- `TestGoroutineLeakProfileConcurrency` — 4 verdict rows withdrawn
 - `TestTryAdd` — 10 verdict rows withdrawn
 
 ## Excluded declarations

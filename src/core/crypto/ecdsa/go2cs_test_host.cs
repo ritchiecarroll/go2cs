@@ -23,10 +23,13 @@ internal static class Go2CsTestHost
         });
         registry.Add("TestEqual", ecdsa_test_package.TestEqual, "equal_test.go", 67);
         registry.Add("TestINDCCA", ecdsa_internal_test_package.TestINDCCA, "ecdsa_test.go", 163);
+        registry.Add("TestInvalidPrivateKeys", ecdsa_internal_test_package.TestInvalidPrivateKeys, "ecdsa_test.go", 661);
+        registry.Add("TestInvalidPublicKeys", ecdsa_internal_test_package.TestInvalidPublicKeys, "ecdsa_test.go", 616);
         registry.Add("TestKeyGeneration", ecdsa_internal_test_package.TestKeyGeneration, "ecdsa_test.go", 61);
         registry.Add("TestNegativeInputs", ecdsa_internal_test_package.TestNegativeInputs, "ecdsa_test.go", 314);
         registry.Add("TestNegativeSignature", ecdsa_internal_test_package.TestNegativeSignature, "ecdsa_test.go", 373);
         registry.Add("TestNonceSafety", ecdsa_internal_test_package.TestNonceSafety, "ecdsa_test.go", 123);
+        registry.Add("TestParseAndBytesRoundTrip", ecdsa_internal_test_package.TestParseAndBytesRoundTrip, "ecdsa_test.go", 549);
         registry.Add("TestRFC6979", ecdsa_internal_test_package.TestRFC6979, "ecdsa_test.go", 439);
         registry.Add("TestRMinusNSignature", ecdsa_internal_test_package.TestRMinusNSignature, "ecdsa_test.go", 417);
         registry.Add("TestRPlusNSignature", ecdsa_internal_test_package.TestRPlusNSignature, "ecdsa_test.go", 395);
