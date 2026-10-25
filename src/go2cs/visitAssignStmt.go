@@ -1041,6 +1041,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// SHL_ASSIGN case) rather than the native operator. Its count is widened to uint64, never `(int)`-cast.
 	shiftAssignGuarded := false
 
+	// shiftAssignWide: a compound shift-assign on a NAMED integer target with an unbounded count, which keeps the
+	// native operator form but passes the count widened to the wrapper's wide overload (compoundShiftWide).
+	shiftAssignWide := v.compoundShiftWide(assignStmt)
+
 	// signedAssignTarget and signedAssignOmitOperand: a governed compound `x /= b` or `x %= b` (see
 	// signedCompoundAssign) may write its own target text (a map element's `m`) and may leave the
 	// right operand out (a -1 fold such as `x = 0`).
@@ -1686,9 +1690,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			if bitwiseAssignOp {
 				if assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN {
-					if shiftAssignGuarded {
-						// The guard takes the count WIDENED to uint64, never `(int)`-truncated: its
-						// full magnitude is what the width comparison needs (emitGuardedShift's rule).
+					if shiftAssignGuarded || shiftAssignWide {
+						// The guard, and a named wrapper's wide operator, take the count WIDENED to uint64,
+						// never `(int)`-truncated: its full magnitude is what the width comparison needs
+						// (emitGuardedShift's rule).
 						rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
 					} else {
 						// The shift count in a C# compound shift-assignment must be `int`;
@@ -2006,10 +2011,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
 				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
 				// counting loop), so it needs the same `(int)` cast the simple-variable path applies.
-				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded
+				shiftAssignCast := (assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN) && !shiftAssignGuarded && !shiftAssignWide
 
-				// A GUARDED shift-assign (`lhs.RshAssign(`) takes the count widened to uint64 instead.
-				if shiftAssignGuarded {
+				// A GUARDED shift-assign (`lhs.RshAssign(`), and a NAMED target's wide operator, take the count
+				// widened to uint64 instead.
+				if shiftAssignGuarded || shiftAssignWide {
 					rhsExpr = v.shiftCountUint64Operand(rhs, rhsExpr)
 				}
 

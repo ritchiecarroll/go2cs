@@ -388,6 +388,7 @@
     <None Include="$(MSBuildThisFileDirectory)namedCompositeGenericArg_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness.go" />
     <None Include="$(MSBuildThisFileDirectory)namedResultLiveness_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)namedShiftCount_test.go" />
     <None Include="$(MSBuildThisFileDirectory)namedUnionBreadcrumb_test.go" />
     <None Include="$(MSBuildThisFileDirectory)narrowArithmeticOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)nativeBackedArrayPointerStore_test.go" />

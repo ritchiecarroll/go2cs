@@ -539,6 +539,49 @@ func (v *Visitor) compoundShiftGuarded(assignStmt *ast.AssignStmt) bool {
 	return ok && v.shiftCountGuarded(assignStmt.Rhs[0], width)
 }
 
+// namedShiftWidth is shiftGuardWidth for a NAMED integer left operand, which shifts through its wrapper's
+// generated operator rather than golib's guard: the width of its underlying basic, or (nil, 0, false).
+func (v *Visitor) namedShiftWidth(binaryExpr *ast.BinaryExpr) (*types.Basic, int, bool) {
+	tv, ok := v.info.Types[binaryExpr]
+
+	if !ok || tv.Type == nil {
+		return nil, 0, false
+	}
+
+	return namedShiftWidthOfType(tv.Type)
+}
+
+// namedShiftWidthOfType is namedShiftWidth for a caller holding the shifted operand's TYPE.
+func namedShiftWidthOfType(t types.Type) (*types.Basic, int, bool) {
+	named, ok := types.Unalias(t).(*types.Named)
+
+	if !ok {
+		return nil, 0, false
+	}
+
+	return shiftGuardWidthOfType(named.Underlying())
+}
+
+// compoundShiftWide reports whether a compound shift-assign (`w <<= n` / `w >>= n`) on a NAMED integer
+// target passes its count WIDENED (shiftCountUint64Operand) to the wrapper's wide operator rather than
+// `(int)`-cast: the compound twin of the binary shift's named rule, for a count shiftCountGuarded cannot
+// bound. A map-index target needs no exclusion here, since a wrapper operator binds through the indexer.
+func (v *Visitor) compoundShiftWide(assignStmt *ast.AssignStmt) bool {
+	if (assignStmt.Tok != token.SHL_ASSIGN && assignStmt.Tok != token.SHR_ASSIGN) || len(assignStmt.Lhs) != 1 || len(assignStmt.Rhs) != 1 {
+		return false
+	}
+
+	lhsType := v.info.TypeOf(assignStmt.Lhs[0])
+
+	if lhsType == nil {
+		return false
+	}
+
+	_, width, ok := namedShiftWidthOfType(lhsType)
+
+	return ok && v.shiftCountGuarded(assignStmt.Rhs[0], width)
+}
+
 // shiftGuardWidthOfType is shiftGuardWidth for a caller holding the shifted operand's TYPE rather than a
 // binary shift node -- a compound shift-assign, whose result type is its left-hand side's.
 func shiftGuardWidthOfType(t types.Type) (*types.Basic, int, bool) {
@@ -1898,9 +1941,14 @@ func (v *Visitor) convBinaryExprCore(binaryExpr *ast.BinaryExpr, context Pattern
 				return v.emitGuardedShift(binaryExpr, leftOperand, rightOperand, binaryOp, basic)
 			}
 
-			// A literal count C# already reads as `int` is written as Go writes it, `x << 8`. The guard above has
-			// taken every constant count that reaches the operand's width, so this one is below it.
-			if !shiftCountIsIntLiteral(binaryExpr.Y) {
+			// A NAMED integer left operand shifts through its wrapper's generated operator, which guards the width
+			// itself; an UNBOUNDED count reaches it widened as the guard above widens it (the wrapper's uint64 and
+			// int64 overloads), never narrowed to `int`, which would turn `1 << 32` into 0 and a negative count into
+			// a huge one. A literal count C# already reads as `int` is written as Go writes it, `x << 8`. The guard
+			// above has taken every constant count that reaches the operand's width, so this one is below it.
+			if _, width, named := v.namedShiftWidth(binaryExpr); named && v.shiftCountGuarded(binaryExpr.Y, width) {
+				rightOperand = v.shiftCountUint64Operand(binaryExpr.Y, rightOperand)
+			} else if !shiftCountIsIntLiteral(binaryExpr.Y) {
 				rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
 			}
 

@@ -61,4 +61,26 @@ func main() {
 	var sw signedword = -8
 	var swp signedword = 1 << 40
 	fmt.Println(int64(sw>>c[3]), int64(sw>>c[5]), int64(swp>>c[3]))
+
+	// An UNBOUNDED count, not merely one at the width: a count past int32's range reaches the named
+	// wrapper widened, never narrowed to `int` (which made `1 << 32` a shift by 0 and `1<<32 + 1` a
+	// shift by 1), in the binary and the compound form, and a NEGATIVE signed count raises Go's panic
+	// rather than reading as a huge count.
+	far := []uint{1 << 32, 1<<32 + 1}
+	for _, k := range far {
+		fmt.Println(uint32(hw<<k), uint32(hw>>k))
+	}
+	hc := hw
+	hc <<= far[1]
+	fmt.Println(uint32(hc))
+	fmt.Println(namedNegativeShift(hw, -1))
+}
+
+func namedNegativeShift(x halfword, n int) (msg string) {
+	defer func() {
+		if e := recover(); e != nil {
+			msg = fmt.Sprint(e)
+		}
+	}()
+	return fmt.Sprint(uint32(x << n))
 }
