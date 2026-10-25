@@ -36,6 +36,8 @@ internal partial struct testCallers_want /*dyn*/ {
 }
 
 internal static void testCallers(ж<testing.T> Ꮡt, slice<uintptr> pcs, bool pan) {
+    var seenᴷ = new stackAppend<@string>();
+
     var m = new map<@string, nint>(len(pcs));
     var frames = Δruntime.CallersFrames(pcs);
     while (ᐧ) {
@@ -50,7 +52,7 @@ internal static void testCallers(ж<testing.T> Ꮡt, slice<uintptr> pcs, bool pa
 
     slice<@string> seen = default!;
     foreach (var (k, _) in m) {
-        seen = append(seen, k);
+        seen = append(seenᴷ, seen, k);
     }
     Ꮡt.Logf("functions seen: %s"u8, strings.Join(seen, " "u8));
 
@@ -441,7 +443,7 @@ internal static void testGenericEndlineno<_>(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-internal static void testCallerLine(ж<testing.T> Ꮡt, nint want) {
+internal static partial void testCallerLine(ж<testing.T> Ꮡt, nint want) {
     {
         nint have = callerLine(Ꮡt, 1); if (have != want) {
             Ꮡt.Errorf("callerLine(1) returned %d, but want %d\n"u8, have, want);
@@ -628,7 +630,7 @@ public static void TestFPUnwindAfterRecovery(ж<testing.T> Ꮡt) {
         // call stack won't crash.
         defer(() => {
             var pcs = new slice<uintptr>(32);
-            foreach (var (i, _) in pcs) {
+            foreach (var i in range(pcs)) {
                 // If runtime.recovery doesn't properly restore the
                 // frame pointer before returning control to this
                 // function, it will point somewhere lower in the stack

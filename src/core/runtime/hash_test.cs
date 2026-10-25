@@ -768,7 +768,7 @@ internal const nint hashSize = /* 32 + int(^uintptr(0)>>63<<5) */ 64;
 internal static void randBytes(ж<rand.Rand> Ꮡr, slice<byte> b) {
     ref var r = ref Ꮡr.DerefOrNull();
 
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         b[i] = (byte)r.Uint32();
     }
 }
@@ -815,6 +815,7 @@ public static void TestArrayHash(ж<testing.T> Ꮡt) {
     // Make sure that "" in arrays hash correctly. The hash
     // should at least scramble the input seed so that, e.g.,
     // {"","foo"} and {"foo",""} have different hashes.
+
     // If the hash is bad, then all (8 choose 4) = 70 keys
     // have the same hash. If so, we allocate 70/8 = 8
     // overflow buckets. If the hash is good we don't

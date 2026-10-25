@@ -91,6 +91,8 @@ internal static readonly @string badMagicˢ = "bad magic"u8;
 internal static readonly @string magicᶜ = "\x00\x00PB"u8;
 
 internal static (slice<fakeTimeFrame>, error) parseFakeTime(slice<byte> x) {
+    var framesᴷ = new stackAppend<fakeTimeFrame>(moves: true);
+
     slice<fakeTimeFrame> frames = default!;
     while (len(x) != 0) {
         if (len(x) < 4 + 8 + 4) {
@@ -107,8 +109,9 @@ internal static (slice<fakeTimeFrame>, error) parseFakeTime(slice<byte> x) {
         x = x[4..];
         @string data = (@string)(x.slice(0, (nint)(dlen)));
         x = x.slice((nint)(dlen));
-        frames = append(frames, new fakeTimeFrame(time, data));
+        frames = append(framesᴷ, frames, new fakeTimeFrame(time, data));
     }
+    frames = move2heap(framesᴷ, frames);
     return (frames, default!);
 }
 

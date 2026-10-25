@@ -285,6 +285,7 @@ public static void TestGCTestMoveStackOnNextCall(ж<testing.T> Ꮡt) {
 internal static partial bool moveStackCheck(ж<testing.T> Ꮡt, ж<nint> Ꮡnew, uintptr old) {
     // new should have been updated by the stack move;
     // old should not have.
+
     // Capture new's value before doing anything that could
     // further move the stack.
     var new2 = (uintptr)Ꮡnew;
@@ -321,6 +322,9 @@ internal static partial void moveStack1(bool x) {
 }
 
 public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
+    var allᴷ = new stackAppend<@unsafe.Pointer>();
+    var halfᴷ = new stackAppend<@unsafe.Pointer>();
+
     slice<@unsafe.Pointer> all = default!;
     slice<@unsafe.Pointer> half = default!;
     uint64 want = default!;
@@ -328,9 +332,9 @@ public static void TestGCTestIsReachable(ж<testing.T> Ꮡt) {
         // The tiny allocator muddies things, so we use a
         // scannable type.
         @unsafe.Pointer p = @unsafe.Pointer.FromBox(@new<ж<nint>>());
-        all = append(all, p);
+        all = append(allᴷ, all, p);
         if (i % 2 == 0) {
-            half = append(half, p);
+            half = append(halfᴷ, half, p);
             want |= (uint64)(((uint64)1).Lsh((int64)(i)));
         }
     }
@@ -508,7 +512,7 @@ public static void TestPageAccounting(ж<testing.T> Ꮡt) {
     // mismatch (golang.org/issue/15022).
     UntypedInt blockSize = /* 64 << 10 */ 65536;
     var blocks = new slice<ж<array<byte>>>((64 << 20) / blockSize);
-    foreach (var (i, _) in blocks) {
+    foreach (var i in range(blocks)) {
         blocks[i] = Ꮡ(new array<byte>(65536));
     }
 
@@ -573,7 +577,7 @@ public static void BenchmarkReadMemStats(ж<testing.B> Ꮡb) {
     ref var ms = ref heap(new Δruntime.MemStats(), out var Ꮡms);
     UntypedInt heapSize = /* 100 << 20 */ 104857600;
     var x = new slice<ж<array<byte>>>(heapSize / 1024);
-    foreach (var (i, _) in x) {
+    foreach (var i in range(x)) {
         x[i] = Ꮡ(new array<byte>(1024));
     }
 
@@ -606,7 +610,7 @@ internal static partial Action applyGCLoad(ж<testing.B> Ꮡb) {
     buildTree = (nint depth) => {
         var tree = @new<applyGCLoad_node>();
         if (depth != 0) {
-            foreach (var (i, _) in (~tree).children) {
+            foreach (var i in range((~tree).children)) {
                 tree.Value.children[i] = ᏑbuildTree.ValueSlot(depth - 1);
             }
         }
@@ -662,6 +666,7 @@ internal static readonly @string p99Nsˢ = "p99-ns"u8;
 
 public static void BenchmarkReadMemStatsLatency(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var latenciesᴷ = new stackAppend<time.Duration>();
 
     var stop = applyGCLoad(Ꮡb);
 
@@ -678,7 +683,7 @@ public static void BenchmarkReadMemStatsLatency(ж<testing.B> Ꮡb) {
         time.Sleep(100 * time.Millisecond);
         var start = time.Now();
         Δruntime.ReadMemStats(Ꮡms);
-        latencies = append(latencies, time.Since(start));
+        latencies = append(latenciesᴷ, latencies, time.Since(start));
     }
     // Make sure to stop the timer before we wait! The load created above
     // is very heavy-weight and not easy to stop, so we could end up
@@ -833,7 +838,7 @@ public static void BenchmarkBulkWriteBarrier(ж<testing.B> Ꮡb) {
     // Construct a large set of objects we can copy around.
     UntypedInt heapSize = /* 64 << 20 */ 67108864;
     var ptrs = new slice<ж<BenchmarkBulkWriteBarrier_obj>>((nint)((uintptr)heapSize / /* unsafe.Sizeof(obj{}) */ (uintptr)128));
-    foreach (var (i, _) in ptrs) {
+    foreach (var i in range(ptrs)) {
         ptrs[i] = @new<BenchmarkBulkWriteBarrier_obj>();
     }
 
@@ -982,7 +987,7 @@ public static partial void TestWeakToStrongMarkTermination(ж<testing.T> Ꮡt) {
         Δruntime.GC();
 
         // Create many objects with a weak pointers to them.
-        foreach (var (i, _) in w) {
+        foreach (var i in range(w)) {
             var x = @new<TestWeakToStrongMarkTermination_T>();
             x.Value.a = @new<nint>();
             w[i] = weak.Make<TestWeakToStrongMarkTermination_T>(x);

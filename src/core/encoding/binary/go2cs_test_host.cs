@@ -32,8 +32,8 @@ internal static class Go2CsTestHost
         registry.Add("TestLittleEndianWrite", binary_internal_test_package.TestLittleEndianWrite, "binary_test.go", 209);
         registry.Add("TestNativeEndian", binary_internal_test_package.TestNativeEndian, "binary_test.go", 1151);
         registry.Add("TestNoFixedSize", binary_internal_test_package.TestNoFixedSize, "binary_test.go", 686);
-        registry.Add("TestNonCanonicalZero", binary_internal_test_package.TestNonCanonicalZero, "varint_test.go", 220);
-        registry.Add("TestOverflow", binary_internal_test_package.TestOverflow, "varint_test.go", 214);
+        registry.Add("TestNonCanonicalZero", binary_internal_test_package.TestNonCanonicalZero, "varint_test.go", 219);
+        registry.Add("TestOverflow", binary_internal_test_package.TestOverflow, "varint_test.go", 213);
         registry.Add("TestReadBool", binary_internal_test_package.TestReadBool, "binary_test.go", 234);
         registry.Add("TestReadBoolSlice", binary_internal_test_package.TestReadBoolSlice, "binary_test.go", 252);
         registry.Add("TestReadErrorMsg", binary_internal_test_package.TestReadErrorMsg, "binary_test.go", 518);

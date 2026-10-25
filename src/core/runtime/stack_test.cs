@@ -1154,7 +1154,7 @@ public static void TestTracebackAncestors(ж<testing.T> Ꮡt) {
 internal static readonly @string deferLivenessˢ = "DeferLiveness"u8;
 
 // Test that defer closure is correctly scanned when the stack is scanned.
-public static void TestDeferLiveness(ж<testing.T> Ꮡt) {
+public static partial void TestDeferLiveness(ж<testing.T> Ꮡt) {
     @string output = runTestProg(Ꮡt, testprogˢ, deferLivenessˢ, godebugClobberfree1ˢ);
     if (output != ""u8) {
         Ꮡt.Errorf("output:\n%s\n\nwant no output"u8, output);
