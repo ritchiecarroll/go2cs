@@ -28355,4 +28355,41 @@ literal. LOW: a reader sees the argument is there; no comparison changes.
 
 — R (2026-10-24)
 
+## 2026-10-25 — G (the go1.26.10 alloc relabel, COORD's FLAG ruling): fourteen allocation readings that ROSE against go1.24.13 — POST-HOP PERF, not a re-bank blocker
+
+**Basis.** The relabel re-read every allocation entry on both OSes at `d804094d7a` (go1.26.10, batch 37's tip,
+Release with tiering off): `alloc-units-windows.tsv` (claude/g-pass2-plan `966562828d`) and `alloc-units-linux.tsv`
+(claude/p1-alloc-reading `8d9d880ca2`), both under `docs/phase4/data/rebank-go1.26.10/`. The go1.24.13 figure is each
+entry's own reading before the relabel. Units are COUNT per run (a lower bound). "Test identical" means the top-level
+`Test` function's body is byte-identical at go1.24.13 and go1.26.10; the package's own source can still differ.
+
+| Entry | go1.24.13 | go1.26.10 windows / linux | Test body | Likely cause |
+|:--|--:|--:|:--|:--|
+| `bufio` `TestReadStringAllocs` | 2 | 3 / 3 | identical | converted side: `strings/builder.go` differs only in comments, so the extra object is golib's or the emission's |
+| `strings` `TestBuilderAllocs` | 2 | 3 / 3 | identical | the same one-object rise on the same `strings.Builder` path as bufio's; one cause for both is likely |
+| `crypto/md5` `TestAllocations` | 6 | 8 / 8 | identical | upstream: `md5.go` gains `Clone` and a chunked `Write` loop; unattributed |
+| `crypto/sha1` `TestAllocations` | 7 | 9 / 9 | identical | upstream `sha1.go` changed (+9/-4); unattributed |
+| `crypto/sha256` `TestAllocations` | 46 | 54 / 54 | identical | upstream `crypto/internal/fips140/sha256` changed (+16); H read 54 already at `8c091fc3aa` |
+| `crypto/sha3` `TestAllocations/New` | 18 | 19 / 19 | identical | upstream `sha3.go` (+35) and `hash/hash.go` (+36, `hash.Cloner`) changed; unattributed |
+| `crypto/sha3` `TestAllocations/Sum` | 16 | 17 / 17 | identical | the same |
+| `net/netip` `TestNoAllocs/Addr.Zone/6zone` | 4 | 10 / 10 | identical | upstream `netip.go` changed (+13/-12); the largest relative rise among identical tests, worth a stack probe first |
+| `os` `TestWriteStringAlloc` | 4 | 7 / 4 | identical | windows only: `file_windows.go` changed (+87/-29); linux holds at 4 |
+| `crypto/internal/fips140test` `TestNISTECAllocations/P224` | 8,480 | 8,490 / 8,490 | changed | Go-side: the test changed; +10 on each curve but P256 |
+| `crypto/internal/fips140test` `TestNISTECAllocations/P384` | 12,568 | 12,578 / 12,578 | changed | the same |
+| `crypto/internal/fips140test` `TestNISTECAllocations/P521` | 17,086 | 17,096 / 17,096 | changed | the same |
+| `net` `TestTCPReadWriteAllocs` | 2 | 16 / 6 | changed | Go-side test change, larger on windows (the overlapped-I/O path) |
+| `net` `TestAllocs` | 35 | 46 / 28 | changed | Go-side test change; DOWN on linux, UP on windows |
+
+**The drops, for contrast** (35 entries fell; the largest): `crypto/ed25519` `TestAllocations` 9,503 -> 4,312 (test
+changed), P256 16,149 -> 7,331 (likely P2's P-256 R3 persistent element boxes, batch 25, `3f426487b8`; not bisected),
+`encoding/binary` `TestAppendAllocs` 75 -> 9, `database/sql` `TestRawBytesAllocs` 28 -> 11, `fmt` `TestCountMallocs`
+20 -> 1 (test changed), `log/slog` `TestValueNoAlloc` 15 -> 1 and `TestAttrNoAlloc` 14 -> 1. Each entry's own
+`reason` now carries the move. No landing commit is claimed without a bisect.
+
+**Next step, if wanted post-publish:** the AllocationCounter stack probe on `bufio` `TestReadStringAllocs` and
+`strings` `TestBuilderAllocs` (identical test, comment-only Builder change, so the rise is ours), then `netip`
+`Addr.Zone/6zone`.
+
+— G (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
