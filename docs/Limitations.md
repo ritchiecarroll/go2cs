@@ -114,6 +114,22 @@ standard library, and runs on x64 Windows or Linux. **A longer evening:** lots o
   string, slice, map, interface, pointer or fixed-size array gets a stand-in number, not an address, so
   the older tricks (the `*(*string)(unsafe.Pointer(&b))` pun, a hand-built slice header) don't convert
   mechanically.
+* **The address of another package's variable is the address of a copy.** When code takes the address of a
+  variable that a different package exports and that is not itself a pointer, the pointer it gets refers to a
+  copy, so writes through it never reach the variable. That covers `&otherpkg.V`, a pointer-receiver method
+  value used as a value (`f := otherpkg.V.Reset`), and the common `flag.BoolVar(&otherpkg.Debug, "debug", false,
+  "...")`, where parsing the flag leaves `otherpkg.Debug` unchanged. Calling the method directly
+  (`otherpkg.V.Reset()`) and reading the variable both work, and inside one package all of these work. To avoid it,
+  keep the variable and the code that takes its address in the same package, or have the package export a pointer
+  (`var V = &T{}`) or an accessor function instead of the value.
+  <!-- Diagnosed by lane R on windows/amd64 and linux/amd64 at 9b0269c2e8 (COORD inbox, 2026-10-25T19:24:56Z):
+       `f := lib.G.Inc` emits `Ꮡ(lib.G).Inc`, a box of a copy (Go prints 1, converted 0); `&lib.G2` and
+       `bump(&lib.Count)` likewise. An importer binds the owner's own box only when the owner boxes the variable, which
+       it decides from its own syntax: src/go2cs/globalAddressOperations.go:237 (`func importedGlobalIsBoxed(varObj *types.Var) bool {`),
+       with exported variables boxed only for a box-only pointer method at
+       :188 (`func markExportedBoxOnlyGlobals(pkg *types.Package, into map[types.Object]bool) {`). The same-package method
+       value is fixed for the 1.26 publication (R's seat F1); the cross-package case is ruled a documented limitation
+       (owner, 2026-10-25), with the fix in the BOARD row of that date. -->
 * **Garbage collection is .NET's.** An object your function just stopped using may not be collectible
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but

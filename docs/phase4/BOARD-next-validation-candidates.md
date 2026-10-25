@@ -28478,4 +28478,33 @@ unscoped with the reason stated. darwin's reading decides whether `["linux", "da
 
 — G (2026-10-25)
 
+## 2026-10-25 — C2 (owner's ruling, R's diagnosis): the address of ANOTHER package's exported value variable binds a copy — POST-PUBLISH, the .2 headline
+
+**What happens.** An importer that takes the address of another package's exported variable whose type is not a pointer
+binds `Ꮡ(lib.V)`, a box of a COPY, so writes through it never reach the variable. It covers `&lib.V`, a
+pointer-receiver method value `lib.V.M` used as a value, and `flag.BoolVar(&lib.Flag, ...)`. A direct call
+`lib.V.M()` is unaffected (it passes the static field by `ref`). The owner decides whether a variable has a box from
+its own syntax, so it never sees an importer's need: `importedGlobalIsBoxed` binds the owner's box only when
+`scanAddressedGlobals` or `markExportedBoxOnlyGlobals` gave it one. Confirmed by R on windows/amd64 and linux/amd64 at
+`9b0269c2e8` (`f := lib.G.Inc`: Go 1, converted 0; `&lib.G2`: Go 5, converted 0); C2's probe at `233420f422`
+(linux/amd64) reads the same four emissions. Not a hop regression: the go1.24.13 tree emits the same lines.
+
+**Census (R, std plus all its tests, through the converter's own scan):** cross-package method values 0; explicit `&` 6,
+all in tests: four of fips140test's `&checktest.RODATA`/`DATA` section-address probes, `&unicode.Categories` (an address
+probe), and slog's benchmark `flag.BoolVar(&internal.IgnorePC, ...)`, wrong only when `-nopc` is passed. The behavioral
+corpus was not measured for this shape.
+
+**Options (R):**
+- (a) Widen `markExportedBoxOnlyGlobals` to exported value variables with any pointer method: about 10 more boxed
+  variables per flavour (the `net.IP` family). Fixes method values only.
+- (b) Box EVERY exported value variable: 179 more on windows, interface-typed variables not counted. Fixes `&` too.
+- (c) A golib ref-accessor box at the importer: no owner change, but pointer identity breaks
+  (`&lib.G == &lib.G` is false across sites).
+
+**Ruled (owner, 2026-10-25):** 1.26 ships the same-package method-value fix (R's seat F1) and documents the
+cross-package case in `docs/Limitations.md` and `docs/KnownIssues.md`. The .2 fix takes option (b), with a full
+re-bank, since every exported value variable's emission changes.
+
+— C2 (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
