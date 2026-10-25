@@ -193,6 +193,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
     GoFrame ᒐ = default;
     try {
         ref var test = ref Ꮡtest.DerefOrNull();
+        var commandᴷ = new stackAppend<@string>();
 
         var cert = testRSACertificate;
         if (len(test.cert) > 0) {
@@ -219,7 +220,7 @@ internal static (ж<recordingConn> conn, ж<exec.Cmd> child, opensslInput stdin,
         slice<@string> command = default!;
         command = appendꓸꓸꓸ(command, serverCommand);
         command = appendꓸꓸꓸ(command, test.args);
-        command = append(command, "-cert"u8, certPath, "-certform", "DER", "-key", keyPath);
+        command = append(commandᴷ, command, "-cert"u8, certPath, "-certform", "DER", "-key", keyPath);
         // serverPort contains the port that OpenSSL will listen on. OpenSSL
         // can't take "0" as an argument here so we have to pick a number and
         // hope that it's not in use on the machine. Since this only occurs
@@ -1476,6 +1477,7 @@ internal static readonly @string serverSelectedˢ = "server selected unadvertise
 public static partial void TestServerSelectingUnconfiguredApplicationProtocol(ж<testing.T> Ꮡt) {
     // This checks that the server can't select an application protocol that the
     // client didn't offer.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var errChan = new channel<error>(1);
 
@@ -1753,6 +1755,7 @@ internal static readonly @string unconfiguredCipherˢ = "unconfigured cipher"u8;
 public static partial void TestServerSelectingUnconfiguredCipherSuite(ж<testing.T> Ꮡt) {
     // This checks that the server can't select a cipher suite that the
     // client didn't offer. See #13174.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var errChan = new channel<error>(1);
 
@@ -3246,7 +3249,7 @@ internal static void testTLS13OnlyClientHelloCipherSuite(ж<testing.T> Ꮡt, sli
             if (len((~chi).CipherSuites) != len(expectedCiphersuites)){
                 Ꮡt.Errorf("only TLS 1.3 suites should be advertised, got=%x"u8, (~chi).CipherSuites);
             } else {
-                foreach (var (i, _) in expectedCiphersuites) {
+                foreach (var i in range(expectedCiphersuites)) {
                     {
                         var (want, got) = (expectedCiphersuites[i], (~chi).CipherSuites[i]); if (want != got) {
                             Ꮡt.Errorf("cipher at index %d does not match, want=%x, got=%x"u8, i, want, got);

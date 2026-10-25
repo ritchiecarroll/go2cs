@@ -324,7 +324,7 @@ public static void TestFSRedirect(ж<testing.T> Ꮡt) {
 internal static readonly @string testˢ = "/test"u8;
 
 internal static void testFSRedirect(ж<testing.T> Ꮡt, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, StripPrefix(testˢ, FileServer(((Δhttp.Dir)(@string)"."u8)))).Value.ts;
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, StripPrefix(testˢ, FileServer((Δhttp.Dir)(@string)"."u8))).Value.ts;
 
     foreach (var (_, data) in fsRedirectTestData) {
         var (res, err) = ts.Client().Get((~ts).URL + data.original);
@@ -438,7 +438,7 @@ internal static void testFileServerEscapesNames(ж<testing.T> Ꮡt, testMode mod
         if (err != default!) {
             Ꮡt.Fatalf("test %q: read Body: %v"u8, test.name, err);
         }
-        @string s = ((@string)b);
+        @string s = (@string)b;
         if (!strings.HasPrefix(s, dirListPrefix) || !strings.HasSuffix(s, dirListSuffix)) {
             Ꮡt.Errorf("test %q: listing dir, full output is %q, want prefix %q and suffix %q"u8, test.name, s, dirListPrefix, dirListSuffix);
         }
@@ -499,7 +499,7 @@ internal static void testFileServerSortsNames(ж<testing.T> Ꮡt, testMode mode)
         if (err != default!) {
             Ꮡt.Fatalf("read Body: %v"u8, err);
         }
-        @string s = ((@string)b);
+        @string s = (@string)b;
         if (!strings.Contains(s, aHrefAAAAHrefBBAˢ)) {
             Ꮡt.Errorf("output appears to be unsorted:\n%s"u8, s);
         }
@@ -524,7 +524,7 @@ internal static readonly @string fooTxtˢ = "foo.txt"u8;
 internal static readonly @string barˢ3 = "/bar/"u8;
 internal static readonly @string fooTxtˢ2 = ">foo.txt<"u8;
 internal static readonly @string barFooTxtˢ = "/bar/foo.txt"u8;
-internal static readonly object helloWorldˢ2 = (@string)"Hello world"u8;
+internal static readonly object helloWorldˢ3 = (@string)"Hello world"u8;
 
 internal static void testFileServerImplicitLeadingSlash(ж<testing.T> Ꮡt, testMode mode) {
     @string tempDir = Ꮡt.TempDir();
@@ -533,7 +533,7 @@ internal static void testFileServerImplicitLeadingSlash(ж<testing.T> Ꮡt, test
             Ꮡt.Fatalf("WriteFile: %v"u8, err);
         }
     }
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, StripPrefix(barˢ3, FileServer(((Δhttp.Dir)tempDir)))).Value.ts;
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, StripPrefix(barˢ3, FileServer((Δhttp.Dir)tempDir))).Value.ts;
     var tsʗ1 = ts;
     @string get(@string suffix) {
         var (res, err) = tsʗ1.Client().Get((~tsʗ1).URL + suffix);
@@ -545,7 +545,7 @@ internal static void testFileServerImplicitLeadingSlash(ж<testing.T> Ꮡt, test
             Ꮡt.Fatalf("ReadAll %s: %v"u8, suffix, err);
         }
         (~res).Body.Close();
-        return ((@string)b);
+        return (@string)b;
     }
     {
         @string s = get(barˢ3); if (!strings.Contains(s, fooTxtˢ2)) {
@@ -554,7 +554,7 @@ internal static void testFileServerImplicitLeadingSlash(ж<testing.T> Ꮡt, test
     }
     {
         @string s = get(barFooTxtˢ); if (s != "Hello world"u8) {
-            Ꮡt.Logf("expected %q, got %q"u8, helloWorldˢ2, s);
+            Ꮡt.Logf("expected %q, got %q"u8, helloWorldˢ3, s);
         }
     }
 }
@@ -598,18 +598,18 @@ public static void TestDirJoin(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
-    test(((Δhttp.Dir)(@string)etcˢ), hostsˢ);
-    test(((Δhttp.Dir)(@string)etcˢ), hostsˢ2);
-    test(((Δhttp.Dir)(@string)etcˢ), hostsˢ3);
-    test(((Δhttp.Dir)(@string)etcˢ2), hostsˢ);
-    test(((Δhttp.Dir)(@string)etcˢ2), hostsˢ2);
-    test(((Δhttp.Dir)(@string)etcˢ2), hostsˢ3);
+    test((Δhttp.Dir)(@string)etcˢ, hostsˢ);
+    test((Δhttp.Dir)(@string)etcˢ, hostsˢ2);
+    test((Δhttp.Dir)(@string)etcˢ, hostsˢ3);
+    test((Δhttp.Dir)(@string)etcˢ2, hostsˢ);
+    test((Δhttp.Dir)(@string)etcˢ2, hostsˢ2);
+    test((Δhttp.Dir)(@string)etcˢ2, hostsˢ3);
 
     // Not really directories, but since we use this trick in
     // ServeFile, test it:
-    test(((Δhttp.Dir)(@string)etcHostsˢ), ""u8);
-    test(((Δhttp.Dir)(@string)etcHostsˢ), "/"u8);
-    test(((Δhttp.Dir)(@string)etcHostsˢ), "../"u8);
+    test((Δhttp.Dir)(@string)etcHostsˢ, ""u8);
+    test((Δhttp.Dir)(@string)etcHostsˢ, "/"u8);
+    test((Δhttp.Dir)(@string)etcHostsˢ, "../"u8);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -630,9 +630,9 @@ public static void TestEmptyDirOpenCWD(ж<testing.T> Ꮡt) {
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     }
-    test(((Δhttp.Dir)(@string)""u8));
-    test(((Δhttp.Dir)(@string)"."u8));
-    test(((Δhttp.Dir)(@string)"./"u8));
+    test((Δhttp.Dir)(@string)""u8);
+    test((Δhttp.Dir)(@string)"."u8);
+    test((Δhttp.Dir)(@string)"./"u8);
 }
 
 public static void TestServeFileContentType(ж<testing.T> Ꮡt) {
@@ -857,7 +857,7 @@ internal static void testServeIndexHtml(ж<testing.T> Ꮡt, testMode mode) {
         @string name = default!;
         switch (i) {
         case 0: {
-            h = FileServer(((Δhttp.Dir)(@string)"."u8));
+            h = FileServer((Δhttp.Dir)(@string)"."u8);
             name = dirˢ;
             break;
         }
@@ -880,7 +880,7 @@ internal static void testServeIndexHtml(ж<testing.T> Ꮡt, testMode mode) {
                     tΔ1.Fatal(readingBodyˢ, err);
                 }
                 {
-                    @string s = ((@string)b); if (s != want) {
+                    @string s = (@string)b; if (s != want) {
                         tΔ1.Errorf("for path %q got %q, want %q"u8, path, s, want);
                     }
                 }
@@ -901,7 +901,7 @@ internal static void testServeIndexHtmlFS(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
         @string want = wantᶜ1;
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)"."u8))).Value.ts;
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer((Δhttp.Dir)(@string)"."u8)).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
 
@@ -915,7 +915,7 @@ internal static void testServeIndexHtmlFS(ж<testing.T> Ꮡt, testMode mode) {
                 Ꮡt.Fatal(readingBodyˢ, err);
             }
             {
-                @string s = ((@string)b); if (s != want) {
+                @string s = (@string)b; if (s != want) {
                     Ꮡt.Errorf("for path %q got %q, want %q"u8, path, s, want);
                 }
             }
@@ -936,7 +936,7 @@ internal static readonly object readResponseˢ = (@string)"ReadResponse: "u8;
 internal static void testFileServerZeroByte(ж<testing.T> Ꮡt, testMode mode) {
     GoFrame ᒐ = default;
     try {
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)"."u8))).Value.ts;
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer((Δhttp.Dir)(@string)"."u8)).Value.ts;
 
         var (c, err) = net.Dial(tcpˢ, (~ts).Listener.Addr().String());
         if (err != default!) {
@@ -962,12 +962,35 @@ internal static void testFileServerZeroByte(ж<testing.T> Ꮡt, testMode mode) {
     finally { ᒐ.Run(); }
 }
 
+public static void TestFileServerNullByte(ж<testing.T> Ꮡt) {
+    run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testFileServerNullByte(Δp0, Δp1));
+}
+
+internal static void testFileServerNullByte(ж<testing.T> Ꮡt, testMode mode) {
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).Value.ts;
+
+    foreach (var (_, path) in new @string[]{
+        "/file%00"u8,
+        "/%00"u8,
+        "/file/qwe/%00"u8
+    }.slice()) {
+        var (res, err) = ts.Client().Get((~ts).URL + path);
+        if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+        (~res).Body.Close();
+        if ((~res).StatusCode != 404) {
+            Ꮡt.Errorf("Get(%q): got status %v, want 404"u8, path, (~res).StatusCode);
+        }
+    }
+}
+
 public static void TestFileServerNamesEscape(ж<testing.T> Ꮡt) {
     run<TжTBRun>(Ꮡt, (Δp0, Δp1) => testFileServerNamesEscape(Δp0, Δp1));
 }
 
 internal static void testFileServerNamesEscape(ж<testing.T> Ꮡt, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)testdataˢ))).Value.ts;
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).Value.ts;
     foreach (var (_, path) in new @string[]{
         "/../testdata/file"u8,
         "/NUL"u8 // don't read from device files on Windows
@@ -1647,7 +1670,7 @@ public static void TestLinuxSendfile(ж<testing.T> Ꮡt) {
         @string filepath = path.Join(os.TempDir(), filename);
 
         {
-            var errΔ3 = os.WriteFile(filepath, bytes.Repeat(new byte[]{(rune)'a'}.slice(), (1 << (int)(10))), 493); if (errΔ3 != default!) {
+            var errΔ3 = os.WriteFile(filepath, bytes.Repeat(new byte[]{(rune)'a'}.slice(), 1 << 10), 493); if (errΔ3 != default!) {
                 Ꮡt.Fatal(errΔ3);
             }
         }
@@ -1716,14 +1739,14 @@ public static void TestLinuxSendfileChild(ж<testing.T> _) {
         if (os.Getenv(goWantHelperProcessˢ) != "1"u8) {
             return;
         }
-        defer(os.Exit, (nint)(0), ref ᒐ);
+        defer(os.Exit, (nint)0, ref ᒐ);
         var fd3 = os.NewFile(3, ephemeralPortListenerˢ);
         var (ln, err) = net.FileListener(fd3);
         if (err != default!) {
             throw panic(err);
         }
         var mux = NewServeMux();
-        mux.Handle("/"u8, FileServer(((Δhttp.Dir)os.TempDir())));
+        mux.Handle("/"u8, FileServer((Δhttp.Dir)os.TempDir()));
         mux.HandleFunc(quitˢ, (Δhttp.ResponseWriter _Δp0, ж<Δhttp.Request> _Δp1) => {
             os.Exit(0);
         });
@@ -1883,7 +1906,7 @@ internal partial struct testServeFileRejectsInvalidSuffixLengths_tests /*dyn*/ {
 }
 
 internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> Ꮡt, testMode mode) {
-    var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)testdataˢ))).Value.ts;
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).Value.ts;
 
     var tests = new testServeFileRejectsInvalidSuffixLengths_tests[]{
         new("bytes=--6"u8, 416, "invalid range\n"u8),
@@ -1896,12 +1919,13 @@ internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> Ꮡt
         new("bytes="u8, 200, "index.html says hello\n"u8)
     }.slice();
 
-    foreach (var (_, tt) in tests) {
-        ref var ttΔ1 = ref heap<testServeFileRejectsInvalidSuffixLengths_tests>(out var ᏑttΔ1);
-        ttΔ1 = tt;
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new testServeFileRejectsInvalidSuffixLengths_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
         var cstʗ1 = cst;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.r, (ж<testing.T> tΔ1) => {
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.r, (ж<testing.T> tΔ1) => {
             var (req, err) = NewRequest(getˢ2, (~cstʗ1).URL + "/index.html"u8, default!);
             if (err != default!) {
                 tΔ1.Fatal(err);
@@ -1923,7 +1947,7 @@ internal static void testServeFileRejectsInvalidSuffixLengths(ж<testing.T> Ꮡt
                 tΔ1.Fatal(err);
             }
             {
-                @string g = ((@string)slurp);
+                @string g = (@string)slurp;
                 @string w = ttʗ1.wantBody; if (g != w) {
                     tΔ1.Fatalf("Content mismatch:\nGot:  %q\nWant: %q"u8, g, w);
                 }
@@ -1937,7 +1961,7 @@ public static void TestFileServerMethods(ж<testing.T> Ꮡt) {
 }
 
 internal static void testFileServerMethods(ж<testing.T> Ꮡt, testMode mode) {
-    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer(((Δhttp.Dir)(@string)testdataˢ))).Value.ts;
+    var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, FileServer((Δhttp.Dir)(@string)testdataˢ)).Value.ts;
 
     var (@file, err) = os.ReadFile(testFile);
     if (err != default!) {
@@ -1996,7 +2020,7 @@ public static void TestFileServerFS(ж<testing.T> Ꮡt) {
         var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
             [filename] = Ꮡ(new fstest.MapFile(Data: contents))
         });
-        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), http1Mode, FileServerFS(fsys)).Value.ts;
+        var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), http1Mode, FileServerFS(new http_test_package.fstest_MapFSᴠFS(fsys))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
 
@@ -2009,7 +2033,7 @@ public static void TestFileServerFS(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readingBodyˢ, err);
         }
         {
-            @string s = ((@string)b); if (s != ((sstring)contents)) {
+            @string s = (@string)b; if (s != ((sstring)contents)) {
                 Ꮡt.Errorf("for path %q got %q, want %q"u8, filename, s, contents);
             }
         }
@@ -2029,7 +2053,7 @@ public static void TestServeFileFS(ж<testing.T> Ꮡt) {
         });
         var fsysʗ1 = fsys;
         var ts = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), http1Mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            ServeFileFS(w, r, fsysʗ1, filename);
+            ServeFileFS(w, r, new http_test_package.fstest_MapFSᴠFS(fsysʗ1), filename);
         }))).Value.ts;
         var tsʗ1 = ts;
         defer(tsʗ1.Close, ref ᒐ);
@@ -2043,7 +2067,7 @@ public static void TestServeFileFS(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readingBodyˢ, err);
         }
         {
-            @string s = ((@string)b); if (s != ((sstring)contents)) {
+            @string s = (@string)b; if (s != ((sstring)contents)) {
                 Ꮡt.Errorf("for path %q got %q, want %q"u8, filename, s, contents);
             }
         }
@@ -2082,7 +2106,7 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> Ꮡt) {
                 var gzw = gzip.NewWriter(new http_test_package.http_ResponseWriterᴠWriter(w));
                 var gzwʗ1 = gzw;
                 defer(() => gzwʗ1.Close(), ref ᒐ);
-                ServeFileFS(new gzipResponseWriter(w: gzw, ResponseWriter: w), r, fsysʗ1, filename);
+                ServeFileFS(new gzipResponseWriter(w: gzw, ResponseWriter: w), r, new http_test_package.fstest_MapFSᴠFS(fsysʗ1), filename);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
             finally { ᒐ.Run(); }
@@ -2099,7 +2123,7 @@ public static void TestServeFileZippingResponseWriter(ж<testing.T> Ꮡt) {
             Ꮡt.Fatal(readingBodyˢ, err);
         }
         {
-            @string s = ((@string)b); if (s != ((sstring)contents)) {
+            @string s = (@string)b; if (s != ((sstring)contents)) {
                 Ꮡt.Errorf("for path %q got %q, want %q"u8, filename, s, contents);
             }
         }
@@ -2162,7 +2186,7 @@ internal static void testFileServerDirWithRootFile(ж<testing.T> Ꮡt, testMode 
 
     var testDirFileʗ1 = testDirFile;
     Ꮡt.Run(fileServerˢ, (ж<testing.T> tΔ2) => {
-        testDirFileʗ1(tΔ2, FileServer(((Δhttp.Dir)(@string)testdataIndexHtmlˢ)));
+        testDirFileʗ1(tΔ2, FileServer((Δhttp.Dir)(@string)testdataIndexHtmlˢ));
     });
 
     var testDirFileʗ2 = testDirFile;
@@ -2240,7 +2264,7 @@ internal static void testServeContentHeadersWithError(ж<testing.T> Ꮡt, bool k
             }
         }
         {
-            @string g = ((@string)@out);
+            @string g = (@string)@out;
             @string e = invalidRangeFailedToˢ; if (g != e) {
                 Ꮡt.Errorf("got body = %q; want %q"u8, g, e);
             }

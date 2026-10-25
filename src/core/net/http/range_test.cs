@@ -3,7 +3,10 @@
 // license that can be found in the LICENSE file.
 namespace go.net;
 
+using metrics = global::go.runtime.metrics_package;
+using strings = strings_package;
 using testing = testing_package;
+using global::go.runtime;
 using static global::go.net.http_package;
 
 partial class http_internal_test_package {
@@ -34,6 +37,7 @@ public static slice<ParseRangeTestsᴛ1> ParseRangeTests = new ParseRangeTests�
     new("bytes=0x01-0x02"u8, 10, default!),
     new("bytes=         "u8, 10, default!),
     new("bytes= , , ,   "u8, 10, default!),
+
     new("bytes=0-9"u8, 10, new global::go.net.http_package.httpRange[]{new(0, 10)}.slice()),
     new("bytes=0-"u8, 10, new global::go.net.http_package.httpRange[]{new(0, 10)}.slice()),
     new("bytes=5-"u8, 10, new global::go.net.http_package.httpRange[]{new(5, 5)}.slice()),
@@ -67,7 +71,7 @@ public static void TestParseRange(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("len(parseRange(%q)) = %d, want %d"u8, test.s, builtin.len(ranges), builtin.len(r));
             continue;
         }
-        foreach (var (i, _) in r) {
+        foreach (var i in range(r)) {
             if (ranges[i].start != r[i].start) {
                 Ꮡt.Errorf("parseRange(%q)[%d].start = %d, want %d"u8, test.s, i, ranges[i].start, r[i].start);
             }
@@ -75,6 +79,115 @@ public static void TestParseRange(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("parseRange(%q)[%d].length = %d, want %d"u8, test.s, i, ranges[i].length, r[i].length);
             }
         }
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string godebugNonDefaultˢ = "/godebug/non-default-behavior/httpservecontentmaxranges:events"u8;
+
+internal partial struct TestParseRangeLimit_type /*dyn*/ {
+    internal @string name;
+    internal @string godebug;
+    internal nint numRanges;
+    internal nint want;
+    internal bool wantNonDef;
+}
+
+public static void TestParseRangeLimit(ж<testing.T> Ꮡt) {
+    foreach (var (_, vᴛ1) in new TestParseRangeLimit_type[]{
+        new(
+            name: "default limit not exceeded"u8,
+            numRanges: defaultMaxContentRanges,
+            want: defaultMaxContentRanges
+        ),
+        new(
+            name: "default limit exceeded"u8,
+            numRanges: defaultMaxContentRanges + 1,
+            want: 0
+        ),
+        new(
+            name: "small limit exceeded"u8,
+            godebug: "httpservecontentmaxranges=10"u8,
+            numRanges: 11,
+            want: 0,
+            wantNonDef: true
+        ),
+        new(
+            name: "small limit not exceeded"u8,
+            godebug: "httpservecontentmaxranges=10"u8,
+            numRanges: 10,
+            want: 10
+        ),
+        new(
+            name: "disabled limit"u8,
+            godebug: "httpservecontentmaxranges=0"u8,
+            numRanges: 2 * defaultMaxContentRanges,
+            want: 2 * defaultMaxContentRanges,
+            wantNonDef: true
+        ),
+        new(
+            name: "large limit exceeded"u8,
+            godebug: "httpservecontentmaxranges=300"u8,
+            numRanges: 301,
+            want: 0
+        ),
+        new(
+            name: "large limit not exceeded"u8,
+            godebug: "httpservecontentmaxranges=300"u8,
+            numRanges: 300,
+            want: 300,
+            wantNonDef: true
+        ),
+        new(
+            name: "large limit not exceeded by small input"u8,
+            godebug: "httpservecontentmaxranges=300"u8,
+            numRanges: 10,
+            want: 10
+        ),
+        new(
+            name: "invalid limit negative"u8,
+            godebug: "httpservecontentmaxranges=-5"u8,
+            numRanges: defaultMaxContentRanges + 1,
+            want: 0
+        ),
+        new(
+            name: "invalid limit non-numeric"u8,
+            godebug: "httpservecontentmaxranges=abc"u8,
+            numRanges: defaultMaxContentRanges + 1,
+            want: 0
+        )
+    }.slice()) {
+        ref var tc = ref heap(new TestParseRangeLimit_type(), out var Ꮡtc);
+        tc = vᴛ1;
+
+        var tcʗ1 = tc;
+        Ꮡt.Run(tc.name, (ж<testing.T> tΔ1) => {
+            tΔ1.Setenv(godebugˢ, tcʗ1.godebug);
+            array<metrics.Sample> m = new(1);
+            m[0].Name = godebugNonDefaultˢ;
+            metrics.Read(m[..]);
+            var before = m[0].Value.Uint64();
+
+            @string rangeHeader = "bytes="u8 + strings.Repeat("0-0,"u8, tcʗ1.numRanges - 1) + "0-0"u8;
+            var (ranges, err) = parseRange(rangeHeader, 10_000_000);
+            if (err != default!) {
+                tΔ1.Fatalf("parseRange(%q): %v"u8, rangeHeader, err);
+            }
+            {
+                nint got = builtin.len(ranges); if (got != tcʗ1.want) {
+                    tΔ1.Errorf("len(ranges) = %v, want %v"u8, got, tcʗ1.want);
+                }
+            }
+
+            metrics.Read(m[..]);
+            var after = m[0].Value.Uint64();
+            if (tcʗ1.wantNonDef && after <= before){
+                tΔ1.Errorf("metric did not increment: before=%d, after=%d"u8, before, after);
+            } else 
+            if (!tcʗ1.wantNonDef && after != before) {
+                tΔ1.Errorf("metric unexpectedly incremented: before=%d, after=%d"u8, before, after);
+            }
+        });
     }
 }
 

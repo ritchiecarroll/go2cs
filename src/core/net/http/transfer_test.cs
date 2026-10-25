@@ -76,10 +76,13 @@ public static void TestDetectInMemoryReaders(ж<testing.T> Ꮡt) {
     var (pr, _) = io.Pipe();
     var tests = new TestDetectInMemoryReaders_tests[]{
         new(new io.PipeReaderжReader(pr), false),
+
         new(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default!)), true),
         new(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default!)), true),
         new(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8)), true),
+
         new(io.NopCloser(new io.PipeReaderжReader(pr)), false),
+
         new(io.NopCloser(new http_test_package.bytes_ReaderжReader(bytes.NewReader(default!))), true),
         new(io.NopCloser(new http_test_package.bytes_BufferжReader(bytes.NewBuffer(default!))), true),
         new(io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(""u8))), true)
@@ -261,7 +264,7 @@ public static void TestTransferWriterWriteBodyReaderTypes(ж<testing.T> Ꮡt) {
                     tΔ1.Fatal(err);
                 }
                 var cleanupʗ1 = cleanup;
-                defer(cleanupʗ1, ref ᒐ);
+                defer(cleanupʗ1, ref ᒐ, recovers: true);
 
                 var mw = Ꮡ(new mockTransferWriter(nil));
                 var tw = Ꮡ(new transferWriter(

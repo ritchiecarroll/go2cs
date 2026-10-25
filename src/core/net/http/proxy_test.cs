@@ -11,8 +11,6 @@ using static global::go.net.http_package;
 
 partial class http_internal_test_package {
 
-// TODO(mattn):
-//	test ProxyAuth
 partial struct cacheKeysTestsᴛ1 /*dyn*/ {
     internal @string proxy;
     internal @string scheme;
@@ -50,6 +48,48 @@ public static void ResetProxyEnv() {
         os.Unsetenv(v);
     }
     ResetCachedEnvironment();
+}
+
+partial struct proxyAuthTestsᴛ1 /*dyn*/ {
+    internal @string proxy;
+    internal @string key;
+}
+internal static slice<proxyAuthTestsᴛ1> proxyAuthTests = new proxyAuthTestsᴛ1[]{
+    new(
+        ""u8,
+        ""u8
+    ),
+    new(
+        "http://bar.com"u8,
+        ""u8
+    ),
+    new(
+        "http://foo@bar.com"u8,
+        "Basic Zm9vOg=="u8
+    ),
+    new(
+        "http://foo:bar@bar.com"u8,
+        "Basic Zm9vOmJhcg=="u8
+    )
+}.slice();
+
+public static void TestProxyAuthKeys(ж<testing.T> Ꮡt) {
+    foreach (var (_, tt) in proxyAuthTests) {
+        ж<url.URL> proxy = default!;
+        if (tt.proxy != ""u8) {
+            var (u, err) = url.Parse(tt.proxy);
+            if (err != default!) {
+                Ꮡt.Fatal(err);
+            }
+            proxy = u;
+        }
+        var cm = new connectMethod(proxyURL: proxy);
+        {
+            @string got = cm.proxyAuth(); if (got != tt.key) {
+                Ꮡt.Fatalf("{%q} proxyAuth key = %q; want %q"u8, tt.proxy, got, tt.key);
+            }
+        }
+    }
 }
 
 } // end http_internal_test_package

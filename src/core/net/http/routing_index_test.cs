@@ -159,12 +159,13 @@ internal static Action<Action<@string>> genStar(nint max, Action<Action<@string>
 
 public static void BenchmarkMultiConflicts(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var patsᴷ = new stackAppend<ж<global::go.net.http_package.pattern>>();
 
     // How fast is indexing if the corpus is all multis?
     const nint nMultis = 1000;
     slice<ж<global::go.net.http_package.pattern>> pats = default!;
     for (nint i = 0; i < nMultis; i++) {
-        pats = append(pats, mustParsePattern(new http_test_package.testing_BжTB(Ꮡb), fmt.Sprintf("/a/b/{x}/d%d/"u8, i)));
+        pats = append(patsᴷ, pats, mustParsePattern(new http_test_package.testing_BжTB(Ꮡb), fmt.Sprintf("/a/b/{x}/d%d/"u8, i)));
     }
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {

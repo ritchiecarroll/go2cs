@@ -12,7 +12,6 @@ using sha1 = crypto.sha1_package;
 using tls = crypto.tls_package;
 using fmt = fmt_package;
 using hash = hash_package;
-using synctest = global::go.@internal.synctest_package;
 using io = io_package;
 using log = log_package;
 using maps = maps_package;
@@ -31,16 +30,17 @@ using strings = strings_package;
 using sync = sync_package;
 using atomic = global::go.sync.atomic_package;
 using testing = testing_package;
+using synctest = global::go.testing.synctest_package;
 using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
 using compress;
 using crypto;
-using global::go.@internal;
 using global::go.net;
 using global::go.net.http;
 using global::go.sync;
+using global::go.testing;
 using iter = iter_package;
 using static global::go.net.http_internal_test_package;
 using Δhttp = global::go.net.http_package;
@@ -54,6 +54,21 @@ internal static readonly testMode http1Mode = "h1"u8; // HTTP/1.1
 internal static readonly testMode https1Mode = "https1"u8; // HTTPS/1.1
 internal static readonly testMode http2Mode = "h2"u8; // HTTP/2
 internal static readonly testMode http2UnencryptedMode = "h2unencrypted"u8; // HTTP/2
+
+partial struct testAddMode /*[]testMode*/; // default, plus these
+
+partial struct testSkipMode /*[]testMode*/; // default, minus these
+
+internal static @string Scheme(this testMode m) {
+    var exprᴛ1 = m;
+    if (exprᴛ1 == http1Mode || exprᴛ1 == http2UnencryptedMode) {
+        return httpˢ;
+    }
+    if (exprᴛ1 == https1Mode || exprᴛ1 == http2Mode) {
+        return httpsˢ;
+    }
+    throw panic("unknown testMode");
+}
 
 partial struct testNotParallelOpt {
 }
@@ -77,12 +92,26 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
     where T : TBRun<T>
 {
     var opts = optsʗp.sslice();
+    var modesᴷ = new stackAppend<testMode>();
 
     t.Helper();
     var modes = new testMode[]{http1Mode, http2Mode}.slice();
     var parallel = true;
     foreach (var (_, opt) in opts) {
         switch (opt.type()) {
+        case testAddMode optΔ1: {
+            foreach (var (_, m) in optΔ1) {
+                if (!slices.Contains(modes, m)) {
+                    modes = append(modesᴷ, modes, m);
+                }
+            }
+            break;
+        }
+        case testSkipMode optΔ1: {
+            var optʗ1 = optΔ1;
+            modes = slices.DeleteFunc(modes, (testMode m) => slices.Contains(optʗ1, m));
+            break;
+        }
         case slice<testMode> optΔ1: {
             modes = optΔ1;
             break;
@@ -98,7 +127,7 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
         }}
     }
     {
-        var (tΔ1, ok) = ((any)t)._<ж<testing.T>>(ᐧ); if (ok && parallel) {
+        var (tΔ1, ok) = ((any)(t).OrTypedNilOf())._<ж<testing.T>>(ᐧ); if (ok && parallel) {
             setParallel(tΔ1);
         }
     }
@@ -106,7 +135,7 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
         t.Run((@string)mode, (T tΔ2) => {
             tΔ2.Helper();
             {
-                var (tΔ3, ok) = ((any)tΔ2)._<ж<testing.T>>(ᐧ); if (ok && parallel) {
+                var (tΔ3, ok) = ((any)(tΔ2).OrTypedNilOf())._<ж<testing.T>>(ᐧ); if (ok && parallel) {
                     setParallel(tΔ3);
                 }
             }
@@ -118,42 +147,16 @@ internal static void run<T>(T t, Action<T, testMode> f, params ꓸꓸꓸany opts
     }
 }
 
-// cleanupT wraps a testing.T and adds its own Cleanup method.
-// Used to execute cleanup functions within a synctest bubble.
-partial struct cleanupT {
-    public partial ref ж<testing_package.T> T { get; }
-    internal slice<Action> cleanups;
-}
-
-// Cleanup replaces T.Cleanup.
-internal static void Cleanup(this ref cleanupT t, Action f) {
-    t.cleanups = append(t.cleanups, f);
-}
-
-internal static void done(this ref cleanupT t) {
-    foreach (var (_, f) in range<nint, Action>(slices.Backward<slice<Action>, Action>(t.cleanups).Invoke)) {
-        f();
-    }
-}
-
 // runSynctest is run combined with synctest.Run.
 //
 // The TB passed to f arranges for cleanup functions to be run in the synctest bubble.
-internal static void runSynctest(ж<testing.T> Ꮡt, Action<testing.TB, testMode> f, params ꓸꓸꓸany optsʗp) {
+internal static void runSynctest(ж<testing.T> Ꮡt, Action<ж<testing.T>, testMode> f, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.sslice();
 
     run<TжTBRun>(Ꮡt, (TжTBRun tΔ1Δp, testMode mode) => {
         var tΔ1 = (ж<testing.T>)tΔ1Δp;
-        synctest.Run(() => {
-            GoFrame ᒐ = default;
-            try {
-                var ct = Ꮡ(new cleanupT(T: tΔ1));
-                var ctʗ1 = ct;
-                defer(ctʗ1.done, ref ᒐ);
-                f(new http_test_package.cleanupTжTB(ct), mode);
-            }
-            catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
-            finally { ᒐ.Run(); }
+        synctest.Test(tΔ1, (ж<testing.T> tΔ2) => {
+            f(tΔ2, mode);
         });
     }, opts.ꓸꓸꓸ);
 }
@@ -230,8 +233,9 @@ internal static ж<EmptyStruct> optFakeNet = @new<EmptyStruct>();
 // suitable for use in testing/synctest tests.
 internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode mode, httpꓸHandler h, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.slice();
+    var transportFuncsᴷ = new stackAppend<Action<ж<Δhttp.Transport>>>();
 
-    if (mode == http2Mode) {
+    if (mode == http2Mode || mode == http2UnencryptedMode) {
         http_internal_test_package.CondSkipHTTP2(t);
     }
     var cst = Ꮡ(new clientServerTest(
@@ -251,7 +255,7 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
                 Listener: new http_test_package.fakeNetListenerжListener((~cst).li)
             ));
             var cstʗ1 = cst;
-            transportFuncs = append(transportFuncs, (ж<Δhttp.Transport> tr) => {
+            transportFuncs = append(transportFuncsᴷ, transportFuncs, (ж<Δhttp.Transport> tr) => {
                 var cstʗ2 = cstʗ1;
                 tr.Value.DialContext = (net.Conn, error) (context.Context ctx, @string network, @string addr) => (new http_test_package.fakeNetConnжConn((~cstʗ2).li.connect()), default!);
             });
@@ -274,6 +278,10 @@ internal static ж<clientServerTest> newClientServerTest(testing.TB t, testMode 
         }
         case Action<ж<httptest.Server>> optΔ1: {
             optΔ1((~cst).ts);
+            break;
+        }
+        case Action<ж<Δhttp.Server>> optΔ1: {
+            optΔ1((~(~cst).ts).Config);
             break;
         }
         default: {
@@ -336,7 +344,7 @@ partial struct testLogWriter {
     internal testing.TB t;
 }
 
-internal static (nint, error) Write(this testLogWriter w, slice<byte> b) {
+internal static partial (nint, error) Write(this testLogWriter w, slice<byte> b) {
     w.t.Logf("server log: %v"u8, strings.TrimSpace((@string)b));
     return (len(b), default!);
 }
@@ -352,12 +360,12 @@ public static void TestNewClientServerTest(ж<testing.T> Ꮡt) {
     Ꮡt.Run(realnetˢ, (ж<testing.T> tΔ1) => {
         run<TжTBRun>(tΔ1, (TжTBRun tΔ2Δp, testMode mode) => {
             var tΔ2 = (ж<testing.T>)tΔ2Δp;
-            testNewClientServerTest(new http_test_package.testing_TжTB(tΔ2), mode);
+            testNewClientServerTest(tΔ2, mode);
         }, modesʗ1);
     });
     var modesʗ2 = modes;
     Ꮡt.Run(synctestˢ, (ж<testing.T> tΔ3) => {
-        runSynctest(tΔ3, (testing.TB tΔ4, testMode mode) => {
+        runSynctest(tΔ3, (ж<testing.T> tΔ4, testMode mode) => {
             testNewClientServerTest(tΔ4, mode, optFakeNet.OrTypedNil());
         }, modesʗ2);
     });
@@ -368,12 +376,12 @@ internal static readonly @string http11ˢ = "HTTP/1.1"u8;
 internal static readonly @string http20ˢ = "HTTP/2.0"u8;
 
 internal partial struct testNewClientServerTest_got /*dyn*/ {
-    public partial ref global::go.sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal @string proto;
     internal bool hasTLS;
 }
 
-internal static void testNewClientServerTest(testing.TB t, testMode mode, params ꓸꓸꓸany optsʗp) {
+internal static void testNewClientServerTest(ж<testing.T> Ꮡt, testMode mode, params ꓸꓸꓸany optsʗp) {
     var opts = optsʗp.sslice();
 
     ref var got = ref heap(new testNewClientServerTest_got(), out var Ꮡgot);
@@ -388,10 +396,10 @@ internal static void testNewClientServerTest(testing.TB t, testMode mode, params
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
         finally { ᒐ.Run(); }
     });
-    var cst = newClientServerTest(t, mode, new http_test_package.http_HandlerFuncᴠΔHandler(h), opts.ꓸꓸꓸ);
+    var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(h), opts.ꓸꓸꓸ);
     {
         var (_, err) = (~cst).c.Head((~(~cst).ts).URL); if (err != default!) {
-            t.Fatal(err);
+            Ꮡt.Fatal(err);
         }
     }
     @string wantProto = default!;
@@ -410,10 +418,10 @@ internal static void testNewClientServerTest(testing.TB t, testMode mode, params
         wantTLS = true;
     }
     if (got.proto != wantProto) {
-        t.Errorf("req.Proto = %q, want %q"u8, got.proto, wantProto);
+        Ꮡt.Errorf("req.Proto = %q, want %q"u8, got.proto, wantProto);
     }
     if (got.hasTLS != wantTLS) {
-        t.Errorf("req.TLS set: %v, want %v"u8, got.hasTLS, wantTLS);
+        Ꮡt.Errorf("req.TLS set: %v, want %v"u8, got.hasTLS, wantTLS);
     }
 }
 
@@ -777,7 +785,6 @@ internal static void testHandlerWritesTooMuch(ж<testing.T> Ꮡt, testMode mode)
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string acceptEncodingˢ = "Accept-Encoding"u8;
-internal static readonly @string contentEncodingˢ = "Content-Encoding"u8;
 internal static readonly @string gzipˢ = "gzip"u8;
 internal static readonly @string iAmSomeGzippedContentGoˢ = "I am some gzipped content. Go go go go go go go go go go go go should compress well."u8;
 
@@ -917,7 +924,7 @@ public static void TestCancelRequestMidBody(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloˢ = "Hello"u8;
+internal static readonly @string helloˢ2 = "Hello"u8;
 internal static readonly @string worldˢ = ", world."u8;
 
 internal static void testCancelRequestMidBody(ж<testing.T> Ꮡt, testMode mode) {
@@ -928,7 +935,7 @@ internal static void testCancelRequestMidBody(ж<testing.T> Ꮡt, testMode mode)
         var didFlushʗ1 = didFlush;
         var unblockʗ1 = unblock;
         var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
-            io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ);
+            io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ2);
             w._<Flusher>().Flush();
             didFlushʗ1.ᐸꟷ(true);
             ᐸꟷ(unblockʗ1);
@@ -1584,13 +1591,13 @@ public static void TestTransportGCRequest(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloˢ2 = "Hello."u8;
+internal static readonly @string helloˢ3 = "Hello."u8;
 
 internal static void testTransportGCRequest(ж<testing.T> Ꮡt, testMode mode, bool body) {
     var cst = newClientServerTest(new http_test_package.testing_TжTB(Ꮡt), mode, new http_test_package.http_HandlerFuncᴠΔHandler(new Δhttp.HandlerFunc((Δhttp.ResponseWriter w, ж<Δhttp.Request> r) => {
         io.ReadAll((~r).Body);
         if (body) {
-            io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ2);
+            io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloˢ3);
         }
     })));
 
@@ -1600,10 +1607,9 @@ internal static void testTransportGCRequest(ж<testing.T> Ꮡt, testMode mode, b
     ((Action)(() => {
         var bodyΔ1 = strings.NewReader(someBodyˢ);
         var (req, _) = NewRequest(postˢ, (~(~cstʗ1).ts).URL, new http_test_package.strings_ReaderжReader(bodyΔ1));
-        var didGCʗ2 = didGCʗ1;
-        runtime.SetFinalizer(req.OrTypedNil(), (ж<Δhttp.Request> _Δp0) => {
-            builtin.close(didGCʗ2);
-        });
+        runtime.AddCleanup(req, (channel<EmptyStruct> ch) => {
+            builtin.close(ch);
+        }, didGCʗ1);
         var (res, err) = (~cstʗ1).c.Do(req);
         if (err != default!) {
             Ꮡt.Fatal(err);
@@ -1810,8 +1816,8 @@ internal static void testInterruptWithPanic(ж<testing.T> Ꮡt, testMode mode, a
 }
 
 partial struct lockedBytesBuffer {
-    public partial ref global::go.sync_package.Mutex Mutex { get; }
-    public partial ref bytes_package.Buffer Buffer { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
+    /*embed*/ public bytes_package.Buffer Buffer;
 }
 
 internal static (nint, error) Write(this ж<lockedBytesBuffer> Ꮡb, slice<byte> p) {
@@ -1913,7 +1919,7 @@ partial struct testErrorReader {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object unexpectedReadCallˢ = (@string)"unexpected Read call"u8;
 
-internal static (nint n, error err) Read(this testErrorReader r, slice<byte> p) {
+internal static partial (nint n, error err) Read(this testErrorReader r, slice<byte> p) {
     r.t.Error(unexpectedReadCallˢ);
     return (0, io.EOF);
 }
@@ -2002,7 +2008,6 @@ public static void TestBadResponseAfterReadingBody(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object someBogusCrapˢ = (@string)"some bogus crap"u8;
-internal static readonly @string helloˢ3 = "hello"u8;
 internal static readonly object expectedAnErrorToBeˢ = (@string)"expected an error to be returned from Post"u8;
 
 internal static void testBadResponseAfterReadingBody(ж<testing.T> Ꮡt, testMode mode) {
@@ -2027,7 +2032,7 @@ internal static void testBadResponseAfterReadingBody(ж<testing.T> Ꮡt, testMod
 
     ref var closes = ref heap<nint>(out var Ꮡcloses);
     closes = 0;
-    var (res, err) = (~cst).c.Post((~(~cst).ts).URL, textPlainˢ, new countCloseReader(Ꮡcloses, new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ3))));
+    var (res, err) = (~cst).c.Post((~(~cst).ts).URL, textPlainˢ, new countCloseReader(Ꮡcloses, new http_test_package.strings_ReaderжReader(strings.NewReader(helloˢ))));
     if (err == default!) {
         (~res).Body.Close();
         Ꮡt.Fatal(expectedAnErrorToBeˢ);
@@ -2259,7 +2264,6 @@ internal static partial void testBidiStreamReverseProxy(ж<testing.T> Ꮡt, test
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string connectionˢ = "Connection"u8;
 internal static readonly @string upgradeˢ = "Upgrade"u8;
 internal static readonly @string webSocketˢ = "WebSocket"u8;
 internal static readonly @string httpIgnoreˢ = "HTTP/IGNORE"u8;
@@ -2375,7 +2379,7 @@ internal static void testEarlyHintsRequest(ж<testing.T> Ꮡt, testMode mode) {
                 tΔ1.Errorf("got %d expected %d"u8, len(got), len(expected));
             }
 
-            foreach (var (i, _) in expected) {
+            foreach (var i in range(expected)) {
                 if (expected[i] != got[i]) {
                     tΔ1.Errorf("got %q expected %q"u8, got[i], expected[i]);
                 }

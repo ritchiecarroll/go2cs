@@ -39,16 +39,18 @@ partial struct dotFileHidingFile {
 internal static (slice<fs.FileInfo> fis, error err) Readdir(this dotFileHidingFile f, nint n) {
     slice<fs.FileInfo> fis = default!;
     error err = default!;
+    var fisᴷ = new stackAppend<fs.FileInfo>(moves: true);
 
     (var files, err) = f.File.Readdir(n);
     foreach (var (_, @file) in files) { // Filters out the dot files
         if (!strings.HasPrefix(@file.Name(), "."u8)) {
-            fis = append(fis, @file);
+            fis = append(fisᴷ, fis, @file);
         }
     }
     if (err == default! && n > 0 && len(fis) == 0) {
         err = io.EOF;
     }
+    fis = move2heap(fisᴷ, fis);
     return (fis, err);
 }
 
@@ -70,7 +72,7 @@ internal static (Δhttp.File, error) Open(this dotFileHidingFileSystem fsys, @st
     if (err != default!) {
         return (default!, err);
     }
-    return (new dotFileHidingFile(@file), err);
+    return (new dotFileHidingFile(@file), default!);
 }
 
 public static void ExampleFileServer_dotFileHiding() {

@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-01 · converter `824704e60`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**1387 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**1526 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net/http`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 22 of the matched tests identically.
+Both runtimes skip 21 of the matched tests identically.
 
 ## Verdicts
 
@@ -25,7 +25,6 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestAcceptMaxFds` | pass | pass |
 | `TestAddCookie` | pass | pass |
 | `TestAltProtoCancellation` | pass | pass |
-| `TestAppendTime` | pass | pass |
 | `TestAutomaticHTTP2_ListenAndServe` | pass | pass |
 | `TestAutomaticHTTP2_ListenAndServe_GetCertificate` | pass | pass |
 | `TestAutomaticHTTP2_ListenAndServe_GetConfigForClient` | pass | pass |
@@ -67,6 +66,34 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestClientCallsCloseOnlyOnce/h2` | pass | pass |
 | `TestClientCanClose` | pass | pass |
 | `TestClientCloseIdleConnections` | pass | pass |
+| `TestClientConnReserveAll` | pass | pass |
+| `TestClientConnReserveAll/h1` | pass | pass |
+| `TestClientConnReserveAll/h2` | pass | pass |
+| `TestClientConnReserveAndConsume` | pass | pass |
+| `TestClientConnReserveAndConsume/body_close` | pass | pass |
+| `TestClientConnReserveAndConsume/body_close/h1` | pass | pass |
+| `TestClientConnReserveAndConsume/body_close/h2` | pass | pass |
+| `TestClientConnReserveAndConsume/cancel` | pass | pass |
+| `TestClientConnReserveAndConsume/cancel/h1` | pass | pass |
+| `TestClientConnReserveAndConsume/cancel/h2` | pass | pass |
+| `TestClientConnReserveAndConsume/early_body_close` | pass | pass |
+| `TestClientConnReserveAndConsume/early_body_close/h1` | pass | pass |
+| `TestClientConnReserveAndConsume/early_body_close/h2` | pass | pass |
+| `TestClientConnReserveAndConsume/invalid_field_name` | pass | pass |
+| `TestClientConnReserveAndConsume/invalid_field_name/h1` | pass | pass |
+| `TestClientConnReserveAndConsume/invalid_field_name/h2` | pass | pass |
+| `TestClientConnReserveAndConsume/release` | pass | pass |
+| `TestClientConnReserveAndConsume/release/h1` | pass | pass |
+| `TestClientConnReserveAndConsume/release/h2` | pass | pass |
+| `TestClientConnReserveParallel` | pass | pass |
+| `TestClientConnReserveParallel/h1` | pass | pass |
+| `TestClientConnReserveParallel/h2` | pass | pass |
+| `TestClientConnReserveRelease` | pass | pass |
+| `TestClientConnReserveRelease/h1` | pass | pass |
+| `TestClientConnReserveRelease/h2` | pass | pass |
+| `TestClientConnRoundTripBlocks` | pass | pass |
+| `TestClientConnRoundTripBlocks/h1` | pass | pass |
+| `TestClientConnRoundTripBlocks/h2` | pass | pass |
 | `TestClientCopyHeadersOnRedirect` | pass | pass |
 | `TestClientCopyHeadersOnRedirect/h1` | pass | pass |
 | `TestClientCopyHeadersOnRedirect/h2` | pass | pass |
@@ -119,6 +146,9 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestClientRedirectsContext/h1` | pass | pass |
 | `TestClientRedirectsContext/h2` | pass | pass |
 | `TestClientSendsCookieFromJar` | pass | pass |
+| `TestClientStripHeadersOnPostToGetRedirect` | pass | pass |
+| `TestClientStripHeadersOnPostToGetRedirect/h1` | pass | pass |
+| `TestClientStripHeadersOnPostToGetRedirect/h2` | pass | pass |
 | `TestClientStripHeadersOnRepeatedRedirect` | pass | pass |
 | `TestClientStripHeadersOnRepeatedRedirect/h1` | pass | pass |
 | `TestClientStripHeadersOnRepeatedRedirect/h2` | pass | pass |
@@ -214,6 +244,64 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestCookieSanitizePath` | pass | pass |
 | `TestCookieSanitizeValue` | pass | pass |
 | `TestCookieValid` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/empty_string` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/http_origin` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/invalid_url` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/missing_host` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/missing_scheme` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/null` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/trailing_slash` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/valid_origin` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/valid_origin_with_port` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/with_fragment` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/with_path` | pass | pass |
+| `TestCrossOriginProtectionAddTrustedOriginErrors/with_query` | pass | pass |
+| `TestCrossOriginProtectionAddingBypassesConcurrently` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/bypass_path_with_cross-site` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/bypass_path_without_sec-fetch-site` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/method-specific_hit` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/method-specific_miss_(GET)` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/method-specific_miss_(PUT)` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/no_trailing_slash_exact_match` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/no_trailing_slash_with_slash` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/non-bypass_path_with_cross-site` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/non-bypass_path_without_sec-fetch-site` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/non-wildcard` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/redirect_to_bypass_path_with_trailing_slash` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/redirect_to_bypass_path_without_..` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/redirect_to_non-bypass_path_with_..` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/redirect_to_non-bypass_path_with_trailing_slash` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/wildcard_bypass` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/yes_trailing_slash_exact_match` | pass | pass |
+| `TestCrossOriginProtectionPatternBypass/yes_trailing_slash_without_slash` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/GET_allowed` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/HEAD_allowed` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/OPTIONS_allowed` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/PUT_blocked` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/cross-site_blocked` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/no_header_with_matching_origin` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/no_header_with_mismatched_origin` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/no_header_with_no_origin` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/no_header_with_null_origin` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/none_allowed` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/same-origin_allowed` | pass | pass |
+| `TestCrossOriginProtectionSecFetchSite/same-site_blocked` | pass | pass |
+| `TestCrossOriginProtectionServer` | pass | pass |
+| `TestCrossOriginProtectionServer/bypass_path` | pass | pass |
+| `TestCrossOriginProtectionServer/cross-site` | pass | pass |
+| `TestCrossOriginProtectionServer/origin_matches_host` | pass | pass |
+| `TestCrossOriginProtectionServer/same-origin` | pass | pass |
+| `TestCrossOriginProtectionServer/trusted_origin` | pass | pass |
+| `TestCrossOriginProtectionServer/untrusted_origin` | pass | pass |
+| `TestCrossOriginProtectionSetDenyHandler` | pass | pass |
+| `TestCrossOriginProtectionTrustedOriginBypass` | pass | pass |
+| `TestCrossOriginProtectionTrustedOriginBypass/trusted_origin_with_cross-site` | pass | pass |
+| `TestCrossOriginProtectionTrustedOriginBypass/trusted_origin_without_sec-fetch-site` | pass | pass |
+| `TestCrossOriginProtectionTrustedOriginBypass/untrusted_origin_with_cross-site` | pass | pass |
+| `TestCrossOriginProtectionTrustedOriginBypass/untrusted_origin_without_sec-fetch-site` | pass | pass |
 | `TestDeleteRedirects` | pass | pass |
 | `TestDeleteRedirects/h1` | pass | pass |
 | `TestDeleteRedirects/h2` | pass | pass |
@@ -227,7 +315,7 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestDirectoryIfNotModified/h2` | pass | pass |
 | `TestDisableContentLength` | pass | pass |
 | `TestDisableContentLength/h1` | pass | pass |
-| `TestDisableContentLength/h2` | skip | skip |
+| `TestDisableContentLength/h2` | pass | pass |
 | `TestDisableKeepAliveUpgrade` | pass | pass |
 | `TestDisableKeepAliveUpgrade/h1` | pass | pass |
 | `TestDontCacheBrokenHTTP2Conn` | pass | pass |
@@ -299,6 +387,9 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestFileServerNotDirError/h2/FS` | pass | pass |
 | `TestFileServerNotDirError/h2/FS/AbsolutePath` | pass | pass |
 | `TestFileServerNotDirError/h2/FS/RelativePath` | pass | pass |
+| `TestFileServerNullByte` | pass | pass |
+| `TestFileServerNullByte/h1` | pass | pass |
+| `TestFileServerNullByte/h2` | pass | pass |
 | `TestFileServerSortsNames` | pass | pass |
 | `TestFileServerSortsNames/h1` | pass | pass |
 | `TestFileServerSortsNames/h2` | pass | pass |
@@ -397,6 +488,9 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestHijackBeforeRequestBodyRead/h1` | pass | pass |
 | `TestHostHandlers` | pass | pass |
 | `TestHostHandlers/h1` | pass | pass |
+| `TestHostMismatchCookies` | pass | pass |
+| `TestHostMismatchCookies/h1` | pass | pass |
+| `TestHostMismatchCookies/h2` | pass | pass |
 | `TestIdentityResponse` | pass | pass |
 | `TestIdentityResponse/h1` | pass | pass |
 | `TestIdentityResponse/h2` | skip | skip |
@@ -566,6 +660,17 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestParsePattern` | pass | pass |
 | `TestParsePatternError` | pass | pass |
 | `TestParseRange` | pass | pass |
+| `TestParseRangeLimit` | pass | pass |
+| `TestParseRangeLimit/default_limit_exceeded` | pass | pass |
+| `TestParseRangeLimit/default_limit_not_exceeded` | pass | pass |
+| `TestParseRangeLimit/disabled_limit` | pass | pass |
+| `TestParseRangeLimit/invalid_limit_negative` | pass | pass |
+| `TestParseRangeLimit/invalid_limit_non-numeric` | pass | pass |
+| `TestParseRangeLimit/large_limit_exceeded` | pass | pass |
+| `TestParseRangeLimit/large_limit_not_exceeded` | pass | pass |
+| `TestParseRangeLimit/large_limit_not_exceeded_by_small_input` | pass | pass |
+| `TestParseRangeLimit/small_limit_exceeded` | pass | pass |
+| `TestParseRangeLimit/small_limit_not_exceeded` | pass | pass |
 | `TestParseSetCookie` | pass | pass |
 | `TestParseTime` | pass | pass |
 | `TestParseTransferEncoding` | pass | pass |
@@ -583,8 +688,10 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestProtocols` | pass | pass |
 | `TestProxyAuthHeader` | pass | pass |
 | `TestProxyAuthHeader/h1` | pass | pass |
+| `TestProxyAuthKeys` | pass | pass |
 | `TestProxyFromEnvironment` | pass | pass |
 | `TestProxyFromEnvironmentLowerCase` | pass | pass |
+| `TestProxyWithInfiniteHeader` | pass | pass |
 | `TestQuery` | pass | pass |
 | `TestQuerySemicolon` | pass | pass |
 | `TestQuerySemicolon/h1` | pass | pass |
@@ -619,6 +726,10 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestRedirectCookiesJar` | pass | pass |
 | `TestRedirectCookiesJar/h1` | pass | pass |
 | `TestRedirectCookiesJar/h2` | pass | pass |
+| `TestRedirectEscapedPath` | pass | pass |
+| `TestRedirectGetBody` | pass | pass |
+| `TestRedirectGetBody/h1` | pass | pass |
+| `TestRedirectGetBody/h2` | pass | pass |
 | `TestReferer` | pass | pass |
 | `TestRegisterConflict` | pass | pass |
 | `TestRegisterErr` | pass | pass |
@@ -791,7 +902,9 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestServeIndexHtmlFS/h2` | pass | pass |
 | `TestServeMuxHandleFuncWithNilHandler` | pass | pass |
 | `TestServeMuxHandler` | pass | pass |
+| `TestServeMuxHandlerRedirectPost` | pass | pass |
 | `TestServeMuxHandlerRedirects` | pass | pass |
+| `TestServeMuxHandlerTrailingSlash` | pass | pass |
 | `TestServeTLS` | pass | pass |
 | `TestServeWithSlashRedirectForHostPatterns` | pass | pass |
 | `TestServeWithSlashRedirectKeepsQueryString` | pass | pass |
@@ -799,6 +912,8 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestServerAllowsBlockingRemoteAddr` | pass | pass |
 | `TestServerAllowsBlockingRemoteAddr/h1` | pass | pass |
 | `TestServerBufferedChunking` | pass | pass |
+| `TestServerCONNECTFailure` | pass | pass |
+| `TestServerCONNECTSuccess` | pass | pass |
 | `TestServerCancelsReadHeaderTimeoutWhenIdle` | pass | pass |
 | `TestServerCancelsReadHeaderTimeoutWhenIdle/h1` | pass | pass |
 | `TestServerCancelsReadTimeoutWhenIdle` | pass | pass |
@@ -842,6 +957,8 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestServerHijackGetsBackgroundByte/h1` | pass | pass |
 | `TestServerHijackGetsBackgroundByte_big` | pass | pass |
 | `TestServerHijackGetsBackgroundByte_big/h1` | pass | pass |
+| `TestServerHijackGetsFullBody` | pass | pass |
+| `TestServerHijackGetsFullBody/h1` | pass | pass |
 | `TestServerIdleTimeout` | pass | pass |
 | `TestServerIdleTimeout/h1` | pass | pass |
 | `TestServerIssue5953` | pass | pass |
@@ -873,6 +990,10 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestServerReadAfterWriteHeader100Continue` | pass | pass |
 | `TestServerReadAfterWriteHeader100Continue/h1` | skip | skip |
 | `TestServerReadAfterWriteHeader100Continue/h2` | skip | skip |
+| `TestServerReadHeaderTimeoutIsCleared` | pass | pass |
+| `TestServerReadHeaderTimeoutIsCleared/h1` | pass | pass |
+| `TestServerReadHeaderTimeoutIsCleared/h2` | pass | pass |
+| `TestServerReadHeaderTimeoutIsCleared/h2unencrypted` | pass | pass |
 | `TestServerReadTimeout` | pass | pass |
 | `TestServerReadTimeout/h1` | pass | pass |
 | `TestServerReadTimeout/h2` | pass | pass |
@@ -902,6 +1023,10 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestServerUndeclaredTrailers` | pass | pass |
 | `TestServerUndeclaredTrailers/h1` | pass | pass |
 | `TestServerUndeclaredTrailers/h2` | pass | pass |
+| `TestServerUnencryptedHTTP2HeaderTimeout` | pass | pass |
+| `TestServerUnencryptedHTTP2HeaderTimeout/client_sends_nothing` | pass | pass |
+| `TestServerUnencryptedHTTP2HeaderTimeout/client_sends_slowly` | pass | pass |
+| `TestServerUnencryptedHTTP2HeaderTimeout/header_read_expires` | pass | pass |
 | `TestServerUnreadRequestBodyLarge` | pass | pass |
 | `TestServerUnreadRequestBodyLittle` | pass | pass |
 | `TestServerValidatesHeaders` | pass | pass |
@@ -973,6 +1098,7 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestTLSServerRejectHTTPRequests` | pass | pass |
 | `TestTLSServerRejectHTTPRequests/h2` | pass | pass |
 | `TestTLSServerRejectHTTPRequests/https1` | pass | pass |
+| `TestTLSServerWithoutTLSConn` | pass | pass |
 | `TestTimeoutHandler` | pass | pass |
 | `TestTimeoutHandler/h1` | pass | pass |
 | `TestTimeoutHandler/h2` | pass | pass |
@@ -1041,6 +1167,8 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestTransportBodyReadError/h2` | pass | pass |
 | `TestTransportCONNECTBidi` | pass | pass |
 | `TestTransportCONNECTBidi/h1` | pass | pass |
+| `TestTransportCONNECTRejected` | pass | pass |
+| `TestTransportCONNECTRejected/h1` | pass | pass |
 | `TestTransportCancelRequest` | pass | pass |
 | `TestTransportCancelRequest/h1` | pass | pass |
 | `TestTransportCancelRequest/h1/ContextCancel` | pass | pass |
@@ -1202,7 +1330,7 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestTransportIdleConnCrash/h2` | pass | pass |
 | `TestTransportIdleConnRacesRequest` | pass | pass |
 | `TestTransportIdleConnRacesRequest/h1` | pass | pass |
-| `TestTransportIdleConnRacesRequest/h2unencrypted` | skip | skip |
+| `TestTransportIdleConnRacesRequest/h2unencrypted` | pass | pass |
 | `TestTransportIdleConnTimeout` | pass | pass |
 | `TestTransportIdleConnTimeout/h1` | pass | pass |
 | `TestTransportIdleConnTimeout/h2` | pass | pass |
@@ -1232,6 +1360,9 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestTransportMaxIdleConns/h1` | pass | pass |
 | `TestTransportMaxPerHostIdleConns` | pass | pass |
 | `TestTransportMaxPerHostIdleConns/h1` | pass | pass |
+| `TestTransportNewClientConnRoundTrip` | pass | pass |
+| `TestTransportNewClientConnRoundTrip/h1` | pass | pass |
+| `TestTransportNewClientConnRoundTrip/h2` | pass | pass |
 | `TestTransportNoHost` | pass | pass |
 | `TestTransportNoReuseAfterEarlyResponse` | pass | pass |
 | `TestTransportNoReuseAfterEarlyResponse/h1` | pass | pass |
@@ -1247,9 +1378,17 @@ Both runtimes skip 22 of the matched tests identically.
 | `TestTransportPersistConnLeakShortBody/h1` | pass | pass |
 | `TestTransportPersistConnLeakShortBody/h2` | skip | skip |
 | `TestTransportPersistConnReadLoopEOF` | pass | pass |
+| `TestTransportPoolCancelRequestReusesConn` | pass | pass |
+| `TestTransportPoolCancelRequestWithDisableKeepAlives` | pass | pass |
+| `TestTransportPoolClosesConnsPastMaxIdleConnsPerHost` | pass | pass |
 | `TestTransportPoolConnCannotReuseConnectionInUse` | pass | pass |
 | `TestTransportPoolConnConnectionBecomesAvailableDuringDial` | pass | pass |
+| `TestTransportPoolConnHTTP2Startup` | pass | pass |
+| `TestTransportPoolConnHTTP2StrictMaxConcurrentRequests` | skip | skip |
 | `TestTransportPoolConnReusePriorConnection` | pass | pass |
+| `TestTransportPoolConnectionBroken` | pass | pass |
+| `TestTransportPoolDisableKeepAlives` | pass | pass |
+| `TestTransportPoolMaxIdleConnsPerHostHTTP2` | pass | pass |
 | `TestTransportPrefersResponseOverWriteError` | pass | pass |
 | `TestTransportPrefersResponseOverWriteError/h1` | pass | pass |
 | `TestTransportPrefersResponseOverWriteError/h2` | pass | pass |
@@ -1416,6 +1555,7 @@ has not implemented, or a platform behavior it provably cannot reproduce. Each i
 the capability it needs.
 
 - BenchmarkClient (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkClientGzip (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClientServer (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkClientServerParallel (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkCloseNotifier (benchmark): benchmark execution is deferred to Phase 4D
@@ -1448,6 +1588,7 @@ the capability it needs.
 - BenchmarkServerHandlerTypeLen (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkServerHijack (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkServerMatch (benchmark): benchmark execution is deferred to Phase 4D
+- ExampleCrossOriginProtection (example): example execution is deferred to Phase 4D
 - ExampleFileServer (example): example execution is deferred to Phase 4D
 - ExampleFileServer_dotFileHiding (example): example execution is deferred to Phase 4D
 - ExampleFileServer_stripPrefix (example): example execution is deferred to Phase 4D
