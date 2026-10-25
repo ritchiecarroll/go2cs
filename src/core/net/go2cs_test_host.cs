@@ -66,6 +66,7 @@ internal static class Go2CsTestHost
             "fd_windows.go",
             "file.go",
             "file_plan9.go",
+            "file_posix.go",
             "file_stub.go",
             "file_test.go",
             "file_unix.go",
@@ -146,7 +147,10 @@ internal static class Go2CsTestHost
             "parse_test.go",
             "pipe.go",
             "pipe_test.go",
+            "platform_plan9_test.go",
             "platform_test.go",
+            "platform_unix_test.go",
+            "platform_windows_test.go",
             "port.go",
             "port_test.go",
             "port_unix.go",
@@ -159,10 +163,10 @@ internal static class Go2CsTestHost
             "resolverdialfunc_test.go",
             "rlimit_js.go",
             "rlimit_unix.go",
-            "sendfile_linux.go",
+            "sendfile.go",
+            "sendfile_nonwindows.go",
             "sendfile_stub.go",
             "sendfile_test.go",
-            "sendfile_unix_alt.go",
             "sendfile_unix_test.go",
             "sendfile_windows.go",
             "server_test.go",
@@ -184,11 +188,12 @@ internal static class Go2CsTestHost
             "sockopt_posix.go",
             "sockopt_solaris.go",
             "sockopt_windows.go",
-            "sockoptip_bsdvar.go",
-            "sockoptip_linux.go",
-            "sockoptip_posix.go",
+            "sockoptip4_bsdvar.go",
+            "sockoptip4_linux.go",
+            "sockoptip4_posix_nonlinux.go",
+            "sockoptip4_windows.go",
+            "sockoptip6_posix.go",
             "sockoptip_stub.go",
-            "sockoptip_windows.go",
             "splice_linux.go",
             "splice_linux_test.go",
             "splice_stub.go",
@@ -274,55 +279,57 @@ internal static class Go2CsTestHost
         {
             "http/pprof/testdata",
         });
-        registry.Add("TestAcceptError", net_internal_test_package.TestAcceptError, "error_test.go", 662);
-        registry.Add("TestAcceptIgnoreAbortedConnRequest", net_internal_test_package.TestAcceptIgnoreAbortedConnRequest, "net_test.go", 297);
+        registry.Add("TestAcceptError", net_internal_test_package.TestAcceptError, "error_test.go", 661);
+        registry.Add("TestAcceptIgnoreAbortedConnRequest", net_internal_test_package.TestAcceptIgnoreAbortedConnRequest, "net_test.go", 293);
         registry.Add("TestAcceptIgnoreSomeErrors", net_internal_test_package.TestAcceptIgnoreSomeErrors, "net_windows_test.go", 42);
         registry.Add("TestAcceptTimeout", net_internal_test_package.TestAcceptTimeout, "timeout_test.go", 169);
-        registry.Add("TestAcceptTimeoutMustNotReturn", net_internal_test_package.TestAcceptTimeoutMustNotReturn, "timeout_test.go", 282);
-        registry.Add("TestAcceptTimeoutMustReturn", net_internal_test_package.TestAcceptTimeoutMustReturn, "timeout_test.go", 252);
+        registry.Add("TestAcceptTimeoutMustNotReturn", net_internal_test_package.TestAcceptTimeoutMustNotReturn, "timeout_test.go", 281);
+        registry.Add("TestAcceptTimeoutMustReturn", net_internal_test_package.TestAcceptTimeoutMustReturn, "timeout_test.go", 251);
         registry.Add("TestAddrList", net_internal_test_package.TestAddrList, "ipsock_test.go", 217);
         registry.Add("TestAddrListPartition", net_internal_test_package.TestAddrListPartition, "ipsock_test.go", 251);
-        registry.Add("TestAllocs", net_internal_test_package.TestAllocs, "udpsock_test.go", 488);
+        registry.Add("TestAllocs", net_internal_test_package.TestAllocs, "udpsock_test.go", 490);
         registry.Add("TestBuffers_WriteTo", net_internal_test_package.TestBuffers_WriteTo, "writev_test.go", 91);
         registry.Add("TestBuffers_consume", net_internal_test_package.TestBuffers_consume, "writev_test.go", 40);
         registry.Add("TestBuffers_read", net_internal_test_package.TestBuffers_read, "writev_test.go", 18);
         registry.Add("TestCIDRMask", net_internal_test_package.TestCIDRMask, "ip_test.go", 511);
         registry.Add("TestCancelAfterDial", net_internal_test_package.TestCancelAfterDial, "dial_test.go", 813);
-        registry.Add("TestCloseError", net_internal_test_package.TestCloseError, "error_test.go", 565);
-        registry.Add("TestCloseRead", net_internal_test_package.TestCloseRead, "net_test.go", 18);
-        registry.Add("TestCloseUnblocksRead", net_internal_test_package.TestCloseUnblocksRead, "net_test.go", 493);
+        registry.Add("TestCloseError", net_internal_test_package.TestCloseError, "error_test.go", 564);
+        registry.Add("TestCloseRead", net_internal_test_package.TestCloseRead, "net_test.go", 19);
+        registry.Add("TestCloseUnblocksRead", net_internal_test_package.TestCloseUnblocksRead, "net_test.go", 488);
+        registry.Add("TestCloseUnblocksReadUDP", net_internal_test_package.TestCloseUnblocksReadUDP, "net_test.go", 507);
         registry.Add("TestCloseWrite", net_internal_test_package.TestCloseWrite, "net_test.go", 71);
-        registry.Add("TestClosingListener", net_internal_test_package.TestClosingListener, "listen_test.go", 698);
-        registry.Add("TestConcurrentPreferGoResolversDial", net_internal_test_package.TestConcurrentPreferGoResolversDial, "lookup_test.go", 1020);
-        registry.Add("TestConcurrentSetDeadline", net_internal_test_package.TestConcurrentSetDeadline, "timeout_test.go", 1167);
+        registry.Add("TestClosingListener", net_internal_test_package.TestClosingListener, "listen_test.go", 699);
+        registry.Add("TestConcurrentPreferGoResolversDial", net_internal_test_package.TestConcurrentPreferGoResolversDial, "lookup_test.go", 1021);
+        registry.Add("TestConcurrentSetDeadline", net_internal_test_package.TestConcurrentSetDeadline, "timeout_test.go", 1163);
         registry.Add("TestConnAndListener", net_internal_test_package.TestConnAndListener, "conn_test.go", 20);
         registry.Add("TestConnAndPacketConn", net_internal_test_package.TestConnAndPacketConn, "packetconn_test.go", 85);
-        registry.Add("TestConnClose", net_internal_test_package.TestConnClose, "net_test.go", 184);
-        registry.Add("TestContextError", net_internal_test_package.TestContextError, "error_test.go", 817);
-        registry.Add("TestCopyPipeIntoTCP", net_internal_test_package.TestCopyPipeIntoTCP, "tcpsock_test.go", 672);
-        registry.Add("TestDNSErrorUnwrap", net_internal_test_package.TestDNSErrorUnwrap, "lookup_test.go", 1625);
+        registry.Add("TestConnClose", net_internal_test_package.TestConnClose, "net_test.go", 183);
+        registry.Add("TestContextError", net_internal_test_package.TestContextError, "error_test.go", 811);
+        registry.Add("TestCopyPipeIntoTCP", net_internal_test_package.TestCopyPipeIntoTCP, "tcpsock_test.go", 675);
+        registry.Add("TestDNSErrorUnwrap", net_internal_test_package.TestDNSErrorUnwrap, "lookup_test.go", 1624);
         registry.Add("TestDNSFlood", net_internal_test_package.TestDNSFlood, "lookup_test.go", 501);
         registry.Add("TestDNSName", net_internal_test_package.TestDNSName, "dnsname_test.go", 60);
         registry.Add("TestDNSSRVUniformity", net_internal_test_package.TestDNSSRVUniformity, "dnsclient_test.go", 48);
-        registry.Add("TestDNSTimeout", net_internal_test_package.TestDNSTimeout, "lookup_test.go", 1325);
-        registry.Add("TestDialAddrError", net_internal_test_package.TestDialAddrError, "error_test.go", 218);
+        registry.Add("TestDNSTimeout", net_internal_test_package.TestDNSTimeout, "lookup_test.go", 1326);
+        registry.Add("TestDialAddrError", net_internal_test_package.TestDialAddrError, "error_test.go", 217);
         registry.Add("TestDialCancel", net_internal_test_package.TestDialCancel, "dial_test.go", 742);
         registry.Add("TestDialClosedPortFailFast", net_internal_test_package.TestDialClosedPortFailFast, "dial_test.go", 891);
+        registry.Add("TestDialContext", net_internal_test_package.TestDialContext, "dial_test.go", 1067);
         registry.Add("TestDialError", net_internal_test_package.TestDialError, "error_test.go", 140);
         registry.Add("TestDialGoogle", net_internal_test_package.TestDialGoogle, "external_test.go", 62);
         registry.Add("TestDialListenIPArgs", net_internal_test_package.TestDialListenIPArgs, "iprawsock_test.go", 130);
         registry.Add("TestDialListenerAddr", net_internal_test_package.TestDialListenerAddr, "dial_test.go", 943);
-        registry.Add("TestDialLocal", net_internal_test_package.TestDialLocal, "dial_test.go", 62);
-        registry.Add("TestDialParallel", net_internal_test_package.TestDialParallel, "dial_test.go", 178);
+        registry.Add("TestDialLocal", net_internal_test_package.TestDialLocal, "dial_test.go", 63);
+        registry.Add("TestDialParallel", net_internal_test_package.TestDialParallel, "dial_test.go", 179);
         registry.Add("TestDialParallelSpuriousConnection", net_internal_test_package.TestDialParallelSpuriousConnection, "dial_test.go", 385);
-        registry.Add("TestDialTCPDefaultKeepAlive", net_internal_test_package.TestDialTCPDefaultKeepAlive, "tcpsock_test.go", 773);
+        registry.Add("TestDialTCPDefaultKeepAlive", net_internal_test_package.TestDialTCPDefaultKeepAlive, "tcpsock_test.go", 776);
         registry.Add("TestDialTimeout", net_internal_test_package.TestDialTimeout, "timeout_test.go", 50);
         registry.Add("TestDialTimeoutMaxDuration", net_internal_test_package.TestDialTimeoutMaxDuration, "timeout_test.go", 137);
-        registry.Add("TestDialWithNonZeroDeadline", net_internal_test_package.TestDialWithNonZeroDeadline, "dial_test.go", 1094);
+        registry.Add("TestDialWithNonZeroDeadline", net_internal_test_package.TestDialWithNonZeroDeadline, "dial_test.go", 1187);
         registry.Add("TestDialerControl", net_internal_test_package.TestDialerControl, "dial_test.go", 988);
         registry.Add("TestDialerControlContext", net_internal_test_package.TestDialerControlContext, "dial_test.go", 1033);
         registry.Add("TestDialerDualStack", net_internal_test_package.TestDialerDualStack, "dial_test.go", 641);
-        registry.Add("TestDialerDualStackFDLeak", net_internal_test_package.TestDialerDualStackFDLeak, "dial_test.go", 76);
+        registry.Add("TestDialerDualStackFDLeak", net_internal_test_package.TestDialerDualStackFDLeak, "dial_test.go", 77);
         registry.Add("TestDialerFallbackDelay", net_internal_test_package.TestDialerFallbackDelay, "dial_test.go", 317);
         registry.Add("TestDialerKeepAlive", net_internal_test_package.TestDialerKeepAlive, "dial_test.go", 692);
         registry.Add("TestDialerLocalAddr", net_internal_test_package.TestDialerLocalAddr, "dial_test.go", 521);
@@ -330,12 +337,12 @@ internal static class Go2CsTestHost
         registry.Add("TestDtoi", net_internal_test_package.TestDtoi, "parse_test.go", 56);
         registry.Add("TestDualStackTCPListener", net_internal_test_package.TestDualStackTCPListener, "listen_test.go", 224);
         registry.Add("TestDualStackUDPListener", net_internal_test_package.TestDualStackUDPListener, "listen_test.go", 314);
-        registry.Add("TestErrors", net_internal_test_package.TestErrors, "net_test.go", 560);
-        registry.Add("TestFileCloseRace", net_internal_test_package.TestFileCloseRace, "file_test.go", 290);
+        registry.Add("TestErrors", net_internal_test_package.TestErrors, "net_test.go", 595);
+        registry.Add("TestFileCloseRace", net_internal_test_package.TestFileCloseRace, "file_test.go", 293);
         registry.Add("TestFileConn", net_internal_test_package.TestFileConn, "file_test.go", 30);
-        registry.Add("TestFileError", net_internal_test_package.TestFileError, "error_test.go", 738);
-        registry.Add("TestFileListener", net_internal_test_package.TestFileListener, "file_test.go", 131);
-        registry.Add("TestFilePacketConn", net_internal_test_package.TestFilePacketConn, "file_test.go", 223);
+        registry.Add("TestFileError", net_internal_test_package.TestFileError, "error_test.go", 737);
+        registry.Add("TestFileListener", net_internal_test_package.TestFileListener, "file_test.go", 132);
+        registry.Add("TestFilePacketConn", net_internal_test_package.TestFilePacketConn, "file_test.go", 225);
         registry.Add("TestForceCgoDNS", net_internal_test_package.TestForceCgoDNS, "main_conf_test.go", 58);
         registry.Add("TestForceGoDNS", net_internal_test_package.TestForceGoDNS, "main_conf_test.go", 76);
         registry.Add("TestHostCacheModification", net_internal_test_package.TestHostCacheModification, "hosts_test.go", 151);
@@ -350,27 +357,27 @@ internal static class Go2CsTestHost
         registry.Add("TestIPNetContains", net_internal_test_package.TestIPNetContains, "ip_test.go", 465);
         registry.Add("TestIPNetString", net_internal_test_package.TestIPNetString, "ip_test.go", 484);
         registry.Add("TestIPString", net_internal_test_package.TestIPString, "ip_test.go", 270);
-        registry.Add("TestIPVersion", net_internal_test_package.TestIPVersion, "lookup_test.go", 1081);
+        registry.Add("TestIPVersion", net_internal_test_package.TestIPVersion, "lookup_test.go", 1082);
         registry.Add("TestIPv4MulticastListener", net_internal_test_package.TestIPv4MulticastListener, "listen_test.go", 530);
-        registry.Add("TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion", net_internal_test_package.TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion, "udpsock_test.go", 712);
+        registry.Add("TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion", net_internal_test_package.TestIPv4WriteMsgUDPAddrPortTargetAddrIPVersion, "udpsock_test.go", 720);
         registry.Add("TestIPv6LinkLocalUnicastTCP", net_internal_test_package.TestIPv6LinkLocalUnicastTCP, "tcpsock_test.go", 375);
-        registry.Add("TestIPv6LinkLocalUnicastUDP", net_internal_test_package.TestIPv6LinkLocalUnicastUDP, "udpsock_test.go", 288);
+        registry.Add("TestIPv6LinkLocalUnicastUDP", net_internal_test_package.TestIPv6LinkLocalUnicastUDP, "udpsock_test.go", 290);
         registry.Add("TestIPv6MulticastListener", net_internal_test_package.TestIPv6MulticastListener, "listen_test.go", 603);
-        registry.Add("TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion", net_internal_test_package.TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion, "udpsock_test.go", 665);
-        registry.Add("TestInterfaceAddrs", net_internal_test_package.TestInterfaceAddrs, "interface_test.go", 82);
-        registry.Add("TestInterfaceAddrsWithNetsh", net_internal_test_package.TestInterfaceAddrsWithNetsh, "net_windows_test.go", 440);
-        registry.Add("TestInterfaceHardwareAddrWithGetmac", net_internal_test_package.TestInterfaceHardwareAddrWithGetmac, "net_windows_test.go", 514);
-        registry.Add("TestInterfaceMulticastAddrs", net_internal_test_package.TestInterfaceMulticastAddrs, "interface_test.go", 128);
-        registry.Add("TestInterfaceUnicastAddrs", net_internal_test_package.TestInterfaceUnicastAddrs, "interface_test.go", 101);
+        registry.Add("TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion", net_internal_test_package.TestIPv6WriteMsgUDPAddrPortTargetAddrIPVersion, "udpsock_test.go", 673);
+        registry.Add("TestInterfaceAddrs", net_internal_test_package.TestInterfaceAddrs, "interface_test.go", 84);
+        registry.Add("TestInterfaceAddrsWithNetsh", net_internal_test_package.TestInterfaceAddrsWithNetsh, "net_windows_test.go", 437);
+        registry.Add("TestInterfaceHardwareAddrWithGetmac", net_internal_test_package.TestInterfaceHardwareAddrWithGetmac, "net_windows_test.go", 511);
+        registry.Add("TestInterfaceMulticastAddrs", net_internal_test_package.TestInterfaceMulticastAddrs, "interface_test.go", 130);
+        registry.Add("TestInterfaceUnicastAddrs", net_internal_test_package.TestInterfaceUnicastAddrs, "interface_test.go", 103);
         registry.Add("TestInterfaces", net_internal_test_package.TestInterfaces, "interface_test.go", 51);
-        registry.Add("TestInterfacesWithNetsh", net_internal_test_package.TestInterfacesWithNetsh, "net_windows_test.go", 271);
+        registry.Add("TestInterfacesWithNetsh", net_internal_test_package.TestInterfacesWithNetsh, "net_windows_test.go", 270);
         registry.Add("TestJoinHostPort", net_internal_test_package.TestJoinHostPort, "ip_test.go", 647);
-        registry.Add("TestListenConfigControl", net_internal_test_package.TestListenConfigControl, "listen_test.go", 726);
-        registry.Add("TestListenError", net_internal_test_package.TestListenError, "error_test.go", 296);
-        registry.Add("TestListenPacketError", net_internal_test_package.TestListenPacketError, "error_test.go", 356);
-        registry.Add("TestListenerClose", net_internal_test_package.TestListenerClose, "net_test.go", 226);
+        registry.Add("TestListenConfigControl", net_internal_test_package.TestListenConfigControl, "listen_test.go", 727);
+        registry.Add("TestListenError", net_internal_test_package.TestListenError, "error_test.go", 295);
+        registry.Add("TestListenPacketError", net_internal_test_package.TestListenPacketError, "error_test.go", 355);
+        registry.Add("TestListenerClose", net_internal_test_package.TestListenerClose, "net_test.go", 224);
         registry.Add("TestLookupCNAME", net_internal_test_package.TestLookupCNAME, "lookup_test.go", 345);
-        registry.Add("TestLookupContextCancel", net_internal_test_package.TestLookupContextCancel, "lookup_test.go", 876);
+        registry.Add("TestLookupContextCancel", net_internal_test_package.TestLookupContextCancel, "lookup_test.go", 877);
         registry.Add("TestLookupDotsWithLocalSource", net_internal_test_package.TestLookupDotsWithLocalSource, "lookup_test.go", 580);
         registry.Add("TestLookupDotsWithRemoteSource", net_internal_test_package.TestLookupDotsWithRemoteSource, "lookup_test.go", 625);
         registry.Add("TestLookupGmailMX", net_internal_test_package.TestLookupGmailMX, "lookup_test.go", 123);
@@ -380,119 +387,128 @@ internal static class Go2CsTestHost
         registry.Add("TestLookupGoogleIP", net_internal_test_package.TestLookupGoogleIP, "lookup_test.go", 437);
         registry.Add("TestLookupGooglePublicDNSAddr", net_internal_test_package.TestLookupGooglePublicDNSAddr, "lookup_test.go", 265);
         registry.Add("TestLookupGoogleSRV", net_internal_test_package.TestLookupGoogleSRV, "lookup_test.go", 74);
-        registry.Add("TestLookupHostCancel", net_internal_test_package.TestLookupHostCancel, "lookup_test.go", 962);
-        registry.Add("TestLookupIPAddrConcurrentCallsForNetworks", net_internal_test_package.TestLookupIPAddrConcurrentCallsForNetworks, "lookup_test.go", 1141);
-        registry.Add("TestLookupIPAddrPreservesContextValues", net_internal_test_package.TestLookupIPAddrPreservesContextValues, "lookup_test.go", 1092);
+        registry.Add("TestLookupHostCancel", net_internal_test_package.TestLookupHostCancel, "lookup_test.go", 963);
+        registry.Add("TestLookupIPAddrConcurrentCallsForNetworks", net_internal_test_package.TestLookupIPAddrConcurrentCallsForNetworks, "lookup_test.go", 1142);
+        registry.Add("TestLookupIPAddrPreservesContextValues", net_internal_test_package.TestLookupIPAddrPreservesContextValues, "lookup_test.go", 1093);
         registry.Add("TestLookupIPv6LinkLocalAddr", net_internal_test_package.TestLookupIPv6LinkLocalAddr, "lookup_test.go", 290);
         registry.Add("TestLookupIPv6LinkLocalAddrWithZone", net_internal_test_package.TestLookupIPv6LinkLocalAddrWithZone, "lookup_test.go", 309);
-        registry.Add("TestLookupLocalPTR", net_internal_test_package.TestLookupLocalPTR, "lookup_windows_test.go", 153);
+        registry.Add("TestLookupLocalPTR", net_internal_test_package.TestLookupLocalPTR, "lookup_windows_test.go", 151);
         registry.Add("TestLookupLongTXT", net_internal_test_package.TestLookupLongTXT, "lookup_test.go", 410);
-        registry.Add("TestLookupNoData", net_internal_test_package.TestLookupNoData, "lookup_test.go", 1392);
-        registry.Add("TestLookupNoSuchHost", net_internal_test_package.TestLookupNoSuchHost, "lookup_test.go", 1503);
-        registry.Add("TestLookupNonLDH", net_internal_test_package.TestLookupNonLDH, "lookup_test.go", 853);
-        registry.Add("TestLookupNullByte", net_internal_test_package.TestLookupNullByte, "lookup_test.go", 1240);
-        registry.Add("TestLookupPTR", net_internal_test_package.TestLookupPTR, "lookup_windows_test.go", 178);
+        registry.Add("TestLookupNoData", net_internal_test_package.TestLookupNoData, "lookup_test.go", 1393);
+        registry.Add("TestLookupNoSuchHost", net_internal_test_package.TestLookupNoSuchHost, "lookup_test.go", 1502);
+        registry.Add("TestLookupNonLDH", net_internal_test_package.TestLookupNonLDH, "lookup_test.go", 854);
+        registry.Add("TestLookupNullByte", net_internal_test_package.TestLookupNullByte, "lookup_test.go", 1241);
+        registry.Add("TestLookupPTR", net_internal_test_package.TestLookupPTR, "lookup_windows_test.go", 176);
         registry.Add("TestLookupPort", net_internal_test_package.TestLookupPort, "lookup_test.go", 748);
         registry.Add("TestLookupPortDifferentNetwork", net_internal_test_package.TestLookupPortDifferentNetwork, "lookup_test.go", 1475);
-        registry.Add("TestLookupPortEmptyNetworkString", net_internal_test_package.TestLookupPortEmptyNetworkString, "lookup_test.go", 1485);
-        registry.Add("TestLookupPortIPNetworkString", net_internal_test_package.TestLookupPortIPNetworkString, "lookup_test.go", 1494);
-        registry.Add("TestLookupPortNotFound", net_internal_test_package.TestLookupPortNotFound, "lookup_test.go", 1455);
-        registry.Add("TestLookupPort_Minimal", net_internal_test_package.TestLookupPort_Minimal, "lookup_test.go", 806);
-        registry.Add("TestLookupProtocol_Minimal", net_internal_test_package.TestLookupProtocol_Minimal, "lookup_test.go", 830);
+        registry.Add("TestLookupPortEmptyNetworkString", net_internal_test_package.TestLookupPortEmptyNetworkString, "lookup_test.go", 1484);
+        registry.Add("TestLookupPortIPNetworkString", net_internal_test_package.TestLookupPortIPNetworkString, "lookup_test.go", 1493);
+        registry.Add("TestLookupPortNotFound", net_internal_test_package.TestLookupPortNotFound, "lookup_test.go", 1456);
+        registry.Add("TestLookupPort_Minimal", net_internal_test_package.TestLookupPort_Minimal, "lookup_test.go", 807);
+        registry.Add("TestLookupProtocol_Minimal", net_internal_test_package.TestLookupProtocol_Minimal, "lookup_test.go", 831);
         registry.Add("TestLookupStaticAddr", net_internal_test_package.TestLookupStaticAddr, "hosts_test.go", 130);
         registry.Add("TestLookupStaticHost", net_internal_test_package.TestLookupStaticHost, "hosts_test.go", 61);
         registry.Add("TestLookupStaticHostAliases", net_internal_test_package.TestLookupStaticHostAliases, "hosts_test.go", 197);
         registry.Add("TestLookupWithIP", net_internal_test_package.TestLookupWithIP, "ip_test.go", 67);
         registry.Add("TestMarshalEmptyIP", net_internal_test_package.TestMarshalEmptyIP, "ip_test.go", 137);
-        registry.Add("TestModeSocket", net_internal_test_package.TestModeSocket, "unixsock_windows_test.go", 72);
-        registry.Add("TestNSLookupCNAME", net_internal_test_package.TestNSLookupCNAME, "lookup_windows_test.go", 83);
-        registry.Add("TestNSLookupMX", net_internal_test_package.TestNSLookupMX, "lookup_windows_test.go", 54);
-        registry.Add("TestNSLookupNS", net_internal_test_package.TestNSLookupNS, "lookup_windows_test.go", 104);
-        registry.Add("TestNSLookupTXT", net_internal_test_package.TestNSLookupTXT, "lookup_windows_test.go", 130);
+        registry.Add("TestModeSocket", net_internal_test_package.TestModeSocket, "unixsock_windows_test.go", 93);
+        registry.Add("TestNSLookupCNAME", net_internal_test_package.TestNSLookupCNAME, "lookup_windows_test.go", 81);
+        registry.Add("TestNSLookupMX", net_internal_test_package.TestNSLookupMX, "lookup_windows_test.go", 52);
+        registry.Add("TestNSLookupNS", net_internal_test_package.TestNSLookupNS, "lookup_windows_test.go", 102);
+        registry.Add("TestNSLookupTXT", net_internal_test_package.TestNSLookupTXT, "lookup_windows_test.go", 128);
         registry.Add("TestNetworkNumberAndMask", net_internal_test_package.TestNetworkNumberAndMask, "ip_test.go", 552);
-        registry.Add("TestNilResolverLookup", net_internal_test_package.TestNilResolverLookup, "lookup_test.go", 942);
-        registry.Add("TestNotTemporaryRead", net_internal_test_package.TestNotTemporaryRead, "net_test.go", 512);
+        registry.Add("TestNilResolverLookup", net_internal_test_package.TestNilResolverLookup, "lookup_test.go", 943);
+        registry.Add("TestNotTemporaryRead", net_internal_test_package.TestNotTemporaryRead, "net_test.go", 547);
         registry.Add("TestPacketConn", net_internal_test_package.TestPacketConn, "packetconn_test.go", 28);
-        registry.Add("TestPacketConnClose", net_internal_test_package.TestPacketConnClose, "net_test.go", 264);
+        registry.Add("TestPacketConnClose", net_internal_test_package.TestPacketConnClose, "net_test.go", 261);
         registry.Add("TestParseCIDR", net_internal_test_package.TestParseCIDR, "ip_test.go", 438);
         registry.Add("TestParseIP", net_internal_test_package.TestParseIP, "ip_test.go", 51);
-        registry.Add("TestParseMAC", net_internal_test_package.TestParseMAC, "mac_test.go", 83);
+        registry.Add("TestParseMAC", net_internal_test_package.TestParseMAC, "mac_test.go", 95);
         registry.Add("TestParsePort", net_internal_test_package.TestParsePort, "port_test.go", 45);
         registry.Add("TestPipe", net_test_package.TestPipe, "pipe_test.go", 16);
         registry.Add("TestPipeCloseError", net_test_package.TestPipeCloseError, "pipe_test.go", 27);
-        registry.Add("TestProhibitionaryDialArg", net_internal_test_package.TestProhibitionaryDialArg, "dial_test.go", 31);
-        registry.Add("TestProtocolDialError", net_internal_test_package.TestProtocolDialError, "error_test.go", 188);
-        registry.Add("TestProtocolListenError", net_internal_test_package.TestProtocolListenError, "error_test.go", 386);
+        registry.Add("TestProhibitionaryDialArg", net_internal_test_package.TestProhibitionaryDialArg, "dial_test.go", 32);
+        registry.Add("TestProtocolDialError", net_internal_test_package.TestProtocolDialError, "error_test.go", 187);
+        registry.Add("TestProtocolListenError", net_internal_test_package.TestProtocolListenError, "error_test.go", 385);
         registry.Add("TestRawConnControl", net_internal_test_package.TestRawConnControl, "rawconn_test.go", 168);
         registry.Add("TestRawConnReadWrite", net_internal_test_package.TestRawConnReadWrite, "rawconn_test.go", 14);
-        registry.Add("TestReadFromTimeout", net_internal_test_package.TestReadFromTimeout, "timeout_test.go", 453);
-        registry.Add("TestReadFromTimeoutFluctuation", net_internal_test_package.TestReadFromTimeoutFluctuation, "timeout_test.go", 797);
+        registry.Add("TestReadFromTimeout", net_internal_test_package.TestReadFromTimeout, "timeout_test.go", 452);
+        registry.Add("TestReadFromTimeoutFluctuation", net_internal_test_package.TestReadFromTimeoutFluctuation, "timeout_test.go", 793);
         registry.Add("TestReadLine", net_internal_test_package.TestReadLine, "parse_test.go", 14);
-        registry.Add("TestReadTimeout", net_internal_test_package.TestReadTimeout, "timeout_test.go", 334);
-        registry.Add("TestReadTimeoutFluctuation", net_internal_test_package.TestReadTimeoutFluctuation, "timeout_test.go", 740);
-        registry.Add("TestReadTimeoutMustNotReturn", net_internal_test_package.TestReadTimeoutMustNotReturn, "timeout_test.go", 386);
-        registry.Add("TestReadTimeoutUnblocksRead", net_internal_test_package.TestReadTimeoutUnblocksRead, "net_test.go", 450);
-        registry.Add("TestReadWriteDeadlineRace", net_internal_test_package.TestReadWriteDeadlineRace, "timeout_test.go", 1110);
-        registry.Add("TestReadWriteProlongedTimeout", net_internal_test_package.TestReadWriteProlongedTimeout, "timeout_test.go", 1032);
+        registry.Add("TestReadTimeout", net_internal_test_package.TestReadTimeout, "timeout_test.go", 333);
+        registry.Add("TestReadTimeoutFluctuation", net_internal_test_package.TestReadTimeoutFluctuation, "timeout_test.go", 736);
+        registry.Add("TestReadTimeoutMustNotReturn", net_internal_test_package.TestReadTimeoutMustNotReturn, "timeout_test.go", 385);
+        registry.Add("TestReadTimeoutUnblocksRead", net_internal_test_package.TestReadTimeoutUnblocksRead, "net_test.go", 445);
+        registry.Add("TestReadUnixgramWithUnnamedSocket", net_internal_test_package.TestReadUnixgramWithUnnamedSocket, "unixsock_test.go", 20);
+        registry.Add("TestReadWriteDeadlineRace", net_internal_test_package.TestReadWriteDeadlineRace, "timeout_test.go", 1106);
+        registry.Add("TestReadWriteMsgUDPAddrPortEmptyCmsg", net_internal_test_package.TestReadWriteMsgUDPAddrPortEmptyCmsg, "udpsock_test.go", 759);
+        registry.Add("TestReadWriteProlongedTimeout", net_internal_test_package.TestReadWriteProlongedTimeout, "timeout_test.go", 1028);
         registry.Add("TestResolveGoogle", net_internal_test_package.TestResolveGoogle, "external_test.go", 15);
         registry.Add("TestResolveIPAddr", net_internal_test_package.TestResolveIPAddr, "iprawsock_test.go", 56);
         registry.Add("TestResolveTCPAddr", net_internal_test_package.TestResolveTCPAddr, "tcpsock_test.go", 330);
-        registry.Add("TestResolveUDPAddr", net_internal_test_package.TestResolveUDPAddr, "udpsock_test.go", 93);
+        registry.Add("TestResolveUDPAddr", net_internal_test_package.TestResolveUDPAddr, "udpsock_test.go", 94);
         registry.Add("TestResolverDialFunc", net_internal_test_package.TestResolverDialFunc, "resolverdialfunc_test.go", 23);
-        registry.Add("TestResolverLookupIP", net_internal_test_package.TestResolverLookupIP, "lookup_test.go", 1246);
-        registry.Add("TestResolverLookupIPWithEmptyHost", net_internal_test_package.TestResolverLookupIPWithEmptyHost, "lookup_test.go", 1204);
+        registry.Add("TestResolverLookupIP", net_internal_test_package.TestResolverLookupIP, "lookup_test.go", 1247);
+        registry.Add("TestResolverLookupIPWithEmptyHost", net_internal_test_package.TestResolverLookupIPWithEmptyHost, "lookup_test.go", 1205);
         registry.Add("TestReverseAddress", net_internal_test_package.TestReverseAddress, "lookup_test.go", 481);
-        registry.Add("TestSendfile", net_internal_test_package.TestSendfile, "sendfile_test.go", 75);
-        registry.Add("TestSendfileOnWriteTimeoutExceeded", net_internal_test_package.TestSendfileOnWriteTimeoutExceeded, "sendfile_test.go", 404);
-        registry.Add("TestSendfileParts", net_internal_test_package.TestSendfileParts, "sendfile_test.go", 185);
-        registry.Add("TestSendfilePipe", net_internal_test_package.TestSendfilePipe, "sendfile_test.go", 303);
-        registry.Add("TestSendfileSeeked", net_internal_test_package.TestSendfileSeeked, "sendfile_test.go", 242);
-        registry.Add("TestSendfileWithExactLimit", net_internal_test_package.TestSendfileWithExactLimit, "sendfile_test.go", 76);
-        registry.Add("TestSendfileWithLargeFile", net_internal_test_package.TestSendfileWithLargeFile, "sendfile_test.go", 82);
-        registry.Add("TestSendfileWithLimitLargerThanFile", net_internal_test_package.TestSendfileWithLimitLargerThanFile, "sendfile_test.go", 79);
+        registry.Add("TestSendfile", net_internal_test_package.TestSendfile, "sendfile_test.go", 86);
+        registry.Add("TestSendfileOnWriteTimeoutExceeded", net_internal_test_package.TestSendfileOnWriteTimeoutExceeded, "sendfile_test.go", 408);
+        registry.Add("TestSendfileParts", net_internal_test_package.TestSendfileParts, "sendfile_test.go", 189);
+        registry.Add("TestSendfilePipe", net_internal_test_package.TestSendfilePipe, "sendfile_test.go", 307);
+        registry.Add("TestSendfileSeeked", net_internal_test_package.TestSendfileSeeked, "sendfile_test.go", 246);
+        registry.Add("TestSendfileWithExactLimit", net_internal_test_package.TestSendfileWithExactLimit, "sendfile_test.go", 87);
+        registry.Add("TestSendfileWithLargeFile", net_internal_test_package.TestSendfileWithLargeFile, "sendfile_test.go", 93);
+        registry.Add("TestSendfileWithLimitLargerThanFile", net_internal_test_package.TestSendfileWithLimitLargerThanFile, "sendfile_test.go", 90);
         registry.Add("TestSplitHostPort", net_internal_test_package.TestSplitHostPort, "ip_test.go", 562);
         registry.Add("TestSpuriousENOTAVAIL", net_internal_test_package.TestSpuriousENOTAVAIL, "error_posix_test.go", 15);
-        registry.Add("TestTCPBig", net_internal_test_package.TestTCPBig, "tcpsock_test.go", 622);
+        registry.Add("TestTCPBig", net_internal_test_package.TestTCPBig, "tcpsock_test.go", 625);
         registry.Add("TestTCPConcurrentAccept", net_internal_test_package.TestTCPConcurrentAccept, "tcpsock_test.go", 427);
         registry.Add("TestTCPConnKeepAliveConfig", net_internal_test_package.TestTCPConnKeepAliveConfig, "tcpconn_keepalive_test.go", 127);
         registry.Add("TestTCPConnKeepAliveConfigDialer", net_internal_test_package.TestTCPConnKeepAliveConfigDialer, "tcpconn_keepalive_test.go", 14);
         registry.Add("TestTCPConnKeepAliveConfigListener", net_internal_test_package.TestTCPConnKeepAliveConfigListener, "tcpconn_keepalive_test.go", 72);
         registry.Add("TestTCPConnSpecificMethods", net_internal_test_package.TestTCPConnSpecificMethods, "protoconn_test.go", 64);
-        registry.Add("TestTCPListenAfterClose", net_internal_test_package.TestTCPListenAfterClose, "tcpsock_test.go", 792);
+        registry.Add("TestTCPListenAfterClose", net_internal_test_package.TestTCPListenAfterClose, "tcpsock_test.go", 795);
         registry.Add("TestTCPListener", net_internal_test_package.TestTCPListener, "listen_test.go", 64);
         registry.Add("TestTCPListenerName", net_internal_test_package.TestTCPListenerName, "tcpsock_test.go", 359);
         registry.Add("TestTCPListenerSpecificMethods", net_internal_test_package.TestTCPListenerSpecificMethods, "protoconn_test.go", 24);
         registry.Add("TestTCPReadWriteAllocs", net_internal_test_package.TestTCPReadWriteAllocs, "tcpsock_test.go", 469);
         registry.Add("TestTCPServer", net_internal_test_package.TestTCPServer, "server_test.go", 54);
-        registry.Add("TestTCPStress", net_internal_test_package.TestTCPStress, "tcpsock_test.go", 538);
-        registry.Add("TestUDPConnLocalAndRemoteNames", net_internal_test_package.TestUDPConnLocalAndRemoteNames, "udpsock_test.go", 246);
-        registry.Add("TestUDPConnLocalName", net_internal_test_package.TestUDPConnLocalName, "udpsock_test.go", 224);
+        registry.Add("TestTCPStress", net_internal_test_package.TestTCPStress, "tcpsock_test.go", 541);
+        registry.Add("TestUDPConnLocalAndRemoteNames", net_internal_test_package.TestUDPConnLocalAndRemoteNames, "udpsock_test.go", 248);
+        registry.Add("TestUDPConnLocalName", net_internal_test_package.TestUDPConnLocalName, "udpsock_test.go", 226);
         registry.Add("TestUDPConnSpecificMethods", net_internal_test_package.TestUDPConnSpecificMethods, "protoconn_test.go", 113);
-        registry.Add("TestUDPIPVersionReadMsg", net_internal_test_package.TestUDPIPVersionReadMsg, "udpsock_test.go", 622);
+        registry.Add("TestUDPIPVersionReadMsg", net_internal_test_package.TestUDPIPVersionReadMsg, "udpsock_test.go", 630);
         registry.Add("TestUDPListener", net_internal_test_package.TestUDPListener, "listen_test.go", 125);
-        registry.Add("TestUDPReadSizeError", net_internal_test_package.TestUDPReadSizeError, "udpsock_test.go", 415);
-        registry.Add("TestUDPReadTimeout", net_internal_test_package.TestUDPReadTimeout, "udpsock_test.go", 459);
+        registry.Add("TestUDPReadSizeError", net_internal_test_package.TestUDPReadSizeError, "udpsock_test.go", 417);
+        registry.Add("TestUDPReadTimeout", net_internal_test_package.TestUDPReadTimeout, "udpsock_test.go", 461);
         registry.Add("TestUDPServer", net_internal_test_package.TestUDPServer, "server_test.go", 251);
-        registry.Add("TestUDPZeroByteBuffer", net_internal_test_package.TestUDPZeroByteBuffer, "udpsock_test.go", 378);
-        registry.Add("TestUDPZeroBytePayload", net_internal_test_package.TestUDPZeroBytePayload, "udpsock_test.go", 340);
+        registry.Add("TestUDPZeroByteBuffer", net_internal_test_package.TestUDPZeroByteBuffer, "udpsock_test.go", 380);
+        registry.Add("TestUDPZeroBytePayload", net_internal_test_package.TestUDPZeroBytePayload, "udpsock_test.go", 342);
+        registry.Add("TestUnixAbstractLongNameNulStart", net_internal_test_package.TestUnixAbstractLongNameNulStart, "unixsock_windows_test.go", 72);
         registry.Add("TestUnixAndUnixpacketServer", net_internal_test_package.TestUnixAndUnixpacketServer, "server_test.go", 126);
-        registry.Add("TestUnixConnLocalWindows", net_internal_test_package.TestUnixConnLocalWindows, "unixsock_windows_test.go", 16);
+        registry.Add("TestUnixConnLocalAndRemoteNames", net_internal_test_package.TestUnixConnLocalAndRemoteNames, "unixsock_test.go", 243);
+        registry.Add("TestUnixConnLocalWindows", net_internal_test_package.TestUnixConnLocalWindows, "unixsock_windows_test.go", 17);
         registry.Add("TestUnixConnSpecificMethods", net_internal_test_package.TestUnixConnSpecificMethods, "protoconn_test.go", 246);
         registry.Add("TestUnixListenerSpecificMethods", net_internal_test_package.TestUnixListenerSpecificMethods, "protoconn_test.go", 205);
-        registry.Add("TestUnixgramServer", net_internal_test_package.TestUnixgramServer, "server_test.go", 330);
-        registry.Add("TestVariousDeadlines", net_internal_test_package.TestVariousDeadlines, "timeout_test.go", 934);
-        registry.Add("TestVariousDeadlines1Proc", net_internal_test_package.TestVariousDeadlines1Proc, "timeout_test.go", 940);
-        registry.Add("TestVariousDeadlines4Proc", net_internal_test_package.TestVariousDeadlines4Proc, "timeout_test.go", 950);
+        registry.Add("TestUnixUnlink", net_internal_test_package.TestUnixUnlink, "unixsock_test.go", 360);
+        registry.Add("TestUnixgramConnLocalAndRemoteNames", net_internal_test_package.TestUnixgramConnLocalAndRemoteNames, "unixsock_test.go", 302);
+        registry.Add("TestUnixgramServer", net_internal_test_package.TestUnixgramServer, "server_test.go", 329);
+        registry.Add("TestUnixgramWrite", net_internal_test_package.TestUnixgramWrite, "unixsock_test.go", 170);
+        registry.Add("TestUnixgramZeroByteBuffer", net_internal_test_package.TestUnixgramZeroByteBuffer, "unixsock_test.go", 123);
+        registry.Add("TestUnixgramZeroBytePayload", net_internal_test_package.TestUnixgramZeroBytePayload, "unixsock_test.go", 78);
+        registry.Add("TestVariousDeadlines", net_internal_test_package.TestVariousDeadlines, "timeout_test.go", 930);
+        registry.Add("TestVariousDeadlines1Proc", net_internal_test_package.TestVariousDeadlines1Proc, "timeout_test.go", 936);
+        registry.Add("TestVariousDeadlines4Proc", net_internal_test_package.TestVariousDeadlines4Proc, "timeout_test.go", 946);
         registry.Add("TestWeighting", net_internal_test_package.TestWeighting, "dnsclient_test.go", 64);
         registry.Add("TestWildWildcardListener", net_internal_test_package.TestWildWildcardListener, "listen_test.go", 487);
-        registry.Add("TestWithUnexpiredValuesPreserved", net_internal_test_package.TestWithUnexpiredValuesPreserved, "lookup_test.go", 1214);
-        registry.Add("TestWriteTimeout", net_internal_test_package.TestWriteTimeout, "timeout_test.go", 519);
-        registry.Add("TestWriteTimeoutFluctuation", net_internal_test_package.TestWriteTimeoutFluctuation, "timeout_test.go", 853);
-        registry.Add("TestWriteTimeoutMustNotReturn", net_internal_test_package.TestWriteTimeoutMustNotReturn, "timeout_test.go", 560);
-        registry.Add("TestWriteToTimeout", net_internal_test_package.TestWriteToTimeout, "timeout_test.go", 620);
-        registry.Add("TestWriteToUDP", net_internal_test_package.TestWriteToUDP, "udpsock_test.go", 113);
+        registry.Add("TestWithUnexpiredValuesPreserved", net_internal_test_package.TestWithUnexpiredValuesPreserved, "lookup_test.go", 1215);
+        registry.Add("TestWriteTimeout", net_internal_test_package.TestWriteTimeout, "timeout_test.go", 518);
+        registry.Add("TestWriteTimeoutFluctuation", net_internal_test_package.TestWriteTimeoutFluctuation, "timeout_test.go", 849);
+        registry.Add("TestWriteTimeoutMustNotReturn", net_internal_test_package.TestWriteTimeoutMustNotReturn, "timeout_test.go", 559);
+        registry.Add("TestWriteToTimeout", net_internal_test_package.TestWriteToTimeout, "timeout_test.go", 619);
+        registry.Add("TestWriteToUDP", net_internal_test_package.TestWriteToUDP, "udpsock_test.go", 114);
         registry.Add("TestWritevError", net_internal_test_package.TestWritevError, "writev_test.go", 182);
-        registry.Add("TestZeroByteRead", net_internal_test_package.TestZeroByteRead, "net_test.go", 348);
+        registry.Add("TestZeroByteRead", net_internal_test_package.TestZeroByteRead, "net_test.go", 344);
         registry.SetTestMain(net_internal_test_package.TestMain);
         return TestHost.Run(registry, args);
     }

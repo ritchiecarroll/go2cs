@@ -10,6 +10,8 @@ using windows = @internal.syscall.windows_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using @internal.syscall;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.net_package;
 
 partial class net_internal_test_package {
@@ -21,7 +23,7 @@ internal static UntypedInt syscall_TCP_KEEPINTVL => /* windows.TCP_KEEPINTVL */ 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingOnWindowsˢ = (@string)"skipping on windows"u8;
 
-internal static void maybeSkipKeepAliveTest(ж<testing.T> Ꮡt) {
+internal static partial void maybeSkipKeepAliveTest(ж<testing.T> Ꮡt) {
     // TODO(panjf2000): Unlike Unix-like OS's, old Windows (prior to Windows 10, version 1709)
     // 	doesn't provide any ways to retrieve the current TCP keep-alive settings, therefore
     // 	we're not able to run the test suite similar to Unix-like OS's on Windows.
