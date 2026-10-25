@@ -405,6 +405,8 @@ public static void TestAppendGrowthHeap(ж<testing.T> Ꮡt) {
 internal static readonly object instrumentationBreaksˢ = (@string)"instrumentation breaks this optimization"u8;
 
 public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
+    var xᴷ = new stackAppend<int64>();
+
     if (race.Enabled || asan.Enabled || msan.Enabled) {
         Ꮡt.Skip(instrumentationBreaksˢ);
     }
@@ -421,7 +423,7 @@ public static void TestAppendGrowthStack(ж<testing.T> Ꮡt) {
         want = 1;
     }
     for (nint i = 1; i <= 100; i++) {
-        x = append(x, (int64)1);
+        x = append(xᴷ, x, (int64)1);
         check(want);
         if ((i & (i - 1)) == 0) {
             want = builtin.max(want, 2 * i);
@@ -485,6 +487,7 @@ internal static readonly @string sparseˢ = "sparse"u8;
 public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
     Action<ж<testing.B>> run(Func<bool> fn) {
         var runOne = (ж<testing.B> bΔ1) => {
+            var latenciesᴷ = new stackAppend<time.Duration>();
             var latencies = new slice<time.Duration>(0, (~bΔ1).N);
 
             bΔ1.ResetTimer();
@@ -494,7 +497,7 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
                 if (!ok) {
                     bΔ1.Fatal(goroutineProfileFailedˢ);
                 }
-                latencies = append(latencies, time.Since(start));
+                latencies = append(latenciesᴷ, latencies, time.Since(start));
             }
             bΔ1.StopTimer();
 
@@ -583,7 +586,7 @@ public static partial void BenchmarkGoroutineProfile(ж<testing.B> Ꮡb) {
     }));
 }
 
-public static void TestVersion(ж<testing.T> Ꮡt) {
+public static partial void TestVersion(ж<testing.T> Ꮡt) {
     // Test that version does not contain \r or \n.
     @string vers = Version();
     if (strings.Contains(vers, "\r"u8) || strings.Contains(vers, "\n"u8)) {
@@ -635,6 +638,7 @@ public static partial void BenchmarkMutexContention(ж<testing.B> Ꮡb) {
     // cache line. This is a simple design, but it helps to make the behavior of
     // the benchmark clear. Most real uses of mutex will protect some number of
     // cache lines anyway.
+
     ref var state = ref heap(new BenchmarkMutexContention_state(), out var Ꮡstate);
 
     nint procs = GOMAXPROCS(0);
@@ -691,6 +695,7 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     // timekeeping overhead out of the critical path, and avoids giving an
     // advantage to lock/unlock implementations that take less time per
     // operation.
+
     ref var state = ref heap(new BenchmarkMutexCapture_state(), out var Ꮡstate);
 
     nint procs = GOMAXPROCS(0);
@@ -735,8 +740,8 @@ public static partial void BenchmarkMutexCapture(ж<testing.B> Ꮡb) {
     array<array<nint>> histogram = new(2, () => new(65));
     foreach (var _ᴛ2 in range(procs)) {
         var h = ᐸꟷ(histograms);
-        foreach (var (i, _) in h) {
-            foreach (var (j, _) in h[i]) {
+        foreach (var i in range(h)) {
+            foreach (var j in range(h[i])) {
                 histogram[i][j] += h[i][j];
             }
         }

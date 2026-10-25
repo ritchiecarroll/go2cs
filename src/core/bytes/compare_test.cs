@@ -70,9 +70,11 @@ public static void TestCompareIdenticalSlice(ж<testing.T> Ꮡt) {
 }
 
 public static void TestCompareBytes(ж<testing.T> Ꮡt) {
+    var lengthsᴷ = new stackAppend<nint>();
+
     var lengths = new slice<nint>(0); // lengths to test in ascending order
     for (nint i = 0; i <= 128; i++) {
-        lengths = append(lengths, i);
+        lengths = append(lengthsᴷ, lengths, i);
     }
     lengths = append(lengths, (nint)256, (nint)512, (nint)1024, (nint)1333, (nint)4095, (nint)4096, (nint)4097);
 

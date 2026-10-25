@@ -5077,6 +5077,20 @@ healthy run look hung — and, in the other direction, what lets a hung one look
     package's files, and `-Apply` refused after deleting. **Step text:** H5c, AMENDED 2026-10-12.
     <!-- docs/phase4/RECON-go1.26-hop.md §4-§5 (F1) on claude/i9-recon-go126 bd69190547; COORD ruling 2026-10-12;
          src/check-h5c-goos-child.ps1 red at 94306766a9, green at 58952d5e85. -->
+88. **(2026-10-25, the Go 1.26 re-bank's L2.) A linux lane's `TMPDIR` is 10 bytes or less (`/tmp`).** The converted
+    test host roots each run at `go2cs-tests/<pkg>/<32 hex>/.tmp` under it, about 60 bytes, so a unix-socket test's
+    path can pass Linux's 108-byte `sun_path` limit where Go's own `t.TempDir` does not: `bind` returns EINVAL and the
+    converted side SKIPS a test Go passes. Why: `bufio` `TestCopyUnixpacket` reached 116 bytes under
+    `/dev/shm/p2-h10-tmp`. **Step text:** the linux leg's act, AMENDED 2026-10-25.
+    <!-- P2's L2 finding, relayed by COORD 2026-10-25; P2 re-read bufio with a short TMPDIR. -->
+89. **(2026-10-25, the Go 1.26 re-bank's linux leg.) A linux lane's pinned GOROOT carries `test/`.** Distribution
+    toolchains (cmd/distpack) strip `GOROOT/test`, and every test that reads it skips on BOTH sides, so the row
+    agrees at a smaller count and nothing reds. Check `test/` exists before the leg; copy it byte-exact from the same
+    release (versions asserted, sha256 manifest) or the source tarball. Why: `go/internal/gcimporter` read 371 on
+    linux against windows' 638, all of it `TestImportTypeparamTests`' 266 subtests skipping. **Step text:** the
+    linux leg's act, AMENDED 2026-10-25.
+    <!-- G's linux-leg review of claude/coord-linux-annot 61fe31d90a, 2026-10-25: 619 - 266 + 1 + 17 = 371;
+         COORD ruled the re-read (R, RWSL). -->
 
 <!-- SEED COVERAGE (owner order 2026-09-23; ledger 2026-09-23 14:52 · OWNER ORDER · c9e15c73a0), each verified against the cited source:
   1 hosts before the hop: DNS (relay NXDOMAIN->SERVFAIL, per-box public IPv4, IPv6 unbound) .......... 42 (+ the Readiness Host bullet)

@@ -21,6 +21,12 @@ using static global::go.unicode.utf8_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -29,7 +35,7 @@ using static global::go.unicode.utf8_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("unicode/utf8/utf8_test.go", "utf8_test.cs", "AA0gkoKUgrqSgpSCAAgSACJGygAIEoKCgoKUgoKUgoKUgoKmgoKClILKgoKCgoKCgsqCgoCCpICC2oKCgoKClIKCgriCgpSCgoK4goKUgoKUgoKCuIKUlIKClIKCgsyCgoKCgpSCgoLOooKCgtyCrsKCgoCCgraCgIKCpIKCgpTKADdwgoKUpoKCgoCCgqSCgIKCpIKClIKCggAJCoKKgoKCgoKClIKCgoKClIKCgpSCgpSUgoKCgoKClIKClIKClIKCgpSUgrqSgoKCgoIACBIACBKCgoCCpICC2oKAgoKUAAkSAAwagoKAggAKFAAUKoKCgpSCAAkUAA4eooKAgtqigoK4ooKCuKKCuKKCuJSigoK4ooKCuKKCgraigoK4ooKCuKKCuKKCuKKCuKKCuKKC/oKCgoKClKaCpqKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCggAMEIIABBCykoI=", "442-445:1;776-780:1")]
+[assembly: go.GoPositionMap("unicode/utf8/utf8_test.go", "utf8_test.cs", "AA0gkoKUggAIEgAiRsoACBKCgoKClIKClIKClIKCpoKCgpSCyoKCgoKCgoLKgoKAgqSAgtqCgoKCgpSCgoK4goKUgoKCuIKClIKClIKCgriClJSCgpSCgoLMgoKCgoKUgoKCzqKCgoLcgq7CgoKAgoK2goCCgqSCgoKUygA3cIKClKaCgoKAgoKkgoCCgqSCgpSCgoIACQqCioKCgoKCgpSCgoKCgpSCgoKUgoKUlIKCgoKCgpSCgpSCgpSCgoKUlIK6koKCgoKCAAgSAAgSgoKAgqSAgtqCgIKClAAJEgAMGoKCgIIAChQAFCqCgoKCgoK4goKClIIACRQADh6igoCC2qKCgriigoK4ooK4ooK4lKKCgriigoK4ooKCtqKCgriigoK4ooK4ooK4ooK4ooK4ooL+goKCgoKUpoKmooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoIADxqCAAQQspKC", "432-435:1;795-799:1")]
 // </GoSourcePositionMaps>
 
 namespace go.unicode;

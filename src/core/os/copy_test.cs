@@ -276,7 +276,7 @@ internal static ж<randReader> newRandReader() {
 }
 
 internal static (nint, error) Read(this ref randReader r, slice<byte> p) {
-    foreach (var (i, _) in p) {
+    foreach (var i in range(p)) {
         p[i] = (byte)(r.rand.Uint32() & 0xff);
     }
     return (len(p), default!);

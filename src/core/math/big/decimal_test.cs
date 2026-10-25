@@ -54,7 +54,7 @@ public static void TestDecimalInit(ж<testing.T> Ꮡt) {
         new(1953125, 9, "1000000000"u8)
     }.slice()) {
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
-        Ꮡd.init(new nat(new global::go.math.big_package.Word[]{test.x}.slice()).norm(), test.shift);
+        Ꮡd.init(new Δnat(new global::go.math.big_package.Word[]{test.x}.slice()).norm(), test.shift);
         {
             @string got = d.String(); if (got != test.want) {
                 Ꮡt.Errorf("%d << %d == %s; want %s"u8, test.x, test.shift, got, test.want);
@@ -73,26 +73,31 @@ public static void TestDecimalRounding(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestDecimalRounding_type[]{
         new(0, 0, "0"u8, "0"u8, "0"u8),
         new(0, 1, "0"u8, "0"u8, "0"u8),
+
         new(1, 0, "0"u8, "0"u8, "10"u8),
         new(5, 0, "0"u8, "0"u8, "10"u8),
         new(9, 0, "0"u8, "10"u8, "10"u8),
+
         new(15, 1, "10"u8, "20"u8, "20"u8),
         new(45, 1, "40"u8, "40"u8, "50"u8),
         new(95, 1, "90"u8, "100"u8, "100"u8),
+
         new(12344999, 4, "12340000"u8, "12340000"u8, "12350000"u8),
         new(12345000, 4, "12340000"u8, "12340000"u8, "12350000"u8),
         new(12345001, 4, "12340000"u8, "12350000"u8, "12350000"u8),
         new(23454999, 4, "23450000"u8, "23450000"u8, "23460000"u8),
         new(23455000, 4, "23450000"u8, "23460000"u8, "23460000"u8),
         new(23455001, 4, "23450000"u8, "23460000"u8, "23460000"u8),
+
         new(99994999, 4, "99990000"u8, "99990000"u8, "100000000"u8),
         new(99995000, 4, "99990000"u8, "100000000"u8, "100000000"u8),
         new(99999999, 4, "99990000"u8, "100000000"u8, "100000000"u8),
+
         new(12994999, 4, "12990000"u8, "12990000"u8, "13000000"u8),
         new(12995000, 4, "12990000"u8, "13000000"u8, "13000000"u8),
         new(12999999, 4, "12990000"u8, "13000000"u8, "13000000"u8)
     }.slice()) {
-        var x = ((global::go.math.big_package.nat)default!).setUint64(test.x);
+        var x = ((global::go.math.big_package.Δnat)default!).setUint64(test.x);
 
         ref var d = ref heap(new global::go.math.big_package.@decimal(), out var Ꮡd);
         Ꮡd.init(x, 0);

@@ -9,6 +9,8 @@ using rand = global::go.math.rand_package;
 using static runtime_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.math;
 using static global::go.runtime_internal_test_package;
 using Δruntime = runtime_package;
@@ -316,6 +318,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 }
                 if (n > 25) {
                     // Double-check that GC utilization looks OK.
+
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
                     assertInEpsilon(tΔ11, gcUtilizationˢ, c[n - 1].gcUtilization, runtime_internal_test_package.GCGoalUtilization, 0.005D);
                     // Make sure GC utilization has mostly levelled off.
@@ -351,6 +354,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 }
                 if (n > 25) {
                     // Double-check that GC utilization looks OK.
+
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
                     assertInEpsilon(tΔ12, gcUtilizationˢ, c[n - 1].gcUtilization, runtime_internal_test_package.GCGoalUtilization, 0.005D);
                     // Make sure GC utilization has mostly levelled off.
@@ -384,6 +388,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                 }
                 if (n > 25) {
                     // Double-check that GC utilization looks OK.
+
                     // At this alloc/scan rate, the pacer should be extremely close to the goal utilization.
                     assertInEpsilon(tΔ13, gcUtilizationˢ, c[n - 1].gcUtilization, runtime_internal_test_package.GCGoalUtilization, 0.005D);
                     // Make sure GC utilization has mostly levelled off.
@@ -659,6 +664,7 @@ public static void TestGcPacer(ж<testing.T> Ꮡt) {
                     //
                     // Note that this is an idealized view of the GC assist pacing
                     // mechanism.
+
                     // From the assist ratio and the alloc and scan rates, we can idealize what
                     // the GC CPU utilization looks like.
                     //
@@ -873,12 +879,12 @@ internal static @string String(this ref gcCycleResult r) {
     return fmt.Sprintf("%d %2.1f%% %d->%d->%d (goal: %d)"u8, r.cycle, r.gcUtilization * 100D, r.heapLive, r.heapTrigger, r.heapPeak, r.heapGoal);
 }
 
-internal static void assertInEpsilon(ж<testing.T> Ꮡt, @string name, float64 a, float64 b, float64 epsilon) {
+internal static partial void assertInEpsilon(ж<testing.T> Ꮡt, @string name, float64 a, float64 b, float64 epsilon) {
     Ꮡt.Helper();
     assertInRange(Ꮡt, name, a, b - epsilon, b + epsilon);
 }
 
-internal static void assertInRange(ж<testing.T> Ꮡt, @string name, float64 a, float64 min, float64 max) {
+internal static partial void assertInRange(ж<testing.T> Ꮡt, @string name, float64 a, float64 min, float64 max) {
     Ꮡt.Helper();
     if (a < min || a > max) {
         Ꮡt.Errorf("%s not in range (%f, %f): %f"u8, name, min, max, a);

@@ -1,11 +1,12 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
-using static strconv_package;
+using fmt = fmt_package;
+using static go.@internal.strconv_package;
 using testing = testing_package;
-using static go.strconv_internal_test_package;
+using static go.@internal.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
@@ -22,9 +23,9 @@ internal static slice<itob64Test> itob64tests = new itob64Test[]{
     new(12345678, 10, "12345678"u8),
     new(-987654321, 10, "-987654321"u8),
     new(2147483648L - 1, 10, "2147483647"u8),
-    new((-1 << (int)(31)) + 1, 10, "-2147483647"u8),
+    new((-1 << 31) + 1, 10, "-2147483647"u8),
     new(2147483648L, 10, "2147483648"u8),
-    new(((int64)(-1) << (int)(31)), 10, "-2147483648"u8),
+    new((int64)(-1) << 31, 10, "-2147483648"u8),
     new(2147483649L, 10, "2147483649"u8),
     new(-2147483649L, 10, "-2147483649"u8),
     new(4294967295L, 10, "4294967295"u8),
@@ -37,18 +38,22 @@ internal static slice<itob64Test> itob64tests = new itob64Test[]{
     new(9223372036854775807L, 10, "9223372036854775807"u8),
     new(-9223372036854775807L, 10, "-9223372036854775807"u8),
     new(-9223372036854775808L, 10, "-9223372036854775808"u8),
+
     new(0, 2, "0"u8),
     new(10, 2, "1010"u8),
     new(-1, 2, "-1"u8),
-    new(((int64)1 << (int)(15)), 2, "1000000000000000"u8),
+    new((int64)1 << 15, 2, "1000000000000000"u8),
+
     new(-8, 8, "-10"u8),
     new(6416645477L, 8, "57635436545"u8),
-    new(((int64)1 << (int)(24)), 8, "100000000"u8),
+    new((int64)1 << 24, 8, "100000000"u8),
+
     new(16, 16, "10"u8),
     new(-0x123456789abcdefL, 16, "-123456789abcdef"u8),
     new(9223372036854775807L, 16, "7fffffffffffffff"u8),
     new(9223372036854775807L, 2, "111111111111111111111111111111111111111111111111111111111111111"u8),
     new(-9223372036854775808L, 2, "-1000000000000000000000000000000000000000000000000000000000000000"u8),
+
     new(16, 17, "g"u8),
     new(25, 25, "10"u8),
     new(32544027072L, 35, "holycow"u8),
@@ -117,7 +122,7 @@ partial struct uitob64Test {
 
 internal static slice<uitob64Test> uitob64tests = new uitob64Test[]{
     new(9223372036854775807UL, 10, "9223372036854775807"u8),
-    new(((uint64)1 << (int)(63)), 10, "9223372036854775808"u8),
+    new((uint64)1 << 63, 10, "9223372036854775808"u8),
     new(9223372036854775809UL, 10, "9223372036854775809"u8),
     new(18446744073709551614UL, 10, "18446744073709551614"u8),
     new(18446744073709551615UL, 10, "18446744073709551615"u8),
@@ -244,13 +249,16 @@ public static void BenchmarkAppendIntSmall(ж<testing.B> Ꮡb) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object digitsˢ = (@string)"digits="u8;
+
 public static void BenchmarkAppendUintVarlen(ж<testing.B> Ꮡb) {
     foreach (var (_, vᴛ1) in varlenUints) {
         ref var test = ref heap(new varlenUintsᴛ1(), out var Ꮡtest);
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡb.Run(test.@out, (ж<testing.B> bΔ1) => {
+        Ꮡb.Run(fmt.Sprint(digitsˢ, len(test.@out)), (ж<testing.B> bΔ1) => {
             var dst = new slice<byte>(0, 30);
             for (nint j = 0; j < (~bΔ1).N; j++) {
                 dst = AppendUint(dst[..0], testʗ1.@in, 10);

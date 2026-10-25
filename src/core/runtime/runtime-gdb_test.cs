@@ -308,6 +308,8 @@ internal static readonly @string m0S0x09aFSInSMainMainAtˢ = @"(?m)^#0\s+(0x[0-9
 internal static readonly @string goroutineAllBtˢ = "goroutine all bt"u8;
 
 internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
+    var argsᴷ = new stackAppend<@string>();
+
     if (cgo) {
         testenv.MustHaveCGO(new runtime_test_package.testing_TжTB(Ꮡt));
     }
@@ -363,7 +365,7 @@ internal static void testGdbPython(ж<testing.T> Ꮡt, bool cgo) {
         // compress the .debug_gdb_scripts into .zdebug_gdb_scripts.
         // Until gold and gdb can work together, temporarily load the
         // python script directly.
-        args = append(args,
+        args = append(argsᴷ, args,
             "-ex"u8, "source " + filepath.Join(testenv.GOROOT(new runtime_test_package.testing_TжTB(Ꮡt)), srcˢ, runtimeˢ, runtimeGdbPyˢ));
     } else {
         args = append(args,

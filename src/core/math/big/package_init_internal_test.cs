@@ -6,6 +6,7 @@ namespace go.math;
 
 partial class big_internal_test_package {
     static big_internal_test_package() {
+        initᴛprodNNExtra();
         initᴛprodNN();
         initᴛleftShiftTests();
         initᴛrightShiftTests();

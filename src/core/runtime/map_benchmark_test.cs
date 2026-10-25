@@ -826,7 +826,7 @@ internal static partial ж<T> newSink<T>() {
 // Return a new maps filled with keys and elems. Both slices must be the same length.
 internal static map<K, E> fillMap<K, E>(slice<K> keys, slice<E> elems) {
     var m = new map<K, E>(len(keys));
-    foreach (var (i, _) in keys) {
+    foreach (var i in range(keys)) {
         m[keys[i]] = elems[i];
     }
     return m;
@@ -910,7 +910,7 @@ internal static partial void benchmarkMapIterLowLoad<K, E>(ж<testing.B> Ꮡb, n
     var e = genValues<E>(0, 1);
 
     var m = new map<K, E>(n);
-    foreach (var (i, _) in k) {
+    foreach (var i in range(k)) {
         m[k[i]] = e[i];
     }
 
@@ -1281,7 +1281,7 @@ internal static readonly @string keyInt32ElemInt32ˢ4 = "Key=int32/Elem=[]int32"
 internal static readonly @string keyInt64ElemInt32ˢ = "Key=int64/Elem=[]int32"u8;
 internal static readonly @string keyStringElemInt32ˢ = "Key=string/Elem=[]int32"u8;
 
-public static void BenchmarkMapAssignAppend(ж<testing.B> Ꮡb) {
+public static partial void BenchmarkMapAssignAppend(ж<testing.B> Ꮡb) {
     Ꮡb.Run(keyInt32ElemInt32ˢ4, benchSizes(benchmarkMapAssignAppend<int32>));
     Ꮡb.Run(keyInt64ElemInt32ˢ, benchSizes(benchmarkMapAssignAppend<int64>));
     Ꮡb.Run(keyStringElemInt32ˢ, benchSizes(benchmarkMapAssignAppend<@string>));
@@ -1307,7 +1307,7 @@ internal static void benchmarkMapDelete<K, E>(ж<testing.B> Ꮡb, nint n) {
             // We'd like to StopTimer while refilling the map, but
             // it is way too expensive and thus makes the benchmark
             // take a long time. See https://go.dev/issue/20875.
-            foreach (var (j, _) in k) {
+            foreach (var j in range(k)) {
                 m[k[j]] = e[j];
             }
         }
@@ -1347,7 +1347,7 @@ internal static void benchmarkMapPop<K, E>(ж<testing.B> Ꮡb, nint n) {
             // We'd like to StopTimer while refilling the map, but
             // it is way too expensive and thus makes the benchmark
             // take a long time. See https://go.dev/issue/20875.
-            foreach (var (j, _) in k) {
+            foreach (var j in range(k)) {
                 m[k[j]] = e[j];
             }
         }

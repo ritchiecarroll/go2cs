@@ -77,12 +77,14 @@ public static void TestInterfaces(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("got %v; want %v"u8, ifxi.OrTypedNil(), ifi);
             }
         }
-        (var ifxn, errΔ1) = InterfaceByName(ifi.Name);
-        if (errΔ1 != default!) {
-            Ꮡt.Fatal(errΔ1);
-        }
-        if (!reflect.DeepEqual(ifxn.OrTypedNil(), Ꮡifi)) {
-            Ꮡt.Errorf("got %v; want %v"u8, ifxn.OrTypedNil(), ifi);
+        if (ifi.Name != ""u8) {
+            var (ifxn, errΔ2) = InterfaceByName(ifi.Name);
+            if (errΔ2 != default!) {
+                Ꮡt.Fatal(errΔ2);
+            }
+            if (!reflect.DeepEqual(ifxn.OrTypedNil(), Ꮡifi)) {
+                Ꮡt.Errorf("got %v; want %v"u8, ifxn.OrTypedNil(), ifi);
+            }
         }
         Ꮡt.Logf("%s: flags=%v index=%d mtu=%d hwaddr=%v"u8, ifi.Name, ifi.Flags, ifi.Index, ifi.MTU, ifi.HardwareAddr);
     }

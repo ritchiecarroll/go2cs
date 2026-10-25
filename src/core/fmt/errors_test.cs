@@ -17,6 +17,7 @@ internal static readonly object prefixˢ = (@string)"prefix"u8;
 internal static readonly object suffixˢ = (@string)"suffix"u8;
 internal static readonly object positionalVerbˢ = (@string)"positional verb"u8;
 internal static readonly object notAnErrorˢ = (@string)"not-an-error"u8;
+internal static readonly object extraˢ = (@string)"extra"u8;
 
 internal partial struct TestErrorf_type /*dyn*/ {
     internal error err;
@@ -64,27 +65,36 @@ public static void TestErrorf(ж<Δtesting.T> Ꮡt) {
         err: noVetErrorf("%w is not an error"u8, notAnErrorˢ),
         wantText: "%!w(string=not-an-error) is not an error"u8
     ), new(
-        err: noVetErrorf("wrapped two errors: %w %w"u8, ((errString)(@string)"1"u8), ((errString)(@string)"2"u8)),
+        err: fmt.Errorf("no verbs"u8),
+        wantText: "no verbs"u8
+    ), new(
+        err: noVetErrorf("no verbs with extra arg"u8, extraˢ),
+        wantText: "no verbs with extra arg%!(EXTRA string=extra)"u8
+    ), new(
+        err: noVetErrorf("too many verbs: %w %v"u8),
+        wantText: "too many verbs: %!w(MISSING) %!v(MISSING)"u8
+    ), new(
+        err: noVetErrorf("wrapped two errors: %w %w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8),
         wantText: "wrapped two errors: 1 2"u8,
         wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8)}.slice()
     ), new(
-        err: noVetErrorf("wrapped three errors: %w %w %w"u8, ((errString)(@string)"1"u8), ((errString)(@string)"2"u8), ((errString)(@string)"3"u8)),
+        err: noVetErrorf("wrapped three errors: %w %w %w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8, (errString)(@string)"3"u8),
         wantText: "wrapped three errors: 1 2 3"u8,
         wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8), ((errString)(@string)"3"u8)}.slice()
     ), new(
-        err: noVetErrorf("wrapped nil error: %w %w %w"u8, ((errString)(@string)"1"u8), (any)(default!), ((errString)(@string)"2"u8)),
+        err: noVetErrorf("wrapped nil error: %w %w %w"u8, (errString)(@string)"1"u8, (any)(default!), (errString)(@string)"2"u8),
         wantText: "wrapped nil error: 1 %!w(<nil>) 2"u8,
         wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8)}.slice()
     ), new(
-        err: noVetErrorf("wrapped one non-error: %w %w %w"u8, ((errString)(@string)"1"u8), notAnErrorˢ, ((errString)(@string)"3"u8)),
+        err: noVetErrorf("wrapped one non-error: %w %w %w"u8, (errString)(@string)"1"u8, notAnErrorˢ, (errString)(@string)"3"u8),
         wantText: "wrapped one non-error: 1 %!w(string=not-an-error) 3"u8,
         wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"3"u8)}.slice()
     ), new(
-        err: fmt.Errorf("wrapped errors out of order: %[3]w %[2]w %[1]w"u8, ((errString)(@string)"1"u8), ((errString)(@string)"2"u8), ((errString)(@string)"3"u8)),
+        err: fmt.Errorf("wrapped errors out of order: %[3]w %[2]w %[1]w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8, (errString)(@string)"3"u8),
         wantText: "wrapped errors out of order: 3 2 1"u8,
         wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8), ((errString)(@string)"3"u8)}.slice()
     ), new(
-        err: fmt.Errorf("wrapped several times: %[1]w %[1]w %[2]w %[1]w"u8, ((errString)(@string)"1"u8), ((errString)(@string)"2"u8)),
+        err: fmt.Errorf("wrapped several times: %[1]w %[1]w %[2]w %[1]w"u8, (errString)(@string)"1"u8, (errString)(@string)"2"u8),
         wantText: "wrapped several times: 1 1 2 1"u8,
         wantSplit: new error[]{((errString)(@string)"1"u8), ((errString)(@string)"2"u8)}.slice()
     ), new(
@@ -129,7 +139,7 @@ internal static slice<error> splitErr(error err) {
 partial struct errString /*@string*/;
 
 internal static @string Error(this errString e) {
-    return ((@string)e);
+    return (@string)e;
 }
 
 } // end fmt_test_package

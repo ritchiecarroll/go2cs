@@ -12,10 +12,12 @@ using go.math.rand;
 partial class slices_test_package {
 
 public static void TestAll(ж<testing.T> Ꮡt) {
+    var sᴷ = new stackAppend<nint>();
+
     for (nint size = 0; size < 10; size++) {
         slice<nint> s = default!;
         foreach (var i in range(size)) {
-            s = append(s, i);
+            s = append(sᴷ, s, i);
         }
         nint ei = 0;
         nint ev = 0;
@@ -35,10 +37,12 @@ public static void TestAll(ж<testing.T> Ꮡt) {
 }
 
 public static void TestBackward(ж<testing.T> Ꮡt) {
+    var sᴷ = new stackAppend<nint>();
+
     for (nint size = 0; size < 10; size++) {
         slice<nint> s = default!;
         foreach (var i in range(size)) {
-            s = append(s, i);
+            s = append(sᴷ, s, i);
         }
         nint ei = size - 1;
         nint ev = size - 1;
@@ -58,10 +62,12 @@ public static void TestBackward(ж<testing.T> Ꮡt) {
 }
 
 public static void TestValues(ж<testing.T> Ꮡt) {
+    var sᴷ = new stackAppend<nint>();
+
     for (nint size = 0; size < 10; size++) {
         slice<nint> s = default!;
         foreach (var i in range(size)) {
-            s = append(s, i);
+            s = append(sᴷ, s, i);
         }
         nint ev = 0;
         nint cnt = 0;
@@ -156,7 +162,7 @@ public static void TestSortedStableFunc(ж<testing.T> Ꮡt) {
     nint n = 1000;
     nint m = 100;
     var data = new intPairs(n);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i].a = rand.IntN(m);
     }
     data.initB();

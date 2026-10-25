@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `reflect` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-28 · converter `9a21c0848`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**396 matched · 22 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**445 matched · 21 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/reflect`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/reflect).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 2 of the matched tests identically.
+Both runtimes skip 1 of the matched tests identically.
 
 ## Verdicts
 
@@ -22,7 +22,7 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestAddr` | pass | pass |
 | `TestAlias` | pass | pass |
 | `TestAliasNames` | pass | pass |
-| `TestAlignment` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestAlignment` | pass | pass |
 | `TestAll` | pass | pass |
 | `TestAllocations` | skip | skip |
 | `TestAllocsInterfaceBig` | pass | pass |
@@ -140,7 +140,45 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestDeepEqual/7` | pass | pass |
 | `TestDeepEqual/8` | pass | pass |
 | `TestDeepEqual/9` | pass | pass |
-| `TestDeepEqualAllocs` | skip | skip |
+| `TestDeepEqualAllocs` | pass | pass |
+| `TestDeepEqualAllocs/[6]uint8` | pass | pass |
+| `TestDeepEqualAllocs/[][6]uint8` | pass | pass |
+| `TestDeepEqualAllocs/[][]uint8` | pass | pass |
+| `TestDeepEqualAllocs/[]bool` | pass | pass |
+| `TestDeepEqualAllocs/[]complex128` | pass | pass |
+| `TestDeepEqualAllocs/[]complex64` | pass | pass |
+| `TestDeepEqualAllocs/[]float32` | pass | pass |
+| `TestDeepEqualAllocs/[]float64` | pass | pass |
+| `TestDeepEqualAllocs/[]int` | pass | pass |
+| `TestDeepEqualAllocs/[]int16` | pass | pass |
+| `TestDeepEqualAllocs/[]int32` | pass | pass |
+| `TestDeepEqualAllocs/[]int64` | pass | pass |
+| `TestDeepEqualAllocs/[]int8` | pass | pass |
+| `TestDeepEqualAllocs/[]string` | pass | pass |
+| `TestDeepEqualAllocs/[]uint` | pass | pass |
+| `TestDeepEqualAllocs/[]uint16` | pass | pass |
+| `TestDeepEqualAllocs/[]uint32` | pass | pass |
+| `TestDeepEqualAllocs/[]uint64` | pass | pass |
+| `TestDeepEqualAllocs/[]uint8` | pass | pass |
+| `TestDeepEqualAllocs/[]uint8#01` | pass | pass |
+| `TestDeepEqualAllocs/[]uintptr` | pass | pass |
+| `TestDeepEqualAllocs/bool` | pass | pass |
+| `TestDeepEqualAllocs/complex128` | pass | pass |
+| `TestDeepEqualAllocs/complex64` | pass | pass |
+| `TestDeepEqualAllocs/float32` | pass | pass |
+| `TestDeepEqualAllocs/float64` | pass | pass |
+| `TestDeepEqualAllocs/int` | pass | pass |
+| `TestDeepEqualAllocs/int16` | pass | pass |
+| `TestDeepEqualAllocs/int32` | pass | pass |
+| `TestDeepEqualAllocs/int64` | pass | pass |
+| `TestDeepEqualAllocs/int8` | pass | pass |
+| `TestDeepEqualAllocs/string` | pass | pass |
+| `TestDeepEqualAllocs/uint` | pass | pass |
+| `TestDeepEqualAllocs/uint16` | pass | pass |
+| `TestDeepEqualAllocs/uint32` | pass | pass |
+| `TestDeepEqualAllocs/uint64` | pass | pass |
+| `TestDeepEqualAllocs/uint8` | pass | pass |
+| `TestDeepEqualAllocs/uintptr` | pass | pass |
 | `TestDeepEqualComplexStruct` | pass | pass |
 | `TestDeepEqualComplexStructInequality` | pass | pass |
 | `TestDeepEqualRecursiveStruct` | pass | pass |
@@ -382,6 +420,12 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestStructOfWithInterface` | pass | pass |
 | `TestSwapper` | pass | pass |
 | `TestTagGet` | pass | pass |
+| `TestTypeAssert` | pass | pass |
+| `TestTypeAssertAllocs` | pass | pass |
+| `TestTypeAssertMethod` | pass | pass |
+| `TestTypeAssertPanic` | pass | pass |
+| `TestTypeAssertPanic/read_only` | pass | pass |
+| `TestTypeAssertPanic/zero_val` | pass | pass |
 | `TestTypeFieldOutOfRangePanic` | pass | pass |
 | `TestTypeFieldReadOnly` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestTypeFor` | pass | pass |
@@ -397,6 +441,8 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestType_CanSeq/func(func(int)_bool)` | pass | pass |
 | `TestType_CanSeq/int64` | pass | pass |
 | `TestType_CanSeq/map[int]int` | pass | pass |
+| `TestType_CanSeq/methodIter.NonSeq` | pass | pass |
+| `TestType_CanSeq/methodIter.Seq` | pass | pass |
 | `TestType_CanSeq/string` | pass | pass |
 | `TestType_CanSeq/uint64` | pass | pass |
 | `TestType_CanSeq2` | pass | pass |
@@ -407,6 +453,8 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestType_CanSeq2/func(func(int,_int)_bool)` | pass | pass |
 | `TestType_CanSeq2/int64` | pass | pass |
 | `TestType_CanSeq2/map[int]int` | pass | pass |
+| `TestType_CanSeq2/methodIter2.NonSeq2` | pass | pass |
+| `TestType_CanSeq2/methodIter2.Seq2` | pass | pass |
 | `TestType_CanSeq2/string` | pass | pass |
 | `TestType_CanSeq2/uint64` | pass | pass |
 | `TestTypelinksSorted` | pass | pass |
@@ -447,12 +495,11 @@ a disclosed test that fails any *other* way is still a hard mismatch.
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAlignment` | `runtime-capability` | runtime-capability: the assert computes field offsets by uintptr ARITHMETIC over the receiver's own address and compares them against reflect's answers. Managed memory exposes no stable byte offsets to arithmetic -- the runtime is free to lay out and to move objects -- so the test's arithmetic yields 0 where Go's yields a real offset, and the printed pair (8 0, then 16 0) is the test's OWN number against the bridge's. reflect's own Offset is CORRECT here and is not what fails: the divergence is in the measuring instrument the test builds, not in the operation under test. Pinned on the stable prefix because the two occurrences print different offsets. |
-| `TestCallReturnsEmpty` | `codegen-liveness` | codegen-liveness: Go's liveness maps drop a local at its LAST USE. The test writes v := ValueOf(f).Call(nil)[0] and NEVER NAMES the intermediate []Value, so Go frees it before runtime.GC() and the finalizer on out[1] -- the *[2]int64 the test waits for -- runs inside the wait. The converted host keeps a caller frame slot rooted for that intermediate while it stays in scope, so out[1] survives the collection and the wait times out with Go's own message. runtime.SetFinalizer is FULLY WIRED here (a ConditionalWeakTable keyed on the referent, with a sentinel that resurrects the box for the call), so a finalizer that does not run means retention rather than a missing feature. MEASURED as a one-axis pair, each arm also run under Go as its own oracle -- (7a) the row's line verbatim: Go COLLECTED / Release+TC0 RETAINED; (7b) the intermediate NAMED and CLEARED, the only axis varied: Go COLLECTED / Release+TC0 COLLECTED. 7a retains and 7b collects, so the pin is SOLELY the frame slot holding the intermediate. That same pair is the anti-laundering control, and it is why this is a disclosure and not a defect: Go issue 21717, which this test exists to catch, is about out[0] ALIASING out[1]'s storage -- if that alias existed here, clearing the slice could not help, because v still holds out[0] and is kept alive across the collection, so 7b would have read RETAINED. It reads COLLECTED. Call does not alias its zero-sized return over the next one; the defect this test guards is measured ABSENT, and what remains is the host's liveness model, a representational fact rather than an unbuilt feature. LIMIT, stated: 7a/7b were measured at Release+TC0 only, the configuration of record; the tier axis of the sibling unique/TestMakeClonesStrings entry predicts retention under tiering and in Debug, but that was not run for this row and is not reported as though it had been. |
+| `TestCallReturnsEmpty` | `codegen-liveness` | codegen-liveness: Go's liveness maps drop a local at its LAST USE. The test writes v := ValueOf(f).Call(nil)[0] and never names the intermediate []Value, so Go frees it before runtime.GC() and the cleanup runtime.AddCleanup attached to out[1] -- the *[2]int64 the test waits for -- runs inside the wait. The converted host keeps a caller frame slot rooted for that intermediate while the frame runs, so out[1] survives every collection and the wait times out with Go's own message. runtime.AddCleanup and runtime.SetFinalizer both run here when nothing in the caller's frame holds the object (a ConditionalWeakTable keyed on the referent, with a sentinel whose .NET finalizer hands the body to the finalizer queue), so a cleanup that does not run means retention rather than a missing feature. MEASURED as a seven-arm probe, every arm also run under Go as its own oracle (all seven run under Go), each read at Release+TC0, Release tiered and Debug with the same result: (1) AddCleanup on an object made in a noinline helper: RUNS; (2) SetFinalizer, the same: RUNS; (3) SetFinalizer through the test's own `ValueOf(f).Call(nil)[0]` line: does NOT run; (4) AddCleanup through that line: does NOT run; (5) the same Call made in a noinline helper that returns only v, v kept alive across the wait: RUNS; (6) the Call made in a helper, its result dropped: RUNS; (7) no reflect at all, `e, _ := f()` in the waiting frame: does NOT run. Arms 3, 4 and 7 retain and 5 and 6 collect, so the pin is the caller's frame slot holding a call's result, with or without reflect; neither the cleanup queue nor Call is involved. That pair is also the anti-laundering control: Go issue 21717, which this test exists to catch, is about out[0] ALIASING out[1]'s storage, and arm 5 keeps v (out[0]) alive across the collection while out[1] is still collected, which could not happen if the alias existed. The defect the test guards is measured ABSENT; what remains is the host's liveness model, a representational fact rather than an unbuilt feature. The failure text is the test's only assertion, so the signature alone does not discriminate: arms 4 and 5 are the evidence. Through Go 1.24 the test used runtime.SetFinalizer and failed with "finalizer did not run" for the same cause; Go 1.25 moved it to runtime.AddCleanup. |
 | `TestChanAlloc` | `alloc-count-semantics` | at-most-one AllocsPerRun assert on a reflect channel Send plus Recv of a `chan *int`: Go counts exactly one allocation per round-trip (the Value reflect.recv returns, which the test's own note calls a limitation of escape analysis) and requires 0.5 <= allocs <= 1.5 (all_test.go TestChanAlloc). The managed channel carries its element boxed, so a send allocates where Go copies into the ring buffer. [SUPERSEDED 2026-09-27: this entry previously called the assert want-zero; its want is ONE.] RELABEL 2026-09-27 (C1, on COORD's seat of 2026-09-27 11:50, ledger 9760611653, under the H10 rulings of ledger 2026-09-23 03:37): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES, golib's counter charging none of it, so no object count exists to compare with Go's one: the ladder's incomparable-unit arm. Nothing to retire and no plan. |
 | `TestGCBits` | `runtime-capability` | runtime-capability: the verifyGCBitsSlice path compares a slice's HEAP-ALLOCATION GC bitmap. Go's gcbits(*E) reads the heap object at the pointer and returns the element's pointer bits REPEATED by the allocation's size class -- have [1] want [1 1], have [1] want [1 1 ...x10000], have [0 1] want [0 1 0 1]. The managed gcbits answers from the POINTEE TYPE's layout (GoReflect.GoGCMaskOf) -- the element's bits ONCE -- because the managed model has no allocation size class to repeat by, and reflect.NewAt's *E carries no cap it was never given. The non-slice verifyGCBits path (New(typ).Interface()) is unaffected. Same managed-model class as the alloc-count and pointer-identity disclosures (coordinator ruling 2026-09-02; C2's gcbits authority, R mints the reflect manifest entry). |
 | `TestMapIterReset` | `alloc-count-semantics` | want-zero AllocsPerRun assert on MapIter.Reset. Go reuses one hiter in place; the managed iterator must obtain a fresh enumerator from the map when it rebinds, because IEnumerator carries no reset-to-a-different-source operation. The allocation is the enumerator itself, charged outside golib (BCL internal), so the figure is reported in BYTES rather than as a count. RELABEL 2026-09-27 (C1, on COORD's seat of 2026-09-27 11:50, ledger 9760611653, under the H10 rulings of ledger 2026-09-23 03:37): alloc-profile -> alloc-count-semantics. The run's own unit note is BYTES -- the enumerator this reason names is BCL-internal and uncounted -- so no object count exists to compare with the want of zero: the ladder's incomparable-unit arm. Nothing to retire and no plan. |
-| `TestMapIterSet` | `structural` | want-zero AllocsPerRun assert over SetIterKey/SetIterValue across one MapRange of a 22-key map. RELABEL 2026-09-27 (COORD, on the i7 readings requested at ledger 2026-09-27 14:58): alloc-profile -> STRUCTURAL. WANT: 0 allocations per run. READING: 1 per run, unit COUNT -- 10 go2cs-runtime object allocations (33,120 bytes) over 10 runs at 1aebd6a885, windows/amd64, Release with tiering off; Go reads 0 mallocs and 0 B on the same box. PROOF, with the object Go keeps off the heap NAMED: the one counted object is the *MapIter itself, a StandardBox<MapIter> (224 B) minted by the hand-owned MapRange and handed to every SetIterKey/SetIterValue call as a ж<MapIter> argument. Go keeps it off the heap only because MapRange is inlineable, so escape analysis stack-allocates the non-escaping iterator in the CALLER (the test's own comment says so). A managed implementation cannot do the same across the call boundary: C# cannot return a reference into a callee's stack frame, and a shared or pooled box would alias two live iterators, which Go forbids. The only route is inlining MapRange into its callers, and go2cs keeps Go's function boundaries one-for-one so the emitted code reads like the Go source. The CLR JIT does not remove the box at tiering off either (measured: 224 B and count 1 on every run). The reading equals that floor. NOTE, not part of the proof: the run also allocates 3,088 B of objects the counter does not see (the range iterator 72 B, the by-design range snapshot 24 + 24 x len, and 112 B per entry of KeyValuePair and key boxing through the non-generic IEnumerator.Current and PropertyInfo.GetValue). They are reducible, but reducing them retires nothing while the box exists, since a zero count with nonzero bytes moves this want-zero assert to the byte arm. The per-site table is in docs/phase4/briefs/reflect-alloc-readings-2026-09-27.md. The previous reason (one KeyValuePair box per step) omitted the counted object. |
+| `TestMapIterSet` | `structural` | want-zero AllocsPerRun assert over SetIterKey/SetIterValue across one MapRange of a 22-key map. RELABEL 2026-09-27 (COORD, on the i7 readings requested at ledger 2026-09-27 14:58): alloc-profile -> STRUCTURAL. WANT: 0 allocations per run. READING: 1 per run, unit COUNT -- 10 go2cs-runtime object allocations (33,120 bytes) over 10 runs at 1aebd6a885, windows/amd64, Release with tiering off; Go reads 0 mallocs and 0 B on the same box. PROOF, with the object Go keeps off the heap NAMED: the one counted object is the *MapIter itself, a StandardBox<MapIter> (224 B) minted by the hand-owned MapRange and handed to every SetIterKey/SetIterValue call as a ж<MapIter> argument. Go keeps it off the heap only because MapRange is inlineable, so escape analysis stack-allocates the non-escaping iterator in the CALLER (the test's own comment says so). A managed implementation cannot do the same across the call boundary: C# cannot return a reference into a callee's stack frame, and a shared or pooled box would alias two live iterators, which Go forbids. The only route is inlining MapRange into its callers, and go2cs keeps Go's function boundaries one-for-one so the emitted code reads like the Go source. The CLR JIT does not remove the box at tiering off either (measured: 224 B and count 1 on every run). The reading equals that floor. NOTE, not part of the proof: the run also allocates 3,088 B of objects the counter does not see (the range iterator 72 B, the by-design range snapshot 24 + 24 x len, and 112 B per entry of KeyValuePair and key boxing through the non-generic IEnumerator.Current and PropertyInfo.GetValue). They are reducible, but reducing them retires nothing while the box exists, since a zero count with nonzero bytes moves this want-zero assert to the byte arm. The per-site table is in docs/phase4/briefs/reflect-alloc-readings-2026-09-27.md. The previous reason (one KeyValuePair box per step) omitted the counted object. READ AT go1.26.10 (2026-10-25, G): 1 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 10 go2cs-runtime object allocations (33,200 bytes) over 10 runs, alloc-units-windows.tsv line 136 (claude/g-pass2-plan 966562828d); linux: 10 go2cs-runtime object allocations (33,200 bytes) over 10 runs, alloc-units-linux.tsv line 123 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND. |
 | `TestMethodCallValueCodePtr` | `runtime-capability` | runtime-capability: reflect.methodValueCall is an ASSEMBLY function with no managed body in this corpus, so no honest program counter exists for it and FuncPCABI0 REFUSES BY NAME rather than minting a number that would be a lie (internal/abi/funcpc_impl.cs, the GoExternalStubAttribute arm; landed 1742450a1, in master via 684d2b00c). The row therefore panics before it reaches its comparison at all. The refusal text was written to serve as a disclosure signature and its own comment names this class, so the pin and the label are the mechanism author's rather than an interpretation of them. STALE BY MECHANISM CHANGE, not by drift: the previous signature pinned a numeric code-pointer MISMATCH -- the row used to reach the comparison and disagree -- and the previous reason described that comparison. The underlying capability gap is unchanged and is now stated earlier and more truthfully; the entry is re-pinned rather than widened, and it absorbs nothing it did not absorb before. |
 | `TestPtrToGC` | `runtime-capability` | runtime-capability: the test converts a **uintptr to a DEFINED pointer type. A defined pointer type emits as a go2cs-gen wrapper CLASS, so there is no aliasing view of the outer slot to hand out and the conversion cannot be performed at all -- which is why increment E3 refused it BY NAME rather than approximating it. The refusal is the honest answer: an approximation would hand back a wrapper over a COPY, and this test's whole point is that the collector must see the pointer through the conversion. reflect's own Convert is correct for every shape where an aliasing view exists; this is the one where the object model does not admit one. |
 | `TestSlice` | `runtime-capability` | runtime-capability: the assert compares a POINTER NUMERICALLY. go2cs pointers are stable identity TOKENS, not addresses -- the same deliberate model the guintptr manual conversion rests on -- so a managed host can report a consistent, comparable identity for a value but never the address Go prints. Go itself documents these as implementation details; the divergence is the architecture showing through, not a defect in the operation under test. |
@@ -505,8 +552,10 @@ the capability it needs.
 - BenchmarkSliceLen (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkString (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkStringLen (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkTypeAssert (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkTypeForError (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkTypeForString (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkZero (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleKind (example): example execution is deferred to Phase 4D
 - ExampleMakeFunc (example): example execution is deferred to Phase 4D
 - ExampleStructOf (example): example execution is deferred to Phase 4D

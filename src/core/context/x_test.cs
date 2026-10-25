@@ -6,12 +6,14 @@ namespace go;
 using static context_package;
 using errors = errors_package;
 using fmt = fmt_package;
+using asan = @internal.asan_package;
 using rand = math.rand_package;
 using Δruntime = runtime_package;
 using strings = strings_package;
 using Δsync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using context = context_package;
@@ -385,6 +387,9 @@ public static void TestValues(ж<testing.T> Ꮡt) {
     check(o4, "o4"u8, ""u8, c2k2ˢ, ""u8);
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object testAllocatesMoreWithˢ = (@string)"test allocates more with -asan"u8;
+
 internal partial struct TestAllocs_type /*dyn*/ {
     internal @string desc;
     internal Action f;
@@ -393,6 +398,9 @@ internal partial struct TestAllocs_type /*dyn*/ {
 }
 
 public static void TestAllocs(ж<testing.T> Ꮡt) {
+    if (asan.Enabled) {
+        Ꮡt.Skip(testAllocatesMoreWithˢ);
+    }
     var bg = Background();
             var bgʗ1 = bg;
 
@@ -470,6 +478,8 @@ public static void TestAllocs(ж<testing.T> Ꮡt) {
 public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var qᴷ = new stackAppend<context.Context>();
+
         var (root, cancel) = WithCancel(Background());
         var m = new map<context.Context, Action>{[root] = cancel};
         var q = new context.Context[]{root}.slice();
@@ -480,7 +490,7 @@ public static partial void TestSimultaneousCancels(ж<testing.T> Ꮡt) {
             for (nint i = 0; i < 4; i++) {
                 var (ctx, cancelΔ1) = WithCancel(parent);
                 m[ctx] = cancelΔ1;
-                q = append(q, ctx);
+                q = append(qᴷ, q, ctx);
             }
         }
         // Start all the cancels in a random order.
@@ -593,6 +603,9 @@ internal partial struct testLayers_value /*num:nint*/;
 internal static void testLayers(ж<testing.T> Ꮡt, int64 seed, bool testTimeout) {
     GoFrame ᒐ = default;
     try {
+        var valsᴷ = new stackAppend<ж<testLayers_value>>();
+        var cancelsᴷ = new stackAppend<Action>();
+
         Ꮡt.Parallel();
 
         var r = rand.New(rand.NewSource(seed));
@@ -611,13 +624,13 @@ internal static void testLayers(ж<testing.T> Ꮡt, int64 seed, bool testTimeout
             case 0: {
                 var v = @new<testLayers_value>();
                 ctx = WithValue(ctx, v.OrTypedNil(), v.OrTypedNil());
-                vals = append(vals, v);
+                vals = append(valsᴷ, vals, v);
                 break;
             }
             case 1: {
                 Action cancel = default!;
                 (ctx, cancel) = WithCancel(ctx);
-                cancels = append(cancels, cancel);
+                cancels = append(cancelsᴷ, cancels, cancel);
                 break;
             }
             case 2: {
@@ -873,7 +886,12 @@ public static void TestCause(ж<testing.T> Ꮡt) {
             var finishedEarlyʗ3 = finishedEarly;
 
             var tooSlowʗ5 = tooSlow;
-    foreach (var (_, test) in new TestCause_type[]{
+
+
+            var parentCauseʗ6 = parentCause;
+
+            var parentCauseʗ7 = parentCause;
+    foreach (var (_, vᴛ1) in new TestCause_type[]{
         new(
             name: "Background"u8,
             ctx: Background,
@@ -1077,12 +1095,52 @@ public static void TestCause(ж<testing.T> Ꮡt) {
             },
             err: default!,
             cause: default!
+        ),
+        new(
+            name: "parent of custom context not canceled"u8,
+            ctx: () => {
+                var (ctx, _) = WithCancelCause(Background());
+                (ctx, var cancel2) = newCustomContext(ctx);
+                cancel2();
+                return ctx;
+            },
+            err: Canceled,
+            cause: Canceled
+        ),
+        new(
+            name: "parent of custom context is canceled before"u8,
+            ctx: () => {
+                var (ctx, cancel1) = WithCancelCause(Background());
+                (ctx, var cancel2) = newCustomContext(ctx);
+                cancel1(parentCauseʗ6);
+                cancel2();
+                return ctx;
+            },
+            err: Canceled,
+            cause: parentCause
+        ),
+        new(
+            name: "parent of custom context is canceled after"u8,
+            ctx: () => {
+                var (ctx, cancel1) = WithCancelCause(Background());
+                (ctx, var cancel2) = newCustomContext(ctx);
+                cancel2();
+                cancel1(parentCauseʗ7);
+                return ctx;
+            },
+            err: Canceled,
+            // This isn't really right: the child context was canceled before
+            // the parent context, and shouldn't inherit the parent's cause.
+            // However, since the child is a custom context, Cause has no way
+            // to tell which was canceled first and returns the parent's cause.
+            cause: parentCause
         )
     }.slice()) {
-        ref var testΔ1 = ref heap<TestCause_type>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.name, (ж<testing.T> tΔ1) => {
+        ref var test = ref heap(new TestCause_type(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var ctx = testʗ1.ctx();
             {
@@ -1510,6 +1568,85 @@ public static void TestAfterFuncCalledAsynchronously(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+// customContext is a custom Context implementation.
+partial struct customContext {
+    internal context.Context parent;
+    internal Δsync.Once doneOnce;
+    internal channel<EmptyStruct> donec;
+    internal error err;
+}
+
+internal static (context.Context, Action) newCustomContext(context.Context parent) {
+    var c = Ꮡ(new customContext(
+        parent: parent,
+        donec: new channel<EmptyStruct>(0)
+    ));
+    var cʗ1 = c;
+    AfterFunc(parent, () => {
+        var cʗ2 = cʗ1;
+        cʗ1.of(customContext.ᏑdoneOnce).Do(() => {
+            cʗ2.Value.err = parent.Err();
+            close((~cʗ2).donec);
+        });
+    });
+    var cʗ3 = c;
+    return (new context_test_package.customContextжContext(c), () => {
+        var cʗ4 = cʗ3;
+        cʗ3.of(customContext.ᏑdoneOnce).Do(() => {
+            cʗ4.Value.err = Canceled;
+            close((~cʗ4).donec);
+        });
+    });
+}
+
+internal static (time.Time, bool) Deadline(this ref customContext c) {
+    return c.parent.Deadline();
+}
+
+internal static /*<-*/channel<EmptyStruct> Done(this ref customContext c) {
+    return c.donec.WithDirection(GoChanDir.Recv);
+}
+
+internal static error Err(this ref customContext c) {
+    var selᴛ39 = c.donec;
+    switch (trySelect(ᐸꟷ(selᴛ39, ꓸꓸꓸ))) {
+    case 0 when selᴛ39.ꟷᐳ(out _): {
+        return c.err;
+    }
+    default: {
+        return default!;
+    }}
+}
+
+internal static any Value(this ref customContext c, any key) {
+    return c.parent.Value(key);
+}
+
+// Issue #75533.
+public static partial void TestContextErrDoneRace(ж<testing.T> Ꮡt) {
+    // 4 iterations reliably reproduced #75533.
+    foreach (var _ᴛ1 in range(10)) {
+        var (ctx, cancel) = WithCancel(Background());
+        var donec = ctx.Done();
+        var cancelʗ1 = cancel;
+        goǃ(() => cancelʗ1());
+        while (ctx.Err() == default!) {
+            if (Δruntime.GOARCH == "wasm"u8) {
+                Δruntime.Gosched(); // need to explicitly yield
+            }
+        }
+        var selᴛ40 = donec;
+        switch (trySelect(ᐸꟷ(selᴛ40, ꓸꓸꓸ))) {
+        case 0 when selᴛ40.ꟷᐳ(out _): {
+            break;
+        }
+        default: {
+            Ꮡt.Fatalf("ctx.Err is non-nil, but ctx.Done is not closed"u8);
+            break;
+        }}
+    }
 }
 
 } // end context_test_package

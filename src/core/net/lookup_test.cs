@@ -381,8 +381,8 @@ partial struct lookupCNAMETestsᴛ1 /*dyn*/ {
     internal @string name, cname;
 }
 internal static slice<lookupCNAMETestsᴛ1> lookupCNAMETests = new lookupCNAMETestsᴛ1[]{
-    new("www.iana.org"u8, "icann.org."u8),
-    new("www.iana.org."u8, "icann.org."u8),
+    new("www.golang.org"u8, "golang.org."u8),
+    new("www.golang.org."u8, "golang.org."u8),
     new("www.google.com"u8, "google.com."u8),
     new("google.com"u8, "google.com."u8),
     new("cname-to-txt.go4.org"u8, "test-txt-record.go4.org."u8)
@@ -712,7 +712,7 @@ public static void TestLookupDotsWithLocalSource(ж<testing.T> Ꮡt) {
 loop:
             foreach (var (iΔ1, name) in names) {
                 if (strings.Index(name, "."u8) == len(name) - 1){ // "localhost" not "localhost."
-                    foreach (var (j, _) in names) {
+                    foreach (var j in range(names)) {
                         if (j == iΔ1) {
                             continue;
                         }
@@ -896,6 +896,7 @@ public static void TestLookupPort(ж<testing.T> Ꮡt) {
         new("tcp"u8, "0"u8, 0, true),
         new("udp"u8, "0"u8, 0, true),
         new("udp"u8, "domain"u8, 53, true),
+
         new("--badnet--"u8, "zzz"u8, 0, false),
         new("tcp"u8, "--badport--"u8, 0, false),
         new("tcp"u8, "-1"u8, 0, false),
@@ -903,6 +904,7 @@ public static void TestLookupPort(ж<testing.T> Ꮡt) {
         new("udp"u8, "-1"u8, 0, false),
         new("udp"u8, "65536"u8, 0, false),
         new("tcp"u8, "123456789"u8, 0, false),
+        new("tcp"u8, "bad\x00port"u8, 0, false),
 
         // Issue 13610: LookupPort("tcp", "")
         new("tcp"u8, ""u8, 0, true),
@@ -1177,7 +1179,7 @@ public static void TestLookupHostCancel(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct lookupCustomResolver {
-    public partial ref ж<global::go.net_package.Resolver> Resolver { get; }
+    /*embed*/ public ж<global::go.net_package.Resolver> Resolver;
     internal Δsync.RWMutex mu;
     internal bool dialed;
 }
@@ -1209,7 +1211,7 @@ public static partial void TestConcurrentPreferGoResolversDial(ж<testing.T> Ꮡ
         defer(ᏑdnsWaitGroup.Wait, ref ᒐ);
 
         var resolvers = new slice<ж<lookupCustomResolver>>(2);
-        foreach (var (i, _) in resolvers) {
+        foreach (var i in range(resolvers)) {
             ref var cs = ref heap<lookupCustomResolver>(out var Ꮡcs);
             cs = new lookupCustomResolver(Resolver: Ꮡ(new Resolver(PreferGo: true)));
             cs.Dial = Ꮡcs.dial();
@@ -1751,8 +1753,8 @@ internal static void testLookupNoData(ж<testing.T> Ꮡt, @string prefix) {
             return;
         }
 
-        ref var dnsErr = ref heap<ж<global::go.net_package.DNSError>>(out var ᏑdnsErr);
-        if (errors.As(err, ᏑdnsErr)) {
+        var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err);
+        if (ok) {
             var succeeded = true;
             if (!(~dnsErr).IsNotFound) {
                 succeeded = false;
@@ -1789,9 +1791,10 @@ internal static readonly @string unknownServiceˢ = "_-unknown-service-"u8;
 public static void TestLookupPortNotFound(ж<testing.T> Ꮡt) {
     allResolvers(Ꮡt, (ж<testing.T> tΔ1) => {
         var (_, err) = LookupPort(udpˢ, unknownServiceˢ);
-        ref var dnsErr = ref heap<ж<global::go.net_package.DNSError>>(out var ᏑdnsErr);
-        if (!errors.As(err, ᏑdnsErr) || !(~dnsErr).IsNotFound) {
-            tΔ1.Fatalf("unexpected error: %v"u8, err);
+        {
+            var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err); if (!ok || !(~dnsErr).IsNotFound) {
+                tΔ1.Fatalf("unexpected error: %v"u8, err);
+            }
         }
     });
 }
@@ -1809,9 +1812,10 @@ internal static @string tcpOnlyService = ((Func<@string>)(() => {
 public static void TestLookupPortDifferentNetwork(ж<testing.T> Ꮡt) {
     allResolvers(Ꮡt, (ж<testing.T> tΔ1) => {
         var (_, err) = LookupPort(udpˢ, tcpOnlyService);
-        ref var dnsErr = ref heap<ж<global::go.net_package.DNSError>>(out var ᏑdnsErr);
-        if (!errors.As(err, ᏑdnsErr) || !(~dnsErr).IsNotFound) {
-            tΔ1.Fatalf("unexpected error: %v"u8, err);
+        {
+            var (dnsErr, ok) = errors.AsType<ж<global::go.net_package.DNSError>>(err); if (!ok || !(~dnsErr).IsNotFound) {
+                tΔ1.Fatalf("unexpected error: %v"u8, err);
+            }
         }
     });
 }

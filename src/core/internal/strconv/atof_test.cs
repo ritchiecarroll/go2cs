@@ -1,18 +1,18 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
-using Δmath = math_package;
+using static go.@internal.strconv_package;
+using math = math_package;
 using rand = go.math.rand_package;
 using reflect = reflect_package;
-using static strconv_package;
 using strings = strings_package;
-using Δsync = sync_package;
+using sync = go.sync_package;
 using testing = testing_package;
+using go;
 using go.math;
-using static go.strconv_internal_test_package;
-using strconv = strconv_package;
+using static go.@internal.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
@@ -80,6 +80,7 @@ internal static ж<slice<atofTest>> Ꮡatoftests = new StandardBox<slice<atofTes
     new("0x0.00p-01234567890123456789"u8, "0"u8, default!),
     new("-0x0p+01234567890123456789"u8, "-0"u8, default!),
     new("-0x0.00p-01234567890123456789"u8, "-0"u8, default!),
+
     new("0e291"u8, "0"u8, default!), // issue 15364
     new("0e292"u8, "0"u8, default!), // issue 15364
     new("0e347"u8, "0"u8, default!), // issue 15364
@@ -204,29 +205,35 @@ internal static ж<slice<atofTest>> Ꮡatoftests = new StandardBox<slice<atofTes
     new("0x1.fffffffffffff7p-1010"u8, "1.8227805048890992e-304"u8, default!), // rounded down
     new("0x1.fffffffffffff8p-1010"u8, "1.8227805048890994e-304"u8, default!), // rounded up
     new("0x1.fffffffffffff9p-1010"u8, "1.8227805048890994e-304"u8, default!), // rounded up
+
     new("0x2.00000000000000p-1022"u8, "4.450147717014403e-308"u8, default!), // 0x0020000000000000
     new("0x1.fffffffffffff0p-1022"u8, "4.4501477170144023e-308"u8, default!), // 0x001fffffffffffff
     new("0x1.fffffffffffff7p-1022"u8, "4.4501477170144023e-308"u8, default!), // rounded down
     new("0x1.fffffffffffff8p-1022"u8, "4.450147717014403e-308"u8, default!), // rounded up
     new("0x1.fffffffffffff9p-1022"u8, "4.450147717014403e-308"u8, default!), // rounded up
+
     new("0x1.00000000000000p-1022"u8, "2.2250738585072014e-308"u8, default!), // 0x0010000000000000
     new("0x0.fffffffffffff0p-1022"u8, "2.225073858507201e-308"u8, default!), // 0x000fffffffffffff
     new("0x0.ffffffffffffe0p-1022"u8, "2.2250738585072004e-308"u8, default!), // 0x000ffffffffffffe
     new("0x0.ffffffffffffe7p-1022"u8, "2.2250738585072004e-308"u8, default!), // rounded down
     new("0x1.ffffffffffffe8p-1023"u8, "2.225073858507201e-308"u8, default!), // rounded up
     new("0x1.ffffffffffffe9p-1023"u8, "2.225073858507201e-308"u8, default!), // rounded up
+
     new("0x0.00000003fffff0p-1022"u8, "2.072261e-317"u8, default!), // 0x00000000003fffff
     new("0x0.00000003456780p-1022"u8, "1.694649e-317"u8, default!), // 0x0000000000345678
     new("0x0.00000003456787p-1022"u8, "1.694649e-317"u8, default!), // rounded down
     new("0x0.00000003456788p-1022"u8, "1.694649e-317"u8, default!), // rounded down (half to even)
     new("0x0.00000003456790p-1022"u8, "1.6946496e-317"u8, default!), // 0x0000000000345679
     new("0x0.00000003456789p-1022"u8, "1.6946496e-317"u8, default!), // rounded up
+
     new("0x0.0000000345678800000000000000000000000001p-1022"u8, "1.6946496e-317"u8, default!), // rounded up
+
     new("0x0.000000000000f0p-1022"u8, "7.4e-323"u8, default!), // 0x000000000000000f
     new("0x0.00000000000060p-1022"u8, "3e-323"u8, default!), // 0x0000000000000006
     new("0x0.00000000000058p-1022"u8, "3e-323"u8, default!), // rounded up
     new("0x0.00000000000057p-1022"u8, "2.5e-323"u8, default!), // rounded down
     new("0x0.00000000000050p-1022"u8, "2.5e-323"u8, default!), // 0x0000000000000005
+
     new("0x0.00000000000010p-1022"u8, "5e-324"u8, default!), // 0x0000000000000001
     new("0x0.000000000000081p-1022"u8, "5e-324"u8, default!), // rounded up
     new("0x0.00000000000008p-1022"u8, "0"u8, default!), // rounded down
@@ -319,6 +326,7 @@ internal static ж<slice<atofTest>> Ꮡatoftests = new StandardBox<slice<atofTes
     new("123.5e-_12"u8, "0"u8, ErrSyntax),
     new("123.5e+1__2"u8, "0"u8, ErrSyntax),
     new("123.5e+12_"u8, "0"u8, ErrSyntax),
+
     new("0x_1_2.3_4_5p+1_2"u8, "74565"u8, default!),
     new("-_0x12.345p+12"u8, "0"u8, ErrSyntax),
     new("+_0x12.345p+12"u8, "0"u8, ErrSyntax),
@@ -335,12 +343,13 @@ internal static ж<slice<atofTest>> Ꮡatoftests = new StandardBox<slice<atofTes
     new("0x12.345p-_12"u8, "0"u8, ErrSyntax),
     new("0x12.345p+1__2"u8, "0"u8, ErrSyntax),
     new("0x12.345p+12_"u8, "0"u8, ErrSyntax),
+
     new("1e100x"u8, "0"u8, ErrSyntax),
     new("1e1000x"u8, "0"u8, ErrSyntax)
 }.slice());
 internal static ref slice<atofTest> atoftests => ref Ꮡatoftests.ValueSlot;
 
-internal static ж<slice<atofTest>> Ꮡatof32tests = new StandardBox<slice<atofTest>>(new atofTest[]{
+internal static slice<atofTest> atof32tests = new atofTest[]{
     // Hex
     new("0x1p-100"u8, "7.888609e-31"u8, default!),
     new("0x1p100"u8, "1.2676506e+30"u8, default!),
@@ -421,16 +430,15 @@ internal static ж<slice<atofTest>> Ꮡatof32tests = new StandardBox<slice<atofT
     // The halfway is 4.951760009. A bad algorithm that thinks the previous
     // float32 is 8388607p+69 will shorten incorrectly to 4.95176e+27.
     new("4951760157141521099596496896"u8, "4.9517602e+27"u8, default!)
-}.slice());
-internal static ref slice<atofTest> atof32tests => ref Ꮡatof32tests.ValueSlot;
+}.slice();
 
 partial struct atofSimpleTest {
     internal float64 x;
     internal @string s;
 }
 
-internal static ж<Δsync.Once> ᏑatofOnce = new StandardBox<Δsync.Once>(default(Δsync.Once));
-internal static ref Δsync.Once atofOnce => ref ᏑatofOnce.Value;
+internal static ж<sync.Once> ᏑatofOnce = new StandardBox<sync.Once>(default(sync.Once));
+internal static ref sync.Once atofOnce => ref ᏑatofOnce.Value;
 internal static slice<atofSimpleTest> atofRandomTests;
 internal static array<@string> benchmarksRandomBits = new(1024);
 internal static array<@string> benchmarksRandomNormal = new(1024);
@@ -440,48 +448,33 @@ internal static void initAtof() {
 }
 
 internal static void initAtofOnce() {
-    // The atof routines return NumErrors wrapping
-    // the error and the string. Convert the table above.
-    foreach (var (i, _) in atoftests) {
-        var test = Ꮡ(atoftests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseFloat"u8, (~test).@in, (~test).err)));
-        }
-    }
-    foreach (var (i, _) in atof32tests) {
-        var test = Ꮡ(atof32tests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError("ParseFloat"u8, (~test).@in, (~test).err)));
-        }
-    }
-
     // Generate random inputs for tests and benchmarks
     if (testing.Short()){
         atofRandomTests = new slice<atofSimpleTest>(100);
     } else {
         atofRandomTests = new slice<atofSimpleTest>(10000);
     }
-    foreach (var (i, _) in atofRandomTests) {
-        var n = (uint64)(((uint64)rand.Uint32() << (int)(32)) | (uint64)rand.Uint32());
-        var x = Δmath.Float64frombits(n);
+    foreach (var i in range(atofRandomTests)) {
+        var n = (uint64)rand.Uint32() << 32 | (uint64)rand.Uint32();
+        var x = math.Float64frombits(n);
         @string s = FormatFloat(x, (rune)'g', -1, 64);
         atofRandomTests[i] = new atofSimpleTest(x, s);
     }
 
-    foreach (var (i, _) in benchmarksRandomBits) {
-        var bits = (uint64)(((uint64)rand.Uint32() << (int)(32)) | (uint64)rand.Uint32());
-        var x = Δmath.Float64frombits(bits);
+    foreach (var i in range(benchmarksRandomBits)) {
+        var bits = (uint64)rand.Uint32() << 32 | (uint64)rand.Uint32();
+        var x = math.Float64frombits(bits);
         benchmarksRandomBits[i] = FormatFloat(x, (rune)'g', -1, 64);
     }
 
-    foreach (var (i, _) in benchmarksRandomNormal) {
+    foreach (var i in range(benchmarksRandomNormal)) {
         var x = rand.NormFloat64();
         benchmarksRandomNormal[i] = FormatFloat(x, (rune)'g', -1, 64);
     }
 }
 
 public static void TestParseFloatPrefix(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in atoftests) {
+    foreach (var i in range(atoftests)) {
         var test = Ꮡ(atoftests, i);
         if ((~test).err != default!) {
             continue;
@@ -491,7 +484,7 @@ public static void TestParseFloatPrefix(ж<testing.T> Ꮡt) {
         // correctly as "inf" with suffix.
         foreach (var (_, suffix) in new @string[]{" "u8, "q"u8, "+"u8, "-"u8, "<"u8, "="u8, ">"u8, "("u8, ")"u8, "i"u8, "init"u8}.slice()) {
             @string @in = (~test).@in + suffix;
-            var (_, n, err) = strconv_internal_test_package.ParseFloatPrefix(@in, 64);
+            var (_, n, err) = parseFloatPrefix(@in, 64);
             if (err != default!) {
                 Ꮡt.Errorf("ParseFloatPrefix(%q, 64): err = %v; want no error"u8, @in, err);
             }
@@ -564,7 +557,7 @@ public static void TestAtofRandom(ж<testing.T> Ꮡt) {
         case {} when x == test.x: {
             break;
         }
-        case {} when Δmath.IsNaN(test.x) && Δmath.IsNaN(x): {
+        case {} when math.IsNaN(test.x) && math.IsNaN(x): {
             break;
         }}
     }
@@ -617,9 +610,9 @@ public static void TestRoundTrip32(ж<testing.T> Ꮡt) {
         step = 99991;
     }
     nint count = 0;
-    for (var i = (uint32)0; i < ((uint32)0xff << (int)(23)); i += step) {
-        var f = Δmath.Float32frombits(i);
-        if ((uint32)(i & 1) == 1) {
+    for (var i = (uint32)0; i < (uint32)0xff << 23; i += step) {
+        var f = math.Float32frombits(i);
+        if ((i & 1) == 1) {
             f = -f; // negative
         }
         @string s = FormatFloat((float64)f, (rune)'g', -1, 32);
@@ -764,9 +757,9 @@ public static void BenchmarkAtof32Random(ж<testing.B> Ꮡb) {
 
     var n = (uint32)997;
     array<@string> float32strings = new(4096);
-    foreach (var (i, _) in float32strings) {
-        n = (99991 * n + 42) % (((uint32)0xff << (int)(23)));
-        float32strings[i] = FormatFloat((float64)Δmath.Float32frombits(n), (rune)'g', -1, 32);
+    foreach (var i in range(float32strings)) {
+        n = (99991 * n + 42) % ((uint32)0xff << 23);
+        float32strings[i] = FormatFloat((float64)math.Float32frombits(n), (rune)'g', -1, 32);
     }
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {
@@ -779,9 +772,9 @@ public static void BenchmarkAtof32RandomLong(ж<testing.B> Ꮡb) {
 
     var n = (uint32)997;
     array<@string> float32strings = new(4096);
-    foreach (var (i, _) in float32strings) {
-        n = (99991 * n + 42) % (((uint32)0xff << (int)(23)));
-        float32strings[i] = FormatFloat((float64)Δmath.Float32frombits(n), (rune)'g', 20, 32);
+    foreach (var i in range(float32strings)) {
+        n = (99991 * n + 42) % ((uint32)0xff << 23);
+        float32strings[i] = FormatFloat((float64)math.Float32frombits(n), (rune)'g', 20, 32);
     }
     b.ResetTimer();
     for (nint i = 0; i < b.N; i++) {

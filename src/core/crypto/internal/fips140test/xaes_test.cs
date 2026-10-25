@@ -28,7 +28,7 @@ public static void TestXAESAllocations(ж<testing.T> Ꮡt) {
     }
     cryptotest.SkipTestAllocations(Ꮡt);
     {
-        var allocs = testing.AllocsPerRun(10, () => {
+        var allocs = testing.AllocsPerRun(100, () => {
             var key = new slice<byte>(32);
             var nonce = new slice<byte>(24);
             var plaintext = new slice<byte>(16);

@@ -20,11 +20,13 @@ internal static slice<parseMACTestsᴛ1> parseMACTests = new parseMACTestsᴛ1[]
     new("00:00:5e:00:53:01"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
     new("00-00-5e-00-53-01"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
     new("0000.5e00.5301"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
+    new("00005e005301"u8, new HardwareAddr(new byte[]{0x00, 0x00, 0x5e, 0x00, 0x53, 0x01}.slice()), ""u8),
 
     // See RFC 7042, Section 2.2.2.
     new("02:00:5e:10:00:00:00:01"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
     new("02-00-5e-10-00-00-00-01"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
     new("0200.5e10.0000.0001"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
+    new("02005e1000000001"u8, new HardwareAddr(new byte[]{0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01}.slice()), ""u8),
 
     // See RFC 4391, Section 9.1.1.
     new(
@@ -54,6 +56,16 @@ internal static slice<parseMACTestsᴛ1> parseMACTests = new parseMACTestsᴛ1[]
         }.slice()),
         ""u8
     ),
+    new(
+        "00000000fe8000000000000002005e1000000001"u8,
+        new HardwareAddr(new byte[]{
+            0x00, 0x00, 0x00, 0x00,
+            0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x02, 0x00, 0x5e, 0x10, 0x00, 0x00, 0x00, 0x01
+        }.slice()),
+        ""u8
+    ),
+
     new("ab:cd:ef:AB:CD:EF"u8, new HardwareAddr(new byte[]{0xab, 0xcd, 0xef, 0xab, 0xcd, 0xef}.slice()), ""u8),
     new("ab:cd:ef:AB:CD:EF:ab:cd"u8, new HardwareAddr(new byte[]{0xab, 0xcd, 0xef, 0xab, 0xcd, 0xef, 0xab, 0xcd}.slice()), ""u8),
     new(
@@ -65,6 +77,7 @@ internal static slice<parseMACTestsᴛ1> parseMACTests = new parseMACTestsᴛ1[]
         }.slice()),
         ""u8
     ),
+
     new("01.02.03.04.05.06"u8, default!, "invalid MAC address"u8),
     new("01:02:03:04:05:06:"u8, default!, "invalid MAC address"u8),
     new("x1:02:03:04:05:06"u8, default!, "invalid MAC address"u8),
@@ -76,7 +89,8 @@ internal static slice<parseMACTestsᴛ1> parseMACTests = new parseMACTestsᴛ1[]
     new("01-02:03:04:05:06"u8, default!, "invalid MAC address"u8),
     new("01:02-03-04-05-06"u8, default!, "invalid MAC address"u8),
     new("0123:4567:89AF"u8, default!, "invalid MAC address"u8),
-    new("0123-4567-89AF"u8, default!, "invalid MAC address"u8)
+    new("0123-4567-89AF"u8, default!, "invalid MAC address"u8),
+    new("0123456789AF0"u8, default!, "invalid MAC address"u8)
 }.slice();
 
 public static void TestParseMAC(ж<testing.T> Ꮡt) {

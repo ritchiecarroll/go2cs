@@ -29,7 +29,7 @@ using static go.log_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("log/log_test.go", "log_test.cs", "ACNKABcokoKCgoKClJSCgoKCgpSClKaCgILIgoKC6IKCgoKCgILIgoKCpoKCgoKCgrKCgqKk9oKCgoKClIKCgpSCgpSCgoKmgoKCgpSCuIKCgoKAgsiCgoKUgoKUgoK4gpSClPaCgoKCgoKAgqSAgsiCgoKQtoK4opKCgoKCgoKCguiigoKCgoKC6KKCgoKCgoIACBCC5oKCgoKCsoKUoqTWooKCgg==", "115-119:1;207-207:1;264-269:1", "", "197=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;206=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1")]
+[assembly: go.GoPositionMap("log/log_test.go", "log_test.cs", "AClSABcokoKCgoKClJSCgoKCgpSClKaCgILIgoKC6IKCgoKCgILIgoKCpoKCgoKCgrKCgqKk9oKCgoKClIKCgpSCgpSCgoKmgoKCgpSCuIKCgoKAgsiCgoKUgoKUgoK4gpSClPaCgoKCgoKAgqSAgsiCgoKQtoIAFwiigqaCgoKmmKKioqKioqKioqKioqLIgoKUlLKUkoKCgriolIKAgraCgpSUqIIABxKikoKCgoKCgoKC6KKCgoKCgoLoooKCgoKCggAIEILmgoKCgoKygpSipNaigoKC", "119-123:1;211-211:1;234-234:1;235-235:2;236-236:3;237-237:4;238-238:5;239-239:6;240-240:7;241-241:8;242-242:9;243-243:10;244-244:11;245-245:12;246-246:13;247-247:14;258-295:15;348-353:1", "", "203=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;212=Year/1/1/1,Month/1/1/1,Day/1/1/1,Hour/1/1/1,Minute/1/1/1,Second/1/1/1;357=Name/1/1/1,QuoteMeta/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -53,10 +53,14 @@ public static partial class log_internal_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
+    [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));

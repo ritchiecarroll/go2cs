@@ -414,7 +414,7 @@ internal static void cSrc(this cbFunc f, Δio.Writer w, bool cdecl) {
     var t = reflect.TypeOf(f.goFunc);
     var cTypes = new slice<@string>(t.NumIn());
     var cArgs = new slice<@string>(t.NumIn());
-    foreach (var (i, _) in cTypes) {
+    foreach (var i in range(cTypes)) {
         // We included stdint.h, so this works for all sized
         // integer types, and uint8Pair_t.
         cTypes[i] = t.In(i).Name() + "_t"u8;
@@ -775,7 +775,7 @@ public static void TestRaiseException(ж<testing.T> Ꮡt) {
 internal static readonly @string zeroDivisionExceptionˢ = "ZeroDivisionException"u8;
 internal static readonly @string panicRuntimeErrorIntegerˢ = "panic: runtime error: integer divide by zero"u8;
 
-public static void TestZeroDivisionException(ж<testing.T> Ꮡt) {
+public static partial void TestZeroDivisionException(ж<testing.T> Ꮡt) {
     @string o = runTestProg(Ꮡt, testprogˢ, zeroDivisionExceptionˢ);
     if (!strings.Contains(o, panicRuntimeErrorIntegerˢ)) {
         Ꮡt.Fatalf("No stack trace: %v"u8, o);
@@ -962,7 +962,7 @@ public static void TestSyscallN(ж<testing.T> Ꮡt) {
                 var args = new slice<@string>(arglenΔ1);
                 var rets = new slice<@string>(arglenΔ1 + 1);
                 var @params = new slice<uintptr>(arglenΔ1);
-                foreach (var (i, _) in args) {
+                foreach (var i in range(args)) {
                     args[i] = fmt.Sprintf("int a%d"u8, i);
                     rets[i] = fmt.Sprintf("(a%d == %d)"u8, i, i);
                     @params[i] = (uintptr)i;
@@ -1160,7 +1160,7 @@ public static void TestFloatReturn(ж<testing.T> Ꮡt) {
     finally { ᒐ.Run(); }
 }
 
-public static void TestTimeBeginPeriod(ж<testing.T> Ꮡt) {
+public static partial void TestTimeBeginPeriod(ж<testing.T> Ꮡt) {
     const uint32 TIMERR_NOERROR = 0;
     if (runtime_internal_test_package.TimeBeginPeriodRetValue.Value != TIMERR_NOERROR) {
         Ꮡt.Fatalf("timeBeginPeriod failed: it returned %d"u8, runtime_internal_test_package.TimeBeginPeriodRetValue.Value);

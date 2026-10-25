@@ -26,7 +26,7 @@ internal static void validateAddrRanges(ж<testing.T> Ꮡt, ж<global::go.runtim
     }
     var gotTotalBytes = (uintptr)0;
     var wantTotalBytes = (uintptr)0;
-    foreach (var (i, _) in ranges) {
+    foreach (var i in range(ranges)) {
         gotTotalBytes += ranges[i].Size();
         wantTotalBytes += want[i].Size();
         if (ranges[i].Base() >= ranges[i].Limit()) {
