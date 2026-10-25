@@ -32,7 +32,7 @@ internal static void Main() {
     fmt.Println(tcw.Lsh(k));
     fmt.Println(s8.Lsh(k));
     fmt.Println(s16.Lsh(k));
-    fmt.Println((nb)(byte)(n << (int)(k)));
+    fmt.Println((nb)(byte)(n << k));
     fmt.Println(cb.Rsh(k));
     fmt.Println(s8.Rsh(k));
 
