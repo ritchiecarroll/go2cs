@@ -417,6 +417,16 @@ var linknamePushTargets = map[string]linknamePush{
 	// end the host through golib's unhandled-goroutine door. The forwarder is on the consumer side, across
 	// the runtime/pprof -> runtime edge that already exists (the same zero graph cost as the row above).
 	"runtime/pprof.readProfile": {source: "runtime.runtime_pprof_readProfile", bareDecl: true},
+	// runtime/pprof's darwin region walk, pushed by runtime/sys_darwin.go
+	// (`//go:linkname mach_vm_region runtime/pprof.mach_vm_region`, and proc_regionfilename beside it).
+	// BARE consumer shape: vminfo_darwin.go declares both bodyless under //go:noescape with no directive of
+	// its own. machVMInfo calls them from readMapping, so every proto profile write on darwin reached the
+	// throwing stub (runtime/pprof died at TestMemoryProfiler/proto, net/http/pprof at /debug/pprof/heap,
+	// on both mac runners). The pushed bodies are converted Go that end in libcCall, whose darwin hand-own
+	// dispatches both args structs by type (runtime/darwin/libccall_impl.cs). Same edge, same zero graph
+	// cost as the rows above.
+	"runtime/pprof.mach_vm_region":      {source: "runtime.mach_vm_region", bareDecl: true},
+	"runtime/pprof.proc_regionfilename": {source: "runtime.proc_regionfilename", bareDecl: true},
 	// crypto/internal/fips140's service indicator, pushed by runtime/runtime1.go
 	// (`//go:linkname fips_getIndicator crypto/internal/fips140.getIndicator`, and the setter beside it).
 	// SELF-SYMBOL consumer shape, the second and third members of that arm: indicator.go declares
