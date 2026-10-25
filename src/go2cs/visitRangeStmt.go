@@ -783,18 +783,26 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		// A pointer to an array ranges its type's length, N, passed beside the pointer: `range(p, 3)`. Go's length of a
 		// `*[N]T` is the constant N, and an index-only range never dereferences the pointer, so a NIL one ranges N times;
 		// golib's array keeps its length in the value, so only the converter knows N. The pointer is still evaluated once,
-		// as Go evaluates a range operand holding a call. A pointer PARAMETER is already the dereferenced value local, and
-		// a pointer RECEIVER is the value it addresses too (`this ref T b`, or the deref alias over its box), so each
-		// ranges as the array it denotes: the box overload cannot bind a ref (CS0411, runtime's pageBits.setAll).
-		receiver := false
+		// as Go evaluates a range operand holding a call. A pointer PARAMETER is already the dereferenced value -- its
+		// ref-lowered form or its DerefOrNull entry alias -- and a pointer RECEIVER is the value it addresses too
+		// (`this ref T b`), so either would range a REF, which is null for a nil pointer and faults where Go ranges N
+		// times. Neither needs evaluating: with at most one iteration variable and a constant length, Go does not
+		// evaluate the range operand at all. So each ranges the count itself, `range(N)` (runtime's pageBits.setAll,
+		// image/jpeg's differ), and the box overload, which cannot bind a ref (CS0411), is never asked to.
+		derefdValue := false
 
 		if ident, ok := rangeStmt.X.(*ast.Ident); ok {
-			receiver = v.isDerefdPointerReceiverIdent(ident)
+			derefdValue = v.isDerefdPointerReceiverIdent(ident) || v.identIsParameter(ident)
 		}
 
-		if arrayType, ok := rangeType.Underlying().(*types.Array); ok && rangedThroughPointer && ptrDeref != "" && !receiver {
+		arrayType, isArrayPointee := rangeType.Underlying().(*types.Array)
+
+		switch {
+		case isArrayPointee && rangedThroughPointer && derefdValue:
+			v.writeOutput("foreach (%s%s in range(%d))", decl, iterExpr, arrayType.Len())
+		case isArrayPointee && rangedThroughPointer && ptrDeref != "":
 			v.writeOutput("foreach (%s%s in range(%s, %d))", decl, iterExpr, rangeExpr, arrayType.Len())
-		} else {
+		default:
 			v.writeOutput("foreach (%s%s in range(%s))", decl, iterExpr, rangeExpr)
 		}
 	} else {
