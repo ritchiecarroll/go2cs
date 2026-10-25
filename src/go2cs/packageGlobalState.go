@@ -373,6 +373,23 @@ var hasSiblingInternalTestFiles bool
 // exactly as siblingTestFuncMethodNames pins reference spelling.
 var siblingTestAddressedGlobalNames []string
 
+// siblingTestMethodValues holds the METHOD VALUES the build-selected IN-PACKAGE `_test.go` half takes
+// on a selector chain rooted at an identifier it does not bind (`f := g.inc`, `gh.t.inc`, `ga[1].inc`).
+// A pointer-receiver method value on addressable storage takes the root's address exactly as `&g`
+// does, so a production var it reaches must be heap-boxed — and, as for siblingTestAddressedGlobalNames,
+// only the production emission can declare the box. The scan is type-free, so whether a candidate IS
+// a pointer-receiver method value on value storage is decided at the fold (collectAddressedGlobals,
+// siblingMethodValueRoot) against the real package types.
+var siblingTestMethodValues []siblingMethodValue
+
+// siblingMethodValue is one candidate of siblingTestMethodValues: the root identifier, the steps from
+// it to the method's operand (a field name, or "[]" for an index expression), and the method name.
+type siblingMethodValue struct {
+	root   string
+	path   []string
+	method string
+}
+
 // siblingTestPublicizedTypeNames holds the UNEXPORTED type names the build-selected IN-PACKAGE
 // `_test.go` half reaches through one of its own EXPORTED members. In Go the in-package test file
 // IS the package, so a production type consumed by an exported member of that file must be at least

@@ -154,10 +154,12 @@ func collectLazyPackageVars(fset *token.FileSet, pkg *types.Package, info *types
 			candidate.reason = "its declaration is hand-owned"
 		}
 
-		// A var in the converter's own box set (collectAddressedGlobals: `&X`, and the pointer-receiver or capture-mode
-		// calls that address it implicitly, io's blackHolePool.Get()) is built lazily WITH its box: the holder holds the
-		// box, and `&X` and `X` read through it (writeLazyAddressedPackageVar). An address the scan sees and the converter
-		// does not box (a pointer-receiver method value) has no box to carry, so that var stays eager.
+		// A var in the converter's own box set (collectAddressedGlobals: `&X`, the pointer-receiver or capture-mode calls
+		// that address it implicitly, io's blackHolePool.Get(), and the pointer-receiver method VALUES that do, `f := X.m`)
+		// is built lazily WITH its box: the holder holds the box, and `&X` and `X` read through it
+		// (writeLazyAddressedPackageVar). This scan's address is the wider one (it peels slice indexes, pointers and
+		// embedded pointers, which need no box), so an address it sees and the converter does not box has no box to
+		// carry, and that var stays eager.
 		if candidate.reason == "" && addressed[obj] && !packageAddressedGlobals[obj] {
 			candidate.reason = "its address is taken where the converter keeps no box for it"
 		}
