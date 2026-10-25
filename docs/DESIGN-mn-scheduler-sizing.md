@@ -150,6 +150,48 @@ universal cost and the visible output. Not revisited here.
   (dotnet/runtimelab issue #2398) concluded in favour of keeping async/await; this reading comes from a secondary
   source, since the issue itself was not reachable.
 
+**E. A logical-thread scheduler, as Gemstone.Threading builds one. Considered; rejected as a route of its own, and
+kept as the design reference for B's scheduler.** Gemstone's
+[LogicalThreads](https://github.com/gemstone/threading/tree/master/src/Gemstone.Threading/LogicalThreads) (read
+at master, 2026-10-24) is a virtual-thread engine that works today:
+
+- a `LogicalThread` is a set of per-priority queues of `Action`s, of which at most one runs at a time;
+- a `LogicalThreadScheduler` runs logical threads on at most `MaxThreadCount` physical threads (by default
+  `Environment.ProcessorCount`). Each turn runs one action, and the logical thread then goes back in the queue if it has
+  more;
+- `LogicalThreadLocal` and `LogicalThread.CurrentThread` give each logical thread its own state, whichever physical
+  thread is running it;
+- the `Join` and `Yield` awaiters move an async method onto a logical thread by pushing its continuation as that
+  thread's next action.
+
+That is Go's scheduler above the stack. A goroutine is a logical thread, `GOMAXPROCS` is `MaxThreadCount`, a runnable
+goroutine is a queued action, and per-goroutine state lives in logical-thread locals.
+
+*Why it is not a route of its own.* What it schedules is an action that runs to completion. A goroutine that parks
+in the middle of a function (a channel receive, `Mutex.Lock`, `time.Sleep`) is not between two actions. Run as one
+action, it holds its physical thread for the whole wait. With a capped pool that deadlocks: a send on an unbuffered
+channel waits for a receiver that is still queued behind it, with no free thread to run on. Gemstone's own contract
+avoids this, because its actions are short and never wait on each other, but a Go program's goroutines do. To give
+up a thread in the middle of a function, the function has to be split at its park points into actions. `Join` and
+`Yield` do exactly that, through `await`, which is B's lowering with its signature change. So E without lowering is
+A with a cap on threads, which is worse than A, and E with lowering is B.
+
+*What it gives B.* B needs "a golib scheduler with `GOMAXPROCS` workers", and this is a worked design for most of it:
+
+- the strand guarantee: no two steps of one goroutine run at once, which a Go G has by construction;
+- a per-logical-thread store, the home §3.4's thread-bound state needs;
+- the awaiter pattern, as the hop that resumes a goroutine after a park, with `Yield` as §3.3's cooperative
+  preemption point;
+- per-logical-thread execution statistics, a start on sysmon's view of a goroutine that runs too long.
+
+B needs these beyond it:
+
+- per-worker run queues with work stealing, where Gemstone keeps one global queue per priority level;
+- syscall handoff (§3.7). A physical thread blocked in a native call still counts against `MaxThreadCount`, and
+  nothing starts a replacement;
+- `LockOSThread` pinning (§3.6);
+- one priority level, since Go has no goroutine priorities.
+
 ## 5. Staged plan, with estimates
 
 Estimates are in lane-weeks (one lane, full time), and they are judgement, not measurement. Each stage ends with a
@@ -160,7 +202,7 @@ measured gate on the demonstrator.
 | S0 | Thread per goroutine, reused after it ends (batch 31) | done | runtime row validated; churn fixed | — |
 | S1 | Option A: small default reserve, converter-marked larger reserves for recursive goroutine bodies | 1–2 | 100k parked under 90 s and 6 GB; no stack-overflow regression on the corpus rows | an unmarked deep recursion now crashes |
 | S2 | **Sizing spike for B, no emission change.** A census through the converter's own analysis: what share of functions and `go` bodies can park, how many dynamic calls must be treated as parking. Plus a hand-written Runtime Async prototype of ParkStorm on .NET 11 preview | 2–3 | a go / no-go number: the can-park share and the prototype's 10<sup>6</sup> memory | the can-park share comes out too high and B collapses into C |
-| S3 | Option B behind an opt-in converter flag: can-park analysis, async emission for that set, golib work-stealing scheduler on `GOMAXPROCS` workers, async-safe defer frame, per-goroutine state, syscall handoff, cooperative preemption, dedicated threads for locked goroutines | 14–22 | ParkStorm 10<sup>6</sup> parks in under 60 s and 20 GB; the corpus rows equal Go with the flag on | the defer frame and `recover()` across `await` is the hardest unbuilt piece |
+| S3 | Option B behind an opt-in converter flag: can-park analysis, async emission for that set, golib work-stealing scheduler on `GOMAXPROCS` workers (§4.E is its design reference), async-safe defer frame, per-goroutine state, syscall handoff, cooperative preemption, dedicated threads for locked goroutines | 14–22 | ParkStorm 10<sup>6</sup> parks in under 60 s and 20 GB; the corpus rows equal Go with the flag on | the defer frame and `recover()` across `await` is the hardest unbuilt piece |
 | S4 | Re-baseline: goldens and corpus emission under the flag, gates and docs | 4–6 | CNR and the banked rows equal Go with the flag on and off | the corpus is large, and its churn is the cost the principle was written to avoid |
 
 The full arc is roughly **20–30 lane-weeks** after S1. S1 alone is cheap and independent.
