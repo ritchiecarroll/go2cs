@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `strings` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**69 matched · 4 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**68 matched · 5 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/strings`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/strings).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -74,7 +74,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestReaderZero` | pass | pass |
 | `TestRepeat` | pass | pass |
 | `TestRepeatCatchesOverflow` | pass | pass |
-| `TestReplace` | pass | pass |
+| `TestReplace` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestReplacer` | pass | pass |
 | `TestRunes` | pass | pass |
 | `TestSpecialCase` | pass | pass |
@@ -104,10 +104,11 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestBuilderAllocs` | `deferred` | exact-count AllocsPerRun assert (want 1): the managed shim is deliberately byte-derived (no CLR malloc counter), so a nonzero count assert can never agree — see the AllocsPerRun entry in docs/ConversionStrategies-Reference.md. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-count-semantics -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: the test is Go's own issue-23382 check that copyCheck does not force the Builder to escape, and the converted `var b Builder` is a ж<Builder> (copyCheck stores the address, src/core/strings/builder.cs:26-35) beside the buffer -- the reading of 2. The alloc-count-semantics premise (a byte-derived shim) is retired by the same note. RE-SIGNED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): the attribution above (a ж<Builder> box beside the buffer) is CORRECTED -- the two counted objects are the box and String()'s ElemRefBox; the buffer is uncounted. The zh-box plan is dropped. The strings.Builder box sits at the identity-keyed boundary -- copyCheck stores and compares the Builder's own address (strings/builder.cs:26-40) -- which the zh-box vetoes exclude (X1/X2, DESIGN-zh-box-reduction.md:162-165; XM-6, DESIGN-zh-box-b-prime.md:583-585; DESIGN-zh-box-three-capabilities.md §6), so zh-box is NOT its plan. |
+| `TestBuilderAllocs` | `deferred` | exact-count AllocsPerRun assert (want 1): the managed shim is deliberately byte-derived (no CLR malloc counter), so a nonzero count assert can never agree — see the AllocsPerRun entry in docs/ConversionStrategies-Reference.md. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-count-semantics -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: the test is Go's own issue-23382 check that copyCheck does not force the Builder to escape, and the converted `var b Builder` is a ж<Builder> (copyCheck stores the address, src/core/strings/builder.cs:26-35) beside the buffer -- the reading of 2. The alloc-count-semantics premise (a byte-derived shim) is retired by the same note. RE-SIGNED 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): the attribution above (a ж<Builder> box beside the buffer) is CORRECTED -- the two counted objects are the box and String()'s ElemRefBox; the buffer is uncounted. The zh-box plan is dropped. The strings.Builder box sits at the identity-keyed boundary -- copyCheck stores and compares the Builder's own address (strings/builder.cs:26-40) -- which the zh-box vetoes exclude (X1/X2, DESIGN-zh-box-reduction.md:162-165; XM-6, DESIGN-zh-box-b-prime.md:583-585; DESIGN-zh-box-three-capabilities.md §6), so zh-box is NOT its plan. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 2 per run at go1.24.13 to 3 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 | `TestBuilderGrow` | `deferred` | exact-count AllocsPerRun asserts (want 1 per growLen>0 leg, want 0 for growLen=0): the byte-derived shim can never agree on a nonzero count, and the growLen=0 leg's addressed Builder heap-boxes per run where Go's escape analysis stack-allocates. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> deferred. The byte-derived-shim premise is retired: every failing leg reads COUNT. The strings.Builder box sits at the identity-keyed boundary -- copyCheck stores and compares the Builder's own address (strings/builder.cs:26-40) -- which the zh-box vetoes exclude (X1/X2, DESIGN-zh-box-reduction.md:162-165; XM-6, DESIGN-zh-box-b-prime.md:583-585; DESIGN-zh-box-three-capabilities.md §6), so zh-box is NOT its plan. |
 | `TestBuilderGrowSizeclasses` | `deferred` | count-bound AllocsPerRun assert (want <= 1): the byte-derived shim reports allocated bytes, so the managed Builder path can never satisfy the count bound. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> deferred. The byte-derived-shim premise is retired: the reading is COUNT. 3 per run = the ж<Builder> box + the ElemRefBox + the append regrow; the byte[18] MakeNoZero allocates is uncounted. The strings.Builder box sits at the identity-keyed boundary -- copyCheck stores and compares the Builder's own address (strings/builder.cs:26-40) -- which the zh-box vetoes exclude (X1/X2, DESIGN-zh-box-reduction.md:162-165; XM-6, DESIGN-zh-box-b-prime.md:583-585; DESIGN-zh-box-three-capabilities.md §6), so zh-box is NOT its plan. |
 | `TestIndexRune` | `deferred` | want-zero AllocsPerRun assert: IndexRune's Index(s, string(r)) materializes a byte[] in the managed model where Go uses a 4-byte stack buffer (runtime.intstring); the index-semantics legs all pass. RELABEL 2026-09-23 (C1, from the i7 reading run at bb54ff0920, Release with tiering off): alloc-profile -> deferred. The run's own unit note is COUNT, so golib's counter SAW these objects -- the COUNT arm of the 2026-09-05 ladder -- and the site family is one a named plan removes: string(r) for a lookup, which Go builds in runtime.intstring's 4-byte stack buffer. |
+| `TestReplace` | `deferred` | AllocsPerRun check new at go1.26.10 (strings_test.go:1480; go1.24.13's TestReplace has no allocation assertion): every Replace case must allocate at most one object (the result string), and the test fails a case with `Replace(...) allocates N objects`. The converted side reads 3.00 objects for 13 cases and 6.00 for Replace("☺☻☹", "", "<>", -1), 14 failure lines, on both OSes. The signature pins the `allocates` lines only, so a failure of TestReplace's value asserts still fails the comparison. |
 
 ## Excluded declarations
 
@@ -167,14 +168,22 @@ the capability it needs.
 - BenchmarkRepeat (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkRepeatLarge (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkRepeatSpaces (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkReplace (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkReplaceAll (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSingleLongSuffixFail (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSingleMatch (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSingleMaxSkipping (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAfterSeqEmptySeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAfterSeqMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAfterSeqSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAndSplitSeq (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitEmptySeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitNMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitNSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitSeqEmptySeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitSeqMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitSeqSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkToLower (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkToUpper (benchmark): benchmark execution is deferred to Phase 4D
@@ -197,6 +206,8 @@ the capability it needs.
 - ExampleEqualFold (example): example execution is deferred to Phase 4D
 - ExampleFields (example): example execution is deferred to Phase 4D
 - ExampleFieldsFunc (example): example execution is deferred to Phase 4D
+- ExampleFieldsFuncSeq (example): example execution is deferred to Phase 4D
+- ExampleFieldsSeq (example): example execution is deferred to Phase 4D
 - ExampleHasPrefix (example): example execution is deferred to Phase 4D
 - ExampleHasSuffix (example): example execution is deferred to Phase 4D
 - ExampleIndex (example): example execution is deferred to Phase 4D
@@ -209,6 +220,7 @@ the capability it needs.
 - ExampleLastIndexAny (example): example execution is deferred to Phase 4D
 - ExampleLastIndexByte (example): example execution is deferred to Phase 4D
 - ExampleLastIndexFunc (example): example execution is deferred to Phase 4D
+- ExampleLines (example): example execution is deferred to Phase 4D
 - ExampleMap (example): example execution is deferred to Phase 4D
 - ExampleNewReplacer (example): example execution is deferred to Phase 4D
 - ExampleRepeat (example): example execution is deferred to Phase 4D
@@ -217,7 +229,9 @@ the capability it needs.
 - ExampleSplit (example): example execution is deferred to Phase 4D
 - ExampleSplitAfter (example): example execution is deferred to Phase 4D
 - ExampleSplitAfterN (example): example execution is deferred to Phase 4D
+- ExampleSplitAfterSeq (example): example execution is deferred to Phase 4D
 - ExampleSplitN (example): example execution is deferred to Phase 4D
+- ExampleSplitSeq (example): example execution is deferred to Phase 4D
 - ExampleTitle (example): example execution is deferred to Phase 4D
 - ExampleToLower (example): example execution is deferred to Phase 4D
 - ExampleToLowerSpecial (example): example execution is deferred to Phase 4D
@@ -235,3 +249,4 @@ the capability it needs.
 - ExampleTrimRightFunc (example): example execution is deferred to Phase 4D
 - ExampleTrimSpace (example): example execution is deferred to Phase 4D
 - ExampleTrimSuffix (example): example execution is deferred to Phase 4D
+- FuzzReplace (fuzz): fuzz execution is deferred to Phase 4D

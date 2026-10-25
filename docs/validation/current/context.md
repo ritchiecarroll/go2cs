@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `context` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**57 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**62 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/context`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/context).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -22,7 +22,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestAfterFuncCalledAsynchronously` | pass | pass |
 | `TestAfterFuncCalledImmediately` | pass | pass |
 | `TestAfterFuncNotCalledAfterStop` | pass | pass |
-| `TestAllocs` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestAllocs` | pass | pass |
 | `TestBackground` | pass | pass |
 | `TestCancelRemoves` | pass | pass |
 | `TestCanceledTimeout` | pass | pass |
@@ -47,8 +47,12 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestCause/WithoutCancel` | pass | pass |
 | `TestCause/WithoutCancel_canceled` | pass | pass |
 | `TestCause/WithoutCancel_timeout` | pass | pass |
+| `TestCause/parent_of_custom_context_is_canceled_after` | pass | pass |
+| `TestCause/parent_of_custom_context_is_canceled_before` | pass | pass |
+| `TestCause/parent_of_custom_context_not_canceled` | pass | pass |
 | `TestCauseRace` | pass | pass |
 | `TestChildFinishesFirst` | pass | pass |
+| `TestContextErrDoneRace` | pass | pass |
 | `TestCustomContextAfterFuncAfterFunc` | pass | pass |
 | `TestCustomContextAfterFuncCancel` | pass | pass |
 | `TestCustomContextAfterFuncTimeout` | pass | pass |
@@ -76,21 +80,6 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestWithValueChecksKey` | pass | pass |
 | `TestWithoutCancel` | pass | pass |
 
-## Disclosed divergences
-
-A disclosed divergence is a specific Go assertion this conversion does not satisfy — not
-a skipped test and not a tolerance. Each one is pinned by exact failure signature in the package's
-hand-owned [`go2cs_test_disclosures.json`](https://github.com/ritchiecarroll/go2cs/blob/master/src/core/context/go2cs_test_disclosures.json);
-a disclosed test that fails any *other* way is still a hard mismatch.
-
-The **Class** column says which kind each one is: a `deferred` entry is an assertion the managed
-CLR *can* meet, pinned against the named plan that will retire it; every other class is one it
-*provably cannot* satisfy.
-
-| Test | Class | Pinned reason |
-|:--|:--|:--|
-| `TestAllocs` | `deferred` | exact-count AllocsPerRun asserts over five context constructors (wants 0/3/12/5/8 mallocs): the managed shim is deliberately byte-derived (no CLR malloc counter), so the four nonzero-count asserts can never agree whatever the allocation behavior - measured 128/754/3744/2104/4876 BYTES for Background/WithValue/WithTimeout/WithCancel/WithTimeout(5ms), and one failing subtest fails the whole test; see the AllocsPerRun entry in docs/ConversionStrategies-Reference.md. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> deferred. The byte-derived-shim premise is retired: the failing leg reads COUNT by construction. |
-
 ## Excluded declarations
 
 Declarations filtered from **both** sides of the comparison, and therefore not claimed above:
@@ -105,6 +94,8 @@ the capability it needs.
 - BenchmarkContextCancelDone (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDeepValueNewGoRoutine (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDeepValueSameGoRoutine (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkErrCanceled (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkErrOK (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkWithTimeout (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleAfterFunc_cond (example): example execution is deferred to Phase 4D
 - ExampleAfterFunc_connection (example): example execution is deferred to Phase 4D

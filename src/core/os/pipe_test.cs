@@ -44,6 +44,7 @@ public static void TestEPIPE(ж<Δtesting.T> Ꮡt) {
     // Write calls occurs during that interval it can spuriously succeed,
     // buffering the write to the child's copy of the pipe (even though the child
     // will not actually read the buffered bytes).
+
     var (r, w, err) = Δos.Pipe();
     if (err != default!) {
         Ꮡt.Fatal(err);
@@ -85,7 +86,7 @@ public static void TestEPIPE(ж<Δtesting.T> Ꮡt) {
 internal static readonly object windowsDoesnTSupportˢ = (@string)"Windows doesn't support SIGPIPE"u8;
 internal static readonly @string goTestStdPipeHelperˢ = "GO_TEST_STD_PIPE_HELPER"u8;
 internal static readonly @string goTestStdPipeHelperˢ2 = "GO_TEST_STD_PIPE_HELPER_SIGNAL"u8;
-internal static readonly @string testRunˢ2 = "-test.run"u8;
+internal static readonly @string testRunˢ3 = "-test.run"u8;
 internal static readonly @string testStdPipeˢ = "TestStdPipe"u8;
 
 public static void TestStdPipe(ж<Δtesting.T> Ꮡt) {
@@ -146,7 +147,7 @@ public static void TestStdPipe(ж<Δtesting.T> Ꮡt) {
     // all writes should fail with EPIPE and then exit 0.
     foreach (var (_, sig) in new bool[]{false, true}.slice()) {
         for (nint dest = 1; dest < 4; dest++) {
-            var cmdΔ1 = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ2, testStdPipeˢ);
+            var cmdΔ1 = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), testRunˢ3, testStdPipeˢ);
             cmdΔ1.Value.Stdout = new Δos.FileжWriter(w);
             cmdΔ1.Value.Stderr = new Δos.FileжWriter(w);
             cmdΔ1.Value.ExtraFiles = new ж<Δos.File>[]{w}.slice();
@@ -182,7 +183,7 @@ public static void TestStdPipe(ж<Δtesting.T> Ꮡt) {
     }
 
     // Test redirecting stdout but not stderr.  Issue 40076.
-    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), Δos.Args[0], testRunˢ2, testStdPipeˢ);
+    var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), testRunˢ3, testStdPipeˢ);
     cmd.Value.Stdout = new Δos.FileжWriter(w);
     ref var stderr = ref heap(new bytes.Buffer(), out var Ꮡstderr);
     cmd.Value.Stderr = new os_test_package.bytes_BufferжWriter(Ꮡstderr);
@@ -221,6 +222,7 @@ internal static partial void testClosedPipeRace(ж<Δtesting.T> Ꮡt, bool read)
         // This test cannot be run in parallel due to the same race as for TestEPIPE.
         // (We expect a write to a closed pipe can fail, but a concurrent fork of a
         // child process can cause the pipe to unexpectedly remain open.)
+
         nint limit = 1;
         if (!read) {
             // Get the amount we have to write to overload a pipe
@@ -340,7 +342,7 @@ public static void TestReadNonblockingFd(ж<Δtesting.T> Ꮡt) {
         defer(() => rʗ1.Close(), ref ᒐ);
         var wʗ1 = w;
         defer(() => wʗ1.Close(), ref ᒐ);
-        var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), Δos.Args[0], "-test.run=^"u8 + Ꮡt.Name() + "$"u8);
+        var cmd = testenv.Command(new os_test_package.testing_TжTB(Ꮡt), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), "-test.run=^"u8 + Ꮡt.Name() + "$"u8);
         cmd.Value.Env = append(cmd.Environ(), "GO_WANT_READ_NONBLOCKING_FD=1"u8);
         cmd.Value.Stdin = new os_test_package.os_FileжReader(r);
         (var output, err) = cmd.CombinedOutput();
@@ -517,6 +519,7 @@ public static partial void TestFdRace(ж<Δtesting.T> Ꮡt) {
         // interesting stack if this or some other test happens to panic. It is also
         // nearly instantaneous, so any latency benefit from running it in parallel
         // would be minimal.
+
         var (r, w, err) = Δos.Pipe();
         if (err != default!) {
             Ꮡt.Fatal(err);

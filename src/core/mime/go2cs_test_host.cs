@@ -34,8 +34,8 @@ internal static class Go2CsTestHost
             "quotedprintable",
             "testdata",
         });
-        registry.Add("TestCharsetDecoder", mime_internal_test_package.TestCharsetDecoder, "encodedword_test.go", 157);
-        registry.Add("TestCharsetDecoderError", mime_internal_test_package.TestCharsetDecoderError, "encodedword_test.go", 207);
+        registry.Add("TestCharsetDecoder", mime_internal_test_package.TestCharsetDecoder, "encodedword_test.go", 161);
+        registry.Add("TestCharsetDecoderError", mime_internal_test_package.TestCharsetDecoderError, "encodedword_test.go", 211);
         registry.Add("TestConsumeMediaParam", mime_internal_test_package.TestConsumeMediaParam, "mediatype_test.go", 61);
         registry.Add("TestConsumeToken", mime_internal_test_package.TestConsumeToken, "mediatype_test.go", 13);
         registry.Add("TestConsumeValue", mime_internal_test_package.TestConsumeValue, "mediatype_test.go", 34);
@@ -45,10 +45,10 @@ internal static class Go2CsTestHost
         registry.Add("TestEncodedWordLength", mime_internal_test_package.TestEncodedWordLength, "encodedword_test.go", 44);
         registry.Add("TestExtensionsByType", mime_internal_test_package.TestExtensionsByType, "type_test.go", 105);
         registry.Add("TestExtensionsByType2", mime_internal_test_package.TestExtensionsByType2, "type_test.go", 199);
-        registry.Add("TestFormatMediaType", mime_internal_test_package.TestFormatMediaType, "mediatype_test.go", 517);
+        registry.Add("TestFormatMediaType", mime_internal_test_package.TestFormatMediaType, "mediatype_test.go", 541);
         registry.Add("TestLookupMallocs", mime_internal_test_package.TestLookupMallocs, "type_test.go", 146);
-        registry.Add("TestParseMediaType", mime_internal_test_package.TestParseMediaType, "mediatype_test.go", 99);
-        registry.Add("TestParseMediaTypeBogus", mime_internal_test_package.TestParseMediaTypeBogus, "mediatype_test.go", 467);
+        registry.Add("TestParseMediaType", mime_internal_test_package.TestParseMediaType, "mediatype_test.go", 422);
+        registry.Add("TestParseMediaTypeBogus", mime_internal_test_package.TestParseMediaTypeBogus, "mediatype_test.go", 483);
         registry.Add("TestTypeByExtension", mime_internal_test_package.TestTypeByExtension, "type_test.go", 37);
         registry.Add("TestTypeByExtensionCase", mime_internal_test_package.TestTypeByExtensionCase, "type_test.go", 80);
         registry.Add("TestTypeByExtension_LocalData", mime_internal_test_package.TestTypeByExtension_LocalData, "type_test.go", 55);

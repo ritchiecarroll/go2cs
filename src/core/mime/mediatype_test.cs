@@ -107,55 +107,9 @@ internal partial struct mediaTypeTest {
     internal map<@string, @string> p;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string keyˢ = "key"u8;
-internal static readonly @string valueˢ = "value"u8;
-internal static readonly @string blahˢ = "blah"u8;
-internal static readonly @string nameˢ = "name"u8;
-internal static readonly @string fooˢ = "foo"u8;
-internal static readonly @string titleˢ = "title"u8;
-internal static readonly @string thisIsFunˢ = "This is ***fun***"u8;
-internal static readonly @string accessTypeˢ = "access-type"u8;
-internal static readonly @string urlˢ = "URL"u8;
-internal static readonly @string urlˢ2 = "url"u8;
-internal static readonly @string ftpCsUtkEduPubMooreBulkˢ = "ftp://cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar"u8;
-internal static readonly @string thisIsEvenMoreFunIsnTItˢ = "This is even more ***fun*** isn't it!"u8;
-internal static readonly @string filenameˢ = "filename"u8;
-internal static readonly @string fooHtmlˢ = "foo.html"u8;
-internal static readonly @string fOoHtmlˢ = "f\\oo.html"u8;
-internal static readonly @string quotingTestedHtmlˢ = @"""quoting"" tested.html"u8;
-internal static readonly @string hereSASemicolonHtmlˢ = "Here's a semicolon;.html"u8;
-internal static readonly @string barˢ = "bar"u8;
-internal static readonly @string fooHtmlˢ2 = "'foo.html'"u8;
-internal static readonly @string fooHtmlˢ3 = "foo-ä.html"u8;
-internal static readonly @string fooHtmlˢ4 = "foo-Ã¤.html"u8;
-internal static readonly @string foo41Htmlˢ = "foo-%41.html"u8;
-internal static readonly @string htmlˢ = "50%.html"u8;
-internal static readonly @string foo41Htmlˢ2 = "foo-%\\41.html"u8;
-internal static readonly @string htmlˢ2 = "ä-%41.html"u8;
-internal static readonly @string fooC3A4E282AcHtmlˢ = "foo-%c3%a4-%e2%82%ac.html"u8;
-internal static readonly @string xfilenameˢ = "xfilename"u8;
-internal static readonly @string creationDateˢ = "creation-date"u8;
-internal static readonly @string wed12Feb19971629510500ˢ = "Wed, 12 Feb 1997 16:29:51 -0500"u8;
-internal static readonly @string modificationDateˢ = "modification-date"u8;
-internal static readonly @string exampleˢ = "example"u8;
-internal static readonly @string filenameExampleTxtˢ = "filename=example.txt"u8;
-internal static readonly @string fooHtmlˢ5 = "foo-ä-€.html"u8;
-internal static readonly @string fooAHtmlˢ = "foo-ä.html"u8;
-internal static readonly @string a41Htmlˢ = "A-%41.html"u8;
-internal static readonly @string foobarˢ = "foobar"u8;
-internal static readonly @string firstnameˢ = "firstname"u8;
-internal static readonly @string lastnameˢ = "lastname"u8;
-internal static readonly @string fileˢ = "file"u8;
-internal static readonly @string cDevGoRobotsTxtˢ = @"C:\dev\go\robots.txt"u8;
-internal static readonly @string cMp4ˢ = @"C:\新建文件夹\中文第二次测试.mp4"u8;
-internal static readonly @string formatˢ = "format"u8;
-internal static readonly @string fixedˢ = "fixed"u8;
-internal static readonly @string flowedˢ = "flowed"u8;
+internal static slice<mediaTypeTest> parseMediaTypeTests;
 
-public static void TestParseMediaType(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
+[GoInit] internal static void init() {
     // Convenience map initializer
     map<@string, @string> m(params ꓸꓸꓸstring sʗp) {
         var s = sʗp.sslice();
@@ -167,29 +121,33 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
     }
 
     var nameFoo = new map<@string, @string>{["name"u8] = "foo"u8};
-    var tests = new mediaTypeTest[]{
+    parseMediaTypeTests = new mediaTypeTest[]{
         new(@"form-data; name=""foo"""u8, "form-data"u8, nameFoo),
         new(@" form-data ; name=foo"u8, "form-data"u8, nameFoo),
         new(@"FORM-DATA;name=""foo"""u8, "form-data"u8, nameFoo),
         new(@" FORM-DATA ; name=""foo"""u8, "form-data"u8, nameFoo),
         new(@" FORM-DATA ; name=""foo"""u8, "form-data"u8, nameFoo),
+
         new(@"form-data; key=value;  blah=""value"";name=""foo"" "u8,
             "form-data"u8,
-            m(keyˢ, valueˢ, blahˢ, valueˢ, nameˢ, fooˢ)),
+            m("key"u8, "value", "blah", "value", "name", "foo")),
+
         new(@"foo; key=val1; key=the-key-appears-again-which-is-bogus"u8,
             ""u8, m()),
 
         // From RFC 2231:
         new(@"application/x-stuff; title*=us-ascii'en-us'This%20is%20%2A%2A%2Afun%2A%2A%2A"u8,
             "application/x-stuff"u8,
-            m(titleˢ, thisIsFunˢ)),
+            m("title"u8, "This is ***fun***")),
+
         new(@"message/external-body; access-type=URL; "u8 + @"URL*0=""ftp://"";"u8 + @"URL*1=""cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar"""u8,
             "message/external-body"u8,
-            m(accessTypeˢ, urlˢ,
-                urlˢ2, ftpCsUtkEduPubMooreBulkˢ)),
+            m("access-type"u8, "URL",
+                "url", "ftp://cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar")),
+
         new(@"application/x-stuff; "u8 + @"title*0*=us-ascii'en'This%20is%20even%20more%20; "u8 + @"title*1*=%2A%2A%2Afun%2A%2A%2A%20; "u8 + @"title*2=""isn't it!"""u8,
             "application/x-stuff"u8,
-            m(titleˢ, thisIsEvenMoreFunIsnTItˢ)),
+            m("title"u8, "This is even more ***fun*** isn't it!")),
 
         // Tests from http://greenbytes.de/tech/tc2231/
         // Note: Backslash escape handling is a bit loose, like MSIE.
@@ -205,87 +163,87 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
         // #attwithasciifilename
         new(@"attachment; filename=""foo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)),
+            m("filename"u8, "foo.html")),
         // #attwithasciifilename25
         new(@"attachment; filename=""0000000000111111111122222"""u8,
             "attachment"u8,
-            m(filenameˢ, "0000000000111111111122222")),
+            m("filename"u8, "0000000000111111111122222")),
         // #attwithasciifilename35
         new(@"attachment; filename=""00000000001111111111222222222233333"""u8,
             "attachment"u8,
-            m(filenameˢ, "00000000001111111111222222222233333")),
+            m("filename"u8, "00000000001111111111222222222233333")),
         // #attwithasciifnescapedchar
         new(@"attachment; filename=""f\oo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fOoHtmlˢ)),
+            m("filename"u8, "f\\oo.html")),
         // #attwithasciifnescapedquote
         new(@"attachment; filename=""\""quoting\"" tested.html"""u8,
             "attachment"u8,
-            m(filenameˢ, quotingTestedHtmlˢ)),
+            m("filename"u8, @"""quoting"" tested.html")),
         // #attwithquotedsemicolon
         new(@"attachment; filename=""Here's a semicolon;.html"""u8,
             "attachment"u8,
-            m(filenameˢ, hereSASemicolonHtmlˢ)),
+            m("filename"u8, "Here's a semicolon;.html")),
         // #attwithfilenameandextparam
         new(@"attachment; foo=""bar""; filename=""foo.html"""u8,
             "attachment"u8,
-            m(fooˢ, barˢ, filenameˢ, fooHtmlˢ)),
+            m("foo"u8, "bar", "filename", "foo.html")),
         // #attwithfilenameandextparamescaped
         new(@"attachment; foo=""\""\\"";filename=""foo.html"""u8,
             "attachment"u8,
-            m(fooˢ, "\"\\", filenameˢ, fooHtmlˢ)),
+            m("foo"u8, "\"\\", "filename", "foo.html")),
         // #attwithasciifilenameucase
         new(@"attachment; FILENAME=""foo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)),
+            m("filename"u8, "foo.html")),
         // #attwithasciifilenamenq
         new(@"attachment; filename=foo.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)),
+            m("filename"u8, "foo.html")),
         // #attwithasciifilenamenqs
         new(@"attachment; filename=foo.html ;"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)),
+            m("filename"u8, "foo.html")),
         // #attwithfntokensq
         new(@"attachment; filename='foo.html'"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ2)),
+            m("filename"u8, "'foo.html'")),
         // #attwithisofnplain
         new(@"attachment; filename=""foo-ä.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attwithutf8fnplain
         new(@"attachment; filename=""foo-Ã¤.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ4)),
+            m("filename"u8, "foo-Ã¤.html")),
         // #attwithfnrawpctenca
         new(@"attachment; filename=""foo-%41.html"""u8,
             "attachment"u8,
-            m(filenameˢ, foo41Htmlˢ)),
+            m("filename"u8, "foo-%41.html")),
         // #attwithfnusingpct
         new(@"attachment; filename=""50%.html"""u8,
             "attachment"u8,
-            m(filenameˢ, htmlˢ)),
+            m("filename"u8, "50%.html")),
         // #attwithfnrawpctencaq
         new(@"attachment; filename=""foo-%\41.html"""u8,
             "attachment"u8,
-            m(filenameˢ, foo41Htmlˢ2)),
+            m("filename"u8, "foo-%\\41.html")),
         // #attwithnamepct
         new(@"attachment; name=""foo-%41.html"""u8,
             "attachment"u8,
-            m(nameˢ, foo41Htmlˢ)),
+            m("name"u8, "foo-%41.html")),
         // #attwithfilenamepctandiso
         new(@"attachment; name=""ä-%41.html"""u8,
             "attachment"u8,
-            m(nameˢ, htmlˢ2)),
+            m("name"u8, "ä-%41.html")),
         // #attwithfnrawpctenclong
         new(@"attachment; filename=""foo-%c3%a4-%e2%82%ac.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooC3A4E282AcHtmlˢ)),
+            m("filename"u8, "foo-%c3%a4-%e2%82%ac.html")),
         // #attwithasciifilenamews1
         new(@"attachment; filename =""foo.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)),
+            m("filename"u8, "foo.html")),
         // #attmissingdisposition
         new(@"filename=foo.html"u8,
             ""u8, m()),
@@ -337,25 +295,25 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
         // #attconfusedparam
         new(@"attachment; xfilename=foo.html"u8,
             "attachment"u8,
-            m(xfilenameˢ, fooHtmlˢ)),
+            m("xfilename"u8, "foo.html")),
         // #attcdate
         new(@"attachment; creation-date=""Wed, 12 Feb 1997 16:29:51 -0500"""u8,
             "attachment"u8,
-            m(creationDateˢ, wed12Feb19971629510500ˢ)),
+            m("creation-date"u8, "Wed, 12 Feb 1997 16:29:51 -0500")),
         // #attmdate
         new(@"attachment; modification-date=""Wed, 12 Feb 1997 16:29:51 -0500"""u8,
             "attachment"u8,
-            m(modificationDateˢ, wed12Feb19971629510500ˢ)),
+            m("modification-date"u8, "Wed, 12 Feb 1997 16:29:51 -0500")),
         // #dispext
         new(@"foobar"u8, "foobar"u8, m()),
         // #dispextbadfn
         new(@"attachment; example=""filename=example.txt"""u8,
             "attachment"u8,
-            m(exampleˢ, filenameExampleTxtˢ)),
+            m("example"u8, "filename=example.txt")),
         // #attwithfn2231utf8
         new(@"attachment; filename*=UTF-8''foo-%c3%a4-%e2%82%ac.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ5)),
+            m("filename"u8, "foo-ä-€.html")),
         // #attwithfn2231noc
         new(@"attachment; filename*=''foo-%c3%a4-%e2%82%ac.html"u8,
             "attachment"u8,
@@ -363,19 +321,19 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
         // #attwithfn2231utf8comp
         new(@"attachment; filename*=UTF-8''foo-a%cc%88.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooAHtmlˢ)),
+            m("filename"u8, "foo-ä.html")),
         // #attwithfn2231ws2
         new(@"attachment; filename*= UTF-8''foo-%c3%a4.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attwithfn2231ws3
         new(@"attachment; filename* =UTF-8''foo-%c3%a4.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attwithfn2231quot
         new(@"attachment; filename*=""UTF-8''foo-%c3%a4.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attwithfn2231quot2
         new(@"attachment; filename*=""foo%20bar.html"""u8,
             "attachment"u8,
@@ -395,38 +353,38 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
         // #attwithfn2231dpct
         new(@"attachment; filename*=UTF-8''A-%2541.html"u8,
             "attachment"u8,
-            m(filenameˢ, a41Htmlˢ)),
+            m("filename"u8, "A-%41.html")),
         // #attfncont
         new(@"attachment; filename*0=""foo.""; filename*1=""html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ)),
+            m("filename"u8, "foo.html")),
         // #attfncontenc
         new(@"attachment; filename*0*=UTF-8''foo-%c3%a4; filename*1="".html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attfncontlz
         new(@"attachment; filename*0=""foo""; filename*01=""bar"""u8,
             "attachment"u8,
-            m(filenameˢ, fooˢ)),
+            m("filename"u8, "foo")),
         // #attfncontnc
         new(@"attachment; filename*0=""foo""; filename*2=""bar"""u8,
             "attachment"u8,
-            m(filenameˢ, fooˢ)),
+            m("filename"u8, "foo")),
         // #attfnconts1
         new(@"attachment; filename*1=""foo.""; filename*2=""html"""u8,
             "attachment"u8, m()),
         // #attfncontord
         new(@"attachment; filename*1=""bar""; filename*0=""foo"""u8,
             "attachment"u8,
-            m(filenameˢ, foobarˢ)),
+            m("filename"u8, "foobar")),
         // #attfnboth
         new(@"attachment; filename=""foo-ae.html""; filename*=UTF-8''foo-%c3%a4.html"u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attfnboth2
         new(@"attachment; filename*=UTF-8''foo-%c3%a4.html; filename=""foo-ae.html"""u8,
             "attachment"u8,
-            m(filenameˢ, fooHtmlˢ3)),
+            m("filename"u8, "foo-ä.html")),
         // #attfnboth3
         new(@"attachment; filename*0*=ISO-8859-15''euro-sign%3d%a4; filename*=ISO-8859-1''currency-sign%3d%a4"u8,
             "attachment"u8,
@@ -434,20 +392,20 @@ public static void TestParseMediaType(ж<testing.T> Ꮡt) {
         // #attnewandfn
         new(@"attachment; foobar=x; filename=""foo.html"""u8,
             "attachment"u8,
-            m(foobarˢ, "x", filenameˢ, fooHtmlˢ)),
+            m("foobar"u8, "x", "filename", "foo.html")),
 
         // Browsers also just send UTF-8 directly without RFC 2231,
         // at least when the source page is served with UTF-8.
         new(@"form-data; firstname=""Брэд""; lastname=""Фицпатрик"""u8,
             "form-data"u8,
-            m(firstnameˢ, "Брэд", lastnameˢ, "Фицпатрик")),
+            m("firstname"u8, "Брэд", "lastname", "Фицпатрик")),
 
         // Empty string used to be mishandled.
-        new(@"foo; bar="""""u8, "foo"u8, m(barˢ, "")),
+        new(@"foo; bar="""""u8, "foo"u8, m("bar"u8, "")),
 
         // Microsoft browsers in intranet mode do not think they need to escape \ in file name.
-        new(@"form-data; name=""file""; filename=""C:\dev\go\robots.txt"""u8, "form-data"u8, m(nameˢ, fileˢ, filenameˢ, cDevGoRobotsTxtˢ)),
-        new(@"form-data; name=""file""; filename=""C:\新建文件夹\中文第二次测试.mp4"""u8, "form-data"u8, m(nameˢ, fileˢ, filenameˢ, cMp4ˢ)),
+        new(@"form-data; name=""file""; filename=""C:\dev\go\robots.txt"""u8, "form-data"u8, m("name"u8, "file", "filename", @"C:\dev\go\robots.txt")),
+        new(@"form-data; name=""file""; filename=""C:\新建文件夹\中文第二次测试.mp4"""u8, "form-data"u8, m("name"u8, "file", "filename", @"C:\新建文件夹\中文第二次测试.mp4")),
 
         // issue #46323 (https://github.com/golang/go/issues/46323)
         new(
@@ -458,14 +416,22 @@ message/external-body; access-type=URL;
 		URL*1="cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar";
 """u8.Raw(), // <-- trailing semicolon
             @"message/external-body"u8,
-            m(accessTypeˢ, urlˢ, urlˢ2, ftpCsUtkEduPubMooreBulkˢ)
+            m("access-type"u8, "URL", "url", "ftp://cs.utk.edu/pub/moore/bulk-mailer/bulk-mailer.tar")
         ),
 
         // Issue #48866: duplicate parameters containing equal values should be allowed
-        new(@"text; charset=utf-8; charset=utf-8; format=fixed"u8, "text"u8, m(charsetˢ, utf8ˢ2, formatˢ, fixedˢ)),
-        new(@"text; charset=utf-8; format=flowed; charset=utf-8"u8, "text"u8, m(charsetˢ, utf8ˢ2, formatˢ, flowedˢ))
+        new(@"text; charset=utf-8; charset=utf-8; format=fixed"u8, "text"u8, m("charset"u8, "utf-8", "format", "fixed")),
+        new(@"text; charset=utf-8; format=flowed; charset=utf-8"u8, "text"u8, m("charset"u8, "utf-8", "format", "flowed")),
+
+        // Issue #76236: '{' and '}' are token chars.
+        new("attachment; filename={file}.png"u8, "attachment"u8, m("filename"u8, "{file}.png"))
     }.slice();
-    foreach (var (_, test) in tests) {
+}
+
+public static void TestParseMediaType(ж<testing.T> Ꮡt) {
+    ref var t = ref Ꮡt.DerefOrNull();
+
+    foreach (var (_, test) in parseMediaTypeTests) {
         var (mt, @params, err) = ParseMediaType(test.@in);
         if (err != default!) {
             if (test.t != ""u8) {
@@ -488,6 +454,16 @@ message/external-body; access-type=URL;
         if (!maps.Equal<map<@string, @string>, map<@string, @string>, @string, @string>(@params, test.p)) {
             Ꮡt.Errorf("for input %#q, wrong params.\n"u8 + "expected: %#v\n"u8 + "     got: %#v"u8,
                 test.@in, test.p, @params);
+        }
+    }
+}
+
+public static void BenchmarkParseMediaType(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    foreach (var _ᴛ1 in range(b.N)) {
+        foreach (var (_, test) in parseMediaTypeTests) {
+            ParseMediaType(test.@in);
         }
     }
 }
@@ -536,6 +512,16 @@ public static void TestParseMediaTypeBogus(ж<testing.T> Ꮡt) {
         }
         if (AreEqual(err, ErrInvalidMediaParameter) && mt != tt.mt) {
             Ꮡt.Errorf("ParseMediaType(%q): in case of invalid parameters: expected type %q, got %q"u8, tt.@in, tt.mt, mt);
+        }
+    }
+}
+
+public static void BenchmarkParseMediaTypeBogus(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    foreach (var _ᴛ1 in range(b.N)) {
+        foreach (var (_, test) in badMediaTypeTests) {
+            ParseMediaType(test.@in);
         }
     }
 }

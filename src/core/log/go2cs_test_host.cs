@@ -18,15 +18,16 @@ internal static class Go2CsTestHost
             "slog",
             "syslog",
         });
-        registry.Add("TestAll", log_internal_test_package.TestAll, "log_test.go", 86);
-        registry.Add("TestDefault", log_internal_test_package.TestDefault, "log_test.go", 80);
-        registry.Add("TestDiscard", log_internal_test_package.TestDiscard, "log_test.go", 204);
-        registry.Add("TestEmptyPrintCreatesLine", log_internal_test_package.TestEmptyPrintCreatesLine, "log_test.go", 190);
-        registry.Add("TestFlagAndPrefixSetting", log_internal_test_package.TestFlagAndPrefixSetting, "log_test.go", 124);
-        registry.Add("TestNonNewLogger", log_internal_test_package.TestNonNewLogger, "log_test.go", 103);
-        registry.Add("TestOutput", log_internal_test_package.TestOutput, "log_test.go", 93);
-        registry.Add("TestOutputRace", log_internal_test_package.TestOutputRace, "log_test.go", 109);
-        registry.Add("TestUTCFlag", log_internal_test_package.TestUTCFlag, "log_test.go", 166);
+        registry.Add("TestAll", log_internal_test_package.TestAll, "log_test.go", 90);
+        registry.Add("TestCallDepth", log_internal_test_package.TestCallDepth, "log_test.go", 219);
+        registry.Add("TestDefault", log_internal_test_package.TestDefault, "log_test.go", 84);
+        registry.Add("TestDiscard", log_internal_test_package.TestDiscard, "log_test.go", 208);
+        registry.Add("TestEmptyPrintCreatesLine", log_internal_test_package.TestEmptyPrintCreatesLine, "log_test.go", 194);
+        registry.Add("TestFlagAndPrefixSetting", log_internal_test_package.TestFlagAndPrefixSetting, "log_test.go", 128);
+        registry.Add("TestNonNewLogger", log_internal_test_package.TestNonNewLogger, "log_test.go", 107);
+        registry.Add("TestOutput", log_internal_test_package.TestOutput, "log_test.go", 97);
+        registry.Add("TestOutputRace", log_internal_test_package.TestOutputRace, "log_test.go", 113);
+        registry.Add("TestUTCFlag", log_internal_test_package.TestUTCFlag, "log_test.go", 170);
         return TestHost.Run(registry, args);
     }
 }
