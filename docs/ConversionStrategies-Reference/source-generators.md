@@ -322,8 +322,9 @@ are the only way to say those things there.
 a Go stack walk counts must not be inlined by the JIT, or `runtime.Caller`, `runtime.Callers`,
 `runtime.Stack` and the profiles name the wrong function. `computeNoInliningClosure`
 (`src/go2cs/callerInliningAnalysis.go`) decides which functions those are: a direct `runtime.Caller` /
-`runtime.Callers` user, a thin forwarder into one, a function inside a constant skip window, a hop into a
-skip-counted walker, a `//go:noinline` function, a goroutine creator, and a thin allocator in a package
+`runtime.Callers` user, a thin forwarder into one, a function inside a constant skip window, a caller
+passing a constant to a skip that is its callee's own parameter (log's `Fatal*` and `Panic*` into
+`output(calldepth)`), a hop into a skip-counted walker, a `//go:noinline` function, a goroutine creator, and a thin allocator in a package
 that reads the heap profile. How each takes the mark:
 
 | Shape | Emitted form | Why |
