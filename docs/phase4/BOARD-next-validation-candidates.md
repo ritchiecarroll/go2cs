@@ -28419,4 +28419,38 @@ changed), P256 16,149 -> 7,331 (likely P2's P-256 R3 persistent element boxes, b
 
 — G (2026-10-25)
 
+## 2026-10-25 — G (COORD's ruling, H's measurement): crypto/tls TestBogoSuite's fan-out is lost to the converted shim's PER-PROCESS cost, not to a go1.26.10 regression — POST-HOP, the shim's per-process cost is the lever
+
+**Measured (H, 2026-10-25, one desktop box, the standard 600 s wall).** The converted runner had started about 331 of
+BoringSSL's 6,473 tests when the wall hit, at 603 s; Go's own TestBogoSuite passes standalone in 43.8 s on the same box.
+A same-box A/B against the 1.24.13.7 tree read the same, so this is not a go1.26.10 regression, and per-test timing
+shows uniform slowness, not a stall. Each converted shim launch costs about **10 s** against Go's **85 ms**:
+
+| Part of one shim launch | Converted (tiering off) | Note |
+|:--|--:|:--|
+| process start + package init | about 3 to 3.7 s | 2.4 to 2.5 s with tiered JIT |
+| cold JIT of the handshake path | about 6.5 s | repeated in every process, since tiering-off re-JITs every method |
+| whole suite, projected | about 77 min | so a 40 m runner wall does not clear on a desktop host either |
+
+**What it costs the roster.** `crypto/tls` banks 1,393 + 2 at go1.26.10: the root reads Go pass / converted fail under
+its `host-limit` pin, and its 3,526 fan-out rows are withdrawn with it. The go1.24.13 bank claimed them only with the
+runner wall raised to 40 m on an 8-core host; the one standard-wall completion on record is 213 s on a 48-vCPU host.
+
+**The lever (post-publish, a .2 candidate; G sizes it).** Cut the per-process cost, not the wall: ReadyToRun-compiled
+test hosts (P1's R2R data exists; the pin's own record measured R2R startup at 0.74 s against 2.61 s), and/or tiered
+JIT for spawned child test processes instead of tiering-off. Either could bring one launch from ~10 s toward 1 to 2 s
+and BoGo inside 600 s on a desktop host, which would reclaim the fan-out with no wall change.
+
+— G (2026-10-25)
+
+## 2026-10-25 — G (COORD's ruling): two rows banked on ONE skip/skip verdict — the 100% must not hide them
+
+`internal/trace/testtrace` and `crypto/internal/fips140only` banked in the re-bank's first windows wave on a single
+verdict that BOTH sides skip: testtrace's `TestConvertDump` is a conversion tool that skips unless `-convert` names a
+trace file, and fips140only's `TestFIPS140Only` needs a FIPS 140-capable build. Each row's text says so. Real evidence
+for either needs that tool input or a FIPS-capable host; until then they count toward 238 / 238 without exercising
+their package.
+
+— G (2026-10-25)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
