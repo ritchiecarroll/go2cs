@@ -110,10 +110,11 @@ internal static void test(ж<testing.T> Ꮡt, global::go.go.doc_package.Mode mod
         var fsetʗ1 = fset;
         var pkgʗ1 = pkg;
         Ꮡt.Run((~pkg).Name, (ж<testing.T> tΔ1) => {
+            var filesΔ1ᴷ = new stackAppend<ж<ast.File>>();
             @string importPath = dataDir + "/" + (~pkgʗ1).Name;
             slice<ж<ast.File>> filesΔ1 = default!;
             foreach (var (_, f) in (~pkgʗ1).Files) {
-                filesΔ1 = append(filesΔ1, f);
+                filesΔ1 = append(filesΔ1ᴷ, filesΔ1, f);
             }
             var (doc, errΔ2) = NewFromFiles(fsetʗ1, filesΔ1, importPath, mode);
             if (errΔ2 != default!) {

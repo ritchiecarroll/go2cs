@@ -1,6 +1,7 @@
 // Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -12,9 +13,14 @@ using reflect = reflect_package;
 using regexp = regexp_package;
 using debug = go.runtime.debug_package;
 using strconv = strconv_package;
+using sync = sync_package;
 using testing = testing_package;
+using synctest = go.testing.synctest_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.runtime;
+using go.testing;
 using io = io_package;
 using static go.encoding.json_package;
 using ꓸꓸꓸany = Span<any>;
@@ -276,7 +282,7 @@ internal static readonly @string allTypesˢ = "AllTypes"u8;
 internal static readonly @string stringDoubleEscapesˢ = "StringDoubleEscapes"u8;
 
 internal partial struct TestRoundtripStringTag_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal StringTag @in;
     internal @string want; // empty to just test that we roundtrip
 }
@@ -420,7 +426,7 @@ internal static slice<RecursiveSlice> recursiveSliceCycle = new RecursiveSlice[]
     recursiveSliceCycle[0] = recursiveSliceCycle;
 }
 
-public static void TestSamePointerNoCycle(ж<testing.T> Ꮡt) {
+public static partial void TestSamePointerNoCycle(ж<testing.T> Ꮡt) {
     {
         var (_, err) = Marshal(samePointerNoCycle.OrTypedNil()); if (err != default!) {
             Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -428,7 +434,7 @@ public static void TestSamePointerNoCycle(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestSliceNoCycle(ж<testing.T> Ꮡt) {
+public static partial void TestSliceNoCycle(ж<testing.T> Ꮡt) {
     {
         var (_, err) = Marshal(sliceNoCycle); if (err != default!) {
             Ꮡt.Fatalf("Marshal error: %v"u8, err);
@@ -437,7 +443,7 @@ public static void TestSliceNoCycle(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestUnsupportedValues_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any @in;
 }
 
@@ -623,7 +629,7 @@ internal static readonly @string embeddedStructPointerˢ = "EmbeddedStructPointe
 internal static readonly @string nestedStructAndIntsˢ = "NestedStructAndInts"u8;
 
 internal partial struct TestAnonymousFields_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal Func<any> makeInput;  // Function to create input value
     internal @string want;    // Expected JSON output
 }
@@ -639,8 +645,8 @@ internal partial struct TestAnonymousFields_S2 /*dyn*/ {
 }
 
 internal partial struct TestAnonymousFields_S /*dyn*/ {
-    public partial ref TestAnonymousFields_S1 S1 { get; }
-    public partial ref TestAnonymousFields_S2 S2 { get; }
+    /*embed*/ public TestAnonymousFields_S1 S1;
+    /*embed*/ public TestAnonymousFields_S2 S2;
 }
 
 internal partial struct TestAnonymousFields_S1ᴛ1 /*dyn*/ {
@@ -654,8 +660,8 @@ internal partial struct TestAnonymousFields_S2ᴛ1 /*dyn*/ {
 }
 
 internal partial struct TestAnonymousFields_Sᴛ1 /*dyn*/ {
-    public partial ref TestAnonymousFields_S1ᴛ1 S1 { get; }
-    public partial ref TestAnonymousFields_S2ᴛ1 S2 { get; }
+    /*embed*/ public TestAnonymousFields_S1ᴛ1 S1;
+    /*embed*/ public TestAnonymousFields_S2ᴛ1 S2;
     internal nint x;
     public nint X;
 }
@@ -663,25 +669,25 @@ internal partial struct TestAnonymousFields_Sᴛ1 /*dyn*/ {
 internal partial struct TestAnonymousFields_myInt /*num:nint*/;
 
 internal partial struct TestAnonymousFields_Sᴛ2 /*dyn*/ {
-    internal partial ref TestAnonymousFields_myInt myInt { get; }
+    /*embed*/ internal TestAnonymousFields_myInt myInt;
 }
 
 internal partial struct TestAnonymousFields_MyInt /*num:nint*/;
 
 internal partial struct TestAnonymousFields_Sᴛ3 /*dyn*/ {
-    public partial ref TestAnonymousFields_MyInt MyInt { get; }
+    /*embed*/ public TestAnonymousFields_MyInt MyInt;
 }
 
 internal partial struct TestAnonymousFields_myIntᴛ1 /*num:nint*/;
 
 internal partial struct TestAnonymousFields_Sᴛ4 /*dyn*/ {
-    internal partial ref ж<TestAnonymousFields_myIntᴛ1> myInt { get; }
+    /*embed*/ internal ж<TestAnonymousFields_myIntᴛ1> myInt;
 }
 
 internal partial struct TestAnonymousFields_MyIntᴛ1 /*num:nint*/;
 
 internal partial struct TestAnonymousFields_Sᴛ5 /*dyn*/ {
-    public partial ref ж<TestAnonymousFields_MyIntᴛ1> MyInt { get; }
+    /*embed*/ public ж<TestAnonymousFields_MyIntᴛ1> MyInt;
 }
 
 internal partial struct TestAnonymousFields_s1 /*dyn*/ {
@@ -695,8 +701,8 @@ internal partial struct TestAnonymousFields_S2ᴛ2 /*dyn*/ {
 }
 
 internal partial struct TestAnonymousFields_Sᴛ6 /*dyn*/ {
-    internal partial ref TestAnonymousFields_s1 s1 { get; }
-    public partial ref TestAnonymousFields_S2ᴛ2 S2 { get; }
+    /*embed*/ internal TestAnonymousFields_s1 s1;
+    /*embed*/ public TestAnonymousFields_S2ᴛ2 S2;
 }
 
 internal partial struct TestAnonymousFields_s1ᴛ1 /*dyn*/ {
@@ -710,8 +716,8 @@ internal partial struct TestAnonymousFields_S2ᴛ3 /*dyn*/ {
 }
 
 internal partial struct TestAnonymousFields_Sᴛ7 /*dyn*/ {
-    internal partial ref ж<TestAnonymousFields_s1ᴛ1> s1 { get; }
-    public partial ref ж<TestAnonymousFields_S2ᴛ3> S2 { get; }
+    /*embed*/ internal ж<TestAnonymousFields_s1ᴛ1> s1;
+    /*embed*/ public ж<TestAnonymousFields_S2ᴛ3> S2;
 }
 
 internal partial struct TestAnonymousFields_MyInt1 /*num:nint*/;
@@ -721,19 +727,19 @@ internal partial struct TestAnonymousFields_MyInt2 /*num:nint*/;
 internal partial struct TestAnonymousFields_myIntᴛ2 /*num:nint*/;
 
 internal partial struct TestAnonymousFields_s2 /*dyn*/ {
-    public partial ref TestAnonymousFields_MyInt2 MyInt2 { get; }
-    internal partial ref TestAnonymousFields_myIntᴛ2 myInt { get; }
+    /*embed*/ public TestAnonymousFields_MyInt2 MyInt2;
+    /*embed*/ internal TestAnonymousFields_myIntᴛ2 myInt;
 }
 
 internal partial struct TestAnonymousFields_s1ᴛ2 /*dyn*/ {
-    public partial ref TestAnonymousFields_MyInt1 MyInt1 { get; }
-    internal partial ref TestAnonymousFields_myIntᴛ2 myInt { get; }
-    internal partial ref TestAnonymousFields_s2 s2 { get; }
+    /*embed*/ public TestAnonymousFields_MyInt1 MyInt1;
+    /*embed*/ internal TestAnonymousFields_myIntᴛ2 myInt;
+    /*embed*/ internal TestAnonymousFields_s2 s2;
 }
 
 internal partial struct TestAnonymousFields_Sᴛ8 /*dyn*/ {
-    internal partial ref TestAnonymousFields_s1ᴛ2 s1 { get; }
-    internal partial ref TestAnonymousFields_myIntᴛ2 myInt { get; }
+    /*embed*/ internal TestAnonymousFields_s1ᴛ2 s1;
+    /*embed*/ internal TestAnonymousFields_myIntᴛ2 myInt;
 }
 
 internal partial struct TestAnonymousFields_S2ᴛ4 /*dyn*/ {
@@ -741,7 +747,7 @@ internal partial struct TestAnonymousFields_S2ᴛ4 /*dyn*/ {
 }
 
 internal partial struct TestAnonymousFields_Sᴛ9 /*dyn*/ {
-    public partial ref ж<TestAnonymousFields_S2ᴛ4> S2 { get; }
+    /*embed*/ public ж<TestAnonymousFields_S2ᴛ4> S2;
 }
 
 public static void TestAnonymousFields(ж<testing.T> Ꮡt) {
@@ -856,7 +862,7 @@ public partial struct BugA {
 }
 
 public partial struct BugB {
-    public partial ref BugA BugA { get; }
+    /*embed*/ public BugA BugA;
     public @string S;
 }
 
@@ -867,8 +873,8 @@ public partial struct BugC {
 // Legal Go: We never use the repeated embedded field (S).
 public partial struct BugX {
     public nint A;
-    public partial ref BugA BugA { get; }
-    public partial ref BugB BugB { get; }
+    /*embed*/ public BugA BugA;
+    /*embed*/ public BugB BugB;
 }
 
 // golang.org/issue/16042.
@@ -900,7 +906,7 @@ internal static (slice<byte>, error) MarshalText(this ж<nilTextMarshaler> Ꮡnm
 }
 
 internal partial struct TestNilMarshal_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any @in;
     internal @string want;
 }
@@ -1001,8 +1007,8 @@ public partial struct BugD {
 
 // BugD's tagged S field should dominate BugA's.
 public partial struct BugY {
-    public partial ref BugA BugA { get; }
-    public partial ref BugD BugD { get; }
+    /*embed*/ public BugA BugA;
+    /*embed*/ public BugD BugD;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
@@ -1027,9 +1033,9 @@ public static void TestTaggedFieldDominates(ж<testing.T> Ꮡt) {
 
 // There are no tags here, so S should not appear.
 public partial struct BugZ {
-    public partial ref BugA BugA { get; }
-    public partial ref BugC BugC { get; }
-    public partial ref BugY BugY { get; } // Contains a tagged S field through BugD; should not dominate.
+    /*embed*/ public BugA BugA;
+    /*embed*/ public BugC BugC;
+    /*embed*/ public BugY BugY; // Contains a tagged S field through BugD; should not dominate.
 }
 
 public static void TestDuplicatedFieldDisappears(ж<testing.T> Ꮡt) {
@@ -1273,7 +1279,7 @@ internal static (slice<byte>, error) MarshalText(this textfloat f) {
 }
 
 internal partial struct TestEncodeBytekind_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any @in;
     internal @string want;
 }
@@ -1463,7 +1469,7 @@ internal partial struct TestMarshalRawMessageValue_T2 /*dyn*/ {
 }
 
 internal partial struct TestMarshalRawMessageValue_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any @in;
     internal @string want;
     internal bool ok;
@@ -1641,7 +1647,7 @@ internal static readonly @string testVariableˢ = "test variable"u8;
 internal static readonly @string errTextᶜ = "json: test error"u8;
 
 internal partial struct TestMarshalerError_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal ж<global::go.encoding.json_package.MarshalerError> err;
     internal @string want;
 }
@@ -1700,6 +1706,24 @@ public static void TestIssue63379(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("expected error for %q"u8, v);
         }
     }
+}
+
+// Issue #73733: encoding/json used a WaitGroup to coordinate access to cache entries.
+// Since WaitGroup.Wait is durably blocking, this caused apparent deadlocks when
+// multiple bubbles called json.Marshal at the same time.
+public static void TestSynctestMarshal(ж<testing.T> Ꮡt) {
+    ref var wg = ref heap(new sync.WaitGroup(), out var Ꮡwg);
+    foreach (var _ᴛ1 in range(5)) {
+        Ꮡwg.Go(() => {
+            synctest.Test(Ꮡt, (ж<testing.T> tΔ1) => {
+                var (_, err) = Marshal(new @string[]{}.slice());
+                if (err != default!) {
+                    tΔ1.Errorf("Marshal: %v"u8, err);
+                }
+            });
+        });
+    }
+    Ꮡwg.Wait();
 }
 
 } // end json_internal_test_package

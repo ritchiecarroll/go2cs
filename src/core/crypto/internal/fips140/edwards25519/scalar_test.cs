@@ -35,8 +35,7 @@ internal static error _ᴛ1ʗ;
 internal static void initᴛscOne() { scOne = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetCanonicalBytes(scOneBytes[..]).Item1; }
 
 internal static ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> scMinusOne;
-internal static error _ᴛ2ʗ;
-internal static void initᴛscMinusOne() { scMinusOne = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetCanonicalBytes(scalarMinusOneBytes[..]).Item1; }
+internal static void initᴛscMinusOne() { scMinusOne = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().Subtract(@new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>(), scOne); }
 
 // Generate returns a valid (reduced modulo l) Scalar with a distribution
 // weighted towards high, low, and edge values.
@@ -54,7 +53,7 @@ internal static reflectꓸValue Generate(this global::go.crypto.@internal.fips14
         break;
     }
     case {} when diceRoll is 2: {
-        s = scalarMinusOneBytes.Clone();
+        s = new array<byte>(scMinusOne.Bytes(), 32);
         break;
     }
     case {} when diceRoll is < 5: {
@@ -137,20 +136,33 @@ public static void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
         }
     }
 
-    var b = scalarMinusOneBytes.Clone();
-    b[31] += 1;
-    var s = scOne;
-    {
-        var (@out, err) = s.SetCanonicalBytes(b[..]); if (err == default!){
-            Ꮡt.Errorf("SetCanonicalBytes worked on a non-canonical value"u8);
-        } else 
-        if (s != scOne){
-            Ꮡt.Errorf("SetCanonicalBytes modified its receiver"u8);
-        } else 
-        if (@out != nil) {
-            Ꮡt.Errorf("SetCanonicalBytes did not return nil with an error"u8);
+    void expectReject(slice<byte> bΔ1) {
+        Ꮡt.Helper();
+        var s = scOne;
+        {
+            var (@out, err) = s.SetCanonicalBytes(bΔ1[..]); if (err == default!){
+                Ꮡt.Errorf("SetCanonicalBytes worked on a non-canonical value"u8);
+            } else 
+            if (s != scOne){
+                Ꮡt.Errorf("SetCanonicalBytes modified its receiver"u8);
+            } else 
+            if (@out != nil) {
+                Ꮡt.Errorf("SetCanonicalBytes did not return nil with an error"u8);
+            }
         }
     }
+
+    var b = scMinusOne.Bytes();
+    b[0] += 1;
+    expectReject(b);
+
+    b = scMinusOne.Bytes();
+    b[31] += 1;
+    expectReject(b);
+
+    b = scMinusOne.Bytes();
+    b[31] |= (byte)(0b1000_0000);
+    expectReject(b);
 }
 
 public static void TestScalarSetUniformBytes(ж<testing.T> Ꮡt) {
@@ -178,6 +190,7 @@ public static void TestScalarSetUniformBytes(ж<testing.T> Ꮡt) {
 
 public static void TestScalarSetBytesWithClamping(ж<testing.T> Ꮡt) {
     // Generated with libsodium.js 1.0.18 crypto_scalarmult_ed25519_base.
+
     @string random = "633d368491364dc9cd4c1bf891b1d59460face1644813240a313e61f2c88216e"u8;
     var (s, _) = @new<global::go.crypto.@internal.fips140.edwards25519_package.Scalar>().SetBytesWithClamping(decodeHex(random));
     var p = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().ScalarBaseMult(s);
@@ -211,7 +224,7 @@ public static void TestScalarSetBytesWithClamping(ж<testing.T> Ꮡt) {
 
 internal static ж<bigꓸInt> bigIntFromLittleEndianBytes(slice<byte> b) {
     var bb = new slice<byte>(len(b));
-    foreach (var (i, _) in b) {
+    foreach (var i in range(b)) {
         bb[i] = b[len(b) - i - 1];
     }
     return @new<bigꓸInt>().SetBytes(bb);

@@ -6,14 +6,14 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `path/filepath` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**61 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**67 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/path/filepath`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/path/filepath).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
-Both runtimes skip 20 of the matched tests identically.
+Both runtimes skip 6 of the matched tests identically.
 
 ## Verdicts
 
@@ -29,34 +29,34 @@ Both runtimes skip 20 of the matched tests identically.
 | `TestDir` | pass | pass |
 | `TestDriveLetterInEvalSymlinks` | pass | pass |
 | `TestEscaping` | pass | pass |
-| `TestEvalSymlinks` | skip | skip |
-| `TestEvalSymlinksAboveRoot` | skip | skip |
-| `TestEvalSymlinksAboveRootChdir` | skip | skip |
+| `TestEvalSymlinks` | pass | pass |
+| `TestEvalSymlinksAboveRoot` | pass | pass |
+| `TestEvalSymlinksAboveRootChdir` | pass | pass |
 | `TestEvalSymlinksCanonicalNames` | pass | pass |
 | `TestEvalSymlinksCanonicalNamesWith8dot3Disabled` | skip | skip |
-| `TestEvalSymlinksIsNotExist` | skip | skip |
+| `TestEvalSymlinksIsNotExist` | pass | pass |
 | `TestEvalSymlinksJunctionToVolumeID` | skip | skip |
 | `TestEvalSymlinksMountPointRecursion` | skip | skip |
-| `TestEvalSymlinksTooManyLinks` | skip | skip |
+| `TestEvalSymlinksTooManyLinks` | pass | pass |
 | `TestExt` | pass | pass |
 | `TestFromAndToSlash` | pass | pass |
 | `TestGlob` | pass | pass |
 | `TestGlobError` | pass | pass |
-| `TestGlobSymlink` | skip | skip |
+| `TestGlobSymlink` | pass | pass |
 | `TestGlobUNC` | pass | pass |
 | `TestIsAbs` | pass | pass |
 | `TestIsLocal` | pass | pass |
-| `TestIssue13582` | skip | skip |
+| `TestIssue13582` | pass | pass |
 | `TestIssue29372` | pass | pass |
 | `TestIssue51617` | pass | pass |
 | `TestIssue52476` | pass | pass |
 | `TestJoin` | pass | pass |
 | `TestLocalize` | pass | pass |
 | `TestMatch` | pass | pass |
-| `TestNTNamespaceSymlink` | skip | skip |
+| `TestNTNamespaceSymlink` | pass | pass |
 | `TestNonWindowsGlobEscape` | skip | skip |
 | `TestRel` | pass | pass |
-| `TestRelativeSymlinkToAbsolute` | skip | skip |
+| `TestRelativeSymlinkToAbsolute` | pass | pass |
 | `TestSplit` | pass | pass |
 | `TestSplitList` | pass | pass |
 | `TestToNorm` | pass | pass |
@@ -66,8 +66,8 @@ Both runtimes skip 20 of the matched tests identically.
 | `TestWalk/PermErr` | skip | skip |
 | `TestWalkDir` | pass | pass |
 | `TestWalkDir/PermErr` | skip | skip |
-| `TestWalkDirectoryJunction` | skip | skip |
-| `TestWalkDirectorySymlink` | skip | skip |
+| `TestWalkDirectoryJunction` | pass | pass |
+| `TestWalkDirectorySymlink` | pass | pass |
 | `TestWalkFileError` | pass | pass |
 | `TestWalkSkipAllOnFile` | pass | pass |
 | `TestWalkSkipAllOnFile/Walk` | pass | pass |
@@ -75,10 +75,16 @@ Both runtimes skip 20 of the matched tests identically.
 | `TestWalkSkipDirOnFile` | pass | pass |
 | `TestWalkSkipDirOnFile/Walk` | pass | pass |
 | `TestWalkSkipDirOnFile/WalkDir` | pass | pass |
-| `TestWalkSymlink` | skip | skip |
-| `TestWalkSymlinkRoot` | skip | skip |
+| `TestWalkSymlink` | pass | pass |
+| `TestWalkSymlinkRoot` | pass | pass |
+| `TestWalkSymlinkRoot/abs_no_slash` | pass | pass |
+| `TestWalkSymlinkRoot/abs_with_slash` | pass | pass |
+| `TestWalkSymlinkRoot/double_link_no_slash` | pass | pass |
+| `TestWalkSymlinkRoot/double_link_with_slash` | pass | pass |
+| `TestWalkSymlinkRoot/no_slash` | pass | pass |
+| `TestWalkSymlinkRoot/slash` | pass | pass |
 | `TestWinSplitListTestsAreValid` | pass | pass |
-| `TestWindowsEvalSymlinks` | skip | skip |
+| `TestWindowsEvalSymlinks` | pass | pass |
 | `TestWindowsGlob` | pass | pass |
 
 ## Excluded declarations
@@ -89,4 +95,6 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkIsLocal (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkMatch (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleExt (example): example execution is deferred to Phase 4D

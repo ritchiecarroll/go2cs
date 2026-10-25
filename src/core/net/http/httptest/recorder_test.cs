@@ -3,11 +3,12 @@
 // license that can be found in the LICENSE file.
 namespace go.net.http;
 
+using bytes = bytes_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using io = io_package;
 using http = go.net.http_package;
 using testing = testing_package;
-using bytes = bytes_package;
 using go.net;
 using static go.net.http.httptest_package;
 using ꓸꓸꓸstring = Span<@string>;
@@ -49,8 +50,8 @@ internal partial struct TestRecorder_type /*dyn*/ {
 
 public static void TestRecorder(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
-    // type checkFunc is a methodless func type — rendered inline as its base delegate
 
+    // type checkFunc is a methodless func type — rendered inline as its base delegate
     slice<Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>> check(params Span<Func<ж<global::go.net.http.httptest_package.ResponseRecorder>, error>> fnsʗp) {
         var fns = fnsʗp.slice();
         return fns;
@@ -356,6 +357,33 @@ public static void TestRecorder(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string worldˢ = "world"u8;
+internal static readonly @string helloWorldˢ = "hello world"u8;
+
+public static void TestBodyNotAllowed(ж<testing.T> Ꮡt) {
+    var rw = NewRecorder();
+    rw.Value.Body = @new<bytes.Buffer>();
+    rw.WriteHeader(204);
+
+    var (_, err) = rw.Write(slice<byte>("hello "u8));
+    if (!errors.Is(err, http.ErrBodyNotAllowed)) {
+        Ꮡt.Errorf("expected BodyNotAllowed for Write after 204, got: %v"u8, err);
+    }
+
+    (_, err) = rw.WriteString(worldˢ);
+    if (!errors.Is(err, http.ErrBodyNotAllowed)) {
+        Ꮡt.Errorf("expected BodyNotAllowed for WriteString after 204, got: %v"u8, err);
+    }
+
+    {
+        @string got = (~rw).Body.String();
+        @string want = helloWorldˢ; if (got != want) {
+            Ꮡt.Errorf("got Body=%q, want %q"u8, got, want);
+        }
+    }
+}
+
 internal partial struct TestParseContentLength_tests /*dyn*/ {
     internal @string cl;
     internal int64 want;
@@ -407,8 +435,7 @@ public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> Ꮡt) {
         -100, 0, 99, 1000, 20000
     }.slice();
     foreach (var (_, badCode) in badCodes) {
-        nint badCodeΔ1 = badCode;
-        Ꮡt.Run(fmt.Sprintf("Code=%d"u8, badCodeΔ1), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(fmt.Sprintf("Code=%d"u8, badCode), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 defer(() => {
@@ -420,7 +447,7 @@ public static void TestRecorderPanicsOnNonXXXStatusCode(ж<testing.T> Ꮡt) {
                 }, ref ᒐ);
 
                 void handler(http.ResponseWriter rwΔ1, ж<http.Request> _Δp1) {
-                    rwΔ1.WriteHeader(badCodeΔ1);
+                    rwΔ1.WriteHeader(badCode);
                 }
                 var (r, _) = http.NewRequest(getˢ, httpExampleOrgˢ, default!);
                 var rw = NewRecorder();

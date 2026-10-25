@@ -15,7 +15,6 @@ using go.io;
 using io = io_package;
 using path;
 using static go.compress.gzip_package;
-using time = time_package;
 
 partial class gzip_internal_test_package {
 

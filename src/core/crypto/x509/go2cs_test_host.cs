@@ -9,8 +9,10 @@ internal static class Go2CsTestHost
     {
         TestRegistry registry = new("crypto/x509", new string[]
         {
+            "bettertls_test.go",
             "cert_pool.go",
             "cert_pool_test.go",
+            "constraints.go",
             "example_test.go",
             "hybrid_pool_test.go",
             "name_constraints_test.go",
@@ -30,6 +32,7 @@ internal static class Go2CsTestHost
             "root_bsd.go",
             "root_darwin.go",
             "root_linux.go",
+            "root_linux_test.go",
             "root_plan9.go",
             "root_solaris.go",
             "root_test.go",
@@ -477,6 +480,7 @@ internal static class Go2CsTestHost
             "verify.go",
             "verify_test.go",
             "x509.go",
+            "x509_string.go",
             "x509_test.go",
             "x509_test_import.go",
         }, new string[]
@@ -485,131 +489,135 @@ internal static class Go2CsTestHost
             "pkix",
             "testdata",
         });
-        registry.Add("TestASN1BitLength", x509_internal_test_package.TestASN1BitLength, "x509_test.go", 1866);
-        registry.Add("TestAdditionFieldsInGeneralSubtree", x509_internal_test_package.TestAdditionFieldsInGeneralSubtree, "x509_test.go", 2397);
-        registry.Add("TestAuthKeyIdOptional", x509_internal_test_package.TestAuthKeyIdOptional, "x509_test.go", 3563);
-        registry.Add("TestBadIPMask", x509_internal_test_package.TestBadIPMask, "x509_test.go", 2343);
+        registry.Add("TestASN1BitLength", x509_internal_test_package.TestASN1BitLength, "x509_test.go", 1864);
+        registry.Add("TestAdditionFieldsInGeneralSubtree", x509_internal_test_package.TestAdditionFieldsInGeneralSubtree, "x509_test.go", 2395);
+        registry.Add("TestAuthKeyIdOptional", x509_internal_test_package.TestAuthKeyIdOptional, "x509_test.go", 3561);
+        registry.Add("TestBadIPMask", x509_internal_test_package.TestBadIPMask, "x509_test.go", 2341);
         registry.Add("TestBadNamesInConstraints", x509_internal_test_package.TestBadNamesInConstraints, "name_constraints_test.go", 2172);
         registry.Add("TestBadNamesInSANs", x509_internal_test_package.TestBadNamesInSANs, "name_constraints_test.go", 2219);
+        registry.Add("TestBetterTLS", x509_internal_test_package.TestBetterTLS, "bettertls_test.go", 39);
         registry.Add("TestCRLCreation", x509_internal_test_package.TestCRLCreation, "x509_test.go", 1332);
         registry.Add("TestCRLWithoutExpiry", x509_internal_test_package.TestCRLWithoutExpiry, "x509_test.go", 1428);
         registry.Add("TestCertPoolEqual", x509_internal_test_package.TestCertPoolEqual, "cert_pool_test.go", 9);
-        registry.Add("TestCertificateChainSignedByECDSA", x509_internal_test_package.TestCertificateChainSignedByECDSA, "verify_test.go", 3100);
+        registry.Add("TestCertificateChainSignedByECDSA", x509_internal_test_package.TestCertificateChainSignedByECDSA, "verify_test.go", 3061);
         registry.Add("TestCertificateEqualOnNil", x509_internal_test_package.TestCertificateEqualOnNil, "x509_test.go", 583);
-        registry.Add("TestCertificateOIDPoliciesGODEBUG", x509_internal_test_package.TestCertificateOIDPoliciesGODEBUG, "x509_test.go", 4030);
+        registry.Add("TestCertificateOIDPoliciesGODEBUG", x509_internal_test_package.TestCertificateOIDPoliciesGODEBUG, "x509_test.go", 4028);
         registry.Add("TestCertificateParse", x509_internal_test_package.TestCertificateParse, "x509_test.go", 557);
-        registry.Add("TestCertificatePolicies", x509_internal_test_package.TestCertificatePolicies, "x509_test.go", 4068);
-        registry.Add("TestCertificateRequestOverrides", x509_internal_test_package.TestCertificateRequestOverrides, "x509_test.go", 1569);
-        registry.Add("TestCertificateRequestRoundtripFields", x509_internal_test_package.TestCertificateRequestRoundtripFields, "x509_test.go", 3321);
-        registry.Add("TestConstraintCases", x509_internal_test_package.TestConstraintCases, "name_constraints_test.go", 1926);
-        registry.Add("TestCreateCertificateBrokenSigner", x509_internal_test_package.TestCreateCertificateBrokenSigner, "x509_test.go", 3244);
-        registry.Add("TestCreateCertificateLegacy", x509_internal_test_package.TestCreateCertificateLegacy, "x509_test.go", 3258);
-        registry.Add("TestCreateCertificateRequest", x509_internal_test_package.TestCreateCertificateRequest, "x509_test.go", 1474);
-        registry.Add("TestCreateNegativeSerial", x509_internal_test_package.TestCreateNegativeSerial, "x509_test.go", 3942);
-        registry.Add("TestCreateRevocationList", x509_internal_test_package.TestCreateRevocationList, "x509_test.go", 2542);
+        registry.Add("TestCertificatePolicies", x509_internal_test_package.TestCertificatePolicies, "x509_test.go", 4066);
+        registry.Add("TestCertificateRequestOverrides", x509_internal_test_package.TestCertificateRequestOverrides, "x509_test.go", 1567);
+        registry.Add("TestCertificateRequestRoundtripFields", x509_internal_test_package.TestCertificateRequestRoundtripFields, "x509_test.go", 3319);
+        registry.Add("TestConstraintCases", x509_internal_test_package.TestConstraintCases, "name_constraints_test.go", 1930);
+        registry.Add("TestCreateCertificateBrokenSigner", x509_internal_test_package.TestCreateCertificateBrokenSigner, "x509_test.go", 3242);
+        registry.Add("TestCreateCertificateLegacy", x509_internal_test_package.TestCreateCertificateLegacy, "x509_test.go", 3256);
+        registry.Add("TestCreateCertificateNegativeMaxPathLength", x509_internal_test_package.TestCreateCertificateNegativeMaxPathLength, "x509_test.go", 4239);
+        registry.Add("TestCreateCertificateRequest", x509_internal_test_package.TestCreateCertificateRequest, "x509_test.go", 1472);
+        registry.Add("TestCreateNegativeSerial", x509_internal_test_package.TestCreateNegativeSerial, "x509_test.go", 3940);
+        registry.Add("TestCreateRevocationList", x509_internal_test_package.TestCreateRevocationList, "x509_test.go", 2540);
         registry.Add("TestCreateSelfSignedCertificate", x509_internal_test_package.TestCreateSelfSignedCertificate, "x509_test.go", 682);
-        registry.Add("TestCriticalFlagInCSRRequestedExtensions", x509_internal_test_package.TestCriticalFlagInCSRRequestedExtensions, "x509_test.go", 1683);
-        registry.Add("TestCriticalNameConstraintWithUnknownType", x509_internal_test_package.TestCriticalNameConstraintWithUnknownType, "x509_test.go", 2311);
+        registry.Add("TestCriticalFlagInCSRRequestedExtensions", x509_internal_test_package.TestCriticalFlagInCSRRequestedExtensions, "x509_test.go", 1681);
+        registry.Add("TestCriticalNameConstraintWithUnknownType", x509_internal_test_package.TestCriticalNameConstraintWithUnknownType, "x509_test.go", 2309);
         registry.Add("TestDecrypt", x509_internal_test_package.TestDecrypt, "pem_decrypt_test.go", 16);
-        registry.Add("TestDisableSHA1ForCertOnly", x509_internal_test_package.TestDisableSHA1ForCertOnly, "x509_test.go", 3717);
-        registry.Add("TestDomainNameValid", x509_internal_test_package.TestDomainNameValid, "parser_test.go", 192);
-        registry.Add("TestDuplicateAttributesCSR", x509_internal_test_package.TestDuplicateAttributesCSR, "x509_test.go", 4019);
-        registry.Add("TestDuplicateExtensionsCSR", x509_internal_test_package.TestDuplicateExtensionsCSR, "x509_test.go", 3997);
-        registry.Add("TestDuplicateExtensionsCert", x509_internal_test_package.TestDuplicateExtensionsCert, "x509_test.go", 3975);
+        registry.Add("TestDisableSHA1ForCertOnly", x509_internal_test_package.TestDisableSHA1ForCertOnly, "x509_test.go", 3715);
+        registry.Add("TestDomainNameValid", x509_internal_test_package.TestDomainNameValid, "parser_test.go", 259);
+        registry.Add("TestDuplicateAttributesCSR", x509_internal_test_package.TestDuplicateAttributesCSR, "x509_test.go", 4017);
+        registry.Add("TestDuplicateExtensionsCSR", x509_internal_test_package.TestDuplicateExtensionsCSR, "x509_test.go", 3995);
+        registry.Add("TestDuplicateExtensionsCert", x509_internal_test_package.TestDuplicateExtensionsCert, "x509_test.go", 3973);
         registry.Add("TestECDSA", x509_internal_test_package.TestECDSA, "x509_test.go", 1003);
         registry.Add("TestECMismatchKeyFormat", x509_internal_test_package.TestECMismatchKeyFormat, "sec1_test.go", 58);
-        registry.Add("TestEKUEnforcement", x509_internal_test_package.TestEKUEnforcement, "verify_test.go", 2456);
+        registry.Add("TestEKUEnforcement", x509_internal_test_package.TestEKUEnforcement, "verify_test.go", 2417);
+        registry.Add("TestEKUOIDS", x509_internal_test_package.TestEKUOIDS, "x509_test.go", 4264);
         registry.Add("TestEd25519SelfSigned", x509_internal_test_package.TestEd25519SelfSigned, "x509_test.go", 1233);
-        registry.Add("TestEmptyNameConstraints", x509_internal_test_package.TestEmptyNameConstraints, "x509_test.go", 2148);
-        registry.Add("TestEmptySerialNumber", x509_internal_test_package.TestEmptySerialNumber, "x509_test.go", 2407);
-        registry.Add("TestEmptySubject", x509_internal_test_package.TestEmptySubject, "x509_test.go", 2438);
+        registry.Add("TestEmptyNameConstraints", x509_internal_test_package.TestEmptyNameConstraints, "x509_test.go", 2146);
+        registry.Add("TestEmptySerialNumber", x509_internal_test_package.TestEmptySerialNumber, "x509_test.go", 2405);
+        registry.Add("TestEmptySubject", x509_internal_test_package.TestEmptySubject, "x509_test.go", 2436);
         registry.Add("TestEncrypt", x509_internal_test_package.TestEncrypt, "pem_decrypt_test.go", 41);
         registry.Add("TestFallback", x509_internal_test_package.TestFallback, "root_test.go", 21);
         registry.Add("TestFallbackPanic", x509_internal_test_package.TestFallbackPanic, "root_test.go", 11);
         registry.Add("TestGoVerify", x509_internal_test_package.TestGoVerify, "verify_test.go", 540);
-        registry.Add("TestGob", x509_internal_test_package.TestGob, "x509_test.go", 4115);
+        registry.Add("TestGob", x509_internal_test_package.TestGob, "x509_test.go", 4113);
         registry.Add("TestHybridPool", x509_test_package.TestHybridPool, "hybrid_pool_test.go", 21);
-        registry.Add("TestIA5SANEnforcement", x509_internal_test_package.TestIA5SANEnforcement, "x509_test.go", 3097);
-        registry.Add("TestISOOIDInCertificate", x509_internal_test_package.TestISOOIDInCertificate, "x509_test.go", 2024);
+        registry.Add("TestIA5SANEnforcement", x509_internal_test_package.TestIA5SANEnforcement, "x509_test.go", 3095);
+        registry.Add("TestISOOIDInCertificate", x509_internal_test_package.TestISOOIDInCertificate, "x509_test.go", 2022);
         registry.Add("TestImports", x509_internal_test_package.TestImports, "x509_test.go", 1459);
         registry.Add("TestIncompleteBlock", x509_internal_test_package.TestIncompleteBlock, "pem_decrypt_test.go", 235);
-        registry.Add("TestInsecureAlgorithmErrorString", x509_internal_test_package.TestInsecureAlgorithmErrorString, "x509_test.go", 1894);
+        registry.Add("TestInsecureAlgorithmErrorString", x509_internal_test_package.TestInsecureAlgorithmErrorString, "x509_test.go", 1892);
         registry.Add("TestInvalidOID", x509_internal_test_package.TestInvalidOID, "oid_test.go", 98);
-        registry.Add("TestInvalidPolicyWithAnyKeyUsage", x509_internal_test_package.TestInvalidPolicyWithAnyKeyUsage, "verify_test.go", 3064);
-        registry.Add("TestIssue51759", x509_internal_test_package.TestIssue51759, "verify_test.go", 1741);
-        registry.Add("TestLargeOID", x509_internal_test_package.TestLargeOID, "x509_test.go", 3657);
-        registry.Add("TestLongChain", x509_internal_test_package.TestLongChain, "verify_test.go", 1648);
-        registry.Add("TestMD5", x509_internal_test_package.TestMD5, "x509_test.go", 1950);
+        registry.Add("TestInvalidPolicyWithAnyKeyUsage", x509_internal_test_package.TestInvalidPolicyWithAnyKeyUsage, "verify_test.go", 3025);
+        registry.Add("TestIssue51759", x509_internal_test_package.TestIssue51759, "verify_test.go", 1702);
+        registry.Add("TestLargeOID", x509_internal_test_package.TestLargeOID, "x509_test.go", 3655);
+        registry.Add("TestMD5", x509_internal_test_package.TestMD5, "x509_test.go", 1948);
         registry.Add("TestMarshalInvalidPublicKey", x509_internal_test_package.TestMarshalInvalidPublicKey, "x509_test.go", 101);
         registry.Add("TestMarshalRSAPrivateKey", x509_internal_test_package.TestMarshalRSAPrivateKey, "x509_test.go", 252);
         registry.Add("TestMarshalRSAPrivateKeyInvalid", x509_internal_test_package.TestMarshalRSAPrivateKeyInvalid, "x509_test.go", 288);
         registry.Add("TestMarshalRSAPublicKey", x509_internal_test_package.TestMarshalRSAPublicKey, "x509_test.go", 339);
         registry.Add("TestMatchHostnames", x509_internal_test_package.TestMatchHostnames, "x509_test.go", 504);
         registry.Add("TestMatchIP", x509_internal_test_package.TestMatchIP, "x509_test.go", 514);
-        registry.Add("TestMaxPathLen", x509_internal_test_package.TestMaxPathLen, "x509_test.go", 1774);
-        registry.Add("TestMaxPathLenNotCA", x509_internal_test_package.TestMaxPathLenNotCA, "x509_test.go", 1736);
+        registry.Add("TestMaxPathLen", x509_internal_test_package.TestMaxPathLen, "x509_test.go", 1772);
+        registry.Add("TestMaxPathLenNotCA", x509_internal_test_package.TestMaxPathLenNotCA, "x509_test.go", 1734);
+        registry.Add("TestMessageSigner", x509_internal_test_package.TestMessageSigner, "x509_test.go", 4216);
         registry.Add("TestMismatchedSignatureAlgorithm", x509_internal_test_package.TestMismatchedSignatureAlgorithm, "x509_test.go", 600);
-        registry.Add("TestMultipleRDN", x509_internal_test_package.TestMultipleRDN, "x509_test.go", 2069);
-        registry.Add("TestMultipleURLsInCRLDP", x509_internal_test_package.TestMultipleURLsInCRLDP, "x509_test.go", 2505);
+        registry.Add("TestMultipleRDN", x509_internal_test_package.TestMultipleRDN, "x509_test.go", 2067);
+        registry.Add("TestMultipleURLsInCRLDP", x509_internal_test_package.TestMultipleURLsInCRLDP, "x509_test.go", 2503);
         registry.Add("TestNISTPKITSPolicy", x509_internal_test_package.TestNISTPKITSPolicy, "pkits_test.go", 23);
-        registry.Add("TestNameConstraints", x509_internal_test_package.TestNameConstraints, "verify_test.go", 1400);
-        registry.Add("TestNoAuthorityKeyIdInSelfSignedCert", x509_internal_test_package.TestNoAuthorityKeyIdInSelfSignedCert, "x509_test.go", 1815);
-        registry.Add("TestNoSubjectKeyIdInCert", x509_internal_test_package.TestNoSubjectKeyIdInCert, "x509_test.go", 1839);
+        registry.Add("TestNoAuthorityKeyIdInSelfSignedCert", x509_internal_test_package.TestNoAuthorityKeyIdInSelfSignedCert, "x509_test.go", 1813);
+        registry.Add("TestNoSubjectKeyIdInCert", x509_internal_test_package.TestNoSubjectKeyIdInCert, "x509_test.go", 1837);
         registry.Add("TestOID", x509_internal_test_package.TestOID, "oid_test.go", 51);
         registry.Add("TestOIDEqual", x509_internal_test_package.TestOIDEqual, "oid_test.go", 130);
         registry.Add("TestOIDEqualASN1OID", x509_internal_test_package.TestOIDEqualASN1OID, "oid_test.go", 273);
+        registry.Add("TestOIDFromASN1OID", x509_internal_test_package.TestOIDFromASN1OID, "oid_test.go", 347);
         registry.Add("TestOIDMarshal", x509_internal_test_package.TestOIDMarshal, "oid_test.go", 158);
         registry.Add("TestOIDUnmarshalBinary", x509_internal_test_package.TestOIDUnmarshalBinary, "oid_test.go", 317);
-        registry.Add("TestOmitEmptyExtensions", x509_internal_test_package.TestOmitEmptyExtensions, "x509_test.go", 3901);
-        registry.Add("TestPKCS1MismatchKeyFormat", x509_internal_test_package.TestPKCS1MismatchKeyFormat, "x509_test.go", 2532);
+        registry.Add("TestOmitEmptyExtensions", x509_internal_test_package.TestOmitEmptyExtensions, "x509_test.go", 3899);
+        registry.Add("TestPKCS1MismatchKeyFormat", x509_internal_test_package.TestPKCS1MismatchKeyFormat, "x509_test.go", 2530);
         registry.Add("TestPKCS1MismatchPublicKeyFormat", x509_internal_test_package.TestPKCS1MismatchPublicKeyFormat, "x509_test.go", 90);
         registry.Add("TestPKCS8", x509_internal_test_package.TestPKCS8, "pkcs8_test.go", 58);
         registry.Add("TestPKCS8MismatchKeyFormat", x509_internal_test_package.TestPKCS8MismatchKeyFormat, "pkcs8_test.go", 167);
         registry.Add("TestPKIXMismatchPublicKeyFormat", x509_internal_test_package.TestPKIXMismatchPublicKeyFormat, "x509_test.go", 200);
-        registry.Add("TestPKIXNameString", x509_internal_test_package.TestPKIXNameString, "x509_test.go", 2161);
+        registry.Add("TestPKIXNameString", x509_internal_test_package.TestPKIXNameString, "x509_test.go", 2159);
         registry.Add("TestParseASN1String", x509_internal_test_package.TestParseASN1String, "parser_test.go", 20);
-        registry.Add("TestParseCertificateRawEquals", x509_internal_test_package.TestParseCertificateRawEquals, "x509_test.go", 3480);
-        registry.Add("TestParseCertificateRequest", x509_internal_test_package.TestParseCertificateRequest, "x509_test.go", 1650);
+        registry.Add("TestParseCertificateNegativeMaxPathLength", x509_internal_test_package.TestParseCertificateNegativeMaxPathLength, "parser_test.go", 216);
+        registry.Add("TestParseCertificateRawEquals", x509_internal_test_package.TestParseCertificateRawEquals, "x509_test.go", 3478);
+        registry.Add("TestParseCertificateRequest", x509_internal_test_package.TestParseCertificateRequest, "x509_test.go", 1648);
         registry.Add("TestParseCertificateWithDSASignatureAlgorithm", x509_internal_test_package.TestParseCertificateWithDSASignatureAlgorithm, "x509_test.go", 1082);
         registry.Add("TestParseCertificateWithDsaPublicKey", x509_internal_test_package.TestParseCertificateWithDsaPublicKey, "x509_test.go", 1053);
         registry.Add("TestParseDERCRL", x509_internal_test_package.TestParseDERCRL, "x509_test.go", 1408);
         registry.Add("TestParseECPrivateKey", x509_internal_test_package.TestParseECPrivateKey, "sec1_test.go", 29);
-        registry.Add("TestParseNegativeSerial", x509_internal_test_package.TestParseNegativeSerial, "x509_test.go", 3934);
+        registry.Add("TestParseNegativeSerial", x509_internal_test_package.TestParseNegativeSerial, "x509_test.go", 3932);
         registry.Add("TestParsePEMCRL", x509_internal_test_package.TestParsePEMCRL, "x509_test.go", 1439);
         registry.Add("TestParsePKCS1PrivateKey", x509_internal_test_package.TestParsePKCS1PrivateKey, "x509_test.go", 41);
         registry.Add("TestParsePKIXPublicKey", x509_internal_test_package.TestParsePKIXPublicKey, "x509_test.go", 133);
-        registry.Add("TestParsePolicies", x509_internal_test_package.TestParsePolicies, "parser_test.go", 173);
-        registry.Add("TestParseRevocationList", x509_internal_test_package.TestParseRevocationList, "x509_test.go", 3778);
-        registry.Add("TestParseUniqueID", x509_internal_test_package.TestParseUniqueID, "x509_test.go", 3703);
-        registry.Add("TestPathBuilding", x509_internal_test_package.TestPathBuilding, "verify_test.go", 1922);
-        registry.Add("TestPathologicalChain", x509_internal_test_package.TestPathologicalChain, "verify_test.go", 1608);
+        registry.Add("TestParsePolicies", x509_internal_test_package.TestParsePolicies, "parser_test.go", 197);
+        registry.Add("TestParseRevocationList", x509_internal_test_package.TestParseRevocationList, "x509_test.go", 3776);
+        registry.Add("TestParseUniqueID", x509_internal_test_package.TestParseUniqueID, "x509_test.go", 3701);
+        registry.Add("TestPathBuilding", x509_internal_test_package.TestPathBuilding, "verify_test.go", 1883);
+        registry.Add("TestPathologicalChains", x509_internal_test_package.TestPathologicalChains, "verify_test.go", 1573);
         registry.Add("TestPlatformVerifier", x509_internal_test_package.TestPlatformVerifier, "platform_test.go", 38);
-        registry.Add("TestPoliciesValid", x509_internal_test_package.TestPoliciesValid, "verify_test.go", 2692);
-        registry.Add("TestPolicyParse", x509_internal_test_package.TestPolicyParse, "parser_test.go", 150);
-        registry.Add("TestRDNSequenceString", x509_internal_test_package.TestRDNSequenceString, "x509_test.go", 2251);
+        registry.Add("TestPoliciesValid", x509_internal_test_package.TestPoliciesValid, "verify_test.go", 2653);
+        registry.Add("TestPolicyParse", x509_internal_test_package.TestPolicyParse, "parser_test.go", 174);
+        registry.Add("TestRDNSequenceString", x509_internal_test_package.TestRDNSequenceString, "x509_test.go", 2249);
         registry.Add("TestRFC2821Parsing", x509_internal_test_package.TestRFC2821Parsing, "name_constraints_test.go", 2147);
-        registry.Add("TestRSAMissingNULLParameters", x509_internal_test_package.TestRSAMissingNULLParameters, "x509_test.go", 2001);
-        registry.Add("TestRSAPSAParameters", x509_internal_test_package.TestRSAPSAParameters, "x509_test.go", 3027);
+        registry.Add("TestRSAMissingNULLParameters", x509_internal_test_package.TestRSAMissingNULLParameters, "x509_test.go", 1999);
+        registry.Add("TestRSAPSAParameters", x509_internal_test_package.TestRSAPSAParameters, "x509_test.go", 3025);
         registry.Add("TestRSAPSSSelfSigned", x509_internal_test_package.TestRSAPSSSelfSigned, "x509_test.go", 1169);
-        registry.Add("TestRejectCriticalAIA", x509_internal_test_package.TestRejectCriticalAIA, "x509_test.go", 4150);
-        registry.Add("TestRejectCriticalAKI", x509_internal_test_package.TestRejectCriticalAKI, "x509_test.go", 4125);
-        registry.Add("TestRejectCriticalSKI", x509_internal_test_package.TestRejectCriticalSKI, "x509_test.go", 4175);
-        registry.Add("TestRevocationListCheckSignatureFrom", x509_internal_test_package.TestRevocationListCheckSignatureFrom, "x509_test.go", 3793);
-        registry.Add("TestRoundtripWeirdSANs", x509_internal_test_package.TestRoundtripWeirdSANs, "parser_test.go", 260);
-        registry.Add("TestSHA1", x509_internal_test_package.TestSHA1, "x509_test.go", 1967);
-        registry.Add("TestSigAlgMismatch", x509_internal_test_package.TestSigAlgMismatch, "x509_test.go", 3515);
-        registry.Add("TestSystemCertPool", x509_internal_test_package.TestSystemCertPool, "x509_test.go", 2085);
-        registry.Add("TestSystemRootsError", x509_internal_test_package.TestSystemRootsError, "verify_test.go", 1685);
-        registry.Add("TestSystemRootsErrorUnwrap", x509_internal_test_package.TestSystemRootsErrorUnwrap, "verify_test.go", 1715);
+        registry.Add("TestRejectCriticalAIA", x509_internal_test_package.TestRejectCriticalAIA, "x509_test.go", 4148);
+        registry.Add("TestRejectCriticalAKI", x509_internal_test_package.TestRejectCriticalAKI, "x509_test.go", 4123);
+        registry.Add("TestRejectCriticalSKI", x509_internal_test_package.TestRejectCriticalSKI, "x509_test.go", 4173);
+        registry.Add("TestRevocationListCheckSignatureFrom", x509_internal_test_package.TestRevocationListCheckSignatureFrom, "x509_test.go", 3791);
+        registry.Add("TestRoundtripWeirdSANs", x509_internal_test_package.TestRoundtripWeirdSANs, "parser_test.go", 327);
+        registry.Add("TestSHA1", x509_internal_test_package.TestSHA1, "x509_test.go", 1965);
+        registry.Add("TestSigAlgMismatch", x509_internal_test_package.TestSigAlgMismatch, "x509_test.go", 3513);
+        registry.Add("TestSystemCertPool", x509_internal_test_package.TestSystemCertPool, "x509_test.go", 2083);
+        registry.Add("TestSystemRootsError", x509_internal_test_package.TestSystemRootsError, "verify_test.go", 1646);
+        registry.Add("TestSystemRootsErrorUnwrap", x509_internal_test_package.TestSystemRootsErrorUnwrap, "verify_test.go", 1676);
         registry.Add("TestSystemVerify", x509_internal_test_package.TestSystemVerify, "verify_test.go", 548);
         registry.Add("TestUnknownAuthorityError", x509_internal_test_package.TestUnknownAuthorityError, "verify_test.go", 1357);
-        registry.Add("TestUnknownExtKey", x509_internal_test_package.TestUnknownExtKey, "x509_test.go", 3082);
-        registry.Add("TestValidHostname", x509_internal_test_package.TestValidHostname, "verify_test.go", 1540);
-        registry.Add("TestVerifyBareWildcard", x509_internal_test_package.TestVerifyBareWildcard, "verify_test.go", 2666);
+        registry.Add("TestUnknownExtKey", x509_internal_test_package.TestUnknownExtKey, "x509_test.go", 3080);
+        registry.Add("TestValidHostname", x509_internal_test_package.TestValidHostname, "verify_test.go", 1501);
+        registry.Add("TestVerifyBareWildcard", x509_internal_test_package.TestVerifyBareWildcard, "verify_test.go", 2627);
         registry.Add("TestVerifyCertificateWithDSASignature", x509_internal_test_package.TestVerifyCertificateWithDSASignature, "x509_test.go", 1093);
-        registry.Add("TestVerifyEKURootAsLeaf", x509_internal_test_package.TestVerifyEKURootAsLeaf, "verify_test.go", 2576);
-        registry.Add("TestVerifyEmptyCertificate", x509_internal_test_package.TestVerifyEmptyCertificate, "x509_test.go", 1888);
-        registry.Add("TestVerifyNilPubKey", x509_internal_test_package.TestVerifyNilPubKey, "verify_test.go", 2647);
+        registry.Add("TestVerifyEKURootAsLeaf", x509_internal_test_package.TestVerifyEKURootAsLeaf, "verify_test.go", 2537);
+        registry.Add("TestVerifyEmptyCertificate", x509_internal_test_package.TestVerifyEmptyCertificate, "x509_test.go", 1886);
+        registry.Add("TestVerifyNilPubKey", x509_internal_test_package.TestVerifyNilPubKey, "verify_test.go", 2608);
         return TestHost.Run(registry, args);
     }
 }

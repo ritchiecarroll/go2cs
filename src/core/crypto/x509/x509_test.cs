@@ -20,6 +20,7 @@ using base64 = go.encoding.base64_package;
 using gob = go.encoding.gob_package;
 using hex = go.encoding.hex_package;
 using pem = go.encoding.pem_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using testenv = go.@internal.testenv_package;
 using io = io_package;
@@ -27,13 +28,15 @@ using math = math_package;
 using big = go.math.big_package;
 using net = net_package;
 using url = go.net.url_package;
-using exec = go.os.exec_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using exec = go.os.exec_package;
 using go.@internal;
 using go.crypto;
 using go.crypto.x509;
@@ -41,6 +44,7 @@ using go.encoding;
 using go.math;
 using go.net;
 using go.os;
+using hash = hash_package;
 using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
@@ -773,20 +777,27 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
             ),
             NotBefore: time.Unix(1000, 0),
             NotAfter: time.Unix(100000, 0),
+
             SignatureAlgorithm: test.sigAlgo,
+
             SubjectKeyId: new byte[]{1, 2, 3, 4}.slice(),
             KeyUsage: KeyUsageCertSign,
+
             ExtKeyUsage: testExtKeyUsage,
             UnknownExtKeyUsage: testUnknownExtKeyUsage,
+
             BasicConstraintsValid: true,
             IsCA: true,
+
             OCSPServer: new @string[]{"http://ocsp.example.com"u8}.slice(),
             IssuingCertificateURL: new @string[]{"http://crt.example.com/ca1.crt"u8}.slice(),
+
             DNSNames: new @string[]{"test.example.com"u8}.slice(),
             EmailAddresses: new @string[]{"gopher@golang.org"u8}.slice(),
             IPAddresses: new net.IP[]{net.IPv4(127, 0, 0, 1).To4(), net.ParseIP("2001:4860:0:2001::68"u8)}.slice(),
             URIs: new ж<url.URL>[]{parseURI(httpsFooComWibbleFooˢ)}.slice(),
-            Policies: new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, 3, math.MaxUint32, math.MaxUint64}.slice())}.slice(),
+
+            Policies: new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, 3, math.MaxUint32, math.MaxUint64}.slice())}.slice(),
             PermittedDNSDomains: new @string[]{".example.com"u8, "example.com"u8}.slice(),
             ExcludedDNSDomains: new @string[]{"bar.example.com"u8}.slice(),
             PermittedIPRanges: new ж<net.IPNet>[]{parseCIDR("192.168.1.1/16"u8), parseCIDR("1.2.3.4/8"u8)}.slice(),
@@ -795,7 +806,9 @@ public static void TestCreateSelfSignedCertificate(ж<testing.T> Ꮡt) {
             ExcludedEmailAddresses: new @string[]{".example.com"u8, "example.com"u8}.slice(),
             PermittedURIDomains: new @string[]{".bar.com"u8, "bar.com"u8}.slice(),
             ExcludedURIDomains: new @string[]{".bar2.com"u8, "bar2.com"u8}.slice(),
+
             CRLDistributionPoints: new @string[]{"http://crl1.example.com/ca1.crl"u8, "http://crl2.example.com/ca1.crl"u8}.slice(),
+
             ExtraExtensions: new pkix.Extension[]{
                 new(
                     Id: new nint[]{1, 2, 3, 4}.slice(),
@@ -1534,17 +1547,14 @@ public static void TestParsePEMCRL(ж<testing.T> Ꮡt) {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingInShortModeˢ = (@string)"skipping in -short mode"u8;
-internal static readonly @string runˢ = "run"u8;
 internal static readonly @string x509TestImportGoˢ = "x509_test_import.go"u8;
 
 public static void TestImports(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
-    testenv.MustHaveGoRun(new x509_test_package.testing_TжTB(Ꮡt));
-
     {
-        var (@out, err) = exec.Command(testenv.GoToolPath(new x509_test_package.testing_TжTB(Ꮡt)), runˢ, x509TestImportGoˢ).CombinedOutput(); if (err != default!) {
+        var (@out, err) = testenv.Command(new x509_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new x509_test_package.testing_TжTB(Ꮡt)), runˢ, x509TestImportGoˢ).CombinedOutput(); if (err != default!) {
             Ꮡt.Errorf("failed to run x509_test_import.go: %s\n%s"u8, err, @out);
         }
     }
@@ -1848,6 +1858,7 @@ public static void TestMaxPathLenNotCA(ж<testing.T> Ꮡt) {
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
+
         BasicConstraintsValid: true,
         IsCA: false
     ));
@@ -1897,6 +1908,7 @@ public static void TestMaxPathLen(ж<testing.T> Ꮡt) {
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
+
         BasicConstraintsValid: true,
         IsCA: true
     ));
@@ -1943,6 +1955,7 @@ public static void TestNoAuthorityKeyIdInSelfSignedCert(ж<testing.T> Ꮡt) {
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
+
         BasicConstraintsValid: true,
         IsCA: true,
         SubjectKeyId: new byte[]{1, 2, 3, 4}.slice()
@@ -1972,6 +1985,7 @@ public static void TestNoSubjectKeyIdInCert(ж<testing.T> Ꮡt) {
         ),
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
+
         BasicConstraintsValid: true,
         IsCA: true
     ));
@@ -2022,7 +2036,7 @@ public static void TestASN1BitLength(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestVerifyEmptyCertificate(ж<testing.T> Ꮡt) {
+public static partial void TestVerifyEmptyCertificate(ж<testing.T> Ꮡt) {
     {
         var (_, err) = @new<global::go.crypto.x509_package.Certificate>().Verify(new VerifyOptions(nil)); if (!AreEqual(err, errNotParsed)) {
             Ꮡt.Errorf("Verifying empty certificate resulted in unexpected error: %q (wanted %q)"u8, err, errNotParsed);
@@ -2458,6 +2472,7 @@ internal partial struct TestRDNSequenceString_tests /*dyn*/ {
 public static void TestRDNSequenceString(ж<testing.T> Ꮡt) {
     // Test some extra cases that get lost in pkix.Name conversions such as
     // multi-valued attributes.
+
     slice<nint> oidCountry = new nint[]{2, 5, 4, 6}.slice();
     slice<nint> oidOrganization = new nint[]{2, 5, 4, 10}.slice();
     slice<nint> oidOrganizationalUnit = new nint[]{2, 5, 4, 11}.slice();
@@ -3555,7 +3570,7 @@ internal static slice<ж<global::go.crypto.x509_package.Certificate>> allCerts(�
     ref var p = ref Ꮡp.DerefOrNull();
 
     var all = new slice<ж<global::go.crypto.x509_package.Certificate>>(Ꮡp.len());
-    foreach (var (i, _) in all) {
+    foreach (var i in range(all)) {
         all[i] = p.mustCert(Ꮡt, i);
     }
     return all;
@@ -3576,7 +3591,7 @@ internal static bool certPoolEqual(ж<global::go.crypto.x509_package.CertPool> �
     if (!reflect.DeepEqual(a.byName, b.byName) || builtin.len(a.lazyCerts) != builtin.len(b.lazyCerts)) {
         return false;
     }
-    foreach (var (i, _) in a.lazyCerts) {
+    foreach (var i in range(a.lazyCerts)) {
         var (la, lb) = (a.lazyCerts[i], b.lazyCerts[i]);
         if (!bytes.Equal(la.rawSubject, lb.rawSubject)) {
             return false;
@@ -4401,7 +4416,7 @@ public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> Ꮡt) {
         new nint[]{1, 2, 3}.slice()
     }.slice();
 
-    slice<global::go.crypto.x509_package.OID> expectPolicies = new global::go.crypto.x509_package.OID[]{
+    slice<global::go.crypto.x509_package.ΔOID> expectPolicies = new global::go.crypto.x509_package.ΔOID[]{
         mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice())
     }.slice();
 
@@ -4419,7 +4434,7 @@ public static void TestCertificateOIDPoliciesGODEBUG(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf("cert.PolicyIdentifiers = %v, want: %v"u8, (~cert).PolicyIdentifiers, expectPolicyIdentifiers);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509_package.Equal)))) {
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
         Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
     }
 }
@@ -4440,10 +4455,10 @@ public static void TestCertificatePolicies(ж<testing.T> Ꮡt) {
         NotBefore: time.Unix(1000, 0),
         NotAfter: time.Unix(100000, 0),
         PolicyIdentifiers: new asn1.ObjectIdentifier[]{new nint[]{1, 2, 3}.slice()}.slice(),
-        Policies: new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice()
+        Policies: new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice()
     );
 
-    var expectPolicies = new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
+    var expectPolicies = new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
     var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != default!) {
         Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
@@ -4454,12 +4469,12 @@ public static void TestCertificatePolicies(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509_package.Equal)))) {
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
         Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
     }
 
     Ꮡt.Setenv(godebugˢ, x509usepolicies1ˢ);
-    expectPolicies = new global::go.crypto.x509_package.OID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
+    expectPolicies = new global::go.crypto.x509_package.ΔOID[]{mustNewOIDFromInts(new uint64[]{1, 2, math.MaxUint32 + 1}.slice())}.slice();
 
     (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
     if (err != default!) {
@@ -4471,7 +4486,7 @@ public static void TestCertificatePolicies(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("ParseCertificate() unexpected error: %v"u8, err);
     }
 
-    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.OID>, slice<global::go.crypto.x509_package.OID>, global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.OID, global::go.crypto.x509_package.OID, bool>)(global::go.crypto.x509_package.Equal)))) {
+    if (!slices.EqualFunc<slice<global::go.crypto.x509_package.ΔOID>, slice<global::go.crypto.x509_package.ΔOID>, global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID>((~cert).Policies, expectPolicies, ((Func<global::go.crypto.x509_package.ΔOID, global::go.crypto.x509_package.ΔOID, bool>)(global::go.crypto.x509_package.Equal)))) {
         Ꮡt.Errorf("cert.Policies = %v, want: %v"u8, (~cert).Policies, expectPolicies);
     }
 }
@@ -4561,6 +4576,96 @@ public static void TestRejectCriticalSKI(ж<testing.T> Ꮡt) {
     (_, err) = ParseCertificate(certDER);
     if (err == default! || err.Error() != expectedErr) {
         Ꮡt.Fatalf("ParseCertificate() unexpected error: %v, want: %s"u8, err, expectedErr);
+    }
+}
+
+internal partial struct messageSigner {
+}
+
+internal static cryptoꓸPublicKey Public(this ref messageSigner ms) {
+    return rsaPrivateKey.Public();
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string unimplementedˢ = "unimplemented"u8;
+
+internal static (slice<byte> signature, error err) Sign(this ref messageSigner ms, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) {
+    return (default!, errors.New(unimplementedˢ));
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string pssOptionsPassedInsteadˢ = "PSSOptions passed instead of hash"u8;
+
+internal static (slice<byte> signature, error err) SignMessage(this ref messageSigner ms, io.Reader rand, slice<byte> msg, crypto.SignerOpts opts) {
+    {
+        var (_, ok) = opts._<ж<rsa.PSSOptions>>(ᐧ); if (ok) {
+            return (default!, errors.New(pssOptionsPassedInsteadˢ));
+        }
+    }
+    var h = opts.HashFunc().New();
+    h.Write(msg);
+    var tbs = h.Sum(default!);
+    return rsa.SignPKCS1v15(rand, rsaPrivateKey, opts.HashFunc(), tbs);
+}
+
+public static void TestMessageSigner(ж<testing.T> Ꮡt) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
+    template = new Certificate(
+        SignatureAlgorithm: SHA256WithRSA,
+        SerialNumber: big.NewInt(1),
+        Subject: new pkix.Name(CommonName: "Cert"u8),
+        NotBefore: time.Unix(1000, 0),
+        NotAfter: time.Unix(100000, 0),
+        BasicConstraintsValid: true,
+        IsCA: true
+    );
+    var (certDER, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), Ꮡ(new messageSigner(nil)));
+    if (err != default!) {
+        Ꮡt.Fatalf("CreateCertificate failed: %s"u8, err);
+    }
+    (var cert, err) = ParseCertificate(certDER);
+    if (err != default!) {
+        Ꮡt.Fatalf("ParseCertificate failed: %s"u8, err);
+    }
+    {
+        var errΔ1 = cert.CheckSignatureFrom(cert); if (errΔ1 != default!) {
+            Ꮡt.Fatalf("CheckSignatureFrom failed: %s"u8, errΔ1);
+        }
+    }
+}
+
+public static void TestCreateCertificateNegativeMaxPathLength(ж<testing.T> Ꮡt) {
+    ref var template = ref heap<global::go.crypto.x509_package.Certificate>(out var Ꮡtemplate);
+    template = new Certificate(
+        SerialNumber: big.NewInt(1),
+        Subject: new pkix.Name(CommonName: "TEST"u8),
+        NotBefore: time.Unix(1000, 0),
+        NotAfter: time.Unix(100000, 0),
+        BasicConstraintsValid: true,
+        IsCA: true,
+
+        // CreateCertificate treats -1 in the same way as: MaxPathLen == 0 && MaxPathLenZero == false.
+        MaxPathLen: -1
+    );
+
+    var (_, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
+    if (err != default!) {
+        Ꮡt.Fatalf("CreateCertificate() unexpected error: %v"u8, err);
+    }
+
+    template.MaxPathLen = -2;
+    (_, err) = CreateCertificate(rand.Reader, Ꮡtemplate, Ꮡtemplate, rsaPrivateKey.Public(), rsaPrivateKey.OrTypedNil());
+    if (err == default! || err.Error() != "x509: invalid MaxPathLen, must be greater or equal to -1"u8) {
+        Ꮡt.Fatalf(@"CreateCertificate() = %v; want = ""x509: invalid MaxPathLen, must be greater or equal to -1"""u8, err);
+    }
+}
+
+public static void TestEKUOIDS(ж<testing.T> Ꮡt) {
+    foreach (var (_, eku) in extKeyUsageOIDs) {
+        var oid = eku.extKeyUsage.OID();
+        if (!oid.EqualASN1OID(eku.oid)) {
+            Ꮡt.Errorf("extKeyUsage %v: expected OID %v, got %v"u8, eku.extKeyUsage, eku.oid, oid);
+        }
     }
 }
 

@@ -4,7 +4,7 @@
 namespace go.go;
 
 using fmt = fmt_package;
-using testenv = @internal.testenv_package;
+using testenv = global::go.@internal.testenv_package;
 using io = io_package;
 using maps = maps_package;
 using os = os_package;
@@ -14,8 +14,8 @@ using runtime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using @internal;
 using fs = global::go.io.fs_package;
+using global::go.@internal;
 using global::go.path;
 using static global::go.go.build_package;
 using ꓸꓸꓸstring = Span<@string>;

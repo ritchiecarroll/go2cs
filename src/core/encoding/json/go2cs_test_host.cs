@@ -21,6 +21,13 @@ internal static class Go2CsTestHost
             "fold_test.go",
             "fuzz_test.go",
             "indent.go",
+            "internal/jsontest/testdata/canada_geometry.json.zst",
+            "internal/jsontest/testdata/citm_catalog.json.zst",
+            "internal/jsontest/testdata/golang_source.json.zst",
+            "internal/jsontest/testdata/string_escaped.json.zst",
+            "internal/jsontest/testdata/string_unicode.json.zst",
+            "internal/jsontest/testdata/synthea_fhir.json.zst",
+            "internal/jsontest/testdata/twitter_status.json.zst",
             "number_test.go",
             "scanner.go",
             "scanner_test.go",
@@ -30,97 +37,119 @@ internal static class Go2CsTestHost
             "tagkey_test.go",
             "tags.go",
             "tags_test.go",
-            "testdata/code.json.gz",
+            "v2_bench_test.go",
+            "v2_decode.go",
+            "v2_decode_test.go",
+            "v2_diff_test.go",
+            "v2_encode.go",
+            "v2_encode_test.go",
+            "v2_example_marshaling_test.go",
+            "v2_example_test.go",
+            "v2_example_text_marshaling_test.go",
+            "v2_fuzz_test.go",
+            "v2_indent.go",
+            "v2_inject.go",
+            "v2_options.go",
+            "v2_scanner.go",
+            "v2_scanner_test.go",
+            "v2_stream.go",
+            "v2_stream_test.go",
+            "v2_tagkey_test.go",
         }, new string[]
         {
-            "testdata",
+            "internal",
+            "jsontext",
+            "v2",
         });
-        registry.Add("TestAnonymousFields", json_internal_test_package.TestAnonymousFields, "encode_test.go", 548);
-        registry.Add("TestBlocking", json_internal_test_package.TestBlocking, "stream_test.go", 357);
-        registry.Add("TestByteKind", json_internal_test_package.TestByteKind, "decode_test.go", 2187);
-        registry.Add("TestCompactAndIndent", json_internal_test_package.TestCompactAndIndent, "scanner_test.go", 51);
-        registry.Add("TestCompactBig", json_internal_test_package.TestCompactBig, "scanner_test.go", 134);
-        registry.Add("TestCompactSeparators", json_internal_test_package.TestCompactSeparators, "scanner_test.go", 110);
-        registry.Add("TestDecodeInStream", json_internal_test_package.TestDecodeInStream, "stream_test.go", 386);
-        registry.Add("TestDecoder", json_internal_test_package.TestDecoder, "stream_test.go", 238);
-        registry.Add("TestDecoderBuffered", json_internal_test_package.TestDecoderBuffered, "stream_test.go", 270);
-        registry.Add("TestDuplicatedFieldDisappears", json_internal_test_package.TestDuplicatedFieldDisappears, "encode_test.go", 866);
-        registry.Add("TestEmbeddedBug", json_internal_test_package.TestEmbeddedBug, "encode_test.go", 803);
-        registry.Add("TestEmptyString", json_internal_test_package.TestEmptyString, "decode_test.go", 1882);
-        registry.Add("TestEncodeBytekind", json_internal_test_package.TestEncodeBytekind, "encode_test.go", 1045);
-        registry.Add("TestEncodePointerString", json_internal_test_package.TestEncodePointerString, "encode_test.go", 943);
-        registry.Add("TestEncodeRenamedByteSlice", json_internal_test_package.TestEncodeRenamedByteSlice, "encode_test.go", 326);
-        registry.Add("TestEncodeString", json_internal_test_package.TestEncodeString, "encode_test.go", 1004);
-        registry.Add("TestEncoder", json_internal_test_package.TestEncoder, "stream_test.go", 70);
-        registry.Add("TestEncoderErrorAndReuseEncodeState", json_internal_test_package.TestEncoderErrorAndReuseEncodeState, "stream_test.go", 90);
-        registry.Add("TestEncoderIndent", json_internal_test_package.TestEncoderIndent, "stream_test.go", 144);
-        registry.Add("TestEncoderSetEscapeHTML", json_internal_test_package.TestEncoderSetEscapeHTML, "stream_test.go", 169);
-        registry.Add("TestErrorMessageFromMisusedString", json_internal_test_package.TestErrorMessageFromMisusedString, "decode_test.go", 1507);
-        registry.Add("TestEscape", json_internal_test_package.TestEscape, "decode_test.go", 1493);
-        registry.Add("TestHTMLEscape", json_internal_test_package.TestHTMLEscape, "encode_test.go", 932);
-        registry.Add("TestHTTPDecoding", json_internal_test_package.TestHTTPDecoding, "stream_test.go", 491);
-        registry.Add("TestIndentBig", json_internal_test_package.TestIndentBig, "scanner_test.go", 148);
-        registry.Add("TestIndentErrors", json_internal_test_package.TestIndentErrors, "scanner_test.go", 187);
-        registry.Add("TestInterfaceSet", json_internal_test_package.TestInterfaceSet, "decode_test.go", 1925);
-        registry.Add("TestInvalidStringOption", json_internal_test_package.TestInvalidStringOption, "decode_test.go", 2420);
-        registry.Add("TestInvalidUnmarshal", json_internal_test_package.TestInvalidUnmarshal, "decode_test.go", 2391);
-        registry.Add("TestIssue10281", json_internal_test_package.TestIssue10281, "encode_test.go", 886);
-        registry.Add("TestIssue63379", json_internal_test_package.TestIssue63379, "encode_test.go", 1385);
-        registry.Add("TestLargeByteSlice", json_internal_test_package.TestLargeByteSlice, "decode_test.go", 1448);
-        registry.Add("TestMarshal", json_internal_test_package.TestMarshal, "decode_test.go", 1192);
-        registry.Add("TestMarshalEmbeds", json_internal_test_package.TestMarshalEmbeds, "decode_test.go", 1249);
-        registry.Add("TestMarshalErrorAndReuseEncodeState", json_internal_test_package.TestMarshalErrorAndReuseEncodeState, "encode_test.go", 897);
-        registry.Add("TestMarshalFloat", json_internal_test_package.TestMarshalFloat, "encode_test.go", 1134);
-        registry.Add("TestMarshalInvalidUTF8", json_internal_test_package.TestMarshalInvalidUTF8, "decode_test.go", 1214);
-        registry.Add("TestMarshalNumberZeroVal", json_internal_test_package.TestMarshalNumberZeroVal, "decode_test.go", 1237);
-        registry.Add("TestMarshalPanic", json_internal_test_package.TestMarshalPanic, "encode_test.go", 1325);
-        registry.Add("TestMarshalRawMessageValue", json_internal_test_package.TestMarshalRawMessageValue, "encode_test.go", 1217);
-        registry.Add("TestMarshalTextFloatMap", json_internal_test_package.TestMarshalTextFloatMap, "encode_test.go", 429);
-        registry.Add("TestMarshalUncommonFieldNames", json_internal_test_package.TestMarshalUncommonFieldNames, "encode_test.go", 1335);
-        registry.Add("TestMarshalerError", json_internal_test_package.TestMarshalerError, "encode_test.go", 1350);
-        registry.Add("TestMarshalerEscaping", json_internal_test_package.TestMarshalerEscaping, "encode_test.go", 526);
-        registry.Add("TestNilMarshal", json_internal_test_package.TestNilMarshal, "encode_test.go", 770);
-        registry.Add("TestNilMarshalerTextMapKey", json_internal_test_package.TestNilMarshalerTextMapKey, "encode_test.go", 1096);
-        registry.Add("TestNullRawMessage", json_internal_test_package.TestNullRawMessage, "stream_test.go", 330);
-        registry.Add("TestNullString", json_internal_test_package.TestNullString, "decode_test.go", 1900);
-        registry.Add("TestNumberAccessors", json_internal_test_package.TestNumberAccessors, "decode_test.go", 1415);
-        registry.Add("TestNumberIsValid", json_internal_test_package.TestNumberIsValid, "number_test.go", 12);
-        registry.Add("TestOmitEmpty", json_internal_test_package.TestOmitEmpty, "encode_test.go", 48);
-        registry.Add("TestOmitEmptyZero", json_internal_test_package.TestOmitEmptyZero, "encode_test.go", 229);
-        registry.Add("TestOmitZero", json_internal_test_package.TestOmitZero, "encode_test.go", 131);
-        registry.Add("TestOmitZeroMap", json_internal_test_package.TestOmitZeroMap, "encode_test.go", 173);
-        registry.Add("TestPrefilled", json_internal_test_package.TestPrefilled, "decode_test.go", 2339);
-        registry.Add("TestRawMessage", json_internal_test_package.TestRawMessage, "stream_test.go", 306);
-        registry.Add("TestRefUnmarshal", json_internal_test_package.TestRefUnmarshal, "decode_test.go", 1854);
-        registry.Add("TestRefValMarshal", json_internal_test_package.TestRefValMarshal, "encode_test.go", 482);
-        registry.Add("TestRoundtripStringTag", json_internal_test_package.TestRoundtripStringTag, "encode_test.go", 263);
-        registry.Add("TestSamePointerNoCycle", json_internal_test_package.TestSamePointerNoCycle, "encode_test.go", 389);
-        registry.Add("TestSkipArrayObjects", json_internal_test_package.TestSkipArrayObjects, "decode_test.go", 2326);
-        registry.Add("TestSliceNoCycle", json_internal_test_package.TestSliceNoCycle, "encode_test.go", 395);
-        registry.Add("TestSliceOfCustomByte", json_internal_test_package.TestSliceOfCustomByte, "decode_test.go", 2206);
-        registry.Add("TestStringKind", json_internal_test_package.TestStringKind, "decode_test.go", 2167);
-        registry.Add("TestStructTagObjectKey", json_internal_test_package.TestStructTagObjectKey, "tagkey_test.go", 75);
-        registry.Add("TestTagParsing", json_internal_test_package.TestTagParsing, "tags_test.go", 9);
-        registry.Add("TestTaggedFieldDominates", json_internal_test_package.TestTaggedFieldDominates, "encode_test.go", 843);
-        registry.Add("TestTextMarshalerMapKeysAreSorted", json_internal_test_package.TestTextMarshalerMapKeysAreSorted, "encode_test.go", 1079);
-        registry.Add("TestUnmarshal", json_internal_test_package.TestUnmarshal, "decode_test.go", 1317);
-        registry.Add("TestUnmarshalEmbeddedUnexported", json_internal_test_package.TestUnmarshalEmbeddedUnexported, "decode_test.go", 2452);
-        registry.Add("TestUnmarshalErrorAfterMultipleJSON", json_internal_test_package.TestUnmarshalErrorAfterMultipleJSON, "decode_test.go", 2584);
-        registry.Add("TestUnmarshalInterface", json_internal_test_package.TestUnmarshalInterface, "decode_test.go", 1471);
-        registry.Add("TestUnmarshalJSONLiteralError", json_internal_test_package.TestUnmarshalJSONLiteralError, "decode_test.go", 2313);
-        registry.Add("TestUnmarshalMapWithTextUnmarshalerStringKey", json_internal_test_package.TestUnmarshalMapWithTextUnmarshalerStringKey, "decode_test.go", 2660);
-        registry.Add("TestUnmarshalMarshal", json_internal_test_package.TestUnmarshalMarshal, "decode_test.go", 1397);
-        registry.Add("TestUnmarshalMaxDepth", json_internal_test_package.TestUnmarshalMaxDepth, "decode_test.go", 2716);
-        registry.Add("TestUnmarshalNulls", json_internal_test_package.TestUnmarshalNulls, "decode_test.go", 2032);
-        registry.Add("TestUnmarshalPanic", json_internal_test_package.TestUnmarshalPanic, "decode_test.go", 2629);
-        registry.Add("TestUnmarshalPtrPtr", json_internal_test_package.TestUnmarshalPtrPtr, "decode_test.go", 1482);
-        registry.Add("TestUnmarshalRecursivePointer", json_internal_test_package.TestUnmarshalRecursivePointer, "decode_test.go", 2641);
-        registry.Add("TestUnmarshalRescanLiteralMangledUnquote", json_internal_test_package.TestUnmarshalRescanLiteralMangledUnquote, "decode_test.go", 2671);
-        registry.Add("TestUnmarshalSyntax", json_internal_test_package.TestUnmarshalSyntax, "decode_test.go", 2247);
-        registry.Add("TestUnmarshalTypeError", json_internal_test_package.TestUnmarshalTypeError, "decode_test.go", 2223);
-        registry.Add("TestUnmarshalUnexported", json_internal_test_package.TestUnmarshalUnexported, "decode_test.go", 2283);
-        registry.Add("TestUnsupportedValues", json_internal_test_package.TestUnsupportedValues, "encode_test.go", 401);
-        registry.Add("TestValid", json_internal_test_package.TestValid, "scanner_test.go", 29);
+        registry.Add("TestAnonymousFields", json_internal_test_package.TestAnonymousFields, "encode_test.go", 552);
+        registry.Add("TestBlocking", json_internal_test_package.TestBlocking, "stream_test.go", 359);
+        registry.Add("TestByteKind", json_internal_test_package.TestByteKind, "decode_test.go", 2301);
+        registry.Add("TestCompactAndIndent", json_internal_test_package.TestCompactAndIndent, "scanner_test.go", 53);
+        registry.Add("TestCompactBig", json_internal_test_package.TestCompactBig, "scanner_test.go", 137);
+        registry.Add("TestCompactSeparators", json_internal_test_package.TestCompactSeparators, "scanner_test.go", 113);
+        registry.Add("TestDecodeInStream", json_internal_test_package.TestDecodeInStream, "stream_test.go", 388);
+        registry.Add("TestDecoder", json_internal_test_package.TestDecoder, "stream_test.go", 240);
+        registry.Add("TestDecoderBuffered", json_internal_test_package.TestDecoderBuffered, "stream_test.go", 272);
+        registry.Add("TestDecoderInputOffset", json_internal_test_package.TestDecoderInputOffset, "stream_test.go", 573);
+        registry.Add("TestDuplicatedFieldDisappears", json_internal_test_package.TestDuplicatedFieldDisappears, "encode_test.go", 870);
+        registry.Add("TestEmbeddedBug", json_internal_test_package.TestEmbeddedBug, "encode_test.go", 807);
+        registry.Add("TestEmptyString", json_internal_test_package.TestEmptyString, "decode_test.go", 1996);
+        registry.Add("TestEncodeBytekind", json_internal_test_package.TestEncodeBytekind, "encode_test.go", 1049);
+        registry.Add("TestEncodePointerString", json_internal_test_package.TestEncodePointerString, "encode_test.go", 947);
+        registry.Add("TestEncodeRenamedByteSlice", json_internal_test_package.TestEncodeRenamedByteSlice, "encode_test.go", 330);
+        registry.Add("TestEncodeString", json_internal_test_package.TestEncodeString, "encode_test.go", 1008);
+        registry.Add("TestEncoder", json_internal_test_package.TestEncoder, "stream_test.go", 72);
+        registry.Add("TestEncoderErrorAndReuseEncodeState", json_internal_test_package.TestEncoderErrorAndReuseEncodeState, "stream_test.go", 92);
+        registry.Add("TestEncoderIndent", json_internal_test_package.TestEncoderIndent, "stream_test.go", 146);
+        registry.Add("TestEncoderSetEscapeHTML", json_internal_test_package.TestEncoderSetEscapeHTML, "stream_test.go", 171);
+        registry.Add("TestErrorMessageFromMisusedString", json_internal_test_package.TestErrorMessageFromMisusedString, "decode_test.go", 1621);
+        registry.Add("TestEscape", json_internal_test_package.TestEscape, "decode_test.go", 1607);
+        registry.Add("TestHTMLEscape", json_internal_test_package.TestHTMLEscape, "encode_test.go", 936);
+        registry.Add("TestHTTPDecoding", json_internal_test_package.TestHTTPDecoding, "stream_test.go", 505);
+        registry.Add("TestIndentBig", json_internal_test_package.TestIndentBig, "scanner_test.go", 151);
+        registry.Add("TestIndentErrors", json_internal_test_package.TestIndentErrors, "scanner_test.go", 190);
+        registry.Add("TestInterfaceSet", json_internal_test_package.TestInterfaceSet, "decode_test.go", 2039);
+        registry.Add("TestInvalidStringOption", json_internal_test_package.TestInvalidStringOption, "decode_test.go", 2534);
+        registry.Add("TestInvalidUnmarshal", json_internal_test_package.TestInvalidUnmarshal, "decode_test.go", 2505);
+        registry.Add("TestIssue10281", json_internal_test_package.TestIssue10281, "encode_test.go", 890);
+        registry.Add("TestIssue63379", json_internal_test_package.TestIssue63379, "encode_test.go", 1389);
+        registry.Add("TestLargeByteSlice", json_internal_test_package.TestLargeByteSlice, "decode_test.go", 1562);
+        registry.Add("TestMarshal", json_internal_test_package.TestMarshal, "decode_test.go", 1298);
+        registry.Add("TestMarshalEmbeds", json_internal_test_package.TestMarshalEmbeds, "decode_test.go", 1355);
+        registry.Add("TestMarshalErrorAndReuseEncodeState", json_internal_test_package.TestMarshalErrorAndReuseEncodeState, "encode_test.go", 901);
+        registry.Add("TestMarshalFloat", json_internal_test_package.TestMarshalFloat, "encode_test.go", 1138);
+        registry.Add("TestMarshalInvalidUTF8", json_internal_test_package.TestMarshalInvalidUTF8, "decode_test.go", 1320);
+        registry.Add("TestMarshalNumberZeroVal", json_internal_test_package.TestMarshalNumberZeroVal, "decode_test.go", 1343);
+        registry.Add("TestMarshalPanic", json_internal_test_package.TestMarshalPanic, "encode_test.go", 1329);
+        registry.Add("TestMarshalRawMessageValue", json_internal_test_package.TestMarshalRawMessageValue, "encode_test.go", 1221);
+        registry.Add("TestMarshalTextFloatMap", json_internal_test_package.TestMarshalTextFloatMap, "encode_test.go", 433);
+        registry.Add("TestMarshalUncommonFieldNames", json_internal_test_package.TestMarshalUncommonFieldNames, "encode_test.go", 1339);
+        registry.Add("TestMarshalerError", json_internal_test_package.TestMarshalerError, "encode_test.go", 1354);
+        registry.Add("TestMarshalerEscaping", json_internal_test_package.TestMarshalerEscaping, "encode_test.go", 530);
+        registry.Add("TestNilMarshal", json_internal_test_package.TestNilMarshal, "encode_test.go", 774);
+        registry.Add("TestNilMarshalerTextMapKey", json_internal_test_package.TestNilMarshalerTextMapKey, "encode_test.go", 1100);
+        registry.Add("TestNullRawMessage", json_internal_test_package.TestNullRawMessage, "stream_test.go", 332);
+        registry.Add("TestNullString", json_internal_test_package.TestNullString, "decode_test.go", 2014);
+        registry.Add("TestNumberAccessors", json_internal_test_package.TestNumberAccessors, "decode_test.go", 1529);
+        registry.Add("TestNumberIsValid", json_internal_test_package.TestNumberIsValid, "number_test.go", 14);
+        registry.Add("TestOmitEmpty", json_internal_test_package.TestOmitEmpty, "encode_test.go", 52);
+        registry.Add("TestOmitEmptyZero", json_internal_test_package.TestOmitEmptyZero, "encode_test.go", 233);
+        registry.Add("TestOmitZero", json_internal_test_package.TestOmitZero, "encode_test.go", 135);
+        registry.Add("TestOmitZeroMap", json_internal_test_package.TestOmitZeroMap, "encode_test.go", 177);
+        registry.Add("TestPrefilled", json_internal_test_package.TestPrefilled, "decode_test.go", 2453);
+        registry.Add("TestRawMessage", json_internal_test_package.TestRawMessage, "stream_test.go", 308);
+        registry.Add("TestRefUnmarshal", json_internal_test_package.TestRefUnmarshal, "decode_test.go", 1968);
+        registry.Add("TestRefValMarshal", json_internal_test_package.TestRefValMarshal, "encode_test.go", 486);
+        registry.Add("TestRoundtripStringTag", json_internal_test_package.TestRoundtripStringTag, "encode_test.go", 267);
+        registry.Add("TestSamePointerNoCycle", json_internal_test_package.TestSamePointerNoCycle, "encode_test.go", 393);
+        registry.Add("TestSkipArrayObjects", json_internal_test_package.TestSkipArrayObjects, "decode_test.go", 2440);
+        registry.Add("TestSliceNoCycle", json_internal_test_package.TestSliceNoCycle, "encode_test.go", 399);
+        registry.Add("TestSliceOfCustomByte", json_internal_test_package.TestSliceOfCustomByte, "decode_test.go", 2320);
+        registry.Add("TestStringKind", json_internal_test_package.TestStringKind, "decode_test.go", 2281);
+        registry.Add("TestStructTagObjectKey", json_internal_test_package.TestStructTagObjectKey, "tagkey_test.go", 77);
+        registry.Add("TestSynctestMarshal", json_internal_test_package.TestSynctestMarshal, "encode_test.go", 1412);
+        registry.Add("TestTagParsing", json_internal_test_package.TestTagParsing, "tags_test.go", 11);
+        registry.Add("TestTaggedFieldDominates", json_internal_test_package.TestTaggedFieldDominates, "encode_test.go", 847);
+        registry.Add("TestTextMarshalerMapKeysAreSorted", json_internal_test_package.TestTextMarshalerMapKeysAreSorted, "encode_test.go", 1083);
+        registry.Add("TestTokenTruncation", json_internal_test_package.TestTokenTruncation, "stream_test.go", 538);
+        registry.Add("TestUnmarshal", json_internal_test_package.TestUnmarshal, "decode_test.go", 1423);
+        registry.Add("TestUnmarshalEmbeddedUnexported", json_internal_test_package.TestUnmarshalEmbeddedUnexported, "decode_test.go", 2566);
+        registry.Add("TestUnmarshalErrorAfterMultipleJSON", json_internal_test_package.TestUnmarshalErrorAfterMultipleJSON, "decode_test.go", 2698);
+        registry.Add("TestUnmarshalInterface", json_internal_test_package.TestUnmarshalInterface, "decode_test.go", 1585);
+        registry.Add("TestUnmarshalJSONLiteralError", json_internal_test_package.TestUnmarshalJSONLiteralError, "decode_test.go", 2427);
+        registry.Add("TestUnmarshalMapWithTextUnmarshalerStringKey", json_internal_test_package.TestUnmarshalMapWithTextUnmarshalerStringKey, "decode_test.go", 2774);
+        registry.Add("TestUnmarshalMarshal", json_internal_test_package.TestUnmarshalMarshal, "decode_test.go", 1511);
+        registry.Add("TestUnmarshalMaxDepth", json_internal_test_package.TestUnmarshalMaxDepth, "decode_test.go", 2830);
+        registry.Add("TestUnmarshalNulls", json_internal_test_package.TestUnmarshalNulls, "decode_test.go", 2146);
+        registry.Add("TestUnmarshalPanic", json_internal_test_package.TestUnmarshalPanic, "decode_test.go", 2743);
+        registry.Add("TestUnmarshalPtrPtr", json_internal_test_package.TestUnmarshalPtrPtr, "decode_test.go", 1596);
+        registry.Add("TestUnmarshalRecursivePointer", json_internal_test_package.TestUnmarshalRecursivePointer, "decode_test.go", 2755);
+        registry.Add("TestUnmarshalRescanLiteralMangledUnquote", json_internal_test_package.TestUnmarshalRescanLiteralMangledUnquote, "decode_test.go", 2785);
+        registry.Add("TestUnmarshalSyntax", json_internal_test_package.TestUnmarshalSyntax, "decode_test.go", 2361);
+        registry.Add("TestUnmarshalTypeError", json_internal_test_package.TestUnmarshalTypeError, "decode_test.go", 2337);
+        registry.Add("TestUnmarshalUnexported", json_internal_test_package.TestUnmarshalUnexported, "decode_test.go", 2397);
+        registry.Add("TestUnsupportedValues", json_internal_test_package.TestUnsupportedValues, "encode_test.go", 405);
+        registry.Add("TestValid", json_internal_test_package.TestValid, "scanner_test.go", 31);
         return TestHost.Run(registry, args);
     }
 }

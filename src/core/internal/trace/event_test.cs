@@ -232,16 +232,19 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
             new(kind: EventRangeEnd, name: "GC concurrent mark phase"u8, scope: new ResourceID(nil), valid: true),
             new(kind: EventMetric, name: "GC concurrent mark phase"u8, scope: new ResourceID(nil), valid: false),
             new(kind: EventRangeBegin, name: "GC concurrent mark phase - INVALID"u8, scope: new ResourceID(nil), valid: false),
+
             new(kind: EventRangeBegin, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)1), valid: true),
             new(kind: EventRangeActive, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)2), valid: true),
             new(kind: EventRangeEnd, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)3), valid: true),
             new(kind: EventMetric, name: "GC incremental sweep"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)4), valid: false),
             new(kind: EventRangeBegin, name: "GC incremental sweep - INVALID"u8, scope: MakeResourceID((global::go.@internal.trace_package.ProcID)5), valid: false),
+
             new(kind: EventRangeBegin, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)1), valid: true),
             new(kind: EventRangeActive, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)2), valid: true),
             new(kind: EventRangeEnd, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)3), valid: true),
             new(kind: EventMetric, name: "GC mark assist"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)4), valid: false),
             new(kind: EventRangeBegin, name: "GC mark assist - INVALID"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)5), valid: false),
+
             new(kind: EventRangeBegin, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)1), valid: true),
             new(kind: EventRangeActive, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)2), valid: false),
             new(kind: EventRangeEnd, name: "stop-the-world (for a good reason)"u8, scope: MakeResourceID((global::go.@internal.trace_package.GoID)3), valid: true),
@@ -864,7 +867,7 @@ public static void TestMakeStack(ж<testing.T> Ꮡt) {
     if (len(got) != len(frames)) {
         Ꮡt.Errorf("got=%d want=%d"u8, len(got), len(frames));
     }
-    foreach (var (i, _) in got) {
+    foreach (var i in range(got)) {
         if (got[i] != frames[i]) {
             Ꮡt.Errorf("got=%v want=%v"u8, got[i], frames[i]);
         }

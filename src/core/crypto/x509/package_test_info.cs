@@ -41,6 +41,7 @@ global using timeꓸMonth = go.time_package.ΔMonth;
 global using timeꓸWeekday = go.time_package.ΔWeekday;
 global using tlsꓸConnectionState = go.crypto.tls_package.ΔConnectionState;
 global using urlꓸError = go.net.url_package.ΔError;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -48,7 +49,6 @@ using static global::go.crypto.x509_test_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("7374727563747b56657273696f6e20696e743b204e202a6d6174682f6269672e496e743b204520696e743b2044202a6d6174682f6269672e496e743b2050202a6d6174682f6269672e496e743b2051202a6d6174682f6269672e496e747d", "TestParsePKCS1PrivateKey_val")]
-[assembly: GoDynamicTypeLift("7374727563747b636f6e73747261696e7420737472696e673b20646f6d61696e20737472696e673b206578706563744572726f7220626f6f6c3b2073686f756c644d6174636820626f6f6c7d", "nameConstraintTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b64657248657820737472696e673b2073686f756c64526573657269616c697a6520626f6f6c7d", "ecKeyTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b6865784b657920737472696e673b206572726f72436f6e7461696e7320737472696e677d", "pkcs8MismatchKeyTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206c6f63616c5061727420737472696e673b20646f6d61696e20737472696e677d", "rfc2821Testsᴛ1")]
@@ -56,15 +56,16 @@ using static global::go.crypto.x509_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b6e616d6520737472696e673b206365727420737472696e673b20657870656374656420737472696e677d", "unknownAuthorityErrorTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b726177205b5d627974653b2076616c696420626f6f6c3b2073747220737472696e673b20696e7473205b5d75696e7436347d", "oidTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b736967416c676f2063727970746f2f783530392e5369676e6174757265416c676f726974686d3b2070656d4365727420737472696e677d", "ecdsaTestsᴛ1")]
+[assembly: GoTypeAlias("OID", "ΔOID")]
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
 [assembly: GoImplement<bytes_package.Buffer, io_package.Writer>(Pointer = true)]
-[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.BinaryMarshaler>]
-[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.BinaryUnmarshaler>(Pointer = true)]
-[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.TextMarshaler>]
-[assembly: GoImplement<global::go.crypto.x509_package.OID, encoding_package.TextUnmarshaler>(Pointer = true)]
 [assembly: GoImplement<global::go.crypto.x509_package.SystemRootsError, error>]
+[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.BinaryMarshaler>]
+[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.BinaryUnmarshaler>(Pointer = true)]
+[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.TextMarshaler>]
+[assembly: GoImplement<global::go.crypto.x509_package.ΔOID, encoding_package.TextUnmarshaler>(Pointer = true)]
 [assembly: GoImplement<go.crypto.ecdsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
 [assembly: GoImplement<go.crypto.ed25519_package.PrivateKey, crypto_package.Signer>]
 [assembly: GoImplement<go.crypto.rsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
@@ -74,6 +75,12 @@ using static global::go.crypto.x509_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -82,7 +89,7 @@ using static global::go.crypto.x509_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAoYgoKCgoKClIKClNyCgpSUAAcQgoKUgoKUgoKmgoKUlIKCppSCgqbcgoKUgoKmgoI=", "", "", "75=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;114=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
+[assembly: go.GoPositionMap("crypto/x509/hybrid_pool_test.go", "hybrid_pool_test.cs", "AB8qgoKClIKUAAsYgoKCgoKClIKClNyCgpSUAAcQgoKUgoKUgoKmgoKUlIKCppSCgqbcgoKUgoKmgoI=", "", "", "76=NewInt/1/1/1,Now/1/2/5,Add/1/2/5,Now/2/2/6,Add/2/2/6;115=NewInt/1/1/1,Now/1/2/2,Add/1/2/2,Now/2/2/3,Add/2/2/3")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -113,6 +120,7 @@ public static partial class x509_test_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸecdsa() => builtin.initPackage(typeof(go.crypto.ecdsa_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸed25519() => builtin.initPackage(typeof(go.crypto.ed25519_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸelliptic() => builtin.initPackage(typeof(go.crypto.elliptic_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸcryptotest() => builtin.initPackage(typeof(go.crypto.@internal.cryptotest_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrsa() => builtin.initPackage(typeof(go.crypto.rsa_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsha256() => builtin.initPackage(typeof(go.crypto.sha256_package));

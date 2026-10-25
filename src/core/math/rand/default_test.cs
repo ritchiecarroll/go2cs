@@ -23,7 +23,7 @@ partial class rand_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingStartingAnotherˢ = (@string)"skipping starting another executable in short mode"u8;
-internal static readonly @string testRunTestDefaultRaceˢ = "-test.run=TestDefaultRace"u8;
+internal static readonly @string testRunTestDefaultRaceˢ = "-test.run=^TestDefaultRace$"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static readonly @string envᶜ = "GO_RAND_TEST_HELPER_CODE"u8;
@@ -47,14 +47,14 @@ public static void TestDefaultRace(ж<testing.T> Ꮡt) {
 
     Ꮡt.Parallel();
 
-    for (nint i = 0; i < 6; i++) {
-        nint iΔ1 = i;
-        Ꮡt.Run(strconv.Itoa(iΔ1), (ж<testing.T> tΔ1) => {
+    for (nint iᴛ1 = 0; iᴛ1 < 6; iᴛ1++) {
+        var i = iᴛ1;
+        Ꮡt.Run(strconv.Itoa(i), (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var cmd = testenv.Command(new rand_test_package.testing_TжTB(tΔ1), testenv.Executable(new rand_test_package.testing_TжTB(tΔ1)), testRunTestDefaultRaceˢ);
             cmd = testenv.CleanCmdEnv(cmd);
-            cmd.Value.Env = append((~cmd).Env, fmt.Sprintf("GO_RAND_TEST_HELPER_CODE=%d"u8, iΔ1 / 2));
-            if (iΔ1 % 2 != 0) {
+            cmd.Value.Env = append((~cmd).Env, fmt.Sprintf("GO_RAND_TEST_HELPER_CODE=%d"u8, i / 2));
+            if (i % 2 != 0) {
                 cmd.Value.Env = append((~cmd).Env, "GODEBUG=randautoseed=0"u8);
             }
             var (@out, err) = cmd.CombinedOutput();

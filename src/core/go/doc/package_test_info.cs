@@ -40,6 +40,12 @@ using static global::go.go.doc_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -48,7 +54,7 @@ using static global::go.go.doc_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/doc/example_test.go", "example_test.cs", "ACAugoKCgpSCgoKCgpSCgoKUgoK4goKUgoKAgv6CgoKUgoKmgpSmpKaCAAoQgoKClIKAgqQAIgqmAAIWAAIUgtyCgqaCggB6EIIAAFQAAoYBgriCgriCgoKUgoKClIK4ABMygoKUlIK4ooKUpoKCgpQ=", "30-87:1", "", "96=Diff/1/1/1;163=mustParse/1/2/1,mustParse/2/2/2;305=mustParse/1/2/1,mustParse/2/2/2")]
+[assembly: global::go.GoPositionMap("go/doc/example_test.go", "example_test.cs", "ACAugoKCgpSCgoKCgpSCgoKUgoK4goKUgoKAgv6CgoKUgoKmgpSmpKaCAAoQgoKClIKAgqQAIgqmAAIWAAIUgtyCgqaCggB8EIIAAFQAAooBgriCgriCgoKUgoKClIK4ABgygoKUlIK4ooKUpoKCgpQ=", "30-87:1", "", "96=Diff/1/1/1;163=mustParse/1/2/1,mustParse/2/2/2;307=mustParse/1/2/1,mustParse/2/2/2")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -81,8 +87,8 @@ public static partial class doc_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸprinter() => builtin.initPackage(typeof(global::go.go.printer_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(@internal.diff_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtxtar() => builtin.initPackage(typeof(@internal.txtar_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(global::go.@internal.diff_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtxtar() => builtin.initPackage(typeof(global::go.@internal.txtar_package));
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));

@@ -12,11 +12,11 @@ partial class edwards25519_internal_test_package {
 
 // a random scalar generated using dalek.
 internal static ж<global::go.crypto.@internal.fips140.edwards25519_package.Scalar> dalekScalar;
-internal static error _ᴛ3ʗ;
+internal static error _ᴛ2ʗ;
 internal static void initᴛdalekScalar() { dalekScalar = (Ꮡ(new Scalar(nil))).SetCanonicalBytes(new byte[]{219, 106, 114, 9, 174, 249, 155, 89, 69, 203, 201, 93, 92, 116, 234, 187, 78, 115, 103, 172, 182, 98, 62, 103, 187, 136, 13, 100, 248, 110, 12, 4}.slice()).Item1; }
 // the above, times the edwards25519 basepoint.
 internal static ж<global::go.crypto.@internal.fips140.edwards25519_package.Point> dalekScalarBasepoint;
-internal static error _ᴛ4ʗ;
+internal static error _ᴛ3ʗ;
 internal static void initᴛdalekScalarBasepoint() { dalekScalarBasepoint = @new<global::go.crypto.@internal.fips140.edwards25519_package.Point>().SetBytes(new byte[]{0xf4, 0xef, 0x7c, 0xa, 0x34, 0x55, 0x7b, 0x9f, 0x72, 0x3b, 0xb6, 0x1e, 0xf9, 0x46, 0x9, 0x91, 0x1c, 0xb9, 0xc0, 0x6c, 0x17, 0x28, 0x2d, 0x8b, 0x43, 0x2b, 0x5, 0x18, 0x6a, 0x54, 0x3e, 0x48}.slice()).Item1; }
 
 public static void TestScalarMultSmallScalars(ж<testing.T> Ꮡt) {
@@ -100,6 +100,7 @@ public static void TestScalarMultDistributesOverAdd(ж<testing.T> Ꮡt) {
 public static void TestScalarMultNonIdentityPoint(ж<testing.T> Ꮡt) {
     // Check whether p.ScalarMult and q.ScalaBaseMult give the same,
     // when p and q are originally set to the base point.
+
     var scalarMultNonIdentityPoint = (global::go.crypto.@internal.fips140.edwards25519_package.Scalar xʗp) => {
         ref var x = ref heap(xʗp.ΔClone(), out var Ꮡx);
         ref var p = ref heap(new global::go.crypto.@internal.fips140.edwards25519_package.Point(), out var Ꮡp);

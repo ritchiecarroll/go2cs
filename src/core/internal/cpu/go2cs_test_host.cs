@@ -19,6 +19,7 @@ internal static class Go2CsTestHost
             "cpu_arm64_linux.go",
             "cpu_arm64_openbsd.go",
             "cpu_arm64_other.go",
+            "cpu_darwin.go",
             "cpu_loong64.go",
             "cpu_loong64_hwcap.go",
             "cpu_loong64_linux.go",
@@ -31,16 +32,25 @@ internal static class Go2CsTestHost
             "cpu_ppc64x_linux.go",
             "cpu_ppc64x_other.go",
             "cpu_riscv64.go",
+            "cpu_riscv64_linux.go",
+            "cpu_riscv64_other.go",
             "cpu_s390x.go",
             "cpu_s390x_test.go",
             "cpu_test.go",
             "cpu_wasm.go",
             "cpu_x86.go",
+            "cpu_x86_darwin.go",
+            "cpu_x86_netbsd.go",
+            "cpu_x86_other.go",
             "cpu_x86_test.go",
+            "datacache_unsupported.go",
+            "datacache_x86.go",
+            "datacache_x86_test.go",
             "export_test.go",
             "export_x86_test.go",
         });
         registry.Add("TestAllCapabilitiesDisabled", cpu_test_package.TestAllCapabilitiesDisabled, "cpu_test.go", 48);
+        registry.Add("TestDataCacheSizes", cpu_test_package.TestDataCacheSizes, "datacache_x86_test.go", 17);
         registry.Add("TestDisableAllCapabilities", cpu_test_package.TestDisableAllCapabilities, "cpu_test.go", 43);
         registry.Add("TestDisableSSE3", cpu_test_package.TestDisableSSE3, "cpu_x86_test.go", 39);
         registry.Add("TestSSE3DebugOption", cpu_test_package.TestSSE3DebugOption, "cpu_x86_test.go", 46);

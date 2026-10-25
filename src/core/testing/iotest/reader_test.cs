@@ -305,11 +305,12 @@ public static void TestErrReader(ж<testing.T> Ꮡt) {
         new("io.EOF"u8, io.EOF)
     }.slice();
 
-    foreach (var (_, tt) in cases) {
-        ref var ttΔ1 = ref heap<TestErrReader_cases>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.name, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in cases) {
+        ref var tt = ref heap(new TestErrReader_cases(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
             var (n, err) = ErrReader(ttʗ1.err).Read(default!);
             if (!AreEqual(err, ttʗ1.err)) {
                 tΔ1.Fatalf("Error mismatch\nGot:  %v\nWant: %v"u8, err, ttʗ1.err);

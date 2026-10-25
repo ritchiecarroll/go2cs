@@ -22,9 +22,11 @@ internal static slice<oidTestsᴛ1> oidTests = new oidTestsᴛ1[]{
     new(new byte[]{}.slice(), false, ""u8, default!),
     new(new byte[]{0x80, 0x01}.slice(), false, ""u8, default!),
     new(new byte[]{0x01, 0x80, 0x01}.slice(), false, ""u8, default!),
+
     new(new byte[]{1, 2, 3}.slice(), true, "0.1.2.3"u8, new uint64[]{0, 1, 2, 3}.slice()),
     new(new byte[]{41, 2, 3}.slice(), true, "1.1.2.3"u8, new uint64[]{1, 1, 2, 3}.slice()),
     new(new byte[]{86, 2, 3}.slice(), true, "2.6.2.3"u8, new uint64[]{2, 6, 2, 3}.slice()),
+
     new(new byte[]{41, 255, 255, 255, 127}.slice(), true, "1.1.268435455"u8, new uint64[]{1, 1, 268435455}.slice()),
     new(new byte[]{41, 0x87, 255, 255, 255, 127}.slice(), true, "1.1.2147483647"u8, new uint64[]{1, 1, 2147483647}.slice()),
     new(new byte[]{41, 255, 255, 255, 255, 127}.slice(), true, "1.1.34359738367"u8, new uint64[]{1, 1, 34359738367UL}.slice()),
@@ -33,6 +35,7 @@ internal static slice<oidTestsᴛ1> oidTests = new oidTestsᴛ1[]{
     new(new byte[]{44, 0x83, 255, 255, 255, 255, 255, 255, 255, 255, 127}.slice(), true, "1.4.36893488147419103231"u8, default!),
     new(new byte[]{85, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127}.slice(), true, "2.5.1180591620717411303423"u8, default!),
     new(new byte[]{85, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127}.slice(), true, "2.5.19342813113834066795298815"u8, default!),
+
     new(new byte[]{255, 255, 255, 127}.slice(), true, "2.268435375"u8, new uint64[]{2, 268435375}.slice()),
     new(new byte[]{0x87, 255, 255, 255, 127}.slice(), true, "2.2147483567"u8, new uint64[]{2, 2147483567}.slice()),
     new(new byte[]{255, 127}.slice(), true, "2.16303"u8, new uint64[]{2, 16303}.slice()),
@@ -42,6 +45,7 @@ internal static slice<oidTestsᴛ1> oidTests = new oidTestsᴛ1[]{
     new(new byte[]{0x83, 255, 255, 255, 255, 255, 255, 255, 255, 127}.slice(), true, "2.36893488147419103151"u8, default!),
     new(new byte[]{255, 255, 255, 255, 255, 255, 255, 255, 255, 127}.slice(), true, "2.1180591620717411303343"u8, default!),
     new(new byte[]{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 127}.slice(), true, "2.19342813113834066795298735"u8, default!),
+
     new(new byte[]{41, (byte)(0x80 | 66), (byte)(0x80 | 44), (byte)(0x80 | 11), 33}.slice(), true, "1.1.139134369"u8, new uint64[]{1, 1, 139134369}.slice()),
     new(new byte[]{(byte)(0x80 | 66), (byte)(0x80 | 44), (byte)(0x80 | 11), 33}.slice(), true, "2.139134289"u8, new uint64[]{2, 139134289}.slice())
 }.slice();
@@ -123,7 +127,7 @@ public static void TestInvalidOID(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("ParseOID(%v) = (%v, %v); want = (OID{}, %v)"u8, tt.str, oid2, err, errInvalidOID);
         }
 
-        global::go.crypto.x509_package.OID oid3 = default!;
+        global::go.crypto.x509_package.ΔOID oid3 = default!;
         err = oid3.UnmarshalText(slice<byte>(tt.str));
         if (err == default!) {
             Ꮡt.Errorf("(*OID).UnmarshalText(%v) = (%v, %v); want = (OID{}, %v)"u8, tt.str, oid3, err, errInvalidOID);
@@ -132,8 +136,8 @@ public static void TestInvalidOID(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestOIDEqual_type /*dyn*/ {
-    internal global::go.crypto.x509_package.OID oid;
-    internal global::go.crypto.x509_package.OID oid2;
+    internal global::go.crypto.x509_package.ΔOID oid;
+    internal global::go.crypto.x509_package.ΔOID oid2;
     internal bool eq;
 }
 
@@ -143,8 +147,8 @@ public static void TestOIDEqual(ж<testing.T> Ꮡt) {
         new(oid: mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice()), oid2: mustNewOIDFromInts(new uint64[]{1, 2, 4}.slice()), eq: false),
         new(oid: mustNewOIDFromInts(new uint64[]{1, 2, 3}.slice()), oid2: mustNewOIDFromInts(new uint64[]{1, 2, 3, 4}.slice()), eq: false),
         new(oid: mustNewOIDFromInts(new uint64[]{2, 33, 22}.slice()), oid2: mustNewOIDFromInts(new uint64[]{2, 33, 23}.slice()), eq: false),
-        new(oid: new OID(nil), oid2: new OID(nil), eq: true),
-        new(oid: new OID(nil), oid2: mustNewOIDFromInts(new uint64[]{2, 33, 23}.slice()), eq: false)
+        new(oid: new ΔOID(nil), oid2: new ΔOID(nil), eq: true),
+        new(oid: new ΔOID(nil), oid2: mustNewOIDFromInts(new uint64[]{2, 33, 23}.slice()), eq: false)
     }.slice();
 
     foreach (var (_, tt) in cases) {
@@ -156,14 +160,14 @@ public static void TestOIDEqual(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static encoding.BinaryMarshaler _ᴛ1ʗ = new x509_test_package.x509_OIDᴠBinaryMarshaler(new OID(nil));
-internal static encoding.BinaryUnmarshaler _ᴛ2ʗ = new x509_test_package.x509_OIDжBinaryUnmarshaler(@new<global::go.crypto.x509_package.OID>());
-internal static encoding.TextMarshaler _ᴛ3ʗ = new x509_test_package.x509_OIDᴠTextMarshaler(new OID(nil));
-internal static encoding.TextUnmarshaler _ᴛ4ʗ = new x509_test_package.x509_OIDжTextUnmarshaler(@new<global::go.crypto.x509_package.OID>());
+internal static encoding.BinaryMarshaler _ᴛ1ʗ = new x509_test_package.x509_ΔOIDᴠBinaryMarshaler(new ΔOID(nil));
+internal static encoding.BinaryUnmarshaler _ᴛ2ʗ = new x509_test_package.x509_ΔOIDжBinaryUnmarshaler(@new<global::go.crypto.x509_package.ΔOID>());
+internal static encoding.TextMarshaler _ᴛ3ʗ = new x509_test_package.x509_ΔOIDᴠTextMarshaler(new ΔOID(nil));
+internal static encoding.TextUnmarshaler _ᴛ4ʗ = new x509_test_package.x509_ΔOIDжTextUnmarshaler(@new<global::go.crypto.x509_package.ΔOID>());
 
 internal partial struct TestOIDMarshal_cases /*dyn*/ {
     internal @string @in;
-    internal global::go.crypto.x509_package.OID @out;
+    internal global::go.crypto.x509_package.ΔOID @out;
     internal error err;
 }
 
@@ -205,7 +209,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
             continue;
         }
 
-        global::go.crypto.x509_package.OID o2 = default!;
+        global::go.crypto.x509_package.ΔOID o2 = default!;
         err = o2.UnmarshalText(slice<byte>(tt.@in));
         if (!AreEqual(err, tt.err)) {
             Ꮡt.Errorf("(*OID).UnmarshalText(%q) = %v; want = %v"u8, tt.@in, err, tt.err);
@@ -245,7 +249,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("(%#v).MarshalBinary() = %v; want = nil"u8, o, err);
         }
 
-        global::go.crypto.x509_package.OID o3 = default!;
+        global::go.crypto.x509_package.ΔOID o3 = default!;
         {
             var errΔ1 = o3.UnmarshalBinary(binary); if (errΔ1 != default!) {
                 Ꮡt.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = nil"u8, binary, errΔ1);
@@ -264,7 +268,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("(%#v).AppendBinary() = %v; want = nil"u8, o, err);
         }
 
-        global::go.crypto.x509_package.OID o4 = default!;
+        global::go.crypto.x509_package.ΔOID o4 = default!;
         {
             var errΔ2 = o4.UnmarshalBinary(binaryAppend); if (errΔ2 != default!) {
                 Ꮡt.Errorf("(*OID).UnmarshalBinary(%v) = %v; want = nil"u8, binaryAppend, errΔ2);
@@ -279,7 +283,7 @@ public static void TestOIDMarshal(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestOIDEqualASN1OID_type /*dyn*/ {
-    internal global::go.crypto.x509_package.OID oid;
+    internal global::go.crypto.x509_package.ΔOID oid;
     internal asn1.ObjectIdentifier oid2;
     internal bool eq;
 }
@@ -302,6 +306,7 @@ public static void TestOIDEqualASN1OID(ж<testing.T> Ꮡt) {
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33, 256}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, 256}.slice()), eq: true),
         new(oid: mustNewOIDFromInts(new uint64[]{2, 33, 257}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{2, 33, 256}.slice()), eq: false),
         new(oid: mustNewOIDFromInts(new uint64[]{2, 33, 256}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{2, 33, 257}.slice()), eq: false),
+
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, math.MaxInt32}.slice()), eq: false),
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33, math.MaxInt32}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33}.slice()), eq: false),
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33, math.MaxInt32}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, math.MaxInt32}.slice()), eq: true),
@@ -310,9 +315,10 @@ public static void TestOIDEqualASN1OID(ж<testing.T> Ꮡt) {
             oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, /*convert to int, so that it compiles on 32bit*/ (nint)maxInt32PlusOne}.slice()),
             eq: false
         ),
+
         new(oid: mustNewOIDFromInts(new uint64[]{1, 33, 256}.slice()), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false),
-        new(oid: new OID(nil), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, 256}.slice()), eq: false),
-        new(oid: new OID(nil), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false)
+        new(oid: new ΔOID(nil), oid2: new asn1.ObjectIdentifier(new nint[]{1, 33, 256}.slice()), eq: false),
+        new(oid: new ΔOID(nil), oid2: new asn1.ObjectIdentifier(new nint[]{}.slice()), eq: false)
     }.slice();
 
     foreach (var (_, tt) in cases) {
@@ -326,7 +332,7 @@ public static void TestOIDEqualASN1OID(ж<testing.T> Ꮡt) {
 
 public static void TestOIDUnmarshalBinary(ж<testing.T> Ꮡt) {
     foreach (var (_, tt) in oidTests) {
-        global::go.crypto.x509_package.OID o = default!;
+        global::go.crypto.x509_package.ΔOID o = default!;
         var err = o.UnmarshalBinary(tt.raw);
 
         var expectErr = errInvalidOID;
@@ -349,12 +355,36 @@ public static void BenchmarkOIDMarshalUnmarshalText(ж<testing.B> Ꮡb) {
         if (err != default!) {
             Ꮡb.Fatal(err);
         }
-        global::go.crypto.x509_package.OID o = default!;
+        global::go.crypto.x509_package.ΔOID o = default!;
         {
             var errΔ1 = o.UnmarshalText(text); if (errΔ1 != default!) {
                 Ꮡb.Fatal(errΔ1);
             }
         }
+    }
+}
+
+public static void TestOIDFromASN1OID(ж<testing.T> Ꮡt) {
+    var negativeComponentOID = new asn1.ObjectIdentifier(new nint[]{-1}.slice());
+    var (_, err) = OIDFromASN1OID(negativeComponentOID);
+    if (err == default! || err.Error() != "x509: OID components must be non-negative"u8) {
+        Ꮡt.Fatalf("OIDFromASN1OID() = %v; want = \"x509: OID components must be non-negative\""u8, err);
+    }
+
+    var shortOID = new asn1.ObjectIdentifier(new nint[]{1}.slice());
+    (_, err) = OIDFromASN1OID(shortOID);
+    if (err == default! || !AreEqual(err, errInvalidOID)) {
+        Ꮡt.Fatalf("OIDFromASN1OID() = %v; want = %q"u8, err, errInvalidOID);
+    }
+    var invalidOIDFirstComponent = new asn1.ObjectIdentifier(new nint[]{255, 1}.slice());
+    (_, err) = OIDFromASN1OID(invalidOIDFirstComponent);
+    if (err == default! || !AreEqual(err, errInvalidOID)) {
+        Ꮡt.Fatalf("OIDFromASN1OID() = %v; want = %q"u8, err, errInvalidOID);
+    }
+    var invalidOIDSecondComponent = new asn1.ObjectIdentifier(new nint[]{1, 255}.slice());
+    (_, err) = OIDFromASN1OID(invalidOIDSecondComponent);
+    if (err == default! || !AreEqual(err, errInvalidOID)) {
+        Ꮡt.Fatalf("OIDFromASN1OID() = %v; want = %q"u8, err, errInvalidOID);
     }
 }
 

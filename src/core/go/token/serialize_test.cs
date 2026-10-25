@@ -6,9 +6,11 @@ namespace go.go;
 using bytes = bytes_package;
 using gob = encoding.gob_package;
 using fmt = fmt_package;
+using slices = slices_package;
 using testing = testing_package;
 using encoding;
 using io = io_package;
+using iter = iter_package;
 using static global::go.go.token_package;
 
 partial class token_internal_test_package {
@@ -36,12 +38,14 @@ internal static error equal(ж<global::go.go.token_package.FileSet> Ꮡp, ж<glo
             return fmt.Errorf("different bases: %d != %d"u8, p.@base, q.@base);
         }
 
-        if (len(p.files) != len(q.files)) {
-            return fmt.Errorf("different number of files: %d != %d"u8, len(p.files), len(q.files));
+        var pfiles = slices.Collect(Ꮡp.of(global::go.go.token_package.FileSet.Ꮡtree).all());
+        var qfiles = slices.Collect(Ꮡq.of(global::go.go.token_package.FileSet.Ꮡtree).all());
+        if (len(pfiles) != len(qfiles)) {
+            return fmt.Errorf("different number of files: %d != %d"u8, len(pfiles), len(qfiles));
         }
 
-        foreach (var (i, f) in p.files) {
-            var g = q.files[i];
+        foreach (var (i, f) in pfiles) {
+            var g = qfiles[i];
             if ((~f).name != (~g).name) {
                 return fmt.Errorf("different filenames: %q != %q"u8, (~f).name, (~g).name);
             }
@@ -100,7 +104,7 @@ public static void TestSerialization(ж<testing.T> Ꮡt) {
     var p = NewFileSet();
     checkSerialize(Ꮡt, p);
     // add some files
-    for (nint i = 0; i < 10; i++) {
+    foreach (var i in range(10)) {
         var f = p.AddFile(fmt.Sprintf("file%d"u8, i), p.Base() + i, i * 100);
         checkSerialize(Ꮡt, p);
         // add some lines and alternative file infos

@@ -22,6 +22,12 @@ using static global::go.cmp_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -30,7 +36,7 @@ using static global::go.cmp_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("cmp/cmp_test.go", "cmp_test.cs", "ABAkopLUAB9GooKClLC0tLSkgsqCgoKUsLS0tKSCyqaCgoKClIIACQqCAAgYgoCCAAkKpoKUgoIADA6CAAgcvoI=", "160-166:1", "", "28=Inf/1/10/13,Inf/2/10/13,Inf/3/10/14,Inf/4/10/14,Inf/5/10/15,Inf/6/10/16,Inf/7/10/17,Inf/8/10/18,NaN/1/6/19,NaN/2/6/19,NaN/3/6/20,NaN/4/6/21,NaN/5/6/22,Inf/9/10/22,Inf/10/10/23,NaN/6/6/23")]
+[assembly: go.GoPositionMap("cmp/cmp_test.go", "cmp_test.cs", "ABAkopLUAB9GooKClLC0tLSkgsqCgoKUsLS0tKSCyqaCgoKClIIACQqCAAgYgoCCAAkKpoKUgoIADA6CAAgcvoIACxiCgoKCAAcQgoKCgg==", "160-166:1", "", "28=Inf/1/10/13,Inf/2/10/13,Inf/3/10/14,Inf/4/10/14,Inf/5/10/15,Inf/6/10/16,Inf/7/10/17,Inf/8/10/18,NaN/1/6/19,NaN/2/6/19,NaN/3/6/20,NaN/4/6/21,NaN/5/6/22,Inf/9/10/22,Inf/10/10/23,NaN/6/6/23")]
 // </GoSourcePositionMaps>
 
 namespace go;

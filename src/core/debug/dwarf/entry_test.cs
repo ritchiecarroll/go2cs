@@ -4,6 +4,7 @@
 namespace go.debug;
 
 using static go.debug.dwarf_package;
+using elf = go.debug.elf_package;
 using binary = encoding.binary_package;
 using filepath = path.filepath_package;
 using reflect = reflect_package;
@@ -328,7 +329,7 @@ public static void TestUnitIteration(ж<testing.T> Ꮡt) {
         Ꮡt.Run(@file, (ж<testing.T> tΔ1) => {
             var d = elfData(tΔ1, @file);
             array<slice<any>> units = new(2);
-            foreach (var (method, _) in units) {
+            foreach (var method in range(units)) {
                 for (var r = d.Reader(); ᐧ ; ) {
                     var (ent, errΔ1) = r.Next();
                     if (errΔ1 != default!) {
@@ -496,6 +497,75 @@ public static void TestIssue52045(ж<testing.T> Ꮡt) {
     // main goal is to make sure we can get here without crashing
     if (entry0 != nil) {
         Ꮡt.Errorf("got non-nil entry0, wanted nil"u8);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string testdataIssue57046Clangˢ = "testdata/issue57046-clang.elf5"u8;
+
+public static void TestIssue57046(ж<testing.T> Ꮡt) {
+    var spdiesᴷ = new stackAppend<dwarf.Offset>();
+    var lopcsᴷ = new stackAppend<uint64>();
+
+    var (f, err) = elf.Open(testdataIssue57046Clangˢ);
+    if (err != default!) {
+        Ꮡt.Fatalf("elf.Open returns err: %v"u8, err);
+    }
+    (var d, err) = f.DWARF();
+    if (err != default!) {
+        Ꮡt.Fatalf("f.DWARF returns err: %v"u8, err);
+    }
+    // Write down all the subprogram DIEs.
+    var spdies = new dwarf.Offset[]{}.slice();
+    var lopcs = new uint64[]{}.slice();
+    var r = d.Reader();
+    while (ᐧ) {
+        var (eΔ1, errΔ1) = r.Next();
+        if (errΔ1 != default!) {
+            Ꮡt.Fatalf("r.Next() returns err: %v"u8, errΔ1);
+        }
+        if (eΔ1 == nil) {
+            break;
+        }
+        if ((~eΔ1).Tag != TagSubprogram) {
+            continue;
+        }
+        @string name = default!;
+        uint64 lopc = default!;
+        {
+            var (n, ok) = eΔ1.Val(AttrName)._<@string>(ᐧ); if (ok) {
+                name = n;
+            }
+        }
+        {
+            var (lo, ok) = eΔ1.Val(AttrLowpc)._<uint64>(ᐧ); if (ok) {
+                lopc = lo;
+            }
+        }
+        if (name == ""u8 || lopc == 0) {
+            continue;
+        }
+        spdies = append(spdiesᴷ, spdies, (~eΔ1).Offset);
+        lopcs = append(lopcsᴷ, lopcs, lopc);
+    }
+
+    // Seek to the second entry in spdies (corresponding to mom() in
+    // issue57046_part2.c) and take a look at it.
+    var r2 = d.Reader();
+    r2.Seek(spdies[1]);
+    (var e, err) = r2.Next();
+    if (err != default!) {
+        Ꮡt.Fatalf("r2.Next() returns err: %v"u8, err);
+    }
+    if (e == nil) {
+        Ꮡt.Fatalf("r2.Next() returned nil"u8);
+    }
+
+    // Verify that the lopc we see matches what we saw before.
+    var got = e.Val(AttrLowpc)._<uint64>();
+    if (got != lopcs[1]) {
+        Ꮡt.Errorf("bad lopc for fn2 following seek: want %x got %x\n"u8,
+            lopcs[1], got);
     }
 }
 

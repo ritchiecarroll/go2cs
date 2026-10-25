@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `net/http/pprof` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-28 · converter `2b8b1fb75`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**15 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**15 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/net/http/pprof`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/net/http/pprof).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 

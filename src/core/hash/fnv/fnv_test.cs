@@ -7,12 +7,41 @@ using bytes = bytes_package;
 using encoding = encoding_package;
 using binary = go.encoding.binary_package;
 using hash = hash_package;
+using testhash = @internal.testhash_package;
 using io = io_package;
 using testing = testing_package;
+using @internal;
 using go.encoding;
 using static go.hash.fnv_package;
 
 partial class fnv_internal_test_package {
+
+internal partial struct TestHashInterface_test /*dyn*/ {
+    internal @string name;
+    internal Func<hash.Hash> fn;
+}
+
+public static void TestHashInterface(ж<testing.T> Ꮡt) {
+    Func<hash.Hash> fn32(Func<hash.Hash32> fn) => () => new fnv_internal_test_package.hash_Hash32ᴠHash(fn());
+    Func<hash.Hash> fn64(Func<hash.Hash64> fn) => () => new fnv_internal_test_package.hash_Hash64ᴠHash(fn());
+    var tests = new TestHashInterface_test[]{
+        new("32"u8, fn32(New32)),
+        new("32a"u8, fn32(New32a)),
+        new("64"u8, fn64(New64)),
+        new("64a"u8, fn64(New64a)),
+        new("128"u8, New128),
+        new("128a"u8, New128a)
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var test = ref heap(new TestHashInterface_test(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+            testhash.TestHash(tΔ1, new Func<hash.Hash>(testʗ1.fn));
+        });
+    }
+}
 
 internal partial struct golden {
     internal slice<byte> @out;
@@ -282,7 +311,7 @@ internal static void benchmarkKB(ж<testing.B> Ꮡb, hash.Hash h) {
 
     b.SetBytes(1024);
     var data = new slice<byte>(1024);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
     var @in = new slice<byte>(0, h.Size());

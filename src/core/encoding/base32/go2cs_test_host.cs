@@ -18,11 +18,11 @@ internal static class Go2CsTestHost
         registry.Add("TestBufferedDecodingSameError", base32_internal_test_package.TestBufferedDecodingSameError, "base32_test.go", 600);
         registry.Add("TestDecode", base32_internal_test_package.TestDecode, "base32_test.go", 132);
         registry.Add("TestDecodeCorrupt", base32_internal_test_package.TestDecodeCorrupt, "base32_test.go", 349);
-        registry.Add("TestDecodeReadAll", base32_internal_test_package.TestDecodeReadAll, "base32_test.go", 843);
-        registry.Add("TestDecodeSmallBuffer", base32_internal_test_package.TestDecodeSmallBuffer, "base32_test.go", 868);
+        registry.Add("TestDecodeReadAll", base32_internal_test_package.TestDecodeReadAll, "base32_test.go", 842);
+        registry.Add("TestDecodeSmallBuffer", base32_internal_test_package.TestDecodeSmallBuffer, "base32_test.go", 867);
         registry.Add("TestDecodeWithPadding", base32_internal_test_package.TestDecodeWithPadding, "base32_test.go", 561);
         registry.Add("TestDecodeWithWrongPadding", base32_internal_test_package.TestDecodeWithWrongPadding, "base32_test.go", 586);
-        registry.Add("TestDecodedLen", base32_internal_test_package.TestDecodedLen, "base32_test.go", 776);
+        registry.Add("TestDecodedLen", base32_internal_test_package.TestDecodedLen, "base32_test.go", 775);
         registry.Add("TestDecoder", base32_internal_test_package.TestDecoder, "base32_test.go", 160);
         registry.Add("TestDecoderBuffering", base32_internal_test_package.TestDecoderBuffering, "base32_test.go", 331);
         registry.Add("TestDecoderBufferingWithPadding", base32_internal_test_package.TestDecoderBufferingWithPadding, "base32_test.go", 95);
@@ -30,7 +30,7 @@ internal static class Go2CsTestHost
         registry.Add("TestDecoderError", base32_internal_test_package.TestDecoderError, "base32_test.go", 298);
         registry.Add("TestDecoderIssue4779", base32_internal_test_package.TestDecoderIssue4779, "base32_test.go", 465);
         registry.Add("TestEncode", base32_internal_test_package.TestEncode, "base32_test.go", 56);
-        registry.Add("TestEncodedLen", base32_internal_test_package.TestEncodedLen, "base32_test.go", 732);
+        registry.Add("TestEncodedLen", base32_internal_test_package.TestEncodedLen, "base32_test.go", 731);
         registry.Add("TestEncoder", base32_internal_test_package.TestEncoder, "base32_test.go", 65);
         registry.Add("TestEncoderBuffering", base32_internal_test_package.TestEncoderBuffering, "base32_test.go", 75);
         registry.Add("TestIssue20044", base32_internal_test_package.TestIssue20044, "base32_test.go", 213);
@@ -38,7 +38,7 @@ internal static class Go2CsTestHost
         registry.Add("TestReaderEOF", base32_internal_test_package.TestReaderEOF, "base32_test.go", 314);
         registry.Add("TestWithCustomPadding", base32_internal_test_package.TestWithCustomPadding, "base32_test.go", 531);
         registry.Add("TestWithoutPadding", base32_internal_test_package.TestWithoutPadding, "base32_test.go", 546);
-        registry.Add("TestWithoutPaddingClose", base32_internal_test_package.TestWithoutPaddingClose, "base32_test.go", 815);
+        registry.Add("TestWithoutPaddingClose", base32_internal_test_package.TestWithoutPaddingClose, "base32_test.go", 814);
         return TestHost.Run(registry, args);
     }
 }

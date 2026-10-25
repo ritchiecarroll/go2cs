@@ -72,6 +72,7 @@ public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {
             )),
             wantBody: ""u8
         ),
+
         new(
             name: "GET with full URL"u8,
             method: "GET"u8,
@@ -95,6 +96,7 @@ public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {
             )),
             wantBody: ""u8
         ),
+
         new(
             name: "GET with full https URL"u8,
             method: "GET"u8,
@@ -122,6 +124,7 @@ public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {
             )),
             wantBody: ""u8
         ),
+
         new(
             name: "Post with known length"u8,
             method: "POST"u8,
@@ -141,6 +144,7 @@ public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {
             )),
             wantBody: "foo"u8
         ),
+
         new(
             name: "Post with unknown length"u8,
             method: "POST"u8,
@@ -160,6 +164,25 @@ public static void TestNewRequestWithContext(ж<testing.T> Ꮡt) {
             )),
             wantBody: "foo"u8
         ),
+
+        new(
+            name: "Post with NoBody"u8,
+            method: "POST"u8,
+            uri: "/"u8,
+            body: new httptest_test_package.http_noBodyᴠReader(http.NoBody),
+            want: Ꮡ(new http.Request(
+                Method: "POST"u8,
+                Host: "example.com"u8,
+                URL: Ꮡ(new url.URL(Path: "/"u8)),
+                Header: new httpꓸHeader(new map<@string, slice<@string>>{}),
+                Proto: "HTTP/1.1"u8,
+                ProtoMajor: 1,
+                ProtoMinor: 1,
+                RemoteAddr: "192.0.2.1:1234"u8,
+                RequestURI: "/"u8
+            ))
+        ),
+
         new(
             name: "OPTIONS *"u8,
             method: "OPTIONS"u8,

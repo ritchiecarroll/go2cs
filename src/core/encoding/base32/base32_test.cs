@@ -231,7 +231,7 @@ internal static (nint, error) Read(this ref badReader b, slice<byte> p) {
     if (len(b.data) < lim) {
         lim = len(b.data);
     }
-    foreach (var (i, _) in p.slice(0, lim)) {
+    foreach (var i in range(p.slice(0, lim))) {
         p[i] = b.data[i];
     }
     b.data = b.data.slice(lim);
@@ -787,17 +787,21 @@ public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
             "I4======"u8,
             "=="u8
         }.slice(), "unexpected EOF"u8),
+
         new(new @string[]{
             "I4======N4======"u8
         }.slice(), "illegal base32 data at input byte 2"u8),
+
         new(new @string[]{
             "I4======"u8,
             "N4======"u8
         }.slice(), "illegal base32 data at input byte 0"u8),
+
         new(new @string[]{
             "I4======"u8,
             "========"u8
         }.slice(), "illegal base32 data at input byte 0"u8),
+
         new(new @string[]{
             "I4I4I4I4"u8,
             "I4======"u8,
@@ -805,12 +809,13 @@ public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
         }.slice(), "illegal base32 data at input byte 0"u8)
     }.slice();
 
-    foreach (var (_, testcase) in testcases) {
-        ref var testcaseΔ1 = ref heap<TestBufferedDecodingPadding_testcases>(out var ᏑtestcaseΔ1);
-        testcaseΔ1 = testcase;
+    foreach (var (_, vᴛ1) in testcases) {
+        ref var testcase = ref heap(new TestBufferedDecodingPadding_testcases(), out var Ꮡtestcase);
+        testcase = vᴛ1;
+
         var (pr, pw) = io.Pipe();
         var pwʗ1 = pw;
-        var testcaseʗ1 = testcaseΔ1;
+        var testcaseʗ1 = testcase;
         goǃ(() => {
             foreach (var (_, chunk) in testcaseʗ1.chunks) {
                 (_, _) = pwʗ1.Write(slice<byte>(chunk));
@@ -821,11 +826,11 @@ public static partial void TestBufferedDecodingPadding(ж<testing.T> Ꮡt) {
         var decoder = NewDecoder(StdEncoding, new io.PipeReaderжReader(pr));
         var (_, err) = io.ReadAll(decoder);
 
-        if (err == default! && len(testcaseΔ1.expectedError) != 0){
-            Ꮡt.Errorf("case %q: got nil error, want %v"u8, testcaseΔ1.chunks, testcaseΔ1.expectedError);
+        if (err == default! && len(testcase.expectedError) != 0){
+            Ꮡt.Errorf("case %q: got nil error, want %v"u8, testcase.chunks, testcase.expectedError);
         } else 
-        if (err.Error() != testcaseΔ1.expectedError) {
-            Ꮡt.Errorf("case %q: got %v, want %v"u8, testcaseΔ1.chunks, err, testcaseΔ1.expectedError);
+        if (err.Error() != testcase.expectedError) {
+            Ꮡt.Errorf("case %q: got %v, want %v"u8, testcase.chunks, err, testcase.expectedError);
         }
     }
 }
@@ -837,6 +842,8 @@ internal partial struct TestEncodedLen_test /*dyn*/ {
 }
 
 public static void TestEncodedLen(ж<testing.T> Ꮡt) {
+    var testsᴷ = new stackAppend<TestEncodedLen_test>();
+
     ж<global::go.encoding.base32_package.Encoding> rawStdEncoding = (~StdEncoding).WithPadding(NoPadding);
     var tests = new TestEncodedLen_test[]{
         new(StdEncoding, 0, 0),
@@ -866,7 +873,7 @@ public static void TestEncodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestEncodedLen_test(rawStdEncoding, unchecked((nint)(5764607523034234879L)), math.MaxInt));
     }
     else if (exprᴛ1 == 64) {
-        tests = append(tests, new TestEncodedLen_test(rawStdEncoding, unchecked((nint)(1152921504606846976L)), 1844674407370955162L));
+        tests = append(testsᴷ, tests, new TestEncodedLen_test(rawStdEncoding, unchecked((nint)(1152921504606846976L)), 1844674407370955162L));
         tests = append(tests, new TestEncodedLen_test(rawStdEncoding, unchecked((nint)(5764607523034234879L)), math.MaxInt));
     }
     foreach (var (_, tt) in tests) {
@@ -885,6 +892,8 @@ internal partial struct TestDecodedLen_test /*dyn*/ {
 }
 
 public static void TestDecodedLen(ж<testing.T> Ꮡt) {
+    var testsᴷ = new stackAppend<TestDecodedLen_test>();
+
     ж<global::go.encoding.base32_package.Encoding> rawStdEncoding = (~StdEncoding).WithPadding(NoPadding);
     var tests = new TestDecodedLen_test[]{
         new(StdEncoding, 0, 0),
@@ -909,7 +918,7 @@ public static void TestDecodedLen(ж<testing.T> Ꮡt) {
         tests = append(tests, new TestDecodedLen_test(rawStdEncoding, math.MaxInt, 1342177279));
     }
     else if (exprᴛ1 == 64) {
-        tests = append(tests, new TestDecodedLen_test(rawStdEncoding, unchecked((nint)(1844674407370955162L)), 1152921504606846976L));
+        tests = append(testsᴷ, tests, new TestDecodedLen_test(rawStdEncoding, unchecked((nint)(1844674407370955162L)), 1152921504606846976L));
         tests = append(tests, new TestDecodedLen_test(rawStdEncoding, math.MaxInt, 5764607523034234879L));
     }
     foreach (var (_, tt) in tests) {

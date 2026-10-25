@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `go/token` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**31 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**36 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/go/token`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/token).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -29,6 +29,8 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestFileSetPastEnd` | pass | pass |
 | `TestFileSetRace` | pass | pass |
 | `TestFileSetRace2` | pass | pass |
+| `TestFileSet_AddExistingFiles` | pass | pass |
+| `TestFile_End` | pass | pass |
 | `TestFiles` | pass | pass |
 | `TestIsIdentifier` | pass | pass |
 | `TestIsIdentifier/Empty` | pass | pass |
@@ -47,7 +49,10 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestPositionFor` | pass | pass |
 | `TestPositions` | pass | pass |
 | `TestRemoveFile` | pass | pass |
+| `TestRemoveFileRace` | pass | pass |
+| `TestRemovedFileFileReturnsNil` | pass | pass |
 | `TestSerialization` | pass | pass |
+| `TestTree` | pass | pass |
 
 ## Excluded declarations
 
@@ -57,5 +62,7 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkFileSet_AddExistingFiles (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkFileSet_Position (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSearchInts (benchmark): benchmark execution is deferred to Phase 4D
 - Example_retrievePositionInfo (example): example execution is deferred to Phase 4D

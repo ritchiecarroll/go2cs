@@ -12,19 +12,20 @@ internal static class Go2CsTestHost
             "fnv.go",
             "fnv_test.go",
         });
-        registry.Add("TestGolden128", fnv_internal_test_package.TestGolden128, "fnv_test.go", 80);
-        registry.Add("TestGolden128a", fnv_internal_test_package.TestGolden128a, "fnv_test.go", 84);
-        registry.Add("TestGolden32", fnv_internal_test_package.TestGolden32, "fnv_test.go", 64);
-        registry.Add("TestGolden32a", fnv_internal_test_package.TestGolden32a, "fnv_test.go", 68);
-        registry.Add("TestGolden64", fnv_internal_test_package.TestGolden64, "fnv_test.go", 72);
-        registry.Add("TestGolden64a", fnv_internal_test_package.TestGolden64a, "fnv_test.go", 76);
-        registry.Add("TestGoldenMarshal", fnv_internal_test_package.TestGoldenMarshal, "fnv_test.go", 104);
-        registry.Add("TestIntegrity128", fnv_internal_test_package.TestIntegrity128, "fnv_test.go", 179);
-        registry.Add("TestIntegrity128a", fnv_internal_test_package.TestIntegrity128a, "fnv_test.go", 183);
-        registry.Add("TestIntegrity32", fnv_internal_test_package.TestIntegrity32, "fnv_test.go", 164);
-        registry.Add("TestIntegrity32a", fnv_internal_test_package.TestIntegrity32a, "fnv_test.go", 168);
-        registry.Add("TestIntegrity64", fnv_internal_test_package.TestIntegrity64, "fnv_test.go", 172);
-        registry.Add("TestIntegrity64a", fnv_internal_test_package.TestIntegrity64a, "fnv_test.go", 176);
+        registry.Add("TestGolden128", fnv_internal_test_package.TestGolden128, "fnv_test.go", 107);
+        registry.Add("TestGolden128a", fnv_internal_test_package.TestGolden128a, "fnv_test.go", 111);
+        registry.Add("TestGolden32", fnv_internal_test_package.TestGolden32, "fnv_test.go", 91);
+        registry.Add("TestGolden32a", fnv_internal_test_package.TestGolden32a, "fnv_test.go", 95);
+        registry.Add("TestGolden64", fnv_internal_test_package.TestGolden64, "fnv_test.go", 99);
+        registry.Add("TestGolden64a", fnv_internal_test_package.TestGolden64a, "fnv_test.go", 103);
+        registry.Add("TestGoldenMarshal", fnv_internal_test_package.TestGoldenMarshal, "fnv_test.go", 131);
+        registry.Add("TestHashInterface", fnv_internal_test_package.TestHashInterface, "fnv_test.go", 17);
+        registry.Add("TestIntegrity128", fnv_internal_test_package.TestIntegrity128, "fnv_test.go", 206);
+        registry.Add("TestIntegrity128a", fnv_internal_test_package.TestIntegrity128a, "fnv_test.go", 210);
+        registry.Add("TestIntegrity32", fnv_internal_test_package.TestIntegrity32, "fnv_test.go", 191);
+        registry.Add("TestIntegrity32a", fnv_internal_test_package.TestIntegrity32a, "fnv_test.go", 195);
+        registry.Add("TestIntegrity64", fnv_internal_test_package.TestIntegrity64, "fnv_test.go", 199);
+        registry.Add("TestIntegrity64a", fnv_internal_test_package.TestIntegrity64a, "fnv_test.go", 203);
         return TestHost.Run(registry, args);
     }
 }
