@@ -367,6 +367,13 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
    - **the row's NEW test sources committed BY EXPLICIT PATH, never `git add -A`** (safety floor 8). The 1.26
      reconvert emits test sources the tree does not carry; net at the freeze, for example, emits
      `platform_windows_test.cs` and `unixsock_test.cs` as `??` (G, 2026-10-24);
+   - **a NEVER-BANKED row's whole scaffold, likewise by explicit path.** Its test host project, manifest,
+     disclosures file, test sources and proof page are all `??`. P2 found 10 such rows at the freeze:
+     `crypto/hpke`, `crypto/internal/fips140/subtle`, `crypto/internal/fips140only`, `internal/runtime/cgroup`,
+     `internal/runtime/wasitest`, `internal/syscall/unix`, `internal/trace/internal/tracev1`,
+     `internal/trace/tracev2`, `math/big/internal/asmgen` and `testing/synctest`. The row's
+     post lists every file it adds, and the list is read against the row's own `git status --porcelain`
+     (COORD, 2026-10-25);
    - **the external-test anchor change, when there is one.** `package_info_external_test.cs` exists only under
      the recompile model, and the converter removes it under a reference model. At the freeze, `crypto/ecdh`
      deletes its anchor (`D`), `crypto/sha3` rewrites 2 import-init lines (`M`), and `net/netip` and
