@@ -185,7 +185,7 @@ private static unsafe int32 machVMRegion(nint entryPoint, object? argsBox, strin
         (uintptr)args.object_name
     ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
 
-    GC.KeepAlive(box);
+    System.GC.KeepAlive(box);
     return unchecked((int32)(uint32)r);
 }
 
@@ -206,7 +206,7 @@ private static int32 procRegionFilename(nint entryPoint, object? argsBox, string
         unchecked((nuint)args.bufSize)
     ], GoLibcErrnoRule.None, s_libcCallErrnoReader, out _);
 
-    GC.KeepAlive(box);
+    System.GC.KeepAlive(box);
     return unchecked((int32)(uint32)r);
 }
 
