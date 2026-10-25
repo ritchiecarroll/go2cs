@@ -382,7 +382,12 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
      and the ledger line names it.** Go's `root_unix.go` honours `SSL_CERT_FILE`, so on a box that exports it (a
      cloud box pointing at its proxy CA bundle) TestSetFallbackRoots' mount-namespace masking cannot hide the
      system pool, and 4 subtests fail on the GO side. P2 measured go1.26.10: FAIL as run, ok with both unset
-     (COORD, 2026-10-24).
+     (COORD, 2026-10-24);
+   - **`net` banks on a host whose resolver answers NXDOMAIN for `invalid.invalid`, and the ledger line names the
+     check** (`nslookup invalid.invalid`). On a SERVFAIL resolver (the i9's network) Go itself fails
+     `TestLookupNoSuchHost/LookupHost_NXDOMAIN/default_resolver` in 11 of 13 runs, so the comparison reads an oracle
+     flake. On a conforming resolver both sides pass, 3 of 3 each at the freeze. The roster's net row carries no
+     disclosure for it (G, 2026-10-25).
    **Each pass-2 row's post lists its `??` test sources and its anchor status by path**, the way pass 1 reported
    the anchors, so a row that ships without a file it now needs is caught (COORD, 2026-10-24).
    It **never** carries `docs/validation/index.md` or the roster header.
