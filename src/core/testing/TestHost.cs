@@ -830,8 +830,9 @@ public static class TestHost
             if (!OwnerIsLive(ownerId, ownerName) || !Directory.Exists(runRoot))
                 return null;
 
-            // The containment test: this process was started somewhere the owner controls.
-            if (!IsWithin(workingDirectory, runRoot) && !IsWithin(workingDirectory, markerDirectory))
+            // The containment test: this process was started somewhere the owner controls. Asked through
+            // symlinks (IsWithinCanonical), because the two sides spell one directory differently on darwin.
+            if (!IsWithinCanonical(workingDirectory, runRoot) && !IsWithinCanonical(workingDirectory, markerDirectory))
                 return null;
 
             return runRoot;
@@ -916,6 +917,68 @@ public static class TestHost
             return false;
         }
     }
+
+    /// <summary>
+    /// <see cref="IsWithin"/>, widened on unix by SYMLINK EQUIVALENCE and by nothing else: true when the
+    /// lexical test is, or when the two paths' realpath(3) forms pass it.
+    /// </summary>
+    /// <remarks>
+    /// The marker's run root is the parent's spelling, built from <see cref="Path.GetTempPath"/> -- on
+    /// darwin <c>$TMPDIR</c>, <c>/var/folders/…</c> -- while a helper's working directory is getcwd()'s,
+    /// which is PHYSICAL: <c>/private/var/folders/…</c>, <c>/var</c> being a symlink. Compared lexically,
+    /// net/http/cgi's children (spawned with cmd.Dir inside the parent's sandbox, the environment marker
+    /// filtered away) failed containment, sandboxed afresh under <c>/tmp</c>, and answered TestDir's and
+    /// TestEnvOverride's os.Getwd() with the new GUID root, on both mac RIDs (go1.26.10 D-W1, run
+    /// 40218859736). Windows keeps the lexical comparison (COORD's ruling), and linux's temp paths are
+    /// physical, so the widening changes no answer there: every pair the lexical test admitted is still
+    /// admitted, and the realpath arm admits only a pair naming the SAME directory tree, never a sibling or
+    /// a prefix-sharing name. A path realpath cannot resolve answers through the lexical test alone.
+    /// Guarded by GolibTests' HelperSandboxContainmentTests.
+    /// </remarks>
+    internal static bool IsWithinCanonical(string candidate, string root)
+    {
+        if (IsWithin(candidate, root))
+            return true;
+
+        if (OperatingSystem.IsWindows())
+            return false;
+
+        string? canonicalCandidate = RealPath(candidate);
+        string? canonicalRoot = RealPath(root);
+
+        return canonicalCandidate is not null && canonicalRoot is not null && IsWithin(canonicalCandidate, canonicalRoot);
+    }
+
+    // realpath(3) with a NULL buffer: libc allocates the result, which is freed here. Null on any failure.
+    private static string? RealPath(string path)
+    {
+        try
+        {
+            IntPtr resolved = realpath(Path.GetFullPath(path), IntPtr.Zero);
+
+            if (resolved == IntPtr.Zero)
+                return null;
+
+            try
+            {
+                return Marshal.PtrToStringUTF8(resolved);
+            }
+            finally
+            {
+                free(resolved);
+            }
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or ArgumentException or NotSupportedException)
+        {
+            return null;
+        }
+    }
+
+    [DllImport("libc", SetLastError = true, EntryPoint = "realpath")]
+    private static extern IntPtr realpath([MarshalAs(UnmanagedType.LPUTF8Str)] string path, IntPtr resolved);
+
+    [DllImport("libc", EntryPoint = "free")]
+    private static extern void free(IntPtr pointer);
 
     /// <summary>
     /// Sets an environment variable in BOTH environments this process has — the CLR's, which the
