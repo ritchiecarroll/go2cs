@@ -397,6 +397,10 @@ A NOVERDICT row is never a 0: it is `NOMATCH` with its cause (H10, THE WORDS).
 ### 5.1 linux (R's WSL, P1, P2)
 
 - **Pass 1's linux readings are the evidence**: run beside the windows recon, as lessons 30 and 64 require.
+- **`internal/poll` reads under a 30m per-test deadline floor** (COORD, 2026-10-25): `TestSplicePipePool` fails at its own
+  ~27m timer with the codegen-liveness entry's signature, which the default 15m watchdog pre-empted (pass 1 read the
+  row DIVERGED at 976 s). The floor and its 30m `$longTimeouts` twin are in `run-validated-sweep.ps1`, so a derived argv
+  carries `-test-timeout 30m -test-deadline 30m`; budget ~28 min of linux wall for the row.
 - **The bank is a separate leg after the windows train it annotates.** It edits only `linux:` annotations, and the
   guard re-derives the header's Linux line.
 - **Closing check:** the annotated set equals the eligible set, 240 by name.
