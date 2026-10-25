@@ -103,8 +103,11 @@ and a publish without Native AOT are not affected.
 
 A converted program's project turns ReadyToRun on for `dotnet publish`. Adding `-p:PublishSingleFile=true`
 to that publish ran the ReadyToRun compiler, crossgen2, to about 10 GB of memory on a linux-x64 machine,
-where it failed with `Insufficient memory` and left the build hanging. A single-file publish with
-ReadyToRun turned off succeeds:
+where it failed with `Insufficient memory` and left the build hanging. The publish profiles go2cs writes
+beside a converted program (`-p:PublishProfile=linux-x64` and the others) turn ReadyToRun off, so a profile
+publish is not affected. A program converted before that change keeps the profiles it already has, since
+go2cs never overwrites one; add `<PublishReadyToRun>false</PublishReadyToRun>` to them. On the command line,
+turn ReadyToRun off yourself:
 
 ```
 dotnet publish -c Release -r linux-x64 -p:PublishSingleFile=true -p:PublishReadyToRun=false
@@ -116,4 +119,15 @@ The program then starts without ReadyToRun's head start, as it does under `dotne
      docs/phase4/DATA-trim-recon-p1-2026-10-24.md §5 finding 3): "-p:PublishSingleFile=true with the csproj's ReadyToRun
      on ran crossgen2 to 10 GB RSS and failed with "Insufficient memory". MSBuild then hung, and it was stopped by PID.
      With ReadyToRun off, the single-file publish succeeded." The template's switch:
-     src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`. -->
+     src/go2cs/csproj-template.xml:58 `<PublishReadyToRun>true</PublishReadyToRun>`.
+     THE PROFILE FIX, 2026-10-25 (P1, claude/p1-singlefile-r2r, COORD's ruling (a)): the nine embedded profiles gain
+     `<PublishReadyToRun>false</PublishReadyToRun>`. A condition on the template's line cannot do it: `dotnet msbuild
+     -getProperty` with the shipped linux-x64 profile reads PublishProfileImported=true and PublishReadyToRun=true under
+     Condition="'$(PublishSingleFile)'!='true'", because the SDK imports a profile after the project body. Arms, linux-x64,
+     .NET SDK 10.0.113, a converted fmt+strings program, `dotnet publish -p:PublishProfile=linux-x64 -p:GoTargetOS=linux`
+     in an 11 GiB memory cgroup: BEFORE (the hop-tip converter's profile) crossgen2 "System.OutOfMemoryException:
+     Insufficient memory to continue the execution of the program", NETSDK1096, cgroup peak 10,973 MiB, no cgroup OOM
+     kill; crossgen2 then stayed alive, idle, until it was stopped by PID. AFTER (the fixed converter's profile)
+     PublishReadyToRun=false, publish rc 0 in 438 s from a purged tree, cgroup peak 3,422 MiB, one 20,677,627-byte
+     executable whose output equals `go run`. The template's own line is deferred: it would move one line in 1,312
+     committed csproj. -->
