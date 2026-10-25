@@ -28355,6 +28355,33 @@ literal. LOW: a reader sees the argument is there; no comparison changes.
 
 — R (2026-10-24)
 
+## 2026-10-25 — P2: exec children inherit the CLR-raised NOFILE soft limit; restoring the original needs pre-CLR native code — OPEN, post-hop (disclosed at the syscall row; not a seat)
+
+**Measured.** The .NET runtime raises the process's RLIMIT_NOFILE soft limit to the hard limit while it initializes,
+before any managed code runs. A probe console app on .NET 10.0.12 (linux/amd64 cloud box, hard limit 20000) read
+`/proc/self/limits` after being launched at soft 1024, 19998 and 20000, and read 20000/20000 every time. Go's own
+`TestRlimitRestored` (go1.26.10, `exec_unix_test.go:345`) on the same box SKIPS with "skipping test because rlimit not
+adjusted at startup" at soft = hard = 20000, and PASSES at `ulimit -Sn 1024`, where the child reads 1024.
+
+**Root.** Go's syscall `init` (`rlimit.go`) raises the soft limit to Max-1 and saves the original in
+`origRlimitNofile` only when it finds `Cur < Max-1`; `StartProcess` then restores that original in each child. The
+converted `init` (`src/core/syscall/linux/rlimit.cs`) is faithful: `setrlimit` is real and the exec path reads
+`origRlimitNofile` (`exec_unix.cs`, `exec_linux.cs`). It always finds `Cur == Max`, because the runtime raised it
+first, so it stores nothing. The converted program therefore behaves as Go does on a host whose soft limit already
+equals its hard limit.
+
+**What differs for programs.** The open-file limit is raised, as in Go (to Max rather than Max-1), so programs that
+open many files are unaffected. The difference is that exec children inherit the raised soft limit instead of the
+parent's original one.
+
+**What a fix needs.** The original soft limit is gone before managed code runs, and no runtime setting for it was
+found (an absence in `libcoreclr.so`'s strings, not proof). Restoring it needs native code that runs before the
+runtime initializes, such as a custom host or a preload constructor. Until then the syscall row carries a
+`platform-skip` disclosure for `TestRlimitRestored` (text sent to G for the roster seat). It fires only on hosts where
+the soft limit is below the hard limit minus one; elsewhere Go skips too and both sides match.
+
+— P2 (measured 2026-10-25; ruled by COORD 2026-10-25 06:29Z and 06:58Z)
+
 ## 2026-10-25 — G (the go1.26.10 alloc relabel, COORD's FLAG ruling): fourteen allocation readings that ROSE against go1.24.13 — POST-HOP PERF, not a re-bank blocker
 
 **Basis.** The relabel re-read every allocation entry on both OSes at `d804094d7a` (go1.26.10, batch 37's tip,

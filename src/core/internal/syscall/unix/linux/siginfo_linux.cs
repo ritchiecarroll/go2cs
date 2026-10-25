@@ -52,6 +52,12 @@ public static partial class unix_package
         public int Status;
         // Size = 128 supplies the tail Go pads with `__ [100]byte`; the kernel may write into it,
         // and inline (not referenced) storage is the entire point of this mirror.
+
+        // Go's SiginfoChild embeds siErrnoCode, so the converter spells a non-escaping zero-value
+        // local `new(nil)` (TestSiginfoChildLayout's `var si unix.SiginfoChild`). go2cs-gen supplies
+        // that constructor only for a type a converted file declares or a hand-written one marks
+        // [GoType], and this mirror is neither; the zero value is default(SiginfoChild), as in Go.
+        public SiginfoChild(NilType _) { }
     }
 
     internal const int _CLD_EXITED = 1;

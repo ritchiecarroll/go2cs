@@ -200,13 +200,17 @@ func TestFixedSkipClosureExcludesStandardLibrary(t *testing.T) {
 
 	marked := markedFixedSkipFixture(t, filepath.Join(goRoot, "src", "logshape"), goRoot, "minimumCallerDepth")
 
+	// The fixed-skip PATH CLOSURE stays out of the standard library: logArgs, Log and Info are unmarked.
+	// Println is marked anyway, by the PARAMETER-CARRIED WINDOW rather than the closure: it passes the
+	// constant 2 to output's parameter skip, so output (0) and Println (1) are the frames runtime.Caller(2)
+	// skips. That is log's own shape, the one the window exists for (COORD ruling 2026-10-24).
 	assertMarked(t, marked, map[string]bool{
 		"getCaller": true,
 		"logArgs":   false,
 		"Log":       false,
 		"Info":      false,
 		"output":    true,
-		"Println":   false,
+		"Println":   true,
 	})
 }
 

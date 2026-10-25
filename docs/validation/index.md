@@ -82,7 +82,6 @@ it beside the proofs on every release.
 | `crypto/internal/fips140/nistec` | [`crypto.internal.fips140.nistec.md`](current/crypto.internal.fips140.nistec.md) | [`src/core/crypto/internal/fips140/nistec`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/nistec) |
 | `crypto/internal/fips140/rsa` | [`crypto.internal.fips140.rsa.md`](current/crypto.internal.fips140.rsa.md) | [`src/core/crypto/internal/fips140/rsa`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140/rsa) |
 | `crypto/internal/fips140test` | [`crypto.internal.fips140test.md`](current/crypto.internal.fips140test.md) | [`src/core/crypto/internal/fips140test`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/fips140test) |
-| `crypto/internal/hpke` | [`crypto.internal.hpke.md`](current/crypto.internal.hpke.md) | [`src/core/crypto/internal/hpke`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/hpke) |
 | `crypto/internal/sysrand` | [`crypto.internal.sysrand.md`](current/crypto.internal.sysrand.md) | [`src/core/crypto/internal/sysrand`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/internal/sysrand) |
 | `crypto/md5` | [`crypto.md5.md`](current/crypto.md5.md) | [`src/core/crypto/md5`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/md5) |
 | `crypto/mlkem` | [`crypto.mlkem.md`](current/crypto.mlkem.md) | [`src/core/crypto/mlkem`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/mlkem) |
@@ -123,7 +122,6 @@ it beside the proofs on every release.
 | `flag` | [`flag.md`](current/flag.md) | [`src/core/flag`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/flag) |
 | `fmt` | [`fmt.md`](current/fmt.md) | [`src/core/fmt`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/fmt) |
 | `go/ast` | [`go.ast.md`](current/go.ast.md) | [`src/core/go/ast`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/ast) |
-| `go/ast/internal/tests` | [`go.ast.internal.tests.md`](current/go.ast.internal.tests.md) | [`src/core/go/ast/internal/tests`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/ast/internal/tests) |
 | `go/build` | [`go.build.md`](current/go.build.md) | [`src/core/go/build`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/build) |
 | `go/build/constraint` | [`go.build.constraint.md`](current/go.build.constraint.md) | [`src/core/go/build/constraint`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/build/constraint) |
 | `go/constant` | [`go.constant.md`](current/go.constant.md) | [`src/core/go/constant`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/constant) |
@@ -173,7 +171,6 @@ it beside the proofs on every release.
 | `internal/godebug` | [`internal.godebug.md`](current/internal.godebug.md) | [`src/core/internal/godebug`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/godebug) |
 | `internal/godebugs` | [`internal.godebugs.md`](current/internal.godebugs.md) | [`src/core/internal/godebugs`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/godebugs) |
 | `internal/gover` | [`internal.gover.md`](current/internal.gover.md) | [`src/core/internal/gover`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/gover) |
-| `internal/itoa` | [`internal.itoa.md`](current/internal.itoa.md) | [`src/core/internal/itoa`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/itoa) |
 | `internal/pkgbits` | [`internal.pkgbits.md`](current/internal.pkgbits.md) | [`src/core/internal/pkgbits`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/pkgbits) |
 | `internal/platform` | [`internal.platform.md`](current/internal.platform.md) | [`src/core/internal/platform`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/platform) |
 | `internal/poll` | [`internal.poll.md`](current/internal.poll.md) | [`src/core/internal/poll`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/poll) |
@@ -192,7 +189,6 @@ it beside the proofs on every release.
 | `internal/sysinfo` | [`internal.sysinfo.md`](current/internal.sysinfo.md) | [`src/core/internal/sysinfo`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/sysinfo) |
 | `internal/testenv` | [`internal.testenv.md`](current/internal.testenv.md) | [`src/core/internal/testenv`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/testenv) |
 | `internal/trace` | [`internal.trace.md`](current/internal.trace.md) | [`src/core/internal/trace`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/trace) |
-| `internal/trace/internal/oldtrace` | [`internal.trace.internal.oldtrace.md`](current/internal.trace.internal.oldtrace.md) | [`src/core/internal/trace/internal/oldtrace`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/trace/internal/oldtrace) |
 | `internal/types/errors` | [`internal.types.errors.md`](current/internal.types.errors.md) | [`src/core/internal/types/errors`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/types/errors) |
 | `internal/xcoff` | [`internal.xcoff.md`](current/internal.xcoff.md) | [`src/core/internal/xcoff`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/xcoff) |
 | `internal/zstd` | [`internal.zstd.md`](current/internal.zstd.md) | [`src/core/internal/zstd`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/zstd) |

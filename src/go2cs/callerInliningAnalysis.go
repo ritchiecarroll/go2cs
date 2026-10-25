@@ -93,6 +93,15 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 		depth int64
 	}
 	var windows []skipWindow
+	// paramSkips[g] = g's runtime.Caller/Callers calls whose skip is one of g's own parameters (see
+	// runtimeCallerParamSkips), and bodies = every declaration's body, walked after the files for the
+	// same-package call sites that pass such a parameter a constant -- see THE PARAMETER-CARRIED WINDOW.
+	paramSkips := map[types.Object][]paramSkip{}
+	type declBody struct {
+		obj  types.Object
+		body *ast.BlockStmt
+	}
+	var bodies []declBody
 	// fixedSkipUsers and smallBodies feed the fixed-skip path closure (moduleScope only), applied after
 	// the walk because a path's callers can be declared in any file.
 	fixedSkipUsers := map[types.Object]bool{}
@@ -134,6 +143,12 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 			if depth, ok := runtimeCallerSkipWindow(info, fn.Body); ok {
 				windows = append(windows, skipWindow{obj: obj, depth: depth})
 			}
+
+			if skips := runtimeCallerParamSkips(info, fn); len(skips) > 0 {
+				paramSkips[obj] = skips
+			}
+
+			bodies = append(bodies, declBody{obj: obj, body: fn.Body})
 
 			if moduleScope {
 				if callsFixedSkipRuntimeCaller(info, fn) {
@@ -185,6 +200,27 @@ func computeNoInliningClosure(files []FileEntry, pkg *types.Package, info *types
 	for _, window := range windows {
 		for _, caller := range callersWithinDepth(window.obj, window.depth, callers) {
 			seed[caller] = true
+		}
+	}
+
+	// THE PARAMETER-CARRIED WINDOW (COORD ruling 2026-10-24, G's seat): the skip window above is sized by
+	// a CONSTANT skip, so a skip carried by a PARAMETER sized nothing, and only its direct user was seeded.
+	// log is the measured case: output calls runtime.Caller(calldepth), and the constant 2 lives at its 18
+	// callers. The six single-statement Print* joined as thin forwarders, but the 2- and 3-statement Fatal*
+	// and Panic* did not, and the linux Release TieredCompilation=0 JIT inlined Fatalf into TestCallDepth's
+	// one-line closure: the reported line moved to the closure's caller (FAIL untiered, PASS tiered, PASS
+	// untiered with DOTNET_JitNoInline=1). ONE step, per call site: a declaration whose own body passes a
+	// constant k to such a parameter of a same-package function sits at depth 1 below that function's
+	// frame, so it keeps its frame when k skips depth 1, and its callers within the remaining depth keep
+	// theirs too. A non-constant argument (Output's calldepth+1) opens nothing, exactly as before; no
+	// parameter is forwarded further and no fact crosses the package.
+	for _, d := range bodies {
+		for _, depth := range paramSkipCallDepths(info, pkg, d.body, paramSkips) {
+			seed[d.obj] = true
+
+			for _, caller := range callersWithinDepth(d.obj, depth-1, callers) {
+				seed[caller] = true
+			}
 		}
 	}
 
@@ -991,6 +1027,197 @@ func callersWithinDepth(fn types.Object, depth int64, callers map[types.Object]m
 	}
 
 	return reached
+}
+
+// paramSkip is one runtime.Caller/Callers call whose skip is the declaring function's own parameter: the
+// parameter's index in the signature, and the frames the skip does not count (1 for Caller(k), which
+// reports depth k; 2 for Callers(k), which records from depth k-1), as in runtimeCallerSkipWindow.
+type paramSkip struct {
+	index     int
+	unskipped int64
+}
+
+// runtimeCallerParamSkips reports fn's own runtime.Caller/Callers calls (a nested *ast.FuncLit is a frame of
+// its own) whose skip argument is exactly one of fn's parameters. A variadic parameter, or one the body
+// assigns, increments or takes the address of (closures included), carries no fact the caller can size.
+func runtimeCallerParamSkips(info *types.Info, fn *ast.FuncDecl) []paramSkip {
+	if fn == nil || fn.Body == nil || info == nil {
+		return nil
+	}
+
+	obj, ok := info.ObjectOf(fn.Name).(*types.Func)
+
+	if !ok {
+		return nil
+	}
+
+	sig := obj.Type().(*types.Signature)
+	var skips []paramSkip
+
+	ast.Inspect(fn.Body, func(n ast.Node) bool {
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || len(call.Args) == 0 {
+			return true
+		}
+
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		used, ok := info.Uses[sel.Sel].(*types.Func)
+
+		if !ok || used.Pkg() == nil || used.Pkg().Path() != "runtime" {
+			return true
+		}
+
+		var unskipped int64
+
+		switch used.Name() {
+		case "Caller":
+			unskipped = 1
+		case "Callers":
+			unskipped = 2
+		default:
+			return true
+		}
+
+		ident, ok := ast.Unparen(call.Args[0]).(*ast.Ident)
+
+		if !ok {
+			return true
+		}
+
+		param, ok := info.Uses[ident].(*types.Var)
+
+		if !ok {
+			return true
+		}
+
+		for i := 0; i < sig.Params().Len(); i++ {
+			if sig.Params().At(i) != param {
+				continue
+			}
+
+			if !(sig.Variadic() && i == sig.Params().Len()-1) && !paramReassigned(info, fn.Body, param) {
+				skips = append(skips, paramSkip{index: i, unskipped: unskipped})
+			}
+		}
+
+		return true
+	})
+
+	return skips
+}
+
+// paramReassigned reports whether body (its closures included) assigns param, increments or decrements it,
+// or takes its address -- any of which leaves the value reaching runtime.Caller unknown at the call site.
+func paramReassigned(info *types.Info, body *ast.BlockStmt, param *types.Var) bool {
+	is := func(expr ast.Expr) bool {
+		ident, ok := ast.Unparen(expr).(*ast.Ident)
+		return ok && info.Uses[ident] == param
+	}
+
+	reassigned := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		switch node := n.(type) {
+		case *ast.AssignStmt:
+			for _, lhs := range node.Lhs {
+				if is(lhs) {
+					reassigned = true
+				}
+			}
+		case *ast.IncDecStmt:
+			if is(node.X) {
+				reassigned = true
+			}
+		case *ast.UnaryExpr:
+			if node.Op == token.AND && is(node.X) {
+				reassigned = true
+			}
+		}
+
+		return !reassigned
+	})
+
+	return reassigned
+}
+
+// paramSkipCallDepths returns, for each call in body (a nested *ast.FuncLit is a frame of its own) to a
+// same-package function with a parameter-carried skip, the depth below that function's frame the call's
+// CONSTANT argument skips, when it reaches at least body's own frame (depth 1). A non-constant argument,
+// or a call through an interface or a function value, contributes nothing.
+func paramSkipCallDepths(info *types.Info, pkg *types.Package, body *ast.BlockStmt, paramSkips map[types.Object][]paramSkip) []int64 {
+	if body == nil || info == nil || len(paramSkips) == 0 {
+		return nil
+	}
+
+	var depths []int64
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if _, isLit := n.(*ast.FuncLit); isLit {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok || call.Ellipsis.IsValid() {
+			return true
+		}
+
+		fun := ast.Unparen(call.Fun)
+
+		switch index := fun.(type) {
+		case *ast.IndexExpr:
+			fun = index.X
+		case *ast.IndexListExpr:
+			fun = index.X
+		}
+
+		var ident *ast.Ident
+
+		switch f := fun.(type) {
+		case *ast.Ident:
+			ident = f
+		case *ast.SelectorExpr:
+			ident = f.Sel
+		default:
+			return true
+		}
+
+		callee, ok := info.Uses[ident].(*types.Func)
+
+		if !ok || callee.Pkg() != pkg {
+			return true
+		}
+
+		for _, skip := range paramSkips[callee.Origin()] {
+			if skip.index >= len(call.Args) {
+				continue
+			}
+
+			value := info.Types[call.Args[skip.index]].Value
+
+			if value == nil {
+				continue
+			}
+
+			if k, exact := constant.Int64Val(value); exact && k-skip.unskipped >= 1 {
+				depths = append(depths, k-skip.unskipped)
+			}
+		}
+
+		return true
+	})
+
+	return depths
 }
 
 // fixedSkipClosureApplies reports whether computeNoInliningClosure's fixed-skip path closure applies to the
