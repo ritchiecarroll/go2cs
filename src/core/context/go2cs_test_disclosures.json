@@ -1,14 +1,5 @@
 {
   "schemaVersion": 1,
   "disclosures": [
-    {
-      "name": "TestAllocs",
-      "class": "deferred",
-      "signature": " allocs = ",
-      "reason": "exact-count AllocsPerRun asserts over five context constructors (wants 0/3/12/5/8 mallocs): the managed shim is deliberately byte-derived (no CLR malloc counter), so the four nonzero-count asserts can never agree whatever the allocation behavior - measured 128/754/3744/2104/4876 BYTES for Background/WithValue/WithTimeout/WithCancel/WithTimeout(5ms), and one failing subtest fails the whole test; see the AllocsPerRun entry in docs/ConversionStrategies-Reference.md. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O4): alloc-count-semantics -> deferred. The byte-derived-shim premise is retired: the failing leg reads COUNT by construction.",
-      "want": "8 allocations at most on the WithTimeout(bg, 5ms) leg",
-      "reading": "9 printed on the WithTimeout(bg, 5ms) leg, COUNT by construction (the timerCtx box at context/context.cs:697 is counted on every run); the first-call note reads 1 per run -- 100 go2cs-runtime object allocations (37,112 bytes) counted over 100 runs at bb54ff0920 (the batch-8b stamp), Release with tiering off, readings-go1.24.13.tsv line 113 (claude/coord-h10-readings ac9f8251ee); only the first call is recorded",
-      "plan": "PARTIAL FORM: docs/phase4/DESIGN-zh-box-b-prime.md (B′) for the receiver field-ref boxes at context.cs:700/:709/:711 (the field-view cache may already collapse :709/:711); the surplus is unattributed; G's B′-admission read is post-hop."
-    }
   ]
 }
