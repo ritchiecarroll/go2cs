@@ -456,4 +456,76 @@ public static void TestFormatPAXRecord(ж<testing.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object expectedErrorˢ = (@string)"expected error"u8;
+
+internal partial struct BenchmarkParsePAXTime_tests /*dyn*/ {
+    internal @string name;
+    internal @string @in;
+    internal time.Time want;
+    internal bool ok;
+}
+
+public static void BenchmarkParsePAXTime(ж<testing.B> Ꮡb) {
+    var tests = new BenchmarkParsePAXTime_tests[]{
+        new(
+            name: "NoNanos"u8,
+            @in: "123456"u8,
+            want: time.Unix(123456, 0),
+            ok: true
+        ),
+        new(
+            name: "ExactNanos"u8,
+            @in: "1.123456789"u8,
+            want: time.Unix(1, 123456789),
+            ok: true
+        ),
+        new(
+            name: "WithNanoPadding"u8,
+            @in: "1.123"u8,
+            want: time.Unix(1, 123000000),
+            ok: true
+        ),
+        new(
+            name: "WithNanoTruncate"u8,
+            @in: "1.123456789123"u8,
+            want: time.Unix(1, 123456789),
+            ok: true
+        ),
+        new(
+            name: "TrailingError"u8,
+            @in: "1.123abc"u8,
+            want: new time.Time(nil),
+            ok: false
+        ),
+        new(
+            name: "LeadingError"u8,
+            @in: "1.abc123"u8,
+            want: new time.Time(nil),
+            ok: false
+        )
+    }.slice();
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new BenchmarkParsePAXTime_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡb.Run(tt.name, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            while (bΔ1.Loop()) {
+                var (ts, err) = parsePAXTime(ttʗ1.@in);
+                if ((err == default!) != ttʗ1.ok) {
+                    if (err != default!) {
+                        bΔ1.Fatal(err);
+                    }
+                    bΔ1.Fatal(expectedErrorˢ);
+                }
+                if (!ts.Equal(ttʗ1.want)) {
+                    bΔ1.Fatalf("time mismatch: got %v, want %v"u8, ts, ttʗ1.want);
+                }
+            }
+        });
+    }
+}
+
 } // end tar_internal_test_package

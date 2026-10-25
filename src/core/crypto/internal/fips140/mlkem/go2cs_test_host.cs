@@ -10,12 +10,14 @@ internal static class Go2CsTestHost
         TestRegistry registry = new("crypto/internal/fips140/mlkem", new string[]
         {
             "cast.go",
+            "cast_test.go",
             "field.go",
             "field_test.go",
             "generate1024.go",
             "mlkem1024.go",
             "mlkem768.go",
         });
+        registry.Add("TestCASTRejectionPaths", mlkem_internal_test_package.TestCASTRejectionPaths, "cast_test.go", 9);
         registry.Add("TestCompress", mlkem_internal_test_package.TestCompress, "field_test.go", 112);
         registry.Add("TestDecompress", mlkem_internal_test_package.TestDecompress, "field_test.go", 145);
         registry.Add("TestDecompressCompress", mlkem_internal_test_package.TestDecompressCompress, "field_test.go", 62);

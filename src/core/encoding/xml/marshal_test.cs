@@ -139,15 +139,15 @@ public partial struct Service {
 internal static ж<Ship> nilStruct;
 
 public partial struct EmbedA {
-    public partial ref EmbedC EmbedC { get; }
+    /*embed*/ public EmbedC EmbedC;
     public EmbedB EmbedB;
     public @string FieldA;
-    internal partial ref embedD embedD { get; }
+    /*embed*/ internal embedD embedD;
 }
 
 public partial struct EmbedB {
     public @string FieldB;
-    public partial ref ж<EmbedC> EmbedC { get; }
+    /*embed*/ public ж<EmbedC> EmbedC;
 }
 
 public partial struct EmbedC {
@@ -292,7 +292,7 @@ public partial struct Plain {
 public partial struct MyInt /*num:nint*/;
 
 public partial struct EmbedInt {
-    public partial ref MyInt MyInt { get; }
+    /*embed*/ public MyInt MyInt;
 }
 
 public partial struct Strings {
@@ -313,8 +313,8 @@ public partial struct ChardataEmptyTest {
 }
 
 public partial struct PointerAnonFields {
-    public partial ref ж<MyInt> MyInt { get; }
-    public partial ref ж<NamedType> NamedType { get; }
+    /*embed*/ public ж<MyInt> MyInt;
+    /*embed*/ public ж<NamedType> NamedType;
 }
 
 public partial struct MyMarshalerTest {
@@ -351,24 +351,24 @@ public partial struct InnerStruct {
 }
 
 public partial struct OuterStruct {
-    public partial ref InnerStruct InnerStruct { get; }
+    /*embed*/ public InnerStruct InnerStruct;
     public nint IntAttr; /*`xml:"int,attr"`*/
 }
 
 public partial struct OuterNamedStruct {
-    public partial ref InnerStruct InnerStruct { get; }
+    /*embed*/ public InnerStruct InnerStruct;
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"outerns test"`*/
     public nint IntAttr; /*`xml:"int,attr"`*/
 }
 
 public partial struct OuterNamedOrderedStruct {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"outerns test"`*/
-    public partial ref InnerStruct InnerStruct { get; }
+    /*embed*/ public InnerStruct InnerStruct;
     public nint IntAttr; /*`xml:"int,attr"`*/
 }
 
 public partial struct OuterOuterStruct {
-    public partial ref OuterStruct OuterStruct { get; }
+    /*embed*/ public OuterStruct OuterStruct;
 }
 
 public partial struct NestedAndChardata {
@@ -1716,7 +1716,7 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
             switch (destʗ1.type()) {
             case ж<Feed> fix: {
                 fix.Value.Author.InnerXML = ""u8;
-                foreach (var (iΔ1, _) in (~fix).Entry) {
+                foreach (var iΔ1 in range((~fix).Entry)) {
                     (~fix).Entry[iΔ1].Author.InnerXML = ""u8;
                 }
                 break;
@@ -2548,7 +2548,7 @@ public static void TestInvalidXMLName(ж<testing.T> Ꮡt) {
 public partial struct LayerOne {
     public global::go.encoding.xml_package.Name XMLName; /*`xml:"l1"`*/
     public ж<float64> Value; /*`xml:"value,omitempty"`*/
-    public partial ref ж<LayerTwo> LayerTwo { get; } /*`xml:",omitempty"`*/
+    /*embed*/ public ж<LayerTwo> LayerTwo; /*`xml:",omitempty"`*/
 }
 
 public partial struct LayerTwo {
@@ -2609,11 +2609,12 @@ internal static slice<encodeTokenTestsᴛ1> closeTests = new encodeTokenTestsᴛ
 internal static readonly object expectedErrorGotNoneˢ = (@string)" expected error; got none"u8;
 
 public static void TestClose(ж<testing.T> Ꮡt) {
-    foreach (var (_, tt) in closeTests) {
-        ref var ttΔ1 = ref heap<encodeTokenTestsᴛ1>(out var ᏑttΔ1);
-        ttΔ1 = tt;
-        var ttʗ1 = ttΔ1;
-        Ꮡt.Run(ttΔ1.desc, (ж<testing.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in closeTests) {
+        ref var tt = ref heap(new encodeTokenTestsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.desc, (ж<testing.T> tΔ1) => {
             ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
             var enc = NewEncoder(new xml_test_package.strings_BuilderжWriter(Ꮡout));
             foreach (var (j, tok) in ttʗ1.toks) {

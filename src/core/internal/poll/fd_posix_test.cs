@@ -26,6 +26,7 @@ internal static slice<eofErrorTestsᴛ1> eofErrorTests = new eofErrorTestsᴛ1[]
     new(0, default!, Ꮡ(new FD(ZeroReadIsEOF: true)), io.EOF),
     new(0, io.EOF, Ꮡ(new FD(ZeroReadIsEOF: true)), io.EOF),
     new(0, ErrNetClosing, Ꮡ(new FD(ZeroReadIsEOF: true)), ErrNetClosing),
+
     new(100, default!, Ꮡ(new FD(ZeroReadIsEOF: false)), default!),
     new(100, io.EOF, Ꮡ(new FD(ZeroReadIsEOF: false)), io.EOF),
     new(100, ErrNetClosing, Ꮡ(new FD(ZeroReadIsEOF: false)), ErrNetClosing),

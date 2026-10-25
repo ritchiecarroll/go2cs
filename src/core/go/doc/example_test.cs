@@ -10,13 +10,13 @@ using Δdoc = global::go.go.doc_package;
 using format = global::go.go.format_package;
 using parser = global::go.go.parser_package;
 using token = global::go.go.token_package;
-using diff = @internal.diff_package;
-using txtar = @internal.txtar_package;
+using diff = global::go.@internal.diff_package;
+using txtar = global::go.@internal.txtar_package;
 using filepath = path.filepath_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
-using @internal;
+using global::go.@internal;
 using global::go.go;
 using io = io_package;
 using path;
@@ -266,6 +266,8 @@ func ExampleFunc1_foo()           {}
 func ExampleFunc1_foo_suffix()    {}
 func ExampleFunc1_foo_Suffix()    {} // matches Func1, instead of Func1_foo
 func Examplefunc1()               {} // invalid - cannot match unexported
+func ExampleFunc1_params(a int)   {} // invalid - has parameter
+func ExampleFunc1_results() int   {} // invalid - has results
 
 func ExampleType1_Func1()               {}
 func ExampleType1_Func1_()              {} // invalid - suffix must start with a lower-case letter
@@ -329,20 +331,25 @@ public static void TestClassifyExamples(ж<testing.T> Ꮡt) {
 
     var want = new map<@string, slice<@string>>{
         [""u8] = new @string[]{""u8, "suffix"u8, "suffix_xX_X_x"u8}.slice(), // Package-level examples.
+
         ["Type1"u8] = new @string[]{""u8, "foo_Suffix"u8, "func2"u8, "suffix"u8}.slice(),
         ["Type1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Type1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+
         ["Func1"u8] = new @string[]{""u8, "foo_Suffix"u8, "suffix"u8}.slice(),
         ["Func1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Func1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+
         ["Type1.Func1"u8] = new @string[]{""u8, "foo_Suffix"u8, "suffix"u8}.slice(),
         ["Type1.Func1_Foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Type1.Func1_foo"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+
         ["Uembed.Func1"u8] = new @string[]{""u8, "suffix"u8}.slice(),
 
         // These are implementation dependent due to the ambiguous parsing.
         ["Conflict_Conflict"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["Conflict_conflict"u8] = new @string[]{""u8, "suffix"u8}.slice(),
+
         ["GFunc"u8] = new @string[]{""u8, "suffix"u8}.slice(),
         ["GType.M"u8] = new @string[]{""u8, "suffix"u8}.slice()
     };
@@ -368,7 +375,7 @@ internal static slice<@string> /*out*/ exampleNames(slice<ж<Δdoc.Example>> exs
 }
 
 internal static ж<ast.File> mustParse(ж<token.FileSet> Ꮡfset, @string filename, @string src) {
-    var (f, err) = parser.ParseFile(Ꮡfset, filename, src, parser.ParseComments);
+    var (f, err) = parser.ParseFile(Ꮡfset, filename, src, (parser.Mode)(parser.ParseComments | parser.SkipObjectResolution));
     if (err != default!) {
         throw panic(err);
     }

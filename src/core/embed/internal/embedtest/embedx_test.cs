@@ -6,6 +6,8 @@ namespace go.embed.@internal;
 using embed = embed_package;
 using os = os_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.embed.@internal.embedtest_internal_test_package;
 
 partial class embedtest_test_package {
@@ -48,7 +50,7 @@ internal static void testFiles(ж<testing.T> Ꮡt, embed.FS f, @string name, @st
     }
 }
 
-internal static void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
+internal static partial void testString(ж<testing.T> Ꮡt, @string s, @string name, @string data) {
     Ꮡt.Helper();
     if (s != data) {
         Ꮡt.Errorf("%v = %q, want %q"u8, name, s, data);

@@ -2065,6 +2065,7 @@ internal static map<@string, Action<ж<uint32>, nint>> hammer32 = new map<@strin
     ["CompareAndSwapInt32"u8] = hammerCompareAndSwapInt32,
     ["CompareAndSwapUint32"u8] = hammerCompareAndSwapUint32,
     ["CompareAndSwapUintptr"u8] = hammerCompareAndSwapUintptr32,
+
     ["SwapInt32Method"u8] = hammerSwapInt32Method,
     ["SwapUint32Method"u8] = hammerSwapUint32Method,
     ["SwapUintptrMethod"u8] = hammerSwapUintptr32Method,
@@ -2355,6 +2356,7 @@ internal static map<@string, Action<ж<uint64>, nint>> hammer64 = new map<@strin
     ["CompareAndSwapInt64"u8] = hammerCompareAndSwapInt64,
     ["CompareAndSwapUint64"u8] = hammerCompareAndSwapUint64,
     ["CompareAndSwapUintptr"u8] = hammerCompareAndSwapUintptr64,
+
     ["SwapInt64Method"u8] = hammerSwapInt64Method,
     ["SwapUint64Method"u8] = hammerSwapUint64Method,
     ["SwapUintptrMethod"u8] = hammerSwapUintptr64Method,

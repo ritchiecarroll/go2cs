@@ -12,6 +12,8 @@ using os = os_package;
 using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using net;
 using static go.mime.multipart_package;
@@ -47,7 +49,7 @@ internal static @string escapeString(@string v) {
     return (@string)bytes;
 }
 
-internal static void expectEq(ж<testing.T> Ꮡt, @string expected, @string actual, @string what) {
+internal static partial void expectEq(ж<testing.T> Ꮡt, @string expected, @string actual, @string what) {
     if (expected == actual) {
         return;
     }
@@ -492,6 +494,7 @@ public static void TestLineContinuation(ж<testing.T> Ꮡt) {
 
     // This body, extracted from an email, contains headers that span multiple
     // lines.
+
     // TODO: The original mail ended with a double-newline before the
     // final delimiter; this was manually edited to use a CRLF.
     @string testBody = appleMail2292336769ˢ;
@@ -570,6 +573,7 @@ internal static readonly @string divDirLtrHelloWorldDivˢ = @"<div dir=""ltr"">H
 
 public static void TestRawPart(ж<testing.T> Ꮡt) {
     // https://github.com/golang/go/issues/29090
+
     @string body = strings.Replace(contentTypeTextPlainˢ, "\n"u8, "\r\n"u8, -1);
 
     var r = NewReader(new multipart_test_package.strings_ReaderжReader(strings.NewReader(body)), "0016e68ee29c5d515f04cedf6733"u8);
@@ -1023,6 +1027,7 @@ Body
             new(new textproto.MIMEHeader(new map<@string, slice<@string>>{["Content-Type"u8] = new @string[]{@"multipart/alternative; boundary=""foo--"""u8}.slice()}), ""u8)
         }.slice()
     ),
+
     roundTripParseTest()
 }.slice();
 

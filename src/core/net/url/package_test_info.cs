@@ -48,6 +48,12 @@ using static global::go.net.url_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -56,7 +62,7 @@ using static global::go.net.url_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/url/example_test.go", "example_test.cs", "ABMegoIACAyCgoKClNyCggAIDIKCgoKUAA0MgoKCgoKUgoIADA6CgoKCgtyCgoKCgpSCAAoOgoKCgoIACAyCgoKCgoLugoKCgoKC7oKCgoKClIIADA6CgoKUgoKCgoLolIKClIKCAAoOgoKClIKClPqCgoKUAAoKgoKClIKCAAwOgoKClIKCAAoOgoKClIKCgpQACAyCgoKCAAoMgoKCpgAIDIKCgoKUAAgKgoKClIKClIKCgIIACQyCgoKUgoKClAAIDIKCgpSCgoIACg6CAAcQgoLcgoKCgpQACQqC3IKCAAgMgoKClLiCgoKU", "", "", "420=UserPassword/1/1/2;453=UserPassword/1/1/2")]
+[assembly: go.GoPositionMap("net/url/example_test.go", "example_test.cs", "ABMegoIACAyCgoKClNyCggAIDIKCgoKUAA0MgoKCgoKCgoKCAA0QgoKCgoLcgoKCgoKUggAKDoKCgoKCAAgMgoKCgoKC7oKCgoKCgu6CgoKCgpSCAAwOgoKClIKCgoKC6JSCgpSCggAKDoKCgpSCgpT6goKClAAKCoKCgpSCggAMDoKCgpSCggAKDoKCgpSCgoKUAAgMgoKCggAKDIKCgqYACAyCgoKClAAICoKCgpSCgpSCgoCCAAkMgoKClIKCgpQACAyCgoKUgoKCAAoOggAHEIKC3IKCgoKUAAkKgtyCggAIDIKCgpS4goKClA==", "", "", "421=UserPassword/1/1/2;454=UserPassword/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
@@ -89,6 +95,7 @@ public static partial class url_test_package
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));
     [GoInit] internal static void initᴛᴛimportꓸnetꓸurl() => builtin.initPackage(typeof(go.net.url_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
+    [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

@@ -23,6 +23,12 @@ using static global::go.crypto.hmac_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -31,7 +37,7 @@ using static global::go.crypto.hmac_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/hmac/hmac_test.go", "hmac_test.cs", "AB04AIEElAiCsoKAgqSAgqSCgoKCuIKCgsq4ggAKDKKClIKCgoKmsgANDoKCgpSClIKUgpSCuIKCgpSi6qKCgoKCgoKCgriigoKCgoKCgoK4ooKCgoKCgg==", "580-580:1;591-596:1;597-597:2;629-631:1;630-630:1.1")]
+[assembly: go.GoPositionMap("crypto/hmac/hmac_test.go", "hmac_test.cs", "AB46AIEElAiCsoKAgqSAgqSCgoKCuIKCgsq4ggAJDIKCgIKkgoKC+KKClIKCgoKmsgANDoKCgpSClIKUgpSCuIKCgpSi6oKCpqKAkqSmooKCgoKCgoKCuKKCgoKCgoKCgriigoKCgoKC", "581-581:1;588-588:1;604-609:1;610-610:2;642-644:1;643-643:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -61,6 +67,7 @@ public static partial class hmac_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsha1() => builtin.initPackage(typeof(go.crypto.sha1_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsha256() => builtin.initPackage(typeof(go.crypto.sha256_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸsha512() => builtin.initPackage(typeof(go.crypto.sha512_package));
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));

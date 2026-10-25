@@ -36,7 +36,8 @@ partial struct fakeNetListener {
     internal bool closed;
     internal netip.AddrPort addr;
     internal uint16 locPort;
-    internal Action onDial; // called when making a new connection
+    internal Action onDial;             // called when making a new connection
+    internal Action<ж<fakeNetConn>> onClose; // called when closing a connection
     internal bool trackConns; // set this to record all created conns
     internal slice<ж<fakeNetConn>> conns;
 }
@@ -75,6 +76,8 @@ internal static ж<fakeNetConn> connect(this ж<fakeNetListener> Ꮡli) {
         var locAddr = netip.AddrPortFrom(netip.AddrFrom4(new byte[]{127, 0, 0, 1}.array()), li.locPort);
         li.locPort++;
         var (c0, c1) = fakeNetPipe(li.addr, locAddr);
+        c0.Value.onClose = li.onClose;
+        c1.Value.onClose = li.onClose;
         li.queue = append(li.queue, (net.Conn)(new http_test_package.fakeNetConnжConn(c0)));
         if (li.trackConns) {
             li.conns = append(li.conns, c0);
@@ -150,7 +153,7 @@ partial struct fakeNetConn {
     internal bool autoWait;
     // peer is the other endpoint.
     internal ж<fakeNetConn> peer;
-    internal Action onClose; // called when closing
+    internal Action<ж<fakeNetConn>> onClose; // called when closing
 }
 
 // Read reads data from the connection.
@@ -209,9 +212,11 @@ internal static bool IsClosedByPeer(this ж<fakeNetConn> Ꮡc) {
 }
 
 // Close closes the connection.
-internal static error Close(this ref fakeNetConn c) {
+internal static error Close(this ж<fakeNetConn> Ꮡc) {
+    ref var c = ref Ꮡc.DerefOrNull();
+
     if (c.onClose != default!) {
-        c.onClose();
+        c.onClose(Ꮡc);
     }
     // Local half of the conn is now closed.
     c.loc.@lock();
@@ -221,9 +226,10 @@ internal static error Close(this ref fakeNetConn c) {
     c.loc.unlock();
     // Remote half of the connection reads EOF after reading any remaining data.
     c.rem.@lock();
-    if ((~c.rem).readErr != default!) {
+    if ((~c.rem).readErr == default!) {
         c.rem.Value.readErr = io.EOF;
     }
+    c.rem.Value.writeErr = net.ErrClosed;
     c.rem.unlock();
     if (c.autoWait) {
         synctest.Wait();

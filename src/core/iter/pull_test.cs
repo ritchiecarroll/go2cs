@@ -611,4 +611,24 @@ public static void TestPull2ImmediateStop(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void BenchmarkPull(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var seq = count(1);
+    foreach (var _ᴛ1 in range(b.N)) {
+        var (_, stop) = Pull(seq);
+        stop();
+    }
+}
+
+public static void BenchmarkPull2(ж<testing.B> Ꮡb) {
+    ref var b = ref Ꮡb.DerefOrNull();
+
+    var seq = squares(1);
+    foreach (var _ᴛ1 in range(b.N)) {
+        var (_, stop) = Pull2(seq);
+        stop();
+    }
+}
+
 } // end iter_test_package

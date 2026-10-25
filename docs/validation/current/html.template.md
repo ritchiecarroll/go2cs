@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `html/template` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**243 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**265 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/html/template`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/html/template).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 2 of the matched tests identically.
 
@@ -27,6 +27,12 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestBlock` | pass | pass |
 | `TestCSSEscaper` | pass | pass |
 | `TestCSSValueFilter` | pass | pass |
+| `TestCVE202656858` | pass | pass |
+| `TestCVE202656858/regexp_after_close_brace` | pass | pass |
+| `TestCVE202656858/regexp_after_close_brace_in_template_literal` | pass | pass |
+| `TestCVE202656858/regexp_after_open_brace_in_if_block` | pass | pass |
+| `TestCVE202656858/regexp_after_open_brace_in_template_literal` | pass | pass |
+| `TestCVE202656858/regexp_pathological_attacker_input` | pass | pass |
 | `TestClone` | pass | pass |
 | `TestCloneCrash` | pass | pass |
 | `TestCloneGrowth` | pass | pass |
@@ -107,6 +113,12 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestEscape/jsStr` | pass | pass |
 | `TestEscape/jsStrNotUnderEscaped` | pass | pass |
 | `TestEscape/jsStrValue` | pass | pass |
+| `TestEscape/meta_content_attribute_url` | pass | pass |
+| `TestEscape/meta_content_string` | pass | pass |
+| `TestEscape/meta_content_url_with_space_after_equals` | pass | pass |
+| `TestEscape/meta_content_url_with_tab_before_equals` | pass | pass |
+| `TestEscape/meta_content_url_with_whitespace_before_equals` | pass | pass |
+| `TestEscape/meta_content_url_with_whitespace_both_sides_of_equals` | pass | pass |
 | `TestEscape/multipleAttrs` | pass | pass |
 | `TestEscape/nonHierURL` | pass | pass |
 | `TestEscape/nonStringValue` | pass | pass |
@@ -120,6 +132,9 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestEscape/rangeBody` | pass | pass |
 | `TestEscape/rangeElse` | pass | pass |
 | `TestEscape/range_in_textarea` | pass | pass |
+| `TestEscape/scriptTypeEmpty` | pass | pass |
+| `TestEscape/scriptTypeSpace` | pass | pass |
+| `TestEscape/scriptTypeTab` | pass | pass |
 | `TestEscape/srcset_bad_URL_in_second_position` | pass | pass |
 | `TestEscape/srcset_buffer_growth` | pass | pass |
 | `TestEscape/styleBidiKeywordPassed` | pass | pass |
@@ -203,12 +218,19 @@ Both runtimes skip 2 of the matched tests identically.
 | `TestIsJsMimeType` | pass | pass |
 | `TestIssue19294` | pass | pass |
 | `TestIssue31810` | skip | skip |
+| `TestIssue81821` | pass | pass |
+| `TestIssue81823` | pass | pass |
+| `TestIssue81823/private_yield` | pass | pass |
+| `TestIssue81823/property_in` | pass | pass |
+| `TestIssue81823/property_yield` | pass | pass |
+| `TestIssue81823/yield` | pass | pass |
 | `TestJSEscaping` | pass | pass |
 | `TestJSRegexpEscaper` | pass | pass |
 | `TestJSStrEscaper` | pass | pass |
 | `TestJSValEscaper` | pass | pass |
 | `TestMaxExecDepth` | pass | pass |
 | `TestMessageForExecuteEmpty` | pass | pass |
+| `TestMetaContentEscapeGODEBUG` | pass | pass |
 | `TestMissingMapKey` | pass | pass |
 | `TestMultiExecute` | pass | pass |
 | `TestNextJsCtx` | pass | pass |

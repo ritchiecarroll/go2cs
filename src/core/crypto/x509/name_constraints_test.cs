@@ -12,6 +12,7 @@ using asn1 = go.encoding.asn1_package;
 using hex = go.encoding.hex_package;
 using pem = go.encoding.pem_package;
 using fmt = fmt_package;
+using testenv = go.@internal.testenv_package;
 using big = go.math.big_package;
 using net = net_package;
 using url = go.net.url_package;
@@ -22,6 +23,7 @@ using strings = strings_package;
 using sync = sync_package;
 using testing = testing_package;
 using time = time_package;
+using go.@internal;
 using go.crypto;
 using go.crypto.x509;
 using go.encoding;
@@ -44,6 +46,7 @@ internal const bool testNameConstraintsAgainstOpenSSL = false;
 internal const bool debugOpenSSLFailure = false;
 
 internal partial struct nameConstraintsTest {
+    internal @string name;
     internal slice<constraintsSpec> roots;
     internal slice<slice<constraintsSpec>> intermediates;
     internal leafSpec leaf;
@@ -66,17 +69,15 @@ internal partial struct leafSpec {
 }
 
 internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstraintsTest[]{
-    // #0: dummy test for the certificate generation process itself.
     new(
+        name: "certificate generation process"u8,
         roots: new slice<constraintsSpec>(1),
         leaf: new leafSpec(
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #1: dummy test for the certificate generation process itself: single
-    // level of intermediate.
     new(
+        name: "single level of intermediate"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -86,10 +87,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #2: dummy test for the certificate generation process itself: two
-    // levels of intermediates.
     new(
+        name: "two levels of intermediates"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -101,9 +100,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #3: matching DNS constraint in root
     new(
+        name: "matching DNS constraint in root"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:example.com"u8}.slice()
@@ -117,9 +115,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #4: matching DNS constraint in intermediate.
     new(
+        name: "matching DNS constraint in intermediate"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -131,9 +128,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #5: .example.com only matches subdomains.
     new(
+        name: "leading period only matches subdomains"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:.example.com"u8}.slice()
@@ -148,9 +144,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"example.com\" is not permitted"u8
     ),
-
-    // #6: .example.com matches subdomains.
     new(
+        name: "leading period matches subdomains"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -162,9 +157,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:foo.example.com"u8}.slice()
         )
     ),
-
-    // #7: .example.com matches multiple levels of subdomains
     new(
+        name: "leading period matches multiple levels of subdomains"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:.example.com"u8}.slice()
@@ -178,10 +172,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:foo.bar.example.com"u8}.slice()
         )
     ),
-
-    // #8: specifying a permitted list of names does not exclude other name
-    // types
     new(
+        name: "specifying a permitted list of names does not exclude other name types"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:.example.com"u8}.slice()
@@ -195,10 +187,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:10.1.1.1"u8}.slice()
         )
     ),
-
-    // #9: specifying a permitted list of names does not exclude other name
-    // types
     new(
+        name: "specifying a permitted list of names does not exclude other name types"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:10.0.0.0/8"u8}.slice()
@@ -212,11 +202,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #10: intermediates can try to permit other names, which isn't
-    // forbidden if the leaf doesn't mention them. I.e. name constraints
-    // apply to names, not constraints themselves.
     new(
+        name: "intermediates can try to permit other names, which isn't forbidden if the leaf doesn't mention them"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:example.com"u8}.slice()
@@ -232,10 +219,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #11: intermediates cannot add permitted names that the root doesn't
-    // grant them.
     new(
+        name: "intermediates cannot add permitted names that the root doesn't grant them"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:example.com"u8}.slice()
@@ -244,7 +229,7 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
                 new(
-                    ok: new @string[]{"dns:example.com"u8, "dns:foo.com"u8}.slice()
+                    ok: new @string[]{"dns:foo.example.com"u8, "dns:foo.com"u8}.slice()
                 )}.slice()
         }.slice(),
         leaf: new leafSpec(
@@ -252,9 +237,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"foo.com\" is not permitted"u8
     ),
-
-    // #12: intermediates can further limit their scope if they wish.
     new(
+        name: "intermediates can further limit their scope if they wish"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:.example.com"u8}.slice()
@@ -270,10 +254,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:foo.bar.example.com"u8}.slice()
         )
     ),
-
-    // #13: intermediates can further limit their scope and that limitation
-    // is effective
     new(
+        name: "intermediates can further limit their scope and that limitation is effective"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:.example.com"u8}.slice()
@@ -290,9 +272,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"foo.notbar.example.com\" is not permitted"u8
     ),
-
-    // #14: roots can exclude subtrees and that doesn't affect other names.
     new(
+        name: "roots can exclude subtrees and that doesn't affect other names"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"dns:.example.com"u8}.slice()
@@ -306,9 +287,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:foo.com"u8}.slice()
         )
     ),
-
-    // #15: roots exclusions are effective.
     new(
+        name: "roots exclusions are effective"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"dns:.example.com"u8}.slice()
@@ -323,10 +303,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"foo.example.com\" is excluded"u8
     ),
-
-    // #16: intermediates can also exclude names and that doesn't affect
-    // other names.
     new(
+        name: "intermediates can also exclude names and that doesn't affect other names"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -338,9 +316,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:foo.com"u8}.slice()
         )
     ),
-
-    // #17: intermediate exclusions are effective.
     new(
+        name: "intermediate exclusions are effective"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -353,9 +330,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"foo.example.com\" is excluded"u8
     ),
-
-    // #18: having an exclusion doesn't prohibit other types of names.
     new(
+        name: "having an exclusion doesn't prohibit other types of names"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"dns:.example.com"u8}.slice()
@@ -369,10 +345,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:foo.com"u8, "ip:10.1.1.1"u8}.slice()
         )
     ),
-
-    // #19: IP-based exclusions are permitted and don't affect unrelated IP
-    // addresses.
     new(
+        name: "IP-based exclusions are permitted and don't affect unrelated IP addresses"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"ip:10.0.0.0/8"u8}.slice()
@@ -386,9 +360,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:192.168.1.1"u8}.slice()
         )
     ),
-
-    // #20: IP-based exclusions are effective
     new(
+        name: "IP-based exclusions are effective"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"ip:10.0.0.0/8"u8}.slice()
@@ -403,9 +376,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"10.0.0.1\" is excluded"u8
     ),
-
-    // #21: intermediates can further constrain IP ranges.
     new(
+        name: "intermediates can further constrain IP ranges"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"ip:0.0.0.0/1"u8}.slice()
@@ -422,10 +394,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"11.0.0.1\" is excluded"u8
     ),
-
-    // #22: when multiple intermediates are present, chain building can
-    // avoid intermediates with incompatible constraints.
     new(
+        name: "multiple intermediates with incompatible constraints"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -442,10 +412,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
-
-    // #23: (same as the previous test, but in the other order in ensure
-    // that we don't pass it by luck.)
     new(
+        name: "multiple intermediates with incompatible constraints swapped"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -462,10 +430,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
-
-    // #24: when multiple roots are valid, chain building can avoid roots
-    // with incompatible constraints.
     new(
+        name: "multiple roots with incompatible constraints"u8,
         roots: new constraintsSpec[]{
             new(),
             new(
@@ -482,10 +448,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
-
-    // #25: (same as the previous test, but in the other order in ensure
-    // that we don't pass it by luck.)
     new(
+        name: "multiple roots with incompatible constraints swapped"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8}.slice()
@@ -502,10 +466,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
-
-    // #26: chain building can find a valid path even with multiple levels
-    // of alternative intermediates and alternative roots.
     new(
+        name: "chain building with multiple intermediates and roots"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8}.slice()
@@ -533,9 +495,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         noOpenSSL: true // OpenSSL's chain building is not informed by constraints.
 
     ),
-
-    // #27: chain building doesn't get stuck when there is no valid path.
     new(
+        name: "chain building fails with no valid path"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8}.slice()
@@ -563,9 +524,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"bar.com\" is not permitted"u8
     ),
-
-    // #28: unknown name types don't cause a problem without constraints.
     new(
+        name: "unknown name types are unconstrained"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -575,9 +535,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"unknown:"u8}.slice()
         )
     ),
-
-    // #29: unknown name types are allowed even in constrained chains.
     new(
+        name: "unknown name types allowed in constrained chain"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
@@ -591,10 +550,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"unknown:"u8}.slice()
         )
     ),
-
-    // #30: without SANs, a certificate with a CN is still accepted in a
-    // constrained chain, since we ignore the CN in VerifyHostname.
     new(
+        name: "CN is ignored in constrained chain"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
@@ -609,10 +566,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             cn: "foo.com"u8
         )
     ),
-
-    // #31: IPv6 addresses work in constraints: roots can permit them as
-    // expected.
     new(
+        name: "IPv6 permitted constraint"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
@@ -626,10 +581,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:2000:abcd:1234::"u8}.slice()
         )
     ),
-
-    // #32: IPv6 addresses work in constraints: root restrictions are
-    // effective.
     new(
+        name: "IPv6 permitted constraint is effective"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
@@ -644,9 +597,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"2000:1234:abcd::\" is not permitted"u8
     ),
-
-    // #33: An IPv6 permitted subtree doesn't affect DNS names.
     new(
+        name: "IPv6 permitted constraint does not affect DNS"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
@@ -660,9 +612,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:2000:abcd::"u8, "dns:foo.com"u8}.slice()
         )
     ),
-
-    // #34: IPv6 exclusions don't affect unrelated addresses.
     new(
+        name: "IPv6 excluded constraint"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"ip:2000:abcd::/32"u8}.slice()
@@ -676,9 +627,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:2000:1234::"u8}.slice()
         )
     ),
-
-    // #35: IPv6 exclusions are effective.
     new(
+        name: "IPv6 excluded constraint is effective"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"ip:2000:abcd::/32"u8}.slice()
@@ -693,9 +643,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"2000:abcd::\" is excluded"u8
     ),
-
-    // #36: IPv6 constraints do not permit IPv4 addresses.
     new(
+        name: "IPv6 constraint does not permit IPv4"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:2000:abcd::/32"u8}.slice()
@@ -710,9 +659,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"10.0.0.1\" is not permitted"u8
     ),
-
-    // #37: IPv4 constraints do not permit IPv6 addresses.
     new(
+        name: "IPv4 constraint does not permit IPv6"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:10.0.0.0/8"u8}.slice()
@@ -727,9 +675,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"2000:abcd::\" is not permitted"u8
     ),
-
-    // #38: an exclusion of an unknown type doesn't affect other names.
     new(
+        name: "unknown excluded constraint does not affect other names"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"unknown:"u8}.slice()
@@ -743,10 +690,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #39: a permitted subtree of an unknown type doesn't affect other
-    // name types.
     new(
+        name: "unknown permitted constraint does not affect other names"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"unknown:"u8}.slice()
@@ -760,9 +705,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #40: exact email constraints work
     new(
+        name: "exact email constraint"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:foo@example.com"u8}.slice()
@@ -776,9 +720,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"email:foo@example.com"u8}.slice()
         )
     ),
-
-    // #41: exact email constraints are effective
     new(
+        name: "exact email constraint is effective"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:foo@example.com"u8}.slice()
@@ -793,9 +736,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"bar@example.com\" is not permitted"u8
     ),
-
-    // #42: email canonicalisation works.
     new(
+        name: "email canonicalization"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:foo@example.com"u8}.slice()
@@ -811,9 +753,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         noOpenSSL: true // OpenSSL doesn't canonicalise email addresses before matching
 
     ),
-
-    // #43: limiting email addresses to a host works.
     new(
+        name: "email host constraint"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:example.com"u8}.slice()
@@ -827,9 +768,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"email:foo@example.com"u8}.slice()
         )
     ),
-
-    // #44: a leading dot matches hosts one level deep
     new(
+        name: "email subdomain constraint"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:.example.com"u8}.slice()
@@ -843,9 +783,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"email:foo@sub.example.com"u8}.slice()
         )
     ),
-
-    // #45: a leading dot does not match the host itself
     new(
+        name: "email subdomain constraint does not match parent"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:.example.com"u8}.slice()
@@ -860,9 +799,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"foo@example.com\" is not permitted"u8
     ),
-
-    // #46: a leading dot also matches two (or more) levels deep.
     new(
+        name: "email subdomain constraint matches deeper subdomains"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:.example.com"u8}.slice()
@@ -876,9 +814,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"email:foo@sub.sub.example.com"u8}.slice()
         )
     ),
-
-    // #47: the local part of an email is case-sensitive
     new(
+        name: "email local part is case-sensitive"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:foo@example.com"u8}.slice()
@@ -893,9 +830,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"Foo@example.com\" is not permitted"u8
     ),
-
-    // #48: the domain part of an email is not case-sensitive
     new(
+        name: "email domain part is case-insensitive"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:foo@EXAMPLE.com"u8}.slice()
@@ -909,9 +845,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"email:foo@example.com"u8}.slice()
         )
     ),
-
-    // #49: the domain part of a DNS constraint is also not case-sensitive.
     new(
+        name: "DNS domain is case-insensitive"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:EXAMPLE.com"u8}.slice()
@@ -925,9 +860,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #50: URI constraints only cover the host part of the URI
     new(
+        name: "URI constraint covers host"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -945,9 +879,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             }.slice()
         )
     ),
-
-    // #51: URIs with IPs are rejected
     new(
+        name: "URI with IP is rejected"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -962,9 +895,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "URI with IP"u8
     ),
-
-    // #52: URIs with IPs and ports are rejected
     new(
+        name: "URI with IP and port is rejected"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -979,9 +911,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "URI with IP"u8
     ),
-
-    // #53: URIs with IPv6 addresses are also rejected
     new(
+        name: "URI with IPv6 is rejected"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -996,9 +927,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "URI with IP"u8
     ),
-
-    // #54: URIs with IPv6 addresses with ports are also rejected
     new(
+        name: "URI with IPv6 and port is rejected"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -1013,9 +943,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "URI with IP"u8
     ),
-
-    // #55: URI constraints are effective
     new(
+        name: "URI permitted constraint is effective"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -1030,9 +959,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"http://bar.com/\" is not permitted"u8
     ),
-
-    // #56: URI constraints are effective
     new(
+        name: "URI excluded constraint is effective"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"uri:foo.com"u8}.slice()
@@ -1047,9 +975,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"http://foo.com/\" is excluded"u8
     ),
-
-    // #57: URI constraints can allow subdomains
     new(
+        name: "URI subdomain constraint"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:.foo.com"u8}.slice()
@@ -1063,10 +990,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"uri:http://www.foo.com/"u8}.slice()
         )
     ),
-
-    // #58: excluding an IPv4-mapped-IPv6 address doesn't affect the IPv4
-    // version of that address.
     new(
+        name: "IPv4-mapped-IPv6 exclusion does not affect IPv4"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"ip:::ffff:1.2.3.4/128"u8}.slice()
@@ -1080,9 +1005,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:1.2.3.4"u8}.slice()
         )
     ),
-
-    // #59: a URI constraint isn't matched by a URN.
     new(
+        name: "URI constraint not matched by URN"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -1097,10 +1021,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "URI with empty host"u8
     ),
-
-    // #60: excluding all IPv6 addresses doesn't exclude all IPv4 addresses
-    // too, even though IPv4 is mapped into the IPv6 range.
     new(
+        name: "IPv6 exclusion does not exclude all IPv4"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"ip:1.2.3.0/24"u8}.slice(),
@@ -1115,10 +1037,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"ip:1.2.3.4"u8}.slice()
         )
     ),
-
-    // #61: omitting extended key usage in a CA certificate implies that
-    // any usage is ok.
     new(
+        name: "empty EKU in CA means any is ok"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1129,9 +1049,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             ekus: new @string[]{"serverAuth"u8, "other"u8}.slice()
         )
     ),
-
-    // #62: The “any” EKU also means that any usage is ok.
     new(
+        name: "any EKU means any is ok"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1144,11 +1063,9 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             ekus: new @string[]{"serverAuth"u8, "other"u8}.slice()
         )
     ),
-
-    // #63: An intermediate with enumerated EKUs causes a failure if we
-    // test for an EKU not in that set. (ServerAuth is required by
     // default.)
     new(
+        name: "intermediate with enumerated EKUs"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1162,10 +1079,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "incompatible key usage"u8
     ),
-
-    // #64: an unknown EKU in the leaf doesn't break anything, even if it's not
-    // correctly nested.
     new(
+        name: "unknown EKU in leaf"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1179,11 +1094,9 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageAny}.slice()
     ),
-
-    // #65: trying to add extra permitted key usages in an intermediate
-    // (after a limitation in the root) is acceptable so long as the leaf
     // certificate doesn't use them.
     new(
+        name: "intermediate cannot add EKUs not in root if leaf uses them"u8,
         roots: new constraintsSpec[]{
             new(
                 ekus: new @string[]{"serverAuth"u8}.slice()
@@ -1200,9 +1113,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             ekus: new @string[]{"serverAuth"u8}.slice()
         )
     ),
-
-    // #66: EKUs in roots are not ignored.
     new(
+        name: "EKUs in root are effective"u8,
         roots: new constraintsSpec[]{
             new(
                 ekus: new @string[]{"email"u8}.slice()
@@ -1220,10 +1132,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "incompatible key usage"u8
     ),
-
-    // #67: SGC key usages used to permit serverAuth and clientAuth,
-    // but don't anymore.
     new(
+        name: "netscapeSGC EKU does not permit server/client auth"u8,
         roots: new constraintsSpec[]{
             new()
         }.slice(),
@@ -1239,10 +1149,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "incompatible key usage"u8
     ),
-
-    // #68: SGC key usages used to permit serverAuth and clientAuth,
-    // but don't anymore.
     new(
+        name: "msSGC EKU does not permit server/client auth"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1256,9 +1164,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "incompatible key usage"u8
     ),
-
-    // #69: an empty DNS constraint should allow anything.
     new(
+        name: "empty DNS permitted constraint allows anything"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:"u8}.slice()
@@ -1272,9 +1179,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:example.com"u8}.slice()
         )
     ),
-
-    // #70: an empty DNS constraint should also reject everything.
     new(
+        name: "empty DNS excluded constraint rejects everything"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"dns:"u8}.slice()
@@ -1289,9 +1195,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"example.com\" is excluded"u8
     ),
-
-    // #71: an empty email constraint should allow anything
     new(
+        name: "empty email permitted constraint allows anything"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"email:"u8}.slice()
@@ -1305,9 +1210,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"email:foo@example.com"u8}.slice()
         )
     ),
-
-    // #72: an empty email constraint should also reject everything.
     new(
+        name: "empty email excluded constraint rejects everything"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"email:"u8}.slice()
@@ -1322,9 +1226,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"foo@example.com\" is excluded"u8
     ),
-
-    // #73: an empty URI constraint should allow anything
     new(
+        name: "empty URI permitted constraint allows anything"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:"u8}.slice()
@@ -1338,9 +1241,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"uri:https://example.com/test"u8}.slice()
         )
     ),
-
-    // #74: an empty URI constraint should also reject everything.
     new(
+        name: "empty URI excluded constraint rejects everything"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"uri:"u8}.slice()
@@ -1355,10 +1257,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"https://example.com/test\" is excluded"u8
     ),
-
-    // #75: serverAuth in a leaf shouldn't permit clientAuth when requested in
-    // VerifyOptions.
     new(
+        name: "serverAuth EKU does not permit clientAuth"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1371,10 +1271,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth}.slice(),
         expectedError: "incompatible key usage"u8
     ),
-
-    // #76: MSSGC in a leaf used to match a request for serverAuth, but doesn't
-    // anymore.
     new(
+        name: "msSGC EKU does not permit serverAuth"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1387,14 +1285,11 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageServerAuth}.slice(),
         expectedError: "incompatible key usage"u8
     ),
-
-    // An invalid DNS SAN should be detected only at validation time so
-    // that we can process CA certificates in the wild that have invalid SANs.
-    // See https://github.com/golang/go/issues/23995
-
-    // #77: an invalid DNS or mail SAN will not be detected if name constraint
-    // checking is not triggered.
     new(
+        // An invalid DNS SAN should be detected only at validation time so
+        // that we can process CA certificates in the wild that have invalid SANs.
+        // See https://github.com/golang/go/issues/23995
+        name: "invalid SANs are ignored with no constraints"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1404,10 +1299,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{"dns:this is invalid"u8, "email:this @ is invalid"u8}.slice()
         )
     ),
-
-    // #78: an invalid DNS SAN will be detected if any name constraint checking
-    // is triggered.
     new(
+        name: "invalid DNS SAN detected with constraints"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"uri:"u8}.slice()
@@ -1422,10 +1315,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "cannot parse dnsName"u8
     ),
-
-    // #79: an invalid email SAN will be detected if any name constraint
-    // checking is triggered.
     new(
+        name: "invalid email SAN detected with constraints"u8,
         roots: new constraintsSpec[]{
             new(
                 bad: new @string[]{"uri:"u8}.slice()
@@ -1440,9 +1331,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "cannot parse rfc822Name"u8
     ),
-
-    // #80: if several EKUs are requested, satisfying any of them is sufficient.
     new(
+        name: "any requested EKU is sufficient"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1454,10 +1344,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         requestedEKUs: new global::go.crypto.x509_package.ExtKeyUsage[]{ExtKeyUsageClientAuth, ExtKeyUsageEmailProtection}.slice()
     ),
-
-    // #81: EKUs that are not asserted in VerifyOpts are not required to be
-    // nested.
     new(
+        name: "unrequested EKUs not required to be nested"u8,
         roots: new slice<constraintsSpec>(1),
         intermediates: new slice<constraintsSpec>[]{
             new constraintsSpec[]{
@@ -1472,9 +1360,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             ekus: new @string[]{"email"u8, "serverAuth"u8}.slice()
         )
     ),
-
-    // #82: a certificate without SANs and CN is accepted in a constrained chain.
     new(
+        name: "empty leaf is accepted in constrained chain"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
@@ -1488,10 +1375,8 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             sans: new @string[]{}.slice()
         )
     ),
-
-    // #83: a certificate without SANs and with a CN that does not parse as a
-    // hostname is accepted in a constrained chain.
     new(
+        name: "no SANs and non-hostname CN is accepted in constrained chain"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
@@ -1503,12 +1388,11 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         }.slice(),
         leaf: new leafSpec(
             sans: new @string[]{}.slice(),
-            cn: "foo,bar"u8
+            cn: "foo.bar"u8
         )
     ),
-
-    // #84: a certificate with SANs and CN is accepted in a constrained chain.
     new(
+        name: "constraints don't apply to CN"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"dns:foo.com"u8, "dns:.foo.com"u8}.slice()
@@ -1523,16 +1407,14 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
             cn: "foo.bar"u8
         )
     ),
-
-    // #85: .example.com is an invalid DNS name, it should not match the
-    // constraint example.com.
     new(
+        name: "DNS SAN cannot use leading period form"u8,
         roots: new constraintsSpec[]{new(ok: new @string[]{"dns:example.com"u8}.slice())}.slice(),
         leaf: new leafSpec(sans: new @string[]{"dns:.example.com"u8}.slice()),
         expectedError: "cannot parse dnsName \".example.com\""u8
     ),
-    // #86: URIs with IPv6 addresses with zones and ports are rejected
     new(
+        name: "URI with IPv6 and zone is rejected"u8,
         roots: new constraintsSpec[]{
             new(
                 ok: new @string[]{"uri:example.com"u8}.slice()
@@ -1547,11 +1429,65 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "URI with IP"u8
     ),
-    // #87: subdomain excluded constraints preclude wildcard names
     new(
+        name: "intermediate can narrow permitted dns scope"u8,
         roots: new constraintsSpec[]{
             new(
-                bad: new @string[]{"dns:foo.example.com"u8}.slice()
+                ok: new @string[]{"dns:"u8}.slice()
+            )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{
+            new constraintsSpec[]{
+                new(
+                    ok: new @string[]{"dns:example.com"u8}.slice()
+                )}.slice()
+        }.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"dns:test.com"u8}.slice()
+        ),
+        expectedError: "\"test.com\" is not permitted"u8
+    ),
+    new(
+        name: "intermediate cannot narrow excluded dns scope"u8,
+        roots: new constraintsSpec[]{
+            new(
+                bad: new @string[]{"dns:"u8}.slice()
+            )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{
+            new constraintsSpec[]{
+                new(
+                    bad: new @string[]{"dns:example.com"u8}.slice()
+                )}.slice()
+        }.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"dns:test.com"u8}.slice()
+        ),
+        expectedError: "\"test.com\" is excluded by constraint \"\""u8
+    ),
+    new(
+        name: "intermediate can narrow excluded dns scope"u8,
+        roots: new constraintsSpec[]{
+            new(
+                bad: new @string[]{"dns:example.com"u8}.slice()
+            )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{
+            new constraintsSpec[]{
+                new(
+                    bad: new @string[]{"dns:"u8}.slice()
+                )}.slice()
+        }.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"dns:test.com"u8}.slice()
+        ),
+        expectedError: "\"test.com\" is excluded by constraint \"\""u8
+    ),
+    new(
+        name: "permitted dns constraint is not a prefix match"u8,
+        roots: new constraintsSpec[]{
+            new(
+                ok: new @string[]{"dns:example.com"u8}.slice()
             )
         }.slice(),
         intermediates: new slice<constraintsSpec>[]{
@@ -1559,15 +1495,15 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
                 new()}.slice()
         }.slice(),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:*.example.com"u8}.slice()
+            sans: new @string[]{"dns:testexample.com"u8}.slice()
         ),
-        expectedError: "\"*.example.com\" is excluded by constraint \"foo.example.com\""u8
+        expectedError: "\"testexample.com\" is not permitted"u8
     ),
-    // #88: wildcard names are not matched by subdomain permitted constraints
     new(
+        name: "subdomain constraint does not allow wildcard"u8,
         roots: new constraintsSpec[]{
             new(
-                ok: new @string[]{"dns:foo.example.com"u8}.slice()
+                ok: new @string[]{"dns:a.com"u8, "dns:foo.example.com"u8, "dns:z.com"u8}.slice()
             )
         }.slice(),
         intermediates: new slice<constraintsSpec>[]{
@@ -1579,11 +1515,11 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
         ),
         expectedError: "\"*.example.com\" is not permitted"u8
     ),
-    // #89: a TLD constraint doesn't exclude unrelated wildcards
     new(
+        name: "excluded dns constraint is not a prefix match"u8,
         roots: new constraintsSpec[]{
             new(
-                bad: new @string[]{"dns:tld"u8}.slice()
+                bad: new @string[]{"dns:example.com"u8}.slice()
             )
         }.slice(),
         intermediates: new slice<constraintsSpec>[]{
@@ -1591,8 +1527,74 @@ internal static slice<nameConstraintsTest> nameConstraintsTests = new nameConstr
                 new()}.slice()
         }.slice(),
         leaf: new leafSpec(
-            sans: new @string[]{"dns:*.example.com"u8}.slice()
+            sans: new @string[]{"dns:testexample.com"u8}.slice()
         )
+    ),
+    new(
+        name: "excluded email constraint, multiple email with matching local portion"u8,
+        roots: new constraintsSpec[]{
+            new(
+                bad: new @string[]{"email:a@example.com"u8, "email:a@test.com"u8}.slice()
+            )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{
+            new constraintsSpec[]{
+                new()}.slice()
+        }.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"email:a@example.com"u8}.slice()
+        ),
+        expectedError: "\"a@example.com\" is excluded by constraint \"a@example.com\""u8
+    ),
+    new(
+        name: "email_case_check"u8,
+        roots: new constraintsSpec[]{
+            new(
+                ok: new @string[]{"email:a@example.com"u8}.slice()
+            )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{
+            new constraintsSpec[]{
+                new()}.slice()
+        }.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"email:a@ExAmple.com"u8}.slice()
+        )
+    ),
+    new(
+        name: "excluded constraint, empty DNS san"u8,
+        roots: new constraintsSpec[]{
+            new(
+                bad: new @string[]{"dns:example.com"u8}.slice()
+            )
+        }.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"dns:"u8}.slice()
+        )
+    ),
+    new(
+        name: "subdomain exclusion blocks uppercase wildcard"u8,
+        roots: new constraintsSpec[]{new(
+            bad: new @string[]{"dns:sub.example.com"u8}.slice()
+        )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{new constraintsSpec[]{new()}.slice()}.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"dns:*.EXAMPLE.COM"u8}.slice()
+        ),
+        expectedError: "\"*.EXAMPLE.COM\" is excluded by constraint \"sub.example.com\""u8
+    ),
+    new(
+        name: "uppercase subdomain exclusion blocks lowercase wildcard"u8,
+        roots: new constraintsSpec[]{new(
+            bad: new @string[]{"dns:SUB.EXAMPLE.COM"u8}.slice()
+        )
+        }.slice(),
+        intermediates: new slice<constraintsSpec>[]{new constraintsSpec[]{new()}.slice()}.slice(),
+        leaf: new leafSpec(
+            sans: new @string[]{"dns:*.example.com"u8}.slice()
+        ),
+        expectedError: "\"*.example.com\" is excluded by constraint \"sub.example.com\""u8
     )
 }.slice();
 
@@ -1640,7 +1642,7 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
 internal static readonly @string dnsˢ = "dns:"u8;
 internal static readonly @string invalidipˢ = "invalidip:"u8;
 internal static readonly @string emailˢ = "email:"u8;
-internal static readonly @string uriˢ2 = "uri:"u8;
+internal static readonly @string uriˢ = "uri:"u8;
 internal static readonly @string unknownˢ = "unknown:"u8;
 
 internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeConstraintsLeafCert(leafSpec leaf, ж<ecdsa.PrivateKey> Ꮡkey, ж<global::go.crypto.x509_package.Certificate> Ꮡparent, ж<ecdsa.PrivateKey> ᏑparentKey) {
@@ -1681,14 +1683,14 @@ internal static (ж<global::go.crypto.x509_package.Certificate>, error) makeCons
             if (errΔ2 != default!) {
                 return (default!, fmt.Errorf("cannot parse invalid IP: %s"u8, errΔ2));
             }
-            template.Value.IPAddresses = append((~template).IPAddresses, ((net.IP)ipBytes));
+            template.Value.IPAddresses = append((~template).IPAddresses, (net.IP)ipBytes);
             break;
         }
         case {} when strings.HasPrefix(name, emailˢ): {
             template.Value.EmailAddresses = append((~template).EmailAddresses, name[6..]);
             break;
         }
-        case {} when strings.HasPrefix(name, uriˢ2): {
+        case {} when strings.HasPrefix(name, uriˢ): {
             var (uri, errΔ3) = url.Parse(name[4..]);
             if (errΔ3 != default!) {
                 return (default!, fmt.Errorf("cannot parse URI %q: %s"u8, name[4..], errΔ3));
@@ -1745,7 +1747,7 @@ internal static pkix.Extension customConstraintsExtension(nint typeNum, slice<by
     slice<byte> appendConstraint(slice<byte> contentsΔ1, uint8 tag) {
         contentsΔ1 = append(contentsΔ1, (byte)((uint8)((uint8)(tag | 32) /* constructed */ | 0x80)) /* context-specific */);
         contentsΔ1 = append(contentsΔ1, (byte)(4 + builtin.len(constraintʗ1)) /* length */);
-        contentsΔ1 = append(contentsΔ1, (byte)(0x30) /* SEQUENCE */);
+        contentsΔ1 = append(contentsΔ1, (byte)0x30 /* SEQUENCE */);
         contentsΔ1 = append(contentsΔ1, (byte)(2 + builtin.len(constraintʗ1)) /* length */);
         contentsΔ1 = append(contentsΔ1, (byte)typeNum /* GeneralName type */);
         contentsΔ1 = append(contentsΔ1, (byte)builtin.len(constraintʗ1));
@@ -1760,7 +1762,7 @@ internal static pkix.Extension customConstraintsExtension(nint typeNum, slice<by
     }
 
     slice<byte> value = default!;
-    value = append(value, (byte)(0x30) /* SEQUENCE */);
+    value = append(value, (byte)0x30 /* SEQUENCE */);
     value = append(value, (byte)builtin.len(contents));
     value = appendꓸꓸꓸ(value, contents);
 
@@ -1797,7 +1799,7 @@ internal static error addConstraintsToTemplate(constraintsSpec constraints, ж<g
                 emailAddrs = append(emailAddrs, constraint[6..]);
                 break;
             }
-            case {} when strings.HasPrefix(constraint, uriˢ2): {
+            case {} when strings.HasPrefix(constraint, uriˢ): {
                 uriDomains = append(uriDomains, constraint[4..]);
                 break;
             }
@@ -1858,6 +1860,7 @@ internal static (slice<global::go.crypto.x509_package.ExtKeyUsage> ekus, slice<a
     slice<global::go.crypto.x509_package.ExtKeyUsage> ekus = default!;
     slice<asn1.ObjectIdentifier> unknowns = default!;
     error err = default!;
+    var unknownsᴷ = new stackAppend<asn1.ObjectIdentifier>(moves: true);
 
     foreach (var (_, s) in ekuStrs) {
         var exprᴛ1 = s;
@@ -1880,13 +1883,14 @@ internal static (slice<global::go.crypto.x509_package.ExtKeyUsage> ekus, slice<a
             ekus = append(ekus, ExtKeyUsageAny);
         }
         else if (exprᴛ1 == "other"u8) {
-            unknowns = append(unknowns, new asn1.ObjectIdentifier(new nint[]{2, 4, 1, 2, 3}.slice()));
+            unknowns = append(unknownsᴷ, unknowns, new asn1.ObjectIdentifier(new nint[]{2, 4, 1, 2, 3}.slice()));
         }
         else { /* default: */
             return (default!, default!, fmt.Errorf("unknown EKU %q"u8, s));
         }
     }
 
+    unknowns = move2heap(unknownsᴷ, unknowns);
     return (ekus, unknowns, err);
 }
 
@@ -1911,7 +1915,8 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
         test = vᴛ1;
 
         var testʗ1 = test;
-        Ꮡt.Run(fmt.Sprintf("#%d"u8, i), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(test.name, (ж<testing.T> tΔ1) => {
+            var keysᴷ = new stackAppend<ж<ecdsa.PrivateKey>>();
             var rootPool = NewCertPool();
             var rootKey = ᏑprivateKeys.Get()._<ж<ecdsa.PrivateKey>>();
             @string rootName = "Root "u8 + strconv.Itoa(i);
@@ -1943,7 +1948,7 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
 
             foreach (var (level, intermediates) in testʗ1.intermediates) {
                 var levelKey = ᏑprivateKeys.Get()._<ж<ecdsa.PrivateKey>>();
-                keys = append(keys, levelKey);
+                keys = append(keysᴷ, keys, levelKey);
                 @string levelName = "Intermediate level "u8 + strconv.Itoa(level);
                 ж<global::go.crypto.x509_package.Certificate> last = default!;
 
@@ -2003,7 +2008,7 @@ public static void TestConstraintCases(ж<testing.T> Ꮡt) {
             );
             (_, err) = leafCert.Verify(verifyOpts);
 
-            var logInfo = true;
+            var logInfo = false;
             if (builtin.len(testʗ1.expectedError) == 0){
                 if (err != default!){
                     tΔ1.Errorf("unexpected failure: %s"u8, err);
@@ -2069,6 +2074,7 @@ internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> Ꮡt, ж<
         ref var leaf = ref Ꮡleaf.DerefOrNull();
         ref var intermediates = ref Ꮡintermediates.DerefOrNull();
         ref var roots = ref Ꮡroots.DerefOrNull();
+        var argsᴷ = new stackAppend<@string>();
 
         var args = new @string[]{"verify"u8, "-no_check_time"u8}.slice();
 
@@ -2078,7 +2084,7 @@ internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> Ꮡt, ж<
         } else {
             defer(os.Remove, rootsFile.Name(), ref ᒐ);
         }
-        args = append(args, "-CAfile"u8, rootsFile.Name());
+        args = append(argsᴷ, args, "-CAfile"u8, rootsFile.Name());
 
         if (Ꮡintermediates.len() > 0) {
             var intermediatesFile = writePEMsToTempFile(allCerts(Ꮡt, Ꮡintermediates));
@@ -2098,13 +2104,9 @@ internal static (@string, error) testChainAgainstOpenSSL(ж<testing.T> Ꮡt, ж<
         }
         args = append(args, leafFile.Name());
 
-        ref var output = ref heap(new bytes.Buffer(), out var Ꮡoutput);
-        var cmd = exec.Command("openssl"u8, args.ꓸꓸꓸ);
-        cmd.Value.Stdout = new x509_test_package.bytes_BufferжWriter(Ꮡoutput);
-        cmd.Value.Stderr = new x509_test_package.bytes_BufferжWriter(Ꮡoutput);
-
-        var err = cmd.Run();
-        return (Ꮡoutput.String(), err);
+        var cmd = testenv.Command(new x509_test_package.testing_TжTB(Ꮡt), "openssl"u8, args.ꓸꓸꓸ);
+        var (@out, err) = cmd.CombinedOutput();
+        return ((@string)@out, err);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default!; }
     finally { ᒐ.Run(); }

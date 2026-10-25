@@ -17,11 +17,18 @@ using static global::go.hash.crc64_internal_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
+[assembly: GoImplement<hash_package.Hash64, hash_package.Hash>]
 [assembly: GoImplement<hash_package.Hash64, io_package.Writer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -31,7 +38,7 @@ using static global::go.hash.crc64_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("hash/crc64/crc64_test.go", "crc64_test.cs", "ABUqACJGgoKCgoKCgoKClIKCgoIACAqCgoKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgriCgoKClJSCgoKmgoKClJSCgqaCgqaAgoK2gpSC3IKClIKCpoCCyKKCgoKUgpSCgoKCAAsIgoKUgpSClIKUgpSC", "77-120:1;121-164:2;199-201:1;202-204:2;205-207:3;208-210:4;211-213:5;214-216:6")]
+[assembly: go.GoPositionMap("hash/crc64/crc64_test.go", "crc64_test.cs", "AA8eggAKFgAiRoKCgoKCgoKCgpSCgoKCAAgKgoKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClIK4goKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgtyCgpSCgqaAgsiigoKClIKUgoKCggALCIKClIKUgpSClIKUgg==", "16-16:1;83-126:1;127-170:2;205-207:1;208-210:2;211-213:3;214-216:4;217-219:5;220-222:6")]
 // </GoSourcePositionMaps>
 
 namespace go.hash;
@@ -55,6 +62,8 @@ public static partial class crc64_internal_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtesthash() => builtin.initPackage(typeof(@internal.testhash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

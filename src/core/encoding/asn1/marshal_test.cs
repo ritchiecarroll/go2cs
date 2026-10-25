@@ -11,6 +11,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.encoding;
 using go.math;
 using static go.encoding.asn1_package;
@@ -236,7 +238,7 @@ public static void TestMarshalError(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestInvalidUTF8(ж<testing.T> Ꮡt) {
+public static partial void TestInvalidUTF8(ж<testing.T> Ꮡt) {
     var (_, err) = Marshal(((@string)new byte[]{0xff, 0xff}.slice()));
     if (err == default!) {
         Ꮡt.Errorf("invalid UTF8 string was accepted"u8);

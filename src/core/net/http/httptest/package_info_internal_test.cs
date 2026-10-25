@@ -32,9 +32,9 @@ using static go.net.http.httptest_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("net/http/httptest/httptest_test.go", "httptest_test.cs", "ABMkgoIAChaCgoIAEgiCAH6SApKCgoKUgpSCgoKUgpSClII=", "176-199:1")]
-[assembly: go.GoPositionMap("net/http/httptest/recorder_test.go", "recorder_test.cs", "ADEckpKQpAAFEAAFEAAFEAAKGgAFEAAFEAAHEAAHEJKSgoKCpqYABxCSkoKCgoKmpgAIEgAXGoKC7oKC7gAKGILu7oL+ggAJFILugoKC7oKCgoKCgoKCAA4g3AALGoKCgoIAChiCgoLuggAIDJKCgoKCgoCCAAwQkgAXNoKAggAJDqKmgoKigoCCyIKUgoKi", "16-16:1;18-25:2;19-24:2.1;26-33:3;27-32:3.1;34-41:4;35-40:4.1;42-54:5;43-53:5.1;55-62:6;56-61:6.1;63-70:7;64-69:7.1;71-78:8;72-77:8.1;79-86:9;80-85:9.1;87-97:10;88-96:10.1;98-105:11;99-104:11.1;106-117:12;107-116:12.1;118-125:13;119-124:13.1;134-134:14;139-143:15;148-152:16;157-159:17;169-172:18;177-179:19;184-187:20;192-195:21;200-206:22;211-216:23;221-231:24;245-253:25;264-270:26;280-285:27;290-293:28;298-308:29;356-369:1;357-361:1.1;363-365:1.2")]
-[assembly: go.GoPositionMap("net/http/httptest/server_test.go", "server_test.cs", "ABYk7oKCpoKCAAkIgoKCgpCSkJKQkpCSkLaCgoKQkpDaooKUkoKClIKCgpSCtKaSgqaCgpSCgoKUgqaUgoKCuKKClJKCgpS4graCkoKCgqaiprKCgpSCgoKCtKjCgpSSgoKClIKCgpSCtKjClJKCgILEqMKUkoKAgsTsgKiiytqigrKCgoKUgoKUoqSCgrKCgoKWkoKCgpSipIKCsqaCoqSCsoKikgAKBoIABBCysoKmlIKkpqSCgpSAksQ=", "38-45:1;40-40:1.1;41-41:1.2;42-42:1.3;43-43:1.4;44-44:1.5;48-52:2;50-50:2.1;51-51:2.2;57-59:1;77-79:1;104-106:1;107-113:2;134-136:1;148-150:1;170-171:1;182-183:1;212-223:1;227-241:2;245-251:3;254-257:4;271-293:1;272-274:1.1")]
+[assembly: go.GoPositionMap("net/http/httptest/httptest_test.go", "httptest_test.cs", "ABMkgoIAChaCgoIAEgiCAJUBtgKSgoKClIKUgoKClIKUgpSC", "194-217:1")]
+[assembly: go.GoPositionMap("net/http/httptest/recorder_test.go", "recorder_test.cs", "ADIgooKQpAAFEAAFEAAFEAAKGgAFEAAFEAAHEAAHEJKSgoKCpqYABxCSkoKCgoKmpgAIEgAXGoKC7oKC7gAKGILu7oL+ggAJFILugoKC7oKCgoKCgoKCAA4g3AALGoKCgoIAChiCgoLuggAIDJKCgoKCgoCCAAsOgoKClIKCpoKCpoCSAAkKkgAXNoKAggAJDqKmgqKCgILIgpSCgqI=", "18-18:1;20-27:2;21-26:2.1;28-35:3;29-34:3.1;36-43:4;37-42:4.1;44-56:5;45-55:5.1;57-64:6;58-63:6.1;65-72:7;66-71:7.1;73-80:8;74-79:8.1;81-88:9;82-87:9.1;89-99:10;90-98:10.1;100-107:11;101-106:11.1;108-119:12;109-118:12.1;120-127:13;121-126:13.1;136-136:14;141-145:15;150-154:16;159-161:17;171-174:18;179-181:19;186-189:20;194-197:21;202-208:22;213-218:23;223-233:24;247-255:25;266-272:26;282-287:27;292-295:28;300-310:29;377-390:1;378-382:1.1;384-386:1.2")]
+[assembly: go.GoPositionMap("net/http/httptest/server_test.go", "server_test.cs", "ABYk7oKCpoKCAAkIgoKCgpCSkJKQkpCSkLaCgoKQkpDaooKUkoKClIKCgpSCtKaSgqaCgpSCgoKUgqaUgoKCuKKClJKCgpS4graCkoKCgqaiprKCgpSCgoKCtKjCgpSSgoKClIKCgpSCtKjClJKCgILEqMKUkoKAgsTsgKiiytqigrKCgoKUgoKUoqSCgrKCgoKWkoKCgpSipIKCsqaCoqSCsoKikgAKBoIABBCysoKmlIKkpqSCgpSAksQADAiCAAYUsrKClJSCpKakgoKUgJLE", "38-45:1;40-40:1.1;41-41:1.2;42-42:1.3;43-43:1.4;44-44:1.5;48-52:2;50-50:2.1;51-51:2.2;57-59:1;77-79:1;104-106:1;107-113:2;134-136:1;148-150:1;170-171:1;182-183:1;212-223:1;227-241:2;245-251:3;254-257:4;271-293:1;272-274:1.1;309-330:1;310-312:1.1")]
 // </GoSourcePositionMaps>
 
 namespace go.net.http;
@@ -59,8 +59,10 @@ public static partial class httptest_internal_test_package
 
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸbufio() => builtin.initPackage(typeof(bufio_package));
+    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcontext() => builtin.initPackage(typeof(context_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸtls() => builtin.initPackage(typeof(crypto.tls_package));
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
     [GoInit] internal static void initᴛᴛimportꓸnet() => builtin.initPackage(typeof(net_package));

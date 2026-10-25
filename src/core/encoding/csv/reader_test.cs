@@ -495,7 +495,7 @@ public static void TestRead(ж<testing.T> Ꮡt) {
                 if (len(pos) != len(rec)) {
                     tΔ1.Fatalf("mismatched position length at record %d"u8, recNum);
                 }
-                foreach (var (i, _) in rec) {
+                foreach (var i in range(rec)) {
                     var (line, col) = r.FieldPos(i);
                     {
                         var (got, want) = (new nint[]{line, col}.array(), pos[i].Clone()); if (got != want) {
@@ -548,6 +548,8 @@ internal static error errorWithPosition(error err, nint recNum, slice<slice<arra
 // CSV lines are separated by ¶ symbols;
 // Error positions are marked with ∑ symbols.
 internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) makePositions(@string text) {
+    var bufᴷ = new stackAppend<byte>();
+
     var buf = new slice<byte>(0, len(text));
     slice<slice<array<nint>>> positions = default!;
     var errPositions = new map<nint, array<nint>>();
@@ -561,7 +563,7 @@ internal static (slice<slice<array<nint>>>, map<nint, array<nint>>, @string) mak
         case (rune)'\n': {
             line++;
             col = 1;
-            buf = append(buf, (byte)((rune)'\n'));
+            buf = append(bufᴷ, buf, (byte)((rune)'\n'));
             break;
         }
         case (rune)'§': {

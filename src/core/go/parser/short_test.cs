@@ -88,6 +88,7 @@ internal static slice<@string> valids = new @string[]{
     @"package p; func _[A, B any](a A) B"u8,
     @"package p; func _[A, B C](a A) B"u8,
     @"package p; func _[A, B C[A, B]](a A) B"u8,
+
     @"package p; type _[A, B any] interface { _(a A) B }"u8,
     @"package p; type _[A, B C[A, B]] interface { _(a A) B }"u8,
     @"package p; func _[T1, T2 interface{}](x T1) T2"u8,
@@ -99,8 +100,10 @@ internal static slice<@string> valids = new @string[]{
     @"package p; var _ = chan T[int](x)"u8,
     @"package p; func _(_ T[P], T P) T[P]"u8,
     @"package p; var _ T[chan int]"u8,
+
     @"package p; func (_ R[P]) _(x T)"u8,
     @"package p; func (_ R[ P, Q]) _(x T)"u8,
+
     @"package p; func (R[P]) _()"u8,
     @"package p; func _(T[P])"u8,
     @"package p; func _(T[P1, P2, P3 ])"u8,
@@ -121,11 +124,11 @@ public static void TestValid(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ4 = @"package p; var _ = T{}"u8;
+internal static readonly @string srcᶜ7 = @"package p; var _ = T{}"u8;
 
 // TestSingle is useful to track down a problem with a single short test program.
 public static void TestSingle(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ4;
+    @string src = srcᶜ7;
     checkErrors(Ꮡt, src, src, (global::go.go.parser_package.Mode)(DeclarationErrors | AllErrors), true);
 }
 
@@ -166,6 +169,7 @@ internal static slice<@string> invalids = new @string[]{
     @"package p; func _() (type /* ERROR ""found 'type'"" */ T)(T)"u8,
     @"package p; func (type /* ERROR ""found 'type'"" */ T)(T) _()"u8,
     @"package p; type _[A+B, /* ERROR ""unexpected comma"" */ ] int"u8,
+
     @"package p; type _ struct{ [ /* ERROR ""expected '}', found '\['"" */ ]byte }"u8,
     @"package p; type _ struct{ ( /* ERROR ""cannot parenthesize embedded type"" */ int) }"u8,
     @"package p; type _ struct{ ( /* ERROR ""cannot parenthesize embedded type"" */ []byte) }"u8,
@@ -190,16 +194,32 @@ internal static slice<@string> invalids = new @string[]{
     @"package p; func f() { if true {} else ; /* ERROR ""expected if statement or block"" */ }"u8,
     @"package p; func f() { if true {} else defer /* ERROR ""expected if statement or block"" */ f() }"u8,
 
+    // variadic parameter lists
+    @"package p; func f(a, b ... /* ERROR ""can only use ... with final parameter"" */ int)"u8,
+    @"package p; func f(a ... /* ERROR ""can only use ... with final parameter"" */ int, b int)"u8,
+    @"package p; func f(... /* ERROR ""can only use ... with final parameter"" */ int, int)"u8,
+    @"package p; func f() (... /* ERROR ""invalid use of ..."" */ int)"u8,
+    @"package p; func f() (a, b ... /* ERROR ""invalid use of ..."" */ int)"u8,
+    @"package p; func f[T ... /* ERROR ""invalid use of ..."" */ C]()() {}"u8,
+
     // generic code
     @"package p; type _[_ any] int; var _ = T[] /* ERROR ""expected operand"" */ {}"u8,
     @"package p; var _ func[ /* ERROR ""must have no type parameters"" */ T any](T)"u8,
     @"package p; func _[]/* ERROR ""empty type parameter list"" */()"u8,
+
     @"package p; type _[A,] /* ERROR ""missing type constraint"" */ struct{ A }"u8,
+
     @"package p; func _[type /* ERROR ""found 'type'"" */ P, *Q interface{}]()"u8,
+
     @"package p; func (T) _[ /* ERROR ""must have no type parameters"" */ A, B any](a A) B"u8,
     @"package p; func (T) _[ /* ERROR ""must have no type parameters"" */ A, B C](a A) B"u8,
     @"package p; func (T) _[ /* ERROR ""must have no type parameters"" */ A, B C[A, B]](a A) B"u8,
-    @"package p; func(*T[e, e /* ERROR ""e redeclared"" */ ]) _()"u8
+
+    @"package p; func(*T[e, e /* ERROR ""e redeclared"" */ ]) _()"u8,
+
+    // go.dev/issue/70957
+    @"package p; func f() {goto; /* ERROR ""expected 'IDENT', found ';'"" */ }"u8,
+    @"package p; func f() {goto} /* ERROR ""expected 'IDENT', found '}'"" */ }"u8
 }.slice();
 
 public static void TestInvalid(ж<testing.T> Ꮡt) {

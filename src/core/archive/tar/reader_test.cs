@@ -11,6 +11,7 @@ using bzip2 = compress.bzip2_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using crc32 = hash.crc32_package;
+using obscuretestdata = @internal.obscuretestdata_package;
 using io = io_package;
 using maps = maps_package;
 using math = math_package;
@@ -22,6 +23,7 @@ using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
+using @internal;
 using compress;
 using hash;
 using hash = hash_package;
@@ -32,10 +34,13 @@ partial class tar_internal_test_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string longˢ = "long"u8;
+internal static readonly @string base64ˢ = ".base64"u8;
 internal static readonly @string bz2ˢ = ".bz2"u8;
+internal static readonly @string bz2Base64ˢ = ".bz2.base64"u8;
 
 internal partial struct TestReader_vectors /*dyn*/ {
     internal @string @file;   // Test input file
+    internal bool obscured;      // Obscured with obscuretestdata package
     internal slice<ж<global::go.archive.tar_package.Header>> headers; // Expected output headers
     internal slice<@string> chksums; // CRC32 checksum of files, leave as nil if not checked
     internal error err;     // Expected error to occur
@@ -520,7 +525,8 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         @file: "testdata/pax-nul-path.tar"u8,
         err: ErrHeader
     ), new(
-        @file: "testdata/neg-size.tar"u8,
+        @file: "testdata/neg-size.tar.base64"u8,
+        obscured: true,
         err: ErrHeader
     ), new(
         @file: "testdata/issue10968.tar"u8,
@@ -631,10 +637,21 @@ public static void TestReader(ж<testing.T> Ꮡt) {
         v = vᴛ1;
 
         var vʗ1 = v;
-        Ꮡt.Run(path.Base(v.@file), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(strings.TrimSuffix(path.Base(v.@file), base64ˢ), (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
-                var (f, err) = os.Open(vʗ1.@file);
+                var hdrsᴷ = new stackAppend<ж<global::go.archive.tar_package.Header>>(moves: true);
+                var chksumsᴷ = new stackAppend<@string>(moves: true);
+                @string pathΔ1 = vʗ1.@file;
+                if (vʗ1.obscured) {
+                    var (tf, errΔ1) = obscuretestdata.DecodeToTempFile(pathΔ1);
+                    if (errΔ1 != default!) {
+                        tΔ1.Fatalf("obscuredtestdata.DecodeToTempFile(%s): %v"u8, pathΔ1, errΔ1);
+                    }
+                    pathΔ1 = tf;
+                }
+
+                var (f, err) = os.Open(pathΔ1);
                 if (err != default!) {
                     tΔ1.Fatalf("unexpected error: %v"u8, err);
                 }
@@ -642,7 +659,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
                 defer(() => fʗ1.Close(), ref ᒐ);
 
                 io.Reader fr = new tar_test_package.os_FileжReader(f);
-                if (strings.HasSuffix(vʗ1.@file, bz2ˢ)) {
+                if (strings.HasSuffix(vʗ1.@file, bz2ˢ) || strings.HasSuffix(vʗ1.@file, bz2Base64ˢ)) {
                     fr = bzip2.NewReader(fr);
                 }
 
@@ -660,7 +677,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
                         }
                         break;
                     }
-                    hdrs = append(hdrs, hdr);
+                    hdrs = append(hdrsᴷ, hdrs, hdr);
 
                     if (vʗ1.chksums == default!) {
                         continue;
@@ -670,9 +687,10 @@ public static void TestReader(ж<testing.T> Ꮡt) {
                     if (err != default!) {
                         break;
                     }
-                    chksums = append(chksums, fmt.Sprintf("%x"u8, h.Sum(default!)));
+                    chksums = append(chksumsᴷ, chksums, fmt.Sprintf("%x"u8, h.Sum(default!)));
                 }
 
+                hdrs = move2heap(hdrsᴷ, hdrs);
                 foreach (var (i, hdr) in hdrs) {
                     if (i >= len(vʗ1.headers)) {
                         tΔ1.Fatalf("entry %d: unexpected header:\ngot %+v"u8, i, hdr.Value);
@@ -685,6 +703,7 @@ public static void TestReader(ж<testing.T> Ꮡt) {
                     tΔ1.Fatalf("got %d headers, want %d headers"u8, len(hdrs), len(vʗ1.headers));
                 }
 
+                chksums = move2heap(chksumsᴷ, chksums);
                 foreach (var (i, sum) in chksums) {
                     if (i >= len(vʗ1.chksums)) {
                         tΔ1.Fatalf("entry %d: unexpected sum: got %s"u8, i, sum);
@@ -762,7 +781,7 @@ public static void TestPartialRead(ж<testing.T> Ꮡt) {
                         }
                     }
                     if (((sstring)buf) != tc.output) {
-                        tΔ1.Fatalf("entry %d, ReadFull(): got %q, want %q"u8, i, ((@string)buf), tc.output);
+                        tΔ1.Fatalf("entry %d, ReadFull(): got %q, want %q"u8, i, (@string)buf, tc.output);
                     }
                 }
 
@@ -835,10 +854,12 @@ internal partial struct TestReadTruncation_vectors /*dyn*/ {
     internal error err;  // Expected error outcome
 }
 
-// TestReadTruncation test the ending condition on various truncated files and
+// TestReadTruncation tests the ending condition on various truncated files and
 // that truncated files are still detected even if the underlying io.Reader
 // satisfies io.Seeker.
 public static void TestReadTruncation(ж<testing.T> Ꮡt) {
+    var ssᴷ = new stackAppend<@string>();
+
     slice<@string> ss = default!;
     foreach (var (_, p) in new @string[]{
         "testdata/gnu.tar"u8,
@@ -850,7 +871,7 @@ public static void TestReadTruncation(ж<testing.T> Ꮡt) {
         if (err != default!) {
             Ꮡt.Fatalf("unexpected error: %v"u8, err);
         }
-        ss = append(ss, ((@string)buf));
+        ss = append(ssᴷ, ss, (@string)buf);
     }
 
     @string data1 = ss[0];
@@ -978,6 +999,8 @@ internal static readonly @string testdataHdrOnlyTarˢ = "testdata/hdr-only.tar"u
 public static void TestReadHeaderOnly(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
+        var hdrsᴷ = new stackAppend<ж<global::go.archive.tar_package.Header>>();
+
         var (f, err) = os.Open(testdataHdrOnlyTarˢ);
         if (err != default!) {
             Ꮡt.Fatalf("unexpected error: %v"u8, err);
@@ -996,7 +1019,7 @@ public static void TestReadHeaderOnly(ж<testing.T> Ꮡt) {
                 Ꮡt.Errorf("Next(): got %v, want %v"u8, errΔ1, (any)(default!));
                 continue;
             }
-            hdrs = append(hdrs, hdr);
+            hdrs = append(hdrsᴷ, hdrs, hdr);
 
             // If a special flag, we should read nothing.
             var (cnt, _) = io.ReadFull(new global::go.archive.tar_package.ReaderжReader(tr), new byte[]{0}.slice());
@@ -1008,7 +1031,7 @@ public static void TestReadHeaderOnly(ж<testing.T> Ꮡt) {
         // File is crafted with 16 entries. The later 8 are identical to the first
         // 8 except that the size is set.
         if (len(hdrs) != 16) {
-            Ꮡt.Fatalf("len(hdrs): got %d, want %d"u8, len(hdrs), (nint)(16));
+            Ꮡt.Fatalf("len(hdrs): got %d, want %d"u8, len(hdrs), (nint)16);
         }
         for (nint i = 0; i < 8; i++) {
             var (hdr1, hdr2) = (hdrs[i + 0], hdrs[i + 8]);
@@ -1175,7 +1198,7 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> Ꮡt) {
             array<byte> b = new(24);
             f.formatNumeric(b[..12], s.Offset);
             f.formatNumeric(b[12..], s.Length);
-            @out = append(@out, ((@string)(b[..])));
+            @out = append(@out, (@string)(b[..]));
         }
         return @out;
     }
@@ -1231,6 +1254,17 @@ public static void TestReadOldGNUSparseMap(ж<testing.T> Ꮡt) {
         input: makeInput(FormatGNU, ""u8,
             makeSparseStrings(new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(10737418240L, 512), new(21474836480L, 512)}.slice())).ꓸꓸꓸ),
         wantMap: new sparseDatas(new global::go.archive.tar_package.sparseEntry[]{new(10737418240L, 512), new(21474836480L, 512)}.slice())
+    ), new(
+        input: makeInput(FormatGNU, ""u8,
+            makeSparseStrings(((Func<global::go.archive.tar_package.sparseDatas>)(() => {
+                global::go.archive.tar_package.sparseDatas datas = default!;
+                // This is more than enough entries to exceed our limit.
+                foreach (var i in range<int64>((int64)((int64)1 << 20))) {
+                    datas = append(datas, new sparseEntry(i * 2, (i * 2) + 1));
+                }
+                return datas;
+            }))()).ꓸꓸꓸ),
+        wantErr: errSparseTooLong
     )
     }.slice();
 
@@ -1414,7 +1448,7 @@ public static void TestReadGNUSparsePAXHeaders(ж<testing.T> Ꮡt) {
         inputData: padInput("100\n"u8 + ((Func<@string>)(() => {
             slice<@string> ss = default!;
             for (nint i = 0; i < 100; i++) {
-                ss = append(ss, fmt.Sprintf("%d\n%d\n"u8, ((int64)i << (int)(30)), (nint)(512)));
+                ss = append(ss, fmt.Sprintf("%d\n%d\n"u8, (int64)i << 30, (nint)512));
             }
             return strings.Join(ss, ""u8);
         }))()),
@@ -1422,7 +1456,7 @@ public static void TestReadGNUSparsePAXHeaders(ж<testing.T> Ꮡt) {
         wantMap: ((Func<global::go.archive.tar_package.sparseDatas>)(() => {
             global::go.archive.tar_package.sparseDatas spd = default!;
             for (nint i = 0; i < 100; i++) {
-                spd = append(spd, new sparseEntry(((int64)i << (int)(30)), 512));
+                spd = append(spd, new sparseEntry((int64)i << 30, 512));
             }
             return spd;
         }))()
@@ -1715,7 +1749,7 @@ public static void TestFileReader(ж<testing.T> Ꮡt) {
                 var b = new slice<byte>(tfΔ1.cnt);
                 var (n, err) = fr.Read(b);
                 {
-                    @string got = ((@string)(b.slice(0, n))); if (got != tfΔ1.wantStr || !AreEqual(err, tfΔ1.wantErr)) {
+                    @string got = (@string)(b.slice(0, n)); if (got != tfΔ1.wantStr || !AreEqual(err, tfΔ1.wantErr)) {
                         Ꮡt.Errorf("test %d.%d, Read(%d):\ngot  (%q, %v)\nwant (%q, %v)"u8, i, j, tfΔ1.cnt, got, err, tfΔ1.wantStr, tfΔ1.wantErr);
                     }
                 }

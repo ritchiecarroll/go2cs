@@ -4,6 +4,7 @@
 namespace go;
 
 using Δsync = sync_package;
+using godebug = @internal.godebug_package;
 using static go.time_package;
 
 partial class time_internal_test_package {
@@ -44,6 +45,8 @@ internal static void initᴛNextStdChunk() { NextStdChunk = nextStdChunk; }
 public static Func<@string, int64, int64, (@string, nint, int64, int64, bool, bool)> Tzset = tzset;
 public static Func<@string, (@string, @string, bool)> TzsetName = tzsetName;
 public static Func<@string, (nint, @string, bool)> TzsetOffset = tzsetOffset;
+public static ж<godebug.Setting> AsynctimerChan;
+internal static void initᴛAsynctimerChan() { AsynctimerChan = asynctimerchan; }
 
 public static (@string, error) LoadFromEmbeddedTZData(@string zone) {
     return loadFromEmbeddedTZData(zone);

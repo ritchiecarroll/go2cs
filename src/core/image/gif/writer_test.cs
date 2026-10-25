@@ -14,6 +14,8 @@ using rand = math.rand_package;
 using os = os_package;
 using reflect = reflect_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.image;
 using go.image.color;
 using math;
@@ -348,7 +350,7 @@ public static void TestEncodeMismatchDelay(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object expectedErrorFromˢ3 = (@string)"expected error from providing empty gif"u8;
 
-public static void TestEncodeZeroGIF(ж<testing.T> Ꮡt) {
+public static partial void TestEncodeZeroGIF(ж<testing.T> Ꮡt) {
     {
         var err = EncodeAll(io.Discard, Ꮡ(new GIF(nil))); if (err == default!) {
             Ꮡt.Error(expectedErrorFromˢ3);

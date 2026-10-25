@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `text/template` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**52 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**53 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/text/template`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/text/template).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -46,6 +46,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestFunctionCheckDuringCall` | pass | pass |
 | `TestGoodFuncNames` | pass | pass |
 | `TestInterfaceValues` | pass | pass |
+| `TestIsTrue` | pass | pass |
 | `TestIssue19294` | pass | pass |
 | `TestIssue31810` | pass | pass |
 | `TestIssue39807` | pass | pass |
@@ -81,6 +82,8 @@ the capability it needs.
 - ExampleTemplate (example): example execution is deferred to Phase 4D
 - ExampleTemplate_block (example): example execution is deferred to Phase 4D
 - ExampleTemplate_func (example): example execution is deferred to Phase 4D
+- ExampleTemplate_funcs (example): example execution is deferred to Phase 4D
 - ExampleTemplate_glob (example): example execution is deferred to Phase 4D
 - ExampleTemplate_helpers (example): example execution is deferred to Phase 4D
+- ExampleTemplate_if (example): example execution is deferred to Phase 4D
 - ExampleTemplate_share (example): example execution is deferred to Phase 4D

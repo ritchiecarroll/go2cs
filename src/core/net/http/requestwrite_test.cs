@@ -13,6 +13,7 @@ using url = global::go.net.url_package;
 using strings = strings_package;
 using testing = testing_package;
 using iotest = global::go.testing.iotest_package;
+using synctest = global::go.testing.synctest_package;
 using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
@@ -58,7 +59,9 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Host: "www.techcrunch.com"u8,
             Form: new map<@string, slice<@string>>{}
         ),
+
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8,
+
         WantProxy: "GET http://www.techcrunch.com/ HTTP/1.1\r\n"u8 + "Host: www.techcrunch.com\r\n"u8 + "User-Agent: Fake\r\n"u8 + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"u8 + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"u8 + "Accept-Encoding: gzip,deflate\r\n"u8 + "Accept-Language: en-us,en;q=0.5\r\n"u8 + "Keep-Alive: 300\r\n"u8 + "Proxy-Connection: keep-alive\r\n\r\n"u8
     ),
     // HTTP/1.1 => chunked coding; body; empty trailer
@@ -75,8 +78,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Header: new ΔHeader(new map<@string, slice<@string>>{}),
             TransferEncoding: new @string[]{"chunked"u8}.slice()
         ),
+
         Body: slice<byte>("abcdef"u8),
+
         WantWrite: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8),
+
         WantProxy: "GET http://www.google.com/search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8)
     ),
     // HTTP/1.1 POST => chunked coding; body; empty trailer
@@ -94,8 +100,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Close: true,
             TransferEncoding: new @string[]{"chunked"u8}.slice()
         ),
+
         Body: slice<byte>("abcdef"u8),
+
         WantWrite: "POST /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8),
+
         WantProxy: "POST http://www.google.com/search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8)
     ),
 
@@ -114,8 +123,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             Close: true,
             ContentLength: 6
         ),
+
         Body: slice<byte>("abcdef"u8),
+
         WantWrite: "POST /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8,
+
         WantProxy: "POST http://www.google.com/search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Connection: close\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8
     ),
 
@@ -130,8 +142,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             }),
             ContentLength: 6
         ),
+
         Body: slice<byte>("abcdef"u8),
+
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8,
+
         WantProxy: "POST http://example.com/ HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 6\r\n"u8 + "\r\n"u8 + "abcdef"u8
     ),
 
@@ -142,6 +157,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             URL: mustParseURL("/search"u8),
             Host: "www.google.com"u8
         ),
+
         WantWrite: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
 
@@ -155,8 +171,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             ContentLength: 0 // as if unset by user
         ),
+
         Body: io.ReadCloser () => io.NopCloser(io.LimitReader(new http_test_package.strings_ReaderжReader(strings.NewReader("xx"u8)), 0)),
+
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n0\r\n\r\n"u8,
+
         WantProxy: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n"u8 + "\r\n0\r\n\r\n"u8
     ),
 
@@ -170,8 +189,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             ContentLength: 0 // as if unset by user
         ),
+
         Body: io.ReadCloser () => default!,
+
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8,
+
         WantProxy: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 0\r\n"u8 + "\r\n"u8
     ),
 
@@ -185,8 +207,11 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             ContentLength: 0 // as if unset by user
         ),
+
         Body: io.ReadCloser () => io.NopCloser(io.LimitReader(new http_test_package.strings_ReaderжReader(strings.NewReader("xx"u8)), 1)),
+
         WantWrite: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("x"u8) + chunk(""u8),
+
         WantProxy: "POST / HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("x"u8) + chunk(""u8)
     ),
 
@@ -241,11 +266,13 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             ContentLength: 0 // as if unset by user
         ),
+
         Body: io.ReadCloser () => {
             var err = errors.New("Custom reader error"u8);
             var errReader = iotest.ErrReader(err);
             return io.NopCloser(io.MultiReader(new http_test_package.strings_ReaderжReader(strings.NewReader("x"u8)), errReader));
         },
+
         WantError: errors.New("Custom reader error"u8)
     ),
 
@@ -259,11 +286,13 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             ContentLength: 0 // as if unset by user
         ),
+
         Body: io.ReadCloser () => {
             var err = errors.New("Custom reader error"u8);
             var errReader = iotest.ErrReader(err);
             return io.NopCloser(errReader);
         },
+
         WantError: errors.New("Custom reader error"u8)
     ),
 
@@ -279,6 +308,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
                 ["X-Foo"u8] = new @string[]{"X-Bar"u8}.slice()
             })
         ),
+
         WantWrite: "GET /foo HTTP/1.1\r\n"u8 + "Host: \r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "X-Foo: X-Bar\r\n\r\n"u8
     ),
 
@@ -301,6 +331,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
                 ["Host"u8] = new @string[]{"bad.example.com"u8}.slice()
             })
         ),
+
         WantWrite: "GET /search HTTP/1.1\r\n"u8 + "Host: \r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
     ),
 
@@ -317,6 +348,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             Header: new ΔHeader(new map<@string, slice<@string>>{})
         ),
+
         WantWrite: "GET /%2F/%2F/ HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
     ),
 
@@ -333,6 +365,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             ProtoMinor: 1,
             Header: new ΔHeader(new map<@string, slice<@string>>{})
         ),
+
         WantWrite: "GET http://y.google.com/%2F/%2F/ HTTP/1.1\r\n"u8 + "Host: x.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n\r\n"u8
     ),
 
@@ -352,6 +385,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
                 ["ALL-CAPS"u8] = new @string[]{"x"u8}.slice()
             })
         ),
+
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "ALL-CAPS: x\r\n"u8 + "\r\n"u8
     ),
 
@@ -363,6 +397,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
                 Host: "[fe80::1%en0]"u8
             ))
         ),
+
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: [fe80::1]\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
 
@@ -375,6 +410,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
             )),
             Host: "[fe80::1%en0]:8080"u8
         ),
+
         WantWrite: "GET / HTTP/1.1\r\n"u8 + "Host: [fe80::1]:8080\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "\r\n"u8
     ),
 
@@ -414,6 +450,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
                 ["X-Idempotency-Key"u8] = default!
             })
         ),
+
         WantWrite: "GET /foo HTTP/1.1\r\n"u8 + "Host: \r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "X-Foo: X-Bar\r\n\r\n"u8
     ),
     [24] = new(
@@ -425,8 +462,10 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
                 ["X-Idempotency-Key"u8] = new @string[]{}.slice()
             })
         ),
+
         WantWrite: "GET /foo HTTP/1.1\r\n"u8 + "Host: \r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "X-Foo: X-Bar\r\n\r\n"u8
     ),
+
     [25] = new(
         Req: new Request(
             Method: "GET"u8,
@@ -437,6 +476,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
         ),
         WantError: errors.New("net/http: can't write control character in Request.URL"u8)
     ),
+
     [26] = new( // Request with nil body and PATCH method. Issue #40978
         Req: new Request(
             Method: "PATCH"u8,
@@ -454,7 +494,7 @@ internal static ж<slice<reqWriteTest>> ᏑreqWriteTests = new StandardBox<slice
 internal static ref slice<reqWriteTest> reqWriteTests => ref ᏑreqWriteTests.ValueSlot;
 
 public static void TestRequestWrite(ж<testing.T> Ꮡt) {
-    foreach (var (i, _) in reqWriteTests) {
+    foreach (var i in range(reqWriteTests)) {
         var tt = Ꮡ(reqWriteTests, i);
 
         var ttʗ1 = tt;
@@ -515,26 +555,34 @@ public static void TestRequestWrite(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
+    Ꮡt.Parallel();
+
+    // Run this test in a synctest bubble, since it relies on the transport
+    // successfully probing the request body within 200ms
+    // (see transferWriter.probeRequestBody).
+    // This occasionally flakes on slow builders (#52575) if we don't use a fake clock.
+    synctest.Test(Ꮡt, testRequestWriteTransport);
+}
+
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string transferEncodingˢ3 = "Transfer-Encoding: "u8;
+internal static readonly @string transferEncodingˢ2 = "Transfer-Encoding: "u8;
 internal static readonly @string foobodyˢ = "foobody"u8;
 internal static readonly @string contentLength7ˢ = "Content-Length: 7"u8;
 internal static readonly @string transferEncodingChunkedˢ2 = "Transfer-Encoding: chunked"u8;
 internal static readonly @string oobodyˢ = "oobody"u8;
 
-internal partial struct TestRequestWriteTransport_testCase /*dyn*/ {
+internal partial struct testRequestWriteTransport_testCase /*dyn*/ {
     internal @string method;
     internal int64 clen; // ContentLength
     internal io.ReadCloser body;
     internal Func<@string, error> want;
     // optional:
-    internal Action<ж<TestRequestWriteTransport_testCase>> init;
+    internal Action<ж<testRequestWriteTransport_testCase>> init;
     internal Action afterReqRead;
 }
 
-public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
-    Ꮡt.Parallel();
-
+internal static void testRequestWriteTransport(ж<testing.T> Ꮡt) {
     Func<@string, error> matchSubstr(@string substr) => error (@string written) => {
             if (!strings.Contains(written, substr)) {
                 return fmt.Errorf("expected substring %q in request: %s"u8, substr, written);
@@ -546,7 +594,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
         if (strings.Contains(req, contentLengthˢ3)) {
             return fmt.Errorf("unexpected Content-Length in request: %s"u8, req);
         }
-        if (strings.Contains(req, transferEncodingˢ3)) {
+        if (strings.Contains(req, transferEncodingˢ2)) {
             return fmt.Errorf("unexpected Transfer-Encoding in request: %s"u8, req);
         }
         return default!;
@@ -567,7 +615,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
         };
     }
 
-    var tests = new TestRequestWriteTransport_testCase[]{
+    var tests = new testRequestWriteTransport_testCase[]{
         new(
             method: "GET"u8,
             want: noContentLengthOrTransferEncoding
@@ -619,7 +667,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
         new(
             method: "GET"u8,
             clen: -1,
-            init: (ж<TestRequestWriteTransport_testCase> tt) => {
+            init: (ж<testRequestWriteTransport_testCase> tt) => {
                 var (pr, pw) = io.Pipe();
                 var pwʗ1 = pw;
                 tt.Value.afterReqRead = () => {
@@ -632,7 +680,7 @@ public static void TestRequestWriteTransport(ж<testing.T> Ꮡt) {
     }.slice();
 
     foreach (var (i, vᴛ1) in tests) {
-        ref var tt = ref heap(new TestRequestWriteTransport_testCase(), out var Ꮡtt);
+        ref var tt = ref heap(new testRequestWriteTransport_testCase(), out var Ꮡtt);
         tt = vᴛ1;
 
         if (tt.init != default!) {

@@ -238,7 +238,7 @@ public static void TestSummarizeTasksTrace(ж<testing.T> Ꮡt) {
         if (len(want.logs) != len((~summary).Logs)){
             Ꮡt.Errorf("wanted %d logs for task %d, got %d logs instead"u8, len(want.logs), id, len((~summary).Logs));
         } else {
-            foreach (var (i, _) in want.logs) {
+            foreach (var i in range(want.logs)) {
                 if (want.logs[i] != (~(~summary).Logs[i]).Log()) {
                     Ꮡt.Errorf("log mismatch: want %#v, got %#v"u8, want.logs[i], (~(~summary).Logs[i]).Log());
                 }

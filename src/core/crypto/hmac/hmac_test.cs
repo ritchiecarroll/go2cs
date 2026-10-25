@@ -9,6 +9,7 @@ using md5 = go.crypto.md5_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
 using sha512 = go.crypto.sha512_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using hash = hash_package;
 using testing = testing_package;
@@ -586,6 +587,23 @@ public static void TestHMAC(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly object noClonerSupportˢ = (@string)"no Cloner support"u8;
+
+public static void TestNoClone(ж<testing.T> Ꮡt) {
+    var h = New(() => new justHash(sha256.New()), slice<byte>("key"u8));
+    {
+        var (_, ok) = h._<hash.Cloner>(ᐧ); if (!ok) {
+            Ꮡt.Skip(noClonerSupportˢ);
+        }
+    }
+    h.Write(slice<byte>("test"u8));
+    var (_, err) = h._<hash.Cloner>().Clone();
+    if (!errors.Is(err, errors.ErrUnsupported)) {
+        Ꮡt.Errorf("Clone() = %v, want ErrUnsupported"u8, err);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object hashHashProvidedByˢ = (@string)"hash.Hash provided by boringcrypto are not comparable"u8;
 internal static readonly object expectedPanicWhenCallingˢ = (@string)"expected panic when calling New with a non-unique hash generation function"u8;
 
@@ -652,6 +670,23 @@ public static void TestHMACHash(ж<testing.T> Ꮡt) {
             cryptotest.TestHash(tΔ1, () => New(baseHashʗ2, keyʗ2));
         });
     }
+}
+
+public static void TestExtraMethods(ж<testing.T> Ꮡt) {
+    var h = New(sha256.New, slice<byte>("key"u8));
+    cryptotest.NoExtraMethods(Ꮡt, maybeCloner(h));
+}
+
+internal static any maybeCloner(hash.Hash hʗp) {
+    ref var h = ref heap(hʗp, out var Ꮡh);
+
+    {
+        ref var c = ref heap<hash.Cloner>(out var Ꮡc);
+        (c, var ok) = h._<hash.Cloner>(ᐧ); if (ok) {
+            return Ꮡc;
+        }
+    }
+    return Ꮡh;
 }
 
 public static void BenchmarkHMACSHA256_1K(ж<testing.B> Ꮡb) {

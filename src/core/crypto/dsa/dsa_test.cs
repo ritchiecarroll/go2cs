@@ -6,6 +6,8 @@ namespace go.crypto;
 using rand = go.crypto.rand_package;
 using big = math.big_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.crypto;
 using io = io_package;
 using math;
@@ -105,7 +107,7 @@ public static void TestSignAndVerify(ж<testing.T> Ꮡt) {
     testSignAndVerify(Ꮡt, 0, Ꮡpriv);
 }
 
-public static void TestSignAndVerifyWithBadPublicKey(ж<testing.T> Ꮡt) {
+public static partial void TestSignAndVerifyWithBadPublicKey(ж<testing.T> Ꮡt) {
     ref var pub = ref heap<global::go.crypto.dsa_package.PublicKey>(out var Ꮡpub);
     pub = new PublicKey(
         Parameters: new Parameters(

@@ -30,7 +30,7 @@ using static go.go.doc_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/doc/comment_test.go", "comment_test.cs", "ACceooKCgpSClJQACBaAgqSAgqSAgqSAgraUgoKAgraCgoCCtoCC")]
-[assembly: global::go.GoPositionMap("go/doc/doc_test.go", "doc_test.cs", "ABwwkriUgoLKtoKCgqaCgpSCgIKklKaCgoKClKaCggAIFJSCgoKClMyCgoK4gqKCgoKUgoK4gqiSgIKkpoKCgoLKgoK4ggAKDIKAkoCSgAAJBoKCgoKUgoKmgpSCgpSCuJSCgoq4gpKClILKgoKUggAwXg==", "89-91:1;103-145:2;150-150:1;151-151:2;152-152:3;178-189:1;192-199:2", "", "80=Ext/1/1/2")]
+[assembly: global::go.GoPositionMap("go/doc/doc_test.go", "doc_test.cs", "ABwwkriUgoLKtoKCgqaCgpSCgIKklKaCgoKClKaCggAIFJSCgoKClMyCgoK4grKCgoKUgoK4gqiSgIKkpoKCgoLKgoK4ggAKDIKAkoCSgAAJBoKCgoKUgoKmgpSCgpSCuJSCgoq4gpKClILKgoKUggAwXg==", "89-91:1;103-145:2;150-150:1;151-151:2;152-152:3;178-189:1;192-199:2", "", "80=Ext/1/1/2")]
 [assembly: global::go.GoPositionMap("go/doc/example_internal_test.go", "example_internal_test.cs", "ABogggBeqAGSgoKClIKCgoKCpoI=", "101-118:1")]
 [assembly: global::go.GoPositionMap("go/doc/synopsis_test.go", "synopsis_test.cs", "AA8SABtAgoKCgpSCgg==")]
 // </GoSourcePositionMaps>
@@ -65,8 +65,8 @@ public static partial class doc_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸgoꓸparser() => builtin.initPackage(typeof(global::go.go.parser_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸprinter() => builtin.initPackage(typeof(global::go.go.printer_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(@internal.diff_package));
-    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtxtar() => builtin.initPackage(typeof(@internal.txtar_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸdiff() => builtin.initPackage(typeof(global::go.@internal.diff_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtxtar() => builtin.initPackage(typeof(global::go.@internal.txtar_package));
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));

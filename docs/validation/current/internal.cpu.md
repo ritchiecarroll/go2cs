@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/cpu` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-28 · converter `9a21c0848`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**8 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**9 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/internal/cpu`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/cpu).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 4 of the matched tests identically.
 
@@ -20,6 +20,7 @@ Both runtimes skip 4 of the matched tests identically.
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
 | `TestAllCapabilitiesDisabled` | skip | skip |
+| `TestDataCacheSizes` | pass | pass |
 | `TestDisableAllCapabilities` | skip | skip |
 | `TestDisableSSE3` | skip | skip |
 | `TestSSE3DebugOption` | skip | skip |

@@ -23,9 +23,9 @@ internal static class Go2CsTestHost
         {
             "testdata/go117",
         });
-        registry.Add("Test117", buildinfo_test_package.Test117, "buildinfo_test.go", 278);
-        registry.Add("TestIssue54968", buildinfo_test_package.TestIssue54968, "buildinfo_test.go", 335);
-        registry.Add("TestNotGo", buildinfo_test_package.TestNotGo, "buildinfo_test.go", 301);
+        registry.Add("Test117", buildinfo_test_package.Test117, "buildinfo_test.go", 275);
+        registry.Add("TestIssue54968", buildinfo_test_package.TestIssue54968, "buildinfo_test.go", 332);
+        registry.Add("TestNotGo", buildinfo_test_package.TestNotGo, "buildinfo_test.go", 298);
         registry.Add("TestReadFile", buildinfo_test_package.TestReadFile, "buildinfo_test.go", 32);
         registry.Add("TestSearchMagic", buildinfo_internal_test_package.TestSearchMagic, "search_test.go", 29);
         return TestHost.Run(registry, args);

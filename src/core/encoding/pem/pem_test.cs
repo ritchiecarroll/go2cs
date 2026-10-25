@@ -9,6 +9,8 @@ using reflect = reflect_package;
 using strings = strings_package;
 using testing = testing_package;
 using quick = go.testing.quick_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.testing;
 using static go.encoding.pem_package;
 
@@ -184,7 +186,7 @@ public static void TestCVE202224675(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestEncode(ж<testing.T> Ꮡt) {
+public static partial void TestEncode(ж<testing.T> Ꮡt) {
     var r = EncodeToMemory(privateKey2);
     if (((sstring)r) != pemPrivateKey2) {
         Ꮡt.Errorf("got:%s want:%s"u8, r, pemPrivateKey2);

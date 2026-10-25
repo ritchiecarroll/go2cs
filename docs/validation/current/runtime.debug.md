@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `runtime/debug` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-30 · converter `d616cc686`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**8 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**8 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/runtime/debug`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/debug).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -38,7 +38,7 @@ a disclosed test that fails any *other* way is still a hard mismatch.
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestFreeOSMemory` | `codegen-liveness` | the test allocates 32 MB inline in its own frame, clears the only named reference, and then asserts — from inside that same still-running frame — that FreeOSMemory has returned the memory to the OS. Go's per-safepoint liveness maps drop the allocation at its last use; the CLR reports a frame's slots live for the frame's whole lifetime, so the 32 MB is still rooted while the test is looking. Measured by the routing probe as a three-way control: the identical allocation behind a RETURNED call releases 33,689,600 B to the byte, and the inline form does not, invariant under Release and under untiered JIT. The first assert (HeapReleased must increase at all) PASSES on the S2/S3 high-water surface — 3,031,040 B of unrelated memory really is released — which is why the pin is the second assert's prefix and stops before its run-varying byte counts |
+| `TestFreeOSMemory` | `codegen-liveness` | the test allocates 32 MB inline in its own frame, clears the only named reference, and then asserts — from inside that same still-running frame — that FreeOSMemory has returned the memory to the OS. Go's per-safepoint liveness maps drop the allocation at its last use; the CLR reports a frame's slots live for the frame's whole lifetime, so the 32 MB is still rooted while the test is looking. Measured by the routing probe as a three-way control: the identical allocation behind a RETURNED call releases 33,689,600 B to the byte, and the inline form does not, invariant under Release and under untiered JIT. The first assert (HeapReleased must increase at all) PASSES on the S2/S3 high-water surface — 3,031,040 B of unrelated memory really is released — which is why the pin is the second assert's prefix and stops before its run-varying byte counts SCOPED 2026-10-13 to windows and linux when the darwin half was added beside it: on darwin the first assert fails before this one runs. |
 
 ## Excluded declarations
 

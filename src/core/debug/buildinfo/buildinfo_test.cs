@@ -65,6 +65,7 @@ internal partial struct TestReadFile_cases /*dyn*/ {
 // checks that build information can or cannot be read.
 public static void TestReadFile(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var platformsᴷ = new stackAppend<TestReadFile_platform>();
 
     if (testing.Short()) {
         Ꮡt.Skip(testRequiresCompilingAndˢ);
@@ -89,7 +90,7 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         }
     }
     if (!haveRuntimePlatform) {
-        platforms = append(platforms, runtimePlatform);
+        platforms = append(platformsᴷ, platforms, runtimePlatform);
     }
 
     var buildModes = new @string[]{"pie"u8, "exe"u8}.slice();
@@ -294,33 +295,34 @@ public static void TestReadFile(ж<testing.T> Ꮡt) {
         )
     }.slice();
 
-    foreach (var (_, p) in platforms) {
-        ref var pΔ1 = ref heap<TestReadFile_platform>(out var ᏑpΔ1);
-        pΔ1 = p;
+    foreach (var (_, vᴛ1) in platforms) {
+        ref var p = ref heap(new TestReadFile_platform(), out var Ꮡp);
+        p = vᴛ1;
+
         var buildModesʗ1 = buildModes;
         var casesʗ1 = cases;
         var cleanOutputForComparisonʗ1 = cleanOutputForComparison;
-        var pʗ1 = pΔ1;
+        var pʗ1 = p;
         var runtimePlatformʗ1 = runtimePlatform;
-        Ꮡt.Run(pΔ1.goos + "_"u8 + pΔ1.goarch, (ж<testing.T> tΔ10) => {
+        Ꮡt.Run(p.goos + "_"u8 + p.goarch, (ж<testing.T> tΔ10) => {
             if (pʗ1 != runtimePlatformʗ1 && !flagAll.Value) {
                 tΔ10.Skipf("skipping platforms other than %s_%s because -all was not set"u8, runtimePlatformʗ1.goos, runtimePlatformʗ1.goarch);
             }
             foreach (var (_, mode) in buildModesʗ1) {
-                @string modeΔ1 = mode;
                 var casesʗ2 = casesʗ1;
                 var cleanOutputForComparisonʗ2 = cleanOutputForComparisonʗ1;
                 var pʗ2 = pʗ1;
-                tΔ10.Run(modeΔ1, (ж<testing.T> tΔ11) => {
-                    foreach (var (_, tc) in casesʗ2) {
-                        ref var tcΔ1 = ref heap<TestReadFile_cases>(out var ᏑtcΔ1);
-                        tcΔ1 = tc;
+                tΔ10.Run(mode, (ж<testing.T> tΔ11) => {
+                    foreach (var (_, vᴛ2) in casesʗ2) {
+                        ref var tc = ref heap(new TestReadFile_cases(), out var Ꮡtc);
+                        tc = vᴛ2;
+
                         var cleanOutputForComparisonʗ3 = cleanOutputForComparisonʗ2;
                         var pʗ3 = pʗ2;
-                        var tcʗ1 = tcΔ1;
-                        tΔ11.Run(tcΔ1.name, (ж<testing.T> tΔ12) => {
+                        var tcʗ1 = tc;
+                        tΔ11.Run(tc.name, (ж<testing.T> tΔ12) => {
                             tΔ12.Parallel();
-                            @string name = tcʗ1.build(tΔ12, pʗ3.goos, pʗ3.goarch, modeΔ1);
+                            @string name = tcʗ1.build(tΔ12, pʗ3.goos, pʗ3.goarch, mode);
                             {
                                 var (info, err) = buildinfo.ReadFile(name); if (err != default!){
                                     if (tcʗ1.wantErr == ""u8){

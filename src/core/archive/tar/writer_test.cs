@@ -10,6 +10,7 @@ namespace go.archive;
 using bytes = bytes_package;
 using hex = encoding.hex_package;
 using errors = errors_package;
+using obscuretestdata = @internal.obscuretestdata_package;
 using io = io_package;
 using fs = go.io.fs_package;
 using maps = maps_package;
@@ -22,6 +23,7 @@ using testing = testing_package;
 using fstest = go.testing.fstest_package;
 using iotest = go.testing.iotest_package;
 using time = time_package;
+using @internal;
 using encoding;
 using go.io;
 using go.testing;
@@ -39,6 +41,8 @@ internal static readonly @string uniqueBᶜ = "+  "u8;
 internal static readonly @string identityᶜ = "   "u8;
 
 internal static @string bytediff(slice<byte> a, slice<byte> b) {
+    var ssᴷ = new stackAppend<@string>();
+
     @string uniqueA = uniqueAᶜ;
     @string uniqueB = uniqueBᶜ;
     @string identity = identityᶜ;
@@ -47,7 +51,7 @@ internal static @string bytediff(slice<byte> a, slice<byte> b) {
     var sb = strings.Split(strings.TrimSpace(hex.Dump(b)), "\n"u8);
     while (len(sa) > 0 && len(sb) > 0) {
         if (sa[0] == sb[0]){
-            ss = append(ss, identity + sa[0]);
+            ss = append(ssᴷ, ss, identity + sa[0]);
         } else {
             ss = append(ss, uniqueA + sa[0]);
             ss = append(ss, uniqueB + sb[0]);
@@ -95,6 +99,7 @@ internal partial struct TestWriter_testClose /*dyn*/ {
 
 internal partial struct TestWriter_vectors /*dyn*/ {
     internal @string @file; // Optional filename of expected output
+    internal bool obscured;   // Whether file is obscured
     internal slice<TestWriter_testFnc> tests;
 }
 
@@ -118,6 +123,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 ModTime: time.Unix(1246508266, 0)
             ), default!),
             new TestWriter_testWrite("Kilts"u8, 5, default!),
+
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
                 Name: "small2.txt"u8,
@@ -130,6 +136,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 ModTime: time.Unix(1245217492, 0)
             ), default!),
             new TestWriter_testWrite("Google.com\n"u8, 11, default!),
+
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeSymlink,
                 Name: "link.txt"u8,
@@ -142,6 +149,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 ModTime: time.Unix(1314603082, 0)
             ), default!),
             new TestWriter_testWrite(""u8, 0, default!),
+
             new TestWriter_testClose((error)(default!))
         }.slice()
     ), new(
@@ -171,7 +179,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
         //  bsdtar -xvf writer-big-long.tar
         //
         // This file is in PAX format.
-        @file: "testdata/writer-big-long.tar"u8,
+        @file: "testdata/writer-big-long.tar.base64"u8,
+        obscured: true,
         tests: new TestWriter_testFnc[]{
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeReg,
@@ -223,6 +232,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 ModTime: time.Unix(1425484303, 0)
             ), default!),
             new TestWriter_testWrite("Slartibartfast\n"u8, 15, default!),
+
             new TestWriter_testHeader(new Header(
                 Typeflag: TypeLink,
                 Name: "hard.txt"u8,
@@ -235,6 +245,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
                 ModTime: time.Unix(1425484303, 0)
             ), default!),
             new TestWriter_testWrite(""u8, 0, default!),
+
             new TestWriter_testClose((error)(default!))
         }.slice()
     ), new(
@@ -410,7 +421,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 					testClose{},
 				},
 			}, {
-				file: "testdata/gnu-sparse-big.tar",
+				file:     "testdata/gnu-sparse-big.tar.base64",
+				obscured: true,
 				tests: []testFnc{
 					testHeader{Header{
 						Typeflag: TypeGNUSparse,
@@ -442,7 +454,8 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 					testClose{nil},
 				},
 			}, {
-				file: "testdata/pax-sparse-big.tar",
+				file:     "testdata/pax-sparse-big.tar.base64",
+				obscured: true,
 				tests: []testFnc{
 					testHeader{Header{
 						Typeflag: TypeReg,
@@ -507,7 +520,7 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
 
         var equalErrorʗ1 = equalError;
         var vʗ1 = v;
-        Ꮡt.Run(path.Base(v.@file), (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(strings.TrimSuffix(path.Base(v.@file), base64ˢ), (ж<testing.T> tΔ1) => {
             const int64 maxSize = /* 10 << 10 */ 10240; // 10KiB
             var buf = @new<bytes.Buffer>();
             var tw = NewWriter(iotest.TruncateWriter(new tar_test_package.bytes_BufferжWriter(buf), maxSize));
@@ -560,7 +573,16 @@ public static void TestWriter(ж<testing.T> Ꮡt) {
             }
 
             if (vʗ1.@file != ""u8) {
-                var (want, err) = os.ReadFile(vʗ1.@file);
+                @string pathΔ1 = vʗ1.@file;
+                if (vʗ1.obscured) {
+                    var (tf, errΔ1) = obscuretestdata.DecodeToTempFile(pathΔ1);
+                    if (errΔ1 != default!) {
+                        tΔ1.Fatalf("obscuretestdata.DecodeToTempFile(%s): %v"u8, pathΔ1, errΔ1);
+                    }
+                    pathΔ1 = tf;
+                }
+
+                var (want, err) = os.ReadFile(pathΔ1);
                 if (err != default!) {
                     tΔ1.Fatalf("ReadFile() = %v, want nil"u8, err);
                 }
@@ -1126,7 +1148,7 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
         {
             var errΔ1 = tw.WriteHeader(Ꮡ(new Header(
                 Name: name,
-                Uid: (1 << (int)(25)) // Prevent USTAR format
+                Uid: (1 << 25) // Prevent USTAR format
             ))); if (errΔ1 != default!) {
                 Ꮡt.Errorf("test %d, unexpected WriteHeader error: %v"u8, i, errΔ1);
             }
@@ -1140,7 +1162,7 @@ public static void TestIssue12594(ж<testing.T> Ꮡt) {
         // The prefix field should never appear in the GNU format.
         ref var blk = ref heap(new global::go.archive.tar_package.block(), out var Ꮡblk);
         copy(blk[..], b.Bytes());
-        @string prefix = ((@string)Ꮡblk.toUSTAR().prefix());
+        @string prefix = (@string)Ꮡblk.toUSTAR().prefix();
         (prefix, _, _) = strings.Cut(prefix, "\x00"u8); // Truncate at the NUL terminator
         if (Ꮡblk.getFormat() == FormatGNU && len(prefix) > 0 && strings.HasPrefix(name, prefix)) {
             Ꮡt.Errorf("test %d, found prefix in GNU format: %s"u8, i, prefix);
@@ -1528,17 +1550,20 @@ public static void TestFileWriter(ж<testing.T> Ꮡt) {
 internal static readonly @string subfolderˢ = "subfolder"u8;
 
 public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
+    var namesᴷ = new stackAppend<@string>();
+
     var fsys = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
         ["emptyfolder"u8] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(493 | os.ModeDir))),
         ["file.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("hello"u8))),
-        ["subfolder/another.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8)))
+        ["subfolder/another.go"u8] = Ꮡ(new fstest.MapFile(Data: slice<byte>("world"u8))),
+        ["symlink.go"u8] = Ꮡ(new fstest.MapFile(Mode: (fs.FileMode)(511 | os.ModeSymlink), Data: slice<byte>("file.go"u8)))
         // Notably missing here is the "subfolder" directory. This makes sure even
         // if we don't have a subfolder directory listed.
     });
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var err = tw.AddFS(fsys); if (err != default!) {
+        var err = tw.AddFS(new tar_test_package.fstest_MapFSᴠFS(fsys)); if (err != default!) {
             Ꮡt.Fatal(err);
         }
     }
@@ -1556,7 +1581,7 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
 
     var names = new slice<@string>(0, len(fsys));
     foreach (var (name, _) in fsys) {
-        names = append(names, name);
+        names = append(namesᴷ, names, name);
     }
     sort.Strings(names);
 
@@ -1564,7 +1589,7 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
     foreach (var (_, name) in names) {
         entriesLeft--;
 
-        var (entryInfo, err) = fsys.Stat(name);
+        var (entryInfo, err) = fsys.Lstat(name);
         if (err != default!) {
             Ꮡt.Fatalf("getting entry info error: %v"u8, err);
         }
@@ -1590,18 +1615,25 @@ public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
                 name, entryInfo.Mode(), hdr.FileInfo().Mode());
         }
 
-        if (entryInfo.IsDir()) {
-            continue;
+        var exprᴛ1 = entryInfo.Mode().Type();
+        if (exprᴛ1 == fs.ModeDir) {
+            // No additional checks necessary.
         }
-
-        (var data, err) = io.ReadAll(new global::go.archive.tar_package.ReaderжReader(tr));
-        if (err != default!) {
-            Ꮡt.Fatal(err);
+        else if (exprᴛ1 == fs.ModeSymlink) {
+            @string origtarget = (@string)(~fsys[name]).Data;
+            if ((~hdr).Linkname != origtarget) {
+                Ꮡt.Fatalf("test fs has link content %s; archive header %v"u8, origtarget, (~hdr).Linkname);
+            }
         }
-        var origdata = fsys[name].Value.Data;
-        if (((sstring)data) != ((sstring)origdata)) {
-            Ꮡt.Fatalf("test fs has file content %v; archive header has %v"u8,
-                data, origdata);
+        else { /* default: */
+            var (data, errΔ2) = io.ReadAll(new global::go.archive.tar_package.ReaderжReader(tr));
+            if (errΔ2 != default!) {
+                Ꮡt.Fatal(errΔ2);
+            }
+            var origdata = fsys[name].Value.Data;
+            if (((sstring)data) != ((sstring)origdata)) {
+                Ꮡt.Fatalf("test fs has file content %v; archive header has %v"u8, origdata, data);
+            }
         }
     }
     if (entriesLeft > 0) {
@@ -1620,7 +1652,7 @@ public static void TestWriterAddFSNonRegularFiles(ж<testing.T> Ꮡt) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var tw = NewWriter(new tar_test_package.bytes_BufferжWriter(Ꮡbuf));
     {
-        var err = tw.AddFS(fsys); if (err == default!) {
+        var err = tw.AddFS(new tar_test_package.fstest_MapFSᴠFS(fsys)); if (err == default!) {
             Ꮡt.Fatal(expectedErrorGotNilˢ);
         }
     }

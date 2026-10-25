@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `hash/fnv` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**19 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**62 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/hash/fnv`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/hash/fnv).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -30,6 +30,49 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestGoldenMarshal/32a` | pass | pass |
 | `TestGoldenMarshal/64` | pass | pass |
 | `TestGoldenMarshal/64a` | pass | pass |
+| `TestHashInterface` | pass | pass |
+| `TestHashInterface/128` | pass | pass |
+| `TestHashInterface/128/Clone` | pass | pass |
+| `TestHashInterface/128/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/128/ResetState` | pass | pass |
+| `TestHashInterface/128/StatefulWrite` | pass | pass |
+| `TestHashInterface/128/SumAppend` | pass | pass |
+| `TestHashInterface/128/WriteWithoutError` | pass | pass |
+| `TestHashInterface/128a` | pass | pass |
+| `TestHashInterface/128a/Clone` | pass | pass |
+| `TestHashInterface/128a/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/128a/ResetState` | pass | pass |
+| `TestHashInterface/128a/StatefulWrite` | pass | pass |
+| `TestHashInterface/128a/SumAppend` | pass | pass |
+| `TestHashInterface/128a/WriteWithoutError` | pass | pass |
+| `TestHashInterface/32` | pass | pass |
+| `TestHashInterface/32/Clone` | pass | pass |
+| `TestHashInterface/32/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/32/ResetState` | pass | pass |
+| `TestHashInterface/32/StatefulWrite` | pass | pass |
+| `TestHashInterface/32/SumAppend` | pass | pass |
+| `TestHashInterface/32/WriteWithoutError` | pass | pass |
+| `TestHashInterface/32a` | pass | pass |
+| `TestHashInterface/32a/Clone` | pass | pass |
+| `TestHashInterface/32a/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/32a/ResetState` | pass | pass |
+| `TestHashInterface/32a/StatefulWrite` | pass | pass |
+| `TestHashInterface/32a/SumAppend` | pass | pass |
+| `TestHashInterface/32a/WriteWithoutError` | pass | pass |
+| `TestHashInterface/64` | pass | pass |
+| `TestHashInterface/64/Clone` | pass | pass |
+| `TestHashInterface/64/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/64/ResetState` | pass | pass |
+| `TestHashInterface/64/StatefulWrite` | pass | pass |
+| `TestHashInterface/64/SumAppend` | pass | pass |
+| `TestHashInterface/64/WriteWithoutError` | pass | pass |
+| `TestHashInterface/64a` | pass | pass |
+| `TestHashInterface/64a/Clone` | pass | pass |
+| `TestHashInterface/64a/OutOfBoundsRead` | pass | pass |
+| `TestHashInterface/64a/ResetState` | pass | pass |
+| `TestHashInterface/64a/StatefulWrite` | pass | pass |
+| `TestHashInterface/64a/SumAppend` | pass | pass |
+| `TestHashInterface/64a/WriteWithoutError` | pass | pass |
 | `TestIntegrity128` | pass | pass |
 | `TestIntegrity128a` | pass | pass |
 | `TestIntegrity32` | pass | pass |

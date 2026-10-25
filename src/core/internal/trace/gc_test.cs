@@ -74,7 +74,7 @@ public static void TestMMU(ж<testing.T> Ꮡt) {
         if (len(worst) != len(test.worst)){
             Ꮡt.Errorf("for %s window, want worst %v, got %v"u8, test.window, test.worst, worst);
         } else {
-            foreach (var (i, _) in worst) {
+            foreach (var i in range(worst)) {
                 if (worst[i].MutatorUtil != test.worst[i]) {
                     Ꮡt.Errorf("for %s window, want worst %v, got %v"u8, test.window, test.worst, worst);
                     break;
@@ -123,7 +123,7 @@ public static void TestMMUTrace(ж<testing.T> Ꮡt) {
             for (var window = time.Microsecond; window < time.ΔSecond; window *= 10) {
                 var mud1 = mmuCurve.MUD(window, quantiles);
                 var mud2 = mmuCurve2.MUD(window, quantiles);
-                foreach (var (i, _) in mud1) {
+                foreach (var i in range(mud1)) {
                     if (!aeq(mud1[i], mud2[i])) {
                         tΔ1.Errorf("for quantiles %v at window %v, want %v, got %v"u8, quantiles, window, mud2, mud1);
                         break;

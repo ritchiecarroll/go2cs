@@ -117,9 +117,10 @@ public static void BenchmarkFindChild(ж<testing.B> Ꮡb) {
         Ꮡb.Run(fmt.Sprintf("n=%d"u8, n), (ж<testing.B> bΔ1) => {
             var listʗ2 = listʗ1;
             bΔ1.Run(repLinearˢ, (ж<testing.B> bΔ2) => {
+                var entriesᴷ = new stackAppend<global::go.net.http_package.entry<@string, any>>();
                 slice<global::go.net.http_package.entry<@string, any>> entries = default!;
                 foreach (var (_, c) in listʗ2) {
-                    entries = append(entries, new entry<@string, any>(c, default!));
+                    entries = append(entriesᴷ, entries, new entry<@string, any>(c, default!));
                 }
                 bΔ2.ResetTimer();
                 for (nint i = 0; i < (~bΔ2).N; i++) {

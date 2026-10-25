@@ -844,6 +844,7 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
     // set, and all following messages must be encrypted. If the server sends
     // additional unencrypted messages in a record with the ServerHello, the
     // client must either fail or ignore the additional messages.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var sʗ1 = s;
     goǃ(() => {
@@ -898,6 +899,7 @@ public static partial void TestServerHelloTrailingMessage(ж<testing.T> Ꮡt) {
 
 public static partial void TestClientHelloTrailingMessage(ж<testing.T> Ꮡt) {
     // Same as TestServerHelloTrailingMessage but for the client side.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
     var cʗ1 = c;
     goǃ(() => {
@@ -937,6 +939,7 @@ public static partial void TestDoubleClientHelloHRR(ж<testing.T> Ꮡt) {
     // If a client sends two ClientHello messages in a single record, and the
     // server sends a HRR after reading the first ClientHello, the server must
     // either fail or ignore the trailing ClientHello.
+
     var (c, s) = localPipe(new tls_test_package.testing_TжTB(Ꮡt));
 
     var cʗ1 = c;

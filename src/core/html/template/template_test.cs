@@ -9,6 +9,8 @@ using static go.html.template_package;
 using strings = strings_package;
 using testing = testing_package;
 using parse = text.template.parse_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.html;
 using io = io_package;
@@ -277,7 +279,7 @@ internal static ж<template.Template> lookup(this ref testCase c, @string name) 
     return c.root.Lookup(name);
 }
 
-internal static void mustParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
+internal static partial void mustParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, err) = Ꮡt.Parse(text);
@@ -286,7 +288,7 @@ internal static void mustParse(this ref testCase c, ж<template.Template> Ꮡt, 
     }
 }
 
-internal static void mustNotParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
+internal static partial void mustNotParse(this ref testCase c, ж<template.Template> Ꮡt, @string text) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var (_, err) = Ꮡt.Parse(text);

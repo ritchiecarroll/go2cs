@@ -6,17 +6,20 @@ namespace go.@internal;
 using static go.@internal.cpu_package;
 using godebug = go.@internal.godebug_package;
 using testenv = go.@internal.testenv_package;
-using os = os_package;
-using exec = go.os.exec_package;
+using exec = os.exec_package;
+using Δruntime = runtime_package;
 using testing = testing_package;
 using go.@internal;
-using go.os;
+using os;
 using static go.@internal.cpu_internal_test_package;
 
 partial class cpu_test_package {
 
 public static void MustHaveDebugOptionsSupport(ж<testing.T> Ꮡt) {
-    if (!DebugOptions) {
+    var exprᴛ1 = Δruntime.GOOS;
+    if (exprᴛ1 == "aix"u8 || exprᴛ1 == "darwin"u8 || exprᴛ1 == "ios"u8 || exprᴛ1 == "dragonfly"u8 || exprᴛ1 == "freebsd"u8 || exprᴛ1 == "netbsd"u8 || exprᴛ1 == "openbsd"u8 || exprᴛ1 == "illumos"u8 || exprᴛ1 == "solaris"u8 || exprᴛ1 == "linux"u8) {
+    }
+    else { /* default: */
         Ꮡt.Skipf("skipping test: cpu feature options not supported by OS"u8);
     }
 }
@@ -28,11 +31,9 @@ public static void MustSupportFeatureDetection(ж<testing.T> Ꮡt) {
 internal static void runDebugOptionsTest(ж<testing.T> Ꮡt, @string test, @string options) {
     MustHaveDebugOptionsSupport(Ꮡt);
 
-    testenv.MustHaveExec(new cpu_test_package.testing_TжTB(Ꮡt));
-
     @string env = "GODEBUG="u8 + options;
 
-    var cmd = exec.Command(os.Args[0], "-test.run=^"u8 + test + "$"u8);
+    var cmd = exec.Command(testenv.Executable(new cpu_test_package.testing_TжTB(Ꮡt)), "-test.run=^"u8 + test + "$"u8);
     cmd.Value.Env = append((~cmd).Env, env);
 
     var (output, err) = cmd.CombinedOutput();

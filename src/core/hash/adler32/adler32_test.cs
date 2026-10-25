@@ -4,13 +4,19 @@
 namespace go.hash;
 
 using encoding = encoding_package;
+using hash = hash_package;
+using testhash = @internal.testhash_package;
 using io = io_package;
 using strings = strings_package;
 using testing = testing_package;
-using hash = hash_package;
+using @internal;
 using static go.hash.adler32_package;
 
 partial class adler32_internal_test_package {
+
+public static void TestHashInterface(ж<testing.T> Ꮡt) {
+    testhash.TestHash(Ꮡt, () => new adler32_internal_test_package.hash_Hash32ᴠHash(New()));
+}
 
 partial struct goldenᴛ1 /*dyn*/ {
     internal uint32 @out;
@@ -147,7 +153,7 @@ public static void BenchmarkAdler32KB(ж<testing.B> Ꮡb) {
 
     b.SetBytes(1024);
     var data = new slice<byte>(1024);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
     var h = New();

@@ -6,6 +6,7 @@ namespace go.encoding;
 using bytes = bytes_package;
 using errors = errors_package;
 using io = io_package;
+using os = os_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using strings = strings_package;
@@ -322,8 +323,8 @@ public partial struct BadPathTestC {
 }
 
 public partial struct BadPathTestD {
-    public partial ref BadPathEmbeddedA BadPathEmbeddedA { get; }
-    public partial ref BadPathEmbeddedB BadPathEmbeddedB { get; }
+    /*embed*/ public BadPathEmbeddedA BadPathEmbeddedA;
+    /*embed*/ public BadPathEmbeddedB BadPathEmbeddedB;
 }
 
 public partial struct BadPathEmbeddedA {
@@ -405,7 +406,7 @@ public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Unmarshal failed in to *int field"u8);
     } else 
     if ((~p1).Int.Value != 1) {
-        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p1).Int.OrTypedNil(), (nint)(1));
+        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p1).Int.OrTypedNil(), (nint)1);
     }
 
     var p2 = Ꮡ(new TestUnmarshalAttr_ParamVal(nil));
@@ -415,7 +416,7 @@ public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
         }
     }
     if ((~p2).Int != 1) {
-        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p2).Int, (nint)(1));
+        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p2).Int, (nint)1);
     }
 
     var p3 = Ꮡ(new TestUnmarshalAttr_ParamStringPtr(nil));
@@ -428,7 +429,7 @@ public static void TestUnmarshalAttr(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Unmarshal failed in to *string field"u8);
     } else 
     if ((~p3).Int.Value != "1"u8) {
-        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p3).Int.OrTypedNil(), (nint)(1));
+        Ꮡt.Fatalf("Unmarshal with %s failed:\nhave %#v,\n want %#v"u8, x, (~p3).Int.OrTypedNil(), (nint)1);
     }
 }
 
@@ -509,7 +510,7 @@ public static void TestMarshalNS(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal: %v"u8, err);
     }
     @string want = tablesTableXmlnsHttpWwwˢ;
-    @string str = ((@string)data);
+    @string str = (@string)data;
     if (str != want) {
         Ꮡt.Errorf("have: %q\nwant: %q\n"u8, str, want);
     }
@@ -613,7 +614,7 @@ public static void TestMarshalNSAttr(ж<testing.T> Ꮡt) {
         Ꮡt.Fatalf("Marshal: %v"u8, err);
     }
     @string want = tableAttrsTAttrXmlnsˢ;
-    @string str = ((@string)data);
+    @string str = (@string)data;
     if (str != want) {
         Ꮡt.Errorf("Marshal:\nhave: %#q\nwant: %#q\n"u8, str, want);
     }
@@ -814,7 +815,7 @@ public partial struct Parent {
     public Child Child;
     public slice<Child> Children;
     public ж<Child> ChildPtr;
-    public partial ref ChildToEmbed ChildToEmbed { get; }
+    /*embed*/ public ChildToEmbed ChildToEmbed;
 }
 
 internal static readonly @string emptyXML = """
@@ -1212,6 +1213,194 @@ public static void TestCVE202230633(ж<testing.T> Ꮡt) {
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
+}
+
+public partial struct recursiveNode {
+    public global::go.encoding.xml_package.Name XMLName;
+    public slice<recursiveNode> Children; /*`xml:",any"`*/
+}
+
+internal partial struct UnmarshalXML_alias /*recursiveNode*/;
+
+public static error UnmarshalXML(this ref recursiveNode n, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement startʗp) {
+    ref var start = ref heap(startʗp, out var Ꮡstart);
+
+    ref var a = ref heap(new UnmarshalXML_alias(), out var Ꮡa);
+    {
+        var err = Ꮡd.DecodeElement(Ꮡa, Ꮡstart); if (err != default!) {
+            return err;
+        }
+    }
+    n = (recursiveNode)a;
+    return default!;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string goBuilderNameˢ = "GO_BUILDER_NAME"u8;
+internal static readonly @string wazeroˢ = "wazero"u8;
+
+internal partial struct TestDecodeElementRecursion_tests /*dyn*/ {
+    internal @string name;
+    internal nint depth;
+    internal error wantErr;
+}
+
+public static void TestDecodeElementRecursion(ж<testing.T> Ꮡt) {
+    // The wazero builder is unable to build the test binary due to its small
+    // stack size.
+    @string builder = os.Getenv(goBuilderNameˢ);
+    if (testing.Short() || strings.Contains(builder, wazeroˢ)) {
+        Ꮡt.Skip(testRequiresSignificantˢ);
+    }
+    nint maxDepth = maxUnmarshalDepth;
+    if (runtime.GOARCH == "wasm"u8) {
+        maxDepth = maxUnmarshalDepthWasm;
+    }
+    var tests = new TestDecodeElementRecursion_tests[]{
+        new(
+            name: "below limit"u8,
+            depth: maxDepth,
+            wantErr: default!
+        ),
+        new(
+            name: "above limit"u8,
+            depth: maxDepth + 1,
+            wantErr: errUnmarshalDepth
+        )
+    }.slice();
+
+    foreach (var (_, vᴛ1) in tests) {
+        ref var tt = ref heap(new TestDecodeElementRecursion_tests(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var payload = bytes.Join(new slice<byte>[]{
+                bytes.Repeat(slice<byte>("<a>"u8), ttʗ1.depth),
+                bytes.Repeat(slice<byte>("</a>"u8), ttʗ1.depth)
+            }.slice(), default!);
+            ref var n = ref heap(new recursiveNode(), out var Ꮡn);
+            var err = Unmarshal(payload, Ꮡn);
+            if (!AreEqual(err, ttʗ1.wantErr)) {
+                tΔ1.Fatalf("unexpected error: got %v, want %v"u8, err, ttʗ1.wantErr);
+            }
+        });
+    }
+}
+
+public partial struct standardNode {
+    public ж<standardNode> Sub; /*`xml:"section"`*/
+    public ж<customUnmarshalerNode> Custom; /*`xml:"extension"`*/
+}
+
+public partial struct customUnmarshalerNode {
+    public standardNode Body;
+}
+
+public static error UnmarshalXML(this ref customUnmarshalerNode e, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement startʗp) {
+    ref var start = ref heap(startʗp, out var Ꮡstart);
+
+    ref var body = ref heap(new standardNode(), out var Ꮡbody);
+    {
+        var err = Ꮡd.DecodeElement(Ꮡbody, Ꮡstart); if (err != default!) {
+            return err;
+        }
+    }
+    e.Body = body;
+    return default!;
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string sectionˢ = "<section>"u8;
+internal static readonly @string sectionˢ2 = "</section>"u8;
+internal static readonly @string extensionˢ = "<extension>"u8;
+internal static readonly @string extensionˢ2 = "</extension>"u8;
+
+public static void TestDecodeElementDepthBypass(ж<testing.T> Ꮡt) {
+    // Construct a document with 3 blocks of 5,000 nested <section> tags,
+    // separated by <extension> tags.
+    // Total XML nesting depth = 15,003 tags deep (maxUnmarshalDepth is 10,000).
+    @string openSections = strings.Repeat(sectionˢ, 5000);
+    @string closeSections = strings.Repeat(sectionˢ2, 5000);
+
+    bytes.Buffer buf = default!;
+    foreach (var _ᴛ1 in range(3)) {
+        buf.WriteString(openSections);
+        buf.WriteString(extensionˢ);
+    }
+    foreach (var _ᴛ2 in range(3)) {
+        buf.WriteString(extensionˢ2);
+        buf.WriteString(closeSections);
+    }
+
+    ref var node = ref heap(new standardNode(), out var Ꮡnode);
+    var err = Unmarshal(buf.Bytes(), Ꮡnode);
+
+    if (!AreEqual(err, errUnmarshalDepth)) {
+        Ꮡt.Fatalf("Unexpected error: got %q want %q"u8, err, errUnmarshalDepth);
+    }
+}
+
+public partial struct manualNode {
+    public ж<manualNode> Child;
+}
+
+public static error UnmarshalXML(this ref manualNode m, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
+    ref var d = ref Ꮡd.DerefOrNull();
+
+    while (ᐧ) {
+        var (tok, err) = d.Token();
+        if (err != default!) {
+            return err;
+        }
+        switch (tok.type()) {
+        case StartElement tᴛ1: {
+            ref var t = ref heap(tᴛ1, out var Ꮡt);
+            ref var child = ref heap(new manualNode(), out var Ꮡchild);
+            {
+                var errΔ1 = Ꮡd.DecodeElement(Ꮡchild, Ꮡt); if (errΔ1 != default!) {
+                    return errΔ1;
+                }
+            }
+            m.Child = Ꮡchild;
+            break;
+        }
+        case EndElement t: {
+            return default!;
+        }}
+    }
+}
+
+public static void TestRecursiveUnmarshalInterfaceDepth(ж<testing.T> Ꮡt) {
+    nint depth = maxUnmarshalDepth + 1;
+    var payload = bytes.Join(new slice<byte>[]{
+        bytes.Repeat(slice<byte>("<a>"u8), depth),
+        bytes.Repeat(slice<byte>("</a>"u8), depth)
+    }.slice(), default!);
+
+    ref var node = ref heap(new manualNode(), out var Ꮡnode);
+    var err = Unmarshal(payload, Ꮡnode);
+    if (!AreEqual(err, errUnmarshalDepth)) {
+        Ꮡt.Fatalf("Unexpected error: got %q want %q"u8, err, errUnmarshalDepth);
+    }
+}
+
+internal partial struct rawTokenNode {
+}
+
+internal static error UnmarshalXML(this ref rawTokenNode r, ж<global::go.encoding.xml_package.Decoder> Ꮡd, global::go.encoding.xml_package.StartElement start) {
+    ref var d = ref Ꮡd.DerefOrNull();
+
+    var (_, err) = d.RawToken();
+    return err;
+}
+
+public static void TestUnmarshalXMLRawToken(ж<testing.T> Ꮡt) {
+    ref var node = ref heap(new rawTokenNode(), out var Ꮡnode);
+    var err = Unmarshal(slice<byte>("<a></a>"u8), Ꮡnode);
+    if (!AreEqual(err, errRawToken)) {
+        Ꮡt.Fatalf("UnmarshalXML calling RawToken: got error %v, want %v"u8, err, errRawToken);
+    }
 }
 
 } // end xml_internal_test_package

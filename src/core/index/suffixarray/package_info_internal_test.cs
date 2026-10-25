@@ -29,7 +29,7 @@ using static go.index.suffixarray_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("index/suffixarray/suffixarray_test.go", "suffixarray_test.cs", "AB42AFWuAbKClIKCgpSCpraigqaCAAgSgoKCkoKUgriUgoKC3KKCpoIACBKCgpKCuJSCgoLuooKCgIIACBCAooCigoKUuIKmooK4soKUgpSCgoKmqPKCgIKkgoKAgqSCpoKCpoKCgIKkgriCgoCCpIKm1oKygoKCgoKCgriCpqKCgpSipIKCgoKCgpS4goKCgoKClAAJDKK4goKUgoKUpgALGIKCgoKClIKCgoKClLiCpqaCkoKClIK4poKSgoKUgs7CgoKUpoKCgoLOwpKAgoK2goKClIKCgpSCgrjYgpzSgoKCgoKCgriCgoLogoKUgoKCtoKCgoKUlJSCtqSCgqamgoKUlIK4goKCgoKUgpSCgpSCgoKUkoKClLKCpIKCgrQACBCCgoKClIKClLKCpIKCgoKCgoKCgoCCpIKAgtY=", "267-269:1;312-314:1;319-327:1;331-339:1;345-358:1;360-392:2;394-406:3;408-420:4;445-450:1;507-516:1;537-539:1;544-579:1;561-577:1.1;566-575:1.1.1;593-614:1")]
+[assembly: go.GoPositionMap("index/suffixarray/suffixarray_test.go", "suffixarray_test.cs", "ACA2AFWuAbKClIKCgpSCpraigqaCAAgSgoKCkoKUgriUgoKC3KKCpoIACBKCgpKCuJSCgoLuooKCgIIACBCAooCigoKUuIKmooK4soKUgpSCgoKmqPKCgIKkgoKAgqSCpoKCpoKCgIKkgriCgoCCpIKm1oKygoKCgoKCgriCpqKCgpSipIKCgoKCgpS4goKCgoKClAAJDKK4goKUgoKUpgALGIKCgoKClIKCgoKClLiCpqaCkoKClIK4poKSgoKUgs7CgoKUpoKCgoLOwpKAgoK2goKClIKCgpSCgrjYgpzSgoKCgoKCgriCgoLogoKUgoKCtoKCgoKUlJSCtqSCgqamgoKUlIK4goKCgoKUgpSCgpSCgoKUkoKClLKCpIKCgrQACBCCgoKClIKClLKCpIKCgoKCgoKCgoCCpIKAgtY=", "267-269:1;312-314:1;319-327:1;331-339:1;345-358:1;360-392:2;394-406:3;408-420:4;445-450:1;507-516:1;537-539:1;544-579:1;561-577:1.1;566-575:1.1.1;593-614:1")]
 // </GoSourcePositionMaps>
 
 namespace go.index;

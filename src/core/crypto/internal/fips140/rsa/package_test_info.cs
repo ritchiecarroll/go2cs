@@ -29,12 +29,17 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<hash_package.Hash, go.crypto.@internal.fips140_package.Hash>]
 [assembly: GoImplement<os_package.File, io_package.Reader>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -46,7 +51,7 @@ using static global::go.crypto.@internal.fips140.rsa_internal_test_package;
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/keygen_test.go", "keygen_test.cs", "ABgkgoKCpoKSgoKCgoKCpoKUlKSktqSUgoKUgqaCgoKCpoKCgoKmgoKCyKaAggAKCIKCgqaygoKCgoKCpoKUpKSklIKClIKmgoKClJSCgILIgoKClJSClICC2KaAgsiCgoKmgoKCpoKCgpSCgpQ=", "51-78:1;115-149:1")]
 [assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v15_test.go", "pkcs1v15_test.cs", "ABUeggAnUIIABhSClIKCgg==", "", "", "64=Size/1/1/8")]
-[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA8alAANHLgADyCCgpSCgpSCpoCC")]
+[assembly: go.GoPositionMap("crypto/internal/fips140/rsa/pkcs1v22_test.go", "pkcs1v22_test.cs", "AA4alAANHLgADyCCgpSCgpSCpoCC")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;

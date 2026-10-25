@@ -12,9 +12,10 @@ internal static class Go2CsTestHost
             "crc64.go",
             "crc64_test.go",
         });
-        registry.Add("TestGolden", crc64_internal_test_package.TestGolden, "crc64_test.go", 56);
-        registry.Add("TestGoldenMarshal", crc64_internal_test_package.TestGoldenMarshal, "crc64_test.go", 76);
-        registry.Add("TestMarshalTableMismatch", crc64_internal_test_package.TestMarshalTableMismatch, "crc64_test.go", 167);
+        registry.Add("TestCRC64Hash", crc64_internal_test_package.TestCRC64Hash, "crc64_test.go", 15);
+        registry.Add("TestGolden", crc64_internal_test_package.TestGolden, "crc64_test.go", 62);
+        registry.Add("TestGoldenMarshal", crc64_internal_test_package.TestGoldenMarshal, "crc64_test.go", 82);
+        registry.Add("TestMarshalTableMismatch", crc64_internal_test_package.TestMarshalTableMismatch, "crc64_test.go", 173);
         return TestHost.Run(registry, args);
     }
 }

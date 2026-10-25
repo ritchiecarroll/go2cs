@@ -152,7 +152,7 @@
       "reason": "wantAllocs(t, 0, ...) over Logger.Log at LevelInfo with two key/value pairs, on a Logger over DiscardHandler, so the level check fails and nothing is formatted. go1.24.13 asserted wantAllocs(t, 2, ...) here and the converted side met it; go1.26.10 tightened the budget to 0, and the converted side still counts 2 per run on both OSes. Its parent TestAlloc discloses as aggregate, with no entry of its own (plan §6).",
       "want": "0 allocations per run, exactly",
       "reading": "2 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 10 go2cs-runtime object allocations (920 bytes) over 5 runs, alloc-units-windows.tsv line 52 (claude/g-pass2-plan 966562828d); linux: 10 go2cs-runtime object allocations (920 bytes) over 5 runs, alloc-units-linux.tsv line 38 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND",
-      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD); its DESIGN record docs/DESIGN-stack-allocation.md is owed (C2 drafts). Charge sites not read yet: the AllocationCounter stack probe, naming each site's family as the sibling TestAlloc/2_pairs entry does. A want-0 entry retires only at zero."
+      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD): docs/DESIGN-stack-allocation.md (PROPOSED, lane C2, 2026-10-25). Charge sites not read yet: the AllocationCounter stack probe, naming each site's family as the sibling TestAlloc/2_pairs entry does. A want-0 entry retires only at zero."
     },
     {
       "name": "TestJSONAllocs/message",
@@ -161,7 +161,7 @@
       "reason": "wantAllocs(t, 0, ...) over Logger.LogAttrs(ctx, LevelInfo, \"hello world\") with no attributes, through a JSONHandler writing to io.Discard; the test is new at go1.26.10. Go budgets zero allocations; the converted side counts 12 per run on windows and 10 on linux. Its parent TestJSONAllocs discloses as aggregate, with no entry of its own (plan §6).",
       "want": "0 allocations per run, exactly",
       "reading": "12 per run on windows, 10 on linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 60 go2cs-runtime object allocations (44,520 bytes) over 5 runs, alloc-units-windows.tsv line 67 (claude/g-pass2-plan 966562828d); linux: 50 go2cs-runtime object allocations (43,800 bytes) over 5 runs, alloc-units-linux.tsv line 53 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND",
-      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD); its DESIGN record docs/DESIGN-stack-allocation.md is owed (C2 drafts). Charge sites not read yet: the AllocationCounter stack probe through JSONHandler.Handle, which also owes the windows-linux difference."
+      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD): docs/DESIGN-stack-allocation.md (PROPOSED, lane C2, 2026-10-25). Charge sites not read yet: the AllocationCounter stack probe through JSONHandler.Handle, which also owes the windows-linux difference."
     },
     {
       "name": "TestJSONAllocs/attrs",
@@ -170,7 +170,7 @@
       "reason": "wantAllocs(t, 1, ...) over Logger.LogAttrs(ctx, LevelInfo, \"hello world\", ...) with five attributes -- String, Int, Bool, Any over an error, Any over a three-field struct -- through a JSONHandler writing to io.Discard; the test is new at go1.26.10. Go budgets exactly one allocation; the converted side counts 28 per run on windows and 26 on linux.",
       "want": "1 allocation per run, exactly",
       "reading": "28 per run on windows, 26 on linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 140 go2cs-runtime object allocations (74,160 bytes) over 5 runs, alloc-units-windows.tsv line 66 (claude/g-pass2-plan 966562828d); linux: 130 go2cs-runtime object allocations (73,440 bytes) over 5 runs, alloc-units-linux.tsv line 52 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND",
-      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD); its DESIGN record docs/DESIGN-stack-allocation.md is owed (C2 drafts). Charge sites not read yet: the AllocationCounter stack probe through JSONHandler.Handle and its attribute appends. As in the sibling TestAlloc entries, Go's budget is an `any` conversion the counter never charges, so the entry is deferred on its counted surplus."
+      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD): docs/DESIGN-stack-allocation.md (PROPOSED, lane C2, 2026-10-25). Charge sites not read yet: the AllocationCounter stack probe through JSONHandler.Handle and its attribute appends. As in the sibling TestAlloc entries, Go's budget is an `any` conversion the counter never charges, so the entry is deferred on its counted surplus."
     }
   ]
 }

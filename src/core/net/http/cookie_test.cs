@@ -627,7 +627,8 @@ public static void TestCookieSanitizeValue(ж<testing.T> Ꮡt) {
             new("a "u8, false, @"""a """u8),
             new("a,z"u8, false, @"""a,z"""u8),
             new(",z"u8, false, @""",z"""u8),
-            new("a,"u8, false, @"""a,"""u8)
+            new("a,"u8, false, @"""a,"""u8),
+            new(""u8, true, @""""""u8)
         }.slice();
         foreach (var (_, tt) in tests) {
             {

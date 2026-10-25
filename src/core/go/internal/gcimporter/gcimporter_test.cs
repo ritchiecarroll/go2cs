@@ -266,12 +266,14 @@ public static void TestImportTypeparamTests(ж<testing.T> Ꮡt) {
 // string, to normalize it for comparison.
 // TODO(rfindley): this should not be necessary.
 internal static @string sanitizeObjectString(@string s) {
+    var runesᴷ = new stackAppend<rune>();
+
     slice<rune> runes = default!;
     foreach (var (_, r) in s) {
         if ((rune)'₀' <= r && r < (rune)'₀' + 10) {
             continue; // trim type parameter subscripts
         }
-        runes = append(runes, r);
+        runes = append(runesᴷ, runes, r);
     }
     return (@string)runes;
 }
@@ -546,7 +548,7 @@ internal static void verifyInterfaceMethodRecvs(ж<testing.T> Ꮡt, ж<types.Nam
     // check explicitly declared methods
     for (nint i = 0; i < iface.NumExplicitMethods(); i++) {
         var m = iface.ExplicitMethod(i);
-        var recv = m.Type()._<ж<typesꓸSignature>>().Recv();
+        var recv = m.Signature().Recv();
         if (recv == nil) {
             Ꮡt.Errorf("%s: missing receiver type"u8, m.OrTypedNil());
             continue;
@@ -748,14 +750,14 @@ public static void TestIssue13898(ж<testing.T> Ꮡt) {
     }
 
     // lookup go/types.Object.Pkg method
-    var (m, index, indirect) = types.LookupFieldOrMethod(new types.NamedжΔType(typ), false, nil, pkgˢ);
-    if (m == default!) {
-        Ꮡt.Fatalf("go/types.Object.Pkg not found (index = %v, indirect = %v)"u8, index, indirect);
+    (var sel, ok) = types.LookupSelection(new types.NamedжΔType(typ), false, nil, pkgˢ);
+    if (!ok) {
+        Ꮡt.Fatalf("go/types.Object.Pkg not found"u8);
     }
 
     // the method must belong to go/types
-    if (m.Pkg().Path() != "go/types"u8) {
-        Ꮡt.Fatalf("found %v; want go/types"u8, m.Pkg().OrTypedNil());
+    if (sel.Obj().Pkg().Path() != "go/types"u8) {
+        Ꮡt.Fatalf("found %v; want go/types"u8, sel.Obj().Pkg().OrTypedNil());
     }
 }
 
@@ -833,8 +835,8 @@ public static void TestIssue20046(ж<testing.T> Ꮡt) {
     var pkg = compileAndImportPkg(Ꮡt, issue20046ˢ);
     var obj = lookupObj(Ꮡt, pkg.Scope(), "V"u8);
     {
-        var (m, index, indirect) = types.LookupFieldOrMethod(obj.Type(), false, nil, "M"u8); if (m == default!) {
-            Ꮡt.Fatalf("V.M not found (index = %v, indirect = %v)"u8, index, indirect);
+        var (_, ok) = types.LookupSelection(obj.Type(), false, nil, "M"u8); if (!ok) {
+            Ꮡt.Fatalf("V.M not found"u8);
         }
     }
 }

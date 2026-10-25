@@ -15,6 +15,8 @@ using reflect = reflect_package;
 using Δruntime = runtime_package;
 using testing = testing_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using global::go.@internal;
 using reflectlite = global::go.@internal.reflectlite_package;
@@ -45,7 +47,7 @@ partial struct pair {
     internal @string s;
 }
 
-internal static void assert(ж<testing.T> Ꮡt, @string s, @string want) {
+internal static partial void assert(ж<testing.T> Ꮡt, @string s, @string want) {
     Ꮡt.Helper();
     if (s != want) {
         Ꮡt.Errorf("have %#q want %#q"u8, s, want);
@@ -305,14 +307,14 @@ internal static slice<pair> valueTests = new pair[]{
     )
 }.slice();
 
-internal static void testType(ж<testing.T> Ꮡt, nint i, reflectliteꓸType typ, @string want) {
+internal static partial void testType(ж<testing.T> Ꮡt, nint i, reflectliteꓸType typ, @string want) {
     @string s = TypeString(typ);
     if (s != want) {
         Ꮡt.Errorf("#%d: have %#q, want %#q"u8, i, s, want);
     }
 }
 
-internal static void testReflectType(ж<testing.T> Ꮡt, nint i, reflectliteꓸType typ, @string want) {
+internal static partial void testReflectType(ж<testing.T> Ꮡt, nint i, reflectliteꓸType typ, @string want) {
     @string s = TypeString(typ);
     if (s != want) {
         Ꮡt.Errorf("#%d: have %#q, want %#q"u8, i, s, want);
@@ -768,14 +770,14 @@ public static void TestTypeOf(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void Nil(any a, ж<testing.T> Ꮡt) {
+public static partial void Nil(any a, ж<testing.T> Ꮡt) {
     var n = reflectlite_internal_test_package.Field(ValueOf(a), 0);
     if (!n.IsNil()) {
         Ꮡt.Errorf("%v should be nil"u8, a);
     }
 }
 
-public static void NotNil(any a, ж<testing.T> Ꮡt) {
+public static partial void NotNil(any a, ж<testing.T> Ꮡt) {
     var n = reflectlite_internal_test_package.Field(ValueOf(a), 0);
     if (n.IsNil()) {
         Ꮡt.Errorf("value of type %v should not be nil"u8, TypeString(ValueOf(a).Type()));

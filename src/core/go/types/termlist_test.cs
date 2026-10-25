@@ -7,6 +7,8 @@ namespace go.go;
 
 using strings = strings_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.go.types_package;
 
 partial class types_internal_test_package {
@@ -22,7 +24,7 @@ internal static global::go.go.types_package.termlist maketl(@string s) {
     return r;
 }
 
-public static void TestTermlistAll(ж<testing.T> Ꮡt) {
+public static partial void TestTermlistAll(ж<testing.T> Ꮡt) {
     if (!allTermlist.isAll()) {
         Ꮡt.Errorf("allTermlist is not the set of all types"u8);
     }

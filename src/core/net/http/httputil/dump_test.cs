@@ -61,7 +61,9 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
             ProtoMinor: 1,
             TransferEncoding: new @string[]{"chunked"u8}.slice()
         )),
+
         Body: slice<byte>("abcdef"u8),
+
         WantDump: "GET /search HTTP/1.1\r\n"u8 + "Host: www.google.com\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + chunk("abcdef"u8) + chunk(""u8)
     ),
 
@@ -77,10 +79,13 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
                 ["X-Foo"u8] = new @string[]{"X-Bar"u8}.slice()
             })
         )),
+
         WantDump: "GET /foo HTTP/1.0\r\n"u8 + "X-Foo: X-Bar\r\n\r\n"u8
     ),
+
     new(
         Req: mustNewRequest("GET"u8, "http://example.com/foo"u8, default!),
+
         WantDumpOut: "GET /foo HTTP/1.1\r\n"u8 + "Host: example.com\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8
     ),
 
@@ -105,8 +110,11 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
             ProtoMajor: 1,
             ProtoMinor: 1
         )),
+
         Body: slice<byte>("abcdef"u8),
+
         WantDumpOut: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 6\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8,
+
         NoBody: true
     ),
 
@@ -122,14 +130,18 @@ internal static slice<dumpTest> dumpTests = new dumpTest[]{
             Header: new httpꓸHeader(new map<@string, slice<@string>>{
                 ["Content-Length"u8] = new @string[]{"8193"u8}.slice()
             }),
+
             ContentLength: 8193,
             ProtoMajor: 1,
             ProtoMinor: 1
         )),
+
         Body: bytes.Repeat(slice<byte>("a"u8), 8193),
+
         WantDumpOut: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "User-Agent: Go-http-client/1.1\r\n"u8 + "Content-Length: 8193\r\n"u8 + "Accept-Encoding: gzip\r\n\r\n"u8 + strings.Repeat("a"u8, 8193),
         WantDump: "POST / HTTP/1.1\r\n"u8 + "Host: post.tld\r\n"u8 + "Content-Length: 8193\r\n\r\n"u8 + strings.Repeat("a"u8, 8193)
     ),
+
     new(
         GetReq: () => mustReadRequest("GET http://foo.com/ HTTP/1.1\r\n"u8 + "User-Agent: blah\r\n\r\n"u8),
         NoBody: true,
@@ -367,6 +379,7 @@ Content-Length: 50
 Foo: Bar
 """u8.Raw()
     ),
+
     new(
         res: Ꮡ(new http.Response(
             Status: "200 OK"u8,
@@ -385,6 +398,7 @@ Content-Length: 3
 foo
 """u8.Raw()
     ),
+
     new(
         res: Ꮡ(new http.Response(
             Status: "200 OK"u8,

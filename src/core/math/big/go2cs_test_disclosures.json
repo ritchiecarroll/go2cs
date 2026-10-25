@@ -26,7 +26,7 @@
       "reason": "AllocsPerRun assert new at go1.26.10 (escape_test.go:43-50): squaring an 80-word nat through Mul(x, x) must allocate at most once (the result). go1.26.10's multiplication takes its scratch from a stack (natmul.go, getStack), which Go keeps off the heap; the converted side heap-allocates that scratch and reads 4.00 objects per run on both OSes. Same Go-side change as the TestMulUnbalanced entry beside it.",
       "want": "at most 1 allocation per run",
       "reading": "4 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 40 go2cs-runtime object allocations (4,240 bytes) over 10 runs, alloc-units-windows.tsv line 73 (claude/g-pass2-plan 966562828d); linux: 40 go2cs-runtime object allocations (4,240 bytes) over 10 runs, alloc-units-linux.tsv line 59 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND",
-      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD); its DESIGN record docs/DESIGN-stack-allocation.md is owed (C2 drafts). The charge sites are not read beyond the scratch-stack attribution above."
+      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD): docs/DESIGN-stack-allocation.md (PROPOSED, lane C2, 2026-10-25). The charge sites are not read beyond the scratch-stack attribution above."
     }
   ]
 }

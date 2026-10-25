@@ -4,12 +4,18 @@
 namespace go.hash;
 
 using encoding = encoding_package;
+using hash = hash_package;
+using testhash = @internal.testhash_package;
 using io = io_package;
 using testing = testing_package;
-using hash = hash_package;
+using @internal;
 using static go.hash.crc64_package;
 
 partial class crc64_internal_test_package {
+
+public static void TestCRC64Hash(ж<testing.T> Ꮡt) {
+    testhash.TestHash(Ꮡt, () => new crc64_internal_test_package.hash_Hash64ᴠHash(New(MakeTable(ISO))));
+}
 
 internal partial struct test {
     internal uint64 outISO;
@@ -194,7 +200,7 @@ internal static void bench(ж<testing.B> Ꮡb, uint64 poly, int64 size) {
 
     b.SetBytes(size);
     var data = new slice<byte>((nint)(size));
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
     var h = New(MakeTable(poly));

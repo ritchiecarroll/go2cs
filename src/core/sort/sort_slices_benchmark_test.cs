@@ -36,14 +36,6 @@ internal static slice<nint> makeSortedInts(nint n) {
     return ints;
 }
 
-internal static slice<nint> makeReversedInts(nint n) {
-    var ints = new slice<nint>(n);
-    for (nint i = 0; i < n; i++) {
-        ints[i] = n - i;
-    }
-    return ints;
-}
-
 internal static slice<@string> makeSortedStrings(nint n) {
     var x = new slice<@string>(n);
     for (nint i = 0; i < n; i++) {
@@ -95,7 +87,7 @@ public static void BenchmarkSlicesIsSorted(ж<testing.B> Ꮡb) {
         b.StopTimer();
         var ints = makeSortedInts(N);
         b.StartTimer();
-        slices.IsSorted<slice<nint>, nint>(ints);
+        _ = slices.IsSorted<slice<nint>, nint>(ints);
     }
 }
 
@@ -193,14 +185,14 @@ internal static myStructs makeRandomStructs(nint n) {
 public static void TestStructSorts(ж<testing.T> Ꮡt) {
     var ss = makeRandomStructs(200);
     var ss2 = new slice<ж<myStruct>>(len(ss));
-    foreach (var (i, _) in ss) {
+    foreach (var i in range(ss)) {
         ss2[i] = Ꮡ(new myStruct(n: (~ss[i]).n));
     }
 
     Sort(ss);
     slices.SortFunc(ss2, (ж<myStruct> a, ж<myStruct> b) => (~a).n - (~b).n);
 
-    foreach (var (i, _) in ss) {
+    foreach (var i in range(ss)) {
         if (ss[i].Value != ss2[i].Value) {
             Ꮡt.Fatalf("ints2 mismatch at %d; %v != %v"u8, i, ss[i].Value, ss2[i].Value);
         }

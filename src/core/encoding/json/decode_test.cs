@@ -1,6 +1,7 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -8,6 +9,7 @@ using encoding = encoding_package;
 using errors = errors_package;
 using fmt = fmt_package;
 using image = image_package;
+using io = io_package;
 using maps = maps_package;
 using math = math_package;
 using big = go.math.big_package;
@@ -19,7 +21,6 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using go.math;
-using io = io_package;
 using static go.encoding.json_package;
 
 partial class json_internal_test_package {
@@ -189,14 +190,14 @@ public partial struct Point {
 
 public partial struct Top {
     public nint Level0;
-    public partial ref Embed0 Embed0 { get; }
-    public partial ref ж<Embed0a> Embed0a { get; }
-    public partial ref ж<Embed0b> Embed0b { get; } /*`json:"e,omitempty"`*/ // treated as named
-    public partial ref Embed0c Embed0c { get; } /*`json:"-"`*/           // ignored
-    public partial ref Loop Loop { get; }
-    public partial ref Embed0p Embed0p { get; } // has Point with X, Y, used
-    public partial ref Embed0q Embed0q { get; } // has Point with Z, used
-    internal partial ref embed embed { get; }   // contains exported field
+    /*embed*/ public Embed0 Embed0;
+    /*embed*/ public ж<Embed0a> Embed0a;
+    /*embed*/ public ж<Embed0b> Embed0b; /*`json:"e,omitempty"`*/ // treated as named
+    /*embed*/ public Embed0c Embed0c; /*`json:"-"`*/           // ignored
+    /*embed*/ public Loop Loop;
+    /*embed*/ public Embed0p Embed0p; // has Point with X, Y, used
+    /*embed*/ public Embed0q Embed0q; // has Point with Z, used
+    /*embed*/ internal embed embed;   // contains exported field
 }
 
 public partial struct Embed0 {
@@ -220,11 +221,11 @@ public partial struct Embed0b /*Embed0*/;
 public partial struct Embed0c /*Embed0*/;
 
 public partial struct Embed0p {
-    public partial ref image_package.Point Point { get; }
+    /*embed*/ public image_package.Point Point;
 }
 
 public partial struct Embed0q {
-    public partial ref Point Point { get; }
+    /*embed*/ public Point Point;
 }
 
 internal partial struct embed {
@@ -234,15 +235,15 @@ internal partial struct embed {
 public partial struct Loop {
     public nint Loop1; /*`json:",omitempty"`*/
     public nint Loop2; /*`json:",omitempty"`*/
-    public partial ref ж<Loop> ΔLoop { get; }
+    /*embed*/ public ж<Loop> ΔLoop;
 }
 
 // From reflect test:
 // The X in S6 and S7 annihilate, but they also block the X in S8.S9.
 public partial struct S5 {
-    public partial ref S6 S6 { get; }
-    public partial ref S7 S7 { get; }
-    public partial ref S8 S8 { get; }
+    /*embed*/ public S6 S6;
+    /*embed*/ public S7 S7;
+    /*embed*/ public S8 S8;
 }
 
 public partial struct S6 {
@@ -252,7 +253,7 @@ public partial struct S6 {
 public partial struct S7 /*S6*/;
 
 public partial struct S8 {
-    public partial ref S9 S9 { get; }
+    /*embed*/ public S9 S9;
 }
 
 public partial struct S9 {
@@ -263,21 +264,21 @@ public partial struct S9 {
 // From reflect test:
 // The X in S11.S6 and S12.S6 annihilate, but they also block the X in S13.S8.S9.
 public partial struct S10 {
-    public partial ref S11 S11 { get; }
-    public partial ref S12 S12 { get; }
-    public partial ref S13 S13 { get; }
+    /*embed*/ public S11 S11;
+    /*embed*/ public S12 S12;
+    /*embed*/ public S13 S13;
 }
 
 public partial struct S11 {
-    public partial ref S6 S6 { get; }
+    /*embed*/ public S6 S6;
 }
 
 public partial struct S12 {
-    public partial ref S6 S6 { get; }
+    /*embed*/ public S6 S6;
 }
 
 public partial struct S13 {
-    public partial ref S8 S8 { get; }
+    /*embed*/ public S8 S8;
 }
 
 public partial struct Ambig {
@@ -423,8 +424,16 @@ public partial struct DoublePtr {
     public ж<ж<nint>> J;
 }
 
+partial struct NestedUnamed_F /*dyn*/ {
+    public nint V;
+}
+
+public partial struct NestedUnamed {
+    public NestedUnamed_F F;
+}
+
 partial struct unmarshalTestsᴛ1 /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal any ptr; // new(type)
     internal any @out;
@@ -444,6 +453,21 @@ partial struct unmarshalTestsᴛ1 /*dyn*/ {
             }
             partial struct Δtypeᴛ3 /*dyn*/ {
                 public global::go.encoding.json_package.Number N; /*`json:",string"`*/
+            }
+            partial struct Δtypeᴛ4 /*dyn*/ {
+                public @string F; /*`json:"-,"`*/
+            }
+            partial struct Δtypeᴛ5 /*dyn*/ {
+                public @string F; /*`json:"-,omitempty"`*/
+            }
+            partial struct Δtypeᴛ6 /*dyn*/ {
+                public int64 X; /*`json:",string"`*/
+            }
+            partial struct Δtypeᴛ7 /*dyn*/ {
+                public uint64 X; /*`json:",string"`*/
+            }
+            partial struct Δtypeᴛ8 /*dyn*/ {
+                public float64 X; /*`json:",string"`*/
             }
 internal static slice<unmarshalTestsᴛ1> unmarshalTests;
 internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTestsᴛ1[]{
@@ -483,6 +507,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     // Z has a "-" tag.
     new(CaseName: Name(""u8), @in: @"{""Y"": 1, ""Z"": 2}"u8, ptr: @new<T>(), @out: new T(Y: 1)),
     new(CaseName: Name(""u8), @in: @"{""Y"": 1, ""Z"": 2}"u8, ptr: @new<T>(), @out: new T(Y: 1), err: fmt.Errorf("json: unknown field \"Z\""u8), disallowUnknownFields: true),
+
     new(CaseName: Name(""u8), @in: @"{""alpha"": ""abc"", ""alphabet"": ""xyz""}"u8, ptr: @new<U>(), @out: new U(Alphabet: "abc"u8)),
     new(CaseName: Name(""u8), @in: @"{""alpha"": ""abc"", ""alphabet"": ""xyz""}"u8, ptr: @new<U>(), @out: new U(Alphabet: "abc"u8), err: fmt.Errorf("json: unknown field \"alphabet\""u8), disallowUnknownFields: true),
     new(CaseName: Name(""u8), @in: @"{""alpha"": ""abc""}"u8, ptr: @new<U>(), @out: new U(Alphabet: "abc"u8)),
@@ -490,11 +515,13 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: @"{""alphabet"": ""xyz""}"u8, ptr: @new<U>(), err: fmt.Errorf("json: unknown field \"alphabet\""u8), disallowUnknownFields: true),
 
     // syntax errors
+    new(CaseName: Name(""u8), @in: @""u8, ptr: @new<any>(), err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("unexpected end of JSON input"u8, 0)))),
+    new(CaseName: Name(""u8), @in: " \n\r\t"u8, ptr: @new<any>(), err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("unexpected end of JSON input"u8, 4)))),
+    new(CaseName: Name(""u8), @in: @"[2, 3"u8, ptr: @new<any>(), err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("unexpected end of JSON input"u8, 5)))),
     new(CaseName: Name(""u8), @in: @"{""X"": ""foo"", ""Y""}"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' after object key"u8, 17)))),
     new(CaseName: Name(""u8), @in: @"[1, 2, 3+]"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '+' after array element"u8, 9)))),
     new(CaseName: Name(""u8), @in: @"{""X"":12x}"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character 'x' after object key:value pair"u8, 8))), useNumber: true),
-    new(CaseName: Name(""u8), @in: @"[2, 3"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(msg: "unexpected end of JSON input"u8, Offset: 5)))),
-    new(CaseName: Name(""u8), @in: @"{""F3"": -}"u8, ptr: @new<V>(), err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError(msg: "invalid character '}' in numeric literal"u8, Offset: 9)))),
+    new(CaseName: Name(""u8), @in: @"{""F3"": -}"u8, ptr: @new<V>(), err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '}' in numeric literal"u8, 9)))),
 
     // raw value errors
     new(CaseName: Name(""u8), @in: "\x01 42"u8, err: new global::go.encoding.json_package.SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character '\\x01' looking for beginning of value"u8, 1)))),
@@ -638,6 +665,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: @"{""x:y"":true}"u8, ptr: @new<map<unmarshalerText, bool>>(), @out: ummapXY),
     // If multiple values for the same key exists, only the most recent value is used.
     new(CaseName: Name(""u8), @in: @"{""x:y"":false,""x:y"":true}"u8, ptr: @new<map<unmarshalerText, bool>>(), @out: ummapXY),
+
     new(
         CaseName: Name(""u8),
         @in: """
@@ -702,6 +730,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<Ambig>(),
         @out: new Ambig(First: 1)
     ),
+
     new(
         CaseName: Name(""u8),
         @in: @"{""X"": 1,""Y"":2}"u8,
@@ -892,6 +921,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         @out: new intWithPtrMarshalText[]{1, 2, 3}.slice(),
         golden: true
     ),
+
     new(CaseName: Name(""u8), @in: @"0.000001"u8, ptr: @new<float64>(), @out: 0.000001D, golden: true),
     new(CaseName: Name(""u8), @in: @"1e-7"u8, ptr: @new<float64>(), @out: 1e-7D, golden: true),
     new(CaseName: Name(""u8), @in: @"100000000000000000000"u8, ptr: @new<float64>(), @out: 100000000000000000000.0D, golden: true),
@@ -903,6 +933,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
     new(CaseName: Name(""u8), @in: @"999999999999999900000"u8, ptr: @new<float64>(), @out: 999999999999999900000.0D, golden: true),
     new(CaseName: Name(""u8), @in: @"9007199254740992"u8, ptr: @new<float64>(), @out: 9007199254740992.0D, golden: true),
     new(CaseName: Name(""u8), @in: @"9007199254740993"u8, ptr: @new<float64>(), @out: 9007199254740992.0D, golden: false),
+
     new(
         CaseName: Name(""u8),
         @in: @"{""V"": {""F2"": ""hello""}}"u8,
@@ -928,6 +959,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
             Offset: 30
         )))
     ),
+
     new(
         CaseName: Name(""u8),
         @in: @"{""Level1a"": ""hello""}"u8,
@@ -1149,6 +1181,7 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         @out: new map<@string, global::go.encoding.json_package.Number>{},
         err: fmt.Errorf("json: invalid number literal, trying to unmarshal %q into Number"u8, (@string)@"""invalid"""u8)
     ),
+
     new(
         CaseName: Name(""u8),
         @in: @"5"u8,
@@ -1201,6 +1234,79 @@ internal static void initᴛunmarshalTests() { unmarshalTests = new unmarshalTes
         ptr: @new<slice<nint>>(),
         @out: new nint[]{1, 2, 0, 4, 5}.slice(),
         err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "bool"u8, Type: reflect.TypeFor<nint>(), Offset: 9)))
+    ),
+
+    new(
+        CaseName: Name("DashComma"u8),
+        @in: @"{""-"":""hello""}"u8,
+        ptr: @new<Δtypeᴛ4>(),
+        @out: new Δtypeᴛ4("hello"u8)
+    ),
+    new(
+        CaseName: Name("DashCommaOmitEmpty"u8),
+        @in: @"{""-"":""hello""}"u8,
+        ptr: @new<Δtypeᴛ5>(),
+        @out: new Δtypeᴛ5("hello"u8)
+    ),
+
+    new(
+        CaseName: Name("ErrorForNestedUnamed"u8),
+        @in: @"{""F"":{""V"":""s""}}"u8,
+        ptr: @new<NestedUnamed>(),
+        @out: new NestedUnamed(nil),
+        err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "string"u8, Type: reflect.TypeFor<nint>(), Offset: 13, Field: "F.V"u8)))
+    ),
+    new(
+        CaseName: Name("ErrorInterface"u8),
+        @in: @"1"u8,
+        ptr: @new<error>(),
+        @out: ((error)default!),
+        err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: reflect.TypeFor<error>(), Offset: 1)))
+    ),
+    new(
+        CaseName: Name("ErrorChan"u8),
+        @in: @"1"u8,
+        ptr: @new<channel<nint>>(),
+        @out: (channel<nint>)(default!),
+        err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number"u8, Type: reflect.TypeFor<channel<nint>>(), Offset: 1)))
+    ),
+
+    // #75619
+    new(
+        CaseName: Name("QuotedInt/GoSyntax"u8),
+        @in: @"{""X"": ""-0000123""}"u8,
+        ptr: @new<Δtypeᴛ6>(),
+        @out: new Δtypeᴛ6(-123)
+    ),
+    new(
+        CaseName: Name("QuotedInt/Invalid"u8),
+        @in: @"{""X"": ""123 ""}"u8,
+        ptr: @new<Δtypeᴛ6>(),
+        err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number 123 "u8, Type: reflect.TypeFor<int64>(), Field: "X"u8, Offset: (int64)len(@"{""X"": ""123 """))))
+    ),
+    new(
+        CaseName: Name("QuotedUint/GoSyntax"u8),
+        @in: @"{""X"": ""0000123""}"u8,
+        ptr: @new<Δtypeᴛ7>(),
+        @out: new Δtypeᴛ7(123)
+    ),
+    new(
+        CaseName: Name("QuotedUint/Invalid"u8),
+        @in: @"{""X"": ""0x123""}"u8,
+        ptr: @new<Δtypeᴛ7>(),
+        err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number 0x123"u8, Type: reflect.TypeFor<uint64>(), Field: "X"u8, Offset: (int64)len(@"{""X"": ""0x123"""))))
+    ),
+    new(
+        CaseName: Name("QuotedFloat/GoSyntax"u8),
+        @in: @"{""X"": ""0x1_4p-2""}"u8,
+        ptr: @new<Δtypeᴛ8>(),
+        @out: new Δtypeᴛ8(5D)
+    ),
+    new(
+        CaseName: Name("QuotedFloat/Invalid"u8),
+        @in: @"{""X"": ""1.5e1_""}"u8,
+        ptr: @new<Δtypeᴛ8>(),
+        err: new global::go.encoding.json_package.UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: "number 1.5e1_"u8, Type: reflect.TypeFor<float64>(), Field: "X"u8, Offset: (int64)len(@"{""X"": ""1.5e1_"""))))
     )
 }.slice(); }
 
@@ -1227,7 +1333,7 @@ public static void TestMarshal(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestMarshalInvalidUTF8_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal @string want;
 }
@@ -1337,6 +1443,9 @@ internal static bool equalError(error a, error b) {
     return a.Error() == b.Error();
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string unexpectedEndOfJsonInputˢ = "unexpected end of JSON input"u8;
+
 public static void TestUnmarshal(ж<testing.T> Ꮡt) {
     foreach (var (_, vᴛ1) in unmarshalTests) {
         ref var tt = ref heap(new unmarshalTestsᴛ1(), out var Ꮡtt);
@@ -1382,6 +1491,14 @@ public static void TestUnmarshal(ж<testing.T> Ꮡt) {
             }
             if (ttʗ1.disallowUnknownFields) {
                 dec.DisallowUnknownFields();
+            }
+            if (ttʗ1.err != default! && strings.Contains(ttʗ1.err.Error(), unexpectedEndOfJsonInputˢ)) {
+                // In streaming mode, we expect EOF or ErrUnexpectedEOF instead.
+                if (strings.TrimSpace(ttʗ1.@in) == ""u8){
+                    ttʗ1.err = io.EOF;
+                } else {
+                    ttʗ1.err = io.ErrUnexpectedEOF;
+                }
             }
             {
                 var err = dec.Decode(v.Interface()); if (!equalError(err, ttʗ1.err)){
@@ -1450,7 +1567,7 @@ public static void TestUnmarshalMarshal(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestNumberAccessors_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal int64 i;
     internal @string intErr;
@@ -1499,7 +1616,7 @@ public static void TestNumberAccessors(ж<testing.T> Ꮡt) {
 
 public static void TestLargeByteSlice(ж<testing.T> Ꮡt) {
     var s0 = new slice<byte>(2000);
-    foreach (var (i, _) in s0) {
+    foreach (var i in range(s0)) {
         s0[i] = (byte)i;
     }
     var (b, err) = Marshal(s0);
@@ -1575,7 +1692,7 @@ internal partial struct TestErrorMessageFromMisusedString_WrongString /*dyn*/ {
 }
 
 internal partial struct TestErrorMessageFromMisusedString_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in, err;
 }
 
@@ -2015,7 +2132,7 @@ internal static ж<T> addr<T>(T vʗp) {
 }
 
 internal partial struct TestInterfaceSet_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any pre;
     internal @string json;
     internal any post;
@@ -2034,6 +2151,7 @@ public static void TestInterfaceSet(ж<testing.T> Ꮡt) {
         new(Name(""u8), (@string)"foo"u8, @"null"u8, default!),
         new(Name(""u8), new map<@string, any>{}, @"true"u8, true),
         new(Name(""u8), new @string[]{}.slice(), @"true"u8, true),
+
         new(Name(""u8), (any)default!, @"null"u8, (any)default!),
         new(Name(""u8), (ж<nint>)nil, @"null"u8, (any)default!),
         new(Name(""u8), addr((nint)0).OrTypedNil(), @"null"u8, (any)default!),
@@ -2045,6 +2163,7 @@ public static void TestInterfaceSet(ж<testing.T> Ꮡt) {
         new(Name(""u8), addr<ж<ж<nint>>>(nil).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
         new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
         new(Name(""u8), addr(addr(addr((nint)1))).OrTypedNil(), @"null"u8, addr<ж<ж<nint>>>(nil).OrTypedNil()),
+
         new(Name(""u8), (any)default!, @"2"u8, (float64)2D),
         new(Name(""u8), (nint)1, @"2"u8, (float64)2D),
         new(Name(""u8), (ж<nint>)nil, @"2"u8, (float64)2D),
@@ -2057,6 +2176,7 @@ public static void TestInterfaceSet(ж<testing.T> Ꮡt) {
         new(Name(""u8), addr<ж<ж<nint>>>(nil).OrTypedNil(), @"2"u8, addr(addr(addr((nint)2))).OrTypedNil()),
         new(Name(""u8), addr(addr<ж<nint>>(nil)).OrTypedNil(), @"2"u8, addr(addr(addr((nint)2))).OrTypedNil()),
         new(Name(""u8), addr(addr(addr((nint)1))).OrTypedNil(), @"2"u8, addr(addr(addr((nint)2))).OrTypedNil()),
+
         new(Name(""u8), (any)default!, @"{}"u8, new map<@string, any>{}),
         new(Name(""u8), (nint)1, @"{}"u8, new map<@string, any>{}),
         new(Name(""u8), (ж<nint>)nil, @"{}"u8, new map<@string, any>{}),
@@ -2137,6 +2257,7 @@ public static void TestUnmarshalNulls(ж<testing.T> Ꮡt) {
     // by setting that Go value to nil. Because null is often used in JSON to mean
     // ``not present,'' unmarshaling a JSON null into any other Go type has no effect
     // on the value and produces no error.
+
     var jsonData = slice<byte>("""
 {
 				"Bool"    : null,
@@ -2334,7 +2455,7 @@ public static void TestSliceOfCustomByte(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestUnmarshalTypeError_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal any dest;
     internal @string @in;
 }
@@ -2366,7 +2487,7 @@ public static void TestUnmarshalTypeError(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestUnmarshalSyntax_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
 }
 
@@ -2474,7 +2595,7 @@ public static void TestSkipArrayObjects(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestPrefilled_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal any ptr;
     internal any @out;
@@ -2536,7 +2657,7 @@ public static void TestPrefilled(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestInvalidUnmarshal_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal any v;
     internal error wantErr;
@@ -2615,51 +2736,51 @@ internal partial struct TestUnmarshalEmbeddedUnexported_embed3 /*dyn*/ {
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S1 /*dyn*/ {
-    internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed1> embed1 { get; }
+    /*embed*/ internal ж<TestUnmarshalEmbeddedUnexported_embed1> embed1;
     public nint R;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S2 /*dyn*/ {
-    internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed1> embed1 { get; }
+    /*embed*/ internal ж<TestUnmarshalEmbeddedUnexported_embed1> embed1;
     public nint Q;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S3 /*dyn*/ {
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; }
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed1 embed1;
     public nint R;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S4 /*dyn*/ {
-    internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed1> embed1 { get; }
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; }
+    /*embed*/ internal ж<TestUnmarshalEmbeddedUnexported_embed1> embed1;
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed2 embed2;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S5 /*dyn*/ {
-    internal partial ref ж<TestUnmarshalEmbeddedUnexported_embed3> embed3 { get; }
+    /*embed*/ internal ж<TestUnmarshalEmbeddedUnexported_embed3> embed3;
     public nint R;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S6 /*dyn*/ {
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; } /*`json:"embed1"`*/
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed1 embed1; /*`json:"embed1"`*/
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S7 /*dyn*/ {
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; } /*`json:"embed1"`*/
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; }
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed1 embed1; /*`json:"embed1"`*/
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed2 embed2;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S8 /*dyn*/ {
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed1 embed1 { get; } /*`json:"embed1"`*/
-    internal partial ref TestUnmarshalEmbeddedUnexported_embed2 embed2 { get; } /*`json:"embed2"`*/
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed1 embed1; /*`json:"embed1"`*/
+    /*embed*/ internal TestUnmarshalEmbeddedUnexported_embed2 embed2; /*`json:"embed2"`*/
     public nint Q;
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_S9 /*dyn*/ {
-    internal partial ref unexportedWithMethods unexportedWithMethods { get; } /*`json:"embed"`*/
+    /*embed*/ internal unexportedWithMethods unexportedWithMethods; /*`json:"embed"`*/
 }
 
 internal partial struct TestUnmarshalEmbeddedUnexported_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal any ptr;
     internal any @out;
@@ -2765,7 +2886,7 @@ public static void TestUnmarshalEmbeddedUnexported(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestUnmarshalErrorAfterMultipleJSON_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal error err;
 }
@@ -2940,13 +3061,13 @@ internal static readonly @string typedMissingFieldˢ = "typed missing field"u8;
 internal static readonly @string customUnmarshalerˢ = "custom unmarshaler"u8;
 
 internal partial struct TestUnmarshalMaxDepth_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string data;
     internal bool errMaxDepth;
 }
 
 internal partial struct TestUnmarshalMaxDepth_targets /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal Func<any> newValue;
 }
 

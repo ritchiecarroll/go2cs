@@ -13,12 +13,15 @@ internal static class Go2CsTestHost
             "pointer.go",
             "pointer_test.go",
         });
-        registry.Add("TestIssue69210", weak_test_package.TestIssue69210, "pointer_test.go", 175);
-        registry.Add("TestIssue70739", weak_test_package.TestIssue70739, "pointer_test.go", 247);
-        registry.Add("TestPointer", weak_test_package.TestPointer, "pointer_test.go", 25);
-        registry.Add("TestPointerEquality", weak_test_package.TestPointerEquality, "pointer_test.go", 54);
-        registry.Add("TestPointerFinalizer", weak_test_package.TestPointerFinalizer, "pointer_test.go", 124);
-        registry.Add("TestPointerSize", weak_test_package.TestPointerSize, "pointer_test.go", 160);
+        registry.Add("TestImmortalPointer", weak_test_package.TestImmortalPointer, "pointer_test.go", 297);
+        registry.Add("TestIssue69210", weak_test_package.TestIssue69210, "pointer_test.go", 214);
+        registry.Add("TestIssue70739", weak_test_package.TestIssue70739, "pointer_test.go", 286);
+        registry.Add("TestPointer", weak_test_package.TestPointer, "pointer_test.go", 28);
+        registry.Add("TestPointerCleanup", weak_test_package.TestPointerCleanup, "pointer_test.go", 163);
+        registry.Add("TestPointerEquality", weak_test_package.TestPointerEquality, "pointer_test.go", 57);
+        registry.Add("TestPointerFinalizer", weak_test_package.TestPointerFinalizer, "pointer_test.go", 127);
+        registry.Add("TestPointerSize", weak_test_package.TestPointerSize, "pointer_test.go", 199);
+        registry.Add("TestPointerTiny", weak_test_package.TestPointerTiny, "pointer_test.go", 333);
         return TestHost.Run(registry, args);
     }
 }

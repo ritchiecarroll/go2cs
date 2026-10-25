@@ -13,8 +13,10 @@ using testenv = @internal.testenv_package;
 using os = os_package;
 using exec = go.os.exec_package;
 using runtime = runtime_package;
+using slices = slices_package;
 using strconv = strconv_package;
 using strings = strings_package;
+using sync = sync_package;
 using syscall = syscall_package;
 using testing = testing_package;
 using unicode = unicode_package;
@@ -309,14 +311,26 @@ public static void TestGroupIdsTestUser(ж<testing.T> Ꮡt) {
     if (err != default!) {
         Ꮡt.Fatalf("%+v.GroupIds(): %v"u8, user.OrTypedNil(), err);
     }
-    if (!containsID(gids, (~user).Gid)) {
+    if (!slices.Contains(gids, (~user).Gid)) {
         Ꮡt.Errorf("%+v.GroupIds() = %v; does not contain user GID %s"u8, user.OrTypedNil(), gids, (~user).Gid);
     }
 }
 
+internal static Func<bool> isSystemDefaultLCIDEnglish = sync.OnceValue(bool () => {
+    // GetSystemDefaultLCID()
+    // https://learn.microsoft.com/en-us/windows/win32/api/winnls/nf-winnls-getsystemdefaultlcid
+    var (r, _, _) = syscall.MustLoadDLL("kernel32.dll"u8).MustFindProc("GetSystemDefaultLCID"u8).Call();
+    var lcid = (uint32)r;
+
+    var lcidLow = lcid & 0xFF;
+    // 0x0409 is en-US
+    // 0x1000 is "Locale without assigned LCID"
+    return lcidLow == 0x00 || lcidLow == 0x09;
+});
+
 partial struct serviceAccountsᴛ1 /*dyn*/ {
     internal @string sid;
-    internal @string name;
+    internal @string name; // name on english Windows
 }
 internal static slice<serviceAccountsᴛ1> serviceAccounts = new serviceAccountsᴛ1[]{
     new("S-1-5-18"u8, "NT AUTHORITY\\SYSTEM"u8),
@@ -326,15 +340,26 @@ internal static slice<serviceAccountsᴛ1> serviceAccounts = new serviceAccounts
 
 public static void TestLookupServiceAccount(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
-    foreach (var (_, tt) in serviceAccounts) {
-        var (u, err) = Lookup(tt.name);
-        if (err != default!) {
-            Ꮡt.Errorf("Lookup(%q): %v"u8, tt.name, err);
-            continue;
-        }
-        if ((~u).Uid != tt.sid) {
-            Ꮡt.Errorf("unexpected uid for %q; got %q, want %q"u8, (~u).Name, (~u).Uid, tt.sid);
-        }
+    foreach (var (_, vᴛ1) in serviceAccounts) {
+        ref var tt = ref heap(new serviceAccountsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var (u, err) = Lookup(ttʗ1.name);
+            if (err != default!) {
+                tΔ1.Logf("Lookup(%q): %v"u8, ttʗ1.name, err);
+                if (!isSystemDefaultLCIDEnglish()) {
+                    tΔ1.Skipf("test not supported on non-English Windows"u8);
+                }
+                tΔ1.Fail();
+                return;
+            }
+            if ((~u).Uid != ttʗ1.sid) {
+                tΔ1.Errorf("unexpected uid for %q; got %q, want %q"u8, (~u).Name, (~u).Uid, ttʗ1.sid);
+            }
+            tΔ1.Logf("Lookup(%q): %q"u8, ttʗ1.name, (~u).Username);
+        });
     }
 }
 
@@ -350,22 +375,36 @@ public static void TestLookupIdServiceAccount(ж<testing.T> Ꮡt) {
             Ꮡt.Errorf("unexpected gid for %q; got %q, want %q"u8, (~u).Name, (~u).Gid, tt.sid);
         }
         if ((~u).Username != tt.name) {
-            Ꮡt.Errorf("unexpected user name for %q; got %q, want %q"u8, (~u).Gid, (~u).Username, tt.name);
+            if (isSystemDefaultLCIDEnglish()){
+                Ꮡt.Errorf("unexpected user name for %q; got %q, want %q"u8, (~u).Gid, (~u).Username, tt.name);
+            } else {
+                Ꮡt.Logf("user name for %q: %q"u8, (~u).Gid, (~u).Username);
+            }
         }
     }
 }
 
 public static void TestLookupGroupServiceAccount(ж<testing.T> Ꮡt) {
     Ꮡt.Parallel();
-    foreach (var (_, tt) in serviceAccounts) {
-        var (u, err) = LookupGroup(tt.name);
-        if (err != default!) {
-            Ꮡt.Errorf("LookupGroup(%q): %v"u8, tt.name, err);
-            continue;
-        }
-        if ((~u).Gid != tt.sid) {
-            Ꮡt.Errorf("unexpected gid for %q; got %q, want %q"u8, (~u).Name, (~u).Gid, tt.sid);
-        }
+    foreach (var (_, vᴛ1) in serviceAccounts) {
+        ref var tt = ref heap(new serviceAccountsᴛ1(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        var ttʗ1 = tt;
+        Ꮡt.Run(tt.name, (ж<testing.T> tΔ1) => {
+            var (g, err) = LookupGroup(ttʗ1.name);
+            if (err != default!) {
+                tΔ1.Logf("LookupGroup(%q): %v"u8, ttʗ1.name, err);
+                if (!isSystemDefaultLCIDEnglish()) {
+                    tΔ1.Skipf("test not supported on non-English Windows"u8);
+                }
+                tΔ1.Fail();
+                return;
+            }
+            if ((~g).Gid != ttʗ1.sid) {
+                tΔ1.Errorf("unexpected gid for %q; got %q, want %q"u8, (~g).Name, (~g).Gid, ttʗ1.sid);
+            }
+        });
     }
 }
 

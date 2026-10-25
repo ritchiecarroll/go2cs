@@ -26,12 +26,14 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("append"u8, @"var s []byte; _ = append(s, ""foo""...)"u8, @"func([]byte, string...) []byte"u8),
     new("append"u8, @"type T []byte; var s T; var str string; _ = append(s, str...)"u8, @"func(p.T, string...) p.T"u8),
     new("append"u8, @"type T []byte; type U string; var s T; var str U; _ = append(s, str...)"u8, @"func(p.T, p.U...) p.T"u8),
+
     new("cap"u8, @"var s [10]int; _ = cap(s)"u8, @"invalid type"u8), // constant
     new("cap"u8, @"var s [10]int; _ = cap(&s)"u8, @"invalid type"u8), // constant
     new("cap"u8, @"var s []int64; _ = cap(s)"u8, @"func([]int64) int"u8),
     new("cap"u8, @"var c chan<-bool; _ = cap(c)"u8, @"func(chan<- bool) int"u8),
     new("cap"u8, @"type S []byte; var s S; _ = cap(s)"u8, @"func(p.S) int"u8),
     new("cap"u8, @"var s P; _ = cap(s)"u8, @"func(P) int"u8),
+
     new("len"u8, @"_ = len(""foo"")"u8, @"invalid type"u8), // constant
     new("len"u8, @"var s string; _ = len(s)"u8, @"func(string) int"u8),
     new("len"u8, @"var s [10]int; _ = len(s)"u8, @"invalid type"u8), // constant
@@ -41,32 +43,40 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
     new("len"u8, @"var m map[string]float32; _ = len(m)"u8, @"func(map[string]float32) int"u8),
     new("len"u8, @"type S []byte; var s S; _ = len(s)"u8, @"func(p.S) int"u8),
     new("len"u8, @"var s P; _ = len(s)"u8, @"func(P) int"u8),
+
     new("clear"u8, @"var m map[float64]int; clear(m)"u8, @"func(map[float64]int)"u8),
     new("clear"u8, @"var s []byte; clear(s)"u8, @"func([]byte)"u8),
+
     new("close"u8, @"var c chan int; close(c)"u8, @"func(chan int)"u8),
     new("close"u8, @"var c chan<- chan string; close(c)"u8, @"func(chan<- chan string)"u8),
+
     new("complex"u8, @"_ = complex(1, 0)"u8, @"invalid type"u8), // constant
     new("complex"u8, @"var re float32; _ = complex(re, 1.0)"u8, @"func(float32, float32) complex64"u8),
     new("complex"u8, @"var im float64; _ = complex(1, im)"u8, @"func(float64, float64) complex128"u8),
     new("complex"u8, @"type F32 float32; var re, im F32; _ = complex(re, im)"u8, @"func(p.F32, p.F32) complex64"u8),
     new("complex"u8, @"type F64 float64; var re, im F64; _ = complex(re, im)"u8, @"func(p.F64, p.F64) complex128"u8),
+
     new("copy"u8, @"var src, dst []byte; copy(dst, src)"u8, @"func([]byte, []byte) int"u8),
     new("copy"u8, @"type T [][]int; var src, dst T; _ = copy(dst, src)"u8, @"func(p.T, p.T) int"u8),
     new("copy"u8, @"var src string; var dst []byte; copy(dst, src)"u8, @"func([]byte, string) int"u8),
     new("copy"u8, @"type T string; type U []byte; var src T; var dst U; copy(dst, src)"u8, @"func(p.U, p.T) int"u8),
     new("copy"u8, @"var dst []byte; copy(dst, ""hello"")"u8, @"func([]byte, string) int"u8),
+
     new("delete"u8, @"var m map[string]bool; delete(m, ""foo"")"u8, @"func(map[string]bool, string)"u8),
     new("delete"u8, @"type (K string; V int); var m map[K]V; delete(m, ""foo"")"u8, @"func(map[p.K]p.V, p.K)"u8),
+
     new("imag"u8, @"_ = imag(1i)"u8, @"invalid type"u8), // constant
     new("imag"u8, @"var c complex64; _ = imag(c)"u8, @"func(complex64) float32"u8),
     new("imag"u8, @"var c complex128; _ = imag(c)"u8, @"func(complex128) float64"u8),
     new("imag"u8, @"type C64 complex64; var c C64; _ = imag(c)"u8, @"func(p.C64) float32"u8),
     new("imag"u8, @"type C128 complex128; var c C128; _ = imag(c)"u8, @"func(p.C128) float64"u8),
+
     new("real"u8, @"_ = real(1i)"u8, @"invalid type"u8), // constant
     new("real"u8, @"var c complex64; _ = real(c)"u8, @"func(complex64) float32"u8),
     new("real"u8, @"var c complex128; _ = real(c)"u8, @"func(complex128) float64"u8),
     new("real"u8, @"type C64 complex64; var c C64; _ = real(c)"u8, @"func(p.C64) float32"u8),
     new("real"u8, @"type C128 complex128; var c C128; _ = real(c)"u8, @"func(p.C128) float64"u8),
+
     new("make"u8, @"_ = make([]int, 10)"u8, @"func([]int, int) []int"u8),
     new("make"u8, @"type T []byte; _ = make(T, 10, 20)"u8, @"func(p.T, int, int) p.T"u8),
 
@@ -88,49 +98,65 @@ internal static slice<builtinCallsᴛ1> builtinCalls = new builtinCallsᴛ1[]{
 
     // go.dev/issue/45667
     new("make"u8, @"const l uint = 1; _ = make([]int, l)"u8, @"func([]int, uint) []int"u8),
+
     new("max"u8, @"               _ = max(0        )"u8, @"invalid type"u8), // constant
     new("max"u8, @"var x int    ; _ = max(x        )"u8, @"func(int) int"u8),
     new("max"u8, @"var x int    ; _ = max(0, x     )"u8, @"func(int, int) int"u8),
     new("max"u8, @"var x string ; _ = max(""a"", x   )"u8, @"func(string, string) string"u8),
     new("max"u8, @"var x float32; _ = max(0, 1.0, x)"u8, @"func(float32, float32, float32) float32"u8),
+
     new("min"u8, @"               _ = min(0        )"u8, @"invalid type"u8), // constant
     new("min"u8, @"var x int    ; _ = min(x        )"u8, @"func(int) int"u8),
     new("min"u8, @"var x int    ; _ = min(0, x     )"u8, @"func(int, int) int"u8),
     new("min"u8, @"var x string ; _ = min(""a"", x   )"u8, @"func(string, string) string"u8),
     new("min"u8, @"var x float32; _ = min(0, 1.0, x)"u8, @"func(float32, float32, float32) float32"u8),
+
     new("new"u8, @"_ = new(int)"u8, @"func(int) *int"u8),
     new("new"u8, @"type T struct{}; _ = new(T)"u8, @"func(p.T) *p.T"u8),
+
     new("panic"u8, @"panic(0)"u8, @"func(interface{})"u8),
     new("panic"u8, @"panic(""foo"")"u8, @"func(interface{})"u8),
+
     new("print"u8, @"print()"u8, @"func()"u8),
     new("print"u8, @"print(0)"u8, @"func(int)"u8),
     new("print"u8, @"print(1, 2.0, ""foo"", true)"u8, @"func(int, float64, string, bool)"u8),
+
     new("println"u8, @"println()"u8, @"func()"u8),
     new("println"u8, @"println(0)"u8, @"func(int)"u8),
     new("println"u8, @"println(1, 2.0, ""foo"", true)"u8, @"func(int, float64, string, bool)"u8),
+
     new("recover"u8, @"recover()"u8, @"func() interface{}"u8),
     new("recover"u8, @"_ = recover()"u8, @"func() interface{}"u8),
+
     new("Add"u8, @"var p unsafe.Pointer; _ = unsafe.Add(p, -1.0)"u8, @"func(unsafe.Pointer, int) unsafe.Pointer"u8),
     new("Add"u8, @"var p unsafe.Pointer; var n uintptr; _ = unsafe.Add(p, n)"u8, @"func(unsafe.Pointer, uintptr) unsafe.Pointer"u8),
     new("Add"u8, @"_ = unsafe.Add(nil, 0)"u8, @"func(unsafe.Pointer, int) unsafe.Pointer"u8),
+
     new("Alignof"u8, @"_ = unsafe.Alignof(0)"u8, @"invalid type"u8), // constant
     new("Alignof"u8, @"var x struct{}; _ = unsafe.Alignof(x)"u8, @"invalid type"u8), // constant
     new("Alignof"u8, @"var x P; _ = unsafe.Alignof(x)"u8, @"func(P) uintptr"u8),
+
     new("Offsetof"u8, @"var x struct{f bool}; _ = unsafe.Offsetof(x.f)"u8, @"invalid type"u8), // constant
     new("Offsetof"u8, @"var x struct{_ int; f bool}; _ = unsafe.Offsetof((&x).f)"u8, @"invalid type"u8), // constant
     new("Offsetof"u8, @"var x struct{_ int; f P}; _ = unsafe.Offsetof((&x).f)"u8, @"func(P) uintptr"u8),
+
     new("Sizeof"u8, @"_ = unsafe.Sizeof(0)"u8, @"invalid type"u8), // constant
     new("Sizeof"u8, @"var x struct{}; _ = unsafe.Sizeof(x)"u8, @"invalid type"u8), // constant
     new("Sizeof"u8, @"var x P; _ = unsafe.Sizeof(x)"u8, @"func(P) uintptr"u8),
+
     new("Slice"u8, @"var p *int; _ = unsafe.Slice(p, 1)"u8, @"func(*int, int) []int"u8),
     new("Slice"u8, @"var p *byte; var n uintptr; _ = unsafe.Slice(p, n)"u8, @"func(*byte, uintptr) []byte"u8),
     new("Slice"u8, @"type B *byte; var b B; _ = unsafe.Slice(b, 0)"u8, @"func(*byte, int) []byte"u8),
+
     new("SliceData"u8, "var s []int; _ = unsafe.SliceData(s)"u8, @"func([]int) *int"u8),
     new("SliceData"u8, "type S []int; var s S; _ = unsafe.SliceData(s)"u8, @"func([]int) *int"u8),
+
     new("String"u8, @"var p *byte; _ = unsafe.String(p, 1)"u8, @"func(*byte, int) string"u8),
     new("String"u8, @"type B *byte; var b B; _ = unsafe.String(b, 0)"u8, @"func(*byte, int) string"u8),
+
     new("StringData"u8, @"var s string; _ = unsafe.StringData(s)"u8, @"func(string) *byte"u8),
     new("StringData"u8, @"_ = unsafe.StringData(""foo"")"u8, @"func(string) *byte"u8),
+
     new("assert"u8, @"assert(true)"u8, @"invalid type"u8), // constant
     new("assert"u8, @"type B bool; const pred B = 1 < 2; assert(pred)"u8, @"invalid type"u8) // constant
 

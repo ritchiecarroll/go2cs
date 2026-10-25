@@ -7,6 +7,14 @@
 global using static global::go.debug.gosym_package;
 
 // <ImportedTypeAliases>
+global using abiꓸArrayType = go.@internal.abi_package.ΔArrayType;
+global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
+global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
+global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
+global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
+global using abiꓸName = go.@internal.abi_package.ΔName;
+global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using elfꓸData = go.debug.elf_package.ΔData;
 global using elfꓸSection = go.debug.elf_package.ΔSection;
 global using execꓸError = go.os.exec_package.ΔError;
@@ -34,6 +42,12 @@ using static global::go.debug.gosym_internal_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -43,7 +57,7 @@ using static global::go.debug.gosym_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("debug/gosym/pclntab_test.go", "pclntab_test.cs", "ACE0gpSCpoKUgoKClIKCgoKCgoCCyIKCgoK8osi4goKCppSCgpQACAaigoKUgoKClIKCgqaCgoKCpuaClIKUuIKCyoKCgpSCgpSSgqaCgqaCgpKClJSCuIKUgpSmuIKCgoK4gqaAgpS2lIKCkoIACgyigpSCkoKCgriCgoKCgpSCgoKCkoLKgoKCgoKCgoKUgoKCgpSClIKClIKkgpKCprTUgpSCgpSCggAHHAAJAoKClIKCgpSCgoKU6JKCgoKCgpSCgoKClIKUgpSCAAwSgoKUkoKCuIKSgoKCgoLKkoKmooKCgoKCgpSClIKUgsqSgoKCgpSClII=", "347-352:1;355-364:2;371-390:3;392-406:4")]
-[assembly: go.GoPositionMap("debug/gosym/symtab_test.go", "symtab_test.cs", "AAsYgoLogoKCgoKC5oKCgoKCggAKBoKCgoKCgoKCgoKCgoKCgoLmgoKCgoKC9oIADyai")]
+[assembly: go.GoPositionMap("debug/gosym/symtab_test.go", "symtab_test.cs", "AA0YgoLogoKCgoKC5oKCgoKCggAKBoKCgoKCgoKCgoKCgoKCgoLmgoKCgoKC9oIADyai")]
 // </GoSourcePositionMaps>
 
 namespace go.debug;

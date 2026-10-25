@@ -126,6 +126,8 @@ internal static void runbench(ж<testing.B> Ꮡb, @string path, bool ignoreFuncB
 }
 
 internal static (slice<ж<ast.File>>, error) pkgFiles(ж<token.FileSet> Ꮡfset, @string path) {
+    var filesᴷ = new stackAppend<ж<ast.File>>(moves: true);
+
     var (filenames, err) = pkgFilenames(path, true); // from stdlib_test.go
     if (err != default!) {
         return (default!, err);
@@ -137,9 +139,10 @@ internal static (slice<ж<ast.File>>, error) pkgFiles(ж<token.FileSet> Ꮡfset,
         if (errΔ1 != default!) {
             return (default!, errΔ1);
         }
-        files = append(files, @file);
+        files = append(filesᴷ, files, @file);
     }
 
+    files = move2heap(filesᴷ, files);
     return (files, default!);
 }
 

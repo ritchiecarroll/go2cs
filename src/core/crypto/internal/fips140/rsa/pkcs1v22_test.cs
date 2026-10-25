@@ -6,7 +6,6 @@ namespace go.crypto.@internal.fips140;
 using bytes = bytes_package;
 using sha1 = go.crypto.sha1_package;
 using testing = testing_package;
-using fips140 = go.crypto.@internal.fips140_package;
 using go.crypto;
 using hash = hash_package;
 using static go.crypto.@internal.fips140.rsa_package;
@@ -53,7 +52,7 @@ public static void TestEMSAPSS(ж<testing.T> Ꮡt) {
     hash.Write(msg);
     var hashed = hash.Sum(default!);
 
-    var (encoded, err) = emsaPSSEncode(hashed, 1023, salt, new rsa_internal_test_package.hash_HashᴠHash(sha1.New()));
+    var (encoded, err) = emsaPSSEncode(hashed, 1023, salt, sha1.New());
     if (err != default!) {
         Ꮡt.Errorf("Error from emsaPSSEncode: %s\n"u8, err);
     }
@@ -62,7 +61,7 @@ public static void TestEMSAPSS(ж<testing.T> Ꮡt) {
     }
 
     {
-        err = emsaPSSVerify(hashed, encoded, 1023, len(salt), new rsa_internal_test_package.hash_HashᴠHash(sha1.New())); if (err != default!) {
+        err = emsaPSSVerify(hashed, encoded, 1023, len(salt), sha1.New()); if (err != default!) {
             Ꮡt.Errorf("Bad verification: %s"u8, err);
         }
     }

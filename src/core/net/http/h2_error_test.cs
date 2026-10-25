@@ -24,20 +24,19 @@ internal static @string Error(this externalStreamError e) {
 }
 
 public static void TestStreamError(ж<testing.T> Ꮡt) {
-    ref var target = ref heap(new externalStreamError(), out var Ꮡtarget);
     var streamErr = http2streamError(42, http2ErrCodeProtocol);
-    var ok = errors.As(streamErr, Ꮡtarget);
+    var (extStreamErr, ok) = errors.AsType<externalStreamError>(streamErr);
     if (!ok) {
-        Ꮡt.Fatalf("errors.As failed"u8);
+        Ꮡt.Fatalf("errors.AsType failed"u8);
     }
-    if (target.StreamID != streamErr.StreamID) {
-        Ꮡt.Errorf("got StreamID %v, expected %v"u8, target.StreamID, streamErr.StreamID);
+    if (extStreamErr.StreamID != streamErr.StreamID) {
+        Ꮡt.Errorf("got StreamID %v, expected %v"u8, extStreamErr.StreamID, streamErr.StreamID);
     }
-    if (!AreEqual(target.Cause, streamErr.Cause)) {
-        Ꮡt.Errorf("got Cause %v, expected %v"u8, target.Cause, streamErr.Cause);
+    if (!AreEqual(extStreamErr.Cause, streamErr.Cause)) {
+        Ꮡt.Errorf("got Cause %v, expected %v"u8, extStreamErr.Cause, streamErr.Cause);
     }
-    if ((uint32)target.Code != (uint32)streamErr.Code) {
-        Ꮡt.Errorf("got Code %v, expected %v"u8, target.Code, streamErr.Code);
+    if ((uint32)extStreamErr.Code != (uint32)streamErr.Code) {
+        Ꮡt.Errorf("got Code %v, expected %v"u8, extStreamErr.Code, streamErr.Code);
     }
 }
 

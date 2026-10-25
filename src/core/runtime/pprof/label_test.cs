@@ -5,22 +5,24 @@ namespace go.runtime;
 
 using context = context_package;
 using fmt = fmt_package;
+using label = @internal.runtime.pprof.label_package;
 using reflect = reflect_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
+using @internal.runtime.pprof;
 using static go.runtime.pprof_package;
 
 partial class pprof_internal_test_package {
 
-internal static slice<global::go.runtime.pprof_package.label> labelsSorted(context.Context ctx) {
-    ref var ls = ref heap<slice<global::go.runtime.pprof_package.label>>(out var Ꮡls);
-    ls = new global::go.runtime.pprof_package.label[]{}.slice();
+internal static slice<label.Label> labelsSorted(context.Context ctx) {
+    ref var ls = ref heap<slice<label.Label>>(out var Ꮡls);
+    ls = new label.Label[]{}.slice();
     ForLabels(ctx, (@string key, @string value) => {
-        Ꮡls.ValueSlot = append(Ꮡls.ValueSlot, new label(key, value));
+        Ꮡls.ValueSlot = append(Ꮡls.ValueSlot, new label.Label(Key: key, Value: value));
         return true;
     });
-    slices.SortFunc(ls, (global::go.runtime.pprof_package.label a, global::go.runtime.pprof_package.label b) => strings_package.Compare(a.key, b.key));
+    slices.SortFunc(ls, (label.Label a, label.Label b) => strings_package.Compare(a.Key, b.Key));
     return ls;
 }
 
@@ -50,7 +52,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf(@"Label(ctx, ""key""): got %v, %v; want ""value"", ok"u8, v, ok);
     }
     var gotLabels = labelsSorted(ctx);
-    var wantLabels = new global::go.runtime.pprof_package.label[]{new("key"u8, "value"u8)}.slice();
+    var wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value"u8)}.slice();
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
@@ -62,7 +64,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf(@"Label(ctx, ""key2""): got %v, %v; want ""value2"", ok"u8, v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = new global::go.runtime.pprof_package.label[]{new("key"u8, "value"u8), new("key2"u8, "value2"u8)}.slice();
+    wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value"u8), new(Key: "key2"u8, Value: "value2"u8)}.slice();
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
@@ -74,7 +76,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf(@"Label(ctx, ""key3""): got %v, %v; want ""value3"", ok"u8, v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = new global::go.runtime.pprof_package.label[]{new("key"u8, "value3"u8), new("key2"u8, "value2"u8)}.slice();
+    wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value3"u8), new(Key: "key2"u8, Value: "value2"u8)}.slice();
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
@@ -86,7 +88,7 @@ public static void TestContextLabels(ж<testing.T> Ꮡt) {
         Ꮡt.Errorf(@"Label(ctx, ""key4""): got %v, %v; want ""value4b"", ok"u8, v, ok);
     }
     gotLabels = labelsSorted(ctx);
-    wantLabels = new global::go.runtime.pprof_package.label[]{new("key"u8, "value3"u8), new("key2"u8, "value2"u8), new("key4"u8, "value4b"u8)}.slice();
+    wantLabels = new label.Label[]{new(Key: "key"u8, Value: "value3"u8), new(Key: "key2"u8, Value: "value2"u8), new(Key: "key4"u8, Value: "value4b"u8)}.slice();
     if (!reflect.DeepEqual(gotLabels, wantLabels)) {
         Ꮡt.Errorf("(sorted) labels on context: got %v, want %v"u8, gotLabels, wantLabels);
     }
@@ -115,17 +117,17 @@ public static void TestLabelMapStringer(ж<testing.T> Ꮡt) {
             expected: "{}"u8
         ), new(
         m: new labelMap(
-            Labels(fooˢ, barˢ)
+            label.NewSet(Labels(fooˢ, barˢ).list)
         ),
         expected: @"{""foo"":""bar""}"u8
     ), new(
         m: new labelMap(
-            Labels(
+            label.NewSet(Labels(
                 fooˢ, barˢ,
                 key1ˢ, value1ˢ,
                 key2ˢ, value2ˢ,
                 key3ˢ, value3ˢ,
-                key4WithNewlineˢ, value4ˢ)
+                key4WithNewlineˢ, value4ˢ).list)
         ),
         expected: @"{""foo"":""bar"", ""key1"":""value1"", ""key2"":""value2"", ""key3"":""value3"", ""key4WithNewline"":""\nvalue4""}"u8
     )

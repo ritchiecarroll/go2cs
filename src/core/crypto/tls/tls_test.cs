@@ -286,7 +286,7 @@ internal static void runWithFIPSDisabled(ж<testing.T> Ꮡt, Action<ж<testing.T
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object skippingTestInFipsModeˢ = (@string)"skipping test in FIPS mode"u8;
 
-internal static void skipFIPS(ж<testing.T> Ꮡt) {
+internal static partial void skipFIPS(ж<testing.T> Ꮡt) {
     if (fips140tls.Required()) {
         Ꮡt.Skip(skippingTestInFipsModeˢ);
     }
@@ -1831,6 +1831,7 @@ public static void TestConnectionState(ж<testing.T> Ꮡt) {
             tΔ3.Run(resumeˢ, (ж<testing.T> tΔ6) => {
                 // TODO: test changing parameters between original and resumed
                 // connection when the protocol allows it.
+
                 ref var ss1 = ref heap<global::go.crypto.tls_package.ΔConnectionState>(out var Ꮡss1);
                 ref var cs1 = ref heap<global::go.crypto.tls_package.ΔConnectionState>(out var Ꮡcs1);
                 (ss1, cs1, var errΔ2) = testHandshake(tΔ6, configʗ1, configʗ1);
@@ -1938,6 +1939,7 @@ public static void TestClientHelloInfo_SupportsCertificate(ж<testing.T> Ꮡt) {
             SignatureSchemes: new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA256, ECDSAWithP256AndSHA256}.slice(),
             SupportedVersions: new uint16[]{VersionTLS13}.slice()
         )), "signature algorithms"u8),
+
         new(rsaCert, Ꮡ(new ClientHelloInfo(
             CipherSuites: new uint16[]{TLS_RSA_WITH_AES_128_GCM_SHA256}.slice(),
             SignatureSchemes: new global::go.crypto.tls_package.SignatureScheme[]{PKCS1WithSHA1}.slice(),
@@ -1952,6 +1954,7 @@ public static void TestClientHelloInfo_SupportsCertificate(ж<testing.T> Ꮡt) {
                 MaxVersion: VersionTLS12
             ))
         )), ""u8), // Check that mutual version selection works.
+
         new(ecdsaCert, Ꮡ(new ClientHelloInfo(
             CipherSuites: new uint16[]{TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256}.slice(),
             SupportedCurves: new global::go.crypto.tls_package.CurveID[]{CurveP256}.slice(),
@@ -2011,6 +2014,7 @@ public static void TestClientHelloInfo_SupportsCertificate(ж<testing.T> Ꮡt) {
             SignatureSchemes: new global::go.crypto.tls_package.SignatureScheme[]{PSSWithSHA256}.slice(),
             SupportedVersions: new uint16[]{VersionTLS12}.slice()
         )), "signature algorithms"u8),
+
         new(ed25519Cert, Ꮡ(new ClientHelloInfo(
             CipherSuites: new uint16[]{TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256}.slice(),
             SupportedCurves: new global::go.crypto.tls_package.CurveID[]{CurveP256}.slice(), // only relevant for ECDHE support
@@ -2033,6 +2037,7 @@ public static void TestClientHelloInfo_SupportsCertificate(ж<testing.T> Ꮡt) {
             SignatureSchemes: new global::go.crypto.tls_package.SignatureScheme[]{Ed25519}.slice(),
             SupportedVersions: new uint16[]{VersionTLS12}.slice()
         )), "doesn't support ECDHE"u8),
+
         new(rsaCert, Ꮡ(new ClientHelloInfo(
             CipherSuites: new uint16[]{TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA}.slice(),
             SupportedCurves: new global::go.crypto.tls_package.CurveID[]{CurveP256}.slice(), // only relevant for ECDHE support

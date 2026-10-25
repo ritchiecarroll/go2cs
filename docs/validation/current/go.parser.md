@@ -6,18 +6,21 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `go/parser` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**176 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**183 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/go/parser`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/go/parser).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
+| `TestBasicLit_End` | pass | pass |
+| `TestBothLineAndLeadComment` | pass | pass |
 | `TestColonEqualsScope` | pass | pass |
+| `TestCommentGroupWithLineDirective` | pass | pass |
 | `TestCommentGroups` | pass | pass |
 | `TestEmptyFileHasValidStartEnd` | pass | pass |
 | `TestErrors` | pass | pass |
@@ -69,6 +72,8 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestParseDepthLimit/binary/small` | pass | pass |
 | `TestParseDepthLimit/binaryparen/big` | pass | pass |
 | `TestParseDepthLimit/binaryparen/small` | pass | pass |
+| `TestParseDepthLimit/block/big` | pass | pass |
+| `TestParseDepthLimit/block/small` | pass | pass |
 | `TestParseDepthLimit/call/big` | pass | pass |
 | `TestParseDepthLimit/call/small` | pass | pass |
 | `TestParseDepthLimit/callseq/big` | pass | pass |
@@ -157,6 +162,8 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestResolution/resolution.src` | pass | pass |
 | `TestResolution/typeparams.go2` | pass | pass |
 | `TestScopeDepthLimit` | pass | pass |
+| `TestScopeDepthLimit/block/big` | pass | pass |
+| `TestScopeDepthLimit/block/small` | pass | pass |
 | `TestScopeDepthLimit/defer/big` | pass | pass |
 | `TestScopeDepthLimit/defer/small` | pass | pass |
 | `TestScopeDepthLimit/for0/big` | pass | pass |

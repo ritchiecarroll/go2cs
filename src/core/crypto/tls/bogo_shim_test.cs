@@ -213,10 +213,14 @@ internal static void bogoShim() {
 
         var cfg = Ꮡ(new Config(
             ServerName: "test"u8,
+
             MinVersion: (uint16)(minVersion.Value),
             MaxVersion: (uint16)(maxVersion.Value),
+
             ClientSessionCache: NewLRUClientSessionCache(0),
+
             CipherSuites: ciphersuites,
+
             GetConfigForClient: (ж<global::go.crypto.tls_package.ClientHelloInfo> chi) => {
                 if (expectAdvertisedALPN.Value != ""u8) {
                     var s = (cryptobyte.String)slice<byte>(expectAdvertisedALPN.Value);
@@ -306,7 +310,7 @@ internal static void bogoShim() {
                     if (len((~chi).SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
                         return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~chi).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                     }
-                    foreach (var (i, _) in expectedPeerSigAlg.ValueSlot) {
+                    foreach (var i in range(expectedPeerSigAlg.ValueSlot)) {
                         if ((~chi).SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
                             return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~chi).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                         }
@@ -319,7 +323,7 @@ internal static void bogoShim() {
                     if (len((~cri).SignatureSchemes) != len(expectedPeerSigAlg.ValueSlot)) {
                         return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~cri).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                     }
-                    foreach (var (i, _) in expectedPeerSigAlg.ValueSlot) {
+                    foreach (var i in range(expectedPeerSigAlg.ValueSlot)) {
                         if ((~cri).SignatureSchemes[i] != ((global::go.crypto.tls_package.SignatureScheme)(uint16)(expectedPeerSigAlg.ValueSlot)[i])) {
                             return (default!, fmt.Errorf("unexpected signature algorithms: got %s, want %v"u8, (~cri).SignatureSchemes, expectedPeerSigAlg.ValueSlot));
                         }
@@ -440,7 +444,7 @@ internal static void bogoShim() {
                     break;
                 }
                 buf = buf.slice(0, n);
-                foreach (var (iΔ1, _) in buf) {
+                foreach (var iΔ1 in range(buf)) {
                     buf[iΔ1] ^= (byte)(0xff);
                 }
                 {
@@ -583,6 +587,8 @@ internal static readonly @string resultsJsonˢ = "results.json"u8;
 internal static readonly @string sslTestRunnerˢ = "ssl/test/runner"u8;
 
 public static void TestBogoSuite(ж<testing.T> Ꮡt) {
+    var argsᴷ = new stackAppend<@string>();
+
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ);
     }
@@ -627,7 +633,7 @@ public static void TestBogoSuite(ж<testing.T> Ꮡt) {
         fmt.Sprintf("-json-output=%s"u8, resultsFile)
     }.slice();
     if (bogoFilter.Value != ""u8) {
-        args = append(args, fmt.Sprintf("-test=%s"u8, bogoFilter.Value));
+        args = append(argsᴷ, args, fmt.Sprintf("-test=%s"u8, bogoFilter.Value));
     }
 
     var cmd = testenv.Command(new tls_test_package.testing_TжTB(Ꮡt), testenv.GoToolPath(new tls_test_package.testing_TжTB(Ꮡt)), args.ꓸꓸꓸ);
@@ -801,7 +807,7 @@ internal static error generateReport(bogoResults results, @string outPath) {
     finally { ᒐ.Run(); }
 }
 
-partial struct bogoResults_Tests /*dyn*/ {
+public partial struct bogoResults_Tests /*dyn*/ {
     public @string Actual; /*`json:"actual"`*/
     public @string Expected; /*`json:"expected"`*/
     public bool IsUnexpected; /*`json:"is_unexpected"`*/

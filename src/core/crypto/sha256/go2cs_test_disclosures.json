@@ -17,7 +17,7 @@
       "reason": "want-zero AllocsPerRun assert, new at go1.26.10 (sha256_test.go:475; the misspelling is Go's own): one closure runs New(), Write, MarshalBinary, AppendBinary and UnmarshalBinary through three interface assertions on the hash shell, and Go budgets zero allocations for all of it. The converted side counts 4 per run on both OSes. The sibling TestAllocations entry's `allocs = ` prefix cannot cover it: the disclosure is matched by name.",
       "want": "0 allocations per run",
       "reading": "4 per run on windows and linux -- go1.26.10 at d804094d7a (batch 37's tip), Release with tiering off; windows: 400 go2cs-runtime object allocations (80,000 bytes) over 100 runs, alloc-units-windows.tsv line 37 (claude/g-pass2-plan 966562828d); linux: 400 go2cs-runtime object allocations (80,000 bytes) over 100 runs, alloc-units-linux.tsv line 23 (claude/p1-alloc-reading 8d9d880ca2); both TSVs under docs/phase4/data/rebank-go1.26.10/; unit COUNT, a LOWER BOUND",
-      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD); its DESIGN record docs/DESIGN-stack-allocation.md is owed (C2 drafts). The four charge sites are not read yet: record the stack of every charged allocation (the AllocationCounter stack probe) over one run and name each site's family."
+      "plan": "the owner-confirmed post-hop stack-allocation design (ruled 2026-10-21, via COORD): docs/DESIGN-stack-allocation.md (PROPOSED, lane C2, 2026-10-25). The four charge sites are not read yet: record the stack of every charged allocation (the AllocationCounter stack probe) over one run and name each site's family."
     }
   ]
 }

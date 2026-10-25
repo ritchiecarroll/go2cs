@@ -98,7 +98,7 @@ internal static map<tokenꓸPos, @string> expectedErrors(ж<token.FileSet> Ꮡfs
             var sΔ2 = errRx.FindStringSubmatch(lit);
             if (len(sΔ2) == 3) {
                 if (sΔ2[1] == "HERE"){
-                    pos = here; // start of comment
+                    pos = here; // position right after the previous token prior to comment
                 } else 
                 if (sΔ2[1] == "AFTER"){
                     pos += ((tokenꓸPos)len(lit)); // end of comment

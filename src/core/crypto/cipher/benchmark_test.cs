@@ -69,14 +69,14 @@ public static void BenchmarkAESGCM(ж<testing.B> Ꮡb) {
     }
 }
 
-internal static void benchmarkAESStream(ж<testing.B> Ꮡb, Func<cipher.Block, slice<byte>, cipher.Stream> mode, slice<byte> buf) {
+internal static void benchmarkAESStream(ж<testing.B> Ꮡb, Func<cipher.Block, slice<byte>, cipher.Stream> mode, slice<byte> buf, nint keySize) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.SetBytes((int64)len(buf));
 
-    array<byte> key = new(16);
+    var key = new slice<byte>(keySize);
     array<byte> iv = new(16);
-    var (aesΔ1, _) = aes.NewCipher(key[..]);
+    var (aesΔ1, _) = aes.NewCipher(key);
     var stream = mode(aesΔ1, iv[..]);
 
     b.ResetTimer();
@@ -94,15 +94,20 @@ internal static UntypedInt almost1K => /* 1024 - 5 */ 1019;
 internal static UntypedInt almost8K => /* 8*1024 - 5 */ 8187;
 
 public static void BenchmarkAESCTR(ж<testing.B> Ꮡb) {
-    Ꮡb.Run("50"u8, (ж<testing.B> bΔ1) => {
-        benchmarkAESStream(bΔ1, cipher.NewCTR, new slice<byte>(50));
-    });
-    Ꮡb.Run("1K"u8, (ж<testing.B> bΔ2) => {
-        benchmarkAESStream(bΔ2, cipher.NewCTR, new slice<byte>(almost1K));
-    });
-    Ꮡb.Run("8K"u8, (ж<testing.B> bΔ3) => {
-        benchmarkAESStream(bΔ3, cipher.NewCTR, new slice<byte>(almost8K));
-    });
+    foreach (var (_, keyBits) in new nint[]{128, 192, 256}.slice()) {
+        nint keySize = keyBits / 8;
+        Ꮡb.Run(strconv.Itoa(keyBits), (ж<testing.B> bΔ1) => {
+            bΔ1.Run("50"u8, (ж<testing.B> bΔ2) => {
+                benchmarkAESStream(bΔ2, cipher.NewCTR, new slice<byte>(50), keySize);
+            });
+            bΔ1.Run("1K"u8, (ж<testing.B> bΔ3) => {
+                benchmarkAESStream(bΔ3, cipher.NewCTR, new slice<byte>(almost1K), keySize);
+            });
+            bΔ1.Run("8K"u8, (ж<testing.B> bΔ4) => {
+                benchmarkAESStream(bΔ4, cipher.NewCTR, new slice<byte>(almost8K), keySize);
+            });
+        });
+    }
 }
 
 public static void BenchmarkAESCBCEncrypt1K(ж<testing.B> Ꮡb) {

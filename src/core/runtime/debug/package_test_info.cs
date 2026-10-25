@@ -41,6 +41,12 @@ using static global::go.runtime.debug_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -49,11 +55,11 @@ using static global::go.runtime.debug_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("runtime/debug/example_monitor_test.go", "example_monitor_test.cs", "AA8mwgAOIJKmggAKEuKClIKUgoKUlLiCgpSAgqSAgqTKgoKUgoKCgoKClIKAgg==")]
-[assembly: go.GoPositionMap("runtime/debug/garbage_test.go", "garbage_test.cs", "ABAgopSCgsiCgqaClIKUgpSClIKClIKUgoKCgpSClIKUuIKCgqaCgsqClIKCgoKUtMi6gqaUgrgACRSUgsqCAAoWgoKClJSUggAGEqKmgoKCuIKClIKEkoKCgoKCgpaSgIK2gpSUgoKAgsiClJSCgpSCgoKCtKSCgpSmAAgSgg==", "169-172:1")]
+[assembly: go.GoPositionMap("runtime/debug/example_monitor_test.go", "example_monitor_test.cs", "AA8mwgAOIJKmggAKEuKClIKUgoKUlLiCgpSAgqSAgqTKgoKUuIKCgoKClIKAgg==")]
+[assembly: go.GoPositionMap("runtime/debug/garbage_test.go", "garbage_test.cs", "ABAgopSCgsiCgqaClIKUgpSClIKClIKUgoKCgpSCgpSUuIKCgqaCgsqClIKCgoKUtMjKgqaUgrgACRSUgsqCAAoWgoKClJSUggAGEqKmgoKCuIKClIKEkoKCgoKCgpaSgIK2gpSUgoKAgsiClJSCgpSCgoKCtKSCgpSmAAgSgg==", "169-172:1")]
 [assembly: go.GoPositionMap("runtime/debug/heapdump_test.go", "heapdump_test.cs", "ABMcooKUgoKUgpKCgoKUgoCCxOy4ooKUgoKUgraCgoKCpoKmgoKiAAkQtJKUooKUgoKUgpKCgqI=")]
 [assembly: go.GoPositionMap("runtime/debug/mod_test.go", "mod_test.cs", "AA0ekoKClAAhBrSspgACEK6cgoKUgsqCgoKmgg==", "55-74:1")]
-[assembly: go.GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB8sgpSCpoKClICCpIK4yoKkggANKgAUAoKCgu6CgNyCgoKClIKCgoKUuKSCgqaCkpSCgpSUlIKClJSUgoKCguaCgoKCppSCgoKCgoKUAAsYgoKUgoKmyoKUgsqCgpSC", "113-129:1")]
+[assembly: go.GoPositionMap("runtime/debug/stack_test.go", "stack_test.cs", "AB4sgpSCpoKClICCpIK4yoKkggANKgAUAoKCgu6CgNyCgoKCgpS4pIKCpoKSlIKClJSUgoKUlJSCgoKC5oKUgoKCgoKClAALGIKClIKCpsqClILKgoKUgg==", "108-124:1")]
 // </GoSourcePositionMaps>
 
 namespace go.runtime;

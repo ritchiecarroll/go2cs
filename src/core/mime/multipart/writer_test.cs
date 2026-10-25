@@ -218,4 +218,28 @@ public static void TestSortedHeader(ж<testing.T> Ꮡt) {
     }
 }
 
+internal partial struct TestFileContentDisposition_tests /*dyn*/ {
+    internal @string fieldname;
+    internal @string filename;
+    internal @string want;
+}
+
+public static void TestFileContentDisposition(ж<testing.T> Ꮡt) {
+    var tests = new TestFileContentDisposition_tests[]{
+        new("somefield"u8, "somefile.txt"u8, @"form-data; name=""somefield""; filename=""somefile.txt"""u8),
+        new(@"field""withquotes"""u8, "somefile.txt"u8, @"form-data; name=""field\""withquotes\""""; filename=""somefile.txt"""u8),
+        new(@"somefield"u8, @"somefile""withquotes"".txt"u8, @"form-data; name=""somefield""; filename=""somefile\""withquotes\"".txt"""u8),
+        new(@"somefield\withbackslash"u8, "somefile.txt"u8, @"form-data; name=""somefield\\withbackslash""; filename=""somefile.txt"""u8),
+        new("somefield"u8, @"somefile\withbackslash.txt"u8, @"form-data; name=""somefield""; filename=""somefile\\withbackslash.txt"""u8),
+        new("a\rb\nc"u8, "e\rf\ng"u8, @"form-data; name=""a%0Db%0Ac""; filename=""e%0Df%0Ag"""u8)
+    }.slice();
+    foreach (var (i, tt) in tests) {
+        {
+            @string found = FileContentDisposition(tt.fieldname, tt.filename); if (found != tt.want) {
+                Ꮡt.Errorf(@"%d. found: ""%s""; want: ""%s"""u8, i, found, tt.want);
+            }
+        }
+    }
+}
+
 } // end multipart_internal_test_package

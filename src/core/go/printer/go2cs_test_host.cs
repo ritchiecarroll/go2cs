@@ -67,22 +67,22 @@ internal static class Go2CsTestHost
         registry.Add("TestBadComments", printer_internal_test_package.TestBadComments, "printer_test.go", 299);
         registry.Add("TestBadNodes", printer_internal_test_package.TestBadNodes, "printer_test.go", 261);
         registry.Add("TestBaseIndent", printer_internal_test_package.TestBaseIndent, "printer_test.go", 534);
-        registry.Add("TestChanType", printer_internal_test_package.TestChanType, "printer_test.go", 610);
-        registry.Add("TestCommentedNode", printer_internal_test_package.TestCommentedNode, "printer_test.go", 684);
+        registry.Add("TestChanType", printer_internal_test_package.TestChanType, "printer_test.go", 609);
+        registry.Add("TestCommentedNode", printer_internal_test_package.TestCommentedNode, "printer_test.go", 683);
         registry.Add("TestDeclLists", printer_internal_test_package.TestDeclLists, "printer_test.go", 488);
-        registry.Add("TestEmptyDecl", printer_internal_test_package.TestEmptyDecl, "printer_test.go", 855);
+        registry.Add("TestEmptyDecl", printer_internal_test_package.TestEmptyDecl, "printer_test.go", 854);
         registry.Add("TestFiles", printer_internal_test_package.TestFiles, "printer_test.go", 197);
-        registry.Add("TestFuncType", printer_internal_test_package.TestFuncType, "printer_test.go", 580);
-        registry.Add("TestIssue11151", printer_internal_test_package.TestIssue11151, "printer_test.go", 735);
-        registry.Add("TestIssue32854", printer_internal_test_package.TestIssue32854, "printer_test.go", 795);
+        registry.Add("TestFuncType", printer_internal_test_package.TestFuncType, "printer_test.go", 579);
+        registry.Add("TestIssue11151", printer_internal_test_package.TestIssue11151, "printer_test.go", 734);
+        registry.Add("TestIssue32854", printer_internal_test_package.TestIssue32854, "printer_test.go", 794);
         registry.Add("TestIssue5945", printer_internal_test_package.TestIssue5945, "printer_test.go", 437);
         registry.Add("TestLineComments", printer_internal_test_package.TestLineComments, "printer_test.go", 215);
-        registry.Add("TestParenthesizedDecl", printer_internal_test_package.TestParenthesizedDecl, "printer_test.go", 760);
+        registry.Add("TestParenthesizedDecl", printer_internal_test_package.TestParenthesizedDecl, "printer_test.go", 759);
         registry.Add("TestSourcePos", printer_internal_test_package.TestSourcePos, "printer_test.go", 366);
-        registry.Add("TestSourcePosNewline", printer_internal_test_package.TestSourcePosNewline, "printer_test.go", 824);
+        registry.Add("TestSourcePosNewline", printer_internal_test_package.TestSourcePosNewline, "printer_test.go", 823);
         registry.Add("TestStmtLists", printer_internal_test_package.TestStmtLists, "printer_test.go", 514);
-        registry.Add("TestWriteErrors", printer_internal_test_package.TestWriteErrors, "printer_test.go", 647);
-        registry.Add("TestX", printer_internal_test_package.TestX, "printer_test.go", 673);
+        registry.Add("TestWriteErrors", printer_internal_test_package.TestWriteErrors, "printer_test.go", 646);
+        registry.Add("TestX", printer_internal_test_package.TestX, "printer_test.go", 672);
         return TestHost.Run(registry, args);
     }
 }

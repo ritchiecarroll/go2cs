@@ -12,6 +12,8 @@ using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = io.fs_package;
 using static go.path.filepath_internal_test_package;
 
@@ -111,6 +113,25 @@ public static void TestMatch(ж<testing.T> Ꮡt) {
     }
 }
 
+public static void BenchmarkMatch(ж<testing.B> Ꮡb) {
+    foreach (var (_, vᴛ1) in matchTests) {
+        ref var tt = ref heap(new MatchTest(), out var Ꮡtt);
+        tt = vᴛ1;
+
+        @string name = fmt.Sprintf("%q %q"u8, tt.pattern, tt.s);
+        var ttʗ1 = tt;
+        Ꮡb.Run(name, (ж<testing.B> bΔ1) => {
+            bΔ1.ReportAllocs();
+            foreach (var _ᴛ1 in range((~bΔ1).N)) {
+                (bSink, errSink) = Match(ttʗ1.pattern, ttʗ1.s);
+            }
+        });
+    }
+}
+
+internal static bool bSink;
+internal static error errSink;
+
 partial struct globTestsᴛ1 /*dyn*/ {
     internal @string pattern, result;
 }
@@ -150,7 +171,7 @@ public static void TestGlob(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestCVE202230632(ж<testing.T> Ꮡt) {
+public static partial void TestCVE202230632(ж<testing.T> Ꮡt) {
     // Prior to CVE-2022-30632, this would cause a stack exhaustion given a
     // large number of separators (more than 4,000,000). There is now a limit
     // of 10,000.
@@ -242,7 +263,7 @@ internal static error globAbs(this ref globTest test, @string root, @string root
     }
     slices.Sort<slice<@string>, @string>(have);
     var want = test.buildWant(root + @"\"u8);
-    if (strings.Join(want, "_"u8) == strings.Join(have, "_"u8)) {
+    if (slices.Equal<slice<@string>, @string>(want, have)) {
         return default!;
     }
     return fmt.Errorf("Glob(%q) returns %q, but %q expected"u8, p, have, want);
@@ -256,12 +277,12 @@ internal static error globRel(this ref globTest test, @string root) {
     }
     slices.Sort<slice<@string>, @string>(have);
     var want = test.buildWant(root);
-    if (strings.Join(want, "_"u8) == strings.Join(have, "_"u8)) {
+    if (slices.Equal<slice<@string>, @string>(want, have)) {
         return default!;
     }
     // try also matching version without root prefix
     var wantWithNoRoot = test.buildWant(""u8);
-    if (strings.Join(wantWithNoRoot, "_"u8) == strings.Join(have, "_"u8)) {
+    if (slices.Equal<slice<@string>, @string>(wantWithNoRoot, have)) {
         return default!;
     }
     return fmt.Errorf("Glob(%q) returns %q, but %q expected"u8, p, have, want);

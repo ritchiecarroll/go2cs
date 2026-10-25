@@ -36,6 +36,12 @@ using static global::go.math.rand_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -44,11 +50,11 @@ using static global::go.math.rand_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/rand/auto_test.go", "auto_test.cs", "AAsguLKC7oKCgoKCgoI=")]
-[assembly: go.GoPositionMap("math/rand/default_test.go", "default_test.cs", "AB4oyIKmgoCCgraUgoKCgoKCgoKUgoKUggAFFMKCgqaCgqaCAAoWpoKCooKipIKCsoKi6IKCsoKi+oKCgqKCoqSCgrKCota2koKmgoKClA==", "38-53:1;89-92:1;96-99:2;105-108:3;116-119:4;123-126:5;132-135:6")]
+[assembly: go.GoPositionMap("math/rand/auto_test.go", "auto_test.cs", "AAsg2LKC7oKCgoKCgoI=")]
+[assembly: go.GoPositionMap("math/rand/default_test.go", "default_test.cs", "AB4oyIKmgoCCgraUkoKCgoKCgpSCgpSCAAUUwoKCpoKCpoIAChamgoKigqKkgoKygqLogoKygqL6goKCooKipIKCsoKi1raSgqaCgoKU", "37-52:1;88-91:1;95-98:2;104-107:3;115-118:4;122-125:5;131-134:6")]
 [assembly: go.GoPositionMap("math/rand/race_test.go", "race_test.cs", "AA4ewpiCgoKCooKCgoKCgoKCgoKCgoKClIKClLTE", "24-47:1")]
-[assembly: go.GoPositionMap("math/rand/rand_test.go", "rand_test.cs", "AB420gAMEoKCgpSmmMKCgoKUgoKClKaCgpKCgpSCgqaCgoKCgriCgoKCgoKClJQAAxCygoKClKaWgoKmpqaqkoK4goKCgoKUgoKCgoIABhaygoKClKaWkqSCgqampqqSgriCgoKCggAFFPKCvIKClIKCgoKCgoKCgoKCgpSmwoK8goKUgoKCgoKCgoKCgoKClKyygoKUlIKCpqyygoKUlIKCpqaCgoCCpICCpICCyIKCgIKkgIKkgIIACAiClNqU1pS4gqaCgoKCyoKCgoKClIKo/KaCgqamgqaCgsqCgoKCgpSCuIKCgoKClIKCgoKUgriCgoKCgpSCgoKClIK4lIKSgM7EgoKCgsqCgoKClPiSgoKClJKkgoK4ggANEoKUkJK4stqCgpSChJKCgqaCgoKClIK4koKCgoIADw6mgoKCgoKCgsqCgoKCgoKCpoKCgoKCgs6ygriCgoLKooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoKCgpSQzMKCgoKC3KKCgoKCuKKCgoKCuKKCgoKCuIKCgoKCooKCtKQ=", "456-456:1;491-555:1;504-504:1.1;505-505:1.2;506-506:1.3;507-514:1.4;512-512:1.4.1;518-553:1.5;562-571:1;574-583:2;584-592:3;604-608:1;674-674:1;683-687:1;723-728:1")]
-[assembly: go.GoPositionMap("math/rand/regress_test.go", "regress_test.cs", "ABYsxKKCgoKClIKCgoKUgoKCgoKUgoKCgoKCqoKClIKCgoKUgpS2pqaCggADNQABPIKmgoKClIKUgoKClJKClJSUgoKUgqa2grg=")]
+[assembly: go.GoPositionMap("math/rand/rand_test.go", "rand_test.cs", "AB420gAMEoKCgpSmmMKCgoKUgoKClKaCgpKCgpSCgqaCgoKCgriCgoKCgoKClJQAAxCygoKClKamgoKmpqaqkoK4goKCgoKUgoKCgoIABhaygoKClKamkqSCgqampqqSgriCgoKCggAFFPKCvIKClIKCgoKCgoKCgoKCgpSmwoK8goKUgoKCgoKCgoKCgoKClKyygoKUlIKCpqyygoKUlIKCpqaCgoCCpICCpICCyIKCgIKkgIKkgIIACAiClNqU1pS4gqaCgoKCyoKCgoKClIKo/KaCgqamgqaCgsqCgoKCgpSCuIKCgoKClIKCgoKUgriCgoKCgpSCgoKClIK4lIKSgM7EgoKCgsqCgoKClPiSgoKClJKkgoK4ggANEoKUkJK4stqCgpSChJKCgqaCgoKClIK4koKCgoIADw6mgoKCgoKCgsqCgoKCgoKCpoKCgoKCgs6ygriCgoLKooKCuKKCgriigoK4ooKCuKKCgriigoK4ooKCuKKCgriigoKCgpSQzMKCgoKC3KKCgoKCuKKCgoKCuKKCgoKCuIKCgoKCooKCtKQ=", "456-456:1;491-555:1;504-504:1.1;505-505:1.2;506-506:1.3;507-514:1.4;512-512:1.4.1;518-553:1.5;562-571:1;574-583:2;584-592:3;604-608:1;674-674:1;683-687:1;723-728:1")]
+[assembly: go.GoPositionMap("math/rand/regress_test.go", "regress_test.cs", "ABYsxLKCgoKClIKCgoKUgoKCgoKUgoKCgoKCqoKClIKCgoKUgpS2pqaCggADNQABPIKmgoKClIKUgoKClJKClJSUgoKUgqa2grg=")]
 // </GoSourcePositionMaps>
 
 namespace go.math;

@@ -43,7 +43,6 @@ internal static class Go2CsTestHost
             "testdata/withvendor/src/a/b/b.go",
             "testdata/withvendor/src/a/vendor/c/d/d.go",
             "vendor_test.go",
-            "zcgo.go",
         }, new string[]
         {
             "constraint",
@@ -55,13 +54,13 @@ internal static class Go2CsTestHost
         registry.Add("TestAllTags", build_internal_test_package.TestAllTags, "build_test.go", 766);
         registry.Add("TestAllTagsNonSourceFile", build_internal_test_package.TestAllTagsNonSourceFile, "build_test.go", 798);
         registry.Add("TestCgoImportsIgnored", build_internal_test_package.TestCgoImportsIgnored, "build_test.go", 748);
-        registry.Add("TestDependencies", build_internal_test_package.TestDependencies, "deps_test.go", 803);
+        registry.Add("TestDependencies", build_internal_test_package.TestDependencies, "deps_test.go", 889);
         registry.Add("TestDirectives", build_internal_test_package.TestDirectives, "build_test.go", 808);
         registry.Add("TestDotSlashImport", build_internal_test_package.TestDotSlashImport, "build_test.go", 63);
         registry.Add("TestEmptyFolderImport", build_internal_test_package.TestEmptyFolderImport, "build_test.go", 98);
         registry.Add("TestEmptyImport", build_internal_test_package.TestEmptyImport, "build_test.go", 85);
         registry.Add("TestExpandSrcDir", build_internal_test_package.TestExpandSrcDir, "build_test.go", 460);
-        registry.Add("TestFindImports", build_internal_test_package.TestFindImports, "deps_test.go", 924);
+        registry.Add("TestFindImports", build_internal_test_package.TestFindImports, "deps_test.go", 1010);
         registry.Add("TestGoodOSArch", build_internal_test_package.TestGoodOSArch, "syslist_test.go", 56);
         registry.Add("TestGoodOSArchFile", build_internal_test_package.TestGoodOSArchFile, "build_test.go", 361);
         registry.Add("TestImportCmd", build_internal_test_package.TestImportCmd, "build_test.go", 427);
@@ -84,7 +83,7 @@ internal static class Go2CsTestHost
         registry.Add("TestReadGoInfo", build_internal_test_package.TestReadGoInfo, "read_test.go", 153);
         registry.Add("TestShellSafety", build_internal_test_package.TestShellSafety, "build_test.go", 471);
         registry.Add("TestShouldBuild", build_internal_test_package.TestShouldBuild, "build_test.go", 344);
-        registry.Add("TestStdlibLowercase", build_internal_test_package.TestStdlibLowercase, "deps_test.go", 907);
+        registry.Add("TestStdlibLowercase", build_internal_test_package.TestStdlibLowercase, "deps_test.go", 993);
         registry.Add("TestVendorPackages", build_internal_test_package.TestVendorPackages, "vendor_test.go", 28);
         registry.SetTestMain(build_internal_test_package.TestMain);
         return TestHost.Run(registry, args);

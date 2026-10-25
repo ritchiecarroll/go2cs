@@ -6,42 +6,73 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `internal/synctest` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-27 · converter `4a77dd2c6`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**28 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**59 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/internal/synctest`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/synctest).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
+| `TestAfterFuncRunsImmediately` | pass | pass |
 | `TestChannelFromOutsideBubble` | pass | pass |
 | `TestChannelFromOutsideBubble/read_closed` | pass | pass |
 | `TestChannelFromOutsideBubble/read_value` | pass | pass |
 | `TestChannelFromOutsideBubble/select_mixed` | pass | pass |
 | `TestChannelFromOutsideBubble/select_outside_only` | pass | pass |
 | `TestChannelFromOutsideBubble/write_value` | pass | pass |
+| `TestChannelMovedOutOfBubble` | pass | pass |
+| `TestChannelMovedOutOfBubble/close` | pass | pass |
+| `TestChannelMovedOutOfBubble/close/different_bubble` | pass | pass |
+| `TestChannelMovedOutOfBubble/close/outside_bubble` | pass | pass |
+| `TestChannelMovedOutOfBubble/receive` | pass | pass |
+| `TestChannelMovedOutOfBubble/receive/different_bubble` | pass | pass |
+| `TestChannelMovedOutOfBubble/receive/outside_bubble` | pass | pass |
+| `TestChannelMovedOutOfBubble/send` | pass | pass |
+| `TestChannelMovedOutOfBubble/send/different_bubble` | pass | pass |
+| `TestChannelMovedOutOfBubble/send/outside_bubble` | pass | pass |
 | `TestCond` | pass | pass |
 | `TestDeadlockChild` | pass | pass |
 | `TestDeadlockRoot` | pass | pass |
+| `TestDeadlockTicker` | pass | pass |
 | `TestGoroutineWait` | pass | pass |
+| `TestHappensBefore` | pass | pass |
 | `TestIteratorPull` | pass | pass |
 | `TestIteratorPush` | pass | pass |
 | `TestMallocs` | pass | pass |
+| `TestMonotonicClock` | pass | pass |
 | `TestNow` | pass | pass |
 | `TestReflectFuncOf` | pass | pass |
 | `TestRunEmpty` | pass | pass |
 | `TestSimpleWait` | pass | pass |
+| `TestSleepNondeterminism` | pass | pass |
 | `TestTimeAfter` | pass | pass |
+| `TestTimerAfterBubbleExit` | pass | pass |
 | `TestTimerFromInsideBubble` | pass | pass |
 | `TestTimerFromInsideBubble/Reset` | pass | pass |
 | `TestTimerFromInsideBubble/Stop` | pass | pass |
 | `TestTimerFromInsideBubble/read_channel` | pass | pass |
 | `TestTimerFromOutsideBubble` | pass | pass |
+| `TestTimerNondeterminism` | pass | pass |
+| `TestTimerRanInPast` | pass | pass |
 | `TestTimerReadAfterDeadline` | pass | pass |
 | `TestTimerReadBeforeDeadline` | pass | pass |
 | `TestTimerReset` | pass | pass |
+| `TestTimerResetZeroDoNotHang` | pass | pass |
+| `TestTimerRunsImmediately` | pass | pass |
 | `TestWait` | pass | pass |
-| `TestWaitGroup` | pass | pass |
+| `TestWaitGroupDisassociateInAdd` | pass | pass |
+| `TestWaitGroupDisassociateInWait` | pass | pass |
+| `TestWaitGroupHeapAllocated` | pass | pass |
+| `TestWaitGroupInBubble` | pass | pass |
+| `TestWaitGroupLinkerAllocated` | pass | pass |
+| `TestWaitGroupManyBubbles` | pass | pass |
+| `TestWaitGroupMovedBetweenBubblesWithNonZeroCount` | pass | pass |
+| `TestWaitGroupMovedIntoBubble` | pass | pass |
+| `TestWaitGroupMovedOutOfBubble` | pass | pass |
+| `TestWaitGroupOutOfBubble` | pass | pass |
+| `TestWaitGroupRacingAdds` | pass | pass |
+| `TestWeak` | pass | pass |

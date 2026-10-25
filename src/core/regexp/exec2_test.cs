@@ -5,6 +5,8 @@
 namespace go;
 
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.regexp_package;
 
 partial class regexp_internal_test_package {
@@ -15,7 +17,7 @@ internal static readonly @string testdataRe2ExhaustiveTxtˢ = "testdata/re2-exha
 
 // This test is excluded when running under the race detector because
 // it is a very expensive test and takes too long.
-public static void TestRE2Exhaustive(ж<testing.T> Ꮡt) {
+public static partial void TestRE2Exhaustive(ж<testing.T> Ꮡt) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingˢ);
     }

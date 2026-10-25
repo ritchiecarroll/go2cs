@@ -274,12 +274,14 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/"u8, "/{x}"u8, moreGeneral),
         new("/"u8, "/"u8, equivalent),
         new("/"u8, "/{x...}"u8, equivalent),
+
         new("/b/"u8, "/b/a"u8, moreGeneral),
         new("/b/"u8, "/b/a/b"u8, moreGeneral),
         new("/b/"u8, "/b/{$}"u8, moreGeneral),
         new("/b/"u8, "/b/{x}"u8, moreGeneral),
         new("/b/"u8, "/b/"u8, equivalent),
         new("/b/"u8, "/b/{x...}"u8, equivalent),
+
         new("/{z}/"u8, "/{z}/a"u8, moreGeneral),
         new("/{z}/"u8, "/{z}/a/b"u8, moreGeneral),
         new("/{z}/"u8, "/{z}/{$}"u8, moreGeneral),
@@ -298,6 +300,7 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/{m...}"u8, "/{x}"u8, moreGeneral),
         new("/{m...}"u8, "/"u8, equivalent),
         new("/{m...}"u8, "/{x...}"u8, equivalent),
+
         new("/b/{m...}"u8, "/b/a"u8, moreGeneral),
         new("/b/{m...}"u8, "/b/a/b"u8, moreGeneral),
         new("/b/{m...}"u8, "/b/{$}"u8, moreGeneral),
@@ -305,6 +308,7 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/b/{m...}"u8, "/b/"u8, equivalent),
         new("/b/{m...}"u8, "/b/{x...}"u8, equivalent),
         new("/b/{m...}"u8, "/a/{x...}"u8, disjoint),
+
         new("/{z}/{m...}"u8, "/{z}/a"u8, moreGeneral),
         new("/{z}/{m...}"u8, "/{z}/a/b"u8, moreGeneral),
         new("/{z}/{m...}"u8, "/{z}/{$}"u8, moreGeneral),
@@ -328,6 +332,7 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/{$}"u8, "/{x}"u8, disjoint),
         new("/{$}"u8, "/"u8, moreSpecific),
         new("/{$}"u8, "/{x...}"u8, moreSpecific),
+
         new("/b/{$}"u8, "/b"u8, disjoint),
         new("/b/{$}"u8, "/b/a"u8, disjoint),
         new("/b/{$}"u8, "/b/a/b"u8, disjoint),
@@ -339,6 +344,7 @@ public static void TestComparePaths(ж<testing.T> Ꮡt) {
         new("/b/{x}/a/{$}"u8, "/{x}/c/{y...}"u8, overlaps),
         new("/{x}/b/{$}"u8, "/a/{x}/{y}"u8, disjoint),
         new("/{x}/b/{$}"u8, "/a/{x}/c"u8, disjoint),
+
         new("/{z}/{$}"u8, "/{z}/a"u8, disjoint),
         new("/{z}/{$}"u8, "/{z}/a/b"u8, disjoint),
         new("/{z}/{$}"u8, "/{z}/{$}"u8, equivalent),

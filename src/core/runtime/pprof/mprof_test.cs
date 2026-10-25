@@ -116,7 +116,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         var tests = new TestMemoryProfiler_tests[]{new(
             stk: new @string[]{"runtime/pprof.allocatePersistent1K"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
-%v: %v \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
+%v: %v \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+( 0x[0-9,a-f]+ 0x[0-9,a-f]+)?
 #	0x[0-9,a-f]+	runtime/pprof\.allocatePersistent1K\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test\.go:48
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test\.go:87
 
@@ -124,7 +124,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         ), new(
             stk: new @string[]{"runtime/pprof.allocateTransient1M"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
-0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
+0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient1M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:25
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:84
 
@@ -132,7 +132,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         ), new(
             stk: new @string[]{"runtime/pprof.allocateTransient2M"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
-0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
+0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2M\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:31
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:85
 
@@ -140,7 +140,7 @@ public static void TestMemoryProfiler(ж<testing.T> Ꮡt) {
         ), new(
             stk: new @string[]{"runtime/pprof.allocateTransient2MInline"u8, "runtime/pprof.TestMemoryProfiler"u8}.slice(),
             legacy: fmt.Sprintf("""
-0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
+0: 0 \[%v: %v\] @ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+ 0x[0-9,a-f]+
 #	0x[0-9,a-f]+	runtime/pprof\.allocateTransient2MInline\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:35
 #	0x[0-9,a-f]+	runtime/pprof\.TestMemoryProfiler\+0x[0-9,a-f]+	.*runtime/pprof/mprof_test.go:86
 

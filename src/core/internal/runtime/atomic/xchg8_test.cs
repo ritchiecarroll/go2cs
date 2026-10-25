@@ -1,7 +1,6 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build 386 || amd64 || arm || arm64 || loong64 || ppc64 || ppc64le
 namespace go.@internal.runtime;
 
 using atomic = go.@internal.runtime.atomic_package;
@@ -12,7 +11,7 @@ partial class atomic_test_package {
 
 public static void TestXchg8(ж<testing.T> Ꮡt) {
     ref var a = ref heap(new array<uint8>(16), out var Ꮡa);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         var next = (uint8)(i + 50);
         a[i] = next;
     }
@@ -20,7 +19,7 @@ public static void TestXchg8(ж<testing.T> Ꮡt) {
 
     // Compare behavior against non-atomic implementation. Expect the operation
     // to work at any byte offset and to not clobber neighboring values.
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         var next = (uint8)(i + 100);
         var pa = atomic.Xchg8(Ꮡa.at<uint8>(i), next);
         var pb = b[i];

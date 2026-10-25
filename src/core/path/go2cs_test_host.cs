@@ -18,15 +18,15 @@ internal static class Go2CsTestHost
         {
             "filepath",
         });
-        registry.Add("TestBase", path_test_package.TestBase, "path_test.go", 182);
-        registry.Add("TestClean", path_test_package.TestClean, "path_test.go", 67);
-        registry.Add("TestCleanMallocs", path_test_package.TestCleanMallocs, "path_test.go", 78);
-        registry.Add("TestDir", path_test_package.TestDir, "path_test.go", 206);
-        registry.Add("TestExt", path_test_package.TestExt, "path_test.go", 159);
-        registry.Add("TestIsAbs", path_test_package.TestIsAbs, "path_test.go", 230);
-        registry.Add("TestJoin", path_test_package.TestJoin, "path_test.go", 139);
-        registry.Add("TestMatch", path_test_package.TestMatch, "match_test.go", 77);
-        registry.Add("TestSplit", path_test_package.TestSplit, "path_test.go", 107);
+        registry.Add("TestBase", path_test_package.TestBase, "path_test.go", 183);
+        registry.Add("TestClean", path_test_package.TestClean, "path_test.go", 68);
+        registry.Add("TestCleanMallocs", path_test_package.TestCleanMallocs, "path_test.go", 79);
+        registry.Add("TestDir", path_test_package.TestDir, "path_test.go", 207);
+        registry.Add("TestExt", path_test_package.TestExt, "path_test.go", 160);
+        registry.Add("TestIsAbs", path_test_package.TestIsAbs, "path_test.go", 231);
+        registry.Add("TestJoin", path_test_package.TestJoin, "path_test.go", 140);
+        registry.Add("TestMatch", path_test_package.TestMatch, "match_test.go", 78);
+        registry.Add("TestSplit", path_test_package.TestSplit, "path_test.go", 108);
         return TestHost.Run(registry, args);
     }
 }

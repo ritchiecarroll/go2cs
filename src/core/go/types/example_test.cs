@@ -36,6 +36,8 @@ internal static readonly @string aFAFDˢ = @" 0x[a-fA-F\d]*"u8;
 // ExampleScope prints the tree of Scopes of a package created from a
 // set of parsed files.
 public static void ExampleScope() {
+    var filesᴷ = new stackAppend<ж<ast.File>>();
+
     // Parse the source files for a package.
     var fset = token.NewFileSet();
     slice<ж<ast.File>> files = default!;
@@ -59,7 +61,7 @@ func Unused() { {}; {{ var x int; _ = x }} } // make sure empty block scopes get
 
 """u8.Raw()
     }.slice()) {
-        files = append(files, mustParse(fset, src));
+        files = append(filesᴷ, files, mustParse(fset, src));
     }
 
     // Type-check a package consisting of these files.
@@ -204,6 +206,8 @@ func fib(x int) int {
 // types.Info struct: definitions of and references to each named object,
 // and the type, value, and mode of every expression in the package.
 public static void ExampleInfo() {
+    var itemsᴷ = new stackAppend<@string>();
+
     // Parse a single source file.
     @string input = inputᶜ1;
     // We need a specific fileset in this test below for positions.
@@ -245,7 +249,7 @@ public static void ExampleInfo() {
             types.ObjectString(obj, types.RelativeTo(pkg)),
             fset.Position(obj.Pos()),
             strings.Join(uses, ", "u8));
-        items = append(items, item);
+        items = append(itemsᴷ, items, item);
     }
     slices.Sort<slice<@string>, @string>(items); // sort by line:col, in effect
     fmt.Println(strings.Join(items, "\n"u8));

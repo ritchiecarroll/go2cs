@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `errors` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**61 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**80 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/errors`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/errors).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -36,6 +36,25 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestAs/7:As(Errorf(...,_oh_no),_0x?)` | pass | pass |
 | `TestAs/8:As(Errorf(...,_err),_0x?)` | pass | pass |
 | `TestAs/9:As(Errorf(...,_open_non-existing:_The_system_cannot_find_the_file_specified.),_0x?)` | pass | pass |
+| `TestAsType` | pass | pass |
+| `TestAsType/AsType[*errors_test.poser](Errorf(...,_oh_no))` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_<nil>))` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_errorT()))` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_multiError))` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_open_non-existing:_The_system_cannot_find_the_file_specified.))` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_open_non-existing:_The_system_cannot_find_the_file_specified.))#01` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_path))` | pass | pass |
+| `TestAsType/AsType[*fs.PathError](Errorf(...,_path_error))` | pass | pass |
+| `TestAsType/AsType[<nil>](Errorf(...,_err))` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_error))` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_multiError))` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_multiError))#01` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_multiError))#02` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_multiError))#03` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_multiError))#04` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_multiError))#05` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_pitied_the_fool))` | pass | pass |
+| `TestAsType/AsType[errors_test.errorT](Errorf(...,_wrapped))` | pass | pass |
 | `TestAsValidation` | pass | pass |
 | `TestAsValidation/*int(<nil>)` | pass | pass |
 | `TestAsValidation/*string(0x?)` | pass | pass |
@@ -88,11 +107,17 @@ has not implemented, or a platform behavior it provably cannot reproduce. Each i
 the capability it needs.
 
 - BenchmarkAs (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkAsType (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkIs (benchmark): benchmark execution is deferred to Phase 4D
 - Example (example): example execution is deferred to Phase 4D
 - ExampleAs (example): example execution is deferred to Phase 4D
+- ExampleAsType (example): example execution is deferred to Phase 4D
+- ExampleAsType_custom_match (example): example execution is deferred to Phase 4D
+- ExampleAs_custom_match (example): example execution is deferred to Phase 4D
 - ExampleIs (example): example execution is deferred to Phase 4D
+- ExampleIs_custom_match (example): example execution is deferred to Phase 4D
 - ExampleJoin (example): example execution is deferred to Phase 4D
 - ExampleNew (example): example execution is deferred to Phase 4D
 - ExampleNew_errorf (example): example execution is deferred to Phase 4D
+- ExampleNew_unique (example): example execution is deferred to Phase 4D
 - ExampleUnwrap (example): example execution is deferred to Phase 4D

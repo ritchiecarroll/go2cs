@@ -30,7 +30,7 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
 
     // Set every bit in array to 1.
     var a = new slice<uint32>((1 << 12));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 0xffffffffU;
     }
 
@@ -41,7 +41,7 @@ public static partial void TestAnd32(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.And(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -76,7 +76,7 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
 
     // Set every bit in array to 1.
     var a = new slice<uint64>((1 << 12));
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 0xffffffffffffffffUL;
     }
 
@@ -87,7 +87,7 @@ public static partial void TestAnd64(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.And64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -129,7 +129,7 @@ public static partial void TestOr32(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.Or32(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);
@@ -172,7 +172,7 @@ public static partial void TestOr64(ж<testing.T> Ꮡt) {
         var aʗ1 = a;
         var doneʗ1 = done;
         goǃ(() => {
-            foreach (var (iΔ1, _) in aʗ1) {
+            foreach (var iΔ1 in range(aʗ1)) {
                 atomic.Or64(Ꮡ(aʗ1, iΔ1), m);
             }
             doneʗ1.ᐸꟷ(true);

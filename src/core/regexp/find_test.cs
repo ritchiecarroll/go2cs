@@ -62,6 +62,7 @@ internal static slice<FindTest> findTests = new FindTest[]{
     new(@"(((a|b|c)*)(d))"u8, "abcd"u8, build(1, 0, 4, 0, 4, 0, 3, 2, 3, 3, 4)),
     new(@"\a\f\n\r\t\v"u8, "\a\f\n\r\t\v"u8, build(1, 0, 6)),
     new(@"[\a\f\n\r\t\v]+"u8, "\a\f\n\r\t\v"u8, build(1, 0, 6)),
+
     new(@"a*(|(b))c*"u8, "aacc"u8, build(1, 0, 4, 2, 2, -1, -1)),
     new(@"(.*).*"u8, "ab"u8, build(1, 0, 2, 0, 2)),
     new(@"[.]"u8, "."u8, build(1, 0, 1)),
@@ -99,6 +100,8 @@ internal static slice<FindTest> findTests = new FindTest[]{
     new(@"\B"u8, "x y"u8, default!),
     new(@"\B"u8, "xx yy"u8, build(2, 1, 1, 4, 4)),
     new(@"(|a)*"u8, "aa"u8, build(3, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2)),
+    new(@"0A|0[aA]"u8, "0a"u8, build(1, 0, 2)),
+    new(@"0[aA]|0A"u8, "0a"u8, build(1, 0, 2)),
 
     // RE2 tests
     new(@"[^\S\s]"u8, "abcd"u8, default!),
@@ -116,6 +119,7 @@ internal static slice<FindTest> findTests = new FindTest[]{
         @"!""#$%&'()*+,-./:;<=>?@[\]^_{|}~"u8, build(1, 0, 31)),
     new("\\`"u8, "`"u8, build(1, 0, 1)),
     new("[\\`]+"u8, "`"u8, build(1, 0, 1)),
+
     new("\ufffd"u8, ((@string)(new byte[]{0xff})), build(1, 0, 1)),
     new("\ufffd"u8, ((@string)(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xff, 0x77, 0x6f, 0x72, 0x6c, 0x64})), build(1, 5, 6)),
     new(@".*"u8, ((@string)(new byte[]{0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xff, 0x77, 0x6f, 0x72, 0x6c, 0x64})), build(1, 0, 11)),
@@ -142,7 +146,7 @@ internal static slice<slice<nint>> build(nint n, params ꓸꓸꓸnint xʗp) {
     var ret = new slice<slice<nint>>(n);
     nint runLength = len(x) / n;
     nint j = 0;
-    foreach (var (i, _) in ret) {
+    foreach (var i in range(ret)) {
         ret[i] = new slice<nint>(runLength);
         copy(ret[i], x.slice(j));
         j += runLength;
@@ -158,7 +162,7 @@ public static void TestFind(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in findTests) {
         var re = MustCompile(test.pat);
         if (re.String() != test.pat) {
-            Ꮡt.Errorf("String() = `%s`; should be `%s`"u8, re.String(), test.pat);
+            Ꮡt.Errorf("re.String() = %q, want %q"u8, re.String(), test.pat);
         }
         var result = re.Find(slice<byte>(test.text));
         switch (ᐧ) {
@@ -167,20 +171,20 @@ public static void TestFind(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Errorf("expected match; got none: %s"u8, test);
+            Ꮡt.Errorf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
-            @string expect = test.text.slice(test.matches[0][0], test.matches[0][1]);
+            @string want = test.text.slice(test.matches[0][0], test.matches[0][1]);
             if (len(result) != cap(result)) {
-                Ꮡt.Errorf("expected capacity %d got %d: %s"u8, len(result), cap(result), test);
+                Ꮡt.Errorf("got capacity %d, want %d: %s"u8, cap(result), len(result), test);
             }
-            if (expect != ((sstring)result)) {
-                Ꮡt.Errorf("expected %q got %q: %s"u8, expect, result, test);
+            if (want != ((sstring)result)) {
+                Ꮡt.Errorf("got %q, want %q: %s"u8, result, want, test);
             }
             break;
         }}
@@ -196,20 +200,20 @@ public static void TestFindString(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != ""u8: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == ""u8: {
             // Tricky because an empty result has two meanings: no match or empty match.
             if (test.matches[0][0] != test.matches[0][1]) {
-                Ꮡt.Errorf("expected match; got none: %s"u8, test);
+                Ꮡt.Errorf("got no match, want one: %s"u8, test);
             }
             break;
         }
         case {} when test.matches != default! && result != ""u8: {
-            @string expect = test.text.slice(test.matches[0][0], test.matches[0][1]);
-            if (expect != result) {
-                Ꮡt.Errorf("expected %q got %q: %s"u8, expect, result, test);
+            @string want = test.text.slice(test.matches[0][0], test.matches[0][1]);
+            if (want != result) {
+                Ꮡt.Errorf("got %q, want %q: %s"u8, result, want, test);
             }
             break;
         }}
@@ -225,17 +229,17 @@ internal static void testFindIndex(ж<FindTest> Ꮡtest, slice<nint> result, ж<
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got match %v, want none: %s"u8, result, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
-        Ꮡt.Errorf("expected match; got none: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got no match, want one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result != default!: {
-        var expect = test.matches[0];
-        if (expect[0] != result[0] || expect[1] != result[1]) {
-            Ꮡt.Errorf("expected %v got %v: %s"u8, expect, result, Ꮡtest.OrTypedNil());
+        var want = test.matches[0];
+        if (want[0] != result[0] || want[1] != result[1]) {
+            Ꮡt.Errorf("got %v, want %v: %s"u8, result, want, Ꮡtest.OrTypedNil());
         }
         break;
     }}
@@ -278,26 +282,26 @@ public static void TestFindAll(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Fatalf("expected match; got none: %s"u8, test);
+            Ꮡt.Fatalf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
             if (len(test.matches) != len(result)) {
-                Ꮡt.Errorf("expected %d matches; got %d: %s"u8, len(test.matches), len(result), test);
+                Ꮡt.Errorf("got %d matches, want %d: %s"u8, len(result), len(test.matches), test);
                 continue;
             }
             foreach (var (k, e) in test.matches) {
                 var got = result[k];
                 if (len(got) != cap(got)) {
-                    Ꮡt.Errorf("match %d: expected capacity %d got %d: %s"u8, k, len(got), cap(got), test);
+                    Ꮡt.Errorf("match %d: got capacity %d, want %d: %s"u8, k, cap(got), len(got), test);
                 }
-                @string expect = test.text.slice(e[0], e[1]);
-                if (expect != ((sstring)got)) {
-                    Ꮡt.Errorf("match %d: expected %q got %q: %s"u8, k, expect, got, test);
+                @string want = test.text.slice(e[0], e[1]);
+                if (want != ((sstring)got)) {
+                    Ꮡt.Errorf("match %d: got %q, want %q: %s"u8, k, got, want, test);
                 }
             }
             break;
@@ -314,22 +318,22 @@ public static void TestFindAllString(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Errorf("expected match; got none: %s"u8, test);
+            Ꮡt.Errorf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
             if (len(test.matches) != len(result)) {
-                Ꮡt.Errorf("expected %d matches; got %d: %s"u8, len(test.matches), len(result), test);
+                Ꮡt.Errorf("got %d matches, want %d: %s"u8, len(result), len(test.matches), test);
                 continue;
             }
             foreach (var (k, e) in test.matches) {
-                @string expect = test.text.slice(e[0], e[1]);
-                if (expect != result[k]) {
-                    Ꮡt.Errorf("expected %q got %q: %s"u8, expect, result, test);
+                @string want = test.text.slice(e[0], e[1]);
+                if (want != result[k]) {
+                    Ꮡt.Errorf("got %q, want %q: %s"u8, result[k], want, test);
                 }
             }
             break;
@@ -346,21 +350,21 @@ internal static void testFindAllIndex(ж<FindTest> Ꮡtest, slice<slice<nint>> r
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got match %v, want none: %s"u8, result, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
-        Ꮡt.Errorf("expected match; got none: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got no match, want one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result != default!: {
         if (len(test.matches) != len(result)) {
-            Ꮡt.Errorf("expected %d matches; got %d: %s"u8, len(test.matches), len(result), Ꮡtest.OrTypedNil());
+            Ꮡt.Errorf("got %d matches, want %d: %s"u8, len(result), len(test.matches), Ꮡtest.OrTypedNil());
             return;
         }
         foreach (var (k, e) in test.matches) {
             if (e[0] != result[k][0] || e[1] != result[k][1]) {
-                Ꮡt.Errorf("match %d: expected %v got %v: %s"u8, k, e, result[k], Ꮡtest.OrTypedNil());
+                Ꮡt.Errorf("match %d: got %v, want %v: %s"u8, k, result[k], e, Ꮡtest.OrTypedNil());
             }
         }
         break;
@@ -390,24 +394,24 @@ internal static void testSubmatchBytes(ж<FindTest> Ꮡtest, nint n, slice<nint>
     ref var test = ref Ꮡtest.DerefOrNull();
 
     if (len(submatches) != len(result) * 2) {
-        Ꮡt.Errorf("match %d: expected %d submatches; got %d: %s"u8, n, len(submatches) / 2, len(result), Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("match %d: got %d submatches, want %d: %s"u8, n, len(result), len(submatches) / 2, Ꮡtest.OrTypedNil());
         return;
     }
     for (nint k = 0; k < len(submatches); k += 2) {
         if (submatches[k] == -1) {
             if (result[k / 2] != default!) {
-                Ꮡt.Errorf("match %d: expected nil got %q: %s"u8, n, result, Ꮡtest.OrTypedNil());
+                Ꮡt.Errorf("match %d: got %q, want nil: %s"u8, n, result, Ꮡtest.OrTypedNil());
             }
             continue;
         }
         var got = result[k / 2];
         if (len(got) != cap(got)) {
-            Ꮡt.Errorf("match %d: expected capacity %d got %d: %s"u8, n, len(got), cap(got), Ꮡtest.OrTypedNil());
+            Ꮡt.Errorf("match %d: got capacity %d, want %d: %s"u8, n, cap(got), len(got), Ꮡtest.OrTypedNil());
             return;
         }
-        @string expect = test.text.slice(submatches[k], submatches[k + 1]);
-        if (expect != ((sstring)got)) {
-            Ꮡt.Errorf("match %d: expected %q got %q: %s"u8, n, expect, got, Ꮡtest.OrTypedNil());
+        @string want = test.text.slice(submatches[k], submatches[k + 1]);
+        if (want != ((sstring)got)) {
+            Ꮡt.Errorf("match %d: got %q, want %q: %s"u8, n, got, want, Ꮡtest.OrTypedNil());
             return;
         }
     }
@@ -425,11 +429,11 @@ public static void TestFindSubmatch(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Errorf("expected match; got none: %s"u8, test);
+            Ꮡt.Errorf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
@@ -443,19 +447,19 @@ internal static void testSubmatchString(ж<FindTest> Ꮡtest, nint n, slice<nint
     ref var test = ref Ꮡtest.DerefOrNull();
 
     if (len(submatches) != len(result) * 2) {
-        Ꮡt.Errorf("match %d: expected %d submatches; got %d: %s"u8, n, len(submatches) / 2, len(result), Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("match %d: got %d submatches, want %d: %s"u8, n, len(result), len(submatches) / 2, Ꮡtest.OrTypedNil());
         return;
     }
     for (nint k = 0; k < len(submatches); k += 2) {
         if (submatches[k] == -1) {
             if (result[k / 2] != "") {
-                Ꮡt.Errorf("match %d: expected nil got %q: %s"u8, n, result, Ꮡtest.OrTypedNil());
+                Ꮡt.Errorf("match %d: got %q, want empty string: %s"u8, n, result, Ꮡtest.OrTypedNil());
             }
             continue;
         }
-        @string expect = test.text.slice(submatches[k], submatches[k + 1]);
-        if (expect != result[k / 2]) {
-            Ꮡt.Errorf("match %d: expected %q got %q: %s"u8, n, expect, result, Ꮡtest.OrTypedNil());
+        @string want = test.text.slice(submatches[k], submatches[k + 1]);
+        if (want != result[k / 2]) {
+            Ꮡt.Errorf("match %d: got %q, want %q: %s"u8, n, result[k / 2], want, Ꮡtest.OrTypedNil());
             return;
         }
     }
@@ -473,11 +477,11 @@ public static void TestFindStringSubmatch(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Errorf("expected match; got none: %s"u8, test);
+            Ꮡt.Errorf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
@@ -487,14 +491,14 @@ public static void TestFindStringSubmatch(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void testSubmatchIndices(ж<FindTest> Ꮡtest, nint n, slice<nint> expect, slice<nint> result, ж<testing.T> Ꮡt) {
-    if (len(expect) != len(result)) {
-        Ꮡt.Errorf("match %d: expected %d matches; got %d: %s"u8, n, len(expect) / 2, len(result) / 2, Ꮡtest.OrTypedNil());
+internal static void testSubmatchIndices(ж<FindTest> Ꮡtest, nint n, slice<nint> want, slice<nint> result, ж<testing.T> Ꮡt) {
+    if (len(want) != len(result)) {
+        Ꮡt.Errorf("match %d: got %d matches, want %d: %s"u8, n, len(result) / 2, len(want) / 2, Ꮡtest.OrTypedNil());
         return;
     }
-    foreach (var (k, e) in expect) {
+    foreach (var (k, e) in want) {
         if (e != result[k]) {
-            Ꮡt.Errorf("match %d: submatch error: expected %v got %v: %s"u8, n, expect, result, Ꮡtest.OrTypedNil());
+            Ꮡt.Errorf("match %d: submatch error: got %v, want %v: %s"u8, n, result, want, Ꮡtest.OrTypedNil());
         }
     }
 }
@@ -508,11 +512,11 @@ internal static void testFindSubmatchIndex(ж<FindTest> Ꮡtest, slice<nint> res
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got match %v, want none: %s"u8, result, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
-        Ꮡt.Errorf("expected match; got none: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got no match, want one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result != default!: {
@@ -561,15 +565,15 @@ public static void TestFindAllSubmatch(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Errorf("expected match; got none: %s"u8, test);
+            Ꮡt.Errorf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when len(test.matches) != len(result): {
-            Ꮡt.Errorf("expected %d matches; got %d: %s"u8, len(test.matches), len(result), test);
+            Ꮡt.Errorf("got %d matches, want %d: %s"u8, len(result), len(test.matches), test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
@@ -593,15 +597,15 @@ public static void TestFindAllStringSubmatch(ж<testing.T> Ꮡt) {
             break;
         }
         case {} when test.matches == default! && result != default!: {
-            Ꮡt.Errorf("expected no match; got one: %s"u8, test);
+            Ꮡt.Errorf("got match %q, want none: %s"u8, result, test);
             break;
         }
         case {} when test.matches != default! && result == default!: {
-            Ꮡt.Errorf("expected match; got none: %s"u8, test);
+            Ꮡt.Errorf("got no match, want one: %s"u8, test);
             break;
         }
         case {} when len(test.matches) != len(result): {
-            Ꮡt.Errorf("expected %d matches; got %d: %s"u8, len(test.matches), len(result), test);
+            Ꮡt.Errorf("got %d matches, want %d: %s"u8, len(result), len(test.matches), test);
             break;
         }
         case {} when test.matches != default! && result != default!: {
@@ -622,15 +626,15 @@ internal static void testFindAllSubmatchIndex(ж<FindTest> Ꮡtest, slice<slice<
         break;
     }
     case {} when test.matches == default! && result != default!: {
-        Ꮡt.Errorf("expected no match; got one: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got match %v, want none: %s"u8, result, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result == default!: {
-        Ꮡt.Errorf("expected match; got none: %s"u8, Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got no match, want one: %s"u8, Ꮡtest.OrTypedNil());
         break;
     }
     case {} when len(test.matches) != len(result): {
-        Ꮡt.Errorf("expected %d matches; got %d: %s"u8, len(test.matches), len(result), Ꮡtest.OrTypedNil());
+        Ꮡt.Errorf("got %d matches, want %d: %s"u8, len(result), len(test.matches), Ꮡtest.OrTypedNil());
         break;
     }
     case {} when test.matches != default! && result != default!: {

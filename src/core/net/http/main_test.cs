@@ -16,6 +16,7 @@ using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using global::go.net;
+using iter = iter_package;
 using static global::go.net.http_internal_test_package;
 
 partial class http_test_package {
@@ -46,9 +47,9 @@ internal static readonly @string runtimeMHeapScavengerˢ = "runtime.MHeap_Scaven
 internal static partial slice<@string> /*gs*/ interestingGoroutines() {
     slice<@string> gs = default!;
 
-    var buf = new slice<byte>((2 << (int)(20)));
+    var buf = new slice<byte>((2 << 20));
     buf = buf.slice(0, runtime.Stack(buf, true));
-    foreach (var (_, g) in strings.Split(((@string)buf), "\n\n"u8)) {
+    foreach (var g in range<@string>(strings.SplitSeq((@string)buf, "\n\n"u8).Invoke)) {
         var (_, stack, _) = strings.Cut(g, "\n"u8);
         stack = strings.TrimSpace(stack);
         if (stack == ""u8 || strings.Contains(stack, testingMBeforeFunc1ˢ) || strings.Contains(stack, osSignalSignalRecvˢ) || strings.Contains(stack, createdByNetStartServerˢ) || strings.Contains(stack, createdByTestingRunTestsˢ) || strings.Contains(stack, closeWriteAndWaitˢ) || strings.Contains(stack, testingMainˢ) ||

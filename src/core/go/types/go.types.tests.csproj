@@ -35,6 +35,13 @@
     <Nullable>annotations</Nullable>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
@@ -101,6 +108,7 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
+    <Compile Include="alias_test.cs" />
     <Compile Include="api_test.cs" />
     <Compile Include="builtins_test.cs" />
     <Compile Include="check_test.cs" />
@@ -156,6 +164,7 @@
     <None Include="../../internal/types/testdata/check/cycles4.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/cycles4.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/cycles5.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/cycles5.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/cycles5a.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/cycles5a.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/check/cycles6.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/cycles6.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/decls0.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/decls0.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/decls1.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/decls1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/decls2/decls2a.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/decls2/decls2a.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -163,6 +172,7 @@
     <None Include="../../internal/types/testdata/check/decls3.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/decls3.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/decls4.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/decls4.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/decls5.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/decls5.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/check/doubled_labels.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/doubled_labels.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/errors.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/errors.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/expr0.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/expr0.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/expr1.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/expr1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -178,6 +188,7 @@
     <None Include="../../internal/types/testdata/check/go1_21_19.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/go1_21_19.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/go1_21_22.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/go1_21_22.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/go1_22_21.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/go1_22_21.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/check/go1_25.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/go1_25.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/go1_8.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/go1_8.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/go1_xx_19.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/go1_xx_19.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/gotos.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/gotos.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -191,6 +202,7 @@
     <None Include="../../internal/types/testdata/check/init2.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/init2.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/issue25008/issue25008a.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/issue25008/issue25008a.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/issue25008/issue25008b.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/issue25008/issue25008b.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/check/issue70974.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/issue70974.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/issues0.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/issues0.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/issues1.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/issues1.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/check/labels.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/check/labels.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -262,7 +274,6 @@
     <None Include="../../internal/types/testdata/fixedbugs/issue43109.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43109.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue43110.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43110.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue43124.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43124.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="../../internal/types/testdata/fixedbugs/issue43125.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43125.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue43190.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43190.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue43527.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43527.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue43671.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue43671.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -457,6 +468,7 @@
     <None Include="../../internal/types/testdata/fixedbugs/issue67683.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue67683.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue67872.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue67872.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue67962.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue67962.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue68162.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue68162.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue68184.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue68184.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue68903.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue68903.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue68935.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue68935.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -466,9 +478,24 @@
     <None Include="../../internal/types/testdata/fixedbugs/issue70150.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue70150.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue70417.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue70417.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue70526.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue70526.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue70549.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue70549.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue71131.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue71131.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue71198.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue71198.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/fixedbugs/issue71284.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue71284.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue72936.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue72936.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue73428.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue73428.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue75194.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue75194.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue75883.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue75883.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue75885.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue75885.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue75918.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue75918.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue75986.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue75986.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue76103.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue76103.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue76220.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue76220.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue76366.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue76366.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue76383.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue76383.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue76384.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue76384.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue76478.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue76478.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="../../internal/types/testdata/fixedbugs/issue78163.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/fixedbugs/issue78163.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/spec/assignability.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/spec/assignability.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/spec/comparable.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/spec/comparable.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/spec/comparable1.19.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/spec/comparable1.19.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -482,6 +509,7 @@
     <None Include="../../internal/types/testdata/spec/typeAliases1.23b.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/spec/typeAliases1.23b.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="../../internal/types/testdata/spec/typeAliases1.8.go" Link="go2cs_shared_fixtures/up2/internal/types/testdata/spec/typeAliases1.8.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="alias.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="alias_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="api.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="api_predicates.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="api_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -500,6 +528,7 @@
     <None Include="context.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="context_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="conversions.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="cycles.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="decl.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="errorcalls_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="errors.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -545,6 +574,7 @@
     <None Include="package.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="pointer.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="predicates.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="range.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="recording.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="resolver.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="resolver_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -593,6 +623,7 @@
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
     <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
@@ -609,6 +640,7 @@
     <ProjectReference Include="$(go2csPath)core/internal/diff/internal.diff.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/godebug/internal.godebug.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/goversion/internal.goversion.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/testenv/internal.testenv.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/types/errors/internal.types.errors.csproj" />

@@ -190,10 +190,13 @@ internal static slice<byte> createBlob(ж<testing.T> Ꮡt, nint i) {
 }
 
 internal static slice<slice<byte>> createMetaDataBlobs(ж<testing.T> Ꮡt, nint nb) {
+    var resᴷ = new stackAppend<slice<byte>>(moves: true);
+
     var res = new slice<byte>[]{}.slice();
     for (nint i = 0; i < nb; i++) {
-        res = append(res, createBlob(Ꮡt, i));
+        res = append(resᴷ, res, createBlob(Ꮡt, i));
     }
+    res = move2heap(resᴷ, res);
     return res;
 }
 

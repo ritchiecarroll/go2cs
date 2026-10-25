@@ -11,7 +11,7 @@ internal static class Go2CsTestHost
         {
             "copyright_test.go",
         });
-        registry.Add("TestCopyright", copyright_internal_test_package.TestCopyright, "copyright_test.go", 34);
+        registry.Add("TestCopyright", copyright_internal_test_package.TestCopyright, "copyright_test.go", 35);
         return TestHost.Run(registry, args);
     }
 }

@@ -7,6 +7,8 @@ using field = go.crypto.@internal.fips140.edwards25519.field_package;
 using hex = encoding.hex_package;
 using reflect = reflect_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.crypto.@internal.fips140.edwards25519;
 using static go.crypto.@internal.fips140.edwards25519_package;
@@ -110,7 +112,7 @@ public static void TestAddSubNegOnBasePoint(ж<testing.T> Ꮡt) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object pointIsUnexpectedlyˢ = (@string)"Point is unexpectedly comparable"u8;
 
-public static void TestComparable(ж<testing.T> Ꮡt) {
+public static partial void TestComparable(ж<testing.T> Ꮡt) {
     if (reflect.TypeOf(new Point(nil)).Comparable()) {
         Ꮡt.Error(pointIsUnexpectedlyˢ);
     }

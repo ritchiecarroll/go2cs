@@ -107,4 +107,12 @@ internal static map<@string, bool> incNonDefaults(ж<testing.T> Ꮡt) {
     return seen;
 }
 
+public static void TestRemoved(ж<testing.T> Ꮡt) {
+    foreach (var (_, info) in godebugs.Removed) {
+        if (godebugs.Lookup(info.Name) != nil) {
+            Ꮡt.Fatalf("GODEBUG: %v exists in both Removed and All"u8, info.Name);
+        }
+    }
+}
+
 } // end godebugs_test_package

@@ -414,6 +414,8 @@ internal partial struct query {
 // run runs the jarTest.
 internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.net.http.cookiejar_package.Jar> Ꮡjar) {
     ref var jar = ref Ꮡjar.DerefOrNull();
+    var csᴷ = new stackAppend<@string>();
+    var sᴷ = new stackAppend<@string>();
 
     var now = tNow;
 
@@ -441,7 +443,7 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
             if (strings.ContainsAny(v, " ,"u8) || cookie.Quoted) {
                 v = @""""u8 + v + @""""u8;
             }
-            cs = append(cs, cookie.Name + "="u8 + v);
+            cs = append(csᴷ, cs, cookie.Name + "="u8 + v);
         }
     }
     slices.Sort<slice<@string>, @string>(cs);
@@ -458,7 +460,7 @@ internal static void run(this jarTest test, ж<testing.T> Ꮡt, ж<global::go.ne
         now = now.Add(1001 * time.Millisecond);
         slice<@string> s = default!;
         foreach (var (_, c) in Ꮡjar.cookies(mustParseURL(query.toURL), now)) {
-            s = append(s, c.String());
+            s = append(sᴷ, s, c.String());
         }
         {
             @string gotΔ1 = strings.Join(s, " "u8); if (gotΔ1 != query.want) {
@@ -503,6 +505,62 @@ internal static array<jarTest> basicsTests = new jarTest[]{
             new("https://www.host.test"u8, "A=a"u8),
             new("https://www.host.test/"u8, "A=a"u8),
             new("https://www.host.test/some/path"u8, "A=a"u8)
+        }.slice()
+    ),
+    new(
+        "Secure cookies are sent for localhost"u8,
+        "http://localhost:8910/"u8,
+        new @string[]{"A=a; secure"u8}.slice(),
+        "A=a"u8,
+        new query[]{
+            new("http://localhost:8910"u8, "A=a"u8),
+            new("http://localhost:8910/"u8, "A=a"u8),
+            new("http://localhost:8910/some/path"u8, "A=a"u8),
+            new("https://localhost:8910"u8, "A=a"u8),
+            new("https://localhost:8910/"u8, "A=a"u8),
+            new("https://localhost:8910/some/path"u8, "A=a"u8)
+        }.slice()
+    ),
+    new(
+        "Secure cookies are sent for localhost (tld)"u8,
+        "http://example.LOCALHOST:8910/"u8,
+        new @string[]{"A=a; secure"u8}.slice(),
+        "A=a"u8,
+        new query[]{
+            new("http://example.LOCALHOST:8910"u8, "A=a"u8),
+            new("http://example.LOCALHOST:8910/"u8, "A=a"u8),
+            new("http://example.LOCALHOST:8910/some/path"u8, "A=a"u8),
+            new("https://example.LOCALHOST:8910"u8, "A=a"u8),
+            new("https://example.LOCALHOST:8910/"u8, "A=a"u8),
+            new("https://example.LOCALHOST:8910/some/path"u8, "A=a"u8)
+        }.slice()
+    ),
+    new(
+        "Secure cookies are sent for localhost (ipv6)"u8,
+        "http://[::1]:8910/"u8,
+        new @string[]{"A=a; secure"u8}.slice(),
+        "A=a"u8,
+        new query[]{
+            new("http://[::1]:8910"u8, "A=a"u8),
+            new("http://[::1]:8910/"u8, "A=a"u8),
+            new("http://[::1]:8910/some/path"u8, "A=a"u8),
+            new("https://[::1]:8910"u8, "A=a"u8),
+            new("https://[::1]:8910/"u8, "A=a"u8),
+            new("https://[::1]:8910/some/path"u8, "A=a"u8)
+        }.slice()
+    ),
+    new(
+        "Localhost only if it's a segment"u8,
+        "http://notlocalhost/"u8,
+        new @string[]{"A=a; secure"u8}.slice(),
+        "A=a"u8,
+        new query[]{
+            new("http://notlocalhost"u8, ""u8),
+            new("http://notlocalhost/"u8, ""u8),
+            new("http://notlocalhost/some/path"u8, ""u8),
+            new("https://notlocalhost"u8, "A=a"u8),
+            new("https://notlocalhost/"u8, "A=a"u8),
+            new("https://notlocalhost/some/path"u8, "A=a"u8)
         }.slice()
     ),
     new(

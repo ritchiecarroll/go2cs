@@ -6,17 +6,34 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `runtime/trace` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-28 · converter `e6fc21050`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**2 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**19 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/runtime/trace`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/runtime/trace).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
+| `TestFlightRecorder` | pass | pass |
+| `TestFlightRecorderConcurrentWriteTo` | pass | pass |
+| `TestFlightRecorderDoubleStart` | pass | pass |
+| `TestFlightRecorderEnabled` | pass | pass |
+| `TestFlightRecorderGenerationCount` | pass | pass |
+| `TestFlightRecorderGenerationCount/MaxBytes` | pass | pass |
+| `TestFlightRecorderGenerationCount/MinAge` | pass | pass |
+| `TestFlightRecorderLog` | pass | pass |
+| `TestFlightRecorderStartStop` | pass | pass |
+| `TestFlightRecorderWriteToDisabled` | pass | pass |
+| `TestSubscribers` | pass | pass |
+| `TestSubscribers/start(flight)_start(trace)_stop(flight)_stop(trace)` | pass | pass |
+| `TestSubscribers/start(flight)_start(trace)_stop(trace)_stop(flight)` | pass | pass |
+| `TestSubscribers/start(flight)_stop(flight)_start(trace)_stop(trace)` | pass | pass |
+| `TestSubscribers/start(flight)_stop(flight)_start(trace)_stop(trace)#01` | pass | pass |
+| `TestSubscribers/start(trace)_start(flight)_stop(trace)_stop(flight)` | pass | pass |
+| `TestTraceAndFlightRecorder` | pass | pass |
 | `TestTraceDoubleStart` | pass | pass |
 | `TestTraceStartStop` | pass | pass |
 
@@ -28,6 +45,7 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkLog (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkNewTask (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkStartRegion (benchmark): benchmark execution is deferred to Phase 4D
 - Example (example): example execution is deferred to Phase 4D

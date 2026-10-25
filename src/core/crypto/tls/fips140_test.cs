@@ -269,7 +269,7 @@ public static void TestFIPSServerCipherSuites(ж<testing.T> Ꮡt) {
 
             var clientHelloʗ1 = clientHello;
             var serverConfigʗ2 = serverConfigʗ1;
-            runWithFIPSDisabled(tΔ1, (ж<testing.T> tΔ2) => {
+            runWithFIPSDisabled(tΔ1, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
                 testClientHello(tΔ2, serverConfigʗ2, new global::go.crypto.tls_package.clientHelloMsgжhandshakeMessage(clientHelloʗ1));
             });
 
@@ -440,6 +440,7 @@ internal static partial void testFIPSClientHello(ж<testing.T> Ꮡt) {
     try {
         // Test that no matter what we put in the client config,
         // the client does not offer non-FIPS configurations.
+
         var (c, s) = net.Pipe();
         var cʗ1 = c;
         defer(() => cʗ1.Close(), ref ᒐ);
@@ -753,6 +754,7 @@ internal static ж<fipsCertificate> fipsCert(ж<testing.T> Ꮡt, @string name, a
         ),
         NotBefore: time_package.Unix(0, 0),
         NotAfter: time_package.Unix(0, 0),
+
         KeyUsage: (Δx509.KeyUsage)(Δx509.KeyUsageKeyEncipherment | Δx509.KeyUsageDigitalSignature),
         ExtKeyUsage: new Δx509.ExtKeyUsage[]{Δx509.ExtKeyUsageServerAuth, Δx509.ExtKeyUsageClientAuth}.slice(),
         BasicConstraintsValid: true

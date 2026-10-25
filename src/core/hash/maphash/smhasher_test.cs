@@ -5,6 +5,7 @@
 namespace go.hash;
 
 using fmt = fmt_package;
+using maps = @internal.runtime.maps_package;
 using testenv = @internal.testenv_package;
 using math = math_package;
 using rand = go.math.rand_package;
@@ -12,8 +13,8 @@ using runtime = runtime_package;
 using slices = slices_package;
 using strings = strings_package;
 using testing = testing_package;
-using @unsafe = unsafe_package;
 using @internal;
+using @internal.runtime;
 using go.math;
 using static go.hash.maphash_package;
 
@@ -531,7 +532,7 @@ internal static readonly @string helloˢ = "hello"u8;
 
 // Make sure different seed values generate different hashes.
 public static void TestSmhasherSeed(ж<testing.T> Ꮡt) {
-    if (/* unsafe.Sizeof(uintptr(0)) */ (uintptr)8 == 4) {
+    if (!maps.Use64BitHash) {
         Ꮡt.Skip(bitPlatformsDonTHaveˢ);
     }
     Ꮡt.Parallel();

@@ -104,12 +104,13 @@ public static void TestFindHandler(ж<testing.T> Ꮡt) {
 
     foreach (var (_, test) in new TestFindHandler_typeᴛ1[]{
         new("GET"u8, "/"u8, "&http.handler{i:1}"u8),
-        new("GET"u8, "//"u8, @"&http.redirectHandler{url:""/"", code:301}"u8),
-        new("GET"u8, "/foo/../bar/./..//baz"u8, @"&http.redirectHandler{url:""/baz"", code:301}"u8),
+        new("GET"u8, "//"u8, @"&http.redirectHandler{url:""/"", code:307}"u8),
+        new("GET"u8, "/foo/../bar/./..//baz"u8, @"&http.redirectHandler{url:""/baz"", code:307}"u8),
         new("GET"u8, "/foo"u8, "&http.handler{i:3}"u8),
         new("GET"u8, "/foo/x"u8, "&http.handler{i:2}"u8),
         new("GET"u8, "/bar/x"u8, "&http.handler{i:4}"u8),
-        new("GET"u8, "/bar"u8, @"&http.redirectHandler{url:""/bar/"", code:301}"u8),
+        new("GET"u8, "/bar"u8, @"&http.redirectHandler{url:""/bar/"", code:307}"u8),
+        new("CONNECT"u8, ""u8, "(http.HandlerFunc)(.*)"u8),
         new("CONNECT"u8, "/"u8, "&http.handler{i:1}"u8),
         new("CONNECT"u8, "//"u8, "&http.handler{i:1}"u8),
         new("CONNECT"u8, "//foo"u8, "&http.handler{i:5}"u8),
@@ -117,7 +118,7 @@ public static void TestFindHandler(ж<testing.T> Ꮡt) {
         new("CONNECT"u8, "/foo"u8, "&http.handler{i:3}"u8),
         new("CONNECT"u8, "/foo/x"u8, "&http.handler{i:2}"u8),
         new("CONNECT"u8, "/bar/x"u8, "&http.handler{i:4}"u8),
-        new("CONNECT"u8, "/bar"u8, @"&http.redirectHandler{url:""/bar/"", code:301}"u8)
+        new("CONNECT"u8, "/bar"u8, @"&http.redirectHandler{url:""/bar/"", code:307}"u8)
     }.slice()) {
         ref var r = ref heap(new global::go.net.http_package.Request(), out var Ꮡr);
         r.Method = test.method;
@@ -125,7 +126,7 @@ public static void TestFindHandler(ж<testing.T> Ꮡt) {
         r.URL = Ꮡ(new url.URL(Path: test.path));
         var (gotH, _, _, _) = mux.findHandler(Ꮡr);
         @string got = fmt.Sprintf("%#v"u8, gotH);
-        if (got != test.wantHandler) {
+        if (!regexp.MustCompile(test.wantHandler).MatchString(got)) {
             Ꮡt.Errorf("%s %q: got %q, want %q"u8, test.method, test.path, got, test.wantHandler);
         }
     }

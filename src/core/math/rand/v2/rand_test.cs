@@ -115,7 +115,7 @@ internal static void checkSampleSliceDistributions(ж<testing.T> Ꮡt, slice<flo
 internal static slice<float64> generateNormalSamples(nint nsamples, float64 mean, float64 stddev, uint64 seed) {
     var r = New(new rand.PCGжSource(NewPCG(seed, seed)));
     var samples = new slice<float64>(nsamples);
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         samples[i] = r.NormFloat64() * stddev + mean;
     }
     return samples;
@@ -123,6 +123,7 @@ internal static slice<float64> generateNormalSamples(nint nsamples, float64 mean
 
 internal static void testNormalDistribution(ж<testing.T> Ꮡt, nint nsamples, float64 mean, float64 stddev, uint64 seed) {
     //fmt.Printf("testing nsamples=%v mean=%v stddev=%v seed=%v\n", nsamples, mean, stddev, seed);
+
     var samples = generateNormalSamples(nsamples, mean, stddev, seed);
     var errorScale = max(1.0D, stddev); // Error scales with stddev
     var expected = Ꮡ(new statsResults(mean, stddev, 0.10D * errorScale, 0.08D * errorScale));
@@ -169,7 +170,7 @@ public static void TestNonStandardNormalValues(ж<testing.T> Ꮡt) {
 internal static slice<float64> generateExponentialSamples(nint nsamples, float64 rate, uint64 seed) {
     var r = New(new rand.PCGжSource(NewPCG(seed, seed)));
     var samples = new slice<float64>(nsamples);
-    foreach (var (i, _) in samples) {
+    foreach (var i in range(samples)) {
         samples[i] = r.ExpFloat64() / rate;
     }
     return samples;
@@ -177,6 +178,7 @@ internal static slice<float64> generateExponentialSamples(nint nsamples, float64
 
 internal static void testExponentialDistribution(ж<testing.T> Ꮡt, nint nsamples, float64 rate, uint64 seed) {
     //fmt.Printf("testing nsamples=%v rate=%v seed=%v\n", nsamples, rate, seed);
+
     ref var mean = ref heap<float64>(out var Ꮡmean);
     mean = 1D / rate;
     ref var stddev = ref heap<float64>(out var Ꮡstddev);
@@ -289,7 +291,7 @@ internal static nint compareUint32Slices(slice<uint32> s1, slice<uint32> s2) {
         }
         return len(s1) + 1;
     }
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (s1[i] != s2[i]) {
             return i;
         }
@@ -307,7 +309,7 @@ internal static nint compareFloat32Slices(slice<float32> s1, slice<float32> s2) 
         }
         return len(s1) + 1;
     }
-    foreach (var (i, _) in s1) {
+    foreach (var i in range(s1)) {
         if (!nearEqual((float64)s1[i], (float64)s2[i], 0D, 1e-7D)) {
             return i;
         }
@@ -461,7 +463,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                 new(name: "Perm"u8, fn: () => encodePerm(rʗ3.Perm(n))),
                 new(name: "Shuffle"u8, fn: () => {
                     // Generate permutation using Shuffle.
-                    foreach (var (i, _) in pʗ1) {
+                    foreach (var i in range(pʗ1)) {
                         pʗ1[i] = i;
                     }
                     var pʗ2 = pʗ1;
@@ -487,7 +489,7 @@ public static void TestUniformFactorial(ж<testing.T> Ꮡt) {
                         nsamples = 1000;
                     }
                     var samples = new slice<float64>(nsamples);
-                    foreach (var (i, _) in samples) {
+                    foreach (var i in range(samples)) {
                         // Generate some uniformly distributed values and count their occurrences.
                         UntypedInt iters = 1000;
                         var counts = new slice<nint>(nfact);
@@ -615,7 +617,7 @@ public static void BenchmarkGlobalIntN1000(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     nint t = default!;
-    nint arg = keep(1000);
+    nint arg = keep<nint>(1000);
     for (nint n = b.N; n > 0; n--) {
         t += IntN(arg);
     }
@@ -627,7 +629,7 @@ public static void BenchmarkIntN1000(ж<testing.B> Ꮡb) {
 
     var r = testRand();
     nint t = default!;
-    nint arg = keep(1000);
+    nint arg = keep<nint>(1000);
     for (nint n = b.N; n > 0; n--) {
         t += r.IntN(arg);
     }
@@ -839,7 +841,7 @@ public static void BenchmarkPerm30ViaShuffle(ж<testing.B> Ꮡb) {
     nint t = default!;
     for (nint n = b.N; n > 0; n--) {
         var p = new slice<nint>(30);
-        foreach (var (i, _) in p) {
+        foreach (var i in range(p)) {
             p[i] = i;
         }
         var pʗ1 = p;
@@ -888,7 +890,7 @@ public static partial void BenchmarkConcurrent(ж<testing.B> Ꮡb) {
 
 public static void TestN(ж<testing.T> Ꮡt) {
     for (nint i = 0; i < 1000; i++) {
-        nint v = N(10);
+        nint v = N<nint>(10);
         if (v < 0 || v >= 10) {
             Ꮡt.Fatalf("N(10) returned %d"u8, v);
         }

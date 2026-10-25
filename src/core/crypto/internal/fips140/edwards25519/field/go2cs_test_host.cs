@@ -13,8 +13,6 @@ internal static class Go2CsTestHost
             "fe_alias_test.go",
             "fe_amd64.go",
             "fe_amd64_noasm.go",
-            "fe_arm64.go",
-            "fe_arm64_noasm.go",
             "fe_bench_test.go",
             "fe_generic.go",
             "fe_test.go",
@@ -24,12 +22,11 @@ internal static class Go2CsTestHost
         });
         registry.Add("TestAliasing", field_internal_test_package.TestAliasing, "fe_alias_test.go", 87);
         registry.Add("TestBytesBigEquivalence", field_internal_test_package.TestBytesBigEquivalence, "fe_test.go", 215);
-        registry.Add("TestCarryPropagate", field_internal_test_package.TestCarryPropagate, "fe_test.go", 492);
         registry.Add("TestConsistency", field_internal_test_package.TestConsistency, "fe_test.go", 303);
         registry.Add("TestDecimalConstants", field_internal_test_package.TestDecimalConstants, "fe_test.go", 284);
         registry.Add("TestEqual", field_internal_test_package.TestEqual, "fe_test.go", 331);
-        registry.Add("TestFeMul", field_internal_test_package.TestFeMul, "fe_test.go", 536);
-        registry.Add("TestFeSquare", field_internal_test_package.TestFeSquare, "fe_test.go", 516);
+        registry.Add("TestFeMul", field_internal_test_package.TestFeMul, "fe_test.go", 512);
+        registry.Add("TestFeSquare", field_internal_test_package.TestFeSquare, "fe_test.go", 492);
         registry.Add("TestInvert", field_internal_test_package.TestInvert, "fe_test.go", 346);
         registry.Add("TestMul64to128", field_internal_test_package.TestMul64to128, "fe_test.go", 128);
         registry.Add("TestMult32", field_internal_test_package.TestMult32, "fe_test.go", 410);

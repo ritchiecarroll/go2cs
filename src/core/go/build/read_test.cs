@@ -254,7 +254,7 @@ public static void TestReadFailuresIgnored(ж<testing.T> Ꮡt) {
     // Convert tests not to return syntax errors.
     var tests = new slice<readTest>(len(readFailuresTests));
     copy(tests, readFailuresTests);
-    foreach (var (i, _) in tests) {
+    foreach (var i in range(tests)) {
         var tt = Ꮡ(tests, i);
         if (!strings.Contains((~tt).err, nulˢ)) {
             tt.Value.err = ""u8;

@@ -334,7 +334,7 @@ public static void TestGobEncoderArrayField(ж<testing.T> Ꮡt) {
     var enc = NewEncoder(new gob_test_package.bytes_BufferжWriter(b));
     ref var a = ref heap(new GobTestArrayEncDec(), out var Ꮡa);
     a.X = 17;
-    foreach (var (i, _) in a.A.a) {
+    foreach (var i in range(a.A.a)) {
         a.A.a[i] = (byte)i;
     }
     var err = enc.Encode(Ꮡa);
@@ -367,7 +367,7 @@ public static void TestGobEncoderIndirectArrayField(ж<testing.T> Ꮡt) {
     ref var app = ref heap<ж<ж<ArrayStruct>>>(out var Ꮡapp);
     app = Ꮡap;
     a.A = Ꮡapp;
-    foreach (var (i, _) in Δarray.a) {
+    foreach (var i in range(Δarray.a)) {
         Δarray.a[i] = (byte)i;
     }
     var err = enc.Encode(a);

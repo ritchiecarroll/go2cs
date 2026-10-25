@@ -228,7 +228,7 @@ means a [golib](#the-golib-runtime-library) type or function implements it at ru
   src/core/unicode/utf8/utf8.cs:20#83c559 + src/core/archive/zip/struct.cs:33#d3abd8 ·
   src/tests/Behavioral/PointerToPointer/PointerToPointer.cs.target:17#ee46fb + src/core/internal/strconv/atoi.cs:130#4606f0 ·
   src/core/golib/uintptr.cs:39#d446ed · src/core/bufio/bufio.csproj:143#07f377 (from src/go2cs/csproj-template.xml:128#07f377) ·
-  src/core/encoding/gob/codec_test.cs:1197#1265b9 ·
+  src/core/encoding/gob/codec_test.cs:1201#1265b9 ·
   src/core/golib/NilType.cs + src/tests/Behavioral/LambdaFunctions/LambdaFunctions.cs.target:52#e494b0 ·
   src/tests/Behavioral/SliceAliasing/main.cs.target:13#ee5567 · src/tests/Behavioral/MapCommaOk/MapCommaOk.csproj:116#9a82dc ·
   src/tests/Behavioral/NamedReturnDefer/main.cs.target:41#f6bf33 · src/tests/Behavioral/ShadowedCompoundAssign/main.cs.target:10#434a84 ·
@@ -1447,7 +1447,7 @@ func TestExt(t *testing.T) {
 	}
 }
 ```
-<!-- source: src/core/path/path_test.cs:4-263 -->
+<!-- source: src/core/path/path_test.cs:4-277 -->
 ```csharp
 namespace go;
 

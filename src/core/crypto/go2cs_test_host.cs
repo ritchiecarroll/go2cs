@@ -10,14 +10,17 @@ internal static class Go2CsTestHost
         TestRegistry registry = new("crypto", new string[]
         {
             "crypto.go",
+            "crypto_test.go",
             "ecdsa/testdata/SigVer.rsp.bz2",
             "ed25519/testdata/sign.input.gz",
+            "hpke/testdata/hpke-pq.json",
+            "hpke/testdata/rfc9180.json",
             "internal/fips140/bigmod/testdata/mod_inv_tests.txt",
             "internal/fips140/rsa/testdata/gcd_lcm_tests.txt",
             "internal/fips140/rsa/testdata/miller_rabin_tests.txt",
-            "internal/hpke/testdata/rfc9180-vectors.json",
             "issue21104_test.go",
             "purego_test.go",
+            "rsa/testdata/keygen2048.txt",
             "rsa/testdata/pss-vect.txt.bz2",
             "tls/testdata/Client-TLSv10-ClientCert-ECDSA-ECDSA",
             "tls/testdata/Client-TLSv10-ClientCert-ECDSA-RSA",
@@ -590,6 +593,7 @@ internal static class Go2CsTestHost
             "fips140",
             "hkdf",
             "hmac",
+            "hpke",
             "internal",
             "md5",
             "mlkem",
@@ -608,9 +612,11 @@ internal static class Go2CsTestHost
         registry.Add("TestCFBDecryptOutOfBoundsWrite", crypto_test_package.TestCFBDecryptOutOfBoundsWrite, "issue21104_test.go", 32);
         registry.Add("TestCFBEncryptOutOfBoundsWrite", crypto_test_package.TestCFBEncryptOutOfBoundsWrite, "issue21104_test.go", 29);
         registry.Add("TestCTROutOfBoundsWrite", crypto_test_package.TestCTROutOfBoundsWrite, "issue21104_test.go", 23);
+        registry.Add("TestDisallowedAssemblyInstructions", crypto_test_package.TestDisallowedAssemblyInstructions, "crypto_test.go", 98);
         registry.Add("TestOFBOutOfBoundsWrite", crypto_test_package.TestOFBOutOfBoundsWrite, "issue21104_test.go", 26);
-        registry.Add("TestPureGoTag", crypto_test_package.TestPureGoTag, "purego_test.go", 21);
+        registry.Add("TestPureGoTag", crypto_test_package.TestPureGoTag, "purego_test.go", 20);
         registry.Add("TestRC4OutOfBoundsWrite", crypto_test_package.TestRC4OutOfBoundsWrite, "issue21104_test.go", 14);
+        registry.Add("TestSignMessage", crypto_test_package.TestSignMessage, "crypto_test.go", 44);
         return TestHost.Run(registry, args);
     }
 }

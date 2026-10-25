@@ -21,8 +21,8 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
 
         ref var stats = ref heap(new debug.GCStats(), out var Ꮡstats);
         ref var mstats = ref heap(new runtime.MemStats(), out var Ꮡmstats);
-        time.Duration min = default!;
-        time.Duration max = default!;
+        time.Duration minimum = default!;
+        time.Duration maximum = default!;
 
         // First ReadGCStats will allocate, second should not,
         // especially if we follow up with an explicit garbage collection.
@@ -56,11 +56,11 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
                 if (dt != ((time.Duration)(int64)mstats.PauseNs[offΔ1])) {
                     Ꮡt.Errorf("stats.Pause[%d] = %d, want %d"u8, i, dt, mstats.PauseNs[offΔ1]);
                 }
-                if (max < dt) {
-                    max = dt;
-                }
-                if (min > dt || i == 0) {
-                    min = dt;
+                maximum = max(maximum, dt);
+                if (i == 0){
+                    minimum = dt;
+                } else {
+                    minimum = min(minimum, dt);
                 }
                 offΔ1 = (offΔ1 + len(mstats.PauseNs) - 1) % len(mstats.PauseNs);
             }
@@ -68,8 +68,8 @@ public static void TestReadGCStats(ж<testing.T> Ꮡt) {
 
         var q = stats.PauseQuantiles;
         nint nq = len(q);
-        if (q[0] != min || q[nq - 1] != max) {
-            Ꮡt.Errorf("stats.PauseQuantiles = [%d, ..., %d], want [%d, ..., %d]"u8, q[0], q[nq - 1], min, max);
+        if (q[0] != minimum || q[nq - 1] != maximum) {
+            Ꮡt.Errorf("stats.PauseQuantiles = [%d, ..., %d], want [%d, ..., %d]"u8, q[0], q[nq - 1], minimum, maximum);
         }
 
         for (nint i = 0; i < nq - 1; i++) {
@@ -101,6 +101,7 @@ public static void TestFreeOSMemory(ж<testing.T> Ꮡt) {
     // Tests FreeOSMemory by making big susceptible to collection
     // and checking that at least that much memory is returned to
     // the OS after.
+
     UntypedInt bigBytes = /* 32 << 20 */ 33554432;
     big = new slice<byte>(bigBytes);
 

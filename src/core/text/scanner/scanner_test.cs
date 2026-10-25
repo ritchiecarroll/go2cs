@@ -9,6 +9,8 @@ using io = io_package;
 using strings = strings_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.unicode;
 using static go.text.scanner_package;
 
@@ -586,7 +588,7 @@ public static void TestIOError(ж<testing.T> Ꮡt) {
     }
 }
 
-internal static void checkPos(ж<testing.T> Ꮡt, global::go.text.scanner_package.Position got, global::go.text.scanner_package.Position want) {
+internal static partial void checkPos(ж<testing.T> Ꮡt, global::go.text.scanner_package.Position got, global::go.text.scanner_package.Position want) {
     if (got.Offset != want.Offset || got.Line != want.Line || got.Column != want.Column) {
         Ꮡt.Errorf("got offset, line, column = %d, %d, %d; want %d, %d, %d"u8,
             got.Offset, got.Line, got.Column, want.Offset, want.Line, want.Column);

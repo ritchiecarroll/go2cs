@@ -13,10 +13,13 @@ internal static class Go2CsTestHost
             "ast_test.go",
             "commentmap.go",
             "commentmap_test.go",
+            "directive.go",
+            "directive_test.go",
             "example_test.go",
             "filter.go",
             "filter_test.go",
             "import.go",
+            "import_test.go",
             "issues_test.go",
             "print.go",
             "print_test.go",
@@ -24,9 +27,6 @@ internal static class Go2CsTestHost
             "scope.go",
             "walk.go",
             "walk_test.go",
-        }, new string[]
-        {
-            "internal",
         });
         registry.Add("TestCommentMap", ast_test_package.TestCommentMap, "commentmap_test.go", 104);
         registry.Add("TestCommentText", ast_internal_test_package.TestCommentText, "ast_test.go", 41);
@@ -35,8 +35,15 @@ internal static class Go2CsTestHost
         registry.Add("TestIsDirective", ast_internal_test_package.TestIsDirective, "ast_test.go", 76);
         registry.Add("TestIssue28089", ast_test_package.TestIssue28089, "issues_test.go", 45);
         registry.Add("TestIssue33649", ast_test_package.TestIssue33649, "issues_test.go", 14);
-        registry.Add("TestPreorderBreak", ast_test_package.TestPreorderBreak, "walk_test.go", 14);
+        registry.Add("TestIssue69183", ast_test_package.TestIssue69183, "import_test.go", 83);
+        registry.Add("TestParseArgs", ast_internal_test_package.TestParseArgs, "directive_test.go", 138);
+        registry.Add("TestParseDirective", ast_internal_test_package.TestParseDirective, "directive_test.go", 29);
+        registry.Add("TestParseDirectiveMatchesIsDirective", ast_internal_test_package.TestParseDirectiveMatchesIsDirective, "directive_test.go", 14);
+        registry.Add("TestPreorderStack", ast_test_package.TestPreorderStack, "walk_test.go", 38);
+        registry.Add("TestPreorder_Break", ast_test_package.TestPreorder_Break, "walk_test.go", 17);
         registry.Add("TestPrint", ast_internal_test_package.TestPrint, "print_test.go", 85);
+        registry.Add("TestSortImportsSameLastLine", ast_test_package.TestSortImportsSameLastLine, "import_test.go", 97);
+        registry.Add("TestSortImportsUpdatesFileImportsField", ast_test_package.TestSortImportsUpdatesFileImportsField, "import_test.go", 14);
         return TestHost.Run(registry, args);
     }
 }

@@ -14,8 +14,8 @@ using static go.crypto.x509_package;
 
 partial class x509_internal_test_package {
 
-internal static map<@string, global::go.crypto.x509_package.OID> nistTestPolicies;
-internal static void initᴛnistTestPolicies() { nistTestPolicies = new map<@string, global::go.crypto.x509_package.OID>{
+internal static map<@string, global::go.crypto.x509_package.ΔOID> nistTestPolicies;
+internal static void initᴛnistTestPolicies() { nistTestPolicies = new map<@string, global::go.crypto.x509_package.ΔOID>{
     ["anyPolicy"u8] = anyPolicyOID,
     ["NIST-test-policy-1"u8] = mustNewOIDFromInts(new uint64[]{2, 16, 840, 1, 101, 3, 2, 1, 48, 1}.slice()),
     ["NIST-test-policy-2"u8] = mustNewOIDFromInts(new uint64[]{2, 16, 840, 1, 101, 3, 2, 1, 48, 2}.slice()),
@@ -45,6 +45,7 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
     // suite assumes you are only validating the path, rather than building
     // _and_ validating the path, we take the path as given and run
     // policiesValid on it.
+
     @string certDir = testdataNistPkitsCertsˢ;
 
     ref var testcases = ref heap<slice<TestNISTPKITSPolicy_testcases>>(out var Ꮡtestcases);
@@ -159,6 +160,8 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
         var errʗ1 = err;
         var tcʗ1 = tc;
         Ꮡt.Run(tc.Name, (ж<testing.T> tΔ1) => {
+            var chainᴷ = new stackAppend<ж<global::go.crypto.x509_package.Certificate>>();
+            var initialPoliciesᴷ = new stackAppend<global::go.crypto.x509_package.ΔOID>();
             slice<ж<global::go.crypto.x509_package.Certificate>> chain = default!;
             foreach (var (_, c) in tcʗ1.CertPath) {
                 var (certDER, errΔ2) = os.ReadFile(filepath.Join(certDir, c));
@@ -169,17 +172,17 @@ public static void TestNISTPKITSPolicy(ж<testing.T> Ꮡt) {
                 if (errΔ2 != default!) {
                     tΔ1.Fatal(errΔ2);
                 }
-                chain = append(chain, cert);
+                chain = append(chainᴷ, chain, cert);
             }
             slices.Reverse<slice<ж<global::go.crypto.x509_package.Certificate>>, ж<global::go.crypto.x509_package.Certificate>>(chain);
 
-            slice<global::go.crypto.x509_package.OID> initialPolicies = default!;
+            slice<global::go.crypto.x509_package.ΔOID> initialPolicies = default!;
             foreach (var (_, pstr) in tcʗ1.InitialPolicySet) {
                 var (policy, ok) = nistTestPolicies[pstr, ꟷ];
                 if (!ok) {
                     tΔ1.Fatalf("unknown test policy: %s"u8, pstr);
                 }
-                initialPolicies = append(initialPolicies, policy);
+                initialPolicies = append(initialPoliciesᴷ, initialPolicies, policy);
             }
 
             var valid = policiesValid(chain, new VerifyOptions(

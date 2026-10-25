@@ -3,16 +3,15 @@
 // license that can be found in the LICENSE file.
 namespace go.crypto;
 
-using mlkem = go.crypto.mlkem_package;
+using Δmlkem = go.crypto.mlkem_package;
 using log = log_package;
 using go.crypto;
-using static go.crypto.mlkem_internal_test_package;
 
 partial class mlkem_test_package {
 
 public static void Example() {
     // Alice generates a new key pair and sends the encapsulation key to Bob.
-    var (dk, err) = mlkem.GenerateKey768();
+    var (dk, err) = Δmlkem.GenerateKey768();
     if (err != default!) {
         log.Fatal(err);
     }
@@ -36,7 +35,7 @@ public static slice<byte> /*ciphertext*/ Bob(slice<byte> encapsulationKey) {
     slice<byte> ciphertext = default!;
 
     // Bob encapsulates a shared secret using the encapsulation key.
-    var (ek, err) = mlkem.NewEncapsulationKey768(encapsulationKey);
+    var (ek, err) = Δmlkem.NewEncapsulationKey768(encapsulationKey);
     if (err != default!) {
         log.Fatal(err);
     }

@@ -1,6 +1,7 @@
 // Copyright 2010 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+//go:build !goexperiment.jsonv2
 namespace go.encoding;
 
 using bytes = bytes_package;
@@ -28,7 +29,7 @@ internal static @string stripWhitespace(@string s) {
 }
 
 internal partial struct TestValid_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string data;
     internal bool ok;
 }
@@ -58,7 +59,7 @@ public static void TestValid(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestCompactAndIndent_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string compact;
     internal @string indent;
 }
@@ -86,7 +87,8 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
 	-5e+2
 ]
 """u8.Raw()),
-        new(Name(""u8), "{\"\":\"<>&\u2028\u2029\"}"u8, "{\n\t\"\": \"<>&\u2028\u2029\"\n}"u8) // See golang.org/issue/34070
+        new(Name(""u8), "{\"\":\"<>&\u2028\u2029\"}"u8, "{\n\t\"\": \"<>&\u2028\u2029\"\n}"u8), // See golang.org/issue/34070
+        new(Name(""u8), @"null"u8, "null \n\r\t"u8) // See golang.org/issue/13520 and golang.org/issue/74806
     }.slice();
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (_, vᴛ1) in tests) {
@@ -137,7 +139,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
                     tΔ1.Errorf("%s: Indent error: %v"u8, ttʗ1.Where, err);
                 } else 
                 {
-                    @string got = Ꮡbuf.String(); if (got != ttʗ1.indent) {
+                    @string got = Ꮡbuf.String(); if (got != strings.TrimRight(ttʗ1.indent, " \n\r\t"u8)) {
                         tΔ1.Errorf("%s: Compact:\n\tgot:  %s\n\twant: %s"u8, ttʗ1.Where, indentNewlines(got), indentNewlines(ttʗ1.indent));
                     }
                 }
@@ -147,7 +149,7 @@ public static void TestCompactAndIndent(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestCompactSeparators_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in, compact;
 }
 
@@ -251,7 +253,7 @@ public static void TestIndentBig(ж<testing.T> Ꮡt) {
 }
 
 internal partial struct TestIndentErrors_tests /*dyn*/ {
-    public partial ref CaseName CaseName { get; }
+    /*embed*/ public CaseName CaseName;
     internal @string @in;
     internal error err;
 }
@@ -339,7 +341,7 @@ internal static any genValue(nint n) {
 internal static @string genString(float64 stddev) {
     nint n = (nint)math.Abs(rand.NormFloat64() * stddev + stddev / 2D);
     var c = new slice<rune>(n);
-    foreach (var (i, _) in c) {
+    foreach (var i in range(c)) {
         var f = math.Abs(rand.NormFloat64() * 64D + 32D);
         if (f > 1114111D) {
             f = 1114111D;
@@ -358,7 +360,7 @@ internal static slice<any> genArray(nint n) {
         f = 1;
     }
     var x = new slice<any>(f);
-    foreach (var (i, _) in x) {
+    foreach (var i in range(x)) {
         x[i] = genValue(quo(((i + 1) * n), f) - quo((i * n), f));
     }
     return x;

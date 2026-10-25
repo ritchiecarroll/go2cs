@@ -17,7 +17,7 @@ partial class tls_internal_test_package {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object roundUpBrokenˢ = (@string)"roundUp broken"u8;
 
-public static void TestRoundUp(ж<testing.T> Ꮡt) {
+public static partial void TestRoundUp(ж<testing.T> Ꮡt) {
     if (roundUp(0, 16) != 0 || roundUp(1, 16) != 16 || roundUp(15, 16) != 16 || roundUp(16, 16) != 16 || roundUp(17, 16) != 32) {
         Ꮡt.Error(roundUpBrokenˢ);
     }
@@ -100,7 +100,7 @@ public static void TestCertificateSelection(ж<testing.T> Ꮡt) {
     config.BuildNameToCertificate();
 
     nint pointerToIndex(ж<global::go.crypto.tls_package.Certificate> c) {
-        foreach (var (i, _) in Ꮡconfig.Value.Certificates) {
+        foreach (var i in range(Ꮡconfig.Value.Certificates)) {
             if (c == Ꮡ(Ꮡconfig.Value.Certificates, i)) {
                 return i;
             }

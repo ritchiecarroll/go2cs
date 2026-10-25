@@ -74,7 +74,7 @@ public static void BenchmarkEndToEndSliceByteBuffer(ж<testing.B> Ꮡb) {
         Register(v.OrTypedNil());
         ref var arr = ref heap<slice<any>>(out var Ꮡarr);
         arr = new slice<any>(100);
-        foreach (var (i, _) in arr) {
+        foreach (var i in range(arr)) {
             arr[i] = v.OrTypedNil();
         }
         return Ꮡarr;
@@ -174,7 +174,7 @@ internal static void benchmarkEncodeSlice(ж<testing.B> Ꮡb, any a) {
 
 public static void BenchmarkEncodeComplex128Slice(ж<testing.B> Ꮡb) {
     var a = new slice<complex128>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 1.2D + 3.4D.i();
     }
     benchmarkEncodeSlice(Ꮡb, a);
@@ -182,7 +182,7 @@ public static void BenchmarkEncodeComplex128Slice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkEncodeFloat64Slice(ж<testing.B> Ꮡb) {
     var a = new slice<float64>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 1.23e4D;
     }
     benchmarkEncodeSlice(Ꮡb, a);
@@ -190,7 +190,7 @@ public static void BenchmarkEncodeFloat64Slice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkEncodeInt32Slice(ж<testing.B> Ꮡb) {
     var a = new slice<int32>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = (int32)(i * 100);
     }
     benchmarkEncodeSlice(Ꮡb, a);
@@ -201,7 +201,7 @@ internal static readonly @string nowIsTheTimeˢ = "now is the time"u8;
 
 public static void BenchmarkEncodeStringSlice(ж<testing.B> Ꮡb) {
     var a = new slice<@string>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkEncodeSlice(Ꮡb, a);
@@ -209,7 +209,7 @@ public static void BenchmarkEncodeStringSlice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkEncodeInterfaceSlice(ж<testing.B> Ꮡb) {
     var a = new slice<any>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkEncodeSlice(Ꮡb, a);
@@ -289,7 +289,7 @@ internal static void benchmarkDecodeSlice(ж<testing.B> Ꮡb, any a) {
 
 public static void BenchmarkDecodeComplex128Slice(ж<testing.B> Ꮡb) {
     var a = new slice<complex128>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 1.2D + 3.4D.i();
     }
     benchmarkDecodeSlice(Ꮡb, a);
@@ -297,7 +297,7 @@ public static void BenchmarkDecodeComplex128Slice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecodeFloat64Slice(ж<testing.B> Ꮡb) {
     var a = new slice<float64>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 1.23e4D;
     }
     benchmarkDecodeSlice(Ꮡb, a);
@@ -305,7 +305,7 @@ public static void BenchmarkDecodeFloat64Slice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecodeInt32Slice(ж<testing.B> Ꮡb) {
     var a = new slice<int32>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = 1234;
     }
     benchmarkDecodeSlice(Ꮡb, a);
@@ -313,7 +313,7 @@ public static void BenchmarkDecodeInt32Slice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecodeStringSlice(ж<testing.B> Ꮡb) {
     var a = new slice<@string>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkDecodeSlice(Ꮡb, a);
@@ -321,7 +321,7 @@ public static void BenchmarkDecodeStringSlice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecodeStringsSlice(ж<testing.B> Ꮡb) {
     var a = new slice<slice<@string>>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = new @string[]{"now is the time"u8}.slice();
     }
     benchmarkDecodeSlice(Ꮡb, a);
@@ -329,7 +329,7 @@ public static void BenchmarkDecodeStringsSlice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecodeBytesSlice(ж<testing.B> Ꮡb) {
     var a = new slice<slice<byte>>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = slice<byte>("now is the time"u8);
     }
     benchmarkDecodeSlice(Ꮡb, a);
@@ -337,7 +337,7 @@ public static void BenchmarkDecodeBytesSlice(ж<testing.B> Ꮡb) {
 
 public static void BenchmarkDecodeInterfaceSlice(ж<testing.B> Ꮡb) {
     var a = new slice<any>(1000);
-    foreach (var (i, _) in a) {
+    foreach (var i in range(a)) {
         a[i] = nowIsTheTimeˢ;
     }
     benchmarkDecodeSlice(Ꮡb, a);

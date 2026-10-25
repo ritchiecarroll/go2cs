@@ -8,15 +8,13 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.crypto.mlkem_package;
-using static go.crypto.mlkem_internal_test_package;
+using static go.crypto.fips140_package;
+using static go.crypto.fips140_internal_test_package;
 
 // <ExportedTypeAliases>
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
-[assembly: GoImplement<global::go.crypto.mlkem_package.EncapsulationKey1024, encapsulationKey>(Pointer = true)]
-[assembly: GoImplement<global::go.crypto.mlkem_package.EncapsulationKey768, encapsulationKey>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -30,13 +28,13 @@ using static go.crypto.mlkem_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/mlkem/mlkem_test.go", "mlkem_test.cs", "AB84goKUgri4goKUgoKCgpSCpoKClIKUgoKUgpSCgoKUgqaCgpSClIKmgoKUgriCgpSCuLiCgoKUgoKUgoCCtoKCgoCCyIKAgraCgoKAgsiCgIK2goKCgILamKKCgoKClIKCpoKCgoKUgoKCgpSClIKCgpSCgpSCpoKCgpSmgoLcopKCgoKCgriigoKCgoKClIKCgoKClIK4ooKClIKCgoKC+IKCgpSCgoKClKKCgoKUgpSCgpSmkoKCgpSCgpTMkoKmgqaCpoKmgqaC", "29-31:1;32-34:2;99-101:1;102-104:2;277-292:1;293-305:2")]
+[assembly: go.GoPositionMap("crypto/fips140/fips140_test.go", "fips140_test.cs", "ABQaooCkgoKUgoKUgqaCgpSCpoKClIKmgoKUgrQ=", "14-14:1")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
 
-[GoPackage("mlkem")]
-public static partial class mlkem_internal_test_package
+[GoPackage("fips140")]
+public static partial class fips140_internal_test_package
 {
     // C# nested types declared with no access modifier are always private, and the
     // Go type declarations in this package's converted sources are deliberately
@@ -54,14 +52,12 @@ public static partial class mlkem_internal_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
-    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸmlkem() => builtin.initPackage(typeof(go.crypto.@internal.fips140.mlkem_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸfips140ꓸsha3() => builtin.initPackage(typeof(go.crypto.@internal.fips140.sha3_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸmlkem() => builtin.initPackage(typeof(go.crypto.mlkem_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
-    [GoInit] internal static void initᴛᴛimportꓸencodingꓸhex() => builtin.initPackage(typeof(encoding.hex_package));
-    [GoInit] internal static void initᴛᴛimportꓸflag() => builtin.initPackage(typeof(flag_package));
-    [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸdes() => builtin.initPackage(typeof(go.crypto.des_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸfips140() => builtin.initPackage(typeof(go.crypto.fips140_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸcryptotest() => builtin.initPackage(typeof(go.crypto.@internal.cryptotest_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸgodebug() => builtin.initPackage(typeof(go.@internal.godebug_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(go.@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>
 }

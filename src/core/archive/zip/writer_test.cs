@@ -539,7 +539,7 @@ public static void TestWriterCreateRaw(ж<testing.T> Ꮡt) {
     var archive = @new<bytes.Buffer>();
     var w = NewWriter(new zip_test_package.bytes_BufferжWriter(archive));
 
-    foreach (var (i, _) in files) {
+    foreach (var i in range(files)) {
         var f = Ꮡ(files, i);
         f.Value.crc32 = crc32.ChecksumIEEE((~f).content);
         var size = (uint64)len((~f).content);
@@ -726,7 +726,7 @@ internal static fs.FS writeTestsToFS(slice<WriteTest> tests) {
             Mode: wt.Mode
         ));
     }
-    return fsys;
+    return new zip_test_package.fstest_MapFSᴠFS(fsys);
 }
 
 public static void TestWriterAddFS(ж<testing.T> Ꮡt) {
