@@ -35,6 +35,13 @@
     <Nullable>annotations</Nullable>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
@@ -101,81 +108,46 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
-    <Compile Include="atob_test.cs" />
-    <Compile Include="atoc_test.cs" />
-    <Compile Include="atof_test.cs" />
-    <Compile Include="atoi_test.cs" />
-    <Compile Include="ctoa_test.cs" />
-    <Compile Include="decimal_test.cs" />
     <Compile Include="export_test.cs" />
-    <Compile Include="fp_test.cs" />
-    <Compile Include="ftoa_test.cs" />
-    <Compile Include="ftoaryu_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
-    <Compile Include="internal_test.cs" />
-    <Compile Include="itoa_test.cs" />
+    <Compile Include="import_test.cs" />
+    <Compile Include="number_test.cs" />
     <Compile Include="package_info_internal_test.cs" />
     <Compile Include="package_init_external_test.cs" />
-    <Compile Include="package_init_internal_test.cs" />
     <Compile Include="package_test_info.cs" />
     <Compile Include="quote_test.cs" />
     <Compile Include="strconv_test.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="atob.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atob_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atoc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atoc_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atof.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atof_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atoi.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="atoi_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="bytealg.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="bytealg_bootstrap.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="ctoa.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="ctoa_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="decimal.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="decimal_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="doc.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="eisel_lemire.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="example_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="export_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="fp_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="ftoa.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="ftoa_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="ftoaryu.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="ftoaryu_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="internal_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="import_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="isprint.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="itoa.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="itoa_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="makeisprint.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="number.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="number_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="quote.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="quote_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="strconv_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <None Include="testdata/testfp.txt" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(go2csPath)core/bufio/bufio.csproj" />
     <ProjectReference Include="$(go2csPath)core/bytes/bytes.csproj" />
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
-    <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/internal/runtime/math/internal.runtime.math.csproj" />
-    <ProjectReference Include="$(go2csPath)core/internal/sync/internal.sync.csproj" />
-    <ProjectReference Include="$(go2csPath)core/io/fs/io.fs.csproj" />
+    <ProjectReference Include="$(go2csPath)core/internal/strconv/internal.strconv.csproj" />
     <ProjectReference Include="$(go2csPath)core/io/io.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/cmplx/math.cmplx.csproj" />
     <ProjectReference Include="$(go2csPath)core/math/math.csproj" />
-    <ProjectReference Include="$(go2csPath)core/math/rand/math.rand.csproj" />
-    <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/reflect/reflect.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
-    <ProjectReference Include="$(go2csPath)core/sync/sync.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/unicode.csproj" />
     <ProjectReference Include="strconv.csproj" />

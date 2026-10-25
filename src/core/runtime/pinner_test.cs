@@ -7,6 +7,8 @@ using Δruntime = runtime_package;
 using testing = testing_package;
 using time = time_package;
 using @unsafe = unsafe_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
 partial class runtime_test_package {
@@ -34,10 +36,12 @@ internal static ж<objWith<ж<uintptr>>> globalPtrToRuntimeObjWithPtr = ((Func<�
     return Ꮡ(new objWith<ж<uintptr>>(nil));
 }))();
 
-internal static void assertDidPanic(ж<testing.T> Ꮡt) {
+internal static partial void assertDidPanic(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        if (recover() == default!) {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
+        if (recover(calledByDefer) == default!) {
             Ꮡt.Fatal(didNotPanicˢ);
         }
     }
@@ -97,7 +101,7 @@ public static void TestPinnerPinKeepsAliveAndReleases(ж<testing.T> Ꮡt) {
     var p = @new<obj>();
     var done = new channel<EmptyStruct>(0);
     var doneʗ1 = done;
-    Δruntime.SetFinalizer(p.OrTypedNil(), (any _) => {
+    Δruntime.SetFinalizer(p.OrTypedNil(), (any _Δp0) => {
         doneʗ1.ᐸꟷ(new EmptyStruct());
     });
     pinner.Pin(p.OrTypedNil());
@@ -292,7 +296,7 @@ public static void TestPinnerPinNonPtrPanics(ж<testing.T> Ꮡt) {
         ref var pinner = ref heap(new Δruntime.Pinner(), out var Ꮡpinner);
         defer(Ꮡpinner.Unpin, ref ᒐ);
         nint i = default!;
-        defer(assertDidPanic, Ꮡt, ref ᒐ);
+        defer(assertDidPanic, Ꮡt, ref ᒐ, recovers: true);
         pinner.Pin(i);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -329,7 +333,7 @@ public static void TestPinnerLeakPanics(ж<testing.T> Ꮡt) {
     ((Action)(() => {
         GoFrame ᒐ = default;
         try {
-            defer(assertDidPanic, Ꮡt, ref ᒐ);
+            defer(assertDidPanic, Ꮡt, ref ᒐ, recovers: true);
             oldʗ1();
         }
         catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
@@ -404,7 +408,7 @@ public static void TestPinnerCgoCheckPtr2UnknownPtr(ж<testing.T> Ꮡt) {
         ((Action)(() => {
             GoFrame ᒐ = default;
             try {
-                defer(assertDidPanic, Ꮡt, ref ᒐ);
+                defer(assertDidPanic, Ꮡt, ref ᒐ, recovers: true);
                 runtime_internal_test_package.CgoCheckPointer(p2ʗ1.OrTypedNil(), default!);
             }
             catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

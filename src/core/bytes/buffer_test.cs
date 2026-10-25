@@ -12,6 +12,8 @@ using strconv = strconv_package;
 using testing = testing_package;
 using utf8 = go.unicode.utf8_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bytes = bytes_package;
 using go.math;
 using go.unicode;
@@ -327,7 +329,7 @@ public static void TestCapWithSliceAndWrittenData(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestNil(ж<testing.T> Ꮡt) {
+public static partial void TestNil(ж<testing.T> Ꮡt) {
     ж<bytes.Buffer> b = default!;
     if (b.String() != "<nil>"u8) {
         Ꮡt.Errorf("expected <nil>; got %q"u8, b.String());
@@ -451,7 +453,7 @@ public static void TestWriteAppend(ж<testing.T> Ꮡt) {
         got.Write(b);
     }
     if (!Equal(got.Bytes(), want)) {
-        Ꮡt.Fatalf("Bytes() = %q, want %q"u8, got, want);
+        Ꮡt.Fatalf("Bytes() = %q, want %q"u8, Ꮡgot, want);
     }
 
     // With a sufficiently sized buffer, there should be no allocations.
@@ -638,6 +640,41 @@ public static void TestReadString(ж<testing.T> Ꮡt) {
         }
         if (!AreEqual(err, test.err)) {
             Ꮡt.Errorf("expected error %v, got %v"u8, test.err, err);
+        }
+    }
+}
+
+partial struct peekTestsᴛ1 /*dyn*/ {
+    internal @string buffer;
+    internal nint skip;
+    internal nint n;
+    internal @string expected;
+    internal error err;
+}
+internal static slice<peekTestsᴛ1> peekTests = new peekTestsᴛ1[]{
+    new(""u8, 0, 0, ""u8, default!),
+    new("aaa"u8, 0, 3, "aaa"u8, default!),
+    new("foobar"u8, 0, 2, "fo"u8, default!),
+    new("a"u8, 0, 2, "a"u8, Δio.EOF),
+    new("helloworld"u8, 4, 3, "owo"u8, default!),
+    new("helloworld"u8, 5, 5, "world"u8, default!),
+    new("helloworld"u8, 5, 6, "world"u8, Δio.EOF),
+    new("helloworld"u8, 10, 1, ""u8, Δio.EOF)
+}.slice();
+
+public static void TestPeek(ж<testing.T> Ꮡt) {
+    foreach (var (_, test) in peekTests) {
+        var buf = NewBufferString(test.buffer);
+        buf.Next(test.skip);
+        var (bytes, err) = buf.Peek(test.n);
+        if (((sstring)bytes) != test.expected) {
+            Ꮡt.Errorf("expected %q, got %q"u8, test.expected, bytes);
+        }
+        if (!AreEqual(err, test.err)) {
+            Ꮡt.Errorf("expected error %v, got %v"u8, test.err, err);
+        }
+        if (buf.Len() != len(test.buffer) - test.skip) {
+            Ꮡt.Errorf("bad length after peek: %d, want %d"u8, buf.Len(), len(test.buffer) - test.skip);
         }
     }
 }

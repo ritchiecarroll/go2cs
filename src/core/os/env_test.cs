@@ -259,18 +259,14 @@ public static void TestEnvironConsistency(ж<Δtesting.T> Ꮡt) {
         @string k = kv.slice(0, i);
         @string v = kv.slice(i + 1);
         var (v2, ok) = LookupEnv(k);
-        if (ok && v == v2){
-            Ꮡt.Logf("LookupEnv(%q) = %q, %t"u8, k, v2, ok);
-        } else {
+        if (!ok || v != v2) {
             Ꮡt.Errorf("Environ contains %q, but LookupEnv(%q) = %q, %t"u8, kv, k, v2, ok);
         }
 
         // Since k=v is already present in the environment,
         // setting it should be a no-op.
         {
-            var err = Setenv(k, v); if (err == default!){
-                Ꮡt.Logf("Setenv(%q, %q)"u8, k, v);
-            } else {
+            var err = Setenv(k, v); if (err != default!) {
                 Ꮡt.Errorf("Environ contains %q, but SetEnv(%q, %q) = %q"u8, kv, k, v, err);
             }
         }

@@ -34,27 +34,27 @@ partial struct fieldsTestsᴛ1 /*dyn*/ {
         public typeᴛ38_A A;
     }
     partial struct Δtypeᴛ39 /*dyn*/ {
-        public partial ref SFG SFG { get; }
+        /*embed*/ public SFG SFG;
     }
     partial struct Δtypeᴛ40 /*dyn*/ {
-        internal partial ref sFG sFG { get; }
+        /*embed*/ internal sFG sFG;
     }
     partial struct Δtypeᴛ41 /*dyn*/ {
-        public partial ref SFG SFG { get; }
-        public partial ref SF SF { get; }
+        /*embed*/ public SFG SFG;
+        /*embed*/ public SF SF;
     }
     partial struct Δtypeᴛ42 /*dyn*/ {
-        public partial ref SFGH3 SFGH3 { get; }
-        public partial ref SG1 SG1 { get; }
-        public partial ref SFG2 SFG2 { get; }
-        public partial ref SF2 SF2 { get; }
+        /*embed*/ public SFGH3 SFGH3;
+        /*embed*/ public SG1 SG1;
+        /*embed*/ public SFG2 SFG2;
+        /*embed*/ public SF2 SF2;
         public nint L;
     }
     partial struct Δtypeᴛ43 /*dyn*/ {
-        public partial ref ж<SF> SF { get; }
+        /*embed*/ public ж<SF> SF;
     }
     partial struct Δtypeᴛ44 /*dyn*/ {
-        public partial ref ΔM M { get; }
+        /*embed*/ public ΔM M;
     }
 internal static slice<fieldsTestsᴛ1> fieldsTests = new fieldsTestsᴛ1[]{new(
     testName: "SimpleStruct"u8,
@@ -240,11 +240,11 @@ partial struct SFG {
 }
 
 partial struct SFG1 {
-    public partial ref SFG SFG { get; }
+    /*embed*/ public SFG SFG;
 }
 
 partial struct SFG2 {
-    public partial ref SFG1 SFG1 { get; }
+    /*embed*/ public SFG1 SFG1;
 }
 
 partial struct SFGH {
@@ -254,15 +254,15 @@ partial struct SFGH {
 }
 
 partial struct SFGH1 {
-    public partial ref SFGH SFGH { get; }
+    /*embed*/ public SFGH SFGH;
 }
 
 partial struct SFGH2 {
-    public partial ref SFGH1 SFGH1 { get; }
+    /*embed*/ public SFGH1 SFGH1;
 }
 
 partial struct SFGH3 {
-    public partial ref SFGH2 SFGH2 { get; }
+    /*embed*/ public SFGH2 SFGH2;
 }
 
 partial struct SF {
@@ -270,11 +270,11 @@ partial struct SF {
 }
 
 partial struct SF1 {
-    public partial ref SF SF { get; }
+    /*embed*/ public SF SF;
 }
 
 partial struct SF2 {
-    public partial ref SF1 SF1 { get; }
+    /*embed*/ public SF1 SF1;
 }
 
 partial struct SG {
@@ -282,7 +282,7 @@ partial struct SG {
 }
 
 partial struct SG1 {
-    public partial ref SG SG { get; }
+    /*embed*/ public SG SG;
 }
 
 partial struct sFG {
@@ -295,31 +295,32 @@ partial struct RS1 {
 }
 
 partial struct RS2 {
-    public partial ref RS1 RS1 { get; }
+    /*embed*/ public RS1 RS1;
 }
 
 partial struct RS3 {
-    public partial ref RS2 RS2 { get; }
-    public partial ref RS1 RS1 { get; }
+    /*embed*/ public RS2 RS2;
+    /*embed*/ public RS1 RS1;
 }
 
 partial struct ΔM /*map[@string, any]*/;
 
 partial struct Rec1 {
-    public partial ref ж<Rec2> Rec2 { get; }
+    /*embed*/ public ж<Rec2> Rec2;
 }
 
 partial struct Rec2 {
     public @string F;
-    public partial ref ж<Rec1> Rec1 { get; }
+    /*embed*/ public ж<Rec1> Rec1;
 }
 
 public static void TestFields(ж<Δtesting.T> Ꮡt) {
-    foreach (var (_, test) in fieldsTests) {
-        ref var testΔ1 = ref heap<fieldsTestsᴛ1>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.testName, (ж<Δtesting.T> tΔ1) => {
+    foreach (var (_, vᴛ1) in fieldsTests) {
+        ref var test = ref heap(new fieldsTestsᴛ1(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.testName, (ж<Δtesting.T> tΔ1) => {
             var typ = TypeOf(testʗ1.val);
             var fields = VisibleFields(typ);
             {
@@ -368,7 +369,7 @@ internal partial struct TestFieldByIndexErr_A /*dyn*/ {
 }
 
 internal partial struct TestFieldByIndexErr_B /*dyn*/ {
-    public partial ref ж<TestFieldByIndexErr_A> A { get; }
+    /*embed*/ public ж<TestFieldByIndexErr_A> A;
 }
 
 // Must not panic with nil embedded pointer.

@@ -217,6 +217,7 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(math.Copysign(0D, -1D), (rune)'f', 0, "-0"u8),
         new(1D, (rune)'f', 0, "1"u8),
         new(-1D, (rune)'f', 0, "-1"u8),
+
         new(0.001D, (rune)'e', 0, "1e-03"u8),
         new(0.459D, (rune)'e', 0, "5e-01"u8),
         new(1.459D, (rune)'e', 0, "1e+00"u8),
@@ -224,6 +225,7 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(3.459D, (rune)'e', 2, "3.46e+00"u8),
         new(4.459D, (rune)'e', 3, "4.459e+00"u8),
         new(5.459D, (rune)'e', 4, "5.4590e+00"u8),
+
         new(0.001D, (rune)'f', 0, "0"u8),
         new(0.459D, (rune)'f', 0, "0"u8),
         new(1.459D, (rune)'f', 0, "1"u8),
@@ -231,11 +233,13 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(3.459D, (rune)'f', 2, "3.46"u8),
         new(4.459D, (rune)'f', 3, "4.459"u8),
         new(5.459D, (rune)'f', 4, "5.4590"u8),
+
         new(0D, (rune)'b', 0, "0"u8),
         new(math.Copysign(0D, -1D), (rune)'b', 0, "-0"u8),
         new(1.0D, (rune)'b', 0, "4503599627370496p-52"u8),
         new(-1.0D, (rune)'b', 0, "-4503599627370496p-52"u8),
         new(4503599627370496D, (rune)'b', 0, "4503599627370496p+0"u8),
+
         new(0D, (rune)'p', 0, "0"u8),
         new(math.Copysign(0D, -1D), (rune)'p', 0, "-0"u8),
         new(1024.0D, (rune)'p', 0, "0x.8p+11"u8),
@@ -261,49 +265,63 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(.0004D, (rune)'g', 2, "0.0004"u8),
         new(.00004D, (rune)'g', 2, "4e-05"u8),
         new(.000004D, (rune)'g', 2, "4e-06"u8),
+
         new(0D, (rune)'e', 5, "0.00000e+00"u8),
         new(0D, (rune)'f', 5, "0.00000"u8),
         new(0D, (rune)'g', 5, "0"u8),
         new(0D, (rune)'g', -1, "0"u8),
+
         new(-1D, (rune)'e', 5, "-1.00000e+00"u8),
         new(-1D, (rune)'f', 5, "-1.00000"u8),
         new(-1D, (rune)'g', 5, "-1"u8),
         new(-1D, (rune)'g', -1, "-1"u8),
+
         new(12D, (rune)'e', 5, "1.20000e+01"u8),
         new(12D, (rune)'f', 5, "12.00000"u8),
         new(12D, (rune)'g', 5, "12"u8),
         new(12D, (rune)'g', -1, "12"u8),
+
         new(123456700D, (rune)'e', 5, "1.23457e+08"u8),
         new(123456700D, (rune)'f', 5, "123456700.00000"u8),
         new(123456700D, (rune)'g', 5, "1.2346e+08"u8),
         new(123456700D, (rune)'g', -1, "1.234567e+08"u8),
+
         new(1.2345e6D, (rune)'e', 5, "1.23450e+06"u8),
         new(1.2345e6D, (rune)'f', 5, "1234500.00000"u8),
         new(1.2345e6D, (rune)'g', 5, "1.2345e+06"u8),
+
         new(1e23D, (rune)'e', 17, "9.99999999999999916e+22"u8),
         new(1e23D, (rune)'f', 17, "99999999999999991611392.00000000000000000"u8),
         new(1e23D, (rune)'g', 17, "9.9999999999999992e+22"u8),
+
         new(1e23D, (rune)'e', -1, "1e+23"u8),
         new(1e23D, (rune)'f', -1, "100000000000000000000000"u8),
         new(1e23D, (rune)'g', -1, "1e+23"u8),
+
         new((float64)below1e23, (rune)'e', 17, "9.99999999999999748e+22"u8),
         new((float64)below1e23, (rune)'f', 17, "99999999999999974834176.00000000000000000"u8),
         new((float64)below1e23, (rune)'g', 17, "9.9999999999999975e+22"u8),
+
         new((float64)below1e23, (rune)'e', -1, "9.999999999999997e+22"u8),
         new((float64)below1e23, (rune)'f', -1, "99999999999999970000000"u8),
         new((float64)below1e23, (rune)'g', -1, "9.999999999999997e+22"u8),
+
         new((float64)above1e23, (rune)'e', 17, "1.00000000000000008e+23"u8),
         new((float64)above1e23, (rune)'f', 17, "100000000000000008388608.00000000000000000"u8),
         new((float64)above1e23, (rune)'g', 17, "1.0000000000000001e+23"u8),
+
         new((float64)above1e23, (rune)'e', -1, "1.0000000000000001e+23"u8),
         new((float64)above1e23, (rune)'f', -1, "100000000000000010000000"u8),
         new((float64)above1e23, (rune)'g', -1, "1.0000000000000001e+23"u8),
+
         new(5e-304D / 1e20D, (rune)'g', -1, "5e-324"u8),
         new(-5e-304D / 1e20D, (rune)'g', -1, "-5e-324"u8),
         new(fdiv(5e-304D, 1e20D), (rune)'g', -1, "5e-324"u8), // avoid constant arithmetic
         new(fdiv(-5e-304D, 1e20D), (rune)'g', -1, "-5e-324"u8), // avoid constant arithmetic
+
         new(32D, (rune)'g', -1, "32"u8),
         new(32D, (rune)'g', 0, "3e+01"u8),
+
         new(100D, (rune)'x', -1, "0x1.9p+06"u8),
 
         // {math.NaN(), 'g', -1, "NaN"},  // Float doesn't support NaNs
@@ -311,6 +329,7 @@ public static void TestFloat64Text(ж<testing.T> Ꮡt) {
         new(math.Inf(0), (rune)'g', -1, "+Inf"u8),
         new(math.Inf(-1), (rune)'g', -1, "-Inf"u8),
         new(-math.Inf(0), (rune)'g', -1, "-Inf"u8),
+
         new(-1D, (rune)'b', -1, "-4503599627370496p-52"u8),
 
         // fixed bugs
@@ -392,39 +411,47 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("-0"u8, defaultRound, 10, (rune)'f', 0, "-0"u8),
         new("1"u8, defaultRound, 10, (rune)'f', 0, "1"u8),
         new("-1"u8, defaultRound, 10, (rune)'f', 0, "-1"u8),
+
         new("1.459"u8, defaultRound, 100, (rune)'e', 0, "1e+00"u8),
         new("2.459"u8, defaultRound, 100, (rune)'e', 1, "2.5e+00"u8),
         new("3.459"u8, defaultRound, 100, (rune)'e', 2, "3.46e+00"u8),
         new("4.459"u8, defaultRound, 100, (rune)'e', 3, "4.459e+00"u8),
         new("5.459"u8, defaultRound, 100, (rune)'e', 4, "5.4590e+00"u8),
+
         new("1.459"u8, defaultRound, 100, (rune)'E', 0, "1E+00"u8),
         new("2.459"u8, defaultRound, 100, (rune)'E', 1, "2.5E+00"u8),
         new("3.459"u8, defaultRound, 100, (rune)'E', 2, "3.46E+00"u8),
         new("4.459"u8, defaultRound, 100, (rune)'E', 3, "4.459E+00"u8),
         new("5.459"u8, defaultRound, 100, (rune)'E', 4, "5.4590E+00"u8),
+
         new("1.459"u8, defaultRound, 100, (rune)'f', 0, "1"u8),
         new("2.459"u8, defaultRound, 100, (rune)'f', 1, "2.5"u8),
         new("3.459"u8, defaultRound, 100, (rune)'f', 2, "3.46"u8),
         new("4.459"u8, defaultRound, 100, (rune)'f', 3, "4.459"u8),
         new("5.459"u8, defaultRound, 100, (rune)'f', 4, "5.4590"u8),
+
         new("1.459"u8, defaultRound, 100, (rune)'g', 0, "1"u8),
         new("2.459"u8, defaultRound, 100, (rune)'g', 1, "2"u8),
         new("3.459"u8, defaultRound, 100, (rune)'g', 2, "3.5"u8),
         new("4.459"u8, defaultRound, 100, (rune)'g', 3, "4.46"u8),
         new("5.459"u8, defaultRound, 100, (rune)'g', 4, "5.459"u8),
+
         new("1459"u8, defaultRound, 53, (rune)'g', 0, "1e+03"u8),
         new("2459"u8, defaultRound, 53, (rune)'g', 1, "2e+03"u8),
         new("3459"u8, defaultRound, 53, (rune)'g', 2, "3.5e+03"u8),
         new("4459"u8, defaultRound, 53, (rune)'g', 3, "4.46e+03"u8),
         new("5459"u8, defaultRound, 53, (rune)'g', 4, "5459"u8),
+
         new("1459"u8, defaultRound, 53, (rune)'G', 0, "1E+03"u8),
         new("2459"u8, defaultRound, 53, (rune)'G', 1, "2E+03"u8),
         new("3459"u8, defaultRound, 53, (rune)'G', 2, "3.5E+03"u8),
         new("4459"u8, defaultRound, 53, (rune)'G', 3, "4.46E+03"u8),
         new("5459"u8, defaultRound, 53, (rune)'G', 4, "5459"u8),
+
         new("3"u8, defaultRound, 10, (rune)'e', 40, "3.0000000000000000000000000000000000000000e+00"u8),
         new("3"u8, defaultRound, 10, (rune)'f', 40, "3.0000000000000000000000000000000000000000"u8),
         new("3"u8, defaultRound, 10, (rune)'g', 40, "3"u8),
+
         new("3e40"u8, defaultRound, 100, (rune)'e', 40, "3.0000000000000000000000000000000000000000e+40"u8),
         new("3e40"u8, defaultRound, 100, (rune)'f', 4, "30000000000000000000000000000000000000000.0000"u8),
         new("3e40"u8, defaultRound, 100, (rune)'g', 40, "3e+40"u8),
@@ -446,6 +473,7 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("1p-2147483649"u8, defaultRound, 64, (rune)'p', 0, "0x.8p-2147483648"u8),
 
         // TODO(gri) need tests for actual large Floats
+
         new("0"u8, defaultRound, 53, (rune)'b', 0, "0"u8),
         new("-0"u8, defaultRound, 53, (rune)'b', 0, "-0"u8),
         new("1.0"u8, defaultRound, 53, (rune)'b', 0, "4503599627370496p-52"u8),
@@ -459,16 +487,19 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("3.0"u8, defaultRound, 350, (rune)'b', 0, "1720123961992553633708115671476565205597423741876210842803191629540192157066363606052513914832594264915968p-348"u8),
         new("3.00"u8, defaultRound, 350, (rune)'b', 0, "1720123961992553633708115671476565205597423741876210842803191629540192157066363606052513914832594264915968p-348"u8),
         new("3.000"u8, defaultRound, 350, (rune)'b', 0, "1720123961992553633708115671476565205597423741876210842803191629540192157066363606052513914832594264915968p-348"u8),
+
         new("3"u8, defaultRound, 350, (rune)'p', 0, "0x.cp+2"u8),
         new("03"u8, defaultRound, 350, (rune)'p', 0, "0x.cp+2"u8),
         new("3."u8, defaultRound, 350, (rune)'p', 0, "0x.cp+2"u8),
         new("3.0"u8, defaultRound, 350, (rune)'p', 0, "0x.cp+2"u8),
         new("3.00"u8, defaultRound, 350, (rune)'p', 0, "0x.cp+2"u8),
         new("3.000"u8, defaultRound, 350, (rune)'p', 0, "0x.cp+2"u8),
+
         new("0"u8, defaultRound, 64, (rune)'p', 0, "0"u8),
         new("-0"u8, defaultRound, 64, (rune)'p', 0, "-0"u8),
         new("1024.0"u8, defaultRound, 64, (rune)'p', 0, "0x.8p+11"u8),
         new("-1024.0"u8, defaultRound, 64, (rune)'p', 0, "-0x.8p+11"u8),
+
         new("0"u8, defaultRound, 64, (rune)'x', -1, "0x0p+00"u8),
         new("0"u8, defaultRound, 64, (rune)'x', 0, "0x0p+00"u8),
         new("0"u8, defaultRound, 64, (rune)'x', 1, "0x0.0p+00"u8),
@@ -491,6 +522,7 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("8191.533203125"u8, defaultRound, 53, (rune)'x', -1, "0x1.fff888p+12"u8),
         new("8191.533203125"u8, defaultRound, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
         new("8191.533203125"u8, defaultRound, 53, (rune)'x', 4, "0x1.fff9p+12"u8),
+
         new("8191.53125"u8, defaultRound, 53, (rune)'x', -1, "0x1.fff88p+12"u8),
         new("8191.53125"u8, ToNearestEven, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
         new("8191.53125"u8, ToNearestAway, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
@@ -498,6 +530,7 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("8191.53125"u8, AwayFromZero, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
         new("8191.53125"u8, ToNegativeInf, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
         new("8191.53125"u8, ToPositiveInf, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
+
         new("8191.53125"u8, defaultRound, 53, (rune)'x', 4, "0x1.fff8p+12"u8),
         new("8191.53125"u8, defaultRound, 53, (rune)'x', 3, "0x1.000p+13"u8),
         new("8191.53125"u8, defaultRound, 53, (rune)'x', 0, "0x1p+13"u8),
@@ -505,6 +538,7 @@ public static void TestFloatText(ж<testing.T> Ꮡt) {
         new("8191.533203125"u8, defaultRound, 53, (rune)'x', 6, "0x1.fff888p+12"u8),
         new("8191.533203125"u8, defaultRound, 53, (rune)'x', 5, "0x1.fff88p+12"u8),
         new("8191.533203125"u8, defaultRound, 53, (rune)'x', 4, "0x1.fff9p+12"u8),
+
         new("8191.53125"u8, ToNearestEven, 53, (rune)'x', 4, "0x1.fff8p+12"u8),
         new("8191.53125"u8, ToNearestAway, 53, (rune)'x', 4, "0x1.fff9p+12"u8),
         new("8191.53125"u8, ToZero, 53, (rune)'x', 4, "0x1.fff8p+12"u8),
@@ -606,6 +640,7 @@ public static void TestFloatFormat(ж<testing.T> Ꮡt) {
         new("%G"u8, -7.0D, "-7"u8),
         new("%G"u8, -1e-9D, "-1E-09"u8),
         new("%G"u8, (float32)(-1e-9F), "-1E-09"u8),
+
         new("%20.6e"u8, 1.2345e3D, "        1.234500e+03"u8),
         new("%20.6e"u8, 1.2345e-3D, "        1.234500e-03"u8),
         new("%20e"u8, 1.2345e3D, "        1.234500e+03"u8),

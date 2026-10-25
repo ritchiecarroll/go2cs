@@ -13,16 +13,19 @@ internal static class Go2CsTestHost
             "alias_test.go",
             "arith.go",
             "arith_amd64.go",
+            "arith_amd64_test.go",
             "arith_decl.go",
             "arith_decl_pure.go",
-            "arith_decl_s390x.go",
             "arith_s390x_test.go",
             "arith_test.go",
+            "arithvec_s390x.go",
             "bits_test.go",
+            "calibrate_graph.go",
             "calibrate_test.go",
             "decimal.go",
             "decimal_test.go",
             "doc.go",
+            "escape_test.go",
             "example_rat_test.go",
             "example_test.go",
             "float.go",
@@ -47,6 +50,7 @@ internal static class Go2CsTestHost
             "natconv.go",
             "natconv_test.go",
             "natdiv.go",
+            "natmul.go",
             "prime.go",
             "prime_test.go",
             "rat.go",
@@ -58,28 +62,37 @@ internal static class Go2CsTestHost
             "roundingmode_string.go",
             "sqrt.go",
             "sqrt_test.go",
+        }, new string[]
+        {
+            "internal",
         });
         registry.Add("TestAbsZ", big_internal_test_package.TestAbsZ, "int_test.go", 74);
+        registry.Add("TestAdd", big_internal_test_package.TestAdd, "nat_test.go", 206);
+        registry.Add("TestAddMulVVWW", big_internal_test_package.TestAddMulVVWW, "arith_test.go", 36);
+        registry.Add("TestAddVV", big_internal_test_package.TestAddVV, "arith_test.go", 29);
+        registry.Add("TestAddVW", big_internal_test_package.TestAddVW, "arith_test.go", 31);
         registry.Add("TestAliasing", big_test_package.TestAliasing, "alias_test.go", 181);
-        registry.Add("TestAppendText", big_internal_test_package.TestAppendText, "intconv_test.go", 113);
+        registry.Add("TestAppendText", big_internal_test_package.TestAppendText, "intconv_test.go", 114);
         registry.Add("TestBinomial", big_internal_test_package.TestBinomial, "int_test.go", 233);
-        registry.Add("TestBit", big_internal_test_package.TestBit, "nat_test.go", 664);
+        registry.Add("TestBit", big_internal_test_package.TestBit, "nat_test.go", 829);
         registry.Add("TestBitLen", big_internal_test_package.TestBitLen, "int_test.go", 525);
         registry.Add("TestBitSet", big_internal_test_package.TestBitSet, "int_test.go", 1385);
         registry.Add("TestBits", big_internal_test_package.TestBits, "int_test.go", 351);
         registry.Add("TestBitwise", big_internal_test_package.TestBitwise, "int_test.go", 1521);
         registry.Add("TestBytes", big_internal_test_package.TestBytes, "int_test.go", 410);
-        registry.Add("TestCmp", big_internal_test_package.TestCmp, "nat_test.go", 35);
+        registry.Add("TestCalibrate", big_internal_test_package.TestCalibrate, "calibrate_test.go", 31);
+        registry.Add("TestCmp", big_internal_test_package.TestCmp, "nat_test.go", 37);
         registry.Add("TestCmpAbs", big_internal_test_package.TestCmpAbs, "int_test.go", 1078);
         registry.Add("TestDecimalInit", big_internal_test_package.TestDecimalInit, "decimal_test.go", 30);
         registry.Add("TestDecimalRounding", big_internal_test_package.TestDecimalRounding, "decimal_test.go", 56);
         registry.Add("TestDecimalString", big_internal_test_package.TestDecimalString, "decimal_test.go", 12);
         registry.Add("TestDenomRace", big_internal_test_package.TestDenomRace, "rat_test.go", 730);
-        registry.Add("TestDivWW", big_internal_test_package.TestDivWW, "arith_test.go", 598);
+        registry.Add("TestDivWW", big_internal_test_package.TestDivWW, "arith_test.go", 736);
         registry.Add("TestDivisionSigns", big_internal_test_package.TestDivisionSigns, "int_test.go", 286);
+        registry.Add("TestEscape", big_internal_test_package.TestEscape, "escape_test.go", 15);
         registry.Add("TestExp", big_internal_test_package.TestExp, "int_test.go", 619);
-        registry.Add("TestExpNN", big_internal_test_package.TestExpNN, "nat_test.go", 539);
-        registry.Add("TestFibo", big_internal_test_package.TestFibo, "nat_test.go", 618);
+        registry.Add("TestExpNN", big_internal_test_package.TestExpNN, "nat_test.go", 698);
+        registry.Add("TestFibo", big_internal_test_package.TestFibo, "nat_test.go", 783);
         registry.Add("TestFillBytes", big_internal_test_package.TestFillBytes, "int_test.go", 1887);
         registry.Add("TestFloat32Distribution", big_internal_test_package.TestFloat32Distribution, "rat_test.go", 394);
         registry.Add("TestFloat32SpecialCases", big_internal_test_package.TestFloat32SpecialCases, "ratconv_test.go", 477);
@@ -141,15 +154,11 @@ internal static class Go2CsTestHost
         registry.Add("TestFloatText", big_internal_test_package.TestFloatText, "floatconv_test.go", 387);
         registry.Add("TestFloatUint64", big_internal_test_package.TestFloatUint64, "float_test.go", 753);
         registry.Add("TestFloatZeroValue", big_internal_test_package.TestFloatZeroValue, "float_test.go", 35);
-        registry.Add("TestFormat", big_internal_test_package.TestFormat, "intconv_test.go", 375);
+        registry.Add("TestFormat", big_internal_test_package.TestFormat, "intconv_test.go", 376);
         registry.Add("TestFromBits", big_internal_test_package.TestFromBits, "bits_test.go", 199);
-        registry.Add("TestFunNN", big_internal_test_package.TestFunNN, "nat_test.go", 115);
-        registry.Add("TestFunVV", big_internal_test_package.TestFunVV, "arith_test.go", 50);
-        registry.Add("TestFunVW", big_internal_test_package.TestFunVW, "arith_test.go", 206);
-        registry.Add("TestFunVWExt", big_internal_test_package.TestFunVWExt, "arith_test.go", 246);
-        registry.Add("TestFunVWW", big_internal_test_package.TestFunVWW, "arith_test.go", 538);
+        registry.Add("TestFunVWW", big_internal_test_package.TestFunVWW, "arith_test.go", 676);
         registry.Add("TestGcd", big_internal_test_package.TestGcd, "int_test.go", 897);
-        registry.Add("TestGetString", big_internal_test_package.TestGetString, "intconv_test.go", 152);
+        registry.Add("TestGetString", big_internal_test_package.TestGetString, "intconv_test.go", 153);
         registry.Add("TestGobEncodingNilIntInSlice", big_internal_test_package.TestGobEncodingNilIntInSlice, "intmarsh_test.go", 53);
         registry.Add("TestGobEncodingNilRatInSlice", big_internal_test_package.TestGobEncodingNilRatInSlice, "ratmarsh_test.go", 40);
         registry.Add("TestHilbert", big_internal_test_package.TestHilbert, "hilbert_test.go", 152);
@@ -160,7 +169,7 @@ internal static class Go2CsTestHost
         registry.Add("TestIntGobEncoding", big_internal_test_package.TestIntGobEncoding, "intmarsh_test.go", 25);
         registry.Add("TestIntJSONEncoding", big_internal_test_package.TestIntJSONEncoding, "intmarsh_test.go", 77);
         registry.Add("TestIntJSONEncodingNil", big_internal_test_package.TestIntJSONEncodingNil, "intmarsh_test.go", 100);
-        registry.Add("TestIntText", big_internal_test_package.TestIntText, "intconv_test.go", 89);
+        registry.Add("TestIntText", big_internal_test_package.TestIntText, "intconv_test.go", 90);
         registry.Add("TestIntXMLEncoding", big_internal_test_package.TestIntXMLEncoding, "intmarsh_test.go", 113);
         registry.Add("TestIsFinite", big_internal_test_package.TestIsFinite, "rat_test.go", 620);
         registry.Add("TestIsInt", big_internal_test_package.TestIsInt, "rat_test.go", 94);
@@ -168,13 +177,13 @@ internal static class Go2CsTestHost
         registry.Add("TestIssue22830", big_internal_test_package.TestIssue22830, "int_test.go", 1810);
         registry.Add("TestIssue2379", big_internal_test_package.TestIssue2379, "rat_test.go", 279);
         registry.Add("TestIssue2607", big_internal_test_package.TestIssue2607, "int_test.go", 1770);
-        registry.Add("TestIssue31084", big_internal_test_package.TestIssue31084, "arith_test.go", 370);
+        registry.Add("TestIssue31084", big_internal_test_package.TestIssue31084, "arith_test.go", 579);
         registry.Add("TestIssue31184", big_internal_test_package.TestIssue31184, "ratconv_test.go", 588);
         registry.Add("TestIssue34919", big_internal_test_package.TestIssue34919, "rat_test.go", 706);
         registry.Add("TestIssue3521", big_internal_test_package.TestIssue3521, "rat_test.go", 319);
-        registry.Add("TestIssue37499", big_internal_test_package.TestIssue37499, "nat_test.go", 868);
-        registry.Add("TestIssue42552", big_internal_test_package.TestIssue42552, "nat_test.go", 886);
-        registry.Add("TestIssue42838", big_internal_test_package.TestIssue42838, "arith_test.go", 384);
+        registry.Add("TestIssue37499", big_internal_test_package.TestIssue37499, "nat_test.go", 1013);
+        registry.Add("TestIssue42552", big_internal_test_package.TestIssue42552, "nat_test.go", 1034);
+        registry.Add("TestIssue42838", big_internal_test_package.TestIssue42838, "arith_test.go", 596);
         registry.Add("TestIssue45910", big_internal_test_package.TestIssue45910, "ratconv_test.go", 603);
         registry.Add("TestIssue6866", big_internal_test_package.TestIssue6866, "float_test.go", 1468);
         registry.Add("TestIssue820", big_internal_test_package.TestIssue820, "rat_test.go", 232);
@@ -184,23 +193,28 @@ internal static class Go2CsTestHost
         registry.Add("TestLsh", big_internal_test_package.TestLsh, "int_test.go", 1009);
         registry.Add("TestLshRsh", big_internal_test_package.TestLshRsh, "int_test.go", 1039);
         registry.Add("TestLshSelf", big_internal_test_package.TestLshSelf, "int_test.go", 1024);
-        registry.Add("TestLucasPseudoprimes", big_internal_test_package.TestLucasPseudoprimes, "prime_test.go", 190);
+        registry.Add("TestLshVU", big_internal_test_package.TestLshVU, "arith_test.go", 33);
+        registry.Add("TestLucasPseudoprimes", big_internal_test_package.TestLucasPseudoprimes, "prime_test.go", 196);
         registry.Add("TestMaxBase", big_internal_test_package.TestMaxBase, "natconv_test.go", 16);
-        registry.Add("TestMillerRabinPseudoprimes", big_internal_test_package.TestMillerRabinPseudoprimes, "prime_test.go", 183);
+        registry.Add("TestMillerRabinPseudoprimes", big_internal_test_package.TestMillerRabinPseudoprimes, "prime_test.go", 186);
         registry.Add("TestModInverse", big_internal_test_package.TestModInverse, "int_test.go", 1583);
         registry.Add("TestModSqrt", big_internal_test_package.TestModSqrt, "int_test.go", 1664);
-        registry.Add("TestModW", big_internal_test_package.TestModW, "nat_test.go", 365);
-        registry.Add("TestMontgomery", big_internal_test_package.TestMontgomery, "nat_test.go", 445);
+        registry.Add("TestModW", big_internal_test_package.TestModW, "nat_test.go", 521);
+        registry.Add("TestMontgomery", big_internal_test_package.TestMontgomery, "nat_test.go", 601);
         registry.Add("TestMul", big_internal_test_package.TestMul, "int_test.go", 174);
-        registry.Add("TestMulAddWWW", big_internal_test_package.TestMulAddWWW, "arith_test.go", 579);
+        registry.Add("TestMulAddVWW", big_internal_test_package.TestMulAddVWW, "arith_test.go", 35);
+        registry.Add("TestMulAddWWW", big_internal_test_package.TestMulAddWWW, "arith_test.go", 717);
+        registry.Add("TestMulAlloc", big_internal_test_package.TestMulAlloc, "escape_test.go", 30);
         registry.Add("TestMulBits", big_internal_test_package.TestMulBits, "bits_test.go", 42);
-        registry.Add("TestMulRangeN", big_internal_test_package.TestMulRangeN, "nat_test.go", 165);
+        registry.Add("TestMulRangeN", big_internal_test_package.TestMulRangeN, "nat_test.go", 324);
         registry.Add("TestMulRangeZ", big_internal_test_package.TestMulRangeZ, "int_test.go", 211);
-        registry.Add("TestMulUnbalanced", big_internal_test_package.TestMulUnbalanced, "nat_test.go", 187);
-        registry.Add("TestMulWW", big_internal_test_package.TestMulWW, "arith_test.go", 559);
-        registry.Add("TestNLZ", big_internal_test_package.TestNLZ, "nat_test.go", 249);
-        registry.Add("TestNatDiv", big_internal_test_package.TestNatDiv, "nat_test.go", 830);
-        registry.Add("TestNatSubMod2N", big_internal_test_package.TestNatSubMod2N, "nat_test.go", 780);
+        registry.Add("TestMulUnbalanced", big_internal_test_package.TestMulUnbalanced, "nat_test.go", 349);
+        registry.Add("TestMulWW", big_internal_test_package.TestMulWW, "arith_test.go", 697);
+        registry.Add("TestNLZ", big_internal_test_package.TestNLZ, "nat_test.go", 405);
+        registry.Add("TestNatDiv", big_internal_test_package.TestNatDiv, "nat_test.go", 972);
+        registry.Add("TestNatMul", big_internal_test_package.TestNatMul, "nat_test.go", 224);
+        registry.Add("TestNatSqr", big_internal_test_package.TestNatSqr, "nat_test.go", 267);
+        registry.Add("TestNatSubMod2N", big_internal_test_package.TestNatSubMod2N, "nat_test.go", 922);
         registry.Add("TestNewIntAllocs", big_internal_test_package.TestNewIntAllocs, "int_test.go", 1949);
         registry.Add("TestNewIntMinInt64", big_internal_test_package.TestNewIntMinInt64, "int_test.go", 1941);
         registry.Add("TestNormBits", big_internal_test_package.TestNormBits, "bits_test.go", 85);
@@ -228,25 +242,29 @@ internal static class Go2CsTestHost
         registry.Add("TestRatXMLEncoding", big_internal_test_package.TestRatXMLEncoding, "ratmarsh_test.go", 105);
         registry.Add("TestRsh", big_internal_test_package.TestRsh, "int_test.go", 957);
         registry.Add("TestRshSelf", big_internal_test_package.TestRshSelf, "int_test.go", 972);
-        registry.Add("TestScan", big_internal_test_package.TestScan, "intconv_test.go", 415);
+        registry.Add("TestRshVU", big_internal_test_package.TestRshVU, "arith_test.go", 34);
+        registry.Add("TestScan", big_internal_test_package.TestScan, "intconv_test.go", 437);
         registry.Add("TestScanBase", big_internal_test_package.TestScanBase, "natconv_test.go", 226);
         registry.Add("TestScanExponent", big_internal_test_package.TestScanExponent, "ratconv_test.go", 65);
         registry.Add("TestScanPi", big_internal_test_package.TestScanPi, "natconv_test.go", 307);
         registry.Add("TestScanPiParallel", big_internal_test_package.TestScanPiParallel, "natconv_test.go", 318);
-        registry.Add("TestSet", big_internal_test_package.TestSet, "nat_test.go", 99);
+        registry.Add("TestSet", big_internal_test_package.TestSet, "nat_test.go", 174);
         registry.Add("TestSetBytes", big_internal_test_package.TestSetBytes, "int_test.go", 394);
         registry.Add("TestSetFloat64NonFinite", big_internal_test_package.TestSetFloat64NonFinite, "rat_test.go", 492);
-        registry.Add("TestSetString", big_internal_test_package.TestSetString, "intconv_test.go", 180);
+        registry.Add("TestSetString", big_internal_test_package.TestSetString, "intconv_test.go", 181);
         registry.Add("TestSetZ", big_internal_test_package.TestSetZ, "int_test.go", 61);
-        registry.Add("TestShiftLeft", big_internal_test_package.TestShiftLeft, "nat_test.go", 274);
-        registry.Add("TestShiftOverlap", big_internal_test_package.TestShiftOverlap, "arith_test.go", 358);
-        registry.Add("TestShiftRight", big_internal_test_package.TestShiftRight, "nat_test.go", 297);
+        registry.Add("TestShiftLeft", big_internal_test_package.TestShiftLeft, "nat_test.go", 430);
+        registry.Add("TestShiftOverlap", big_internal_test_package.TestShiftOverlap, "arith_test.go", 567);
+        registry.Add("TestShiftRight", big_internal_test_package.TestShiftRight, "nat_test.go", 453);
         registry.Add("TestSignZ", big_internal_test_package.TestSignZ, "int_test.go", 50);
-        registry.Add("TestSqr", big_internal_test_package.TestSqr, "nat_test.go", 723);
+        registry.Add("TestSqrAlloc", big_internal_test_package.TestSqrAlloc, "escape_test.go", 43);
         registry.Add("TestSqrt", big_internal_test_package.TestSqrt, "int_test.go", 1776);
-        registry.Add("TestSticky", big_internal_test_package.TestSticky, "nat_test.go", 696);
+        registry.Add("TestSticky", big_internal_test_package.TestSticky, "nat_test.go", 861);
         registry.Add("TestString", big_internal_test_package.TestString, "natconv_test.go", 73);
-        registry.Add("TestStringPowers", big_internal_test_package.TestStringPowers, "natconv_test.go", 445);
+        registry.Add("TestStringPowers", big_internal_test_package.TestStringPowers, "natconv_test.go", 453);
+        registry.Add("TestSub", big_internal_test_package.TestSub, "nat_test.go", 214);
+        registry.Add("TestSubVV", big_internal_test_package.TestSubVV, "arith_test.go", 30);
+        registry.Add("TestSubVW", big_internal_test_package.TestSubVW, "arith_test.go", 32);
         registry.Add("TestSumZZ", big_internal_test_package.TestSumZZ, "int_test.go", 101);
         registry.Add("TestTrailingZeroBits", big_internal_test_package.TestTrailingZeroBits, "int_test.go", 1422);
         registry.Add("TestUint64", big_internal_test_package.TestUint64, "int_test.go", 1207);

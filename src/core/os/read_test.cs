@@ -4,9 +4,11 @@
 namespace go;
 
 using bytes = bytes_package;
+using errors = errors_package;
 using static os_package;
 using filepath = go.path.filepath_package;
 using Δruntime = runtime_package;
+using syscall = syscall_package;
 using Δtesting = testing_package;
 using fs = go.io.fs_package;
 using go.io;
@@ -123,9 +125,22 @@ public static void TestReadDir(ж<Δtesting.T> Ꮡt) {
     Ꮡt.Parallel();
 
     @string dirname = rumpelstilzchenˢ;
-    var (_, err) = ReadDir(dirname);
-    if (err == default!) {
-        Ꮡt.Fatalf("ReadDir %s: error expected, none found"u8, dirname);
+    {
+        var (_, errΔ1) = ReadDir(dirname); if (errΔ1 == default!) {
+            Ꮡt.Fatalf("ReadDir %s: error expected, none found"u8, dirname);
+        }
+    }
+
+    @string filename = filepath.Join(Ꮡt.TempDir(), fooˢ);
+    var (f, err) = Create(filename);
+    if (err != default!) {
+        Ꮡt.Fatal(err);
+    }
+    f.Close();
+    {
+        var (listΔ1, errΔ2) = ReadDir(filename); if (listΔ1 != default! || !errors.Is(errΔ2, syscall.ENOTDIR)) {
+            Ꮡt.Fatalf("ReadDir %s: (nil, ENOTDIR) expected, got (%v, %v)"u8, filename, listΔ1, errΔ2);
+        }
     }
 
     dirname = "."u8;

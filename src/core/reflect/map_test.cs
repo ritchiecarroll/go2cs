@@ -1,7 +1,6 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//go:build goexperiment.swissmap
 namespace go;
 
 using Δreflect = reflect_package;
@@ -9,11 +8,6 @@ using Δtesting = testing_package;
 using static global::go.reflect_internal_test_package;
 
 partial class reflect_test_package {
-
-internal static void testGCBitsMap(ж<Δtesting.T> Ꮡt) {
-    // Unlike old maps, we don't manually construct GC data for swiss maps,
-    // instead using the public reflect API in groupAndSlotOf.
-}
 
 // See also runtime_test.TestGroupSizeZero.
 public static void TestGroupSizeZero(ж<Δtesting.T> Ꮡt) {

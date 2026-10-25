@@ -5,34 +5,14 @@ namespace go;
 
 using testenv = @internal.testenv_package;
 using Δos = os_package;
-using exec = go.os.exec_package;
 using Δruntime = runtime_package;
-using strconv = strconv_package;
 using strings = strings_package;
 using testing = testing_package;
 using @internal;
-using go.os;
 using static go.net_package;
 using ꓸꓸꓸany = Span<any>;
 
 partial class net_internal_test_package {
-
-internal static bool unixEnabledOnAIX;
-
-[GoInit] internal static void initΔ1() {
-    if (Δruntime.GOOS == "aix"u8) {
-        // Unix network isn't properly working on AIX 7.2 with
-        // Technical Level < 2.
-        // The information is retrieved only once in this init()
-        // instead of everytime testableNetwork is called.
-        var (@out, _) = exec.Command("oslevel"u8, "-s"u8).Output();
-        if (len(@out) >= len("7200-XX-ZZ-YYMM")) { // AIX 7.2, Tech Level XX, Service Pack ZZ, date YYMM
-            sstring aixVer = ((sstring)(@out[..4]));
-            var (tl, _) = strconv.Atoi(((@string)(@out[5..7])));
-            unixEnabledOnAIX = aixVer > "7200"u8 || (aixVer == "7200"u8 && tl >= 2);
-        }
-    }
-}
 
 // testableNetwork reports whether network is testable on the current
 // platform configuration.
@@ -52,14 +32,17 @@ internal static bool testableNetwork(@string network) {
             }
         }
     }
-    else if (exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8) {
+    else if (exprᴛ1 == "unixgram"u8) {
         var exprᴛ3 = Δruntime.GOOS;
-        if (exprᴛ3 == "android"u8 || exprᴛ3 == "ios"u8 || exprᴛ3 == "plan9"u8 || exprᴛ3 == "windows"u8) {
+        if (exprᴛ3 == "windows"u8) {
             return false;
         }
-        if (exprᴛ3 == "aix"u8) {
-            return unixEnabledOnAIX;
+        { /* default: */
+            return supportsUnixSocket();
         }
+    }
+    else if (exprᴛ1 == "unix"u8) {
+        return supportsUnixSocket();
     }
     else if (exprᴛ1 == "unixpacket"u8) {
         var exprᴛ4 = Δruntime.GOOS;

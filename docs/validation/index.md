@@ -190,6 +190,7 @@ it beside the proofs on every release.
 | `internal/runtime/sys` | [`internal.runtime.sys.md`](current/internal.runtime.sys.md) | [`src/core/internal/runtime/sys`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/runtime/sys) |
 | `internal/saferio` | [`internal.saferio.md`](current/internal.saferio.md) | [`src/core/internal/saferio`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/saferio) |
 | `internal/singleflight` | [`internal.singleflight.md`](current/internal.singleflight.md) | [`src/core/internal/singleflight`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/singleflight) |
+| `internal/strconv` | [`internal.strconv.md`](current/internal.strconv.md) | [`src/core/internal/strconv`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/strconv) |
 | `internal/sync` | [`internal.sync.md`](current/internal.sync.md) | [`src/core/internal/sync`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/sync) |
 | `internal/synctest` | [`internal.synctest.md`](current/internal.synctest.md) | [`src/core/internal/synctest`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/synctest) |
 | `internal/syscall/unix` | [`internal.syscall.unix.md`](current/internal.syscall.unix.md) | [`src/core/internal/syscall/unix`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/internal/syscall/unix) |

@@ -28,7 +28,7 @@ public static void TestNISTECAllocations(ж<testing.T> Ꮡt) {
     cryptotest.SkipTestAllocations(Ꮡt);
     Ꮡt.Run(p224ˢ, (ж<testing.T> tΔ1) => {
         {
-            var allocs = testing.AllocsPerRun(10, () => {
+            var allocs = testing.AllocsPerRun(100, () => {
                 var p = nistec.NewP224Point().SetGenerator();
                 var scalar = new slice<byte>(28);
                 rand.Read(scalar);
@@ -53,7 +53,7 @@ public static void TestNISTECAllocations(ж<testing.T> Ꮡt) {
     });
     Ꮡt.Run(p256ˢ, (ж<testing.T> tΔ2) => {
         {
-            var allocs = testing.AllocsPerRun(10, () => {
+            var allocs = testing.AllocsPerRun(100, () => {
                 var p = nistec.NewP256Point().SetGenerator();
                 var scalar = new slice<byte>(32);
                 rand.Read(scalar);
@@ -78,7 +78,7 @@ public static void TestNISTECAllocations(ж<testing.T> Ꮡt) {
     });
     Ꮡt.Run(p384ˢ, (ж<testing.T> tΔ3) => {
         {
-            var allocs = testing.AllocsPerRun(10, () => {
+            var allocs = testing.AllocsPerRun(100, () => {
                 var p = nistec.NewP384Point().SetGenerator();
                 var scalar = new slice<byte>(48);
                 rand.Read(scalar);
@@ -103,7 +103,7 @@ public static void TestNISTECAllocations(ж<testing.T> Ꮡt) {
     });
     Ꮡt.Run(p521ˢ, (ж<testing.T> tΔ4) => {
         {
-            var allocs = testing.AllocsPerRun(10, () => {
+            var allocs = testing.AllocsPerRun(100, () => {
                 var p = nistec.NewP521Point().SetGenerator();
                 var scalar = new slice<byte>(66);
                 rand.Read(scalar);
@@ -317,13 +317,6 @@ internal static void testScalarMult<P>(ж<testing.T> Ꮡt, Func<P> newPoint, ell
         Ꮡt.Run(fmt.Sprintf("N%+d"u8, i), (ж<testing.T> tΔ10) => {
             checkScalarʗ9(tΔ10, @new<bigꓸInt>().Add((~c.Params()).N, big.NewInt(i)).Bytes());
         });
-    }
-}
-
-internal static void fatalIfErr(ж<testing.T> Ꮡt, error err) {
-    Ꮡt.Helper();
-    if (err != default!) {
-        Ꮡt.Fatal(err);
     }
 }
 

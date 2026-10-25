@@ -46,7 +46,6 @@ using static global::go.math.big_test_package;
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206f757420737472696e677d", "notTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b206f75742075696e747d", "tzbTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e20737472696e673b207072656320696e743b206f757420737472696e677d", "floatStringTestsᴛ1")]
-[assembly: GoDynamicTypeLift("7374727563747b696e70757420737472696e673b20666f726d617420737472696e673b206f757470757420737472696e673b2072656d61696e696e6720696e747d", "scanTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b696e70757420737472696e673b20666f726d617420737472696e673b206f757470757420737472696e677d", "formatTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7261743120737472696e673b207261743220737472696e673b206f757420696e747d", "ratCmpTestsᴛ1")]
 [assembly: GoDynamicTypeLift("7374727563747b7320737472696e673b206261736520696e743b206672616320626f6f6c3b2078206d6174682f6269672e6e61743b206220696e743b20636f756e7420696e743b20657272206572726f723b206e6578742072756e657d", "natScanTestsᴛ1")]
@@ -84,6 +83,12 @@ using static global::go.math.big_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -92,7 +97,7 @@ using static global::go.math.big_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAwCpoCCyICCgsgAAhwADwKmgKaSgsiCgIKCtoKAgoLsgoKAgpKCyICCgraCgIKCyKaCABsiuroABBSCooK4gqKCuAAQTAAEEAAHHJKSlKSkpJSApg==", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29")]
+[assembly: go.GoPositionMap("math/big/alias_test.go", "alias_test.cs", "ABIggu6igoKCpqKCgpTuooKClIKU7oKC7qKCgpTuou6iAAIYAAwCpoCCyICCgsgAAhwADwKmgKaSgsiCgIKCtoKAgoLsgoKAgpKCyICCgraCgIKCyPaCABsiuroABBSCooK4gqKCuAAQTAAEEAAHHJKSlKSkpJSAptqCgoKCgqaCgoKCgqaCgoKCgg==", "183-185:1;186-188:2;189-191:3;192-194:4;195-197:5;198-202:6;199-201:6.1;203-207:7;204-206:7.1;208-212:8;209-211:8.1;213-217:9;214-216:9.1;218-224:10;220-223:10.1;225-231:11;227-230:11.1;232-236:12;233-235:12.1;237-239:13;240-242:14;243-245:15;246-248:16;249-251:17;252-254:18;255-257:19;258-260:20;261-266:21;262-265:21.1;267-269:22;270-274:23;271-273:23.1;275-277:24;278-282:25;279-281:25.1;283-285:26;286-288:27;289-291:28;293-310:29;313-319:30;321-327:31;329-335:32")]
 [assembly: go.GoPositionMap("math/big/example_rat_test.go", "example_rat_test.cs", "AAwoAAgCgoKUpoLKlKyygso=")]
 // </GoSourcePositionMaps>
 
@@ -131,12 +136,15 @@ public static partial class big_test_package
     [GoInit] internal static void initᴛᴛimportꓸencodingꓸxml() => builtin.initPackage(typeof(encoding.xml_package));
     [GoInit] internal static void initᴛᴛimportꓸflag() => builtin.initPackage(typeof(flag_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸsysinfo() => builtin.initPackage(typeof(@internal.sysinfo_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
+    [GoInit] internal static void initᴛᴛimportꓸiter() => builtin.initPackage(typeof(iter_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbig() => builtin.initPackage(typeof(go.math.big_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(go.math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrand() => builtin.initPackage(typeof(go.math.rand_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸrandꓸv2() => builtin.initPackage(typeof(go.math.rand.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(go.os.exec_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
@@ -145,6 +153,7 @@ public static partial class big_test_package
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtestingꓸquick() => builtin.initPackage(typeof(go.testing.quick_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));

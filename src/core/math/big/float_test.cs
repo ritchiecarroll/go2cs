@@ -68,10 +68,12 @@ public static void TestFloatZeroValue(ж<testing.T> Ꮡt) {
         new(0, 1, 2, 3, (rune)'+', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Add))),
         new(1, 2, 0, 2, (rune)'+', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Add))),
         new(2, 0, 1, 1, (rune)'+', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Add))),
+
         new(0, 0, 0, 0, (rune)'-', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Sub))),
         new(0, 1, 2, -1, (rune)'-', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Sub))),
         new(1, 2, 0, 2, (rune)'-', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Sub))),
         new(2, 0, 1, -1, (rune)'-', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Sub))),
+
         new(0, 0, 0, 0, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
         new(0, 1, 2, 2, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
         new(1, 2, 0, 0, (rune)'*', ((Func<ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>, ж<global::go.math.big_package.Float>>)(global::go.math.big_package.Mul))),
@@ -338,7 +340,7 @@ public static void TestFloatPredicates(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string intˢ = " int"u8;
+internal static readonly @string intˢ2 = " int"u8;
 
 public static void TestFloatIsInt(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
@@ -359,7 +361,7 @@ public static void TestFloatIsInt(ж<testing.T> Ꮡt) {
         "+Inf"u8,
         "-Inf"u8
     }.slice()) {
-        @string s = strings.TrimSuffix(test, intˢ);
+        @string s = strings.TrimSuffix(test, intˢ2);
         var want = s != test;
         {
             var got = makeFloat(s).IsInt(); if (got != want) {
@@ -485,6 +487,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(5, "1101"u8, "1101"u8, "1101"u8, "1101"u8, "1101"u8),
         new(5, "1110"u8, "1110"u8, "1110"u8, "1110"u8, "1110"u8),
         new(5, "1111"u8, "1111"u8, "1111"u8, "1111"u8, "1111"u8),
+
         new(4, "1000"u8, "1000"u8, "1000"u8, "1000"u8, "1000"u8),
         new(4, "1001"u8, "1001"u8, "1001"u8, "1001"u8, "1001"u8),
         new(4, "1010"u8, "1010"u8, "1010"u8, "1010"u8, "1010"u8),
@@ -493,6 +496,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(4, "1101"u8, "1101"u8, "1101"u8, "1101"u8, "1101"u8),
         new(4, "1110"u8, "1110"u8, "1110"u8, "1110"u8, "1110"u8),
         new(4, "1111"u8, "1111"u8, "1111"u8, "1111"u8, "1111"u8),
+
         new(3, "1000"u8, "1000"u8, "1000"u8, "1000"u8, "1000"u8),
         new(3, "1001"u8, "1000"u8, "1000"u8, "1010"u8, "1010"u8),
         new(3, "1010"u8, "1010"u8, "1010"u8, "1010"u8, "1010"u8),
@@ -501,6 +505,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(3, "1101"u8, "1100"u8, "1100"u8, "1110"u8, "1110"u8),
         new(3, "1110"u8, "1110"u8, "1110"u8, "1110"u8, "1110"u8),
         new(3, "1111"u8, "1110"u8, "10000"u8, "10000"u8, "10000"u8),
+
         new(3, "1000001"u8, "1000000"u8, "1000000"u8, "1000000"u8, "1010000"u8),
         new(3, "1001001"u8, "1000000"u8, "1010000"u8, "1010000"u8, "1010000"u8),
         new(3, "1010001"u8, "1010000"u8, "1010000"u8, "1010000"u8, "1100000"u8),
@@ -509,6 +514,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(3, "1101001"u8, "1100000"u8, "1110000"u8, "1110000"u8, "1110000"u8),
         new(3, "1110001"u8, "1110000"u8, "1110000"u8, "1110000"u8, "10000000"u8),
         new(3, "1111001"u8, "1110000"u8, "10000000"u8, "10000000"u8, "10000000"u8),
+
         new(2, "1000"u8, "1000"u8, "1000"u8, "1000"u8, "1000"u8),
         new(2, "1001"u8, "1000"u8, "1000"u8, "1000"u8, "1100"u8),
         new(2, "1010"u8, "1000"u8, "1000"u8, "1100"u8, "1100"u8),
@@ -517,6 +523,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(2, "1101"u8, "1100"u8, "1100"u8, "1100"u8, "10000"u8),
         new(2, "1110"u8, "1100"u8, "10000"u8, "10000"u8, "10000"u8),
         new(2, "1111"u8, "1100"u8, "10000"u8, "10000"u8, "10000"u8),
+
         new(2, "1000001"u8, "1000000"u8, "1000000"u8, "1000000"u8, "1100000"u8),
         new(2, "1001001"u8, "1000000"u8, "1000000"u8, "1000000"u8, "1100000"u8),
         new(2, "1010001"u8, "1000000"u8, "1100000"u8, "1100000"u8, "1100000"u8),
@@ -525,6 +532,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(2, "1101001"u8, "1100000"u8, "1100000"u8, "1100000"u8, "10000000"u8),
         new(2, "1110001"u8, "1100000"u8, "10000000"u8, "10000000"u8, "10000000"u8),
         new(2, "1111001"u8, "1100000"u8, "10000000"u8, "10000000"u8, "10000000"u8),
+
         new(1, "1000"u8, "1000"u8, "1000"u8, "1000"u8, "1000"u8),
         new(1, "1001"u8, "1000"u8, "1000"u8, "1000"u8, "10000"u8),
         new(1, "1010"u8, "1000"u8, "1000"u8, "1000"u8, "10000"u8),
@@ -533,6 +541,7 @@ public static void TestFloatRound(ж<testing.T> Ꮡt) {
         new(1, "1101"u8, "1000"u8, "10000"u8, "10000"u8, "10000"u8),
         new(1, "1110"u8, "1000"u8, "10000"u8, "10000"u8, "10000"u8),
         new(1, "1111"u8, "1000"u8, "10000"u8, "10000"u8, "10000"u8),
+
         new(1, "1000001"u8, "1000000"u8, "1000000"u8, "1000000"u8, "10000000"u8),
         new(1, "1001001"u8, "1000000"u8, "1000000"u8, "1000000"u8, "10000000"u8),
         new(1, "1010001"u8, "1000000"u8, "1000000"u8, "1000000"u8, "10000000"u8),
@@ -623,7 +632,7 @@ public static void TestFloatSetInt64(ж<testing.T> Ꮡt) {
     }.slice()) {
         var want = vᴛ1;
 
-        foreach (var (i, _) in new nint[]{}.array(2)) {
+        foreach (var i in range(new nint[]{}.array(2))) {
             if ((i & 1) != 0) {
                 want = -want;
             }
@@ -672,7 +681,7 @@ public static void TestFloatSetFloat64(ж<testing.T> Ꮡt) {
         }.slice()) {
             var want = vᴛ1;
 
-            foreach (var (i, _) in new nint[]{}.array(2)) {
+            foreach (var i in range(new nint[]{}.array(2))) {
                 if ((i & 1) != 0) {
                     want = -want;
                 }
@@ -925,25 +934,31 @@ public static void TestFloatFloat32(ж<testing.T> Ꮡt) {
         new("0x0.0000010p-126"u8, math.Float32frombits(0x00000000), Below), // rounded down to even
         new("0x0.0000011p-126"u8, math.Float32frombits(0x00000001), Above), // rounded up to smallest denormal
         new("0x0.0000018p-126"u8, math.Float32frombits(0x00000001), Above), // rounded up to smallest denormal
+
         new("0x1.0000000p-149"u8, math.Float32frombits(0x00000001), Exact), // smallest denormal
         new("0x0.0000020p-126"u8, math.Float32frombits(0x00000001), Exact), // smallest denormal
         new("0x0.fffffe0p-126"u8, math.Float32frombits(0x007fffff), Exact), // largest denormal
         new("0x1.0000000p-126"u8, math.Float32frombits(0x00800000), Exact), // smallest normal
+
         new("0x0.8p-149"u8, math.Float32frombits(0x000000000), Below), // rounded down to even
         new("0x0.9p-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
         new("0x0.ap-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
         new("0x0.bp-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
         new("0x0.cp-149"u8, math.Float32frombits(0x000000001), Above), // rounded up to smallest denormal
+
         new("0x1.0p-149"u8, math.Float32frombits(0x000000001), Exact), // smallest denormal
         new("0x1.7p-149"u8, math.Float32frombits(0x000000001), Below),
         new("0x1.8p-149"u8, math.Float32frombits(0x000000002), Above),
         new("0x1.9p-149"u8, math.Float32frombits(0x000000002), Above),
+
         new("0x2.0p-149"u8, math.Float32frombits(0x000000002), Exact),
         new("0x2.8p-149"u8, math.Float32frombits(0x000000002), Below), // rounded down to even
         new("0x2.9p-149"u8, math.Float32frombits(0x000000003), Above),
+
         new("0x3.0p-149"u8, math.Float32frombits(0x000000003), Exact),
         new("0x3.7p-149"u8, math.Float32frombits(0x000000003), Below),
         new("0x3.8p-149"u8, math.Float32frombits(0x000000004), Above), // rounded up to even
+
         new("0x4.0p-149"u8, math.Float32frombits(0x000000004), Exact),
         new("0x4.8p-149"u8, math.Float32frombits(0x000000004), Below), // rounded down to even
         new("0x4.9p-149"u8, math.Float32frombits(0x000000005), Above),
@@ -1037,21 +1052,26 @@ public static void TestFloatFloat64(ж<testing.T> Ꮡt) {
         new("0x0.00000000000008p-1022"u8, math.Float64frombits(0x00000000000000000), Below), // rounded down to even
         new("0x0.00000000000009p-1022"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
         new("0x0.0000000000000ap-1022"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
+
         new("0x0.8p-1074"u8, math.Float64frombits(0x00000000000000000), Below), // rounded down to even
         new("0x0.9p-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
         new("0x0.ap-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
         new("0x0.bp-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
         new("0x0.cp-1074"u8, math.Float64frombits(0x00000000000000001), Above), // rounded up to smallest denormal
+
         new("0x1.0p-1074"u8, math.Float64frombits(0x00000000000000001), Exact),
         new("0x1.7p-1074"u8, math.Float64frombits(0x00000000000000001), Below),
         new("0x1.8p-1074"u8, math.Float64frombits(0x00000000000000002), Above),
         new("0x1.9p-1074"u8, math.Float64frombits(0x00000000000000002), Above),
+
         new("0x2.0p-1074"u8, math.Float64frombits(0x00000000000000002), Exact),
         new("0x2.8p-1074"u8, math.Float64frombits(0x00000000000000002), Below), // rounded down to even
         new("0x2.9p-1074"u8, math.Float64frombits(0x00000000000000003), Above),
+
         new("0x3.0p-1074"u8, math.Float64frombits(0x00000000000000003), Exact),
         new("0x3.7p-1074"u8, math.Float64frombits(0x00000000000000003), Below),
         new("0x3.8p-1074"u8, math.Float64frombits(0x00000000000000004), Above), // rounded up to even
+
         new("0x4.0p-1074"u8, math.Float64frombits(0x00000000000000004), Exact),
         new("0x4.8p-1074"u8, math.Float64frombits(0x00000000000000004), Below), // rounded down to even
         new("0x4.9p-1074"u8, math.Float64frombits(0x00000000000000005), Above),
@@ -1380,7 +1400,7 @@ public static void TestFloatAdd32(ж<testing.T> Ꮡt) {
     // chose base such that we cross the mantissa precision limit
     UntypedInt @base = /* 1<<26 - 0x10 */ 67108848; // 11...110000 (26 bits)
     for (nint d = 0; d <= 0x10; d++) {
-        foreach (var (i, _) in new nint[]{}.array(2)) {
+        foreach (var i in range(new nint[]{}.array(2))) {
             var (x0, y0) = ((float64)@base, (float64)d);
             if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
@@ -1413,7 +1433,7 @@ public static void TestFloatAdd64(ж<testing.T> Ꮡt) {
     // chose base such that we cross the mantissa precision limit
     UntypedInt @base = /* 1<<55 - 0x10 */ 36028797018963952; // 11...110000 (55 bits)
     for (nint d = 0; d <= 0x10; d++) {
-        foreach (var (i, _) in new nint[]{}.array(2)) {
+        foreach (var i in range(new nint[]{}.array(2))) {
             var (x0, y0) = ((float64)@base, (float64)d);
             if ((i & 1) != 0) {
                 (x0, y0) = (y0, x0);
@@ -1526,7 +1546,7 @@ public static void TestFloatMul64(ж<testing.T> Ꮡt) {
         new(2.718281828e10D, 3.14159265358979e-32D),
         new(1.0D / 3D, 1e200D)
     }.slice()) {
-        foreach (var (i, _) in new nint[]{}.array(8)) {
+        foreach (var i in range(new nint[]{}.array(8))) {
             var (x0, y0) = (test.x, test.y);
             if ((i & 1) != 0) {
                 x0 = -x0;
@@ -1598,6 +1618,7 @@ public static void TestIssue6866(ж<testing.T> Ꮡt) {
 
 public static void TestFloatQuo(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
+    var bitsᴷ = new stackAppend<nint>();
 
     // TODO(gri) make the test vary these precisions
     nint preci = 200; // precision of integer part
@@ -1607,7 +1628,7 @@ public static void TestFloatQuo(ж<testing.T> Ꮡt) {
         // compute accurate (not rounded) result z
         var bits = new ΔBits(new nint[]{preci - 1}.slice());
         if ((i & 3) != 0) {
-            bits = append(bits, (nint)0);
+            bits = append(bitsᴷ, bits, (nint)0);
         }
         if ((i & 2) != 0) {
             bits = append(bits, (nint)(-1));
@@ -1798,22 +1819,28 @@ public static void TestFloatArithmeticOverflow(ж<testing.T> Ꮡt) {
     foreach (var (_, test) in new TestFloatArithmeticOverflow_type[]{
         new(4, ToNearestEven, (rune)'+', "0"u8, "0"u8, "0"u8, Exact), // smoke test
         new(4, ToNearestEven, (rune)'+', "0x.8p+0"u8, "0x.8p+0"u8, "0x.8p+1"u8, Exact), // smoke test
+
         new(4, ToNearestEven, (rune)'+', "0"u8, "0x.8p2147483647"u8, "0x.8p+2147483647"u8, Exact),
         new(4, ToNearestEven, (rune)'+', "0x.8p2147483500"u8, "0x.8p2147483647"u8, "0x.8p+2147483647"u8, Below), // rounded to zero
         new(4, ToNearestEven, (rune)'+', "0x.8p2147483647"u8, "0x.8p2147483647"u8, "+Inf"u8, Above), // exponent overflow in +
         new(4, ToNearestEven, (rune)'+', "-0x.8p2147483647"u8, "-0x.8p2147483647"u8, "-Inf"u8, Below), // exponent overflow in +
         new(4, ToNearestEven, (rune)'-', "-0x.8p2147483647"u8, "0x.8p2147483647"u8, "-Inf"u8, Below), // exponent overflow in -
+
         new(4, ToZero, (rune)'+', "0x.fp2147483647"u8, "0x.8p2147483643"u8, "0x.fp+2147483647"u8, Below), // rounded to zero
         new(4, ToNearestEven, (rune)'+', "0x.fp2147483647"u8, "0x.8p2147483643"u8, "+Inf"u8, Above), // exponent overflow in rounding
         new(4, AwayFromZero, (rune)'+', "0x.fp2147483647"u8, "0x.8p2147483643"u8, "+Inf"u8, Above), // exponent overflow in rounding
+
         new(4, AwayFromZero, (rune)'-', "-0x.fp2147483647"u8, "0x.8p2147483644"u8, "-Inf"u8, Below), // exponent overflow in rounding
         new(4, ToNearestEven, (rune)'-', "-0x.fp2147483647"u8, "0x.8p2147483643"u8, "-Inf"u8, Below), // exponent overflow in rounding
         new(4, ToZero, (rune)'-', "-0x.fp2147483647"u8, "0x.8p2147483643"u8, "-0x.fp+2147483647"u8, Above), // rounded to zero
+
         new(4, ToNearestEven, (rune)'+', "0"u8, "0x.8p-2147483648"u8, "0x.8p-2147483648"u8, Exact),
         new(4, ToNearestEven, (rune)'+', "0x.8p-2147483648"u8, "0x.8p-2147483648"u8, "0x.8p-2147483647"u8, Exact),
+
         new(4, ToNearestEven, (rune)'*', "1"u8, "0x.8p2147483647"u8, "0x.8p+2147483647"u8, Exact),
         new(4, ToNearestEven, (rune)'*', "2"u8, "0x.8p2147483647"u8, "+Inf"u8, Above), // exponent overflow in *
         new(4, ToNearestEven, (rune)'*', "-2"u8, "0x.8p2147483647"u8, "-Inf"u8, Below), // exponent overflow in *
+
         new(4, ToNearestEven, (rune)'/', "0.5"u8, "0x.8p2147483647"u8, "0x.8p-2147483646"u8, Exact),
         new(4, ToNearestEven, (rune)'/', "0x.8p+0"u8, "0x.8p2147483647"u8, "0x.8p-2147483646"u8, Exact),
         new(4, ToNearestEven, (rune)'/', "0x.8p-1"u8, "0x.8p2147483647"u8, "0x.8p-2147483647"u8, Exact),
@@ -1873,12 +1900,15 @@ public static void TestFloatArithmeticRounding(ж<testing.T> Ꮡt) {
         new(ToZero, 3, -0x8, -0x1, -0x8, (rune)'+'),
         new(AwayFromZero, 3, -0x8, -0x1, -0xa, (rune)'+'),
         new(ToNegativeInf, 3, -0x8, -0x1, -0xa, (rune)'+'),
+
         new(ToZero, 3, -0x8, 0x1, -0x8, (rune)'-'),
         new(AwayFromZero, 3, -0x8, 0x1, -0xa, (rune)'-'),
         new(ToNegativeInf, 3, -0x8, 0x1, -0xa, (rune)'-'),
+
         new(ToZero, 3, -0x9, 0x1, -0x8, (rune)'*'),
         new(AwayFromZero, 3, -0x9, 0x1, -0xa, (rune)'*'),
         new(ToNegativeInf, 3, -0x9, 0x1, -0xa, (rune)'*'),
+
         new(ToZero, 3, -0x9, 0x1, -0x8, (rune)'/'),
         new(AwayFromZero, 3, -0x9, 0x1, -0xa, (rune)'/'),
         new(ToNegativeInf, 3, -0x9, 0x1, -0xa, (rune)'/')

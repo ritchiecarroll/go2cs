@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `bytes` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**83 matched · 6 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**84 matched · 6 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/bytes`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/bytes).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -69,6 +69,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestNext` | pass | pass |
 | `TestNil` | pass | pass |
 | `TestNotEqual` | pass | pass |
+| `TestPeek` | pass | pass |
 | `TestReadAfterBigSeek` | pass | pass |
 | `TestReadBytes` | pass | pass |
 | `TestReadEmptyAtEOF` | pass | pass |
@@ -182,10 +183,17 @@ the capability it needs.
 - BenchmarkReadString (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkRepeat (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkRepeatLarge (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkReplace (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAfterSeqEmptySeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAfterSeqMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitAfterSeqSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitEmptySeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitNMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitNSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitSeqEmptySeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitSeqMultiByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkSplitSeqSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkSplitSingleByteSeparator (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkToLower (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkToUpper (benchmark): benchmark execution is deferred to Phase 4D
@@ -220,6 +228,8 @@ the capability it needs.
 - ExampleEqualFold (example): example execution is deferred to Phase 4D
 - ExampleFields (example): example execution is deferred to Phase 4D
 - ExampleFieldsFunc (example): example execution is deferred to Phase 4D
+- ExampleFieldsFuncSeq (example): example execution is deferred to Phase 4D
+- ExampleFieldsSeq (example): example execution is deferred to Phase 4D
 - ExampleHasPrefix (example): example execution is deferred to Phase 4D
 - ExampleHasSuffix (example): example execution is deferred to Phase 4D
 - ExampleIndex (example): example execution is deferred to Phase 4D
@@ -232,6 +242,7 @@ the capability it needs.
 - ExampleLastIndexAny (example): example execution is deferred to Phase 4D
 - ExampleLastIndexByte (example): example execution is deferred to Phase 4D
 - ExampleLastIndexFunc (example): example execution is deferred to Phase 4D
+- ExampleLines (example): example execution is deferred to Phase 4D
 - ExampleMap (example): example execution is deferred to Phase 4D
 - ExampleReader_Len (example): example execution is deferred to Phase 4D
 - ExampleRepeat (example): example execution is deferred to Phase 4D
@@ -241,7 +252,9 @@ the capability it needs.
 - ExampleSplit (example): example execution is deferred to Phase 4D
 - ExampleSplitAfter (example): example execution is deferred to Phase 4D
 - ExampleSplitAfterN (example): example execution is deferred to Phase 4D
+- ExampleSplitAfterSeq (example): example execution is deferred to Phase 4D
 - ExampleSplitN (example): example execution is deferred to Phase 4D
+- ExampleSplitSeq (example): example execution is deferred to Phase 4D
 - ExampleTitle (example): example execution is deferred to Phase 4D
 - ExampleToLower (example): example execution is deferred to Phase 4D
 - ExampleToLowerSpecial (example): example execution is deferred to Phase 4D
@@ -259,3 +272,4 @@ the capability it needs.
 - ExampleTrimRightFunc (example): example execution is deferred to Phase 4D
 - ExampleTrimSpace (example): example execution is deferred to Phase 4D
 - ExampleTrimSuffix (example): example execution is deferred to Phase 4D
+- FuzzReplace (fuzz): fuzz execution is deferred to Phase 4D

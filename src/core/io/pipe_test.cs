@@ -468,9 +468,11 @@ public static void TestPipeConcurrent(ж<testing.T> Ꮡt) {
 }
 
 internal static slice<byte> sortBytesInGroups(slice<byte> b, nint n) {
+    var groupsᴷ = new stackAppend<slice<byte>>();
+
     slice<slice<byte>> groups = default!;
     while (len(b) > 0) {
-        groups = append(groups, b.slice(0, n));
+        groups = append(groupsᴷ, groups, b.slice(0, n));
         b = b.slice(n);
     }
     slices.SortFunc<slice<slice<byte>>, slice<byte>>(groups, bytes.Compare);

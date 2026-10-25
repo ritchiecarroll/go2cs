@@ -379,10 +379,9 @@ public static void TestMultiReaderFreesExhaustedReaders(ж<testing.T> Ꮡt) {
         var buf1 = bytes.NewReader(slice<byte>("foo"u8));
         var buf2 = bytes.NewReader(slice<byte>("bar"u8));
         Ꮡmr.ValueSlot = MultiReader(new io_test_package.bytes_ReaderжReader(buf1), new io_test_package.bytes_ReaderжReader(buf2));
-        var closedʗ2 = closedʗ1;
-        Δruntime.SetFinalizer(buf1.OrTypedNil(), (ж<bytes.Reader> _) => {
-            close(closedʗ2);
-        });
+        Δruntime.AddCleanup(buf1, (channel<EmptyStruct> ch) => {
+            close(ch);
+        }, closedʗ1);
     }))();
 
     var buf = new slice<byte>(4);

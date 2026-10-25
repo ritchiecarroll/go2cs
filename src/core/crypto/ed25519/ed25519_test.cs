@@ -425,13 +425,14 @@ internal static readonly object signatureDidnTVerifyˢ = (@string)"signature did
 
 public static void TestAllocations(ж<testing.T> Ꮡt) {
     cryptotest.SkipTestAllocations(Ꮡt);
+    var seed = new slice<byte>(SeedSize);
+    var priv = NewKeyFromSeed(seed);
     {
+        var privʗ1 = priv;
         var allocs = testing.AllocsPerRun(100, () => {
-            var seed = new slice<byte>(SeedSize);
             var message = slice<byte>("Hello, world!"u8);
-            var priv = NewKeyFromSeed(seed);
-            var pub = priv.Public()._<PublicKey>();
-            var signature = Sign(priv, message);
+            var pub = privʗ1.Public()._<PublicKey>();
+            var signature = Sign(privʗ1, message);
             if (!Verify(pub, message, signature)) {
                 Ꮡt.Fatal(signatureDidnTVerifyˢ);
             }

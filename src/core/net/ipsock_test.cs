@@ -136,6 +136,7 @@ internal static void initᴛaddrListTests() { addrListTests = new addrListTests�
         }.slice()),
         default!
     ),
+
     new(
         ipv4only,
         new global::go.net_package.IPAddr[]{
@@ -160,6 +161,7 @@ internal static void initᴛaddrListTests() { addrListTests = new addrListTests�
         default!,
         default!
     ),
+
     new(
         ipv6only,
         new global::go.net_package.IPAddr[]{
@@ -184,9 +186,12 @@ internal static void initᴛaddrListTests() { addrListTests = new addrListTests�
         default!,
         default!
     ),
+
     new(default!, default!, testInetaddr, default!, default!, default!, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR"u8)))),
+
     new(ipv4only, default!, testInetaddr, default!, default!, default!, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR"u8)))),
     new(ipv4only, new global::go.net_package.IPAddr[]{new(IP: IPv6loopback)}.slice(), testInetaddr, default!, default!, default!, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR"u8)))),
+
     new(ipv6only, default!, testInetaddr, default!, default!, default!, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR"u8)))),
     new(ipv6only, new global::go.net_package.IPAddr[]{new(IP: IPv4(127, 0, 0, 1))}.slice(), testInetaddr, default!, default!, default!, new global::go.net_package.AddrErrorжerror(Ꮡ(new AddrError(errNoSuitableAddress.Error(), "ADDR"u8))))
 }.slice(); }

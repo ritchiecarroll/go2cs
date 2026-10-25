@@ -6,6 +6,8 @@ namespace go;
 
 partial class strconv_test_package {
     static strconv_test_package() {
+        initᴛparseBitSizeTests();
+        initᴛparseBaseTests();
         initᴛmallocTest();
     }
 } // end strconv_test_package

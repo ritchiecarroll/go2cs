@@ -38,6 +38,7 @@ internal static partial nint blankLinesFunc() {
     // lines
     // without
     // code
+
     return callerStartLine(false);
 }
 

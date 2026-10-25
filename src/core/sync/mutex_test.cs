@@ -35,7 +35,7 @@ public static partial void TestSemaphore(ж<Δtesting.T> Ꮡt) {
     s.Value = 1;
     var c = new channel<bool>(0);
     for (nint i = 0; i < 10; i++) {
-        goǃ(HammerSemaphore, s, (nint)(1000), c);
+        goǃ(HammerSemaphore, s, (nint)1000, c);
     }
     for (nint i = 0; i < 10; i++) {
         ᐸꟷ(c);
@@ -93,7 +93,7 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
                 Ꮡt.Logf("got mutexrate %d expected 0"u8, n);
             }
         }
-        defer(Δruntime.SetMutexProfileFraction, (nint)(0), ref ᒐ);
+        defer(Δruntime.SetMutexProfileFraction, (nint)0, ref ᒐ);
 
         var m = @new<Δsync.Mutex>();
 
@@ -109,7 +109,7 @@ public static partial void TestMutex(ж<Δtesting.T> Ꮡt) {
 
         var c = new channel<bool>(0);
         for (nint i = 0; i < 10; i++) {
-            goǃ(HammerMutex, m, (nint)(1000), c);
+            goǃ(HammerMutex, m, (nint)1000, c);
         }
         for (nint i = 0; i < 10; i++) {
             ᐸꟷ(c);
@@ -223,10 +223,9 @@ internal static readonly @string testmisuseˢ = "TESTMISUSE"u8;
 internal static readonly @string unlockedˢ = "unlocked"u8;
 
 public static void TestMutexMisuse(ж<Δtesting.T> Ꮡt) {
-    testenv.MustHaveExec(new sync_test_package.testing_TжTB(Ꮡt));
     foreach (var (_, test) in misuseTests) {
-        var (@out, err) = exec.Command(Δos.Args[0], testmisuseˢ, test.name).CombinedOutput();
-        if (err == default! || !strings.Contains(((@string)@out), unlockedˢ)) {
+        var (@out, err) = exec.Command(testenv.Executable(new sync_test_package.testing_TжTB(Ꮡt)), testmisuseˢ, test.name).CombinedOutput();
+        if (err == default! || !strings.Contains((@string)@out, unlockedˢ)) {
             Ꮡt.Errorf("%s: did not find failure with message about unlocked lock: %s\n%s\n"u8, test.name, err, @out);
         }
     }
@@ -282,7 +281,7 @@ public static partial void TestMutexFairness(ж<Δtesting.T> Ꮡt) {
 }
 
 internal partial struct BenchmarkMutexUncontended_PaddedMutex /*dyn*/ {
-    public partial ref sync_package.Mutex Mutex { get; }
+    /*embed*/ public sync_package.Mutex Mutex;
     internal array<uint8> pad = new(128);
 }
 
@@ -350,7 +349,7 @@ public static void BenchmarkMutexNoSpin(ж<Δtesting.B> Ꮡb) {
     b.SetParallelism(4);
     Ꮡb.RunParallel([MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.PB> pb) => {
         var c = new channel<bool>(0);
-        array<uint64> data = new(4096); /* (4 << (int)(10)) */
+        array<uint64> data = new(4096); /* (4 << 10) */
         for (nint i = 0; pb.Next(); i++) {
             if (i % 4 == 0){
                 Ꮡm.Lock();
@@ -382,7 +381,7 @@ public static void BenchmarkMutexSpin(ж<Δtesting.B> Ꮡb) {
     uint64 acc0 = default!;
     uint64 acc1 = default!;
     Ꮡb.RunParallel((ж<Δtesting.PB> pb) => {
-        array<uint64> data = new(16384); /* (16 << (int)(10)) */
+        array<uint64> data = new(16384); /* (16 << 10) */
         for (nint i = 0; pb.Next(); i++) {
             Ꮡm.Lock();
             acc0 -= 100;

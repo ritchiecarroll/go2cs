@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/sha3` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**18 matched · 5 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**54 matched · 5 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/sha3`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/sha3).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -38,6 +38,42 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestMarshalUnmarshal/cSHAKE128` | pass | pass |
 | `TestMarshalUnmarshal/cSHAKE256` | pass | pass |
 | `TestReset` | pass | pass |
+| `TestSHA3Hash` | pass | pass |
+| `TestSHA3Hash/SHA3-224` | pass | pass |
+| `TestSHA3Hash/SHA3-224/Clone` | pass | pass |
+| `TestSHA3Hash/SHA3-224/OutOfBoundsRead` | pass | pass |
+| `TestSHA3Hash/SHA3-224/ResetState` | pass | pass |
+| `TestSHA3Hash/SHA3-224/StatefulWrite` | pass | pass |
+| `TestSHA3Hash/SHA3-224/SumAppend` | pass | pass |
+| `TestSHA3Hash/SHA3-224/WriteWithoutError` | pass | pass |
+| `TestSHA3Hash/SHA3-256` | pass | pass |
+| `TestSHA3Hash/SHA3-256/Clone` | pass | pass |
+| `TestSHA3Hash/SHA3-256/OutOfBoundsRead` | pass | pass |
+| `TestSHA3Hash/SHA3-256/ResetState` | pass | pass |
+| `TestSHA3Hash/SHA3-256/StatefulWrite` | pass | pass |
+| `TestSHA3Hash/SHA3-256/SumAppend` | pass | pass |
+| `TestSHA3Hash/SHA3-256/WriteWithoutError` | pass | pass |
+| `TestSHA3Hash/SHA3-384` | pass | pass |
+| `TestSHA3Hash/SHA3-384/Clone` | pass | pass |
+| `TestSHA3Hash/SHA3-384/OutOfBoundsRead` | pass | pass |
+| `TestSHA3Hash/SHA3-384/ResetState` | pass | pass |
+| `TestSHA3Hash/SHA3-384/StatefulWrite` | pass | pass |
+| `TestSHA3Hash/SHA3-384/SumAppend` | pass | pass |
+| `TestSHA3Hash/SHA3-384/WriteWithoutError` | pass | pass |
+| `TestSHA3Hash/SHA3-512` | pass | pass |
+| `TestSHA3Hash/SHA3-512/Clone` | pass | pass |
+| `TestSHA3Hash/SHA3-512/OutOfBoundsRead` | pass | pass |
+| `TestSHA3Hash/SHA3-512/ResetState` | pass | pass |
+| `TestSHA3Hash/SHA3-512/StatefulWrite` | pass | pass |
+| `TestSHA3Hash/SHA3-512/SumAppend` | pass | pass |
+| `TestSHA3Hash/SHA3-512/WriteWithoutError` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero/Clone` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero/OutOfBoundsRead` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero/ResetState` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero/StatefulWrite` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero/SumAppend` | pass | pass |
+| `TestSHA3Hash/SHA3-Zero/WriteWithoutError` | pass | pass |
 | `TestSqueezing` | pass | pass |
 | `TestUnalignedWrite` | pass | pass |
 
@@ -55,9 +91,9 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 | Test | Class | Pinned reason |
 |:--|:--|:--|
 | `TestAllocations` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
-| `TestAllocations/New` | `deferred` | want-zero AllocsPerRun assert over New256() plus a 3-byte input slice, a 32-byte output buffer and h.Sum(out) (sha3_test.go:223's family, under cryptotest.SkipTestAllocations). Go's escape analysis proves the state object and every byte slice in the closure non-escaping, so it asserts zero; the converted path allocates 18 per run. DEFERRED rather than alloc-count-semantics, and the discriminator is the run's own unit note rather than a source read: the host reports `counted 180 go2cs-runtime object allocations over 10 run(s)`, an allocation COUNT per run in Go's own units, so the counter SAW them. DEFERRED rather than structural, and this is the call worth stating: a mechanism can be NAMED -- the SHA-3 sponge state object that New256()/NewSHAKE128() returns and the non-escaping byte slices around it, none of which the CLR's object model requires an allocation for -- so the excess is reducible bridge work and a floor claim here would be one the census could not falsify. Contrast TestXAESAllocations in crypto/internal/fips140test, classed STRUCTURAL on a 199-per-run LOWER BOUND over a whole AEAD round trip: what separates them is whether a removable mechanism can be named, not the size of the number. If a later measurement establishes a floor here, the entry moves deferred -> structural, which by the ladder never re-opens. |
+| `TestAllocations/New` | `deferred` | want-zero AllocsPerRun assert over New256() plus a 3-byte input slice, a 32-byte output buffer and h.Sum(out) (sha3_test.go:223's family, under cryptotest.SkipTestAllocations). Go's escape analysis proves the state object and every byte slice in the closure non-escaping, so it asserts zero; the converted path allocates 18 per run. DEFERRED rather than alloc-count-semantics, and the discriminator is the run's own unit note rather than a source read: the host reports `counted 180 go2cs-runtime object allocations over 10 run(s)`, an allocation COUNT per run in Go's own units, so the counter SAW them. DEFERRED rather than structural, and this is the call worth stating: a mechanism can be NAMED -- the SHA-3 sponge state object that New256()/NewSHAKE128() returns and the non-escaping byte slices around it, none of which the CLR's object model requires an allocation for -- so the excess is reducible bridge work and a floor claim here would be one the census could not falsify. Contrast TestXAESAllocations in crypto/internal/fips140test, classed STRUCTURAL on a 199-per-run LOWER BOUND over a whole AEAD round trip: what separates them is whether a removable mechanism can be named, not the size of the number. If a later measurement establishes a floor here, the entry moves deferred -> structural, which by the ladder never re-opens. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 18 per run at go1.24.13 to 19 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 | `TestAllocations/NewSHAKE` | `deferred` | want-zero AllocsPerRun assert over NewSHAKE128() plus a 3-byte input slice, a 32-byte output buffer and h.Read(out) (sha3_test.go:223's family, under cryptotest.SkipTestAllocations). Go's escape analysis proves the state object and every byte slice in the closure non-escaping, so it asserts zero; the converted path allocates 16 per run. DEFERRED rather than alloc-count-semantics, and the discriminator is the run's own unit note rather than a source read: the host reports `counted 160 go2cs-runtime object allocations over 10 run(s)`, an allocation COUNT per run in Go's own units, so the counter SAW them. DEFERRED rather than structural, and this is the call worth stating: a mechanism can be NAMED -- the SHA-3 sponge state object that New256()/NewSHAKE128() returns and the non-escaping byte slices around it, none of which the CLR's object model requires an allocation for -- so the excess is reducible bridge work and a floor claim here would be one the census could not falsify. Contrast TestXAESAllocations in crypto/internal/fips140test, classed STRUCTURAL on a 199-per-run LOWER BOUND over a whole AEAD round trip: what separates them is whether a removable mechanism can be named, not the size of the number. If a later measurement establishes a floor here, the entry moves deferred -> structural, which by the ladder never re-opens. |
-| `TestAllocations/Sum` | `deferred` | want-zero AllocsPerRun assert over a 3-byte input slice and Sum256(b), whose [32]byte result Go returns by value (sha3_test.go:223's family, under cryptotest.SkipTestAllocations). Go's escape analysis proves the state object and every byte slice in the closure non-escaping, so it asserts zero; the converted path allocates 16 per run. DEFERRED rather than alloc-count-semantics, and the discriminator is the run's own unit note rather than a source read: the host reports `counted 160 go2cs-runtime object allocations over 10 run(s)`, an allocation COUNT per run in Go's own units, so the counter SAW them. DEFERRED rather than structural, and this is the call worth stating: a mechanism can be NAMED -- the SHA-3 sponge state object that New256()/NewSHAKE128() returns and the non-escaping byte slices around it, none of which the CLR's object model requires an allocation for -- so the excess is reducible bridge work and a floor claim here would be one the census could not falsify. Contrast TestXAESAllocations in crypto/internal/fips140test, classed STRUCTURAL on a 199-per-run LOWER BOUND over a whole AEAD round trip: what separates them is whether a removable mechanism can be named, not the size of the number. If a later measurement establishes a floor here, the entry moves deferred -> structural, which by the ladder never re-opens. |
+| `TestAllocations/Sum` | `deferred` | want-zero AllocsPerRun assert over a 3-byte input slice and Sum256(b), whose [32]byte result Go returns by value (sha3_test.go:223's family, under cryptotest.SkipTestAllocations). Go's escape analysis proves the state object and every byte slice in the closure non-escaping, so it asserts zero; the converted path allocates 16 per run. DEFERRED rather than alloc-count-semantics, and the discriminator is the run's own unit note rather than a source read: the host reports `counted 160 go2cs-runtime object allocations over 10 run(s)`, an allocation COUNT per run in Go's own units, so the counter SAW them. DEFERRED rather than structural, and this is the call worth stating: a mechanism can be NAMED -- the SHA-3 sponge state object that New256()/NewSHAKE128() returns and the non-escaping byte slices around it, none of which the CLR's object model requires an allocation for -- so the excess is reducible bridge work and a floor claim here would be one the census could not falsify. Contrast TestXAESAllocations in crypto/internal/fips140test, classed STRUCTURAL on a 199-per-run LOWER BOUND over a whole AEAD round trip: what separates them is whether a removable mechanism can be named, not the size of the number. If a later measurement establishes a floor here, the entry moves deferred -> structural, which by the ladder never re-opens. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 16 per run at go1.24.13 to 17 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 | `TestAllocations/SumSHAKE` | `deferred` | want-zero AllocsPerRun assert over a 3-byte input slice and SumSHAKE128(b, 10), whose []byte result Go keeps on the stack (sha3_test.go:223's family, under cryptotest.SkipTestAllocations). Go's escape analysis proves the state object and every byte slice in the closure non-escaping, so it asserts zero; the converted path allocates 13 per run. DEFERRED rather than alloc-count-semantics, and the discriminator is the run's own unit note rather than a source read: the host reports `counted 130 go2cs-runtime object allocations over 10 run(s)`, an allocation COUNT per run in Go's own units, so the counter SAW them. DEFERRED rather than structural, and this is the call worth stating: a mechanism can be NAMED -- the SHA-3 sponge state object that New256()/NewSHAKE128() returns and the non-escaping byte slices around it, none of which the CLR's object model requires an allocation for -- so the excess is reducible bridge work and a floor claim here would be one the census could not falsify. Contrast TestXAESAllocations in crypto/internal/fips140test, classed STRUCTURAL on a 199-per-run LOWER BOUND over a whole AEAD round trip: what separates them is whether a removable mechanism can be named, not the size of the number. If a later measurement establishes a floor here, the entry moves deferred -> structural, which by the ladder never re-opens. |
 
 ## Excluded declarations

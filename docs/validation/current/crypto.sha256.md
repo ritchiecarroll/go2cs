@@ -6,37 +6,45 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `crypto/sha256` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**22 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**29 matched · 2 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/crypto/sha256`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/crypto/sha256).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
 | Test | `go test` | go2cs |
 |:--|:--:|:--:|
 | `TestAllocations` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestAllocatonsWithTypeAsserts` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestBlockSize` | pass | pass |
 | `TestCgo` | pass | pass |
+| `TestExtraLarge` | pass | pass |
+| `TestExtraMethods` | pass | pass |
+| `TestExtraMethods/SHA-224` | pass | pass |
+| `TestExtraMethods/SHA-256` | pass | pass |
 | `TestGolden` | pass | pass |
 | `TestGoldenMarshal` | pass | pass |
 | `TestGoldenMarshal/224` | pass | pass |
 | `TestGoldenMarshal/256` | pass | pass |
 | `TestHash` | pass | pass |
 | `TestHash/SHA-224` | pass | pass |
+| `TestHash/SHA-224/Clone` | pass | pass |
 | `TestHash/SHA-224/OutOfBoundsRead` | pass | pass |
 | `TestHash/SHA-224/ResetState` | pass | pass |
 | `TestHash/SHA-224/StatefulWrite` | pass | pass |
 | `TestHash/SHA-224/SumAppend` | pass | pass |
 | `TestHash/SHA-224/WriteWithoutError` | pass | pass |
 | `TestHash/SHA-256` | pass | pass |
+| `TestHash/SHA-256/Clone` | pass | pass |
 | `TestHash/SHA-256/OutOfBoundsRead` | pass | pass |
 | `TestHash/SHA-256/ResetState` | pass | pass |
 | `TestHash/SHA-256/StatefulWrite` | pass | pass |
 | `TestHash/SHA-256/SumAppend` | pass | pass |
 | `TestHash/SHA-256/WriteWithoutError` | pass | pass |
+| `TestLarge` | pass | pass |
 | `TestLargeHashes` | pass | pass |
 | `TestMarshalTypeMismatch` | pass | pass |
 | `TestSize` | pass | pass |
@@ -54,7 +62,8 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [8]uint32 state and [64]byte block — golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident; Write/Sum also allocate through the hash.Hash interface surface. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. 46 per run = 36 + 4 + 4 + 2. The measured closure mints a source-generated hash.Hash shell for every New* call on every run (sha256_test.cs:322/:328; sha256.cs:40/:51): 2 per run, UNCOUNTED (AllocationCounter.cs:50-53), ruled structural on 2026-08-25. |
+| `TestAllocations` | `deferred` | want-zero AllocsPerRun assert: Sum copies the digest (`d0 := *d`) so the caller can keep writing, and that copy must deep-copy the digest's [8]uint32 state and [64]byte block — golib's array<T> is a struct over a heap T[], so the copy is two managed allocations where Go's is stack-resident; Write/Sum also allocate through the hash.Hash interface surface. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O1): alloc-profile -> deferred. 46 per run = 36 + 4 + 4 + 2. The measured closure mints a source-generated hash.Hash shell for every New* call on every run (sha256_test.cs:322/:328; sha256.cs:40/:51): 2 per run, UNCOUNTED (AllocationCounter.cs:50-53), ruled structural on 2026-08-25. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 46 per run at go1.24.13 to 54 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
+| `TestAllocatonsWithTypeAsserts` | `deferred` | want-zero AllocsPerRun assert, new at go1.26.10 (sha256_test.go:475; the misspelling is Go's own): one closure runs New(), Write, MarshalBinary, AppendBinary and UnmarshalBinary through three interface assertions on the hash shell, and Go budgets zero allocations for all of it. The converted side counts 4 per run on both OSes. The sibling TestAllocations entry's `allocs = ` prefix cannot cover it: the disclosure is matched by name. |
 
 ## Excluded declarations
 
@@ -65,6 +74,8 @@ has not implemented, or a platform behavior it provably cannot reproduce. Each i
 the capability it needs.
 
 - BenchmarkHash1K (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkHash1M (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkHash256K (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkHash8Bytes (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkHash8K (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleNew (example): example execution is deferred to Phase 4D
