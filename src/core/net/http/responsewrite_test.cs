@@ -31,6 +31,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 Body: io.NopCloser(new http_test_package.strings_ReaderжReader(strings.NewReader(abcdefˢ))),
                 ContentLength: 6
             ),
+
             "HTTP/1.0 503 Service Unavailable\r\n"u8 + "Content-Length: 6\r\n\r\n"u8 + "abcdef"u8
         ),
         // Unchunked response without Content-Length.
@@ -145,6 +146,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 TransferEncoding: new @string[]{"chunked"u8}.slice(),
                 Close: true
             ),
+
             "HTTP/1.1 200 OK\r\n"u8 + "Connection: close\r\n"u8 + "Transfer-Encoding: chunked\r\n\r\n"u8 + "6\r\nabcdef\r\n0\r\n\r\n"u8
         ),
 
@@ -164,6 +166,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 TransferEncoding: new @string[]{"chunked"u8}.slice(),
                 Close: true
             ),
+
             "HTTP/1.1 204 No Content\r\n"u8 + "Connection: close\r\n"u8 + "Foo: Bar Baz\r\n"u8 + "\r\n"u8
         ),
 
@@ -212,6 +215,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: default!
             ),
+
             "HTTP/1.0 007 license to violate specs\r\nContent-Length: 0\r\n\r\n"u8
         ),
 
@@ -227,6 +231,7 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: default!
             ),
+
             "HTTP/1.0 123 Sesame Street\r\n\r\n"u8
         ),
 
@@ -242,11 +247,12 @@ public static void TestResponseWrite(ж<testing.T> Ꮡt) {
                 Header: new ΔHeader(new map<@string, slice<@string>>{}),
                 Body: default!
             ),
+
             "HTTP/1.0 204 No Content\r\n\r\n"u8
         )
     }.slice();
 
-    foreach (var (i, _) in respWriteTests) {
+    foreach (var i in range(respWriteTests)) {
         var tt = Ꮡ(respWriteTests, i);
         ref var braw = ref heap(new strings.Builder(), out var Ꮡbraw);
         var err = tt.of(respWriteTest.ᏑResp).Write(new http_test_package.strings_BuilderжWriter(Ꮡbraw));

@@ -166,7 +166,7 @@ internal static reflectꓸValue Generate(this ref global::go.crypto.tls_package.
     m.Value.ocspStapling = randΔ1.Intn(10) > 5;
     m.Value.supportedPoints = randomBytes(randΔ1.Intn(5) + 1, Ꮡrand);
     m.Value.supportedCurves = new slice<global::go.crypto.tls_package.CurveID>(randΔ1.Intn(5) + 1);
-    foreach (var (i, _) in (~m).supportedCurves) {
+    foreach (var i in range((~m).supportedCurves)) {
         m.Value.supportedCurves[i] = (global::go.crypto.tls_package.CurveID)(uint16)(randΔ1.Intn(30000) + 1);
     }
     if (randΔ1.Intn(10) > 5) {
@@ -552,6 +552,7 @@ internal static readonly object unmarshaledServerHelloˢ = (@string)"Unmarshaled
 
 public static void TestRejectEmptySCTList(ж<testing.T> Ꮡt) {
     // RFC 6962, Section 3.3.1 specifies that empty SCT lists are invalid.
+
     array<byte> random = new(32);
     var sct = new byte[]{0x42, 0x42, 0x42, 0x42}.slice();
     var serverHello = Ꮡ(new serverHelloMsg(
@@ -598,6 +599,7 @@ internal static readonly object unmarshaledServerHelloˢ2 = (@string)"Unmarshale
 public static void TestRejectEmptySCT(ж<testing.T> Ꮡt) {
     // Not only must the SCT list be non-empty, but the SCT elements must
     // not be zero length.
+
     array<byte> random = new(32);
     var serverHello = Ꮡ(new serverHelloMsg(
         vers: VersionTLS12,

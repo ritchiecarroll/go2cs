@@ -33,10 +33,13 @@ public static void TestForeachHeaderElement(ж<testing.T> Ꮡt) {
         new(" Foo"u8, new @string[]{"Foo"u8}.slice()),
         new("Foo "u8, new @string[]{"Foo"u8}.slice()),
         new(" Foo "u8, new @string[]{"Foo"u8}.slice()),
+
         new("foo"u8, new @string[]{"foo"u8}.slice()),
         new("anY-cAsE"u8, new @string[]{"anY-cAsE"u8}.slice()),
+
         new(""u8, default!),
         new(",,,,  ,  ,,   ,,, ,"u8, default!),
+
         new(" Foo,Bar, Baz,lower,,Quux "u8, new @string[]{"Foo"u8, "Bar"u8, "Baz"u8, "lower"u8, "Quux"u8}.slice())
     }.slice();
     foreach (var (_, tt) in tests) {
@@ -191,7 +194,7 @@ public static void TestNoUnicodeStrings(ж<testing.T> Ꮡt) {
             if (path == "internal/ascii"u8) {
                 return fs.SkipDir;
             }
-            if (!strings.HasSuffix(path, ".go"u8) || strings.HasSuffix(path, testGoˢ) || path == "h2_bundle.go"u8 || d.IsDir()) {
+            if (!strings.HasSuffix(path, ".go"u8) || strings.HasSuffix(path, testGoˢ) || path == "h2_bundle.go"u8 || path == "internal/httpcommon/httpcommon.go"u8 || d.IsDir()) {
                 return default!;
             }
 

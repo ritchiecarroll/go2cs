@@ -43,14 +43,14 @@ using static go.crypto.tls_package;
 
 partial class tls_internal_test_package {
 
-internal static void testClientHello(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑserverConfig, global::go.crypto.tls_package.handshakeMessage m) {
+internal static partial void testClientHello(ж<testing.T> Ꮡt, ж<global::go.crypto.tls_package.Config> ᏑserverConfig, global::go.crypto.tls_package.handshakeMessage m) {
     Ꮡt.Helper();
     testClientHelloFailure(Ꮡt, ᏑserverConfig, m, ""u8);
 }
 
 // testFatal is a hack to prevent the compiler from complaining that there is a
 // call to t.Fatal from a non-test goroutine
-internal static void testFatal(ж<testing.T> Ꮡt, error err) {
+internal static partial void testFatal(ж<testing.T> Ꮡt, error err) {
     Ꮡt.Helper();
     Ꮡt.Fatal(err);
 }
@@ -708,6 +708,7 @@ internal static partial (ж<recordingConn> conn, ж<exec.Cmd> child, error err) 
     GoFrame ᒐ = default;
     try {
         ref var test = ref Ꮡtest.DerefOrNull();
+        var commandᴷ = new stackAppend<@string>();
 
         (var l, err) = net.ListenTCP(tcpˢ, Ꮡ(new net.TCPAddr(
             IP: net.IPv4(127, 0, 0, 1),
@@ -726,7 +727,7 @@ internal static partial (ж<recordingConn> conn, ж<exec.Cmd> child, error err) 
         if (len(command) == 0) {
             command = defaultClientCommand;
         }
-        command = append(command, "-connect"u8);
+        command = append(commandᴷ, command, "-connect"u8);
         command = append(command, fmt.Sprintf("127.0.0.1:%d"u8, port));
         var cmd = exec.Command(command[0], command[1..].ꓸꓸꓸ);
         cmd.Value.Stdin = default!;
@@ -1849,7 +1850,7 @@ internal static void initᴛgetConfigForClientTests() { getConfigForClientTests 
     ),
     new(
         (ж<global::go.crypto.tls_package.Config> config) => {
-            foreach (var (i, _) in (~config).SessionTicketKey) {
+            foreach (var i in range((~config).SessionTicketKey)) {
                 config.Value.SessionTicketKey[i] = (byte)i;
             }
             config.Value.sessionTicketKeys = default!;
@@ -1871,7 +1872,7 @@ internal static void initᴛgetConfigForClientTests() { getConfigForClientTests 
     new(
         (ж<global::go.crypto.tls_package.Config> config) => {
             array<byte> dummyKey = new(32);
-            foreach (var (i, _) in dummyKey) {
+            foreach (var i in range(dummyKey)) {
                 dummyKey[i] = (byte)i;
             }
 

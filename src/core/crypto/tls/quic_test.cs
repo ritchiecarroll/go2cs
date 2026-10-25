@@ -324,7 +324,7 @@ public static void TestQUICFragmentaryData(ж<testing.T> Ꮡt) {
     var onEvent = (global::go.crypto.tls_package.QUICEvent e, ж<testQUICConn> src, ж<testQUICConn> dst) => {
         if (e.Kind == QUICWriteData) {
             // Provide the data one byte at a time.
-            foreach (var (i, _) in e.Data) {
+            foreach (var i in range(e.Data)) {
                 {
                     var err = (~dst).conn.HandleData(e.Level, e.Data.slice(i, i + 1)); if (err != default!) {
                         Ꮡt.Errorf("HandleData: %v"u8, err);

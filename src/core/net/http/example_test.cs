@@ -10,6 +10,7 @@ using log = log_package;
 using Δhttp = global::go.net.http_package;
 using os = os_package;
 using signal = global::go.os.signal_package;
+using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using bufio = bufio_package;
@@ -206,13 +207,14 @@ public static void ExampleListenAndServeTLS() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string helloWorldˢ = "Hello, world!\n"u8;
+internal static readonly @string helloWorldˢ2 = "Hello, world!\n"u8;
 internal static readonly @string helloˢ4 = "/hello"u8;
 
 public static void ExampleListenAndServe() {
     // Hello world, the web server
+
     var helloHandler = (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
-        io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloWorldˢ);
+        io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), helloWorldˢ2);
     };
 
     Δhttp.HandleFunc(helloˢ4, helloHandler);
@@ -290,6 +292,29 @@ public static void ExampleProtocols_http1or2() {
         log.Fatal(err);
     }
     (~res).Body.Close();
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string requestAllowedˢ = "request allowed\n"u8;
+
+public static void ExampleCrossOriginProtection() {
+    var mux = Δhttp.NewServeMux();
+
+    mux.HandleFunc(helloˢ4, (Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => {
+        io.WriteString(new http_test_package.http_ResponseWriterᴠWriter(w), requestAllowedˢ);
+    });
+
+    ref var srv = ref heap<Δhttp.Server>(out var Ꮡsrv);
+    srv = new Δhttp.Server(
+        Addr: ":8080"u8,
+        ReadTimeout: (time.Duration)(15000000000L),
+        WriteTimeout: (time.Duration)(15000000000L),
+        // Use CrossOriginProtection.Handler to block all non-safe cross-origin
+        // browser requests to mux.
+        Handler: Δhttp.NewCrossOriginProtection().Handler(new Δhttp.ServeMuxжΔHandler(mux))
+    );
+
+    log.Fatal(Ꮡsrv.ListenAndServe());
 }
 
 } // end http_test_package
