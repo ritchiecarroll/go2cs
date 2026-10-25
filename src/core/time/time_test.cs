@@ -434,7 +434,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
 
     // divisors of Second
     var testOneʗ1 = testOne;
-    var f1 = (int64 ti, int32 tns, int32 logdi) => {
+    var f1 = [MethodImpl(MethodImplOptions.NoInlining)] (int64 ti, int32 tns, int32 logdi) => {
         var d = (Δtime.Duration)1;
         nuint a = (nuint)(logdi % 9);
         var b = (logdi >> 16) % 9;
@@ -455,7 +455,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
 
     // multiples of Second
     var testOneʗ2 = testOne;
-    var f2 = (int64 ti, int32 tns, int32 di) => {
+    var f2 = [MethodImpl(MethodImplOptions.NoInlining)] (int64 ti, int32 tns, int32 di) => {
         var d = ((Δtime.Duration)(int64)di) * ΔSecond;
         if (d < 0) {
             d = -d;
@@ -467,7 +467,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
 
     // halfway cases
     var testOneʗ3 = testOne;
-    var f3 = (int64 tns, int64 di) => {
+    var f3 = [MethodImpl(MethodImplOptions.NoInlining)] (int64 tns, int64 di) => {
         di &= (int64)(0xfffffffeL);
         if (di == 0) {
             di = 2;
@@ -484,7 +484,7 @@ public static void TestTruncateRound(ж<Δtesting.T> Ꮡt) {
 
     // full generality
     var testOneʗ4 = testOne;
-    var f4 = (int64 ti, int32 tns, int64 di) => {
+    var f4 = [MethodImpl(MethodImplOptions.NoInlining)] (int64 ti, int32 tns, int64 di) => {
         ti >>= (int)(1); // see comment in f1
         return testOneʗ4(ti, (int64)tns, di);
     };

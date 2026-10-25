@@ -10,6 +10,8 @@ using mathrand = math.rand_package;
 using reflect = reflect_package;
 using testing = testing_package;
 using quick = go.testing.quick_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using encoding;
 using go.testing;
 using math;
@@ -100,7 +102,7 @@ public static void TestScalarGenerate(ж<testing.T> Ꮡt) {
     }
 }
 
-public static void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
+public static partial void TestScalarSetCanonicalBytes(ж<testing.T> Ꮡt) {
     var f1 = ([GoArrayDims(32)] array<byte> @in, global::go.crypto.@internal.fips140.edwards25519_package.Scalar scʗp) => {
         @in = @in.Clone();
         ref var sc = ref heap(scʗp.ΔClone(), out var Ꮡsc);

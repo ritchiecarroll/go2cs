@@ -82,7 +82,7 @@ private static readonly @string txtˢ = "*.txt"u8;
 private static readonly @string readDirOnlyˢ = "readDirOnly"u8;
 private static readonly @string openOnlyˢ = "openOnly"u8;
 
-public static void TestGlobMethod(ж<testing.T> Ꮡt) {
+public static partial void TestGlobMethod(ж<testing.T> Ꮡt) {
     void check(@string desc, slice<@string> namesΔ1, error errΔ1) {
         Ꮡt.Helper();
         if (errΔ1 != default! || len(namesΔ1) != 1 || namesΔ1[0] != "hello.txt") {

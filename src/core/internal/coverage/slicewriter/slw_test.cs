@@ -5,6 +5,8 @@ namespace go.@internal.coverage;
 
 using io = io_package;
 using testing = testing_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static go.@internal.coverage.slicewriter_package;
 
 partial class slicewriter_internal_test_package {
@@ -34,7 +36,7 @@ public static void TestSliceWriter(ж<testing.T> Ꮡt) {
     }
 
     var sleqʗ1 = sleq;
-    void rf(ж<testing.T> tΔ3, ж<global::go.@internal.coverage.slicewriter_package.WriteSeeker> wsΔ2, slice<byte> p) {
+    [MethodImpl(MethodImplOptions.NoInlining)] void rf(ж<testing.T> tΔ3, ж<global::go.@internal.coverage.slicewriter_package.WriteSeeker> wsΔ2, slice<byte> p) {
         tΔ3.Helper();
         var b = new slice<byte>(len(p));
         var (nr, rerr) = wsΔ2.Read(b);

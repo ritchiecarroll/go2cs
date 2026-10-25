@@ -1758,7 +1758,7 @@ public static void TestIllformedUTF16FileName(ж<Δtesting.T> Ꮡt) {
     }
 }
 
-public static void TestUTF16Alloc(ж<Δtesting.T> Ꮡt) {
+public static partial void TestUTF16Alloc(ж<Δtesting.T> Ꮡt) {
     void allowsPerRun(nint want, Action f) {
         Ꮡt.Helper();
         nint got = (nint)Δtesting.AllocsPerRun(5, f);

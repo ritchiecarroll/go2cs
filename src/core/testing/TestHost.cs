@@ -165,9 +165,9 @@ public static class TestHost
 
         // The test binary's build info, as `go test` links it in: `path <package>.test` -- bare for a main
         // package, whose own build info cmd/go's test main copies -- plus `mod <module> (devel)` outside the
-        // standard library. Registered from the two values every host already passes its registry, so
-        // runtime/debug.ReadBuildInfo answers and no emitted host changes.
-        GoModInfoAttribute.Register(registry.Package, registry.ModulePath, HostsMainPackage(Assembly.GetEntryAssembly()));
+        // standard library, then a main package's `dep` lines. Registered from the values the host passes its registry,
+        // so runtime/debug.ReadBuildInfo answers; a host with no dependencies is unchanged.
+        GoModInfoAttribute.Register(registry.Package, registry.ModulePath, HostsMainPackage(Assembly.GetEntryAssembly()), registry.ModuleDependencies);
 
         // The run's own command line, announced once so nothing downstream has to ask the PROCESS
         // for it. See TestFlagBridge.HostCommandLine: in a real converted test binary this array

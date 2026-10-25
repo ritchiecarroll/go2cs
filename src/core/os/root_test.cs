@@ -2506,7 +2506,7 @@ public static void TestRootNoLstat(ж<Δtesting.T> Ꮡt) {
             }
         }
         var checkFileInfoʗ1 = checkFileInfo;
-        void checkDirEntry(ж<Δtesting.T> tΔ3, fs.DirEntry d) {
+        [MethodImpl(MethodImplOptions.NoInlining)] void checkDirEntry(ж<Δtesting.T> tΔ3, fs.DirEntry d) {
             tΔ3.Helper();
             {
                 @string got = d.Name();
@@ -2537,7 +2537,7 @@ public static void TestRootNoLstat(ж<Δtesting.T> Ꮡt) {
         });
         // File.ReadDir, returning []DirEntry
         var checkDirEntryʗ1 = checkDirEntry;
-        test(readDirEntryˢ, (ж<Δtesting.T> tΔ5, ж<Δos.File> subdir) => {
+        test(readDirEntryˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.T> tΔ5, ж<Δos.File> subdir) => {
             var (dirents, errΔ5) = subdir.ReadDir(-1);
             if (errΔ5 != default!) {
                 tΔ5.Fatal(errΔ5);
@@ -2549,7 +2549,7 @@ public static void TestRootNoLstat(ж<Δtesting.T> Ꮡt) {
         });
         // File.Readdir, returning []FileInfo
         var checkFileInfoʗ2 = checkFileInfo;
-        test(readFileInfoˢ, (ж<Δtesting.T> tΔ6, ж<Δos.File> subdir) => {
+        test(readFileInfoˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<Δtesting.T> tΔ6, ж<Δos.File> subdir) => {
             var (fileinfos, errΔ6) = subdir.Readdir(-1);
             if (errΔ6 != default!) {
                 tΔ6.Fatal(errΔ6);

@@ -2569,7 +2569,7 @@ internal static void testHandshakeChainExpiryResumption(ж<testing.T> Ꮡt, uint
         var leafNotAfterʗ1 = leafNotAfter;
         var nowʗ2 = nowʗ1;
         var rootNotAfterʗ1 = rootNotAfter;
-        Ꮡt.Run(name, (ж<testing.T> tΔ1) => {
+        Ꮡt.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
             var (initialLeafDER, expiredLeafDER, initialRoot) = createChainʗ2(leafNotAfterʗ1, rootNotAfterʗ1);
 
             var serverConfig = testConfig.Clone();
@@ -2643,15 +2643,15 @@ internal static void testHandshakeChainExpiryResumption(ж<testing.T> Ꮡt, uint
 }
 
 public static void TestHandshakeGetConfigForClientDifferentClientCAs(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(tls12ˢ3, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(tls12ˢ3, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         testHandshakeGetConfigForClientDifferentClientCAs(tΔ1, VersionTLS12);
     });
-    Ꮡt.Run(tls13ˢ3, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(tls13ˢ3, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         testHandshakeGetConfigForClientDifferentClientCAs(tΔ2, VersionTLS13);
     });
 }
 
-internal static void testHandshakeGetConfigForClientDifferentClientCAs(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testHandshakeGetConfigForClientDifferentClientCAs(ж<testing.T> Ꮡt, uint16 version) {
     ref var now = ref heap<time.Time>(out var Ꮡnow);
     now = time_package.Now();
     var tmpl = Ꮡ(new Δx509.Certificate(
@@ -2764,15 +2764,15 @@ internal static void testHandshakeGetConfigForClientDifferentClientCAs(ж<testin
 }
 
 public static void TestHandshakeChangeRootCAsResumption(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(tls12ˢ3, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(tls12ˢ3, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         testHandshakeChangeRootCAsResumption(tΔ1, VersionTLS12);
     });
-    Ꮡt.Run(tls13ˢ3, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(tls13ˢ3, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         testHandshakeChangeRootCAsResumption(tΔ2, VersionTLS13);
     });
 }
 
-internal static void testHandshakeChangeRootCAsResumption(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testHandshakeChangeRootCAsResumption(ж<testing.T> Ꮡt, uint16 version) {
     ref var now = ref heap<time.Time>(out var Ꮡnow);
     now = time_package.Now();
     var tmpl = Ꮡ(new Δx509.Certificate(

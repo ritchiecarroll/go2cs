@@ -6,6 +6,8 @@ namespace go.io;
 using static go.io.fs_package;
 using testing = testing_package;
 using fstest = go.testing.fstest_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
@@ -23,7 +25,7 @@ private static readonly @string dirˢ = "dir"u8;
 private static readonly @string linkˢ = "link"u8;
 private static readonly @string parentlinkˢ = "parentlink"u8;
 
-public static void TestReadLink(ж<testing.T> Ꮡt) {
+public static partial void TestReadLink(ж<testing.T> Ꮡt) {
     var testFS = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
         ["foo"u8] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("bar"u8),
@@ -65,7 +67,7 @@ public static void TestReadLink(ж<testing.T> Ꮡt) {
     check(sub, parentlinkˢ, barˢ2);
 }
 
-public static void TestLstat(ж<testing.T> Ꮡt) {
+public static partial void TestLstat(ж<testing.T> Ꮡt) {
     var testFS = new fstest.MapFS(new map<@string, ж<fstest.MapFile>>{
         ["foo"u8] = Ꮡ(new fstest.MapFile(
             Data: slice<byte>("bar"u8),
