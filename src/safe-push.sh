@@ -135,7 +135,15 @@ run_push() {
   # on an unrelated branch-existence abort, so "it refused" would have read as proof the SHA check
   # worked while that check never executed. An arm asserts the REASON it failed, or it is not a
   # control -- and an arm that cannot reach its target is a script-ordering defect in test clothing.
-  if [ -n "$announced" ]; then announced=$(resolve_sha "$announced" "announced SHA"); fi
+  #
+  # ⚠ THE `|| exit 1` IS THE GATE. resolve_sha runs inside $(...), so its `die` exits only that
+  # subshell: the ABORT line reaches stderr, the substitution yields an empty string, and without
+  # the exit this function carried on with announced="" -- which IDENTITY reads as "nothing was
+  # announced". On an existing branch that still died, for another reason; on a --new branch it was
+  # "skipped" and the push ran and exited 0 under SAFEPUSH OK, with the refusal printed above it
+  # (lane H, 2026-10-25). The three READ arms below missed it because they ran without --new, so the
+  # branch-existence abort exited non-zero while the subshell's text supplied the reason they matched.
+  if [ -n "$announced" ]; then announced=$(resolve_sha "$announced" "announced SHA") || exit 1; fi
 
   step "READ the local SHA (never typed)"
   local_sha=$(git rev-parse "${ref}^{commit}"); rc=$?
@@ -238,13 +246,14 @@ self_test() {
   printf 'safe-push self-test -- hermetic origin at %s\n' "$bare"
   printf 'every arm asserts the REASON it aborted, never merely a nonzero exit\n\n'
 
-  # READ -- the three shapes of a SHA that was not read.
+  # READ -- the three shapes of a SHA that was not read. Each runs with --new, so no later check (the
+  # branch-existence abort, IDENTITY on a public ref) can exit for it: the READ refusal must gate alone.
   arm 'short SHA refused'    'never expanded from a prefix' \
-      bash "$0" --branch none --remote "$bare" --announced 52c01fbb9 --dry-run
+      bash "$0" --branch none --remote "$bare" --new --announced 52c01fbb9 --dry-run
   arm 'fabricated SHA'       'does not resolve to a commit' \
-      bash "$0" --branch none --remote "$bare" --announced 0123456789abcdef0123456789abcdef01234567 --dry-run
+      bash "$0" --branch none --remote "$bare" --new --announced 0123456789abcdef0123456789abcdef01234567 --dry-run
   arm 'non-hex SHA'          'not a hex object name' \
-      bash "$0" --branch none --remote "$bare" --announced zzzz --dry-run
+      bash "$0" --branch none --remote "$bare" --new --announced zzzz --dry-run
 
   # A branch that does not exist on the remote, without --new.
   arm 'missing branch needs --new' 'Pass --new if that is intended' \

@@ -1,0 +1,3 @@
+event	seq	row	corpus	converter	bin_mtime	boot	utc	timeout	testdeadline	word	verdicts	rc	wall_s
+START	1	internal/syscall/unix	b5fc1294db3b5b625e8a840b1a786dc768a82d95	b5fc1294db3b5b625e8a840b1a786dc768a82d95	1792926979	b2ddcf68	2026-10-25T11:16:20Z	30m	15m				
+END	1	internal/syscall/unix	b5fc1294db3b5b625e8a840b1a786dc768a82d95	b5fc1294db3b5b625e8a840b1a786dc768a82d95	1792926979	b2ddcf68	2026-10-25T11:21:35Z	30m	15m	PASS	9	0	313
