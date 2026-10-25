@@ -301,7 +301,7 @@ public static partial void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗ
 }
 
 // Fatal is equivalent to l.Print() followed by a call to [os.Exit](1).
-public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -310,7 +310,7 @@ public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 }
 
 // Fatalf is equivalent to l.Printf() followed by a call to [os.Exit](1).
-public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+public static partial void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -319,7 +319,7 @@ public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸ
 }
 
 // Fatalln is equivalent to l.Println() followed by a call to [os.Exit](1).
-public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -328,7 +328,7 @@ public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 }
 
 // Panic is equivalent to l.Print() followed by a call to panic().
-public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
@@ -337,7 +337,7 @@ public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
 }
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
-public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+public static partial void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
@@ -346,7 +346,7 @@ public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸ
 }
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
-public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+public static partial void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
@@ -460,7 +460,7 @@ public static partial void Println(params ꓸꓸꓸany vʗp) {
 }
 
 // Fatal is equivalent to [Print] followed by a call to [os.Exit](1).
-public static void Fatal(params ꓸꓸꓸany vʗp) {
+public static partial void Fatal(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -469,7 +469,7 @@ public static void Fatal(params ꓸꓸꓸany vʗp) {
 }
 
 // Fatalf is equivalent to [Printf] followed by a call to [os.Exit](1).
-public static void Fatalf(@string format, params ꓸꓸꓸany vʗp) {
+public static partial void Fatalf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -478,7 +478,7 @@ public static void Fatalf(@string format, params ꓸꓸꓸany vʗp) {
 }
 
 // Fatalln is equivalent to [Println] followed by a call to [os.Exit](1).
-public static void Fatalln(params ꓸꓸꓸany vʗp) {
+public static partial void Fatalln(params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -487,7 +487,7 @@ public static void Fatalln(params ꓸꓸꓸany vʗp) {
 }
 
 // Panic is equivalent to [Print] followed by a call to panic().
-public static void Panic(params ꓸꓸꓸany vʗp) {
+public static partial void Panic(params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
@@ -496,7 +496,7 @@ public static void Panic(params ꓸꓸꓸany vʗp) {
 }
 
 // Panicf is equivalent to [Printf] followed by a call to panic().
-public static void Panicf(@string format, params ꓸꓸꓸany vʗp) {
+public static partial void Panicf(@string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
@@ -505,7 +505,7 @@ public static void Panicf(@string format, params ꓸꓸꓸany vʗp) {
 }
 
 // Panicln is equivalent to [Println] followed by a call to panic().
-public static void Panicln(params ꓸꓸꓸany vʗp) {
+public static partial void Panicln(params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
