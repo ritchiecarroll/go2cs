@@ -14,8 +14,9 @@
 //
 // Each argument is a go2cs_test_results.json or the package directory that holds one. A sibling
 // go2cs_test_comparison.json, when present, supplies the Go verdict. Without -entries, every test
-// that carries a note is reported. With -entries (one "<package> <test>" pair per line, '#' starts
-// a comment), every named entry gets exactly one row, whether or not it carries a note.
+// that carries a note is reported. With -entries (one "<package> <test>" pair per line, '#' at the
+// start of a line or after whitespace starts a comment, so a test name's #NN suffix is kept), every
+// named entry gets exactly one row, whether or not it carries a note.
 //
 // Output is TSV on stdout with a header; a one-line summary goes to stderr. Columns:
 //
@@ -261,8 +262,13 @@ func readEntries(path string) ([]entry, error) {
 	sc := bufio.NewScanner(f)
 	for n := 1; sc.Scan(); n++ {
 		line := sc.Text()
-		if i := strings.IndexByte(line, '#'); i >= 0 {
-			line = line[:i]
+		// '#' starts a comment only at the start of the line or after whitespace: Go's #NN suffix on a
+		// repeated subtest name (TestSizeAllocs/[]binary.Struct#01) is part of the name.
+		for i := 0; i < len(line); i++ {
+			if line[i] == '#' && (i == 0 || line[i-1] == ' ' || line[i-1] == '\t') {
+				line = line[:i]
+				break
+			}
 		}
 		fields := strings.Fields(line)
 		if len(fields) == 0 {
