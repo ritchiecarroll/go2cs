@@ -27,6 +27,9 @@ internal class ReceiverMethodTemplate : TemplateBase
     // reason ReceiverTypeIsPublic is: the one construction site cannot silently take a default.
     public required bool NoInlining;
 
+    // Whether DynamicSecurityMethod rides beside the no-inline mark (NoInliningPartials.CallerFrameMarkAvailable).
+    public bool CallerFrame;
+
     // The SOURCE method's [OverloadResolutionPriority(n)] argument, or null. The converter marks the
     // sstring member of an sstring twin with priority 1 (docs/phase4/DESIGN-sstring-twin-pilot.md), and
     // the ж-forwarder emitted here must carry the same priority. Otherwise the two forwarders a twin pair
@@ -40,7 +43,7 @@ internal class ReceiverMethodTemplate : TemplateBase
         get
         {
             string attributes = NoInlining
-                ? $"{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), {NoInliningPartials.CallerFrameAttribute}"
+                ? $"{GeneratedCodeAttribute}, global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining){(CallerFrame ? ", " + NoInliningPartials.CallerFrameAttribute : "")}"
                 : GeneratedCodeAttribute;
 
             if (OverloadResolutionPriority is not null)

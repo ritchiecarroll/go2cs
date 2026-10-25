@@ -31,7 +31,33 @@ namespace go2cs;
 public static class NoInliningPartials
 {
     public const string Attribute =
-        "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining), " + CallerFrameAttribute + "]";
+        "[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]";
+
+    /// <summary>The no-inline mark, with <see cref="CallerFrameAttribute"/> beside it when the compilation can name it.</summary>
+    public static string AttributeFor(bool callerFrame) =>
+        callerFrame ? Attribute.Substring(0, Attribute.Length - 1) + ", " + CallerFrameAttribute + "]" : Attribute;
+
+    /// <summary>
+    /// Whether the compilation sees a PUBLIC <c>System.Security.DynamicSecurityMethodAttribute</c> -- golib's, which every
+    /// converted project references. CoreLib's own is internal, so a compilation without golib (a generator test's
+    /// snippet) cannot name it, and gets the no-inline mark alone. Scanned per assembly: GetTypeByMetadataName answers
+    /// null when CoreLib's internal type and golib's public one are both in view.
+    /// </summary>
+    public static bool CallerFrameMarkAvailable(Compilation compilation)
+    {
+        const string name = "System.Security.DynamicSecurityMethodAttribute";
+
+        if (compilation.Assembly.GetTypeByMetadataName(name) is { DeclaredAccessibility: Accessibility.Public })
+            return true;
+
+        foreach (IAssemblySymbol assembly in compilation.SourceModule.ReferencedAssemblySymbols)
+        {
+            if (assembly.GetTypeByMetadataName(name) is { DeclaredAccessibility: Accessibility.Public })
+                return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// The mark that keeps a method's CALLER on the stack: the C# compiler writes <c>MethodAttributes.RequireSecObject</c>
@@ -123,6 +149,7 @@ public class NoInliningPartialGenerator : ISourceGenerator
             return;
 
         HashSet<string> hintNames = new(System.StringComparer.OrdinalIgnoreCase);
+        bool callerFrame = NoInliningPartials.CallerFrameMarkAvailable(context.Compilation);
 
         foreach (IGrouping<SyntaxTree, MethodDeclarationSyntax> file in finder.Candidates.GroupBy(method => method.SyntaxTree))
         {
@@ -212,7 +239,7 @@ public class NoInliningPartialGenerator : ISourceGenerator
                         .WithoutTrivia();
 
                     // A forwarder's declaring part carries [StackTraceHidden]; every other carrier's the no-inline mark.
-                    source.Append(memberIndent).Append(NoInliningPartials.IsForwarder(method) ? NoInliningPartials.ForwarderAttribute : NoInliningPartials.Attribute).Append("\r\n");
+                    source.Append(memberIndent).Append(NoInliningPartials.IsForwarder(method) ? NoInliningPartials.ForwarderAttribute : NoInliningPartials.AttributeFor(callerFrame)).Append("\r\n");
                     source.Append(memberIndent).Append(declaring.ToFullString().TrimEnd()).Append("\r\n");
                 }
 

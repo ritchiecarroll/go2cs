@@ -48,6 +48,7 @@ public class RecvGenerator : ISourceGenerator
 
         // In a hand-owned package a method is a pointer receiver by [GoRecv] alone.
         bool handOwnedPackage = context.Compilation.Assembly.IsHandOwnedPackage();
+        bool callerFrame = NoInliningPartials.CallerFrameMarkAvailable(context.Compilation);
 
         foreach (MethodDeclarationSyntax methodSyntax in finder.Methods)
         {
@@ -120,6 +121,7 @@ public class RecvGenerator : ISourceGenerator
                 Method = method,
                 ReceiverTypeIsPublic = receiverTypeIsPublic,
                 NoInlining = HasNoInliningMark(methodSyntax, semanticModel),
+                CallerFrame = callerFrame,
                 OverloadResolutionPriority = GetOverloadResolutionPriority(methodSyntax),
                 UsingStatements = usingStatements
             }
