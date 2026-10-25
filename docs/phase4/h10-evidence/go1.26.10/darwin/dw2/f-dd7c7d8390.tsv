@@ -1,0 +1,13 @@
+shard	row	RID	verdicts	matched	disclosed	divergent	new	status	agree	win_expected	win_disclosed	darwin_seg	win_differs
+f-dd7c7d8390	os	osx-arm64	3737	3735	1	2	1	failing	yes	6826	2	-	yes
+f-dd7c7d8390	os	osx-x64	3737	3735	1	2	1	failing	yes	6826	2	-	yes
+f-dd7c7d8390	io	osx-arm64	61	60	1	1	0	validated	yes	60	1	60/1/True	no
+f-dd7c7d8390	io	osx-x64	61	60	1	1	0	validated	yes	60	1	60/1/True	no
+f-dd7c7d8390	fmt	osx-arm64	63	62	1	1	0	validated	yes	62	1	62/1/True	no
+f-dd7c7d8390	fmt	osx-x64	63	62	1	1	0	validated	yes	62	1	62/1/True	no
+f-dd7c7d8390	strconv	osx-arm64	50	39	11	11	0	validated	yes	39	11	55/11/True	no
+f-dd7c7d8390	strconv	osx-x64	50	39	11	11	0	validated	yes	39	11	55/11/True	no
+f-dd7c7d8390	strings	osx-arm64	73	68	5	5	0	validated	yes	68	5	69/4/True	no
+f-dd7c7d8390	strings	osx-x64	73	68	5	5	0	validated	yes	68	5	69/4/True	no
+f-dd7c7d8390	sync	osx-arm64	57	48	9	9	0	validated	yes	48	9	46/6/True	no
+f-dd7c7d8390	sync	osx-x64	57	48	9	9	0	validated	yes	48	9	46/6/True	no
