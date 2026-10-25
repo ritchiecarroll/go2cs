@@ -202,6 +202,7 @@ internal static slice<ReplaceTest> replaceTests = new ReplaceTest[]{
     new("^[a-c]*"u8, "x"u8, ""u8, "x"u8),
     new("[a-c]*$"u8, "x"u8, ""u8, "x"u8),
     new("^[a-c]*$"u8, "x"u8, ""u8, "x"u8),
+
     new("^[a-c]+"u8, "x"u8, "abcdabc"u8, "xdabc"u8),
     new("[a-c]+$"u8, "x"u8, "abcdabc"u8, "abcdx"u8),
     new("^[a-c]+$"u8, "x"u8, "abcdabc"u8, "abcdabc"u8),
@@ -990,11 +991,12 @@ internal static @string sink;
 
 public static void BenchmarkQuoteMetaAll(ж<testing.B> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var specialsᴷ = new stackAppend<byte>();
 
     var specials = new slice<byte>(0);
     for (var i = (byte)0; i < utf8.RuneSelf; i++) {
         if (special(i)) {
-            specials = append(specials, i);
+            specials = append(specialsᴷ, specials, i);
         }
     }
     @string s = (@string)specials;
@@ -1106,7 +1108,7 @@ internal static readonly object unexpectedSuccessˢ = (@string)"unexpected succe
 
 public static void TestUnmarshalText(ж<testing.T> Ꮡt) {
     var unmarshaled = @new<global::go.regexp_package.Regexp>();
-    foreach (var (i, _) in goodRe) {
+    foreach (var i in range(goodRe)) {
         var re = compileTest(Ꮡt, goodRe[i], ""u8);
         var (marshaled, err) = re.MarshalText();
         if (err != default!) {

@@ -31,6 +31,7 @@ using static global::go.archive.zip_test_package;
 [assembly: GoImplement<bytes_package.Reader, io_package.ReaderAt>(Pointer = true)]
 [assembly: GoImplement<global::go.archive.zip_package.ReadCloser, go.io.fs_package.FS>(Pointer = true)]
 [assembly: GoImplement<global::go.archive.zip_package.Reader, go.io.fs_package.FS>(Pointer = true)]
+[assembly: GoImplement<go.testing.fstest_package.MapFS, go.io.fs_package.FS>]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.ReaderAt>(Pointer = true)]
@@ -40,6 +41,12 @@ using static global::go.archive.zip_test_package;
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it

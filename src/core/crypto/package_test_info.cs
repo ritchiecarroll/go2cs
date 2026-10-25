@@ -7,12 +7,15 @@
 global using static global::go.crypto_package;
 
 // <ImportedTypeAliases>
-global using execꓸError = go.os.exec_package.ΔError;
+global using cryptoꓸDecrypterOpts = object;
+global using cryptoꓸPrivateKey = object;
+global using cryptoꓸPublicKey = object;
 global using osꓸDirEntry = go.io.fs_package.DirEntry;
 global using osꓸFileInfo = go.io.fs_package.FileInfo;
 global using osꓸFileMode = go.io.fs_package.FileMode;
 global using osꓸPathError = go.io.fs_package.PathError;
 global using osꓸSignal = go.os_package.ΔSignal;
+global using x509ꓸOID = go.crypto.x509_package.ΔOID;
 // </ImportedTypeAliases>
 
 using go;
@@ -22,11 +25,20 @@ using static global::go.crypto_test_package;
 // </ExportedTypeAliases>
 
 // <InterfaceImplementations>
+[assembly: GoImplement<go.crypto.rsa_package.PSSOptions, crypto_package.SignerOpts>(Pointer = true)]
+[assembly: GoImplement<go.crypto.rsa_package.PrivateKey, crypto_package.Signer>(Pointer = true)]
+[assembly: GoImplement<messageSignerOnly, crypto_package.Signer>(Pointer = true)]
 [assembly: GoImplement<testing_package.T, testing_package.TB>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: global::go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -36,8 +48,9 @@ using static global::go.crypto_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: global::go.GoPositionMap("crypto/crypto_test.go", "crypto_test.cs", "ACI6gtaCpoKCgoIAIwaCAAE4lJSCgpSCgpSAgraCgpSAggALCAAKFpSCgpSAkoKUgpSCpoKCpoKCgpSmlA==", "115-140:1")]
 [assembly: global::go.GoPositionMap("crypto/issue21104_test.go", "issue21104_test.cs", "ABAclIKCgpTUgtSC1ILUgqSUgpKCgpSCAAgEwoKCgpKCgpSCgqai", "50-59:1")]
-[assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoqwoKCgoKClJSCgoKClIKCgqaCgqaCAAgQgoKUgpQ=", "", "", "59=GOROOT/1/1/3")]
+[assembly: global::go.GoPositionMap("crypto/purego_test.go", "purego_test.cs", "ABoowoKCgoKCgpSUgoKCgpSCgoKmgoKmggAIEIKClIKU", "", "", "60=GOROOT/1/1/3")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -52,6 +65,7 @@ public static partial class crypto_test_package
     // via declarations below.
 
     // <TypeAccessibility>
+    internal partial struct messageSignerOnly {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import
@@ -61,14 +75,24 @@ public static partial class crypto_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸaes() => builtin.initPackage(typeof(crypto.aes_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸcipher() => builtin.initPackage(typeof(crypto.cipher_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrc4() => builtin.initPackage(typeof(crypto.rc4_package));
+    [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
+    [GoInit] internal static void initᴛᴛimportꓸcrypto() => builtin.initPackage(typeof(crypto_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸaes() => builtin.initPackage(typeof(global::go.crypto.aes_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸcipher() => builtin.initPackage(typeof(global::go.crypto.cipher_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(global::go.crypto.rand_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrc4() => builtin.initPackage(typeof(global::go.crypto.rc4_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrsa() => builtin.initPackage(typeof(global::go.crypto.rsa_package));
+    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸx509() => builtin.initPackage(typeof(global::go.crypto.x509_package));
+    [GoInit] internal static void initᴛᴛimportꓸencodingꓸpem() => builtin.initPackage(typeof(encoding.pem_package));
+    [GoInit] internal static void initᴛᴛimportꓸerrors() => builtin.initPackage(typeof(errors_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸbuild() => builtin.initPackage(typeof(global::go.go.build_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));
+    [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸlog() => builtin.initPackage(typeof(log_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
-    [GoInit] internal static void initᴛᴛimportꓸosꓸexec() => builtin.initPackage(typeof(global::go.os.exec_package));
+    [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
+    [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

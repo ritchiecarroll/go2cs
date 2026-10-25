@@ -28,7 +28,7 @@ internal static class Go2CsTestHost
             "testdata/gnu-nil-sparse-data.tar",
             "testdata/gnu-nil-sparse-hole.tar",
             "testdata/gnu-not-utf8.tar",
-            "testdata/gnu-sparse-big.tar",
+            "testdata/gnu-sparse-big.tar.base64",
             "testdata/gnu-sparse-many-zeros.tar.bz2",
             "testdata/gnu-utf8.tar",
             "testdata/gnu.tar",
@@ -38,7 +38,7 @@ internal static class Go2CsTestHost
             "testdata/issue10968.tar",
             "testdata/issue11169.tar",
             "testdata/issue12435.tar",
-            "testdata/neg-size.tar",
+            "testdata/neg-size.tar.base64",
             "testdata/nil-uid.tar",
             "testdata/pax-bad-hdr-file.tar",
             "testdata/pax-bad-hdr-large.tar.bz2",
@@ -52,7 +52,7 @@ internal static class Go2CsTestHost
             "testdata/pax-path-hdr.tar",
             "testdata/pax-pos-size-file.tar",
             "testdata/pax-records.tar",
-            "testdata/pax-sparse-big.tar",
+            "testdata/pax-sparse-big.tar.base64",
             "testdata/pax.tar",
             "testdata/small.txt",
             "testdata/small2.txt",
@@ -63,7 +63,7 @@ internal static class Go2CsTestHost
             "testdata/ustar-file-reg.tar",
             "testdata/ustar.tar",
             "testdata/v7.tar",
-            "testdata/writer-big-long.tar",
+            "testdata/writer-big-long.tar.base64",
             "testdata/writer-big.tar",
             "testdata/writer.tar",
             "testdata/xattrs.tar",
@@ -73,13 +73,13 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("TestDisableInsecurePathCheck", tar_internal_test_package.TestDisableInsecurePathCheck, "reader_test.go", 1664);
+        registry.Add("TestDisableInsecurePathCheck", tar_internal_test_package.TestDisableInsecurePathCheck, "reader_test.go", 1687);
         registry.Add("TestFileInfoHeader", tar_internal_test_package.TestFileInfoHeader, "tar_test.go", 209);
         registry.Add("TestFileInfoHeaderDir", tar_internal_test_package.TestFileInfoHeaderDir, "tar_test.go", 236);
         registry.Add("TestFileInfoHeaderSymlink", tar_internal_test_package.TestFileInfoHeaderSymlink, "tar_test.go", 260);
         registry.Add("TestFileInfoHeaderUseFileInfoNames", tar_internal_test_package.TestFileInfoHeaderUseFileInfoNames, "tar_test.go", 886);
-        registry.Add("TestFileReader", tar_internal_test_package.TestFileReader, "reader_test.go", 1364);
-        registry.Add("TestFileWriter", tar_internal_test_package.TestFileWriter, "writer_test.go", 1048);
+        registry.Add("TestFileReader", tar_internal_test_package.TestFileReader, "reader_test.go", 1387);
+        registry.Add("TestFileWriter", tar_internal_test_package.TestFileWriter, "writer_test.go", 1062);
         registry.Add("TestFitsInBase256", tar_internal_test_package.TestFitsInBase256, "strconv_test.go", 14);
         registry.Add("TestFitsInOctal", tar_internal_test_package.TestFitsInOctal, "strconv_test.go", 177);
         registry.Add("TestFormatNumeric", tar_internal_test_package.TestFormatNumeric, "strconv_test.go", 107);
@@ -87,35 +87,35 @@ internal static class Go2CsTestHost
         registry.Add("TestFormatPAXTime", tar_internal_test_package.TestFormatPAXTime, "strconv_test.go", 297);
         registry.Add("TestHeaderAllowedFormats", tar_internal_test_package.TestHeaderAllowedFormats, "tar_test.go", 515);
         registry.Add("TestHeaderRoundTrip", tar_internal_test_package.TestHeaderRoundTrip, "tar_test.go", 337);
-        registry.Add("TestInsecurePaths", tar_internal_test_package.TestInsecurePaths, "reader_test.go", 1626);
-        registry.Add("TestIssue12594", tar_internal_test_package.TestIssue12594, "writer_test.go", 966);
-        registry.Add("TestMergePAX", tar_internal_test_package.TestMergePAX, "reader_test.go", 941);
+        registry.Add("TestInsecurePaths", tar_internal_test_package.TestInsecurePaths, "reader_test.go", 1649);
+        registry.Add("TestIssue12594", tar_internal_test_package.TestIssue12594, "writer_test.go", 980);
+        registry.Add("TestMergePAX", tar_internal_test_package.TestMergePAX, "reader_test.go", 953);
         registry.Add("TestParseNumeric", tar_internal_test_package.TestParseNumeric, "strconv_test.go", 45);
-        registry.Add("TestParsePAX", tar_internal_test_package.TestParsePAX, "reader_test.go", 995);
+        registry.Add("TestParsePAX", tar_internal_test_package.TestParsePAX, "reader_test.go", 1007);
         registry.Add("TestParsePAXRecord", tar_internal_test_package.TestParsePAXRecord, "strconv_test.go", 342);
         registry.Add("TestParsePAXTime", tar_internal_test_package.TestParsePAXTime, "strconv_test.go", 216);
-        registry.Add("TestPartialRead", tar_internal_test_package.TestPartialRead, "reader_test.go", 702);
-        registry.Add("TestPax", tar_internal_test_package.TestPax, "writer_test.go", 538);
-        registry.Add("TestPaxHeadersSorted", tar_internal_test_package.TestPaxHeadersSorted, "writer_test.go", 712);
-        registry.Add("TestPaxNonAscii", tar_internal_test_package.TestPaxNonAscii, "writer_test.go", 617);
-        registry.Add("TestPaxSymlink", tar_internal_test_package.TestPaxSymlink, "writer_test.go", 578);
-        registry.Add("TestPaxXattrs", tar_internal_test_package.TestPaxXattrs, "writer_test.go", 673);
-        registry.Add("TestReadGNUSparsePAXHeaders", tar_internal_test_package.TestReadGNUSparsePAXHeaders, "reader_test.go", 1156);
-        registry.Add("TestReadHeaderOnly", tar_internal_test_package.TestReadHeaderOnly, "reader_test.go", 900);
-        registry.Add("TestReadOldGNUSparseMap", tar_internal_test_package.TestReadOldGNUSparseMap, "reader_test.go", 1036);
-        registry.Add("TestReadTruncation", tar_internal_test_package.TestReadTruncation, "reader_test.go", 781);
-        registry.Add("TestReader", tar_internal_test_package.TestReader, "reader_test.go", 26);
+        registry.Add("TestPartialRead", tar_internal_test_package.TestPartialRead, "reader_test.go", 714);
+        registry.Add("TestPax", tar_internal_test_package.TestPax, "writer_test.go", 552);
+        registry.Add("TestPaxHeadersSorted", tar_internal_test_package.TestPaxHeadersSorted, "writer_test.go", 726);
+        registry.Add("TestPaxNonAscii", tar_internal_test_package.TestPaxNonAscii, "writer_test.go", 631);
+        registry.Add("TestPaxSymlink", tar_internal_test_package.TestPaxSymlink, "writer_test.go", 592);
+        registry.Add("TestPaxXattrs", tar_internal_test_package.TestPaxXattrs, "writer_test.go", 687);
+        registry.Add("TestReadGNUSparsePAXHeaders", tar_internal_test_package.TestReadGNUSparsePAXHeaders, "reader_test.go", 1179);
+        registry.Add("TestReadHeaderOnly", tar_internal_test_package.TestReadHeaderOnly, "reader_test.go", 912);
+        registry.Add("TestReadOldGNUSparseMap", tar_internal_test_package.TestReadOldGNUSparseMap, "reader_test.go", 1048);
+        registry.Add("TestReadTruncation", tar_internal_test_package.TestReadTruncation, "reader_test.go", 793);
+        registry.Add("TestReader", tar_internal_test_package.TestReader, "reader_test.go", 27);
         registry.Add("TestRoundTrip", tar_internal_test_package.TestRoundTrip, "tar_test.go", 290);
         registry.Add("TestSparseEntries", tar_internal_test_package.TestSparseEntries, "tar_test.go", 103);
-        registry.Add("TestSplitUSTARPath", tar_internal_test_package.TestSplitUSTARPath, "writer_test.go", 929);
-        registry.Add("TestUSTARLongName", tar_internal_test_package.TestUSTARLongName, "writer_test.go", 758);
-        registry.Add("TestUninitializedRead", tar_internal_test_package.TestUninitializedRead, "reader_test.go", 757);
-        registry.Add("TestValidTypeflagWithPAXHeader", tar_internal_test_package.TestValidTypeflagWithPAXHeader, "writer_test.go", 794);
-        registry.Add("TestWriteLongHeader", tar_internal_test_package.TestWriteLongHeader, "writer_test.go", 1010);
-        registry.Add("TestWriter", tar_internal_test_package.TestWriter, "writer_test.go", 54);
-        registry.Add("TestWriterAddFS", tar_internal_test_package.TestWriterAddFS, "writer_test.go", 1340);
-        registry.Add("TestWriterAddFSNonRegularFiles", tar_internal_test_package.TestWriterAddFSNonRegularFiles, "writer_test.go", 1418);
-        registry.Add("TestWriterErrors", tar_internal_test_package.TestWriterErrors, "writer_test.go", 840);
+        registry.Add("TestSplitUSTARPath", tar_internal_test_package.TestSplitUSTARPath, "writer_test.go", 943);
+        registry.Add("TestUSTARLongName", tar_internal_test_package.TestUSTARLongName, "writer_test.go", 772);
+        registry.Add("TestUninitializedRead", tar_internal_test_package.TestUninitializedRead, "reader_test.go", 769);
+        registry.Add("TestValidTypeflagWithPAXHeader", tar_internal_test_package.TestValidTypeflagWithPAXHeader, "writer_test.go", 808);
+        registry.Add("TestWriteLongHeader", tar_internal_test_package.TestWriteLongHeader, "writer_test.go", 1024);
+        registry.Add("TestWriter", tar_internal_test_package.TestWriter, "writer_test.go", 55);
+        registry.Add("TestWriterAddFS", tar_internal_test_package.TestWriterAddFS, "writer_test.go", 1354);
+        registry.Add("TestWriterAddFSNonRegularFiles", tar_internal_test_package.TestWriterAddFSNonRegularFiles, "writer_test.go", 1438);
+        registry.Add("TestWriterErrors", tar_internal_test_package.TestWriterErrors, "writer_test.go", 854);
         return TestHost.Run(registry, args);
     }
 }

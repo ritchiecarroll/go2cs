@@ -42,6 +42,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
     }
 
     Ꮡf.Fuzz((ж<testing.T> t, slice<byte> b) => {
+        var filesᴷ = new stackAppend<FuzzReader_file>(moves: true);
         var (r, errΔ2) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(b)), (int64)len(b));
         if (errΔ2 != default!) {
             return;
@@ -57,7 +58,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
             if (errΔ3 != default!) {
                 continue;
             }
-            files = append(files, new FuzzReader_file(header: fΔ1.of(global::go.archive.zip_package.File.ᏑFileHeader), content: content));
+            files = append(filesᴷ, files, new FuzzReader_file(header: fΔ1.of(global::go.archive.zip_package.File.ᏑFileHeader), content: content));
             {
                 var (_, errΔ4) = r.Open((~fΔ1).Name); if (errΔ4 != default!) {
                     continue;
@@ -72,6 +73,7 @@ public static void FuzzReader(ж<testing.F> Ꮡf) {
         }
 
         var w = NewWriter(io.Discard);
+        files = move2heap(filesᴷ, files);
         foreach (var (_, fΔ2) in files) {
             var (ww, errΔ5) = w.CreateHeader(fΔ2.header);
             if (errΔ5 != default!) {

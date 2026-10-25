@@ -15,22 +15,22 @@ internal static class Go2CsTestHost
             "parse.go",
             "parse_test.go",
         });
-        registry.Add("TestBlock", parse_internal_test_package.TestBlock, "parse_test.go", 613);
+        registry.Add("TestBlock", parse_internal_test_package.TestBlock, "parse_test.go", 627);
         registry.Add("TestDelims", parse_internal_test_package.TestDelims, "lex_test.go", 469);
         registry.Add("TestDelimsAlphaNumeric", parse_internal_test_package.TestDelimsAlphaNumeric, "lex_test.go", 478);
         registry.Add("TestDelimsAndMarkers", parse_internal_test_package.TestDelimsAndMarkers, "lex_test.go", 494);
-        registry.Add("TestErrorContextWithTreeCopy", parse_internal_test_package.TestErrorContextWithTreeCopy, "parse_test.go", 480);
-        registry.Add("TestErrors", parse_internal_test_package.TestErrors, "parse_test.go", 599);
-        registry.Add("TestIsEmpty", parse_internal_test_package.TestIsEmpty, "parse_test.go", 464);
-        registry.Add("TestKeywordsAndFuncs", parse_internal_test_package.TestKeywordsAndFuncs, "parse_test.go", 401);
+        registry.Add("TestErrorContextWithTreeCopy", parse_internal_test_package.TestErrorContextWithTreeCopy, "parse_test.go", 494);
+        registry.Add("TestErrors", parse_internal_test_package.TestErrors, "parse_test.go", 613);
+        registry.Add("TestIsEmpty", parse_internal_test_package.TestIsEmpty, "parse_test.go", 478);
+        registry.Add("TestKeywordsAndFuncs", parse_internal_test_package.TestKeywordsAndFuncs, "parse_test.go", 415);
         registry.Add("TestLex", parse_internal_test_package.TestLex, "lex_test.go", 433);
-        registry.Add("TestLineNum", parse_internal_test_package.TestLineNum, "parse_test.go", 636);
-        registry.Add("TestNumberParse", parse_internal_test_package.TestNumberParse, "parse_test.go", 89);
-        registry.Add("TestParse", parse_internal_test_package.TestParse, "parse_test.go", 368);
-        registry.Add("TestParseCopy", parse_internal_test_package.TestParseCopy, "parse_test.go", 373);
-        registry.Add("TestParseWithComments", parse_internal_test_package.TestParseWithComments, "parse_test.go", 377);
+        registry.Add("TestLineNum", parse_internal_test_package.TestLineNum, "parse_test.go", 650);
+        registry.Add("TestNumberParse", parse_internal_test_package.TestNumberParse, "parse_test.go", 94);
+        registry.Add("TestParse", parse_internal_test_package.TestParse, "parse_test.go", 382);
+        registry.Add("TestParseCopy", parse_internal_test_package.TestParseCopy, "parse_test.go", 387);
+        registry.Add("TestParseWithComments", parse_internal_test_package.TestParseWithComments, "parse_test.go", 391);
         registry.Add("TestPos", parse_internal_test_package.TestPos, "lex_test.go", 562);
-        registry.Add("TestSkipFuncCheck", parse_internal_test_package.TestSkipFuncCheck, "parse_test.go", 431);
+        registry.Add("TestSkipFuncCheck", parse_internal_test_package.TestSkipFuncCheck, "parse_test.go", 445);
         return TestHost.Run(registry, args);
     }
 }

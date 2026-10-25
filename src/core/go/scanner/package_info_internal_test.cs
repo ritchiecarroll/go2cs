@@ -30,7 +30,7 @@ using static go.go.scanner_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: global::go.GoPositionMap("go/scanner/scanner_test.go", "scanner_test.cs", "ABIgAAcSgpSkpJQACBIAhQGiAoKCgoKUpoKCgoKmpoKmgpSClIKUgrqSpoKokqbugoKmlIKUpoKCgpSCuIK4gqaUgrakpJSCgqSCpoKmgriCqIL4ggALGIKCAAoKgoKCgqaCgoKCgoKClKaCgqaClICC+ABn9AGCgpKCuIKCAAoWAB5A3Lj6koKCgpS4goKCqJKCgJKCgoIABxCC3AAKEpSSgqiSgoKCgpSCpqKmggAJCpKmgoKCgpSCgoKCuIKCgoKUgoKmggAJCIIABRKCgKSCgoKAgsiCpoKCpoKCgqaCgoIACRSCgoKCgoKUgoKClIKUgoKUgpSClIIACggAP4wBgoIAGgqSAAAmgoKCgoKClIL6goKCgoKCgoKmgsqigoKCgoKCgoKCgtym3IKCgoKClIKCgoKCgoKCgoIADBCCAH+yAoKCgoKmgoKmlKSkpoKClIK4gsqCgpSC", "230-232:1;578-578:1;617-624:1;680-680:1;721-725:1;903-924:1;1084-1088:1")]
+[assembly: global::go.GoPositionMap("go/scanner/scanner_test.go", "scanner_test.cs", "ABQkAAcSgpSkpJQACBIAkQGiAoKCgoKUpoKCgoKmpoKmgpSClIKUgrqSpoKokqbugoKmlIKUpoKCgpSCuIK4gqaUgrakpJSCgqSCpoKmgriCqIL4ggALGIKCAAoKooKCgqaCgoKCgoKClKaCgqaClICC+AB59AGCgpKCuIKCAAoWAB9A3Lj6koKCgpS4goKCqJKCgJKCgoIABxCC3AAKEpSSgqiSgoKCgpSCpqKmggAJCpKmgoKCgpSCgoKCuIKCgoKUgoKmggAJCIIABRKCgKSCgoKAgsiCpoKCpoKCgqaCgoIACRSCgoKCgoKUgoKClIKUgoKUgpSClIIACggAP4wBgoK4priCgpSCgri4ggAbDJIAACaCgoKCgoKUgvqCgoKCgoKCgqaCyqKCgoKCgoKCgoKC3KbcgoKCgoKUgoKCgoKCgoKCggAMEIIAlQGyAoKCgoKmgoKmlKSkpoKClIK4gsqCgpSC", "232-234:1;580-580:1;619-626:1;682-682:1;723-727:1;835-837:1;932-953:1;1113-1117:1")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -54,10 +54,12 @@ public static partial class scanner_internal_test_package
     // item of the project guarantees.
 
     // <ImportInitializers>
+    [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸgoꓸtoken() => builtin.initPackage(typeof(global::go.go.token_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
+    [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     // </ImportInitializers>

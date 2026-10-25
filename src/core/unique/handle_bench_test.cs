@@ -24,10 +24,11 @@ public static void BenchmarkMakeManyMany(ж<testing.B> Ꮡb) {
 
 internal static void benchmarkMake(ж<testing.B> Ꮡb, slice<@string> testData) {
     ref var b = ref Ꮡb.DerefOrNull();
+    var handlesᴷ = new stackAppend<global::go.unique_package.Handle<@string>>();
 
     var handles = new slice<global::go.unique_package.Handle<@string>>(0, len(testData));
-    foreach (var (i, _) in testData) {
-        handles = append(handles, Make<@string>(testData[i]));
+    foreach (var i in range(testData)) {
+        handles = append(handlesᴷ, handles, Make<@string>(testData[i]));
     }
 
     b.ReportAllocs();
@@ -55,10 +56,10 @@ internal static array<@string> testData = new(128);
 internal static array<@string> testDataLarge = new(131072);
 
 [GoInit] internal static void init() {
-    foreach (var (i, _) in testData) {
+    foreach (var i in range(testData)) {
         testData[i] = fmt.Sprintf("%b"u8, i);
     }
-    foreach (var (i, _) in testDataLarge) {
+    foreach (var i in range(testDataLarge)) {
         testDataLarge[i] = fmt.Sprintf("%b"u8, i);
     }
 }

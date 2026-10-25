@@ -283,7 +283,7 @@ public static void TestReaderEarlyEOF(ж<testing.T> Ꮡt) {
 
     var readBuf = new slice<byte>(40);
     var data = new slice<byte>(maxSize);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = (byte)i;
     }
 

@@ -30,19 +30,19 @@ internal static class Go2CsTestHost
         registry.Add("TestBreakPatterns", sort_test_package.TestBreakPatterns, "sort_test.go", 141);
         registry.Add("TestCountSortOps", sort_test_package.TestCountSortOps, "sort_test.go", 715);
         registry.Add("TestCountStableOps", sort_test_package.TestCountStableOps, "sort_test.go", 714);
-        registry.Add("TestFind", sort_test_package.TestFind, "search_test.go", 61);
-        registry.Add("TestFindExhaustive", sort_test_package.TestFindExhaustive, "search_test.go", 238);
+        registry.Add("TestFind", sort_test_package.TestFind, "search_test.go", 62);
+        registry.Add("TestFindExhaustive", sort_test_package.TestFindExhaustive, "search_test.go", 236);
         registry.Add("TestFloat64s", sort_test_package.TestFloat64s, "sort_test.go", 77);
         registry.Add("TestHeapsortBM", sort_test_package.TestHeapsortBM, "sort_test.go", 526);
         registry.Add("TestInts", sort_test_package.TestInts, "sort_test.go", 68);
         registry.Add("TestNonDeterministicComparison", sort_test_package.TestNonDeterministicComparison, "sort_test.go", 191);
         registry.Add("TestReverseRange", sort_test_package.TestReverseRange, "sort_test.go", 153);
         registry.Add("TestReverseSortIntSlice", sort_test_package.TestReverseSortIntSlice, "sort_test.go", 124);
-        registry.Add("TestSearch", sort_test_package.TestSearch, "search_test.go", 52);
-        registry.Add("TestSearchEfficiency", sort_test_package.TestSearchEfficiency, "search_test.go", 147);
-        registry.Add("TestSearchExhaustive", sort_test_package.TestSearchExhaustive, "search_test.go", 226);
-        registry.Add("TestSearchWrappers", sort_test_package.TestSearchWrappers, "search_test.go", 187);
-        registry.Add("TestSearchWrappersDontAlloc", sort_test_package.TestSearchWrappersDontAlloc, "search_test.go", 204);
+        registry.Add("TestSearch", sort_test_package.TestSearch, "search_test.go", 53);
+        registry.Add("TestSearchEfficiency", sort_test_package.TestSearchEfficiency, "search_test.go", 145);
+        registry.Add("TestSearchExhaustive", sort_test_package.TestSearchExhaustive, "search_test.go", 224);
+        registry.Add("TestSearchWrappers", sort_test_package.TestSearchWrappers, "search_test.go", 185);
+        registry.Add("TestSearchWrappersDontAlloc", sort_test_package.TestSearchWrappersDontAlloc, "search_test.go", 202);
         registry.Add("TestSlice", sort_test_package.TestSlice, "sort_test.go", 95);
         registry.Add("TestSortBM", sort_test_package.TestSortBM, "sort_test.go", 522);
         registry.Add("TestSortFloat64Slice", sort_test_package.TestSortFloat64Slice, "sort_test.go", 34);
@@ -54,7 +54,7 @@ internal static class Go2CsTestHost
         registry.Add("TestStableBM", sort_test_package.TestStableBM, "sort_test.go", 530);
         registry.Add("TestStableInts", sort_test_package.TestStableInts, "sort_test.go", 601);
         registry.Add("TestStrings", sort_test_package.TestStrings, "sort_test.go", 86);
-        registry.Add("TestStructSorts", sort_test_package.TestStructSorts, "sort_slices_benchmark_test.go", 167);
+        registry.Add("TestStructSorts", sort_test_package.TestStructSorts, "sort_slices_benchmark_test.go", 159);
         return TestHost.Run(registry, args);
     }
 }

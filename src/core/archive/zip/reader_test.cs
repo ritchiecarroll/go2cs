@@ -6,6 +6,7 @@ namespace go.archive;
 using bytes = bytes_package;
 using binary = encoding.binary_package;
 using hex = encoding.hex_package;
+using errors = errors_package;
 using fmt = fmt_package;
 using obscuretestdata = @internal.obscuretestdata_package;
 using io = io_package;
@@ -1225,7 +1226,7 @@ internal partial struct TestFS_type /*dyn*/ {
 }
 
 public static void TestFS(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFS_type[]{
+    foreach (var (_, vᴛ1) in new TestFS_type[]{
         new(
             "testdata/unix.zip"u8,
             new @string[]{"hello"u8, "dir/bar"u8, "readonly"u8}.slice()
@@ -1235,10 +1236,11 @@ public static void TestFS(ж<testing.T> Ꮡt) {
             new @string[]{"a/b/c"u8}.slice()
         )
     }.slice()) {
-        ref var testΔ1 = ref heap<TestFS_type>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.@file, (ж<testing.T> tΔ1) => {
+        ref var test = ref heap(new TestFS_type(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.@file, (ж<testing.T> tΔ1) => {
             GoFrame ᒐ = default;
             try {
                 tΔ1.Parallel();
@@ -1271,7 +1273,7 @@ internal partial struct TestFSWalk_type /*dyn*/ {
 }
 
 public static void TestFSWalk(ж<testing.T> Ꮡt) {
-    foreach (var (_, test) in new TestFSWalk_type[]{
+    foreach (var (_, vᴛ1) in new TestFSWalk_type[]{
         new(
             @file: "testdata/unix.zip"u8,
             want: new @string[]{"."u8, "dir"u8, "dir/bar"u8, "dir/empty"u8, "hello"u8, "readonly"u8}.slice()
@@ -1285,10 +1287,11 @@ public static void TestFSWalk(ж<testing.T> Ꮡt) {
             wantErr: true
         )
     }.slice()) {
-        ref var testΔ1 = ref heap<TestFSWalk_type>(out var ᏑtestΔ1);
-        testΔ1 = test;
-        var testʗ1 = testΔ1;
-        Ꮡt.Run(testΔ1.@file, (ж<testing.T> tΔ1) => {
+        ref var test = ref heap(new TestFSWalk_type(), out var Ꮡtest);
+        test = vᴛ1;
+
+        var testʗ1 = test;
+        Ꮡt.Run(test.@file, (ж<testing.T> tΔ1) => {
             tΔ1.Parallel();
             var (z, err) = OpenReader(testʗ1.@file);
             if (err != default!) {
@@ -1321,6 +1324,51 @@ public static void TestFSWalk(ж<testing.T> Ꮡt) {
                 tΔ1.Errorf("got %v want %v"u8, Ꮡfiles.ValueSlot, testʗ1.want);
             }
         });
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string repeatedCallToPathˢ = "repeated call to path"u8;
+
+public static void TestFSWalkBadFile(ж<testing.T> Ꮡt) {
+    Ꮡt.Parallel();
+
+    ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
+    var zw = NewWriter(new zip_test_package.bytes_BufferжWriter(Ꮡbuf));
+    var hdr = Ꮡ(new FileHeader(Name: "."u8));
+    hdr.SetMode((fs.FileMode)(fs.ModeDir | 493));
+    var (w, err) = zw.CreateHeader(hdr);
+    if (err != default!) {
+        Ꮡt.Fatalf("create zip header: %v"u8, err);
+    }
+    (_, err) = w.Write(slice<byte>("some data"u8));
+    if (err != default!) {
+        Ꮡt.Fatalf("write zip contents: %v"u8, err);
+    }
+    err = zw.Close();
+    if (err != default!) {
+        Ꮡt.Fatalf("close zip writer: %v"u8, err);
+    }
+
+    (var zr, err) = NewReader(new zip_test_package.bytes_ReaderжReaderAt(bytes.NewReader(buf.Bytes())), (int64)buf.Len());
+    if (err != default!) {
+        Ꮡt.Fatalf("create zip reader: %v"u8, err);
+    }
+    nint count = default!;
+    error errRepeat = errors.New(repeatedCallToPathˢ);
+    var errRepeatʗ1 = errRepeat;
+    err = fs.WalkDir(new zip_test_package.zip_ReaderжFS(zr), "."u8, (@string p, fs.DirEntry d, error errΔ1) => {
+        count++;
+        if (count > 2) { // once for directory read, once for the error
+            return errRepeatʗ1;
+        }
+        return errΔ1;
+    });
+    if (err == default!){
+        Ꮡt.Fatalf("expected error from invalid file name"u8);
+    } else 
+    if (errors.Is(err, errRepeat)) {
+        Ꮡt.Fatal(err);
     }
 }
 

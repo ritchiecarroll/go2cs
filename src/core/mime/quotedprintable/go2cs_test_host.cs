@@ -15,7 +15,7 @@ internal static class Go2CsTestHost
             "writer.go",
             "writer_test.go",
         });
-        registry.Add("TestExhaustive", quotedprintable_internal_test_package.TestExhaustive, "reader_test.go", 108);
+        registry.Add("TestExhaustive", quotedprintable_internal_test_package.TestExhaustive, "reader_test.go", 112);
         registry.Add("TestReader", quotedprintable_internal_test_package.TestReader, "reader_test.go", 21);
         registry.Add("TestRoundTrip", quotedprintable_internal_test_package.TestRoundTrip, "writer_test.go", 120);
         registry.Add("TestWriter", quotedprintable_internal_test_package.TestWriter, "writer_test.go", 14);

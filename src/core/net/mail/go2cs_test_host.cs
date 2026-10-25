@@ -13,16 +13,16 @@ internal static class Go2CsTestHost
             "message.go",
             "message_test.go",
         });
-        registry.Add("TestAddressFormattingAndParsing", mail_internal_test_package.TestAddressFormattingAndParsing, "message_test.go", 1216);
-        registry.Add("TestAddressParser", mail_internal_test_package.TestAddressParser, "message_test.go", 852);
-        registry.Add("TestAddressParsing", mail_internal_test_package.TestAddressParsing, "message_test.go", 419);
-        registry.Add("TestAddressParsingAndFormatting", mail_internal_test_package.TestAddressParsingAndFormatting, "message_test.go", 1130);
-        registry.Add("TestAddressParsingError", mail_internal_test_package.TestAddressParsingError, "message_test.go", 368);
-        registry.Add("TestAddressString", mail_internal_test_package.TestAddressString, "message_test.go", 1035);
-        registry.Add("TestDateParsing", mail_internal_test_package.TestDateParsing, "message_test.go", 126);
-        registry.Add("TestDateParsingCFWS", mail_internal_test_package.TestDateParsingCFWS, "message_test.go", 180);
-        registry.Add("TestEmptyAddress", mail_internal_test_package.TestEmptyAddress, "message_test.go", 1245);
-        registry.Add("TestParsing", mail_internal_test_package.TestParsing, "message_test.go", 86);
+        registry.Add("TestAddressFormattingAndParsing", mail_internal_test_package.TestAddressFormattingAndParsing, "message_test.go", 1217);
+        registry.Add("TestAddressParser", mail_internal_test_package.TestAddressParser, "message_test.go", 853);
+        registry.Add("TestAddressParsing", mail_internal_test_package.TestAddressParsing, "message_test.go", 420);
+        registry.Add("TestAddressParsingAndFormatting", mail_internal_test_package.TestAddressParsingAndFormatting, "message_test.go", 1131);
+        registry.Add("TestAddressParsingError", mail_internal_test_package.TestAddressParsingError, "message_test.go", 369);
+        registry.Add("TestAddressString", mail_internal_test_package.TestAddressString, "message_test.go", 1036);
+        registry.Add("TestDateParsing", mail_internal_test_package.TestDateParsing, "message_test.go", 127);
+        registry.Add("TestDateParsingCFWS", mail_internal_test_package.TestDateParsingCFWS, "message_test.go", 181);
+        registry.Add("TestEmptyAddress", mail_internal_test_package.TestEmptyAddress, "message_test.go", 1246);
+        registry.Add("TestParsing", mail_internal_test_package.TestParsing, "message_test.go", 87);
         return TestHost.Run(registry, args);
     }
 }

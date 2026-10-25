@@ -7,6 +7,7 @@ using bytes = bytes_package;
 using fmt = fmt_package;
 using hash = hash_package;
 using asan = @internal.asan_package;
+using testhash = @internal.testhash_package;
 using math = math_package;
 using reflect = reflect_package;
 using strings = strings_package;
@@ -46,7 +47,7 @@ public static void TestSeededHash(ж<testing.T> Ꮡt) {
 public static void TestHashGrouping(ж<testing.T> Ꮡt) {
     var b = bytes.Repeat(slice<byte>("foo"u8), 100);
     var hh = new slice<ж<global::go.hash.maphash_package.Hash>>(7);
-    foreach (var (i, _) in hh) {
+    foreach (var i in range(hh)) {
         hh[i] = @new<global::go.hash.maphash_package.Hash>();
     }
     foreach (var (_, h) in hh[1..]) {
@@ -300,10 +301,10 @@ public static void TestComparable(ж<testing.T> Ꮡt) {
     testComparableNoEqual(Ꮡt, c1, c2);
 }
 
-internal static void testComparableNoEqual<T>(ж<testing.T> Ꮡt, T v1, T v2) {
+internal static partial void testComparableNoEqual<T>(ж<testing.T> Ꮡt, T v1, T v2) {
     var seed = MakeSeed();
     if (Comparable(seed, v1) == Comparable(seed, v2)) {
-        Ꮡt.Fatalf("Comparable(seed, %v) == Comparable(seed, %v)"u8, v1, v2);
+        Ꮡt.Fatalf("Comparable(seed, %v) == Comparable(seed, %v)"u8, (v1).OrTypedNilOf(), (v2).OrTypedNilOf());
     }
 }
 
@@ -331,7 +332,7 @@ internal static void testComparable<T, Tᴺ>(ж<testing.T> Ꮡt, T v, params Spa
         ж<T> pa = Ꮡa;
         var seed = MakeSeed();
         if (Comparable(seed, a) != Comparable(seed, b)) {
-            tΔ1.Fatalf("Comparable(seed, %v) != Comparable(seed, %v)"u8, a, b);
+            tΔ1.Fatalf("Comparable(seed, %v) != Comparable(seed, %v)"u8, (a).OrTypedNilOf(), (b).OrTypedNilOf());
         }
         var old = Comparable(seed, pa);
         stackGrow(8192);
@@ -400,7 +401,7 @@ internal static void testWriteComparableNoEqual<T>(ж<testing.T> Ꮡt, T v1, T v
     WriteComparable(Ꮡh1, v1);
     WriteComparable(Ꮡh2, v2);
     if (h1.Sum64() == h2.Sum64()) {
-        Ꮡt.Fatalf("WriteComparable(seed, %v) == WriteComparable(seed, %v)"u8, v1, v2);
+        Ꮡt.Fatalf("WriteComparable(seed, %v) == WriteComparable(seed, %v)"u8, (v1).OrTypedNilOf(), (v2).OrTypedNilOf());
     }
 }
 
@@ -429,7 +430,7 @@ internal static void testWriteComparable<T, Tᴺ>(ж<testing.T> Ꮡt, T v, param
         WriteComparable(Ꮡh1, a);
         WriteComparable(Ꮡh2, b);
         if (h1.Sum64() != h2.Sum64()) {
-            tΔ1.Fatalf("WriteComparable(h, %v) != WriteComparable(h, %v)"u8, a, b);
+            tΔ1.Fatalf("WriteComparable(h, %v) != WriteComparable(h, %v)"u8, (a).OrTypedNilOf(), (b).OrTypedNilOf());
         }
         WriteComparable(Ꮡh1, pa);
         var old = h1.Sum64();
@@ -480,8 +481,8 @@ public static void TestWriteComparableNoncommute(ж<testing.T> Ꮡt) {
     h2.SetSeed(seed);
 
     h1.WriteString(abcˢ);
-    WriteComparable(Ꮡh1, 123);
-    WriteComparable(Ꮡh2, 123);
+    WriteComparable<nint>(Ꮡh1, 123);
+    WriteComparable<nint>(Ꮡh2, 123);
     h2.WriteString(abcˢ);
 
     if (h1.Sum64() == h2.Sum64()) {
@@ -530,6 +531,10 @@ public static void TestComparableAllocations(ж<testing.T> Ꮡt) {
 internal static hash.Hash _ᴛ1ʗ = new maphash_test_package.maphash_HashжHash(Ꮡ(new Hash(nil)));
 
 internal static hash.Hash64 _ᴛ2ʗ = new maphash_test_package.maphash_HashжHash64(Ꮡ(new Hash(nil)));
+
+public static void TestHashInterface(ж<testing.T> Ꮡt) {
+    testhash.TestHash(Ꮡt, () => new maphash_test_package.maphash_HashжHash(@new<global::go.hash.maphash_package.Hash>()));
+}
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly @string writeˢ = "Write"u8;

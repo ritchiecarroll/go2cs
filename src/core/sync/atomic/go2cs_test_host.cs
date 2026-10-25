@@ -107,12 +107,12 @@ internal static class Go2CsTestHost
         registry.Add("TestSwapUintptrMethod", atomic_test_package.TestSwapUintptrMethod, "atomic_test.go", 230);
         registry.Add("TestUnaligned64", atomic_test_package.TestUnaligned64, "atomic_test.go", 2879);
         registry.Add("TestValue", atomic_test_package.TestValue, "value_test.go", 17);
-        registry.Add("TestValueCompareAndSwapConcurrent", atomic_test_package.TestValueCompareAndSwapConcurrent, "value_test.go", 249);
+        registry.Add("TestValueCompareAndSwapConcurrent", atomic_test_package.TestValueCompareAndSwapConcurrent, "value_test.go", 248);
         registry.Add("TestValueConcurrent", atomic_test_package.TestValueConcurrent, "value_test.go", 82);
         registry.Add("TestValueLarge", atomic_test_package.TestValueLarge, "value_test.go", 34);
         registry.Add("TestValuePanic", atomic_test_package.TestValuePanic, "value_test.go", 48);
         registry.Add("TestValueSwapConcurrent", atomic_test_package.TestValueSwapConcurrent, "value_test.go", 178);
-        registry.Add("TestValue_CompareAndSwap", atomic_test_package.TestValue_CompareAndSwap, "value_test.go", 226);
+        registry.Add("TestValue_CompareAndSwap", atomic_test_package.TestValue_CompareAndSwap, "value_test.go", 225);
         registry.Add("TestValue_Swap", atomic_test_package.TestValue_Swap, "value_test.go", 152);
         return TestHost.Run(registry, args);
     }

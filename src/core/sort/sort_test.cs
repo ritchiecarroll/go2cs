@@ -151,7 +151,7 @@ public static void TestReverseSortIntSlice(ж<testing.T> Ꮡt) {
 public static void TestBreakPatterns(ж<testing.T> Ꮡt) {
     // Special slice used to trigger breakPatterns.
     var data = new slice<nint>(30);
-    foreach (var (i, _) in data) {
+    foreach (var i in range(data)) {
         data[i] = 10;
     }
     data[(len(data) / 4) * 1] = 0;
@@ -232,7 +232,7 @@ public static void BenchmarkSortString1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<@string>((1 << 10));
-    foreach (var (i, _) in unsorted) {
+    foreach (var i in range(unsorted)) {
         unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
@@ -250,7 +250,7 @@ public static void BenchmarkSortString1K_Slice(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<@string>((1 << 10));
-    foreach (var (i, _) in unsorted) {
+    foreach (var i in range(unsorted)) {
         unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
@@ -269,7 +269,7 @@ public static void BenchmarkStableString1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<@string>((1 << 10));
-    foreach (var (i, _) in unsorted) {
+    foreach (var i in range(unsorted)) {
         unsorted[i] = strconv.Itoa(i ^ 0x2cc);
     }
     var data = new slice<@string>(len(unsorted));
@@ -347,7 +347,7 @@ public static void BenchmarkStableInt1K(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<nint>((1 << 10));
-    foreach (var (i, _) in unsorted) {
+    foreach (var i in range(unsorted)) {
         unsorted[i] = i ^ 0x2cc;
     }
     var data = new slice<nint>(len(unsorted));
@@ -364,7 +364,7 @@ public static void BenchmarkStableInt1K_Slice(ж<testing.B> Ꮡb) {
 
     b.StopTimer();
     var unsorted = new slice<nint>((1 << 10));
-    foreach (var (i, _) in unsorted) {
+    foreach (var i in range(unsorted)) {
         unsorted[i] = i ^ 0x2cc;
     }
     var data = new slice<nint>(len(unsorted));
@@ -692,7 +692,7 @@ internal static void Swap(this intPairs d, nint i, nint j) {
 
 // Record initial order in B.
 internal static void initB(this intPairs d) {
-    foreach (var (i, _) in d) {
+    foreach (var i in range(d)) {
         d[i].b = i;
     }
 }

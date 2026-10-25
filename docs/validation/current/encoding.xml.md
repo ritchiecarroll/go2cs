@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `encoding/xml` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**387 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**393 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/encoding/xml`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/encoding/xml).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -32,6 +32,10 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestDecodeEOF/Malformed/earlyEOF=true` | pass | pass |
 | `TestDecodeEOF/OK/earlyEOF=false` | pass | pass |
 | `TestDecodeEOF/OK/earlyEOF=true` | pass | pass |
+| `TestDecodeElementDepthBypass` | pass | pass |
+| `TestDecodeElementRecursion` | pass | pass |
+| `TestDecodeElementRecursion/above_limit` | pass | pass |
+| `TestDecodeElementRecursion/below_limit` | pass | pass |
 | `TestDecodeEncode` | pass | pass |
 | `TestDecodeNilToken` | pass | pass |
 | `TestDecodeNilToken/Strict=false` | pass | pass |
@@ -236,6 +240,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestRawToken` | pass | pass |
 | `TestRawTokenAltEncoding` | pass | pass |
 | `TestRawTokenAltEncodingNoConverter` | pass | pass |
+| `TestRecursiveUnmarshalInterfaceDepth` | pass | pass |
 | `TestRoundTrip` | pass | pass |
 | `TestRoundTrip/comments_in_directives` | pass | pass |
 | `TestRoundTrip/trailing_colon` | pass | pass |
@@ -400,6 +405,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestUnmarshalWhitespaceAttrs` | pass | pass |
 | `TestUnmarshalWhitespaceValues` | pass | pass |
 | `TestUnmarshalWithoutNameType` | pass | pass |
+| `TestUnmarshalXMLRawToken` | pass | pass |
 | `TestUnmarshaler` | pass | pass |
 | `TestUnquotedAttrs` | pass | pass |
 | `TestValuelessAttrs` | pass | pass |

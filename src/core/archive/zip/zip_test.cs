@@ -17,6 +17,8 @@ using strings = strings_package;
 using testing = testing_package;
 using time = time_package;
 using @internal;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using static go.archive.zip_package;
@@ -662,7 +664,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
     }
     f._<ж<global::go.archive.zip_package.fileWriter>>().Value.crc32 = new fakeHash32(nil);
     var chunk = new slice<byte>(chunkSize);
-    foreach (var (i, _) in chunk) {
+    foreach (var i in range(chunk)) {
         chunk[i] = (rune)'.';
     }
     for (nint i = 0; i < chunks; i++) {
@@ -747,7 +749,7 @@ internal static ж<rleBuffer> testZip64(testing.TB t, int64 size) {
 internal static readonly object notAZip64ˢ = (@string)"not a zip64"u8;
 
 // Issue 9857
-internal static void testZip64DirectoryRecordLength(ж<rleBuffer> Ꮡbuf, ж<testing.T> Ꮡt) {
+internal static partial void testZip64DirectoryRecordLength(ж<rleBuffer> Ꮡbuf, ж<testing.T> Ꮡt) {
     if (!suffixIsZip64(Ꮡt, new zip_internal_test_package.rleBufferжsizedReaderAt(Ꮡbuf))) {
         Ꮡt.Fatal(notAZip64ˢ);
     }

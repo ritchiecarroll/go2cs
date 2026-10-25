@@ -520,8 +520,10 @@ internal static (nint, error) Write(this panicWriter _Δp0, slice<byte> _Δp1) {
 internal static void wantPanicString(ж<testing.T> Ꮡt, @string want) {
     GoFrame ᒐ = default;
     try {
+        var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
+
         {
-            var e = recover(); if (e != default!) {
+            var e = recover(calledByDefer); if (e != default!) {
                 var (got, ok) = e._<@string>(ᐧ);
                 switch (ᐧ) {
                 case {} when !ok: {
@@ -545,7 +547,7 @@ private static readonly @string tabwriterPanicDuringˢ = "tabwriter: panic durin
 public static void TestPanicDuringFlush(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanicString, Ꮡt, tabwriterPanicDuringˢ, ref ᒐ);
+        defer(wantPanicString, Ꮡt, tabwriterPanicDuringˢ, ref ᒐ, recovers: true);
         panicWriter p = default!;
         var w = @new<tabwriter.Writer>();
         w.Init(p, 0, 0, 5, (rune)' ', 0);
@@ -563,7 +565,7 @@ private static readonly @string tabwriterPanicDuringˢ2 = "tabwriter: panic duri
 public static void TestPanicDuringWrite(ж<testing.T> Ꮡt) {
     GoFrame ᒐ = default;
     try {
-        defer(wantPanicString, Ꮡt, tabwriterPanicDuringˢ2, ref ᒐ);
+        defer(wantPanicString, Ꮡt, tabwriterPanicDuringˢ2, ref ᒐ, recovers: true);
         panicWriter p = default!;
         var w = @new<tabwriter.Writer>();
         w.Init(p, 0, 0, 5, (rune)' ', 0);

@@ -12,14 +12,13 @@ internal static class Go2CsTestHost
             "elliptic.go",
             "elliptic_test.go",
             "nistec.go",
-            "nistec_p256.go",
             "p224_test.go",
             "p256_test.go",
             "params.go",
         });
         registry.Add("TestInfinity", elliptic_internal_test_package.TestInfinity, "elliptic_test.go", 80);
         registry.Add("TestInvalidCoordinates", elliptic_internal_test_package.TestInvalidCoordinates, "elliptic_test.go", 223);
-        registry.Add("TestIssue52075", elliptic_internal_test_package.TestIssue52075, "p256_test.go", 140);
+        registry.Add("TestIssue52075", elliptic_internal_test_package.TestIssue52075, "p256_test.go", 77);
         registry.Add("TestLargeIsOnCurve", elliptic_internal_test_package.TestLargeIsOnCurve, "elliptic_test.go", 335);
         registry.Add("TestMarshal", elliptic_internal_test_package.TestMarshal, "elliptic_test.go", 155);
         registry.Add("TestMarshalCompressed", elliptic_internal_test_package.TestMarshalCompressed, "elliptic_test.go", 276);
@@ -29,7 +28,6 @@ internal static class Go2CsTestHost
         registry.Add("TestP224GenericBaseMult", elliptic_internal_test_package.TestP224GenericBaseMult, "p224_test.go", 299);
         registry.Add("TestP224Overflow", elliptic_internal_test_package.TestP224Overflow, "p224_test.go", 317);
         registry.Add("TestP256BaseMult", elliptic_internal_test_package.TestP256BaseMult, "p256_test.go", 35);
-        registry.Add("TestP256CombinedMult", elliptic_internal_test_package.TestP256CombinedMult, "p256_test.go", 87);
         registry.Add("TestP256Mult", elliptic_internal_test_package.TestP256Mult, "p256_test.go", 61);
         registry.Add("TestUnmarshalToLargeCoordinates", elliptic_internal_test_package.TestUnmarshalToLargeCoordinates, "elliptic_test.go", 173);
         return TestHost.Run(registry, args);

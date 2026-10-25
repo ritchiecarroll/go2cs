@@ -158,7 +158,7 @@ public static void TestDecompress(ж<testing.T> Ꮡt) {
 
 internal static global::go.crypto.@internal.fips140.mlkem_package.ringElement randomRingElement() {
     global::go.crypto.@internal.fips140.mlkem_package.ringElement r = default!;
-    foreach (var (i, _) in r) {
+    foreach (var i in range(r)) {
         r[i] = (global::go.crypto.@internal.fips140.mlkem_package.fieldElement)(uint16)mathrand.IntN(q);
     }
     return r.Clone();

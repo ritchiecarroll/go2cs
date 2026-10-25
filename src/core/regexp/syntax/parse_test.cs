@@ -109,10 +109,16 @@ internal static void initᴛparseTests() { parseTests = new parseTest[]{
     new(@"[\P{^Braille}]"u8, @"cc{0x2800-0x28ff}"u8),
     new(@"[\pZ]"u8, @"cc{0x20 0xa0 0x1680 0x2000-0x200a 0x2028-0x2029 0x202f 0x205f 0x3000}"u8),
     new(@"\p{Lu}"u8, mkCharClass(unicode.IsUpper)),
+    new(@"\p{Uppercase_Letter}"u8, mkCharClass(unicode.IsUpper)),
+    new(@"\p{upper case-let ter}"u8, mkCharClass(unicode.IsUpper)),
+    new(@"\p{__upper case-let ter}"u8, mkCharClass(unicode.IsUpper)),
     new(@"[\p{Lu}]"u8, mkCharClass(unicode.IsUpper)),
     new(@"(?i)[\p{Lu}]"u8, mkCharClass(isUpperFold)),
     new(@"\p{Any}"u8, @"dot{}"u8),
     new(@"\p{^Any}"u8, @"cc{}"u8),
+    new(@"(?i)\p{ascii}"u8, @"cc{0x0-0x7f 0x17f 0x212a}"u8),
+    new(@"\p{Assigned}"u8, mkCharClass((rune r) => !unicode.In(r, unicode.Cn))),
+    new(@"\p{^Assigned}"u8, mkCharClass((rune r) => unicode.In(r, unicode.Cn))),
 
     // Hex, octal.
     new(@"[\012-\234]\141"u8, @"cat{cc{0xa-0x9c}lit{a}}"u8),

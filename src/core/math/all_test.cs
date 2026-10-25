@@ -1748,6 +1748,7 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{Inf(-1), Pi}.array(),
     new float64[]{Inf(-1), 0.5D}.array(),
     new float64[]{Inf(-1), NaN()}.array(),
+
     new float64[]{-Pi, Inf(-1)}.array(),
     new float64[]{-Pi, -Pi}.array(),
     new float64[]{-Pi, Copysign(0D, -1D)}.array(),
@@ -1756,6 +1757,7 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{-Pi, Pi}.array(),
     new float64[]{-Pi, Inf(1)}.array(),
     new float64[]{-Pi, NaN()}.array(),
+
     new float64[]{-1D, Inf(-1)}.array(),
     new float64[]{-1D, Inf(1)}.array(),
     new float64[]{-1D, NaN()}.array(),
@@ -1769,6 +1771,7 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{Copysign(0D, -1D), Pi}.array(),
     new float64[]{Copysign(0D, -1D), 0.5D}.array(),
     new float64[]{Copysign(0D, -1D), Inf(1)}.array(),
+
     new float64[]{0D, Inf(-1)}.array(),
     new float64[]{0D, -Pi}.array(),
     new float64[]{0D, -3D}.array(),
@@ -1778,11 +1781,13 @@ internal static slice<array<float64>> vfpowSC = GoReflect.WithElemDims(new array
     new float64[]{0D, Pi}.array(),
     new float64[]{0D, Inf(1)}.array(),
     new float64[]{0D, NaN()}.array(),
+
     new float64[]{0.5D, Inf(-1)}.array(),
     new float64[]{0.5D, Inf(1)}.array(),
     new float64[]{1D, Inf(-1)}.array(),
     new float64[]{1D, Inf(1)}.array(),
     new float64[]{1D, NaN()}.array(),
+
     new float64[]{Pi, Inf(-1)}.array(),
     new float64[]{Pi, Copysign(0D, -1D)}.array(),
     new float64[]{Pi, 0D}.array(),
@@ -2222,7 +2227,12 @@ internal static slice<fmaCᴛ1> fmaC = new fmaCᴛ1[]{
 
     // Issue #61130
     new(-1D, 1D, 1D, 0D),
-    new(1D, 1D, -1D, 0D)
+    new(1D, 1D, -1D, 0D),
+
+    // Issue #73757
+    new(2.2250738585072014e-308D, -2.2250738585072014e-308D, 0D, Copysign(0D, -1D)),
+    new(Copysign(0D, -1D), 1D, 0D, 0D),
+    new(1D, Copysign(0D, -1D), 0D, 0D)
 }.slice();
 
 internal static slice<float32> sqrt32 = new float32[]{
@@ -3648,13 +3658,15 @@ public static void TestLargeTan(ж<testing.T> Ꮡt) {
 // Check that trigReduce matches the standard reduction results for input values
 // below reduceThreshold.
 public static void TestTrigReduce(ж<testing.T> Ꮡt) {
+    var inputsᴷ = new stackAppend<float64>();
+
     var inputs = new slice<float64>(len(vf));
     // all of the standard inputs
     copy(inputs, vf);
     // all of the large inputs
     var large = /* 100000 * Pi */ 314159.26535897935D;
     foreach (var (_, v) in vf) {
-        inputs = append(inputs, v + large);
+        inputs = append(inputsᴷ, inputs, v + large);
     }
     // Also test some special inputs, Pi and right below the reduceThreshold
     inputs = append(inputs, (float64)(Pi), Nextafter(math_internal_test_package.ReduceThreshold, 0D));

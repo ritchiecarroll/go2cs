@@ -14,17 +14,18 @@ internal static class Go2CsTestHost
             "scanner.go",
             "scanner_test.go",
         });
-        registry.Add("TestInit", scanner_internal_test_package.TestInit, "scanner_test.go", 635);
-        registry.Add("TestInvalidLineDirectives", scanner_internal_test_package.TestInvalidLineDirectives, "scanner_test.go", 606);
-        registry.Add("TestIssue10213", scanner_internal_test_package.TestIssue10213, "scanner_test.go", 826);
-        registry.Add("TestIssue28112", scanner_internal_test_package.TestIssue28112, "scanner_test.go", 860);
-        registry.Add("TestLineDirectives", scanner_internal_test_package.TestLineDirectives, "scanner_test.go", 559);
-        registry.Add("TestNumbers", scanner_internal_test_package.TestNumbers, "scanner_test.go", 928);
-        registry.Add("TestScan", scanner_internal_test_package.TestScan, "scanner_test.go", 226);
-        registry.Add("TestScanErrors", scanner_internal_test_package.TestScanErrors, "scanner_test.go", 819);
-        registry.Add("TestSemicolons", scanner_internal_test_package.TestSemicolons, "scanner_test.go", 491);
-        registry.Add("TestStdErrorHandler", scanner_internal_test_package.TestStdErrorHandler, "scanner_test.go", 669);
-        registry.Add("TestStripCR", scanner_internal_test_package.TestStripCR, "scanner_test.go", 317);
+        registry.Add("TestInit", scanner_internal_test_package.TestInit, "scanner_test.go", 637);
+        registry.Add("TestInvalidLineDirectives", scanner_internal_test_package.TestInvalidLineDirectives, "scanner_test.go", 608);
+        registry.Add("TestIssue10213", scanner_internal_test_package.TestIssue10213, "scanner_test.go", 855);
+        registry.Add("TestIssue28112", scanner_internal_test_package.TestIssue28112, "scanner_test.go", 889);
+        registry.Add("TestLineDirectives", scanner_internal_test_package.TestLineDirectives, "scanner_test.go", 561);
+        registry.Add("TestNumbers", scanner_internal_test_package.TestNumbers, "scanner_test.go", 957);
+        registry.Add("TestScan", scanner_internal_test_package.TestScan, "scanner_test.go", 228);
+        registry.Add("TestScanErrors", scanner_internal_test_package.TestScanErrors, "scanner_test.go", 821);
+        registry.Add("TestSemicolons", scanner_internal_test_package.TestSemicolons, "scanner_test.go", 493);
+        registry.Add("TestStdErrorHandler", scanner_internal_test_package.TestStdErrorHandler, "scanner_test.go", 671);
+        registry.Add("TestStripCR", scanner_internal_test_package.TestStripCR, "scanner_test.go", 319);
+        registry.Add("TestUTF16", scanner_internal_test_package.TestUTF16, "scanner_test.go", 827);
         return TestHost.Run(registry, args);
     }
 }

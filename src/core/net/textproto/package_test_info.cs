@@ -29,10 +29,17 @@ using static global::go.net.textproto_internal_test_package;
 [assembly: GoImplement<net_package.Conn, io_package.ReadWriteCloser>]
 [assembly: GoImplement<strings_package.Builder, io_package.Writer>(Pointer = true)]
 [assembly: GoImplement<strings_package.Reader, io_package.Reader>(Pointer = true)]
+[assembly: GoImplement<testReader, io_package.Reader>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
+
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -43,7 +50,7 @@ using static global::go.net.textproto_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: go.GoPositionMap("net/textproto/header_test.go", "header_test.cs", "AA4aABYugoKAggAIDJKmgoKC")]
-[assembly: go.GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABUogtaCgoKClIKClIKCuIKCgoKClILogoKCgpSCgpSCgpSCguiCgoKClIKClIKClICCpIKC6IKCgoKCpoKCguiCgoKCgqaCgoLogoKCuILogoKCgoIACAyiABYygoKC+oKCgoKC6IKCgpSCgoKClIKCvLSKgu6CuKIADRyCgoCC2qKCgoKClLS0tMa0pIKCpoKCgoKUtLS0pIKCzOiegoKUyoK6koKCgoKSgoKClIK4gIIACxYAFjqSgoKCgoKUgpSCzJKcnIKClIKUgpSC6IKCgoKmgoKSgIK2gujMgsqCpJSmlIK4AA4aABIYooLukoKClIKCgIIADA6igoKCgoKCgoKUgII=", "438-442:1;461-464:1;509-520:1")]
+[assembly: go.GoPositionMap("net/textproto/reader_test.go", "reader_test.cs", "ABUogtaCgoKClIKClIKCuIKCgoKClILogoKCgpSCgpSCgpSCguiCgoKClIKClIKClICCpIKC6IKCgoKCpoKCguiCgoKCgqaCgoLogoKCuILogoKCgoIACAyiABYygoKC+oKCgoKC6IKCgpSCgoKClIKCvLSKgu6CuKIADRyCgoCC2qKCgoKClLS0tMa0pIKCpoKCgoKUtLS0pIKCzOiegoKUyoK6koKCgoKSgoKClIK4gIIACBCApJTKgpSmgoIAChYAGTqSgoKCgoKUgpSC/JKcnJSCgpSClIKUguiCgoKCpoKCkoCCtoLo3ILKgqSUppSCuAAOGgASGKKC7pKCgpSCgoCCAAwOooKCgoKCgoKClICC", "359-364:1;465-469:1;488-491:1;536-547:1", "", "411=NewReader/1/3/2,MultiReader/1/1/1")]
 [assembly: go.GoPositionMap("net/textproto/writer_test.go", "writer_test.cs", "ABAagoKCgoCC+IKCgoKCgpSCgoCCyIKCgoKCgpSCgoCCyIKCgoKCgoCC")]
 // </GoSourcePositionMaps>
 

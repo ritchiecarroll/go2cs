@@ -19,15 +19,15 @@ internal static class Go2CsTestHost
             "writer_test.go",
         });
         registry.Add("TestCanonicalMIMEHeaderKey", textproto_internal_test_package.TestCanonicalMIMEHeaderKey, "header_test.go", 36);
-        registry.Add("TestCommonHeaders", textproto_internal_test_package.TestCommonHeaders, "reader_test.go", 429);
+        registry.Add("TestCommonHeaders", textproto_internal_test_package.TestCommonHeaders, "reader_test.go", 456);
         registry.Add("TestDotWriter", textproto_internal_test_package.TestDotWriter, "writer_test.go", 22);
         registry.Add("TestDotWriterCloseEmptyWrite", textproto_internal_test_package.TestDotWriterCloseEmptyWrite, "writer_test.go", 37);
         registry.Add("TestDotWriterCloseNoWrite", textproto_internal_test_package.TestDotWriterCloseNoWrite, "writer_test.go", 52);
-        registry.Add("TestIssue46363", textproto_internal_test_package.TestIssue46363, "reader_test.go", 448);
+        registry.Add("TestIssue46363", textproto_internal_test_package.TestIssue46363, "reader_test.go", 475);
         registry.Add("TestLargeReadMIMEHeader", textproto_internal_test_package.TestLargeReadMIMEHeader, "reader_test.go", 191);
         registry.Add("TestMIMEHeaderMultipleValues", textproto_internal_test_package.TestMIMEHeaderMultipleValues, "header_test.go", 45);
         registry.Add("TestPrintfLine", textproto_internal_test_package.TestPrintfLine, "writer_test.go", 13);
-        registry.Add("TestRFC959Lines", textproto_internal_test_package.TestRFC959Lines, "reader_test.go", 383);
+        registry.Add("TestRFC959Lines", textproto_internal_test_package.TestRFC959Lines, "reader_test.go", 408);
         registry.Add("TestReadCodeLine", textproto_internal_test_package.TestReadCodeLine, "reader_test.go", 72);
         registry.Add("TestReadContinuedLine", textproto_internal_test_package.TestReadContinuedLine, "reader_test.go", 52);
         registry.Add("TestReadDotBytes", textproto_internal_test_package.TestReadDotBytes, "reader_test.go", 110);
@@ -40,9 +40,10 @@ internal static class Go2CsTestHost
         registry.Add("TestReadMIMEHeaderMalformed", textproto_internal_test_package.TestReadMIMEHeaderMalformed, "reader_test.go", 230);
         registry.Add("TestReadMIMEHeaderNoKey", textproto_internal_test_package.TestReadMIMEHeaderNoKey, "reader_test.go", 182);
         registry.Add("TestReadMIMEHeaderNonCompliant", textproto_internal_test_package.TestReadMIMEHeaderNonCompliant, "reader_test.go", 210);
+        registry.Add("TestReadMIMEHeaderShortLimitLongLine", textproto_internal_test_package.TestReadMIMEHeaderShortLimitLongLine, "reader_test.go", 353);
         registry.Add("TestReadMIMEHeaderSingle", textproto_internal_test_package.TestReadMIMEHeaderSingle, "reader_test.go", 137);
         registry.Add("TestReadMIMEHeaderTrimContinued", textproto_internal_test_package.TestReadMIMEHeaderTrimContinued, "reader_test.go", 300);
-        registry.Add("TestReadMultiLineError", textproto_internal_test_package.TestReadMultiLineError, "reader_test.go", 401);
+        registry.Add("TestReadMultiLineError", textproto_internal_test_package.TestReadMultiLineError, "reader_test.go", 426);
         registry.Add("TestReaderUpcomingHeaderKeys", textproto_internal_test_package.TestReaderUpcomingHeaderKeys, "reader_test.go", 148);
         return TestHost.Run(registry, args);
     }

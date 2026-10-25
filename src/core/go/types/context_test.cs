@@ -47,7 +47,7 @@ public static void TestContextHashCollisions(ж<testing.T> Ꮡt) {
     {
         // type unaryP = func[P any](_ P)
         var tparam = NewTypeParam(NewTypeName(nopos, nil, "P"u8, default!), new global::go.go.types_package.InterfaceжΔType(ᏑemptyInterface));
-        var @params = NewTuple(NewVar(nopos, nil, "_"u8, new global::go.go.types_package.TypeParamжΔType(tparam)));
+        var @params = NewTuple(NewParam(nopos, nil, "_"u8, new global::go.go.types_package.TypeParamжΔType(tparam)));
         unaryP = new types_test_package.types_ΔSignatureжΔType(NewSignatureType(nil, default!, new ж<global::go.go.types_package.TypeParam>[]{tparam}.slice(), @params, nil, false));
     }
 

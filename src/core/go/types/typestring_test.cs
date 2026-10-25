@@ -66,14 +66,17 @@ struct {
     new("func(x, y int, z string)"u8, "func(x int, y int, z string)"u8),
     dup("func(int)"u8),
     new("func(int, string, byte)"u8, "func(int, string, byte)"u8),
+
     dup("func() int"u8),
     new("func() (string)"u8, "func() string"u8),
     dup("func() (u int)"u8),
     new("func() (u, v int, w string)"u8, "func() (u int, v int, w string)"u8),
+
     dup("func(int) string"u8),
     dup("func(x int) string"u8),
     dup("func(x int) (u string)"u8),
     new("func(x, y int) (u string)"u8, "func(x int, y int) (u string)"u8),
+
     dup("func(...int) string"u8),
     dup("func(x ...int) string"u8),
     dup("func(x ...int) (u string)"u8),

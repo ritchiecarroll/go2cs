@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `archive/tar` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-22 · converter `c6fdbe73c`*
+*Validated 2026-10-25 · converter `b5fc1294d`*
 
-**98 matched · 0 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**98 matched · 0 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/archive/tar`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/archive/tar).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 Both runtimes skip 1 of the matched tests identically.
 
@@ -127,5 +127,6 @@ has not implemented, or a platform behavior it provably cannot reproduce. Each i
 the capability it needs.
 
 - Benchmark (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkParsePAXTime (benchmark): benchmark execution is deferred to Phase 4D
 - Example_minimal (example): example execution is deferred to Phase 4D
 - FuzzReader (fuzz): fuzz execution is deferred to Phase 4D

@@ -142,10 +142,10 @@ public static void TestInstantiateEquality(ж<testing.T> Ꮡt) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ17 = "package p; type T[P any] int"u8;
+internal static readonly @string srcᶜ18 = "package p; type T[P any] int"u8;
 
 public static void TestInstantiateNonEquality(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ17;
+    @string src = srcᶜ18;
     var pkg1 = mustTypecheck(src, nil, nil);
     var pkg2 = mustTypecheck(src, nil, nil);
     // We consider T1 and T2 to be distinct types, so their instances should not
@@ -201,13 +201,12 @@ public static void TestMethodInstantiation(ж<testing.T> Ꮡt) {
         @string src = prefix + test.decl;
         var pkg = mustTypecheck(src, nil, nil);
         var typ = NewPointer(pkg.Scope().Lookup("X"u8).Type());
-        var (obj, _, _) = LookupFieldOrMethod(new types.PointerжΔType(typ), false, pkg, "m"u8);
-        var (m, _) = obj._<ж<types.Func>>(ᐧ);
-        if (m == nil) {
-            Ꮡt.Fatalf(@"LookupFieldOrMethod(%s, ""m"") = %v, want func m"u8, typ.OrTypedNil(), obj);
+        var (sel, ok) = LookupSelection(new types.PointerжΔType(typ), false, pkg, "m"u8);
+        if (!ok) {
+            Ꮡt.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m"u8, typ.OrTypedNil());
         }
         {
-            @string got = ObjectString(new types.FuncжObject(m), RelativeTo(pkg)); if (got != test.want) {
+            @string got = ObjectString(sel.Obj(), RelativeTo(pkg)); if (got != test.want) {
                 Ꮡt.Errorf("instantiated %q, want %q"u8, got, test.want);
             }
         }
@@ -218,7 +217,7 @@ public static void TestMethodInstantiation(ж<testing.T> Ꮡt) {
 internal static readonly @string funcTPMˢ = "func (T[P]).m()"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static readonly @string srcᶜ18 = """
+internal static readonly @string srcᶜ19 = """
 package p
 
 type T[P any] struct{}
@@ -230,19 +229,19 @@ var _ T[int]
 """u8.Raw();
 
 public static void TestImmutableSignatures(ж<testing.T> Ꮡt) {
-    @string src = srcᶜ18;
+    @string src = srcᶜ19;
     var pkg = mustTypecheck(src, nil, nil);
     var typ = pkg.Scope().Lookup("T"u8).Type()._<ж<types.Named>>();
-    var (obj, _, _) = LookupFieldOrMethod(new types.NamedжΔType(typ), false, pkg, "m"u8);
-    if (obj == default!) {
-        Ꮡt.Fatalf(@"LookupFieldOrMethod(%s, ""m"") = %v, want func m"u8, typ.OrTypedNil(), obj);
+    var (sel, ok) = LookupSelection(new types.NamedжΔType(typ), false, pkg, "m"u8);
+    if (!ok) {
+        Ꮡt.Fatalf(@"LookupSelection(%s, ""m"") failed, want func m"u8, typ.OrTypedNil());
     }
 
     // Verify that the original method is not mutated by instantiating T (this
     // bug manifested when subst did not return a new signature).
     @string want = funcTPMˢ;
     {
-        @string got = stripAnnotations(ObjectString(obj, RelativeTo(pkg))); if (got != want) {
+        @string got = stripAnnotations(ObjectString(sel.Obj(), RelativeTo(pkg))); if (got != want) {
             Ꮡt.Errorf("instantiated %q, want %q"u8, got, want);
         }
     }

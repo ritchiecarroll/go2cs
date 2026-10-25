@@ -16,18 +16,19 @@ internal static class Go2CsTestHost
             "maphash_test.go",
             "smhasher_test.go",
         });
-        registry.Add("TestComparable", maphash_internal_test_package.TestComparable, "maphash_test.go", 224);
-        registry.Add("TestComparableAllocations", maphash_internal_test_package.TestComparableAllocations, "maphash_test.go", 429);
-        registry.Add("TestComparableShouldPanic", maphash_internal_test_package.TestComparableShouldPanic, "maphash_test.go", 396);
-        registry.Add("TestHashBytesVsString", maphash_internal_test_package.TestHashBytesVsString, "maphash_test.go", 106);
-        registry.Add("TestHashGrouping", maphash_internal_test_package.TestHashGrouping, "maphash_test.go", 43);
-        registry.Add("TestHashHighBytes", maphash_internal_test_package.TestHashHighBytes, "maphash_test.go", 125);
-        registry.Add("TestRepeat", maphash_internal_test_package.TestRepeat, "maphash_test.go", 139);
-        registry.Add("TestSeedFromFlush", maphash_internal_test_package.TestSeedFromFlush, "maphash_test.go", 189);
-        registry.Add("TestSeedFromReset", maphash_internal_test_package.TestSeedFromReset, "maphash_test.go", 203);
-        registry.Add("TestSeedFromSeed", maphash_internal_test_package.TestSeedFromSeed, "maphash_test.go", 175);
-        registry.Add("TestSeedFromSum64", maphash_internal_test_package.TestSeedFromSum64, "maphash_test.go", 162);
-        registry.Add("TestSeededHash", maphash_internal_test_package.TestSeededHash, "maphash_test.go", 30);
+        registry.Add("TestComparable", maphash_internal_test_package.TestComparable, "maphash_test.go", 225);
+        registry.Add("TestComparableAllocations", maphash_internal_test_package.TestComparableAllocations, "maphash_test.go", 430);
+        registry.Add("TestComparableShouldPanic", maphash_internal_test_package.TestComparableShouldPanic, "maphash_test.go", 397);
+        registry.Add("TestHashBytesVsString", maphash_internal_test_package.TestHashBytesVsString, "maphash_test.go", 107);
+        registry.Add("TestHashGrouping", maphash_internal_test_package.TestHashGrouping, "maphash_test.go", 44);
+        registry.Add("TestHashHighBytes", maphash_internal_test_package.TestHashHighBytes, "maphash_test.go", 126);
+        registry.Add("TestHashInterface", maphash_internal_test_package.TestHashInterface, "maphash_test.go", 464);
+        registry.Add("TestRepeat", maphash_internal_test_package.TestRepeat, "maphash_test.go", 140);
+        registry.Add("TestSeedFromFlush", maphash_internal_test_package.TestSeedFromFlush, "maphash_test.go", 190);
+        registry.Add("TestSeedFromReset", maphash_internal_test_package.TestSeedFromReset, "maphash_test.go", 204);
+        registry.Add("TestSeedFromSeed", maphash_internal_test_package.TestSeedFromSeed, "maphash_test.go", 176);
+        registry.Add("TestSeedFromSum64", maphash_internal_test_package.TestSeedFromSum64, "maphash_test.go", 163);
+        registry.Add("TestSeededHash", maphash_internal_test_package.TestSeededHash, "maphash_test.go", 31);
         registry.Add("TestSmhasherAppendedZeros", maphash_internal_test_package.TestSmhasherAppendedZeros, "smhasher_test.go", 123);
         registry.Add("TestSmhasherAvalanche", maphash_internal_test_package.TestSmhasherAvalanche, "smhasher_test.go", 352);
         registry.Add("TestSmhasherCyclic", maphash_internal_test_package.TestSmhasherCyclic, "smhasher_test.go", 217);
@@ -40,9 +41,9 @@ internal static class Go2CsTestHost
         registry.Add("TestSmhasherTwoNonzero", maphash_internal_test_package.TestSmhasherTwoNonzero, "smhasher_test.go", 171);
         registry.Add("TestSmhasherWindowed", maphash_internal_test_package.TestSmhasherWindowed, "smhasher_test.go", 423);
         registry.Add("TestSmhasherZeros", maphash_internal_test_package.TestSmhasherZeros, "smhasher_test.go", 156);
-        registry.Add("TestUnseededHash", maphash_internal_test_package.TestUnseededHash, "maphash_test.go", 19);
-        registry.Add("TestWriteComparable", maphash_internal_test_package.TestWriteComparable, "maphash_test.go", 316);
-        registry.Add("TestWriteComparableNoncommute", maphash_internal_test_package.TestWriteComparableNoncommute, "maphash_test.go", 413);
+        registry.Add("TestUnseededHash", maphash_internal_test_package.TestUnseededHash, "maphash_test.go", 20);
+        registry.Add("TestWriteComparable", maphash_internal_test_package.TestWriteComparable, "maphash_test.go", 317);
+        registry.Add("TestWriteComparableNoncommute", maphash_internal_test_package.TestWriteComparableNoncommute, "maphash_test.go", 414);
         return TestHost.Run(registry, args);
     }
 }

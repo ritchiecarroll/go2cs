@@ -25,7 +25,7 @@ internal static class Go2CsTestHost
             "utf8",
         });
         registry.Add("TestCalibrate", unicode_test_package.TestCalibrate, "letter_test.go", 454);
-        registry.Add("TestCategories", unicode_test_package.TestCategories, "script_test.go", 95);
+        registry.Add("TestCategories", unicode_test_package.TestCategories, "script_test.go", 99);
         registry.Add("TestDigit", unicode_test_package.TestDigit, "digit_test.go", 106);
         registry.Add("TestDigitOptimization", unicode_test_package.TestDigitOptimization, "digit_test.go", 120);
         registry.Add("TestIsControlLatin1", unicode_test_package.TestIsControlLatin1, "graphic_test.go", 15);
@@ -44,7 +44,7 @@ internal static class Go2CsTestHost
         registry.Add("TestLetterOptimizations", unicode_test_package.TestLetterOptimizations, "letter_test.go", 346);
         registry.Add("TestNegativeRune", unicode_test_package.TestNegativeRune, "letter_test.go", 567);
         registry.Add("TestNumberLatin1", unicode_test_package.TestNumberLatin1, "graphic_test.go", 61);
-        registry.Add("TestProperties", unicode_test_package.TestProperties, "script_test.go", 114);
+        registry.Add("TestProperties", unicode_test_package.TestProperties, "script_test.go", 118);
         registry.Add("TestSimpleFold", unicode_test_package.TestSimpleFold, "letter_test.go", 425);
         registry.Add("TestSpecialCaseNoMapping", unicode_test_package.TestSpecialCaseNoMapping, "letter_test.go", 556);
         registry.Add("TestTo", unicode_test_package.TestTo, "letter_test.go", 286);

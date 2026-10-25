@@ -12,6 +12,7 @@ global using abiꓸChanDir = go.@internal.abi_package.ΔChanDir;
 global using abiꓸFuncType = go.@internal.abi_package.ΔFuncType;
 global using abiꓸInterfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using abiꓸKind = go.@internal.abi_package.ΔKind;
+global using abiꓸMapType = go.@internal.abi_package.ΔMapType;
 global using abiꓸName = go.@internal.abi_package.ΔName;
 global using abiꓸStructType = go.@internal.abi_package.ΔStructType;
 global using reflectꓸChanDir = go.reflect_package.ΔChanDir;
@@ -38,6 +39,12 @@ using static global::go.unique_internal_test_package;
 [assembly: GoImplicitConv<EmptyStruct, testZeroSize>]
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -46,9 +53,10 @@ using static global::go.unique_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
+[assembly: go.GoPositionMap("unique/canonmap_test.go", "canonmap_test.cs", "ABIggqqCqoLKAAkIgoKUgqaCkpSCgoKCgpSCgoKUgoKCgoKmgryCgoKCgoLSlIKCgoKUgoKUgoKCgIIACAykABMopqaChoKC7oKCgpSCyoKCgpSClIKUvMaChqrGgoKCgpY=", "17-19:1;23-25:1;29-35:1;39-45:1;46-144:2;47-69:2.1;70-143:2.2;71-73:2.2.1;83-106:2.2.2;135-137:2.2.3;149-155:1;160-170:1;179-181:1;194-196:1")]
 [assembly: go.GoPositionMap("unique/clone_test.go", "clone_test.cs", "AA8cgoKCgoKCgqaipoKCgqKCgg==", "31-36:1")]
-[assembly: go.GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmooKCpoKUkoKCgoKCypSCAAUQgoKUgg==", "34-43:1")]
-[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "ADJKgoKCgoKCgoKmgoLmgoKClIKUgpSClIKmgrqSlIKm3IKSAAkMgqamlIKCgpSCgoKUgoKU1oKCgpKUppS01taCgoKUgoKCgpSCgpSCgoI=", "55-73:1;91-96:1;127-129:1")]
+[assembly: go.GoPositionMap("unique/handle_bench_test.go", "handle_bench_test.cs", "AAwagqaCpoKmsoKCpoKUkoKCgoKCypSCAAUQgoKUgg==", "34-43:1")]
+[assembly: go.GoPositionMap("unique/handle_test.go", "handle_test.cs", "AD9cgoKCgoKCgoKmgoLmgoKCgpSClIKUgqaCupKUgpSmgpSCppSCgoKUgoKC6IKCgoKUppS01taygoKUgoKCgpSCgpSCgoLKotyCgoKClICCpICCpICC2oIAAhAACAaCggAPEIKCgqacuLi4uIKCuLi4uLi4uLiCgri4goKCzJKCgoKUqJI=", "64-80:1;117-119:1;214-216:1;218-220:2;222-224:3;226-228:4;230-234:5;236-238:6;240-242:7;244-246:8;248-250:9;252-254:10;256-258:11;260-262:12;264-268:13;270-272:14", "", "195=Make/1/1/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -64,6 +72,7 @@ public static partial class unique_internal_test_package
 
     // <TypeAccessibility>
     [GoLocalName("testEface")] partial interface testEfaceᴅ {}
+    [GoValueClone("arr")] partial struct testNestedHandle {}
     [GoValueClone("s")] partial struct testStringStructArrayStruct {}
     // </TypeAccessibility>
 
@@ -76,10 +85,14 @@ public static partial class unique_internal_test_package
     // <ImportInitializers>
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸabi() => builtin.initPackage(typeof(@internal.abi_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸrace() => builtin.initPackage(typeof(@internal.race_package));
+    [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸrandꓸv2() => builtin.initPackage(typeof(math.rand.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸstrconv() => builtin.initPackage(typeof(strconv_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
+    [GoInit] internal static void initᴛᴛimportꓸsync() => builtin.initPackage(typeof(sync_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
     [GoInit] internal static void initᴛᴛimportꓸtime() => builtin.initPackage(typeof(time_package));
     // </ImportInitializers>

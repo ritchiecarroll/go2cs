@@ -37,6 +37,12 @@ using static global::go.sort_test_package;
 // <ImplicitConversions>
 // </ImplicitConversions>
 
+// This package's string literals are hoisted to `static readonly` fields (the standard
+// library's form, or -hoist-literals), so no converted file passes a bare literal for
+// go2cs-gen's literal interceptor to box. The stamp below tells the generator to skip
+// the assembly.
+[assembly: go.GoHoistedLiterals]
+
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
 // can name the GO file and line a frame was converted from rather than the emitted C# one.
@@ -48,8 +54,8 @@ using static global::go.sort_test_package;
 [assembly: go.GoPositionMap("sort/example_keys_test.go", "example_keys_test.cs", "ABo2krgACBSSqJKokqYADBCkhoaGuoKUgpSClII=", "66-68:1;69-71:2;72-74:3;75-77:4")]
 [assembly: go.GoPositionMap("sort/example_multi_test.go", "example_multi_test.cs", "ABo4soKqwsySqJIAAhLihJKCgqa23KYAEh7EhoaGgriCpoKUgpSClII=", "95-97:1;98-100:2;101-103:3;104-106:4")]
 [assembly: go.GoPositionMap("sort/example_wrapper_test.go", "example_wrapper_test.cs", "AA0cgAAJEoCigAAIDIAACAyA5IIACBKCgpSCggASJoKC")]
-[assembly: go.GoPositionMap("sort/search_test.go", "search_test.cs", "AA4cgrr0ABg8goKCggALCoKCgoKmppQAJGCykqiCggAFEKKClKamgoKCpoKSgoCAkoKUgqaCzJLkAAgagoKCyoKCgoKCguaCgpSClIKCuKKCvrKCkoKC3tqCkoKUlJSUgoKUgpSC", "15-17:1;122-131:1;123-125:1.1;156-156:1;229-229:1;248-251:1", "", "28=f/1/12/13,f/2/12/14,f/3/12/15,f/4/12/16,f/5/12/17,f/6/12/18,f/7/12/19,f/8/12/20,f/9/12/21,f/10/12/22,f/11/12/23,f/12/12/24;183=SearchInts/1/1/5,SearchFloat64s/1/1/6,SearchStrings/1/1/7,Search/1/3/8,Search/2/3/9,Search/3/3/10")]
-[assembly: go.GoPositionMap("sort/sort_slices_benchmark_test.go", "sort_slices_benchmark_test.cs", "ABIosoKCgpSmgoKClKaCgoKUpoKCgpSCyqKCgoKCuKKCgoKCuKKCgoKCuKKCgoKCvKKCgoKCgoKClJSmooKCgoK4ooKCgoK4ooKUgriigpSCAAwagKKAooCkgoKCgpSmgoKCgqaClIKCyqKCgoKCuKKCgoKCgg==", "175-175:1;194-194:1")]
+[assembly: go.GoPositionMap("sort/search_test.go", "search_test.cs", "ABAegrr0ABg8goKCggALCoKCgoKmppQAKmCykqiCggAFEKKClKaCgoKmgpKCgICSgpSCpoLMkuQACBqCgoLKgoKCgoKC5oKClIKUgoK4ooK+soKSgoLe2oKSgpSUlJSCgpSClII=", "16-18:1;123-132:1;124-126:1.1;154-154:1;227-227:1;246-249:1", "", "30=f/1/12/13,f/2/12/14,f/3/12/15,f/4/12/16,f/5/12/17,f/6/12/18,f/7/12/19,f/8/12/20,f/9/12/21,f/10/12/22,f/11/12/23,f/12/12/24;188=SearchInts/1/1/5,SearchFloat64s/1/1/6,SearchStrings/1/1/7,Search/1/3/8,Search/2/3/9,Search/3/3/10")]
+[assembly: go.GoPositionMap("sort/sort_slices_benchmark_test.go", "sort_slices_benchmark_test.cs", "ABIosoKCgpSmgoKClKaCgoKUgsqigoKCgriigoKCgriigoKCgriigoKCgryigoKCgoKCgpSUpqKCgoKCuKKCgoKCuKKClIK4ooKUggAMGoCigKKApIKCgoKUpoKCgoKmgpSCgsqigoKCgriigoKCgoI=", "167-167:1;186-186:1")]
 [assembly: go.GoPositionMap("sort/sort_test.go", "sort_test.cs", "ABYokpKUgoKCgoKCuIKCgoKCgrqSgpSCpoK4goKCgoKCuIKCgoKCuIKCgoKCuIKCgoKCuIKSlpKCuKKCgpSCgpSClIKCuKKCgoKCgoKCgpSCypSCgpSCgoKmooKCgoK4goKCgoIACBKCpIKClKSCgrjGgoCCyLiCtKSigoKClJSCgoKCuKKCgoKUlIKCgpK4ooKCgpSUgoKCgriigoKCgpSCgriigoKCgpSCgriigoKCgpSCgriigoKCgpSCgriigoKClIKCgoKCuKKCgoKUgoKCgpK4ooKCgoKUgoK4ooKCgoKUgpK4ooKCgoKUgoIAGj6AooKCpIKClIKmgoKClKaigoKUgoKSgoKCgoKCgpSkpKSkgoKUgsqCgpSCtoK2gpSCtoKUgraCuKSCuJKCAAsYggAHEIKmgqaCAA4egKSCgpSUgpSCpoK4gpKCpqaCpoKSgoKUpoKCgoKUgoLKgoKCggAJEpCigKKAppKCupKSgoKCgpSClJSmopKClKaClIKUgoKClIK4goKClIK4gpSCgoKUgrjEgoKClIKUguyClILogNKA5KKClIKCgoKCgoKCgpSUgoKCgoKUggAIDICigKKAooCigKKA", "53-53:1;97-99:1;100-100:2;194-198:1;236-236:1;334-334:1;360-360:1;523-523:1;527-527:1;531-531:1", "", "218=NewPCG/1/1/1,New/1/1/1")]
 // </GoSourcePositionMaps>
 
@@ -98,6 +104,7 @@ public static partial class sort_test_package
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸinternalꓸtestenv() => builtin.initPackage(typeof(@internal.testenv_package));
     [GoInit] internal static void initᴛᴛimportꓸmath() => builtin.initPackage(typeof(math_package));
+    [GoInit] internal static void initᴛᴛimportꓸmathꓸbits() => builtin.initPackage(typeof(go.math.bits_package));
     [GoInit] internal static void initᴛᴛimportꓸmathꓸrandꓸv2() => builtin.initPackage(typeof(go.math.rand.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸruntime() => builtin.initPackage(typeof(runtime_package));
     [GoInit] internal static void initᴛᴛimportꓸslices() => builtin.initPackage(typeof(slices_package));

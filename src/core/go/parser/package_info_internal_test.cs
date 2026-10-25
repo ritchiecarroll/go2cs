@@ -30,10 +30,10 @@ using static go.go.parser_internal_test_package;
 
 // <GoSourcePositionMaps>
 [assembly: global::go.GoPositionMap("go/parser/error_test.go", "error_test.cs", "ACdIurKCgoKUlJSmgoCCpAAIEpiilLiCgpSCgqSkgoKCkoKUlNiClLSCgoKUlM6igqaCgJSCgoKUgIKCttzagoKCyoKCgoKCpoKCkoKClJSCprjmgoKClIKCkoKCgpQ=", "42-50:1;192-200:1")]
-[assembly: global::go.GoPositionMap("go/parser/parser_test.go", "parser_test.cs", "ABEg7oKCgoLKgpSklKaA1IKCgoLogoKCguiCgoKClICCpIKCgpSAgqSCgvqCgoKCAA0IpoKCgqaAgsiCgoKmgILIgoKClIKUgILIgoCCyIKAgqSCgIK4koKCgoCC2oLogoKCuIKCgoKmgoKC+oKCgriCgoKCpoKCABAKogABEoKCpgAKFpKAgoKCgpSUgpSCgrYAHgiCAAAugqYAEyqSgoKUlIIAGQiCAAAkgpQABxCClIKCgoKUgoKC3KKCgoCCgoCCgIKCgoIACxKosoKCgqamgoKClICCpICCACsIggAAJIKUgoKCgoKClIKCgoL6kgALGIKCgqaSkpS0xoKmgoCCgoKUxgAYCoIAABaCgoK4gJK2gJIADQ6yuIKCgoKmgoKmgoKAgqSUgoKUgoKCAA4KgoaCgoKUgoIAEwgAMIQBopKClNaCgpSygpKCgpTcpoKCgpSUlIKCgoKmgoIAChCCsoKUgpKCgpTcpoKCgpSUlIKCgoKmgoIAChKSAAcQgoKCgqaSlIKCtsyS3IKCgvqCgoKCpoKCgpSCggAIDIKCgoKCyriCgoIACQiClIKCgqaCgoIACwqSAAUSgoKCgg==", "230-248:1;465-487:1;540-545:1;653-688:1;699-734:1;756-765:1")]
+[assembly: global::go.GoPositionMap("go/parser/parser_test.go", "parser_test.cs", "ABMi7oKCgoLKgpSklKaA1IKCgoLogoKCguiCgoKClICCpIKCgpSAgqSCgvqCgoKCAA0IpoKCgqaAgsiCgoKmgILIgoKClIKUgILIgoCCyIKAgqSCgIK4koKCgoCC2oLogoKCuIKCgoKmgoKC+oKCgriCgoKCpoKCABAKogABEoKCpgAKFpKAgoKCgpSUgpSCgrYAHgiCAAAugqYAEyqSgoKUlIIAGQiCAAAkgpQABxCClIKCgoKUgoKC3KKCgoCCgoCCgIKCgoIACxKosoKCgqamgoKClICCpICCACsIggAAJIKUgoKCgoKClIKCgoL6kgALGIKCgqaSkpS0xoKmgoCCgoKUxgAYCoIAABaCgoK4gJK2gJIADQ6yuIKCgoKmgoKmgoKAgqSUgoKUgoKCAA4KgoaCgoKUgoIAEwgAMYYBopKClNaCgpSygpKCgpTcpoKCgpSUlIKCgoKmgoIAChCCsoKUgpKCgpTcpoKCgpSUlIKCgoKmgoIAChKSAAcQgoKCgqaSlIKCtsyS3IKCgvqCgoKCpoKCgpSCggAIDIKCgoKCyriCgoIACQiClIKCgqaCgoIACwqSAAUSgoKCggAOCoKMgoKCpgALHoKSgoIAFg6yAAEYgpSClIKUgqaClIKmgoKUgqaCggAMDra6AAQSgoKUgqKAgoK8gILIgILGlII=", "231-249:1;466-488:1;541-546:1;655-690:1;701-736:1;758-767:1;975-994:1")]
 [assembly: global::go.GoPositionMap("go/parser/performance_test.go", "performance_test.cs", "AA4alIKCgpSmooKCgILaooKCgILaooKCgoKCgpSCgg==")]
 [assembly: global::go.GoPositionMap("go/parser/resolver_test.go", "resolver_test.cs", "ABk8AAwCgoKCpoKSgoKCgoKC3IKClJKmgpSCgIKkpoIABRCigqSAgqSUrLKUlIKCgpSCpq7ygoKCgpSCgoKkpIKCgoCCpJSC2oKUpMamwoKUlIKClLS0gtY=", "38-72:1;55-61:1.1;80-86:1")]
-[assembly: global::go.GoPositionMap("go/parser/short_test.go", "short_test.cs", "AAsWAGjYAYKC6pKCpgBInAGCgg==")]
+[assembly: global::go.GoPositionMap("go/parser/short_test.go", "short_test.cs", "AAsWAGvYAYKC6pKCpgBZtAGCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -65,6 +65,7 @@ public static partial class parser_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸioꓸfs() => builtin.initPackage(typeof(global::go.io.fs_package));
     [GoInit] internal static void initᴛᴛimportꓸos() => builtin.initPackage(typeof(os_package));
     [GoInit] internal static void initᴛᴛimportꓸpathꓸfilepath() => builtin.initPackage(typeof(path.filepath_package));
+    [GoInit] internal static void initᴛᴛimportꓸreflect() => builtin.initPackage(typeof(reflect_package));
     [GoInit] internal static void initᴛᴛimportꓸregexp() => builtin.initPackage(typeof(regexp_package));
     [GoInit] internal static void initᴛᴛimportꓸstrings() => builtin.initPackage(typeof(strings_package));
     [GoInit] internal static void initᴛᴛimportꓸtesting() => builtin.initPackage(typeof(testing_package));
