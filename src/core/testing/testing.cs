@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security;
 using go.testing_runtime;
 using any = System.Object;
 using ꓸꓸꓸany = System.Span<System.Object>;
@@ -337,7 +338,10 @@ public static partial class testing_package
     // Release with TieredCompilation=0 (the banks' configuration of record): Attr's refusal read "???:1", and a
     // helper in a cleanup was attributed to its own line instead of the Cleanup call. Tiered, the methods were
     // never inlined, which is why the default run stayed green.
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Error(this ref T t, params ꓸꓸꓸany args)
+    // They carry [DynamicSecurityMethod] beside it for the same frame, seen one call earlier: the JIT never
+    // implicitly TAIL-CALLS a method so marked, so a test or helper whose last statement is t.Errorf(...) keeps
+    // the frame the report names (golib's DynamicSecurityMethodAttribute; on linux/amd64 the tail call erased it).
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Error(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -349,7 +353,7 @@ public static partial class testing_package
         execution.Fail();
     }
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Errorf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -427,7 +431,7 @@ public static partial class testing_package
     [GoRecv] public static bool Failed(this ref T t) =>
         t.Execution is { } execution ? execution.Failed : t.DetachedFailed;
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatal(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -439,7 +443,7 @@ public static partial class testing_package
         execution.FailNow();
     }
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatalf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -451,14 +455,14 @@ public static partial class testing_package
         execution.FailNow();
     }
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Log(this ref T t, params ꓸꓸꓸany args) =>
         t.Execution?.LogFromCaller(Sprintln(args));
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Logf(this ref T t, @string format, params ꓸꓸꓸany args) =>
         t.Execution?.LogFromCaller(Sprintf(format, args));
 
     // Go's Helper (testing.go:1272) records the CALLER of t.Helper: the first Go frame past this API.
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Helper(this ref T t)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Helper(this ref T t)
     {
         if (t.Execution is not { } execution)
             return;
@@ -473,13 +477,13 @@ public static partial class testing_package
     [GoRecv] public static @string Name(this ref T t) =>
         t.Execution is { } execution ? execution.Name : (@string)"";
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Cleanup(this ref T t, Action cleanup) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Cleanup(this ref T t, Action cleanup) =>
         t.Execution?.Cleanup(cleanup);
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static bool Run(this ref T t, @string name, Action<ж<T>> test) =>
         t.RequiredExecution.Run(name.ToString(), test);
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Skip(this ref T t, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skip(this ref T t, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -491,7 +495,7 @@ public static partial class testing_package
         execution.SkipNow();
     }
 
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skipf(this ref T t, @string format, params ꓸꓸꓸany args)
     {
         if (t.Execution is not { } execution)
         {
@@ -547,7 +551,7 @@ public static partial class testing_package
     /// holding a carriage return or newline, each in Go's text; otherwise an <c>attr</c> event under
     /// chatty output.
     /// </summary>
-    [GoRecv, MethodImpl(MethodImplOptions.NoInlining)] public static void Attr(this ref T t, @string key, @string value)
+    [GoRecv, MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Attr(this ref T t, @string key, @string value)
     {
         string k = key.ToString();
         string v = value.ToString();
@@ -602,21 +606,21 @@ public static partial class testing_package
     // of the next call instead. Measured under Release with TieredCompilation=0: TestTBHelper's record 8
     // (`t.Error("8")` at helper_test.go:22, just before a `return`) read helper_test.go:26, the t.Parallel()
     // after the block; tier-0, which inlines nothing, read :22.
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Error(this ж<T> t, params ꓸꓸꓸany args) => Error(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Error(this ж<T> t, params ꓸꓸꓸany args) => Error(ref t.Value, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Errorf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Errorf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Errorf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Errorf(ref t.Value, format, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Fatal(this ж<T> t, params ꓸꓸꓸany args) => Fatal(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatal(this ж<T> t, params ꓸꓸꓸany args) => Fatal(ref t.Value, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Fatalf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Fatalf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Fatalf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Fatalf(ref t.Value, format, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Log(this ж<T> t, params ꓸꓸꓸany args) => Log(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Log(this ж<T> t, params ꓸꓸꓸany args) => Log(ref t.Value, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Logf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Logf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Logf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Logf(ref t.Value, format, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Skip(this ж<T> t, params ꓸꓸꓸany args) => Skip(ref t.Value, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skip(this ж<T> t, params ꓸꓸꓸany args) => Skip(ref t.Value, args);
 
-    [MethodImpl(MethodImplOptions.NoInlining)] public static void Skipf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Skipf(ref t.Value, format, args);
+    [MethodImpl(MethodImplOptions.NoInlining), DynamicSecurityMethod] public static void Skipf(this ж<T> t, @string format, params ꓸꓸꓸany args) => Skipf(ref t.Value, format, args);
 
     [GoRecv] public static nint Run(this ref M m)
     {

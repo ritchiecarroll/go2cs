@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
@@ -51,7 +52,8 @@ public sealed class GoModInfoAttribute(string value) : Attribute
     /// <summary>
     /// Registers a test binary's module build info as <c>go test</c> links it in: <c>path &lt;importPath&gt;.test</c>,
     /// or the bare <c>path &lt;importPath&gt;</c> when the package under test is <c>main</c>, plus
-    /// <c>mod &lt;modulePath&gt; (devel)</c> for a package outside the standard library.
+    /// <c>mod &lt;modulePath&gt; (devel)</c> for a package outside the standard library, then the <c>dep</c> lines of a main
+    /// package's own build info.
     /// </summary>
     /// <remarks>
     /// cmd/go's test main copies a MAIN package's own build info, so its path carries no <c>.test</c>
@@ -62,12 +64,18 @@ public sealed class GoModInfoAttribute(string value) : Attribute
     /// <param name="importPath">Import path of the package under test.</param>
     /// <param name="modulePath">Its module path, or "" for the standard library.</param>
     /// <param name="mainPackage">Whether the package under test is <c>main</c>.</param>
-    public static void Register(string importPath, string modulePath, bool mainPackage)
+    /// <param name="dependencies">The test binary's <c>dep</c> lines, each line's fields joined by tabs: a main package's
+    /// modules, and none for any other package, as Go's test main lists none there.</param>
+    public static void Register(string importPath, string modulePath, bool mainPackage, IReadOnlyList<string>? dependencies = null)
     {
         string lines = mainPackage ? $"path\t{importPath}\n" : $"path\t{importPath}.test\n";
 
         if (modulePath != "")
             lines += $"mod\t{modulePath}\t(devel)\t\n";
+
+        // A main package's modules, after the mod line as cmd/go writes them (setBuildInfo).
+        foreach (string dependency in dependencies ?? [])
+            lines += $"dep\t{dependency}\n";
 
         s_registered = lines;
 

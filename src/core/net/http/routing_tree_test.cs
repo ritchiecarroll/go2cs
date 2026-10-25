@@ -9,6 +9,8 @@ using maps = maps_package;
 using strings = strings_package;
 using testing = testing_package;
 using slices = slices_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using iter = iter_package;
 using static global::go.net.http_package;
 using ꓸꓸꓸstring = Span<@string>;
@@ -131,7 +133,7 @@ internal static readonly @string pathPˢ = "/path/{p...}"u8;
 internal static readonly @string aBWˢ = "/a/b/{w}"u8;
 internal static readonly @string aBWˢ2 = "/a/b/{w...}"u8;
 
-public static void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
+public static partial void TestRoutingNodeMatch(ж<testing.T> Ꮡt) {
     void test(ж<global::go.net.http_package.routingNode> treeΔ1, slice<testCase> tests) {
         Ꮡt.Helper();
         foreach (var (_, testΔ1) in tests) {

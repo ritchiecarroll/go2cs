@@ -72,10 +72,10 @@ using static global::go.io.fs_test_package;
 [assembly: go.GoPositionMap("io/fs/format_test.go", "format_test.cs", "ABcugqaCpoKmgqaCpoKmgqaC9gAuZoKygoLKgrKCgg==", "", "", "61=Date/1/4/10,Date/2/4/21,Date/3/4/32,Date/4/4/43")]
 [assembly: go.GoPositionMap("io/fs/fs_test.go", "fs_test.cs", "AA4YABo8goKCgg==")]
 [assembly: go.GoPositionMap("io/fs/glob_test.go", "glob_test.cs", "ABUgAAcWgoKCgoKUgqaCgoKClILKgoKCgoLKpoKC/ID0goKCgsqCpoI=", "74-79:1", "", "22=DirFS/1/5/4,DirFS/2/5/5,DirFS/3/5/6,DirFS/4/5/7,DirFS/5/5/8")]
-[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABUkgNSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEErKigoKmgoCCpICSpICC7IKCgpQACQaCgoKCgJI=", "21-30:1;75-91:1", "", "65=Now/1/2/4,Now/2/2/10")]
+[assembly: go.GoPositionMap("io/fs/readdir_test.go", "readdir_test.cs", "ABckgNSCgoKCgoKUyoKmgqaCgpSCAAgGggAMHgAEErKigoKmgoCCpICSpICC7IKCgpQACQaCgoKCgJI=", "21-30:1;75-91:1", "", "67=Now/1/2/4,Now/2/2/10")]
 [assembly: go.GoPositionMap("io/fs/readfile_test.go", "readfile_test.cs", "ABAeABMmgAAKCJSCgriCgriCgpSCgriCgoKCgJI=", "", "", "17=Now/1/2/4,Now/2/2/10")]
-[assembly: go.GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ABkaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
-[assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABEegOSCgoKCgoKUyoKmgg==", "18-27:1")]
+[assembly: go.GoPositionMap("io/fs/readlink_test.go", "readlink_test.cs", "ABsaggASMIKCgoK4goKmgoKmgqaCABIwgoKCgoKUgriCpoKClA==", "38-44:1;85-95:1")]
+[assembly: go.GoPositionMap("io/fs/stat_test.go", "stat_test.cs", "ABMegOSCgoKCgoKUyoKmgg==", "18-27:1")]
 [assembly: go.GoPositionMap("io/fs/sub_test.go", "sub_test.cs", "ABEegAAKBIKCgoKClIKCpoKCgoKUyoKmgpSCgpSCgpSCpoKC", "18-37:1")]
 [assembly: go.GoPositionMap("io/fs/walk_test.go", "walk_test.cs", "ABkuABc0ooKCuIKCkoKUpqzSgoKCpoKCgpSUpoKUgpKCmIKClIKUgoKUuILu7oKigoCCkoCCtIKUuIKClIKAggAJCqKCgoCCtoKAgqSCgoKClIKUlIKUgoK0", "58-64:1;73-77:1;94-96:1;105-110:2;129-140:1;167-175:1")]
 // </GoSourcePositionMaps>

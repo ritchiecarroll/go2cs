@@ -9,6 +9,8 @@ using reflect = reflect_package;
 using slices = slices_package;
 using testing = testing_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using go.@internal;
 using iter = iter_package;
 using static go.@internal.trace_package;
@@ -201,7 +203,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
 
     var checkTimeʗ3 = checkTime;
     var checkValidʗ3 = checkValid;
-    Ꮡt.Run(labelˢ, (ж<testing.T> tΔ6) => {
+    Ꮡt.Run(labelˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ6) => {
         var (ev, err) = MakeEvent(new EventConfig<ΔLabel>(
             Kind: EventLabel,
             Time: 42,
@@ -260,7 +262,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
             var checkTimeʗ5 = checkTimeʗ4;
             var checkValidʗ5 = checkValidʗ4;
             var testʗ2 = test;
-            tΔ7.Run(name, (ж<testing.T> tΔ8) => {
+            tΔ7.Run(name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ8) => {
                 var (ev, err) = MakeEvent(new EventConfig<ΔRange>(
                     Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),
                     Kind: testʗ2.kind,
@@ -526,7 +528,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
             var checkTimeʗ7 = checkTimeʗ6;
             var checkValidʗ7 = checkValidʗ6;
             var testʗ3 = test;
-            tΔ9.Run(test.name, (ж<testing.T> tΔ10) => {
+            tΔ9.Run(test.name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ10) => {
                 var st = MakeGoStateTransition(testʗ3.stG, testʗ3.from, testʗ3.to);
                 st.Stack = testʗ3.stStack;
                 st.Reason = testʗ3.reason;
@@ -839,7 +841,7 @@ public static void TestMakeEvent(ж<testing.T> Ꮡt) {
             var checkTimeʗ19 = checkTimeʗ18;
             var checkValidʗ19 = checkValidʗ18;
             var testʗ9 = test;
-            tΔ21.Run(test.name, (ж<testing.T> tΔ22) => {
+            tΔ21.Run(test.name, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ22) => {
                 var (ev, err) = MakeEvent(new EventConfig<StackSample>(
                     Kind: testʗ9.kind,
                     Time: ((global::go.@internal.trace_package.ΔTime)(int64)(42 + i)),

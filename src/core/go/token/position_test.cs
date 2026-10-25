@@ -635,7 +635,7 @@ internal static readonly @string a14B510C100105D200205ˢ = "{A:1-4 B:5-10 C:100-
 internal static readonly @string afterAddFileEˢ = "after AddFile [E]"u8;
 internal static readonly @string a14B510C100105D200205Eˢ = "{A:1-4 B:5-10 C:100-105 D:200-205 E:206-209}"u8;
 
-public static void TestFileSet_AddExistingFiles(ж<testing.T> Ꮡt) {
+public static partial void TestFileSet_AddExistingFiles(ж<testing.T> Ꮡt) {
     var fset = NewFileSet();
 
     var fsetʗ1 = fset;

@@ -21,8 +21,8 @@ heap, so any test that counts allocations reads more than Go does.
 allocation reports at least 1, whether or not golib's counter sees it. So parity means removing the allocation. Taking
 it out of the counter changes nothing: an allocation the counter does not charge still fails a want-zero assert on
 its bytes. `AllocsPerRun` also calls the function once before it measures, so storage that is created on first use
-and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1117 (`if (allocated == 0L)`),
-:1100 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1022
+and reused afterwards does not show in the reading. <!-- src/core/testing/testing.cs:1121 (`if (allocated == 0L)`),
+:1104 (`initialization — and JIT compilation here — must not count against f.`). The floor: src/core/testing/testing.cs:1026
 (`nonzero bytes with a nonzero count ⟹ the COUNT is reported, floored at 1;`). -->
 
 **Where Go decides.** Go makes the decision at one of two places:
