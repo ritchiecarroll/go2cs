@@ -2165,7 +2165,7 @@ spells them: `rec.Kind = x`, `rec.Off += 1`, `rec.In.X`. Such a pointer may alia
 the struct's CLR layout is not Go's (the CLR places the reference first), so neither the whole-value read
 `rec.Value` nor the field's CLR slot can serve the site.
 
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.go:27-45 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.go:34-77 -->
 ```go
 type record struct {
 	Kind   uint32
@@ -2186,9 +2186,9 @@ type record struct {
 	n := copy(rec.Path[2:], []uint16{0x0c0d})
 	rec.B = 0x1112
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:7-8, 23-32 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:9-10, 51-60 -->
 ```csharp
-[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4))]
+[GoFieldAccess(typeof(record), typeof(syscall.RawSockaddrInet4), typeof(reparse))]
 partial class main_package {
 …
     var blob = new slice<byte>(24);
@@ -2258,11 +2258,72 @@ serves a read, a write, a compound assignment, a nested field and a `ref` argume
 over native memory: `field` refuses it by name, `runtime error: cannot read native memory as main.record: its
 CLR layout is not its Go layout (field Path is a managed reference where Go stores the value inline)`, as the
 whole-value read did. Over managed memory every field reads as before. A local assigned anything else (a
-`new(T)`, a parameter, a field), a range variable, a multi-value assignment or a local whose address is taken
-keeps the `p.Value.f` / `(~p).f` emission.
+`new(T)`, a parameter, a field), a range variable, a multi-value assignment other than the call below, or a
+local whose address is taken keeps the `p.Value.f` / `(~p).f` emission.
+
+**One step across a return, for native bytes only.** A local assigned from a CALL takes the same property form,
+single- or multi-value (the local at position `i` takes result `i`), when the callee lays the struct over BYTE
+STORAGE: a static, non-generic function or concrete method of the same package with unnamed results, every
+return of which gives that position `nil`, `(*T)(unsafe.Pointer(&b[i]))` with `b` a byte array or byte slice,
+or a callee local whose every assignment is that form. This is os's `TestRootSymlinkRelativity`: its helper
+`readSymlinkReparseData` returns a `*windows.SymbolicLinkReparseBuffer` over the `[N]byte` that
+`DeviceIoControl` fills, and the caller reads `osRDB.Flags`.
+
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.go:52-63, 90-97 -->
+```go
+func readReparse(flags uint32, fail bool) (*reparse, error) {
+	var buf [64]byte
+
+	if fail {
+		return nil, errors.New("no record")
+	}
+
+	buf[8], buf[9] = byte(flags), byte(flags>>8)
+	buf[12] = 'x'
+	rec := (*reparse)(unsafe.Pointer(&buf[0]))
+	return rec, nil
+}
+…
+	got, err := readReparse(0x0201, false)
+
+	for i := 0; i < 1000; i++ {
+		sink = make([]byte, 1024)
+	}
+
+	runtime.GC()
+	fmt.Println("returned:", got.Flags, got.Path[0], err)
+```
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:73-80 -->
+```csharp
+    var (got, err) = readReparse(0x0201, false);
+
+    for (nint i = 0; i < 1000; i++) {
+        sink = new slice<byte>(1024);
+    }
+
+    runtime.GC();
+    fmt.Println("returned:", got.Flags, got.of(reparse.ᏑPath).ElementRef(0), err);
+```
+
+The box owns its pin: the reinterpret of a managed element pins the backing and hands the pin and its source to
+the native box it returns, so the returned record keeps the callee's array still and alive across the
+collection. A nil result reads as Go's nil dereference panic. The step is ONE: a callee that returns another
+call, a named-result callee (a bare return or a deferred write reaches its result), a generic or cross-package
+callee, a call through a func value and a callee over any storage that is not bytes (an `unsafe.Pointer`
+parameter, a `uintptr`, a `[]uint64` element) all keep `(~p).f`. Those reinterpret managed storage of another
+Go type, which `(~p).f` already reads correctly, and only a struct laid over raw bytes reaches the refusal.
+<!-- Ruled 2026-10-24 (COORD, G's amendments, the tight cut). Census of the predicate over std with tests
+     (purego, CGO_ENABLED=0), sites the step admits beyond the in-function rule: as first ruled (any
+     unsafe.Pointer reinterpret in the callee) windows 328 / linux 327 / darwin 322, 316 of them runtime
+     production (efaceOf, the *uintptr.ptr() getters, mget, getCleanupContext...) plus sync's indexLocal and
+     reflect's toRType; with the byte-storage cut windows 4 (os/root_windows_test.go:149-150) / linux 0 /
+     darwin 0. Two-seeded -stdlib A/B at f8fe15c97e, three targets: 0 production .cs. Roster test emission
+     (every row, -tests convert, freeze vs seat binary): windows os/root_windows_test.cs and its
+     package_test_info.cs only; linux and darwin 0. -->
 
 Guarded by: `tests/Behavioral/FieldAccessReinterpret` (byte-level, against Go; with the route off it exits
-with the refusal above), the converter's `TestFieldAccessReadsThroughTheFieldProperty`, GenTests'
+with the refusal above), the converter's `TestFieldAccessReadsThroughTheFieldProperty` and
+`TestFieldAccessCrossesOneReturn` (the return step and its negatives), GenTests'
 `FieldAccessGeneratorTests` (the collision guard among them), and GolibTests' `FieldAccessTests` (Go offsets,
 the refusal, zero bytes allocated per call).
 <!-- Ruled 2026-10-16: the provenance rule (a reinterpret-only local, a reference-bearing T), uniform scope

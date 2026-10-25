@@ -11221,7 +11221,7 @@ The label is a plain C# literal, which go2cs-gen boxes as a Go string ([Strings]
 other managed field, the CLR lays it out differently from Go, so each field is reached through a property that
 go2cs generates on the pointer, and the code reads as Go's does:
 
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.go:36-42 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.go:68-74 -->
 ```go
 	blob := make([]byte, 24)
 	rec := (*record)(unsafe.Pointer(&blob[0]))
@@ -11231,7 +11231,7 @@ go2cs generates on the pointer, and the code reads as Go's does:
 	rec.Off = 7
 	rec.Off += 1
 ```
-<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:23-29 -->
+<!-- source: src/tests/Behavioral/FieldAccessReinterpret/main.cs.target:51-57 -->
 ```csharp
     var blob = new slice<byte>(24);
     var rec = Ꮡ(blob, 0).Reinterpret<byte, record>();
