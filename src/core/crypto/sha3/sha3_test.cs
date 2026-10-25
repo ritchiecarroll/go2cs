@@ -5,9 +5,9 @@ namespace go.crypto;
 
 using bytes = bytes_package;
 using cryptotest = go.crypto.@internal.cryptotest_package;
-using fips140 = go.crypto.@internal.fips140_package;
 using static go.crypto.sha3_package;
 using hex = encoding.hex_package;
+using hash = hash_package;
 using io = io_package;
 using rand = math.rand_package;
 using strings = strings_package;
@@ -29,7 +29,8 @@ internal static map<@string, Func<ж<sha3.SHA3>>> testDigests = new map<@string,
     ["SHA3-224"u8] = New224,
     ["SHA3-256"u8] = New256,
     ["SHA3-384"u8] = New384,
-    ["SHA3-512"u8] = New512
+    ["SHA3-512"u8] = New512,
+    ["SHA3-Zero"u8] = () => Ꮡ(new SHA3(nil))
 };
 
 // testShakes contains functions that return *sha3.SHAKE instances for
@@ -44,20 +45,24 @@ internal static map<@string, testShakesᴛ1> testShakes = new map<@string, testS
     ["SHAKE128"u8] = new(NewCSHAKE128, ""u8, ""u8),
     ["SHAKE256"u8] = new(NewCSHAKE256, ""u8, ""u8),
     ["cSHAKE128"u8] = new(NewCSHAKE128, "CSHAKE128"u8, "CustomString"u8),
-    ["cSHAKE256"u8] = new(NewCSHAKE256, "CSHAKE256"u8, "CustomString"u8)
+    ["cSHAKE256"u8] = new(NewCSHAKE256, "CSHAKE256"u8, "CustomString"u8),
+    ["SHAKE-Zero"u8] = new((slice<byte> N, slice<byte> S) => Ꮡ(new SHAKE(nil)), ""u8, ""u8)
 };
-
-// decodeHex converts a hex-encoded string into a raw byte string.
-internal static slice<byte> decodeHex(@string s) {
-    var (b, err) = hex.DecodeString(s);
-    if (err != default!) {
-        throw panic(err);
-    }
-    return b;
-}
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string sha3ˢ = "sha3"u8;
+
+public static void TestSHA3Hash(ж<testing.T> Ꮡt) {
+    cryptotest.TestAllImplementations(Ꮡt, sha3ˢ, (ж<testing.T> tΔ1) => {
+        foreach (var (name, f) in testDigests) {
+            var fʗ1 = f;
+            tΔ1.Run(name, (ж<testing.T> tΔ2) => {
+                var fʗ2 = fʗ1;
+                cryptotest.TestHash(tΔ2, () => new sha3.SHA3жHash(fʗ2()));
+            });
+        }
+    });
+}
 
 // TestUnalignedWrite tests that writing data in an arbitrary pattern with
 // small input buffers.
@@ -186,7 +191,7 @@ internal static void testSqueezing(ж<testing.T> Ꮡt) {
         var d1 = v.constructor(slice<byte>(v.defAlgoName), slice<byte>(v.defCustomStr));
         d1.Write(slice<byte>(testString));
         slice<byte> multiple = default!;
-        foreach ((_, _) in @ref) {
+        foreach (var _ᴛ1 in range(@ref)) {
             d1.Read(new slice<byte>(0));
             var one = new slice<byte>(1);
             d1.Read(one);
@@ -207,7 +212,7 @@ internal static void testSqueezing(ж<testing.T> Ꮡt) {
 internal static slice<byte> sequentialBytes(nint size) {
     nint alignmentOffset = rand.Intn(8);
     var result = new slice<byte>(size + alignmentOffset).slice(alignmentOffset);
-    foreach (var (i, _) in result) {
+    foreach (var i in range(result)) {
         result[i] = (byte)i;
     }
     return result;
@@ -531,7 +536,7 @@ internal static void testMarshalUnmarshalSHAKE(ж<testing.T> Ꮡt, ж<sha3.SHAKE
 }
 
 // benchmarkHash tests the speed to hash num buffers of buflen each.
-internal static void benchmarkHash(ж<testing.B> Ꮡb, fips140.Hash h, nint size, nint num) {
+internal static void benchmarkHash(ж<testing.B> Ꮡb, hash.Hash h, nint size, nint num) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.StopTimer();
@@ -574,19 +579,19 @@ internal static void benchmarkShake(ж<testing.B> Ꮡb, ж<sha3.SHAKE> Ꮡh, nin
 }
 
 public static void BenchmarkSha3_512_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жfips140_Hash(New512()), 1350, 1);
+    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New512()), 1350, 1);
 }
 
 public static void BenchmarkSha3_384_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жfips140_Hash(New384()), 1350, 1);
+    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New384()), 1350, 1);
 }
 
 public static void BenchmarkSha3_256_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жfips140_Hash(New256()), 1350, 1);
+    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New256()), 1350, 1);
 }
 
 public static void BenchmarkSha3_224_MTU(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жfips140_Hash(New224()), 1350, 1);
+    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New224()), 1350, 1);
 }
 
 public static void BenchmarkShake128_MTU(ж<testing.B> Ꮡb) {
@@ -606,7 +611,7 @@ public static void BenchmarkShake256_1MiB(ж<testing.B> Ꮡb) {
 }
 
 public static void BenchmarkSha3_512_1MiB(ж<testing.B> Ꮡb) {
-    benchmarkHash(Ꮡb, new sha3.SHA3жfips140_Hash(New512()), 1024, 1024);
+    benchmarkHash(Ꮡb, new sha3.SHA3жHash(New512()), 1024, 1024);
 }
 
 } // end sha3_test_package

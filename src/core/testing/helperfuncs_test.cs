@@ -11,25 +11,25 @@ using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOpti
 partial class testing_test_package {
 
 // The line numbering of this file is important for TestTBHelper.
-internal static void notHelper(ж<testing.T> Ꮡt, @string msg) {
+internal static partial void notHelper(ж<testing.T> Ꮡt, @string msg) {
     Ꮡt.Error(msg);
 }
 
-internal static void helper(ж<testing.T> Ꮡt, @string msg) {
+internal static partial void helper(ж<testing.T> Ꮡt, @string msg) {
     Ꮡt.Helper();
     Ꮡt.Error(msg);
 }
 
-internal static void notHelperCallingHelper(ж<testing.T> Ꮡt, @string msg) {
+internal static partial void notHelperCallingHelper(ж<testing.T> Ꮡt, @string msg) {
     helper(Ꮡt, msg);
 }
 
-internal static void helperCallingHelper(ж<testing.T> Ꮡt, @string msg) {
+internal static partial void helperCallingHelper(ж<testing.T> Ꮡt, @string msg) {
     Ꮡt.Helper();
     helper(Ꮡt, msg);
 }
 
-internal static void genericHelper<G>(ж<testing.T> Ꮡt, @string msg) {
+internal static partial void genericHelper<G>(ж<testing.T> Ꮡt, @string msg) {
     Ꮡt.Helper();
     Ꮡt.Error(msg);
 }
@@ -136,7 +136,7 @@ internal static void recoverHelper(ж<testing.T> Ꮡt, @string msg) {
     finally { ᒐ.Run(); }
 }
 
-internal static void doPanic(ж<testing.T> Ꮡt, @string msg) {
+internal static partial void doPanic(ж<testing.T> Ꮡt, @string msg) {
     Ꮡt.Helper();
     throw panic(msg);
 }

@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `log/slog` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-10-02 · converter `8f46a9ada`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**199 matched · 17 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**228 matched · 21 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/log/slog`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/log/slog).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -21,7 +21,7 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestAlloc` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAlloc/2_pairs` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAlloc/2_pairs_disabled` | pass | pass |
-| `TestAlloc/2_pairs_disabled_inline` | pass | pass |
+| `TestAlloc/2_pairs_disabled_inline` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAlloc/9_kvs` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAlloc/Error` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAlloc/Info` | pass | fail ([disclosed](#disclosed-divergences)) |
@@ -39,6 +39,21 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestAttrNoAlloc` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestAttrs` | pass | pass |
 | `TestCallDepth` | pass | pass |
+| `TestCallDepthConnection` | pass | pass |
+| `TestCallDepthConnection/log.Default.Fatal` | pass | pass |
+| `TestCallDepthConnection/log.Default.Fatalf` | pass | pass |
+| `TestCallDepthConnection/log.Default.Fatalln` | pass | pass |
+| `TestCallDepthConnection/log.Default.Output` | pass | pass |
+| `TestCallDepthConnection/log.Default.Panic` | pass | pass |
+| `TestCallDepthConnection/log.Default.Panicf` | pass | pass |
+| `TestCallDepthConnection/log.Default.Panicln` | pass | pass |
+| `TestCallDepthConnection/log.Fatal` | pass | pass |
+| `TestCallDepthConnection/log.Fatalf` | pass | pass |
+| `TestCallDepthConnection/log.Fatalln` | pass | pass |
+| `TestCallDepthConnection/log.Output` | pass | pass |
+| `TestCallDepthConnection/log.Panic` | pass | pass |
+| `TestCallDepthConnection/log.Panicf` | pass | pass |
+| `TestCallDepthConnection/log.Panicln` | pass | pass |
 | `TestConcurrentWrites` | pass | pass |
 | `TestConcurrentWrites/json` | pass | pass |
 | `TestConcurrentWrites/text` | pass | pass |
@@ -56,6 +71,9 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestDiscardHandler` | pass | pass |
 | `TestEmptyGroup` | pass | pass |
 | `TestHandlerEnabled` | pass | pass |
+| `TestJSONAllocs` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestJSONAllocs/attrs` | pass | fail ([disclosed](#disclosed-divergences)) |
+| `TestJSONAllocs/message` | pass | fail ([disclosed](#disclosed-divergences)) |
 | `TestJSONAndTextHandlers` | pass | pass |
 | `TestJSONAndTextHandlers/GroupValue_as_Attr_value` | pass | pass |
 | `TestJSONAndTextHandlers/GroupValue_as_Attr_value/json` | pass | pass |
@@ -90,6 +108,9 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestJSONAndTextHandlers/escapes` | pass | pass |
 | `TestJSONAndTextHandlers/escapes/json` | pass | pass |
 | `TestJSONAndTextHandlers/escapes/text` | pass | pass |
+| `TestJSONAndTextHandlers/group_and_key_(or_both)_needs_quoting` | pass | pass |
+| `TestJSONAndTextHandlers/group_and_key_(or_both)_needs_quoting/json` | pass | pass |
+| `TestJSONAndTextHandlers/group_and_key_(or_both)_needs_quoting/text` | pass | pass |
 | `TestJSONAndTextHandlers/groups` | pass | pass |
 | `TestJSONAndTextHandlers/groups/json` | pass | pass |
 | `TestJSONAndTextHandlers/groups/text` | pass | pass |
@@ -168,6 +189,9 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestJSONAndTextHandlers/with-group` | pass | pass |
 | `TestJSONAndTextHandlers/with-group/json` | pass | pass |
 | `TestJSONAndTextHandlers/with-group/text` | pass | pass |
+| `TestJSONAndTextHandlersWithUnavailableSource` | pass | pass |
+| `TestJSONAndTextHandlersWithUnavailableSource/json` | pass | pass |
+| `TestJSONAndTextHandlersWithUnavailableSource/text` | pass | pass |
 | `TestJSONAppendAttrValueSpecial` | pass | pass |
 | `TestJSONHandler` | pass | pass |
 | `TestJSONHandler/none` | pass | pass |
@@ -191,8 +215,17 @@ Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd
 | `TestLogValue` | pass | pass |
 | `TestLoggerError` | pass | pass |
 | `TestLoggerNoOps` | pass | pass |
+| `TestMultiHandler` | pass | pass |
+| `TestMultiHandler/Enabled_returns_false_if_no_handlers_are_enabled` | pass | pass |
+| `TestMultiHandler/Enabled_returns_true_if_any_handler_is_enabled` | pass | pass |
+| `TestMultiHandler/Handle_propagates_errors_from_handlers` | pass | pass |
+| `TestMultiHandler/Handle_sends_log_to_all_handlers` | pass | pass |
+| `TestMultiHandler/Handle_with_no_handlers` | pass | pass |
+| `TestMultiHandler/WithAttrs_propagates_attributes_to_all_handlers` | pass | pass |
+| `TestMultiHandler/WithGroup_propagates_group_to_all_handlers` | pass | pass |
 | `TestNeedsQuoting` | pass | pass |
 | `TestNewLogLogger` | pass | pass |
+| `TestNewMultiHandlerCopy` | pass | pass |
 | `TestPanics` | pass | pass |
 | `TestRecordAttrs` | pass | pass |
 | `TestRecordSource` | pass | pass |
@@ -248,22 +281,26 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 | Test | Class | Pinned reason |
 |:--|:--|:--|
 | `TestAlloc` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
-| `TestAlloc/2_pairs` | `deferred` | wantAllocs assert with a NONZERO Go budget (2): the managed model pays a heap shell per boxed pair on top of Go's two budgeted allocations, so the divergence is the shell count rather than the assert's premise. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
-| `TestAlloc/9_kvs` | `deferred` | wantAllocs assert with a nonzero Go budget (10): nine key/value pairs box into nine heap shells above Go's budgeted slice growth. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
+| `TestAlloc/2_pairs` | `deferred` | wantAllocs assert with a NONZERO Go budget (2): the managed model pays a heap shell per boxed pair on top of Go's two budgeted allocations, so the divergence is the shell count rather than the assert's premise. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 10 per run at go1.24.13 to 6 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAlloc/2_pairs_disabled_inline` | `deferred` | wantAllocs(t, 0, ...) over Logger.Log at LevelInfo with two key/value pairs, on a Logger over DiscardHandler, so the level check fails and nothing is formatted. go1.24.13 asserted wantAllocs(t, 2, ...) here and the converted side met it; go1.26.10 tightened the budget to 0, and the converted side still counts 2 per run on both OSes. Its parent TestAlloc discloses as aggregate, with no entry of its own (plan §6). |
+| `TestAlloc/9_kvs` | `deferred` | wantAllocs assert with a nonzero Go budget (10): nine key/value pairs box into nine heap shells above Go's budgeted slice growth. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 27 per run at go1.24.13 to 16 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
 | `TestAlloc/Error` | `deferred` | wantAllocs assert: same `...any` boxing as TestAlloc/Info on the Error level path — one heap shell per argument where Go's interface value allocates nothing. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). |
 | `TestAlloc/Info` | `deferred` | wantAllocs assert: the variadic `...any` argument list boxes each value into a heap shell where Go's interface value is two words carrying the data pointer inline (DESIGN-iface-shell-caching §2 — 'C# has no two-word interface value; the shell IS the itab+data fused into an object'). RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). |
-| `TestAlloc/attrs1` | `deferred` | wantAllocs assert: constructing one Attr materializes a boxed Value in the managed model where Go's Value packs the payload into its own struct fields. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
-| `TestAlloc/attrs3` | `deferred` | wantAllocs assert: three Attrs, each carrying a boxed Value shell that Go's packed Value representation does not allocate. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
-| `TestAlloc/attrs3_disabled` | `deferred` | wantAllocs assert: the Attrs are constructed — and therefore boxed — before the level check discards them, so the level-disabled path allocates in the managed model exactly as the enabled one does. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
-| `TestAlloc/attrs6` | `deferred` | wantAllocs assert with a nonzero Go budget (1): six Attrs box six Values above Go's single budgeted allocation. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
-| `TestAlloc/attrs9` | `deferred` | wantAllocs assert with a nonzero Go budget (1): nine Attrs box nine Values above Go's single budgeted allocation. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
+| `TestAlloc/attrs1` | `deferred` | wantAllocs assert: constructing one Attr materializes a boxed Value in the managed model where Go's Value packs the payload into its own struct fields. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 7 per run at go1.24.13 to 4 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAlloc/attrs3` | `deferred` | wantAllocs assert: three Attrs, each carrying a boxed Value shell that Go's packed Value representation does not allocate. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 12 per run at go1.24.13 to 7 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAlloc/attrs3_disabled` | `deferred` | wantAllocs assert: the Attrs are constructed — and therefore boxed — before the level check discards them, so the level-disabled path allocates in the managed model exactly as the enabled one does. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 9 per run at go1.24.13 to 4 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAlloc/attrs6` | `deferred` | wantAllocs assert with a nonzero Go budget (1): six Attrs box six Values above Go's single budgeted allocation. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 21 per run at go1.24.13 to 12 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAlloc/attrs9` | `deferred` | wantAllocs assert with a nonzero Go budget (1): nine Attrs box nine Values above Go's single budgeted allocation. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 28 per run at go1.24.13 to 16 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
 | `TestAlloc/logger.Info` | `deferred` | wantAllocs assert: the Logger.Info convenience path boxes its `...any` arguments into heap shells where Go passes two-word interface values. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). |
 | `TestAlloc/logger.Log` | `deferred` | wantAllocs assert: the Logger.Log path boxes its `...any` arguments into heap shells where Go passes two-word interface values. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). |
-| `TestAlloc/pairs` | `deferred` | wantAllocs assert: each key/value pair boxes through `any` into a heap shell; Go's escape analysis keeps the equivalent interface values off the heap entirely. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). |
-| `TestAnyLevelAlloc` | `deferred` | wantAllocs assert: passing a Level through `any` boxes the value type into a heap shell, which is precisely the allocation Go's two-word interface value avoids. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). |
-| `TestAttrNoAlloc` | `deferred` | want-zero AllocsPerRun assert: each Attr constructor boxes its payload into a Value shell in the managed model, where Go's Value stores the payload inline in the struct and allocates nothing. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
-| `TestTextHandlerAlloc` | `deferred` | wantAllocs assert: TextHandler.Handle formats through boxed Values and an interface-typed Handler, so the append-only formatting path Go performs allocation-free pays one heap shell per attribute here. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. |
-| `TestValueNoAlloc` | `deferred` | want-zero AllocsPerRun assert: every Value constructor boxes through `any` into a heap shell, the direct managed counterpart of Go's inline-payload Value (DESIGN-iface-shell-caching §2 — the shell IS the interface value, and nothing short of IDynamicInterfaceCastable removes it). RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. |
+| `TestAlloc/pairs` | `deferred` | wantAllocs assert: each key/value pair boxes through `any` into a heap shell; Go's escape analysis keeps the equivalent interface values off the heap entirely. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 6 per run at go1.24.13 to 3 per run on windows and linux; the test body changed between go1.24.13 and go1.26.10. |
+| `TestAnyLevelAlloc` | `deferred` | wantAllocs assert: passing a Level through `any` boxes the value type into a heap shell, which is precisely the allocation Go's two-word interface value avoids. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1). RE-READ AT go1.26.10 (2026-10-25, G): unit COUNT -> BYTES. |
+| `TestAttrNoAlloc` | `deferred` | want-zero AllocsPerRun assert: each Attr constructor boxes its payload into a Value shell in the managed model, where Go's Value stores the payload inline in the struct and allocates nothing. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 14 per run at go1.24.13 to 1 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
+| `TestJSONAllocs` | `aggregate` | no failure text of its own — the roll-up of this test's disclosed subtests |
+| `TestJSONAllocs/attrs` | `deferred` | wantAllocs(t, 1, ...) over Logger.LogAttrs(ctx, LevelInfo, "hello world", ...) with five attributes -- String, Int, Bool, Any over an error, Any over a three-field struct -- through a JSONHandler writing to io.Discard; the test is new at go1.26.10. Go budgets exactly one allocation; the converted side counts 28 per run on windows and 26 on linux. |
+| `TestJSONAllocs/message` | `deferred` | wantAllocs(t, 0, ...) over Logger.LogAttrs(ctx, LevelInfo, "hello world") with no attributes, through a JSONHandler writing to io.Discard; the test is new at go1.26.10. Go budgets zero allocations; the converted side counts 12 per run on windows and 10 on linux. Its parent TestJSONAllocs discloses as aggregate, with no entry of its own (plan §6). |
+| `TestTextHandlerAlloc` | `deferred` | wantAllocs assert: TextHandler.Handle formats through boxed Values and an interface-typed Handler, so the append-only formatting path Go performs allocation-free pays one heap shell per attribute here. RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 20 per run at go1.24.13 to 20 per run on windows, 19 on linux; the test body is identical at go1.24.13 and go1.26.10. |
+| `TestValueNoAlloc` | `deferred` | want-zero AllocsPerRun assert: every Value constructor boxes through `any` into a heap shell, the direct managed counterpart of Go's inline-payload Value (DESIGN-iface-shell-caching §2 — the shell IS the interface value, and nothing short of IDynamicInterfaceCastable removes it). RELABEL 2026-09-23 (C1, as ruled at ledger 2026-09-23 03:37 O2): alloc-profile -> deferred. The boxing/shell proof above is WITHDRAWN: the counter never charges a CLR box or an interface shell (AllocationCounter.cs:50-53), so it cannot explain a COUNT reading. The composition in the plan was READ in the emission at bb54ff0920 (C1); it replaces the ruling's fitted F6/F7 for this row: F6 is the per-call literal (the converter's degenerate-slug floor, hoistedLiteralOperations.go:103) and F7 the StringData element reference. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 15 per run at go1.24.13 to 1 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 
@@ -273,10 +310,12 @@ test requiring a capability the managed runtime does not provide — a `testing`
 has not implemented, or a platform behavior it provably cannot reproduce. Each is named with
 the capability it needs.
 
+- BenchmarkAppendKey (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAttrString (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDispatch (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkJSONEncoding (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkJSONHandler (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkLevelString (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkNopLog (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkPC (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkPreformatting (benchmark): benchmark execution is deferred to Phase 4D
@@ -284,10 +323,12 @@ the capability it needs.
 - BenchmarkUnsafeStrings (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkWriteTime (benchmark): benchmark execution is deferred to Phase 4D
 - ExampleGroup (example): example execution is deferred to Phase 4D
+- ExampleGroupAttrs (example): example execution is deferred to Phase 4D
 - ExampleHandlerOptions_customLevels (example): example execution is deferred to Phase 4D
 - ExampleHandler_levelHandler (example): example execution is deferred to Phase 4D
 - ExampleLogValuer_group (example): example execution is deferred to Phase 4D
 - ExampleLogValuer_secret (example): example execution is deferred to Phase 4D
+- ExampleMultiHandler (example): example execution is deferred to Phase 4D
 - ExampleSetLogLoggerLevel_log (example): example execution is deferred to Phase 4D
 - ExampleSetLogLoggerLevel_slog (example): example execution is deferred to Phase 4D
 - Example_discardHandler (example): example execution is deferred to Phase 4D

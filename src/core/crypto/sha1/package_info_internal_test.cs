@@ -28,7 +28,7 @@ using static go.crypto.sha1_internal_test_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: go.GoPositionMap("crypto/sha1/sha1_test.go", "sha1_test.cs", "ABs2ACJGgoKCgoKUgoKClIK0goKCtIKUgoKCpIKClMqCgoKCgpSUgoKCpoKCgpSUgoKmgoKmgIKCtoKUgILagoKAgsiCgoCC+pKClIKCgoKCgoIAESQADBrCgoCCyOaChIKAgoK2goKCpoLKgoKCkoKigoKUgriCppLUgoKSgoKCgoKmgoKCgsqCpoKmgqaC", "203-207:1;238-242:1;257-265:1;266-272:2")]
+[assembly: go.GoPositionMap("crypto/sha1/sha1_test.go", "sha1_test.cs", "ABk0ACVGgqSCgoKCgpSCgoKUgrSCgoK0gpSCgoKkgoKUyoKkgoKCgoKUlIKCgqaCgoKUlIKCpoKCpoCCgraClICC2oKCgILIgoKAggARIgAMGsKCgILI5oKkgoKCgIKCtoKCgqaCyoKCgpKCooKClIK4goIACQiCkriigJKkppLUgoKSgoKCgoKmgoKCgsqCpoKmgqaC", "191-195:1;228-232:1;239-241:1;262-270:1;271-277:2")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto;
@@ -55,7 +55,6 @@ public static partial class sha1_internal_test_package
     [GoInit] internal static void initᴛᴛimportꓸbytes() => builtin.initPackage(typeof(bytes_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸboring() => builtin.initPackage(typeof(go.crypto.@internal.boring_package));
     [GoInit] internal static void initᴛᴛimportꓸcryptoꓸinternalꓸcryptotest() => builtin.initPackage(typeof(go.crypto.@internal.cryptotest_package));
-    [GoInit] internal static void initᴛᴛimportꓸcryptoꓸrand() => builtin.initPackage(typeof(go.crypto.rand_package));
     [GoInit] internal static void initᴛᴛimportꓸfmt() => builtin.initPackage(typeof(fmt_package));
     [GoInit] internal static void initᴛᴛimportꓸhash() => builtin.initPackage(typeof(hash_package));
     [GoInit] internal static void initᴛᴛimportꓸio() => builtin.initPackage(typeof(io_package));

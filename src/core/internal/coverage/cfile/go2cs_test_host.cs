@@ -23,13 +23,13 @@ internal static class Go2CsTestHost
         {
             "testdata",
         });
-        registry.Add("TestApisOnNocoverBinary", cfile_internal_test_package.TestApisOnNocoverBinary, "emitdata_test.go", 443);
-        registry.Add("TestAuxMetaDataFiles", cfile_internal_test_package.TestAuxMetaDataFiles, "ts_test.go", 130);
-        registry.Add("TestCoverageApis", cfile_internal_test_package.TestCoverageApis, "emitdata_test.go", 24);
-        registry.Add("TestCoverageSnapshot", cfile_internal_test_package.TestCoverageSnapshot, "ts_test.go", 82);
-        registry.Add("TestIssue56006EmitDataRaceCoverRunningGoroutine", cfile_internal_test_package.TestIssue56006EmitDataRaceCoverRunningGoroutine, "emitdata_test.go", 464);
-        registry.Add("TestIssue59563TruncatedCoverPkgAll", cfile_internal_test_package.TestIssue59563TruncatedCoverPkgAll, "emitdata_test.go", 500);
-        registry.Add("TestTestSupport", cfile_internal_test_package.TestTestSupport, "ts_test.go", 34);
+        registry.Add("TestApisOnNocoverBinary", cfile_internal_test_package.TestApisOnNocoverBinary, "emitdata_test.go", 439);
+        registry.Add("TestAuxMetaDataFiles", cfile_internal_test_package.TestAuxMetaDataFiles, "ts_test.go", 126);
+        registry.Add("TestCoverageApis", cfile_internal_test_package.TestCoverageApis, "emitdata_test.go", 23);
+        registry.Add("TestCoverageSnapshot", cfile_internal_test_package.TestCoverageSnapshot, "ts_test.go", 78);
+        registry.Add("TestIssue56006EmitDataRaceCoverRunningGoroutine", cfile_internal_test_package.TestIssue56006EmitDataRaceCoverRunningGoroutine, "emitdata_test.go", 460);
+        registry.Add("TestIssue59563TruncatedCoverPkgAll", cfile_internal_test_package.TestIssue59563TruncatedCoverPkgAll, "emitdata_test.go", 493);
+        registry.Add("TestTestSupport", cfile_internal_test_package.TestTestSupport, "ts_test.go", 33);
         return TestHost.Run(registry, args);
     }
 }
