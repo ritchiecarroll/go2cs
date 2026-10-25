@@ -9,6 +9,8 @@ using os = os_package;
 using testing = testing_package;
 using fstest = go.testing.fstest_package;
 using time = time_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using fs = go.io.fs_package;
 using go.io;
 using go.testing;
@@ -26,7 +28,7 @@ internal static (fs.File, error) Open(this readDirOnly _, @string name) {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly @string subˢ = "sub(.)"u8;
 
-public static void TestReadDir(ж<testing.T> Ꮡt) {
+public static partial void TestReadDir(ж<testing.T> Ꮡt) {
     void check(@string desc, slice<fs.DirEntry> dirsΔ1, error errΔ1) {
         Ꮡt.Helper();
         if (errΔ1 != default! || len(dirsΔ1) != 2 || dirsΔ1[0].Name() != "hello.txt"u8 || dirsΔ1[1].Name() != "sub"u8) {

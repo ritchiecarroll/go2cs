@@ -91,7 +91,7 @@ Don't worry much about the base levels, but check the ones in our own package.
 	created by testing.RunTests
 		/Users/r/go/src/testing/testing.go:561 +0x86d
 */
-public static void TestStack(ж<testing.T> Ꮡt) {
+public static partial void TestStack(ж<testing.T> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var b = ((T)0).method();

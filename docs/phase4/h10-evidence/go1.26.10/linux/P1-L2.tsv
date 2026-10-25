@@ -1,0 +1,16 @@
+row	word	verdicts	sweep_s	first_in_list	rc	diverged	platform	tree	wall_s	post_s	matched	disclosed
+crypto/sha512	PASS	44	329	1	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	329	0	44	1
+crypto/md5	PASS	14	360	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	360	0	14	1
+crypto/sha256	PASS	29	320	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	320	0	29	2
+crypto/ed25519	PASS	9	369	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	369	0	9	1
+io	PASS	60	317	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	317	0	60	1
+bytes	PASS	88	317	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	317	0	88	6
+log	PASS	23	336	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	336	0	23	1
+crypto/rsa	PASS	590	411	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	411	0	590	1
+os	PASS	3831	441	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	441	1	3831	2
+encoding/binary	PASS	143	331	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	331	0	143	3
+unicode/utf16	PASS	8	315	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	315	0	8	1
+internal/zstd	PASS	536	328	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	328	0	536	0
+net/netip	PASS	211	339	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	339	0	211	57
+fmt	PASS	62	335	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	335	0	62	1
+strings	PASS	68	330	0	0	0	linux/amd64	36306723aeeddd706a04eac90a7fcff3e176b156	330	0	68	5

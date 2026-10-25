@@ -953,10 +953,10 @@ public static void TestClientKeyUpdate(ж<testing.T> Ꮡt) {
 }
 
 public static void TestResumption(ж<testing.T> Ꮡt) {
-    Ꮡt.Run(tlSv12ˢ, (ж<testing.T> tΔ1) => {
+    Ꮡt.Run(tlSv12ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ1) => {
         testResumption(tΔ1, VersionTLS12);
     });
-    Ꮡt.Run(tlSv13ˢ, (ж<testing.T> tΔ2) => {
+    Ꮡt.Run(tlSv13ˢ, [MethodImpl(MethodImplOptions.NoInlining)] (ж<testing.T> tΔ2) => {
         testResumption(tΔ2, VersionTLS13);
     });
 }
@@ -989,7 +989,7 @@ internal static readonly @string withoutSessionCacheˢ = "WithoutSessionCache"u8
 internal static readonly @string beforeSerializingCacheˢ = "BeforeSerializingCache"u8;
 internal static readonly @string withSerializingCacheˢ = "WithSerializingCache"u8;
 
-internal static void testResumption(ж<testing.T> Ꮡt, uint16 version) {
+internal static partial void testResumption(ж<testing.T> Ꮡt, uint16 version) {
     if (testing.Short()) {
         Ꮡt.Skip(skippingInShortModeˢ2);
     }

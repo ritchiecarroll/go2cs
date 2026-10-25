@@ -617,6 +617,21 @@ A byte endpoint quoted off an unconverged instrument is a false measurement.
      Ordering by `GetHashCode` unsound (2026-09-03). Saturating index field ruled 2026-09-08 — found
      by WRITING the candidate out as a DESIGN rather than as a sentence, which turned "the narrow
      split is arguable" into "its only sound form holes the door where the biggest arrays are". -->
+## Frames the JIT erases: inlining AND implicit tail calls
+- **Go never tail-calls; the optimizing JIT does, and an erased frame is as gone as an inlined one.** Every frame Go code counts (runtime.Caller/Callers, t.Helper, log's Lshortfile) needs BOTH guards: `[MethodImpl(NoInlining)]` keeps its own frame, and keeping its CALLER's frame takes one of two levers.
+- **Lever A, the callee side: `[System.Security.DynamicSecurityMethod]`** (golib declares the public attribute). The C# compiler writes `MethodAttributes.RequireSecObject` for that name, and the VM's `canTailCall` refuses an IMPLICIT tail call into such a method from any caller in any assembly. go2cs-gen writes it beside every no-inline mark (NoInliningPartials.CallerFrameAttribute); hand-owned frame APIs carry it by hand (runtime's Callers and Stack, testing's reporting members). A NEW hand-owned frame API needs both attributes.
+- **Lever B, the caller side: a `[MethodImpl(NoInlining)]` method makes no implicit tail call at all.** It is the only protection for a call through a function VALUE (the exact callee is the delegate's Invoke) or an interface method; the converter applies it where a tail call reaches a caller-observing static target (markTailCalledObservingValues).
+- **Both are runtime BEHAVIOR, not a documented contract.** GolibTests' `TailCallFrameGuardTests` is the guard: an optimized lambda tail-calling a marked method keeps its frame, an unmarked control loses it, and the flag is read on real converted methods. It runs at Release; at Debug it is Inconclusive by design. **After any .NET upgrade, run it at Release before trusting a caller line.**
+<!-- Tail-call seat, G, 2026-10-25 (COORD's condition: name the mechanism and its guard here). Measured on
+     linux/amd64 (.NET 10.0.12, WSL, a two-assembly probe, TC off, DOTNET_FastTailCalls=0 as the control
+     that keeps every frame): an unmarked method lost its frame on a tail-position call, direct, through a
+     delegate or from a lambda; a callee marked [DynamicSecurityMethod] kept a lambda caller's frame; a
+     caller marked [MethodImpl(NoInlining)] kept its frame in all three shapes. slog's
+     TestCallDepthConnection (a closure tail-calling log.Fatalf) and testing's TestTBHelper (testHelper
+     ending in a call through the package var genericIntHelper) were the two linux reds. Windows x64
+     tail-calls the guard's probe shape too (its control passes there). Census of std, 2026-10-25: 922
+     function-value and 528 interface tail calls in all; 60 reach a caller-observing static target (lever
+     B's scope); the broad rule is a BOARD row, post-publish. -->
 ## Mute deaths, dumps and signal dispositions
 - **A shared syscall dispatcher that mis-calls the WRITE primitive MUTES the entire platform's runtime error output** — `runtime`'s `throw`/`print` reach `writeErr` → `write1`, so every death is **exit-138/SIGBUS with a blank stderr**. **For a stderr instrument, a blank-stderr death on such a platform is the mis-call SIGNAL — a symptom to attribute, never an instrument gap to chase — so the mute baseline is recorded BEFORE the primitive is seamed.**
 - **A STACK BEFORE A DESIGN**, and **an instrument's COST is quoted with its result** so the next reader can afford to measure before designing.

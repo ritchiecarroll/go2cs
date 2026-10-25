@@ -1224,7 +1224,9 @@ function Invoke-SweepRow {
 # 10819 in 4,234 s (70.6 min, Release with tiering off) -- ~6x the i7's wall on this row. 120m is 1.7x
 # that wall, inside the 1.3-1.8x full-sweep-load multipliers measured on archive/zip and go/parser above,
 # and a floor costs a fast host nothing unless a genuine hang has to be declared.
-$longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto/dsa' = '120m'; 'archive/zip' = '60m'; 'go/parser' = '90m'; 'crypto/internal/fips140/mlkem' = '30m'; 'crypto/mlkem' = '30m'; 'time' = '40m'; 'crypto/tls' = '60m'; 'sync/atomic' = '150m'; 'net' = '120m'; 'net/http' = '60m'; 'runtime' = '120m' }
+# internal/poll 30m, added 2026-10-25 (COORD's floor ruling), only as the twin its $testDeadlineFloors entry below must
+# have: 30m is what the linux lanes already ask, so the row's package timeout does not move. See that entry for why.
+$longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto/dsa' = '120m'; 'archive/zip' = '60m'; 'go/parser' = '90m'; 'crypto/internal/fips140/mlkem' = '30m'; 'crypto/mlkem' = '30m'; 'time' = '40m'; 'crypto/tls' = '60m'; 'sync/atomic' = '150m'; 'net' = '120m'; 'net/http' = '60m'; 'runtime' = '120m'; 'internal/poll' = '30m' }
 # PER-TEST deadline floors (-test-deadline), a SECOND column beside $longTimeouts and resolved the same way:
 # the LONGER of the floor and the asked -TestDeadline (Resolve-RowTestDeadline). COORD ruled option (A),
 # 2026-10-17: keep the 15m default and floor only the rows whose OWN test is measured past it, and raise
@@ -1241,9 +1243,15 @@ $longTimeouts = @{ 'hash/maphash' = '60m'; 'index/suffixarray' = '120m'; 'crypto
 #     slowest. The four ran concurrently inside a 2,709 s row, so the 120m $longTimeouts floor stays as it is.
 #     Until then runtime was deliberately ABSENT, because its hangs (TestProfBufWakeup took the whole 2 h deadline) are
 #     what the per-test deadline exists for; at 60m such a hang is still abandoned, 60 minutes in rather than 15.
+#   internal/poll 30m, added 2026-10-25 (COORD ruling, P1's linux arm at 36306723ae): TestSplicePipePool (linux only) WAITS
+#     for its pipes' finalizers until its own timer fires at 90% of t.Deadline, then fails "leaked descriptors: [...]" --
+#     the codegen-liveness entry's signature. Under a 30m -test-timeout that timer fires at ~27m, so the 15m per-test
+#     watchdog abandoned the test first and its text replaced the signed one: pass 1 read the row DIVERGED (976 s).
+#     Floored at 30m, the test's own failure surfaces (~27m) inside the deadline and the comparison validates against
+#     the existing entry, unchanged. Cost: ~28 min of linux wall for this row. Windows never runs the test.
 # Every key here must also be a $longTimeouts row: a test bound above its own package's default deadline is
 # meaningless, and run-h10-recon.ps1 refuses such an orphan by name.
-$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m' }
+$testDeadlineFloors = @{ 'crypto/dsa' = '120m'; 'go/parser' = '90m'; 'runtime' = '60m'; 'internal/poll' = '30m' }
 
 # A row's per-test deadline: the LONGER of the asked -TestDeadline and the row's floor, compared as Go
 # durations, the package floor's rule. '0' is no deadline, which is longer than any duration, so an asked

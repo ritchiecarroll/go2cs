@@ -53,6 +53,7 @@ public class StrGenerator : ISourceGenerator
 
         // In a hand-owned package a method is a twin by [GoStr] alone.
         bool handOwnedPackage = context.Compilation.Assembly.IsHandOwnedPackage();
+        bool callerFrame = NoInliningPartials.CallerFrameMarkAvailable(context.Compilation);
 
         foreach (MethodDeclarationSyntax methodSyntax in finder.Methods)
         {
@@ -78,7 +79,8 @@ public class StrGenerator : ISourceGenerator
                 PackageName = packageName,
                 Method = method,
                 ParameterNames = methodSyntax.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text).ToArray(),
-                NoInlining = RecvGenerator.HasNoInliningMark(methodSyntax, semanticModel)
+                NoInlining = RecvGenerator.HasNoInliningMark(methodSyntax, semanticModel),
+                CallerFrame = callerFrame
             };
 
             // A twin whose shape the forwarder cannot re-declare is not emitted: the converter refuses
