@@ -275,6 +275,38 @@ func TestItRefusesRatherThanGuesses(t *testing.T) {
 	}
 }
 
+// TestAHashSuffixIsPartOfATestName pins the -entries comment rule: '#' starts a comment only at the
+// start of a line or after whitespace. Go uniquifies a repeated subtest name with a #NN suffix
+// (TestSizeAllocs/[]binary.Struct#01 beside TestSizeAllocs/[]binary.Struct), and a '#' anywhere
+// cut that name to its sibling's, so the pair read as one entry listed twice.
+func TestAHashSuffixIsPartOfATestName(t *testing.T) {
+	got, err := readEntries(writeEntries(t,
+		"# a whole-line comment",
+		"encoding/binary TestSizeAllocs/[]binary.Struct",
+		"encoding/binary TestSizeAllocs/[]binary.Struct#01",
+		"p TestA # a trailing comment after a space",
+		"p TestB\t# a trailing comment after a tab",
+		"   # an indented comment",
+	))
+	if err != nil {
+		t.Fatalf("readEntries: %v", err)
+	}
+	want := []entry{
+		{"encoding/binary", "TestSizeAllocs/[]binary.Struct"},
+		{"encoding/binary", "TestSizeAllocs/[]binary.Struct#01"},
+		{"p", "TestA"},
+		{"p", "TestB"},
+	}
+	if len(got) != len(want) {
+		t.Fatalf("got %d entries %q, want %d %q", len(got), got, len(want), want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("entry %d: got %q, want %q", i, got[i], want[i])
+		}
+	}
+}
+
 // TestRealResults reads two results files the converted host wrote on linux at master 226afb810a
 // (go2cs -tests -test-action all -test-config Release, tiering off), one per unit. The readings
 // equal the ones the packages' disclosures cite from the i7 reading run at bb54ff0920.
