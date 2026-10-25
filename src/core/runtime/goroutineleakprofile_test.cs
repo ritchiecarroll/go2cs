@@ -337,6 +337,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> Ꮡt) {
     // leaked2() [wait reason]
     var goroutineHeaderʗ1 = goroutineHeader;
     slice<@string> extractLeaks(@string output) {
+        var leaksᴷ = new stackAppend<@string>(moves: true);
         var stacks = strings.Split(output, goroutineˢ);
         slice<@string> leaks = default!;
         foreach (var (_, stack) in stacks) {
@@ -375,8 +376,9 @@ public static void TestGoroutineLeakProfile(ж<testing.T> Ꮡt) {
                 Ꮡt.Fatalf("failed to extract function name from stack trace: %s"u8, lines);
             }
 
-            leaks = append(leaks, funcName + " "u8 + waitReason);
+            leaks = append(leaksᴷ, leaks, funcName + " "u8 + waitReason);
         }
+        leaks = move2heap(leaksᴷ, leaks);
         return leaks;
     }
 
@@ -654,6 +656,9 @@ public static void TestGoroutineLeakProfile(ж<testing.T> Ꮡt) {
             var extractLeaksʗ2 = extractLeaksʗ1;
             var tcaseʗ1 = tcase;
             Ꮡt.Run(tcase.name, (ж<testing.T> tΔ1) => {
+                var cmdEnvᴷ = new stackAppend<@string>();
+                var unexpectedLeaksᴷ = new stackAppend<@string>();
+                var missingLeakStrsᴷ = new stackAppend<@string>();
                 tΔ1.Parallel();
 
                 var cmdEnv = new @string[]{
@@ -664,7 +669,7 @@ public static void TestGoroutineLeakProfile(ж<testing.T> Ꮡt) {
                 if (tcaseʗ1.simple) {
                     // If the test is simple, set GOMAXPROCS=1 in order to better
                     // control the behavior of the scheduler.
-                    cmdEnv = append(cmdEnv, "GOMAXPROCS=1"u8);
+                    cmdEnv = append(cmdEnvᴷ, cmdEnv, "GOMAXPROCS=1"u8);
                 }
 
                 @string output = default!;
@@ -728,7 +733,7 @@ leaks:
                             }
                         }
 
-                        unexpectedLeaks = append(unexpectedLeaks, leak);
+                        unexpectedLeaks = append(unexpectedLeaksᴷ, unexpectedLeaks, leak);
                     }
 continue_leaks:;
                 }
@@ -737,7 +742,7 @@ break_leaks:;
                 var missingLeakStrs = new slice<@string>(0, len(tcaseʗ1.expectedLeaks));
                 foreach (var (expectedLeak, found) in tcaseʗ1.expectedLeaks) {
                     if (!found) {
-                        missingLeakStrs = append(missingLeakStrs, expectedLeak.String());
+                        missingLeakStrs = append(missingLeakStrsᴷ, missingLeakStrs, expectedLeak.String());
                     }
                 }
 

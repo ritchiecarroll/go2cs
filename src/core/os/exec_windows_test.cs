@@ -9,10 +9,13 @@ using Δio = io_package;
 using static os_package;
 using filepath = go.path.filepath_package;
 using Δsync = sync_package;
+using syscall = syscall_package;
 using Δtesting = testing_package;
+using time = time_package;
 using @internal;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using context = context_package;
 using exec = go.os.exec_package;
 using go.os;
 using go.path;
@@ -111,6 +114,57 @@ public static partial void TestRemoveAllWithExecutedProcess(ж<Δtesting.T> Ꮡt
             }, i);
         }
         Ꮡwg.Wait();
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string getProcessTimesˢ = "GetProcessTimes"u8;
+internal static readonly object withHandleDidNotCallTheˢ = (@string)"WithHandle did not call the callback function"u8;
+
+// Hoisted Go string constant (single allocation; Go keeps it in RODATA)
+internal static readonly @string envVarᶜ = "OSTEST_PROCESS_WITH_HANDLE"u8;
+
+public static void TestProcessWithHandleWindows(ж<Δtesting.T> Ꮡt) {
+    GoFrame ᒐ = default;
+    try {
+        @string envVar = envVarᶜ;
+        if (Getenv(envVar) != ""u8) {
+            time.Sleep((time.Duration)(60000000000L));
+            return;
+        }
+
+        var cmd = testenv.CommandContext(new os_test_package.testing_TжTB(Ꮡt), Ꮡt.Context(), testenv.Executable(new os_test_package.testing_TжTB(Ꮡt)), "-test.run=^"u8 + Ꮡt.Name() + "$"u8);
+        cmd = testenv.CleanCmdEnv(cmd);
+        cmd.Value.Env = append((~cmd).Env, envVar + "=1");
+        {
+            var errΔ1 = cmd.Start(); if (errΔ1 != default!) {
+                Ꮡt.Fatal(errΔ1);
+            }
+        }
+        var cmdʗ1 = cmd;
+        defer(() => {
+            (~cmdʗ1).Process.Kill();
+            cmdʗ1.Wait();
+        }, ref ᒐ);
+
+        var called = false;
+        var err = (~cmd).Process.WithHandle((uintptr handle) => {
+            called = true;
+            // Check the handle is valid.
+            ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
+            var e = syscall.GetProcessTimes((syscallꓸHandle)handle, Ꮡu.of(syscall.Rusage.ᏑCreationTime), Ꮡu.of(syscall.Rusage.ᏑExitTime), Ꮡu.of(syscall.Rusage.ᏑKernelTime), Ꮡu.of(syscall.Rusage.ᏑUserTime));
+            if (e != default!) {
+                Ꮡt.Errorf("Using process handle failed: %v"u8, NewSyscallError(getProcessTimesˢ, e));
+            }
+        });
+        if (err != default!) {
+            Ꮡt.Fatalf("WithHandle: got error %v, want nil"u8, err);
+        }
+        if (!called) {
+            Ꮡt.Fatal(withHandleDidNotCallTheˢ);
+        }
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }

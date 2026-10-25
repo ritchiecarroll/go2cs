@@ -251,7 +251,7 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
                 if (backward) {
                     (Ꮡsrc.ValueSlot, Ꮡdst.ValueSlot) = (Ꮡdst.ValueSlot, Ꮡsrc.ValueSlot);
                 }
-                foreach (var (i, _) in Ꮡsrc.ValueSlot) {
+                foreach (var i in range(Ꮡsrc.ValueSlot)) {
                     Ꮡsrc.ValueSlot[i] = Ꮡx;
                 }
                 builtin.clear(Ꮡdst.ValueSlot);
@@ -273,7 +273,7 @@ public static void TestMemmoveAtomicity(ж<testing.T> Ꮡt) {
                 }
 
                 while (Ꮡready.Load() != 2) {
-                    foreach (var (i, _) in Ꮡdst.ValueSlot) {
+                    foreach (var i in range(Ꮡdst.ValueSlot)) {
                         var p = Ꮡdst.ValueSlot[i];
                         if (p != nil && p != Ꮡx) {
                             tΔ1.Fatalf("got partially updated pointer %p at dst[%d], want either nil or %p"u8, p.OrTypedNil(), i, Ꮡx);
@@ -1235,7 +1235,7 @@ public static void BenchmarkMemclrKnownSize1(ж<testing.B> Ꮡb) {
 
     b.SetBytes(1);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1250,7 +1250,7 @@ public static void BenchmarkMemclrKnownSize2(ж<testing.B> Ꮡb) {
 
     b.SetBytes(2);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1265,7 +1265,7 @@ public static void BenchmarkMemclrKnownSize4(ж<testing.B> Ꮡb) {
 
     b.SetBytes(4);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1280,7 +1280,7 @@ public static void BenchmarkMemclrKnownSize8(ж<testing.B> Ꮡb) {
 
     b.SetBytes(8);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1295,7 +1295,7 @@ public static void BenchmarkMemclrKnownSize16(ж<testing.B> Ꮡb) {
 
     b.SetBytes(16);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1310,7 +1310,7 @@ public static void BenchmarkMemclrKnownSize32(ж<testing.B> Ꮡb) {
 
     b.SetBytes(32);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1325,7 +1325,7 @@ public static void BenchmarkMemclrKnownSize64(ж<testing.B> Ꮡb) {
 
     b.SetBytes(64);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1340,7 +1340,7 @@ public static void BenchmarkMemclrKnownSize112(ж<testing.B> Ꮡb) {
 
     b.SetBytes(112);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1355,7 +1355,7 @@ public static void BenchmarkMemclrKnownSize128(ж<testing.B> Ꮡb) {
 
     b.SetBytes(128);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1370,7 +1370,7 @@ public static void BenchmarkMemclrKnownSize192(ж<testing.B> Ꮡb) {
 
     b.SetBytes(192);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1385,7 +1385,7 @@ public static void BenchmarkMemclrKnownSize248(ж<testing.B> Ꮡb) {
 
     b.SetBytes(248);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1400,7 +1400,7 @@ public static void BenchmarkMemclrKnownSize256(ж<testing.B> Ꮡb) {
 
     b.SetBytes(256);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1415,7 +1415,7 @@ public static void BenchmarkMemclrKnownSize512(ж<testing.B> Ꮡb) {
 
     b.SetBytes(512);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1430,7 +1430,7 @@ public static void BenchmarkMemclrKnownSize1024(ж<testing.B> Ꮡb) {
 
     b.SetBytes(1024);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1445,7 +1445,7 @@ public static void BenchmarkMemclrKnownSize4096(ж<testing.B> Ꮡb) {
 
     b.SetBytes(4096);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }
@@ -1460,7 +1460,7 @@ public static void BenchmarkMemclrKnownSize512KiB(ж<testing.B> Ꮡb) {
 
     b.SetBytes(524288);
     for (nint i = 0; i < b.N; i++) {
-        foreach (var (a, _) in x) {
+        foreach (var a in range(x)) {
             x[a] = 0;
         }
     }

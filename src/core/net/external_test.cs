@@ -99,7 +99,6 @@ internal static array<@string> literalAddrs4 = new @string[]{
     "www.google.com:80"u8,
     "%d.%d.%d.%d:http"u8,
     "www.google.com:http"u8,
-    "%03d.%03d.%03d.%03d:0080"u8,
     "[::ffff:%d.%d.%d.%d]:80"u8,
     "[::ffff:%02x%02x:%02x%02x]:80"u8,
     "[0:0:0:0:0000:ffff:%d.%d.%d.%d]:80"u8,

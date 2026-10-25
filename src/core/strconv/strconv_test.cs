@@ -70,7 +70,7 @@ public static void TestCountMallocs(ж<testing.T> Ꮡt) {
     }
     // Allocate a big messy buffer for AppendQuoteToASCII's test.
     oneMB = new slice<byte>(1000000);
-    foreach (var (i, _) in oneMB) {
+    foreach (var i in range(oneMB)) {
         oneMB[i] = (byte)i;
     }
     foreach (var (_, mt) in mallocTest) {

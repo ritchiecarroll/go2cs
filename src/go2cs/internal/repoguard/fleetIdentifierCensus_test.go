@@ -1521,7 +1521,7 @@ func TestFleetEmbedPayloadDerivationReadsTheTree(t *testing.T) {
 	payloads := fleetEmbedPayloads(root, files)
 	for _, want := range []string{
 		"src/core/embed/internal/embedtest/concurrency.txt",
-		"src/core/crypto/internal/fips140test/acvp_capabilities.json",
+		"src/core/crypto/internal/fips140test/acvp_capabilities_fips140v1.26.json",
 	} {
 		if !payloads[want] {
 			t.Errorf("the //go:embed payload %s was not derived from its project file (derived %d) -- "+

@@ -40,9 +40,13 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
     slice<byte> inReg = default!;
     slice<byte> outReg = default!;
     bool ptrs = default!;
+    var stackᴷ = new stackAppend<byte>(moves: true);
+    var inRegᴷ = new stackAppend<byte>(moves: true);
+    var outRegᴷ = new stackAppend<byte>(moves: true);
+    var gcᴷ = new stackAppend<byte>(moves: true);
 
     ж<abi.Type> ft = default!;
-    global::go.reflect_package.abiDesc abid = new();
+    ref var abid = ref heap(new global::go.reflect_package.abiDesc(), out var Ꮡabid);
     if (rcvr != default!){
         (ft, _, abid) = funcLayout(t.common().FuncType(), rcvr.common());
     } else {
@@ -55,7 +59,7 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
 
     // Expand stack pointer bitmap into byte-map.
     for (var i = (uint32)0; i < (~abid.stackPtrs).n; i++) {
-        stack = builtin.append(stack, (byte)((~abid.stackPtrs).data[i / 8] >> (int)(i % 8) & 1));
+        stack = builtin.append(stackᴷ, stack, (byte)((~abid.stackPtrs).data[i / 8] >> (int)(i % 8) & 1));
     }
 
     // Expand register pointer bitmaps into byte-maps.
@@ -66,8 +70,8 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         return 0;
     }
     for (nint i = 0; i < intArgRegs; i++) {
-        inReg = builtin.append(inReg, bool2byte(abid.inRegPtrs.Get(i)));
-        outReg = builtin.append(outReg, bool2byte(abid.outRegPtrs.Get(i)));
+        inReg = builtin.append(inRegᴷ, inReg, bool2byte(Ꮡabid.of(global::go.reflect_package.abiDesc.ᏑinRegPtrs).Get(i)));
+        outReg = builtin.append(outRegᴷ, outReg, bool2byte(Ꮡabid.of(global::go.reflect_package.abiDesc.ᏑoutRegPtrs).Get(i)));
     }
 
     // Expand frame type's GC bitmap into byte-map.
@@ -76,22 +80,29 @@ public static (global::go.reflect_package.ΔType frametype, uintptr argSize, uin
         var nptrs = (~ft).PtrBytes / (uintptr)goarch.PtrSize;
         var gcdata = ft.GcSlice(0, (nptrs + 7) / 8);
         for (var i = (uintptr)0; i < nptrs; i++) {
-            gc = builtin.append(gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
+            gc = builtin.append(gcᴷ, gc, (byte)(gcdata[i / 8] >> (int)(i % 8) & 1));
         }
     }
+    stack = move2heap(stackᴷ, stack);
+    inReg = move2heap(inRegᴷ, inReg);
+    outReg = move2heap(outRegᴷ, outReg);
+    gc = move2heap(gcᴷ, gc);
     return (frametype, argSize, retOffset, stack, gc, inReg, outReg, ptrs);
 }
 
 public static slice<@string> TypeLinks() {
+    var rᴷ = new stackAppend<@string>(moves: true);
+
     slice<@string> r = default!;
     var (sections, offset) = typelinks();
     foreach (var (i, offs) in offset) {
         @unsafe.Pointer rodata = sections[i];
         foreach (var (_, off) in offs) {
             var typ = (ж<global::go.reflect_package.rtype>)(uintptr)(resolveTypeOff(rodata, off));
-            r = builtin.append(r, typ.String());
+            r = builtin.append(rᴷ, r, typ.String());
         }
     }
+    r = move2heap(rᴷ, r);
     return r;
 }
 
@@ -166,5 +177,10 @@ public static Func<uintptr> MethodValueCallCodePtr = methodValueCallCodePtr;
 public static Func<slice<byte>, bool> InternalIsZero = isZero;
 
 public static Func<global::go.reflect_package.ΔType, bool> IsRegularMemory = isRegularMemory;
+
+public static global::go.reflect_package.ΔType MapGroupOf(global::go.reflect_package.ΔType x, global::go.reflect_package.ΔType y) {
+    var (grp, _) = groupAndSlotOf(x, y);
+    return grp;
+}
 
 } // end reflect_internal_test_package

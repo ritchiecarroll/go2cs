@@ -6,12 +6,12 @@ library, run under the Go-semantics test host, and compared verdict for verdict 
 comparison — it is the evidence behind the `unicode/utf8` row in
 [Validated Test Packages](../../ValidatedTestPackages.md).
 
-*Validated 2026-09-23 · converter `f95f88866`*
+*Validated 2026-10-25 · converter `3e3f18925`*
 
-**14 matched · 1 disclosed** — Go 1.24.13, `windows/amd64`, converted package
+**14 matched · 1 disclosed** — Go 1.26.10, `windows/amd64`, converted package
 [`src/core/unicode/utf8`](https://github.com/ritchiecarroll/go2cs/tree/master/src/core/unicode/utf8).
 
-Measured at `Release` (tiered JIT off), oracle `go version go1.24.13 windows/amd64`.
+Measured at `Release` (tiered JIT off), oracle `go version go1.26.10 windows/amd64`.
 
 ## Verdicts
 
@@ -46,7 +46,7 @@ CLR *can* meet, pinned against the named plan that will retire it; every other c
 
 | Test | Class | Pinned reason |
 |:--|:--|:--|
-| `TestRuneCountNonASCIIAllocation` | `deferred` | NEW at 1.24: a want-zero AllocsPerRun over `s := []byte("日本語日本語日本語日"); _ = RuneCount(s)`. Go's escape analysis keeps the []byte(const) conversion and RuneCount's slow-path string on the stack, so it asserts zero; the converted path charges 3 per run. DEFERRED, not alloc-count-semantics: the run's own unit note says `counted 30 go2cs-runtime object allocations ... over 10 run(s) ... an allocation COUNT per run` -- Go's own unit, so the counter saw them. The three sites, each read in golib at the 1.24.13 hop: (1) the test's []byte(const) -> slice<byte> from a span -> AllocationCounter.CopyOf; (2) RuneCount's non-ASCII slow path `RuneCountInString((@string)(p[n..]))` -> @string(slice<byte>) -> ToArray -> CopyOf; (3) ranging over that @string -> RuneSpanEnumerator, a class charged by AllocationCounter.Count(). (2) and (3) are LOCAL to RuneCount and removable; (1) is the escape-analysis class no local change removes, hence the floor. |
+| `TestRuneCountNonASCIIAllocation` | `deferred` | NEW at 1.24: a want-zero AllocsPerRun over `s := []byte("日本語日本語日本語日"); _ = RuneCount(s)`. Go's escape analysis keeps the []byte(const) conversion and RuneCount's slow-path string on the stack, so it asserts zero; the converted path charges 3 per run. DEFERRED, not alloc-count-semantics: the run's own unit note says `counted 30 go2cs-runtime object allocations ... over 10 run(s) ... an allocation COUNT per run` -- Go's own unit, so the counter saw them. The three sites, each read in golib at the 1.24.13 hop: (1) the test's []byte(const) -> slice<byte> from a span -> AllocationCounter.CopyOf; (2) RuneCount's non-ASCII slow path `RuneCountInString((@string)(p[n..]))` -> @string(slice<byte>) -> ToArray -> CopyOf; (3) ranging over that @string -> RuneSpanEnumerator, a class charged by AllocationCounter.Count(). (2) and (3) are LOCAL to RuneCount and removable; (1) is the escape-analysis class no local change removes, hence the floor. RE-READ AT go1.26.10 (2026-10-25, G): reading moved from 3 per run at go1.24.13 to 1 per run on windows and linux; the test body is identical at go1.24.13 and go1.26.10. |
 
 ## Excluded declarations
 
@@ -64,7 +64,9 @@ the capability it needs.
 - BenchmarkAppendMaxRune (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkAppendSpanishRune (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDecodeASCIIRune (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkDecodeASCIIRuneInString (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkDecodeJapaneseRune (benchmark): benchmark execution is deferred to Phase 4D
+- BenchmarkDecodeJapaneseRuneInString (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkEncodeASCIIRune (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkEncodeInvalidRuneMaxPlusOne (benchmark): benchmark execution is deferred to Phase 4D
 - BenchmarkEncodeInvalidRuneNegative (benchmark): benchmark execution is deferred to Phase 4D

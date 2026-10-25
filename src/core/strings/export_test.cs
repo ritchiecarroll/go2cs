@@ -18,7 +18,7 @@ internal static @string PrintTrie(this ж<global::go.strings_package.Replacer> �
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.of(global::go.strings_package.Replacer.Ꮡonce).Do(Ꮡr.buildOnce);
-    var gen = r.r._<ж<global::go.strings_package.genericReplacer>>();
+    var gen = r.r._<global::go.strings_package.replacer, ж<global::go.strings_package.genericReplacer>>();
     return gen.printNode(gen.of(global::go.strings_package.genericReplacer.Ꮡroot), 0);
 }
 

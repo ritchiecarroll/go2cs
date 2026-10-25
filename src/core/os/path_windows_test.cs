@@ -252,7 +252,6 @@ public static void TestMkdirAllVolumeNameAtRoot(ж<Δtesting.T> Ꮡt) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly @string fooˢ = "foo"u8;
 internal static readonly @string barˢ = "bar"u8;
 
 public static void TestRemoveAllLongPathRelative(ж<Δtesting.T> Ꮡt) {
@@ -268,6 +267,35 @@ public static void TestRemoveAllLongPathRelative(ж<Δtesting.T> Ꮡt) {
     err = Δos.RemoveAll(fooˢ);
     if (err != default!) {
         Ꮡt.Fatal(err);
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string file1ˢ = "file1"u8;
+internal static readonly @string file2ˢ = "file2"u8;
+
+public static void TestRemoveAllFallback(ж<Δtesting.T> Ꮡt) {
+    windows.TestDeleteatFallback = true;
+    Ꮡt.Cleanup(() => {
+        windows.TestDeleteatFallback = false;
+    });
+
+    @string dir = Ꮡt.TempDir();
+    {
+        var err = Δos.WriteFile(filepath.Join(dir, file1ˢ), new byte[]{}.slice(), 448); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
+    }
+    {
+        var err = Δos.WriteFile(filepath.Join(dir, file2ˢ), new byte[]{}.slice(), 256); if (err != default!) { // read-only file
+            Ꮡt.Fatal(err);
+        }
+    }
+
+    {
+        var err = Δos.RemoveAll(dir); if (err != default!) {
+            Ꮡt.Fatal(err);
+        }
     }
 }
 

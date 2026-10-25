@@ -407,4 +407,23 @@ public static void TestClosedStat(ж<Δtesting.T> Ꮡt) {
     }
 }
 
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static readonly @string notfoundˢ = "notfound"u8;
+internal static readonly @string notfounddirˢ = "notfounddir"u8;
+
+public static void TestStatNotExist(ж<Δtesting.T> Ꮡt) {
+    Ꮡt.Parallel();
+    @string name = filepath.Join(Ꮡt.TempDir(), notfoundˢ);
+    var (_, err) = Δos.Stat(name);
+    if (!errors.Is(err, fs.ErrNotExist)) {
+        Ꮡt.Errorf("os.Stat(%q) = %v; want fs.ErrNotExist"u8, name, err);
+    }
+
+    name = filepath.Join(Ꮡt.TempDir(), notfounddirˢ, notfoundˢ);
+    (_, err) = Δos.Stat(name);
+    if (!errors.Is(err, fs.ErrNotExist)) {
+        Ꮡt.Errorf("os.Stat(%q) = %v; want fs.ErrNotExist"u8, name, err);
+    }
+}
+
 } // end os_test_package

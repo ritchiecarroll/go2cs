@@ -14,7 +14,7 @@ partial class rand_test_package {
 public static void TestText(ж<testing.T> Ꮡt) {
     var set = new map<@string, EmptyStruct>(); // hold every string produced
     array<map<rune, nint>> indexSet = new(26);                             // hold every char produced at every position
-    foreach (var (i, _) in indexSet) {
+    foreach (var i in range(indexSet)) {
         indexSet[i] = new map<rune, nint>();
     }
 

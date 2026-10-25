@@ -1,28 +1,26 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
-using Δmath = math_package;
+using static go.@internal.strconv_package;
+using math = math_package;
 using cmplx = go.math.cmplx_package;
-using reflect = reflect_package;
-using static strconv_package;
 using testing = testing_package;
 using go.math;
-using static go.strconv_internal_test_package;
-using strconv = strconv_package;
+using static go.@internal.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
-internal static complex128 infp0 = complex(Δmath.Inf(+1), 0D);
-internal static complex128 infm0 = complex(Δmath.Inf(-1), 0D);
-internal static complex128 inf0p = complex(0D, Δmath.Inf(+1));
-internal static complex128 inf0m = complex(0D, Δmath.Inf(-1));
+internal static complex128 infp0 = complex(math.Inf(+1), 0D);
+internal static complex128 infm0 = complex(math.Inf(-1), 0D);
+internal static complex128 inf0p = complex(0D, math.Inf(+1));
+internal static complex128 inf0m = complex(0D, math.Inf(-1));
 
-internal static complex128 infpp = complex(Δmath.Inf(+1), Δmath.Inf(+1));
-internal static complex128 infpm = complex(Δmath.Inf(+1), Δmath.Inf(-1));
-internal static complex128 infmp = complex(Δmath.Inf(-1), Δmath.Inf(+1));
-internal static complex128 infmm = complex(Δmath.Inf(-1), Δmath.Inf(-1));
+internal static complex128 infpp = complex(math.Inf(+1), math.Inf(+1));
+internal static complex128 infpm = complex(math.Inf(+1), math.Inf(-1));
+internal static complex128 infmp = complex(math.Inf(-1), math.Inf(+1));
+internal static complex128 infmm = complex(math.Inf(-1), math.Inf(-1));
 
 partial struct atocTest {
     internal @string @in;
@@ -57,9 +55,9 @@ public static void TestParseComplex(ж<testing.T> Ꮡt) {
         new("3.0+5.5i)"u8, 0D, ErrSyntax),
 
         // NaNs
-        new("NaN"u8, complex(Δmath.NaN(), 0D), default!),
-        new("NANi"u8, complex(0D, Δmath.NaN()), default!),
-        new("nan+nAni"u8, complex(Δmath.NaN(), Δmath.NaN()), default!),
+        new("NaN"u8, complex(math.NaN(), 0D), default!),
+        new("NANi"u8, complex(0D, math.NaN()), default!),
+        new("nan+nAni"u8, complex(math.NaN(), math.NaN()), default!),
         new("+NaN"u8, 0D, ErrSyntax),
         new("-NaN"u8, 0D, ErrSyntax),
         new("NaN-NaNi"u8, 0D, ErrSyntax),
@@ -186,30 +184,24 @@ public static void TestParseComplex(ж<testing.T> Ꮡt) {
         new("1e+4294967296+1e+4294967296i"u8, infpp, ErrRange),
         new("1e+4294967296-1e+4294967296i"u8, infpm, ErrRange)
     }.slice();
-    foreach (var (i, _) in tests) {
+    foreach (var i in range(tests)) {
         var test = Ꮡ(tests, i);
-        if ((~test).err != default!) {
-            test.Value.err = new strconv.NumErrorжerror(Ꮡ(new NumError(Func: "ParseComplex"u8, Num: (~test).@in, Err: (~test).err)));
+        var (c, e) = ParseComplex((~test).@in, 128);
+        if (!sameComplex(c, (~test).@out) || !AreEqual(e, (~test).err)) {
+            Ꮡt.Errorf("ParseComplex(%s, 128) = %v, %v, want %v, %v"u8, (~test).@in, c, e, (~test).@out, (~test).err);
         }
-        var (got, err) = ParseComplex((~test).@in, 128);
-        if (!reflect.DeepEqual(err, (~test).err)) {
-            Ꮡt.Fatalf("ParseComplex(%q, 128) = %v, %v; want %v, %v"u8, (~test).@in, got, err, (~test).@out, (~test).err);
-        }
-        if (!(cmplx.IsNaN((~test).@out) && cmplx.IsNaN(got)) && got != (~test).@out) {
-            Ꮡt.Fatalf("ParseComplex(%q, 128) = %v, %v; want %v, %v"u8, (~test).@in, got, err, (~test).@out, (~test).err);
-        }
-
         if ((complex128)(complex64)(~test).@out == (~test).@out) {
-            var (gotΔ1, errΔ1) = ParseComplex((~test).@in, 64);
-            if (!reflect.DeepEqual(errΔ1, (~test).err)) {
-                Ꮡt.Fatalf("ParseComplex(%q, 64) = %v, %v; want %v, %v"u8, (~test).@in, gotΔ1, errΔ1, (~test).@out, (~test).err);
-            }
-            var got64 = (complex64)gotΔ1;
-            if ((complex128)got64 != (~test).@out) {
-                Ꮡt.Fatalf("ParseComplex(%q, 64) = %v, %v; want %v, %v"u8, (~test).@in, gotΔ1, errΔ1, (~test).@out, (~test).err);
+            var (cΔ1, eΔ1) = ParseComplex((~test).@in, 64);
+            var c64 = (complex64)cΔ1;
+            if (!sameComplex((complex128)c64, (~test).@out) || !AreEqual(eΔ1, (~test).err)) {
+                Ꮡt.Errorf("ParseComplex(%s, 64) = %v, %v, want %v, %v"u8, (~test).@in, cΔ1, eΔ1, (~test).@out, (~test).err);
             }
         }
     }
+}
+
+internal static bool sameComplex(complex128 c1, complex128 c2) {
+    return cmplx.IsNaN(c1) && cmplx.IsNaN(c2) || c1 == c2;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)

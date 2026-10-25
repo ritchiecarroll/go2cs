@@ -112,7 +112,7 @@ public static void TestFinalizerRegisterABI(ж<testing.T> Ꮡt) {
             new("Pointer"u8, regFinalizerPointer, -1),
             new("Interface"u8, regFinalizerIface, -2)
         }.slice();
-        foreach (var (i, _) in tests) {
+        foreach (var i in range(tests)) {
             var test = Ꮡ(tests, i);
             var testʗ1 = test;
             Ꮡt.Run((~test).name, (ж<testing.T> tΔ1) => {

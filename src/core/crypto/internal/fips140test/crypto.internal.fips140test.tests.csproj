@@ -35,6 +35,13 @@
     <Nullable>annotations</Nullable>
     <NoWarn>CS0162;CS0164;CS0282;CS0660;CS0661;CS1717;CS1718;CS8618;CS8860;CS8974;CS8981;IDE0060;IDE1006;CA2255</NoWarn>
     <LangVersion Condition="'$(LangVersion)'==''">14</LangVersion>
+    <!-- Go strings in `any` slots: go2cs-gen's LiteralInterceptorGenerator boxes a bare C# literal the converter passes
+         there, through an interceptor in namespace go2cs.Interceptors; without this opt-in every such call is CS9137.
+         A go2cs-gen that cannot load is an error, not the compiler's warning (CS8032, CS8034, CS8784, CS8785, and
+         CS9057: it references a newer compiler than the one running it): otherwise the build would go on without the
+         interceptors, and the program would see System.String where Go has a string. -->
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);go2cs.Interceptors</InterceptorsNamespaces>
+    <WarningsAsErrors>$(WarningsAsErrors);CS8032;CS8034;CS8784;CS8785;CS9057</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IsPackable>false</IsPackable>
@@ -101,6 +108,7 @@
        shared directory (Generated/**, *.cs.auto review siblings, the production package_info.cs)
        can leak in because it is never listed. -->
   <ItemGroup>
+    <Compile Include="acvp_fips140v1.26_test.cs" />
     <Compile Include="acvp_test.cs" />
     <Compile Include="alias_test.cs" />
     <Compile Include="cast_test.cs" />
@@ -108,16 +116,22 @@
     <Compile Include="cmac_test.cs" />
     <Compile Include="ctrdrbg_test.cs" />
     <Compile Include="edwards25519_test.cs" />
+    <Compile Include="entropy_test.cs" />
+    <Compile Include="fips140v1.26_test.cs" />
     <Compile Include="fips_test.cs" />
     <Compile Include="go2cs_test_host.cs" />
     <Compile Include="indicator_test.cs" />
+    <Compile Include="mldsa_test.cs" />
     <Compile Include="nistec_test.cs" />
+    <Compile Include="package_init_internal_test.cs" />
     <Compile Include="package_test_info.cs" />
     <Compile Include="sshkdf_test.cs" />
     <Compile Include="xaes_test.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="acvp_fips140v1.0_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="acvp_fips140v1.26_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="acvp_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="alias_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="cast_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
@@ -125,13 +139,18 @@
     <None Include="cmac_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="ctrdrbg_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="edwards25519_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="entropy_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="fips140v1.0_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="fips140v1.26_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="fips_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="indicator_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Include="mldsa_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="nistec_ordinv_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="nistec_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="sshkdf_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <None Include="xaes_test.go" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-    <EmbeddedResource Include="acvp_capabilities.json" LogicalName="go.embed/crypto/internal/fips140test_test/acvp_capabilities.json" />
+    <EmbeddedResource Include="acvp_capabilities_fips140v1.26.json" LogicalName="go.embed/crypto/internal/fips140test_test/acvp_capabilities_fips140v1.26.json" />
+    <EmbeddedResource Include="acvp_capabilities.entropy.json" LogicalName="go.embed/crypto/internal/fips140test_test/acvp_capabilities.entropy.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -140,10 +159,13 @@
     <ProjectReference Include="$(go2csPath)core/context/context.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/crypto.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/elliptic/crypto.elliptic.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/boring/crypto.internal.boring.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/entropy/v1.0.0/crypto.internal.entropy.v1.0.0.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/aes/crypto.internal.fips140.aes.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/aes/gcm/crypto.internal.fips140.aes.gcm.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/alias/crypto.internal.fips140.alias.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/bigmod/crypto.internal.fips140.bigmod.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/checktest/crypto.internal.fips140.check.checktest.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/check/crypto.internal.fips140.check.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/crypto.internal.fips140.csproj" />
@@ -154,6 +176,7 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/edwards25519/crypto.internal.fips140.edwards25519.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/hkdf/crypto.internal.fips140.hkdf.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/hmac/crypto.internal.fips140.hmac.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/mldsa/crypto.internal.fips140.mldsa.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/mlkem/crypto.internal.fips140.mlkem.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/nistec/crypto.internal.fips140.nistec.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/pbkdf2/crypto.internal.fips140.pbkdf2.csproj" />
@@ -165,12 +188,16 @@
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/subtle/crypto.internal.fips140.subtle.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls12/crypto.internal.fips140.tls12.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140/tls13/crypto.internal.fips140.tls13.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/fips140deps/time/crypto.internal.fips140deps.time.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/internal/impl/crypto.internal.impl.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/rand/crypto.rand.csproj" />
     <ProjectReference Include="$(go2csPath)core/crypto/sha256/crypto.sha256.csproj" />
+    <ProjectReference Include="$(go2csPath)core/crypto/sha512/crypto.sha512.csproj" />
     <ProjectReference Include="$(go2csPath)core/embed/embed.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/binary/encoding.binary.csproj" />
     <ProjectReference Include="$(go2csPath)core/encoding/hex/encoding.hex.csproj" />
     <ProjectReference Include="$(go2csPath)core/errors/errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core/flag/flag.csproj" />
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
     <ProjectReference Include="$(go2csPath)core/hash/hash.csproj" />
@@ -185,10 +212,12 @@
     <ProjectReference Include="$(go2csPath)core/os/os.csproj" />
     <ProjectReference Include="$(go2csPath)core/path/filepath/path.filepath.csproj" />
     <ProjectReference Include="$(go2csPath)core/regexp/regexp.csproj" />
+    <ProjectReference Include="$(go2csPath)core/runtime/debug/runtime.debug.csproj" />
     <ProjectReference Include="$(go2csPath)core/runtime/runtime.csproj" />
     <ProjectReference Include="$(go2csPath)core/slices/slices.csproj" />
     <ProjectReference Include="$(go2csPath)core/strings/strings.csproj" />
     <ProjectReference Include="$(go2csPath)core/testing/testing.csproj" />
+    <ProjectReference Include="$(go2csPath)core/time/time.csproj" />
     <ProjectReference Include="$(go2csPath)core/unicode/unicode.csproj" />
     <ProjectReference Include="$(go2csPath)core/unsafe/unsafe.csproj" />
     <ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />

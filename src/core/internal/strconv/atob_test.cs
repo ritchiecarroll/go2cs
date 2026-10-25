@@ -1,13 +1,12 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
 using bytes = bytes_package;
-using static strconv_package;
+using static go.@internal.strconv_package;
 using testing = testing_package;
-using static go.strconv_internal_test_package;
-using strconv = strconv_package;
+using static go.@internal.strconv_internal_test_package;
 
 partial class strconv_test_package {
 
@@ -35,27 +34,10 @@ internal static slice<atobTest> atobtests = new atobTest[]{
 }.slice();
 
 public static void TestParseBool(ж<testing.T> Ꮡt) {
-    ref var t = ref Ꮡt.DerefOrNull();
-
     foreach (var (_, test) in atobtests) {
         var (b, e) = ParseBool(test.@in);
-        if (test.err != default!){
-            // expect an error
-            if (e == default!){
-                Ꮡt.Errorf("ParseBool(%s) = nil; want %s"u8, test.@in, test.err);
-            } else {
-                // NumError assertion must succeed; it's the only thing we return.
-                if (!AreEqual((~e._<ж<strconv.NumError>>()).Err, test.err)) {
-                    Ꮡt.Errorf("ParseBool(%s) = %s; want %s"u8, test.@in, e, test.err);
-                }
-            }
-        } else {
-            if (e != default!) {
-                Ꮡt.Errorf("ParseBool(%s) = %s; want nil"u8, test.@in, e);
-            }
-            if (b != test.@out) {
-                Ꮡt.Errorf("ParseBool(%s) = %t; want %t"u8, test.@in, b, test.@out);
-            }
+        if (b != test.@out || !AreEqual(e, test.err)) {
+            Ꮡt.Errorf("ParseBool(%s) = %v, %v, want %v, %v"u8, test.@in, b, e, test.@out, test.err);
         }
     }
 }

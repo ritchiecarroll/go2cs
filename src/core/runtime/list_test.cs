@@ -10,6 +10,7 @@ using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAt
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
 using static global::go.runtime_internal_test_package;
 
+[GoFieldAccess(typeof(listedVal))]
 partial class runtime_test_package {
 
 partial struct listedVal {
@@ -42,8 +43,8 @@ public static void TestListPush(ж<testing.T> Ꮡt) {
     if (v == nil) {
         Ꮡt.Fatalf("pop got nil want 3"u8);
     }
-    if ((~v).val != 3) {
-        Ꮡt.Errorf("pop got %d want 3"u8, (~v).val);
+    if (v.val != 3) {
+        Ꮡt.Errorf("pop got %d want 3"u8, v.val);
     }
 
     p = (uintptr)headA.Pop();
@@ -51,8 +52,8 @@ public static void TestListPush(ж<testing.T> Ꮡt) {
     if (v == nil) {
         Ꮡt.Fatalf("pop got nil want 2"u8);
     }
-    if ((~v).val != 2) {
-        Ꮡt.Errorf("pop got %d want 2"u8, (~v).val);
+    if (v.val != 2) {
+        Ꮡt.Errorf("pop got %d want 2"u8, v.val);
     }
 
     p = (uintptr)headA.Pop();
@@ -60,8 +61,8 @@ public static void TestListPush(ж<testing.T> Ꮡt) {
     if (v == nil) {
         Ꮡt.Fatalf("pop got nil want 1"u8);
     }
-    if ((~v).val != 1) {
-        Ꮡt.Errorf("pop got %d want 1"u8, (~v).val);
+    if (v.val != 1) {
+        Ꮡt.Errorf("pop got %d want 1"u8, v.val);
     }
 
     p = (uintptr)headA.Pop();

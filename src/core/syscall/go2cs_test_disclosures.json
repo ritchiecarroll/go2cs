@@ -107,6 +107,13 @@
       "reason": "The managed runtime's descriptor floor exceeds 43. The test lowers the process's SOFT RLIMIT_NOFILE to 43 (magicRlimitValue + 1, syscall_linux_test.go:720-734) and then opens two pipes; a Go test binary holds a handful of descriptors, the converted host holds far more -- 163 when GolibTests' LinuxDescriptorLimitTests measured it on the WSL arm (2026-09-23, go1.24.13) -- so the first os.Pipe fails EMFILE here and passes in Go. The CLR's own thread start needs 2 free descriptors under that limit (same arm; a native pthread_create needs none), which is why the test host now restores RLIMIT_NOFILE after each top-level test (testing/HostDescriptorLimit.cs): before that, this one verdict took the rest of the syscall row down with it, OutOfMemoryException out of Thread.StartCore at the next test's start and 19 rows never run. Measured, not argued: the row re-read with the restore in place runs 56 of 56."
     },
     {
+      "name": "TestRlimitRestored",
+      "class": "platform-skip",
+      "platforms": ["linux"],
+      "signature": "rlimit not adjusted at startup",
+      "reason": "The .NET runtime raises the process's RLIMIT_NOFILE soft limit to its hard limit while it initializes, before any managed code runs (P2 measured it on .NET 10.0.12: a probe launched at soft 1024, 19998 and 20000 read 20000/20000 every time). Go's syscall init (rlimit.go) raises the soft limit to Max-1 and saves the original in origRlimitNofile only when it finds Cur < Max-1, and StartProcess restores that original in each child. The converted init (src/core/syscall/linux/rlimit.cs) is faithful -- setrlimit is real and the exec path reads origRlimitNofile -- but it always finds Cur == Max, so it saves nothing, and the test takes the branch Go's own source wrote for exactly that state: `t.Skip(\"skipping test because rlimit not adjusted at startup\")` (exec_unix_test.go:353). Go passes on a host whose soft limit starts below Max-1 and skips with the same line where it does not, so the entry fires only on the first kind of host; elsewhere both sides skip and agree. The class is the verdict shape (Go pass / converted skip), not a defect in the converted code: the original limit is gone before managed code exists, and restoring it needs native code that runs before the runtime initializes (a custom host or a preload constructor; no runtime setting was found). Self-retiring: the entry stops firing the day the host preserves the original soft limit. Rooted by P2 (BOARD, 2026-10-25, \"exec children inherit the CLR-raised NOFILE soft limit\"); class ruled by COORD 2026-10-25 06:29Z and 06:58Z; authored by G, 2026-10-25. The signature is Go's own skip text, which the converted host prints verbatim."
+    },
+    {
       "name": "TestUnshare",
       "class": "platform-skip",
       "platforms": ["linux"],
@@ -133,6 +140,13 @@
       "platforms": ["linux"],
       "signature": "posix_spawn seam: SysProcAttr.Unshareflags is not supported",
       "reason": "The posix_spawn seam's Unshareflags refusal, the same field and the same refusal TestUnshare and TestUnshareMountNameSpace disclose above (see TestUnshareMountNameSpaceChroot for the seam's structural property). It was never minted because it never diverged where the Linux row was banked: as ROOT, Go skips it itself (exec_linux_test.go:345, 'fails with privileges'), so the 1.23.12 bank read skip/skip; run unprivileged, as the go1.24.13 Linux leg is, Go passes and the seam skips. Surfaced 2026-09-23 when the descriptor-limit restore let the row run past TestPrlimitFileLimit."
+    },
+    {
+      "name": "TestUseCgroupFD",
+      "class": "platform-skip",
+      "platforms": ["linux"],
+      "signature": "posix_spawn seam: SysProcAttr.UseCgroupFD is not supported",
+      "reason": "The converted deployment spawns children through posix_spawn(3), and its seam NAMES each SysProcAttr field it cannot express and refuses the request rather than silently ignoring it (src/core/syscall/linux/exec_unix.cs, unsupportedSysProcAttrField), joined with ENOTSUP so Go's own predicates see the kind. This is the property the syscall row's Cloneflags, Unshareflags, Credential and Chroot entries already disclose; here the suite reaches UseCgroupFD (clone3 with CLONE_INTO_CGROUP). The child never starts, testenv.SyscallIsNotSupported accepts the ENOTSUP, and the test's OWN error handling skips with \"clone3 with CLONE_INTO_CGROUP not available\" (exec_linux_test.go:458). Go reports pass where the kernel offers clone3 into a cgroup v2 directory; the converted side reports skip by executing the branch Go's source wrote for a kernel that cannot. Self-retiring: the entry stops firing the moment the spawn seam gains UseCgroupFD (the post-hop Cloneflags seam, docs/phase4/DESIGN-linux-clone-stepper.md), with no corpus change and no manifest edit. Long missing from this manifest: STYLE-disclosure-reasons.md names it \"syscall's missing TestUseCgroupFD entry\"; the go1.26.10 linux reading (P1-2, 2026-10-24) and P2's analysis read it as this skip. SIGNATURE NOTE: pinned to the seam message alone, as the sibling entries are, because the raw skip line also carries the executable's temp path. Taken from the seam's source; L2's reading confirms it. Authored by G, 2026-10-25, on COORD's L2 gate."
     }
   ]
 }

@@ -15,6 +15,7 @@ using testing = testing_package;
 using time = time_package;
 using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
 using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using iter = iter_package;
 using net.@internal;
 using static go.net_package;
 using syscall = syscall_package;
@@ -189,9 +190,9 @@ internal static readonly @string createdByNetˢ = "created by net"u8;
 // runningGoroutines returns a list of remaining goroutines.
 internal static partial slice<@string> runningGoroutines() {
     slice<@string> gss = default!;
-    var b = new slice<byte>((2 << (int)(20)));
+    var b = new slice<byte>((2 << 20));
     b = b.slice(0, Δruntime.Stack(b, true));
-    foreach (var (_, s) in strings.Split(((@string)b), "\n\n"u8)) {
+    foreach (var s in range<@string>(strings.SplitSeq((@string)b, "\n\n"u8).Invoke)) {
         var (_, stack, _) = strings.Cut(s, "\n"u8);
         stack = strings.TrimSpace(stack);
         if (!strings.Contains(stack, createdByNetˢ)) {

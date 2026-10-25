@@ -12,15 +12,16 @@ internal static class Go2CsTestHost
             "sha3.go",
             "sha3_test.go",
         });
-        registry.Add("TestAllocations", sha3_test_package.TestAllocations, "sha3_test.go", 223);
-        registry.Add("TestAppend", sha3_test_package.TestAppend, "sha3_test.go", 116);
-        registry.Add("TestAppendNoRealloc", sha3_test_package.TestAppendNoRealloc, "sha3_test.go", 138);
-        registry.Add("TestCSHAKEAccumulated", sha3_test_package.TestCSHAKEAccumulated, "sha3_test.go", 269);
-        registry.Add("TestCSHAKELargeS", sha3_test_package.TestCSHAKELargeS, "sha3_test.go", 355);
-        registry.Add("TestMarshalUnmarshal", sha3_test_package.TestMarshalUnmarshal, "sha3_test.go", 389);
-        registry.Add("TestReset", sha3_test_package.TestReset, "sha3_test.go", 196);
-        registry.Add("TestSqueezing", sha3_test_package.TestSqueezing, "sha3_test.go", 155);
-        registry.Add("TestUnalignedWrite", sha3_test_package.TestUnalignedWrite, "sha3_test.go", 56);
+        registry.Add("TestAllocations", sha3_test_package.TestAllocations, "sha3_test.go", 226);
+        registry.Add("TestAppend", sha3_test_package.TestAppend, "sha3_test.go", 119);
+        registry.Add("TestAppendNoRealloc", sha3_test_package.TestAppendNoRealloc, "sha3_test.go", 141);
+        registry.Add("TestCSHAKEAccumulated", sha3_test_package.TestCSHAKEAccumulated, "sha3_test.go", 272);
+        registry.Add("TestCSHAKELargeS", sha3_test_package.TestCSHAKELargeS, "sha3_test.go", 358);
+        registry.Add("TestMarshalUnmarshal", sha3_test_package.TestMarshalUnmarshal, "sha3_test.go", 392);
+        registry.Add("TestReset", sha3_test_package.TestReset, "sha3_test.go", 199);
+        registry.Add("TestSHA3Hash", sha3_test_package.TestSHA3Hash, "sha3_test.go", 47);
+        registry.Add("TestSqueezing", sha3_test_package.TestSqueezing, "sha3_test.go", 158);
+        registry.Add("TestUnalignedWrite", sha3_test_package.TestUnalignedWrite, "sha3_test.go", 59);
         return TestHost.Run(registry, args);
     }
 }
